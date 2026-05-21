@@ -1,15 +1,11 @@
-/* global wcOrderMilestoneEgg, Path2D */
-/*
- * This is a standalone canvas/SVG animation loaded on classic wp-admin order
- * screens. It intentionally uses function declarations before definition,
- * browser globals, mutable module state, and imperative DOM APIs.
- */
-/* eslint-disable @typescript-eslint/no-use-before-define, @typescript-eslint/no-unused-vars, @wordpress/no-global-active-element, @wordpress/no-unused-vars-before-return, eqeqeq, no-bitwise, no-lonely-if, no-nested-ternary, no-undef, no-unused-expressions, prettier/prettier */
+/* global wcOrderMilestoneEgg, Path2D, requestAnimationFrame, cancelAnimationFrame, navigator, history */
+/* eslint-disable @typescript-eslint/no-use-before-define -- Function declarations are grouped by feature in this standalone animation script. */
 ( function () {
 	'use strict';
 
 	/* eslint-disable no-var */
-	var _cfg = typeof wcOrderMilestoneEgg !== 'undefined' ? wcOrderMilestoneEgg : {};
+	var _cfg =
+		typeof wcOrderMilestoneEgg !== 'undefined' ? wcOrderMilestoneEgg : {};
 	var milestones = _cfg.milestones || {};
 	var SVG_DATA = _cfg.svgData || {};
 	var ALL_MILESTONES = _cfg.allMilestones || {};
@@ -22,7 +18,6 @@
 	);
 
 	/* -- Variant definitions ------------------------------------------------ */
-	var STRING_OVERLAP_PX = 20;
 	var VARIANTS = {
 		llama: {
 			vbW: 789.58,
@@ -111,13 +106,11 @@
 	var mx = 0,
 		my = 0,
 		lastMx = 0,
-		lastMy = 0,
 		mouseVx = 0,
 		mActive = false;
 	var stickAngle = 25,
 		stickAngleVel = 0;
-	var _ropeLen = 70,
-		_pinataCenterX = 0,
+	var _pinataCenterX = 0,
 		_pinataCenterY = 0,
 		_pinataR = 0,
 		_shiftX = 0;
@@ -127,19 +120,15 @@
 		settled = [],
 		SETTLED_CAP = 1200;
 	var bgCV, bgCtx, cfCV, cfCtx, stick;
-	var overlayEl, svgDefsEl, rafId = null;
-	var hitCount = 0,
-		fallingPieces = [],
+	var overlayEl,
+		svgDefsEl,
+		rafId = null;
+	var fallingPieces = [],
 		protectedEls;
 	var eyeEls = [],
 		eyeElsSet,
-		eyeCx = 0,
-		eyeCy = 0,
 		blinkTimer = null;
-	var pupilEl = null,
-		pupilCx = 0,
-		pupilCy = 0,
-		blinkScaleY = 1;
+	var blinkScaleY = 1;
 	var highlightEls = [];
 	var eyeGroups = [];
 	var currentMilestone = null;
@@ -159,9 +148,9 @@
 		var w = pinataPxWidth();
 		var sc = w / active.vbW;
 		var attachX =
-			active.attachX != null ? active.attachX : _contentBB.centerX;
-		var attachY =
-			active.attachY != null ? active.attachY : _contentBB.topY;
+			active.attachX !== null && active.attachX !== undefined
+				? active.attachX
+				: _contentBB.centerX;
 
 		_shiftX = active.shiftX || 0;
 		var cont = document.getElementById( 'egg-pinata-container' );
@@ -170,8 +159,8 @@
 		cont.style.transform =
 			'translateX(' + ( w / 2 - attachX * sc + _shiftX ) + 'px)';
 
-		var topOfContainer = window.innerHeight / 2 - 60 - _contentBB.centerY * sc;
-		_ropeLen = topOfContainer + attachY * sc + STRING_OVERLAP_PX;
+		var topOfContainer =
+			window.innerHeight / 2 - 60 - _contentBB.centerY * sc;
 		_pinataCenterX = ( _contentBB.centerX - attachX ) * sc + _shiftX;
 		_pinataCenterY = window.innerHeight / 2 - 60;
 		_pinataR = w * 0.42;
@@ -198,38 +187,27 @@
 		};
 	}
 
-	function loopScreenPos() {
-		var sa = Math.sin( mainAngle ),
-			ca = Math.cos( mainAngle );
-		return {
-			x:
-				window.innerWidth / 2 + _shiftX * ca - _ropeLen * sa,
-			y:
-				( dropped ? 0 : -window.innerHeight * 1.2 ) +
-				_shiftX * sa +
-				_ropeLen * ca,
-		};
-	}
-
 	/* -- Load pinata -------------------------------------------------------- */
 	async function loadPinata( variantKey ) {
-		var v = VARIANTS[ variantKey ];
-		if ( ! v ) return;
-		active = v;
+		if ( ! VARIANTS[ variantKey ] ) return;
 
+		var svgText = SVG_DATA[ variantKey ];
+		if ( ! svgText ) return;
+
+		active = VARIANTS[ variantKey ];
+		var v = active;
 		var cont = document.getElementById( 'egg-pinata-container' );
 		HEAD_TOP_LAYER.els = [];
 		HEAD_TOP_LAYER.val = 0;
 		HEAD_TOP_LAYER.vel = 0;
 
-		var svgText = SVG_DATA[ variantKey ];
-		if ( ! svgText ) return;
 		cont.innerHTML = svgText;
 
 		var svg = cont.querySelector( 'svg' );
 		pinataEl = svg;
 		var firstEl =
-			svg && svg.querySelector( 'path,circle,ellipse,polygon,rect,polyline' );
+			svg &&
+			svg.querySelector( 'path,circle,ellipse,polygon,rect,polyline' );
 		if ( firstEl ) protectedEls.add( firstEl );
 		svg.removeAttribute( 'width' );
 		svg.removeAttribute( 'height' );
@@ -272,7 +250,11 @@
 			maxX = -Infinity,
 			maxY = -Infinity;
 		[].slice
-			.call( svg.querySelectorAll( 'path,circle,ellipse,polygon,rect,polyline' ) )
+			.call(
+				svg.querySelectorAll(
+					'path,circle,ellipse,polygon,rect,polyline'
+				)
+			)
 			.forEach( function ( el ) {
 				var bb;
 				try {
@@ -295,8 +277,7 @@
 		}
 		applyLayout();
 
-		var headThreshold =
-			_contentBB.topY + ( maxY - minY ) * v.headTopFrac;
+		var headThreshold = _contentBB.topY + ( maxY - minY ) * v.headTopFrac;
 		HEAD_TOP_LAYER.els = [];
 		COLOR_LAYERS.forEach( function ( layer ) {
 			layer.els = layer.els.filter( function ( el ) {
@@ -317,8 +298,6 @@
 		// -- Detect eye circles (all groups of concentric circles in head area) --
 		eyeEls = [];
 		eyeElsSet = null;
-		eyeCx = 0;
-		eyeCy = 0;
 		eyeGroups = [];
 		var headCircles = [].slice
 			.call( svg.querySelectorAll( 'circle' ) )
@@ -371,36 +350,36 @@
 		} );
 		if ( eyeGroups.length ) {
 			eyeElsSet = new Set( eyeEls );
-			eyeCx = eyeGroups[ 0 ].eyeCx;
-			eyeCy = eyeGroups[ 0 ].eyeCy;
 
-			[].slice.call( svg.querySelectorAll( 'circle' ) ).forEach( function ( c ) {
-				if ( eyeElsSet.has( c ) ) return;
-				var cx = parseFloat( c.getAttribute( 'cx' ) ),
-					cy = parseFloat( c.getAttribute( 'cy' ) );
-				var near = eyeGroups.some( function ( g ) {
-					return (
-						Math.sqrt(
-							( cx - g.eyeCx ) * ( cx - g.eyeCx ) +
-								( cy - g.eyeCy ) * ( cy - g.eyeCy )
-						) < 100
-					);
-				} );
-				if ( ! near ) return;
-				protectedEls.add( c );
-				eyeEls.push( c );
-				eyeElsSet.add( c );
-				HEAD_TOP_LAYER.els = HEAD_TOP_LAYER.els.filter(
-					function ( el ) {
-						return el !== c;
-					}
-				);
-				COLOR_LAYERS.forEach( function ( layer ) {
-					layer.els = layer.els.filter( function ( el ) {
+			[].slice
+				.call( svg.querySelectorAll( 'circle' ) )
+				.forEach( function ( c ) {
+					if ( eyeElsSet.has( c ) ) return;
+					var cx = parseFloat( c.getAttribute( 'cx' ) ),
+						cy = parseFloat( c.getAttribute( 'cy' ) );
+					var near = eyeGroups.some( function ( g ) {
+						return (
+							Math.sqrt(
+								( cx - g.eyeCx ) * ( cx - g.eyeCx ) +
+									( cy - g.eyeCy ) * ( cy - g.eyeCy )
+							) < 100
+						);
+					} );
+					if ( ! near ) return;
+					protectedEls.add( c );
+					eyeEls.push( c );
+					eyeElsSet.add( c );
+					HEAD_TOP_LAYER.els = HEAD_TOP_LAYER.els.filter( function (
+						el
+					) {
 						return el !== c;
 					} );
+					COLOR_LAYERS.forEach( function ( layer ) {
+						layer.els = layer.els.filter( function ( el ) {
+							return el !== c;
+						} );
+					} );
 				} );
-			} );
 
 			HEAD_TOP_LAYER.els = HEAD_TOP_LAYER.els.filter( function ( el ) {
 				return ! eyeElsSet.has( el );
@@ -412,40 +391,42 @@
 			} );
 
 			highlightEls = [];
-			[].slice.call( svg.querySelectorAll( 'path' ) ).forEach( function ( p ) {
-				var bb;
-				try {
-					bb = p.getBBox();
-				} catch ( _ ) {
-					return;
-				}
-				var cx = bb.x + bb.width / 2,
-					cy = bb.y + bb.height / 2;
-				var nearAnyEye = eyeGroups.some( function ( g ) {
-					return (
-						Math.sqrt(
-							( cx - g.eyeCx ) * ( cx - g.eyeCx ) +
-								( cy - g.eyeCy ) * ( cy - g.eyeCy )
-						) < 40 &&
-						bb.width < 35 &&
-						bb.height < 35
-					);
-				} );
-				if ( nearAnyEye ) {
-					highlightEls.push( p );
-					protectedEls.add( p );
-					HEAD_TOP_LAYER.els = HEAD_TOP_LAYER.els.filter(
-						function ( el ) {
-							return el !== p;
-						}
-					);
-					COLOR_LAYERS.forEach( function ( layer ) {
-						layer.els = layer.els.filter( function ( el ) {
-							return el !== p;
-						} );
+			[].slice
+				.call( svg.querySelectorAll( 'path' ) )
+				.forEach( function ( p ) {
+					var bb;
+					try {
+						bb = p.getBBox();
+					} catch ( _ ) {
+						return;
+					}
+					var cx = bb.x + bb.width / 2,
+						cy = bb.y + bb.height / 2;
+					var nearAnyEye = eyeGroups.some( function ( g ) {
+						return (
+							Math.sqrt(
+								( cx - g.eyeCx ) * ( cx - g.eyeCx ) +
+									( cy - g.eyeCy ) * ( cy - g.eyeCy )
+							) < 40 &&
+							bb.width < 35 &&
+							bb.height < 35
+						);
 					} );
-				}
-			} );
+					if ( nearAnyEye ) {
+						highlightEls.push( p );
+						protectedEls.add( p );
+						HEAD_TOP_LAYER.els = HEAD_TOP_LAYER.els.filter(
+							function ( el ) {
+								return el !== p;
+							}
+						);
+						COLOR_LAYERS.forEach( function ( layer ) {
+							layer.els = layer.els.filter( function ( el ) {
+								return el !== p;
+							} );
+						} );
+					}
+				} );
 		}
 
 		var existingBoom = svg.querySelector( '#egg-boom-text' );
@@ -470,8 +451,8 @@
 		);
 		boomText.id = 'egg-boom-text';
 		var boomSc = pinataPxWidth() / active.vbW;
-		var boomOffX = active.boomOffsetX != null ? active.boomOffsetX : 20;
-		var boomOffY = active.boomOffsetY != null ? active.boomOffsetY : 40;
+		var boomOffX = active.boomOffsetX !== null ? active.boomOffsetX : 20;
+		var boomOffY = active.boomOffsetY !== null ? active.boomOffsetY : 40;
 		boomText.setAttribute(
 			'x',
 			( _contentBB.centerX + boomOffX / boomSc ).toFixed( 1 )
@@ -529,9 +510,6 @@
 	/* -- Blink -------------------------------------------------------------- */
 	function startBlink() {
 		if ( ! eyeGroups.length ) return;
-		pupilEl = eyeGroups[ 0 ].pupilEl;
-		pupilCx = eyeGroups[ 0 ].pupilCx;
-		pupilCy = eyeGroups[ 0 ].pupilCy;
 		blinkScaleY = 1;
 		function animTo( from, to, dur, done ) {
 			var t0 = Date.now();
@@ -617,8 +595,7 @@
 				d = Math.hypot( dx, my - c.y ),
 				R = c.r * 2.69;
 			if ( d < R && d > 1 )
-				proxTorque =
-					-( dx / d ) * Math.pow( 1 - d / R, 2 ) * 0.0006;
+				proxTorque = -( dx / d ) * Math.pow( 1 - d / R, 2 ) * 0.0006;
 		}
 
 		mainOmega =
@@ -629,7 +606,7 @@
 		if ( mainOmega < -0.06 ) mainOmega = -0.06;
 		mainAngle += mainOmega;
 		var _maxSwing =
-			active && active.maxSwing != null ? active.maxSwing : 0.9;
+			active && active.maxSwing !== null ? active.maxSwing : 0.9;
 		if ( mainAngle > _maxSwing ) {
 			mainAngle = _maxSwing;
 			mainOmega *= -0.4;
@@ -654,7 +631,13 @@
 				layer.damp;
 			layer.val += layer.vel;
 			var t =
-				'rotate(' + layer.val.toFixed( 3 ) + ' ' + pcx + ' ' + pcy + ')';
+				'rotate(' +
+				layer.val.toFixed( 3 ) +
+				' ' +
+				pcx +
+				' ' +
+				pcy +
+				')';
 			layer.els.forEach( function ( el ) {
 				el.setAttribute( 'transform', t );
 			} );
@@ -730,7 +713,7 @@
 		if ( ! dropped ) return;
 		var c = pinataCentre();
 		var strOff =
-			active && active.stringOffsetX != null ? active.stringOffsetX : 10;
+			active && active.stringOffsetX !== null ? active.stringOffsetX : 10;
 		var topX = window.innerWidth / 2 + strOff,
 			topY = 0;
 		var botX = c.x + strOff,
@@ -762,55 +745,59 @@
 			'position:absolute;left:-9999px;top:-9999px;visibility:hidden';
 		tmp.innerHTML = text;
 		document.body.appendChild( tmp );
-		[].slice.call( tmp.querySelectorAll( 'path' ) ).forEach( function ( p ) {
-			var bb;
-			try {
-				bb = p.getBBox();
-			} catch ( _ ) {
-				return;
-			}
-			var d = p.getAttribute( 'd' ),
-				fill = p.getAttribute( 'fill' ) || '#7c5cf0';
-			if ( ! d || bb.width <= 0 || bb.height <= 0 ) return;
-			var aspect =
-				Math.max( bb.width, bb.height ) /
-				Math.max( 0.0001, Math.min( bb.width, bb.height ) );
-			ALL_SHAPES.push( {
-				path2d: new Path2D( d ),
-				cx: bb.x + bb.width / 2,
-				cy: bb.y + bb.height / 2,
-				r: Math.max( bb.width, bb.height ) / 2,
-				color: fill,
-				kind:
-					aspect < 1.15
-						? 'circle'
-						: aspect > 1.7
-						? 'line'
-						: 'misc',
+		[].slice
+			.call( tmp.querySelectorAll( 'path' ) )
+			.forEach( function ( p ) {
+				var bb;
+				try {
+					bb = p.getBBox();
+				} catch ( _ ) {
+					return;
+				}
+				var d = p.getAttribute( 'd' ),
+					fill = p.getAttribute( 'fill' ) || '#7c5cf0';
+				if ( ! d || bb.width <= 0 || bb.height <= 0 ) return;
+				var aspect =
+					Math.max( bb.width, bb.height ) /
+					Math.max( 0.0001, Math.min( bb.width, bb.height ) );
+				var kind = 'misc';
+				if ( aspect < 1.15 ) {
+					kind = 'circle';
+				} else if ( aspect > 1.7 ) {
+					kind = 'line';
+				}
+				ALL_SHAPES.push( {
+					path2d: new Path2D( d ),
+					cx: bb.x + bb.width / 2,
+					cy: bb.y + bb.height / 2,
+					r: Math.max( bb.width, bb.height ) / 2,
+					color: fill,
+					kind,
+				} );
 			} );
-		} );
 		document.body.removeChild( tmp );
 	}
 
 	function filterShapes() {
 		var k = settings.cfShape;
-		activeShapes =
-			k === 'circles'
-				? ALL_SHAPES.filter( function ( s ) {
-						return s.kind === 'circle';
-				  } )
-				: k === 'lines'
-				? ALL_SHAPES.filter( function ( s ) {
-						return s.kind === 'line';
-				  } )
-				: ALL_SHAPES.slice();
+		if ( k === 'circles' ) {
+			activeShapes = ALL_SHAPES.filter( function ( s ) {
+				return s.kind === 'circle';
+			} );
+		} else if ( k === 'lines' ) {
+			activeShapes = ALL_SHAPES.filter( function ( s ) {
+				return s.kind === 'line';
+			} );
+		} else {
+			activeShapes = ALL_SHAPES.slice();
+		}
 		if ( ! activeShapes.length ) activeShapes = ALL_SHAPES.slice();
 	}
 
 	function rebuildColumns() {
-		columns = new Array( Math.ceil( window.innerWidth / COLUMN_W ) + 4 ).fill(
-			window.innerHeight
-		);
+		columns = new Array(
+			Math.ceil( window.innerWidth / COLUMN_W ) + 4
+		).fill( window.innerHeight );
 	}
 
 	function colOf( x ) {
@@ -827,7 +814,10 @@
 		for ( var i = 0; i < count; i++ ) {
 			var ang = Math.random() * Math.PI * 2,
 				speed = 5 + Math.random() * 8;
-			var tpl = activeShapes[ ( Math.random() * activeShapes.length ) | 0 ];
+			var tpl =
+				activeShapes[
+					Math.floor( Math.random() * activeShapes.length )
+				];
 			var scale =
 				( 6 / Math.max( 0.5, tpl.r ) ) *
 				( 0.85 + Math.random() * 0.3 ) *
@@ -944,13 +934,12 @@
 		var eligible = [];
 		allLayers.forEach( function ( layer ) {
 			layer.els.forEach( function ( el ) {
-				if ( ! protectedEls.has( el ) )
-					eligible.push( { layer, el } );
+				if ( ! protectedEls.has( el ) ) eligible.push( { layer, el } );
 			} );
 		} );
 		if ( ! eligible.length ) return;
 
-		var pick = eligible[ ( Math.random() * eligible.length ) | 0 ];
+		var pick = eligible[ Math.floor( Math.random() * eligible.length ) ];
 		var layer = pick.layer;
 		var el = pick.el;
 		var idx = layer.els.indexOf( el );
@@ -1039,21 +1028,15 @@
 		}
 	}
 
-	function clearConfetti() {
-		live.length = 0;
-		settled.length = 0;
-		rebuildColumns();
-	}
-
 	/* -- Cursor ------------------------------------------------------------- */
 	function updateCursor() {
 		if ( ! mActive ) return;
 		var rawVx = mx - lastMx;
 		mouseVx = mouseVx * 0.7 + rawVx * 0.3;
 		lastMx = mx;
-		lastMy = my;
 		var vel = Math.max( -35, Math.min( 35, mouseVx * 0.45 ) );
-		stickAngleVel = ( stickAngleVel + ( 25 + vel - stickAngle ) * 0.1 ) * 0.82;
+		stickAngleVel =
+			( stickAngleVel + ( 25 + vel - stickAngle ) * 0.1 ) * 0.82;
 		stickAngle += stickAngleVel;
 		stick.style.transform =
 			'translate(' +
@@ -1092,7 +1075,8 @@
 		squishAngle = Math.atan2( c.y - cy, c.x - cx );
 		squishVel += 0.9;
 		var boomEl = document.getElementById( 'egg-boom-text' );
-		if ( boomEl && boomEl.style.opacity === '0' ) boomEl.style.opacity = '1';
+		if ( boomEl && boomEl.style.opacity === '0' )
+			boomEl.style.opacity = '1';
 	}
 
 	/* -- Main loop ---------------------------------------------------------- */
@@ -1145,11 +1129,9 @@
 					e.preventDefault();
 					last.focus();
 				}
-			} else {
-				if ( document.activeElement === last ) {
-					e.preventDefault();
-					first.focus();
-				}
+			} else if ( document.activeElement === last ) {
+				e.preventDefault();
+				first.focus();
 			}
 		}
 	}
@@ -1173,9 +1155,11 @@
 			fd.append( 'action', 'wc_egg_dismiss' );
 			fd.append( 'nonce', DISMISS.nonce );
 			fd.append( 'order_id', currentMilestone._orderId );
-			navigator.sendBeacon
-				? navigator.sendBeacon( DISMISS.url, fd )
-				: fetch( DISMISS.url, { method: 'POST', body: fd } );
+			if ( navigator.sendBeacon ) {
+				navigator.sendBeacon( DISMISS.url, fd );
+			} else {
+				fetch( DISMISS.url, { method: 'POST', body: fd } );
+			}
 		}
 		if ( blinkTimer ) {
 			clearTimeout( blinkTimer );
@@ -1369,9 +1353,11 @@
 					var fd = new FormData();
 					fd.append( 'action', 'wc_egg_opt_out' );
 					fd.append( 'nonce', DISMISS.nonce );
-					navigator.sendBeacon
-						? navigator.sendBeacon( DISMISS.url, fd )
-						: fetch( DISMISS.url, { method: 'POST', body: fd } );
+					if ( navigator.sendBeacon ) {
+						navigator.sendBeacon( DISMISS.url, fd );
+					} else {
+						fetch( DISMISS.url, { method: 'POST', body: fd } );
+					}
 				}
 				closeOverlay();
 			}
@@ -1389,9 +1375,7 @@
 		( function animReveal() {
 			var t = Math.min( ( Date.now() - revealStart ) / 1000, 1 );
 			var e2 =
-				t < 0.5
-					? 4 * t * t * t
-					: 1 - Math.pow( -2 * t + 2, 3 ) / 2;
+				t < 0.5 ? 4 * t * t * t : 1 - Math.pow( -2 * t + 2, 3 ) / 2;
 			wooblePath.setAttribute(
 				'transform',
 				'translate(' +
@@ -1427,15 +1411,9 @@
 		live.length = 0;
 		settled.length = 0;
 		fallingPieces = [];
-		hitCount = 0;
 		protectedEls = new Set();
 		eyeEls = [];
 		eyeElsSet = null;
-		eyeCx = 0;
-		eyeCy = 0;
-		pupilEl = null;
-		pupilCx = 0;
-		pupilCy = 0;
 		blinkScaleY = 1;
 		highlightEls = [];
 		eyeGroups = [];
@@ -1462,7 +1440,6 @@
 		mx = window.innerWidth / 2;
 		my = window.innerHeight / 2;
 		lastMx = mx;
-		lastMy = my;
 
 		currentMilestone = milestoneData;
 		settings = Object.assign( {}, DEFAULTS, {
