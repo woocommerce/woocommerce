@@ -38,6 +38,7 @@
 
 .product_page_woocommerce-products-dashboard-snackbar {
 	@include snackbar-container;
+	z-index: 100002;
 }
 
 .product_page_woocommerce-products-dashboard .edit-site-layout__content {
