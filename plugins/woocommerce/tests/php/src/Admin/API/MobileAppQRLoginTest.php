@@ -1955,6 +1955,33 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Invalid exchange grants do not extend approved records beyond the original token lifetime.
+	 */
+	public function test_invalid_exchange_grant_does_not_extend_approved_record_past_token_lifetime(): void {
+		$prep          = $this->prepare_exchange_token();
+		$transient_key = $this->token_transient_key( $prep['plaintext'] );
+		$record        = get_transient( $transient_key );
+		$expires_at    = time() + 20;
+
+		$this->assertIsArray( $record );
+		$record['expires_at'] = $expires_at;
+		set_transient( $transient_key, $record, 20 );
+
+		$response = $this->dispatch_exchange( $prep['plaintext'], str_repeat( 'b', strlen( $prep['exchange_grant'] ) ) );
+
+		$this->assertSame( 412, $response->get_status() );
+		$this->assertSame( 'invalid_exchange_grant', $response->get_data()['code'] );
+
+		$timeout = get_option( '_transient_timeout_' . $transient_key );
+		$this->assertNotFalse( $timeout, 'Token transient should keep a timeout after the failed exchange.' );
+		$this->assertLessThanOrEqual(
+			$expires_at,
+			(int) $timeout,
+			'Failed exchange must not extend the approved record beyond token expiry.'
+		);
+	}
+
+	/**
 	 * @testdox Repeated invalid exchange grants terminally reject the token after the threshold.
 	 */
 	public function test_exchange_rejects_after_invalid_grant_threshold(): void {

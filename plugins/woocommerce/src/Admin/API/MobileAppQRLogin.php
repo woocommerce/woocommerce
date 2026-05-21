@@ -733,7 +733,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 */
 	private function get_token_record_ttl( array $token_data ) {
 		return max(
-			30,
+			1,
 			isset( $token_data['expires_at'] ) ? (int) $token_data['expires_at'] - time() : self::TOKEN_TTL
 		);
 	}
@@ -1229,6 +1229,16 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		$state = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
 
+		// Rejected / expired states are terminal — surface them directly so
+		// wc-admin can render the "Login denied" terminal screen.
+		if ( in_array( $state, array( self::STATE_REJECTED, self::STATE_EXPIRED ), true ) ) {
+			return rest_ensure_response( array( 'status' => $state ) );
+		}
+
+		if ( ! empty( $record['expires_at'] ) && time() >= (int) $record['expires_at'] ) {
+			return rest_ensure_response( array( 'status' => self::STATE_EXPIRED ) );
+		}
+
 		// While in `scanned`, surface the shuffled candidate triple and the
 		// device that scanned so wc-admin can render the matching UI. The
 		// REAL number is never returned via this endpoint — only the
@@ -1246,12 +1256,6 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 					'expires_at' => isset( $challenge['expires_at'] ) ? (int) $challenge['expires_at'] : null,
 				)
 			);
-		}
-
-		// Rejected / expired states are terminal — surface them directly so
-		// wc-admin can render the "Login denied" terminal screen.
-		if ( in_array( $state, array( self::STATE_REJECTED, self::STATE_EXPIRED ), true ) ) {
-			return rest_ensure_response( array( 'status' => $state ) );
 		}
 
 		// Approved (post-tap, pre-exchange) — surface so a wc-admin tab that
@@ -1765,6 +1769,14 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		$state    = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
 		$response = array( 'state' => $state );
+
+		if ( in_array( $state, array( self::STATE_REJECTED, self::STATE_EXPIRED ), true ) ) {
+			return rest_ensure_response( $response );
+		}
+
+		if ( ! empty( $record['expires_at'] ) && time() >= (int) $record['expires_at'] ) {
+			return rest_ensure_response( array( 'state' => self::STATE_EXPIRED ) );
+		}
 
 		if ( self::STATE_APPROVED === $state && ! empty( $record['exchange_grant'] ) ) {
 			$response['exchange_grant'] = (string) $record['exchange_grant'];
