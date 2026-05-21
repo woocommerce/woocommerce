@@ -557,7 +557,7 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		$this->assertNotEmpty(
 			array_filter(
 				$note_strings,
-				static fn ( $note ) => false !== strpos( $note, 'Abandoned cart recovery email manually sent' )
+				static fn ( $note ) => false !== strpos( $note, 'sent from the order actions menu' )
 			),
 			'Manual send must record an order note announcing the email.'
 		);
@@ -685,7 +685,7 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 	}
 
 	/**
-	 * @testdox handle_recovery_email_send() is a no-op when the email is disabled — avoids writing a "manually sent" order note for a send that never happened.
+	 * @testdox handle_recovery_email_send() is a no-op when the email is disabled — avoids writing an order note for a send that never happened.
 	 */
 	public function test_handle_recovery_email_send_bails_when_email_disabled(): void {
 		$this->become_admin();
@@ -707,9 +707,9 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		$this->assertEmpty(
 			array_filter(
 				$note_strings,
-				static fn ( $note ) => false !== strpos( $note, 'Abandoned cart recovery email manually sent' )
+				static fn ( $note ) => false !== strpos( $note, 'sent from the order actions menu' )
 			),
-			'Disabled email must not record a "manually sent" order note.'
+			'Disabled email must not record a "sent from the order actions menu" order note.'
 		);
 	}
 
@@ -746,7 +746,7 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 	}
 
 	/**
-	 * @testdox handle_recovery_email_send() is a no-op when the order has no billing email so we don't record a "manually sent" note for a send that never went out.
+	 * @testdox handle_recovery_email_send() is a no-op when the order has no billing email so we don't record an order note for a send that never went out.
 	 */
 	public function test_handle_recovery_email_send_bails_without_billing_email(): void {
 		$this->become_admin();
@@ -767,9 +767,9 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		$this->assertEmpty(
 			array_filter(
 				$note_strings,
-				static fn ( $note ) => false !== strpos( $note, 'Abandoned cart recovery email manually sent' )
+				static fn ( $note ) => false !== strpos( $note, 'sent from the order actions menu' )
 			),
-			'Recipient-less order must not record a "manually sent" order note.'
+			'Recipient-less order must not record a "sent from the order actions menu" order note.'
 		);
 	}
 
@@ -801,9 +801,9 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		$this->assertEmpty(
 			array_filter(
 				$note_strings,
-				static fn ( $note ) => false !== strpos( $note, 'Abandoned cart recovery email manually sent' )
+				static fn ( $note ) => false !== strpos( $note, 'sent from the order actions menu' )
 			),
-			'Suppressed email must not record a "manually sent" order note.'
+			'Suppressed email must not record a "sent from the order actions menu" order note.'
 		);
 	}
 
