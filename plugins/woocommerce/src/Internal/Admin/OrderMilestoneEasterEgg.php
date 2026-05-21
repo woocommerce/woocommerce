@@ -184,26 +184,7 @@ class OrderMilestoneEasterEgg {
 		$svg_data = $this->get_svg_data( $needed_variants );
 		$labels   = $this->get_ui_labels();
 
-		$asset_file = WC_ABSPATH . 'assets/client/admin/wp-admin-scripts/order-milestone-easter-egg.asset.php';
-		$asset      = file_exists( $asset_file )
-			? require $asset_file
-			: array(
-				'dependencies' => array(),
-				'version'      => WC_VERSION,
-			);
-
-		wp_register_script(
-			'wc-order-milestone-easter-egg',
-			plugins_url( 'assets/client/admin/wp-admin-scripts/order-milestone-easter-egg.js', WC_PLUGIN_FILE ),
-			$asset['dependencies'],
-			$asset['version'],
-			array(
-				'in_footer' => true,
-				'strategy'  => 'defer',
-			)
-		);
-
-		wp_enqueue_script( 'wc-order-milestone-easter-egg' );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'order-milestone-easter-egg', true );
 
 		$localize_data = array(
 			'milestones' => $milestone_map,
@@ -219,7 +200,7 @@ class OrderMilestoneEasterEgg {
 			$localize_data['allMilestones'] = $all_msgs;
 		}
 
-		wp_localize_script( 'wc-order-milestone-easter-egg', 'wcOrderMilestoneEgg', $localize_data );
+		wp_localize_script( 'wc-admin-order-milestone-easter-egg', 'wcOrderMilestoneEgg', $localize_data );
 	}
 
 	/**

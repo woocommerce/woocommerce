@@ -1,4 +1,10 @@
-/* global wcOrderMilestoneEgg */
+/* global wcOrderMilestoneEgg, Path2D */
+/*
+ * This is a standalone canvas/SVG animation loaded on classic wp-admin order
+ * screens. It intentionally uses function declarations before definition,
+ * browser globals, mutable module state, and imperative DOM APIs.
+ */
+/* eslint-disable @typescript-eslint/no-use-before-define, @typescript-eslint/no-unused-vars, @wordpress/no-global-active-element, @wordpress/no-unused-vars-before-return, eqeqeq, no-bitwise, no-lonely-if, no-nested-ternary, no-undef, no-unused-expressions, prettier/prettier */
 ( function () {
 	'use strict';
 
