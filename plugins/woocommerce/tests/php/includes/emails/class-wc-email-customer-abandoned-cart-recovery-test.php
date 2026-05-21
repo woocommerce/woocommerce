@@ -509,7 +509,10 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		// Logged-out / no caps.
 		wp_set_current_user( 0 );
 
+		// Age the order past the threshold so the capability check — not the
+		// recent-order gate — is what removes the action from the list.
 		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
 
 		$actions = $this->sut->register_order_action( array(), $order );
 
@@ -631,7 +634,10 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		$this->sut->update_option( 'enabled', 'yes' );
 		$this->sut->enabled = 'yes';
 
+		// Age the order past the threshold so the capability check — not the
+		// recent-order gate — is what blocks the dispatch.
 		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
 
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
@@ -704,6 +710,66 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 				static fn ( $note ) => false !== strpos( $note, 'Abandoned cart recovery email manually sent' )
 			),
 			'Disabled email must not record a "manually sent" order note.'
+		);
+	}
+
+	/**
+	 * Create an order without a billing email or associated customer.
+	 *
+	 * `OrderHelper::create_order()` always seeds a billing email, and
+	 * `WC_Order::maybe_set_user_billing_email()` re-populates the field from
+	 * the associated user on save. To exercise the no-recipient path we have
+	 * to drop both the customer link and the address email together.
+	 *
+	 * @return WC_Order Reloaded order with empty billing email.
+	 */
+	private function create_order_without_recipient(): WC_Order {
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_customer_id( 0 );
+		$order->set_billing_email( '' );
+		$order->save();
+
+		return $this->age_order_past_threshold( $order );
+	}
+
+	/**
+	 * @testdox register_order_action() hides the action when the order has no billing email — checkout-draft orders can land here mid-flow and a recipient-less send would silently no-op.
+	 */
+	public function test_register_order_action_skips_without_billing_email(): void {
+		$this->become_admin();
+
+		$order = $this->create_order_without_recipient();
+
+		$actions = $this->sut->register_order_action( array(), $order );
+
+		$this->assertArrayNotHasKey( WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+	}
+
+	/**
+	 * @testdox handle_recovery_email_send() is a no-op when the order has no billing email so we don't record a "manually sent" note for a send that never went out.
+	 */
+	public function test_handle_recovery_email_send_bails_without_billing_email(): void {
+		$this->become_admin();
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = $this->create_order_without_recipient();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+
+		$this->sut->handle_recovery_email_send( $order );
+
+		$this->assertSame( $before, count( $mailer->mock_sent ), 'Order without a recipient must not dispatch.' );
+
+		$notes        = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$note_strings = wp_list_pluck( $notes, 'content' );
+		$this->assertEmpty(
+			array_filter(
+				$note_strings,
+				static fn ( $note ) => false !== strpos( $note, 'Abandoned cart recovery email manually sent' )
+			),
+			'Recipient-less order must not record a "manually sent" order note.'
 		);
 	}
 

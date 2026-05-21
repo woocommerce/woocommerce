@@ -149,12 +149,13 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				&& $this->object instanceof WC_Order
 				&& $this->is_order_eligible_for_recovery( $this->object )
 			) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+				$sent = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 
-				// Record the send timestamp so the automated-scheduling integration can dedup
-				// against orders that have already been emailed via either path.
-				$this->object->update_meta_data( self::META_KEY_SENT_AT, (string) time() );
-				$this->object->save_meta_data();
+				// Only record the send timestamp when the dispatch actually succeeded.
+				if ( $sent ) {
+					$this->object->update_meta_data( self::META_KEY_SENT_AT, (string) time() );
+					$this->object->save_meta_data();
+				}
 			}
 
 			$this->restore_locale();
@@ -202,9 +203,11 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		/**
 		 * Whether an order is in a state that warrants a recovery email.
 		 *
-		 * The order must (a) be in one of the eligible statuses and (b) have lived
-		 * in that state for at least `ABANDONMENT_THRESHOLD_SECONDS`, so we don't
-		 * nudge customers who are actively still on the page.
+		 * The order must (a) be in one of the eligible statuses, (b) have lived
+		 * in that state for at least `ABANDONMENT_THRESHOLD_SECONDS` (so we don't
+		 * nudge customers who are actively still on the page), and (c) have a
+		 * valid billing email — checkout-draft orders in particular can land in
+		 * the eligible status without a recipient.
 		 *
 		 * Single source of truth: called both by `trigger()` (defence-in-depth at
 		 * send time) and by the manual-send dropdown gates. Partners can widen the
@@ -243,7 +246,11 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				return false;
 			}
 
-			return ( time() - $date_created->getTimestamp() ) >= self::ABANDONMENT_THRESHOLD_SECONDS;
+			if ( ( time() - $date_created->getTimestamp() ) < self::ABANDONMENT_THRESHOLD_SECONDS ) {
+				return false;
+			}
+
+			return is_email( $order->get_billing_email() ) !== false;
 		}
 
 		/**

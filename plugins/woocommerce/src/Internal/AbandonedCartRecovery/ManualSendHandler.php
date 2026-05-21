@@ -71,6 +71,10 @@ class ManualSendHandler {
 	 * @return array
 	 */
 	public function register_order_action( $actions, $order ): array {
+		if ( ! is_array( $actions ) ) {
+			$actions = array();
+		}
+
 		$email = $this->get_email();
 		if ( ! $email ) {
 			return $actions;
