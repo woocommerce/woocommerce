@@ -157,6 +157,37 @@ describe( 'product edit utils', () => {
 		);
 	} );
 
+	it( 'merges bulk dimensions per dimension field', () => {
+		const products = [
+			buildProduct( {
+				id: 1,
+				dimensions: {
+					length: '12',
+					width: '4',
+					height: '3',
+				},
+			} ),
+			buildProduct( {
+				id: 2,
+				dimensions: {
+					length: '12',
+					width: '7',
+					height: '3',
+				},
+			} ),
+		];
+
+		expect( buildMergedProductEditData( products ) ).toEqual(
+			expect.objectContaining( {
+				dimensions: {
+					length: '12',
+					width: '',
+					height: '3',
+				},
+			} )
+		);
+	} );
+
 	it( 'returns bulk field state for mixed values', () => {
 		const products = [
 			buildProduct( {

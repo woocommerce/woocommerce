@@ -128,6 +128,35 @@ function getCostOfGoodsSoldDataWithValue(
 	};
 }
 
+function isDimensionChanges(
+	value: unknown
+): value is Partial< ProductEntityRecord[ 'dimensions' ] > {
+	return (
+		Boolean( value ) &&
+		typeof value === 'object' &&
+		! Array.isArray( value )
+	);
+}
+
+function mergeProductChangesForProduct(
+	product: ProductEntityRecord,
+	changes: Partial< ProductEntityRecord >
+): Partial< ProductEntityRecord > {
+	const { dimensions, ...remainingChanges } = changes;
+
+	if ( ! isDimensionChanges( dimensions ) ) {
+		return changes;
+	}
+
+	return {
+		...remainingChanges,
+		dimensions: {
+			...product.dimensions,
+			...dimensions,
+		} as ProductEntityRecord[ 'dimensions' ],
+	};
+}
+
 function getBulkEditFormData(
 	mergedData: ProductEntityRecord,
 	bulkEditData: ProductBulkEditFormData,
@@ -137,6 +166,15 @@ function getBulkEditFormData(
 		...mergedData,
 		...bulkEditData,
 	};
+
+	if ( isDimensionChanges( bulkEditData.dimensions ) ) {
+		data.dimensions = {
+			...( isDimensionChanges( mergedData.dimensions )
+				? mergedData.dimensions
+				: {} ),
+			...bulkEditData.dimensions,
+		} as ProductEntityRecord[ 'dimensions' ];
+	}
 
 	Object.keys( fieldStates ).forEach( ( fieldId ) => {
 		if ( fieldId === 'stock' && fieldStates[ fieldId ].isMixed ) {
@@ -625,7 +663,9 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 	const onChange = useCallback(
 		( changes: Partial< ProductEntityRecord > ) => {
 			if ( selectedProducts.length <= 1 ) {
-				applySelectedProductChanges( () => changes );
+				applySelectedProductChanges( ( product ) =>
+					mergeProductChangesForProduct( product, changes )
+				);
 				return;
 			}
 
@@ -641,6 +681,10 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 					return;
 				}
 
+				if ( fieldId === 'dimensions' && isDimensionChanges( value ) ) {
+					bulkChanges[ fieldId ] = value;
+				}
+
 				productChanges[ fieldId as keyof ProductEntityRecord ] =
 					value as never;
 			} );
@@ -649,11 +693,25 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 				setBulkEditData( ( currentData ) => ( {
 					...currentData,
 					...bulkChanges,
+					...( isDimensionChanges( bulkChanges.dimensions )
+						? {
+								dimensions: {
+									...( isDimensionChanges(
+										currentData.dimensions
+									)
+										? currentData.dimensions
+										: {} ),
+									...bulkChanges.dimensions,
+								} as ProductEntityRecord[ 'dimensions' ],
+						  }
+						: {} ),
 				} ) );
 			}
 
 			if ( Object.keys( productChanges ).length > 0 ) {
-				applySelectedProductChanges( () => productChanges );
+				applySelectedProductChanges( ( product ) =>
+					mergeProductChangesForProduct( product, productChanges )
+				);
 			}
 		},
 		[ applySelectedProductChanges, selectedProducts.length ]
