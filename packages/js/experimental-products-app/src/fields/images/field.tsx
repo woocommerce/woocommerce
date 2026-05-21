@@ -264,8 +264,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 										alt={ image.alt || data.name }
 										onRemove={ onRemove }
 										showDragHandle={
-											! isVariation &&
-											images.length > 1
+											! isVariation && images.length > 1
 										}
 									/>
 								);
