@@ -175,7 +175,8 @@ export const fieldExtensions: Partial< Field< PriceFilterData > > = {
 
 		return (
 			<InputControl
-				label={ hideLabelFromVision ? '' : field.label }
+				label={ field.label }
+				hideLabelFromVision={ hideLabelFromVision }
 				type="number"
 				step={ step }
 				value={ singleValue }
