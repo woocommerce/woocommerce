@@ -311,13 +311,14 @@ class WC_Download_Handler {
 		}
 
 		// See if path needs an abspath prepended to work.
+		$wp_content_relative_path = '/' . str_replace( ABSPATH, '', WP_CONTENT_DIR );
 		if ( file_exists( ABSPATH . $file_path ) ) {
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
 
-		} elseif ( '/wp-content' === substr( $file_path, 0, 11 ) ) {
+		} elseif ( $wp_content_relative_path === substr( $file_path, 0, strlen( $wp_content_relative_path ) ) ) {
 			$remote_file = false;
-			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, 11 ) );
+			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, strlen( $wp_content_relative_path ) ) );
 
 			// Check if we have an absolute path.
 		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ), true ) ) && isset( $parsed_file_path['path'] ) ) {
