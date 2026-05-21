@@ -1,8 +1,16 @@
 /**
+ * External dependencies
+ */
+import type { View } from '@wordpress/dataviews';
+
+/**
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../fields/types';
-import { getProductsWithEmbeddedVariations } from './utils';
+import {
+	getProductsWithEmbeddedVariations,
+	hasActiveProductListSearchOrFilters,
+} from './utils';
 
 function createProduct(
 	id: number,
@@ -48,6 +56,60 @@ describe( 'product list utils', () => {
 			expect(
 				getProductsWithEmbeddedVariations( [ parent, listedVariation ] )
 			).toEqual( [ parent, listedVariation ] );
+		} );
+	} );
+
+	describe( 'hasActiveProductListSearchOrFilters', () => {
+		const baseView = {
+			type: 'table',
+			page: 1,
+			perPage: 20,
+			filters: [],
+		} as View;
+
+		it( 'returns true when the view has a search query', () => {
+			expect(
+				hasActiveProductListSearchOrFilters( {
+					...baseView,
+					search: ' hoodie ',
+				} )
+			).toBe( true );
+		} );
+
+		it( 'returns true when the view has a filter value', () => {
+			expect(
+				hasActiveProductListSearchOrFilters( {
+					...baseView,
+					filters: [
+						{
+							field: 'stock_quantity',
+							operator: 'is',
+							value: 0,
+						},
+					],
+				} as View )
+			).toBe( true );
+		} );
+
+		it( 'ignores empty search and filter values', () => {
+			expect(
+				hasActiveProductListSearchOrFilters( {
+					...baseView,
+					search: ' ',
+					filters: [
+						{
+							field: 'categories',
+							operator: 'isAny',
+							value: [],
+						},
+						{
+							field: 'tags',
+							operator: 'isAny',
+							value: [ '', undefined ],
+						},
+					],
+				} as View )
+			).toBe( false );
 		} );
 	} );
 } );

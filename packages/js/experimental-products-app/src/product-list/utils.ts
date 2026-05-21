@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { Filter, View } from '@wordpress/dataviews';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
@@ -83,4 +84,24 @@ export function getSelectionFromPostId( postId?: string ) {
 
 export function isProductEditorAccessible( item: ProductEntityRecord ) {
 	return item.status !== 'trash';
+}
+
+function hasFilterValue( value: Filter[ 'value' ] ): boolean {
+	if ( Array.isArray( value ) ) {
+		return value.some( hasFilterValue );
+	}
+
+	if ( typeof value === 'string' ) {
+		return value.trim() !== '';
+	}
+
+	return value !== undefined && value !== null;
+}
+
+export function hasActiveProductListSearchOrFilters( view: View ) {
+	return (
+		( typeof view.search === 'string' && view.search.trim() !== '' ) ||
+		view.filters?.some( ( filter ) => hasFilterValue( filter.value ) ) ===
+			true
+	);
 }
