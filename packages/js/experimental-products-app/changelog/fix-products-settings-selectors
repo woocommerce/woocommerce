@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix product shipping fields reading measurement settings in the experimental products app.
