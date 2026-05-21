@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { addQueryArgs, getQueryArgs } from '@wordpress/url';
+import { Filter, View } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
