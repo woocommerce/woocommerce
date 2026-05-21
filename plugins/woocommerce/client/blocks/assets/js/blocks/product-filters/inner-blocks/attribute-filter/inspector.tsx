@@ -6,6 +6,10 @@ import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Block, getBlockTypes } from '@wordpress/blocks';
 import {
+	DisplayStyleSwitcher,
+	resetDisplayStyleBlock,
+} from '@woocommerce/editor-components/display-style-switcher';
+import {
 	SelectControl,
 	ToggleControl,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -24,10 +28,6 @@ import {
 import { sortOrderOptions, sortOrders } from './constants';
 import { EditProps, DEFAULT_SORT_ORDER, DEFAULT_QUERY_TYPE } from './types';
 import metadata from './block.json';
-import {
-	DisplayStyleSwitcher,
-	resetDisplayStyleBlock,
-} from '../../components/display-style-switcher';
 
 let displayStyleOptions: Block[] = [];
 

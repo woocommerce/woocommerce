@@ -22,6 +22,10 @@ import type { ProductResponseAttributeItem } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
 import {
+	DisplayStyleSwitcher,
+	resetDisplayStyleBlock,
+} from '@woocommerce/editor-components/display-style-switcher';
+import {
 	ToggleControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
@@ -33,10 +37,6 @@ import {
  * Internal dependencies
  */
 import { DEFAULT_ATTRIBUTES, EMPTY_TERM_COLORS } from './constants';
-import {
-	DisplayStyleSwitcher,
-	resetDisplayStyleBlock,
-} from '../../../product-filters/components/display-style-switcher';
 import type {
 	SelectableItem,
 	SelectableItemsContext,

@@ -17,7 +17,7 @@ import {
 /**
  * Internal dependencies
  */
-import { DISPLAY_STYLE_SWITCHER_EXCLUDED_BLOCK_NAMES } from '../../constants';
+import { DISPLAY_STYLE_SWITCHER_EXCLUDED_BLOCK_NAMES } from './constants';
 
 function isDisplayStyleCandidate(
 	blockTypeName: string,
