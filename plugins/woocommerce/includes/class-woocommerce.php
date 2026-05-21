@@ -1000,6 +1000,7 @@ final class WooCommerce {
 		$container->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class );
 		$container->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Endpoint::class );
 		$container->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\ManualSendHandler::class );
+		$container->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\Scheduler::class );
 	}
 
 	/**

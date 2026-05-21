@@ -291,6 +291,26 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox trigger() does not dispatch when META_KEY_SENT_AT is already populated, so a duplicate AS firing or a re-trigger after a successful send cannot double-email the customer.
+	 */
+	public function test_trigger_skips_when_already_sent(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
+		$order->update_meta_data( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT, (string) time() );
+		$order->save();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		$this->sut->trigger( $order->get_id() );
+		$after = count( $mailer->mock_sent );
+
+		$this->assertSame( $before, $after, 'Order already marked as sent must not receive a second dispatch.' );
+	}
+
+	/**
 	 * @testdox trigger() does not write the sent_at meta when the email is disabled (no send happened).
 	 */
 	public function test_trigger_does_not_record_meta_when_disabled(): void {

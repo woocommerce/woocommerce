@@ -80,6 +80,18 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		public const ABANDONMENT_THRESHOLD_SECONDS = HOUR_IN_SECONDS;
 
 		/**
+		 * Delay between order creation and the automated recovery send.
+		 *
+		 * Deliberately longer than `ABANDONMENT_THRESHOLD_SECONDS` so the auto-send
+		 * never races the customer's own checkout retry. The shorter eligibility
+		 * threshold still gates manual sends from the order edit page so merchants
+		 * have an earlier window to intervene.
+		 *
+		 * @since 10.9.0
+		 */
+		public const AUTO_SEND_DELAY_SECONDS = 2 * HOUR_IN_SECONDS;
+
+		/**
 		 * Constructor.
 		 */
 		public function __construct() {
@@ -151,10 +163,13 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				&& $this->object instanceof WC_Order
 				&& $this->is_order_eligible_for_recovery( $this->object )
 				&& ! self::is_recipient_unsubscribed( $this->get_recipient() )
+				&& '' === (string) $this->object->get_meta( self::META_KEY_SENT_AT )
 			) {
 				$sent = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 
 				// Only record the send timestamp when the dispatch actually succeeded.
+				// Subsequent invocations (duplicate AS firings, post-manual auto fires)
+				// short-circuit on this meta before reaching `send()` again.
 				if ( $sent ) {
 					$this->object->update_meta_data( self::META_KEY_SENT_AT, (string) time() );
 					$this->object->save_meta_data();
