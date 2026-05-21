@@ -222,7 +222,7 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 		$map = $this->get_milestone_map_via_filter();
 
 		$this->assertArrayHasKey( $order->get_id(), $map );
-		$this->assertEquals( 'lama', $map[ $order->get_id() ]['variant'] );
+		$this->assertEquals( 'llama', $map[ $order->get_id() ]['variant'] );
 	}
 
 	/**
