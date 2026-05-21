@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { addQueryArgs } from '@wordpress/url';
+import { addQueryArgs, getQueryArgs } from '@wordpress/url';
+import { Filter, View } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
@@ -11,11 +12,21 @@ import { PRODUCT_LIST_TAB_VALUES, type StatusTab } from './constants';
 
 export function getProductListNavigationPath(
 	path: string,
-	params: Record< string, string >
+	params: Record< string, string | undefined >
 ) {
 	const [ pathname = '/' ] = path.split( '?' );
+	const query = {
+		...getQueryArgs( path ),
+		...params,
+	};
+	const sanitizedQuery = Object.fromEntries(
+		Object.entries( query ).filter(
+			( [ key, value ] ) =>
+				key !== 'undefined' && typeof value !== 'undefined'
+		)
+	);
 
-	return addQueryArgs( pathname, params );
+	return addQueryArgs( pathname, sanitizedQuery );
 }
 
 export function getItemId( item: ProductEntityRecord ) {
@@ -83,4 +94,24 @@ export function getSelectionFromPostId( postId?: string ) {
 
 export function isProductEditorAccessible( item: ProductEntityRecord ) {
 	return item.status !== 'trash';
+}
+
+function hasFilterValue( value: Filter[ 'value' ] ): boolean {
+	if ( Array.isArray( value ) ) {
+		return value.some( hasFilterValue );
+	}
+
+	if ( typeof value === 'string' ) {
+		return value.trim() !== '';
+	}
+
+	return value !== undefined && value !== null;
+}
+
+export function hasActiveProductListSearchOrFilters( view: View ) {
+	return (
+		( typeof view.search === 'string' && view.search.trim() !== '' ) ||
+		view.filters?.some( ( filter ) => hasFilterValue( filter.value ) ) ===
+			true
+	);
 }

@@ -102,6 +102,9 @@ final class ProductFilterChips extends AbstractBlock {
 							<?php if ( ! empty( $item['ariaLabel'] ) ) : ?>
 								aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
 							<?php endif; ?>
+							<?php if ( $has_color_swatches ) : ?>
+								title="<?php echo esc_attr( $item['label'] ); ?>"
+							<?php endif; ?>
 							value="<?php echo esc_attr( $item['value'] ); ?>"
 							aria-checked="<?php echo ! empty( $item['selected'] ) ? 'true' : 'false'; ?>"
 							<?php disabled( ! empty( $item['disabled'] ) ); ?>
@@ -143,6 +146,9 @@ final class ProductFilterChips extends AbstractBlock {
 							role="checkbox"
 							data-wp-bind--id="context.item.id"
 							data-wp-bind--aria-label="context.item.ariaLabel"
+							<?php if ( $has_color_swatches ) : ?>
+								data-wp-bind--title="context.item.label"
+							<?php endif; ?>
 							data-wp-bind--value="context.item.value"
 							data-wp-bind--aria-checked="context.item.selected"
 							data-wp-bind--disabled="context.item.disabled"
