@@ -284,6 +284,7 @@ export function VariationView( { productId }: VariationViewProps ) {
 				<VariationEditDrawer
 					products={ [ productWithVariations ] }
 					isOpen={ showQuickEdit }
+					productId={ productId }
 				/>
 			) }
 		</div>

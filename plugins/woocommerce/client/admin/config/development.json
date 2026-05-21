@@ -4,7 +4,7 @@
 		"analytics": true,
 		"analytics-scheduled-import": true,
 		"product-block-editor": true,
-		"product-data-views": false,
+		"product-data-views": true,
 		"experimental-blocks": true,
 		"experimental-iapi-mini-cart": true,
 		"experimental-iapi-runtime": false,
@@ -19,7 +19,7 @@
 		"shipping-setting-tour": true,
 		"homescreen": true,
 		"marketing": true,
-		"minified-js": true,
+		"minified-js": false,
 		"mobile-app-banner": true,
 		"onboarding": true,
 		"onboarding-tasks": true,
@@ -42,10 +42,10 @@
 		"wc-visual-attribute": true,
 		"async-product-editor-category-field": true,
 		"launch-your-store": true,
-		"product-editor-template-system": false,
+		"product-editor-template-system": true,
 		"use-wp-horizon": false,
-		"rest-api-v4": false,
+		"rest-api-v4": true,
 		"order-detail-redesign": false,
-		"product-variations-classic-redesign": false
+		"product-variations-classic-redesign": true
 	}
 }

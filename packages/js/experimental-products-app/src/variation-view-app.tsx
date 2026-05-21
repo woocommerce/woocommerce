@@ -3,7 +3,6 @@
  */
 import { StrictMode, Suspense, createRoot, lazy } from '@wordpress/element';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import { privateApis as themeProviderPrivateApis } from '@wordpress/theme';
 
 /**
  * Internal dependencies
@@ -11,7 +10,6 @@ import { privateApis as themeProviderPrivateApis } from '@wordpress/theme';
 import { unlock } from './lock-unlock';
 
 const { RouterProvider } = unlock( routerPrivateApis );
-const { ThemeProvider } = unlock( themeProviderPrivateApis );
 
 const VariationView = lazy( () =>
 	import(
@@ -43,9 +41,7 @@ export function initializeVariationView(
 		<StrictMode>
 			<Suspense fallback={ null }>
 				<RouterProvider>
-					<ThemeProvider>
-						<VariationView productId={ productId } />
-					</ThemeProvider>
+					<VariationView productId={ productId } />
 				</RouterProvider>
 			</Suspense>
 		</StrictMode>

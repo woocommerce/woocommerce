@@ -11,7 +11,7 @@ import type { ProductEntityRecord } from '../fields/types';
 import {
 	buildMergedProductEditData,
 	getProductEditFields,
-	getVisibleProductEditFields,
+	isCostOfGoodsSoldFeatureEnabled,
 } from '../../product-edit/utils';
 import { VARIATION_FORM_FIELDS } from './form-fields';
 import type { VariationEditFieldId } from '../fields/registry';
@@ -52,10 +52,19 @@ export function VariationEditForm( {
 	selectedVariations,
 }: VariationEditFormProps ) {
 	const mergedData = buildMergedProductEditData( selectedVariations );
-	const visibleFields = getVisibleProductEditFields(
-		editableFields,
-		selectedVariations
-	);
+	const isBulkEdit = selectedVariations.length > 1;
+	const visibleFields = editableFields.filter( ( field ) => {
+		if ( field.id === 'cost_of_goods_sold' && ! isCostOfGoodsSoldFeatureEnabled() ) {
+			return false;
+		}
+		if ( isBulkEdit && field.id === 'sku' ) {
+			return false;
+		}
+		if ( typeof field.isVisible !== 'function' ) {
+			return true;
+		}
+		return selectedVariations.every( ( v ) => field.isVisible!( v ) );
+	} );
 	const visibleFieldIds = new Set( visibleFields.map( ( f ) => f.id ) );
 
 	const form = {
@@ -65,7 +74,7 @@ export function VariationEditForm( {
 	};
 
 	return (
-		<div className="woocommerce-variation-edit__form">
+		<div className="woocommerce-product-edit__form">
 			<DataForm
 				data={ mergedData }
 				fields={ visibleFields }

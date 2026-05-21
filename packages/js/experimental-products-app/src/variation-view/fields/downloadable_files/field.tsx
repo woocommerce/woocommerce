@@ -2,251 +2,200 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { FormFileUpload } from '@wordpress/components';
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { Button, TextControl } from '@wordpress/components';
+import { trash } from '@wordpress/icons';
+import { useCallback, useState } from '@wordpress/element';
 import type { Field } from '@wordpress/dataviews';
-import { uploadMedia } from '@wordpress/media-utils';
-import type { Attachment } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../types';
+import type { UploadedItem } from './utils';
 
-import { ListItem } from '../components/list-item';
-
-import {
-	GenericThumbnail,
-	getLastPathFromUrl,
-	isImageFromLink,
-	isItemToUpload,
-	isUploadedItem,
-	type ItemToUpload,
-	type UploadedItem,
-} from './utils';
-
-const uploadingLabel = __( 'uploading…', 'woocommerce' );
-
-const getAttachmentTextValue = ( value: unknown ) => {
-	return typeof value === 'string' ? value : '';
-};
-
-const toUploadedDownload = (
-	attachment: Attachment,
-	fallbackFile: File
-): UploadedItem | undefined => {
-	const file = getAttachmentTextValue( attachment.url );
-
-	if ( ! file ) {
-		return undefined;
+declare global {
+	interface Window {
+		wp?: {
+			media?: ( config: {
+				title?: string;
+				button?: { text?: string };
+				multiple?: boolean;
+			} ) => WPMediaFrame;
+		};
 	}
+}
 
-	return {
-		id: attachment.id ? String( attachment.id ) : undefined,
-		file,
-		name:
-			getAttachmentTextValue( attachment.title ) ||
-			getAttachmentTextValue( attachment.alt ) ||
-			getAttachmentTextValue( attachment.caption ) ||
-			fallbackFile.name ||
-			getLastPathFromUrl( file ),
+interface WPMediaFrame {
+	on( event: 'select', callback: () => void ): WPMediaFrame;
+	open(): void;
+	state(): {
+		get( key: 'selection' ): {
+			first(): {
+				toJSON(): {
+					url: string;
+					title: string;
+					filename: string;
+					id: number;
+				};
+			};
+		};
 	};
-};
+}
 
-const fieldDefinition = {
-	type: 'boolean',
+function openMediaLibrary(
+	onSelect: ( url: string, name: string, id?: string ) => void
+) {
+	if ( ! window.wp?.media ) {
+		return;
+	}
+	const frame = window.wp.media( {
+		title: __( 'Choose a file', 'woocommerce' ),
+		button: { text: __( 'Choose file', 'woocommerce' ) },
+		multiple: false,
+	} );
+	frame.on( 'select', () => {
+		const attachment = frame
+			.state()
+			.get( 'selection' )
+			.first()
+			.toJSON();
+		onSelect(
+			attachment.url,
+			attachment.title || attachment.filename || '',
+			attachment.id ? String( attachment.id ) : undefined
+		);
+	} );
+	frame.open();
+}
+
+function DownloadableFilesEdit( {
+	data,
+	onChange,
+}: {
+	data: ProductEntityRecord;
+	onChange: ( changes: Partial< ProductEntityRecord > ) => void;
+} ) {
+	const savedDownloads = ( data.downloads ?? [] ) as UploadedItem[];
+
+	// State is initialised from saved data once per mount.
+	// The drawer unmounts on close/cancel, so re-opening always starts fresh.
+	const [ downloads, setDownloads ] = useState< UploadedItem[] >(
+		savedDownloads.length > 0 ? savedDownloads : [ { file: '', name: '' } ]
+	);
+
+	const commit = useCallback(
+		( next: UploadedItem[] ) => {
+			setDownloads( next );
+			// Only persist entries that have a URL.
+			onChange( {
+				downloads: next.filter( ( d ) => d.file.trim() !== '' ),
+			} );
+		},
+		[ onChange ]
+	);
+
+	const updateEntry = (
+		index: number,
+		changes: Partial< UploadedItem >
+	) => {
+		commit(
+			downloads.map( ( d, i ) =>
+				i === index ? { ...d, ...changes } : d
+			)
+		);
+	};
+
+	const removeEntry = ( index: number ) => {
+		commit( downloads.filter( ( _, i ) => i !== index ) );
+	};
+
+	const canDelete = downloads.length > 1;
+
+	return (
+		<div className="woocommerce-fields-downloadable-files">
+			{ downloads.map( ( download, index ) => (
+				<div
+					key={ index }
+					className="woocommerce-fields-downloadable-files__entry"
+				>
+					{ index > 0 && (
+						<hr className="woocommerce-fields-downloadable-files__separator" />
+					) }
+
+					<div className="woocommerce-fields-downloadable-files__url-row">
+						<TextControl
+							__nextHasNoMarginBottom
+							__next40pxDefaultSize
+							label={ __( 'URL', 'woocommerce' ) }
+							type="url"
+							placeholder="https://"
+							value={ download.file }
+							onChange={ ( val ) =>
+								updateEntry( index, { file: val } )
+							}
+						/>
+						<Button
+							className="woocommerce-fields-downloadable-files__choose-button"
+							variant="secondary"
+							__next40pxDefaultSize
+							onClick={ () =>
+								openMediaLibrary( ( url, name, id ) => {
+									updateEntry( index, {
+										file: url,
+										name: download.name || name,
+										...( id ? { id } : {} ),
+									} );
+								} )
+							}
+						>
+							{ __( 'Choose file', 'woocommerce' ) }
+						</Button>
+					</div>
+
+					<div className="woocommerce-fields-downloadable-files__name-row">
+						<TextControl
+							__nextHasNoMarginBottom
+							__next40pxDefaultSize
+							label={ __( 'Name', 'woocommerce' ) }
+							value={ download.name }
+							onChange={ ( val ) =>
+								updateEntry( index, { name: val } )
+							}
+						/>
+						{ canDelete && (
+							<Button
+								className="woocommerce-fields-downloadable-files__delete-button"
+								variant="secondary"
+								__next40pxDefaultSize
+								icon={ trash }
+								label={ __( 'Remove file', 'woocommerce' ) }
+								onClick={ () => removeEntry( index ) }
+							/>
+						) }
+					</div>
+				</div>
+			) ) }
+
+			<Button
+				className="woocommerce-fields-downloadable-files__add-button"
+				variant="tertiary"
+				__next40pxDefaultSize
+				onClick={ () =>
+					commit( [ ...downloads, { file: '', name: '' } ] )
+				}
+			>
+				{ __( '+ Add file', 'woocommerce' ) }
+			</Button>
+		</div>
+	);
+}
+
+export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	label: __( 'Downloadable files', 'woocommerce' ),
 	enableSorting: false,
 	enableHiding: false,
 	filterBy: false,
-} satisfies Partial< Field< ProductEntityRecord > >;
-
-export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
-	...fieldDefinition,
-	type: 'boolean',
 	isVisible: ( item ) => !! item.downloadable,
 	getValue: ( { item } ) => item.downloads ?? [],
-	Edit: ( { data, onChange } ) => {
-		const dataDownloads = useMemo(
-			() =>
-				( data.downloads ?? [] ) as Array<
-					UploadedItem | ItemToUpload
-				>,
-			[ data.downloads ]
-		);
-		const [ downloads, setDownloads ] = useState( dataDownloads );
-		const downloadsRef = useRef( dataDownloads );
-
-		useEffect( () => {
-			downloadsRef.current = dataDownloads;
-			setDownloads( dataDownloads );
-		}, [ dataDownloads ] );
-
-		const setVisibleDownloads = useCallback(
-			( nextDownloads: Array< UploadedItem | ItemToUpload > ) => {
-				downloadsRef.current = nextDownloads;
-				setDownloads( nextDownloads );
-			},
-			[]
-		);
-
-		const commitDownloads = useCallback(
-			( nextDownloads: Array< UploadedItem | ItemToUpload > ) => {
-				setVisibleDownloads( nextDownloads );
-				onChange( {
-					downloads: nextDownloads,
-				} );
-			},
-			[ onChange, setVisibleDownloads ]
-		);
-
-		const filesToUpload = downloads.filter( isItemToUpload );
-		const uploadedFiles = downloads.filter( isUploadedItem );
-
-		const handleRemoveDownload = useCallback(
-			( fileId: string | number ) => {
-				commitDownloads(
-					downloadsRef.current.filter(
-						( download ) => download.file !== fileId
-					)
-				);
-			},
-			[ commitDownloads ]
-		);
-
-		const handleAddDownload = useCallback(
-			( file: File ) => {
-				const objectUrl = URL.createObjectURL( file );
-				const placeholderDownload: ItemToUpload = {
-					file: objectUrl,
-					name: file.name,
-					type: file.type,
-				};
-
-				setVisibleDownloads( [
-					...downloadsRef.current,
-					placeholderDownload,
-				] );
-
-				uploadMedia( {
-					filesList: [ file ],
-					onFileChange( attachments ) {
-						const attachment = attachments[ 0 ] as
-							| Attachment
-							| undefined;
-
-						const uploadedDownload = attachment?.id
-							? toUploadedDownload( attachment, file )
-							: undefined;
-
-						if ( ! uploadedDownload ) {
-							URL.revokeObjectURL( objectUrl );
-							setVisibleDownloads(
-								downloadsRef.current.filter(
-									( download ) => download.file !== objectUrl
-								)
-							);
-							return;
-						}
-
-						const hasPlaceholder = downloadsRef.current.some(
-							( download ) => download.file === objectUrl
-						);
-
-						if ( ! hasPlaceholder ) {
-							URL.revokeObjectURL( objectUrl );
-							return;
-						}
-
-						const currentDownloads = downloadsRef.current.filter(
-							( download ) => download.file !== objectUrl
-						);
-						const isAlreadyAdded = currentDownloads.some(
-							( download ) =>
-								download.file === uploadedDownload.file
-						);
-
-						URL.revokeObjectURL( objectUrl );
-						commitDownloads(
-							isAlreadyAdded
-								? currentDownloads
-								: [ ...currentDownloads, uploadedDownload ]
-						);
-					},
-					onError() {
-						URL.revokeObjectURL( objectUrl );
-						setVisibleDownloads(
-							downloadsRef.current.filter(
-								( download ) => download.file !== objectUrl
-							)
-						);
-					},
-				} );
-			},
-			[ commitDownloads, setVisibleDownloads ]
-		);
-
-		const items = [
-			...uploadedFiles.map( ( file ) => {
-				const thumbnail = isImageFromLink( file.file ) ? (
-					file.file
-				) : (
-					<GenericThumbnail />
-				);
-				return {
-					id: file.file,
-					title: file.name,
-					thumbnail,
-					meta: getLastPathFromUrl( file.file ),
-					altText: file.name,
-				};
-			} ),
-			...filesToUpload.map( ( file ) => {
-				const thumbnail = file.type?.startsWith( 'image/' ) ? (
-					file.file
-				) : (
-					<GenericThumbnail />
-				);
-				return {
-					id: file.file,
-					title: `${ file.name } - ${ uploadingLabel }`,
-					thumbnail,
-					meta: getLastPathFromUrl( file.file ),
-					altText: file.name,
-				};
-			} ),
-		];
-
-		return (
-			<div className="woocommerce-fields-field__downloadable-files">
-				{ items.length > 0 && (
-					<ListItem
-						items={ items }
-						onRemove={ ( item ) => handleRemoveDownload( item.id ) }
-						showRemoveButton={ true }
-					/>
-				) }
-				<FormFileUpload
-					__next40pxDefaultSize
-					className="woocommerce-fields-field__downloadable-files-upload-button"
-					onChange={ ( event ) => {
-						const file = event?.currentTarget.files?.[ 0 ];
-						if ( file ) {
-							handleAddDownload( file );
-						}
-					} }
-				>
-					<span>
-						{ __( '+ Add file', 'woocommerce' ) }
-					</span>
-				</FormFileUpload>
-			</div>
-		);
-	},
+	Edit: DownloadableFilesEdit,
 };

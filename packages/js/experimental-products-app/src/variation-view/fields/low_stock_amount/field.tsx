@@ -32,11 +32,11 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				}
 				placeholder={ __( 'Store wide threshold', 'woocommerce' ) }
 				onChange={ ( next ) => {
-					const parsed = next === '' ? null : parseInt( next, 10 );
+					const parsed = next === '' ? undefined : parseInt( next, 10 );
 					onChange( {
 						low_stock_amount: Number.isNaN( parsed )
-							? null
-							: ( parsed as number ),
+							? undefined
+							: parsed,
 					} );
 				} }
 			/>

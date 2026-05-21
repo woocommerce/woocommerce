@@ -27,6 +27,7 @@
 	@import "./fields/components/searchable-chip-select/style.scss";
 	@import "./fields/components/taxonomy-edit/style.scss";
 	@import "./fields/downloadable/style.scss";
+	@import "./variation-view/fields/downloadable_files/style.scss";
 	@import "./fields/images/style.scss";
 	@import "./fields/stock/style.scss";
 	@import "./fields/visibility_summary/style.scss";
@@ -163,6 +164,13 @@
 
 	.dataforms-layouts__wrapper + .dataforms-layouts-regular__header {
 		margin-top: 32px;
+	}
+
+	// Unlabeled sub-groups (e.g. checkbox pairs) inside a section get a tight gap.
+	// The section wrapper is always preceded by a header; its direct child group
+	// wrappers are one level deeper and should not carry the 16px field spacing.
+	.dataforms-layouts-regular__header + .dataforms-layouts__wrapper > .dataforms-layouts__wrapper {
+		gap: 4px !important;
 	}
 }
 

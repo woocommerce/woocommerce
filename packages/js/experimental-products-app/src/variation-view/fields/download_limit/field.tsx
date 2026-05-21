@@ -20,7 +20,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	Edit: ( { data, onChange, field } ) => {
 		const isLimited = ( data.download_limit ?? -1 ) !== -1;
 		return (
-			<div className="woocommerce-fields-field__download-limit">
+			<div className="woocommerce-fields-field__download-limit" style={ { display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: isLimited ? '8px' : 0 } }>
 				<CheckboxControl
 					__nextHasNoMarginBottom
 					label={ __(
@@ -37,8 +37,8 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				{ isLimited && (
 					<TextControl
 						__nextHasNoMarginBottom
+						__next40pxDefaultSize
 						label={ field.label }
-						hideLabelFromVision
 						type="number"
 						min={ 1 }
 						value={ String( data.download_limit ) }
