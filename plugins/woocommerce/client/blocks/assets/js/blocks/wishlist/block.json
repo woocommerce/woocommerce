@@ -16,7 +16,7 @@
 	},
 	"allowedBlocks": [ "core/heading" ],
 	"supports": {
-		 "align": [ "wide", "full" ],
+		"align": [ "wide", "full" ],
 		"interactivity": true,
 		"html": false,
 		"reusable": false,

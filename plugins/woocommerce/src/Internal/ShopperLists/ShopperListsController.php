@@ -154,7 +154,7 @@ final class ShopperListsController implements RegisterHooksInterface {
 	 * logged-out guard, asset enqueues, and item rendering.
 	 */
 	public function render_wishlist_endpoint(): void {
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the block string is a static literal; `do_blocks()` returns escaped HTML.
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the block string is a static literal; `do_blocks()` invokes the registered block's render callback, which is responsible for its own escaping.
 		echo do_blocks( '<!-- wp:woocommerce/wishlist /-->' );
 	}
 }
