@@ -43,17 +43,6 @@ export function getProductsWithEmbeddedVariations(
 	const itemsById = new Map( items.map( ( item ) => [ item.id, item ] ) );
 	const productsWithVariations = new Map< number, ProductEntityRecord >();
 
-	function normalizeEmbeddedVariation(
-		variation: ProductEntityRecord,
-		parent: ProductEntityRecord
-	): ProductEntityRecord {
-		return {
-			...variation,
-			parent_id: variation.parent_id || parent.id,
-			type: 'variation',
-		};
-	}
-
 	function addItem( item: ProductEntityRecord ) {
 		if ( productsWithVariations.has( item.id ) ) {
 			return;
@@ -70,10 +59,7 @@ export function getProductsWithEmbeddedVariations(
 		addItem( item );
 
 		item._embedded?.variations?.forEach( ( variation ) => {
-			addItem(
-				itemsById.get( variation.id ) ??
-					normalizeEmbeddedVariation( variation, item )
-			);
+			addItem( itemsById.get( variation.id ) ?? variation );
 		} );
 	} );
 
