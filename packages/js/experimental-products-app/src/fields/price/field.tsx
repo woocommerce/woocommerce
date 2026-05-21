@@ -57,7 +57,7 @@ const CurrencySuffixSlot = () => {
 
 const fieldDefinition = {
 	label: __( 'Price', 'woocommerce' ),
-	enableSorting: true,
+	enableSorting: false,
 	filterBy: {
 		operators: [ 'is', 'between', 'greaterThanOrEqual', 'lessThanOrEqual' ],
 	},
