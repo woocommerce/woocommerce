@@ -69,7 +69,10 @@ const blocks = {
 	'featured-product': {
 		customDir: 'featured-items/featured-product',
 	},
-	'filter-wrapper': {},
+	'filter-wrapper': {
+		// Frontend-only lazy component registration; exclude from styling build.
+		skipStyling: true,
+	},
 	'handpicked-products': {},
 	// We need to keep the legacy-template id, so we need to add a custom config to point to the renamed classic-template folder
 	'legacy-template': {
@@ -311,7 +314,10 @@ const blockStylingEntries = getBlockEntries(
 				...blocks,
 				...genericBlocks,
 				...cartAndCheckoutBlocks,
-			} ).filter( ( [ blockName ] ) => {
+			} ).filter( ( [ blockName, config ] ) => {
+				if ( config.skipStyling ) {
+					return false;
+				}
 				return ! frontendScriptModuleBlocksToSkip.includes(
 					`woocommerce/${ blockName }`
 				);
