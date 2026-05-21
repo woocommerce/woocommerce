@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class GetGreeting {
 	public static function get_field_definition(): array {
 		return array(
-			'type'        => Type::nonNull(
+			'type'          => Type::nonNull(
 				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
 					array(
 						'name'   => 'GetGreetingResult',
@@ -24,19 +24,31 @@ class GetGreeting {
 					)
 				)
 			),
-			'description' => __( 'Build a greeting', 'woocommerce' ),
-			'args'        => array(
+			'description'   => __( 'Build a greeting', 'woocommerce' ),
+			'authorization' => array(
+				array(
+					'attribute' => 'PublicAccess',
+					'args'      => array(),
+				),
+			),
+			'args'          => array(
 				'name' => array(
 					'type'         => Type::string(),
 					'description'  => __( 'Who to greet (defaults to \"world\")', 'woocommerce' ),
 					'defaultValue' => null,
 				),
 			),
-			'resolve'     => array( self::class, 'resolve' ),
+			'resolve'       => array( self::class, 'resolve' ),
 		);
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = array();
+
 		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Infrastructure\ClassResolver::resolve_class( GetGreetingCommand::class );
 
 		$execute_args = array();
