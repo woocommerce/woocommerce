@@ -3,7 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useMemo, useCallback, useEffect, useState } from '@wordpress/element';
-import { Fieldset, IconButton } from '@wordpress/ui';
+import { BaseControl } from '@wordpress/components';
+import { IconButton } from '@wordpress/ui';
 import clsx from 'clsx';
 import type { Field } from '@wordpress/dataviews';
 import { upload, closeSmall, dragHandle } from '@wordpress/icons';
@@ -233,8 +234,10 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		}, [ images, handleRemoveImage ] );
 
 		return (
-			<Fieldset.Root>
-				<Fieldset.Legend>{ field.label }</Fieldset.Legend>
+			<div className="woocommerce-fields-control__images">
+				<BaseControl.VisualLabel>
+					{ field.label }
+				</BaseControl.VisualLabel>
 				<DragDropProvider onDragEnd={ handleDragEnd }>
 					<div className="woocommerce-fields-control__featured-image">
 						<div className="woocommerce-fields-controls__featured-image-uploaded-images">
@@ -281,7 +284,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 						</div>
 					</div>
 				</DragDropProvider>
-				</Fieldset.Root>
+			</div>
 		);
 	},
 };

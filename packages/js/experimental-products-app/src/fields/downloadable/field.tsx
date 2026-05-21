@@ -39,7 +39,10 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	getValue: ( { item } ) => item.downloadable,
 	Edit: ( { data, onChange } ) => {
 		const downloads: ProductDownload[] = useMemo(
-			() => data.downloads ?? [],
+			() =>
+				data.downloads?.length
+					? data.downloads
+					: [ { id: generateDownloadId(), name: '', file: '' } ],
 			[ data.downloads ]
 		);
 

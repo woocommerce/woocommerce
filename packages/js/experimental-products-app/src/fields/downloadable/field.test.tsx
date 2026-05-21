@@ -149,7 +149,13 @@ describe( 'downloadable field', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'adds a new empty file row when "+ Add file" is clicked', () => {
+	it( 'shows one empty file row when the product has no downloads', () => {
+		renderEdit( buildProduct() );
+
+		expect( screen.getByPlaceholderText( 'https://' ) ).toBeInTheDocument();
+	} );
+
+	it( 'adds a second empty file row when "+ Add file" is clicked on an empty product', () => {
 		const onChange = jest.fn();
 		renderEdit( buildProduct(), onChange );
 
@@ -158,6 +164,7 @@ describe( 'downloadable field', () => {
 		expect( onChange ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				downloads: [
+					expect.objectContaining( { name: '', file: '' } ),
 					expect.objectContaining( { name: '', file: '' } ),
 				],
 			} )
