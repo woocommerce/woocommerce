@@ -1,7 +1,7 @@
 /**
  * API error response format
  *
- * https://woocommerce.github.io/woocommerce-rest-api-docs/#errors
+ * https://developer.woocommerce.com/docs/apis/rest-api/#errors
  */
 export const errorResponse = {
 	code: '',

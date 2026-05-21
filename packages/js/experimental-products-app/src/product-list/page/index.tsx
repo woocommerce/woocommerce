@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { Page } from '@wordpress/admin-ui';
-import { Stack } from '@wordpress/ui';
+import { Badge, Stack } from '@wordpress/ui';
+import { __ } from '@wordpress/i18n';
+
+const FEEDBACK_URL = 'https://usabi.li/do/mqc0hscbzp2i/yejxei';
 
 type ProductListPageProps = {
 	ariaLabel: string;
@@ -42,6 +45,19 @@ export function ProductListPageHeader( {
 					<h2 className="woocommerce-product-list-page__header-title">
 						{ title }
 					</h2>
+					<a
+						className="woocommerce-product-list-page__feedback-link"
+						href={ FEEDBACK_URL }
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<Badge intent="none">
+							{ __(
+								'Experimental · Share feedback',
+								'woocommerce'
+							) }
+						</Badge>
+					</a>
 				</Stack>
 				<Stack
 					direction="row"

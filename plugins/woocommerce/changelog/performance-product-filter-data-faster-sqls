@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Review and optimize the SQL queries used in product filters to improve performance.
