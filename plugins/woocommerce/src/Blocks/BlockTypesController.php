@@ -560,6 +560,7 @@ final class BlockTypesController {
 
 		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'wishlist' ) ) {
 			$block_types[] = 'Wishlist';
+			$block_types[] = 'AddToWishlistButton';
 		}
 
 		if ( wp_is_block_theme() ) {
