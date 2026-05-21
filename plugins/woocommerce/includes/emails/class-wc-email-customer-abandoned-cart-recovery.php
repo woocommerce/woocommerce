@@ -6,7 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Internal\CheckoutRecovery\ManualSendHandler;
+use Automattic\WooCommerce\Internal\AbandonedCartRecovery\ManualSendHandler;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
 defined( 'ABSPATH' ) || exit;
@@ -40,9 +40,9 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		/**
 		 * Order meta key recording the timestamp of the most recent send.
 		 *
-		 * Written by `trigger()` after a successful dispatch (manual or automated) of the checkout recovery email.
+		 * Written by `trigger()` after a successful dispatch (manual or automated) of the abandoned cart recovery email.
 		 */
-		public const META_KEY_SENT_AT = '_checkout_recovery_email_sent_at';
+		public const META_KEY_SENT_AT = '_abandoned_cart_recovery_email_sent_at';
 
 		/**
 		 * Order action id used by the recovery email send item on the order edit page.
@@ -97,7 +97,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 
 			// Trigger fires after Action Scheduler dispatches `woocommerce_send_abandoned_cart_recovery_notification`,
 			// or when the merchant invokes the manual-send action from the order edit page.
-			// The order-edit action hooks live in `Internal\CheckoutRecovery\ManualSendHandler`
+			// The order-edit action hooks live in `Internal\AbandonedCartRecovery\ManualSendHandler`
 			// so the listener is in place before the admin POST runs the order-meta save flow
 			// (which happens before the mailer would otherwise be instantiated).
 			add_action( 'woocommerce_send_abandoned_cart_recovery_notification', array( $this, 'trigger' ), 10, 1 );
@@ -194,7 +194,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				return $actions;
 			}
 
-			$actions[ self::MANUAL_RECOVERY_EMAIL_SEND_ACTION ] = __( 'Send checkout recovery email', 'woocommerce' );
+			$actions[ self::MANUAL_RECOVERY_EMAIL_SEND_ACTION ] = __( 'Send abandoned cart recovery email', 'woocommerce' );
 
 			return $actions;
 		}
@@ -208,7 +208,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 *
 		 * Single source of truth: called both by `trigger()` (defence-in-depth at
 		 * send time) and by the manual-send dropdown gates. Partners can widen the
-		 * eligible-status set via `woocommerce_checkout_recovery_eligible_statuses`
+		 * eligible-status set via `woocommerce_abandoned_cart_recovery_eligible_statuses`
 		 * and both paths will agree.
 		 *
 		 * @since 10.9.0
@@ -299,12 +299,12 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			);
 
 			/**
-			 * Fires after the checkout recovery email has been manually resent.
+			 * Fires after the abandoned cart recovery email has been manually resent.
 			 *
 			 * @since 10.9.0
 			 *
 			 * @param WC_Order $order      Order being recovered.
-			 * @param string   $email_type Email identifier ('customer_checkout_recovery').
+			 * @param string   $email_type Email identifier ('customer_abandoned_cart_recovery').
 			 */
 			do_action( 'woocommerce_after_resend_order_email', $order, $this->id );
 

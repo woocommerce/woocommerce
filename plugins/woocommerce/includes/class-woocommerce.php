@@ -324,7 +324,7 @@ final class WooCommerce {
 		add_action( 'load-post.php', array( $this, 'includes' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( $this, 'maybe_init_order_reviews' ), 1 );
-		add_action( 'init', array( $this, 'maybe_init_checkout_recovery' ), 1 );
+		add_action( 'init', array( $this, 'maybe_init_abandoned_cart_recovery' ), 1 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
@@ -984,7 +984,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Resolve the CheckoutRecovery services when the `checkout_recovery`
+	 * Resolve the AbandonedCartRecovery services when the `abandoned_cart_recovery`
 	 * feature flag is on. Hooked to `init` priority 1 from `init_hooks()`
 	 * so the order-edit action listener is registered before
 	 * `WC_Meta_Box_Order_Actions::save()` dispatches its hook on POST.
@@ -992,11 +992,11 @@ final class WooCommerce {
 	 * @since 10.9.0
 	 * @internal
 	 */
-	public function maybe_init_checkout_recovery(): void {
-		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'checkout_recovery' ) ) {
+	public function maybe_init_abandoned_cart_recovery(): void {
+		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'abandoned_cart_recovery' ) ) {
 			return;
 		}
-		wc_get_container()->get( \Automattic\WooCommerce\Internal\CheckoutRecovery\ManualSendHandler::class );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\ManualSendHandler::class );
 	}
 
 	/**

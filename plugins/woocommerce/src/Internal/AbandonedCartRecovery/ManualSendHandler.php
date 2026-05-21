@@ -5,13 +5,13 @@
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Internal\CheckoutRecovery;
+namespace Automattic\WooCommerce\Internal\AbandonedCartRecovery;
 
-use WC_Email_Customer_Checkout_Recovery;
+use WC_Email_Customer_Abandoned_Cart_Recovery;
 use WC_Order;
 
 /**
- * Registers the order-edit "Send checkout recovery email" action and routes
+ * Registers the order-edit "Send abandoned cart recovery email" action and routes
  * the merchant click to the email class's handler.
  *
  * This lives outside the email class because the email is only instantiated
@@ -23,7 +23,7 @@ use WC_Order;
  * actually needed.
  *
  * The container auto-calls `init()` after instantiation; resolution is driven
- * by `WooCommerce::maybe_init_checkout_recovery()`, hooked on `init` priority 1.
+ * by `WooCommerce::maybe_init_abandoned_cart_recovery()`, hooked on `init` priority 1.
  *
  * @internal Just for internal use.
  *
@@ -35,14 +35,14 @@ class ManualSendHandler {
 	 * Order action id used by the manual-send dropdown item.
 	 *
 	 * Source of truth lives here (PSR-4 autoloaded) rather than on
-	 * `WC_Email_Customer_Checkout_Recovery` because this class registers hooks
+	 * `WC_Email_Customer_Abandoned_Cart_Recovery` because this class registers hooks
 	 * at WP `init` priority 1 — earlier than `WC_Emails::init()` includes the
 	 * legacy email file, so the email class isn't loadable yet.
 	 *
-	 * Kept in sync with `WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION`,
+	 * Kept in sync with `WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION`,
 	 * which re-exports this same value for the email-class callers that use it.
 	 */
-	public const MANUAL_SEND_ACTION = 'send_checkout_recovery_email';
+	public const MANUAL_SEND_ACTION = 'send_abandoned_cart_recovery_email';
 
 	/**
 	 * Register hooks and filters.
@@ -101,12 +101,12 @@ class ManualSendHandler {
 	 * the feature flag is off (in which case `WC_Emails::init()` does not
 	 * include the class file) so callers can short-circuit cleanly.
 	 *
-	 * @return WC_Email_Customer_Checkout_Recovery|null
+	 * @return WC_Email_Customer_Abandoned_Cart_Recovery|null
 	 */
-	private function get_email(): ?WC_Email_Customer_Checkout_Recovery {
+	private function get_email(): ?WC_Email_Customer_Abandoned_Cart_Recovery {
 		$emails = WC()->mailer()->get_emails();
-		$email  = $emails['WC_Email_Customer_Checkout_Recovery'] ?? null;
+		$email  = $emails['WC_Email_Customer_Abandoned_Cart_Recovery'] ?? null;
 
-		return $email instanceof WC_Email_Customer_Checkout_Recovery ? $email : null;
+		return $email instanceof WC_Email_Customer_Abandoned_Cart_Recovery ? $email : null;
 	}
 }

@@ -95,7 +95,7 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 	 * @return WC_Order Reloaded order reflecting the persisted date.
 	 */
 	private function age_order_past_threshold( WC_Order $order ): WC_Order {
-		$order->set_date_created( time() - WC_Email_Customer_Checkout_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
+		$order->set_date_created( time() - WC_Email_Customer_Abandoned_Cart_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
 		$order->save();
 		return wc_get_order( $order->get_id() );
 	}
@@ -269,6 +269,7 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		$this->assertSame( $order->get_billing_email(), $this->sut->recipient );
 	}
 
+	/**
 	 * @testdox trigger() records the send timestamp on order meta so the future auto-send dedup can skip already-emailed orders.
 	 */
 	public function test_trigger_records_sent_at_meta(): void {
@@ -453,8 +454,8 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 
 		$actions = $this->sut->register_order_action( array(), $order );
 
-		$this->assertArrayHasKey( WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
-		$this->assertSame( 'Send checkout recovery email', $actions[ WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION ] );
+		$this->assertArrayHasKey( WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+		$this->assertSame( 'Send abandoned cart recovery email', $actions[ WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION ] );
 	}
 
 	/**
@@ -470,7 +471,7 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 
 		$actions = $this->sut->register_order_action( array(), $order );
 
-		$this->assertArrayHasKey( WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+		$this->assertArrayHasKey( WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
 	}
 
 	/**
@@ -483,7 +484,7 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 
 		$actions = $this->sut->register_order_action( array(), $order );
 
-		$this->assertArrayNotHasKey( WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+		$this->assertArrayNotHasKey( WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
 	}
 
 	/**
@@ -498,7 +499,7 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 
 		$actions = $this->sut->register_order_action( array(), $order );
 
-		$this->assertArrayNotHasKey( WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+		$this->assertArrayNotHasKey( WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
 	}
 
 	/**
@@ -512,7 +513,7 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 
 		$actions = $this->sut->register_order_action( array(), $order );
 
-		$this->assertArrayNotHasKey( WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+		$this->assertArrayNotHasKey( WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
 	}
 
 	/**
@@ -546,14 +547,14 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		$this->assertSame( $before + 1, count( $mailer->mock_sent ), 'Manual send must dispatch one message.' );
 
 		$fresh = wc_get_order( $order->get_id() );
-		$this->assertNotEmpty( $fresh->get_meta( WC_Email_Customer_Checkout_Recovery::META_KEY_SENT_AT ) );
+		$this->assertNotEmpty( $fresh->get_meta( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT ) );
 
 		$notes        = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
 		$note_strings = wp_list_pluck( $notes, 'content' );
 		$this->assertNotEmpty(
 			array_filter(
 				$note_strings,
-				static fn ( $note ) => false !== strpos( $note, 'Checkout recovery email manually sent' )
+				static fn ( $note ) => false !== strpos( $note, 'Abandoned cart recovery email manually sent' )
 			),
 			'Manual send must record an order note announcing the email.'
 		);
@@ -597,7 +598,7 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 
 		$this->assertSame( $before, count( $mailer->mock_sent ), 'Recent pending order must not dispatch.' );
 		$fresh = wc_get_order( $order->get_id() );
-		$this->assertSame( '', $fresh->get_meta( WC_Email_Customer_Checkout_Recovery::META_KEY_SENT_AT ) );
+		$this->assertSame( '', $fresh->get_meta( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT ) );
 	}
 
 	/**
@@ -619,7 +620,7 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 
 		$this->assertSame( $before, count( $mailer->mock_sent ), 'Non-abandoned order must not dispatch.' );
 		$fresh = wc_get_order( $order->get_id() );
-		$this->assertSame( '', $fresh->get_meta( WC_Email_Customer_Checkout_Recovery::META_KEY_SENT_AT ) );
+		$this->assertSame( '', $fresh->get_meta( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT ) );
 	}
 
 	/**
@@ -653,24 +654,28 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 
 		$actions = $this->sut->register_order_action( array(), $order );
 
-		$this->assertArrayNotHasKey( WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+		$this->assertArrayNotHasKey( WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
 	}
 
 	/**
-	 * @testdox register_order_action() hides the action when suppression is on (toggle or known-handler default), so merchants don't click a no-op item.
+	 * @testdox register_order_action() hides the action when the woocommerce_abandoned_cart_recovery_suppress filter returns true, so merchants don't click a no-op item.
 	 */
 	public function test_register_order_action_skips_when_suppressed(): void {
 		$this->become_admin();
 		$this->sut->update_option( 'enabled', 'yes' );
 		$this->sut->enabled = 'yes';
-		$this->sut->update_option( 'suppressed', 'yes' );
 
 		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
 		$order = $this->age_order_past_threshold( $order );
 
-		$actions = $this->sut->register_order_action( array(), $order );
+		add_filter( 'woocommerce_abandoned_cart_recovery_suppress', '__return_true' );
+		try {
+			$actions = $this->sut->register_order_action( array(), $order );
+		} finally {
+			remove_filter( 'woocommerce_abandoned_cart_recovery_suppress', '__return_true' );
+		}
 
-		$this->assertArrayNotHasKey( WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+		$this->assertArrayNotHasKey( WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
 	}
 
 	/**
@@ -696,20 +701,19 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		$this->assertEmpty(
 			array_filter(
 				$note_strings,
-				static fn ( $note ) => false !== strpos( $note, 'Checkout recovery email manually sent' )
+				static fn ( $note ) => false !== strpos( $note, 'Abandoned cart recovery email manually sent' )
 			),
 			'Disabled email must not record a "manually sent" order note.'
 		);
 	}
 
 	/**
-	 * @testdox handle_recovery_email_send() is a no-op when suppression is on — avoids writing a misleading order note when trigger() would also bail.
+	 * @testdox handle_recovery_email_send() is a no-op when the woocommerce_abandoned_cart_recovery_suppress filter returns true — avoids writing a misleading order note when trigger() would also bail.
 	 */
 	public function test_handle_recovery_email_send_bails_when_suppressed(): void {
 		$this->become_admin();
 		$this->sut->update_option( 'enabled', 'yes' );
 		$this->sut->enabled = 'yes';
-		$this->sut->update_option( 'suppressed', 'yes' );
 
 		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
 		$order = $this->age_order_past_threshold( $order );
@@ -717,7 +721,12 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
 
-		$this->sut->handle_recovery_email_send( $order );
+		add_filter( 'woocommerce_abandoned_cart_recovery_suppress', '__return_true' );
+		try {
+			$this->sut->handle_recovery_email_send( $order );
+		} finally {
+			remove_filter( 'woocommerce_abandoned_cart_recovery_suppress', '__return_true' );
+		}
 
 		$this->assertSame( $before, count( $mailer->mock_sent ), 'Suppressed email must not dispatch from manual handler.' );
 
@@ -726,7 +735,7 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		$this->assertEmpty(
 			array_filter(
 				$note_strings,
-				static fn ( $note ) => false !== strpos( $note, 'Checkout recovery email manually sent' )
+				static fn ( $note ) => false !== strpos( $note, 'Abandoned cart recovery email manually sent' )
 			),
 			'Suppressed email must not record a "manually sent" order note.'
 		);
