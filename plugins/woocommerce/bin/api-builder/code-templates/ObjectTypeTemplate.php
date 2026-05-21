@@ -8,8 +8,9 @@
  * @var string $description
  * @var array  $use_statements
  * @var array  $interfaces - each: ['alias' => string]
- * @var array  $fields - each: ['name', 'type_expr', 'description', 'args' => [], 'deprecation_reason' => ?string, 'paginated_connection' => bool, 'metadata' => array]
- * @var array  $metadata - type-level metadata, name => scalar value.
+ * @var array  $fields - each: ['name', 'type_expr', 'description', 'args' => [], 'deprecation_reason' => ?string, 'paginated_connection' => bool, 'metadata' => array, 'metadata_runtime' => array]
+ * @var array  $metadata - type-level metadata for discovery (`_apiMetadata`); blank when the type opts out via shows_in_metadata_query().
+ * @var array  $metadata_runtime - full type-level metadata, threaded into field gates' $_metadata['type'] slice regardless of discovery opt-out.
  */
 
 $escaped_description = addslashes( $description );
@@ -163,8 +164,8 @@ class <?php echo $class_name; ?> {
 	<?php
 	$has_field_auth      = ! empty( $field['authorization']['attribute_expr'] ) && 'true' !== $field['authorization']['attribute_expr'];
 	$is_paginated        = ! empty( $field['paginated_connection'] );
-	$field_metadata_expr = var_export( $field['metadata'], true );
-	$type_metadata_expr  = var_export( $metadata, true );
+	$field_metadata_expr = var_export( $field['metadata_runtime'], true );
+	$type_metadata_expr  = var_export( $metadata_runtime, true );
 	?>
 	<?php if ( $is_paginated ) : ?>
 							'complexity' => ResolverHelpers::complexity_from_pagination(...),

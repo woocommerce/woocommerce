@@ -11,7 +11,8 @@
  * @var string $return_type_expr
  * @var array  $use_statements
  * @var array  $args - each: ['name', 'type_expr', 'description', 'has_default', 'default', 'metadata' => array]
- * @var array  $metadata - root-field-level metadata, name => scalar value.
+ * @var array  $metadata - root-field-level metadata for discovery (`_apiMetadata`); blank when the operation opts out via shows_in_metadata_query().
+ * @var array  $metadata_runtime - full root-field-level metadata, published into $context['_query_metadata'] for downstream field gates regardless of discovery opt-out.
  * @var bool   $has_connection_of
  * @var string $connection_type_alias
  * @var bool   $standalone_attribute_check - true when authorize() is absent and the attribute_expr is the sole authorization gate
@@ -150,7 +151,7 @@ class <?php echo $class_name; ?> {
 		// authorization gates can read it via `$_metadata['query']`.
 		// $context is an ArrayObject (see GraphQLController::process_request())
 		// so the mutation propagates to nested resolvers.
-		$context['_query_metadata'] = <?php echo var_export( $metadata, true ); ?>;
+		$context['_query_metadata'] = <?php echo var_export( $metadata_runtime, true ); ?>;
 
 
 <?php if ( null !== $class_resolver_fqcn ) : ?>
