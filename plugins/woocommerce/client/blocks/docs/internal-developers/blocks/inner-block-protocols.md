@@ -22,7 +22,7 @@ WooCommerce reusable inner blocks use small context protocols so they can render
 
 ## Selectable Items
 
-Context key: `woocommerceSelectableItems`
+Context key: `woocommerce/selectableItems`
 
 Used by selectable list UIs such as checkbox-list and chips.
 
