@@ -118,6 +118,31 @@ describe( 'dimension field', () => {
 		} );
 	} );
 
+	it( 'emits only the edited dimension', () => {
+		const { onChange } = renderEdit( {
+			id: 12,
+			name: 'Beanie',
+			dimensions: {
+				length: '12',
+				width: '',
+				height: '',
+			},
+		} as ProductEntityRecord );
+		const input = screen.getByLabelText( 'Length' );
+
+		fireEvent.change( input, {
+			target: {
+				value: '15',
+			},
+		} );
+
+		expect( onChange ).toHaveBeenCalledWith( {
+			dimensions: {
+				length: '15',
+			},
+		} );
+	} );
+
 	it( 'renders the mixed placeholder when provided', () => {
 		renderEdit(
 			{

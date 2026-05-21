@@ -55,7 +55,6 @@ export const createDimensionField = (
 					onChange={ ( event ) => {
 						onChange( {
 							dimensions: {
-								...dimensions,
 								[ key ]: event.target.value,
 							} as ProductEntityRecord[ 'dimensions' ],
 						} );
