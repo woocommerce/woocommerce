@@ -30,6 +30,14 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 	class WC_Email_Customer_Abandoned_Cart_Recovery extends WC_Email {
 
 		/**
+		 * Email identifier — kept in `$this->id` for the rest of WC_Email's
+		 * machinery but also exposed as a constant so static methods (and
+		 * external callers using the unsubscribe storage) can reference the
+		 * same string without it drifting out of sync with the constructor.
+		 */
+		public const EMAIL_ID = 'customer_abandoned_cart_recovery';
+
+		/**
 		 * Plugins known to provide their own abandoned cart recovery flow.
 		 *
 		 * Detection is install-only.
@@ -95,7 +103,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * Constructor.
 		 */
 		public function __construct() {
-			$this->id             = 'customer_abandoned_cart_recovery';
+			$this->id             = self::EMAIL_ID;
 			$this->customer_email = true;
 			$this->title          = __( 'Abandoned cart recovery', 'woocommerce' );
 			$this->email_group    = 'order-updates';
@@ -299,9 +307,8 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				return;
 			}
 
-			// Don't write a "manually sent" order note when the underlying trigger
-			// would silently bail. Cheaper to short-circuit here than to inspect
-			// the meta after the fact.
+			// Don't record an order note for a send that the underlying trigger
+			// would silently bail on.
 			if ( ! $this->is_enabled() || self::is_suppressed() ) {
 				return;
 			}
@@ -329,7 +336,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			$this->trigger( $order->get_id() );
 
 			$order->add_order_note(
-				__( 'Abandoned cart recovery email manually sent to customer.', 'woocommerce' ),
+				__( 'Abandoned cart recovery email sent from the order actions menu.', 'woocommerce' ),
 				0,
 				true,
 				array( 'note_group' => OrderNoteGroup::EMAIL_NOTIFICATION )
@@ -441,10 +448,11 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		/**
 		 * Get the unsubscribe URL for the currently-bound order's recipient.
 		 *
-		 * Returns an HMAC-signed `?wc-recovery-unsubscribe=…` URL handled by
-		 * `UnsubscribeEndpoint`. Empty when no order is bound or the order has
-		 * no billing email — both states mean there's no recipient to unsubscribe
-		 * and the template should suppress the footer link.
+		 * Returns an HMAC-signed URL routed through `Endpoint::QUERY_VAR`
+		 * (`?wc-email-unsubscribe=…`) and handled by `UnsubscribesEndpoint`.
+		 * Empty when no order is bound or the order has no billing email —
+		 * both states mean there's no recipient to unsubscribe and the
+		 * template should suppress the footer link.
 		 *
 		 * @since  10.9.0
 		 * @return string
@@ -476,7 +484,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			if ( '' === $email ) {
 				return false;
 			}
-			return wc_get_container()->get( UnsubscribesStorage::class )->is_unsubscribed( $email, 'customer_abandoned_cart_recovery' );
+			return wc_get_container()->get( UnsubscribesStorage::class )->is_unsubscribed( $email, self::EMAIL_ID );
 		}
 
 		/**

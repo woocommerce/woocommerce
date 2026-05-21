@@ -42,7 +42,7 @@ class UnsubscribeTagsProvider extends AbstractTagProvider {
 					if ( ! $wc_email instanceof WC_Email ) {
 						return '';
 					}
-					if ( ! method_exists( $wc_email, 'get_unsubscribe_url' ) ) {
+					if ( ! is_callable( array( $wc_email, 'get_unsubscribe_url' ) ) ) {
 						return '';
 					}
 					return (string) $wc_email->get_unsubscribe_url();

@@ -63,6 +63,36 @@ class StorageTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox mark_unsubscribed_by_hash() records the row under the given hash so callers that already operate on the hash (the public Endpoint) never have to recover the raw address.
+	 */
+	public function test_mark_unsubscribed_by_hash(): void {
+		$email = 'by-hash-' . uniqid( '', true ) . '@example.test';
+		$hash  = Storage::hash_email( $email );
+
+		$this->assertFalse( $this->storage->is_unsubscribed( $email, self::KIND ) );
+		$this->assertTrue( $this->storage->mark_unsubscribed_by_hash( $hash, self::KIND ) );
+		$this->assertTrue( $this->storage->is_unsubscribed( $email, self::KIND ) );
+	}
+
+	/**
+	 * @testdox mark_unsubscribed_by_hash() rejects empty hash or empty kind without writing a row.
+	 */
+	public function test_mark_unsubscribed_by_hash_rejects_empty(): void {
+		$this->assertFalse( $this->storage->mark_unsubscribed_by_hash( '', self::KIND ) );
+		$this->assertFalse( $this->storage->mark_unsubscribed_by_hash( str_repeat( 'a', 64 ), '' ) );
+	}
+
+	/**
+	 * @testdox mark_unsubscribed_by_hash() refuses inputs that don't match HASH_PATTERN — a future caller that forgets to pre-validate can't insert junk rows.
+	 */
+	public function test_mark_unsubscribed_by_hash_rejects_malformed(): void {
+		$this->assertFalse( $this->storage->mark_unsubscribed_by_hash( 'not-a-hash', self::KIND ) );
+		$this->assertFalse( $this->storage->mark_unsubscribed_by_hash( str_repeat( 'g', 64 ), self::KIND ), 'Non-hex chars must be rejected.' );
+		$this->assertFalse( $this->storage->mark_unsubscribed_by_hash( str_repeat( 'a', 63 ), self::KIND ), 'Wrong length must be rejected.' );
+		$this->assertFalse( $this->storage->mark_unsubscribed_by_hash( str_repeat( 'A', 64 ), self::KIND ), 'Uppercase hex must be rejected — hash() returns lowercase.' );
+	}
+
+	/**
 	 * @testdox erase_for_email() removes all rows for an address across every kind — the GDPR eraser clears all preferences for the requested email.
 	 */
 	public function test_erase_for_email_removes_all_kinds(): void {

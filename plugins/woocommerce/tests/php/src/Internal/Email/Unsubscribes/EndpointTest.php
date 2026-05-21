@@ -39,8 +39,8 @@ class EndpointTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		unset(
 			$_GET[ Endpoint::QUERY_VAR ],
+			$_GET[ Endpoint::QUERY_VAR_HASH ],
 			$_GET['kind'],
-			$_GET['email'],
 			$_GET['sig']
 		);
 		parent::tearDown();
@@ -112,19 +112,47 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Missing email param is rejected even when the query-var is present.
+	 * @testdox Missing email-hash param is rejected even when the query-var is present.
 	 */
-	public function test_missing_email_bails(): void {
+	public function test_missing_hash_bails(): void {
 		$email = 'missing-' . uniqid( '', true ) . '@example.test';
 		$url   = Endpoint::url_for( 12345, $email, self::KIND );
 
 		$parsed = wp_parse_url( $url );
 		parse_str( $parsed['query'] ?? '', $query );
-		unset( $query['email'] );
+		unset( $query[ Endpoint::QUERY_VAR_HASH ] );
 
 		$this->dispatch( $query );
 
 		$this->assertFalse( $this->storage->is_unsubscribed( $email, self::KIND ) );
+	}
+
+	/**
+	 * @testdox An email-hash that doesn't match the SHA-256 hex shape is rejected without invoking storage, so the endpoint never writes a row for a malformed payload.
+	 */
+	public function test_malformed_hash_bails(): void {
+		$email = 'shape-' . uniqid( '', true ) . '@example.test';
+		$url   = Endpoint::url_for( 12345, $email, self::KIND );
+
+		$parsed = wp_parse_url( $url );
+		parse_str( $parsed['query'] ?? '', $query );
+		$query[ Endpoint::QUERY_VAR_HASH ] = 'not-a-hash';
+
+		$this->dispatch( $query );
+
+		$this->assertFalse( $this->storage->is_unsubscribed( $email, self::KIND ) );
+	}
+
+	/**
+	 * @testdox url_for() never embeds the raw recipient email in the URL — the hash is what travels, so the address can't leak via logs, Referer headers, or link previews.
+	 */
+	public function test_url_does_not_contain_raw_email(): void {
+		$email = 'pii-leak-' . uniqid( '', true ) . '@example.test';
+		$url   = Endpoint::url_for( 12345, $email, self::KIND );
+
+		$this->assertStringNotContainsString( $email, $url );
+		$this->assertStringNotContainsString( rawurlencode( $email ), $url );
+		$this->assertStringNotContainsString( '@example.test', $url );
 	}
 
 	/**
