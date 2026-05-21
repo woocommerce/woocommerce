@@ -37,12 +37,23 @@ const BACKORDERS_ROW: FormField = {
 	children: [ 'allow_backorders', 'low_stock_amount' ],
 };
 
+// Unlabeled groups render children in a nested wrapper without a section header,
+// allowing CSS to tighten the gap specifically for that inner wrapper.
+const GENERAL_CHECKBOXES: FormField = {
+	id: 'general-checkboxes',
+	children: [ 'downloadable', 'virtual' ],
+};
+
+const DOWNLOAD_OPTIONS: FormField = {
+	id: 'download-options',
+	children: [ 'download_limit', 'download_expiry' ],
+};
+
+
 export const VARIATION_FORM_FIELDS: VariationFormField[] = [
 	createFormGroup( 'general-fields', __( 'General', 'woocommerce' ), [
 		'product_status',
-		'tax_class',
-		'downloadable',
-		'virtual',
+		GENERAL_CHECKBOXES,
 	] ),
 	createFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
 		'regular_price',
@@ -50,14 +61,16 @@ export const VARIATION_FORM_FIELDS: VariationFormField[] = [
 		'schedule_sale',
 		SALE_SCHEDULE_DATES,
 		'cost_of_goods_sold',
+		'tax_class',
 	] ),
-	createFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
+	createFormGroup( 'details-fields', __( 'Details', 'woocommerce' ), [
 		'images',
+		'description',
 	] ),
 	createFormGroup(
 		'downloadable-files-fields',
 		__( 'Downloadable files', 'woocommerce' ),
-		[ 'downloadable_files', 'download_limit', 'download_expiry' ]
+		[ 'downloadable_files', DOWNLOAD_OPTIONS ]
 	),
 	createFormGroup( 'inventory-fields', __( 'Inventory', 'woocommerce' ), [
 		'sku',
@@ -72,7 +85,7 @@ export const VARIATION_FORM_FIELDS: VariationFormField[] = [
 		DIMENSIONS,
 		'weight',
 	] ),
-	createFormGroup( 'details-fields', __( 'Details', 'woocommerce' ), [
-		'description',
+	createFormGroup( 'attributes-fields', __( 'Attributes', 'woocommerce' ), [
+		'attributes',
 	] ),
 ];

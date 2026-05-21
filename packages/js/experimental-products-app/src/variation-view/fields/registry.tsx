@@ -11,6 +11,8 @@ import {
 	type ProductFieldId,
 } from '../../fields/registry';
 import { fieldExtensions as allowBackordersFieldExtensions } from './allow_backorders/field';
+import { fieldExtensions as attributesFieldExtensions } from './attributes/field';
+import { fieldExtensions as downloadableFieldExtensions } from './downloadable/field';
 import { fieldExtensions as downloadableFilesFieldExtensions } from './downloadable_files/field';
 import { fieldExtensions as downloadExpiryFieldExtensions } from './download_expiry/field';
 import { fieldExtensions as downloadLimitFieldExtensions } from './download_limit/field';
@@ -37,7 +39,6 @@ const SHARED_FIELD_IDS: readonly ProductFieldId[] = [
 	'manage_stock',
 	'stock',
 	'stock_quantity',
-	'downloadable',
 	'tax_status',
 ] as const;
 
@@ -69,6 +70,7 @@ const shippingFields: VariationEditField[] = createProductFields( SHIPPING_FIELD
 // Variation-exclusive field IDs — these do not exist in the main registry.
 const VARIATION_ONLY_FIELD_IDS = [
 	'product_status',
+	'downloadable',
 	'tax_class',
 	'virtual',
 	'allow_backorders',
@@ -76,6 +78,7 @@ const VARIATION_ONLY_FIELD_IDS = [
 	'downloadable_files',
 	'download_limit',
 	'download_expiry',
+	'attributes',
 ] as const;
 
 export type VariationOnlyFieldId =
@@ -86,6 +89,7 @@ const VARIATION_ONLY_FIELD_EXTENSIONS: Record<
 	Partial< VariationEditField >
 > = {
 	product_status: productStatusFieldExtensions,
+	downloadable: downloadableFieldExtensions,
 	tax_class: taxClassFieldExtensions,
 	virtual: virtualFieldExtensions,
 	allow_backorders: allowBackordersFieldExtensions,
@@ -93,6 +97,7 @@ const VARIATION_ONLY_FIELD_EXTENSIONS: Record<
 	downloadable_files: downloadableFilesFieldExtensions,
 	download_limit: downloadLimitFieldExtensions,
 	download_expiry: downloadExpiryFieldExtensions,
+	attributes: attributesFieldExtensions,
 };
 
 const variationOnlyFields: VariationEditField[] = VARIATION_ONLY_FIELD_IDS.map(
