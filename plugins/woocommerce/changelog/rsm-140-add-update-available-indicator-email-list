@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Surface an "Update available" indicator on the email list page that links into the editor with a deep-link review parameter so merchants can see which transactional emails have customizations diverging from the current core template.

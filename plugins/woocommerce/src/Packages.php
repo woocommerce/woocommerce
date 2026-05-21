@@ -36,7 +36,7 @@ class Packages {
 	/**
 	 * Array of package names and their main package classes.
 	 *
-	 * One a package has been merged into WooCommerce Core it should be moved from the package list and placed in
+	 * Once a package has been merged into WooCommerce Core it should be moved from the package list and placed in
 	 * this list. This will ensure that the feature plugin is disabled as well as provide the class to handle
 	 * initialization for the now-merged feature plugin.
 	 *
@@ -60,7 +60,8 @@ class Packages {
 	 * @var array Key is the package name/directory, value is the main package class which handles init.
 	 */
 	protected static $merged_packages = array(
-		'woocommerce-brands' => '\\Automattic\\WooCommerce\\Internal\\Brands',
+		'woocommerce-brands'                      => '\\Automattic\\WooCommerce\\Internal\\Brands',
+		'woocommerce-additional-variation-images' => '\\Automattic\\WooCommerce\\Internal\\VariationGallery\\Package',
 	);
 
 
@@ -90,7 +91,7 @@ class Packages {
 	}
 
 	/**
-	 * Checks a package exists by looking for it's directory.
+	 * Checks a package exists by looking for its directory.
 	 *
 	 * @param string $package Package name.
 	 * @return boolean
@@ -100,7 +101,7 @@ class Packages {
 	}
 
 	/**
-	 * Checks a package exists by looking for it's directory.
+	 * Checks if a class name corresponds to a merged package and should be loaded.
 	 *
 	 * @param string $class_name Class name.
 	 * @return boolean

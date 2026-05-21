@@ -1,0 +1,11 @@
+.woocommerce-schedule-sale-control {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.woocommerce-schedule-sale-control__dates {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+}

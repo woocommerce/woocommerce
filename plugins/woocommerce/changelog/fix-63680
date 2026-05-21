@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Skip unnecessary DELETE queries in update_line_items_from_cart when order ID is 0.
