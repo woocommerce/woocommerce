@@ -36,6 +36,11 @@ class ShopperListSchemaTest extends WC_Unit_Test_Case {
 	 * Set up.
 	 */
 	public function setUp(): void {
+		// `saved-for-later` depends on the `cart_save_for_later` feature
+		// flag. Filter the option read so `ShopperList::get_by_slug()`
+		// returns a list without writing the option to the database.
+		add_filter( 'pre_option_woocommerce_cart_save_for_later_enabled', array( $this, 'filter_save_for_later_enabled' ) );
+
 		parent::setUp();
 
 		$formatters = new Formatters();
@@ -55,7 +60,15 @@ class ShopperListSchemaTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		wp_delete_user( $this->user_id );
 		$this->sut = null;
+		remove_filter( 'pre_option_woocommerce_cart_save_for_later_enabled', array( $this, 'filter_save_for_later_enabled' ) );
 		parent::tearDown();
+	}
+
+	/**
+	 * Filter callback that forces the SFL option to `yes` for the lifetime of the test.
+	 */
+	public function filter_save_for_later_enabled(): string {
+		return 'yes';
 	}
 
 	/**

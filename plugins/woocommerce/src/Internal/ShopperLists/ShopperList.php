@@ -70,6 +70,12 @@ class ShopperList {
 	 * @return self|false
 	 */
 	public static function get_by_slug( string $slug, ?int $user_id = null ) {
+		// Gate disabled or unknown slugs upfront so previously-persisted lists
+		// don't bypass the feature flag (the Store API surfaces this as 404).
+		if ( ! wc_get_container()->get( ShopperListsController::class )->is_enabled( $slug ) ) {
+			return false;
+		}
+
 		$user_id = absint( $user_id ? $user_id : get_current_user_id() );
 		if ( ! $user_id ) {
 			return false;
@@ -81,17 +87,13 @@ class ShopperList {
 			return self::from_array( $stored, $user_id );
 		}
 
-		// In-memory saved-for-later; persisted lazily on the first save().
-		if ( 'saved-for-later' === $slug ) {
-			return new self(
-				$user_id,
-				'saved-for-later',
-				current_time( 'mysql', true ),
-				array()
-			);
-		}
-
-		return false;
+		// In-memory list; saved on the first save().
+		return new self(
+			$user_id,
+			$slug,
+			current_time( 'mysql', true ),
+			array()
+		);
 	}
 
 	/**
@@ -101,14 +103,14 @@ class ShopperList {
 	 * @return array<string, self>
 	 */
 	public static function get_all_for_user( ?int $user_id = null ): array {
-		// Only `saved-for-later` is registered today. Additional list types
-		// (e.g. wishlist) will be added here behind their own feature flag
-		// once the corresponding block ships.
-		return array_filter(
-			array(
-				'saved-for-later' => self::get_by_slug( 'saved-for-later', $user_id ),
-			)
-		);
+		$result = array();
+		foreach ( wc_get_container()->get( ShopperListsController::class )->get_enabled_slugs() as $slug ) {
+			$list = self::get_by_slug( $slug, $user_id );
+			if ( $list ) {
+				$result[ $slug ] = $list;
+			}
+		}
+		return $result;
 	}
 
 	/**
