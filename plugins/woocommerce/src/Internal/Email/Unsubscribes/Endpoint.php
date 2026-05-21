@@ -11,9 +11,9 @@ namespace Automattic\WooCommerce\Internal\Email\Unsubscribes;
  * Public-facing endpoint that handles the unsubscribe links embedded in
  * customer emails.
  *
- * URL shape: `?wc-email-unsubscribe=<order_id>&kind=<email_kind>&email=<urlencoded>&sig=<hmac>`
+ * URL shape: `?wc-email-unsubscribe=<order_id>&kind=<email_kind>&email_hash=<sha256>&sig=<hmac>`
  *
- * Signature: HMAC-SHA-256 of `"{order_id}|{normalized_email}|{kind}"` using
+ * Signature: HMAC-SHA-256 of `"{order_id}|{email_hash}|{kind}"` using
  * `wp_salt('nonce')` as the key. The kind is part of the payload so a link
  * issued for one email type can't be replayed to opt out of another.
  *
@@ -28,9 +28,14 @@ class Endpoint {
 	/**
 	 * Query var carrying the order id. The presence of this var is what
 	 * triggers the endpoint; the value is informational only (lookup is by
-	 * email + kind, not order).
+	 * email hash + kind, not order).
 	 */
 	public const QUERY_VAR = 'wc-email-unsubscribe';
+
+	/**
+	 * Query var carrying the SHA-256 hash of the recipient's normalized email.
+	 */
+	public const QUERY_VAR_HASH = 'email_hash';
 
 	/**
 	 * Storage layer.
@@ -54,21 +59,29 @@ class Endpoint {
 	/**
 	 * Build the URL the email's unsubscribe link should point to.
 	 *
-	 * @param int    $order_id Order id (informational; lookup is by email + kind).
+	 * The raw email is hashed before it ever lands in the URL — see the class
+	 * docblock for why. Callers pass the raw address (so the API stays
+	 * ergonomic and signing stays in one place), but the rendered link only
+	 * contains the hash.
+	 *
+	 * @param int    $order_id Order id (informational; lookup is by email hash + kind).
 	 * @param string $email    Billing email.
 	 * @param string $kind     Email-kind identifier (the email class's `$this->id`).
 	 * @return string
 	 */
 	public static function url_for( int $order_id, string $email, string $kind ): string {
-		$normalized = strtolower( trim( $email ) );
-		$sig        = self::sign( $order_id, $normalized, $kind );
+		$hash = Storage::hash_email( $email );
+		if ( '' === $hash ) {
+			return '';
+		}
+		$sig = self::sign( $order_id, $hash, $kind );
 
 		return add_query_arg(
 			array(
-				self::QUERY_VAR => $order_id,
-				'kind'          => $kind,
-				'email'         => rawurlencode( $normalized ),
-				'sig'           => $sig,
+				self::QUERY_VAR      => $order_id,
+				'kind'               => $kind,
+				self::QUERY_VAR_HASH => $hash,
+				'sig'                => $sig,
 			),
 			home_url( '/' )
 		);
@@ -89,42 +102,45 @@ class Endpoint {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- signature verified below.
 		$order_id = absint( $_GET[ self::QUERY_VAR ] );
 		$kind     = isset( $_GET['kind'] ) ? sanitize_key( wp_unslash( $_GET['kind'] ) ) : '';
-		$email    = isset( $_GET['email'] ) ? sanitize_email( rawurldecode( wp_unslash( $_GET['email'] ) ) ) : '';
+		$hash     = isset( $_GET[ self::QUERY_VAR_HASH ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::QUERY_VAR_HASH ] ) ) : '';
 		$sig      = isset( $_GET['sig'] ) ? sanitize_text_field( wp_unslash( $_GET['sig'] ) ) : '';
 		// phpcs:enable
 
-		if ( '' === $email || '' === $kind || '' === $sig || ! self::verify( $order_id, $email, $kind, $sig ) ) {
+		// 64 lowercase hex chars: the SHA-256 of the recipient's normalized email.
+		// Reject anything that doesn't match the shape before we even hash-compare
+		// — a malformed hash can't possibly verify.
+		if ( '' === $hash || '' === $kind || '' === $sig || ! preg_match( '/^[a-f0-9]{64}$/', $hash ) || ! self::verify( $order_id, $hash, $kind, $sig ) ) {
 			$this->render_invalid();
 			return;
 		}
 
-		$this->storage->mark_unsubscribed( $email, $kind );
+		$this->storage->mark_unsubscribed_by_hash( $hash, $kind );
 		$this->render_unsubscribed();
 	}
 
 	/**
-	 * Compute the HMAC signature for a (order, email, kind) triple.
+	 * Compute the HMAC signature for a (order, hash, kind) triple.
 	 *
 	 * @param int    $order_id Order id.
-	 * @param string $email    Already-normalized (lowercased, trimmed) email.
+	 * @param string $hash     SHA-256 hash of the normalized email.
 	 * @param string $kind     Email-kind identifier.
 	 * @return string Hex digest.
 	 */
-	private static function sign( int $order_id, string $email, string $kind ): string {
-		return hash_hmac( 'sha256', $order_id . '|' . $email . '|' . $kind, wp_salt( 'nonce' ) );
+	private static function sign( int $order_id, string $hash, string $kind ): string {
+		return hash_hmac( 'sha256', $order_id . '|' . $hash . '|' . $kind, wp_salt( 'nonce' ) );
 	}
 
 	/**
 	 * Constant-time signature verification.
 	 *
 	 * @param int    $order_id  Order id from the URL.
-	 * @param string $email     Email from the URL (sanitized).
+	 * @param string $hash      Email hash from the URL (already shape-validated).
 	 * @param string $kind      Kind from the URL (sanitized).
 	 * @param string $signature Signature from the URL.
 	 * @return bool
 	 */
-	private static function verify( int $order_id, string $email, string $kind, string $signature ): bool {
-		$expected = self::sign( $order_id, strtolower( trim( $email ) ), $kind );
+	private static function verify( int $order_id, string $hash, string $kind, string $signature ): bool {
+		$expected = self::sign( $order_id, $hash, $kind );
 		return hash_equals( $expected, $signature );
 	}
 

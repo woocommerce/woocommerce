@@ -820,15 +820,17 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		$repository = wc_get_container()->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class );
 		$repository->mark_unsubscribed( $order->get_billing_email(), 'customer_abandoned_cart_recovery' );
 
-		$mailer = tests_retrieve_phpmailer_instance();
-		$before = count( $mailer->mock_sent );
-		$this->sut->trigger( $order->get_id() );
-		$after = count( $mailer->mock_sent );
+		try {
+			$mailer = tests_retrieve_phpmailer_instance();
+			$before = count( $mailer->mock_sent );
+			$this->sut->trigger( $order->get_id() );
+			$after = count( $mailer->mock_sent );
 
-		$this->assertSame( $before, $after, 'Unsubscribed recipient must not receive a recovery email.' );
-
-		// Cleanup so the row doesn't leak into later tests in this run.
-		$repository->erase_for_email( $order->get_billing_email() );
+			$this->assertSame( $before, $after, 'Unsubscribed recipient must not receive a recovery email.' );
+		} finally {
+			// Cleanup so the row doesn't leak into later tests in this run.
+			$repository->erase_for_email( $order->get_billing_email() );
+		}
 	}
 
 	/**
@@ -843,11 +845,13 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		$repository = wc_get_container()->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class );
 		$repository->mark_unsubscribed( $order->get_billing_email(), 'customer_abandoned_cart_recovery' );
 
-		$actions = $this->sut->register_order_action( array(), $order );
+		try {
+			$actions = $this->sut->register_order_action( array(), $order );
 
-		$this->assertArrayNotHasKey( WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
-
-		$repository->erase_for_email( $order->get_billing_email() );
+			$this->assertArrayNotHasKey( WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+		} finally {
+			$repository->erase_for_email( $order->get_billing_email() );
+		}
 	}
 
 	/**
@@ -864,23 +868,25 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		$repository = wc_get_container()->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class );
 		$repository->mark_unsubscribed( $order->get_billing_email(), 'customer_abandoned_cart_recovery' );
 
-		$mailer = tests_retrieve_phpmailer_instance();
-		$before = count( $mailer->mock_sent );
-		$this->sut->handle_recovery_email_send( $order );
+		try {
+			$mailer = tests_retrieve_phpmailer_instance();
+			$before = count( $mailer->mock_sent );
+			$this->sut->handle_recovery_email_send( $order );
 
-		$this->assertSame( $before, count( $mailer->mock_sent ), 'Unsubscribed recipient must not receive a manual send.' );
+			$this->assertSame( $before, count( $mailer->mock_sent ), 'Unsubscribed recipient must not receive a manual send.' );
 
-		$notes        = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
-		$note_strings = wp_list_pluck( $notes, 'content' );
-		$this->assertEmpty(
-			array_filter(
-				$note_strings,
-				static fn ( $note ) => false !== strpos( $note, 'Abandoned cart recovery email manually sent' )
-			),
-			'Unsubscribed recipient must not have a "manually sent" order note written.'
-		);
-
-		$repository->erase_for_email( $order->get_billing_email() );
+			$notes        = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+			$note_strings = wp_list_pluck( $notes, 'content' );
+			$this->assertEmpty(
+				array_filter(
+					$note_strings,
+					static fn ( $note ) => false !== strpos( $note, 'Abandoned cart recovery email manually sent' )
+				),
+				'Unsubscribed recipient must not have a "manually sent" order note written.'
+			);
+		} finally {
+			$repository->erase_for_email( $order->get_billing_email() );
+		}
 	}
 
 	/**

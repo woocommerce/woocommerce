@@ -426,10 +426,11 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		/**
 		 * Get the unsubscribe URL for the currently-bound order's recipient.
 		 *
-		 * Returns an HMAC-signed `?wc-recovery-unsubscribe=…` URL handled by
-		 * `UnsubscribeEndpoint`. Empty when no order is bound or the order has
-		 * no billing email — both states mean there's no recipient to unsubscribe
-		 * and the template should suppress the footer link.
+		 * Returns an HMAC-signed URL routed through `Endpoint::QUERY_VAR`
+		 * (`?wc-email-unsubscribe=…`) and handled by `UnsubscribesEndpoint`.
+		 * Empty when no order is bound or the order has no billing email —
+		 * both states mean there's no recipient to unsubscribe and the
+		 * template should suppress the footer link.
 		 *
 		 * @since  10.9.0
 		 * @return string

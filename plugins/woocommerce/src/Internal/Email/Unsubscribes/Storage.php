@@ -137,7 +137,23 @@ class Storage {
 	 * @return bool True if a row was written, false if input was empty.
 	 */
 	public function mark_unsubscribed( string $email, string $kind ): bool {
-		return $this->record_action( $email, $kind, self::ACTION_UNSUBSCRIBED );
+		return $this->record_action( self::hash_email( $email ), $kind, self::ACTION_UNSUBSCRIBED );
+	}
+
+	/**
+	 * Record an unsubscribe directly by SHA-256 hash, for callers (e.g. the
+	 * public unsubscribe endpoint) that operate on the hash already and never
+	 * need to handle the raw email.
+	 *
+	 * The caller is expected to have shape-validated the hash. Empty hashes
+	 * or empty kinds are no-ops.
+	 *
+	 * @param string $hash SHA-256 hex digest of the normalized email.
+	 * @param string $kind Email-kind identifier.
+	 * @return bool True if a row was written.
+	 */
+	public function mark_unsubscribed_by_hash( string $hash, string $kind ): bool {
+		return $this->record_action( $hash, $kind, self::ACTION_UNSUBSCRIBED );
 	}
 
 	/**
@@ -207,13 +223,12 @@ class Storage {
 	/**
 	 * Append an action row.
 	 *
-	 * @param string $email  Raw email.
+	 * @param string $hash   SHA-256 hex digest of the normalized email.
 	 * @param string $kind   Email-kind identifier.
 	 * @param string $action `unsubscribed` or `resubscribed`.
 	 * @return bool
 	 */
-	private function record_action( string $email, string $kind, string $action ): bool {
-		$hash = self::hash_email( $email );
+	private function record_action( string $hash, string $kind, string $action ): bool {
 		if ( '' === $hash || '' === $kind ) {
 			return false;
 		}
