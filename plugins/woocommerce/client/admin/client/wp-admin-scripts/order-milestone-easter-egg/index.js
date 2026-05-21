@@ -1,5 +1,4 @@
 /* global wcOrderMilestoneEgg, Path2D, requestAnimationFrame, cancelAnimationFrame, navigator, history */
-/* eslint-disable @typescript-eslint/no-use-before-define -- Function declarations are grouped by feature in this standalone animation script. */
 ( function () {
 	'use strict';
 
@@ -122,6 +121,7 @@
 	var bgCV, bgCtx, cfCV, cfCtx, stick;
 	var overlayEl,
 		svgDefsEl,
+		closeOverlay,
 		rafId = null;
 	var fallingPieces = [],
 		protectedEls;
@@ -490,23 +490,6 @@
 	}
 
 	/* -- Init --------------------------------------------------------------- */
-	async function init() {
-		stick.innerHTML = SVG_DATA.stick || '';
-		ALL_SHAPES = [];
-		if ( ! reducedMotion ) await loadConfettiShapes();
-		filterShapes();
-		await loadPinata( settings.variant );
-		if ( ! reducedMotion ) startBlink();
-		dropped = true;
-		if ( reducedMotion ) {
-			applyRotation();
-			drawBg();
-		} else {
-			mainOmega = 0.022;
-			loop();
-		}
-	}
-
 	/* -- Blink -------------------------------------------------------------- */
 	function startBlink() {
 		if ( ! eyeGroups.length ) return;
@@ -706,32 +689,6 @@
 		return dpr;
 	}
 
-	function drawBg() {
-		var dpr = sizeCanvasHiDPI( bgCV );
-		bgCtx.setTransform( dpr, 0, 0, dpr, 0, 0 );
-		bgCtx.clearRect( 0, 0, window.innerWidth, window.innerHeight );
-		if ( ! dropped ) return;
-		var c = pinataCentre();
-		var strOff =
-			active && active.stringOffsetX !== null ? active.stringOffsetX : 10;
-		var topX = window.innerWidth / 2 + strOff,
-			topY = 0;
-		var botX = c.x + strOff,
-			botY = c.y;
-		var trail = mainOmega * 1200;
-		var cp1x = topX + ( botX - topX ) * 0.25 - trail * 0.2;
-		var cp1y = topY + ( botY - topY ) * 0.25;
-		var cp2x = topX + ( botX - topX ) * 0.75 - trail * 0.8;
-		var cp2y = topY + ( botY - topY ) * 0.75;
-		bgCtx.beginPath();
-		bgCtx.moveTo( topX, topY );
-		bgCtx.bezierCurveTo( cp1x, cp1y, cp2x, cp2y, botX, botY );
-		bgCtx.strokeStyle = '#330862';
-		bgCtx.lineWidth = 4;
-		bgCtx.lineCap = 'round';
-		bgCtx.stroke();
-	}
-
 	function sizeConfetti() {
 		sizeCanvasHiDPI( cfCV );
 	}
@@ -914,6 +871,35 @@
 		}
 	}
 
+	function drawShapeList( arr ) {
+		for ( var i = 0; i < arr.length; i++ ) {
+			var p = arr[ i ],
+				tpl = p.tpl;
+			cfCtx.save();
+			cfCtx.translate( p.x, p.y );
+			cfCtx.rotate( p.rot );
+			cfCtx.scale( p.scale, p.scale );
+			cfCtx.translate( -tpl.cx, -tpl.cy );
+			cfCtx.fillStyle = tpl.color;
+			cfCtx.fill( tpl.path2d );
+			cfCtx.restore();
+		}
+	}
+
+	function drawFallingPieces() {
+		for ( var i = 0; i < fallingPieces.length; i++ ) {
+			var p = fallingPieces[ i ];
+			cfCtx.save();
+			cfCtx.translate( p.x, p.y );
+			cfCtx.rotate( p.rot );
+			cfCtx.scale( p.scale, p.scale );
+			cfCtx.translate( -p.svgCx, -p.svgCy );
+			cfCtx.fillStyle = p.fill;
+			cfCtx.fill( p.path2d );
+			cfCtx.restore();
+		}
+	}
+
 	function drawConfetti() {
 		var dpr = sizeCanvasHiDPI( cfCV );
 		cfCtx.setTransform( dpr, 0, 0, dpr, 0, 0 );
@@ -921,6 +907,32 @@
 		drawShapeList( settled );
 		drawShapeList( live );
 		drawFallingPieces();
+	}
+
+	function drawBg() {
+		var dpr = sizeCanvasHiDPI( bgCV );
+		bgCtx.setTransform( dpr, 0, 0, dpr, 0, 0 );
+		bgCtx.clearRect( 0, 0, window.innerWidth, window.innerHeight );
+		if ( ! dropped ) return;
+		var c = pinataCentre();
+		var strOff =
+			active && active.stringOffsetX !== null ? active.stringOffsetX : 10;
+		var topX = window.innerWidth / 2 + strOff,
+			topY = 0;
+		var botX = c.x + strOff,
+			botY = c.y;
+		var trail = mainOmega * 1200;
+		var cp1x = topX + ( botX - topX ) * 0.25 - trail * 0.2;
+		var cp1y = topY + ( botY - topY ) * 0.25;
+		var cp2x = topX + ( botX - topX ) * 0.75 - trail * 0.8;
+		var cp2y = topY + ( botY - topY ) * 0.75;
+		bgCtx.beginPath();
+		bgCtx.moveTo( topX, topY );
+		bgCtx.bezierCurveTo( cp1x, cp1y, cp2x, cp2y, botX, botY );
+		bgCtx.strokeStyle = '#330862';
+		bgCtx.lineWidth = 4;
+		bgCtx.lineCap = 'round';
+		bgCtx.stroke();
 	}
 
 	/* -- Falling pinata pieces ---------------------------------------------- */
@@ -999,35 +1011,6 @@
 		}
 	}
 
-	function drawFallingPieces() {
-		for ( var i = 0; i < fallingPieces.length; i++ ) {
-			var p = fallingPieces[ i ];
-			cfCtx.save();
-			cfCtx.translate( p.x, p.y );
-			cfCtx.rotate( p.rot );
-			cfCtx.scale( p.scale, p.scale );
-			cfCtx.translate( -p.svgCx, -p.svgCy );
-			cfCtx.fillStyle = p.fill;
-			cfCtx.fill( p.path2d );
-			cfCtx.restore();
-		}
-	}
-
-	function drawShapeList( arr ) {
-		for ( var i = 0; i < arr.length; i++ ) {
-			var p = arr[ i ],
-				tpl = p.tpl;
-			cfCtx.save();
-			cfCtx.translate( p.x, p.y );
-			cfCtx.rotate( p.rot );
-			cfCtx.scale( p.scale, p.scale );
-			cfCtx.translate( -tpl.cx, -tpl.cy );
-			cfCtx.fillStyle = tpl.color;
-			cfCtx.fill( tpl.path2d );
-			cfCtx.restore();
-		}
-	}
-
 	/* -- Cursor ------------------------------------------------------------- */
 	function updateCursor() {
 		if ( ! mActive ) return;
@@ -1092,6 +1075,23 @@
 		rafId = requestAnimationFrame( loop );
 	}
 
+	async function init() {
+		stick.innerHTML = SVG_DATA.stick || '';
+		ALL_SHAPES = [];
+		if ( ! reducedMotion ) await loadConfettiShapes();
+		filterShapes();
+		await loadPinata( settings.variant );
+		if ( ! reducedMotion ) startBlink();
+		dropped = true;
+		if ( reducedMotion ) {
+			applyRotation();
+			drawBg();
+		} else {
+			mainOmega = 0.022;
+			loop();
+		}
+	}
+
 	/* -- Named event handlers (for cleanup) --------------------------------- */
 	function onMouseMove( e ) {
 		mx = e.clientX;
@@ -1110,6 +1110,7 @@
 		rebuildColumns();
 		settled.length = 0;
 	}
+
 	function onKeyDown( e ) {
 		if ( e.key === 'Escape' ) {
 			closeOverlay();
@@ -1124,12 +1125,13 @@
 			if ( ! focusable.length ) return;
 			var first = focusable[ 0 ],
 				last = focusable[ focusable.length - 1 ];
+			var activeElement = overlayEl.ownerDocument.activeElement;
 			if ( e.shiftKey ) {
-				if ( document.activeElement === first ) {
+				if ( activeElement === first ) {
 					e.preventDefault();
 					last.focus();
 				}
-			} else if ( document.activeElement === last ) {
+			} else if ( activeElement === last ) {
 				e.preventDefault();
 				first.focus();
 			}
@@ -1149,7 +1151,7 @@
 	}
 
 	/* -- Close -------------------------------------------------------------- */
-	function closeOverlay() {
+	closeOverlay = function () {
 		if ( currentMilestone && currentMilestone._orderId && DISMISS ) {
 			var fd = new FormData();
 			fd.append( 'action', 'wc_egg_dismiss' );
@@ -1182,9 +1184,17 @@
 		if ( _previousFocus && typeof _previousFocus.focus === 'function' ) {
 			_previousFocus.focus();
 		}
-	}
+	};
 
 	/* -- Build overlay DOM -------------------------------------------------- */
+	function escHtml( s ) {
+		return String( s )
+			.replace( /&/g, '&amp;' )
+			.replace( /</g, '&lt;' )
+			.replace( />/g, '&gt;' )
+			.replace( /"/g, '&quot;' );
+	}
+
 	function buildOverlay( milestoneData ) {
 		var W = window.innerWidth,
 			H = window.innerHeight;
@@ -1391,14 +1401,6 @@
 		} )();
 	}
 
-	function escHtml( s ) {
-		return String( s )
-			.replace( /&/g, '&amp;' )
-			.replace( /</g, '&lt;' )
-			.replace( />/g, '&gt;' )
-			.replace( /"/g, '&quot;' );
-	}
-
 	/* -- showOverlay -------------------------------------------------------- */
 	function showOverlay( milestoneData ) {
 		mainAngle = 0;
@@ -1449,7 +1451,7 @@
 			boomText: milestoneData.boomText || 'One down',
 		} );
 
-		_previousFocus = document.activeElement;
+		_previousFocus = document.body.ownerDocument.activeElement;
 		buildOverlay( milestoneData );
 		init();
 	}
