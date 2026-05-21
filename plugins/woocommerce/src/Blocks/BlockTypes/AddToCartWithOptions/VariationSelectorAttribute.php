@@ -326,8 +326,8 @@ class VariationSelectorAttribute extends AbstractBlock {
 				'selected'  => $default_selected === $value,
 			);
 
-			if ( ! empty( $term_colors ) && isset( $attribute_term['term_id'] ) ) {
-				$item['color'] = $term_colors[ $attribute_term['term_id'] ] ?? '';
+			if ( ! empty( $term_colors ) && isset( $attribute_term['term_id'], $term_colors[ $attribute_term['term_id'] ] ) ) {
+				$item['color'] = $term_colors[ $attribute_term['term_id'] ];
 			}
 
 			$items[] = $item;
