@@ -28,6 +28,10 @@ final class ShopperListRenderer {
 	 * grid scaffold. `$wrapper_attrs` are merged with the block's wrapper
 	 * attributes via `get_block_wrapper_attributes()`.
 	 *
+	 * Trust contract: callers are responsible for ensuring `$inner` and
+	 * `$before_list` contain only safe, escaped HTML — typically composed
+	 * from the section helpers below, never from raw schema/request input.
+	 *
 	 * @param array<string, mixed> $wrapper_attrs Attributes for the outer `<section>`.
 	 * @param string               $list_class    Class attribute for the inner `<ul>`.
 	 * @param string               $inner         Markup placed inside the `<ul>` (template + SSR rows + empty state).
@@ -49,6 +53,9 @@ final class ShopperListRenderer {
 	 * iAPI uses to render new rows. `$row_inner_markup` is the inner HTML
 	 * for the `<li>` — everything between `<li>` and `</li>`.
 	 *
+	 * Trust contract: caller is responsible for ensuring `$row_inner_markup`
+	 * contains only safe, escaped HTML.
+	 *
 	 * @param string $row_inner_markup Inner markup for the `<li>`.
 	 * @return string
 	 */
@@ -65,6 +72,9 @@ final class ShopperListRenderer {
 	 * seeded with the per-row iAPI context derived from `$item`. iAPI's
 	 * hydration treats this as a no-op diff against the `<template>` if
 	 * the inner markup matches.
+	 *
+	 * Trust contract: caller is responsible for ensuring `$row_inner_markup`
+	 * contains only safe, escaped HTML.
 	 *
 	 * @param array<string, mixed> $item             Schema-shape item.
 	 * @param string               $row_inner_markup Inner markup for the `<li>`.
@@ -133,12 +143,16 @@ final class ShopperListRenderer {
 		$variation_label = self::get_variation_label( $item );
 		$remove_aria     = sprintf( $remove_aria_label_template, $alt );
 		$is_price_hidden = '' === $price_html;
-		$has_live_href   = $is_live && '' !== $permalink;
+		// Tombstone rows (`is_live=false` or empty permalink) render `<a>`
+		// without an href — keeps the element shape stable for iAPI
+		// reconciliation against the live-row template, and the CSS in the
+		// shared partial drops link affordances when the anchor has no href.
+		$href_attr = $is_live && '' !== $permalink ? 'href="' . esc_url( $permalink ) . '"' : '';
 
 		ob_start();
 		?>
 		<div class="wc-block-components-product-image wc-block-components-product-image--aspect-ratio-auto">
-			<a <?php echo $has_live_href ? 'href="' . esc_url( $permalink ) . '"' : ''; ?> data-wp-bind--href="context.listItem.permalink">
+			<a <?php echo $href_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-escaped above with esc_url(). ?> data-wp-bind--href="context.listItem.permalink">
 				<span
 					class="<?php echo esc_attr( self::ROW_CLASS ); ?>__image-slot"
 					data-wp-context='{"htmlField":"image_html"}'
@@ -169,7 +183,7 @@ final class ShopperListRenderer {
 			><?php echo esc_html( $variation_label ); ?></span>
 		</div>
 		<h2 class="wp-block-post-title has-text-align-center has-medium-font-size">
-			<a <?php echo $has_live_href ? 'href="' . esc_url( $permalink ) . '"' : ''; ?> data-wp-bind--href="context.listItem.permalink" data-wp-text="state.currentItemDisplayName"><?php echo esc_html( $alt ); ?></a>
+			<a <?php echo $href_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-escaped above with esc_url(). ?> data-wp-bind--href="context.listItem.permalink" data-wp-text="state.currentItemDisplayName"><?php echo esc_html( $alt ); ?></a>
 		</h2>
 		<div
 			class="price wc-block-components-product-price has-text-align-center has-small-font-size"
