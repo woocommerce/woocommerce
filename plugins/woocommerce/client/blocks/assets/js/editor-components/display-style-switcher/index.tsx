@@ -44,8 +44,8 @@ export const DisplayStyleSwitcher = ( {
 	currentStyle: string;
 	onChange: ( value: string ) => void;
 } ) => {
-	const filterBlock = select( 'core/block-editor' ).getBlock( clientId );
-	const parentBlockName = filterBlock?.name;
+	const parentBlock = select( 'core/block-editor' ).getBlock( clientId );
+	const parentBlockName = parentBlock?.name;
 
 	const displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
 		isDisplayStyleCandidate(
@@ -72,9 +72,9 @@ export const DisplayStyleSwitcher = ( {
 			hideLabelFromVision
 			onChange={ ( value: string | number | undefined ) => {
 				if ( ! value || typeof value !== 'string' ) return;
-				if ( ! filterBlock ) return;
+				if ( ! parentBlock ) return;
 				const currentStyleBlock = getInnerBlockByName(
-					filterBlock,
+					parentBlock,
 					currentStyle
 				);
 
@@ -93,8 +93,8 @@ export const DisplayStyleSwitcher = ( {
 				} else {
 					insertBlock(
 						createBlock( value ),
-						filterBlock.innerBlocks.length,
-						filterBlock.clientId,
+						parentBlock.innerBlocks.length,
+						parentBlock.clientId,
 						false
 					);
 				}
@@ -117,10 +117,10 @@ export function resetDisplayStyleBlock(
 	clientId: string,
 	defaultStyle: string
 ) {
-	const filterBlock = select( 'core/block-editor' ).getBlock( clientId );
-	if ( ! filterBlock ) return;
+	const parentBlock = select( 'core/block-editor' ).getBlock( clientId );
+	if ( ! parentBlock ) return;
 
-	const parentBlockName = filterBlock.name;
+	const parentBlockName = parentBlock.name;
 	const displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
 		isDisplayStyleCandidate(
 			blockType.name,
@@ -130,11 +130,11 @@ export function resetDisplayStyleBlock(
 	);
 
 	const currentStyle = displayStyleOptions.find( ( blockType ) =>
-		getInnerBlockByName( filterBlock, blockType.name )
+		getInnerBlockByName( parentBlock, blockType.name )
 	);
 
 	const currentStyleBlock = currentStyle
-		? getInnerBlockByName( filterBlock, currentStyle.name )
+		? getInnerBlockByName( parentBlock, currentStyle.name )
 		: null;
 
 	const { insertBlock, replaceBlock } = dispatch( 'core/block-editor' );
@@ -143,8 +143,8 @@ export function resetDisplayStyleBlock(
 	} else {
 		insertBlock(
 			createBlock( defaultStyle ),
-			filterBlock.innerBlocks.length,
-			filterBlock.clientId,
+			parentBlock.innerBlocks.length,
+			parentBlock.clientId,
 			false
 		);
 	}
