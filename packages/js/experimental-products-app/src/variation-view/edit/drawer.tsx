@@ -27,6 +27,7 @@ import {
 	isProductVariation,
 } from '../../product-edit/utils';
 import { saveSelectedProducts } from '../../product-edit/save';
+import { buildVariationViewQuery } from '../query';
 import type { ProductEntityRecord } from '../fields/types';
 import { variationEditFields } from '../fields/registry';
 import { VariationEditForm } from './form';
@@ -36,6 +37,7 @@ const { useHistory, useLocation } = unlock( routerPrivateApis );
 type VariationEditDrawerProps = {
 	products: ProductEntityRecord[];
 	isOpen: boolean;
+	productId: number;
 };
 
 function getSaveNoticeMessage( successCount: number, failedCount: number ) {
@@ -77,6 +79,7 @@ function getSaveNoticeMessage( successCount: number, failedCount: number ) {
 export function VariationEditDrawer( {
 	products,
 	isOpen,
+	productId,
 }: VariationEditDrawerProps ) {
 	const { navigate } = useHistory();
 	const { path, query = {} } = useLocation();
@@ -208,8 +211,14 @@ export function VariationEditDrawer( {
 		[ products, requestedProductIds ]
 	);
 
-	const { clearEntityRecordEdits, editEntityRecord, saveEditedEntityRecord } =
-		useDispatch( coreStore );
+	const {
+		clearEntityRecordEdits,
+		editEntityRecord,
+		saveEditedEntityRecord,
+		// @ts-expect-error – invalidateResolution is added by the resolver system
+		// but not reflected in @wordpress/core-data's public dispatch types.
+		invalidateResolution,
+	} = useDispatch( coreStore );
 
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
@@ -278,6 +287,13 @@ export function VariationEditDrawer( {
 		[ editEntityRecord, selectedProducts ]
 	);
 
+	const navigateAway = useCallback( () => {
+		const nextQuery = { ...query } as Record< string, string >;
+		delete nextQuery.quickEdit;
+		navigate( getProductListNavigationPath( path, nextQuery ) );
+	}, [ navigate, path, query ] );
+
+	// Discard unsaved edits and close (Cancel / X button).
 	const closeDrawer = useCallback( () => {
 		const editedProductIds = new Set(
 			selectedProducts.map( ( product ) =>
@@ -286,18 +302,13 @@ export function VariationEditDrawer( {
 					: product.id
 			)
 		);
-		const nextQuery = {
-			...query,
-		} as Record< string, string >;
 
 		editedProductIds.forEach( ( productId ) => {
 			clearEntityRecordEdits( 'root', 'product', productId );
 		} );
 
-		delete nextQuery.quickEdit;
-
-		navigate( getProductListNavigationPath( path, nextQuery ) );
-	}, [ clearEntityRecordEdits, navigate, path, query, selectedProducts ] );
+		navigateAway();
+	}, [ clearEntityRecordEdits, navigateAway, selectedProducts ] );
 
 	const onSave = useCallback( async () => {
 		if ( selectedProducts.length === 0 || isSaving ) {
@@ -335,16 +346,32 @@ export function VariationEditDrawer( {
 				} );
 			}
 
-			closeDrawer();
+			// Invalidate the entity records cache so that VariationView
+			// re-fetches fresh data (including updated _embedded.variations)
+			// the next time the drawer is opened.
+			invalidateResolution( 'getEntityRecords', [
+				'root',
+				'product',
+				buildVariationViewQuery( productId ),
+			] );
+
+			// Navigate without clearing entity record edits. The edits set
+			// by saveVariation hold the fresh server-saved state. Clearing
+			// them here would revert to the stale base state before the
+			// re-fetch completes, making the next drawer open appear to show
+			// unsaved data (e.g. downloads missing).
+			navigateAway();
 		} finally {
 			setIsSaving( false );
 		}
 	}, [
-		closeDrawer,
 		createErrorNotice,
 		createSuccessNotice,
 		editEntityRecord,
+		invalidateResolution,
 		isSaving,
+		navigateAway,
+		productId,
 		saveEditedEntityRecord,
 		selectedProducts,
 	] );
@@ -352,14 +379,14 @@ export function VariationEditDrawer( {
 	return (
 		<Drawer.Root open={ isOpen } swipeDirection="right">
 			<Drawer.Popup
-				className="woocommerce-variation-edit__drawer"
+				className="woocommerce-product-edit__drawer"
 				portal={
-					<Drawer.Portal className="woocommerce-variation-edit__drawer-portal" />
+					<Drawer.Portal className="woocommerce-product-edit__drawer-portal" />
 				}
 				style={ { width: 450 } }
 			>
-				<Drawer.Header className="woocommerce-variation-edit__header">
-					<Drawer.Title className="woocommerce-variation-edit__title">
+				<Drawer.Header className="woocommerce-product-edit__header">
+					<Drawer.Title className="woocommerce-product-edit__title">
 						{ title }
 					</Drawer.Title>
 					<Drawer.CloseIcon
@@ -368,9 +395,9 @@ export function VariationEditDrawer( {
 					/>
 				</Drawer.Header>
 
-				<Drawer.Content className="woocommerce-variation-edit">
+				<Drawer.Content className="woocommerce-product-edit">
 					{ hasNoRequestedProducts && (
-						<div className="woocommerce-variation-edit__empty-state">
+						<div className="woocommerce-product-edit__empty-state">
 							<p>
 								{ __(
 									'Select one or more variations to edit them here.',
@@ -381,7 +408,7 @@ export function VariationEditDrawer( {
 					) }
 
 					{ ! hasNoRequestedProducts && isResolving && (
-						<div className="woocommerce-variation-edit__loading">
+						<div className="woocommerce-product-edit__loading">
 							<Spinner />
 						</div>
 					) }
@@ -389,7 +416,7 @@ export function VariationEditDrawer( {
 					{ ! hasNoRequestedProducts &&
 						! isResolving &&
 						hasMissingProducts && (
-							<div className="woocommerce-variation-edit__empty-state">
+							<div className="woocommerce-product-edit__empty-state">
 								<p>
 									{ __(
 										'Select one or more variations to edit them here.',
@@ -409,7 +436,7 @@ export function VariationEditDrawer( {
 				</Drawer.Content>
 
 				{ isReady && (
-					<Drawer.Footer className="woocommerce-variation-edit__footer">
+					<Drawer.Footer className="woocommerce-product-edit__footer">
 						<Button
 							variant="tertiary"
 							onClick={ closeDrawer }
