@@ -133,10 +133,13 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * @since 10.9.0
 		 *
 		 * @param int $order_id The order ID.
+		 * @return bool True when an email was dispatched in this call, false when any
+		 *              gate (suppression, disabled, ineligible, unsubscribed, dedup) or
+		 *              the underlying `send()` rejected the request.
 		 */
-		public function trigger( $order_id ): void {
+		public function trigger( $order_id ): bool {
 			if ( self::is_suppressed() ) {
-				return;
+				return false;
 			}
 
 			$this->setup_locale();
@@ -158,6 +161,8 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				$this->placeholders['{order_number}'] = $order->get_order_number();
 			}
 
+			$dispatched = false;
+
 			if (
 				$this->is_enabled()
 				&& $this->get_recipient()
@@ -166,18 +171,20 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				&& ! self::is_recipient_unsubscribed( $this->get_recipient() )
 				&& '' === (string) $this->object->get_meta( self::META_KEY_SENT_AT )
 			) {
-				$sent = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+				$dispatched = (bool) $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 
 				// Only record the send timestamp when the dispatch actually succeeded.
 				// Subsequent invocations (duplicate AS firings, post-manual auto fires)
 				// short-circuit on this meta before reaching `send()` again.
-				if ( $sent ) {
+				if ( $dispatched ) {
 					$this->object->update_meta_data( self::META_KEY_SENT_AT, (string) time() );
 					$this->object->save_meta_data();
 				}
 			}
 
 			$this->restore_locale();
+
+			return $dispatched;
 		}
 
 		/**

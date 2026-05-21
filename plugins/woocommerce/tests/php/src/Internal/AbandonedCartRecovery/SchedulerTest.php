@@ -117,6 +117,54 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox handle_scheduled_send() records an "sent automatically" order note when the send actually goes out, so the audit trail mirrors the manual-send path.
+	 */
+	public function test_handle_scheduled_send_records_order_note_on_success(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->set_date_created( time() - WC_Email_Customer_Abandoned_Cart_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
+		$order->save();
+
+		$this->sut->handle_scheduled_send( $order->get_id() );
+
+		$notes        = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$note_strings = wp_list_pluck( $notes, 'content' );
+		$this->assertNotEmpty(
+			array_filter(
+				$note_strings,
+				static fn ( $note ) => false !== strpos( $note, 'sent automatically' )
+			),
+			'Successful auto-send must add an "sent automatically" order note.'
+		);
+	}
+
+	/**
+	 * @testdox handle_scheduled_send() does NOT add a note when trigger() bails (already sent, disabled, suppressed, unsubscribed) — no audit row for a non-event.
+	 */
+	public function test_handle_scheduled_send_skips_note_when_trigger_bails(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		// Mark the order as already sent so trigger() bails on the dedup gate.
+		$order->update_meta_data( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT, (string) ( time() - HOUR_IN_SECONDS ) );
+		$order->save();
+		$order->set_date_created( time() - WC_Email_Customer_Abandoned_Cart_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
+		$order->save();
+
+		$this->sut->handle_scheduled_send( $order->get_id() );
+
+		$notes        = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$note_strings = wp_list_pluck( $notes, 'content' );
+		$this->assertEmpty(
+			array_filter(
+				$note_strings,
+				static fn ( $note ) => false !== strpos( $note, 'sent automatically' )
+			),
+			'Dedup-gated trigger() must not record an "sent automatically" order note.'
+		);
+	}
+
+	/**
 	 * @testdox do_action( Scheduler::ACTION_HOOK, $order_id ) reaches handle_scheduled_send so the production WP-Cron dispatch path is wired without the email class being instantiated up-front.
 	 */
 	public function test_action_dispatch_reaches_handle_scheduled_send(): void {

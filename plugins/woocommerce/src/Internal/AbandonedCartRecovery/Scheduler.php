@@ -8,6 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\AbandonedCartRecovery;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use WC_Email_Customer_Abandoned_Cart_Recovery;
 use WC_Order;
 
@@ -188,7 +189,23 @@ class Scheduler {
 		if ( null === $email ) {
 			return;
 		}
-		$email->trigger( (int) $order_id );
+
+		$dispatched = $email->trigger( (int) $order_id );
+		if ( ! $dispatched ) {
+			return;
+		}
+
+		$order = wc_get_order( (int) $order_id );
+		if ( ! $order instanceof WC_Order ) {
+			return;
+		}
+
+		$order->add_order_note(
+			__( 'Abandoned cart recovery email sent automatically.', 'woocommerce' ),
+			0,
+			false,
+			array( 'note_group' => OrderNoteGroup::EMAIL_NOTIFICATION )
+		);
 	}
 
 	/**
