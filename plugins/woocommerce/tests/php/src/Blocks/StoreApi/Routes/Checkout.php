@@ -2255,7 +2255,7 @@ class Checkout extends MockeryTestCase {
 			$second_order_id,
 			'Second POST must reuse the existing pending order, not create a new one (regression: issue #64792).'
 		);
-		$this->assertSame( $first_order_id, (int) WC()->session->get( 'store_api_draft_order' ), 'Session pointer should still reference the reused order.' );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ), 'Successful checkout should clear the draft order pointer when the cart is emptied.' );
 	}
 
 	/**
