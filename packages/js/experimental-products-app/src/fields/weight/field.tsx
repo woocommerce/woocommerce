@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEntityRecord } from '@wordpress/core-data';
+import { store as coreStore } from '@wordpress/core-data';
+import { useSelect } from '@wordpress/data';
 import { InputControl, InputLayout } from '@wordpress/ui';
 import type { Field } from '@wordpress/dataviews';
 
@@ -10,7 +11,7 @@ import type { Field } from '@wordpress/dataviews';
  * Internal dependencies
  */
 
-import type { ProductEntityRecord, SettingsEntityRecord } from '../types';
+import type { ProductEntityRecord } from '../types';
 import { isDimensionVisible } from '../components/dimension';
 
 const fieldDefinition = {
@@ -29,11 +30,22 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		const {
 			record: storeProductsSettings,
 			isResolving: storeProductsSettingsResolving,
-		} = useEntityRecord< SettingsEntityRecord >(
-			'root',
-			'settings',
-			'products'
-		);
+		} = useSelect( ( select ) => {
+			const coreSelect = select( coreStore );
+
+			return {
+				record: coreSelect.getEntityRecord(
+					'root',
+					'settings',
+					'products'
+				),
+				isResolving: coreSelect.isResolving( 'getEntityRecord', [
+					'root',
+					'settings',
+					'products',
+				] ),
+			};
+		}, [] );
 
 		if ( storeProductsSettingsResolving ) {
 			return null;
