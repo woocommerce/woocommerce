@@ -23,6 +23,7 @@ final class ProductFilterChips extends AbstractBlock {
 	 * @param array $attributes  Any attributes that currently are available from the block.
 	 *                           Note, this will be empty in the editor context when the block is
 	 *                           not in the post content on editor load.
+	 * @return void
 	 */
 	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
