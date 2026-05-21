@@ -32,6 +32,7 @@ type ProductType = 'simple' | 'variation' | 'variable' | 'grouped' | 'external';
 type ProductVariationEntityRecord = ProductEntityRecord & {
 	parent_id: number;
 };
+type DimensionKey = keyof ProductEntityRecord[ 'dimensions' ];
 type Feature = {
 	is_enabled?: boolean;
 };
@@ -84,6 +85,8 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'grouped_products',
 	'linked_products_count',
 ] as const;
+
+const DIMENSION_KEYS: DimensionKey[] = [ 'length', 'width', 'height' ];
 
 const DIMENSIONS_FORM_FIELD: ProductEditFormField = {
 	id: 'dimensions',
@@ -317,6 +320,48 @@ function getMixedValueFallback( sample: unknown ) {
 	return undefined;
 }
 
+function isRecord( value: unknown ): value is Record< string, unknown > {
+	return (
+		Boolean( value ) &&
+		typeof value === 'object' &&
+		! Array.isArray( value )
+	);
+}
+
+function buildMergedDimensions(
+	values: unknown[]
+): ProductEntityRecord[ 'dimensions' ] | undefined {
+	const hasDimensionValue = values.some( isRecord );
+
+	if ( ! hasDimensionValue ) {
+		return undefined;
+	}
+
+	const dimensions: Partial< ProductEntityRecord[ 'dimensions' ] > = {};
+
+	DIMENSION_KEYS.forEach( ( dimensionKey ) => {
+		const dimensionValues = values.map( ( value ) =>
+			isRecord( value ) ? value[ dimensionKey ] : undefined
+		);
+		const firstDefinedValue = dimensionValues.find(
+			( value ) => value !== undefined
+		);
+		const areValuesEqual = dimensionValues.every(
+			( value ) =>
+				normalizeValue( value ) ===
+				normalizeValue( dimensionValues[ 0 ] )
+		);
+
+		dimensions[ dimensionKey ] = (
+			areValuesEqual
+				? dimensionValues[ 0 ]
+				: getMixedValueFallback( firstDefinedValue )
+		) as string | undefined;
+	} );
+
+	return dimensions as ProductEntityRecord[ 'dimensions' ];
+}
+
 function isVariableProductParent( product: ProductEntityRecord ) {
 	return product.type === 'variable' && ! product.parent_id;
 }
@@ -520,6 +565,12 @@ export function buildMergedProductEditData(
 		const values = products.map(
 			( product ) => product[ key as keyof ProductEntityRecord ]
 		);
+
+		if ( key === 'dimensions' ) {
+			mergedData[ key ] = buildMergedDimensions( values );
+			return;
+		}
+
 		const firstDefinedValue = values.find(
 			( value ) => value !== undefined
 		);

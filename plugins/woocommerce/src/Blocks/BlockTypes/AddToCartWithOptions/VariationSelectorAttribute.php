@@ -22,6 +22,60 @@ class VariationSelectorAttribute extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-variation-selector-attribute';
 
 	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes Any attributes that currently are available from the block.
+	 * @return void
+	 */
+	protected function enqueue_data( array $attributes = array() ) {
+		parent::enqueue_data( $attributes );
+
+		if ( is_admin() ) {
+			$this->asset_data_registry->add( 'variationSelectorTermColors', $this->get_visual_attribute_term_colors() );
+		}
+	}
+
+	/**
+	 * Get color values for all wc-visual attribute terms.
+	 *
+	 * @param string|null $attribute_name Optional product attribute taxonomy name (e.g. `pa_color`). When omitted, colors for every wc-visual attribute are loaded.
+	 * @return array<int, string|null> Map of term ID to hex color.
+	 */
+	private function get_visual_attribute_term_colors( ?string $attribute_name = null ): array {
+		$colors     = array();
+		$attributes = wc_get_attribute_taxonomies();
+
+		foreach ( $attributes as $attribute ) {
+			if ( 'wc-visual' !== $attribute->attribute_type ) {
+				continue;
+			}
+			if ( $attribute_name && 'pa_' . $attribute->attribute_name !== $attribute_name ) {
+				continue;
+			}
+
+			$terms = get_terms(
+				array(
+					'taxonomy'   => 'pa_' . $attribute->attribute_name,
+					'hide_empty' => false,
+				)
+			);
+
+			if ( is_wp_error( $terms ) ) {
+				continue;
+			}
+
+			foreach ( $terms as $term ) {
+				$color = sanitize_hex_color( get_term_meta( $term->term_id, 'color', true ) );
+				if ( ! empty( $color ) ) {
+					$colors[ $term->term_id ] = $color;
+				}
+			}
+		}
+
+		return $colors;
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -77,7 +131,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 		}
 
 		$default_selected = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
-		$variation_items  = $this->build_variation_selectable_items( $attribute_slug, $attribute_terms, $default_selected );
+		$variation_items  = $this->build_variation_selectable_items( $attribute_name, $attribute_slug, $attribute_terms, $default_selected );
 		$attribute_label  = wc_attribute_label( $attribute_name );
 		$attribute_id     = 'wc_product_attribute_' . uniqid();
 		$context          = array(
@@ -247,28 +301,36 @@ class VariationSelectorAttribute extends AbstractBlock {
 	/**
 	 * Build selectable items for the inner block protocol and client context.
 	 *
+	 * @param string      $attribute_name Product attribute name.
 	 * @param string      $attribute_slug Attribute slug.
 	 * @param array       $attribute_terms Terms from context.
 	 * @param string|null $default_selected Default selected attribute value.
 	 * @return array
 	 */
-	private function build_variation_selectable_items( string $attribute_slug, array $attribute_terms, ?string $default_selected ): array {
-		$id_prefix = sanitize_title( $attribute_slug );
-		$items     = array();
+	private function build_variation_selectable_items( string $attribute_name, string $attribute_slug, array $attribute_terms, ?string $default_selected ): array {
+		$id_prefix   = sanitize_title( $attribute_slug );
+		$items       = array();
+		$term_colors = $this->get_visual_attribute_term_colors( $attribute_name );
 
 		foreach ( $attribute_terms as $attribute_term ) {
 			if ( ! is_array( $attribute_term ) || ! isset( $attribute_term['value'], $attribute_term['label'] ) ) {
 				continue;
 			}
-			$value   = (string) $attribute_term['value'];
-			$slug    = sanitize_title( $value );
-			$items[] = array(
+			$value = (string) $attribute_term['value'];
+			$slug  = sanitize_title( $value );
+			$item  = array(
 				'id'        => $id_prefix . '-' . $slug,
 				'label'     => (string) $attribute_term['label'],
 				'value'     => $value,
 				'ariaLabel' => (string) $attribute_term['label'],
 				'selected'  => $default_selected === $value,
 			);
+
+			if ( ! empty( $term_colors ) && isset( $attribute_term['term_id'], $term_colors[ $attribute_term['term_id'] ] ) ) {
+				$item['color'] = $term_colors[ $attribute_term['term_id'] ];
+			}
+
+			$items[] = $item;
 		}
 
 		return $items;
@@ -296,7 +358,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 			return array();
 		}
 
-		return array(
+		$option = array(
 			'value'      => $value,
 			/**
 			 * Filter the variation option name.
@@ -317,5 +379,11 @@ class VariationSelectorAttribute extends AbstractBlock {
 			),
 			'isSelected' => $selected_attribute === $value,
 		);
+
+		if ( $term instanceof \WP_Term ) {
+			$option['term_id'] = $term->term_id;
+		}
+
+		return $option;
 	}
 }

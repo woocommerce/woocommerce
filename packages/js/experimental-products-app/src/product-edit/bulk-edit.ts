@@ -14,6 +14,7 @@ import { validateSalePrice } from '../fields/sale_price/validation';
 import { buildMergedProductEditData } from './utils';
 
 type ProductField = Field< ProductEntityRecord >;
+type DimensionFieldId = keyof ProductEntityRecord[ 'dimensions' ];
 
 export type ProductBulkEditFieldState = {
 	isEmpty: boolean;
@@ -71,6 +72,12 @@ const FIELD_DATA_KEYS: Record< string, string > = {
 	stock: 'stock_status',
 };
 
+const DIMENSION_FIELD_ID_SET = new Set< DimensionFieldId >( [
+	'length',
+	'width',
+	'height',
+] );
+
 export function getBulkNumericOperationFieldId( fieldId: BulkNumericFieldId ) {
 	return `${ fieldId }${ BULK_NUMERIC_OPERATION_FIELD_SUFFIX }`;
 }
@@ -95,12 +102,20 @@ function getDefinedCostValue( product: ProductEntityRecord ) {
 	return product.cost_of_goods_sold?.values?.[ 0 ]?.defined_value;
 }
 
+function isDimensionFieldId( fieldId: string ): fieldId is DimensionFieldId {
+	return DIMENSION_FIELD_ID_SET.has( fieldId as DimensionFieldId );
+}
+
 function getProductFieldValue(
 	product: ProductEntityRecord,
 	field: ProductField
 ) {
 	if ( field.id === 'cost_of_goods_sold' ) {
 		return getDefinedCostValue( product );
+	}
+
+	if ( isDimensionFieldId( field.id ) ) {
+		return product.dimensions?.[ field.id ] ?? '';
 	}
 
 	const dataKey = getFieldDataKey( field.id );
