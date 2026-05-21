@@ -310,7 +310,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 	private function build_variation_selectable_items( string $attribute_name, string $attribute_slug, array $attribute_terms, ?string $default_selected ): array {
 		$id_prefix   = sanitize_title( $attribute_slug );
 		$items       = array();
-		$term_colors = $this->is_visual_attribute( $attribute_name ) ? $this->get_visual_attribute_term_colors( $attribute_name ) : array();
+		$term_colors = $this->get_visual_attribute_term_colors( $attribute_name );
 
 		foreach ( $attribute_terms as $attribute_term ) {
 			if ( ! is_array( $attribute_term ) || ! isset( $attribute_term['value'], $attribute_term['label'] ) ) {
@@ -334,28 +334,6 @@ class VariationSelectorAttribute extends AbstractBlock {
 		}
 
 		return $items;
-	}
-
-	/**
-	 * Whether the given product attribute uses the wc-visual type.
-	 *
-	 * @param string $attribute_name Product attribute name.
-	 * @return bool
-	 */
-	private function is_visual_attribute( string $attribute_name ): bool {
-		if ( ! taxonomy_exists( $attribute_name ) ) {
-			return false;
-		}
-
-		$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute_name );
-
-		if ( ! $attribute_id ) {
-			return false;
-		}
-
-		$attribute = wc_get_attribute( $attribute_id );
-
-		return $attribute && 'wc-visual' === $attribute->type;
 	}
 
 	/**
