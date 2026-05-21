@@ -82,13 +82,56 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox init() registers the new-order, status-changed, trash and delete hooks so a fresh container resolve wires the schedule + cancel listeners in one place.
+	 * @testdox init() registers the new-order, status-changed, trash, delete, and AS-callback hooks so a fresh container resolve wires the schedule + cancel + dispatch listeners in one place.
 	 */
 	public function test_init_registers_hooks(): void {
 		$this->assertNotFalse( has_action( 'woocommerce_new_order', array( $this->sut, 'handle_new_order' ) ) );
 		$this->assertNotFalse( has_action( 'woocommerce_order_status_changed', array( $this->sut, 'handle_status_changed' ) ) );
 		$this->assertNotFalse( has_action( 'woocommerce_trash_order', array( $this->sut, 'handle_cancellation' ) ) );
 		$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'handle_cancellation' ) ) );
+		$this->assertNotFalse( has_action( Scheduler::ACTION_HOOK, array( $this->sut, 'handle_scheduled_send' ) ) );
+	}
+
+	/**
+	 * @testdox handle_scheduled_send() resolves the email lazily and dispatches the send — the path AS uses on its WP-Cron firing context where the email class isn't already loaded.
+	 */
+	public function test_handle_scheduled_send_dispatches_to_email(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->set_date_created( time() - WC_Email_Customer_Abandoned_Cart_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
+		$order->save();
+		$order = wc_get_order( $order->get_id() );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+
+		$this->sut->handle_scheduled_send( $order->get_id() );
+
+		$this->assertSame( $before + 1, count( $mailer->mock_sent ), 'AS-fired callback must dispatch one email.' );
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty(
+			$fresh->get_meta( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT ),
+			'Successful send must record the sent_at meta so the dedup gate works on subsequent fires.'
+		);
+	}
+
+	/**
+	 * @testdox do_action( Scheduler::ACTION_HOOK, $order_id ) reaches handle_scheduled_send so the production WP-Cron dispatch path is wired without the email class being instantiated up-front.
+	 */
+	public function test_action_dispatch_reaches_handle_scheduled_send(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->set_date_created( time() - WC_Email_Customer_Abandoned_Cart_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
+		$order->save();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+
+		do_action( Scheduler::ACTION_HOOK, $order->get_id() );
+
+		$this->assertSame( $before + 1, count( $mailer->mock_sent ) );
 	}
 
 	/**

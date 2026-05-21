@@ -70,6 +70,7 @@ class Scheduler {
 		add_action( 'woocommerce_order_status_changed', array( $this, 'handle_status_changed' ), 10, 3 );
 		add_action( 'woocommerce_trash_order', array( $this, 'handle_cancellation' ), 10, 1 );
 		add_action( 'woocommerce_before_delete_order', array( $this, 'handle_cancellation' ), 10, 1 );
+		add_action( self::ACTION_HOOK, array( $this, 'handle_scheduled_send' ), 10, 1 );
 	}
 
 	/**
@@ -168,6 +169,26 @@ class Scheduler {
 			$order->delete_meta_data( self::SCHEDULED_META_KEY );
 			$order->save();
 		}
+	}
+
+	/**
+	 * Dispatch the recovery email when the scheduled AS action fires.
+	 *
+	 * Resolve the email lazily through the mailer (which loads the class) and delegate the
+	 * actual send to `trigger()`, which keeps every send-time gate
+	 * (enabled, recipient, eligibility, unsubscribed, dedup-meta) in one
+	 * place.
+	 *
+	 * @internal
+	 *
+	 * @param int $order_id Order id the AS action was scheduled with.
+	 */
+	public function handle_scheduled_send( $order_id ): void {
+		$email = $this->get_email();
+		if ( null === $email ) {
+			return;
+		}
+		$email->trigger( (int) $order_id );
 	}
 
 	/**

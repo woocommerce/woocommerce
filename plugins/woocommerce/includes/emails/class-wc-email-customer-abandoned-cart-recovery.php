@@ -117,13 +117,6 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				'{order_number}' => '',
 			);
 
-			// Trigger fires after Action Scheduler dispatches `woocommerce_send_abandoned_cart_recovery_notification`,
-			// or when the merchant invokes the manual-send action from the order edit page.
-			// The order-edit action hooks live in `Internal\AbandonedCartRecovery\ManualSendHandler`
-			// so the listener is in place before the admin POST runs the order-meta save flow
-			// (which happens before the mailer would otherwise be instantiated).
-			add_action( 'woocommerce_send_abandoned_cart_recovery_notification', array( $this, 'trigger' ), 10, 1 );
-
 			parent::__construct();
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
