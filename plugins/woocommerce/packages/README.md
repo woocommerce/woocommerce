@@ -1,4 +1,13 @@
-# External Packages
+# Packages
+
+This directory has a **dual purpose** today:
+
+1. **Composer packages** (the historical use) — third-party PHP packages installed via Composer (`action-scheduler`, `blueprint`, `email-editor`, etc.). These are gitignored and pulled in by `composer install`. The rest of this README documents this use case.
+2. **wp-build source packages** — JavaScript/TypeScript source packages compiled by `@wordpress/build` into script modules (currently `core-dashboard-init`). These are tracked in git via explicit allowlist entries in `.gitignore`.
+
+The collision is forced by `@wordpress/build`, which hardcodes its package scan path to `${plugin_root}/packages/*` (see `lib/build.mjs:78` of the installed `@wordpress/build`). Tentatively we're going to suggest upstream that this be made configurable (e.g. `wpPlugin.packagesDir`) so the WC-side wp-build packages can move to a dedicated folder (`js-packages/`, `wp-build-packages/`, or similar) and `packages/` can return to its Composer-only purpose. Until then, treat the JS packages here as a special case marked individually in `.gitignore`.
+
+## Composer packages — original purpose
 
 This directory holds Composer packages containing functionality developed outside of WooCommerce core.
 

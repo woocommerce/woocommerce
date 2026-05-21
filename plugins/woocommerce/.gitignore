@@ -23,9 +23,16 @@ tests/cli/vendor
 # Test translations
 /i18n/languages/woocommerce*
 
-# Packages
+# Packages — Composer-installed third parties by default (gitignored).
+# Source packages compiled by @wordpress/build are allowlisted individually
+# until upstream supports a configurable packagesDir. See packages/README.md.
 /packages/*
 !/packages/README.md
+!/packages/core-dashboard-init
+!/packages/core-dashboard-init/**
+# ...but never the package's installed dependencies (the `**` above re-includes
+# them, overriding the root .gitignore's node_modules rule).
+/packages/core-dashboard-init/node_modules/
 
 # Language files
 i18n/languages/woocommerce.pot

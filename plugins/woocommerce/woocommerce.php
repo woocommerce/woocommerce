@@ -37,6 +37,9 @@ if ( ! class_exists( 'WooCommerce', false ) ) {
 // Initialize dependency injection.
 $GLOBALS['wc_container'] = new Automattic\WooCommerce\Container();
 
+// Load dashboard widgets (Gutenberg experimental dashboard).
+\Automattic\WooCommerce\Internal\Admin\DashboardWidgets\Loader::init();
+
 /**
  * Returns the main instance of WC.
  *

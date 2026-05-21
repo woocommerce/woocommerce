@@ -1,0 +1,23 @@
+{
+	"name": "@woocommerce/widgets-app",
+	"version": "0.0.0",
+	"description": "Dashboard widgets surfaced by WooCommerce.",
+	"private": true,
+	"license": "GPL-2.0-or-later",
+	"browserslist": [
+		"defaults and supports es6-module"
+	],
+	"dependencies": {
+		"@wordpress/components": "next",
+		"@wordpress/dataviews": "next",
+		"@wordpress/element": "next",
+		"@wordpress/hooks": "next",
+		"@wordpress/i18n": "next",
+		"@wordpress/icons": "next",
+		"@wordpress/ui": "next",
+		"fast-deep-equal": "^3.1.3"
+	},
+	"devDependencies": {
+		"@types/react": "18.3.x"
+	}
+}

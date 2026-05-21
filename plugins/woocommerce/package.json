@@ -21,6 +21,7 @@
 		"build:project:copy-assets:blocks": "rsync -avhW --checksum --delete --quiet client/blocks/build/ assets/client/blocks && wp-scripts build-blocks-manifest --input=assets/client/blocks --output=assets/client/blocks/blocks-json.php",
 		"build:project:copy-assets:email-editor": "rsync -avhW --checksum --delete --quiet ../../packages/php/email-editor/src/ packages/email-editor/src",
 		"build:project:copy-assets:blueprint": "rsync -avhW --checksum --delete --quiet ../../packages/php/blueprint/src/ packages/blueprint/src",
+		"build:project:widgets": "BROWSERSLIST='defaults and supports es6-module' wp-build",
 		"build:project:actualize-translation-domains": "wireit",
 		"build:api": "php bin/api-builder/build-api.php",
 		"build:api:check": "php bin/api-builder/check-api-staleness.php",
@@ -101,6 +102,7 @@
 		"watch:build:classic-assets": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"@woocommerce/classic-assets...\" --filter=\"$npm_package_name\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:copy-assets": "wireit",
+		"watch:build:project:widgets": "BROWSERSLIST='defaults and supports es6-module' wp-build --watch",
 		"wp-env": "wp-env"
 	},
 	"lint-staged": {
@@ -114,6 +116,12 @@
 		"!(*min).js": [
 			"eslint --fix"
 		]
+	},
+	"wpPlugin": {
+		"name": "woocommerce",
+		"scriptGlobal": "wc",
+		"packageNamespace": "woocommerce",
+		"handlePrefix": "wc"
 	},
 	"config": {
 		"wp_org_slug": "woocommerce",
@@ -926,6 +934,7 @@
 		"@woocommerce/e2e-utils-playwright": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/browserslist-config": "next",
+		"@wordpress/build": "^0.14.0",
 		"@wordpress/e2e-test-utils-playwright": "wp-6.8",
 		"@wordpress/env": "11.0.1-next.v.20260206T143.0",
 		"@wordpress/scripts": "30.6.0",
