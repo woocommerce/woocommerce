@@ -47266,18 +47266,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
 
 		-
-			message: '#^Cannot access property \$base on WP_Screen\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
-			message: '#^Cannot access property \$post_type on WP_Screen\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:maybe_set_has_product_transient\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
