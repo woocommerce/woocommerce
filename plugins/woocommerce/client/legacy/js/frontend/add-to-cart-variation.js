@@ -854,7 +854,9 @@
 			$product_gallery = $product.find( '.images' ),
 			reset_slide_position = false,
 			new_image_id =
-				variation && variation.image_id ? variation.image_id : '';
+				variation && variation.image_id
+					? String( variation.image_id )
+					: '';
 
 		if ( $form.attr( 'current-image' ) !== new_image_id ) {
 			reset_slide_position = true;
