@@ -275,9 +275,8 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				return;
 			}
 
-			// Don't write a "manually sent" order note when the underlying trigger
-			// would silently bail. Cheaper to short-circuit here than to inspect
-			// the meta after the fact.
+			// Don't record an order note for a send that the underlying trigger
+			// would silently bail on.
 			if ( ! $this->is_enabled() || self::is_suppressed() ) {
 				return;
 			}
@@ -299,7 +298,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			$this->trigger( $order->get_id() );
 
 			$order->add_order_note(
-				__( 'Abandoned cart recovery email manually sent to customer.', 'woocommerce' ),
+				__( 'Abandoned cart recovery email sent from the order actions menu.', 'woocommerce' ),
 				0,
 				true,
 				array( 'note_group' => OrderNoteGroup::EMAIL_NOTIFICATION )
