@@ -13,9 +13,8 @@ import { useSelect } from '@wordpress/data';
 import { ESCAPE } from '@wordpress/keycodes';
 import {
 	store as blockEditorStore,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore This is actively used in the GB repo and probably safe to use.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	// @ts-expect-error __experimentalLibrary is not exported from @wordpress/block-editor's public types.
 	__experimentalLibrary as Library,
 } from '@wordpress/block-editor';
 
@@ -28,8 +27,6 @@ export default function InserterSidebar() {
 	const { setIsInserterOpened } = useContext( EditorContext );
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const { rootClientId } = useSelect( ( select ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore These selectors are available in the block data store.
 		const { getBlockRootClientId } = select( blockEditorStore );
 
 		return {

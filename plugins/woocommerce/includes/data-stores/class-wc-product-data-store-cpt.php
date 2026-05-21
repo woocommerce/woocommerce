@@ -943,6 +943,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
+	 * Refresh the product meta lookup table row for a given product.
+	 *
+	 * @since 10.8.0
+	 * @param int $product_id Product ID.
+	 * @return void
+	 */
+	public function refresh_product_lookup_table( int $product_id ): void {
+		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
+	}
+
+	/**
 	 * For all stored terms in all taxonomies, save them to the DB.
 	 *
 	 * @param WC_Product $product Product object.

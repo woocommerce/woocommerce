@@ -10,6 +10,7 @@ module.exports = [
 	'@woocommerce/date',
 	'@woocommerce/dependency-extraction-webpack-plugin',
 	'@woocommerce/eslint-plugin',
+	'@woocommerce/experimental-products-app',
 	'@woocommerce/experimental',
 	'@woocommerce/explat',
 	'@woocommerce/extend-cart-checkout-block',

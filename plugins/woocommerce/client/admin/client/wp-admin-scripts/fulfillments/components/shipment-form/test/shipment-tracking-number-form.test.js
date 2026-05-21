@@ -29,8 +29,23 @@ jest.mock( '../../../utils/icons', () => ( {
 
 jest.mock( '@wordpress/api-fetch' );
 
+// Provide explicit stubs for the @wordpress/components imports used by the
+// SUT. Spreading `jest.requireActual( '@wordpress/components' )` crashes
+// against wp-6.8's circular import between the barrel and
+// custom-select-control-v2.
 jest.mock( '@wordpress/components', () => ( {
-	...jest.requireActual( '@wordpress/components' ),
+	Button: ( { children, text, icon, onClick, disabled, ...props } ) => (
+		<button onClick={ onClick } disabled={ disabled } { ...props }>
+			{ icon }
+			{ text ?? children }
+		</button>
+	),
+	ExternalLink: ( { href, children, ...props } ) => (
+		<a href={ href } { ...props }>
+			{ children }
+		</a>
+	),
+	Flex: ( { children, ...props } ) => <div { ...props }>{ children }</div>,
 	TextControl: React.forwardRef(
 		( { value, onChange, placeholder, onKeyDown }, ref ) => (
 			<div data-testid="text-control">

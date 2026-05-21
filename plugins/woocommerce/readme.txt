@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online
 Requires at least: 6.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 10.6.2
+Stable tag: 10.7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -132,7 +132,7 @@ Yes, you can! Join in on our [GitHub repository](https://github.com/woocommerce/
 
 = Where can I find REST API documentation? =
 
-Extensive [WooCommerce REST API Documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) is available on GitHub.
+Extensive [WooCommerce REST API Documentation](https://developer.woocommerce.com/docs/apis/rest-api/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) is available.
 
 = My question is not listed here. Where can I find more answers? =
 
@@ -170,6 +170,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.8.0-dev 2026-XX-XX =
+= 10.9.0-dev 2026-XX-XX =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).

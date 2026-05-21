@@ -8,13 +8,11 @@ import { createElement, forwardRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { WP_REST_API_Category } from 'wp-types';
 import {
-	// @ts-expect-error AlignmentControl is not exported from @wordpress/block-editor
 	AlignmentControl,
 	BlockControls,
 	InspectorControls,
 	useBlockProps,
 	PlainText,
-	// @ts-expect-error HeadingLevelDropdown is not exported from @wordpress/block-editor
 	HeadingLevelDropdown,
 } from '@wordpress/block-editor';
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -70,7 +68,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	const userCanEdit = useSelect(
 		( select ) => {
 			if ( ! termId ) return false;
-			// @ts-expect-error canUser is not typed correctly
 			// This use actually reflects the use seen in `core/post-title` block.
 			return select( coreStore ).canUser( 'update', {
 				kind: 'taxonomy',
@@ -117,7 +114,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	if ( termId ) {
 		titleElement = userCanEdit ? (
 			<PlainText
-				// @ts-expect-error PlainText component types are not up-to-date
 				tagName={ TagName }
 				placeholder={ __( 'No title', 'woocommerce' ) }
 				value={ rawTitle }
@@ -140,7 +136,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		titleElement = userCanEdit ? (
 			<ContainerElement tagName={ TagName } { ...blockProps }>
 				<PlainText
-					// @ts-expect-error PlainText component types are not up-to-date
 					tagName="a"
 					href={ link }
 					target={ linkTarget }
@@ -172,7 +167,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	return (
 		<>
-			{ /* @ts-expect-error BlockControls typing */ }
 			<BlockControls group="block">
 				<HeadingLevelDropdown
 					value={ level }

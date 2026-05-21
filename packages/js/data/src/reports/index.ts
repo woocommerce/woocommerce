@@ -61,3 +61,9 @@ type RemoveStateParam< F > = F extends (
 ) => infer R // eslint-disable-line @typescript-eslint/no-unused-vars -- Name is used to infer the type to avoid `any`.
 	? T
 	: never;
+
+declare module '@wordpress/data' {
+	interface StoreRegistry {
+		[ STORE_NAME ]: typeof store;
+	}
+}

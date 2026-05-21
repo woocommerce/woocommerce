@@ -212,6 +212,9 @@ const program = new Command( 'changefile' )
 
 			const git = simpleGit( {
 				baseDir: tmpRepoPath,
+				unsafe: {
+					allowUnsafeHooksPath: true,
+				},
 				config: [ 'core.hooksPath=/dev/null' ],
 			} );
 

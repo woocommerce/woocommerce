@@ -1,7 +1,7 @@
 {
-	"extends": "../tsconfig-cjs",
+	"extends": "@woocommerce/internal-ts-config/tsconfig-cjs.json",
 	"compilerOptions": {
-		"declaration": true,
+		"rootDir": "src",
 		"outDir": "build",
 		"typeRoots": [
 			"./typings",
@@ -10,9 +10,9 @@
 	},
 	"include": [
 		"typings/**/*",
-		"src/**/*",
+		"src/**/*"
 	],
 	"exclude": [
-		"**/test/**",
+		"**/test/**"
 	]
 }

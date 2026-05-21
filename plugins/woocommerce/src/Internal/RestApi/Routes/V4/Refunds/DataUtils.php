@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use WP_Error;
 use WC_Order;
@@ -263,7 +264,7 @@ class DataUtils {
 	 */
 	private function build_tax_rates_array( WC_Order $order, array $tax_ids ): array {
 		$tax_rates = array();
-		$tax_items = $order->get_items( 'tax' );
+		$tax_items = $order->get_items( OrderItemType::TAX );
 
 		foreach ( $tax_ids as $tax_id ) {
 			foreach ( $tax_items as $tax_item ) {

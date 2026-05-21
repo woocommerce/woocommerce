@@ -119,6 +119,7 @@ class WC_Emails {
 				'woocommerce_order_status_failed',
 				'woocommerce_order_fully_refunded',
 				'woocommerce_order_partially_refunded',
+				'woocommerce_send_review_request',
 				'woocommerce_new_customer_note',
 				'woocommerce_created_customer',
 				'woocommerce_payment_gateway_enabled',
@@ -154,11 +155,11 @@ class WC_Emails {
 	 * @return void
 	 */
 	public static function queue_transactional_email( ...$args ) {
-		if ( self::$deferred_queue instanceof DeferredEmailQueue ) {
-			self::$deferred_queue->push( current_filter(), $args );
-		} else {
-			self::send_transactional_email( ...$args );
+		if ( self::$deferred_queue instanceof DeferredEmailQueue && self::$deferred_queue->push( current_filter(), $args ) ) {
+			return;
 		}
+
+		self::send_transactional_email( ...$args );
 	}
 
 	/**
@@ -306,6 +307,9 @@ class WC_Emails {
 			$emails['WC_Email_Customer_Fulfillment_Updated'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-updated.php';
 			$emails['WC_Email_Customer_Fulfillment_Deleted'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-deleted.php';
 		}
+		if ( FeaturesUtil::feature_is_enabled( 'customer_review_request' ) ) {
+			$emails['WC_Email_Customer_Review_Request'] = __DIR__ . '/emails/class-wc-email-customer-review-request.php';
+		}
 
 		// Prime caches to reduce future queries.
 		wp_prime_option_caches(
@@ -393,6 +397,10 @@ class WC_Emails {
 	 * @return string       Email footer text with any replacements done.
 	 */
 	public function replace_placeholders( $text ) {
+		if ( ! is_string( $text ) ) {
+			$text = is_scalar( $text ) ? (string) $text : '';
+		}
+
 		$domain = wp_parse_url( home_url(), PHP_URL_HOST );
 
 		return str_replace(

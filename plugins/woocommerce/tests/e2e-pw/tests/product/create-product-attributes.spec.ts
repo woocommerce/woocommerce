@@ -223,3 +223,113 @@ test( 'can add custom product attributes', async ( { page, product } ) => {
 		} );
 	}
 } );
+
+test( 'can create attribute terms from the attributes modal', async ( {
+	page,
+	restApi,
+} ) => {
+	const attributeName = 'Fabric';
+	const initialTerm = 'Cotton';
+	const newTerm = `Linen-${ Date.now() }`;
+	let attributeId: number | undefined;
+	let createdProductId: number | undefined;
+
+	try {
+		await test.step( `Create a global attribute "${ attributeName }"`, async () => {
+			const response = await restApi.post(
+				`${ WC_API_PATH }/products/attributes`,
+				{
+					name: attributeName,
+				}
+			);
+
+			attributeId = response.data.id;
+		} );
+
+		await test.step( 'Create a variable product with that global attribute', async () => {
+			const response = await restApi.post( `${ WC_API_PATH }/products`, {
+				...getFakeProduct( { type: 'variable' } ),
+				attributes: [
+					{
+						id: attributeId,
+						visible: true,
+						variation: true,
+						options: [ initialTerm ],
+					},
+				],
+			} );
+
+			createdProductId = response.data.id;
+		} );
+
+		await test.step( `Open "Edit product" page of product id ${ createdProductId }`, async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ createdProductId }&action=edit`
+			);
+			await toggleVariableProductTour( page, false );
+		} );
+
+		await goToAttributesTab( page );
+
+		await test.step( `Expand the "${ attributeName }" attribute`, async () => {
+			await page
+				.getByRole( 'heading', {
+					name: attributeName,
+				} )
+				.last()
+				.click();
+		} );
+
+		await test.step( `Create a new term "${ newTerm }" from the modal`, async () => {
+			await page.getByRole( 'button', { name: 'Create value' } ).click();
+
+			const modal = page.locator(
+				'.wc-backbone-modal-add-attribute-term .wc-backbone-modal-content'
+			);
+			await expect( modal ).toBeVisible();
+
+			const modalHeader = modal.getByRole( 'heading', {
+				name: 'Create value',
+			} );
+			await expect( modalHeader ).toBeVisible();
+
+			const submitButton = page.getByRole( 'button', { name: 'OK' } );
+			await expect( submitButton ).toBeDisabled();
+
+			await modal.getByLabel( 'Name' ).fill( newTerm );
+			await expect( submitButton ).toBeEnabled();
+			await submitButton.click();
+		} );
+
+		await test.step( `Expect "${ newTerm }" to be in attribute values`, async () => {
+			await expect(
+				page.locator(
+					'.woocommerce_attribute .attribute_values option',
+					{
+						hasText: newTerm,
+					}
+				)
+			).toBeVisible();
+		} );
+	} finally {
+		// eslint-disable-next-line playwright/no-conditional-in-test
+		if ( createdProductId ) {
+			await restApi.delete(
+				`${ WC_API_PATH }/products/${ createdProductId }`,
+				{
+					force: true,
+				}
+			);
+		}
+
+		// eslint-disable-next-line playwright/no-conditional-in-test
+		if ( attributeId ) {
+			await restApi.delete(
+				`${ WC_API_PATH }/products/attributes/${ attributeId }`,
+				{
+					force: true,
+				}
+			);
+		}
+	}
+} );

@@ -140,6 +140,7 @@ export type State = {
 		errorMessage?: string;
 	};
 	contentValidation?: ContentValidation;
+	templateSelected: boolean;
 };
 
 export type EmailTemplatePreview = Omit<

@@ -347,17 +347,19 @@ class CartSchema extends AbstractSchema {
 		if ( ! empty( $cross_sell_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $cross_sell_ids );
-			$cross_sells = array_filter( array_map( 'wc_get_product', $cross_sell_ids ), 'wc_products_array_filter_visible' );
+			$cross_sells = array_values( array_filter( array_map( 'wc_get_product', $cross_sell_ids ), 'wc_products_array_filter_visible' ) );
 			/** @var \WC_Product[] $cross_sells */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 			// Identify which images need priming.
-			$image_ids[] = array_values( array_filter( array_map( static fn( $product ) => (int) $product->get_image_id(), $cross_sells ) ) );
+			$ids         = array_map( static fn( $product ) => array( (int) $product->get_image_id(), ...$product->get_gallery_image_ids() ), $cross_sells );
+			$image_ids[] = array_values( array_filter( array_merge( ...$ids ) ) );
 		}
 
 		$cart_all_items  = $cart->get_cart();
-		$cart_line_items = array_filter( $cart_all_items, static fn( $item ) => ( $item['data'] ?? null ) instanceof \WC_Product );
+		$cart_line_items = array_values( array_filter( $cart_all_items, static fn( $item ) => ( $item['data'] ?? null ) instanceof \WC_Product ) );
 		if ( ! empty( $cart_line_items ) ) {
 			// Identify which images need priming.
-			$image_ids[] = array_values( array_filter( array_map( static fn( $item ) => (int) $item['data']->get_image_id(), $cart_line_items ) ) );
+			$ids         = array_map( static fn( $item ) => array( (int) $item['data']->get_image_id(), ...$item['data']->get_gallery_image_ids() ), $cart_line_items );
+			$image_ids[] = array_values( array_filter( array_merge( ...array_values( $ids ) ) ) );
 		}
 
 		if ( ! empty( $image_ids ) ) {

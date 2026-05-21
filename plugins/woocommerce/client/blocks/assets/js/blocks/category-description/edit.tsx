@@ -6,7 +6,6 @@ import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore, useEntityProp } from '@wordpress/core-data';
 import {
-	// @ts-expect-error AlignmentControl is not exported from @wordpress/block-editor
 	AlignmentControl,
 	BlockControls,
 	useBlockProps,
@@ -30,7 +29,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	const userCanEdit = useSelect(
 		( select ) => {
 			if ( ! termId ) return false;
-			// @ts-expect-error canUser is not typed correctly
 			// This use actually reflects the use seen in `core/post-title` block.
 			return select( coreStore ).canUser( 'update', {
 				kind: 'taxonomy',
@@ -60,7 +58,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	if ( termId ) {
 		descriptionElement = userCanEdit ? (
 			<PlainText
-				// @ts-expect-error PlainText component types are not up-to-date
 				tagName="p"
 				placeholder={ __( 'No description', 'woocommerce' ) as string }
 				value={ rawDescription }
@@ -82,7 +79,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	return (
 		<>
-			{ /* @ts-expect-error BlockControls typing */ }
 			<BlockControls group="block">
 				<AlignmentControl
 					value={ textAlign }

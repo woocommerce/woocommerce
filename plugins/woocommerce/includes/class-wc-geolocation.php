@@ -10,6 +10,8 @@
  * @version 3.9.0
  */
 
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -69,7 +71,7 @@ class WC_Geolocation {
 	 * @return bool
 	 */
 	private static function is_geolocation_enabled( $current_settings ) {
-		return in_array( $current_settings, array( 'geolocation', 'geolocation_ajax' ), true );
+		return in_array( $current_settings, array( DefaultCustomerAddress::GEOLOCATION, DefaultCustomerAddress::GEOLOCATION_AJAX ), true );
 	}
 
 	/**
@@ -357,7 +359,7 @@ class WC_Geolocation {
 		wc_deprecated_function( 'WC_Geolocation::disable_geolocation_on_legacy_php', '3.9.0' );
 
 		if ( self::is_geolocation_enabled( $default_customer_address ) ) {
-			$default_customer_address = 'base';
+			$default_customer_address = DefaultCustomerAddress::BASE;
 		}
 
 		return $default_customer_address;

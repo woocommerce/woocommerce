@@ -51,7 +51,7 @@
 
 		&::after {
 			content: "•";
-			color: #bbb;
+			color: $gray-400;
 			margin-left: 4px;
 
 			@include breakpoint( "<782px" ) {

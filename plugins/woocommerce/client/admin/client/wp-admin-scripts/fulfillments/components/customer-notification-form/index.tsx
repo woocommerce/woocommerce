@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useEffect, useMemo, useRef } from 'react';
-import { ToggleControl } from '@wordpress/components';
+import { TextareaControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -21,7 +21,8 @@ export default function CustomerNotificationBox( {
 }: {
 	type: 'fulfill' | 'update' | 'remove';
 } ) {
-	const { notifyCustomer, setNotifyCustomer } = useFulfillmentContext();
+	const { notifyCustomer, setNotifyCustomer, customerNote, setCustomerNote } =
+		useFulfillmentContext();
 	const toggleRef = useRef< HTMLInputElement >( null );
 
 	const headerStrings = useMemo( () => {
@@ -80,12 +81,33 @@ export default function CustomerNotificationBox( {
 				</>
 			}
 		>
-			<p
-				id={ descriptionId }
-				className="woocommerce-fulfillment-description"
-			>
-				{ contentStrings[ type ] || contentStrings.fulfill }
-			</p>
+			<div className="woocommerce-fulfillment-notification-content">
+				<p
+					id={ descriptionId }
+					className="woocommerce-fulfillment-description"
+				>
+					{ contentStrings[ type ] || contentStrings.fulfill }
+				</p>
+				{ type === 'update' && notifyCustomer && (
+					<div className="woocommerce-fulfillment-customer-note">
+						<TextareaControl
+							__nextHasNoMarginBottom
+							label={ __( 'Customer note', 'woocommerce' ) }
+							placeholder={ __(
+								'Add a note for the customer (optional)',
+								'woocommerce'
+							) }
+							help={ __(
+								'This note will be included in the update notification email sent to the customer.',
+								'woocommerce'
+							) }
+							value={ customerNote }
+							onChange={ ( value ) => setCustomerNote( value ) }
+							rows={ 3 }
+						/>
+					</div>
+				) }
+			</div>
 		</FulfillmentCard>
 	);
 }

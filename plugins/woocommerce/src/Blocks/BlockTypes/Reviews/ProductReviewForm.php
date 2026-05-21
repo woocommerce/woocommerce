@@ -41,8 +41,21 @@ class ProductReviewForm extends AbstractBlock {
 			return '';
 		}
 
-		if ( get_option( 'woocommerce_review_rating_verification_required' ) !== 'no' && ! wc_customer_bought_product( '', get_current_user_id(), $product->get_id() ) ) {
-			return '<p class="woocommerce-verification-required">' . esc_html__( 'Only logged in customers who have purchased this product may leave a review.', 'woocommerce' ) . '</p>';
+		if ( get_option( 'woocommerce_review_rating_verification_required' ) !== 'no' ) {
+			$is_user_logged_in   = is_user_logged_in();
+			$product_has_reviews = $product->get_review_count() > 0;
+			$no_reviews_message  = $product_has_reviews ? '' : esc_html__( 'There are no reviews yet.', 'woocommerce' ) . ' ';
+
+			if ( ! $is_user_logged_in ) {
+				$account_page_url = wc_get_page_permalink( 'myaccount' );
+				// translators: %1$s is the opening link tag, %2$s is the closing link tag.
+				$login_message = $account_page_url ? sprintf( esc_html__( '%1$sLog in%2$s', 'woocommerce' ), ' <a href="' . esc_url( $account_page_url ) . '">', '</a>' ) : '';
+				return '<p class="woocommerce-verification-required">' . $no_reviews_message . esc_html__( 'Only logged in customers who have purchased this product may leave a review.', 'woocommerce' ) . $login_message . '</p>';
+			}
+
+			if ( ! wc_customer_bought_product( '', get_current_user_id(), $product->get_id() ) ) {
+				return '<p class="woocommerce-verification-required">' . $no_reviews_message . esc_html__( 'Only customers who have purchased this product may leave a review.', 'woocommerce' ) . '</p>';
+			}
 		}
 
 		$interactivity_state  = [];

@@ -7,9 +7,6 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import { ProductProductAttribute } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp, useEntityId } from '@wordpress/core-data';
 
 /**

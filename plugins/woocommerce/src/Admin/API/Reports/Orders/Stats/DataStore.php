@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
@@ -676,7 +677,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected static function get_num_items_sold( $order ) {
 		$num_items = 0;
 
-		$line_items = $order->get_items( 'line_item' );
+		$line_items = $order->get_items( OrderItemType::LINE_ITEM );
 		foreach ( $line_items as $line_item ) {
 			$num_items += $line_item->get_quantity();
 		}
@@ -806,10 +807,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				// phpcs:ignore Generic.Commenting.Todo.TaskFound
-				// TODO: use the %i placeholder to prepare the table name when available in the minimum required WordPress version.
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"UPDATE {$orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
+				'UPDATE %i SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d',
+				$orders_stats_table,
 				$order_id,
 				$customer_id
 			)

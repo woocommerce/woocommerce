@@ -9,7 +9,7 @@
 		"woocommerce"
 	],
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/customer-effort-score/README.md",
 	"repository": {
@@ -57,11 +57,11 @@
 	},
 	"dependencies": {
 		"@woocommerce/experimental": "workspace:*",
-		"@wordpress/components": "wp-6.6",
-		"@wordpress/compose": "wp-6.6",
-		"@wordpress/element": "wp-6.6",
-		"@wordpress/i18n": "wp-6.6",
-		"@wordpress/notices": "wp-6.6",
+		"@wordpress/components": "catalog:wp-min",
+		"@wordpress/compose": "catalog:wp-min",
+		"@wordpress/element": "catalog:wp-min",
+		"@wordpress/i18n": "catalog:wp-min",
+		"@wordpress/notices": "catalog:wp-min",
 		"clsx": "2.1.x",
 		"prop-types": "^15.8.1",
 		"react-transition-group": "^4.4.5"
@@ -80,6 +80,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
+		"@woocommerce/internal-ts-config": "workspace:*",
 		"@woocommerce/navigation": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/browserslist-config": "next",
@@ -99,7 +100,7 @@
 		"wireit": "0.14.12"
 	},
 	"peerDependencies": {
-		"@wordpress/data": "wp-6.6",
+		"@wordpress/data": "^10.0.2",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
 	},
@@ -196,12 +197,11 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/experimental/build",
-				"node_modules/@woocommerce/experimental/build-module",
 				"node_modules/@woocommerce/experimental/build-style",
 				"node_modules/@woocommerce/experimental/build-types",
 				"node_modules/@woocommerce/data/build",
-				"node_modules/@woocommerce/data/build-module",
 				"node_modules/@woocommerce/data/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
@@ -210,12 +210,15 @@
 				"node_modules/@woocommerce/internal-js-tests/build-module",
 				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
 				"node_modules/@woocommerce/internal-style-build/index.js",
+				"node_modules/@woocommerce/internal-style-build/webpack-rtl-plugin.js",
+				"node_modules/@woocommerce/internal-style-build/style-asset-plugin.js",
 				"node_modules/@woocommerce/internal-style-build/abstracts",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
+				"node_modules/@woocommerce/internal-ts-config/types",
 				"node_modules/@woocommerce/navigation/build",
-				"node_modules/@woocommerce/navigation/build-module",
 				"node_modules/@woocommerce/navigation/build-types",
 				"node_modules/@woocommerce/tracks/build",
-				"node_modules/@woocommerce/tracks/build-module",
 				"node_modules/@woocommerce/tracks/build-types"
 			]
 		}

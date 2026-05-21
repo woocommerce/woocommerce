@@ -27,7 +27,8 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 - **`woocommerce-copy-guidelines`** - UI text standards (sentence case rules)
 - **`woocommerce-code-review`** - Code review standards and critical violations to flag
 - **`woocommerce-markdown`** - Markdown writing and editing guidelines
-- **`woocommerce-git`** - Guidelines for git and GitHub operations
+- **`woocommerce-git-commit`** - Commit changes with conventional messages and smart grouping
+- **`woocommerce-git-draft-pr`** - Create draft PRs with proper template, changelog, and milestone handling
 - **`woocommerce-email-editor`** - Email editor development setup and Mailpit configuration
 - **`woocommerce-performance`** - Performance guardrails. **Invoke when writing or reviewing PHP code.**
 
@@ -94,7 +95,7 @@ pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
 composer exec -- phpstan analyse path/to/modified/File.php --memory-limit=2G
 ```
 
-PHPStan failures often indicate the need to update the baseline file (`phpstan-baseline.neon`). If your fix resolves a previously baselined error, remove the corresponding entry from the baseline.
+**PHPStan Baseline Policy:** The baseline file (`phpstan-baseline.neon`) must never be added to. It should only shrink over time as existing errors are naturally resolved by code changes. If PHPStan reports a new error, fix it in the code rather than adding it to the baseline. If your fix resolves a previously baselined error, remove the corresponding entry from the baseline.
 
 ### Pre-push Checks
 

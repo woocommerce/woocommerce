@@ -1,0 +1,6 @@
+Significance: minor
+Type: dev
+
+Add extra flexibility to the authentication and authorization stages of the dual code+GraphQL API.
+
+

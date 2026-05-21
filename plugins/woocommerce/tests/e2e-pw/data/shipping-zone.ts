@@ -3,7 +3,7 @@
  *
  * For more details on shipping zone properties, see:
  *
- * https://woocommerce.github.io/woocommerce-rest-api-docs/#shipping-zone-properties
+ * https://developer.woocommerce.com/docs/apis/rest-api/v3/shipping-zones/#shipping-zone-properties
  *
  */
 const shippingZone = {

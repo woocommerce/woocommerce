@@ -34,8 +34,6 @@ export default function Edit( {
 		'root',
 		'comment',
 		'content',
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-expect-error - the type of useEntityProp is not correct
 		commentId
 	);
 

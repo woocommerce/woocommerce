@@ -4,7 +4,7 @@
 	"description": "A template to be used with `@wordpress/create-block` to create a WooCommerce extension.",
 	"main": "index.js",
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"repository": {
 		"type": "git",

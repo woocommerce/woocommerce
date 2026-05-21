@@ -14,11 +14,11 @@ This document will outline the steps an extension should take to register some a
 
 Additional checkout fields can be registered in three different places:
 
-| Title                                | Identifier |
-| ------------------------------------ | ---------- |
-| Contact information                  | **`contact`**  |
-| Addresses (Shipping **and** Billing) | **`address`**  |
-| Order information                    | **`order`**    |
+| Title                                | Identifier    |
+| ------------------------------------ | ------------- |
+| Contact information                  | **`contact`** |
+| Addresses (Shipping **and** Billing) | **`address`** |
+| Order information                    | **`order`**   |
 
 A field can only be shown in one location, it is not possible to render the same field in multiple locations in the same registration.
 
@@ -209,21 +209,21 @@ The registration function takes an array of options describing your field. Some 
 
 These options apply to all field types (except in a few circumstances which are noted inline).
 
-| Option name         | Description                                                                                                                         | Required? | Example                                      | Default value                                                                                                                                                                                                                                                                                  |
-|---------------------|-------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`                | The field's ID. This should be a unique identifier for your field. It is composed of a namespace and field name separated by a `/`. | Yes       | `plugin-namespace/how-did-you-hear`          | No default - this must be provided.                                                                                                                                                                                                                                                            |
-| `label`             | The label shown on your field. This will be the placeholder too.                                                                    | Yes       | `How did you hear about us?`                 | No default - this must be provided.                                                                                                                                                                                                                                                            |
-| `optionalLabel`     | The label shown on your field if it is optional. This will be the placeholder too.                                                  | No        | `How did you hear about us? (Optional)`      | The default value will be the value of `label` with `(optional)` appended.                                                                                                                                                                                                                     |
-| `location`          | The location to render your field.                                                                                                  | Yes       | `contact`, `address`, or `order`        | No default - this must be provided.                                                                                                                                                                                                                                                            |
-| `type`              | The type of field you're rendering. It defaults to `text` and must match one of the supported field types.                          | No        | `text`, `select`, or `checkbox`              | `text`                                                                                                                                                                                                                                                                                         |
-| `attributes`        | An array of additional attributes to render on the field's input element. This is _not_ supported for `select` fields.              | No        | `[	'data-custom-data' => 'my-custom-data' ]` | `[]`                                                                                                                                                                                                                                                                                           |
-| `required`          | Can be a boolean or a JSON Schema array. If boolean and `true`, the shopper _must_ provide a value for this field during the checkout process. For checkbox fields, the shopper must check the box to place the order. If a JSON Schema array, the field will be required based on the schema conditions. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `true` or `["type" => "object", "properties" => [...]]` | `false` |
-| `hidden`            | Can be a boolean or a JSON Schema array. Must be `false` when used as a boolean. If a JSON Schema array, the field will be hidden based on the schema conditions. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `false` or `["type" => "object", "properties" => [...]]` | `false` |
-| `validation`        | An array of JSON Schema objects that define validation rules for the field. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `[{"type": "object", "properties": {...}}]` | `[]` |
-| `sanitize_callback` | A function called to sanitize the customer provided value when posted.                                                              | No        | See example below                            | By default the field's value is returned unchanged.                                                                                                                                                                                                                          |
-| `validate_callback` | A function called to validate the customer provided value when posted. This runs _after_ sanitization.                              | No        | See example below                            | The default validation function will add an error to the response if the field is required and does not have a value. [See the default validation function.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFields.php#L270-L281) |
+| Option name | Description | Required? | Example | Default value |
+| --- | --- | --- | --- | --- |
+| `id` | The field's ID. This should be a unique identifier for your field. It is composed of a namespace and field name separated by a `/`. | Yes | `plugin-namespace/how-did-you-hear` | No default - this must be provided. |
+| `label` | The label shown on your field. This will be the placeholder too. | Yes | `How did you hear about us?` | No default - this must be provided. |
+| `optionalLabel` | The label shown on your field if it is optional. This will be the placeholder too. | No | `How did you hear about us? (Optional)` | The default value will be the value of `label` with `(optional)` appended. |
+| `location` | The location to render your field. | Yes | `contact`, `address`, or `order` | No default - this must be provided. |
+| `type` | The type of field you're rendering. It defaults to `text` and must match one of the supported field types. | No | `text`, `select`, or `checkbox` | `text` |
+| `attributes` | An array of additional attributes to render on the field's input element. This is _not_ supported for `select` fields. | No | `[	'data-custom-data' => 'my-custom-data' ]` | `[]` |
+| `required` | Can be a boolean or a JSON Schema array. If boolean and `true`, the shopper _must_ provide a value for this field during the checkout process. For checkbox fields, the shopper must check the box to place the order. If a JSON Schema array, the field will be required based on the schema conditions. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `true` or `["type" => "object", "properties" => [...]]` | `false` |
+| `hidden` | Can be a boolean or a JSON Schema array. Must be `false` when used as a boolean. If a JSON Schema array, the field will be hidden based on the schema conditions. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `false` or `["type" => "object", "properties" => [...]]` | `false` |
+| `validation` | An array of JSON Schema objects that define validation rules for the field. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `[{"type": "object", "properties": {...}}]` | `[]` |
+| `sanitize_callback` | A function called to sanitize the customer-provided value when posted. | No | See example below | By default the field's value is returned unchanged. |
+| `validate_callback` | A function called to validate the customer-provided value when posted. This runs _after_ sanitization. | No | See example below | The default validation function will add an error to the response if the field is required and does not have a value. [See the default validation function.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFields.php#L270-L281) |
 
-##### Example of `sanitize_callback`. This function will remove spaces from the value <!-- omit from toc -->
+##### Example of `sanitize_callback`. This function will remove spaces from the value {/* omit in toc */}
 
 ```php
 'sanitize_callback' => function( $field_value ) {
@@ -231,7 +231,7 @@ These options apply to all field types (except in a few circumstances which are 
 },
 ```
 
-##### Example of `validate_callback`. This function will check if the value is an email <!-- omit from toc -->
+##### Example of `validate_callback`. This function will check if the value is an email {/* omit in toc */}
 
 ```php
 'validate_callback' => function( $field_value ) {
@@ -253,8 +253,8 @@ Select fields will mount with no value selected by default, if the field is requ
 
 You can set a placeholder to be shown on the select by passing a `placeholder` value when registering the field. This will be the first option in the select and will not be selectable if the field is required.
 
-| Option name | Description | Required? | Example        | Default value |
-|-----|-----|-----|----------------|--------------|
+| Option name | Description | Required? | Example | Default value |
+| --- | --- | --- | --- | --- |
 | `options` | An array of options to show in the select input. Each options must be an array containing a `label` and `value` property. Each entry must have a unique `value`. Any duplicate options will be removed. The `value` is what gets submitted to the server during checkout and the `label` is simply a user-friendly representation of this value. It is not transmitted to the server in any way. | Yes | see below | No default - this must be provided. |
 | `placeholder` | If this value is set, the shopper will see this option in the select. If the select is required, the shopper cannot select this option. | No | `Select a role` | Select a $label |
 
@@ -282,9 +282,9 @@ You can set a placeholder to be shown on the select by passing a `placeholder` v
 
 As well as the options above, checkbox field support showing an error message if it's required and not checked.
 
-| Option name     | Description                                                                  | Required? | Example                                                      | Default value |
-|-----------------|------------------------------------------------------------------------------|-----------|--------------------------------------------------------------|---|
-| `error_message` | A custom message to show if the box is unchecked.                            | No | `You must confirm you are over 18 before placing the order.` | `Please check this box if you want to proceed.` |
+| Option name | Description | Required? | Example | Default value |
+| --- | --- | --- | --- | --- |
+| `error_message` | A custom message to show if the box is unchecked. | No | `You must confirm you are over 18 before placing the order.` | `Please check this box if you want to proceed.` |
 
 ### Attributes
 
@@ -446,10 +446,10 @@ Sanitization is used to ensure the value of a field is in a specific format. An 
 
 To run a custom sanitization function for a field you can use the `sanitize_callback` function on registration, or the `woocommerce_sanitize_additional_field` filter.
 
-| Argument     | Type              | Description                                                             |
-|--------------|-------------------|-------------------------------------------------------------------------|
+| Argument       | Type              | Description                                                             |
+|----------------|-------------------|-------------------------------------------------------------------------|
 | `$field_value` | `boolean\|string` | The value of the field.                                                 |
-| `$field_key`   | `string` | The ID of the field. This is the same ID the field was registered with. |
+| `$field_key`   | `string`          | The ID of the field. This is the same ID the field was registered with. |
 
 ##### Example of sanitization
 
@@ -482,11 +482,11 @@ When the `woocommerce_validate_additional_field` action is fired  the callback r
 
 To add validation errors to the response, use the [`WP_Error::add`](https://developer.wordpress.org/reference/classes/wp_error/add/) method.
 
-| Argument     | Type              | Description                                                                                                                                                                           |
-|--------------|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `$errors`      | `WP_Error`        | An error object containing errors that were already encountered while processing the request. If no errors were added yet, it will still be a `WP_Error` object but it will be empty. |
-| `$field_key`   | `string`          | The id of the field. This is the ID the field was registered with.                                                                                                                    |
-| `$field_value` | `boolean\|string` | The value of the field                                                                                                                                                                |
+| Argument | Type | Description |
+| --- | --- | --- |
+| `$errors` | `WP_Error` | An error object containing errors that were already encountered while processing the request. If no errors were added yet, it will still be a `WP_Error` object but it will be empty. |
+| `$field_key` | `string` | The id of the field. This is the ID the field was registered with. |
+| `$field_value` | `boolean\|string` | The value of the field |
 
 ###### The `WP_Error` object
 
@@ -530,11 +530,11 @@ The callback receives the keys and values of the other additional fields in the 
 
 It is important to note that any fields rendered in other locations will not be passed to this action, however it might be possible to get those values by accessing the customer or order object, however this is not supported and there are no guarantees regarding backward compatibility in future versions.
 
-| Argument | Type                        | Description                                                                                                                                                                           |
-|----------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `$errors`  | `WP_Error`                  | An error object containing errors that were already encountered while processing the request. If no errors were added yet, it will still be a `WP_Error` object but it will be empty. |
-| `$fields`  | `array`                     | The fields rendered in this locations.                                                                                                                                                |
-| `$group`   | `'billing'\|'shipping'\|'other'` | If the action is for the address location, the type of address will be set here. If it is for contact or order, this will be 'other'.                                   |
+| Argument | Type | Description |
+| --- | --- | --- |
+| `$errors` | `WP_Error` | An error object containing errors that were already encountered while processing the request. If no errors were added yet, it will still be a `WP_Error` object but it will be empty. |
+| `$fields` | `array` | The fields rendered in this locations. |
+| `$group` | `'billing'\|'shipping'\|'other'` | If the action is for the address location, the type of address will be set here. If it is for contact or order, this will be 'other'. |
 
 There are several places where these hooks are fired.
 
@@ -602,7 +602,6 @@ When you're writing your rules, you're writing a partial schema for the document
 
 An example of the document object looks like this:
 
-<!-- markdownlint-disable MD033 -->
 <details>
 	<summary>Document object</summary>
 
@@ -692,11 +691,9 @@ An example of the document object looks like this:
 ```
 
 </details>
-<!-- markdownlint-enable MD033 -->
-
 
 It's full schema is this one:
-<!-- markdownlint-disable MD033 -->
+
 <details>
 	<summary>Document schema</summary>
 	
@@ -917,7 +914,6 @@ It's full schema is this one:
 ```
 
 </details>
-<!-- markdownlint-enable MD033 -->
 
 ### Examples
 

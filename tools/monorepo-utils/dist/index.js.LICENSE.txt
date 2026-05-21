@@ -19,7 +19,7 @@
  * MIT Licensed
  */
 
-/*! Axios v1.8.4 Copyright (c) 2025 Matt Zabriskie and contributors */
+/*! Axios v1.15.0 Copyright (c) 2026 Matt Zabriskie and contributors */
 
 /*! formdata-polyfill. MIT License. Jimmy Wärting <https://jimmy.warting.se/opensource> */
 

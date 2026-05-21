@@ -35,10 +35,10 @@ const config: Config = {
 	// may want to replace "en" with "zh-Hans".
 	i18n: {
 		defaultLocale: 'en',
-		locales: [ 'en' ],
+		locales: ['en'],
 	},
 
-	plugins: [ './llms-txt/index.ts', './consent-plugin/index.ts' ],
+	plugins: ['./llms-txt/index.ts', './consent-plugin/index.ts'],
 
 	presets: [
 		[
@@ -49,21 +49,21 @@ const config: Config = {
 				docs: {
 					sidebarPath: './sidebars.ts',
 					path: '../',
-					exclude: [ '_docu-tools/**' ],
+					exclude: ['_docu-tools/**'],
 					showLastUpdateTime: true,
 					editUrl:
 						'https://github.com/woocommerce/woocommerce/tree/trunk/docs/docs/',
 					routeBasePath: '/',
 
 					// Custom sidebar filter to remove some items from the docs sidebar.
-					async sidebarItemsGenerator( {
+					async sidebarItemsGenerator({
 						defaultSidebarItemsGenerator,
 						...args
-					} ) {
+					}) {
 						let sidebarItems = await defaultSidebarItemsGenerator(
 							args
 						);
-						sidebarItems = filterSidebarItems( sidebarItems );
+						sidebarItems = filterSidebarItems(sidebarItems);
 						return sidebarItems;
 					},
 				},
@@ -200,19 +200,19 @@ const config: Config = {
 					],
 				},
 			],
-			copyright: `Copyright © ${ new Date().getFullYear() } Built with Docusaurus. Documentation is licensed under <a href="https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/license.txt/">GPLv3</a> and can be modified in the <a href="https://github.com/woocommerce/woocommerce/">WooCommerce Monorepo</a>.
+			copyright: `Copyright © ${new Date().getFullYear()} Built with Docusaurus. Documentation is licensed under <a href="https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/license.txt/">GPLv3</a> and can be modified in the <a href="https://github.com/woocommerce/woocommerce/">WooCommerce Monorepo</a>.
 				<div class="docusaurus-footer-for-automattic">
 					<a href="https://automattic.com/">
 						An
-						<img src="/docs/img/automattic.svg" alt="Automattic" class="automattic-logo automattic-logo-light" />
-						<img src="/docs/img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" />
+						<img src="img/automattic.svg" alt="Automattic" class="automattic-logo automattic-logo-light" />
+						<img src="img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" />
 						Creation</a>
 				</div>`,
 		},
 		prism: {
 			theme: prismThemes.github,
 			darkTheme: prismThemes.dracula,
-			additionalLanguages: [ 'php' ],
+			additionalLanguages: ['php'],
 		},
 		// colorMode: {
 		// 	defaultMode: 'light',

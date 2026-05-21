@@ -12,12 +12,19 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 module.exports = {
 	mode: NODE_ENV,
-	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+	cache: ( process.env.CI && { type: 'memory' } ) || {
 		type: 'filesystem',
 		cacheDirectory: path.resolve(
 			__dirname,
 			'node_modules/.cache/webpack'
 		),
+		buildDependencies: {
+			config: [
+				__filename,
+				path.resolve( __dirname, '../../../pnpm-lock.yaml' ),
+				require.resolve( '@woocommerce/internal-style-build' ),
+			],
+		},
 	},
 	entry: {
 		'build-style': __dirname + '/src/style.scss',

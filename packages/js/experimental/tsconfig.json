@@ -1,13 +1,16 @@
 {
-	"extends": "../tsconfig",
+	"extends": "@woocommerce/internal-ts-config/tsconfig.json",
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "build-module",
 		"declaration": true,
 		"declarationMap": true,
 		"declarationDir": "./build-types",
-		"typeRoots": [ "./typings", "./node_modules/@types" ],
-		"types": [ "jest" ]
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types"
+		],
+		"types": ["jest"]
 	},
 	"include": [
 		"typings/**/*",

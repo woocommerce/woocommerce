@@ -25,8 +25,8 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 	const { color, storeOnly } = attributes;
 	const blockProps = { ...useBlockProps() };
 
-	// Existance of storeOnly attribute means it doesn't have a background color,
-	// absense of custom color attribute means it's post-v1 template,
+	// Existence of storeOnly attribute means it doesn't have a background color,
+	// absence of custom color attribute means it's post-v1 template,
 	// in both cases, no need to show the color picker.
 	if ( storeOnly || ! color ) {
 		return (
@@ -42,7 +42,6 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<ColorPicker
 						color={ color }
-						// @ts-expect-error type is not defined in the library
 						onChange={ ( newColor: string ) =>
 							setAttributes( { color: newColor } )
 						}

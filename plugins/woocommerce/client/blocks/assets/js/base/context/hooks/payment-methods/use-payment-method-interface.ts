@@ -9,6 +9,7 @@ import PaymentMethodIcons from '@woocommerce/base-components/cart-checkout/payme
 import { getSetting } from '@woocommerce/settings';
 import deprecated from '@wordpress/deprecated';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
+import { Skeleton } from '@woocommerce/base-components/skeleton';
 import { type PaymentMethodInterface, responseTypes } from '@woocommerce/types';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
@@ -216,6 +217,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 			LoadingMask,
 			PaymentMethodIcons,
 			PaymentMethodLabel,
+			Skeleton,
 			ValidationInputError,
 		},
 		emitResponse: {

@@ -7,7 +7,6 @@ import { SearchListItem } from '@woocommerce/editor-components/search-list-contr
 import { ADMIN_URL } from '@woocommerce/settings';
 import {
 	ExternalLink,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';

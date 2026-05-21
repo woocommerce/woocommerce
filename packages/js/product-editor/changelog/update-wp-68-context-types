@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+ProductEditorContext now extends Record<string, unknown> to satisfy BlockEditProps.context in @types/wordpress__blocks@12.5.18.

@@ -409,7 +409,10 @@ class FulfillmentUtils {
 	 * This method retrieves the shipping providers registered in the WooCommerce Fulfillments system.
 	 * It can be filtered using the `woocommerce_fulfillment_shipping_providers` filter.
 	 *
-	 * @return array An associative array of shipping providers with their details.
+	 * Any class name strings in the filter result are resolved into AbstractShippingProvider instances
+	 * via the DI container. Invalid entries are silently skipped.
+	 *
+	 * @return AbstractShippingProvider[] An associative array of shipping provider instances keyed by provider key.
 	 */
 	public static function get_shipping_providers(): array {
 		/**
@@ -421,52 +424,33 @@ class FulfillmentUtils {
 		 *
 		 * @param array $shipping_providers The default list of shipping providers.
 		 */
-		return apply_filters(
+		$raw_providers = apply_filters(
 			'woocommerce_fulfillment_shipping_providers',
 			array()
 		);
-	}
 
-	/**
-	 * Get the shipping providers as an array of JS objects, for use in the fulfillment UI.
-	 *
-	 * @return array An associative array of shipping providers with their details.
-	 */
-	public static function get_shipping_providers_object(): array {
-		$shipping_providers = self::get_shipping_providers();
-		if ( ! is_array( $shipping_providers ) ) {
+		if ( ! is_array( $raw_providers ) ) {
 			return array();
 		}
-		$shipping_providers_object = array();
-		foreach ( $shipping_providers as $shipping_provider ) {
-			if ( is_string( $shipping_provider )
-			&& class_exists( $shipping_provider )
-			&& is_subclass_of( $shipping_provider, AbstractShippingProvider::class )
+
+		$resolved = array();
+		foreach ( $raw_providers as $provider ) {
+			if ( $provider instanceof AbstractShippingProvider ) {
+				$resolved[ $provider->get_key() ] = $provider;
+			} elseif ( is_string( $provider )
+				&& class_exists( $provider )
+				&& is_subclass_of( $provider, AbstractShippingProvider::class )
 			) {
 				try {
-					// Instantiate the shipping provider class.
-					$shipping_provider_instance = wc_get_container()->get( $shipping_provider );
+					$instance = wc_get_container()->get( $provider );
 				} catch ( \Throwable $e ) {
-					continue; // Skip if instantiation fails.
+					continue;
 				}
-				$shipping_providers_object[ $shipping_provider_instance->get_key() ] = array(
-					'label' => $shipping_provider_instance->get_name(),
-					'icon'  => $shipping_provider_instance->get_icon(),
-					'value' => $shipping_provider_instance->get_key(),
-					'url'   => $shipping_provider_instance->get_tracking_url( '__PLACEHOLDER__' ),
-				);
-			}
-			if ( is_object( $shipping_provider ) && $shipping_provider instanceof AbstractShippingProvider ) {
-				$shipping_providers_object[ $shipping_provider->get_key() ] = array(
-					'label' => $shipping_provider->get_name(),
-					'icon'  => $shipping_provider->get_icon(),
-					'value' => $shipping_provider->get_key(),
-					'url'   => $shipping_provider->get_tracking_url( '__PLACEHOLDER__' ),
-				);
+				$resolved[ $instance->get_key() ] = $instance;
 			}
 		}
 
-		return $shipping_providers_object;
+		return $resolved;
 	}
 
 	/**

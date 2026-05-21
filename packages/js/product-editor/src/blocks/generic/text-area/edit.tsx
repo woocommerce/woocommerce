@@ -91,7 +91,7 @@ export function TextAreaBlockEdit( {
 		textAreaRef.current?.focus();
 	}
 
-	const blockControlsBlockProps = { group: 'block' };
+	const blockControlsBlockProps = { group: 'block' as const };
 
 	const isRichTextMode = mode === 'rich-text';
 	const isPlainTextMode = mode === 'plain-text';

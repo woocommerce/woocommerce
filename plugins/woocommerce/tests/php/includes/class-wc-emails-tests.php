@@ -42,6 +42,26 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that replace_placeholders safely handles null values.
+	 */
+	public function test_replace_placeholders_handles_null_value() {
+		$email_object = new WC_Emails();
+		$this->assertSame( '', $email_object->replace_placeholders( null ) );
+	}
+
+	/**
+	 * Test that replace_placeholders replaces known placeholders.
+	 */
+	public function test_replace_placeholders_replaces_site_title() {
+		$email_object = new WC_Emails();
+		$placeholder  = '{site_title}';
+		$actual       = $email_object->replace_placeholders( $placeholder );
+		$expected     = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
+
+		$this->assertSame( $expected, $actual );
+	}
+
+	/**
 	 * Test that order meta function outputs linked meta.
 	 */
 	public function test_order_meta() {

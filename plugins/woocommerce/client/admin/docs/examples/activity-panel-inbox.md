@@ -39,7 +39,7 @@ There are some constraints extensions should follow when working with the inbox:
 1. Notes can have 0, 1, or 2 action buttons. Action buttons have URLs. They can either be complete URLs (like in the case of an external link) or partial URLs (like in the case of an admin page on the site) - in the case of partial URLs you’ll want to give a string that is the same as what you’d supply to WordPress core’s admin_url function. You can even include query parameters in that string.
 1. You should store your extension’s name (slug) in the source property of the note. WooCommerce will store ‘woocommerce’ there. For example, the “Panda Payments” extension could use a name like “panda-payments” - this makes it easier to use built in functions to get (or delete) all notes with a certain name.
 1. You can use the name property of a note to store a sub-type of note. For example, if the Panda Payments extension generates notes for both connection problems AND for new features, they might both have ‘panda-payments’ in the source property but then use ‘connection-problem’ and ‘new-feature’ in the name property to distinguish between the two types of notes.
-1. Icons are Gridicons. You can find a gallery [here](https://automattic.github.io/gridicons/)
+1. Icons are Gridicons. You can find [the Gridicons gallery on the Automattic GitHub site](https://automattic.github.io/gridicons/).
 1. As a best practice, have your extension remove its notes on deactivation or at least uninstall.
 
 So, enough rules - let’s get into how to code this up. And surprise, no JavaScript is necessary - you can work with the inbox exclusively through PHP -- the inbox front-end is React based, sure, but it draws all its data from a couple of new database tables and the PHP based REST API (and that’s where you can work with notes).
@@ -110,8 +110,6 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_One {
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'wapi-example-plugin-one' );
-		$note->set_layout('plain');
-		$note->set_image('');
 		// This example has two actions. A note can have 0 or 1 as well.
 		$note->add_action(
 			'settings',
@@ -209,8 +207,6 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_Two {
 
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
-		$note->set_layout('plain');
-		$note->set_image('');
 		$note->set_source( 'wapi-example-plugin-two' );
 		// This example has no actions. A note can have 1 or 2 as well.
 		$note->save();

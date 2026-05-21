@@ -62,12 +62,24 @@ describe( 'useCollection', () => {
 		};
 
 	const setUpMocks = () => {
+		// Memoize the fixture by selector args so wp-data's SCRIPT_DEBUG
+		// unstable-reference check (which double-invokes the selector with
+		// the same state) sees the same object reference each time. Real
+		// Redux selectors return stable references when args and state are
+		// unchanged; a naive `() => ({ foo: 'bar' })` mock returns a fresh
+		// object every call, which wp-data correctly flags.
+		const collectionCache = new Map();
+		const getCollection = jest.fn().mockImplementation( ( ...args ) => {
+			const key = JSON.stringify( args );
+			if ( ! collectionCache.has( key ) ) {
+				collectionCache.set( key, { foo: 'bar' } );
+			}
+			return collectionCache.get( key );
+		} );
 		mocks = {
 			selectors: {
 				getCollectionError: jest.fn().mockReturnValue( false ),
-				getCollection: jest
-					.fn()
-					.mockImplementation( () => ( { foo: 'bar' } ) ),
+				getCollection,
 				hasFinishedResolution: jest.fn().mockReturnValue( true ),
 			},
 		};
@@ -238,9 +250,18 @@ describe( 'useCollection', () => {
 		}
 	);
 	it( 'should return previous query results if `shouldSelect` is false', () => {
+		// Memoize by args so wp-data's SCRIPT_DEBUG unstable-reference check
+		// sees the same array reference across the two selector invocations
+		// it does within a single render cycle. The test intentionally uses
+		// `args` as the stored value to verify the selector was called.
+		const cache = new Map();
 		mocks.selectors.getCollection.mockImplementation(
 			( state, ...args ) => {
-				return args;
+				const key = JSON.stringify( args );
+				if ( ! cache.has( key ) ) {
+					cache.set( key, args );
+				}
+				return cache.get( key );
 			}
 		);
 		const TestComponent = getTestComponent();
@@ -256,6 +277,13 @@ describe( 'useCollection', () => {
 			);
 		} );
 		const { results } = getProps( renderer );
+		// Capture the call count after the first render so the next assertion
+		// measures whether the rerender caused additional invocations rather
+		// than the absolute total (wp-data's SCRIPT_DEBUG unstable-reference
+		// check double-invokes the useSelect mapping, so the absolute count
+		// is implementation-dependent).
+		const callsAfterFirstRender =
+			mocks.selectors.getCollection.mock.calls.length;
 		// rerender but with shouldSelect to false
 		act( () => {
 			renderer.update(
@@ -271,7 +299,11 @@ describe( 'useCollection', () => {
 		} );
 		const { results: results2 } = getProps( renderer );
 		expect( results2 ).toBe( results );
-		expect( mocks.selectors.getCollection ).toHaveBeenCalledTimes( 1 );
+		// `shouldSelect: false` should not have triggered any new selector
+		// invocations; the cached previous results should be returned.
+		expect( mocks.selectors.getCollection.mock.calls.length ).toBe(
+			callsAfterFirstRender
+		);
 
 		// rerender again but set shouldSelect to true again and we should see
 		// new results

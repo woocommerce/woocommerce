@@ -44,8 +44,7 @@ export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 	return (
 		<PanelBody
 			initialOpen={ false }
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore We need to send an Element.
+			// @ts-expect-error PanelBody's title prop is typed as string, but it accepts an array of nodes at runtime.
 			title={ [
 				__( 'Visibility: ', 'woocommerce' ),
 				<span className="editor-post-publish-panel__link" key="label">

@@ -30,3 +30,9 @@ export const ONBOARDING_STORE_NAME = STORE_NAME;
 
 export type OnboardingSelector = SelectFromMap< typeof selectors > &
 	WPDataSelectors;
+
+declare module '@wordpress/data' {
+	interface StoreRegistry {
+		[ STORE_NAME ]: typeof store;
+	}
+}

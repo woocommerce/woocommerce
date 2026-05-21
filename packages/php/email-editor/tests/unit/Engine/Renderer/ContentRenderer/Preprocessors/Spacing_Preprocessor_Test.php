@@ -263,6 +263,49 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test it adds padding-right to column blocks in RTL renders.
+	 */
+	public function testItAddsPaddingRightToColumnsInRtl(): void {
+		$theme_json = $this->createMock( \WP_Theme_JSON::class );
+		$context    = new \Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context(
+			$theme_json,
+			array( 'is_rtl' => true )
+		);
+		$blocks     = array(
+			array(
+				'blockName'   => 'core/columns',
+				'attrs'       => array(
+					'style' => array(
+						'spacing' => array(
+							'blockGap' => array(
+								'left' => '30px',
+							),
+						),
+					),
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/column',
+						'attrs'       => array(),
+						'innerBlocks' => array(),
+					),
+					array(
+						'blockName'   => 'core/column',
+						'attrs'       => array(),
+						'innerBlocks' => array(),
+					),
+				),
+			),
+		);
+
+		$result        = $this->preprocessor->preprocess_with_context( $blocks, $this->layout, $this->styles, $context );
+		$second_column = $result[0]['innerBlocks'][1];
+
+		$this->assertArrayNotHasKey( 'padding-left', $second_column['email_attrs'] );
+		$this->assertSame( '30px', $second_column['email_attrs']['padding-right'] );
+	}
+
+	/**
 	 * Test it skips root padding for core/post-content but applies it to its children
 	 */
 	public function testItDistributesRootPaddingThroughPostContent(): void {
@@ -911,5 +954,51 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 
 		// Should not have padding-left due to malicious value.
 		$this->assertArrayNotHasKey( 'padding-left', $second_column['email_attrs'] );
+	}
+
+	/**
+	 * Test preset variable references in container padding are resolved to pixel values
+	 */
+	public function testItResolvesPresetReferencesInContainerPadding(): void {
+		$styles                    = $this->styles;
+		$styles['__variables_map'] = array(
+			'--wp--preset--spacing--20' => '24px',
+		);
+
+		$blocks = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(
+					'style' => array(
+						'spacing' => array(
+							'padding' => array(
+								'left'  => 'var:preset|spacing|20',
+								'right' => 'var:preset|spacing|20',
+							),
+						),
+					),
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/post-content',
+						'attrs'       => array(),
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/paragraph',
+								'attrs'       => array(),
+								'innerBlocks' => array(),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$result    = $this->preprocessor->preprocess( $blocks, $this->layout, $styles );
+		$paragraph = $result[0]['innerBlocks'][0]['innerBlocks'][0];
+
+		// Container padding should be resolved pixel values, not raw preset references.
+		$this->assertEquals( '24px', $paragraph['email_attrs']['container-padding-left'] );
+		$this->assertEquals( '24px', $paragraph['email_attrs']['container-padding-right'] );
 	}
 }

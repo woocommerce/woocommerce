@@ -16,8 +16,7 @@ export const HelpMenuItem = () => {
 		<MenuItem
 			role="menuitem"
 			icon={ external }
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore href is okay here
+			// @ts-expect-error MenuItem's public type doesn't accept an href prop, but the runtime forwards it to the underlying element.
 			href={ __(
 				'https://wordpress.org/documentation/article/wordpress-block-editor/',
 				'woocommerce'

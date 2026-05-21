@@ -9,8 +9,6 @@ import { useEntityProp } from '@wordpress/core-data';
 import { useInstanceId } from '@wordpress/compose';
 import clsx from 'clsx';
 import {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
 	AlignmentControl,
 	BlockControls,
 	RichText,
@@ -64,8 +62,6 @@ export function SummaryBlockEdit( {
 				'wp-block wp-block-woocommerce-product-summary-field-wrapper'
 			}
 		>
-			{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-			{ /* @ts-ignore No types for this exist yet. */ }
 			<BlockControls group="block">
 				<AlignmentControl
 					alignmentControls={ ALIGNMENT_CONTROLS }

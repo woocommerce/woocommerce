@@ -322,6 +322,7 @@ class WCAdminAssets {
 			'wc-currency',
 			'wc-navigation',
 			'wc-block-templates',
+			'wc-experimental-products-app',
 			'wc-product-editor',
 			'wc-settings-editor',
 			'wc-remote-logging',
@@ -339,6 +340,7 @@ class WCAdminAssets {
 			'wc-date',
 			'wc-components',
 			'wc-customer-effort-score',
+			'wc-experimental-products-app',
 			'wc-experimental',
 			'wc-navigation',
 			'wc-product-editor',
@@ -393,6 +395,9 @@ class WCAdminAssets {
 			),
 			array(
 				'handle' => 'wc-block-templates',
+			),
+			array(
+				'handle' => 'wc-experimental-products-app',
 			),
 			array(
 				'handle' => 'wc-product-editor',
@@ -451,6 +456,7 @@ class WCAdminAssets {
 				'wc-csv',
 				'wc-currency',
 				'wc-customer-effort-score',
+				'wc-experimental-products-app',
 				'wc-navigation',
 				// NOTE: This should be removed when Gutenberg is updated and
 				// the notices package is removed from WooCommerce Admin.

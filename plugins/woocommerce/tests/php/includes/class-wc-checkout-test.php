@@ -228,7 +228,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->sut->validate_checkout( $data, $errors );
 
 		$this->assertEquals(
-			$expect_we_dont_ship_error ? 'Unfortunately <strong>we do not ship to JP</strong>. Please enter an alternative shipping address.' : '',
+			$expect_we_dont_ship_error ? 'Unfortunately, <strong>we do not ship to Japan</strong>. Please enter an alternative shipping address.' : '',
 			$errors->get_error_message( 'shipping' )
 		);
 		remove_all_filters( 'woocommerce_countries_allowed_countries' );

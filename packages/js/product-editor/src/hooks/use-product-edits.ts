@@ -26,11 +26,8 @@ export function useProductEdits( productType = <string>'product' ) {
 
 	const { edits } = useSelect(
 		( select ) => {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			const { getEntityRecordNonTransientEdits } = select( 'core' );
 
-			// @ts-expect-error Selector is not typed
 			const _edits = getEntityRecordNonTransientEdits(
 				'postType',
 				productType,

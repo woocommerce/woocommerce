@@ -26,14 +26,19 @@ async function getDefaultVariationValues(
 	productId: number
 ): Promise< Partial< Omit< ProductVariation, 'id' > > > {
 	try {
-		// @ts-expect-error TODO react-18-upgrade: core.getEntityRecord type is not typed yet
-		const { attributes } = await resolveSelect( 'core' ).getEntityRecord(
+		const product = ( await resolveSelect( 'core' ).getEntityRecord(
 			'postType',
 			'product',
 			productId
-		);
+		) ) as Product;
+		if ( ! product ) {
+			return {};
+		}
+
+		const { attributes } = product;
+
 		const alreadyHasVariableAttribute = attributes.some(
-			( attr: Product ) => attr.variation
+			( attr ) => attr.variation
 		);
 		if ( ! alreadyHasVariableAttribute ) {
 			return {};
@@ -106,10 +111,13 @@ export function useProductVariationsHelper() {
 	) {
 		setIsGenerating( true );
 
-		// @ts-expect-error TODO react-18-upgrade: core.getEntityRecord type is not typed yet
-		const { status: lastStatus, variations } = await resolveSelect(
+		const { status: lastStatus, variations } = ( await resolveSelect(
 			'core'
-		).getEditedEntityRecord( 'postType', 'product', productId );
+		).getEditedEntityRecord(
+			'postType',
+			'product',
+			productId
+		) ) as unknown as Product;
 		const hasVariableAttribute = attributes.some(
 			( attr ) => attr.variation
 		);
@@ -120,7 +128,6 @@ export function useProductVariationsHelper() {
 
 		await Promise.all(
 			variations.map( ( variationId: number ) =>
-				// @ts-expect-error invalidateResolution is not typed correctly because we are overriding the type definition. https://github.com/woocommerce/woocommerce/blob/eeaf58e20064d837412d6c455e69cc5a5e2678b4/packages/js/product-editor/typings/index.d.ts#L15-L35
 				dispatch( coreStore ).invalidateResolution( 'getEntityRecord', [
 					'postType',
 					'product_variation',
@@ -161,7 +168,6 @@ export function useProductVariationsHelper() {
 				}
 			)
 			.then( async ( response ) => {
-				// @ts-expect-error invalidateResolution is not typed correctly because we are overriding the type definition. https://github.com/woocommerce/woocommerce/blob/eeaf58e20064d837412d6c455e69cc5a5e2678b4/packages/js/product-editor/typings/index.d.ts#L15-L35
 				await dispatch( coreStore ).invalidateResolution(
 					'getEntityRecord',
 					[ 'postType', 'product', productId ]

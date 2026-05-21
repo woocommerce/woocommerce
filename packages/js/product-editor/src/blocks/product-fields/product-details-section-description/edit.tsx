@@ -21,9 +21,6 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import type { ProductStatus, Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityId, useEntityProp } from '@wordpress/core-data';
 
 /**
@@ -52,10 +49,10 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	const { getProductErrorMessageAndProps } = useErrorHandler();
 
+	// @ts-expect-error getEditorSettings's return type is the generic Object; productTemplates/productTemplate are WooCommerce additions injected at runtime.
 	const { productTemplates, productTemplate: selectedProductTemplate } =
 		useSelect( ( select ) => {
 			const { getEditorSettings } = select( 'core/editor' );
-			// @ts-expect-error Selector is not typed
 			return getEditorSettings();
 		}, [] );
 
@@ -87,8 +84,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	);
 
 	const { validate } = useValidations< Product >();
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	const { editEntityRecord, saveEditedEntityRecord, saveEntityRecord } =
 		useDispatch( 'core' );
 	const { createSuccessNotice, createErrorNotice } =
@@ -97,7 +92,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const rootClientId = useSelect(
 		( select ) => {
 			const { getBlockRootClientId } = select( 'core/block-editor' );
-			// @ts-expect-error Selector is not typed
 			return getBlockRootClientId( clientId );
 		},
 		[ clientId ]
@@ -107,38 +101,24 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		useState< ProductTemplate >();
 
 	// Pull the product templates from the store.
-	const productFormPosts = useSelect(
-		(
-			sel: ( key: string ) => {
-				getEntityRecords: (
-					kind: string,
-					name: string,
-					query: Record< string, unknown >
-				) => ProductFormPostProps[] | undefined;
-			}
-		) => {
-			// Do not fetch product form posts if the feature is not enabled.
-			if ( ! isProductFormTemplateSystemEnabled() ) {
-				return [];
-			}
+	const productFormPosts = useSelect( ( sel ) => {
+		// Do not fetch product form posts if the feature is not enabled.
+		if ( ! isProductFormTemplateSystemEnabled() ) {
+			return [];
+		}
 
-			return (
-				sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
-					per_page: -1,
-				} ) || []
-			);
-		},
-		[]
-	) as ProductFormPostProps[];
+		return (
+			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
+				per_page: -1,
+			} ) || []
+		);
+	}, [] ) as ProductFormPostProps[];
 
 	const { isSaving } = useSelect(
 		( select ) => {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
-				// @ts-expect-error Selector is not typed
 				isSaving: isSavingEntityRecord(
 					'postType',
 					'product',
@@ -307,8 +287,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						},
 					],
 				},
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				{
 					throwOnError: true,
 				}

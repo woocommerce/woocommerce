@@ -451,3 +451,40 @@ if ( ! class_exists( \IntegrationTester::class ) ) {
 		}
 	}
 }
+
+if ( ! class_exists( \WP_REST_Templates_Controller::class ) ) {
+	/**
+	 * Stub for WP_REST_Templates_Controller used in unit tests.
+	 */
+	class WP_REST_Templates_Controller {
+		/**
+		 * Constructor.
+		 *
+		 * @param string $post_type Post type slug.
+		 */
+		public function __construct( string $post_type ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		}
+
+		/**
+		 * Returns the schema configured via $GLOBALS['wc_ee_test_schema'].
+		 *
+		 * @return array
+		 */
+		public function get_item_schema(): array {
+			return $GLOBALS['wc_ee_test_schema'] ?? array( 'properties' => array() );
+		}
+	}
+}
+
+if ( ! function_exists( 'register_rest_field' ) ) {
+	/**
+	 * Mock register_rest_field function.
+	 *
+	 * @param string|array $object_type Object type or array of types.
+	 * @param string       $attribute   Attribute name.
+	 * @param array        $args        Optional. Field arguments.
+	 */
+	function register_rest_field( $object_type, $attribute, $args = array() ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$GLOBALS['wc_ee_rest_field_registered'] = true;
+	}
+}

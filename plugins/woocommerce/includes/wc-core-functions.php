@@ -9,8 +9,9 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -1205,10 +1206,10 @@ function wc_get_customer_geolocation( $fallback = array(
  * @return array
  */
 function wc_get_customer_default_location() {
-	$set_default_location_to = get_option( 'woocommerce_default_customer_address', 'base' );
+	$set_default_location_to = get_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::BASE );
 
 	// Unless the location should be blank, use the base location as the default.
-	if ( '' !== $set_default_location_to ) {
+	if ( DefaultCustomerAddress::NO_DEFAULT !== $set_default_location_to ) {
 		$default_location_string = get_option( 'woocommerce_default_country', 'US:CA' );
 	}
 
@@ -1234,7 +1235,7 @@ function wc_get_customer_default_location() {
 	}
 
 	// Geolocation takes priority if geolocation is possible.
-	if ( in_array( $set_default_location_to, array( 'geolocation', 'geolocation_ajax' ), true ) ) {
+	if ( in_array( $set_default_location_to, array( DefaultCustomerAddress::GEOLOCATION, DefaultCustomerAddress::GEOLOCATION_AJAX ), true ) ) {
 		$default_location = wc_get_customer_geolocation( $default_location );
 	}
 

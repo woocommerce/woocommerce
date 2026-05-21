@@ -720,7 +720,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 	}
 
 
-//phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, Suin.Classes.PSR4.IncorrectClassName
+//phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, SlevomatCodingStandard.Files.TypeNameMatchesFileName.NoMatchBetweenTypeNameAndFileName
 	/**
 	 * Mock class that extends RemoteLogger to allow overriding is_dev_or_local_environment.
 	 */
@@ -748,7 +748,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			return $this->is_dev_or_local;
 		}
 	}
-//phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, Suin.Classes.PSR4.IncorrectClassName
+//phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, SlevomatCodingStandard.Files.TypeNameMatchesFileName.NoMatchBetweenTypeNameAndFileName
 }
 
 /**

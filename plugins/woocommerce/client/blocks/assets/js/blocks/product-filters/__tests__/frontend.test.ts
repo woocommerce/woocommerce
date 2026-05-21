@@ -52,6 +52,108 @@ describe( 'product filters interactivity store', () => {
 		} );
 	} );
 
+	it( 'ignores invalid selectable item payloads', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+
+		const context = {
+			isOverlayOpened: false,
+			params: {},
+			activeFilters: [],
+			item: {
+				label: 'Blue',
+				value: 'blue',
+				selected: false,
+				count: 1,
+			},
+			activeLabelTemplate: '{{label}}',
+			filterType: 'attribute/color',
+		};
+
+		mockGetContext.mockReturnValue( context );
+
+		mockRegisteredStore.actions.toggle();
+
+		expect( context.activeFilters ).toEqual( [] );
+	} );
+
+	it( 'uses value as active filter label fallback', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+
+		const context = {
+			isOverlayOpened: false,
+			params: {},
+			activeFilters: [],
+			item: {
+				type: 'attribute/color',
+				value: 'blue',
+				selected: false,
+				count: 1,
+			},
+			activeLabelTemplate: 'Color: {{label}}',
+			filterType: 'attribute/color',
+		};
+
+		mockGetContext.mockReturnValue( context );
+
+		mockRegisteredStore.actions.toggle();
+
+		expect( context.activeFilters ).toEqual( [
+			{
+				value: 'blue',
+				type: 'attribute/color',
+				activeLabel: 'Color: blue',
+			},
+		] );
+	} );
+
+	it( 'returns no selectable items when server context items are not an array', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+
+		mockGetServerContext.mockReturnValue( {
+			items: 'invalid',
+			activeFilters: [],
+		} );
+
+		expect( mockRegisteredStore.state.selectableItems ).toEqual( [] );
+	} );
+
+	it( 'does not add child-owned index metadata to selectable items', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+
+		mockGetServerContext.mockReturnValue( {
+			items: [
+				{
+					id: 'attribute-blue',
+					label: 'Blue',
+					value: 'blue',
+					type: 'attribute/color',
+				},
+			],
+			activeFilters: [],
+		} );
+		mockGetContext.mockReturnValue( {
+			activeFilters: [],
+		} );
+
+		expect( mockRegisteredStore.state.selectableItems ).toEqual( [
+			{
+				id: 'attribute-blue',
+				label: 'Blue',
+				value: 'blue',
+				type: 'attribute/color',
+				selected: false,
+			},
+		] );
+	} );
+
 	[
 		{
 			description: 'unicode value',

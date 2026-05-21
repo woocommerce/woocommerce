@@ -5,8 +5,6 @@ sidebar_label: HTML best practices
 
 # Email HTML - Best Practices
 
-<!-- markdownlint-disable MD024 -->
-
 ## Overview
 
 Email design and development require a different approach than traditional web development. This guide outlines best practices for ensuring your HTML emails render correctly across all major email clients.

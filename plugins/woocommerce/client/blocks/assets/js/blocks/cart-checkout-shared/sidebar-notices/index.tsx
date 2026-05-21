@@ -7,23 +7,10 @@ import {
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { addFilter, hasFilter } from '@wordpress/hooks';
-import type { StoreDescriptor } from '@wordpress/data';
 import { DefaultNotice } from '@woocommerce/editor-components/default-notice';
 import { IncompatibleExtensionsNotice } from '@woocommerce/editor-components/incompatible-extension-notice';
 import { useSelect } from '@wordpress/data';
 import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
-
-declare module '@wordpress/editor' {
-	let store: StoreDescriptor;
-}
-
-declare module '@wordpress/core-data' {
-	let store: StoreDescriptor;
-}
-
-declare module '@wordpress/block-editor' {
-	let store: StoreDescriptor;
-}
 
 const SidebarNotices = ( { clientId } ) => {
 	const { isCart, isCheckout, parentId } = useSelect(

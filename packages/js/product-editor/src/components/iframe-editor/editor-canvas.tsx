@@ -5,14 +5,11 @@ import { createElement, Fragment } from '@wordpress/element';
 import {
 	EditorSettings,
 	EditorBlockListSettings,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
+	// @ts-expect-error __unstableIframe is not exported from @wordpress/block-editor's public types.
 	__unstableIframe as Iframe,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
+	// @ts-expect-error __unstableUseMouseMoveTypingReset is not exported from @wordpress/block-editor's public types.
 	__unstableUseMouseMoveTypingReset as useMouseMoveTypingReset,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
+	// @ts-expect-error __unstableEditorStyles is not exported from @wordpress/block-editor's public types.
 	__unstableEditorStyles as EditorStyles,
 } from '@wordpress/block-editor';
 

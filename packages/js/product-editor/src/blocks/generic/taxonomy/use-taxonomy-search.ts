@@ -26,19 +26,17 @@ async function getTaxonomiesMissingParents(
 		}
 	} );
 	if ( missingParentIds.length > 0 ) {
-		return (
-			resolveSelect( 'core' )
-				.getEntityRecords( 'taxonomy', taxonomyName, {
-					include: missingParentIds,
-				} )
-				// @ts-expect-error TODO react-18-upgrade: getEntityRecords type is not correctly typed yet
-				.then( ( parentTaxonomies: Taxonomy[] ) => {
-					return getTaxonomiesMissingParents(
-						[ ...parentTaxonomies, ...taxonomies ],
-						taxonomyName
-					);
-				} )
-		);
+		const parentTaxonomies = ( await resolveSelect(
+			'core'
+		).getEntityRecords( 'taxonomy', taxonomyName, {
+			include: missingParentIds,
+		} ) ) as Taxonomy[];
+		if ( parentTaxonomies ) {
+			return getTaxonomiesMissingParents(
+				[ ...parentTaxonomies, ...taxonomies ],
+				taxonomyName
+			);
+		}
 	}
 	return taxonomies;
 }
@@ -61,20 +59,22 @@ const useTaxonomySearch = (
 		setIsSearching( true );
 		let taxonomies: Taxonomy[] = [];
 		try {
-			// @ts-expect-error TODO react-18-upgrade: getEntityRecords type is not correctly typed yet
-			taxonomies = await resolveSelect( 'core' ).getEntityRecords(
+			const results = ( await resolveSelect( 'core' ).getEntityRecords(
 				'taxonomy',
 				taxonomyName,
 				{
 					per_page: PAGINATION_SIZE,
 					search: escapeHTML( search ),
 				}
-			);
-			if ( options?.fetchParents ) {
-				taxonomies = await getTaxonomiesMissingParents(
-					taxonomies,
-					taxonomyName
-				);
+			) ) as Taxonomy[];
+			if ( results ) {
+				taxonomies = results;
+				if ( options?.fetchParents ) {
+					taxonomies = await getTaxonomiesMissingParents(
+						taxonomies,
+						taxonomyName
+					);
+				}
 			}
 		} finally {
 			setIsSearching( false );
