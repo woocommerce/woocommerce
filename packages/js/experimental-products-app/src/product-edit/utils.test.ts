@@ -252,6 +252,47 @@ describe( 'product edit utils', () => {
 		} );
 	} );
 
+	it( 'returns bulk field state for variation active values', () => {
+		const activeVariation = buildProduct( {
+			id: 1,
+			parent_id: 12,
+			type: 'variation',
+			status: 'publish',
+			price: '12',
+		} );
+		const inactiveVariation = buildProduct( {
+			id: 2,
+			parent_id: 12,
+			type: 'variation',
+			status: 'private',
+			price: '12',
+		} );
+
+		expect(
+			buildProductBulkEditData(
+				[ activeVariation ],
+				getProductEditFields( productFields )
+			).fieldStates.variation_active
+		).toEqual( {
+			isEmpty: false,
+			isMixed: false,
+			placeholder: undefined,
+			value: 'active',
+		} );
+
+		expect(
+			buildProductBulkEditData(
+				[ activeVariation, inactiveVariation ],
+				getProductEditFields( productFields )
+			).fieldStates.variation_active
+		).toEqual( {
+			isEmpty: false,
+			isMixed: true,
+			placeholder: 'Mixed',
+			value: undefined,
+		} );
+	} );
+
 	it( 'returns a mixed bulk field state for different grouped products', () => {
 		const products = [
 			buildProduct( {
@@ -1033,7 +1074,7 @@ describe( 'product edit utils', () => {
 
 			expect( fieldIds ).toEqual(
 				expect.arrayContaining( [
-					'product_status',
+					'variation_active',
 					'regular_price',
 					'sale_price',
 					'schedule_sale',
@@ -1081,7 +1122,7 @@ describe( 'product edit utils', () => {
 					'cost_of_goods_sold',
 					'stock',
 					'manage_stock',
-					'product_status',
+					'variation_active',
 					'shipping_class',
 					'weight',
 					'length',
@@ -1255,7 +1296,6 @@ describe( 'product edit utils', () => {
 
 			expect( fieldIds ).toEqual(
 				expect.arrayContaining( [
-					'product_status',
 					'images',
 					'manage_stock',
 					'shipping_class',
@@ -1268,6 +1308,8 @@ describe( 'product edit utils', () => {
 			expectFieldsHidden( fieldIds, [
 				...parentOwnedFieldIds,
 				...priceFieldIds,
+				'product_status',
+				'variation_active',
 				'downloadable',
 				'sku',
 				'stock',
@@ -1304,7 +1346,6 @@ describe( 'product edit utils', () => {
 
 			expect( fieldIds ).toEqual(
 				expect.arrayContaining( [
-					'product_status',
 					'images',
 					'manage_stock',
 					'shipping_class',
@@ -1317,6 +1358,8 @@ describe( 'product edit utils', () => {
 			expectFieldsHidden( fieldIds, [
 				...parentOwnedFieldIds,
 				...priceFieldIds,
+				'product_status',
+				'variation_active',
 				'downloadable',
 				'sku',
 				'stock',
@@ -1595,7 +1638,7 @@ describe( 'product edit utils', () => {
 				{
 					id: 'general-fields',
 					label: 'General',
-					children: [ 'product_status' ],
+					children: [ 'variation_active' ],
 				},
 				{
 					id: 'price-fields',

@@ -118,6 +118,10 @@ function getProductFieldValue(
 		return product.dimensions?.[ field.id ] ?? '';
 	}
 
+	if ( field.getValue ) {
+		return field.getValue( { item: product } );
+	}
+
 	const dataKey = getFieldDataKey( field.id );
 
 	return product[ dataKey as keyof ProductEntityRecord ];

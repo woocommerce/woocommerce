@@ -182,6 +182,14 @@ function getBulkEditFormData(
 			return;
 		}
 
+		if ( fieldId === 'variation_active' ) {
+			( data as Record< string, unknown > ).variation_active =
+				fieldStates[ fieldId ].isMixed
+					? undefined
+					: fieldStates[ fieldId ].value;
+			return;
+		}
+
 		if ( ! isBulkNumericFieldId( fieldId ) ) {
 			return;
 		}

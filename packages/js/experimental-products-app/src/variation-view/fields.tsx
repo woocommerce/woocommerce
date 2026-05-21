@@ -18,7 +18,7 @@ const REUSED_VARIATION_FIELD_IDS = [
 	'stock',
 	'stock_quantity',
 	'manage_stock',
-	'product_status',
+	'variation_active',
 	'images',
 	'downloadable',
 	'weight',

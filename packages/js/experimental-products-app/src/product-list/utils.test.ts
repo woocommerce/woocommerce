@@ -90,7 +90,25 @@ describe( 'product list utils', () => {
 
 			expect(
 				getProductsWithEmbeddedVariations( [ parent, otherProduct ] )
-			).toEqual( [ parent, variation, otherProduct ] );
+			).toEqual( [
+				parent,
+				{ ...variation, type: 'variation' },
+				otherProduct,
+			] );
+		} );
+
+		it( 'marks embedded variation rows as variations when the embedded record omits variation fields', () => {
+			const embeddedVariation = createProduct( 2 );
+			const parent = createProduct( 1, undefined, [ embeddedVariation ] );
+
+			expect( getProductsWithEmbeddedVariations( [ parent ] ) ).toEqual( [
+				parent,
+				expect.objectContaining( {
+					id: 2,
+					parent_id: 1,
+					type: 'variation',
+				} ),
+			] );
 		} );
 
 		it( 'does not duplicate embedded variations already present in the list', () => {
