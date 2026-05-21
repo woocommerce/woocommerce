@@ -558,6 +558,10 @@ final class BlockTypesController {
 			$block_types[] = 'SavedForLater';
 		}
 
+		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'wishlist' ) ) {
+			$block_types[] = 'Wishlist';
+		}
+
 		if ( wp_is_block_theme() ) {
 			$block_types[] = 'AddToCartWithOptions\AddToCartWithOptions';
 			$block_types[] = 'AddToCartWithOptions\QuantitySelector';
