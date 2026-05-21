@@ -37,20 +37,11 @@ class PluginUtil {
 	private $woocommerce_aware_active_plugins = null;
 
 	/**
-	 * List of plugins excluded from feature compatibility warnings in UI.
-	 *
-	 * @var string[]
-	 */
-	private $plugins_excluded_from_compatibility_ui;
-
-	/**
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
 		add_action( 'activated_plugin', array( $this, 'handle_plugin_de_activation' ), 10, 0 );
 		add_action( 'deactivated_plugin', array( $this, 'handle_plugin_de_activation' ), 10, 0 );
-
-		$this->plugins_excluded_from_compatibility_ui = array( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' );
 	}
 
 	/**
@@ -227,31 +218,21 @@ class PluginUtil {
 	 */
 	public function generate_incompatible_plugin_feature_warning( string $feature_id, array $plugin_feature_info ): string {
 		$incompatibles      = $this->get_items_considered_incompatible( $feature_id, $plugin_feature_info );
-		$incompatibles      = array_filter( $incompatibles, 'is_plugin_active' );
-		$incompatibles      = array_values( array_diff( $incompatibles, $this->get_plugins_excluded_from_compatibility_ui() ) );
+		$incompatibles      = array_values( array_filter( $incompatibles, 'is_plugin_active' ) );
 		$incompatible_count = count( $incompatibles );
 
 		$feature_warnings = array();
-		if ( 'custom_order_tables' === $feature_id && 'yes' === get_option( 'woocommerce_api_enabled' ) ) {
-			if ( is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ) {
-				$legacy_api_and_hpos_incompatibility_warning_text =
-					sprintf(
-						// translators: %s is a URL.
-						__( '⚠ <b><a target="_blank" href="%s">The Legacy REST API plugin</a> is installed and active on this site.</b> Please be aware that the WooCommerce Legacy REST API is <b>not</b> compatible with HPOS.', 'woocommerce' ),
-						'https://wordpress.org/plugins/woocommerce-legacy-rest-api/'
-					);
-			} else {
-				$legacy_api_and_hpos_incompatibility_warning_text =
+		if ( 'custom_order_tables' === $feature_id && WC()->legacy_rest_api_is_available() ) {
+			$legacy_api_and_hpos_incompatibility_warning_text =
 				sprintf(
 					// translators: %s is a URL.
-					__( '⚠ <b><a target="_blank" href="%s">The Legacy REST API</a> is active on this site.</b> Please be aware that the WooCommerce Legacy REST API is <b>not</b> compatible with HPOS.', 'woocommerce' ),
-					admin_url( 'admin.php?page=wc-settings&tab=advanced&section=legacy_api' )
+					__( '⚠ <b><a target="_blank" href="%s">The Legacy REST API plugin</a> is installed and active on this site.</b> Please be aware that the WooCommerce Legacy REST API is <b>not</b> compatible with HPOS.', 'woocommerce' ),
+					'https://wordpress.org/plugins/woocommerce-legacy-rest-api/'
 				);
-			}
 
 			/**
 			 * Filter to modify the warning text that appears in the HPOS section of the features settings page
-			 * when both the Legacy REST API is active (via WooCommerce core or via the Legacy REST API plugin)
+			 * when the Legacy REST API plugin is active
 			 * and the orders table is in use as the primary data store for orders.
 			 *
 			 * @param string $legacy_api_and_hpos_incompatibility_warning_text Original warning text.
@@ -330,12 +311,14 @@ class PluginUtil {
 
 	/**
 	 * Get the names of the plugins that are excluded from the feature compatibility UI.
-	 * These plugins won't be considered as incompatible with any existing feature for the purposes
-	 * of displaying compatibility warning in UI, even if they declare incompatibilities explicitly.
 	 *
-	 * @return string[] Plugin names relative to the root plugins directory.
+	 * Core no longer excludes any plugins from the compatibility UI, so this method
+	 * always returns an empty array. Retained as a stable public API for backwards
+	 * compatibility with any external callers.
+	 *
+	 * @return string[] Always an empty array.
 	 */
 	public function get_plugins_excluded_from_compatibility_ui() {
-		return $this->plugins_excluded_from_compatibility_ui;
+		return array();
 	}
 }

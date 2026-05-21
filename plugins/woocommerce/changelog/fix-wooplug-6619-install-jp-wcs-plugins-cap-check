@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add install_plugins capability check to the install-jp-and-wcs-plugins inbox-note action handler so the latent installer call is unreachable to users without the `install_plugins` capability.

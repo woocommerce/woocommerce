@@ -1,4 +1,4 @@
 Significance: minor
-Type: add
+Type: update
 
-Add wc-visual attribute type to allow setting colors for attributes
+Rename 'Select' attribute type to 'Text' in all user-facing strings
