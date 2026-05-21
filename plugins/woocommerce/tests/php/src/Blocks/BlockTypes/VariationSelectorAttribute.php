@@ -28,12 +28,12 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		if ( ! self::$are_blocks_registered ) {
+		if ( ! self::$are_blocks_registered && ! \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/add-to-cart-with-options-variation-selector-attribute' ) ) {
 			new AddToCartWithOptionsVariationSelectorAttributeMock();
 			new AddToCartWithOptionsVariationSelectorAttributeNameMock();
-
-			self::$are_blocks_registered = true;
 		}
+
+		self::$are_blocks_registered = true;
 	}
 
 	/**

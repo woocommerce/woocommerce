@@ -346,9 +346,9 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertDoesNotMatchRegularExpression(
-			'/<input[^>]*type="radio"[^>]* checked(?:="checked")?[^>]*>/',
+			'/<button[^>]*aria-checked="true"[^>]*>/',
 			$markup,
-			'No radio options should be checked by default.'
+			'No options should be checked by default.'
 		);
 
 		$product->set_default_attributes( array( 'pa_size' => 'small-slug' ) );
@@ -358,7 +358,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertMatchesRegularExpression(
-			'/<input[^>]*checked(?:="checked")?[^>]*type="radio"[^>]*value="small-slug"[^>]*>/',
+			'/<button[^>]*value="small-slug"[^>]*aria-checked="true"[^>]*>/',
 			$markup,
 			'The "small" size option should be checked when set as the default attribute.'
 		);
@@ -368,7 +368,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertMatchesRegularExpression(
-			'/<input[^>]*checked(?:="checked")?[^>]*type="radio"[^>]*value="medium-slug"[^>]*>/',
+			'/<button[^>]*value="medium-slug"[^>]*aria-checked="true"[^>]*>/',
 			$markup,
 			'The "medium" size option should be checked when set in the URL parameters.'
 		);
