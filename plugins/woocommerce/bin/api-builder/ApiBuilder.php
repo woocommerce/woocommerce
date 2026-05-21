@@ -3175,6 +3175,20 @@ class ApiBuilder {
 			return $nullable ? $expr : "Type::nonNull({$expr})";
 		}
 
+		// Check for ArrayOf on the method (plain list return). Mirrors the
+		// property-/parameter-level ArrayOf handling: a method declared
+		// `: array` with `#[ArrayOf( X::class )]` becomes `[X!]!` (or `[X!]`
+		// when the return type is nullable). The element expression is
+		// resolved through the same helper the field path uses, so scalar
+		// and object element types are handled identically.
+		$array_of_attr = $method->getAttributes( ArrayOf::class );
+		if ( ! empty( $array_of_attr ) && 'array' === $type_name ) {
+			$item_type = $array_of_attr[0]->newInstance()->type;
+			$item_expr = $this->type_string_to_graphql_expr( $item_type, $use_stmts );
+			$expr      = "Type::listOf(Type::nonNull({$item_expr}))";
+			return $nullable ? $expr : "Type::nonNull({$expr})";
+		}
+
 		// Output type reference.
 		$class_info = $this->get_class_info( $type_name );
 		if ( $class_info !== null && $class_info['kind'] === 'type' ) {
