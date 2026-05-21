@@ -83,6 +83,16 @@ class StorageTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox mark_unsubscribed_by_hash() refuses inputs that don't match HASH_PATTERN — a future caller that forgets to pre-validate can't insert junk rows.
+	 */
+	public function test_mark_unsubscribed_by_hash_rejects_malformed(): void {
+		$this->assertFalse( $this->storage->mark_unsubscribed_by_hash( 'not-a-hash', self::KIND ) );
+		$this->assertFalse( $this->storage->mark_unsubscribed_by_hash( str_repeat( 'g', 64 ), self::KIND ), 'Non-hex chars must be rejected.' );
+		$this->assertFalse( $this->storage->mark_unsubscribed_by_hash( str_repeat( 'a', 63 ), self::KIND ), 'Wrong length must be rejected.' );
+		$this->assertFalse( $this->storage->mark_unsubscribed_by_hash( str_repeat( 'A', 64 ), self::KIND ), 'Uppercase hex must be rejected — hash() returns lowercase.' );
+	}
+
+	/**
 	 * @testdox erase_for_email() removes all rows for an address across every kind — the GDPR eraser clears all preferences for the requested email.
 	 */
 	public function test_erase_for_email_removes_all_kinds(): void {

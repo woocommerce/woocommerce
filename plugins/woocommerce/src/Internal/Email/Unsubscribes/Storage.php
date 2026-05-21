@@ -43,6 +43,13 @@ class Storage {
 	public const ACTION_UNSUBSCRIBED = 'unsubscribed';
 
 	/**
+	 * Shape of a valid email hash: 64 lowercase hex chars, matching the output
+	 * of `hash('sha256', …)`. Shared with the public unsubscribe endpoint so
+	 * the two validation sites can't drift apart.
+	 */
+	public const HASH_PATTERN = '/^[a-f0-9]{64}$/';
+
+	/**
 	 * Register the GDPR personal-data eraser.
 	 *
 	 * The table itself is installed via `WC_Install::get_schema()` so it's
@@ -145,14 +152,18 @@ class Storage {
 	 * public unsubscribe endpoint) that operate on the hash already and never
 	 * need to handle the raw email.
 	 *
-	 * The caller is expected to have shape-validated the hash. Empty hashes
-	 * or empty kinds are no-ops.
+	 * Validates the hash matches `HASH_PATTERN` as defense in depth — the
+	 * Endpoint already shape-checks the URL value, but any future caller that
+	 * forgets to would otherwise insert a junk row.
 	 *
 	 * @param string $hash SHA-256 hex digest of the normalized email.
 	 * @param string $kind Email-kind identifier.
 	 * @return bool True if a row was written.
 	 */
 	public function mark_unsubscribed_by_hash( string $hash, string $kind ): bool {
+		if ( 1 !== preg_match( self::HASH_PATTERN, $hash ) ) {
+			return false;
+		}
 		return $this->record_action( $hash, $kind, self::ACTION_UNSUBSCRIBED );
 	}
 

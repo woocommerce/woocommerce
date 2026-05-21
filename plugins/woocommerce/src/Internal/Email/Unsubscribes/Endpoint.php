@@ -106,10 +106,11 @@ class Endpoint {
 		$sig      = isset( $_GET['sig'] ) ? sanitize_text_field( wp_unslash( $_GET['sig'] ) ) : '';
 		// phpcs:enable
 
-		// 64 lowercase hex chars: the SHA-256 of the recipient's normalized email.
-		// Reject anything that doesn't match the shape before we even hash-compare
-		// — a malformed hash can't possibly verify.
-		if ( '' === $hash || '' === $kind || '' === $sig || ! preg_match( '/^[a-f0-9]{64}$/', $hash ) || ! self::verify( $order_id, $hash, $kind, $sig ) ) {
+		// Reject anything that doesn't match `Storage::HASH_PATTERN` before we
+		// even hash-compare — a malformed hash can't possibly verify, and the
+		// shared constant means the endpoint and storage agree on what valid
+		// means.
+		if ( '' === $hash || '' === $kind || '' === $sig || 1 !== preg_match( Storage::HASH_PATTERN, $hash ) || ! self::verify( $order_id, $hash, $kind, $sig ) ) {
 			$this->render_invalid();
 			return;
 		}

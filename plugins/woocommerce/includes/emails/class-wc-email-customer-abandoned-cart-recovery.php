@@ -30,6 +30,14 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 	class WC_Email_Customer_Abandoned_Cart_Recovery extends WC_Email {
 
 		/**
+		 * Email identifier — kept in `$this->id` for the rest of WC_Email's
+		 * machinery but also exposed as a constant so static methods (and
+		 * external callers using the unsubscribe storage) can reference the
+		 * same string without it drifting out of sync with the constructor.
+		 */
+		public const EMAIL_ID = 'customer_abandoned_cart_recovery';
+
+		/**
 		 * Plugins known to provide their own abandoned cart recovery flow.
 		 *
 		 * Detection is install-only.
@@ -83,7 +91,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * Constructor.
 		 */
 		public function __construct() {
-			$this->id             = 'customer_abandoned_cart_recovery';
+			$this->id             = self::EMAIL_ID;
 			$this->customer_email = true;
 			$this->title          = __( 'Abandoned cart recovery', 'woocommerce' );
 			$this->email_group    = 'order-updates';
@@ -462,7 +470,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			if ( '' === $email ) {
 				return false;
 			}
-			return wc_get_container()->get( UnsubscribesStorage::class )->is_unsubscribed( $email, 'customer_abandoned_cart_recovery' );
+			return wc_get_container()->get( UnsubscribesStorage::class )->is_unsubscribed( $email, self::EMAIL_ID );
 		}
 
 		/**
