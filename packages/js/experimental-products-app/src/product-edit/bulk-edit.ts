@@ -115,7 +115,7 @@ function getProductFieldValue(
 	}
 
 	if ( isDimensionFieldId( field.id ) ) {
-		return product.dimensions?.[ field.id ];
+		return product.dimensions?.[ field.id ] ?? '';
 	}
 
 	const dataKey = getFieldDataKey( field.id );
