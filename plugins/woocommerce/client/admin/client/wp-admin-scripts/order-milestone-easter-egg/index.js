@@ -18,7 +18,7 @@
 	/* -- Variant definitions ------------------------------------------------ */
 	var STRING_OVERLAP_PX = 20;
 	var VARIANTS = {
-		lama: {
+		llama: {
 			vbW: 789.58,
 			vbH: 979.2,
 			headTopFrac: 0.32,
@@ -81,7 +81,7 @@
 		headline: 'You got your very first order!',
 		body: 'Your store is officially in business, and\nthis is just the beginning.',
 		cta: "Let's go!",
-		variant: 'lama',
+		variant: 'llama',
 		gravity: 0.0028,
 		damp: 0.985,
 		hit: 0.0004,
@@ -1462,7 +1462,7 @@
 		settings = Object.assign( {}, DEFAULTS, {
 			headline: milestoneData.title,
 			body: milestoneData.subtitle,
-			variant: milestoneData.variant || 'lama',
+			variant: milestoneData.variant || 'llama',
 			boomText: milestoneData.boomText || 'One down',
 		} );
 

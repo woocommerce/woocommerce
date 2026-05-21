@@ -361,7 +361,7 @@ class OrderMilestoneEasterEgg {
 			'first'    => array(
 				'title'    => __( 'Cha-ching! Order number one', 'woocommerce' ),
 				'subtitle' => __( "That's a big deal. Smash the llama. You've earned it.", 'woocommerce' ),
-				'variant'  => 'lama',
+				'variant'  => 'llama',
 				'boomText' => __( 'One down', 'woocommerce' ),
 			),
 			'hundred'  => array(
@@ -400,7 +400,7 @@ class OrderMilestoneEasterEgg {
 	 */
 	private function get_variant_map(): array {
 		return array(
-			'lama'  => 'woo-pinata-lama2.svg',
+			'llama' => 'woo-pinata-llama2.svg',
 			'octo'  => 'woo-octo.svg',
 			'whale' => 'woo-whale.svg',
 		);
@@ -412,7 +412,7 @@ class OrderMilestoneEasterEgg {
 	 * Only the variant SVGs listed in $variants are loaded; shared assets
 	 * (confetti, stick, sprinkle) are always included.
 	 *
-	 * @param string[] $variants Variant keys to load (e.g. ['lama', 'octo']).
+	 * @param string[] $variants Variant keys to load (e.g. ['llama', 'octo']).
 	 * @return array<string, string>
 	 */
 	private function get_svg_data( array $variants = array() ): array {
