@@ -13,6 +13,7 @@
 		"interactivity": true,
 		"html": false,
 		"reusable": false,
+		"multiple": false,
 		"spacing": {
 			"margin": true,
 			"padding": true

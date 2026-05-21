@@ -30,7 +30,8 @@ type BlockContext = {
 	productId: number;
 	isVariableType: boolean;
 	// Mid-click flag, gated per-block so the button can be disabled while
-	// the request is in flight without coupling to a global signal.
+	// the request is in flight. Single-instance block, no `pendingKeys`
+	// map needed (Wishlist/SFL use one because they're per-row).
 	isPending: boolean;
 };
 
@@ -64,17 +65,23 @@ const { state } = store< BlockStore >(
 	'woocommerce/add-to-wishlist-button',
 	{
 		state: {
-			// For variable products, resolve the matched variation from
-			// the shared products store (the variation-selector writes the
-			// matched ID into `productsState.variationId` whenever the
-			// shopper picks an option). Falls back to 0 until a variation
-			// resolves, which `isDisabled` reads as "not yet selectable".
+			// For variable products, the effective product is the selected
+			// variation — resolved through the products store's
+			// `productInContext` derived getter, which already encapsulates
+			// "variation if one is selected, otherwise the parent." Returns
+			// 0 when the current resolution is still the variable parent
+			// (i.e. the shopper hasn't picked attributes yet), which
+			// `isDisabled` reads as "not yet selectable."
 			get effectiveProductId(): number {
 				const context = getContext< BlockContext >();
-				if ( context.isVariableType ) {
-					return productsState.variationId ?? 0;
+				const product = productsState.productInContext;
+				if ( ! product ) {
+					return 0;
 				}
-				return context.productId;
+				if ( context.isVariableType && product.type === 'variable' ) {
+					return 0;
+				}
+				return product.id;
 			},
 
 			get currentItem(): RawShopperListItem | null {
@@ -98,17 +105,15 @@ const { state } = store< BlockStore >(
 				if ( context.isPending ) {
 					return true;
 				}
-				// Variable parent with no variation chosen yet.
 				return ! state.effectiveProductId;
 			},
 
 			get currentLabel(): string {
-				const context = getContext< BlockContext >();
 				const { addLabel, savedLabel, selectOptionsLabel } = getConfig(
 					'woocommerce/add-to-wishlist-button'
 				) as ButtonConfig;
 
-				if ( context.isVariableType && ! productsState.variationId ) {
+				if ( ! state.effectiveProductId ) {
 					return selectOptionsLabel;
 				}
 				return state.isInWishlist ? savedLabel : addLabel;

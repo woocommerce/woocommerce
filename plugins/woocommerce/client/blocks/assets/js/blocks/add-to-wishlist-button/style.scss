@@ -15,19 +15,15 @@
 		font: inherit;
 		gap: 0.25em;
 		padding: 0;
-		text-decoration: underline;
+		text-decoration: none;
 
 		&:hover:not(:disabled) {
-			opacity: 0.7;
+			text-decoration: underline;
 		}
 
 		&:disabled {
 			cursor: default;
 			opacity: 0.5;
-		}
-
-		&[aria-pressed="true"] {
-			text-decoration: none;
 		}
 	}
 
