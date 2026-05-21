@@ -123,7 +123,7 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 					{ PREVIEW_ITEMS.map( ( item ) => (
 						<li
 							key={ item.key }
-							className="wc-block-saved-for-later-item"
+							className="wc-block-shopper-list-item"
 						>
 							<div className="wc-block-components-product-image wc-block-components-product-image--aspect-ratio-auto">
 								<a
@@ -134,7 +134,7 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 								</a>
 								<button
 									type="button"
-									className="wc-block-saved-for-later-item__remove"
+									className="wc-block-shopper-list-item__remove"
 									aria-label={ sprintf(
 										/* translators: %s: product name. */
 										__(
@@ -148,7 +148,7 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 									<Icon icon={ trash } size={ 24 } />
 								</button>
 								{ item.variation && (
-									<span className="wc-block-saved-for-later-item__variation">
+									<span className="wc-block-shopper-list-item__variation">
 										{ item.variation }
 									</span>
 								) }
@@ -166,7 +166,7 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 									{ item.price }
 								</span>
 							</div>
-							<span className="wc-block-saved-for-later-item__quantity">
+							<span className="wc-block-shopper-list-item__quantity">
 								{ item.quantity }
 							</span>
 							<div className="wp-block-button wc-block-components-product-button">
