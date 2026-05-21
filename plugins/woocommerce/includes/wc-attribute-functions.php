@@ -274,7 +274,7 @@ function wc_get_attribute_types() {
 	}
 
 	if ( $allow_visual_attribute_type ) {
-		$attribute_types['wc-visual'] = __( 'Color / Image', 'woocommerce' );
+		$attribute_types['wc-visual'] = __( 'Color', 'woocommerce' );
 	}
 
 	return (array) apply_filters(

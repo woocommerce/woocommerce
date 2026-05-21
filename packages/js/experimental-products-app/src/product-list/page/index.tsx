@@ -5,7 +5,10 @@ import { Page } from '@wordpress/admin-ui';
 import { Badge, Stack } from '@wordpress/ui';
 import { __ } from '@wordpress/i18n';
 
-const FEEDBACK_URL = 'https://usabi.li/do/mqc0hscbzp2i/yejxei';
+/**
+ * Internal dependencies
+ */
+import { FEEDBACK_URL } from '../../constants';
 
 type ProductListPageProps = {
 	ariaLabel: string;

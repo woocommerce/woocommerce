@@ -2246,7 +2246,18 @@ class Checkout extends MockeryTestCase {
 		remove_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
 
 		// Second POST on the same session should reuse the existing pending order.
-		$second_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		$session_order_id_during_retry = null;
+		$capture_session_order_id      = function () use ( &$session_order_id_during_retry ) {
+			$session_order_id_during_retry = (int) WC()->session->get( 'store_api_draft_order' );
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $capture_session_order_id, 999, 0 );
+
+		try {
+			$second_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_order_processed', $capture_session_order_id, 999 );
+		}
+
 		$this->assertEquals( 200, $second_response->get_status(), print_r( $second_response->get_data(), true ) );
 
 		$second_order_id = (int) $second_response->get_data()['order_id'];
@@ -2255,7 +2266,8 @@ class Checkout extends MockeryTestCase {
 			$second_order_id,
 			'Second POST must reuse the existing pending order, not create a new one (regression: issue #64792).'
 		);
-		$this->assertSame( $first_order_id, (int) WC()->session->get( 'store_api_draft_order' ), 'Session pointer should still reference the reused order.' );
+		$this->assertSame( $first_order_id, $session_order_id_during_retry, 'Session pointer should reference the reused order while the second POST is being processed.' );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ), 'Successful checkout should clear the draft order pointer when the cart is emptied.' );
 	}
 
 	/**

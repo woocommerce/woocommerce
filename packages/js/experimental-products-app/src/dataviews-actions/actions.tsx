@@ -24,7 +24,10 @@ import { useMemo } from '@wordpress/element';
  */
 import type { ProductEntityRecord } from '../fields/types';
 import { unlock } from '../lock-unlock';
-import { getProductListNavigationPath } from '../product-list/utils';
+import {
+	getProductEditPostId,
+	getProductListNavigationPath,
+} from '../product-list/utils';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
@@ -73,11 +76,10 @@ function getSelectionPath(
 		{} as Record< string, string >
 	);
 
-	delete nextQuery.quickEdit;
-
 	return getProductListNavigationPath( path, {
 		...nextQuery,
 		postId: productIds.join( ',' ),
+		quickEdit: undefined,
 	} );
 }
 
@@ -190,7 +192,7 @@ export const editAction = (): Action< ProductEntityRecord > => ( {
 		if ( product ) {
 			window.location.href = getAdminLink(
 				addQueryArgs( 'post.php', {
-					post: product.id,
+					post: getProductEditPostId( product ),
 					action: 'edit',
 				} )
 			);

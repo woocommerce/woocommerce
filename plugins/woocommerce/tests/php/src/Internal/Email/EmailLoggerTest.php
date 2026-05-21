@@ -198,7 +198,7 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 
 		$log = $this->captured_logs[0];
 		$this->assertStringNotContainsString( 'customer@example.com', $log['message'], 'Raw recipient address must not appear in the logged message.' );
-		$this->assertStringNotContainsString( 'server.example.org', $log['message'], 'Domain-only host names should be left intact (only address-shaped tokens are redacted).' );
+		$this->assertStringContainsString( 'server.example.org', $log['message'], 'Domain-only host names should be left intact (only address-shaped tokens are redacted).' );
 		$this->assertStringContainsString( '[redacted_email]', $log['message'], 'Redacted addresses should be replaced with the [redacted_email] marker.' );
 	}
 

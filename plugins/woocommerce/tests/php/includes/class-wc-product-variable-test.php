@@ -292,8 +292,8 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		$available_variation = $product->get_available_variation( $variation );
 
 		$this->assertSame( $variation_gallery_id, $available_variation['image_id'] );
-		$this->assertStringContainsString( 'wp-image-' . $variation_gallery_id, $available_variation['gallery_images_html'] );
-		$this->assertStringNotContainsString( 'wp-image-' . $parent_featured_id, $available_variation['gallery_images_html'] );
+		$this->assertStringContainsString( 'variation-gallery.jpg', $available_variation['gallery_images_html'] );
+		$this->assertStringNotContainsString( 'parent-featured.jpg', $available_variation['gallery_images_html'] );
 	}
 
 	/**
