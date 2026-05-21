@@ -880,9 +880,9 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 			$this->assertEmpty(
 				array_filter(
 					$note_strings,
-					static fn ( $note ) => false !== strpos( $note, 'Abandoned cart recovery email manually sent' )
+					static fn ( $note ) => false !== strpos( $note, 'sent from the order actions menu' )
 				),
-				'Unsubscribed recipient must not have a "manually sent" order note written.'
+				'Unsubscribed recipient must not have a "sent from the order actions menu" order note written.'
 			);
 		} finally {
 			$repository->erase_for_email( $order->get_billing_email() );
