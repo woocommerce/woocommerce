@@ -116,6 +116,7 @@ const blocks = {
 		customDir: 'reviews/reviews-by-product',
 	},
 	'saved-for-later': {},
+	wishlist: {},
 	'single-product': {},
 	'stock-filter': {},
 	'store-notices': {},

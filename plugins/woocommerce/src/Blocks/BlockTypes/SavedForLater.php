@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListRenderer;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -14,6 +15,13 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  * Store API endpoints via the shared `woocommerce/shopper-lists` iAPI store.
  * PHP prefetches the list so the first paint is already populated; JS then
  * takes over for adds, removes, and Move-to-cart.
+ *
+ * The row markup (image, name, price, remove badge, variation overlay) is
+ * shared with other shopper-list blocks via `ShopperListRenderer`. This
+ * class composes those fragments and adds the bits that are unique to
+ * Saved for Later: auto-injection via the Block Hooks API, the
+ * `hasShownItems` empty-state gating, the per-row quantity span, and the
+ * Move-to-cart action button.
  */
 final class SavedForLater extends AbstractBlock {
 	/**
@@ -230,23 +238,10 @@ final class SavedForLater extends AbstractBlock {
 
 		$list_class = sprintf( 'wc-block-saved-for-later__list columns-%d', $column_count );
 
-		// The heading inner block (and any future siblings rendered into
-		// `$content`) is wrapped so its visibility matches the empty-state
-		// gating: hidden on first paint for shoppers who have never had
-		// items in this session, revealed once the iAPI watcher flips
-		// `context.hasShownItems` to `true`. Without this wrapper a heading
-		// would be visible even on a fresh empty page, with no list under
-		// it — visually disconnected from anything.
-		return sprintf(
-			'<section %1$s>%5$s%6$s<ul class="%7$s">%2$s%3$s%4$s</ul></section>',
-			get_block_wrapper_attributes( $wrapper_attributes ),
-			$this->render_template_markup(),
-			$this->render_items_markup( $items ),
-			$this->render_empty_markup(),
-			$this->render_header_markup( $content, empty( $items ) ),
-			$this->render_interactivity_notices_region(),
-			esc_attr( $list_class )
-		);
+		$ul_inner    = $this->render_template_markup() . $this->render_items_markup( $items ) . $this->render_empty_markup();
+		$before_list = $this->render_header_markup( $content, empty( $items ) ) . ShopperListRenderer::render_interactivity_notices_region( 'wc-block-saved-for-later__notices' );
+
+		return ShopperListRenderer::render_grid_wrapper( $wrapper_attributes, $list_class, $ul_inner, $before_list );
 	}
 
 	/**
@@ -298,62 +293,16 @@ final class SavedForLater extends AbstractBlock {
 	/**
 	 * The `<template data-wp-each>` describing how each item is rendered on
 	 * the client. Pre-rendered children sit alongside as `data-wp-each-child`
-	 * elements so first paint is populated.
+	 * elements so first paint is populated. Composes the shared row markup
+	 * with Saved for Later's quantity span and Move-to-cart action button.
 	 *
 	 * @return string
 	 */
 	private function render_template_markup(): string {
-		ob_start();
-		?>
-		<template
-			data-wp-each--list-item="state.currentItems"
-			data-wp-each-key="context.listItem.key"
-		>
-			<li class="wc-block-saved-for-later-item">
-				<?php
-				// Single anchor for both live products and tombstones. For
-				// tombstones `permalink` is empty, so iAPI removes the `href`
-				// attribute and the anchor degrades to non-clickable.
-				// Image and price markup come pre-formatted from the schema
-				// (`image_html`, `price_html`) — `data-wp-watch` callbacks
-				// swap each slot's innerHTML on hydrate / state change so we
-				// don't reimplement WC's `wc_price` / `wp_get_attachment_image`
-				// in JS.
-				?>
-				<div class="wc-block-components-product-image wc-block-components-product-image--aspect-ratio-auto">
-					<a data-wp-bind--href="context.listItem.permalink">
-						<span class="wc-block-saved-for-later-item__image-slot" data-wp-context='{"htmlField":"image_html"}' data-wp-watch="callbacks.updateInnerHtml"></span>
-					</a>
-					<button
-						type="button"
-						class="wc-block-saved-for-later-item__remove"
-						data-wp-on--click="actions.onClickRemove"
-						data-wp-bind--aria-label="state.currentItemRemoveLabel"
-						data-wp-bind--disabled="state.isCurrentItemPending"
-					>
-						<?php echo $this->get_remove_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG markup. ?>
-					</button>
-					<span class="wc-block-saved-for-later-item__variation" data-wp-bind--hidden="!state.currentItemVariationLabel" data-wp-text="state.currentItemVariationLabel"></span>
-				</div>
-				<h2 class="wp-block-post-title has-text-align-center has-medium-font-size">
-					<a data-wp-bind--href="context.listItem.permalink" data-wp-text="state.currentItemDisplayName"></a>
-				</h2>
-				<div class="price wc-block-components-product-price has-text-align-center has-small-font-size" data-wp-bind--hidden="state.isPriceHidden" data-wp-context='{"htmlField":"price_html"}' data-wp-watch="callbacks.updateInnerHtml"></div>
-				<span class="wc-block-saved-for-later-item__quantity" data-wp-text="state.currentItemQuantityLabel"></span>
-				<div class="wp-block-button wc-block-components-product-button" data-wp-bind--hidden="state.isMoveToCartHidden">
-					<button
-						type="button"
-						class="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
-						data-wp-on--click="actions.onClickMoveToCart"
-						data-wp-bind--disabled="state.isCurrentItemPending"
-					>
-						<?php echo esc_html( $this->get_move_to_cart_label() ); ?>
-					</button>
-				</div>
-			</li>
-		</template>
-		<?php
-		return (string) ob_get_clean();
+		$row_inner = ShopperListRenderer::render_template_common_row()
+			. $this->render_template_quantity()
+			. $this->render_template_move_to_cart();
+		return ShopperListRenderer::render_each_template( $row_inner );
 	}
 
 	/**
@@ -372,131 +321,101 @@ final class SavedForLater extends AbstractBlock {
 	}
 
 	/**
-	 * Render a single SSR item.
+	 * Render a single SSR item. Composes the shared image / name / price
+	 * markup with the SFL-specific quantity span and Move-to-cart button.
 	 *
 	 * @param array<string, mixed> $item Schema-shape item.
 	 * @return string
 	 */
 	private function render_item_markup( array $item ): string {
-		$is_live         = ! empty( $item['is_live'] );
-		$is_purchasable  = ! empty( $item['is_purchasable'] );
-		$name            = (string) ( $item['name'] ?? '' );
-		$permalink       = (string) ( $item['permalink'] ?? '' );
-		$quantity        = (int) ( $item['quantity'] ?? 1 );
-		$alt             = html_entity_decode( $name, ENT_QUOTES, 'UTF-8' );
-		$image_html      = (string) ( $item['image_html'] ?? '' );
-		$price_html      = (string) ( $item['price_html'] ?? '' );
-		$variation_label = $this->get_variation_label( $item );
+		$row_inner = ShopperListRenderer::render_ssr_common_row( $item, $this->get_remove_label_template() )
+			. $this->render_ssr_quantity( $item )
+			. $this->render_ssr_move_to_cart( $item );
+		return ShopperListRenderer::render_each_child( $item, $row_inner );
+	}
 
-		$quantity_label = sprintf( $this->get_quantity_label_template(), $quantity );
-		$remove_aria    = sprintf( $this->get_remove_label_template(), $alt );
-
-		$is_price_hidden = '' === $price_html;
-
-		$context = array(
-			'listItem' => $item,
+	/**
+	 * Template-mode markup for the quantity span. SFL-specific — Wishlist
+	 * has no quantity column.
+	 *
+	 * @return string
+	 */
+	private function render_template_quantity(): string {
+		return sprintf(
+			'<span class="%s__quantity" data-wp-text="state.currentItemQuantityLabel"></span>',
+			esc_attr( ShopperListRenderer::ROW_CLASS )
 		);
+	}
 
+	/**
+	 * Template-mode markup for the Move-to-cart action button. SFL-specific.
+	 *
+	 * @return string
+	 */
+	private function render_template_move_to_cart(): string {
 		ob_start();
 		?>
-		<li
-			class="wc-block-saved-for-later-item"
-			data-wp-each-child
-			<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			<?php echo wp_interactivity_data_wp_context( $context ); ?>
+		<div class="wp-block-button wc-block-components-product-button" data-wp-bind--hidden="state.isMoveToCartHidden">
+			<button
+				type="button"
+				class="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
+				data-wp-on--click="actions.onClickMoveToCart"
+				data-wp-bind--disabled="state.isCurrentItemPending"
+			>
+				<?php echo esc_html( $this->get_move_to_cart_label() ); ?>
+			</button>
+		</div>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * SSR-mode markup for the quantity span. SFL-specific.
+	 *
+	 * @param array<string, mixed> $item Schema-shape item.
+	 * @return string
+	 */
+	private function render_ssr_quantity( array $item ): string {
+		$quantity       = (int) ( $item['quantity'] ?? 1 );
+		$quantity_label = sprintf( $this->get_quantity_label_template(), $quantity );
+		return sprintf(
+			'<span class="%s__quantity">%s</span>',
+			esc_attr( ShopperListRenderer::ROW_CLASS ),
+			esc_html( $quantity_label )
+		);
+	}
+
+	/**
+	 * SSR-mode markup for the Move-to-cart action button. SFL-specific.
+	 * Always emits the wrapper so iAPI can toggle `hidden` after hydration
+	 * without swapping the row out. Starts hidden when the row isn't
+	 * purchasable.
+	 *
+	 * @param array<string, mixed> $item Schema-shape item.
+	 * @return string
+	 */
+	private function render_ssr_move_to_cart( array $item ): string {
+		$is_move_to_cart_hidden = empty( $item['is_purchasable'] );
+		ob_start();
+		?>
+		<div
+			class="wp-block-button wc-block-components-product-button"
+			data-wp-bind--hidden="state.isMoveToCartHidden"
+			<?php
+			if ( $is_move_to_cart_hidden ) {
+				echo 'hidden';
+			}
+			?>
 		>
-			<?php
-			// Emit the same structure as the `<template>` so iAPI
-			// hydration is a no-op diff. For tombstones the anchor's
-			// href is omitted (the anchor degrades to non-clickable
-			// rather than self-linking back to the current page).
-			// Image and price markup come pre-formatted from the
-			// schema (`image_html`, `price_html`) and are echoed into
-			// the watcher slots — the JS-side `updateInnerHtml`
-			// callback takes over after hydration to swap the slot's
-			// innerHTML when the row's context.listItem changes.
-			?>
-			<div class="wc-block-components-product-image wc-block-components-product-image--aspect-ratio-auto">
-				<a <?php echo $is_live && '' !== $permalink ? 'href="' . esc_url( $permalink ) . '"' : ''; ?> data-wp-bind--href="context.listItem.permalink">
-					<span
-						class="wc-block-saved-for-later-item__image-slot"
-						data-wp-context='{"htmlField":"image_html"}'
-						data-wp-watch="callbacks.updateInnerHtml"
-					>
-						<?php echo wp_kses_post( $image_html ); ?>
-					</span>
-				</a>
-				<button
-					type="button"
-					class="wc-block-saved-for-later-item__remove"
-					aria-label="<?php echo esc_attr( $remove_aria ); ?>"
-					data-wp-on--click="actions.onClickRemove"
-					data-wp-bind--aria-label="state.currentItemRemoveLabel"
-					data-wp-bind--disabled="state.isCurrentItemPending"
-				>
-					<?php echo $this->get_remove_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG markup. ?>
-				</button>
-				<span
-					class="wc-block-saved-for-later-item__variation"
-					data-wp-bind--hidden="!state.currentItemVariationLabel"
-					data-wp-text="state.currentItemVariationLabel"
-					<?php
-					if ( '' === $variation_label ) {
-						echo 'hidden';
-					}
-					?>
-				><?php echo esc_html( $variation_label ); ?></span>
-			</div>
-			<?php
-			// Render the decoded display name as plain text so the SSR
-			// output matches what `data-wp-text="state.currentItemDisplayName"`
-			// will write after hydration. Names like "Tom &amp; Jerry"
-			// must show as "Tom & Jerry" both before and after JS.
-			// Same single-anchor pattern as the image — href omitted
-			// for tombstones.
-			?>
-			<h2 class="wp-block-post-title has-text-align-center has-medium-font-size">
-				<a <?php echo $is_live && '' !== $permalink ? 'href="' . esc_url( $permalink ) . '"' : ''; ?> data-wp-bind--href="context.listItem.permalink" data-wp-text="state.currentItemDisplayName"><?php echo esc_html( $alt ); ?></a>
-			</h2>
-			<div
-				class="price wc-block-components-product-price has-text-align-center has-small-font-size"
-				data-wp-bind--hidden="state.isPriceHidden"
-				data-wp-context='{"htmlField":"price_html"}'
-				data-wp-watch="callbacks.updateInnerHtml"
-				<?php
-				if ( $is_price_hidden ) {
-					echo 'hidden';
-				}
-				?>
+			<button
+				type="button"
+				class="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
+				data-wp-on--click="actions.onClickMoveToCart"
+				data-wp-bind--disabled="state.isCurrentItemPending"
 			>
-				<?php echo wp_kses_post( $price_html ); ?>
-			</div>
-			<span class="wc-block-saved-for-later-item__quantity"><?php echo esc_html( $quantity_label ); ?></span>
-			<?php
-			// Always emit the wrapper so iAPI can toggle `hidden` after
-			// hydration without swapping the row out. Start hidden when
-			// the row isn't purchasable.
-			$is_move_to_cart_hidden = ! $is_purchasable;
-			?>
-			<div
-				class="wp-block-button wc-block-components-product-button"
-				data-wp-bind--hidden="state.isMoveToCartHidden"
-				<?php
-				if ( $is_move_to_cart_hidden ) {
-					echo 'hidden';
-				}
-				?>
-			>
-				<button
-					type="button"
-					class="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
-					data-wp-on--click="actions.onClickMoveToCart"
-					data-wp-bind--disabled="state.isCurrentItemPending"
-				>
-					<?php echo esc_html( $this->get_move_to_cart_label() ); ?>
-				</button>
-			</div>
-		</li>
+				<?php echo esc_html( $this->get_move_to_cart_label() ); ?>
+			</button>
+		</div>
 		<?php
 		return (string) ob_get_clean();
 	}
@@ -534,57 +453,16 @@ final class SavedForLater extends AbstractBlock {
 	 * @return string
 	 */
 	private function render_empty_markup(): string {
-		return sprintf(
-			'<li class="wc-block-saved-for-later__empty" data-wp-bind--hidden="!state.isEmpty" hidden>%s</li>',
-			esc_html__( 'Nothing saved yet — items you save from the cart will appear here.', 'woocommerce' )
+		return ShopperListRenderer::render_empty_state(
+			__( 'Nothing saved yet — items you save from the cart will appear here.', 'woocommerce' ),
+			'wc-block-saved-for-later__empty',
+			true
 		);
 	}
 
 	/**
-	 * Render the iAPI store-notices region. Mirrors
-	 * `AddToCartWithOptions::render_interactivity_notices_region()` —
-	 * keep in sync if the shape changes.
-	 *
-	 * @return string
-	 */
-	private function render_interactivity_notices_region(): string {
-		ob_start();
-		?>
-		<div class="wc-block-saved-for-later__notices wc-block-components-notices" data-wp-interactive="woocommerce/store-notices" data-wp-bind--hidden="!context.notices.length" hidden>
-			<template data-wp-each--notice="context.notices" data-wp-each-key="context.notice.id">
-				<div
-					class="wc-block-components-notice-banner"
-					data-wp-class--is-error="state.isError"
-					data-wp-class--is-success="state.isSuccess"
-					data-wp-class--is-info="state.isInfo"
-					data-wp-class--is-dismissible="context.notice.dismissible"
-					data-wp-bind--role="state.role"
-					data-wp-watch="callbacks.injectIcon"
-				>
-					<div class="wc-block-components-notice-banner__content">
-						<span data-wp-init="callbacks.renderNoticeContent" aria-live="assertive" aria-atomic="true"></span>
-					</div>
-					<button
-						type="button"
-						data-wp-bind--hidden="!context.notice.dismissible"
-						class="wc-block-components-button wp-element-button wc-block-components-notice-banner__dismiss contained"
-						aria-label="<?php esc_attr_e( 'Dismiss this notice', 'woocommerce' ); ?>"
-						data-wp-on--click="actions.removeNotice"
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-							<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z" />
-						</svg>
-					</button>
-				</div>
-			</template>
-		</div>
-		<?php
-		return (string) ob_get_clean();
-	}
-
-	/**
 	 * Sprintf template for the per-row quantity label. Used both by PHP SSR
-	 * (`render_item_markup()`) and by the JS-side getter (via
+	 * (`render_ssr_quantity()`) and by the JS-side getter (via
 	 * `wp_interactivity_config`) so both paths produce the same string after
 	 * `%d` interpolation.
 	 */
@@ -608,45 +486,6 @@ final class SavedForLater extends AbstractBlock {
 	 */
 	private function get_move_to_cart_label(): string {
 		return __( 'Move to cart', 'woocommerce' );
-	}
-
-	/**
-	 * Markup for the trash icon used in the remove-item button. Mirrors the
-	 * `trash` icon from `@wordpress/icons` that the cart line item uses for
-	 * `wc-block-cart-item__remove-link`, inlined here so SSR first paint
-	 * matches what JS would render after hydration. `currentColor` lets the
-	 * surrounding badge wrapper drive the fill.
-	 *
-	 * @return string
-	 */
-	private function get_remove_icon_svg(): string {
-		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12 5.5A2.25 2.25 0 0 0 9.878 7h4.244A2.251 2.251 0 0 0 12 5.5ZM12 4a3.751 3.751 0 0 0-3.675 3H5v1.5h1.27l.818 8.997a2.75 2.75 0 0 0 2.739 2.501h4.347a2.75 2.75 0 0 0 2.738-2.5L17.73 8.5H19V7h-3.325A3.751 3.751 0 0 0 12 4Zm4.224 4.5H7.776l.806 8.861a1.25 1.25 0 0 0 1.245 1.137h4.347a1.25 1.25 0 0 0 1.245-1.137l.805-8.861Z"/></svg>';
-	}
-
-	/**
-	 * Build a comma-separated variation label like "Color: Blue, Size: M".
-	 *
-	 * @param array<string, mixed> $item Schema-shape item.
-	 * @return string
-	 */
-	private function get_variation_label( array $item ): string {
-		$variation = $item['variation'] ?? array();
-		if ( ! is_array( $variation ) || empty( $variation ) ) {
-			return '';
-		}
-		$parts = array();
-		foreach ( $variation as $entry ) {
-			if ( ! is_array( $entry ) ) {
-				continue;
-			}
-			$attribute = isset( $entry['attribute'] ) ? html_entity_decode( (string) $entry['attribute'], ENT_QUOTES, 'UTF-8' ) : '';
-			$value     = isset( $entry['value'] ) ? html_entity_decode( (string) $entry['value'], ENT_QUOTES, 'UTF-8' ) : '';
-			if ( '' === $attribute && '' === $value ) {
-				continue;
-			}
-			$parts[] = $attribute . ': ' . $value;
-		}
-		return implode( ', ', $parts );
 	}
 
 	/**
