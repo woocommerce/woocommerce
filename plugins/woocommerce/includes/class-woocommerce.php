@@ -30,6 +30,7 @@ use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
+use Automattic\WooCommerce\Internal\Email\EmailLogger;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
@@ -323,7 +324,7 @@ final class WooCommerce {
 		add_action( 'load-post.php', array( $this, 'includes' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( $this, 'maybe_init_order_reviews' ), 1 );
-		add_action( 'init', array( $this, 'maybe_init_checkout_recovery' ), 1 );
+		add_action( 'init', array( $this, 'maybe_init_abandoned_cart_recovery' ), 1 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
@@ -397,6 +398,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
+		$container->get( EmailLogger::class )->register();
 		$container->get( Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Agentic\AgenticController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
@@ -416,7 +418,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
 
 		// Code+GraphQL API.
-		Automattic\WooCommerce\Internal\Api\Main::register();
+		Automattic\WooCommerce\Api\Infrastructure\Main::register();
 
 		// Integration point between legacy reports and orders APIs (the reports caches invalidation focused).
 		\WC_Admin_Reports::register_orders_hook_handlers();
@@ -982,7 +984,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Resolve the CheckoutRecovery services when the `checkout_recovery`
+	 * Resolve the AbandonedCartRecovery services when the `abandoned_cart_recovery`
 	 * feature flag is on. Hooked to `init` priority 1 from `init_hooks()`
 	 * so the order-edit action listener is registered before
 	 * `WC_Meta_Box_Order_Actions::save()` dispatches its hook on POST.
@@ -990,14 +992,14 @@ final class WooCommerce {
 	 * @since 10.9.0
 	 * @internal
 	 */
-	public function maybe_init_checkout_recovery(): void {
-		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'checkout_recovery' ) ) {
+	public function maybe_init_abandoned_cart_recovery(): void {
+		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'abandoned_cart_recovery' ) ) {
 			return;
 		}
 		$container = wc_get_container();
 		$container->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class );
 		$container->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Endpoint::class );
-		$container->get( \Automattic\WooCommerce\Internal\CheckoutRecovery\ManualSendHandler::class );
+		$container->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\ManualSendHandler::class );
 	}
 
 	/**

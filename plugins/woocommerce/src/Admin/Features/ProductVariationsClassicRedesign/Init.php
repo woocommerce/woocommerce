@@ -25,6 +25,7 @@ class Init {
 		}
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ), 20 );
+		add_filter( 'woocommerce_product_data_tabs', array( $this, 'handle_woocommerce_product_data_tabs' ), 5 );
 	}
 
 	/**
@@ -42,6 +43,26 @@ class Init {
 		// phpcs:disable WordPress.Security.NonceVerification
 		return isset( $_GET['edit_variation'] ) && is_numeric( $_GET['edit_variation'] );
 		// phpcs:enable WordPress.Security.NonceVerification
+	}
+
+	/**
+	 * Handle the woocommerce_product_data_tabs filter.
+	 *
+	 * @internal
+	 *
+	 * @param array $tabs Product data tabs.
+	 * @return array Product data tabs.
+	 */
+	public function handle_woocommerce_product_data_tabs( array $tabs ): array {
+		if ( isset( $tabs['variations'] ) && is_array( $tabs['variations'] ) ) {
+			$tabs['variations']['priority'] = 40;
+		}
+
+		if ( isset( $tabs['linked_product'] ) && is_array( $tabs['linked_product'] ) ) {
+			$tabs['linked_product']['priority'] = 60;
+		}
+
+		return $tabs;
 	}
 
 	/**

@@ -81,6 +81,7 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'tax_status',
 	'upsell_ids',
 	'cross_sell_ids',
+	'grouped_products',
 	'linked_products_count',
 ] as const;
 
@@ -119,11 +120,6 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 		'regular_price',
 		'sale_price',
 		'schedule_sale',
-		{
-			id: 'sale-schedule-dates',
-			layout: { type: 'row' as const },
-			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
-		},
 		'cost_of_goods_sold',
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
@@ -133,7 +129,7 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'inventory-fields',
 		__( 'Inventory', 'woocommerce' ),
-		[ 'sku', 'stock', 'manage_stock', 'stock_quantity' ]
+		[ 'sku', 'manage_stock', 'stock', 'stock_quantity' ]
 	),
 	createProductEditFormGroup(
 		'product-organization-fields',
@@ -157,11 +153,6 @@ const VARIATION_PRODUCT_EDIT_FORM_FIELDS = [
 		'regular_price',
 		'sale_price',
 		'schedule_sale',
-		{
-			id: 'sale-schedule-dates',
-			layout: { type: 'row' as const },
-			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
-		},
 		'cost_of_goods_sold',
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
@@ -216,11 +207,6 @@ const EXTERNAL_PRODUCT_EDIT_FORM_FIELDS = [
 		'regular_price',
 		'sale_price',
 		'schedule_sale',
-		{
-			id: 'sale-schedule-dates',
-			layout: { type: 'row' as const },
-			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
-		},
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
@@ -246,7 +232,7 @@ const GROUPED_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'general-fields',
 		__( 'General', 'woocommerce' ),
-		[ 'name', 'product_status', 'catalog_visibility', 'upsell_ids' ]
+		[ 'name', 'product_status', 'catalog_visibility', 'grouped_products' ]
 	),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
@@ -283,6 +269,7 @@ const PARENT_OWNED_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
 	'featured',
 	'upsell_ids',
 	'cross_sell_ids',
+	'grouped_products',
 	'external_url',
 	'button_text',
 ] );

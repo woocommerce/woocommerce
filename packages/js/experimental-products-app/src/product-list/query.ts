@@ -8,8 +8,14 @@ import type {
 	ProductType,
 } from '@woocommerce/data';
 
-export type ProductListQuery = Omit< ProductQuery, 'status' > & {
+type ProductStockStatus = 'instock' | 'outofstock' | 'onbackorder';
+
+export type ProductListQuery = Omit<
+	ProductQuery,
+	'status' | 'stock_status'
+> & {
 	status?: ProductStatus | ProductStatus[];
+	stock_status?: ProductStockStatus | ProductStockStatus[];
 	_embed?: number;
 	search_name_or_sku?: string;
 	exclude_status?: ProductStatus[];
@@ -45,15 +51,17 @@ function getStringValues( value: unknown ): string[] {
 
 function getNumericValues( value: unknown ): number[] {
 	const values = Array.isArray( value ) ? value : [ value ];
-	return values.map( ( item ) => {
-		if ( typeof item === 'number' ) {
-			return item;
-		}
-		if ( typeof item === 'string' ) {
-			return Number( item );
-		}
-		return Number.NaN;
-	} );
+	return values
+		.map( ( item ) => {
+			if ( typeof item === 'number' ) {
+				return item;
+			}
+			if ( typeof item === 'string' && item.trim() !== '' ) {
+				return Number( item );
+			}
+			return Number.NaN;
+		} )
+		.filter( Number.isFinite );
 }
 
 function getPriceValue( value: unknown ): string | undefined {
@@ -139,10 +147,13 @@ function applyBrandFilter( query: ProductListQuery, filter: Filter ) {
 }
 
 function applyStockFilter( query: ProductListQuery, filter: Filter ) {
-	const [ stockStatus ] = getStringValues( filter.value );
+	const stockStatuses = getStringValues(
+		filter.value
+	) as ProductStockStatus[];
 
-	if ( stockStatus ) {
-		query.stock_status = stockStatus as ProductListQuery[ 'stock_status' ];
+	if ( stockStatuses.length > 0 ) {
+		query.stock_status =
+			stockStatuses.length === 1 ? stockStatuses[ 0 ] : stockStatuses;
 	}
 }
 

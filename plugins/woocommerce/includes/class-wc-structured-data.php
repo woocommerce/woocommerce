@@ -418,11 +418,14 @@ class WC_Structured_Data {
 					'url'   => $shop_url,
 				),
 			);
+			if ( 'Offer' === $markup_offer['@type'] && empty( $markup_offer['price'] ) && ! empty( $markup_offer['priceSpecification'][0]['price'] ) ) {
+				$markup_offer['price'] = $markup_offer['priceSpecification'][0]['price'];
+			}
 			if (
 				( ! empty( $markup_offer['price'] ) ||
 					! empty( $markup_offer['lowPrice'] ) ||
 					! empty( $markup_offer['highPrice'] )
-				) && empty( $markup_offer['priceCurrency'] )
+				)
 			) {
 				$markup_offer['priceCurrency'] = $currency;
 			}
