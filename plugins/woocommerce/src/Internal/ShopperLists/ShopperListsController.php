@@ -149,9 +149,12 @@ final class ShopperListsController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Placeholder rendered until the wishlist block variation lands.
+	 * Render the wishlist endpoint by dispatching to the
+	 * `woocommerce/wishlist` block. The block handles the empty state,
+	 * logged-out guard, asset enqueues, and item rendering.
 	 */
 	public function render_wishlist_endpoint(): void {
-		echo '<p>' . esc_html__( 'Your wishlist is empty.', 'woocommerce' ) . '</p>';
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the block string is a static literal; `do_blocks()` returns escaped HTML.
+		echo do_blocks( '<!-- wp:woocommerce/wishlist /-->' );
 	}
 }
