@@ -1,36 +1,24 @@
 /**
  * External dependencies
  */
-import { store as coreStore } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
+import { useEntityRecord } from '@wordpress/core-data';
 
 import type { Field } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
  */
-import type { ProductEntityRecord } from '../types';
+import type { ProductEntityRecord, SettingsEntityRecord } from '../types';
 
 const ShippingSummaryRender = ( { item }: { item: ProductEntityRecord } ) => {
 	const {
 		record: storeProductsSettings,
 		isResolving: storeProductsSettingsResolving,
-	} = useSelect( ( select ) => {
-		const coreSelect = select( coreStore );
-
-		return {
-			record: coreSelect.getEntityRecord(
-				'root',
-				'settings',
-				'products'
-			),
-			isResolving: coreSelect.isResolving( 'getEntityRecord', [
-				'root',
-				'settings',
-				'products',
-			] ),
-		};
-	}, [] );
+	} = useEntityRecord< SettingsEntityRecord >(
+		'root',
+		'settings',
+		'products'
+	);
 
 	if ( storeProductsSettingsResolving ) {
 		return null;

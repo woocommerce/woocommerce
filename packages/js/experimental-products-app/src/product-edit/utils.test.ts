@@ -176,6 +176,10 @@ describe( 'product edit utils', () => {
 				},
 			} ),
 		];
+		const bulkData = buildProductBulkEditData(
+			products,
+			getProductEditFields( productFields )
+		);
 
 		expect( buildMergedProductEditData( products ) ).toEqual(
 			expect.objectContaining( {
@@ -186,6 +190,24 @@ describe( 'product edit utils', () => {
 				},
 			} )
 		);
+		expect( bulkData.fieldStates.length ).toEqual( {
+			isEmpty: false,
+			isMixed: false,
+			placeholder: undefined,
+			value: '12',
+		} );
+		expect( bulkData.fieldStates.width ).toEqual( {
+			isEmpty: false,
+			isMixed: true,
+			placeholder: 'Mixed',
+			value: undefined,
+		} );
+		expect( bulkData.fieldStates.height ).toEqual( {
+			isEmpty: false,
+			isMixed: false,
+			placeholder: undefined,
+			value: '3',
+		} );
 	} );
 
 	it( 'returns bulk field state for mixed values', () => {
@@ -194,11 +216,13 @@ describe( 'product edit utils', () => {
 				id: 1,
 				name: 'Beanie',
 				status: 'publish',
+				weight: '1',
 			} ),
 			buildProduct( {
 				id: 2,
 				name: 'Hoodie',
 				status: 'draft',
+				weight: '2',
 			} ),
 		];
 
@@ -215,6 +239,12 @@ describe( 'product edit utils', () => {
 			value: undefined,
 		} );
 		expect( bulkData.fieldStates.product_status ).toEqual( {
+			isEmpty: false,
+			isMixed: true,
+			placeholder: 'Mixed',
+			value: undefined,
+		} );
+		expect( bulkData.fieldStates.weight ).toEqual( {
 			isEmpty: false,
 			isMixed: true,
 			placeholder: 'Mixed',

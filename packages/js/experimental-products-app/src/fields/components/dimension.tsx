@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { store as coreStore } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
+import { useEntityRecord } from '@wordpress/core-data';
 
 import type { Field } from '@wordpress/dataviews';
 import { InputControl, InputLayout } from '@wordpress/ui';
@@ -10,7 +9,7 @@ import { InputControl, InputLayout } from '@wordpress/ui';
 /**
  * Internal dependencies
  */
-import type { ProductEntityRecord } from '../types';
+import type { ProductEntityRecord, SettingsEntityRecord } from '../types';
 
 export type DimensionKey = 'height' | 'width' | 'length';
 
@@ -35,22 +34,11 @@ export const createDimensionField = (
 			const {
 				record: storeProductsSettings,
 				isResolving: storeProductsSettingsResolving,
-			} = useSelect( ( select ) => {
-				const coreSelect = select( coreStore );
-
-				return {
-					record: coreSelect.getEntityRecord(
-						'root',
-						'settings',
-						'products'
-					),
-					isResolving: coreSelect.isResolving( 'getEntityRecord', [
-						'root',
-						'settings',
-						'products',
-					] ),
-				};
-			}, [] );
+			} = useEntityRecord< SettingsEntityRecord >(
+				'root',
+				'settings',
+				'products'
+			);
 
 			if ( storeProductsSettingsResolving ) {
 				return null;
@@ -62,6 +50,7 @@ export const createDimensionField = (
 			return (
 				<InputControl
 					label={ field.label }
+					placeholder={ field.placeholder }
 					value={ dimensions[ key ] ?? '' }
 					onChange={ ( event ) => {
 						onChange( {

@@ -6,11 +6,7 @@ import type { DataFormControlProps } from '@wordpress/dataviews';
 import React from 'react';
 
 jest.mock( '@wordpress/core-data', () => ( {
-	store: {},
-} ) );
-
-jest.mock( '@wordpress/data', () => ( {
-	useSelect: jest.fn( () => ( {
+	useEntityRecord: jest.fn( () => ( {
 		record: {
 			values: {
 				woocommerce_dimension_unit: 'cm',
@@ -27,11 +23,13 @@ jest.mock( '@wordpress/ui', () => {
 		InputControl: ( {
 			label,
 			onChange,
+			placeholder,
 			suffix,
 			value,
 		}: {
 			label: string;
 			onChange: React.ChangeEventHandler< HTMLInputElement >;
+			placeholder?: string;
 			suffix?: React.ReactNode;
 			value?: string;
 		} ) =>
@@ -42,6 +40,7 @@ jest.mock( '@wordpress/ui', () => {
 				ReactActual.createElement( 'input', {
 					'aria-label': label,
 					onChange,
+					placeholder,
 					value: value ?? '',
 				} ),
 				suffix
@@ -61,7 +60,11 @@ import type { ProductEntityRecord } from '../types';
 import { createDimensionField } from './dimension';
 
 describe( 'dimension field', () => {
-	const renderEdit = ( data: ProductEntityRecord, onChange = jest.fn() ) => {
+	const renderEdit = (
+		data: ProductEntityRecord,
+		onChange = jest.fn(),
+		placeholder?: string
+	) => {
 		const fieldExtensions = createDimensionField( 'length' );
 
 		if ( ! fieldExtensions.Edit ) {
@@ -80,6 +83,7 @@ describe( 'dimension field', () => {
 						...fieldExtensions,
 						id: 'length',
 						label: 'Length',
+						placeholder,
 					} as DataFormControlProps< ProductEntityRecord >[ 'field' ]
 				}
 				onChange={ onChange }
@@ -112,5 +116,26 @@ describe( 'dimension field', () => {
 				length: '12',
 			},
 		} );
+	} );
+
+	it( 'renders the mixed placeholder when provided', () => {
+		renderEdit(
+			{
+				id: 12,
+				name: 'Beanie',
+				dimensions: {
+					length: '',
+					width: '',
+					height: '',
+				},
+			} as ProductEntityRecord,
+			jest.fn(),
+			'Mixed'
+		);
+
+		expect( screen.getByLabelText( 'Length' ) ).toHaveAttribute(
+			'placeholder',
+			'Mixed'
+		);
 	} );
 } );

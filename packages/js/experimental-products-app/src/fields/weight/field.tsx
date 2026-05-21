@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { store as coreStore } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
+import { useEntityRecord } from '@wordpress/core-data';
 import { InputControl, InputLayout } from '@wordpress/ui';
 import type { Field } from '@wordpress/dataviews';
 
@@ -11,7 +10,7 @@ import type { Field } from '@wordpress/dataviews';
  * Internal dependencies
  */
 
-import type { ProductEntityRecord } from '../types';
+import type { ProductEntityRecord, SettingsEntityRecord } from '../types';
 import { isDimensionVisible } from '../components/dimension';
 
 const fieldDefinition = {
@@ -30,22 +29,11 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		const {
 			record: storeProductsSettings,
 			isResolving: storeProductsSettingsResolving,
-		} = useSelect( ( select ) => {
-			const coreSelect = select( coreStore );
-
-			return {
-				record: coreSelect.getEntityRecord(
-					'root',
-					'settings',
-					'products'
-				),
-				isResolving: coreSelect.isResolving( 'getEntityRecord', [
-					'root',
-					'settings',
-					'products',
-				] ),
-			};
-		}, [] );
+		} = useEntityRecord< SettingsEntityRecord >(
+			'root',
+			'settings',
+			'products'
+		);
 
 		if ( storeProductsSettingsResolving ) {
 			return null;
@@ -57,6 +45,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		return (
 			<InputControl
 				label={ field.label }
+				placeholder={ field.placeholder }
 				value={ data.weight }
 				onChange={ ( event ) =>
 					onChange( { weight: event.target.value } )
