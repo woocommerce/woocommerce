@@ -1,7 +1,38 @@
 .woocommerce-fields-field__downloadable {
-	// Override the WordPress button styles.
-	button.woocommerce-fields-field__downloadable-upload-button.components-button {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+
+	&-file {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding-bottom: 16px;
+		border-bottom: 1px solid #e0e0e0;
+	}
+
+	&-url-row {
+		display: flex;
+		align-items: flex-end;
+		gap: 8px;
+
+		.components-base-control {
+			flex: 1;
+			margin-bottom: 0;
+		}
+	}
+
+	&-choose-file.components-button {
+		flex-shrink: 0;
+		height: 36px;
+	}
+
+	&-remove.components-button {
+		align-self: flex-start;
+	}
+
+	&-add.components-button {
 		color: #3858e9;
-		box-shadow: none;
+		align-self: flex-start;
 	}
 }
