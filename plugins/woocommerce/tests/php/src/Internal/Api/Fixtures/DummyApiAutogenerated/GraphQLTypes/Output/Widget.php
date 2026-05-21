@@ -72,14 +72,8 @@ class Widget {
 							'description' => __( 'Priority assigned to this widget', 'woocommerce' ),
 						),
 						'tag_ids'          => array(
-							'type'          => Type::nonNull( Type::listOf( Type::nonNull( Type::int() ) ) ),
-							'description'   => __( 'Tag IDs assigned to this widget', 'woocommerce' ),
-							'authorization' => array(
-								array(
-									'attribute' => 'PublicAccess',
-									'args'      => array(),
-								),
-							),
+							'type'        => Type::nonNull( Type::listOf( Type::nonNull( Type::int() ) ) ),
+							'description' => __( 'Tag IDs assigned to this widget', 'woocommerce' ),
 						),
 						'featured_reviews' => array(
 							'type'        => Type::nonNull( Type::listOf( Type::nonNull( WidgetReview::get() ) ) ),

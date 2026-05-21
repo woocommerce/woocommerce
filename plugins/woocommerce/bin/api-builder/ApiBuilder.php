@@ -1402,15 +1402,36 @@ class ApiBuilder {
 			$usages[] = $usage;
 		}
 
+		// Descriptors advertised through `_apiMetadata` must mirror the
+		// *effective* gates: a no-op #[PublicAccess] on a field is dropped from
+		// $usages above, so drop it from the descriptors too — otherwise
+		// discovery would advertise a gate that never runs. $usages and the
+		// harvested descriptors are parallel (one per authorization attribute)
+		// and #[PublicAccess] is the only no-op, so keeping the descriptors whose
+		// attribute short name survives in $usages preserves every real gate and
+		// removes only the ignored ones.
+		$effective_shorts = array();
+		foreach ( $usages as $u ) {
+			$fqcn                       = $u['fqcn'];
+			$short                      = ( false !== strrpos( $fqcn, '\\' ) ) ? substr( $fqcn, strrpos( $fqcn, '\\' ) + 1 ) : $fqcn;
+			$effective_shorts[ $short ] = true;
+		}
+		$descriptors = array_values(
+			array_filter(
+				array_merge(
+					$this->harvest_authorization_descriptors( $prop ),
+					$type_level_descriptors,
+				),
+				static fn( array $d ): bool => isset( $effective_shorts[ $d['attribute'] ] ),
+			)
+		);
+
 		if ( empty( $usages ) ) {
 			return array(
 				'usages'                => array(),
 				'attribute_expr'        => 'true',
 				'first_attribute_short' => null,
-				'descriptors'           => array_merge(
-					$this->harvest_authorization_descriptors( $prop ),
-					$type_level_descriptors,
-				),
+				'descriptors'           => $descriptors,
 			);
 		}
 
@@ -1449,10 +1470,7 @@ class ApiBuilder {
 			'usages'                => $usages,
 			'attribute_expr'        => implode( ' && ', $expressions ),
 			'first_attribute_short' => $first_short,
-			'descriptors'           => array_merge(
-				$this->harvest_authorization_descriptors( $prop ),
-				$type_level_descriptors,
-			),
+			'descriptors'           => $descriptors,
 		);
 	}
 
