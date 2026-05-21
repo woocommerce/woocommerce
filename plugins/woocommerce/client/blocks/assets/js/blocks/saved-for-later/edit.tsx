@@ -24,8 +24,8 @@ const MIN_COLUMNS = 2;
 const MAX_COLUMNS = 6;
 
 // Lives in JS because `__()` is needed for the heading copy. `block.json`
-// strings aren't run through translation, so keeping the template here
-// is the only way to ship a localized default.
+// literals are not passed through the translation pipeline at runtime, so a
+// localized default template must be declared here.
 const TEMPLATE: [ string, Record< string, unknown > ][] = [
 	[
 		'core/heading',
@@ -85,11 +85,9 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 		className: 'wc-block-saved-for-later',
 	} );
 
-	// `allowedBlocks` is read from block.json automatically — passing it
-	// here would just duplicate the declaration. `templateLock: false`
-	// is the default so we omit that too. The className matches the
-	// `<div>` PHP wraps `$content` in on the frontend, so any CSS keyed
-	// off `__header` applies in both contexts.
+	// `allowedBlocks` is read from block.json; `templateLock: false` is the
+	// default. The className matches the `<div>` PHP wraps `$content` in on
+	// the frontend, so `__header`-keyed CSS applies in both contexts.
 	const innerBlocksProps = useInnerBlocksProps(
 		{ className: 'wc-block-saved-for-later__header' },
 		{ template: TEMPLATE }

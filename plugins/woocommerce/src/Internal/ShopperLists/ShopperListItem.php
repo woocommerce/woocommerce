@@ -245,7 +245,7 @@ class ShopperListItem {
 	}
 
 	/**
-	 * Storage key — also used as the response identifier.
+	 * Storage key; also used as the response identifier.
 	 */
 	public function get_key(): string {
 		return $this->key;
@@ -331,9 +331,9 @@ class ShopperListItem {
 
 	/**
 	 * Whether the product can be added to the cart. Mirrors the catalog gate
-	 * (`is_purchasable()` && `is_in_stock()`), but additionally requires the
-	 * row to be live and rejects password-gated products (self or parent) —
-	 * cart-add can't prompt for a password.
+	 * (`is_purchasable()` && `is_in_stock()`) and additionally requires the row
+	 * to be live. Password-gated products (self or parent) are rejected because
+	 * the cart-add flow cannot prompt for a password.
 	 */
 	public function is_purchasable(): bool {
 		$product = $this->get_product();

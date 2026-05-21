@@ -54,9 +54,8 @@ type BlockStore = {
 };
 
 // Allow-list for sanitizing the schema's preformatted strings on innerHTML
-// swap. Covers what `wc_price` (sale/discount markup, currency symbol) and
-// `wp_get_attachment_image` / `wc_placeholder_img` emit (responsive image
-// + dimensions + lazy loading).
+// swap. Covers the markup emitted by `wc_price` and
+// `wp_get_attachment_image` / `wc_placeholder_img`.
 const ALLOWED_TAGS = [
 	'a',
 	'b',
@@ -224,12 +223,11 @@ store< BlockStore >(
 				}
 
 				// Map the schema's `variation` shape to the cart's
-				// SelectedAttributes shape. The schema returns the
-				// slug-form attribute under `raw_attribute` (e.g.
-				// `attribute_pa_color`) plus a display label under
-				// `attribute` (e.g. "Color"); the cart matches by the
-				// slug-form, so override `attribute` with `raw_attribute`.
-				// Empty for simple products.
+				// `SelectedAttributes` shape. The schema exposes the slug-form
+				// attribute under `raw_attribute` and a display label under
+				// `attribute`. The cart matches by the slug form, so
+				// `attribute` is overridden with `raw_attribute`. Empty for
+				// simple products.
 				const variation = listItem.variation.map(
 					( { raw_attribute: rawAttribute, value, attribute } ) => ( {
 						attribute: rawAttribute || attribute,
@@ -239,13 +237,12 @@ store< BlockStore >(
 				const isVariation = listItem.variation_id > 0;
 
 				// Wishlist always adds quantity 1 (no quantity column).
-				// `cartActions.addCartItem` catches its own errors and
-				// surfaces them as store notices, so the yield resolves
-				// the same way on success and failure. Snapshot the
-				// matching line's quantity, run the add, then only remove
-				// from the wishlist if the cart line actually grew — that
-				// guards against partial-stock and silent-failure paths
-				// where the wishlist entry should not be removed.
+				// `cartActions.addCartItem` catches its own errors and surfaces
+				// them as store notices, so the yield resolves identically on
+				// success and failure. Snapshot the matching line's quantity,
+				// run the add, then remove from the wishlist only if the cart
+				// line actually grew. Guards against partial-stock and
+				// silent-failure paths where the wishlist entry must remain.
 				const lookup = {
 					id: listItem.id,
 					...( isVariation && { variation } ),
@@ -280,16 +277,13 @@ store< BlockStore >(
 		},
 
 		callbacks: {
-			// Single shared innerHTML-swap callback for any slot whose
-			// content is one of the schema's preformatted HTML fields.
-			// Mirrors the atomic product-elements `updateValue` callback:
-			// the watched element carries `data-wp-context='{"htmlField":"price_html"}'`
-			// (or `"image_html"`), and this callback reads that field
-			// off the row's `listItem` and pastes its sanitized HTML into
-			// `element.ref`. PHP renders the same HTML server-side, so
-			// hydration is a no-op when the row's listItem hasn't changed,
-			// and a clean swap when it has (e.g. after Remove shifts the
-			// next item into this slot).
+			// Shared innerHTML-swap callback for slots whose content is one of
+			// the schema's preformatted HTML fields. The watched element
+			// carries `data-wp-context='{"htmlField":"price_html"}'` (or
+			// `"image_html"`); this reads the named field off the row's
+			// `listItem` and writes its sanitized HTML into `element.ref`.
+			// PHP renders the same HTML server-side, so hydration is a no-op
+			// until the row's `listItem` changes.
 			updateInnerHtml: () => {
 				const { ref } = getElement();
 				const { listItem, htmlField } = getContext< BlockContext >();

@@ -76,11 +76,9 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 		className: 'wc-block-wishlist',
 	} );
 
-	// `allowedBlocks` is read from block.json automatically — passing it
-	// here would just duplicate the declaration. `templateLock: false`
-	// is the default so we omit that too. The className matches the
-	// `<div>` PHP wraps `$content` in on the frontend, so any CSS keyed
-	// off `__header` applies in both contexts.
+	// `allowedBlocks` is read from block.json; `templateLock: false` is the
+	// default. The className matches the `<div>` PHP wraps `$content` in on
+	// the frontend, so `__header`-keyed CSS applies in both contexts.
 	const innerBlocksProps = useInnerBlocksProps(
 		{ className: 'wc-block-wishlist__header' },
 		{ template: TEMPLATE }

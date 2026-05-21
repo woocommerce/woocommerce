@@ -7,11 +7,9 @@ import type { CurrencyResponse } from '@woocommerce/types';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
 /**
- * Mirror of `Automattic\WooCommerce\StoreApi\Schemas\V1\ShopperListItemSchema::get_properties()`.
- *
- * Keep this in sync with the schema. State here must not include any UI-derived
- * fields — display values belong in block-private stores or PHP SSR.
- * TO DO: decide where UI-derived state lives
+ * Mirror of {@see \Automattic\WooCommerce\StoreApi\Schemas\V1\ShopperListItemSchema::get_properties()}.
+ * Keep in sync with the schema. UI-derived fields do not belong here; display
+ * values are kept in block-private stores or rendered server-side.
  */
 export type ShopperListItemImage = {
 	id: number;
@@ -70,14 +68,11 @@ export type AddItemPayload = {
 export type Store = {
 	state: {
 		restUrl: string;
-		// TODO: revisit nonce handling when we look at authentication for
-		// the shopper-lists routes. Today PHP seeds this via
-		// `wp_create_nonce( 'wc_store_api' )` and we refresh it from
-		// response headers (see restRequest below). Likely changes once
-		// the routes start enforcing nonces server-side: align with the
-		// cart store's bootstrap-from-response-header pattern, share the
-		// cart's `state.nonce` instead of duplicating, or move to a
-		// caching-friendlier transport.
+		// TODO: revisit nonce handling once the shopper-lists routes enforce
+		// authentication server-side. Currently seeded by PHP via
+		// `wp_create_nonce( 'wc_store_api' )` and refreshed from response
+		// headers in `restRequest`. May converge with the cart store's
+		// bootstrap-from-response-header pattern.
 		nonce: string;
 		lists: Record< string, ShopperListState >;
 	};
@@ -89,7 +84,7 @@ export type Store = {
 	};
 };
 
-// Stores are locked to prevent 3PD usage until the API is stable.
+// Locked to prevent third-party use until the API stabilizes.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
@@ -111,15 +106,10 @@ const ensureListState = (
 };
 
 /**
- * Send a Store API request following the cart store's auth shape:
- * Nonce header, `wc_store_api` action on the server side, cookie auth via
- * `credentials: 'include'`, and `cache: 'no-store'` so user-specific data is
- * never cached.
- *
- * The starter nonce is seeded by PHP via `wp_interactivity_state` and
- * refreshed from the `Nonce` response header on every subsequent request,
- * so the server-side enforcement (landing in a follow-up PR) can be
- * flipped on without rewriting the client.
+ * Send a Store API request using the cart store's auth shape: Nonce header
+ * (`wc_store_api` action), cookie auth via `credentials: 'include'`, and
+ * `cache: 'no-store'` for user-specific data. The nonce is seeded by PHP and
+ * refreshed from the `Nonce` response header on each reply.
  */
 async function restRequest< T >(
 	state: Store[ 'state' ],
@@ -166,11 +156,10 @@ async function restRequest< T >(
 	return json as T | null;
 }
 
-// Do NOT supply `nonce` / `restUrl` defaults here. iAPI's deep-merge has the
-// JS-supplied state win over the existing (PHP-seeded) state for primitives,
-// so an empty-string default would clobber the values seeded server-side via
-// `wp_interactivity_state`. State for those fields comes purely from PHP. Same
-// reason the cart store doesn't ship state defaults — see cart.ts.
+// Do not supply `nonce` / `restUrl` defaults here. iAPI's deep-merge lets
+// JS-supplied state win over PHP-seeded state for primitives, so an empty
+// default would clobber the values seeded via `wp_interactivity_state`. Both
+// fields are sourced exclusively from PHP.
 const { state, actions } = store< Store >(
 	'woocommerce/shopper-lists',
 	{
@@ -200,10 +189,10 @@ const { state, actions } = store< Store >(
 
 					// TODO: track in-flight mutation count and skip applying
 					// load results when mutations are pending, so a slow
-					// loadList cannot clobber a fresh add/remove.
+					// loadList cannot overwrite a fresh add or remove.
 					list.items = items;
 				} catch ( error ) {
-					// No user trigger to attach a banner to; log for ops.
+					// No user-initiated trigger to attach a banner to; logged for diagnostics.
 					// eslint-disable-next-line no-console
 					console.error( error );
 				} finally {
@@ -237,10 +226,9 @@ const { state, actions } = store< Store >(
 						);
 					}
 
-					// Merge the returned item by key — replace if present,
-					// append otherwise. Re-saving the same product POSTs
-					// twice and the server merges quantity, so we mirror
-					// that behaviour locally.
+					// Merge the returned item by key: replace if present, append
+					// otherwise. The server merges quantity on duplicate saves;
+					// this mirrors that behaviour client-side.
 					const existingIndex = list.items.findIndex(
 						( i ) => i.key === item.key
 					);
@@ -264,9 +252,9 @@ const { state, actions } = store< Store >(
 					return;
 				}
 
-				// Pessimistic remove: leave the row in place until the
-				// server confirms, so failures don't flash. Buttons are
-				// disabled meanwhile via the block's `pendingKeys`.
+				// Pessimistic remove: keep the row in place until the server
+				// confirms, to avoid a momentary disappearance on failure.
+				// Buttons are disabled in the meantime via `pendingKeys`.
 				try {
 					yield restRequest(
 						state,
@@ -280,7 +268,7 @@ const { state, actions } = store< Store >(
 					return;
 				}
 
-				// Re-find — the list may have mutated during the await.
+				// Re-find: the list may have mutated during the await.
 				const removedIndex = list.items.findIndex(
 					( i ) => i.key === key
 				);
@@ -289,7 +277,7 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			// Mirrors `cart.ts::showNoticeError`.
+			// Mirrors `cart.ts::showNoticeError`; keep in sync if the shape changes.
 			*showNoticeError( error: Error ): AsyncAction< void > {
 				yield import( '@woocommerce/stores/store-notices' );
 				const { actions: noticeActions } = store< StoreNotices >(
@@ -312,15 +300,11 @@ const { state, actions } = store< Store >(
 	{ lock: universalLock }
 );
 
-// Listen for shopper-list item additions emitted from the wp.data side (e.g.
-// the cart store's saveForLater thunk). Mirrors the cart's iAPI → wp.data
-// sync direction, which also ships a payload (`from_iAPI` carries
-// `quantityChanges`). The event carries the saved item directly so we can
-// splice it in without an extra GET — keeps the merge ordering deterministic
-// and avoids the loadList-vs-mutation race the iAPI store's loadList still
-// has a TODO about.
-//
-// Keeps the discriminator + payload contract in sync with
+// Receive shopper-list item additions emitted from the wp.data side (e.g.
+// the cart store's `saveForLater` thunk). The event carries the saved item
+// directly so it can be spliced in without an extra GET, avoiding the
+// loadList-vs-mutation race described in the TODO above. The discriminator
+// and payload shape must stay aligned with
 // `assets/js/data/cart/thunks.ts::saveForLater`.
 window.addEventListener( 'wc-blocks_store_sync_required', ( event: Event ) => {
 	const detail = ( event as CustomEvent ).detail as
