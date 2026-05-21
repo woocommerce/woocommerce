@@ -1127,6 +1127,7 @@ class OrdersTableQuery {
 				'transaction_id',
 				'ip_address',
 				'user_agent',
+				'customer_note',
 			),
 			array( $this, 'arg_isset' )
 		);
@@ -1267,7 +1268,6 @@ class OrdersTableQuery {
 				'discount_tax_amount',
 				'shipping_total_amount',
 				'shipping_tax_amount',
-				'customer_note',
 			),
 			array( $this, 'arg_isset' )
 		);
