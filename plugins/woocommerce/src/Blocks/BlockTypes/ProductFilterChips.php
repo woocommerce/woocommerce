@@ -44,8 +44,9 @@ final class ProductFilterChips extends AbstractBlock {
 		}
 
 		$wrapper_attributes = array(
-			'data-wp-interactive' => 'woocommerce/product-filter-chips',
-			'data-wp-context'     => (string) wp_json_encode(
+			'data-wp-interactive'  => 'woocommerce/product-filter-chips',
+			'data-wp-init--colors' => 'callbacks.initColors',
+			'data-wp-context'      => (string) wp_json_encode(
 				array(
 					'storeNamespace' => $store_namespace,
 					'displayLimit'   => $display_limit,
@@ -53,7 +54,7 @@ final class ProductFilterChips extends AbstractBlock {
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
-			'class'               => esc_attr( $classes ),
+			'class'                => esc_attr( $classes ),
 		);
 
 		if ( ! empty( $style ) ) {
