@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import type { Filter, View } from '@wordpress/dataviews';
-import { addQueryArgs } from '@wordpress/url';
+import { addQueryArgs, getQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -12,11 +11,21 @@ import { PRODUCT_LIST_TAB_VALUES, type StatusTab } from './constants';
 
 export function getProductListNavigationPath(
 	path: string,
-	params: Record< string, string >
+	params: Record< string, string | undefined >
 ) {
 	const [ pathname = '/' ] = path.split( '?' );
+	const query = {
+		...getQueryArgs( path ),
+		...params,
+	};
+	const sanitizedQuery = Object.fromEntries(
+		Object.entries( query ).filter(
+			( [ key, value ] ) =>
+				key !== 'undefined' && typeof value !== 'undefined'
+		)
+	);
 
-	return addQueryArgs( pathname, params );
+	return addQueryArgs( pathname, sanitizedQuery );
 }
 
 export function getItemId( item: ProductEntityRecord ) {

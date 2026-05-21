@@ -8,8 +8,9 @@ import type { View } from '@wordpress/dataviews';
  */
 import type { ProductEntityRecord } from '../fields/types';
 import {
-	getProductsWithEmbeddedVariations,
 	hasActiveProductListSearchOrFilters,
+	getProductListNavigationPath,
+	getProductsWithEmbeddedVariations,
 } from './utils';
 
 function createProduct(
@@ -25,6 +26,35 @@ function createProduct(
 }
 
 describe( 'product list utils', () => {
+	describe( 'getProductListNavigationPath', () => {
+		it( 'preserves existing query args when adding new params', () => {
+			expect(
+				getProductListNavigationPath(
+					'woocommerce-products-dashboard?post_type=product',
+					{
+						activeView: 'draft',
+					}
+				)
+			).toBe(
+				'woocommerce-products-dashboard?post_type=product&activeView=draft'
+			);
+		} );
+
+		it( 'removes invalid undefined params from the existing query and new params', () => {
+			expect(
+				getProductListNavigationPath(
+					'woocommerce-products-dashboard?undefined=%2F&post_type=product',
+					{
+						undefined: '/',
+						activeView: 'draft',
+					}
+				)
+			).toBe(
+				'woocommerce-products-dashboard?post_type=product&activeView=draft'
+			);
+		} );
+	} );
+
 	describe( 'getProductsWithEmbeddedVariations', () => {
 		it( 'adds embedded variations after their parent product', () => {
 			const variation = createProduct( 2, 1 );
