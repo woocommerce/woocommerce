@@ -18,6 +18,8 @@ type ChipsItem = SelectableItem< {
 } >;
 
 const DEFAULT_DISPLAY_LIMIT = 15;
+const CHIP_BACKGROUND_VAR = '--wc-product-filter-chips-background';
+const CHIP_TEXT_VAR = '--wc-product-filter-chips-text';
 
 type ChipsContext = {
 	storeNamespace: string;
@@ -58,6 +60,31 @@ function normalizeDisplayLimit( displayLimit: number ): number {
 function getCurrentItem(): ChipsItem | undefined {
 	const context = getContext< { item?: ChipsItem } >();
 	return context.item;
+}
+
+function getCssVariable( element: HTMLElement, property: string ): string {
+	return (
+		element.style.getPropertyValue( property ) ||
+		window.getComputedStyle( element ).getPropertyValue( property )
+	).trim();
+}
+
+function initChipColors( element: HTMLElement ): void {
+	const style = element.style;
+
+	if ( ! getCssVariable( element, CHIP_BACKGROUND_VAR ) ) {
+		const backgroundColor = getClosestColor( element, 'backgroundColor' );
+		if ( backgroundColor ) {
+			style.setProperty( CHIP_BACKGROUND_VAR, backgroundColor );
+		}
+	}
+
+	if ( ! getCssVariable( element, CHIP_TEXT_VAR ) ) {
+		const textColor = getClosestColor( element, 'color' );
+		if ( textColor ) {
+			style.setProperty( CHIP_TEXT_VAR, textColor );
+		}
+	}
 }
 
 const { state }: ChipsStore = store< ChipsStore >(
@@ -111,24 +138,7 @@ const { state }: ChipsStore = store< ChipsStore >(
 					return;
 				}
 
-				const style = el.ref.style;
-				const hasBg = style.getPropertyValue(
-					'--wc-chips-background-color'
-				);
-				const hasFg = style.getPropertyValue( '--wc-chips-text-color' );
-
-				if ( ! hasBg ) {
-					const bg = getClosestColor( el.ref, 'backgroundColor' );
-					if ( bg ) {
-						style.setProperty( '--wc-chips-background-color', bg );
-					}
-				}
-				if ( ! hasFg ) {
-					const fg = getClosestColor( el.ref, 'color' );
-					if ( fg ) {
-						style.setProperty( '--wc-chips-text-color', fg );
-					}
-				}
+				initChipColors( el.ref );
 			},
 		},
 	},

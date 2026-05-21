@@ -156,7 +156,7 @@ describe( 'product filter chips interactivity store', () => {
 		expect( mockParentToggle ).not.toHaveBeenCalled();
 	} );
 
-	it( 'sets theme contrast CSS variables when not already defined', () => {
+	it( 'sets chip CSS variables when not already defined', () => {
 		if ( ! mockRegisteredStore ) {
 			throw new Error( 'Chips store was not registered.' );
 		}
@@ -178,24 +178,29 @@ describe( 'product filter chips interactivity store', () => {
 		mockRegisteredStore.callbacks.initColors();
 
 		expect(
-			element.style.getPropertyValue( '--wc-chips-background-color' )
+			element.style.getPropertyValue(
+				'--wc-product-filter-chips-background'
+			)
 		).toBe( 'rgb(255, 255, 255)' );
 		expect(
-			element.style.getPropertyValue( '--wc-chips-text-color' )
+			element.style.getPropertyValue( '--wc-product-filter-chips-text' )
 		).toBe( 'rgb(0, 0, 0)' );
 	} );
 
-	it( 'does not override existing theme contrast CSS variables', () => {
+	it( 'does not calculate chip colors when already defined', () => {
 		if ( ! mockRegisteredStore ) {
 			throw new Error( 'Chips store was not registered.' );
 		}
 
 		const element = document.createElement( 'div' );
 		element.style.setProperty(
-			'--wc-chips-background-color',
-			'rgb(1, 2, 3)'
+			'--wc-product-filter-chips-text',
+			'var(--wp--preset--color--contrast)'
 		);
-		element.style.setProperty( '--wc-chips-text-color', 'rgb(4, 5, 6)' );
+		element.style.setProperty(
+			'--wc-product-filter-chips-background',
+			'var(--wp--preset--color--base)'
+		);
 
 		mockGetElement.mockReturnValue( { ref: element } );
 
@@ -203,10 +208,46 @@ describe( 'product filter chips interactivity store', () => {
 
 		expect( mockGetClosestColor ).not.toHaveBeenCalled();
 		expect(
-			element.style.getPropertyValue( '--wc-chips-background-color' )
-		).toBe( 'rgb(1, 2, 3)' );
+			element.style.getPropertyValue( '--wc-product-filter-chips-text' )
+		).toBe( 'var(--wp--preset--color--contrast)' );
 		expect(
-			element.style.getPropertyValue( '--wc-chips-text-color' )
-		).toBe( 'rgb(4, 5, 6)' );
+			element.style.getPropertyValue(
+				'--wc-product-filter-chips-background'
+			)
+		).toBe( 'var(--wp--preset--color--base)' );
+	} );
+
+	it( 'does not override theme contrast CSS variables from stylesheets', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Chips store was not registered.' );
+		}
+
+		const style = document.createElement( 'style' );
+		style.textContent = `.has-theme-vars {
+			--wc-product-filter-chips-background: rgb(1, 2, 3);
+			--wc-product-filter-chips-text: rgb(4, 5, 6);
+		}`;
+		document.head.appendChild( style );
+
+		const element = document.createElement( 'div' );
+		element.className = 'has-theme-vars';
+		document.body.appendChild( element );
+
+		mockGetElement.mockReturnValue( { ref: element } );
+
+		mockRegisteredStore.callbacks.initColors();
+
+		expect( mockGetClosestColor ).not.toHaveBeenCalled();
+		expect(
+			element.style.getPropertyValue(
+				'--wc-product-filter-chips-background'
+			)
+		).toBe( '' );
+		expect(
+			element.style.getPropertyValue( '--wc-product-filter-chips-text' )
+		).toBe( '' );
+
+		element.remove();
+		style.remove();
 	} );
 } );
