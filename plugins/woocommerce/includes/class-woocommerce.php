@@ -406,6 +406,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ShopperLists\Privacy\Privacy::class );
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();

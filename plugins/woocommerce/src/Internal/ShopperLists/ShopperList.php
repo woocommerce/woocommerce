@@ -65,14 +65,19 @@ class ShopperList {
 	/**
 	 * Load a list by slug. Returns false for any other list that doesn't exist.
 	 *
-	 * @param string   $slug List identifier.
-	 * @param int|null $user_id Defaults to the current user.
+	 * @param string   $slug        List identifier.
+	 * @param int|null $user_id     Defaults to the current user.
+	 * @param bool     $skip_checks Bypass the feature-flag gate. For internal callers
+	 *                              (e.g. privacy export/erase) that must reach stored
+	 *                              data regardless of feature state. Do not use for
+	 *                              user-facing reads; the Store API relies on the gate
+	 *                              to surface 404s for disabled or unknown slugs.
 	 * @return self|false
 	 */
-	public static function get_by_slug( string $slug, ?int $user_id = null ) {
+	public static function get_by_slug( string $slug, ?int $user_id = null, bool $skip_checks = false ) {
 		// Gate disabled or unknown slugs upfront so previously-persisted lists
 		// don't bypass the feature flag (the Store API surfaces this as 404).
-		if ( ! wc_get_container()->get( ShopperListsController::class )->is_enabled( $slug ) ) {
+		if ( ! $skip_checks && ! wc_get_container()->get( ShopperListsController::class )->is_enabled( $slug ) ) {
 			return false;
 		}
 

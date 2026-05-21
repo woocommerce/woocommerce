@@ -66,6 +66,21 @@ final class ShopperListsController implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Slugs of every supported list type, regardless of feature-flag state.
+	 *
+	 * For use by code that must reach data across the feature-flag boundary
+	 * (e.g. privacy export/erase, where stale data from a now-disabled feature
+	 * still has to be surfaced and removed).
+	 *
+	 * @return string[]
+	 *
+	 * @since 10.9.0
+	 */
+	public function get_supported_slugs(): array {
+		return array_keys( self::SUPPORTED_LISTS );
+	}
+
+	/**
 	 * Register hooks.
 	 */
 	public function register(): void {
