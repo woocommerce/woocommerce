@@ -115,9 +115,9 @@ class OrderMilestoneEasterEgg {
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$woo_egg_key  = isset( $_GET['woo_egg'] ) ? sanitize_text_field( wp_unslash( $_GET['woo_egg'] ) ) : '';
-		$page_param   = isset( $_GET['page'] )     ? sanitize_text_field( wp_unslash( $_GET['page'] ) )    : '';
-		$action_param = isset( $_GET['action'] )   ? sanitize_text_field( wp_unslash( $_GET['action'] ) )  : '';
-		$id_param     = isset( $_GET['id'] )       ? absint( wp_unslash( $_GET['id'] ) )                   : 0;
+		$page_param   = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+		$action_param = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
+		$id_param     = isset( $_GET['id'] ) ? absint( wp_unslash( $_GET['id'] ) ) : 0;
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		// Preview: ?woo_egg=first|hundred|thousand lets admins preview any milestone without real orders.
@@ -187,7 +187,10 @@ class OrderMilestoneEasterEgg {
 		$asset_file = WC_ABSPATH . 'assets/client/admin/wp-admin-scripts/order-milestone-easter-egg.asset.php';
 		$asset      = file_exists( $asset_file )
 			? require $asset_file
-			: array( 'dependencies' => array(), 'version' => WC_VERSION );
+			: array(
+				'dependencies' => array(),
+				'version'      => WC_VERSION,
+			);
 
 		wp_register_script(
 			'wc-order-milestone-easter-egg',
@@ -301,10 +304,11 @@ class OrderMilestoneEasterEgg {
 	 * @return array<string, int>
 	 */
 	private function compute_milestone_order_ids(): array {
-		$qualifying_order_ids = array();
-		$page                 = 1;
+		$qualifying_order_ids       = array();
+		$qualifying_order_ids_count = 0;
+		$page                       = 1;
 
-		while ( count( $qualifying_order_ids ) < self::MAX_QUALIFYING_ORDERS ) {
+		while ( $qualifying_order_ids_count < self::MAX_QUALIFYING_ORDERS ) {
 			$batch = (array) wc_get_orders(
 				array(
 					'limit'   => self::QUERY_BATCH_SIZE,
@@ -323,7 +327,8 @@ class OrderMilestoneEasterEgg {
 			foreach ( $batch as $order ) {
 				if ( $order instanceof \WC_Order && '' !== $order->get_transaction_id() ) {
 					$qualifying_order_ids[] = $order->get_id();
-					if ( count( $qualifying_order_ids ) >= self::MAX_QUALIFYING_ORDERS ) {
+					++$qualifying_order_ids_count;
+					if ( $qualifying_order_ids_count >= self::MAX_QUALIFYING_ORDERS ) {
 						break 2;
 					}
 				}

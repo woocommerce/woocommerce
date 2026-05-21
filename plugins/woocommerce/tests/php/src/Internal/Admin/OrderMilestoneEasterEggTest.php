@@ -20,6 +20,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	/** @var int */
 	private int $admin_user_id;
 
+	/**
+	 * Set up the test case.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->setup_cot();
@@ -30,6 +33,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 		wp_set_current_user( $this->admin_user_id );
 	}
 
+	/**
+	 * Tear down the test case.
+	 */
 	public function tearDown(): void {
 		delete_option( $this->get_cache_option_name() );
 		remove_action( 'admin_enqueue_scripts', array( $this->sut, 'handle_admin_enqueue_scripts' ) );
@@ -91,14 +97,15 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	public function test_handle_ajax_dismiss_saves_seen_meta(): void {
 		$order = $this->create_real_paid_order();
 
+		$nonce             = wp_create_nonce( 'wc_egg_dismiss' );
 		$_POST['order_id'] = $order->get_id();
-		$_POST['nonce']    = wp_create_nonce( 'wc_egg_dismiss' );
-		$_REQUEST['nonce'] = $_POST['nonce'];
+		$_POST['nonce']    = $nonce;
+		$_REQUEST['nonce'] = $nonce;
 
 		try {
 			$this->sut->handle_ajax_dismiss();
 		} catch ( \WPDieException $e ) {
-			// wp_die() throws in test context — expected.
+			$this->assertInstanceOf( \WPDieException::class, $e );
 		}
 
 		$this->assertEquals(
@@ -111,14 +118,15 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	 * @testdox handle_ajax_dismiss does nothing when order_id is zero.
 	 */
 	public function test_handle_ajax_dismiss_ignores_zero_order_id(): void {
+		$nonce             = wp_create_nonce( 'wc_egg_dismiss' );
 		$_POST['order_id'] = 0;
-		$_POST['nonce']    = wp_create_nonce( 'wc_egg_dismiss' );
-		$_REQUEST['nonce'] = $_POST['nonce'];
+		$_POST['nonce']    = $nonce;
+		$_REQUEST['nonce'] = $nonce;
 
 		try {
 			$this->sut->handle_ajax_dismiss();
 		} catch ( \WPDieException $e ) {
-			// expected.
+			$this->assertInstanceOf( \WPDieException::class, $e );
 		}
 
 		$meta = get_user_meta( $this->admin_user_id );
@@ -131,13 +139,14 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	 * @testdox handle_ajax_opt_out saves the opted-out meta for the current user.
 	 */
 	public function test_handle_ajax_opt_out_saves_opted_out_meta(): void {
-		$_POST['nonce']    = wp_create_nonce( 'wc_egg_dismiss' );
-		$_REQUEST['nonce'] = $_POST['nonce'];
+		$nonce             = wp_create_nonce( 'wc_egg_dismiss' );
+		$_POST['nonce']    = $nonce;
+		$_REQUEST['nonce'] = $nonce;
 
 		try {
 			$this->sut->handle_ajax_opt_out();
 		} catch ( \WPDieException $e ) {
-			// expected.
+			$this->assertInstanceOf( \WPDieException::class, $e );
 		}
 
 		$this->assertEquals(
