@@ -269,5 +269,4 @@ class Storage {
 		global $wpdb;
 		return $wpdb->prefix . self::TABLE;
 	}
-
 }

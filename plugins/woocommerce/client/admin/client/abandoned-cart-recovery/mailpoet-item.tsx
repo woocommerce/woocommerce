@@ -17,7 +17,7 @@ const MAILPOET_SLUG = 'mailpoet';
 
 type MailPoetItemProps = {
 	pluginsBeingSetup: ReadonlyArray< string >;
-	onSetupClick: ( slugs: string[] ) => PromiseLike< void >;
+	onSetupClick: ( slugs: string[] ) => Promise< void >;
 };
 
 const MailPoetItem = ( {
