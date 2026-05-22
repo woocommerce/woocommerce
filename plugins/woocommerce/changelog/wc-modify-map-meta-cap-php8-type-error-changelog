@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Prevent fatal TypeError in `wc_modify_map_meta_cap()` on PHP 8+
+Prevent fatal TypeError in wc_modify_map_meta_cap() on PHP 8+ when a capability check is passed an invalid user ID.
