@@ -1,15 +1,11 @@
 /**
- * External dependencies
- */
-import type {
-	ProductDefaultAttribute,
-	ProductProductAttribute,
-} from '@woocommerce/data';
-
-/**
  * Internal dependencies
  */
-import type { ProductEntityRecord } from '../../fields/types';
+import type {
+	ProductEntityAttribute,
+	ProductEntityDefaultAttribute,
+	ProductEntityRecord,
+} from '../../fields/types';
 
 export type VariationAttributeRow = {
 	attributeId: number;
@@ -26,8 +22,8 @@ export type VariationAttributeRow = {
 type AttributeFilter = 'product' | 'variation';
 
 function getAttributeDefaultValue(
-	attribute: ProductProductAttribute,
-	defaultAttributes: ProductDefaultAttribute[]
+	attribute: ProductEntityAttribute,
+	defaultAttributes: ProductEntityDefaultAttribute[]
 ): string {
 	const matchingDefault = defaultAttributes.find( ( defaultAttribute ) => {
 		return (
@@ -74,10 +70,7 @@ function getAttributeRows(
 				attribute,
 				defaultAttributes
 			),
-			id:
-				attribute.id > 0
-					? `global-${ attribute.id }`
-					: `local-${ attribute.name }`,
+			id: attribute.slug,
 			isGlobal: attribute.id > 0,
 			isVisible: Boolean( attribute.visible ),
 			name: attribute.name,

@@ -56,7 +56,7 @@ describe( 'getVariationAttributeRows', () => {
 		expect( rows ).toEqual( [
 			expect.objectContaining( {
 				attributeId: 1,
-				id: 'global-1',
+				id: 'pa_theme',
 				isGlobal: true,
 				name: 'Theme',
 				slug: 'pa_theme',
@@ -64,7 +64,7 @@ describe( 'getVariationAttributeRows', () => {
 			} ),
 			expect.objectContaining( {
 				attributeId: 2,
-				id: 'global-2',
+				id: 'pa_color',
 				isGlobal: true,
 				name: 'Color',
 				slug: 'pa_color',
@@ -140,7 +140,7 @@ describe( 'getVariationAttributeRows', () => {
 		expect( rows[ 0 ] ).toEqual(
 			expect.objectContaining( {
 				attributeId: 0,
-				id: 'local-Material',
+				id: 'material',
 				isGlobal: false,
 				name: 'Material',
 				slug: 'material',
@@ -188,7 +188,7 @@ describe( 'getProductAttributeRows', () => {
 		expect( rows ).toEqual( [
 			expect.objectContaining( {
 				attributeId: 1,
-				id: 'global-1',
+				id: 'pa_material',
 				isGlobal: true,
 				isVisible: false,
 				name: 'Material',
@@ -197,7 +197,7 @@ describe( 'getProductAttributeRows', () => {
 			} ),
 			expect.objectContaining( {
 				attributeId: 0,
-				id: 'local-Pattern',
+				id: 'pattern',
 				isGlobal: false,
 				isVisible: true,
 				name: 'Pattern',
