@@ -387,11 +387,18 @@ class SavedForLaterTests extends WP_UnitTestCase {
 			)
 		);
 
-		$registry = $this->invoke_render_with_registry_mock( array() );
+		// This class extends WP_UnitTestCase rather than WC_Unit_Test_Case, so the
+		// proxy isn't reset automatically between tests — clean up explicitly to
+		// avoid leaking the is_cart() mock into later tests in the same process.
+		try {
+			$registry = $this->invoke_render_with_registry_mock( array() );
 
-		$this->assertSame(
-			$expected,
-			array_key_exists( 'cartPageHasSavedForLater', $registry->get() )
-		);
+			$this->assertSame(
+				$expected,
+				array_key_exists( 'cartPageHasSavedForLater', $registry->get() )
+			);
+		} finally {
+			$legacy_proxy->reset();
+		}
 	}
 }
