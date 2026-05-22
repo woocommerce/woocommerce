@@ -79,7 +79,8 @@ class Privacy extends \WC_Abstract_Privacy {
 				continue;
 			}
 
-			$rows = array(
+			$position = 0;
+			$rows     = array(
 				array(
 					'name'  => __( 'List', 'woocommerce' ),
 					'value' => $list->get_slug(),
@@ -89,7 +90,6 @@ class Privacy extends \WC_Abstract_Privacy {
 					'value' => $list->get_date_created_gmt(),
 				),
 			);
-			$position = 0;
 			foreach ( $list->get_items() as $item ) {
 				++$position;
 				$rows[] = self::item_to_row( $item, $position );

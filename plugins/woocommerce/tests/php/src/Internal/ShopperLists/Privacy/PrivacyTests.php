@@ -153,8 +153,8 @@ class PrivacyTests extends WC_Unit_Test_Case {
 		$this->product->set_name( 'Renamed After Save' );
 		$this->product->save();
 
-		$result   = $this->sut->export_data( self::TEST_EMAIL );
-		$row      = $this->find_item_row( $result, 'saved-for-later', 1 );
+		$result = $this->sut->export_data( self::TEST_EMAIL );
+		$row    = $this->find_item_row( $result, 'saved-for-later', 1 );
 		$this->assertStringContainsString( 'Renamed After Save', $row['value'] );
 		$this->assertStringNotContainsString( 'Privacy SUT Product', $row['value'] );
 	}
