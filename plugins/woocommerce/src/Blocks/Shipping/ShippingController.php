@@ -256,7 +256,7 @@ class ShippingController {
 								'type'        => 'string',
 							),
 							'auto_select_pickup_tab' => array(
-								'description' => __( 'If enabled, the local pickup tab is selected by default when no shipping rates are available for the customer. Shipping rates always take priority when available.', 'woocommerce' ),
+								'description' => __( 'If enabled, the local pickup tab is selected by default when no shipping rates are available for the customer. Shipping rates always take priority when available. The "Hide shipping costs until an address is entered" setting overrides this and keeps no rate selected until the customer enters an address.', 'woocommerce' ),
 								'type'        => 'string',
 								'enum'        => array( 'yes', 'no' ),
 							),

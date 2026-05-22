@@ -172,7 +172,7 @@ const GeneralSettings = () => {
 						'woocommerce'
 					) }
 					help={ __(
-						'When enabled, the local pickup tab is selected by default if no shipping rates are available for the customer. Shipping rates always take priority when available.',
+						'When enabled, the local pickup tab is selected by default if no shipping rates are available for the customer. Shipping rates always take priority when available. The "Hide shipping costs until an address is entered" setting overrides this and keeps no rate selected until the customer enters an address.',
 						'woocommerce'
 					) }
 				/>
