@@ -37,6 +37,9 @@ type CurrencyControlProps = {
 	customValidity?: NonNullable<
 		DataFormControlProps< ProductEntityRecord >[ 'validity' ]
 	>[ 'custom' ];
+	hideLabelFromVision?: boolean;
+	placeholder?: string;
+	disabled?: boolean;
 };
 
 export function CurrencyControl( {
@@ -45,13 +48,19 @@ export function CurrencyControl( {
 	value,
 	onChange,
 	customValidity,
+	hideLabelFromVision,
+	placeholder,
+	disabled,
 }: CurrencyControlProps ) {
 	return (
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call -- ValidatedInputControl is a private API
 		<ValidatedInputControl
 			id={ id }
 			label={ label }
+			hideLabelFromVision={ hideLabelFromVision }
 			value={ value }
+			placeholder={ placeholder }
+			disabled={ disabled }
 			onChange={ onChange }
 			type="number"
 			min={ 0 }
