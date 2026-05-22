@@ -84,15 +84,18 @@ module.exports = {
 		'@woocommerce/stores/(.*)$': 'assets/js/base/stores/$1',
 		'^react$': '<rootDir>/node_modules/react',
 		'^react-dom$': '<rootDir>/node_modules/react-dom',
-		'^(.+)/build-module/(.*)$': '$1/build/$2',
 		// Catch-all for monorepo @woocommerce/* packages: route bare and
 		// subpath imports through source so tests don't depend on built
-		// artifacts. Must come after all blocks-internal aliases above.
+		// artifacts. Must come after all blocks-internal aliases above and
+		// before the generic build-module rewrite so @woocommerce/* subpaths
+		// (e.g. @woocommerce/product-editor/build-module/utils/...) land on
+		// src/ instead of build/.
 		'^@woocommerce/([^/]+)/(?:src|build|build-module|build-types)/(.+)$':
 			'<rootDir>/../../../../packages/js/$1/src/$2',
 		'^@woocommerce/([^/]+)/(.+)$':
 			'<rootDir>/../../../../packages/js/$1/src/$2',
 		'^@woocommerce/([^/]+)$': '<rootDir>/../../../../packages/js/$1/src',
+		'^(.+)/build-module/(.*)$': '$1/build/$2',
 	},
 	preset: '@wordpress/jest-preset-default',
 	setupFiles: [ '<rootDir>/tests/js/config/global-mocks.js' ],
