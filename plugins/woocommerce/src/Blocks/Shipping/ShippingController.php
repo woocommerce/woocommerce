@@ -71,6 +71,7 @@ class ShippingController {
 		}
 		$this->asset_data_registry->add( 'shippingCostRequiresAddress', get_option( 'woocommerce_shipping_cost_requires_address', false ) === 'yes' );
 		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
+		add_action( 'rest_api_init', array( $this, 'register_pickup_locations_routes' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'admin_footer', array( $this, 'hydrate_client_settings' ), 0 );
 		add_action( 'woocommerce_load_shipping_methods', array( $this, 'register_local_pickup' ) );
@@ -311,6 +312,18 @@ class ShippingController {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Register the /wc/v3/pickup-locations REST route.
+	 *
+	 * This route uses the manage_woocommerce capability (via wc_rest_check_manager_permissions)
+	 * so Shop Managers can save Local Pickup settings without needing manage_options.
+	 *
+	 * @since 10.9.0
+	 */
+	public function register_pickup_locations_routes() {
+		( new PickupLocationsRestController() )->register_routes();
 	}
 
 	/**
@@ -615,7 +628,8 @@ class ShippingController {
 	 * @return bool
 	 */
 	public function track_local_pickup( $served, $result, $request ) {
-		if ( '/wp/v2/settings' !== $request->get_route() ) {
+		$route = $request->get_route();
+		if ( '/wp/v2/settings' !== $route && '/wc/v3/pickup-locations' !== $route ) {
 			return $served;
 		}
 		// Param name here comes from the show_in_rest['name'] value when registering the setting.
