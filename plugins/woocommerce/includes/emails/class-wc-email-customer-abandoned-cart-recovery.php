@@ -329,6 +329,13 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				return;
 			}
 
+			// Mirror trigger()'s dedup gate before firing the before/after
+			// resend hooks so extensions don't see a resend event for a send
+			// that trigger() would short-circuit.
+			if ( '' !== (string) $order->get_meta( self::META_KEY_SENT_AT ) ) {
+				return;
+			}
+
 			/**
 			 * Fires before the abandoned cart recovery email is manually resent.
 			 *
@@ -340,8 +347,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			do_action( 'woocommerce_before_resend_order_emails', $order, $this->id );
 
 			// Gate the note + admin notice on trigger()'s return so the audit
-			// trail only records sends that actually went out (e.g. trigger()
-			// short-circuits when META_KEY_SENT_AT is already set).
+			// trail only records sends that actually went out.
 			if ( ! $this->trigger( $order->get_id() ) ) {
 				return;
 			}

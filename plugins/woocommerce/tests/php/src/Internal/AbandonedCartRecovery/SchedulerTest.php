@@ -89,6 +89,17 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 * @testdox init() registers the new-order, status-changed, trash, delete, and AS-callback hooks so a fresh container resolve wires the schedule + cancel + dispatch listeners in one place.
 	 */
 	public function test_init_registers_hooks(): void {
+		// setUp() pre-registers ACTION_HOOK so the dispatch test works without
+		// init() (which would also wire woocommerce_new_order and auto-fire on
+		// every OrderHelper::create_order). Tear that fixture shortcut down
+		// here so this test asserts the production wiring rather than passing
+		// on the setUp registration.
+		remove_action( Scheduler::ACTION_HOOK, array( $this->sut, 'handle_scheduled_send' ), 10 );
+		$this->assertFalse(
+			has_action( Scheduler::ACTION_HOOK, array( $this->sut, 'handle_scheduled_send' ) ),
+			'Fixture cleanup precondition: ACTION_HOOK must be unregistered before init() is asserted.'
+		);
+
 		// init() ran when the container first resolved Scheduler, but WP's
 		// test framework has since restored `$wp_filter` past that point.
 		// Re-invoke here so the assertions exercise the production wiring.
