@@ -37,8 +37,12 @@ describe( 'matchVariationItem', () => {
 			{ attribute: 'Size', value: 'large' },
 		];
 
-		expect( matchVariationItem( redLarge, 42, selectedLarge ) ).toBe( true );
-		expect( matchVariationItem( redSmall, 42, selectedLarge ) ).toBe( false );
+		expect( matchVariationItem( redLarge, 42, selectedLarge ) ).toBe(
+			true
+		);
+		expect( matchVariationItem( redSmall, 42, selectedLarge ) ).toBe(
+			false
+		);
 	} );
 
 	it( 'is case-insensitive on values (slug vs term display name)', () => {
