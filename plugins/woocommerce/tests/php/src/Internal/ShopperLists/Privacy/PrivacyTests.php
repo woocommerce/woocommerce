@@ -145,20 +145,63 @@ class PrivacyTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Exporter includes the product title snapshot in each item row.
+	 * @testdox Exporter uses the live product title when the product still exists.
 	 */
-	public function test_export_includes_product_title_snapshot_in_item_row(): void {
+	public function test_export_uses_live_product_title(): void {
 		$this->seed_list( self::SAVED_FOR_LATER_SLUG );
 
-		$result = $this->sut->export_data( self::TEST_EMAIL );
+		$this->product->set_name( 'Renamed After Save' );
+		$this->product->save();
 
-		$rows         = $result['data'][0]['data'];
-		$row_values   = array_column( $rows, 'value' );
-		$item_strings = array_filter(
-			$row_values,
-			static fn( string $value ): bool => false !== strpos( $value, 'Privacy SUT Product' )
-		);
-		$this->assertNotEmpty( $item_strings, 'Item row should contain the product title snapshot.' );
+		$result   = $this->sut->export_data( self::TEST_EMAIL );
+		$row      = $this->find_item_row( $result, 'saved-for-later', 1 );
+		$this->assertStringContainsString( 'Renamed After Save', $row['value'] );
+		$this->assertStringNotContainsString( 'Privacy SUT Product', $row['value'] );
+	}
+
+	/**
+	 * @testdox Exporter falls back to the title snapshot when the product is gone.
+	 */
+	public function test_export_falls_back_to_title_snapshot_when_product_is_deleted(): void {
+		$this->seed_list( self::SAVED_FOR_LATER_SLUG );
+
+		$this->product->delete( true );
+		$this->product = null;
+
+		$result = $this->sut->export_data( self::TEST_EMAIL );
+		$row    = $this->find_item_row( $result, 'saved-for-later', 1 );
+		$this->assertStringContainsString( 'Privacy SUT Product', $row['value'] );
+	}
+
+	/**
+	 * @testdox Exporter appends the product permalink when the item is publicly accessible.
+	 */
+	public function test_export_appends_permalink_when_product_is_live(): void {
+		$this->seed_list( self::SAVED_FOR_LATER_SLUG );
+
+		$result    = $this->sut->export_data( self::TEST_EMAIL );
+		$row       = $this->find_item_row( $result, 'saved-for-later', 1 );
+		$permalink = get_permalink( $this->product->get_id() );
+
+		$this->assertIsString( $permalink );
+		$this->assertStringContainsString( $permalink, $row['value'] );
+	}
+
+	/**
+	 * @testdox Exporter omits the permalink when the product is not publicly accessible.
+	 */
+	public function test_export_omits_permalink_when_product_is_not_live(): void {
+		$this->seed_list( self::SAVED_FOR_LATER_SLUG );
+
+		$this->product->set_status( 'draft' );
+		$this->product->save();
+
+		$result    = $this->sut->export_data( self::TEST_EMAIL );
+		$row       = $this->find_item_row( $result, 'saved-for-later', 1 );
+		$permalink = get_permalink( $this->product->get_id() );
+
+		$this->assertIsString( $permalink );
+		$this->assertStringNotContainsString( $permalink, $row['value'] );
 	}
 
 	/**
@@ -214,6 +257,30 @@ class PrivacyTests extends WC_Unit_Test_Case {
 		$this->assertFalse(
 			is_array( Users::get_site_user_meta( $this->user_id, ShopperList::META_KEY_PREFIX . self::SAVED_FOR_LATER_SLUG ) )
 		);
+	}
+
+	/**
+	 * Pluck the data group for a given list slug out of an exporter result, then return the row
+	 * at the requested 1-indexed item position.
+	 *
+	 * @param array  $result   Result from Privacy::export_data().
+	 * @param string $slug     List slug to look for.
+	 * @param int    $position 1-indexed item position within the list.
+	 *
+	 * @return array{name: string, value: string}
+	 */
+	private function find_item_row( array $result, string $slug, int $position ): array {
+		$item_id = 'shopper-list-' . $slug;
+		foreach ( $result['data'] as $group ) {
+			if ( $item_id !== $group['item_id'] ) {
+				continue;
+			}
+			// First two rows are the "List" and "Created" headers; items start at index 2.
+			$row_index = 2 + ( $position - 1 );
+			$this->assertArrayHasKey( $row_index, $group['data'], "No item row at position {$position} for {$slug}." );
+			return $group['data'][ $row_index ];
+		}
+		$this->fail( "No exported group for slug {$slug}." );
 	}
 
 	/**

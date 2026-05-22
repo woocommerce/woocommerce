@@ -75,20 +75,31 @@ class Privacy extends \WC_Abstract_Privacy {
 
 		foreach ( $controller->get_supported_slugs() as $slug ) {
 			$list = ShopperList::get_by_slug( $slug, $user_id, true );
-			if ( ! $list ) {
+			if ( ! $list || ! $list->get_items() ) {
 				continue;
 			}
 
-			$items = $list->get_items();
-			if ( empty( $items ) ) {
-				continue;
+			$rows = array(
+				array(
+					'name'  => __( 'List', 'woocommerce' ),
+					'value' => $list->get_slug(),
+				),
+				array(
+					'name'  => __( 'Created', 'woocommerce' ),
+					'value' => $list->get_date_created_gmt(),
+				),
+			);
+			$position = 0;
+			foreach ( $list->get_items() as $item ) {
+				++$position;
+				$rows[] = self::item_to_row( $item, $position );
 			}
 
 			$data[] = array(
 				'group_id'    => self::GROUP_ID,
 				'group_label' => $group_label,
 				'item_id'     => 'shopper-list-' . $slug,
-				'data'        => self::build_list_export_rows( $list->get_slug(), $list->get_date_created_gmt(), $items ),
+				'data'        => $rows,
 			);
 		}
 
@@ -140,66 +151,50 @@ class Privacy extends \WC_Abstract_Privacy {
 	}
 
 	/**
-	 * Build the `data` rows for a single exported list.
+	 * Render a single item as one `{name, value}` row for the export.
 	 *
-	 * @param string                         $slug             List slug.
-	 * @param string                         $date_created_gmt Creation time (MySQL DATETIME, GMT).
-	 * @param array<string, ShopperListItem> $items            Items keyed by storage key.
+	 * Title precedence: current product name (if the product still resolves) →
+	 * snapshot captured at save time → `Product #<id>` placeholder. A permalink
+	 * is appended only when the row is "live" (publish status on the product
+	 * and, for variations, the parent — see `ShopperListItem::is_live()`).
 	 *
-	 * @return array<int, array{name: string, value: string}>
+	 * @param ShopperListItem $item     Item to format.
+	 * @param int             $position 1-indexed position within the list.
+	 *
+	 * @return array{name: string, value: string}
 	 */
-	private static function build_list_export_rows( string $slug, string $date_created_gmt, array $items ): array {
-		$rows = array(
-			array(
-				'name'  => __( 'List', 'woocommerce' ),
-				'value' => $slug,
-			),
-			array(
-				'name'  => __( 'Created', 'woocommerce' ),
-				'value' => $date_created_gmt,
-			),
-		);
-
-		$index = 1;
-		foreach ( $items as $item ) {
-			/* translators: %d: position of the item within the list. */
-			$row_name = sprintf( __( 'Item %d', 'woocommerce' ), $index );
-			$rows[]   = array(
-				'name'  => $row_name,
-				'value' => self::format_item_for_export( $item ),
-			);
-			++$index;
-		}
-
-		return $rows;
-	}
-
-	/**
-	 * Render a single item as a human-readable line for the export.
-	 *
-	 * Uses the snapshot title captured at save time so the export reflects what
-	 * the shopper actually saw; falls back to the live product title when the
-	 * snapshot is empty (older data, or items added before title-snapshotting).
-	 *
-	 * @param ShopperListItem $item Item to format.
-	 */
-	private static function format_item_for_export( ShopperListItem $item ): string {
-		$title = $item->get_product_title_at_save();
+	private static function item_to_row( ShopperListItem $item, int $position ): array {
+		$product = $item->get_product();
+		$title   = $product instanceof \WC_Product ? $product->get_name() : '';
 		if ( '' === $title ) {
-			$product = $item->get_product();
-			$title   = $product instanceof \WC_Product ? $product->get_name() : '';
+			$title = $item->get_product_title_at_save();
 		}
 		if ( '' === $title ) {
 			/* translators: %d: product ID for which no title could be resolved. */
 			$title = sprintf( __( 'Product #%d', 'woocommerce' ), $item->get_product_id() );
 		}
 
-		return sprintf(
-			/* translators: 1: product title, 2: quantity, 3: MySQL DATETIME the item was saved. */
-			__( '%1$s × %2$d (added %3$s)', 'woocommerce' ),
-			$title,
-			$item->get_quantity(),
-			$item->get_date_added_gmt()
+		$value = ( $product instanceof \WC_Product && $item->is_live() )
+			? sprintf(
+				/* translators: 1: product title, 2: quantity, 3: MySQL DATETIME the item was saved, 4: product URL. */
+				__( '%1$s × %2$d (added %3$s) — %4$s', 'woocommerce' ),
+				$title,
+				$item->get_quantity(),
+				$item->get_date_added_gmt(),
+				$product->get_permalink()
+			)
+			: sprintf(
+				/* translators: 1: product title, 2: quantity, 3: MySQL DATETIME the item was saved. */
+				__( '%1$s × %2$d (added %3$s)', 'woocommerce' ),
+				$title,
+				$item->get_quantity(),
+				$item->get_date_added_gmt()
+			);
+
+		return array(
+			/* translators: %d: position of the item within the list. */
+			'name'  => sprintf( __( 'Item %d', 'woocommerce' ), $position ),
+			'value' => $value,
 		);
 	}
 }
