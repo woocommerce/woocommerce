@@ -218,4 +218,17 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'local_pickup:1', $result, 'An explicit pickup choice should not be reverted to shipping on reload' );
 	}
+
+	/**
+	 * @testdox Does not auto-select pickup when the shopper had previously chosen a shipping rate that is no longer available.
+	 */
+	public function test_does_not_auto_select_pickup_when_prior_shipping_choice_vanished(): void {
+		$this->set_pickup_default_tab( 'yes' );
+
+		// Shopper previously chose flat_rate:1, but it's no longer in the package after recalculation.
+		$package = $this->build_package( array( 'local_pickup:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'flat_rate:1' );
+
+		$this->assertSame( '', $result, 'Should leave the default empty rather than silently flipping a vanished shipping choice to pickup' );
+	}
 }

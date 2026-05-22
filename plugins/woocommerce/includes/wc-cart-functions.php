@@ -529,8 +529,16 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 		$local_pickup_settings  = LocalPickupUtils::get_local_pickup_settings();
 		$prefers_pickup_default = ! empty( $local_pickup_settings['default_tab'] );
 
-		// No shipping rate available. Only auto-select pickup when the merchant opted in.
-		if ( '' === $default && $prefers_pickup_default ) {
+		// If the shopper previously chose a non-pickup shipping rate that's no longer in the package
+		// (e.g. address change made it unavailable), don't silently flip them to pickup. Leave the
+		// default empty so the block UI surfaces the toggle in a neutral state.
+		$chosen_method_id_for_default     = '' !== $chosen_method ? current( explode( ':', $chosen_method ) ) : '';
+		$had_prior_non_pickup_choice      = '' !== $chosen_method_id_for_default
+			&& ! in_array( $chosen_method_id_for_default, $local_pickup_method_ids, true );
+
+		// No shipping rate available. Only auto-select pickup when the merchant opted in and the
+		// shopper has not already made an explicit non-pickup choice.
+		if ( '' === $default && $prefers_pickup_default && ! $had_prior_non_pickup_choice ) {
 			$default = $first_pickup_key;
 		}
 
