@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\ShopperLists;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
+use Automattic\WooCommerce\Internal\ShopperLists\Privacy\Privacy;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -81,11 +82,13 @@ final class ShopperListsController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Register hooks.
+	 * Register hooks and instantiate sibling services that set up hooks on construction.
 	 */
 	public function register(): void {
 		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'maybe_flush_rewrite_rules' ), 10, 1 );
 		add_action( 'init', array( $this, 'maybe_register_wishlist_endpoint' ), 5 );
+
+		wc_get_container()->get( Privacy::class );
 	}
 
 	/**
