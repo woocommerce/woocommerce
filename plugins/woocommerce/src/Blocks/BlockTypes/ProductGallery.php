@@ -37,14 +37,13 @@ class ProductGallery extends AbstractBlock {
 	 */
 	protected function render_dialog( $images ) {
 		$images_html = '';
-		foreach ( $images as $index => $image ) {
+		foreach ( $images as $image ) {
 			$id           = esc_attr( $image['id'] );
 			$src          = esc_url( $image['src'] );
 			$srcset       = esc_attr( $image['srcset'] );
 			$sizes        = esc_attr( $image['sizes'] );
 			$alt          = esc_attr( $image['alt'] );
-			$loading      = 0 === $index ? 'fetchpriority="high"' : 'loading="lazy"';
-			$images_html .= "<img data-image-id='{$id}' src='{$src}' srcset='{$srcset}' sizes='{$sizes}' {$loading} decoding='async' alt='{$alt}' />";
+			$images_html .= "<img data-image-id='{$id}' src='{$src}' srcset='{$srcset}' sizes='{$sizes}' decoding='async' alt='{$alt}' />";
 		}
 		ob_start();
 		?>
