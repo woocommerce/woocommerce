@@ -73,11 +73,11 @@ const { state } = store< BlockStore >(
 			// (i.e. the shopper hasn't picked attributes yet), which
 			// `isDisabled` reads as "not yet selectable."
 			get effectiveProductId(): number {
-				const context = getContext< BlockContext >();
 				const product = productsState.productInContext;
 				if ( ! product ) {
 					return 0;
 				}
+				const context = getContext< BlockContext >();
 				if ( context.isVariableType && product.type === 'variable' ) {
 					return 0;
 				}
