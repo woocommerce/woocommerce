@@ -256,7 +256,7 @@ class ShippingController {
 								'type'        => 'string',
 							),
 							'default_tab' => array(
-								'description' => __( 'If enabled, the local pickup tab will be selected by default when no customer address is available.', 'woocommerce' ),
+								'description' => __( 'If enabled, the local pickup tab is selected by default when no shipping rates are available for the customer. Shipping rates always take priority when available.', 'woocommerce' ),
 								'type'        => 'string',
 								'enum'        => array( 'yes', 'no' ),
 							),
