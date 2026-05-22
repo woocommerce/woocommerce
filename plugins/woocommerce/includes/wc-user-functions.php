@@ -747,7 +747,7 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 					// Shop managers can only edit customer info.
 					$userdata                    = get_userdata( $args[0] );
 					$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-					if ( $userdata instanceof WP_User && property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
+					if ( $userdata instanceof WP_User && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
 						$caps[] = 'do_not_allow';
 					}
 				}
