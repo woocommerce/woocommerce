@@ -84,8 +84,8 @@ export const getPageTitle = ( sections: string[] ) => {
 /**
  * BaseHeader is a dumb layout component shared by Header (non-embedded WC
  * admin pages) and EmbedHeader (overlay on top of classic wp-admin pages).
- * It owns the fixed-position bar, body-margin sync, slot rendering, and
- * the optional reminder bar. Anything wp-admin-specific (h1 suppression,
+ * It owns the fixed-position bar, body-margin sync, and slot rendering.
+ * Anything wp-admin-specific (h1 suppression,
  * compact-bar mode, Screen Options / Help proxy icons) is the caller's
  * responsibility — passed in via `suppressTitle`, `compact`, and the
  * `trailingItems` slot.
