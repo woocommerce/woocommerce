@@ -32,6 +32,7 @@ use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Internal\Email\EmailLogger;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
+use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
@@ -378,6 +379,7 @@ final class WooCommerce {
 		$container->get( ProductVersionStringInvalidator::class );
 		$container->get( OrdersVersionStringInvalidator::class );
 		$container->get( TaxRateVersionStringInvalidator::class );
+		$container->get( OrderMilestoneEasterEgg::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {

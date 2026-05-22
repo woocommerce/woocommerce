@@ -31,6 +31,7 @@ type VariationOptionItem = {
 	label: string;
 	value: string;
 	ariaLabel?: string;
+	color?: string;
 };
 
 type Context = AddToCartWithOptionsStoreContext & {
@@ -248,6 +249,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						selected,
 						disabled,
 						hidden: hideInvalid && disabled,
+						...( row.color !== undefined && { color: row.color } ),
 					};
 				} );
 			},

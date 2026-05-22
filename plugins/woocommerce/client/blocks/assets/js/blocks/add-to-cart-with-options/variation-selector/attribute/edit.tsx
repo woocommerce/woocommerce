@@ -20,6 +20,7 @@ import {
 import { isProductResponseItem } from '@woocommerce/entities';
 import type { ProductResponseAttributeItem } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
+import { getSetting } from '@woocommerce/settings';
 import {
 	ToggleControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
@@ -31,12 +32,15 @@ import {
 /**
  * Internal dependencies
  */
-import { DEFAULT_ATTRIBUTES } from './constants';
+import { DEFAULT_ATTRIBUTES, EMPTY_TERM_COLORS } from './constants';
 import {
 	DisplayStyleSwitcher,
 	resetDisplayStyleBlock,
 } from '../../../product-filters/components/display-style-switcher';
-import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
+import type {
+	SelectableItem,
+	SelectableItemsContext,
+} from '../../../../types/type-defs/selectable-items';
 
 const INNER_CHIPS = 'woocommerce/product-filter-chips';
 
@@ -57,19 +61,36 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
 
+	const termColors = getSetting< Record< string, string > >(
+		'variationSelectorTermColors',
+		{} as Record< string, string >
+	);
+
 	const selectableContext = useMemo( () => {
-		let items = [];
+		let items: SelectableItem< {
+			label: string;
+			ariaLabel: string;
+		} >[] = [];
 		if (
 			attribute &&
 			Array.isArray( attribute?.terms ) &&
 			attribute.terms.length > 0
 		) {
-			items = attribute.terms.map( ( term ) => ( {
-				id: `${ attribute.taxonomy }-${ term.slug }`,
-				label: term.name,
-				value: term.slug,
-				ariaLabel: term.name,
-			} ) );
+			items = attribute.terms.map( ( term ) => {
+				let color: string | null = null;
+				if ( term.id in termColors ) {
+					color = termColors[ term.id ];
+				} else if ( term.id in EMPTY_TERM_COLORS ) {
+					color = EMPTY_TERM_COLORS[ term.id ];
+				}
+				return {
+					id: `${ attribute.taxonomy }-${ term.slug }`,
+					label: term.name,
+					value: term.slug,
+					ariaLabel: term.name,
+					...( color !== null ? { color } : {} ),
+				};
+			} );
 		}
 
 		return {
@@ -81,7 +102,7 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			label: string;
 			ariaLabel: string;
 		} >;
-	}, [ attribute ] );
+	}, [ attribute, termColors ] );
 
 	const blockPreviewProps = useBlockPreview( {
 		blocks,

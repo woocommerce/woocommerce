@@ -11,6 +11,14 @@ import type { Field } from '@wordpress/dataviews';
  */
 import type { ProductEntityRecord } from '../types';
 import { ProductStatusBadge } from '../components/product-status-badge';
+import {
+	getVariationActiveValue,
+	VariationActiveBadge,
+} from '../variation_active/field';
+
+function isVariation( item: ProductEntityRecord ) {
+	return item.type === 'variation' || Boolean( item.parent_id );
+}
 
 function isValidStatus( value: string ) {
 	return (
@@ -36,10 +44,14 @@ const fieldDefinition = {
 
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
-	getValue: ( { item } ) => item.status,
-	render: ( { item }: { item: ProductEntityRecord } ) => (
-		<ProductStatusBadge status={ item.status } />
-	),
+	getValue: ( { item } ) =>
+		isVariation( item ) ? getVariationActiveValue( item ) : item.status,
+	render: ( { item }: { item: ProductEntityRecord } ) =>
+		isVariation( item ) ? (
+			<VariationActiveBadge value={ getVariationActiveValue( item ) } />
+		) : (
+			<ProductStatusBadge status={ item.status } />
+		),
 	Edit: ( { data, onChange, field } ) => {
 		const options =
 			field.elements?.filter(

@@ -16,7 +16,6 @@ import {
 /**
  * Internal dependencies
  */
-import { TasksReminderBar } from '../task-lists/reminder-bar';
 import useIsScrolled from '~/hooks/useIsScrolled';
 
 export const useUpdateBodyMargin = ( {
@@ -60,8 +59,6 @@ export const useUpdateBodyMargin = ( {
 			wpBody.style.marginTop = '';
 		};
 	}, [ headerItemSlot?.fills, updateBodyMargin ] );
-
-	return updateBodyMargin;
 };
 
 export const getPageTitle = ( sections: string[] ) => {
@@ -87,8 +84,8 @@ export const getPageTitle = ( sections: string[] ) => {
 /**
  * BaseHeader is a dumb layout component shared by Header (non-embedded WC
  * admin pages) and EmbedHeader (overlay on top of classic wp-admin pages).
- * It owns the fixed-position bar, body-margin sync, slot rendering, and
- * the optional reminder bar. Anything wp-admin-specific (h1 suppression,
+ * It owns the fixed-position bar, body-margin sync, and slot rendering.
+ * Anything wp-admin-specific (h1 suppression,
  * compact-bar mode, Screen Options / Help proxy icons) is the caller's
  * responsibility — passed in via `suppressTitle`, `compact`, and the
  * `trailingItems` slot.
@@ -96,7 +93,6 @@ export const getPageTitle = ( sections: string[] ) => {
 export const BaseHeader = ( {
 	isEmbedded,
 	query,
-	showReminderBar,
 	sections,
 	children,
 	leftAlign = true,
@@ -106,7 +102,6 @@ export const BaseHeader = ( {
 }: {
 	isEmbedded: boolean;
 	query: Record< string, string >;
-	showReminderBar: boolean;
 	sections: string[];
 	children?: React.ReactNode;
 	leftAlign?: boolean;
@@ -135,7 +130,7 @@ export const BaseHeader = ( {
 	const pageTitleSlot = useSlot( WC_HEADER_PAGE_TITLE_SLOT_NAME );
 	const hasPageTitleFills = Boolean( pageTitleSlot?.fills?.length );
 	const headerItemSlot = useSlot( WC_HEADER_SLOT_NAME );
-	const updateBodyMargin = useUpdateBodyMargin( {
+	useUpdateBodyMargin( {
 		headerElement,
 		headerItemSlot,
 	} );
@@ -153,12 +148,6 @@ export const BaseHeader = ( {
 			} ) }
 			ref={ headerElement }
 		>
-			{ showReminderBar && (
-				<TasksReminderBar
-					updateBodyMargin={ updateBodyMargin }
-					taskListId="setup"
-				/>
-			) }
 			<div className="woocommerce-layout__header-wrapper">
 				<WooHeaderNavigationItem.Slot
 					fillProps={ { isEmbedded, query } }
