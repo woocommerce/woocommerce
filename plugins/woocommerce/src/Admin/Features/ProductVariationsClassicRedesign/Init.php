@@ -11,10 +11,11 @@ namespace Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign
  * Loads assets for the product variations classic redesign feature.
  */
 class Init {
-	const FEATURE_ID    = 'product-variations-classic-redesign';
-	const SCRIPT_HANDLE = 'wc-experimental-products-app';
-	const SCRIPT_PATH   = 'experimental-products-app';
-	const ROOT_ID       = 'woocommerce-variations-classic-root';
+	const FEATURE_ID         = 'product-variations-classic-redesign';
+	const SCRIPT_HANDLE      = 'wc-experimental-products-app';
+	const SCRIPT_PATH        = 'experimental-products-app';
+	const ROOT_ID            = 'woocommerce-variations-classic-root';
+	const ATTRIBUTES_ROOT_ID = 'woocommerce-product-attributes-classic-root';
 
 	/**
 	 * Constructor
@@ -78,14 +79,20 @@ class Init {
 
 		global $post;
 		$product_id = $post ? $post->ID : 0;
+		$script     = sprintf(
+			'window.wc.experimentalProductsApp.initializeVariationView( %s, %d );',
+			wp_json_encode( self::ROOT_ID ),
+			$product_id
+		);
+		$script    .= sprintf(
+			' window.wc.experimentalProductsApp.initializeProductAttributesView( %s, %d );',
+			wp_json_encode( self::ATTRIBUTES_ROOT_ID ),
+			$product_id
+		);
 
 		wp_add_inline_script(
 			self::SCRIPT_HANDLE,
-			sprintf(
-				'window.wc.experimentalProductsApp.initializeVariationView( %s, %d );',
-				wp_json_encode( self::ROOT_ID ),
-				$product_id
-			),
+			$script,
 			'after'
 		);
 	}

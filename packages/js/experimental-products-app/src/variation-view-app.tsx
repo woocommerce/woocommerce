@@ -22,15 +22,18 @@ const VariationView = lazy( () =>
 	} ) )
 );
 
-/**
- * Initializes the classic product editor variation view.
- *
- * @param {string} containerId DOM element ID.
- * @param {number} productId   Parent product ID.
- */
-export function initializeVariationView(
+const ProductAttributes = lazy( () =>
+	import(
+		/* webpackChunkName: "experimental-products-app-variation-view-main" */
+		'./variation-view'
+	).then( ( module ) => ( {
+		default: module.ProductAttributes,
+	} ) )
+);
+
+function renderWithProviders(
 	containerId: string,
-	productId: number
+	children: JSX.Element
 ): void {
 	const target = document.getElementById( containerId );
 
@@ -43,11 +46,41 @@ export function initializeVariationView(
 		<StrictMode>
 			<Suspense fallback={ null }>
 				<RouterProvider>
-					<ThemeProvider>
-						<VariationView productId={ productId } />
-					</ThemeProvider>
+					<ThemeProvider>{ children }</ThemeProvider>
 				</RouterProvider>
 			</Suspense>
 		</StrictMode>
+	);
+}
+
+/**
+ * Initializes the classic product editor variation view.
+ *
+ * @param {string} containerId DOM element ID.
+ * @param {number} productId   Parent product ID.
+ */
+export function initializeVariationView(
+	containerId: string,
+	productId: number
+): void {
+	renderWithProviders(
+		containerId,
+		<VariationView productId={ productId } />
+	);
+}
+
+/**
+ * Initializes the classic product editor product attributes view.
+ *
+ * @param {string} containerId DOM element ID.
+ * @param {number} productId   Parent product ID.
+ */
+export function initializeProductAttributesView(
+	containerId: string,
+	productId: number
+): void {
+	renderWithProviders(
+		containerId,
+		<ProductAttributes productId={ productId } />
 	);
 }

@@ -5,8 +5,20 @@
  * @package WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign\Init;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+if ( Features::exists( Init::FEATURE_ID ) ) {
+	?>
+	<div id="product_attributes" class="panel wc-metaboxes-wrapper hidden">
+		<div id="<?php echo esc_attr( Init::ATTRIBUTES_ROOT_ID ); ?>"></div>
+	</div>
+	<?php
+	return;
 }
 
 global $wc_product_attributes;
