@@ -39,6 +39,11 @@ import { fieldExtensions as widthFieldExtensions } from './width/field';
 
 type VariationEditField = Field< ProductEntityRecord >;
 
+// TODO: Move all product field definitions into a common fields folder once
+// the product list/edit pages and variation edit drawer standardize their
+// UI/UX. The current page-specific designs require separate field
+// implementations even when the underlying product data is the same.
+
 function withVirtualGuard( field: VariationEditField ): VariationEditField {
 	const existing = field.isVisible;
 	return {
