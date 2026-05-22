@@ -26,16 +26,20 @@ type VariationSource = Pick< ProductVariation, 'id' > & {
 };
 
 function getVariationName( variation: VariationSource ) {
-	if ( variation.name ) {
-		return variation.name;
-	}
-
 	const attributes = variation.attributes ?? [];
 
 	if ( attributes.length > 0 ) {
-		return attributes
+		const label = attributes
 			.flatMap( ( attr ) => attr.option ?? attr.options ?? [] )
-			.join( ', ' );
+			.join( ' · ' );
+
+		if ( label ) {
+			return label;
+		}
+	}
+
+	if ( variation.name ) {
+		return variation.name;
 	}
 
 	return sprintf(

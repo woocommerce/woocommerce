@@ -107,8 +107,9 @@ export function VariationView( { productId }: VariationViewProps ) {
 		const parentAttributes = parentProduct?.attributes ?? [];
 		return parentAttributes
 			.filter( ( attr ) => attr.variation )
+			.sort( ( a, b ) => a.position - b.position )
 			.map( ( attr ) => {
-				const fieldId = `attribute_${ attr.slug || attr.name }`;
+				const fieldId = `attribute_${ ( attr.slug || attr.name ).replace( /[^a-zA-Z0-9_-]/g, '_' ) }`;
 				const options = attr.options ?? [];
 				return {
 					id: fieldId,
@@ -296,7 +297,10 @@ export function VariationView( { productId }: VariationViewProps ) {
 							/>
 							<Menu.Popover>
 								<Menu.Group>
-									<Menu.Item onClick={ () => undefined }>
+									<Menu.Item
+										disabled
+										onClick={ () => undefined }
+									>
 										<Menu.ItemLabel>
 											{ __(
 												'Add variations manually',
@@ -304,7 +308,10 @@ export function VariationView( { productId }: VariationViewProps ) {
 											) }
 										</Menu.ItemLabel>
 									</Menu.Item>
-									<Menu.Item onClick={ () => undefined }>
+									<Menu.Item
+										disabled
+										onClick={ () => undefined }
+									>
 										<Menu.ItemLabel>
 											{ __(
 												'Generate missing variations',

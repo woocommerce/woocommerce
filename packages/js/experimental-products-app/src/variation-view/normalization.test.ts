@@ -48,6 +48,46 @@ describe( 'normalizeVariation', () => {
 		] );
 	} );
 
+	it( 'joins multiple attribute options with " · "', () => {
+		const normalized = normalizeVariation( {
+			id: 14,
+			parent_id: 99,
+			name: 'Test T-Shirt - Red, S',
+			attributes: [
+				{ id: 1, name: 'Color', slug: 'pa_color', option: 'Red' },
+				{ id: 2, name: 'Size', slug: 'pa_size', option: 'S' },
+			],
+		} as unknown as ProductVariation );
+
+		expect( normalized.name ).toBe( 'Red · S' );
+	} );
+
+	it( 'prefers attributes over the full product-prefixed variation name', () => {
+		const normalized = normalizeVariation( {
+			id: 15,
+			parent_id: 99,
+			name: 'Test T-Shirt - Red, S',
+			attributes: [
+				{ id: 1, name: 'Color', slug: 'pa_color', option: 'Red' },
+			],
+		} as unknown as ProductVariation );
+
+		expect( normalized.name ).toBe( 'Red' );
+	} );
+
+	it( 'falls back to variation.name when all attributes have empty options', () => {
+		const normalized = normalizeVariation( {
+			id: 16,
+			parent_id: 99,
+			name: 'Fallback Name',
+			attributes: [
+				{ id: 1, name: 'Color', slug: 'pa_color', option: '' },
+			],
+		} as unknown as ProductVariation );
+
+		expect( normalized.name ).toBe( 'Fallback Name' );
+	} );
+
 	it( 'falls back to the variation ID when there are no attributes', () => {
 		const normalized = normalizeVariation( {
 			id: 12,

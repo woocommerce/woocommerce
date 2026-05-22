@@ -260,7 +260,16 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 
 	if ( isReady ) {
 		if ( selectedProducts.length === 1 ) {
-			title = selectedProducts[ 0 ]?.name || title;
+			const selectedProduct = selectedProducts[ 0 ];
+			if ( selectedProduct ) {
+				const listedProduct = findProductInList(
+					products,
+					selectedProduct.id
+				);
+				const displayName =
+					listedProduct?.name || selectedProduct.name;
+				title = sprintf( '#%d · %s', selectedProduct.id, displayName );
+			}
 		} else {
 			title = sprintf(
 				/* translators: %d number of selected products. */
