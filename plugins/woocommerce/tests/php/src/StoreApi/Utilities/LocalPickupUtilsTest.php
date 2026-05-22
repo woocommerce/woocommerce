@@ -363,4 +363,60 @@ class LocalPickupUtilsTest extends \WC_Unit_Test_Case {
 
 		delete_option( 'woocommerce_pickup_location_settings' );
 	}
+
+	/**
+	 * @testdox prefers_pickup_default_tab returns the constant-driven default when the option is missing entirely.
+	 */
+	public function test_prefers_pickup_default_tab_defaults_when_option_missing(): void {
+		delete_option( 'woocommerce_pickup_location_settings' );
+
+		$this->assertSame(
+			wc_string_to_bool( LocalPickupUtils::DEFAULT_TAB_DEFAULT ),
+			LocalPickupUtils::prefers_pickup_default_tab(),
+			'Should fall back to the DEFAULT_TAB_DEFAULT constant when the option is unset'
+		);
+	}
+
+	/**
+	 * @testdox prefers_pickup_default_tab returns the constant-driven default when the key is missing from the stored option.
+	 */
+	public function test_prefers_pickup_default_tab_defaults_when_key_missing(): void {
+		update_option(
+			'woocommerce_pickup_location_settings',
+			array(
+				'enabled'    => 'yes',
+				'title'      => 'Pickup',
+				'tax_status' => 'taxable',
+				'cost'       => '',
+			)
+		);
+
+		$this->assertSame(
+			wc_string_to_bool( LocalPickupUtils::DEFAULT_TAB_DEFAULT ),
+			LocalPickupUtils::prefers_pickup_default_tab(),
+			'Should fall back to the DEFAULT_TAB_DEFAULT constant when the key is missing'
+		);
+
+		delete_option( 'woocommerce_pickup_location_settings' );
+	}
+
+	/**
+	 * @testdox prefers_pickup_default_tab returns false when the stored value is 'no'.
+	 */
+	public function test_prefers_pickup_default_tab_returns_false_for_no(): void {
+		update_option(
+			'woocommerce_pickup_location_settings',
+			array(
+				'enabled'     => 'yes',
+				'title'       => 'Pickup',
+				'tax_status'  => 'taxable',
+				'cost'        => '',
+				'default_tab' => 'no',
+			)
+		);
+
+		$this->assertFalse( LocalPickupUtils::prefers_pickup_default_tab() );
+
+		delete_option( 'woocommerce_pickup_location_settings' );
+	}
 }
