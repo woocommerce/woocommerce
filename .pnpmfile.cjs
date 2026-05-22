@@ -87,8 +87,8 @@ function writeTsconfig( tsconfigPath, tsconfig ) {
  * Identify workspace packages that consume @woocommerce/internal-ts-config.
  *
  * A TS consumer has @woocommerce/internal-ts-config in dependencies or
- * devDependencies AND has a tsconfig.json on disk. The result maps the
- * package name to its absolute directory path.
+ * devDependencies. Whether the package has a tsconfig.json on disk is
+ * verified by loadTsconfig later in syncTsReferences.
  *
  * @param {Object} lockfile The lockfile passed to afterAllResolved.
  * @return {Map<string, { packagePath: string, absolutePath: string }>}
@@ -97,12 +97,6 @@ function identifyTsConsumers( lockfile ) {
 	const consumers = new Map();
 
 	for ( const packagePath in lockfile.importers ) {
-		const absolutePath = path.resolve( __dirname, packagePath );
-		const tsconfigPath = path.join( absolutePath, 'tsconfig.json' );
-		if ( ! fs.existsSync( tsconfigPath ) ) {
-			continue;
-		}
-
 		const packageFile = loadPackageFile( packagePath );
 		const allDeps = {
 			...( packageFile.dependencies || {} ),
@@ -112,6 +106,7 @@ function identifyTsConsumers( lockfile ) {
 			continue;
 		}
 
+		const absolutePath = path.resolve( __dirname, packagePath );
 		consumers.set( packageFile.name, { packagePath, absolutePath } );
 	}
 
