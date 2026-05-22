@@ -44,6 +44,8 @@ class EmailLogger implements RegisterHooksInterface {
 	public function register(): void {
 		add_action( 'wp_mail_failed', array( $this, 'capture_mail_error' ), 10, 1 );
 		add_action( 'woocommerce_email_sent', array( $this, 'handle_woocommerce_email_sent' ), 10, 3 );
+		add_action( 'woocommerce_email_disabled', array( $this, 'handle_woocommerce_email_disabled' ), 10, 2 );
+		add_action( 'woocommerce_email_skipped', array( $this, 'handle_woocommerce_email_skipped' ), 10, 3 );
 	}
 
 	/**
@@ -88,17 +90,11 @@ class EmailLogger implements RegisterHooksInterface {
 			return;
 		}
 
-		$object_context = $this->get_object_context( $email->object );
-		$object_label   = isset( $object_context['type'], $object_context['id'] )
+		$object_context  = $this->get_object_context( $email->object );
+		$object_label    = isset( $object_context['type'], $object_context['id'] )
 			? sprintf( ' for %s #%d', $object_context['type'], $object_context['id'] )
 			: '';
-
-		if ( $success ) {
-			$message = sprintf( 'Email "%s"%s sent', $email_id, $object_label );
-		} else {
-			$reason  = $this->last_mail_error ? ': ' . $this->redact_emails( $this->last_mail_error ) : '';
-			$message = sprintf( 'Email "%s"%s failed to send%s', $email_id, $object_label, $reason );
-		}
+		$last_mail_error = $this->last_mail_error;
 
 		$this->last_mail_error = null;
 
@@ -124,8 +120,104 @@ class EmailLogger implements RegisterHooksInterface {
 		 */
 		$context = (array) apply_filters( 'woocommerce_email_log_context', $context, $email_id, $email );
 
+		$type_label = ! empty( $context['is_test'] ) ? 'Test email' : 'Email';
+
+		if ( $success ) {
+			$message = sprintf( '%s "%s"%s sent', $type_label, $email_id, $object_label );
+		} else {
+			$reason  = $last_mail_error ? ': ' . $this->redact_emails( $last_mail_error ) : '';
+			$message = sprintf( '%s "%s"%s failed to send%s', $type_label, $email_id, $object_label, $reason );
+		}
+
 		$level = $success ? WC_Log_Levels::INFO : WC_Log_Levels::WARNING;
 		wc_get_logger()->log( $level, $message, $context );
+	}
+
+	/**
+	 * Handle the woocommerce_email_disabled action.
+	 *
+	 * @param string   $email_id The email type ID (e.g. `customer_processing_order`).
+	 * @param WC_Email $email    The WC_Email instance.
+	 * @return void
+	 */
+	public function handle_woocommerce_email_disabled( string $email_id, WC_Email $email ): void {
+		$this->log_non_send_outcome( $email_id, $email, 'disabled' );
+	}
+
+	/**
+	 * Handle the woocommerce_email_skipped action.
+	 *
+	 * @param string   $reason   Short identifier for why the email was skipped (e.g. 'no_recipient').
+	 * @param string   $email_id The email type ID (e.g. `new_order`).
+	 * @param WC_Email $email    The WC_Email instance.
+	 * @return void
+	 */
+	public function handle_woocommerce_email_skipped( string $reason, string $email_id, WC_Email $email ): void {
+		$this->log_non_send_outcome( $email_id, $email, 'skipped', $reason );
+	}
+
+	/**
+	 * Write a log entry for an email that was not sent (disabled or skipped).
+	 *
+	 * Centralises the shared logic for disabled and skipped outcomes so that the context
+	 * schema (`source`, `email_type`, `status`, `reason`, `recipient`, object key) is
+	 * defined in exactly one place. Future additions (e.g. a `correlation_id` field) only
+	 * need to be made here.
+	 *
+	 * @param string      $email_id The email type ID.
+	 * @param WC_Email    $email    The WC_Email instance.
+	 * @param string      $status   The outcome status: 'disabled' or 'skipped'.
+	 * @param string|null $reason   Optional reason identifier (only set for 'skipped' status).
+	 * @return void
+	 */
+	private function log_non_send_outcome( string $email_id, WC_Email $email, string $status, ?string $reason = null ): void {
+		/**
+		 * Filter whether to log this transactional email attempt.
+		 *
+		 * This filter is documented in src/Internal/Email/EmailLogger.php
+		 *
+		 * @since 10.9.0
+		 */
+		if ( ! apply_filters( 'woocommerce_email_log_enabled', true, $email_id, $email ) ) {
+			return;
+		}
+
+		$object_context = $this->get_object_context( $email->object );
+		$object_label   = isset( $object_context['type'], $object_context['id'] )
+			? sprintf( ' for %s #%d', $object_context['type'], $object_context['id'] )
+			: '';
+
+		if ( 'disabled' === $status ) {
+			$message = sprintf( 'Email "%s"%s not sent: email type is disabled', $email_id, $object_label );
+		} else {
+			$message = sprintf( 'Email "%s"%s not sent: %s', $email_id, $object_label, $reason );
+		}
+
+		$context = array(
+			'source'     => self::LOG_SOURCE,
+			'email_type' => $email_id,
+			'status'     => $status,
+			'recipient'  => $this->resolve_recipient( $email->get_recipient() ),
+		);
+
+		if ( null !== $reason ) {
+			$context['reason'] = $reason;
+		}
+
+		if ( ! empty( $object_context ) ) {
+			$context[ $object_context['type'] ] = $object_context['id'] ?? null;
+		}
+
+		/**
+		 * Filter the context array logged for each transactional email attempt.
+		 *
+		 * This filter is documented in src/Internal/Email/EmailLogger.php
+		 *
+		 * @since 10.9.0
+		 */
+		$context = (array) apply_filters( 'woocommerce_email_log_context', $context, $email_id, $email );
+
+		wc_get_logger()->log( WC_Log_Levels::NOTICE, $message, $context );
 	}
 
 	/**

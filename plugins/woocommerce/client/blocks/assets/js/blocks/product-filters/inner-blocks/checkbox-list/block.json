@@ -16,7 +16,7 @@
 	"supports": {
 		"interactivity": true
 	},
-	"usesContext": [ "woocommerceSelectableItems" ],
+	"usesContext": [ "woocommerce/selectableItems" ],
 	"attributes": {
 		"optionElementBorder": {
 			"type": "string",

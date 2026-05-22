@@ -53,7 +53,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		customSelectedChipBorder,
 	} = attributes;
 	const { isLoading = false, items = [] } =
-		context?.woocommerceSelectableItems ?? {};
+		context?.[ 'woocommerce/selectableItems' ] ?? {};
 
 	const hasColorSwatches = items.some( ( item ) => 'color' in item );
 

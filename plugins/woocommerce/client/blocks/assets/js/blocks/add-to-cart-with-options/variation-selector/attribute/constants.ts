@@ -34,9 +34,7 @@ export const ATTRIBUTE_ITEM_TEMPLATE: TemplateArray = [
 							fontSize: 'medium',
 						},
 					],
-					[
-						'woocommerce/add-to-cart-with-options-variation-selector-attribute-options',
-					],
+					[ 'woocommerce/product-filter-chips' ],
 				],
 			],
 		],
@@ -50,9 +48,9 @@ export const DEFAULT_ATTRIBUTES = [
 		name: __( 'Color', 'woocommerce' ),
 		has_variations: true,
 		terms: [
-			{ id: 1, slug: 'blue', name: __( 'Blue', 'woocommerce' ) },
-			{ id: 2, slug: 'red', name: __( 'Red', 'woocommerce' ) },
-			{ id: 3, slug: 'green', name: __( 'Green', 'woocommerce' ) },
+			{ id: -1, slug: 'blue', name: __( 'Blue', 'woocommerce' ) },
+			{ id: -2, slug: 'red', name: __( 'Red', 'woocommerce' ) },
+			{ id: -3, slug: 'green', name: __( 'Green', 'woocommerce' ) },
 		],
 	},
 	{
@@ -67,3 +65,9 @@ export const DEFAULT_ATTRIBUTES = [
 		],
 	},
 ] as const;
+
+export const EMPTY_TERM_COLORS: Record< string, string > = {
+	'-1': '#0000ff',
+	'-2': '#e10000',
+	'-3': '#009b00',
+};

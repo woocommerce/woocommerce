@@ -9,13 +9,14 @@ import type { DataFormControlProps, Field } from '@wordpress/dataviews';
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../types';
+import { getBulkNumericOperationFieldId } from '../../product-edit/bulk-edit';
 
 type StockQuantityRange = [ number | string, number | string ];
 type StockQuantityFilterRecord = Omit<
 	ProductEntityRecord,
 	'stock_quantity'
 > & {
-	stock_quantity?: number | null | StockQuantityRange;
+	stock_quantity?: number | string | null | StockQuantityRange;
 };
 
 const castValueToString = (
@@ -28,6 +29,9 @@ const castValueToString = (
 	}
 	return '';
 };
+
+const isBulkStockQuantityEdit = ( data: ProductEntityRecord ) =>
+	getBulkNumericOperationFieldId( 'stock_quantity' ) in data;
 
 const fieldDefinition = {
 	type: 'integer',
@@ -61,7 +65,11 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		const onChangeBetween = onChange as (
 			data: Partial< StockQuantityFilterRecord >
 		) => void;
+		const onChangeStockQuantity = onChange as (
+			data: Partial< StockQuantityFilterRecord >
+		) => void;
 		const raw = ( data as StockQuantityFilterRecord ).stock_quantity;
+		const disabled = field.isDisabled( { item: data, field } );
 
 		if ( operator === 'between' ) {
 			const [ minRaw = '', maxRaw = '' ] = Array.isArray( raw )
@@ -103,17 +111,27 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		}
 
 		const value = castValueToString( raw );
+		const isBulkEdit = isBulkStockQuantityEdit( data );
+
 		return (
 			<InputControl
-				label={ hideLabelFromVision ? '' : field.label }
+				label={ field.label }
+				hideLabelFromVision={ hideLabelFromVision }
 				type="number"
 				step={ 1 }
 				value={ value }
+				placeholder={ field.placeholder }
+				disabled={ disabled }
 				onChange={ ( event ) => {
 					const next = event.target.value;
-					onChange( {
-						stock_quantity: next === '' ? null : Number( next ),
-					} );
+					let stockQuantity: StockQuantityFilterRecord[ 'stock_quantity' ] =
+						next === '' ? null : Number( next );
+
+					if ( isBulkEdit ) {
+						stockQuantity = next;
+					}
+
+					onChangeStockQuantity( { stock_quantity: stockQuantity } );
 				} }
 			/>
 		);
