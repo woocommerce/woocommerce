@@ -139,11 +139,14 @@ class EmailLogger implements RegisterHooksInterface {
 	/**
 	 * Add a private order note when a transactional email is sent or fails for an order.
 	 *
-	 * @param WC_Order|WC_Product|WP_User|false|null $wc_object    The email's related object, or false/null when none is set.
-	 * @param string                                  $email_id     The email type ID (e.g. `customer_processing_order`).
-	 * @param WC_Email                                $email        The WC_Email instance.
-	 * @param bool                                    $success      Whether the email was sent successfully.
-	 * @param string|null                             $error_reason The error message from wp_mail_failed, or null.
+	 * Accepts mixed input because $email->object is loosely typed (any object the email subclass attaches),
+	 * and we narrow to WC_Order at the top of the method before doing anything with it.
+	 *
+	 * @param mixed       $wc_object    The email's related object, or false/null when none is set.
+	 * @param string      $email_id     The email type ID (e.g. `customer_processing_order`).
+	 * @param WC_Email    $email        The WC_Email instance.
+	 * @param bool        $success      Whether the email was sent successfully.
+	 * @param string|null $error_reason The error message from wp_mail_failed, or null.
 	 * @return void
 	 */
 	private function maybe_add_order_note( $wc_object, string $email_id, WC_Email $email, bool $success, ?string $error_reason ): void {
@@ -168,7 +171,8 @@ class EmailLogger implements RegisterHooksInterface {
 			return;
 		}
 
-		$email_label = $email->get_title() ?: $email_id;
+		$email_title = $email->get_title();
+		$email_label = '' !== $email_title ? $email_title : $email_id;
 
 		if ( $success ) {
 			$note = sprintf(
