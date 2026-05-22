@@ -66,12 +66,16 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$this->email->update_option( 'automated', 'yes' );
 
 		$this->sut = wc_get_container()->get( Scheduler::class );
+
+		add_action( Scheduler::ACTION_HOOK, array( $this->sut, 'handle_scheduled_send' ), 10, 1 );
 	}
 
 	/**
 	 * Reset settings + cancel any leftover scheduled actions between tests.
 	 */
 	public function tearDown(): void {
+		remove_action( Scheduler::ACTION_HOOK, array( $this->sut, 'handle_scheduled_send' ), 10 );
+
 		delete_option( 'woocommerce_feature_abandoned_cart_recovery_enabled' );
 		delete_option( 'woocommerce_customer_abandoned_cart_recovery_settings' );
 		update_option( 'active_plugins', $this->original_active_plugins );
@@ -85,6 +89,11 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 * @testdox init() registers the new-order, status-changed, trash, delete, and AS-callback hooks so a fresh container resolve wires the schedule + cancel + dispatch listeners in one place.
 	 */
 	public function test_init_registers_hooks(): void {
+		// init() ran when the container first resolved Scheduler, but WP's
+		// test framework has since restored `$wp_filter` past that point.
+		// Re-invoke here so the assertions exercise the production wiring.
+		$this->sut->init();
+
 		$this->assertNotFalse( has_action( 'woocommerce_new_order', array( $this->sut, 'handle_new_order' ) ) );
 		$this->assertNotFalse( has_action( 'woocommerce_order_status_changed', array( $this->sut, 'handle_status_changed' ) ) );
 		$this->assertNotFalse( has_action( 'woocommerce_trash_order', array( $this->sut, 'handle_cancellation' ) ) );
@@ -117,7 +126,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox handle_scheduled_send() records an "sent automatically" order note when the send actually goes out, so the audit trail mirrors the manual-send path.
+	 * @testdox handle_scheduled_send() records a "sent automatically" order note when the send actually goes out, so the audit trail mirrors the manual-send path.
 	 */
 	public function test_handle_scheduled_send_records_order_note_on_success(): void {
 		$order = OrderHelper::create_order();
@@ -135,7 +144,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 				$note_strings,
 				static fn ( $note ) => false !== strpos( $note, 'sent automatically' )
 			),
-			'Successful auto-send must add an "sent automatically" order note.'
+			'Successful auto-send must add a "sent automatically" order note.'
 		);
 	}
 
@@ -160,7 +169,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 				$note_strings,
 				static fn ( $note ) => false !== strpos( $note, 'sent automatically' )
 			),
-			'Dedup-gated trigger() must not record an "sent automatically" order note.'
+			'Dedup-gated trigger() must not record a "sent automatically" order note.'
 		);
 	}
 
@@ -177,6 +186,15 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
 
+		/**
+		 * Fires the Action Scheduler callback that dispatches the abandoned
+		 * cart recovery email — simulated here so the test exercises the
+		 * registered handler end-to-end.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param int $order_id The order to dispatch the recovery email for.
+		 */
 		do_action( Scheduler::ACTION_HOOK, $order->get_id() );
 
 		$this->assertSame( $before + 1, count( $mailer->mock_sent ) );
@@ -293,8 +311,8 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$order->save();
 
 		$this->sut->handle_new_order( $order->get_id() );
-		$fresh       = wc_get_order( $order->get_id() );
-		$first_when  = (string) $fresh->get_meta( Scheduler::SCHEDULED_META_KEY );
+		$fresh      = wc_get_order( $order->get_id() );
+		$first_when = (string) $fresh->get_meta( Scheduler::SCHEDULED_META_KEY );
 
 		$this->sut->handle_new_order( $order->get_id() );
 		$fresh       = wc_get_order( $order->get_id() );

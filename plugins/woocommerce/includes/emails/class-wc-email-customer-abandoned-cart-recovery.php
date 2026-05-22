@@ -227,6 +227,12 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				return $actions;
 			}
 
+			// trigger() refuses to dispatch a second time once META_KEY_SENT_AT is
+			// set, so don't surface a control that would silently no-op.
+			if ( '' !== (string) $order->get_meta( self::META_KEY_SENT_AT ) ) {
+				return $actions;
+			}
+
 			$actions[ self::MANUAL_RECOVERY_EMAIL_SEND_ACTION ] = __( 'Send abandoned cart recovery email', 'woocommerce' );
 
 			return $actions;
@@ -333,7 +339,12 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			 */
 			do_action( 'woocommerce_before_resend_order_emails', $order, $this->id );
 
-			$this->trigger( $order->get_id() );
+			// Gate the note + admin notice on trigger()'s return so the audit
+			// trail only records sends that actually went out (e.g. trigger()
+			// short-circuits when META_KEY_SENT_AT is already set).
+			if ( ! $this->trigger( $order->get_id() ) ) {
+				return;
+			}
 
 			$order->add_order_note(
 				__( 'Abandoned cart recovery email sent from the order actions menu.', 'woocommerce' ),

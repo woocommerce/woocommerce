@@ -41,9 +41,9 @@ class Scheduler {
 	/**
 	 * Action Scheduler hook fired when the configured delay elapses.
 	 *
-	 * Kept in sync with the `add_action` registration in
-	 * `WC_Email_Customer_Abandoned_Cart_Recovery::__construct()`, which is the
-	 * listener that performs the actual send when this hook fires.
+	 * Registered in `Scheduler::init()` against `handle_scheduled_send()`, which
+	 * resolves the email class through the mailer and performs the actual send
+	 * when the hook fires.
 	 */
 	public const ACTION_HOOK = 'woocommerce_send_abandoned_cart_recovery_notification';
 
@@ -184,18 +184,18 @@ class Scheduler {
 	 *
 	 * @param int $order_id Order id the AS action was scheduled with.
 	 */
-	public function handle_scheduled_send( $order_id ): void {
+	public function handle_scheduled_send( int $order_id ): void {
 		$email = $this->get_email();
 		if ( null === $email ) {
 			return;
 		}
 
-		$dispatched = $email->trigger( (int) $order_id );
+		$dispatched = $email->trigger( $order_id );
 		if ( ! $dispatched ) {
 			return;
 		}
 
-		$order = wc_get_order( (int) $order_id );
+		$order = wc_get_order( $order_id );
 		if ( ! $order instanceof WC_Order ) {
 			return;
 		}
