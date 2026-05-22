@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { Notice } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
 import {
 	createInterpolateElement,
 	useEffect,
@@ -16,6 +18,7 @@ import {
 	getProductAttributeRows,
 	getVariationAttributeRows,
 } from './attribute-rows';
+import type { ProductEntityRecord } from '../../fields/types';
 import {
 	AttributeTable,
 	DEFAULT_PRODUCT_ATTRIBUTE_COLUMNS,
@@ -140,6 +143,31 @@ type VariationAttributesProps = {
 };
 
 export function ProductAttributes( { productId }: VariationAttributesProps ) {
+	const { product, hasResolved } = useSelect(
+		( select ) => {
+			const coreSelect = select( coreStore );
+			const resolutionArgs = [ 'root', 'product', productId ];
+
+			return {
+				hasResolved: coreSelect.hasFinishedResolution(
+					'getEntityRecord',
+					resolutionArgs
+				),
+				product: coreSelect.getEditedEntityRecord(
+					'root',
+					'product',
+					productId
+				) as unknown as ProductEntityRecord | undefined,
+			};
+		},
+		[ productId ]
+	);
+
+	const notice =
+		hasResolved && product?.type === 'variable' ? (
+			<ProductAttributesNotice />
+		) : undefined;
+
 	return (
 		<AttributeTable
 			columns={ DEFAULT_PRODUCT_ATTRIBUTE_COLUMNS }
@@ -149,7 +177,7 @@ export function ProductAttributes( { productId }: VariationAttributesProps ) {
 				'woocommerce'
 			) }
 			nameLabel={ __( 'Name', 'woocommerce' ) }
-			notice={ <ProductAttributesNotice /> }
+			notice={ notice }
 			productId={ productId }
 			styles={ DEFAULT_PRODUCT_ATTRIBUTE_LAYOUT_STYLES }
 			title={ __( 'Product attributes', 'woocommerce' ) }
