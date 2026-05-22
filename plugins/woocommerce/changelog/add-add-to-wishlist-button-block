@@ -1,0 +1,5 @@
+Significance: minor
+Type: add
+Comment: Experimental Add to Wishlist button block, gated by the `product_wishlist` feature flag.
+
+Add the `woocommerce/add-to-wishlist-button` block: shipped as an inner block of `woocommerce/add-to-cart-with-options` on the single-product template (block themes only). Toggles the currently configured product (parent or selected variation) in the shopper's wishlist via the shared `shopper-lists` iAPI store. Hidden for guests.
