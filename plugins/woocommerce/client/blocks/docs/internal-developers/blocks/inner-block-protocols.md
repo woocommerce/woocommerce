@@ -6,9 +6,9 @@ WooCommerce reusable inner blocks use small context protocols so they can render
 
 | Context key | Purpose | Inner blocks |
 | --- | --- | --- |
-| `woocommerceSelectableItems` | Select/deselect items | checkbox-list, chips |
-| `woocommerceRemovableItems` | Remove active items | removable-chips |
-| `woocommerceRangeInput` | Numeric range input | price-slider |
+| `woocommerce/selectableItems` | Select/deselect items (filters, variation attributes) | checkbox-list, chips, dropdown |
+| `woocommerce/removableItems` | Remove individual items (active filters) | removable-chips |
+| `woocommerce/rangeInput` | Numeric range input (price, slider) | price-slider |
 
 ## Shared pattern
 
@@ -30,7 +30,7 @@ Parents pass the context directly when rendering inner blocks because items are 
 
 ```php
 ( new \WP_Block( $parsed_block, array(
-    'woocommerceSelectableItems' => $context,
+    'woocommerce/selectableItems' => $context,
 ) ) )->render();
 ```
 
@@ -117,7 +117,7 @@ Checkbox-list and chips mirror parent items into child `state.items`, adding loc
 
 ## Removable Items
 
-Context key: `woocommerceRemovableItems`
+Context key: `woocommerce/removableItems`
 
 Used by active-filter chips and similar removable item lists.
 
@@ -160,7 +160,7 @@ Reference implementations: `ProductFilterRemovableChips.php`, `ProductFilterClea
 
 ## Range Input
 
-Context key: `woocommerceRangeInput`
+Context key: `woocommerce/rangeInput`
 
 Used by two-ended numeric controls such as price sliders.
 

@@ -215,6 +215,15 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 				);
 			}
 
+			if ( array_key_exists( 'max_rating', $shape ) ) {
+				$properties['max_rating'] = array(
+					'type'        => array( 'integer', 'null' ),
+					'minimum'     => 1,
+					'maximum'     => 5,
+					'description' => __( 'Maximum star rating that triggers a review notification (1–5), or null to disable the threshold.', 'woocommerce' ),
+				);
+			}
+
 			$args[ $key ] = array(
 				'description'       => sprintf(
 					/* translators: %s: notification preference key (e.g. store_order). */

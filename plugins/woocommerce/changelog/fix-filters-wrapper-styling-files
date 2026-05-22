@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Avoid building unnecessary styling files in Product Filters block
+
+

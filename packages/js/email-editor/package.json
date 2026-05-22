@@ -134,6 +134,8 @@
 		"ts-jest": "29.1.x",
 		"ts-loader": "9.5.x",
 		"typescript": "5.7.x",
+		"webpack": "5.97.x",
+		"webpack-cli": "5.1.x",
 		"wireit": "0.14.12"
 	},
 	"config": {
