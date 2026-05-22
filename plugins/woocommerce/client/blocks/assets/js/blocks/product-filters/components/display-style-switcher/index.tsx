@@ -14,6 +14,27 @@ import {
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
 
+/**
+ * Internal dependencies
+ */
+import { DISPLAY_STYLE_SWITCHER_EXCLUDED_BLOCK_NAMES } from '../../constants';
+
+function isDisplayStyleCandidate(
+	blockTypeName: string,
+	parentBlockName: string | undefined,
+	blockAncestor: readonly string[] | undefined
+): boolean {
+	if ( ! parentBlockName ) {
+		return false;
+	}
+	if (
+		DISPLAY_STYLE_SWITCHER_EXCLUDED_BLOCK_NAMES.includes( blockTypeName )
+	) {
+		return false;
+	}
+	return blockAncestor?.includes( parentBlockName ) ?? false;
+}
+
 export const DisplayStyleSwitcher = ( {
 	clientId,
 	currentStyle,
@@ -26,12 +47,13 @@ export const DisplayStyleSwitcher = ( {
 	const filterBlock = select( 'core/block-editor' ).getBlock( clientId );
 	const parentBlockName = filterBlock?.name;
 
-	const displayStyleOptions = getBlockTypes().filter( ( blockType ) => {
-		if ( parentBlockName ) {
-			return blockType.ancestor?.includes( parentBlockName );
-		}
-		return [];
-	} );
+	const displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
+		isDisplayStyleCandidate(
+			blockType.name,
+			parentBlockName,
+			blockType.ancestor
+		)
+	);
 
 	const { insertBlock, replaceBlock } = useDispatch( 'core/block-editor' );
 
@@ -100,7 +122,11 @@ export function resetDisplayStyleBlock(
 
 	const parentBlockName = filterBlock.name;
 	const displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
-		blockType.ancestor?.includes( parentBlockName )
+		isDisplayStyleCandidate(
+			blockType.name,
+			parentBlockName,
+			blockType.ancestor
+		)
 	);
 
 	const currentStyle = displayStyleOptions.find( ( blockType ) =>

@@ -10,6 +10,10 @@ import type { Field } from '@wordpress/dataviews';
  */
 import type { ProductEntityRecord } from '../types';
 
+// Radix UI (used by @wordpress/ui SelectControl) rejects empty-string values.
+// We use 'parent' as a UI sentinel for the '' API value ("Same as parent").
+const SAME_AS_PARENT = 'parent';
+
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	type: 'text',
 	label: __( 'Tax class', 'woocommerce' ),
@@ -18,7 +22,10 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	getValue: ( { item } ) => item.tax_class ?? '',
 	Edit: ( { data, onChange, field } ) => {
 		const options = [
-			{ value: '', label: __( 'Same as parent', 'woocommerce' ) },
+			{
+				value: SAME_AS_PARENT,
+				label: __( 'Same as parent', 'woocommerce' ),
+			},
 			{ value: 'standard', label: __( 'Standard', 'woocommerce' ) },
 			{
 				value: 'reduced-rate',
@@ -26,9 +33,11 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			},
 			{ value: 'zero-rate', label: __( 'Zero rate', 'woocommerce' ) },
 		];
-		const selected = options.find(
-			( o ) => o.value === ( data.tax_class ?? '' )
-		);
+
+		const apiValue = data.tax_class ?? '';
+		const uiValue = apiValue === '' ? SAME_AS_PARENT : apiValue;
+		const selected = options.find( ( o ) => o.value === uiValue );
+
 		return (
 			<SelectControl
 				label={ field.label }
@@ -36,8 +45,13 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				items={ options }
 				onValueChange={ ( option ) => {
 					if ( option != null ) {
+						const apiVal =
+							option.value === SAME_AS_PARENT
+								? ''
+								: option.value;
 						onChange( {
-							tax_class: option.value as ProductEntityRecord[ 'tax_class' ],
+							tax_class:
+								apiVal as ProductEntityRecord[ 'tax_class' ],
 						} );
 					}
 				} }

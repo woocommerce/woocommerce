@@ -290,7 +290,7 @@ export function VariationEditDrawer( {
 	const navigateAway = useCallback( () => {
 		const nextQuery = { ...query } as Record< string, string >;
 		delete nextQuery.quickEdit;
-		navigate( getProductListNavigationPath( path, nextQuery ) );
+		navigate( getProductListNavigationPath( path ?? '/', nextQuery ) );
 	}, [ navigate, path, query ] );
 
 	// Discard unsaved edits and close (Cancel / X button).

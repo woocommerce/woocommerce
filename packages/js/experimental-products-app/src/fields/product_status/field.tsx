@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Badge, SelectControl } from '@wordpress/ui';
+import { SelectControl } from '@wordpress/ui';
 
 import type { Field } from '@wordpress/dataviews';
 
@@ -11,6 +11,14 @@ import type { Field } from '@wordpress/dataviews';
  */
 import type { ProductEntityRecord } from '../types';
 import { ProductStatusBadge } from '../components/product-status-badge';
+import {
+	getVariationActiveValue,
+	VariationActiveBadge,
+} from '../variation_active/field';
+
+function isVariation( item: ProductEntityRecord ) {
+	return item.type === 'variation' || Boolean( item.parent_id );
+}
 
 type VariationStatus = 'publish' | 'private';
 
@@ -53,21 +61,14 @@ const variationStatusElements = [
 
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
-	getValue: ( { item } ) => item.status,
-	render: ( { item }: { item: ProductEntityRecord } ) => {
-		if ( isVariationItem( item ) ) {
-			const isActive = item.status === 'publish';
-			return (
-				<Badge intent={ isActive ? 'stable' : 'none' }>
-					{ isActive
-						? __( 'Active', 'woocommerce' )
-						: __( 'Inactive', 'woocommerce' ) }
-				</Badge>
-			);
-		}
-
-		return <ProductStatusBadge status={ item.status } />;
-	},
+	getValue: ( { item } ) =>
+		isVariation( item ) ? getVariationActiveValue( item ) : item.status,
+	render: ( { item }: { item: ProductEntityRecord } ) =>
+		isVariation( item ) ? (
+			<VariationActiveBadge value={ getVariationActiveValue( item ) } />
+		) : (
+			<ProductStatusBadge status={ item.status } />
+		),
 	Edit: ( { data, onChange, field } ) => {
 		if ( isVariationItem( data ) ) {
 			const isMixed = ! data.status;
@@ -156,6 +157,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		return (
 			<SelectControl
 				label={ field.label }
+				placeholder={ field.placeholder }
 				value={ selectedOption }
 				items={ options }
 				onValueChange={ ( option ) => {

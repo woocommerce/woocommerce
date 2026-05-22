@@ -18,6 +18,11 @@ import { fieldExtensions as downloadExpiryFieldExtensions } from './download_exp
 import { fieldExtensions as downloadLimitFieldExtensions } from './download_limit/field';
 import { fieldExtensions as lowStockAmountFieldExtensions } from './low_stock_amount/field';
 import { fieldExtensions as productStatusFieldExtensions } from './product_status/field';
+import { fieldExtensions as shippingClassFieldExtensions } from './shipping_class/field';
+import {
+	createVariationDimensionField,
+	createVariationWeightField,
+} from './components/dimension';
 import { fieldExtensions as taxClassFieldExtensions } from './tax_class/field';
 import { fieldExtensions as virtualFieldExtensions } from './virtual/field';
 import type { ProductEntityRecord } from './types';
@@ -65,7 +70,23 @@ function withVirtualGuard(
 
 const sharedFields: VariationEditField[] = createProductFields( SHARED_FIELD_IDS );
 
-const shippingFields: VariationEditField[] = createProductFields( SHIPPING_FIELD_IDS ).map( withVirtualGuard );
+const variationShippingOverrides: Record< string, Partial< VariationEditField > > = {
+	shipping_class: shippingClassFieldExtensions,
+	length: createVariationDimensionField( 'length' ),
+	width: createVariationDimensionField( 'width' ),
+	height: createVariationDimensionField( 'height' ),
+	weight: createVariationWeightField(),
+};
+
+const shippingFields: VariationEditField[] = createProductFields( SHIPPING_FIELD_IDS )
+	.map( ( field ) => {
+		const override = variationShippingOverrides[ field.id as string ];
+		if ( override?.Edit ) {
+			return { ...field, Edit: override.Edit };
+		}
+		return field;
+	} )
+	.map( withVirtualGuard );
 
 // Variation-exclusive field IDs — these do not exist in the main registry.
 const VARIATION_ONLY_FIELD_IDS = [
