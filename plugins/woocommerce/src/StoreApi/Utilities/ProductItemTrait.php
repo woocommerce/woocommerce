@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 /**
  * ProductItemTrait
  *
- * Shared functionality for formating product item data.
+ * Shared functionality for formatting product item data.
  */
 trait ProductItemTrait {
 	/**

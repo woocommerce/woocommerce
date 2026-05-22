@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { SelectControl } from '@wordpress/components';
-import { Badge } from '@wordpress/ui';
+import { Badge, SelectControl } from '@wordpress/ui';
 import type { Field } from '@wordpress/dataviews';
 
 /**
@@ -33,7 +32,7 @@ const fieldDefinition = {
 	enableSorting: false,
 	enableHiding: false,
 	filterBy: {
-		operators: [ 'is' ],
+		operators: [ 'isAny' ],
 	},
 	elements: [
 		{ label: __( 'In stock', 'woocommerce' ), value: 'instock' },
@@ -57,31 +56,47 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			return item.stock_status;
 		}
 
+		const stockLabel =
+			item.stock_quantity && item.stock_quantity > 0
+				? `${ match.label } (${ item.stock_quantity })`
+				: match.label;
+
 		return (
 			<div className="woocommerce-fields-field__stock">
 				<Badge intent={ stockStatusBadgeIntent[ match.value ] }>
-					{ match.label }
+					{ stockLabel }
 				</Badge>
-				{ item.stock_quantity && item.stock_quantity > 0 && (
-					<span className="woocommerce-fields-field__stock-quantity">
-						({ item.stock_quantity })
-					</span>
-				) }
 			</div>
 		);
 	},
-	Edit: ( { data, onChange, field } ) => (
-		<SelectControl
-			label={ __( 'Status', 'woocommerce' ) }
-			value={ data.stock_status }
-			options={ field?.elements || [] }
-			onChange={ ( value ) => {
-				if ( value && isValidStockStatus( value ) ) {
-					onChange( {
-						stock_status: value,
-					} );
-				}
-			} }
-		/>
-	),
+	Edit: ( { data, onChange, field } ) => {
+		const options = field?.elements ?? [];
+		const selectedOption =
+			field.placeholder && ! data.stock_status
+				? undefined
+				: options.find(
+						( option ) => option.value === data.stock_status
+				  );
+
+		return (
+			<SelectControl
+				label={ __( 'Stock status', 'woocommerce' ) }
+				placeholder={ field.placeholder }
+				value={ selectedOption }
+				items={ options }
+				onValueChange={ ( option ) => {
+					const value = option?.value;
+
+					if (
+						typeof value === 'string' &&
+						isValidStockStatus( value )
+					) {
+						onChange( {
+							stock_status: value,
+						} );
+					}
+				} }
+			/>
+		);
+	},
 };

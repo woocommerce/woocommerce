@@ -117,6 +117,7 @@ changes.json
 .claude/docs/analysis/
 .claude/docs/research/
 CLAUDE.local.md
+.agents/
 
 # AI agent scratchpad and temp (scaffold-project)
 .agents/scratchpad/**

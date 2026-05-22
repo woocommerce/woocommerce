@@ -35,6 +35,7 @@ export const ListItem = ( {
 					align="center"
 					justify="space-between"
 					className="woocommerce-list-item"
+					gap={ 'md' }
 				>
 					{ item.thumbnail && (
 						<div className="woocommerce-list-item__thumbnail">

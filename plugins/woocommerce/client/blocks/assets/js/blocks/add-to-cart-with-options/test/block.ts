@@ -30,7 +30,6 @@ import '../grouped-product-selector/product-item-selector';
 import '../variation-selector';
 import '../variation-selector/attribute';
 import '../variation-selector/attribute-name';
-import '../variation-selector/attribute-options';
 import '../variation-description';
 
 const mockTemplatePartsHTML: Record< string, string > = {
@@ -325,7 +324,6 @@ describe( 'Add to Cart + Options block', () => {
 
 		await expectHasBlock( 'Variation Selector (Beta)' );
 		await expectHasBlock( 'Variation Selector: Attribute Name (Beta)' );
-		await expectHasBlock( 'Variation Selector: Attribute Options (Beta)' );
 		await expectHasBlock( 'Variation Selector: Template (Beta)' );
 		await expectHasBlock( 'Variation Description (Beta)' );
 		await expectHasBlock( 'Product Stock Indicator' );

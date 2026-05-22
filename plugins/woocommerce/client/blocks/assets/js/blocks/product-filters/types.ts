@@ -52,13 +52,3 @@ export type BlockAttributes = {
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;
-
-// ----------------------------------------
-// Editor color picker
-// ----------------------------------------
-export type Color = {
-	slug?: string;
-	class?: string;
-	name?: string;
-	color: string;
-};

@@ -35,7 +35,7 @@ Two files changed for the same reason = one commit. Don't over-split.
 
 ### 3. Draft Commit Message(s)
 
-Use the current session context to understand what work was done and why. If motivation is still unclear after reviewing the diff and conversation, ask the user in a single question.
+Use the current session context to understand what work was done and why. If motivation is still unclear after reviewing the diff and conversation, infer the best reasonable description from the diff and commit conventions.
 
 **Format** — verb-first imperative, under 72 chars:
 
@@ -53,9 +53,9 @@ Do NOT include issue/PR refs — GitHub adds those on squash-merge.
 
 If $ARGUMENTS is provided, use it as guidance for the commit message.
 
-### 4. Preview and Confirm
+### 4. Preview
 
-Show the user each proposed commit:
+State each proposed commit before executing:
 
 ```text
 Commit 1: Fix double margin-top in flex layout
@@ -65,8 +65,6 @@ Commit 1: Fix double margin-top in flex layout
 Commit 2: Add changelog entries for email editor fix
   files: plugins/woocommerce/changelog/fix-email-margin
 ```
-
-Wait for user approval or corrections before executing.
 
 ### 5. Execute
 

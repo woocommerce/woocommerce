@@ -182,7 +182,7 @@ export function VariationView( { productId }: VariationViewProps ) {
 			if ( items.length > 0 ) {
 				nextQuery.postId = items.join( ',' );
 			} else {
-				delete nextQuery.postId;
+				nextQuery.postId = undefined;
 			}
 
 			navigate(
@@ -280,8 +280,11 @@ export function VariationView( { productId }: VariationViewProps ) {
 				<DataViews.Layout />
 				<DataViews.Footer />
 			</DataViews>
-			{ showQuickEdit && productWithVariations && (
-				<ProductEdit products={ [ productWithVariations ] } />
+			{ productWithVariations && (
+				<ProductEdit
+					products={ [ productWithVariations ] }
+					isOpen={ showQuickEdit }
+				/>
 			) }
 		</div>
 	);
