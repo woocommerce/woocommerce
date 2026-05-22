@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -141,7 +142,16 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 				$this->object
 			);
 
-			return in_array( $this->object->get_status(), $eligible_statuses, true );
+			if ( ! in_array( $this->object->get_status(), $eligible_statuses, true ) ) {
+				return false;
+			}
+
+			// Eligibility can change between scheduling and sending (e.g. the
+			// admin disables site-wide reviews during the delay window, or the
+			// customer reviews everything via another entry point). Re-check at
+			// send time so the email is silently dropped instead of pointing
+			// the customer at the empty-state page.
+			return ItemEligibility::has_actionable_items( $this->object );
 		}
 
 		/**

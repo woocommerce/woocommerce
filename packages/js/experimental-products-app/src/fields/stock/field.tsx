@@ -32,7 +32,7 @@ const fieldDefinition = {
 	enableSorting: false,
 	enableHiding: false,
 	filterBy: {
-		operators: [ 'is' ],
+		operators: [ 'isAny' ],
 	},
 	elements: [
 		{ label: __( 'In stock', 'woocommerce' ), value: 'instock' },
@@ -56,28 +56,32 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			return item.stock_status;
 		}
 
+		const stockLabel =
+			item.stock_quantity && item.stock_quantity > 0
+				? `${ match.label } (${ item.stock_quantity })`
+				: match.label;
+
 		return (
 			<div className="woocommerce-fields-field__stock">
 				<Badge intent={ stockStatusBadgeIntent[ match.value ] }>
-					{ match.label }
+					{ stockLabel }
 				</Badge>
-				{ item.stock_quantity && item.stock_quantity > 0 && (
-					<span className="woocommerce-fields-field__stock-quantity">
-						({ item.stock_quantity })
-					</span>
-				) }
 			</div>
 		);
 	},
 	Edit: ( { data, onChange, field } ) => {
 		const options = field?.elements ?? [];
-		const selectedOption = options.find(
-			( option ) => option.value === data.stock_status
-		);
+		const selectedOption =
+			field.placeholder && ! data.stock_status
+				? undefined
+				: options.find(
+						( option ) => option.value === data.stock_status
+				  );
 
 		return (
 			<SelectControl
-				label={ __( 'Status', 'woocommerce' ) }
+				label={ __( 'Stock status', 'woocommerce' ) }
+				placeholder={ field.placeholder }
 				value={ selectedOption }
 				items={ options }
 				onValueChange={ ( option ) => {

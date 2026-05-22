@@ -30,6 +30,9 @@ $meta_parts = \Automattic\WooCommerce\Internal\OrderReviews\Meta::parts_for_orde
 		if ( $reviewed_count > 0 ) {
 			esc_html_e( 'Thank you for your reviews', 'woocommerce' );
 		} else {
+			// Defensive fallback for direct-URL visits (bookmark, admin-shared link).
+			// The email pipeline never schedules or sends when an order has no
+			// reviewable items, so customers don't reach this branch via the email.
 			esc_html_e( 'Nothing to review here', 'woocommerce' );
 		}
 		?>

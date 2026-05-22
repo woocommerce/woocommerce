@@ -1330,12 +1330,26 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'AR' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.ar/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1386,9 +1400,24 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'BR' => array(
-			self::STRIPE => array(
+			self::STRIPE       => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
+			self::MERCADO_PAGO => array(
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.br/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.br/ajuda/termos-e-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
@@ -1409,22 +1438,50 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'CL' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.cl/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.cl/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'CO' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.co/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.co/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1557,15 +1614,30 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'MX' => array(
-			self::STRIPE => array(
+			self::STRIPE       => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
+			self::MERCADO_PAGO => array(
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.mx/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.mx/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
 			self::PAYPAL_WALLET,
-			self::KLARNA => array(
+			self::KLARNA       => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -1611,12 +1683,26 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'PE' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.pe/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.pe/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1694,12 +1780,26 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'UY' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.uy/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.uy/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
