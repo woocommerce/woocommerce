@@ -143,6 +143,24 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The "Hide shipping costs until an address is entered" setting takes precedence over the
+	 * "Auto-select local pickup tab" setting: when both are enabled but the customer has no
+	 * address, no default rate should be surfaced.
+	 *
+	 * @testdox Returns empty when only pickup is available and hide-shipping-costs is enabled, even if the merchant opted in to auto-select pickup.
+	 */
+	public function test_returns_empty_when_hide_shipping_costs_overrides_auto_select_pickup(): void {
+		$this->set_pickup_default_tab( 'yes' );
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->clear_customer_address();
+
+		$package = $this->build_package( array( 'local_pickup:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, '' );
+
+		$this->assertSame( '', $result, 'Hide-shipping-costs should win over the pickup auto-default when no address is set' );
+	}
+
+	/**
 	 * Test default method with both shipping and pickup rates.
 	 *
 	 * @testdox Returns a shipping rate when both shipping and pickup rates exist.

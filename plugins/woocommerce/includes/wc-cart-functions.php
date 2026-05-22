@@ -535,13 +535,10 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 		$had_prior_non_pickup_choice  = '' !== $chosen_method_id_for_default
 			&& ! in_array( $chosen_method_id_for_default, $local_pickup_method_ids, true );
 
-		// No shipping rate available. Only auto-select pickup when the merchant opted in and the
-		// shopper has not already made an explicit non-pickup choice.
-		if ( '' === $default && $prefers_pickup_default && ! $had_prior_non_pickup_choice ) {
-			$default = $first_pickup_key;
-		}
-
-		// Don't auto-select pickup when shipping rates are hidden pending an address.
+		// "Hide shipping costs until an address is entered" is a deliberate merchant choice to gate
+		// any rate selection on the customer providing an address. It wins over the pickup
+		// auto-default below — without this ordering, pickup would silently be revealed when the
+		// merchant explicitly asked for the rates UI to stay empty until an address is supplied.
 		if (
 			'' === $default
 			&& 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' )
@@ -557,6 +554,12 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 			 * @param string $chosen_method Chosen method id.
 			 */
 			return (string) apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
+		}
+
+		// No shipping rate available. Only auto-select pickup when the merchant opted in and the
+		// shopper has not already made an explicit non-pickup choice.
+		if ( '' === $default && $prefers_pickup_default && ! $had_prior_non_pickup_choice ) {
+			$default = $first_pickup_key;
 		}
 	}
 
