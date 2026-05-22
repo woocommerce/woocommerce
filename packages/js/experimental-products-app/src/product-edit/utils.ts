@@ -292,7 +292,7 @@ const SELLABLE_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
 const BULK_UNSUPPORTED_PRODUCT_EDIT_FIELD_ID_SET =
 	new Set< ProductEditFieldId >( [ 'sku' ] );
 
-export function isCostOfGoodsSoldFeatureEnabled() {
+function isCostOfGoodsSoldFeatureEnabled() {
 	const adminSettings = getSetting< AdminSettings >( 'admin', {} );
 	return Boolean( adminSettings.features?.cost_of_goods_sold?.is_enabled );
 }

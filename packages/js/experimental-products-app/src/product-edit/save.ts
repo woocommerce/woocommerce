@@ -103,9 +103,6 @@ async function saveVariation(
 		data: getVariationSaveData( editedVariation ),
 	} );
 
-	// Update the parent's embedded variations in the store so that subsequent
-	// variation saves in the same batch read the correct parent state, not a
-	// stale snapshot that would overwrite the previous save's changes.
 	if ( parentProduct ) {
 		const updatedParentProduct = getProductWithUpdatedVariation(
 			parentProduct,
@@ -188,9 +185,15 @@ function getSelectedProductSaveResults(
 			);
 		}
 
-		// Variations are saved directly via apiFetch (not via saveEditedEntityRecord
-		// on the parent), so the variation result is the authoritative outcome.
-		return variationResultsById.get( product.id ) ?? missingSaveResult;
+		const variationResult = variationResultsById.get( product.id );
+
+		if ( variationResult?.status === 'rejected' ) {
+			return variationResult;
+		}
+
+		return (
+			productSaveResultsById.get( product.parent_id ) ?? missingSaveResult
+		);
 	} );
 }
 
@@ -214,12 +217,11 @@ export async function saveSelectedProducts( {
 		editEntityRecord
 	);
 
-	// Do NOT add parent product IDs to productIdsToSave after variation saves.
-	// Variations are already persisted via direct apiFetch above. Calling
-	// saveEditedEntityRecord for the parent would overwrite the entity record
-	// base state with a server response that lacks _embedded.variations, causing
-	// the drawer to show stale data when reopened. The caller is responsible for
-	// invalidating the entity records cache after this function resolves.
+	variationResults.forEach( ( result, index ) => {
+		if ( result.status === 'fulfilled' ) {
+			productIdsToSave.add( selectedVariations[ index ].parent_id );
+		}
+	} );
 
 	const productSaveIds = Array.from( productIdsToSave );
 	const productSaveResults = await Promise.allSettled(

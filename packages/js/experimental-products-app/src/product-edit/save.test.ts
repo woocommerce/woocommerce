@@ -306,7 +306,14 @@ describe( 'saveSelectedProducts', () => {
 			saveEditedEntityRecord,
 		} );
 
-		expect( saveEditedEntityRecord ).not.toHaveBeenCalled();
+		expect( saveEditedEntityRecord ).toHaveBeenCalledWith(
+			'root',
+			'product',
+			10,
+			{
+				throwOnError: true,
+			}
+		);
 		expect( editedParent._embedded?.variations ).toEqual( [
 			expect.objectContaining( {
 				id: 101,
