@@ -26,6 +26,9 @@ importers:
       clsx:
         specifier: ^2.0.0
         version: 2.1.1
+      js-cookie:
+        specifier: ^2.2.1
+        version: 2.2.1
       prism-react-renderer:
         specifier: ^2.3.0
         version: 2.4.1(react@19.2.6)

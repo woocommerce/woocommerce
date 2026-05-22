@@ -569,6 +569,6 @@ jobs:
         shell: bash
         working-directory: docs/_docu-tools
         run: |
-            pnpm install
+            pnpm install --ignore-workspace
             pnpm run lint:markdown
             pnpm exec docusaurus build --config ./utils/docusaurus-faster.deploy.config.js
