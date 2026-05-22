@@ -41,7 +41,7 @@ const AutomateWooItem = () => {
 					variant="secondary"
 					href={ AUTOMATEWOO_URL }
 					target="_blank"
-					rel="noreferrer"
+					rel="noopener noreferrer"
 					onClick={ handleClick }
 				>
 					{ __( 'Learn more', 'woocommerce' ) }

@@ -47,6 +47,11 @@
 	}
 }
 
-body.woocommerce_page_wc-settings .woocommerce-embedded-layout__primary {
+// Scope the embedded-layout padding override to pages that actually render
+// this recommendation — without `:has()`, the selector would target every
+// wc-settings page's primary container as soon as this chunk loaded.
+body.woocommerce_page_wc-settings .woocommerce-embedded-layout__primary:has(
+.woocommerce-recommended-abandoned-cart-recovery-extensions
+) {
 	padding: 0 20px 80px;
 }

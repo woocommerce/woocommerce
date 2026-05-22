@@ -37,7 +37,7 @@ export const useInstallPlugin = () => {
 
 	const { installAndActivatePlugins } = useDispatch( pluginsStore );
 
-	const handleSetup = ( slugs: string[] ): PromiseLike< void > => {
+	const handleSetup = ( slugs: string[] ): Promise< void > => {
 		if ( pluginsBeingSetup.length > 0 ) {
 			return Promise.resolve();
 		}
