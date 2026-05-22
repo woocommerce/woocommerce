@@ -189,6 +189,59 @@ describe( 'saveSelectedProducts', () => {
 		expect( request.data.images ).toBeUndefined();
 	} );
 
+	it( 'omits variation cost of goods when the defined value is null', async () => {
+		const editedVariation = buildVariation( {
+			id: 101,
+			cost_of_goods_sold: {
+				values: [
+					{
+						defined_value: null,
+						effective_value: '5.00',
+					},
+				],
+			},
+		} );
+		const editedParent = buildProduct( {
+			id: 10,
+			type: 'variable',
+			_embedded: {
+				variations: [ editedVariation ],
+			},
+		} );
+		const editEntityRecord = jest.fn(
+			(
+				_kind,
+				_name,
+				_recordId,
+				edits: Partial< ProductEntityRecord >
+			) => {
+				Object.assign( editedParent, edits );
+			}
+		);
+		const saveEditedEntityRecord = jest.fn( async () => editedParent );
+
+		mockGetEditedEntityRecord.mockImplementation( ( _kind, _name, id ) =>
+			id === editedParent.id ? editedParent : undefined
+		);
+		( apiFetch as unknown as jest.Mock ).mockResolvedValueOnce( {
+			id: 101,
+			parent_id: 10,
+			name: 'Blue saved',
+			manage_stock: false,
+		} );
+
+		await saveSelectedProducts( {
+			selectedProducts: [ editedVariation ],
+			editEntityRecord,
+			saveEditedEntityRecord,
+		} );
+
+		const request = ( apiFetch as unknown as jest.Mock ).mock
+			.calls[ 0 ][ 0 ];
+
+		expect( request.data.cost_of_goods_sold ).toBeUndefined();
+	} );
+
 	it( 'keeps edits for selected variations that failed after another variation saved', async () => {
 		const originalSavedVariation = buildVariation( {
 			id: 101,
