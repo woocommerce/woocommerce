@@ -11,10 +11,10 @@ import type { ProductEntityRecord } from '../fields/types';
 import {
 	buildMergedProductEditData,
 	getProductEditFields,
-	isCostOfGoodsSoldFeatureEnabled,
 } from '../../product-edit/utils';
 import { VARIATION_FORM_FIELDS } from './form-fields';
 import type { VariationEditFieldId } from '../fields/registry';
+import { getSetting } from '@woocommerce/settings';
 
 type VariationFormField = VariationEditFieldId | FormField;
 
@@ -53,10 +53,14 @@ export function VariationEditForm( {
 }: VariationEditFormProps ) {
 	const mergedData = buildMergedProductEditData( selectedVariations );
 	const isBulkEdit = selectedVariations.length > 1;
+	const adminSettings = getSetting( 'admin', {} );
+	const isCostOfGoodsSoldFeatureEnabled =
+		// @ts-expect-error - This setting is not typed yet.
+		adminSettings?.wcAdminFeatures?.includes( 'cost-of-goods-sold' );
 	const visibleFields = editableFields.filter( ( field ) => {
 		if (
 			field.id === 'cost_of_goods_sold' &&
-			! isCostOfGoodsSoldFeatureEnabled()
+			! isCostOfGoodsSoldFeatureEnabled
 		) {
 			return false;
 		}
