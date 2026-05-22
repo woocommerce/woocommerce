@@ -328,11 +328,11 @@ class WC_Install {
 			'wc_update_1080_migrate_analytics_import_option',
 			'wc_update_1080_backfill_email_template_sync_meta',
 		),
-		'10.9.0' => array(
-			'wc_update_1090_remove_task_list_reminder_bar_hidden_option',
-		),
 		'10.8.0-2' => array(
 			'wc_update_10802_restore_orders_meta_key_value_index',
+		),
+		'10.9.0'   => array(
+			'wc_update_1090_remove_task_list_reminder_bar_hidden_option',
 		),
 	);
 
