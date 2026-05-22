@@ -87,6 +87,12 @@
 	&--no-color {
 		display: none;
 	}
+	.has-chip-border-color & {
+		border-color: var(--wc-product-filter-chips-border);
+	}
+	.has-selected-chip-border-color .wc-block-product-filter-chips__item[aria-checked="true"] & {
+		border-color: transparent;
+	}
 }
 
 .wc-block-product-filter-chips__text {
