@@ -9694,6 +9694,7 @@ body.woocommerce-settings-payments-section_legacy {
 
 	&.is-empty::before {
 		content: '';
+		border-radius: 50%;
 		position: absolute;
 		top: 0;
 		right: 0;
