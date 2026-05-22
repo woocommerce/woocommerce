@@ -18,4 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<section>
 		<progress class="woocommerce-importer-progress" max="100" value="0"></progress>
 	</section>
+	<section aria-hidden="true" class="hidden notice notice-error woocommerce-importer__error">
+		<p><?= esc_html_e( 'Your import has hit an error after multiple tries', 'woocommerce' ) ?></p>
+		<button class="woocommerce-importer__retry button" type="button"><?= esc_html_e( 'Retry', 'woocommerce' ) ?></button>
+	</section>
 </div>
