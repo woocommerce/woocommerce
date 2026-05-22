@@ -1,3 +1,5 @@
+@use "@wordpress/base-styles/colors";
+
 // overflow: hidden on .panel-wrap creates a scroll container that prevents
 // position: sticky on .dataviews-footer from working relative to the viewport.
 // overflow: clip preserves the float-clearfix BFC without creating a scroll
@@ -9,7 +11,7 @@
 
 .woocommerce-variation-attributes {
 	&--has-separator {
-		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+		border-bottom: 1px solid colors.$gray-100;
 	}
 
 	&__notice.components-notice {
