@@ -27,10 +27,14 @@ class EndpointTest extends WC_Unit_Test_Case {
 
 	private const KIND = 'customer_checkout_recovery';
 
+	/**
+	 * Resolve the storage + endpoint singletons from the container so each
+	 * test exercises the same wiring production uses.
+	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->storage = wc_get_container()->get( Storage::class );
-		$this->endpoint   = wc_get_container()->get( Endpoint::class );
+		$this->storage  = wc_get_container()->get( Storage::class );
+		$this->endpoint = wc_get_container()->get( Endpoint::class );
 	}
 
 	/**
