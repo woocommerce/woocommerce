@@ -5,7 +5,7 @@ import {
 	getProductAttributeRows,
 	getVariationAttributeRows,
 } from './attribute-rows';
-import type { ProductEntityRecord } from '../fields/types';
+import type { ProductEntityRecord } from '../../fields/types';
 
 function getProduct(
 	overrides: Partial< ProductEntityRecord >

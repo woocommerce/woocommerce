@@ -9,7 +9,7 @@ import type {
 /**
  * Internal dependencies
  */
-import type { ProductEntityRecord } from '../fields/types';
+import type { ProductEntityRecord } from '../../fields/types';
 
 export type VariationAttributeRow = {
 	attributeId: number;

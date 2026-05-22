@@ -110,37 +110,6 @@
 		}
 	}
 
-	// DataViews does not currently expose table-density controls for this
-	// embedded metabox layout, so these scoped overrides match the prototype.
-	&__dataview {
-		.dataviews-wrapper {
-			height: auto;
-		}
-
-		.dataviews-layout__container {
-			overflow: visible;
-		}
-
-		.dataviews-view-table-header-button {
-			pointer-events: none;
-			cursor: default;
-
-			&:hover {
-				background: transparent;
-			}
-		}
-
-		.dataviews-view-table tr th:first-child .dataviews-view-table-header-button,
-		.dataviews-view-table tr th:last-child .dataviews-view-table-header-button {
-			padding-left: 0;
-			padding-right: 0;
-		}
-
-		.dataviews-view-table tbody td .dataviews-view-table__cell-content-wrapper,
-		.dataviews-view-table thead th .dataviews-view-table__cell-content-wrapper {
-			min-width: 0 !important;
-		}
-	}
 }
 
 .woocommerce-product-list__filters {
@@ -148,16 +117,6 @@
 }
 
 .woocommerce-variation-view {
-	// DataViews is designed for a constrained editor viewport. Override to let
-	// the table grow to its natural height in the traditional metabox document flow.
-	.dataviews-wrapper {
-		height: auto;
-	}
-
-	.dataviews-layout__container {
-		overflow: visible;
-	}
-
 	&__title {
 		margin: 0;
 		padding: 16px 24px 0;
