@@ -31,6 +31,8 @@ const ProductAttributes = lazy( () =>
 	} ) )
 );
 
+// The variations redesign mounts into separate PHP-provided metabox roots,
+// but each root needs the same app providers.
 function renderWithProviders(
 	containerId: string,
 	children: JSX.Element
@@ -70,7 +72,9 @@ export function initializeVariationView(
 }
 
 /**
- * Initializes the classic product editor product attributes view.
+ * Initializes the product data attributes panel for the variations redesign.
+ * This is mounted separately from the variations view because the attributes
+ * panel has its own metabox DOM root.
  *
  * @param {string} containerId DOM element ID.
  * @param {number} productId   Parent product ID.
