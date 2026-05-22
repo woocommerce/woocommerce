@@ -74,7 +74,17 @@ function getVariationImageSaveData(
 function getVariationSaveData(
 	variation: ProductEntityRecord
 ): ProductVariationSaveData {
-	const { images, ...data } = variation;
+	const { images, ...rest } = variation;
+	const data = rest as Record< string, unknown >;
+
+	// The REST API rejects cost_of_goods_sold when defined_value is null.
+	// Omit the field so the server retains its existing value.
+	const cogs = data.cost_of_goods_sold as
+		| { values?: Array< { defined_value: unknown } > }
+		| undefined;
+	if ( cogs?.values?.some( ( v ) => v.defined_value === null ) ) {
+		delete data.cost_of_goods_sold;
+	}
 
 	return {
 		...data,
