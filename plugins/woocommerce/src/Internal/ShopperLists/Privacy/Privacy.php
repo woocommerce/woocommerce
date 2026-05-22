@@ -21,9 +21,15 @@ use Automattic\WooCommerce\Internal\Utilities\Users;
 class Privacy extends \WC_Abstract_Privacy {
 
 	/**
-	 * WP "data group" identifier used by both the exporter and the eraser.
+	 * Identifier used to register both the exporter and the eraser with WP.
 	 */
-	private const GROUP_ID = 'woocommerce-shopper-lists';
+	private const REGISTRATION_ID = 'woocommerce-shopper-lists';
+
+	/**
+	 * Prefix for the per-list-type WP data group IDs (a unique slug is appended,
+	 * e.g. `woocommerce-shopper-lists-saved-for-later`).
+	 */
+	private const GROUP_ID_PREFIX = 'woocommerce-shopper-lists-';
 
 	/**
 	 * Constructor.
@@ -42,18 +48,23 @@ class Privacy extends \WC_Abstract_Privacy {
 	public function register_exporters_and_erasers(): void {
 		$label = __( 'WooCommerce Shopper Lists', 'woocommerce' );
 
-		$this->add_exporter( self::GROUP_ID, $label, array( $this, 'export_data' ) );
-		$this->add_eraser( self::GROUP_ID, $label, array( $this, 'erase_data' ) );
+		$this->add_exporter( self::REGISTRATION_ID, $label, array( $this, 'export_data' ) );
+		$this->add_eraser( self::REGISTRATION_ID, $label, array( $this, 'erase_data' ) );
 	}
 
 	/**
 	 * Export every stored shopper list for the user matching the given email.
 	 *
+	 * Emits one WP data group per supported list type and one entry per saved
+	 * item within it, with per-field `{name, value}` rows — matching the shape
+	 * used by `WC_Privacy_Exporters::order_data_exporter()`.
+	 *
 	 * @internal
 	 *
 	 * @param string $email_address Email address the request applies to.
-	 * @param int    $page          Page number. Unused — output is bounded by the
-	 *                              per-list item cap, so a single page is sufficient.
+	 * @param int    $page          Page number. Unused — output is bounded by
+	 *                              the per-list item cap, so a single page is
+	 *                              sufficient.
 	 *
 	 * @return array{data: array<int, array<string, mixed>>, done: bool}
 	 */
@@ -68,10 +79,9 @@ class Privacy extends \WC_Abstract_Privacy {
 			);
 		}
 
-		$user_id     = (int) $user->ID;
-		$controller  = wc_get_container()->get( ShopperListsController::class );
-		$group_label = __( 'Shopper Lists', 'woocommerce' );
-		$data        = array();
+		$user_id    = (int) $user->ID;
+		$controller = wc_get_container()->get( ShopperListsController::class );
+		$data       = array();
 
 		foreach ( $controller->get_supported_slugs() as $slug ) {
 			$list = ShopperList::get_by_slug( $slug, $user_id, true );
@@ -79,28 +89,16 @@ class Privacy extends \WC_Abstract_Privacy {
 				continue;
 			}
 
-			$position = 0;
-			$rows     = array(
-				array(
-					'name'  => __( 'List', 'woocommerce' ),
-					'value' => $list->get_slug(),
-				),
-				array(
-					'name'  => __( 'Created', 'woocommerce' ),
-					'value' => $list->get_date_created_gmt(),
-				),
-			);
+			$group_id    = self::GROUP_ID_PREFIX . $slug;
+			$group_label = self::group_label_for_slug( $slug );
 			foreach ( $list->get_items() as $item ) {
-				++$position;
-				$rows[] = self::item_to_row( $item, $position );
+				$data[] = array(
+					'group_id'    => $group_id,
+					'group_label' => $group_label,
+					'item_id'     => $item->get_key(),
+					'data'        => self::item_export_rows( $item ),
+				);
 			}
-
-			$data[] = array(
-				'group_id'    => self::GROUP_ID,
-				'group_label' => $group_label,
-				'item_id'     => 'shopper-list-' . $slug,
-				'data'        => $rows,
-			);
 		}
 
 		return array(
@@ -145,25 +143,80 @@ class Privacy extends \WC_Abstract_Privacy {
 
 			Users::delete_site_user_meta( $user_id, $meta_key );
 			$response['items_removed'] = true;
+			$response['messages'][]    = sprintf(
+				/* translators: %s: shopper-list label (e.g. "Saved for Later"). */
+				__( 'Removed shopper list: %s', 'woocommerce' ),
+				self::group_label_for_slug( $slug )
+			);
 		}
 
 		return $response;
 	}
 
 	/**
-	 * Render a single item as one `{name, value}` row for the export.
+	 * Build the `data` array (one row per field) for a single saved item.
 	 *
 	 * Title precedence: current product name (if the product still resolves) →
-	 * snapshot captured at save time → `Product #<id>` placeholder. A permalink
-	 * is appended only when the row is "live" (publish status on the product
+	 * snapshot captured at save time → `Product #<id>` placeholder. The URL row
+	 * is included only when the item is live (publish status on the product
 	 * and, for variations, the parent — see `ShopperListItem::is_live()`).
 	 *
-	 * @param ShopperListItem $item     Item to format.
-	 * @param int             $position 1-indexed position within the list.
+	 * @param ShopperListItem $item Item to export.
 	 *
-	 * @return array{name: string, value: string}
+	 * @return array<int, array{name: string, value: string}>
 	 */
-	private static function item_to_row( ShopperListItem $item, int $position ): array {
+	private static function item_export_rows( ShopperListItem $item ): array {
+		$rows = array(
+			array(
+				'name'  => __( 'Product ID', 'woocommerce' ),
+				'value' => (string) $item->get_product_id(),
+			),
+			array(
+				'name'  => __( 'Product', 'woocommerce' ),
+				'value' => self::resolve_item_title( $item ),
+			),
+		);
+
+		if ( $item->get_variation_id() > 0 ) {
+			$rows[]     = array(
+				'name'  => __( 'Variation ID', 'woocommerce' ),
+				'value' => (string) $item->get_variation_id(),
+			);
+			$attributes = self::format_variation_attributes( $item->get_variation_attributes() );
+			if ( '' !== $attributes ) {
+				$rows[] = array(
+					'name'  => __( 'Variation', 'woocommerce' ),
+					'value' => $attributes,
+				);
+			}
+		}
+
+		$rows[] = array(
+			'name'  => __( 'Quantity', 'woocommerce' ),
+			'value' => (string) $item->get_quantity(),
+		);
+		$rows[] = array(
+			'name'  => __( 'Date Added', 'woocommerce' ),
+			'value' => $item->get_date_added_gmt(),
+		);
+
+		$product = $item->get_product();
+		if ( $product instanceof \WC_Product && $item->is_live() ) {
+			$rows[] = array(
+				'name'  => __( 'URL', 'woocommerce' ),
+				'value' => $product->get_permalink(),
+			);
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Resolve a human-readable title for the item.
+	 *
+	 * @param ShopperListItem $item Item to title.
+	 */
+	private static function resolve_item_title( ShopperListItem $item ): string {
 		$product = $item->get_product();
 		$title   = $product instanceof \WC_Product ? $product->get_name() : '';
 		if ( '' === $title ) {
@@ -173,28 +226,43 @@ class Privacy extends \WC_Abstract_Privacy {
 			/* translators: %d: product ID for which no title could be resolved. */
 			$title = sprintf( __( 'Product #%d', 'woocommerce' ), $item->get_product_id() );
 		}
+		return $title;
+	}
 
-		$value = ( $product instanceof \WC_Product && $item->is_live() )
-			? sprintf(
-				/* translators: 1: product title, 2: quantity, 3: MySQL DATETIME the item was saved, 4: product URL. */
-				__( '%1$s × %2$d (added %3$s) — %4$s', 'woocommerce' ),
-				$title,
-				$item->get_quantity(),
-				$item->get_date_added_gmt(),
-				$product->get_permalink()
-			)
-			: sprintf(
-				/* translators: 1: product title, 2: quantity, 3: MySQL DATETIME the item was saved. */
-				__( '%1$s × %2$d (added %3$s)', 'woocommerce' ),
-				$title,
-				$item->get_quantity(),
-				$item->get_date_added_gmt()
-			);
+	/**
+	 * Format `[ 'attribute_color' => 'red', ... ]` as a `Color: red, ...` string
+	 * suitable for a single row value. Drops the storage `attribute_` prefix and
+	 * title-cases the remaining slug.
+	 *
+	 * @param array<string, string> $attributes Variation attributes as stored.
+	 */
+	private static function format_variation_attributes( array $attributes ): string {
+		$pairs = array();
+		foreach ( $attributes as $key => $value ) {
+			$name = (string) preg_replace( '/^attribute_/', '', (string) $key );
+			$name = ucwords( str_replace( array( '-', '_' ), ' ', $name ) );
+			if ( '' === $name || '' === (string) $value ) {
+				continue;
+			}
+			$pairs[] = sprintf( '%s: %s', $name, (string) $value );
+		}
+		return implode( ', ', $pairs );
+	}
 
-		return array(
-			/* translators: %d: position of the item within the list. */
-			'name'  => sprintf( __( 'Item %d', 'woocommerce' ), $position ),
-			'value' => $value,
-		);
+	/**
+	 * Friendly user-facing label for a list slug — used as the group heading in
+	 * the export and in the eraser's per-list messages.
+	 *
+	 * @param string $slug List slug.
+	 */
+	private static function group_label_for_slug( string $slug ): string {
+		switch ( $slug ) {
+			case 'saved-for-later':
+				return __( 'Saved for Later', 'woocommerce' );
+			case 'wishlist':
+				return __( 'Wishlist', 'woocommerce' );
+			default:
+				return $slug;
+		}
 	}
 }

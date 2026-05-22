@@ -100,23 +100,25 @@ class PrivacyTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Exporter returns one group per stored shopper list.
+	 * @testdox Exporter emits one entry per saved item, scoped to a per-slug group ID.
 	 */
-	public function test_export_returns_one_group_per_stored_list(): void {
+	public function test_export_emits_one_entry_per_item_with_slug_scoped_group_id(): void {
 		$this->seed_list( self::SAVED_FOR_LATER_SLUG );
 		$this->seed_list( self::WISHLIST_SLUG );
 
 		$result = $this->sut->export_data( self::TEST_EMAIL );
 
 		$this->assertCount( 2, $result['data'] );
-		$item_ids = array_column( $result['data'], 'item_id' );
-		$this->assertContains( 'shopper-list-saved-for-later', $item_ids );
-		$this->assertContains( 'shopper-list-wishlist', $item_ids );
 
-		foreach ( $result['data'] as $group ) {
-			$this->assertSame( 'woocommerce-shopper-lists', $group['group_id'] );
-			$this->assertArrayHasKey( 'data', $group );
-			$this->assertNotEmpty( $group['data'] );
+		$group_ids = array_column( $result['data'], 'group_id' );
+		$this->assertContains( 'woocommerce-shopper-lists-saved-for-later', $group_ids );
+		$this->assertContains( 'woocommerce-shopper-lists-wishlist', $group_ids );
+
+		foreach ( $result['data'] as $entry ) {
+			$this->assertArrayHasKey( 'group_label', $entry );
+			$this->assertArrayHasKey( 'item_id', $entry );
+			$this->assertArrayHasKey( 'data', $entry );
+			$this->assertNotEmpty( $entry['data'] );
 		}
 	}
 
@@ -141,7 +143,24 @@ class PrivacyTests extends WC_Unit_Test_Case {
 		$result = $this->sut->export_data( self::TEST_EMAIL );
 
 		$this->assertCount( 1, $result['data'] );
-		$this->assertSame( 'shopper-list-saved-for-later', $result['data'][0]['item_id'] );
+		$this->assertSame( 'woocommerce-shopper-lists-saved-for-later', $result['data'][0]['group_id'] );
+	}
+
+	/**
+	 * @testdox Exporter includes per-field rows for product, quantity, and date for each item.
+	 */
+	public function test_export_includes_per_field_rows_for_each_item(): void {
+		$this->seed_list( self::SAVED_FOR_LATER_SLUG );
+
+		$entry = $this->find_first_entry_for_slug(
+			$this->sut->export_data( self::TEST_EMAIL ),
+			self::SAVED_FOR_LATER_SLUG
+		);
+
+		$this->assertSame( (string) $this->product->get_id(), $this->row_value( $entry, 'Product ID' ) );
+		$this->assertSame( 'Privacy SUT Product', $this->row_value( $entry, 'Product' ) );
+		$this->assertSame( '1', $this->row_value( $entry, 'Quantity' ) );
+		$this->assertNotEmpty( $this->row_value( $entry, 'Date Added' ) );
 	}
 
 	/**
@@ -153,10 +172,12 @@ class PrivacyTests extends WC_Unit_Test_Case {
 		$this->product->set_name( 'Renamed After Save' );
 		$this->product->save();
 
-		$result = $this->sut->export_data( self::TEST_EMAIL );
-		$row    = $this->find_item_row( $result, 'saved-for-later', 1 );
-		$this->assertStringContainsString( 'Renamed After Save', $row['value'] );
-		$this->assertStringNotContainsString( 'Privacy SUT Product', $row['value'] );
+		$entry = $this->find_first_entry_for_slug(
+			$this->sut->export_data( self::TEST_EMAIL ),
+			self::SAVED_FOR_LATER_SLUG
+		);
+
+		$this->assertSame( 'Renamed After Save', $this->row_value( $entry, 'Product' ) );
 	}
 
 	/**
@@ -168,40 +189,45 @@ class PrivacyTests extends WC_Unit_Test_Case {
 		$this->product->delete( true );
 		$this->product = null;
 
-		$result = $this->sut->export_data( self::TEST_EMAIL );
-		$row    = $this->find_item_row( $result, 'saved-for-later', 1 );
-		$this->assertStringContainsString( 'Privacy SUT Product', $row['value'] );
+		$entry = $this->find_first_entry_for_slug(
+			$this->sut->export_data( self::TEST_EMAIL ),
+			self::SAVED_FOR_LATER_SLUG
+		);
+
+		$this->assertSame( 'Privacy SUT Product', $this->row_value( $entry, 'Product' ) );
 	}
 
 	/**
-	 * @testdox Exporter appends the product permalink when the item is publicly accessible.
+	 * @testdox Exporter includes a URL row when the product is publicly accessible.
 	 */
-	public function test_export_appends_permalink_when_product_is_live(): void {
+	public function test_export_includes_url_row_when_product_is_live(): void {
 		$this->seed_list( self::SAVED_FOR_LATER_SLUG );
 
-		$result    = $this->sut->export_data( self::TEST_EMAIL );
-		$row       = $this->find_item_row( $result, 'saved-for-later', 1 );
+		$entry     = $this->find_first_entry_for_slug(
+			$this->sut->export_data( self::TEST_EMAIL ),
+			self::SAVED_FOR_LATER_SLUG
+		);
 		$permalink = get_permalink( $this->product->get_id() );
 
 		$this->assertIsString( $permalink );
-		$this->assertStringContainsString( $permalink, $row['value'] );
+		$this->assertSame( $permalink, $this->row_value( $entry, 'URL' ) );
 	}
 
 	/**
-	 * @testdox Exporter omits the permalink when the product is not publicly accessible.
+	 * @testdox Exporter omits the URL row when the product is not publicly accessible.
 	 */
-	public function test_export_omits_permalink_when_product_is_not_live(): void {
+	public function test_export_omits_url_row_when_product_is_not_live(): void {
 		$this->seed_list( self::SAVED_FOR_LATER_SLUG );
 
 		$this->product->set_status( 'draft' );
 		$this->product->save();
 
-		$result    = $this->sut->export_data( self::TEST_EMAIL );
-		$row       = $this->find_item_row( $result, 'saved-for-later', 1 );
-		$permalink = get_permalink( $this->product->get_id() );
+		$entry = $this->find_first_entry_for_slug(
+			$this->sut->export_data( self::TEST_EMAIL ),
+			self::SAVED_FOR_LATER_SLUG
+		);
 
-		$this->assertIsString( $permalink );
-		$this->assertStringNotContainsString( $permalink, $row['value'] );
+		$this->assertNull( $this->row_value( $entry, 'URL' ) );
 	}
 
 	/**
@@ -212,6 +238,7 @@ class PrivacyTests extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $result['items_removed'] );
 		$this->assertFalse( $result['items_retained'] );
+		$this->assertSame( array(), $result['messages'] );
 		$this->assertTrue( $result['done'] );
 	}
 
@@ -234,12 +261,28 @@ class PrivacyTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Eraser emits one message per removed list.
+	 */
+	public function test_erase_emits_message_per_removed_list(): void {
+		$this->seed_list( self::SAVED_FOR_LATER_SLUG );
+		$this->seed_list( self::WISHLIST_SLUG );
+
+		$result = $this->sut->erase_data( self::TEST_EMAIL );
+
+		$this->assertCount( 2, $result['messages'] );
+		$joined = implode( "\n", $result['messages'] );
+		$this->assertStringContainsString( 'Saved for Later', $joined );
+		$this->assertStringContainsString( 'Wishlist', $joined );
+	}
+
+	/**
 	 * @testdox Eraser reports items_removed false when there is nothing to erase.
 	 */
 	public function test_erase_reports_no_removal_when_nothing_is_stored(): void {
 		$result = $this->sut->erase_data( self::TEST_EMAIL );
 
 		$this->assertFalse( $result['items_removed'] );
+		$this->assertSame( array(), $result['messages'] );
 		$this->assertTrue( $result['done'] );
 	}
 
@@ -260,27 +303,37 @@ class PrivacyTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Pluck the data group for a given list slug out of an exporter result, then return the row
-	 * at the requested 1-indexed item position.
+	 * Pluck the first exported entry whose `group_id` matches the given slug.
 	 *
-	 * @param array  $result   Result from Privacy::export_data().
-	 * @param string $slug     List slug to look for.
-	 * @param int    $position 1-indexed item position within the list.
+	 * @param array  $result Result from Privacy::export_data().
+	 * @param string $slug   List slug.
 	 *
-	 * @return array{name: string, value: string}
+	 * @return array<string, mixed>
 	 */
-	private function find_item_row( array $result, string $slug, int $position ): array {
-		$item_id = 'shopper-list-' . $slug;
-		foreach ( $result['data'] as $group ) {
-			if ( $item_id !== $group['item_id'] ) {
-				continue;
+	private function find_first_entry_for_slug( array $result, string $slug ): array {
+		$group_id = 'woocommerce-shopper-lists-' . $slug;
+		foreach ( $result['data'] as $entry ) {
+			if ( $group_id === $entry['group_id'] ) {
+				return $entry;
 			}
-			// First two rows are the "List" and "Created" headers; items start at index 2.
-			$row_index = 2 + ( $position - 1 );
-			$this->assertArrayHasKey( $row_index, $group['data'], "No item row at position {$position} for {$slug}." );
-			return $group['data'][ $row_index ];
 		}
-		$this->fail( "No exported group for slug {$slug}." );
+		$this->fail( "No exported entry for slug {$slug}." );
+	}
+
+	/**
+	 * Return the value of the row with the given name within an exported entry,
+	 * or null if no such row exists.
+	 *
+	 * @param array  $entry     Exported entry returned by find_first_entry_for_slug().
+	 * @param string $row_name  Row name to look up.
+	 */
+	private function row_value( array $entry, string $row_name ): ?string {
+		foreach ( $entry['data'] as $row ) {
+			if ( $row_name === $row['name'] ) {
+				return $row['value'];
+			}
+		}
+		return null;
 	}
 
 	/**
