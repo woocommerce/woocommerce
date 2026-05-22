@@ -164,9 +164,9 @@ const GeneralSettings = () => {
 					</>
 				) : null }
 				<CheckboxControl
-					checked={ settings.default_tab }
-					name="local_pickup_default_tab"
-					onChange={ setSettingField( 'default_tab' ) }
+					checked={ settings.auto_select_pickup_tab }
+					name="local_pickup_auto_select_pickup_tab"
+					onChange={ setSettingField( 'auto_select_pickup_tab' ) }
 					label={ __(
 						'Auto-select local pickup tab',
 						'woocommerce'

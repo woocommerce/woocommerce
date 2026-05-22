@@ -59,11 +59,11 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		update_option(
 			'woocommerce_pickup_location_settings',
 			array(
-				'enabled'     => 'yes',
-				'title'       => 'Pickup',
-				'tax_status'  => 'taxable',
-				'cost'        => '',
-				'default_tab' => $default_tab,
+				'enabled'                => 'yes',
+				'title'                  => 'Pickup',
+				'tax_status'             => 'taxable',
+				'cost'                   => '',
+				'auto_select_pickup_tab' => $default_tab,
 			)
 		);
 	}

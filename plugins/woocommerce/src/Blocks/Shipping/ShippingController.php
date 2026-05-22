@@ -237,25 +237,25 @@ class ShippingController {
 					'schema' => array(
 						'type'       => 'object',
 						'properties' => array(
-							'enabled'     => array(
+							'enabled'                => array(
 								'description' => __( 'If enabled, this method will appear on the block based checkout.', 'woocommerce' ),
 								'type'        => 'string',
 								'enum'        => array( 'yes', 'no' ),
 							),
-							'title'       => array(
+							'title'                  => array(
 								'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 								'type'        => 'string',
 							),
-							'tax_status'  => array(
+							'tax_status'             => array(
 								'description' => __( 'If a cost is defined, this controls if taxes are applied to that cost.', 'woocommerce' ),
 								'type'        => 'string',
 								'enum'        => array( ProductTaxStatus::TAXABLE, ProductTaxStatus::NONE ),
 							),
-							'cost'        => array(
+							'cost'                   => array(
 								'description' => __( 'Optional cost to charge for local pickup.', 'woocommerce' ),
 								'type'        => 'string',
 							),
-							'default_tab' => array(
+							'auto_select_pickup_tab' => array(
 								'description' => __( 'If enabled, the local pickup tab is selected by default when no shipping rates are available for the customer. Shipping rates always take priority when available.', 'woocommerce' ),
 								'type'        => 'string',
 								'enum'        => array( 'yes', 'no' ),

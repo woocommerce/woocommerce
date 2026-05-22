@@ -12,7 +12,7 @@ class LocalPickupUtils {
 	 * Stored as the 'yes'/'no' string used by the option schema. All other code
 	 * paths (backfill, hot-path accessor, REST default) derive from this constant.
 	 */
-	const DEFAULT_TAB_DEFAULT = 'yes';
+	const AUTO_SELECT_PICKUP_TAB_DEFAULT = 'yes';
 
 	/**
 	 * Gets the local pickup location settings.
@@ -42,8 +42,8 @@ class LocalPickupUtils {
 			$pickup_location_settings['cost'] = '';
 		}
 
-		if ( ! isset( $pickup_location_settings['default_tab'] ) ) {
-			$pickup_location_settings['default_tab'] = self::DEFAULT_TAB_DEFAULT;
+		if ( ! isset( $pickup_location_settings['auto_select_pickup_tab'] ) ) {
+			$pickup_location_settings['auto_select_pickup_tab'] = self::AUTO_SELECT_PICKUP_TAB_DEFAULT;
 		}
 
 		// Return settings as is if we're editing them.
@@ -52,9 +52,9 @@ class LocalPickupUtils {
 		}
 
 		// All consumers of this turn it into a bool eventually. Doing it here removes the need for that.
-		$pickup_location_settings['enabled']     = wc_string_to_bool( $pickup_location_settings['enabled'] );
-		$pickup_location_settings['title']       = wc_clean( $pickup_location_settings['title'] );
-		$pickup_location_settings['default_tab'] = wc_string_to_bool( $pickup_location_settings['default_tab'] );
+		$pickup_location_settings['enabled']                = wc_string_to_bool( $pickup_location_settings['enabled'] );
+		$pickup_location_settings['title']                  = wc_clean( $pickup_location_settings['title'] );
+		$pickup_location_settings['auto_select_pickup_tab'] = wc_string_to_bool( $pickup_location_settings['auto_select_pickup_tab'] );
 
 		return $pickup_location_settings;
 	}
@@ -64,15 +64,15 @@ class LocalPickupUtils {
 	 *
 	 * Thin accessor for hot paths (e.g. per-package shipping default selection): reads only the
 	 * relevant option key and skips the full normalization in get_local_pickup_settings().
-	 * Defaults derive from self::DEFAULT_TAB_DEFAULT.
+	 * Defaults derive from self::AUTO_SELECT_PICKUP_TAB_DEFAULT.
 	 *
 	 * @return bool
 	 */
 	public static function prefers_pickup_default_tab(): bool {
 		$pickup_location_settings = get_option( 'woocommerce_pickup_location_settings' );
-		$value                    = is_array( $pickup_location_settings ) && isset( $pickup_location_settings['default_tab'] )
-			? $pickup_location_settings['default_tab']
-			: self::DEFAULT_TAB_DEFAULT;
+		$value                    = is_array( $pickup_location_settings ) && isset( $pickup_location_settings['auto_select_pickup_tab'] )
+			? $pickup_location_settings['auto_select_pickup_tab']
+			: self::AUTO_SELECT_PICKUP_TAB_DEFAULT;
 
 		return wc_string_to_bool( $value );
 	}
