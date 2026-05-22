@@ -19,6 +19,7 @@ export type VariationAttributeRow = {
 	isVisible: boolean;
 	name: string;
 	position: number;
+	slug: string;
 	values: string[];
 };
 
@@ -81,6 +82,7 @@ function getAttributeRows(
 			isVisible: Boolean( attribute.visible ),
 			name: attribute.name,
 			position: attribute.position,
+			slug: attribute.slug,
 			values: attribute.options ?? [],
 		} ) );
 }

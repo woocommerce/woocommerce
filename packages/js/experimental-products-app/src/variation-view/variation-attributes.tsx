@@ -20,7 +20,7 @@ import { addQueryArgs } from '@wordpress/url';
 import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 import { Badge, Button, Stack } from '@wordpress/ui';
-import { external, help, Icon } from '@wordpress/icons';
+import { help, Icon, link as linkIcon } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -52,12 +52,11 @@ type AttributeRowGetter = (
 	product?: Pick< ProductEntityRecord, 'attributes' | 'default_attributes' >
 ) => VariationAttributeRow[];
 
-function getGlobalAttributeEditLink( attributeId: number ): string {
+function getGlobalAttributeTermsLink( attributeSlug: string ): string {
 	return getAdminLink(
-		addQueryArgs( 'edit.php', {
+		addQueryArgs( 'edit-tags.php', {
+			taxonomy: attributeSlug,
 			post_type: 'product',
-			page: 'product_attributes',
-			edit: attributeId,
 		} )
 	);
 }
@@ -220,15 +219,13 @@ function getAttributeTableFields(
 					>
 						<a
 							className="woocommerce-variation-attributes__global-link"
-							href={ getGlobalAttributeEditLink(
-								item.attributeId
-							) }
+							href={ getGlobalAttributeTermsLink( item.slug ) }
 							target="_blank"
 							rel="noreferrer"
 							onClick={ ( event ) => event.stopPropagation() }
 						>
 							{ __( 'Yes', 'woocommerce' ) }
-							<Icon icon={ external } size={ 12 } />
+							<Icon icon={ linkIcon } size={ 16 } />
 						</a>
 					</Tooltip>
 				) : (

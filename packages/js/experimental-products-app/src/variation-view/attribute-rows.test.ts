@@ -59,6 +59,7 @@ describe( 'getVariationAttributeRows', () => {
 				id: 'global-1',
 				isGlobal: true,
 				name: 'Theme',
+				slug: 'pa_theme',
 				values: [ 'Unicorn', 'Pirate' ],
 			} ),
 			expect.objectContaining( {
@@ -66,6 +67,7 @@ describe( 'getVariationAttributeRows', () => {
 				id: 'global-2',
 				isGlobal: true,
 				name: 'Color',
+				slug: 'pa_color',
 				values: [ 'Yellow', 'Blue' ],
 			} ),
 		] );
@@ -141,6 +143,7 @@ describe( 'getVariationAttributeRows', () => {
 				id: 'local-Material',
 				isGlobal: false,
 				name: 'Material',
+				slug: 'material',
 			} )
 		);
 	} );
@@ -189,6 +192,7 @@ describe( 'getProductAttributeRows', () => {
 				isGlobal: true,
 				isVisible: false,
 				name: 'Material',
+				slug: 'pa_material',
 				values: [ 'Cotton' ],
 			} ),
 			expect.objectContaining( {
@@ -197,6 +201,7 @@ describe( 'getProductAttributeRows', () => {
 				isGlobal: false,
 				isVisible: true,
 				name: 'Pattern',
+				slug: 'pattern',
 				values: [ 'Dots' ],
 			} ),
 		] );
