@@ -74,10 +74,16 @@ function getVariationImageSaveData(
 function getVariationSaveData(
 	variation: ProductEntityRecord
 ): ProductVariationSaveData {
-	const { images, ...data } = variation;
+	const { images, cost_of_goods_sold: costOfGoodsSold, ...data } = variation;
+	const hasNullCostOfGoodsSoldValue = costOfGoodsSold?.values?.some(
+		( value ) => value.defined_value === null
+	);
 
 	return {
 		...data,
+		...( ! hasNullCostOfGoodsSoldValue && costOfGoodsSold !== undefined
+			? { cost_of_goods_sold: costOfGoodsSold }
+			: {} ),
 		image: getVariationImageSaveData( images?.[ 0 ] ),
 	};
 }
