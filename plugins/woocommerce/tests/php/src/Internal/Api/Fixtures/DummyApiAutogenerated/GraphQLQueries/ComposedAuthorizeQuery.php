@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class ComposedAuthorizeQuery {
 	public static function get_field_definition(): array {
 		return array(
-			'type'        => Type::nonNull(
+			'type'          => Type::nonNull(
 				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
 					array(
 						'name'   => 'ComposedAuthorizeQueryResult',
@@ -24,13 +24,27 @@ class ComposedAuthorizeQuery {
 					)
 				)
 			),
-			'description' => __( 'Composes #[RequiredCapability] with authorize() via $_preauthorized', 'woocommerce' ),
-			'args'        => array(),
-			'resolve'     => array( self::class, 'resolve' ),
+			'description'   => __( 'Composes #[RequiredCapability] with authorize() via $_preauthorized', 'woocommerce' ),
+			'authorization' => array(
+				array(
+					'attribute' => 'RequiredCapability',
+					'args'      => array(
+						0 => 'manage_options',
+					),
+				),
+			),
+			'args'          => array(),
+			'resolve'       => array( self::class, 'resolve' ),
 		);
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = array();
+
 		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Infrastructure\ClassResolver::resolve_class( ComposedAuthorizeQueryCommand::class );
 
 		$execute_args = array();

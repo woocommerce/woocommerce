@@ -47,6 +47,7 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'images',
 	'images_count',
 	'product_status',
+	'variation_active',
 	'sku',
 	'price',
 	'regular_price',
@@ -150,7 +151,7 @@ const VARIATION_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'general-fields',
 		__( 'General', 'woocommerce' ),
-		[ 'product_status' ]
+		[ 'variation_active' ]
 	),
 	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
 		'regular_price',

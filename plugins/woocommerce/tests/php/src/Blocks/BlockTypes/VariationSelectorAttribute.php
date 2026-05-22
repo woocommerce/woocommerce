@@ -147,6 +147,94 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that wc-visual attribute terms render chips with swatch markup and classes.
+	 *
+	 * @testdox VariationSelectorAttribute renders wc-visual attribute options with swatch classes and colors.
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::build_variation_selectable_items
+	 */
+	public function test_renders_wc_visual_attribute_with_swatch_classes(): void {
+		global $wpdb;
+
+		$fixtures     = new FixtureData();
+		$attribute    = FixtureData::get_product_attribute(
+			'vswatch',
+			array( 'Tone A', 'Tone B' )
+		);
+		$attribute_id = $attribute['attribute_id'];
+		$taxonomy     = $attribute['attribute_taxonomy'];
+		$term_ids     = $attribute['term_ids'];
+		$term_a       = get_term( $term_ids[0] );
+		$term_b       = get_term( $term_ids[1] );
+		$this->assertInstanceOf( \WP_Term::class, $term_a );
+		$this->assertInstanceOf( \WP_Term::class, $term_b );
+
+		$wpdb->update(
+			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+			array( 'attribute_type' => 'wc-visual' ),
+			array( 'attribute_id' => $attribute_id ),
+			array( '%s' ),
+			array( '%d' )
+		);
+		delete_transient( 'wc_attribute_taxonomies' );
+		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
+
+		update_term_meta( $term_a->term_id, 'color', '#aa0000' );
+		update_term_meta( $term_b->term_id, 'color', '#0000aa' );
+
+		try {
+			$variable_product = $fixtures->get_variable_product(
+				array(),
+				array( $attribute )
+			);
+
+			$product_id = $variable_product->get_id();
+
+			$fixtures->get_variation_product(
+				$product_id,
+				array( $taxonomy => $term_a->slug ),
+				array(
+					'regular_price' => 10,
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+				)
+			);
+
+			$fixtures->get_variation_product(
+				$product_id,
+				array( $taxonomy => $term_b->slug ),
+				array(
+					'regular_price' => 12,
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+				)
+			);
+
+			\WC_Product_Variable::sync( $product_id );
+
+			$variable_product = wc_get_product( $product_id );
+			$this->assertInstanceOf( \WC_Product_Variable::class, $variable_product );
+
+			$inner_blocks = $this->get_attribute_name_block_markup() . $this->get_chips_block_markup();
+			$markup       = $this->render_variation_selector_attribute( $variable_product, $inner_blocks );
+
+			$this->assertStringContainsString( 'is-style-swatch', $markup, 'Chips wrapper should use swatch style when colors are present.' );
+			$this->assertStringContainsString( 'wc-block-product-filter-chips__swatch', $markup, 'Swatch elements should be rendered for wc-visual terms.' );
+			$this->assertStringContainsString( 'background-color: #aa0000', $markup, 'First term swatch should use its term color meta.' );
+			$this->assertStringContainsString( 'background-color: #0000aa', $markup, 'Second term swatch should use its term color meta.' );
+		} finally {
+			delete_term_meta( $term_a->term_id, 'color' );
+			delete_term_meta( $term_b->term_id, 'color' );
+			$wpdb->update(
+				$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+				array( 'attribute_type' => 'select' ),
+				array( 'attribute_id' => $attribute_id ),
+				array( '%s' ),
+				array( '%d' )
+			);
+			delete_transient( 'wc_attribute_taxonomies' );
+			\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
+		}
+	}
+
+	/**
 	 * Tests that legacy Attribute Options blocks nested in a group are replaced when rendered.
 	 *
 	 * @testdox Legacy Attribute Options block nested in a group is replaced with a dropdown when rendered.
@@ -247,6 +335,15 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	 */
 	private function get_attribute_name_block_markup(): string {
 		return '<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute-name /-->';
+	}
+
+	/**
+	 * Block markup for the Chips inner block (variation selector default).
+	 *
+	 * @return string
+	 */
+	private function get_chips_block_markup(): string {
+		return '<!-- wp:woocommerce/product-filter-chips /-->';
 	}
 
 	/**
