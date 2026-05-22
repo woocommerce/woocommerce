@@ -117,6 +117,7 @@ const blocks = {
 	},
 	'saved-for-later': {},
 	wishlist: {},
+	'add-to-wishlist-button': {},
 	'single-product': {},
 	'stock-filter': {},
 	'store-notices': {},

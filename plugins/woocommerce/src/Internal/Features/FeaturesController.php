@@ -655,7 +655,7 @@ class FeaturesController {
 			'product_wishlist'                   => array(
 				'name'                         => __( 'Wishlists', 'woocommerce' ),
 				'description'                  => __(
-					'Let shoppers save products to a wishlist from product pages.',
+					'Let shoppers save products to a wishlist from product pages. Requires the Add to Cart + Options block on the single-product template.',
 					'woocommerce'
 				),
 				'is_experimental'              => true,
