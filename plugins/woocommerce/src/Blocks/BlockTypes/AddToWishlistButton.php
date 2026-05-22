@@ -10,12 +10,15 @@ use Automattic\WooCommerce\Internal\ShopperLists\ShopperListRenderer;
 /**
  * Add to Wishlist Button block.
  *
- * Single-product trigger UI for the wishlist. Auto-injected by the Block
- * Hooks API after `woocommerce/add-to-cart-with-options` on the single-
- * product template (block themes only). Hidden for guests and gated by the
- * `product_wishlist` feature flag.
+ * Single-product trigger UI for the wishlist. Shipped as an inner block of
+ * `woocommerce/add-to-cart-with-options` (ATCWO) via the per-product-type
+ * template parts, so it always renders inside the form's iAPI scope and can
+ * read its `selectedAttributes` context directly. The `ancestor` restriction
+ * in `block.json` prevents merchants from inserting the block outside ATCWO
+ * (where it'd lose iAPI scope and the variation-attribute read would break).
  *
- * On click, toggles the currently configured product (parent or selected
+ * Hidden for guests and gated by the `product_wishlist` feature flag. On
+ * click, toggles the currently configured product (parent or selected
  * variation) in the shopper's wishlist via the shared
  * `woocommerce/shopper-lists` iAPI store. Errors are surfaced through the
  * page's existing `woocommerce/store-notices` region — no inline notices
@@ -33,59 +36,6 @@ final class AddToWishlistButton extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'add-to-wishlist-button';
-
-	/**
-	 * Initialize this block type.
-	 */
-	protected function initialize(): void {
-		parent::initialize();
-
-		// We do not use `BlockHooksTrait` currently as it has issues with PHPStan.
-		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
-	}
-
-	/**
-	 * Auto-inject this block after `woocommerce/add-to-cart-with-options`,
-	 * scoped to single-product templates on block themes. The iAPI hookups
-	 * the JS frontend relies on (the products store's `productId` /
-	 * `variationId` state) are seeded by the block-theme single-product
-	 * pipeline — classic themes don't get them, so we never inject there.
-	 *
-	 * @param array                                  $hooked_block_types Block names hooked at this position.
-	 * @param string                                 $relative_position  Position of the insertion point.
-	 * @param string                                 $anchor_block_type  Anchor block name.
-	 * @param array|\WP_Post|\WP_Block_Template|null $context            Where the block is being embedded.
-	 * @return array
-	 */
-	public function register_hooked_block( $hooked_block_types, $relative_position, $anchor_block_type, $context ) {
-		if ( 'after' !== $relative_position || 'woocommerce/add-to-cart-with-options' !== $anchor_block_type ) {
-			return $hooked_block_types;
-		}
-
-		if ( ! wp_is_block_theme() ) {
-			return $hooked_block_types;
-		}
-
-		// Only inject into block templates — and only the single-product
-		// ones. The slug is either the canonical `single-product` or a
-		// product-specific variant `single-product-{post_name}` (see
-		// `SingleProductTemplate::SLUG`); both should get the button.
-		if ( ! ( $context instanceof \WP_Block_Template ) ) {
-			return $hooked_block_types;
-		}
-		if ( 'single-product' !== $context->slug && 0 !== strpos( $context->slug, 'single-product-' ) ) {
-			return $hooked_block_types;
-		}
-
-		// `has_block()` accepts post/string content but not `WP_Block_Template`
-		// — pass the template's `content` string so the parser can scan it.
-		if ( has_block( $this->get_full_block_name(), $context->content ) ) {
-			return $hooked_block_types;
-		}
-
-		$hooked_block_types[] = $this->get_full_block_name();
-		return $hooked_block_types;
-	}
 
 	/**
 	 * Render the block.

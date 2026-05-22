@@ -10,6 +10,7 @@ import {
 import '@woocommerce/stores/woocommerce/products';
 import '@woocommerce/stores/woocommerce/shopper-lists';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import type {
 	RawShopperListItem,
 	Store as ShopperListsStore,
@@ -33,6 +34,14 @@ type BlockContext = {
 	// the request is in flight. Single-instance block, no `pendingKeys`
 	// map needed (Wishlist/SFL use one because they're per-row).
 	isPending: boolean;
+};
+
+// The narrow slice of ATCWO's iAPI context this block consumes. Reuses
+// `SelectedAttributes` from the cart store — the same type ATCWO uses for
+// its own `selectedAttributes` context field — so any shape change there
+// (e.g. adding a `taxonomy` field) flows through here automatically.
+type ATCWOContext = {
+	selectedAttributes: SelectedAttributes[];
 };
 
 type BlockStore = {
@@ -140,12 +149,47 @@ const { state } = store< BlockStore >(
 							existing.key
 						);
 					} else {
-						// Passing the variation ID directly as `product_id`
-						// lets the server resolve variation attributes
-						// from the variation itself — no need to ship the
-						// selected-attributes payload from the client.
+						// We inherit ATCWO's iAPI context because this block
+						// is an inner block of ATCWO (enforced by
+						// `ancestor` in `block.json`). That lets us read
+						// the shopper-picked attributes — needed for
+						// variations with "any" slots, where the server
+						// can't resolve the line item without them.
+						//
+						// ATCWO stores them by display label ("Color"), but
+						// the shopper-lists route expects taxonomy slugs
+						// ("pa_color"). Map via the parent product's
+						// `attributes` table; fall back to the raw name for
+						// non-taxonomy custom attributes.
+						//
+						// TODO: drop this mapping once ATCWO exposes the
+						// taxonomy on `selectedAttributes` directly.
+						const addToCartContext = getContext< ATCWOContext >(
+							'woocommerce/add-to-cart-with-options'
+						);
+						const parent = productsState.mainProductInContext;
+						const attrMap = new Map< string, string >();
+						parent?.attributes?.forEach(
+							( a: {
+								name?: string;
+								taxonomy?: string | null;
+							} ) => {
+								if ( a.name ) {
+									attrMap.set( a.name, a.taxonomy || a.name );
+								}
+							}
+						);
+						const variation =
+							addToCartContext?.selectedAttributes?.map(
+								( { attribute, value } ) => ( {
+									attribute:
+										attrMap.get( attribute ) ?? attribute,
+									value,
+								} )
+							) ?? [];
 						yield shopperListsActions.addItem( LIST_SLUG, {
 							product_id: id,
+							...( variation.length && { variation } ),
 						} );
 					}
 				} finally {

@@ -9,6 +9,7 @@
 	"keywords": [ "WooCommerce", "Wishlist" ],
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId" ],
+	"ancestor": [ "woocommerce/add-to-cart-with-options" ],
 	"supports": {
 		"interactivity": true,
 		"html": false,
