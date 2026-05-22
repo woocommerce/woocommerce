@@ -16,6 +16,11 @@ import type {
 	Store as ShopperListsStore,
 } from '@woocommerce/stores/woocommerce/shopper-lists';
 
+/**
+ * Internal dependencies
+ */
+import { matchVariationItem } from './match-variation-item';
+
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
@@ -102,7 +107,27 @@ const { state } = store< BlockStore >(
 				if ( ! list ) {
 					return null;
 				}
-				return list.items.find( ( item ) => item.id === id ) ?? null;
+				const context = getContext< BlockContext >();
+				// For non-variable products, id alone uniquely identifies
+				// the wishlist row. For variable products with "any"
+				// attribute slots, several attribute combinations can map
+				// to the same variation product, so we additionally
+				// disambiguate by the shopper's picked attributes — see
+				// `matchVariationItem` for details.
+				if ( ! context.isVariableType ) {
+					return (
+						list.items.find( ( item ) => item.id === id ) ?? null
+					);
+				}
+				const addToCartContext = getContext< ATCWOContext >(
+					'woocommerce/add-to-cart-with-options'
+				);
+				const selected = addToCartContext?.selectedAttributes ?? [];
+				return (
+					list.items.find( ( item ) =>
+						matchVariationItem( item, id, selected )
+					) ?? null
+				);
 			},
 
 			get isInWishlist(): boolean {
