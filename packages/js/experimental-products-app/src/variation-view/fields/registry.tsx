@@ -17,7 +17,6 @@ import { fieldExtensions as downloadableFilesFieldExtensions } from './downloada
 import { fieldExtensions as downloadExpiryFieldExtensions } from './download_expiry/field';
 import { fieldExtensions as downloadLimitFieldExtensions } from './download_limit/field';
 import { fieldExtensions as lowStockAmountFieldExtensions } from './low_stock_amount/field';
-import { fieldExtensions as productStatusFieldExtensions } from './product_status/field';
 import { fieldExtensions as shippingClassFieldExtensions } from './shipping_class/field';
 import {
 	createVariationDimensionField,
@@ -45,6 +44,7 @@ const SHARED_FIELD_IDS: readonly ProductFieldId[] = [
 	'stock',
 	'stock_quantity',
 	'tax_status',
+	'variation_active',
 ] as const;
 
 // Shipping fields get an extra isVisible so they disappear when virtual=true.
@@ -90,7 +90,6 @@ const shippingFields: VariationEditField[] = createProductFields( SHIPPING_FIELD
 
 // Variation-exclusive field IDs — these do not exist in the main registry.
 const VARIATION_ONLY_FIELD_IDS = [
-	'product_status',
 	'downloadable',
 	'tax_class',
 	'virtual',
@@ -109,7 +108,6 @@ const VARIATION_ONLY_FIELD_EXTENSIONS: Record<
 	VariationOnlyFieldId,
 	Partial< VariationEditField >
 > = {
-	product_status: productStatusFieldExtensions,
 	downloadable: downloadableFieldExtensions,
 	tax_class: taxClassFieldExtensions,
 	virtual: virtualFieldExtensions,

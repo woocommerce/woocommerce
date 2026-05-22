@@ -52,7 +52,7 @@ const DOWNLOAD_OPTIONS: FormField = {
 
 export const VARIATION_FORM_FIELDS: VariationFormField[] = [
 	createFormGroup( 'general-fields', __( 'General', 'woocommerce' ), [
-		'product_status',
+		'variation_active',
 		GENERAL_CHECKBOXES,
 	] ),
 	createFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
