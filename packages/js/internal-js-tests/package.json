@@ -36,7 +36,7 @@
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
 		"lint:lang:js": "eslint src",
-		"lint:lang:types": "tsc -b --emitDeclarationOnly",
+		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build:publish:project",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",

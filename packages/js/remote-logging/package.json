@@ -40,7 +40,7 @@
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
 		"lint:lang:js": "eslint src",
-		"lint:lang:types": "tsc -b --emitDeclarationOnly",
+		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build:publish:project",
 		"test:js": "jest --config ./jest.config.json --passWithNoTests",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",

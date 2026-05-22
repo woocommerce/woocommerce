@@ -26,7 +26,7 @@
 		"lint:fix:lang:js": "pnpm lint:lang:js --fix --ext=js,ts,tsx",
 		"lint:lang:css": "stylelint '**/*.scss' --cache --cache-location=node_modules/.cache/stylelint",
 		"lint:lang:js": "eslint ./client --ext=js,ts,tsx --cache --cache-location=node_modules/.cache/eslint",
-		"lint:lang:types": "tsc -b --emitDeclarationOnly",
+		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"postinstall": "node bin/xstate5-symlink.js",
 		"test:js": "jest --config client/jest.config.js",
 		"ts:check": "tsc --build",

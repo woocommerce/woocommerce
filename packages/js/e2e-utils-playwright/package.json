@@ -34,7 +34,7 @@
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"lint": "eslint --ext=js,ts,tsx src",
 		"lint:fix": "eslint --ext=js,ts,tsx src --fix",
-		"lint:lang:types": "tsc -b --emitDeclarationOnly",
+		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build",
 		"test": "jest --passWithNoTests",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",

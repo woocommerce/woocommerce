@@ -58,7 +58,7 @@
 		"lint:fix:lang:js": "pnpm lint:js-fix",
 		"lint:lang:css": "pnpm lint:css",
 		"lint:lang:js": "pnpm lint:js",
-		"lint:lang:types": "tsc -b --emitDeclarationOnly || true",
+		"lint:lang:types": "tsc --build --emitDeclarationOnly || true",
 		"lint:ci": "pnpm run lint:js && pnpm run lint:css",
 		"lint:css": "stylelint '**/*.scss' --cache --cache-location=node_modules/.cache/stylelint",
 		"lint:css-fix": "stylelint '**/*.scss' --fix",
