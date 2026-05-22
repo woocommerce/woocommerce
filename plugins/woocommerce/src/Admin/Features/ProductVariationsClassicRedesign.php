@@ -5,12 +5,12 @@
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign;
+namespace Automattic\WooCommerce\Admin\Features;
 
 /**
  * Loads assets for the product variations classic redesign feature.
  */
-class Init {
+class ProductVariationsClassicRedesign {
 	const FEATURE_ID         = 'product-variations-classic-redesign';
 	const SCRIPT_HANDLE      = 'wc-experimental-products-app';
 	const SCRIPT_PATH        = 'experimental-products-app';
