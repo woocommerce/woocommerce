@@ -40,6 +40,13 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Block-based page IDs created on demand to simulate a block store.
+	 *
+	 * @var int[]
+	 */
+	private $block_page_ids = array();
+
+	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
@@ -47,7 +54,34 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
 		delete_option( 'woocommerce_pickup_location_settings' );
 		WC()->cart->cart_context = 'shortcode';
+
+		foreach ( $this->block_page_ids as $key => $page_id ) {
+			wp_delete_post( $page_id, true );
+			delete_option( 'woocommerce_' . $key . '_page_id' );
+		}
+		$this->block_page_ids = array();
+
 		parent::tearDown();
+	}
+
+	/**
+	 * Create a page containing the requested WooCommerce block and assign it as the active
+	 * cart/checkout page so CartCheckoutUtils::is_*_block_default() returns true.
+	 *
+	 * @param string $key   Either 'cart' or 'checkout'.
+	 * @param string $block Block name to embed in the page content.
+	 */
+	private function make_page_block_based( string $key, string $block ): void {
+		$page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_title'   => ucfirst( $key ) . ' (block)',
+				'post_content' => '<!-- wp:' . $block . ' /-->',
+			)
+		);
+		update_option( 'woocommerce_' . $key . '_page_id', $page_id );
+		$this->block_page_ids[ $key ] = $page_id;
 	}
 
 	/**
@@ -230,5 +264,58 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'flat_rate:1' );
 
 		$this->assertSame( '', $result, 'Should leave the default empty rather than silently flipping a vanished shipping choice to pickup' );
+	}
+
+	/**
+	 * Block cart/checkout runs shipping calculation during server-side render where the cart context
+	 * is still 'shortcode'. The default-tab-aware path must apply to block-based stores in that case.
+	 *
+	 * @testdox Block-based stores route through the default-tab-aware path even when cart_context is 'shortcode' (server-side render).
+	 */
+	public function test_block_based_store_uses_default_tab_path_when_cart_context_is_shortcode(): void {
+		$this->make_page_block_based( 'cart', 'woocommerce/cart' );
+		$this->make_page_block_based( 'checkout', 'woocommerce/checkout' );
+
+		// Reproduce the SSR condition: block-based store, but cart_context still reads 'shortcode'.
+		WC()->cart->cart_context = 'shortcode';
+		$this->set_pickup_default_tab( 'no' );
+
+		$package = $this->build_package( array( 'local_pickup:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, '' );
+
+		// Legacy shortcode path would return current($rate_keys) = 'local_pickup:1' here.
+		// The block-aware SSR path must honour the merchant opt-out and return ''.
+		$this->assertSame(
+			'',
+			$result,
+			'Block-based stores should honour the default_tab opt-out even when cart_context is still the SSR-time shortcode value'
+		);
+	}
+
+	/**
+	 * @testdox Pickup is auto-selected for a pickup-only package when an existing store upgrades and the option lacks the auto_select_pickup_tab key.
+	 */
+	public function test_pickup_auto_selected_when_option_is_missing_the_auto_select_key(): void {
+		// Simulate an existing store that has saved Local Pickup settings before this feature shipped:
+		// the option exists but does not contain the new key. The isset() backfill in LocalPickupUtils
+		// must preserve the prior behavior of auto-selecting pickup when it's the only available rate.
+		update_option(
+			'woocommerce_pickup_location_settings',
+			array(
+				'enabled'    => 'yes',
+				'title'      => 'Pickup',
+				'tax_status' => 'taxable',
+				'cost'       => '',
+			)
+		);
+
+		$package = $this->build_package( array( 'local_pickup:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, '' );
+
+		$this->assertSame(
+			'local_pickup:1',
+			$result,
+			'Existing stores upgrading without the auto_select_pickup_tab key should keep auto-selecting pickup for pickup-only packages'
+		);
 	}
 }
