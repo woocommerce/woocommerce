@@ -90,7 +90,16 @@ export const VariableProductTour = () => {
 			'#product-type'
 		) as HTMLSelectElement;
 
-		if ( hasShownTour === 'yes' || ! productTypeSelect ) {
+		// Don't show the tour when the new variations panel is active.
+		const hasNewVariationView = document.getElementById(
+			'woocommerce-variations-classic-root'
+		);
+
+		if (
+			hasShownTour === 'yes' ||
+			! productTypeSelect ||
+			hasNewVariationView
+		) {
 			return;
 		}
 

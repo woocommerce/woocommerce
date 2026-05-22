@@ -52,7 +52,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			};
 		}, [] );
 
-		const shippingClassOptions = [
+		const options = [
 			{
 				label: __( 'No shipping class', 'woocommerce' ),
 				value: '',
@@ -64,20 +64,15 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				  } ) )
 				: [] ),
 		];
-		const selectedOption =
-			field.placeholder && ! data.shipping_class
-				? undefined
-				: shippingClassOptions.find(
-						( option ) =>
-							option.value === ( data.shipping_class ?? '' )
-				  );
+		const selectedOption = options.find(
+			( option ) => option.value === ( data.shipping_class ?? '' )
+		);
 
 		return (
 			<SelectControl
 				label={ field.label }
-				placeholder={ field.placeholder }
 				value={ selectedOption }
-				items={ shippingClassOptions }
+				items={ options }
 				onValueChange={ ( option ) =>
 					onChange( {
 						shipping_class: option?.value ?? '',

@@ -19,7 +19,7 @@ import { buildVariationViewQuery } from './query';
 import { normalizeVariation } from './normalization';
 import { variationFields } from './fields';
 import type { VariationEntityRecord } from './types';
-import ProductEdit from '../product-edit';
+import { VariationEditDrawer } from './edit/drawer';
 import { getProductWithUpdatedVariation } from '../product-edit/utils';
 import type { ProductEntityRecord } from '../fields/types';
 import { unlock } from '../lock-unlock';
@@ -266,6 +266,15 @@ export function VariationView( { productId }: VariationViewProps ) {
 		[ handleEditSelectedVariations ]
 	);
 
+	const handleCloseDrawer = useCallback( () => {
+		navigate(
+			getProductListNavigationPath( location.path, {
+				...currentQuery,
+				quickEdit: undefined,
+			} )
+		);
+	}, [ currentQuery, location.path, navigate ] );
+
 	const actions: Action< VariationEntityRecord >[] = useMemo(
 		() => [
 			{
@@ -348,9 +357,11 @@ export function VariationView( { productId }: VariationViewProps ) {
 				<DataViews.Footer />
 			</DataViews>
 			{ productWithVariations && (
-				<ProductEdit
+				<VariationEditDrawer
 					products={ [ productWithVariations ] }
 					isOpen={ showQuickEdit }
+					productId={ productId }
+					onClose={ handleCloseDrawer }
 				/>
 			) }
 		</div>
