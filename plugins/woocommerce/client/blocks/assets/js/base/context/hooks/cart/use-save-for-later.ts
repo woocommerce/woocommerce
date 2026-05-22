@@ -8,12 +8,9 @@ import { store as noticesStore } from '@wordpress/notices';
 import { cartStore } from '@woocommerce/block-data';
 
 /**
- * Save a cart line item to the saved-for-later shopper list.
- *
- * Dispatches the cart store's `saveForLater` thunk and resolves to `true` on
- * success. On failure, surfaces an error notice in the cart context and
- * resolves to `false`. Removing the line from the cart is the caller's
- * responsibility, so save and remove errors can be reported independently.
+ * Save a cart line item to the saved-for-later shopper list. Resolves to `true` on success. On failure,
+ * surfaces an error notice in the cart context and resolves to `false`. Removing the line from the cart
+ * is the caller's responsibility, so save and remove errors can be reported independently.
  */
 export const useSaveForLater = (): {
 	isSaving: boolean;

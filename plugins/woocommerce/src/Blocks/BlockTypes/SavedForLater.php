@@ -9,15 +9,10 @@ use Automattic\WooCommerce\Internal\ShopperLists\ShopperListRenderer;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
- * Saved for Later block.
- *
- * Renders the shopper's Saved for Later list. Items are loaded from the
- * `shopper-lists` Store API and shared with the cart via the
- * `woocommerce/shopper-lists` iAPI store. Row markup is shared with other
- * shopper-list blocks through {@see ShopperListRenderer}; this class adds
- * the Saved for Later specifics (Block Hooks auto-injection, the
- * `hasShownItems` empty-state gate, the quantity span, and the
- * Move-to-cart action).
+ * Saved for Later block. Renders the shopper's Saved for Later list from the `shopper-lists` Store API,
+ * sharing state with the cart via the `woocommerce/shopper-lists` iAPI store. Shared row markup lives in
+ * {@see ShopperListRenderer}. Adds Block Hooks auto-injection, the empty-state guard, the quantity span,
+ * and the Move-to-cart action.
  */
 final class SavedForLater extends AbstractBlock {
 	/**
@@ -89,26 +84,17 @@ final class SavedForLater extends AbstractBlock {
 			return $parsed_hooked_block;
 		}
 
-		// Seed a `core/heading` inner block so auto-injected instances
-		// carry the same heading the editor template provides. The
-		// append is unconditional: extensions may register additional
-		// hooked inner blocks on
-		// `hooked_block_woocommerce/saved-for-later`, and gating on
-		// `empty( $parsed_hooked_block['innerBlocks'] )` would suppress
-		// this heading whenever any other extension ran first.
+		// Seed a `core/heading` inner block so auto-injected instances carry the editor template's heading.
+		// Append unconditionally: checking `empty( $parsed_hooked_block['innerBlocks'] )` would suppress this
+		// heading whenever another extension already hooked into `hooked_block_woocommerce/saved-for-later`.
 		//
-		// `core/heading` is a static block, so the serialised markup
-		// must match the editor-saved form
-		// (`<h2 class="wp-block-heading">…</h2>`) or block validation
-		// will fail when the cart page is opened in the editor.
-		// `attrs.content` mirrors the editor template's seed
-		// (`{ content, level }`) so the parsed shape round-trips
-		// identically. The value is the raw string because attrs are
-		// JSON-encoded into the block comment delimiter; `esc_html()`
-		// would corrupt translations containing `&`, `<`, etc. The
-		// matching `null` push onto `innerContent` is required for
-		// `WP_Block::render()` to descend into the heading when
-		// assembling `$content`.
+		// `core/heading` is a static block, so the serialised markup must match the editor-saved form
+		// (`<h2 class="wp-block-heading">…</h2>`) or block validation will fail when the cart page is opened
+		// in the editor. `attrs.content` mirrors the editor template's seed (`{ content, level }`) so the
+		// parsed shape round-trips identically. The value is the raw string because attrs are JSON-encoded
+		// into the block comment delimiter, and `esc_html()` would corrupt translations containing `&`, `<`,
+		// etc. The matching `null` push onto `innerContent` is required for `WP_Block::render()` to descend
+		// into the heading when assembling `$content`.
 		$list_heading = __( 'Saved for later', 'woocommerce' );
 		$heading_html = '<h2 class="wp-block-heading">' . esc_html( $list_heading ) . '</h2>';
 
@@ -142,21 +128,20 @@ final class SavedForLater extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		// Guests have no personal list; bail before enqueuing assets or seeding state.
+		// Guests have no personal list. Bail before enqueuing assets or seeding state.
 		if ( ! is_user_logged_in() ) {
 			return '';
 		}
 
-		// Set from render() rather than Cart::enqueue_data so the flag is also set when
-		// the block is auto-injected via Block Hooks and absent from stored post_content.
+		// Set here rather than in Cart::enqueue_data so the flag is also set when the block is auto-injected
+		// via Block Hooks and absent from stored post_content.
 		if ( wc_get_container()->get( LegacyProxy::class )->call_function( 'is_cart' ) ) {
 			$this->asset_data_registry->add( 'cartPageHasSavedForLater', true );
 		}
 
-		// Clamp to the 2-6 range supported by the SCSS `@for $i from 2 through 6` loop
-		// and the editor `RangeControl`. `absint()` coerces non-integer attribute values
-		// written through the code editor; `min`/`max` then constrain the result to the
-		// range covered by `&.columns-#{$i}` rules in the stylesheet.
+		// Clamp to the 2-6 range supported by the SCSS `@for $i from 2 through 6` loop and the editor
+		// `RangeControl`. `absint()` coerces non-integer values written through the code editor, then
+		// `min`/`max` constrain the result to the range with `&.columns-#{$i}` rules in the stylesheet.
 		$column_count = min( 6, max( 2, absint( $attributes['columnCount'] ?? 5 ) ) );
 
 		wp_enqueue_script_module( $this->get_full_block_name() );
@@ -169,10 +154,9 @@ final class SavedForLater extends AbstractBlock {
 
 		$items = $this->prefetch_items();
 
-		// Seed the shared shopper-lists store with the REST URL, prefetched items, and a
-		// bootstrap nonce. The JS layer refreshes the nonce from the `Nonce` response
-		// header on every subsequent request; this seed only avoids deadlocking mutations
-		// that await `isNonceReady` before any GET has fired.
+		// Seed the shared shopper-lists store with the REST URL, prefetched items, and a bootstrap nonce.
+		// The JS layer refreshes the nonce from the `Nonce` response header on every subsequent request.
+		// This seed only avoids deadlocking mutations that await `isNonceReady` before any GET has fired.
 		wp_interactivity_state(
 			'woocommerce/shopper-lists',
 			array(
@@ -187,9 +171,8 @@ final class SavedForLater extends AbstractBlock {
 			)
 		);
 
-		// Sprintf templates passed through `wp_interactivity_config` for JS-side
-		// interpolation. Visible strings (empty state, error, action label) are rendered
-		// server-side and toggled with directives, so they are not seeded here.
+		// Sprintf templates passed through `wp_interactivity_config` for JS-side interpolation. Visible
+		// strings (empty state, error, action label) are rendered server-side and toggled with directives.
 		wp_interactivity_config(
 			'woocommerce/saved-for-later',
 			array(
@@ -198,21 +181,18 @@ final class SavedForLater extends AbstractBlock {
 			)
 		);
 
-		// `hasShownItems` seeds the per-block context that gates the empty
-		// message. The JS-side watcher flips it to `true` the first time the
-		// list has items (SSR seed or a runtime "Save for later" add), and
-		// `state.isEmpty` only activates when the flag is set *and* the list is
-		// currently empty. Stored in per-block context so it resets on each full
-		// page load. `data-wp-context---notices` seeds the store-notices
-		// namespace on the same wrapper.
+		// `hasShownItems` seeds the per-block context that controls the empty message. The JS watcher flips
+		// it to `true` the first time the list has items (SSR seed or a runtime "Save for later" add).
+		// `state.isEmpty` only activates when the flag is set *and* the list is currently empty. The flag
+		// is stored in per-block context so it resets on each full page load. `data-wp-context---notices`
+		// seeds the store-notices namespace on the same wrapper.
 		$wrapper_attributes = array(
 			'class'                     => 'wc-block-saved-for-later',
 			'data-wp-interactive'       => 'woocommerce/saved-for-later',
 			'data-wp-context'           => (string) wp_json_encode(
 				array(
 					'hasShownItems' => ! empty( $items ),
-					// `stdClass` so JSON serializes as `{}` rather than `[]`; iAPI's
-					// reactive proxy only fires updates on object writes.
+					// `stdClass` so JSON serializes as `{}` rather than `[]`. iAPI's reactive proxy only fires updates on object writes.
 					'pendingKeys'   => new \stdClass(),
 				)
 			),
@@ -245,9 +225,8 @@ final class SavedForLater extends AbstractBlock {
 		if ( $response->is_error() ) {
 			$error   = $response->as_error();
 			$message = $error instanceof \WP_Error ? $error->get_error_message() : 'Unknown error';
-			// Debug level: prefetch failures are typically transient and the
-			// user-visible fallback is the empty-state message. Raise the WC log
-			// level to surface them when investigating a regression.
+			// Debug level: prefetch failures are usually transient and the user-visible fallback is the
+			// empty-state message. Raise the WC log level to surface them when investigating a regression.
 			wc_get_logger()->debug(
 				sprintf( 'Saved for Later prefetch failed: %s', $message ),
 				array(
@@ -263,17 +242,15 @@ final class SavedForLater extends AbstractBlock {
 			return array();
 		}
 
-		// The schema casts `prices` and image entries to stdClass so JSON renders
-		// them as objects. Round-trip through JSON to normalise everything to
-		// nested arrays for the SSR markup helpers.
+		// The schema casts `prices` and image entries to stdClass so JSON renders them as objects.
+		// Round-trip through JSON to normalise everything to nested arrays for the SSR markup helpers.
 		$decoded = json_decode( (string) wp_json_encode( $data ), true );
 		return is_array( $decoded ) ? $decoded : array();
 	}
 
 	/**
-	 * Render the `<template data-wp-each>` describing how each item is rendered
-	 * on the client. Pre-rendered `data-wp-each-child` elements sit alongside
-	 * to populate first paint.
+	 * Render the `<template data-wp-each>` used by iAPI to render rows on the client. Pre-rendered
+	 * `data-wp-each-child` elements sit alongside to populate first paint.
 	 *
 	 * @return string
 	 */
@@ -285,8 +262,7 @@ final class SavedForLater extends AbstractBlock {
 	}
 
 	/**
-	 * Render the SSR markup for each item. Reconciled by iAPI via
-	 * `data-wp-each-child` after hydration.
+	 * Render the SSR markup for each item. Reconciled by iAPI via `data-wp-each-child` after hydration.
 	 *
 	 * @param array<int, array<string, mixed>> $items Schema-shape items.
 	 * @return string
@@ -300,8 +276,7 @@ final class SavedForLater extends AbstractBlock {
 	}
 
 	/**
-	 * Render a single SSR item, combining the shared row markup with the
-	 * quantity span and Move-to-cart button.
+	 * Render a single SSR item, combining the shared row markup with the quantity span and Move-to-cart button.
 	 *
 	 * @param array<string, mixed> $item Schema-shape item.
 	 * @return string
@@ -364,9 +339,8 @@ final class SavedForLater extends AbstractBlock {
 	}
 
 	/**
-	 * SSR-mode markup for the Move-to-cart action button. The wrapper is always
-	 * emitted so iAPI can toggle `hidden` after hydration; starts hidden when
-	 * the row is not purchasable.
+	 * SSR-mode markup for the Move-to-cart action button. The wrapper is always emitted so iAPI can toggle
+	 * `hidden` after hydration. Starts hidden when the row is not purchasable.
 	 *
 	 * @param array<string, mixed> $item Schema-shape item.
 	 * @return string
@@ -398,12 +372,10 @@ final class SavedForLater extends AbstractBlock {
 	}
 
 	/**
-	 * Wrap the inner-block content in an element whose visibility mirrors the
-	 * empty-state gate. Hidden until `context.hasShownItems` flips to `true`.
-	 * Returns an empty string when there is no content to wrap, to avoid
-	 * emitting an empty `<div>`.
+	 * Wrap the inner-block content in a wrapper that mirrors the empty-state visibility. Hidden until
+	 * `context.hasShownItems` flips to `true`. Returns an empty string when no content needs wrapping.
 	 *
-	 * @param string $content  Rendered inner-block content (typically the heading HTML).
+	 * @param string $content  Rendered inner-block content (usually the heading HTML).
 	 * @param bool   $is_empty Whether the saved-for-later list is empty on initial paint.
 	 * @return string
 	 */
@@ -420,10 +392,8 @@ final class SavedForLater extends AbstractBlock {
 	}
 
 	/**
-	 * Render the empty-state markup. Always present in the DOM so iAPI can
-	 * reveal it once the last item is removed. Initially hidden: SSR never
-	 * shows the message, since `state.isEmpty` requires the JS-side
-	 * `hasShownItems` context flag to flip first.
+	 * Render the empty-state markup. Always present in the DOM so iAPI can reveal it once the last item is
+	 * removed. Initially hidden: `state.isEmpty` requires the `hasShownItems` context flag to flip first.
 	 *
 	 * @return string
 	 */
@@ -436,9 +406,8 @@ final class SavedForLater extends AbstractBlock {
 	}
 
 	/**
-	 * Sprintf template for the per-row quantity label. Shared between PHP SSR
-	 * and the JS-side getter (seeded via `wp_interactivity_config`) so both
-	 * paths produce identical output.
+	 * Sprintf template for the per-row quantity label. Shared between PHP SSR and the JS-side getter
+	 * (seeded via `wp_interactivity_config`) so both paths produce identical output.
 	 */
 	private function get_quantity_label_template(): string {
 		/* translators: %d: quantity of saved items. */
@@ -446,8 +415,7 @@ final class SavedForLater extends AbstractBlock {
 	}
 
 	/**
-	 * Sprintf template for the per-row remove button's aria-label. Same dual
-	 * use as the quantity template.
+	 * Sprintf template for the per-row remove button's aria-label. Shared between PHP SSR and JS.
 	 */
 	private function get_remove_label_template(): string {
 		/* translators: %s: product name. */
@@ -455,8 +423,7 @@ final class SavedForLater extends AbstractBlock {
 	}
 
 	/**
-	 * Visible label for the move-to-cart action button, used by both the
-	 * iAPI `<template>` and the SSR per-row markup.
+	 * Visible label for the Move-to-cart action button. Used by the iAPI `<template>` and the SSR markup.
 	 */
 	private function get_move_to_cart_label(): string {
 		return __( 'Move to cart', 'woocommerce' );
@@ -475,14 +442,10 @@ final class SavedForLater extends AbstractBlock {
 	}
 
 	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * Returns null so WP uses the `style` array from block.json, which
-	 * declares this block's stylesheet alongside the atomic product-image,
-	 * product-price, and product-button stylesheets whose class names this
-	 * block reuses. Those atomic blocks cannot be rendered as inner blocks
-	 * here (they depend on WP_Query / $post context), so declaring them as
-	 * style dependencies is the only way to enqueue their CSS.
+	 * Frontend style handle. Returns null so WP uses the `style` array from block.json, which declares
+	 * this block's stylesheet alongside the atomic product-image, product-price, and product-button
+	 * stylesheets whose class names this block reuses. Those atomic blocks cannot render as inner blocks
+	 * here (they depend on WP_Query / $post context), so style dependencies are the only way to load them.
 	 *
 	 * @return null
 	 */

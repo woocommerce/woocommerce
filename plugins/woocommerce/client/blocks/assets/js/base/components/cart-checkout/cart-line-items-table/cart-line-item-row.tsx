@@ -131,11 +131,10 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 			false,
 			isBoolean
 		);
-		// Three independent gates: the REST endpoints require authentication;
-		// disabling `cart_save_for_later` unregisters the block but leaves
-		// any prior insertion in the cart page's post content; and the
-		// feature can be enabled on cart pages that never inserted the block.
-		// All three must hold for the link to have a working destination.
+		// Three independent guards must hold for the link to have a working destination. The REST
+		// endpoints require authentication. Disabling `cart_save_for_later` unregisters the block but
+		// leaves any prior insertion in the cart page's post content. The feature can also be enabled
+		// on cart pages that never inserted the block.
 		const showSaveForLater =
 			isUserLoggedIn &&
 			isSaveForLaterFeatureEnabled &&
@@ -373,11 +372,9 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 										if ( ! saved ) {
 											return;
 										}
-										// `removeItem` surfaces its own errors via
-										// `processErrorResponse`; the analytics
-										// event and a11y announcement still
-										// fire to mirror the regular remove
-										// flow.
+										// `removeItem` surfaces its own errors via `processErrorResponse`. The
+										// analytics event and a11y announcement still fire to mirror the
+										// regular remove flow.
 										await removeItem();
 										// TODO: emit a dedicated
 										// `cart-save-for-later` store event so

@@ -486,13 +486,10 @@ export const removeItemFromCart =
 	};
 
 /**
- * Save a cart line item to the saved-for-later shopper list.
- *
- * On success, dispatches a `wc-blocks_store_sync_required` event so a
- * `woocommerce/shopper-lists` iAPI store on the same page can splice the
- * returned item into local state without an extra GET. Removing the item
- * from the cart is the caller's responsibility, so save and remove errors
- * can be reported independently.
+ * Save a cart line item to the saved-for-later shopper list. On success, dispatches a
+ * `wc-blocks_store_sync_required` event so a `woocommerce/shopper-lists` iAPI store on the same page can
+ * splice the returned item into local state without an extra GET. Removing the item from the cart is the
+ * caller's responsibility, so save and remove errors can be reported independently.
  *
  * @param {string} cartItemKey Cart item to save.
  */

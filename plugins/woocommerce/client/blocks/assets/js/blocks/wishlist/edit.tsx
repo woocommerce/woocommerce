@@ -23,9 +23,8 @@ interface EditProps {
 const MIN_COLUMNS = 2;
 const MAX_COLUMNS = 6;
 
-// Lives in JS because `__()` is needed for the heading copy. `block.json`
-// literals aren't passed through the translation pipeline at runtime, so
-// a localized default template must be declared in JS.
+// Lives in JS because `__()` is needed for the heading copy. `block.json` literals are not passed
+// through the translation pipeline at runtime, so a localized default template is declared here.
 const TEMPLATE: [ string, Record< string, unknown > ][] = [
 	[ 'core/heading', { content: __( 'Wishlist', 'woocommerce' ), level: 2 } ],
 ];
@@ -76,9 +75,8 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 		className: 'wc-block-wishlist',
 	} );
 
-	// `allowedBlocks` is read from block.json; `templateLock: false` is the
-	// default. The className matches the `<div>` PHP wraps `$content` in on
-	// the frontend, so `__header`-keyed CSS applies in both contexts.
+	// `allowedBlocks` is read from block.json and `templateLock: false` is the default. The className
+	// matches the `<div>` PHP wraps `$content` in on the frontend, so `__header` CSS applies in both.
 	const innerBlocksProps = useInnerBlocksProps(
 		{ className: 'wc-block-wishlist__header' },
 		{ template: TEMPLATE }

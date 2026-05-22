@@ -8,8 +8,8 @@ import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
 /**
  * Mirror of {@see \Automattic\WooCommerce\StoreApi\Schemas\V1\ShopperListItemSchema::get_properties()}.
- * Keep in sync with the schema. UI-derived fields do not belong here; display
- * values are kept in block-private stores or rendered server-side.
+ * Keep in sync with the schema. UI-derived fields do not belong here. Display values are kept in
+ * block-private stores or rendered server-side.
  */
 export type ShopperListItemImage = {
 	id: number;
@@ -68,11 +68,9 @@ export type AddItemPayload = {
 export type Store = {
 	state: {
 		restUrl: string;
-		// TODO: revisit nonce handling once the shopper-lists routes enforce
-		// authentication server-side. Currently seeded by PHP via
-		// `wp_create_nonce( 'wc_store_api' )` and refreshed from response
-		// headers in `restRequest`. May converge with the cart store's
-		// bootstrap-from-response-header pattern.
+		// TODO: revisit nonce handling once the shopper-lists routes enforce auth server-side. Currently
+		// seeded by PHP and refreshed from response headers in `restRequest`. May converge with the cart
+		// store's bootstrap-from-response-header pattern.
 		nonce: string;
 		lists: Record< string, ShopperListState >;
 	};
@@ -187,12 +185,11 @@ const { state, actions } = store< Store >(
 
 					const items = response.filter( isShopperListItem );
 
-					// TODO: track in-flight mutation count and skip applying
-					// load results when mutations are pending, so a slow
-					// loadList cannot overwrite a fresh add or remove.
+					// TODO: track in-flight mutation count and skip applying load results when mutations
+					// are pending, so a slow loadList cannot overwrite a fresh add or remove.
 					list.items = items;
 				} catch ( error ) {
-					// No user-initiated trigger to attach a banner to; logged for diagnostics.
+					// No user-initiated trigger to attach a banner to. Logged for diagnostics.
 					// eslint-disable-next-line no-console
 					console.error( error );
 				} finally {
@@ -226,9 +223,8 @@ const { state, actions } = store< Store >(
 						);
 					}
 
-					// Merge the returned item by key: replace if present, append
-					// otherwise. The server merges quantity on duplicate saves;
-					// this mirrors that behaviour client-side.
+					// Merge the returned item by key: replace if present, append otherwise. The server
+					// merges quantity on duplicate saves, and this mirrors that behaviour client-side.
 					const existingIndex = list.items.findIndex(
 						( i ) => i.key === item.key
 					);
@@ -252,9 +248,8 @@ const { state, actions } = store< Store >(
 					return;
 				}
 
-				// Pessimistic remove: keep the row in place until the server
-				// confirms, to avoid a momentary disappearance on failure.
-				// Buttons are disabled in the meantime via `pendingKeys`.
+				// Pessimistic remove: keep the row in place until the server confirms, to avoid a
+				// momentary disappearance on failure. Buttons stay disabled meanwhile via `pendingKeys`.
 				try {
 					yield restRequest(
 						state,
@@ -268,7 +263,7 @@ const { state, actions } = store< Store >(
 					return;
 				}
 
-				// Re-find: the list may have mutated during the await.
+				// Re-find. The list may have mutated during the await.
 				const removedIndex = list.items.findIndex(
 					( i ) => i.key === key
 				);
@@ -277,7 +272,7 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			// Mirrors `cart.ts::showNoticeError`; keep in sync if the shape changes.
+			// Mirrors `cart.ts::showNoticeError`. Keep in sync if the shape changes.
 			*showNoticeError( error: Error ): AsyncAction< void > {
 				yield import( '@woocommerce/stores/store-notices' );
 				const { actions: noticeActions } = store< StoreNotices >(

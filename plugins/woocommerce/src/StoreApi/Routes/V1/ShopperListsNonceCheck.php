@@ -4,11 +4,9 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 /**
- * CSRF guard for the write-capable shopper-lists routes.
- *
- * Enforces a `wc_store_api` Nonce header on writes and refreshes the client
- * nonce via response headers on every reply. Intended as a temporary measure
- * until a reusable Store API-wide nonce trait lands on trunk.
+ * CSRF guard for the write-capable shopper-lists routes. Enforces a `wc_store_api` Nonce header on writes
+ * and refreshes the client nonce via response headers on every reply. Temporary, until a reusable
+ * Store API-wide nonce trait lands on trunk.
  *
  * @internal
  */
@@ -21,8 +19,8 @@ trait ShopperListsNonceCheck {
 	private static $store_api_nonce_action = 'wc_store_api';
 
 	/**
-	 * Enforce the `wc_store_api` Nonce header on writes and refresh it on every
-	 * reply. Overrides {@see AbstractRoute::get_response}.
+	 * Enforce the `wc_store_api` Nonce header on writes and refresh it on every reply.
+	 * Overrides {@see AbstractRoute::get_response}.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request

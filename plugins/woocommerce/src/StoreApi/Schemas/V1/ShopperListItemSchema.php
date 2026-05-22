@@ -15,8 +15,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\ProductItemTrait;
  * item reports `is_live`, and falls back to at-save snapshot data otherwise.
  */
 class ShopperListItemSchema extends AbstractSchema {
-	// Only `format_variation_data()` is used from this trait; see phpstan.neon
-	// for the related suppressions.
+	// Only `format_variation_data()` is used from this trait. See phpstan.neon for related suppressions.
 	use ProductItemTrait;
 
 	/**
@@ -265,8 +264,8 @@ class ShopperListItemSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Get the main image for a shopper list item. Only the product's main image
-	 * is returned; the gallery is not exposed at the row level.
+	 * Get the main image for a shopper list item. Only the product's main image is returned. The
+	 * gallery is not exposed at the row level.
 	 *
 	 * @param \WC_Product $product Live product instance.
 	 * @return array
@@ -299,9 +298,8 @@ class ShopperListItemSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Compute live prices for the saved item. ProductSchema is not extended
-	 * because saved items are not products; the returned shape is a thin subset
-	 * of cart-item prices.
+	 * Compute live prices for the saved item. ProductSchema is not extended because saved items are not
+	 * products. The returned shape is a thin subset of cart-item prices.
 	 *
 	 * @param \WC_Product $product Live product instance.
 	 * @return array

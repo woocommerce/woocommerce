@@ -5,26 +5,22 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\ShopperLists;
 
 /**
- * Shared markup helpers for blocks that render a shopper-list item card
- * (Saved for Later, Wishlist, …). Composed by each consuming block around
- * its own quantity, action-button, and heading markup. The row markup is
- * part of the iAPI hydration contract; any divergence between this helper's
- * output and a consumer's template will cause a hydration mismatch on first
- * paint.
+ * Shared markup helpers for blocks that render a shopper-list item card (Saved for Later, Wishlist, …).
+ * Composed by each consuming block around its own quantity, action-button, and heading markup. The row
+ * markup is part of the iAPI hydration contract: any divergence between this helper and a consumer's
+ * template will cause a hydration mismatch on first paint.
  */
 final class ShopperListRenderer {
 
 	/**
-	 * Shared CSS root class for the row. Each section helper emits BEM-style
-	 * modifiers off this base (`__image-slot`, `__remove`, …).
+	 * Shared CSS root class for the row. Section helpers emit BEM modifiers off this base.
 	 */
 	public const ROW_CLASS = 'wc-block-shopper-list-item';
 
 	/**
-	 * Wrap `$inner` in the block's outer `<section><ul>…</ul></section>` grid
-	 * scaffold. `$wrapper_attrs` are merged with the block's wrapper attributes
-	 * via `get_block_wrapper_attributes()`. Callers must ensure `$inner` and
-	 * `$before_list` contain only pre-escaped markup; both are emitted verbatim.
+	 * Wrap `$inner` in the block's outer `<section><ul>…</ul></section>` grid scaffold. `$wrapper_attrs`
+	 * are merged with the block's wrapper attributes via `get_block_wrapper_attributes()`. Callers must
+	 * ensure `$inner` and `$before_list` contain only pre-escaped markup. Both are emitted verbatim.
 	 *
 	 * @param array<string, mixed> $wrapper_attrs Attributes for the outer `<section>`.
 	 * @param string               $list_class    Class attribute for the inner `<ul>`.
@@ -43,9 +39,8 @@ final class ShopperListRenderer {
 	}
 
 	/**
-	 * Wrap `$row_inner_markup` in a `<template data-wp-each>` element used by
-	 * iAPI to render new rows. Callers must ensure `$row_inner_markup` contains
-	 * only pre-escaped markup; it is emitted verbatim.
+	 * Wrap `$row_inner_markup` in a `<template data-wp-each>` element used by iAPI to render new rows.
+	 * Callers must ensure `$row_inner_markup` contains only pre-escaped markup. It is emitted verbatim.
 	 *
 	 * @param string $row_inner_markup Inner markup for the `<li>`.
 	 * @return string
@@ -59,10 +54,9 @@ final class ShopperListRenderer {
 	}
 
 	/**
-	 * Wrap `$row_inner_markup` in an SSR `<li data-wp-each-child>` element
-	 * seeded with the per-row iAPI context derived from `$item`. Hydration is
-	 * a no-op diff against the `<template>` when the inner markup matches.
-	 * Callers must ensure `$row_inner_markup` contains only pre-escaped markup.
+	 * Wrap `$row_inner_markup` in an SSR `<li data-wp-each-child>` element seeded with the per-row iAPI
+	 * context from `$item`. Hydration is a no-op diff against the `<template>` when the inner markup
+	 * matches. Callers must ensure `$row_inner_markup` contains only pre-escaped markup.
 	 *
 	 * @param array<string, mixed> $item             Schema-shape item.
 	 * @param string               $row_inner_markup Inner markup for the `<li>`.
@@ -70,7 +64,7 @@ final class ShopperListRenderer {
 	 */
 	public static function render_each_child( array $item, string $row_inner_markup ): string {
 		$context = array( 'listItem' => $item );
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_interactivity_data_wp_context() returns a safely-encoded attribute pair; $row_inner_markup is composed of escaped fragments from the section helpers below.
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_interactivity_data_wp_context() returns a safely-encoded attribute pair, and $row_inner_markup is composed of escaped fragments from the section helpers below.
 		return sprintf(
 			'<li class="%1$s" data-wp-each-child %2$s>%3$s</li>',
 			esc_attr( self::ROW_CLASS ),
@@ -80,8 +74,7 @@ final class ShopperListRenderer {
 	}
 
 	/**
-	 * Render the image + title + price triplet for the template-mode row
-	 * (bindings only, no static attrs).
+	 * Render the image + title + price triplet for the template-mode row (bindings only, no static attrs).
 	 *
 	 * @return string
 	 */
@@ -112,9 +105,8 @@ final class ShopperListRenderer {
 	}
 
 	/**
-	 * Render the image + title + price triplet for the SSR-mode row, populated
-	 * from `$item`. Binding directives match the template-mode markup so iAPI
-	 * hydration is a no-op diff after first paint.
+	 * Render the image + title + price triplet for the SSR-mode row, populated from `$item`. Binding
+	 * directives match the template-mode markup so iAPI hydration is a no-op diff after first paint.
 	 *
 	 * @param array<string, mixed> $item                        Schema-shape item.
 	 * @param string               $remove_aria_label_template  Sprintf template for the remove button's aria-label. `%s` is replaced with the product name.
@@ -130,10 +122,9 @@ final class ShopperListRenderer {
 		$variation_label = self::get_variation_label( $item );
 		$remove_aria     = sprintf( $remove_aria_label_template, $alt );
 		$is_price_hidden = '' === $price_html;
-		// Tombstone rows (`is_live=false` or empty permalink) emit `<a>` without
-		// an href so the element shape stays stable for iAPI reconciliation
-		// against the live-row template; the stylesheet drops link affordances
-		// when the anchor has no href.
+		// Tombstone rows (`is_live=false` or empty permalink) emit `<a>` without an href so the element
+		// shape stays stable for iAPI reconciliation against the live-row template. The stylesheet drops
+		// link affordances when the anchor has no href.
 		$href_attr = $is_live && '' !== $permalink ? 'href="' . esc_url( $permalink ) . '"' : '';
 
 		ob_start();
@@ -190,13 +181,9 @@ final class ShopperListRenderer {
 	}
 
 	/**
-	 * Empty-state `<li>` that the block toggles on once `state.isEmpty`
-	 * flips. When `$start_hidden` is true, the rendered `<li>` carries
-	 * the `hidden` attribute on first paint and is revealed by iAPI once
-	 * `state.isEmpty` flips. Used by blocks where the list is populated
-	 * asynchronously after first paint (Saved for Later). Pass false for
-	 * blocks where the empty state should be visible immediately when
-	 * the list is empty (Wishlist).
+	 * Empty-state `<li>` that the block reveals once `state.isEmpty` flips. With `$start_hidden = true`
+	 * the `<li>` carries `hidden` on first paint (Saved for Later, populated asynchronously). Pass false
+	 * when the empty state should be visible immediately on first paint (Wishlist).
 	 *
 	 * @param string $message      Visible empty-state message.
 	 * @param string $css_class    Class attribute for the `<li>`.
@@ -213,9 +200,8 @@ final class ShopperListRenderer {
 	}
 
 	/**
-	 * Render the iAPI store-notices region used by row-level error banners.
-	 * Mirrors {@see AddToCartWithOptions::render_interactivity_notices_region()};
-	 * keep in sync if the shape changes.
+	 * Render the iAPI store-notices region used by row-level error banners. Mirrors
+	 * {@see AddToCartWithOptions::render_interactivity_notices_region()}. Keep in sync if the shape changes.
 	 *
 	 * @param string $wrapper_class Class attribute for the outer `<div>`.
 	 * @return string

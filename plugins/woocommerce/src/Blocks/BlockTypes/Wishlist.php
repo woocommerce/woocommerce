@@ -8,14 +8,10 @@ use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListRenderer;
 
 /**
- * Wishlist block.
- *
- * Renders the shopper's wishlist using the `shopper-lists` Store API and the
- * shared `woocommerce/shopper-lists` iAPI store. Merchant-placed (no Block
- * Hooks integration); also rendered by the `/my-account/wishlist/` endpoint
- * when the `product_wishlist` feature flag is enabled. The Add to cart
- * action adds the product to the cart and then removes the row from the
- * wishlist on confirmed success.
+ * Wishlist block. Renders the shopper's wishlist via the `shopper-lists` Store API and the shared
+ * `woocommerce/shopper-lists` iAPI store. Merchant-placed (no Block Hooks integration), and also rendered
+ * by the `/my-account/wishlist/` endpoint when the `product_wishlist` feature flag is enabled. The Add to
+ * cart action adds the product to the cart and removes the row from the wishlist on confirmed success.
  */
 final class Wishlist extends AbstractBlock {
 	/**
@@ -39,17 +35,15 @@ final class Wishlist extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		// Guests have no personal list; bail before enqueuing assets or seeding state.
-		// The My Account endpoint is not reachable for guests, but a merchant may also
-		// place this block on any page where the same guard is needed.
+		// Guests have no personal list. The My Account endpoint is unreachable for guests, and the same
+		// guard is needed when a merchant places this block on any other page.
 		if ( ! is_user_logged_in() ) {
 			return '';
 		}
 
-		// Clamp to the 2-6 range supported by the SCSS `@for $i from 2 through 6` loop
-		// and the editor `RangeControl`. `absint()` coerces non-integer attribute values
-		// written through the code editor; `min`/`max` then constrain the result to the
-		// range covered by `&.columns-#{$i}` rules in the stylesheet.
+		// Clamp to the 2-6 range supported by the SCSS `@for $i from 2 through 6` loop and the editor
+		// `RangeControl`. `absint()` coerces non-integer values written through the code editor, then
+		// `min`/`max` constrain the result to the range with `&.columns-#{$i}` rules in the stylesheet.
 		$column_count = min( 6, max( 2, absint( $attributes['columnCount'] ?? 5 ) ) );
 
 		wp_enqueue_script_module( $this->get_full_block_name() );
@@ -62,10 +56,9 @@ final class Wishlist extends AbstractBlock {
 
 		$items = $this->prefetch_items();
 
-		// Seed the shared shopper-lists store with the REST URL, prefetched items, and a
-		// bootstrap nonce. The JS layer refreshes the nonce from the `Nonce` response
-		// header on every subsequent request; this seed only avoids deadlocking mutations
-		// that await `isNonceReady` before any GET has fired.
+		// Seed the shared shopper-lists store with the REST URL, prefetched items, and a bootstrap nonce.
+		// The JS layer refreshes the nonce from the `Nonce` response header on every subsequent request.
+		// This seed only avoids deadlocking mutations that await `isNonceReady` before any GET has fired.
 		wp_interactivity_state(
 			'woocommerce/shopper-lists',
 			array(
@@ -80,9 +73,8 @@ final class Wishlist extends AbstractBlock {
 			)
 		);
 
-		// Only the remove-button aria-label template needs JS-side interpolation;
-		// visible strings (empty state, action label) are rendered server-side and
-		// toggled with directives.
+		// Only the remove-button aria-label template needs JS-side interpolation. Visible strings (empty
+		// state, action label) are rendered server-side and toggled with directives.
 		wp_interactivity_config(
 			'woocommerce/wishlist',
 			array(
@@ -90,18 +82,15 @@ final class Wishlist extends AbstractBlock {
 			)
 		);
 
-		// No `hasShownItems` flag here, unlike Saved for Later. Wishlist is reached
-		// deliberately (My Account endpoint or merchant placement), so the empty
-		// message should appear immediately when the list is empty.
-		// `data-wp-context---notices` seeds the store-notices namespace on the
-		// same wrapper.
+		// No `hasShownItems` flag here, unlike Saved for Later. Wishlist is reached deliberately (My Account
+		// endpoint or merchant placement), so the empty message should appear immediately when the list is
+		// empty. `data-wp-context---notices` seeds the store-notices namespace on the same wrapper.
 		$wrapper_attributes = array(
 			'class'                     => 'wc-block-wishlist',
 			'data-wp-interactive'       => 'woocommerce/wishlist',
 			'data-wp-context'           => (string) wp_json_encode(
 				array(
-					// `stdClass` so JSON serializes as `{}` rather than `[]`; iAPI's
-					// reactive proxy only fires updates on object writes.
+					// `stdClass` so JSON serializes as `{}` rather than `[]`. iAPI's reactive proxy only fires updates on object writes.
 					'pendingKeys' => new \stdClass(),
 				)
 			),
@@ -132,9 +121,8 @@ final class Wishlist extends AbstractBlock {
 		if ( $response->is_error() ) {
 			$error   = $response->as_error();
 			$message = $error instanceof \WP_Error ? $error->get_error_message() : 'Unknown error';
-			// Debug level: prefetch failures are typically transient and the
-			// user-visible fallback is the empty-state message. Raise the WC log
-			// level to surface them when investigating a regression.
+			// Debug level: prefetch failures are usually transient and the user-visible fallback is the
+			// empty-state message. Raise the WC log level to surface them when investigating a regression.
 			wc_get_logger()->debug(
 				sprintf( 'Wishlist prefetch failed: %s', $message ),
 				array(
@@ -150,17 +138,15 @@ final class Wishlist extends AbstractBlock {
 			return array();
 		}
 
-		// The schema casts `prices` and image entries to stdClass so JSON renders
-		// them as objects. Round-trip through JSON to normalise everything to
-		// nested arrays for the SSR markup helpers.
+		// The schema casts `prices` and image entries to stdClass so JSON renders them as objects.
+		// Round-trip through JSON to normalise everything to nested arrays for the SSR markup helpers.
 		$decoded = json_decode( (string) wp_json_encode( $data ), true );
 		return is_array( $decoded ) ? $decoded : array();
 	}
 
 	/**
-	 * Render the `<template data-wp-each>` describing how each item is rendered
-	 * on the client. Pre-rendered `data-wp-each-child` elements sit alongside
-	 * to populate first paint.
+	 * Render the `<template data-wp-each>` used by iAPI to render rows on the client. Pre-rendered
+	 * `data-wp-each-child` elements sit alongside to populate first paint.
 	 *
 	 * @return string
 	 */
@@ -171,8 +157,7 @@ final class Wishlist extends AbstractBlock {
 	}
 
 	/**
-	 * Render the SSR markup for each item. Reconciled by iAPI via
-	 * `data-wp-each-child` after hydration.
+	 * Render the SSR markup for each item. Reconciled by iAPI via `data-wp-each-child` after hydration.
 	 *
 	 * @param array<int, array<string, mixed>> $items Schema-shape items.
 	 * @return string
@@ -186,8 +171,7 @@ final class Wishlist extends AbstractBlock {
 	}
 
 	/**
-	 * Render a single SSR item, combining the shared row markup with the
-	 * Add to cart button.
+	 * Render a single SSR item, combining the shared row markup with the Add to cart button.
 	 *
 	 * @param array<string, mixed> $item Schema-shape item.
 	 * @return string
@@ -199,9 +183,8 @@ final class Wishlist extends AbstractBlock {
 	}
 
 	/**
-	 * Template-mode markup for the "Add to cart" action button. iAPI
-	 * substitutes the per-row state through `data-wp-bind--hidden` and
-	 * `data-wp-bind--disabled`.
+	 * Template-mode markup for the Add to cart action button. iAPI substitutes the per-row state through
+	 * `data-wp-bind--hidden` and `data-wp-bind--disabled`.
 	 *
 	 * @return string
 	 */
@@ -223,9 +206,8 @@ final class Wishlist extends AbstractBlock {
 	}
 
 	/**
-	 * SSR-mode markup for the Add to cart action button. The wrapper is always
-	 * emitted so iAPI can toggle `hidden` after hydration; starts hidden when
-	 * the row is not purchasable.
+	 * SSR-mode markup for the Add to cart action button. The wrapper is always emitted so iAPI can toggle
+	 * `hidden` after hydration. Starts hidden when the row is not purchasable.
 	 *
 	 * @param array<string, mixed> $item Schema-shape item.
 	 * @return string
@@ -257,11 +239,10 @@ final class Wishlist extends AbstractBlock {
 	}
 
 	/**
-	 * Wrap the inner-block content in a div. No `hasShownItems` gating: the
-	 * header is always shown when content is present. Returns an empty string
-	 * when there is no content to wrap, to avoid emitting an empty `<div>`.
+	 * Wrap the inner-block content in a div. The header is always shown when content is present, with no
+	 * `hasShownItems` guard. Returns an empty string when there is no content, to avoid an empty `<div>`.
 	 *
-	 * @param string $content Rendered inner-block content (typically the heading HTML).
+	 * @param string $content Rendered inner-block content (usually the heading HTML).
 	 * @return string
 	 */
 	private function render_header_markup( string $content ): string {
@@ -272,9 +253,8 @@ final class Wishlist extends AbstractBlock {
 	}
 
 	/**
-	 * Render the empty-state markup. Visible on first paint when the list is
-	 * empty (no `hasShownItems` gate); iAPI handles runtime transitions via
-	 * `state.isEmpty`.
+	 * Render the empty-state markup. Visible on first paint when the list is empty. iAPI handles runtime
+	 * transitions via `state.isEmpty`.
 	 *
 	 * @param array<int, array<string, mixed>> $items Schema-shape items.
 	 * @return string
@@ -288,9 +268,8 @@ final class Wishlist extends AbstractBlock {
 	}
 
 	/**
-	 * Sprintf template for the per-row remove button aria-label. Shared between
-	 * PHP SSR and the JS-side getter (seeded via `wp_interactivity_config`) so
-	 * both paths produce identical output.
+	 * Sprintf template for the per-row remove button aria-label. Shared between PHP SSR and the JS-side
+	 * getter (seeded via `wp_interactivity_config`) so both paths produce identical output.
 	 */
 	private function get_remove_label_template(): string {
 		/* translators: %s: product name. */
@@ -298,8 +277,7 @@ final class Wishlist extends AbstractBlock {
 	}
 
 	/**
-	 * Visible label for the add-to-cart action button, used by both the
-	 * iAPI `<template>` and the SSR per-row markup.
+	 * Visible label for the Add to cart action button. Used by the iAPI `<template>` and the SSR markup.
 	 */
 	private function get_add_to_cart_label(): string {
 		return __( 'Add to cart', 'woocommerce' );

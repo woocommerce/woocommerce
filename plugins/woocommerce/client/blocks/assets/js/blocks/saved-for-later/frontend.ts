@@ -28,9 +28,8 @@ type SavedForLaterConfig = {
 };
 
 type BlockContext = {
-	// Wrapper-scoped flag seeded from SSR (`items.length > 0`) and flipped
-	// to `true` by `trackShownItems` the first time the list has items.
-	// Stored in iAPI context so it resets on every full page load.
+	// Wrapper-scoped flag seeded from SSR (`items.length > 0`) and flipped to `true` by `trackShownItems`
+	// the first time the list has items. Stored in iAPI context so it resets on every full page load.
 	hasShownItems: boolean;
 	listItem?: RawShopperListItem;
 	htmlField?: 'price_html' | 'image_html';
@@ -60,9 +59,8 @@ type BlockStore = {
 	};
 };
 
-// Allow-list for sanitizing the schema's preformatted strings on innerHTML
-// swap. Covers the markup emitted by `wc_price` and
-// `wp_get_attachment_image` / `wc_placeholder_img`.
+// Allow-list for sanitizing the schema's preformatted strings on innerHTML swap. Covers the markup
+// emitted by `wc_price` and `wp_get_attachment_image` / `wc_placeholder_img`.
 const ALLOWED_TAGS = [
 	'a',
 	'b',
@@ -171,11 +169,9 @@ store< BlockStore >(
 				return ! listItem.is_purchasable;
 			},
 
-			// `data-wp-text` writes its argument as text-content without entity
-			// decoding, so a name like `Tom &amp; Jerry` would render with the
-			// literal entity. Bind templates and SSR text spans to this getter
-			// (not the raw context field) so rendered text matches PHP's first
-			// paint.
+			// `data-wp-text` writes its argument as text-content without entity decoding, so a name like
+			// `Tom &amp; Jerry` would render with the literal entity. Bind templates and SSR text spans
+			// to this getter (not the raw context field) so rendered text matches PHP's first paint.
 			get currentItemDisplayName(): string {
 				const { listItem } = getContext< BlockContext >();
 				return listItem ? decodeEntities( listItem.name ) : '';
@@ -242,13 +238,10 @@ store< BlockStore >(
 					return;
 				}
 
-				// Map the schema's `variation` shape to the cart's
-				// `SelectedAttributes` shape. The schema exposes the slug-form
-				// attribute under `raw_attribute` (e.g. `attribute_pa_color`)
-				// and a display label under `attribute`. The cart matches by
-				// the slug form, so `attribute` is overridden with
-				// `raw_attribute`. Same swap mini-cart's `changeQuantity`
-				// performs; empty for simple products.
+				// Map the schema's `variation` shape to the cart's `SelectedAttributes` shape. The schema
+				// exposes the slug-form attribute under `raw_attribute` and a display label under
+				// `attribute`. The cart matches by the slug form, so `attribute` is overridden with
+				// `raw_attribute`. Same swap as mini-cart's `changeQuantity`. Empty for simple products.
 				const variation = listItem.variation.map(
 					( { raw_attribute: rawAttribute, value, attribute } ) => ( {
 						attribute: rawAttribute || attribute,
@@ -257,11 +250,9 @@ store< BlockStore >(
 				);
 				const isVariation = listItem.variation_id > 0;
 
-				// `cartActions.addCartItem` catches its own errors and surfaces
-				// them as store notices, so the yield resolves identically on
-				// success and failure. Snapshot the matching line's quantity,
-				// run the add, then remove from the saved list only if the
-				// cart line actually grew.
+				// `cartActions.addCartItem` catches its own errors and surfaces them as store notices,
+				// so the yield resolves identically on success and failure. Snapshot the matching line's
+				// quantity, run the add, and only remove from the saved list if the cart line grew.
 				const lookup = {
 					id: listItem.id,
 					...( isVariation && { variation } ),
@@ -296,13 +287,11 @@ store< BlockStore >(
 		},
 
 		callbacks: {
-			// Wrapper-level watcher: flips `hasShownItems` to `true` the first
-			// time the list has items. Pairs with `state.isEmpty` to gate the
-			// empty message: a shopper landing on a page with nothing saved
-			// keeps the SSR-seeded `false` and sees no message; once items
-			// have been seen, an empty list surfaces the message. The flag
-			// never flips back to `false`, producing the had-items →
-			// now-empty transition within a session.
+			// Wrapper-level watcher: flips `hasShownItems` to `true` the first time the list has items.
+			// Pairs with `state.isEmpty` to control the empty message. A shopper landing on a page with
+			// nothing saved keeps the SSR-seeded `false` and sees no message. Once items have been seen,
+			// an empty list surfaces the message. The flag never flips back to `false`, producing the
+			// had-items to now-empty transition within a session.
 			trackShownItems: () => {
 				const ctx = getContext< BlockContext >();
 				const list = getList( LIST_SLUG );
@@ -311,13 +300,11 @@ store< BlockStore >(
 				}
 			},
 
-			// Shared innerHTML-swap callback for slots whose content is one of
-			// the schema's preformatted HTML fields. The watched element
-			// carries `data-wp-context='{"htmlField":"price_html"}'` (or
-			// `"image_html"`); this reads the named field off the row's
-			// `listItem` and writes its sanitized HTML into `element.ref`.
-			// PHP renders the same HTML server-side, so hydration is a no-op
-			// until the row's `listItem` changes.
+			// Shared innerHTML-swap callback for slots whose content is one of the schema's preformatted
+			// HTML fields. The watched element carries `data-wp-context='{"htmlField":"price_html"}'` (or
+			// `"image_html"`). This reads the named field off the row's `listItem` and writes its
+			// sanitized HTML into `element.ref`. PHP renders the same HTML server-side, so hydration is
+			// a no-op until the row's `listItem` changes.
 			updateInnerHtml: () => {
 				const { ref } = getElement();
 				const { listItem, htmlField } = getContext< BlockContext >();
