@@ -20,6 +20,12 @@ The Store API provides public REST API endpoints for the development of customer
 
 Explore the [Store API](./store-api/README.md) documentation.
 
+## Dual API (code + GraphQL, experimental)
+
+The dual API is an experimental, code-first API: you write plain PHP classes (the code API) and a build script generates a matching GraphQL endpoint from them. WooCommerce core ships its own dual API, and the underlying infrastructure can be reused by plugins to build their own.
+
+Explore the [Dual API](./dual-api/README.md) documentation.
+
 ## Other Resources
 
 Beyond the powerful REST APIs, WooCommerce offers a suite of PHP-based APIs designed for developers to deeply integrate and extend the core functionality of their store. These APIs allow for direct interaction with WooCommerce classes, enabling custom behaviors for settings, payment gateways, shipping methods, and more.
