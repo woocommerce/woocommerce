@@ -8,6 +8,13 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 class LocalPickupUtils {
 
 	/**
+	 * Authoritative default for the "Auto-select local pickup tab" setting.
+	 * Stored as the 'yes'/'no' string used by the option schema. All other code
+	 * paths (backfill, hot-path accessor, REST default) derive from this constant.
+	 */
+	const DEFAULT_TAB_DEFAULT = 'yes';
+
+	/**
 	 * Gets the local pickup location settings.
 	 *
 	 * @param string $context The context for the settings. Defaults to 'view'.
@@ -16,11 +23,10 @@ class LocalPickupUtils {
 		$pickup_location_settings = get_option(
 			'woocommerce_pickup_location_settings',
 			[
-				'enabled'     => 'no',
-				'title'       => __( 'Pickup', 'woocommerce' ),
-				'cost'        => '',
-				'tax_status'  => 'taxable',
-				'default_tab' => 'yes',
+				'enabled'    => 'no',
+				'title'      => __( 'Pickup', 'woocommerce' ),
+				'cost'       => '',
+				'tax_status' => 'taxable',
 			]
 		);
 
@@ -37,7 +43,7 @@ class LocalPickupUtils {
 		}
 
 		if ( ! isset( $pickup_location_settings['default_tab'] ) ) {
-			$pickup_location_settings['default_tab'] = 'yes';
+			$pickup_location_settings['default_tab'] = self::DEFAULT_TAB_DEFAULT;
 		}
 
 		// Return settings as is if we're editing them.
@@ -51,6 +57,24 @@ class LocalPickupUtils {
 		$pickup_location_settings['default_tab'] = wc_string_to_bool( $pickup_location_settings['default_tab'] );
 
 		return $pickup_location_settings;
+	}
+
+	/**
+	 * Returns whether the "Auto-select local pickup tab" setting is enabled.
+	 *
+	 * Thin accessor for hot paths (e.g. per-package shipping default selection): reads only the
+	 * relevant option key and skips the full normalization in get_local_pickup_settings().
+	 * Defaults derive from self::DEFAULT_TAB_DEFAULT.
+	 *
+	 * @return bool
+	 */
+	public static function prefers_pickup_default_tab(): bool {
+		$pickup_location_settings = get_option( 'woocommerce_pickup_location_settings' );
+		$value                    = is_array( $pickup_location_settings ) && isset( $pickup_location_settings['default_tab'] )
+			? $pickup_location_settings['default_tab']
+			: self::DEFAULT_TAB_DEFAULT;
+
+		return wc_string_to_bool( $value );
 	}
 
 	/**

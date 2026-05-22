@@ -526,8 +526,7 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 			}
 		}
 
-		$local_pickup_settings  = LocalPickupUtils::get_local_pickup_settings();
-		$prefers_pickup_default = ! empty( $local_pickup_settings['default_tab'] );
+		$prefers_pickup_default = LocalPickupUtils::prefers_pickup_default_tab();
 
 		// If the shopper previously chose a non-pickup shipping rate that's no longer in the package
 		// (e.g. address change made it unavailable), don't silently flip them to pickup. Leave the
