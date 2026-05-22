@@ -130,6 +130,41 @@ class WC_Tests_User_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that wc_modify_map_meta_cap handles invalid user IDs without fataling.
+	 *
+	 * Regression test: on PHP 8+, get_userdata( 0 ) returns false and the
+	 * subsequent property_exists() call would fatal with a TypeError. The
+	 * function should silently no-op when the target user is invalid rather
+	 * than appending do_not_allow.
+	 */
+	public function test_wc_modify_map_meta_cap_invalid_user_id() {
+		$password = wp_generate_password();
+
+		$manager_id = wp_insert_user(
+			array(
+				'user_login' => 'test_manager_invalid',
+				'user_pass'  => $password,
+				'user_email' => 'manager_invalid@example.com',
+				'role'       => 'shop_manager',
+			)
+		);
+
+		wp_set_current_user( $manager_id );
+
+		// User ID 0 — get_userdata( 0 ) returns false.
+		$caps = map_meta_cap( 'edit_user', $manager_id, 0 );
+		$this->assertNotContains( 'do_not_allow', $caps );
+
+		// Non-existent user ID — get_userdata() also returns false.
+		$caps = map_meta_cap( 'edit_user', $manager_id, PHP_INT_MAX );
+		$this->assertNotContains( 'do_not_allow', $caps );
+
+		// Repeat with delete_user for switch-case breadth.
+		$caps = map_meta_cap( 'delete_user', $manager_id, 0 );
+		$this->assertNotContains( 'do_not_allow', $caps );
+	}
+
+	/**
 	 * Test wc_shop_manager_has_capability function.
 	 *
 	 * @since 3.5.4
