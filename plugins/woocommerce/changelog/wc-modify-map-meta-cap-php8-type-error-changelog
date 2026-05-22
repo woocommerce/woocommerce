@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal TypeError in `wc_modify_map_meta_cap()` on PHP 8+
