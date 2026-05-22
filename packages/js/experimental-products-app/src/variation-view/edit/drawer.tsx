@@ -15,7 +15,6 @@ import { Drawer } from '@wordpress/ui';
  */
 import { unlock } from '../../lock-unlock';
 import {
-	getProductListNavigationPath,
 	getSelectionFromPostId,
 } from '../../product-list/utils';
 import {
@@ -32,12 +31,13 @@ import type { ProductEntityRecord } from '../fields/types';
 import { variationEditFields } from '../fields/registry';
 import { VariationEditForm } from './form';
 
-const { useHistory, useLocation } = unlock( routerPrivateApis );
+const { useLocation } = unlock( routerPrivateApis );
 
 type VariationEditDrawerProps = {
 	products: ProductEntityRecord[];
 	isOpen: boolean;
 	productId: number;
+	onClose: () => void;
 };
 
 function getSaveNoticeMessage( successCount: number, failedCount: number ) {
@@ -80,9 +80,9 @@ export function VariationEditDrawer( {
 	products,
 	isOpen,
 	productId,
+	onClose,
 }: VariationEditDrawerProps ) {
-	const { navigate } = useHistory();
-	const { path, query = {} } = useLocation();
+	const { query = {} } = useLocation();
 	const requestedProductIdsFromRoute = getSelectionFromPostId( query.postId )
 		.map( ( postId ) => Number( postId ) )
 		.filter( ( postId ) => Number.isSafeInteger( postId ) && postId > 0 );
@@ -215,8 +215,6 @@ export function VariationEditDrawer( {
 		clearEntityRecordEdits,
 		editEntityRecord,
 		saveEditedEntityRecord,
-		// @ts-expect-error – invalidateResolution is added by the resolver system
-		// but not reflected in @wordpress/core-data's public dispatch types.
 		invalidateResolution,
 	} = useDispatch( coreStore );
 
@@ -287,12 +285,6 @@ export function VariationEditDrawer( {
 		[ editEntityRecord, selectedProducts ]
 	);
 
-	const navigateAway = useCallback( () => {
-		const nextQuery = { ...query } as Record< string, string >;
-		delete nextQuery.quickEdit;
-		navigate( getProductListNavigationPath( path ?? '/', nextQuery ) );
-	}, [ navigate, path, query ] );
-
 	// Discard unsaved edits and close (Cancel / X button).
 	const closeDrawer = useCallback( () => {
 		const editedProductIds = new Set(
@@ -307,8 +299,8 @@ export function VariationEditDrawer( {
 			clearEntityRecordEdits( 'root', 'product', productId );
 		} );
 
-		navigateAway();
-	}, [ clearEntityRecordEdits, navigateAway, selectedProducts ] );
+		onClose();
+	}, [ clearEntityRecordEdits, onClose, selectedProducts ] );
 
 	const onSave = useCallback( async () => {
 		if ( selectedProducts.length === 0 || isSaving ) {
@@ -360,7 +352,7 @@ export function VariationEditDrawer( {
 			// them here would revert to the stale base state before the
 			// re-fetch completes, making the next drawer open appear to show
 			// unsaved data (e.g. downloads missing).
-			navigateAway();
+			onClose();
 		} finally {
 			setIsSaving( false );
 		}
@@ -370,7 +362,7 @@ export function VariationEditDrawer( {
 		editEntityRecord,
 		invalidateResolution,
 		isSaving,
-		navigateAway,
+		onClose,
 		productId,
 		saveEditedEntityRecord,
 		selectedProducts,
