@@ -562,7 +562,7 @@ jobs:
       - name: 'Validate - lint md-files'
         if: ${{ steps.target-changes.outputs.needs-markdown-linting }}
         shell: bash
-        run: pnpm dlx markdownlint-cli ${{ steps.target-changes.outputs.needs-markdown-linting_files }}
+        run: pnpm dlx markdownlint-cli -- ${{ steps.target-changes.outputs.needs-markdown-linting_files }}
 
       - name: 'Validate - lint docs-files'
         if: ${{ always() && steps.target-changes.outputs.needs-docs-build-validation }}
