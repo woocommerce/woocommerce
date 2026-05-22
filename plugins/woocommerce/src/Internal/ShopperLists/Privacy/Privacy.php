@@ -68,8 +68,8 @@ class Privacy extends \WC_Abstract_Privacy {
 			);
 		}
 
-		$user_id    = (int) $user->ID;
-		$controller = wc_get_container()->get( ShopperListsController::class );
+		$user_id     = (int) $user->ID;
+		$controller  = wc_get_container()->get( ShopperListsController::class );
 		$group_label = __( 'Shopper Lists', 'woocommerce' );
 		$data        = array();
 
@@ -142,9 +142,9 @@ class Privacy extends \WC_Abstract_Privacy {
 	/**
 	 * Build the `data` rows for a single exported list.
 	 *
-	 * @param string                              $slug             List slug.
-	 * @param string                              $date_created_gmt Creation time (MySQL DATETIME, GMT).
-	 * @param array<string, ShopperListItem>      $items            Items keyed by storage key.
+	 * @param string                         $slug             List slug.
+	 * @param string                         $date_created_gmt Creation time (MySQL DATETIME, GMT).
+	 * @param array<string, ShopperListItem> $items            Items keyed by storage key.
 	 *
 	 * @return array<int, array{name: string, value: string}>
 	 */
@@ -194,8 +194,8 @@ class Privacy extends \WC_Abstract_Privacy {
 			$title = sprintf( __( 'Product #%d', 'woocommerce' ), $item->get_product_id() );
 		}
 
-		/* translators: 1: product title, 2: quantity, 3: MySQL DATETIME the item was saved. */
 		return sprintf(
+			/* translators: 1: product title, 2: quantity, 3: MySQL DATETIME the item was saved. */
 			__( '%1$s × %2$d (added %3$s)', 'woocommerce' ),
 			$title,
 			$item->get_quantity(),
