@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Polish the variations DataViews table: rename the title column to "Variation" with the variation id rendered as small secondary text, replace the "Edit options" CTA with an ellipsis Menu, add filters (price, stock, and per-attribute) via DataViews' Filters component, and make the table vertically scrollable.
+Polish the variations DataViews table: rename the title column to "Variation" with the variation id rendered as small secondary text, replace the "Edit options" CTA with an ellipsis Menu, add filters (price, stock, and per-attribute) via DataViews' Filters component, and make the table vertically scrollable. Unify the stock field to render as a single pill showing quantity ("N in stock" when managed) across both the variations view and the all-products dashboard. Show only attribute values (e.g. "Red · S") instead of the full product-prefixed name in the variation column, and prefix the quick-edit side panel title with the variation ID (e.g. "#14 · Red · S").
