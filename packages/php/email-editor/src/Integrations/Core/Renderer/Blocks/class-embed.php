@@ -437,9 +437,10 @@ class Embed extends Abstract_Block_Renderer {
 		);
 
 		// Wrap with spacer if we have email attributes.
-		return $this->add_spacer(
+		return $this->add_spacer_with_context(
 			$link_html,
-			$parsed_block['email_attrs'] ?? array()
+			$parsed_block['email_attrs'] ?? array(),
+			$rendering_context
 		);
 	}
 
@@ -923,7 +924,7 @@ class Embed extends Abstract_Block_Renderer {
 			$content_parts .= sprintf(
 				'<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin-top: 16px;">'
 				. '<tr>'
-				. '<td style="vertical-align: middle; padding-right: 6px;">'
+				. '<td style="vertical-align: middle; padding-' . esc_attr( $rendering_context->get_end_side() ) . ': 6px;">'
 				. '<img src="%s" width="16" height="16" alt="" style="display: block; border-radius: 2px;" />'
 				. '</td>'
 				. '<td style="vertical-align: middle;">%s</td>'
@@ -949,14 +950,15 @@ class Embed extends Abstract_Block_Renderer {
 		$outlook_wrapped = Table_Wrapper_Helper::render_outlook_table_wrapper(
 			$card_html,
 			array(
-				'align' => 'left',
+				'align' => $rendering_context->get_default_text_align(),
 				'width' => '100%',
 			)
 		);
 
-		return $this->add_spacer(
+		return $this->add_spacer_with_context(
 			$outlook_wrapped,
-			$parsed_block['email_attrs'] ?? array()
+			$parsed_block['email_attrs'] ?? array(),
+			$rendering_context
 		);
 	}
 
@@ -997,14 +999,15 @@ class Embed extends Abstract_Block_Renderer {
 		$outlook_wrapped = Table_Wrapper_Helper::render_outlook_table_wrapper(
 			$card_html,
 			array(
-				'align' => 'left',
+				'align' => $rendering_context->get_default_text_align(),
 				'width' => '100%',
 			)
 		);
 
-		return $this->add_spacer(
+		return $this->add_spacer_with_context(
 			$outlook_wrapped,
-			$parsed_block['email_attrs'] ?? array()
+			$parsed_block['email_attrs'] ?? array(),
+			$rendering_context
 		);
 	}
 }

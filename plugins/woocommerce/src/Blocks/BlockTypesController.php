@@ -382,6 +382,7 @@ final class BlockTypesController {
 			'CatalogSorting',
 			'ClassicShortcode',
 			'CustomerAccount',
+			'Dropdown',
 			'FeaturedCategory',
 			'FeaturedProduct',
 			'MiniCart',
@@ -450,6 +451,7 @@ final class BlockTypesController {
 			'ComingSoon',
 			'CouponCode',
 			'CustomerAccount',
+			'Dropdown',
 			'EmailContent',
 			'FeaturedCategory',
 			'FeaturedProduct',
@@ -570,7 +572,6 @@ final class BlockTypesController {
 			$block_types[] = 'AddToCartWithOptions\VariationSelector';
 			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttribute';
 			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeName';
-			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeOptions';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductSelector';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItem';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemSelector';

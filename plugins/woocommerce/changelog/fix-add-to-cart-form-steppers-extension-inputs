@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Add to Cart + Options steppers not working on extension quantity inputs

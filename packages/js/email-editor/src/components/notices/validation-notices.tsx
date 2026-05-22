@@ -24,7 +24,7 @@ export function ValidationNotices() {
 		>
 			<>
 				<strong>
-					{ __( 'Fix errors to continue:', 'woocommerce' ) }
+					{ __( 'Fix errors to continue:', __i18n_text_domain__ ) }
 				</strong>
 				<ul>
 					{ notices.map( ( { id, content, actions } ) => (

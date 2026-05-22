@@ -34,9 +34,7 @@ export const ATTRIBUTE_ITEM_TEMPLATE: TemplateArray = [
 							fontSize: 'medium',
 						},
 					],
-					[
-						'woocommerce/add-to-cart-with-options-variation-selector-attribute-options',
-					],
+					[ 'woocommerce/product-filter-chips' ],
 				],
 			],
 		],

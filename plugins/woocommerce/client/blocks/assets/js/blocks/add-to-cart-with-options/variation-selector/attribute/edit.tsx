@@ -1,8 +1,10 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { useMemo, useState } from '@wordpress/element';
 import {
+	BlockContextProvider,
+	InspectorControls,
 	useBlockProps,
 	useInnerBlocksProps,
 	store as blockEditorStore,
@@ -12,17 +14,37 @@ import { BlockInstance, type BlockEditProps } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import {
 	CustomDataProvider,
+	useCustomDataContext,
 	useProductDataContext,
 } from '@woocommerce/shared-context';
 import { isProductResponseItem } from '@woocommerce/entities';
+import type { ProductResponseAttributeItem } from '@woocommerce/types';
+import { __ } from '@wordpress/i18n';
+import {
+	ToggleControl,
+	__experimentalToggleGroupControl as ToggleGroupControl,
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	__experimentalToolsPanel as ToolsPanel,
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { DEFAULT_ATTRIBUTES } from './constants';
+import {
+	DisplayStyleSwitcher,
+	resetDisplayStyleBlock,
+} from '../../../product-filters/components/display-style-switcher';
+import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
+
+const INNER_CHIPS = 'woocommerce/product-filter-chips';
 
 interface Attributes {
 	className?: string;
+	displayStyle: string;
+	autoselect: boolean;
+	disabledAttributesAction: 'disable' | 'hide';
 }
 
 type AttributeItemProps = {
@@ -32,39 +54,76 @@ type AttributeItemProps = {
 };
 
 function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
+	const { data: attribute } =
+		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
+
+	const selectableContext = useMemo( () => {
+		let items = [];
+		if (
+			attribute &&
+			Array.isArray( attribute?.terms ) &&
+			attribute.terms.length > 0
+		) {
+			items = attribute.terms.map( ( term ) => ( {
+				id: `${ attribute.taxonomy }-${ term.slug }`,
+				label: term.name,
+				value: term.slug,
+				ariaLabel: term.name,
+			} ) );
+		}
+
+		return {
+			items,
+			selectionMode: 'single' as const,
+			storeNamespace: 'woocommerce/add-to-cart-with-options',
+			groupLabel: '',
+		} satisfies SelectableItemsContext< {
+			label: string;
+			ariaLabel: string;
+		} >;
+	}, [ attribute ] );
+
 	const blockPreviewProps = useBlockPreview( {
 		blocks,
 	} );
-	const innerBlocksProps = useInnerBlocksProps(
-		{ role: 'listitem' },
-		{ templateLock: 'insert' }
-	);
+	const innerBlocksProps = useInnerBlocksProps( { role: 'listitem' } );
+
+	if ( ! attribute ) {
+		return null;
+	}
 
 	return (
-		<>
-			{ isSelected ? <div { ...innerBlocksProps } /> : <></> }
-
-			<div
-				role="listitem"
-				style={ { display: isSelected ? 'none' : undefined } }
-			>
+		<BlockContextProvider
+			value={ {
+				'woocommerce/selectableItems': selectableContext,
+			} }
+		>
+			{ isSelected ? (
+				<div { ...innerBlocksProps } />
+			) : (
+				// We don't need these elements to be interactive with the
+				// keyboard because the first attribute blocks are always
+				// editable. We allow clicking on the blocks of other attributes
+				// but it's not critical, so we disable the keyboard events.
+				// eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
 				<div
 					{ ...blockPreviewProps }
-					role="button"
 					tabIndex={ 0 }
 					onClick={ onSelect }
-					onKeyDown={ onSelect }
-				/>
-			</div>
-		</>
+				>
+					<div { ...innerBlocksProps } />
+				</div>
+			) }
+		</BlockContextProvider>
 	);
 }
 
 export default function AttributeItemTemplateEdit(
 	props: BlockEditProps< Attributes >
 ) {
-	const { clientId } = props;
-	const { className } = props.attributes;
+	const { attributes, setAttributes, clientId } = props;
+	const { className, displayStyle, autoselect, disabledAttributesAction } =
+		attributes;
 
 	const blockProps = useBlockProps( {
 		className,
@@ -80,7 +139,9 @@ export default function AttributeItemTemplateEdit(
 	const { blocks } = useSelect(
 		( select ) => {
 			const { getBlocks } = select( blockEditorStore );
-			return { blocks: getBlocks( clientId ) };
+			return {
+				blocks: getBlocks( clientId ),
+			};
 		},
 		[ clientId ]
 	);
@@ -89,25 +150,139 @@ export default function AttributeItemTemplateEdit(
 		useState< number >();
 
 	return (
-		<div { ...blockProps } role="list">
-			{ productAttributes.map( ( attribute ) => (
-				<CustomDataProvider
-					key={ attribute.id }
-					id="attribute"
-					data={ attribute }
+		<>
+			<InspectorControls>
+				<ToolsPanel
+					label={ __( 'Style', 'woocommerce' ) }
+					resetAll={ () => {
+						setAttributes( { displayStyle: INNER_CHIPS } );
+						resetDisplayStyleBlock( clientId, INNER_CHIPS );
+					} }
 				>
-					<AttributeItem
-						blocks={ blocks }
-						isSelected={
-							( selectedAttributeItem ||
-								productAttributes[ 0 ]?.id ) === attribute.id
+					<ToolsPanelItem
+						hasValue={ () => displayStyle !== INNER_CHIPS }
+						label={ __( 'Style', 'woocommerce' ) }
+						onDeselect={ () => {
+							setAttributes( { displayStyle: INNER_CHIPS } );
+							resetDisplayStyleBlock( clientId, INNER_CHIPS );
+						} }
+						isShownByDefault
+					>
+						<div>
+							<span className="screen-reader-text">
+								{ __( 'Style', 'woocommerce' ) }
+							</span>
+							<DisplayStyleSwitcher
+								clientId={ clientId }
+								currentStyle={ displayStyle }
+								onChange={ ( value ) => {
+									setAttributes( {
+										displayStyle: value,
+									} );
+								} }
+							/>
+						</div>
+					</ToolsPanelItem>
+				</ToolsPanel>
+				<ToolsPanel
+					label={ __( 'Auto-select', 'woocommerce' ) }
+					resetAll={ () =>
+						setAttributes( {
+							autoselect: false,
+							disabledAttributesAction: 'disable',
+						} )
+					}
+				>
+					<ToolsPanelItem
+						label={ __(
+							'Auto-select when only one option is available',
+							'woocommerce'
+						) }
+						hasValue={ () => autoselect }
+						onDeselect={ () =>
+							setAttributes( { autoselect: false } )
 						}
-						onSelect={ () =>
-							setSelectedAttributeItem( attribute.id )
+						isShownByDefault
+					>
+						<ToggleControl
+							label={ __(
+								'Auto-select when only one option is available',
+								'woocommerce'
+							) }
+							help={ __(
+								'Automatically select options on page load or after the shopper changes attributes, when only one valid choice is available.',
+								'woocommerce'
+							) }
+							checked={ autoselect }
+							onChange={ () =>
+								setAttributes( { autoselect: ! autoselect } )
+							}
+							__nextHasNoMarginBottom
+						/>
+					</ToolsPanelItem>
+					<ToolsPanelItem
+						label={ __( 'Invalid options', 'woocommerce' ) }
+						hasValue={ () =>
+							disabledAttributesAction !== 'disable'
 						}
-					/>
-				</CustomDataProvider>
-			) ) }
-		</div>
+						onDeselect={ () =>
+							setAttributes( {
+								disabledAttributesAction: 'disable',
+							} )
+						}
+						isShownByDefault
+					>
+						<ToggleGroupControl
+							label={ __( 'Invalid options', 'woocommerce' ) }
+							help={ __(
+								'Control the display of invalid options.',
+								'woocommerce'
+							) }
+							value={ disabledAttributesAction }
+							onChange={ ( value ) => {
+								if ( value === 'hide' || value === 'disable' ) {
+									setAttributes( {
+										disabledAttributesAction: value,
+									} );
+								}
+							} }
+							isBlock
+							size="__unstable-large"
+						>
+							<ToggleGroupControlOption
+								value="disable"
+								label={ __( 'Grayed-out', 'woocommerce' ) }
+							/>
+							<ToggleGroupControlOption
+								value="hide"
+								label={ __( 'Hidden', 'woocommerce' ) }
+							/>
+						</ToggleGroupControl>
+					</ToolsPanelItem>
+				</ToolsPanel>
+			</InspectorControls>
+
+			<div { ...blockProps } role="list">
+				{ productAttributes.map( ( attribute ) => (
+					<CustomDataProvider
+						key={ attribute.id }
+						id="attribute"
+						data={ attribute }
+					>
+						<AttributeItem
+							blocks={ blocks }
+							isSelected={
+								( selectedAttributeItem ||
+									productAttributes[ 0 ]?.id ) ===
+								attribute.id
+							}
+							onSelect={ () =>
+								setSelectedAttributeItem( attribute.id )
+							}
+						/>
+					</CustomDataProvider>
+				) ) }
+			</div>
+		</>
 	);
 }

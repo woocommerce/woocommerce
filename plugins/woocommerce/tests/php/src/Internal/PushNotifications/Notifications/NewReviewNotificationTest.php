@@ -155,4 +155,158 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 
 		$this->assertNull( $notification->to_payload() );
 	}
+
+	/**
+	 * @testdox should_send_to_user should return true when rating is below max_rating.
+	 */
+	public function test_should_send_to_user_when_rating_below_max(): void {
+		$comment_id = $this->create_review_with_rating( 3 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertTrue(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'max_rating' => 4,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return true when rating equals max_rating.
+	 */
+	public function test_should_send_to_user_when_rating_equals_max(): void {
+		$comment_id = $this->create_review_with_rating( 3 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertTrue(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'max_rating' => 3,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return false when rating is above max_rating.
+	 */
+	public function test_should_not_send_to_user_when_rating_above_max(): void {
+		$comment_id = $this->create_review_with_rating( 5 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertFalse(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'max_rating' => 3,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return true when max_rating key is missing (backwards compat).
+	 */
+	public function test_should_send_to_user_when_max_rating_missing(): void {
+		$comment_id = $this->create_review_with_rating( 5 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertTrue(
+			$notification->should_send_to_user( array( 'enabled' => true ) )
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return true when max_rating is null (threshold disabled).
+	 */
+	public function test_should_send_to_user_when_max_rating_null(): void {
+		$comment_id = $this->create_review_with_rating( 5 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertTrue(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'max_rating' => null,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return false when notification is disabled, regardless of rating.
+	 */
+	public function test_should_not_send_to_user_when_disabled(): void {
+		$comment_id = $this->create_review_with_rating( 1 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertFalse(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => false,
+					'max_rating' => null,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return false when the comment no longer exists.
+	 */
+	public function test_should_not_send_to_user_when_comment_deleted(): void {
+		$notification = new NewReviewNotification( 999999 );
+
+		$this->assertFalse(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'max_rating' => 3,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return true when the review has no rating meta.
+	 */
+	public function test_should_send_to_user_when_no_rating_meta(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$comment_id = WC_Helper_Product::create_product_review( $product->get_id() );
+
+		// Ensure no rating meta is present, in case the helper changes to set one by default.
+		delete_comment_meta( $comment_id, 'rating' );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertTrue(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'max_rating' => 3,
+				)
+			)
+		);
+	}
+
+	/**
+	 * Creates a product review with a specific rating stored in comment meta.
+	 *
+	 * @param int $rating The star rating (1–5).
+	 * @return int The new comment ID.
+	 */
+	private function create_review_with_rating( int $rating ): int {
+		$product    = WC_Helper_Product::create_simple_product();
+		$comment_id = WC_Helper_Product::create_product_review( $product->get_id() );
+		update_comment_meta( $comment_id, 'rating', $rating );
+		return (int) $comment_id;
+	}
 }

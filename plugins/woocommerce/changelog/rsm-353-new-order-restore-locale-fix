@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix locale leak in WC_Email_New_Order::trigger(): restore_locale() was not called when the email was skipped due to already being sent, leaving the locale set for the remainder of the request.

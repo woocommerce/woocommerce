@@ -1,6 +1,7 @@
 ---
 post_title: 'Getting Started with WooCommerce APIs'
 sidebar_label: 'Getting started'
+sidebar_position: 0
 ---
 
 # Getting Started with WooCommerce APIs
@@ -11,7 +12,7 @@ WooCommerce provides a number of programmatic APIs to interact with WooCommerce 
 
 The WC REST API is a powerful part of WooCommerce which lets you read and write various parts of WooCommerce data such as orders, products, coupons, customers, and shipping zones. It based on the [WordPress REST API](https://developer.wordpress.org/rest-api/).
 
-Explore the [WC REST API](./rest-api/README.md) documentation.
+Explore the [WC REST API](./rest-api/) documentation.
 
 ## Store API
 

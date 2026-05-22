@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix PHP 8.1+ deprecation notice when passing null to preg_match in WC_Eval_Math.

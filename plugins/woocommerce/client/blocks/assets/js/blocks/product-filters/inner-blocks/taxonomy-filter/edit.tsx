@@ -22,18 +22,27 @@ import { termOptionsPreview } from './constants';
 import { EditProps } from './types';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { EXCLUDED_BLOCKS } from '../../constants';
-import type { FilterOptionItem } from '../../types';
+import type { FilterOptionItem, FilterItemFields } from '../../types';
+import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
 import { getTaxonomyLabel } from './utils';
 import { sortFilterOptions } from '../../utils/sort-filter-options';
 
+type WPTaxonomyTerm = {
+	id: number;
+	name: string;
+	slug: string;
+	parent: number;
+	menu_order?: number;
+};
+
 // Module-level stable references for the taxonomy-terms useSelect below.
 // Avoids allocating fresh objects on every selector invocation, which would
 // trip @wordpress/data's SCRIPT_DEBUG unstable-reference check. Frozen so an
 // accidental mutation in a consumer cannot leak across renders or instances.
-const EMPTY_TAXONOMY_TERMS: ReadonlyArray< FilterOptionItem > = Object.freeze(
-	[] as FilterOptionItem[]
+const EMPTY_TAXONOMY_TERMS: readonly WPTaxonomyTerm[] = Object.freeze(
+	[] as WPTaxonomyTerm[]
 );
 const EMPTY_TAXONOMY_TERMS_RESULT = Object.freeze( {
 	taxonomyTerms: EMPTY_TAXONOMY_TERMS,
@@ -47,12 +56,13 @@ function createHierarchicalList(
 ) {
 	const children = new Map();
 
-	// First: categorize terms
+	// First: categorize terms by parent (numeric WP term ID)
 	terms.forEach( ( term ) => {
-		if ( ! children.has( term.parent ) ) {
-			children.set( term.parent, [] );
+		const parentId = term.parent ?? 0;
+		if ( ! children.has( parentId ) ) {
+			children.set( parentId, [] );
 		}
-		children.get( term.parent ).push( term );
+		children.get( parentId ).push( term );
 	} );
 
 	// Next: sort them
@@ -74,12 +84,12 @@ function createHierarchicalList(
 			return;
 		}
 		termList.forEach( ( term ) => {
-			if ( ! term.id || visited.has( term.id ) ) {
+			if ( ! term.termId || visited.has( term.termId ) ) {
 				return;
 			}
-			visited.add( term.id );
+			visited.add( term.termId );
 			result.push( { ...term, depth } );
-			const termChildren = children.get( term.id ) || [];
+			const termChildren = children.get( term.termId ) || [];
 			if ( termChildren.length > 0 ) {
 				addTermsRecursively( termChildren, depth + 1, visited );
 			}
@@ -129,8 +139,9 @@ const Edit = ( props: EditProps ) => {
 			};
 			return {
 				taxonomyTerms:
-					getEntityRecords( 'taxonomy', taxonomy, selectArgs ) ||
-					EMPTY_TAXONOMY_TERMS,
+					( getEntityRecords( 'taxonomy', taxonomy, selectArgs ) as
+						| WPTaxonomyTerm[]
+						| null ) || EMPTY_TAXONOMY_TERMS,
 				isTermsLoading: ! hasFinishedResolution( 'getEntityRecords', [
 					'taxonomy',
 					taxonomy,
@@ -152,9 +163,15 @@ const Edit = ( props: EditProps ) => {
 	useEffect( () => {
 		if ( isPreview ) {
 			// In preview mode, use the preview data directly
-			setTermOptions(
-				sortFilterOptions( [ ...termOptionsPreview ], sortOrder )
-			);
+			const previewItems = termOptionsPreview.map( ( item ) => {
+				if ( showCounts ) {
+					return item;
+				}
+				// Strip count when showCounts is false
+				const { count, ...rest } = item;
+				return rest;
+			} );
+			setTermOptions( sortFilterOptions( previewItems, sortOrder ) );
 			setIsOptionsLoading( false );
 			return;
 		}
@@ -193,8 +210,9 @@ const Edit = ( props: EditProps ) => {
 					label: term.name,
 					value: term.slug,
 					selected: false,
-					count,
-					id: term.id,
+					...( showCounts && { count } ),
+					id: String( term.id ),
+					termId: term.id,
 					parent: term.parent || 0,
 					menuOrder: term.menu_order ?? 0,
 				} );
@@ -217,6 +235,7 @@ const Edit = ( props: EditProps ) => {
 		filteredCounts,
 		sortOrder,
 		hideEmpty,
+		showCounts,
 		isPreview,
 		isTermsLoading,
 		isFilterCountsLoading,
@@ -291,14 +310,15 @@ const Edit = ( props: EditProps ) => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						filterData: {
+						'woocommerce/selectableItems': {
 							items:
 								termOptions.length === 0 && isPreview
 									? termOptionsPreview
 									: termOptions,
+							selectionMode: 'multiple' as const,
+							storeNamespace: 'woocommerce/product-filters',
 							isLoading,
-							showCounts,
-						},
+						} satisfies SelectableItemsContext< FilterItemFields >,
 					} }
 				>
 					{ children }

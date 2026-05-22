@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Rename CartCheckoutUtils::is_overriden_by_custom_template_content() to is_overridden_by_custom_template_content(). The misspelled name is preserved as a deprecated alias for backwards compatibility.

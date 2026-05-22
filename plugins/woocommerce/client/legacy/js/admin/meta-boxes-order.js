@@ -1359,8 +1359,24 @@ jQuery( function ( $ ) {
 		init: function() {
 			$( '#woocommerce-order-notes' )
 				.on( 'click', 'button.add_note', this.add_order_note )
-				.on( 'click', 'a.delete_note', this.delete_order_note );
+				.on( 'click', 'a.delete_note', this.delete_order_note )
+				.on( 'change', 'select#order_note_type', this.update_note_type_ui );
 
+			// Sync the CTA + helper link to reflect the current select state on load.
+			$( 'select#order_note_type' ).trigger( 'change' );
+		},
+
+		update_note_type_ui: function() {
+			var $option      = $( this ).find( ':selected' );
+			// Fallback: extension-injected options may lack data-button-label.
+			// Default to the first option's label so the button never shows stale text.
+			var defaultLabel = $( this ).find( 'option:first' ).data( 'button-label' );
+			var label        = $option.data( 'button-label' ) || defaultLabel;
+			var isCustomer   = 'customer' === $( this ).val();
+			if ( label ) {
+				$( '#woocommerce-order-notes button.add_note' ).text( label );
+			}
+			$( '#woocommerce-order-notes .add_note_email_settings' ).prop( 'hidden', ! isCustomer );
 		},
 
 		add_order_note: function() {
@@ -1400,8 +1416,12 @@ jQuery( function ( $ ) {
 		},
 
 		delete_order_note: function() {
-			if ( window.confirm( woocommerce_admin_meta_boxes.i18n_delete_note ) ) {
-				var note = $( this ).closest( 'li.note' );
+			var note = $( this ).closest( 'li.note' );
+			var message = note.hasClass( 'customer-note' )
+				? woocommerce_admin_meta_boxes.i18n_delete_customer_note
+				: woocommerce_admin_meta_boxes.i18n_delete_note;
+
+			if ( window.confirm( message ) ) {
 
 				$( note ).block({
 					message: null,
@@ -1418,7 +1438,25 @@ jQuery( function ( $ ) {
 				};
 
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {
+					if ( window.wcTracks && window.wcTracks.recordEvent ) {
+						var noteType = note.hasClass( 'customer-note' ) ? 'customer' : 'private';
+						var dateStr  = note.find( '.exact-date' ).attr( 'title' );
+						var addedAt  = dateStr ? new Date( dateStr.replace( ' ', 'T' ) ) : null;
+						var seconds  = ( addedAt && ! isNaN( addedAt.valueOf() ) )
+							? Math.round( ( Date.now() - addedAt.getTime() ) / 1000 )
+							: null;
+						window.wcTracks.recordEvent( 'order_edit_delete_order_note', {
+							order_id:            woocommerce_admin_meta_boxes.post_id,
+							note_type:           noteType,
+							status:              $( '#order_status' ).val(),
+							seconds_since_added: seconds
+						} );
+					}
 					$( note ).remove();
+					var $list = $( 'ul.order_notes' );
+					if ( 0 === $list.find( 'li.note' ).length ) {
+						$list.append( $( '<li class="no-items"></li>' ).text( woocommerce_admin_meta_boxes.i18n_no_notes_yet ) );
+					}
 				});
 			}
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Alias the four WordPress-defaults SCSS variables ($adminbar-height, $adminbar-height-mobile, $admin-menu-width, $admin-menu-width-collapsed) to their @wordpress/base-styles equivalents instead of hardcoding raw px values, so they track Core automatically.
