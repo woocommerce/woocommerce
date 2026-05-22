@@ -3,6 +3,7 @@
  */
 import { DataForm } from '@wordpress/dataviews';
 import type { FormField } from '@wordpress/dataviews';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -14,7 +15,6 @@ import {
 } from '../../product-edit/utils';
 import { VARIATION_FORM_FIELDS } from './form-fields';
 import type { VariationEditFieldId } from '../fields/registry';
-import { getSetting } from '@woocommerce/settings';
 
 type VariationFormField = VariationEditFieldId | FormField;
 
