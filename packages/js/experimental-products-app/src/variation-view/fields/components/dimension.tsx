@@ -63,12 +63,12 @@ export const createVariationDimensionField = (
 			return (
 				<InputControl
 					label={ field.label }
-					value={ data.dimensions[ key ] }
+					value={ data.dimensions?.[ key ] ?? '' }
 					placeholder={ placeholder }
 					onChange={ ( event ) => {
 						onChange( {
 							dimensions: {
-								...data.dimensions,
+								...( data.dimensions ?? {} ),
 								[ key ]: event.target.value,
 							},
 						} );
@@ -171,11 +171,11 @@ export const createDimensionField = (
 			return (
 				<InputControl
 					label={ field.label }
-					value={ data.dimensions[ key ] }
+					value={ data.dimensions?.[ key ] ?? '' }
 					onChange={ ( event ) => {
 						onChange( {
 							dimensions: {
-								...data.dimensions,
+								...( data.dimensions ?? {} ),
 								[ key ]: event.target.value,
 							},
 						} );

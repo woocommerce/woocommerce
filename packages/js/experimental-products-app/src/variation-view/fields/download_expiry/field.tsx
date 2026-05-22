@@ -48,9 +48,10 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 						onChange={ ( event ) => {
 							const parsed = parseInt( event.target.value, 10 );
 							onChange( {
-								download_expiry: Number.isNaN( parsed )
-									? 1
-									: parsed,
+								download_expiry:
+									Number.isNaN( parsed ) || parsed < 1
+										? 1
+										: parsed,
 							} );
 						} }
 						suffix={

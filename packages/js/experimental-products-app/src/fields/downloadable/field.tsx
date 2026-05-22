@@ -24,7 +24,10 @@ const fieldDefinition = {
 } satisfies Partial< Field< ProductEntityRecord > >;
 
 function generateDownloadId() {
-	return String( Date.now() );
+	return (
+		globalThis.crypto?.randomUUID?.() ??
+		`${ Date.now() }-${ Math.random().toString( 36 ).slice( 2 ) }`
+	);
 }
 
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {

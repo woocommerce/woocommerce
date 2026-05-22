@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Badge } from '@wordpress/ui';
-import { ProductStatus } from '@woocommerce/data';
+import type { ProductStatus } from '@woocommerce/data';
 
 type BadgeStatusConfig = {
 	label: string;

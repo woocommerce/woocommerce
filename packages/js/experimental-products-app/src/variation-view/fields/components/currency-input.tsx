@@ -91,7 +91,10 @@ export function CurrencyInput( {
 	onChange,
 	validity,
 }: DataFormControlProps< ProductEntityRecord > ) {
-	const fieldId = field.id as CurrencyField;
+	if ( field.id !== 'regular_price' && field.id !== 'sale_price' ) {
+		return null;
+	}
+	const fieldId: CurrencyField = field.id;
 
 	return (
 		<CurrencyControl

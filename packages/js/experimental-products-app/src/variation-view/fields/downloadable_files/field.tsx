@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button, TextControl } from '@wordpress/components';
 import { trash } from '@wordpress/icons';
-import { useCallback, useState } from '@wordpress/element';
+import { useCallback, useRef, useState } from '@wordpress/element';
 import type { Field } from '@wordpress/dataviews';
 
 /**
@@ -71,28 +71,36 @@ function DownloadableFilesEdit( {
 	data: ProductEntityRecord;
 	onChange: ( changes: Partial< ProductEntityRecord > ) => void;
 } ) {
+	type KeyedItem = UploadedItem & { _key: number };
+
 	const savedDownloads = ( data.downloads ?? [] ) as UploadedItem[];
+	const keyCounter = useRef( Math.max( savedDownloads.length, 1 ) );
 
 	// State is initialised from saved data once per mount.
 	// The drawer unmounts on close/cancel, so re-opening always starts fresh.
-	const [ downloads, setDownloads ] = useState< UploadedItem[] >(
-		savedDownloads.length > 0 ? savedDownloads : [ { file: '', name: '' } ]
+	const [ downloads, setDownloads ] = useState< KeyedItem[] >(
+		savedDownloads.length > 0
+			? savedDownloads.map( ( d, i ) => ( { ...d, _key: i } ) )
+			: [ { file: '', name: '', _key: 0 } ]
 	);
 
 	const commit = useCallback(
-		( next: UploadedItem[] ) => {
+		( next: KeyedItem[] ) => {
 			setDownloads( next );
 			// Only persist entries that have a URL.
 			onChange( {
 				downloads: next
 					.filter( ( d ) => d.file.trim() !== '' )
-					.map( ( d ) => ( { ...d, id: d.id ?? '' } ) ),
+					.map( ( { _key: _, ...d } ) => ( {
+						...d,
+						id: d.id ?? '',
+					} ) ),
 			} );
 		},
 		[ onChange ]
 	);
 
-	const updateEntry = ( index: number, changes: Partial< UploadedItem > ) => {
+	const updateEntry = ( index: number, changes: Partial< KeyedItem > ) => {
 		commit(
 			downloads.map( ( d, i ) =>
 				i === index ? { ...d, ...changes } : d
@@ -110,7 +118,7 @@ function DownloadableFilesEdit( {
 		<div className="woocommerce-fields-downloadable-files">
 			{ downloads.map( ( download, index ) => (
 				<div
-					key={ index }
+					key={ download._key }
 					className="woocommerce-fields-downloadable-files__entry"
 				>
 					{ index > 0 && (
@@ -176,7 +184,10 @@ function DownloadableFilesEdit( {
 				variant="tertiary"
 				__next40pxDefaultSize
 				onClick={ () =>
-					commit( [ ...downloads, { file: '', name: '' } ] )
+					commit( [
+						...downloads,
+						{ file: '', name: '', _key: keyCounter.current++ },
+					] )
 				}
 			>
 				{ __( '+ Add file', 'woocommerce' ) }
