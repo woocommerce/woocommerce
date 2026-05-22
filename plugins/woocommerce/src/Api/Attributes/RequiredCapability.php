@@ -8,14 +8,22 @@ use Attribute;
 use Automattic\WooCommerce\Api\Infrastructure\Principal;
 
 /**
- * Declares a WordPress capability required to execute a query or mutation.
+ * Declares a WordPress capability required to execute a query or mutation,
+ * or to read an output field, or to set an input field on a mutation.
  *
  * This attribute is repeatable: apply it multiple times to require several
  * capabilities (logical AND).
  *
- * Mutually exclusive with #[PublicAccess] on the same class.
+ * Mutually exclusive with #[PublicAccess] at the class level. At the field
+ * level a `#[PublicAccess]` placement on the same property is a build
+ * warning and is treated as a no-op.
+ *
+ * Targets: class (query/mutation/output type) and property (output field,
+ * input field, or trait-declared property). Trait-declared properties
+ * carry the attribute onto every implementing class through PHP's
+ * reflection.
  */
-#[Attribute( Attribute::IS_REPEATABLE | Attribute::TARGET_CLASS )]
+#[Attribute( Attribute::IS_REPEATABLE | Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY )]
 final class RequiredCapability {
 	/**
 	 * Constructor.
