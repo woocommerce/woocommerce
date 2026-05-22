@@ -3,8 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useMemo, useCallback, useEffect, useState } from '@wordpress/element';
-import { BaseControl } from '@wordpress/components';
-import { IconButton } from '@wordpress/ui';
+import { Fieldset, IconButton } from '@wordpress/ui';
 import clsx from 'clsx';
 import type { Field } from '@wordpress/dataviews';
 import { upload, closeSmall, dragHandle } from '@wordpress/icons';
@@ -150,17 +149,9 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			/>
 		);
 	},
-	Edit: ( { data, onChange, field } ) => {
-		const isVariation = data.type === 'variation';
-		const dataImages = useMemo( () => {
-			const nextImages = data.images ?? [];
-
-			return isVariation ? nextImages.slice( 0, 1 ) : nextImages;
-		}, [ data.images, isVariation ] );
+	Edit: ( { data, onChange } ) => {
+		const dataImages = useMemo( () => data.images ?? [], [ data.images ] );
 		const [ images, setImages ] = useState( dataImages );
-		const uploadLabel = isVariation
-			? __( 'Add image', 'woocommerce' )
-			: __( 'Add images', 'woocommerce' );
 
 		useEffect( () => {
 			setImages( dataImages );
@@ -183,11 +174,9 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 					: [ selection ];
 				const mappedImages = attachments.map( toProductImage );
 
-				commitImages(
-					isVariation ? mappedImages.slice( 0, 1 ) : mappedImages
-				);
+				commitImages( mappedImages );
 			},
-			[ commitImages, isVariation ]
+			[ commitImages ]
 		);
 
 		const handleRemoveImage = useCallback(
@@ -244,10 +233,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		}, [ images, handleRemoveImage ] );
 
 		return (
-			<div className="woocommerce-fields-control__images">
-				<BaseControl.VisualLabel>
-					{ field.label }
-				</BaseControl.VisualLabel>
+			<Fieldset.Root>
 				<DragDropProvider onDragEnd={ handleDragEnd }>
 					<div className="woocommerce-fields-control__featured-image">
 						<div className="woocommerce-fields-controls__featured-image-uploaded-images">
@@ -267,9 +253,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 										index={ index }
 										alt={ image.alt || data.name }
 										onRemove={ onRemove }
-										showDragHandle={
-											! isVariation && images.length > 1
-										}
+										showDragHandle={ images.length > 1 }
 									/>
 								);
 							} ) }
@@ -277,15 +261,18 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 						<div className="woocommerce-fields-control__featured-image-actions">
 							<MediaUpload
 								allowedTypes={ [ 'image' ] }
-								multiple={ isVariation ? false : 'add' }
+								multiple="add"
 								onSelect={ handleSelect }
-								title={ uploadLabel }
+								title={ __( 'Add images', 'woocommerce' ) }
 								value={ images.map( ( image ) => image.id ) }
 								render={ ( { open }: { open: () => void } ) => (
 									<IconButton
 										variant="minimal"
 										icon={ upload }
-										label={ uploadLabel }
+										label={ __(
+											'Add images',
+											'woocommerce'
+										) }
 										onClick={ open }
 									/>
 								) }
@@ -293,7 +280,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 						</div>
 					</div>
 				</DragDropProvider>
-			</div>
+			</Fieldset.Root>
 		);
 	},
 };

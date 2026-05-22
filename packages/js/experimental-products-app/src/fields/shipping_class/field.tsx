@@ -42,18 +42,17 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		const { shippingClasses } = useSelect( ( select ) => {
 			// TODO: Register shipping class entity and use it instead.
 			// eslint-disable-next-line @wordpress/data-no-store-string-literals
-			const store = select(
+			const { getProductShippingClasses } = select(
 				'experimental/wc/admin/products/shipping-classes'
 			);
 			return {
 				shippingClasses:
 					// @ts-expect-error - The store return type lives in Woo core.
-					( store?.getProductShippingClasses?.() ??
-						[] ) as ProductShippingClass[],
+					getProductShippingClasses() as ProductShippingClass[],
 			};
 		}, [] );
 
-		const shippingClassOptions = [
+		const options = [
 			{
 				label: __( 'No shipping class', 'woocommerce' ),
 				value: '',
@@ -65,20 +64,15 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				  } ) )
 				: [] ),
 		];
-		const selectedOption =
-			field.placeholder && ! data.shipping_class
-				? undefined
-				: shippingClassOptions.find(
-						( option ) =>
-							option.value === ( data.shipping_class ?? '' )
-				  );
+		const selectedOption = options.find(
+			( option ) => option.value === ( data.shipping_class ?? '' )
+		);
 
 		return (
 			<SelectControl
 				label={ field.label }
-				placeholder={ field.placeholder }
 				value={ selectedOption }
-				items={ shippingClassOptions }
+				items={ options }
 				onValueChange={ ( option ) =>
 					onChange( {
 						shipping_class: option?.value ?? '',
