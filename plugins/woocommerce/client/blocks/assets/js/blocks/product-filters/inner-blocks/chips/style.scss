@@ -76,23 +76,22 @@
 	vertical-align: bottom;
 }
 
-.wc-block-product-filter-chips__swatch {
+:where(.wc-block-product-filter-chips__swatch) {
 	display: inline-block;
 	width: 1.25em;
 	height: 1.25em;
 	border-radius: 50%;
 	border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
 	flex-shrink: 0;
-
-	&--no-color {
-		display: none;
-	}
-	.has-chip-border-color & {
-		border-color: var(--wc-product-filter-chips-border);
-	}
-	.has-selected-chip-border-color .wc-block-product-filter-chips__item[aria-checked="true"] & {
-		border-color: transparent;
-	}
+}
+:where(.wc-block-product-filter-chips__swatch--no-color) {
+	display: none;
+}
+:where(.has-chip-border-color .wc-block-product-filter-chips__swatch) {
+	border-color: var(--wc-product-filter-chips-border);
+}
+:where(.has-selected-chip-border-color .wc-block-product-filter-chips__item[aria-checked="true"] .wc-block-product-filter-chips__swatch) {
+	border-color: transparent;
 }
 
 .wc-block-product-filter-chips__text {
