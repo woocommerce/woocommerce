@@ -74,27 +74,18 @@ function getVariationImageSaveData(
 function getVariationSaveData(
 	variation: ProductEntityRecord
 ): ProductVariationSaveData {
-	const { images, ...data } = variation;
+	const { images, cost_of_goods_sold: costOfGoodsSold, ...data } = variation;
+	const hasNullCostOfGoodsSoldValue = costOfGoodsSold?.values?.some(
+		( value ) => value.defined_value === null
+	);
 
 	return {
 		...data,
+		...( ! hasNullCostOfGoodsSoldValue && costOfGoodsSold !== undefined
+			? { cost_of_goods_sold: costOfGoodsSold }
+			: {} ),
 		image: getVariationImageSaveData( images?.[ 0 ] ),
 	};
-}
-
-function sanitizeVariationForSave(
-	variation: ProductEntityRecord
-): ProductEntityRecord {
-	const data = { ...variation } as Record< string, unknown >;
-	// The REST API rejects cost_of_goods_sold when defined_value is null.
-	// Omit the field so the server retains its existing value.
-	const cogs = data.cost_of_goods_sold as
-		| { values?: Array< { defined_value: unknown } > }
-		| undefined;
-	if ( cogs?.values?.some( ( v ) => v.defined_value === null ) ) {
-		delete data.cost_of_goods_sold;
-	}
-	return data as ProductEntityRecord;
 }
 
 async function saveVariation(
@@ -109,7 +100,7 @@ async function saveVariation(
 	const savedVariation = await apiFetch< ProductVariation >( {
 		path: getProductVariationUpdatePath( product ),
 		method: 'PUT',
-		data: getVariationSaveData( sanitizeVariationForSave( editedVariation ) ),
+		data: getVariationSaveData( editedVariation ),
 	} );
 
 	if ( parentProduct ) {
