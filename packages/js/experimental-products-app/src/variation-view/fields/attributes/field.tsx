@@ -64,9 +64,8 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			( attr ) => attr.variation !== false
 		);
 
-		const variationAttributes = (
-			data.attributes ?? []
-		) as unknown as VariationAttribute[];
+		const variationAttributes = ( data.attributes ??
+			[] ) as unknown as VariationAttribute[];
 
 		if ( parentAttributes.length === 0 ) {
 			return null;
@@ -81,8 +80,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				const matches =
 					attrId !== 0
 						? attr.id === attrId
-						: attr.name.toLowerCase() ===
-						  attrName.toLowerCase();
+						: attr.name.toLowerCase() === attrName.toLowerCase();
 				return matches ? { ...attr, option: newOption } : attr;
 			} );
 			onChange( {
@@ -117,9 +115,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 						<div
 							key={ `${ attr.id }-${ attr.name }` }
 							style={
-								isLastOdd
-									? { gridColumn: '1 / -1' }
-									: undefined
+								isLastOdd ? { gridColumn: '1 / -1' } : undefined
 							}
 						>
 							<SelectControl

@@ -56,21 +56,22 @@ const SHIPPING_FIELD_IDS: readonly ProductFieldId[] = [
 	'height',
 ] as const;
 
-function withVirtualGuard(
-	field: VariationEditField
-): VariationEditField {
+function withVirtualGuard( field: VariationEditField ): VariationEditField {
 	const existing = field.isVisible;
 	return {
 		...field,
 		isVisible: ( item: ProductEntityRecord ) =>
-			! item.virtual &&
-			( existing === undefined || existing( item ) ),
+			! item.virtual && ( existing === undefined || existing( item ) ),
 	};
 }
 
-const sharedFields: VariationEditField[] = createProductFields( SHARED_FIELD_IDS );
+const sharedFields: VariationEditField[] =
+	createProductFields( SHARED_FIELD_IDS );
 
-const variationShippingOverrides: Record< string, Partial< VariationEditField > > = {
+const variationShippingOverrides: Record<
+	string,
+	Partial< VariationEditField >
+> = {
 	shipping_class: shippingClassFieldExtensions,
 	length: createVariationDimensionField( 'length' ),
 	width: createVariationDimensionField( 'width' ),
@@ -78,7 +79,9 @@ const variationShippingOverrides: Record< string, Partial< VariationEditField > 
 	weight: createVariationWeightField(),
 };
 
-const shippingFields: VariationEditField[] = createProductFields( SHIPPING_FIELD_IDS )
+const shippingFields: VariationEditField[] = createProductFields(
+	SHIPPING_FIELD_IDS
+)
 	.map( ( field ) => {
 		const override = variationShippingOverrides[ field.id as string ];
 		if ( override?.Edit ) {
@@ -131,6 +134,4 @@ export const variationEditFields: VariationEditField[] = [
 ];
 
 // Union type of all field IDs available in the variation panel.
-export type VariationEditFieldId =
-	| ProductFieldId
-	| VariationOnlyFieldId;
+export type VariationEditFieldId = ProductFieldId | VariationOnlyFieldId;

@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-import { useEntityRecord } from '@wordpress/core-data';
+import { useEntityRecord, store as coreStore } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
-import { store as coreStore } from '@wordpress/core-data';
 import type { Field } from '@wordpress/dataviews';
 import { InputControl, InputLayout } from '@wordpress/ui';
 

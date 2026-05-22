@@ -13,7 +13,7 @@ import './confirmation-modal.scss';
 /**
  * Confirmation modal for the site visibility settings.
  *
- * @return {React.ReactNode} The confirmation modal component.
+ * @return {JSX.Element} The confirmation modal component.
  */
 export const ConfirmationModal = ( {
 	formRef,

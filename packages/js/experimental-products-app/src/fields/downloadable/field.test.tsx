@@ -39,8 +39,7 @@ jest.mock( '@wordpress/components', () => {
 			ReactActual.createElement(
 				'div',
 				null,
-				label &&
-					ReactActual.createElement( 'label', null, label ),
+				label && ReactActual.createElement( 'label', null, label ),
 				ReactActual.createElement( 'input', {
 					value: value ?? '',
 					placeholder,
@@ -242,7 +241,9 @@ describe( 'downloadable field', () => {
 		const onChange = jest.fn();
 		renderEdit( buildProduct(), onChange );
 
-		const checkbox = screen.getByLabelText( 'Limit downloads per customer' );
+		const checkbox = screen.getByLabelText(
+			'Limit downloads per customer'
+		);
 		fireEvent.click( checkbox );
 
 		expect( onChange ).toHaveBeenCalledWith( { download_limit: 1 } );
@@ -266,8 +267,6 @@ describe( 'downloadable field', () => {
 		expect(
 			screen.getByLabelText( 'Limit downloads per customer' )
 		).toBeChecked();
-		expect(
-			screen.getByLabelText( 'Expire download link' )
-		).toBeChecked();
+		expect( screen.getByLabelText( 'Expire download link' ) ).toBeChecked();
 	} );
 } );

@@ -14,11 +14,8 @@ import { Drawer } from '@wordpress/ui';
  * Internal dependencies
  */
 import { unlock } from '../../lock-unlock';
+import { getSelectionFromPostId } from '../../product-list/utils';
 import {
-	getSelectionFromPostId,
-} from '../../product-list/utils';
-import {
-	buildMergedProductEditData,
 	findProductInList,
 	getProductEditRecord,
 	getProductEditFields,
@@ -112,64 +109,69 @@ export function VariationEditDrawer( {
 			}
 
 			const coreSelect = select( coreStore );
-			const productResults = requestedProductIds.map( ( productId ) => {
-				const resolutionArgs = [ 'root', 'product', productId ];
-				const rootRecord = coreSelect.getEditedEntityRecord(
-					'root',
-					'product',
-					productId
-				) as unknown as ProductEntityRecord | false | undefined;
-				const rootRecordEdits = coreSelect.getEntityRecordEdits(
-					'root',
-					'product',
-					productId
-				) as Partial< ProductEntityRecord > | undefined;
-				const listedProduct = findProductInList( products, productId );
-				const product = getProductEditRecord(
-					listedProduct,
-					rootRecord,
-					rootRecordEdits
-				);
-				let record: ProductEntityRecord | false | undefined =
-					product ?? rootRecord;
-
-				if (
-					product &&
-					isProductVariation( product ) &&
-					product.parent_id
-				) {
-					const parentProduct = coreSelect.getEditedEntityRecord(
+			const productResults = requestedProductIds.map(
+				( reqProductId ) => {
+					const resolutionArgs = [ 'root', 'product', reqProductId ];
+					const rootRecord = coreSelect.getEditedEntityRecord(
 						'root',
 						'product',
-						product.parent_id
+						reqProductId
 					) as unknown as ProductEntityRecord | false | undefined;
-					const editedParentProduct =
-						parentProduct !== false ? parentProduct : undefined;
-					const editedVariation =
-						editedParentProduct?._embedded?.variations?.find(
-							( variation ) => variation.id === product.id
-						);
+					const rootRecordEdits = coreSelect.getEntityRecordEdits(
+						'root',
+						'product',
+						reqProductId
+					) as Partial< ProductEntityRecord > | undefined;
+					const listedProduct = findProductInList(
+						products,
+						reqProductId
+					);
+					const product = getProductEditRecord(
+						listedProduct,
+						rootRecord,
+						rootRecordEdits
+					);
+					let record: ProductEntityRecord | false | undefined =
+						product ?? rootRecord;
 
-					record = editedVariation || product;
+					if (
+						product &&
+						isProductVariation( product ) &&
+						product.parent_id
+					) {
+						const parentProduct = coreSelect.getEditedEntityRecord(
+							'root',
+							'product',
+							product.parent_id
+						) as unknown as ProductEntityRecord | false | undefined;
+						const editedParentProduct =
+							parentProduct !== false ? parentProduct : undefined;
+						const editedVariation =
+							editedParentProduct?._embedded?.variations?.find(
+								( variation ) => variation.id === product.id
+							);
+
+						record = editedVariation || product;
+					}
+
+					return {
+						productId: reqProductId,
+						record,
+						isResolving: listedProduct
+							? false
+							: coreSelect.isResolving(
+									'getEditedEntityRecord',
+									resolutionArgs
+							  ),
+						hasFinishedResolution: listedProduct
+							? true
+							: coreSelect.hasFinishedResolution(
+									'getEditedEntityRecord',
+									resolutionArgs
+							  ),
+					};
 				}
-
-				return {
-					productId,
-					record,
-					isResolving: listedProduct
-						? false
-						: coreSelect.isResolving(
-								'getEditedEntityRecord',
-								resolutionArgs
-						  ),
-					hasFinishedResolution: listedProduct
-						? true
-						: coreSelect.hasFinishedResolution(
-								'getEditedEntityRecord',
-								resolutionArgs
-						  ),
-				};
-			} );
+			);
 			const resolvedProducts = productResults
 				.map( ( { record } ) => record )
 				.filter(
@@ -199,11 +201,11 @@ export function VariationEditDrawer( {
 					( result ) =>
 						result.hasFinishedResolution && result.record === false
 				),
-				hasEdits: editedProductIds.some( ( productId ) =>
+				hasEdits: editedProductIds.some( ( editedProductId ) =>
 					coreSelect.hasEditsForEntityRecord(
 						'root',
 						'product',
-						productId
+						editedProductId
 					)
 				),
 			};
@@ -295,8 +297,8 @@ export function VariationEditDrawer( {
 			)
 		);
 
-		editedProductIds.forEach( ( productId ) => {
-			clearEntityRecordEdits( 'root', 'product', productId );
+		editedProductIds.forEach( ( editedProductId ) => {
+			clearEntityRecordEdits( 'root', 'product', editedProductId );
 		} );
 
 		onClose();

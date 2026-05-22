@@ -21,7 +21,14 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	Edit: ( { data, onChange, field } ) => {
 		const hasExpiry = ( data.download_expiry ?? -1 ) !== -1;
 		return (
-			<div className="woocommerce-fields-field__download-expiry" style={ { display: 'flex', flexDirection: 'column', gap: '12px' } }>
+			<div
+				className="woocommerce-fields-field__download-expiry"
+				style={ {
+					display: 'flex',
+					flexDirection: 'column',
+					gap: '12px',
+				} }
+			>
 				<CheckboxControl
 					__nextHasNoMarginBottom
 					label={ __( 'Expire download link', 'woocommerce' ) }

@@ -95,7 +95,11 @@ export const VariableProductTour = () => {
 			'woocommerce-variations-classic-root'
 		);
 
-		if ( hasShownTour === 'yes' || ! productTypeSelect || hasNewVariationView ) {
+		if (
+			hasShownTour === 'yes' ||
+			! productTypeSelect ||
+			hasNewVariationView
+		) {
 			return;
 		}
 

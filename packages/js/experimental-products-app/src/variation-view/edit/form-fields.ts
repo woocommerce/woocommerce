@@ -49,7 +49,6 @@ const DOWNLOAD_OPTIONS: FormField = {
 	children: [ 'download_limit', 'download_expiry' ],
 };
 
-
 export const VARIATION_FORM_FIELDS: VariationFormField[] = [
 	createFormGroup( 'general-fields', __( 'General', 'woocommerce' ), [
 		'variation_active',

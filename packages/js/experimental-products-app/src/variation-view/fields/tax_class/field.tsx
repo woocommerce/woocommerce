@@ -44,11 +44,9 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				value={ selected }
 				items={ options }
 				onValueChange={ ( option ) => {
-					if ( option != null ) {
+					if ( option !== null && option !== undefined ) {
 						const apiVal =
-							option.value === SAME_AS_PARENT
-								? ''
-								: option.value;
+							option.value === SAME_AS_PARENT ? '' : option.value;
 						onChange( {
 							tax_class:
 								apiVal as ProductEntityRecord[ 'tax_class' ],

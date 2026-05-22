@@ -54,11 +54,7 @@ function openMediaLibrary(
 		multiple: false,
 	} );
 	frame.on( 'select', () => {
-		const attachment = frame
-			.state()
-			.get( 'selection' )
-			.first()
-			.toJSON();
+		const attachment = frame.state().get( 'selection' ).first().toJSON();
 		onSelect(
 			attachment.url,
 			attachment.title || attachment.filename || '',
@@ -89,17 +85,14 @@ function DownloadableFilesEdit( {
 			// Only persist entries that have a URL.
 			onChange( {
 				downloads: next
-				.filter( ( d ) => d.file.trim() !== '' )
-				.map( ( d ) => ( { ...d, id: d.id ?? '' } ) ),
+					.filter( ( d ) => d.file.trim() !== '' )
+					.map( ( d ) => ( { ...d, id: d.id ?? '' } ) ),
 			} );
 		},
 		[ onChange ]
 	);
 
-	const updateEntry = (
-		index: number,
-		changes: Partial< UploadedItem >
-	) => {
+	const updateEntry = ( index: number, changes: Partial< UploadedItem > ) => {
 		commit(
 			downloads.map( ( d, i ) =>
 				i === index ? { ...d, ...changes } : d

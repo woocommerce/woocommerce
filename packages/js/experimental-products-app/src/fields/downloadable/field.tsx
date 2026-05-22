@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	Button,
-	CheckboxControl,
-	TextControl,
-} from '@wordpress/components';
+import { Button, CheckboxControl, TextControl } from '@wordpress/components';
 import { useCallback, useMemo } from '@wordpress/element';
 import type { Field } from '@wordpress/dataviews';
 import { MediaUpload } from '@wordpress/media-utils';
@@ -106,17 +102,19 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 											),
 									} );
 								} }
-								allowedTypes={ [ 'application', 'video', 'audio', 'image' ] }
+								allowedTypes={ [
+									'application',
+									'video',
+									'audio',
+									'image',
+								] }
 								render={ ( { open }: { open: () => void } ) => (
 									<Button
 										variant="secondary"
 										onClick={ open }
 										className="woocommerce-fields-field__downloadable-choose-file"
 									>
-										{ __(
-											'Choose file',
-											'woocommerce'
-										) }
+										{ __( 'Choose file', 'woocommerce' ) }
 									</Button>
 								) }
 							/>
@@ -150,7 +148,10 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				</Button>
 				<CheckboxControl
 					__nextHasNoMarginBottom
-					label={ __( 'Limit downloads per customer', 'woocommerce' ) }
+					label={ __(
+						'Limit downloads per customer',
+						'woocommerce'
+					) }
 					checked={ limitDownloads }
 					onChange={ ( checked ) =>
 						onChange( { download_limit: checked ? 1 : -1 } )

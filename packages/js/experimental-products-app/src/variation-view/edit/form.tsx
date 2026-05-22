@@ -54,7 +54,10 @@ export function VariationEditForm( {
 	const mergedData = buildMergedProductEditData( selectedVariations );
 	const isBulkEdit = selectedVariations.length > 1;
 	const visibleFields = editableFields.filter( ( field ) => {
-		if ( field.id === 'cost_of_goods_sold' && ! isCostOfGoodsSoldFeatureEnabled() ) {
+		if (
+			field.id === 'cost_of_goods_sold' &&
+			! isCostOfGoodsSoldFeatureEnabled()
+		) {
 			return false;
 		}
 		if ( isBulkEdit && field.id === 'sku' ) {

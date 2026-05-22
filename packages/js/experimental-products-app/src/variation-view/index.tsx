@@ -122,7 +122,7 @@ export function VariationView( { productId }: VariationViewProps ) {
 					: undefined,
 			};
 		},
-		[ productId, query ]
+		[ query ]
 	);
 
 	const allVariations = useMemo< VariationEntityRecord[] >(
@@ -216,17 +216,14 @@ export function VariationView( { productId }: VariationViewProps ) {
 		[ handleEditSelectedVariations ]
 	);
 
-	const handleCloseDrawer = useCallback(
-		() => {
-			navigate(
-				getProductListNavigationPath( location.path, {
-					...currentQuery,
-					quickEdit: undefined,
-				} )
-			);
-		},
-		[ currentQuery, location.path, navigate ]
-	);
+	const handleCloseDrawer = useCallback( () => {
+		navigate(
+			getProductListNavigationPath( location.path, {
+				...currentQuery,
+				quickEdit: undefined,
+			} )
+		);
+	}, [ currentQuery, location.path, navigate ] );
 
 	const actions: Action< VariationEntityRecord >[] = useMemo(
 		() => [
