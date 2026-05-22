@@ -18,6 +18,7 @@ import { getAttributeTableFields, type AttributeTableColumn } from './fields';
 import type { VariationAttributeRow } from './attribute-rows';
 
 const EMPTY_ARRAY: VariationAttributeRow[] = [];
+const ATTRIBUTE_PAGE_SIZE = 50;
 const noop = () => undefined;
 
 type AttributeTableLayoutStyles = NonNullable<
@@ -34,7 +35,7 @@ function getAttributeTableView(
 	return {
 		type: 'table',
 		page: 1,
-		perPage: 50,
+		perPage: ATTRIBUTE_PAGE_SIZE,
 		titleField: 'name',
 		fields: columns,
 		layout: {
@@ -125,6 +126,20 @@ export function AttributeTable( {
 		() => ( hasResolved ? getRows( product ) : EMPTY_ARRAY ),
 		[ getRows, hasResolved, product ]
 	);
+	const perPage = view.perPage || ATTRIBUTE_PAGE_SIZE;
+	const pageRows = useMemo< VariationAttributeRow[] >( () => {
+		const page = view.page ?? 1;
+		const offset = ( page - 1 ) * perPage;
+
+		return rows.slice( offset, offset + perPage );
+	}, [ perPage, rows, view.page ] );
+	const paginationInfo = useMemo(
+		() => ( {
+			totalItems: rows.length,
+			totalPages: Math.ceil( rows.length / perPage ),
+		} ),
+		[ perPage, rows.length ]
+	);
 
 	if ( hideWhenEmpty && hasResolved && rows.length === 0 ) {
 		return null;
@@ -171,14 +186,11 @@ export function AttributeTable( {
 			<div className="woocommerce-variation-attributes__body">
 				<div className="woocommerce-variation-attributes__dataview">
 					<DataViews
-						data={ rows }
+						data={ pageRows }
 						fields={ fields }
 						view={ view }
 						onChangeView={ setView }
-						paginationInfo={ {
-							totalItems: rows.length,
-							totalPages: 1,
-						} }
+						paginationInfo={ paginationInfo }
 						defaultLayouts={ { table: {} } }
 						getItemId={ ( item ) => item.id }
 						search={ false }
