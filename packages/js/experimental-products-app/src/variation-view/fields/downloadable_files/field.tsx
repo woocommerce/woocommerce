@@ -88,7 +88,9 @@ function DownloadableFilesEdit( {
 			setDownloads( next );
 			// Only persist entries that have a URL.
 			onChange( {
-				downloads: next.filter( ( d ) => d.file.trim() !== '' ),
+				downloads: next
+				.filter( ( d ) => d.file.trim() !== '' )
+				.map( ( d ) => ( { ...d, id: d.id ?? '' } ) ),
 			} );
 		},
 		[ onChange ]

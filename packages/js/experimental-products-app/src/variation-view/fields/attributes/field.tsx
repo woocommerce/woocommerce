@@ -54,11 +54,10 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			[ data.parent_id ]
 		);
 
-		const allParentAttributes =
-			parentProduct && parentProduct !== false
-				? ( ( parentProduct.attributes ??
-						[] ) as unknown as ParentAttribute[] )
-				: [];
+		const allParentAttributes = parentProduct
+			? ( ( parentProduct.attributes ??
+					[] ) as unknown as ParentAttribute[] )
+			: [];
 
 		// Only show attributes marked as variation attributes.
 		const parentAttributes = allParentAttributes.filter(
