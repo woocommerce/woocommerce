@@ -646,7 +646,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	private function delete_claim_if_value_matches( $claim_key, $observed_claim_value ) {
 		global $wpdb;
 
-		$deleted = (int) $wpdb->query(
+		$result = $wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s",
 				$claim_key,
@@ -654,9 +654,20 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			)
 		);
 
+		if ( false === $result ) {
+			wc_get_logger()->warning(
+				sprintf(
+					'QR login stale-claim cleanup query failed for %s: %s',
+					$claim_key,
+					$wpdb->last_error
+				),
+				array( 'source' => 'mobile-app-qr-login' )
+			);
+		}
+
 		wp_cache_delete( $claim_key, 'options' );
 
-		return $deleted > 0;
+		return (int) $result > 0;
 	}
 
 	/**
