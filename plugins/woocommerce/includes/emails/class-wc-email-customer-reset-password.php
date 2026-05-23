@@ -52,6 +52,13 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 		public $reset_key;
 
 		/**
+		 * User display name (first name, or login as fallback).
+		 *
+		 * @var string
+		 */
+		public $user_display_name;
+
+		/**
 		 * Constructor.
 		 */
 		public function __construct() {
@@ -120,6 +127,9 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 				$this->reset_key  = $reset_key;
 				$this->user_email = stripslashes( $this->object->user_email );
 				$this->recipient  = $this->user_email;
+				$customer                = new WC_Customer( $this->object->ID );
+				$first_name              = $customer->get_billing_first_name() ?: $this->object->first_name;
+				$this->user_display_name = ! empty( $first_name ) ? $first_name : $this->user_login;
 			}
 
 			$this->send_notification();
@@ -139,6 +149,7 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 					'email_heading'      => $this->get_heading(),
 					'user_id'            => $this->user_id,
 					'user_login'         => $this->user_login,
+					'user_display_name'  => $this->user_display_name,
 					'reset_key'          => $this->reset_key,
 					'blogname'           => $this->get_blogname(),
 					'additional_content' => $this->get_additional_content(),
@@ -161,6 +172,7 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 					'email_heading'      => $this->get_heading(),
 					'user_id'            => $this->user_id,
 					'user_login'         => $this->user_login,
+					'user_display_name'  => $this->user_display_name,
 					'reset_key'          => $this->reset_key,
 					'blogname'           => $this->get_blogname(),
 					'additional_content' => $this->get_additional_content(),
@@ -183,6 +195,7 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 				array(
 					'user_id'       => $this->user_id,
 					'user_login'    => $this->user_login,
+					'user_display_name' => $this->user_display_name,
 					'reset_key'     => $this->reset_key,
 					'sent_to_admin' => false,
 					'plain_text'    => false,
