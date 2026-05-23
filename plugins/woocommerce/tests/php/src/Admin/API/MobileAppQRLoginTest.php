@@ -1837,6 +1837,38 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Approve returns 410 with no grant when the token expires between scan and tap.
+	 */
+	public function test_approve_returns_410_when_token_expired_after_scan(): void {
+		$plaintext     = $this->generate_token_as_admin();
+		$transient_key = $this->token_transient_key( $plaintext );
+
+		wp_set_current_user( 0 );
+		$scan_data = $this->dispatch_scan( $plaintext )->get_data();
+
+		// Simulate the underlying token lapsing after the scan but before the
+		// merchant taps: push expires_at into the past while keeping the
+		// transient itself readable so approve re-reads the lapsed record.
+		$record = get_transient( $transient_key );
+		$this->assertIsArray( $record );
+		$record['expires_at'] = time() - 1;
+		set_transient( $transient_key, $record, 60 );
+
+		wp_set_current_user( $this->admin_id );
+		$response = $this->dispatch_approve( $plaintext, (string) $scan_data['real_number'] );
+
+		$this->assertSame( 410, $response->get_status() );
+		$this->assertSame( 'qr_login_expired', $response->get_data()['code'] );
+
+		// Terminal expired state, and — even though the tapped number was
+		// correct — no exchange_grant may ever be minted.
+		$record = get_transient( $transient_key );
+		$this->assertIsArray( $record );
+		$this->assertSame( MobileAppQRLogin::STATE_EXPIRED, $record['state'] );
+		$this->assertArrayNotHasKey( 'exchange_grant', $record, 'An expired challenge must never mint an exchange grant.' );
+	}
+
+	/**
 	 * @testdox Approve endpoint terminates the session with rejected when the merchant taps a wrong number.
 	 */
 	public function test_approve_wrong_choice_marks_rejected(): void {
