@@ -1710,12 +1710,12 @@ table.wc_status_table--tools {
 		span.title {
 			display: block;
 			float: left;
-			width: 5em;
+			width: 6em;
 		}
 
 		span.input-text-wrap {
 			display: block;
-			margin-left: 5em;
+			margin-left: 6em;
 		}
 	}
 
@@ -1734,6 +1734,53 @@ table.wc_status_table--tools {
 
 	.height {
 		margin-right: 0;
+	}
+
+	.product_attributes_fields {
+		clear: both;
+		margin: 0.2em 0 0.4em;
+
+		label {
+			clear: both;
+			display: block;
+			margin: 0.2em 0;
+		}
+
+		span.title {
+			display: block;
+			float: left;
+			width: 6em;
+		}
+
+		span.input-text-wrap {
+			display: block;
+			margin-left: 6em;
+		}
+
+		.select2-container {
+			margin-left: 1px;
+			width: 99% !important;
+		}
+
+		.select2-selection--multiple {
+			border-radius: 2px;
+		}
+
+		.select2-container:not(.select2-container--open) {
+			.select2-search--inline {
+				width: 0;
+				height: 0;
+				overflow: hidden;
+			}
+
+			.select2-search__field {
+				width: 0 !important;
+				min-width: 0;
+				min-height: 0;
+				height: 0;
+				padding: 0;
+			}
+		}
 	}
 }
 

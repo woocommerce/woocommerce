@@ -24,6 +24,88 @@ jQuery(
 			);
 		}
 
+		function updateProductAttributeDropdownSpacing( $select ) {
+			var $label    = $select.closest( 'label' ),
+				$dropdown = $( '.select2-container--open .select2-dropdown' ).last(),
+				dropdownRect,
+				labelRect,
+				dropdownOverlap;
+
+			if (
+				! $label.hasClass( 'wc-product-attribute-values-open' ) ||
+				! $dropdown.length ||
+				$dropdown.hasClass( 'select2-dropdown--above' )
+			) {
+				$label.css( 'margin-bottom', '' );
+				return;
+			}
+
+			dropdownRect = $dropdown[0].getBoundingClientRect();
+			labelRect    = $label[0].getBoundingClientRect();
+
+			dropdownOverlap = Math.ceil( dropdownRect.bottom - labelRect.bottom );
+			$label.css( 'margin-bottom', 0 < dropdownOverlap ? dropdownOverlap + 6 + 'px' : '' );
+		}
+
+		function scheduleProductAttributeDropdownSpacing( $select ) {
+			$.each(
+				[ 0, 100, 500 ],
+				function( index, delay ) {
+					window.setTimeout(
+						function() {
+							updateProductAttributeDropdownSpacing( $select );
+						},
+						delay
+					);
+				}
+			);
+		}
+
+		function observeProductAttributeDropdownSpacing( $select ) {
+			var observer  = $select.data( 'wcQuickEditAttributeDropdownObserver' ),
+				$dropdown = $( '.select2-container--open .select2-dropdown' ).last();
+
+			if ( observer ) {
+				observer.disconnect();
+			}
+
+			if ( ! window.MutationObserver || ! $dropdown.length ) {
+				return;
+			}
+
+			observer = new window.MutationObserver(
+				function() {
+					updateProductAttributeDropdownSpacing( $select );
+				}
+			);
+
+			observer.observe(
+				$dropdown[0],
+				{
+					attributes: true,
+					childList: true,
+					characterData: true,
+					subtree: true,
+				}
+			);
+
+			$select.data( 'wcQuickEditAttributeDropdownObserver', observer );
+		}
+
+		function clearProductAttributeDropdownSpacing( $select ) {
+			var observer = $select.data( 'wcQuickEditAttributeDropdownObserver' );
+
+			if ( observer ) {
+				observer.disconnect();
+				$select.removeData( 'wcQuickEditAttributeDropdownObserver' );
+			}
+
+			$select
+				.closest( 'label' )
+				.removeClass( 'wc-product-attribute-values-open' )
+				.css( 'margin-bottom', '' );
+		}
+
 		function initProductAttributes( postId, $wc_inline_data, attempts ) {
 			var $quick_edit_row = $( '#edit-' + postId ),
 				$attribute_selects;
@@ -46,7 +128,23 @@ jQuery(
 			$attribute_selects = $quick_edit_row.find( 'select.wc-product-attribute-values' );
 			$attribute_selects
 				.addClass( 'wc-taxonomy-term-search' )
-				.off( '.wcQuickEditAttributes' );
+				.off( '.wcQuickEditAttributes' )
+				.on(
+					'select2:open.wcQuickEditAttributes',
+					function() {
+						var $select = $( this );
+
+						$select.closest( 'label' ).addClass( 'wc-product-attribute-values-open' );
+						scheduleProductAttributeDropdownSpacing( $select );
+						observeProductAttributeDropdownSpacing( $select );
+					}
+				)
+				.on(
+					'select2:close.wcQuickEditAttributes',
+					function() {
+						clearProductAttributeDropdownSpacing( $( this ) );
+					}
+				);
 
 			$( document.body ).trigger( 'wc-enhanced-select-init' );
 			populateProductAttributes( $quick_edit_row, $wc_inline_data );
