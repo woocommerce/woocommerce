@@ -268,10 +268,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	private function get_quick_edit_attributes_data() {
-		$attributes_data       = array();
-		$attribute_options     = array();
-		$attribute_taxonomies  = array();
-		$attribute_option_ids  = array();
+		$attributes_data      = array();
+		$attribute_options    = array();
+		$attribute_taxonomies = array();
+		$attribute_option_ids = array();
 
 		if ( ! $this->object instanceof WC_Product ) {
 			return $attributes_data;
