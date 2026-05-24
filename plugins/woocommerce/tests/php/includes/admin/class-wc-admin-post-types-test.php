@@ -22,6 +22,7 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 		$sut = $this
 			->getMockBuilder( WC_Admin_Post_Types::class )
 			->setMethods( array( 'request_data' ) )
+			->disableOriginalConstructor()
 			->getMock();
 
 		$sut->method( 'request_data' )->willReturn( $request_data );
@@ -331,6 +332,49 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( $updated_attributes[ $taxonomy ]->get_variation(), 'Quick edit should keep the attribute available for variations.' );
 		$this->assertEqualsCanonicalizing( $original_options, array_values( $updated_attributes[ $taxonomy ]->get_options() ), 'Quick edit should keep the variation attribute terms.' );
 		$this->assertEqualsCanonicalizing( $original_options, wp_list_pluck( wp_get_object_terms( $product->get_id(), $taxonomy ), 'term_id' ), 'Quick edit should keep the assigned variation attribute terms.' );
+	}
+
+	/**
+	 * @test
+	 * @testdox Variable product variation attributes should only preserve terms used by existing variations when cleared.
+	 */
+	public function quick_edit_preserves_only_used_variable_product_variation_attribute_terms_when_cleared() {
+		$attribute_data = WC_Helper_Product::create_attribute( 'Quick edit variation size', array( 'Small', 'Medium', 'Large' ) );
+
+		try {
+			$taxonomy  = $attribute_data['attribute_taxonomy'];
+			$small_id  = $attribute_data['term_ids'][0];
+			$medium_id = $attribute_data['term_ids'][1];
+			$large_id  = $attribute_data['term_ids'][2];
+			$product   = new WC_Product_Variable();
+			$attribute = $this->create_product_attribute( $attribute_data, array( $small_id, $medium_id, $large_id ) );
+
+			$attribute->set_variation( true );
+			$product->set_name( 'Quick Edit Variable Product' );
+			$product->set_attributes( array( $attribute ) );
+			$product->save();
+
+			WC_Helper_Product::create_product_variation_object(
+				$product->get_id(),
+				'QUICK-EDIT-VARIATION-SMALL',
+				10,
+				array(
+					$taxonomy => 'small',
+				)
+			);
+
+			$this->quick_edit_save_product_attributes( $product, array( $taxonomy ) );
+
+			$updated_product    = wc_get_product( $product->get_id() );
+			$updated_attributes = $updated_product->get_attributes( 'edit' );
+
+			$this->assertArrayHasKey( $taxonomy, $updated_attributes, 'Quick edit should preserve the variation attribute.' );
+			$this->assertTrue( $updated_attributes[ $taxonomy ]->get_variation(), 'Quick edit should keep the attribute available for variations.' );
+			$this->assertSame( array( $small_id ), array_values( $updated_attributes[ $taxonomy ]->get_options() ), 'Quick edit should keep only terms used by existing variations.' );
+			$this->assertSame( array( $small_id ), wp_list_pluck( wp_get_object_terms( $product->get_id(), $taxonomy ), 'term_id' ), 'Quick edit should assign only terms used by existing variations.' );
+		} finally {
+			$this->delete_test_attribute( $attribute_data );
+		}
 	}
 
 	/**

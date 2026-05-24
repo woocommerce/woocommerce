@@ -174,11 +174,12 @@ defined( 'ABSPATH' ) || exit;
 					<label class="wc-product-attribute-field">
 						<span class="title"><?php echo esc_html( $attribute_label ); ?></span>
 						<span class="input-text-wrap">
-							<input type="hidden" class="wc-product-attribute-taxonomy" name="quick_edit_product_attribute_taxonomies[]" value="<?php echo esc_attr( $attribute_taxonomy_name ); ?>" />
+							<input type="hidden" class="wc-product-attribute-taxonomy" name="quick_edit_product_attribute_taxonomies[]" value="<?php echo esc_attr( $attribute_taxonomy_name ); ?>" disabled="disabled" />
 							<select
 								class="wc-product-attribute-values"
 								name="quick_edit_product_attributes[<?php echo esc_attr( $attribute_taxonomy_name ); ?>][]"
 								multiple="multiple"
+								disabled="disabled"
 								data-taxonomy="<?php echo esc_attr( $attribute_taxonomy_name ); ?>"
 								data-return_id="id"
 								data-orderby="<?php echo esc_attr( $attribute_orderby ); ?>"

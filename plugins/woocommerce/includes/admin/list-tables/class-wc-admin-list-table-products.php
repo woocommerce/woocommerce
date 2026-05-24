@@ -268,7 +268,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	private function get_quick_edit_attributes_data() {
-		$attributes_data = array();
+		$attributes_data       = array();
+		$attribute_options     = array();
+		$attribute_taxonomies  = array();
+		$attribute_option_ids  = array();
 
 		if ( ! $this->object instanceof WC_Product ) {
 			return $attributes_data;
@@ -279,17 +282,55 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				continue;
 			}
 
-			$terms = $attribute->get_terms();
-			if ( empty( $terms ) ) {
+			$taxonomy = $attribute->get_name();
+			$options  = wp_parse_id_list( $attribute->get_options() );
+			if ( empty( $options ) ) {
 				continue;
 			}
 
-			$attributes_data[ $attribute->get_name() ] = array(
+			$attribute_options[ $taxonomy ] = $options;
+			$attribute_taxonomies[]         = $taxonomy;
+			$attribute_option_ids           = array_merge( $attribute_option_ids, $options );
+		}
+
+		if ( empty( $attribute_options ) ) {
+			return $attributes_data;
+		}
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => array_unique( $attribute_taxonomies ),
+				'include'    => array_unique( $attribute_option_ids ),
+				'hide_empty' => false,
+			)
+		);
+
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			return $attributes_data;
+		}
+
+		$terms_by_taxonomy = array();
+		foreach ( $terms as $term ) {
+			$terms_by_taxonomy[ $term->taxonomy ][ $term->term_id ] = $term;
+		}
+
+		foreach ( $attribute_options as $taxonomy => $options ) {
+			if ( empty( $terms_by_taxonomy[ $taxonomy ] ) ) {
+				continue;
+			}
+
+			$attributes_data[ $taxonomy ] = array(
 				'terms' => array(),
 			);
 
-			foreach ( $terms as $term ) {
-				$attributes_data[ $attribute->get_name() ]['terms'][] = array(
+			foreach ( $options as $term_id ) {
+				if ( empty( $terms_by_taxonomy[ $taxonomy ][ $term_id ] ) ) {
+					continue;
+				}
+
+				$term = $terms_by_taxonomy[ $taxonomy ][ $term_id ];
+
+				$attributes_data[ $taxonomy ]['terms'][] = array(
 					'id'   => $term->term_id,
 					'name' => $term->name,
 				);
