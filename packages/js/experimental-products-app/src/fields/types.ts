@@ -6,7 +6,28 @@ import type {
 	ProductStatus as WooProductStatus,
 } from '@woocommerce/data';
 
-export type ProductEntityRecord = Omit< Product, 'categories' | 'tags' > & {
+export type ProductEntityAttribute = {
+	id: number;
+	name: string;
+	slug: string;
+	position: number;
+	visible: boolean;
+	variation: boolean;
+	options: string[];
+};
+
+export type ProductEntityDefaultAttribute = {
+	id: number;
+	name: string;
+	option: string;
+};
+
+export type ProductEntityRecord = Omit<
+	Product,
+	'attributes' | 'categories' | 'default_attributes' | 'tags'
+> & {
+	attributes: ProductEntityAttribute[];
+	default_attributes: ProductEntityDefaultAttribute[];
 	cost_of_goods_sold?: {
 		values?: Array< {
 			defined_value?: number | string | null;

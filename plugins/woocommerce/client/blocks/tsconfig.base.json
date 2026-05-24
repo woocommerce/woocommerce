@@ -124,6 +124,9 @@
 			"@woocommerce/stores/woocommerce/products": [
 				"assets/js/base/stores/woocommerce/products"
 			],
+			"@woocommerce/stores/woocommerce/shopper-lists": [
+				"assets/js/base/stores/woocommerce/shopper-lists"
+			],
 			"@woocommerce/type-defs/*": [
 				"assets/js/types/type-defs/*"
 			],

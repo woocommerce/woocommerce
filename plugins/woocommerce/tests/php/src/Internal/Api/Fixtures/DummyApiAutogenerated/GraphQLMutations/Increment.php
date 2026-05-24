@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class Increment {
 	public static function get_field_definition(): array {
 		return array(
-			'type'        => Type::nonNull(
+			'type'          => Type::nonNull(
 				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
 					array(
 						'name'   => 'IncrementResult',
@@ -24,8 +24,14 @@ class Increment {
 					)
 				)
 			),
-			'description' => __( 'Increment a value by an optional amount', 'woocommerce' ),
-			'args'        => array(
+			'description'   => __( 'Increment a value by an optional amount', 'woocommerce' ),
+			'authorization' => array(
+				array(
+					'attribute' => 'PublicAccess',
+					'args'      => array(),
+				),
+			),
+			'args'          => array(
 				'value' => array(
 					'type'        => Type::nonNull( Type::int() ),
 					'description' => __( 'The starting value', 'woocommerce' ),
@@ -36,11 +42,17 @@ class Increment {
 					'defaultValue' => 1,
 				),
 			),
-			'resolve'     => array( self::class, 'resolve' ),
+			'resolve'       => array( self::class, 'resolve' ),
 		);
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = array();
+
 		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Infrastructure\ClassResolver::resolve_class( IncrementCommand::class );
 
 		$execute_args = array();

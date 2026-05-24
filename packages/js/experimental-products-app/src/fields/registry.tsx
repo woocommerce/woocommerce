@@ -49,6 +49,7 @@ import { fieldExtensions as taxStatusFieldExtensions } from './tax_status/field'
 import type { ProductEntityRecord } from './types';
 import { fieldExtensions as typeFieldExtensions } from './type/field';
 import { fieldExtensions as upsellIdsFieldExtensions } from './upsell_ids/field';
+import { fieldExtensions as variationActiveFieldExtensions } from './variation_active/field';
 import { fieldExtensions as visibilitySummaryFieldExtensions } from './visibility_summary/field';
 import { fieldExtensions as weightFieldExtensions } from './weight/field';
 import { fieldExtensions as widthFieldExtensions } from './width/field';
@@ -63,6 +64,7 @@ export const PRODUCT_FIELD_IDS = [
 	'images',
 	'images_count',
 	'product_status',
+	'variation_active',
 	'sku',
 	'price',
 	'regular_price',
@@ -116,6 +118,7 @@ const PRODUCT_FIELD_EXTENSIONS: Record<
 	images: imagesFieldExtensions,
 	images_count: imagesCountFieldExtensions,
 	product_status: productStatusFieldExtensions,
+	variation_active: variationActiveFieldExtensions,
 	sku: skuFieldExtensions,
 	price: priceFieldExtensions as ProductFieldExtensions,
 	regular_price: regularPriceFieldExtensions,

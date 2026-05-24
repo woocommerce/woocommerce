@@ -37,14 +37,13 @@ class ProductGallery extends AbstractBlock {
 	 */
 	protected function render_dialog( $images ) {
 		$images_html = '';
-		foreach ( $images as $index => $image ) {
-			$id           = $image['id'];
-			$src          = $image['src'];
-			$srcset       = $image['srcset'];
-			$sizes        = $image['sizes'];
-			$alt          = $image['alt'];
-			$loading      = 0 === $index ? 'fetchpriority="high"' : 'loading="lazy"';
-			$images_html .= "<img data-image-id='{$id}' data-wp-watch='callbacks.toggleImageVisibility' src='{$src}' srcset='{$srcset}' sizes='{$sizes}' loading='{$loading}' decoding='async' alt='{$alt}' />";
+		foreach ( $images as $image ) {
+			$id           = esc_attr( $image['id'] );
+			$src          = esc_url( $image['src'] );
+			$srcset       = esc_attr( $image['srcset'] );
+			$sizes        = esc_attr( $image['sizes'] );
+			$alt          = esc_attr( $image['alt'] );
+			$images_html .= "<img data-image-id='{$id}' data-wp-watch='callbacks.toggleImageVisibility' src='{$src}' srcset='{$srcset}' sizes='{$sizes}' decoding='async' alt='{$alt}' />";
 		}
 		ob_start();
 		?>
@@ -66,7 +65,7 @@ class ProductGallery extends AbstractBlock {
 					</button>
 				</div>
 				<div class="wc-block-product-gallery-dialog__content">
-						<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Output is already escaped by WooCommerce. ?>
+						<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Attribute values are escaped above when building $images_html. ?>
 						<?php echo $images_html; ?>
 				</div>
 			</dialog>

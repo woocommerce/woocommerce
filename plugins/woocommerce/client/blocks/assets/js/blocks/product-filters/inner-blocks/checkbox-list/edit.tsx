@@ -49,7 +49,7 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		customOptionElement,
 		customLabelElement,
 	} = attributes;
-	const selectableItems = context?.woocommerceSelectableItems ?? {};
+	const selectableItems = context?.[ 'woocommerce/selectableItems' ] ?? {};
 	const isLoading = selectableItems.isLoading ?? false;
 	const items = Array.isArray( selectableItems.items )
 		? selectableItems.items

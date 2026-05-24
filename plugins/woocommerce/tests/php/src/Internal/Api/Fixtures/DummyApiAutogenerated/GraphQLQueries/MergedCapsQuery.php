@@ -37,6 +37,12 @@ class MergedCapsQuery {
 			throw ResolverHelpers::build_authorization_error( $context['principal'] );
 		}
 
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = array();
+
 		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Infrastructure\ClassResolver::resolve_class( MergedCapsQueryCommand::class );
 
 		$execute_args = array();
