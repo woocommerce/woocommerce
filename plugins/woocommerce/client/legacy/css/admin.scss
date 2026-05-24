@@ -1812,6 +1812,22 @@ table.wc_status_table--tools {
 	}
 }
 
+.select2-container--open {
+	.wc-product-quick-edit-attribute-dropdown {
+		border-radius: 2px;
+	}
+
+	.wc-product-quick-edit-attribute-dropdown.select2-dropdown--below {
+		border-top-left-radius: 0;
+		border-top-right-radius: 0;
+	}
+
+	.wc-product-quick-edit-attribute-dropdown.select2-dropdown--above {
+		border-bottom-left-radius: 0;
+		border-bottom-right-radius: 0;
+	}
+}
+
 #woocommerce-fields-bulk.inline-edit-col {
 	label {
 		clear: left;
