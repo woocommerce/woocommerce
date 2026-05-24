@@ -1684,6 +1684,10 @@ table.wc_status_table--tools {
  * Inline edit
  */
 .inline-edit-product.quick-edit-row {
+	.inline-edit-col-left {
+		min-width: 0;
+	}
+
 	.inline-edit-col-center,
 	.inline-edit-col-right {
 		float: right !important;

@@ -534,6 +534,9 @@ test.describe( 'Product Quick Edit attributes', () => {
 			quickEditRow,
 			styleAttribute.name
 		);
+		const closedSizeSelectionBox = await expectBoundingBox(
+			sizeField.locator( '.select2-selection' )
+		);
 
 		await sizeField.locator( '.select2-selection' ).click();
 		await expect(
@@ -546,8 +549,14 @@ test.describe( 'Product Quick Edit attributes', () => {
 		const dropdownBox = await expectBoundingBox(
 			page.locator( '.select2-container--open .select2-dropdown' )
 		);
+		const openSizeSelectionBox = await expectBoundingBox(
+			sizeField.locator( '.select2-selection' )
+		);
 		const styleFieldBox = await expectBoundingBox( styleField );
 
+		expect( Math.round( openSizeSelectionBox.width ) ).toBe(
+			Math.round( closedSizeSelectionBox.width )
+		);
 		expect( styleFieldBox.y ).toBeGreaterThanOrEqual(
 			dropdownBox.y + dropdownBox.height
 		);
