@@ -404,6 +404,8 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 				)
 			);
 
+			$product = wc_get_product( $product->get_id() );
+
 			$this->quick_edit_save_product_attributes( $product, array( $taxonomy ) );
 
 			$updated_product    = wc_get_product( $product->get_id() );

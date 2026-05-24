@@ -609,6 +609,9 @@ class WC_Admin_Post_Types {
 		$variation_ids = wp_parse_id_list( $variation_ids );
 		$query_in      = '(' . implode( ',', array_fill( 0, count( $variation_ids ), '%d' ) ) . ')';
 		$query_args    = array_merge( array( wc_variation_attribute_name( $taxonomy ) ), $variation_ids );
+		$attributes    = $product->get_attributes( 'edit' );
+		$attribute_key = sanitize_title( $taxonomy );
+		$current_terms = isset( $attributes[ $attribute_key ] ) && $attributes[ $attribute_key ] instanceof WC_Product_Attribute ? $attributes[ $attribute_key ]->get_options() : $term_ids;
 
 		$variation_term_slugs = $wpdb->get_col(
 			$wpdb->prepare(
@@ -619,26 +622,36 @@ class WC_Admin_Post_Types {
 		);
 
 		if ( empty( $variation_term_slugs ) ) {
-			return wp_parse_id_list( $term_ids );
+			return wp_parse_id_list(
+				array_unique(
+					array_merge( $term_ids, $current_terms )
+				)
+			);
 		}
 
-		if ( in_array( '', $variation_term_slugs, true ) ) {
-			$attributes    = $product->get_attributes( 'edit' );
-			$attribute_key = sanitize_title( $taxonomy );
-
-			if ( isset( $attributes[ $attribute_key ] ) && $attributes[ $attribute_key ] instanceof WC_Product_Attribute ) {
-				return wp_parse_id_list( array_unique( array_merge( $term_ids, $attributes[ $attribute_key ]->get_options() ) ) );
+		$has_wildcard_variation    = false;
+		$variation_term_slug_names = array();
+		foreach ( $variation_term_slugs as $variation_term_slug ) {
+			if ( null === $variation_term_slug || '' === $variation_term_slug ) {
+				$has_wildcard_variation = true;
+				continue;
 			}
 
-			return wp_parse_id_list( $term_ids );
+			$variation_term_slug_names[] = (string) $variation_term_slug;
 		}
 
-		$variation_term_slugs = array_filter( $variation_term_slugs, 'strlen' );
+		if ( $has_wildcard_variation || empty( $variation_term_slug_names ) ) {
+			return wp_parse_id_list(
+				array_unique(
+					array_merge( $term_ids, $current_terms )
+				)
+			);
+		}
 
 		$variation_term_ids = get_terms(
 			array(
 				'taxonomy'   => $taxonomy,
-				'slug'       => $variation_term_slugs,
+				'slug'       => $variation_term_slug_names,
 				'hide_empty' => false,
 				'fields'     => 'ids',
 			)
