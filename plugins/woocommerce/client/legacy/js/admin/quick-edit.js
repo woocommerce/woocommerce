@@ -24,6 +24,34 @@ jQuery(
 			);
 		}
 
+		function initProductAttributes( postId, $wc_inline_data, attempts ) {
+			var $quick_edit_row = $( '#edit-' + postId ),
+				$attribute_selects;
+
+			attempts = attempts || 0;
+
+			if ( ! $quick_edit_row.length || ! $quick_edit_row.is( ':visible' ) ) {
+				if ( attempts < 10 ) {
+					window.setTimeout(
+						function() {
+							initProductAttributes( postId, $wc_inline_data, attempts + 1 );
+						},
+						50
+					);
+				}
+
+				return;
+			}
+
+			$attribute_selects = $quick_edit_row.find( 'select.wc-product-attribute-values' );
+			$attribute_selects
+				.addClass( 'wc-taxonomy-term-search' )
+				.off( '.wcQuickEditAttributes' );
+
+			$( document.body ).trigger( 'wc-enhanced-select-init' );
+			populateProductAttributes( $quick_edit_row, $wc_inline_data );
+		}
+
 		$( '#the-list' ).on(
 			'click',
 			'.editinline',
@@ -72,7 +100,7 @@ jQuery(
 				$( 'input[name="_length"]', '.inline-edit-row' ).val( length );
 				$( 'input[name="_width"]', '.inline-edit-row' ).val( width );
 				$( 'input[name="_height"]', '.inline-edit-row' ).val( height );
-				populateProductAttributes( $( '#edit-' + post_id ), $wc_inline_data );
+				initProductAttributes( post_id, $wc_inline_data );
 
 				$( 'select[name="_shipping_class"] option:selected', '.inline-edit-row' ).attr( 'selected', false ).trigger( 'change' );
 				$( 'select[name="_shipping_class"] option[value="' + shipping_class + '"]' ).attr( 'selected', 'selected' )
