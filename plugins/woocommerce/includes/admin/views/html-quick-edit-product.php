@@ -183,6 +183,8 @@ defined( 'ABSPATH' ) || exit;
 								data-return_id="id"
 								data-orderby="<?php echo esc_attr( $attribute_orderby ); ?>"
 								data-minimum_input_length="0"
+								data-cache_results="true"
+								data-loading_without_search_term="true"
 								data-placeholder="<?php echo esc_attr( $placeholder ); ?>"
 								style="width:99%;"
 							></select>
