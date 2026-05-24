@@ -513,10 +513,116 @@ class WC_Admin_Post_Types {
 		}
 
 		$product = $this->maybe_update_stock_status( $product, $stock_status );
+		$this->quick_edit_save_attributes( $product, $request_data );
 
 		$product->save();
 
 		do_action( 'woocommerce_product_quick_edit_save', $product );
+	}
+
+	/**
+	 * Save product attributes from Quick Edit.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @param array      $request_data Request data.
+	 */
+	private function quick_edit_save_attributes( $product, $request_data ): void {
+		if ( empty( $request_data['quick_edit_product_attribute_taxonomies'] ) || ! is_array( $request_data['quick_edit_product_attribute_taxonomies'] ) ) {
+			return;
+		}
+
+		$submitted_attributes = array();
+		if ( ! empty( $request_data['quick_edit_product_attributes'] ) && is_array( $request_data['quick_edit_product_attributes'] ) ) {
+			$submitted_attributes = $request_data['quick_edit_product_attributes'];
+		}
+
+		$attributes = $product->get_attributes( 'edit' );
+		$taxonomies = wp_unslash( $request_data['quick_edit_product_attribute_taxonomies'] );
+		if ( ! is_array( $taxonomies ) ) {
+			return;
+		}
+
+		$taxonomies = array_map( 'wc_clean', $taxonomies );
+
+		foreach ( $taxonomies as $taxonomy ) {
+			if ( ! is_string( $taxonomy ) || '' === $taxonomy || ! taxonomy_is_product_attribute( $taxonomy ) ) {
+				continue;
+			}
+
+			$attribute_key = sanitize_title( $taxonomy );
+			$term_ids      = array();
+
+			if ( isset( $submitted_attributes[ $taxonomy ] ) && is_array( $submitted_attributes[ $taxonomy ] ) ) {
+				$term_ids = wp_parse_id_list( wp_unslash( $submitted_attributes[ $taxonomy ] ) );
+			}
+
+			$is_existing_attribute = isset( $attributes[ $attribute_key ] ) && $attributes[ $attribute_key ] instanceof WC_Product_Attribute;
+
+			if ( $is_existing_attribute && $attributes[ $attribute_key ]->get_variation() && $product->is_type( 'variable' ) ) {
+				$term_ids = $this->get_quick_edit_variation_attribute_term_ids( $product, $taxonomy, $attributes[ $attribute_key ], $term_ids );
+			}
+
+			$set_terms = wp_set_object_terms( $product->get_id(), $term_ids, $taxonomy );
+			if ( is_wp_error( $set_terms ) ) {
+				continue;
+			}
+
+			if ( empty( $term_ids ) ) {
+				unset( $attributes[ $attribute_key ] );
+				continue;
+			}
+
+			$attribute             = $is_existing_attribute ? $attributes[ $attribute_key ] : new WC_Product_Attribute();
+
+			$attribute->set_id( wc_attribute_taxonomy_id_by_name( $taxonomy ) );
+			$attribute->set_name( $taxonomy );
+			$attribute->set_options( $term_ids );
+
+			if ( ! $is_existing_attribute ) {
+				$attribute->set_position( count( $attributes ) );
+				$attribute->set_visible( true );
+				$attribute->set_variation( false );
+			}
+
+			$attributes[ $attribute_key ] = $attribute;
+		}
+
+		$product->set_attributes( $attributes );
+	}
+
+	/**
+	 * Preserve terms required by existing variations when saving a variation attribute from Quick Edit.
+	 *
+	 * @param WC_Product           $product Product object.
+	 * @param string               $taxonomy Attribute taxonomy.
+	 * @param WC_Product_Attribute $attribute Existing product attribute.
+	 * @param array                $term_ids Submitted term IDs.
+	 * @return array Term IDs safe to save.
+	 */
+	private function get_quick_edit_variation_attribute_term_ids( $product, string $taxonomy, WC_Product_Attribute $attribute, array $term_ids ): array {
+		if ( empty( $term_ids ) ) {
+			return wp_parse_id_list( $attribute->get_options() );
+		}
+
+		foreach ( $product->get_children() as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			if ( ! $variation instanceof WC_Product_Variation ) {
+				continue;
+			}
+
+			$variation_attributes = $variation->get_attributes();
+			$variation_term_slug  = $variation_attributes[ $taxonomy ] ?? '';
+			if ( '' === $variation_term_slug ) {
+				continue;
+			}
+
+			$variation_term = get_term_by( 'slug', $variation_term_slug, $taxonomy );
+			if ( $variation_term instanceof WP_Term ) {
+				$term_ids[] = (int) $variation_term->term_id;
+			}
+		}
+
+		return wp_parse_id_list( array_unique( $term_ids ) );
 	}
 
 	/**
