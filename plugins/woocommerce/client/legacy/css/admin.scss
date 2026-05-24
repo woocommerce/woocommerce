@@ -1688,6 +1688,10 @@ table.wc_status_table--tools {
 		min-width: 0;
 	}
 
+	.woocommerce-product-data-fields {
+		clear: left;
+	}
+
 	.inline-edit-col-center,
 	.inline-edit-col-right {
 		float: right !important;

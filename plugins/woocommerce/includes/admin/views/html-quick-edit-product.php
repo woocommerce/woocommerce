@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 defined( 'ABSPATH' ) || exit;
 ?>
 
-<fieldset class="inline-edit-col-left">
+<fieldset class="inline-edit-col-left woocommerce-product-data-fields">
 	<div id="woocommerce-fields" class="inline-edit-col">
 
 		<h4><?php esc_html_e( 'Product data', 'woocommerce' ); ?></h4>
