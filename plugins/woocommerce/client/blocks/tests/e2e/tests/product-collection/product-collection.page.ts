@@ -157,32 +157,37 @@ class ProductCollectionPage {
 		const placeholderSelector = this.editor.canvas.locator(
 			SELECTORS.collectionPlaceholder
 		);
+		const inserter = placeholderSelector.locator(
+			'.wc-blocks-product-collection__collections-grid, .wc-blocks-product-collection__collections-dropdown'
+		);
 
-		const chooseCollectionFromPlaceholder = async () => {
+		await inserter.waitFor( { state: 'visible' } );
+		await this.dismissBlockEditorCardPopover();
+
+		const inserterClass = await inserter.getAttribute( 'class' );
+		const isDropdown = inserterClass?.includes(
+			'wc-blocks-product-collection__collections-dropdown'
+		);
+
+		if ( ! isDropdown ) {
 			await placeholderSelector
 				.getByRole( 'button', { name: buttonName, exact: true } )
 				.click();
-		};
+			return;
+		}
 
-		const chooseCollectionFromDropdown = async () => {
-			await placeholderSelector
-				.getByRole( 'button', {
-					name: 'Choose collection',
-				} )
-				.click();
+		await placeholderSelector
+			.getByRole( 'button', {
+				name: 'Choose collection',
+			} )
+			.click();
 
-			await this.admin.page
-				.locator(
-					'.wc-blocks-product-collection__collections-dropdown-content'
-				)
-				.getByRole( 'button', { name: buttonName, exact: true } )
-				.click();
-		};
-
-		await Promise.any( [
-			chooseCollectionFromPlaceholder(),
-			chooseCollectionFromDropdown(),
-		] );
+		await this.admin.page
+			.locator(
+				'.wc-blocks-product-collection__collections-dropdown-content'
+			)
+			.getByRole( 'button', { name: buttonName, exact: true } )
+			.click();
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
@@ -202,6 +207,7 @@ class ProductCollectionPage {
 		const isDropdown = inserterClass?.includes(
 			'wc-blocks-product-collection__collections-dropdown'
 		);
+		await this.dismissBlockEditorCardPopover();
 
 		if ( isDropdown ) {
 			await this.editor.canvas
@@ -776,6 +782,15 @@ class ProductCollectionPage {
 
 	locateByTestId( testId: string ) {
 		return this.page.getByTestId( testId );
+	}
+
+	async dismissBlockEditorCardPopover() {
+		const blockCardPopover = this.page.locator(
+			'.components-popover__fallback-container .block-editor-block-card'
+		);
+
+		await this.page.keyboard.press( 'Escape' );
+		await blockCardPopover.waitFor( { state: 'hidden', timeout: 3000 } );
 	}
 
 	async getCollectionHeading() {
