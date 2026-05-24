@@ -1771,6 +1771,17 @@ table.wc_status_table--tools {
 		}
 
 		.select2-container:not(.select2-container--open) {
+			.select2-selection__rendered {
+				box-sizing: border-box;
+				min-height: 38px;
+				padding: 6px 5px;
+			}
+
+			.select2-selection__choice {
+				margin-top: 0;
+				margin-bottom: 0;
+			}
+
 			.select2-search--inline {
 				width: 0;
 				height: 0;

@@ -225,7 +225,7 @@ async function removeAttributeTerm(
 		.locator( '.select2-selection__choice' )
 		.filter( { hasText: termName } );
 
-	await chip.locator( '.select2-selection__choice__remove' ).click();
+	await chip.click( { position: { x: 8, y: 12 } } );
 }
 
 async function removeAllAttributeTerms(
@@ -237,10 +237,7 @@ async function removeAllAttributeTerms(
 	let remainingChips = await chips.count();
 
 	while ( remainingChips ) {
-		await chips
-			.first()
-			.locator( '.select2-selection__choice__remove' )
-			.click();
+		await chips.first().click( { position: { x: 8, y: 12 } } );
 		await expect( chips ).toHaveCount( remainingChips - 1 );
 		remainingChips = await chips.count();
 	}
