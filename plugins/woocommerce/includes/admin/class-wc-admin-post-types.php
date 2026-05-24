@@ -572,7 +572,7 @@ class WC_Admin_Post_Types {
 				continue;
 			}
 
-			$attribute             = $is_existing_attribute ? $attributes[ $attribute_key ] : new WC_Product_Attribute();
+			$attribute = $is_existing_attribute ? $attributes[ $attribute_key ] : new WC_Product_Attribute();
 
 			$attribute->set_id( wc_attribute_taxonomy_id_by_name( $taxonomy ) );
 			$attribute->set_name( $taxonomy );
