@@ -227,8 +227,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$cogs_value_html = $this->cogs_is_enabled ?
 				'<div class="cogs_value">' . esc_html( $this->object->get_cogs_value() ?? '0' ) . '</div>' :
 				'';
+		$attributes_data = $this->get_quick_edit_attributes_data();
+		$attributes_json = wp_json_encode( $attributes_data );
+		$attributes_json = false === $attributes_json ? '{}' : $attributes_json;
 
-		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- the COGS value is already escaped.
+		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Custom inline data is escaped below.
 		/* Custom inline data for woocommerce. */
 		echo '
 			<div class="hidden" id="woocommerce_inline_' . absint( $this->object->get_id() ) . '">
@@ -253,9 +256,47 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				<div class="tax_class">' . esc_html( $this->object->get_tax_class() ) . '</div>
 				<div class="backorders">' . esc_html( $this->object->get_backorders() ) . '</div>
 				<div class="low_stock_amount">' . esc_html( $this->object->get_low_stock_amount() ) . '</div>'
+				. '<div class="product_attributes" data-attributes="' . esc_attr( $attributes_json ) . '"></div>'
 				. $cogs_value_html .
 			'</div>';
 		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Get product attribute data used to populate the Quick Edit form.
+	 *
+	 * @return array
+	 */
+	private function get_quick_edit_attributes_data() {
+		$attributes_data = array();
+
+		if ( ! $this->object instanceof WC_Product ) {
+			return $attributes_data;
+		}
+
+		foreach ( $this->object->get_attributes( 'edit' ) as $attribute ) {
+			if ( ! $attribute->is_taxonomy() ) {
+				continue;
+			}
+
+			$terms = $attribute->get_terms();
+			if ( empty( $terms ) ) {
+				continue;
+			}
+
+			$attributes_data[ $attribute->get_name() ] = array(
+				'terms' => array(),
+			);
+
+			foreach ( $terms as $term ) {
+				$attributes_data[ $attribute->get_name() ]['terms'][] = array(
+					'id'   => $term->term_id,
+					'name' => $term->name,
+				);
+			}
+		}
+
+		return $attributes_data;
 	}
 
 	/**

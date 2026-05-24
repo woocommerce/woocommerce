@@ -1,6 +1,29 @@
 /*global inlineEditPost, woocommerce_admin, woocommerce_quick_edit */
 jQuery(
 	function( $ ) {
+		function populateProductAttributes( $quick_edit_row, $wc_inline_data ) {
+			var attributes = $wc_inline_data.find( '.product_attributes' ).data( 'attributes' ) || {};
+
+			$quick_edit_row.find( 'select.wc-product-attribute-values' ).each(
+				function() {
+					var $select  = $( this ),
+						taxonomy = $select.data( 'taxonomy' ),
+						terms    = attributes[ taxonomy ] ? attributes[ taxonomy ].terms : [];
+
+					$select.empty();
+
+					$.each(
+						terms,
+						function( index, term ) {
+							$select.append( new Option( term.name, term.id, true, true ) );
+						}
+					);
+
+					$select.trigger( 'change' );
+				}
+			);
+		}
+
 		$( '#the-list' ).on(
 			'click',
 			'.editinline',
@@ -49,6 +72,7 @@ jQuery(
 				$( 'input[name="_length"]', '.inline-edit-row' ).val( length );
 				$( 'input[name="_width"]', '.inline-edit-row' ).val( width );
 				$( 'input[name="_height"]', '.inline-edit-row' ).val( height );
+				populateProductAttributes( $( '#edit-' + post_id ), $wc_inline_data );
 
 				$( 'select[name="_shipping_class"] option:selected', '.inline-edit-row' ).attr( 'selected', false ).trigger( 'change' );
 				$( 'select[name="_shipping_class"] option[value="' + shipping_class + '"]' ).attr( 'selected', 'selected' )
@@ -144,6 +168,7 @@ jQuery(
 			function() {
 				$( 'input.text', '.inline-edit-row' ).val( '' );
 				$( '#woocommerce-fields' ).find( 'select' ).prop( 'selectedIndex', 0 );
+				$( '#woocommerce-fields' ).find( 'select.wc-product-attribute-values' ).val( [] ).trigger( 'change' );
 				$( '#woocommerce-fields-bulk' ).find( '.inline-edit-group .change-input' ).hide();
 			}
 		);
