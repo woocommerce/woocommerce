@@ -149,6 +149,49 @@ defined( 'ABSPATH' ) || exit;
 			</span>
 		</div>
 
+		<?php
+		$attribute_taxonomies = wc_get_attribute_taxonomies();
+		if ( ! empty( $attribute_taxonomies ) ) :
+			?>
+			<h4><?php esc_html_e( 'Attributes', 'woocommerce' ); ?></h4>
+			<div class="inline-edit-group product_attributes_fields">
+				<?php
+				foreach ( $attribute_taxonomies as $attribute_taxonomy ) :
+					$attribute_taxonomy_name = wc_attribute_taxonomy_name( $attribute_taxonomy->attribute_name );
+
+					if ( ! taxonomy_exists( $attribute_taxonomy_name ) ) {
+						continue;
+					}
+
+					$attribute_orderby = ! empty( $attribute_taxonomy->attribute_orderby ) ? $attribute_taxonomy->attribute_orderby : 'name';
+					$attribute_label   = wc_attribute_label( $attribute_taxonomy_name );
+					$placeholder       = sprintf(
+						/* translators: %s: Product attribute name. */
+						__( 'Select %s', 'woocommerce' ),
+						$attribute_label
+					);
+					?>
+					<label>
+						<span class="title"><?php echo esc_html( $attribute_label ); ?></span>
+						<span class="input-text-wrap">
+							<input type="hidden" name="quick_edit_product_attribute_taxonomies[]" value="<?php echo esc_attr( $attribute_taxonomy_name ); ?>" />
+							<select
+								class="wc-product-attribute-values"
+								name="quick_edit_product_attributes[<?php echo esc_attr( $attribute_taxonomy_name ); ?>][]"
+								multiple="multiple"
+								data-taxonomy="<?php echo esc_attr( $attribute_taxonomy_name ); ?>"
+								data-return_id="id"
+								data-orderby="<?php echo esc_attr( $attribute_orderby ); ?>"
+								data-minimum_input_length="0"
+								data-placeholder="<?php echo esc_attr( $placeholder ); ?>"
+								style="width:99%;"
+							></select>
+						</span>
+					</label>
+				<?php endforeach; ?>
+			</div>
+		<?php endif; ?>
+
 		<div class="inline-edit-group">
 			<label class="alignleft">
 				<span class="title"><?php esc_html_e( 'Visibility', 'woocommerce' ); ?></span>
