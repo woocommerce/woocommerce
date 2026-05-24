@@ -199,4 +199,141 @@ class PickupLocationsRestControllerTest extends WC_Unit_Test_Case {
 			'Existing method settings should not be overwritten when only pickup_locations is sent.'
 		);
 	}
+
+	// -------------------------------------------------------------------------
+	// Sanitization tests (defense in depth against stored XSS)
+	// -------------------------------------------------------------------------
+
+	/**
+	 * @testdox Should strip HTML/script from the method settings title before saving.
+	 */
+	public function test_update_settings_sanitizes_html_in_title(): void {
+		wp_set_current_user( $this->shop_manager_id );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/pickup-locations' );
+		$request->set_param(
+			'pickup_location_settings',
+			array(
+				'enabled'    => 'yes',
+				'title'      => '<script>alert(1)</script>Pickup',
+				'tax_status' => 'taxable',
+				'cost'       => '',
+			)
+		);
+
+		$this->sut->update_settings( $request );
+
+		$saved = get_option( 'woocommerce_pickup_location_settings' );
+
+		$this->assertIsArray( $saved );
+		$this->assertArrayHasKey( 'title', $saved );
+		$this->assertStringNotContainsString( '<script', $saved['title'], 'Script tag must be stripped from saved title.' );
+		$this->assertStringNotContainsString( 'alert(1)', $saved['title'], 'Inline script payload must not survive sanitization.' );
+		$this->assertStringContainsString( 'Pickup', $saved['title'], 'Plain text portion of the title should be preserved.' );
+	}
+
+	/**
+	 * @testdox Should preserve safe HTML in location details but strip scripts.
+	 */
+	public function test_update_settings_preserves_safe_html_in_details(): void {
+		wp_set_current_user( $this->shop_manager_id );
+
+		$locations = array(
+			array(
+				'name'    => 'Main Store',
+				'address' => array(
+					'address_1' => '123 Main St',
+					'city'      => 'Anytown',
+					'state'     => 'CA',
+					'postcode'  => '90210',
+					'country'   => 'US',
+				),
+				'details' => '<strong>Hours:</strong> 9-5 <a href="https://example.com">Map</a><script>alert(1)</script>',
+				'enabled' => true,
+			),
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/pickup-locations' );
+		$request->set_param( 'pickup_locations', $locations );
+
+		$this->sut->update_settings( $request );
+
+		$saved = get_option( 'pickup_location_pickup_locations' );
+
+		$this->assertIsArray( $saved );
+		$this->assertArrayHasKey( 0, $saved );
+		$this->assertArrayHasKey( 'details', $saved[0] );
+		$this->assertStringContainsString( '<strong>', $saved[0]['details'], 'wp_kses_post should keep <strong>.' );
+		$this->assertStringContainsString( '<a ', $saved[0]['details'], 'wp_kses_post should keep <a> tags.' );
+		$this->assertStringNotContainsString( '<script', $saved[0]['details'], '<script> must be stripped by wp_kses_post.' );
+		$this->assertStringNotContainsString( 'alert(1)', $saved[0]['details'], 'Inline script payload must not survive sanitization.' );
+	}
+
+	/**
+	 * @testdox Should strip HTML/script from pickup location name and address fields.
+	 */
+	public function test_update_settings_sanitizes_html_in_location_fields(): void {
+		wp_set_current_user( $this->shop_manager_id );
+
+		$locations = array(
+			array(
+				'name'    => '<script>alert(1)</script>Main Store',
+				'address' => array(
+					'address_1' => '<img src=x onerror=alert(1)>123 Main St',
+					'city'      => 'Anytown',
+					'state'     => 'CA',
+					'postcode'  => '90210',
+					'country'   => 'US',
+				),
+				'details' => '',
+				'enabled' => true,
+			),
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/pickup-locations' );
+		$request->set_param( 'pickup_locations', $locations );
+
+		$this->sut->update_settings( $request );
+
+		$saved = get_option( 'pickup_location_pickup_locations' );
+
+		$this->assertIsArray( $saved );
+		$this->assertArrayHasKey( 0, $saved );
+		$this->assertStringNotContainsString( '<script', $saved[0]['name'], 'Script tag must be stripped from saved location name.' );
+		$this->assertStringNotContainsString( 'alert(1)', $saved[0]['name'], 'Inline script payload must not survive location name sanitization.' );
+		$this->assertStringContainsString( 'Main Store', $saved[0]['name'], 'Plain text portion of the location name should be preserved.' );
+
+		$this->assertArrayHasKey( 'address_1', $saved[0]['address'] );
+		$this->assertStringNotContainsString( '<img', $saved[0]['address']['address_1'], 'HTML tags must be stripped from address fields.' );
+		$this->assertStringNotContainsString( 'onerror', $saved[0]['address']['address_1'], 'Event handler payload must not survive address sanitization.' );
+		$this->assertStringContainsString( '123 Main St', $saved[0]['address']['address_1'], 'Plain text portion of the address should be preserved.' );
+	}
+
+	/**
+	 * @testdox Should preserve math expressions in cost while stripping HTML.
+	 */
+	public function test_update_settings_preserves_cost_formula(): void {
+		wp_set_current_user( $this->shop_manager_id );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/pickup-locations' );
+		$request->set_param(
+			'pickup_location_settings',
+			array(
+				'enabled'    => 'yes',
+				'title'      => 'Local Pickup',
+				'tax_status' => 'taxable',
+				'cost'       => '<script>alert(1)</script>5 + 1.50',
+			)
+		);
+
+		$this->sut->update_settings( $request );
+
+		$saved = get_option( 'woocommerce_pickup_location_settings' );
+
+		$this->assertIsArray( $saved );
+		$this->assertArrayHasKey( 'cost', $saved );
+		$this->assertStringNotContainsString( '<script', $saved['cost'], '<script> must be stripped from cost.' );
+		$this->assertStringNotContainsString( 'alert(1)', $saved['cost'], 'Inline script payload must not survive cost sanitization.' );
+		$this->assertStringContainsString( '5 + 1.50', $saved['cost'], 'Math formula syntax must be preserved in cost — must not be coerced to float.' );
+	}
 }

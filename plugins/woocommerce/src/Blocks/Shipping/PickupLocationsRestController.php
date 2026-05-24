@@ -73,11 +73,13 @@ class PickupLocationsRestController extends \WP_REST_Controller {
 		$settings  = $request->get_param( 'pickup_location_settings' );
 		$locations = $request->get_param( 'pickup_locations' );
 
-		if ( null !== $settings ) {
+		if ( null !== $settings && is_array( $settings ) ) {
+			$settings = $this->sanitize_pickup_location_settings( $settings );
 			update_option( 'woocommerce_pickup_location_settings', $settings );
 		}
 
-		if ( null !== $locations ) {
+		if ( null !== $locations && is_array( $locations ) ) {
+			$locations = $this->sanitize_pickup_locations( $locations );
 			update_option( 'pickup_location_pickup_locations', $locations );
 		}
 
@@ -87,6 +89,94 @@ class PickupLocationsRestController extends \WP_REST_Controller {
 				'pickup_locations'         => $locations,
 			)
 		);
+	}
+
+	/**
+	 * Sanitize the pickup_location_settings payload before persisting.
+	 *
+	 * The WP REST dispatcher only auto-sanitizes top-level args, so nested
+	 * object properties need to be cleaned here as defense in depth against
+	 * stored HTML/JS in admin surfaces.
+	 *
+	 * @param array $settings Raw settings payload.
+	 * @return array Sanitized settings payload.
+	 */
+	private function sanitize_pickup_location_settings( array $settings ): array {
+		$sanitized = array();
+
+		if ( isset( $settings['enabled'] ) ) {
+			// The schema enum will already reject anything other than 'yes'/'no',
+			// but normalize defensively in case the dispatcher is bypassed.
+			$sanitized['enabled'] = in_array( $settings['enabled'], array( 'yes', 'no' ), true )
+				? $settings['enabled']
+				: 'no';
+		}
+
+		if ( isset( $settings['title'] ) ) {
+			$sanitized['title'] = sanitize_text_field( (string) $settings['title'] );
+		}
+
+		if ( isset( $settings['tax_status'] ) ) {
+			$sanitized['tax_status'] = in_array( $settings['tax_status'], array( 'taxable', 'none' ), true )
+				? $settings['tax_status']
+				: 'none';
+		}
+
+		if ( isset( $settings['cost'] ) ) {
+			// Cost may be a math expression (e.g. "5 + 1.50"), so strip HTML
+			// without coercing to float — floatval would break formula syntax.
+			$sanitized['cost'] = wp_strip_all_tags( (string) $settings['cost'] );
+		}
+
+		return $sanitized;
+	}
+
+	/**
+	 * Sanitize the pickup_locations payload before persisting.
+	 *
+	 * @param array $locations Raw list of pickup locations.
+	 * @return array Sanitized list of pickup locations.
+	 */
+	private function sanitize_pickup_locations( array $locations ): array {
+		$sanitized = array();
+
+		foreach ( $locations as $location ) {
+			if ( ! is_array( $location ) ) {
+				continue;
+			}
+
+			$entry = array();
+
+			if ( isset( $location['name'] ) ) {
+				$entry['name'] = sanitize_text_field( (string) $location['name'] );
+			}
+
+			if ( isset( $location['address'] ) && is_array( $location['address'] ) ) {
+				$address     = $location['address'];
+				$address_out = array();
+				foreach ( array( 'address_1', 'city', 'state', 'postcode', 'country' ) as $field ) {
+					if ( isset( $address[ $field ] ) ) {
+						$address_out[ $field ] = sanitize_text_field( (string) $address[ $field ] );
+					}
+				}
+				$entry['address'] = $address_out;
+			}
+
+			if ( isset( $location['details'] ) ) {
+				// Details may contain limited HTML — match the rendering side
+				// in ShippingController::show_local_pickup_details() which uses
+				// wp_kses_post().
+				$entry['details'] = wp_kses_post( (string) $location['details'] );
+			}
+
+			if ( isset( $location['enabled'] ) ) {
+				$entry['enabled'] = rest_sanitize_boolean( $location['enabled'] );
+			}
+
+			$sanitized[] = $entry;
+		}
+
+		return $sanitized;
 	}
 
 	/**
