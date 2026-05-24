@@ -378,6 +378,47 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @test
+	 * @testdox Variable product variation attributes should preserve current terms when cleared and an existing variation allows any attribute value.
+	 */
+	public function quick_edit_preserves_all_variable_product_variation_attribute_terms_when_any_variation_is_cleared() {
+		$attribute_data = WC_Helper_Product::create_attribute( 'Quick edit any size', array( 'Small', 'Medium', 'Large' ) );
+
+		try {
+			$taxonomy         = $attribute_data['attribute_taxonomy'];
+			$original_options = $attribute_data['term_ids'];
+			$product          = new WC_Product_Variable();
+			$attribute        = $this->create_product_attribute( $attribute_data, $original_options );
+
+			$attribute->set_variation( true );
+			$product->set_name( 'Quick Edit Any Variation Product' );
+			$product->set_attributes( array( $attribute ) );
+			$product->save();
+
+			WC_Helper_Product::create_product_variation_object(
+				$product->get_id(),
+				'QUICK-EDIT-VARIATION-ANY-SIZE',
+				10,
+				array(
+					$taxonomy => '',
+				)
+			);
+
+			$this->quick_edit_save_product_attributes( $product, array( $taxonomy ) );
+
+			$updated_product    = wc_get_product( $product->get_id() );
+			$updated_attributes = $updated_product->get_attributes( 'edit' );
+
+			$this->assertArrayHasKey( $taxonomy, $updated_attributes, 'Quick edit should preserve the variation attribute.' );
+			$this->assertTrue( $updated_attributes[ $taxonomy ]->get_variation(), 'Quick edit should keep the attribute available for wildcard variations.' );
+			$this->assertEqualsCanonicalizing( $original_options, array_values( $updated_attributes[ $taxonomy ]->get_options() ), 'Quick edit should keep all current terms used by wildcard variations.' );
+			$this->assertEqualsCanonicalizing( $original_options, wp_list_pluck( wp_get_object_terms( $product->get_id(), $taxonomy ), 'term_id' ), 'Quick edit should keep assigned terms for wildcard variations.' );
+		} finally {
+			$this->delete_test_attribute( $attribute_data );
+		}
+	}
+
+	/**
 	 * Save global attribute request data through the Quick Edit save handler.
 	 *
 	 * @param WC_Product $product Product to save.

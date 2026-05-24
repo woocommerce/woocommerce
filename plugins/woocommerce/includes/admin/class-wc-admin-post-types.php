@@ -613,7 +613,7 @@ class WC_Admin_Post_Types {
 		$variation_term_slugs = $wpdb->get_col(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT DISTINCT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value <> '' AND post_id IN {$query_in}",
+				"SELECT DISTINCT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN {$query_in}",
 				$query_args
 			)
 		);
@@ -621,6 +621,19 @@ class WC_Admin_Post_Types {
 		if ( empty( $variation_term_slugs ) ) {
 			return wp_parse_id_list( $term_ids );
 		}
+
+		if ( in_array( '', $variation_term_slugs, true ) ) {
+			$attributes    = $product->get_attributes( 'edit' );
+			$attribute_key = sanitize_title( $taxonomy );
+
+			if ( isset( $attributes[ $attribute_key ] ) && $attributes[ $attribute_key ] instanceof WC_Product_Attribute ) {
+				return wp_parse_id_list( array_unique( array_merge( $term_ids, $attributes[ $attribute_key ]->get_options() ) ) );
+			}
+
+			return wp_parse_id_list( $term_ids );
+		}
+
+		$variation_term_slugs = array_filter( $variation_term_slugs, 'strlen' );
 
 		$variation_term_ids = get_terms(
 			array(
