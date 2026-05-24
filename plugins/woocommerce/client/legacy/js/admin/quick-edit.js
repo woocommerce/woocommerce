@@ -1,14 +1,120 @@
 /*global inlineEditPost, woocommerce_admin, woocommerce_quick_edit */
 jQuery(
 	function( $ ) {
+		function attributeDataHasTaxonomy( attributes, taxonomy ) {
+			return Object.prototype.hasOwnProperty.call( attributes, taxonomy );
+		}
+
+		function setProductAttributeFieldVisibility( $select, isVisible ) {
+			var $label = $select.closest( 'label' );
+
+			if ( ! isVisible ) {
+				if ( $select.hasClass( 'select2-hidden-accessible' ) ) {
+					$select.selectWoo( 'close' );
+				}
+
+				clearProductAttributeDropdownSpacing( $select );
+			}
+
+			$select.prop( 'disabled', ! isVisible );
+			$label
+				.find( 'input.wc-product-attribute-taxonomy' )
+				.prop( 'disabled', ! isVisible );
+			$label.css( 'display', isVisible ? 'block' : 'none' );
+		}
+
+		function getVisibleProductAttributeTaxonomies( $quick_edit_row ) {
+			var taxonomies = [];
+
+			$quick_edit_row.find( 'select.wc-product-attribute-values' ).each(
+				function() {
+					var $select  = $( this ),
+						taxonomy = $select.data( 'taxonomy' );
+
+					if ( taxonomy && ! $select.prop( 'disabled' ) ) {
+						taxonomies.push( taxonomy );
+					}
+				}
+			);
+
+			return taxonomies;
+		}
+
+		function updateProductAttributeAddSearch( $quick_edit_row ) {
+			var visibleTaxonomies  = getVisibleProductAttributeTaxonomies(
+					$quick_edit_row
+				),
+				hasHiddenTaxonomies = false,
+				$addField           = $quick_edit_row.find(
+					'.wc-product-attribute-add-field'
+				),
+				$addSelect          = $quick_edit_row.find(
+					'select.wc-product-attribute-add'
+				),
+				$addTitle           = $addField.find( 'span.title' ),
+				$addMessage         = $addField.find(
+					'.wc-product-attribute-add-message'
+				);
+
+			if ( ! $addField.length ) {
+				return;
+			}
+
+			$quick_edit_row.find( 'select.wc-product-attribute-values' ).each(
+				function() {
+					if ( $( this ).prop( 'disabled' ) ) {
+						hasHiddenTaxonomies = true;
+						return false;
+					}
+				}
+			);
+
+			$addSelect.data( 'disabled-items', visibleTaxonomies );
+			$addField.css( 'display', 'block' );
+			$addSelect.prop( 'disabled', ! hasHiddenTaxonomies );
+			$addSelect
+				.next( '.select2-container' )
+				.css( 'display', hasHiddenTaxonomies ? '' : 'none' );
+			$addTitle.prop( 'hidden', ! hasHiddenTaxonomies );
+			$addMessage.prop( 'hidden', hasHiddenTaxonomies );
+
+			if (
+				! hasHiddenTaxonomies &&
+				$addSelect.hasClass( 'select2-hidden-accessible' )
+			) {
+				$addSelect.selectWoo( 'close' );
+				$addSelect.val( null ).trigger( 'change' );
+			}
+		}
+
+		function showProductAttributeField( $quick_edit_row, taxonomy ) {
+			var $select = $quick_edit_row
+				.find( 'select.wc-product-attribute-values' )
+				.filter(
+					function() {
+						return $( this ).data( 'taxonomy' ) === taxonomy;
+					}
+				)
+				.first();
+
+			if ( ! $select.length ) {
+				return;
+			}
+
+			setProductAttributeFieldVisibility( $select, true );
+			$select.trigger( 'change' );
+			updateProductAttributeAddSearch( $quick_edit_row );
+		}
+
 		function populateProductAttributes( $quick_edit_row, $wc_inline_data ) {
 			var attributes = $wc_inline_data.find( '.product_attributes' ).data( 'attributes' ) || {};
 
 			$quick_edit_row.find( 'select.wc-product-attribute-values' ).each(
 				function() {
-					var $select  = $( this ),
-						taxonomy = $select.data( 'taxonomy' ),
-						terms    = attributes[ taxonomy ] ? attributes[ taxonomy ].terms : [];
+					var $select      = $( this ),
+						taxonomy     = $select.data( 'taxonomy' ),
+						hasAttribute = attributeDataHasTaxonomy( attributes, taxonomy ),
+						terms        = hasAttribute && attributes[ taxonomy ].terms ? attributes[ taxonomy ].terms : [];
 
 					$select.empty();
 
@@ -19,37 +125,47 @@ jQuery(
 						}
 					);
 
+					setProductAttributeFieldVisibility( $select, hasAttribute );
 					$select.trigger( 'change' );
 				}
 			);
+
+			updateProductAttributeAddSearch( $quick_edit_row );
 		}
 
 		function updateProductAttributeDropdownSpacing( $select ) {
 			var $label    = $select.closest( 'label' ),
 				$dropdown = $( '.select2-container--open .select2-dropdown' ).last(),
+				$selection = $label.find( '.select2-selection' ).first(),
 				dropdownRect,
 				labelRect,
-				dropdownOverlap;
+				selectionRect,
+				dropdownOverlap,
+				openLabelHeight;
 
 			if (
 				! $label.hasClass( 'wc-product-attribute-values-open' ) ||
 				! $dropdown.length ||
 				$dropdown.hasClass( 'select2-dropdown--above' )
 			) {
-				$label.css( 'margin-bottom', '' );
+				$label.css( { 'margin-bottom': '', 'min-height': '' } );
 				return;
 			}
 
 			dropdownRect = $dropdown[0].getBoundingClientRect();
-			labelRect    = $label[0].getBoundingClientRect();
+			labelRect = $label[0].getBoundingClientRect();
+			selectionRect = (
+				$selection.length ? $selection[0] : $label[0]
+			).getBoundingClientRect();
 
-			dropdownOverlap = Math.ceil( dropdownRect.bottom - labelRect.bottom );
-			$label.css( 'margin-bottom', 0 < dropdownOverlap ? dropdownOverlap + 6 + 'px' : '' );
+			dropdownOverlap = Math.ceil( dropdownRect.bottom - selectionRect.bottom );
+			openLabelHeight = Math.ceil( dropdownRect.bottom - labelRect.top + 6 );
+			$label.css( 'min-height', 0 < dropdownOverlap ? openLabelHeight + 'px' : '' );
 		}
 
 		function scheduleProductAttributeDropdownSpacing( $select ) {
 			$.each(
-				[ 0, 100, 500 ],
+				[ 0, 50, 100, 250, 500 ],
 				function( index, delay ) {
 					window.setTimeout(
 						function() {
@@ -61,15 +177,30 @@ jQuery(
 			);
 		}
 
-		function observeProductAttributeDropdownSpacing( $select ) {
+		function observeProductAttributeDropdownSpacing( $select, attempts ) {
 			var observer  = $select.data( 'wcQuickEditAttributeDropdownObserver' ),
 				$dropdown = $( '.select2-container--open .select2-dropdown' ).last();
+
+			attempts = attempts || 0;
 
 			if ( observer ) {
 				observer.disconnect();
 			}
 
-			if ( ! window.MutationObserver || ! $dropdown.length ) {
+			if ( ! window.MutationObserver ) {
+				return;
+			}
+
+			if ( ! $dropdown.length ) {
+				if ( attempts < 10 ) {
+					window.setTimeout(
+						function() {
+							observeProductAttributeDropdownSpacing( $select, attempts + 1 );
+						},
+						50
+					);
+				}
+
 				return;
 			}
 
@@ -103,12 +234,13 @@ jQuery(
 			$select
 				.closest( 'label' )
 				.removeClass( 'wc-product-attribute-values-open' )
-				.css( 'margin-bottom', '' );
+				.css( { 'margin-bottom': '', 'min-height': '' } );
 		}
 
 		function initProductAttributes( postId, $wc_inline_data, attempts ) {
 			var $quick_edit_row = $( '#edit-' + postId ),
-				$attribute_selects;
+				$attribute_selects,
+				$attribute_add_select;
 
 			attempts = attempts || 0;
 
@@ -143,6 +275,31 @@ jQuery(
 					'select2:close.wcQuickEditAttributes',
 					function() {
 						clearProductAttributeDropdownSpacing( $( this ) );
+					}
+				);
+
+			$attribute_add_select = $quick_edit_row.find(
+				'select.wc-product-attribute-add'
+			);
+			$attribute_add_select
+				.addClass( 'wc-attribute-search' )
+				.off( '.wcQuickEditAttributeAdd' )
+				.on(
+					'select2:select.wcQuickEditAttributeAdd',
+					function( event ) {
+						var taxonomy =
+							event &&
+							event.params &&
+							event.params.data &&
+							event.params.data.id;
+
+						if ( taxonomy ) {
+							showProductAttributeField( $quick_edit_row, taxonomy );
+						}
+
+						$( this ).val( null ).trigger( 'change' );
+
+						return false;
 					}
 				);
 

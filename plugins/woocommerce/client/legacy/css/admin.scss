@@ -1746,12 +1746,16 @@ table.wc_status_table--tools {
 
 	.product_attributes_fields {
 		clear: both;
-		margin: 0.2em 0 0.4em;
+		margin: 0.2em 0 1em;
 
 		label {
 			clear: both;
 			display: block;
 			margin: 0.2em 0;
+		}
+
+		.wc-product-attribute-field {
+			display: none;
 		}
 
 		span.title {
@@ -1772,6 +1776,54 @@ table.wc_status_table--tools {
 
 		.select2-selection--multiple {
 			border-radius: 2px;
+		}
+
+		.wc-product-attribute-add-field {
+			margin-bottom: 0.45em;
+			margin-top: 0.55em;
+
+			span.title {
+				align-items: center;
+				display: flex;
+				line-height: 1.25;
+				min-height: 32px;
+			}
+
+			span.title[hidden] {
+				display: none;
+			}
+
+			.select2-selection--single {
+				align-items: center;
+				box-sizing: border-box;
+				border-radius: 2px;
+				display: flex;
+				height: 32px;
+			}
+
+			.select2-selection__rendered {
+				flex: 1;
+				line-height: normal;
+				min-width: 0;
+			}
+
+			.select2-selection__arrow {
+				height: 30px;
+			}
+
+			.wc-product-attribute-add-message {
+				align-items: center;
+				box-sizing: border-box;
+				color: #646970;
+				display: flex;
+				line-height: 1.4;
+				margin-left: 1px;
+				min-height: 32px;
+			}
+
+			.wc-product-attribute-add-message[hidden] {
+				display: none;
+			}
 		}
 
 		.select2-container:not(.select2-container--open) {

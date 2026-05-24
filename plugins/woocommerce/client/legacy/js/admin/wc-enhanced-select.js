@@ -408,6 +408,9 @@ jQuery( function( $ ) {
 
 				$( ':input.wc-attribute-search' ).filter( ':not(.enhanced)' ).each( function() {
 					var select2Element = this;
+					var loading_without_search_term = $( this ).data( 'loading_without_search_term' ) === true || (
+						$( this ).data( 'loading_without_search_term' ) === 'true'
+					);
 					var select2_args = $.extend( {
 						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder       : $( this ).data( 'placeholder' ),
@@ -444,7 +447,7 @@ jQuery( function( $ ) {
 							},
 							cache: true
 						}
-					}, getEnhancedSelectFormatString() );
+					}, getEnhancedSelectFormatString( { loadingWithoutSearchTerm: loading_without_search_term } ) );
 
 					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
 				});

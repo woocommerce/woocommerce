@@ -50,6 +50,8 @@ const createdAttributeIds: number[] = [];
 let sizeAttribute: GlobalAttribute;
 let styleAttribute: GlobalAttribute;
 let emptyProduct: Product;
+let addAttributeProduct: Product;
+let singleAttributeProduct: Product;
 let simpleProduct: Product;
 let manySelectedProduct: Product;
 let variableProduct: Product;
@@ -165,6 +167,10 @@ function getAttributeField( quickEditRow: Locator, attributeName: string ) {
 		.first();
 }
 
+function getAddAttributeField( quickEditRow: Locator ) {
+	return quickEditRow.locator( '.wc-product-attribute-add-field' );
+}
+
 async function expectAttributeChips(
 	quickEditRow: Locator,
 	attributeName: string,
@@ -173,11 +179,34 @@ async function expectAttributeChips(
 	const field = getAttributeField( quickEditRow, attributeName );
 	const chips = field.locator( '.select2-selection__choice' );
 
+	await expect( field ).toBeVisible();
 	await expect( chips ).toHaveCount( expectedTerms.length );
 
 	for ( const termName of expectedTerms ) {
 		await expect( chips.filter( { hasText: termName } ) ).toHaveCount( 1 );
 	}
+}
+
+async function addAttributeField(
+	page: Page,
+	quickEditRow: Locator,
+	attribute: GlobalAttribute
+) {
+	const addField = getAddAttributeField( quickEditRow );
+	const searchField = page.locator(
+		'.select2-container--open .select2-search__field'
+	);
+
+	await expect( addField ).toBeVisible();
+	await addField.locator( '.select2-selection' ).click();
+	await expect( searchField ).toBeVisible();
+	await searchField.fill( attribute.name );
+	await page
+		.getByRole( 'option', { name: attribute.name, exact: true } )
+		.click();
+	await expect(
+		getAttributeField( quickEditRow, attribute.name )
+	).toBeVisible();
 }
 
 async function openAttributeSearch( page: Page, field: Locator ) {
@@ -292,6 +321,20 @@ function isTaxonomyTermSearchRequest( request: Request, taxonomy: string ) {
 	);
 }
 
+function isProductAttributeSearchRequest( request: Request ) {
+	const url = new URL( request.url() );
+	const postData = request.postData() || '';
+	const postParams = new URLSearchParams( postData );
+
+	return (
+		url.pathname.endsWith( 'admin-ajax.php' ) &&
+		( url.searchParams.get( 'action' ) ===
+			'woocommerce_json_search_product_attributes' ||
+			postParams.get( 'action' ) ===
+				'woocommerce_json_search_product_attributes' )
+	);
+}
+
 test.describe( 'Product Quick Edit attributes', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -313,6 +356,23 @@ test.describe( 'Product Quick Edit attributes', () => {
 			name: `Quick Edit Attributes Empty ${ suffix }`,
 			type: 'simple',
 			regular_price: '10',
+		} );
+		addAttributeProduct = await createProduct( restApi, {
+			name: `Quick Edit Attributes Add ${ suffix }`,
+			type: 'simple',
+			regular_price: '11',
+		} );
+		singleAttributeProduct = await createProduct( restApi, {
+			name: `Quick Edit Attributes Single ${ suffix }`,
+			type: 'simple',
+			regular_price: '11.50',
+			attributes: [
+				{
+					id: sizeAttribute.id,
+					visible: true,
+					options: [ 'Medium' ],
+				},
+			],
 		} );
 		simpleProduct = await createProduct( restApi, {
 			name: `Quick Edit Attributes Simple ${ suffix }`,
@@ -395,24 +455,53 @@ test.describe( 'Product Quick Edit attributes', () => {
 		page,
 	} ) => {
 		await page.setViewportSize( { width: 900, height: 900 } );
+		await page.route( '**/wp-admin/admin-ajax.php', async ( route ) => {
+			if ( isProductAttributeSearchRequest( route.request() ) ) {
+				await new Promise( ( resolve ) => setTimeout( resolve, 100 ) );
+			}
+
+			await route.continue();
+		} );
 
 		await goToProductList( page, emptyProduct );
 		let quickEditRow = await openQuickEdit( page, emptyProduct );
 		await expect(
 			quickEditRow.getByRole( 'heading', { name: 'Attributes' } )
 		).toBeVisible();
-		await expectAttributeChips( quickEditRow, sizeAttribute.name, [] );
-		await expectAttributeChips( quickEditRow, styleAttribute.name, [] );
+		await expect(
+			getAttributeField( quickEditRow, sizeAttribute.name )
+		).toBeHidden();
+		await expect(
+			getAttributeField( quickEditRow, styleAttribute.name )
+		).toBeHidden();
+		await expect( getAddAttributeField( quickEditRow ) ).toBeVisible();
+		await getAddAttributeField( quickEditRow )
+			.locator( '.select2-selection' )
+			.click();
+		await expect(
+			page.locator( '.select2-container--open .loading-results' )
+		).toContainText( 'Loading' );
+		await expect(
+			page.getByRole( 'option', {
+				name: sizeAttribute.name,
+				exact: true,
+			} )
+		).toBeVisible();
+		await quickEditRow.locator( 'input[name="post_title"]' ).click();
+		await expect( page.locator( '.select2-container--open' ) ).toHaveCount(
+			0
+		);
 		await cancelQuickEdit( quickEditRow );
 
-		await goToProductList( page, simpleProduct );
-		quickEditRow = await openQuickEdit( page, simpleProduct );
+		await goToProductList( page, singleAttributeProduct );
+		quickEditRow = await openQuickEdit( page, singleAttributeProduct );
 		await expectAttributeChips( quickEditRow, sizeAttribute.name, [
 			'Medium',
 		] );
-		await expectAttributeChips( quickEditRow, styleAttribute.name, [
-			'Regular',
-		] );
+		await expect(
+			getAttributeField( quickEditRow, styleAttribute.name )
+		).toBeHidden();
+		await expect( getAddAttributeField( quickEditRow ) ).toBeVisible();
 		await cancelQuickEdit( quickEditRow );
 
 		await goToProductList( page, manySelectedProduct );
@@ -427,6 +516,19 @@ test.describe( 'Product Quick Edit attributes', () => {
 			styleAttribute.name,
 			styleAttribute.terms.map( ( term ) => term.name )
 		);
+		const allAttributesAddedField = getAddAttributeField( quickEditRow );
+		await expect( allAttributesAddedField ).toBeVisible();
+		await expect(
+			allAttributesAddedField.locator( '.select2-container' )
+		).toBeHidden();
+		await expect(
+			allAttributesAddedField.locator( '.title' )
+		).toBeHidden();
+		await expect(
+			allAttributesAddedField.locator(
+				'.wc-product-attribute-add-message'
+			)
+		).toHaveText( 'All available attributes have been added.' );
 
 		const styleField = getAttributeField(
 			quickEditRow,
@@ -443,19 +545,34 @@ test.describe( 'Product Quick Edit attributes', () => {
 		page,
 		restApi,
 	} ) => {
-		await goToProductList( page, emptyProduct );
-		let quickEditRow = await openQuickEdit( page, emptyProduct );
+		await goToProductList( page, addAttributeProduct );
+		let quickEditRow = await openQuickEdit( page, addAttributeProduct );
 		await expect( quickEditRow ).toBeVisible();
 
+		await addAttributeField( page, quickEditRow, sizeAttribute );
 		await selectAttributeTerms( page, quickEditRow, sizeAttribute.name, [
 			'Medium',
 		] );
 		await cancelQuickEdit( quickEditRow );
 		await expectProductAttributeOptions(
 			restApi,
-			emptyProduct.id,
+			addAttributeProduct.id,
 			sizeAttribute.id,
 			[]
+		);
+
+		await goToProductList( page, addAttributeProduct );
+		quickEditRow = await openQuickEdit( page, addAttributeProduct );
+		await addAttributeField( page, quickEditRow, sizeAttribute );
+		await selectAttributeTerms( page, quickEditRow, sizeAttribute.name, [
+			'Medium',
+		] );
+		await saveQuickEdit( page, quickEditRow );
+		await expectProductAttributeOptions(
+			restApi,
+			addAttributeProduct.id,
+			sizeAttribute.id,
+			[ 'Medium' ]
 		);
 
 		await goToProductList( page, simpleProduct );
@@ -524,8 +641,8 @@ test.describe( 'Product Quick Edit attributes', () => {
 			}
 		} );
 
-		await goToProductList( page, emptyProduct );
-		const quickEditRow = await openQuickEdit( page, emptyProduct );
+		await goToProductList( page, manySelectedProduct );
+		const quickEditRow = await openQuickEdit( page, manySelectedProduct );
 		const sizeField = getAttributeField( quickEditRow, sizeAttribute.name );
 		const styleField = getAttributeField(
 			quickEditRow,

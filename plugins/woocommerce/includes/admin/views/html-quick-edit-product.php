@@ -171,10 +171,10 @@ defined( 'ABSPATH' ) || exit;
 						$attribute_label
 					);
 					?>
-					<label>
+					<label class="wc-product-attribute-field">
 						<span class="title"><?php echo esc_html( $attribute_label ); ?></span>
 						<span class="input-text-wrap">
-							<input type="hidden" name="quick_edit_product_attribute_taxonomies[]" value="<?php echo esc_attr( $attribute_taxonomy_name ); ?>" />
+							<input type="hidden" class="wc-product-attribute-taxonomy" name="quick_edit_product_attribute_taxonomies[]" value="<?php echo esc_attr( $attribute_taxonomy_name ); ?>" />
 							<select
 								class="wc-product-attribute-values"
 								name="quick_edit_product_attributes[<?php echo esc_attr( $attribute_taxonomy_name ); ?>][]"
@@ -192,6 +192,27 @@ defined( 'ABSPATH' ) || exit;
 						</span>
 					</label>
 				<?php endforeach; ?>
+				<label class="wc-product-attribute-add-field">
+					<span class="title"><?php esc_html_e( 'Add attribute', 'woocommerce' ); ?></span>
+					<span class="input-text-wrap">
+						<select
+							class="wc-product-attribute-add"
+							data-placeholder="<?php esc_attr_e( 'Search attributes', 'woocommerce' ); ?>"
+							data-minimum_input_length="0"
+							data-loading_without_search_term="true"
+							data-dropdown-css-class="wc-product-quick-edit-attribute-dropdown"
+							style="width:99%;"
+						></select>
+						<span class="wc-product-attribute-add-message" hidden>
+							<?php
+							esc_html_e(
+								'All available attributes have been added.',
+								'woocommerce'
+							);
+							?>
+						</span>
+					</span>
+				</label>
 			</div>
 		<?php endif; ?>
 
