@@ -136,14 +136,17 @@ class Privacy extends \WC_Abstract_Privacy {
 		$controller = wc_get_container()->get( ShopperListsController::class );
 
 		foreach ( $controller->get_supported_slugs() as $slug ) {
-			Users::delete_site_user_meta( $user_id, ShopperList::META_KEY_PREFIX . $slug );
-			$response['messages'][] = sprintf(
+			if ( ! Users::delete_site_user_meta( $user_id, ShopperList::META_KEY_PREFIX . $slug ) ) {
+				continue;
+			}
+
+			$response['items_removed'] = true;
+			$response['messages'][]    = sprintf(
 				/* translators: %s: shopper-list slug. */
 				__( 'Removed shopper list: %s', 'woocommerce' ),
 				$slug
 			);
 		}
-		$response['items_removed'] = true;
 
 		return $response;
 	}

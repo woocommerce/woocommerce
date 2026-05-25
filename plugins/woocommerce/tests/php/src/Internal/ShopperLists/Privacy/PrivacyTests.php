@@ -243,44 +243,35 @@ class PrivacyTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Eraser deletes stored shopper-list meta for every supported slug.
+	 * @testdox Eraser deletes stored shopper-list meta and emits one slug-named message per removed slug.
 	 */
-	public function test_erase_removes_meta_for_every_supported_slug(): void {
+	public function test_erase_removes_meta_and_emits_message_per_removed_slug(): void {
 		$this->seed_list( self::SAVED_FOR_LATER_SLUG );
 		$this->seed_list( self::WISHLIST_SLUG );
 
 		$result = $this->sut->erase_data( self::TEST_EMAIL );
 
 		$this->assertTrue( $result['items_removed'] );
+		$this->assertCount( count( self::LIST_OPTIONS ), $result['messages'] );
+		$joined = implode( "\n", $result['messages'] );
 		foreach ( array_keys( self::LIST_OPTIONS ) as $slug ) {
 			$this->assertFalse(
 				is_array( Users::get_site_user_meta( $this->user_id, ShopperList::META_KEY_PREFIX . $slug ) ),
 				"Meta for slug {$slug} should be removed."
 			);
-		}
-	}
-
-	/**
-	 * @testdox Eraser reports items_removed true once a matching user is found, even when no list data is stored.
-	 */
-	public function test_erase_reports_removal_for_matched_user_regardless_of_stored_data(): void {
-		$result = $this->sut->erase_data( self::TEST_EMAIL );
-
-		$this->assertTrue( $result['items_removed'] );
-		$this->assertTrue( $result['done'] );
-	}
-
-	/**
-	 * @testdox Eraser emits one slug-named message per supported list type.
-	 */
-	public function test_erase_emits_message_per_supported_slug(): void {
-		$result = $this->sut->erase_data( self::TEST_EMAIL );
-
-		$this->assertCount( count( self::LIST_OPTIONS ), $result['messages'] );
-		$joined = implode( "\n", $result['messages'] );
-		foreach ( array_keys( self::LIST_OPTIONS ) as $slug ) {
 			$this->assertStringContainsString( $slug, $joined, "Eraser message should reference {$slug}." );
 		}
+	}
+
+	/**
+	 * @testdox Eraser reports items_removed false when the matched user has no stored list data.
+	 */
+	public function test_erase_reports_no_removal_when_nothing_is_stored(): void {
+		$result = $this->sut->erase_data( self::TEST_EMAIL );
+
+		$this->assertFalse( $result['items_removed'] );
+		$this->assertSame( array(), $result['messages'] );
+		$this->assertTrue( $result['done'] );
 	}
 
 	/**
