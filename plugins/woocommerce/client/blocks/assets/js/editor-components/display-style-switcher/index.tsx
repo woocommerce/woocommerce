@@ -11,10 +11,8 @@ import { useState } from '@wordpress/element';
 import { dispatch, select, useDispatch } from '@wordpress/data';
 import { getInnerBlockByName } from '@woocommerce/utils';
 import {
-	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
-	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
@@ -31,6 +29,12 @@ type DisplayStyleBlockType = ReturnType< typeof getBlockTypes >[ number ] & {
 	usesContext?: readonly string[] | string;
 };
 
+type DisplayStyleSupportReader = (
+	blockName: string,
+	feature: 'woocommerce.innerBlockDisplayStyle',
+	defaultSupports: false
+) => unknown;
+
 type DisplayStyleSwitcherProps = {
 	clientId: string;
 	currentStyle: string;
@@ -40,6 +44,8 @@ type DisplayStyleSwitcherProps = {
 		parentBlock: BlockInstance
 	) => DisplayStyleInsertionPoint;
 };
+
+const getDisplayStyleSupport = getBlockSupport as DisplayStyleSupportReader;
 
 function isBlockInstance(
 	block: BlockInstance | null
@@ -56,6 +62,18 @@ function getBlockTypeList(
 	return Array.isArray( value ) ? value : [ value ];
 }
 
+function hasInnerBlockDisplayStyleSupport(
+	blockType: DisplayStyleBlockType
+): boolean {
+	return (
+		getDisplayStyleSupport(
+			blockType.name,
+			'woocommerce.innerBlockDisplayStyle',
+			false
+		) === true
+	);
+}
+
 function isDisplayStyleCandidate(
 	blockType: DisplayStyleBlockType,
 	parentBlockName: string | undefined,
@@ -65,13 +83,7 @@ function isDisplayStyleCandidate(
 		return false;
 	}
 
-	if (
-		getBlockSupport(
-			blockType.name,
-			'woocommerce.innerBlockDisplayStyle',
-			false
-		) !== true
-	) {
+	if ( ! hasInnerBlockDisplayStyleSupport( blockType ) ) {
 		return false;
 	}
 
@@ -150,15 +162,16 @@ export const DisplayStyleSwitcher = ( {
 			onChange={ ( value: string | number | undefined ) => {
 				if ( ! value || typeof value !== 'string' ) return;
 				if ( ! parentBlock ) return;
-				const currentStyleBlock = getInnerBlockByName(
+				const currentStyleBlock = getCurrentDisplayStyleBlock(
 					parentBlock,
-					currentStyle
+					displayStyleOptions
 				);
 
 				if ( currentStyleBlock ) {
 					const nextDisplayStyleBlocksAttributes = {
 						...displayStyleBlocksAttributes,
-						[ currentStyle ]: currentStyleBlock.attributes,
+						[ currentStyleBlock.name ]:
+							currentStyleBlock.attributes,
 					};
 
 					setDisplayStyleBlocksAttributes(
