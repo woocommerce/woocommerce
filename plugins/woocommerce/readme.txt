@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.8.0-rc.1 2026-XX-XX =
+= 10.8.0-rc.1 2026-05-25 =
 
 **WooCommerce**
 
@@ -252,6 +252,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fix PHP 8.5 fatal error when unsetting string offsets in StoreApi AbstractSchema [#64670](https://github.com/woocommerce/woocommerce/pull/64670)
 * Fix - Prevent re-entrant order reads triggered by cached refund objects. [#64657](https://github.com/woocommerce/woocommerce/pull/64657)
 * Fix - Revert PR 62843 which added checkout evidence validation to WC_Order::payment_complete() [#64687](https://github.com/woocommerce/woocommerce/pull/64687)
+* Fix - Cancel the delayed Customer Review Request email when the order leaves `completed` for any status, and refuse to send if the order is no longer in an eligible status at trigger time. [#64786](https://github.com/woocommerce/woocommerce/pull/64786)
+* Fix - Fix Add to Cart + Options steppers not working on extension quantity inputs [#64847](https://github.com/woocommerce/woocommerce/pull/64847)
+* Fix - Prevent invalid cache prefixes from causing fatal errors on the My Account orders page. [#64870](https://github.com/woocommerce/woocommerce/pull/64870)
+* Fix - Restore the meta_value column to the meta_key_value index on the wc_orders_meta table to fix a performance regression. [#65162](https://github.com/woocommerce/woocommerce/pull/65162)
 * Add - Add a GraphQL settings section under Advanced with a toggle for the GET endpoint. [#64293](https://github.com/woocommerce/woocommerce/pull/64293)
 * Add - Add an offline banner to WooCommerce admin that appears when the browser loses its connection, and surface a clear notice when save requests fail silently due to network loss. [#64334](https://github.com/woocommerce/woocommerce/pull/64334)
 * Add - Add auto-generation mode to the coupon code email block, allowing users to configure coupon rules that generate unique codes at send time. [#64342](https://github.com/woocommerce/woocommerce/pull/64342)
@@ -265,6 +269,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Add the accessible 5-star rating control used by the Review Order page. Native radio inputs with keyboard navigation (arrows, Home, End), dynamic caption, and visible focus ring; filterable labels via `woocommerce_review_order_rating_labels`. [#64701](https://github.com/woocommerce/woocommerce/pull/64701)
 * Add - Add the per-item review form row on the Review Order page: linked product title, thumbnail, accessible star rating, review textarea, and an extensions hook (`woocommerce_review_order_form_fields`). Submit button is gated on at least one rating being selected. Narrow-viewport layout stacks the row vertically below 600px. [#64701](https://github.com/woocommerce/woocommerce/pull/64701)
 * Add - Schedule the Review request email via Action Scheduler so it fires automatically a configurable number of days after an order is completed, and cancel the pending send when the order is cancelled, refunded, trashed or deleted. [#64625](https://github.com/woocommerce/woocommerce/pull/64625)
+* Add - Add the AJAX submission handler that turns the Review Order form into product reviews — one verified-buyer comment per rated row, per-row outcome, `comment_moderation` honoured. [#64805](https://github.com/woocommerce/woocommerce/pull/64805)
+* Add - Exclude fully-refunded line items from the customer Review Order page so customers can't review products they no longer own. [#64840](https://github.com/woocommerce/woocommerce/pull/64840)
+* Add - Pre-fill the Review Order form with the customer's existing review for this order, scoped per-order so repeat purchases of the same product get a fresh empty row. [#64832](https://github.com/woocommerce/woocommerce/pull/64832)
+* Add - Render an empty-state thank-you view on the customer Review Order page when no actionable rows remain (every eligible item is already reviewed or skipped because reviews are disabled). [#64840](https://github.com/woocommerce/woocommerce/pull/64840)
 * Update - Add a woocommerce/product-context iAPI store for use in Add to Cart with Options [#63208](https://github.com/woocommerce/woocommerce/pull/63208)
 * Update - Add to Cart Button: open external products link in a new tab [#63970](https://github.com/woocommerce/woocommerce/pull/63970)
 * Update - Bump @wordpress/* dependencies to the wp-6.8 minimum across the admin, blocks, email-editor, product-editor, and settings-editor packages. [#64114](https://github.com/woocommerce/woocommerce/pull/64114)
@@ -281,6 +289,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update copy on the activate payments step in NOX [#63919](https://github.com/woocommerce/woocommerce/pull/63919)
 * Update - Show all country-relevant shipping partner recommendations on the settings page even when one of the partners is already installed. [#64629](https://github.com/woocommerce/woocommerce/pull/64629)
 * Update - Stamp the new `_wc_email_template_last_core_render` and `_wc_email_backfilled` post meta during email template sync so 10.9's three-way diff change-summary has a base reference on 10.8-era posts. [#64728](https://github.com/woocommerce/woocommerce/pull/64728)
+* Update - Update version requirements to WordPress 6.9. [#65211](https://github.com/woocommerce/woocommerce/pull/65211)
 * Dev - Add internal WCEmailTemplateSyncRegistry helper that resolves block email templates participating in template update propagation via their @version header. No runtime behaviour change yet. [#64261](https://github.com/woocommerce/woocommerce/pull/64261)
 * Dev - Add server-side POST /woocommerce-email-editor/v1/emails/{id}/reset endpoint that atomically rewrites a woo_email post to its current core template render and stamps sync meta (version, source hash, synced-at, status=in_sync). [#64355](https://github.com/woocommerce/woocommerce/pull/64355)
 * Dev - Backfill template sync metadata onto pre-existing block email posts during upgrade so the divergence detector can classify legacy installs safely. [#64364](https://github.com/woocommerce/woocommerce/pull/64364)
@@ -301,6 +310,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Stamp sync meta on generated block email posts (version, source hash, synced-at) for emails whose templates expose a parseable @version header. No runtime behaviour change for emails outside the sync registry. [#64287](https://github.com/woocommerce/woocommerce/pull/64287)
 * Dev - Update webpack configuration [#64250](https://github.com/woocommerce/woocommerce/pull/64250)
 * Dev - Upgrade pnpm from 9.15.0 to 10.33.0 with supply chain security settings. [#63964](https://github.com/woocommerce/woocommerce/pull/63964)
+* Dev - Gate the Customer Review Request feature behind a FeaturesController flag (off by default). The host page is created lazily on the first request after the feature is enabled, not on plugin install. [#64895](https://github.com/woocommerce/woocommerce/pull/64895)
+* Dev - Make `WC_Email_Customer_Review_Request_Test` self-contained for the `customer_review_request` feature gate so `test_is_registered_with_wc_emails` doesn't depend on incidental test ordering. [#64895](https://github.com/woocommerce/woocommerce/pull/64895)
 * Tweak - Add "role": "content" to editable block attributes (product-sku, product-reviews-pagination-next, product-reviews-pagination-previous) for WordPress 7.0 contentOnly pattern editing compatibility. [#63977](https://github.com/woocommerce/woocommerce/pull/63977)
 * Tweak - Add 8px border-radius to editor meta boxes and product description to align with WP 7.0 dashboard widget styling [#64191](https://github.com/woocommerce/woocommerce/pull/64191)
 * Tweak - Add translatable “(incl. tax)” / “(excl. tax)” labels to product price fields depending on WooCommerce tax settings. [#62044](https://github.com/woocommerce/woocommerce/pull/62044)
@@ -316,6 +327,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Update myPOS payment gateway icon to match design library [#64138](https://github.com/woocommerce/woocommerce/pull/64138)
 * Tweak - Update the Blueprint settings error notice background to match the WordPress 7.0 admin notice spec (#fcf0f0). [#64469](https://github.com/woocommerce/woocommerce/pull/64469)
 * Tweak - Vertically centre Product / Coupon Data panel labels and help-tip icons with 40px inputs on WordPress 7.0. [#64458](https://github.com/woocommerce/woocommerce/pull/64458)
+* Tweak - Hide the duplicate page title heading on the Customer Review Order page so the shortcode body's heading is the only H1 visitors and screen readers encounter. [#64849](https://github.com/woocommerce/woocommerce/pull/64849)
 * Performance - Add 3s timeout to DataSourcePoller HTTP calls and skip redundant remote fetches in wc_admin_daily when transients are fresh. [#63738](https://github.com/woocommerce/woocommerce/pull/63738)
 * Performance - Add missing `_prime_post_caches()` calls in AJAX downloadable product search, scheduled sales processing, and Recent Reviews widget to batch-load post data and reduce individual database queries. [#63773](https://github.com/woocommerce/woocommerce/pull/63773)
 * Performance - Add missing `_prime_post_caches()` calls in grouped product structured data, grouped product add-to-cart template, and download permissions adjuster to batch-load child product data to reduce individual database queries. [#63797](https://github.com/woocommerce/woocommerce/pull/63797)
@@ -340,6 +352,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Allow extensionCartUpdate's overwriteDirtyCustomerData option to accept an object with per-address control ({ shipping_address?: boolean, billing_address?: boolean }) in addition to a boolean. [#64032](https://github.com/woocommerce/woocommerce/pull/64032)
 * Enhancement - Cap cached filter combinations to limit transient growth from bot enumeration. [#64039](https://github.com/woocommerce/woocommerce/pull/64039)
 * Enhancement - My Subscriptions: show "Managed by host" or "Managed by agency" in the expiry column for host plan and agency subscriptions. [#63925](https://github.com/woocommerce/woocommerce/pull/63925)
+* Enhancement - Align the Customer Review Order page with the Figma design: ship the functional state gaps, swap to theme-aware classes, and route the customer to a thank-you view in place after any successful submission. [#64867](https://github.com/woocommerce/woocommerce/pull/64867)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
