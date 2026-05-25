@@ -277,7 +277,7 @@ export default function AttributeItemTemplateEdit(
 				</ToolsPanel>
 			</InspectorControls>
 
-			<div { ...blockProps } role="list">
+			<div { ...blockProps }>
 				{ productAttributes.map( ( attribute ) => (
 					<CustomDataProvider
 						key={ attribute.id }
