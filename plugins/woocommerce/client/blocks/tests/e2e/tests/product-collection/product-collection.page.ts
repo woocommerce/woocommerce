@@ -177,13 +177,13 @@ class ProductCollectionPage {
 		}
 
 		await this.clickChooseCollectionButton( placeholderSelector );
-
-		await this.admin.page
-			.locator(
-				'.wc-blocks-product-collection__collections-dropdown-content'
-			)
-			.getByRole( 'button', { name: buttonName, exact: true } )
-			.click();
+		await this.clickCollectionDropdownOption(
+			buttonName,
+			[ this.admin.page, this.editor.canvas ],
+			async () => {
+				await this.clickChooseCollectionButton( placeholderSelector );
+			}
+		);
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
@@ -207,13 +207,15 @@ class ProductCollectionPage {
 
 		if ( isDropdown ) {
 			await this.clickChooseCollectionButton( this.editor.canvas );
-
-			await this.editor.canvas
-				.locator(
-					'.wc-blocks-product-collection__collections-dropdown-content'
-				)
-				.getByRole( 'button', { name: buttonName, exact: true } )
-				.click();
+			await this.clickCollectionDropdownOption(
+				buttonName,
+				[ this.editor.canvas, this.admin.page ],
+				async () => {
+					await this.clickChooseCollectionButton(
+						this.editor.canvas
+					);
+				}
+			);
 		} else {
 			await this.editor.canvas
 				.locator( SELECTORS.collectionPlaceholder )
@@ -825,6 +827,50 @@ class ProductCollectionPage {
 				await this.dismissBlockEditorCardPopover();
 				await chooseCollectionButton.click( { force: true } );
 			} );
+	}
+
+	private async clickCollectionDropdownOption(
+		buttonName: string,
+		containers: Array< Page | FrameLocator >,
+		openDropdown: () => Promise< void >
+	) {
+		let lastError: unknown;
+
+		for ( let attempt = 0; attempt < 2; attempt++ ) {
+			if ( attempt > 0 ) {
+				await this.dismissBlockEditorCardPopover();
+				await openDropdown();
+			}
+
+			for ( const container of containers ) {
+				const option = container
+					.locator(
+						'.wc-blocks-product-collection__collections-dropdown-content'
+					)
+					.getByRole( 'button', {
+						name: buttonName,
+						exact: true,
+					} );
+
+				try {
+					await option.waitFor( {
+						state: 'visible',
+						timeout: 3000,
+					} );
+					await option.scrollIntoViewIfNeeded();
+					await option.click( { timeout: 5000 } ).catch( async () => {
+						await option.click( { force: true } );
+					} );
+					return;
+				} catch ( error ) {
+					lastError = error;
+				}
+			}
+		}
+
+		throw lastError instanceof Error
+			? lastError
+			: new Error( `Unable to choose collection "${ buttonName }".` );
 	}
 
 	async refreshLocators( currentUI: 'editor' | 'frontend' ) {
