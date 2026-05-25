@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-image-with-color-swatches",
+	"title": "Product Image with Color Swatches",
+	"description": "Display a product image with color swatches that preview variation images.",
+	"category": "woocommerce-product-elements",
+	"keywords": [ "WooCommerce", "variation", "swatches", "color" ],
+	"textdomain": "woocommerce",
+	"usesContext": [ "postId", "query", "queryId" ],
+	"ancestor": [ "woocommerce/product-template", "core/post-template" ],
+	"supports": {
+		"interactivity": true,
+		"html": false,
+		"spacing": {
+			"margin": true,
+			"padding": true
+		}
+	},
+	"viewScriptModule": "woocommerce/product-image-with-color-swatches"
+}

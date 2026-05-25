@@ -11,7 +11,8 @@
 		"woocommerce/product-filter-attribute",
 		"woocommerce/product-filter-taxonomy",
 		"woocommerce/product-filter-status",
-		"woocommerce/add-to-cart-with-options-variation-selector-attribute"
+		"woocommerce/add-to-cart-with-options-variation-selector-attribute",
+		"woocommerce/product-image-with-color-swatches"
 	],
 	"supports": {
 		"interactivity": true
