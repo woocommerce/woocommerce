@@ -146,7 +146,7 @@
 		flex-shrink: 0;
 	}
 
-	.wc-block-product-filter-chips__swatch--no-color {
+	:where(.wc-block-product-filter-chips__swatch--no-color) {
 		display: inline-block;
 		background: linear-gradient(
 			to top left,
