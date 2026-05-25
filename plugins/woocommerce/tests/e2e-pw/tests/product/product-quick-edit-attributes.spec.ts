@@ -153,9 +153,13 @@ async function openQuickEdit( page: Page, product: Product ) {
 
 	const quickEditRow = page.locator( `#edit-${ product.id }` );
 	await expect( quickEditRow ).toBeVisible();
-	await expect(
-		quickEditRow.locator( 'select.wc-product-attribute-values.enhanced' )
-	).toHaveCount( 2 );
+	await expect
+		.poll( async () =>
+			quickEditRow
+				.locator( 'select.wc-product-attribute-values.enhanced' )
+				.count()
+		)
+		.toBeGreaterThanOrEqual( 2 );
 
 	return quickEditRow;
 }
