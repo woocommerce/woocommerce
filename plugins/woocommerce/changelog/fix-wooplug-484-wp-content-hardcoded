@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Fix hardcoded wp-content path in download handler to use WP_CONTENT_DIR constant instead.
