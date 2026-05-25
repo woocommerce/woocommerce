@@ -176,11 +176,7 @@ class ProductCollectionPage {
 			return;
 		}
 
-		await placeholderSelector
-			.getByRole( 'button', {
-				name: 'Choose collection',
-			} )
-			.click();
+		await this.clickChooseCollectionButton( placeholderSelector );
 
 		await this.admin.page
 			.locator(
@@ -210,9 +206,7 @@ class ProductCollectionPage {
 		await this.dismissBlockEditorCardPopover();
 
 		if ( isDropdown ) {
-			await this.editor.canvas
-				.getByRole( 'button', { name: 'Choose collection' } )
-				.click();
+			await this.clickChooseCollectionButton( this.editor.canvas );
 
 			await this.editor.canvas
 				.locator(
@@ -792,7 +786,7 @@ class ProductCollectionPage {
 		await this.page.keyboard.press( 'Escape' );
 		await blockCardPopover
 			.waitFor( { state: 'hidden', timeout: 3000 } )
-			.catch( () => {} );
+			.catch( () => undefined );
 	}
 
 	async getCollectionHeading() {
@@ -817,6 +811,20 @@ class ProductCollectionPage {
 			.nth( 0 )
 			.click();
 		await singleProductBlock.getByText( 'Done' ).click();
+	}
+
+	private async clickChooseCollectionButton( container: Locator ) {
+		const chooseCollectionButton = container.getByRole( 'button', {
+			name: 'Choose collection',
+		} );
+
+		await chooseCollectionButton.scrollIntoViewIfNeeded();
+		await chooseCollectionButton
+			.click( { timeout: 5000 } )
+			.catch( async () => {
+				await this.dismissBlockEditorCardPopover();
+				await chooseCollectionButton.click( { force: true } );
+			} );
 	}
 
 	async refreshLocators( currentUI: 'editor' | 'frontend' ) {
