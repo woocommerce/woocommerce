@@ -271,6 +271,19 @@ class PrivacyTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Eraser emits one slug-named message per supported list type.
+	 */
+	public function test_erase_emits_message_per_supported_slug(): void {
+		$result = $this->sut->erase_data( self::TEST_EMAIL );
+
+		$this->assertCount( count( self::LIST_OPTIONS ), $result['messages'] );
+		$joined = implode( "\n", $result['messages'] );
+		foreach ( array_keys( self::LIST_OPTIONS ) as $slug ) {
+			$this->assertStringContainsString( $slug, $joined, "Eraser message should reference {$slug}." );
+		}
+	}
+
+	/**
 	 * @testdox Eraser removes stored data even when the backing feature is disabled.
 	 */
 	public function test_erase_removes_stored_data_when_feature_is_disabled(): void {
