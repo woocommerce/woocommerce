@@ -112,8 +112,7 @@ test.describe.serial(
 			// Verify system note was added
 			await expect(
 				page.locator( '.system-note' ).filter( {
-					hasText:
-						'Order status changed from Completed to Refunded.',
+					hasText: 'Order status changed from Completed to Refunded.',
 				} )
 			).toBeVisible();
 		} );
