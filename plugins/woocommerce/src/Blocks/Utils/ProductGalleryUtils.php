@@ -205,8 +205,8 @@ class ProductGalleryUtils {
 			return null;
 		}
 
-		$hero_id    = (int) $variation->get_image_id();
-		$hero_valid = $hero_id && wp_attachment_is_image( $hero_id );
+		$featured_id    = (int) $variation->get_image_id();
+		$featured_valid = $featured_id && wp_attachment_is_image( $featured_id );
 
 		$variation_gallery_ids = VariationGalleryPackage::is_enabled()
 			? array_values(
@@ -214,8 +214,8 @@ class ProductGalleryUtils {
 			)
 			: array();
 
-		// Variation contributes nothing usable → full parent fallback.
-		if ( ! $hero_valid && empty( $variation_gallery_ids ) ) {
+		// No images from variation - full parent fallback.
+		if ( ! $featured_valid && empty( $variation_gallery_ids ) ) {
 			$parent_image_ids = array_values(
 				array_filter( array_merge( array( $parent_featured_id ), $parent_gallery_extras ) )
 			);
@@ -233,29 +233,26 @@ class ProductGalleryUtils {
 			);
 		}
 
-		// Variation has a gallery → hero + variation gallery, no parent extras.
-		// Hero falls back to gallery[0] if the variation's stored featured is
-		// stale (non-zero but pointing at a deleted attachment, which doesn't
-		// trigger the view-context parent fallback).
+		// Variation has featured image and gallery - full variation gallery.
 		if ( ! empty( $variation_gallery_ids ) ) {
-			$hero      = $hero_valid ? $hero_id : $variation_gallery_ids[0];
+			$featured  = $featured_valid ? $featured_id : $variation_gallery_ids[0];
 			$image_ids = array_values(
-				array_unique( array_merge( array( $hero ), $variation_gallery_ids ) )
+				array_unique( array_merge( array( $featured ), $variation_gallery_ids ) )
 			);
 
 			return array(
-				'image_id'  => $hero,
+				'image_id'  => $featured,
 				'image_ids' => $image_ids,
 			);
 		}
 
-		// No variation gallery → hero + parent gallery extras.
+		// Variation has only featured image - variation featured and parent gallery.
 		$image_ids = array_values(
-			array_unique( array_merge( array( $hero_id ), $parent_gallery_extras ) )
+			array_unique( array_merge( array( $featured_id ), $parent_gallery_extras ) )
 		);
 
 		return array(
-			'image_id'  => $hero_id,
+			'image_id'  => $featured_id,
 			'image_ids' => $image_ids,
 		);
 	}
