@@ -660,6 +660,54 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Safety net should ignore type/resource_id keys smuggled into the extras array so the positional params remain authoritative.
+	 */
+	public function test_handle_safety_net_extras_cannot_override_positional_params(): void {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 3,
+			)
+		);
+
+		$captured_notification = null;
+		$this->dispatcher
+			->expects( $this->once() )
+			->method( 'dispatch' )
+			->with(
+				$this->callback(
+					function ( $notification ) use ( &$captured_notification ) {
+						$captured_notification = $notification;
+						return true;
+					}
+				)
+			)
+			->willReturn(
+				array(
+					'success'     => true,
+					'retry_after' => null,
+				)
+			);
+
+		// `type` and `resource_id` keys inside the extras array are smuggled values
+		// that must be ignored — the positional params should remain authoritative.
+		$this->sut->handle_safety_net(
+			'store_stock',
+			$product->get_id(),
+			array(
+				'event_type'  => 'low_stock',
+				'type'        => 'store_order',
+				'resource_id' => 999999,
+			)
+		);
+
+		$this->assertNotNull( $captured_notification );
+		$this->assertSame( 'store_stock', $captured_notification->get_type() );
+		$this->assertSame( $product->get_id(), $captured_notification->get_resource_id() );
+	}
+
+	/**
 	 * @testdox Safety net should propagate the stock quantity captured at trigger time when reconstructing the notification.
 	 */
 	public function test_handle_safety_net_with_stock_quantity_at_trigger(): void {

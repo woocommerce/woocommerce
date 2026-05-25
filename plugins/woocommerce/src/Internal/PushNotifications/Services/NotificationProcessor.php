@@ -241,13 +241,13 @@ class NotificationProcessor {
 	 */
 	public function handle_safety_net( string $type, int $resource_id, array $extra = array() ): void {
 		try {
-			$data = array_merge(
-				array(
-					'type'        => $type,
-					'resource_id' => $resource_id,
-				),
-				$extra
-			);
+			// Use the `+` array union operator (not array_merge) so the positional
+			// $type and $resource_id always win over any colliding keys in $extra.
+			// Defends against a malformed payload reconstructing the wrong target.
+			$data = array(
+				'type'        => $type,
+				'resource_id' => $resource_id,
+			) + $extra;
 
 			$notification = Notification::from_array( $data );
 
