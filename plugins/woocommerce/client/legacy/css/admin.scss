@@ -1325,6 +1325,24 @@ table.wc_status_table--tools {
 	}
 }
 
+@media screen and (max-width: 500px) {
+	body.woocommerce_page_wc-status {
+		.updated.woocommerce-message.inline {
+			p.submit {
+				a,
+				button {
+					display: block;
+					width: 100%;
+					margin-bottom: 0.5em;
+					margin-left: 0;
+					text-align: center;
+					box-sizing: border-box;
+				}
+			}
+		}
+	}
+}
+
 /**
  * FileV2 logs
  */
