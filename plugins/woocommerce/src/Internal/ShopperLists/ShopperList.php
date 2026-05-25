@@ -67,26 +67,17 @@ class ShopperList {
 	 *
 	 * @param string   $slug        List identifier.
 	 * @param int|null $user_id     Defaults to the current user.
-	 * @param bool     $skip_checks Bypass the feature-flag gate. For internal callers
-	 *                              (e.g. privacy export/erase) that must reach stored
-	 *                              data regardless of feature state. Slug validity is
-	 *                              still enforced — `$skip_checks` does not let unknown
-	 *                              slugs through. Do not use for user-facing reads; the
-	 *                              Store API relies on the feature-flag gate to surface
-	 *                              404s for disabled lists.
+	 * @param bool     $skip_checks Bypass the feature-flag gate (slug validity is still
+	 *                              enforced). For internal callers like privacy export.
 	 * @return self|false
 	 */
 	public static function get_by_slug( string $slug, ?int $user_id = null, bool $skip_checks = false ) {
 		$controller = wc_get_container()->get( ShopperListsController::class );
 
-		// Always reject unknown slugs, even when callers ask to skip checks. The
-		// feature-flag gate is the only thing $skip_checks bypasses.
 		if ( ! in_array( $slug, $controller->get_supported_slugs(), true ) ) {
 			return false;
 		}
 
-		// Gate disabled slugs so previously-persisted lists don't bypass the
-		// feature flag (the Store API surfaces this as 404).
 		if ( ! $skip_checks && ! $controller->is_enabled( $slug ) ) {
 			return false;
 		}

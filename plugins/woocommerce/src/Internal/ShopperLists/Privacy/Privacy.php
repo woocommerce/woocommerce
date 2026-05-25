@@ -11,11 +11,6 @@ use Automattic\WooCommerce\Internal\Utilities\Users;
 /**
  * GDPR/CCPA privacy exporter and eraser for shopper lists.
  *
- * Surfaces stored shopper-list data to WP's admin "Export/Erase Personal Data"
- * tools so site admins can fulfill data-subject requests. Operates over every
- * supported list type regardless of feature-flag state, so stale data from a
- * now-disabled feature is still surfaced and removed.
- *
  * @internal Just for internal use.
  */
 class Privacy extends \WC_Abstract_Privacy {
@@ -26,8 +21,7 @@ class Privacy extends \WC_Abstract_Privacy {
 	private const REGISTRATION_ID = 'woocommerce-shopper-lists';
 
 	/**
-	 * Prefix for the per-list-type WP data group IDs (a unique slug is appended,
-	 * e.g. `woocommerce-shopper-lists-saved-for-later`).
+	 * Prefix for the per-list-type WP data group IDs.
 	 */
 	private const GROUP_ID_PREFIX = 'woocommerce-shopper-lists-';
 
@@ -55,16 +49,10 @@ class Privacy extends \WC_Abstract_Privacy {
 	/**
 	 * Export every stored shopper list for the user matching the given email.
 	 *
-	 * Emits one WP data group per supported list type and one entry per saved
-	 * item within it, with per-field `{name, value}` rows — matching the shape
-	 * used by `WC_Privacy_Exporters::order_data_exporter()`.
-	 *
 	 * @internal
 	 *
 	 * @param string $email_address Email address the request applies to.
-	 * @param int    $page          Page number. Unused — output is bounded by
-	 *                              the per-list item cap, so a single page is
-	 *                              sufficient.
+	 * @param int    $page          Page number. Unused — output is bounded.
 	 *
 	 * @return array{data: array<int, array<string, mixed>>, done: bool}
 	 */
@@ -152,14 +140,7 @@ class Privacy extends \WC_Abstract_Privacy {
 	}
 
 	/**
-	 * Build the `data` array (one row per field) for a single saved item.
-	 *
-	 * Title resolution mirrors `ShopperListItemSchema::get_item_response()`:
-	 * the current product title when the item is live, otherwise the snapshot
-	 * captured at save time. The URL row is included only when the item is
-	 * live (publish status on the product and, for variations, the parent —
-	 * see `ShopperListItem::is_live()`). Variation attributes are rendered
-	 * via core's `wc_get_formatted_variation()`.
+	 * Build the per-field `{name, value}` rows for a single saved item.
 	 *
 	 * @param ShopperListItem $item Item to export.
 	 *
@@ -216,8 +197,7 @@ class Privacy extends \WC_Abstract_Privacy {
 	}
 
 	/**
-	 * Friendly user-facing label for a list slug — used as the group heading in
-	 * the export and in the eraser's per-list messages.
+	 * Friendly label for a list slug, used as the exporter's group heading.
 	 *
 	 * @param string $slug List slug.
 	 */
