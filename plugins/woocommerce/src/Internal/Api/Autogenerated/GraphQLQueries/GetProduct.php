@@ -15,19 +15,33 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class GetProduct {
 	public static function get_field_definition(): array {
 		return array(
-			'type'        => ProductInterface::get(),
-			'description' => __( 'Retrieve a single product by ID.', 'woocommerce' ),
-			'args'        => array(
+			'type'          => ProductInterface::get(),
+			'description'   => __( 'Retrieve a single product by ID.', 'woocommerce' ),
+			'authorization' => array(
+				array(
+					'attribute' => 'RequiredCapability',
+					'args'      => array(
+						0 => 'read_product',
+					),
+				),
+			),
+			'args'          => array(
 				'id' => array(
 					'type'        => Type::nonNull( Type::int() ),
 					'description' => __( 'The ID of the product to retrieve.', 'woocommerce' ),
 				),
 			),
-			'resolve'     => array( self::class, 'resolve' ),
+			'resolve'       => array( self::class, 'resolve' ),
 		);
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = array();
+
 		$command = \Automattic\WooCommerce\Api\Infrastructure\ClassResolver::resolve_class( GetProductCommand::class );
 
 		$query_info   = QueryInfoExtractor::extract_from_info( $info, $args );

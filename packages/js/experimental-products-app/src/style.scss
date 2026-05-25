@@ -41,6 +41,16 @@
 	z-index: 100002;
 }
 
+.woocommerce-experimental-products-app-error {
+	box-sizing: border-box;
+	min-height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
+	padding: var(--wpds-dimension-padding-2xl, 24px);
+}
+
+.woocommerce-experimental-products-app-error__description {
+	max-width: 520px;
+}
+
 .product_page_woocommerce-products-dashboard .edit-site-layout__content {
 	display: flex;
 	align-items: stretch;

@@ -65,4 +65,28 @@ class MetadataAttributeTest extends WC_Unit_Test_Case {
 		$attribute = $attributes[0]->newInstance();
 		$this->assertNotSame( 0, $attribute->flags & \Attribute::IS_REPEATABLE );
 	}
+
+	/**
+	 * @testdox Metadata::shows_in_metadata_query() defaults to true so existing entries surface through `_apiMetadata`.
+	 */
+	public function test_shows_in_metadata_query_defaults_to_true(): void {
+		$metadata = new Metadata( 'sample', 'value' );
+		$this->assertTrue( $metadata->shows_in_metadata_query() );
+	}
+
+	/**
+	 * @testdox A Metadata subclass can override shows_in_metadata_query() to opt out of `_apiMetadata` exposure.
+	 */
+	public function test_shows_in_metadata_query_can_be_overridden_to_false(): void {
+		$hidden = new class('hidden', 'value') extends Metadata {
+			/**
+			 * Opt the carrying target out of the `_apiMetadata` query.
+			 */
+			public function shows_in_metadata_query(): bool {
+				return false;
+			}
+		};
+
+		$this->assertFalse( $hidden->shows_in_metadata_query() );
+	}
 }
