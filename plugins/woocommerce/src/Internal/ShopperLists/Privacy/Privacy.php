@@ -136,12 +136,13 @@ class Privacy extends \WC_Abstract_Privacy {
 		$controller = wc_get_container()->get( ShopperListsController::class );
 
 		foreach ( $controller->get_supported_slugs() as $slug ) {
-			$meta_key = ShopperList::META_KEY_PREFIX . $slug;
-			if ( ! is_array( Users::get_site_user_meta( $user_id, $meta_key ) ) ) {
+			// Trust delete_user_meta's return value as the existence signal so a corrupt
+			// or non-array value still gets erased — a data-subject erase request must not
+			// silently retain personal data because the stored payload is malformed.
+			if ( ! Users::delete_site_user_meta( $user_id, ShopperList::META_KEY_PREFIX . $slug ) ) {
 				continue;
 			}
 
-			Users::delete_site_user_meta( $user_id, $meta_key );
 			$response['items_removed'] = true;
 			$response['messages'][]    = sprintf(
 				/* translators: %s: shopper-list label (e.g. "Saved for Later"). */
