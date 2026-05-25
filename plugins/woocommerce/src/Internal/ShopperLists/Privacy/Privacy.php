@@ -52,13 +52,10 @@ class Privacy extends \WC_Abstract_Privacy {
 	 * @internal
 	 *
 	 * @param string $email_address Email address the request applies to.
-	 * @param int    $page          Page number. Unused — output is bounded.
 	 *
 	 * @return array{data: array<int, array<string, mixed>>, done: bool}
 	 */
-	public function export_data( string $email_address, int $page = 1 ): array {
-		unset( $page );
-
+	public function export_data( string $email_address ): array {
 		$user = get_user_by( 'email', $email_address );
 		if ( ! $user instanceof \WP_User ) {
 			return array(
@@ -77,12 +74,11 @@ class Privacy extends \WC_Abstract_Privacy {
 				continue;
 			}
 
-			$group_id    = self::GROUP_ID_PREFIX . $slug;
-			$group_label = self::group_label_for_slug( $slug );
+			$group_id = self::GROUP_ID_PREFIX . $slug;
 			foreach ( $list->get_items() as $item ) {
 				$data[] = array(
 					'group_id'    => $group_id,
-					'group_label' => $group_label,
+					'group_label' => $slug,
 					'item_id'     => $item->get_key(),
 					'data'        => self::item_export_rows( $item ),
 				);
@@ -101,13 +97,10 @@ class Privacy extends \WC_Abstract_Privacy {
 	 * @internal
 	 *
 	 * @param string $email_address Email address the request applies to.
-	 * @param int    $page          Page number. Unused — see export_data().
 	 *
 	 * @return array{items_removed: bool, items_retained: bool, messages: array<int, string>, done: bool}
 	 */
-	public function erase_data( string $email_address, int $page = 1 ): array {
-		unset( $page );
-
+	public function erase_data( string $email_address ): array {
 		$response = array(
 			'items_removed'  => false,
 			'items_retained' => false,
@@ -196,19 +189,4 @@ class Privacy extends \WC_Abstract_Privacy {
 		return $rows;
 	}
 
-	/**
-	 * Friendly label for a list slug, used as the exporter's group heading.
-	 *
-	 * @param string $slug List slug.
-	 */
-	private static function group_label_for_slug( string $slug ): string {
-		switch ( $slug ) {
-			case 'saved-for-later':
-				return __( 'Saved for Later', 'woocommerce' );
-			case 'wishlist':
-				return __( 'Wishlist', 'woocommerce' );
-			default:
-				return $slug;
-		}
-	}
 }
