@@ -7110,6 +7110,14 @@ woocommerce.get("").parsed_response
 							"description": "Variation image data.",
 							"type": "object"
 						},
+						"gallery_image_ids": {
+							"required": false,
+							"description": "Variation gallery image IDs, excluding the featured image (which is set via \"image\"). Mirrors how galleries work on parent products.",
+							"type": "array",
+							"items": {
+								"type": "integer"
+							}
+						},
 						"attributes": {
 							"required": false,
 							"description": "List of attributes.",
@@ -7352,6 +7360,14 @@ woocommerce.get("").parsed_response
 							"description": "Variation image data.",
 							"type": "object"
 						},
+						"gallery_image_ids": {
+							"required": false,
+							"description": "Variation gallery image IDs, excluding the featured image (which is set via \"image\"). Mirrors how galleries work on parent products.",
+							"type": "array",
+							"items": {
+								"type": "integer"
+							}
+						},
 						"attributes": {
 							"required": false,
 							"description": "List of attributes.",
@@ -7587,6 +7603,14 @@ woocommerce.get("").parsed_response
 							"required": false,
 							"description": "Variation image data.",
 							"type": "object"
+						},
+						"gallery_image_ids": {
+							"required": false,
+							"description": "Variation gallery image IDs, excluding the featured image (which is set via \"image\"). Mirrors how galleries work on parent products.",
+							"type": "array",
+							"items": {
+								"type": "integer"
+							}
 						},
 						"attributes": {
 							"required": false,
