@@ -790,7 +790,9 @@ class ProductCollectionPage {
 		);
 
 		await this.page.keyboard.press( 'Escape' );
-		await blockCardPopover.waitFor( { state: 'hidden', timeout: 3000 } );
+		await blockCardPopover
+			.waitFor( { state: 'hidden', timeout: 3000 } )
+			.catch( () => {} );
 	}
 
 	async getCollectionHeading() {

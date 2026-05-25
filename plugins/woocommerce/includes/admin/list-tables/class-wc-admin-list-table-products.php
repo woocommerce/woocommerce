@@ -289,9 +289,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			return $attributes_data;
 		}
 
+		$product = $this->object;
+
 		$this->prefetch_quick_edit_attribute_terms();
 
-		foreach ( $this->object->get_attributes( 'edit' ) as $attribute ) {
+		foreach ( $product->get_attributes( 'edit' ) as $attribute ) {
 			if ( ! $attribute->is_taxonomy() ) {
 				continue;
 			}
@@ -343,7 +345,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * The name column renders hidden inline-edit data for each row. Without this cache,
 	 * rendering products with global attributes can run a separate term query per row.
 	 */
-	private function prefetch_quick_edit_attribute_terms() {
+	private function prefetch_quick_edit_attribute_terms(): void {
 		global $wp_query;
 
 		if ( $this->quick_edit_attribute_terms_prefetched ) {
@@ -378,7 +380,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 					continue;
 				}
 
-				$taxonomy = $attribute->get_name();
+				$taxonomy                       = $attribute->get_name();
 				$attribute_options[ $taxonomy ] = array_merge(
 					$attribute_options[ $taxonomy ] ?? array(),
 					$options
@@ -394,7 +396,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 *
 	 * @param array $attribute_options Product attribute term IDs grouped by taxonomy.
 	 */
-	private function cache_quick_edit_attribute_terms( $attribute_options ) {
+	private function cache_quick_edit_attribute_terms( $attribute_options ): void {
 		$missing_term_ids_by_taxonomy = array();
 		$missing_term_ids             = array();
 
@@ -414,8 +416,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				}
 
 				$this->quick_edit_attribute_terms[ $taxonomy ][ $term_id ] = null;
-				$missing_term_ids_by_taxonomy[ $taxonomy ][]             = $term_id;
-				$missing_term_ids[]                                       = $term_id;
+				$missing_term_ids_by_taxonomy[ $taxonomy ][]               = $term_id;
+				$missing_term_ids[]                                        = $term_id;
 			}
 		}
 
