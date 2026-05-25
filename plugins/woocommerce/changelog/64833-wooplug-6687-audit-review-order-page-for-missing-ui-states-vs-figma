@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Align the Customer Review Order page with the Figma design: ship the functional state gaps, swap to theme-aware classes, and route the customer to a thank-you view in place after any successful submission.
