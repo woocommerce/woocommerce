@@ -222,7 +222,7 @@ export default function AttributeItemTemplateEdit(
 							<DisplayStyleSwitcher
 								clientId={ clientId }
 								currentStyle={ displayStyle }
-								getFallbackInsertionPoint={
+								getFallbackDisplayStyleInsertionPoint={
 									getDisplayStyleInsertionPoint
 								}
 								onChange={ ( value ) => {

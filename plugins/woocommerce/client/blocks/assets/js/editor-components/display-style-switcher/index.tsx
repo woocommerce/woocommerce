@@ -3,7 +3,6 @@
  */
 import {
 	createBlock,
-	getBlockSupport,
 	getBlockTypes,
 	type BlockInstance,
 } from '@wordpress/blocks';
@@ -24,28 +23,29 @@ type DisplayStyleInsertionPoint = {
 	index: number;
 };
 
+type DisplayStyleBlockSupport = {
+	woocommerce?: {
+		innerBlockDisplayStyle?: unknown;
+	};
+};
+
+type GetFallbackDisplayStyleInsertionPoint = (
+	parentBlock: BlockInstance
+) => DisplayStyleInsertionPoint;
+
 type DisplayStyleBlockType = ReturnType< typeof getBlockTypes >[ number ] & {
 	ancestor?: readonly string[] | string;
 	usesContext?: readonly string[] | string;
+	supports?: DisplayStyleBlockSupport;
 };
-
-type DisplayStyleSupportReader = (
-	blockName: string,
-	feature: 'woocommerce.innerBlockDisplayStyle',
-	defaultSupports: false
-) => unknown;
 
 type DisplayStyleSwitcherProps = {
 	clientId: string;
 	currentStyle: string;
 	onChange: ( value: string ) => void;
 	contextKey?: string;
-	getFallbackInsertionPoint?: (
-		parentBlock: BlockInstance
-	) => DisplayStyleInsertionPoint;
+	getFallbackDisplayStyleInsertionPoint?: GetFallbackDisplayStyleInsertionPoint;
 };
-
-const getDisplayStyleSupport = getBlockSupport as DisplayStyleSupportReader;
 
 function isBlockInstance(
 	block: BlockInstance | null
@@ -65,13 +65,7 @@ function getBlockTypeList(
 function hasInnerBlockDisplayStyleSupport(
 	blockType: DisplayStyleBlockType
 ): boolean {
-	return (
-		getDisplayStyleSupport(
-			blockType.name,
-			'woocommerce.innerBlockDisplayStyle',
-			false
-		) === true
-	);
+	return blockType.supports?.woocommerce?.innerBlockDisplayStyle === true;
 }
 
 function isDisplayStyleCandidate(
@@ -118,12 +112,10 @@ function getCurrentDisplayStyleBlock(
 
 function getDisplayStyleInsertionPoint(
 	parentBlock: BlockInstance,
-	getFallbackInsertionPoint?: (
-		parentBlock: BlockInstance
-	) => DisplayStyleInsertionPoint
+	getFallbackDisplayStyleInsertionPoint?: GetFallbackDisplayStyleInsertionPoint
 ): DisplayStyleInsertionPoint {
 	return (
-		getFallbackInsertionPoint?.( parentBlock ) ?? {
+		getFallbackDisplayStyleInsertionPoint?.( parentBlock ) ?? {
 			rootClientId: parentBlock.clientId,
 			index: parentBlock.innerBlocks.length,
 		}
@@ -135,7 +127,7 @@ export const DisplayStyleSwitcher = ( {
 	currentStyle,
 	onChange,
 	contextKey = SELECTABLE_ITEMS_CONTEXT,
-	getFallbackInsertionPoint,
+	getFallbackDisplayStyleInsertionPoint,
 }: DisplayStyleSwitcherProps ) => {
 	const parentBlock = select( 'core/block-editor' ).getBlock( clientId );
 	const parentBlockName = parentBlock?.name;
@@ -187,7 +179,7 @@ export const DisplayStyleSwitcher = ( {
 				} else {
 					const insertionPoint = getDisplayStyleInsertionPoint(
 						parentBlock,
-						getFallbackInsertionPoint
+						getFallbackDisplayStyleInsertionPoint
 					);
 
 					insertBlock(
@@ -215,9 +207,7 @@ export const DisplayStyleSwitcher = ( {
 export function resetDisplayStyleBlock(
 	clientId: string,
 	defaultStyle: string,
-	getFallbackInsertionPoint?: (
-		parentBlock: BlockInstance
-	) => DisplayStyleInsertionPoint,
+	getFallbackDisplayStyleInsertionPoint?: GetFallbackDisplayStyleInsertionPoint,
 	contextKey = SELECTABLE_ITEMS_CONTEXT
 ) {
 	const parentBlock = select( 'core/block-editor' ).getBlock( clientId );
@@ -238,7 +228,7 @@ export function resetDisplayStyleBlock(
 	} else {
 		const insertionPoint = getDisplayStyleInsertionPoint(
 			parentBlock,
-			getFallbackInsertionPoint
+			getFallbackDisplayStyleInsertionPoint
 		);
 
 		insertBlock(

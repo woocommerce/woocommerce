@@ -26,33 +26,18 @@ type MockBlockType = {
 let mockBlockTypes: MockBlockType[] = [];
 let mockParentBlock: MockBlock | null = null;
 
-const mockCreateBlock = jest.fn( ( name, attributes = {} ) => ( {
-	name,
-	attributes,
-} ) );
+const mockCreateBlock = jest.fn(
+	( name: string, attributes: Record< string, unknown > = {} ) => ( {
+		name,
+		attributes,
+	} )
+);
 const mockInsertBlock = jest.fn();
 const mockReplaceBlock = jest.fn();
 
 jest.mock( '@wordpress/blocks', () => ( {
-	createBlock: ( ...args: unknown[] ) => mockCreateBlock( ...args ),
-	getBlockSupport: (
-		blockName: string,
-		feature: string,
-		defaultSupports: unknown
-	) => {
-		const blockType = mockBlockTypes.find(
-			( block ) => block.name === blockName
-		);
-
-		return (
-			feature.split( '.' ).reduce< unknown >( ( value, key ) => {
-				if ( value && typeof value === 'object' && key in value ) {
-					return ( value as Record< string, unknown > )[ key ];
-				}
-				return undefined;
-			}, blockType?.supports ) ?? defaultSupports
-		);
-	},
+	createBlock: ( name: string, attributes?: Record< string, unknown > ) =>
+		mockCreateBlock( name, attributes ),
 	getBlockTypes: () => mockBlockTypes,
 } ) );
 
@@ -329,7 +314,7 @@ describe( 'DisplayStyleSwitcher', () => {
 			<DisplayStyleSwitcher
 				clientId="parent-client-id"
 				currentStyle="woocommerce/product-filter-chips"
-				getFallbackInsertionPoint={ () => ( {
+				getFallbackDisplayStyleInsertionPoint={ () => ( {
 					rootClientId: 'group-client-id',
 					index: 0,
 				} ) }
