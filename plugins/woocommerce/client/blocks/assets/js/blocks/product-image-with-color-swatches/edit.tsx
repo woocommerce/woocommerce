@@ -9,7 +9,11 @@ import {
 import { __, sprintf } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { getSetting } from '@woocommerce/settings';
-import { isProductResponseItem, useProduct } from '@woocommerce/entities';
+import { isProductResponseItem } from '@woocommerce/entities';
+import { useCollection } from '@woocommerce/base-context/hooks';
+import { useProductDataContext } from '@woocommerce/shared-context';
+import type { ProductEntityResponse } from '@woocommerce/entities';
+import type { ProductResponseItem } from '@woocommerce/types';
 import type { BlockEditProps, TemplateArray } from '@wordpress/blocks';
 
 /**
@@ -110,9 +114,23 @@ function getSelectableItems(
 	} ) );
 }
 
+function getProductId( postId: unknown ): number | undefined {
+	if ( typeof postId === 'number' ) {
+		return postId;
+	}
+
+	if ( typeof postId === 'string' ) {
+		const parsedPostId = parseInt( postId, 10 );
+		return Number.isNaN( parsedPostId ) ? undefined : parsedPostId;
+	}
+
+	return undefined;
+}
+
 const Edit = ( {
 	context,
 }: BlockEditProps< Record< string, never > > ): JSX.Element => {
+	const productId = getProductId( context.postId );
 	const blockProps = useBlockProps( {
 		className: 'wc-block-product-image-with-color-swatches',
 	} );
@@ -120,7 +138,23 @@ const Edit = ( {
 		template: TEMPLATE,
 		allowedBlocks: ALLOWED_BLOCKS,
 	} );
-	const { product } = useProduct( context.postId as number );
+	const productDataContext = useProductDataContext();
+	const contextProduct = productDataContext.product;
+	const hasContext =
+		'hasContext' in productDataContext && productDataContext.hasContext;
+	const shouldFetchProduct = ! hasContext && !! productId && productId > 0;
+	const { results: products } = useCollection< ProductResponseItem >( {
+		namespace: '/wc/store/v1',
+		resourceName: 'products',
+		query: shouldFetchProduct ? { include: productId } : {},
+		shouldSelect: shouldFetchProduct,
+	} );
+	let product: ProductResponseItem | ProductEntityResponse | undefined;
+	if ( hasContext ) {
+		product = contextProduct;
+	} else if ( shouldFetchProduct ) {
+		product = products[ 0 ];
+	}
 	const termColors = getSetting< Record< string, string > >(
 		'productImageWithColorSwatchesTermColors',
 		{}
@@ -140,8 +174,6 @@ const Edit = ( {
 			groupLabel: colorAttribute?.name || __( 'Color', 'woocommerce' ),
 		} satisfies SelectableItemsContext< SwatchFields >;
 	}, [ product, termColors ] );
-
-	console.log(selectableContext)
 
 	return (
 		<BlockContextProvider
