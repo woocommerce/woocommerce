@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Improve color contrast for status marks on System Status tab to meet WCAG 2.2 AA requirements.
