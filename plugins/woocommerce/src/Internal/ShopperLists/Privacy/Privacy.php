@@ -136,20 +136,9 @@ class Privacy extends \WC_Abstract_Privacy {
 		$controller = wc_get_container()->get( ShopperListsController::class );
 
 		foreach ( $controller->get_supported_slugs() as $slug ) {
-			// Trust delete_user_meta's return value as the existence signal so a corrupt
-			// or non-array value still gets erased — a data-subject erase request must not
-			// silently retain personal data because the stored payload is malformed.
-			if ( ! Users::delete_site_user_meta( $user_id, ShopperList::META_KEY_PREFIX . $slug ) ) {
-				continue;
-			}
-
-			$response['items_removed'] = true;
-			$response['messages'][]    = sprintf(
-				/* translators: %s: shopper-list label (e.g. "Saved for Later"). */
-				__( 'Removed shopper list: %s', 'woocommerce' ),
-				self::group_label_for_slug( $slug )
-			);
+			Users::delete_site_user_meta( $user_id, ShopperList::META_KEY_PREFIX . $slug );
 		}
+		$response['items_removed'] = true;
 
 		return $response;
 	}
@@ -157,16 +146,23 @@ class Privacy extends \WC_Abstract_Privacy {
 	/**
 	 * Build the `data` array (one row per field) for a single saved item.
 	 *
-	 * Title precedence: current product name (if the product still resolves) →
-	 * snapshot captured at save time → `Product #<id>` placeholder. The URL row
-	 * is included only when the item is live (publish status on the product
-	 * and, for variations, the parent — see `ShopperListItem::is_live()`).
+	 * Title resolution mirrors `ShopperListItemSchema::get_item_response()`:
+	 * the current product title when the item is live, otherwise the snapshot
+	 * captured at save time. The URL row is included only when the item is
+	 * live (publish status on the product and, for variations, the parent —
+	 * see `ShopperListItem::is_live()`). Variation attributes are rendered
+	 * via core's `wc_get_formatted_variation()`.
 	 *
 	 * @param ShopperListItem $item Item to export.
 	 *
 	 * @return array<int, array{name: string, value: string}>
 	 */
 	private static function item_export_rows( ShopperListItem $item ): array {
+		$product = $item->get_product();
+		$title   = ( $item->is_live() && $product instanceof \WC_Product )
+			? $product->get_title()
+			: $item->get_product_title_at_save();
+
 		$rows = array(
 			array(
 				'name'  => __( 'Product ID', 'woocommerce' ),
@@ -174,7 +170,7 @@ class Privacy extends \WC_Abstract_Privacy {
 			),
 			array(
 				'name'  => __( 'Product', 'woocommerce' ),
-				'value' => self::resolve_item_title( $item ),
+				'value' => $title,
 			),
 		);
 
@@ -183,7 +179,7 @@ class Privacy extends \WC_Abstract_Privacy {
 				'name'  => __( 'Variation ID', 'woocommerce' ),
 				'value' => (string) $item->get_variation_id(),
 			);
-			$attributes = self::format_variation_attributes( $item->get_variation_attributes() );
+			$attributes = wc_get_formatted_variation( $item->get_variation_attributes(), true );
 			if ( '' !== $attributes ) {
 				$rows[] = array(
 					'name'  => __( 'Variation', 'woocommerce' ),
@@ -201,8 +197,7 @@ class Privacy extends \WC_Abstract_Privacy {
 			'value' => $item->get_date_added_gmt(),
 		);
 
-		$product = $item->get_product();
-		if ( $product instanceof \WC_Product && $item->is_live() ) {
+		if ( $item->is_live() && $product instanceof \WC_Product ) {
 			$rows[] = array(
 				'name'  => __( 'URL', 'woocommerce' ),
 				'value' => $product->get_permalink(),
@@ -210,44 +205,6 @@ class Privacy extends \WC_Abstract_Privacy {
 		}
 
 		return $rows;
-	}
-
-	/**
-	 * Resolve a human-readable title for the item.
-	 *
-	 * @param ShopperListItem $item Item to title.
-	 */
-	private static function resolve_item_title( ShopperListItem $item ): string {
-		$product = $item->get_product();
-		$title   = $product instanceof \WC_Product ? $product->get_name() : '';
-		if ( '' === $title ) {
-			$title = $item->get_product_title_at_save();
-		}
-		if ( '' === $title ) {
-			/* translators: %d: product ID for which no title could be resolved. */
-			$title = sprintf( __( 'Product #%d', 'woocommerce' ), $item->get_product_id() );
-		}
-		return $title;
-	}
-
-	/**
-	 * Format `[ 'attribute_color' => 'red', ... ]` as a `Color: red, ...` string
-	 * suitable for a single row value. Drops the storage `attribute_` prefix and
-	 * title-cases the remaining slug.
-	 *
-	 * @param array<string, string> $attributes Variation attributes as stored.
-	 */
-	private static function format_variation_attributes( array $attributes ): string {
-		$pairs = array();
-		foreach ( $attributes as $key => $value ) {
-			$name = (string) preg_replace( '/^attribute_/', '', (string) $key );
-			$name = ucwords( str_replace( array( '-', '_' ), ' ', $name ) );
-			if ( '' === $name || '' === (string) $value ) {
-				continue;
-			}
-			$pairs[] = sprintf( '%s: %s', $name, (string) $value );
-		}
-		return implode( ', ', $pairs );
 	}
 
 	/**

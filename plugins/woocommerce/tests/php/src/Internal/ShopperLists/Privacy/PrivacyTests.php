@@ -261,28 +261,12 @@ class PrivacyTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Eraser emits one message per removed list.
+	 * @testdox Eraser reports items_removed true once a matching user is found, even when no list data is stored.
 	 */
-	public function test_erase_emits_message_per_removed_list(): void {
-		$this->seed_list( self::SAVED_FOR_LATER_SLUG );
-		$this->seed_list( self::WISHLIST_SLUG );
-
+	public function test_erase_reports_removal_for_matched_user_regardless_of_stored_data(): void {
 		$result = $this->sut->erase_data( self::TEST_EMAIL );
 
-		$this->assertCount( 2, $result['messages'] );
-		$joined = implode( "\n", $result['messages'] );
-		$this->assertStringContainsString( 'Saved for Later', $joined );
-		$this->assertStringContainsString( 'Wishlist', $joined );
-	}
-
-	/**
-	 * @testdox Eraser reports items_removed false when there is nothing to erase.
-	 */
-	public function test_erase_reports_no_removal_when_nothing_is_stored(): void {
-		$result = $this->sut->erase_data( self::TEST_EMAIL );
-
-		$this->assertFalse( $result['items_removed'] );
-		$this->assertSame( array(), $result['messages'] );
+		$this->assertTrue( $result['items_removed'] );
 		$this->assertTrue( $result['done'] );
 	}
 
