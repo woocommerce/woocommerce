@@ -188,5 +188,4 @@ class Privacy extends \WC_Abstract_Privacy {
 
 		return $rows;
 	}
-
 }
