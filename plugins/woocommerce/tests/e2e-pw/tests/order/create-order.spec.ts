@@ -511,12 +511,10 @@ test.describe(
 				'wc-processing'
 			);
 			await expect(
-				page
-					.locator( 'div.note_content' )
-					.filter( {
-						hasText:
-							'Order status changed from Pending payment to Processing.',
-					} )
+				page.locator( 'div.note_content' ).filter( {
+					hasText:
+						'Order status changed from Pending payment to Processing.',
+				} )
 			).toBeVisible();
 		} );
 
