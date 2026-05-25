@@ -147,25 +147,33 @@ const Edit = ( props: EditProps ): JSX.Element => {
 					<ColorGradientSettingsDropdown
 						__experimentalIsRenderedInSidebar
 						settings={ [
-							{
-								label: __(
-									'Unselected Chip Text',
-									'woocommerce'
-								),
-								colorValue: chipText.color || customChipText,
-								onColorChange: ( colorValue: string ) => {
-									setChipText( colorValue );
-									setAttributes( {
-										customChipText: colorValue,
-									} );
-								},
-								resetAllFilter: () => {
-									setChipText( '' );
-									setAttributes( {
-										customChipText: '',
-									} );
-								},
-							},
+							...( ! hasColorSwatches
+								? [
+										{
+											label: __(
+												'Unselected Chip Text',
+												'woocommerce'
+											),
+											colorValue:
+												chipText.color ||
+												customChipText,
+											onColorChange: (
+												colorValue: string
+											) => {
+												setChipText( colorValue );
+												setAttributes( {
+													customChipText: colorValue,
+												} );
+											},
+											resetAllFilter: () => {
+												setChipText( '' );
+												setAttributes( {
+													customChipText: '',
+												} );
+											},
+										},
+								  ]
+								: [] ),
 							{
 								label: __(
 									'Unselected Chip Border',
@@ -186,48 +194,60 @@ const Edit = ( props: EditProps ): JSX.Element => {
 									} );
 								},
 							},
-							{
-								label: __(
-									'Unselected Chip Background',
-									'woocommerce'
-								),
-								colorValue:
-									chipBackground.color ||
-									customChipBackground,
-								onColorChange: ( colorValue: string ) => {
-									setChipBackground( colorValue );
-									setAttributes( {
-										customChipBackground: colorValue,
-									} );
-								},
-								resetAllFilter: () => {
-									setChipBackground( '' );
-									setAttributes( {
-										customChipBackground: '',
-									} );
-								},
-							},
-							{
-								label: __(
-									'Selected Chip Text',
-									'woocommerce'
-								),
-								colorValue:
-									selectedChipText.color ||
-									customSelectedChipText,
-								onColorChange: ( colorValue: string ) => {
-									setSelectedChipText( colorValue );
-									setAttributes( {
-										customSelectedChipText: colorValue,
-									} );
-								},
-								resetAllFilter: () => {
-									setSelectedChipText( '' );
-									setAttributes( {
-										customSelectedChipText: '',
-									} );
-								},
-							},
+							...( ! hasColorSwatches
+								? [
+										{
+											label: __(
+												'Unselected Chip Background',
+												'woocommerce'
+											),
+											colorValue:
+												chipBackground.color ||
+												customChipBackground,
+											onColorChange: (
+												colorValue: string
+											) => {
+												setChipBackground( colorValue );
+												setAttributes( {
+													customChipBackground:
+														colorValue,
+												} );
+											},
+											resetAllFilter: () => {
+												setChipBackground( '' );
+												setAttributes( {
+													customChipBackground: '',
+												} );
+											},
+										},
+										{
+											label: __(
+												'Selected Chip Text',
+												'woocommerce'
+											),
+											colorValue:
+												selectedChipText.color ||
+												customSelectedChipText,
+											onColorChange: (
+												colorValue: string
+											) => {
+												setSelectedChipText(
+													colorValue
+												);
+												setAttributes( {
+													customSelectedChipText:
+														colorValue,
+												} );
+											},
+											resetAllFilter: () => {
+												setSelectedChipText( '' );
+												setAttributes( {
+													customSelectedChipText: '',
+												} );
+											},
+										},
+								  ]
+								: [] ),
 							{
 								label: __(
 									'Selected Chip Border',
@@ -249,28 +269,37 @@ const Edit = ( props: EditProps ): JSX.Element => {
 									} );
 								},
 							},
-							{
-								label: __(
-									'Selected Chip Background',
-									'woocommerce'
-								),
-								colorValue:
-									selectedChipBackground.color ||
-									customSelectedChipBackground,
-								onColorChange: ( colorValue: string ) => {
-									setSelectedChipBackground( colorValue );
-									setAttributes( {
-										customSelectedChipBackground:
-											colorValue,
-									} );
-								},
-								resetAllFilter: () => {
-									setSelectedChipBackground( '' );
-									setAttributes( {
-										customSelectedChipBackground: '',
-									} );
-								},
-							},
+							...( ! hasColorSwatches
+								? [
+										{
+											label: __(
+												'Selected Chip Background',
+												'woocommerce'
+											),
+											colorValue:
+												selectedChipBackground.color ||
+												customSelectedChipBackground,
+											onColorChange: (
+												colorValue: string
+											) => {
+												setSelectedChipBackground(
+													colorValue
+												);
+												setAttributes( {
+													customSelectedChipBackground:
+														colorValue,
+												} );
+											},
+											resetAllFilter: () => {
+												setSelectedChipBackground( '' );
+												setAttributes( {
+													customSelectedChipBackground:
+														'',
+												} );
+											},
+										},
+								  ]
+								: [] ),
 						] }
 						panelId={ clientId }
 						{ ...colorGradientSettings }
