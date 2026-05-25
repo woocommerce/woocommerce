@@ -44,7 +44,9 @@ import type {
 
 const INNER_CHIPS = 'woocommerce/product-filter-chips';
 
-const getDisplayStyleInsertionPoint = ( parentBlock: BlockInstance ) => {
+const getFallbackDisplayStyleInsertionPoint = (
+	parentBlock: BlockInstance
+) => {
 	const groupBlock = parentBlock.innerBlocks.find(
 		( block ) => block.name === 'core/group'
 	);
@@ -198,7 +200,7 @@ export default function AttributeItemTemplateEdit(
 						resetDisplayStyleBlock(
 							clientId,
 							INNER_CHIPS,
-							getDisplayStyleInsertionPoint
+							getFallbackDisplayStyleInsertionPoint
 						);
 					} }
 				>
@@ -210,7 +212,7 @@ export default function AttributeItemTemplateEdit(
 							resetDisplayStyleBlock(
 								clientId,
 								INNER_CHIPS,
-								getDisplayStyleInsertionPoint
+								getFallbackDisplayStyleInsertionPoint
 							);
 						} }
 						isShownByDefault
@@ -223,7 +225,7 @@ export default function AttributeItemTemplateEdit(
 								clientId={ clientId }
 								currentStyle={ displayStyle }
 								getFallbackDisplayStyleInsertionPoint={
-									getDisplayStyleInsertionPoint
+									getFallbackDisplayStyleInsertionPoint
 								}
 								onChange={ ( value ) => {
 									setAttributes( {
