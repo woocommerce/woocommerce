@@ -27,7 +27,7 @@ class StockNotification extends Notification {
 		self::EVENT_ON_BACKORDER,
 	);
 
-	const ICON = 'https://s.wp.com/wp-content/mu-plugins/notes/images/update-payment-2x.png';
+	const ICON = 'https://s.wp.com/wp-content/mu-plugins/notes/images/tos-warning-note-icon.png';
 
 	/**
 	 * The stock event that triggered this notification.
