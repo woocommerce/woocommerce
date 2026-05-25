@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { privateApis as themeProviderPrivateApis } from '@wordpress/theme';
 import { UnsavedChangesWarning } from '@wordpress/editor';
@@ -36,8 +35,8 @@ export function ProductsApp() {
 	return (
 		<NewNavigationProvider>
 			<UnsavedChangesWarning />
-			<RouterProvider>
-				<ThemeProvider>
+			<RouterProvider pathArg="page">
+				<ThemeProvider isRoot>
 					<ProductsLayout />
 				</ThemeProvider>
 			</RouterProvider>

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Show a clear permission error message when users without install_plugins capability attempt to install plugins

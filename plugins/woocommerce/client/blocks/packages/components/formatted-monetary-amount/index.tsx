@@ -121,6 +121,7 @@ const FormattedMonetaryAmount = ( {
 		<NumberFormat
 			className={ classes }
 			displayType={ displayType }
+			translate="no"
 			{ ...numberFormatProps }
 			value={ priceValue }
 			onValueChange={ onValueChangeWrapper }

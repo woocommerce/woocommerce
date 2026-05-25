@@ -377,7 +377,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		// phpcs:ignore Generic.Commenting.Todo.TaskFound
-		// @todo Remove these assignements when refactoring segmenter classes to use query objects.
+		// @todo Remove these assignments when refactoring segmenter classes to use query objects.
 		$totals_query    = array(
 			'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
 			'where_time_clause' => $where_time,
@@ -807,10 +807,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				// phpcs:ignore Generic.Commenting.Todo.TaskFound
-				// TODO: use the %i placeholder to prepare the table name when available in the minimum required WordPress version.
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"UPDATE {$orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
+				'UPDATE %i SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d',
+				$orders_stats_table,
 				$order_id,
 				$customer_id
 			)

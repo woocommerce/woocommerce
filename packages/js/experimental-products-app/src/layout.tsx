@@ -1,17 +1,14 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
 import {
 	useViewportMatch,
 	useResizeObserver,
 	useReducedMotion,
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import {
-	EditorSnackbars,
-	privateApis as editorPrivateApis,
-} from '@wordpress/editor';
+import { privateApis as editorPrivateApis } from '@wordpress/editor';
+import { SnackbarNotices } from '@wordpress/notices';
 import {
 	__unstableMotion as motion,
 	__unstableAnimatePresence as AnimatePresence,
@@ -39,6 +36,7 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 	const disableMotion = useReducedMotion();
 
 	const { key: routeKey, areas, widths } = route;
+	const mobileArea = areas.mobile === true ? areas.content : areas.mobile;
 
 	return (
 		<>
@@ -80,7 +78,7 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 							</NavigableRegion>
 						) }
 
-					<EditorSnackbars />
+					<SnackbarNotices className="product_page_woocommerce-products-dashboard-snackbar" />
 
 					{ ! isMobileViewport && areas.content && (
 						<div
@@ -93,16 +91,13 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 						</div>
 					) }
 
-					{ ! isMobileViewport && areas.edit && (
-						<div
-							className="edit-site-layout__area"
-							style={ {
-								maxWidth: widths?.edit,
-							} }
-						>
-							{ areas.edit }
+					{ isMobileViewport && mobileArea && (
+						<div className="edit-site-layout__area">
+							{ mobileArea }
 						</div>
 					) }
+
+					{ ! isMobileViewport && areas.edit }
 				</div>
 			</div>
 		</>

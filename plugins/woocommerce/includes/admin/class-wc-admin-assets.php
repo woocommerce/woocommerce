@@ -38,6 +38,58 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_command_palette_assets' ) );
+			add_action( 'admin_notices', array( $this, 'render_lost_connection_notice' ) );
+		}
+
+		/**
+		 * Render WordPress core's #lost-connection-notice markup on Woo admin
+		 * screens that don't already get it for free.
+		 *
+		 * WP core renders this element on classic post-type edit pages (via
+		 * edit-form-advanced.php), and wp-autosave.js toggles it in response
+		 * to Heartbeat events. By echoing the same markup here and enqueueing
+		 * the `autosave` script (see admin_scripts()), Woo admin screens
+		 * inherit the same offline awareness without any new copy, styling,
+		 * or behavior.
+		 *
+		 * Translation strings use the 'default' text domain so WP core's
+		 * existing translations apply.
+		 *
+		 * Skipped on:
+		 * - Classic post-type edit screens (WP core already renders the notice).
+		 * - wc-admin React pages (they use their own layout rather than the
+		 *   standard admin_notices position).
+		 *
+		 * @return void
+		 */
+		public function render_lost_connection_notice() {
+			$screen = get_current_screen();
+			if ( ! $screen ) {
+				return;
+			}
+
+			if ( 'post' === $screen->base ) {
+				return;
+			}
+
+			$is_wc_admin_page = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
+				&& \Automattic\WooCommerce\Admin\PageController::is_admin_page();
+			if ( $is_wc_admin_page ) {
+				return;
+			}
+
+			if ( ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
+				return;
+			}
+			?>
+			<div id="lost-connection-notice" class="notice error hidden">
+				<p>
+					<span class="spinner"></span>
+					<strong><?php esc_html_e( 'Connection lost.' ); /* phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- Reusing WP core translation. */ ?></strong>
+					<?php esc_html_e( 'Saving has been disabled until you are reconnected.' ); /* phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- Reusing WP core translation. */ ?>
+				</p>
+			</div>
+			<?php
 		}
 
 		/**
@@ -414,6 +466,14 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'woocommerce_admin' );
 				wp_enqueue_script( 'wc-enhanced-select' );
 
+				// Pair the #lost-connection-notice markup with core's autosave script.
+				// See render_lost_connection_notice() for scoping rationale.
+				$is_wc_admin_page = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
+					&& \Automattic\WooCommerce\Admin\PageController::is_admin_page();
+				if ( 'post' !== ( $screen->base ?? '' ) && ! $is_wc_admin_page ) {
+					wp_enqueue_script( 'autosave' );
+				}
+
 				wp_enqueue_script( 'jquery-ui-sortable' );
 				wp_enqueue_script( 'jquery-ui-autocomplete' );
 
@@ -431,7 +491,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_delete_product_notice'        => __( 'This product has produced sales and may be linked to existing orders. Are you sure you want to delete it?', 'woocommerce' ),
 					'i18n_remove_personal_data_notice'  => __( 'This action cannot be reversed. Are you sure you wish to erase personal data from the selected orders?', 'woocommerce' ),
 					'i18n_confirm_delete'               => __( 'Are you sure you wish to delete this item?', 'woocommerce' ),
-					'i18n_global_unique_id_error'       => __( 'Please enter only numbers and hyphens (-).', 'woocommerce' ),
+					'i18n_global_unique_id_error'       => __( 'Enter only numbers and hyphens (-). The letter X is allowed only as the final ISBN-10 check digit.', 'woocommerce' ),
 					'decimal_point'                     => $decimal,
 					'mon_decimal_point'                 => wc_get_price_decimal_separator(),
 					'ajax_url'                          => admin_url( 'admin-ajax.php' ),
@@ -490,7 +550,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			/* phpcs:disable */
 			if ( in_array( $screen_id, array( 'product', 'edit-product' ) ) ) {
 				wp_enqueue_media();
-				wp_register_script( 'wc-admin-product-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'media-models' ), $version );
+				wp_register_script( 'wc-admin-product-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'media-models', 'underscore' ), $version );
 				wp_register_script( 'wc-admin-variation-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product-variation' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-serializejson', 'media-models', 'backbone', 'jquery-ui-sortable', 'wc-backbone-modal', 'wp-data', 'wp-notices' ), $version );
 
 				wp_enqueue_script( 'wc-admin-product-meta-boxes' );
@@ -642,6 +702,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_permission_revoke'                          => __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
 					'i18n_tax_rate_already_exists'                    => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
 					'i18n_delete_note'                                => __( 'Are you sure you wish to delete this note? This action cannot be undone.', 'woocommerce' ),
+					'i18n_delete_customer_note'                       => __( 'Are you sure you wish to delete this note? This action cannot be undone. Caution: This only removes the note from your records — it does not recall the email already sent to the customer.', 'woocommerce' ),
+					'i18n_no_notes_yet'                               => __( 'There are no notes yet.', 'woocommerce' ),
 					'i18n_apply_coupon'                               => __( 'Enter a coupon code to apply. Discounts are applied to line totals, before taxes.', 'woocommerce' ),
 					'i18n_add_fee'                                    => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ),
 					'i18n_attribute_name_placeholder'                 => __( 'New attribute', 'woocommerce' ),

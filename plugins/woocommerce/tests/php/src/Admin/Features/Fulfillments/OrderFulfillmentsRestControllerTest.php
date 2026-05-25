@@ -1903,4 +1903,379 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		wp_set_current_user( 0 );
 	}
+
+	/**
+	 * @testdox Should accept customer_note in update request and forward sanitized value to notification hook.
+	 */
+	public function test_update_fulfillment_with_customer_note_fires_notification_with_sanitized_note(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'fulfilled',
+				'is_fulfilled' => true,
+			)
+		);
+
+		$captured_note = null;
+		$callback      = function ( $order_id, $fulfillment_obj, $order_obj, $customer_note ) use ( &$captured_note ) {
+			unset( $order_id, $fulfillment_obj, $order_obj );
+			$captured_note = $customer_note;
+		};
+		add_action( 'woocommerce_fulfillment_updated_notification', $callback, 10, 4 );
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'          => 'fulfilled',
+					'is_fulfilled'    => true,
+					'notify_customer' => true,
+					'customer_note'   => "Hello customer!\n<script>alert('xss')</script>",
+					'meta_data'       => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'Update with customer_note should succeed' );
+		$this->assertNotNull( $captured_note, 'Notification hook should have been fired with customer_note' );
+		$this->assertStringNotContainsString( '<script>', $captured_note, 'Script tags should be stripped by wp_kses_post' );
+		$this->assertStringContainsString( 'Hello customer!', $captured_note, 'Legitimate note text should be preserved' );
+
+		remove_action( 'woocommerce_fulfillment_updated_notification', $callback, 10 );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should preserve safe HTML (links, bold, italic) in customer_note.
+	 */
+	public function test_update_fulfillment_preserves_safe_html_in_customer_note(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'fulfilled',
+				'is_fulfilled' => true,
+			)
+		);
+
+		$captured_note = null;
+		$callback      = function ( $order_id, $fulfillment_obj, $order_obj, $customer_note ) use ( &$captured_note ) {
+			unset( $order_id, $fulfillment_obj, $order_obj );
+			$captured_note = $customer_note;
+		};
+		add_action( 'woocommerce_fulfillment_updated_notification', $callback, 10, 4 );
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'          => 'fulfilled',
+					'is_fulfilled'    => true,
+					'notify_customer' => true,
+					'customer_note'   => 'Please <strong>call us</strong> at <a href="https://example.com">our site</a>.',
+					'meta_data'       => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'Update with HTML customer_note should succeed' );
+		$this->assertNotNull( $captured_note, 'Notification hook should have been fired with customer_note' );
+		$this->assertStringContainsString( '<strong>call us</strong>', $captured_note, 'Safe bold markup should be preserved' );
+		$this->assertStringContainsString( '<a href="https://example.com">our site</a>', $captured_note, 'Safe link markup should be preserved' );
+
+		remove_action( 'woocommerce_fulfillment_updated_notification', $callback, 10 );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should fire notification with empty customer_note when parameter is omitted.
+	 */
+	public function test_update_fulfillment_without_customer_note_fires_notification_with_empty_note(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'fulfilled',
+				'is_fulfilled' => true,
+			)
+		);
+
+		$captured_note = null;
+		$callback      = function ( $order_id, $fulfillment_obj, $order_obj, $customer_note ) use ( &$captured_note ) {
+			unset( $order_id, $fulfillment_obj, $order_obj );
+			$captured_note = $customer_note;
+		};
+		add_action( 'woocommerce_fulfillment_updated_notification', $callback, 10, 4 );
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'          => 'fulfilled',
+					'is_fulfilled'    => true,
+					'notify_customer' => true,
+					'meta_data'       => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'Update without customer_note should succeed' );
+		$this->assertNotNull( $captured_note, 'Notification hook should have been fired' );
+		$this->assertSame( '', $captured_note, 'Customer note should be empty when not provided' );
+
+		remove_action( 'woocommerce_fulfillment_updated_notification', $callback, 10 );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should not fire notification hook when notify_customer is false even with customer_note.
+	 */
+	public function test_update_fulfillment_with_note_but_no_notification_does_not_fire_hook(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'fulfilled',
+				'is_fulfilled' => true,
+			)
+		);
+
+		$hook_fired = false;
+		$callback   = function () use ( &$hook_fired ) {
+			$hook_fired = true;
+		};
+		add_action( 'woocommerce_fulfillment_updated_notification', $callback );
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'          => 'fulfilled',
+					'is_fulfilled'    => true,
+					'notify_customer' => false,
+					'customer_note'   => 'This should not be sent',
+					'meta_data'       => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'Update should succeed' );
+		$this->assertFalse( $hook_fired, 'Notification hook should not fire when notify_customer is false' );
+
+		remove_action( 'woocommerce_fulfillment_updated_notification', $callback );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * A `_date_fulfilled` value supplied via meta_data on create must be routed
+	 * through the UTC normalization contract (set_date_fulfilled), and the
+	 * response must surface it as ISO 8601 with a 'Z' suffix.
+	 */
+	public function test_create_fulfillment_normalizes_date_fulfilled_meta_to_utc() {
+		$original_timezone = get_option( 'timezone_string' );
+		$original_offset   = get_option( 'gmt_offset' );
+
+		update_option( 'timezone_string', 'America/Los_Angeles' );
+		update_option( 'gmt_offset', '' );
+
+		$date_fulfilled = $this->dispatch_create_with_date_fulfilled_meta( '2025-01-15 10:30:00' );
+
+		update_option( 'timezone_string', $original_timezone );
+		update_option( 'gmt_offset', $original_offset );
+
+		// Bare MySQL string is treated as site-local (LA, UTC-8 in January) and
+		// surfaced as ISO 8601 with explicit 'Z'.
+		$this->assertSame( '2025-01-15T18:30:00Z', $date_fulfilled );
+	}
+
+	/**
+	 * Dispatches a create-fulfillment REST request with a `_date_fulfilled` meta
+	 * value and returns the value the API surfaces back for that key.
+	 *
+	 * @param string $date_fulfilled Value to send in `meta_data['_date_fulfilled']`.
+	 * @return string|null
+	 */
+	private function dispatch_create_with_date_fulfilled_meta( string $date_fulfilled ): ?string {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+
+		// Use is_fulfilled=false so the data store does not unconditionally overwrite
+		// date_fulfilled with current_time() during create; this isolates the test to
+		// the meta-data normalization path under test.
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/fulfillments' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'entity_type'  => WC_Order::class,
+					'entity_id'    => '' . $order->get_id(),
+					'status'       => 'unfulfilled',
+					'is_fulfilled' => false,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => '_date_fulfilled',
+							'value' => $date_fulfilled,
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertIsArray( $data );
+		wp_set_current_user( 0 );
+
+		foreach ( $data['meta_data'] as $meta ) {
+			if ( '_date_fulfilled' === $meta['key'] ) {
+				return $meta['value'];
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * The /metadata endpoints must format `_date_fulfilled` as ISO 8601 with 'Z'
+	 * suffix instead of leaking the raw 'Y-m-d H:i:s' UTC storage form.
+	 */
+	public function test_get_fulfillment_meta_formats_date_fulfilled_as_iso8601() {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+
+		wp_set_current_user( 1 );
+
+		// Use is_fulfilled=false so the data store does not overwrite the
+		// _date_fulfilled meta value with current_time() during create.
+		$create = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/fulfillments' );
+		$create->set_header( 'content-type', 'application/json' );
+		$create->set_body(
+			wp_json_encode(
+				array(
+					'entity_type'  => WC_Order::class,
+					'entity_id'    => '' . $order->get_id(),
+					'status'       => 'unfulfilled',
+					'is_fulfilled' => false,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => '_date_fulfilled',
+							'value' => '2025-01-15T10:30:00Z',
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+		$create_response = $this->server->dispatch( $create );
+		$this->assertEquals( WP_Http::CREATED, $create_response->get_status() );
+		$fulfillment_id = $create_response->get_data()['id'];
+
+		$get          = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment_id . '/metadata' );
+		$get_response = $this->server->dispatch( $get );
+		$this->assertEquals( WP_Http::OK, $get_response->get_status() );
+
+		$get_meta = null;
+		foreach ( $get_response->get_data() as $meta ) {
+			if ( '_date_fulfilled' === $meta['key'] ) {
+				$get_meta = $meta['value'];
+				break;
+			}
+		}
+		$this->assertSame( '2025-01-15T10:30:00Z', $get_meta );
+
+		wp_set_current_user( 0 );
+	}
 }

@@ -44,12 +44,10 @@ const entries = {
 		'./assets/js/base/stores/woocommerce/cart.ts',
 	'@woocommerce/stores/store-notices':
 		'./assets/js/base/stores/store-notices.ts',
-	'@woocommerce/stores/woocommerce/product-context':
-		'./assets/js/base/stores/woocommerce/product-context.ts',
-	'@woocommerce/stores/woocommerce/product-data':
-		'./assets/js/base/stores/woocommerce/product-data.ts',
 	'@woocommerce/stores/woocommerce/products':
 		'./assets/js/base/stores/woocommerce/products.ts',
+	'@woocommerce/stores/woocommerce/shopper-lists':
+		'./assets/js/base/stores/woocommerce/shopper-lists.ts',
 };
 
 module.exports = {
@@ -82,12 +80,8 @@ module.exports = {
 			combineAssets: true,
 			combinedOutputFile: './interactivity-blocks-frontend-assets.php',
 			requestToExternalModule( request ) {
-				if (
-					request.startsWith( '@woocommerce/stores/woocommerce/' )
-				) {
+				if ( request.startsWith( '@woocommerce/stores/' ) ) {
 					return `module ${ request }`;
-				} else if ( request.startsWith( '@woocommerce/stores/' ) ) {
-					return `import ${ request }`;
 				}
 			},
 		} ),

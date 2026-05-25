@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Internal\ProductFilters\Params;
 
 /**
@@ -36,8 +37,9 @@ class ProductFilters extends AbstractBlock {
 	 *                           not in the post content on editor load.
 	 */
 	protected function enqueue_data( array $attributes = array() ) {
-		global $pagenow;
 		parent::enqueue_data( $attributes );
+
+		$this->asset_data_registry->add( 'globalStylesColors', wp_get_global_styles( array( 'color' ) ) );
 
 		BlocksSharedState::load_store_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
@@ -99,23 +101,15 @@ class ProductFilters extends AbstractBlock {
 			'activeFilters' => $active_filters,
 		);
 
-		$classes = '';
-		$styles  = '';
-		$tags    = new \WP_HTML_Tag_Processor( $content );
-
-		if ( $tags->next_tag( array( 'class_name' => 'wc-block-product-filters' ) ) ) {
-			$classes = $tags->get_attribute( 'class' );
-			$styles  = $tags->get_attribute( 'style' );
-		}
-
 		$wrapper_attributes = array(
-			'class'                            => $classes,
+			'class'                            => 'wc-block-product-filters',
 			'data-wp-interactive'              => $this->get_full_block_name(),
+			'data-wp-init--colors'             => 'callbacks.initColors',
 			'data-wp-watch--scrolling'         => 'callbacks.scrollLimit',
 			'data-wp-on--keyup'                => 'actions.closeOverlayOnEscape',
-			'data-wp-context'                  => wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wp-context'                  => (string) wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			'data-wp-class--is-overlay-opened' => 'context.isOverlayOpened',
-			'style'                            => $styles,
+			'style'                            => $this->get_css_variables( $attributes ),
 		);
 
 		// TODO: Remove this conditional once the fix is released in WP. https://github.com/woocommerce/gutenberg/pull/4.
@@ -191,6 +185,33 @@ class ProductFilters extends AbstractBlock {
 			'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">%s</svg>',
 			$icons[ $name ]
 		);
+	}
+
+	/**
+	 * Get CSS custom properties from block attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return string CSS custom properties string.
+	 */
+	private function get_css_variables( $attributes ) {
+		$styles = array();
+
+		$bg = StyleAttributesUtils::get_background_color_class_and_style( $attributes );
+		if ( ! empty( $bg['value'] ) ) {
+			$styles[] = sprintf( '--wc-product-filters-background-color: %s', $bg['value'] );
+		}
+
+		$text = StyleAttributesUtils::get_text_color_class_and_style( $attributes );
+		if ( ! empty( $text['value'] ) ) {
+			$styles[] = sprintf( '--wc-product-filters-text-color: %s', $text['value'] );
+		}
+
+		$block_gap = $attributes['style']['spacing']['blockGap'] ?? '';
+		if ( $block_gap ) {
+			$styles[] = sprintf( '--wc-product-filter-block-spacing: %s', StyleAttributesUtils::get_spacing_value( $block_gap ) );
+		}
+
+		return $styles ? implode( ';', $styles ) . ';' : '';
 	}
 
 	/**

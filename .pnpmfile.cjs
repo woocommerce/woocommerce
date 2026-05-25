@@ -84,6 +84,12 @@ function updateConfig(
 			if ( dependencyFile.files ) {
 				for ( const entry in dependencyFile.files ) {
 					const entryValue = dependencyFile.files[ entry ];
+					// Since 'build-module' and 'build-types' are generated simultaneously, it is more efficient for WireIt to track changes
+					// to 'build-types' only. This approach also enables a clear separation of the CJS and ESM watch build cascades.
+					if ( entryValue === 'build-module' && dependencyFile.files.includes( 'build-types' ) ) {
+						continue;
+					}
+
 					let normalizedValue;
 					if ( entryValue.startsWith( '!' ) ) {
 						normalizedValue =

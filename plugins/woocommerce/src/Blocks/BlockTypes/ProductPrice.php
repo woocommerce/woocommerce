@@ -71,6 +71,17 @@ class ProductPrice extends AbstractBlock {
 			$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
 			$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product->is_type( ProductType::VARIABLE );
 
+			if ( $is_interactive ) {
+				// phpcs:ignore Generic.Commenting.DocComment.MissingShort -- Type hint for PHPStan.
+				/** @var \WC_Product_Variable $product */
+				$prices_vary = $product->get_variation_sale_price( 'min' ) !== $product->get_variation_sale_price( 'max' )
+					|| $product->get_variation_regular_price( 'min' ) !== $product->get_variation_regular_price( 'max' );
+
+				if ( ! $prices_vary ) {
+					$is_interactive = false;
+				}
+			}
+
 			$wrapper_attributes     = array(
 				'style' => $styles_and_classes['styles'] ?? '',
 				'class' => $styles_and_classes['classes'] ?? '',
@@ -79,69 +90,14 @@ class ProductPrice extends AbstractBlock {
 			$context_directive      = '';
 
 			if ( $is_interactive ) {
-				// phpcs:ignore Generic.Commenting.DocComment.MissingShort -- Type hint for PHPStan.
-				/** @var \WC_Product_Variable $product */
-				// Check if variation prices differ (replicates logic from WC_Product_Variable::get_available_variation).
-				$prices_vary = $product->get_variation_sale_price( 'min' ) !== $product->get_variation_sale_price( 'max' )
-					|| $product->get_variation_regular_price( 'min' ) !== $product->get_variation_regular_price( 'max' );
-
-				$formatted_variations_data = array();
-
-				if ( $prices_vary ) {
-					$variations_data = $product->get_available_variations( 'objects' );
-
-					foreach ( $variations_data as $variation ) {
-						/**
-						 * Filter whether to show variation price.
-						 * Replicates the filter from WC_Product_Variable::get_available_variation().
-						 *
-						 * @since 2.4.0
-						 *
-						 * @param bool                  $show_price Whether to show the price.
-						 * @param \WC_Product_Variable  $product    The variable product.
-						 * @param \WC_Product_Variation $variation  The variation.
-						 */
-						$show_variation_price = apply_filters(
-							'woocommerce_show_variation_price',
-							true,
-							$product,
-							$variation
-						);
-
-						if ( ! $show_variation_price ) {
-							continue;
-						}
-
-						$formatted_variations_data[ $variation->get_id() ] = array(
-							'price_html' => '<span class="price">' . $variation->get_price_html() . '</span>',
-						);
-					}
-				}
-
-				if ( empty( $formatted_variations_data ) ) {
-					$is_interactive = false;
-				} else {
-					wp_interactivity_config(
-						'woocommerce',
-						array(
-							'products' => array(
-								$product->get_id() => array(
-									'price_html' => $product->get_price_html(),
-									'variations' => $formatted_variations_data,
-								),
-							),
-						)
-					);
-
-					wp_enqueue_script_module( 'woocommerce/product-elements' );
-					$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
-					$context_directive                         = wp_interactivity_data_wp_context(
-						array(
-							'productElementKey' => 'price_html',
-						)
-					);
-					$interactive_attributes                    = 'data-wp-watch="callbacks.updateValue" aria-live="polite" aria-atomic="true"';
-				}
+				wp_enqueue_script_module( 'woocommerce/product-elements' );
+				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
+				$context_directive                         = wp_interactivity_data_wp_context(
+					array(
+						'productElementKey' => 'price_html',
+					)
+				);
+				$interactive_attributes                    = 'data-wp-watch="callbacks.updateValue" aria-live="polite" aria-atomic="true"';
 			}
 
 			return sprintf(

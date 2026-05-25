@@ -247,6 +247,32 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * V4 must format `_date_fulfilled` meta as ISO 8601 with 'Z' suffix in
+	 * responses, matching V3 and the storage UTC contract — clients should not
+	 * see the raw 'Y-m-d H:i:s' form.
+	 */
+	public function test_get_fulfillment_formats_date_fulfilled_meta_as_iso8601() {
+		wp_set_current_user( $this->admin_user_id );
+
+		$this->test_fulfillment->set_date_fulfilled( '2025-01-15T10:30:00Z' );
+		$this->test_fulfillment->save();
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data           = $response->get_data();
+		$date_fulfilled = null;
+		foreach ( $data['meta_data'] as $meta ) {
+			if ( '_date_fulfilled' === $meta['key'] ) {
+				$date_fulfilled = $meta['value'];
+				break;
+			}
+		}
+		$this->assertSame( '2025-01-15T10:30:00Z', $date_fulfilled );
+	}
+
+	/**
 	 * Test get_fulfillment with invalid ID
 	 */
 	public function test_get_fulfillment_invalid_id() {
@@ -376,6 +402,32 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Regression test for WOO13-227: an unauthenticated request must not be
+	 * able to read a guest order's fulfillments. The owner-read check compares
+	 * get_current_user_id() to $order->get_customer_id(); for guest orders
+	 * both are 0, so the check needs a `get_current_user_id() > 0` guard.
+	 */
+	public function test_permission_check_unauthenticated_cannot_read_guest_order_fulfillments() {
+		$guest_order       = WC_Helper_Order::create_order( 0 );
+		$guest_fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => $guest_order->get_id() )
+		);
+
+		wp_set_current_user( 0 );
+
+		$list_request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
+		$list_request->set_param( 'order_id', $guest_order->get_id() );
+		$list_response = rest_get_server()->dispatch( $list_request );
+		$this->assertSame( 401, $list_response->get_status() );
+
+		$get_request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $guest_fulfillment->get_id() );
+		$get_response = rest_get_server()->dispatch( $get_request );
+		$this->assertSame( 401, $get_response->get_status() );
+
+		WC_Helper_Order::delete_order( $guest_order->get_id() );
 	}
 
 	/**

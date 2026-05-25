@@ -34,8 +34,7 @@ class Text extends Abstract_Block_Renderer {
 		$block_attributes     = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
 			array(
-				'textAlign' => 'left',
-				'style'     => array(),
+				'style' => array(),
 			)
 		);
 		$html                 = new \WP_HTML_Tag_Processor( $block_content );
@@ -76,11 +75,11 @@ class Text extends Abstract_Block_Renderer {
 			$additional_styles['color'] = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000'; // Fallback for the text color.
 		}
 
-		$additional_styles['text-align'] = 'left';
+		$additional_styles['text-align'] = $rendering_context->get_default_text_align();
 		if ( ! empty( $parsed_block['attrs']['textAlign'] ) ) { // in this case, textAlign needs to be one of 'left', 'center', 'right'.
-			$additional_styles['text-align'] = $parsed_block['attrs']['textAlign'];
-		} elseif ( in_array( $parsed_block['attrs']['align'] ?? null, array( 'left', 'center', 'right' ), true ) ) {
-			$additional_styles['text-align'] = $parsed_block['attrs']['align'];
+			$additional_styles['text-align'] = $rendering_context->resolve_text_align( $parsed_block['attrs']['textAlign'] );
+		} elseif ( null !== $rendering_context->sanitize_text_align( $parsed_block['attrs']['align'] ?? null ) ) {
+			$additional_styles['text-align'] = $rendering_context->resolve_text_align( $parsed_block['attrs']['align'] );
 		} elseif ( null !== $alignment_from_class ) {
 			$additional_styles['text-align'] = $alignment_from_class;
 		}

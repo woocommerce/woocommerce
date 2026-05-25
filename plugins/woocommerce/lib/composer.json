@@ -10,7 +10,8 @@
 		"mobiledetect/mobiledetectlib": "^3.74",
 		"psr/container": "^1.1",
 		"pelago/emogrifier": "7.3.0",
-		"league/iso3166": "^4.3.3"
+		"league/iso3166": "^4.3.3",
+		"webonyx/graphql-php": "^15.31"
 	},
 	"config": {
 		"platform": {
@@ -33,7 +34,8 @@
 				"psr/container",
 				"mobiledetect/mobiledetectlib",
 				"pelago/emogrifier",
-				"league/iso3166"
+				"league/iso3166",
+				"webonyx/graphql-php"
 			],
 			"excluded_packages": [
 			],
