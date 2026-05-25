@@ -79,17 +79,6 @@ const Edit = ( props: EditProps ): JSX.Element => {
 				colorVars[ '--wc-product-filter-chips-background' ] ||
 				globalColors.background ||
 				undefined,
-			'--wc-product-filter-chips-border':
-				colorVars[ '--wc-product-filter-chips-border' ] || undefined,
-			'--wc-product-filter-chips-selected-text':
-				colorVars[ '--wc-product-filter-chips-selected-text' ] ||
-				undefined,
-			'--wc-product-filter-chips-selected-background':
-				colorVars[ '--wc-product-filter-chips-selected-background' ] ||
-				undefined,
-			'--wc-product-filter-chips-selected-border':
-				colorVars[ '--wc-product-filter-chips-selected-border' ] ||
-				undefined,
 		},
 	} );
 
