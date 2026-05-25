@@ -42,7 +42,7 @@ Extract issue/PR refs from commits and branch name:
 
 ### 3. Generate PR Title + Body
 
-Use the PR template from the dynamic context above.
+Use the PR template from the dynamic context above. Preserve HTML comments from the template in every retained section; several comments are automation markers or test fixtures for milestone, changelog, and other GitHub checks.
 
 **Title** (under 70 chars, verb-first — the repo convention):
 
@@ -70,10 +70,10 @@ Use the full template:
 - **Screenshots**: Remove section if no UI changes. For UI changes, use Chrome DevTools MCP to capture screenshots if available; otherwise remind user to add them before marking ready.
 - **Testing instructions**: Concrete numbered steps with expected outcomes derived from the diff. Each step must be actionable — don't reference links that won't exist yet.
 - **Testing done**: Fill with what's verifiable from the session (commits, test runs, lint runs). If nothing is verifiable, write "Author to fill in before marking ready."
-- **Milestone**: Check auto-assign `[x]` if plugin-affecting.
-- **Changelog**: If changelogs already in diff → "does not require" (created manually). Otherwise → "Automatically create" `[x]` with Significance, Type, and a user-facing Message.
+- **Milestone**: Check auto-assign `[x]` if plugin-affecting. Keep the surrounding template comments, including `<!-- milestone-target-selection -->` and `<!-- /milestone-target-selection -->`.
+- **Changelog**: If changelogs already in diff → "does not require" (created manually). Otherwise → "Automatically create" `[x]` with Significance, Type, and a user-facing Message. Keep the template comments in this section, including inline comments after headings such as `#### Message <!-- Add a changelog message here -->`.
 
-Strip all HTML comments (`<!-- -->`) and unfilled placeholder lines (e.g., `Closes # .`, `Bug introduced in PR # .`) from output.
+Do not strip HTML comments (`<!-- -->`) from retained template sections. They support PR automation and GitHub tests. Remove only unfilled placeholder lines that are actual visible placeholders (e.g., `Closes # .`, `Bug introduced in PR # .`).
 
 ### 4. Preview
 
@@ -95,5 +95,5 @@ Output the PR URL. If UI changes need screenshots, remind the user.
 
 - No Co-Authored-By lines or self-attribution
 - Never commit code — pushing is fine
-- Preserve the PR template section headings exactly (for plugin-affecting PRs)
+- Preserve the PR template section headings and HTML comments exactly in retained sections (for plugin-affecting PRs)
 - Changelog checkboxes must match CI automation format
