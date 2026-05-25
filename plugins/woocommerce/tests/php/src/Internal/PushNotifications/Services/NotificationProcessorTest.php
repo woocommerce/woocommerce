@@ -630,7 +630,11 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->sut->handle_safety_net( 'store_stock', $product->get_id(), 'low_stock' );
+		$this->sut->handle_safety_net(
+			'store_stock',
+			$product->get_id(),
+			array( 'event_type' => 'low_stock' )
+		);
 
 		$refreshed = wc_get_product( $product->get_id() );
 		$this->assertNotEmpty(
@@ -639,9 +643,9 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Safety net backward compat: two-arg calls should still work for existing notification types.
+	 * @testdox Safety net should default the extras array so notification types without subclass-specific state still work.
 	 */
-	public function test_handle_safety_net_backward_compat_two_args(): void {
+	public function test_handle_safety_net_omits_extras_for_simple_types(): void {
 		$this->dispatcher->expects( $this->once() )->method( 'dispatch' )->willReturn(
 			array(
 				'success'     => true,
@@ -688,7 +692,14 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			);
 
 		// Trigger-time stock was 1 (post-decrement), even though current product stock is 5.
-		$this->sut->handle_safety_net( 'store_stock', $product->get_id(), 'low_stock', 1 );
+		$this->sut->handle_safety_net(
+			'store_stock',
+			$product->get_id(),
+			array(
+				'event_type'                => 'low_stock',
+				'stock_quantity_at_trigger' => 1,
+			)
+		);
 
 		$this->assertNotNull( $captured_payload );
 		$this->assertSame( '1', $captured_payload['message']['args'][1] );

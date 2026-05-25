@@ -99,7 +99,7 @@ class NotificationProcessor {
 	 * @since 10.7.0
 	 */
 	public function register(): void {
-		add_action( self::SAFETY_NET_HOOK, array( $this, 'handle_safety_net' ), 10, 4 );
+		add_action( self::SAFETY_NET_HOOK, array( $this, 'handle_safety_net' ), 10, 3 );
 	}
 
 	/**
@@ -231,28 +231,23 @@ class NotificationProcessor {
 	 * send does not occur, or fails and cannot schedule a retry (e.g. out of
 	 * memory, retry scheduling error) then this safety net will run.
 	 *
-	 * @param string   $type                      The notification type.
-	 * @param int      $resource_id               The resource ID.
-	 * @param string   $event_type                Optional event subtype (e.g. for stock notifications).
-	 * @param int|null $stock_quantity_at_trigger Optional stock snapshot captured at trigger time (stock notifications only).
+	 * @param string $type        The notification type.
+	 * @param int    $resource_id The resource ID.
+	 * @param array  $extra       Optional subclass-specific extras (e.g. event_type, stock_quantity_at_trigger).
+	 *                            Empty for notification types whose state is fully described by type + resource_id.
 	 * @return void
 	 *
 	 * @since 10.7.0
 	 */
-	public function handle_safety_net( string $type, int $resource_id, string $event_type = '', ?int $stock_quantity_at_trigger = null ): void {
+	public function handle_safety_net( string $type, int $resource_id, array $extra = array() ): void {
 		try {
-			$data = array(
-				'type'        => $type,
-				'resource_id' => $resource_id,
+			$data = array_merge(
+				array(
+					'type'        => $type,
+					'resource_id' => $resource_id,
+				),
+				$extra
 			);
-
-			if ( '' !== $event_type ) {
-				$data['event_type'] = $event_type;
-			}
-
-			if ( null !== $stock_quantity_at_trigger ) {
-				$data['stock_quantity_at_trigger'] = $stock_quantity_at_trigger;
-			}
 
 			$notification = Notification::from_array( $data );
 
@@ -262,6 +257,6 @@ class NotificationProcessor {
 				sprintf( 'Safety net failed: %s', $e->getMessage() ),
 				array( 'source' => PushNotifications::FEATURE_NAME )
 			);
-		}//end try
+		}
 	}
 }
