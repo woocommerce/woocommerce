@@ -47008,12 +47008,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/TaskList.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\TaskList\:\:possibly_remove_reminder_bar\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/TaskList.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\TaskList\:\:possibly_track_completion\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
