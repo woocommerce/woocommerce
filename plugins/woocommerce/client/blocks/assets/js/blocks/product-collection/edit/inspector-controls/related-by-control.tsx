@@ -2,7 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { CheckboxControl, PanelBody } from '@wordpress/components';
+import {
+	CheckboxControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -33,8 +39,22 @@ const RelatedByControl = ( {
 	};
 
 	return (
-		<PanelBody title={ __( 'Related by', 'woocommerce' ) }>
-			<div className="wc-block-editor-product-collection-inspector-controls__relate-by">
+		<ToolsPanel
+			label={ __( 'Related by', 'woocommerce' ) }
+			className="wc-block-editor-product-collection-inspector-controls__relate-by"
+			resetAll={ () => {
+				setQueryAttribute( {
+					relatedBy: { categories: true, tags: true },
+				} );
+				trackInteraction( CoreFilterNames.RELATED_BY );
+			} }
+		>
+			<ToolsPanelItem
+				label={ __( 'Categories', 'woocommerce' ) }
+				hasValue={ () => relatedBy?.categories !== true }
+				onDeselect={ () => handleRelatedByChange( true, 'categories' ) }
+				isShownByDefault
+			>
 				<CheckboxControl
 					__nextHasNoMarginBottom
 					label={ __( 'Categories', 'woocommerce' ) }
@@ -43,7 +63,13 @@ const RelatedByControl = ( {
 						handleRelatedByChange( value, 'categories' );
 					} }
 				/>
-
+			</ToolsPanelItem>
+			<ToolsPanelItem
+				label={ __( 'Tags', 'woocommerce' ) }
+				hasValue={ () => relatedBy?.tags !== true }
+				onDeselect={ () => handleRelatedByChange( true, 'tags' ) }
+				isShownByDefault
+			>
 				<CheckboxControl
 					__nextHasNoMarginBottom
 					label={ __( 'Tags', 'woocommerce' ) }
@@ -52,8 +78,8 @@ const RelatedByControl = ( {
 						handleRelatedByChange( value, 'tags' );
 					} }
 				/>
-			</div>
-		</PanelBody>
+			</ToolsPanelItem>
+		</ToolsPanel>
 	);
 };
 
