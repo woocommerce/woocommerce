@@ -12,6 +12,7 @@ exports[`ProductPrice should apply the format if one is provided 1`] = `
   </span>
   <del
     className="wc-block-components-product-price__regular"
+    translate="no"
   >
     £1.00
   </del>
@@ -22,6 +23,7 @@ exports[`ProductPrice should apply the format if one is provided 1`] = `
   </span>
   <ins
     className="wc-block-components-product-price__value is-discounted"
+    translate="no"
   >
     £0.50
   </ins>
@@ -40,6 +42,7 @@ exports[`ProductPrice should use default price if no format is provided 1`] = `
   </span>
   <del
     className="wc-block-components-product-price__regular"
+    translate="no"
   >
     £1.00
   </del>
@@ -50,6 +53,7 @@ exports[`ProductPrice should use default price if no format is provided 1`] = `
   </span>
   <ins
     className="wc-block-components-product-price__value is-discounted"
+    translate="no"
   >
     £0.50
   </ins>

@@ -51,6 +51,7 @@ The product variations API allows you to create, view, update, and delete indivi
 | `shipping_class`        | string          | Shipping class slug.                                                                                                |
 | `shipping_class_id`     | string          | Shipping class ID. `READ-ONLY`                                                        |
 | `image`                 | object          | Variation image data. See [Product variation - Image properties](#product-variation---image-properties)               |
+| `gallery_image_ids`     | array           | Variation gallery image IDs, excluding the featured image (which is set via `image`).                               |
 | `attributes`            | array           | List of attributes. See [Product variation - Attributes properties](#product-variation---attributes-properties)       |
 | `menu_order`            | integer         | Menu order, used to custom sort products.                                                                           |
 | `meta_data`             | array           | Meta data. See [Product variation - Meta data properties](#product-variation---meta-data-properties)                  |
@@ -271,6 +272,7 @@ woocommerce.post("products/22/variations", data).parsed_response
 		"name": "",
 		"alt": ""
 	},
+	"gallery_image_ids": [],
 	"attributes": [
 		{
 			"id": 6,
@@ -407,6 +409,7 @@ woocommerce.get("products/22/variations/732").parsed_response
 		"name": "",
 		"alt": ""
 	},
+	"gallery_image_ids": [],
 	"attributes": [
 		{
 			"id": 6,
@@ -544,6 +547,7 @@ woocommerce.get("products/22/variations").parsed_response
 			"name": "",
 			"alt": ""
 		},
+		"gallery_image_ids": [],
 		"attributes": [
 			{
 				"id": 6,
@@ -621,6 +625,7 @@ woocommerce.get("products/22/variations").parsed_response
 			"name": "",
 			"alt": ""
 		},
+		"gallery_image_ids": [],
 		"attributes": [
 			{
 				"id": 6,
@@ -811,6 +816,7 @@ woocommerce.put("products/22/variations/733", data).parsed_response
 		"name": "",
 		"alt": ""
 	},
+	"gallery_image_ids": [],
 	"attributes": [
 		{
 			"id": 6,
@@ -949,6 +955,7 @@ woocommerce.delete("products/22/variations/733", force: true).parsed_response
 		"name": "",
 		"alt": ""
 	},
+	"gallery_image_ids": [],
 	"attributes": [
 		{
 			"id": 6,
@@ -1258,6 +1265,7 @@ woocommerce.post("products/22/variations/batch", data).parsed_response
 				"name": "Placeholder",
 				"alt": "Placeholder"
 			},
+			"gallery_image_ids": [],
 			"attributes": [
 				{
 					"id": 6,
@@ -1335,6 +1343,7 @@ woocommerce.post("products/22/variations/batch", data).parsed_response
 				"name": "Placeholder",
 				"alt": "Placeholder"
 			},
+			"gallery_image_ids": [],
 			"attributes": [
 				{
 					"id": 6,
@@ -1414,6 +1423,7 @@ woocommerce.post("products/22/variations/batch", data).parsed_response
 				"name": "",
 				"alt": ""
 			},
+			"gallery_image_ids": [],
 			"attributes": [
 				{
 					"id": 6,
@@ -1493,6 +1503,7 @@ woocommerce.post("products/22/variations/batch", data).parsed_response
 				"name": "",
 				"alt": ""
 			},
+			"gallery_image_ids": [],
 			"attributes": [
 				{
 					"id": 6,

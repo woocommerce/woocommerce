@@ -3,7 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Api;
 
-use Automattic\WooCommerce\Internal\Api\Main;
+use Automattic\WooCommerce\Api\Infrastructure\Main;
 use Automattic\WooCommerce\Internal\Api\QueryCache;
 use Automattic\WooCommerce\Internal\Api\OpcacheFileExpiry;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\DocumentNode;
