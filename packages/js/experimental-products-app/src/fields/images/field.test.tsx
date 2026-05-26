@@ -55,15 +55,40 @@ describe( 'images field', () => {
 			...overrides,
 		} as ProductEntityRecord );
 
+	const renderImagesEdit = (
+		data: ProductEntityRecord,
+		onChange = jest.fn()
+	) => {
+		if ( ! fieldExtensions.Edit ) {
+			throw new Error( 'images edit not implemented' );
+		}
+
+		const Edit = fieldExtensions.Edit as React.ComponentType<
+			DataFormControlProps< ProductEntityRecord >
+		>;
+
+		render(
+			<Edit
+				data={ data }
+				field={
+					{
+						...fieldExtensions,
+						id: 'images',
+						label: 'Images',
+					} as DataFormControlProps< ProductEntityRecord >[ 'field' ]
+				}
+				onChange={ onChange }
+			/>
+		);
+
+		return onChange;
+	};
+
 	afterEach( () => {
 		jest.clearAllMocks();
 	} );
 
 	it( 'replaces the current images with the selected media attachments', () => {
-		if ( ! fieldExtensions.Edit ) {
-			throw new Error( 'images edit not implemented' );
-		}
-
 		const attachments = [
 			{
 				id: 34,
@@ -78,30 +103,18 @@ describe( 'images field', () => {
 			},
 		];
 		const onChange = jest.fn();
-		const Edit = fieldExtensions.Edit as React.ComponentType<
-			DataFormControlProps< ProductEntityRecord >
-		>;
 
-		render(
-			<Edit
-				data={ buildProduct( {
-					images: [
-						{
-							id: 15,
-							src: 'old-image.jpg',
-							alt: 'Old image',
-						} as ProductEntityRecord[ 'images' ][ number ],
-					],
-				} ) }
-				field={
+		renderImagesEdit(
+			buildProduct( {
+				images: [
 					{
-						...fieldExtensions,
-						id: 'images',
-						label: 'Images',
-					} as DataFormControlProps< ProductEntityRecord >[ 'field' ]
-				}
-				onChange={ onChange }
-			/>
+						id: 15,
+						src: 'old-image.jpg',
+						alt: 'Old image',
+					} as ProductEntityRecord[ 'images' ][ number ],
+				],
+			} ),
+			onChange
 		);
 
 		expect( mockMediaUpload ).toHaveBeenCalledWith(
@@ -142,6 +155,106 @@ describe( 'images field', () => {
 					alt: 'New image',
 					name: 'New image title',
 					thumbnail: 'new-image-thumbnail.jpg',
+				} ),
+			],
+		} );
+	} );
+
+	it( 'limits variations to a single selected image', () => {
+		const attachments = [
+			{
+				id: 34,
+				url: 'new-variation-image.jpg',
+				alt: 'New variation image',
+				title: 'New variation image title',
+				sizes: {
+					thumbnail: {
+						url: 'new-variation-image-thumbnail.jpg',
+					},
+				},
+			},
+			{
+				id: 35,
+				url: 'extra-variation-image.jpg',
+				alt: 'Extra variation image',
+				title: 'Extra variation image title',
+			},
+		];
+		const onChange = jest.fn();
+
+		renderImagesEdit(
+			buildProduct( {
+				type: 'variation',
+				images: [
+					{
+						id: 15,
+						src: 'old-variation-image.jpg',
+						alt: 'Old variation image',
+					} as ProductEntityRecord[ 'images' ][ number ],
+					{
+						id: 16,
+						src: 'second-variation-image.jpg',
+						alt: 'Second variation image',
+					} as ProductEntityRecord[ 'images' ][ number ],
+				],
+			} ),
+			onChange
+		);
+
+		expect( mockMediaUpload ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				allowedTypes: [ 'image' ],
+				multiple: false,
+				title: 'Add image',
+				value: [ 15 ],
+			} )
+		);
+
+		expect(
+			screen.getByRole( 'img', {
+				name: 'Old variation image',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'img', {
+				name: 'Second variation image',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', {
+				name: 'Drag to reorder',
+			} )
+		).not.toBeInTheDocument();
+
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Add image',
+			} )
+		);
+		expect( mockOpenMediaUploadModal ).toHaveBeenCalled();
+
+		act( () => {
+			mockMediaUpload.mock.calls[ 0 ][ 0 ].onSelect( attachments );
+		} );
+
+		expect(
+			screen.getByRole( 'img', {
+				name: 'New variation image',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'img', {
+				name: 'Extra variation image',
+			} )
+		).not.toBeInTheDocument();
+		expect( onChange ).toHaveBeenCalledWith( {
+			images: [
+				expect.objectContaining( {
+					id: 34,
+					src: 'new-variation-image.jpg',
+					alt: 'New variation image',
+					name: 'New variation image title',
+					thumbnail: 'new-variation-image-thumbnail.jpg',
 				} ),
 			],
 		} );

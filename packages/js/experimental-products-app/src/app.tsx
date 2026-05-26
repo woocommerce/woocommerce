@@ -35,7 +35,7 @@ export function ProductsApp() {
 	return (
 		<NewNavigationProvider>
 			<UnsavedChangesWarning />
-			<RouterProvider>
+			<RouterProvider pathArg="page">
 				<ThemeProvider isRoot>
 					<ProductsLayout />
 				</ThemeProvider>

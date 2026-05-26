@@ -66,13 +66,167 @@ class Endpoint {
 	 * @internal
 	 */
 	final public function init(): void {
+		// Seed the host page before `add_rewrite_rule` runs on init:10.
+		add_action( 'init', array( $this, 'maybe_create_host_page' ), 4 );
 		add_action( 'init', array( $this, 'add_rewrite_rule' ) );
 		add_filter( 'query_vars', array( $this, 'add_query_var' ), 0 );
 		add_action( 'template_redirect', array( $this, 'gate_request' ) );
 		add_action( 'wp_loaded', array( $this, 'maybe_flush_pending_rewrite' ) );
 		add_action( 'transition_post_status', array( $this, 'skip_auto_menu_for_self' ), 9, 3 );
 		add_filter( 'get_pages', array( $this, 'exclude_self_from_page_list' ) );
+		add_filter( 'display_post_states', array( $this, 'add_post_state_label' ), 10, 2 );
+		// Inject our entry into every `WC_Install::create_pages()` invocation so
+		// Status → Tools "Create default pages" and any other repair caller see it too.
+		add_filter( 'woocommerce_create_pages', array( $this, 'inject_review_order_page' ) );
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
+	}
+
+	/**
+	 * Create or adopt the Review Order host page on every feature-on init.
+	 *
+	 * Idempotent and self-healing: re-aligns the stored option with whichever
+	 * row WP's permalink routing would resolve `/review-order/` to, so the
+	 * page id `gate_request()` checks always matches the page that
+	 * `add_rewrite_rule()` points at. Leftover duplicates from prior
+	 * activation/disable cycles no longer cause asset enqueueing to silently
+	 * skip.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @internal
+	 */
+	public function maybe_create_host_page(): void {
+		// Fast path: the stored option already points at a published page
+		// that still embeds our shortcode. `get_post()` is served from the
+		// posts cache so this short-circuit costs ~nothing per request and
+		// avoids the slug `wp_posts` lookup the reconciliation path runs.
+		$option_id   = (int) wc_get_page_id( self::PAGE_KEY );
+		$option_page = $option_id > 0 ? get_post( $option_id ) : null;
+		if ( $option_page instanceof WP_Post
+			&& 'page' === $option_page->post_type
+			&& 'publish' === $option_page->post_status
+			&& false !== strpos( (string) $option_page->post_content, '[' . self::SHORTCODE . ']' ) ) {
+			return;
+		}
+
+		// Reconcile: adopt the slug-routed page when it also embeds our
+		// shortcode. The combined signal avoids hijacking a merchant page
+		// that happens to share either the slug or the shortcode alone.
+		$canonical = $this->find_canonical_host_page();
+		if ( $canonical instanceof WP_Post ) {
+			$needs_save = false;
+
+			if ( $option_id !== (int) $canonical->ID ) {
+				update_option( 'woocommerce_review_order_page_id', (int) $canonical->ID );
+				$needs_save = true;
+			}
+			if ( 'publish' !== $canonical->post_status ) {
+				wp_update_post(
+					array(
+						'ID'          => (int) $canonical->ID,
+						'post_status' => 'publish',
+					)
+				);
+				$needs_save = true;
+			}
+			if ( $needs_save ) {
+				update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+			}
+			return;
+		}
+
+		// No slug-canonical page. If the merchant renamed the host page away
+		// from our default slug but the stored option still resolves to a
+		// non-trashed page, respect it and only republish a draft we own.
+		if ( $option_page instanceof WP_Post && 'page' === $option_page->post_type && 'trash' !== $option_page->post_status ) {
+			if ( 'publish' !== $option_page->post_status ) {
+				wp_update_post(
+					array(
+						'ID'          => (int) $option_page->ID,
+						'post_status' => 'publish',
+					)
+				);
+				update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+			}
+			return;
+		}
+
+		// No managed page anywhere. The permanent `woocommerce_create_pages`
+		// filter (registered in `init()`) makes the call inject our entry.
+		\WC_Install::create_pages();
+
+		// Defer the rewrite flush to wp_loaded; rewrite_rule fires later on init.
+		update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+	}
+
+	/**
+	 * Append the Review Order page to any caller of
+	 * `WC_Install::create_pages()` — keeps Status → Tools' "Create default
+	 * pages" repair path and any third-party callers seeded with our page
+	 * whenever the feature is on, without having to call create_pages()
+	 * with a one-off filter in `maybe_create_host_page()`.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @internal Public only because WP filter callbacks need to be callable from outside.
+	 *
+	 * @param array<string,array<string,string>>|mixed $pages Existing page definitions.
+	 * @return array<string,array<string,string>>|mixed
+	 */
+	public function inject_review_order_page( $pages ) {
+		if ( ! is_array( $pages ) ) {
+			return $pages;
+		}
+		$pages[ self::PAGE_KEY ] = array(
+			'name'    => _x( 'review-order', 'Page slug', 'woocommerce' ),
+			'title'   => _x( 'Review your order', 'Page title', 'woocommerce' ),
+			'content' => '<!-- wp:shortcode -->[' . self::SHORTCODE . ']<!-- /wp:shortcode -->',
+		);
+		return $pages;
+	}
+
+	/**
+	 * Return the slug-routed page if it also embeds our shortcode, so we only
+	 * adopt rows that are unambiguously WC-owned (matching slug alone or the
+	 * shortcode alone would hijack merchant-authored pages).
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return WP_Post|null
+	 */
+	private function find_canonical_host_page(): ?WP_Post {
+		$page = get_page_by_path( _x( 'review-order', 'Page slug', 'woocommerce' ), OBJECT, 'page' );
+		if ( ! $page instanceof WP_Post || 'trash' === $page->post_status ) {
+			return null;
+		}
+		if ( false === strpos( (string) $page->post_content, '[' . self::SHORTCODE . ']' ) ) {
+			return null;
+		}
+		return $page;
+	}
+
+	/**
+	 * Label the Review Order page in the admin Pages list ("— Review Order
+	 * Page"), mirroring how `WC_Admin_Post_Types` labels Shop / Cart /
+	 * Checkout / My account so editors can spot it at a glance.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @internal Public only because WP filter callbacks need to be callable from outside.
+	 *
+	 * @param array<string,string>|mixed $post_states Existing post-state labels keyed by id.
+	 * @param \WP_Post|mixed             $post        Current post being listed.
+	 * @return array<string,string>|mixed
+	 */
+	public function add_post_state_label( $post_states, $post ) {
+		if ( ! is_array( $post_states ) || ! $post instanceof \WP_Post ) {
+			return $post_states;
+		}
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		if ( $page_id > 0 && $page_id === (int) $post->ID ) {
+			$post_states['wc_page_for_review_order'] = __( 'Review Order Page', 'woocommerce' );
+		}
+		return $post_states;
 	}
 
 	/**
@@ -230,12 +384,13 @@ class Endpoint {
 	}
 
 	/**
-	 * Flush rewrite rules once after the 10.8.0 upgrade installs the
-	 * Review Order page.
+	 * Flush rewrite rules once after the Review Order page is seeded or
+	 * republished.
 	 *
-	 * The 10.8.0 db update runs on `init` priority 5 and only seeds the
-	 * page; `add_rewrite_rule()` doesn't fire until `init` priority 10, so
-	 * the flush has to happen later. `wp_loaded` runs after every `init`
+	 * `maybe_create_host_page()` runs on `init` priority 4 and queues the
+	 * flush by setting `woocommerce_review_order_flush_rewrite_pending`;
+	 * `add_rewrite_rule()` doesn't fire until `init` priority 10, so the
+	 * flush has to happen later. `wp_loaded` runs after every `init`
 	 * callback, which is the earliest safe moment.
 	 */
 	public function maybe_flush_pending_rewrite(): void {

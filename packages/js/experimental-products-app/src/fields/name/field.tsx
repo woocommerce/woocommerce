@@ -13,7 +13,7 @@ import { type ProductEntityRecord } from '../types';
 const fieldDefinition = {
 	type: 'text',
 	label: __( 'Name', 'woocommerce' ),
-	enableSorting: true,
+	enableSorting: false,
 	filterBy: false,
 	enableHiding: false,
 } satisfies Partial< Field< ProductEntityRecord > >;

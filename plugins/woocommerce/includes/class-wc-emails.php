@@ -292,7 +292,6 @@ class WC_Emails {
 			'WC_Email_Customer_Processing_Order'     => __DIR__ . '/emails/class-wc-email-customer-processing-order.php',
 			'WC_Email_Customer_Completed_Order'      => __DIR__ . '/emails/class-wc-email-customer-completed-order.php',
 			'WC_Email_Customer_Refunded_Order'       => __DIR__ . '/emails/class-wc-email-customer-refunded-order.php',
-			'WC_Email_Customer_Review_Request'       => __DIR__ . '/emails/class-wc-email-customer-review-request.php',
 			'WC_Email_Customer_Invoice'              => __DIR__ . '/emails/class-wc-email-customer-invoice.php',
 			'WC_Email_Customer_Note'                 => __DIR__ . '/emails/class-wc-email-customer-note.php',
 			'WC_Email_Customer_Reset_Password'       => __DIR__ . '/emails/class-wc-email-customer-reset-password.php',
@@ -307,6 +306,9 @@ class WC_Emails {
 			$emails['WC_Email_Customer_Fulfillment_Created'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-created.php';
 			$emails['WC_Email_Customer_Fulfillment_Updated'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-updated.php';
 			$emails['WC_Email_Customer_Fulfillment_Deleted'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-deleted.php';
+		}
+		if ( FeaturesUtil::feature_is_enabled( 'customer_review_request' ) ) {
+			$emails['WC_Email_Customer_Review_Request'] = __DIR__ . '/emails/class-wc-email-customer-review-request.php';
 		}
 
 		// Prime caches to reduce future queries.

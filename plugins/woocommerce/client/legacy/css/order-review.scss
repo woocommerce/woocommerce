@@ -39,6 +39,14 @@
 		}
 	}
 
+	&__item-variation {
+		display: block;
+		margin-top: 0.25em;
+		font-size: 0.875em;
+		font-weight: 400;
+		opacity: 0.75;
+	}
+
 	&__item-row {
 		display: flex;
 		gap: 1.5em;
@@ -48,6 +56,12 @@
 	&__item-image {
 		flex: 0 0 120px;
 		max-width: 120px;
+
+		img {
+			display: block;
+			width: 100%;
+			height: auto;
+		}
 	}
 
 	&__item-rating {
@@ -74,7 +88,7 @@
 	}
 
 	&__item-rating-error {
-		margin: 0.5em 0 0;
+		margin: 0.5em 0 1em;
 		color: var(--wc-red, #a00);
 	}
 
@@ -187,10 +201,12 @@
 		margin-left: 0;
 	}
 
+	// Absolute px so theme resets on `input[type=radio]+label` (e.g. font-size:0)
+	// can't collapse the icon to 0x0.
 	&__icon {
 		display: block;
-		width: 1.5em;
-		height: 1.5em;
+		width: 24px;
+		height: 24px;
 		fill: currentColor;
 		opacity: 0.3;
 		transition: opacity 100ms ease-in-out;

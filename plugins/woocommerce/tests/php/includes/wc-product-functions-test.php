@@ -17,6 +17,15 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 	/**
+	 * Reset the variation gallery feature-flag option after each test so
+	 * individual cases that flip it on don't leak global state.
+	 */
+	public function tearDown(): void {
+		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox If 'wc_get_price_excluding_tax' gets an order as argument, it passes the order customer to 'WC_Tax::get_rates'.
 	 *
 	 * @testWith [true, 1, true]
@@ -1018,5 +1027,63 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		}
 
 		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Variable add-to-cart attaches a pristine gallery snapshot to the variation script when the feature is on.
+	 */
+	public function test_woocommerce_variable_add_to_cart_attaches_gallery_snapshot() {
+		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
+
+		$inline_js = $this->capture_variable_add_to_cart_inline_js();
+
+		$this->assertStringContainsString( 'wc_variation_gallery_defaults', $inline_js );
+
+		// Extract the JSON snapshot from the inline JS and verify it contains gallery markup.
+		preg_match( '/\)\[\d+\]\s*=\s*("(?:\\\\.|[^"])*");/', $inline_js, $matches );
+		$this->assertNotEmpty( $matches, 'Inline JS should expose a JSON-encoded snapshot.' );
+		$decoded_snapshot = json_decode( $matches[1] );
+		$this->assertIsString( $decoded_snapshot );
+		$this->assertStringContainsString( 'woocommerce-product-gallery', $decoded_snapshot );
+	}
+
+	/**
+	 * @testdox Variable add-to-cart skips the gallery snapshot when the feature is off.
+	 */
+	public function test_woocommerce_variable_add_to_cart_skips_gallery_snapshot_when_feature_off() {
+		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+
+		$inline_js = $this->capture_variable_add_to_cart_inline_js();
+
+		$this->assertStringNotContainsString( 'wc_variation_gallery_defaults', $inline_js );
+	}
+
+	/**
+	 * Render the variable add-to-cart template and return the inline JS
+	 * attached to the variation script.
+	 */
+	private function capture_variable_add_to_cart_inline_js(): string {
+		$product = WC_Helper_Product::create_variation_product();
+
+		WC_Frontend_Scripts::load_scripts();
+
+		$wp_scripts = wp_scripts();
+		if ( isset( $wp_scripts->registered['wc-add-to-cart-variation'] ) ) {
+			unset( $wp_scripts->registered['wc-add-to-cart-variation']->extra['before'] );
+		}
+
+		$previous_product   = $GLOBALS['product'] ?? null;
+		$GLOBALS['product'] = $product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		ob_start();
+		woocommerce_variable_add_to_cart();
+		ob_end_clean();
+
+		$before_data = $wp_scripts->registered['wc-add-to-cart-variation']->extra['before'] ?? array();
+
+		$GLOBALS['product'] = $previous_product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		WC_Helper_Product::delete_product( $product->get_id() );
+
+		return implode( "\n", (array) $before_data );
 	}
 }
