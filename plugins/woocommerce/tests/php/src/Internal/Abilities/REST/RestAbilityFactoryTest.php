@@ -871,7 +871,7 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 	/**
 	 * Expected widened scalar union: {@see RestAbilityFactory::OUTPUT_SCALAR_UNION}.
 	 */
-	private const SCALAR_UNION_WITH_NULL = array( 'string', 'integer', 'number', 'boolean', 'null' );
+	private const SCALAR_UNION_WITH_NULL = array( 'string', 'integer', 'number', 'boolean', 'array', 'object', 'null' );
 
 	/**
 	 * @testdox Should widen any single scalar type to the full scalar union plus null in output schema.
@@ -924,8 +924,35 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 			$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['properties'][ $field ]['type'] );
 			$this->assertContains( 'string', $schema['properties'][ $field ]['type'] );
 			$this->assertContains( 'integer', $schema['properties'][ $field ]['type'] );
+			$this->assertContains( 'array', $schema['properties'][ $field ]['type'] );
+			$this->assertContains( 'object', $schema['properties'][ $field ]['type'] );
 			$this->assertContains( 'null', $schema['properties'][ $field ]['type'] );
 		}
+	}
+
+	/**
+	 * @testdox Should admit array and object values for fields declared as a scalar (meta_data display_value case).
+	 *
+	 * `meta_data[].display_value` is declared as `string` in the orders schema
+	 * but the REST controller returns whatever shape the underlying meta value
+	 * has — including arrays for variation attributes and serialized custom
+	 * data. Widening the output union to include `array` and `object` keeps
+	 * structuredContent validation passing for those rows.
+	 */
+	public function test_output_schema_admits_array_and_object_for_declared_scalar_fields(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'display_value' => array( 'type' => 'string' ),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$this->assertContains( 'array', $schema['properties']['display_value']['type'] );
+		$this->assertContains( 'object', $schema['properties']['display_value']['type'] );
 	}
 
 	/**
