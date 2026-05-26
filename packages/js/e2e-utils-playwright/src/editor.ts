@@ -107,10 +107,12 @@ export const openEditorSettings = async ( {
  */
 export const getCanvas = async ( page: Page ): Promise< EditorCanvas > => {
 	const canvasLocator = page
-		.locator( 'iframe[name="editor-canvas"], .wp-block-post-content' )
+		.locator(
+			'iframe[name="editor-canvas"]:visible, .wp-block-post-content:visible'
+		)
 		.first();
 
-	await canvasLocator.waitFor( { state: 'visible' } );
+	await canvasLocator.waitFor();
 
 	const isFramed = await canvasLocator.evaluate(
 		( node ) => node.tagName === 'IFRAME'
