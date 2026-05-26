@@ -848,4 +848,71 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			'Post-hook should fire for each type exactly once across the two saves, even though the first call threw.'
 		);
 	}
+
+	/**
+	 * @testdox Should ignore non-string item types and trigger _doing_it_wrong.
+	 */
+	public function test_remove_order_items_rejects_non_string_type() {
+		$order = WC_Helper_Order::create_order();
+
+		$this->setExpectedIncorrectUsage( 'WC_Abstract_Order::remove_order_items' );
+
+		$pre_calls = array();
+		$pre_hook  = function ( $fired_order, $type ) use ( &$pre_calls ) {
+			$pre_calls[] = $type;
+		};
+		add_action( 'woocommerce_remove_order_items', $pre_hook, 10, 2 );
+
+		try {
+			$order->remove_order_items( array( 'line_item' ) );
+		} finally {
+			remove_action( 'woocommerce_remove_order_items', $pre_hook, 10 );
+		}
+
+		$this->assertSame(
+			array(),
+			$pre_calls,
+			'Pre-hook should not fire for a non-string type — the guard returns before the hook.'
+		);
+		$this->assertNotEmpty( $order->get_items(), 'Line items should remain in memory since the guard ignored the malformed type.' );
+	}
+
+	/**
+	 * @testdox Should clear in-memory items for extension-registered groups when remove_order_items() is called without a type.
+	 */
+	public function test_remove_order_items_clears_custom_filter_groups() {
+		$order   = WC_Helper_Order::create_order();
+		$adjust  = function ( $type_to_group ) {
+			$type_to_group['custom_unit_test_type'] = 'custom_unit_test_lines';
+			return $type_to_group;
+		};
+		$reflect = new ReflectionClass( $order );
+
+		add_filter( 'woocommerce_order_type_to_group', $adjust );
+
+		try {
+			$items_prop = $reflect->getProperty( 'items' );
+			$items_prop->setAccessible( true );
+			$items = $items_prop->getValue( $order );
+
+			$items['custom_unit_test_lines'] = array( 'sentinel' );
+			$items_prop->setValue( $order, $items );
+
+			$order->remove_order_items();
+
+			$items_after = $items_prop->getValue( $order );
+			$this->assertArrayHasKey(
+				'custom_unit_test_lines',
+				$items_after,
+				'Filter-registered groups should be present as keys after the in-memory clear.'
+			);
+			$this->assertSame(
+				array(),
+				$items_after['custom_unit_test_lines'],
+				'Filter-registered group should be cleared to an empty array — not left with stale entries.'
+			);
+		} finally {
+			remove_filter( 'woocommerce_order_type_to_group', $adjust );
+		}
+	}
 }

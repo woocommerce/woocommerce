@@ -950,8 +950,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Guard against extension code passing non-string values. Anything not
 		// a string or null is ignored so it never reaches the deferred queue or
-		// the data store.
+		// the data store. Surface the misuse so it's traceable rather than silent.
 		if ( null !== $type && ! is_string( $type ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				/* translators: %s: PHP type that was passed instead of a string. */
+				sprintf( esc_html__( 'remove_order_items() expects a string item type or null; received %s.', 'woocommerce' ), esc_html( gettype( $type ) ) ),
+				'10.9.0'
+			);
 			return;
 		}
 
@@ -986,10 +992,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$this->bulk_delete_all_items_pending = true;
 				$this->item_types_to_bulk_delete     = array();
 			}
-			// Clear every group bucket currently populated, including any custom groups
-			// registered by extensions via the woocommerce_order_type_to_group filter.
+			$type_to_group = $this->get_item_types_to_group();
+			// Union with currently populated keys so any group already loaded into
+			// $this->items (including by direct manipulation) is reset too. This
+			// matches the historical "wipe everything" semantics that the original
+			// $this->items = array() provided.
 			$groups = array_unique(
-				array_merge( array_values( $this->item_types_to_group ), array_keys( $this->items ) )
+				array_merge( array_values( $type_to_group ), array_keys( $this->items ) )
 			);
 			foreach ( $groups as $group ) {
 				$this->items[ $group ] = array();
@@ -1004,11 +1013,33 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	protected function type_to_group( $type ) {
-		$type_to_group = apply_filters(
+		$type_to_group = $this->get_item_types_to_group();
+		return $type_to_group[ $type ] ?? '';
+	}
+
+	/**
+	 * Return the item type -> group mapping, after applying the
+	 * woocommerce_order_type_to_group filter so extension-registered types are
+	 * included.
+	 *
+	 * @since 10.9.0
+	 * @return array<string, string>
+	 */
+	protected function get_item_types_to_group() {
+		/**
+		 * Filter the order item type -> group mapping.
+		 *
+		 * Allows extensions to register custom order item types so they participate
+		 * in operations such as get_items() grouping and bulk in-memory clearing.
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param array<string, string> $item_types_to_group The default mapping.
+		 */
+		return (array) apply_filters(
 			'woocommerce_order_type_to_group',
 			$this->item_types_to_group
 		);
-		return $type_to_group[ $type ] ?? '';
 	}
 
 	/**
