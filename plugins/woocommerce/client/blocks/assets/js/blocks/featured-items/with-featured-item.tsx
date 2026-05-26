@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import type { BlockAlignment, BlockAttributes } from '@wordpress/blocks';
+import type { BlockAlignment } from '@wordpress/blocks';
 import type { ComponentType, Dispatch, SetStateAction } from 'react';
 import { ProductResponseItem } from '@woocommerce/types';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
@@ -17,7 +17,7 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
-import { usePreviewMode, useStyleProps } from '@woocommerce/base-hooks';
+import { useStyleProps } from '@woocommerce/base-hooks';
 import { InnerBlocks, BlockContextProvider } from '@wordpress/block-editor';
 
 /**
@@ -216,8 +216,6 @@ export const withFeaturedItem =
 			);
 		};
 
-		const isPreviewMode = usePreviewMode();
-
 		const renderInnerBlocks = () => {
 			if ( product ) {
 				const innerBlocksTemplate =
@@ -232,40 +230,7 @@ export const withFeaturedItem =
 						>
 							<div className={ `${ className }__inner-blocks` }>
 								<InnerBlocks
-									template={
-										// When previewing the block, replace
-										// the core/post-title block with a
-										// core/heading block. This way, we can
-										// set the text to the preview product
-										// name.
-										isPreviewMode
-											? innerBlocksTemplate.map(
-													( block ) => {
-														if (
-															block[ 0 ] ===
-															'core/post-title'
-														) {
-															return [
-																'core/heading',
-																{
-																	level: 2,
-																	content:
-																		product.name,
-																	style: {
-																		typography:
-																			{
-																				textAlign:
-																					'center',
-																			},
-																	},
-																} as BlockAttributes,
-															];
-														}
-														return block;
-													}
-											  )
-											: innerBlocksTemplate
-									}
+									template={ innerBlocksTemplate }
 									templateLock={ false }
 								/>
 							</div>
