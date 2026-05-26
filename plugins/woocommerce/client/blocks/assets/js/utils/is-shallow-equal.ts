@@ -14,15 +14,33 @@ type IsShallowEqualFn = ( a: unknown, b: unknown ) => boolean;
 // of `.default`). The upstream Gutenberg source has started adding
 // named exports as a migration aid, but the npm package only exposes
 // `default`, so we fall back to that for WordPress core's bundled
-// version. See: https://github.com/WordPress/gutenberg/issues/XXXXX.
+// version. See: https://github.com/WordPress/gutenberg/issues/78697.
 const moduleExports = IsShallowEqualModule as unknown as {
-	default?: IsShallowEqualFn;
-	isShallowEqual?: IsShallowEqualFn;
+	default?: unknown;
+	isShallowEqual?: unknown;
 };
 
-const isShallowEqual: IsShallowEqualFn =
-	moduleExports.default ??
-	moduleExports.isShallowEqual ??
-	( IsShallowEqualModule as unknown as IsShallowEqualFn );
+// Pick the first candidate that is actually callable. Guarding against
+// non-function values avoids a delayed crash if some future build of
+// `@wordpress/is-shallow-equal` ships a non-callable `default`/named
+// export but still passes truthy checks.
+const candidates: unknown[] = [
+	moduleExports.default,
+	moduleExports.isShallowEqual,
+	IsShallowEqualModule,
+];
+const callable = candidates.find(
+	( candidate ): candidate is IsShallowEqualFn =>
+		typeof candidate === 'function'
+);
+
+if ( ! callable ) {
+	throw new Error(
+		'WooCommerce: `@wordpress/is-shallow-equal` did not expose a callable export. ' +
+			'This usually means the runtime build of the package has changed in an incompatible way.'
+	);
+}
+
+const isShallowEqual: IsShallowEqualFn = callable;
 
 export default isShallowEqual;
