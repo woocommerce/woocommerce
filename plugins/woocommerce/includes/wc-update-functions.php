@@ -3546,3 +3546,18 @@ function wc_update_1080_backfill_email_template_sync_meta(): bool {
 function wc_update_1090_remove_task_list_reminder_bar_hidden_option() {
 	delete_option( 'woocommerce_task_list_reminder_bar_hidden' );
 }
+
+/**
+ * Register the POS Cashier + POS Manager roles introduced in 10.9.0.
+ *
+ * Always runs on upgrade so the roles exist in the DB regardless of the
+ * `point_of_sale_staff` feature flag state. Calling create_roles() is idempotent —
+ * existing role definitions are not duplicated, and capabilities are merged in.
+ *
+ * @since 10.9.0
+ *
+ * @return void
+ */
+function wc_update_1090_create_pos_roles() {
+	WC_Install::create_roles();
+}
