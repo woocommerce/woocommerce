@@ -9685,7 +9685,7 @@ body.woocommerce-settings-payments-section_legacy {
 	display: inline-block;
 	vertical-align: middle;
 	border: 1px solid #7e8993;
-	border-radius: 2px;
+	border-radius: 50%;
 	margin-right: 0.5em;
 	height: 1em;
 	width: 1em;
@@ -9694,6 +9694,7 @@ body.woocommerce-settings-payments-section_legacy {
 
 	&.is-empty::before {
 		content: '';
+		border-radius: 50%;
 		position: absolute;
 		top: 0;
 		right: 0;
