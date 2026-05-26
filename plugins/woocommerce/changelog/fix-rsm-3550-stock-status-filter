@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow the v4 products endpoint to filter by multiple stock statuses.

@@ -14,6 +14,14 @@ parameters:
 		# Matches the prior test implementation; GeoIP relies on data files.
 		- includes/class-wc-geo-ip.php
 		- includes/react-admin/feature-config.php (?)
+		# The Code API (src/Api/) and its infrastructure (src/Internal/Api/)
+		# require PHP 8.1+ and use enums, named arguments, constructor
+		# property promotion, union types, and `mixed` throughout — all of
+		# which the global phpVersion: 70400 setting cannot parse or resolve.
+		# Infrastructure files also reference src/Api/ classes that PHPStan
+		# can't discover once the public API dir is excluded.
+		- src/Api/
+		- src/Internal/Api/
 	bootstrapFiles:
 		- vendor/autoload.php
 	scanDirectories:
@@ -31,6 +39,17 @@ parameters:
 		WC_TEMPLATE_DEBUG_MODE: bool
 	ignoreErrors:
 		- identifier: missingType.iterableValue
+		# ShopperListItemSchema uses ProductItemTrait only for format_variation_data();
+		# the trait's unused prepare_product_price_response() assumes a ProductSchema parent.
+		-
+			message: '#Call to an undefined method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\ShopperListItemSchema::get_tax_display_mode\(\)#'
+			path: src/StoreApi/Utilities/ProductItemTrait.php
+		-
+			message: '#Call to an undefined method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\ShopperListItemSchema::get_price_function_from_tax_display_mode\(\)#'
+			path: src/StoreApi/Utilities/ProductItemTrait.php
+		-
+			message: '#Call to an undefined static method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\AbstractSchema::prepare_product_price_response\(\)#'
+			path: src/StoreApi/Utilities/ProductItemTrait.php
 	parallel:
 		maximumNumberOfProcesses: 4
 

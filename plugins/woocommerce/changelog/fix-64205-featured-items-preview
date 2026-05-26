@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update Featured Product and Featured Category block previews in the inserter so they better match the frontend

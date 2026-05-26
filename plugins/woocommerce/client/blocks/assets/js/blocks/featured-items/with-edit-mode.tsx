@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 import type { ComponentType } from 'react';
 import { useEffect, useState } from '@wordpress/element';
 import { info } from '@wordpress/icons';
@@ -102,7 +103,13 @@ export const withEditMode =
 			itemType: name,
 		} );
 
+		const isPreviewMode = usePreviewMode();
+
 		useEffect( () => {
+			if ( isPreviewMode ) {
+				return;
+			}
+
 			if ( ! isLoading ) {
 				const currEditModeValue =
 					( name === BLOCK_NAMES.featuredProduct &&
@@ -113,7 +120,7 @@ export const withEditMode =
 					setEditMode( currEditModeValue );
 				}
 			}
-		}, [ status, isDeleted, name, isLoading ] );
+		}, [ status, isDeleted, name, isLoading, isPreviewMode ] );
 
 		if ( editMode ) {
 			return (

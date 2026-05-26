@@ -10,7 +10,6 @@ import { checkoutStore } from '@woocommerce/block-data';
 import {
 	filterShippingRatesByPrefersCollection,
 	hasAllFieldsForShippingRates,
-	selectedRatesAreCollectable,
 } from '@woocommerce/base-utils';
 
 const Block = ( {
@@ -28,19 +27,18 @@ const Block = ( {
 		return null;
 	}
 
-	const hasSelectedCollectionOnly = selectedRatesAreCollectable(
-		filterShippingRatesByPrefersCollection(
-			shippingRates,
-			prefersCollection ?? false
-		)
+	const filteredRates = filterShippingRatesByPrefersCollection(
+		shippingRates,
+		prefersCollection ?? false
 	);
 
 	const hasCompleteAddress = hasAllFieldsForShippingRates( shippingAddress );
 	return (
 		<TotalsWrapper className={ className }>
 			<TotalsShipping
+				shippingRates={ filteredRates }
 				label={
-					hasSelectedCollectionOnly
+					prefersCollection
 						? __( 'Pickup', 'woocommerce' )
 						: __( 'Delivery', 'woocommerce' )
 				}
