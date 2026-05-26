@@ -170,10 +170,28 @@ class RestAbilityFactory {
 	private static $valid_types = array( 'string', 'number', 'integer', 'boolean', 'object', 'array', 'null' );
 
 	/**
-	 * Subset of {@see self::$valid_types} that gets a `null` union in output schemas
-	 * to accommodate fields WooCommerce REST controllers may return as `null`.
+	 * Subset of {@see self::$valid_types} considered scalar for output relaxation.
+	 *
+	 * When a field is declared as one of these in the source REST schema, output
+	 * validation widens it to {@see self::OUTPUT_SCALAR_UNION}.
 	 */
-	private const NULLABLE_SCALAR_TYPES = array( 'string', 'integer', 'number', 'boolean' );
+	private const SCALAR_TYPES = array( 'string', 'integer', 'number', 'boolean' );
+
+	/**
+	 * Union we emit on output for any field originally declared as a single scalar.
+	 *
+	 * Covers two failure modes seen in the wild on WooCommerce REST responses:
+	 * 1. The field may legitimately be unset / null (e.g. `low_stock_amount`).
+	 * 2. The declared scalar disagrees with the value actually returned — e.g.
+	 *    `shipping_class_id` is declared `string` but the controller returns an
+	 *    `int`, and `meta_data[].display_value` is declared `string` but resolves
+	 *    to whatever shape the stored meta value has.
+	 *
+	 * Widening every scalar to every scalar throws away input-formatting hints,
+	 * but the alternative is per-controller schema fixes scattered across legacy
+	 * REST code. This stays contained to the MCP output schema path.
+	 */
+	private const OUTPUT_SCALAR_UNION = array( 'string', 'integer', 'number', 'boolean', 'null' );
 
 	/**
 	 * Sanitize WordPress REST args to valid JSON Schema format.
@@ -420,12 +438,17 @@ class RestAbilityFactory {
 	 * 1. `format: "date-time"` and `format: "uri"` are stripped. WooCommerce REST
 	 *    date strings (e.g. `2025-11-24T16:31:43`) omit the timezone suffix RFC 3339
 	 *    requires, and `format: "uri"` fields routinely return empty strings.
-	 * 2. Scalar `type` values (`string`, `integer`, `number`, `boolean`) are unioned
-	 *    with `null` so unset fields validate. Object and array types are left alone.
-	 *    Skipped inside `anyOf` / `oneOf` / `allOf` branches: unioning `null` into
-	 *    every branch of a `oneOf` makes `null` match multiple branches at once and
-	 *    breaks the "exactly one" rule, and for `anyOf` / `allOf` the schema author
-	 *    was explicit about which branches admit `null`.
+	 * 2. Any single scalar `type` (`string`, `integer`, `number`, `boolean`) is
+	 *    widened to {@see self::OUTPUT_SCALAR_UNION} — every scalar plus `null`.
+	 *    Object and array types are left alone. This is a deliberate accuracy
+	 *    tradeoff: many WooCommerce REST controllers declare a scalar type that
+	 *    disagrees with what they actually return (e.g. `shipping_class_id`
+	 *    declared `string`, returned as `int`; `meta_data[].display_value`
+	 *    declared `string`, returned as whatever the stored meta value is), and
+	 *    the alternative is per-controller schema fixes across legacy code.
+	 *    Skipped inside `anyOf` / `oneOf` / `allOf` branches: widening every
+	 *    branch breaks the "exactly one" rule for `oneOf`, and for `anyOf` /
+	 *    `allOf` the schema author was explicit about admissible shapes.
 	 *
 	 * Recurses into `properties`, `items` (single schema and tuple form),
 	 * `additionalProperties`, and the `anyOf` / `oneOf` / `allOf` combiners.
@@ -440,8 +463,8 @@ class RestAbilityFactory {
 			unset( $schema['format'] );
 		}
 
-		if ( $apply_null_union && isset( $schema['type'] ) && is_string( $schema['type'] ) && in_array( $schema['type'], self::NULLABLE_SCALAR_TYPES, true ) ) {
-			$schema['type'] = array( $schema['type'], 'null' );
+		if ( $apply_null_union && isset( $schema['type'] ) && is_string( $schema['type'] ) && in_array( $schema['type'], self::SCALAR_TYPES, true ) ) {
+			$schema['type'] = self::OUTPUT_SCALAR_UNION;
 		}
 
 		if ( isset( $schema['properties'] ) && is_array( $schema['properties'] ) ) {

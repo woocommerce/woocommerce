@@ -869,9 +869,14 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should union null into scalar types in output schema.
+	 * Expected widened scalar union: {@see RestAbilityFactory::OUTPUT_SCALAR_UNION}.
 	 */
-	public function test_output_schema_unions_null_into_scalar_types(): void {
+	private const SCALAR_UNION_WITH_NULL = array( 'string', 'integer', 'number', 'boolean', 'null' );
+
+	/**
+	 * @testdox Should widen any single scalar type to the full scalar union plus null in output schema.
+	 */
+	public function test_output_schema_widens_scalar_types_to_full_union(): void {
 		$controller = $this->create_mock_controller_with_item_schema(
 			array(
 				'type'       => 'object',
@@ -886,10 +891,41 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 
 		$schema = $this->invoke_get_output_schema( $controller, 'get' );
 
-		$this->assertSame( array( 'integer', 'null' ), $schema['properties']['low_stock_amount']['type'] );
-		$this->assertSame( array( 'number', 'null' ), $schema['properties']['price']['type'] );
-		$this->assertSame( array( 'string', 'null' ), $schema['properties']['name']['type'] );
-		$this->assertSame( array( 'boolean', 'null' ), $schema['properties']['on_sale']['type'] );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['properties']['low_stock_amount']['type'] );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['properties']['price']['type'] );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['properties']['name']['type'] );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['properties']['on_sale']['type'] );
+	}
+
+	/**
+	 * @testdox Should admit cross-scalar values for fields whose declared type disagrees with the actual response.
+	 *
+	 * Documents the motivating bug: several WooCommerce REST controllers declare a
+	 * scalar type that does not match what they return — `shipping_class_id` is
+	 * declared `string` but returned as `int`, `meta_data[].display_value` is
+	 * declared `string` but can be array/object, etc. The widened union admits
+	 * every scalar so structuredContent validation passes regardless of which
+	 * scalar the controller actually emits.
+	 */
+	public function test_output_schema_admits_cross_scalar_values_for_mismatched_declarations(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'shipping_class_id' => array( 'type' => 'string' ),
+					'image_id'          => array( 'type' => 'integer' ),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		foreach ( array( 'shipping_class_id', 'image_id' ) as $field ) {
+			$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['properties'][ $field ]['type'] );
+			$this->assertContains( 'string', $schema['properties'][ $field ]['type'] );
+			$this->assertContains( 'integer', $schema['properties'][ $field ]['type'] );
+			$this->assertContains( 'null', $schema['properties'][ $field ]['type'] );
+		}
 	}
 
 	/**
@@ -967,7 +1003,7 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 		$image = $schema['properties']['images']['items']['properties'];
 		$this->assertArrayNotHasKey( 'format', $image['src'], 'Nested uri format should be stripped' );
 		$this->assertArrayNotHasKey( 'format', $image['date_created'], 'Nested date-time format should be stripped' );
-		$this->assertSame( array( 'integer', 'null' ), $image['id']['type'], 'Nested scalar should be unioned with null' );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $image['id']['type'], 'Nested scalar should be widened to the full scalar union with null' );
 	}
 
 	/**
@@ -1034,7 +1070,7 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'boolean', $schema['properties']['deleted']['type'], 'delete wrapper deleted flag should remain a single boolean' );
 
 		$previous = $schema['properties']['previous'];
-		$this->assertSame( array( 'integer', 'null' ), $previous['properties']['id']['type'], 'previous schema should have scalar union with null' );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $previous['properties']['id']['type'], 'previous schema should have scalar widened to the full scalar union with null' );
 		$this->assertArrayNotHasKey( 'format', $previous['properties']['date_created'], 'previous schema should have date-time format stripped' );
 	}
 
@@ -1164,10 +1200,10 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 		$schema = $this->invoke_get_output_schema( $controller, 'get' );
 
 		$entries = $schema['properties']['pair']['items'];
-		$this->assertContains(
+		$this->assertSame(
+			self::SCALAR_UNION_WITH_NULL,
 			$entries[0]['type'],
-			array( 'string', array( 'string', 'null' ) ),
-			'date-time pseudo-type in a tuple entry must be normalized to string by sanitize_schema before relax runs'
+			'date-time pseudo-type must be normalized to string by sanitize_schema, then widened by relax'
 		);
 		$this->assertArrayNotHasKey( 'format', $entries[0], 'format: date-time emitted by sanitize_schema must then be stripped by relax' );
 	}
@@ -1198,8 +1234,8 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 
 		$items = $schema['properties']['pair']['items'];
 		$this->assertArrayNotHasKey( 'format', $items[0], 'first tuple entry should have format stripped' );
-		$this->assertSame( array( 'string', 'null' ), $items[0]['type'], 'tuple entries are positional and not combiner branches, so null-union applies' );
-		$this->assertSame( array( 'integer', 'null' ), $items[1]['type'] );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $items[0]['type'], 'tuple entries are positional and not combiner branches, so scalar widening applies' );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $items[1]['type'] );
 	}
 
 	/**
@@ -1219,7 +1255,7 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 		$schema = $this->invoke_get_output_schema( $controller, 'get' );
 
 		$this->assertArrayNotHasKey( 'format', $schema['additionalProperties'], 'additionalProperties schema should have format: uri stripped' );
-		$this->assertSame( array( 'string', 'null' ), $schema['additionalProperties']['type'] );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['additionalProperties']['type'] );
 	}
 
 	/**
@@ -1242,7 +1278,7 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'array', $schema['properties']['data']['type'], 'list wrapper data property should remain array' );
 
 		$item = $schema['properties']['data']['items'];
-		$this->assertSame( array( 'integer', 'null' ), $item['properties']['id']['type'] );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $item['properties']['id']['type'] );
 		$this->assertArrayNotHasKey( 'format', $item['properties']['date_created'] );
 	}
 }
