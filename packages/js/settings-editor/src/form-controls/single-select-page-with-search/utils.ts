@@ -20,7 +20,7 @@ export const formatPageToItem = ( page: Page ): PageItem => ( {
 		/* translators: 1: page name 2: page ID */
 		__( '%1$s (ID: %2$s)', 'woocommerce' ),
 		page.title.rendered,
-		page.id
+		page.id.toString()
 	),
 	value: page.id.toString(),
 } );
