@@ -95,6 +95,10 @@ const getSaveStrategy = (
 	schema: ModernSettingsSchema
 ): ModernSettingsSaveStrategy => schema.save || { adapter: 'form_post' };
 
+const clearLegacyFormPrompt = () => {
+	window.onbeforeunload = null;
+};
+
 const GroupHeader = ( { group }: { group: ModernSettingsGroup } ) => {
 	const hasHeaderContent =
 		group.title || group.description || ( group.actions || [] ).length > 0;
@@ -226,6 +230,7 @@ const ShellHeader = ( {
 
 	const actions = showSaveButton ? (
 		<Button
+			className="woocommerce-save-button"
 			variant="primary"
 			type={ saveButtonType }
 			name="save"
@@ -233,7 +238,9 @@ const ShellHeader = ( {
 			disabled={ ! isDirty || isSaving }
 			isBusy={ isSaving }
 			onClick={
-				saveStrategy.adapter === 'form_post' ? undefined : onSave
+				saveStrategy.adapter === 'form_post'
+					? clearLegacyFormPrompt
+					: onSave
 			}
 		>
 			{ __( 'Save changes', 'woocommerce' ) }
