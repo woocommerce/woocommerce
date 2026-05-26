@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix command palette command registration on WooCommerce admin pages by loading the command scripts in admin and preserving settings/analytics command hydration.

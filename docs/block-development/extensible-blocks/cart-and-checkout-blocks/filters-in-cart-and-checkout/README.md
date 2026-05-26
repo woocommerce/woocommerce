@@ -29,6 +29,7 @@ The following [Order Summary Items filters](/docs/block-development/extensible-b
 
 -   `cartItemClass`
 -   `cartItemPrice`
+-   `cartItemScreenReaderPrice`
 -   `itemName`
 -   `subtotalPriceFormat`
 

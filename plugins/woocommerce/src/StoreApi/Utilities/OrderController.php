@@ -127,8 +127,9 @@ class OrderController {
 	 * @param \WC_Order $order Order object.
 	 */
 	public function sync_customer_data_with_order( \WC_Order $order ) {
-		if ( $order->get_customer_id() ) {
-			$customer = new \WC_Customer( $order->get_customer_id() );
+		$customer_id = $order->get_customer_id();
+		if ( $customer_id ) {
+			$customer = new \WC_Customer( $customer_id );
 			$customer->set_props(
 				array(
 					'billing_first_name'  => $order->get_billing_first_name(),
@@ -154,9 +155,7 @@ class OrderController {
 					'shipping_phone'      => $order->get_shipping_phone(),
 				)
 			);
-
 			$this->additional_fields_controller->sync_customer_additional_fields_with_order( $order, $customer );
-
 			$customer->save();
 		}
 	}

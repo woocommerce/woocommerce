@@ -468,7 +468,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testWith [false, true, true, false]
 	 *           [false, false, true, false]
 	 *           [true, true, false, false]
-	 *           [true, true, true, true]
 	 *
 	 * @param bool $tax_enabled Taxes enabled shop-wide or not.
 	 * @param bool $taxable_product Product is taxable or not.
@@ -504,9 +503,41 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		sort( $actual_hashes );
 		$this->assertEquals( $expected_hashes, $actual_hashes );
 
+		// Restore default state to avoid leaking into subsequent tests.
+		WC()->customer->set_is_vat_exempt( false );
+
 		remove_filter( 'wc_tax_enabled', $tax_enabled ? '__return_true' : '__return_false' );
 		remove_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
 		remove_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
+	}
+
+	/**
+	 * @testdox taxes_influence_price returns true even when customer is VAT exempt, because exempt prices differ from non-exempt.
+	 */
+	public function test_taxes_influence_price_returns_true_for_vat_exempt() {
+		add_filter( 'wc_tax_enabled', '__return_true' );
+		add_filter( 'woocommerce_product_is_taxable', '__return_true' );
+		add_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+
+		$product = WC_Helper_Product::create_variation_product();
+
+		$extended_data_store = $this->get_data_store_with_public_taxes_influence_price();
+
+		// Non-exempt: taxes should influence price.
+		WC()->customer->set_is_vat_exempt( false );
+		$this->assertTrue( $extended_data_store->taxes_influence_price( $product ) );
+
+		// VAT exempt: taxes should STILL influence price because the displayed
+		// prices are different (tax removed), requiring separate cache entries.
+		WC()->customer->set_is_vat_exempt( true );
+		$this->assertTrue( $extended_data_store->taxes_influence_price( $product ) );
+
+		// Restore default state to avoid leaking into other tests.
+		WC()->customer->set_is_vat_exempt( false );
+
+		remove_filter( 'wc_tax_enabled', '__return_true' );
+		remove_filter( 'woocommerce_product_is_taxable', '__return_true' );
+		remove_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
 	}
 
 	/**
@@ -599,6 +630,21 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		return new class() extends WC_Product_Variable_Data_Store_CPT {
 			public function get_price_hash( &$product, $for_display = false ) {
 				return parent::get_price_hash( $product, $for_display );
+			}
+		};
+		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
+	}
+
+	/**
+	 * Get a data store instance with taxes_influence_price() exposed as public.
+	 *
+	 * @return object Data store with public taxes_influence_price method.
+	 */
+	private function get_data_store_with_public_taxes_influence_price(): object {
+		// phpcs:disable Generic.CodeAnalysis, Squiz.Commenting
+		return new class() extends WC_Product_Variable_Data_Store_CPT {
+			public function taxes_influence_price( $product ): bool {
+				return parent::taxes_influence_price( $product );
 			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting

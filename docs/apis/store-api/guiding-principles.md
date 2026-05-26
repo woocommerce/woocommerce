@@ -80,7 +80,7 @@ An example would be the `wc/store/v1/cart/add-item` endpoint which accepts a qua
 
 Resources, including customer and order data, should reflect only the current session. Do not return data for other customers as this would be a breach of privacy and security issue.
 
-Store data such as settings (for example, store currency) is permitted in responses, but _private or sensitive data_ must be avoided. To allow more extensive access to data, you must use the authenticated [WC REST API](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction).
+Store data such as settings (for example, store currency) is permitted in responses, but _private or sensitive data_ must be avoided. To allow more extensive access to data, you must use the authenticated [WC REST API](/docs/apis/rest-api/).
 
 Data returned from the API should not be [escaped](https://developer.wordpress.org/themes/theme-security/data-sanitization-escaping/) (this is left to the client rendering it), but it should be sanitized. For example, HTML should be run through [`wp_kses_post`](https://developer.wordpress.org/reference/functions/wp_kses_post/).
 

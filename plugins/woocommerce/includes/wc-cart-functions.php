@@ -512,6 +512,25 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 				break;
 			}
 		}
+
+		// When shipping costs are hidden until an address is entered, don't auto-select pickup as the default.
+		// Without this, pickup gets silently selected because it's the only remaining rate after filtering.
+		if (
+			'' === $default
+			&& 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' )
+			&& WC()->customer instanceof \WC_Customer
+			&& ! WC()->customer->has_full_shipping_address()
+		) {
+			/**
+			 * Filters the default shipping method for a package.
+			 *
+			 * @since 3.2.0
+			 * @param string $default Default shipping method.
+			 * @param array  $rates   Shipping rates.
+			 * @param string $chosen_method Chosen method id.
+			 */
+			return (string) apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
+		}
 	}
 
 	/**

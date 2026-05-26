@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update product filter color handling to use block and global styles.

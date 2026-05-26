@@ -206,10 +206,13 @@
 }
 
 button.components-button.send-magic-link-button {
-	background: #007cba;
+	background: var(--wp-admin-theme-color, #007cba);
 	color: #fff;
 	position: relative;
 	margin-bottom: 1em;
+	&:hover {
+		background: var(--wp-admin-theme-color-darker-20, #005a87);
+	}
 	:hover {
 		// the hover state makes the text invisible so we need to override it
 		color: #fff;

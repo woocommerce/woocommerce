@@ -47,7 +47,7 @@ Checkout:
 
 ### Passed parameters
 
--   `cart`: `wc/store/cart` data but in `camelCase` instead of `snake_case`. [Object breakdown.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/c00da597efe4c16fcf5481c213d8052ec5df3766/assets/js/type-defs/cart.ts#L172-L188)
+-   `cart`: `wc/store/cart` data but in `camelCase` instead of `snake_case`. [Object breakdown.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/types/type-defs/cart.ts)
 -   `extensions`: external data registered by third-party developers using `ExtendSchema`. If you used `ExtendSchema` on `wc/store/cart` you would find your data under your namespace here.
 -   `context`, equal to the name of the Block in which the fill is rendered: `woocommerce/cart` or `woocommerce/checkout`
 
@@ -89,7 +89,7 @@ Checkout:
 -   `showItems`: `Boolean|undefined` If we should show the content of each package, this is undefined in Cart and Checkout and is left to the actual package logic to decide.
 -   `noResultsMessage`: A React element that you can render if there are no shipping options.
 -   `renderOption`: a render function that takes a rate object and returns a render option.
--   `cart`: `wc/store/cart` data but in `camelCase` instead of `snake_case`. [Object breakdown.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/c00da597efe4c16fcf5481c213d8052ec5df3766/assets/js/type-defs/cart.ts#L172-L188)
+-   `cart`: `wc/store/cart` data but in `camelCase` instead of `snake_case`. [Object breakdown.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/types/type-defs/cart.ts)
 -   `extensions`: external data registered by third-party developers using `ExtendSchema`, if you used `ExtendSchema` on `wc/store/cart` you would find your data under your namespace here.
 -   `components`: an object containing components you can use to render your own shipping rates, it contains `ShippingRatesControlPackage`.
 -   `context`, equal to the name of the Block in which the fill is rendered: `woocommerce/cart` or `woocommerce/checkout`
@@ -129,7 +129,7 @@ Checkout:
 ### Passed parameters
 
 -   `renderPickupLocation`: a render function that renders the address details of a local pickup option.
--   `cart`: `wc/store/cart` data but in `camelCase` instead of `snake_case`. [Object breakdown.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/c00da597efe4c16fcf5481c213d8052ec5df3766/assets/js/type-defs/cart.ts#L172-L188)
+-   `cart`: `wc/store/cart` data but in `camelCase` instead of `snake_case`. [Object breakdown.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/types/type-defs/cart.ts)
 -   `extensions`: external data registered by third-party developers using `ExtendSchema`, if you used `ExtendSchema` on `wc/store/cart` you would find your data under your namespace here.
 -   `components`: an object containing components you can use to render your own pickup rates, it contains `ShippingRatesControlPackage` and `RadioControl`.
 
@@ -168,6 +168,6 @@ Checkout:
 
 ### Passed parameters
 
--   `cart`: `wc/store/cart` data but in `camelCase` instead of `snake_case`. [Object breakdown.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/c00da597efe4c16fcf5481c213d8052ec5df3766/assets/js/type-defs/cart.ts#L172-L188)
+-   `cart`: `wc/store/cart` data but in `camelCase` instead of `snake_case`. [Object breakdown.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/types/type-defs/cart.ts)
 -   `extensions`: external data registered by third-party developers using `ExtendSchema`, if you used `ExtendSchema` on `wc/store/cart` you would find your data under your namespace here.
 -   `context`, equal to the name of the Block in which the fill is rendered: `woocommerce/cart` or `woocommerce/checkout`

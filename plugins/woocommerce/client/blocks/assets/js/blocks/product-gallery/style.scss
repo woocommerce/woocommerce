@@ -21,6 +21,9 @@ $dialog-padding: 20px;
 		align-items: center;
 		margin: 0;
 		padding: 0;
+		// Chrome drops `scrollTo({behavior:'smooth'})` on `overflow:hidden`
+		// unless `scroll-behavior` is set on the element.
+		scroll-behavior: smooth;
 	}
 
 	:where(.wc-block-product-gallery-large-image__wrapper) {
@@ -34,6 +37,10 @@ $dialog-padding: 20px;
 		&:has(.wc-block-components-product-image--aspect-ratio-auto) {
 			aspect-ratio: 1/1;
 		}
+	}
+
+	.wc-block-product-gallery-large-image__wrapper[hidden] {
+		display: none;
 	}
 
 	// These rules are overriding styles from WooCommerce core, that's why we
@@ -244,6 +251,10 @@ $dialog-padding: 20px;
 
 :where(.wc-block-product-gallery-thumbnails__thumbnail) {
 	display: flex;
+}
+
+.wc-block-product-gallery-thumbnails__thumbnail[hidden] {
+	display: none;
 }
 
 :where(.wc-block-product-gallery-thumbnails__thumbnail__image) {

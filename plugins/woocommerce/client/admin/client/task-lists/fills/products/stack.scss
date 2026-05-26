@@ -20,7 +20,7 @@
 
 		&:hover {
 			background-color: #fff;
-			border: 1.5px solid #007cba;
+			border: 1.5px solid var(--wp-admin-theme-color, #007cba);
 
 			.woocommerce-list__item-title {
 				color: $gray-900;

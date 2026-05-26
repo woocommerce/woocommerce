@@ -654,7 +654,7 @@ class WC_Admin_Setup_Wizard {
 							</p>
 						</article>
 						<footer>
-							<div class="inner">
+							<div class="wc-backbone-modal-buttons">
 								<button class="button button-primary button-large" id="wc_tracker_submit" aria-label="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
 							</div>
 						</footer>
