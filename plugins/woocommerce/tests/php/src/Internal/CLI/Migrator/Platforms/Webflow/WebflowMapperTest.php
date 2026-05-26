@@ -74,11 +74,11 @@ class WebflowMapperTest extends \WC_Unit_Test_Case {
 	public function test_zero_price_maps_to_zero_regular_price(): void {
 		$item = MockWebflowData::simple_product_item();
 
-		$item->skus[0]->fieldData->price                  = (object) array(
+		$item->skus[0]->fieldData->price = (object) array(
 			'value' => 0,
 			'unit'  => 'USD',
 		);
-		$item->skus[0]->fieldData->{'compare-at-price'}   = null;
+		$item->skus[0]->fieldData->{'compare-at-price'} = null;
 
 		$result = $this->mapper->map_product_data( $item );
 
