@@ -47,14 +47,15 @@ $dialog-padding: 20px;
 			height: 100%;
 		}
 
-		img {
+		img,
+		video {
 			height: 100%;
 		}
 
-		&.wc-block-components-product-image--aspect-ratio-auto img {
+		&.wc-block-components-product-image--aspect-ratio-auto img,
+		&.wc-block-components-product-image--aspect-ratio-auto video {
 			object-fit: contain !important;
 		}
-
 	}
 
 	:where(.wc-block-woocommerce-product-gallery-large-image__image) {

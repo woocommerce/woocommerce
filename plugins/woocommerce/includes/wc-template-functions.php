@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -1815,15 +1816,7 @@ if ( ! function_exists( 'wc_get_gallery_video_poster_id' ) ) {
 	 * @return int Poster attachment ID.
 	 */
 	function wc_get_gallery_video_poster_id( $media_item ) {
-		$poster_id = isset( $media_item['poster_id'] ) ? absint( $media_item['poster_id'] ) : 0;
-
-		if ( $poster_id ) {
-			return $poster_id;
-		}
-
-		$attachment_id = isset( $media_item['id'] ) ? absint( $media_item['id'] ) : 0;
-
-		return $attachment_id ? (int) get_post_thumbnail_id( $attachment_id ) : 0;
+		return is_array( $media_item ) ? ProductMediaGallery::get_video_poster_id( $media_item ) : 0;
 	}
 }
 
@@ -1843,149 +1836,17 @@ if ( ! function_exists( 'wc_get_product_media_gallery_items' ) ) {
 			return array();
 		}
 
-		$product_gallery_videos_enabled = function_exists( 'wc_product_gallery_videos_enabled' ) && wc_product_gallery_videos_enabled();
-		$media_gallery                  = $product_gallery_videos_enabled
-			? $product->get_media_gallery()
-			: array();
-		$media_items                    = array();
-
-		if ( ! empty( $media_gallery ) ) {
-			foreach ( $media_gallery as $media_item ) {
-				if ( ! is_array( $media_item ) || empty( $media_item['media_type'] ) ) {
-					continue;
-				}
-
-				$media_type  = wc_clean( $media_item['media_type'] );
-				$source_type = ! empty( $media_item['source_type'] )
-					? wc_clean( $media_item['source_type'] )
-					: 'attachment';
-
-				if ( 'image' === $media_type ) {
-					$attachment_id = isset( $media_item['id'] ) ? absint( $media_item['id'] ) : 0;
-
-					if ( $attachment_id ) {
-						$media_items[] = array(
-							'media_type'  => 'image',
-							'source_type' => 'attachment',
-							'id'          => $attachment_id,
-						);
-					}
-				} elseif ( 'video' === $media_type && 'attachment' === $source_type ) {
-					$attachment_id = isset( $media_item['id'] ) ? absint( $media_item['id'] ) : 0;
-
-					if ( $attachment_id ) {
-						$media_items[] = array_merge(
-							$media_item,
-							array(
-								'media_type'  => 'video',
-								'source_type' => 'attachment',
-								'id'          => $attachment_id,
-								'poster_id'   => isset( $media_item['poster_id'] )
-									? absint( $media_item['poster_id'] )
-									: 0,
-							)
-						);
-					}
-				}
-			}
-
-			$featured_image_id = $product->get_image_id();
-
-			if ( $featured_image_id ) {
-				$featured_image_item = array(
-					'media_type'  => 'image',
-					'source_type' => 'attachment',
-					'id'          => absint( $featured_image_id ),
-				);
-
-				foreach ( $media_items as $index => $media_item ) {
-					if (
-						'image' !== ( $media_item['media_type'] ?? '' ) ||
-						absint( $media_item['id'] ?? 0 ) !== absint( $featured_image_id )
-					) {
-						continue;
-					}
-
-					if ( 0 === $index ) {
-						$featured_image_item = array();
-					} else {
-						unset( $media_items[ $index ] );
-					}
-
-					break;
-				}
-
-				if ( ! empty( $featured_image_item ) ) {
-					array_unshift( $media_items, $featured_image_item );
-					$media_items = array_values( $media_items );
-				}
-			}
-		} else {
-			$image_ids         = array();
-			$featured_image_id = $product->get_image_id();
-
-			if ( $featured_image_id ) {
-				$image_ids = array_unique( array_merge( array( $featured_image_id ), $product->get_gallery_image_ids() ) );
-			}
-
-			foreach ( $image_ids as $image_id ) {
-				$media_items[] = array(
-					'media_type'  => 'image',
-					'source_type' => 'attachment',
-					'id'          => absint( $image_id ),
-				);
-			}
-		}
-
-		$media_items = array_values(
-			array_intersect_key(
-				$media_items,
-				array_unique( array_column( $media_items, 'id' ) )
+		$media_items = ProductMediaGallery::get_product_media_gallery_items(
+			$product,
+			array(
+				'include_placeholder' => true,
+				'deduplicate'         => true,
 			)
 		);
 
-		$attachment_ids = array_filter(
-			array_map(
-				static function ( $media_item ) {
-					return isset( $media_item['id'] ) ? absint( $media_item['id'] ) : 0;
-				},
-				$media_items
-			)
-		);
+		ProductMediaGallery::prime_attachment_caches( $media_items, true );
 
-		if ( ! empty( $attachment_ids ) ) {
-			// Prime caches to reduce future queries.
-			_prime_post_caches( $attachment_ids );
-		}
-
-		$poster_ids = array();
-		foreach ( $media_items as $index => $media_item ) {
-			if ( 'video' !== $media_item['media_type'] ) {
-				continue;
-			}
-
-			$poster_id = wc_get_gallery_video_poster_id( $media_item );
-
-			if ( $poster_id ) {
-				$poster_ids[]                       = $poster_id;
-				$media_items[ $index ]['poster_id'] = $poster_id;
-			}
-		}
-
-		if ( ! empty( $poster_ids ) ) {
-			// Prime caches to reduce future queries.
-			_prime_post_caches( array_unique( $poster_ids ) );
-		}
-
-		if ( empty( $media_items ) ) {
-			$media_items[] = array(
-				'media_type'  => 'image',
-				'source_type' => 'placeholder',
-				'id'          => 0,
-			);
-		}
-
-		return array_values( $media_items );
+		return $media_items;
 	}
 }
 

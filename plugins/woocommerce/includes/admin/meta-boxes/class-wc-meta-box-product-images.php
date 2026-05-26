@@ -11,6 +11,7 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
@@ -31,23 +32,30 @@ class WC_Meta_Box_Product_Images {
 
 		$thepostid      = $post->ID;
 		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product();
+		$product_object = $product_object instanceof WC_Product ? $product_object : new WC_Product();
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 		?>
 		<div id="product_images_container">
 			<ul class="product_images">
 				<?php
-				$product_gallery_videos_enabled = self::product_gallery_videos_enabled();
+				$product_gallery_videos_enabled = ProductMediaGallery::is_feature_enabled();
 				$product_media_gallery          = $product_gallery_videos_enabled
-					? self::get_product_media_gallery_items( $product_object )
-					: self::get_product_image_gallery_items( $product_object );
-				$attachment_ids                 = array_filter( wp_list_pluck( $product_media_gallery, 'id' ) );
+					? ProductMediaGallery::get_product_media_gallery_items(
+						$product_object,
+						array(
+							'context'               => 'edit',
+							'include_product_image' => false,
+							'validate_attachments'  => true,
+						)
+					)
+					: ProductMediaGallery::get_legacy_image_media_items( $product_object, false, 'edit' );
 				$update_meta                    = false;
 				$updated_gallery_ids            = array();
 				$updated_media_gallery          = array();
 
-				if ( ! empty( $attachment_ids ) ) {
+				if ( ! empty( $product_media_gallery ) ) {
 					// Prime caches to reduce future queries.
-					_prime_post_caches( $attachment_ids );
+					ProductMediaGallery::prime_attachment_caches( $product_media_gallery, true );
 
 					foreach ( $product_media_gallery as $media_item ) {
 						$attachment_id = absint( $media_item['id'] ?? 0 );
@@ -159,94 +167,24 @@ class WC_Meta_Box_Product_Images {
 		}
 
 		$attachment_ids = isset( $_POST['product_image_gallery'] ) ? array_filter( explode( ',', wc_clean( $_POST['product_image_gallery'] ) ) ) : array();
-		$videos_enabled = self::product_gallery_videos_enabled();
+		$videos_enabled = ProductMediaGallery::is_feature_enabled();
 		$media_posted   = $videos_enabled && isset( $_POST['product_media_gallery'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$media_gallery  = array();
 
 		if ( $media_posted ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$media_gallery  = self::sanitize_media_gallery( wc_clean( wp_unslash( $_POST['product_media_gallery'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$attachment_ids = self::get_image_ids_from_media_gallery( $media_gallery );
+			$media_gallery  = ProductMediaGallery::normalize_media_gallery_items( wc_clean( wp_unslash( $_POST['product_media_gallery'] ) ), true, false ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$attachment_ids = ProductMediaGallery::get_image_ids( $media_gallery );
 		}
 
 		$product->set_gallery_image_ids( $attachment_ids );
 
 		if ( $videos_enabled ) {
-			$product->set_media_gallery( self::media_gallery_has_videos( $media_gallery ) ? $media_gallery : array() );
+			$product->set_media_gallery( ProductMediaGallery::has_videos( $media_gallery ) ? $media_gallery : array() );
 		} else {
 			$product->set_media_gallery( array() );
 		}
 
 		$product->save();
-	}
-
-	/**
-	 * Get product media gallery items to display in the product gallery metabox.
-	 *
-	 * @param WC_Product|false|null $product Product object.
-	 * @return array
-	 */
-	private static function get_product_media_gallery_items( $product ) {
-		if ( ! $product instanceof WC_Product ) {
-			return array();
-		}
-
-		$product_image_id = absint( $product->get_image_id( 'edit' ) );
-		$media_gallery    = $product->get_media_gallery( 'edit' );
-		$media_gallery    = self::sanitize_media_gallery( $media_gallery );
-
-		if ( ! empty( $media_gallery ) ) {
-			// The product image can be represented in media gallery data, but
-			// this metabox only manages gallery items below the product image.
-			if (
-				$product_image_id &&
-				isset( $media_gallery[0] ) &&
-				'image' === ( $media_gallery[0]['media_type'] ?? '' ) &&
-				absint( $media_gallery[0]['id'] ?? 0 ) === $product_image_id
-			) {
-				array_shift( $media_gallery );
-			}
-
-			return $media_gallery;
-		}
-
-		return self::get_product_image_gallery_items( $product );
-	}
-
-	/**
-	 * Get legacy product gallery image items.
-	 *
-	 * @param WC_Product|false|null $product Product object.
-	 * @return array
-	 */
-	private static function get_product_image_gallery_items( $product ) {
-		if ( ! $product instanceof WC_Product ) {
-			return array();
-		}
-
-		$items = array();
-
-		foreach ( $product->get_gallery_image_ids( 'edit' ) as $attachment_id ) {
-			$attachment_id = absint( $attachment_id );
-
-			if ( $attachment_id ) {
-				$items[] = array(
-					'media_type'  => 'image',
-					'source_type' => 'attachment',
-					'id'          => $attachment_id,
-				);
-			}
-		}
-
-		return $items;
-	}
-
-	/**
-	 * Check if product gallery videos are enabled.
-	 *
-	 * @return bool
-	 */
-	private static function product_gallery_videos_enabled() {
-		return function_exists( 'wc_product_gallery_videos_enabled' ) && wc_product_gallery_videos_enabled();
 	}
 
 	/**
@@ -291,107 +229,6 @@ class WC_Meta_Box_Product_Images {
 				'class' => 'woocommerce-product-gallery__video-preview',
 			)
 		);
-	}
-
-	/**
-	 * Sanitize media gallery items.
-	 *
-	 * @param array|string $media_gallery Media gallery data.
-	 * @return array
-	 */
-	private static function sanitize_media_gallery( $media_gallery ) {
-		if ( is_string( $media_gallery ) ) {
-			$decoded = json_decode( $media_gallery, true );
-			if ( JSON_ERROR_NONE !== json_last_error() ) {
-				return array();
-			}
-			$media_gallery = $decoded;
-		}
-
-		if ( ! is_array( $media_gallery ) ) {
-			return array();
-		}
-
-		$items = array();
-
-		foreach ( $media_gallery as $item ) {
-			if ( ! is_array( $item ) ) {
-				continue;
-			}
-
-			$media_type    = wc_clean( $item['media_type'] ?? '' );
-			$attachment_id = absint( $item['id'] ?? 0 );
-
-			if ( ! $attachment_id ) {
-				continue;
-			}
-
-			if ( 'image' === $media_type ) {
-				if ( ! wp_attachment_is_image( $attachment_id ) ) {
-					continue;
-				}
-
-				$items[] = array(
-					'media_type'  => 'image',
-					'source_type' => 'attachment',
-					'id'          => $attachment_id,
-				);
-				continue;
-			}
-
-			if ( 'video' !== $media_type || 0 !== strpos( (string) get_post_mime_type( $attachment_id ), 'video/' ) ) {
-				continue;
-			}
-
-			$video_item = array(
-				'media_type'  => 'video',
-				'source_type' => 'attachment',
-				'id'          => $attachment_id,
-			);
-			$poster_id  = absint( $item['poster_id'] ?? 0 );
-
-			if ( $poster_id && wp_attachment_is_image( $poster_id ) ) {
-				$video_item['poster_id'] = $poster_id;
-			}
-
-			$items[] = $video_item;
-		}
-
-		return $items;
-	}
-
-	/**
-	 * Get image IDs from media gallery items.
-	 *
-	 * @param array $media_gallery Media gallery items.
-	 * @return array
-	 */
-	private static function get_image_ids_from_media_gallery( $media_gallery ) {
-		$image_ids = array();
-
-		foreach ( $media_gallery as $item ) {
-			if ( 'image' === ( $item['media_type'] ?? '' ) && ! empty( $item['id'] ) ) {
-				$image_ids[] = absint( $item['id'] );
-			}
-		}
-
-		return array_filter( $image_ids );
-	}
-
-	/**
-	 * Check if media gallery contains video items.
-	 *
-	 * @param array $media_gallery Media gallery items.
-	 * @return bool
-	 */
-	private static function media_gallery_has_videos( $media_gallery ) {
-		foreach ( $media_gallery as $item ) {
-			if ( 'video' === ( $item['media_type'] ?? '' ) ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**

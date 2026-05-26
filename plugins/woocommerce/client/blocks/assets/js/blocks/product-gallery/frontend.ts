@@ -40,7 +40,11 @@ const syncVideoElementPlayback = (
 	);
 	const shouldPlayInDialog = isDialogVideo && isDialogOpen;
 	const shouldPlayInGallery =
-		! isDialogVideo && selectedImageId === imageId && ! isDialogOpen;
+		video.classList.contains(
+			'wc-block-woocommerce-product-gallery-large-image__video'
+		) &&
+		selectedImageId === imageId &&
+		! isDialogOpen;
 	const shouldPlay = shouldPlayInDialog || shouldPlayInGallery;
 
 	if ( shouldPlay ) {
@@ -60,7 +64,9 @@ const syncGalleryVideoPlayback = (
 	}
 
 	galleryContainer
-		.querySelectorAll< HTMLVideoElement >( 'video[data-image-id]' )
+		.querySelectorAll< HTMLVideoElement >(
+			'.wc-block-woocommerce-product-gallery-large-image__video[data-image-id], .wc-block-product-gallery-dialog video[data-image-id]'
+		)
 		.forEach( ( video ) =>
 			syncVideoElementPlayback( video, selectedImageId, isDialogOpen )
 		);

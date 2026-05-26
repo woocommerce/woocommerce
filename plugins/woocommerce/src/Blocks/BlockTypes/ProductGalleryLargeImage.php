@@ -217,7 +217,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 					>
 						<?php
 						if ( 'video' === ( $media['media_type'] ?? '' ) ) {
-							echo $this->get_video_html( $media, $context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							echo $this->get_video_html( $media, $context, $inner_block->parsed_block['attrs'] ?? array() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 							continue;
 						}
 
@@ -243,11 +243,12 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	/**
 	 * Get video HTML for the product gallery large image area.
 	 *
-	 * @param array $media Video media data.
-	 * @param array $context The block context.
+	 * @param array $media                    Video media data.
+	 * @param array $context                  The block context.
+	 * @param array $product_image_attributes Product Image block attributes.
 	 * @return string
 	 */
-	private function get_video_html( $media, $context ) {
+	private function get_video_html( $media, $context, $product_image_attributes = array() ) {
 		if ( empty( $media['video_src'] ) ) {
 			return '';
 		}
@@ -260,6 +261,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		)
 			? $settings['preload']
 			: 'metadata';
+		$aspect_ratio = $this->get_product_image_aspect_ratio( $product_image_attributes );
 		$video_class = 'wc-block-woocommerce-product-gallery-large-image__image ' .
 			'wc-block-woocommerce-product-gallery-large-image__video';
 		$attrs       = array(
@@ -277,7 +279,12 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			'playsinline'              => 'playsinline',
 			'preload'                  => $preload,
 			'src'                      => $media['video_src'],
+			'style'                    => $this->get_video_style( $product_image_attributes, $aspect_ratio ),
 			'tabindex'                 => '-1',
+		);
+		$wrapper_attrs = array(
+			'class' => 'wc-block-components-product-image wc-block-grid__product-image ' .
+				'wc-block-components-product-image--aspect-ratio-' . str_replace( '/', '-', $aspect_ratio ),
 		);
 
 		if ( ! empty( $media['poster_id'] ) && ! empty( $media['poster_src'] ) ) {
@@ -288,7 +295,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			$attrs['data-wp-on--click'] = 'actions.openDialog';
 		}
 
-		return '<video ' . wc_implode_html_attributes(
+		$video_html = '<video ' . wc_implode_html_attributes(
 			array_filter(
 				$attrs,
 				static function ( $value ) {
@@ -296,6 +303,54 @@ class ProductGalleryLargeImage extends AbstractBlock {
 				}
 			)
 		) . '></video>';
+
+		return '<div ' . wc_implode_html_attributes( $wrapper_attrs ) . '>' . $video_html . '</div>';
+	}
+
+	/**
+	 * Get the Product Image aspect ratio applied to gallery videos.
+	 *
+	 * @param array $product_image_attributes Product Image block attributes.
+	 * @return string
+	 */
+	private function get_product_image_aspect_ratio( $product_image_attributes ) {
+		$aspect_ratio = $product_image_attributes['aspectRatio'] ?? $product_image_attributes['style']['dimensions']['aspectRatio'] ?? 'auto';
+
+		return is_string( $aspect_ratio ) && '' !== $aspect_ratio ? $aspect_ratio : 'auto';
+	}
+
+	/**
+	 * Get inline styles for gallery videos from Product Image attributes.
+	 *
+	 * @param array  $product_image_attributes Product Image block attributes.
+	 * @param string $aspect_ratio             Product Image aspect ratio.
+	 * @return string
+	 */
+	private function get_video_style( $product_image_attributes, $aspect_ratio ) {
+		$styles = array();
+		$scale  = isset( $product_image_attributes['scale'] ) ? $product_image_attributes['scale'] : 'cover';
+		$scale  = in_array( $scale, array( 'cover', 'contain', 'fill' ), true ) ? $scale : 'cover';
+		$scale  = 'auto' === $aspect_ratio ? 'contain' : $scale;
+
+		if ( ! empty( $product_image_attributes['height'] ) ) {
+			$styles[] = sprintf( 'height:%s', $product_image_attributes['height'] );
+		}
+
+		if ( ! empty( $product_image_attributes['width'] ) ) {
+			$styles[] = sprintf( 'width:%s', $product_image_attributes['width'] );
+		}
+
+		$styles[] = sprintf( 'object-fit:%s', $scale );
+
+		if ( 'auto' !== $aspect_ratio ) {
+			$styles[] = sprintf( 'aspect-ratio:%s', $aspect_ratio );
+		}
+
+		if ( ! empty( $product_image_attributes['style']['dimensions']['minHeight'] ) ) {
+			$styles[] = sprintf( 'min-height:%s', $product_image_attributes['style']['dimensions']['minHeight'] );
+		}
+
+		return implode( ';', $styles ) . ';';
 	}
 
 	/**

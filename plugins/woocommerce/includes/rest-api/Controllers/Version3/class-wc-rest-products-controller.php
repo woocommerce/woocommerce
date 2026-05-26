@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 
@@ -220,40 +221,19 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return array
 	 */
 	protected function get_media_gallery( $product ) {
-		if ( ! $this->product_gallery_videos_enabled() ) {
-			return $this->get_media_gallery_from_images( $product );
-		}
-
-		$media_gallery = $product->get_media_gallery( 'edit' );
-
-		if ( empty( $media_gallery ) ) {
-			$media_gallery = $this->get_media_gallery_from_images( $product );
-		} else {
-			$media_gallery = $this->maybe_prepend_product_image_to_media_gallery( $product, $media_gallery );
-		}
+		$media_gallery = ProductMediaGallery::get_product_media_gallery_items(
+			$product,
+			array(
+				'context'         => 'edit',
+				'feature_enabled' => ProductMediaGallery::is_feature_enabled(),
+			)
+		);
 
 		if ( empty( $media_gallery ) ) {
 			return array();
 		}
 
-		$attachment_ids = array();
-
-		foreach ( $media_gallery as $item ) {
-			if ( 'attachment' === ( $item['source_type'] ?? '' ) && ! empty( $item['id'] ) ) {
-				$attachment_ids[] = (int) $item['id'];
-			}
-
-			if ( ! empty( $item['poster_id'] ) ) {
-				$attachment_ids[] = (int) $item['poster_id'];
-			}
-		}
-
-		$attachment_ids = array_values( array_unique( array_filter( $attachment_ids ) ) );
-
-		if ( ! empty( $attachment_ids ) ) {
-			// Prime caches to reduce future queries.
-			_prime_post_caches( $attachment_ids );
-		}
+		ProductMediaGallery::prime_attachment_caches( $media_gallery, true );
 
 		$items = array();
 
@@ -275,7 +255,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$item = array_merge( $item, $attachment_data );
 
 			if ( 'video' === ( $item['media_type'] ?? '' ) ) {
-				$poster_id = $this->get_media_gallery_video_poster_id( $item );
+				$poster_id = ProductMediaGallery::get_video_poster_id( $item );
 
 				if ( $poster_id ) {
 					$item['poster_id'] = $poster_id;
@@ -288,109 +268,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		return $items;
-	}
-
-	/**
-	 * Check if product gallery videos are enabled.
-	 *
-	 * @return bool
-	 */
-	protected function product_gallery_videos_enabled() {
-		return function_exists( 'wc_product_gallery_videos_enabled' ) && wc_product_gallery_videos_enabled();
-	}
-
-	/**
-	 * Project legacy product images into media gallery items.
-	 *
-	 * @param WC_Product|WC_Product_Variation $product Product instance.
-	 *
-	 * @return array
-	 */
-	protected function get_media_gallery_from_images( $product ) {
-		$attachment_ids = array();
-
-		if ( $product->get_image_id() ) {
-			$attachment_ids[] = $product->get_image_id();
-		}
-
-		$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
-		$media_gallery  = array();
-
-		foreach ( $attachment_ids as $attachment_id ) {
-			$attachment_id = absint( $attachment_id );
-
-			if ( ! $attachment_id ) {
-				continue;
-			}
-
-			$media_gallery[] = array(
-				'media_type'  => 'image',
-				'source_type' => 'attachment',
-				'id'          => $attachment_id,
-			);
-		}
-
-		return $media_gallery;
-	}
-
-	/**
-	 * Move the product image to the front of stored media gallery data.
-	 *
-	 * @param WC_Product|WC_Product_Variation $product       Product instance.
-	 * @param array                           $media_gallery Media gallery items.
-	 *
-	 * @return array
-	 */
-	protected function maybe_prepend_product_image_to_media_gallery( $product, $media_gallery ) {
-		$product_image_id = $product->get_image_id();
-
-		if ( ! $product_image_id ) {
-			return $media_gallery;
-		}
-
-		$product_image_item = array(
-			'media_type'  => 'image',
-			'source_type' => 'attachment',
-			'id'          => (int) $product_image_id,
-		);
-
-		foreach ( $media_gallery as $index => $item ) {
-			if (
-				! is_array( $item ) ||
-				! $this->media_gallery_item_is_product_image( $item, (int) $product_image_id )
-			) {
-				continue;
-			}
-
-			if ( 0 === $index ) {
-				return $media_gallery;
-			}
-
-			unset( $media_gallery[ $index ] );
-			array_unshift( $media_gallery, $product_image_item );
-
-			return array_values( $media_gallery );
-		}
-
-		array_unshift(
-			$media_gallery,
-			$product_image_item
-		);
-
-		return $media_gallery;
-	}
-
-	/**
-	 * Check if a media gallery item represents the product image.
-	 *
-	 * @param array $item             Media gallery item.
-	 * @param int   $product_image_id Product image attachment ID.
-	 *
-	 * @return bool
-	 */
-	protected function media_gallery_item_is_product_image( $item, $product_image_id ) {
-		return 'image' === ( $item['media_type'] ?? '' ) &&
-			(int) ( $item['id'] ?? 0 ) === $product_image_id;
 	}
 
 	/**
@@ -464,27 +341,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		return $data;
-	}
-
-	/**
-	 * Get the poster attachment ID for a media gallery video item.
-	 *
-	 * @param array $item Media gallery item.
-	 *
-	 * @return int
-	 */
-	protected function get_media_gallery_video_poster_id( array $item ) {
-		$poster_id = ! empty( $item['poster_id'] ) ? absint( $item['poster_id'] ) : 0;
-
-		if ( $poster_id ) {
-			return $poster_id;
-		}
-
-		if ( 'attachment' === ( $item['source_type'] ?? '' ) && ! empty( $item['id'] ) ) {
-			return (int) get_post_thumbnail_id( (int) $item['id'] );
-		}
-
-		return 0;
 	}
 
 	/**
@@ -1026,7 +882,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			return $product;
 		}
 
-		if ( ! $this->product_gallery_videos_enabled() ) {
+		if ( ! ProductMediaGallery::is_feature_enabled() ) {
 			$product->set_media_gallery( array() );
 			return $product;
 		}
@@ -1052,7 +908,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			return $product;
 		}
 
-		$image_media_items    = $this->get_media_gallery_from_images( $product );
+		$image_media_items    = ProductMediaGallery::get_legacy_image_media_items( $product, true, 'edit' );
 		$updated_media_items  = array();
 		$images_inserted      = false;
 		$has_preserved_videos = false;
@@ -1085,7 +941,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$updated_media_items = array_merge( $image_media_items, $updated_media_items );
 		}
 
-		$product->set_media_gallery( $this->maybe_prepend_product_image_to_media_gallery( $product, $updated_media_items ) );
+		$product->set_media_gallery( ProductMediaGallery::maybe_prepend_product_image( $product, $updated_media_items, 'edit' ) );
 
 		return $product;
 	}
@@ -1174,35 +1030,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return void
 	 */
 	protected function sync_product_images_from_media_gallery( $product, $media_gallery ) {
-		$image_ids              = array();
-		$cover_image_id         = 0;
-		$cover_is_gallery_image = false;
-
-		foreach ( $media_gallery as $item ) {
-			if ( ! is_array( $item ) ) {
-				continue;
-			}
-
-			if (
-				'image' === ( $item['media_type'] ?? '' ) &&
-				'attachment' === ( $item['source_type'] ?? '' ) &&
-				! empty( $item['id'] )
-			) {
-				$image_id = absint( $item['id'] );
-
-				if ( ! $image_id ) {
-					continue;
-				}
-
-				if ( ! $cover_image_id ) {
-					$cover_image_id         = $image_id;
-					$cover_is_gallery_image = true;
-				}
-
-				$image_ids[] = $image_id;
-				continue;
-			}
-		}
+		$image_ids      = ProductMediaGallery::get_image_ids( $media_gallery );
+		$cover_image_id = ! empty( $image_ids ) ? absint( array_shift( $image_ids ) ) : 0;
 
 		if ( $cover_image_id ) {
 			wc_product_attach_featured_image( $cover_image_id, $product, false );
@@ -1210,14 +1039,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$product->set_image_id( $cover_image_id );
 		}
 
-		if ( $cover_is_gallery_image ) {
-			array_shift( $image_ids );
-		}
-
 		$product->set_gallery_image_ids( $image_ids );
 
 		if ( $cover_image_id ) {
-			$product->set_media_gallery( $this->maybe_prepend_product_image_to_media_gallery( $product, $media_gallery ) );
+			$product->set_media_gallery( ProductMediaGallery::maybe_prepend_product_image( $product, $media_gallery, 'edit' ) );
 		}
 	}
 
@@ -1640,7 +1465,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Check for mixed media gallery and set it.
 		if ( isset( $request['media_gallery'] ) ) {
-			if ( ! $this->product_gallery_videos_enabled() ) {
+			if ( ! ProductMediaGallery::is_feature_enabled() ) {
 				throw new WC_REST_Exception( 'woocommerce_product_media_gallery_feature_disabled', esc_html__( 'Product gallery videos are not enabled.', 'woocommerce' ), 400 );
 			}
 
@@ -2500,7 +2325,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$schema = $this->add_cogs_related_product_schema( $schema, false );
 		}
 
-		if ( $this->product_gallery_videos_enabled() ) {
+		if ( ProductMediaGallery::is_feature_enabled() ) {
 			$schema['properties']['media_gallery'] = $this->get_media_gallery_schema();
 		}
 
@@ -2722,7 +2547,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				$data['global_unique_id'] = $product->get_global_unique_id( $context );
 			}
 
-			if ( $this->product_gallery_videos_enabled() && in_array( 'media_gallery', $fields, true ) ) {
+			if ( ProductMediaGallery::is_feature_enabled() && in_array( 'media_gallery', $fields, true ) ) {
 				$data['media_gallery'] = $this->get_media_gallery( $product );
 			}
 
