@@ -7549,12 +7549,6 @@ parameters:
 			path: includes/admin/settings/class-wc-settings-integrations.php
 
 		-
-			message: '#^Default value of the parameter \#2 \$section_id \(false\) of method WC_Settings_Page\:\:get_custom_view\(\) is incompatible with type string\.$#'
-			identifier: parameter.defaultValue
-			count: 1
-			path: includes/admin/settings/class-wc-settings-page.php
-
-		-
 			message: '#^Method WC_Settings_Page\:\:add_settings_slot\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7563,18 +7557,6 @@ parameters:
 		-
 			message: '#^Method WC_Settings_Page\:\:do_update_options_action\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/admin/settings/class-wc-settings-page.php
-
-		-
-			message: '#^Method WC_Settings_Page\:\:get_custom_view\(\) should return string but returns array\<string, string\>\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/admin/settings/class-wc-settings-page.php
-
-		-
-			message: '#^Method WC_Settings_Page\:\:get_custom_view\(\) should return string but returns null\.$#'
-			identifier: return.type
 			count: 1
 			path: includes/admin/settings/class-wc-settings-page.php
 
@@ -7600,12 +7582,6 @@ parameters:
 			message: '#^Method WC_Settings_Page\:\:save_settings_for_current_section\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: includes/admin/settings/class-wc-settings-page.php
-
-		-
-			message: '#^Parameter \#1 \$str of function trim expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
 			path: includes/admin/settings/class-wc-settings-page.php
 
 		-
@@ -45586,66 +45562,6 @@ parameters:
 			path: src/Admin/API/SettingOptions.php
 
 		-
-			message: '#^Call to method get_params\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Settings.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Settings\:\:register_routes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/API/Settings.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Settings\:\:save_items_permissions_check\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Settings.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Settings\:\:save_settings\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Settings.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Settings\:\:save_settings\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Settings.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Settings\:\:save_settings\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_Error\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Admin/API/Settings.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Settings\:\:save_settings\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Settings.php
-
-		-
-			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Data_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 66 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Admin/API/Settings.php
-
-		-
-			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\Settings\:\:save_items_permissions_check\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Settings.php
-
-		-
-			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\Settings\:\:save_settings\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Settings.php
-
-		-
 			message: '#^Call to method get_param\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
 			identifier: class.notFound
 			count: 1
@@ -46246,26 +46162,8 @@ parameters:
 			path: src/Admin/Features/Features.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Features\:\:maybe_disable_features\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/Features.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Features\:\:maybe_load_beta_features_modal\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/Features.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Features\:\:register_internal_class_aliases\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/Features.php
-
-		-
-			message: '#^Parameter \#3 \$need_translation of static method Automattic\\WooCommerce\\Internal\\Admin\\WCAdminAssets\:\:register_script\(\) expects bool, array\<int, string\> given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Admin/Features/Features.php
 
@@ -47914,42 +47812,6 @@ parameters:
 			path: src/Admin/Features/ProductDataViews/Init.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$ver\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Admin/Features/Settings/Init.php
-
-		-
-			message: '#^Constant WPINC not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Admin/Features/Settings/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Settings\\Init\:\:enqueue_settings_editor_scripts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/Settings/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Settings\\Init\:\:enqueue_settings_editor_styles\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/Settings/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Settings\\Init\:\:get_instance\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/Settings/Init.php
-
-		-
-			message: '#^Parameter \#1 \$stack of function array_shift expects array, array\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/Settings/Transformer.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ShippingPartnerSuggestions\\ShippingPartnerSuggestions\:\:get_specs\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -48767,12 +48629,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\PageController\:\:is_embed_page\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/PageController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\PageController\:\:is_modern_settings_page\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Admin/PageController.php

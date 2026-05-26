@@ -379,7 +379,6 @@
 			],
 			"packages": [
 				"@woocommerce/product-editor",
-				"@woocommerce/settings-editor",
 				"@woocommerce/admin-library"
 			],
 			"isIgnored": true

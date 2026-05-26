@@ -161,7 +161,6 @@
 		"@woocommerce/onboarding": "workspace:*",
 		"@woocommerce/product-editor": "workspace:*",
 		"@woocommerce/remote-logging": "workspace:*",
-		"@woocommerce/settings-editor": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/babel-preset-default": "next",
 		"@wordpress/block-editor": "catalog:wp-min",
@@ -375,9 +374,6 @@
 				"node_modules/@woocommerce/product-editor/build-types",
 				"node_modules/@woocommerce/remote-logging/build",
 				"node_modules/@woocommerce/remote-logging/build-types",
-				"node_modules/@woocommerce/settings-editor/build",
-				"node_modules/@woocommerce/settings-editor/build-style",
-				"node_modules/@woocommerce/settings-editor/build-types",
 				"node_modules/@woocommerce/tracks/build",
 				"node_modules/@woocommerce/tracks/build-types"
 			]
