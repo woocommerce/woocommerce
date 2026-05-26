@@ -22,15 +22,33 @@ jobs:
               uses: ./.github/actions/setup-woocommerce-monorepo
 
             - name: Build package for mirroring
+              env:
+                  PACKAGE: ${{ github.event.inputs.package }}
               run: |
-                  pnpm --filter "${{ github.event.inputs.package }}" build:composer-package
-                  echo "mirror_dir=$( pnpm --filter ${{ github.event.inputs.package }} list --json | jq --compact-output '.[]' | jq --raw-output '( .path + "/build")' )" >> $GITHUB_ENV
+                  pnpm --filter "$PACKAGE" build:composer-package
+                  mirror_dir=$( pnpm --filter "$PACKAGE" list --json | jq --compact-output '.[]' | jq --raw-output '( .path + "/build")' )
+                  echo "mirror_dir=$mirror_dir" >> $GITHUB_ENV
+                  # The target org is the first path segment of the package's mirrors.txt.
+                  # It determines which user/token can push to the mirror repo (see below).
+                  echo "mirror_org=$( cut -d/ -f1 "$mirror_dir/mirrors.txt" )" >> $GITHUB_ENV
+
+            # woocommercebot belongs to the woocommerce org and cannot push to Automattic
+            # repos, so packages mirrored to the Automattic org must use matticbot instead.
+            - name: Verify Automattic mirror token is set
+              if: env.mirror_org == 'Automattic'
+              env:
+                  TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
+              run: |
+                  if [[ -z "$TOKEN" ]]; then
+                    echo '::error::Mirroring to the Automattic org requires the API_TOKEN_GITHUB secret to be set.'
+                    exit 1
+                  fi
 
             - name: Push to mirror
               uses: Automattic/action-push-to-mirrors@4dfc139699dff77d96af45b2aaf70888c8cd963d #v2.2.2
               with:
-                  token: ${{ secrets.PR_ASSIGN_TOKEN }}
-                  username: woocommercebot
+                  token: ${{ env.mirror_org == 'Automattic' && secrets.API_TOKEN_GITHUB || secrets.PR_ASSIGN_TOKEN }}
+                  username: ${{ env.mirror_org == 'Automattic' && 'matticbot' || 'woocommercebot' }}
                   working-directory: ${{ env.mirror_dir }}
                   commit-message: 'Mirror package ${{ github.event.inputs.package }} from WooCommerce'
               timeout-minutes: 5 # Normally should take up to 30 seconds
