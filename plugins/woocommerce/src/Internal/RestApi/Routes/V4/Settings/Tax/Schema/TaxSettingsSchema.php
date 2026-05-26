@@ -176,6 +176,11 @@ class TaxSettingsSchema extends AbstractSchema {
 				continue;
 			}
 
+			// Skip special marker types.
+			if ( in_array( $setting_type, array( 'title', 'sectionend', 'conflict_error', 'add_settings_slot' ), true ) ) {
+				continue;
+			}
+
 			// Convert setting to field format.
 			if ( isset( $setting['id'] ) && $current_group ) {
 				$field = $this->transform_setting_to_field( $setting );

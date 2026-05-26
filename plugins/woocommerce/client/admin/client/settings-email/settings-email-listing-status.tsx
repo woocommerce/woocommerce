@@ -8,6 +8,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { scheduled, published, cancelCircleFilled } from '@wordpress/icons';
+import { __experimentalHStack as HStack, Icon } from '@wordpress/components';
 
 export const EMAIL_STATUSES = [
 	{
@@ -35,3 +36,24 @@ export const EMAIL_STATUSES = [
 		),
 	},
 ];
+
+export const Status = ( { slug }: { slug: string | undefined } ) => {
+	const status = slug
+		? EMAIL_STATUSES.find( ( s ) => s.value === slug )
+		: undefined;
+	if ( ! status ) {
+		return slug;
+	}
+	return (
+		<HStack
+			alignment="left"
+			spacing={ 0 }
+			className="woocommerce-email-listing-status"
+		>
+			<Icon icon={ status.icon } size={ 24 } />
+			<span className="woocommerce-email-listing-status-label">
+				{ status.label }
+			</span>
+		</HStack>
+	);
+};

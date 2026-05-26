@@ -30,7 +30,7 @@ class EmailSettingsSchema extends AbstractSchema {
 	 *
 	 * @var string[]
 	 */
-	const NON_EDITABLE_TYPES = array( 'title', 'sectionend', 'previewing_new_templates', 'email_improvements_button', 'email_notification', 'hidden' );
+	const NON_EDITABLE_TYPES = array( 'title', 'sectionend', 'email_color_palette', 'previewing_new_templates', 'email_improvements_button', 'email_notification', 'email_notification_block_emails', 'hidden' );
 
 	/**
 	 * Return all properties for the item schema.
@@ -157,8 +157,8 @@ class EmailSettingsSchema extends AbstractSchema {
 		foreach ( $settings as $setting ) {
 			$setting_type = $setting['type'] ?? '';
 
-			// Handle section titles - start of a new group.
-			if ( 'title' === $setting_type ) {
+			// Handle section titles and email_color_palette - start of a new group.
+			if ( 'title' === $setting_type || 'email_color_palette' === $setting_type ) {
 				$current_group_id = $setting['id'] ?? '';
 				$current_group    = array(
 					'title'       => $setting['title'] ?? '',

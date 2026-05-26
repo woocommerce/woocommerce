@@ -64,6 +64,7 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_tax_display_cart'      => 'select',
 			'woocommerce_price_display_suffix'  => 'text',
 			'woocommerce_tax_total_display'     => 'select',
+			''                                  => array( 'conflict_error', 'add_settings_slot' ),
 		);
 
 		$this->assertEquals( $expected, $setting_ids_and_types );

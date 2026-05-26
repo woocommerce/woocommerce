@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -62,6 +63,10 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		}
 
 		$sections['woocommerce_com'] = __( 'WooCommerce.com', 'woocommerce' );
+
+		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
+			$sections['blueprint'] = __( 'Blueprint (beta)', 'woocommerce' );
+		}
 
 		return $sections;
 	}
@@ -488,6 +493,23 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	}
 
 	/**
+	 * Get settings for the Blueprint section.
+	 *
+	 * @return array
+	 */
+	protected function get_settings_for_blueprint_section() {
+		$settings =
+			array(
+				array(
+					'id'   => 'wc_settings_blueprint_slotfill',
+					'type' => 'slotfill_placeholder',
+				),
+			);
+
+		return $settings;
+	}
+
+	/**
 	 * Form method.
 	 *
 	 * @deprecated 3.4.4
@@ -519,6 +541,10 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 */
 	public function output() {
 		global $current_section, $hide_save_button;
+
+		if ( 'blueprint' === $current_section ) {
+			$hide_save_button = true;
+		}
 
 		if ( 'webhooks' === $current_section ) {
 			WC_Admin_Webhooks::page_output();
