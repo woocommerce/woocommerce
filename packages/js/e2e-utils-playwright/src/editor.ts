@@ -94,15 +94,24 @@ export const openEditorSettings = async ( {
  * This helper function returns the content frame of the editor canvas iframe if it exists,
  * or falls back to the main page if the iframe isn't present.
  *
+ * Waits briefly for the iframe to attach before falling back to the page, because
+ * recent Gutenberg builds mount the editor iframe slightly after initial paint.
+ * Without the wait, callers can resolve the canvas against the outer page and
+ * then time out on locators that only exist inside the iframe.
+ *
  * @param page - The Playwright page object
  * @return The editor canvas frame or the original page
  */
 export const getCanvas = async ( page: Page ): Promise< EditorCanvas > => {
-	const iframeLocator = page.locator( 'iframe[name="editor-canvas"]' );
-	if ( ( await iframeLocator.count() ) > 0 ) {
+	const iframeLocator = page
+		.locator( 'iframe[name="editor-canvas"]' )
+		.first();
+	try {
+		await iframeLocator.waitFor( { timeout: 10_000 } );
 		return iframeLocator.contentFrame();
+	} catch {
+		return page;
 	}
-	return page;
 };
 
 /**

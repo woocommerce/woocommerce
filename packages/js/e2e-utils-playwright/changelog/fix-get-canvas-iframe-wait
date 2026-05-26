@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Wait for the editor canvas iframe to attach in `getCanvas` so callers don't race against the outer page on recent Gutenberg builds.
