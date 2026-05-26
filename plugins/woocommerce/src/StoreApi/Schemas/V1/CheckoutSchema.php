@@ -261,6 +261,13 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_draft_response( \WC_Cart $cart, \WC_Customer $customer ) {
+		// Use the shopper's session-stored selection so a PATCH-time choice survives the next render — but only if the gateway is still enabled, since the slug can outlive the gateway (admin disables it, payment plugin deactivated).
+		$session_payment_method = (string) WC()->session->get( 'chosen_payment_method' );
+		$enabled_gateways       = PaymentUtils::get_enabled_payment_gateways();
+		$payment_method         = ( '' !== $session_payment_method && isset( $enabled_gateways[ $session_payment_method ] ) )
+			? $session_payment_method
+			: (string) PaymentUtils::get_default_payment_method();
+
 		return [
 			'order_id'           => 0,
 			'status'             => 'checkout-draft',
@@ -270,7 +277,7 @@ class CheckoutSchema extends AbstractSchema {
 			'customer_id'        => $customer->get_id(),
 			'billing_address'    => (object) $this->billing_address_schema->get_item_response( $customer ),
 			'shipping_address'   => (object) $this->shipping_address_schema->get_item_response( $customer ),
-			'payment_method'     => (string) PaymentUtils::get_default_payment_method(),
+			'payment_method'     => $payment_method,
 			'payment_result'     => null,
 			'additional_fields'  => (object) $this->get_additional_fields_response( $customer ),
 			'__experimentalCart' => (object) $this->cart_schema->get_item_response( $cart ),

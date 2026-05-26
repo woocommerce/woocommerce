@@ -64,21 +64,31 @@ class NotificationProcessor {
 	private PushTokensDataStore $data_store;
 
 	/**
+	 * The notification preferences service.
+	 *
+	 * @var NotificationPreferencesService
+	 */
+	private NotificationPreferencesService $preferences_service;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
 	 *
-	 * @param WpcomNotificationDispatcher $dispatcher The WPCOM dispatcher.
-	 * @param PushTokensDataStore         $data_store The push tokens data store.
+	 * @param WpcomNotificationDispatcher    $dispatcher          The WPCOM dispatcher.
+	 * @param PushTokensDataStore            $data_store          The push tokens data store.
+	 * @param NotificationPreferencesService $preferences_service The notification preferences service.
 	 *
 	 * @since 10.7.0
 	 */
 	final public function init(
 		WpcomNotificationDispatcher $dispatcher,
-		PushTokensDataStore $data_store
+		PushTokensDataStore $data_store,
+		NotificationPreferencesService $preferences_service
 	): void {
-		$this->dispatcher = $dispatcher;
-		$this->data_store = $data_store;
+		$this->dispatcher          = $dispatcher;
+		$this->data_store          = $data_store;
+		$this->preferences_service = $preferences_service;
 	}
 
 	/**
@@ -133,8 +143,19 @@ class NotificationProcessor {
 		);
 
 		/**
-		 * There are no recipients to send to. We don't want to retry as this
-		 * isn't a 'recoverable error', so mark as sent and return.
+		 * Filter out tokens whose owning user does not want this notification.
+		 * The decision is delegated to the notification itself via
+		 * {@see Notification::should_send_to_user()} so per-type preference
+		 * shapes (simple bool today, parametrized arrays in the future) stay
+		 * encapsulated alongside the type's resource access.
+		 */
+		$tokens = $this->filter_tokens_by_preferences( $tokens, $notification );
+
+		/**
+		 * There are no recipients to send to (either no tokens at all, or
+		 * every owning user opted out of this notification type). We don't
+		 * want to retry as this isn't a 'recoverable error', so mark as sent
+		 * and return.
 		 */
 		if ( empty( $tokens ) ) {
 			$notification->write_meta( self::SENT_META_KEY );
@@ -155,6 +176,51 @@ class NotificationProcessor {
 		 */
 
 		return false;
+	}
+
+	/**
+	 * Returns the subset of $tokens whose owning user wants $notification.
+	 *
+	 * The decision is delegated to {@see Notification::should_send_to_user()}
+	 * so per-type preference shapes (simple bool today, parametrized arrays
+	 * in the future) stay encapsulated alongside the type's resource access.
+	 * Tokens with no owning user are dropped — there are no preferences to
+	 * consult.
+	 *
+	 * Decisions are memoized per user for the duration of one call, since
+	 * the same user can have several registered tokens (iOS, iPad, Android,
+	 * browser) and we don't want to re-read user meta or re-fetch the
+	 * resource for every token.
+	 *
+	 * @param PushToken[]  $tokens       The tokens to filter.
+	 * @param Notification $notification The notification being processed.
+	 *
+	 * @return PushToken[] The tokens whose owner wants the notification.
+	 *
+	 * @since 10.8.0
+	 */
+	private function filter_tokens_by_preferences( array $tokens, Notification $notification ): array {
+		$type           = $notification->get_type();
+		$decision_cache = array();
+
+		return array_values(
+			array_filter(
+				$tokens,
+				function ( PushToken $token ) use ( $notification, $type, &$decision_cache ) {
+					$user_id = $token->get_user_id();
+					if ( ! $user_id ) {
+						return false;
+					}
+
+					if ( ! isset( $decision_cache[ $user_id ] ) ) {
+						$prefs                      = $this->preferences_service->get_preferences( $user_id );
+						$decision_cache[ $user_id ] = $notification->should_send_to_user( $prefs[ $type ] ?? null );
+					}
+
+					return $decision_cache[ $user_id ];
+				}
+			)
+		);
 	}
 
 	/**

@@ -161,7 +161,7 @@ trait BlockHooksTrait {
 		$pattern_slug = is_array( $context ) && isset( $context['slug'] ) ? $context['slug'] : '';
 		if ( ! $pattern_slug ) {
 			/**
-			 * Woo patterns have a slug property in $context, but core/theme patterns dont.
+			 * Woo patterns have a slug property in $context, but core/theme patterns don't.
 			 * In that case, we fallback to the name property, as they're the same.
 			 */
 			$pattern_slug = is_array( $context ) && isset( $context['name'] ) ? $context['name'] : '';
