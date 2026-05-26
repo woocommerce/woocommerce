@@ -121,7 +121,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 				$this->user_login         = stripslashes( $this->object->user_login );
 				$this->user_email         = stripslashes( $this->object->user_email );
 				$customer                 = new WC_Customer( $user_id );
-				$first_name               = $customer->get_billing_first_name() ?: $this->object->first_name;
+				$first_name               = ! empty( $customer->get_billing_first_name() ) ? $customer->get_billing_first_name() : $this->object->first_name;
 				$this->user_display_name  = ! empty( $first_name ) ? $first_name : $this->user_login;
 				$this->recipient          = $this->user_email;
 				$this->user_pass          = $user_pass;

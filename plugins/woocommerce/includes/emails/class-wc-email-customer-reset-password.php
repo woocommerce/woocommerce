@@ -121,14 +121,14 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 			$this->setup_locale();
 
 			if ( $user_login && $reset_key ) {
-				$this->object     = get_user_by( 'login', $user_login );
-				$this->user_id    = $this->object->ID;
-				$this->user_login = $user_login;
-				$this->reset_key  = $reset_key;
-				$this->user_email = stripslashes( $this->object->user_email );
-				$this->recipient  = $this->user_email;
+				$this->object            = get_user_by( 'login', $user_login );
+				$this->user_id           = $this->object->ID;
+				$this->user_login        = $user_login;
+				$this->reset_key         = $reset_key;
+				$this->user_email        = stripslashes( $this->object->user_email );
+				$this->recipient         = $this->user_email;
 				$customer                = new WC_Customer( $this->object->ID );
-				$first_name              = $customer->get_billing_first_name() ?: $this->object->first_name;
+				$first_name              = ! empty( $customer->get_billing_first_name() ) ? $customer->get_billing_first_name() : $this->object->first_name;
 				$this->user_display_name = ! empty( $first_name ) ? $first_name : $this->user_login;
 			}
 
@@ -193,13 +193,13 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 			return wc_get_template_html(
 				$this->template_block_content,
 				array(
-					'user_id'       => $this->user_id,
-					'user_login'    => $this->user_login,
+					'user_id'           => $this->user_id,
+					'user_login'        => $this->user_login,
 					'user_display_name' => $this->user_display_name,
-					'reset_key'     => $this->reset_key,
-					'sent_to_admin' => false,
-					'plain_text'    => false,
-					'email'         => $this,
+					'reset_key'         => $this->reset_key,
+					'sent_to_admin'     => false,
+					'plain_text'        => false,
+					'email'             => $this,
 				)
 			);
 		}
