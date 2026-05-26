@@ -5,9 +5,9 @@ catalogs:
     wp-min:
         '@types/wordpress__block-editor': 15.0.6
         '@types/wordpress__block-library': 2.6.3
-        '@types/wordpress__blocks': 15.17.0
+        '@types/wordpress__blocks': 12.5.18
         '@types/wordpress__edit-post': 8.4.2
-        '@types/wordpress__viewport': 6.44.0
+        '@types/wordpress__viewport': 5.5.3
         '@wordpress/a11y': 4.33.1
         '@wordpress/api-fetch': 7.33.1
         '@wordpress/base-styles': 6.9.1
