@@ -558,6 +558,18 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => true,
 			),
+			'point_of_sale_staff'                => array(
+				'name'                         => __( 'POS staff', 'woocommerce' ),
+				'description'                  => __(
+					'Experimental (POC): server-side POS staff, roles, and client-asserted order attribution. Requires Point of Sale to also be enabled. Hidden from the UI before this feature ships.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'is_experimental'              => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			'fulfillments'                       => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
 				'description'                  => __(
