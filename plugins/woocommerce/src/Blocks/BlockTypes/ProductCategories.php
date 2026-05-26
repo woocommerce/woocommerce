@@ -170,6 +170,22 @@ class ProductCategories extends AbstractDynamicBlock {
 				}
 			);
 		}
+
+		if ( ! empty( $attributes['hasImage'] ) && ! empty( $categories ) ) {
+			$attachment_ids = array_filter(
+				array_map(
+					static function ( $category ) {
+						return (int) get_term_meta( $category->term_id, 'thumbnail_id', true );
+					},
+					$categories
+				)
+			);
+			if ( ! empty( $attachment_ids ) ) {
+				// Prime caches to reduce future queries.
+				_prime_post_caches( $attachment_ids );
+			}
+		}
+
 		return $hierarchical ? $this->build_category_tree( $categories, $children_only ) : $categories;
 	}
 

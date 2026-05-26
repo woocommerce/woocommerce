@@ -345,9 +345,25 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			}
 		}
 		$response = array();
-		foreach ( $query_result as $term ) {
-			$data       = $this->prepare_item_for_response( $term, $request );
-			$response[] = $this->prepare_response_for_collection( $data );
+		if ( is_array( $query_result ) ) {
+			$attachment_ids = array();
+			foreach ( $query_result as $term ) {
+				if ( $term instanceof \WP_Term ) {
+					$thumbnail_id = (int) get_term_meta( $term->term_id, 'thumbnail_id', true );
+					if ( $thumbnail_id ) {
+						$attachment_ids[] = $thumbnail_id;
+					}
+				}
+			}
+			if ( ! empty( $attachment_ids ) ) {
+				// Prime caches to reduce future queries.
+				_prime_post_caches( $attachment_ids );
+			}
+
+			foreach ( $query_result as $term ) {
+				$data       = $this->prepare_item_for_response( $term, $request );
+				$response[] = $this->prepare_response_for_collection( $data );
+			}
 		}
 
 		$response = rest_ensure_response( $response );
