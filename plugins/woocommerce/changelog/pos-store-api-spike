@@ -1,0 +1,3 @@
+Significance: patch
+Type: add
+Comment: Architectural spike for routing mobile POS through the WooCommerce Store API. Adds the `wc/pos/v1` namespace, a Cart-Token-scoped session handler, a wrapper-delegation route base, and a stock policy hook. Not yet user-facing; see plugins/woocommerce/src/Internal/POS/StoreApi/DECISIONS.md.
