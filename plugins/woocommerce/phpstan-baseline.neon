@@ -7435,13 +7435,49 @@ parameters:
 			path: includes/admin/settings/class-wc-settings-emails.php
 
 		-
+			message: '#^Method WC_Settings_Emails\:\:delete_transient_email_settings\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/settings/class-wc-settings-emails.php
+
+		-
+			message: '#^Method WC_Settings_Emails\:\:email_color_palette\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/settings/class-wc-settings-emails.php
+
+		-
 			message: '#^Method WC_Settings_Emails\:\:email_font_family\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/admin/settings/class-wc-settings-emails.php
 
 		-
+			message: '#^Method WC_Settings_Emails\:\:email_image_url\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/settings/class-wc-settings-emails.php
+
+		-
 			message: '#^Method WC_Settings_Emails\:\:email_notification_setting\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/settings/class-wc-settings-emails.php
+
+		-
+			message: '#^Method WC_Settings_Emails\:\:email_notification_setting_block_emails\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/settings/class-wc-settings-emails.php
+
+		-
+			message: '#^Method WC_Settings_Emails\:\:email_preview\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/settings/class-wc-settings-emails.php
+
+		-
+			message: '#^Method WC_Settings_Emails\:\:email_preview_single\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/admin/settings/class-wc-settings-emails.php
@@ -7513,6 +7549,12 @@ parameters:
 			path: includes/admin/settings/class-wc-settings-integrations.php
 
 		-
+			message: '#^Method WC_Settings_Page\:\:add_settings_slot\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/settings/class-wc-settings-page.php
+
+		-
 			message: '#^Method WC_Settings_Page\:\:do_update_options_action\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7540,12 +7582,6 @@ parameters:
 			message: '#^Method WC_Settings_Page\:\:save_settings_for_current_section\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: includes/admin/settings/class-wc-settings-page.php
-
-		-
-			message: '#^Parameter \#1 \$str of function trim expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
 			path: includes/admin/settings/class-wc-settings-page.php
 
 		-
@@ -7755,6 +7791,12 @@ parameters:
 		-
 			message: '#^Argument of an invalid type array\|string supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
+			count: 1
+			path: includes/admin/settings/class-wc-settings-tax.php
+
+		-
+			message: '#^Method WC_Settings_Tax\:\:conflict_error\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: includes/admin/settings/class-wc-settings-tax.php
 
@@ -46122,12 +46164,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Features\:\:register_internal_class_aliases\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/Features.php
-
-		-
-			message: '#^Parameter \#3 \$need_translation of static method Automattic\\WooCommerce\\Internal\\Admin\\WCAdminAssets\:\:register_script\(\) expects bool, array\<int, string\> given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Admin/Features/Features.php
 
