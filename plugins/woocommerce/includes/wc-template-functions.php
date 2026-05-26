@@ -2168,6 +2168,7 @@ if ( ! function_exists( 'wc_get_gallery_video_html' ) ) {
 		$full_height      = isset( $full_src[2] ) ? absint( $full_src[2] ) : 1000;
 		$full_src_url     = isset( $full_src[0] ) ? $full_src[0] : wc_placeholder_img_src( 'woocommerce_single' );
 		$video_attributes = array(
+			'autoplay'                => 'autoplay',
 			'class'                   => $main_video ? 'wp-post-video wp-post-image' : 'wp-post-video',
 			'src'                     => $video_src,
 			'loop'                    => 'loop',
@@ -2186,10 +2187,6 @@ if ( ! function_exists( 'wc_get_gallery_video_html' ) ) {
 			$video_attributes['poster'] = $poster_src[0];
 		}
 
-		if ( ! empty( $settings['autoplay'] ) && wc_string_to_bool( $settings['autoplay'] ) ) {
-			$video_attributes['autoplay'] = 'autoplay';
-		}
-
 		$thumbnail           = isset( $thumbnail_src[0] )
 			? $thumbnail_src[0]
 			: wc_placeholder_img_src( 'woocommerce_gallery_thumbnail' );
@@ -2204,7 +2201,14 @@ if ( ! function_exists( 'wc_get_gallery_video_html' ) ) {
 			esc_attr( $thumbnail_sizes ? $thumbnail_sizes : '' ),
 			esc_url( $thumbnail_video_src ),
 			esc_url( $video_src ),
-			wc_implode_html_attributes( array_filter( $video_attributes ) )
+			wc_implode_html_attributes(
+				array_filter(
+					$video_attributes,
+					static function ( $value ) {
+						return '' !== $value;
+					}
+				)
+			)
 		);
 	}
 }

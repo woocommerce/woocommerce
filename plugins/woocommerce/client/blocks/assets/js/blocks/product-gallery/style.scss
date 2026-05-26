@@ -2,11 +2,6 @@ $admin-bar-height: 32px;
 $thumbnails-gradient-size: 20%;
 $thumbnails-gap: 2%;
 $dialog-padding: 20px;
-$thumbnail-video-overlay-background: rgba(0, 0, 0, 0.55);
-$thumbnail-video-overlay-color: var(--wp--preset--color--base, #fff);
-$thumbnail-video-overlay-size: 36px;
-$thumbnail-video-play-icon-height: 8px;
-$thumbnail-video-play-icon-width: 12px;
 
 :where(.wc-block-product-gallery-large-image) {
 	width: 100%;
@@ -260,31 +255,15 @@ $thumbnail-video-play-icon-width: 12px;
 }
 
 :where(.wc-block-product-gallery-thumbnails__thumbnail--video)::after {
-	content: "";
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-40%, -50%);
-	z-index: 1;
-	height: 0;
-	border-bottom: $thumbnail-video-play-icon-height solid transparent;
-	border-left: $thumbnail-video-play-icon-width solid currentColor;
-	border-top: $thumbnail-video-play-icon-height solid transparent;
-	color: $thumbnail-video-overlay-color;
-	pointer-events: none;
-}
-
-:where(.wc-block-product-gallery-thumbnails__thumbnail--video)::before {
-	content: "";
+	content: "\25B6";
 	position: absolute;
 	left: 50%;
 	top: 50%;
 	transform: translate(-50%, -50%);
 	z-index: 1;
-	width: $thumbnail-video-overlay-size;
-	height: $thumbnail-video-overlay-size;
-	background: $thumbnail-video-overlay-background;
-	border-radius: 999px;
+	color: var(--wp--preset--color--base, #fff);
+	line-height: 1;
+	text-shadow: 0 0 0.25em rgb(0 0 0 / 80%);
 	pointer-events: none;
 }
 

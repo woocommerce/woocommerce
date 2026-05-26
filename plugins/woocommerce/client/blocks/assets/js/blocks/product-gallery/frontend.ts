@@ -29,75 +29,22 @@ const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
 	isDisabledNext: imageIndex === totalImages - 1,
 } );
 
-const playVideo = ( video: HTMLVideoElement ) => {
-	void video.play().catch( () => undefined );
-};
-
-const getDialogVisibilityRatio = ( video: HTMLVideoElement ) => {
-	const dialogContent = video.closest(
-		'.wc-block-product-gallery-dialog__content'
-	);
-
-	if ( ! ( dialogContent instanceof HTMLElement ) ) {
-		return 0;
-	}
-
-	const videoRect = video.getBoundingClientRect();
-	const contentRect = dialogContent.getBoundingClientRect();
-	const visibleHeight =
-		Math.min( videoRect.bottom, contentRect.bottom ) -
-		Math.max( videoRect.top, contentRect.top );
-
-	if ( visibleHeight <= 0 || videoRect.height <= 0 ) {
-		return 0;
-	}
-
-	return Math.min( visibleHeight / videoRect.height, 1 );
-};
-
-const getVisibleDialogVideo = ( galleryContainer: Element ) => {
-	const dialog = galleryContainer.matches(
-		'.wc-block-product-gallery-dialog'
-	)
-		? galleryContainer
-		: galleryContainer.querySelector( '.wc-block-product-gallery-dialog' );
-
-	if ( ! ( dialog instanceof HTMLDialogElement ) || ! dialog.open ) {
-		return null;
-	}
-
-	return Array.from(
-		dialog.querySelectorAll< HTMLVideoElement >( 'video[data-image-id]' )
-	).reduce< { ratio: number; video: HTMLVideoElement | null } >(
-		( visibleVideo, video ) => {
-			const ratio = getDialogVisibilityRatio( video );
-
-			if ( ratio > visibleVideo.ratio ) {
-				return { ratio, video };
-			}
-
-			return visibleVideo;
-		},
-		{ ratio: 0, video: null }
-	).video;
-};
-
-const syncVideoPlayback = (
+const syncVideoElementPlayback = (
 	video: HTMLVideoElement,
 	selectedImageId: number,
-	isDialogOpen: boolean,
-	visibleDialogVideo: HTMLVideoElement | null = null
+	isDialogOpen: boolean
 ) => {
 	const imageId = Number( video.getAttribute( 'data-image-id' ) ?? 0 );
 	const isDialogVideo = Boolean(
 		video.closest( '.wc-block-product-gallery-dialog' )
 	);
-	const shouldPlay =
-		( isDialogVideo && isDialogOpen && video === visibleDialogVideo ) ||
-		( ! isDialogVideo && selectedImageId === imageId && ! isDialogOpen );
+	const shouldPlayInDialog = isDialogVideo && isDialogOpen;
+	const shouldPlayInGallery =
+		! isDialogVideo && selectedImageId === imageId && ! isDialogOpen;
+	const shouldPlay = shouldPlayInDialog || shouldPlayInGallery;
 
 	if ( shouldPlay ) {
-		playVideo( video );
+		void video.play().catch( () => undefined );
 	} else {
 		video.pause();
 	}
@@ -112,17 +59,10 @@ const syncGalleryVideoPlayback = (
 		return;
 	}
 
-	const visibleDialogVideo = getVisibleDialogVideo( galleryContainer );
-
 	galleryContainer
 		.querySelectorAll< HTMLVideoElement >( 'video[data-image-id]' )
 		.forEach( ( video ) =>
-			syncVideoPlayback(
-				video,
-				selectedImageId,
-				isDialogOpen,
-				visibleDialogVideo
-			)
+			syncVideoElementPlayback( video, selectedImageId, isDialogOpen )
 		);
 };
 
@@ -408,40 +348,18 @@ const productGallery = {
 		openDialog: withSyncEvent( ( event?: Event ) => {
 			event?.preventDefault();
 			const context = getContext();
-			const element = getElement()?.ref as HTMLElement | undefined;
-			const galleryContainer =
-				element?.closest( '.wp-block-woocommerce-product-gallery' ) ??
-				null;
 
 			context.isDialogOpen = true;
 			document.body.classList.add(
 				'wc-block-product-gallery-dialog-open'
 			);
-			window.requestAnimationFrame( () =>
-				syncGalleryVideoPlayback(
-					galleryContainer,
-					context.selectedImageId,
-					context.isDialogOpen
-				)
-			);
 		} ),
 		closeDialog: () => {
 			const context = getContext();
-			const element = getElement()?.ref as HTMLElement | undefined;
-			const galleryContainer =
-				element?.closest( '.wp-block-woocommerce-product-gallery' ) ??
-				null;
 
 			context.isDialogOpen = false;
 			document.body.classList.remove(
 				'wc-block-product-gallery-dialog-open'
-			);
-			window.requestAnimationFrame( () =>
-				syncGalleryVideoPlayback(
-					galleryContainer,
-					context.selectedImageId,
-					context.isDialogOpen
-				)
 			);
 		},
 		onTouchStart: ( event: TouchEvent ) => {
@@ -499,22 +417,6 @@ const productGallery = {
 			const overflowState = checkOverflow( scrollableElement );
 
 			context.thumbnailsOverflow = overflowState;
-		},
-		onDialogScroll: () => {
-			const element = getElement()?.ref as HTMLElement | undefined;
-			const galleryContainer =
-				element?.closest( '.wp-block-woocommerce-product-gallery' ) ??
-				element?.closest( '.wc-block-product-gallery-dialog' ) ??
-				null;
-			const { selectedImageId, isDialogOpen } = getContext();
-
-			window.requestAnimationFrame( () =>
-				syncGalleryVideoPlayback(
-					galleryContainer,
-					selectedImageId,
-					isDialogOpen
-				)
-			);
 		},
 		onArrowsKeyDown: ( event: KeyboardEvent ) => {
 			if ( event.key === 'ArrowRight' ) {

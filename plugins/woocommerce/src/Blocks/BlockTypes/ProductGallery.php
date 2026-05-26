@@ -55,7 +55,7 @@ class ProductGallery extends AbstractBlock {
 						</svg>
 					</button>
 				</div>
-				<div class="wc-block-product-gallery-dialog__content" data-wp-on--scroll="actions.onDialogScroll">
+				<div class="wc-block-product-gallery-dialog__content">
 					<?php foreach ( $media_items as $index => $media ) : ?>
 						<?php if ( 'video' === ( $media['media_type'] ?? '' ) ) : ?>
 							<?php echo $this->get_dialog_video_html( $media ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -115,7 +115,14 @@ class ProductGallery extends AbstractBlock {
 			$attrs['poster'] = $media['poster_src'];
 		}
 
-		return '<video ' . wc_implode_html_attributes( array_filter( $attrs ) ) . '></video>';
+		return '<video ' . wc_implode_html_attributes(
+			array_filter(
+				$attrs,
+				static function ( $value ) {
+					return '' !== $value;
+				}
+			)
+		) . '></video>';
 	}
 
 	/**

@@ -1238,19 +1238,6 @@ class Controller extends WC_REST_Products_V2_Controller {
 		// Check for featured/gallery images, upload it and set it.
 		if ( isset( $request['images'] ) ) {
 			$product = $this->set_product_images( $product, $request['images'] );
-
-			if ( ! isset( $request['media_gallery'] ) ) {
-				$product = $this->sync_media_gallery_from_legacy_images_request( $product ); // @phpstan-ignore argument.type
-			}
-		}
-
-		// Check for mixed media gallery and set it.
-		if ( isset( $request['media_gallery'] ) ) {
-			if ( ! $this->product_gallery_videos_enabled() ) {
-				throw new WC_REST_Exception( 'woocommerce_product_media_gallery_feature_disabled', esc_html__( 'Product gallery videos are not enabled.', 'woocommerce' ), 400 );
-			}
-
-			$product = $this->set_product_media_gallery( $product, $request['media_gallery'] ); // @phpstan-ignore argument.type
 		}
 
 		// Allow set meta_data.
@@ -1969,10 +1956,6 @@ class Controller extends WC_REST_Products_V2_Controller {
 
 		if ( $this->cogs_is_enabled() ) {
 			$schema = $this->add_cogs_related_product_schema( $schema, false );
-		}
-
-		if ( $this->product_gallery_videos_enabled() ) {
-			$schema['properties']['media_gallery'] = $this->get_media_gallery_schema();
 		}
 
 		// New properties added for v4.

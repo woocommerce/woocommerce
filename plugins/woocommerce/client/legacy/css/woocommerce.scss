@@ -213,7 +213,8 @@ p.demo_store,
 					list-style: none;
 					position: relative;
 
-					img {
+					img,
+					.woocommerce-product-gallery__video-thumbnail-preview {
 						cursor: pointer;
 						opacity: 0.5;
 						margin: 0;
@@ -239,7 +240,6 @@ p.demo_store,
 							width: 100%;
 							height: 100%;
 							object-fit: cover;
-							opacity: 0.5;
 							pointer-events: none;
 						}
 

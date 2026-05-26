@@ -164,10 +164,7 @@ class WC_Meta_Box_Product_Images {
 		$media_gallery  = array();
 
 		if ( $media_posted ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$media_gallery = self::sanitize_media_gallery( wc_clean( wp_unslash( $_POST['product_media_gallery'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		}
-
-		if ( $media_posted ) {
+			$media_gallery  = self::sanitize_media_gallery( wc_clean( wp_unslash( $_POST['product_media_gallery'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$attachment_ids = self::get_image_ids_from_media_gallery( $media_gallery );
 		}
 

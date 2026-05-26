@@ -1285,18 +1285,6 @@ jQuery( function ( $ ) {
 		'ul.product_images'
 	);
 
-	function getProductGalleryMediaType( attachment ) {
-		if ( 'video' === attachment.type ) {
-			return 'video';
-		}
-
-		if ( 'image' === attachment.type ) {
-			return 'image';
-		}
-
-		return '';
-	}
-
 	function getProductGalleryAttachmentImage( attachment ) {
 		if ( attachment.sizes && attachment.sizes.thumbnail ) {
 			return attachment.sizes.thumbnail.url;
@@ -1311,10 +1299,6 @@ jQuery( function ( $ ) {
 		}
 
 		return attachment.icon || attachment.url;
-	}
-
-	function getProductGalleryVideoPreview( attachment ) {
-		return attachment.url || '';
 	}
 
 	function addProductGalleryMediaItemActions( $item, $el ) {
@@ -1360,7 +1344,7 @@ jQuery( function ( $ ) {
 
 	function createProductGalleryVideoItem( attachment, $el ) {
 		const attachmentImage = getProductGalleryAttachmentImage( attachment );
-		const videoPreview = getProductGalleryVideoPreview( attachment );
+		const posterId = parseInt( attachment.poster_id, 10 ) || 0;
 
 		if ( ! attachment.id || ! attachmentImage ) {
 			return null;
@@ -1371,12 +1355,13 @@ jQuery( function ( $ ) {
 		} )
 			.attr( 'data-attachment_id', attachment.id )
 			.attr( 'data-media_type', 'video' )
-			.attr( 'data-source_type', 'attachment' );
+			.attr( 'data-source_type', 'attachment' )
+			.attr( 'data-poster_id', posterId );
 
-		if ( videoPreview ) {
+		if ( attachment.url ) {
 			$( '<video />', {
 				class: 'woocommerce-product-gallery__video-preview',
-				src: videoPreview,
+				src: attachment.url,
 				preload: 'metadata',
 				muted: 'muted',
 				'aria-hidden': 'true',
@@ -1392,7 +1377,7 @@ jQuery( function ( $ ) {
 	}
 
 	function createProductGalleryMediaItem( attachment, $el, allowVideos ) {
-		const mediaType = getProductGalleryMediaType( attachment );
+		const mediaType = attachment.type;
 
 		if ( 'image' === mediaType ) {
 			return createProductGalleryImageItem( attachment, $el );

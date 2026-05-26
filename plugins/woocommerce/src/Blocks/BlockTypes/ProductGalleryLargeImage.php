@@ -288,7 +288,14 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			$attrs['data-wp-on--click'] = 'actions.openDialog';
 		}
 
-		return '<video ' . wc_implode_html_attributes( array_filter( $attrs ) ) . '></video>';
+		return '<video ' . wc_implode_html_attributes(
+			array_filter(
+				$attrs,
+				static function ( $value ) {
+					return '' !== $value;
+				}
+			)
+		) . '></video>';
 	}
 
 	/**

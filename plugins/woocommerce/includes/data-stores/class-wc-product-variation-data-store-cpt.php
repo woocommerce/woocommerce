@@ -636,25 +636,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	}
 
 	/**
-	 * Update meta data in, or delete it from, the database.
-	 *
-	 * Variations do not support product media galleries.
-	 *
-	 * @param WC_Data $product    Product object.
-	 * @param string  $meta_key   Meta key to update.
-	 * @param mixed   $meta_value Value to save.
-	 * @since 10.9.0
-	 * @return bool
-	 */
-	protected function update_or_delete_post_meta( $product, $meta_key, $meta_value ) {
-		if ( '_wc_media_gallery' === $meta_key ) {
-			return false;
-		}
-
-		return parent::update_or_delete_post_meta( $product, $meta_key, $meta_value );
-	}
-
-	/**
 	 * Update product variation guid.
 	 *
 	 * @param WC_Product_Variation $product Product variation object.

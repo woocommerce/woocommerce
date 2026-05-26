@@ -213,6 +213,281 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
+	 * Get the media gallery for a product.
+	 *
+	 * @param WC_Product|WC_Product_Variation $product Product instance.
+	 *
+	 * @return array
+	 */
+	protected function get_media_gallery( $product ) {
+		if ( ! $this->product_gallery_videos_enabled() ) {
+			return $this->get_media_gallery_from_images( $product );
+		}
+
+		$media_gallery = $product->get_media_gallery( 'edit' );
+
+		if ( empty( $media_gallery ) ) {
+			$media_gallery = $this->get_media_gallery_from_images( $product );
+		} else {
+			$media_gallery = $this->maybe_prepend_product_image_to_media_gallery( $product, $media_gallery );
+		}
+
+		if ( empty( $media_gallery ) ) {
+			return array();
+		}
+
+		$attachment_ids = array();
+
+		foreach ( $media_gallery as $item ) {
+			if ( 'attachment' === ( $item['source_type'] ?? '' ) && ! empty( $item['id'] ) ) {
+				$attachment_ids[] = (int) $item['id'];
+			}
+
+			if ( ! empty( $item['poster_id'] ) ) {
+				$attachment_ids[] = (int) $item['poster_id'];
+			}
+		}
+
+		$attachment_ids = array_values( array_unique( array_filter( $attachment_ids ) ) );
+
+		if ( ! empty( $attachment_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $attachment_ids );
+		}
+
+		$items = array();
+
+		foreach ( array_values( $media_gallery ) as $item ) {
+			if ( ! is_array( $item ) ) {
+				continue;
+			}
+
+			if ( 'attachment' !== ( $item['source_type'] ?? '' ) || empty( $item['id'] ) ) {
+				continue;
+			}
+
+			$attachment_data = $this->get_media_gallery_attachment_data( (int) $item['id'], $item['media_type'] ?? '' );
+
+			if ( empty( $attachment_data ) ) {
+				continue;
+			}
+
+			$item = array_merge( $item, $attachment_data );
+
+			if ( 'video' === ( $item['media_type'] ?? '' ) ) {
+				$poster_id = $this->get_media_gallery_video_poster_id( $item );
+
+				if ( $poster_id ) {
+					$item['poster_id'] = $poster_id;
+					$item              = array_merge( $item, $this->get_media_gallery_poster_data( $poster_id ) );
+				}
+			}
+
+			$item['position'] = count( $items );
+			$items[]          = $item;
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Check if product gallery videos are enabled.
+	 *
+	 * @return bool
+	 */
+	protected function product_gallery_videos_enabled() {
+		return function_exists( 'wc_product_gallery_videos_enabled' ) && wc_product_gallery_videos_enabled();
+	}
+
+	/**
+	 * Project legacy product images into media gallery items.
+	 *
+	 * @param WC_Product|WC_Product_Variation $product Product instance.
+	 *
+	 * @return array
+	 */
+	protected function get_media_gallery_from_images( $product ) {
+		$attachment_ids = array();
+
+		if ( $product->get_image_id() ) {
+			$attachment_ids[] = $product->get_image_id();
+		}
+
+		$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
+		$media_gallery  = array();
+
+		foreach ( $attachment_ids as $attachment_id ) {
+			$attachment_id = absint( $attachment_id );
+
+			if ( ! $attachment_id ) {
+				continue;
+			}
+
+			$media_gallery[] = array(
+				'media_type'  => 'image',
+				'source_type' => 'attachment',
+				'id'          => $attachment_id,
+			);
+		}
+
+		return $media_gallery;
+	}
+
+	/**
+	 * Move the product image to the front of stored media gallery data.
+	 *
+	 * @param WC_Product|WC_Product_Variation $product       Product instance.
+	 * @param array                           $media_gallery Media gallery items.
+	 *
+	 * @return array
+	 */
+	protected function maybe_prepend_product_image_to_media_gallery( $product, $media_gallery ) {
+		$product_image_id = $product->get_image_id();
+
+		if ( ! $product_image_id ) {
+			return $media_gallery;
+		}
+
+		$product_image_item = array(
+			'media_type'  => 'image',
+			'source_type' => 'attachment',
+			'id'          => (int) $product_image_id,
+		);
+
+		foreach ( $media_gallery as $index => $item ) {
+			if (
+				! is_array( $item ) ||
+				! $this->media_gallery_item_is_product_image( $item, (int) $product_image_id )
+			) {
+				continue;
+			}
+
+			if ( 0 === $index ) {
+				return $media_gallery;
+			}
+
+			unset( $media_gallery[ $index ] );
+			array_unshift( $media_gallery, $product_image_item );
+
+			return array_values( $media_gallery );
+		}
+
+		array_unshift(
+			$media_gallery,
+			$product_image_item
+		);
+
+		return $media_gallery;
+	}
+
+	/**
+	 * Check if a media gallery item represents the product image.
+	 *
+	 * @param array $item             Media gallery item.
+	 * @param int   $product_image_id Product image attachment ID.
+	 *
+	 * @return bool
+	 */
+	protected function media_gallery_item_is_product_image( $item, $product_image_id ) {
+		return 'image' === ( $item['media_type'] ?? '' ) &&
+			(int) ( $item['id'] ?? 0 ) === $product_image_id;
+	}
+
+	/**
+	 * Get attachment response data for a media gallery item.
+	 *
+	 * @param int    $attachment_id Attachment ID.
+	 * @param string $media_type    Media type.
+	 *
+	 * @return array
+	 */
+	protected function get_media_gallery_attachment_data( $attachment_id, $media_type ) {
+		$attachment_post = get_post( $attachment_id );
+
+		if ( is_null( $attachment_post ) ) {
+			return array();
+		}
+
+		$attachment_url = wp_get_attachment_url( $attachment_id );
+		$data           = array(
+			'date_created'      => wc_rest_prepare_date_response( $attachment_post->post_date, false ),
+			'date_created_gmt'  => wc_rest_prepare_date_response( $attachment_post->post_date_gmt ),
+			'date_modified'     => wc_rest_prepare_date_response( $attachment_post->post_modified, false ),
+			'date_modified_gmt' => wc_rest_prepare_date_response( $attachment_post->post_modified_gmt ),
+			'mime_type'         => get_post_mime_type( $attachment_id ),
+			'name'              => get_the_title( $attachment_id ),
+		);
+
+		if ( $attachment_url ) {
+			$data['src'] = $attachment_url;
+		}
+
+		if ( 'image' === $media_type ) {
+			$thumbnail = wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
+
+			$data['alt']    = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
+			$data['srcset'] = (string) wp_get_attachment_image_srcset( $attachment_id, 'full' );
+			$data['sizes']  = (string) wp_get_attachment_image_sizes( $attachment_id, 'full' );
+
+			if ( is_array( $thumbnail ) ) {
+				$data['thumbnail'] = current( $thumbnail );
+			} elseif ( $attachment_url ) {
+				$data['thumbnail'] = $attachment_url;
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get poster response data for a media gallery video item.
+	 *
+	 * @param int $poster_id Poster attachment ID.
+	 *
+	 * @return array
+	 */
+	protected function get_media_gallery_poster_data( $poster_id ) {
+		$poster_url = wp_get_attachment_image_src( $poster_id, 'full' );
+		$poster_url = is_array( $poster_url ) ? current( $poster_url ) : wp_get_attachment_url( $poster_id );
+		$data       = array();
+
+		if ( $poster_url ) {
+			$data['poster'] = $poster_url;
+		}
+
+		$thumbnail = wp_get_attachment_image_src( $poster_id, 'woocommerce_thumbnail' );
+
+		if ( is_array( $thumbnail ) ) {
+			$data['thumbnail'] = current( $thumbnail );
+		} elseif ( $poster_url ) {
+			$data['thumbnail'] = $poster_url;
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get the poster attachment ID for a media gallery video item.
+	 *
+	 * @param array $item Media gallery item.
+	 *
+	 * @return int
+	 */
+	protected function get_media_gallery_video_poster_id( array $item ) {
+		$poster_id = ! empty( $item['poster_id'] ) ? absint( $item['poster_id'] ) : 0;
+
+		if ( $poster_id ) {
+			return $poster_id;
+		}
+
+		if ( 'attachment' === ( $item['source_type'] ?? '' ) && ! empty( $item['id'] ) ) {
+			return (int) get_post_thumbnail_id( (int) $item['id'] );
+		}
+
+		return 0;
+	}
+
+	/**
 	 * Make extra product orderby features supported by WooCommerce available to the WC API.
 	 * This includes 'price', 'popularity', and 'rating'.
 	 *
@@ -723,6 +998,230 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
+	 * Set product media gallery.
+	 *
+	 * @param WC_Product $product       Product instance.
+	 * @param array      $media_gallery Media gallery data.
+	 *
+	 * @throws WC_REST_Exception REST API exceptions.
+	 * @return WC_Product
+	 */
+	protected function set_product_media_gallery( $product, $media_gallery ) {
+		$this->validate_product_media_gallery( $media_gallery );
+		$product->set_media_gallery( $media_gallery );
+		$this->sync_product_images_from_media_gallery( $product, $product->get_media_gallery( 'edit' ) );
+
+		return $product;
+	}
+
+	/**
+	 * Sync stored media gallery data after an update through the legacy images request field.
+	 *
+	 * @param WC_Product $product Product instance.
+	 *
+	 * @return WC_Product
+	 */
+	protected function sync_media_gallery_from_legacy_images_request( $product ) {
+		if ( ! method_exists( $product, 'set_media_gallery' ) ) {
+			return $product;
+		}
+
+		if ( ! $this->product_gallery_videos_enabled() ) {
+			$product->set_media_gallery( array() );
+			return $product;
+		}
+
+		return $this->sync_media_gallery_from_legacy_images_update( $product );
+	}
+
+	/**
+	 * Sync stored media gallery data after an update through the legacy images field.
+	 *
+	 * @param WC_Product $product Product instance.
+	 *
+	 * @return WC_Product
+	 */
+	protected function sync_media_gallery_from_legacy_images_update( $product ) {
+		if ( ! method_exists( $product, 'get_media_gallery' ) || ! method_exists( $product, 'set_media_gallery' ) ) {
+			return $product;
+		}
+
+		$media_gallery = $product->get_media_gallery( 'edit' );
+
+		if ( empty( $media_gallery ) ) {
+			return $product;
+		}
+
+		$image_media_items    = $this->get_media_gallery_from_images( $product );
+		$updated_media_items  = array();
+		$images_inserted      = false;
+		$has_preserved_videos = false;
+
+		foreach ( $media_gallery as $media_item ) {
+			if ( ! is_array( $media_item ) || empty( $media_item['media_type'] ) ) {
+				continue;
+			}
+
+			if ( 'image' === $media_item['media_type'] ) {
+				if ( ! $images_inserted ) {
+					$updated_media_items = array_merge( $updated_media_items, $image_media_items );
+					$images_inserted     = true;
+				}
+				continue;
+			}
+
+			if ( 'video' === $media_item['media_type'] ) {
+				$updated_media_items[] = $media_item;
+				$has_preserved_videos  = true;
+			}
+		}
+
+		if ( ! $has_preserved_videos ) {
+			$product->set_media_gallery( array() );
+			return $product;
+		}
+
+		if ( ! $images_inserted ) {
+			$updated_media_items = array_merge( $image_media_items, $updated_media_items );
+		}
+
+		$product->set_media_gallery( $this->maybe_prepend_product_image_to_media_gallery( $product, $updated_media_items ) );
+
+		return $product;
+	}
+
+	/**
+	 * Validate product media gallery items.
+	 *
+	 * @param mixed $media_gallery Media gallery data.
+	 *
+	 * @throws WC_REST_Exception REST API exceptions.
+	 * @return void
+	 */
+	protected function validate_product_media_gallery( $media_gallery ) {
+		if ( ! is_array( $media_gallery ) ) {
+			throw new WC_REST_Exception( 'woocommerce_product_media_gallery_invalid', esc_html__( 'Media gallery must be an array.', 'woocommerce' ), 400 );
+		}
+
+		if ( empty( $media_gallery ) ) {
+			return;
+		}
+
+		foreach ( $media_gallery as $item ) {
+			$this->validate_product_media_gallery_item( $item );
+		}
+	}
+
+	/**
+	 * Validate a product media gallery item.
+	 *
+	 * @param mixed $item Media gallery item.
+	 *
+	 * @throws WC_REST_Exception REST API exceptions.
+	 * @return void
+	 */
+	protected function validate_product_media_gallery_item( $item ) {
+		if ( ! is_array( $item ) ) {
+			throw new WC_REST_Exception( 'woocommerce_product_media_gallery_invalid_item', esc_html__( 'Media gallery items must be objects.', 'woocommerce' ), 400 );
+		}
+
+		$media_type = isset( $item['media_type'] ) ? sanitize_key( $item['media_type'] ) : '';
+
+		if ( ! in_array( $media_type, array( 'image', 'video' ), true ) ) {
+			throw new WC_REST_Exception( 'woocommerce_product_media_gallery_invalid_media_type', esc_html__( 'Media gallery items must be images or videos.', 'woocommerce' ), 400 );
+		}
+
+		$source_type = isset( $item['source_type'] ) ? sanitize_key( $item['source_type'] ) : 'attachment';
+
+		if ( 'attachment' !== $source_type ) {
+			throw new WC_REST_Exception( 'woocommerce_product_media_gallery_invalid_source_type', esc_html__( 'Only attachment media gallery items are currently supported.', 'woocommerce' ), 400 );
+		}
+
+		$attachment_id = isset( $item['id'] ) ? absint( $item['id'] ) : 0;
+
+		if ( ! $attachment_id ) {
+			throw new WC_REST_Exception( 'woocommerce_product_media_gallery_invalid_attachment_id', esc_html__( 'Media gallery attachment ID is required.', 'woocommerce' ), 400 );
+		}
+
+		if ( 'image' === $media_type && ! wp_attachment_is_image( $attachment_id ) ) {
+			/* translators: %s: attachment id */
+			throw new WC_REST_Exception( 'woocommerce_product_media_gallery_invalid_image_id', sprintf( esc_html__( '#%s is an invalid image ID.', 'woocommerce' ), esc_html( (string) $attachment_id ) ), 400 );
+		}
+
+		if ( 'video' === $media_type ) {
+			$mime_type = get_post_mime_type( $attachment_id );
+
+			if ( ! is_string( $mime_type ) || 0 !== strpos( $mime_type, 'video/' ) ) {
+				/* translators: %s: attachment id */
+				throw new WC_REST_Exception( 'woocommerce_product_media_gallery_invalid_video_id', sprintf( esc_html__( '#%s is an invalid video ID.', 'woocommerce' ), esc_html( (string) $attachment_id ) ), 400 );
+			}
+
+			$poster_id = isset( $item['poster_id'] ) ? absint( $item['poster_id'] ) : 0;
+
+			if ( $poster_id && ! wp_attachment_is_image( $poster_id ) ) {
+				/* translators: %s: attachment id */
+				throw new WC_REST_Exception( 'woocommerce_product_media_gallery_invalid_poster_id', sprintf( esc_html__( '#%s is an invalid poster image ID.', 'woocommerce' ), esc_html( (string) $poster_id ) ), 400 );
+			}
+		}
+	}
+
+	/**
+	 * Sync legacy product image props from the mixed media gallery.
+	 *
+	 * @param WC_Product $product       Product instance.
+	 * @param array      $media_gallery Normalized media gallery items.
+	 *
+	 * @return void
+	 */
+	protected function sync_product_images_from_media_gallery( $product, $media_gallery ) {
+		$image_ids              = array();
+		$cover_image_id         = 0;
+		$cover_is_gallery_image = false;
+
+		foreach ( $media_gallery as $item ) {
+			if ( ! is_array( $item ) ) {
+				continue;
+			}
+
+			if (
+				'image' === ( $item['media_type'] ?? '' ) &&
+				'attachment' === ( $item['source_type'] ?? '' ) &&
+				! empty( $item['id'] )
+			) {
+				$image_id = absint( $item['id'] );
+
+				if ( ! $image_id ) {
+					continue;
+				}
+
+				if ( ! $cover_image_id ) {
+					$cover_image_id         = $image_id;
+					$cover_is_gallery_image = true;
+				}
+
+				$image_ids[] = $image_id;
+				continue;
+			}
+		}
+
+		if ( $cover_image_id ) {
+			wc_product_attach_featured_image( $cover_image_id, $product, false );
+		} else {
+			$product->set_image_id( $cover_image_id );
+		}
+
+		if ( $cover_is_gallery_image ) {
+			array_shift( $image_ids );
+		}
+
+		$product->set_gallery_image_ids( $image_ids );
+
+		if ( $cover_image_id ) {
+			$product->set_media_gallery( $this->maybe_prepend_product_image_to_media_gallery( $product, $media_gallery ) );
+		}
+	}
+
+	/**
 	 * Prepare a single product for create or update.
 	 *
 	 * @param  WP_REST_Request $request Request object.
@@ -1182,6 +1681,141 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		 * @param bool            $creating If is creating a new object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $product, $request, $creating );
+	}
+
+	/**
+	 * Get the Product media gallery schema.
+	 *
+	 * @return array
+	 */
+	protected function get_media_gallery_schema() {
+		return array(
+			'description' => __( 'List of media gallery items.', 'woocommerce' ),
+			'type'        => 'array',
+			'context'     => array( 'view', 'edit' ),
+			'items'       => array(
+				'type'       => 'object',
+				'properties' => array(
+					'media_type'        => array(
+						'description' => __( 'Media type.', 'woocommerce' ),
+						'type'        => 'string',
+						'enum'        => array( 'image', 'video' ),
+						'context'     => array( 'view', 'edit' ),
+					),
+					'source_type'       => array(
+						'description' => __( 'Media source type.', 'woocommerce' ),
+						'type'        => 'string',
+						'default'     => 'attachment',
+						'enum'        => array( 'attachment' ),
+						'context'     => array( 'view', 'edit' ),
+					),
+					'id'                => array(
+						'description' => __( 'Media attachment ID.', 'woocommerce' ),
+						'type'        => 'integer',
+						'context'     => array( 'view', 'edit' ),
+					),
+					'poster_id'         => array(
+						'description' => __( 'Video poster attachment ID.', 'woocommerce' ),
+						'type'        => 'integer',
+						'context'     => array( 'view', 'edit' ),
+					),
+					'settings'          => array(
+						'description' => __( 'Video loading settings.', 'woocommerce' ),
+						'type'        => 'object',
+						'context'     => array( 'view', 'edit' ),
+						'properties'  => array(
+							'preload' => array(
+								'description' => __( 'Video preload behavior.', 'woocommerce' ),
+								'type'        => 'string',
+								'enum'        => array( 'auto', 'metadata', 'none' ),
+								'context'     => array( 'view', 'edit' ),
+							),
+						),
+					),
+					'src'               => array(
+						'description' => __( 'Media URL.', 'woocommerce' ),
+						'type'        => 'string',
+						'format'      => 'uri',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'poster'            => array(
+						'description' => __( 'Video poster URL.', 'woocommerce' ),
+						'type'        => 'string',
+						'format'      => 'uri',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'thumbnail'         => array(
+						'description' => __( 'Media thumbnail URL.', 'woocommerce' ),
+						'type'        => 'string',
+						'format'      => 'uri',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'mime_type'         => array(
+						'description' => __( 'Media MIME type.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'name'              => array(
+						'description' => __( 'Media name.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'alt'               => array(
+						'description' => __( 'Image alternative text.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'srcset'            => array(
+						'description' => __( 'Image srcset.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'sizes'             => array(
+						'description' => __( 'Image sizes.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'date_created'      => array(
+						'description' => __( "The date the media was created, in the site's timezone.", 'woocommerce' ),
+						'type'        => 'date-time',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'date_created_gmt'  => array(
+						'description' => __( 'The date the media was created, as GMT.', 'woocommerce' ),
+						'type'        => 'date-time',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'date_modified'     => array(
+						'description' => __( "The date the media was last modified, in the site's timezone.", 'woocommerce' ),
+						'type'        => 'date-time',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'date_modified_gmt' => array(
+						'description' => __( 'The date the media was last modified, as GMT.', 'woocommerce' ),
+						'type'        => 'date-time',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'position'          => array(
+						'description' => __( 'Media position in the gallery.', 'woocommerce' ),
+						'type'        => 'integer',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+				),
+			),
+		);
 	}
 
 	/**
@@ -2086,6 +2720,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			if ( in_array( 'global_unique_id', $fields, true ) ) {
 				$data['global_unique_id'] = $product->get_global_unique_id( $context );
+			}
+
+			if ( $this->product_gallery_videos_enabled() && in_array( 'media_gallery', $fields, true ) ) {
+				$data['media_gallery'] = $this->get_media_gallery( $product );
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );

@@ -418,7 +418,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 						'id'          => $video_id,
 						'poster_id'   => $poster_id,
 						'settings'    => array(
-							'controls' => true,
+							'preload' => 'metadata',
 						),
 					),
 					array(
@@ -458,7 +458,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 					'id'          => $video_id,
 					'poster_id'   => $poster_id,
 					'settings'    => array(
-						'controls' => true,
+						'preload' => 'metadata',
 					),
 				),
 			),
@@ -1377,12 +1377,15 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 * @return int
 	 */
 	private function create_product_media_attachment( $title, $mime_type = 'image/jpeg' ) {
+		$file_extension = 'video/mp4' === $mime_type ? 'mp4' : 'jpg';
+
 		return wp_insert_attachment(
 			array(
 				'post_title'     => $title,
 				'post_type'      => 'attachment',
 				'post_mime_type' => $mime_type,
-			)
+			),
+			sanitize_title( $title ) . '.' . $file_extension
 		);
 	}
 

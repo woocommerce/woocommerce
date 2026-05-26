@@ -188,12 +188,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 					'id'          => 456,
 					'poster_id'   => 789,
 					'settings'    => array(
-						'controls'     => true,
-						'autoplay'     => false,
-						'loop'         => true,
-						'muted'        => false,
-						'plays_inline' => true,
-						'preload'      => 'metadata',
+						'preload' => 'metadata',
 					),
 				),
 				array(
@@ -221,7 +216,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	 * @testdox Should persist media gallery items.
 	 */
 	public function test_media_gallery_persists_items() {
-		$media_gallery = array(
+		$media_gallery          = array(
 			array(
 				'media_type'  => 'image',
 				'source_type' => 'attachment',
@@ -238,14 +233,30 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 				),
 			),
 		);
-		$product       = new WC_Product_Simple();
+		$expected_media_gallery = array(
+			array(
+				'media_type'  => 'image',
+				'source_type' => 'attachment',
+				'id'          => 123,
+			),
+			array(
+				'media_type'  => 'video',
+				'source_type' => 'attachment',
+				'id'          => 456,
+				'poster_id'   => 789,
+				'settings'    => array(
+					'preload' => 'metadata',
+				),
+			),
+		);
+		$product                = new WC_Product_Simple();
 
 		$product->set_name( 'Product with media gallery' );
 		$product->set_media_gallery( $media_gallery );
 		$product->save();
 
 		$this->assertEquals(
-			$media_gallery,
+			$expected_media_gallery,
 			json_decode( get_post_meta( $product->get_id(), '_wc_media_gallery', true ), true ),
 			'Media gallery should be stored as JSON product meta.'
 		);
@@ -254,7 +265,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( WC_Product::class, $reloaded_product );
 		$this->assertEquals(
-			$media_gallery,
+			$expected_media_gallery,
 			$reloaded_product->get_media_gallery(),
 			'Reloaded product should expose media gallery items.'
 		);
