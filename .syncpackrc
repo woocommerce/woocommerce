@@ -421,15 +421,6 @@
 			"pinVersion": "11.0.1-next.v.20260206T143.0"
 		},
 		{
-			"dependencies": [
-				"@wordpress/e2e-test-utils-playwright"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "wp-6.8"
-		},
-		{
 			"label": "Ensure @woocommerce/* dependencies are locked to the monorepo itself - except certain dependencies (migration pending).",
 			"dependencies": [
 				"@woocommerce/settings"
