@@ -825,6 +825,15 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		try {
 			$order->save();
+
+			// Intermediate checkpoint: line_item was processed (its post-hook threw),
+			// shipping should remain queued. Reload from the data store so we're
+			// asserting persisted state rather than the in-memory order.
+			$after_first_save = wc_get_order( $order_id );
+			$this->assertCount( 0, $after_first_save->get_items(), 'Line items should be removed from the DB after the first save().' );
+			$this->assertNotEmpty( $after_first_save->get_items( 'shipping' ), 'Shipping items should remain in the DB until the retry save() drains them.' );
+			$this->assertSame( array( 'line_item' ), $hook_calls, 'Only the line_item post-hook should have fired during the first save().' );
+
 			$order->save();
 		} finally {
 			remove_action( 'woocommerce_removed_order_items', $callback, 10 );
