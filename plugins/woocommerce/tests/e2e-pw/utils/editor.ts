@@ -19,8 +19,13 @@ const fillPageTitle = async ( page: Page, title: string ) => {
 	}
 
 	const canvas = await getCanvas( page );
-	// Gutenberg (since 19.9) uses the "Block: Title" label.
-	const block_title = canvas.getByLabel( /Add title|Block: Title/ );
+	// Match by role/name to stay compatible across Gutenberg versions:
+	// older releases expose the title as an `aria-label` ("Add title"
+	// or "Block: Title"), while recent trunk only exposes the accessible
+	// name through the textbox role.
+	const block_title = canvas.getByRole( 'textbox', {
+		name: /^(Add title|Block: Title)$/,
+	} );
 	await block_title.click();
 	await block_title.fill( title );
 };
