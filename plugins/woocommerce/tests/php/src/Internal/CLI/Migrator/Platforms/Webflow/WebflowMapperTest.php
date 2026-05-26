@@ -69,6 +69,24 @@ class WebflowMapperTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that a zero price maps to '0.00' instead of being discarded.
+	 */
+	public function test_zero_price_maps_to_zero_regular_price(): void {
+		$item = MockWebflowData::simple_product_item();
+
+		$item->skus[0]->fieldData->price                  = (object) array(
+			'value' => 0,
+			'unit'  => 'USD',
+		);
+		$item->skus[0]->fieldData->{'compare-at-price'}   = null;
+
+		$result = $this->mapper->map_product_data( $item );
+
+		$this->assertSame( '0.00', $result['regular_price'] );
+		$this->assertNull( $result['sale_price'] );
+	}
+
+	/**
 	 * Test stock mapping for finite inventory.
 	 */
 	public function test_simple_product_stock(): void {

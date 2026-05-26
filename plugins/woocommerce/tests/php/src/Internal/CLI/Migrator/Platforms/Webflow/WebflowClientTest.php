@@ -33,10 +33,18 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 	private WebflowClient $client;
 
 	/**
+	 * HTTP filter callbacks registered during the test, removed in tearDown.
+	 *
+	 * @var array<callable>
+	 */
+	private array $http_filters = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->http_filters     = array();
 		$this->test_credentials = array(
 			'site_id'      => 'site-123',
 			'access_token' => 'ws-test-token',
@@ -48,7 +56,10 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'pre_http_request' );
+		foreach ( $this->http_filters as $cb ) {
+			remove_filter( 'pre_http_request', $cb );
+		}
+		$this->http_filters = array();
 		parent::tearDown();
 	}
 
@@ -56,8 +67,7 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 	 * Test that a successful REST request returns the decoded body.
 	 */
 	public function test_rest_request_success(): void {
-		add_filter(
-			'pre_http_request',
+		$this->add_http_filter(
 			function ( $preempt, $args, $url ) {
 				unset( $preempt );
 				$this->assertStringContainsString( 'api.webflow.com/v2/sites/site-123/products', $url );
@@ -72,7 +82,6 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 					),
 				);
 			},
-			10,
 			3
 		);
 
@@ -87,8 +96,7 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 	 * Test that query parameters end up in the URL.
 	 */
 	public function test_rest_request_with_query_params(): void {
-		add_filter(
-			'pre_http_request',
+		$this->add_http_filter(
 			function ( $preempt, $args, $url ) {
 				unset( $preempt, $args );
 				$this->assertStringContainsString( 'limit=10', $url );
@@ -98,7 +106,6 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 					'body'     => wp_json_encode( array( 'ok' => true ) ),
 				);
 			},
-			10,
 			3
 		);
 
@@ -130,8 +137,7 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 	 * Test that HTTP errors surface as WP_Error.
 	 */
 	public function test_rest_request_http_error(): void {
-		add_filter(
-			'pre_http_request',
+		$this->add_http_filter(
 			function () {
 				return new WP_Error( 'http_request_failed', 'Connection refused' );
 			}
@@ -147,8 +153,7 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 	 * Test that a non-2xx API response surfaces as WP_Error with the API message.
 	 */
 	public function test_rest_request_api_error(): void {
-		add_filter(
-			'pre_http_request',
+		$this->add_http_filter(
 			function () {
 				return array(
 					'response' => array( 'code' => 403 ),
@@ -172,5 +177,16 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 
 		$empty = new WebflowClient( array() );
 		$this->assertInstanceOf( WP_Error::class, $empty->get_site_id() );
+	}
+
+	/**
+	 * Register a pre_http_request filter and track it for cleanup.
+	 *
+	 * @param callable $callback   Filter callback.
+	 * @param int      $args_count Number of accepted arguments (default 1).
+	 */
+	private function add_http_filter( callable $callback, int $args_count = 1 ): void {
+		add_filter( 'pre_http_request', $callback, 10, $args_count );
+		$this->http_filters[] = $callback;
 	}
 }

@@ -23,8 +23,8 @@ defined( 'ABSPATH' ) || exit;
  * Webflow does not expose a `/products/categories` endpoint. Categories live in
  * an auto-provisioned CMS collection (slug `category`). We resolve them once
  * via `/sites/{id}/collections` + `/collections/{id}/items` and stash a map of
- * `cms_item_id => { name, slug }` on the fetcher so the mapper can read it
- * through `get_category_cache()` while mapping each product.
+ * `cms_item_id => { name, slug }` and decorates each fetched product item with a
+ * `_resolved_categories` property so the mapper can read categories inline.
  *
  * @internal This class is part of the CLI Migrator feature and should not be used directly.
  */
@@ -81,7 +81,10 @@ class WebflowFetcher implements PlatformFetcherInterface {
 
 		$limit  = (int) ( $args['limit'] ?? 50 );
 		$limit  = max( 1, min( $limit, self::MAX_PAGE_SIZE ) );
-		$offset = isset( $args['after_cursor'] ) ? (int) $args['after_cursor'] : 0;
+		$offset = 0;
+		if ( isset( $args['after_cursor'] ) && is_numeric( $args['after_cursor'] ) ) {
+			$offset = max( 0, (int) $args['after_cursor'] );
+		}
 
 		$query = array(
 			'limit'  => $limit,

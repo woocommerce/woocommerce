@@ -32,11 +32,19 @@ class WebflowFetcherTest extends WC_Unit_Test_Case {
 	private WebflowFetcher $fetcher;
 
 	/**
+	 * HTTP filter callbacks registered during the test, removed in tearDown.
+	 *
+	 * @var array<callable>
+	 */
+	private array $http_filters = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->fetcher = new WebflowFetcher(
+		$this->http_filters = array();
+		$this->fetcher      = new WebflowFetcher(
 			array(
 				'site_id'      => 'site-123',
 				'access_token' => 'ws-test-token',
@@ -48,7 +56,10 @@ class WebflowFetcherTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'pre_http_request' );
+		foreach ( $this->http_filters as $cb ) {
+			remove_filter( 'pre_http_request', $cb );
+		}
+		$this->http_filters = array();
 		parent::tearDown();
 	}
 
@@ -66,26 +77,24 @@ class WebflowFetcherTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	private function install_http_router( array $routes ): void {
-		add_filter(
-			'pre_http_request',
-			function ( $preempt, $args, $url ) use ( $routes ) {
-				unset( $preempt, $args );
-				foreach ( $routes as $needle => $body ) {
-					if ( false !== strpos( $url, $needle ) ) {
-						return array(
-							'response' => array( 'code' => 200 ),
-							'body'     => $body,
-						);
-					}
+		$cb = function ( $preempt, $args, $url ) use ( $routes ) {
+			unset( $preempt, $args );
+			foreach ( $routes as $needle => $body ) {
+				if ( false !== strpos( $url, $needle ) ) {
+					return array(
+						'response' => array( 'code' => 200 ),
+						'body'     => $body,
+					);
 				}
-				return array(
-					'response' => array( 'code' => 404 ),
-					'body'     => wp_json_encode( array( 'message' => 'Not stubbed: ' . $url ) ),
-				);
-			},
-			10,
-			3
-		);
+			}
+			return array(
+				'response' => array( 'code' => 404 ),
+				'body'     => wp_json_encode( array( 'message' => 'Not stubbed: ' . $url ) ),
+			);
+		};
+
+		add_filter( 'pre_http_request', $cb, 10, 3 );
+		$this->http_filters[] = $cb;
 	}
 
 	/**
@@ -114,25 +123,23 @@ class WebflowFetcherTest extends WC_Unit_Test_Case {
 	public function test_fetch_batch_translates_cursor_to_offset(): void {
 		$captured_urls = array();
 
-		add_filter(
-			'pre_http_request',
-			function ( $preempt, $args, $url ) use ( &$captured_urls ) {
-				unset( $preempt, $args );
-				$captured_urls[] = $url;
-				if ( false !== strpos( $url, '/products' ) ) {
-					return array(
-						'response' => array( 'code' => 200 ),
-						'body'     => MockWebflowData::empty_products_list_response_body(),
-					);
-				}
+		$cb = function ( $preempt, $args, $url ) use ( &$captured_urls ) {
+			unset( $preempt, $args );
+			$captured_urls[] = $url;
+			if ( false !== strpos( $url, '/products' ) ) {
 				return array(
 					'response' => array( 'code' => 200 ),
-					'body'     => wp_json_encode( array( 'collections' => array() ) ),
+					'body'     => MockWebflowData::empty_products_list_response_body(),
 				);
-			},
-			10,
-			3
-		);
+			}
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode( array( 'collections' => array() ) ),
+			);
+		};
+
+		add_filter( 'pre_http_request', $cb, 10, 3 );
+		$this->http_filters[] = $cb;
 
 		$this->fetcher->fetch_batch(
 			array(

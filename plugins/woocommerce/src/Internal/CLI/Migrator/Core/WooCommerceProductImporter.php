@@ -488,19 +488,11 @@ class WooCommerceProductImporter {
 			$product->set_date_created( $product_data['date_created_gmt'] );
 		}
 
-		if ( ! empty( $product_data['weight'] ) ) {
-			$product->set_weight( $product_data['weight'] );
-		}
+		$product->set_weight( $product_data['weight'] ?? '' );
 
-		if ( ! empty( $product_data['length'] ) ) {
-			$product->set_length( (string) $product_data['length'] );
-		}
-		if ( ! empty( $product_data['width'] ) ) {
-			$product->set_width( (string) $product_data['width'] );
-		}
-		if ( ! empty( $product_data['height'] ) ) {
-			$product->set_height( (string) $product_data['height'] );
-		}
+		$product->set_length( ! empty( $product_data['length'] ) ? (string) $product_data['length'] : '' );
+		$product->set_width( ! empty( $product_data['width'] ) ? (string) $product_data['width'] : '' );
+		$product->set_height( ! empty( $product_data['height'] ) ? (string) $product_data['height'] : '' );
 
 		if ( ! empty( $product_data['tax_status'] ) ) {
 			$product->set_tax_status( $product_data['tax_status'] );
@@ -819,15 +811,9 @@ class WooCommerceProductImporter {
 
 			$variation->set_weight( $var_data['weight'] ?? '' );
 
-			if ( ! empty( $var_data['length'] ) ) {
-				$variation->set_length( (string) $var_data['length'] );
-			}
-			if ( ! empty( $var_data['width'] ) ) {
-				$variation->set_width( (string) $var_data['width'] );
-			}
-			if ( ! empty( $var_data['height'] ) ) {
-				$variation->set_height( (string) $var_data['height'] );
-			}
+			$variation->set_length( ! empty( $var_data['length'] ) ? (string) $var_data['length'] : '' );
+			$variation->set_width( ! empty( $var_data['width'] ) ? (string) $var_data['width'] : '' );
+			$variation->set_height( ! empty( $var_data['height'] ) ? (string) $var_data['height'] : '' );
 
 			if ( ! empty( $var_data['tax_status'] ) ) {
 				$variation->set_tax_status( $var_data['tax_status'] );

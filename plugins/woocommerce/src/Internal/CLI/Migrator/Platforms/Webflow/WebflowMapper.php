@@ -396,7 +396,10 @@ class WebflowMapper implements PlatformMapperInterface {
 
 		if ( $this->should_process( 'weight' ) ) {
 			$simple['weight'] = $this->extract_weight( $sku_field );
-			$simple           = array_merge( $simple, $this->extract_dimensions( $sku_field ) );
+		}
+
+		if ( $this->should_process( 'dimensions' ) ) {
+			$simple = array_merge( $simple, $this->extract_dimensions( $sku_field ) );
 		}
 
 		return $simple;
@@ -499,7 +502,10 @@ class WebflowMapper implements PlatformMapperInterface {
 
 			if ( $this->should_process( 'weight' ) ) {
 				$variation['weight'] = $this->extract_weight( $sku_field );
-				$variation           = array_merge( $variation, $this->extract_dimensions( $sku_field ) );
+			}
+
+			if ( $this->should_process( 'dimensions' ) ) {
+				$variation = array_merge( $variation, $this->extract_dimensions( $sku_field ) );
 			}
 
 			if ( $this->should_process( 'attributes' ) ) {
@@ -599,7 +605,7 @@ class WebflowMapper implements PlatformMapperInterface {
 			return null;
 		}
 		$minor = (int) $money->value;
-		if ( $minor <= 0 ) {
+		if ( $minor < 0 ) {
 			return null;
 		}
 		return number_format( $minor / 100, 2, '.', '' );

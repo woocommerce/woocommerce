@@ -16,6 +16,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * Registers the Webflow source platform with the WooCommerce Migrator's
  * platform registry. Users authenticate with a Webflow Site Access Token.
+ *
+ * @internal
  */
 class WebflowPlatform {
 
