@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Replace PanelBody with ToolsPanel in Related By control of Product Collection block.
