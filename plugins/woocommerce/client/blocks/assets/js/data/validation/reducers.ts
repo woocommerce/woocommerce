@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { Reducer } from 'redux';
-import isShallowEqual from '@wordpress/is-shallow-equal';
+import isShallowEqual from '../../utils/is-shallow-equal';
 import { isString, FieldValidationStatus } from '@woocommerce/types';
 
 /**

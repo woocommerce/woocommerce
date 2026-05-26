@@ -28,7 +28,7 @@ import { useInstanceId } from '@wordpress/compose';
 import { dispatch, select } from '@wordpress/data';
 import { useEffect, useRef } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
-import isShallowEqual from '@wordpress/is-shallow-equal';
+import isShallowEqual from '../../../../utils/is-shallow-equal';
 import clsx from 'clsx';
 import fastDeepEqual from 'fast-deep-equal/es6';
 

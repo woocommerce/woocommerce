@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Component } from '@wordpress/element';
-import isShallowEqual from '@wordpress/is-shallow-equal';
+import isShallowEqual from '../../utils/is-shallow-equal';
 import type { Review } from '@woocommerce/base-components/reviews/types';
 import { ErrorObject } from '@woocommerce/editor-components/error-placeholder';
 

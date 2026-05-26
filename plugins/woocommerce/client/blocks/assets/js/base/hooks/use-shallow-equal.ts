@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useRef } from '@wordpress/element';
-import isShallowEqual from '@wordpress/is-shallow-equal';
+import isShallowEqual from '../../utils/is-shallow-equal';
 
 /**
  * A custom hook that compares the provided value across renders and returns the

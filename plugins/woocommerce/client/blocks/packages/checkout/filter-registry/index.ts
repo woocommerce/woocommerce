@@ -4,9 +4,25 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import deprecated from '@wordpress/deprecated';
-import isShallowEqual from '@wordpress/is-shallow-equal';
+import * as IsShallowEqualModule from '@wordpress/is-shallow-equal';
 import type { ComparableObject } from '@wordpress/is-shallow-equal';
 import { isNull, isObject, objectHasProp } from '@woocommerce/types';
+
+// Gutenberg's new esbuild-based bundling pipeline appends a
+// `wp.X = Object.assign({}, wp.X)` footer to every `window.wp.*` global,
+// which drops the non-enumerable `__esModule` flag and breaks webpack's
+// default-import interop. Resolve `isShallowEqual` through the namespace
+// so we still get the function whether the runtime exposes it as
+// `default` (WordPress core) or as a named export (Gutenberg trunk).
+type IsShallowEqualFn = ( a: unknown, b: unknown ) => boolean;
+const isShallowEqualModule = IsShallowEqualModule as unknown as {
+	default?: IsShallowEqualFn;
+	isShallowEqual?: IsShallowEqualFn;
+};
+const isShallowEqual: IsShallowEqualFn =
+	isShallowEqualModule.default ??
+	isShallowEqualModule.isShallowEqual ??
+	( IsShallowEqualModule as unknown as IsShallowEqualFn );
 
 /**
  * A function that always return true.

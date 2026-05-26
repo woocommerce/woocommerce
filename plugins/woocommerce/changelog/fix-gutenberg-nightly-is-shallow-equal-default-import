@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Cart and checkout blocks now render against Gutenberg trunk by resolving `isShallowEqual` through the namespace, so the function is picked up regardless of whether `window.wp.isShallowEqual` exposes `__esModule`.

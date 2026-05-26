@@ -3,7 +3,7 @@
  */
 import { Component } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import isShallowEqual from '@wordpress/is-shallow-equal';
+import isShallowEqual from '../utils/is-shallow-equal';
 import { getProductVariationsWithTotal } from '@woocommerce/editor-components/utils';
 import { ErrorObject } from '@woocommerce/editor-components/error-placeholder';
 import {
