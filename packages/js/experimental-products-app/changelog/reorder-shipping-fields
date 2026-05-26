@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Reorder shipping fields in the product edit drawer to Length, Width, Height in a row with Weight below.

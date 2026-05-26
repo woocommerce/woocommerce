@@ -326,11 +326,13 @@ class WC_Install {
 		),
 		'10.8.0'   => array(
 			'wc_update_1080_migrate_analytics_import_option',
-			'wc_update_1080_slim_orders_meta_key_index',
 			'wc_update_1080_backfill_email_template_sync_meta',
 		),
-		'10.8.0-1' => array(
-			'wc_update_1080_create_review_order_page',
+		'10.8.0-2' => array(
+			'wc_update_10802_restore_orders_meta_key_value_index',
+		),
+		'10.9.0'   => array(
+			'wc_update_1090_remove_task_list_reminder_bar_hidden_option',
 		),
 	);
 
@@ -582,7 +584,8 @@ class WC_Install {
 	 * @return void
 	 */
 	public static function install_actions() {
-		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok.
+		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
+			// WPCS: input var ok.
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			wc_get_logger()->info( 'Manual database update triggered.', array( 'source' => 'wc-updater' ) );
 			self::update();
@@ -605,7 +608,8 @@ class WC_Install {
 				}
 
 				$return_url = esc_url_raw( wp_unslash( $return_url ) );
-				wp_safe_redirect( $return_url ); // WPCS: input var ok.
+				wp_safe_redirect( $return_url );
+				// WPCS: input var ok.
 				exit;
 			}
 		}
@@ -1155,11 +1159,6 @@ class WC_Install {
 					'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'My account', 'Page title', 'woocommerce' ),
 					'content' => '<!-- wp:shortcode -->[' . $my_account_shortcode . ']<!-- /wp:shortcode -->',
-				),
-				'review_order'   => array(
-					'name'    => _x( 'review-order', 'Page slug', 'woocommerce' ),
-					'title'   => _x( 'Review your order', 'Page title', 'woocommerce' ),
-					'content' => '<!-- wp:shortcode -->[woocommerce_review_order]<!-- /wp:shortcode -->',
 				),
 				'refund_returns' => array(
 					'name'        => _x( 'refund_returns', 'Page slug', 'woocommerce' ),

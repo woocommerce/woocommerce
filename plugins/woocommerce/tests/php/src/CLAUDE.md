@@ -8,7 +8,7 @@
 ### Rule: Use targeted assertions, not full equality checks
 
 | Pattern | Brittle (Wrong) | Resilient (Correct) |
-|---------|-----------------|---------------------|
+| ------- | --------------- | ------------------- |
 | Array key + value | `assertSame(['key' => null], $arr)` | `assertArrayHasKey('key', $arr)` + `assertNull($arr['key'])` |
 | Single value | `assertSame(['a' => 1, 'b' => 2], $r)` | `assertArrayHasKey('a', $r)` + `assertSame(1, $r['a'])` |
 | Nested | `assertSame(['m' => ['e' => null]], $r)` | `assertArrayHasKey('e', $r['m'])` + `assertNull($r['m']['e'])` |
@@ -31,7 +31,7 @@ $this->assertNull( $result['messages']['not_supported'] );
 **Priority order**: Most specific → Structure → General
 
 | Assertion | Use | Example |
-|-----------|-----|---------|
+| --------- | --- | ------- |
 | `assertSame()` | Strict === | `assertSame(5, $count)` |
 | `assertEquals()` | Loose == | `assertEquals('5', $count)` |
 | `assertNull()` | Null check | `assertNull($error)` |
@@ -50,7 +50,7 @@ if ( ! class_exists( 'WC_Payments_Utils' ) ) {
      * Mock for testing.
      *
      * phpcs:disable Squiz.Classes.ClassFileName.NoMatch
-     * phpcs:disable Suin.Classes.PSR4.IncorrectClassName
+     * phpcs:disable SlevomatCodingStandard.Files.TypeNameMatchesFileName.NoMatchBetweenTypeNameAndFileName
      * phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
      */
     class WC_Payments_Utils {
@@ -65,7 +65,7 @@ if ( ! class_exists( 'WC_Payments_Utils' ) ) {
 **Why ignores needed:**
 
 - `ClassFileName.NoMatch` - Mock doesn't match file name
-- `PSR4.IncorrectClassName` - External class not PSR-4
+- `TypeNameMatchesFileName.NoMatchBetweenTypeNameAndFileName` - External class not PSR-4
 - `ValidClassName.NotCamelCaps` - Uses underscores
 
 ## Unused Closure Parameters
@@ -226,7 +226,7 @@ pnpm test:php:env -- --testdox --filter WooPaymentsServiceTest
 **Common issues:**
 
 | Error | Cause | Fix |
-|-------|-------|-----|
+| ----- | ----- | --- |
 | `Undefined array key` | Missing key | Check code returns key |
 | `Arrays not identical` | Extra/missing keys | Use targeted assertions |
 | `Mock not called` | Code path skipped | Check test setup |

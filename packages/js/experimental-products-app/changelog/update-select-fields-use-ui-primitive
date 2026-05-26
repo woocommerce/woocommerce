@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Use the @wordpress/ui SelectControl for every single-select field in the experimental products quick edit panel (Status, Stock, Shipping class, Visibility).

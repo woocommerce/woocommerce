@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\Api;
 
+use Automattic\WooCommerce\Api\Infrastructure\Main;
+use Automattic\WooCommerce\Api\Infrastructure\ResolverHelpers;
+
 /**
  * Deletes expired OPcache cache files via Action Scheduler.
  */
@@ -36,7 +39,7 @@ class OpcacheFileExpiry {
 			return 0;
 		}
 
-		$fs = Utils::wp_filesystem();
+		$fs = ResolverHelpers::wp_filesystem();
 		if ( ! $fs ) {
 			return 0;
 		}
@@ -62,12 +65,16 @@ class OpcacheFileExpiry {
 	 * Action Scheduler callback: delete expired files and reschedule.
 	 *
 	 * Immediate reschedule when files were deleted (drain the backlog), 24h
-	 * otherwise.
+	 * otherwise. Skipped when the feature is disabled.
 	 *
 	 * @internal
 	 */
 	public static function handle_cleanup_action(): void {
 		$interval = self::delete_expired_files() > 0 ? 1 : DAY_IN_SECONDS;
+
+		if ( ! Main::is_enabled() ) {
+			return;
+		}
 
 		if ( function_exists( 'as_schedule_single_action' ) ) {
 			as_schedule_single_action( time() + $interval, self::ACTION_HOOK, array(), self::ACTION_GROUP );
@@ -77,8 +84,10 @@ class OpcacheFileExpiry {
 	/**
 	 * Schedule the cleanup if it isn't already scheduled.
 	 *
-	 * Called from {@see QueryCache::write_to_opcache()} so the first run is
-	 * triggered by the first write — no separate bootstrap step.
+	 * Called from {@see QueryCache::write_to_opcache()} and
+	 * {@see QueryCache::read_from_opcache()} so the cleanup is rescheduled
+	 * after a feature-disable/re-enable cycle even when every request hits a
+	 * cached file (no writes).
 	 */
 	public static function ensure_scheduled(): void {
 		if ( wp_cache_get( self::SCHEDULED_CACHE_KEY, QueryCache::CACHE_GROUP ) ) {

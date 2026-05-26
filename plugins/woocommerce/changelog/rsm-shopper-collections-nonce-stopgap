@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Require a wc_store_api Nonce header on shopper-lists item writes.

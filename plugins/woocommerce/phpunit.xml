@@ -23,9 +23,11 @@
 			<directory suffix=".php">./tests/php</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
+			<exclude>./tests/php/src/Api/Infrastructure</exclude>
 			<exclude>./tests/php/src/Internal/Api</exclude>
 		</testsuite>
 		<testsuite name="wc-phpunit-graphql-infra">
+			<directory suffix=".php">./tests/php/src/Api/Infrastructure</directory>
 			<directory suffix=".php">./tests/php/src/Internal/Api</directory>
 		</testsuite>
 
@@ -38,6 +40,7 @@
 			<directory suffix=".php">./tests/php</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
+			<exclude>./tests/php/src/Api/Infrastructure</exclude>
 			<exclude>./tests/php/src/Internal/Api</exclude>
 		</testsuite>
 		<testsuite name="wc-phpunit-full">
