@@ -12,14 +12,14 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Contract for settings pages that opt into the modern settings renderer.
  *
- * @since 10.8.0
+ * @since 10.9.0
  */
 interface ModernSettingsPageInterface {
 
 	/**
 	 * Get the stable page id used for scoping the modern settings UI.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 *
 	 * @return string
 	 */
@@ -28,7 +28,7 @@ interface ModernSettingsPageInterface {
 	/**
 	 * Build the canonical settings schema for a section.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 *
 	 * @param string $section Section id. Empty string means the default section.
 	 * @return array
@@ -38,7 +38,7 @@ interface ModernSettingsPageInterface {
 	/**
 	 * Get script handles that must be loaded before the modern settings app mounts.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 *
 	 * @param string $section Section id. Empty string means the default section.
 	 * @return string[]
@@ -50,7 +50,7 @@ interface ModernSettingsPageInterface {
 	 *
 	 * Supported values are `form_post` and `none`.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 *
 	 * @param string $section Section id. Empty string means the default section.
 	 * @return string

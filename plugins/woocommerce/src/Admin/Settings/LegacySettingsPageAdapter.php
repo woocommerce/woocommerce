@@ -15,6 +15,6 @@ defined( 'ABSPATH' ) || exit;
  * Extensions can use this class directly for native-field migrations, or
  * subclass it to add component metadata, script handles, or custom save behavior.
  *
- * @since 10.8.0
+ * @since 10.9.0
  */
 class LegacySettingsPageAdapter extends \Automattic\WooCommerce\Internal\Admin\Settings\LegacySettingsPageAdapter {}

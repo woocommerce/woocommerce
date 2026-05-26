@@ -40,6 +40,50 @@ describe( 'settings extension registry', () => {
 		).toBe( component );
 	} );
 
+	it( 'resolves field components by documented precedence before registration recency', () => {
+		const component: SettingsFieldComponent = () => null;
+		const fieldOverride: SettingsFieldComponent = () => null;
+		const typeRenderer: SettingsFieldComponent = () => null;
+
+		registerSettingsExtension( {
+			scope: { page: 'registry-precedence' },
+			components: {
+				'test/component': component,
+			},
+			fieldOverrides: {
+				field: fieldOverride,
+			},
+		} );
+		registerSettingsExtension( {
+			scope: { page: 'registry-precedence' },
+			typeRenderers: {
+				text: typeRenderer,
+			},
+		} );
+
+		expect(
+			resolveFieldComponent(
+				{
+					id: 'field',
+					label: 'Field',
+					type: 'text',
+					component: 'test/component',
+				},
+				{ page: 'registry-precedence' }
+			)
+		).toBe( component );
+		expect(
+			resolveFieldComponent(
+				{
+					id: 'field',
+					label: 'Field',
+					type: 'text',
+				},
+				{ page: 'registry-precedence' }
+			)
+		).toBe( fieldOverride );
+	} );
+
 	it( 'ignores registrations outside the current page scope', () => {
 		const component: SettingsFieldComponent = () => null;
 

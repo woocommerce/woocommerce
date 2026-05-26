@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * Internal implementation of the legacy settings adapter. Extensions should use
  * Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter.
  *
- * @since 10.8.0
+ * @since 10.9.0
  */
 class LegacySettingsPageAdapter implements PublicModernSettingsPageInterface {
 
@@ -31,7 +31,7 @@ class LegacySettingsPageAdapter implements PublicModernSettingsPageInterface {
 	/**
 	 * Constructor.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 *
 	 * @param \WC_Settings_Page $settings_page Legacy settings page.
 	 */
@@ -47,7 +47,10 @@ class LegacySettingsPageAdapter implements PublicModernSettingsPageInterface {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Build the canonical settings schema for a section.
+	 *
+	 * @param string $section Section id. Empty string means the default section.
+	 * @return array
 	 */
 	public function get_schema( string $section ): array {
 		$schema = ModernSettingsSchema::from_legacy_settings(
@@ -80,7 +83,7 @@ class LegacySettingsPageAdapter implements PublicModernSettingsPageInterface {
 			$section_id   = (string) $id;
 			$navigation[] = array(
 				'id'     => '' === $section_id ? 'default' : $section_id,
-				'label'  => wp_strip_all_tags( html_entity_decode( (string) $label ) ),
+				'label'  => wp_strip_all_tags( html_entity_decode( (string) $label, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ),
 				'href'   => admin_url( 'admin.php?page=wc-settings&tab=' . $this->settings_page->get_id() . '&section=' . sanitize_title( $section_id ) ),
 				'active' => $current_section === $section_id,
 			);
@@ -90,14 +93,20 @@ class LegacySettingsPageAdapter implements PublicModernSettingsPageInterface {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Get script handles that must be loaded before the modern settings app mounts.
+	 *
+	 * @param string $section Section id. Empty string means the default section.
+	 * @return string[]
 	 */
 	public function get_script_handles( string $section ): array {
 		return array();
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Get the default save adapter for fields on this page.
+	 *
+	 * @param string $section Section id. Empty string means the default section.
+	 * @return string
 	 */
 	public function get_save_adapter( string $section ): string {
 		return 'form_post';

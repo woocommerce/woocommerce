@@ -103,22 +103,36 @@ export const resolveFieldComponent = (
 	field: ModernSettingsField,
 	context: SettingsFieldContext
 ): SettingsFieldComponent | undefined => {
+	if ( field.component ) {
+		for ( let i = registrations.length - 1; i >= 0; i-- ) {
+			const registration = registrations[ i ];
+			if ( ! scopeMatches( registration, context ) ) {
+				continue;
+			}
+
+			const namedComponent = registration.components?.[ field.component ];
+			if ( namedComponent ) {
+				return namedComponent;
+			}
+		}
+	}
+
 	for ( let i = registrations.length - 1; i >= 0; i-- ) {
 		const registration = registrations[ i ];
 		if ( ! scopeMatches( registration, context ) ) {
 			continue;
 		}
 
-		if ( field.component ) {
-			const namedComponent = registration.components?.[ field.component ];
-			if ( namedComponent ) {
-				return namedComponent;
-			}
-		}
-
 		const fieldOverride = registration.fieldOverrides?.[ field.id ];
 		if ( fieldOverride ) {
 			return fieldOverride;
+		}
+	}
+
+	for ( let i = registrations.length - 1; i >= 0; i-- ) {
+		const registration = registrations[ i ];
+		if ( ! scopeMatches( registration, context ) ) {
+			continue;
 		}
 
 		const typeRenderer = registration.typeRenderers?.[ field.type ];

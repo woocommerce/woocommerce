@@ -14,12 +14,15 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Adapts the WooCommerce Products settings page for the modern settings renderer.
  *
- * @since 10.8.0
+ * @since 10.9.0
  */
 final class ProductsSettingsPageAdapter extends LegacySettingsPageAdapter {
 
 	/**
-	 * {@inheritDoc}
+	 * Build the canonical settings schema for a section.
+	 *
+	 * @param string $section Section id. Empty string means the default section.
+	 * @return array
 	 */
 	public function get_schema( string $section ): array {
 		$schema = parent::get_schema( $section );

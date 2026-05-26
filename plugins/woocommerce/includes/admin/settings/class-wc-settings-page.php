@@ -166,7 +166,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * Settings pages can override this to opt in to the modern settings renderer
 		 * while retaining the classic WooCommerce settings page route and save flow.
 		 *
-		 * @since 10.8.0
+		 * @since 10.9.0
 		 * @return ModernSettingsPageInterface|null
 		 */
 		public function get_modern_settings_page(): ?ModernSettingsPageInterface {
@@ -176,7 +176,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		/**
 		 * Add a body class for settings pages rendered through the modern settings SDK.
 		 *
-		 * @since 10.8.0
+		 * @since 10.9.0
 		 *
 		 * @param string $classes The existing body classes for the admin area.
 		 * @return string The modified body classes for the admin area.

@@ -50,7 +50,7 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 
 		global $current_section, $current_tab;
 
-		$this->original_get             = $_GET;
+		$this->original_get             = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->original_current_section = $current_section ?? null;
 		$this->original_current_tab     = $current_tab ?? null;
 	}
@@ -61,7 +61,7 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		global $current_section, $current_tab;
 
-		$_GET           = $this->original_get;
+		$_GET            = $this->original_get;
 		$current_section = $this->original_current_section;
 		$current_tab     = $this->original_current_tab;
 		unset( $GLOBALS['hide_save_button'] );
@@ -280,15 +280,15 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 	/**
 	 * Invoke a private method for focused feature-flag assertions.
 	 *
-	 * @param object $object Object instance.
+	 * @param object $target Object instance.
 	 * @param string $method_name Method name.
 	 * @param array  $arguments Method arguments.
 	 * @return mixed
 	 */
-	private function invoke_private_method( object $object, string $method_name, array $arguments = array() ) {
-		$method = new \ReflectionMethod( $object, $method_name );
+	private function invoke_private_method( object $target, string $method_name, array $arguments = array() ) {
+		$method = new \ReflectionMethod( $target, $method_name );
 		$method->setAccessible( true );
 
-		return $method->invokeArgs( $object, $arguments );
+		return $method->invokeArgs( $target, $arguments );
 	}
 }

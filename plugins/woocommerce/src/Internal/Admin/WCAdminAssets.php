@@ -346,6 +346,7 @@ class WCAdminAssets {
 			'wc-experimental',
 			'wc-navigation',
 			'wc-product-editor',
+			'wc-modern-settings-sdk',
 			WC_ADMIN_APP,
 		);
 
@@ -504,12 +505,20 @@ class WCAdminAssets {
 	 * @return string
 	 */
 	private function get_current_settings_tab(): string {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( ! isset( $_GET['tab'] ) ) {
 			return 'general';
 		}
 
-		$tab = wp_unslash( $_GET['tab'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		return is_string( $tab ) ? sanitize_title( $tab ) : 'general';
+		$tab = wp_unslash( $_GET['tab'] );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		if ( ! is_string( $tab ) ) {
+			return 'general';
+		}
+
+		$tab = sanitize_title( $tab );
+		return '' !== $tab ? $tab : 'general';
 	}
 
 	/**
@@ -518,11 +527,14 @@ class WCAdminAssets {
 	 * @return string
 	 */
 	private function get_current_settings_section(): string {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( ! isset( $_GET['section'] ) ) {
 			return '';
 		}
 
-		$section = wp_unslash( $_GET['section'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$section = wp_unslash( $_GET['section'] );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
 		return is_string( $section ) ? sanitize_title( $section ) : '';
 	}
 

@@ -43,7 +43,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 	/**
 	 * Get the modern settings page adapter for this settings page.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 * @return ModernSettingsPageInterface|null
 	 */
 	public function get_modern_settings_page(): ?ModernSettingsPageInterface {

@@ -14,6 +14,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Internal alias for the public modern settings page contract.
  *
- * @since 10.8.0
+ * @since 10.9.0
  */
 interface ModernSettingsPageInterface extends PublicModernSettingsPageInterface {}

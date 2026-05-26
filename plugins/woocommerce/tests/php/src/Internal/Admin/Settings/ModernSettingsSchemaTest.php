@@ -81,15 +81,15 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 					'title' => 'Group',
 				),
 				array(
-					'id'        => 'woocommerce_test_component',
-					'type'      => 'multiselect',
-					'title'     => 'Component field',
-					'component' => 'test/component',
+					'id'                => 'woocommerce_test_component',
+					'type'              => 'multiselect',
+					'title'             => 'Component field',
+					'component'         => 'test/component',
 					'custom_attributes' => array(
 						'min'  => 1,
 						'step' => 1,
 					),
-					'options'   => array(
+					'options'           => array(
 						'a' => 'Option A',
 					),
 				),
@@ -100,8 +100,22 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'array', $field['type'] );
 		$this->assertSame( 'test/component', $field['component'] );
-		$this->assertSame( array( 'min' => 1, 'step' => 1 ), $field['customAttributes'] );
-		$this->assertSame( array( array( 'label' => 'Option A', 'value' => 'a' ) ), $field['options'] );
+		$this->assertSame(
+			array(
+				'min'  => 1,
+				'step' => 1,
+			),
+			$field['customAttributes']
+		);
+		$this->assertSame(
+			array(
+				array(
+					'label' => 'Option A',
+					'value' => 'a',
+				),
+			),
+			$field['options']
+		);
 	}
 
 	/**
@@ -228,9 +242,9 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It marks info fields as non-saving when their text is rendered as description.
+	 * It sanitizes info field text and marks info fields as non-saving.
 	 */
-	public function test_from_legacy_settings_marks_info_fields_as_non_saving(): void {
+	public function test_from_legacy_settings_sanitizes_info_field_text_and_marks_info_fields_as_non_saving(): void {
 		$schema = ModernSettingsSchema::from_legacy_settings(
 			'test',
 			'',
@@ -239,14 +253,14 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 				array(
 					'id'   => 'woocommerce_test_info',
 					'type' => 'info',
-					'text' => 'Read-only information.',
+					'text' => 'Read-only <strong>information</strong><script>alert("x")</script>.',
 				),
 			)
 		);
 
 		$field = $schema['groups']['default']['fields'][0];
 
-		$this->assertSame( 'Read-only information.', $field['description'] );
+		$this->assertSame( 'Read-only <strong>information</strong>alert("x").', $field['description'] );
 		$this->assertSame( array( 'adapter' => 'none' ), $field['save'] );
 	}
 }

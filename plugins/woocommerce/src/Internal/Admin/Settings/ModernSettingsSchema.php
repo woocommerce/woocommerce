@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Builds the canonical settings schema consumed by the modern settings renderer.
  *
- * @since 10.8.0
+ * @since 10.9.0
  */
 class ModernSettingsSchema {
 
@@ -26,7 +26,7 @@ class ModernSettingsSchema {
 	/**
 	 * Build a schema from a legacy WC settings array.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 *
 	 * @param string $page_id Settings page id.
 	 * @param string $section Section id. Empty string means the default section.
@@ -54,7 +54,7 @@ class ModernSettingsSchema {
 					: 'group_' . $group_index;
 				$current_group = array(
 					'id'          => $current_id,
-					'title'       => isset( $setting['title'] ) && is_scalar( $setting['title'] ) ? html_entity_decode( (string) $setting['title'] ) : '',
+					'title'       => isset( $setting['title'] ) && is_scalar( $setting['title'] ) ? html_entity_decode( (string) $setting['title'], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) : '',
 					'description' => isset( $setting['desc'] ) && is_scalar( $setting['desc'] ) ? wp_kses_post( (string) $setting['desc'] ) : '',
 					'actions'     => self::get_group_actions( $setting ),
 					'order'       => isset( $setting['order'] ) ? (int) $setting['order'] : $group_index,
@@ -100,7 +100,7 @@ class ModernSettingsSchema {
 			}
 		);
 
-		$decoded_title = html_entity_decode( $title );
+		$decoded_title = html_entity_decode( $title, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 );
 
 		return array(
 			'id'      => $page_id,
@@ -156,7 +156,7 @@ class ModernSettingsSchema {
 		}
 
 		if ( 'info' === $type && '' === $field['description'] && isset( $setting['text'] ) && is_scalar( $setting['text'] ) ) {
-			$field['description'] = (string) $setting['text'];
+			$field['description'] = wp_kses_post( (string) $setting['text'] );
 			$field['save']        = array( 'adapter' => 'none' );
 		}
 
@@ -173,12 +173,12 @@ class ModernSettingsSchema {
 	 */
 	private static function get_field_label( array $setting, string $id, string $type ): string {
 		if ( 'checkbox' === $type && isset( $setting['desc'] ) && is_scalar( $setting['desc'] ) && '' !== (string) $setting['desc'] ) {
-			return wp_strip_all_tags( html_entity_decode( (string) $setting['desc'] ) );
+			return wp_strip_all_tags( html_entity_decode( (string) $setting['desc'], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) );
 		}
 
 		foreach ( array( 'title', 'name' ) as $key ) {
 			if ( isset( $setting[ $key ] ) && is_scalar( $setting[ $key ] ) && '' !== (string) $setting[ $key ] ) {
-				return wp_strip_all_tags( html_entity_decode( (string) $setting[ $key ] ) );
+				return wp_strip_all_tags( html_entity_decode( (string) $setting[ $key ], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) );
 			}
 		}
 
@@ -301,7 +301,7 @@ class ModernSettingsSchema {
 			}
 
 			$options[] = array(
-				'label' => is_scalar( $label ) ? html_entity_decode( (string) $label ) : '',
+				'label' => is_scalar( $label ) ? html_entity_decode( (string) $label, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) : '',
 				'value' => (string) $value,
 			);
 		}
@@ -359,7 +359,7 @@ class ModernSettingsSchema {
 
 			$normalized_action = array(
 				'id'    => isset( $action['id'] ) && is_scalar( $action['id'] ) ? sanitize_key( (string) $action['id'] ) : 'action_' . $index,
-				'label' => wp_strip_all_tags( html_entity_decode( (string) $action['label'] ) ),
+				'label' => wp_strip_all_tags( html_entity_decode( (string) $action['label'], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ),
 				'href'  => $href,
 			);
 
@@ -384,6 +384,7 @@ class ModernSettingsSchema {
 	/**
 	 * Get the default group.
 	 *
+	 * @param int $order Group order.
 	 * @return array
 	 */
 	private static function get_default_group( int $order ): array {
