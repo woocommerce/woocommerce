@@ -134,29 +134,19 @@ test.describe(
 				page.getByRole( 'radio', { name: 'Coming soon', exact: true } )
 			).not.toBeChecked();
 
-			// The store only checkbox should be visible and unchecked.
+			// The store only checkbox should not be on the page.
 			await expect(
 				page.getByRole( 'checkbox', {
-					name: 'Store pages only',
+					name: 'Apply to store pages only',
 				} )
-			).toBeVisible();
-			await expect(
-				page.getByRole( 'checkbox', {
-					name: 'Store pages only',
-				} )
-			).not.toBeChecked();
+			).toHaveCount( 0 );
 
-			// The private link checkbox should be visible and unchecked.
+			// The private link should not be on the page.
 			await expect(
 				page.getByRole( 'checkbox', {
-					name: 'Private link',
+					name: 'Share your site with a private link',
 				} )
-			).toBeVisible();
-			await expect(
-				page.getByRole( 'checkbox', {
-					name: 'Private link',
-				} )
-			).not.toBeChecked();
+			).toHaveCount( 0 );
 
 			// The Live radio should be checked.
 			await expect(
@@ -168,12 +158,38 @@ test.describe(
 				.getByRole( 'radio', { name: 'Coming soon', exact: true } )
 				.check();
 
+			// The store only checkbox should be visible.
+			await expect(
+				page.getByRole( 'checkbox', {
+					name: 'Apply to store pages only',
+				} )
+			).toBeVisible();
+
+			// The store only checkbox should not be checked.
+			await expect(
+				page.getByRole( 'checkbox', {
+					name: 'Apply to store pages only',
+				} )
+			).not.toBeChecked();
+
+			// The private link should not be checked.
+			await expect(
+				page.getByRole( 'checkbox', {
+					name: 'Share your site with a private link',
+				} )
+			).not.toBeChecked();
+
 			// Check the private link checkbox.
 			await page
 				.getByRole( 'checkbox', {
-					name: 'Private link',
+					name: 'Share your site with a private link',
 				} )
 				.check();
+
+			// The private link input should be visible.
+			await expect(
+				page.getByRole( 'button', { name: 'Copy link' } )
+			).toBeVisible();
 		} );
 
 		test( 'Homescreen badge coming soon store only', async ( {
