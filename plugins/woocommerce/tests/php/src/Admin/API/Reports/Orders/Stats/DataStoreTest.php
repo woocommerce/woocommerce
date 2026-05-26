@@ -34,7 +34,7 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->previous_db_version          = get_option( 'woocommerce_db_version' );
+		$this->previous_db_version           = get_option( 'woocommerce_db_version' );
 		$this->previous_old_full_refund_flag = get_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 	}
 

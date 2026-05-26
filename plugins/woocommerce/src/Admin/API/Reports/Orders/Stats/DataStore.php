@@ -596,10 +596,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$parent_order = wc_get_order( $order->get_parent_id() );
 			// Refunds attach to the original order. Skip if the parent is another refund.
 			if ( $parent_order && ! $parent_order instanceof WC_Order_Refund ) {
-				$data['parent_id']        = $parent_order->get_id();
-				$data['status']           = self::normalize_order_status( $parent_order->get_status() );
+				$data['parent_id'] = $parent_order->get_id();
+				$data['status']    = self::normalize_order_status( $parent_order->get_status() );
 
-				$refund_type              = $order->get_meta( '_refund_type' );
+				$refund_type               = $order->get_meta( '_refund_type' );
 				$uses_new_full_refund_data = OrderUtil::uses_new_full_refund_data();
 				$use_parent_refund_amounts = $uses_new_full_refund_data && (
 					'full' === $refund_type
