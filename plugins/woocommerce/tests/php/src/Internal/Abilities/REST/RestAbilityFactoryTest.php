@@ -982,9 +982,14 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave already-nullable array types untouched in output schema.
+	 * @testdox Should widen pre-existing scalar-plus-null unions to the full output union.
+	 *
+	 * `low_stock_amount` is declared as `[integer, null]` in the products
+	 * schema but the controller returns an empty string when unset (via
+	 * `set_low_stock_amount('')`), which neither member of the declared union
+	 * admits. Widening scalar-only unions covers that case.
 	 */
-	public function test_output_schema_leaves_existing_array_types_untouched(): void {
+	public function test_output_schema_widens_pre_existing_scalar_unions(): void {
 		$controller = $this->create_mock_controller_with_item_schema(
 			array(
 				'type'       => 'object',
@@ -996,7 +1001,31 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 
 		$schema = $this->invoke_get_output_schema( $controller, 'get' );
 
-		$this->assertSame( array( 'integer', 'null' ), $schema['properties']['low_stock_amount']['type'], 'Existing array type should not be re-wrapped' );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['properties']['low_stock_amount']['type'] );
+	}
+
+	/**
+	 * @testdox Should leave unions containing compound types untouched in output schema.
+	 *
+	 * If the schema author declared a union that includes `object` or `array`,
+	 * trust that — widening would lose information without a known WC quirk to
+	 * justify it.
+	 */
+	public function test_output_schema_leaves_compound_unions_untouched(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'payload' => array( 'type' => array( 'object', 'null' ) ),
+					'mixed'   => array( 'type' => array( 'string', 'array' ) ),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$this->assertSame( array( 'object', 'null' ), $schema['properties']['payload']['type'] );
+		$this->assertSame( array( 'string', 'array' ), $schema['properties']['mixed']['type'] );
 	}
 
 	/**

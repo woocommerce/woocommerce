@@ -442,18 +442,22 @@ class RestAbilityFactory {
 	 * 1. `format: "date-time"` and `format: "uri"` are stripped. WooCommerce REST
 	 *    date strings (e.g. `2025-11-24T16:31:43`) omit the timezone suffix RFC 3339
 	 *    requires, and `format: "uri"` fields routinely return empty strings.
-	 * 2. Any single scalar `type` (`string`, `integer`, `number`, `boolean`) is
+	 * 2. Any `type` whose declared members are all scalars and/or `null` is
 	 *    widened to {@see self::OUTPUT_SCALAR_UNION} — every JSON type plus
-	 *    `null`. Fields declared as `object` or `array` are left alone. This is
-	 *    a deliberate accuracy tradeoff: many WooCommerce REST controllers
-	 *    declare a scalar type that disagrees with what they actually return
+	 *    `null`. Applies to single scalars (`string`, `integer`, `number`,
+	 *    `boolean`) and to pre-existing unions like `[integer, null]`. Fields
+	 *    that declare any compound type (`object`, `array`) are left alone.
+	 *    This is a deliberate accuracy tradeoff: many WooCommerce REST
+	 *    controllers declare types that disagree with what they actually return
 	 *    (e.g. `shipping_class_id` declared `string` but returned as `int`;
-	 *    `meta_data[].display_value` declared `string` but routinely an array
-	 *    for variation attributes and serialized custom meta). The alternative
-	 *    is per-controller schema fixes across legacy code. Skipped inside
-	 *    `anyOf` / `oneOf` / `allOf` branches: widening every branch breaks the
-	 *    "exactly one" rule for `oneOf`, and for `anyOf` / `allOf` the schema
-	 *    author was explicit about admissible shapes.
+	 *    `low_stock_amount` declared `[integer, null]` but returned as `""`
+	 *    when unset; `meta_data[].display_value` declared `string` but
+	 *    routinely an array for variation attributes and serialized custom
+	 *    meta). The alternative is per-controller schema fixes across legacy
+	 *    code. Skipped inside `anyOf` / `oneOf` / `allOf` branches: widening
+	 *    every branch breaks the "exactly one" rule for `oneOf`, and for
+	 *    `anyOf` / `allOf` the schema author was explicit about admissible
+	 *    shapes.
 	 *
 	 * Recurses into `properties`, `items` (single schema and tuple form),
 	 * `additionalProperties`, and the `anyOf` / `oneOf` / `allOf` combiners.
@@ -468,7 +472,7 @@ class RestAbilityFactory {
 			unset( $schema['format'] );
 		}
 
-		if ( $apply_null_union && isset( $schema['type'] ) && is_string( $schema['type'] ) && in_array( $schema['type'], self::SCALAR_TYPES, true ) ) {
+		if ( $apply_null_union && isset( $schema['type'] ) && self::should_widen_to_output_union( $schema['type'] ) ) {
 			$schema['type'] = self::OUTPUT_SCALAR_UNION;
 		}
 
@@ -509,6 +513,40 @@ class RestAbilityFactory {
 		}
 
 		return $schema;
+	}
+
+	/**
+	 * Decide whether an output-schema `type` should be widened to the full union.
+	 *
+	 * Widens when the declared type is either a single scalar (`integer`, `string`, etc.)
+	 * or an array union whose members are all scalars and/or `null`. Leaves the
+	 * declaration alone if any compound type (`object`, `array`) appears, since the
+	 * schema author was explicit about admitting a structured value.
+	 *
+	 * Handles the WC quirk where fields declared as `[integer, null]`
+	 * (e.g. `low_stock_amount`) are returned as empty strings when unset, which
+	 * neither member of the declared union admits.
+	 *
+	 * @param mixed $type Schema `type` value (string, array, or other).
+	 * @return bool True if the type should be replaced with {@see self::OUTPUT_SCALAR_UNION}.
+	 */
+	private static function should_widen_to_output_union( $type ): bool {
+		if ( is_string( $type ) ) {
+			return in_array( $type, self::SCALAR_TYPES, true );
+		}
+
+		if ( ! is_array( $type ) || empty( $type ) ) {
+			return false;
+		}
+
+		$widenable = array_merge( self::SCALAR_TYPES, array( 'null' ) );
+		foreach ( $type as $member ) {
+			if ( ! is_string( $member ) || ! in_array( $member, $widenable, true ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
