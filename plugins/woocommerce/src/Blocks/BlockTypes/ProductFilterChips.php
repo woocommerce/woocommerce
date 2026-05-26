@@ -18,6 +18,22 @@ final class ProductFilterChips extends AbstractBlock {
 	protected $block_name = 'product-filter-chips';
 
 	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 * @return void
+	 */
+	protected function enqueue_data( array $attributes = array() ) {
+		parent::enqueue_data( $attributes );
+
+		if ( is_admin() ) {
+			$this->asset_data_registry->add( 'globalStylesColors', wp_get_global_styles( array( 'color' ) ) );
+		}
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array     $attributes Block attributes.
