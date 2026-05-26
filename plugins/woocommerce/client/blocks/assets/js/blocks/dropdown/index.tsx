@@ -14,5 +14,5 @@ import Save from './save';
 registerBlockType( metadata, {
 	edit: Edit,
 	icon: productFilterOptions,
-	save: Save,
+	save: () => null,
 } );
