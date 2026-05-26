@@ -445,6 +445,7 @@
 				"node_modules/@woocommerce/tracks/build-types",
 				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
 				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig-jest.json",
 				"node_modules/@woocommerce/internal-ts-config/types",
 				"node_modules/@woocommerce/customer-effort-score/build",
 				"node_modules/@woocommerce/customer-effort-score/build-style",

@@ -315,6 +315,7 @@
 				"node_modules/@woocommerce/sanitize/build-types",
 				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
 				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig-jest.json",
 				"node_modules/@woocommerce/internal-ts-config/types",
 				"node_modules/@woocommerce/admin-layout/build",
 				"node_modules/@woocommerce/admin-layout/build-style",
