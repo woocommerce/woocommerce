@@ -6,7 +6,7 @@ import { request } from '@playwright/test';
 /**
  * Internal dependencies
  */
-import { setOption, deleteOption } from '../../../utils/options';
+import { setOption } from '../../../utils/options';
 
 /**
  * Set the feature flag for email improvements feature.
@@ -24,11 +24,5 @@ export const setFeatureEmailImprovementsFlag = async (
 		baseURL,
 		'woocommerce_feature_email_improvements_enabled',
 		value
-	);
-	// We need to delete the transient to prevent unwanted popups.
-	await deleteOption(
-		request,
-		baseURL,
-		'_transient_wc_settings_email_improvements_reverted'
 	);
 };

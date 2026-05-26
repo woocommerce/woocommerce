@@ -165,7 +165,6 @@ class FeaturesController {
 		add_filter( 'views_plugins', array( $this, 'handle_plugins_page_views_list' ), 10, 1 );
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'set_change_feature_enable_nonce' ), 20, 1 );
 		add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
-		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'display_email_improvements_feedback_notice' ), 10, 2 );
 	}
 
 	/**
@@ -2043,26 +2042,6 @@ class FeaturesController {
 		if ( count( $query_params_to_remove ) > 1 && isset( $_SERVER['REQUEST_URI'] ) ) {
 			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			wp_safe_redirect( remove_query_arg( $query_params_to_remove, $_SERVER['REQUEST_URI'] ) );
-		}
-	}
-
-	/**
-	 * Display the email improvements feedback notice to render CES modal in.
-	 *
-	 * @param string $feature_id The feature id.
-	 * @param bool   $is_enabled Whether the feature is enabled.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 */
-	public function display_email_improvements_feedback_notice( $feature_id, $is_enabled ): void {
-		if ( 'email_improvements' === $feature_id && ! $is_enabled ) {
-			set_transient( 'wc_settings_email_improvements_reverted', 'yes', 15 );
-			add_action(
-				'admin_notices',
-				function () {
-					echo '<div id="wc_settings_features_email_feedback_slotfill"></div>';
-				}
-			);
 		}
 	}
 

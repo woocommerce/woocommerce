@@ -31,8 +31,7 @@ export type SettingType =
 	| 'sectionend'
 	| 'single_select_page'
 	| 'single_select_page_with_search'
-	| 'single_select_country'
-	| 'slotfill_placeholder';
+	| 'single_select_country';
 
 /**
  * Represents a setting group

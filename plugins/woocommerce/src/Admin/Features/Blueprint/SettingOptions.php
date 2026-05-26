@@ -22,7 +22,7 @@ class SettingOptions {
 	 *
 	 * @var array
 	 */
-	private $ignore_setting_types = array( 'title', 'sectionend', 'slotfill_placeholder', 'hidden' );
+	private $ignore_setting_types = array( 'title', 'sectionend', 'hidden' );
 
 
 	/**

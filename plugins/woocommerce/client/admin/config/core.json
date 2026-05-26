@@ -31,7 +31,6 @@
 		"remote-free-extensions": true,
 		"payment-gateway-suggestions": true,
 		"printful": true,
-		"settings": false,
 		"shipping-label-banner": true,
 		"subscriptions": true,
 		"store-alerts": true,

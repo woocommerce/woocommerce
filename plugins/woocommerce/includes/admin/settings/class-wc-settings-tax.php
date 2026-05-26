@@ -27,7 +27,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$this->label = __( 'Tax', 'woocommerce' );
 
 		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
-		add_action( 'woocommerce_admin_field_conflict_error', array( $this, 'conflict_error' ) );
 		if ( wc_tax_enabled() ) {
 			add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
 			add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
@@ -42,21 +41,6 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @var string
 	 */
 	public $icon = 'percent';
-
-	/**
-	 * Creates the React mount point for the embedded banner.
-	 */
-	public function conflict_error() {
-		?>
-		<tr valign="top">
-							<th scope="row" class="titledesc woocommerce_admin_tax_settings_slotfill_th">
-							</th>
-							<td class="forminp forminp-text woocommerce_admin_tax_settings_slotfill_td">
-		<div id="wc_tax_settings_slotfill"> </div>
-	</td>
-	</tr>
-		<?php
-	}
 
 	/**
 	 * Add this page to settings.

@@ -166,7 +166,7 @@ class Controller extends AbstractController {
 			$settings_by_id,
 			static function ( $def ) {
 				$type = $def['type'] ?? '';
-				return isset( $def['id'] ) && ! in_array( $type, array( 'title', 'sectionend', 'conflict_error', 'add_settings_slot' ), true );
+				return isset( $def['id'] ) && ! in_array( $type, array( 'title', 'sectionend' ), true );
 			}
 		);
 

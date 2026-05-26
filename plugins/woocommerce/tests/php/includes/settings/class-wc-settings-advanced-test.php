@@ -8,7 +8,6 @@
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
 
@@ -32,11 +31,6 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_com',
 			'features',
 		);
-
-		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
-			$position = array_search( 'woocommerce_com', $expected, true ) + 1;
-			array_splice( $expected, $position, 0, 'blueprint' );
-		}
 
 		$this->assertEquals( $expected, $section_names );
 	}

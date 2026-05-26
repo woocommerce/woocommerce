@@ -1,5 +1,5 @@
 /**
- * This file is used to enhance the settings page with additional features such as registering slot fills.
+ * This file is used to enhance the settings page with additional payment settings.
  */
 
 /**
@@ -10,7 +10,6 @@ import { createRoot } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { isFeatureEnabled } from '~/utils/features';
 import {
 	SettingsPaymentsBacsWrapper,
 	SettingsPaymentsChequeWrapper,
@@ -19,17 +18,6 @@ import {
 	SettingsPaymentsOfflineWrapper,
 	SettingsPaymentsWooPaymentsWrapper,
 } from '~/settings-payments';
-
-import { possiblyRenderSettingsSlots } from '~/settings/settings-slots';
-import { registerTaxSettingsConflictErrorFill } from '~/settings/conflict-error-slotfill';
-import { registerPaymentsSettingsBannerFill } from '~/payments/payments-settings-banner-slotfill';
-import { registerSiteVisibilitySlotFill } from '~/launch-your-store';
-import { registerBlueprintSlotfill } from '~/blueprint';
-import { registerSettingsEmailColorPaletteFill } from '~/settings-email/settings-email-color-palette-slotfill';
-import { registerSettingsEmailImageUrlFill } from '~/settings-email/settings-email-image-url-slotfill';
-import { registerSettingsEmailPreviewFill } from '~/settings-email/settings-email-preview-slotfill';
-import { registerSettingsEmailFeedbackFill } from '~/settings-email/settings-email-feedback-slotfill';
-import { registerSettingsEmailListingFill } from '~/settings-email/settings-email-listing-slotfill';
 
 const renderPaymentsSettings = () => {
 	const pages = [
@@ -70,29 +58,4 @@ const renderPaymentsSettings = () => {
 	} );
 };
 
-const registerSlotFills = () => {
-	possiblyRenderSettingsSlots();
-	registerTaxSettingsConflictErrorFill();
-	registerPaymentsSettingsBannerFill();
-
-	const features = window.wcAdminFeatures;
-	if ( features?.[ 'launch-your-store' ] === true ) {
-		registerSiteVisibilitySlotFill();
-	}
-
-	if ( isFeatureEnabled( 'blueprint' ) ) {
-		registerBlueprintSlotfill();
-	}
-
-	if ( isFeatureEnabled( 'block_email_editor' ) ) {
-		registerSettingsEmailListingFill();
-	}
-
-	registerSettingsEmailColorPaletteFill();
-	registerSettingsEmailFeedbackFill();
-	registerSettingsEmailImageUrlFill();
-	registerSettingsEmailPreviewFill();
-};
-
 renderPaymentsSettings();
-registerSlotFills();
