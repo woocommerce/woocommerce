@@ -1,3 +1,21 @@
+# Gate community PR reviewer assignment on CodeRabbit's review status.
+#
+# Problem: Community PRs (from forks) get reviewer teams assigned immediately,
+# even when CodeRabbit has already flagged issues. Human reviewers waste time
+# re-discovering the same problems.
+#
+# Solution: This workflow listens for CodeRabbit's summary comment and checks
+# its formal review state. If approved, it adds a `coderabbit-approved` label
+# which triggers reviewer assignment in automate-team-review-assignment.yml.
+# If changes are requested, it posts a guidance comment to the contributor.
+#
+# Why issue_comment instead of pull_request_review?
+# For fork PRs, pull_request_review events have read-only GITHUB_TOKEN and no
+# access to secrets. The issue_comment event runs in the base repo context with
+# full permissions, even for fork PRs. The label bridges from this context to
+# pull_request_target (labeled) where the reviewer assignment action has the
+# github.event.pull_request context it needs.
+
 name: Community PR CodeRabbit Gate
 
 on:
@@ -120,8 +138,6 @@ jobs:
                   comment-id: ${{ steps.find-guidance.outputs.comment-id }}
                   issue-number: ${{ steps.gate.outputs.pr_number }}
                   body: |
-                      ## CodeRabbit Review Gate
-
                       CodeRabbit has requested changes on this PR. Please address the feedback in the review comments and push your changes — CodeRabbit will re-review automatically.
 
                       If you believe a comment is a false positive, you can resolve it with a brief explanation using GitHub's "Resolve conversation" button, or reply `@coderabbitai resolve` to resolve all comments at once.
