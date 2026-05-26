@@ -106,16 +106,17 @@ export const openEditorSettings = async ( {
  * @return The editor canvas frame or the original page
  */
 export const getCanvas = async ( page: Page ): Promise< EditorCanvas > => {
-	await page
+	const canvasLocator = page
 		.locator( 'iframe[name="editor-canvas"], .wp-block-post-content' )
-		.first()
-		.waitFor( { state: 'visible' } );
+		.first();
 
-	const iframeLocator = page.locator( 'iframe[name="editor-canvas"]' );
-	if ( ( await iframeLocator.count() ) > 0 ) {
-		return iframeLocator.contentFrame();
-	}
-	return page;
+	await canvasLocator.waitFor( { state: 'visible' } );
+
+	const isFramed = await canvasLocator.evaluate(
+		( node ) => node.tagName === 'IFRAME'
+	);
+
+	return isFramed ? canvasLocator.contentFrame() : page;
 };
 
 /**
