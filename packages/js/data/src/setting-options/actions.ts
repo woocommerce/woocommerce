@@ -4,10 +4,7 @@
 import apiFetch from '@wordpress/api-fetch';
 import type { createRegistry } from '@wordpress/data';
 import type { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
-import type CreateLocksActions from '@wordpress/core-data/build-types/locks/actions';
-// @ts-expect-error WP core data doesn't explicitly export the actions
-// eslint-disable-next-line @woocommerce/dependency-group
-import createLocksActions from '@wordpress/core-data/build/locks/actions';
+import { store as coreDataStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -42,6 +39,10 @@ export type ThunkArgs = {
 	resolveSelect: CurriedState< Resolvers >;
 	dispatch: ActionDispatchersForThunk;
 	registry: WPDataRegistry;
+};
+
+export const getCoreDataLockActions = ( registry: WPDataRegistry ) => {
+	return registry.dispatch( coreDataStore );
 };
 
 /**
@@ -226,9 +227,12 @@ const saveSettingRequest = async (
 	groupId: string,
 	settingId: string,
 	value: SettingValue,
-	dispatch: ActionDispatchersForThunk
+	dispatch: ActionDispatchersForThunk,
+	registry: WPDataRegistry
 ): Promise< Setting > => {
-	const lock = await dispatch.__unstableAcquireStoreLock(
+	const { __unstableAcquireStoreLock, __unstableReleaseStoreLock } =
+		getCoreDataLockActions( registry );
+	const lock = await __unstableAcquireStoreLock(
 		STORE_NAME,
 		[ 'settings', groupId, settingId ],
 		{ exclusive: true }
@@ -250,7 +254,7 @@ const saveSettingRequest = async (
 		throw error;
 	} finally {
 		dispatch( setSaving( groupId, settingId, false ) );
-		dispatch.__unstableReleaseStoreLock( lock );
+		__unstableReleaseStoreLock( lock );
 	}
 };
 
@@ -260,9 +264,12 @@ const saveSettingRequest = async (
 const saveSettingsGroupRequest = async (
 	groupId: string,
 	updates: SettingEdit[],
-	dispatch: ActionDispatchersForThunk
+	dispatch: ActionDispatchersForThunk,
+	registry: WPDataRegistry
 ) => {
-	const lock = await dispatch.__unstableAcquireStoreLock(
+	const { __unstableAcquireStoreLock, __unstableReleaseStoreLock } =
+		getCoreDataLockActions( registry );
+	const lock = await __unstableAcquireStoreLock(
 		STORE_NAME,
 		[ 'settings', groupId ],
 		{ exclusive: true }
@@ -327,7 +334,7 @@ const saveSettingsGroupRequest = async (
 		throw error;
 	} finally {
 		dispatch( setSaving( groupId, null, false ) );
-		dispatch.__unstableReleaseStoreLock( lock );
+		__unstableReleaseStoreLock( lock );
 	}
 };
 
@@ -340,7 +347,7 @@ const saveSettingsGroupRequest = async (
  */
 export const saveSettingsGroup =
 	( groupId: string, updates: SettingEdit[] | SettingsEditObject ) =>
-	async ( { dispatch }: ThunkArgs ) => {
+	async ( { dispatch, registry }: ThunkArgs ) => {
 		const updatesArray = Array.isArray( updates )
 			? updates
 			: Object.entries( updates ).map( ( [ id, value ] ) => ( {
@@ -348,7 +355,12 @@ export const saveSettingsGroup =
 					value,
 			  } ) );
 
-		return saveSettingsGroupRequest( groupId, updatesArray, dispatch );
+		return saveSettingsGroupRequest(
+			groupId,
+			updatesArray,
+			dispatch,
+			registry
+		);
 	};
 
 /**
@@ -361,8 +373,14 @@ export const saveSettingsGroup =
  */
 export const saveSetting =
 	( groupId: string, settingId: string, value: SettingValue ) =>
-	async ( { dispatch }: ThunkArgs ) => {
-		return saveSettingRequest( groupId, settingId, value, dispatch );
+	async ( { dispatch, registry }: ThunkArgs ) => {
+		return saveSettingRequest(
+			groupId,
+			settingId,
+			value,
+			dispatch,
+			registry
+		);
 	};
 
 /**
@@ -373,7 +391,7 @@ export const saveSetting =
  */
 export const saveEditedSettingsGroup =
 	( groupId: string ) =>
-	async ( { select, dispatch }: ThunkArgs ) => {
+	async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const editedSettings = select
 			.getEditedSettingIds( groupId )
 			.map( ( settingId: string ) => ( {
@@ -388,7 +406,12 @@ export const saveEditedSettingsGroup =
 			return;
 		}
 
-		return saveSettingsGroupRequest( groupId, editedSettings, dispatch );
+		return saveSettingsGroupRequest(
+			groupId,
+			editedSettings,
+			dispatch,
+			registry
+		);
 	};
 
 /**
@@ -400,7 +423,7 @@ export const saveEditedSettingsGroup =
  */
 export const saveEditedSetting =
 	( groupId: string, settingId: string ) =>
-	async ( { select, dispatch }: ThunkArgs ) => {
+	async ( { select, dispatch, registry }: ThunkArgs ) => {
 		// Check if this setting has any edits
 		const editedSettingIds = select.getEditedSettingIds( groupId );
 		if ( ! editedSettingIds.includes( settingId ) ) {
@@ -410,16 +433,14 @@ export const saveEditedSetting =
 		const value = select.getSettingValue( groupId, settingId, {
 			includeEdits: true,
 		} );
-		return saveSettingRequest( groupId, settingId, value, dispatch );
+		return saveSettingRequest(
+			groupId,
+			settingId,
+			value,
+			dispatch,
+			registry
+		);
 	};
-
-const lockActions = createLocksActions() as ReturnType<
-	typeof CreateLocksActions
->;
-export const __unstableAcquireStoreLock =
-	lockActions.__unstableAcquireStoreLock;
-export const __unstableReleaseStoreLock =
-	lockActions.__unstableReleaseStoreLock;
 
 // Return type of all action creators
 export type Actions = ReturnType<
@@ -447,4 +468,4 @@ export type ActionDispatchersForThunk = {
 	saveSetting: typeof saveSetting;
 	saveSettingsGroup: typeof saveSettingsGroup;
 	< T = Record< string, unknown > >( args: T ): void;
-} & ReturnType< typeof CreateLocksActions >;
+};
