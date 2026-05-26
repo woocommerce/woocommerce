@@ -149,6 +149,25 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 }
 
 /**
+ * Get the tokenized Review Order URL for the given order.
+ *
+ * Top-level rewrite: returns `/review-order/{id}/?key={order_key}` on pretty
+ * permalinks and `/?review-order={id}&key={order_key}` on plain permalinks.
+ * The order key allows guest customers to reach the page without logging in.
+ *
+ * @since 10.8.0
+ * @param  WC_Order $order Order object.
+ * @return string
+ */
+function wc_get_review_order_url( $order ) {
+	if ( ! $order instanceof WC_Order ) {
+		return '';
+	}
+
+	return \Automattic\WooCommerce\Internal\OrderReviews\Endpoint::get_url( $order );
+}
+
+/**
  * Hide or adjust menu items conditionally.
  *
  * @param array $items Navigation items.

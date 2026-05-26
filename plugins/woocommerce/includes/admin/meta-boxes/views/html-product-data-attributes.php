@@ -5,8 +5,20 @@
  * @package WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+if ( Features::exists( ProductVariationsClassicRedesign::FEATURE_ID ) ) {
+	?>
+	<div id="product_attributes" class="panel wc-metaboxes-wrapper hidden">
+		<div id="<?php echo esc_attr( ProductVariationsClassicRedesign::ATTRIBUTES_ROOT_ID ); ?>"></div>
+	</div>
+	<?php
+	return;
 }
 
 global $wc_product_attributes;
@@ -77,6 +89,10 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 					<form class="wc-add-attribute-term-fields" action="" method="post">
 						<label for="wc-modal-add-attribute-term-input"><?php esc_html_e( 'Name', 'woocommerce' ); ?></label>
 						<input id="wc-modal-add-attribute-term-input" type="text" name="term" value="" />
+						<# if ( data.isVisualAttribute ) { #>
+							<label for="wc-modal-add-attribute-term-color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label>
+							<input id="wc-modal-add-attribute-term-color" class="wc-admin-visual-attribute-color-input" type="text" name="term_color" value="" />
+						<# } #>
 					</form>
 				</article>
 				<footer>

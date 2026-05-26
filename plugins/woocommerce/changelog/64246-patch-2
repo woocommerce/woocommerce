@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Allow the shipping zones REST API endpoint to be extended

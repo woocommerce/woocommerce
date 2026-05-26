@@ -29,6 +29,8 @@ import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { EXCLUDED_BLOCKS } from '../../constants';
 import { Notice } from '../../components/notice';
 import type { Attributes } from './types';
+import type { FilterItemFields } from '../../types';
+import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
 import { InitialDisabled } from '../../components/initial-disabled';
 import RatingStars from './components/rating-stars';
 
@@ -120,6 +122,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 					.sort( ( a, b ) => b.rating - a.rating )
 					.filter( ( { rating } ) => rating >= minimumRating )
 					.map( ( { rating, count }, index ) => ( {
+						id: `rating-${ rating }`,
 						label: <RatingStars key={ rating } stars={ rating } />,
 						ariaLabel: sprintf(
 							/* translators: %d: rating value. Example: Rated 4 out of 5. */
@@ -128,7 +131,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 						),
 						value: rating?.toString(),
 						selected: index === 0,
-						count,
+						...( showCounts && { count } ),
 					} ) )
 			: [];
 
@@ -184,11 +187,13 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 					>
 						<BlockContextProvider
 							value={ {
-								filterData: {
+								'woocommerce/selectableItems': {
 									items: displayedOptions,
+									selectionMode: 'multiple' as const,
+									storeNamespace:
+										'woocommerce/product-filters',
 									isLoading,
-									showCounts,
-								},
+								} satisfies SelectableItemsContext< FilterItemFields >,
 							} }
 						>
 							{ children }

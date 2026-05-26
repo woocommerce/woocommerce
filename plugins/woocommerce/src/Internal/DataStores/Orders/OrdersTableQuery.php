@@ -203,8 +203,8 @@ class OrdersTableQuery {
 		$this->args       = $args;
 		$this->query_args = $args; // Keep a copy of the original vars used to initialize the query.
 
-		// TODO: args to be implemented.
-		unset( $this->args['customer_note'], $this->args['name'] );
+		// TODO: 'name' arg (post_name equivalent) is not yet implemented for HPOS.
+		unset( $this->args['name'] );
 
 		$this->build_query();
 		if ( ! $this->maybe_override_query() ) {
@@ -1133,6 +1133,11 @@ class OrdersTableQuery {
 
 		foreach ( $fields as $arg_key ) {
 			$this->where[] = $this->where( $this->tables['orders'], $arg_key, '=', $this->args[ $arg_key ], $this->mappings['orders'][ $arg_key ]['type'] );
+		}
+
+		// customer_note allows empty string to match orders with no note, so it cannot use arg_isset (which skips '').
+		if ( isset( $this->args['customer_note'] ) ) {
+			$this->where[] = $this->where( $this->tables['orders'], 'customer_note', '=', $this->args['customer_note'], $this->mappings['orders']['customer_note']['type'] );
 		}
 
 		if ( $this->arg_isset( 'parent_exclude' ) ) {

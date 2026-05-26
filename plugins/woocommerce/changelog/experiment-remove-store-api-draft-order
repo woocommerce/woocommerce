@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Store API: defer checkout draft order creation to place-order time, eliminating orphaned `wc-checkout-draft` rows from page views and form interactions. Adds `woocommerce_store_api_checkout_update_draft` action for PATCH-time observation and `woocommerce_store_api_checkout_order_created` action when the order is first materialised.

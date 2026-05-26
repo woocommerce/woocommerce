@@ -7,22 +7,53 @@ import * as iAPI from '@wordpress/interactivity';
  * Internal dependencies
  */
 import { decodeHtmlEntities } from '../../utils/html-entities';
+import type { SelectableItemsParentStore } from '../../types/type-defs/selectable-items';
+import type {
+	ActiveFilterItem,
+	FilterItemFields,
+	FilterOptionItem,
+	ProductFiltersContext,
+} from './types';
+import { getClosestColor } from './utils/get-closest-color';
 
-const { getContext, store, getServerContext, getConfig } = iAPI;
+const { getContext, getElement, store, getServerContext, getConfig } = iAPI;
 
 const BLOCK_NAME = 'woocommerce/product-filters';
 
-function selectFilter() {
+type ValidFilterOptionItem = FilterOptionItem & {
+	type: string;
+	value: string;
+};
+
+function isValidFilterOptionItem(
+	item: FilterOptionItem
+): item is ValidFilterOptionItem {
+	return (
+		typeof item.type === 'string' &&
+		item.type.length > 0 &&
+		typeof item.value === 'string' &&
+		item.value.length > 0
+	);
+}
+
+function getFilterLabel( item: ValidFilterOptionItem ): string {
+	const label = item.ariaLabel ?? item.label;
+	return typeof label === 'string' && label.length > 0 ? label : item.value;
+}
+
+function selectFilter( item: ValidFilterOptionItem ) {
 	const context = getContext< ProductFiltersContext >();
-	const newActiveFilter = {
-		value: context.item.value,
-		type: context.item.type,
-		attributeQueryType: context.item.attributeQueryType,
+	const newActiveFilter: ActiveFilterItem = {
+		value: item.value,
+		type: item.type,
 		activeLabel: context.activeLabelTemplate.replace(
 			'{{label}}',
-			context.item?.ariaLabel || context.item.label
+			getFilterLabel( item )
 		),
 	};
+	if ( item.attributeQueryType ) {
+		newActiveFilter.attributeQueryType = item.attributeQueryType;
+	}
 	const newActiveFilters = context.activeFilters.filter(
 		( activeFilter ) =>
 			! (
@@ -36,42 +67,12 @@ function selectFilter() {
 	context.activeFilters = newActiveFilters;
 }
 
-function unselectFilter() {
-	const { item } = getContext< ProductFiltersContext >();
+function unselectFilter( item: ValidFilterOptionItem ) {
 	actions.removeActiveFiltersBy(
 		( activeFilter ) =>
 			activeFilter.type === item.type && activeFilter.value === item.value
 	);
 }
-
-type FilterItem = {
-	label: string;
-	ariaLabel?: string;
-	value: string;
-	selected: boolean;
-	count: number;
-	type: string;
-	attributeQueryType?: 'and' | 'or' | undefined;
-	id?: number;
-	parent?: number;
-	depth?: number;
-};
-
-export type ActiveFilterItem = Pick<
-	FilterItem,
-	'type' | 'value' | 'attributeQueryType'
-> & {
-	activeLabel: string;
-};
-
-export type ProductFiltersContext = {
-	isOverlayOpened: boolean;
-	params: Record< string, string >;
-	activeFilters: ActiveFilterItem[];
-	item: FilterItem;
-	activeLabelTemplate: string;
-	filterType: string;
-};
 
 const productFiltersStore = {
 	state: {
@@ -138,13 +139,23 @@ const productFiltersStore = {
 					uid: `${ item.type }/${ item.value }`,
 				} ) );
 		},
-		get isFilterSelected() {
-			const { activeFilters, item } =
-				getContext< ProductFiltersContext >();
-			return activeFilters.some(
-				( filter ) =>
-					filter.type === item.type && filter.value === item.value
-			);
+		get selectableItems() {
+			// Items are server-owned (narrow on every navigation); read
+			// from server context so they refresh post-navigation.
+			// `getContext()` soft-merges and would keep the stale client
+			// snapshot.
+			const server = getServerContext
+				? getServerContext< ProductFiltersContext >()
+				: getContext< ProductFiltersContext >();
+			const items = server.items;
+			if ( ! Array.isArray( items ) ) return [];
+			return items.map( ( item ) => ( {
+				...item,
+				selected: state.activeFilters.some(
+					( filter ) =>
+						filter.type === item.type && filter.value === item.value
+				),
+			} ) );
 		},
 	},
 	actions: {
@@ -181,11 +192,20 @@ const productFiltersStore = {
 				( item ) => ! callback( item )
 			);
 		},
-		toggleFilter: () => {
-			if ( state.isFilterSelected ) {
-				unselectFilter();
+		toggle: ( itemArg?: FilterOptionItem | Event ) => {
+			const context = getContext< ProductFiltersContext >();
+			const item =
+				itemArg && ! ( itemArg instanceof Event )
+					? itemArg
+					: context.item;
+			if ( ! item || ! isValidFilterOptionItem( item ) ) return;
+			const isSelected = context.activeFilters.some(
+				( f ) => f.type === item.type && f.value === item.value
+			);
+			if ( isSelected ) {
+				unselectFilter( item );
 			} else {
-				selectFilter();
+				selectFilter( item );
 			}
 			actions.navigate();
 		},
@@ -234,6 +254,34 @@ const productFiltersStore = {
 		},
 	},
 	callbacks: {
+		initColors: () => {
+			const el = getElement();
+			if ( ! el.ref ) return;
+
+			const style = el.ref.style;
+			const hasBg = style.getPropertyValue(
+				'--wc-product-filters-background-color'
+			);
+			const hasFg = style.getPropertyValue(
+				'--wc-product-filters-text-color'
+			);
+
+			if ( ! hasBg ) {
+				const bg = getClosestColor( el.ref, 'backgroundColor' );
+				if ( bg ) {
+					style.setProperty(
+						'--wc-product-filters-background-color',
+						bg
+					);
+				}
+			}
+			if ( ! hasFg ) {
+				const fg = getClosestColor( el.ref, 'color' );
+				if ( fg ) {
+					style.setProperty( '--wc-product-filters-text-color', fg );
+				}
+			}
+		},
 		scrollLimit: () => {
 			const { isOverlayOpened } = getContext< ProductFiltersContext >();
 			if ( isOverlayOpened ) {
@@ -244,6 +292,10 @@ const productFiltersStore = {
 		},
 	},
 };
+
+// Compile-time protocol conformance check.
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+productFiltersStore satisfies SelectableItemsParentStore< FilterItemFields >;
 
 export type ProductFiltersStore = typeof productFiltersStore;
 

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\Api;
 
+use Automattic\WooCommerce\Api\Infrastructure\GraphQLControllerBase;
+use Automattic\WooCommerce\Api\Infrastructure\Main;
+
 /**
  * Settings handling for the GraphQL API.
  *
@@ -68,7 +71,7 @@ class Settings {
 				'desc'     => __( 'Path relative to /wp-json/ where the GraphQL endpoint is exposed. Needs at least two segments (namespace/route), e.g. wc/graphql.', 'woocommerce' ),
 				'desc_tip' => true,
 				'id'       => Main::OPTION_ENDPOINT_URL,
-				'default'  => GraphQLController::DEFAULT_ENDPOINT_URL,
+				'default'  => GraphQLControllerBase::DEFAULT_ENDPOINT_URL,
 				'type'     => 'text',
 			),
 			array(
@@ -82,7 +85,7 @@ class Settings {
 				'title'             => __( 'Maximum query depth', 'woocommerce' ),
 				'desc'              => __( 'Reject queries whose selection nesting exceeds this depth.', 'woocommerce' ),
 				'id'                => Main::OPTION_MAX_QUERY_DEPTH,
-				'default'           => (string) GraphQLController::DEFAULT_MAX_QUERY_DEPTH,
+				'default'           => (string) GraphQLControllerBase::DEFAULT_MAX_QUERY_DEPTH,
 				'type'              => 'number',
 				'custom_attributes' => array( 'min' => '1' ),
 			),
@@ -90,9 +93,16 @@ class Settings {
 				'title'             => __( 'Maximum query complexity', 'woocommerce' ),
 				'desc'              => __( 'Reject queries whose computed complexity score exceeds this value.', 'woocommerce' ),
 				'id'                => Main::OPTION_MAX_QUERY_COMPLEXITY,
-				'default'           => (string) GraphQLController::DEFAULT_MAX_QUERY_COMPLEXITY,
+				'default'           => (string) GraphQLControllerBase::DEFAULT_MAX_QUERY_COMPLEXITY,
 				'type'              => 'number',
 				'custom_attributes' => array( 'min' => '1' ),
+			),
+			array(
+				'title'   => __( 'Enable OPcache-based caching', 'woocommerce' ),
+				'desc'    => __( 'Cache parsed queries on disk as PHP files so OPcache can serve them from shared memory. Falls back to the object cache when the filesystem is not writable.', 'woocommerce' ),
+				'id'      => Main::OPTION_OPCACHE_ENABLED,
+				'default' => 'yes',
+				'type'    => 'checkbox',
 			),
 			array(
 				'title'   => __( 'Enable ObjectCache-based caching', 'woocommerce' ),
@@ -140,7 +150,7 @@ class Settings {
 	public function sanitize_endpoint_url( $value, array $option, $raw_value ): string {
 		unset( $value, $option );
 
-		$fallback = (string) get_option( Main::OPTION_ENDPOINT_URL, GraphQLController::DEFAULT_ENDPOINT_URL );
+		$fallback = (string) get_option( Main::OPTION_ENDPOINT_URL, GraphQLControllerBase::DEFAULT_ENDPOINT_URL );
 
 		if ( ! is_string( $raw_value ) ) {
 			return $fallback;
@@ -160,7 +170,7 @@ class Settings {
 		}
 
 		foreach ( $parts as $part ) {
-			if ( '' === $part || ! preg_match( GraphQLController::ENDPOINT_URL_SEGMENT_PATTERN, $part ) ) {
+			if ( '' === $part || ! preg_match( GraphQLControllerBase::ENDPOINT_URL_SEGMENT_PATTERN, $part ) ) {
 				\WC_Admin_Settings::add_error(
 					sprintf(
 						/* translators: %s: the invalid path segment */
