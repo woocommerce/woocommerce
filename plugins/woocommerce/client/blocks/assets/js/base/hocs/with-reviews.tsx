@@ -2,13 +2,13 @@
  * External dependencies
  */
 import { Component } from '@wordpress/element';
-import isShallowEqual from '../../utils/is-shallow-equal';
 import type { Review } from '@woocommerce/base-components/reviews/types';
 import { ErrorObject } from '@woocommerce/editor-components/error-placeholder';
 
 /**
  * Internal dependencies
  */
+import isShallowEqual from '../../utils/is-shallow-equal';
 import { getReviews } from '../../blocks/reviews/utils';
 import { formatError } from '../utils/errors';
 

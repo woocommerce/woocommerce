@@ -13,7 +13,6 @@ import {
 } from '@woocommerce/base-context/hooks';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean, isObject, objectHasProp } from '@woocommerce/types';
-import isShallowEqual from '../../utils/is-shallow-equal';
 import { useState, useCallback, useMemo, useEffect } from '@wordpress/element';
 import { CheckboxList } from '@woocommerce/blocks-components';
 import FilterSubmitButton from '@woocommerce/base-components/filter-submit-button';
@@ -31,6 +30,7 @@ import type { ReactElement } from 'react';
 /**
  * Internal dependencies
  */
+import isShallowEqual from '../../utils/is-shallow-equal';
 import { previewOptions } from './preview';
 import './style.scss';
 import { Attributes } from './types';

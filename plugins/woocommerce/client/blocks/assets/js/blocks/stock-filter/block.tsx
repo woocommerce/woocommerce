@@ -24,7 +24,6 @@ import FilterResetButton from '@woocommerce/base-components/filter-reset-button'
 import FilterTitlePlaceholder from '@woocommerce/base-components/filter-placeholder';
 import Label from '@woocommerce/base-components/filter-element-label';
 import FormTokenField from '@woocommerce/base-components/form-token-field';
-import isShallowEqual from '../../utils/is-shallow-equal';
 import { decodeEntities } from '@wordpress/html-entities';
 import { isBoolean, objectHasProp } from '@woocommerce/types';
 import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
@@ -39,6 +38,7 @@ import clsx from 'clsx';
 /**
  * Internal dependencies
  */
+import isShallowEqual from '../../utils/is-shallow-equal';
 import { previewOptions } from './preview';
 import './style.scss';
 import { formatSlug, getActiveFilters } from './utils';

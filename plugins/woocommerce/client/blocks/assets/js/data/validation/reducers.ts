@@ -2,12 +2,12 @@
  * External dependencies
  */
 import type { Reducer } from 'redux';
-import isShallowEqual from '../../utils/is-shallow-equal';
 import { isString, FieldValidationStatus } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
+import isShallowEqual from '../../utils/is-shallow-equal';
 import { ACTION_TYPES as types } from './action-types';
 
 const reducer: Reducer< Record< string, FieldValidationStatus > > = (

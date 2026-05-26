@@ -4,13 +4,12 @@
 import { QUERY_STATE_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useRef, useEffect, useCallback } from '@wordpress/element';
-import isShallowEqual from '../../../utils/is-shallow-equal';
 import { useShallowEqual, usePrevious } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
  */
-
+import isShallowEqual from '../../../utils/is-shallow-equal';
 import { useQueryStateContext } from '../providers/query-state-context';
 
 /**

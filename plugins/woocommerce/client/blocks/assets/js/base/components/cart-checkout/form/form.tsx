@@ -28,13 +28,13 @@ import { useInstanceId } from '@wordpress/compose';
 import { dispatch, select } from '@wordpress/data';
 import { useEffect, useRef } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
-import isShallowEqual from '../../../../utils/is-shallow-equal';
 import clsx from 'clsx';
 import fastDeepEqual from 'fast-deep-equal/es6';
 
 /**
  * Internal dependencies
  */
+import isShallowEqual from '../../../../utils/is-shallow-equal';
 import { Select } from '../../select';
 import AddressLineFields from './address-line-fields';
 import { FormProps } from './types';

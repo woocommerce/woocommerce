@@ -9,11 +9,11 @@ import {
 	hasCollectableRate,
 	deriveSelectedShippingRates,
 } from '@woocommerce/base-utils';
-import isShallowEqual from '../../../../utils/is-shallow-equal';
 
 /**
  * Internal dependencies
  */
+import isShallowEqual from '../../../../utils/is-shallow-equal';
 import { useStoreEvents } from '../use-store-events';
 import type { ShippingData } from './types';
 

@@ -2,6 +2,10 @@
  * External dependencies
  */
 import { useRef } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
 import isShallowEqual from '../../utils/is-shallow-equal';
 
 /**

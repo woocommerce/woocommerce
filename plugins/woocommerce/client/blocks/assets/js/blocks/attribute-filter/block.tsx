@@ -13,7 +13,6 @@ import { useCallback, useEffect, useState, useMemo } from '@wordpress/element';
 import Label from '@woocommerce/base-components/filter-element-label';
 import FilterResetButton from '@woocommerce/base-components/filter-reset-button';
 import FilterSubmitButton from '@woocommerce/base-components/filter-submit-button';
-import isShallowEqual from '../../utils/is-shallow-equal';
 import { decodeEntities } from '@wordpress/html-entities';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { getQueryArgs, removeQueryArgs } from '@wordpress/url';
@@ -40,6 +39,7 @@ import clsx from 'clsx';
 /**
  * Internal dependencies
  */
+import isShallowEqual from '../../utils/is-shallow-equal';
 import { getAttributeFromID } from '../../utils/attributes';
 import { updateAttributeFilter } from '../../utils/attributes-query';
 import { previewAttributeObject, previewOptions } from './preview';

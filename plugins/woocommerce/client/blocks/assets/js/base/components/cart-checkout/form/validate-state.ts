@@ -5,6 +5,10 @@ import { dispatch, select } from '@wordpress/data';
 import { KeyedFormFields, ShippingAddress } from '@woocommerce/settings';
 import { validationStore } from '@woocommerce/block-data';
 import { __, sprintf } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import isShallowEqual from '../../../../utils/is-shallow-equal';
 
 function previousAddress( initialValue?: ShippingAddress ) {

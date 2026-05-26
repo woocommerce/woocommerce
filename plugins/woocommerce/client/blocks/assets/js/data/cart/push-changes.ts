@@ -7,11 +7,11 @@ import {
 } from '@woocommerce/base-utils';
 import { CartBillingAddress, CartShippingAddress } from '@woocommerce/types';
 import { select, dispatch } from '@wordpress/data';
-import isShallowEqual from '../../utils/is-shallow-equal';
 
 /**
  * Internal dependencies
  */
+import isShallowEqual from '../../utils/is-shallow-equal';
 import { store as cartStore } from './index';
 import { processErrorResponse } from '../utils';
 import { getDirtyKeys, validateDirtyProps, BaseAddressKey } from './utils';
