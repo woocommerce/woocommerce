@@ -81,44 +81,57 @@ class OrderController {
 		 * The alternative would be to instead use `woocommerce_order_get_tax_location` to return the pickup location
 		 * address directly, however since we have the customer filter in place we don't need to duplicate effort.
 		 *
+		 * The named method is used (not a closure) so it can be removed via `remove_filter` after use; otherwise the
+		 * filter chain would grow on every checkout retry within the same request.
+		 *
 		 * @see \WC_Abstract_Order::get_tax_location()
 		 */
-		add_filter(
-			'woocommerce_order_get_tax_location',
-			function ( $location ) {
+		add_filter( 'woocommerce_order_get_tax_location', array( $this, 'filter_order_tax_location_from_customer' ) );
 
-				if ( ! is_null( wc()->customer ) ) {
-
-					$taxable_address = wc()->customer->get_taxable_address();
-
-					$location = array(
-						'country'  => $taxable_address[0],
-						'state'    => $taxable_address[1],
-						'postcode' => $taxable_address[2],
-						'city'     => $taxable_address[3],
-					);
-				}
-
-				return $location;
+		try {
+			// Ensure cart is current.
+			if ( $update_totals ) {
+				wc()->cart->calculate_totals();
 			}
-		);
 
-		// Ensure cart is current.
-		if ( $update_totals ) {
-			wc()->cart->calculate_totals();
+			// Update the current order to match the current cart.
+			$this->update_line_items_from_cart( $order );
+			$this->update_addresses_from_cart( $order );
+			$order->set_currency( get_woocommerce_currency() );
+			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+			$order->set_customer_id( get_current_user_id() );
+			$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
+			$order->set_customer_user_agent( wc_get_user_agent() );
+			$order->set_payment_method( PaymentUtils::get_default_payment_method() );
+			$order->update_meta_data( 'is_vat_exempt', wc_bool_to_string( wc()->cart->get_customer()->get_is_vat_exempt() ) );
+			$order->calculate_totals();
+		} finally {
+			remove_filter( 'woocommerce_order_get_tax_location', array( $this, 'filter_order_tax_location_from_customer' ) );
+		}
+	}
+
+	/**
+	 * Filter callback for `woocommerce_order_get_tax_location` used by `update_order_from_cart` to make order tax
+	 * calculation honor the current customer's taxable address. See `update_order_from_cart` for rationale.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param array $location Tax location array.
+	 * @return array
+	 */
+	public function filter_order_tax_location_from_customer( $location ) {
+		if ( ! is_null( wc()->customer ) ) {
+			$taxable_address = wc()->customer->get_taxable_address();
+
+			$location = array(
+				'country'  => $taxable_address[0],
+				'state'    => $taxable_address[1],
+				'postcode' => $taxable_address[2],
+				'city'     => $taxable_address[3],
+			);
 		}
 
-		// Update the current order to match the current cart.
-		$this->update_line_items_from_cart( $order );
-		$this->update_addresses_from_cart( $order );
-		$order->set_currency( get_woocommerce_currency() );
-		$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
-		$order->set_customer_id( get_current_user_id() );
-		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
-		$order->set_customer_user_agent( wc_get_user_agent() );
-		$order->set_payment_method( PaymentUtils::get_default_payment_method() );
-		$order->update_meta_data( 'is_vat_exempt', wc_bool_to_string( wc()->cart->get_customer()->get_is_vat_exempt() ) );
-		$order->calculate_totals();
+		return $location;
 	}
 
 	/**

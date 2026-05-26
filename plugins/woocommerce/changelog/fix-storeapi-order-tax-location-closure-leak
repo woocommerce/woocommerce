@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Store API: prevent the `woocommerce_order_get_tax_location` filter chain from growing on each `OrderController::update_order_from_cart` call by switching the temporary callback from an anonymous closure to a removable named method.
