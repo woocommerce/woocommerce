@@ -15661,12 +15661,6 @@ parameters:
 			path: includes/class-wc-structured-data.php
 
 		-
-			message: '#^Offset ''priceCurrency'' on array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''AggregateOffer'', lowPrice\: mixed, highPrice\: mixed, offerCount\: int\<0, max\>, \.\.\.\} in empty\(\) does not exist\.$#'
-			identifier: empty.offset
-			count: 1
-			path: includes/class-wc-structured-data.php
-
-		-
 			message: '#^Parameter \#1 \$attachment_id of function wp_get_attachment_url expects int, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -19133,18 +19127,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/emails/class-wc-email-failed-order.php
-
-		-
-			message: '#^Cannot call method save\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/emails/class-wc-email-new-order.php
-
-		-
-			message: '#^Cannot call method update_meta_data\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/emails/class-wc-email-new-order.php
 
 		-
 			message: '#^Method WC_Email_New_Order\:\:init_form_fields\(\) has no return type specified\.$#'
@@ -47026,12 +47008,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/TaskList.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\TaskList\:\:possibly_remove_reminder_bar\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/TaskList.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\TaskList\:\:possibly_track_completion\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -47281,18 +47257,6 @@ parameters:
 			message: '#^Call to method get_status\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
-			message: '#^Cannot access property \$base on WP_Screen\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
-			message: '#^Cannot access property \$post_type on WP_Screen\|null\.$#'
-			identifier: property.nonObject
-			count: 2
 			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
 
 		-
@@ -53548,12 +53512,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterCheckboxList.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterChips.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterChips\:\:render\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -53568,12 +53526,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$text of function esc_attr expects string, string\|true\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterChips.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterChips\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterChips.php
 
@@ -66381,12 +66333,6 @@ parameters:
 		-
 			message: '#^@param array \$results does not accept actual type of parameter\: null\.$#'
 			identifier: parameter.phpDocType
-			count: 1
-			path: src/Internal/ProductFilters/FilterData.php
-
-		-
-			message: '#^Binary operation "\." between non\-falsy\-string and array\|string results in an error\.$#'
-			identifier: binaryOp.invalid
 			count: 1
 			path: src/Internal/ProductFilters/FilterData.php
 

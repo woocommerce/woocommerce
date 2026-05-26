@@ -16,11 +16,6 @@ const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
 
 	page: async ( { page, restApi }, use ) => {
-		// Disable the task list reminder bar, it can interfere with the quick actions
-		await restApi.post( `${ WC_ADMIN_API_PATH }/options`, {
-			woocommerce_task_list_reminder_bar_hidden: 'yes',
-		} );
-
 		// Disable the orders report date tour
 		await restApi.post( `${ WC_ADMIN_API_PATH }/options`, {
 			woocommerce_orders_report_date_tour_shown: 'yes',

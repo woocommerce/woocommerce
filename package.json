@@ -28,7 +28,18 @@
 		"postinstall": "husky",
 		"run-canonical-extensions-tests": "bash bin/run-canonical-extensions-tests.sh",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
-		"utils": "./tools/monorepo-utils/bin/run"
+		"utils": "./tools/monorepo-utils/bin/run",
+		"wc:build": "pnpm --filter='@woocommerce/plugin-woocommerce' build",
+		"wc:build:admin": "pnpm --filter='@woocommerce/plugin-woocommerce' build:admin",
+		"wc:build:blocks": "pnpm --filter='@woocommerce/plugin-woocommerce' build:blocks",
+		"wc:build:classic-assets": "pnpm --filter='@woocommerce/plugin-woocommerce' build:classic-assets",
+		"wc:env": "pnpm --filter='@woocommerce/plugin-woocommerce' env:dev",
+		"wc:env:restart": "pnpm --filter='@woocommerce/plugin-woocommerce' env:restart",
+		"wc:env:stop": "pnpm --filter='@woocommerce/plugin-woocommerce' env:stop",
+		"wc:watch": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build",
+		"wc:watch:admin": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:admin",
+		"wc:watch:blocks": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:blocks",
+		"wc:watch:classic-assets": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:classic-assets"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "7.25.7",
