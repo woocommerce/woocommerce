@@ -118,6 +118,20 @@ class CreateCouponTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox execute() skips set_discount_type() when discount_type is null.
+	 */
+	public function test_execute_skips_discount_type_when_provided_null(): void {
+		$input                = new CreateCouponInput();
+		$input->code          = 'null-discount-type';
+		$input->discount_type = null;
+
+		$result = $this->sut->execute( $input );
+
+		$wc_coupon = new WC_Coupon( $result->id );
+		$this->assertSame( 'fixed_cart', $wc_coupon->get_discount_type() );
+	}
+
+	/**
 	 * @testdox execute() applies the status enum when provided.
 	 */
 	public function test_execute_applies_status_enum(): void {
@@ -129,5 +143,19 @@ class CreateCouponTest extends WC_Unit_Test_Case {
 
 		$wc_coupon = new WC_Coupon( $result->id );
 		$this->assertSame( 'draft', $wc_coupon->get_status() );
+	}
+
+	/**
+	 * @testdox execute() skips set_status() when status is null.
+	 */
+	public function test_execute_skips_status_when_provided_null(): void {
+		$input         = new CreateCouponInput();
+		$input->code   = 'null-status';
+		$input->status = null;
+
+		$result = $this->sut->execute( $input );
+
+		$wc_coupon = new WC_Coupon( $result->id );
+		$this->assertSame( 'publish', $wc_coupon->get_status() );
 	}
 }

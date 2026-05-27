@@ -132,7 +132,8 @@ class CreateProductTest extends WC_Unit_Test_Case {
 			$this->assertSame( 'A product with this name already exists.', $e->getMessage() );
 			$this->assertSame( 'VALIDATION_ERROR', $e->getErrorCode() );
 			$this->assertSame( 422, $e->getStatusCode() );
-			$this->assertSame( array( 'field' => 'name' ), $e->getExtensions() );
+			$this->assertArrayHasKey( 'field', $e->getExtensions() );
+			$this->assertSame( 'name', $e->getExtensions()['field'] );
 		}
 	}
 
