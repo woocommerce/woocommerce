@@ -1,0 +1,3 @@
+Significance: patch
+Type: tweak
+Comment: Move DisplayStyleSwitcher to editor-components and discover display styles via block supports

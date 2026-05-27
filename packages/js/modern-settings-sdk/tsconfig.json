@@ -7,8 +7,20 @@
 		"declaration": true,
 		"declarationMap": true,
 		"declarationDir": "./build-types",
-		"typeRoots": [ "./node_modules/@types" ]
+		"typeRoots": [
+			"./node_modules/@types"
+		],
+		"composite": true
 	},
-	"include": [ "src/**/*" ],
-	"exclude": [ "**/test/**" ]
+	"include": [
+		"src/**/*"
+	],
+	"exclude": [
+		"**/test/**"
+	],
+	"references": [
+		{
+			"path": "../sanitize"
+		}
+	]
 }

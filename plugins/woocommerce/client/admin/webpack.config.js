@@ -6,7 +6,6 @@ const path = require( 'path' );
 const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
-const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
 const webpack = require( 'webpack' );
 
@@ -60,7 +59,6 @@ const wcAdminPackages = [
 	'block-templates',
 	'product-editor',
 	'sanitize',
-	'settings-editor',
 	'modern-settings-sdk',
 	'remote-logging',
 	'email-editor',
@@ -70,7 +68,6 @@ const getEntryPoints = () => {
 	const entryPoints = {
 		app: './client/index.tsx',
 		embed: './client/embed.tsx',
-		settings: './client/settings/index.js',
 	};
 	wcAdminPackages.forEach( ( name ) => {
 		entryPoints[ name ] = `${ WC_ADMIN_PACKAGES_DIR }/${ name }`;
@@ -203,8 +200,6 @@ const webpackConfig = {
 		new webpack.DefinePlugin( {
 			__i18n_text_domain__: JSON.stringify( 'woocommerce' ),
 		} ),
-		// Runs TypeScript type checker on a separate process.
-		! process.env.STORYBOOK && isWatch && new ForkTsCheckerWebpackPlugin(),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );

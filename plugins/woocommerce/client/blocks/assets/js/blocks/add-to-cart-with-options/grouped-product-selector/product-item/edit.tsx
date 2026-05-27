@@ -55,7 +55,7 @@ const ProductItem = ( {
 		blocks,
 	} );
 	const innerBlocksProps = useInnerBlocksProps(
-		{ role: 'listitem' },
+		{},
 		{ templateLock: 'insert' }
 	);
 
@@ -64,20 +64,12 @@ const ProductItem = ( {
 			{ isSelected ? (
 				<div { ...innerBlocksProps } />
 			) : (
-				<div role="listitem">
-					<div
-						{ ...blockPreviewProps }
-						role="button"
-						tabIndex={ 0 }
-						onClick={ onSelect }
-						onKeyDown={ ( e ) => {
-							if ( e.key === 'Enter' || e.key === ' ' ) {
-								e.preventDefault();
-								onSelect();
-							}
-						} }
-					/>
-				</div>
+				// We don't need this element to be interactive with the
+				// keyboard because the first child row is always editable.
+				// We allow clicking on the blocks of other children rows
+				// but it's not critical, so we disable the keyboard events.
+				// eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+				<div { ...blockPreviewProps } onClick={ onSelect } />
 			) }
 		</ProductDataContextProvider>
 	);
@@ -227,7 +219,7 @@ export default function ProductItemTemplateEdit(
 	return (
 		<div { ...blockProps }>
 			<InnerBlockLayoutContextProvider parentName="woocommerce/add-to-cart-with-options-grouped-product-item">
-				<div role="list">{ productList }</div>
+				{ productList }
 			</InnerBlockLayoutContextProvider>
 		</div>
 	);
