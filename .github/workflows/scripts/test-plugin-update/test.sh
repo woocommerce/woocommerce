@@ -103,7 +103,7 @@ echo "::endgroup::"
 # --- Scenarios ----------------------------------------------------------------
 for FROM in stable trunk; do
 	for HOW in web cli; do
-		[[ -e "$ZIPDIR/$PLUGIN_SLUG-$FROM.zip" ]] || { echo "No $FROM zip, skipping $FROM/$HOW."; continue; }
+		[[ -e "$ZIPDIR/$PLUGIN_SLUG-$FROM.zip" ]] || { echo "::warning::No $FROM source zip present; skipping $FROM/$HOW."; continue; }
 
 		FAILED=
 		printf '\n\e[1mTest upgrade of %s from %s via %s\e[0m\n' "$PLUGIN_SLUG" "$FROM" "$HOW"
@@ -118,7 +118,14 @@ for FROM in stable trunk; do
 		echo "::group::Installing baseline $PLUGIN_SLUG $FROM"
 		reset_log
 		if ! "${WP[@]}" plugin install --activate --force "$ZIPDIR/$PLUGIN_SLUG-$FROM.zip"; then
-			failed "Baseline install/activate failed for $PLUGIN_SLUG $FROM!"
+			# The baseline is a published build, not this PR, so a failed install/activate
+			# is an environment/source problem. Warn and skip rather than failing the PR.
+			echo "::warning::Baseline $FROM build failed to install/activate — skipping $FROM/$HOW (not attributed to this PR)."
+			echo "⚠️ Baseline $FROM build failed to install/activate (environment/source issue, not this PR); skipped $FROM/$HOW." >> "$GITHUB_STEP_SUMMARY"
+			BASELINE_SKIPPED=$(( BASELINE_SKIPPED + 1 ))
+			rm -rf "$WP_PATH/wp-content/plugins/$PLUGIN_SLUG"
+			echo "::endgroup::"
+			continue
 		fi
 		echo '== Debug log =='
 		cat "$DEBUG_LOG"
@@ -126,10 +133,6 @@ for FROM in stable trunk; do
 		# Remove the sentinel so its reappearance after the upgrade proves the swap.
 		rm -f "$WP_PATH/wp-content/plugins/$PLUGIN_SLUG/ci-flag.txt"
 		echo "::endgroup::"
-		if [[ -n "$FAILED" ]]; then
-			rm -rf "$WP_PATH/wp-content/plugins/$PLUGIN_SLUG"
-			continue
-		fi
 		# A fatal in the baseline (the previous release / nightly itself, before any
 		# upgrade) is an environment/source problem, not a regression in this PR.
 		# Surface it as a warning and skip, rather than red-flagging an innocent PR.
