@@ -46,14 +46,14 @@ class MiniCartTitleItemsCounterBlock extends AbstractInnerBlock {
 		$cart_item_text = __( '(items: %d)', 'woocommerce' );
 
 		wp_interactivity_config(
-			$this->get_full_block_name(),
+			$this->get_block_type(),
 			array(
 				'itemsInCartTextTemplate' => $cart_item_text,
 			)
 		);
 
 		wp_interactivity_state(
-			$this->get_full_block_name(),
+			$this->get_block_type(),
 			array(
 				'itemsInCartText' => sprintf( $cart_item_text, $cart_item_count ),
 			)

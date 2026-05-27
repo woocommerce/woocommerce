@@ -71,11 +71,11 @@ final class SavedForLater extends AbstractBlock {
 
 		// Don't double-inject if the block is already in the cart page
 		// content.
-		if ( has_block( $this->get_full_block_name(), $context ) ) {
+		if ( has_block( $this->get_block_type(), $context ) ) {
 			return $hooked_block_types;
 		}
 
-		$hooked_block_types[] = $this->get_full_block_name();
+		$hooked_block_types[] = $this->get_block_type();
 		return $hooked_block_types;
 	}
 
@@ -164,7 +164,7 @@ final class SavedForLater extends AbstractBlock {
 		// range where a `&.columns-#{$i}` rule actually exists.
 		$column_count = min( 6, max( 2, absint( $attributes['columnCount'] ?? 5 ) ) );
 
-		wp_enqueue_script_module( $this->get_full_block_name() );
+		wp_enqueue_script_module( $this->get_block_type() );
 
 		$consent = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 		BlocksSharedState::load_store_config( $consent );

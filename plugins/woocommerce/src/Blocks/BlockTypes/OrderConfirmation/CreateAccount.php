@@ -43,8 +43,8 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 					return $hooked_block_types;
 				}
 
-				if ( ! str_contains( $context->content, '<!-- wp:' . $this->get_full_block_name() ) ) {
-					$hooked_block_types[] = $this->get_full_block_name();
+				if ( ! str_contains( $context->content, '<!-- wp:' . $this->get_block_type() ) ) {
+					$hooked_block_types[] = $this->get_block_type();
 				}
 
 				return $hooked_block_types;
