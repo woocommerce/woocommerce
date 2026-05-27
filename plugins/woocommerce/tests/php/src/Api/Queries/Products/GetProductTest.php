@@ -108,6 +108,8 @@ class GetProductTest extends WC_Unit_Test_Case {
 	 * @testdox authorize() throws "Product not found." for a non-positive ID.
 	 *
 	 * @dataProvider provider_non_positive_ids
+	 *
+	 * @param int $id The non-positive ID to reject.
 	 */
 	public function test_authorize_rejects_non_positive_id( int $id ): void {
 		$this->expectException( UnauthorizedException::class );
