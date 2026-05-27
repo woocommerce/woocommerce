@@ -170,7 +170,7 @@ array(
 	'desc'    => sprintf(
 		/* translators: %s: documentation link */
 		__( 'Choose where customers can use express payment methods. %s', 'my-plugin' ),
-		'<a href="https://example.com/docs">' . esc_html__( 'Learn more', 'my-plugin' ) . '</a>'
+		'<a href="' . esc_url( 'https://example.com/docs' ) . '">' . esc_html__( 'Learn more', 'my-plugin' ) . '</a>'
 	),
 	'actions' => array(
 		array(
