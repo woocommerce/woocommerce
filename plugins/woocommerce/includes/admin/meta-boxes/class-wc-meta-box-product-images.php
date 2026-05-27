@@ -84,6 +84,13 @@ class WC_Meta_Box_Product_Images {
 			</div>
 		</div>
 
+		<script type="text/html" id="tmpl-wc-product-image-tile">
+			<div class="wc-product-images__image wc-product-images__image--{{ data.modifier }}" data-attachment-id="{{ data.attachmentId }}" tabindex="0">
+				<img src="{{ data.imgUrl }}" />
+				<button type="button" class="wc-product-images__remove" tabindex="-1" aria-label="{{ data.removeLabel }}"><?php echo self::get_remove_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
+			</div>
+		</script>
+
 		<input type="hidden" id="wc_product_image_ids" name="wc_product_image_ids" value="<?php echo esc_attr( implode( ',', $rendered_ids ) ); ?>" />
 		<div id="wc-product-images__live-region" class="screen-reader-text" aria-live="polite"></div>
 		<?php
