@@ -46,7 +46,7 @@ class WC_Brands {
 		add_action( 'wp', array( $this, 'body_class' ) );
 
 		add_action( 'woocommerce_product_meta_end', array( $this, 'show_brand' ) );
-		add_filter( 'woocommerce_structured_data_product', array( $this, 'add_structured_data' ), 20 );
+		add_filter( 'woocommerce_structured_data_product', array( $this, 'add_structured_data' ), 20, 2 );
 
 		// duplicate product brands.
 		add_action( 'woocommerce_product_duplicate_before_save', array( $this, 'duplicate_store_temporary_brands' ), 10, 2 );
@@ -478,10 +478,11 @@ class WC_Brands {
 	/**
 	 * Add structured data to product page.
 	 *
-	 * @param  array $markup Markup.
+	 * @param  array           $markup  Markup.
+	 * @param  WC_Product|null $product Product data.
 	 * @return array $markup
 	 */
-	public function add_structured_data( $markup ) {
+	public function add_structured_data( $markup, $product = null ) {
 		global $post;
 
 		if ( ! is_array( $markup ) ) {
@@ -492,7 +493,13 @@ class WC_Brands {
 			return $markup;
 		}
 
-		$brands = get_the_terms( $post->ID, 'product_brand' );
+		$product_id = $product instanceof WC_Product ? $product->get_id() : ( isset( $post->ID ) ? $post->ID : 0 );
+
+		if ( ! $product_id ) {
+			return $markup;
+		}
+
+		$brands = get_the_terms( $product_id, 'product_brand' );
 
 		if ( ! empty( $brands ) && is_array( $brands ) ) {
 			// Can only return one brand, so pick the first.

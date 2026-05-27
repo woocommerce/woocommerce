@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 9.6.0
+ * @version 10.9.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -60,6 +60,14 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 			</tbody>
 		</table>
 		<div class="reset_variations_alert screen-reader-text" role="alert" aria-live="polite" aria-relevant="all"></div>
+		<?php
+		// Reset snapshot for cases where a theme/plugin loads the variation form later, like quick-view modals.
+		if ( \Automattic\WooCommerce\Internal\VariationGallery\Package::is_enabled() ) :
+			?>
+			<script type="text/template" class="wc-product-gallery-default-template"><?php echo wc_get_product_gallery_html( $product ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></script>
+			<?php
+		endif;
+		?>
 		<?php do_action( 'woocommerce_after_variations_table' ); ?>
 
 		<div class="single_variation_wrap">

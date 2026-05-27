@@ -57,7 +57,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 
 		// We crop the images to square only if the aspect ratio is 1:1.
 		// Otherwise, we show the uncropped and use object-fit to crop them.
-		$image_size             = '1' === $attributes['aspectRatio'] ? 'woocommerce_thumbnail' : 'woocommerce_single';
+		$image_size            = '1' === $attributes['aspectRatio'] ? 'woocommerce_thumbnail' : 'woocommerce_single';
 		$product_gallery_media = ProductGalleryUtils::get_product_gallery_media_data( $product, $image_size );
 
 		// Don't show the thumbnails block if there is only one media item.
@@ -76,6 +76,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			class="wc-block-product-gallery-thumbnails wc-block-product-gallery-thumbnails--active-<?php echo esc_attr( $active_thumbnail_style ); ?> <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 			style="<?php echo '--wc-block-product-gallery-thumbnails-size:' . absint( $thumbnail_size ) . ';' . esc_attr( $classes_and_styles['styles'] ); ?>"
 			data-wp-interactive="woocommerce/product-gallery"
+			data-wp-bind--hidden="context.hideNextPreviousButtons"
 			data-wp-class--wc-block-product-gallery-thumbnails--overflow-top="context.thumbnailsOverflow.top"
 			data-wp-class--wc-block-product-gallery-thumbnails--overflow-bottom="context.thumbnailsOverflow.bottom"
 			data-wp-class--wc-block-product-gallery-thumbnails--overflow-left="context.thumbnailsOverflow.left"
@@ -104,7 +105,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 								aria-label="<?php echo esc_attr( $media['alt'] ); ?>"
 								data-wp-on--click="actions.selectCurrentImage"
 								data-wp-on--keydown="actions.onThumbnailsArrowsKeyDown"
-								data-wp-watch="callbacks.toggleActiveThumbnailAttributes"
+								data-wp-watch="callbacks.syncThumbnailState"
 								tabindex="<?php echo 0 === $index ? '0' : '-1'; ?>"
 								draggable="false"
 								preload="metadata"
@@ -123,7 +124,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 								alt="<?php echo esc_attr( $media['alt'] ); ?>"
 								data-wp-on--click="actions.selectCurrentImage"
 								data-wp-on--keydown="actions.onThumbnailsArrowsKeyDown"
-								data-wp-watch="callbacks.toggleActiveThumbnailAttributes"
+								data-wp-watch="callbacks.syncThumbnailState"
 								decoding="async"
 								tabindex="<?php echo 0 === $index ? '0' : '-1'; ?>"
 								draggable="false"

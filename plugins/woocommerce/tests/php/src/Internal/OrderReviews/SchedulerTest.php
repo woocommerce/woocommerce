@@ -6,7 +6,9 @@ namespace Automattic\WooCommerce\Tests\Internal\OrderReviews;
 use Automattic\WooCommerce\Internal\OrderReviews\Scheduler;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use WC_Email_Customer_Review_Request;
+use WC_Helper_Product;
 use WC_Order;
+use WC_Order_Item_Product;
 use WC_Unit_Test_Case;
 
 /**
@@ -22,8 +24,13 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Make sure the email class is available for WC()->mailer().
-		WC()->mailer();
+		// Feature flag gates the OrderReviews stack. Enable it, then resolve
+		// the Scheduler from the container (singleton across the test run)
+		// and call init() to wire hooks. Re-init WC_Emails so the
+		// review-request email class lands in the mailer map.
+		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
+		wc_get_container()->get( Scheduler::class )->init();
+		WC()->mailer()->init();
 
 		$this->set_review_email_enabled( true );
 	}
@@ -35,6 +42,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$this->set_review_email_enabled( false );
 		remove_all_filters( 'woocommerce_should_send_review_request' );
 		remove_all_filters( 'woocommerce_review_request_delay_seconds' );
+		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 
 		parent::tearDown();
 	}
@@ -97,6 +105,79 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$second = (int) wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY );
 
 		$this->assertSame( $first, $second, 'Scheduled-at meta should not change on re-completion.' );
+	}
+
+	/**
+	 * @testdox Scheduling is skipped when every product on the order has reviews disabled per-product.
+	 */
+	public function test_skips_when_all_items_have_reviews_disabled(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_reviews_allowed( false );
+		$product->save();
+
+		$order = $this->create_pending_order_with_product( $product );
+		$order->update_status( 'completed' );
+
+		$this->assertFalse( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY ) );
+	}
+
+	/**
+	 * @testdox Scheduling is skipped when site-wide reviews are disabled.
+	 *
+	 * The `woocommerce_enable_reviews=no` setting removes `comments` support
+	 * from the product post type so `comments_open()` returns false for every
+	 * product, which `ItemEligibility::has_actionable_items()` reads.
+	 */
+	public function test_skips_when_site_wide_reviews_disabled(): void {
+		$previous = get_option( 'woocommerce_enable_reviews', 'yes' );
+		update_option( 'woocommerce_enable_reviews', 'no' );
+		// `comments` post-type support is registered at init based on the
+		// option, so reflect the option change for the rest of this test.
+		remove_post_type_support( 'product', 'comments' );
+
+		try {
+			$order = $this->create_pending_order();
+			$order->update_status( 'completed' );
+
+			$this->assertFalse( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+			$this->assertEmpty( wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY ) );
+		} finally {
+			update_option( 'woocommerce_enable_reviews', $previous );
+			if ( 'yes' === $previous ) {
+				add_post_type_support( 'product', 'comments' );
+			}
+		}
+	}
+
+	/**
+	 * @testdox A mixed order with at least one reviewable item still schedules.
+	 */
+	public function test_schedules_when_at_least_one_item_is_reviewable(): void {
+		$reviewable = WC_Helper_Product::create_simple_product();
+		$disabled   = WC_Helper_Product::create_simple_product();
+		$disabled->set_reviews_allowed( false );
+		$disabled->save();
+
+		$order = OrderHelper::create_order( 1, $reviewable );
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $disabled,
+				'quantity' => 1,
+				'subtotal' => wc_get_price_excluding_tax( $disabled ),
+				'total'    => wc_get_price_excluding_tax( $disabled ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_status( 'pending' );
+		$order->calculate_totals();
+		$order->save();
+
+		$order->update_status( 'completed' );
+
+		$this->assertTrue( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
 	}
 
 	/**
@@ -225,6 +306,18 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	private function create_pending_order(): WC_Order {
 		$order = OrderHelper::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+		return $order;
+	}
+
+	/**
+	 * Create a pending order whose single line item is the provided product.
+	 *
+	 * @param \WC_Product $product Product to add to the order.
+	 */
+	private function create_pending_order_with_product( \WC_Product $product ): WC_Order {
+		$order = OrderHelper::create_order( 1, $product );
 		$order->set_status( 'pending' );
 		$order->save();
 		return $order;

@@ -448,6 +448,18 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => false,
 			),
+			'customer_review_request'            => array(
+				'name'                         => __( 'Customer review request (beta)', 'woocommerce' ),
+				'description'                  => __(
+					'Send customers a transactional email after order completion inviting them to review the products they bought, and host the per-order Review Order landing page.',
+					'woocommerce'
+				),
+				// Skip compatibility checks like the other opt-in transactional-email features.
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'enabled_by_default'           => false,
+				'is_experimental'              => false,
+			),
 			'email_improvements'                 => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
 				'description'                  => __(
@@ -508,6 +520,31 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
+			),
+			\Automattic\WooCommerce\Internal\VariationGallery\Package::FEATURE_ID => array(
+				'name'                         => __( 'Variation gallery', 'woocommerce' ),
+				'description'                  => __(
+					'Add multiple images per product variation. Once enabled, the Additional Variation Images extension will be deactivated and its data migrated.',
+					'woocommerce'
+				),
+				'option_key'                   => \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME,
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
+			'wc-visual-attribute'                => array(
+				'name'                         => __( 'Color swatches for attributes', 'woocommerce' ),
+				'description'                  => __(
+					'Add color swatches to product attribute values.',
+					'woocommerce'
+				),
+				'option_key'                   => 'woocommerce_feature_wc_visual_attribute_enabled',
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'point_of_sale'                      => array(
 				'name'                         => __( 'Point of Sale', 'woocommerce' ),
@@ -609,6 +646,30 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
+			'cart_save_for_later'                => array(
+				'name'                         => __( 'Save for Later in Cart', 'woocommerce' ),
+				'description'                  => __(
+					'Let shoppers save cart items to a list to purchase later.',
+					'woocommerce'
+				),
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				// Custom option_key as we expect this setting to move out of features to
+				// a cart/checkout settings section.
+				'option_key'                   => 'woocommerce_cart_save_for_later_enabled',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
+			'product_wishlist'                   => array(
+				'name'                         => __( 'Wishlists', 'woocommerce' ),
+				'description'                  => __(
+					'Let shoppers save products to a wishlist from product pages. Requires the Add to Cart + Options block on the single-product template.',
+					'woocommerce'
+				),
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'option_key'                   => 'woocommerce_product_wishlist_enabled',
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			ProductCacheController::FEATURE_NAME => array(
@@ -784,6 +845,10 @@ class FeaturesController {
 		if ( isset( $features['product_block_editor'] )
 			&& ! $this->feature_is_enabled( 'product_block_editor' ) ) {
 			$features['product_block_editor']['disable_ui'] = true;
+		}
+
+		if ( isset( $features['wc-visual-attribute'] ) && ! wp_is_block_theme() ) {
+			$features['wc-visual-attribute']['disable_ui'] = true;
 		}
 
 		return $features;

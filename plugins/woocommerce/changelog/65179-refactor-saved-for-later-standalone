@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Saved for Later: split standalone block from the Shopper Collection variation; shared shopper-lists REST + iAPI domain remains reusable for future list-type blocks.

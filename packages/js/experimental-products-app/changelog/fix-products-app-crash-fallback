@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show a recovery message with GitHub and survey links when the experimental products app crashes.

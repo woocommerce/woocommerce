@@ -62,6 +62,7 @@ class ProductGallery extends AbstractBlock {
 						<?php else : ?>
 							<img
 								data-image-id="<?php echo esc_attr( $media['id'] ); ?>"
+								data-wp-watch="callbacks.toggleImageVisibility"
 								src="<?php echo esc_url( $media['src'] ); ?>"
 								srcset="<?php echo esc_attr( $media['srcset'] ); ?>"
 								sizes="<?php echo esc_attr( $media['sizes'] ); ?>"
@@ -164,11 +165,12 @@ class ProductGallery extends AbstractBlock {
 			return '';
 		}
 
-		$media_items            = ProductGalleryUtils::get_all_media_items( $product );
-		$media_ids              = ProductGalleryUtils::get_media_ids( $media_items );
-		$number_of_media        = count( $media_ids );
+		$media_items       = ProductGalleryUtils::get_all_media_items( $product );
+		$default_media_ids = ProductGalleryUtils::get_media_ids( wc_get_product_media_gallery_items( $product ) );
+
+		$number_of_media        = count( $default_media_ids );
 		$classname              = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
-		$initial_media_id       = $number_of_media > 0 ? $media_ids[0] : -1;
+		$initial_media_id       = $number_of_media > 0 ? $default_media_ids[0] : -1;
 		$classname_single_image = $number_of_media < 2 ? 'is-single-product-gallery-image' : '';
 		$product_id             = strval( $product->get_id() );
 		$fullsize_media_data    = ProductGalleryUtils::get_media_src_data( $media_items, 'full', $product->get_title() );
@@ -182,7 +184,7 @@ class ProductGallery extends AbstractBlock {
 				'data-wp-context',
 				wp_json_encode(
 					array(
-						'imageData'               => $media_ids,
+						'imageData'               => $default_media_ids,
 						'isDialogOpen'            => false,
 						'isDragging'              => false,
 						'touchStartX'             => 0,
@@ -198,7 +200,7 @@ class ProductGallery extends AbstractBlock {
 						// Next/Previous Buttons block context.
 						'hideNextPreviousButtons' => $number_of_media <= 1,
 						'isDisabledPrevious'      => true,
-						'isDisabledNext'          => false,
+						'isDisabledNext'          => $number_of_media <= 1,
 						'ariaLabelPrevious'       => __( 'Previous image', 'woocommerce' ),
 						'ariaLabelNext'           => __( 'Next image', 'woocommerce' ),
 					),
@@ -207,15 +209,22 @@ class ProductGallery extends AbstractBlock {
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$has_variation_images = false;
-				foreach ( $product->get_available_variations( 'objects' ) as $variation ) {
-					if ( (int) $variation->get_image_id() ) {
-						$has_variation_images = true;
-						break;
-					}
-				}
+				$formatted_variations_data = ProductGalleryUtils::get_product_variation_gallery_data( $product );
 
-				if ( $has_variation_images ) {
+				if ( ! empty( $formatted_variations_data ) ) {
+					wp_interactivity_config(
+						'woocommerce',
+						array(
+							'products' => array(
+								$product->get_id() => array(
+									'image_id'   => $initial_media_id,
+									'image_ids'  => $default_media_ids,
+									'variations' => $formatted_variations_data,
+								),
+							),
+						)
+					);
+
 					// Support legacy Add to Cart with Options block.
 					$p->set_attribute( 'data-wp-init--watch-changes-on-add-to-cart-form', 'callbacks.watchForChangesOnAddToCartForm' );
 					// Support blockified Add to Cart + Options block.
