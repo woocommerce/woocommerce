@@ -78,7 +78,7 @@ abstract class AbstractBlock {
 	 * @return string
 	 */
 	protected function get_full_block_name() {
-		_deprecated_function( __METHOD__, '10.9.0', 'get_block_type' );
+		wc_deprecated_function( __METHOD__, '10.9.0', 'get_block_type' );
 		return $this->get_block_type();
 	}
 
