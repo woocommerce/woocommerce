@@ -65,7 +65,7 @@
 		"@wordpress/html-entities": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
 		"@wordpress/icons": "10.6.0",
-		"@wordpress/interface": "catalog:wp-min",
+		"@wordpress/interface": "^5.24.0",
 		"@wordpress/keyboard-shortcuts": "catalog:wp-min",
 		"@wordpress/keycodes": "catalog:wp-min",
 		"@wordpress/media-utils": "catalog:wp-min",

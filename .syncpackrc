@@ -359,8 +359,18 @@
 			"isIgnored": true
 		},
 		{
+			"label": "@woocommerce/product-editor and admin-library must stay on @wordpress/interface ^5.24.0 because product-editor imports private build-module components that are not compatible with the wp-min catalog version yet.",
 			"dependencies": [
-				"@wordpress/interface",
+				"@wordpress/interface"
+			],
+			"packages": [
+				"@woocommerce/product-editor",
+				"@woocommerce/admin-library"
+			],
+			"pinVersion": "^5.24.0"
+		},
+		{
+			"dependencies": [
 				"@wordpress/router",
 				"@wordpress/edit-site",
 				"@wordpress/private-apis",
@@ -418,15 +428,6 @@
 				"**"
 			],
 			"pinVersion": "11.0.1-next.v.20260206T143.0"
-		},
-		{
-			"dependencies": [
-				"@wordpress/e2e-test-utils-playwright"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "wp-6.8"
 		},
 		{
 			"label": "Ensure @woocommerce/* dependencies are locked to the monorepo itself - except certain dependencies (migration pending).",
@@ -653,6 +654,15 @@
 				"**"
 			],
 			"pinVersion": "^3.2.6"
+		},
+		{
+			"dependencies": [
+				"@automattic/site-admin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^0.0.1"
 		},
 		{
 			"label": "Only manage versions for these dependencies",
