@@ -114,23 +114,34 @@ class WC_Meta_Box_Product_Images {
 	 */
 	public static function save( $post_id, $post ) {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in WC_Admin_Meta_Boxes::save_meta_boxes().
-		$product_type = ( ! empty( $_POST['product-type'] ) && is_scalar( $_POST['product-type'] ) )
-			? sanitize_title( wp_unslash( (string) $_POST['product-type'] ) )
-			: WC_Product_Factory::get_product_type( $post_id );
+		$product_type = WC_Product_Factory::get_product_type( $post_id );
+		if ( ! empty( $_POST['product-type'] ) && is_scalar( $_POST['product-type'] ) ) {
+			$product_type = sanitize_title( wp_unslash( (string) $_POST['product-type'] ) );
+		}
+
 		if ( ! $product_type ) {
 			$product_type = ProductType::SIMPLE;
 		}
+
 		$classname = WC_Product_Factory::get_product_classname( $post_id, $product_type );
 		/**
 		 * Product instance.
 		 *
 		 * @var WC_Product $product
 		 */
-		$product   = new $classname( $post_id );
-		$raw_ids   = isset( $_POST['wc_product_image_ids'] ) && is_scalar( $_POST['wc_product_image_ids'] )
-			? wc_clean( wp_unslash( (string) $_POST['wc_product_image_ids'] ) )
-			: '';
-		$image_ids = '' === $raw_ids ? array() : array_filter( array_map( 'absint', explode( ',', $raw_ids ) ) );
+		$product = new $classname( $post_id );
+
+		$raw_ids = '';
+		if ( isset( $_POST['wc_product_image_ids'] ) && is_scalar( $_POST['wc_product_image_ids'] ) ) {
+			$raw_ids = wc_clean( wp_unslash( (string) $_POST['wc_product_image_ids'] ) );
+		}
+
+		$image_ids = array();
+		if ( '' !== $raw_ids ) {
+			$posted_image_ids = explode( ',', $raw_ids );
+			$parsed_image_ids = array_map( 'absint', $posted_image_ids );
+			$image_ids        = array_filter( $parsed_image_ids );
+		}
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		$product->set_image_ids( $image_ids );

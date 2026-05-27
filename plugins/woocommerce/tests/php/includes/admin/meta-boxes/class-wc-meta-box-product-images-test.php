@@ -1,0 +1,125 @@
+<?php
+declare( strict_types = 1 );
+
+/**
+ * Tests for the WC_Meta_Box_Product_Images class.
+ *
+ * @package WooCommerce\Tests\Admin\MetaBoxes
+ */
+
+/**
+ * Class WC_Meta_Box_Product_Images_Test
+ */
+class WC_Meta_Box_Product_Images_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * Original POST data.
+	 *
+	 * @var array
+	 */
+	private $original_post;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		$_POST = $this->original_post;
+
+		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Should save posted product image IDs.
+	 */
+	public function test_save_saves_posted_product_image_ids(): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$saved_product = $this->save_product_images(
+			$product,
+			array(
+				'product-type'         => 'variable',
+				'wc_product_image_ids' => '12,34,56',
+			)
+		);
+
+		$this->assertSame( array( 12, 34, 56 ), $saved_product->get_image_ids( 'edit' ), 'Posted image IDs should be saved in order.' );
+		$this->assertTrue( $saved_product->is_type( 'variable' ), 'Posted product type should be used while saving.' );
+	}
+
+	/**
+	 * @testdox Should clear product image IDs when posted image IDs are empty.
+	 */
+	public function test_save_clears_product_image_ids_when_posted_image_ids_are_empty(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_ids( array( 12, 34 ) );
+		$product->save();
+
+		$saved_product = $this->save_product_images(
+			$product,
+			array(
+				'product-type'         => 'simple',
+				'wc_product_image_ids' => '',
+			)
+		);
+
+		$this->assertSame( array(), $saved_product->get_image_ids( 'edit' ), 'Empty posted image IDs should clear product image IDs.' );
+	}
+
+	/**
+	 * @testdox Should filter sparse posted product image IDs.
+	 */
+	public function test_save_filters_sparse_posted_product_image_ids(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$saved_product = $this->save_product_images(
+			$product,
+			array(
+				'product-type'         => 'simple',
+				'wc_product_image_ids' => '12,,34, ,56',
+			)
+		);
+
+		$this->assertSame( array( 12, 34, 56 ), $saved_product->get_image_ids( 'edit' ), 'Sparse posted image IDs should be filtered before saving.' );
+	}
+
+	/**
+	 * @testdox Should fall back to the stored product type when none is posted.
+	 */
+	public function test_save_falls_back_to_stored_product_type_when_none_is_posted(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$saved_product = $this->save_product_images(
+			$product,
+			array(
+				'wc_product_image_ids' => '12,34',
+			)
+		);
+
+		$this->assertSame( array( 12, 34 ), $saved_product->get_image_ids( 'edit' ), 'Image IDs should be saved when product type falls back to the stored value.' );
+		$this->assertTrue( $saved_product->is_type( 'simple' ), 'Stored product type should be used when no product type is posted.' );
+	}
+
+	/**
+	 * Save product images from POST data.
+	 *
+	 * @param WC_Product $product Product to save.
+	 * @param array      $post_data POST data for the save handler.
+	 * @return WC_Product
+	 */
+	private function save_product_images( WC_Product $product, array $post_data ): WC_Product {
+		$_POST = $post_data;
+
+		WC_Meta_Box_Product_Images::save( $product->get_id(), get_post( $product->get_id() ) );
+
+		return wc_get_product( $product->get_id() );
+	}
+}
