@@ -458,7 +458,7 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'out_of_stock', $defaults['store_stock'] );
 		$this->assertTrue( $defaults['store_stock']['out_of_stock'] );
 		$this->assertArrayHasKey( 'on_backorder', $defaults['store_stock'] );
-		$this->assertFalse( $defaults['store_stock']['on_backorder'] );
+		$this->assertTrue( $defaults['store_stock']['on_backorder'] );
 	}
 
 	/**

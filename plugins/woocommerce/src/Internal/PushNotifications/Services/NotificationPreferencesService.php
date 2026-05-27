@@ -120,7 +120,7 @@ class NotificationPreferencesService {
 		$defaults['store_review']['max_rating']  = null;
 		$defaults['store_stock']['low_stock']    = true;
 		$defaults['store_stock']['out_of_stock'] = true;
-		$defaults['store_stock']['on_backorder'] = false;
+		$defaults['store_stock']['on_backorder'] = true;
 
 		return $defaults;
 	}
