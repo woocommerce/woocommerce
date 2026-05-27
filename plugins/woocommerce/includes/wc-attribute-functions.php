@@ -782,3 +782,35 @@ function wc_attribute_taxonomy_slug( $attribute_name ) {
 
 	return $attribute_slug;
 }
+
+/**
+ * Save visual attribute term meta (color or image).
+ *
+ * Color and image are mutually exclusive. When a color is saved, any image meta is removed,
+ * and when an image is saved, any color meta is removed.
+ *
+ * @internal This function is only used internally and should not be used directly.
+ *
+ * @since 10.9.0
+ * @param int    $term_id  Term ID.
+ * @param string $color    Hex color value.
+ * @param int    $image_id Attachment ID for the term image.
+ * @return void
+ */
+function wc_save_visual_attribute_term_meta( int $term_id, string $color = '', int $image_id = 0 ): void {
+	if ( $image_id && wp_attachment_is_image( $image_id ) ) {
+		update_term_meta( $term_id, 'image', absint( $sanitized_image_id ) );
+		delete_term_meta( $term_id, 'color' );
+		return;
+	}
+
+	$sanitized_color = sanitize_hex_color( $color );
+	if ( $sanitized_color ) {
+		update_term_meta( $term_id, 'color', $sanitized_color );
+		delete_term_meta( $term_id, 'image' );
+		return;
+	}
+
+	delete_term_meta( $term_id, 'color' );
+	delete_term_meta( $term_id, 'image' );
+}

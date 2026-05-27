@@ -64,6 +64,8 @@ class WC_Admin_Taxonomies {
 		add_action( 'product_cat_edit_form_fields', array( $this, 'edit_category_fields' ), 10 );
 		add_action( 'created_term', array( $this, 'save_category_fields' ), 10, 3 );
 		add_action( 'edit_term', array( $this, 'save_category_fields' ), 10, 3 );
+		add_action( 'created_term', array( $this, 'save_product_attribute_term_fields' ), 10, 3 );
+		add_action( 'edit_term', array( $this, 'save_product_attribute_term_fields' ), 10, 3 );
 
 		// Add columns.
 		add_filter( 'manage_edit-product_cat_columns', array( $this, 'product_cat_columns' ) );
@@ -88,13 +90,13 @@ class WC_Admin_Taxonomies {
 				add_filter(
 					"manage_edit-{$taxonomy}_columns",
 					function ( $columns ) use ( $taxonomy ) {
-						return $this->add_term_color_columns( $columns, $taxonomy );
+						return $this->add_term_visual_column( $columns, $taxonomy );
 					}
 				);
 				add_filter(
 					"manage_{$taxonomy}_custom_column",
 					function ( $content, $column, $term_id ) use ( $taxonomy ) {
-						return $this->render_term_color_column( $content, $column, $term_id, $taxonomy );
+						return $this->render_term_visual_column( $content, $column, $term_id, $taxonomy );
 					},
 					10,
 					3
@@ -365,6 +367,10 @@ class WC_Admin_Taxonomies {
 			<label for="term_color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label>
 			<input name="term_color" id="term_color" class="wc-admin-visual-attribute-color-input" type="text" value="" />
 		</div>
+		<div class="form-field term-image-wrap">
+			<label for="term_image"><?php esc_html_e( 'Image value', 'woocommerce' ); ?></label>
+			<input name="term_image" id="term_image" class="wc-admin-visual-attribute-image-input" type="hidden" value="" />
+		</div>
 		<?php
 	}
 
@@ -382,11 +388,18 @@ class WC_Admin_Taxonomies {
 		}
 
 		$color_value = get_term_meta( $term->term_id, 'color', true );
+		$image_value = get_term_meta( $term->term_id, 'image', true );
 		?>
 		<tr class="form-field term-color-wrap">
 			<th scope="row" valign="top"><label for="term_color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label></th>
 			<td>
 				<input name="term_color" id="term_color" class="wc-admin-visual-attribute-color-input" type="text" value="<?php echo esc_attr( $color_value ); ?>" />
+			</td>
+		</tr>
+		<tr class="form-field term-image-wrap">
+			<th scope="row" valign="top"><label for="term_image"><?php esc_html_e( 'Image value', 'woocommerce' ); ?></label></th>
+			<td>
+				<input name="term_image" id="term_image" class="wc-admin-visual-attribute-image-input" type="hidden" value="<?php echo absint( $image_value ); ?>" />
 			</td>
 		</tr>
 		<?php
@@ -407,6 +420,7 @@ class WC_Admin_Taxonomies {
 		$is_product_editor_screen = 'product' === $screen->id;
 
 		if ( $is_product_editor_screen && array_key_exists( 'wc-visual', wc_get_attribute_types() ) ) {
+			wp_enqueue_media();
 			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-color-picker', true, array( 'wp-components' ) );
 			return;
 		}
@@ -415,8 +429,8 @@ class WC_Admin_Taxonomies {
 		$taxonomy                 = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( $is_attribute_term_screen && $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
+			wp_enqueue_media();
 			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-color-picker', true, array( 'wp-components' ) );
-			return;
 		}
 	}
 
@@ -434,15 +448,26 @@ class WC_Admin_Taxonomies {
 		if ( isset( $_POST['product_cat_thumbnail_id'] ) && 'product_cat' === $taxonomy ) { // WPCS: CSRF ok, input var ok.
 			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // WPCS: CSRF ok, input var ok.
 		}
-		if ( $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
-			$color_value = isset( $_POST['term_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['term_color'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	}
 
-			if ( $color_value ) {
-				update_term_meta( $term_id, 'color', $color_value );
-			} elseif ( '' === $color_value ) {
-				delete_term_meta( $term_id, 'color' );
-			}
+	/**
+	 * Save product attribute term fields.
+	 *
+	 * @param mixed  $term_id Term ID being saved.
+	 * @param mixed  $tt_id Term taxonomy ID.
+	 * @param string $taxonomy Taxonomy slug.
+	 *
+	 * @internal
+	 */
+	public function save_product_attribute_term_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
+		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
+			return;
 		}
+
+		$color_value = isset( $_POST['term_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['term_color'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$image_id    = isset( $_POST['term_image'] ) ? absint( wp_unslash( $_POST['term_image'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+		wc_save_visual_attribute_term_meta( (int) $term_id, $color_value, $image_id );
 	}
 
 	/**
@@ -489,7 +514,7 @@ class WC_Admin_Taxonomies {
 	}
 
 	/**
-	 * Add custom columns for product attribute terms.
+	 * Add visual column for product attribute terms.
 	 *
 	 * @param array  $columns  Existing columns.
 	 * @param string $taxonomy Taxonomy slug (bound when the filter is registered).
@@ -497,7 +522,7 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @internal
 	 */
-	public function add_term_color_columns( $columns, $taxonomy ) {
+	public function add_term_visual_column( $columns, $taxonomy ) {
 		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
 			return $columns;
 		}
@@ -505,20 +530,22 @@ class WC_Admin_Taxonomies {
 		$new_columns = array();
 		foreach ( $columns as $key => $label ) {
 			if ( 'slug' === $key ) {
-				$new_columns['color'] = __( 'Color value', 'woocommerce' );
+				$new_columns['visual'] = __( 'Visual', 'woocommerce' );
 			}
 			$new_columns[ $key ] = $label;
 		}
 
-		if ( ! isset( $new_columns['color'] ) ) {
-			$new_columns['color'] = __( 'Color value', 'woocommerce' );
+		if ( ! isset( $new_columns['visual'] ) ) {
+			$new_columns['visual'] = __( 'Visual', 'woocommerce' );
 		}
 
 		return $new_columns;
 	}
 
 	/**
-	 * Render color column for product attribute terms.
+	 * Render visual column for product attribute terms.
+	 *
+	 * Shows the term image when set, otherwise the color swatch.
 	 *
 	 * @param string $content  Column output so far (often empty string).
 	 * @param string $column   Current column key.
@@ -528,13 +555,21 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @internal
 	 */
-	public function render_term_color_column( $content, $column, $term_id, $taxonomy ) {
-		if ( 'color' !== $column ) {
+	public function render_term_visual_column( $content, $column, $term_id, $taxonomy ) {
+		if ( 'visual' !== $column ) {
 			return $content;
 		}
 
 		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
 			return $content;
+		}
+
+		$image_id = absint( get_term_meta( $term_id, 'image', true ) );
+
+		if ( $image_id && wp_attachment_is_image( $image_id ) ) {
+			$thumbnail = wp_get_attachment_image( $image_id, array( 32, 32 ) );
+
+			return $thumbnail ? $thumbnail : '&ndash;';
 		}
 
 		$color_value = get_term_meta( $term_id, 'color', true );
@@ -721,15 +756,23 @@ class WC_Admin_Taxonomies {
 			"(function() {
 				'use strict';
 				const addFormColor = document.querySelector('.form-field.term-color-wrap');
+				const addFormImage = document.querySelector('.form-field.term-image-wrap');
 				const addFormSlug = document.querySelector('.form-field.term-slug-wrap');
 				if (addFormColor && addFormSlug) {
 					addFormSlug.parentNode.insertBefore(addFormColor, addFormSlug);
 				}
+				if (addFormImage && addFormSlug) {
+					addFormSlug.parentNode.insertBefore(addFormImage, addFormSlug);
+				}
 
 				const editFormColor = document.querySelector('tr.form-field.term-color-wrap');
+				const editFormImage = document.querySelector('tr.form-field.term-image-wrap');
 				const editFormSlug = document.querySelector('tr.form-field.term-slug-wrap');
 				if (editFormColor && editFormSlug) {
 					editFormSlug.parentNode.insertBefore(editFormColor, editFormSlug);
+				}
+				if (editFormImage && editFormSlug) {
+					editFormSlug.parentNode.insertBefore(editFormImage, editFormSlug);
 				}
 			})();"
 		);

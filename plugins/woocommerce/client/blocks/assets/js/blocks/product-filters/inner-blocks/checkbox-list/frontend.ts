@@ -13,6 +13,7 @@ import type {
 
 type CheckboxListItem = SelectableItem< {
 	color?: string;
+	image?: string;
 	index?: number;
 } >;
 
@@ -39,9 +40,9 @@ type CheckboxListStore = {
 
 function getParentStore( storeNamespace?: string ) {
 	if ( ! storeNamespace ) return undefined;
-	return store< SelectableItemsParentStore< { color?: string } > >(
-		storeNamespace
-	);
+	return store<
+		SelectableItemsParentStore< { color?: string; image?: string } >
+	>( storeNamespace );
 }
 
 function normalizeDisplayLimit( displayLimit: number ): number {
@@ -55,6 +56,19 @@ function normalizeDisplayLimit( displayLimit: number ): number {
 function getCurrentItem(): CheckboxListItem | undefined {
 	const context = getContext< { item?: CheckboxListItem } >();
 	return context.item;
+}
+
+function getSwatchStyle( item?: CheckboxListItem ): string {
+	if ( item?.image ) {
+		const escapedImage = item.image.split( "'" ).join( '%27' );
+		return `background-image: url('${ escapedImage }');`;
+	}
+
+	if ( item?.color ) {
+		return `background-color: ${ item.color }`;
+	}
+
+	return '';
 }
 
 const { state }: CheckboxListStore = store< CheckboxListStore >(
@@ -86,12 +100,11 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 			},
 			get colorSwatchStyle(): string {
 				const item = getCurrentItem();
-				if ( ! item?.color ) return '';
-				return `background-color: ${ item.color }`;
+				return getSwatchStyle( item );
 			},
 			get isColorSwatchEmpty(): boolean {
 				const item = getCurrentItem();
-				return ! item?.color;
+				return ! item?.color && ! item?.image;
 			},
 		},
 		actions: {

@@ -20,11 +20,11 @@ final class ProductFilterAttribute extends AbstractBlock {
 	protected $block_name = 'product-filter-attribute';
 
 	/**
-	 * Cached map of term ID to color value for all wc-visual attribute terms.
+	 * Cached map of term ID to visual values for wc-visual attribute terms.
 	 *
-	 * @var array<int, string>|null
+	 * @var array<int, array{color: string, image: string}>|null
 	 */
-	private $term_colors = null;
+	private $term_visuals = null;
 
 	/**
 	 * Initialize this block type.
@@ -52,21 +52,21 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		if ( is_admin() ) {
 			$this->asset_data_registry->add( 'defaultProductFilterAttribute', $this->get_default_product_attribute() );
-			$this->asset_data_registry->add( 'productFilterTermColors', $this->get_visual_attribute_term_colors() );
+			$this->asset_data_registry->add( 'productFilterTermVisuals', $this->get_visual_attribute_term_visuals() );
 		}
 	}
 
 	/**
-	 * Get color values for all wc-visual attribute terms.
+	 * Get visual values for all wc-visual attribute terms.
 	 *
-	 * @return array<int, string> Map of term ID to hex color.
+	 * @return array<int, array{color?: string, image?: string}> Map of term ID to color/image values.
 	 */
-	private function get_visual_attribute_term_colors(): array {
-		if ( null !== $this->term_colors ) {
-			return $this->term_colors;
+	private function get_visual_attribute_term_visuals(): array {
+		if ( null !== $this->term_visuals ) {
+			return $this->term_visuals;
 		}
 
-		$colors     = array();
+		$visuals    = array();
 		$attributes = wc_get_attribute_taxonomies();
 
 		foreach ( $attributes as $attribute ) {
@@ -86,14 +86,32 @@ final class ProductFilterAttribute extends AbstractBlock {
 			}
 
 			foreach ( $terms as $term ) {
-				$color                    = sanitize_hex_color( get_term_meta( $term->term_id, 'color', true ) );
-				$colors[ $term->term_id ] = $color ? $color : '';
+				$image_id = absint( get_term_meta( $term->term_id, 'image', true ) );
+
+				if ( $image_id && wp_attachment_is_image( $image_id ) ) {
+					$image = wp_get_attachment_image_url( $image_id, 'thumbnail' );
+
+					if ( $image ) {
+						$visuals[ $term->term_id ] = array(
+							'image' => $image,
+						);
+						continue;
+					}
+				}
+
+				$color = sanitize_hex_color( get_term_meta( $term->term_id, 'color', true ) );
+
+				if ( $color ) {
+					$visuals[ $term->term_id ] = array(
+						'color' => $color,
+					);
+				}
 			}
 		}
 
-		$this->term_colors = $colors;
+		$this->term_visuals = $visuals;
 
-		return $this->term_colors;
+		return $this->term_visuals;
 	}
 
 	/**
@@ -241,8 +259,9 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		if ( ! empty( $attribute_counts ) ) {
 			$show_counts       = $block_attributes['showCounts'] ?? false;
+			$visual_values     = $this->get_visual_attribute_term_visuals();
 			$attribute_options = array_map(
-				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute, $show_counts ) {
+				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute, $show_counts, $visual_values ) {
 					$term          = (array) $term;
 					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
 
@@ -262,8 +281,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 					}
 
 					if ( 'wc-visual' === $product_attribute->type ) {
-						$colors        = $this->get_visual_attribute_term_colors();
-						$item['color'] = $colors[ $term['term_id'] ] ?? '';
+						$item['color'] = $visual_values[ $term['term_id'] ]['color'] ?? '';
+						$item['image'] = $visual_values[ $term['term_id'] ]['image'] ?? '';
 					}
 
 					return $item;

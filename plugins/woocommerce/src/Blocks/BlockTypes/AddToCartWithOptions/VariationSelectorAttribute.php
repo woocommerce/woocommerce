@@ -31,18 +31,18 @@ class VariationSelectorAttribute extends AbstractBlock {
 		parent::enqueue_data( $attributes );
 
 		if ( is_admin() ) {
-			$this->asset_data_registry->add( 'variationSelectorTermColors', $this->get_visual_attribute_term_colors() );
+			$this->asset_data_registry->add( 'variationSelectorTermVisuals', $this->get_visual_attribute_term_visuals() );
 		}
 	}
 
 	/**
-	 * Get color values for all wc-visual attribute terms.
+	 * Get visual values for wc-visual attribute terms.
 	 *
-	 * @param string|null $attribute_name Optional product attribute taxonomy name (e.g. `pa_color`). When omitted, colors for every wc-visual attribute are loaded.
-	 * @return array<int, string|null> Map of term ID to hex color.
+	 * @param string|null $attribute_name Optional product attribute taxonomy name (e.g. `pa_color`). When omitted, values for every wc-visual attribute are loaded.
+	 * @return array<int, array{color?: string, image?: string}> Map of term ID to color/image values.
 	 */
-	private function get_visual_attribute_term_colors( ?string $attribute_name = null ): array {
-		$colors     = array();
+	private function get_visual_attribute_term_visuals( ?string $attribute_name = null ): array {
+		$visuals    = array();
 		$attributes = wc_get_attribute_taxonomies();
 
 		foreach ( $attributes as $attribute ) {
@@ -65,14 +65,30 @@ class VariationSelectorAttribute extends AbstractBlock {
 			}
 
 			foreach ( $terms as $term ) {
+				$image_id = absint( get_term_meta( $term->term_id, 'image', true ) );
+
+				if ( $image_id && wp_attachment_is_image( $image_id ) ) {
+					$image = wp_get_attachment_image_url( $image_id, 'thumbnail' );
+
+					if ( $image ) {
+						$visuals[ $term->term_id ] = array(
+							'image' => $image,
+						);
+						continue;
+					}
+				}
+
 				$color = sanitize_hex_color( get_term_meta( $term->term_id, 'color', true ) );
-				if ( ! empty( $color ) ) {
-					$colors[ $term->term_id ] = $color;
+
+				if ( $color ) {
+					$visuals[ $term->term_id ] = array(
+						'color' => $color,
+					);
 				}
 			}
 		}
 
-		return $colors;
+		return $visuals;
 	}
 
 	/**
@@ -308,9 +324,9 @@ class VariationSelectorAttribute extends AbstractBlock {
 	 * @return array
 	 */
 	private function build_variation_selectable_items( string $attribute_name, string $attribute_slug, array $attribute_terms, ?string $default_selected ): array {
-		$id_prefix   = sanitize_title( $attribute_slug );
-		$items       = array();
-		$term_colors = $this->get_visual_attribute_term_colors( $attribute_name );
+		$id_prefix    = sanitize_title( $attribute_slug );
+		$items        = array();
+		$term_visuals = $this->get_visual_attribute_term_visuals( $attribute_name );
 
 		foreach ( $attribute_terms as $attribute_term ) {
 			if ( ! is_array( $attribute_term ) || ! isset( $attribute_term['value'], $attribute_term['label'] ) ) {
@@ -326,8 +342,9 @@ class VariationSelectorAttribute extends AbstractBlock {
 				'selected'  => $default_selected === $value,
 			);
 
-			if ( ! empty( $term_colors ) && isset( $attribute_term['term_id'], $term_colors[ $attribute_term['term_id'] ] ) ) {
-				$item['color'] = $term_colors[ $attribute_term['term_id'] ];
+			if ( isset( $attribute_term['term_id'], $term_visuals[ $attribute_term['term_id'] ] ) ) {
+				$item['color'] = $term_visuals[ $attribute_term['term_id'] ]['color'] ?? '';
+				$item['image'] = $term_visuals[ $attribute_term['term_id'] ]['image'] ?? '';
 			}
 
 			$items[] = $item;

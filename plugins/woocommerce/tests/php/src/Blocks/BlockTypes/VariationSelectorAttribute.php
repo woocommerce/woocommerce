@@ -178,7 +178,15 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 		delete_transient( 'wc_attribute_taxonomies' );
 		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
-		update_term_meta( $term_a->term_id, 'color', '#aa0000' );
+		$image_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Variation selector swatch image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		update_post_meta( $image_id, '_wp_attached_file', 'variation-selector-swatch-image.jpg' );
+		update_term_meta( $term_a->term_id, 'image', $image_id );
 		update_term_meta( $term_b->term_id, 'color', '#0000aa' );
 
 		try {
@@ -217,11 +225,14 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 
 			$this->assertStringContainsString( 'is-style-swatch', $markup, 'Chips wrapper should use swatch style when colors are present.' );
 			$this->assertStringContainsString( 'wc-block-product-filter-chips__swatch', $markup, 'Swatch elements should be rendered for wc-visual terms.' );
-			$this->assertStringContainsString( 'background-color: #aa0000', $markup, 'First term swatch should use its term color meta.' );
-			$this->assertStringContainsString( 'background-color: #0000aa', $markup, 'Second term swatch should use its term color meta.' );
+			$this->assertStringContainsString( 'background-image:url(', $markup, 'First term swatch should use its term image meta.' );
+			$this->assertStringContainsString( 'background-color:#0000aa', $markup, 'Second term swatch should use its term color meta.' );
 		} finally {
-			delete_term_meta( $term_a->term_id, 'color' );
+			delete_term_meta( $term_a->term_id, 'image' );
 			delete_term_meta( $term_b->term_id, 'color' );
+			if ( $image_id ) {
+				wp_delete_attachment( $image_id, true );
+			}
 			$wpdb->update(
 				$wpdb->prefix . 'woocommerce_attribute_taxonomies',
 				array( 'attribute_type' => 'select' ),

@@ -14,6 +14,7 @@ import { getClosestColor } from '../../utils/get-closest-color';
 
 type ChipsItem = SelectableItem< {
 	color?: string;
+	image?: string;
 	index?: number;
 } >;
 
@@ -44,9 +45,9 @@ type ChipsStore = {
 
 function getParentStore( storeNamespace?: string ) {
 	if ( ! storeNamespace ) return undefined;
-	return store< SelectableItemsParentStore< { color?: string } > >(
-		storeNamespace
-	);
+	return store<
+		SelectableItemsParentStore< { color?: string; image?: string } >
+	>( storeNamespace );
 }
 
 function normalizeDisplayLimit( displayLimit: number ): number {
@@ -87,6 +88,19 @@ function initChipColors( element: HTMLElement ): void {
 	}
 }
 
+function getSwatchStyle( item?: ChipsItem ): string {
+	if ( item?.image ) {
+		const escapedImage = item.image.split( "'" ).join( '%27' );
+		return `background-image: url('${ escapedImage }');`;
+	}
+
+	if ( item?.color ) {
+		return `background-color: ${ item.color }`;
+	}
+
+	return '';
+}
+
 const { state }: ChipsStore = store< ChipsStore >(
 	'woocommerce/product-filter-chips',
 	{
@@ -111,12 +125,11 @@ const { state }: ChipsStore = store< ChipsStore >(
 			},
 			get swatchHidden(): boolean {
 				const item = getCurrentItem();
-				return ! item?.color;
+				return ! item?.color && ! item?.image;
 			},
 			get swatchStyle(): string {
 				const item = getCurrentItem();
-				if ( ! item?.color ) return '';
-				return `background-color: ${ item.color }`;
+				return getSwatchStyle( item );
 			},
 		},
 		actions: {

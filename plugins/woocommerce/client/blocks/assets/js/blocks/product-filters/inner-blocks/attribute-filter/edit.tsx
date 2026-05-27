@@ -37,7 +37,8 @@ import { Notice } from '../../components/notice';
 import { sortFilterOptions } from '../../utils/sort-filter-options';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
-const EMPTY_TERM_COLORS: Record< string, string > = {};
+const EMPTY_TERM_VISUALS: Record< string, { color?: string; image?: string } > =
+	{};
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
@@ -53,10 +54,9 @@ const Edit = ( props: EditProps ) => {
 	} = blockAttributes;
 
 	const attributeObject = getAttributeFromId( attributeId );
-	const termColors = getSetting< Record< string, string > >(
-		'productFilterTermColors',
-		EMPTY_TERM_COLORS
-	);
+	const termVisuals = getSetting<
+		Record< string, { color?: string; image?: string } >
+	>( 'productFilterTermVisuals', EMPTY_TERM_VISUALS );
 
 	const [ attributeOptions, setAttributeOptions ] = useState<
 		FilterOptionItem[]
@@ -107,8 +107,9 @@ const Edit = ( props: EditProps ) => {
 					value: term.id.toString(),
 					selected: index === 0,
 					...( showCounts && { count: term.count } ),
-					...( term.id in termColors && {
-						color: termColors[ term.id ],
+					...( term.id in termVisuals && {
+						color: termVisuals[ term.id ]?.color || '',
+						image: termVisuals[ term.id ]?.image || '',
 					} ),
 				} ) );
 
@@ -127,7 +128,7 @@ const Edit = ( props: EditProps ) => {
 		isTermsLoading,
 		isFilterCountsLoading,
 		attributeObject,
-		termColors,
+		termVisuals,
 	] );
 
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(

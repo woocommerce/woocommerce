@@ -27,6 +27,21 @@ import './editor.scss';
 import { EditProps } from './types';
 import { getColorClasses, getColorVars } from './utils';
 
+const getSwatchStyle = ( item: { color?: string; image?: string } ) => {
+	if ( item.image ) {
+		const escapedImage = item.image.split( "'" ).join( '%27' );
+		return {
+			backgroundImage: `url('${ escapedImage }')`,
+		};
+	} else if ( item.color ) {
+		return {
+			backgroundColor: item.color,
+		};
+	}
+
+	return undefined;
+};
+
 const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 	const {
 		clientId,
@@ -122,23 +137,20 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 											/>
 										</span>
 										<span className="wc-block-product-filter-checkbox-list__text-wrapper">
-											{ item.color !== undefined && (
+											{ ( item.color !== undefined ||
+												item.image !== undefined ) && (
 												<span
 													className={ clsx(
 														'wc-block-product-filter-checkbox-list__color-swatch',
 														{
 															'is-empty':
-																! item.color,
+																! item.color &&
+																! item.image,
 														}
 													) }
-													style={
-														item.color
-															? {
-																	backgroundColor:
-																		item.color,
-															  }
-															: undefined
-													}
+													style={ getSwatchStyle(
+														item
+													) }
 													aria-hidden="true"
 												/>
 											) }

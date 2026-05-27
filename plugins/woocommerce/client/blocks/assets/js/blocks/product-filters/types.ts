@@ -19,6 +19,7 @@ export type FilterItemFields = {
 	menuOrder?: number;
 	attributeQueryType?: 'and' | 'or';
 	color?: string;
+	image?: string;
 };
 
 export type FilterOptionItem = SelectableItem< FilterItemFields >;

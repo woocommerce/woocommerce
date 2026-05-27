@@ -32,6 +32,7 @@ type VariationOptionItem = {
 	value: string;
 	ariaLabel?: string;
 	color?: string;
+	image?: string;
 };
 
 type Context = AddToCartWithOptionsStoreContext & {
@@ -250,6 +251,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						disabled,
 						hidden: hideInvalid && disabled,
 						...( row.color !== undefined && { color: row.color } ),
+						...( row.image !== undefined && { image: row.image } ),
 					};
 				} );
 			},

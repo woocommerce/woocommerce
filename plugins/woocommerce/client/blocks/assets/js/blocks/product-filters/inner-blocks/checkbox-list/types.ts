@@ -31,6 +31,7 @@ export type EditProps = BlockEditProps< BlockAttributes > & {
 	context: SelectableItemsBlockContext< {
 		count?: number;
 		color?: string;
+		image?: string;
 		depth?: number;
 	} >;
 	optionElementBorder: Color;

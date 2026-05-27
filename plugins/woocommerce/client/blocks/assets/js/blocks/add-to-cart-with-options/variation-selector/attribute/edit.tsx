@@ -81,10 +81,9 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
 
-	const termColors = getSetting< Record< string, string > >(
-		'variationSelectorTermColors',
-		{} as Record< string, string >
-	);
+	const termVisuals = getSetting<
+		Record< string, { color?: string; image?: string } >
+	>( 'variationSelectorTermVisuals', {} );
 
 	const selectableContext = useMemo( () => {
 		let items: SelectableItem< {
@@ -97,18 +96,23 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			attribute.terms.length > 0
 		) {
 			items = attribute.terms.map( ( term ) => {
-				let color: string | null = null;
-				if ( term.id in termColors ) {
-					color = termColors[ term.id ];
+				let color: string | undefined;
+				let image: string | undefined;
+
+				if ( term.id in termVisuals ) {
+					color = termVisuals[ term.id ]?.color || '';
+					image = termVisuals[ term.id ]?.image || '';
 				} else if ( term.id in EMPTY_TERM_COLORS ) {
 					color = EMPTY_TERM_COLORS[ term.id ];
 				}
+
 				return {
 					id: `${ attribute.taxonomy }-${ term.slug }`,
 					label: term.name,
 					value: term.slug,
 					ariaLabel: term.name,
-					...( color !== null ? { color } : {} ),
+					...( color ? { color } : {} ),
+					...( image ? { image } : {} ),
 				};
 			} );
 		}
@@ -122,7 +126,7 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			label: string;
 			ariaLabel: string;
 		} >;
-	}, [ attribute, termColors ] );
+	}, [ attribute, termVisuals ] );
 
 	const blockPreviewProps = useBlockPreview( {
 		blocks,

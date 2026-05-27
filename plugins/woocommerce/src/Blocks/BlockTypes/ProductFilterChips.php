@@ -92,12 +92,12 @@ final class ProductFilterChips extends AbstractBlock {
 		$visible_items           = array_merge( $first_items, $overflow_selected_items );
 		$hidden_count            = count( $items ) - count( $visible_items );
 
-		$first_item         = reset( $items );
-		$show_counts        = is_array( $first_item ) && array_key_exists( 'count', $first_item );
-		$has_color_swatches = is_array( $first_item ) && array_key_exists( 'color', $first_item );
-		$button_role        = 'single' === $block_context['selectionMode'] ? 'radio' : 'checkbox';
+		$first_item          = reset( $items );
+		$show_counts         = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$has_visual_swatches = is_array( $first_item ) && ( array_key_exists( 'color', $first_item ) || array_key_exists( 'image', $first_item ) );
+		$button_role         = 'single' === $block_context['selectionMode'] ? 'radio' : 'checkbox';
 
-		if ( $has_color_swatches && is_string( $classes ) && ! str_contains( $classes, 'is-style-swatch' ) ) {
+		if ( $has_visual_swatches && is_string( $classes ) && ! str_contains( $classes, 'is-style-swatch' ) ) {
 			$classes                    .= ' is-style-swatch';
 			$wrapper_attributes['class'] = esc_attr( $classes );
 		}
@@ -121,7 +121,7 @@ final class ProductFilterChips extends AbstractBlock {
 							<?php if ( ! empty( $item['ariaLabel'] ) ) : ?>
 								aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
 							<?php endif; ?>
-							<?php if ( $has_color_swatches ) : ?>
+							<?php if ( $has_visual_swatches ) : ?>
 								title="<?php echo esc_attr( $item['label'] ); ?>"
 							<?php endif; ?>
 							value="<?php echo esc_attr( $item['value'] ); ?>"
@@ -135,11 +135,15 @@ final class ProductFilterChips extends AbstractBlock {
 							data-wp-on--click="actions.toggle"
 						>
 							<span class="wc-block-product-filter-chips__label">
-								<?php if ( $has_color_swatches ) : ?>
+								<?php if ( $has_visual_swatches ) : ?>
+									<?php
+									$swatch_style = $this->get_item_swatch_style( $item );
+									$has_visual   = '' !== $swatch_style;
+									?>
 									<span
-										class="wc-block-product-filter-chips__swatch<?php echo empty( $item['color'] ) ? ' wc-block-product-filter-chips__swatch--no-color' : ''; ?>"
-										<?php if ( ! empty( $item['color'] ) ) : ?>
-											style="background-color: <?php echo esc_attr( $item['color'] ); ?>;"
+										class="wc-block-product-filter-chips__swatch<?php echo ! $has_visual ? ' wc-block-product-filter-chips__swatch--no-color' : ''; ?>"
+										<?php if ( $has_visual ) : ?>
+											style="<?php echo esc_attr( $swatch_style ); ?>"
 										<?php endif; ?>
 										aria-hidden="true"
 									></span>
@@ -165,7 +169,7 @@ final class ProductFilterChips extends AbstractBlock {
 							role="<?php echo esc_attr( $button_role ); ?>"
 							data-wp-bind--id="context.item.id"
 							data-wp-bind--aria-label="context.item.ariaLabel"
-							<?php if ( $has_color_swatches ) : ?>
+							<?php if ( $has_visual_swatches ) : ?>
 								data-wp-bind--title="context.item.label"
 							<?php endif; ?>
 							data-wp-bind--value="context.item.value"
@@ -175,7 +179,7 @@ final class ProductFilterChips extends AbstractBlock {
 							data-wp-on--click="actions.toggle"
 						>
 							<span class="wc-block-product-filter-chips__label">
-								<?php if ( $has_color_swatches ) : ?>
+								<?php if ( $has_visual_swatches ) : ?>
 									<span
 										class="wc-block-product-filter-chips__swatch"
 										data-wp-class--wc-block-product-filter-chips__swatch--no-color="woocommerce/product-filter-chips::state.swatchHidden"
@@ -213,5 +217,25 @@ final class ProductFilterChips extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Build inline swatch style from item visual data.
+	 *
+	 * @param array $item Selectable item data.
+	 * @return string
+	 */
+	private function get_item_swatch_style( array $item ): string {
+		$image = isset( $item['image'] ) ? esc_url_raw( (string) $item['image'] ) : '';
+		if ( $image ) {
+			return sprintf( "background-image:url('%s')", str_replace( "'", '%27', $image ) );
+		}
+
+		$color = isset( $item['color'] ) ? sanitize_hex_color( (string) $item['color'] ) : '';
+		if ( $color ) {
+			return sprintf( 'background-color:%s', $color );
+		}
+
+		return '';
 	}
 }

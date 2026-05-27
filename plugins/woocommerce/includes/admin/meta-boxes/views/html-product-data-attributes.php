@@ -92,6 +92,8 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 						<# if ( data.isVisualAttribute ) { #>
 							<label for="wc-modal-add-attribute-term-color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label>
 							<input id="wc-modal-add-attribute-term-color" class="wc-admin-visual-attribute-color-input" type="text" name="term_color" value="" />
+							<label for="wc-modal-add-attribute-term-image"><?php esc_html_e( 'Image value', 'woocommerce' ); ?></label>
+							<input id="wc-modal-add-attribute-term-image" class="wc-admin-visual-attribute-image-input" type="hidden" name="term_image" value="" />
 						<# } #>
 					</form>
 				</article>
