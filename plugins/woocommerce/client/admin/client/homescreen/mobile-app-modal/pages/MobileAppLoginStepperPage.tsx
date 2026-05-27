@@ -60,7 +60,7 @@ export const MobileAppLoginStepperPage = ( {
 			<div className="modal-subheader">
 				<h3>
 					{ __(
-						'Run your store from anywhere in two easy steps.',
+						'Run your store from anywhere with the Woo mobile app.',
 						'woocommerce'
 					) }
 				</h3>

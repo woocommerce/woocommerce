@@ -679,6 +679,27 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Token generation rejects a site_url filter that downgrades the final URL to HTTP.
+	 */
+	public function test_generate_token_rejects_filtered_http_site_url(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$downgrade_site_url = static function () {
+			return 'http://filtered.example.com';
+		};
+		add_filter( 'site_url', $downgrade_site_url );
+
+		try {
+			$response = $this->dispatch_generate();
+
+			$this->assertSame( 500, $response->get_status() );
+			$this->assertSame( 'insecure_site_url', $response->get_data()['code'] );
+		} finally {
+			remove_filter( 'site_url', $downgrade_site_url );
+		}
+	}
+
+	/**
 	 * @testdox Token exchange fails with insecure_site_url when the site URL is not HTTPS.
 	 */
 	public function test_exchange_token_rejects_http_site_url(): void {
@@ -760,8 +781,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Token exchange fails when the target user lacks the create_app_password capability.
 	 */
 	public function test_exchange_token_requires_create_app_password_capability(): void {
-		wp_set_current_user( $this->admin_id );
-		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+		$prep = $this->prepare_exchange_token();
 
 		$deny_create_app_password = function ( $caps, $cap ) {
 			if ( 'create_app_password' === $cap ) {
@@ -773,13 +793,13 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 		try {
 			wp_set_current_user( 0 );
-			$response = $this->dispatch_exchange( $plaintext );
+			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
 			$this->assertSame( rest_authorization_required_code(), $response->get_status() );
 			$this->assertSame( 'rest_cannot_create_application_passwords', $response->get_data()['code'] );
 			$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
-			$this->assertIsArray( get_transient( $this->token_transient_key( $plaintext ) ) );
-			$this->assertFalse( get_option( $this->token_claim_key( $plaintext ), false ) );
+			$this->assertIsArray( get_transient( $this->token_transient_key( $prep['plaintext'] ) ) );
+			$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
 		} finally {
 			remove_filter( 'map_meta_cap', $deny_create_app_password, 10 );
 		}
@@ -1787,7 +1807,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Scan endpoint does not consume the scan bucket for invalid random tokens.
+	 * @testdox Scan endpoint rate-limits invalid random tokens without consuming the valid scan bucket.
 	 */
 	public function test_scan_invalid_token_does_not_consume_scan_rate_limit(): void {
 		wp_set_current_user( 0 );
@@ -1799,6 +1819,9 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$this->assertNull(
 			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_SCAN, '203.0.113.10' )
 		);
+		$row = $this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_INVALID_SCAN, '203.0.113.10' );
+		$this->assertNotNull( $row );
+		$this->assertSame( MobileAppQRLogin::MAX_INVALID_SCAN_ATTEMPTS - 1, (int) $row->rate_limit_remaining );
 	}
 
 	/**
@@ -2252,6 +2275,27 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Session-status endpoint requires HTTPS before it can return an exchange grant.
+	 */
+	public function test_session_status_requires_https(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( 0 );
+		$scan_data = $this->dispatch_scan( $plaintext )->get_data();
+
+		wp_set_current_user( $this->admin_id );
+		$this->dispatch_approve( $plaintext, $scan_data['real_number'] );
+
+		wp_set_current_user( 0 );
+		$this->force_https( false );
+		$response = $this->dispatch_session_status( $scan_data['session_id'], $plaintext );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 'ssl_required', $response->get_data()['code'] );
+		$this->assertArrayNotHasKey( 'exchange_grant', $response->get_data() );
+	}
+
+	/**
 	 * @testdox Session-status endpoint does not create rate-limit rows for random missing sessions.
 	 */
 	public function test_session_status_missing_session_does_not_consume_rate_limit(): void {
@@ -2328,6 +2372,25 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->admin_id );
 		$this->force_https( false );
 		$this->force_site_url( 'http://example.org' );
+
+		$response = $this->dispatch_availability();
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertFalse( $data['available'] );
+		$this->assertSame(
+			MobileAppQRLogin::AVAILABILITY_REASON_HTTPS_REQUIRED,
+			$data['reason']
+		);
+	}
+
+	/**
+	 * @testdox Availability endpoint mirrors the token endpoint when the request is HTTP but siteurl is HTTPS.
+	 */
+	public function test_availability_reports_https_required_when_request_is_not_secure(): void {
+		wp_set_current_user( $this->admin_id );
+		$this->force_https( false );
+		$this->force_site_url( 'https://example.org' );
 
 		$response = $this->dispatch_availability();
 

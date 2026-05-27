@@ -247,7 +247,7 @@ export const QRLoginNumberMatchStep = ( {
 				<Button
 					variant="secondary"
 					className="woocommerce-qr-direct-login__match-cancel-button"
-					disabled={ inFlight }
+					disabled={ tilesDisabled }
 					onClick={ () => {
 						recordEvent(
 							'mobile_app_qr_login_number_match_cancelled'

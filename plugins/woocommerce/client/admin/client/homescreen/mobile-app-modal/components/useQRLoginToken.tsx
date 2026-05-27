@@ -220,6 +220,7 @@ export const useQRLoginToken = ( {
 		if ( ! token || ! isMountedRef.current ) {
 			return;
 		}
+		const requestId = requestIdRef.current;
 
 		try {
 			const response = await apiFetch< QRLoginStatusResponse >( {
@@ -228,7 +229,11 @@ export const useQRLoginToken = ( {
 				data: { token },
 			} );
 
-			if ( ! isMountedRef.current ) {
+			if (
+				! isMountedRef.current ||
+				token !== tokenRef.current ||
+				requestId !== requestIdRef.current
+			) {
 				return;
 			}
 
@@ -281,9 +286,20 @@ export const useQRLoginToken = ( {
 				setCandidateNumbers( null );
 				setState( QRLoginTokenStates.REJECTED );
 				tokenRef.current = null;
+				return;
 			}
-			// `pending` and `expired` are no-ops here — the countdown timer
-			// drives the EXPIRED transition; we just keep polling on `pending`.
+
+			if ( response.status === 'expired' ) {
+				clearTimer();
+				clearPollTimer();
+				setQrUrl( null );
+				setCandidateNumbers( null );
+				setChallengeExpiresAt( 0 );
+				setState( QRLoginTokenStates.EXPIRED );
+				tokenRef.current = null;
+			}
+			// `pending` is a no-op here — the countdown timer drives the
+			// normal READY expiry transition; we just keep polling.
 		} catch ( error ) {
 			// Swallow polling errors. A transient 500/429 should not break the
 			// QR flow — the next tick will retry, and the countdown will
@@ -488,6 +504,7 @@ export const useQRLoginToken = ( {
 				}
 
 				if ( response.state === 'approved' ) {
+					requestIdRef.current += 1;
 					clearTimer();
 					setCandidateNumbers( null );
 					setState( QRLoginTokenStates.APPROVED );

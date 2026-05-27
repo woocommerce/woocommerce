@@ -84,7 +84,7 @@ describe( 'QRLoginNumberMatchStep', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'invokes onChooseNumber with the tapped value', () => {
+	it( 'invokes onChooseNumber with the tapped value', async () => {
 		const { onChooseNumber } = renderStep();
 
 		fireEvent.click(
@@ -94,6 +94,13 @@ describe( 'QRLoginNumberMatchStep', () => {
 		);
 
 		expect( onChooseNumber ).toHaveBeenCalledWith( '042' );
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'button', {
+					name: /Confirm with the number 042/i,
+				} )
+			).not.toBeDisabled()
+		);
 	} );
 
 	/**
@@ -151,9 +158,16 @@ describe( 'QRLoginNumberMatchStep', () => {
 		expect( onChooseNumber ).toHaveBeenCalledTimes( 1 );
 
 		resolveChoice();
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'button', {
+					name: /Confirm with the number 042/i,
+				} )
+			).not.toBeDisabled()
+		);
 	} );
 
-	it( 'cancel-login button calls onChooseNumber with the empty-string sentinel', () => {
+	it( 'cancel-login button calls onChooseNumber with the empty-string sentinel', async () => {
 		const { onChooseNumber } = renderStep();
 
 		fireEvent.click(
@@ -161,6 +175,11 @@ describe( 'QRLoginNumberMatchStep', () => {
 		);
 
 		expect( onChooseNumber ).toHaveBeenCalledWith( '' );
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'button', { name: /cancel login/i } )
+			).not.toBeDisabled()
+		);
 	} );
 
 	it( 'shows a 90-second countdown that ticks down each second', () => {
@@ -191,7 +210,9 @@ describe( 'QRLoginNumberMatchStep', () => {
 	} );
 
 	it( 'disables tiles and surfaces an expired message once the challenge window elapses', () => {
-		renderStep( { challengeExpiresAt: NOW_SECONDS } );
+		const { onChooseNumber } = renderStep( {
+			challengeExpiresAt: NOW_SECONDS,
+		} );
 
 		const expiredMessage = screen.getByText(
 			/This sign-in attempt has expired/
@@ -203,5 +224,12 @@ describe( 'QRLoginNumberMatchStep', () => {
 				name: /Confirm with the number 042/i,
 			} )
 		).toBeDisabled();
+		const cancelButton = screen.getByRole( 'button', {
+			name: /cancel login/i,
+		} );
+		expect( cancelButton ).toBeDisabled();
+
+		fireEvent.click( cancelButton );
+		expect( onChooseNumber ).not.toHaveBeenCalled();
 	} );
 } );

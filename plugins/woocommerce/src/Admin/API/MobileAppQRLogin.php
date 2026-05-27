@@ -63,6 +63,11 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	const MAX_INVALID_EXCHANGE_ATTEMPTS = 100;
 
 	/**
+	 * Max invalid-token scan attempts per IP per 15-minute window.
+	 */
+	const MAX_INVALID_SCAN_ATTEMPTS = 100;
+
+	/**
 	 * Broad anonymous exchange abuse guard per IP per 15-minute window.
 	 */
 	const MAX_EXCHANGE_IP_ATTEMPTS = 1000;
@@ -384,7 +389,6 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 						'token_hash' => array(
-							'required'          => true,
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 						),
@@ -451,6 +455,26 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	}
 
 	/**
+	 * Return a REST response carrying WordPress' no-cache headers.
+	 *
+	 * @param array<string, mixed> $data Response payload.
+	 * @return \WP_REST_Response
+	 */
+	private function rest_ensure_nocache_response( array $data ): \WP_REST_Response {
+		$response = rest_ensure_response( $data );
+
+		foreach ( wp_get_nocache_headers() as $header_name => $header_value ) {
+			if ( false === $header_value ) {
+				continue;
+			}
+
+			$response->header( $header_name, (string) $header_value );
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Reason codes returned by `/qr-login-availability` so wc-admin can
 	 * tailor the disabled card to the specific cause.
 	 */
@@ -467,8 +491,8 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * error. The reason code is the heuristic best we can do without each
 	 * security plugin self-identifying:
 	 *
-	 *  - `https_required` — `is_ssl()` is false (and the raw `siteurl` is
-	 *    `http://`). The most common cause is a local dev environment;
+	 *  - `https_required` — `is_ssl()` is false or the raw/final `siteurl` is
+	 *    `http://`. The most common cause is a local dev environment;
 	 *    production sites without HTTPS can't use QR login at all.
 	 *  - `application_passwords_unsupported` — WordPress core's own support
 	 *    gate (`wp_is_application_passwords_supported()`) returns false.
@@ -498,6 +522,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			&& wp_is_application_passwords_supported();
 		$ap_available = $this->are_application_passwords_available();
 
+		$https_ok  = is_ssl() && $https_ok;
 		$available = $https_ok && $ap_available;
 		$reason    = null;
 
@@ -511,7 +536,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			}
 		}
 
-		return rest_ensure_response(
+		return $this->rest_ensure_nocache_response(
 			array(
 				'available' => $available,
 				'reason'    => $reason,
@@ -550,6 +575,15 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 */
 	private function check_invalid_exchange_rate_limit() {
 		return QRLoginRateLimits::consume( QRLoginRateLimits::BUCKET_INVALID_EXCHANGE, $this->get_client_ip() );
+	}
+
+	/**
+	 * Check rate limit for random/nonexistent scan tokens.
+	 *
+	 * @return bool True if within rate limit.
+	 */
+	private function check_invalid_scan_rate_limit() {
+		return QRLoginRateLimits::consume( QRLoginRateLimits::BUCKET_INVALID_SCAN, $this->get_client_ip() );
 	}
 
 	/**
@@ -804,9 +838,23 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
-		// Use get_site_url() for the returned value so any scheme normalization or
-		// filtering that WordPress applies downstream is preserved.
-		return get_site_url();
+		// Use get_site_url() for the returned value so any scheme normalization
+		// or filtering that WordPress applies downstream is preserved, then
+		// validate the final value too. A plugin can still filter `site_url`
+		// after the raw option check above; never hand the mobile app an
+		// HTTP exchange target.
+		$site_url     = get_site_url();
+		$final_scheme = wp_parse_url( $site_url, PHP_URL_SCHEME );
+
+		if ( 'https' !== $final_scheme ) {
+			return new \WP_Error(
+				'insecure_site_url',
+				__( 'QR login cannot be used because the site URL is not configured for HTTPS. Please update the WordPress Address (URL) in Settings → General to use https://.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		return $site_url;
 	}
 
 	/**
@@ -1202,7 +1250,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		$token = (string) $request->get_param( 'token' );
 		if ( '' === $token ) {
-			return rest_ensure_response( array( 'status' => 'expired' ) );
+			return $this->rest_ensure_nocache_response( array( 'status' => 'expired' ) );
 		}
 
 		$token_hash = hash( 'sha256', $token );
@@ -1214,10 +1262,10 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		$consumed = get_transient( self::CONSUMED_TRANSIENT_PREFIX . $token_hash );
 		if ( is_array( $consumed ) ) {
 			if ( ! isset( $consumed['user_id'] ) || (int) $consumed['user_id'] !== (int) $user_id ) {
-				return rest_ensure_response( array( 'status' => 'expired' ) );
+				return $this->rest_ensure_nocache_response( array( 'status' => 'expired' ) );
 			}
 
-			return rest_ensure_response(
+			return $this->rest_ensure_nocache_response(
 				array(
 					'status'      => self::STATE_CONSUMED,
 					'consumed_at' => isset( $consumed['consumed_at'] ) ? (int) $consumed['consumed_at'] : null,
@@ -1230,12 +1278,12 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		$record = get_transient( self::TOKEN_TRANSIENT_PREFIX . $token_hash );
 		if ( ! is_array( $record ) ) {
-			return rest_ensure_response( array( 'status' => self::STATE_EXPIRED ) );
+			return $this->rest_ensure_nocache_response( array( 'status' => self::STATE_EXPIRED ) );
 		}
 
 		// Cross-user defense in depth — same as before.
 		if ( ! isset( $record['user_id'] ) || (int) $record['user_id'] !== (int) $user_id ) {
-			return rest_ensure_response( array( 'status' => self::STATE_EXPIRED ) );
+			return $this->rest_ensure_nocache_response( array( 'status' => self::STATE_EXPIRED ) );
 		}
 
 		$state = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
@@ -1243,11 +1291,11 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// Rejected / expired states are terminal — surface them directly so
 		// wc-admin can render the "Login denied" terminal screen.
 		if ( in_array( $state, array( self::STATE_REJECTED, self::STATE_EXPIRED ), true ) ) {
-			return rest_ensure_response( array( 'status' => $state ) );
+			return $this->rest_ensure_nocache_response( array( 'status' => $state ) );
 		}
 
 		if ( ! empty( $record['expires_at'] ) && time() >= (int) $record['expires_at'] ) {
-			return rest_ensure_response( array( 'status' => self::STATE_EXPIRED ) );
+			return $this->rest_ensure_nocache_response( array( 'status' => self::STATE_EXPIRED ) );
 		}
 
 		// While in `scanned`, surface the shuffled candidate triple and the
@@ -1259,7 +1307,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			$challenge = isset( $record['challenge'] ) && is_array( $record['challenge'] ) ? $record['challenge'] : array();
 			$numbers   = $this->shuffled_candidate_numbers( $challenge );
 
-			return rest_ensure_response(
+			return $this->rest_ensure_nocache_response(
 				array(
 					'status'     => self::STATE_SCANNED,
 					'numbers'    => $numbers,
@@ -1273,12 +1321,12 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// reloaded between approve and exchange shows the "Signing in…"
 		// transitional state rather than going back to the QR.
 		if ( self::STATE_APPROVED === $state ) {
-			return rest_ensure_response( array( 'status' => self::STATE_APPROVED ) );
+			return $this->rest_ensure_nocache_response( array( 'status' => self::STATE_APPROVED ) );
 		}
 
 		// Pending: same shape as before, plus the new `state` field for
 		// clients that want to switch on it directly.
-		return rest_ensure_response(
+		return $this->rest_ensure_nocache_response(
 			array(
 				'status'     => self::STATE_PENDING,
 				'expires_at' => isset( $record['expires_at'] ) ? (int) $record['expires_at'] : null,
@@ -1475,6 +1523,14 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		$record = get_transient( $key );
 		if ( ! is_array( $record ) ) {
+			if ( ! $this->check_invalid_scan_rate_limit() ) {
+				return new \WP_Error(
+					'rate_limit_exceeded',
+					__( 'Too many QR login scans. Please try again later.', 'woocommerce' ),
+					array( 'status' => 429 )
+				);
+			}
+
 			return new \WP_Error(
 				'invalid_token',
 				__( 'Invalid or expired QR login token.', 'woocommerce' ),
@@ -1743,6 +1799,14 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// symptom we see if the cache pins the first hit.
 		nocache_headers();
 
+		if ( ! is_ssl() ) {
+			return new \WP_Error(
+				'ssl_required',
+				__( 'QR login requires an HTTPS connection.', 'woocommerce' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		$session_id     = (string) $request->get_param( 'session_id' );
 		$submitted_hash = (string) $request->get_param( 'token_hash' );
 
@@ -1750,7 +1814,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		if ( ! is_string( $token_hash ) || '' === $token_hash ) {
 			// Either the session never existed or it has expired. Either way,
 			// surface as expired to the polling app.
-			return rest_ensure_response( array( 'state' => self::STATE_EXPIRED ) );
+			return $this->rest_ensure_nocache_response( array( 'state' => self::STATE_EXPIRED ) );
 		}
 
 		// Bind grant delivery to proof of token knowledge: an attacker who
@@ -1762,7 +1826,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// `hash_equals` for constant-time comparison; `expired` opacity so
 		// we never leak whether the session_id is real or not.
 		if ( ! hash_equals( $token_hash, $submitted_hash ) ) {
-			return rest_ensure_response( array( 'state' => self::STATE_EXPIRED ) );
+			return $this->rest_ensure_nocache_response( array( 'state' => self::STATE_EXPIRED ) );
 		}
 
 		if ( ! $this->check_session_status_rate_limit( $session_id ) ) {
@@ -1775,25 +1839,25 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		$record = get_transient( self::TOKEN_TRANSIENT_PREFIX . $token_hash );
 		if ( ! is_array( $record ) ) {
-			return rest_ensure_response( array( 'state' => self::STATE_EXPIRED ) );
+			return $this->rest_ensure_nocache_response( array( 'state' => self::STATE_EXPIRED ) );
 		}
 
 		$state    = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
 		$response = array( 'state' => $state );
 
 		if ( in_array( $state, array( self::STATE_REJECTED, self::STATE_EXPIRED ), true ) ) {
-			return rest_ensure_response( $response );
+			return $this->rest_ensure_nocache_response( $response );
 		}
 
 		if ( ! empty( $record['expires_at'] ) && time() >= (int) $record['expires_at'] ) {
-			return rest_ensure_response( array( 'state' => self::STATE_EXPIRED ) );
+			return $this->rest_ensure_nocache_response( array( 'state' => self::STATE_EXPIRED ) );
 		}
 
 		if ( self::STATE_APPROVED === $state && ! empty( $record['exchange_grant'] ) ) {
 			$response['exchange_grant'] = (string) $record['exchange_grant'];
 		}
 
-		return rest_ensure_response( $response );
+		return $this->rest_ensure_nocache_response( $response );
 	}
 
 	/**
@@ -1806,30 +1870,40 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * fall back to mt_rand() and is predictable.
 	 *
 	 * @return array{real: string, distractors: array<int, string>}
+	 * @throws \RuntimeException If a valid distractor set cannot be generated.
 	 */
 	private function generate_challenge_numbers(): array {
-		$real        = random_int( 0, 999 );
-		$distractors = array();
+		$real             = random_int( 0, 999 );
+		$valid_candidates = array();
 
-		// At most a few iterations needed in practice; cap defensively in
-		// case a freak rng run keeps colliding.
-		$attempts         = 0;
-		$distractor_count = 0;
-		while ( $distractor_count < 2 && $attempts < 100 ) {
-			++$attempts;
-			$candidate = random_int( 0, 999 );
-			if ( $candidate === $real ) {
-				continue;
+		for ( $candidate = 0; $candidate <= 999; $candidate++ ) {
+			if ( $candidate !== $real && abs( $candidate - $real ) >= 100 ) {
+				$valid_candidates[] = $candidate;
 			}
-			if ( abs( $candidate - $real ) < 100 ) {
-				continue;
-			}
-			if ( $distractor_count > 0 && abs( $candidate - $distractors[0] ) < 100 ) {
-				continue;
-			}
-			$distractors[] = $candidate;
-			++$distractor_count;
 		}
+
+		if ( empty( $valid_candidates ) ) {
+			throw new \RuntimeException( 'QR login challenge generator could not find a valid first distractor.' );
+		}
+
+		$first_index = random_int( 0, count( $valid_candidates ) - 1 );
+		$first       = $valid_candidates[ $first_index ];
+
+		$second_candidates = array_values(
+			array_filter(
+				$valid_candidates,
+				static function ( $candidate ) use ( $first ) {
+					return abs( $candidate - $first ) >= 100;
+				}
+			)
+		);
+
+		if ( empty( $second_candidates ) ) {
+			throw new \RuntimeException( 'QR login challenge generator could not find a valid second distractor.' );
+		}
+
+		$second      = $second_candidates[ random_int( 0, count( $second_candidates ) - 1 ) ];
+		$distractors = array( $first, $second );
 
 		return array(
 			'real'        => str_pad( (string) $real, 3, '0', STR_PAD_LEFT ),

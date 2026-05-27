@@ -41,6 +41,11 @@ class QRLoginRateLimits extends WC_Rate_Limiter {
 	const BUCKET_INVALID_EXCHANGE = 'exc_invalid';
 
 	/**
+	 * Invalid-token scan bucket.
+	 */
+	const BUCKET_INVALID_SCAN = 'scn_invalid';
+
+	/**
 	 * Valid-token exchange bucket.
 	 */
 	const BUCKET_VALID_EXCHANGE = 'exc_token';
@@ -172,6 +177,11 @@ class QRLoginRateLimits extends WC_Rate_Limiter {
 			case self::BUCKET_INVALID_EXCHANGE:
 				return array(
 					'limit'   => MobileAppQRLogin::MAX_INVALID_EXCHANGE_ATTEMPTS,
+					'seconds' => 15 * MINUTE_IN_SECONDS,
+				);
+			case self::BUCKET_INVALID_SCAN:
+				return array(
+					'limit'   => MobileAppQRLogin::MAX_INVALID_SCAN_ATTEMPTS,
 					'seconds' => 15 * MINUTE_IN_SECONDS,
 				);
 			case self::BUCKET_VALID_EXCHANGE:
