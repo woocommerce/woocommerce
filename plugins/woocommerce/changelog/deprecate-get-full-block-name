@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Deprecate AbstractBlock::get_full_block_name in favor of get_block_type.
