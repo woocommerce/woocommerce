@@ -194,6 +194,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 					'post_mime_type' => 'image/jpeg',
 				)
 			);
+			$this->assertIsInt( $image_id, 'The image should be created.' );
 
 			update_post_meta( $image_id, '_wp_attached_file', 'visual-ajax-term-image.jpg' );
 
