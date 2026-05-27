@@ -1,64 +1,150 @@
 /**
  * External dependencies
  */
-import { createBlock, getBlockTypes } from '@wordpress/blocks';
+import {
+	createBlock,
+	getBlockTypes,
+	type BlockInstance,
+} from '@wordpress/blocks';
 import { useState } from '@wordpress/element';
 import { dispatch, select, useDispatch } from '@wordpress/data';
 import { getInnerBlockByName } from '@woocommerce/utils';
 import {
-	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
-	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
 
+const SELECTABLE_ITEMS_CONTEXT = 'woocommerce/selectableItems';
+
+type DisplayStyleInsertionPoint = {
+	rootClientId: string;
+	index: number;
+};
+
+type DisplayStyleBlockSupport = {
+	woocommerce?: {
+		innerBlockDisplayStyle?: unknown;
+	};
+};
+
 /**
- * Internal dependencies
+ * By default, the current parent block is the insertion point. For complex
+ * block compositions, the default insertion point can be an inner block of
+ * the parent, such as the Variation Attribute Selector block.
  */
-import { DISPLAY_STYLE_SWITCHER_EXCLUDED_BLOCK_NAMES } from './constants';
+type GetFallbackDisplayStyleInsertionPoint = (
+	parentBlock: BlockInstance
+) => DisplayStyleInsertionPoint;
+
+type DisplayStyleBlockType = ReturnType< typeof getBlockTypes >[ number ] & {
+	ancestor?: readonly string[] | string;
+	usesContext?: readonly string[] | string;
+	supports?: DisplayStyleBlockSupport;
+};
+
+type DisplayStyleSwitcherProps = {
+	clientId: string;
+	currentStyle: string;
+	onChange: ( value: string ) => void;
+	contextKey?: string;
+	getFallbackDisplayStyleInsertionPoint?: GetFallbackDisplayStyleInsertionPoint;
+};
+
+function isBlockInstance(
+	block: BlockInstance | null
+): block is BlockInstance {
+	return Boolean( block );
+}
+
+function getBlockTypeList(
+	value: readonly string[] | string | undefined
+): readonly string[] {
+	if ( ! value ) {
+		return [];
+	}
+	return Array.isArray( value ) ? value : [ value ];
+}
+
+function hasInnerBlockDisplayStyleSupport(
+	blockType: DisplayStyleBlockType
+): boolean {
+	return blockType.supports?.woocommerce?.innerBlockDisplayStyle === true;
+}
 
 function isDisplayStyleCandidate(
-	blockTypeName: string,
+	blockType: DisplayStyleBlockType,
 	parentBlockName: string | undefined,
-	blockAncestor: readonly string[] | undefined
+	contextKey: string
 ): boolean {
 	if ( ! parentBlockName ) {
 		return false;
 	}
-	if (
-		DISPLAY_STYLE_SWITCHER_EXCLUDED_BLOCK_NAMES.includes( blockTypeName )
-	) {
+
+	if ( ! hasInnerBlockDisplayStyleSupport( blockType ) ) {
 		return false;
 	}
-	return blockAncestor?.includes( parentBlockName ) ?? false;
+
+	return (
+		getBlockTypeList( blockType.ancestor ).includes( parentBlockName ) &&
+		getBlockTypeList( blockType.usesContext ).includes( contextKey )
+	);
+}
+
+function getDisplayStyleOptions(
+	parentBlockName: string | undefined,
+	contextKey: string
+): DisplayStyleBlockType[] {
+	return ( getBlockTypes() as DisplayStyleBlockType[] ).filter(
+		( blockType ) =>
+			isDisplayStyleCandidate( blockType, parentBlockName, contextKey )
+	);
+}
+
+function getCurrentDisplayStyleBlock(
+	parentBlock: BlockInstance,
+	displayStyleOptions: DisplayStyleBlockType[]
+): BlockInstance | null {
+	return (
+		displayStyleOptions
+			.map( ( blockType ) =>
+				getInnerBlockByName( parentBlock, blockType.name )
+			)
+			.find( isBlockInstance ) ?? null
+	);
+}
+
+function getDisplayStyleInsertionPoint(
+	parentBlock: BlockInstance,
+	getFallbackDisplayStyleInsertionPoint?: GetFallbackDisplayStyleInsertionPoint
+): DisplayStyleInsertionPoint {
+	return (
+		getFallbackDisplayStyleInsertionPoint?.( parentBlock ) ?? {
+			rootClientId: parentBlock.clientId,
+			index: parentBlock.innerBlocks.length,
+		}
+	);
 }
 
 export const DisplayStyleSwitcher = ( {
 	clientId,
 	currentStyle,
 	onChange,
-}: {
-	clientId: string;
-	currentStyle: string;
-	onChange: ( value: string ) => void;
-} ) => {
+	contextKey = SELECTABLE_ITEMS_CONTEXT,
+	getFallbackDisplayStyleInsertionPoint,
+}: DisplayStyleSwitcherProps ) => {
 	const parentBlock = select( 'core/block-editor' ).getBlock( clientId );
 	const parentBlockName = parentBlock?.name;
-
-	const displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
-		isDisplayStyleCandidate(
-			blockType.name,
-			parentBlockName,
-			blockType.ancestor
-		)
+	const displayStyleOptions = getDisplayStyleOptions(
+		parentBlockName,
+		contextKey
 	);
 
 	const { insertBlock, replaceBlock } = useDispatch( 'core/block-editor' );
 
 	const [ displayStyleBlocksAttributes, setDisplayStyleBlocksAttributes ] =
-		useState< Record< string, unknown > >( {} );
+		useState< Record< string, Record< string, unknown > > >( {} );
 
 	if ( displayStyleOptions.length === 0 ) return null;
 
@@ -73,28 +159,38 @@ export const DisplayStyleSwitcher = ( {
 			onChange={ ( value: string | number | undefined ) => {
 				if ( ! value || typeof value !== 'string' ) return;
 				if ( ! parentBlock ) return;
-				const currentStyleBlock = getInnerBlockByName(
+				const currentStyleBlock = getCurrentDisplayStyleBlock(
 					parentBlock,
-					currentStyle
+					displayStyleOptions
 				);
 
 				if ( currentStyleBlock ) {
-					setDisplayStyleBlocksAttributes( {
+					const nextDisplayStyleBlocksAttributes = {
 						...displayStyleBlocksAttributes,
-						[ currentStyle ]: currentStyleBlock.attributes,
-					} );
+						[ currentStyleBlock.name ]:
+							currentStyleBlock.attributes,
+					};
+
+					setDisplayStyleBlocksAttributes(
+						nextDisplayStyleBlocksAttributes
+					);
 					replaceBlock(
 						currentStyleBlock.clientId,
 						createBlock(
 							value,
-							displayStyleBlocksAttributes[ value ] || {}
+							nextDisplayStyleBlocksAttributes[ value ] || {}
 						)
 					);
 				} else {
+					const insertionPoint = getDisplayStyleInsertionPoint(
+						parentBlock,
+						getFallbackDisplayStyleInsertionPoint
+					);
+
 					insertBlock(
 						createBlock( value ),
-						parentBlock.innerBlocks.length,
-						parentBlock.clientId,
+						insertionPoint.index,
+						insertionPoint.rootClientId,
 						false
 					);
 				}
@@ -115,36 +211,35 @@ export const DisplayStyleSwitcher = ( {
 
 export function resetDisplayStyleBlock(
 	clientId: string,
-	defaultStyle: string
+	defaultStyle: string,
+	getFallbackDisplayStyleInsertionPoint?: GetFallbackDisplayStyleInsertionPoint,
+	contextKey = SELECTABLE_ITEMS_CONTEXT
 ) {
 	const parentBlock = select( 'core/block-editor' ).getBlock( clientId );
 	if ( ! parentBlock ) return;
 
-	const parentBlockName = parentBlock.name;
-	const displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
-		isDisplayStyleCandidate(
-			blockType.name,
-			parentBlockName,
-			blockType.ancestor
-		)
+	const displayStyleOptions = getDisplayStyleOptions(
+		parentBlock.name,
+		contextKey
 	);
-
-	const currentStyle = displayStyleOptions.find( ( blockType ) =>
-		getInnerBlockByName( parentBlock, blockType.name )
+	const currentStyleBlock = getCurrentDisplayStyleBlock(
+		parentBlock,
+		displayStyleOptions
 	);
-
-	const currentStyleBlock = currentStyle
-		? getInnerBlockByName( parentBlock, currentStyle.name )
-		: null;
 
 	const { insertBlock, replaceBlock } = dispatch( 'core/block-editor' );
 	if ( currentStyleBlock ) {
 		replaceBlock( currentStyleBlock.clientId, createBlock( defaultStyle ) );
 	} else {
+		const insertionPoint = getDisplayStyleInsertionPoint(
+			parentBlock,
+			getFallbackDisplayStyleInsertionPoint
+		);
+
 		insertBlock(
 			createBlock( defaultStyle ),
-			parentBlock.innerBlocks.length,
-			parentBlock.clientId,
+			insertionPoint.index,
+			insertionPoint.rootClientId,
 			false
 		);
 	}

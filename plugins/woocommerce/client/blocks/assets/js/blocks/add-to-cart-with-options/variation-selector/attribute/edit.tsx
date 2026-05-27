@@ -10,7 +10,7 @@ import {
 	store as blockEditorStore,
 	__experimentalUseBlockPreview as useBlockPreview,
 } from '@wordpress/block-editor';
-import { BlockInstance, type BlockEditProps } from '@wordpress/blocks';
+import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import {
 	CustomDataProvider,
@@ -43,6 +43,26 @@ import type {
 } from '../../../../types/type-defs/selectable-items';
 
 const INNER_CHIPS = 'woocommerce/product-filter-chips';
+
+const getFallbackDisplayStyleInsertionPoint = (
+	parentBlock: BlockInstance
+) => {
+	const groupBlock = parentBlock.innerBlocks.find(
+		( block ) => block.name === 'core/group'
+	);
+
+	if ( groupBlock ) {
+		return {
+			rootClientId: groupBlock.clientId,
+			index: groupBlock.innerBlocks.length,
+		};
+	}
+
+	return {
+		rootClientId: parentBlock.clientId,
+		index: parentBlock.innerBlocks.length,
+	};
+};
 
 interface Attributes {
 	className?: string;
@@ -177,7 +197,11 @@ export default function AttributeItemTemplateEdit(
 					label={ __( 'Style', 'woocommerce' ) }
 					resetAll={ () => {
 						setAttributes( { displayStyle: INNER_CHIPS } );
-						resetDisplayStyleBlock( clientId, INNER_CHIPS );
+						resetDisplayStyleBlock(
+							clientId,
+							INNER_CHIPS,
+							getFallbackDisplayStyleInsertionPoint
+						);
 					} }
 				>
 					<ToolsPanelItem
@@ -185,7 +209,11 @@ export default function AttributeItemTemplateEdit(
 						label={ __( 'Style', 'woocommerce' ) }
 						onDeselect={ () => {
 							setAttributes( { displayStyle: INNER_CHIPS } );
-							resetDisplayStyleBlock( clientId, INNER_CHIPS );
+							resetDisplayStyleBlock(
+								clientId,
+								INNER_CHIPS,
+								getFallbackDisplayStyleInsertionPoint
+							);
 						} }
 						isShownByDefault
 					>
@@ -196,6 +224,9 @@ export default function AttributeItemTemplateEdit(
 							<DisplayStyleSwitcher
 								clientId={ clientId }
 								currentStyle={ displayStyle }
+								getFallbackDisplayStyleInsertionPoint={
+									getFallbackDisplayStyleInsertionPoint
+								}
 								onChange={ ( value ) => {
 									setAttributes( {
 										displayStyle: value,
