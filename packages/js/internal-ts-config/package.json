@@ -22,6 +22,7 @@
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint 'types/**/*.d.ts' --fix",
 		"lint:lang:js": "eslint 'types/**/*.d.ts'",
+		"postinstall": "pnpm build:project:types",
 		"types:update-patch": "node scripts/generate-types.mjs update-patch"
 	},
 	"devDependencies": {
