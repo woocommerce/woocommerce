@@ -243,10 +243,8 @@ class WCAdminAssets {
 			return;
 		}
 
-		if ( ! PageController::is_modern_settings_page() ) {
-			wp_enqueue_script( WC_ADMIN_APP );
-			wp_enqueue_style( WC_ADMIN_APP );
-		}
+		wp_enqueue_script( WC_ADMIN_APP );
+		wp_enqueue_style( WC_ADMIN_APP );
 
 		wp_enqueue_style( 'wc-material-icons' );
 		wp_enqueue_style( 'wc-onboarding' );
@@ -324,7 +322,6 @@ class WCAdminAssets {
 			'wc-block-templates',
 			'wc-experimental-products-app',
 			'wc-product-editor',
-			'wc-settings-editor',
 			'wc-remote-logging',
 			'wc-sanitize',
 		);
@@ -401,9 +398,6 @@ class WCAdminAssets {
 			),
 			array(
 				'handle' => 'wc-product-editor',
-			),
-			array(
-				'handle' => 'wc-settings-editor',
 			),
 			array(
 				'handle' => 'wc-customer-effort-score',

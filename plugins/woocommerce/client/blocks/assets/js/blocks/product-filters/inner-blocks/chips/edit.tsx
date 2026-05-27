@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
+import { Disabled } from '@wordpress/components';
 import clsx from 'clsx';
 import { decodeHtmlEntities } from '@woocommerce/utils';
 import { getSetting } from '@woocommerce/settings';
@@ -107,56 +108,60 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	return (
 		<>
 			<div { ...blockProps }>
-				<div className="wc-block-product-filter-chips__items">
-					{ isLoading && loadingState }
-					{ ! isLoading &&
-						( isLongList
-							? items.slice( 0, threshold )
-							: items
-						).map( ( item, index ) => (
-							<div
-								key={ index }
-								className="wc-block-product-filter-chips__item"
-								aria-checked={ !! item.selected }
-							>
-								<span className="wc-block-product-filter-chips__label">
-									<span
-										className={ clsx(
-											'wc-block-product-filter-chips__swatch',
-											{
-												'wc-block-product-filter-chips__swatch--no-color':
-													! item.color,
+				<Disabled>
+					<div className="wc-block-product-filter-chips__items">
+						{ isLoading && loadingState }
+						{ ! isLoading &&
+							( isLongList
+								? items.slice( 0, threshold )
+								: items
+							).map( ( item, index ) => (
+								<div
+									key={ index }
+									className="wc-block-product-filter-chips__item"
+									aria-checked={ !! item.selected }
+								>
+									<span className="wc-block-product-filter-chips__label">
+										<span
+											className={ clsx(
+												'wc-block-product-filter-chips__swatch',
+												{
+													'wc-block-product-filter-chips__swatch--no-color':
+														! item.color,
+												}
+											) }
+											style={
+												item.color
+													? {
+															backgroundColor:
+																item.color,
+													  }
+													: undefined
 											}
-										) }
-										style={
-											item.color
-												? {
-														backgroundColor:
-															item.color,
-												  }
-												: undefined
-										}
-										aria-hidden="true"
-									/>
-									<span className="wc-block-product-filter-chips__text">
-										{ typeof item.label === 'string'
-											? decodeHtmlEntities( item.label )
-											: item.label }
-									</span>
-									{ item.count !== undefined && (
-										<span className="wc-block-product-filter-chips__count">
-											{ ` (${ item.count })` }
+											aria-hidden="true"
+										/>
+										<span className="wc-block-product-filter-chips__text">
+											{ typeof item.label === 'string'
+												? decodeHtmlEntities(
+														item.label
+												  )
+												: item.label }
 										</span>
-									) }
-								</span>
-							</div>
-						) ) }
-				</div>
-				{ ! isLoading && isLongList && (
-					<button className="wc-block-product-filter-chips__show-more">
-						{ __( 'Show more…', 'woocommerce' ) }
-					</button>
-				) }
+										{ item.count !== undefined && (
+											<span className="wc-block-product-filter-chips__count">
+												{ ` (${ item.count })` }
+											</span>
+										) }
+									</span>
+								</div>
+							) ) }
+					</div>
+					{ ! isLoading && isLongList && (
+						<button className="wc-block-product-filter-chips__show-more">
+							{ __( 'Show more…', 'woocommerce' ) }
+						</button>
+					) }
+				</Disabled>
 			</div>
 			<InspectorControls group="color">
 				{ colorGradientSettings.hasColorsOrGradients && (

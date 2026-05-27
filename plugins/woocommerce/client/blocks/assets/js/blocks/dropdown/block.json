@@ -11,7 +11,10 @@
 		"woocommerce/add-to-cart-with-options-variation-selector-attribute"
 	],
 	"supports": {
-		"interactivity": true
+		"interactivity": true,
+		"woocommerce": {
+			"innerBlockDisplayStyle": true
+		}
 	},
 	"usesContext": [ "woocommerce/selectableItems", "woocommerce/attributeId" ],
 	"attributes": {},
