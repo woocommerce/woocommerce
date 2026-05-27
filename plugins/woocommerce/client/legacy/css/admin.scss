@@ -5610,14 +5610,14 @@ img.help_tip {
 	}
 
 	// Hide original item while dragging
-	.wc-product-images__image--dragging {
-		opacity: 0 !important;
-		height: 0 !important;
-		min-height: 0 !important;
-		padding: 0 !important;
-		margin: 0 !important;
-		border: none !important;
-		overflow: hidden !important;
+	.wc-product-images__image.wc-product-images__image--dragging {
+		opacity: 0;
+		height: 0;
+		min-height: 0;
+		padding: 0;
+		margin: 0;
+		border: none;
+		overflow: hidden;
 	}
 
 	// Drag placeholder
