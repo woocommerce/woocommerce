@@ -312,6 +312,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 					'post_mime_type' => 'image/jpeg',
 				)
 			);
+			$this->assertIsInt( $image_id, 'The image should be created.' );
 
 			update_post_meta( $image_id, '_wp_attached_file', 'visual-attribute-term-image.jpg' );
 
