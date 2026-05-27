@@ -1515,6 +1515,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
 	 * Set all product image IDs. The first ID becomes the featured image, the rest become the gallery.
+	 * Duplicate IDs are removed before assigning the image properties.
 	 *
 	 * @param int[] $image_ids Ordered array of attachment IDs.
 	 * @return void
