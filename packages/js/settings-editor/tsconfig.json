@@ -10,7 +10,8 @@
 		"typeRoots": [
 			"./typings",
 			"./node_modules/@types"
-		]
+		],
+		"composite": true
 	},
 	"include": [
 		"typings/**/*",
@@ -18,5 +19,22 @@
 	],
 	"exclude": [
 		"**/test/**"
+	],
+	"references": [
+		{
+			"path": "../components"
+		},
+		{
+			"path": "../navigation"
+		},
+		{
+			"path": "../product-editor"
+		},
+		{
+			"path": "../sanitize"
+		},
+		{
+			"path": "../tracks"
+		}
 	]
 }

@@ -6,7 +6,6 @@ const path = require( 'path' );
 const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
-const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
 const webpack = require( 'webpack' );
 
@@ -202,8 +201,6 @@ const webpackConfig = {
 		new webpack.DefinePlugin( {
 			__i18n_text_domain__: JSON.stringify( 'woocommerce' ),
 		} ),
-		// Runs TypeScript type checker on a separate process.
-		! process.env.STORYBOOK && isWatch && new ForkTsCheckerWebpackPlugin(),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );
