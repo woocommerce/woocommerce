@@ -1,0 +1,205 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Checkout\Helpers;
+
+use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
+use WC_Unit_Test_Case;
+
+/**
+ * @covers \Automattic\WooCommerce\Checkout\Helpers\ReserveStock::get_reserved_stock_batch
+ * @covers \Automattic\WooCommerce\Checkout\Helpers\ReserveStock::get_reserved_stock
+ */
+class ReserveStockTest extends WC_Unit_Test_Case {
+
+	/**
+	 * IDs of products created in setUp, in order.
+	 *
+	 * @var int[]
+	 */
+	private array $product_ids = array();
+
+	public function setUp(): void {
+		parent::setUp();
+		ReserveStock::flush_reserved_stock_cache();
+
+		// 3 stock-managed simple products.
+		for ( $i = 0; $i < 3; $i++ ) {
+			$product = new \WC_Product_Simple();
+			$product->set_name( 'CC2 RS Test ' . $i );
+			$product->set_regular_price( '5.00' );
+			$product->set_manage_stock( true );
+			$product->set_stock_quantity( 50 );
+			$product->set_stock_status( 'instock' );
+			$product->set_status( 'publish' );
+			$this->product_ids[] = (int) $product->save();
+		}
+	}
+
+	public function tearDown(): void {
+		ReserveStock::flush_reserved_stock_cache();
+		foreach ( $this->product_ids as $id ) {
+			wp_delete_post( $id, true );
+		}
+		$this->product_ids = array();
+		parent::tearDown();
+	}
+
+	/**
+	 * @testdox get_reserved_stock_batch returns 0 for every requested ID when no reservations exist.
+	 */
+	public function test_batch_returns_zero_for_unreserved_products(): void {
+		$rs     = new ReserveStock();
+		$result = $rs->get_reserved_stock_batch( $this->product_ids, 0 );
+
+		$this->assertIsArray( $result );
+		foreach ( $this->product_ids as $pid ) {
+			$this->assertArrayHasKey( $pid, $result );
+			$this->assertSame( 0.0, (float) $result[ $pid ] );
+		}
+	}
+
+	/**
+	 * @testdox get_reserved_stock_batch agrees with per-product get_reserved_stock for the same exclude_order_id.
+	 */
+	public function test_batch_parity_with_single_call(): void {
+		// Reserve some stock against a pending order.
+		$order = new \WC_Order();
+		$order->set_status( 'pending' );
+		$order->save();
+
+		$pid = $this->product_ids[1];
+		$this->reserve_directly( (int) $order->get_id(), $pid, 7 );
+
+		ReserveStock::flush_reserved_stock_cache();
+
+		$rs    = new ReserveStock();
+		$batch = $rs->get_reserved_stock_batch( $this->product_ids, 0 );
+
+		// Compare to single-shot lookups (fresh instance, fresh cache).
+		ReserveStock::flush_reserved_stock_cache();
+		foreach ( $this->product_ids as $product_id ) {
+			$product = wc_get_product( $product_id );
+			$single  = ( new ReserveStock() )->get_reserved_stock( $product, 0 );
+			$this->assertSame(
+				(float) $single,
+				(float) $batch[ $product_id ],
+				"Batch vs single mismatch for product $product_id"
+			);
+		}
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox exclude_order_id removes that order's reservations from both single and batch results.
+	 */
+	public function test_exclude_order_id_excludes_in_batch(): void {
+		$order = new \WC_Order();
+		$order->set_status( 'pending' );
+		$order->save();
+		$oid = (int) $order->get_id();
+
+		$pid = $this->product_ids[2];
+		$this->reserve_directly( $oid, $pid, 9 );
+
+		ReserveStock::flush_reserved_stock_cache();
+		$rs = new ReserveStock();
+
+		// Without excluding, we see the reservation.
+		$batch_unexcluded = $rs->get_reserved_stock_batch( array( $pid ), 0 );
+		$this->assertSame( 9.0, (float) $batch_unexcluded[ $pid ] );
+
+		// With excluding, we don't.
+		ReserveStock::flush_reserved_stock_cache();
+		$batch_excluded = $rs->get_reserved_stock_batch( array( $pid ), $oid );
+		$this->assertSame( 0.0, (float) $batch_excluded[ $pid ] );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox After get_reserved_stock_batch, get_reserved_stock hits the cache and emits no extra SQL.
+	 */
+	public function test_batch_primes_cache_for_single_calls(): void {
+		global $wpdb;
+
+		ReserveStock::flush_reserved_stock_cache();
+		$rs = new ReserveStock();
+		$rs->get_reserved_stock_batch( $this->product_ids, 0 );
+
+		// Snapshot wpdb num_queries; require_once SAVEQUERIES already on in tests is unreliable, so we use num_queries.
+		$before = (int) $wpdb->num_queries;
+		foreach ( $this->product_ids as $product_id ) {
+			$rs->get_reserved_stock( wc_get_product( $product_id ), 0 );
+		}
+		$after = (int) $wpdb->num_queries;
+
+		$this->assertSame( $before, $after, 'Per-product calls after batch must not run any SQL.' );
+	}
+
+	/**
+	 * @testdox The same single-call value is returned on the second invocation (memoization).
+	 */
+	public function test_single_call_is_memoized(): void {
+		global $wpdb;
+
+		ReserveStock::flush_reserved_stock_cache();
+		$rs      = new ReserveStock();
+		$product = wc_get_product( $this->product_ids[0] );
+
+		// Warm.
+		$first  = $rs->get_reserved_stock( $product, 0 );
+		$before = (int) $wpdb->num_queries;
+		$second = $rs->get_reserved_stock( $product, 0 );
+		$after  = (int) $wpdb->num_queries;
+
+		$this->assertSame( (float) $first, (float) $second );
+		$this->assertSame( $before, $after, 'Second call must hit cache.' );
+	}
+
+	/**
+	 * @testdox flush_reserved_stock_cache(null) drops all cached entries; targeted flush only drops one bucket.
+	 */
+	public function test_flush_cache_behaviour(): void {
+		global $wpdb;
+		$rs = new ReserveStock();
+
+		// Prime two buckets: exclude_order_id 0 and exclude_order_id 999.
+		$rs->get_reserved_stock_batch( $this->product_ids, 0 );
+		$rs->get_reserved_stock_batch( $this->product_ids, 999 );
+
+		// Targeted flush.
+		ReserveStock::flush_reserved_stock_cache( 999 );
+
+		$before = (int) $wpdb->num_queries;
+		// Bucket 0 should still be warm.
+		foreach ( $this->product_ids as $pid ) {
+			$rs->get_reserved_stock( wc_get_product( $pid ), 0 );
+		}
+		$this->assertSame( $before, (int) $wpdb->num_queries, 'Bucket 0 should still be cached.' );
+
+		// Full flush.
+		ReserveStock::flush_reserved_stock_cache();
+		$before = (int) $wpdb->num_queries;
+		$rs->get_reserved_stock( wc_get_product( $this->product_ids[0] ), 0 );
+		$this->assertGreaterThan( $before, (int) $wpdb->num_queries, 'After flush, single call must run SQL.' );
+	}
+
+	/**
+	 * Insert a reserved_stock row without going through reserve_stock_for_order (which would trigger flush internally).
+	 */
+	private function reserve_directly( int $order_id, int $product_id, float $qty ): void {
+		global $wpdb;
+		$wpdb->insert(
+			$wpdb->wc_reserved_stock,
+			array(
+				'order_id'       => $order_id,
+				'product_id'     => $product_id,
+				'stock_quantity' => $qty,
+				'timestamp'      => current_time( 'mysql', true ),
+				'expires'        => gmdate( 'Y-m-d H:i:s', time() + 3600 ),
+			)
+		);
+	}
+}
