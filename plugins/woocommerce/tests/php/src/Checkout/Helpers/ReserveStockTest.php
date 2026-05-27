@@ -19,6 +19,9 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 	 */
 	private array $product_ids = array();
 
+	/**
+	 * Reset the request-scoped cache and seed three stock-managed products.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		ReserveStock::flush_reserved_stock_cache();
@@ -36,6 +39,9 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Flush the cache and delete the seeded products.
+	 */
 	public function tearDown(): void {
 		ReserveStock::flush_reserved_stock_cache();
 		foreach ( $this->product_ids as $id ) {
@@ -49,8 +55,8 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 	 * @testdox get_reserved_stock_batch returns 0 for every requested ID when no reservations exist.
 	 */
 	public function test_batch_returns_zero_for_unreserved_products(): void {
-		$rs     = new ReserveStock();
-		$result = $rs->get_reserved_stock_batch( $this->product_ids, 0 );
+		$sut    = new ReserveStock();
+		$result = $sut->get_reserved_stock_batch( $this->product_ids, 0 );
 
 		$this->assertIsArray( $result );
 		foreach ( $this->product_ids as $pid ) {
@@ -73,8 +79,8 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 
 		ReserveStock::flush_reserved_stock_cache();
 
-		$rs    = new ReserveStock();
-		$batch = $rs->get_reserved_stock_batch( $this->product_ids, 0 );
+		$sut   = new ReserveStock();
+		$batch = $sut->get_reserved_stock_batch( $this->product_ids, 0 );
 
 		// Compare to single-shot lookups (fresh instance, fresh cache).
 		ReserveStock::flush_reserved_stock_cache();
@@ -104,15 +110,15 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 		$this->reserve_directly( $oid, $pid, 9 );
 
 		ReserveStock::flush_reserved_stock_cache();
-		$rs = new ReserveStock();
+		$sut = new ReserveStock();
 
 		// Without excluding, we see the reservation.
-		$batch_unexcluded = $rs->get_reserved_stock_batch( array( $pid ), 0 );
+		$batch_unexcluded = $sut->get_reserved_stock_batch( array( $pid ), 0 );
 		$this->assertSame( 9.0, (float) $batch_unexcluded[ $pid ] );
 
 		// With excluding, we don't.
 		ReserveStock::flush_reserved_stock_cache();
-		$batch_excluded = $rs->get_reserved_stock_batch( array( $pid ), $oid );
+		$batch_excluded = $sut->get_reserved_stock_batch( array( $pid ), $oid );
 		$this->assertSame( 0.0, (float) $batch_excluded[ $pid ] );
 
 		$order->delete( true );
@@ -125,13 +131,13 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		ReserveStock::flush_reserved_stock_cache();
-		$rs = new ReserveStock();
-		$rs->get_reserved_stock_batch( $this->product_ids, 0 );
+		$sut = new ReserveStock();
+		$sut->get_reserved_stock_batch( $this->product_ids, 0 );
 
 		// Snapshot wpdb num_queries; require_once SAVEQUERIES already on in tests is unreliable, so we use num_queries.
 		$before = (int) $wpdb->num_queries;
 		foreach ( $this->product_ids as $product_id ) {
-			$rs->get_reserved_stock( wc_get_product( $product_id ), 0 );
+			$sut->get_reserved_stock( wc_get_product( $product_id ), 0 );
 		}
 		$after = (int) $wpdb->num_queries;
 
@@ -145,13 +151,13 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		ReserveStock::flush_reserved_stock_cache();
-		$rs      = new ReserveStock();
+		$sut     = new ReserveStock();
 		$product = wc_get_product( $this->product_ids[0] );
 
 		// Warm.
-		$first  = $rs->get_reserved_stock( $product, 0 );
+		$first  = $sut->get_reserved_stock( $product, 0 );
 		$before = (int) $wpdb->num_queries;
-		$second = $rs->get_reserved_stock( $product, 0 );
+		$second = $sut->get_reserved_stock( $product, 0 );
 		$after  = (int) $wpdb->num_queries;
 
 		$this->assertSame( (float) $first, (float) $second );
@@ -163,11 +169,11 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 	 */
 	public function test_flush_cache_behaviour(): void {
 		global $wpdb;
-		$rs = new ReserveStock();
+		$sut = new ReserveStock();
 
 		// Prime two buckets: exclude_order_id 0 and exclude_order_id 999.
-		$rs->get_reserved_stock_batch( $this->product_ids, 0 );
-		$rs->get_reserved_stock_batch( $this->product_ids, 999 );
+		$sut->get_reserved_stock_batch( $this->product_ids, 0 );
+		$sut->get_reserved_stock_batch( $this->product_ids, 999 );
 
 		// Targeted flush.
 		ReserveStock::flush_reserved_stock_cache( 999 );
@@ -175,14 +181,14 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 		$before = (int) $wpdb->num_queries;
 		// Bucket 0 should still be warm.
 		foreach ( $this->product_ids as $pid ) {
-			$rs->get_reserved_stock( wc_get_product( $pid ), 0 );
+			$sut->get_reserved_stock( wc_get_product( $pid ), 0 );
 		}
 		$this->assertSame( $before, (int) $wpdb->num_queries, 'Bucket 0 should still be cached.' );
 
 		// Full flush.
 		ReserveStock::flush_reserved_stock_cache();
 		$before = (int) $wpdb->num_queries;
-		$rs->get_reserved_stock( wc_get_product( $this->product_ids[0] ), 0 );
+		$sut->get_reserved_stock( wc_get_product( $this->product_ids[0] ), 0 );
 		$this->assertGreaterThan( $before, (int) $wpdb->num_queries, 'After flush, single call must run SQL.' );
 	}
 
