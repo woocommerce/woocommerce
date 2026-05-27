@@ -43,7 +43,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 					{ sprintf(
 						/* translators: %d: stock quantity */
 						__( '%d available in stock', 'woocommerce' ),
-						item.stock_quantity
+						item.stock_quantity ?? 0
 					) }
 				</div>
 			);
