@@ -122,6 +122,10 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 
 			if ( $user_login && $reset_key ) {
 				$this->object            = get_user_by( 'login', $user_login );
+				if ( ! ( $this->object instanceof WP_User ) ) {
+					$this->restore_locale();
+					return;
+				}
 				$this->user_id           = $this->object->ID;
 				$this->user_login        = $user_login;
 				$this->reset_key         = $reset_key;
