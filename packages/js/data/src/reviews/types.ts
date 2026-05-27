@@ -77,7 +77,7 @@ export interface ReviewsState {
 	};
 }
 
-export interface ReviewsQueryParams {
+export type ReviewsQueryParams = {
 	/** Scope under which the request is made; determines fields present in response. */
 	context?: 'view' | 'edit';
 	/** Current page of the collection. */
