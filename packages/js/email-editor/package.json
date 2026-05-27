@@ -39,9 +39,10 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
 		"build:project:esm": "wireit",
-		"build:publish:project": "pnpm build && tsc --project tsconfig-cjs.json --noCheck",
+		"build:publish:project": "pnpm --if-present '/^build:publish:project:.*$/'",
+		"build:publish:project:cjs": "tsc --project tsconfig-cjs.json --noCheck",
+		"build:publish:project:deps": "pnpm build",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
-		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"format": "prettier --write 'src/**/*.{js,jsx,json,ts,tsx,yml,yaml,scss}'",
 		"format:check": "prettier --check 'src/**/*.{js,jsx,json,ts,tsx,yml,yaml,scss}'",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/' && pnpm format:check && pnpm lint:lang:style",
@@ -50,8 +51,10 @@
 		"lint:fix:lang:style": "stylelint 'src/**/*.{css,scss}' --fix",
 		"lint:lang:js": "eslint --ext=js,ts,tsx src",
 		"lint:lang:style": "stylelint 'src/**/*.{css,scss}'",
+		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build:publish:project",
 		"test:js": "jest --config ./jest.config.json --passWithNoTests",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:bundle": "wireit",
@@ -189,7 +192,7 @@
 			"service": true
 		},
 		"build:project:esm": {
-			"command": "tsc --project tsconfig.json",
+			"command": "tsc --project tsconfig.json --noCheck",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig.json",
@@ -198,14 +201,15 @@
 			],
 			"output": [
 				"build-module",
-				"build-types"
+				"build-types",
+				"tsconfig.tsbuildinfo"
 			],
 			"dependencies": [
 				"dependencyOutputs"
 			]
 		},
 		"watch:build:project:esm": {
-			"command": "tsc --project tsconfig.json --watch",
+			"command": "tsc --project tsconfig.json --noCheck --watch",
 			"service": true
 		},
 		"dependencyOutputs": {
@@ -225,6 +229,7 @@
 				"node_modules/@woocommerce/internal-style-build/abstracts",
 				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
 				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig-jest.json",
 				"node_modules/@woocommerce/internal-ts-config/types"
 			]
 		}
