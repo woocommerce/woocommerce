@@ -8,6 +8,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\TaxBasedOn;
+
 require_once __DIR__ . '/legacy/class-wc-legacy-customer.php';
 
 /**
@@ -187,15 +189,15 @@ class WC_Customer extends WC_Legacy_Customer {
 
 		// Check shipping method at this point to see if we need special handling.
 		if ( true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) && count( array_intersect( wc_get_chosen_shipping_method_ids(), apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) ) ) ) > 0 ) {
-			$tax_based_on = 'base';
+			$tax_based_on = TaxBasedOn::BASE;
 		}
 
-		if ( 'base' === $tax_based_on ) {
+		if ( TaxBasedOn::BASE === $tax_based_on ) {
 			$country  = WC()->countries->get_base_country();
 			$state    = WC()->countries->get_base_state();
 			$postcode = WC()->countries->get_base_postcode();
 			$city     = WC()->countries->get_base_city();
-		} elseif ( 'billing' === $tax_based_on ) {
+		} elseif ( TaxBasedOn::BILLING === $tax_based_on ) {
 			$country  = $this->get_billing_country();
 			$state    = $this->get_billing_state();
 			$postcode = $this->get_billing_postcode();
@@ -1263,5 +1265,28 @@ class WC_Customer extends WC_Legacy_Customer {
 	 */
 	public function set_is_paying_customer( $is_paying_customer ) {
 		$this->set_prop( 'is_paying_customer', (bool) $is_paying_customer );
+	}
+
+	/**
+	 * Overrides the save method to guard against saves with no data changed.
+	 *
+	 * @since 10.9.0
+	 * @return int
+	 */
+	public function save() {
+		$customer_id = $this->get_id();
+		if ( $customer_id ) {
+			$meta_data     = $this->meta_data ?? array();
+			$props_changed = ! empty( $this->password ) || ! empty( $this->changes );
+			$state_changed = $props_changed || ! empty( array_filter( $meta_data, static fn( $meta ) => ! $meta->id || ! empty( $meta->get_changes() ) ) );
+			if ( ! $state_changed ) {
+				// Backward compatibility: e.g. '( new WC_Customer( $customer_id ) )->save()' as means to trigger integrations.
+				do_action( 'woocommerce_update_customer', $customer_id, $this ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+
+				return $this->get_id();
+			}
+		}
+
+		return parent::save();
 	}
 }

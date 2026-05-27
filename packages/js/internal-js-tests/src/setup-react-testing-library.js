@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import '@wordpress/jest-console';
-import '@testing-library/jest-dom';
+require( '@wordpress/jest-console' );
+require( '@testing-library/jest-dom' );
 
 /**
  * Ignore messages that match the pattern `Store ".*" is already registered.`

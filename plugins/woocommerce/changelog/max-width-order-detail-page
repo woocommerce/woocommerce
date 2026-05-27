@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the `order-detail-redesign` feature flag (default off). When enabled, caps the admin Order edit screen at 1200px on wide displays.

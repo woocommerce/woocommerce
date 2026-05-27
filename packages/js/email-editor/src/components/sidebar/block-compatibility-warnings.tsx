@@ -49,12 +49,12 @@ export function BlockCompatibilityWarnings(): JSX.Element {
 					>
 						{ __(
 							'Border display may vary or be unsupported in some email clients.',
-							'woocommerce'
+							__i18n_text_domain__
 						) }
 						<br />
 						{ __(
 							'Units other than pixels (px) lack support in old email clients.',
-							'woocommerce'
+							__i18n_text_domain__
 						) }
 					</Notice>
 				</Fill>
@@ -68,7 +68,7 @@ export function BlockCompatibilityWarnings(): JSX.Element {
 					>
 						{ __(
 							'Select a background color for email clients that do not support background images.',
-							'woocommerce'
+							__i18n_text_domain__
 						) }
 					</Notice>
 				</Fill>

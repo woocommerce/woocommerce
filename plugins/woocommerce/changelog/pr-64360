@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Validate product_query before using in WC_Product_Data_Store_CPT.

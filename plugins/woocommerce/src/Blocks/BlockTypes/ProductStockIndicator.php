@@ -125,32 +125,9 @@ class ProductStockIndicator extends AbstractBlock {
 		$watch_attribute    = '';
 
 		if ( $is_interactive && 'out-of-stock' !== $availability['class'] ) {
-			$variations                = $product_to_render->get_available_variations( 'objects' );
-			$formatted_variations_data = array();
-			foreach ( $variations as $variation ) {
-				$variation_availability = $variation->get_availability();
-				if ( is_string( $variation_availability['availability'] ) && ! empty( $variation_availability['availability'] ) ) {
-					$formatted_variations_data[ $variation->get_id() ] = array(
-						'availability' => $variation_availability['availability'],
-					);
-				}
-			}
-
-			wp_interactivity_config(
-				'woocommerce',
-				array(
-					'products' => array(
-						$product_to_render->get_id() => array(
-							'availability' => $availability['availability'],
-							'variations'   => $formatted_variations_data,
-						),
-					),
-				)
-			);
-
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
-			$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
-			$wrapper_attributes['data-wp-text']        = 'state.productData.availability';
+			$wrapper_attributes['data-wp-interactive'] = 'woocommerce/products';
+			$wrapper_attributes['data-wp-text']        = 'state.productInContext.stock_availability.text';
 			$wrapper_attributes['aria-live']           = 'polite';
 			$wrapper_attributes['aria-atomic']         = 'true';
 		}

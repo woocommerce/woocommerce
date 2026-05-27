@@ -308,12 +308,22 @@
 	}
 }
 
+.woocommerce-fulfillment-notification-content {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
 .woocommerce-fulfillment-description {
 	font-size: 12px;
 	line-height: 16px;
 	font-weight: 400;
 	color: var(--wc-admin-subtext, #767676);
 	margin: 0;
+}
+
+.woocommerce-fulfillment-customer-note {
+	margin-top: 16px;
 }
 
 .woocommerce-fulfillment-description-button {
@@ -417,14 +427,14 @@ a.fulfillments-trigger {
 	line-height: 16px;
 
 	svg {
-		fill: #2271b1;
+		fill: var(--wp-admin-theme-color, #2271b1);
 	}
 
 	&:hover {
 		svg {
-			fill: #135e96;
+			fill: var(--wp-admin-theme-color-darker-20, #135e96);
 		}
-		border: 2px solid var(--wp-admin-theme-color, #00a0d2);
+		border: 2px solid var(--wp-admin-theme-color, #2271b1);
 	}
 }
 
