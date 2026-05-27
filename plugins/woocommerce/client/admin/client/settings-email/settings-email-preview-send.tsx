@@ -7,7 +7,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import { isValidEmail } from '@woocommerce/product-editor/build/utils/validate-email'; // Import from the build directory so we don't load the entire product editor since we only need this one function.
+import { isValidEmail } from '@woocommerce/product-editor/build-module/utils/validate-email'; // Deep import so we don't load the entire product editor since we only need this one function.
 
 /**
  * Internal dependencies

@@ -98,21 +98,6 @@ if ( file_exists( $plugin_path ) ) {
 
 		</tr>
 		<tr>
-			<td data-export-label="Legacy REST API Package Version"><?php esc_html_e( 'WooCommerce Legacy REST API package', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce Legacy REST API plugin running on this site.', 'woocommerce' ) ); ?></td>
-			<td>
-				<?php
-				if ( WC()->legacy_rest_api_is_available() ) {
-					$plugin_path = wc_get_container()->get( \Automattic\WooCommerce\Utilities\PluginUtil::class )->get_wp_plugin_id( 'woocommerce-legacy-rest-api' );
-					$version     = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin_path )['Version'] ?? '';
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code></mark> ';
-				} else {
-					echo '<mark class="info-icon"><span class="dashicons dashicons-info"></span> ' . esc_html__( 'The Legacy REST API plugin is not installed on this site.', 'woocommerce' ) . '</mark>';
-				}
-				?>
-			</td>
-		</tr>
-		<tr>
 			<td data-export-label="Action Scheduler Version"><?php esc_html_e( 'Action Scheduler package', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Action Scheduler package running on your site.', 'woocommerce' ) ); ?></td>
 			<td>
@@ -704,11 +689,6 @@ if ( 0 < $mu_plugins_count ) :
 		</tr>
 	</thead>
 	<tbody>
-		<tr>
-			<td data-export-label="Legacy API Enabled"><?php esc_html_e( 'Legacy API enabled', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Does your site have the Legacy REST API enabled?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td><?php echo $settings['api_enabled'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
-		</tr>
 		<tr>
 			<td data-export-label="Force SSL"><?php esc_html_e( 'Force SSL', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Does your site force a SSL Certificate for transactions?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>

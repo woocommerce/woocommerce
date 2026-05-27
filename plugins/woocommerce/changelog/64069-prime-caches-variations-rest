@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Reduce database queries when listing product variations and products via the REST API by priming attachment post caches before iterating over images.

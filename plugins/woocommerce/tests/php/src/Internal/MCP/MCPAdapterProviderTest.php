@@ -67,6 +67,13 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	private $original_wp_abilities_api_categories_init_action_count;
 
 	/**
+	 * Original value of $wp_actions['init'] to restore in tearDown.
+	 *
+	 * @var int|null
+	 */
+	private $original_init_action_count;
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
@@ -74,8 +81,12 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 
 		parent::setUp();
 
+		$this->original_init_action_count                             = $wp_actions['init'] ?? null;
 		$this->original_wp_abilities_api_init_action_count            = $wp_actions['wp_abilities_api_init'] ?? null;
 		$this->original_wp_abilities_api_categories_init_action_count = $wp_actions['wp_abilities_api_categories_init'] ?? null;
+
+		// WordPress 6.9+ requires init to have fired before the Abilities API registry can be initialized.
+		$wp_actions['init'] = max( 1, (int) ( $wp_actions['init'] ?? 0 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		// Bootstrap the WordPress Abilities API for tests.
 		if ( ! function_exists( 'wp_register_ability' ) ) {
@@ -159,6 +170,12 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			$wp_actions['wp_abilities_api_categories_init'] = $this->original_wp_abilities_api_categories_init_action_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		} elseif ( isset( $wp_actions['wp_abilities_api_categories_init'] ) ) {
 			unset( $wp_actions['wp_abilities_api_categories_init'] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		if ( null !== $this->original_init_action_count ) {
+			$wp_actions['init'] = $this->original_init_action_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		} elseif ( isset( $wp_actions['init'] ) ) {
+			unset( $wp_actions['init'] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 
 		parent::tearDown();
@@ -426,6 +443,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	 */
 	private function register_test_ability( string $ability_id, array $meta ): void {
 		$this->ensure_test_ability_category( 'woocommerce-rest' );
+		$this->ensure_abilities_registry_initialized();
 
 		$ability  = null;
 		$callback = null;
@@ -474,6 +492,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		if ( ! function_exists( 'wp_register_ability_category' ) || ! function_exists( 'wp_has_ability_category' ) ) {
 			return;
 		}
+		$this->ensure_ability_categories_registry_initialized();
 
 		if ( wp_has_ability_category( $category_id ) ) {
 			return;
@@ -508,5 +527,29 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertTrue( wp_has_ability_category( $category_id ), 'Test ability category should be available.' );
+	}
+
+	/**
+	 * Ensure the ability registry is ready before adding one-off test callbacks.
+	 *
+	 * Registry initialization fires wp_abilities_api_init. If the test callback is
+	 * already attached, the same ability can be registered twice and return null.
+	 */
+	private function ensure_abilities_registry_initialized(): void {
+		if ( class_exists( '\WP_Abilities_Registry' ) ) {
+			\WP_Abilities_Registry::get_instance();
+		}
+	}
+
+	/**
+	 * Ensure the ability category registry is ready before adding one-off test callbacks.
+	 *
+	 * Registry initialization fires wp_abilities_api_categories_init. If the test
+	 * callback is already attached, the same category can be registered twice.
+	 */
+	private function ensure_ability_categories_registry_initialized(): void {
+		if ( class_exists( '\WP_Ability_Categories_Registry' ) ) {
+			\WP_Ability_Categories_Registry::get_instance();
+		}
 	}
 }

@@ -115,6 +115,10 @@ class NotificationPreferencesService {
 		foreach ( array_keys( Notification::NOTIFICATION_CLASSES ) as $type ) {
 			$defaults[ $type ] = array( 'enabled' => true );
 		}
+
+		$defaults['store_order']['min_amount']  = null;
+		$defaults['store_review']['max_rating'] = null;
+
 		return $defaults;
 	}
 
@@ -153,7 +157,6 @@ class NotificationPreferencesService {
 	 * @return array<string, mixed>
 	 */
 	protected function sanitize_value( string $key, array $value, array $default_shape ): array {
-		// Reserved for per-key dispatch when sub-fields are added.
 		unset( $key );
 
 		$sanitized = array();
@@ -165,8 +168,27 @@ class NotificationPreferencesService {
 					: (bool) $sub_default;
 				continue;
 			}
-			// Future sub-fields (thresholds, sub-toggles) extend this switch.
-		}
+
+			if ( 'min_amount' === $sub_key ) {
+				if ( ! array_key_exists( $sub_key, $value ) || null === $value[ $sub_key ] ) {
+					$sanitized[ $sub_key ] = null;
+					continue;
+				}
+				$amount                = (float) $value[ $sub_key ];
+				$sanitized[ $sub_key ] = $amount > 0 ? $amount : null;
+				continue;
+			}
+
+			if ( 'max_rating' === $sub_key ) {
+				if ( ! array_key_exists( $sub_key, $value ) || null === $value[ $sub_key ] ) {
+					$sanitized[ $sub_key ] = null;
+					continue;
+				}
+				$rating                = (int) $value[ $sub_key ];
+				$sanitized[ $sub_key ] = ( $rating >= 1 && $rating <= 5 ) ? $rating : null;
+				continue;
+			}
+		}//end foreach
 
 		return $sanitized;
 	}

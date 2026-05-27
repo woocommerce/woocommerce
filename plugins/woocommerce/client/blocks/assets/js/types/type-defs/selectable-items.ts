@@ -11,6 +11,7 @@ export type SelectableItem< T = unknown > = (
 	value: string;
 	selected?: boolean;
 	disabled?: boolean;
+	hidden?: boolean;
 	type?: string;
 } & T;
 
@@ -29,7 +30,8 @@ export interface SelectableItemsContext< T = unknown > {
 }
 
 export type SelectableItemsBlockContext< T = unknown > = {
-	woocommerceSelectableItems: SelectableItemsContext< T >;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	'woocommerce/selectableItems': SelectableItemsContext< T >;
 };
 
 /**
