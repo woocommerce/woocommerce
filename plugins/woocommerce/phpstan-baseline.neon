@@ -67483,24 +67483,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderSchema.php
 
 		-
-			message: '#^Parameter \#1 \$order_item of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\Schema\\OrderFeeSchema\:\:get_item_response\(\) expects WC_Order_Item_Fee, WC_Order_Item given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderSchema.php
-
-		-
-			message: '#^Parameter \#1 \$order_item of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\Schema\\OrderItemSchema\:\:get_item_response\(\) expects WC_Order_Item_Product, WC_Order_Item given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderSchema.php
-
-		-
-			message: '#^Parameter \#1 \$order_item of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\Schema\\OrderShippingSchema\:\:get_item_response\(\) expects WC_Order_Item_Shipping, WC_Order_Item given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderSchema.php
-
-		-
 			message: '#^Parameter \#1 \$order_item of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\Schema\\OrderTaxSchema\:\:get_item_response\(\) expects WC_Order_Item_Tax, WC_Order_Item given\.$#'
 			identifier: argument.type
 			count: 1
