@@ -40,6 +40,8 @@ jobs:
             contents: read
         steps:
             - uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -98,6 +100,8 @@ jobs:
             TRUNK_URL: https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip
         steps:
             - uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
 
             # runner.temp is not available in job-level env, so derive the
             # runner-scratch paths here and share them via $GITHUB_ENV.
