@@ -14,6 +14,7 @@ import { createElement, RawHTML } from '@wordpress/element';
  * Internal dependencies
  */
 import { warn } from './diagnostics';
+import { sanitizeSettingsHtml } from './html';
 import type { SettingsFieldComponentProps, SettingsValue } from './types';
 
 type TextInputType =
@@ -47,7 +48,11 @@ const isTextInputType = ( type: string ): type is TextInputType =>
 
 const getHelp = ( description?: string ) =>
 	description ? (
-		<span dangerouslySetInnerHTML={ { __html: description } } />
+		<span
+			dangerouslySetInnerHTML={ {
+				__html: sanitizeSettingsHtml( description ),
+			} }
+		/>
 	) : undefined;
 
 export const NativeSettingsField = ( {
@@ -60,7 +65,9 @@ export const NativeSettingsField = ( {
 			<div className="wc-modern-settings__info" id={ field.id }>
 				<strong>{ field.label }</strong>
 				{ field.description ? (
-					<RawHTML>{ field.description }</RawHTML>
+					<RawHTML>
+						{ sanitizeSettingsHtml( field.description ) }
+					</RawHTML>
 				) : null }
 			</div>
 		);

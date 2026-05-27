@@ -84,7 +84,14 @@ class LegacySettingsPageAdapter implements PublicModernSettingsPageInterface {
 			$navigation[] = array(
 				'id'     => '' === $section_id ? 'default' : $section_id,
 				'label'  => wp_strip_all_tags( html_entity_decode( (string) $label, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ),
-				'href'   => admin_url( 'admin.php?page=wc-settings&tab=' . $this->settings_page->get_id() . '&section=' . sanitize_title( $section_id ) ),
+				'href'   => add_query_arg(
+					array(
+						'page'    => 'wc-settings',
+						'tab'     => sanitize_title( $this->settings_page->get_id() ),
+						'section' => sanitize_title( $section_id ),
+					),
+					admin_url( 'admin.php' )
+				),
 				'active' => $current_section === $section_id,
 			);
 		}

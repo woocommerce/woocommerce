@@ -467,8 +467,8 @@ class WCAdminAssets {
 			array( 'wc-modern-settings-sdk' ),
 			array_filter(
 				$modern_settings_page->get_script_handles( $this->get_current_settings_section() ),
-				static function ( string $script_handle ): bool {
-					return '' !== $script_handle;
+				static function ( $script_handle ): bool {
+					return is_string( $script_handle ) && '' !== $script_handle;
 				}
 			)
 		);

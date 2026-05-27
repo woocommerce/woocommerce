@@ -6,8 +6,13 @@ declare const process:
 	  }
 	| undefined;
 
-const isDevelopment = () =>
-	typeof process === 'undefined' || process.env.NODE_ENV !== 'production';
+const isDevelopment = () => {
+	if ( typeof process === 'undefined' ) {
+		return false;
+	}
+
+	return process.env.NODE_ENV !== 'production';
+};
 
 export const warn = ( message: string, context?: unknown ) => {
 	if ( ! isDevelopment() ) {

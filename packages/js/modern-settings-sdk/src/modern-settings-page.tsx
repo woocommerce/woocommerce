@@ -19,6 +19,7 @@ import type { ReactNode } from 'react';
  */
 import { HiddenInputs } from './hidden-inputs';
 import { warn } from './diagnostics';
+import { sanitizeSettingsHtml } from './html';
 import { NativeSettingsField } from './native-fields';
 import {
 	resolveFieldComponent,
@@ -112,7 +113,9 @@ const GroupHeader = ( { group }: { group: ModernSettingsGroup } ) => {
 			{ group.title ? <h2>{ group.title }</h2> : null }
 			{ group.description ? (
 				<div className="wc-modern-settings__group-description">
-					<RawHTML>{ group.description }</RawHTML>
+					<RawHTML>
+						{ sanitizeSettingsHtml( group.description ) }
+					</RawHTML>
 				</div>
 			) : null }
 			{ group.actions && group.actions.length > 0 ? (

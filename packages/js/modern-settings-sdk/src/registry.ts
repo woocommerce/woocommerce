@@ -14,6 +14,50 @@ import type {
 
 const registrations: SettingsExtensionRegistration[] = [];
 
+const registrationMapKeys = [
+	'components',
+	'fieldOverrides',
+	'typeRenderers',
+	'fieldVisibility',
+	'groupVisibility',
+	'saveHandlers',
+	'regions',
+] as const;
+
+type RegistrationMapKey = ( typeof registrationMapKeys )[ number ];
+
+const isPlainRecord = ( value: unknown ): value is Record< string, unknown > =>
+	typeof value === 'object' && value !== null && ! Array.isArray( value );
+
+const isValidRegistration = (
+	registration: unknown
+): registration is SettingsExtensionRegistration => {
+	if ( ! isPlainRecord( registration ) ) {
+		return false;
+	}
+
+	const scope = registration.scope;
+	if ( ! isPlainRecord( scope ) ) {
+		return false;
+	}
+
+	if ( typeof scope.page !== 'string' || scope.page.length === 0 ) {
+		return false;
+	}
+
+	if (
+		typeof scope.section !== 'undefined' &&
+		typeof scope.section !== 'string'
+	) {
+		return false;
+	}
+
+	return registrationMapKeys.every( ( key ) => {
+		const value = registration[ key ];
+		return typeof value === 'undefined' || isPlainRecord( value );
+	} );
+};
+
 const scopeMatches = (
 	registration: SettingsExtensionRegistration,
 	context: SettingsFieldContext
@@ -33,16 +77,7 @@ const getScopeKey = ( scope: SettingsExtensionRegistration[ 'scope' ] ) =>
 
 const warnOnDuplicateKeys = (
 	registration: SettingsExtensionRegistration,
-	key: keyof Pick<
-		SettingsExtensionRegistration,
-		| 'components'
-		| 'fieldOverrides'
-		| 'typeRenderers'
-		| 'fieldVisibility'
-		| 'groupVisibility'
-		| 'saveHandlers'
-		| 'regions'
-	>
+	key: RegistrationMapKey
 ) => {
 	const entries = registration[ key ];
 	if ( ! entries ) {
@@ -84,17 +119,16 @@ const warnOnDuplicateKeys = (
 export const registerSettingsExtension = (
 	registration: SettingsExtensionRegistration
 ) => {
-	(
-		[
-			'components',
-			'fieldOverrides',
-			'typeRenderers',
-			'fieldVisibility',
-			'groupVisibility',
-			'saveHandlers',
-			'regions',
-		] as const
-	 ).forEach( ( key ) => warnOnDuplicateKeys( registration, key ) );
+	if ( ! isValidRegistration( registration ) ) {
+		warn( 'Invalid settings extension registration payload.', {
+			registration,
+		} );
+		return;
+	}
+
+	registrationMapKeys.forEach( ( key ) =>
+		warnOnDuplicateKeys( registration, key )
+	);
 
 	registrations.push( registration );
 };

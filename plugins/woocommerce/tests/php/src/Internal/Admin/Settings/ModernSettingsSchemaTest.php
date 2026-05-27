@@ -42,6 +42,29 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * It skips malformed settings entries.
+	 */
+	public function test_from_legacy_settings_skips_malformed_settings_entries(): void {
+		$schema = ModernSettingsSchema::from_legacy_settings(
+			'test',
+			'',
+			'Test settings',
+			array(
+				'not a setting',
+				null,
+				array(
+					'id'    => 'woocommerce_test_text',
+					'type'  => 'text',
+					'title' => 'Test text',
+				),
+			)
+		);
+
+		$this->assertCount( 1, $schema['groups']['default']['fields'] );
+		$this->assertSame( 'woocommerce_test_text', $schema['groups']['default']['fields'][0]['id'] );
+	}
+
+	/**
 	 * It groups fields that appear before the first title marker.
 	 */
 	public function test_from_legacy_settings_creates_default_group_for_fields_before_title(): void {

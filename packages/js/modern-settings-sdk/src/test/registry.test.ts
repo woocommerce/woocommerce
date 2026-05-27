@@ -10,6 +10,7 @@ import {
 	resolveSaveHandler,
 } from '../registry';
 import type {
+	SettingsExtensionRegistration,
 	SettingsFieldComponent,
 	SettingsRegionComponent,
 	SettingsSaveHandler,
@@ -82,6 +83,38 @@ describe( 'settings extension registry', () => {
 				{ page: 'registry-precedence' }
 			)
 		).toBe( fieldOverride );
+	} );
+
+	it( 'ignores malformed registration payloads', () => {
+		const warnSpy = jest
+			.spyOn( console, 'warn' )
+			.mockImplementation( () => undefined );
+
+		expect( () =>
+			registerSettingsExtension( {
+				scope: { page: 'registry-invalid' },
+				components: [],
+			} as unknown as SettingsExtensionRegistration )
+		).not.toThrow();
+		expect(
+			resolveFieldComponent(
+				{
+					id: 'field',
+					label: 'Field',
+					type: 'text',
+					component: '0',
+				},
+				{ page: 'registry-invalid' }
+			)
+		).toBeUndefined();
+		expect( warnSpy ).toHaveBeenCalledWith(
+			expect.stringContaining(
+				'Invalid settings extension registration payload.'
+			),
+			expect.any( Object )
+		);
+
+		warnSpy.mockRestore();
 	} );
 
 	it( 'ignores registrations outside the current page scope', () => {

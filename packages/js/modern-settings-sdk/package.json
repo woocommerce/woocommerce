@@ -27,6 +27,7 @@
 		"build-types"
 	],
 	"dependencies": {
+		"@woocommerce/sanitize": "workspace:*",
 		"@wordpress/admin-ui": "catalog:wp-min",
 		"@wordpress/components": "catalog:wp-min",
 		"@wordpress/element": "catalog:wp-min",
@@ -137,6 +138,9 @@
 			"files": [
 				"package.json",
 				"../../../pnpm-lock.yaml",
+				"node_modules/@woocommerce/sanitize/build",
+				"node_modules/@woocommerce/sanitize/build-style",
+				"node_modules/@woocommerce/sanitize/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",

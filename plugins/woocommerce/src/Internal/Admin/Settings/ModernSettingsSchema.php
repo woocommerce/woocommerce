@@ -42,6 +42,10 @@ class ModernSettingsSchema {
 		$group_index   = 0;
 
 		foreach ( $settings as $setting ) {
+			if ( ! is_array( $setting ) ) {
+				continue;
+			}
+
 			$type = isset( $setting['type'] ) && is_string( $setting['type'] ) ? $setting['type'] : 'text';
 
 			if ( 'title' === $type ) {
