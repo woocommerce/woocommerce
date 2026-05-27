@@ -75,6 +75,7 @@ class WC_Meta_Box_Product_Images {
 
 		$slot_modifier = empty( $rendered_ids ) ? 'featured' : 'gallery';
 		?>
+		<span class="woocommerce-help-tip" data-tip="<?php echo esc_attr( self::get_product_images_tip() ); ?>"></span>
 		<div id="wc-product-images__list" class="wc-product-images__list<?php echo ! empty( $rendered_ids ) ? ' wc-product-images__list--has-images' : ''; ?>">
 			<?php echo $image_tiles; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<div id="wc-product-images__add-slot" class="wc-product-images__add-slot wc-product-images__add-slot--<?php echo esc_attr( $slot_modifier ); ?> hide-if-no-js" role="button" tabindex="0" aria-label="<?php esc_attr_e( 'Add product images', 'woocommerce' ); ?>">
@@ -86,6 +87,19 @@ class WC_Meta_Box_Product_Images {
 		<input type="hidden" id="wc_product_image_ids" name="wc_product_image_ids" value="<?php echo esc_attr( implode( ',', $rendered_ids ) ); ?>" />
 		<div id="wc-product-images__live-region" class="screen-reader-text" aria-live="polite"></div>
 		<?php
+	}
+
+	/**
+	 * Get the product images help tip text.
+	 *
+	 * @return string
+	 */
+	private static function get_product_images_tip(): string {
+		return sprintf(
+			/* translators: %s: maximum upload file size */
+			__( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. The first image will be used as the main product image. Maximum upload file size: %s.', 'woocommerce' ),
+			size_format( wp_max_upload_size() )
+		);
 	}
 
 	/**

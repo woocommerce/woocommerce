@@ -5490,12 +5490,17 @@ img.help_tip {
 }
 
 #woocommerce-product-images {
+	position: relative;
+
 	> .postbox-header > .hndle {
 		justify-content: flex-start;
+	}
 
-		> .woocommerce-help-tip {
-			margin: 0 10px;
-		}
+	> .inside > .woocommerce-help-tip {
+		inset-inline-start: 120px;
+		margin: 0 10px;
+		position: absolute;
+		top: 13px;
 	}
 
 	.inside {

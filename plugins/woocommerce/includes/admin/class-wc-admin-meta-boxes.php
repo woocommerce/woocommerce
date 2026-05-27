@@ -132,12 +132,7 @@ class WC_Admin_Meta_Boxes {
 		// Products.
 		add_meta_box( 'postexcerpt', __( 'Product short description', 'woocommerce' ), 'WC_Meta_Box_Product_Short_Description::output', 'product', 'normal' );
 		add_meta_box( 'woocommerce-product-data', __( 'Product data', 'woocommerce' ), 'WC_Meta_Box_Product_Data::output', 'product', 'normal', 'high' );
-		$product_images_tip = sprintf(
-			/* translators: %s: maximum upload file size */
-			__( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. The first image will be used as the main product image. Maximum upload file size: %s.', 'woocommerce' ),
-			size_format( wp_max_upload_size() )
-		);
-		add_meta_box( 'woocommerce-product-images', __( 'Product images', 'woocommerce' ) . '<span class="woocommerce-help-tip" data-tip="' . esc_attr( $product_images_tip ) . '"></span>', 'WC_Meta_Box_Product_Images::output', 'product', 'side', 'low' );
+		add_meta_box( 'woocommerce-product-images', __( 'Product images', 'woocommerce' ), 'WC_Meta_Box_Product_Images::output', 'product', 'side', 'low' );
 
 		// Orders.
 		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
