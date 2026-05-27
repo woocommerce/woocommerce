@@ -41,7 +41,9 @@ After regenerating, commit the `src/Api/` change and the regenerated `src/Intern
 | `--phpcbf-path=PATH` | Path to the `phpcbf` binary used for formatting. |
 | `--no-linter` | Skip the `phpcbf` formatting pass. |
 
-Plugins generally don't call these flags directly; they use `ApiBuilder::run_for_plugin()` (see [Creating a dual API in a plugin](./creating-a-dual-api-in-a-plugin.md)).
+For fast local iteration, pass `--no-linter`: the `phpcbf` pass is the slowest step in the build, and it only affects whitespace in the generated PHP — the code is functionally identical with or without it. Run a full build (without the flag) before committing so the formatted output is what lands in source control. `ApiBuilder::run_for_plugin()` also honours `--no-linter` from `argv`, so the same shortcut works for plugin builds: `WC_PATH=… php bin/build-api.php --no-linter`.
+
+Plugins generally don't call the other flags directly; they use `ApiBuilder::run_for_plugin()` (see [Creating a dual API in a plugin](./creating-a-dual-api-in-a-plugin.md)).
 
 ## The staleness check
 
