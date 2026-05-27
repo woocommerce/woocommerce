@@ -70,3 +70,9 @@ add_filter(
 		return $value;
 	}
 );
+
+// Prevent WooCommerce's first-activation setup-wizard redirect. Activating WC sets the
+// _wc_activation_redirect transient, and OnboardingSetupWizard then 302-redirects the very
+// next admin request -- including our /wp-admin/update.php upgrade -- before the upgrade runs.
+// This filter makes WooCommerce clear the transient and skip the redirect instead.
+add_filter( 'woocommerce_prevent_automatic_wizard_redirect', '__return_true' );

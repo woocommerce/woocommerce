@@ -18,12 +18,14 @@ set -eo pipefail
 mkdir -p "$ZIPDIR" "$WORKDIR"
 
 echo "::group::Creating $PLUGIN_SLUG-dev.zip"
-# Unpack the PR build and add a sentinel file, so the test can prove the
-# in-place upgrade actually swapped the plugin's files.
-unzip -q "$DEV_ZIP_SRC" -d "$WORKDIR"
-[[ -d "$WORKDIR/$PLUGIN_SLUG" ]] || { echo "::error::Built zip did not contain a $PLUGIN_SLUG/ directory."; exit 1; }
+# Add a sentinel file to the PR build so the test can prove the in-place upgrade
+# actually swapped the plugin's files. zip can append a single entry to the copied
+# archive, so there's no need to unpack and repack the whole plugin.
+unzip -l "$DEV_ZIP_SRC" | grep -qE " $PLUGIN_SLUG/" || { echo "::error::Built zip did not contain a $PLUGIN_SLUG/ directory."; exit 1; }
+cp "$DEV_ZIP_SRC" "$ZIPDIR/$PLUGIN_SLUG-dev.zip"
+mkdir -p "$WORKDIR/$PLUGIN_SLUG"
 touch "$WORKDIR/$PLUGIN_SLUG/ci-flag.txt"
-( cd "$WORKDIR" && zip -qr "$ZIPDIR/$PLUGIN_SLUG-dev.zip" "$PLUGIN_SLUG" )
+( cd "$WORKDIR" && zip -q "$ZIPDIR/$PLUGIN_SLUG-dev.zip" "$PLUGIN_SLUG/ci-flag.txt" )
 rm -rf "${WORKDIR:?}/$PLUGIN_SLUG"
 echo "::endgroup::"
 
