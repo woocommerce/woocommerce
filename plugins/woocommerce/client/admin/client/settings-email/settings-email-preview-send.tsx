@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button, Modal, TextControl } from '@wordpress/components';
-import { Icon, check, warning } from '@wordpress/icons';
+import { Icon, check, cautionFilled } from '@wordpress/icons';
 import apiFetch from '@wordpress/api-fetch';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -181,7 +181,9 @@ export const EmailPreviewSend = ( { type }: EmailPreviewSendProps ) => {
 						>
 							<Icon
 								icon={
-									noticeType === 'success' ? check : warning
+									noticeType === 'success'
+										? check
+										: cautionFilled
 								}
 							/>
 							<span>{ notice }</span>

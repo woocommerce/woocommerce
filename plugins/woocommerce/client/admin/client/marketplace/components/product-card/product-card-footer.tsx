@@ -85,6 +85,7 @@ function ProductCardFooter( props: { product: Product } ) {
 			return __( 'Free plan available', 'woocommerce' );
 		}
 
+		// @ts-expect-error The type isn't correct. We need to update @wordpress/i18n to a newer version to fix it.
 		return sprintf( getCurrencyFormat( product.currency ), product.price );
 	}
 
@@ -127,7 +128,7 @@ function ProductCardFooter( props: { product: Product } ) {
 		return sprintf(
 			// translators: %1$d: billing period interval, %2$s: billing period (e.g. days, weeks, months, years)
 			__( 'every %1$d %2$s', 'woocommerce' ),
-			product.billingPeriodInterval,
+			product.billingPeriodInterval ?? 0,
 			period
 		);
 	}
@@ -155,6 +156,7 @@ function ProductCardFooter( props: { product: Product } ) {
 				getPriceLabel(),
 				sprintf(
 					getCurrencyFormat( product.currency ),
+					// @ts-expect-error The type isn't correct. We need to update @wordpress/i18n to a newer version to fix it.
 					product.regularPrice
 				),
 				getBillingText()
@@ -214,6 +216,7 @@ function ProductCardFooter( props: { product: Product } ) {
 					>
 						{ sprintf(
 							getCurrencyFormat( product.currency ),
+							// @ts-expect-error The type isn't correct. We need to update @wordpress/i18n to a newer version to fix it.
 							product.regularPrice
 						) }
 					</span>
@@ -238,7 +241,7 @@ function ProductCardFooter( props: { product: Product } ) {
 								{ sprintf(
 									// translators: %.1f: average rating
 									__( '%.1f stars', 'woocommerce' ),
-									product.averageRating
+									product.averageRating ?? 0
 								) }
 							</span>
 						</span>
@@ -248,7 +251,7 @@ function ProductCardFooter( props: { product: Product } ) {
 								{ sprintf(
 									// translators: %d: rating count
 									__( 'from %d reviews', 'woocommerce' ),
-									product.reviewsCount
+									product.reviewsCount ?? 0
 								) }
 							</span>
 						</span>
