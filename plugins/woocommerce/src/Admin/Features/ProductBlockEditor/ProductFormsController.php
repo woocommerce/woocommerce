@@ -75,9 +75,11 @@ class ProductFormsController {
 	 */
 	public function migrate_product_form_posts( $action ) {
 		if ( has_filter( 'woocommerce_product_form_templates' ) ) {
-			wc_deprecated_function(
-				'The woocommerce_product_form_templates filter, which will be removed in WooCommerce 11.0',
-				self::DEPRECATED_SINCE
+			wc_deprecated_hook(
+				'woocommerce_product_form_templates',
+				$this::DEPRECATED_SINCE,
+				null,
+				'This product editor extension filter will be removed in WooCommerce 11.0.'
 			);
 		}
 

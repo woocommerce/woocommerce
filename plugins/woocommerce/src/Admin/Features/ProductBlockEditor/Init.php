@@ -112,9 +112,11 @@ class Init {
 		}
 		if ( ! $product->meta_exists( '_product_template_id' ) ) {
 			if ( has_filter( 'experimental_woocommerce_product_editor_product_template_id_for_product' ) ) {
-				wc_deprecated_function(
-					'The experimental_woocommerce_product_editor_product_template_id_for_product filter, which will be removed in WooCommerce 11.0',
-					self::DEPRECATED_SINCE
+				wc_deprecated_hook(
+					'experimental_woocommerce_product_editor_product_template_id_for_product',
+					$this::DEPRECATED_SINCE,
+					null,
+					'This product editor extension filter will be removed in WooCommerce 11.0.'
 				);
 			}
 
@@ -418,9 +420,11 @@ class Init {
 	 */
 	public function register_product_templates() {
 		if ( has_filter( 'woocommerce_product_editor_product_templates' ) ) {
-			wc_deprecated_function(
-				'The woocommerce_product_editor_product_templates filter, which will be removed in WooCommerce 11.0',
-				self::DEPRECATED_SINCE
+			wc_deprecated_hook(
+				'woocommerce_product_editor_product_templates',
+				self::DEPRECATED_SINCE,
+				null,
+				'This product editor extension filter will be removed in WooCommerce 11.0.'
 			);
 		}
 
