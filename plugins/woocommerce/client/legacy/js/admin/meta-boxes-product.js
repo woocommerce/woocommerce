@@ -1391,9 +1391,7 @@ jQuery( function ( $ ) {
 			}
 		}
 
-		function buildImageHtml( attachmentId, imgUrl, isFeatured ) {
-			const modifier = isFeatured ? 'featured' : 'gallery';
-
+		function buildImageHtml( attachmentId, imgUrl, modifier ) {
 			return tileTemplate( {
 				attachmentId,
 				imgUrl,
@@ -1401,6 +1399,45 @@ jQuery( function ( $ ) {
 				removeLabel:
 					woocommerce_admin_meta_boxes.i18n_remove_product_image,
 			} );
+		}
+
+		function getExistingImageIds() {
+			return $input.val() ? $input.val().split( ',' ).map( Number ) : [];
+		}
+
+		function pickImageUrl( attachment, isFeatured ) {
+			if ( isFeatured ) {
+				return (
+					( attachment.sizes &&
+						attachment.sizes.medium &&
+						attachment.sizes.medium.url ) ||
+					attachment.url
+				);
+			}
+
+			return (
+				( attachment.sizes &&
+					attachment.sizes.thumbnail &&
+					attachment.sizes.thumbnail.url ) ||
+				attachment.url
+			);
+		}
+
+		function appendNewTile( attachment, isFeatured ) {
+			const modifier = isFeatured ? 'featured' : 'gallery';
+			const imgUrl = pickImageUrl( attachment, isFeatured );
+
+			$addSlot.before(
+				buildImageHtml( attachment.id, imgUrl, modifier )
+			);
+		}
+
+		function announceAdded( addedCount ) {
+			announce(
+				addedCount === 1
+					? woocommerce_admin_meta_boxes.i18n_product_image_added
+					: woocommerce_admin_meta_boxes.i18n_product_images_added
+			);
 		}
 
 		// Sortable drag-and-drop.
@@ -1526,45 +1563,25 @@ jQuery( function ( $ ) {
 
 			mediaFrame.on( 'select', function () {
 				const selection = mediaFrame.state().get( 'selection' );
-				const existingIds = $input.val()
-					? $input.val().split( ',' ).map( Number )
-					: [];
+				const existingIds = getExistingImageIds();
 				const isEmpty =
 					existingIds.length === 0 &&
 					$list.children( '.wc-product-images__image' ).length === 0;
 				let addedCount = 0;
 
 				selection.each( function ( attachment, index ) {
-					attachment = attachment.toJSON();
-					if ( ! attachment.id ) {
+					const attachmentData = attachment.toJSON();
+					if ( ! attachmentData.id ) {
 						return;
 					}
 
-					if ( existingIds.indexOf( attachment.id ) !== -1 ) {
+					if ( existingIds.indexOf( attachmentData.id ) !== -1 ) {
 						return;
 					}
 
 					const isFeatured = isEmpty && index === 0;
-					let imgUrl;
-
-					if ( isFeatured ) {
-						imgUrl =
-							( attachment.sizes &&
-								attachment.sizes.medium &&
-								attachment.sizes.medium.url ) ||
-							attachment.url;
-					} else {
-						imgUrl =
-							( attachment.sizes &&
-								attachment.sizes.thumbnail &&
-								attachment.sizes.thumbnail.url ) ||
-							attachment.url;
-					}
-
-					$addSlot.before(
-						buildImageHtml( attachment.id, imgUrl, isFeatured )
-					);
-					existingIds.push( attachment.id );
+					appendNewTile( attachmentData, isFeatured );
+					existingIds.push( attachmentData.id );
 					addedCount++;
 				} );
 
@@ -1573,11 +1590,7 @@ jQuery( function ( $ ) {
 					$addSlot
 						.prev( '.wc-product-images__image' )
 						.trigger( 'focus' );
-					announce(
-						addedCount === 1
-							? woocommerce_admin_meta_boxes.i18n_product_image_added
-							: woocommerce_admin_meta_boxes.i18n_product_images_added
-					);
+					announceAdded( addedCount );
 				}
 			} );
 
