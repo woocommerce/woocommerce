@@ -19,9 +19,16 @@ defined( 'ABSPATH' ) || exit;
  * would trigger an autoloader miss and a "Class not found" fatal during the
  * upgrade-completion iframe of /wp-admin/update.php.
  *
+ * The class_exists() guard (with autoload disabled) matches the defensive
+ * pattern used elsewhere in includes/, e.g. class-wc-gateway-paypal.php, and
+ * keeps this safe under opcache.preload or any other mechanism that may have
+ * already defined the class before the file is included.
+ *
  * The architectural fix lives in https://github.com/woocommerce/woocommerce/issues/54657.
  */
-require_once dirname( WC_PLUGIN_FILE ) . '/src/Enums/DefaultCustomerAddress.php';
+if ( ! class_exists( '\Automattic\WooCommerce\Enums\DefaultCustomerAddress', false ) ) {
+	require_once dirname( WC_PLUGIN_FILE ) . '/src/Enums/DefaultCustomerAddress.php';
+}
 
 if ( class_exists( 'WC_Settings_General', false ) ) {
 	return new WC_Settings_General();
