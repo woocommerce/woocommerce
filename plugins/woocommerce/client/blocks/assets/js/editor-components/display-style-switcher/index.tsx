@@ -29,6 +29,11 @@ type DisplayStyleBlockSupport = {
 	};
 };
 
+/**
+ * By default, the current parent block is the insertion point. For complex
+ * block compositions, the default insertion point can be an inner block of
+ * the parent, such as the Variation Attribute Selector block.
+ */
 type GetFallbackDisplayStyleInsertionPoint = (
 	parentBlock: BlockInstance
 ) => DisplayStyleInsertionPoint;
