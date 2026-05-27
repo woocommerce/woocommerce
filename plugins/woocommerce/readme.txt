@@ -170,6 +170,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.8.1 2026-XX-XX =
+= 10.8.1 2026-05-27 =
+
+**WooCommerce**
+
+* Fix - Fix a fatal error during in-place upgrade to 10.8.0 caused by the new DefaultCustomerAddress enum being referenced from class-wc-settings-general.php before the in-process autoloader classmap is refreshed. [#65359](https://github.com/woocommerce/woocommerce/pull/65359)
+* Fix - Fix WooPayments onboarding business type dropdown crash. [#65345](https://github.com/woocommerce/woocommerce/pull/65345)
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
