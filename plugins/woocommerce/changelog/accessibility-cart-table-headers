@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Add proper ARIA roles and scope attributes to cart table headers for screen reader accessibility (WCAG 1.3.1)
+
+
