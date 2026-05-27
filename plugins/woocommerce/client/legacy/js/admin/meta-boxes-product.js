@@ -1287,14 +1287,8 @@ jQuery( function ( $ ) {
 		const $input = $( '#wc_product_image_ids' );
 		const $addSlot = $( '#wc-product-images__add-slot' );
 		const $liveRegion = $( '#wc-product-images__live-region' );
+		const tileTemplate = wp.template( 'wc-product-image-tile' );
 		let mediaFrame;
-
-		const removeIcon =
-			'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">' +
-			'<path d="M12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8' +
-			'Zm3.8 10.7-1.1 1.1-2.7-2.7-2.7 2.7-1.1-1.1 2.7-2.7-2.7-2.7 ' +
-			'1.1-1.1 2.7 2.7 2.7-2.7 1.1 1.1-2.7 2.7 2.7 2.7Z" />' +
-			'</svg>';
 
 		function announce( message ) {
 			$liveRegion.text( '' );
@@ -1399,22 +1393,14 @@ jQuery( function ( $ ) {
 
 		function buildImageHtml( attachmentId, imgUrl, isFeatured ) {
 			const modifier = isFeatured ? 'featured' : 'gallery';
-			return (
-				'<div class="wc-product-images__image wc-product-images__image--' +
-				modifier +
-				'" data-attachment-id="' +
-				attachmentId +
-				'" tabindex="0">' +
-				'<img src="' +
-				imgUrl +
-				'" />' +
-				'<button type="button" class="wc-product-images__remove" tabindex="-1" aria-label="' +
-				woocommerce_admin_meta_boxes.i18n_remove_product_image +
-				'">' +
-				removeIcon +
-				'</button>' +
-				'</div>'
-			);
+
+			return tileTemplate( {
+				attachmentId,
+				imgUrl,
+				modifier,
+				removeLabel:
+					woocommerce_admin_meta_boxes.i18n_remove_product_image,
+			} );
 		}
 
 		// Sortable drag-and-drop.
