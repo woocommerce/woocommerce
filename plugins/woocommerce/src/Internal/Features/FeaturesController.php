@@ -301,11 +301,8 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'product_block_editor'               => array(
-				'name'                         => __( 'New product editor (deprecated)', 'woocommerce' ),
-				'description'                  => __(
-					'Enable the deprecated new product editor. It will be removed in WooCommerce 11.0.',
-					'woocommerce'
-				),
+				'name'                         => __( 'New product editor', 'woocommerce' ),
+				'description'                  => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
