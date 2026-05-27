@@ -53,7 +53,7 @@ class WC_Meta_Box_Product_Images {
 				?>
 				<div class="wc-product-images__image wc-product-images__image--<?php echo esc_attr( $modifier ); ?>" data-attachment-id="<?php echo esc_attr( (string) $attachment_id ); ?>" tabindex="0">
 					<?php echo $img; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					<button type="button" class="wc-product-images__remove" tabindex="-1" aria-label="<?php esc_attr_e( 'Remove image', 'woocommerce' ); ?>"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8Zm3.8 10.7-1.1 1.1-2.7-2.7-2.7 2.7-1.1-1.1 2.7-2.7-2.7-2.7 1.1-1.1 2.7 2.7 2.7-2.7 1.1 1.1-2.7 2.7 2.7 2.7Z" /></svg></button>
+					<button type="button" class="wc-product-images__remove" tabindex="-1" aria-label="<?php esc_attr_e( 'Remove image', 'woocommerce' ); ?>"><?php echo self::get_remove_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
 					<?php
 					if ( ! $is_featured ) {
 						/**
@@ -79,13 +79,31 @@ class WC_Meta_Box_Product_Images {
 			<?php echo $image_tiles; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<div id="wc-product-images__add-slot" class="wc-product-images__add-slot wc-product-images__add-slot--<?php echo esc_attr( $slot_modifier ); ?> hide-if-no-js" role="button" tabindex="0" aria-label="<?php esc_attr_e( 'Add product images', 'woocommerce' ); ?>">
 				<span class="wc-product-images__add-label"><?php esc_html_e( 'Add an image', 'woocommerce' ); ?></span>
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 12.5V17.5H12.5V12.5H17.5V11H12.5V6H11V11H6V12.5H11V12.5Z"/></svg>
+				<?php echo self::get_add_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</div>
 		</div>
 
 		<input type="hidden" id="wc_product_image_ids" name="wc_product_image_ids" value="<?php echo esc_attr( implode( ',', $rendered_ids ) ); ?>" />
 		<div id="wc-product-images__live-region" class="screen-reader-text" aria-live="polite"></div>
 		<?php
+	}
+
+	/**
+	 * Get the remove image icon SVG.
+	 *
+	 * @return string
+	 */
+	private static function get_remove_icon_svg(): string {
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8Zm3.8 10.7-1.1 1.1-2.7-2.7-2.7 2.7-1.1-1.1 2.7-2.7-2.7-2.7 1.1-1.1 2.7 2.7 2.7-2.7 1.1 1.1-2.7 2.7 2.7 2.7Z" /></svg>';
+	}
+
+	/**
+	 * Get the add image icon SVG.
+	 *
+	 * @return string
+	 */
+	private static function get_add_icon_svg(): string {
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 12.5V17.5H12.5V12.5H17.5V11H12.5V6H11V11H6V12.5H11V12.5Z"/></svg>';
 	}
 
 	/**
