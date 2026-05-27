@@ -30,7 +30,7 @@ export type FeedbackBarProps = {
 };
 
 export function FeedbackBar( { productType }: FeedbackBarProps ) {
-	const { hideFeedbackBar, shouldShowFeedbackBar } = useFeedbackBar();
+	const { hideFeedbackBar } = useFeedbackBar();
 	const { showCesModal, showProductMVPFeedbackModal } =
 		useCustomerEffortScoreModal();
 
