@@ -61,7 +61,7 @@ final class Wishlist extends AbstractBlock {
 		// within the range where a `&.columns-#{$i}` rule actually exists.
 		$column_count = min( 6, max( 2, absint( $attributes['columnCount'] ?? 5 ) ) );
 
-		wp_enqueue_script_module( $this->get_block_type() );
+		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		$consent = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 		BlocksSharedState::load_store_config( $consent );

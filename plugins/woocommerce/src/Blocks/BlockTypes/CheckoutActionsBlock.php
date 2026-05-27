@@ -29,7 +29,7 @@ class CheckoutActionsBlock extends AbstractInnerBlock {
 	 */
 	public function register_style_variations() {
 		register_block_style(
-			$this->get_block_type(),
+			$this->get_full_block_name(),
 			array(
 				'name'       => 'without-price',
 				'label'      => __( 'Hide Price', 'woocommerce' ),
@@ -38,7 +38,7 @@ class CheckoutActionsBlock extends AbstractInnerBlock {
 		);
 
 		register_block_style(
-			$this->get_block_type(),
+			$this->get_full_block_name(),
 			array(
 				'name'       => 'with-price',
 				'label'      => __( 'Show Price', 'woocommerce' ),

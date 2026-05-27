@@ -63,7 +63,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 		}
 
 		wp_interactivity_state(
-			$this->get_block_type(),
+			$this->get_full_block_name(),
 			array(
 				'formattedSubtotal' => $formatted_subtotal,
 			)

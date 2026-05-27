@@ -74,12 +74,10 @@ abstract class AbstractBlock {
 	/**
 	 * Get the full block name, including namespace.
 	 *
-	 * @deprecated 10.9.0 Use get_block_type() instead.
 	 * @return string
 	 */
 	protected function get_full_block_name() {
-		wc_deprecated_function( __METHOD__, '10.9.0', 'get_block_type' );
-		return $this->get_block_type();
+		return $this->namespace . '/' . $this->block_name;
 	}
 
 	/**
@@ -263,7 +261,7 @@ abstract class AbstractBlock {
 		$block_settings['uses_context'] = $this->get_block_type_uses_context();
 
 		register_block_type(
-			$this->get_block_type(),
+			$this->get_full_block_name(),
 			$block_settings
 		);
 	}
@@ -271,10 +269,12 @@ abstract class AbstractBlock {
 	/**
 	 * Get the block type.
 	 *
+	 * @deprecated 10.9.0 Use get_full_block_name() instead.
 	 * @return string
 	 */
 	protected function get_block_type() {
-		return $this->namespace . '/' . $this->block_name;
+		wc_deprecated_function( __METHOD__, '10.9.0', 'get_full_block_name' );
+		return $this->get_full_block_name();
 	}
 
 	/**

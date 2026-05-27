@@ -67,7 +67,7 @@ class Checkout extends AbstractBlock {
 	 * @return void
 	 */
 	public function disable_wp_emoji() {
-		if ( has_block( $this->get_block_type() ) ) {
+		if ( has_block( $this->get_full_block_name() ) ) {
 			remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
 			remove_action( 'wp_print_styles', 'print_emoji_styles' );
 		}

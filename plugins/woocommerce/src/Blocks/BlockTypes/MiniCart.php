@@ -501,7 +501,7 @@ class MiniCart extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_iapi_mini_cart( $attributes, $content, $block ) {
-		wp_enqueue_script_module( $this->get_block_type() );
+		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		// Enqueue all integration scripts registered for this block.
 		$integration_script_handles = $this->integration_registry->get_all_registered_script_handles();
@@ -553,7 +553,7 @@ class MiniCart extends AbstractBlock {
 				: __( 'Number of items in the cart: %1$d. Total price of %2$s', 'woocommerce' );
 
 			wp_interactivity_state(
-				$this->get_block_type(),
+				$this->get_full_block_name(),
 				array(
 					'isOpen'             => false,
 					'totalItemsInCart'   => $cart_item_count,
@@ -576,7 +576,7 @@ class MiniCart extends AbstractBlock {
 			);
 
 			wp_interactivity_config(
-				$this->get_block_type(),
+				$this->get_full_block_name(),
 				array(
 					'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
 					'onCartClickBehaviour'         => $on_cart_click_behaviour,

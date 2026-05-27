@@ -39,8 +39,8 @@ class ProductReviews extends AbstractBlock {
 
 		$p = new \WP_HTML_Tag_Processor( $content );
 		$p->next_tag();
-		$p->set_attribute( 'data-wp-interactive', $this->get_block_type() );
-		$p->set_attribute( 'data-wp-router-region', $this->get_block_type() );
+		$p->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
+		$p->set_attribute( 'data-wp-router-region', $this->get_full_block_name() );
 
 		return $p->get_updated_html();
 	}

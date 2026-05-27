@@ -67,7 +67,7 @@ class ProductFilters extends AbstractBlock {
 		$query_id      = $block->context['queryId'] ?? 0;
 		$filter_params = $this->get_filter_params( $query_id );
 
-		wp_interactivity_config( $this->get_block_type(), [ 'canonicalUrl' => $this->get_canonical_url_no_pagination( $filter_params ) ] );
+		wp_interactivity_config( $this->get_full_block_name(), [ 'canonicalUrl' => $this->get_canonical_url_no_pagination( $filter_params ) ] );
 
 		/**
 		 * Filter hook to modify the selected filter items.
@@ -105,7 +105,7 @@ class ProductFilters extends AbstractBlock {
 
 		$wrapper_attributes = array(
 			'class'                            => 'wc-block-product-filters',
-			'data-wp-interactive'              => $this->get_block_type(),
+			'data-wp-interactive'              => $this->get_full_block_name(),
 			'data-wp-init--colors'             => 'callbacks.initColors',
 			'data-wp-watch--scrolling'         => 'callbacks.scrollLimit',
 			'data-wp-on--keyup'                => 'actions.closeOverlayOnEscape',
@@ -153,7 +153,7 @@ class ProductFilters extends AbstractBlock {
 						>
 							<button
 								class="wc-block-product-filters__apply wp-element-button"
-								data-wp-interactive="<?php echo esc_attr( $this->get_block_type() ); ?>"
+								data-wp-interactive="<?php echo esc_attr( $this->get_full_block_name() ); ?>"
 								data-wp-on--click="actions.closeOverlay"
 							>
 								<span><?php echo esc_html__( 'Apply', 'woocommerce' ); ?></span>

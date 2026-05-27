@@ -29,7 +29,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 		$head_total_label   = __( 'Total', 'woocommerce' );
 
 		wp_interactivity_state(
-			$this->get_block_type(),
+			$this->get_full_block_name(),
 			array(
 				'cartItem' => function () {
 					$context = wp_interactivity_get_context( 'woocommerce' );
@@ -67,7 +67,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 		$available_on_backorder_label = __( 'Available on backorder', 'woocommerce' );
 
 		wp_interactivity_config(
-			$this->get_block_type(),
+			$this->get_full_block_name(),
 			array(
 				'reduceQuantityLabel'      => $reduce_quantity_label,
 				'increaseQuantityLabel'    => $increase_quantity_label,
@@ -79,7 +79,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class'               => 'wc-block-mini-cart__products-table',
-				'data-wp-interactive' => $this->get_block_type(),
+				'data-wp-interactive' => $this->get_full_block_name(),
 			)
 		);
 
