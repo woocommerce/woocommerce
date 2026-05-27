@@ -799,7 +799,7 @@ function wc_attribute_taxonomy_slug( $attribute_name ) {
  */
 function wc_save_visual_attribute_term_meta( int $term_id, string $color = '', int $image_id = 0 ): void {
 	if ( $image_id && wp_attachment_is_image( $image_id ) ) {
-		update_term_meta( $term_id, 'image', absint( $sanitized_image_id ) );
+		update_term_meta( $term_id, 'image', absint( $image_id ) );
 		delete_term_meta( $term_id, 'color' );
 		return;
 	}

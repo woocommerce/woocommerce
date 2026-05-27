@@ -22,7 +22,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 	/**
 	 * Cached map of term ID to visual values for wc-visual attribute terms.
 	 *
-	 * @var array<int, array{color: string, image: string}>|null
+	 * @var array<int, array{color?: string, image?: string}>|null
 	 */
 	private $term_visuals = null;
 

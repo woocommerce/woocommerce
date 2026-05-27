@@ -497,15 +497,11 @@ class WC_Admin_Taxonomies {
 	 * @param string $taxonomy Taxonomy slug.
 	 */
 	public function save_category_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
-		if ( isset( $_POST['display_type'] ) && 'product_cat' === $taxonomy ) {
-			// WPCS: CSRF ok, input var ok.
-			update_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) );
-			// WPCS: CSRF ok, sanitization ok, input var ok.
+		if ( isset( $_POST['display_type'] ) && 'product_cat' === $taxonomy ) { // WPCS: CSRF ok, input var ok.
+			update_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) ); // WPCS: CSRF ok, sanitization ok, input var ok.
 		}
-		if ( isset( $_POST['product_cat_thumbnail_id'] ) && 'product_cat' === $taxonomy ) {
-			// WPCS: CSRF ok, input var ok.
-			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) );
-			// WPCS: CSRF ok, input var ok.
+		if ( isset( $_POST['product_cat_thumbnail_id'] ) && 'product_cat' === $taxonomy ) { // WPCS: CSRF ok, input var ok.
+			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // WPCS: CSRF ok, input var ok.
 		}
 	}
 
@@ -515,6 +511,7 @@ class WC_Admin_Taxonomies {
 	 * @param mixed  $term_id Term ID being saved.
 	 * @param mixed  $tt_id Term taxonomy ID.
 	 * @param string $taxonomy Taxonomy slug.
+	 * @return void
 	 *
 	 * @internal
 	 */
@@ -526,7 +523,7 @@ class WC_Admin_Taxonomies {
 		$color_value = isset( $_POST['term_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['term_color'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$image_id    = isset( $_POST['term_image'] ) ? absint( wp_unslash( $_POST['term_image'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
-		wc_save_visual_attribute_term_meta( (int) $term_id, $color_value, $image_id );
+		wc_save_visual_attribute_term_meta( (int) $term_id, $color_value ?? '', $image_id );
 	}
 
 	/**
@@ -700,13 +697,10 @@ class WC_Admin_Taxonomies {
 	 * Handle custom row actions.
 	 */
 	public function handle_product_cat_row_actions() {
-		if ( isset( $_GET['action'], $_GET['tag_ID'], $_GET['_wpnonce'] ) && 'make_default' === $_GET['action'] ) {
-			// WPCS: CSRF ok, input var ok.
-			$make_default_id = absint( $_GET['tag_ID'] );
-			// WPCS: Input var ok.
+		if ( isset( $_GET['action'], $_GET['tag_ID'], $_GET['_wpnonce'] ) && 'make_default' === $_GET['action'] ) { // WPCS: CSRF ok, input var ok.
+			$make_default_id = absint( $_GET['tag_ID'] ); // WPCS: Input var ok.
 
-			if ( wp_verify_nonce( $_GET['_wpnonce'], 'make_default_' . $make_default_id ) && current_user_can( 'edit_term', $make_default_id ) ) {
-				// WPCS: Sanitization ok, input var ok, CSRF ok.
+			if ( wp_verify_nonce( $_GET['_wpnonce'], 'make_default_' . $make_default_id ) && current_user_can( 'edit_term', $make_default_id ) ) { // WPCS: Sanitization ok, input var ok, CSRF ok.
 				update_option( 'default_product_cat', $make_default_id );
 			}
 		}
