@@ -197,7 +197,7 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 
 	return (
 		<>
-			{ shouldShowFeedbackBar && (
+			{ false && (
 				<div className="woocommerce-product-mvp-ces-footer">
 					<Pill>Beta</Pill>
 					<div className="woocommerce-product-mvp-ces-footer__message">

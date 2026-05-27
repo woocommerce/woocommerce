@@ -440,11 +440,11 @@ export function BlockEditor( {
 				className="woocommerce-product-block-editor__deprecation-notice"
 				type="warning"
 				title={ __(
-					'The new product editor is deprecated',
+					'This version of the product editor is deprecated',
 					'woocommerce'
 				) }
 				content={ __(
-					'It will be removed in WooCommerce 11.0. The classic editor remains supported for ongoing product editing.',
+					'We recommend switching to the classic editor before this version is removed in WooCommerce 11.0. The classic editor remains supported for ongoing product editing.',
 					'woocommerce'
 				) }
 			>
