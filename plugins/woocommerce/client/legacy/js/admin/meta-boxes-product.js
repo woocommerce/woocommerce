@@ -1279,17 +1279,17 @@ jQuery( function ( $ ) {
 
 	// Unified product images manager.
 	( function () {
-		var $list = $( '#wc-product-images__list' );
+		const $list = $( '#wc-product-images__list' );
 		if ( ! $list.length ) {
 			return;
 		}
 
-		var $input = $( '#wc_product_image_ids' );
-		var $addSlot = $( '#wc-product-images__add-slot' );
-		var $liveRegion = $( '#wc-product-images__live-region' );
-		var mediaFrame;
+		const $input = $( '#wc_product_image_ids' );
+		const $addSlot = $( '#wc-product-images__add-slot' );
+		const $liveRegion = $( '#wc-product-images__live-region' );
+		let mediaFrame;
 
-		var removeIcon =
+		const removeIcon =
 			'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">' +
 			'<path d="M12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8' +
 			'Zm3.8 10.7-1.1 1.1-2.7-2.7-2.7 2.7-1.1-1.1 2.7-2.7-2.7-2.7 ' +
@@ -1304,50 +1304,69 @@ jQuery( function ( $ ) {
 		}
 
 		function syncIds() {
-			var ids = [];
-			$list.children( '.wc-product-images__image' ).each( function () {
-				ids.push( $( this ).data( 'attachment-id' ) );
-			} );
+			const ids = $list
+				.children( '.wc-product-images__image' )
+				.map( function () {
+					return $( this ).data( 'attachment-id' );
+				} )
+				.get();
+			const hasImages = ids.length > 0;
+
 			$input.val( ids.join( ',' ) );
-			$list.toggleClass( 'wc-product-images__list--has-images', ids.length > 0 );
+			$list.toggleClass(
+				'wc-product-images__list--has-images',
+				hasImages
+			);
 			$addSlot
-				.toggleClass( 'wc-product-images__add-slot--featured', ids.length === 0 )
-				.toggleClass( 'wc-product-images__add-slot--gallery', ids.length > 0 );
+				.toggleClass(
+					'wc-product-images__add-slot--featured',
+					! hasImages
+				)
+				.toggleClass(
+					'wc-product-images__add-slot--gallery',
+					hasImages
+				);
 			refreshFeaturedState();
 		}
 
 		function refreshFeaturedState() {
 			$list.children( '.wc-product-images__image' ).each( function ( i ) {
-				var $item = $( this );
-				if ( i === 0 ) {
-					$item
-						.removeClass( 'wc-product-images__image--gallery' )
-						.addClass( 'wc-product-images__image--featured' );
+				const $item = $( this );
+				const isFeatured = i === 0;
+
+				$item
+					.toggleClass(
+						'wc-product-images__image--featured',
+						isFeatured
+					)
+					.toggleClass(
+						'wc-product-images__image--gallery',
+						! isFeatured
+					);
+
+				if ( isFeatured ) {
 					maybeUpgradeImage( $item );
 				} else {
-					$item
-						.removeClass( 'wc-product-images__image--featured' )
-						.addClass( 'wc-product-images__image--gallery' );
 					maybeDowngradeImage( $item );
 				}
 			} );
 		}
 
 		function maybeUpgradeImage( $item ) {
-			var $img = $item.find( 'img' );
-			var attachmentId = $item.data( 'attachment-id' );
-			var currentSrc = $img.attr( 'src' ) || '';
+			const $img = $item.find( 'img' );
+			const attachmentId = $item.data( 'attachment-id' );
+			const currentSrc = $img.attr( 'src' ) || '';
 
 			if (
 				currentSrc.indexOf( '-150x150' ) !== -1 ||
 				currentSrc.indexOf( '-100x100' ) !== -1
 			) {
-				var attachment = wp.media.attachment( attachmentId );
+				const attachment = wp.media.attachment( attachmentId );
 				attachment.fetch().then( function () {
-					var sizes = attachment.get( 'sizes' );
-					var medium = sizes && sizes.medium;
-					var full = sizes && sizes.full;
-					var newSrc =
+					const sizes = attachment.get( 'sizes' );
+					const medium = sizes && sizes.medium;
+					const full = sizes && sizes.full;
+					const newSrc =
 						( medium && medium.url ) ||
 						( full && full.url ) ||
 						currentSrc;
@@ -1358,18 +1377,18 @@ jQuery( function ( $ ) {
 		}
 
 		function maybeDowngradeImage( $item ) {
-			var $img = $item.find( 'img' );
-			var attachmentId = $item.data( 'attachment-id' );
-			var currentSrc = $img.attr( 'src' ) || '';
+			const $img = $item.find( 'img' );
+			const attachmentId = $item.data( 'attachment-id' );
+			const currentSrc = $img.attr( 'src' ) || '';
 
 			if (
 				currentSrc.indexOf( '-150x150' ) === -1 &&
 				currentSrc.indexOf( '-100x100' ) === -1
 			) {
-				var attachment = wp.media.attachment( attachmentId );
+				const attachment = wp.media.attachment( attachmentId );
 				attachment.fetch().then( function () {
-					var sizes = attachment.get( 'sizes' );
-					var thumb = sizes && sizes.thumbnail;
+					const sizes = attachment.get( 'sizes' );
+					const thumb = sizes && sizes.thumbnail;
 					if ( thumb && thumb.url ) {
 						$img.attr( 'src', thumb.url );
 						$img.removeAttr( 'width' ).removeAttr( 'height' );
@@ -1379,7 +1398,7 @@ jQuery( function ( $ ) {
 		}
 
 		function buildImageHtml( attachmentId, imgUrl, isFeatured ) {
-			var modifier = isFeatured ? 'featured' : 'gallery';
+			const modifier = isFeatured ? 'featured' : 'gallery';
 			return (
 				'<div class="wc-product-images__image wc-product-images__image--' +
 				modifier +
@@ -1428,14 +1447,14 @@ jQuery( function ( $ ) {
 		} );
 
 		function updateDragVisuals( $ph ) {
-			var $children = $list
+			const $children = $list
 				.children()
 				.not(
 					'.wc-product-images__image--dragging, #wc-product-images__add-slot'
 				);
 
 			$children.each( function ( i ) {
-				var $el = $( this );
+				const $el = $( this );
 
 				if ( $el.hasClass( 'wc-product-images__placeholder' ) ) {
 					if ( i === 0 ) {
@@ -1449,7 +1468,7 @@ jQuery( function ( $ ) {
 							height: $list.width() + 'px',
 						} );
 					} else {
-						var gw = Math.floor( ( $list.width() - 16 ) / 3 );
+						const gw = Math.floor( ( $list.width() - 16 ) / 3 );
 						$el.addClass(
 							'wc-product-images__placeholder--gallery'
 						).removeClass(
@@ -1490,8 +1509,8 @@ jQuery( function ( $ ) {
 		// Remove image.
 		$list.on( 'click', '.wc-product-images__remove', function ( e ) {
 			e.preventDefault();
-			var $item = $( this ).closest( '.wc-product-images__image' );
-			var $next =
+			const $item = $( this ).closest( '.wc-product-images__image' );
+			const $next =
 				$item.next( '.wc-product-images__image' ).length > 0
 					? $item.next( '.wc-product-images__image' )
 					: $addSlot;
@@ -1520,14 +1539,14 @@ jQuery( function ( $ ) {
 			} );
 
 			mediaFrame.on( 'select', function () {
-				var selection = mediaFrame.state().get( 'selection' );
-				var existingIds = $input.val()
+				const selection = mediaFrame.state().get( 'selection' );
+				const existingIds = $input.val()
 					? $input.val().split( ',' ).map( Number )
 					: [];
-				var isEmpty =
+				const isEmpty =
 					existingIds.length === 0 &&
 					$list.children( '.wc-product-images__image' ).length === 0;
-				var addedCount = 0;
+				let addedCount = 0;
 
 				selection.each( function ( attachment, index ) {
 					attachment = attachment.toJSON();
@@ -1539,8 +1558,8 @@ jQuery( function ( $ ) {
 						return;
 					}
 
-					var isFeatured = isEmpty && index === 0;
-					var imgUrl;
+					const isFeatured = isEmpty && index === 0;
+					let imgUrl;
 
 					if ( isFeatured ) {
 						imgUrl =
@@ -1596,9 +1615,9 @@ jQuery( function ( $ ) {
 		// Navigation: Tab / Shift+Tab (native, no JS needed — images have tabindex="0").
 		// Reordering: Arrow keys move the focused image.
 		$list.on( 'keydown', '.wc-product-images__image', function ( e ) {
-			var $item = $( this );
-			var $images = $list.children( '.wc-product-images__image' );
-			var index = $images.index( $item );
+			const $item = $( this );
+			const $images = $list.children( '.wc-product-images__image' );
+			const index = $images.index( $item );
 
 			// ArrowLeft / ArrowUp — move image earlier in list.
 			if (
@@ -1609,7 +1628,7 @@ jQuery( function ( $ ) {
 				$item.prev( '.wc-product-images__image' ).before( $item );
 				syncIds();
 				$item.trigger( 'focus' );
-				var newPos = $list
+				const newPos = $list
 					.children( '.wc-product-images__image' )
 					.index( $item ) + 1;
 				announce(
@@ -1646,12 +1665,16 @@ jQuery( function ( $ ) {
 			// Backspace / Delete — remove the focused image.
 			if ( e.key === 'Backspace' || e.key === 'Delete' ) {
 				e.preventDefault();
-				var $next =
-					$item.next( '.wc-product-images__image' ).length > 0
-						? $item.next( '.wc-product-images__image' )
-						: $item.prev( '.wc-product-images__image' ).length > 0
-						? $item.prev( '.wc-product-images__image' )
-						: $addSlot;
+				let $next;
+				if ( $item.next( '.wc-product-images__image' ).length > 0 ) {
+					$next = $item.next( '.wc-product-images__image' );
+				} else if (
+					$item.prev( '.wc-product-images__image' ).length > 0
+				) {
+					$next = $item.prev( '.wc-product-images__image' );
+				} else {
+					$next = $addSlot;
+				}
 				$item.remove();
 				syncIds();
 				$next.trigger( 'focus' );
