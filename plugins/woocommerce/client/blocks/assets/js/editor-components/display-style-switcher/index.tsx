@@ -157,8 +157,19 @@ export const DisplayStyleSwitcher = ( {
 			label=""
 			hideLabelFromVision
 			onChange={ ( value: string | number | undefined ) => {
-				if ( ! value || typeof value !== 'string' ) return;
-				if ( ! parentBlock ) return;
+				if ( ! value || typeof value !== 'string' ) {
+					return;
+				}
+				if ( ! parentBlock ) {
+					return;
+				}
+				if (
+					! displayStyleOptions.some(
+						( blockType ) => blockType.name === value
+					)
+				) {
+					return;
+				}
 				const currentStyleBlock = getCurrentDisplayStyleBlock(
 					parentBlock,
 					displayStyleOptions
