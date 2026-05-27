@@ -19,6 +19,8 @@ There are two separate parts to understand:
 - **The infrastructure** (the build tooling, attributes, authorization model, engine-decoupling layer): Implementing a robust and stable infrastructure has been for now the main focus of the development efforts.
 - **WooCommerce core's own code API** (the `coupons` and `products` queries/mutations): This is a **proof of concept**. It exists to exercise the infrastructure and will likely change significantly or be replaced in the short term. Treat it as an example, not a contract.
 
+This dual API, both the infrastructure and the proof of concept code API, has been introduced as an experimental feature in WooCommerce 10.9.
+
 ## Requirements
 
 - **PHP 8.1+.** The code API uses enums, named arguments, and PHP 8 attributes. On PHP 8.0 or older the GraphQL endpoint is not registered.
