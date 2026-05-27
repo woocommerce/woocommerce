@@ -340,7 +340,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			wc_save_visual_attribute_term_meta( $term_id, '#ff00aa', $image_id );
 
 			$this->assertSame( '', get_term_meta( $term_id, 'color', true ), 'Color meta should be removed when image takes precedence.' );
-			$this->assertSame( $image_id, get_term_meta( $term_id, 'image', true ), 'Image should take precedence when both values are provided.' );
+			$this->assertSame( (string) $image_id, get_term_meta( $term_id, 'image', true ), 'Image should take precedence when both values are provided.' );
 		} finally {
 			if ( $term_id ) {
 				wp_delete_term( $term_id, 'product_cat' );
