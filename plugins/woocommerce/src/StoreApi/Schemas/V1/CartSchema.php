@@ -360,6 +360,10 @@ class CartSchema extends AbstractSchema {
 			// Identify which images need priming.
 			$ids         = array_map( static fn( $item ) => array( (int) $item['data']->get_image_id(), ...$item['data']->get_gallery_image_ids() ), $cart_line_items );
 			$image_ids[] = array_values( array_filter( array_merge( ...array_values( $ids ) ) ) );
+
+			// Prime the reserved-stock cache once for the whole cart so per-item lookups via
+			// QuantityLimits and CartController collapse into a single SQL.
+			$controller->prime_reserved_stock_for_cart_items( $cart_all_items );
 		}
 
 		if ( ! empty( $image_ids ) ) {
