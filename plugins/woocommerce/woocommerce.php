@@ -30,6 +30,7 @@ if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
 \Automattic\WooCommerce\Packages::init();
 
 // Include the main WooCommerce class.
+// CI labeled-event path test marker; safe to remove after measuring workflow jobs.
 if ( ! class_exists( 'WooCommerce', false ) ) {
 	include_once dirname( WC_PLUGIN_FILE ) . '/includes/class-woocommerce.php';
 }
