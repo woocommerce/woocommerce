@@ -25,6 +25,17 @@ final class ReserveStock {
 	private $enabled = true;
 
 	/**
+	 * Request-scoped cache of reserved stock results.
+	 *
+	 * Shape: [ "{exclude_order_id}" => [ product_id => float ] ]
+	 *
+	 * Static so transient `new ReserveStock()` instances created in the same request share the cache.
+	 *
+	 * @var array<string, array<int, int|float>>
+	 */
+	private static $reserved_stock_cache = array();
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -56,10 +67,142 @@ final class ReserveStock {
 			return 0;
 		}
 
-		return wc_stock_amount(
+		$product_id       = (int) $product->get_stock_managed_by_id();
+		$exclude_order_id = (int) $exclude_order_id;
+		$cache_key        = 'eo_' . $exclude_order_id;
+
+		if ( isset( self::$reserved_stock_cache[ $cache_key ][ $product_id ] ) ) {
+			return self::$reserved_stock_cache[ $cache_key ][ $product_id ];
+		}
+
+		$value = wc_stock_amount(
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-			$wpdb->get_var( $this->get_query_for_reserved_stock( $product->get_stock_managed_by_id(), $exclude_order_id ) )
+			$wpdb->get_var( $this->get_query_for_reserved_stock( $product_id, $exclude_order_id ) )
 		);
+
+		self::$reserved_stock_cache[ $cache_key ][ $product_id ] = $value;
+
+		return $value;
+	}
+
+	/**
+	 * Query reserved stock for a set of product IDs in a single SQL statement.
+	 *
+	 * Populates the request-scoped cache used by {@see get_reserved_stock()} so subsequent
+	 * per-product calls become free. Filters that are normally applied per product via
+	 * `woocommerce_query_for_reserved_stock` are still applied for cache-miss product IDs
+	 * by deferring to {@see get_reserved_stock()} when a filter is registered, preserving
+	 * the public extension contract.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param int[] $product_ids      Product IDs (stock-managed IDs) to query.
+	 * @param int   $exclude_order_id Optional order to exclude from the results.
+	 * @return array<int, int|float>  Map of product_id => reserved quantity. Missing entries default to 0.
+	 */
+	public function get_reserved_stock_batch( array $product_ids, $exclude_order_id = 0 ) {
+		global $wpdb;
+
+		$product_ids      = array_values( array_unique( array_map( 'intval', $product_ids ) ) );
+		$exclude_order_id = (int) $exclude_order_id;
+		$cache_key        = 'eo_' . $exclude_order_id;
+
+		if ( ! $this->is_enabled() || empty( $product_ids ) ) {
+			return array_fill_keys( $product_ids, 0 );
+		}
+
+		// If a third-party filter is registered, the per-product query may diverge from the bulk one.
+		// Honour the contract by falling back to single-row lookups (each still cached).
+		if ( has_filter( 'woocommerce_query_for_reserved_stock' ) ) {
+			$out = array();
+			foreach ( $product_ids as $product_id ) {
+				if ( isset( self::$reserved_stock_cache[ $cache_key ][ $product_id ] ) ) {
+					$out[ $product_id ] = self::$reserved_stock_cache[ $cache_key ][ $product_id ];
+					continue;
+				}
+				$sql = $this->get_query_for_reserved_stock( $product_id, $exclude_order_id );
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+				$value = wc_stock_amount( $wpdb->get_var( $sql ) );
+				self::$reserved_stock_cache[ $cache_key ][ $product_id ] = $value;
+				$out[ $product_id ]                                      = $value;
+			}
+			return $out;
+		}
+
+		$missing = array();
+		$result  = array();
+		foreach ( $product_ids as $product_id ) {
+			if ( isset( self::$reserved_stock_cache[ $cache_key ][ $product_id ] ) ) {
+				$result[ $product_id ] = self::$reserved_stock_cache[ $cache_key ][ $product_id ];
+			} else {
+				$missing[]             = $product_id;
+				$result[ $product_id ] = 0;
+			}
+		}
+
+		if ( empty( $missing ) ) {
+			return $result;
+		}
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$join         = "{$wpdb->prefix}wc_orders orders ON stock_table.`order_id` = orders.id";
+			$where_status = "orders.status IN ( 'wc-checkout-draft', '" . OrderInternalStatus::PENDING . "' )";
+		} else {
+			$join         = "{$wpdb->posts} posts ON stock_table.`order_id` = posts.ID";
+			$where_status = "posts.post_status IN ( 'wc-checkout-draft', '" . OrderInternalStatus::PENDING . "' )";
+		}
+
+		$placeholders = implode( ',', array_fill( 0, count( $missing ), '%d' ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare(
+			"
+			SELECT stock_table.`product_id` AS product_id, COALESCE( SUM( stock_table.`stock_quantity` ), 0 ) AS reserved
+			FROM $wpdb->wc_reserved_stock stock_table
+			LEFT JOIN $join
+			WHERE $where_status
+			AND stock_table.`expires` > NOW()
+			AND stock_table.`product_id` IN ( $placeholders )
+			AND stock_table.`order_id` != %d
+			GROUP BY stock_table.`product_id`
+			",
+			array_merge( $missing, array( $exclude_order_id ) )
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows = $wpdb->get_results( $sql, ARRAY_A );
+
+		// Initialise misses to 0 in the cache so untouched IDs do not re-query.
+		foreach ( $missing as $product_id ) {
+			self::$reserved_stock_cache[ $cache_key ][ $product_id ] = 0;
+		}
+		if ( is_array( $rows ) ) {
+			foreach ( $rows as $row ) {
+				$pid   = (int) $row['product_id'];
+				$value = wc_stock_amount( $row['reserved'] );
+
+				self::$reserved_stock_cache[ $cache_key ][ $pid ] = $value;
+				$result[ $pid ]                                   = $value;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Clear the request-scoped reserved-stock cache. Intended for tests and after writes.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param int|null $exclude_order_id Only clear entries for this exclude_order_id, or null for all.
+	 */
+	public static function flush_reserved_stock_cache( $exclude_order_id = null ): void {
+		if ( null === $exclude_order_id ) {
+			self::$reserved_stock_cache = array();
+			return;
+		}
+		unset( self::$reserved_stock_cache[ 'eo_' . (int) $exclude_order_id ] );
 	}
 
 	/**
@@ -201,6 +344,9 @@ final class ReserveStock {
 				'order_id' => $order->get_id(),
 			)
 		);
+
+		// Released rows may shadow values cached for any exclude_order_id; safest to flush everything.
+		self::flush_reserved_stock_cache();
 	}
 
 	/**
@@ -244,6 +390,9 @@ final class ReserveStock {
 				break;
 			}
 		}
+
+		// Whether the insert succeeded or not, any prior cached value for this product is now stale.
+		self::flush_reserved_stock_cache();
 
 		if ( ! $result ) {
 			$product = wc_get_product( $product_id );
