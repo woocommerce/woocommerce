@@ -27,7 +27,7 @@ During the release process, you may encounter CI test failures on release-relate
 2. **Backport test fixes**: If possible, [backport](/docs/contribution/releases/backporting) the relevant test fixes from trunk to the release branch, then re-run the CI workflow.
 3. **Handle complex cases**: If backporting isn't possible due to dependencies or the cause isn't clear, document what you've found and ask for help in the release Slack channel. The "Heart of Gold - Flux" team can assist with resolving CI issues that block release work.
 
-### Something looks wrong in the final release ZIP. Can I start over? {#can-i-start-over-id}
+### Something looks wrong in the final release ZIP. Can I start over?
 
 If, after downloading and unzipping the generated artifact, something seems off (e.g., missing files, incorrect changelog, or version mismatch), this usually means:
 
@@ -45,7 +45,7 @@ If, after downloading and unzipping the generated artifact, something seems off 
 
 **Once you know which step failed,** re-run only that step as described in the [Building & Publishing guide](/docs/contribution/releases/building-and-publishing). Make sure to run skipped workflows in the correct order and double-check all configuration (version number, release type, etc.) before proceeding.
 
-### A serious bug was detected during internal checks / monitoring {#deploy-serious-bug}
+### A serious bug was detected during internal checks / monitoring
 
 For RC and stable releases, deploying to our staging environment and monitoring for errors is required before the release is made publicly available. If a serious bug is detected during this monitoring period, follow these steps:
 
@@ -67,11 +67,11 @@ For RC and stable releases, deploying to our staging environment and monitoring 
 If a severe regression or bug is discovered (e.g., checkout failure or unrecoverable data loss):
 
 1. Immediately notify the relevant engineering team(s).
-2. Follow the [Point Releases guide](/docs/contribution/releases/point-releases) to create a tracking issue, prepare the fix, and ship the patch.
-3. If the severity warrants it (e.g., checkout failure, data loss, or other critical impact affecting many stores), temporarily move the stable tag on WordPress.org back to the previous known-good version:
+2. If the severity warrants it (e.g., checkout failure, data loss, or other critical impact affecting many stores), temporarily move the stable tag on WordPress.org back to the previous known-good version, so new installs and updates stop landing on the broken version while the fix is being prepared:
    - Identify the correct previous version and note its exact number.
    - Use the [`Release: Update stable tag`](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) workflow, making sure to check the _Revert_ option to allow downgrading.
    - Merge any auto-generated PRs right away.
+3. Follow the [Point Releases guide](/docs/contribution/releases/point-releases) to create a tracking issue, prepare the fix, and ship the patch.
 
 ### The release needs to be delayed. What should we do?
 
