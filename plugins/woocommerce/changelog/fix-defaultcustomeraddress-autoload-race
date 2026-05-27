@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a fatal error during in-place upgrade to 10.8.0 caused by the new DefaultCustomerAddress enum being referenced from class-wc-settings-general.php before the in-process autoloader classmap is refreshed.
