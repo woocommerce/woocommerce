@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Email;
 
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WC_Email;
 use WC_Log_Levels;
@@ -131,6 +132,70 @@ class EmailLogger implements RegisterHooksInterface {
 
 		$level = $success ? WC_Log_Levels::INFO : WC_Log_Levels::WARNING;
 		wc_get_logger()->log( $level, $message, $context );
+
+		$this->maybe_add_order_note( $email->object, $email_id, $email, (bool) $success, $last_mail_error );
+	}
+
+	/**
+	 * Add a private order note when a transactional email is sent or fails for an order.
+	 *
+	 * Accepts mixed input because $email->object is loosely typed (any object the email subclass attaches),
+	 * and we narrow to WC_Order at the top of the method before doing anything with it.
+	 *
+	 * @param mixed       $wc_object    The email's related object, or false/null when none is set.
+	 * @param string      $email_id     The email type ID (e.g. `customer_processing_order`).
+	 * @param WC_Email    $email        The WC_Email instance.
+	 * @param bool        $success      Whether the email was sent successfully.
+	 * @param string|null $error_reason The error message from wp_mail_failed, or null.
+	 * @return void
+	 */
+	private function maybe_add_order_note( $wc_object, string $email_id, WC_Email $email, bool $success, ?string $error_reason ): void {
+		if ( ! $wc_object instanceof WC_Order ) {
+			return;
+		}
+
+		/**
+		 * Filter whether to add an order note for this transactional email attempt.
+		 *
+		 * Return false to suppress the order note for a particular email or globally,
+		 * while still allowing the WooCommerce logger entry to be written.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param bool     $enabled  Whether to add the order note.
+		 * @param string   $email_id The email type ID.
+		 * @param WC_Email $email    The WC_Email instance.
+		 * @param WC_Order $order    The order the note would be added to.
+		 */
+		if ( ! apply_filters( 'woocommerce_email_log_add_order_note', true, $email_id, $email, $wc_object ) ) {
+			return;
+		}
+
+		$email_title = $email->get_title();
+		$email_label = '' !== $email_title ? $email_title : $email_id;
+
+		if ( $success ) {
+			$note = sprintf(
+				/* translators: %s: Email title or type identifier */
+				__( 'Email "%s" sent.', 'woocommerce' ),
+				$email_label
+			);
+		} elseif ( $error_reason ) {
+			$note = sprintf(
+				/* translators: 1: Email title or type identifier, 2: Error reason */
+				__( 'Email "%1$s" failed to send: %2$s.', 'woocommerce' ),
+				$email_label,
+				$this->redact_emails( $error_reason )
+			);
+		} else {
+			$note = sprintf(
+				/* translators: %s: Email title or type identifier */
+				__( 'Email "%s" failed to send.', 'woocommerce' ),
+				$email_label
+			);
+		}
+
+		$wc_object->add_order_note( $note, 0, false, array( 'note_group' => OrderNoteGroup::EMAIL_NOTIFICATION ) );
 	}
 
 	/**
