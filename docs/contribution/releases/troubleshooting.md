@@ -58,7 +58,7 @@ For RC and stable releases, deploying to our staging environment and monitoring 
 
 #### How to proceed once the bug fix is merged into the release branch?
 
-1. **Create a new tracking issue** for the new version (e.g., `-rc.2` if the bug was detected during `-rc.1`, or `x.y.2` if detected while monitoring `x.y.1`) by running the [`Release: Create Tracking Issue`](https://github.com/woocommerce/woocommerce/actions/workflows/release-create-tracking-issue.yml) workflow. Do not reuse the existing tracking issue.
+1. **Create a new tracking issue** for the new version (e.g., `-rc.2` if the bug was detected during `-rc.1`, or `x.y.2` if detected while monitoring `x.y.1`) by running the [`Release: Create Tracking Issue`](https://github.com/woocommerce/woocommerce/actions/workflows/release-create-tracking-issue.yml) workflow. Do not reuse the existing tracking issue. The new issue is automatically nested under the `[X.Y] Release tracking` parent in Linear.
 2. **Follow the release procedure as normal** for the new version.
 3. **Publish all draft releases** for the affected version series. Even if the prior version wasn't made publicly available, it must be published along with the valid version. Each version will have its own changelog section.
 
@@ -67,8 +67,8 @@ For RC and stable releases, deploying to our staging environment and monitoring 
 If a severe regression or bug is discovered (e.g., checkout failure or unrecoverable data loss):
 
 1. Immediately notify the relevant engineering team(s).
-2. Prepare to do a [Point Release](/docs/contribution/releases/point-releases).
-3. Temporarily move the stable tag on WordPress.org back to the previous known-good version:
+2. Follow the [Point Releases guide](/docs/contribution/releases/point-releases) to create a tracking issue, prepare the fix, and ship the patch.
+3. If the severity warrants it (e.g., checkout failure, data loss, or other critical impact affecting many stores), temporarily move the stable tag on WordPress.org back to the previous known-good version:
    - Identify the correct previous version and note its exact number.
    - Use the [`Release: Update stable tag`](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) workflow, making sure to check the _Revert_ option to allow downgrading.
    - Merge any auto-generated PRs right away.
