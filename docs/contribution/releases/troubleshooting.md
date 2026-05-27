@@ -27,7 +27,7 @@ During the release process, you may encounter CI test failures on release-relate
 2. **Backport test fixes**: If possible, [backport](/docs/contribution/releases/backporting) the relevant test fixes from trunk to the release branch, then re-run the CI workflow.
 3. **Handle complex cases**: If backporting isn't possible due to dependencies or the cause isn't clear, document what you've found and ask for help in the release Slack channel. The "Heart of Gold - Flux" team can assist with resolving CI issues that block release work.
 
-<h3 id="can-i-start-over-id">Something looks wrong in the final release ZIP. Can I start over?</h3>
+### Something looks wrong in the final release ZIP. Can I start over? {#can-i-start-over-id}
 
 If, after downloading and unzipping the generated artifact, something seems off (e.g., missing files, incorrect changelog, or version mismatch), this usually means:
 
@@ -45,7 +45,7 @@ If, after downloading and unzipping the generated artifact, something seems off 
 
 **Once you know which step failed,** re-run only that step as described in the [Building & Publishing guide](/docs/contribution/releases/building-and-publishing). Make sure to run skipped workflows in the correct order and double-check all configuration (version number, release type, etc.) before proceeding.
 
-<h3 id="deploy-serious-bug">A serious bug was detected during internal checks / monitoring</h3>
+### A serious bug was detected during internal checks / monitoring {#deploy-serious-bug}
 
 For RC and stable releases, deploying to our staging environment and monitoring for errors is required before the release is made publicly available. If a serious bug is detected during this monitoring period, follow these steps:
 

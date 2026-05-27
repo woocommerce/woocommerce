@@ -59,10 +59,10 @@ The work is split between the **fix author** and the **release lead**. These tas
 
 Two paths are acceptable. The first is preferred when the fix applies cleanly to both branches.
 
-- **Preferred:** merge to `trunk` with the release milestone set. Open the PR against `trunk` as normal and set its milestone to the release series (e.g. `X.Y.0`). WooCommerce milestones use the `.0` form for the whole series, so a fix targeting `X.Y.1` still uses milestone `X.Y.0`. The release lead picks it up from there and ports it to the release branch.
-- **Alternative:** PR directly against the `release/X.Y` branch. Use this when the fix doesn't apply cleanly to `trunk` or the branches have diverged. Include a changelog entry, set the milestone to `X.Y.0`, and apply the `cherry pick to trunk` and/or `cherry pick to frozen release` labels as appropriate so the fix is forward-ported automatically after merge. Any cherry-pick PRs that get generated must also be reviewed and merged before the release is published; they share the same milestone as the original fix.
+- **Preferred:** merge to `trunk` with the `X.Y.0` milestone set. The cherry-pick automation handles the rest. See the [Cherry-picking guide](/docs/contribution/releases/backporting) for the full flow, including your responsibility for reviewing and merging the auto-generated cherry-pick PR.
+- **Alternative:** PR directly against the `release/X.Y` branch when the fix doesn't apply cleanly to `trunk`. Use the [cherry-pick label flow](/docs/contribution/releases/backporting) to forward-port to `trunk` (and the next frozen release if applicable).
 
-Get the PR reviewed and merged following the normal review process. Once it lands, the rest is on the release lead.
+Once the PR and any cherry-pick follow-ups have been reviewed, merged, and milestoned, the rest is on the release lead.
 
 ### For the release lead: create the tracking issue and cut the release
 
