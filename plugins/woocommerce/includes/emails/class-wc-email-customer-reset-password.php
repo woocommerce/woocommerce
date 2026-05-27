@@ -121,8 +121,8 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 			$this->setup_locale();
 
 			if ( $user_login && $reset_key ) {
-				$this->object            = get_user_by( 'login', $user_login );
-				if ( ! ( $this->object instanceof WP_User ) ) {
+				$this->object = get_user_by( 'login', $user_login );
+				if ( ! $this->object ) {
 					$this->restore_locale();
 					return;
 				}
