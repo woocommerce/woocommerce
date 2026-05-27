@@ -1610,80 +1610,94 @@ jQuery( function ( $ ) {
 			}
 		} );
 
-		// Keyboard reordering for images.
-		// Navigation: Tab / Shift+Tab (native, no JS needed — images have tabindex="0").
-		// Reordering: Arrow keys move the focused image.
+		function getImages() {
+			return $list.children( '.wc-product-images__image' );
+		}
+
+		function getPosition( $item ) {
+			return getImages().index( $item ) + 1;
+		}
+
+		function announcePosition( $item ) {
+			const position = getPosition( $item );
+
+			announce(
+				position === 1
+					? woocommerce_admin_meta_boxes.i18n_product_image_now_featured
+					: woocommerce_admin_meta_boxes.i18n_product_image_moved_to_position.replace(
+							'%d',
+							position
+					  )
+			);
+		}
+
+		function moveItemEarlier( $item ) {
+			$item.prev( '.wc-product-images__image' ).before( $item );
+			syncIds();
+			$item.trigger( 'focus' );
+			announcePosition( $item );
+		}
+
+		function moveItemLater( $item ) {
+			$item.next( '.wc-product-images__image' ).after( $item );
+			syncIds();
+			$item.trigger( 'focus' );
+			announcePosition( $item );
+		}
+
+		function getNextFocusAfterRemoval( $item ) {
+			if ( $item.next( '.wc-product-images__image' ).length > 0 ) {
+				return $item.next( '.wc-product-images__image' );
+			}
+
+			if ( $item.prev( '.wc-product-images__image' ).length > 0 ) {
+				return $item.prev( '.wc-product-images__image' );
+			}
+
+			return $addSlot;
+		}
+
+		function removeFocusedItem( $item ) {
+			const $next = getNextFocusAfterRemoval( $item );
+
+			$item.remove();
+			syncIds();
+			$next.trigger( 'focus' );
+			announce(
+				woocommerce_admin_meta_boxes.i18n_product_image_removed
+			);
+		}
+
 		$list.on( 'keydown', '.wc-product-images__image', function ( e ) {
 			const $item = $( this );
-			const $images = $list.children( '.wc-product-images__image' );
+			const $images = getImages();
 			const index = $images.index( $item );
 
-			// ArrowLeft / ArrowUp — move image earlier in list.
 			if (
 				( e.key === 'ArrowLeft' || e.key === 'ArrowUp' ) &&
 				index > 0
 			) {
 				e.preventDefault();
-				$item.prev( '.wc-product-images__image' ).before( $item );
-				syncIds();
-				$item.trigger( 'focus' );
-				const newPos = $list
-					.children( '.wc-product-images__image' )
-					.index( $item ) + 1;
-				announce(
-					newPos === 1
-						? woocommerce_admin_meta_boxes.i18n_product_image_now_featured
-						: woocommerce_admin_meta_boxes.i18n_product_image_moved_to_position.replace(
-								'%d',
-								newPos
-						  )
-				);
+				moveItemEarlier( $item );
 				return;
 			}
 
-			// ArrowRight / ArrowDown — move image later in list.
 			if (
 				( e.key === 'ArrowRight' || e.key === 'ArrowDown' ) &&
 				index < $images.length - 1
 			) {
 				e.preventDefault();
-				$item.next( '.wc-product-images__image' ).after( $item );
-				syncIds();
-				$item.trigger( 'focus' );
-				announce(
-					woocommerce_admin_meta_boxes.i18n_product_image_moved_to_position.replace(
-						'%d',
-						$list
-							.children( '.wc-product-images__image' )
-							.index( $item ) + 1
-					)
-				);
+				moveItemLater( $item );
 				return;
 			}
 
-			// Backspace / Delete — remove the focused image.
 			if ( e.key === 'Backspace' || e.key === 'Delete' ) {
 				e.preventDefault();
-				let $next;
-				if ( $item.next( '.wc-product-images__image' ).length > 0 ) {
-					$next = $item.next( '.wc-product-images__image' );
-				} else if (
-					$item.prev( '.wc-product-images__image' ).length > 0
-				) {
-					$next = $item.prev( '.wc-product-images__image' );
-				} else {
-					$next = $addSlot;
-				}
-				$item.remove();
-				syncIds();
-				$next.trigger( 'focus' );
-				announce(
-					woocommerce_admin_meta_boxes.i18n_product_image_removed
-				);
+				removeFocusedItem( $item );
 			}
 		} );
 
-		// Initialize tooltip on the help tip in the meta box title.
+		// Initialize tooltip on the help tip in the product images meta box.
 		$( '#woocommerce-product-images' )
 			.find( '.woocommerce-help-tip' )
 			.tipTip( {
