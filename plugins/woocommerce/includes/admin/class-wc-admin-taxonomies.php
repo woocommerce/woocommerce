@@ -8,7 +8,8 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+	exit;
+	// Exit if accessed directly.
 }
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
@@ -363,11 +364,35 @@ class WC_Admin_Taxonomies {
 			return;
 		}
 		?>
-		<div class="form-field term-color-wrap">
+		<div class="form-field wc-admin-visual-attribute-type">
+			<label><?php esc_html_e( 'Swatch type', 'woocommerce' ); ?></label>
+			<fieldset>
+				<label for="term_visual_type_color">
+					<input
+						type="radio"
+						id="term_visual_type_color"
+						name="wc_visual_attribute_type"
+						value="color"
+						checked
+					/>
+					<?php esc_html_e( 'Color', 'woocommerce' ); ?>
+				</label>
+				<label for="term_visual_type_image">
+					<input
+						type="radio"
+						id="term_visual_type_image"
+						name="wc_visual_attribute_type"
+						value="image"
+					/>
+					<?php esc_html_e( 'Image', 'woocommerce' ); ?>
+				</label>
+			</fieldset>
+		</div>
+		<div class="form-field wc-admin-visual-attribute-color">
 			<label for="term_color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label>
 			<input name="term_color" id="term_color" class="wc-admin-visual-attribute-color-input" type="text" value="" />
 		</div>
-		<div class="form-field term-image-wrap">
+		<div class="form-field wc-admin-visual-attribute-image">
 			<label for="term_image"><?php esc_html_e( 'Image value', 'woocommerce' ); ?></label>
 			<input name="term_image" id="term_image" class="wc-admin-visual-attribute-image-input" type="hidden" value="" />
 		</div>
@@ -389,14 +414,44 @@ class WC_Admin_Taxonomies {
 
 		$color_value = get_term_meta( $term->term_id, 'color', true );
 		$image_value = get_term_meta( $term->term_id, 'image', true );
+		$has_image   = absint( $image_value ) > 0;
 		?>
-		<tr class="form-field term-color-wrap">
+		<tr class="form-field wc-admin-visual-attribute-type">
+			<th scope="row" valign="top">
+				<label><?php esc_html_e( 'Swatch type', 'woocommerce' ); ?></label>
+			</th>
+			<td>
+				<fieldset>
+					<label for="term_visual_type_color">
+						<input
+							type="radio"
+							id="term_visual_type_color"
+							name="wc_visual_attribute_type"
+							value="color"
+							<?php checked( ! $has_image ); ?>
+						/>
+						<?php esc_html_e( 'Color', 'woocommerce' ); ?>
+					</label>
+					<label for="term_visual_type_image">
+						<input
+							type="radio"
+							id="term_visual_type_image"
+							name="wc_visual_attribute_type"
+							value="image"
+							<?php checked( $has_image ); ?>
+						/>
+						<?php esc_html_e( 'Image', 'woocommerce' ); ?>
+					</label>
+				</fieldset>
+			</td>
+		</tr>
+		<tr class="form-field wc-admin-visual-attribute-color">
 			<th scope="row" valign="top"><label for="term_color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label></th>
 			<td>
 				<input name="term_color" id="term_color" class="wc-admin-visual-attribute-color-input" type="text" value="<?php echo esc_attr( $color_value ); ?>" />
 			</td>
 		</tr>
-		<tr class="form-field term-image-wrap">
+		<tr class="form-field wc-admin-visual-attribute-image">
 			<th scope="row" valign="top"><label for="term_image"><?php esc_html_e( 'Image value', 'woocommerce' ); ?></label></th>
 			<td>
 				<input name="term_image" id="term_image" class="wc-admin-visual-attribute-image-input" type="hidden" value="<?php echo absint( $image_value ); ?>" />
@@ -442,11 +497,15 @@ class WC_Admin_Taxonomies {
 	 * @param string $taxonomy Taxonomy slug.
 	 */
 	public function save_category_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
-		if ( isset( $_POST['display_type'] ) && 'product_cat' === $taxonomy ) { // WPCS: CSRF ok, input var ok.
-			update_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) ); // WPCS: CSRF ok, sanitization ok, input var ok.
+		if ( isset( $_POST['display_type'] ) && 'product_cat' === $taxonomy ) {
+			// WPCS: CSRF ok, input var ok.
+			update_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) );
+			// WPCS: CSRF ok, sanitization ok, input var ok.
 		}
-		if ( isset( $_POST['product_cat_thumbnail_id'] ) && 'product_cat' === $taxonomy ) { // WPCS: CSRF ok, input var ok.
-			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // WPCS: CSRF ok, input var ok.
+		if ( isset( $_POST['product_cat_thumbnail_id'] ) && 'product_cat' === $taxonomy ) {
+			// WPCS: CSRF ok, input var ok.
+			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) );
+			// WPCS: CSRF ok, input var ok.
 		}
 	}
 
@@ -641,10 +700,13 @@ class WC_Admin_Taxonomies {
 	 * Handle custom row actions.
 	 */
 	public function handle_product_cat_row_actions() {
-		if ( isset( $_GET['action'], $_GET['tag_ID'], $_GET['_wpnonce'] ) && 'make_default' === $_GET['action'] ) { // WPCS: CSRF ok, input var ok.
-			$make_default_id = absint( $_GET['tag_ID'] ); // WPCS: Input var ok.
+		if ( isset( $_GET['action'], $_GET['tag_ID'], $_GET['_wpnonce'] ) && 'make_default' === $_GET['action'] ) {
+			// WPCS: CSRF ok, input var ok.
+			$make_default_id = absint( $_GET['tag_ID'] );
+			// WPCS: Input var ok.
 
-			if ( wp_verify_nonce( $_GET['_wpnonce'], 'make_default_' . $make_default_id ) && current_user_can( 'edit_term', $make_default_id ) ) { // WPCS: Sanitization ok, input var ok, CSRF ok.
+			if ( wp_verify_nonce( $_GET['_wpnonce'], 'make_default_' . $make_default_id ) && current_user_can( 'edit_term', $make_default_id ) ) {
+				// WPCS: Sanitization ok, input var ok, CSRF ok.
 				update_option( 'default_product_cat', $make_default_id );
 			}
 		}
@@ -755,9 +817,13 @@ class WC_Admin_Taxonomies {
 			$handle,
 			"(function() {
 				'use strict';
-				const addFormColor = document.querySelector('.form-field.term-color-wrap');
-				const addFormImage = document.querySelector('.form-field.term-image-wrap');
+				const addFormVisualType = document.querySelector('.form-field.wc-admin-visual-attribute-type');
+				const addFormColor = document.querySelector('.form-field.wc-admin-visual-attribute-color');
+				const addFormImage = document.querySelector('.form-field.wc-admin-visual-attribute-image');
 				const addFormSlug = document.querySelector('.form-field.term-slug-wrap');
+				if (addFormVisualType && addFormSlug) {
+					addFormSlug.parentNode.insertBefore(addFormVisualType, addFormSlug);
+				}
 				if (addFormColor && addFormSlug) {
 					addFormSlug.parentNode.insertBefore(addFormColor, addFormSlug);
 				}
@@ -765,9 +831,13 @@ class WC_Admin_Taxonomies {
 					addFormSlug.parentNode.insertBefore(addFormImage, addFormSlug);
 				}
 
-				const editFormColor = document.querySelector('tr.form-field.term-color-wrap');
-				const editFormImage = document.querySelector('tr.form-field.term-image-wrap');
+				const editFormVisualType = document.querySelector('tr.form-field.wc-admin-visual-attribute-type');
+				const editFormColor = document.querySelector('tr.form-field.wc-admin-visual-attribute-color');
+				const editFormImage = document.querySelector('tr.form-field.wc-admin-visual-attribute-image');
 				const editFormSlug = document.querySelector('tr.form-field.term-slug-wrap');
+				if (editFormVisualType && editFormSlug) {
+					editFormSlug.parentNode.insertBefore(editFormVisualType, editFormSlug);
+				}
 				if (editFormColor && editFormSlug) {
 					editFormSlug.parentNode.insertBefore(editFormColor, editFormSlug);
 				}

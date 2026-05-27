@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { mountAllImagePickers } from './image-field';
+import { mountAllVisualTypeSwitchers } from './type-switcher';
 import {
 	COLOR_INPUT_SELECTOR,
 	IMAGE_INPUT_SELECTOR,
@@ -177,6 +178,7 @@ const mountAllColorPickers = ( context: ParentNode = document ) => {
 const mountAllVisualAttributeFields = ( context: ParentNode = document ) => {
 	mountAllColorPickers( context );
 	mountAllImagePickers( context );
+	mountAllVisualTypeSwitchers( context );
 };
 
 const startObserver = () => {

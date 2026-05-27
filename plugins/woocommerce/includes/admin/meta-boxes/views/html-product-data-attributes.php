@@ -90,10 +90,38 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 						<label for="wc-modal-add-attribute-term-input"><?php esc_html_e( 'Name', 'woocommerce' ); ?></label>
 						<input id="wc-modal-add-attribute-term-input" type="text" name="term" value="" />
 						<# if ( data.isVisualAttribute ) { #>
-							<label for="wc-modal-add-attribute-term-color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label>
-							<input id="wc-modal-add-attribute-term-color" class="wc-admin-visual-attribute-color-input" type="text" name="term_color" value="" />
-							<label for="wc-modal-add-attribute-term-image"><?php esc_html_e( 'Image value', 'woocommerce' ); ?></label>
-							<input id="wc-modal-add-attribute-term-image" class="wc-admin-visual-attribute-image-input" type="hidden" name="term_image" value="" />
+							<div class="form-field wc-admin-visual-attribute-type">
+								<label><?php esc_html_e( 'Swatch type', 'woocommerce' ); ?></label>
+								<fieldset>
+									<label for="wc-modal-add-attribute-term-visual-type-color">
+										<input
+											type="radio"
+											id="wc-modal-add-attribute-term-visual-type-color"
+											name="wc_visual_attribute_type"
+											value="color"
+											checked
+										/>
+										<?php esc_html_e( 'Color', 'woocommerce' ); ?>
+									</label>
+									<label for="wc-modal-add-attribute-term-visual-type-image">
+										<input
+											type="radio"
+											id="wc-modal-add-attribute-term-visual-type-image"
+											name="wc_visual_attribute_type"
+											value="image"
+										/>
+										<?php esc_html_e( 'Image', 'woocommerce' ); ?>
+									</label>
+								</fieldset>
+							</div>
+							<div class="form-field wc-admin-visual-attribute-color">
+								<label for="wc-modal-add-attribute-term-color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label>
+								<input id="wc-modal-add-attribute-term-color" class="wc-admin-visual-attribute-color-input" type="text" name="term_color" value="" />
+							</div>
+							<div class="form-field wc-admin-visual-attribute-image">
+								<label for="wc-modal-add-attribute-term-image"><?php esc_html_e( 'Image value', 'woocommerce' ); ?></label>
+								<input id="wc-modal-add-attribute-term-image" class="wc-admin-visual-attribute-image-input" type="hidden" name="term_image" value="" />
+							</div>
 						<# } #>
 					</form>
 				</article>
