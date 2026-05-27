@@ -41,6 +41,7 @@ catalogs:
         '@wordpress/keycodes': 4.33.1
         '@wordpress/media-utils': 5.33.1
         '@wordpress/notices': 5.33.1
+        '@wordpress/patterns': 2.33.9
         '@wordpress/plugins': 7.33.5
         '@wordpress/preferences': 4.33.5
         '@wordpress/primitives': 4.33.1

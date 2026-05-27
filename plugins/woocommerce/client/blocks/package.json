@@ -172,6 +172,7 @@
 		"@wordpress/interactivity-router": "^2.39.0",
 		"@wordpress/is-shallow-equal": "catalog:wp-min",
 		"@wordpress/jest-preset-default": "next",
+		"@wordpress/patterns": "catalog:wp-min",
 		"@wordpress/postcss-plugins-preset": "next",
 		"@wordpress/postcss-themes": "next",
 		"@wordpress/prettier-config": "1.4.0",
