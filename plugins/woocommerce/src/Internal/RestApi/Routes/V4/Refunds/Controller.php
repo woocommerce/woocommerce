@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
 use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
@@ -46,9 +47,16 @@ class Controller extends AbstractController {
 	/**
 	 * Schema class for this route.
 	 *
-	 * @var OrderSchema
+	 * @var RefundSchema
 	 */
 	protected $item_schema;
+
+	/**
+	 * Schema class for preview responses.
+	 *
+	 * @var RefundPreviewSchema
+	 */
+	protected $preview_schema;
 
 	/**
 	 * Collection query class.
@@ -67,13 +75,16 @@ class Controller extends AbstractController {
 	/**
 	 * Initialize the controller.
 	 *
-	 * @param RefundSchema    $item_schema Refund schema class.
-	 * @param CollectionQuery $collection_query Collection query class.
-	 * @param DataUtils       $data_utils Data utils class.
 	 * @internal
+	 *
+	 * @param RefundSchema        $item_schema Refund schema class.
+	 * @param RefundPreviewSchema $preview_schema Preview schema class.
+	 * @param CollectionQuery     $collection_query Collection query class.
+	 * @param DataUtils           $data_utils Data utils class.
 	 */
-	final public function init( RefundSchema $item_schema, CollectionQuery $collection_query, DataUtils $data_utils ) {
+	final public function init( RefundSchema $item_schema, RefundPreviewSchema $preview_schema, CollectionQuery $collection_query, DataUtils $data_utils ) {
 		$this->item_schema      = $item_schema;
+		$this->preview_schema   = $preview_schema;
 		$this->collection_query = $collection_query;
 		$this->data_utils       = $data_utils;
 	}
@@ -152,6 +163,52 @@ class Controller extends AbstractController {
 					),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/preview',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'preview_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => array(
+						'order_id'   => array(
+							'description'       => __( 'The ID of the order to preview a refund for.', 'woocommerce' ),
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+							'validate_callback' => 'rest_validate_request_arg',
+						),
+						'line_items' => array(
+							'description' => __( 'Line items to include in the refund preview.', 'woocommerce' ),
+							'type'        => 'array',
+							'required'    => true,
+							'items'       => array(
+								'type'       => 'object',
+								'properties' => array(
+									'line_item_id' => array(
+										'description'       => __( 'ID of the original order line item.', 'woocommerce' ),
+										'type'              => 'integer',
+										'required'          => true,
+										'sanitize_callback' => 'absint',
+										'validate_callback' => 'rest_validate_request_arg',
+									),
+									'quantity'     => array(
+										'description'       => __( 'Quantity to refund.', 'woocommerce' ),
+										'type'              => 'integer',
+										'required'          => true,
+										'sanitize_callback' => 'absint',
+										'validate_callback' => 'rest_validate_request_arg',
+									),
+								),
+							),
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_preview_schema' ),
 			)
 		);
 
@@ -369,6 +426,43 @@ class Controller extends AbstractController {
 		} catch ( \WC_REST_Exception $e ) {
 			return $this->get_route_error_response( $e->getErrorCode(), $e->getMessage() );
 		}
+	}
+
+	/**
+	 * Preview a refund without creating it.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function preview_item( $request ) {
+		$order = wc_get_order( $request['order_id'] );
+
+		if ( ! $order || $order instanceof \WC_Order_Refund ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		$validation_error = $this->data_utils->validate_preview_line_items( $request['line_items'], $order );
+
+		if ( is_wp_error( $validation_error ) ) {
+			return $this->get_route_error_response( (string) $validation_error->get_error_code(), $validation_error->get_error_message() );
+		}
+
+		$preview = $this->data_utils->build_refund_preview( $order, $request['line_items'] );
+
+		return rest_ensure_response( $preview );
+	}
+
+	/**
+	 * Get the public schema for the preview endpoint.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return array
+	 */
+	public function get_public_preview_schema(): array {
+		return $this->preview_schema->get_item_schema();
 	}
 
 	/**
