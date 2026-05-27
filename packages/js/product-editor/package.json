@@ -120,7 +120,6 @@
 		"webpack": "5.97.x",
 		"webpack-cli": "5.1.x",
 		"webpack-remove-empty-scripts": "1.0.x",
-		"@automattic/webpack-rtl-plugin": "6.0.x",
 		"wireit": "0.14.12"
 	},
 	"scripts": {
@@ -130,13 +129,14 @@
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
-		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
 		"lint:lang:js": "eslint src",
+		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build",
 		"test:js": "jest --config ./jest.config.json --passWithNoTests",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:bundle": "wireit",
@@ -187,7 +187,9 @@
 			},
 			"files": [
 				"webpack.config.js",
-				"src/**/*.scss"
+				"config/**/*.js",
+				"src/**/*.scss",
+				"src/**/block.json"
 			],
 			"output": [
 				"build-style"
@@ -220,7 +222,7 @@
 			"service": true
 		},
 		"build:project:esm": {
-			"command": "tsc --project tsconfig.json",
+			"command": "tsc --project tsconfig.json --noCheck",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig.json",
@@ -229,14 +231,15 @@
 			],
 			"output": [
 				"build-module",
-				"build-types"
+				"build-types",
+				"tsconfig.tsbuildinfo"
 			],
 			"dependencies": [
 				"dependencyOutputs"
 			]
 		},
 		"watch:build:project:esm": {
-			"command": "tsc --project tsconfig.json --watch",
+			"command": "tsc --project tsconfig.json --noCheck --watch",
 			"service": true
 		},
 		"dependencyOutputs": {
@@ -245,45 +248,33 @@
 				"package.json",
 				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/admin-layout/build",
-				"node_modules/@woocommerce/admin-layout/build-module",
 				"node_modules/@woocommerce/admin-layout/build-style",
 				"node_modules/@woocommerce/admin-layout/build-types",
 				"node_modules/@woocommerce/block-templates/build",
-				"node_modules/@woocommerce/block-templates/build-module",
 				"node_modules/@woocommerce/block-templates/build-style",
 				"node_modules/@woocommerce/block-templates/build-types",
 				"node_modules/@woocommerce/components/build",
-				"node_modules/@woocommerce/components/build-module",
 				"node_modules/@woocommerce/components/build-style",
 				"node_modules/@woocommerce/components/build-types",
 				"node_modules/@woocommerce/currency/build",
-				"node_modules/@woocommerce/currency/build-module",
 				"node_modules/@woocommerce/currency/build-types",
 				"node_modules/@woocommerce/customer-effort-score/build",
-				"node_modules/@woocommerce/customer-effort-score/build-module",
 				"node_modules/@woocommerce/customer-effort-score/build-style",
 				"node_modules/@woocommerce/customer-effort-score/build-types",
 				"node_modules/@woocommerce/data/build",
-				"node_modules/@woocommerce/data/build-module",
 				"node_modules/@woocommerce/data/build-types",
 				"node_modules/@woocommerce/experimental/build",
-				"node_modules/@woocommerce/experimental/build-module",
 				"node_modules/@woocommerce/experimental/build-style",
 				"node_modules/@woocommerce/experimental/build-types",
 				"node_modules/@woocommerce/expression-evaluation/build",
-				"node_modules/@woocommerce/expression-evaluation/build-module",
 				"node_modules/@woocommerce/expression-evaluation/build-types",
 				"node_modules/@woocommerce/navigation/build",
-				"node_modules/@woocommerce/navigation/build-module",
 				"node_modules/@woocommerce/navigation/build-types",
 				"node_modules/@woocommerce/number/build",
-				"node_modules/@woocommerce/number/build-module",
 				"node_modules/@woocommerce/number/build-types",
 				"node_modules/@woocommerce/tracks/build",
-				"node_modules/@woocommerce/tracks/build-module",
 				"node_modules/@woocommerce/tracks/build-types",
 				"node_modules/@woocommerce/sanitize/build",
-				"node_modules/@woocommerce/sanitize/build-module",
 				"node_modules/@woocommerce/sanitize/build-style",
 				"node_modules/@woocommerce/sanitize/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
@@ -298,6 +289,7 @@
 				"node_modules/@woocommerce/internal-style-build/abstracts",
 				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
 				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig-jest.json",
 				"node_modules/@woocommerce/internal-ts-config/types"
 			]
 		}

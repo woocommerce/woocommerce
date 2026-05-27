@@ -101,7 +101,7 @@ class WC_Tests_Base_Order_Item extends WC_Unit_Test_Case {
 	/**
 	 * @testdox 'calculate_cogs_value' sets the value returned by the 'calculate_cogs_core' override, and returns true.
 	 */
-	public function test_calculate_cogs_sets_value_from_core_calculation_overriden_in_child_class() {
+	public function test_calculate_cogs_sets_value_from_core_calculation_overridden_in_child_class() {
 		$this->sut->has_cogs_value = true;
 		$this->enable_cogs_feature();
 

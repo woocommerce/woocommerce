@@ -99,6 +99,8 @@ class FulfillmentsManager {
 	 * Initialize order deletion hooks.
 	 *
 	 * Registers hooks to clean up fulfillment records when an order is permanently deleted.
+	 * Hooks into both `woocommerce_before_delete_order` (HPOS) and `before_delete_post`
+	 * (legacy post storage) to ensure cleanup regardless of storage backend.
 	 */
 	private function init_order_deletion_hooks(): void {
 		add_action( 'woocommerce_before_delete_order', array( $this, 'delete_order_fulfillments' ), 10, 1 );
@@ -107,6 +109,9 @@ class FulfillmentsManager {
 
 	/**
 	 * Delete all fulfillment records for an order that is being permanently deleted.
+	 *
+	 * Does nothing if the given ID does not correspond to a valid order type.
+	 * Exceptions are caught and logged; this method never throws.
 	 *
 	 * @since 10.7.0
 	 *

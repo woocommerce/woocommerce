@@ -705,7 +705,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$cache_keys_mapping = array();
 		foreach ( $order_ids as $order_id ) {
-			$cache_keys_mapping[ $order_id ] = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order_id;
+			$cache_keys_mapping[ $order_id ] = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $order_id;
 		}
 
 		$non_cached_ids = array();
@@ -738,16 +738,15 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			)
 		);
 
-		$order_refunds = array();
+		$order_refund_ids = array_fill_keys( $non_cached_ids, array() );
 		foreach ( $refunds as $refund ) {
-			if ( $refund instanceof \WC_Order_Refund ) {
-				$order_refunds[ $refund->get_parent_id() ][] = $refund;
+			if ( $refund instanceof \WC_Order_Refund && isset( $order_refund_ids[ $refund->get_parent_id() ] ) ) {
+				$order_refund_ids[ $refund->get_parent_id() ][] = $refund->get_id();
 			}
 		}
 
 		foreach ( $non_cached_ids as $order_id ) {
-			$cached_refunds = isset( $order_refunds[ $order_id ] ) ? $order_refunds[ $order_id ] : array();
-			wp_cache_set( $cache_keys_mapping[ $order_id ], $cached_refunds, 'orders' );
+			wp_cache_set( $cache_keys_mapping[ $order_id ], $order_refund_ids[ $order_id ], 'orders' );
 		}
 	}
 

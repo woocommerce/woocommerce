@@ -31,7 +31,6 @@
 		"remote-free-extensions": true,
 		"payment-gateway-suggestions": true,
 		"printful": true,
-		"settings": false,
 		"shipping-label-banner": true,
 		"subscriptions": true,
 		"store-alerts": true,
@@ -43,6 +42,8 @@
 		"launch-your-store": true,
 		"product-editor-template-system": false,
 		"use-wp-horizon": false,
-		"rest-api-v4": false
+		"rest-api-v4": false,
+		"order-detail-redesign": false,
+		"product-variations-classic-redesign": false
 	}
 }

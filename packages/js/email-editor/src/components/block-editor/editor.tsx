@@ -47,6 +47,7 @@ import { PublishSave } from '../../hacks/publish-save';
 import { EditorNotices } from '../notices';
 import { BlockCompatibilityWarnings } from '../sidebar';
 import { BackButtonContent } from '../header/back-button-content';
+import { TemplateCanvasAffordance } from '../template-canvas-affordance';
 import { recordEventOnce } from '../../events';
 
 export function InnerEditor( {
@@ -163,15 +164,19 @@ export function InnerEditor( {
 			</div>
 		);
 	}
+	// In WordPress 6.8 WooCommerce commands are registered because Core does
+	// not mount the global CommandMenu. Use that as a signal to render our own
+	// CommandMenu fallback. Core loads it starting in WordPress 6.9.
+	const isWordPress68 = allCommands.every( ( { name } ) =>
+		name.includes( 'woocommerce' )
+	);
 
 	recordEventOnce( 'editor_layout_loaded' );
 	return (
 		<SlotFillProvider>
 			<ErrorBoundary canCopyContent>
-				{ /* The CommandMenu is not needed if the commands are registered. The CommandMenu can be removed after we drop support for WP 6.8. */ }
-				{ ( ! allCommands || allCommands.length === 0 ) && (
-					<CommandMenu />
-				) }
+				{ /* Keep this fallback only for WordPress 6.8. Core mounts the CommandMenu in 6.9+. */ }
+				{ isWordPress68 && <CommandMenu /> }
 				<Editor
 					postId={ currentPost.postId }
 					postType={ currentPost.postType }
@@ -187,6 +192,7 @@ export function InnerEditor( {
 					<EditorKeyboardShortcutsRegister />
 					<PostLockedModal />
 					<TemplateSelection />
+					<TemplateCanvasAffordance />
 					<StylesSidebar />
 					<SendPreview />
 					<PreviewSaveGuard />

@@ -24,11 +24,11 @@ interface NoticeOverride {
 function getNoticeOverrides(): Record< string, NoticeOverride > {
 	return {
 		'site-editor-save-success': {
-			content: __( 'Email design updated.', 'woocommerce' ),
+			content: __( 'Email design updated.', __i18n_text_domain__ ),
 			removeActions: true,
 		},
 		'editor-save': {
-			content: __( 'Email saved.', 'woocommerce' ),
+			content: __( 'Email saved.', __i18n_text_domain__ ),
 			removeActions: false,
 			contentCheck: ( content: string ) =>
 				// Intentionally without text domain to match the core translation.

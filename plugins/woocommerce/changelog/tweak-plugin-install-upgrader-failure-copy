@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Show a clearer, actionable message when a plugin install fails during the upgrader step.

@@ -15,7 +15,6 @@ catalogs:
         '@wordpress/block-editor': 14.14.6
         '@wordpress/block-library': 9.19.6
         '@wordpress/blocks': 14.8.2
-        '@wordpress/browserslist-config': 6.19.1
         '@wordpress/commands': 1.19.4
         '@wordpress/components': 29.5.4
         '@wordpress/compose': 7.19.2
@@ -42,7 +41,6 @@ catalogs:
         '@wordpress/media-utils': 5.19.2
         '@wordpress/notices': 5.19.2
         '@wordpress/plugins': 7.19.4
-        '@wordpress/postcss-plugins-preset': 5.19.1
         '@wordpress/preferences': 4.19.4
         '@wordpress/primitives': 4.19.1
         '@wordpress/priority-queue': 3.19.1

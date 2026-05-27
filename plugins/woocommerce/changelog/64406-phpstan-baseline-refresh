@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Refresh PHPStan baseline to reflect changes from PR 64406.

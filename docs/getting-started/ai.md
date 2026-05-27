@@ -23,7 +23,7 @@ To feed the WooCommerce Developer Documentation into your LLM or AI-assisted IDE
 
 If you are using an IDE like Cursor or Windsurf, we recommend adding these links as custom documentation so that you can reference them as needed.
 
-**Note** that these do not include the contents of the [WC REST API documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction) or the [WooCommerce Code Reference](https://woocommerce.github.io/code-reference/).
+**Note** that these do not include the contents of the [WooCommerce Code Reference](https://woocommerce.github.io/code-reference/).
 
 ### Serve as Markdown
 

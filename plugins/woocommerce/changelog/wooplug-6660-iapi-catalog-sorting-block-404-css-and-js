@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Prevent 404s for Catalog Sorting block assets.
+
+Catalog Sorting block: prevent 404s for non-existent JS and CSS asset files.

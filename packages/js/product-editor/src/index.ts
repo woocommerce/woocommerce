@@ -35,11 +35,6 @@ export * from './contexts/validation-context/types';
 export { EditorLoadingContext as __experimentalEditorLoadingContext } from './contexts/editor-loading-context';
 export { PostTypeContext } from './contexts/post-type-context';
 
-/**
- * Product data views page.
- */
-export * from './products';
-
 // Init the store
 registerProductEditorUiStore();
 

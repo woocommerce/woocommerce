@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Prevent widows in store alerts message body copy with text-wrap: pretty.

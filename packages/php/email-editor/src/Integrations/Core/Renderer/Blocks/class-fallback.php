@@ -37,7 +37,9 @@ class Fallback extends Abstract_Block_Renderer {
 			'width' => '100%',
 		);
 
-		$align = $block_attrs['textAlign'] ?? $block_attrs['align'] ?? 'left';
+		$align = $rendering_context->sanitize_text_align( $block_attrs['textAlign'] ?? null )
+			?? $rendering_context->sanitize_text_align( $block_attrs['align'] ?? null )
+			?? $rendering_context->get_default_text_align();
 
 		$cell_attrs = array(
 			'align' => $align,

@@ -5,7 +5,16 @@ import { __ } from '@wordpress/i18n';
 import { lazy, useState, useEffect, useCallback } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
-import { Icon, help as helpIcon, external } from '@wordpress/icons';
+import {
+	Icon,
+	help as helpIcon,
+	external,
+	bell,
+	bellUnread,
+	listView,
+	comment,
+	store,
+} from '@wordpress/icons';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { H, Section } from '@woocommerce/components';
 import { onboardingStore, optionsStore, useUser } from '@woocommerce/data';
@@ -21,10 +30,8 @@ import {
  * Internal dependencies
  */
 import './style.scss';
-import { IconFlag } from './icon-flag';
 import { hasUnreadNotes as checkIfHasUnreadNotes } from './unread-indicators';
 import { Tabs } from './tabs';
-import { SetupProgress } from './setup-progress';
 import { DisplayOptions } from './display-options';
 import { Panel } from './panel';
 import {
@@ -37,7 +44,6 @@ import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-n
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getUrlParams } from '~/utils';
 import { getSegmentsFromPath } from '~/utils/url-helpers';
-import { FeedbackIcon } from '~/products/images/feedback-icon';
 import { useLaunchYourStore } from '~/launch-your-store';
 import { useTaskListsState } from '~/hooks/use-tasklists-state';
 import HeaderAccount from '../marketplace/components/header-account/header-account';
@@ -150,8 +156,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		requestingTaskListOptions,
 		setupTaskListComplete,
 		setupTaskListHidden,
-		setupTasksCount,
-		setupTasksCompleteCount,
 		thingsToDoNextCount,
 	} = useTaskListsState();
 
@@ -188,20 +192,40 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 	const { currentUserCan } = useUser();
 
-	const togglePanel = ( { name: tabName }, isTabOpen ) => {
-		const panelSwitching =
-			tabName !== currentTab &&
-			currentTab !== '' &&
-			isTabOpen &&
-			isPanelOpen;
-
-		if ( isPanelClosing ) {
+	// Single decision point for a tab click. Side-effect tabs (Preview store,
+	// Feedback CES modal) bail out before any panel state is touched. The
+	// rest of the logic decides open / close / switch from the parent's own
+	// state (currentTab, isPanelOpen) rather than the click target's intent
+	// — that way a focus-outside close racing with a same-tab click can't
+	// flip the panel back open after blur fires closePanel().
+	const togglePanel = ( tab ) => {
+		if ( tab.onClick ) {
+			tab.onClick();
 			return;
 		}
 
+		const tabName = tab.name;
+		// Same-tab re-click during a pending close: do nothing. The close
+		// from useFocusOutside is already in flight; let it finish.
+		if ( isPanelClosing && tabName === currentTab ) {
+			return;
+		}
+
+		const isSameTab = tabName === currentTab;
+		const isClosing = isSameTab && isPanelOpen;
+		const isSwitching = ! isSameTab && currentTab !== '' && isPanelOpen;
+
+		// Record a Tracks event when a panel is being opened or switched in
+		// (not when closing). Previously the Tabs child fired this — moved
+		// here so it stays consistent with the rest of the intent logic.
+		if ( ! isClosing ) {
+			recordEvent( 'activity_panel_open', { tab: tabName } );
+		}
+
 		setCurrentTab( tabName );
-		setIsPanelOpen( isTabOpen );
-		setIsPanelSwitching( panelSwitching );
+		setIsPanelOpen( ! isClosing );
+		setIsPanelSwitching( isSwitching );
+		setIsPanelClosing( isClosing );
 	};
 
 	const isProductScreen = () => {
@@ -236,7 +260,20 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const activity = {
 			name: 'activity',
 			title: __( 'Activity', 'woocommerce' ),
-			icon: <IconFlag />,
+			// Use bellUnread (bell + dot baked into the SVG) when there is
+			// unread activity so the unread state lives in one source of truth
+			// inside @wordpress/icons rather than a separately-positioned CSS
+			// pseudo-element on top of the plain bell.
+			icon: (
+				<Icon
+					icon={
+						hasUnreadNotes || hasAbbreviatedNotifications
+							? bellUnread
+							: bell
+					}
+					size={ 18 }
+				/>
+			),
 			unread: hasUnreadNotes || hasAbbreviatedNotifications,
 			visible:
 				( isEmbedded || ! isHomescreen ) &&
@@ -248,7 +285,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const feedback = {
 			name: 'feedback',
 			title: __( 'Feedback', 'woocommerce' ),
-			icon: <FeedbackIcon />,
+			icon: <Icon icon={ comment } size={ 18 } />,
 			onClick: () => {
 				setCurrentTab( 'feedback' );
 				setIsPanelOpen( true );
@@ -290,14 +327,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const setup = {
 			name: 'setup',
 			title: __( 'Finish setup', 'woocommerce' ),
-			icon: (
-				<SetupProgress
-					setupTasksComplete={ setupTasksCompleteCount }
-					setupCompletePercent={ Math.ceil(
-						( setupTasksCompleteCount / setupTasksCount ) * 100
-					) }
-				/>
-			),
+			icon: <Icon icon={ listView } size={ 18 } />,
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
 				! requestingTaskListOptions &&
@@ -325,7 +355,11 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		};
 
 		const headerAccount = {
-			component: () => <HeaderAccount page="wc-admin" />,
+			// Stable component reference — an inline arrow would give React a
+			// new component type on every parent render, remounting HeaderAccount
+			// and resetting its DropdownMenu's internal isOpen state.
+			component: HeaderAccount,
+			options: { page: 'wc-admin' },
 			visible: isHomescreen,
 		};
 
@@ -351,6 +385,12 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				( comingSoon === 'yes' &&
 					__( 'Preview store', 'woocommerce' ) ) ||
 				__( 'View store', 'woocommerce' ),
+			// Tiny shopfront icon for the literal "View store" / "Preview
+			// store" semantic, distinct from the other icons in the bar.
+			// Required because activity-panel tabs are now icon-only —
+			// a tab without an icon renders as an empty button on the
+			// floating header.
+			icon: <Icon icon={ store } />,
 			visible: isHomescreen && query.task !== 'appearance',
 			onClick: () => {
 				window.open( getAdminSetting( 'shopUrl' ) );
@@ -413,14 +453,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 						tabs={ tabs }
 						tabOpen={ isPanelOpen }
 						selectedTab={ currentTab }
-						onTabClick={ ( tab, tabOpen ) => {
-							if ( tab.onClick ) {
-								tab.onClick();
-								return;
-							}
-
-							togglePanel( tab, tabOpen );
-						} }
+						onTabClick={ togglePanel }
 					/>
 					<Panel
 						currentTab
