@@ -83,6 +83,28 @@ class GetProductTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox authorize() still throws for a non-existent ID even when _preauthorized is true.
+	 */
+	public function test_authorize_rejects_missing_product_even_when_preauthorized(): void {
+		$this->expectException( UnauthorizedException::class );
+		$this->expectExceptionMessage( 'Product not found.' );
+
+		$this->sut->authorize( 999999, true );
+	}
+
+	/**
+	 * @testdox authorize() still throws for a non-product post even when _preauthorized is true.
+	 */
+	public function test_authorize_rejects_non_product_post_even_when_preauthorized(): void {
+		$post_id = self::factory()->post->create();
+
+		$this->expectException( UnauthorizedException::class );
+		$this->expectExceptionMessage( 'Product not found.' );
+
+		$this->sut->authorize( $post_id, true );
+	}
+
+	/**
 	 * @testdox authorize() throws "Product not found." for a non-positive ID.
 	 */
 	public function test_authorize_rejects_non_positive_id(): void {
