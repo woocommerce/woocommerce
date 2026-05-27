@@ -222,6 +222,15 @@ export function resetDisplayStyleBlock(
 		parentBlock.name,
 		contextKey
 	);
+
+	if (
+		! displayStyleOptions.some(
+			( blockType ) => blockType.name === defaultStyle
+		)
+	) {
+		return;
+	}
+
 	const currentStyleBlock = getCurrentDisplayStyleBlock(
 		parentBlock,
 		displayStyleOptions
