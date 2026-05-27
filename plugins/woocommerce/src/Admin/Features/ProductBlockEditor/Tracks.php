@@ -7,6 +7,8 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 /**
  * Add tracks for the product block editor.
+ *
+ * @deprecated 10.9.0 Product editor extension APIs will be removed in WooCommerce 11.0.
  */
 class Tracks {
 

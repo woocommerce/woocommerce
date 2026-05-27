@@ -51,6 +51,11 @@ function augmentUsesContext( usesContext?: string[] ) {
 	return [ ...( usesContext || [] ), 'postType' ];
 }
 
+/**
+ * Register a block type for the product editor.
+ *
+ * @deprecated since WooCommerce 10.9.0. Product editor extension APIs will be removed in WooCommerce 11.0.
+ */
 export function registerProductEditorBlockType<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Record< string, any > = Record< string, any >
