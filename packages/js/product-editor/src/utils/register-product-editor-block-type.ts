@@ -4,6 +4,7 @@
 import { Block, BlockConfiguration } from '@wordpress/blocks';
 import { registerWooBlockType } from '@woocommerce/block-templates';
 import { useEntityId } from '@wordpress/core-data';
+import deprecated from '@wordpress/deprecated';
 
 interface BlockRepresentation< T extends Record< string, object > > {
 	name?: string;
@@ -60,6 +61,12 @@ export function registerProductEditorBlockType<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Record< string, any > = Record< string, any >
 >( block: BlockRepresentation< T > ): Block< T > | undefined {
+	deprecated( 'registerProductEditorBlockType()', {
+		version: '10.9.0',
+		plugin: 'WooCommerce',
+		hint: 'Product editor extension APIs are deprecated and will be removed in WooCommerce 11.0.',
+	} );
+
 	const { metadata, settings, name } = block;
 
 	const augmentedMetadata = {
