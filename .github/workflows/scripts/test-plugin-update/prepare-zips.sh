@@ -35,7 +35,7 @@ echo "::endgroup::"
 # source's scenarios rather than red-flagging the PR. test.sh skips a source whose zip
 # is absent, and its zero-guard still fails the job if NO source ends up available.
 echo "::group::Fetching $PLUGIN_SLUG-trunk.zip"
-if curl -L --fail --retry 2 --retry-delay "$(( 15 + RANDOM % 8 ))" --url "$TRUNK_URL" --output "$ZIPDIR/$PLUGIN_SLUG-trunk.zip"; then
+if curl -L --fail --connect-timeout 15 --max-time 180 --retry 2 --retry-delay "$(( 15 + RANDOM % 8 ))" --url "$TRUNK_URL" --output "$ZIPDIR/$PLUGIN_SLUG-trunk.zip"; then
 	echo "Downloaded trunk build from $TRUNK_URL"
 else
 	rm -f "$ZIPDIR/$PLUGIN_SLUG-trunk.zip"
@@ -49,10 +49,10 @@ echo "::group::Fetching $PLUGIN_SLUG-stable.zip"
 # Don't use --fail on the info request: the API returns a 404 body with a valid JSON
 # response when the plugin doesn't exist, which we want to inspect rather than error on.
 STABLE_OK=
-if JSON="$( curl -L --retry 2 --retry-delay "$(( 30 + RANDOM % 8 ))" "https://api.wordpress.org/plugins/info/1.0/$PLUGIN_SLUG.json" )" \
+if JSON="$( curl -L --connect-timeout 15 --max-time 60 --retry 2 --retry-delay "$(( 30 + RANDOM % 8 ))" "https://api.wordpress.org/plugins/info/1.0/$PLUGIN_SLUG.json" )" \
 	&& jq -e --arg slug "$PLUGIN_SLUG" '.slug == $slug' <<<"$JSON" &>/dev/null; then
 	URL="$( jq -r '.download_link // ""' <<<"$JSON" )"
-	if [[ -n "$URL" ]] && curl -L --fail --retry 2 --retry-delay "$(( 30 + RANDOM % 8 ))" --url "$URL" --output "$ZIPDIR/$PLUGIN_SLUG-stable.zip"; then
+	if [[ -n "$URL" ]] && curl -L --fail --connect-timeout 15 --max-time 180 --retry 2 --retry-delay "$(( 30 + RANDOM % 8 ))" --url "$URL" --output "$ZIPDIR/$PLUGIN_SLUG-stable.zip"; then
 		echo "Downloaded stable build from $URL"
 		STABLE_OK=1
 	fi
