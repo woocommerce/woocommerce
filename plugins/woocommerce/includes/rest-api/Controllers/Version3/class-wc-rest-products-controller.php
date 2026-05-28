@@ -864,8 +864,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 */
 	protected function set_product_media_gallery( $product, $media_gallery ) {
 		$this->validate_product_media_gallery( $media_gallery );
-		$product->set_media_gallery( $media_gallery );
-		$this->sync_product_images_from_media_gallery( $product, $product->get_media_gallery( 'edit' ) );
+
+		$media_gallery = ProductMediaGallery::normalize_media_gallery_items( $media_gallery, true );
+		$media_gallery = $this->sync_product_images_from_media_gallery( $product, $media_gallery );
+
+		$stored_media_gallery = ProductMediaGallery::has_videos( $media_gallery ) ? $media_gallery : array();
+
+		$product->set_media_gallery( $stored_media_gallery );
 
 		return $product;
 	}
@@ -1027,7 +1032,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @param WC_Product $product       Product instance.
 	 * @param array      $media_gallery Normalized media gallery items.
 	 *
-	 * @return void
+	 * @return array Canonical media gallery items.
 	 */
 	protected function sync_product_images_from_media_gallery( $product, $media_gallery ) {
 		$image_ids      = ProductMediaGallery::get_image_ids( $media_gallery );
@@ -1042,8 +1047,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$product->set_gallery_image_ids( $image_ids );
 
 		if ( $cover_image_id ) {
-			$product->set_media_gallery( ProductMediaGallery::maybe_prepend_product_image( $product, $media_gallery, 'edit' ) );
+			return ProductMediaGallery::maybe_prepend_product_image( $product, $media_gallery, 'edit' );
 		}
+
+		return array_values( $media_gallery );
 	}
 
 	/**
