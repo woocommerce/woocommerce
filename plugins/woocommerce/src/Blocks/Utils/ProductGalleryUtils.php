@@ -59,20 +59,13 @@ class ProductGalleryUtils {
 			? \wc_get_product_media_gallery_items( $product )
 			: self::get_product_gallery_image_items( $product );
 		$product_variation_image_ids = self::get_product_variation_image_ids( $product );
+		$is_placeholder_only         = 1 === count( $product_media_items ) && 0 === (int) ( $product_media_items[0]['id'] ?? 0 );
 
-		if (
-			1 === count( $product_media_items ) &&
-			0 === (int) ( $product_media_items[0]['id'] ?? 0 ) &&
-			! empty( $product->get_gallery_image_ids() )
-		) {
+		// If the media gallery only returned the placeholder, fall back to legacy gallery images.
+		if ( $is_placeholder_only && ! empty( $product->get_gallery_image_ids() ) ) {
 			$product_media_items = self::get_product_gallery_image_items( $product );
-		}
-
-		if (
-			1 === count( $product_media_items ) &&
-			0 === (int) ( $product_media_items[0]['id'] ?? 0 ) &&
-			! empty( $product_variation_image_ids )
-		) {
+		} elseif ( $is_placeholder_only && ! empty( $product_variation_image_ids ) ) {
+			// Drop the placeholder when variation images are available to populate the gallery.
 			$product_media_items = array();
 		}
 
