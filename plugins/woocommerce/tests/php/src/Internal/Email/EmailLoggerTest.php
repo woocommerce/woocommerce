@@ -500,6 +500,7 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 
 		$order = $this->createMock( \WC_Order::class );
 		$order->method( 'get_id' )->willReturn( 42 );
+		$order->method( 'get_object_read' )->willReturn( true );
 		$order->expects( $this->never() )->method( 'add_order_note' );
 
 		$email = $this->create_mock_email( 'customer_processing_order', 'customer@example.com', $order );
@@ -514,6 +515,7 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 
 		$order = $this->createMock( \WC_Order::class );
 		$order->method( 'get_id' )->willReturn( 42 );
+		$order->method( 'get_object_read' )->willReturn( true );
 		$order->expects( $this->never() )->method( 'add_order_note' );
 
 		$email = $this->create_mock_email( 'customer_processing_order', 'customer@example.com', $order );
