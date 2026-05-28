@@ -37,7 +37,8 @@ export interface ProductResponseTermItem {
 	name: string;
 	slug: string;
 	link?: string;
-	visual?: VisualAttributeTerm;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	__experimentalVisual?: VisualAttributeTerm;
 }
 
 export interface ProductResponseAttributeItem {

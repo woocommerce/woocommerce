@@ -102,8 +102,8 @@ const Edit = ( props: EditProps ) => {
 					value: term.id.toString(),
 					selected: index === 0,
 					...( showCounts && { count: term.count } ),
-					...( term.visual && {
-						visual: term.visual,
+					...( term.__experimentalVisual && {
+						visual: term.__experimentalVisual,
 					} ),
 				} ) );
 

@@ -43,7 +43,8 @@ export interface AttributeTerm {
 	name: string;
 	parent: number;
 	slug: string;
-	visual?: VisualAttributeTerm;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	__experimentalVisual?: VisualAttributeTerm;
 }
 
 export interface AttributeMetadata {

@@ -329,32 +329,32 @@ class ProductSchema extends AbstractSchema {
 							'items'       => [
 								'type'       => 'object',
 								'properties' => [
-									'id'      => [
+									'id'                   => [
 										'description' => __( 'The term ID, or 0 if the attribute is not a global attribute.', 'woocommerce' ),
 										'type'        => 'integer',
 										'context'     => [ 'view', 'edit', 'embed' ],
 										'readonly'    => true,
 									],
-									'name'    => [
+									'name'                 => [
 										'description' => __( 'The term name.', 'woocommerce' ),
 										'type'        => 'string',
 										'context'     => [ 'view', 'edit', 'embed' ],
 										'readonly'    => true,
 									],
-									'slug'    => [
+									'slug'                 => [
 										'description' => __( 'The term slug.', 'woocommerce' ),
 										'type'        => 'string',
 										'context'     => [ 'view', 'edit', 'embed' ],
 										'readonly'    => true,
 									],
-									'default' => [
+									'default'              => [
 										'description' => __( 'If this is a default attribute', 'woocommerce' ),
 										'type'        => 'boolean',
 										'context'     => [ 'view', 'edit', 'embed' ],
 										'readonly'    => true,
 									],
-									'visual'  => [
-										'description' => __( 'Visual swatch data for wc-visual attribute terms.', 'woocommerce' ),
+									'__experimentalVisual' => [
+										'description' => __( 'Experimental visual swatch data for wc-visual attribute terms.', 'woocommerce' ),
 										'type'        => 'object',
 										'context'     => [ 'view', 'edit', 'embed' ],
 										'readonly'    => true,
@@ -910,7 +910,7 @@ class ProductSchema extends AbstractSchema {
 		$value = (array) $this->prepare_product_attribute_value( $term->name, $term->term_id, $term->slug );
 
 		if ( VisualAttributeTermMeta::is_visual_attribute_taxonomy( $term->taxonomy ) ) {
-			$value['visual'] = VisualAttributeTermMeta::get_term_visual( (int) $term->term_id );
+			$value['__experimentalVisual'] = VisualAttributeTermMeta::get_term_visual( (int) $term->term_id );
 		}
 
 		return (object) $value;

@@ -93,7 +93,8 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			attribute.terms.length > 0
 		) {
 			items = attribute.terms.map( ( term ) => {
-				const visual = term.visual || EMPTY_TERM_VISUALS[ term.id ];
+				const visual =
+					term.__experimentalVisual || EMPTY_TERM_VISUALS[ term.id ];
 
 				return {
 					id: `${ attribute.taxonomy }-${ term.slug }`,

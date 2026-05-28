@@ -28,44 +28,44 @@ class TermSchema extends AbstractSchema {
 	 */
 	public function get_properties() {
 		return [
-			'id'          => array(
+			'id'                   => array(
 				'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'name'        => array(
+			'name'                 => array(
 				'description' => __( 'Term name.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'slug'        => array(
+			'slug'                 => array(
 				'description' => __( 'String based identifier for the term.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'description' => array(
+			'description'          => array(
 				'description' => __( 'Term description.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'parent'      => array(
+			'parent'               => array(
 				'description' => __( 'Parent term ID, if applicable.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'count'       => array(
+			'count'                => array(
 				'description' => __( 'Number of objects (posts of any type) assigned to the term.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'visual'      => array(
-				'description' => __( 'Visual swatch data for wc-visual attribute terms.', 'woocommerce' ),
+			'__experimentalVisual' => array(
+				'description' => __( 'Experimental visual swatch data for wc-visual attribute terms.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -99,7 +99,7 @@ class TermSchema extends AbstractSchema {
 		];
 
 		if ( VisualAttributeTermMeta::is_visual_attribute_taxonomy( $term->taxonomy ) ) {
-			$response['visual'] = VisualAttributeTermMeta::get_term_visual( (int) $term->term_id );
+			$response['__experimentalVisual'] = VisualAttributeTermMeta::get_term_visual( (int) $term->term_id );
 		}
 
 		return $response;
