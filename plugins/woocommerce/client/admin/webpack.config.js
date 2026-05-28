@@ -59,7 +59,6 @@ const wcAdminPackages = [
 	'block-templates',
 	'product-editor',
 	'sanitize',
-	'settings-editor',
 	'remote-logging',
 	'email-editor',
 ];
@@ -68,7 +67,6 @@ const getEntryPoints = () => {
 	const entryPoints = {
 		app: './client/index.tsx',
 		embed: './client/embed.tsx',
-		settings: './client/settings/index.js',
 	};
 	wcAdminPackages.forEach( ( name ) => {
 		entryPoints[ name ] = `${ WC_ADMIN_PACKAGES_DIR }/${ name }`;

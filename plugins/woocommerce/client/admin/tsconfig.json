@@ -78,9 +78,6 @@
 			"path": "../../../../packages/js/sanitize"
 		},
 		{
-			"path": "../../../../packages/js/settings-editor"
-		},
-		{
 			"path": "../../../../packages/js/tracks"
 		}
 	]

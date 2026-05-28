@@ -298,18 +298,35 @@ class DataUtils {
 	/**
 	 * Compute the tax-inclusive refund total for a line item at a given quantity.
 	 *
+	 * Precondition: $item must be one of WC_Order_Item_Product, WC_Order_Item_Shipping,
+	 * WC_Order_Item_Fee, and $quantity must be a positive integer (>= 1). For
+	 * shipping and fee items the quantity is informational only — the full item
+	 * total is returned regardless. Callers using untrusted input should validate
+	 * via {@see validate_preview_line_items()} first.
+	 *
 	 * @since 10.8.0
 	 *
 	 * @param WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item     The order item.
-	 * @param int                                                            $quantity The quantity to refund.
-	 * @return float The tax-inclusive refund total.
+	 * @param int                                                            $quantity The quantity to refund (>= 1).
+	 * @return float The tax-inclusive refund total. May be negative for items with negative totals (e.g. discount fees).
+	 * @throws \InvalidArgumentException When $quantity is less than 1.
 	 */
 	public function compute_line_item_refund_total( $item, int $quantity ): float {
+		if ( $quantity < 1 ) {
+			// Exception message is developer-facing only; the value is a typed int and the format is a literal string.
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new \InvalidArgumentException( sprintf( 'Quantity must be >= 1, got %d.', (int) $quantity ) );
+		}
+
 		$price_decimals = wc_get_price_decimals();
 
 		if ( $item instanceof WC_Order_Item_Product ) {
 			$original_qty = $item->get_quantity();
 			if ( 0 === $original_qty ) {
+				wc_get_logger()->warning(
+					sprintf( 'Refund preview: product item %d has zero original quantity on order %d.', $item->get_id(), $item->get_order_id() ),
+					array( 'source' => 'wc-v4-refunds' )
+				);
 				return 0.0;
 			}
 			$unit_price_with_tax = ( (float) $item->get_total() + (float) $item->get_total_tax() ) / $original_qty;
@@ -322,25 +339,47 @@ class DataUtils {
 	/**
 	 * Build a refund preview showing authoritative totals and breakdowns.
 	 *
+	 * Callers must invoke {@see validate_preview_line_items()} first — this
+	 * method assumes inputs have been validated and throws on missing items.
+	 *
 	 * @since 10.8.0
 	 *
 	 * @param WC_Order $order      The order being previewed for refund.
 	 * @param array    $line_items Array of line items with 'line_item_id' and 'quantity' keys.
 	 * @return array The structured preview response.
+	 * @throws \InvalidArgumentException When a line_item_id does not resolve to an item on the order.
 	 */
 	public function build_refund_preview( WC_Order $order, array $line_items ): array {
 		$price_decimals = wc_get_price_decimals();
-		$products_items = array();
-		$shipping_items = array();
-		$fees_items     = array();
+		$sections       = array(
+			'products' => array(
+				'items'    => array(),
+				'subtotal' => 0.0,
+				'tax'      => 0.0,
+				'total'    => 0.0,
+			),
+			'shipping' => array(
+				'items'    => array(),
+				'subtotal' => 0.0,
+				'tax'      => 0.0,
+				'total'    => 0.0,
+			),
+			'fees'     => array(
+				'items'    => array(),
+				'subtotal' => 0.0,
+				'tax'      => 0.0,
+				'total'    => 0.0,
+			),
+		);
 
 		foreach ( $line_items as $line_item ) {
 			$item = $order->get_item( $line_item['line_item_id'] );
 			if ( ! $item ) {
-				continue;
+				// Exception message is developer-facing only; both values are typed ints and the format is a literal string.
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				throw new \InvalidArgumentException( sprintf( 'Line item %d not found on order %d.', (int) $line_item['line_item_id'], (int) $order->get_id() ) );
 			}
 
-			/** @var WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item */
 			$refund_total_with_tax = $this->compute_line_item_refund_total( $item, $line_item['quantity'] );
 			$subtotal              = $refund_total_with_tax;
 			$tax                   = 0.0;
@@ -353,6 +392,17 @@ class DataUtils {
 				}
 			);
 
+			if ( ! empty( $original_taxes['total'] ?? array() ) && empty( $tax_totals ) ) {
+				wc_get_logger()->warning(
+					sprintf(
+						'Refund preview: tax totals filtered to empty for item %d on order %d (non-numeric or non-positive values).',
+						(int) $line_item['line_item_id'],
+						$order->get_id()
+					),
+					array( 'source' => 'wc-v4-refunds' )
+				);
+			}
+
 			if ( ! empty( $tax_totals ) ) {
 				$tax_rates        = $this->build_tax_rates_array( $order, array_keys( $tax_totals ) );
 				$calculated_taxes = WC_Tax::calc_inclusive_tax( $refund_total_with_tax, $tax_rates );
@@ -362,8 +412,8 @@ class DataUtils {
 					},
 					$calculated_taxes
 				);
-				$tax      = NumberUtil::round( array_sum( $calculated_taxes ), $price_decimals );
-				$subtotal = NumberUtil::round( $refund_total_with_tax - $tax, $price_decimals );
+				$tax              = NumberUtil::round( array_sum( $calculated_taxes ), $price_decimals );
+				$subtotal         = NumberUtil::round( $refund_total_with_tax - $tax, $price_decimals );
 			}
 
 			$item_data = array(
@@ -374,46 +424,46 @@ class DataUtils {
 				'total'    => wc_format_decimal( $refund_total_with_tax, $price_decimals ),
 			);
 
+			$item_data['name'] = $item->get_name();
+
 			if ( $item instanceof WC_Order_Item_Product ) {
-				$item_data['name']         = $item->get_name();
 				$item_data['product_id']   = $item->get_product_id();
 				$item_data['variation_id'] = $item->get_variation_id();
-				$products_items[]          = $item_data;
+				$section_key               = 'products';
 			} elseif ( $item instanceof WC_Order_Item_Shipping ) {
-				$item_data['name'] = $item->get_name();
-				$shipping_items[]  = $item_data;
-			} elseif ( $item instanceof WC_Order_Item_Fee ) {
-				$item_data['name'] = $item->get_name();
-				$fees_items[]      = $item_data;
+				$section_key = 'shipping';
+			} else {
+				$section_key = 'fees';
 			}
+
+			$sections[ $section_key ]['items'][]   = $item_data;
+			$sections[ $section_key ]['subtotal'] += $subtotal;
+			$sections[ $section_key ]['tax']      += $tax;
+			$sections[ $section_key ]['total']    += $refund_total_with_tax;
 		}
 
-		$build_section = function ( array $items ) use ( $price_decimals ): array {
-			$s = 0.0;
-			$t = 0.0;
-			$g = 0.0;
-			foreach ( $items as $i ) {
-				$s += (float) $i['subtotal'];
-				$t += (float) $i['tax'];
-				$g += (float) $i['total'];
-			}
+		$format_section = function ( array $section ) use ( $price_decimals ): array {
 			return array(
-				'items'    => $items,
-				'subtotal' => wc_format_decimal( $s, $price_decimals ),
-				'tax'      => wc_format_decimal( $t, $price_decimals ),
-				'total'    => wc_format_decimal( $g, $price_decimals ),
+				'items'    => $section['items'],
+				'subtotal' => wc_format_decimal( $section['subtotal'], $price_decimals ),
+				'tax'      => wc_format_decimal( $section['tax'], $price_decimals ),
+				'total'    => wc_format_decimal( $section['total'], $price_decimals ),
 			);
 		};
 
-		$ps = $build_section( $products_items );
-		$ss = $build_section( $shipping_items );
-		$fs = $build_section( $fees_items );
+		$grand_subtotal = $sections['products']['subtotal'] + $sections['shipping']['subtotal'] + $sections['fees']['subtotal'];
+		$grand_tax      = $sections['products']['tax'] + $sections['shipping']['tax'] + $sections['fees']['tax'];
+		$grand_total    = $sections['products']['total'] + $sections['shipping']['total'] + $sections['fees']['total'];
 
 		return array(
-			'breakdown'      => array( 'products' => $ps, 'shipping' => $ss, 'fees' => $fs ),
-			'subtotal'       => wc_format_decimal( (float) $ps['subtotal'] + (float) $ss['subtotal'] + (float) $fs['subtotal'], $price_decimals ),
-			'tax'            => wc_format_decimal( (float) $ps['tax'] + (float) $ss['tax'] + (float) $fs['tax'], $price_decimals ),
-			'total'          => wc_format_decimal( (float) $ps['total'] + (float) $ss['total'] + (float) $fs['total'], $price_decimals ),
+			'breakdown'      => array(
+				'products' => $format_section( $sections['products'] ),
+				'shipping' => $format_section( $sections['shipping'] ),
+				'fees'     => $format_section( $sections['fees'] ),
+			),
+			'subtotal'       => wc_format_decimal( $grand_subtotal, $price_decimals ),
+			'tax'            => wc_format_decimal( $grand_tax, $price_decimals ),
+			'total'          => wc_format_decimal( $grand_total, $price_decimals ),
 			'max_refundable' => wc_format_decimal( $order->get_remaining_refund_amount(), $price_decimals ),
 		);
 	}
@@ -429,7 +479,7 @@ class DataUtils {
 	 */
 	public function validate_preview_line_items( array $line_items, WC_Order $order ) {
 		if ( empty( $line_items ) ) {
-			return new WP_Error( 'invalid_line_item', __( 'At least one line item is required.', 'woocommerce' ) );
+			return new WP_Error( 'missing_line_items', __( 'At least one line item is required.', 'woocommerce' ) );
 		}
 
 		if ( ! in_array( $order->get_status(), self::REFUNDABLE_STATUSES, true ) ) {
@@ -445,19 +495,22 @@ class DataUtils {
 		foreach ( $line_items as $line_item ) {
 			$line_item_id = $line_item['line_item_id'] ?? null;
 			if ( ! $line_item_id ) {
-				return new WP_Error( 'invalid_line_item', __( 'Line item ID is required.', 'woocommerce' ) );
+				return new WP_Error( 'missing_line_item_id', __( 'Line item ID is required.', 'woocommerce' ) );
 			}
 
 			$item = $order->get_item( $line_item_id );
 			if ( ! $item || $item->get_order_id() !== $order->get_id() ) {
-				return new WP_Error( 'invalid_line_item', __( 'Line item not found.', 'woocommerce' ) );
+				return new WP_Error( 'line_item_not_found', __( 'Line item not found.', 'woocommerce' ) );
 			}
 
 			if ( ! $item instanceof WC_Order_Item_Product && ! $item instanceof WC_Order_Item_Fee && ! $item instanceof WC_Order_Item_Shipping ) {
-				return new WP_Error( 'invalid_line_item', __( 'Line item is not a product, fee, or shipping line.', 'woocommerce' ) );
+				return new WP_Error( 'unsupported_item_type', __( 'Line item is not a product, fee, or shipping line.', 'woocommerce' ) );
 			}
 
-			$quantity = $line_item['quantity'] ?? 0;
+			if ( ! isset( $line_item['quantity'] ) || ! is_int( $line_item['quantity'] ) || $line_item['quantity'] < 1 ) {
+				return new WP_Error( 'invalid_quantity', __( 'Quantity must be a positive integer.', 'woocommerce' ) );
+			}
+			$quantity = $line_item['quantity'];
 
 			if ( $item instanceof WC_Order_Item_Product ) {
 				$remaining_qty = $item->get_quantity() + ( $refund_data['qtys'][ $line_item_id ] ?? 0 );
@@ -474,8 +527,15 @@ class DataUtils {
 			}
 
 			if ( $item instanceof WC_Order_Item_Shipping || $item instanceof WC_Order_Item_Fee ) {
-				$refunded_total  = $refund_data['totals'][ $line_item_id ] ?? 0.0;
-				$remaining_total = (float) $item->get_total() - $refunded_total;
+				if ( 1 !== $quantity ) {
+					return new WP_Error(
+						'invalid_quantity',
+						__( 'Shipping and fee line items must be refunded with quantity of 1.', 'woocommerce' )
+					);
+				}
+
+				$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
+				$remaining_total = abs( (float) $item->get_total() ) - $refunded_total;
 				if ( $remaining_total <= 0 ) {
 					return new WP_Error(
 						'quantity_exceeds_refundable',
