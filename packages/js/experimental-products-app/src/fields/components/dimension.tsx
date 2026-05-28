@@ -29,6 +29,8 @@ export const createDimensionField = (
 	return {
 		isVisible: isDimensionVisible,
 		Edit: ( { data, onChange, field } ) => {
+			const dimensions: Partial< ProductEntityRecord[ 'dimensions' ] > =
+				data.dimensions ?? {};
 			const {
 				record: storeProductsSettings,
 				isResolving: storeProductsSettingsResolving,
@@ -48,13 +50,13 @@ export const createDimensionField = (
 			return (
 				<InputControl
 					label={ field.label }
-					value={ data.dimensions[ key ] }
+					placeholder={ field.placeholder }
+					value={ dimensions[ key ] ?? '' }
 					onChange={ ( event ) => {
 						onChange( {
 							dimensions: {
-								...data.dimensions,
 								[ key ]: event.target.value,
-							},
+							} as ProductEntityRecord[ 'dimensions' ],
 						} );
 					} }
 					type="number"

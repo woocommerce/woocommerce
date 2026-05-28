@@ -198,7 +198,46 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 		$args     = array();
 		$defaults = $this->preferences_service->get_defaults();
 
-		foreach ( array_keys( $defaults ) as $key ) {
+		foreach ( $defaults as $key => $shape ) {
+			$properties = array(
+				'enabled' => array(
+					'type'        => 'boolean',
+					'description' => __( 'Whether this notification type is enabled.', 'woocommerce' ),
+				),
+			);
+
+			if ( array_key_exists( 'min_amount', $shape ) ) {
+				$properties['min_amount'] = array(
+					'type'             => array( 'number', 'null' ),
+					'minimum'          => 0,
+					'exclusiveMinimum' => true,
+					'description'      => __( 'Minimum order amount required to trigger this notification, or null to disable the threshold.', 'woocommerce' ),
+				);
+			}
+
+			if ( array_key_exists( 'max_rating', $shape ) ) {
+				$properties['max_rating'] = array(
+					'type'        => array( 'integer', 'null' ),
+					'minimum'     => 1,
+					'maximum'     => 5,
+					'description' => __( 'Maximum star rating that triggers a review notification (1–5), or null to disable the threshold.', 'woocommerce' ),
+				);
+			}
+
+			$boolean_sub_fields = array( 'low_stock', 'out_of_stock', 'on_backorder' );
+			foreach ( $boolean_sub_fields as $sub_field ) {
+				if ( array_key_exists( $sub_field, $shape ) ) {
+					$properties[ $sub_field ] = array(
+						'type'        => 'boolean',
+						'description' => sprintf(
+							/* translators: %s: sub-field name (e.g. low_stock). */
+							__( 'Whether %s notifications are enabled for this type.', 'woocommerce' ),
+							$sub_field
+						),
+					);
+				}
+			}
+
 			$args[ $key ] = array(
 				'description'       => sprintf(
 					/* translators: %s: notification preference key (e.g. store_order). */
@@ -206,16 +245,11 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 					$key
 				),
 				'type'              => 'object',
-				'properties'        => array(
-					'enabled' => array(
-						'type'        => 'boolean',
-						'description' => __( 'Whether this notification type is enabled.', 'woocommerce' ),
-					),
-				),
+				'properties'        => $properties,
 				'required'          => false,
 				'validate_callback' => 'rest_validate_request_arg',
 			);
-		}
+		}//end foreach
 
 		return $args;
 	}

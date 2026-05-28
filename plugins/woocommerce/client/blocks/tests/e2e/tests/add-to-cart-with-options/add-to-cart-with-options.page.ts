@@ -114,7 +114,7 @@ class AddToCartWithOptionsPage {
 		autoselect,
 		disabledAttributesAction,
 	}: {
-		optionStyle?: 'pills' | 'dropdown';
+		optionStyle?: 'chips' | 'dropdown';
 		autoselect?: boolean;
 		disabledAttributesAction?: 'disable' | 'hide';
 	} = {} ) {
@@ -126,21 +126,21 @@ class AddToCartWithOptionsPage {
 		// Verify inner blocks have loaded.
 		await expect(
 			this.editor.canvas
-				.getByLabel(
-					'Block: Variation Selector: Attribute Options (Beta)'
-				)
+				.getByLabel( 'Block: Variation Selector: Template (Beta)' )
 				.first()
 		).toBeVisible();
 
-		const attributeOptionsBlock = await this.editor.getBlockByName(
-			'woocommerce/add-to-cart-with-options-variation-selector-attribute-options'
+		const attributeTemplateBlock = await this.editor.getBlockByName(
+			'woocommerce/add-to-cart-with-options-variation-selector-attribute'
 		);
-		await this.editor.selectBlocks( attributeOptionsBlock.first() );
+		await this.editor.selectBlocks( attributeTemplateBlock.first() );
 
-		// Option style attribute.
+		// Option style attribute (inner block titles: Chips, Dropdown).
 		if ( optionStyle ) {
+			const styleLabel =
+				optionStyle === 'dropdown' ? 'Dropdown' : 'Chips';
 			const optionStyleInput = page.getByRole( 'radio', {
-				name: optionStyle,
+				name: styleLabel,
 			} );
 			await optionStyleInput.click();
 		}
@@ -195,22 +195,33 @@ class AddToCartWithOptionsPage {
 	async selectVariationSelectorOptions(
 		attributeName: string,
 		attributeValue: string,
-		optionStyle: 'pills' | 'dropdown'
+		optionStyle: 'chips' | 'dropdown'
 	) {
 		if ( optionStyle === 'dropdown' ) {
-			await this.page
-				.getByLabel( attributeName )
-				.selectOption( attributeValue );
-		} else if ( attributeValue !== '' ) {
-			await this.page
-				.getByLabel( attributeName )
-				.getByText( attributeValue )
+			const select = this.page.getByLabel( attributeName, {
+				exact: true,
+			} );
+			if ( attributeValue !== '' ) {
+				await expect(
+					select.getByRole( 'option', {
+						name: attributeValue,
+						exact: true,
+					} )
+				).toBeAttached();
+			}
+			await select.selectOption( attributeValue );
+			return;
+		}
+		const group = this.page.getByRole( 'radiogroup', {
+			name: attributeName,
+		} );
+		if ( attributeValue !== '' ) {
+			await group
+				.getByRole( 'radio', { name: attributeValue, exact: true } )
 				.click();
 		} else {
-			await this.page
-				.getByLabel( attributeName )
-				.locator( 'label:has(:checked)' )
-				.click();
+			const selected = group.getByRole( 'radio', { checked: true } );
+			await selected.click();
 		}
 	}
 
@@ -221,18 +232,21 @@ class AddToCartWithOptionsPage {
 			variation: boolean;
 			visible: boolean;
 		}[],
-		expectedValues: Record< string, string | RegExp > = {},
-		optionStyle: 'pills' | 'dropdown'
+		expectedValues: Record< string, string > = {},
+		optionStyle: 'chips' | 'dropdown'
 	) {
 		for ( let {
 			name: attributeName,
 			options: attributeValues,
 		} of productAttributes ) {
-			const attributeNameLocator = this.page.getByLabel( attributeName, {
-				exact: true,
-			} );
 			if ( optionStyle === 'dropdown' ) {
-				let expectedValue: string | RegExp;
+				const attributeNameLocator = this.page.getByLabel(
+					attributeName,
+					{
+						exact: true,
+					}
+				);
+				let expectedValue: string;
 				if (
 					attributeName in expectedValues &&
 					expectedValues[ attributeName ] !== ''
@@ -246,27 +260,32 @@ class AddToCartWithOptionsPage {
 				);
 				continue;
 			}
+			const group = this.page.getByRole( 'radiogroup', {
+				name: attributeName,
+			} );
 			if (
 				attributeName in expectedValues &&
 				expectedValues[ attributeName ] !== ''
 			) {
 				attributeValues = attributeValues.filter(
 					( item ) => item !== expectedValues[ attributeName ]
-				); // Omit attributeName
+				);
 				await expect(
-					attributeNameLocator.getByLabel(
-						expectedValues[ attributeName ],
-						{ exact: true }
-					)
+					group.getByRole( 'radio', {
+						name: String( expectedValues[ attributeName ] ),
+						exact: true,
+					} )
 				).toBeChecked();
 			}
 			if ( attributeValues.length ) {
 				for ( const attributeValue of attributeValues ) {
-					await expect(
-						attributeNameLocator.getByLabel( attributeValue, {
-							exact: true,
-						} )
-					).not.toBeChecked();
+					const radio = group.getByRole( 'radio', {
+						name: attributeValue,
+						exact: true,
+					} );
+					if ( ( await radio.count() ) > 0 ) {
+						await expect( radio ).not.toBeChecked();
+					}
 				}
 			}
 		}
