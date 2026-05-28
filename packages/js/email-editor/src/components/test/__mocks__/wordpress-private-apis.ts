@@ -6,7 +6,7 @@ jest.mock( '@wordpress/private-apis', () => ( {
 			if ( obj && typeof obj === 'object' ) {
 				return obj;
 			}
-			return {}
-		}),
+			return {};
+		} ),
+	} ) ),
 } ) );
-}))
