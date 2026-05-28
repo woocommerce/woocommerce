@@ -170,12 +170,13 @@ class Controller extends AbstractController {
 			$this->namespace,
 			'/' . $this->rest_base . '/preview',
 			array(
+				// permission_callback below intentionally uses the create-refund capability:
+				// preview is read-only but logically part of the refund-creation flow, so it
+				// requires the same capability. This prevents read-only-API clients from
+				// probing refund state on orders they cannot act on.
 				array(
-					'methods'  => WP_REST_Server::CREATABLE,
-					'callback' => array( $this, 'preview_item' ),
-					// Preview is read-only but logically part of the refund-creation flow, so it requires
-					// the same capability as creating a refund. This prevents read-only-API clients from
-					// probing refund state.
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'preview_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array(
 						'order_id'   => array(

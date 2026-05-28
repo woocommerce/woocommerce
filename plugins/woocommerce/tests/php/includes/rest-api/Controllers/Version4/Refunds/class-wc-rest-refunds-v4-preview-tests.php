@@ -297,9 +297,9 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox P8: Preview with invalid line item ID returns line_item_not_found.
 	 */
 	public function test_preview_invalid_line_item(): void {
-		$order             = $this->create_order_with_product( 50.00, 1 );
-		$existing_item_id  = $this->get_first_line_item_id( $order );
-		$nonexistent_id    = $existing_item_id + 999;
+		$order            = $this->create_order_with_product( 50.00, 1 );
+		$existing_item_id = $this->get_first_line_item_id( $order );
+		$nonexistent_id   = $existing_item_id + 999;
 
 		$response = $this->do_preview_request(
 			$order->get_id(),
@@ -363,8 +363,8 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	 *
 	 * @dataProvider invalid_quantity_provider
 	 *
-	 * @param array  $line_item_overrides Overrides merged into the line item entry (after line_item_id).
-	 * @param array  $expected_codes      Acceptable response error codes (REST framework or DataUtils).
+	 * @param array $line_item_overrides Overrides merged into the line item entry (after line_item_id).
+	 * @param array $expected_codes      Acceptable response error codes (REST framework or DataUtils).
 	 */
 	public function test_preview_invalid_quantity( array $line_item_overrides, array $expected_codes ): void {
 		$order   = $this->create_order_with_product( 50.00, 1 );
@@ -424,7 +424,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_preview_non_shop_order_returns_invalid_id(): void {
 		// Create a refund directly — wc_get_order() will return it but get_type() is shop_order_refund.
-		$order = $this->create_order_with_product( 50.00, 1 );
+		$order  = $this->create_order_with_product( 50.00, 1 );
 		$refund = wc_create_refund(
 			array(
 				'order_id' => $order->get_id(),

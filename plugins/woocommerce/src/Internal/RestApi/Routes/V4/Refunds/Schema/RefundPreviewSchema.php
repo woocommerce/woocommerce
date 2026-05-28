@@ -31,7 +31,8 @@ class RefundPreviewSchema extends AbstractSchema {
 	/**
 	 * Not used. The refund preview controller bypasses prepare_item_for_response
 	 * and returns the raw data array directly via rest_ensure_response, so this
-	 * method must never be invoked. Implemented only to satisfy the abstract.
+	 * method must never be invoked. The `: array` return type is required to
+	 * satisfy AbstractSchema::get_item_response, but the body always throws.
 	 *
 	 * @param mixed           $item           Item data.
 	 * @param WP_REST_Request $request        Request object.
@@ -39,6 +40,7 @@ class RefundPreviewSchema extends AbstractSchema {
 	 * @return array
 	 * @throws \LogicException Always — this method should never be called for the preview route.
 	 */
+	// phpcs:ignore Squiz.Commenting.FunctionComment.InvalidNoReturn
 	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
 		throw new \LogicException(
 			'RefundPreviewSchema::get_item_response() should not be called; the preview controller bypasses prepare_item_for_response().'
@@ -184,7 +186,7 @@ class RefundPreviewSchema extends AbstractSchema {
 	 * @return array
 	 */
 	private function get_product_item_schema(): array {
-		$schema = $this->get_base_item_schema();
+		$schema                               = $this->get_base_item_schema();
 		$schema['properties']['product_id']   = array(
 			'description' => __( 'The product ID.', 'woocommerce' ),
 			'type'        => 'integer',
