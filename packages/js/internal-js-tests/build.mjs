@@ -7,8 +7,17 @@ const watch = process.argv.includes( '--watch' );
 const format = process.argv.includes( '--cjs' ) ? 'cjs' : 'esm';
 const outdir = format === 'cjs' ? 'build' : 'build-module';
 
+// setup-*.js and mocks/* are CommonJS shims consumed directly by Jest via
+// jest-preset.js → src/*. They are not consumed via build-module/, and forcing
+// esbuild to transpile them produces noisy unsupported-require-call warnings.
 const ENTRY_GLOB = 'src/**/*.{ts,tsx,js,jsx}';
-const ENTRY_IGNORE = [ '**/test/**', '**/stories/**', '**/*.d.ts' ];
+const ENTRY_IGNORE = [
+	'**/test/**',
+	'**/stories/**',
+	'**/*.d.ts',
+	'src/setup-*.js',
+	'src/mocks/**',
+];
 
 async function resolveEntryPoints() {
 	return glob( ENTRY_GLOB, { ignore: ENTRY_IGNORE } );
@@ -41,14 +50,25 @@ function summarize( result ) {
 	return parts.length ? ` — ${ parts.join( ', ' ) }` : '';
 }
 
+// Wrap a watch-mode step so a single failure (disk error, build crash, etc.)
+// doesn't take the watcher process down. Errors are surfaced; the loop survives.
+async function safe( label, fn ) {
+	try {
+		return await fn();
+	} catch ( error ) {
+		console.error( `[watch] ${ label } failed:`, error.message ?? error );
+		return null;
+	}
+}
+
 await rm( outdir, { recursive: true, force: true } );
 
 if ( watch ) {
 	const startupT0 = Date.now();
 	let entryPoints = await resolveEntryPoints();
 	let ctx = await context( makeOptions( entryPoints ) );
-	const initial = await ctx.rebuild();
-	console.log( `[watch] ready in ${ Date.now() - startupT0 }ms — ${ entryPoints.length } entry point(s)${ summarize( initial ) }` );
+	const initial = await safe( 'startup build', () => ctx.rebuild() );
+	console.log( `[watch] ready in ${ Date.now() - startupT0 }ms — ${ entryPoints.length } entry point(s)${ initial ? summarize( initial ) : '' }` );
 
 	// esbuild's own watcher polls the filesystem, which can miss or delay
 	// changes (especially edits to files added after context creation).
@@ -60,7 +80,7 @@ if ( watch ) {
 	const restart = ( path, kind ) => {
 		pendingChanges.add( `${ path } (${ kind })` );
 		clearTimeout( pending );
-		pending = setTimeout( async () => {
+		pending = setTimeout( () => safe( 'restart', async () => {
 			const changes = [ ...pendingChanges ];
 			pendingChanges.clear();
 			const preview = changes.slice( 0, 3 ).join( ', ' );
@@ -73,7 +93,7 @@ if ( watch ) {
 			ctx = await context( makeOptions( entryPoints ) );
 			const result = await ctx.rebuild();
 			console.log( `[watch] rebuilt in ${ Date.now() - t0 }ms — ${ entryPoints.length } entry point(s)${ summarize( result ) }` );
-		}, 200 );
+		} ), 200 );
 	};
 
 	chokidar
@@ -82,8 +102,10 @@ if ( watch ) {
 		.on( 'unlink', ( path ) => restart( path, 'deleted' ) )
 		.on( 'change', async ( path ) => {
 			const t0 = Date.now();
-			const result = await ctx.rebuild().catch( ( error ) => ( { errors: [ error ], warnings: [] } ) );
-			console.log( `[watch] rebuilt ${ path } in ${ Date.now() - t0 }ms${ summarize( result ) }` );
+			const result = await safe( `rebuild ${ path }`, () => ctx.rebuild() );
+			if ( result ) {
+				console.log( `[watch] rebuilt ${ path } in ${ Date.now() - t0 }ms${ summarize( result ) }` );
+			}
 		} );
 } else {
 	const entryPoints = await resolveEntryPoints();
