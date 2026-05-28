@@ -54,8 +54,11 @@ class CartAddItem extends StoreApiCartAddItem {
 	public function get_args() {
 		$endpoints = parent::get_args();
 
-		foreach ( $endpoints as &$endpoint ) {
-			if ( ! is_array( $endpoint ) ) {
+		// The parent's array mixes numerically-indexed endpoint definitions with
+		// string-keyed metadata ('schema', 'allow_batch') — only the endpoint
+		// definitions should be mutated.
+		foreach ( $endpoints as $key => &$endpoint ) {
+			if ( ! is_int( $key ) || ! is_array( $endpoint ) || ! isset( $endpoint['methods'] ) ) {
 				continue;
 			}
 			$endpoint['permission_callback'] = array( $this, 'check_permission' );
