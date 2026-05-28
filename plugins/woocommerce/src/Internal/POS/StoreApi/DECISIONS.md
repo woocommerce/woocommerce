@@ -168,13 +168,42 @@ A representative example, verified in code:
 A small per-policy-point audit is the highest-leverage next concrete
 step.
 
+## Correction: `/checkout` does require a `payment_method`
+
+An earlier draft of the proposal claimed POS could POST `/checkout`
+with no `payment_method`, relying on the Store API's `process_payment`
+to silently no-op. That was wrong:
+`CheckoutTrait::update_order_from_request` throws
+`woocommerce_rest_checkout_missing_payment_method` (HTTP 400) when
+the order needs payment, the request is POST, and no payment_method
+is supplied. The integration test for `/checkout` (added in this
+branch) catches this directly.
+
+Implication: POS will need to send *some* `payment_method` slug at
+checkout time. Options for the production design (out of scope for
+this spike):
+
+1. **Register a minimal `pos_pending` gateway** whose
+   `process_payment` returns synchronously with the order left in
+   `pending`, then the existing post-checkout flow (WooPayments
+   `capture_terminal_payment` for cards, cash mark-paid endpoint
+   for cash) takes over.
+2. **Reuse an existing offline gateway** (`bacs`, `cod`) — works but
+   the order's recorded payment method ends up misleading in admin.
+
+Option 1 is the cleaner long-term shape. The integration test in
+this spike uses a temporary `PosCheckoutTestGateway` defined inline
+to prove the route works end-to-end.
+
 ## What this spike deliberately does NOT include
 
-- **More than one route.** `cart/add-item` is the canonical example;
-  the full set (`cart/*`, `checkout`) is mechanical and additive.
+- **More than two routes.** `cart/add-item` and `/checkout` are the
+  load-bearing pair; the rest (`cart/remove-item`, `cart/update-item`,
+  `cart/apply-coupon`, etc.) is mechanical and additive.
 - **Agent/customer identity swap.** No current route accepts a
-  `customer_id` parameter, so there's nothing to swap yet. Will come
-  with `/checkout`.
+  `customer_id` parameter, so there's nothing to swap yet.
+- **A real production `pos_pending` payment gateway** — see correction
+  above; integration tests stand up a temporary one inline.
 - **Cash-paid endpoint** — additive, not load-bearing for the pattern.
 - **Per-policy-point filter audit** — research/inventory work, not code.
 - **Integration tests** against a real fulfillment extension (e.g.
