@@ -325,6 +325,10 @@ function wc_product_post_type_link( $permalink, $post ) {
 				foreach ( $ancestors as $ancestor ) {
 					$ancestor_object = get_term( $ancestor, 'product_cat' );
 
+					if ( ! $ancestor_object instanceof WP_Term ) {
+						continue;
+					}
+
 					/**
 					 * Filter whether to use only the top-level parent category in the product permalink.
 					 *
