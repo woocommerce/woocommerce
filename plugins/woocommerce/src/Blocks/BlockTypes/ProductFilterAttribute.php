@@ -258,10 +258,16 @@ final class ProductFilterAttribute extends AbstractBlock {
 		);
 
 		if ( ! empty( $attribute_counts ) ) {
-			$show_counts       = $block_attributes['showCounts'] ?? false;
-			$visual_values     = $this->get_visual_attribute_term_visuals();
+			$show_counts         = $block_attributes['showCounts'] ?? false;
+			$is_visual_attribute = 'wc-visual' === $product_attribute->type;
+			$visual_values       = array();
+
+			if ( $is_visual_attribute ) {
+				$visual_values = $this->get_visual_attribute_term_visuals();
+			}
+
 			$attribute_options = array_map(
-				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute, $show_counts, $visual_values ) {
+				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute, $show_counts, $is_visual_attribute, $visual_values ) {
 					$term          = (array) $term;
 					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
 
@@ -280,7 +286,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 						$item['count'] = $term['count'];
 					}
 
-					if ( 'wc-visual' === $product_attribute->type ) {
+					if ( $is_visual_attribute ) {
 						$item['color'] = $visual_values[ $term['term_id'] ]['color'] ?? '';
 						$item['image'] = $visual_values[ $term['term_id'] ]['image'] ?? '';
 					}
