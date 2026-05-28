@@ -8,23 +8,25 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\POS\StoreApi\Routes;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-use Automattic\WooCommerce\StoreApi\RoutesController as StoreApiRoutesController;
+use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 
 /**
  * Registers POS Store API REST routes.
  *
- * Routes live under the `wc/pos/v1` namespace, intentionally separate from
- * `wc/store/v1`. Each POS route wraps a Store API delegate (see
- * {@see AbstractRoute}); this controller is responsible for:
+ * Routes live under the `wc/pos/v1` namespace, intentionally separate
+ * from `wc/store/v1`. Each POS route directly subclasses the corresponding
+ * Store API concrete route (e.g. {@see CartAddItem} extends Store API's
+ * `CartAddItem`), mirroring the agentic commerce pattern. This:
  *
- *   - Maintaining the route → Store API identifier mapping.
- *   - Resolving Store API delegates via the Store API DI container.
- *   - Calling register_rest_route for each at the right WP lifecycle moment.
+ *   - Reuses the Store API request schema, sanitisation, validation, and
+ *     response shape (`ExtendSchema` extensions apply automatically since
+ *     the route is the same class).
+ *   - Lets each POS route override only what's POS-specific (permission
+ *     callback, nonce policy).
  *
- * Adding a new POS route means: writing the route class (typically just a
- * subclass of AbstractRoute with a STORE_API_IDENTIFIER constant) and
- * adding one entry to {@see ROUTE_CLASSES}.
+ * Adding a new POS route is: write the subclass and add one entry to
+ * {@see ROUTE_CLASSES}.
  *
  * @internal Just for internal use.
  *
@@ -39,8 +41,6 @@ class Controller implements RegisterHooksInterface {
 
 	/**
 	 * POS route classes to register.
-	 *
-	 * Each must extend AbstractRoute and declare STORE_API_IDENTIFIER.
 	 *
 	 * @var string[]
 	 */
@@ -61,10 +61,13 @@ class Controller implements RegisterHooksInterface {
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
 	public function register_routes(): void {
-		$store_api_routes = StoreApi::container()->get( StoreApiRoutesController::class );
+		$schema_controller = StoreApi::container()->get( SchemaController::class );
 
 		foreach ( self::ROUTE_CLASSES as $route_class ) {
-			$route = new $route_class( $store_api_routes->get( $route_class::STORE_API_IDENTIFIER ) );
+			$route = new $route_class(
+				$schema_controller,
+				$schema_controller->get( $route_class::SCHEMA_TYPE, $route_class::SCHEMA_VERSION )
+			);
 
 			register_rest_route(
 				self::REST_NAMESPACE,

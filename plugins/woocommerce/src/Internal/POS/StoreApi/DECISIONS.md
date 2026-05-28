@@ -5,164 +5,177 @@ WooCommerce Store API (instead of the REST API), so that checkout-time
 extension hooks fire and product types that need fulfillment setup at
 checkout time (gift cards, subscriptions, bookings, downloadables) work.
 
-The spike intentionally implements only a thin slice — `Context`, a session
-handler swap, one delegated route (`cart/add-item`), and one policy hook
-(stock override) — to validate the architectural pattern end-to-end before
-the full route set is built out. This document records the judgement calls
+The spike implements a thin slice — `Context`, a session handler swap,
+one POS route (`cart/add-item`), and one policy hook (stock override)
+— to validate the architectural pattern end-to-end before the full
+route set is built out. This document records the judgement calls
 made along the way so they don't have to be re-derived later.
 
 ## Why a separate namespace (`wc/pos/v1`)
 
-Considered: extending `wc/store/v1/*` with per-route POS-aware branching, vs
-nesting POS routes under `wc/store/v1/pos/*`, vs a wholly separate
-`wc/pos/v1`. Picked the last for three reasons:
+Considered: nesting POS routes under `wc/store/v1/pos/*`. Picked the
+separate namespace because of opt-in vs opt-out asymmetry on Store API
+middleware:
 
-1. **Auth / nonce / CSRF policy diverges.** Store API routes assume cookie
-   sessions with a Store-API nonce header for writes. POS is authenticated
-   via Application Passwords / WPCOM-bearer proxy and doesn't need CSRF
-   defenses (no cookie, no cross-origin exposure). A separate namespace
-   means the nonce middleware is structurally absent, not toggled.
-2. **Avoids spreading `is_pos_request()` checks through Store API code.**
-   That was the failure mode flagged by Thomas Roberts in the Rubik review
-   on the [POS × Store API P2 thread] — front-end cart had the same shape
-   and accumulated bug-prone state interactions. Separate routes keep the
-   Store API code path policy-neutral.
-3. **Wraps the Store API delegate explicitly.** A POS route is a thin
-   permission/identity adapter around a Store API route handler. Making
-   that explicit (`new CartAddItem( $storeApiCartAddItem )`) is easier to
-   reason about than "this same route behaves differently depending on
-   request flags."
+- Under `wc/store/v1/*`, Store API auto-applies CORS handling, rate
+  limiting (including the strict 3-per-60s checkout rate limit),
+  cart-token-header session swap, etc. We'd need to opt out of the
+  ones we don't want via filters.
+- Under `wc/pos/v1`, none of that fires. We opt in to what we want.
 
-[POS × Store API P2 thread]: https://peacockp2.wordpress.com/2026/03/12/pos-x-store-api/
+Future Store API changes (tighter checkout rate limits, additional
+CORS rules) would automatically apply to POS unless someone notices
+and excludes us — opt-in is more fragile.
+
+[Agentic commerce] sets the precedent: it lives at `wc/agentic/v1`,
+not `wc/store/v1/agentic/`.
+
+[Agentic commerce]: https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/StoreApi/Routes/V1/Agentic
+
+## Why POS routes extend Store API concrete routes directly
+
+An earlier draft of this spike used a wrapper-delegation pattern: a
+POS route held an injected delegate Store API route in its constructor
+and forwarded `get_path` / `get_args` / `get_response` to it. That
+worked but was an unnecessary layer.
+
+Agentic commerce uses a simpler pattern: each agentic route extends
+`AbstractCartRoute` directly and overrides what it needs to specialise.
+For POS the same idea is even cleaner — extend the Store API
+**concrete** route (`StoreApi\Routes\V1\CartAddItem`) so the
+add-to-cart logic is inherited automatically and the subclass only
+overrides three things:
+
+- `get_args()` to substitute our permission_callback.
+- `check_permission()` for the capability check.
+- `requires_nonce()` to return false.
+
+Result: `CartAddItem` is ~60 lines, no separate `AbstractRoute` base,
+no DI plumbing to fetch a delegate. `ExtendSchema` and all pipeline
+hooks fire identically to web because the route class IS the same
+class, registered at a different URL.
+
+## How session continuity works
+
+The Store API's `AbstractCartRoute::add_response_headers` already
+emits a `Cart-Token` HTTP response header on every cart response — a
+JWT signed by `CartTokenUtils::get_cart_token` encoding the current
+session's customer_id.
+
+Mobile flow:
+
+1. First request: no `Cart-Token` header. Server's `POSSessionHandler`
+   generates a guest-style customer_id, the cart is added in that
+   session, and the response carries a `Cart-Token` header.
+2. Mobile captures the header.
+3. Subsequent requests: mobile sends `Cart-Token: <jwt>` as a request
+   header. The Store API's
+   `Authentication::maybe_use_store_api_session_handler` detects the
+   header and swaps in `StoreApi\SessionHandler` (the final,
+   header-based handler), which loads the session by the JWT's
+   user_id payload.
+
+No subclass of `StoreApi\SessionHandler` is needed.
+`POSSessionHandler` is only consulted on the very first request (when
+no cart-token is present yet) — its sole job is to make sure the
+generated customer_id isn't tied to the authenticated cashier user.
 
 ## Why URI-based context detection (`Context::is_pos_request()`)
 
 The POS context flag needs to be available at session-handler-construction
-time, which fires during `plugins_loaded` — well before any REST route is
-matched. URI prefix detection works the same way the Store API itself
-detects its own requests (`WooCommerce::is_store_api_request`) and lets us
-answer "is this a POS request" from any callsite without coordination.
+time, which fires during `plugins_loaded` — well before any REST route
+is matched. URI prefix detection works the same way the Store API
+itself detects its own requests (`WooCommerce::is_store_api_request`)
+and lets us answer "is this a POS request" from any callsite without
+coordination.
 
-A test override (`Context::set_test_override`) is provided so unit tests
-can simulate POS context without faking the entire REST request stack.
+A test override (`Context::set_test_override`) is provided so unit
+tests can simulate POS context without faking the entire REST request
+stack.
 
-## Why `POSSessionHandler` extends `WC_Session_Handler` and only overrides
-`generate_customer_id()`
+## Why `POSSessionHandler` extends `WC_Session_Handler` and only overrides `generate_customer_id()`
 
-The default `WC_Session_Handler` keys carts by the authenticated WP user
-ID whenever one is present. For POS that is the wrong scope — multiple
-cashiers on multiple devices typically share one store-manager account and
-would collide on a single cart row.
+The default `WC_Session_Handler` keys carts by the authenticated WP
+user ID whenever one is present. For POS that is the wrong scope —
+multiple cashiers on multiple devices typically share one
+store-manager account and would collide on a single cart row.
 
-Initial draft overrode `init_session_cookie()` wholesale to skip the
-`migrate_guest_session_to_user_session()` block. That ran into private
-methods (`restore_session_data`, `is_session_cookie_valid`,
-`is_session_expiring`) that we'd have had to either re-implement or
-upstream as protected.
-
-Cleaner read of the parent: the migration block lives inside
+The migration-to-user-session block in the parent lives inside
 `if ( $cookie )`, and mobile clients don't send the WC session cookie.
-So in practice the parent's "no cookie → generate_customer_id" path runs,
-and the `generate_customer_id()` override is sufficient. The class is
-deliberately minimal; if a future code path causes the parent's migration
-branch to fire for POS requests, the right fix is to upstream the relevant
-methods as protected and override them here rather than copy-paste.
+The parent's "no cookie → generate_customer_id" path runs, and the
+`generate_customer_id()` override is sufficient.
 
-## Open question: Cart-Token header transport vs `?session=`
+## Why nonce check is disabled per-route (not via a filter)
 
-The default `WC_Session_Handler` accepts a cart token via `?session=` query
-parameter and treats it as a "one-time import" mechanism (clones the
-referenced session into a new one). For headless API consumers (Block
-checkout, mobile), Store API ships `StoreApi\SessionHandler` which reads
-an `HTTP_CART_TOKEN` header and treats the token as the persistent session
-identifier — cleaner for clients that don't have browser cookies.
+POS requests are not cookie-authenticated (Application Password /
+WPCOM bearer), so CSRF isn't a vector and the Store API cart-route
+nonce check is moot.
 
-`StoreApi\SessionHandler` is declared `final`, so we can't extend it.
-Options for follow-up:
+An earlier draft used the `woocommerce_store_api_disable_nonce_check`
+filter via a `NonceCheckPolicy` class. After moving to the direct
+subclass pattern (mirroring agentic), the simpler answer is to
+override `requires_nonce()` on each POS route to return `false` —
+exactly what agentic does. The override is two lines per route; over
+time, if the POS route set grows, a thin shared `AbstractPosCartRoute`
+could collapse it.
 
-1. **Use `?session=` query transport** with the current handler (works,
-   but each request clones the session — wasteful).
-2. **Make `StoreApi\SessionHandler` non-final and extend it** for POS
-   (upstream change, but cleanly mirrors the header-based flow).
-3. **Add an explicit "issue cart token" endpoint** the mobile app calls
-   once at sale start, then sends the token via `HTTP_CART_TOKEN` header
-   on subsequent requests (more verbose for the client).
+## Identity model (from Thomas Roberts's reply on the P2 thread)
 
-Out of scope for this spike. Recommend option 2 to Rubik when this lands
-in review — the header-based flow is the right model for any non-browser
-consumer and POS will share it with other future headless clients.
+- `customer_id` (optional) — swapped into `$user` during the request,
+  after the capability check. Persisted as the order's `_customer_user`.
+- `agent_id` (the cashier) — stays out of `$user`, stored as order
+  meta for audit. Never the customer of record.
+- Guest sales (the common POS case): `customer_id` unset; cart-token
+  still scopes the session; cashier still in meta.
 
-## Why route delegation via constructor injection
+Not implemented in this spike yet — will land when we add `/checkout`.
 
-The `AbstractRoute` takes a fully-constructed Store API route handler in
-its constructor and forwards `get_path()` / `get_args()` / `get_response`
-to it. Alternative considered: have each POS route reach into the Store
-API container itself.
+## Authentication
 
-Constructor injection is preferred because:
-
-- It makes the dependency explicit in the type signature.
-- The `Controller` becomes the single place that knows about Store API's
-  container — POS routes themselves only know about their delegate.
-- Trivial to substitute a mock for unit tests of POS-specific pre-flight
-  behaviour (identity swap, error mapping) without spinning up the whole
-  Store API container.
-
-## Why `get_args()` rewrites `permission_callback` and `callback`
-
-The Store API's `get_args()` returns endpoint definitions with
-`permission_callback => '__return_true'` (Store API is unauthenticated).
-For POS we substitute the POS capability check and a wrapper callback so
-subclasses can intercept pre/post-delegation (identity swap, response
-filtering) without re-implementing the route.
-
-The wrapper for `callback` is deliberately added even when the default
-`get_response` is a pure delegate — it costs nothing and makes the override
-point obvious for future subclasses.
+Reuses whatever auth the mobile apps already use (Application Passwords,
+WPCOM/Jetpack bearer proxy, etc.) — these populate `wp_get_current_user()`
+for both REST and Store API. No new auth scheme.
 
 ## Why `manage_woocommerce` as the default POS capability
 
-POS routes operate on behalf of customers, mutate carts, create orders,
-and (in future) record payments. `manage_woocommerce` is the closest
-existing capability that maps to "trusted retail staff." A future
-refinement might introduce a finer-grained `process_pos_orders` capability,
-but introducing a new capability is a separate decision worth its own
-discussion. For the spike, `manage_woocommerce` is the conservative
-default and is overridable per-route via the `REQUIRED_CAPABILITY` class
-constant.
+POS routes operate on behalf of customers, mutate carts, create
+orders, and (in future) record payments. `manage_woocommerce` is the
+closest existing capability that maps to "trusted retail staff." A
+future refinement might introduce a finer-grained `process_pos_orders`
+capability, but that's a separate decision. For the spike,
+`manage_woocommerce` is the conservative default and is overridable
+per-route via the `REQUIRED_CAPABILITY` class constant.
 
-## Why three RegisterHooksInterface classes instead of one
+## The load-bearing assumption to validate
 
-`SessionHandlerSwap`, `StockPolicy`, and `Routes\Controller` are each
-registered separately in `class-woocommerce.php`. Could have collapsed
-them into one. Kept separate because:
+Pipeline policy-point hooks. The architecture works cleanly **only
+where the pipeline already exposes a filter at the policy decision
+we want to influence**. Where filters exist (e.g.
+`woocommerce_product_is_in_stock`), hooking them gated by POS context
+is one-liner. Where they don't, we'd either need to upstream a filter
+to Woo core (preferred long term) or accept a less clean workaround.
 
-- Each owns exactly one concern (matches the existing
-  `PointOfSaleEmailHandler` pattern).
-- Policy hooks (stock, session, future email-suppression, future
-  gateway-availability) all live in `PolicyHooks/` and follow the same
-  shape — adding a new one is "copy `StockPolicy.php`, change the filter
-  name and the body."
-- Easy to selectively disable any one of them in tests without affecting
-  the others.
+A representative example, verified in code:
+
+- `WC_Product::is_in_stock()` is filterable via
+  `woocommerce_product_is_in_stock` → POS can allow selling
+  out-of-stock items via a single filter callback. Clean.
+- The second-layer quantity-vs-remaining check at
+  `src/StoreApi/Utilities/CartController.php:298` reads
+  `$product->backorders_allowed()` directly, which may or may not be
+  cleanly filterable depending on the code path.
+
+A small per-policy-point audit is the highest-leverage next concrete
+step.
 
 ## What this spike deliberately does NOT include
 
-- **More than one route.** `cart/add-item` is the canonical example; the
-  full set (`cart/*`, `checkout`) is mechanical and additive.
-- **Agent/customer identity swap.** The wrapper has the hook point for it
-  (`get_response` is overridable), but no current route accepts a
-  `customer_id` parameter, so there's nothing to swap yet. Will come with
-  `/checkout`.
-- **Cash-paid endpoint.** Documented in the project proposal as the one
-  net-new server-side endpoint; not in the architectural spike because
-  it's straightforward additive work, not a load-bearing pattern.
-- **Per-policy-point filter audit.** Stock is one example of the pattern.
-  The full audit (visibility, gateway availability, email enabled, etc.)
-  is the highest-leverage next concrete step, but is research/inventory
-  work, not code.
-- **Integration tests.** Unit tests cover the small surface area in this
-  spike; an end-to-end test against a real cart pipeline + real
-  fulfillment extension (e.g. Gift Cards) is the right way to validate
-  the wrapper-delegation pattern preserves extension behaviour, and is
-  the next test work after this spike merges.
+- **More than one route.** `cart/add-item` is the canonical example;
+  the full set (`cart/*`, `checkout`) is mechanical and additive.
+- **Agent/customer identity swap.** No current route accepts a
+  `customer_id` parameter, so there's nothing to swap yet. Will come
+  with `/checkout`.
+- **Cash-paid endpoint** — additive, not load-bearing for the pattern.
+- **Per-policy-point filter audit** — research/inventory work, not code.
+- **Integration tests** against a real fulfillment extension (e.g.
+  Gift Cards) — the natural next test step.
