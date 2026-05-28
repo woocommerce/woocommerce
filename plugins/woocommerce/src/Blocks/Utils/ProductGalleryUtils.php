@@ -69,12 +69,7 @@ class ProductGalleryUtils {
 			$product_media_items = array();
 		}
 
-		$existing_ids = array_map(
-			static function ( $media_item ) {
-				return isset( $media_item['id'] ) ? strval( $media_item['id'] ) : '';
-			},
-			$product_media_items
-		);
+		$existing_ids = array_map( 'strval', self::get_media_ids( $product_media_items ) );
 
 		foreach ( $product_variation_image_ids as $variation_image_id ) {
 			if ( in_array( strval( $variation_image_id ), $existing_ids, true ) ) {
@@ -119,17 +114,6 @@ class ProductGalleryUtils {
 	public static function get_product_gallery_media_data( $product, $size ) {
 		$media_items = self::get_all_media_items( $product );
 		return self::get_media_src_data( $media_items, $size, $product->get_title() );
-	}
-
-	/**
-	 * Get the product gallery image count.
-	 *
-	 * @param \WC_Product $product The product object to retrieve the gallery images for.
-	 * @return int The number of images in the product gallery.
-	 */
-	public static function get_product_gallery_image_count( $product ) {
-		$all_image_ids = self::get_all_image_ids( $product );
-		return count( $all_image_ids );
 	}
 
 	/**
