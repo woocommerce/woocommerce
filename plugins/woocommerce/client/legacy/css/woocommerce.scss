@@ -226,6 +226,19 @@ p.demo_store,
 					}
 
 					&.woocommerce-product-gallery__video-thumbnail {
+						&::before {
+							content: "\25B6";
+							position: absolute;
+							left: 50%;
+							top: 50%;
+							transform: translate(-50%, -50%);
+							z-index: 1;
+							color: $contentbg;
+							font-size: 1.4em;
+							text-shadow: 0 0 0.25em rgba(0, 0, 0, 0.8);
+							pointer-events: none;
+						}
+
 						// FlexSlider needs an image thumbnail, so no-poster videos
 						// hide that placeholder once the video preview is injected.
 						img.woocommerce-product-gallery__video-thumbnail-placeholder,

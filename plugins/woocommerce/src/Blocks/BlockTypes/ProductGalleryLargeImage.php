@@ -114,7 +114,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		ob_start();
 		?>
 			<div class="wc-block-product-gallery-large-image wp-block-woocommerce-product-gallery-large-image">
-				<?php // No need to use wp_kses here because the image HTML is built internally. ?>
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo $images_html; ?>
 				<div class="wc-block-product-gallery-large-image__inner-blocks">
@@ -254,34 +253,40 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			return '';
 		}
 
-		$settings    = isset( $media['settings'] ) && is_array( $media['settings'] ) ? $media['settings'] : array();
-		$preload     = isset( $settings['preload'] ) && in_array(
+		$settings      = isset( $media['settings'] ) && is_array( $media['settings'] ) ? $media['settings'] : array();
+		$preload       = isset( $settings['preload'] ) && in_array(
 			$settings['preload'],
 			array( 'auto', 'metadata', 'none' ),
 			true
 		)
 			? $settings['preload']
 			: 'metadata';
-		$aspect_ratio = $this->get_product_image_aspect_ratio( $product_image_attributes );
-		$video_class = 'wc-block-woocommerce-product-gallery-large-image__image ' .
+		$aspect_ratio  = $this->get_product_image_aspect_ratio( $product_image_attributes );
+		$video_class   = 'wc-block-woocommerce-product-gallery-large-image__image ' .
 			'wc-block-woocommerce-product-gallery-large-image__video';
-		$attrs       = array(
-			'aria-label'               => $media['alt'] ?? '',
-			'autoplay'                 => 'autoplay',
-			'class'                    => $video_class,
-			'data-image-id'            => $media['id'],
-			'data-wp-on--touchend'     => 'actions.onTouchEnd',
-			'data-wp-on--touchmove'    => 'actions.onTouchMove',
-			'data-wp-on--touchstart'   => 'actions.onTouchStart',
-			'data-wp-watch'            => 'callbacks.syncVideoPlayback',
-			'draggable'                => 'false',
-			'loop'                     => 'loop',
-			'muted'                    => 'muted',
-			'playsinline'              => 'playsinline',
-			'preload'                  => $preload,
-			'src'                      => $media['video_src'],
-			'style'                    => $this->get_video_style( $product_image_attributes, $aspect_ratio ),
-			'tabindex'                 => '-1',
+		$attrs         = array(
+			'aria-label'             => $media['alt'] ?? '',
+			'autoplay'               => 'autoplay',
+			'class'                  => $video_class,
+			'data-image-id'          => $media['id'],
+			'data-wp-context'        => wp_json_encode(
+				array(
+					'videoLocation' => 'gallery',
+				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			),
+			'data-wp-on--touchend'   => 'actions.onTouchEnd',
+			'data-wp-on--touchmove'  => 'actions.onTouchMove',
+			'data-wp-on--touchstart' => 'actions.onTouchStart',
+			'data-wp-watch'          => 'callbacks.syncVideoPlayback',
+			'draggable'              => 'false',
+			'loop'                   => 'loop',
+			'muted'                  => 'muted',
+			'playsinline'            => 'playsinline',
+			'preload'                => $preload,
+			'src'                    => $media['video_src'],
+			'style'                  => $this->get_video_style( $product_image_attributes, $aspect_ratio ),
+			'tabindex'               => '-1',
 		);
 		$wrapper_attrs = array(
 			'class' => 'wc-block-components-product-image wc-block-grid__product-image ' .

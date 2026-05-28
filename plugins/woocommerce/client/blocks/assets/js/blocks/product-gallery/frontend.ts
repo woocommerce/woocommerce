@@ -39,17 +39,13 @@ const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
 const syncVideoElementPlayback = (
 	video: HTMLVideoElement,
 	selectedImageId: number,
-	isDialogOpen: boolean
+	isDialogOpen: boolean,
+	videoLocation?: ProductGalleryContext[ 'videoLocation' ]
 ) => {
 	const imageId = Number( video.getAttribute( 'data-image-id' ) ?? 0 );
-	const isDialogVideo = Boolean(
-		video.closest( '.wc-block-product-gallery-dialog' )
-	);
-	const shouldPlayInDialog = isDialogVideo && isDialogOpen;
+	const shouldPlayInDialog = videoLocation === 'dialog' && isDialogOpen;
 	const shouldPlayInGallery =
-		video.classList.contains(
-			'wc-block-woocommerce-product-gallery-large-image__video'
-		) &&
+		videoLocation === 'gallery' &&
 		selectedImageId === imageId &&
 		! isDialogOpen;
 	const shouldPlay = shouldPlayInDialog || shouldPlayInGallery;
@@ -59,24 +55,6 @@ const syncVideoElementPlayback = (
 	} else {
 		video.pause();
 	}
-};
-
-const syncGalleryVideoPlayback = (
-	galleryContainer: Element | null,
-	selectedImageId: number,
-	isDialogOpen: boolean
-) => {
-	if ( ! galleryContainer ) {
-		return;
-	}
-
-	galleryContainer
-		.querySelectorAll< HTMLVideoElement >(
-			'.wc-block-woocommerce-product-gallery-large-image__video[data-image-id], .wc-block-product-gallery-dialog video[data-image-id]'
-		)
-		.forEach( ( video ) =>
-			syncVideoElementPlayback( video, selectedImageId, isDialogOpen )
-		);
 };
 
 /** Read the `products` map from the WooCommerce iAPI config (or `{}`). */
@@ -499,13 +477,11 @@ const productGallery = {
 		openDialog: withSyncEvent( ( event?: Event ) => {
 			event?.preventDefault();
 			const context = getContext();
-
 			context.isDialogOpen = true;
 			document.body.classList.add( CLASSES.dialogOpenBody );
 		} ),
 		closeDialog: () => {
 			const context = getContext();
-
 			context.isDialogOpen = false;
 			document.body.classList.remove( CLASSES.dialogOpenBody );
 		},
@@ -791,14 +767,6 @@ const productGallery = {
 						32; // Arbitrary value for the header height.
 				}
 			}
-
-			window.requestAnimationFrame( () =>
-				syncGalleryVideoPlayback(
-					dialogRef,
-					selectedImageId,
-					isDialogOpen
-				)
-			);
 		},
 		syncVideoPlayback: () => {
 			const element = getElement()?.ref;
@@ -809,16 +777,13 @@ const productGallery = {
 
 			toggleImageVisibility( element );
 
-			const { selectedImageId, isDialogOpen } = getContext();
-			const galleryContainer =
-				element.closest( '.wp-block-woocommerce-product-gallery' ) ??
-				element.closest( '.wc-block-product-gallery-dialog' ) ??
-				null;
-
-			syncGalleryVideoPlayback(
-				galleryContainer,
+			const { selectedImageId, isDialogOpen, videoLocation } =
+				getContext();
+			syncVideoElementPlayback(
+				element,
 				selectedImageId,
-				isDialogOpen
+				isDialogOpen,
+				videoLocation
 			);
 		},
 		/** Per-image `data-wp-watch` callback that toggles visibility from `imageData`. */

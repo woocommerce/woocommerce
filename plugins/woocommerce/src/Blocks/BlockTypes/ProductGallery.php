@@ -101,15 +101,21 @@ class ProductGallery extends AbstractBlock {
 			? $settings['preload']
 			: 'metadata';
 		$attrs    = array(
-			'aria-label'    => $media['alt'] ?? '',
-			'autoplay'      => 'autoplay',
-			'data-image-id' => $media['id'],
-			'data-wp-watch' => 'callbacks.syncVideoPlayback',
-			'loop'          => 'loop',
-			'muted'         => 'muted',
-			'playsinline'   => 'playsinline',
-			'preload'       => $preload,
-			'src'           => $media['video_src'],
+			'aria-label'      => $media['alt'] ?? '',
+			'autoplay'        => 'autoplay',
+			'data-image-id'   => $media['id'],
+			'data-wp-context' => wp_json_encode(
+				array(
+					'videoLocation' => 'dialog',
+				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			),
+			'data-wp-watch'   => 'callbacks.syncVideoPlayback',
+			'loop'            => 'loop',
+			'muted'           => 'muted',
+			'playsinline'     => 'playsinline',
+			'preload'         => $preload,
+			'src'             => $media['video_src'],
 		);
 
 		if ( ! empty( $media['poster_id'] ) && ! empty( $media['poster_src'] ) ) {
