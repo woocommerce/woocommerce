@@ -334,9 +334,26 @@ class DataUtils {
 	 */
 	public function build_refund_preview( WC_Order $order, array $line_items ): array {
 		$price_decimals = wc_get_price_decimals();
-		$products_items = array();
-		$shipping_items = array();
-		$fees_items     = array();
+		$sections       = array(
+			'products' => array(
+				'items'    => array(),
+				'subtotal' => 0.0,
+				'tax'      => 0.0,
+				'total'    => 0.0,
+			),
+			'shipping' => array(
+				'items'    => array(),
+				'subtotal' => 0.0,
+				'tax'      => 0.0,
+				'total'    => 0.0,
+			),
+			'fees'     => array(
+				'items'    => array(),
+				'subtotal' => 0.0,
+				'tax'      => 0.0,
+				'total'    => 0.0,
+			),
+		);
 
 		foreach ( $line_items as $line_item ) {
 			$item = $order->get_item( $line_item['line_item_id'] );
@@ -381,45 +398,46 @@ class DataUtils {
 			);
 
 			if ( $item instanceof WC_Order_Item_Product ) {
-				$item_data['name']         = $item->get_name();
-				$item_data['product_id']   = $item->get_product_id();
-				$item_data['variation_id'] = $item->get_variation_id();
-				$products_items[]          = $item_data;
+				$item_data['name']            = $item->get_name();
+				$item_data['product_id']      = $item->get_product_id();
+				$item_data['variation_id']    = $item->get_variation_id();
+				$section_key                  = 'products';
 			} elseif ( $item instanceof WC_Order_Item_Shipping ) {
 				$item_data['name'] = $item->get_name();
-				$shipping_items[]  = $item_data;
-			} elseif ( $item instanceof WC_Order_Item_Fee ) {
+				$section_key       = 'shipping';
+			} else {
 				$item_data['name'] = $item->get_name();
-				$fees_items[]      = $item_data;
+				$section_key       = 'fees';
 			}
+
+			$sections[ $section_key ]['items'][]   = $item_data;
+			$sections[ $section_key ]['subtotal'] += $subtotal;
+			$sections[ $section_key ]['tax']      += $tax;
+			$sections[ $section_key ]['total']    += $refund_total_with_tax;
 		}
 
-		$build_section = function ( array $items ) use ( $price_decimals ): array {
-			$s = 0.0;
-			$t = 0.0;
-			$g = 0.0;
-			foreach ( $items as $i ) {
-				$s += (float) $i['subtotal'];
-				$t += (float) $i['tax'];
-				$g += (float) $i['total'];
-			}
+		$format_section = function ( array $section ) use ( $price_decimals ): array {
 			return array(
-				'items'    => $items,
-				'subtotal' => wc_format_decimal( $s, $price_decimals ),
-				'tax'      => wc_format_decimal( $t, $price_decimals ),
-				'total'    => wc_format_decimal( $g, $price_decimals ),
+				'items'    => $section['items'],
+				'subtotal' => wc_format_decimal( $section['subtotal'], $price_decimals ),
+				'tax'      => wc_format_decimal( $section['tax'], $price_decimals ),
+				'total'    => wc_format_decimal( $section['total'], $price_decimals ),
 			);
 		};
 
-		$ps = $build_section( $products_items );
-		$ss = $build_section( $shipping_items );
-		$fs = $build_section( $fees_items );
+		$grand_subtotal = $sections['products']['subtotal'] + $sections['shipping']['subtotal'] + $sections['fees']['subtotal'];
+		$grand_tax      = $sections['products']['tax'] + $sections['shipping']['tax'] + $sections['fees']['tax'];
+		$grand_total    = $sections['products']['total'] + $sections['shipping']['total'] + $sections['fees']['total'];
 
 		return array(
-			'breakdown'      => array( 'products' => $ps, 'shipping' => $ss, 'fees' => $fs ),
-			'subtotal'       => wc_format_decimal( (float) $ps['subtotal'] + (float) $ss['subtotal'] + (float) $fs['subtotal'], $price_decimals ),
-			'tax'            => wc_format_decimal( (float) $ps['tax'] + (float) $ss['tax'] + (float) $fs['tax'], $price_decimals ),
-			'total'          => wc_format_decimal( (float) $ps['total'] + (float) $ss['total'] + (float) $fs['total'], $price_decimals ),
+			'breakdown'      => array(
+				'products' => $format_section( $sections['products'] ),
+				'shipping' => $format_section( $sections['shipping'] ),
+				'fees'     => $format_section( $sections['fees'] ),
+			),
+			'subtotal'       => wc_format_decimal( $grand_subtotal, $price_decimals ),
+			'tax'            => wc_format_decimal( $grand_tax, $price_decimals ),
+			'total'          => wc_format_decimal( $grand_total, $price_decimals ),
 			'max_refundable' => wc_format_decimal( $order->get_remaining_refund_amount(), $price_decimals ),
 		);
 	}
