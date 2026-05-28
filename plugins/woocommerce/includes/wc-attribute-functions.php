@@ -7,7 +7,6 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -782,22 +781,4 @@ function wc_attribute_taxonomy_slug( $attribute_name ) {
 	wp_cache_set( $cache_key, $attribute_slug, 'woocommerce-attributes' );
 
 	return $attribute_slug;
-}
-
-/**
- * Save visual attribute term meta (color or image).
- *
- * Color and image are mutually exclusive. When a color is saved, any image meta is removed,
- * and when an image is saved, any color meta is removed.
- *
- * @internal This function is only used internally and should not be used directly.
- *
- * @since 10.9.0
- * @param int    $term_id  Term ID.
- * @param string $color    Hex color value.
- * @param int    $image_id Attachment ID for the term image.
- * @return void
- */
-function wc_save_visual_attribute_term_meta( int $term_id, string $color = '', int $image_id = 0 ): void {
-	VisualAttributeTermMeta::save_term_visual( $term_id, $color, $image_id );
 }

@@ -297,7 +297,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @testdox Should save visual attribute term color or image meta exclusively.
 	 */
-	public function test_wc_save_visual_attribute_term_meta(): void {
+	public function test_visual_attribute_term_meta_saves_exclusive_values(): void {
 		$term_name = 'visual-meta-test-' . wp_rand();
 		$term      = wp_insert_term( $term_name, 'product_cat' );
 		$term_id   = is_array( $term ) ? (int) $term['term_id'] : 0;
@@ -320,7 +320,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			update_term_meta( $term_id, 'image', $image_id );
 			update_term_meta( $term_id, 'color', '#112233' );
 
-			wc_save_visual_attribute_term_meta( $term_id, '#aabbcc', 0 );
+			VisualAttributeTermMeta::save_term_visual( $term_id, '#aabbcc', 0 );
 
 			$this->assertSame( '#aabbcc', get_term_meta( $term_id, 'color', true ), 'Color meta should be saved.' );
 			$this->assertSame( '', get_term_meta( $term_id, 'image', true ), 'Image meta should be removed when color is saved.' );
@@ -333,7 +333,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 				'Canonical visual meta should expose saved colors as a typed value.'
 			);
 
-			wc_save_visual_attribute_term_meta( $term_id, '', $image_id );
+			VisualAttributeTermMeta::save_term_visual( $term_id, '', $image_id );
 
 			$this->assertSame( (string) $image_id, get_term_meta( $term_id, 'image', true ), 'Image meta should be saved.' );
 			$this->assertSame( '', get_term_meta( $term_id, 'color', true ), 'Color meta should be removed when image is saved.' );
@@ -341,7 +341,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			$this->assertSame( VisualAttributeTermMeta::TYPE_IMAGE, $saved_image_visual['type'], 'Canonical visual meta should expose saved images as a typed value.' );
 			$this->assertStringContainsString( 'visual-attribute-term-image.jpg', $saved_image_visual['value'], 'Canonical image values should use the image URL.' );
 
-			wc_save_visual_attribute_term_meta( $term_id, '', 999999 );
+			VisualAttributeTermMeta::save_term_visual( $term_id, '', 999999 );
 
 			$this->assertSame( '', get_term_meta( $term_id, 'image', true ), 'Invalid image IDs should be ignored.' );
 			$this->assertSame( '', get_term_meta( $term_id, 'color', true ), 'Invalid image IDs should clear existing visual meta.' );
@@ -350,7 +350,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			update_term_meta( $term_id, 'color', '#112233' );
 			update_term_meta( $term_id, 'image', $image_id );
 
-			wc_save_visual_attribute_term_meta( $term_id, '#ff00aa', $image_id );
+			VisualAttributeTermMeta::save_term_visual( $term_id, '#ff00aa', $image_id );
 
 			$this->assertSame( '', get_term_meta( $term_id, 'color', true ), 'Color meta should be removed when image takes precedence.' );
 			$this->assertSame( (string) $image_id, get_term_meta( $term_id, 'image', true ), 'Image should take precedence when both values are provided.' );

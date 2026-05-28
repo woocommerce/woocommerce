@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
@@ -790,7 +791,7 @@ class WC_AJAX {
 						$color_value = isset( $_POST['term_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['term_color'] ) ) : '';
 						$image_id    = isset( $_POST['term_image'] ) ? absint( wp_unslash( $_POST['term_image'] ) ) : 0;
 
-						wc_save_visual_attribute_term_meta( (int) $result['term_id'], $color_value ?? '', $image_id );
+						VisualAttributeTermMeta::save_term_visual( (int) $result['term_id'], $color_value ?? '', $image_id );
 					}
 
 					$term = get_term_by( 'id', $result['term_id'], $taxonomy );

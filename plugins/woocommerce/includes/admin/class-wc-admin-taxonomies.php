@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 
 /**
  * WC_Admin_Taxonomies class.
@@ -522,7 +523,7 @@ class WC_Admin_Taxonomies {
 		$color_value = isset( $_POST['term_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['term_color'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$image_id    = isset( $_POST['term_image'] ) ? absint( wp_unslash( $_POST['term_image'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
-		wc_save_visual_attribute_term_meta( (int) $term_id, $color_value ?? '', $image_id );
+		VisualAttributeTermMeta::save_term_visual( (int) $term_id, $color_value ?? '', $image_id );
 	}
 
 	/**
