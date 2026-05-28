@@ -1105,7 +1105,7 @@ class CartController {
 	 * @return int
 	 */
 	protected function get_remaining_stock_for_product( $product ) {
-		$qty_reserved = ( new ReserveStock() )->get_reserved_stock( $product, $this->get_draft_order_id() );
+		$qty_reserved = ( new ReserveStock() )->get_reserved_stock_cached( $product, $this->get_draft_order_id() );
 
 		return $product->get_stock_quantity() - $qty_reserved;
 	}

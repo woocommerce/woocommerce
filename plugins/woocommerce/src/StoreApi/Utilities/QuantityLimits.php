@@ -225,7 +225,7 @@ final class QuantityLimits {
 		}
 
 		$reserve_stock  = new ReserveStock();
-		$reserved_stock = $reserve_stock->get_reserved_stock( $product, $this->get_draft_order_id() );
+		$reserved_stock = $reserve_stock->get_reserved_stock_cached( $product, $this->get_draft_order_id() );
 
 		return wc_stock_amount( $product->get_stock_quantity() - $reserved_stock );
 	}

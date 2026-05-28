@@ -125,7 +125,7 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox After get_reserved_stock_batch, get_reserved_stock hits the cache and emits no extra SQL.
+	 * @testdox After get_reserved_stock_batch, get_reserved_stock_cached hits the cache and emits no extra SQL.
 	 */
 	public function test_batch_primes_cache_for_single_calls(): void {
 		global $wpdb;
@@ -137,31 +137,81 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 		// Snapshot wpdb num_queries; require_once SAVEQUERIES already on in tests is unreliable, so we use num_queries.
 		$before = (int) $wpdb->num_queries;
 		foreach ( $this->product_ids as $product_id ) {
-			$sut->get_reserved_stock( wc_get_product( $product_id ), 0 );
+			$sut->get_reserved_stock_cached( wc_get_product( $product_id ), 0 );
 		}
 		$after = (int) $wpdb->num_queries;
 
-		$this->assertSame( $before, $after, 'Per-product calls after batch must not run any SQL.' );
+		$this->assertSame( $before, $after, 'Per-product cached calls after batch must not run any SQL.' );
 	}
 
 	/**
-	 * @testdox The same single-call value is returned on the second invocation (memoization).
+	 * @testdox The plain get_reserved_stock() is uncached and re-queries on every call.
 	 */
-	public function test_single_call_is_memoized(): void {
+	public function test_plain_getter_is_uncached(): void {
 		global $wpdb;
 
 		ReserveStock::flush_reserved_stock_cache();
 		$sut     = new ReserveStock();
 		$product = wc_get_product( $this->product_ids[0] );
 
-		// Warm.
 		$first  = $sut->get_reserved_stock( $product, 0 );
 		$before = (int) $wpdb->num_queries;
 		$second = $sut->get_reserved_stock( $product, 0 );
 		$after  = (int) $wpdb->num_queries;
 
 		$this->assertSame( (float) $first, (float) $second );
-		$this->assertSame( $before, $after, 'Second call must hit cache.' );
+		$this->assertGreaterThan( $before, $after, 'Plain getter must always run SQL.' );
+	}
+
+	/**
+	 * @testdox The cached getter returns the same value on the second invocation without extra SQL.
+	 */
+	public function test_cached_call_is_memoized(): void {
+		global $wpdb;
+
+		ReserveStock::flush_reserved_stock_cache();
+		$sut     = new ReserveStock();
+		$product = wc_get_product( $this->product_ids[0] );
+
+		// Warm (cache miss => 1 query).
+		$first  = $sut->get_reserved_stock_cached( $product, 0 );
+		$before = (int) $wpdb->num_queries;
+		$second = $sut->get_reserved_stock_cached( $product, 0 );
+		$after  = (int) $wpdb->num_queries;
+
+		$this->assertSame( (float) $first, (float) $second );
+		$this->assertSame( $before, $after, 'Second cached call must hit cache.' );
+	}
+
+	/**
+	 * @testdox get_reserved_stock_cached bypasses the cache when a woocommerce_query_for_reserved_stock filter is registered.
+	 */
+	public function test_cached_getter_bypasses_cache_when_filter_registered(): void {
+		$order = new \WC_Order();
+		$order->set_status( 'pending' );
+		$order->save();
+
+		$pid = $this->product_ids[0];
+		$this->reserve_directly( (int) $order->get_id(), $pid, 4 );
+
+		ReserveStock::flush_reserved_stock_cache();
+		$sut     = new ReserveStock();
+		$product = wc_get_product( $pid );
+
+		// Warm the cache with the unfiltered value (4).
+		$this->assertSame( 4.0, (float) $sut->get_reserved_stock_cached( $product, 0 ) );
+
+		// Register a filter mid-request that forces the query to return nothing.
+		$filter = static function () {
+			return 'SELECT 0';
+		};
+		add_filter( 'woocommerce_query_for_reserved_stock', $filter );
+
+		// Cached getter must now bypass the stale cache and honour the filter.
+		$this->assertSame( 0.0, (float) $sut->get_reserved_stock_cached( $product, 0 ) );
+
+		remove_filter( 'woocommerce_query_for_reserved_stock', $filter );
+		$order->delete( true );
 	}
 
 	/**
@@ -181,15 +231,15 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 		$before = (int) $wpdb->num_queries;
 		// Bucket 0 should still be warm.
 		foreach ( $this->product_ids as $pid ) {
-			$sut->get_reserved_stock( wc_get_product( $pid ), 0 );
+			$sut->get_reserved_stock_cached( wc_get_product( $pid ), 0 );
 		}
 		$this->assertSame( $before, (int) $wpdb->num_queries, 'Bucket 0 should still be cached.' );
 
 		// Full flush.
 		ReserveStock::flush_reserved_stock_cache();
 		$before = (int) $wpdb->num_queries;
-		$sut->get_reserved_stock( wc_get_product( $this->product_ids[0] ), 0 );
-		$this->assertGreaterThan( $before, (int) $wpdb->num_queries, 'After flush, single call must run SQL.' );
+		$sut->get_reserved_stock_cached( wc_get_product( $this->product_ids[0] ), 0 );
+		$this->assertGreaterThan( $before, (int) $wpdb->num_queries, 'After flush, cached call must run SQL.' );
 	}
 
 	/**

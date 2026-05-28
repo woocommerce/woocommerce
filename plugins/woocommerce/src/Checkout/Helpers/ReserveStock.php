@@ -55,6 +55,12 @@ final class ReserveStock {
 	/**
 	 * Query for any existing holds on stock for this item.
 	 *
+	 * This is an uncached, direct database read. Callers inside core that issue many
+	 * lookups within a single request should prefer {@see get_reserved_stock_cached()}
+	 * (optionally warmed via {@see prime_reserved_stock()}). This method is left
+	 * deliberately cache-free so external callers keep their existing read-through-to-DB
+	 * behaviour and the `woocommerce_query_for_reserved_stock` filter always applies.
+	 *
 	 * @param \WC_Product $product Product to get reserved stock for.
 	 * @param int         $exclude_order_id Optional order to exclude from the results.
 	 *
@@ -67,22 +73,50 @@ final class ReserveStock {
 			return 0;
 		}
 
+		$product_id = (int) $product->get_stock_managed_by_id();
+
+		return wc_stock_amount(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->get_var( $this->get_query_for_reserved_stock( $product_id, (int) $exclude_order_id ) )
+		);
+	}
+
+	/**
+	 * Request-scoped cached variant of {@see get_reserved_stock()}.
+	 *
+	 * Returns the reserved stock for a product, reading from the request-scoped cache
+	 * (which can be warmed in bulk via {@see prime_reserved_stock()}) and falling back to
+	 * a single DB read on a cache miss. Intended for hot paths within core that look up
+	 * the same products repeatedly during one request.
+	 *
+	 * When a `woocommerce_query_for_reserved_stock` filter is registered the result can
+	 * diverge per product, so the cache is bypassed entirely and the filtered, uncached
+	 * {@see get_reserved_stock()} is used to guarantee correctness.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param \WC_Product $product          Product to get reserved stock for.
+	 * @param int         $exclude_order_id Optional order to exclude from the results.
+	 * @return int|float Amount of stock already reserved.
+	 */
+	public function get_reserved_stock_cached( $product, $exclude_order_id = 0 ) {
+		if ( ! $this->is_enabled() ) {
+			return 0;
+		}
+
+		if ( has_filter( 'woocommerce_query_for_reserved_stock' ) ) {
+			return $this->get_reserved_stock( $product, $exclude_order_id );
+		}
+
 		$product_id       = (int) $product->get_stock_managed_by_id();
 		$exclude_order_id = (int) $exclude_order_id;
 		$cache_key        = 'eo_' . $exclude_order_id;
 
-		if ( isset( self::$reserved_stock_cache[ $cache_key ][ $product_id ] ) ) {
-			return self::$reserved_stock_cache[ $cache_key ][ $product_id ];
+		if ( ! isset( self::$reserved_stock_cache[ $cache_key ][ $product_id ] ) ) {
+			self::$reserved_stock_cache[ $cache_key ][ $product_id ] = $this->get_reserved_stock( $product, $exclude_order_id );
 		}
 
-		$value = wc_stock_amount(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-			$wpdb->get_var( $this->get_query_for_reserved_stock( $product_id, $exclude_order_id ) )
-		);
-
-		self::$reserved_stock_cache[ $cache_key ][ $product_id ] = $value;
-
-		return $value;
+		return self::$reserved_stock_cache[ $cache_key ][ $product_id ];
 	}
 
 	/**
