@@ -458,6 +458,118 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Response shape matches the published schema (keys-only parity, recursive).
+	 */
+	public function test_schema_matches_response_shape(): void {
+		// Build a mixed-section order so every section's items[] has at least one entry to walk.
+		$order   = $this->create_order_with_product( 50.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$shipping = new \WC_Order_Item_Shipping();
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => 10.00,
+			)
+		);
+		$shipping->save();
+		$order->add_item( $shipping );
+
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Service fee',
+				'total' => 5.00,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+
+		$order->set_total( 65.00 );
+		$order->save();
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 1,
+				),
+				array(
+					'line_item_id' => $shipping->get_id(),
+					'quantity'     => 1,
+				),
+				array(
+					'line_item_id' => $fee->get_id(),
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+
+		$schema_properties = wc_get_container()
+			->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema::class )
+			->get_item_schema_properties();
+
+		$this->assertSchemaKeysMatchData( $schema_properties, $data, 'root' );
+	}
+
+	/**
+	 * Assert that every key present in $data is declared in the schema and vice
+	 * versa for object subtrees. Skips assertion at array-of-objects boundaries
+	 * (the items[] array) and instead recurses into the first element's shape
+	 * against the items.items schema. Optional fields (e.g. product_id only on
+	 * the products section) are tolerated when absent from $data.
+	 *
+	 * @param array  $schema Schema fragment (an associative array of property name => spec, or a single-property spec).
+	 * @param mixed  $data   Data fragment at the same path.
+	 * @param string $path   Dot path for assertion messages.
+	 */
+	private function assertSchemaKeysMatchData( array $schema, $data, string $path ): void {
+		// Treat each entry as a property descriptor.
+		foreach ( $schema as $name => $spec ) {
+			if ( ! is_array( $spec ) ) {
+				continue;
+			}
+			$type = $spec['type'] ?? null;
+			if ( 'object' === $type && isset( $spec['properties'] ) ) {
+				if ( ! array_key_exists( $name, $data ) ) {
+					$this->fail( "Schema declares object '{$path}.{$name}' but response is missing it" );
+				}
+				$this->assertSchemaKeysMatchData( $spec['properties'], $data[ $name ], "{$path}.{$name}" );
+			} elseif ( 'array' === $type && isset( $spec['items']['properties'] ) ) {
+				if ( ! array_key_exists( $name, $data ) ) {
+					$this->fail( "Schema declares array '{$path}.{$name}' but response is missing it" );
+				}
+				if ( ! empty( $data[ $name ] ) ) {
+					$this->assertSchemaKeysMatchData( $spec['items']['properties'], $data[ $name ][0], "{$path}.{$name}[0]" );
+				}
+			} else {
+				// Scalar: every product-section item should have product_id, but shipping/fees should not — tolerate either presence.
+				if ( ! array_key_exists( $name, $data ) ) {
+					// Skip — products-only fields are legitimately absent on shipping/fees.
+					continue;
+				}
+			}
+		}
+
+		// Inverse check: every key in $data should be declared in the schema.
+		if ( is_array( $data ) && array_keys( $data ) !== range( 0, count( $data ) - 1 ) ) {
+			foreach ( array_keys( $data ) as $key ) {
+				if ( is_string( $key ) ) {
+					$this->assertArrayHasKey(
+						$key,
+						$schema,
+						"Response key '{$path}.{$key}' is not declared in the schema"
+					);
+				}
+			}
+		}
+	}
+
+	/**
 	 * @testdox Preview returns 500 with invalid_preview_request when build_refund_preview throws an invariant violation.
 	 */
 	public function test_preview_invariant_violation_returns_500(): void {
