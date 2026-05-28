@@ -11,11 +11,12 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
-	 * User ID.
+	 * Shared admin user ID. Created once per class to avoid the wp_insert_user cost
+	 * on every test (this suite has 25+ cases).
 	 *
 	 * @var int
 	 */
-	private $user_id;
+	protected static $user_id;
 
 	/**
 	 * Collection of created orders for cleanup.
@@ -51,21 +52,40 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Create the shared admin user once per class.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
+		self::$user_id = wp_insert_user(
+			array(
+				'user_login' => 'preview_admin_' . wp_generate_password( 6, false ),
+				'user_email' => 'preview_admin_' . wp_generate_password( 6, false ) . '@example.com',
+				'user_pass'  => 'password',
+				'role'       => 'administrator',
+			)
+		);
+	}
+
+	/**
+	 * Delete the shared admin user once per class.
+	 */
+	public static function tearDownAfterClass(): void {
+		if ( self::$user_id ) {
+			wp_delete_user( self::$user_id );
+			self::$user_id = 0;
+		}
+		parent::tearDownAfterClass();
+	}
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
 		$this->enable_rest_api_v4_feature();
 		parent::setUp();
 
-		$this->user_id = wp_insert_user(
-			array(
-				'user_login' => 'test_admin',
-				'user_email' => 'test@example.com',
-				'user_pass'  => 'password',
-				'role'       => 'administrator',
-			)
-		);
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 	}
 
 	/**
@@ -277,13 +297,15 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox P8: Preview with invalid line item ID returns line_item_not_found.
 	 */
 	public function test_preview_invalid_line_item(): void {
-		$order = $this->create_order_with_product( 50.00, 1 );
+		$order             = $this->create_order_with_product( 50.00, 1 );
+		$existing_item_id  = $this->get_first_line_item_id( $order );
+		$nonexistent_id    = $existing_item_id + 999;
 
 		$response = $this->do_preview_request(
 			$order->get_id(),
 			array(
 				array(
-					'line_item_id' => 999999,
+					'line_item_id' => $nonexistent_id,
 					'quantity'     => 1,
 				),
 			)
@@ -453,7 +475,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertContains( $response->get_status(), array( 401, 403 ) );
 
 		// Restore admin user for teardown.
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		wp_delete_user( $customer_id );
 	}
 
@@ -638,8 +660,8 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertCount( 1, $data['breakdown']['shipping']['items'] );
-		$this->assertSame( array(), $data['breakdown']['products']['items'] );
-		$this->assertSame( array(), $data['breakdown']['fees']['items'] );
+		$this->assertEmpty( $data['breakdown']['products']['items'] );
+		$this->assertEmpty( $data['breakdown']['fees']['items'] );
 		$this->assertEquals( '10.00', $data['breakdown']['shipping']['total'] );
 		$this->assertEquals( '10.00', $data['total'] );
 	}
@@ -665,8 +687,8 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertCount( 1, $data['breakdown']['fees']['items'] );
-		$this->assertSame( array(), $data['breakdown']['products']['items'] );
-		$this->assertSame( array(), $data['breakdown']['shipping']['items'] );
+		$this->assertEmpty( $data['breakdown']['products']['items'] );
+		$this->assertEmpty( $data['breakdown']['shipping']['items'] );
 		$this->assertEquals( '20.00', $data['breakdown']['fees']['total'] );
 		$this->assertEquals( '20.00', $data['total'] );
 	}
@@ -797,7 +819,8 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $preview_response->get_status() );
 		$preview_data = $preview_response->get_data();
 
-		// Create the actual refund with the same line items using the create endpoint.
+		// Create the actual refund. Drive refund_total from the preview total so a divergence
+		// between preview and create produces an actual mismatch rather than passing by coincidence.
 		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
 		$create_request->set_body_params(
 			array(
@@ -806,7 +829,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 					array(
 						'line_item_id' => $item_id,
 						'quantity'     => 1,
-						'refund_total' => 110.00,
+						'refund_total' => (float) $preview_data['total'],
 					),
 				),
 			)
