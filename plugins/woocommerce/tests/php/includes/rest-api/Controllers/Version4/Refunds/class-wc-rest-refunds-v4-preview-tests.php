@@ -568,12 +568,10 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 				if ( ! empty( $data[ $name ] ) ) {
 					$this->assertSchemaKeysMatchData( $spec['items']['properties'], $data[ $name ][0], "{$path}.{$name}[0]" );
 				}
-			} else {
-				// Scalar: every product-section item should have product_id, but shipping/fees should not — tolerate either presence.
-				if ( ! array_key_exists( $name, $data ) ) {
-					// Skip — products-only fields are legitimately absent on shipping/fees.
-					continue;
-				}
+			} elseif ( ! array_key_exists( $name, $data ) ) {
+				// Scalar field missing from data is OK — products-only fields (product_id,
+				// variation_id) are legitimately absent on shipping/fees sections.
+				continue;
 			}
 		}
 
@@ -600,12 +598,30 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 
 		// Stub DataUtils so validate_preview_line_items passes but build_refund_preview throws.
 		$stub = new class() extends \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils {
+			/**
+			 * Validation is forced to pass so the controller reaches the build step.
+			 *
+			 * @param array     $line_items Ignored.
+			 * @param \WC_Order $order      Ignored.
+			 * @return bool
+			 */
 			public function validate_preview_line_items( array $line_items, \WC_Order $order ) {
 				return true;
 			}
+			/**
+			 * Always throws to exercise the controller's InvalidArgumentException catch arm.
+			 *
+			 * @param \WC_Order $order      Ignored.
+			 * @param array     $line_items Ignored.
+			 * @return array
+			 * @throws \InvalidArgumentException Always.
+			 *
+			 * phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn
+			 */
 			public function build_refund_preview( \WC_Order $order, array $line_items ): array {
 				throw new \InvalidArgumentException( 'simulated invariant violation' );
 			}
+			// phpcs:enable Squiz.Commenting.FunctionComment.InvalidNoReturn
 		};
 		wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Controller::class )
 			->init(

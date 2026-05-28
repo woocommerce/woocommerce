@@ -39,13 +39,15 @@ class RefundPreviewSchema extends AbstractSchema {
 	 * @param array           $include_fields Fields to include.
 	 * @return array
 	 * @throws \LogicException Always — this method should never be called for the preview route.
+	 *
+	 * phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn
 	 */
-	// phpcs:ignore Squiz.Commenting.FunctionComment.InvalidNoReturn
 	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
 		throw new \LogicException(
 			'RefundPreviewSchema::get_item_response() should not be called; the preview controller bypasses prepare_item_for_response().'
 		);
 	}
+	// phpcs:enable Squiz.Commenting.FunctionComment.InvalidNoReturn
 
 	/**
 	 * Return all properties for the item schema.
