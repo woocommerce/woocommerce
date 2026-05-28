@@ -1285,20 +1285,10 @@ jQuery( function ( $ ) {
 		'ul.product_images'
 	);
 
-	function getProductGalleryAttachmentImage( attachment ) {
-		if ( attachment.sizes && attachment.sizes.thumbnail ) {
-			return attachment.sizes.thumbnail.url;
-		}
-
-		if ( attachment.image && attachment.image.src ) {
-			return attachment.image.src;
-		}
-
-		if ( attachment.thumb && attachment.thumb.src ) {
-			return attachment.thumb.src;
-		}
-
-		return attachment.icon || attachment.url;
+	function getProductGalleryImageSrc( attachment ) {
+		return attachment.sizes && attachment.sizes.thumbnail
+			? attachment.sizes.thumbnail.url
+			: attachment.url;
 	}
 
 	function addProductGalleryMediaItemActions( $item, $el ) {
@@ -1322,7 +1312,7 @@ jQuery( function ( $ ) {
 	}
 
 	function createProductGalleryImageItem( attachment, $el ) {
-		const attachmentImage = getProductGalleryAttachmentImage( attachment );
+		const attachmentImage = getProductGalleryImageSrc( attachment );
 
 		if ( ! attachment.id || ! attachmentImage ) {
 			return null;
@@ -1343,10 +1333,9 @@ jQuery( function ( $ ) {
 	}
 
 	function createProductGalleryVideoItem( attachment, $el ) {
-		const attachmentImage = getProductGalleryAttachmentImage( attachment );
 		const posterId = parseInt( attachment.poster_id, 10 ) || 0;
 
-		if ( ! attachment.id || ! attachmentImage ) {
+		if ( ! attachment.id || ! attachment.url ) {
 			return null;
 		}
 
@@ -1358,20 +1347,13 @@ jQuery( function ( $ ) {
 			.attr( 'data-source_type', 'attachment' )
 			.attr( 'data-poster_id', posterId );
 
-		if ( attachment.url ) {
-			$( '<video />', {
-				class: 'woocommerce-product-gallery__video-preview',
-				src: attachment.url,
-				preload: 'metadata',
-				muted: 'muted',
-				'aria-hidden': 'true',
-			} ).appendTo( $item );
-		} else {
-			$( '<img />', {
-				src: attachmentImage,
-				class: 'woocommerce-product-gallery__video-preview',
-			} ).appendTo( $item );
-		}
+		$( '<video />', {
+			class: 'woocommerce-product-gallery__video-preview',
+			src: attachment.url,
+			preload: 'metadata',
+			muted: 'muted',
+			'aria-hidden': 'true',
+		} ).appendTo( $item );
 
 		return addProductGalleryMediaItemActions( $item, $el );
 	}
