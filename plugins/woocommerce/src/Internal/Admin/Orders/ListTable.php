@@ -979,13 +979,15 @@ class ListTable extends WP_List_Table {
 			$user_id = absint( $_GET['_customer_user'] );
 			$user    = get_user_by( 'id', $user_id );
 
-			$user_string = sprintf(
-				/* translators: 1: user display name 2: user ID 3: user email */
-				esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
-				$user->display_name,
-				absint( $user->ID ),
-				$user->user_email
-			);
+			if ( $user ) {
+				$user_string = sprintf(
+					/* translators: 1: user display name 2: user ID 3: user email */
+					esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
+					$user->display_name,
+					absint( $user->ID ),
+					$user->user_email
+				);
+			}
 		}
 
 		// Note: use of htmlspecialchars (below) is to prevent XSS when rendered by selectWoo.
