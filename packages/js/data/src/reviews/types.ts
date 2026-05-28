@@ -112,4 +112,4 @@ export type ReviewsQueryParams = {
 	status?: 'all' | 'hold' | 'approved' | 'spam' | 'trash';
 
 	_embed?: number;
-}
+};
