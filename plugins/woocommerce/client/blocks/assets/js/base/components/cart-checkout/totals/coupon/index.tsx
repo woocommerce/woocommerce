@@ -3,7 +3,7 @@
  */
 import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
-import { useState, useRef } from '@wordpress/element';
+import { useState, useRef, useEffect } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import {
@@ -32,7 +32,8 @@ export interface TotalsCouponProps {
 	 */
 	isLoading?: boolean;
 	/**
-	 * Whether the coupon form is hidden
+	 * Whether the coupon form is displayed expanded (open) by default.
+	 * When true, the input field is immediately visible.
 	 */
 	displayCouponForm?: boolean;
 	/**
@@ -50,6 +51,9 @@ export const TotalsCoupon = ( {
 	const [ couponValue, setCouponValue ] = useState( '' );
 	const [ isCouponFormVisible, setIsCouponFormVisible ] =
 		useState( displayCouponForm );
+	useEffect( () => {
+		setIsCouponFormVisible( displayCouponForm );
+	}, [ displayCouponForm ] );
 	const textInputId = `wc-block-components-totals-coupon__input-${ instanceId }`;
 	const { validationErrorId } = useSelect(
 		( select ) => {
