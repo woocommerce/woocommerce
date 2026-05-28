@@ -3,7 +3,6 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import type { createRegistry } from '@wordpress/data';
-import type { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
 import { store as coreDataStore } from '@wordpress/core-data';
 
 /**
@@ -21,9 +20,10 @@ import type {
 	SettingsState,
 } from './types';
 import { NAMESPACE } from '../constants';
-import { store, STORE_NAME } from './';
+import { STORE_NAME } from './';
 
 type WPDataRegistry = ReturnType< typeof createRegistry >;
+type Selectors = typeof import('./selectors');
 
 type CurriedState< F > = F extends (
 	state: SettingsState,
@@ -32,10 +32,21 @@ type CurriedState< F > = F extends (
 	? ( ...args: P ) => R
 	: F;
 
+type CurriedSelectors< T > = {
+	[ K in keyof T ]: CurriedState< T[ K ] >;
+};
+
 type Resolvers = typeof import('./resolvers');
+type CoreDataActions = ReturnType<
+	ReturnType< typeof coreDataStore.instantiate >[ 'getActions' ]
+>;
+type CoreDataLockDispatch = Pick<
+	CoreDataActions,
+	'__unstableAcquireStoreLock' | '__unstableReleaseStoreLock'
+>;
 
 export type ThunkArgs = {
-	select: CurriedSelectorsOf< typeof store >;
+	select: CurriedSelectors< Selectors >;
 	resolveSelect: CurriedState< Resolvers >;
 	dispatch: ActionDispatchersForThunk;
 	registry: WPDataRegistry;
@@ -442,6 +453,32 @@ export const saveEditedSetting =
 		);
 	};
 
+const getCoreDataLockDispatch = (
+	registry: WPDataRegistry
+): CoreDataLockDispatch =>
+	registry.dispatch( coreDataStore ) as CoreDataLockDispatch;
+
+type UnstableAcquireStoreLockParams = Parameters<
+	CoreDataLockDispatch[ '__unstableAcquireStoreLock' ]
+>;
+type UnstableReleaseStoreLockParams = Parameters<
+	CoreDataLockDispatch[ '__unstableReleaseStoreLock' ]
+>;
+
+export const __unstableAcquireStoreLock =
+	( ...args: UnstableAcquireStoreLockParams ) =>
+	( { registry }: ThunkArgs ) =>
+		getCoreDataLockDispatch( registry ).__unstableAcquireStoreLock(
+			...args
+		);
+
+export const __unstableReleaseStoreLock =
+	( ...args: UnstableReleaseStoreLockParams ) =>
+	( { registry }: ThunkArgs ) =>
+		getCoreDataLockDispatch( registry ).__unstableReleaseStoreLock(
+			...args
+		);
+
 // Return type of all action creators
 export type Actions = ReturnType<
 	| typeof receiveGroups
@@ -467,5 +504,7 @@ export type ActionDispatchersForThunk = {
 	saveEditedSettingsGroup: typeof saveEditedSettingsGroup;
 	saveSetting: typeof saveSetting;
 	saveSettingsGroup: typeof saveSettingsGroup;
+	__unstableAcquireStoreLock: CoreDataLockDispatch[ '__unstableAcquireStoreLock' ];
+	__unstableReleaseStoreLock: CoreDataLockDispatch[ '__unstableReleaseStoreLock' ];
 	< T = Record< string, unknown > >( args: T ): void;
 };

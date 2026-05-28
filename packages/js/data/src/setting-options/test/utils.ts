@@ -3,6 +3,7 @@
  */
 import { createRegistry } from '@wordpress/data';
 import { controls } from '@wordpress/data-controls';
+import { store as coreDataStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -19,6 +20,7 @@ import { Setting, SettingsGroup } from '../types';
  */
 export const createTestRegistryAndStore = () => {
 	const registry = createRegistry();
+	registry.register( coreDataStore );
 
 	// Create initial state matching the reducer's initial state
 	const initialState: SettingsState = {
