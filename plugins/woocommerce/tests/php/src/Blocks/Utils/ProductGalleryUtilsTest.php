@@ -29,7 +29,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		$variable_product = \WC_Helper_Product::create_variation_product();
 
 		// Create and set the main product image.
-		$image_id  = wp_insert_attachment(
+		$image_id = wp_insert_attachment(
 			array(
 				'post_title'     => 'Test Image',
 				'post_type'      => 'attachment',
@@ -280,7 +280,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 
 		$product = \WC_Helper_Product::create_simple_product();
 
-		$image_id = wp_insert_attachment(
+		$image_id  = wp_insert_attachment(
 			array(
 				'post_title'     => 'Gallery Image',
 				'post_type'      => 'attachment',
