@@ -1921,12 +1921,9 @@ if ( ! function_exists( 'wc_get_gallery_video_html' ) ) {
 	 * @since 10.9.0
 	 * @param array $media_item  Product media gallery item.
 	 * @param bool  $main_video  Is this the main gallery item?.
-	 * @param int   $media_index The media item index in the gallery.
 	 * @return string
 	 */
-	function wc_get_gallery_video_html( $media_item, $main_video = false, $media_index = -1 ) {
-		global $product;
-
+	function wc_get_gallery_video_html( $media_item, $main_video = false ) {
 		$attachment_id = isset( $media_item['id'] ) ? absint( $media_item['id'] ) : 0;
 		$video_src     = $attachment_id ? wp_get_attachment_url( $attachment_id ) : '';
 
@@ -2004,16 +2001,6 @@ if ( ! function_exists( 'wc_get_gallery_video_html' ) ) {
 					$video_title
 				)
 				: '';
-		}
-		if ( empty( $alt_text ) && ( $product instanceof WC_Product ) ) {
-			$media_position = max( 1, $media_index + 1 );
-
-			$alt_text = sprintf(
-				/* translators: 1: Media position in gallery. 2: Product title. */
-				__( 'Product video %1$d: %2$s', 'woocommerce' ),
-				$media_position,
-				$product->get_title()
-			);
 		}
 		$settings         = isset( $media_item['settings'] ) && is_array( $media_item['settings'] )
 			? $media_item['settings']

@@ -50,7 +50,7 @@ $wrapper_classes   = apply_filters(
 	<div class="woocommerce-product-gallery__wrapper">
 		<?php
 		if ( $is_video ) {
-			$html = wc_get_gallery_video_html( $first_media_item, true, 0 );
+			$html = wc_get_gallery_video_html( $first_media_item, true );
 		} elseif ( $has_media && $first_media_id ) {
 			$html = wc_get_gallery_image_html( $first_media_id, true );
 		} else {

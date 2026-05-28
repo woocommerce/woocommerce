@@ -43,7 +43,7 @@ if ( count( $media_items ) > 1 ) {
 		$is_video = 'video' === ( $media_item['media_type'] ?? '' ) && function_exists( 'wc_get_gallery_video_html' );
 
 		if ( $is_video ) {
-			$html = wc_get_gallery_video_html( $media_item, false, $key + 1 );
+			$html = wc_get_gallery_video_html( $media_item, false );
 		} else {
 			$html = wc_get_gallery_image_html( $attachment_id, false, $key );
 		}
