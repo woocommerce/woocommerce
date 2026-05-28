@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the store_stock push notification covering low-stock, out-of-stock, and backorder events. All three events are enabled by default and each one has its own merchant-configurable sub-flag.
