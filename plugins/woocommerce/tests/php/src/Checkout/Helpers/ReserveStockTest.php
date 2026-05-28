@@ -138,10 +138,13 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 		$sut = new ReserveStock();
 		$sut->prime_reserved_stock( $this->product_ids, 0 );
 
+		// Resolve products before snapshotting so product loading is not in the measured window.
+		$products = array_map( 'wc_get_product', $this->product_ids );
+
 		// Snapshot wpdb num_queries; require_once SAVEQUERIES already on in tests is unreliable, so we use num_queries.
 		$before = (int) $wpdb->num_queries;
-		foreach ( $this->product_ids as $product_id ) {
-			$sut->get_reserved_stock_cached( wc_get_product( $product_id ), 0 );
+		foreach ( $products as $product ) {
+			$sut->get_reserved_stock_cached( $product, 0 );
 		}
 		$after = (int) $wpdb->num_queries;
 
@@ -232,10 +235,13 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 		// Targeted flush.
 		ReserveStock::flush_reserved_stock_cache( 999 );
 
+		// Resolve products before snapshotting so product loading is not in the measured window.
+		$products = array_map( 'wc_get_product', $this->product_ids );
+
 		$before = (int) $wpdb->num_queries;
 		// Bucket 0 should still be warm.
-		foreach ( $this->product_ids as $pid ) {
-			$sut->get_reserved_stock_cached( wc_get_product( $pid ), 0 );
+		foreach ( $products as $product ) {
+			$sut->get_reserved_stock_cached( $product, 0 );
 		}
 		$this->assertSame( $before, (int) $wpdb->num_queries, 'Bucket 0 should still be cached.' );
 
