@@ -1253,8 +1253,10 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 						if ( count( $intersect ) > 0 ) {
 							foreach ( $intersect as $cat_id ) {
-								$cat          = get_term( $cat_id, 'product_cat' );
-								$categories[] = $cat->name;
+								$cat = get_term( $cat_id, 'product_cat' );
+								if ( $cat instanceof WP_Term ) {
+									$categories[] = $cat->name;
+								}
 							}
 						}
 					}
