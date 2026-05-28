@@ -92,24 +92,16 @@ class ProductMediaGallery {
 	/**
 	 * Normalize media gallery items.
 	 *
-	 * @param array|string $media_gallery       Media gallery data.
-	 * @param bool         $validate_attachments Whether attachment IDs should be type-checked.
-	 * @param bool         $preserve_video_data  Whether to preserve additional video item keys.
+	 * @param array $media_gallery Media gallery data.
+	 * @param bool  $validate_attachments Whether attachment IDs should be type-checked.
+	 * @param bool  $preserve_video_data Whether to preserve additional video item keys.
 	 * @return array
 	 */
-	public static function normalize_media_gallery_items( $media_gallery, bool $validate_attachments = false, bool $preserve_video_data = true ): array {
-		if ( is_string( $media_gallery ) ) {
-			$decoded = json_decode( $media_gallery, true );
-			if ( JSON_ERROR_NONE !== json_last_error() ) {
-				return array();
-			}
-			$media_gallery = $decoded;
-		}
-
-		if ( ! is_array( $media_gallery ) ) {
-			return array();
-		}
-
+	public static function normalize_media_gallery_items(
+		array $media_gallery,
+		bool $validate_attachments = false,
+		bool $preserve_video_data = true
+	): array {
 		$items = array();
 
 		foreach ( $media_gallery as $item ) {

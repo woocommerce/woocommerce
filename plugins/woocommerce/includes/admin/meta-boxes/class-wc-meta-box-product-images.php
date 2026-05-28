@@ -172,8 +172,13 @@ class WC_Meta_Box_Product_Images {
 		$media_gallery  = array();
 
 		if ( $media_posted ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$media_gallery  = ProductMediaGallery::normalize_media_gallery_items( wc_clean( wp_unslash( $_POST['product_media_gallery'] ) ), true, false ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$attachment_ids = ProductMediaGallery::get_image_ids( $media_gallery );
+			$posted_media_gallery = wc_clean( wp_unslash( $_POST['product_media_gallery'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$media_gallery        = ProductMediaGallery::normalize_media_gallery_items(
+				self::decode_media_gallery_json( $posted_media_gallery ),
+				true,
+				false
+			);
+			$attachment_ids       = ProductMediaGallery::get_image_ids( $media_gallery );
 		}
 
 		$product->set_gallery_image_ids( $attachment_ids );
@@ -241,5 +246,27 @@ class WC_Meta_Box_Product_Images {
 		$json = wp_json_encode( $media_gallery );
 
 		return false === $json ? '[]' : $json;
+	}
+
+	/**
+	 * Decode the posted media gallery hidden field.
+	 *
+	 * @param mixed $media_gallery_json JSON-encoded media gallery field value.
+	 * @return array
+	 */
+	private static function decode_media_gallery_json( $media_gallery_json ) {
+		if ( ! is_string( $media_gallery_json ) || '' === $media_gallery_json ) {
+			return array();
+		}
+
+		$decoded = json_decode( $media_gallery_json, true );
+
+		if ( ! is_array( $decoded ) ) {
+			return array();
+		}
+
+		$decoded = wc_clean( $decoded );
+
+		return is_array( $decoded ) ? $decoded : array();
 	}
 }

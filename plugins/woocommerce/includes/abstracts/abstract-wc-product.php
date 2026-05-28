@@ -1481,13 +1481,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set mixed media gallery items.
 	 *
-	 * @param array|string $media_gallery List of media gallery items, or JSON-encoded gallery data.
+	 * @param array $media_gallery List of media gallery items.
 	 * @return void
 	 *
 	 * @since 10.9.0
 	 */
 	public function set_media_gallery( $media_gallery ) {
-		$this->set_prop( 'media_gallery', self::normalize_media_gallery( $media_gallery ) );
+		$media_gallery = is_array( $media_gallery ) ? self::normalize_media_gallery( $media_gallery ) : array();
+
+		$this->set_prop( 'media_gallery', $media_gallery );
 	}
 
 	/**
@@ -1504,22 +1506,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Normalize mixed media gallery items.
 	 *
-	 * @param array|string $media_gallery List of media gallery items, or JSON-encoded gallery data.
+	 * @param array $media_gallery List of media gallery items.
 	 * @return array<int, array<string, mixed>>
 	 */
-	private static function normalize_media_gallery( $media_gallery ) {
-		if ( is_string( $media_gallery ) ) {
-			$decoded = json_decode( $media_gallery, true );
-			if ( JSON_ERROR_NONE !== json_last_error() ) {
-				return array();
-			}
-			$media_gallery = $decoded;
-		}
-
-		if ( ! is_array( $media_gallery ) ) {
-			return array();
-		}
-
+	private static function normalize_media_gallery( array $media_gallery ) {
 		$normalized = array();
 
 		foreach ( $media_gallery as $item ) {
