@@ -8,6 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\POS\StoreApi\Routes;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\CartAddItem as StoreApiCartAddItem;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use WP_Error;
 use WP_REST_Request;
 
@@ -54,9 +55,20 @@ class CartAddItem extends StoreApiCartAddItem {
 		$endpoints = parent::get_args();
 
 		foreach ( $endpoints as &$endpoint ) {
-			if ( is_array( $endpoint ) ) {
-				$endpoint['permission_callback'] = array( $this, 'check_permission' );
+			if ( ! is_array( $endpoint ) ) {
+				continue;
 			}
+			$endpoint['permission_callback'] = array( $this, 'check_permission' );
+			$endpoint['args']                = array_merge(
+				$endpoint['args'] ?? array(),
+				array(
+					'cart_token' => array(
+						'description' => __( 'Cart session token returned by a prior POS Store API response. Pass it back on subsequent requests to keep the cart scoped to the same transaction.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+					),
+				)
+			);
 		}
 		unset( $endpoint );
 
@@ -93,5 +105,40 @@ class CartAddItem extends StoreApiCartAddItem {
 		// Request parameter is unused; signature is required by the parent.
 		unset( $request );
 		return false;
+	}
+
+	/**
+	 * Look for a Cart-Token sent by the client either as the `cart_token`
+	 * query parameter or the `Cart-Token` HTTP header. If valid, inject it
+	 * as the HTTP header so the Store API session swap mechanism (see
+	 * {@see \Automattic\WooCommerce\StoreApi\Authentication::maybe_use_store_api_session_handler})
+	 * picks it up and uses {@see \Automattic\WooCommerce\StoreApi\SessionHandler}
+	 * to resolve the session by the token's payload.
+	 *
+	 * Accepting the URL parameter is what lets mobile clients participate
+	 * without needing custom-header support in their HTTP stack; mirrors the
+	 * `checkout_session_id` URL-parameter pattern used by agentic commerce
+	 * in {@see \Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\CheckoutSessionsUpdate::has_cart_token}.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool
+	 */
+	protected function has_cart_token( WP_REST_Request $request ) {
+		if ( ! is_null( $this->has_cart_token ) ) {
+			return $this->has_cart_token;
+		}
+
+		$cart_token = (string) ( $request->get_param( 'cart_token' ) ?? $request->get_header( 'Cart-Token' ) ?? '' );
+
+		if ( '' === $cart_token || ! CartTokenUtils::validate_cart_token( $cart_token ) ) {
+			$this->has_cart_token = false;
+			return false;
+		}
+
+		$request->set_header( 'Cart-Token', $cart_token );
+		$_SERVER['HTTP_CART_TOKEN'] = $cart_token;
+		$this->has_cart_token       = true;
+
+		return true;
 	}
 }
