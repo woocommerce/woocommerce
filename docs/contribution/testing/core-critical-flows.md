@@ -130,8 +130,8 @@ These flows will continually evolve as the platform evolves with flows updated, 
 | Merchant  | Core Profiler | Install all default extensions                                 | activate-and-setup/core-profiler.spec.js |
 | Merchant  | Core Profiler | Complete site setup                                            | activate-and-setup/core-profiler.spec.js |
 | Merchant  | Core Profiler | Skip introduction and confirm business location                | activate-and-setup/core-profiler.spec.js |
-| Merchant  | NOX Onboarding | Start or resume in-context onboarding from Payments settings | onboarding/nox-onboarding.spec.ts |
-| Merchant  | NOX Onboarding | Activate payments business details: select legal entity type and confirm dependent fields render | onboarding/nox-onboarding.spec.ts |
+| Merchant  | NOX Onboarding | Open onboarding from Payments settings | onboarding/nox-onboarding.spec.ts |
+| Merchant  | NOX Onboarding | Select legal entity type and show fields | onboarding/nox-onboarding.spec.ts |
 
 ### Merchant - Dashboard
 
