@@ -95,6 +95,33 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox billing_address and shipping_address are not schema-required on the POS checkout route.
+	 */
+	public function test_address_fields_are_optional_at_schema_level(): void {
+		$routes  = rest_get_server()->get_routes();
+		$handlers = $routes[ '/' . Controller::REST_NAMESPACE . '/checkout' ] ?? array();
+
+		$post_endpoint = null;
+		foreach ( $handlers as $endpoint ) {
+			if ( in_array( 'POST', (array) ( $endpoint['methods'] ?? array() ), true )
+				|| ( is_array( $endpoint['methods'] ?? null ) && isset( $endpoint['methods']['POST'] ) ) ) {
+				$post_endpoint = $endpoint;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $post_endpoint, 'POS checkout route should define a POST endpoint.' );
+		$this->assertFalse(
+			$post_endpoint['args']['billing_address']['required'] ?? null,
+			'billing_address should not be schema-required for POS checkout.'
+		);
+		$this->assertFalse(
+			$post_endpoint['args']['shipping_address']['required'] ?? null,
+			'shipping_address should not be schema-required for POS checkout.'
+		);
+	}
+
+	/**
 	 * @testdox Anonymous request to /checkout is forbidden.
 	 */
 	public function test_anonymous_request_is_forbidden(): void {
@@ -140,9 +167,14 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		}
 		$this->assertNotEmpty( $cart_token, 'add-item should emit a Cart-Token header for checkout to use.' );
 
-		// Run checkout against the same cart. Deliberately NO payment_method —
-		// POS defers payment selection past order creation. The POS opt-out
-		// (`woocommerce_store_api_checkout_require_payment_method`) allows this.
+		// Run checkout against the same cart. Deliberately NO payment_method
+		// (the POS opt-out lets it be deferred). Addresses are sent as
+		// minimal placeholders — the schema-level requirement has been
+		// relaxed for POS, but OrderController::validate_addresses still
+		// enforces store-configured per-field validation (postcode, phone,
+		// etc.) at the pipeline layer. Relaxing that is a larger upstream
+		// change tracked in DECISIONS.md; for now mobile sends placeholder
+		// values for those fields.
 		$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
 		$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );
 		$checkout_request->set_body_params(

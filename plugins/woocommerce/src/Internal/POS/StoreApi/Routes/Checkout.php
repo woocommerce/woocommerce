@@ -69,6 +69,22 @@ class Checkout extends StoreApiCheckout {
 					),
 				)
 			);
+			// Drop the schema-level required flag on billing/shipping address.
+			// The Store API marks these as required for web checkout, but for
+			// in-store POS sales the cashier often doesn't have customer
+			// address info to capture (cash sale of physical goods that the
+			// customer is leaving with). Mirrors the deferred-payment-method
+			// pattern: POS opts out of a UX-safety guard that doesn't fit the
+			// retail use case. For product types that genuinely need an
+			// address (downloadables, gift cards, shipped goods sold for
+			// delivery), the cashier still captures it and sends it through.
+			// A smarter cart-aware per-product-type requirements model is a
+			// follow-up; see DECISIONS.md.
+			foreach ( array( 'billing_address', 'shipping_address' ) as $address_arg ) {
+				if ( isset( $endpoint['args'][ $address_arg ] ) && is_array( $endpoint['args'][ $address_arg ] ) ) {
+					$endpoint['args'][ $address_arg ]['required'] = false;
+				}
+			}
 		}
 		unset( $endpoint );
 
