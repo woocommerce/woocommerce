@@ -99,6 +99,7 @@ function wc_get_filename_from_url( $file_url ) {
 	if ( isset( $parts['path'] ) ) {
 		return basename( $parts['path'] );
 	}
+	return '';
 }
 
 /**
@@ -121,6 +122,8 @@ function wc_get_dimension( $dimension, $to_unit, $from_unit = '' ) {
 
 	if ( empty( $from_unit ) ) {
 		$from_unit = strtolower( get_option( 'woocommerce_dimension_unit' ) );
+	} else {
+		$from_unit = strtolower( $from_unit );
 	}
 
 	// Unify all units to cm first.
@@ -181,6 +184,8 @@ function wc_get_weight( $weight, $to_unit, $from_unit = '' ) {
 
 	if ( empty( $from_unit ) ) {
 		$from_unit = strtolower( get_option( 'woocommerce_weight_unit' ) );
+	} else {
+		$from_unit = strtolower( $from_unit );
 	}
 
 	// Unify all units to kg first.
