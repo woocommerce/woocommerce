@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix fatal errors from unchecked return values of wc_get_order(), wc_get_product(), get_term(), and get_user_by() in OrdersTableDataStore, structured data, product permalink builder, and Orders list table.
