@@ -18,7 +18,7 @@ import type { ComponentType } from 'react';
 interface ProductsControlProps {
 	error: ErrorObject | null;
 	isLoading?: boolean;
-	onSearch?: ( ( search: string ) => void ) | null;
+	onSearch?: ( search: string ) => void;
 	products?: ProductResponseItem[];
 	selected?: number[];
 	onChange: ( value: SearchListItem< ProductResponseItem >[] ) => void;
@@ -75,10 +75,10 @@ const ProductsControl = ( {
 			isCompact={ isCompact }
 			isLoading={ isLoading }
 			isSingle={ false }
-			selected={ productList.filter( ( { id } ) =>
-				selected.includes( Number( id ) )
+			selected={ productList.filter( ( { details } ) =>
+				selected.includes( details?.id ?? 0 )
 			) }
-			onSearch={ onSearch || undefined }
+			onSearch={ onSearch }
 			onChange={ onChange }
 			messages={ messages }
 		/>
