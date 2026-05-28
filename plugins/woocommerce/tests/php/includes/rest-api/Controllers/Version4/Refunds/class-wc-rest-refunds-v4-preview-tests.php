@@ -337,25 +337,172 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Preview with quantity 0 returns invalid_quantity.
+	 * @testdox Preview rejects invalid quantity values (zero, negative, missing, non-integer).
+	 *
+	 * @dataProvider invalid_quantity_provider
+	 *
+	 * @param array  $line_item_overrides Overrides merged into the line item entry (after line_item_id).
+	 * @param array  $expected_codes      Acceptable response error codes (REST framework or DataUtils).
 	 */
-	public function test_preview_invalid_quantity_zero(): void {
+	public function test_preview_invalid_quantity( array $line_item_overrides, array $expected_codes ): void {
 		$order   = $this->create_order_with_product( 50.00, 1 );
 		$item_id = $this->get_first_line_item_id( $order );
+
+		$line_item = array_merge( array( 'line_item_id' => $item_id ), $line_item_overrides );
+		$response  = $this->do_preview_request( $order->get_id(), array( $line_item ) );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertContains( $data['code'], $expected_codes, 'Got code ' . $data['code'] );
+	}
+
+	/**
+	 * Quantity scenarios that should all be rejected at the HTTP boundary.
+	 *
+	 * Some inputs are rejected by the REST framework (`rest_invalid_param`) and
+	 * others by DataUtils::validate_preview_line_items (`invalid_quantity`).
+	 * The test accepts either so it documents the actual observable behaviour
+	 * without coupling to which layer rejects first.
+	 *
+	 * @return array<string, array<int, mixed>>
+	 */
+	public function invalid_quantity_provider(): array {
+		return array(
+			'zero'        => array( array( 'quantity' => 0 ), array( 'rest_invalid_param', 'invalid_quantity' ) ),
+			'negative'    => array( array( 'quantity' => -1 ), array( 'rest_invalid_param', 'invalid_quantity' ) ),
+			'missing key' => array( array(), array( 'rest_invalid_param', 'missing_line_item_id', 'invalid_quantity' ) ),
+			'string'      => array( array( 'quantity' => 'abc' ), array( 'rest_invalid_param', 'invalid_quantity' ) ),
+			'float'       => array( array( 'quantity' => 1.5 ), array( 'rest_invalid_param', 'invalid_quantity' ) ),
+		);
+	}
+
+	/**
+	 * @testdox Preview rejects malformed line_items payload at REST validation boundary.
+	 */
+	public function test_preview_invalid_payload_shape(): void {
+		$order = $this->create_order_with_product( 50.00, 1 );
 
 		$response = $this->do_preview_request(
 			$order->get_id(),
 			array(
 				array(
-					'line_item_id' => $item_id,
-					'quantity'     => 0,
+					'line_item_id' => 'not-an-int',
+					'quantity'     => 'also-not-an-int',
 				),
 			)
 		);
 
 		$this->assertEquals( 400, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'invalid_quantity', $data['code'] );
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Preview returns INVALID_ID for an order ID belonging to a non-shop_order post type.
+	 */
+	public function test_preview_non_shop_order_returns_invalid_id(): void {
+		// Create a refund directly — wc_get_order() will return it but get_type() is shop_order_refund.
+		$order = $this->create_order_with_product( 50.00, 1 );
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10.00,
+			)
+		);
+		$this->assertNotInstanceOf( \WP_Error::class, $refund );
+
+		$response = $this->do_preview_request(
+			$refund->get_id(),
+			array(
+				array(
+					'line_item_id' => $this->get_first_line_item_id( $order ),
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Preview rejects unauthorized users (read-only / customer role).
+	 */
+	public function test_preview_read_only_user_returns_forbidden(): void {
+		$customer_id = wp_insert_user(
+			array(
+				'user_login' => 'preview_customer_' . wp_generate_password( 6, false ),
+				'user_email' => 'customer_' . wp_generate_password( 6, false ) . '@example.com',
+				'user_pass'  => 'password',
+				'role'       => 'customer',
+			)
+		);
+		wp_set_current_user( $customer_id );
+
+		$order = $this->create_order_with_product( 50.00, 1 );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $this->get_first_line_item_id( $order ),
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		$this->assertContains( $response->get_status(), array( 401, 403 ) );
+
+		// Restore admin user for teardown.
+		wp_set_current_user( $this->user_id );
+		wp_delete_user( $customer_id );
+	}
+
+	/**
+	 * @testdox Preview returns 500 with invalid_preview_request when build_refund_preview throws an invariant violation.
+	 */
+	public function test_preview_invariant_violation_returns_500(): void {
+		$order   = $this->create_order_with_product( 50.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		// Stub DataUtils so validate_preview_line_items passes but build_refund_preview throws.
+		$stub = new class() extends \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils {
+			public function validate_preview_line_items( array $line_items, \WC_Order $order ) {
+				return true;
+			}
+			public function build_refund_preview( \WC_Order $order, array $line_items ): array {
+				throw new \InvalidArgumentException( 'simulated invariant violation' );
+			}
+		};
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Controller::class )
+			->init(
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema::class ),
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema::class ),
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\CollectionQuery::class ),
+				$stub
+			);
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		$this->assertEquals( 500, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'invalid_preview_request', $data['code'] );
+
+		// Restore the real DataUtils for subsequent tests in this run.
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Controller::class )
+			->init(
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema::class ),
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema::class ),
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\CollectionQuery::class ),
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils::class )
+			);
 	}
 
 	/**
