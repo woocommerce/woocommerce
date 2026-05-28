@@ -61,7 +61,7 @@ async function safe( label, fn ) {
 	try {
 		return await fn();
 	} catch ( error ) {
-		console.error( `[watch] ${ label } failed:`, error.message ?? error );
+		console.error( `[watch] ${ label } failed:`, error?.message ?? error );
 		return null;
 	}
 }

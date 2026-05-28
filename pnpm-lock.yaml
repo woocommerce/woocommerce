@@ -298,13 +298,13 @@ importers:
         specifier: next
         version: 6.43.1-next.v.202604091042.0
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -413,7 +413,7 @@ importers:
         specifier: next
         version: 6.43.1-next.v.202604091042.0
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       copy-webpack-plugin:
         specifier: 13.0.x
@@ -422,7 +422,7 @@ importers:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -726,13 +726,13 @@ importers:
         specifier: next
         version: 6.43.1-next.v.202604091042.0
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -815,10 +815,10 @@ importers:
         specifier: workspace:*
         version: link:../internal-ts-config
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -885,10 +885,10 @@ importers:
         specifier: workspace:*
         version: link:../internal-ts-config
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -997,13 +997,13 @@ importers:
         specifier: next
         version: 6.43.1-next.v.202604091042.0
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -1145,10 +1145,10 @@ importers:
         specifier: workspace:*
         version: link:../internal-ts-config
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -1227,13 +1227,13 @@ importers:
         specifier: workspace:*
         version: link:../internal-ts-config
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       d3-time-format:
         specifier: ^2.3.0
         version: 2.3.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -1325,10 +1325,10 @@ importers:
         specifier: workspace:*
         version: link:../internal-ts-config
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -1527,10 +1527,10 @@ importers:
         specifier: ^21.0.0
         version: 21.41.0(postcss@8.5.9)(stylelint@14.16.1)
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -1709,13 +1709,13 @@ importers:
         specifier: next
         version: 6.43.1-next.v.202604091042.0
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -1984,10 +1984,10 @@ importers:
         specifier: workspace:*
         version: link:../internal-ts-config
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -2039,10 +2039,10 @@ importers:
         specifier: workspace:*
         version: link:../internal-ts-config
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -2135,7 +2135,7 @@ importers:
         specifier: next
         version: 6.43.1-next.v.202604091042.0
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       copy-webpack-plugin:
         specifier: 13.0.x
@@ -2144,7 +2144,7 @@ importers:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -2214,10 +2214,10 @@ importers:
         specifier: 29.5.x
         version: 29.5.0(@babel/core@7.25.7)
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -2396,10 +2396,10 @@ importers:
         specifier: workspace:*
         version: link:../internal-ts-config
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -2463,10 +2463,10 @@ importers:
         specifier: workspace:*
         version: link:../internal-ts-config
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -2521,10 +2521,10 @@ importers:
         specifier: workspace:*
         version: link:../internal-ts-config
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -2621,13 +2621,13 @@ importers:
         specifier: next
         version: 6.43.1-next.v.202604091042.0
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -2865,7 +2865,7 @@ importers:
         specifier: next
         version: 6.43.1-next.v.202604091042.0
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       copy-webpack-plugin:
         specifier: 13.0.x
@@ -2874,7 +2874,7 @@ importers:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -2971,10 +2971,10 @@ importers:
         specifier: ^5.4.0
         version: 5.4.0(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -3044,10 +3044,10 @@ importers:
         specifier: ^27.0.0
         version: 27.9.0(@playwright/test@1.59.1)(@swc/core@1.15.24)(@types/eslint@9.6.1)(@types/node@24.12.2)(@types/webpack@4.41.40)(babel-plugin-macros@3.1.0)(encoding@0.1.13)(esbuild@0.24.2)(file-loader@6.2.0(webpack@5.97.1))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(webpack-hot-middleware@2.26.1)
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
@@ -3102,10 +3102,10 @@ importers:
         specifier: workspace:*
         version: link:../internal-ts-config
       chokidar:
-        specifier: ^3.6.0
+        specifier: 3.6.x
         version: 3.6.0
       esbuild:
-        specifier: ^0.24.0
+        specifier: 0.24.x
         version: 0.24.2
       eslint:
         specifier: ^8.55.0
