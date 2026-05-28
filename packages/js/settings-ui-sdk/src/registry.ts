@@ -75,7 +75,7 @@ const scopeMatches = (
 const getScopeKey = ( scope: SettingsExtensionRegistration[ 'scope' ] ) =>
 	`${ scope.page }::${ scope.section || 'default' }`;
 
-const warnOnDuplicateKeys = (
+const hasDuplicateScopeAndKeys = (
 	registration: SettingsExtensionRegistration,
 	key: RegistrationMapKey
 ) => {
@@ -100,20 +100,19 @@ const warnOnDuplicateKeys = (
 			continue;
 		}
 
-		incomingKeys.forEach( ( entryKey ) => {
-			if (
+		if (
+			incomingKeys.some( ( entryKey ) =>
 				Object.prototype.hasOwnProperty.call(
 					existingEntries,
 					entryKey
 				)
-			) {
-				warn(
-					`Registration for "${ entryKey }" in "${ key }" already exists for scope "${ scopeKey }". The latest registration will take precedence.`,
-					{ registration }
-				);
-			}
-		} );
+			)
+		) {
+			return true;
+		}
 	}
+
+	return false;
 };
 
 export const registerSettingsExtension = (
@@ -126,11 +125,32 @@ export const registerSettingsExtension = (
 		return;
 	}
 
-	registrationMapKeys.forEach( ( key ) =>
-		warnOnDuplicateKeys( registration, key )
+	const hasDuplicateKeys = registrationMapKeys.some( ( key ) =>
+		hasDuplicateScopeAndKeys( registration, key )
 	);
 
+	if ( hasDuplicateKeys ) {
+		warn(
+			`Registration already exists for scope "${ getScopeKey(
+				registration.scope
+			) }". Replacing the existing registration.`,
+			{ registration }
+		);
+		for ( let i = registrations.length - 1; i >= 0; i-- ) {
+			if (
+				getScopeKey( registrations[ i ].scope ) ===
+				getScopeKey( registration.scope )
+			) {
+				registrations.splice( i, 1 );
+			}
+		}
+	}
+
 	registrations.push( registration );
+};
+
+export const __resetRegistry = () => {
+	registrations.splice( 0 );
 };
 
 export const resolveFieldComponent = (

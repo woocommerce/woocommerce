@@ -7,8 +7,13 @@ export type SettingsUIOption = {
 	value: string;
 };
 
+export type SettingsUISaveAdapter =
+	| 'form_post'
+	| 'none'
+	| ( string & NonNullable< unknown > );
+
 export type SettingsUISaveSchema = {
-	adapter: 'form_post' | 'none' | string;
+	adapter: SettingsUISaveAdapter;
 	name?: string;
 };
 
@@ -16,7 +21,12 @@ export type SettingsUISaveStrategy =
 	| { adapter: 'form_post' }
 	| { adapter: 'custom'; handler: string }
 	| { adapter: 'none' }
-	| { adapter: string; handler?: string };
+	| { adapter: string & NonNullable< unknown >; handler?: string };
+
+export type SettingsUIVisibilityRule = {
+	controller: string;
+	value?: SettingsValue | SettingsValue[];
+};
 
 export type SettingsUIField = {
 	id: string;
@@ -29,6 +39,7 @@ export type SettingsUIField = {
 	placeholder?: string;
 	disabled?: boolean;
 	customAttributes?: Record< string, string | number | boolean >;
+	visibility?: SettingsUIVisibilityRule;
 	save?: SettingsUISaveSchema;
 };
 

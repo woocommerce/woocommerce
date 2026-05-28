@@ -42,7 +42,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It skips malformed settings entries.
+	 * @testdox It skips malformed settings entries.
 	 */
 	public function test_from_legacy_settings_skips_malformed_settings_entries(): void {
 		$schema = SettingsUISchema::from_legacy_settings(
@@ -65,7 +65,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It groups fields that appear before the first title marker.
+	 * @testdox It groups fields that appear before the first title marker.
 	 */
 	public function test_from_legacy_settings_creates_default_group_for_fields_before_title(): void {
 		update_option( 'woocommerce_test_text', 'saved value' );
@@ -90,7 +90,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It keeps component metadata with the field schema.
+	 * @testdox It keeps component metadata with the field schema.
 	 */
 	public function test_from_legacy_settings_preserves_component_metadata(): void {
 		$schema = SettingsUISchema::from_legacy_settings(
@@ -142,7 +142,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It preserves sanitized group description markup and header actions.
+	 * @testdox It preserves sanitized group description markup and header actions.
 	 */
 	public function test_from_legacy_settings_preserves_group_description_and_actions(): void {
 		$schema = SettingsUISchema::from_legacy_settings(
@@ -188,7 +188,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It uses checkbox descriptions as labels and desc_tip as help text.
+	 * @testdox It uses checkbox descriptions as labels and desc_tip as help text.
 	 */
 	public function test_from_legacy_settings_uses_checkbox_desc_as_label(): void {
 		$schema = SettingsUISchema::from_legacy_settings(
@@ -213,7 +213,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It does not render boolean desc_tip values as help text.
+	 * @testdox It does not render boolean desc_tip values as help text.
 	 */
 	public function test_from_legacy_settings_ignores_boolean_desc_tip(): void {
 		$schema = SettingsUISchema::from_legacy_settings(
@@ -238,7 +238,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It uses legacy field names for form POST save schema.
+	 * @testdox It uses legacy field names for form POST save schema.
 	 */
 	public function test_from_legacy_settings_uses_field_name_for_form_post_save_schema(): void {
 		$schema = SettingsUISchema::from_legacy_settings(
@@ -265,7 +265,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It sanitizes info field text and marks info fields as non-saving.
+	 * @testdox It sanitizes info field text and marks info fields as non-saving.
 	 */
 	public function test_from_legacy_settings_sanitizes_info_field_text_and_marks_info_fields_as_non_saving(): void {
 		$schema = SettingsUISchema::from_legacy_settings(
@@ -285,5 +285,113 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'Read-only <strong>information</strong>alert("x").', $field['description'] );
 		$this->assertSame( array( 'adapter' => 'none' ), $field['save'] );
+	}
+
+	/**
+	 * @testdox It preserves both legacy descriptions and string desc_tip values.
+	 */
+	public function test_from_legacy_settings_preserves_desc_and_string_desc_tip(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'test',
+			'',
+			'Test settings',
+			array(
+				array(
+					'id'       => 'woocommerce_test_text',
+					'type'     => 'text',
+					'title'    => 'Text field',
+					'desc'     => 'Visible help text.',
+					'desc_tip' => 'Tooltip help text.',
+				),
+			)
+		);
+
+		$this->assertSame( 'Visible help text.<br />Tooltip help text.', $schema['groups']['default']['fields'][0]['description'] );
+	}
+
+	/**
+	 * @testdox It adds visibility metadata for legacy checkbox groups and stock fields.
+	 */
+	public function test_from_legacy_settings_adds_visibility_metadata_for_legacy_conditional_fields(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'test',
+			'',
+			'Test settings',
+			array(
+				array(
+					'id'              => 'woocommerce_enable_reviews',
+					'type'            => 'checkbox',
+					'desc'            => 'Enable product reviews',
+					'checkboxgroup'   => 'start',
+					'show_if_checked' => 'option',
+				),
+				array(
+					'id'              => 'woocommerce_review_rating_required',
+					'type'            => 'checkbox',
+					'desc'            => 'Star ratings should be required',
+					'checkboxgroup'   => 'end',
+					'show_if_checked' => 'yes',
+				),
+				array(
+					'id'    => 'woocommerce_hold_stock_minutes',
+					'type'  => 'number',
+					'title' => 'Hold stock',
+					'class' => 'manage_stock_field',
+				),
+			)
+		);
+
+		$fields = $schema['groups']['default']['fields'];
+
+		$this->assertSame(
+			array(
+				'controller' => 'woocommerce_enable_reviews',
+				'value'      => true,
+			),
+			$fields[1]['visibility']
+		);
+		$this->assertSame(
+			array(
+				'controller' => 'woocommerce_manage_stock',
+				'value'      => true,
+			),
+			$fields[2]['visibility']
+		);
+	}
+
+	/**
+	 * @testdox It sanitizes custom attribute keys and option labels.
+	 */
+	public function test_from_legacy_settings_sanitizes_custom_attribute_keys_and_option_labels(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'test',
+			'',
+			'Test settings',
+			array(
+				array(
+					'id'                => 'woocommerce_test_select',
+					'type'              => 'select',
+					'title'             => 'Select field',
+					'custom_attributes' => array(
+						'onChange' => 'alert(1)',
+						'min'      => 1,
+					),
+					'options'           => array(
+						'a' => '<strong>Option A</strong>',
+					),
+				),
+			)
+		);
+
+		$field = $schema['groups']['default']['fields'][0];
+
+		$this->assertSame(
+			array(
+				'onchange' => 'alert(1)',
+				'min'      => 1,
+			),
+			$field['customAttributes']
+		);
+		$this->assertSame( 'Option A', $field['options'][0]['label'] );
 	}
 }

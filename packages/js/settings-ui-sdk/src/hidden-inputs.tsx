@@ -6,7 +6,7 @@ import { createElement, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { warn } from './diagnostics';
+import { error } from './diagnostics';
 import type { SettingsUIField, SettingsValue } from './types';
 
 type HiddenInput = {
@@ -30,7 +30,7 @@ export const getHiddenInputs = (
 	}
 
 	if ( adapter !== 'form_post' ) {
-		warn( `Save adapter "${ adapter }" is not supported.`, { field } );
+		error( `Save adapter "${ adapter }" is not supported.`, { field } );
 		return [];
 	}
 

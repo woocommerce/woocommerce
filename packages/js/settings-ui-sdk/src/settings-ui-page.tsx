@@ -4,6 +4,7 @@
 import { Page } from '@wordpress/admin-ui';
 import { Button, Notice } from '@wordpress/components';
 import {
+	Component,
 	createElement,
 	RawHTML,
 	useCallback,
@@ -12,13 +13,13 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import type { ReactNode } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
 
 /**
  * Internal dependencies
  */
 import { HiddenInputs } from './hidden-inputs';
-import { warn } from './diagnostics';
+import { error, warn } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
 import { NativeSettingsField } from './native-fields';
 import {
@@ -136,9 +137,23 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 	);
 };
 
+const valueMatchesVisibilityRule = (
+	value: SettingsValue,
+	expected: SettingsValue | SettingsValue[] | undefined
+) => {
+	const expectedValues = Array.isArray( expected )
+		? expected
+		: [ expected ?? true ];
+
+	return expectedValues.some( ( expectedValue ) =>
+		areValuesEqual( value, expectedValue )
+	);
+};
+
 const getVisible = ( {
 	id,
 	kind,
+	field,
 	values,
 	initialValues,
 	context,
@@ -146,6 +161,7 @@ const getVisible = ( {
 }: {
 	id: string;
 	kind: 'field' | 'group';
+	field?: SettingsUIField;
 	values: SettingsValues;
 	initialValues: SettingsValues;
 	context: SettingsFieldContext;
@@ -156,23 +172,71 @@ const getVisible = ( {
 			? resolveFieldVisibilityPredicate( id, context )
 			: resolveGroupVisibilityPredicate( id, context );
 
-	if ( ! predicate ) {
-		return true;
+	if ( predicate ) {
+		try {
+			return predicate( { values, initialValues, context, schema } );
+		} catch ( predicateError ) {
+			warn(
+				`Visibility predicate for ${ kind } "${ id }" failed. Rendering it visible.`,
+				{ error: predicateError, context }
+			);
+			return true;
+		}
 	}
 
-	try {
-		return predicate( { values, initialValues, context, schema } );
-	} catch ( error ) {
-		warn(
-			`Visibility predicate for ${ kind } "${ id }" failed. Rendering it visible.`,
-			{ error, context }
+	if ( field?.visibility ) {
+		return valueMatchesVisibilityRule(
+			values[ field.visibility.controller ],
+			field.visibility.value
 		);
-		return true;
 	}
+
+	return true;
 };
 
 const getAllFields = ( schema: SettingsUISchema ): SettingsUIField[] =>
 	Object.values( schema.groups ).flatMap( ( group ) => group.fields );
+
+type ErrorBoundaryProps = {
+	children: ReactNode;
+};
+
+type ErrorBoundaryState = {
+	hasError: boolean;
+};
+
+class SettingsUIErrorBoundary extends Component<
+	ErrorBoundaryProps,
+	ErrorBoundaryState
+> {
+	state: ErrorBoundaryState = { hasError: false };
+
+	static getDerivedStateFromError(): ErrorBoundaryState {
+		return { hasError: true };
+	}
+
+	componentDidCatch( caughtError: Error, errorInfo: ErrorInfo ) {
+		error( 'Settings UI render failed.', {
+			error: caughtError,
+			errorInfo,
+		} );
+	}
+
+	render() {
+		if ( this.state.hasError ) {
+			return (
+				<Notice status="error" isDismissible={ false }>
+					{ __(
+						'Something went wrong while rendering this settings page. Reload the page with the settings UI feature disabled to use the classic settings screen.',
+						'woocommerce'
+					) }
+				</Notice>
+			);
+		}
+
+		return this.props.children;
+	}
+}
 
 const ShellHeader = ( {
 	schema,
@@ -395,8 +459,10 @@ export const SettingsUIPage = ( {
 			return;
 		}
 
-		const handler = saveStrategy.handler
-			? resolveSaveHandler( saveStrategy.handler, context )
+		const handlerName =
+			'handler' in saveStrategy ? saveStrategy.handler : undefined;
+		const handler = handlerName
+			? resolveSaveHandler( handlerName, context )
 			: undefined;
 		if ( ! handler ) {
 			setSaveNotice( {
@@ -427,10 +493,10 @@ export const SettingsUIPage = ( {
 					result?.notice ||
 					__( 'Settings saved successfully.', 'woocommerce' ),
 			} );
-		} catch ( error ) {
+		} catch ( saveError ) {
 			const message =
-				error instanceof Error && error.message
-					? error.message
+				saveError instanceof Error && saveError.message
+					? saveError.message
 					: __( 'Unable to save settings.', 'woocommerce' );
 			setSaveNotice( { status: 'error', message } );
 		} finally {
@@ -465,6 +531,7 @@ export const SettingsUIPage = ( {
 						getVisible( {
 							id: field.id,
 							kind: 'field',
+							field,
 							values,
 							initialValues,
 							context,
@@ -480,75 +547,87 @@ export const SettingsUIPage = ( {
 		saveStrategy.adapter === 'form_post' ? getAllFields( schema ) : [];
 
 	return (
-		<ShellHeader
-			schema={ schema }
-			context={ context }
-			values={ values }
-			initialValues={ initialValues }
-			isDirty={ isDirty }
-			isSaving={ isSaving }
-			saveStrategy={ saveStrategy }
-			onSave={ handleCustomSave }
-		>
-			{ saveNotice ? (
-				<Notice
-					className="wc-settings-ui-shell__notice"
-					status={ saveNotice.status }
-					isDismissible
-					onRemove={ () => setSaveNotice( null ) }
-				>
-					{ saveNotice.message }
-				</Notice>
-			) : null }
-			<div className="wc-settings-ui">
-				{ visibleGroups.map( ( group ) => (
-					<section className="wc-settings-ui__group" key={ group.id }>
-						<GroupHeader group={ group } />
-						<div className="wc-settings-ui__group-panel">
-							{ group.fields.map( ( field ) => {
-								const FieldComponent =
-									resolveFieldComponent( field, context ) ||
-									NativeSettingsField;
-								const value = values[ field.id ];
+		<SettingsUIErrorBoundary>
+			<ShellHeader
+				schema={ schema }
+				context={ context }
+				values={ values }
+				initialValues={ initialValues }
+				isDirty={ isDirty }
+				isSaving={ isSaving }
+				saveStrategy={ saveStrategy }
+				onSave={ handleCustomSave }
+			>
+				{ saveNotice ? (
+					<Notice
+						className="wc-settings-ui-shell__notice"
+						status={ saveNotice.status }
+						isDismissible
+						onRemove={ () => setSaveNotice( null ) }
+					>
+						{ saveNotice.message }
+					</Notice>
+				) : null }
+				<div className="wc-settings-ui">
+					{ visibleGroups.map( ( group ) => (
+						<section
+							className="wc-settings-ui__group"
+							key={ group.id }
+						>
+							<GroupHeader group={ group } />
+							<div className="wc-settings-ui__group-panel">
+								{ group.fields.map( ( field ) => {
+									const FieldComponent =
+										resolveFieldComponent(
+											field,
+											context
+										) || NativeSettingsField;
+									const value = values[ field.id ];
 
-								return (
-									<div
-										className={ [
-											'wc-settings-ui__field',
-											getFieldTypeClassName( field.type ),
-										].join( ' ' ) }
-										key={ field.id }
-									>
-										<FieldComponent
-											field={ field }
-											value={ value }
-											context={ context }
-											values={ values }
-											initialValues={ initialValues }
-											setValue={ setValue }
-											setValues={ setValues }
-											onChange={ ( nextValue ) =>
-												setValue( field.id, nextValue )
-											}
-										/>
-									</div>
-								);
-							} ) }
-						</div>
-					</section>
-				) ) }
-			</div>
-			{ formPostFields.length > 0 ? (
-				<div className="wc-settings-ui__hidden-inputs">
-					{ formPostFields.map( ( field ) => (
-						<HiddenInputs
-							field={ field }
-							value={ values[ field.id ] }
-							key={ field.id }
-						/>
+									return (
+										<div
+											className={ [
+												'wc-settings-ui__field',
+												getFieldTypeClassName(
+													field.type
+												),
+											].join( ' ' ) }
+											key={ field.id }
+										>
+											<FieldComponent
+												field={ field }
+												value={ value }
+												context={ context }
+												values={ values }
+												initialValues={ initialValues }
+												setValue={ setValue }
+												setValues={ setValues }
+												onChange={ ( nextValue ) =>
+													setValue(
+														field.id,
+														nextValue
+													)
+												}
+											/>
+										</div>
+									);
+								} ) }
+							</div>
+						</section>
 					) ) }
 				</div>
-			) : null }
-		</ShellHeader>
+				{ formPostFields.length > 0 ? (
+					<div className="wc-settings-ui__hidden-inputs">
+						{ formPostFields.map( ( field ) => (
+							<HiddenInputs
+								field={ field }
+								value={ values[ field.id ] }
+								key={ field.id }
+							/>
+						) ) }
+					</div>
+				) : null }
+			</ShellHeader>
+		</SettingsUIErrorBoundary>
 	);
 };

@@ -70,6 +70,47 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it( 'hides fields with unmet native visibility rules', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'none' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'controller',
+							label: 'Controller',
+							type: 'checkbox',
+							value: false,
+						},
+						{
+							id: 'dependent',
+							label: 'Dependent field',
+							type: 'text',
+							visibility: {
+								controller: 'controller',
+								value: true,
+							},
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		expect( container.textContent ).toContain( 'Controller' );
+		expect( container.textContent ).not.toContain( 'Dependent field' );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
 	it( 'sanitizes info fields and group descriptions before rendering', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',

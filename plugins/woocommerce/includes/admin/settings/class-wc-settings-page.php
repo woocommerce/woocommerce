@@ -309,8 +309,19 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			global $current_section;
 
 			$settings_ui_page = $this->get_settings_ui_page();
-			if ( Features::is_enabled( 'settings-ui' ) && $settings_ui_page instanceof SettingsUIPageInterface ) {
-				foreach ( $settings_ui_page->get_script_handles( $current_section ) as $script_handle ) {
+			$section_key      = '' === $current_section ? 'default' : $current_section;
+			$page_id          = $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page->get_page_id() : '';
+			$schema_failed    = ! empty( $GLOBALS['wc_settings_ui_schema_failed'][ $page_id ][ $section_key ] );
+
+			if ( Features::is_enabled( 'settings-ui' ) && $settings_ui_page instanceof SettingsUIPageInterface && ! $schema_failed ) {
+				try {
+					$script_handles = $settings_ui_page->get_script_handles( $current_section );
+				} catch ( \Throwable $e ) {
+					$script_handles = array();
+					wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
+				}
+
+				foreach ( is_array( $script_handles ) ? $script_handles : array() as $script_handle ) {
 					if ( is_string( $script_handle ) && '' !== $script_handle ) {
 						wp_enqueue_script( $script_handle );
 					}

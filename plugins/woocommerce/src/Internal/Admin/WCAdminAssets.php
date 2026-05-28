@@ -448,7 +448,7 @@ class WCAdminAssets {
 	 * @return array
 	 */
 	private function get_settings_ui_script_dependencies(): array {
-		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'settings-ui' ) ) {
+		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'settings-ui' ) || ! current_user_can( 'manage_woocommerce' ) ) {
 			return array();
 		}
 
@@ -457,10 +457,17 @@ class WCAdminAssets {
 			return array();
 		}
 
+		$extension_handles = array();
+		try {
+			$extension_handles = $settings_ui_page->get_script_handles( $this->get_current_settings_section() );
+		} catch ( \Throwable $e ) {
+			wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
+		}
+
 		$dependencies = array_merge(
 			array( 'wc-settings-ui-sdk' ),
 			array_filter(
-				$settings_ui_page->get_script_handles( $this->get_current_settings_section() ),
+				is_array( $extension_handles ) ? $extension_handles : array(),
 				static function ( $script_handle ): bool {
 					return is_string( $script_handle ) && '' !== $script_handle;
 				}

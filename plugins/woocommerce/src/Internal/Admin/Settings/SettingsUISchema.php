@@ -36,10 +36,11 @@ class SettingsUISchema {
 	 * @return array
 	 */
 	public static function from_legacy_settings( string $page_id, string $section, string $title, array $settings, string $default_save_adapter = 'form_post' ): array {
-		$groups        = array();
-		$current_group = null;
-		$current_id    = null;
-		$group_index   = 0;
+		$groups                = array();
+		$current_group         = null;
+		$current_id            = null;
+		$group_index           = 0;
+		$visibility_controller = null;
 
 		foreach ( $settings as $setting ) {
 			if ( ! is_array( $setting ) ) {
@@ -49,6 +50,7 @@ class SettingsUISchema {
 			$type = isset( $setting['type'] ) && is_string( $setting['type'] ) ? $setting['type'] : 'text';
 
 			if ( 'title' === $type ) {
+				$visibility_controller = null;
 				if ( $current_group && $current_id ) {
 					$groups[ $current_id ] = $current_group;
 				}
@@ -69,6 +71,7 @@ class SettingsUISchema {
 			}
 
 			if ( 'sectionend' === $type ) {
+				$visibility_controller = null;
 				if ( $current_group && $current_id ) {
 					$groups[ $current_id ] = $current_group;
 				}
@@ -87,9 +90,17 @@ class SettingsUISchema {
 				++$group_index;
 			}
 
-			$field = self::transform_legacy_field( $setting, $default_save_adapter );
+			$field = self::transform_legacy_field( $setting, $default_save_adapter, $visibility_controller );
 			if ( $field ) {
 				$current_group['fields'][] = $field;
+			}
+
+			if ( 'checkbox' === $type && 'option' === ( $setting['show_if_checked'] ?? null ) ) {
+				$visibility_controller = $field['id'] ?? null;
+			}
+
+			if ( 'end' === ( $setting['checkboxgroup'] ?? null ) ) {
+				$visibility_controller = null;
 			}
 		}
 
@@ -123,11 +134,12 @@ class SettingsUISchema {
 	/**
 	 * Transform a legacy field into the canonical schema.
 	 *
-	 * @param array  $setting Legacy field definition.
-	 * @param string $default_save_adapter Default save adapter.
+	 * @param array       $setting Legacy field definition.
+	 * @param string      $default_save_adapter Default save adapter.
+	 * @param string|null $visibility_controller Current checkbox group controller.
 	 * @return array|null
 	 */
-	private static function transform_legacy_field( array $setting, string $default_save_adapter ): ?array {
+	private static function transform_legacy_field( array $setting, string $default_save_adapter, ?string $visibility_controller = null ): ?array {
 		$id   = isset( $setting['id'] ) && is_scalar( $setting['id'] ) ? (string) $setting['id'] : '';
 		$type = isset( $setting['type'] ) && is_string( $setting['type'] ) ? $setting['type'] : 'text';
 		if ( '' === $id ) {
@@ -152,6 +164,11 @@ class SettingsUISchema {
 
 		if ( isset( $setting['custom_attributes'] ) && is_array( $setting['custom_attributes'] ) ) {
 			$field['customAttributes'] = self::get_custom_attributes( $setting['custom_attributes'] );
+		}
+
+		$visibility = self::get_field_visibility( $setting, $visibility_controller );
+		if ( $visibility ) {
+			$field['visibility'] = $visibility;
 		}
 
 		$options = self::get_options( $setting );
@@ -197,15 +214,23 @@ class SettingsUISchema {
 	 * @return string
 	 */
 	private static function get_field_description( array $setting, string $type ): string {
-		if ( isset( $setting['desc_tip'] ) && is_string( $setting['desc_tip'] ) && '' !== $setting['desc_tip'] ) {
-			return wp_kses_post( (string) $setting['desc_tip'] );
+		$description = 'checkbox' === $type || ! isset( $setting['desc'] ) || ! is_scalar( $setting['desc'] )
+			? ''
+			: wp_kses_post( (string) $setting['desc'] );
+
+		$desc_tip = isset( $setting['desc_tip'] ) && is_string( $setting['desc_tip'] ) && '' !== $setting['desc_tip']
+			? wp_kses_post( $setting['desc_tip'] )
+			: '';
+
+		if ( '' === $description ) {
+			return $desc_tip;
 		}
 
-		if ( 'checkbox' === $type ) {
-			return '';
+		if ( '' === $desc_tip ) {
+			return $description;
 		}
 
-		return isset( $setting['desc'] ) && is_scalar( $setting['desc'] ) ? wp_kses_post( (string) $setting['desc'] ) : '';
+		return $description . '<br />' . $desc_tip;
 	}
 
 	/**
@@ -288,6 +313,32 @@ class SettingsUISchema {
 	}
 
 	/**
+	 * Get visibility metadata for legacy conditional fields.
+	 *
+	 * @param array       $setting Legacy field definition.
+	 * @param string|null $visibility_controller Current checkbox group controller.
+	 * @return array|null
+	 */
+	private static function get_field_visibility( array $setting, ?string $visibility_controller ): ?array {
+		$class_names = isset( $setting['class'] ) && is_string( $setting['class'] ) ? explode( ' ', $setting['class'] ) : array();
+		if ( in_array( 'manage_stock_field', $class_names, true ) ) {
+			return array(
+				'controller' => 'woocommerce_manage_stock',
+				'value'      => true,
+			);
+		}
+
+		if ( 'yes' === ( $setting['show_if_checked'] ?? null ) && $visibility_controller ) {
+			return array(
+				'controller' => $visibility_controller,
+				'value'      => true,
+			);
+		}
+
+		return null;
+	}
+
+	/**
 	 * Normalize field options.
 	 *
 	 * @param array $setting Legacy field definition.
@@ -305,7 +356,7 @@ class SettingsUISchema {
 			}
 
 			$options[] = array(
-				'label' => is_scalar( $label ) ? html_entity_decode( (string) $label, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) : '',
+				'label' => is_scalar( $label ) ? wp_strip_all_tags( html_entity_decode( (string) $label, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ) : '',
 				'value' => (string) $value,
 			);
 		}
@@ -327,7 +378,12 @@ class SettingsUISchema {
 				continue;
 			}
 
-			$attributes[ (string) $attribute ] = $value;
+			$attribute_key = sanitize_key( (string) $attribute );
+			if ( '' === $attribute_key ) {
+				continue;
+			}
+
+			$attributes[ $attribute_key ] = $value;
 		}
 
 		return $attributes;

@@ -2,29 +2,12 @@
  * External dependencies
  */
 import { createElement, createRoot } from '@wordpress/element';
+import type { SettingsUISchema } from '@woocommerce/settings-ui-sdk';
 
 /**
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
-
-type SettingsUINavigationItem = {
-	id: string;
-	label: string;
-	href: string;
-	active?: boolean;
-};
-
-type SettingsUISchema = {
-	id: string;
-	section?: string;
-	shell?: {
-		title?: string;
-		navigation?: SettingsUINavigationItem[];
-		sectionNavigation?: SettingsUINavigationItem[];
-	};
-	groups: Record< string, unknown >;
-};
 
 declare global {
 	interface Window {

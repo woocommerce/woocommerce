@@ -90,7 +90,9 @@ const registerSlotFills = () => {
 		registerSettingsEmailListingFill();
 	}
 
-	registerSettingsUIScreens();
+	if ( isFeatureEnabled( 'settings-ui' ) ) {
+		registerSettingsUIScreens();
+	}
 
 	registerSettingsEmailColorPaletteFill();
 	registerSettingsEmailFeedbackFill();

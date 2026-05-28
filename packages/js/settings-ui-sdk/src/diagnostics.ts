@@ -8,7 +8,7 @@ declare const process:
 
 const isDevelopment = () => {
 	if ( typeof process === 'undefined' ) {
-		return false;
+		return true;
 	}
 
 	return process.env.NODE_ENV !== 'production';
@@ -27,4 +27,15 @@ export const warn = ( message: string, context?: unknown ) => {
 
 	// eslint-disable-next-line no-console
 	console.warn( `[WooCommerce settings UI] ${ message }` );
+};
+
+export const error = ( message: string, context?: unknown ) => {
+	if ( context ) {
+		// eslint-disable-next-line no-console
+		console.error( `[WooCommerce settings UI] ${ message }`, context );
+		return;
+	}
+
+	// eslint-disable-next-line no-console
+	console.error( `[WooCommerce settings UI] ${ message }` );
 };

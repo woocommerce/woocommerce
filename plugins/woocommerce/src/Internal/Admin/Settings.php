@@ -409,7 +409,7 @@ class Settings {
 	 * @return array
 	 */
 	private function add_settings_ui_schema( array $settings ): array {
-		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'settings-ui' ) ) {
+		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'settings-ui' ) || ! current_user_can( 'manage_woocommerce' ) ) {
 			return $settings;
 		}
 
@@ -429,7 +429,12 @@ class Settings {
 			$settings['settingsUI'][ $page_id ] = array();
 		}
 
-		$settings['settingsUI'][ $page_id ][ $section_key ] = $settings_ui_page->get_schema( $section );
+		try {
+			$settings['settingsUI'][ $page_id ][ $section_key ] = $settings_ui_page->get_schema( $section );
+		} catch ( \Throwable $e ) {
+			$GLOBALS['wc_settings_ui_schema_failed'][ $page_id ][ $section_key ] = true;
+			wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
+		}
 
 		return $settings;
 	}
