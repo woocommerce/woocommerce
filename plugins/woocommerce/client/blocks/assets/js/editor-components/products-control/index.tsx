@@ -6,13 +6,13 @@ import { SearchListControl } from '@woocommerce/editor-components/search-list-co
 import { withSearchedProducts } from '@woocommerce/block-hocs';
 import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message';
 import { decodeEntities } from '@wordpress/html-entities';
+import { convertProductResponseItemToSearchItem } from '@woocommerce/utils';
 import type { ProductResponseItem } from '@woocommerce/types';
 import type { ErrorObject } from '@woocommerce/editor-components/error-placeholder';
 import type {
 	SearchListItem,
 	SearchListMessages,
 } from '@woocommerce/editor-components/search-list-control/types';
-import { convertProductResponseItemToSearchItem } from '@woocommerce/utils';
 import type { ComponentType } from 'react';
 
 interface ProductsControlProps {
