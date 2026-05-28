@@ -7,6 +7,7 @@ import { render, screen } from '@testing-library/react';
  * Internal dependencies
  */
 import Block from '../block';
+import { TotalsCoupon } from '@woocommerce/base-components/cart-checkout';
 
 jest.mock( '@woocommerce/settings', () => ( {
 	getSetting: jest.fn( ( setting, defaultValue ) => {
@@ -25,8 +26,8 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 	} ) ),
 } ) );
 
-const MockTotalsCoupon = jest.fn(
-	( { isLoading, instanceId, displayCouponForm } ) => (
+jest.mock( '@woocommerce/base-components/cart-checkout', () => ( {
+	TotalsCoupon: jest.fn( ( { isLoading, instanceId, displayCouponForm } ) => (
 		<div data-testid="totals-coupon">
 			<span>Coupon Form</span>
 			<span data-testid="instance-id">{ instanceId }</span>
@@ -35,10 +36,7 @@ const MockTotalsCoupon = jest.fn(
 				{ String( displayCouponForm ) }
 			</span>
 		</div>
-	)
-);
-jest.mock( '@woocommerce/base-components/cart-checkout', () => ( {
-	TotalsCoupon: MockTotalsCoupon,
+	) ),
 } ) );
 
 jest.mock( '@woocommerce/blocks-components', () => ( {
@@ -48,6 +46,8 @@ jest.mock( '@woocommerce/blocks-components', () => ( {
 		</div>
 	) ),
 } ) );
+
+const MockTotalsCoupon = jest.mocked( TotalsCoupon );
 
 describe( 'Checkout Order Summary Coupon Form Block', () => {
 	beforeEach( () => {
