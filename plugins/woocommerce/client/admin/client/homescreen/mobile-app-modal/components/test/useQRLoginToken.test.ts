@@ -674,6 +674,54 @@ describe( 'useQRLoginToken', () => {
 		expect( result.current.candidateNumbers ).toBeNull();
 	} );
 
+	it( 'ignores an older same-token scanned poll after a status poll approves', async () => {
+		let resolveStalePoll: ( value: unknown ) => void = () => undefined;
+		const stalePoll = new Promise( ( resolve ) => {
+			resolveStalePoll = resolve;
+		} );
+		const scannedResponse = {
+			status: 'scanned',
+			numbers: [ '317', '042', '589' ],
+			device: { model: 'Pixel 10' },
+			expires_at: NOW_SECONDS + 90,
+		};
+
+		mockApiFetch
+			.mockResolvedValueOnce( buildResponse() )
+			.mockResolvedValueOnce( scannedResponse )
+			.mockImplementationOnce( () => stalePoll )
+			.mockResolvedValueOnce( { status: 'approved' } );
+
+		const { result } = renderHook( () => useQRLoginToken() );
+
+		await act( async () => {
+			await result.current.fetchToken();
+		} );
+		expect( result.current.state ).toBe( QRLoginTokenStates.SCANNED );
+
+		await act( async () => {
+			jest.advanceTimersByTime( 2600 );
+			await Promise.resolve();
+		} );
+
+		await act( async () => {
+			jest.advanceTimersByTime( 2600 );
+			await Promise.resolve();
+		} );
+
+		expect( result.current.state ).toBe( QRLoginTokenStates.APPROVED );
+		expect( result.current.candidateNumbers ).toBeNull();
+
+		await act( async () => {
+			resolveStalePoll( scannedResponse );
+			await stalePoll;
+		} );
+
+		expect( result.current.state ).toBe( QRLoginTokenStates.APPROVED );
+		expect( result.current.candidateNumbers ).toBeNull();
+		expect( result.current.challengeExpiresAt ).toBe( 0 );
+	} );
+
 	it( 'moves APPROVED → EXPIRED when a later status poll reports expiry', async () => {
 		mockApiFetch
 			.mockResolvedValueOnce( buildResponse() )

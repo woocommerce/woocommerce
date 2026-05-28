@@ -2249,11 +2249,13 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$this->dispatch_approve( $plaintext, $scan_data['real_number'] );
 		wp_set_current_user( 0 );
 
-		// No token_hash → opaque expired (we never confirm the session_id is real).
+		// No token_hash → request validation error.
 		$response = $this->dispatch_session_status( $scan_data['session_id'] );
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertSame( MobileAppQRLogin::STATE_EXPIRED, $response->get_data()['state'] );
-		$this->assertArrayNotHasKey( 'exchange_grant', $response->get_data() );
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame(
+			'rest_missing_callback_param',
+			$response->get_data()['code']
+		);
 
 		// Wrong token_hash → same opaque expired.
 		$response = $this->dispatch_session_status( $scan_data['session_id'], 'a-different-token' );
@@ -2445,9 +2447,12 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$response = $this->dispatch_availability();
 
 		$this->assertSame( 200, $response->get_status() );
-		$headers = $response->get_headers();
-		$this->assertArrayHasKey( 'Cache-Control', $headers );
-		$this->assertStringContainsString( 'no-cache', (string) $headers['Cache-Control'] );
+		$headers = array_change_key_case( $response->get_headers(), CASE_LOWER );
+		$this->assertArrayHasKey( 'cache-control', $headers );
+		$this->assertStringContainsStringIgnoringCase(
+			'no-cache',
+			(string) $headers['cache-control']
+		);
 	}
 
 	/**

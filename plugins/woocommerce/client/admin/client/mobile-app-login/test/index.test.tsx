@@ -160,6 +160,48 @@ describe( 'MobileAppLoginPage', () => {
 		expect( refreshToken ).toHaveBeenCalledTimes( 1 );
 	} );
 
+	it( 'renders a recovery action when READY has no QR URL', () => {
+		const refreshToken = jest.fn();
+		mockedUseQRLoginToken.mockReturnValue( {
+			...makeReadyState(),
+			qrUrl: null,
+			refreshToken,
+		} );
+
+		render( <MobileAppLoginPage /> );
+
+		expect(
+			screen.getByText( /could not generate the login code/i )
+		).toBeInTheDocument();
+
+		fireEvent.click(
+			screen.getByRole( 'button', { name: /Renew code/i } )
+		);
+
+		expect( refreshToken ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'renders a recovery action when SCANNED has no candidate numbers', () => {
+		const refreshToken = jest.fn();
+		mockedUseQRLoginToken.mockReturnValue( {
+			...makeReadyState(),
+			state: QRLoginTokenStates.SCANNED,
+			qrUrl: null,
+			candidateNumbers: null,
+			refreshToken,
+		} );
+
+		render( <MobileAppLoginPage /> );
+
+		expect(
+			screen.getByText( /could not load the confirmation challenge/i )
+		).toBeInTheDocument();
+
+		fireEvent.click( screen.getByRole( 'button', { name: /Try again/i } ) );
+
+		expect( refreshToken ).toHaveBeenCalledTimes( 1 );
+	} );
+
 	it( 'does not render the magic-link button (regression guard — modal-only feature)', () => {
 		render( <MobileAppLoginPage /> );
 

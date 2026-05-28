@@ -274,7 +274,10 @@ export const useQRLoginToken = ( {
 				// Merchant tapped correctly on this tab or another tab. Show
 				// "Signing in…" until the mobile app finishes the exchange and
 				// the next poll flips us to CONSUMED.
+				requestIdRef.current += 1;
 				clearTimer();
+				setCandidateNumbers( null );
+				setChallengeExpiresAt( 0 );
 				setState( QRLoginTokenStates.APPROVED );
 				return;
 			}
@@ -507,11 +510,13 @@ export const useQRLoginToken = ( {
 					requestIdRef.current += 1;
 					clearTimer();
 					setCandidateNumbers( null );
+					setChallengeExpiresAt( 0 );
 					setState( QRLoginTokenStates.APPROVED );
 				} else {
 					clearTimer();
 					clearPollTimer();
 					setCandidateNumbers( null );
+					setChallengeExpiresAt( 0 );
 					tokenRef.current = null;
 					setState( QRLoginTokenStates.REJECTED );
 				}

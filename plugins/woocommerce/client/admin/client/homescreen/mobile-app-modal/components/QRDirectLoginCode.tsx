@@ -115,6 +115,27 @@ export const QRDirectLoginCode = ( {
 		return `${ mins }:${ secs.toString().padStart( 2, '0' ) }`;
 	};
 
+	const renderRecoveryFallback = (
+		message: string,
+		buttonLabel: string,
+		eventName: string
+	) => (
+		<div className="woocommerce-qr-direct-login">
+			<p className="woocommerce-qr-direct-login__error" role="alert">
+				{ message }
+			</p>
+			<Button
+				variant="secondary"
+				onClick={ () => {
+					recordEvent( eventName );
+					refreshToken();
+				} }
+			>
+				{ buttonLabel }
+			</Button>
+		</div>
+	);
+
 	// Up-front availability gate — render a brief loading state while the
 	// /qr-login-availability probe resolves, then either the disabled card
 	// (terminal) or fall through to the normal state machine below.
@@ -208,6 +229,17 @@ export const QRDirectLoginCode = ( {
 				onChooseNumber={ chooseNumber }
 				errorMessage={ errorMessage }
 			/>
+		);
+	}
+
+	if ( state === QRLoginTokenStates.SCANNED ) {
+		return renderRecoveryFallback(
+			__(
+				'We could not load the confirmation challenge. Please try again.',
+				'woocommerce'
+			),
+			__( 'Try again', 'woocommerce' ),
+			'mobile_app_qr_direct_login_refreshed'
 		);
 	}
 
@@ -311,6 +343,17 @@ export const QRDirectLoginCode = ( {
 					</Button>
 				</div>
 			</div>
+		);
+	}
+
+	if ( state === QRLoginTokenStates.READY ) {
+		return renderRecoveryFallback(
+			__(
+				'We could not generate the login code. Please renew and try again.',
+				'woocommerce'
+			),
+			__( 'Renew code', 'woocommerce' ),
+			'mobile_app_qr_direct_login_renewed'
 		);
 	}
 
