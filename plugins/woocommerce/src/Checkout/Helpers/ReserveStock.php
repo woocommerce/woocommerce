@@ -100,6 +100,10 @@ final class ReserveStock {
 	 * @return int|float Amount of stock already reserved.
 	 */
 	public function get_reserved_stock_cached( $product, $exclude_order_id = 0 ) {
+		if ( ! $product instanceof \WC_Product ) {
+			return 0;
+		}
+
 		if ( ! $this->is_enabled() ) {
 			return 0;
 		}
