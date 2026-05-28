@@ -126,6 +126,7 @@
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/stylelint-config": "^21.0.0",
+		"chokidar": "^3.6.0",
 		"esbuild": "^0.24.0",
 		"eslint": "^8.55.0",
 		"glob": "^10.3.10",

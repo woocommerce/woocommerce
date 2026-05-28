@@ -55,6 +55,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-ts-config": "workspace:*",
 		"babel-jest": "29.5.x",
+		"chokidar": "^3.6.0",
 		"esbuild": "^0.24.0",
 		"eslint": "^8.55.0",
 		"glob": "^10.3.10",

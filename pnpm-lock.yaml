@@ -297,6 +297,9 @@ importers:
       '@wordpress/browserslist-config':
         specifier: next
         version: 6.43.1-next.v.202604091042.0
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
@@ -409,6 +412,9 @@ importers:
       '@wordpress/browserslist-config':
         specifier: next
         version: 6.43.1-next.v.202604091042.0
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       copy-webpack-plugin:
         specifier: 13.0.x
         version: 13.0.1(webpack@5.97.1)
@@ -719,6 +725,9 @@ importers:
       '@wordpress/browserslist-config':
         specifier: next
         version: 6.43.1-next.v.202604091042.0
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
@@ -805,6 +814,9 @@ importers:
       '@woocommerce/internal-ts-config':
         specifier: workspace:*
         version: link:../internal-ts-config
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
@@ -872,6 +884,9 @@ importers:
       '@woocommerce/internal-ts-config':
         specifier: workspace:*
         version: link:../internal-ts-config
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
@@ -981,6 +996,9 @@ importers:
       '@wordpress/browserslist-config':
         specifier: next
         version: 6.43.1-next.v.202604091042.0
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
@@ -1126,6 +1144,9 @@ importers:
       '@woocommerce/internal-ts-config':
         specifier: workspace:*
         version: link:../internal-ts-config
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
@@ -1205,6 +1226,9 @@ importers:
       '@woocommerce/internal-ts-config':
         specifier: workspace:*
         version: link:../internal-ts-config
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       d3-time-format:
         specifier: ^2.3.0
         version: 2.3.0
@@ -1300,6 +1324,9 @@ importers:
       '@woocommerce/internal-ts-config':
         specifier: workspace:*
         version: link:../internal-ts-config
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
@@ -1499,6 +1526,9 @@ importers:
       '@wordpress/stylelint-config':
         specifier: ^21.0.0
         version: 21.41.0(postcss@8.5.9)(stylelint@14.16.1)
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
@@ -1678,6 +1708,9 @@ importers:
       '@wordpress/browserslist-config':
         specifier: next
         version: 6.43.1-next.v.202604091042.0
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
@@ -1850,6 +1883,9 @@ importers:
       '@woocommerce/internal-ts-config':
         specifier: workspace:*
         version: link:../internal-ts-config
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
@@ -1947,6 +1983,9 @@ importers:
       '@woocommerce/internal-ts-config':
         specifier: workspace:*
         version: link:../internal-ts-config
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
@@ -1999,6 +2038,9 @@ importers:
       '@woocommerce/internal-ts-config':
         specifier: workspace:*
         version: link:../internal-ts-config
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
@@ -2092,6 +2134,9 @@ importers:
       '@wordpress/browserslist-config':
         specifier: next
         version: 6.43.1-next.v.202604091042.0
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       copy-webpack-plugin:
         specifier: 13.0.x
         version: 13.0.1(webpack@5.97.1)
@@ -2168,6 +2213,9 @@ importers:
       babel-jest:
         specifier: 29.5.x
         version: 29.5.0(@babel/core@7.25.7)
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
@@ -2347,6 +2395,9 @@ importers:
       '@woocommerce/internal-ts-config':
         specifier: workspace:*
         version: link:../internal-ts-config
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
@@ -2411,6 +2462,9 @@ importers:
       '@woocommerce/internal-ts-config':
         specifier: workspace:*
         version: link:../internal-ts-config
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
@@ -2466,6 +2520,9 @@ importers:
       '@woocommerce/internal-ts-config':
         specifier: workspace:*
         version: link:../internal-ts-config
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
@@ -2563,6 +2620,9 @@ importers:
       '@wordpress/browserslist-config':
         specifier: next
         version: 6.43.1-next.v.202604091042.0
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
@@ -2804,6 +2864,9 @@ importers:
       '@wordpress/browserslist-config':
         specifier: next
         version: 6.43.1-next.v.202604091042.0
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       copy-webpack-plugin:
         specifier: 13.0.x
         version: 13.0.1(webpack@5.97.1)
@@ -2907,6 +2970,9 @@ importers:
       '@wordpress/jest-console':
         specifier: ^5.4.0
         version: 5.4.0(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
@@ -2977,6 +3043,9 @@ importers:
       '@wordpress/scripts':
         specifier: ^27.0.0
         version: 27.9.0(@playwright/test@1.59.1)(@swc/core@1.15.24)(@types/eslint@9.6.1)(@types/node@24.12.2)(@types/webpack@4.41.40)(babel-plugin-macros@3.1.0)(encoding@0.1.13)(esbuild@0.24.2)(file-loader@6.2.0(webpack@5.97.1))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(webpack-hot-middleware@2.26.1)
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
@@ -3032,6 +3101,9 @@ importers:
       '@woocommerce/internal-ts-config':
         specifier: workspace:*
         version: link:../internal-ts-config
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
@@ -27008,7 +27080,7 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       collect-v8-coverage: 1.0.3
 
-  '@jest/test-sequencer@26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))':
+  '@jest/test-sequencer@26.6.3':
     dependencies:
       '@jest/test-result': 26.6.2
       graceful-fs: 4.2.11
@@ -27016,11 +27088,7 @@ snapshots:
       jest-runner: 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-runtime: 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
     transitivePeerDependencies:
-      - bufferutil
-      - canvas
       - supports-color
-      - ts-node
-      - utf-8-validate
 
   '@jest/test-sequencer@29.7.0':
     dependencies:
@@ -37951,7 +38019,7 @@ snapshots:
       expect-puppeteer: 4.4.0
       filenamify: 4.3.0
       jest: 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-circus: 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
+      jest-circus: 26.6.3
       jest-dev-server: 5.0.3
       jest-environment-node: 26.6.2
       markdownlint: 0.23.1
@@ -46109,7 +46177,7 @@ snapshots:
       jest-util: 29.7.0
       p-limit: 3.1.0
 
-  jest-circus@26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)):
+  jest-circus@26.6.3:
     dependencies:
       '@babel/traverse': 7.29.0
       '@jest/environment': 26.6.2
@@ -46133,11 +46201,7 @@ snapshots:
       stack-utils: 2.0.6
       throat: 5.0.0
     transitivePeerDependencies:
-      - bufferutil
-      - canvas
       - supports-color
-      - ts-node
-      - utf-8-validate
 
   jest-circus@29.5.0:
     dependencies:
@@ -46258,7 +46322,7 @@ snapshots:
   jest-config@26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)):
     dependencies:
       '@babel/core': 7.25.7
-      '@jest/test-sequencer': 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
+      '@jest/test-sequencer': 26.6.3
       '@jest/types': 26.6.2
       babel-jest: 26.6.3(@babel/core@7.25.7)
       chalk: 4.1.2

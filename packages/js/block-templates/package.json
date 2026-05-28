@@ -75,6 +75,7 @@
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@woocommerce/internal-ts-config": "workspace:*",
 		"@wordpress/browserslist-config": "next",
+		"chokidar": "^3.6.0",
 		"copy-webpack-plugin": "13.0.x",
 		"css-loader": "6.11.x",
 		"esbuild": "^0.24.0",

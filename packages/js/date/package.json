@@ -46,6 +46,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-ts-config": "workspace:*",
+		"chokidar": "^3.6.0",
 		"d3-time-format": "^2.3.0",
 		"esbuild": "^0.24.0",
 		"eslint": "^8.55.0",

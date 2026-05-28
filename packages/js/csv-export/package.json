@@ -59,6 +59,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-ts-config": "workspace:*",
+		"chokidar": "^3.6.0",
 		"esbuild": "^0.24.0",
 		"eslint": "^8.55.0",
 		"glob": "^10.3.10",

@@ -69,6 +69,7 @@
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-ts-config": "workspace:*",
 		"@wordpress/jest-console": "^5.4.0",
+		"chokidar": "^3.6.0",
 		"esbuild": "^0.24.0",
 		"eslint": "^8.55.0",
 		"glob": "^10.3.10",
