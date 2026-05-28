@@ -37,17 +37,17 @@ type CurriedSelectors< T > = {
 };
 
 type Resolvers = typeof import('./resolvers');
-type StoreActions< StoreDescriptor > = StoreDescriptor extends {
-	instantiate: ( ...args: never[] ) => infer StoreInstance;
-}
-	? StoreInstance extends { getActions: () => infer Actions }
-		? Actions
-		: never
-	: never;
-type CoreDataLockDispatch = Pick<
-	StoreActions< typeof coreDataStore >,
-	'__unstableAcquireStoreLock' | '__unstableReleaseStoreLock'
->;
+type StoreLock = {
+	readonly __storeLock: unique symbol;
+};
+type CoreDataLockDispatch = {
+	__unstableAcquireStoreLock: (
+		storeName: string,
+		path: string[],
+		options: { exclusive: boolean }
+	) => Promise< StoreLock >;
+	__unstableReleaseStoreLock: ( lock: StoreLock ) => Promise< void >;
+};
 
 export type ThunkArgs = {
 	select: CurriedSelectors< Selectors >;
