@@ -298,13 +298,26 @@ class DataUtils {
 	/**
 	 * Compute the tax-inclusive refund total for a line item at a given quantity.
 	 *
+	 * Precondition: $item must be one of WC_Order_Item_Product, WC_Order_Item_Shipping,
+	 * WC_Order_Item_Fee, and $quantity must be a positive integer (>= 1). For
+	 * shipping and fee items the quantity is informational only — the full item
+	 * total is returned regardless. Callers using untrusted input should validate
+	 * via {@see validate_preview_line_items()} first.
+	 *
 	 * @since 10.8.0
 	 *
 	 * @param WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item     The order item.
-	 * @param int                                                            $quantity The quantity to refund.
-	 * @return float The tax-inclusive refund total.
+	 * @param int                                                            $quantity The quantity to refund (>= 1).
+	 * @return float The tax-inclusive refund total. May be negative for items with negative totals (e.g. discount fees).
+	 * @throws \InvalidArgumentException When $quantity is less than 1.
 	 */
 	public function compute_line_item_refund_total( $item, int $quantity ): float {
+		if ( $quantity < 1 ) {
+			throw new \InvalidArgumentException(
+				sprintf( 'Quantity must be >= 1, got %d.', $quantity )
+			);
+		}
+
 		$price_decimals = wc_get_price_decimals();
 
 		if ( $item instanceof WC_Order_Item_Product ) {
