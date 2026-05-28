@@ -174,13 +174,7 @@ final class ReserveStock {
 			return;
 		}
 
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$join         = "{$wpdb->prefix}wc_orders orders ON stock_table.`order_id` = orders.id";
-			$where_status = "orders.status IN ( 'wc-checkout-draft', '" . OrderInternalStatus::PENDING . "' )";
-		} else {
-			$join         = "{$wpdb->posts} posts ON stock_table.`order_id` = posts.ID";
-			$where_status = "posts.post_status IN ( 'wc-checkout-draft', '" . OrderInternalStatus::PENDING . "' )";
-		}
+		list( $join, $where_status ) = $this->get_reserved_stock_query_clauses();
 
 		$placeholders = implode( ',', array_fill( 0, count( $missing ), '%d' ) );
 
@@ -434,13 +428,15 @@ final class ReserveStock {
 	}
 
 	/**
-	 * Returns query statement for getting reserved stock of a product.
+	 * Build the JOIN target and status WHERE clause shared by the reserved-stock queries.
 	 *
-	 * @param int $product_id       Product ID.
-	 * @param int $exclude_order_id Optional order to exclude from the results.
-	 * @return string|void          Query statement.
+	 * The reserved-stock table is joined to either the HPOS orders table or `wp_posts`
+	 * depending on the active order storage, and only checkout-draft and pending orders
+	 * count towards a hold.
+	 *
+	 * @return array{0:string,1:string} Tuple of [ join target, status WHERE clause ].
 	 */
-	private function get_query_for_reserved_stock( $product_id, $exclude_order_id = 0 ) {
+	private function get_reserved_stock_query_clauses(): array {
 		global $wpdb;
 
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
@@ -450,6 +446,21 @@ final class ReserveStock {
 			$join         = "{$wpdb->posts} posts ON stock_table.`order_id` = posts.ID";
 			$where_status = "posts.post_status IN ( 'wc-checkout-draft', '" . OrderInternalStatus::PENDING . "' )";
 		}
+
+		return array( $join, $where_status );
+	}
+
+	/**
+	 * Returns query statement for getting reserved stock of a product.
+	 *
+	 * @param int $product_id       Product ID.
+	 * @param int $exclude_order_id Optional order to exclude from the results.
+	 * @return string|void          Query statement.
+	 */
+	private function get_query_for_reserved_stock( $product_id, $exclude_order_id = 0 ) {
+		global $wpdb;
+
+		list( $join, $where_status ) = $this->get_reserved_stock_query_clauses();
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$query = $wpdb->prepare(
