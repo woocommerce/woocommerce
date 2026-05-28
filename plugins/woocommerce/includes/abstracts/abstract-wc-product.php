@@ -1542,15 +1542,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		$source_type = isset( $item['source_type'] ) ? sanitize_key( $item['source_type'] ) : 'attachment';
 
-		if ( ! in_array( $source_type, array( 'attachment', 'embed' ), true ) ) {
+		if ( 'attachment' !== $source_type ) {
 			return array();
 		}
 
-		if ( 'attachment' === $source_type ) {
-			return self::normalize_attachment_media_gallery_item( $item, $media_type );
-		}
-
-		return self::normalize_embed_media_gallery_item( $item, $media_type );
+		return self::normalize_attachment_media_gallery_item( $item, $media_type );
 	}
 
 	/**
@@ -1572,49 +1568,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'source_type' => 'attachment',
 			'id'          => $id,
 		);
-
-		return self::normalize_video_media_gallery_item( $normalized, $item, $media_type );
-	}
-
-	/**
-	 * Normalize an embed-backed media gallery item.
-	 *
-	 * @param array<string, mixed> $item       Media gallery item.
-	 * @param string               $media_type Media type.
-	 * @return array<string, mixed>
-	 */
-	private static function normalize_embed_media_gallery_item( array $item, string $media_type ) {
-		if ( 'video' !== $media_type || empty( $item['url'] ) ) {
-			return array();
-		}
-
-		$normalized = array(
-			'media_type'  => 'video',
-			'source_type' => 'embed',
-			'url'         => esc_url_raw( $item['url'] ),
-		);
-
-		if ( empty( $normalized['url'] ) ) {
-			return array();
-		}
-
-		if ( ! empty( $item['provider_name_slug'] ) ) {
-			$normalized['provider_name_slug'] = sanitize_key( $item['provider_name_slug'] );
-		}
-
-		if ( ! empty( $item['embed'] ) && is_array( $item['embed'] ) ) {
-			$embed = array();
-
-			foreach ( array( 'responsive', 'previewable' ) as $key ) {
-				if ( array_key_exists( $key, $item['embed'] ) ) {
-					$embed[ $key ] = wc_string_to_bool( $item['embed'][ $key ] );
-				}
-			}
-
-			if ( ! empty( $embed ) ) {
-				$normalized['embed'] = $embed;
-			}
-		}
 
 		return self::normalize_video_media_gallery_item( $normalized, $item, $media_type );
 	}

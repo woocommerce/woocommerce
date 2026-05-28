@@ -191,17 +191,6 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 						'preload' => 'metadata',
 					),
 				),
-				array(
-					'media_type'         => 'video',
-					'source_type'        => 'embed',
-					'url'                => 'https://www.youtube.com/watch?v=abc123',
-					'provider_name_slug' => 'youtube',
-					'poster_id'          => 321,
-					'embed'              => array(
-						'responsive'  => true,
-						'previewable' => false,
-					),
-				),
 			),
 			$product->get_media_gallery( 'edit' ),
 			'Media gallery should keep only supported normalized items.'
@@ -209,7 +198,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 		$product->set_media_gallery( 'not json' );
 
-		$this->assertEquals( array(), $product->get_media_gallery( 'edit' ), 'Invalid JSON should reset the gallery.' );
+		$this->assertEquals( array(), $product->get_media_gallery( 'edit' ), 'Invalid media gallery input should reset the gallery.' );
 	}
 
 	/**
