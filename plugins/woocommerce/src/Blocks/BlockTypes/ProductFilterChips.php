@@ -96,7 +96,7 @@ final class ProductFilterChips extends AbstractBlock {
 
 		$first_item          = reset( $items );
 		$show_counts         = is_array( $first_item ) && array_key_exists( 'count', $first_item );
-		$has_visual_swatches = is_array( $first_item ) && array_key_exists( 'visual', $first_item );
+		$has_visual_swatches = self::has_visual_swatches( $items );
 		$button_role         = 'single' === $block_context['selectionMode'] ? 'radio' : 'checkbox';
 
 		if ( $has_visual_swatches && is_string( $classes ) && ! str_contains( $classes, 'is-style-swatch' ) ) {
@@ -219,6 +219,22 @@ final class ProductFilterChips extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Check whether any item has visual swatch data.
+	 *
+	 * @param array $items Selectable items.
+	 * @return bool
+	 */
+	private static function has_visual_swatches( array $items ): bool {
+		foreach ( $items as $item ) {
+			if ( is_array( $item ) && array_key_exists( 'visual', $item ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
