@@ -25,7 +25,6 @@
 		"onboarding-tasks": true,
 		"pattern-toolkit-full-composability": true,
 		"payment-gateway-suggestions": true,
-		"product-pre-publish-modal": false,
 		"product-custom-fields": true,
 		"products-catalog-api": true,
 		"printful": true,
