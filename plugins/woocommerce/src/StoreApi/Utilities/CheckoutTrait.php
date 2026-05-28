@@ -184,7 +184,41 @@ trait CheckoutTrait {
 			$order->set_payment_method_title( $payment_method->title );
 		} else {
 			$order_needs_payment = $order->needs_payment();
-			if ( $order_needs_payment && 'POST' === $request->get_method() ) {
+
+			/*
+			 * NOTE for the non-POC version: this filter should be added in a
+			 * standalone, small PR targeting trunk separately from the POS
+			 * spike. Mirrors the existing `woocommerce_store_api_disable_nonce_check`
+			 * pattern — a documented opt-out for trusted-actor callers (POS,
+			 * agentic commerce, headless apps) that legitimately defer
+			 * payment-method selection past the order-creation step. Default
+			 * behaviour is unchanged.
+			 */
+
+			/**
+			 * Filters whether a payment_method is required for a POST /checkout
+			 * request that creates an order which needs payment.
+			 *
+			 * Returning false lets trusted-actor callers (e.g. POS) create the
+			 * order without immediately committing a payment method. Downstream
+			 * `process_payment` already tolerates an empty payment_method, so
+			 * the order is created in `pending` and a later flow (terminal
+			 * capture, cash mark-paid, etc.) supplies the method when payment
+			 * is taken.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param bool             $require Whether a payment_method is required. Default true.
+			 * @param \WP_REST_Request $request The current REST request.
+			 * @param \WC_Order        $order   The order being checked out.
+			 */
+			$require_payment_method = (bool) apply_filters(
+				'woocommerce_store_api_checkout_require_payment_method',
+				true,
+				$request,
+				$order
+			);
+			if ( $require_payment_method && $order_needs_payment && 'POST' === $request->get_method() ) {
 				throw new RouteException(
 					'woocommerce_rest_checkout_missing_payment_method',
 					esc_html__( 'No payment method provided.', 'woocommerce' ),

@@ -3,7 +3,9 @@
  * POS Checkout integration tests.
  *
  * Verifies that the POS /checkout route is registered and produces a
- * pending order from the cart established by prior /cart/add-item calls.
+ * pending order from the cart established by prior /cart/add-item calls,
+ * without requiring a payment_method on the request (POS defers payment
+ * method selection past order creation).
  *
  * @package Automattic\WooCommerce\Tests\Internal\POS\StoreApi\Routes
  */
@@ -14,6 +16,7 @@ namespace Automattic\WooCommerce\Tests\Internal\POS\StoreApi\Routes;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Context;
+use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutPaymentMethodPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Routes\Controller;
 use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
@@ -22,6 +25,7 @@ use WC_Product_Simple;
 
 /**
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\Routes\Controller
+ * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutPaymentMethodPolicy
  */
 class CheckoutIntegrationTest extends ControllerTestCase {
 
@@ -40,33 +44,18 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 	private $product;
 
 	/**
-	 * Instance of the no-op POS test gateway.
-	 *
-	 * @var PosCheckoutTestGateway
-	 */
-	private $test_gateway;
-
-	/**
 	 * Setup.
 	 */
 	protected function setUp(): void {
-		// The Store API checkout validates payment_method on POST (via
-		// CheckoutTrait::update_order_from_request) — a no-op POS gateway lets
-		// us prove the end-to-end flow without depending on a real one.
-		// Two filters are needed (mirroring the agentic test pattern): the
-		// first puts the gateway in the registered list; the second injects
-		// it into the per-request "available" gateway map that the Store API
-		// schema enum reads from. We also force the WC gateways singleton to
-		// re-init so a previously-cached gateway list from a prior test does
-		// not mask our additions.
-		$this->test_gateway = new PosCheckoutTestGateway();
-		add_filter( 'woocommerce_payment_gateways', array( $this, 'register_test_gateway' ) );
-		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'inject_available_test_gateway' ) );
-		WC()->payment_gateways()->init();
-
 		parent::setUp();
 
 		Context::set_test_override( true );
+
+		// Engage the POS opt-out so the Store API's require-payment_method guard
+		// is relaxed for these requests. In production this is registered in
+		// class-woocommerce.php; in tests we register it explicitly so the test
+		// is self-contained.
+		( new CheckoutPaymentMethodPolicy() )->register();
 
 		$this->admin_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
 
@@ -87,34 +76,10 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 	 * Tear down.
 	 */
 	protected function tearDown(): void {
-		remove_filter( 'woocommerce_payment_gateways', array( $this, 'register_test_gateway' ) );
-		remove_filter( 'woocommerce_available_payment_gateways', array( $this, 'inject_available_test_gateway' ) );
+		remove_all_filters( 'woocommerce_store_api_checkout_require_payment_method' );
 		Context::set_test_override( null );
 		wp_delete_user( $this->admin_id );
 		parent::tearDown();
-	}
-
-	/**
-	 * Append a no-op POS test gateway to the list of registered payment gateway classes.
-	 *
-	 * @param string[] $gateways Registered gateway class names.
-	 * @return string[]
-	 */
-	public function register_test_gateway( array $gateways ): array {
-		$gateways[] = PosCheckoutTestGateway::class;
-		return $gateways;
-	}
-
-	/**
-	 * Inject the POS test gateway instance into the per-request available
-	 * gateway map. This is what the Store API checkout schema enum reads from.
-	 *
-	 * @param array $gateways Existing available gateways keyed by ID.
-	 * @return array
-	 */
-	public function inject_available_test_gateway( array $gateways ): array {
-		$gateways[ PosCheckoutTestGateway::GATEWAY_ID ] = $this->test_gateway;
-		return $gateways;
 	}
 
 	/**
@@ -150,9 +115,9 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Add-item then checkout creates a pending order with the same line item.
+	 * @testdox Add-item then checkout with no payment_method creates a pending order with the same line item.
 	 */
-	public function test_checkout_creates_pending_order_from_cart(): void {
+	public function test_checkout_without_payment_method_creates_pending_order_from_cart(): void {
 		wp_set_current_user( $this->admin_id );
 
 		// Build the cart with one item.
@@ -175,13 +140,13 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		}
 		$this->assertNotEmpty( $cart_token, 'add-item should emit a Cart-Token header for checkout to use.' );
 
-		// Run checkout against the same cart, no payment_method (POS leaves the order
-		// in pending and hands off to the existing payment flow).
+		// Run checkout against the same cart. Deliberately NO payment_method —
+		// POS defers payment selection past order creation. The POS opt-out
+		// (`woocommerce_store_api_checkout_require_payment_method`) allows this.
 		$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
 		$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );
 		$checkout_request->set_body_params(
 			array(
-				'payment_method'   => PosCheckoutTestGateway::GATEWAY_ID,
 				'billing_address'  => $this->minimal_address(),
 				'shipping_address' => $this->minimal_address(),
 			)
@@ -199,14 +164,68 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		$this->assertGreaterThan( 0, $data['order_id'] );
 		$this->assertSame( 'pending', $data['status'] );
 
-		// And there should be a real order in the database with our line item.
+		// There should be a real order in the database with our line item.
 		$order = wc_get_order( $data['order_id'] );
 		$this->assertNotFalse( $order, 'Order should exist in the database.' );
 		$this->assertSame( 'pending', $order->get_status() );
+		// payment_method is intentionally empty — the order is created in
+		// `pending` and a subsequent payment flow (WooPayments capture, cash
+		// mark-paid) will populate it when the cashier completes payment.
+		$this->assertSame( '', $order->get_payment_method() );
 		$items = $order->get_items();
 		$this->assertCount( 1, $items );
 		$first_item = reset( $items );
 		$this->assertSame( $this->product->get_id(), $first_item->get_product_id() );
+	}
+
+	/**
+	 * @testdox Without the POS opt-out, /checkout still rejects missing payment_method (regression).
+	 */
+	public function test_default_behavior_still_requires_payment_method(): void {
+		wp_set_current_user( $this->admin_id );
+
+		// Turn the POS opt-out off for this one test, mirroring how a non-POS
+		// caller would experience the guard.
+		Context::set_test_override( false );
+
+		$add_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/cart/add-item' );
+		$add_request->set_body_params(
+			array(
+				'id'       => $this->product->get_id(),
+				'quantity' => 1,
+			)
+		);
+		$add_response = rest_get_server()->dispatch( $add_request );
+		// add-item ran outside POS context so the URI-based detection would
+		// normally apply auth/oversell defaults — but our wrapper still gates
+		// on capability and add-item itself doesn't need payment_method, so
+		// it still succeeds. The point of this test is only the checkout guard.
+		$this->assertSame( 201, $add_response->get_status() );
+
+		$cart_token = '';
+		foreach ( $add_response->get_headers() as $key => $value ) {
+			if ( strtolower( $key ) === 'cart-token' ) {
+				$cart_token = (string) $value;
+				break;
+			}
+		}
+
+		$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
+		$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );
+		$checkout_request->set_body_params(
+			array(
+				'billing_address'  => $this->minimal_address(),
+				'shipping_address' => $this->minimal_address(),
+			)
+		);
+		$checkout_response = rest_get_server()->dispatch( $checkout_request );
+
+		$this->assertSame( 400, $checkout_response->get_status() );
+		$this->assertSame(
+			'woocommerce_rest_checkout_missing_payment_method',
+			$checkout_response->get_data()['code'] ?? null,
+			'Outside POS context the original Store API guard must still fire.'
+		);
 	}
 
 	/**
@@ -230,37 +249,3 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		);
 	}
 }
-
-/**
- * No-op payment gateway used to satisfy the Store API's
- * payment_method validation during checkout integration tests.
- *
- * phpcs:disable Squiz.Classes.ClassFileName.NoMatch
- * phpcs:disable Suin.Classes.PSR4.IncorrectClassName
- */
-class PosCheckoutTestGateway extends \WC_Payment_Gateway {
-
-	public const GATEWAY_ID = 'pos_test_gateway';
-
-	public function __construct() {
-		$this->id           = self::GATEWAY_ID;
-		$this->method_title = 'POS Test Gateway';
-		$this->enabled      = 'yes';
-		$this->title        = 'POS Test Gateway';
-		$this->supports     = array( 'products' );
-	}
-
-	public function is_available() {
-		return true;
-	}
-
-	public function process_payment( $order_id ) {
-		$order = wc_get_order( $order_id );
-		// Intentionally leave the order in 'pending' so tests can assert on that state.
-		return array(
-			'result'   => 'success',
-			'redirect' => $order ? $order->get_checkout_order_received_url() : '',
-		);
-	}
-}
-// phpcs:enable
