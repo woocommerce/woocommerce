@@ -268,9 +268,8 @@ class WC_Structured_Data {
 								break;
 							}
 						}
-						$date_on_sale_to        = isset( $variation_id )
-							? wc_get_product( $variation_id )->get_date_on_sale_to()
-							: null;
+						$variation_product = isset( $variation_id ) ? wc_get_product( $variation_id ) : null;
+						$date_on_sale_to   = $variation_product ? $variation_product->get_date_on_sale_to() : null;
 						$sale_price_valid_until = $date_on_sale_to
 							? gmdate( 'Y-m-d', $date_on_sale_to->getTimestamp() )
 							: null;
