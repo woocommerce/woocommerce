@@ -85,7 +85,7 @@ class StockNotificationTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'message', $payload );
 		$this->assertArrayHasKey( 'format', $payload['message'] );
 		$this->assertArrayHasKey( 'args', $payload['message'] );
-		$this->assertArrayHasKey( 'icon', $payload );
+		$this->assertArrayNotHasKey( 'icon', $payload );
 		$this->assertArrayHasKey( 'meta', $payload );
 		$this->assertArrayHasKey( 'product_id', $payload['meta'] );
 		$this->assertArrayHasKey( 'event_type', $payload['meta'] );

@@ -27,8 +27,6 @@ class StockNotification extends Notification {
 		self::EVENT_ON_BACKORDER,
 	);
 
-	const ICON = 'https://s.wp.com/wp-content/mu-plugins/notes/images/tos-warning-note-icon.png';
-
 	/**
 	 * The stock event that triggered this notification.
 	 *
@@ -195,7 +193,6 @@ class StockNotification extends Notification {
 
 		return array(
 			'type'        => $this->get_type(),
-			'icon'        => self::ICON,
 			'timestamp'   => gmdate( 'c' ),
 			'resource_id' => $this->get_resource_id(),
 			'title'       => $this->build_title( $product_name ),
