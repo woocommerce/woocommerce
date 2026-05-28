@@ -56416,12 +56416,6 @@ parameters:
 			path: src/Checkout/Helpers/ReserveStock.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Checkout\\Helpers\\ReserveStock\:\:get_query_for_reserved_stock\(\) never returns void so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Checkout\\Helpers\\ReserveStock\:\:release_stock_for_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
