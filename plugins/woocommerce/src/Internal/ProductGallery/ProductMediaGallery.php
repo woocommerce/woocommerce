@@ -241,7 +241,7 @@ class ProductMediaGallery {
 	 * @param string     $context       Product read context.
 	 * @return array
 	 */
-	public static function maybe_remove_product_image( WC_Product $product, array $media_gallery, string $context = 'view' ): array {
+	private static function maybe_remove_product_image( WC_Product $product, array $media_gallery, string $context = 'view' ): array {
 		$product_image_id = absint( $product->get_image_id( $context ) );
 
 		if (
@@ -263,7 +263,7 @@ class ProductMediaGallery {
 	 * @param int   $product_image_id Product image attachment ID.
 	 * @return bool
 	 */
-	public static function media_item_is_product_image( array $item, int $product_image_id ): bool {
+	private static function media_item_is_product_image( array $item, int $product_image_id ): bool {
 		return 'image' === ( $item['media_type'] ?? '' ) && absint( $item['id'] ?? 0 ) === $product_image_id;
 	}
 
@@ -331,7 +331,7 @@ class ProductMediaGallery {
 	 * @param bool  $include_posters Whether to include resolved video poster IDs.
 	 * @return array
 	 */
-	public static function get_attachment_ids( array $media_gallery, bool $include_posters = false ): array {
+	private static function get_attachment_ids( array $media_gallery, bool $include_posters = false ): array {
 		$attachment_ids = array();
 
 		foreach ( $media_gallery as $item ) {
