@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix missing return value in wc_get_filename_from_url(), silent unit conversion failures in wc_get_dimension()/wc_get_weight() from unlowercased $from_unit, and undefined array key warning in cart tax display for unknown country codes.
