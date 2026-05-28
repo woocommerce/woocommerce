@@ -313,9 +313,9 @@ class DataUtils {
 	 */
 	public function compute_line_item_refund_total( $item, int $quantity ): float {
 		if ( $quantity < 1 ) {
-			throw new \InvalidArgumentException(
-				sprintf( 'Quantity must be >= 1, got %d.', $quantity )
-			);
+			// Exception message is developer-facing only; the value is a typed int and the format is a literal string.
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new \InvalidArgumentException( sprintf( 'Quantity must be >= 1, got %d.', (int) $quantity ) );
 		}
 
 		$price_decimals = wc_get_price_decimals();
@@ -375,9 +375,9 @@ class DataUtils {
 		foreach ( $line_items as $line_item ) {
 			$item = $order->get_item( $line_item['line_item_id'] );
 			if ( ! $item ) {
-				throw new \InvalidArgumentException(
-					sprintf( 'Line item %d not found on order %d.', (int) $line_item['line_item_id'], $order->get_id() )
-				);
+				// Exception message is developer-facing only; both values are typed ints and the format is a literal string.
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				throw new \InvalidArgumentException( sprintf( 'Line item %d not found on order %d.', (int) $line_item['line_item_id'], (int) $order->get_id() ) );
 			}
 
 			/** @var WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item */
@@ -413,8 +413,8 @@ class DataUtils {
 					},
 					$calculated_taxes
 				);
-				$tax      = NumberUtil::round( array_sum( $calculated_taxes ), $price_decimals );
-				$subtotal = NumberUtil::round( $refund_total_with_tax - $tax, $price_decimals );
+				$tax              = NumberUtil::round( array_sum( $calculated_taxes ), $price_decimals );
+				$subtotal         = NumberUtil::round( $refund_total_with_tax - $tax, $price_decimals );
 			}
 
 			$item_data = array(
@@ -425,17 +425,16 @@ class DataUtils {
 				'total'    => wc_format_decimal( $refund_total_with_tax, $price_decimals ),
 			);
 
+			$item_data['name'] = $item->get_name();
+
 			if ( $item instanceof WC_Order_Item_Product ) {
-				$item_data['name']            = $item->get_name();
-				$item_data['product_id']      = $item->get_product_id();
-				$item_data['variation_id']    = $item->get_variation_id();
-				$section_key                  = 'products';
+				$item_data['product_id']   = $item->get_product_id();
+				$item_data['variation_id'] = $item->get_variation_id();
+				$section_key               = 'products';
 			} elseif ( $item instanceof WC_Order_Item_Shipping ) {
-				$item_data['name'] = $item->get_name();
-				$section_key       = 'shipping';
+				$section_key = 'shipping';
 			} else {
-				$item_data['name'] = $item->get_name();
-				$section_key       = 'fees';
+				$section_key = 'fees';
 			}
 
 			$sections[ $section_key ]['items'][]   = $item_data;
