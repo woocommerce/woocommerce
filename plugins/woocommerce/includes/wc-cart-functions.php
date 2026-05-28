@@ -345,7 +345,7 @@ function wc_cart_totals_order_total_html() {
 		if ( ! empty( $tax_string_array ) ) {
 			$taxable_address = WC()->customer->get_taxable_address();
 			if ( WC()->customer->is_customer_outside_base() && ! WC()->customer->has_calculated_shipping() ) {
-				$country = WC()->countries->estimated_for_prefix( $taxable_address[0] ) . WC()->countries->countries[ $taxable_address[0] ];
+				$country = WC()->countries->estimated_for_prefix( $taxable_address[0] ) . ( WC()->countries->countries[ $taxable_address[0] ] ?? '' );
 				/* translators: 1: tax amount 2: country name */
 				$tax_text = wp_kses_post( sprintf( __( '(includes %1$s estimated for %2$s)', 'woocommerce' ), implode( ', ', $tax_string_array ), $country ) );
 			} else {
