@@ -28,6 +28,8 @@ class RefundPreviewSchema extends AbstractSchema {
 	 */
 	const IDENTIFIER = 'refund-preview';
 
+	// The next method always throws so its return type can never be reached.
+	// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn
 	/**
 	 * Not used. The refund preview controller bypasses prepare_item_for_response
 	 * and returns the raw data array directly via rest_ensure_response, so this
@@ -39,8 +41,6 @@ class RefundPreviewSchema extends AbstractSchema {
 	 * @param array           $include_fields Fields to include.
 	 * @return array
 	 * @throws \LogicException Always — this method should never be called for the preview route.
-	 *
-	 * phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn
 	 */
 	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
 		throw new \LogicException(

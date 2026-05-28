@@ -608,6 +608,8 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 			public function validate_preview_line_items( array $line_items, \WC_Order $order ) {
 				return true;
 			}
+			// Stub always throws; the : array return type is never reached.
+			// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn
 			/**
 			 * Always throws to exercise the controller's InvalidArgumentException catch arm.
 			 *
@@ -615,8 +617,6 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 			 * @param array     $line_items Ignored.
 			 * @return array
 			 * @throws \InvalidArgumentException Always.
-			 *
-			 * phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn
 			 */
 			public function build_refund_preview( \WC_Order $order, array $line_items ): array {
 				throw new \InvalidArgumentException( 'simulated invariant violation' );
