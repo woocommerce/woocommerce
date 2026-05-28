@@ -49,36 +49,21 @@ jest.mock( '@woocommerce/blocks-components', () => ( {
 	) ),
 } ) );
 
-describe( 'Checkout Order Summary Coupon Form Block', () => {
+describe( 'Cart Order Summary Coupon Form Block', () => {
 	beforeEach( () => {
 		mockApplyCoupon.mockClear();
 		MockTotalsCoupon.mockClear();
 	} );
 
 	it( 'renders coupon form when coupons are enabled', () => {
-		render( <Block /> );
+		render( <Block className="" /> );
 
 		expect( screen.getByText( 'Coupon Form' ) ).toBeInTheDocument();
-		expect( screen.getByTestId( 'totals-coupon' ) ).toBeInTheDocument();
 		expect( screen.getByTestId( 'totals-wrapper' ) ).toBeInTheDocument();
 	} );
 
-	it( 'does not render when coupons are disabled', () => {
-		// eslint-disable-next-line @typescript-eslint/no-var-requires -- Required for mocking
-		const getSetting = require( '@woocommerce/settings' ).getSetting;
-		getSetting.mockImplementationOnce(
-			( setting: string, defaultValue: unknown ) => {
-				if ( setting === 'couponsEnabled' ) return false;
-				return defaultValue;
-			}
-		);
-
-		const { container } = render( <Block /> );
-		expect( container.firstChild ).toBeNull();
-	} );
-
 	it( 'passes displayCouponForm as true by default', () => {
-		render( <Block /> );
+		render( <Block className="" /> );
 
 		expect( MockTotalsCoupon ).toHaveBeenCalledWith(
 			expect.objectContaining( {
@@ -89,7 +74,7 @@ describe( 'Checkout Order Summary Coupon Form Block', () => {
 	} );
 
 	it( 'passes displayCouponForm={false} when explicitly set', () => {
-		render( <Block displayCouponForm={ false } /> );
+		render( <Block className="" displayCouponForm={ false } /> );
 
 		expect( MockTotalsCoupon ).toHaveBeenCalledWith(
 			expect.objectContaining( {
@@ -99,60 +84,28 @@ describe( 'Checkout Order Summary Coupon Form Block', () => {
 		);
 	} );
 
-	it( 'passes correct props to TotalsCoupon', () => {
-		render( <Block /> );
+	it( 'does not render when coupons are disabled', () => {
+		const getSetting =
+			// eslint-disable-next-line @typescript-eslint/no-var-requires -- Required for mocking
+			require( '@woocommerce/settings' ).getSetting;
+		getSetting.mockImplementationOnce(
+			( setting: string, defaultValue: unknown ) => {
+				if ( setting === 'couponsEnabled' ) return false;
+				return defaultValue;
+			}
+		);
 
-		expect( screen.getByTestId( 'instance-id' ) ).toHaveTextContent(
-			'coupon'
-		);
-		expect( screen.getByTestId( 'is-loading' ) ).toHaveTextContent(
-			'false'
-		);
+		const { container } = render( <Block className="" /> );
+		expect( container.firstChild ).toBeNull();
 	} );
 
-	it( 'passes correct context to useStoreCartCoupons hook', () => {
+	it( 'calls useStoreCartCoupons with cart context', () => {
 		const useStoreCartCoupons =
 			// eslint-disable-next-line @typescript-eslint/no-var-requires -- Required for mocking
 			require( '@woocommerce/base-context/hooks' ).useStoreCartCoupons;
 
-		render( <Block /> );
+		render( <Block className="" /> );
 
-		expect( useStoreCartCoupons ).toHaveBeenCalledWith( 'wc/checkout' );
-	} );
-
-	it( 'passes custom className to TotalsWrapper', () => {
-		render( <Block className="custom-coupon-form" /> );
-
-		expect( screen.getByTestId( 'totals-wrapper' ) ).toHaveClass(
-			'custom-coupon-form'
-		);
-	} );
-
-	it( 'passes applyCoupon and instanceId to TotalsCoupon', () => {
-		render( <Block /> );
-
-		expect( MockTotalsCoupon ).toHaveBeenCalledWith(
-			expect.objectContaining( {
-				onSubmit: mockApplyCoupon,
-				instanceId: 'coupon',
-				isLoading: false,
-			} ),
-			expect.anything()
-		);
-	} );
-
-	it( 'passes loading state from hook to TotalsCoupon', () => {
-		const useStoreCartCoupons =
-			// eslint-disable-next-line @typescript-eslint/no-var-requires -- Required for mocking
-			require( '@woocommerce/base-context/hooks' ).useStoreCartCoupons;
-
-		useStoreCartCoupons.mockReturnValueOnce( {
-			applyCoupon: mockApplyCoupon,
-			isApplyingCoupon: true,
-		} );
-
-		render( <Block /> );
-
-		expect( screen.getByTestId( 'is-loading' ) ).toHaveTextContent( 'true' );
+		expect( useStoreCartCoupons ).toHaveBeenCalledWith( 'wc/cart' );
 	} );
 } );

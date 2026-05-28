@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, ToggleControl } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 
 /**
@@ -11,20 +13,38 @@ import Block from './block';
 
 export const Edit = ( {
 	attributes,
+	setAttributes,
 }: {
 	attributes: {
 		className: string;
+		displayCouponForm: boolean;
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
-	const { className } = attributes;
+	const { className, displayCouponForm } = attributes;
 	const blockProps = useBlockProps();
 	return (
-		<div { ...blockProps }>
-			<Noninteractive>
-				<Block className={ className } />
-			</Noninteractive>
-		</div>
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+					<ToggleControl
+						label={ __( 'Show coupon form expanded', 'woocommerce' ) }
+						checked={ displayCouponForm }
+						onChange={ ( value ) =>
+							setAttributes( { displayCouponForm: value } )
+						}
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				<Noninteractive>
+					<Block
+						className={ className }
+						displayCouponForm={ displayCouponForm }
+					/>
+				</Noninteractive>
+			</div>
+		</>
 	);
 };
 

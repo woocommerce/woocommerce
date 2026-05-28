@@ -8,8 +8,10 @@ import { TotalsWrapper } from '@woocommerce/blocks-components';
 
 const Block = ( {
 	className = '',
+	displayCouponForm = true,
 }: {
 	className?: string;
+	displayCouponForm?: boolean;
 } ): JSX.Element | null => {
 	const couponsEnabled = getSetting( 'couponsEnabled', true );
 
@@ -26,6 +28,7 @@ const Block = ( {
 				onSubmit={ applyCoupon }
 				isLoading={ isApplyingCoupon }
 				instanceId="coupon"
+				displayCouponForm={ displayCouponForm }
 			/>
 		</TotalsWrapper>
 	);

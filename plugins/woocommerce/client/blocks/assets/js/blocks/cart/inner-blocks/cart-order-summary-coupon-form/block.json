@@ -21,6 +21,10 @@
 				"remove": false,
 				"move": false
 			}
+		},
+		"displayCouponForm": {
+			"type": "boolean",
+			"default": true
 		}
 	},
 	"parent": [

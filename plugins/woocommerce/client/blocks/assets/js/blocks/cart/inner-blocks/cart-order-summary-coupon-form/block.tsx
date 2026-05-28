@@ -6,7 +6,13 @@ import { useStoreCartCoupons } from '@woocommerce/base-context/hooks';
 import { getSetting } from '@woocommerce/settings';
 import { TotalsWrapper } from '@woocommerce/blocks-components';
 
-const Block = ( { className }: { className: string } ): JSX.Element | null => {
+const Block = ( {
+	className,
+	displayCouponForm = true,
+}: {
+	className: string;
+	displayCouponForm?: boolean;
+} ): JSX.Element | null => {
 	const couponsEnabled = getSetting( 'couponsEnabled', true );
 
 	const { applyCoupon, isApplyingCoupon } = useStoreCartCoupons( 'wc/cart' );
@@ -21,6 +27,7 @@ const Block = ( { className }: { className: string } ): JSX.Element | null => {
 				onSubmit={ applyCoupon }
 				isLoading={ isApplyingCoupon }
 				instanceId="coupon"
+				displayCouponForm={ displayCouponForm }
 			/>
 		</TotalsWrapper>
 	);
