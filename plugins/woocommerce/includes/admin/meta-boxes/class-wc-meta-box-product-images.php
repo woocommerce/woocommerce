@@ -168,10 +168,17 @@ class WC_Meta_Box_Product_Images {
 
 		$attachment_ids = isset( $_POST['product_image_gallery'] ) ? array_filter( explode( ',', wc_clean( $_POST['product_image_gallery'] ) ) ) : array();
 		$videos_enabled = ProductMediaGallery::is_feature_enabled();
-		$media_posted   = $videos_enabled && isset( $_POST['product_media_gallery'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$media_gallery  = array();
 
-		if ( $media_posted ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( ! $videos_enabled ) {
+			$product->set_gallery_image_ids( $attachment_ids );
+			$product->set_media_gallery( array() );
+			$product->save();
+			return;
+		}
+
+		$media_gallery = array();
+
+		if ( isset( $_POST['product_media_gallery'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$posted_media_gallery = wc_clean( wp_unslash( $_POST['product_media_gallery'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$media_gallery        = ProductMediaGallery::normalize_media_gallery_items(
 				self::decode_media_gallery_json( $posted_media_gallery ),
@@ -182,12 +189,7 @@ class WC_Meta_Box_Product_Images {
 		}
 
 		$product->set_gallery_image_ids( $attachment_ids );
-
-		if ( $videos_enabled ) {
-			$product->set_media_gallery( ProductMediaGallery::has_videos( $media_gallery ) ? $media_gallery : array() );
-		} else {
-			$product->set_media_gallery( array() );
-		}
+		$product->set_media_gallery( ProductMediaGallery::has_videos( $media_gallery ) ? $media_gallery : array() );
 
 		$product->save();
 	}
