@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add Point of Sale store-actor model and read-only staff REST endpoint (dev-only `point_of_sale_actors` feature flag). Introduces wc_store_actors and wc_store_actor_access tables; replaces the prior WP-roles approach so POS-only staff are not wp_users.
