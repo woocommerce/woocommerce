@@ -1569,7 +1569,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			'id'          => $id,
 		);
 
-		return self::normalize_video_media_gallery_item( $normalized, $item, $media_type );
+		if ( 'video' !== $media_type ) {
+			return $normalized;
+		}
+
+		return self::normalize_video_media_gallery_item( $normalized, $item );
 	}
 
 	/**
@@ -1577,14 +1581,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @param array<string, mixed> $normalized Normalized item data.
 	 * @param array<string, mixed> $item       Original item data.
-	 * @param string               $media_type Media type.
 	 * @return array<string, mixed>
 	 */
-	private static function normalize_video_media_gallery_item( array $normalized, array $item, string $media_type ) {
-		if ( 'video' !== $media_type ) {
-			return $normalized;
-		}
-
+	private static function normalize_video_media_gallery_item( array $normalized, array $item ) {
 		$poster_id = isset( $item['poster_id'] ) ? absint( $item['poster_id'] ) : 0;
 
 		if ( $poster_id ) {
