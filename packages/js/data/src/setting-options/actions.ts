@@ -3,11 +3,11 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import type { createRegistry } from '@wordpress/data';
-import type { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
-import type CreateLocksActions from '@wordpress/core-data/build-types/locks/actions';
-// @ts-expect-error WP core data doesn't explicitly export the actions
-// eslint-disable-next-line @woocommerce/dependency-group
-import createLocksActions from '@wordpress/core-data/build/locks/actions';
+import type {
+	ActionCreatorsOf,
+	CurriedSelectorsOf,
+} from '@wordpress/data/build-types/types';
+import { store as coreDataStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -413,13 +413,27 @@ export const saveEditedSetting =
 		return saveSettingRequest( groupId, settingId, value, dispatch );
 	};
 
-const lockActions = createLocksActions() as ReturnType<
-	typeof CreateLocksActions
+type CoreDataActions = ActionCreatorsOf< typeof coreDataStore >;
+type UnstableAcquireStoreLockParams = Parameters<
+	CoreDataActions[ '__unstableAcquireStoreLock' ]
 >;
+type UnstableReleaseStoreLockParams = Parameters<
+	CoreDataActions[ '__unstableReleaseStoreLock' ]
+>;
+
 export const __unstableAcquireStoreLock =
-	lockActions.__unstableAcquireStoreLock;
+	( ...args: UnstableAcquireStoreLockParams ) =>
+	( { registry }: ThunkArgs ) =>
+		registry
+			.dispatch( coreDataStore )
+			.__unstableAcquireStoreLock( ...args );
+
 export const __unstableReleaseStoreLock =
-	lockActions.__unstableReleaseStoreLock;
+	( ...args: UnstableReleaseStoreLockParams ) =>
+	( { registry }: ThunkArgs ) =>
+		registry
+			.dispatch( coreDataStore )
+			.__unstableReleaseStoreLock( ...args );
 
 // Return type of all action creators
 export type Actions = ReturnType<
@@ -446,5 +460,7 @@ export type ActionDispatchersForThunk = {
 	saveEditedSettingsGroup: typeof saveEditedSettingsGroup;
 	saveSetting: typeof saveSetting;
 	saveSettingsGroup: typeof saveSettingsGroup;
+	__unstableAcquireStoreLock: typeof __unstableAcquireStoreLock;
+	__unstableReleaseStoreLock: typeof __unstableReleaseStoreLock;
 	< T = Record< string, unknown > >( args: T ): void;
-} & ReturnType< typeof CreateLocksActions >;
+};
