@@ -249,66 +249,37 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 * @return string
 	 */
 	private function get_video_html( $media, $context, $product_image_attributes = array() ) {
-		if ( empty( $media['video_src'] ) ) {
+		$attrs = ProductGalleryUtils::get_video_attributes( $media, 'gallery' );
+
+		if ( empty( $attrs ) ) {
 			return '';
 		}
 
-		$settings      = isset( $media['settings'] ) && is_array( $media['settings'] ) ? $media['settings'] : array();
-		$preload       = isset( $settings['preload'] ) && in_array(
-			$settings['preload'],
-			array( 'auto', 'metadata', 'none' ),
-			true
-		)
-			? $settings['preload']
-			: 'metadata';
 		$aspect_ratio  = $this->get_product_image_aspect_ratio( $product_image_attributes );
 		$video_class   = 'wc-block-woocommerce-product-gallery-large-image__image ' .
 			'wc-block-woocommerce-product-gallery-large-image__video';
-		$attrs         = array(
-			'aria-label'             => $media['alt'] ?? '',
-			'autoplay'               => 'autoplay',
-			'class'                  => $video_class,
-			'data-image-id'          => $media['id'],
-			'data-wp-context'        => wp_json_encode(
-				array(
-					'videoLocation' => 'gallery',
-				),
-				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-			),
-			'data-wp-on--touchend'   => 'actions.onTouchEnd',
-			'data-wp-on--touchmove'  => 'actions.onTouchMove',
-			'data-wp-on--touchstart' => 'actions.onTouchStart',
-			'data-wp-watch'          => 'callbacks.syncVideoPlayback',
-			'draggable'              => 'false',
-			'loop'                   => 'loop',
-			'muted'                  => 'muted',
-			'playsinline'            => 'playsinline',
-			'preload'                => $preload,
-			'src'                    => $media['video_src'],
-			'style'                  => $this->get_video_style( $product_image_attributes, $aspect_ratio ),
-			'tabindex'               => '-1',
+		$attrs         = array_merge(
+			$attrs,
+			array(
+				'class'                  => $video_class,
+				'data-wp-on--touchend'   => 'actions.onTouchEnd',
+				'data-wp-on--touchmove'  => 'actions.onTouchMove',
+				'data-wp-on--touchstart' => 'actions.onTouchStart',
+				'draggable'              => 'false',
+				'style'                  => $this->get_video_style( $product_image_attributes, $aspect_ratio ),
+				'tabindex'               => '-1',
+			)
 		);
 		$wrapper_attrs = array(
 			'class' => 'wc-block-components-product-image wc-block-grid__product-image ' .
 				'wc-block-components-product-image--aspect-ratio-' . str_replace( '/', '-', $aspect_ratio ),
 		);
 
-		if ( ! empty( $media['poster_id'] ) && ! empty( $media['poster_src'] ) ) {
-			$attrs['poster'] = $media['poster_src'];
-		}
-
 		if ( ! empty( $context['fullScreenOnClick'] ) ) {
 			$attrs['data-wp-on--click'] = 'actions.openDialog';
 		}
 
-		$video_html = '<video ' . wc_implode_html_attributes(
-			array_filter(
-				$attrs,
-				static function ( $value ) {
-					return '' !== $value;
-				}
-			)
-		) . '></video>';
+		$video_html = ProductGalleryUtils::get_video_html( $attrs );
 
 		return '<div ' . wc_implode_html_attributes( $wrapper_attrs ) . '>' . $video_html . '</div>';
 	}

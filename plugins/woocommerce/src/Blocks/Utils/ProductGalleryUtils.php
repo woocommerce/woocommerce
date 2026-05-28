@@ -195,6 +195,63 @@ class ProductGalleryUtils {
 	}
 
 	/**
+	 * Get base attributes for product gallery videos.
+	 *
+	 * @param array  $media Video media data.
+	 * @param string $video_location Video location in the product gallery.
+	 * @return array Video attributes.
+	 */
+	public static function get_video_attributes( $media, $video_location ) {
+		if ( empty( $media['video_src'] ) ) {
+			return array();
+		}
+
+		$video_location = in_array( $video_location, array( 'dialog', 'gallery' ), true ) ? $video_location : 'gallery';
+		$settings       = isset( $media['settings'] ) && is_array( $media['settings'] ) ? $media['settings'] : array();
+		$preload        = $settings['preload'] ?? 'metadata';
+		$preload        = in_array( $preload, array( 'auto', 'metadata', 'none' ), true ) ? $preload : 'metadata';
+		$attrs          = array(
+			'aria-label'      => $media['alt'] ?? '',
+			'autoplay'        => 'autoplay',
+			'data-image-id'   => $media['id'] ?? '',
+			'data-wp-context' => sprintf( '{"videoLocation":"%s"}', $video_location ),
+			'data-wp-watch'   => 'callbacks.syncVideoPlayback',
+			'loop'            => 'loop',
+			'muted'           => 'muted',
+			'playsinline'     => 'playsinline',
+			'preload'         => $preload,
+			'src'             => $media['video_src'],
+		);
+
+		if ( ! empty( $media['poster_id'] ) && ! empty( $media['poster_src'] ) ) {
+			$attrs['poster'] = $media['poster_src'];
+		}
+
+		return $attrs;
+	}
+
+	/**
+	 * Get product gallery video HTML from attributes.
+	 *
+	 * @param array $attributes Video attributes.
+	 * @return string Video HTML.
+	 */
+	public static function get_video_html( $attributes ) {
+		if ( empty( $attributes ) ) {
+			return '';
+		}
+
+		return '<video ' . wc_implode_html_attributes(
+			array_filter(
+				$attributes,
+				static function ( $value ) {
+					return '' !== $value;
+				}
+			)
+		) . '></video>';
+	}
+
+	/**
 	 * Get source data for one image.
 	 *
 	 * @param int|string $image_id The image ID.

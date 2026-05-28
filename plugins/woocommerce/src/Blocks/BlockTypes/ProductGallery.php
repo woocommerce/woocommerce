@@ -88,43 +88,9 @@ class ProductGallery extends AbstractBlock {
 	 * @return string
 	 */
 	private function get_dialog_video_html( $media ) {
-		if ( empty( $media['video_src'] ) ) {
-			return '';
-		}
-
-		$settings = isset( $media['settings'] ) && is_array( $media['settings'] ) ? $media['settings'] : array();
-		$preload  = isset( $settings['preload'] ) && in_array(
-			$settings['preload'],
-			array( 'auto', 'metadata', 'none' ),
-			true
-		)
-			? $settings['preload']
-			: 'metadata';
-		$attrs    = array(
-			'aria-label'      => $media['alt'] ?? '',
-			'autoplay'        => 'autoplay',
-			'data-image-id'   => $media['id'],
-			'data-wp-context' => '{"videoLocation":"dialog"}',
-			'data-wp-watch'   => 'callbacks.syncVideoPlayback',
-			'loop'            => 'loop',
-			'muted'           => 'muted',
-			'playsinline'     => 'playsinline',
-			'preload'         => $preload,
-			'src'             => $media['video_src'],
+		return ProductGalleryUtils::get_video_html(
+			ProductGalleryUtils::get_video_attributes( $media, 'dialog' )
 		);
-
-		if ( ! empty( $media['poster_id'] ) && ! empty( $media['poster_src'] ) ) {
-			$attrs['poster'] = $media['poster_src'];
-		}
-
-		return '<video ' . wc_implode_html_attributes(
-			array_filter(
-				$attrs,
-				static function ( $value ) {
-					return '' !== $value;
-				}
-			)
-		) . '></video>';
 	}
 
 	/**
