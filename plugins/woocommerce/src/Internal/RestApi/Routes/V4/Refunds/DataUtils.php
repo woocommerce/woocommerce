@@ -380,6 +380,11 @@ class DataUtils {
 				throw new \InvalidArgumentException( sprintf( 'Line item %d not found on order %d.', (int) $line_item['line_item_id'], (int) $order->get_id() ) );
 			}
 
+			/**
+			 * Validated by validate_preview_line_items() upstream.
+			 *
+			 * @var WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item
+			 */
 			$refund_total_with_tax = $this->compute_line_item_refund_total( $item, $line_item['quantity'] );
 			$subtotal              = $refund_total_with_tax;
 			$tax                   = 0.0;
