@@ -37,15 +37,17 @@ type CurriedSelectors< T > = {
 };
 
 type Resolvers = typeof import('./resolvers');
-type StoreLock = unknown;
-type StoreLockDispatch = {
-	__unstableAcquireStoreLock: (
-		storeName: string,
-		path: string[],
-		options: { exclusive: boolean }
-	) => Promise< StoreLock >;
-	__unstableReleaseStoreLock: ( lock: StoreLock ) => Promise< void >;
-};
+type StoreActions< StoreDescriptor > = StoreDescriptor extends {
+	instantiate: ( ...args: never[] ) => infer StoreInstance;
+}
+	? StoreInstance extends { getActions: () => infer Actions }
+		? Actions
+		: never
+	: never;
+type CoreDataLockDispatch = Pick<
+	StoreActions< typeof coreDataStore >,
+	'__unstableAcquireStoreLock' | '__unstableReleaseStoreLock'
+>;
 
 export type ThunkArgs = {
 	select: CurriedSelectors< Selectors >;
@@ -425,14 +427,14 @@ export const saveEditedSetting =
 
 const getCoreDataLockDispatch = (
 	registry: WPDataRegistry
-): StoreLockDispatch =>
-	registry.dispatch( coreDataStore ) as unknown as StoreLockDispatch;
+): CoreDataLockDispatch =>
+	registry.dispatch( coreDataStore ) as CoreDataLockDispatch;
 
 type UnstableAcquireStoreLockParams = Parameters<
-	StoreLockDispatch[ '__unstableAcquireStoreLock' ]
+	CoreDataLockDispatch[ '__unstableAcquireStoreLock' ]
 >;
 type UnstableReleaseStoreLockParams = Parameters<
-	StoreLockDispatch[ '__unstableReleaseStoreLock' ]
+	CoreDataLockDispatch[ '__unstableReleaseStoreLock' ]
 >;
 
 export const __unstableAcquireStoreLock =
@@ -474,7 +476,7 @@ export type ActionDispatchersForThunk = {
 	saveEditedSettingsGroup: typeof saveEditedSettingsGroup;
 	saveSetting: typeof saveSetting;
 	saveSettingsGroup: typeof saveSettingsGroup;
-	__unstableAcquireStoreLock: StoreLockDispatch[ '__unstableAcquireStoreLock' ];
-	__unstableReleaseStoreLock: StoreLockDispatch[ '__unstableReleaseStoreLock' ];
+	__unstableAcquireStoreLock: CoreDataLockDispatch[ '__unstableAcquireStoreLock' ];
+	__unstableReleaseStoreLock: CoreDataLockDispatch[ '__unstableReleaseStoreLock' ];
 	< T = Record< string, unknown > >( args: T ): void;
 };
