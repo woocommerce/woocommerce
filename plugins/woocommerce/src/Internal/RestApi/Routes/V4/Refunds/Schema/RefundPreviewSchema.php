@@ -22,18 +22,6 @@ use WP_REST_Request;
 class RefundPreviewSchema extends AbstractSchema {
 
 	/**
-	 * Get an item response. Not used for preview — the controller returns the data array directly.
-	 *
-	 * @param mixed           $item           Item data.
-	 * @param WP_REST_Request $request        Request object.
-	 * @param array           $include_fields Fields to include.
-	 * @return array
-	 */
-	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
-		return is_array( $item ) ? $item : array();
-	}
-
-	/**
 	 * The schema item identifier.
 	 *
 	 * @var string
@@ -41,96 +29,28 @@ class RefundPreviewSchema extends AbstractSchema {
 	const IDENTIFIER = 'refund-preview';
 
 	/**
+	 * Not used. The refund preview controller bypasses prepare_item_for_response
+	 * and returns the raw data array directly via rest_ensure_response, so this
+	 * method must never be invoked. Implemented only to satisfy the abstract.
+	 *
+	 * @param mixed           $item           Item data.
+	 * @param WP_REST_Request $request        Request object.
+	 * @param array           $include_fields Fields to include.
+	 * @return array
+	 * @throws \LogicException Always — this method should never be called for the preview route.
+	 */
+	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
+		throw new \LogicException(
+			'RefundPreviewSchema::get_item_response() should not be called; the preview controller bypasses prepare_item_for_response().'
+		);
+	}
+
+	/**
 	 * Return all properties for the item schema.
 	 *
 	 * @return array
 	 */
 	public function get_item_schema_properties(): array {
-		$item_schema = array(
-			'type'       => 'object',
-			'properties' => array(
-				'id'           => array(
-					'description' => __( 'The original order line item ID.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-					'readonly'    => true,
-				),
-				'name'         => array(
-					'description' => __( 'The line item name.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-					'readonly'    => true,
-				),
-				'quantity'     => array(
-					'description' => __( 'The quantity being refunded.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-					'readonly'    => true,
-				),
-				'subtotal'     => array(
-					'description' => __( 'The refund subtotal for this item (excluding tax).', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-					'readonly'    => true,
-				),
-				'tax'          => array(
-					'description' => __( 'The tax amount for this item.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-					'readonly'    => true,
-				),
-				'total'        => array(
-					'description' => __( 'The total refund for this item (including tax).', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-					'readonly'    => true,
-				),
-				'product_id'   => array(
-					'description' => __( 'The product ID (products only).', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-					'readonly'    => true,
-				),
-				'variation_id' => array(
-					'description' => __( 'The variation ID, if applicable (products only).', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-					'readonly'    => true,
-				),
-			),
-		);
-
-		$section_schema = array(
-			'type'       => 'object',
-			'properties' => array(
-				'items'    => array(
-					'description' => __( 'Line items in this section.', 'woocommerce' ),
-					'type'        => 'array',
-					'items'       => $item_schema,
-					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-					'readonly'    => true,
-				),
-				'subtotal' => array(
-					'description' => __( 'Section subtotal (excluding tax).', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-					'readonly'    => true,
-				),
-				'tax'      => array(
-					'description' => __( 'Section tax total.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-					'readonly'    => true,
-				),
-				'total'    => array(
-					'description' => __( 'Section total (including tax).', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-					'readonly'    => true,
-				),
-			),
-		);
-
 		return array(
 			'breakdown'      => array(
 				'description' => __( 'Refund breakdown by item type.', 'woocommerce' ),
@@ -138,9 +58,9 @@ class RefundPreviewSchema extends AbstractSchema {
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 				'properties'  => array(
-					'products' => $section_schema,
-					'shipping' => $section_schema,
-					'fees'     => $section_schema,
+					'products' => $this->get_section_schema( 'products' ),
+					'shipping' => $this->get_section_schema( 'shipping' ),
+					'fees'     => $this->get_section_schema( 'fees' ),
 				),
 			),
 			'subtotal'       => array(
@@ -168,5 +88,115 @@ class RefundPreviewSchema extends AbstractSchema {
 				'readonly'    => true,
 			),
 		);
+	}
+
+	/**
+	 * Schema for one section of the breakdown (products, shipping, or fees).
+	 *
+	 * @param string $section_key One of 'products', 'shipping', 'fees'. Determines which item schema variant is used.
+	 * @return array
+	 */
+	private function get_section_schema( string $section_key ): array {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'items'    => array(
+					'description' => __( 'Line items in this section.', 'woocommerce' ),
+					'type'        => 'array',
+					'items'       => 'products' === $section_key ? $this->get_product_item_schema() : $this->get_base_item_schema(),
+					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+					'readonly'    => true,
+				),
+				'subtotal' => array(
+					'description' => __( 'Section subtotal (excluding tax).', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+					'readonly'    => true,
+				),
+				'tax'      => array(
+					'description' => __( 'Section tax total.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+					'readonly'    => true,
+				),
+				'total'    => array(
+					'description' => __( 'Section total (including tax).', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+					'readonly'    => true,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Schema for an item entry in the shipping or fees sections (no product_id/variation_id).
+	 *
+	 * @return array
+	 */
+	private function get_base_item_schema(): array {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'id'       => array(
+					'description' => __( 'The original order line item ID.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+					'readonly'    => true,
+				),
+				'name'     => array(
+					'description' => __( 'The line item name.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+					'readonly'    => true,
+				),
+				'quantity' => array(
+					'description' => __( 'The quantity being refunded.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+					'readonly'    => true,
+				),
+				'subtotal' => array(
+					'description' => __( 'The refund subtotal for this item (excluding tax).', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+					'readonly'    => true,
+				),
+				'tax'      => array(
+					'description' => __( 'The tax amount for this item.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+					'readonly'    => true,
+				),
+				'total'    => array(
+					'description' => __( 'The total refund for this item (including tax).', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+					'readonly'    => true,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Schema for an item entry in the products section (extends the base with product_id/variation_id).
+	 *
+	 * @return array
+	 */
+	private function get_product_item_schema(): array {
+		$schema = $this->get_base_item_schema();
+		$schema['properties']['product_id']   = array(
+			'description' => __( 'The product ID.', 'woocommerce' ),
+			'type'        => 'integer',
+			'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+			'readonly'    => true,
+		);
+		$schema['properties']['variation_id'] = array(
+			'description' => __( 'The variation ID, if applicable.', 'woocommerce' ),
+			'type'        => 'integer',
+			'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+			'readonly'    => true,
+		);
+		return $schema;
 	}
 }
