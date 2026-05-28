@@ -40,6 +40,7 @@
 		"build:project:esm": "node build.mjs",
 		"build:publish:project": "pnpm --if-present '/^build:publish:project:.*$/'",
 		"build:publish:project:cjs": "node build.mjs --cjs",
+		"build:publish:project:types": "tsc --build --emitDeclarationOnly",
 		"build:publish:project:deps": "pnpm build",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
