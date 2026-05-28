@@ -89,48 +89,48 @@ class ProductGalleryThumbnails extends AbstractBlock {
 				role="listbox">
 				<?php foreach ( $product_gallery_media as $index => $media ) : ?>
 					<?php
-					$thumbnail_classes = 'wc-block-product-gallery-thumbnails__thumbnail';
-					if ( 'video' === ( $media['media_type'] ?? '' ) ) {
+					$media_type             = isset( $media['media_type'] ) && is_string( $media['media_type'] ) ? sanitize_key( $media['media_type'] ) : 'image';
+					$thumbnail_classes      = 'wc-block-product-gallery-thumbnails__thumbnail';
+					$thumbnail_image_class  = 0 === $index ? $img_class . ' wc-block-product-gallery-thumbnails__thumbnail__image--is-active' : $img_class;
+					$thumbnail_aspect_ratio = $attributes['aspectRatio'] ?? '1';
+					$thumbnail_aspect_ratio = is_string( $thumbnail_aspect_ratio ) ? $thumbnail_aspect_ratio : '1';
+
+					if ( 'video' === $media_type ) {
 						$thumbnail_classes .= ' wc-block-product-gallery-thumbnails__thumbnail--video';
 					}
-					$show_video_preview = 'video' === ( $media['media_type'] ?? '' ) && empty( $media['poster_id'] ) && ! empty( $media['video_src'] );
+
+					$thumbnail_attributes = array(
+						'class'               => $thumbnail_image_class,
+						'data-image-id'       => isset( $media['id'] ) ? absint( $media['id'] ) : 0,
+						'data-media-type'     => $media_type,
+						'data-wp-on--click'   => 'actions.selectCurrentImage',
+						'data-wp-on--keydown' => 'actions.onThumbnailsArrowsKeyDown',
+						'data-wp-watch'       => 'callbacks.syncThumbnailState',
+						'draggable'           => 'false',
+						'role'                => 'option',
+						'style'               => 'aspect-ratio: ' . $thumbnail_aspect_ratio,
+						'tabindex'            => 0 === $index ? '0' : '-1',
+					);
+					$show_video_preview   = 'video' === $media_type && empty( $media['poster_id'] ) && ! empty( $media['video_src'] );
 					?>
 					<div class="<?php echo esc_attr( $thumbnail_classes ); ?>">
 						<?php if ( $show_video_preview ) : ?>
 							<video
-								class="<?php echo 0 === $index ? esc_attr( $img_class . ' wc-block-product-gallery-thumbnails__thumbnail__image--is-active' ) : esc_attr( $img_class ); ?>"
-								data-image-id="<?php echo esc_attr( $media['id'] ); ?>"
-								data-media-type="video"
+								<?php echo wc_implode_html_attributes( $thumbnail_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								src="<?php echo esc_url( $media['video_src'] ); ?>"
 								aria-label="<?php echo esc_attr( $media['alt'] ); ?>"
-								data-wp-on--click="actions.selectCurrentImage"
-								data-wp-on--keydown="actions.onThumbnailsArrowsKeyDown"
-								data-wp-watch="callbacks.syncThumbnailState"
-								tabindex="<?php echo 0 === $index ? '0' : '-1'; ?>"
-								draggable="false"
 								preload="metadata"
 								muted="muted"
-								playsinline="playsinline"
-								role="option"
-								style="aspect-ratio: <?php echo esc_attr( $attributes['aspectRatio'] ); ?>"></video>
+								playsinline="playsinline"></video>
 						<?php else : ?>
 							<img
-								class="<?php echo 0 === $index ? esc_attr( $img_class . ' wc-block-product-gallery-thumbnails__thumbnail__image--is-active' ) : esc_attr( $img_class ); ?>"
-								data-image-id="<?php echo esc_attr( $media['id'] ); ?>"
-								data-media-type="<?php echo esc_attr( $media['media_type'] ?? 'image' ); ?>"
+								<?php echo wc_implode_html_attributes( $thumbnail_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								src="<?php echo esc_attr( $media['src'] ); ?>"
 								srcset="<?php echo esc_attr( $media['srcset'] ); ?>"
 								sizes="<?php echo esc_attr( $media['sizes'] ); ?>"
 								alt="<?php echo esc_attr( $media['alt'] ); ?>"
-								data-wp-on--click="actions.selectCurrentImage"
-								data-wp-on--keydown="actions.onThumbnailsArrowsKeyDown"
-								data-wp-watch="callbacks.syncThumbnailState"
 								decoding="async"
-								tabindex="<?php echo 0 === $index ? '0' : '-1'; ?>"
-								draggable="false"
-								loading="lazy"
-								role="option"
-								style="aspect-ratio: <?php echo esc_attr( $attributes['aspectRatio'] ); ?>" />
+								loading="lazy" />
 						<?php endif; ?>
 					</div>
 				<?php endforeach; ?>
