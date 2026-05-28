@@ -7,7 +7,8 @@ use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use WC_Unit_Test_Case;
 
 /**
- * @covers \Automattic\WooCommerce\Checkout\Helpers\ReserveStock::get_reserved_stock_batch
+ * @covers \Automattic\WooCommerce\Checkout\Helpers\ReserveStock::prime_reserved_stock
+ * @covers \Automattic\WooCommerce\Checkout\Helpers\ReserveStock::get_reserved_stock_cached
  * @covers \Automattic\WooCommerce\Checkout\Helpers\ReserveStock::get_reserved_stock
  */
 class ReserveStockTest extends WC_Unit_Test_Case {
@@ -52,23 +53,21 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_reserved_stock_batch returns 0 for every requested ID when no reservations exist.
+	 * @testdox After priming, get_reserved_stock_cached returns 0 for every requested ID when no reservations exist.
 	 */
-	public function test_batch_returns_zero_for_unreserved_products(): void {
-		$sut    = new ReserveStock();
-		$result = $sut->get_reserved_stock_batch( $this->product_ids, 0 );
+	public function test_prime_returns_zero_for_unreserved_products(): void {
+		$sut = new ReserveStock();
+		$sut->prime_reserved_stock( $this->product_ids, 0 );
 
-		$this->assertIsArray( $result );
 		foreach ( $this->product_ids as $pid ) {
-			$this->assertArrayHasKey( $pid, $result );
-			$this->assertSame( 0.0, (float) $result[ $pid ] );
+			$this->assertSame( 0.0, (float) $sut->get_reserved_stock_cached( wc_get_product( $pid ), 0 ) );
 		}
 	}
 
 	/**
-	 * @testdox get_reserved_stock_batch agrees with per-product get_reserved_stock for the same exclude_order_id.
+	 * @testdox Primed cached reads agree with per-product get_reserved_stock for the same exclude_order_id.
 	 */
-	public function test_batch_parity_with_single_call(): void {
+	public function test_primed_cached_parity_with_single_call(): void {
 		// Reserve some stock against a pending order.
 		$order = new \WC_Order();
 		$order->set_status( 'pending' );
@@ -79,18 +78,22 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 
 		ReserveStock::flush_reserved_stock_cache();
 
-		$sut   = new ReserveStock();
-		$batch = $sut->get_reserved_stock_batch( $this->product_ids, 0 );
+		$sut = new ReserveStock();
+		$sut->prime_reserved_stock( $this->product_ids, 0 );
+
+		$cached = array();
+		foreach ( $this->product_ids as $product_id ) {
+			$cached[ $product_id ] = $sut->get_reserved_stock_cached( wc_get_product( $product_id ), 0 );
+		}
 
 		// Compare to single-shot lookups (fresh instance, fresh cache).
 		ReserveStock::flush_reserved_stock_cache();
 		foreach ( $this->product_ids as $product_id ) {
-			$product = wc_get_product( $product_id );
-			$single  = ( new ReserveStock() )->get_reserved_stock( $product, 0 );
+			$single = ( new ReserveStock() )->get_reserved_stock( wc_get_product( $product_id ), 0 );
 			$this->assertSame(
 				(float) $single,
-				(float) $batch[ $product_id ],
-				"Batch vs single mismatch for product $product_id"
+				(float) $cached[ $product_id ],
+				"Primed cached vs single mismatch for product $product_id"
 			);
 		}
 
@@ -98,41 +101,42 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox exclude_order_id removes that order's reservations from both single and batch results.
+	 * @testdox exclude_order_id removes that order's reservations from both single and primed cached results.
 	 */
-	public function test_exclude_order_id_excludes_in_batch(): void {
+	public function test_exclude_order_id_excludes_in_prime(): void {
 		$order = new \WC_Order();
 		$order->set_status( 'pending' );
 		$order->save();
 		$oid = (int) $order->get_id();
 
-		$pid = $this->product_ids[2];
+		$pid     = $this->product_ids[2];
+		$product = wc_get_product( $pid );
 		$this->reserve_directly( $oid, $pid, 9 );
 
 		ReserveStock::flush_reserved_stock_cache();
 		$sut = new ReserveStock();
 
 		// Without excluding, we see the reservation.
-		$batch_unexcluded = $sut->get_reserved_stock_batch( array( $pid ), 0 );
-		$this->assertSame( 9.0, (float) $batch_unexcluded[ $pid ] );
+		$sut->prime_reserved_stock( array( $pid ), 0 );
+		$this->assertSame( 9.0, (float) $sut->get_reserved_stock_cached( $product, 0 ) );
 
 		// With excluding, we don't.
 		ReserveStock::flush_reserved_stock_cache();
-		$batch_excluded = $sut->get_reserved_stock_batch( array( $pid ), $oid );
-		$this->assertSame( 0.0, (float) $batch_excluded[ $pid ] );
+		$sut->prime_reserved_stock( array( $pid ), $oid );
+		$this->assertSame( 0.0, (float) $sut->get_reserved_stock_cached( $product, $oid ) );
 
 		$order->delete( true );
 	}
 
 	/**
-	 * @testdox After get_reserved_stock_batch, get_reserved_stock_cached hits the cache and emits no extra SQL.
+	 * @testdox After priming, get_reserved_stock_cached hits the cache and emits no extra SQL.
 	 */
-	public function test_batch_primes_cache_for_single_calls(): void {
+	public function test_prime_warms_cache_for_cached_calls(): void {
 		global $wpdb;
 
 		ReserveStock::flush_reserved_stock_cache();
 		$sut = new ReserveStock();
-		$sut->get_reserved_stock_batch( $this->product_ids, 0 );
+		$sut->prime_reserved_stock( $this->product_ids, 0 );
 
 		// Snapshot wpdb num_queries; require_once SAVEQUERIES already on in tests is unreliable, so we use num_queries.
 		$before = (int) $wpdb->num_queries;
@@ -222,8 +226,8 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 		$sut = new ReserveStock();
 
 		// Prime two buckets: exclude_order_id 0 and exclude_order_id 999.
-		$sut->get_reserved_stock_batch( $this->product_ids, 0 );
-		$sut->get_reserved_stock_batch( $this->product_ids, 999 );
+		$sut->prime_reserved_stock( $this->product_ids, 0 );
+		$sut->prime_reserved_stock( $this->product_ids, 999 );
 
 		// Targeted flush.
 		ReserveStock::flush_reserved_stock_cache( 999 );

@@ -1134,7 +1134,7 @@ class CartController {
 		if ( empty( $product_ids ) ) {
 			return;
 		}
-		( new ReserveStock() )->get_reserved_stock_batch( array_unique( $product_ids ), $this->get_draft_order_id() );
+		( new ReserveStock() )->prime_reserved_stock( $product_ids, $this->get_draft_order_id() );
 	}
 
 	/**
