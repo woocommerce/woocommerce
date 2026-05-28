@@ -1162,6 +1162,10 @@ class WC_Cart extends WC_Legacy_Cart {
 				$missing_attributes = array();
 				$parent_data        = wc_get_product( $product_data->get_parent_id() );
 
+				if ( ! $parent_data ) {
+					throw new Exception( __( 'Sorry, this product cannot be added to the cart.', 'woocommerce' ) );
+				}
+
 				$variation_attributes = $product_data->get_variation_attributes();
 				// Filter out 'any' variations, which are empty, as they need to be explicitly specified while adding to cart.
 				$variation_attributes = array_filter( $variation_attributes );
