@@ -449,7 +449,13 @@ class Controller extends AbstractController {
 			return $this->get_route_error_response( (string) $validation_error->get_error_code(), $validation_error->get_error_message() );
 		}
 
-		$preview = $this->data_utils->build_refund_preview( $order, $request['line_items'] );
+		try {
+			$preview = $this->data_utils->build_refund_preview( $order, $request['line_items'] );
+		} catch ( \InvalidArgumentException $e ) {
+			// validate_preview_line_items above should have caught any bad input. If
+			// build_refund_preview still throws, treat it as a server-side invariant violation.
+			return $this->get_route_error_response( 'invalid_preview_request', $e->getMessage() );
+		}
 
 		return rest_ensure_response( $preview );
 	}

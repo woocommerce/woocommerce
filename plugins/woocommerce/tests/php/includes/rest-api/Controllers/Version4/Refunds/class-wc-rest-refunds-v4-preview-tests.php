@@ -274,7 +274,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox P8: Preview with invalid line item ID returns error.
+	 * @testdox P8: Preview with invalid line item ID returns line_item_not_found.
 	 */
 	public function test_preview_invalid_line_item(): void {
 		$order = $this->create_order_with_product( 50.00, 1 );
@@ -291,7 +291,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 400, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'invalid_line_item', $data['code'] );
+		$this->assertEquals( 'line_item_not_found', $data['code'] );
 	}
 
 	/**
@@ -324,7 +324,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox P11: Preview with empty line_items array returns error.
+	 * @testdox P11: Preview with empty line_items array returns missing_line_items.
 	 */
 	public function test_preview_empty_line_items(): void {
 		$order = $this->create_order_with_product( 50.00, 1 );
@@ -332,6 +332,140 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$response = $this->do_preview_request( $order->get_id(), array() );
 
 		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'missing_line_items', $data['code'] );
+	}
+
+	/**
+	 * @testdox Preview with quantity 0 returns invalid_quantity.
+	 */
+	public function test_preview_invalid_quantity_zero(): void {
+		$order   = $this->create_order_with_product( 50.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 0,
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'invalid_quantity', $data['code'] );
+	}
+
+	/**
+	 * @testdox Preview on order with shipping-only line returns populated shipping section.
+	 */
+	public function test_preview_shipping_line(): void {
+		$order = $this->create_order_with_shipping( 10.00 );
+		$items = $order->get_items( 'shipping' );
+		$item  = reset( $items );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertCount( 1, $data['breakdown']['shipping']['items'] );
+		$this->assertSame( array(), $data['breakdown']['products']['items'] );
+		$this->assertSame( array(), $data['breakdown']['fees']['items'] );
+		$this->assertEquals( '10.00', $data['breakdown']['shipping']['total'] );
+		$this->assertEquals( '10.00', $data['total'] );
+	}
+
+	/**
+	 * @testdox Preview on order with fee-only line returns populated fees section.
+	 */
+	public function test_preview_fee_line(): void {
+		$order = $this->create_order_with_fee( 20.00 );
+		$items = $order->get_items( 'fee' );
+		$item  = reset( $items );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertCount( 1, $data['breakdown']['fees']['items'] );
+		$this->assertSame( array(), $data['breakdown']['products']['items'] );
+		$this->assertSame( array(), $data['breakdown']['shipping']['items'] );
+		$this->assertEquals( '20.00', $data['breakdown']['fees']['total'] );
+		$this->assertEquals( '20.00', $data['total'] );
+	}
+
+	/**
+	 * @testdox Preview on mixed order aggregates products, shipping, and fees sections correctly.
+	 */
+	public function test_preview_mixed_sections(): void {
+		$order   = $this->create_order_with_product( 50.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$shipping = new \WC_Order_Item_Shipping();
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => 10.00,
+			)
+		);
+		$shipping->save();
+		$order->add_item( $shipping );
+
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Service fee',
+				'total' => 5.00,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+
+		$order->set_total( 65.00 );
+		$order->save();
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 1,
+				),
+				array(
+					'line_item_id' => $shipping->get_id(),
+					'quantity'     => 1,
+				),
+				array(
+					'line_item_id' => $fee->get_id(),
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( '50.00', $data['breakdown']['products']['total'] );
+		$this->assertEquals( '10.00', $data['breakdown']['shipping']['total'] );
+		$this->assertEquals( '5.00', $data['breakdown']['fees']['total'] );
+		$this->assertEquals( '65.00', $data['total'] );
 	}
 
 	/**
@@ -582,6 +716,58 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->created_orders[] = $order->get_id();
 		$product->delete( true );
+
+		return $order;
+	}
+
+	/**
+	 * Create a completed order with a single shipping line.
+	 *
+	 * @param float $total Shipping total.
+	 * @return WC_Order
+	 */
+	private function create_order_with_shipping( float $total ): WC_Order {
+		$order    = wc_create_order();
+		$shipping = new \WC_Order_Item_Shipping();
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => $total,
+			)
+		);
+		$shipping->save();
+		$order->add_item( $shipping );
+		$order->set_total( $total );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$this->created_orders[] = $order->get_id();
+
+		return $order;
+	}
+
+	/**
+	 * Create a completed order with a single fee line.
+	 *
+	 * @param float $total Fee total.
+	 * @return WC_Order
+	 */
+	private function create_order_with_fee( float $total ): WC_Order {
+		$order = wc_create_order();
+		$fee   = new \WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Service fee',
+				'total' => $total,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+		$order->set_total( $total );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$this->created_orders[] = $order->get_id();
 
 		return $order;
 	}
