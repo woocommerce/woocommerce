@@ -147,7 +147,7 @@ class Renderer {
 				$p->set_attribute( 'data-wp-init', 'callbacks.onRender' );
 				$p->set_attribute( 'data-wp-context', wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 
-				if ( $is_enhanced_pagination_enabled && isset( $this->parsed_block ) ) {
+				if ( $is_enhanced_pagination_enabled && isset( $this->parsed_block ) && isset( $this->parsed_block['attrs']['queryId'] ) ) {
 					$p->set_attribute(
 						'data-wp-router-region',
 						'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
