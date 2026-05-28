@@ -40,6 +40,7 @@ catalogs:
         '@wordpress/keycodes': 4.19.1
         '@wordpress/media-utils': 5.19.2
         '@wordpress/notices': 5.19.2
+        '@wordpress/patterns': 2.19.6
         '@wordpress/plugins': 7.19.4
         '@wordpress/preferences': 4.19.4
         '@wordpress/primitives': 4.19.1
