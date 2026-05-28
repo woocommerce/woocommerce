@@ -18,6 +18,7 @@ use WC_Order_Item_Product;
 use WC_Order_Item_Shipping;
 use WC_Tax;
 use WP_Error;
+use WP_Http;
 
 /**
  * Helper methods for the REST API.
@@ -484,15 +485,27 @@ class DataUtils {
 	 */
 	public function validate_preview_line_items( array $line_items, WC_Order $order ) {
 		if ( empty( $line_items ) ) {
-			return new WP_Error( 'missing_line_items', __( 'At least one line item is required.', 'woocommerce' ) );
+			return new WP_Error(
+				'missing_line_items',
+				__( 'At least one line item is required.', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
 		}
 
 		if ( ! in_array( $order->get_status(), self::REFUNDABLE_STATUSES, true ) ) {
-			return new WP_Error( 'order_not_refundable', __( 'This order cannot be refunded.', 'woocommerce' ) );
+			return new WP_Error(
+				'order_not_refundable',
+				__( 'This order cannot be refunded.', 'woocommerce' ),
+				array( 'status' => 422 )
+			);
 		}
 
 		if ( (float) $order->get_remaining_refund_amount() <= 0 ) {
-			return new WP_Error( 'order_not_refundable', __( 'This order has already been fully refunded.', 'woocommerce' ) );
+			return new WP_Error(
+				'order_not_refundable',
+				__( 'This order has already been fully refunded.', 'woocommerce' ),
+				array( 'status' => 422 )
+			);
 		}
 
 		$refund_data = $this->compute_refunded_quantities_and_totals( $order );
@@ -500,20 +513,36 @@ class DataUtils {
 		foreach ( $line_items as $line_item ) {
 			$line_item_id = $line_item['line_item_id'] ?? null;
 			if ( ! $line_item_id ) {
-				return new WP_Error( 'missing_line_item_id', __( 'Line item ID is required.', 'woocommerce' ) );
+				return new WP_Error(
+					'missing_line_item_id',
+					__( 'Line item ID is required.', 'woocommerce' ),
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
 			}
 
 			$item = $order->get_item( $line_item_id );
 			if ( ! $item || $item->get_order_id() !== $order->get_id() ) {
-				return new WP_Error( 'line_item_not_found', __( 'Line item not found.', 'woocommerce' ) );
+				return new WP_Error(
+					'line_item_not_found',
+					__( 'Line item not found.', 'woocommerce' ),
+					array( 'status' => WP_Http::NOT_FOUND )
+				);
 			}
 
 			if ( ! $item instanceof WC_Order_Item_Product && ! $item instanceof WC_Order_Item_Fee && ! $item instanceof WC_Order_Item_Shipping ) {
-				return new WP_Error( 'unsupported_item_type', __( 'Line item is not a product, fee, or shipping line.', 'woocommerce' ) );
+				return new WP_Error(
+					'unsupported_item_type',
+					__( 'Line item is not a product, fee, or shipping line.', 'woocommerce' ),
+					array( 'status' => 422 )
+				);
 			}
 
 			if ( ! isset( $line_item['quantity'] ) || ! is_int( $line_item['quantity'] ) || $line_item['quantity'] < 1 ) {
-				return new WP_Error( 'invalid_quantity', __( 'Quantity must be a positive integer.', 'woocommerce' ) );
+				return new WP_Error(
+					'invalid_quantity',
+					__( 'Quantity must be a positive integer.', 'woocommerce' ),
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
 			}
 			$quantity = $line_item['quantity'];
 
@@ -526,7 +555,8 @@ class DataUtils {
 							/* translators: %d: remaining refundable quantity */
 							__( 'Requested quantity exceeds remaining refundable quantity (%d).', 'woocommerce' ),
 							$remaining_qty
-						)
+						),
+						array( 'status' => 422 )
 					);
 				}
 			}
@@ -535,7 +565,8 @@ class DataUtils {
 				if ( 1 !== $quantity ) {
 					return new WP_Error(
 						'invalid_quantity',
-						__( 'Shipping and fee line items must be refunded with quantity of 1.', 'woocommerce' )
+						__( 'Shipping and fee line items must be refunded with quantity of 1.', 'woocommerce' ),
+						array( 'status' => WP_Http::BAD_REQUEST )
 					);
 				}
 
@@ -544,7 +575,8 @@ class DataUtils {
 				if ( $remaining_total <= 0 ) {
 					return new WP_Error(
 						'quantity_exceeds_refundable',
-						__( 'This line item has already been fully refunded.', 'woocommerce' )
+						__( 'This line item has already been fully refunded.', 'woocommerce' ),
+						array( 'status' => 422 )
 					);
 				}
 			}
