@@ -1,10 +1,10 @@
 ---
-post_title: Registering modern settings components
-sidebar_label: Modern settings components
+post_title: Registering settings UI components
+sidebar_label: Settings UI components
 sidebar_position: 6
 ---
 
-# Registering modern settings components
+# Registering settings UI components
 
 Use custom components when a WooCommerce settings field needs plugin-specific React UI that cannot be represented by a native field type.
 
@@ -31,10 +31,10 @@ The `component` value is a name, not a script handle. It lets the PHP schema say
 
 ## Register JavaScript components
 
-Register components with `registerSettingsExtension()` from `@woocommerce/modern-settings-sdk`:
+Register components with `registerSettingsExtension()` from `@woocommerce/settings-ui-sdk`:
 
 ```ts
-import { registerSettingsExtension } from '@woocommerce/modern-settings-sdk';
+import { registerSettingsExtension } from '@woocommerce/settings-ui-sdk';
 import { PaymentMethodPicker } from './payment-method-picker';
 
 registerSettingsExtension( {
@@ -82,7 +82,7 @@ Call `onChange()` with the next field value. The SDK handles hidden input serial
 ## Example component
 
 ```tsx
-import type { SettingsFieldComponentProps } from '@woocommerce/modern-settings-sdk';
+import type { SettingsFieldComponentProps } from '@woocommerce/settings-ui-sdk';
 
 export const PaymentMethodPicker = ( {
 	field,
@@ -163,15 +163,15 @@ Resolution order is:
 
 ## Enqueue the component script
 
-Register your script in WordPress and return its handle from the modern settings adapter:
+Register your script in WordPress and return its handle from the settings UI adapter:
 
 ```php
 <?php
 use Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter;
 
-final class My_Plugin_Modern_Settings_Page extends LegacySettingsPageAdapter {
+final class My_Plugin_Settings_UI_Page extends LegacySettingsPageAdapter {
 	public function get_script_handles( string $section ): array {
-		return array( 'my-plugin-modern-settings' );
+		return array( 'my-plugin-settings-ui' );
 	}
 }
 ```

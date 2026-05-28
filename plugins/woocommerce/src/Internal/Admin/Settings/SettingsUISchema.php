@@ -1,6 +1,6 @@
 <?php
 /**
- * Modern settings schema builder.
+ * Settings UI schema builder.
  */
 
 declare( strict_types=1 );
@@ -10,11 +10,11 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Builds the canonical settings schema consumed by the modern settings renderer.
+ * Builds the canonical settings schema consumed by the settings UI renderer.
  *
  * @since 10.9.0
  */
-class ModernSettingsSchema {
+class SettingsUISchema {
 
 	/**
 	 * Default group id for fields before the first title marker.

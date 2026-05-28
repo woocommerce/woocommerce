@@ -9,7 +9,7 @@
 declare( strict_types = 1);
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Settings\ModernSettingsPageInterface;
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -86,7 +86,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
 			add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
 			add_action( 'woocommerce_admin_field_add_settings_slot', array( $this, 'add_settings_slot' ) );
-			add_filter( 'admin_body_class', array( $this, 'add_modern_settings_body_class' ) );
+			add_filter( 'admin_body_class', array( $this, 'add_settings_ui_body_class' ) );
 		}
 
 		/**
@@ -110,42 +110,42 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		}
 
 		/**
-		 * Get the modern settings page adapter for this settings page.
+		 * Get the settings UI page adapter for this settings page.
 		 *
-		 * Settings pages can override this to opt in to the modern settings renderer
+		 * Settings pages can override this to opt in to the settings UI renderer
 		 * while retaining the classic WooCommerce settings page route and save flow.
 		 *
 		 * @since 10.9.0
-		 * @return ModernSettingsPageInterface|null
+		 * @return SettingsUIPageInterface|null
 		 */
-		public function get_modern_settings_page(): ?ModernSettingsPageInterface {
+		public function get_settings_ui_page(): ?SettingsUIPageInterface {
 			return null;
 		}
 
 		/**
-		 * Add a body class for settings pages rendered through the modern settings SDK.
+		 * Add a body class for settings pages rendered through the settings UI SDK.
 		 *
 		 * @since 10.9.0
 		 *
 		 * @param string $classes The existing body classes for the admin area.
 		 * @return string The modified body classes for the admin area.
 		 */
-		public function add_modern_settings_body_class( $classes ) {
+		public function add_settings_ui_body_class( $classes ) {
 			global $current_tab;
 
 			if ( ! is_string( $classes ) || $this->id !== $current_tab ) {
 				return $classes;
 			}
 
-			if ( ! Features::is_enabled( 'modern-settings' ) || ! $this->get_modern_settings_page() instanceof ModernSettingsPageInterface ) {
+			if ( ! Features::is_enabled( 'settings-ui' ) || ! $this->get_settings_ui_page() instanceof SettingsUIPageInterface ) {
 				return $classes;
 			}
 
-			if ( str_contains( $classes, 'woocommerce-modern-settings-page' ) ) {
+			if ( str_contains( $classes, 'woocommerce-settings-ui-page' ) ) {
 				return $classes;
 			}
 
-			return "$classes woocommerce-modern-settings-page";
+			return "$classes woocommerce-settings-ui-page";
 		}
 
 		/**
@@ -308,9 +308,9 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		public function output() {
 			global $current_section;
 
-			$modern_settings_page = $this->get_modern_settings_page();
-			if ( Features::is_enabled( 'modern-settings' ) && $modern_settings_page instanceof ModernSettingsPageInterface ) {
-				foreach ( $modern_settings_page->get_script_handles( $current_section ) as $script_handle ) {
+			$settings_ui_page = $this->get_settings_ui_page();
+			if ( Features::is_enabled( 'settings-ui' ) && $settings_ui_page instanceof SettingsUIPageInterface ) {
+				foreach ( $settings_ui_page->get_script_handles( $current_section ) as $script_handle ) {
 					if ( is_string( $script_handle ) && '' !== $script_handle ) {
 						wp_enqueue_script( $script_handle );
 					}
@@ -319,9 +319,9 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 				$GLOBALS['hide_save_button'] = true;
 
 				printf(
-					'<div id="%1$s" data-wc-modern-settings="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
-					esc_attr( 'wc_settings_modern_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $current_section ? 'default' : $current_section ) ),
-					esc_attr( $modern_settings_page->get_page_id() ),
+					'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
+					esc_attr( 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $current_section ? 'default' : $current_section ) ),
+					esc_attr( $settings_ui_page->get_page_id() ),
 					esc_attr( $current_section )
 				);
 				return;

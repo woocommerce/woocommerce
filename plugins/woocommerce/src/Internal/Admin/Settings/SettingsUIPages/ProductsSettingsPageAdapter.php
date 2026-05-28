@@ -1,18 +1,18 @@
 <?php
 /**
- * Products settings adapter for modern settings.
+ * Products settings adapter for settings UI.
  */
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsPages;
+namespace Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIPages;
 
 use Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Adapts the WooCommerce Products settings page for the modern settings renderer.
+ * Adapts the WooCommerce Products settings page for the settings UI renderer.
  *
  * @since 10.9.0
  */

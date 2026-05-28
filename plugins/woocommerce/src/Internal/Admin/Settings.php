@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Admin\Settings\ModernSettingsPageInterface;
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
@@ -222,7 +222,7 @@ class Settings {
 		//phpcs:ignore
 		$settings['variationTitleAttributesSeparator'] = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
 
-		$settings = $this->add_modern_settings_schema( $settings );
+		$settings = $this->add_settings_ui_schema( $settings );
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$settings['dataEndpoints'] = isset( $settings['dataEndpoints'] )
 				? $settings['dataEndpoints']
@@ -403,43 +403,43 @@ class Settings {
 	}
 
 	/**
-	 * Add the modern settings schema for the current classic settings page.
+	 * Add the settings UI schema for the current classic settings page.
 	 *
 	 * @param array $settings Array of component settings.
 	 * @return array
 	 */
-	private function add_modern_settings_schema( array $settings ): array {
-		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'modern-settings' ) ) {
+	private function add_settings_ui_schema( array $settings ): array {
+		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'settings-ui' ) ) {
 			return $settings;
 		}
 
-		$modern_settings_page = $this->get_current_modern_settings_page();
-		if ( ! $modern_settings_page ) {
+		$settings_ui_page = $this->get_current_settings_ui_page();
+		if ( ! $settings_ui_page ) {
 			return $settings;
 		}
 
 		$section     = $this->get_current_settings_section();
 		$section_key = '' === $section ? 'default' : $section;
-		$page_id     = $modern_settings_page->get_page_id();
+		$page_id     = $settings_ui_page->get_page_id();
 
-		if ( ! isset( $settings['modernSettings'] ) || ! is_array( $settings['modernSettings'] ) ) {
-			$settings['modernSettings'] = array();
+		if ( ! isset( $settings['settingsUI'] ) || ! is_array( $settings['settingsUI'] ) ) {
+			$settings['settingsUI'] = array();
 		}
-		if ( ! isset( $settings['modernSettings'][ $page_id ] ) || ! is_array( $settings['modernSettings'][ $page_id ] ) ) {
-			$settings['modernSettings'][ $page_id ] = array();
+		if ( ! isset( $settings['settingsUI'][ $page_id ] ) || ! is_array( $settings['settingsUI'][ $page_id ] ) ) {
+			$settings['settingsUI'][ $page_id ] = array();
 		}
 
-		$settings['modernSettings'][ $page_id ][ $section_key ] = $modern_settings_page->get_schema( $section );
+		$settings['settingsUI'][ $page_id ][ $section_key ] = $settings_ui_page->get_schema( $section );
 
 		return $settings;
 	}
 
 	/**
-	 * Get the modern settings adapter for the current settings tab.
+	 * Get the settings UI adapter for the current settings tab.
 	 *
-	 * @return ModernSettingsPageInterface|null
+	 * @return SettingsUIPageInterface|null
 	 */
-	private function get_current_modern_settings_page(): ?ModernSettingsPageInterface {
+	private function get_current_settings_ui_page(): ?SettingsUIPageInterface {
 		if ( ! class_exists( '\WC_Admin_Settings' ) ) {
 			return null;
 		}
@@ -450,8 +450,8 @@ class Settings {
 				continue;
 			}
 
-			$modern_settings_page = $settings_page->get_modern_settings_page();
-			return $modern_settings_page instanceof ModernSettingsPageInterface ? $modern_settings_page : null;
+			$settings_ui_page = $settings_page->get_settings_ui_page();
+			return $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page : null;
 		}
 
 		return null;

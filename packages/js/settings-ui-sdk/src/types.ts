@@ -2,37 +2,37 @@ export type SettingsValue = string | number | boolean | string[] | null;
 
 export type SettingsValues = Record< string, SettingsValue >;
 
-export type ModernSettingsOption = {
+export type SettingsUIOption = {
 	label: string;
 	value: string;
 };
 
-export type ModernSettingsSaveSchema = {
+export type SettingsUISaveSchema = {
 	adapter: 'form_post' | 'none' | string;
 	name?: string;
 };
 
-export type ModernSettingsSaveStrategy =
+export type SettingsUISaveStrategy =
 	| { adapter: 'form_post' }
 	| { adapter: 'custom'; handler: string }
 	| { adapter: 'none' }
 	| { adapter: string; handler?: string };
 
-export type ModernSettingsField = {
+export type SettingsUIField = {
 	id: string;
 	label: string;
 	type: string;
 	description?: string;
 	value?: SettingsValue;
-	options?: ModernSettingsOption[];
+	options?: SettingsUIOption[];
 	component?: string;
 	placeholder?: string;
 	disabled?: boolean;
 	customAttributes?: Record< string, string | number | boolean >;
-	save?: ModernSettingsSaveSchema;
+	save?: SettingsUISaveSchema;
 };
 
-export type ModernSettingsGroupAction = {
+export type SettingsUIGroupAction = {
 	id: string;
 	label: string;
 	href: string;
@@ -41,41 +41,41 @@ export type ModernSettingsGroupAction = {
 	rel?: string;
 };
 
-export type ModernSettingsGroup = {
+export type SettingsUIGroup = {
 	id: string;
 	title?: string;
 	description?: string;
-	actions?: ModernSettingsGroupAction[];
-	fields: ModernSettingsField[];
+	actions?: SettingsUIGroupAction[];
+	fields: SettingsUIField[];
 };
 
-export type ModernSettingsShellBreadcrumb = {
+export type SettingsUIShellBreadcrumb = {
 	label: string;
 	href?: string;
 };
 
-export type ModernSettingsShellNavigationItem = {
+export type SettingsUIShellNavigationItem = {
 	id: string;
 	label: string;
 	href: string;
 	active?: boolean;
 };
 
-export type ModernSettingsShell = {
+export type SettingsUIShell = {
 	title?: string;
-	breadcrumbs?: ModernSettingsShellBreadcrumb[];
-	navigation?: ModernSettingsShellNavigationItem[];
-	sectionNavigation?: ModernSettingsShellNavigationItem[];
+	breadcrumbs?: SettingsUIShellBreadcrumb[];
+	navigation?: SettingsUIShellNavigationItem[];
+	sectionNavigation?: SettingsUIShellNavigationItem[];
 	navigationComponent?: string;
 };
 
-export type ModernSettingsSchema = {
+export type SettingsUISchema = {
 	id: string;
 	title?: string;
 	section?: string;
-	save?: ModernSettingsSaveStrategy;
-	shell?: ModernSettingsShell;
-	groups: Record< string, ModernSettingsGroup >;
+	save?: SettingsUISaveStrategy;
+	shell?: SettingsUIShell;
+	groups: Record< string, SettingsUIGroup >;
 };
 
 export type SettingsFieldContext = {
@@ -84,7 +84,7 @@ export type SettingsFieldContext = {
 };
 
 export type SettingsFieldComponentProps = {
-	field: ModernSettingsField;
+	field: SettingsUIField;
 	value: SettingsValue;
 	onChange: ( value: SettingsValue ) => void;
 	values: SettingsValues;
@@ -102,7 +102,7 @@ export type SettingsVisibilityPredicateArgs = {
 	values: SettingsValues;
 	initialValues: SettingsValues;
 	context: SettingsFieldContext;
-	schema: ModernSettingsSchema;
+	schema: SettingsUISchema;
 };
 
 export type SettingsVisibilityPredicate = (
@@ -115,7 +115,7 @@ export type SettingsSaveHandlerArgs = {
 	changedValues: Partial< SettingsValues >;
 	dirtyFields: string[];
 	context: SettingsFieldContext;
-	schema: ModernSettingsSchema;
+	schema: SettingsUISchema;
 };
 
 export type SettingsSaveResult = void | {
@@ -131,7 +131,7 @@ export type SettingsRegionComponentProps = {
 	values: SettingsValues;
 	initialValues: SettingsValues;
 	context: SettingsFieldContext;
-	schema: ModernSettingsSchema;
+	schema: SettingsUISchema;
 };
 
 export type SettingsRegionComponent = (
@@ -154,7 +154,7 @@ export type SettingsExtensionRegistration = {
 	regions?: Record< string, SettingsRegionComponent >;
 };
 
-export type ModernSettingsRegistry = {
+export type SettingsUIRegistry = {
 	registerSettingsExtension: (
 		registration: SettingsExtensionRegistration
 	) => void;
@@ -162,6 +162,6 @@ export type ModernSettingsRegistry = {
 
 declare global {
 	interface Window {
-		wcModernSettings?: ModernSettingsRegistry;
+		wcSettingsUI?: SettingsUIRegistry;
 	}
 }

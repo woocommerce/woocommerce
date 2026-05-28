@@ -1,6 +1,6 @@
 <?php
 /**
- * Modern settings page contract.
+ * Settings UI page contract.
  */
 
 declare( strict_types=1 );
@@ -10,14 +10,14 @@ namespace Automattic\WooCommerce\Admin\Settings;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Contract for settings pages that opt into the modern settings renderer.
+ * Contract for settings pages that opt into the settings UI renderer.
  *
  * @since 10.9.0
  */
-interface ModernSettingsPageInterface {
+interface SettingsUIPageInterface {
 
 	/**
-	 * Get the stable page id used for scoping the modern settings UI.
+	 * Get the stable page id used for scoping the settings UI.
 	 *
 	 * @since 10.9.0
 	 *
@@ -36,7 +36,7 @@ interface ModernSettingsPageInterface {
 	public function get_schema( string $section ): array;
 
 	/**
-	 * Get script handles that must be loaded before the modern settings app mounts.
+	 * Get script handles that must be loaded before the settings UI app mounts.
 	 *
 	 * @since 10.9.0
 	 *

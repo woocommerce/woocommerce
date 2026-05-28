@@ -21,10 +21,10 @@ export const warn = ( message: string, context?: unknown ) => {
 
 	if ( context ) {
 		// eslint-disable-next-line no-console
-		console.warn( `[WooCommerce modern settings] ${ message }`, context );
+		console.warn( `[WooCommerce settings UI] ${ message }`, context );
 		return;
 	}
 
 	// eslint-disable-next-line no-console
-	console.warn( `[WooCommerce modern settings] ${ message }` );
+	console.warn( `[WooCommerce settings UI] ${ message }` );
 };

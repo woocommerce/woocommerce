@@ -10,7 +10,7 @@
 // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Settings\ModernSettingsPageInterface;
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -38,15 +38,15 @@ if ( ! $tab_exists ) {
 }
 
 $hide_nav                = 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true );
-$is_modern_settings_page = false;
+$is_settings_ui_page = false;
 
-if ( Features::is_enabled( 'modern-settings' ) ) {
+if ( Features::is_enabled( 'settings-ui' ) ) {
 	foreach ( WC_Admin_Settings::get_settings_pages() as $settings_page ) {
 		if ( ! $settings_page instanceof WC_Settings_Page || $settings_page->get_id() !== $current_tab ) {
 			continue;
 		}
 
-		$is_modern_settings_page = $settings_page->get_modern_settings_page() instanceof ModernSettingsPageInterface;
+		$is_settings_ui_page = $settings_page->get_settings_ui_page() instanceof SettingsUIPageInterface;
 		break;
 	}
 }
@@ -127,7 +127,7 @@ $marketplace_links = array(
 		<?php endif; ?>
 			<h1 class="screen-reader-text"><?php echo esc_html( $current_tab_label ); ?></h1>
 			<?php
-			if ( ! $is_modern_settings_page ) {
+			if ( ! $is_settings_ui_page ) {
 				do_action( 'woocommerce_sections_' . $current_tab );
 			}
 

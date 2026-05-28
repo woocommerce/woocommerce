@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use _WP_Dependency;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
-use Automattic\WooCommerce\Admin\Settings\ModernSettingsPageInterface;
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 use Automattic\WooCommerce\Internal\Admin\Loader;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 /**
@@ -251,7 +251,7 @@ class WCAdminAssets {
 		wp_enqueue_style( 'wc-onboarding' );
 
 		if ( PageController::is_settings_page() ) {
-			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $this->get_modern_settings_script_dependencies() );
+			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $this->get_settings_ui_script_dependencies() );
 			$this->register_style( 'settings-embed', 'style', array( 'wp-components' ) );
 		}
 
@@ -323,7 +323,7 @@ class WCAdminAssets {
 			'wc-block-templates',
 			'wc-experimental-products-app',
 			'wc-product-editor',
-			'wc-modern-settings-sdk',
+			'wc-settings-ui-sdk',
 			'wc-remote-logging',
 			'wc-sanitize',
 		);
@@ -343,7 +343,7 @@ class WCAdminAssets {
 			'wc-experimental',
 			'wc-navigation',
 			'wc-product-editor',
-			'wc-modern-settings-sdk',
+			'wc-settings-ui-sdk',
 			WC_ADMIN_APP,
 		);
 
@@ -447,20 +447,20 @@ class WCAdminAssets {
 	 *
 	 * @return array
 	 */
-	private function get_modern_settings_script_dependencies(): array {
-		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'modern-settings' ) ) {
+	private function get_settings_ui_script_dependencies(): array {
+		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'settings-ui' ) ) {
 			return array();
 		}
 
-		$modern_settings_page = $this->get_current_modern_settings_page();
-		if ( ! $modern_settings_page ) {
+		$settings_ui_page = $this->get_current_settings_ui_page();
+		if ( ! $settings_ui_page ) {
 			return array();
 		}
 
 		$dependencies = array_merge(
-			array( 'wc-modern-settings-sdk' ),
+			array( 'wc-settings-ui-sdk' ),
 			array_filter(
-				$modern_settings_page->get_script_handles( $this->get_current_settings_section() ),
+				$settings_ui_page->get_script_handles( $this->get_current_settings_section() ),
 				static function ( $script_handle ): bool {
 					return is_string( $script_handle ) && '' !== $script_handle;
 				}
@@ -471,11 +471,11 @@ class WCAdminAssets {
 	}
 
 	/**
-	 * Get the modern settings adapter for the current settings tab.
+	 * Get the settings UI adapter for the current settings tab.
 	 *
-	 * @return ModernSettingsPageInterface|null
+	 * @return SettingsUIPageInterface|null
 	 */
-	private function get_current_modern_settings_page(): ?ModernSettingsPageInterface {
+	private function get_current_settings_ui_page(): ?SettingsUIPageInterface {
 		if ( ! class_exists( '\WC_Admin_Settings' ) ) {
 			return null;
 		}
@@ -486,8 +486,8 @@ class WCAdminAssets {
 				continue;
 			}
 
-			$modern_settings_page = $settings_page->get_modern_settings_page();
-			return $modern_settings_page instanceof ModernSettingsPageInterface ? $modern_settings_page : null;
+			$settings_ui_page = $settings_page->get_settings_ui_page();
+			return $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page : null;
 		}
 
 		return null;

@@ -2272,7 +2272,7 @@ importers:
         specifier: 0.14.12
         version: 0.14.12
 
-  packages/js/modern-settings-sdk:
+  packages/js/settings-ui-sdk:
     dependencies:
       '@woocommerce/sanitize':
         specifier: workspace:*
@@ -3456,9 +3456,9 @@ importers:
       '@woocommerce/explat':
         specifier: workspace:*
         version: link:../../../../packages/js/explat
-      '@woocommerce/modern-settings-sdk':
+      '@woocommerce/settings-ui-sdk':
         specifier: workspace:*
-        version: link:../../../../packages/js/modern-settings-sdk
+        version: link:../../../../packages/js/settings-ui-sdk
       '@woocommerce/navigation':
         specifier: workspace:*
         version: link:../../../../packages/js/navigation

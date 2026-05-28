@@ -7,21 +7,20 @@ import { createElement, Fragment } from '@wordpress/element';
  * Internal dependencies
  */
 import { warn } from './diagnostics';
-import type { ModernSettingsField, SettingsValue } from './types';
+import type { SettingsUIField, SettingsValue } from './types';
 
 type HiddenInput = {
 	name: string;
 	value: string;
 };
 
-const getFieldName = ( field: ModernSettingsField ) =>
-	field.save?.name || field.id;
+const getFieldName = ( field: SettingsUIField ) => field.save?.name || field.id;
 
 const getArrayFieldName = ( name: string ) =>
 	name.endsWith( '[]' ) ? name : `${ name }[]`;
 
 export const getHiddenInputs = (
-	field: ModernSettingsField,
+	field: SettingsUIField,
 	value: SettingsValue
 ): HiddenInput[] => {
 	const adapter = field.save?.adapter || 'form_post';
@@ -71,7 +70,7 @@ export const HiddenInputs = ( {
 	field,
 	value,
 }: {
-	field: ModernSettingsField;
+	field: SettingsUIField;
 	value: SettingsValue;
 } ) => (
 	<>

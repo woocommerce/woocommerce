@@ -1,6 +1,6 @@
 <?php
 /**
- * Modern settings feature flag tests.
+ * Settings UI feature flag tests.
  *
  * @package WooCommerce\Tests\Internal\Admin\Settings
  */
@@ -14,9 +14,9 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for the modern settings feature flag boundary.
+ * Tests for the settings UI feature flag boundary.
  */
-class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
+class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Original request globals.
@@ -66,8 +66,8 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 		$current_tab     = $this->original_current_tab;
 		unset( $GLOBALS['hide_save_button'] );
 
-		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_modern_settings_feature' ) );
-		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_modern_settings_feature' ) );
+		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
 
 		parent::tearDown();
 	}
@@ -76,38 +76,38 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 	 * It keeps opted-in pages on the legacy renderer when the feature flag is disabled.
 	 */
 	public function test_opted_in_page_uses_legacy_output_when_feature_flag_is_disabled(): void {
-		add_filter( 'woocommerce_admin_features', array( $this, 'disable_modern_settings_feature' ) );
+		add_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
 
 		global $current_section;
 		$current_section = '';
-		$page            = $this->get_modern_settings_test_page();
+		$page            = $this->get_settings_ui_test_page();
 
 		ob_start();
 		$page->output();
 		$output = ob_get_clean();
 
-		$this->assertStringContainsString( 'name="woocommerce_modern_settings_flag_test"', $output );
-		$this->assertStringNotContainsString( 'data-wc-modern-settings="1"', $output );
+		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
 		$this->assertArrayNotHasKey( 'hide_save_button', $GLOBALS );
 	}
 
 	/**
-	 * It renders the modern mount point only when the feature flag is enabled.
+	 * It renders the settings UI mount point only when the feature flag is enabled.
 	 */
-	public function test_opted_in_page_uses_modern_output_when_feature_flag_is_enabled(): void {
-		add_filter( 'woocommerce_admin_features', array( $this, 'enable_modern_settings_feature' ) );
+	public function test_opted_in_page_uses_settings_ui_output_when_feature_flag_is_enabled(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 
 		global $current_section;
 		$current_section = '';
-		$page            = $this->get_modern_settings_test_page();
+		$page            = $this->get_settings_ui_test_page();
 
 		ob_start();
 		$page->output();
 		$output = ob_get_clean();
 
-		$this->assertStringContainsString( 'data-wc-modern-settings="1"', $output );
-		$this->assertStringContainsString( 'data-wc-settings-page="modern_settings_flag_test"', $output );
-		$this->assertStringNotContainsString( 'name="woocommerce_modern_settings_flag_test"', $output );
+		$this->assertStringContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertStringContainsString( 'data-wc-settings-page="settings_ui_flag_test"', $output );
+		$this->assertStringNotContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
 		$this->assertTrue( $GLOBALS['hide_save_button'] );
 	}
 
@@ -115,11 +115,11 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 	 * It exposes section navigation metadata from legacy settings pages.
 	 */
 	public function test_legacy_adapter_adds_shell_navigation_metadata(): void {
-		$page    = $this->get_modern_settings_page_with_sections();
+		$page    = $this->get_settings_ui_page_with_sections();
 		$adapter = new \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter( $page );
 		$schema  = $adapter->get_schema( '' );
 
-		$this->assertSame( 'Modern settings flag test', $schema['shell']['title'] );
+		$this->assertSame( 'Settings UI flag test', $schema['shell']['title'] );
 		$this->assertArrayNotHasKey( 'breadcrumbs', $schema['shell'] );
 		$this->assertArrayNotHasKey( 'navigation', $schema['shell'] );
 		$this->assertSame( 'General', $schema['shell']['sectionNavigation'][0]['label'] );
@@ -128,106 +128,106 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It does not inject modern settings shared data when the feature flag is disabled.
+	 * It does not inject settings UI shared data when the feature flag is disabled.
 	 */
 	public function test_shared_settings_are_not_injected_when_feature_flag_is_disabled(): void {
-		add_filter( 'woocommerce_admin_features', array( $this, 'disable_modern_settings_feature' ) );
+		add_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
 
 		$_GET['page'] = 'wc-settings';
 		$_GET['tab']  = 'products';
 
-		$settings = $this->invoke_private_method( new Settings(), 'add_modern_settings_schema', array( array() ) );
+		$settings = $this->invoke_private_method( new Settings(), 'add_settings_ui_schema', array( array() ) );
 
-		$this->assertArrayNotHasKey( 'modernSettings', $settings );
+		$this->assertArrayNotHasKey( 'settingsUI', $settings );
 	}
 
 	/**
-	 * It does not add modern settings script dependencies when the feature flag is disabled.
+	 * It does not add settings UI script dependencies when the feature flag is disabled.
 	 */
-	public function test_modern_settings_script_dependencies_are_empty_when_feature_flag_is_disabled(): void {
-		add_filter( 'woocommerce_admin_features', array( $this, 'disable_modern_settings_feature' ) );
+	public function test_settings_ui_script_dependencies_are_empty_when_feature_flag_is_disabled(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
 
 		$_GET['page'] = 'wc-settings';
 		$_GET['tab']  = 'products';
 
-		$dependencies = $this->invoke_private_method( new WCAdminAssets(), 'get_modern_settings_script_dependencies' );
+		$dependencies = $this->invoke_private_method( new WCAdminAssets(), 'get_settings_ui_script_dependencies' );
 
 		$this->assertSame( array(), $dependencies );
 	}
 
 	/**
-	 * It does not add the modern settings body class when the feature flag is disabled.
+	 * It does not add the settings UI body class when the feature flag is disabled.
 	 */
-	public function test_modern_settings_body_class_is_not_added_when_feature_flag_is_disabled(): void {
-		add_filter( 'woocommerce_admin_features', array( $this, 'disable_modern_settings_feature' ) );
+	public function test_settings_ui_body_class_is_not_added_when_feature_flag_is_disabled(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
 
 		global $current_tab;
-		$current_tab = 'modern_settings_flag_test';
-		$page        = $this->get_modern_settings_test_page();
+		$current_tab = 'settings_ui_flag_test';
+		$page        = $this->get_settings_ui_test_page();
 
-		$classes = $page->add_modern_settings_body_class( 'existing-class' );
+		$classes = $page->add_settings_ui_body_class( 'existing-class' );
 
 		$this->assertSame( 'existing-class', $classes );
 	}
 
 	/**
-	 * It adds the modern settings body class when the feature flag is enabled.
+	 * It adds the settings UI body class when the feature flag is enabled.
 	 */
-	public function test_modern_settings_body_class_is_added_when_feature_flag_is_enabled(): void {
-		add_filter( 'woocommerce_admin_features', array( $this, 'enable_modern_settings_feature' ) );
+	public function test_settings_ui_body_class_is_added_when_feature_flag_is_enabled(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 
 		global $current_tab;
-		$current_tab = 'modern_settings_flag_test';
-		$page        = $this->get_modern_settings_test_page();
+		$current_tab = 'settings_ui_flag_test';
+		$page        = $this->get_settings_ui_test_page();
 
-		$classes = $page->add_modern_settings_body_class( 'existing-class' );
+		$classes = $page->add_settings_ui_body_class( 'existing-class' );
 
 		$this->assertStringContainsString( 'existing-class', $classes );
-		$this->assertStringContainsString( 'woocommerce-modern-settings-page', $classes );
+		$this->assertStringContainsString( 'woocommerce-settings-ui-page', $classes );
 	}
 
 	/**
-	 * Enable the modern settings feature flag.
+	 * Enable the settings UI feature flag.
 	 *
 	 * @param array $features Feature flags.
 	 * @return array
 	 */
-	public function enable_modern_settings_feature( array $features ): array {
-		$features[] = 'modern-settings';
+	public function enable_settings_ui_feature( array $features ): array {
+		$features[] = 'settings-ui';
 		return array_values( array_unique( $features ) );
 	}
 
 	/**
-	 * Disable the modern settings feature flag.
+	 * Disable the settings UI feature flag.
 	 *
 	 * @param array $features Feature flags.
 	 * @return array
 	 */
-	public function disable_modern_settings_feature( array $features ): array {
-		return array_values( array_diff( $features, array( 'modern-settings' ) ) );
+	public function disable_settings_ui_feature( array $features ): array {
+		return array_values( array_diff( $features, array( 'settings-ui' ) ) );
 	}
 
 	/**
-	 * Build a settings page that opts into the modern renderer.
+	 * Build a settings page that opts into the settings UI renderer.
 	 *
 	 * @return \WC_Settings_Page
 	 */
-	private function get_modern_settings_test_page(): \WC_Settings_Page {
+	private function get_settings_ui_test_page(): \WC_Settings_Page {
 		return new class() extends \WC_Settings_Page {
 			/**
 			 * Constructor.
 			 */
 			public function __construct() {
-				$this->id    = 'modern_settings_flag_test';
-				$this->label = 'Modern settings flag test';
+				$this->id    = 'settings_ui_flag_test';
+				$this->label = 'Settings UI flag test';
 			}
 
 			/**
-			 * Get the modern settings page adapter.
+			 * Get the settings UI page adapter.
 			 *
-			 * @return \Automattic\WooCommerce\Admin\Settings\ModernSettingsPageInterface|null
+			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
 			 */
-			public function get_modern_settings_page(): ?\Automattic\WooCommerce\Admin\Settings\ModernSettingsPageInterface {
+			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
 				return new \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter( $this );
 			}
 
@@ -239,9 +239,9 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 			protected function get_settings_for_default_section() {
 				return array(
 					array(
-						'id'    => 'woocommerce_modern_settings_flag_test',
+						'id'    => 'woocommerce_settings_ui_flag_test',
 						'type'  => 'text',
-						'title' => 'Modern settings flag test',
+						'title' => 'Settings UI flag test',
 					),
 				);
 			}
@@ -253,14 +253,14 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 	 *
 	 * @return \WC_Settings_Page
 	 */
-	private function get_modern_settings_page_with_sections(): \WC_Settings_Page {
+	private function get_settings_ui_page_with_sections(): \WC_Settings_Page {
 		return new class() extends \WC_Settings_Page {
 			/**
 			 * Constructor.
 			 */
 			public function __construct() {
-				$this->id    = 'modern_settings_flag_test';
-				$this->label = 'Modern settings flag test';
+				$this->id    = 'settings_ui_flag_test';
+				$this->label = 'Settings UI flag test';
 			}
 
 			/**

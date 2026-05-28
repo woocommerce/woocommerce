@@ -1,25 +1,25 @@
 <?php
 /**
- * Legacy WC_Settings_Page adapter for modern settings.
+ * Legacy WC_Settings_Page adapter for settings UI.
  */
 
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
-use Automattic\WooCommerce\Admin\Settings\ModernSettingsPageInterface as PublicModernSettingsPageInterface;
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface as PublicSettingsUIPageInterface;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Adapts a WC_Settings_Page instance into the modern settings page contract.
+ * Adapts a WC_Settings_Page instance into the settings UI page contract.
  *
  * Internal implementation of the legacy settings adapter. Extensions should use
  * Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter.
  *
  * @since 10.9.0
  */
-class LegacySettingsPageAdapter implements PublicModernSettingsPageInterface {
+class LegacySettingsPageAdapter implements PublicSettingsUIPageInterface {
 
 	/**
 	 * Legacy settings page.
@@ -53,7 +53,7 @@ class LegacySettingsPageAdapter implements PublicModernSettingsPageInterface {
 	 * @return array
 	 */
 	public function get_schema( string $section ): array {
-		$schema = ModernSettingsSchema::from_legacy_settings(
+		$schema = SettingsUISchema::from_legacy_settings(
 			$this->settings_page->get_id(),
 			$section,
 			$this->settings_page->get_label(),
@@ -67,7 +67,7 @@ class LegacySettingsPageAdapter implements PublicModernSettingsPageInterface {
 	}
 
 	/**
-	 * Get secondary settings section navigation for the modern shell.
+	 * Get secondary settings section navigation for the settings UI shell.
 	 *
 	 * @param string $current_section Current section id.
 	 * @return array<int, array{id: string, label: string, href: string, active: bool}>
@@ -100,7 +100,7 @@ class LegacySettingsPageAdapter implements PublicModernSettingsPageInterface {
 	}
 
 	/**
-	 * Get script handles that must be loaded before the modern settings app mounts.
+	 * Get script handles that must be loaded before the settings UI app mounts.
 	 *
 	 * @param string $section Section id. Empty string means the default section.
 	 * @return string[]

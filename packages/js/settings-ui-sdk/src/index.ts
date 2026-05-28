@@ -1,4 +1,4 @@
-export { ModernSettingsPage } from './modern-settings-page';
+export { SettingsUIPage } from './settings-ui-page';
 export { NativeSettingsField } from './native-fields';
 export { HiddenInputs, getHiddenInputs } from './hidden-inputs';
 export {
@@ -10,16 +10,16 @@ export {
 	resolveSaveHandler,
 } from './registry';
 export type {
-	ModernSettingsField,
-	ModernSettingsGroup,
-	ModernSettingsGroupAction,
-	ModernSettingsOption,
-	ModernSettingsRegistry,
-	ModernSettingsSaveSchema,
-	ModernSettingsSaveStrategy,
-	ModernSettingsSchema,
-	ModernSettingsShell,
-	ModernSettingsShellBreadcrumb,
+	SettingsUIField,
+	SettingsUIGroup,
+	SettingsUIGroupAction,
+	SettingsUIOption,
+	SettingsUIRegistry,
+	SettingsUISaveSchema,
+	SettingsUISaveStrategy,
+	SettingsUISchema,
+	SettingsUIShell,
+	SettingsUIShellBreadcrumb,
 	SettingsExtensionRegistration,
 	SettingsExtensionScope,
 	SettingsFieldComponent,

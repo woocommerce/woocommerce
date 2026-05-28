@@ -8,20 +8,20 @@ import { createElement, createRoot } from '@wordpress/element';
  */
 import { getAdminSetting } from '~/utils/admin-settings';
 
-type ModernSettingsNavigationItem = {
+type SettingsUINavigationItem = {
 	id: string;
 	label: string;
 	href: string;
 	active?: boolean;
 };
 
-type ModernSettingsSchema = {
+type SettingsUISchema = {
 	id: string;
 	section?: string;
 	shell?: {
 		title?: string;
-		navigation?: ModernSettingsNavigationItem[];
-		sectionNavigation?: ModernSettingsNavigationItem[];
+		navigation?: SettingsUINavigationItem[];
+		sectionNavigation?: SettingsUINavigationItem[];
 	};
 	groups: Record< string, unknown >;
 };
@@ -29,9 +29,9 @@ type ModernSettingsSchema = {
 declare global {
 	interface Window {
 		wc?: {
-			modernSettingsSdk?: {
-				ModernSettingsPage: ( props: {
-					schema: ModernSettingsSchema;
+			settingsUiSdk?: {
+				SettingsUIPage: ( props: {
+					schema: SettingsUISchema;
 					page: string;
 					section?: string;
 				} ) => JSX.Element | null;
@@ -43,31 +43,27 @@ declare global {
 const getSchema = (
 	page: string,
 	section: string
-): ModernSettingsSchema | undefined => {
-	const settings = getAdminSetting( 'modernSettings', {} );
+): SettingsUISchema | undefined => {
+	const settings = getAdminSetting( 'settingsUI', {} );
 	const sectionKey = section || 'default';
 	return settings?.[ page ]?.[ sectionKey ];
 };
 
-export const registerModernSettingsScreens = () => {
-	const ModernSettingsPage = window.wc?.modernSettingsSdk?.ModernSettingsPage;
+export const registerSettingsUIScreens = () => {
+	const SettingsUIPage = window.wc?.settingsUiSdk?.SettingsUIPage;
 
-	if ( ! ModernSettingsPage ) {
+	if ( ! SettingsUIPage ) {
 		if (
-			document.querySelector< HTMLElement >(
-				'[data-wc-modern-settings="1"]'
-			)
+			document.querySelector< HTMLElement >( '[data-wc-settings-ui="1"]' )
 		) {
 			// eslint-disable-next-line no-console
-			console.warn(
-				'[WooCommerce modern settings] SDK script is missing.'
-			);
+			console.warn( '[WooCommerce settings UI] SDK script is missing.' );
 		}
 		return;
 	}
 
 	document
-		.querySelectorAll< HTMLElement >( '[data-wc-modern-settings="1"]' )
+		.querySelectorAll< HTMLElement >( '[data-wc-settings-ui="1"]' )
 		.forEach( ( element ) => {
 			const page = element.dataset.wcSettingsPage || '';
 			const section = element.dataset.wcSettingsSection || '';
@@ -76,14 +72,14 @@ export const registerModernSettingsScreens = () => {
 			if ( ! schema ) {
 				// eslint-disable-next-line no-console
 				console.warn(
-					'[WooCommerce modern settings] Settings payload is missing.',
+					'[WooCommerce settings UI] Settings payload is missing.',
 					{ page, section }
 				);
 				return;
 			}
 
 			createRoot( element ).render(
-				createElement( ModernSettingsPage, {
+				createElement( SettingsUIPage, {
 					schema,
 					page,
 					section: section || schema.section,

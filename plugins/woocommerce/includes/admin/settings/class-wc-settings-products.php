@@ -6,8 +6,8 @@
  * @version 2.4.0
  */
 
-use Automattic\WooCommerce\Admin\Settings\ModernSettingsPageInterface;
-use Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsPages\ProductsSettingsPageAdapter;
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIPages\ProductsSettingsPageAdapter;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -41,12 +41,12 @@ class WC_Settings_Products extends WC_Settings_Page {
 	public $icon = 'box';
 
 	/**
-	 * Get the modern settings page adapter for this settings page.
+	 * Get the settings UI page adapter for this settings page.
 	 *
 	 * @since 10.9.0
-	 * @return ModernSettingsPageInterface|null
+	 * @return SettingsUIPageInterface|null
 	 */
-	public function get_modern_settings_page(): ?ModernSettingsPageInterface {
+	public function get_settings_ui_page(): ?SettingsUIPageInterface {
 		return new ProductsSettingsPageAdapter( $this );
 	}
 

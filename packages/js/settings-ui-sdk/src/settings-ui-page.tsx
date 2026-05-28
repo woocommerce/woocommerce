@@ -29,10 +29,10 @@ import {
 	resolveSaveHandler,
 } from './registry';
 import type {
-	ModernSettingsField,
-	ModernSettingsGroup,
-	ModernSettingsSaveStrategy,
-	ModernSettingsSchema,
+	SettingsUIField,
+	SettingsUIGroup,
+	SettingsUISaveStrategy,
+	SettingsUISchema,
 	SettingsFieldContext,
 	SettingsValue,
 	SettingsValues,
@@ -43,7 +43,7 @@ type SaveNotice = {
 	message: string;
 };
 
-const getInitialValues = ( schema: ModernSettingsSchema ): SettingsValues => {
+const getInitialValues = ( schema: SettingsUISchema ): SettingsValues => {
 	const values: SettingsValues = {};
 
 	Object.values( schema.groups ).forEach( ( group ) => {
@@ -85,22 +85,21 @@ const getChangedValues = (
 };
 
 const getFieldTypeClassName = ( type: string ) =>
-	`wc-modern-settings__field--${ type.replace( /[^a-z0-9_-]/gi, '-' ) }`;
+	`wc-settings-ui__field--${ type.replace( /[^a-z0-9_-]/gi, '-' ) }`;
 
 const getActionVariant = ( variant?: string ) =>
 	( [ 'primary', 'secondary', 'tertiary', 'link' ].includes( variant || '' )
 		? variant
 		: 'secondary' ) as 'primary' | 'secondary' | 'tertiary' | 'link';
 
-const getSaveStrategy = (
-	schema: ModernSettingsSchema
-): ModernSettingsSaveStrategy => schema.save || { adapter: 'form_post' };
+const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
+	schema.save || { adapter: 'form_post' };
 
 const clearLegacyFormPrompt = () => {
 	window.onbeforeunload = null;
 };
 
-const GroupHeader = ( { group }: { group: ModernSettingsGroup } ) => {
+const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 	const hasHeaderContent =
 		group.title || group.description || ( group.actions || [] ).length > 0;
 
@@ -109,17 +108,17 @@ const GroupHeader = ( { group }: { group: ModernSettingsGroup } ) => {
 	}
 
 	return (
-		<div className="wc-modern-settings__group-header">
+		<div className="wc-settings-ui__group-header">
 			{ group.title ? <h2>{ group.title }</h2> : null }
 			{ group.description ? (
-				<div className="wc-modern-settings__group-description">
+				<div className="wc-settings-ui__group-description">
 					<RawHTML>
 						{ sanitizeSettingsHtml( group.description ) }
 					</RawHTML>
 				</div>
 			) : null }
 			{ group.actions && group.actions.length > 0 ? (
-				<div className="wc-modern-settings__group-actions">
+				<div className="wc-settings-ui__group-actions">
 					{ group.actions.map( ( action ) => (
 						<Button
 							key={ action.id }
@@ -150,7 +149,7 @@ const getVisible = ( {
 	values: SettingsValues;
 	initialValues: SettingsValues;
 	context: SettingsFieldContext;
-	schema: ModernSettingsSchema;
+	schema: SettingsUISchema;
 } ) => {
 	const predicate =
 		kind === 'field'
@@ -172,7 +171,7 @@ const getVisible = ( {
 	}
 };
 
-const getAllFields = ( schema: ModernSettingsSchema ): ModernSettingsField[] =>
+const getAllFields = ( schema: SettingsUISchema ): SettingsUIField[] =>
 	Object.values( schema.groups ).flatMap( ( group ) => group.fields );
 
 const ShellHeader = ( {
@@ -186,13 +185,13 @@ const ShellHeader = ( {
 	onSave,
 	children,
 }: {
-	schema: ModernSettingsSchema;
+	schema: SettingsUISchema;
 	context: SettingsFieldContext;
 	values: SettingsValues;
 	initialValues: SettingsValues;
 	isDirty: boolean;
 	isSaving: boolean;
-	saveStrategy: ModernSettingsSaveStrategy;
+	saveStrategy: SettingsUISaveStrategy;
 	onSave: () => void;
 	children: ReactNode;
 } ) => {
@@ -213,12 +212,12 @@ const ShellHeader = ( {
 	const breadcrumbs =
 		shell.breadcrumbs && shell.breadcrumbs.length > 0 ? (
 			<nav
-				className="wc-modern-settings-shell__breadcrumbs"
+				className="wc-settings-ui-shell__breadcrumbs"
 				aria-label={ __( 'Breadcrumbs', 'woocommerce' ) }
 			>
 				{ shell.breadcrumbs.map( ( breadcrumb, index ) => (
 					<span
-						className="wc-modern-settings-shell__breadcrumb"
+						className="wc-settings-ui-shell__breadcrumb"
 						key={ `${ breadcrumb.label }-${ index }` }
 					>
 						{ breadcrumb.href ? (
@@ -252,7 +251,7 @@ const ShellHeader = ( {
 
 	return (
 		<Page
-			className="wc-modern-settings-shell"
+			className="wc-settings-ui-shell"
 			headingLevel={ 1 }
 			title={ title }
 			breadcrumbs={ breadcrumbs }
@@ -260,18 +259,18 @@ const ShellHeader = ( {
 			showSidebarToggle={ false }
 		>
 			{ hasNavigation ? (
-				<div className="wc-modern-settings-shell__navigation">
+				<div className="wc-settings-ui-shell__navigation">
 					{ shell.navigation && shell.navigation.length > 0 ? (
 						<nav
-							className="wc-modern-settings-shell__tabs wc-modern-settings-shell__tabs--primary"
+							className="wc-settings-ui-shell__tabs wc-settings-ui-shell__tabs--primary"
 							aria-label={ __( 'Settings pages', 'woocommerce' ) }
 						>
 							{ shell.navigation.map( ( item ) => (
 								<a
 									className={
 										item.active
-											? 'wc-modern-settings-shell__tab is-active'
-											: 'wc-modern-settings-shell__tab'
+											? 'wc-settings-ui-shell__tab is-active'
+											: 'wc-settings-ui-shell__tab'
 									}
 									href={ item.href }
 									key={ item.id }
@@ -284,7 +283,7 @@ const ShellHeader = ( {
 					{ shell.sectionNavigation &&
 					shell.sectionNavigation.length > 0 ? (
 						<nav
-							className="wc-modern-settings-shell__tabs wc-modern-settings-shell__tabs--secondary"
+							className="wc-settings-ui-shell__tabs wc-settings-ui-shell__tabs--secondary"
 							aria-label={ __(
 								'Settings sections',
 								'woocommerce'
@@ -294,8 +293,8 @@ const ShellHeader = ( {
 								<a
 									className={
 										item.active
-											? 'wc-modern-settings-shell__tab is-active'
-											: 'wc-modern-settings-shell__tab'
+											? 'wc-settings-ui-shell__tab is-active'
+											: 'wc-settings-ui-shell__tab'
 									}
 									href={ item.href }
 									key={ item.id }
@@ -320,12 +319,12 @@ const ShellHeader = ( {
 	);
 };
 
-export const ModernSettingsPage = ( {
+export const SettingsUIPage = ( {
 	schema,
 	page,
 	section,
 }: {
-	schema: ModernSettingsSchema;
+	schema: SettingsUISchema;
 	page?: string;
 	section?: string;
 } ) => {
@@ -493,7 +492,7 @@ export const ModernSettingsPage = ( {
 		>
 			{ saveNotice ? (
 				<Notice
-					className="wc-modern-settings-shell__notice"
+					className="wc-settings-ui-shell__notice"
 					status={ saveNotice.status }
 					isDismissible
 					onRemove={ () => setSaveNotice( null ) }
@@ -501,14 +500,11 @@ export const ModernSettingsPage = ( {
 					{ saveNotice.message }
 				</Notice>
 			) : null }
-			<div className="wc-modern-settings">
+			<div className="wc-settings-ui">
 				{ visibleGroups.map( ( group ) => (
-					<section
-						className="wc-modern-settings__group"
-						key={ group.id }
-					>
+					<section className="wc-settings-ui__group" key={ group.id }>
 						<GroupHeader group={ group } />
-						<div className="wc-modern-settings__group-panel">
+						<div className="wc-settings-ui__group-panel">
 							{ group.fields.map( ( field ) => {
 								const FieldComponent =
 									resolveFieldComponent( field, context ) ||
@@ -518,7 +514,7 @@ export const ModernSettingsPage = ( {
 								return (
 									<div
 										className={ [
-											'wc-modern-settings__field',
+											'wc-settings-ui__field',
 											getFieldTypeClassName( field.type ),
 										].join( ' ' ) }
 										key={ field.id }
@@ -543,7 +539,7 @@ export const ModernSettingsPage = ( {
 				) ) }
 			</div>
 			{ formPostFields.length > 0 ? (
-				<div className="wc-modern-settings__hidden-inputs">
+				<div className="wc-settings-ui__hidden-inputs">
 					{ formPostFields.map( ( field ) => (
 						<HiddenInputs
 							field={ field }

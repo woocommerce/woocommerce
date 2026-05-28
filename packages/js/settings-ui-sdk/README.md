@@ -1,17 +1,17 @@
-# Modern Settings SDK
+# Settings UI SDK
 
-React utilities for WooCommerce settings pages that opt in to the modern settings renderer.
+React utilities for WooCommerce settings pages that opt in to the settings UI renderer.
 
-For the full integration guide, see [Modern settings SDK](../../../docs/extensions/settings-and-config/modern-settings-sdk.md).
+For the full integration guide, see [Settings UI SDK](../../../docs/extensions/settings-and-config/settings-ui-sdk.md).
 
 ## Usage
 
-PHP settings pages continue to register through `WC_Settings_Page`. A page opts in by returning a modern settings adapter from `get_modern_settings_page()`. The adapter provides the canonical schema, save adapter, and any script handles that must load before the React app mounts.
+PHP settings pages continue to register through `WC_Settings_Page`. A page opts in by returning a settings UI adapter from `get_settings_ui_page()`. The adapter provides the canonical schema, save adapter, and any script handles that must load before the React app mounts.
 
 Custom JavaScript registers scoped components:
 
 ```ts
-import { registerSettingsExtension } from '@woocommerce/modern-settings-sdk';
+import { registerSettingsExtension } from '@woocommerce/settings-ui-sdk';
 import { PaymentMethodPicker } from './payment-method-picker';
 
 registerSettingsExtension( {

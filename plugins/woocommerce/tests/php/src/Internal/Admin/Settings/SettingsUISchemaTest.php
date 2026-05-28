@@ -1,6 +1,6 @@
 <?php
 /**
- * ModernSettingsSchema tests.
+ * SettingsUISchema tests.
  *
  * @package WooCommerce\Tests\Internal\Admin\Settings
  */
@@ -9,19 +9,19 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings;
 
-use Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsSchema;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUISchema;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for ModernSettingsSchema.
+ * Tests for SettingsUISchema.
  */
-class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
+class SettingsUISchemaTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox It includes page-level save and shell metadata.
 	 */
 	public function test_from_legacy_settings_includes_page_save_and_shell_metadata(): void {
-		$schema = ModernSettingsSchema::from_legacy_settings(
+		$schema = SettingsUISchema::from_legacy_settings(
 			'test',
 			'',
 			'Test &amp; settings',
@@ -45,7 +45,7 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 	 * It skips malformed settings entries.
 	 */
 	public function test_from_legacy_settings_skips_malformed_settings_entries(): void {
-		$schema = ModernSettingsSchema::from_legacy_settings(
+		$schema = SettingsUISchema::from_legacy_settings(
 			'test',
 			'',
 			'Test settings',
@@ -70,7 +70,7 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 	public function test_from_legacy_settings_creates_default_group_for_fields_before_title(): void {
 		update_option( 'woocommerce_test_text', 'saved value' );
 
-		$schema = ModernSettingsSchema::from_legacy_settings(
+		$schema = SettingsUISchema::from_legacy_settings(
 			'test',
 			'',
 			'Test settings',
@@ -93,7 +93,7 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 	 * It keeps component metadata with the field schema.
 	 */
 	public function test_from_legacy_settings_preserves_component_metadata(): void {
-		$schema = ModernSettingsSchema::from_legacy_settings(
+		$schema = SettingsUISchema::from_legacy_settings(
 			'test',
 			'advanced',
 			'Test settings',
@@ -145,7 +145,7 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 	 * It preserves sanitized group description markup and header actions.
 	 */
 	public function test_from_legacy_settings_preserves_group_description_and_actions(): void {
-		$schema = ModernSettingsSchema::from_legacy_settings(
+		$schema = SettingsUISchema::from_legacy_settings(
 			'test',
 			'advanced',
 			'Test settings',
@@ -191,7 +191,7 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 	 * It uses checkbox descriptions as labels and desc_tip as help text.
 	 */
 	public function test_from_legacy_settings_uses_checkbox_desc_as_label(): void {
-		$schema = ModernSettingsSchema::from_legacy_settings(
+		$schema = SettingsUISchema::from_legacy_settings(
 			'test',
 			'',
 			'Test settings',
@@ -216,7 +216,7 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 	 * It does not render boolean desc_tip values as help text.
 	 */
 	public function test_from_legacy_settings_ignores_boolean_desc_tip(): void {
-		$schema = ModernSettingsSchema::from_legacy_settings(
+		$schema = SettingsUISchema::from_legacy_settings(
 			'test',
 			'',
 			'Test settings',
@@ -241,7 +241,7 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 	 * It uses legacy field names for form POST save schema.
 	 */
 	public function test_from_legacy_settings_uses_field_name_for_form_post_save_schema(): void {
-		$schema = ModernSettingsSchema::from_legacy_settings(
+		$schema = SettingsUISchema::from_legacy_settings(
 			'test',
 			'',
 			'Test settings',
@@ -268,7 +268,7 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 	 * It sanitizes info field text and marks info fields as non-saving.
 	 */
 	public function test_from_legacy_settings_sanitizes_info_field_text_and_marks_info_fields_as_non_saving(): void {
-		$schema = ModernSettingsSchema::from_legacy_settings(
+		$schema = SettingsUISchema::from_legacy_settings(
 			'test',
 			'',
 			'Test settings',

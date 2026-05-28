@@ -2,14 +2,14 @@
 /**
  * ProductsSettingsPageAdapter tests.
  *
- * @package WooCommerce\Tests\Internal\Admin\Settings\ModernSettingsPages
+ * @package WooCommerce\Tests\Internal\Admin\Settings\SettingsUIPages
  */
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\ModernSettingsPages;
+namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\SettingsUIPages;
 
-use Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsPages\ProductsSettingsPageAdapter;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIPages\ProductsSettingsPageAdapter;
 use WC_Unit_Test_Case;
 
 /**

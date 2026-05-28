@@ -3,7 +3,7 @@
  */
 import { warn } from './diagnostics';
 import type {
-	ModernSettingsField,
+	SettingsUIField,
 	SettingsExtensionRegistration,
 	SettingsFieldComponent,
 	SettingsFieldContext,
@@ -134,7 +134,7 @@ export const registerSettingsExtension = (
 };
 
 export const resolveFieldComponent = (
-	field: ModernSettingsField,
+	field: SettingsUIField,
 	context: SettingsFieldContext
 ): SettingsFieldComponent | undefined => {
 	if ( field.component ) {
@@ -266,8 +266,8 @@ export const resolveRegionComponent = (
 };
 
 if ( typeof window !== 'undefined' ) {
-	window.wcModernSettings = {
-		...( window.wcModernSettings || {} ),
+	window.wcSettingsUI = {
+		...( window.wcSettingsUI || {} ),
 		registerSettingsExtension,
 	};
 }

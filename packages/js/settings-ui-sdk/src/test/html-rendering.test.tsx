@@ -13,9 +13,9 @@ jest.mock( '@wordpress/admin-ui', () => ( {
 /**
  * Internal dependencies
  */
-import { ModernSettingsPage } from '../modern-settings-page';
+import { SettingsUIPage } from '../settings-ui-page';
 import { NativeSettingsField } from '../native-fields';
-import type { ModernSettingsSchema } from '../types';
+import type { SettingsUISchema } from '../types';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -71,7 +71,7 @@ describe( 'settings HTML rendering', () => {
 	} );
 
 	it( 'sanitizes info fields and group descriptions before rendering', () => {
-		const schema: ModernSettingsSchema = {
+		const schema: SettingsUISchema = {
 			id: 'test-page',
 			title: 'Test page',
 			section: 'default',
@@ -94,7 +94,7 @@ describe( 'settings HTML rendering', () => {
 		};
 
 		const { container, root } = renderElement(
-			<ModernSettingsPage schema={ schema } />
+			<SettingsUIPage schema={ schema } />
 		);
 
 		expect( container.textContent ).toContain( 'Info field' );
