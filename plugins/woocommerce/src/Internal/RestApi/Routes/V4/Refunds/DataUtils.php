@@ -429,7 +429,7 @@ class DataUtils {
 	 */
 	public function validate_preview_line_items( array $line_items, WC_Order $order ) {
 		if ( empty( $line_items ) ) {
-			return new WP_Error( 'invalid_line_item', __( 'At least one line item is required.', 'woocommerce' ) );
+			return new WP_Error( 'missing_line_items', __( 'At least one line item is required.', 'woocommerce' ) );
 		}
 
 		if ( ! in_array( $order->get_status(), self::REFUNDABLE_STATUSES, true ) ) {
@@ -445,19 +445,22 @@ class DataUtils {
 		foreach ( $line_items as $line_item ) {
 			$line_item_id = $line_item['line_item_id'] ?? null;
 			if ( ! $line_item_id ) {
-				return new WP_Error( 'invalid_line_item', __( 'Line item ID is required.', 'woocommerce' ) );
+				return new WP_Error( 'missing_line_item_id', __( 'Line item ID is required.', 'woocommerce' ) );
 			}
 
 			$item = $order->get_item( $line_item_id );
 			if ( ! $item || $item->get_order_id() !== $order->get_id() ) {
-				return new WP_Error( 'invalid_line_item', __( 'Line item not found.', 'woocommerce' ) );
+				return new WP_Error( 'line_item_not_found', __( 'Line item not found.', 'woocommerce' ) );
 			}
 
 			if ( ! $item instanceof WC_Order_Item_Product && ! $item instanceof WC_Order_Item_Fee && ! $item instanceof WC_Order_Item_Shipping ) {
-				return new WP_Error( 'invalid_line_item', __( 'Line item is not a product, fee, or shipping line.', 'woocommerce' ) );
+				return new WP_Error( 'unsupported_item_type', __( 'Line item is not a product, fee, or shipping line.', 'woocommerce' ) );
 			}
 
-			$quantity = $line_item['quantity'] ?? 0;
+			if ( ! isset( $line_item['quantity'] ) || ! is_int( $line_item['quantity'] ) || $line_item['quantity'] < 1 ) {
+				return new WP_Error( 'invalid_quantity', __( 'Quantity must be a positive integer.', 'woocommerce' ) );
+			}
+			$quantity = $line_item['quantity'];
 
 			if ( $item instanceof WC_Order_Item_Product ) {
 				$remaining_qty = $item->get_quantity() + ( $refund_data['qtys'][ $line_item_id ] ?? 0 );
@@ -474,8 +477,15 @@ class DataUtils {
 			}
 
 			if ( $item instanceof WC_Order_Item_Shipping || $item instanceof WC_Order_Item_Fee ) {
-				$refunded_total  = $refund_data['totals'][ $line_item_id ] ?? 0.0;
-				$remaining_total = (float) $item->get_total() - $refunded_total;
+				if ( 1 !== $quantity ) {
+					return new WP_Error(
+						'invalid_quantity',
+						__( 'Shipping and fee line items must be refunded with quantity of 1.', 'woocommerce' )
+					);
+				}
+
+				$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
+				$remaining_total = abs( (float) $item->get_total() ) - $refunded_total;
 				if ( $remaining_total <= 0 ) {
 					return new WP_Error(
 						'quantity_exceeds_refundable',
