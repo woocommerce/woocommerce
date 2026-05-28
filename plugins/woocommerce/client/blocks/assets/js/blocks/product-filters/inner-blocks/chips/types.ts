@@ -7,6 +7,7 @@ import { BlockEditProps } from '@wordpress/blocks';
  * Internal dependencies
  */
 import type { SelectableItemsBlockContext } from '../../../../types/type-defs/selectable-items';
+import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 
 export type Color = {
 	slug?: string;
@@ -35,8 +36,7 @@ export type EditProps = BlockEditProps< BlockAttributes > & {
 	style: Record< string, string >;
 	context: SelectableItemsBlockContext< {
 		count?: number;
-		color?: string;
-		image?: string;
+		visual?: VisualAttributeTerm;
 	} >;
 	chipText: Color;
 	setChipText: ( value: string ) => void;

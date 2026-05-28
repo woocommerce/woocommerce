@@ -7,6 +7,7 @@
 
 declare( strict_types=1 );
 
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use PHPUnit\Framework\MockObject\Matcher\InvokedRecorder;
 
@@ -323,16 +324,28 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 
 			$this->assertSame( '#aabbcc', get_term_meta( $term_id, 'color', true ), 'Color meta should be saved.' );
 			$this->assertSame( '', get_term_meta( $term_id, 'image', true ), 'Image meta should be removed when color is saved.' );
+			$this->assertSame(
+				array(
+					'type'  => VisualAttributeTermMeta::TYPE_COLOR,
+					'value' => '#aabbcc',
+				),
+				VisualAttributeTermMeta::get_term_visual( $term_id ),
+				'Canonical visual meta should expose saved colors as a typed value.'
+			);
 
 			wc_save_visual_attribute_term_meta( $term_id, '', $image_id );
 
 			$this->assertSame( (string) $image_id, get_term_meta( $term_id, 'image', true ), 'Image meta should be saved.' );
 			$this->assertSame( '', get_term_meta( $term_id, 'color', true ), 'Color meta should be removed when image is saved.' );
+			$saved_image_visual = VisualAttributeTermMeta::get_term_visual( $term_id );
+			$this->assertSame( VisualAttributeTermMeta::TYPE_IMAGE, $saved_image_visual['type'], 'Canonical visual meta should expose saved images as a typed value.' );
+			$this->assertStringContainsString( 'visual-attribute-term-image.jpg', $saved_image_visual['value'], 'Canonical image values should use the image URL.' );
 
 			wc_save_visual_attribute_term_meta( $term_id, '', 999999 );
 
 			$this->assertSame( '', get_term_meta( $term_id, 'image', true ), 'Invalid image IDs should be ignored.' );
 			$this->assertSame( '', get_term_meta( $term_id, 'color', true ), 'Invalid image IDs should clear existing visual meta.' );
+			$this->assertSame( VisualAttributeTermMeta::get_empty_visual(), VisualAttributeTermMeta::get_term_visual( $term_id ), 'Canonical visual meta should expose invalid image IDs as empty values.' );
 
 			update_term_meta( $term_id, 'color', '#112233' );
 			update_term_meta( $term_id, 'image', $image_id );

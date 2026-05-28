@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
+
 /**
  * Product Filter: Checkbox List Block.
  */
@@ -85,7 +87,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 
 		$first_item          = reset( $items );
 		$show_counts         = is_array( $first_item ) && array_key_exists( 'count', $first_item );
-		$has_visual_swatches = is_array( $first_item ) && ( array_key_exists( 'color', $first_item ) || array_key_exists( 'image', $first_item ) );
+		$has_visual_swatches = is_array( $first_item ) && array_key_exists( 'visual', $first_item );
 
 		ob_start();
 		?>
@@ -249,17 +251,9 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	 * @return string
 	 */
 	private function get_item_swatch_style( array $item ): string {
-		$image = isset( $item['image'] ) ? esc_url_raw( (string) $item['image'] ) : '';
-		if ( $image ) {
-			return sprintf( "background-image:url('%s')", str_replace( "'", '%27', $image ) );
-		}
+		$visual = isset( $item['visual'] ) && is_array( $item['visual'] ) ? $item['visual'] : array();
 
-		$color = isset( $item['color'] ) ? sanitize_hex_color( (string) $item['color'] ) : '';
-		if ( $color ) {
-			return sprintf( 'background-color:%s', $color );
-		}
-
-		return '';
+		return VisualAttributeTermMeta::get_swatch_style( $visual );
 	}
 
 	/**

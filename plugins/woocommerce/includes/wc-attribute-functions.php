@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -798,19 +799,5 @@ function wc_attribute_taxonomy_slug( $attribute_name ) {
  * @return void
  */
 function wc_save_visual_attribute_term_meta( int $term_id, string $color = '', int $image_id = 0 ): void {
-	if ( $image_id && wp_attachment_is_image( $image_id ) ) {
-		update_term_meta( $term_id, 'image', absint( $image_id ) );
-		delete_term_meta( $term_id, 'color' );
-		return;
-	}
-
-	$sanitized_color = sanitize_hex_color( $color );
-	if ( $sanitized_color ) {
-		update_term_meta( $term_id, 'color', $sanitized_color );
-		delete_term_meta( $term_id, 'image' );
-		return;
-	}
-
-	delete_term_meta( $term_id, 'color' );
-	delete_term_meta( $term_id, 'image' );
+	VisualAttributeTermMeta::save_term_visual( $term_id, $color, $image_id );
 }

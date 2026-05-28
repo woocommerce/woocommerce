@@ -26,21 +26,10 @@ import './style.scss';
 import './editor.scss';
 import { EditProps } from './types';
 import { getColorClasses, getColorVars } from './utils';
-
-const getSwatchStyle = ( item: { color?: string; image?: string } ) => {
-	if ( item.image ) {
-		const escapedImage = item.image.split( "'" ).join( '%27' );
-		return {
-			backgroundImage: `url('${ escapedImage }')`,
-		};
-	} else if ( item.color ) {
-		return {
-			backgroundColor: item.color,
-		};
-	}
-
-	return undefined;
-};
+import {
+	getVisualAttributeTermStyle,
+	isVisualAttributeTermEmpty,
+} from '../../../../base/utils/visual-attribute-terms';
 
 const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 	const {
@@ -137,19 +126,19 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 											/>
 										</span>
 										<span className="wc-block-product-filter-checkbox-list__text-wrapper">
-											{ ( item.color !== undefined ||
-												item.image !== undefined ) && (
+											{ item.visual !== undefined && (
 												<span
 													className={ clsx(
 														'wc-block-product-filter-checkbox-list__color-swatch',
 														{
 															'is-empty':
-																! item.color &&
-																! item.image,
+																isVisualAttributeTermEmpty(
+																	item.visual
+																),
 														}
 													) }
-													style={ getSwatchStyle(
-														item
+													style={ getVisualAttributeTermStyle(
+														item.visual
 													) }
 													aria-hidden="true"
 												/>
