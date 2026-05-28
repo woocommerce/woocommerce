@@ -75,9 +75,12 @@ const ProductsControl = ( {
 			isCompact={ isCompact }
 			isLoading={ isLoading }
 			isSingle={ false }
-			selected={ productList.filter( ( { details } ) =>
-				selected.includes( details?.id ?? 0 )
-			) }
+			selected={ productList.filter( ( { details } ) => {
+				if ( ! details || ! Number.isSafeInteger( details.id ) ) {
+					return false;
+				}
+				return selected.includes( details.id );
+			} ) }
 			onSearch={ onSearch }
 			onChange={ onChange }
 			messages={ messages }
