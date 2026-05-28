@@ -104,12 +104,7 @@ class ProductGallery extends AbstractBlock {
 			'aria-label'      => $media['alt'] ?? '',
 			'autoplay'        => 'autoplay',
 			'data-image-id'   => $media['id'],
-			'data-wp-context' => wp_json_encode(
-				array(
-					'videoLocation' => 'dialog',
-				),
-				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-			),
+			'data-wp-context' => '{"videoLocation":"dialog"}',
 			'data-wp-watch'   => 'callbacks.syncVideoPlayback',
 			'loop'            => 'loop',
 			'muted'           => 'muted',
