@@ -22,6 +22,10 @@ on:
     issue_comment:
         types: [created]
 
+concurrency:
+    group: community-pr-coderabbit-gate-${{ github.event.issue.number }}
+    cancel-in-progress: false
+
 permissions:
     contents: read
     pull-requests: write
@@ -50,6 +54,13 @@ jobs:
                       // Skip drafts
                       if ( pr.draft ) {
                           core.info( 'PR is a draft, skipping.' );
+                          core.setOutput( 'action', 'none' );
+                          return;
+                      }
+
+                      // Skip closed/merged PRs
+                      if ( pr.state !== 'open' ) {
+                          core.info( `PR is ${ pr.state }, skipping.` );
                           core.setOutput( 'action', 'none' );
                           return;
                       }
