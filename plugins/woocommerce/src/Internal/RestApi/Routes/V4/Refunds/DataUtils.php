@@ -310,6 +310,10 @@ class DataUtils {
 		if ( $item instanceof WC_Order_Item_Product ) {
 			$original_qty = $item->get_quantity();
 			if ( 0 === $original_qty ) {
+				wc_get_logger()->warning(
+					sprintf( 'Refund preview: product item %d has zero original quantity on order %d.', $item->get_id(), $item->get_order_id() ),
+					array( 'source' => 'wc-v4-refunds' )
+				);
 				return 0.0;
 			}
 			$unit_price_with_tax = ( (float) $item->get_total() + (float) $item->get_total_tax() ) / $original_qty;
@@ -375,6 +379,17 @@ class DataUtils {
 					return is_numeric( $amount ) && $amount > 0;
 				}
 			);
+
+			if ( ! empty( $original_taxes['total'] ?? array() ) && empty( $tax_totals ) ) {
+				wc_get_logger()->warning(
+					sprintf(
+						'Refund preview: tax totals filtered to empty for item %d on order %d (non-numeric or non-positive values).',
+						(int) $line_item['line_item_id'],
+						$order->get_id()
+					),
+					array( 'source' => 'wc-v4-refunds' )
+				);
+			}
 
 			if ( ! empty( $tax_totals ) ) {
 				$tax_rates        = $this->build_tax_rates_array( $order, array_keys( $tax_totals ) );
