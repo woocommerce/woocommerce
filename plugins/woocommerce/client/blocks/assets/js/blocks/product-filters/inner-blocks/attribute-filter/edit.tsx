@@ -32,13 +32,11 @@ import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { EXCLUDED_BLOCKS } from '../../constants';
 import { FilterOptionItem, FilterItemFields } from '../../types';
 import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
-import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
 import { sortFilterOptions } from '../../utils/sort-filter-options';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
-const EMPTY_TERM_VISUALS: Record< string, VisualAttributeTerm > = {};
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
@@ -54,10 +52,6 @@ const Edit = ( props: EditProps ) => {
 	} = blockAttributes;
 
 	const attributeObject = getAttributeFromId( attributeId );
-	const termVisuals = getSetting< Record< string, VisualAttributeTerm > >(
-		'productFilterTermVisuals',
-		EMPTY_TERM_VISUALS
-	);
 
 	const [ attributeOptions, setAttributeOptions ] = useState<
 		FilterOptionItem[]
@@ -108,8 +102,8 @@ const Edit = ( props: EditProps ) => {
 					value: term.id.toString(),
 					selected: index === 0,
 					...( showCounts && { count: term.count } ),
-					...( term.id in termVisuals && {
-						visual: termVisuals[ term.id ],
+					...( term.visual && {
+						visual: term.visual,
 					} ),
 				} ) );
 
@@ -128,7 +122,6 @@ const Edit = ( props: EditProps ) => {
 		isTermsLoading,
 		isFilterCountsLoading,
 		attributeObject,
-		termVisuals,
 	] );
 
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(

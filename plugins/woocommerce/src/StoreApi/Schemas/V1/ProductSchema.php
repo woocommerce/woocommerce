@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
@@ -351,6 +352,21 @@ class ProductSchema extends AbstractSchema {
 										'type'        => 'boolean',
 										'context'     => [ 'view', 'edit', 'embed' ],
 										'readonly'    => true,
+									],
+									'visual'  => [
+										'description' => __( 'Visual swatch data for wc-visual attribute terms.', 'woocommerce' ),
+										'type'        => 'object',
+										'context'     => [ 'view', 'edit', 'embed' ],
+										'readonly'    => true,
+										'properties'  => [
+											'type'  => [
+												'type' => 'string',
+												'enum' => [ VisualAttributeTermMeta::TYPE_COLOR, VisualAttributeTermMeta::TYPE_IMAGE, VisualAttributeTermMeta::TYPE_NONE ],
+											],
+											'value' => [
+												'type' => 'string',
+											],
+										],
 									],
 								],
 							],
@@ -891,7 +907,13 @@ class ProductSchema extends AbstractSchema {
 	 * @return object
 	 */
 	protected function prepare_product_attribute_taxonomy_value( \WP_Term $term ) {
-		return $this->prepare_product_attribute_value( $term->name, $term->term_id, $term->slug );
+		$value = (array) $this->prepare_product_attribute_value( $term->name, $term->term_id, $term->slug );
+
+		if ( VisualAttributeTermMeta::is_visual_attribute_taxonomy( $term->taxonomy ) ) {
+			$value['visual'] = VisualAttributeTermMeta::get_term_visual( (int) $term->term_id );
+		}
+
+		return (object) $value;
 	}
 
 	/**

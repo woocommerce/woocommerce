@@ -20,7 +20,6 @@ import {
 import { isProductResponseItem } from '@woocommerce/entities';
 import type { ProductResponseAttributeItem } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
-import { getSetting } from '@woocommerce/settings';
 import {
 	DisplayStyleSwitcher,
 	resetDisplayStyleBlock,
@@ -82,11 +81,6 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
 
-	const termVisuals = getSetting< Record< string, VisualAttributeTerm > >(
-		'variationSelectorTermVisuals',
-		{}
-	);
-
 	const selectableContext = useMemo( () => {
 		let items: SelectableItem< {
 			label: string;
@@ -99,8 +93,7 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			attribute.terms.length > 0
 		) {
 			items = attribute.terms.map( ( term ) => {
-				const visual =
-					termVisuals[ term.id ] || EMPTY_TERM_VISUALS[ term.id ];
+				const visual = term.visual || EMPTY_TERM_VISUALS[ term.id ];
 
 				return {
 					id: `${ attribute.taxonomy }-${ term.slug }`,
@@ -122,7 +115,7 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			ariaLabel: string;
 			visual?: VisualAttributeTerm;
 		} >;
-	}, [ attribute, termVisuals ] );
+	}, [ attribute ] );
 
 	const blockPreviewProps = useBlockPreview( {
 		blocks,

@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
+
 /**
  * TermSchema class.
  */
@@ -62,6 +64,21 @@ class TermSchema extends AbstractSchema {
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
+			'visual'      => array(
+				'description' => __( 'Visual swatch data for wc-visual attribute terms.', 'woocommerce' ),
+				'type'        => 'object',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'properties'  => array(
+					'type'  => array(
+						'type' => 'string',
+						'enum' => array( VisualAttributeTermMeta::TYPE_COLOR, VisualAttributeTermMeta::TYPE_IMAGE, VisualAttributeTermMeta::TYPE_NONE ),
+					),
+					'value' => array(
+						'type' => 'string',
+					),
+				),
+			),
 		];
 	}
 
@@ -72,7 +89,7 @@ class TermSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_item_response( $term ) {
-		return [
+		$response = [
 			'id'          => (int) $term->term_id,
 			'name'        => $this->prepare_html_response( $term->name ),
 			'slug'        => $term->slug,
@@ -80,5 +97,11 @@ class TermSchema extends AbstractSchema {
 			'parent'      => (int) $term->parent,
 			'count'       => (int) $term->count,
 		];
+
+		if ( VisualAttributeTermMeta::is_visual_attribute_taxonomy( $term->taxonomy ) ) {
+			$response['visual'] = VisualAttributeTermMeta::get_term_visual( (int) $term->term_id );
+		}
+
+		return $response;
 	}
 }

@@ -23,20 +23,6 @@ class VariationSelectorAttribute extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-variation-selector-attribute';
 
 	/**
-	 * Extra data passed through from server to client for block.
-	 *
-	 * @param array $attributes Any attributes that currently are available from the block.
-	 * @return void
-	 */
-	protected function enqueue_data( array $attributes = array() ) {
-		parent::enqueue_data( $attributes );
-
-		if ( is_admin() ) {
-			$this->asset_data_registry->add( 'variationSelectorTermVisuals', VisualAttributeTermMeta::get_attribute_term_visuals() );
-		}
-	}
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -271,7 +257,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 	private function build_variation_selectable_items( string $attribute_name, string $attribute_slug, array $attribute_terms, ?string $default_selected ): array {
 		$id_prefix    = sanitize_title( $attribute_slug );
 		$items        = array();
-		$term_visuals = VisualAttributeTermMeta::get_attribute_term_visuals( $attribute_name );
+		$term_visuals = VisualAttributeTermMeta::get_term_visuals( wp_list_pluck( $attribute_terms, 'term_id' ) );
 
 		foreach ( $attribute_terms as $attribute_term ) {
 			if ( ! is_array( $attribute_term ) || ! isset( $attribute_term['value'], $attribute_term['label'] ) ) {

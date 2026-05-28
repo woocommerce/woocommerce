@@ -46,7 +46,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		if ( is_admin() ) {
 			$this->asset_data_registry->add( 'defaultProductFilterAttribute', $this->get_default_product_attribute() );
-			$this->asset_data_registry->add( 'productFilterTermVisuals', VisualAttributeTermMeta::get_attribute_term_visuals() );
 		}
 	}
 
@@ -176,6 +175,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		$attribute_terms = get_terms( $args );
 
+		if ( is_wp_error( $attribute_terms ) ) {
+			$attribute_terms = array();
+		}
+
 		$filter_param_key = 'filter_' . str_replace( 'pa_', '', $product_attribute->slug );
 		$filter_params    = $block->context['filterParams'] ?? array();
 		$selected_terms   = array();
@@ -197,7 +200,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			$visual_values       = array();
 
 			if ( $is_visual_attribute ) {
-				$visual_values = VisualAttributeTermMeta::get_attribute_term_visuals( $product_attribute->slug );
+				$visual_values = VisualAttributeTermMeta::get_term_visuals( wp_list_pluck( $attribute_terms, 'term_id' ) );
 			}
 
 			$attribute_options = array_map(

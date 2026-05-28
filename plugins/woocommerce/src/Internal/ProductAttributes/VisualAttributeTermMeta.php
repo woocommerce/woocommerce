@@ -83,50 +83,47 @@ class VisualAttributeTermMeta {
 	}
 
 	/**
-	 * Get normalized visual values for wc-visual attribute terms.
+	 * Get normalized visual values for the given terms.
 	 *
-	 * @param string|null $attribute_name Optional product attribute taxonomy name, e.g. `pa_color`.
-	 * @param string      $image_size Image size for image visual URLs.
+	 * @param array  $term_ids Term IDs.
+	 * @param string $image_size Image size for image visual URLs.
 	 * @return array<int, array{type: string, value: string}> Map of term ID to visual values.
 	 *
 	 * @since 10.9.0
 	 */
-	public static function get_attribute_term_visuals( ?string $attribute_name = null, string $image_size = 'thumbnail' ): array {
-		$visuals        = array();
-		$attribute_slug = $attribute_name ? wc_attribute_taxonomy_slug( $attribute_name ) : null;
+	public static function get_term_visuals( array $term_ids, string $image_size = 'thumbnail' ): array {
+		$visuals  = array();
+		$term_ids = array_unique( array_filter( array_map( 'absint', $term_ids ) ) );
 
-		$attributes = wc_get_attribute_taxonomies();
-
-		foreach ( $attributes as $attribute ) {
-			if ( 'wc-visual' !== $attribute->attribute_type ) {
-				continue;
-			}
-
-			if ( $attribute_slug && $attribute_slug !== $attribute->attribute_name ) {
-				continue;
-			}
-
-			$terms = get_terms(
-				array(
-					'taxonomy'   => wc_attribute_taxonomy_name( $attribute->attribute_name ),
-					'hide_empty' => false,
-				)
-			);
-
-			if ( is_wp_error( $terms ) ) {
-				continue;
-			}
-
-			foreach ( $terms as $term ) {
-				if ( ! $term instanceof \WP_Term ) {
-					continue;
-				}
-
-				$visuals[ $term->term_id ] = self::get_term_visual( (int) $term->term_id, $image_size );
-			}
+		foreach ( $term_ids as $term_id ) {
+			$visuals[ $term_id ] = self::get_term_visual( $term_id, $image_size );
 		}
 
 		return $visuals;
+	}
+
+	/**
+	 * Check whether a taxonomy is a wc-visual product attribute taxonomy.
+	 *
+	 * @param string $taxonomy Taxonomy name.
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public static function is_visual_attribute_taxonomy( string $taxonomy ): bool {
+		static $visual_attribute_taxonomies = null;
+
+		if ( null === $visual_attribute_taxonomies ) {
+			$visual_attribute_taxonomies = array();
+
+			foreach ( wc_get_attribute_taxonomies() as $attribute ) {
+				if ( 'wc-visual' === $attribute->attribute_type ) {
+					$visual_attribute_taxonomies[ wc_attribute_taxonomy_name( $attribute->attribute_name ) ] = true;
+				}
+			}
+		}
+
+		return isset( $visual_attribute_taxonomies[ $taxonomy ] );
 	}
 
 	/**
