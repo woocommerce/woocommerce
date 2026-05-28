@@ -35,6 +35,47 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 	}
 
 	/**
+	 * Get own sections — adds a "Staff" sub-section when the POS staff actors
+	 * feature is enabled.
+	 *
+	 * @since 10.9.0
+	 * @return array
+	 */
+	protected function get_own_sections() {
+		$sections = array(
+			'' => __( 'General', 'woocommerce' ),
+		);
+
+		if ( class_exists( 'WC_Admin_POS_Staff' ) && WC_Admin_POS_Staff::is_enabled() ) {
+			$sections['staff'] = __( 'Staff', 'woocommerce' );
+		}
+
+		return $sections;
+	}
+
+	/**
+	 * Output the settings — routes the "Staff" sub-section through the
+	 * actor-backed admin page.
+	 *
+	 * @since 10.9.0
+	 */
+	public function output(): void {
+		global $current_section, $hide_save_button;
+
+		if (
+			'staff' === $current_section
+			&& class_exists( 'WC_Admin_POS_Staff' )
+			&& WC_Admin_POS_Staff::is_enabled()
+		) {
+			$hide_save_button = true; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			WC_Admin_POS_Staff::page_output();
+			return;
+		}
+
+		parent::output();
+	}
+
+	/**
 	 * Setting page icon.
 	 *
 	 * @var string
