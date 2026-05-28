@@ -171,37 +171,40 @@ class Controller extends AbstractController {
 			'/' . $this->rest_base . '/preview',
 			array(
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'preview_item' ),
+					'methods'  => WP_REST_Server::CREATABLE,
+					'callback' => array( $this, 'preview_item' ),
+					// Preview is read-only but logically part of the refund-creation flow, so it requires
+					// the same capability as creating a refund. This prevents read-only-API clients from
+					// probing refund state.
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array(
 						'order_id'   => array(
 							'description'       => __( 'The ID of the order to preview a refund for.', 'woocommerce' ),
 							'type'              => 'integer',
 							'required'          => true,
-							'sanitize_callback' => 'absint',
+							'minimum'           => 1,
 							'validate_callback' => 'rest_validate_request_arg',
 						),
 						'line_items' => array(
-							'description' => __( 'Line items to include in the refund preview.', 'woocommerce' ),
-							'type'        => 'array',
-							'required'    => true,
-							'items'       => array(
-								'type'       => 'object',
-								'properties' => array(
+							'description'       => __( 'Line items to include in the refund preview.', 'woocommerce' ),
+							'type'              => 'array',
+							'required'          => true,
+							'minItems'          => 1,
+							'validate_callback' => 'rest_validate_request_arg',
+							'items'             => array(
+								'type'                 => 'object',
+								'required'             => array( 'line_item_id', 'quantity' ),
+								'additionalProperties' => false,
+								'properties'           => array(
 									'line_item_id' => array(
 										'description' => __( 'ID of the original order line item.', 'woocommerce' ),
 										'type'        => 'integer',
-										'required'    => true,
-										'sanitize_callback' => 'absint',
-										'validate_callback' => 'rest_validate_request_arg',
+										'minimum'     => 1,
 									),
 									'quantity'     => array(
 										'description' => __( 'Quantity to refund.', 'woocommerce' ),
 										'type'        => 'integer',
-										'required'    => true,
-										'sanitize_callback' => 'absint',
-										'validate_callback' => 'rest_validate_request_arg',
+										'minimum'     => 1,
 									),
 								),
 							),
@@ -439,7 +442,7 @@ class Controller extends AbstractController {
 	public function preview_item( $request ) {
 		$order = wc_get_order( $request['order_id'] );
 
-		if ( ! $order || $order instanceof \WC_Order_Refund ) {
+		if ( ! $order || 'shop_order' !== $order->get_type() ) {
 			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
