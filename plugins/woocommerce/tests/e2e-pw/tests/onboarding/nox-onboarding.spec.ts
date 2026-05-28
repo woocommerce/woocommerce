@@ -5,10 +5,13 @@ import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 const WC_ADMIN_NAMESPACE = '/wp-json/wc-admin';
+// Match the WC Admin payments providers endpoint, allowing optional query args.
 const PROVIDERS_ENDPOINT =
 	/\/wp-json\/wc-admin\/settings\/payments\/providers(\?.*)?$/;
+// Match the WooPayments onboarding endpoint without matching nested step endpoints.
 const ONBOARDING_ENDPOINT =
 	/\/wp-json\/wc-admin\/settings\/payments\/woopayments\/onboarding(\?.*)?$/;
+// Match the WooPayments business verification step endpoint, allowing optional query args.
 const BUSINESS_VERIFICATION_ENDPOINT =
 	/\/wp-json\/wc-admin\/settings\/payments\/woopayments\/onboarding\/business-verification(\?.*)?$/;
 
@@ -253,6 +256,8 @@ test.describe(
 				} )
 			).toBeVisible();
 
+			// Guard against the legal entity dropdown crash and similar runtime failures
+			// without failing on unrelated WordPress admin console noise.
 			expect(
 				consoleErrors.filter(
 					( message ) =>
