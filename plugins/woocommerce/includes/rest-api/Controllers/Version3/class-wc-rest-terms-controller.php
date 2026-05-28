@@ -346,15 +346,8 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		}
 		$response = array();
 		if ( is_array( $query_result ) ) {
-			$attachment_ids = array();
-			foreach ( $query_result as $term ) {
-				if ( $term instanceof \WP_Term ) {
-					$thumbnail_id = (int) get_term_meta( $term->term_id, 'thumbnail_id', true );
-					if ( $thumbnail_id ) {
-						$attachment_ids[] = $thumbnail_id;
-					}
-				}
-			}
+			$terms          = array_filter( $query_result, static fn( $term ) => $term instanceof \WP_Term );
+			$attachment_ids = array_filter( array_map( static fn( $term ) => (int) get_term_meta( $term->term_id, 'thumbnail_id', true ), $terms ) );
 			if ( ! empty( $attachment_ids ) ) {
 				// Prime caches to reduce future queries.
 				_prime_post_caches( $attachment_ids );

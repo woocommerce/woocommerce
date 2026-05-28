@@ -172,13 +172,7 @@ class ProductCategories extends AbstractDynamicBlock {
 		}
 
 		if ( ! empty( $attributes['hasImage'] ) ) {
-			$attachment_ids = array();
-			foreach ( $categories as $category ) {
-				$thumbnail_id = (int) get_term_meta( $category->term_id, 'thumbnail_id', true );
-				if ( $thumbnail_id ) {
-					$attachment_ids[] = $thumbnail_id;
-				}
-			}
+			$attachment_ids = array_filter( array_map( static fn( $category ) => (int) get_term_meta( $category->term_id, 'thumbnail_id', true ), $categories ) );
 			if ( ! empty( $attachment_ids ) ) {
 				// Prime caches to reduce future queries.
 				_prime_post_caches( $attachment_ids );
