@@ -70,6 +70,7 @@ declare global {
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;
+			'settings-ui': boolean;
 			'shipping-label-banner': boolean;
 			subscriptions: boolean;
 			'store-alerts': boolean;

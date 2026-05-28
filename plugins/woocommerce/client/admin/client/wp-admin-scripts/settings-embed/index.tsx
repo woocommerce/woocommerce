@@ -90,7 +90,7 @@ const registerSlotFills = () => {
 		registerSettingsEmailListingFill();
 	}
 
-	if ( isFeatureEnabled( 'settings-ui' ) ) {
+	if ( features?.[ 'settings-ui' ] === true ) {
 		registerSettingsUIScreens();
 	}
 

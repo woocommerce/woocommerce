@@ -267,6 +267,13 @@ class WCAdminAssets {
 	 * @return array Modified dependencies.
 	 */
 	private function modify_script_dependencies( $dependencies, $script ) {
+		$dependencies = array_map(
+			static function ( $dependency ) {
+				return 'wp-route' === $dependency ? 'wp-router' : $dependency;
+			},
+			$dependencies
+		);
+
 		switch ( $script ) {
 			case WC_ADMIN_APP:
 				// Remove wp-editor dependency if we're not on a customize store page since we don't use wp-editor in other pages.
