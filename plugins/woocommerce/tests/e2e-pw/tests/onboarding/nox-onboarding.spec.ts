@@ -217,7 +217,7 @@ test.describe(
 			);
 
 			await expect(
-				page.getByRole( 'heading', { name: 'Payment providers' } )
+				page.getByText( 'Payment providers', { exact: true } )
 			).toBeVisible( { timeout: 30000 } );
 
 			await page
@@ -230,9 +230,7 @@ test.describe(
 				page.getByRole( 'heading', { name: 'Set up WooPayments' } )
 			).toBeVisible();
 			await expect(
-				page
-					.getByRole( 'heading', { name: 'Activate payments' } )
-					.first()
+				page.getByText( 'Activate payments', { exact: true } )
 			).toBeVisible();
 
 			const businessTypeSelect = page.getByRole( 'combobox', {
