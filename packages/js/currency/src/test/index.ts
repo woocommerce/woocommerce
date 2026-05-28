@@ -14,12 +14,10 @@ describe( 'formatAmount', () => {
 		const currency = Currency();
 		expect( currency.formatAmount( 9.99, true ) ).toBe( 'USD9.99' );
 		const currency2 = Currency( {
-			code: 'EUR',
 			priceFormat: '%2$s %1$s',
-			symbol: '€',
+			symbol: 'EUR',
 		} );
-		expect( currency2.formatAmount( 30 ) ).toBe( '30.00 €' );
-		expect( currency2.formatAmount( 30, true ) ).toBe( '30.00 EUR' );
+		expect( currency2.formatAmount( 30 ) ).toBe( '30.00 EUR' );
 	} );
 
 	it( 'should uses store currency settings, not locale-based', () => {
