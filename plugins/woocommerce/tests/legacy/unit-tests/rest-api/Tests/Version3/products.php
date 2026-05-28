@@ -341,11 +341,11 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting a product projects legacy images to the media gallery.
+	 * Test product images are projected to the media gallery on get.
 	 *
-	 * @testdox Should project legacy images to media gallery responses.
+	 * @testdox Should project product images to media gallery responses.
 	 */
-	public function test_get_product_projects_legacy_images_to_media_gallery() {
+	public function test_get_product_projects_images_to_media_gallery() {
 		wp_set_current_user( $this->user );
 		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
 
@@ -395,11 +395,11 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test updating a product media gallery persists mixed media and syncs legacy images.
+	 * Test updating a product media gallery persists mixed media and syncs product images.
 	 *
-	 * @testdox Should persist media gallery and sync legacy images.
+	 * @testdox Should persist media gallery and sync product images.
 	 */
-	public function test_update_product_media_gallery_persists_and_syncs_legacy_images() {
+	public function test_update_product_media_gallery_persists_and_syncs_product_images() {
 		wp_set_current_user( $this->user );
 		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
 
@@ -472,9 +472,9 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test updating legacy product images preserves stored video gallery data.
+	 * Test updating product images preserves stored video gallery data.
 	 *
-	 * @testdox Should preserve stored videos when legacy images are updated.
+	 * @testdox Should preserve stored videos when product images are updated.
 	 */
 	public function test_update_product_images_preserves_stored_video_media_gallery_items() {
 		wp_set_current_user( $this->user );
@@ -566,9 +566,9 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test updating legacy product images clears stored video gallery data when the feature is disabled.
+	 * Test updating product images clears stored video gallery data when the feature is disabled.
 	 *
-	 * @testdox Should clear stored videos when legacy images are updated while product gallery videos are disabled.
+	 * @testdox Should clear stored videos when product images are updated while product gallery videos are disabled.
 	 */
 	public function test_update_product_images_clears_stored_video_media_gallery_items_when_feature_disabled() {
 		wp_set_current_user( $this->user );

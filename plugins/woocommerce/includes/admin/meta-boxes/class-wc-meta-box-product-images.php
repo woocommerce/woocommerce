@@ -48,7 +48,7 @@ class WC_Meta_Box_Product_Images {
 							'validate_attachments'  => true,
 						)
 					)
-					: ProductMediaGallery::get_legacy_image_media_items( $product_object, false, 'edit' );
+					: ProductMediaGallery::get_product_image_media_items( $product_object, false, 'edit' );
 				$update_meta                    = false;
 				$updated_gallery_ids            = array();
 				$updated_media_gallery          = array();

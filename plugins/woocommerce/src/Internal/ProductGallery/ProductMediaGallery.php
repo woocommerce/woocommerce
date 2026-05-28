@@ -67,7 +67,7 @@ class ProductMediaGallery {
 		}
 
 		if ( empty( $media_items ) ) {
-			$media_items = self::get_legacy_image_media_items( $product, (bool) $args['include_product_image'], $context );
+			$media_items = self::get_product_image_media_items( $product, (bool) $args['include_product_image'], $context );
 		}
 
 		if ( $args['deduplicate'] ) {
@@ -170,14 +170,14 @@ class ProductMediaGallery {
 	}
 
 	/**
-	 * Get image media items from legacy product image props.
+	 * Get image media items from product image props.
 	 *
 	 * @param WC_Product $product               Product object.
 	 * @param bool       $include_product_image Whether to include the product image.
 	 * @param string     $context               Product read context.
 	 * @return array
 	 */
-	public static function get_legacy_image_media_items( WC_Product $product, bool $include_product_image = true, string $context = 'view' ): array {
+	public static function get_product_image_media_items( WC_Product $product, bool $include_product_image = true, string $context = 'view' ): array {
 		$attachment_ids = array();
 
 		if ( $include_product_image && $product->get_image_id( $context ) ) {

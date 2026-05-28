@@ -871,13 +871,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Sync stored media gallery data after an update through the legacy images request field.
+	 * Sync stored media gallery data after an update through the images request field.
 	 *
 	 * @param WC_Product $product Product instance.
 	 *
 	 * @return WC_Product
 	 */
-	protected function sync_media_gallery_from_legacy_images_request( $product ) {
+	protected function sync_media_gallery_from_images_request( $product ) {
 		if ( ! method_exists( $product, 'set_media_gallery' ) ) {
 			return $product;
 		}
@@ -887,17 +887,17 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			return $product;
 		}
 
-		return $this->sync_media_gallery_from_legacy_images_update( $product );
+		return $this->sync_media_gallery_from_images_update( $product );
 	}
 
 	/**
-	 * Sync stored media gallery data after an update through the legacy images field.
+	 * Sync stored media gallery data after an update through product image props.
 	 *
 	 * @param WC_Product $product Product instance.
 	 *
 	 * @return WC_Product
 	 */
-	protected function sync_media_gallery_from_legacy_images_update( $product ) {
+	protected function sync_media_gallery_from_images_update( $product ) {
 		if ( ! method_exists( $product, 'get_media_gallery' ) || ! method_exists( $product, 'set_media_gallery' ) ) {
 			return $product;
 		}
@@ -908,7 +908,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			return $product;
 		}
 
-		$image_media_items    = ProductMediaGallery::get_legacy_image_media_items( $product, true, 'edit' );
+		$image_media_items    = ProductMediaGallery::get_product_image_media_items( $product, true, 'edit' );
 		$updated_media_items  = array();
 		$images_inserted      = false;
 		$has_preserved_videos = false;
@@ -1022,7 +1022,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Sync legacy product image props from the mixed media gallery.
+	 * Sync product image props from the mixed media gallery.
 	 *
 	 * @param WC_Product $product       Product instance.
 	 * @param array      $media_gallery Normalized media gallery items.
@@ -1459,7 +1459,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$product = $this->set_product_images( $product, $request['images'] );
 
 			if ( ! isset( $request['media_gallery'] ) ) {
-				$product = $this->sync_media_gallery_from_legacy_images_request( $product );
+				$product = $this->sync_media_gallery_from_images_request( $product );
 			}
 		}
 
