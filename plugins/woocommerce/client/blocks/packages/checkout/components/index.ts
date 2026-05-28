@@ -16,3 +16,7 @@ export {
 export { default as TextInput } from '../../components/text-input/text-input';
 export { default as ValidationInputError } from '../../components/validation-input-error';
 export { default as StoreNotice } from '../../components/store-notice';
+export {
+	commonIcons as paymentMethodCommonIcons,
+	getCommonIconProps,
+} from '../../../assets/js/base/components/cart-checkout/payment-method-icons/common-icons';

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Defer focus ring widths to WordPress's --wp-admin-border-width-focus variable so Woo's keyboard focus indicators adopt the density-responsive behavior (2px default, 1.5px retina) that WP core ships.

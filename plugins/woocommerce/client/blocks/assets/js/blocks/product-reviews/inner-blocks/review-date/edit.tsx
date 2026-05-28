@@ -30,8 +30,6 @@ export default function Edit( {
 } ) {
 	const blockProps = useBlockProps();
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-expect-error - the type of useEntityProp is not correct
 	let [ date ] = useEntityProp( 'root', 'comment', 'date', commentId );
 	const [ siteFormat = getDateSettings().formats.date ] = useEntityProp(
 		'root',

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use bundled moment-timezone directly to prevent crash when plugins clobber global moment

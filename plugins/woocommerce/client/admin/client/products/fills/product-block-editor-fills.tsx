@@ -23,7 +23,7 @@ export const MoreMenuFill = ( {
 	productType = 'product',
 	onClose,
 }: MoreMenuFillProps ) => {
-	const [ id ] = useEntityProp( 'postType', productType, 'id' );
+	const [ id ] = useEntityProp< number >( 'postType', productType, 'id' );
 
 	const product = useSelect(
 		( select ) => {

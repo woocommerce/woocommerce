@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Convert e2e-pw reporters, test-data, and data files from CJS to ESM TypeScript.

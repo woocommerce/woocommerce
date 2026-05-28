@@ -160,8 +160,7 @@ const SettingsPaymentsMain = () => {
 												'Business location :',
 												'woocommerce'
 											) }
-											// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-											// @ts-ignore placeholder prop exists
+											// @ts-expect-error placeholder was removed from SelectControl's public types but is still accepted at runtime.
 											placeholder={ '' }
 											label={ '' }
 											options={ [] }

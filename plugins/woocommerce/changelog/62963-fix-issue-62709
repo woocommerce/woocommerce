@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix attribute matching for non-ASCII characters in product CSV importer

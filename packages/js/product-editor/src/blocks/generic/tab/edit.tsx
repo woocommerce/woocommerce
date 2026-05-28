@@ -77,8 +77,6 @@ export function TabBlockEdit( {
 					} }
 				>
 					{ canRenderChildren && (
-						/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-						/* @ts-ignore Content only template locking does exist for this property. */
 						<InnerBlocks templateLock="contentOnly" />
 					) }
 				</ErrorBoundary>

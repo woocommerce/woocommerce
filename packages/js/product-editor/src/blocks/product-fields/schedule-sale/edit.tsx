@@ -10,9 +10,6 @@ import { useEntityProp } from '@wordpress/core-data';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import moment from 'moment';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore We need this to get the datetime format for the DateTimePickerControl.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { getSettings } from '@wordpress/date';
 
 /**
@@ -157,8 +154,6 @@ export function Edit( {
 				label={ __( 'Schedule sale', 'woocommerce' ) }
 				checked={ showScheduleSale }
 				onChange={ handleToggleChange }
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore disabled prop exists
 				disabled={ ! isSalePriceGreaterThanZero }
 			/>
 

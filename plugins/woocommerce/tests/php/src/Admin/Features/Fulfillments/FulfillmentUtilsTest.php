@@ -2,7 +2,9 @@
 
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 
 /**
  * FulfillmentUtilsTest class.
@@ -84,5 +86,86 @@ class FulfillmentUtilsTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'fulfilled', $fulfillment_statuses );
 		$this->assertArrayHasKey( 'custom_status', $fulfillment_statuses );
 		$this->assertEquals( 'Custom Status', $fulfillment_statuses['custom_status']['label'] );
+	}
+
+	/**
+	 * @testdox resolve_provider_name returns slug for known providers.
+	 */
+	public function test_resolve_provider_name_returns_slug_for_known_providers(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 ),
+			array(
+				'_items'             => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_shipment_provider' => 'usps',
+				'_provider_name'     => 'USPS',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertSame( 'usps', FulfillmentUtils::resolve_provider_name( $reloaded ) );
+	}
+
+	/**
+	 * @testdox resolve_provider_name returns display name for custom providers.
+	 */
+	public function test_resolve_provider_name_returns_display_name_for_custom_providers(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 ),
+			array(
+				'_items'             => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_shipment_provider' => 'other',
+				'_provider_name'     => 'My Custom Carrier',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertSame( 'My Custom Carrier', FulfillmentUtils::resolve_provider_name( $reloaded ) );
+	}
+
+	/**
+	 * @testdox resolve_provider_name falls back to display name when slug is empty (auto-lookup case).
+	 */
+	public function test_resolve_provider_name_falls_back_to_display_name_when_slug_empty(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 ),
+			array(
+				'_items'         => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_provider_name' => 'UPS',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertSame( 'UPS', FulfillmentUtils::resolve_provider_name( $reloaded ) );
+	}
+
+	/**
+	 * @testdox resolve_provider_name returns empty string when no provider info is set.
+	 */
+	public function test_resolve_provider_name_returns_empty_when_no_provider_info(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 )
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertSame( '', FulfillmentUtils::resolve_provider_name( $reloaded ) );
 	}
 }

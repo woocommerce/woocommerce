@@ -6,7 +6,7 @@
 	"license": "GPL-2.0-or-later",
 	"main": "index.js",
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"scripts": {
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger"

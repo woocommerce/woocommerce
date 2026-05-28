@@ -35,6 +35,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION );
 		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
+		delete_option( OrdersScheduler::LEGACY_IMMEDIATE_IMPORT_OPTION );
 
 		// Clean up any scheduled actions.
 		$this->clear_scheduled_batch_processor();
@@ -385,6 +386,61 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		$result = OrdersStatsDataStore::sync_order( $order->get_id() );
 
 		$this->assertSame( -1, $result );
+	}
+
+	/**
+	 * @testdox is_scheduled_import_enabled falls back to legacy option when new option is absent.
+	 */
+	public function test_is_scheduled_import_enabled_falls_back_to_legacy_option(): void {
+		// Simulate a pre-10.5.0 store that opted into scheduled imports (legacy 'no' = not immediate = scheduled).
+		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
+		update_option( OrdersScheduler::LEGACY_IMMEDIATE_IMPORT_OPTION, 'no' );
+
+		$reflection = new \ReflectionClass( OrdersScheduler::class );
+		$method     = $reflection->getMethod( 'is_scheduled_import_enabled' );
+		$method->setAccessible( true );
+
+		$this->assertTrue(
+			$method->invoke( null ),
+			'Legacy option "no" (not immediate) should be interpreted as scheduled import enabled'
+		);
+	}
+
+	/**
+	 * @testdox is_scheduled_import_enabled falls back to legacy option 'yes' correctly.
+	 */
+	public function test_is_scheduled_import_enabled_falls_back_to_legacy_option_yes(): void {
+		// Simulate a pre-10.5.0 store with default immediate import (legacy 'yes' = immediate = not scheduled).
+		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
+		update_option( OrdersScheduler::LEGACY_IMMEDIATE_IMPORT_OPTION, 'yes' );
+
+		$reflection = new \ReflectionClass( OrdersScheduler::class );
+		$method     = $reflection->getMethod( 'is_scheduled_import_enabled' );
+		$method->setAccessible( true );
+
+		$this->assertFalse(
+			$method->invoke( null ),
+			'Legacy option "yes" (immediate) should be interpreted as scheduled import disabled'
+		);
+	}
+
+	/**
+	 * @testdox is_scheduled_import_enabled prefers new option over legacy option when they conflict.
+	 */
+	public function test_is_scheduled_import_enabled_prefers_new_option(): void {
+		// New option says "not scheduled", legacy says "scheduled" (inverted 'no' = scheduled).
+		// If the new option takes precedence, result should be false.
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+		update_option( OrdersScheduler::LEGACY_IMMEDIATE_IMPORT_OPTION, 'no' );
+
+		$reflection = new \ReflectionClass( OrdersScheduler::class );
+		$method     = $reflection->getMethod( 'is_scheduled_import_enabled' );
+		$method->setAccessible( true );
+
+		$this->assertFalse(
+			$method->invoke( null ),
+			'New option "no" should take precedence over legacy option "no" (which would mean scheduled)'
+		);
 	}
 
 	/**

@@ -123,6 +123,37 @@ class DeleteDraftOrders extends TestCase {
 		$this->assertEquals( 1, (int) $wpdb->get_var( "SELECT COUNT(ID) from $wpdb->posts posts WHERE posts.post_status = 'wc-on-hold'" ) );
 	}
 
+	/**
+	 * Test that a custom batch size filter allows more than the default 20 results without error.
+	 */
+	public function test_custom_batch_size_filter_allows_larger_results() {
+		add_filter(
+			'woocommerce_delete_expired_draft_orders_batch_size',
+			function () {
+				return 50;
+			}
+		);
+
+		$sample_results = function ( $results, $args ) {
+			if ( isset( $args['status'] ) && DraftOrders::DB_STATUS === $args['status'] ) {
+				$orders = array();
+				for ( $i = 0; $i < 50; $i++ ) {
+					$order = new WC_Order();
+					$order->set_status( DraftOrders::STATUS );
+					$orders[] = $order;
+				}
+				return $orders;
+			}
+			return $results;
+		};
+		$this->mock_results_for_wc_query( $sample_results );
+		$this->draft_orders_instance->delete_expired_draft_orders();
+		$this->assertNull( $this->caught_exception, 'No exception should be thrown when batch size filter allows more results.' );
+		$this->unset_mock_results_for_wc_query( $sample_results );
+
+		remove_all_filters( 'woocommerce_delete_expired_draft_orders_batch_size' );
+	}
+
 	public function test_greater_than_batch_results_error() {
 		$sample_results = function( $results, $args ) {
 			if ( isset( $args[ 'status' ] ) && DraftOrders::DB_STATUS === $args[ 'status' ] ) {

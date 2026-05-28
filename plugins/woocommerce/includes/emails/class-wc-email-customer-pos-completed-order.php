@@ -88,9 +88,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
 			}
 
-			if ( $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-			}
+			$this->send_if_recipient();
 
 			$this->restore_locale();
 		}
@@ -504,6 +502,10 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 			// Only replace placeholders if we're in the context of a POS email.
 			if ( $email->id !== $this->id ) {
 				return $footer_text;
+			}
+
+			if ( ! is_string( $footer_text ) ) {
+				$footer_text = is_scalar( $footer_text ) ? (string) $footer_text : '';
 			}
 
 			return str_replace(

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { TableRow } from '@woocommerce/components/build-types/table/types';
+import type { TableRow } from '@woocommerce/components/build-types/table/types';
 import { gmdateI18n } from '@wordpress/date';
 import { __, sprintf } from '@wordpress/i18n';
 import { Icon, plugins } from '@wordpress/icons';
@@ -332,8 +332,6 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 }
 
 export function expiry( subscription: Subscription ): TableRow {
-	const expiryDate = subscription.expires;
-
 	if (
 		subscription.local.installed === true &&
 		subscription.product_key === ''
@@ -344,8 +342,26 @@ export function expiry( subscription: Subscription ): TableRow {
 		};
 	}
 
+	if ( subscription.is_agency || subscription.included_in_host_plan ) {
+		const isAgency = subscription.is_agency;
+		const text = isAgency
+			? __( 'Managed by agency', 'woocommerce' )
+			: __( 'Managed by host', 'woocommerce' );
+		return {
+			display: (
+				<StatusPopover
+					text={ text }
+					level={ StatusLevel.Info }
+					explanation=""
+				/>
+			),
+			value: 'host_plan',
+		};
+	}
+
 	let expiryDateElement = __( 'Never expires', 'woocommerce' );
 
+	const expiryDate = subscription.expires;
 	if ( expiryDate ) {
 		expiryDateElement = gmdateI18n(
 			'j M, Y',

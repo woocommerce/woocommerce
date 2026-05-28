@@ -19,7 +19,6 @@ import {
 	type BlockAttributes,
 	type BlockInstance,
 	createBlock,
-	// @ts-expect-error Type definitions for this function are missing in Gutenberg
 	createBlocksFromInnerBlocksTemplate,
 } from '@wordpress/blocks';
 

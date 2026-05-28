@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Animate the quick/bulk edit drawer's close transition in the experimental products app so it mirrors the open animation, and close the drawer after a fully successful save. The drawer stays open on any save failure so the user can correct and retry.

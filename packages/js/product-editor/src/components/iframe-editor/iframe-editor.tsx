@@ -22,14 +22,11 @@ import {
 import {
 	BlockEditorProvider,
 	BlockList,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
+	// @ts-expect-error BlockTools is not exported from @wordpress/block-editor's public types.
 	BlockTools,
 	BlockEditorKeyboardShortcuts,
 	EditorSettings,
 	EditorBlockListSettings,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -165,7 +162,6 @@ export function IframeEditor( {
 		useDispatch( blockEditorStore );
 
 	const parentEditorSettings = useSelect( ( select ) => {
-		// @ts-expect-error Selector is not typed
 		return select( blockEditorStore ).getSettings();
 	}, [] );
 
@@ -179,8 +175,7 @@ export function IframeEditor( {
 
 	useEffect( () => {
 		// Manually update the settings so that __unstableResolvedAssets gets added to the data store.
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
+		// @ts-expect-error `productBlockEditorSettings` is a runtime global injected by PHP and isn't declared in the ambient types.
 		updateSettings( productBlockEditorSettings );
 	}, [] );
 
@@ -268,8 +263,7 @@ export function IframeEditor( {
 								}
 							} }
 						>
-							{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-							{ /* @ts-ignore */ }
+							{ /* @ts-expect-error BlockEditorKeyboardShortcuts.Register is not exposed on the component's public types. */ }
 							<BlockEditorKeyboardShortcuts.Register />
 							{ showBackButton && onClose && (
 								<BackButton
@@ -280,8 +274,7 @@ export function IframeEditor( {
 							) }
 							<ResizableEditor
 								enableResizing={ true }
-								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-								// @ts-ignore This accepts numbers or strings.
+								// @ts-expect-error ResizableEditor's upstream height prop expects a number, but the component accepts percentage strings.
 								height="100%"
 							>
 								<EditorCanvas

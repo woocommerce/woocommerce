@@ -109,6 +109,63 @@ class AddToCartWithOptionsPage {
 		await this.updateAddToCartWithOptionsBlock();
 	}
 
+	async setVariationSelectorAttributes( {
+		optionStyle,
+		autoselect,
+		disabledAttributesAction,
+	}: {
+		optionStyle?: 'chips' | 'dropdown';
+		autoselect?: boolean;
+		disabledAttributesAction?: 'disable' | 'hide';
+	} = {} ) {
+		const page = this.editor.page;
+
+		await this.switchProductType( 'Variable product' );
+		await page.getByRole( 'tab', { name: 'Block' } ).click();
+
+		// Verify inner blocks have loaded.
+		await expect(
+			this.editor.canvas
+				.getByLabel( 'Block: Variation Selector: Template (Beta)' )
+				.first()
+		).toBeVisible();
+
+		const attributeTemplateBlock = await this.editor.getBlockByName(
+			'woocommerce/add-to-cart-with-options-variation-selector-attribute'
+		);
+		await this.editor.selectBlocks( attributeTemplateBlock.first() );
+
+		// Option style attribute (inner block titles: Chips, Dropdown).
+		if ( optionStyle ) {
+			const styleLabel =
+				optionStyle === 'dropdown' ? 'Dropdown' : 'Chips';
+			const optionStyleInput = page.getByRole( 'radio', {
+				name: styleLabel,
+			} );
+			await optionStyleInput.click();
+		}
+
+		// Auto-select attribute.
+		if ( typeof autoselect === 'boolean' ) {
+			const autoselectInput = page.getByRole( 'checkbox', {
+				name: 'Auto-select when only one option is available',
+			} );
+			await autoselectInput.setChecked( autoselect );
+		}
+
+		// Invalid options attribute.
+		if ( disabledAttributesAction ) {
+			const invalidOptionsLabel =
+				disabledAttributesAction === 'disable'
+					? 'Grayed-out'
+					: 'Hidden';
+			const invalidOptionsRadio = page
+				.getByLabel( 'Invalid options' )
+				.getByRole( 'radio', { name: invalidOptionsLabel } );
+			await invalidOptionsRadio.click();
+		}
+	}
+
 	async createPostWithProductBlock( product: string, variation?: string ) {
 		await this.admin.createNewPost();
 		await this.editor.insertBlock( { name: 'woocommerce/single-product' } );
@@ -135,49 +192,61 @@ class AddToCartWithOptionsPage {
 		await this.editor.publishAndVisitPost();
 	}
 
-	async selectVariationSelectorOptionsBlockAttribute(
+	async selectVariationSelectorOptions(
 		attributeName: string,
 		attributeValue: string,
-		optionStyle: 'Pills' | 'Dropdown'
+		optionStyle: 'chips' | 'dropdown'
 	) {
-		if ( optionStyle === 'Dropdown' ) {
-			await this.page
-				.getByLabel( attributeName )
-				.selectOption( attributeValue );
+		if ( optionStyle === 'dropdown' ) {
+			const select = this.page.getByLabel( attributeName, {
+				exact: true,
+			} );
+			if ( attributeValue !== '' ) {
+				await expect(
+					select.getByRole( 'option', {
+						name: attributeValue,
+						exact: true,
+					} )
+				).toBeAttached();
+			}
+			await select.selectOption( attributeValue );
 			return;
 		}
+		const group = this.page.getByRole( 'radiogroup', {
+			name: attributeName,
+		} );
 		if ( attributeValue !== '' ) {
-			await this.page
-				.getByLabel( attributeName )
-				.getByText( attributeValue )
+			await group
+				.getByRole( 'radio', { name: attributeValue, exact: true } )
 				.click();
-			return;
+		} else {
+			const selected = group.getByRole( 'radio', { checked: true } );
+			await selected.click();
 		}
-		await this.page
-			.getByLabel( attributeName )
-			.locator( 'label:has(:checked)' )
-			.click();
 	}
 
-	async expectSelectedAttributes(
+	async expectVariationSelectorOptions(
 		productAttributes: {
 			name: string;
 			options: string[];
 			variation: boolean;
 			visible: boolean;
 		}[],
-		expectedValues: Record< string, string | RegExp > = {},
-		optionStyle: 'Pills' | 'Dropdown'
+		expectedValues: Record< string, string > = {},
+		optionStyle: 'chips' | 'dropdown'
 	) {
 		for ( let {
 			name: attributeName,
 			options: attributeValues,
 		} of productAttributes ) {
-			const attributeNameLocator = this.page.getByLabel( attributeName, {
-				exact: true,
-			} );
-			if ( optionStyle === 'Dropdown' ) {
-				let expectedValue: string | RegExp;
+			if ( optionStyle === 'dropdown' ) {
+				const attributeNameLocator = this.page.getByLabel(
+					attributeName,
+					{
+						exact: true,
+					}
+				);
+				let expectedValue: string;
 				if (
 					attributeName in expectedValues &&
 					expectedValues[ attributeName ] !== ''
@@ -189,29 +258,34 @@ class AddToCartWithOptionsPage {
 				await expect( attributeNameLocator ).toHaveValue(
 					expectedValue
 				);
-				return;
+				continue;
 			}
+			const group = this.page.getByRole( 'radiogroup', {
+				name: attributeName,
+			} );
 			if (
 				attributeName in expectedValues &&
 				expectedValues[ attributeName ] !== ''
 			) {
 				attributeValues = attributeValues.filter(
 					( item ) => item !== expectedValues[ attributeName ]
-				); // Omit attributeName
+				);
 				await expect(
-					attributeNameLocator.getByLabel(
-						expectedValues[ attributeName ],
-						{ exact: true }
-					)
+					group.getByRole( 'radio', {
+						name: String( expectedValues[ attributeName ] ),
+						exact: true,
+					} )
 				).toBeChecked();
 			}
 			if ( attributeValues.length ) {
 				for ( const attributeValue of attributeValues ) {
-					await expect(
-						attributeNameLocator.getByLabel( attributeValue, {
-							exact: true,
-						} )
-					).not.toBeChecked();
+					const radio = group.getByRole( 'radio', {
+						name: attributeValue,
+						exact: true,
+					} );
+					if ( ( await radio.count() ) > 0 ) {
+						await expect( radio ).not.toBeChecked();
+					}
 				}
 			}
 		}

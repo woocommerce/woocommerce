@@ -15,8 +15,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class NewOrderNotification extends Notification {
 	/**
-	 * The notification type identifier, this should match the subtype or type
-	 * (if there isn't a subtype) values attributed to notes in WordPress.com.
+	 * The notification type identifier for new orders.
 	 */
 	const TYPE = 'store_order';
 
@@ -31,14 +30,10 @@ class NewOrderNotification extends Notification {
 	const EMOJI_LIST = array( '🎉', '🎊', '🥳', '👏', '🙌' );
 
 	/**
-	 * Creates a new order notification.
-	 *
-	 * @param int $order_id The order ID.
-	 *
-	 * @since 10.7.0
+	 * {@inheritDoc}
 	 */
-	public function __construct( int $order_id ) {
-		parent::__construct( self::TYPE, $order_id );
+	public function get_type(): string {
+		return self::TYPE;
 	}
 
 	/**
@@ -58,7 +53,7 @@ class NewOrderNotification extends Notification {
 		}
 
 		return array(
-			'type'        => self::TYPE,
+			'type'        => $this->get_type(),
 			'icon'        => self::ICON,
 			// This represents the time the notification was triggered, so we can monitor age of notification at delivery.
 			'timestamp'   => gmdate( 'c' ),
@@ -86,5 +81,82 @@ class NewOrderNotification extends Notification {
 				'order_id' => $this->get_resource_id(),
 			),
 		);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * Extends the base enabled-toggle check with a minimum-amount threshold.
+	 * When `min_amount` is set in the user's preferences, the order total must
+	 * meet or exceed it for the notification to be sent.
+	 *
+	 * The threshold is interpreted in the order's currency; no currency
+	 * conversion is performed. This mirrors how `WC_Coupon::minimum_amount`
+	 * behaves, so multi-currency merchants should set thresholds with that
+	 * in mind.
+	 *
+	 * @param mixed $pref_value The user's stored preference value, or null.
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public function should_send_to_user( $pref_value ): bool {
+		if ( ! parent::should_send_to_user( $pref_value ) ) {
+			return false;
+		}
+
+		if ( ! is_array( $pref_value ) || ! isset( $pref_value['min_amount'] ) ) {
+			return true;
+		}
+
+		$min_amount = (float) $pref_value['min_amount'];
+		if ( $min_amount <= 0 ) {
+			return true;
+		}
+
+		$order = WC()->call_function( 'wc_get_order', $this->get_resource_id() );
+		if ( ! $order instanceof WC_Order ) {
+			return false;
+		}
+
+		return (float) $order->get_total() >= $min_amount;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
+	 */
+	public function has_meta( string $key ): bool {
+		$order = WC()->call_function( 'wc_get_order', $this->get_resource_id() );
+		return $order instanceof WC_Order && $order->meta_exists( $key );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
+	 */
+	public function write_meta( string $key ): void {
+		$order = WC()->call_function( 'wc_get_order', $this->get_resource_id() );
+
+		if ( $order instanceof WC_Order ) {
+			$order->update_meta_data( $key, (string) time() );
+			$order->save_meta_data();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
+	 */
+	public function delete_meta( string $key ): void {
+		$order = WC()->call_function( 'wc_get_order', $this->get_resource_id() );
+
+		if ( $order instanceof WC_Order ) {
+			$order->delete_meta_data( $key );
+			$order->save_meta_data();
+		}
 	}
 }

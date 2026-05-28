@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix interval selector shifting downward on WP 7.0 by restoring margin-bottom.

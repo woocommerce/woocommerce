@@ -6,8 +6,6 @@ sidebar_label: Cart Line Items
 
 # Cart line items
 
-<!-- markdownlint-disable MD024 -->
-
 The following Cart Line Items filters are available:
 
 -   `cartItemClass`
@@ -28,11 +26,11 @@ The following screenshot shows which parts the individual filters affect:
 
 ## `cartItemClass`
 
-### Description <!-- omit in toc -->
+### Description {/* omit in toc */}
 
 The `cartItemClass` filter allows to change the cart item class.
 
-### Parameters <!-- omit in toc -->
+### Parameters {/* omit in toc */}
 
 -   _defaultValue_ `object` (default: `''`) - The default cart item class.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -41,13 +39,13 @@ The `cartItemClass` filter allows to change the cart item class.
     -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 
-### Returns <!-- omit in toc -->
+### Returns {/* omit in toc */}
 
 -   `string` - The modified cart item class, or an empty string.
 
-### Code examples <!-- omit in toc -->
+### Code examples {/* omit in toc */}
 
-#### Basic example <!-- omit in toc -->
+#### Basic example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -67,7 +65,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -97,20 +95,20 @@ registerCheckoutFilters( 'example-extension', {
 
 > Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots {/* omit in toc */}
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a587a6ce-d051-4ed0-bba5-815b5d72179d) |![After applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/9b25eeae-6d81-4e28-b177-32f942e1d0c2) |
+| Before | After |
+| --- | --- |
+| ![Before applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a587a6ce-d051-4ed0-bba5-815b5d72179d) | ![After applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/9b25eeae-6d81-4e28-b177-32f942e1d0c2) |
 
 
 ## `cartItemPrice`
 
-### Description <!-- omit in toc -->
+### Description {/* omit in toc */}
 
 The `cartItemPrice` filter allows to format the cart item price.
 
-### Parameters <!-- omit in toc -->
+### Parameters {/* omit in toc */}
 
 -   _defaultValue_ `string` (default: `<price/>`) - The default cart item price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -120,13 +118,13 @@ The `cartItemPrice` filter allows to format the cart item price.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 -   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
 
-### Returns <!-- omit in toc -->
+### Returns {/* omit in toc */}
 
 -   `string` - The modified format of the cart item price, which must contain the substring `<price/>`, or the original price format.
 
-### Code examples <!-- omit in toc -->
+### Code examples {/* omit in toc */}
 
-#### Basic example <!-- omit in toc -->
+#### Basic example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -146,7 +144,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -176,19 +174,19 @@ registerCheckoutFilters( 'example-extension', {
 
 > Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots {/* omit in toc */}
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/bbaeb68a-492e-41e7-87b7-4b8b05ca3709) |![After applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/bbaeb68a-492e-41e7-87b7-4b8b05ca3709) |
+| Before | After |
+| --- | --- |
+| ![Before applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/bbaeb68a-492e-41e7-87b7-4b8b05ca3709) | ![After applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/bbaeb68a-492e-41e7-87b7-4b8b05ca3709) |
 
 ## `itemName`
 
-### Description <!-- omit in toc -->
+### Description {/* omit in toc */}
 
 The `itemName` filter allows to change the cart item name.
 
-### Parameters <!-- omit in toc -->
+### Parameters {/* omit in toc */}
 
 -   _defaultValue_ `string` - The default cart item name.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -197,13 +195,13 @@ The `itemName` filter allows to change the cart item name.
     -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 
-### Returns <!-- omit in toc -->
+### Returns {/* omit in toc */}
 
 -   `string` - The original or modified cart item name.
 
-### Code examples <!-- omit in toc -->
+### Code examples {/* omit in toc */}
 
-#### Basic example <!-- omit in toc -->
+#### Basic example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -223,7 +221,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -253,19 +251,19 @@ registerCheckoutFilters( 'example-extension', {
 
 > Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots {/* omit in toc */}
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/97d0f501-138e-4448-93df-a4d865b524e6) |![After applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/69381932-d064-4e8f-b378-c2477fef56ae) |
+| Before | After |
+| --- | --- |
+| ![Before applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/97d0f501-138e-4448-93df-a4d865b524e6) | ![After applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/69381932-d064-4e8f-b378-c2477fef56ae) |
 
 ## `saleBadgePriceFormat`
 
-### Description <!-- omit in toc -->
+### Description {/* omit in toc */}
 
 The `saleBadgePriceFormat` filter allows to format the cart item sale badge price.
 
-### Parameters <!-- omit in toc -->
+### Parameters {/* omit in toc */}
 
 -   _defaultValue_ `string` (default: `<price/>`) - The default cart item sale badge price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -275,11 +273,11 @@ The `saleBadgePriceFormat` filter allows to format the cart item sale badge pric
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 -   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
 
-### Returns <!-- omit in toc -->
+### Returns {/* omit in toc */}
 
 -   `string` - The modified format of the cart item sale badge price, which must contain the substring `<price/>`, or the original price format.
 
-### Code examples <!-- omit in toc -->
+### Code examples {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -304,7 +302,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -339,20 +337,20 @@ registerCheckoutFilters( 'example-extension', {
 
 > Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots {/* omit in toc */}
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Sale Badge Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/d2aeb206-e620-44e0-93c1-31484cfcdca6) |![After applying the Sale Badge Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/6b929695-5d89-433b-8694-b9201a7c0519) |
+| Before | After |
+| --- | --- |
+| ![Before applying the Sale Badge Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/d2aeb206-e620-44e0-93c1-31484cfcdca6) | ![After applying the Sale Badge Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/6b929695-5d89-433b-8694-b9201a7c0519) |
 
 
 ## `showRemoveItemLink`
 
-### Description <!-- omit in toc -->
+### Description {/* omit in toc */}
 
 The `showRemoveItemLink` is used to show or hide the cart item remove link.
 
-### Parameters <!-- omit in toc -->
+### Parameters {/* omit in toc */}
 
 -   _defaultValue_ (type: `boolean`, default: `true`) - The default value of the remove link.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -361,13 +359,13 @@ The `showRemoveItemLink` is used to show or hide the cart item remove link.
     -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 
-### Returns <!-- omit in toc -->
+### Returns {/* omit in toc */}
 
 -   `boolean` - `true` if the cart item remove link should be shown, `false` otherwise.
 
-### Code examples <!-- omit in toc -->
+### Code examples {/* omit in toc */}
 
-#### Basic example <!-- omit in toc -->
+#### Basic example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -387,7 +385,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -417,21 +415,21 @@ registerCheckoutFilters( 'example-extension', {
 
 > Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots {/* omit in toc */}
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Show Remove Item Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a4254f3b-f056-47ad-b34a-d5f6d5500e56) |![After applying the Show Remove Item Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/32c55dc7-ef65-4f35-ab90-9533bc79d362) |
+| Before | After |
+| --- | --- |
+| ![Before applying the Show Remove Item Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a4254f3b-f056-47ad-b34a-d5f6d5500e56) | ![After applying the Show Remove Item Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/32c55dc7-ef65-4f35-ab90-9533bc79d362) |
 
 
 
 ## `subtotalPriceFormat`
 
-### Description <!-- omit in toc -->
+### Description {/* omit in toc */}
 
 The `subtotalPriceFormat` filter allows to format the cart item subtotal price.
 
-### Parameters <!-- omit in toc -->
+### Parameters {/* omit in toc */}
 
 -   _defaultValue_ `string` (default: `<price/>`) - The default cart item subtotal price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -441,13 +439,13 @@ The `subtotalPriceFormat` filter allows to format the cart item subtotal price.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 -   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
 
-### Returns <!-- omit in toc -->
+### Returns {/* omit in toc */}
 
 -   `string` - The modified format of the cart item subtotal price, which must contain the substring `<price/>`, or the original price format.
 
-### Code examples <!-- omit in toc -->
+### Code examples {/* omit in toc */}
 
-#### Basic example <!-- omit in toc -->
+#### Basic example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -472,7 +470,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -507,11 +505,11 @@ registerCheckoutFilters( 'example-extension', {
 
 > Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots {/* omit in toc */}
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a392cb24-4c40-4e25-8396-bf4971830e22) |![After applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/af69b26f-662a-4ef9-a288-3713b6e46373) |
+| Before | After |
+| --- | --- |
+| ![Before applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a392cb24-4c40-4e25-8396-bf4971830e22) | ![After applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/af69b26f-662a-4ef9-a288-3713b6e46373) |
 
 ## Cart object
 

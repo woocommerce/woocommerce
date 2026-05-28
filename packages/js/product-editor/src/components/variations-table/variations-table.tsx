@@ -17,9 +17,6 @@ import {
 	useEffect,
 } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityId, useEntityProp } from '@wordpress/core-data';
 
 /**

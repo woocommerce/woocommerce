@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { CheckboxControl } from '@wordpress/components';
-import { _n, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
+import { speak } from '@wordpress/a11y';
 
 /**
  * Internal dependencies
@@ -40,6 +41,7 @@ export default function ItemSelector( { editMode }: ItemSelectorProps ) {
 				} ) ),
 			} ) )
 		);
+		speak( __( 'All items deselected.', 'woocommerce' ), 'polite' );
 	};
 
 	const selectAllItems = () => {
@@ -51,6 +53,19 @@ export default function ItemSelector( { editMode }: ItemSelectorProps ) {
 					checked: true,
 				} ) ),
 			} ) )
+		);
+		speak(
+			sprintf(
+				/* translators: %d is the number of selected items */
+				_n(
+					'%d item selected.',
+					'%d items selected.',
+					itemsCount,
+					'woocommerce'
+				),
+				itemsCount
+			),
+			'polite'
 		);
 	};
 
@@ -91,6 +106,23 @@ export default function ItemSelector( { editMode }: ItemSelectorProps ) {
 				return item;
 			} ),
 		] );
+
+		const currentItem = selectedItems.find(
+			( item ) => item.item_id === id
+		);
+		if ( currentItem ) {
+			speak(
+				sprintf(
+					/* translators: %1$s is the item name, %2$s is selected/deselected status */
+					__( '%1$s %2$s.', 'woocommerce' ),
+					currentItem.item.name,
+					checked
+						? __( 'selected', 'woocommerce' )
+						: __( 'deselected', 'woocommerce' )
+				),
+				'polite'
+			);
+		}
 	};
 
 	const isChecked = ( id: number, index: number ) => {
@@ -124,7 +156,10 @@ export default function ItemSelector( { editMode }: ItemSelectorProps ) {
 	};
 
 	return (
-		<ul className="woocommerce-fulfillment-item-list">
+		<ul
+			className="woocommerce-fulfillment-item-list"
+			aria-label={ __( 'Select items for fulfillment', 'woocommerce' ) }
+		>
 			<li>
 				<div className="woocommerce-fulfillment-item-bulk-select">
 					{ editMode && (
@@ -140,6 +175,11 @@ export default function ItemSelector( { editMode }: ItemSelectorProps ) {
 							indeterminate={
 								selectedItemsCount > 0 &&
 								selectedItemsCount < itemsCount
+							}
+							aria-label={
+								selectedItemsCount === itemsCount
+									? __( 'Deselect all items', 'woocommerce' )
+									: __( 'Select all items', 'woocommerce' )
 							}
 							__nextHasNoMarginBottom
 						/>

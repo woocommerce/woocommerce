@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
-import { MediaItem } from '@wordpress/media-utils';
+import type { Attachment } from '@wordpress/media-utils';
 
 export type InsertUrlLinkErrorCallback = ( error: string ) => void;
 
 export type InsertUrlMenuItemProps = {
-	onLinkSuccess( files: MediaItem[] ): void;
+	onLinkSuccess( files: Attachment[] ): void;
 	onLinkError: InsertUrlLinkErrorCallback;
 };

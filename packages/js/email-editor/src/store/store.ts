@@ -53,7 +53,7 @@ export interface EmailEditorStore {
 }
 
 declare module '@wordpress/data' {
-	interface StoreMap {
+	interface StoreRegistry {
 		[ storeName ]: GenericStoreDescriptor<
 			ReduxStoreConfig<
 				unknown,

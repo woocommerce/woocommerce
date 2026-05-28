@@ -243,10 +243,8 @@ class WCAdminAssets {
 			return;
 		}
 
-		if ( ! PageController::is_modern_settings_page() ) {
-			wp_enqueue_script( WC_ADMIN_APP );
-			wp_enqueue_style( WC_ADMIN_APP );
-		}
+		wp_enqueue_script( WC_ADMIN_APP );
+		wp_enqueue_style( WC_ADMIN_APP );
 
 		wp_enqueue_style( 'wc-material-icons' );
 		wp_enqueue_style( 'wc-onboarding' );
@@ -322,8 +320,8 @@ class WCAdminAssets {
 			'wc-currency',
 			'wc-navigation',
 			'wc-block-templates',
+			'wc-experimental-products-app',
 			'wc-product-editor',
-			'wc-settings-editor',
 			'wc-remote-logging',
 			'wc-sanitize',
 		);
@@ -339,6 +337,7 @@ class WCAdminAssets {
 			'wc-date',
 			'wc-components',
 			'wc-customer-effort-score',
+			'wc-experimental-products-app',
 			'wc-experimental',
 			'wc-navigation',
 			'wc-product-editor',
@@ -395,10 +394,10 @@ class WCAdminAssets {
 				'handle' => 'wc-block-templates',
 			),
 			array(
-				'handle' => 'wc-product-editor',
+				'handle' => 'wc-experimental-products-app',
 			),
 			array(
-				'handle' => 'wc-settings-editor',
+				'handle' => 'wc-product-editor',
 			),
 			array(
 				'handle' => 'wc-customer-effort-score',
@@ -451,6 +450,7 @@ class WCAdminAssets {
 				'wc-csv',
 				'wc-currency',
 				'wc-customer-effort-score',
+				'wc-experimental-products-app',
 				'wc-navigation',
 				// NOTE: This should be removed when Gutenberg is updated and
 				// the notices package is removed from WooCommerce Admin.

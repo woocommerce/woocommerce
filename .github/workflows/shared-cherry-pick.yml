@@ -342,7 +342,9 @@ jobs:
               });
 
               // Create PR body
-              let prBody = `This PR is a cherry-pick of #${prNumber} to \`${targetBranch}\`.\n\n`;
+              const sourceBranch = originalPr.base.ref;
+              let prBody = `<!-- cherry-pick-source-branch: ${sourceBranch} -->\n`;
+              prBody += `This PR is a cherry-pick of #${prNumber} to \`${targetBranch}\`.\n\n`;
 
               if (hasConflicts) {
                 prBody += `> [!WARNING]\n`;

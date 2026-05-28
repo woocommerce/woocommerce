@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Dispatchers;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\WpcomNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
-use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use WC_Unit_Test_Case;
 use WP_Error;
 
@@ -277,31 +277,19 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Creates a concrete Notification instance for testing.
+	 * Creates a mock Notification instance for testing.
 	 *
 	 * @param array|null $payload The payload to return from to_payload().
-	 * @return Notification
+	 * @return NewOrderNotification
 	 */
-	private function create_notification( ?array $payload = array( 'test' => true ) ): Notification {
-		return new class( $payload ) extends Notification {
-			/** @var array|null */
-			private ?array $test_payload;
+	private function create_notification( ?array $payload = array( 'test' => true ) ): NewOrderNotification {
+		$mock = $this->getMockBuilder( NewOrderNotification::class )
+			->setConstructorArgs( array( 1 ) )
+			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta' ) )
+			->getMock();
+		$mock->method( 'to_payload' )->willReturn( $payload );
 
-			/**
-			 * @param array|null $payload The payload to return.
-			 */
-			public function __construct( ?array $payload ) {
-				parent::__construct( 'store_order', 1 );
-				$this->test_payload = $payload;
-			}
-
-			/**
-			 * {@inheritDoc}
-			 */
-			public function to_payload(): ?array {
-				return $this->test_payload;
-			}
-		};
+		return $mock;
 	}
 
 	/**

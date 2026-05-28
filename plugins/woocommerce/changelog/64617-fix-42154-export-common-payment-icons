@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Export shared payment method icons and `getCommonIconProps` from `@woocommerce/blocks-checkout`.

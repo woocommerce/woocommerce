@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix - Show 'Billing address' instead of 'Billing and shipping address' when Local Pickup is selected and shipping is forced to the billing address.

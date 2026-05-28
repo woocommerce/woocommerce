@@ -122,15 +122,18 @@ $border-width: 1px;
 
 .wc-block-components-express-payment--cart {
 	.wc-block-components-express-payment__event-buttons {
+		display: flex;
+		flex-direction: column;
+		gap: $gap-small;
+
 		> div,
 		> li {
-			padding-bottom: $gap-small;
+			margin: 0;
+			padding: 0;
 			text-align: center;
 			width: 100%;
-
-			&:last-child {
-				padding-bottom: 0;
-			}
+			font-size: 0;
+			line-height: 0;
 		}
 	}
 }

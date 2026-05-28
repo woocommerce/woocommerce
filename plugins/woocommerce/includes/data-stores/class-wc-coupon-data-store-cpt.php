@@ -144,7 +144,6 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'minimum_amount'              => get_post_meta( $coupon_id, 'minimum_amount', true ),
 				'maximum_amount'              => get_post_meta( $coupon_id, 'maximum_amount', true ),
 				'email_restrictions'          => array_filter( (array) get_post_meta( $coupon_id, 'customer_email', true ) ),
-				'used_by'                     => array_filter( (array) get_post_meta( $coupon_id, '_used_by' ) ),
 			)
 		);
 		$coupon->read_meta_data();
@@ -789,7 +788,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		global $wpdb;
 		return $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC",
+				"SELECT ID FROM $wpdb->posts WHERE LOWER(post_title) = LOWER(%s) AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC",
 				wc_sanitize_coupon_code( $code )
 			)
 		);

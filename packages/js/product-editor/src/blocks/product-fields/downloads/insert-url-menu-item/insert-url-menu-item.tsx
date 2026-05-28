@@ -5,7 +5,7 @@ import { FocusEvent, FormEvent } from 'react';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { customLink, keyboardReturn } from '@wordpress/icons';
-import { MediaItem } from '@wordpress/media-utils';
+import type { Attachment } from '@wordpress/media-utils';
 import {
 	Button,
 	Dropdown,
@@ -47,7 +47,7 @@ export function InsertUrlMenuItem( {
 			const url = form.url.value;
 			const mediaItem = {
 				url,
-			} as MediaItem;
+			} as Attachment;
 
 			onLinkSuccess( [ mediaItem ] );
 		} else {

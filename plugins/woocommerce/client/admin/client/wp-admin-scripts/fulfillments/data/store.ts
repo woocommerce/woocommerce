@@ -113,6 +113,10 @@ const publicActions = {
 					),
 					method: 'POST',
 					data: fulfillment,
+					headers: {
+						'Content-Type': 'application/json',
+						'X-WC-Fulfillments-UI': 'true',
+					},
 				} );
 				if ( ! saved.id ) {
 					throw new Error( 'Fulfillment ID is missing in response' );
@@ -135,7 +139,8 @@ const publicActions = {
 		(
 			orderId: number,
 			fulfillment: Fulfillment,
-			notifyCustomer: boolean
+			notifyCustomer: boolean,
+			customerNote: string
 		) =>
 		async ( { dispatch }: { dispatch: typeof actions } ) => {
 			dispatch.setLoading( orderId, true );
@@ -152,7 +157,14 @@ const publicActions = {
 						{ notify_customer: notifyCustomer }
 					),
 					method: 'PUT',
-					data: fulfillment,
+					data: {
+						...fulfillment,
+						customer_note: customerNote,
+					},
+					headers: {
+						'Content-Type': 'application/json',
+						'X-WC-Fulfillments-UI': 'true',
+					},
 				} );
 				if ( ! updated.id ) {
 					throw new Error( 'Fulfillment ID is missing in response' );
@@ -183,6 +195,10 @@ const publicActions = {
 						{ notify_customer: notifyCustomer }
 					),
 					method: 'DELETE',
+					headers: {
+						'Content-Type': 'application/json',
+						'X-WC-Fulfillments-UI': 'true',
+					},
 				} );
 				dispatch.deleteFulfillmentRecord( orderId, fulfillmentId );
 			} catch ( error: unknown ) {

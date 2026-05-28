@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Refactor cart, cart-link, mini-cart and checkout blocks to use isPreviewMode flag

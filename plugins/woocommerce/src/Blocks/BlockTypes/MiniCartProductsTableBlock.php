@@ -119,8 +119,10 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 							<td data-wp-context='{ "isImageHidden": false }' class="wc-block-cart-item__image" aria-hidden="true">
 								<img
 									data-wp-bind--hidden="!state.isProductHiddenFromCatalog"
-									data-wp-bind--src="state.itemThumbnail" 
+									data-wp-bind--src="state.itemThumbnail"
 									data-wp-bind--alt="state.cartItemName"
+									data-wp-bind--srcset="state.itemSrcset"
+									data-wp-bind--sizes="state.itemSizes"
 									data-wp-on--error="actions.hideImage"
 								>
 								<a data-wp-bind--hidden="state.isProductHiddenFromCatalog" data-wp-bind--href="state.cartItem.permalink" tabindex="-1">
@@ -128,8 +130,10 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										data-wp-bind--hidden="context.isImageHidden"
 										data-wp-bind--src="state.itemThumbnail"
 										data-wp-bind--alt="state.cartItemName"
+										data-wp-bind--srcset="state.itemSrcset"
+										data-wp-bind--sizes="state.itemSizes"
 										data-wp-on--error="actions.hideImage"
-									>	
+									>
 								</a>
 							</td>
 							<td class="wc-block-cart-item__product">
@@ -145,16 +149,16 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 											<span class="screen-reader-text">
 												<?php esc_html_e( 'Previous price:', 'woocommerce' ); ?>
 											</span>
-											<del data-wp-text="state.priceWithoutDiscount" class="wc-block-components-product-price__regular"></del>
+											<del data-wp-text="state.priceWithoutDiscount" class="wc-block-components-product-price__regular notranslate" translate="no"></del>
 											<span class="screen-reader-text">
 												<?php esc_html_e( 'Discounted price:', 'woocommerce' ); ?>
 											</span>
-											<ins data-wp-text="state.itemPrice" class="wc-block-components-product-price__value is-discounted"></ins>
+											<ins data-wp-text="state.itemPrice" class="wc-block-components-product-price__value is-discounted notranslate" translate="no"></ins>
 											<span data-wp-text="state.afterItemPrice"></span>
 										</span>
 										<span data-wp-bind--hidden="state.cartItemHasDiscount" class="price wc-block-components-product-price">
 											<span data-wp-text="state.beforeItemPrice"></span>
-											<span data-wp-text="state.itemPrice" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
+											<span data-wp-text="state.itemPrice" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value notranslate" translate="no">
 											</span>
 											<span data-wp-text="state.afterItemPrice"></span>
 										</span>
@@ -163,35 +167,35 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										<div data-wp-watch="callbacks.itemShortDescription" >
 											<div class="wc-block-components-product-metadata__description"></div>
 										</div>
-										<?php echo $this->render_product_details_markup( 'item_data' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>										
-										<?php echo $this->render_product_details_markup( 'variation' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>																				
+										<?php echo $this->render_product_details_markup( 'item_data' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										<?php echo $this->render_product_details_markup( 'variation' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 									</div>
 									<div class="wc-block-cart-item__quantity">
 										<div class="wc-block-components-quantity-selector" data-wp-bind--hidden="state.cartItem.sold_individually">
-											<input 
+											<input
 												data-wp-on--input="actions.overrideInvalidQuantity"
-												data-wp-on--change="actions.changeQuantity" 
-												data-wp-bind--aria-label="state.quantityDescriptionLabel" 
-												data-wp-bind--min="state.cartItem.quantity_limits.minimum" 
+												data-wp-on--change="actions.changeQuantity"
+												data-wp-bind--aria-label="state.quantityDescriptionLabel"
+												data-wp-bind--min="state.cartItem.quantity_limits.minimum"
 												data-wp-bind--max="state.cartItem.quantity_limits.maximum"
 												data-wp-bind--value="state.cartItem.quantity"
 												data-wp-bind--readonly="!state.cartItem.quantity_limits.editable"
-												class="wc-block-components-quantity-selector__input" 
-												type="number" 
+												class="wc-block-components-quantity-selector__input"
+												type="number"
 												step="1"
 											>
-											<button 
-												data-wp-bind--disabled="state.minimumReached" 
-												data-wp-on--click="actions.decrementQuantity" 
+											<button
+												data-wp-bind--disabled="state.minimumReached"
+												data-wp-on--click="actions.decrementQuantity"
 												data-wp-bind--aria-label="state.reduceQuantityLabel"
 												data-wp-bind--hidden="!state.cartItem.quantity_limits.editable"
 												class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"
 											>
 												−
 											</button>
-											<button 
-												data-wp-bind--disabled="state.maximumReached" 
-												data-wp-on--click="actions.incrementQuantity" 
+											<button
+												data-wp-bind--disabled="state.maximumReached"
+												data-wp-on--click="actions.incrementQuantity"
 												data-wp-bind--aria-label="state.increaseQuantityLabel"
 												data-wp-bind--hidden="!state.cartItem.quantity_limits.editable"
 												class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus"
@@ -215,11 +219,11 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 							<td class="wc-block-cart-item__total">
 								<div class="wc-block-cart-item__total-price-and-sale-badge-wrapper">
 									<span class="price wc-block-components-product-price">
-										<span data-wp-text="state.lineItemTotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
-										</span>											
+										<span data-wp-text="state.lineItemTotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value notranslate" translate="no">
+										</span>
 									</span>
-									<div 
-										data-wp-bind--hidden="!state.cartItemHasDiscount" 
+									<div
+										data-wp-bind--hidden="!state.cartItemHasDiscount"
 										class="wc-block-components-product-badge wc-block-components-sale-badge"
 									>
 									<?php

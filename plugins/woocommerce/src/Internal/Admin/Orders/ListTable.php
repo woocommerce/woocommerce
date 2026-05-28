@@ -1755,7 +1755,9 @@ class ListTable extends WP_List_Table {
 								{{{ data.actions_html }}}
 
 								<# if ( data.is_editable ) { #>
-								<a class="button button-primary button-large" aria-label="<?php esc_attr_e( 'Edit this order', 'woocommerce' ); ?>" href="<?php echo $order_edit_url_placeholder; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+								<div class="wc-backbone-modal-buttons">
+									<a class="button button-primary button-large" aria-label="<?php esc_attr_e( 'Edit this order', 'woocommerce' ); ?>" href="<?php echo $order_edit_url_placeholder; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+								</div>
 								<# } #>
 							</div>
 						</footer>

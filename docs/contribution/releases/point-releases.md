@@ -6,6 +6,10 @@ sidebar_position: 2
 
 # Point Releases
 
+:::important
+The formal Point Release Request (PRR) issue template is not strictly required for all point release fixes. In practice, coordinating directly with the release lead is often sufficient to get fixes included in a point release. The rest of this document remains useful for understanding what types of fixes qualify for point releases and how to prepare them in the repository.
+:::
+
 ## What Are Point Releases?
 
 Point releases are patch releases that address specific issues without adding substantial new functionality. Point releases typically contain:
@@ -68,16 +72,16 @@ After a PRR is opened, the **release lead** evaluates it.
 When deciding whether to approve a PRR, the release lead should consider the following:
 
 | Evaluation Criterion | Guidance |
-| -------------------- | -------- |
-| **Scope of Impact**  | How many stores are already affected? Larger reach increases urgency. |
+| ---------------------- | ---------- |
+| **Scope of Impact** | How many stores are already affected? Larger reach increases urgency. |
 | **Error Commonality** | Does the problem stem from a widely-used core flow, plugin, or theme? Issues in common components usually merit faster action. |
-| **Workarounds**      | Is there an easy, documented workaround (e.g., a filter, setting toggle, or temporary feature disable) that store owners can apply? Readily available workarounds lower the need for a point release. |
-| **Impact Severity**  | Does the bug block critical commerce functionality (checkout, payments, product visibility)? The more business-critical the failure, the higher the priority. |
+| **Workarounds** | Is there an easy, documented workaround (e.g., a filter, setting toggle, or temporary feature disable) that store owners can apply? Readily available workarounds lower the need for a point release. |
+| **Impact Severity** | Does the bug block critical commerce functionality (checkout, payments, product visibility)? The more business-critical the failure, the higher the priority. |
 
 #### 4. Approval or Rejection
 
 | Outcome | Release-Lead Action | Workflow Triggered |
-|---------|--------------------|--------------------|
+| --------- | -------------------- | ------------------- |
 | **Approve** | Apply the **`Approved`** label to the PRR issue and optionally leave a short rationale referencing the criteria above. | Labels are automatically added to the PR (“cherry pick to trunk”, “cherry pick to frozen release”); the issue milestone is set to the current release; the PRR is commented with an approval note. |
 | **Reject** | Apply the **`Rejected`** label and briefly state the reason (e.g., limited impact, simple workaround available). | A workflow adds a comment, closes the PRR, and the author must retarget the PR to `trunk`, resolve conflicts, and merge through the normal path. |
 
@@ -101,7 +105,7 @@ When deciding whether to approve a PRR, the release lead should consider the fol
 After the primary fix is merged into `release/x.y`, the labels that remain on the PR determine what happens next:
 
 | Label present | Automation result | What the release lead must do |
-|---------------|------------------|------------------------------|
+| --------------- | ------------------- | ------------------------------ |
 | `cherry pick to trunk` | Action opens a new PR targeting `trunk` and adds the current milestone. | Review tests / CI and merge this PR. |
 | `cherry pick to frozen release` | Action opens a new PR targeting the **next frozen branch** (e.g., `release/9.6`) and adds the milestone. | Review and merge this PR as well. |
 

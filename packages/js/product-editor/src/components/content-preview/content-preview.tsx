@@ -5,14 +5,10 @@ import { useSelect } from '@wordpress/data';
 import { createElement, Fragment } from '@wordpress/element';
 import { sanitizeHTML } from '@woocommerce/sanitize';
 import {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
+	// @ts-expect-error __unstableIframe is not exported from @wordpress/block-editor's public types.
 	__unstableIframe as Iframe,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
+	// @ts-expect-error __unstableEditorStyles is not exported from @wordpress/block-editor's public types.
 	__unstableEditorStyles as EditorStyles,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 
@@ -56,8 +52,6 @@ const CONTENT_ATTR = [
 
 export function ContentPreview( { content }: ContentPreviewProps ) {
 	const parentEditorSettings = useSelect( ( select ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
 		return select( blockEditorStore ).getSettings();
 	}, [] );
 

@@ -105,7 +105,7 @@ export class Leaderboard extends Component {
 							{ title }
 						</Text>
 					</CardHeader>
-					<CardBody size={ null }>
+					<CardBody size="none">
 						<EmptyTable>
 							{ __(
 								'No data recorded for the selected time period.',

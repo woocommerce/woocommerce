@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Dev: swap unmaintained Suin PSR-4 sniff for Slevomat to keep PHPCS working on PHP 8.5.

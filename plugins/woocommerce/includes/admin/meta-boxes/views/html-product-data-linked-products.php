@@ -8,13 +8,24 @@
 use Automattic\WooCommerce\Enums\ProductType;
 
 defined( 'ABSPATH' ) || exit;
+
+// In WP 7.0, we made the inputs wider.
+// @see https://github.com/woocommerce/woocommerce/pull/63779/changes#diff-dfef13b204157e98982fb3af978fbabfaa7f6bedd31bf02f2c9070718d59642eR8402-R8408.
+$version = get_bloginfo( 'version' );
+
+if ( $version ) {
+	$version_parts = explode( '-', $version );
+	$version       = count( $version_parts ) > 1 ? $version_parts[0] : $version;
+}
+
+$width = $version && version_compare( $version, '7.0', '>=' ) ? 'width: 55%;' : 'width: 50%;';
 ?>
 <div id="linked_product_data" class="panel woocommerce_options_panel hidden">
 
 	<div class="options_group show_if_grouped">
 		<p class="form-field">
 			<label for="grouped_products"><?php esc_html_e( 'Grouped products', 'woocommerce' ); ?></label>
-			<select class="wc-product-search" multiple="multiple" style="width: 50%;" id="grouped_products" name="grouped_products[]" data-sortable="true" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-exclude="<?php echo intval( $post->ID ); ?>">
+			<select class="wc-product-search" multiple="multiple" style="<?php echo esc_attr( $width ); ?>" id="grouped_products" name="grouped_products[]" data-sortable="true" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-exclude="<?php echo intval( $post->ID ); ?>">
 				<?php
 				$product_ids = $product_object->is_type( ProductType::GROUPED ) ? $product_object->get_children( 'edit' ) : array();
 
@@ -37,7 +48,7 @@ defined( 'ABSPATH' ) || exit;
 	<div class="options_group">
 		<p class="form-field">
 			<label for="upsell_ids"><?php esc_html_e( 'Upsells', 'woocommerce' ); ?></label>
-			<select class="wc-product-search" multiple="multiple" style="width: 50%;" id="upsell_ids" name="upsell_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-exclude="<?php echo intval( $post->ID ); ?>">
+			<select class="wc-product-search" multiple="multiple" style="<?php echo esc_attr( $width ); ?>" id="upsell_ids" name="upsell_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-exclude="<?php echo intval( $post->ID ); ?>">
 				<?php
 				$product_ids = $product_object->get_upsell_ids( 'edit' );
 
@@ -58,7 +69,7 @@ defined( 'ABSPATH' ) || exit;
 
 		<p class="form-field hide_if_grouped hide_if_external">
 			<label for="crosssell_ids"><?php esc_html_e( 'Cross-sells', 'woocommerce' ); ?></label>
-			<select class="wc-product-search" multiple="multiple" style="width: 50%;" id="crosssell_ids" name="crosssell_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-exclude="<?php echo intval( $post->ID ); ?>">
+			<select class="wc-product-search" multiple="multiple" style="<?php echo esc_attr( $width ); ?>" id="crosssell_ids" name="crosssell_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-exclude="<?php echo intval( $post->ID ); ?>">
 				<?php
 				$product_ids = $product_object->get_cross_sell_ids( 'edit' );
 

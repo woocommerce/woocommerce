@@ -3,11 +3,11 @@
  */
 import { __, sprintf, _n } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import type { Options as NoticeOptions } from 'wordpress__notices';
 
 /**
  * Internal dependencies
  */
+import type { NoticeAction } from '~/lib/notices/types';
 import {
 	MARKETPLACE_RENEW_SUBSCRIPTON_PATH,
 	MARKETPLACE_SUPPORT_PATH,
@@ -25,7 +25,7 @@ type ConnectError = {
 	};
 };
 
-type StoreAction = NonNullable< NoticeOptions[ 'actions' ] >[ number ];
+type StoreAction = NoticeAction;
 
 function trackConnectErrorActionClicked(
 	action: 'manage_subscriptions' | 'contact_support' | 'try_again',

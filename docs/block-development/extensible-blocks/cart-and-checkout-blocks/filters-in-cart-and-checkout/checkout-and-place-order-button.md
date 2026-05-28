@@ -92,9 +92,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots 
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Proceed To Checkout Button Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/fb0216c1-a091-4d58-b443-f49ccff98ed8) |![After applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/ef15b6df-fbd7-43e7-a359-b4adfbba961a) |
+| Before | After |
+| --- | --- |
+| ![Before applying the Proceed To Checkout Button Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/fb0216c1-a091-4d58-b443-f49ccff98ed8) | ![After applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/ef15b6df-fbd7-43e7-a359-b4adfbba961a) |
 
 ## `proceedToCheckoutButtonLink`
 
@@ -171,9 +171,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots 
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Proceed To Checkout Button Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3f657e0f-4fcc-4746-a554-64221e071b2e) |![After applying the Proceed To Checkout Button Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/064df213-439e-4d8f-b29c-55962604cb97) |
+| Before | After |
+| --- | --- |
+| ![Before applying the Proceed To Checkout Button Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3f657e0f-4fcc-4746-a554-64221e071b2e) | ![After applying the Proceed To Checkout Button Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/064df213-439e-4d8f-b29c-55962604cb97) |
 
 ## `placeOrderButtonLabel`
 
@@ -208,11 +208,11 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots 
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Place Order Button Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/aa6d9b65-4d56-45f7-8162-a6bbfe171250) |![After applying the Place Order Button Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a5cc2572-16e7-4781-a5ab-5d6cdced2ff6) |
+| Before | After |
+| --- | --- |
+| ![Before applying the Place Order Button Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/aa6d9b65-4d56-45f7-8162-a6bbfe171250) | ![After applying the Place Order Button Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a5cc2572-16e7-4781-a5ab-5d6cdced2ff6) |
 
-<!-- FEEDBACK -->
+{/* FEEDBACK */}
 
 ## Cart object
 

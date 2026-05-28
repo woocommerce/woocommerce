@@ -12,7 +12,10 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
+use Automattic\WooCommerce\Internal\VariationGallery\LegacyVariationGalleryCompatibility;
+use Automattic\WooCommerce\Internal\VariationGallery\Telemetry as VariationGalleryTelemetry;
 use Automattic\WooCommerce\Utilities\I18nUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -154,6 +157,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'shipping_class'        => $object->get_shipping_class(),
 			'shipping_class_id'     => $object->get_shipping_class_id(),
 			'image'                 => $this->get_image( $object, $context ),
+			'gallery_image_ids'     => $object instanceof WC_Product ? array_map( 'intval', $object->get_gallery_image_ids() ) : array(),
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
 			'meta_data'             => $object->get_meta_data(),
@@ -191,6 +195,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
+	 * @throws \Throwable When setting gallery_image_ids fails.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		if ( isset( $request['id'] ) ) {
@@ -223,6 +228,37 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			} else {
 				$variation->set_image_id( '' );
 			}
+		}
+
+		if ( isset( $request['gallery_image_ids'] ) && $variation instanceof WC_Product_Variation ) {
+			// Enforce the schema: gallery is disjoint from the featured image.
+			$gallery_ids = array_values(
+				array_diff(
+					wp_parse_id_list( $request['gallery_image_ids'] ),
+					array( (int) $variation->get_image_id() )
+				)
+			);
+			try {
+				$variation->set_gallery_image_ids( $gallery_ids );
+				LegacyVariationGalleryCompatibility::mark_core_managed( $variation );
+			} catch ( \Throwable $e ) {
+				VariationGalleryTelemetry::record_event(
+					VariationGalleryTelemetry::EVENT_SAVE_FAILED,
+					array(
+						'context' => 'rest_v3',
+						'reason'  => get_class( $e ),
+					)
+				);
+				throw $e;
+			}
+			VariationGalleryTelemetry::record_event(
+				VariationGalleryTelemetry::EVENT_SAVE_SUCCEEDED,
+				array(
+					'context'     => 'rest_v3',
+					'image_count' => count( $gallery_ids ),
+					'is_multi'    => count( $gallery_ids ) > 1 ? 'yes' : 'no',
+				)
+			);
 		}
 
 		// Virtual variation.
@@ -389,11 +425,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		// Meta data.
-		if ( is_array( $request['meta_data'] ) ) {
-			foreach ( $request['meta_data'] as $meta ) {
-				$variation->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-			}
-		}
+		MetaDataUtil::update( $request['meta_data'], $variation );
 
 		if ( $this->cogs_is_enabled() ) {
 			$this->set_cogs_info_in_product_object( $request, $variation );
@@ -825,6 +857,15 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 						),
 					),
 				),
+				'gallery_image_ids'     => array(
+					'description' => __( 'Variation gallery image IDs, excluding the featured image (which is set via "image"). Mirrors how galleries work on parent products.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+					),
+				),
 				'attributes'            => array(
 					'description' => __( 'List of attributes.', 'woocommerce' ),
 					'type'        => 'array',
@@ -1136,6 +1177,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			remove_filter( 'posts_where', array( $this, 'exclude_product_variation_statuses' ) );
 
 			$this->exclude_status = array();
+		}
+
+		$attachment_ids = array_filter( array_map( fn( $variation ) => (int) $variation->get_image_id(), $result['objects'] ) );
+		if ( ! empty( $attachment_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $attachment_ids );
 		}
 
 		return $result;

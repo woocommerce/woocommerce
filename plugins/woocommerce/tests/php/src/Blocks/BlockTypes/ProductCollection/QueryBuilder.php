@@ -1231,4 +1231,20 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		return $clauses;
 	}
+
+	/**
+	 * @testdox Empty string values for perPage and offset fall back to defaults.
+	 */
+	public function test_per_page_and_offset_empty_string_handling() {
+		$parsed_block = Utils::get_base_parsed_block();
+
+		// Set values as empty strings.
+		$parsed_block['attrs']['query']['perPage'] = '';
+		$parsed_block['attrs']['query']['offset']  = '';
+
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+
+		$this->assertSame( 0, $merged_query['offset'] );
+		$this->assertSame( 9, $merged_query['posts_per_page'] );
+	}
 }

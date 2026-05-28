@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add export column and item filters to Revenue Stats, Taxes, and Variations report controllers, and forward selected currency from URL query params into the export job payload.

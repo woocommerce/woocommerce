@@ -110,6 +110,7 @@ type MiniCart = {
 		contentsBackgroundColor: string;
 		badgeBackgroundColor: string | undefined;
 		badgeTextColor: string | undefined;
+		productCountColor: string;
 	};
 	actions: {
 		openDrawer: () => void;
@@ -287,6 +288,9 @@ store< MiniCart >(
 
 			get badgeBackgroundColor(): string | undefined {
 				if ( state.isHydrated ) {
+					if ( state.productCountColor ) {
+						return state.productCountColor;
+					}
 					const { ref } = getElement();
 					return getClosestColor( ref!, 'color' ) || '#000';
 				}
@@ -368,12 +372,14 @@ store< MiniCart >(
 				const removeJQueryAddedToCartEvent =
 					translateJQueryEventToNative(
 						'added_to_cart',
-						'wc-blocks_added_to_cart'
+						'wc-blocks_added_to_cart',
+						true
 					);
 				const removeJQueryRemovedFromCartEvent =
 					translateJQueryEventToNative(
 						'removed_from_cart',
-						'wc-blocks_removed_from_cart'
+						'wc-blocks_removed_from_cart',
+						true
 					);
 
 				return () => {
@@ -414,26 +420,34 @@ store< MiniCart >(
 	{ lock: universalLock }
 );
 
-function itemDataInnerHTML( field: 'name' | 'value' ) {
-	const { ref } = getElement();
+/**
+ * Returns the raw API value for an item_data field. Used by both innerHTML
+ * callbacks and the cartItemDataAttr getter.
+ */
+function getItemDataRaw( field: 'name' | 'value' ): string {
+	const { itemData, dataProperty } = getContext< {
+		itemData: ItemData;
+		dataProperty: DataProperty;
+	} >();
 
-	if ( ! ref ) {
-		return;
+	const dataItemAttr =
+		// eslint-disable-next-line @typescript-eslint/no-use-before-define
+		itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
+
+	if ( ! dataItemAttr ) {
+		return '';
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-use-before-define
-	const dataAttr = cartItemState.cartItemDataAttr;
-
-	if ( ! dataAttr ) {
-		return;
+	if ( field === 'name' ) {
+		return (
+			dataItemAttr.key ||
+			dataItemAttr.attribute ||
+			dataItemAttr.name ||
+			''
+		);
 	}
 
-	if ( field in dataAttr ) {
-		const value = dataAttr[ field as keyof typeof dataAttr ];
-		if ( typeof value === 'string' && value ) {
-			ref.innerHTML = trimWords( value );
-		}
-	}
+	return dataItemAttr.display || dataItemAttr.value || '';
 }
 
 const { state: cartItemState } = store(
@@ -592,6 +606,18 @@ const { state: cartItemState } = store(
 					placeholderImgSrc ||
 					''
 				);
+			},
+
+			get itemSrcset(): string {
+				return (
+					cartItemState.cartItem.images[ 0 ]?.thumbnail_srcset || ''
+				);
+			},
+
+			get itemSizes(): string {
+				return cartItemState.cartItem.images[ 0 ]?.thumbnail_srcset
+					? '64px'
+					: '';
 			},
 
 			get priceWithoutDiscount(): string {
@@ -764,41 +790,28 @@ const { state: cartItemState } = store(
 			},
 
 			get cartItemDataAttr(): CartItemDataAttr | null {
-				const { itemData, dataProperty } = getContext< {
-					itemData: ItemData;
-					dataProperty: DataProperty;
-				} >();
+				const rawName = getItemDataRaw( 'name' );
+				const rawValue = getItemDataRaw( 'value' );
 
-				// Use the context if it is in a loop, otherwise use the unique item if it exists.
-				const dataItemAttr =
-					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
-
-				if ( ! dataItemAttr ) {
+				if ( ! rawName && ! rawValue ) {
 					return null;
 				}
 
-				// Extract name based on data type (variation uses 'attribute', item_data uses 'key' or 'name')
-				const rawName =
-					dataItemAttr.key ||
-					dataItemAttr.attribute ||
-					dataItemAttr.name ||
-					'';
-
-				// Extract value - prefer 'display' over 'value' for item_data if available
-				const rawValue =
-					dataItemAttr.display || dataItemAttr.value || '';
-
-				// Decode entities.
 				const nameTxt = document.createElement( 'textarea' );
 				nameTxt.innerHTML = rawName;
 				const valueTxt = document.createElement( 'textarea' );
 				valueTxt.innerHTML = rawValue;
 
-				const processedName = nameTxt.value ? nameTxt.value + ':' : '';
-				const hiddenValue = dataItemAttr.hidden;
+				const { itemData, dataProperty } = getContext< {
+					itemData: ItemData;
+					dataProperty: DataProperty;
+				} >();
+				const dataItemAttr =
+					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
+				const hiddenValue = dataItemAttr?.hidden;
 
 				return {
-					name: processedName,
+					name: nameTxt.value ? nameTxt.value + ':' : '',
 					value: valueTxt.value,
 					className: `wc-block-components-product-details__${ nameTxt.value
 						.replace( /([a-z])([A-Z])/g, '$1-$2' )
@@ -988,8 +1001,6 @@ const { state: cartItemState } = store(
 					const { short_description: shortDescription, description } =
 						cartItemState.cartItem;
 
-					// A workaround for the lack of dangerous set HTML directive
-					// in interactivity API.
 					if ( innerEl && ( shortDescription || description ) ) {
 						innerEl.innerHTML = trimWords(
 							shortDescription || description
@@ -999,10 +1010,19 @@ const { state: cartItemState } = store(
 			},
 
 			itemDataNameInnerHTML() {
-				itemDataInnerHTML( 'name' );
+				const { ref } = getElement();
+				const raw = getItemDataRaw( 'name' );
+				if ( ref && raw ) {
+					ref.innerHTML = trimWords( raw + ':' );
+				}
 			},
+
 			itemDataValueInnerHTML() {
-				itemDataInnerHTML( 'value' );
+				const { ref } = getElement();
+				const raw = getItemDataRaw( 'value' );
+				if ( ref && raw ) {
+					ref.innerHTML = trimWords( raw );
+				}
 			},
 
 			filterCartItemClass() {

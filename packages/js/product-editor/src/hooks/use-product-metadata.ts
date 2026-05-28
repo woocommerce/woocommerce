@@ -1,12 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityId } from '@wordpress/core-data';
 /**
  * External dependencies
  */
+import { useEntityId } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { Product } from '@woocommerce/data';
+
 /**
  * Internal dependencies
  */
@@ -22,23 +20,17 @@ function useProductMetadata( options?: Options ) {
 	const thisId = useEntityId( 'postType', postType );
 	const id = options?.id || thisId;
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	const { editEntityRecord } = useDispatch( 'core' );
 
 	const { isLoading, meta_data } = useSelect(
 		( select ) => {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			const { getEditedEntityRecord, hasFinishedResolution } =
 				select( 'core' );
-			// @ts-expect-error Selector is not typed
-			const { meta_data: metadata }: Product = getEditedEntityRecord(
+			const { meta_data: metadata } = getEditedEntityRecord(
 				'postType',
 				postType,
 				id
-			);
-			// @ts-expect-error Selector is not typed
+			) as unknown as Product;
 			const isResolutionFinished = hasFinishedResolution(
 				'getEditedEntityRecord',
 				[ 'postType', postType, id ]

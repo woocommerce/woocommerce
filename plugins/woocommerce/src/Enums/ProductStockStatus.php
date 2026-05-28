@@ -35,4 +35,20 @@ final class ProductStockStatus {
 	 * @var string
 	 */
 	public const LOW_STOCK = 'lowstock';
+
+	/**
+	 * Returns all product stock status values.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return string[]
+	 */
+	public static function get_all(): array {
+		return array(
+			self::IN_STOCK,
+			self::OUT_OF_STOCK,
+			self::ON_BACKORDER,
+			self::LOW_STOCK,
+		);
+	}
 }

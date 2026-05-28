@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
+import { useEffect, useRef, useState } from 'react';
 
 export const SearchIcon = () => (
 	<svg
@@ -68,30 +69,75 @@ export const EnvelopeIcon = () => (
 );
 
 export const CopyIcon = ( { copyText }: { copyText: string } ) => {
+	const [ copied, setCopied ] = useState( false );
+	const timeoutRef = useRef< ReturnType< typeof setTimeout > >();
+
+	useEffect( () => {
+		return () => {
+			if ( timeoutRef.current ) {
+				clearTimeout( timeoutRef.current );
+			}
+		};
+	}, [] );
+
+	const handleCopy = ( event: React.MouseEvent ) => {
+		event.stopPropagation();
+		navigator.clipboard.writeText( copyText ).then(
+			() => {
+				setCopied( true );
+				if ( timeoutRef.current ) {
+					clearTimeout( timeoutRef.current );
+				}
+				timeoutRef.current = setTimeout(
+					() => setCopied( false ),
+					2000
+				);
+			},
+			( err ) => {
+				// eslint-disable-next-line no-console
+				console.error( 'Failed to copy to clipboard:', err );
+			}
+		);
+	};
+
 	return (
 		<Button
 			size="small"
 			iconSize={ 14 }
-			onClick={ () => {
-				navigator.clipboard.writeText( copyText );
-			} }
+			onClick={ handleCopy }
 			icon={
-				<svg
-					width="14"
-					height="14"
-					viewBox="0 0 14 14"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						fillRule="evenodd"
-						clipRule="evenodd"
-						d="M1.68815 1.5835H9.81315C9.87065 1.5835 9.91732 1.63016 9.91732 1.68766V9.81266C9.91732 9.84029 9.90634 9.86679 9.88681 9.88632C9.86727 9.90586 9.84078 9.91683 9.81315 9.91683H1.68815C1.66052 9.91683 1.63403 9.90586 1.61449 9.88632C1.59496 9.86679 1.58398 9.84029 1.58398 9.81266V1.68766C1.58398 1.63016 1.63065 1.5835 1.68815 1.5835ZM0.333984 1.68766C0.333984 0.940163 0.940651 0.333496 1.68815 0.333496H9.81315C10.5615 0.333496 11.1673 0.940163 11.1673 1.68766V9.81266C11.1673 10.561 10.5615 11.1668 9.81315 11.1668H1.68815C1.329 11.1668 0.984566 11.0242 0.730611 10.7702C0.476655 10.5162 0.333984 10.1718 0.333984 9.81266V1.68766ZM12.4173 11.401V3.901H13.6673V11.401C13.6673 12.6668 12.6423 13.6668 11.3765 13.6668H2.20898V12.4168H11.3765C11.9515 12.4168 12.4173 11.9768 12.4173 11.401Z"
-						fill="#949494"
-					/>
-				</svg>
+				copied ? (
+					<svg
+						width="14"
+						height="14"
+						viewBox="0 0 14 14"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							d="M5.25 10.5L1.75 7L2.6275 6.1225L5.25 8.7375L11.3725 2.625L12.25 3.5L5.25 10.5Z"
+							fill="#008A20"
+						/>
+					</svg>
+				) : (
+					<svg
+						width="14"
+						height="14"
+						viewBox="0 0 14 14"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							fillRule="evenodd"
+							clipRule="evenodd"
+							d="M1.68815 1.5835H9.81315C9.87065 1.5835 9.91732 1.63016 9.91732 1.68766V9.81266C9.91732 9.84029 9.90634 9.86679 9.88681 9.88632C9.86727 9.90586 9.84078 9.91683 9.81315 9.91683H1.68815C1.66052 9.91683 1.63403 9.90586 1.61449 9.88632C1.59496 9.86679 1.58398 9.84029 1.58398 9.81266V1.68766C1.58398 1.63016 1.63065 1.5835 1.68815 1.5835ZM0.333984 1.68766C0.333984 0.940163 0.940651 0.333496 1.68815 0.333496H9.81315C10.5615 0.333496 11.1673 0.940163 11.1673 1.68766V9.81266C11.1673 10.561 10.5615 11.1668 9.81315 11.1668H1.68815C1.329 11.1668 0.984566 11.0242 0.730611 10.7702C0.476655 10.5162 0.333984 10.1718 0.333984 9.81266V1.68766ZM12.4173 11.401V3.901H13.6673V11.401C13.6673 12.6668 12.6423 13.6668 11.3765 13.6668H2.20898V12.4168H11.3765C11.9515 12.4168 12.4173 11.9768 12.4173 11.401Z"
+							fill="#949494"
+						/>
+					</svg>
+				)
 			}
-			label={ 'Copy' }
+			aria-label={ copied ? 'Copied' : 'Copy' }
+			label={ copied ? 'Copied' : 'Copy' }
 			__next40pxDefaultSize
 		/>
 	);
