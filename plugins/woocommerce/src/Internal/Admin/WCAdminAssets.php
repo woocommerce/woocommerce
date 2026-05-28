@@ -467,16 +467,16 @@ class WCAdminAssets {
 		$extension_handles = array();
 		try {
 			$extension_handles = $settings_ui_page->get_script_handles( $this->get_current_settings_section() );
-		} catch ( \Throwable $e ) {
+		} catch ( \Exception $e ) {
 			wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
 		}
 
 		$dependencies = array_merge(
 			array( 'wc-settings-ui-sdk' ),
 			array_filter(
-				is_array( $extension_handles ) ? $extension_handles : array(),
-				static function ( $script_handle ): bool {
-					return is_string( $script_handle ) && '' !== $script_handle;
+				$extension_handles,
+				static function ( string $script_handle ): bool {
+					return '' !== $script_handle;
 				}
 			)
 		);

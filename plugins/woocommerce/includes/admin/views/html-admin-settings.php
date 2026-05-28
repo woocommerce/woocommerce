@@ -37,7 +37,7 @@ if ( ! $tab_exists ) {
 	exit;
 }
 
-$hide_nav                = 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true );
+$hide_nav            = 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true );
 $is_settings_ui_page = false;
 
 if ( Features::is_enabled( 'settings-ui' ) ) {

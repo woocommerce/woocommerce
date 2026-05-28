@@ -431,7 +431,7 @@ class Settings {
 
 		try {
 			$settings['settingsUI'][ $page_id ][ $section_key ] = $settings_ui_page->get_schema( $section );
-		} catch ( \Throwable $e ) {
+		} catch ( \Exception $e ) {
 			$GLOBALS['wc_settings_ui_schema_failed'][ $page_id ][ $section_key ] = true;
 			wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
 		}
