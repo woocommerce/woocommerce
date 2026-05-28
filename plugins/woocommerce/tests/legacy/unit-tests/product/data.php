@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
 /**
@@ -24,7 +25,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	 * Tear down test case.
 	 */
 	public function tearDown(): void {
-		delete_option( 'woocommerce_feature_product_gallery_videos_enabled' );
+		delete_option( ProductMediaGallery::ENABLE_OPTION_NAME );
 		parent::tearDown();
 	}
 
@@ -268,7 +269,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			require_once WC_ABSPATH . 'includes/admin/meta-boxes/class-wc-meta-box-product-images.php';
 		}
 
-		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
 
 		$product  = WC_Helper_Product::create_simple_product();
 		$image_id = wp_insert_attachment(
@@ -346,7 +347,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			require_once WC_ABSPATH . 'includes/admin/meta-boxes/class-wc-meta-box-product-images.php';
 		}
 
-		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'no' );
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'no' );
 
 		$product      = WC_Helper_Product::create_simple_product();
 		$old_image_id = wp_insert_attachment(

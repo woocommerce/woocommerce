@@ -19,6 +19,16 @@ defined( 'ABSPATH' ) || exit;
 class ProductMediaGallery {
 
 	/**
+	 * The feature id used by `FeaturesController` (Settings → Advanced → Features).
+	 */
+	public const FEATURE_ID = 'product_gallery_videos';
+
+	/**
+	 * Option backing the product gallery videos feature toggle.
+	 */
+	public const ENABLE_OPTION_NAME = 'woocommerce_feature_product_gallery_videos_enabled';
+
+	/**
 	 * Check if product gallery videos are enabled.
 	 *
 	 * @return bool

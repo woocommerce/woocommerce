@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
 // phpcs:ignore Squiz.Commenting.FileComment.Missing
@@ -38,7 +39,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 * Tear down test case.
 	 */
 	public function tearDown(): void {
-		delete_option( 'woocommerce_feature_product_gallery_videos_enabled' );
+		delete_option( ProductMediaGallery::ENABLE_OPTION_NAME );
 		parent::tearDown();
 	}
 
@@ -347,7 +348,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_product_projects_images_to_media_gallery() {
 		wp_set_current_user( $this->user );
-		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
 
 		$product           = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$image_id          = $this->create_product_media_attachment( 'Main product image' );
@@ -401,7 +402,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_product_media_gallery_persists_and_syncs_product_images() {
 		wp_set_current_user( $this->user );
-		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
 
 		$product   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$poster_id = $this->create_product_media_attachment( 'Video poster' );
@@ -478,7 +479,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_product_images_preserves_stored_video_media_gallery_items() {
 		wp_set_current_user( $this->user );
-		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
 
 		$product      = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$old_image_id = $this->create_product_media_attachment( 'Old gallery image' );
@@ -572,7 +573,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_product_images_clears_stored_video_media_gallery_items_when_feature_disabled() {
 		wp_set_current_user( $this->user );
-		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'no' );
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'no' );
 
 		$product      = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$old_image_id = $this->create_product_media_attachment( 'Old gallery image' );
@@ -619,7 +620,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$this->assertSame( array(), $updated_product->get_gallery_image_ids() );
 		$this->assertSame( array(), $updated_product->get_media_gallery( 'edit' ) );
 
-		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
 
 		$get_response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
 		$get_data     = $get_response->get_data();
@@ -651,7 +652,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_product_media_gallery_rejects_mismatched_attachment_media_types() {
 		wp_set_current_user( $this->user );
-		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
 
 		$product  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$image_id = $this->create_product_media_attachment( 'Gallery image' );
@@ -711,7 +712,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_product_media_gallery_rejects_embeds() {
 		wp_set_current_user( $this->user );
-		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
 
 		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
@@ -742,7 +743,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_product_media_gallery_omits_embeds() {
 		wp_set_current_user( $this->user );
-		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
 
 		$product  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$image_id = $this->create_product_media_attachment( 'Gallery image' );

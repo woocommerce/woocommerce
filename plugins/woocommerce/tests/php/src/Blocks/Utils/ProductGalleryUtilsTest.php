@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Blocks\Utils;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use WP_UnitTestCase;
 
 /**
@@ -13,7 +14,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	 * Reset feature-flag options leaked by individual tests.
 	 */
 	public function tearDown(): void {
-		delete_option( 'woocommerce_feature_product_gallery_videos_enabled' );
+		delete_option( ProductMediaGallery::ENABLE_OPTION_NAME );
 		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
 		parent::tearDown();
 	}
@@ -275,7 +276,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	 * @testdox Should include unique video items in product gallery media data.
 	 */
 	public function test_get_product_gallery_media_data_supports_videos() {
-		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
 
 		$product = \WC_Helper_Product::create_simple_product();
 
@@ -358,7 +359,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	 * @testdox Should prepend the featured image to gallery-only media gallery data.
 	 */
 	public function test_get_product_gallery_media_data_prepends_featured_image_to_gallery_only_media() {
-		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
 
 		$product = \WC_Helper_Product::create_simple_product();
 
