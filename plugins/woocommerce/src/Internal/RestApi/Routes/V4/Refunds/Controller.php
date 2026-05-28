@@ -190,16 +190,16 @@ class Controller extends AbstractController {
 								'type'       => 'object',
 								'properties' => array(
 									'line_item_id' => array(
-										'description'       => __( 'ID of the original order line item.', 'woocommerce' ),
-										'type'              => 'integer',
-										'required'          => true,
+										'description' => __( 'ID of the original order line item.', 'woocommerce' ),
+										'type'        => 'integer',
+										'required'    => true,
 										'sanitize_callback' => 'absint',
 										'validate_callback' => 'rest_validate_request_arg',
 									),
 									'quantity'     => array(
-										'description'       => __( 'Quantity to refund.', 'woocommerce' ),
-										'type'              => 'integer',
-										'required'          => true,
+										'description' => __( 'Quantity to refund.', 'woocommerce' ),
+										'type'        => 'integer',
+										'required'    => true,
 										'sanitize_callback' => 'absint',
 										'validate_callback' => 'rest_validate_request_arg',
 									),

@@ -24,9 +24,9 @@ class RefundPreviewSchema extends AbstractSchema {
 	/**
 	 * Get an item response. Not used for preview — the controller returns the data array directly.
 	 *
-	 * @param mixed                              $item           Item data.
-	 * @param WP_REST_Request<array<string,mixed>> $request        Request object.
-	 * @param array                              $include_fields Fields to include.
+	 * @param mixed           $item           Item data.
+	 * @param WP_REST_Request $request        Request object.
+	 * @param array           $include_fields Fields to include.
 	 * @return array
 	 */
 	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {

@@ -180,7 +180,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$product_b->set_regular_price( 30.00 );
 		$product_b->save();
 
-		$order = wc_create_order();
+		$order  = wc_create_order();
 		$item_a = new WC_Order_Item_Product();
 		$item_a->set_props(
 			array(
@@ -511,8 +511,8 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		// Reload the order and check refunds.
-		$order          = wc_get_order( $order->get_id() );
-		$refunds_after  = $order->get_refunds();
+		$order         = wc_get_order( $order->get_id() );
+		$refunds_after = $order->get_refunds();
 
 		$this->assertCount( count( $refunds_before ), $refunds_after, 'Preview should not create any refund records' );
 	}
