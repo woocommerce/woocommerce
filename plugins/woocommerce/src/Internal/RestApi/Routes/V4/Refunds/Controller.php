@@ -449,15 +449,41 @@ class Controller extends AbstractController {
 		$validation_error = $this->data_utils->validate_preview_line_items( $request['line_items'], $order );
 
 		if ( is_wp_error( $validation_error ) ) {
-			return $this->get_route_error_response( (string) $validation_error->get_error_code(), $validation_error->get_error_message() );
+			$error_data = $validation_error->get_error_data();
+			$status     = is_array( $error_data ) && isset( $error_data['status'] ) ? (int) $error_data['status'] : WP_Http::BAD_REQUEST;
+			return $this->get_route_error_response_from_object( $validation_error, $status );
 		}
 
 		try {
 			$preview = $this->data_utils->build_refund_preview( $order, $request['line_items'] );
+		} catch ( \WC_Data_Exception $e ) {
+			return $this->get_route_error_response( (string) $e->getErrorCode(), $e->getMessage() );
+		} catch ( \WC_REST_Exception $e ) {
+			return $this->get_route_error_response( (string) $e->getErrorCode(), $e->getMessage() );
 		} catch ( \InvalidArgumentException $e ) {
-			// validate_preview_line_items above should have caught any bad input. If
-			// build_refund_preview still throws, treat it as a server-side invariant violation.
-			return $this->get_route_error_response( 'invalid_preview_request', $e->getMessage() );
+			// validate_preview_line_items above should have caught any bad input.
+			// If build_refund_preview still throws InvalidArgumentException, treat
+			// it as a server-side invariant violation, log for observability, and
+			// return a generic message (do not leak internal IDs to clients).
+			wc_get_logger()->error(
+				sprintf( 'Refund preview invariant violation on order %d: %s', $order->get_id(), $e->getMessage() ),
+				array( 'source' => 'wc-v4-refunds' )
+			);
+			return $this->get_route_error_response(
+				'invalid_preview_request',
+				__( 'The refund preview could not be generated due to an unexpected error.', 'woocommerce' ),
+				WP_Http::INTERNAL_SERVER_ERROR
+			);
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Refund preview unexpected error on order %d: %s', $order->get_id(), $e->getMessage() ),
+				array( 'source' => 'wc-v4-refunds' )
+			);
+			return $this->get_route_error_response(
+				'unexpected_preview_error',
+				__( 'An unexpected error occurred while generating the refund preview.', 'woocommerce' ),
+				WP_Http::INTERNAL_SERVER_ERROR
+			);
 		}
 
 		return rest_ensure_response( $preview );
