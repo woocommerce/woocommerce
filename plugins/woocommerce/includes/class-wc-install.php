@@ -1736,6 +1736,11 @@ class WC_Install {
 		$stock_notifications_table_schema = wc_get_container()->get( StockNotificationsDataStore::class )->get_database_schema();
 		$order_stats_table_schema         = self::get_order_stats_table_schema( $collate );
 
+		// Store Actors Tables Schema (gated on the point_of_sale_actors feature flag).
+		$store_actors_table_schema = $feature_controller->feature_is_enabled( 'point_of_sale_actors' )
+			? wc_get_container()->get( \Automattic\WooCommerce\Internal\StoreActors\ActorRepository::class )->get_database_schema()
+			: '';
+
 		$mysql_version = wc_get_server_database_version()['number'];
 		if ( version_compare( $mysql_version, '5.6', '>=' ) ) {
 			$datetime_default = 'DEFAULT CURRENT_TIMESTAMP';
@@ -2078,6 +2083,7 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 ) $collate;
 $hpos_table_schema;
 $stock_notifications_table_schema;
+$store_actors_table_schema
 		";
 
 		return $tables;
@@ -2117,6 +2123,8 @@ $stock_notifications_table_schema;
 			"{$wpdb->prefix}wc_product_attributes_lookup",
 			"{$wpdb->prefix}wc_stock_notifications",
 			"{$wpdb->prefix}wc_stock_notificationmeta",
+			"{$wpdb->prefix}wc_store_actors",
+			"{$wpdb->prefix}wc_store_actor_access",
 
 			// WCA Tables.
 			"{$wpdb->prefix}wc_order_stats",

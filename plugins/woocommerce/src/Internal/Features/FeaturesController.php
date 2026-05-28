@@ -558,6 +558,18 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => true,
 			),
+			'point_of_sale_actors'               => array(
+				'name'                         => __( 'Point of Sale staff', 'woocommerce' ),
+				'description'                  => __(
+					'Manage Point of Sale staff and their PINs directly in WooCommerce, without creating WordPress user accounts. Any existing WordPress user can optionally be linked. Experimental — for development and testing.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'is_experimental'              => true,
+			),
 			'fulfillments'                       => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
 				'description'                  => __(
