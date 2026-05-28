@@ -72,11 +72,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$item  = reset( $items );
 
 		// Line items WITHOUT explicit refund_tax.
+		// refund_total 110.00 includes 10% tax.
 		$line_items = array(
 			array(
 				'line_item_id' => $item->get_id(),
 				'quantity'     => 1,
-				'refund_total' => 110.00, // Includes 10% tax.
+				'refund_total' => 110.00,
 			),
 		);
 
@@ -121,6 +122,7 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$item  = reset( $items );
 
 		// Line items WITH explicit refund_tax (legacy format).
+		// Explicit refund_tax value (7.50) should be preserved by the converter.
 		$line_items = array(
 			array(
 				'line_item_id' => $item->get_id(),
@@ -129,7 +131,7 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 				'refund_tax'   => array(
 					array(
 						'id'           => $tax_rate_id,
-						'refund_total' => 7.50, // Explicit value.
+						'refund_total' => 7.50,
 					),
 				),
 			),
@@ -158,7 +160,7 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	 * attempt to extract taxes from refund_total in this case.
 	 */
 	public function test_convert_line_items_skips_tax_extraction_for_zero_tax_items() {
-		// Create a tax rate (applied to products but not shipping in this test).
+		// Create a tax rate that applies to products but NOT shipping (tax_rate_shipping => '0').
 		$tax_rate_id = WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate_country'  => 'US',
@@ -167,7 +169,7 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 				'tax_rate_name'     => 'VAT',
 				'tax_rate_priority' => '1',
 				'tax_rate_compound' => '0',
-				'tax_rate_shipping' => '0', // Tax does NOT apply to shipping.
+				'tax_rate_shipping' => '0',
 				'tax_rate_order'    => '1',
 				'tax_rate_class'    => '',
 			)
@@ -186,11 +188,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, (float) $shipping_taxes['total'][ $tax_rate_id ] );
 
 		// Line items WITHOUT explicit refund_tax for shipping.
+		// refund_total 10.00 is the shipping cost (no tax included).
 		$line_items = array(
 			array(
 				'line_item_id' => $shipping_item->get_id(),
 				'quantity'     => 1,
-				'refund_total' => 10.00, // Shipping cost to refund (no tax included).
+				'refund_total' => 10.00,
 			),
 		);
 
@@ -276,7 +279,14 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 
 		$order = wc_create_order();
 		$item  = new WC_Order_Item_Product();
-		$item->set_props( array( 'product' => $product, 'quantity' => 4, 'subtotal' => 100.00, 'total' => 100.00 ) );
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 4,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
 		$item->save();
 		$order->add_item( $item );
 		$order->save();
@@ -297,21 +307,41 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 
 		$order = wc_create_order();
 		$item  = new WC_Order_Item_Product();
-		$item->set_props( array( 'product' => $product, 'quantity' => 2, 'subtotal' => 50.00, 'total' => 50.00 ) );
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
 		$item->save();
 		$order->add_item( $item );
 		$order->set_total( 50.00 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
-		wc_create_refund( array(
-			'order_id'   => $order->get_id(),
-			'amount'     => 25.00,
-			'line_items' => array( $item->get_id() => array( 'qty' => 1, 'refund_total' => 25.00, 'refund_tax' => array() ) ),
-		) );
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 25.00,
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => 1,
+						'refund_total' => 25.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
 
 		$result = $this->data_utils->validate_preview_line_items(
-			array( array( 'line_item_id' => $item->get_id(), 'quantity' => 2 ) ),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 2,
+				),
+			),
 			$order
 		);
 
@@ -334,7 +364,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$item  = reset( $items );
 
 		$result = $this->data_utils->validate_preview_line_items(
-			array( array( 'line_item_id' => $item->get_id(), 'quantity' => 1 ) ),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			),
 			$order
 		);
 
@@ -348,7 +383,13 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	public function test_compute_line_item_refund_total_zero_original_quantity(): void {
 		$order = wc_create_order();
 		$item  = new WC_Order_Item_Product();
-		$item->set_props( array( 'quantity' => 0, 'subtotal' => 0, 'total' => 0 ) );
+		$item->set_props(
+			array(
+				'quantity' => 0,
+				'subtotal' => 0,
+				'total'    => 0,
+			)
+		);
 		$item->save();
 		$order->add_item( $item );
 		$order->save();
@@ -363,7 +404,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_compute_line_item_refund_total_shipping(): void {
 		$shipping = new WC_Order_Item_Shipping();
-		$shipping->set_props( array( 'method_title' => 'Flat Rate', 'total' => 10.00 ) );
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => 10.00,
+			)
+		);
 		$shipping->set_taxes( array( 'total' => array( 1 => 1.50 ) ) );
 		$shipping->save();
 
@@ -375,7 +421,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_compute_line_item_refund_total_fee_positive(): void {
 		$fee = new WC_Order_Item_Fee();
-		$fee->set_props( array( 'name' => 'Handling', 'total' => 20.00 ) );
+		$fee->set_props(
+			array(
+				'name'  => 'Handling',
+				'total' => 20.00,
+			)
+		);
 		$fee->set_taxes( array( 'total' => array( 1 => 3.00 ) ) );
 		$fee->save();
 
@@ -387,7 +438,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_compute_line_item_refund_total_fee_negative(): void {
 		$fee = new WC_Order_Item_Fee();
-		$fee->set_props( array( 'name' => 'Loyalty discount', 'total' => -10.00 ) );
+		$fee->set_props(
+			array(
+				'name'  => 'Loyalty discount',
+				'total' => -10.00,
+			)
+		);
 		$fee->set_taxes( array( 'total' => array() ) );
 		$fee->save();
 
@@ -403,7 +459,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_compute_line_item_refund_total_invalid_quantity( int $quantity ): void {
 		$fee = new WC_Order_Item_Fee();
-		$fee->set_props( array( 'name' => 'Fee', 'total' => 5.00 ) );
+		$fee->set_props(
+			array(
+				'name'  => 'Fee',
+				'total' => 5.00,
+			)
+		);
 		$fee->save();
 
 		$this->expectException( \InvalidArgumentException::class );
@@ -426,14 +487,24 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	public function test_build_refund_preview_shipping_only(): void {
 		$order    = wc_create_order();
 		$shipping = new WC_Order_Item_Shipping();
-		$shipping->set_props( array( 'method_title' => 'Flat Rate', 'total' => 10.00 ) );
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => 10.00,
+			)
+		);
 		$shipping->save();
 		$order->add_item( $shipping );
 		$order->save();
 
 		$result = $this->data_utils->build_refund_preview(
 			$order,
-			array( array( 'line_item_id' => $shipping->get_id(), 'quantity' => 1 ) )
+			array(
+				array(
+					'line_item_id' => $shipping->get_id(),
+					'quantity'     => 1,
+				),
+			)
 		);
 
 		$this->assertCount( 1, $result['breakdown']['shipping']['items'] );
@@ -451,14 +522,24 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	public function test_build_refund_preview_fee_only(): void {
 		$order = wc_create_order();
 		$fee   = new WC_Order_Item_Fee();
-		$fee->set_props( array( 'name' => 'Service fee', 'total' => 20.00 ) );
+		$fee->set_props(
+			array(
+				'name'  => 'Service fee',
+				'total' => 20.00,
+			)
+		);
 		$fee->save();
 		$order->add_item( $fee );
 		$order->save();
 
 		$result = $this->data_utils->build_refund_preview(
 			$order,
-			array( array( 'line_item_id' => $fee->get_id(), 'quantity' => 1 ) )
+			array(
+				array(
+					'line_item_id' => $fee->get_id(),
+					'quantity'     => 1,
+				),
+			)
 		);
 
 		$this->assertCount( 1, $result['breakdown']['fees']['items'] );
@@ -480,17 +561,34 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 
 		$order = wc_create_order();
 		$item  = new WC_Order_Item_Product();
-		$item->set_props( array( 'product' => $product, 'quantity' => 1, 'subtotal' => 50.00, 'total' => 50.00 ) );
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
 		$item->save();
 		$order->add_item( $item );
 
 		$shipping = new WC_Order_Item_Shipping();
-		$shipping->set_props( array( 'method_title' => 'Flat Rate', 'total' => 10.00 ) );
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => 10.00,
+			)
+		);
 		$shipping->save();
 		$order->add_item( $shipping );
 
 		$fee = new WC_Order_Item_Fee();
-		$fee->set_props( array( 'name' => 'Service fee', 'total' => 5.00 ) );
+		$fee->set_props(
+			array(
+				'name'  => 'Service fee',
+				'total' => 5.00,
+			)
+		);
 		$fee->save();
 		$order->add_item( $fee );
 
@@ -499,9 +597,18 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$result = $this->data_utils->build_refund_preview(
 			$order,
 			array(
-				array( 'line_item_id' => $item->get_id(), 'quantity' => 1 ),
-				array( 'line_item_id' => $shipping->get_id(), 'quantity' => 1 ),
-				array( 'line_item_id' => $fee->get_id(), 'quantity' => 1 ),
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+				array(
+					'line_item_id' => $shipping->get_id(),
+					'quantity'     => 1,
+				),
+				array(
+					'line_item_id' => $fee->get_id(),
+					'quantity'     => 1,
+				),
 			)
 		);
 
@@ -526,14 +633,27 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$ids    = array();
 		foreach ( $prices as $price ) {
 			$item = new WC_Order_Item_Product();
-			$item->set_props( array( 'product' => $product, 'quantity' => 1, 'subtotal' => $price, 'total' => $price ) );
+			$item->set_props(
+				array(
+					'product'  => $product,
+					'quantity' => 1,
+					'subtotal' => $price,
+					'total'    => $price,
+				)
+			);
 			$item->save();
 			$order->add_item( $item );
 			$ids[] = $item->get_id();
 		}
 		$order->save();
 
-		$line_items = array_map( fn( $id ) => array( 'line_item_id' => $id, 'quantity' => 1 ), $ids );
+		$line_items = array_map(
+			fn( $id ) => array(
+				'line_item_id' => $id,
+				'quantity'     => 1,
+			),
+			$ids
+		);
 		$result     = $this->data_utils->build_refund_preview( $order, $line_items );
 
 		$item_total_sum = 0.0;
@@ -562,7 +682,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$this->expectException( \InvalidArgumentException::class );
 		$this->data_utils->build_refund_preview(
 			$order,
-			array( array( 'line_item_id' => 999999, 'quantity' => 1 ) )
+			array(
+				array(
+					'line_item_id' => 999999,
+					'quantity'     => 1,
+				),
+			)
 		);
 
 		$order->delete( true );
@@ -592,14 +717,27 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$items = $order->get_items( 'line_item' );
 		$item  = reset( $items );
 
-		wc_create_refund( array(
-			'order_id'   => $order->get_id(),
-			'amount'     => 50.00,
-			'line_items' => array( $item->get_id() => array( 'qty' => 1, 'refund_total' => 50.00, 'refund_tax' => array() ) ),
-		) );
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 50.00,
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => 1,
+						'refund_total' => 50.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
 
 		$result = $this->data_utils->validate_preview_line_items(
-			array( array( 'line_item_id' => $item->get_id(), 'quantity' => 1 ) ),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			),
 			$order
 		);
 
@@ -631,14 +769,19 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$order_a = $this->create_order_with_taxes( array(), 50.00 );
 		$order_a->set_status( OrderStatus::COMPLETED );
 		$order_a->save();
-		$order_b      = $this->create_order_with_taxes( array(), 50.00 );
+		$order_b = $this->create_order_with_taxes( array(), 50.00 );
 		$order_b->set_status( OrderStatus::COMPLETED );
 		$order_b->save();
 		$order_b_items = $order_b->get_items( 'line_item' );
 		$order_b_item  = reset( $order_b_items );
 
 		$result = $this->data_utils->validate_preview_line_items(
-			array( array( 'line_item_id' => $order_b_item->get_id(), 'quantity' => 1 ) ),
+			array(
+				array(
+					'line_item_id' => $order_b_item->get_id(),
+					'quantity'     => 1,
+				),
+			),
 			$order_a
 		);
 
@@ -650,11 +793,19 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	 * @testdox Should return unsupported_item_type when line_item_id refers to a tax line.
 	 */
 	public function test_validate_preview_line_items_unsupported_type(): void {
-		$tax_rate_id = WC_Tax::_insert_tax_rate( array(
-			'tax_rate_country' => 'US', 'tax_rate_state' => '', 'tax_rate' => '10.0000',
-			'tax_rate_name' => 'VAT', 'tax_rate_priority' => '1', 'tax_rate_compound' => '0',
-			'tax_rate_shipping' => '1', 'tax_rate_order' => '1', 'tax_rate_class' => '',
-		) );
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
 		$order       = $this->create_order_with_taxes( array( $tax_rate_id ), 50.00 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
@@ -662,7 +813,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$tax_item  = reset( $tax_items );
 
 		$result = $this->data_utils->validate_preview_line_items(
-			array( array( 'line_item_id' => $tax_item->get_id(), 'quantity' => 1 ) ),
+			array(
+				array(
+					'line_item_id' => $tax_item->get_id(),
+					'quantity'     => 1,
+				),
+			),
 			$order
 		);
 
@@ -712,7 +868,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	public function test_validate_preview_line_items_shipping_quantity_must_be_one(): void {
 		$order    = wc_create_order();
 		$shipping = new WC_Order_Item_Shipping();
-		$shipping->set_props( array( 'method_title' => 'Flat Rate', 'total' => 10.00 ) );
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => 10.00,
+			)
+		);
 		$shipping->save();
 		$order->add_item( $shipping );
 		$order->set_status( OrderStatus::COMPLETED );
@@ -720,7 +881,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$order->save();
 
 		$result = $this->data_utils->validate_preview_line_items(
-			array( array( 'line_item_id' => $shipping->get_id(), 'quantity' => 2 ) ),
+			array(
+				array(
+					'line_item_id' => $shipping->get_id(),
+					'quantity'     => 2,
+				),
+			),
 			$order
 		);
 
@@ -734,21 +900,39 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	public function test_validate_preview_line_items_shipping_fully_refunded(): void {
 		$order    = wc_create_order();
 		$shipping = new WC_Order_Item_Shipping();
-		$shipping->set_props( array( 'method_title' => 'Flat Rate', 'total' => 10.00 ) );
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => 10.00,
+			)
+		);
 		$shipping->save();
 		$order->add_item( $shipping );
 		$order->set_total( 10.00 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
-		wc_create_refund( array(
-			'order_id'   => $order->get_id(),
-			'amount'     => 10.00,
-			'line_items' => array( $shipping->get_id() => array( 'qty' => 0, 'refund_total' => 10.00, 'refund_tax' => array() ) ),
-		) );
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 10.00,
+				'line_items' => array(
+					$shipping->get_id() => array(
+						'qty'          => 0,
+						'refund_total' => 10.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
 
 		$result = $this->data_utils->validate_preview_line_items(
-			array( array( 'line_item_id' => $shipping->get_id(), 'quantity' => 1 ) ),
+			array(
+				array(
+					'line_item_id' => $shipping->get_id(),
+					'quantity'     => 1,
+				),
+			),
 			$order
 		);
 
@@ -767,12 +951,24 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 
 		$order = wc_create_order();
 		$item  = new WC_Order_Item_Product();
-		$item->set_props( array( 'product' => $product, 'quantity' => 1, 'subtotal' => 50.00, 'total' => 50.00 ) );
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
 		$item->save();
 		$order->add_item( $item );
 
 		$fee = new WC_Order_Item_Fee();
-		$fee->set_props( array( 'name' => 'Discount', 'total' => -10.00 ) );
+		$fee->set_props(
+			array(
+				'name'  => 'Discount',
+				'total' => -10.00,
+			)
+		);
 		$fee->save();
 		$order->add_item( $fee );
 
@@ -781,7 +977,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$order->save();
 
 		$result = $this->data_utils->validate_preview_line_items(
-			array( array( 'line_item_id' => $fee->get_id(), 'quantity' => 1 ) ),
+			array(
+				array(
+					'line_item_id' => $fee->get_id(),
+					'quantity'     => 1,
+				),
+			),
 			$order
 		);
 
@@ -795,11 +996,19 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	 * @testdox Should build refund preview with correct tax extraction.
 	 */
 	public function test_build_refund_preview_with_tax(): void {
-		$tax_rate_id = WC_Tax::_insert_tax_rate( array(
-			'tax_rate_country' => 'US', 'tax_rate_state' => '', 'tax_rate' => '10.0000',
-			'tax_rate_name' => 'VAT', 'tax_rate_priority' => '1', 'tax_rate_compound' => '0',
-			'tax_rate_shipping' => '1', 'tax_rate_order' => '1', 'tax_rate_class' => '',
-		) );
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
 
 		$order = $this->create_order_with_taxes( array( $tax_rate_id ), 100.00 );
 		$order->set_status( OrderStatus::COMPLETED );
@@ -809,7 +1018,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$item   = reset( $items );
 		$result = $this->data_utils->build_refund_preview(
 			$order,
-			array( array( 'line_item_id' => $item->get_id(), 'quantity' => 1 ) )
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			)
 		);
 
 		$this->assertEquals( '100.00', $result['subtotal'] );
@@ -856,7 +1070,8 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$tax_item = new \WC_Order_Item_Tax();
 		$tax_item->set_rate( $tax_rate_id );
 		$tax_item->set_order_id( $order->get_id() );
-		$tax_item->set_tax_total( 0 ); // Product tax would be here, but we're focusing on shipping.
+		$tax_item->set_tax_total( 0 );
+		// Product tax would be here, but we're focusing on shipping.
 		$tax_item->set_shipping_tax_total( 0 );
 		$tax_item->save();
 		$order->add_item( $tax_item );
