@@ -1117,6 +1117,8 @@ class CartController {
 	 * across {@see validate_cart_items()}, {@see get_remaining_stock_for_product()}, and
 	 * {@see QuantityLimits::get_remaining_stock()} called from `CartItemSchema`.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @param array $cart_items Cart items (as returned by `WC_Cart::get_cart()`).
 	 */
 	public function prime_reserved_stock_for_cart_items( $cart_items ): void {
