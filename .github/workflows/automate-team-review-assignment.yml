@@ -60,22 +60,28 @@ jobs:
         - name: Check if community contribution
           id: check
           uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+          env:
+            PR_USER: ${{ github.event.pull_request.user.login }}
+            ACTION: ${{ github.event.action }}
+            LABEL_NAME: ${{ github.event.label.name }}
           with:
             retries: 2
             script: |
+              const username = process.env.PR_USER;
               const { data: { permission } } = await github.rest.repos.getCollaboratorPermissionLevel( {
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  username: '${{ github.event.pull_request.user.login }}',
+                  username,
               } );
-              const isCommunity = ( permission === 'read' || permission === 'none' );
+              const isCommunity = ( permission === 'read' || permission === 'none' )
+                  && username !== 'gglobalstep'
+                  && username !== 'linear[bot]';
               core.setOutput( 'contributor', isCommunity ? 'yes' : 'no' );
 
               // Community PRs are only assigned when the coderabbit-approved label is added
-              const action = '${{ github.event.action }}';
               const shouldAssignCommunity = isCommunity
-                  && action === 'labeled'
-                  && '${{ github.event.label.name }}' === 'coderabbit-approved';
+                  && process.env.ACTION === 'labeled'
+                  && process.env.LABEL_NAME === 'coderabbit-approved';
               core.setOutput( 'assign_community', shouldAssignCommunity ? 'yes' : 'no' );
 
         - name: Check if reviewers already assigned
