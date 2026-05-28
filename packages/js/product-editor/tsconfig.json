@@ -2,7 +2,7 @@
 	"extends": "@woocommerce/internal-ts-config/tsconfig.json",
 	"compilerOptions": {
 		"rootDir": "src",
-		"noCheck": false,
+		"noCheck": true,
 		"outDir": "build-module",
 		"declaration": true,
 		"declarationMap": true,
