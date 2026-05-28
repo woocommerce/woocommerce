@@ -3,26 +3,28 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { SearchListControl } from '@woocommerce/editor-components/search-list-control';
-import PropTypes from 'prop-types';
 import { withSearchedProducts } from '@woocommerce/block-hocs';
 import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message';
 import { decodeEntities } from '@wordpress/html-entities';
+import type { ProductResponseItem } from '@woocommerce/types';
+import type { ErrorObject } from '@woocommerce/editor-components/error-placeholder';
+import type {
+	SearchListItem,
+	SearchListMessages,
+} from '@woocommerce/editor-components/search-list-control/types';
+import { convertProductResponseItemToSearchItem } from '@woocommerce/utils';
+import type { ComponentType } from 'react';
 
-/**
- * The products control exposes a custom selector for searching and selecting
- * products.
- *
- * @param {Object}   props           Component props.
- * @param {string}   props.error
- * @param {Function} props.onChange  Callback fired when the selected item changes
- * @param {Function} props.onSearch  Callback fired when a search is triggered
- * @param {Array}    props.selected  An array of selected products.
- * @param {Array}    props.products  An array of products to select from.
- * @param {boolean}  props.isLoading Whether or not the products are being loaded.
- * @param {boolean}  props.isCompact Whether or not the control should have compact styles.
- *
- * @return {Function} A functional component.
- */
+interface ProductsControlProps {
+	error: ErrorObject | null;
+	isLoading?: boolean;
+	onSearch?: ( ( search: string ) => void ) | null;
+	products?: ProductResponseItem[];
+	selected?: number[];
+	onChange: ( value: SearchListItem< ProductResponseItem >[] ) => void;
+	isCompact?: boolean;
+}
+
 const ProductsControl = ( {
 	error,
 	onChange,
@@ -31,13 +33,12 @@ const ProductsControl = ( {
 	products = [],
 	isLoading = true,
 	isCompact = false,
-} ) => {
-	const messages = {
+}: ProductsControlProps ): JSX.Element => {
+	const messages: Partial< SearchListMessages > = {
 		clear: __( 'Clear all products', 'woocommerce' ),
-		list: __( 'Products', 'woocommerce' ),
 		noItems: __( "Your store doesn't have any products.", 'woocommerce' ),
 		search: __( 'Search for products to display', 'woocommerce' ),
-		selected: ( n ) =>
+		selected: ( n: number ) =>
 			sprintf(
 				/* translators: %d is the number of selected products. */
 				_n(
@@ -55,12 +56,14 @@ const ProductsControl = ( {
 		return <ErrorMessage error={ error } />;
 	}
 
+	const productList = products.map( convertProductResponseItemToSearchItem );
+
 	return (
 		<SearchListControl
 			className="woocommerce-products"
-			list={ products.map( ( product ) => {
-				const formattedSku = product.sku
-					? ' (' + product.sku + ')'
+			list={ productList.map( ( product ) => {
+				const formattedSku = product.details?.sku
+					? ' (' + product.details.sku + ')'
 					: '';
 				return {
 					...product,
@@ -71,23 +74,23 @@ const ProductsControl = ( {
 			} ) }
 			isCompact={ isCompact }
 			isLoading={ isLoading }
-			selected={ products.filter( ( { id } ) =>
-				selected.includes( id )
+			isSingle={ false }
+			selected={ productList.filter( ( { id } ) =>
+				selected.includes( Number( id ) )
 			) }
-			onSearch={ onSearch }
+			onSearch={ onSearch || undefined }
 			onChange={ onChange }
 			messages={ messages }
 		/>
 	);
 };
 
-ProductsControl.propTypes = {
-	onChange: PropTypes.func.isRequired,
-	onSearch: PropTypes.func,
-	selected: PropTypes.array,
-	products: PropTypes.array,
-	isCompact: PropTypes.bool,
-	isLoading: PropTypes.bool,
-};
+const WrappedProductsControl: ComponentType< {
+	onChange: ( value: SearchListItem< ProductResponseItem >[] ) => void;
+	selected: number[];
+	isCompact?: boolean;
+} > =
+	// @ts-expect-error HOC typing for injected products is narrower than this control's search list item shape.
+	withSearchedProducts( ProductsControl );
 
-export default withSearchedProducts( ProductsControl );
+export default WrappedProductsControl;
