@@ -656,7 +656,7 @@ class WC_Tax {
 
 		// Check if cart has items before proceeding.
 		if ( ! $cart->get_cart() ) {
-			return $standard_tax_class;
+			return null;
 		}
 
 		$cart_tax_classes = $cart->get_cart_item_tax_classes_for_shipping();
