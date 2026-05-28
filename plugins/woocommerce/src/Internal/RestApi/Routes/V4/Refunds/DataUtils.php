@@ -322,11 +322,15 @@ class DataUtils {
 	/**
 	 * Build a refund preview showing authoritative totals and breakdowns.
 	 *
+	 * Callers must invoke {@see validate_preview_line_items()} first — this
+	 * method assumes inputs have been validated and throws on missing items.
+	 *
 	 * @since 10.8.0
 	 *
 	 * @param WC_Order $order      The order being previewed for refund.
 	 * @param array    $line_items Array of line items with 'line_item_id' and 'quantity' keys.
 	 * @return array The structured preview response.
+	 * @throws \InvalidArgumentException When a line_item_id does not resolve to an item on the order.
 	 */
 	public function build_refund_preview( WC_Order $order, array $line_items ): array {
 		$price_decimals = wc_get_price_decimals();
@@ -337,7 +341,9 @@ class DataUtils {
 		foreach ( $line_items as $line_item ) {
 			$item = $order->get_item( $line_item['line_item_id'] );
 			if ( ! $item ) {
-				continue;
+				throw new \InvalidArgumentException(
+					sprintf( 'Line item %d not found on order %d.', (int) $line_item['line_item_id'], $order->get_id() )
+				);
 			}
 
 			/** @var WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item */
