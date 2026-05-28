@@ -171,7 +171,15 @@ if ( wc_tax_enabled() ) {
 				<td class="label"><?php esc_html_e( 'Items Subtotal:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">
-					<?php echo wc_price( $order->get_subtotal(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php
+					$adjust_non_base = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
+					if ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) && ! $adjust_non_base ) {
+						$subtotal_ex_tax = $order->get_subtotal() - $order->get_cart_tax();
+						echo wc_price( $subtotal_ex_tax, array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					} else {
+						echo wc_price( $order->get_subtotal(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					}
+					?>
 				</td>
 			</tr>
 		<?php if ( 0 < $order->get_total_discount() ) : ?>

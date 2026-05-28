@@ -1634,13 +1634,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		if ( $product ) {
 			$order = ArrayUtil::get_value_or_default( $args, 'order' );
-			$total = wc_get_price_excluding_tax(
-				$product,
-				array(
-					'qty'   => $qty,
-					'order' => $order,
-				)
-			);
+
+			if ( 'yes' === get_option( 'woocommerce_prices_include_tax' )
+				&& ! apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
+				$total = (float) $product->get_price() * $qty;
+			} else {
+				$total = wc_get_price_excluding_tax(
+					$product,
+					array(
+						'qty'   => $qty,
+						'order' => $order,
+					)
+				);
+			}
 
 			$default_args = array(
 				'name'         => $product->get_name(),
@@ -1865,19 +1871,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function calculate_taxes( $args = array() ) {
-		if ( array_key_exists( '_adjust_non_base_location_prices', $args ) ) {
-			$adjust_non_base_location_prices = wc_string_to_bool( $args['_adjust_non_base_location_prices'] );
-			unset( $args['_adjust_non_base_location_prices'] );
-		} else {
-			/**
-			 * Filters whether to adjust product prices for non-base tax locations.
-			 *
-			 * @since 2.4.7
-			 *
-			 * @param bool $adjust_non_base_location_prices True by default.
-			 */
-			$adjust_non_base_location_prices = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
-		}
+		/**
+		 * Filters whether to adjust product prices for non-base tax locations.
+		 *
+		 * @since 2.4.7
+		 *
+		 * @param bool $adjust_non_base_location_prices True by default.
+		 */
+		$adjust_non_base_location_prices = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
 
 		do_action( 'woocommerce_order_before_calculate_taxes', $args, $this );
 
@@ -1891,7 +1892,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
 
-		if ( $this->get_prices_include_tax() && ! $adjust_non_base_location_prices ) {
+		if ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) && ! $adjust_non_base_location_prices ) {
 			$calculate_tax_for['prices_include_tax'] = true;
 		}
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
@@ -2070,7 +2071,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Calculate taxes for items, shipping, discounts. Note; this also triggers save().
 		if ( $and_taxes ) {
-			$this->calculate_taxes( array( '_adjust_non_base_location_prices' => $adjust_non_base_location_prices ) );
+			$this->calculate_taxes();
 		}
 
 		// Re-read cart totals after calculate_taxes().
@@ -2092,7 +2093,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Fixed end-price orders keep inclusive item totals; compare net values and add tax back below.
-		if ( $this->get_prices_include_tax() && ! $adjust_non_base_location_prices ) {
+		if ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) && ! $adjust_non_base_location_prices ) {
 			$cart_subtotal = $cart_subtotal - $cart_subtotal_tax;
 			$cart_total    = $cart_total - $cart_total_tax;
 		}
