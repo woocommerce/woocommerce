@@ -871,7 +871,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	public function get_download_permissions_granted( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
 		$order    = wc_get_order( $order_id );
-		return $order->get_download_permissions_granted();
+		return $order ? $order->get_download_permissions_granted() : false;
 	}
 
 	/**
@@ -898,7 +898,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	public function get_recorded_sales( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
 		$order    = wc_get_order( $order_id );
-		return $order->get_recorded_sales();
+		return $order ? $order->get_recorded_sales() : false;
 	}
 
 	/**
@@ -952,7 +952,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	public function get_email_sent( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
 		$order    = wc_get_order( $order_id );
-		return $order->get_new_order_email_sent();
+		return $order ? $order->get_new_order_email_sent() : false;
 	}
 
 	/**
@@ -1004,7 +1004,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	public function get_stock_reduced( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
 		$order    = wc_get_order( $order_id );
-		return $order->get_order_stock_reduced();
+		return $order ? $order->get_order_stock_reduced() : false;
 	}
 
 	/**
