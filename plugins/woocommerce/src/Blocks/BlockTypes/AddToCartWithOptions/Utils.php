@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Enums\ProductType;
-use WP_Block;
 
 /**
  * Utility methods used for the Add to Cart + Options block.
