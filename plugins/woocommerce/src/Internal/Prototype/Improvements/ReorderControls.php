@@ -41,7 +41,7 @@ class ReorderControls {
 
 	/**
 	 * Add a "Show reorder controls" checkbox to Screen Options.
-	 * The checkbox writes a cookie directly and reloads — no Apply button needed.
+	 * Toggles arrow visibility instantly via JS; cookie persists state across page loads.
 	 *
 	 * @param string     $settings Existing screen settings HTML.
 	 * @param \WP_Screen $screen   Current screen.
@@ -62,9 +62,18 @@ class ReorderControls {
 		$settings .= '</label></fieldset>';
 		$settings .= '<script>
 ( function () {
+	var SELECTOR = ".postbox-header .handle-order-higher, .postbox-header .handle-order-lower";
+	var COOKIE   = "' . esc_js( $cookie_key ) . '";
+
+	function setVisible( show ) {
+		document.querySelectorAll( SELECTOR ).forEach( function ( el ) {
+			el.style.display = show ? "" : "none";
+		} );
+		document.cookie = COOKIE + "=" + ( show ? "1" : "0" ) + ";path=/;max-age=86400";
+	}
+
 	document.getElementById( "wc-proto-reorder-controls" ).addEventListener( "change", function () {
-		document.cookie = "' . esc_js( $cookie_key ) . '=" + ( this.checked ? "1" : "0" ) + ";path=/;max-age=86400";
-		location.reload();
+		setVisible( this.checked );
 	} );
 }() );
 </script>';
@@ -73,7 +82,8 @@ class ReorderControls {
 	}
 
 	/**
-	 * Inject CSS to hide reorder arrows unless the user opted in.
+	 * Inject initial CSS to hide reorder arrows on page load when cookie is not set.
+	 * JS takes over from there without requiring a reload.
 	 */
 	public static function maybe_hide_controls(): void {
 		$screen = get_current_screen();
@@ -82,7 +92,7 @@ class ReorderControls {
 		}
 
 		if ( ! self::is_showing() ) {
-			echo '<style>.postbox-header .handle-order-higher, .postbox-header .handle-order-lower { display: none !important; }</style>';
+			echo '<style id="wc-proto-reorder-hide">.postbox-header .handle-order-higher, .postbox-header .handle-order-lower { display: none !important; }</style>';
 		}
 	}
 }
