@@ -7891,12 +7891,6 @@ parameters:
 			path: includes/admin/settings/views/html-settings-tax.php
 
 		-
-			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/settings/views/html-webhooks-edit.php
-
-		-
 			message: '#^Parameter \#1 \$text of function esc_html expects string, \(float\|int\) given\.$#'
 			identifier: argument.type
 			count: 1

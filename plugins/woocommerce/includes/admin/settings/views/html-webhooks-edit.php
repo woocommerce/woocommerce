@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<input type="hidden" name="webhook_id" value="<?php echo esc_attr( $webhook->get_id() ); ?>" />
+<input type="hidden" name="webhook_id" value="<?php echo esc_attr( (string) $webhook->get_id() ); ?>" />
 
 <div id="webhook-options" class="settings-panel">
 	<h2><?php esc_html_e( 'Webhook data', 'woocommerce' ); ?></h2>
