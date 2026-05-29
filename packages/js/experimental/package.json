@@ -20,9 +20,17 @@
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
+	"exports": {
+		".": {
+			"source": "./src/index.js",
+			"types": "./build-types/index.d.ts",
+			"import": "./build-module/index.js",
+			"require": "./build/index.js"
+		}
+	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
-	"types": "build-types",
+	"types": "build-types/index.d.ts",
 	"react-native": "src/index",
 	"files": [
 		"build",
@@ -49,7 +57,14 @@
 		"react-transition-group": "^4.4.5"
 	},
 	"publishConfig": {
-		"access": "public"
+		"access": "public",
+		"exports": {
+			".": {
+				"types": "./build-types/index.d.ts",
+				"import": "./build-module/index.js",
+				"require": "./build/index.js"
+			}
+		}
 	},
 	"devDependencies": {
 		"@babel/core": "7.25.7",
@@ -88,11 +103,11 @@
 	},
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
-		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project": "pnpm --stream --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "NODE_ENV=production webpack",
 		"build:project:esm": "node build.mjs",
 		"build:publish:project": "pnpm --if-present '/^build:publish:project:.*$/'",
-		"build:publish:project:cjs": "node build.mjs --cjs",
+		"build:publish:project:cjs": "node build.mjs --commonjs",
 		"build:publish:project:types": "tsc --build --emitDeclarationOnly",
 		"build:publish:project:deps": "pnpm build",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
