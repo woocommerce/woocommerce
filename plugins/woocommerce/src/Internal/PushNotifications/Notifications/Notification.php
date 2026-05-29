@@ -25,6 +25,7 @@ abstract class Notification {
 	const NOTIFICATION_CLASSES = array(
 		'store_order'  => NewOrderNotification::class,
 		'store_review' => NewReviewNotification::class,
+		'store_stock'  => StockNotification::class,
 	);
 
 	/**
@@ -139,7 +140,13 @@ abstract class Notification {
 			throw new InvalidArgumentException( sprintf( 'Unknown notification type: %s', $type ) );
 		}
 
-		return new $class( $resource_id );
+		$instance = new $class( $resource_id );
+
+		if ( method_exists( $instance, 'hydrate' ) ) {
+			$instance->hydrate( $data );
+		}
+
+		return $instance;
 	}
 
 	/**

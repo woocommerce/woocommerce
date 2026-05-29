@@ -33,9 +33,8 @@ export type ViewedFrom =
  * should be able to query by any of these regardless of which surface fired
  * the event.
  *
- * Each event adds its own extension fields on top — see the individual call
- * sites (`use-update-banner.ts`, `settings-email-listing-update-cell.tsx`,
- * and the PHP tracker class) for the per-event keys.
+ * Each event adds its own extension fields on top. See the individual call
+ * sites for the per-event keys.
  */
 export interface SharedTracksPayload {
 	email_id: string;

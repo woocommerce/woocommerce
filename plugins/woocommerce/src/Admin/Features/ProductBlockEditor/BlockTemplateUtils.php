@@ -6,6 +6,8 @@ use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
 /**
  * Utils for block templates.
+ *
+ * @deprecated 10.9.0 Product editor extension APIs will be removed in WooCommerce 11.0.
  */
 class BlockTemplateUtils {
 	/**

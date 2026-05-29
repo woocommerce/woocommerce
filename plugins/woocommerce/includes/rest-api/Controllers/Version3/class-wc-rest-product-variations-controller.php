@@ -1179,6 +1179,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			$this->exclude_status = array();
 		}
 
+		$attachment_ids = array_filter( array_map( fn( $variation ) => (int) $variation->get_image_id(), $result['objects'] ) );
+		if ( ! empty( $attachment_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $attachment_ids );
+		}
+
 		return $result;
 	}
 
