@@ -54,14 +54,15 @@ $dialog-padding: 20px;
 			height: 100%;
 		}
 
-		img {
+		img,
+		video {
 			height: 100%;
 		}
 
-		&.wc-block-components-product-image--aspect-ratio-auto img {
+		&.wc-block-components-product-image--aspect-ratio-auto img,
+		&.wc-block-components-product-image--aspect-ratio-auto video {
 			object-fit: contain !important;
 		}
-
 	}
 
 	:where(.wc-block-woocommerce-product-gallery-large-image__image) {
@@ -77,6 +78,13 @@ $dialog-padding: 20px;
 		&:where(.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom) {
 			cursor: zoom-in;
 		}
+	}
+
+	:where(.wc-block-woocommerce-product-gallery-large-image__video) {
+		height: 100%;
+		max-width: 100%;
+		object-fit: contain;
+		width: 100%;
 	}
 
 	:where(.wc-block-product-gallery-large-image__inner-blocks) {
@@ -251,6 +259,20 @@ $dialog-padding: 20px;
 
 :where(.wc-block-product-gallery-thumbnails__thumbnail) {
 	display: flex;
+	position: relative;
+}
+
+:where(.wc-block-product-gallery-thumbnails__thumbnail--video)::after {
+	content: "\25B6";
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 1;
+	color: var(--wp--preset--color--base, #fff);
+	line-height: 1;
+	text-shadow: 0 0 0.25em rgb(0 0 0 / 80%);
+	pointer-events: none;
 }
 
 .wc-block-product-gallery-thumbnails__thumbnail[hidden] {
@@ -347,7 +369,8 @@ $dialog-padding: 20px;
 		height: calc(100vh - 64px - $admin-bar-height);
 	}
 
-	img {
+	img,
+	video {
 		max-width: 1600px;
 		width: 100%;
 		height: auto;

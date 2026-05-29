@@ -53716,12 +53716,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGalleryLargeImage\:\:get_main_images_html\(\) should return array but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGalleryLargeImage\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

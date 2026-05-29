@@ -36,6 +36,27 @@ const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
 	isDisabledNext: imageIndex === totalImages - 1,
 } );
 
+const syncVideoElementPlayback = (
+	video: HTMLVideoElement,
+	selectedImageId: number,
+	isDialogOpen: boolean,
+	videoLocation?: ProductGalleryContext[ 'videoLocation' ]
+) => {
+	const imageId = Number( video.getAttribute( 'data-image-id' ) ?? 0 );
+	const shouldPlayInDialog = videoLocation === 'dialog' && isDialogOpen;
+	const shouldPlayInGallery =
+		videoLocation === 'gallery' &&
+		selectedImageId === imageId &&
+		! isDialogOpen;
+	const shouldPlay = shouldPlayInDialog || shouldPlayInGallery;
+
+	if ( shouldPlay ) {
+		void video.play().catch( () => undefined );
+	} else {
+		video.pause();
+	}
+};
+
 /** Read the `products` map from the WooCommerce iAPI config (or `{}`). */
 const getConfiguredProducts = () =>
 	( getConfig( 'woocommerce' ) as ProductGalleryConfig )?.products || {};
@@ -237,7 +258,7 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	}
 
 	const thumbnailElement = galleryContainer.querySelector(
-		`${ SELECTORS.thumbnail } ${ SELECTORS.imgByImageId( imageId ) }`
+		`${ SELECTORS.thumbnail } ${ SELECTORS.elementByImageId( imageId ) }`
 	);
 
 	if ( ! thumbnailElement ) {
@@ -544,7 +565,7 @@ const productGallery = {
 				);
 				if ( galleryContainer ) {
 					const selectedImage = galleryContainer.querySelector(
-						SELECTORS.imgByImageId( selectedImageId )
+						SELECTORS.elementByImageId( selectedImageId )
 					) as HTMLElement;
 					if ( selectedImage ) {
 						selectedImage.focus( { preventScroll: true } );
@@ -723,7 +744,11 @@ const productGallery = {
 			const { selectedImageId, isDialogOpen } = getContext();
 			const { ref: dialogRef } = getElement() || {};
 
-			if ( isDialogOpen && dialogRef instanceof HTMLElement ) {
+			if ( ! ( dialogRef instanceof HTMLElement ) ) {
+				return;
+			}
+
+			if ( isDialogOpen ) {
 				dialogRef.focus();
 				const selectedImage = dialogRef.querySelector(
 					SELECTORS.elementByImageId( selectedImageId )
@@ -742,6 +767,24 @@ const productGallery = {
 						32; // Arbitrary value for the header height.
 				}
 			}
+		},
+		syncVideoPlayback: () => {
+			const element = getElement()?.ref;
+
+			if ( ! ( element instanceof HTMLVideoElement ) ) {
+				return;
+			}
+
+			toggleImageVisibility( element );
+
+			const { selectedImageId, isDialogOpen, videoLocation } =
+				getContext();
+			syncVideoElementPlayback(
+				element,
+				selectedImageId,
+				isDialogOpen,
+				videoLocation
+			);
 		},
 		/** Per-image `data-wp-watch` callback that toggles visibility from `imageData`. */
 		toggleImageVisibility: () => {

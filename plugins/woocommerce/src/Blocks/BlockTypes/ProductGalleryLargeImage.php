@@ -85,13 +85,13 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		foreach ( $block->inner_blocks as $inner_block ) {
 			if ( 'woocommerce/product-image' === $inner_block->name ) {
-				// Product Image requires special handling because we need to render it once for each image.
-				$images_html .= $this->get_main_images_html( $block->context, $product, $inner_block );
+				// Product Image requires special handling because we need to render it once for each media item.
+				$images_html .= $this->get_main_media_html( $block->context, $product, $inner_block );
 			} else {
-				// For Next/Previous Buttons block, check if we have more than one image, otherwise don't render it.
+				// For Next/Previous Buttons block, check if we have more than one media item, otherwise don't render it.
 				if ( 'woocommerce/product-gallery-large-image-next-previous' === $inner_block->name ) {
-					$product_gallery_image_count = ProductGalleryUtils::get_product_gallery_image_count( $product );
-					if ( $product_gallery_image_count <= 1 ) {
+					$product_gallery_media_count = ProductGalleryUtils::get_product_gallery_media_count( $product );
+					if ( $product_gallery_media_count <= 1 ) {
 						continue;
 					}
 				}
@@ -114,7 +114,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		ob_start();
 		?>
 			<div class="wc-block-product-gallery-large-image wp-block-woocommerce-product-gallery-large-image">
-				<?php // No need to use wp_kses here because the image HTML is built internally. ?>
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo $images_html; ?>
 				<div class="wc-block-product-gallery-large-image__inner-blocks">
@@ -192,15 +191,15 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	}
 
 	/**
-	 * Get the main images html code. The first element of the array contains the HTML of the first image that is visible, the second element contains the HTML of the other images that are hidden.
+	 * Get the main media HTML.
 	 *
 	 * @param array       $context The block context.
 	 * @param \WC_Product $product The product object.
 	 * @param WP_Block    $inner_block The inner block object.
-	 * @return array
+	 * @return string
 	 */
-	private function get_main_images_html( $context, $product, $inner_block ) {
-		$image_data = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_single' );
+	private function get_main_media_html( $context, $product, $inner_block ) {
+		$media_data = ProductGalleryUtils::get_product_gallery_media_data( $product, 'woocommerce_single' );
 
 		ob_start();
 		?>
@@ -212,19 +211,25 @@ class ProductGalleryLargeImage extends AbstractBlock {
 				tabindex="0"
 				aria-roledescription="carousel"
 			>
-				<?php foreach ( $image_data as $index => $image ) : ?>
+				<?php foreach ( $media_data as $index => $media ) : ?>
 					<li
 						class="wc-block-product-gallery-large-image__wrapper"
 					>
 						<?php
-							$image_html = (
-								new WP_Block(
-									$inner_block->parsed_block,
-									array_merge( $context, array( 'imageId' => $image['id'] ) )
-								)
-							)->render( array( 'dynamic' => true ) );
+						if ( 'video' === ( $media['media_type'] ?? '' ) ) {
+							echo $this->get_video_html( $media, $context, $inner_block->parsed_block['attrs'] ?? array() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							continue;
+						}
 
-							echo $this->update_single_image( $image_html, $context, $index ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						$image_html = (
+							new WP_Block(
+								$inner_block->parsed_block,
+								array_merge( $context, array( 'imageId' => $media['id'] ) )
+							)
+						)->render( array( 'dynamic' => true ) );
+
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo $this->update_single_image( $image_html, $context, $index );
 						?>
 					</li>
 				<?php endforeach; ?>
@@ -233,6 +238,96 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		$template = ob_get_clean();
 
 		return wp_interactivity_process_directives( $template );
+	}
+
+	/**
+	 * Get video HTML for the product gallery large image area.
+	 *
+	 * @param array $media                    Video media data.
+	 * @param array $context                  The block context.
+	 * @param array $product_image_attributes Product Image block attributes.
+	 * @return string
+	 */
+	private function get_video_html( $media, $context, $product_image_attributes = array() ) {
+		$attrs = ProductGalleryUtils::get_video_attributes( $media, 'gallery' );
+
+		if ( empty( $attrs ) ) {
+			return '';
+		}
+
+		$aspect_ratio  = $this->get_product_image_aspect_ratio( $product_image_attributes );
+		$video_class   = 'wc-block-woocommerce-product-gallery-large-image__image ' .
+			'wc-block-woocommerce-product-gallery-large-image__video';
+		$attrs         = array_merge(
+			$attrs,
+			array(
+				'class'                  => $video_class,
+				'data-wp-on--touchend'   => 'actions.onTouchEnd',
+				'data-wp-on--touchmove'  => 'actions.onTouchMove',
+				'data-wp-on--touchstart' => 'actions.onTouchStart',
+				'draggable'              => 'false',
+				'style'                  => $this->get_video_style( $product_image_attributes, $aspect_ratio ),
+				'tabindex'               => '-1',
+			)
+		);
+		$wrapper_attrs = array(
+			'class' => 'wc-block-components-product-image wc-block-grid__product-image ' .
+				'wc-block-components-product-image--aspect-ratio-' . str_replace( '/', '-', $aspect_ratio ),
+		);
+
+		if ( ! empty( $context['fullScreenOnClick'] ) ) {
+			$attrs['data-wp-on--click'] = 'actions.openDialog';
+		}
+
+		$video_html = ProductGalleryUtils::get_video_html( $attrs );
+
+		return '<div ' . wc_implode_html_attributes( $wrapper_attrs ) . '>' . $video_html . '</div>';
+	}
+
+	/**
+	 * Get the Product Image aspect ratio applied to gallery videos.
+	 *
+	 * @param array $product_image_attributes Product Image block attributes.
+	 * @return string
+	 */
+	private function get_product_image_aspect_ratio( $product_image_attributes ) {
+		$aspect_ratio = $product_image_attributes['aspectRatio'] ?? $product_image_attributes['style']['dimensions']['aspectRatio'] ?? 'auto';
+
+		return is_string( $aspect_ratio ) && '' !== $aspect_ratio ? $aspect_ratio : 'auto';
+	}
+
+	/**
+	 * Get inline styles for gallery videos from Product Image attributes.
+	 *
+	 * @param array  $product_image_attributes Product Image block attributes.
+	 * @param string $aspect_ratio             Product Image aspect ratio.
+	 * @return string
+	 */
+	private function get_video_style( $product_image_attributes, $aspect_ratio ) {
+		$styles = array();
+		$scale  = isset( $product_image_attributes['scale'] ) ? $product_image_attributes['scale'] : 'cover';
+		$scale  = in_array( $scale, array( 'cover', 'contain', 'fill' ), true ) ? $scale : 'cover';
+		$scale  = 'auto' === $aspect_ratio ? 'contain' : $scale;
+
+		if ( ! empty( $product_image_attributes['height'] ) ) {
+			$styles[] = sprintf( 'height:%s', $product_image_attributes['height'] );
+		}
+
+		if ( ! empty( $product_image_attributes['width'] ) ) {
+			$styles[] = sprintf( 'width:%s', $product_image_attributes['width'] );
+		}
+
+		$styles[] = sprintf( 'object-fit:%s', $scale );
+
+		if ( 'auto' !== $aspect_ratio ) {
+			$styles[] = sprintf( 'aspect-ratio:%s', $aspect_ratio );
+		}
+
+		if ( ! empty( $product_image_attributes['style']['dimensions']['minHeight'] ) ) {
+			$styles[] = sprintf( 'min-height:%s', $product_image_attributes['style']['dimensions']['minHeight'] );
+		}
+
+		return implode( ';', $styles ) . ';';
 	}
 
 	/**
