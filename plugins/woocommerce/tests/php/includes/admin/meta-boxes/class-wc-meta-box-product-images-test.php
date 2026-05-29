@@ -32,7 +32,7 @@ class WC_Meta_Box_Product_Images_Test extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		$_POST = $this->original_post;
+		$_POST = $this->original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		parent::tearDown();
 	}
@@ -116,7 +116,7 @@ class WC_Meta_Box_Product_Images_Test extends WC_Unit_Test_Case {
 	 * @return WC_Product
 	 */
 	private function save_product_images( WC_Product $product, array $post_data ): WC_Product {
-		$_POST = $post_data;
+		$_POST = $post_data; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		WC_Meta_Box_Product_Images::save( $product->get_id(), get_post( $product->get_id() ) );
 
