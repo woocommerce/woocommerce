@@ -23,6 +23,7 @@ use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerIdPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerSwap;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\DefaultPaymentMethodPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\ShippingPolicy;
+use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\TaxLocationPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Routes\Controller;
 use WC_Customer;
 use Automattic\WooCommerce\StoreApi\RoutesController;
@@ -39,6 +40,7 @@ use WC_Product_Simple;
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerSwap
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\DefaultPaymentMethodPolicy
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\ShippingPolicy
+ * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\TaxLocationPolicy
  */
 class CheckoutIntegrationTest extends ControllerTestCase {
 
@@ -83,6 +85,7 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		( new CustomerIdPolicy() )->register();
 		( new DefaultPaymentMethodPolicy() )->register();
 		( new ShippingPolicy() )->register();
+		( new TaxLocationPolicy() )->register();
 		( new CustomerSwap() )->register();
 
 		$this->admin_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
@@ -110,6 +113,8 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		remove_all_filters( 'woocommerce_store_api_order_customer_id' );
 		remove_all_filters( 'woocommerce_store_api_order_default_payment_method' );
 		remove_all_filters( 'woocommerce_cart_needs_shipping' );
+		remove_all_filters( 'woocommerce_customer_taxable_address' );
+		remove_all_filters( 'woocommerce_pos_tax_location' );
 		remove_all_filters( 'rest_pre_dispatch' );
 		Context::set_test_override( null );
 		WC()->customer = $this->original_customer;
@@ -336,6 +341,112 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		$this->assertSame( '', $order->get_shipping_address_1() );
 		$this->assertCount( 0, $order->get_items( 'shipping' ), 'In-person POS sales must not carry a shipping line.' );
 		$this->assertSame( 0.0, (float) $order->get_shipping_total() );
+	}
+
+	/**
+	 * Tax must compute to the store's location for POS even though the order
+	 * itself carries no billing/shipping address. Regression for:
+	 * "totals are broken - it doesn't calculate taxes at all" caused by the
+	 * Store API's tax pipeline reading from wc()->customer (which we
+	 * replace with a guest) and getting an empty taxable address back, so
+	 * no rate matched.
+	 *
+	 * TaxLocationPolicy hooks woocommerce_customer_taxable_address for POS
+	 * to return store base address regardless of customer state, restoring
+	 * the in-person-retail rule that tax follows the register's location.
+	 *
+	 * @testdox POS checkout applies the store's tax rate even when the order has no address.
+	 */
+	public function test_checkout_applies_store_location_tax_when_order_address_is_blank(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$store_country  = 'US';
+		$store_state    = 'CA';
+		$store_postcode = '94103';
+		$store_city     = 'San Francisco';
+
+		$original_options = array(
+			'woocommerce_default_country'    => get_option( 'woocommerce_default_country' ),
+			'woocommerce_store_postcode'     => get_option( 'woocommerce_store_postcode' ),
+			'woocommerce_store_city'         => get_option( 'woocommerce_store_city' ),
+			'woocommerce_calc_taxes'         => get_option( 'woocommerce_calc_taxes' ),
+			'woocommerce_tax_based_on'       => get_option( 'woocommerce_tax_based_on' ),
+			'woocommerce_prices_include_tax' => get_option( 'woocommerce_prices_include_tax' ),
+		);
+
+		update_option( 'woocommerce_default_country', "{$store_country}:{$store_state}" );
+		update_option( 'woocommerce_store_postcode', $store_postcode );
+		update_option( 'woocommerce_store_city', $store_city );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		// "billing" specifically — the failure mode being guarded against is
+		// the Store API reading the (empty for POS) customer billing address.
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
+		$tax_rate_id = \WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => $store_country,
+				'tax_rate_state'    => $store_state,
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'POS Test Tax',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 0,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		try {
+			$add_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/cart/add-item' );
+			$add_request->set_body_params(
+				array(
+					'id'       => $this->product->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$add_response = rest_get_server()->dispatch( $add_request );
+			$this->assertSame( 201, $add_response->get_status() );
+
+			$cart_token = '';
+			foreach ( $add_response->get_headers() as $key => $value ) {
+				if ( strtolower( $key ) === 'cart-token' ) {
+					$cart_token = (string) $value;
+					break;
+				}
+			}
+			$this->assertNotEmpty( $cart_token );
+
+			$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
+			$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );
+			$checkout_response = rest_get_server()->dispatch( $checkout_request );
+
+			$this->assertSame(
+				200,
+				$checkout_response->get_status(),
+				'Checkout failed: ' . wp_json_encode( $checkout_response->get_data() )
+			);
+
+			$order = wc_get_order( $checkout_response->get_data()['order_id'] );
+
+			$this->assertSame( '', $order->get_billing_country(), 'POS order should still carry no billing address.' );
+			$this->assertGreaterThan(
+				0.0,
+				(float) $order->get_total_tax(),
+				'POS order should carry tax computed from the store location.'
+			);
+			// Product is $25, tax rate is 10% — expect exactly $2.50 of tax.
+			$this->assertEqualsWithDelta( 2.50, (float) $order->get_total_tax(), 0.01 );
+		} finally {
+			\WC_Tax::_delete_tax_rate( $tax_rate_id );
+			foreach ( $original_options as $opt => $value ) {
+				if ( false === $value ) {
+					delete_option( $opt );
+				} else {
+					update_option( $opt, $value );
+				}
+			}
+		}
 	}
 
 	/**

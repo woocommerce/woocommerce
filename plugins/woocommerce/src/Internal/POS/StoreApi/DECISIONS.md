@@ -195,6 +195,50 @@ Option 1 is the cleaner long-term shape. The integration test in
 this spike uses a temporary `PosCheckoutTestGateway` defined inline
 to prove the route works end-to-end.
 
+## Tax location for POS uses store base, not POS physical address
+
+For in-person retail, tax follows the register's location — not the
+customer's. `TaxLocationPolicy` enforces this by filtering
+`woocommerce_customer_taxable_address` for POS to return the store's
+base address, so tax computation produces the correct rate even when
+the order itself carries no billing/shipping address.
+
+**The conceptually correct source would be the POS-specific physical
+address** at Settings → Point of Sale → Physical address. But that
+setting (`woocommerce_pos_store_address`) is currently stored as a
+single free-text textarea — it can't be safely parsed into the
+structured `country` / `state` / `postcode` / `city` tuple required
+for tax rate lookup (international address formats are inconsistent
+enough that parsing produces wrong jurisdictions). The setting is
+used for receipt display only.
+
+Store base address (Settings → General → Store Address) IS structured
+and exists everywhere, so the policy uses it as the default. For
+single-location merchants that's the right answer because their POS
+register is at the store's physical location.
+
+The policy wraps the default in a `woocommerce_pos_tax_location`
+filter so that follow-up work which adds structured per-register
+address fields can plug them in without re-architecting:
+
+```php
+add_filter( 'woocommerce_pos_tax_location', function ( $location, $customer ) {
+    $register = get_option( 'woocommerce_pos_structured_address' );
+    return $register ? array(
+        $register['country'],
+        $register['state'],
+        $register['postcode'],
+        $register['city'],
+    ) : $location;
+}, 10, 2 );
+```
+
+The merchant's `woocommerce_tax_based_on` setting (base/billing/
+shipping) is intentionally bypassed for POS — for in-person sales the
+answer is always "where the register is," not the configured
+online-checkout default. Rate tables themselves continue to govern
+which rate applies.
+
 ## What this spike deliberately does NOT include
 
 - **More than two routes.** `cart/add-item` and `/checkout` are the
