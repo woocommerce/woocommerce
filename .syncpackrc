@@ -51,8 +51,6 @@
 				"@typescript-eslint/*",
 				"@wordpress/a11y",
 				"@wordpress/autop",
-				"@wordpress/interactivity",
-				"@wordpress/interactivity-router",
 				"@wordpress/prettier-config",
 				"@wordpress/private-apis",
 				"@wordpress/scripts",
