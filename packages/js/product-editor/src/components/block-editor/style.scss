@@ -28,6 +28,23 @@
 		text-decoration: none;
 	}
 
+	&__deprecation-notice {
+		box-sizing: border-box;
+		max-width: 650px;
+		margin: 0 calc(2 * $gap) $gap-large;
+		background-color: #fff8e5;
+		border-left: 4px solid #b26200;
+
+		@include breakpoint(">782px") {
+			margin-left: auto;
+			margin-right: auto;
+		}
+	}
+
+	&__deprecation-notice-action {
+		margin-top: $gap-small;
+	}
+
 	/*
 	 * Override default block margins and layout applied for themes without a theme.json file.
 	 *

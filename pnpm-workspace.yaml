@@ -33,6 +33,8 @@ catalogs:
         '@wordpress/hooks': 4.19.1
         '@wordpress/html-entities': 4.19.1
         '@wordpress/i18n': 5.19.1
+        '@wordpress/interactivity': 6.19.1
+        '@wordpress/interactivity-router': 2.19.1
         '@wordpress/icons': 10.19.1
         '@wordpress/interface': 9.4.4
         '@wordpress/is-shallow-equal': 5.19.1
