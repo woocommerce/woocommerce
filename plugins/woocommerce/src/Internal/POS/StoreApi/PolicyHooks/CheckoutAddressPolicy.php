@@ -38,26 +38,12 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 class CheckoutAddressPolicy implements RegisterHooksInterface {
 
 	/**
-	 * Register hooks.
+	 * Register hooks. No-op on non-POS requests.
 	 */
 	public function register(): void {
-		add_filter( 'woocommerce_store_api_validate_addresses', array( $this, 'allow_missing_address_for_pos' ) );
-	}
-
-	/**
-	 * Return false when the current request is a POS request, otherwise
-	 * pass through the original value.
-	 *
-	 * @param bool $validate Original value from the filter chain.
-	 * @return bool
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function allow_missing_address_for_pos( bool $validate ): bool {
-		if ( Context::is_pos_request() ) {
-			return false;
+		if ( ! Context::is_pos_request() ) {
+			return;
 		}
-
-		return $validate;
+		add_filter( 'woocommerce_store_api_validate_addresses', '__return_false' );
 	}
 }

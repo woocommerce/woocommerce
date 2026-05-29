@@ -15,9 +15,9 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
  * Swaps WC_Session_Handler for POSSessionHandler on POS Store API requests.
  *
  * Lives in PolicyHooks/ alongside other request-context-aware filter wiring.
- * The filter is registered unconditionally; the swap itself is gated on
- * {@see Context::is_pos_request()} so non-POS requests pay only a single
- * URI check.
+ * Registration itself is gated on {@see Context::is_pos_request()}, so the
+ * filter is installed only when the current request is POS. The callback
+ * therefore needs no per-invocation context check.
  *
  * @internal Just for internal use.
  *
@@ -29,22 +29,22 @@ class SessionHandlerSwap implements RegisterHooksInterface {
 	 * Register hooks.
 	 */
 	public function register(): void {
-		add_filter( 'woocommerce_session_handler', array( $this, 'maybe_swap_session_handler' ) );
+		if ( ! Context::is_pos_request() ) {
+			return;
+		}
+		add_filter( 'woocommerce_session_handler', array( $this, 'swap_session_handler' ) );
 	}
 
 	/**
-	 * Return POSSessionHandler when the current request is POS.
+	 * Return the POS session handler.
 	 *
 	 * @param string $handler Class name supplied by the previous filter or default.
 	 * @return string
 	 *
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
-	public function maybe_swap_session_handler( string $handler ): string {
-		if ( Context::is_pos_request() ) {
-			return POSSessionHandler::class;
-		}
-
-		return $handler;
+	public function swap_session_handler( string $handler ): string {
+		unset( $handler );
+		return POSSessionHandler::class;
 	}
 }

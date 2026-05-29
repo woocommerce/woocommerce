@@ -34,26 +34,13 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 class StockPolicy implements RegisterHooksInterface {
 
 	/**
-	 * Register hooks.
+	 * Register hooks. No-op on non-POS requests.
 	 */
 	public function register(): void {
-		add_filter( 'woocommerce_product_is_in_stock', array( $this, 'allow_oversell_for_pos' ) );
-		add_filter( 'woocommerce_variation_is_in_stock', array( $this, 'allow_oversell_for_pos' ) );
-	}
-
-	/**
-	 * Force is_in_stock to true for POS requests.
-	 *
-	 * @param bool $is_in_stock Original value.
-	 * @return bool
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function allow_oversell_for_pos( bool $is_in_stock ): bool {
-		if ( Context::is_pos_request() ) {
-			return true;
+		if ( ! Context::is_pos_request() ) {
+			return;
 		}
-
-		return $is_in_stock;
+		add_filter( 'woocommerce_product_is_in_stock', '__return_true' );
+		add_filter( 'woocommerce_variation_is_in_stock', '__return_true' );
 	}
 }

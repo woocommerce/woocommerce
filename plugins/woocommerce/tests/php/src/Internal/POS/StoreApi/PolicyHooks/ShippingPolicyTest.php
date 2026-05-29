@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\ShippingPolicy;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for ShippingPolicy.
+ * Tests for the POS Shipping policy hook.
  *
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\ShippingPolicy
  */
@@ -21,33 +21,42 @@ class ShippingPolicyTest extends WC_Unit_Test_Case {
 	 */
 	private $sut;
 
+	/**
+	 * Set up.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new ShippingPolicy();
 	}
 
+	/**
+	 * Tear down.
+	 */
 	public function tearDown(): void {
+		remove_filter( 'woocommerce_cart_needs_shipping', '__return_false' );
 		Context::set_test_override( null );
 		parent::tearDown();
 	}
 
 	/**
-	 * @testdox no_shipping_for_pos passes the original value through outside POS context.
+	 * @testdox register() attaches the needs-shipping opt-out inside POS context.
 	 */
-	public function test_passthrough_outside_pos_context(): void {
-		Context::set_test_override( false );
+	public function test_register_attaches_filter_in_pos_context(): void {
+		Context::set_test_override( true );
 
-		$this->assertTrue( $this->sut->no_shipping_for_pos( true ) );
-		$this->assertFalse( $this->sut->no_shipping_for_pos( false ) );
+		$this->sut->register();
+
+		$this->assertNotFalse( has_filter( 'woocommerce_cart_needs_shipping', '__return_false' ) );
 	}
 
 	/**
-	 * @testdox no_shipping_for_pos returns false inside POS context.
+	 * @testdox register() does not attach the filter outside POS context.
 	 */
-	public function test_returns_false_inside_pos_context(): void {
-		Context::set_test_override( true );
+	public function test_register_skips_filter_outside_pos_context(): void {
+		Context::set_test_override( false );
 
-		$this->assertFalse( $this->sut->no_shipping_for_pos( true ) );
-		$this->assertFalse( $this->sut->no_shipping_for_pos( false ) );
+		$this->sut->register();
+
+		$this->assertFalse( has_filter( 'woocommerce_cart_needs_shipping', '__return_false' ) );
 	}
 }

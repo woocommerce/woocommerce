@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutPaymentMeth
 use WC_Unit_Test_Case;
 
 /**
- * Tests for the POS checkout-payment-method policy hook.
+ * Tests for the POS Checkout Payment Method policy hook.
  *
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutPaymentMethodPolicy
  */
@@ -30,30 +30,33 @@ class CheckoutPaymentMethodPolicyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Reset POS context override.
+	 * Tear down.
 	 */
 	public function tearDown(): void {
+		remove_filter( 'woocommerce_store_api_checkout_require_payment_method', '__return_false' );
 		Context::set_test_override( null );
 		parent::tearDown();
 	}
 
 	/**
-	 * @testdox allow_deferred_for_pos returns the original value outside POS context.
+	 * @testdox register() attaches the deferred-payment opt-out inside POS context.
 	 */
-	public function test_passthrough_outside_pos_context(): void {
-		Context::set_test_override( false );
+	public function test_register_attaches_filter_in_pos_context(): void {
+		Context::set_test_override( true );
 
-		$this->assertTrue( $this->sut->allow_deferred_for_pos( true ) );
-		$this->assertFalse( $this->sut->allow_deferred_for_pos( false ) );
+		$this->sut->register();
+
+		$this->assertNotFalse( has_filter( 'woocommerce_store_api_checkout_require_payment_method', '__return_false' ) );
 	}
 
 	/**
-	 * @testdox allow_deferred_for_pos returns false inside POS context regardless of input.
+	 * @testdox register() does not attach the filter outside POS context.
 	 */
-	public function test_allows_deferred_payment_inside_pos_context(): void {
-		Context::set_test_override( true );
+	public function test_register_skips_filter_outside_pos_context(): void {
+		Context::set_test_override( false );
 
-		$this->assertFalse( $this->sut->allow_deferred_for_pos( true ) );
-		$this->assertFalse( $this->sut->allow_deferred_for_pos( false ) );
+		$this->sut->register();
+
+		$this->assertFalse( has_filter( 'woocommerce_store_api_checkout_require_payment_method', '__return_false' ) );
 	}
 }

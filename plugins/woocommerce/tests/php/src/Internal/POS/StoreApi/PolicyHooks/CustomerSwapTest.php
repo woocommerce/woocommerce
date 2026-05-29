@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Internal\POS\StoreApi\Context;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerSwap;
 use WC_Customer;
 use WC_Unit_Test_Case;
-use WP_REST_Request;
 
 /**
  * Tests for CustomerSwap.
@@ -45,6 +44,7 @@ class CustomerSwapTest extends WC_Unit_Test_Case {
 	}
 
 	public function tearDown(): void {
+		remove_filter( 'rest_dispatch_request', array( $this->sut, 'swap_customer' ), 11 );
 		Context::set_test_override( null );
 		WC()->customer = $this->original_customer;
 		wp_set_current_user( $this->original_user_id );
@@ -52,35 +52,31 @@ class CustomerSwapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox swap_customer_for_pos leaves WC()->customer untouched for non-POS REST routes.
+	 * @testdox register() attaches the dispatch hook inside POS context.
 	 */
-	public function test_does_not_swap_for_non_pos_route(): void {
-		Context::set_test_override( false );
-		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $admin_id );
+	public function test_register_attaches_filter_in_pos_context(): void {
+		Context::set_test_override( true );
 
-		$preset_customer = new WC_Customer( $admin_id );
-		WC()->customer   = $preset_customer;
+		$this->sut->register();
 
-		$request = new WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
-
-		$result = $this->sut->swap_customer_for_pos( null, $request );
-
-		$this->assertNull( $result );
-		$this->assertSame(
-			$preset_customer,
-			WC()->customer,
-			'Non-POS routes must not have WC()->customer swapped out.'
-		);
-
-		wp_delete_user( $admin_id );
+		$this->assertNotFalse( has_filter( 'rest_dispatch_request', array( $this->sut, 'swap_customer' ) ) );
 	}
 
 	/**
-	 * @testdox swap_customer_for_pos replaces WC()->customer with a blank guest WC_Customer for POS routes.
+	 * @testdox register() does not attach the dispatch hook outside POS context.
 	 */
-	public function test_swaps_to_guest_customer_for_pos_route(): void {
+	public function test_register_skips_filter_outside_pos_context(): void {
 		Context::set_test_override( false );
+
+		$this->sut->register();
+
+		$this->assertFalse( has_filter( 'rest_dispatch_request', array( $this->sut, 'swap_customer' ) ) );
+	}
+
+	/**
+	 * @testdox swap_customer replaces WC()->customer with a blank guest WC_Customer.
+	 */
+	public function test_swaps_to_guest_customer(): void {
 		$admin_id = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
@@ -104,9 +100,7 @@ class CustomerSwapTest extends WC_Unit_Test_Case {
 		// from wp_get_current_user(). Mirror that order here.
 		wp_set_current_user( 0 );
 
-		$request = new WP_REST_Request( 'POST', '/wc/pos/v1/cart/add-item' );
-
-		$this->sut->swap_customer_for_pos( null, $request );
+		$this->sut->swap_customer( null );
 
 		$this->assertInstanceOf( WC_Customer::class, WC()->customer );
 		$this->assertSame( 0, WC()->customer->get_id(), 'POS customer must be a guest (id 0).' );
@@ -126,5 +120,16 @@ class CustomerSwapTest extends WC_Unit_Test_Case {
 		$this->assertSame( '', WC()->customer->get_shipping_state() );
 
 		wp_delete_user( $admin_id );
+	}
+
+	/**
+	 * @testdox swap_customer returns the incoming dispatch result unchanged.
+	 */
+	public function test_returns_dispatch_result_unchanged(): void {
+		$sentinel = new \WP_REST_Response( array( 'sentinel' => true ), 200 );
+
+		$result = $this->sut->swap_customer( $sentinel );
+
+		$this->assertSame( $sentinel, $result );
 	}
 }

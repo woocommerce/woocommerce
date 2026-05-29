@@ -8,7 +8,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks;
 
 use Automattic\WooCommerce\Internal\POS\StoreApi\Context;
-use Automattic\WooCommerce\Internal\POS\StoreApi\POSSessionHandler;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
@@ -39,8 +38,9 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
  *   - Non-POS requests (e.g. the admin browsing the storefront in a
  *     browser) keep the persistent-cart behaviour exactly as today.
  *
- * Mirrors the other `PolicyHooks/` classes (single filter callback gated
- * on {@see Context::is_pos_request()}).
+ * Mirrors the other `PolicyHooks/` classes: registration is gated on
+ * {@see Context::is_pos_request()}, so the filter is installed only when
+ * the current request is POS.
  *
  * @internal Just for internal use.
  *
@@ -49,42 +49,12 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 class CartPersistencePolicy implements RegisterHooksInterface {
 
 	/**
-	 * Register hooks.
+	 * Register hooks. No-op on non-POS requests.
 	 */
 	public function register(): void {
-		add_filter( 'woocommerce_persistent_cart_enabled', array( $this, 'disable_for_pos' ) );
-	}
-
-	/**
-	 * Return false when the current request is a POS request OR the active
-	 * WC session is being handled by {@see POSSessionHandler}; otherwise
-	 * pass through the original value.
-	 *
-	 * The two checks are deliberately redundant for defense in depth:
-	 *
-	 *   - The URI check ({@see Context::is_pos_request()}) is the primary
-	 *     gate. It catches all POS requests up-front, before WC's cart
-	 *     bootstrap runs.
-	 *   - The session-handler instance check is a belt-and-suspenders
-	 *     fallback. If anything ever messes with URI detection (rewrite
-	 *     rules, reverse proxies, future refactors) but POSSessionHandler
-	 *     is still the active handler, this second check still gates the
-	 *     persistent-cart machinery off.
-	 *
-	 * @param bool $enabled Original value from the filter chain.
-	 * @return bool
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function disable_for_pos( bool $enabled ): bool {
-		if ( Context::is_pos_request() ) {
-			return false;
+		if ( ! Context::is_pos_request() ) {
+			return;
 		}
-
-		if ( function_exists( 'WC' ) && WC()->session instanceof POSSessionHandler ) {
-			return false;
-		}
-
-		return $enabled;
+		add_filter( 'woocommerce_persistent_cart_enabled', '__return_false' );
 	}
 }

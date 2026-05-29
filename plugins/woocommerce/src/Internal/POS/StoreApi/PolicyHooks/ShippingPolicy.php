@@ -31,26 +31,12 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 class ShippingPolicy implements RegisterHooksInterface {
 
 	/**
-	 * Register hooks.
+	 * Register hooks. No-op on non-POS requests.
 	 */
 	public function register(): void {
-		add_filter( 'woocommerce_cart_needs_shipping', array( $this, 'no_shipping_for_pos' ) );
-	}
-
-	/**
-	 * Return false for POS requests, otherwise pass the original value
-	 * through.
-	 *
-	 * @param bool $needs_shipping Original value from the filter chain.
-	 * @return bool
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function no_shipping_for_pos( bool $needs_shipping ): bool {
-		if ( Context::is_pos_request() ) {
-			return false;
+		if ( ! Context::is_pos_request() ) {
+			return;
 		}
-
-		return $needs_shipping;
+		add_filter( 'woocommerce_cart_needs_shipping', '__return_false' );
 	}
 }

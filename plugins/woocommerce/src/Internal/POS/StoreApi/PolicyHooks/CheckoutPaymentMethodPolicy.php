@@ -32,26 +32,12 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 class CheckoutPaymentMethodPolicy implements RegisterHooksInterface {
 
 	/**
-	 * Register hooks.
+	 * Register hooks. No-op on non-POS requests.
 	 */
 	public function register(): void {
-		add_filter( 'woocommerce_store_api_checkout_require_payment_method', array( $this, 'allow_deferred_for_pos' ) );
-	}
-
-	/**
-	 * Return false when the current request is a POS request, otherwise
-	 * pass through the original value.
-	 *
-	 * @param bool $require Original value from the filter chain.
-	 * @return bool
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function allow_deferred_for_pos( bool $require ): bool {
-		if ( Context::is_pos_request() ) {
-			return false;
+		if ( ! Context::is_pos_request() ) {
+			return;
 		}
-
-		return $require;
+		add_filter( 'woocommerce_store_api_checkout_require_payment_method', '__return_false' );
 	}
 }

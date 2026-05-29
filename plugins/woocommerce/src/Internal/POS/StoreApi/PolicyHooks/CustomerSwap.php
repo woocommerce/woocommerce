@@ -53,28 +53,26 @@ class CustomerSwap implements RegisterHooksInterface {
 	private const PRIORITY = 11;
 
 	/**
-	 * Register hooks.
+	 * Register hooks. No-op on non-POS requests.
 	 */
 	public function register(): void {
-		add_filter( 'rest_dispatch_request', array( $this, 'swap_customer_for_pos' ), self::PRIORITY, 2 );
+		if ( ! Context::is_pos_request() ) {
+			return;
+		}
+		add_filter( 'rest_dispatch_request', array( $this, 'swap_customer' ), self::PRIORITY, 2 );
 	}
 
 	/**
-	 * For POS REST requests, replace {@see WC()->customer} with a fresh
-	 * guest customer with no address. Returns null to decline
+	 * Replace {@see WC()->customer} with a fresh guest customer with no
+	 * address. Returns the dispatch result unchanged to decline
 	 * short-circuiting the route's actual callback.
 	 *
-	 * @param mixed                                      $dispatch_result Existing dispatch short-circuit value.
-	 * @param \WP_REST_Request<array<string,mixed>>|null $request         Inbound request.
+	 * @param mixed $dispatch_result Existing dispatch short-circuit value.
 	 * @return mixed
 	 *
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
-	public function swap_customer_for_pos( $dispatch_result, $request ) {
-		if ( ! $this->is_pos_route( $request ) ) {
-			return $dispatch_result;
-		}
-
+	public function swap_customer( $dispatch_result ) {
 		if ( function_exists( 'WC' ) ) {
 			$customer = new WC_Customer( 0, true );
 
@@ -91,27 +89,5 @@ class CustomerSwap implements RegisterHooksInterface {
 		}
 
 		return $dispatch_result;
-	}
-
-	/**
-	 * Determine whether the inbound REST request targets the POS namespace.
-	 *
-	 * Uses {@see \WP_REST_Request::get_route()} (authoritative for the
-	 * dispatched route) and falls back to {@see Context::is_pos_request()}
-	 * which derives the same thing from REQUEST_URI; the fallback covers
-	 * test contexts and overrides.
-	 *
-	 * @param \WP_REST_Request<array<string,mixed>>|null $request Inbound REST request, if any.
-	 * @return bool
-	 */
-	private function is_pos_route( $request ): bool {
-		if ( $request instanceof \WP_REST_Request ) {
-			$route = (string) $request->get_route();
-			if ( 0 === strpos( $route, '/wc/pos/' ) ) {
-				return true;
-			}
-		}
-
-		return Context::is_pos_request();
 	}
 }

@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\DefaultPaymentMetho
 use WC_Unit_Test_Case;
 
 /**
- * Tests for DefaultPaymentMethodPolicy.
+ * Tests for the POS Default Payment Method policy hook.
  *
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\DefaultPaymentMethodPolicy
  */
@@ -21,33 +21,42 @@ class DefaultPaymentMethodPolicyTest extends WC_Unit_Test_Case {
 	 */
 	private $sut;
 
+	/**
+	 * Set up.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new DefaultPaymentMethodPolicy();
 	}
 
+	/**
+	 * Tear down.
+	 */
 	public function tearDown(): void {
+		remove_filter( 'woocommerce_store_api_order_default_payment_method', '__return_empty_string' );
 		Context::set_test_override( null );
 		parent::tearDown();
 	}
 
 	/**
-	 * @testdox no_default_for_pos returns the incoming method outside POS context.
+	 * @testdox register() attaches the empty-default filter inside POS context.
 	 */
-	public function test_passthrough_outside_pos_context(): void {
-		Context::set_test_override( false );
+	public function test_register_attaches_filter_in_pos_context(): void {
+		Context::set_test_override( true );
 
-		$this->assertSame( 'woocommerce_payments', $this->sut->no_default_for_pos( 'woocommerce_payments' ) );
-		$this->assertSame( '', $this->sut->no_default_for_pos( '' ) );
+		$this->sut->register();
+
+		$this->assertNotFalse( has_filter( 'woocommerce_store_api_order_default_payment_method', '__return_empty_string' ) );
 	}
 
 	/**
-	 * @testdox no_default_for_pos returns an empty string inside POS context.
+	 * @testdox register() does not attach the filter outside POS context.
 	 */
-	public function test_returns_empty_inside_pos_context(): void {
-		Context::set_test_override( true );
+	public function test_register_skips_filter_outside_pos_context(): void {
+		Context::set_test_override( false );
 
-		$this->assertSame( '', $this->sut->no_default_for_pos( 'woocommerce_payments' ) );
-		$this->assertSame( '', $this->sut->no_default_for_pos( 'stripe' ) );
+		$this->sut->register();
+
+		$this->assertFalse( has_filter( 'woocommerce_store_api_order_default_payment_method', '__return_empty_string' ) );
 	}
 }

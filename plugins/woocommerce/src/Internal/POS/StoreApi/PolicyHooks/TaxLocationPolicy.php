@@ -49,15 +49,17 @@ use WC_Customer;
 class TaxLocationPolicy implements RegisterHooksInterface {
 
 	/**
-	 * Register hooks.
+	 * Register hooks. No-op on non-POS requests.
 	 */
 	public function register(): void {
-		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'override_taxable_address_for_pos' ), 10, 2 );
+		if ( ! Context::is_pos_request() ) {
+			return;
+		}
+		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'override_taxable_address' ), 10, 2 );
 	}
 
 	/**
-	 * Return store base address as the taxable address for POS requests.
-	 * Pass through unchanged for non-POS requests.
+	 * Return store base address as the taxable address.
 	 *
 	 * @param array       $taxable_address Original [country, state, postcode, city] from WC_Customer::get_taxable_address.
 	 * @param WC_Customer $customer        Customer the taxable address was computed for.
@@ -65,10 +67,8 @@ class TaxLocationPolicy implements RegisterHooksInterface {
 	 *
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
-	public function override_taxable_address_for_pos( $taxable_address, $customer ): array {
-		if ( ! Context::is_pos_request() ) {
-			return (array) $taxable_address;
-		}
+	public function override_taxable_address( $taxable_address, $customer ): array {
+		unset( $taxable_address );
 
 		$store_base = array(
 			(string) WC()->countries->get_base_country(),

@@ -32,26 +32,12 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 class DefaultPaymentMethodPolicy implements RegisterHooksInterface {
 
 	/**
-	 * Register hooks.
+	 * Register hooks. No-op on non-POS requests.
 	 */
 	public function register(): void {
-		add_filter( 'woocommerce_store_api_order_default_payment_method', array( $this, 'no_default_for_pos' ) );
-	}
-
-	/**
-	 * Return an empty string for POS requests, otherwise pass the original
-	 * value through.
-	 *
-	 * @param string $payment_method Original payment method id from the filter chain.
-	 * @return string
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function no_default_for_pos( string $payment_method ): string {
-		if ( Context::is_pos_request() ) {
-			return '';
+		if ( ! Context::is_pos_request() ) {
+			return;
 		}
-
-		return $payment_method;
+		add_filter( 'woocommerce_store_api_order_default_payment_method', '__return_empty_string' );
 	}
 }

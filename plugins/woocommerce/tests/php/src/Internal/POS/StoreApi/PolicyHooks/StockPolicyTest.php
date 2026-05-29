@@ -30,48 +30,36 @@ class StockPolicyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down — clear the POS context override left by any test that set it.
+	 * Tear down — clear POS context override and any filters this test may have installed.
 	 */
 	public function tearDown(): void {
+		remove_filter( 'woocommerce_product_is_in_stock', '__return_true' );
+		remove_filter( 'woocommerce_variation_is_in_stock', '__return_true' );
 		Context::set_test_override( null );
 		parent::tearDown();
 	}
 
 	/**
-	 * @testdox allow_oversell_for_pos returns the original value outside POS context.
+	 * @testdox register() attaches stock filters inside POS context.
 	 */
-	public function test_passthrough_outside_pos_context(): void {
-		Context::set_test_override( false );
-
-		$this->assertFalse( $this->sut->allow_oversell_for_pos( false ) );
-		$this->assertTrue( $this->sut->allow_oversell_for_pos( true ) );
-	}
-
-	/**
-	 * @testdox allow_oversell_for_pos returns true inside POS context regardless of input.
-	 */
-	public function test_forces_in_stock_inside_pos_context(): void {
+	public function test_register_attaches_filters_in_pos_context(): void {
 		Context::set_test_override( true );
 
-		$this->assertTrue( $this->sut->allow_oversell_for_pos( false ) );
-		$this->assertTrue( $this->sut->allow_oversell_for_pos( true ) );
+		$this->sut->register();
+
+		$this->assertNotFalse( has_filter( 'woocommerce_product_is_in_stock', '__return_true' ) );
+		$this->assertNotFalse( has_filter( 'woocommerce_variation_is_in_stock', '__return_true' ) );
 	}
 
 	/**
-	 * @testdox register() attaches the expected filters.
+	 * @testdox register() does not attach stock filters outside POS context.
 	 */
-	public function test_register_attaches_filters(): void {
+	public function test_register_skips_filters_outside_pos_context(): void {
+		Context::set_test_override( false );
+
 		$this->sut->register();
 
-		$this->assertNotFalse(
-			has_filter( 'woocommerce_product_is_in_stock', array( $this->sut, 'allow_oversell_for_pos' ) )
-		);
-		$this->assertNotFalse(
-			has_filter( 'woocommerce_variation_is_in_stock', array( $this->sut, 'allow_oversell_for_pos' ) )
-		);
-
-		// Cleanup so we don't leak filter state into other tests.
-		remove_filter( 'woocommerce_product_is_in_stock', array( $this->sut, 'allow_oversell_for_pos' ) );
-		remove_filter( 'woocommerce_variation_is_in_stock', array( $this->sut, 'allow_oversell_for_pos' ) );
+		$this->assertFalse( has_filter( 'woocommerce_product_is_in_stock', '__return_true' ) );
+		$this->assertFalse( has_filter( 'woocommerce_variation_is_in_stock', '__return_true' ) );
 	}
 }

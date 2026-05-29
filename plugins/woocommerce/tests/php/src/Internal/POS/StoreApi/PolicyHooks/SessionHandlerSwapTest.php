@@ -31,31 +31,41 @@ class SessionHandlerSwapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Reset POS context override.
+	 * Tear down.
 	 */
 	public function tearDown(): void {
+		remove_filter( 'woocommerce_session_handler', array( $this->sut, 'swap_session_handler' ) );
 		Context::set_test_override( null );
 		parent::tearDown();
 	}
 
 	/**
-	 * @testdox maybe_swap_session_handler returns the original handler outside POS context.
+	 * @testdox register() attaches the session handler swap inside POS context.
 	 */
-	public function test_passthrough_outside_pos_context(): void {
-		Context::set_test_override( false );
+	public function test_register_attaches_filter_in_pos_context(): void {
+		Context::set_test_override( true );
 
-		$this->assertSame( 'WC_Session_Handler', $this->sut->maybe_swap_session_handler( 'WC_Session_Handler' ) );
+		$this->sut->register();
+
+		$this->assertNotFalse( has_filter( 'woocommerce_session_handler', array( $this->sut, 'swap_session_handler' ) ) );
 	}
 
 	/**
-	 * @testdox maybe_swap_session_handler returns POSSessionHandler inside POS context.
+	 * @testdox register() does not attach the filter outside POS context.
 	 */
-	public function test_swaps_inside_pos_context(): void {
-		Context::set_test_override( true );
+	public function test_register_skips_filter_outside_pos_context(): void {
+		Context::set_test_override( false );
 
-		$this->assertSame(
-			POSSessionHandler::class,
-			$this->sut->maybe_swap_session_handler( 'WC_Session_Handler' )
-		);
+		$this->sut->register();
+
+		$this->assertFalse( has_filter( 'woocommerce_session_handler', array( $this->sut, 'swap_session_handler' ) ) );
+	}
+
+	/**
+	 * @testdox swap_session_handler returns POSSessionHandler regardless of input.
+	 */
+	public function test_swap_session_handler_returns_pos_handler(): void {
+		$this->assertSame( POSSessionHandler::class, $this->sut->swap_session_handler( 'WC_Session_Handler' ) );
+		$this->assertSame( POSSessionHandler::class, $this->sut->swap_session_handler( 'AnythingElse' ) );
 	}
 }

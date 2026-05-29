@@ -56,7 +56,7 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 class CurrentUserSwap implements RegisterHooksInterface {
 
 	/**
-	 * Register hooks.
+	 * Register hooks. No-op on non-POS requests.
 	 *
 	 * `rest_dispatch_request` fires inside {@see \WP_REST_Server::respond_to_request}
 	 * after the route's permission_callback has been evaluated and accepted —
@@ -67,51 +67,27 @@ class CurrentUserSwap implements RegisterHooksInterface {
 	 * the global user.
 	 */
 	public function register(): void {
-		add_filter( 'rest_dispatch_request', array( $this, 'swap_to_guest_for_pos' ), 10, 2 );
+		if ( ! Context::is_pos_request() ) {
+			return;
+		}
+		add_filter( 'rest_dispatch_request', array( $this, 'swap_to_guest' ), 10, 2 );
 	}
 
 	/**
-	 * For POS REST requests, swap the global current WP user to guest (0)
-	 * after the permission callback has already passed. Returns null to
+	 * Swap the global current WP user to guest (0) after the permission
+	 * callback has already passed. Returns the dispatch result unchanged to
 	 * decline short-circuiting the dispatch.
 	 *
-	 * @param mixed                                      $dispatch_result Existing dispatch short-circuit value (null = don't short-circuit).
-	 * @param \WP_REST_Request<array<string,mixed>>|null $request         Inbound REST request.
+	 * @param mixed $dispatch_result Existing dispatch short-circuit value (null = don't short-circuit).
 	 * @return mixed
 	 *
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
-	public function swap_to_guest_for_pos( $dispatch_result, $request ) {
-		if ( ! $this->is_pos_route( $request ) ) {
-			return $dispatch_result;
-		}
-
+	public function swap_to_guest( $dispatch_result ) {
 		// Capability check already passed by this point — it's safe to drop
 		// the authenticated identity for the remainder of the request.
 		wp_set_current_user( 0 );
 
 		return $dispatch_result;
-	}
-
-	/**
-	 * Determine whether the inbound REST request targets the POS namespace.
-	 *
-	 * Uses {@see \WP_REST_Request::get_route()} (authoritative for the
-	 * dispatched route) and falls back to {@see Context::is_pos_request()}
-	 * which derives the same thing from REQUEST_URI; the fallback covers
-	 * test contexts and overrides.
-	 *
-	 * @param \WP_REST_Request<array<string,mixed>>|null $request Inbound REST request, if any.
-	 * @return bool
-	 */
-	private function is_pos_route( $request ): bool {
-		if ( $request instanceof \WP_REST_Request ) {
-			$route = (string) $request->get_route();
-			if ( 0 === strpos( $route, '/wc/pos/' ) ) {
-				return true;
-			}
-		}
-
-		return Context::is_pos_request();
 	}
 }

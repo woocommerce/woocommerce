@@ -45,6 +45,7 @@ class TaxLocationPolicyTest extends WC_Unit_Test_Case {
 	}
 
 	public function tearDown(): void {
+		remove_filter( 'woocommerce_customer_taxable_address', array( $this->sut, 'override_taxable_address' ), 10 );
 		Context::set_test_override( null );
 		remove_all_filters( 'woocommerce_pos_tax_location' );
 		foreach ( $this->original_base as $opt => $value ) {
@@ -58,26 +59,34 @@ class TaxLocationPolicyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox override_taxable_address_for_pos passes the original value through outside POS context.
+	 * @testdox register() attaches the taxable-address override inside POS context.
 	 */
-	public function test_passthrough_outside_pos_context(): void {
-		Context::set_test_override( false );
+	public function test_register_attaches_filter_in_pos_context(): void {
+		Context::set_test_override( true );
 
-		$original = array( 'GB', '', 'SW1A 1AA', 'London' );
-		$customer = new WC_Customer( 0, true );
+		$this->sut->register();
 
-		$this->assertSame( $original, $this->sut->override_taxable_address_for_pos( $original, $customer ) );
+		$this->assertNotFalse( has_filter( 'woocommerce_customer_taxable_address', array( $this->sut, 'override_taxable_address' ) ) );
 	}
 
 	/**
-	 * @testdox override_taxable_address_for_pos returns store base for POS regardless of input.
+	 * @testdox register() does not attach the filter outside POS context.
 	 */
-	public function test_returns_store_base_for_pos(): void {
-		Context::set_test_override( true );
+	public function test_register_skips_filter_outside_pos_context(): void {
+		Context::set_test_override( false );
 
+		$this->sut->register();
+
+		$this->assertFalse( has_filter( 'woocommerce_customer_taxable_address', array( $this->sut, 'override_taxable_address' ) ) );
+	}
+
+	/**
+	 * @testdox override_taxable_address returns the store base address regardless of input.
+	 */
+	public function test_returns_store_base(): void {
 		$customer = new WC_Customer( 0, true );
 
-		$result = $this->sut->override_taxable_address_for_pos( array( 'GB', '', 'SW1A 1AA', 'London' ), $customer );
+		$result = $this->sut->override_taxable_address( array( 'GB', '', 'SW1A 1AA', 'London' ), $customer );
 
 		$this->assertSame( 'US', $result[0], 'Country should be store base country.' );
 		$this->assertSame( 'CA', $result[1], 'State should be store base state.' );
@@ -86,14 +95,12 @@ class TaxLocationPolicyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox override_taxable_address_for_pos returns store base even when customer's address is empty.
+	 * @testdox override_taxable_address returns store base even when customer's address is empty.
 	 */
 	public function test_returns_store_base_when_customer_address_empty(): void {
-		Context::set_test_override( true );
-
 		$customer = new WC_Customer( 0, true );
 
-		$result = $this->sut->override_taxable_address_for_pos( array( '', '', '', '' ), $customer );
+		$result = $this->sut->override_taxable_address( array( '', '', '', '' ), $customer );
 
 		$this->assertSame( 'US', $result[0] );
 		$this->assertSame( 'CA', $result[1] );
@@ -107,8 +114,6 @@ class TaxLocationPolicyTest extends WC_Unit_Test_Case {
 	 * @testdox woocommerce_pos_tax_location filter overrides the store-base default.
 	 */
 	public function test_pos_tax_location_filter_overrides_default(): void {
-		Context::set_test_override( true );
-
 		add_filter(
 			'woocommerce_pos_tax_location',
 			static function () {
@@ -117,7 +122,7 @@ class TaxLocationPolicyTest extends WC_Unit_Test_Case {
 		);
 
 		$customer = new WC_Customer( 0, true );
-		$result   = $this->sut->override_taxable_address_for_pos( array( '', '', '', '' ), $customer );
+		$result   = $this->sut->override_taxable_address( array( '', '', '', '' ), $customer );
 
 		$this->assertSame( array( 'GB', 'ENG', 'SW1A 1AA', 'London' ), $result );
 	}
