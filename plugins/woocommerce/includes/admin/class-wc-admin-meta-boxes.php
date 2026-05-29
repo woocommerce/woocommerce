@@ -158,7 +158,7 @@ class WC_Admin_Meta_Boxes {
 
 		if ( $current_value ) {
 			// Strip stale postimagediv reference from existing user ordering.
-			if ( is_array( $current_value ) && ! empty( $current_value['side'] ) && false !== strpos( $current_value['side'], 'postimagediv' ) ) {
+			if ( is_array( $current_value ) && isset( $current_value['side'] ) && is_string( $current_value['side'] ) && false !== strpos( $current_value['side'], 'postimagediv' ) ) {
 				$boxes                 = array_filter( array_map( 'trim', explode( ',', $current_value['side'] ) ) );
 				$boxes                 = array_values( array_diff( $boxes, array( 'postimagediv' ) ) );
 				$current_value['side'] = implode( ',', $boxes );
