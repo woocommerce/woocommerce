@@ -37,6 +37,11 @@ if ( ! class_exists( 'WooCommerce', false ) ) {
 // Initialize dependency injection.
 $GLOBALS['wc_container'] = new Automattic\WooCommerce\Container();
 
+// Prototype tools - not for merge.
+if ( file_exists( __DIR__ . '/src/Internal/Prototype/bootstrap.php' ) ) {
+	require_once __DIR__ . '/src/Internal/Prototype/bootstrap.php';
+}
+
 /**
  * Returns the main instance of WC.
  *
