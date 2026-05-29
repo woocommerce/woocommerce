@@ -88,7 +88,6 @@ export const TotalsCoupon = ( {
 	return (
 		<Panel
 			className="wc-block-components-totals-coupon"
-			initialOpen={ isCouponFormVisible }
 			hasBorder={ false }
 			headingLevel={ 2 }
 			title={ __( 'Add coupons', 'woocommerce' ) }
@@ -114,7 +113,7 @@ export const TotalsCoupon = ( {
 							onChange={ ( newCouponValue ) => {
 								setCouponValue( newCouponValue );
 							} }
-							focusOnMount={ true }
+							focusOnMount={ ! displayCouponForm }
 							validateOnMount={ false }
 							showError={ false }
 							ref={ inputRef }

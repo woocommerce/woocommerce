@@ -87,7 +87,7 @@ describe( 'Cart Order Summary Coupon Form Block', () => {
 	it( 'does not render when coupons are disabled', () => {
 		// eslint-disable-next-line @typescript-eslint/no-var-requires -- Required for mocking
 		const getSetting = require( '@woocommerce/settings' ).getSetting;
-		getSetting.mockImplementationOnce(
+		getSetting.mockImplementation(
 			( setting: string, defaultValue: unknown ) => {
 				if ( setting === 'couponsEnabled' ) return false;
 				return defaultValue;
@@ -96,6 +96,13 @@ describe( 'Cart Order Summary Coupon Form Block', () => {
 
 		const { container } = render( <Block className="" /> );
 		expect( container.firstChild ).toBeNull();
+
+		getSetting.mockImplementation(
+			( setting: string, defaultValue: unknown ) => {
+				if ( setting === 'couponsEnabled' ) return true;
+				return defaultValue;
+			}
+		);
 	} );
 
 	it( 'calls useStoreCartCoupons with cart context', () => {
@@ -106,5 +113,18 @@ describe( 'Cart Order Summary Coupon Form Block', () => {
 		render( <Block className="" /> );
 
 		expect( useStoreCartCoupons ).toHaveBeenCalledWith( 'wc/cart' );
+	} );
+
+	it( 'passes applyCoupon and instanceId to TotalsCoupon', () => {
+		render( <Block className="" /> );
+
+		expect( MockTotalsCoupon ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				onSubmit: mockApplyCoupon,
+				instanceId: 'coupon',
+				isLoading: false,
+			} ),
+			expect.anything()
+		);
 	} );
 } );

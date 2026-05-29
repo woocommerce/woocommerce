@@ -66,7 +66,7 @@ describe( 'Checkout Order Summary Coupon Form Block', () => {
 	it( 'does not render when coupons are disabled', () => {
 		// eslint-disable-next-line @typescript-eslint/no-var-requires -- Required for mocking
 		const getSetting = require( '@woocommerce/settings' ).getSetting;
-		getSetting.mockImplementationOnce(
+		getSetting.mockImplementation(
 			( setting: string, defaultValue: unknown ) => {
 				if ( setting === 'couponsEnabled' ) return false;
 				return defaultValue;
@@ -75,6 +75,13 @@ describe( 'Checkout Order Summary Coupon Form Block', () => {
 
 		const { container } = render( <Block /> );
 		expect( container.firstChild ).toBeNull();
+
+		getSetting.mockImplementation(
+			( setting: string, defaultValue: unknown ) => {
+				if ( setting === 'couponsEnabled' ) return true;
+				return defaultValue;
+			}
+		);
 	} );
 
 	it( 'passes displayCouponForm as true by default', () => {
