@@ -53464,12 +53464,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
 		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, array\<int, WP_Term\>\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
 			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterAttribute\:\:get_attribute_counts\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 1
