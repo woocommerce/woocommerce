@@ -231,7 +231,8 @@ class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_customer_order_data_and_format
 	 */
 	public function test_date_last_active_falls_back_when_date_created_is_null() {
-		$order = $this->createMock( WC_Order::class );
+		$order = $this->createMock( \Automattic\WooCommerce\Admin\Overrides\Order::class );
+		$order->method( 'get_id' )->willReturn( 0 );
 		$order->method( 'get_date_created' )->willReturn( null );
 		$order->method( 'get_date_modified' )->willReturn( null );
 		$order->method( 'get_date_paid' )->willReturn( null );
@@ -243,6 +244,8 @@ class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 		$order->method( 'get_billing_state' )->willReturn( '' );
 		$order->method( 'get_billing_postcode' )->willReturn( '' );
 		$order->method( 'get_billing_country' )->willReturn( '' );
+		$order->method( 'get_customer_first_name' )->willReturn( 'Test' );
+		$order->method( 'get_customer_last_name' )->willReturn( 'User' );
 
 		list( $data, ) = \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_customer_order_data_and_format( $order );
 
