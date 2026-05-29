@@ -491,7 +491,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_delete_product_notice'        => __( 'This product has produced sales and may be linked to existing orders. Are you sure you want to delete it?', 'woocommerce' ),
 					'i18n_remove_personal_data_notice'  => __( 'This action cannot be reversed. Are you sure you wish to erase personal data from the selected orders?', 'woocommerce' ),
 					'i18n_confirm_delete'               => __( 'Are you sure you wish to delete this item?', 'woocommerce' ),
-					'i18n_global_unique_id_error'       => __( 'Please enter only numbers and hyphens (-).', 'woocommerce' ),
+					'i18n_global_unique_id_error'       => __( 'Enter only numbers and hyphens (-). The letter X is allowed only as the final ISBN-10 check digit.', 'woocommerce' ),
 					'decimal_point'                     => $decimal,
 					'mon_decimal_point'                 => wc_get_price_decimal_separator(),
 					'ajax_url'                          => admin_url( 'admin-ajax.php' ),
@@ -550,7 +550,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			/* phpcs:disable */
 			if ( in_array( $screen_id, array( 'product', 'edit-product' ) ) ) {
 				wp_enqueue_media();
-				wp_register_script( 'wc-admin-product-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'media-models' ), $version );
+				wp_register_script( 'wc-admin-product-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'media-models', 'underscore' ), $version );
 				wp_register_script( 'wc-admin-variation-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product-variation' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-serializejson', 'media-models', 'backbone', 'jquery-ui-sortable', 'wc-backbone-modal', 'wp-data', 'wp-notices' ), $version );
 
 				wp_enqueue_script( 'wc-admin-product-meta-boxes' );
@@ -595,7 +595,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( $this->is_order_meta_box_screen( $screen_id ) ) {
 				$default_location = wc_get_customer_default_location();
 
-				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard' ), $version );
+				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard', 'wp-a11y' ), $version );
 				wp_localize_script(
 					'wc-admin-order-meta-boxes',
 					'woocommerce_admin_meta_boxes_order',
@@ -702,6 +702,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_permission_revoke'                          => __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
 					'i18n_tax_rate_already_exists'                    => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
 					'i18n_delete_note'                                => __( 'Are you sure you wish to delete this note? This action cannot be undone.', 'woocommerce' ),
+					'i18n_delete_customer_note'                       => __( 'Are you sure you wish to delete this note? This action cannot be undone. Caution: This only removes the note from your records — it does not recall the email already sent to the customer.', 'woocommerce' ),
+					'i18n_no_notes_yet'                               => __( 'There are no notes yet.', 'woocommerce' ),
+					'i18n_order_note_added'                           => __( 'Order note added.', 'woocommerce' ),
+					'i18n_customer_order_note_added'                  => __( 'Order note added and emailed to the customer.', 'woocommerce' ),
 					'i18n_apply_coupon'                               => __( 'Enter a coupon code to apply. Discounts are applied to line totals, before taxes.', 'woocommerce' ),
 					'i18n_add_fee'                                    => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ),
 					'i18n_attribute_name_placeholder'                 => __( 'New attribute', 'woocommerce' ),

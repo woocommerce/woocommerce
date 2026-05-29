@@ -1,0 +1,1661 @@
+---
+sidebar_position: 5
+sidebar_label: 'Customers'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Customers
+The customer API allows you to create, view, update, and delete individual, or a batch, of customers.
+
+## Customer properties
+|    Attribute    |    Type   |                                                                                                                                                                            Description                                                                                                                                                                             |
+|-----------------|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `id`            | integer   | Unique identifier for the resource. `READ-ONLY`                                                                                                                                                                                                                                                                                      |
+| `date_created`  | date-time | The date the customer was created, in the site's timezone. `READ-ONLY`                                                                                                                                                                                                                                                               |
+| `date_modified` | date-time | The date the customer was last modified, in the site's timezone. `READ-ONLY`                                                                                                                                                                                                                                                         |
+| `email`         | string    | The email address for the customer. `MANDATORY`                                                                                                                                                                                                                                                                                      |
+| `first_name`    | string    | Customer first name.                                                                                                                                                                                                                                                                                                                                               |
+| `last_name`     | string    | Customer last name.                                                                                                                                                                                                                                                                                                                                                |
+| `username`      | string    | Customer login name. Can be generated automatically from the customer's email address if the option `woocommerce_registration_generate_username` is equal to `yes` `CANNOT BE CHANGED` `MAYBE MANDATORY`                                                                                               |
+| `password`      | string    | Customer password. Can be generated automatically with [`wp_generate_password()`](http://codex.wordpress.org/Function_Reference/wp_generate_password) if the "Automatically generate customer password" option is enabled, check the index meta for `generate_password` `WRITE-ONLY` `MAYBE MANDATORY` |
+| `last_order`    | array     | Last order data. See [Customer Last Order properties](#customer-last-order-properties). `READ-ONLY`                                                                                                                                                                                                                                  |
+| `orders_count`  | integer   | Quantity of orders made by the customer. `READ-ONLY`                                                                                                                                                                                                                                                                                 |
+| `total_spent`   | string    | Total amount spent. `READ-ONLY`                                                                                                                                                                                                                                                                                                      |
+| `avatar_url`    | string    | Avatar URL.                                                                                                                                                                                                                                                                                                                                                        |
+| `billing`       | array     | List of billing address data. See [Billing Address properties](#billing-address-properties).                                                                                                                                                                                                                                                                       |
+| `shipping`      | array     | List of shipping address data. See [Shipping Address properties](#shipping-address-properties).                                                                                                                                                                                                                                                                    |
+
+### Customer last order properties
+| Attribute |    Type   |                                    Description                                     |
+|-----------|-----------|------------------------------------------------------------------------------------|
+| `id`      | integer   | Last order ID. `READ-ONLY`                           |
+| `date`    | date-time | UTC DateTime of the customer last order. `READ-ONLY` |
+
+### Billing address properties
+|  Attribute   |  Type  |                     Description                      |
+|--------------|--------|------------------------------------------------------|
+| `first_name` | string | First name.                                          |
+| `last_name`  | string | Last name.                                           |
+| `company`    | string | Company name.                                        |
+| `address_1`  | string | Address line 1.                                      |
+| `address_2`  | string | Address line 2.                                      |
+| `city`       | string | City name.                                           |
+| `state`      | string | ISO code or name of the state, province or district. |
+| `postcode`   | string | Postal code.                                         |
+| `country`    | string | ISO code of the country.                             |
+| `email`      | string | Email address.                                       |
+| `phone`      | string | Phone number.                                        |
+
+### Shipping address properties
+|  Attribute   |  Type  |                     Description                      |
+|--------------|--------|------------------------------------------------------|
+| `first_name` | string | First name.                                          |
+| `last_name`  | string | Last name.                                           |
+| `company`    | string | Company name.                                        |
+| `address_1`  | string | Address line 1.                                      |
+| `address_2`  | string | Address line 2.                                      |
+| `city`       | string | City name.                                           |
+| `state`      | string | ISO code or name of the state, province or district. |
+| `postcode`   | string | Postal code.                                         |
+| `country`    | string | ISO code of the country.                             |
+
+## Create a customer
+This API helps you to create a new customer.
+
+```http
+POST /wp-json/wc/v1/customers
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X POST https://example.com/wp-json/wc/v1/customers \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{
+  "email": "john.doe@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "username": "john.doe",
+  "billing": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "company": "",
+    "address_1": "969 Market",
+    "address_2": "",
+    "city": "San Francisco",
+    "state": "CA",
+    "postcode": "94103",
+    "country": "US",
+    "email": "john.doe@example.com",
+    "phone": "(555) 555-5555"
+  },
+  "shipping": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "company": "",
+    "address_1": "969 Market",
+    "address_2": "",
+    "city": "San Francisco",
+    "state": "CA",
+    "postcode": "94103",
+    "country": "US"
+  }
+}'
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+const data = {
+  email: "john.doe@example.com",
+  first_name: "John",
+  last_name: "Doe",
+  username: "john.doe",
+  billing: {
+    first_name: "John",
+    last_name: "Doe",
+    company: "",
+    address_1: "969 Market",
+    address_2: "",
+    city: "San Francisco",
+    state: "CA",
+    postcode: "94103",
+    country: "US",
+    email: "john.doe@example.com",
+    phone: "(555) 555-5555"
+  },
+  shipping: {
+    first_name: "John",
+    last_name: "Doe",
+    company: "",
+    address_1: "969 Market",
+    address_2: "",
+    city: "San Francisco",
+    state: "CA",
+    postcode: "94103",
+    country: "US"
+  }
+};
+
+WooCommerce.post("customers", data)
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+$data = [
+    'email' => 'john.doe@example.com',
+    'first_name' => 'John',
+    'last_name' => 'Doe',
+    'username' => 'john.doe',
+    'billing' => [
+        'first_name' => 'John',
+        'last_name' => 'Doe',
+        'company' => '',
+        'address_1' => '969 Market',
+        'address_2' => '',
+        'city' => 'San Francisco',
+        'state' => 'CA',
+        'postcode' => '94103',
+        'country' => 'US',
+        'email' => 'john.doe@example.com',
+        'phone' => '(555) 555-5555'
+    ],
+    'shipping' => [
+        'first_name' => 'John',
+        'last_name' => 'Doe',
+        'company' => '',
+        'address_1' => '969 Market',
+        'address_2' => '',
+        'city' => 'San Francisco',
+        'state' => 'CA',
+        'postcode' => '94103',
+        'country' => 'US'
+    ]
+];
+
+print_r($woocommerce->post('customers', $data));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+data = {
+    "email": "john.doe@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "username": "john.doe",
+    "billing": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "company": "",
+        "address_1": "969 Market",
+        "address_2": "",
+        "city": "San Francisco",
+        "state": "CA",
+        "postcode": "94103",
+        "country": "US",
+        "email": "john.doe@example.com",
+        "phone": "(555) 555-5555"
+    },
+    "shipping": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "company": "",
+        "address_1": "969 Market",
+        "address_2": "",
+        "city": "San Francisco",
+        "state": "CA",
+        "postcode": "94103",
+        "country": "US"
+    }
+}
+
+print(wcapi.post("customers", data).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+data = {
+  email: "john.doe@example.com",
+  first_name: "John",
+  last_name: "Doe",
+  username: "john.doe",
+  billing: {
+    first_name: "John",
+    last_name: "Doe",
+    company: "",
+    address_1: "969 Market",
+    address_2: "",
+    city: "San Francisco",
+    state: "CA",
+    postcode: "94103",
+    country: "US",
+    email: "john.doe@example.com",
+    phone: "(555) 555-5555"
+  },
+  shipping: {
+    first_name: "John",
+    last_name: "Doe",
+    company: "",
+    address_1: "969 Market",
+    address_2: "",
+    city: "San Francisco",
+    state: "CA",
+    postcode: "94103",
+    country: "US"
+  }
+}
+
+woocommerce.post("customers", data).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 2,
+  "date_created": "2016-05-03T17:58:35",
+  "date_modified": "2016-05-11T21:34:43",
+  "email": "john.doe@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "username": "john.doe",
+  "last_order": {
+    "id": 118,
+    "date": "2016-05-03T18:10:43"
+  },
+  "orders_count": 3,
+  "total_spent": "28.00",
+  "avatar_url": "https://secure.gravatar.com/avatar/?s=96",
+  "billing": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "company": "",
+    "address_1": "969 Market",
+    "address_2": "",
+    "city": "San Francisco",
+    "state": "CA",
+    "postcode": "94103",
+    "country": "US",
+    "email": "john.doe@example.com",
+    "phone": "(555) 555-5555"
+  },
+  "shipping": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "company": "",
+    "address_1": "969 Market",
+    "address_2": "",
+    "city": "San Francisco",
+    "state": "CA",
+    "postcode": "94103",
+    "country": "US"
+  },
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/customers/2"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/customers"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Retrieve a customer
+This API lets you retrieve and view a specific customer by ID.
+
+```http
+GET /wp-json/wc/v1/customers/<id>
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v1/customers/2 \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get("customers/2")
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('customers/2')); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("customers/2").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("customers/2").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 2,
+  "date_created": "2016-05-03T17:58:35",
+  "date_modified": "2016-05-11T21:34:43",
+  "email": "john.doe@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "username": "john.doe",
+  "last_order": {
+    "id": 118,
+    "date": "2016-05-03T18:10:43"
+  },
+  "orders_count": 3,
+  "total_spent": "28.00",
+  "avatar_url": "https://secure.gravatar.com/avatar/?s=96",
+  "billing": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "company": "",
+    "address_1": "969 Market",
+    "address_2": "",
+    "city": "San Francisco",
+    "state": "CA",
+    "postcode": "94103",
+    "country": "US",
+    "email": "john.doe@example.com",
+    "phone": "(555) 555-5555"
+  },
+  "shipping": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "company": "",
+    "address_1": "969 Market",
+    "address_2": "",
+    "city": "San Francisco",
+    "state": "CA",
+    "postcode": "94103",
+    "country": "US"
+  },
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/customers/2"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/customers"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## List all customers
+This API helps you to view all the customers.
+
+```http
+GET /wp-json/wc/v1/customers
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v1/customers \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get("customers")
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('customers')); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("customers").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("customers").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+  {
+    "id": 5,
+    "date_created": "2016-05-11T21:39:01",
+    "date_modified": "2016-05-11T21:40:02",
+    "email": "joao.silva@example.com",
+    "first_name": "João",
+    "last_name": "Silva",
+    "username": "joao.silva",
+    "last_order": {
+      "id": null,
+      "date": null
+    },
+    "orders_count": 0,
+    "total_spent": "0.00",
+    "avatar_url": "https://secure.gravatar.com/avatar/?s=96",
+    "billing": {
+      "first_name": "João",
+      "last_name": "Silva",
+      "company": "",
+      "address_1": "Av. Brasil, 432",
+      "address_2": "",
+      "city": "Rio de Janeiro",
+      "state": "RJ",
+      "postcode": "12345-000",
+      "country": "BR",
+      "email": "joao.silva@example.com",
+      "phone": "(55) 5555-5555"
+    },
+    "shipping": {
+      "first_name": "João",
+      "last_name": "Silva",
+      "company": "",
+      "address_1": "Av. Brasil, 432",
+      "address_2": "",
+      "city": "Rio de Janeiro",
+      "state": "RJ",
+      "postcode": "12345-000",
+      "country": "BR"
+    },
+    "_links": {
+      "self": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/customers/5"
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/customers"
+        }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "date_created": "2016-05-03T17:58:35",
+    "date_modified": "2016-05-11T21:34:43",
+    "email": "john.doe@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "username": "john.doe",
+    "last_order": {
+      "id": 118,
+      "date": "2016-05-03T18:10:43"
+    },
+    "orders_count": 3,
+    "total_spent": "28.00",
+    "avatar_url": "https://secure.gravatar.com/avatar/?s=96",
+    "billing": {
+      "first_name": "John",
+      "last_name": "Doe",
+      "company": "",
+      "address_1": "969 Market",
+      "address_2": "",
+      "city": "San Francisco",
+      "state": "CA",
+      "postcode": "94103",
+      "country": "US",
+      "email": "john.doe@example.com",
+      "phone": "(555) 555-5555"
+    },
+    "shipping": {
+      "first_name": "John",
+      "last_name": "Doe",
+      "company": "",
+      "address_1": "969 Market",
+      "address_2": "",
+      "city": "San Francisco",
+      "state": "CA",
+      "postcode": "94103",
+      "country": "US"
+    },
+    "_links": {
+      "self": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/customers/2"
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/customers"
+        }
+      ]
+    }
+  }
+]
+```
+
+  </TabItem>
+</Tabs>
+
+#### Available parameters
+| Parameter  |   Type  |                                                                                                           Description                                                                                                           |
+|------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `context`  | string  | Scope under which the request is made; determines fields present in response. Options: `view` and `edit`.                                                                                                                       |
+| `page`     | integer | Current page of the collection.                                                                                                                                                                                                 |
+| `per_page` | integer | Maximum number of items to be returned in result set.                                                                                                                                                                           |
+| `search`   | string  | Limit results to those matching a string.                                                                                                                                                                                       |
+| `exclude`  | string  | Ensure result set excludes specific ids.                                                                                                                                                                                        |
+| `include`  | string  | Limit result set to specific ids.                                                                                                                                                                                               |
+| `offset`   | integer | Offset the result set by a specific number of items.                                                                                                                                                                            |
+| `order`    | string  | Order sort attribute ascending or descending. Default is `asc`, Options: `asc` and `desc`.                                                                                                                                      |
+| `orderby`  | string  | Sort collection by object attribute. Default is `name`. Options: `id`, `include`, `name` and `registered_date`.                                                                                                                 |
+| `email`    | string  | Limit result set to resources with a specific email.                                                                                                                                                                            |
+| `role`     | string  | Limit result set to resources with a specific role. Default: `customer`. Options (some plugins can add more user roles): `all`, `administrator`, `editor`, `author`, `contributor`, `subscriber`, `customer` and `shop_manager` |
+
+## Update a customer
+This API lets you make changes to a customer.
+
+```http
+PUT /wp-json/wc/v1/customers/<id>
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X PUT https://example.com/wp-json/wc/v1/customers/2 \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{
+  "first_name": "James",
+  "billing": {
+    "first_name": "James"
+  },
+  "shipping": {
+    "first_name": "James"
+  }
+}'
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+const data = {
+  first_name: "James",
+  billing: {
+    first_name: "James"
+  },
+  shipping: {
+    first_name: "James"
+  }
+};
+
+WooCommerce.put("customers/2", data)
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php 
+$data = [
+    'first_name' => 'James',
+    'billing' => [
+        'first_name' => 'James'
+    ],
+    'shipping' => [
+        'first_name' => 'James'
+    ]
+];
+
+print_r($woocommerce->put('customers/2', $data));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+data = {
+    "first_name": "James",
+    "billing": {
+        "first_name": "James"
+    },
+    "shipping": {
+        "first_name": "James"
+    }
+}
+
+print(wcapi.put("customers/2", data).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+data = {
+  first_name: "James",
+  billing: {
+    first_name: "James"
+  },
+  shipping: {
+    first_name: "James"
+  }
+}
+
+woocommerce.put("customers/2", data).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 2,
+  "date_created": "2016-05-03T17:58:35",
+  "date_modified": "2016-05-11T21:43:45",
+  "email": "john.doe@example.com",
+  "first_name": "James",
+  "last_name": "Doe",
+  "username": "john.doe",
+  "last_order": {
+    "id": 118,
+    "date": "2016-05-03T18:10:43"
+  },
+  "orders_count": 3,
+  "total_spent": "28.00",
+  "avatar_url": "https://secure.gravatar.com/avatar/?s=96",
+  "billing": {
+    "first_name": "James",
+    "last_name": "Doe",
+    "company": "",
+    "address_1": "969 Market",
+    "address_2": "",
+    "city": "San Francisco",
+    "state": "CA",
+    "postcode": "94103",
+    "country": "US",
+    "email": "john.doe@example.com",
+    "phone": "(555) 555-5555"
+  },
+  "shipping": {
+    "first_name": "James",
+    "last_name": "Doe",
+    "company": "",
+    "address_1": "969 Market",
+    "address_2": "",
+    "city": "San Francisco",
+    "state": "CA",
+    "postcode": "94103",
+    "country": "US"
+  },
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/customers/2"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/customers"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Delete a customer
+This API helps you delete a customer.
+
+```http
+DELETE /wp-json/wc/v1/customers/<id>
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X DELETE https://example.com/wp-json/wc/v1/customers/2?force=true \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.delete("customers/2", {
+  force: true
+})
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->delete('customers/2', ['force' => true])); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.delete("customers/2", params={"force": True}).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.delete("customers/2", force: true).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 2,
+  "date_created": "2016-05-03T17:58:35",
+  "date_modified": "2016-05-11T21:43:45",
+  "email": "john.doe@example.com",
+  "first_name": "James",
+  "last_name": "Doe",
+  "username": "john.doe",
+  "last_order": {
+    "id": 118,
+    "date": "2016-05-03T18:10:43"
+  },
+  "orders_count": 3,
+  "total_spent": "28.00",
+  "avatar_url": "https://secure.gravatar.com/avatar/?s=96",
+  "billing": {
+    "first_name": "James",
+    "last_name": "Doe",
+    "company": "",
+    "address_1": "969 Market",
+    "address_2": "",
+    "city": "San Francisco",
+    "state": "CA",
+    "postcode": "94103",
+    "country": "US",
+    "email": "john.doe@example.com",
+    "phone": "(555) 555-5555"
+  },
+  "shipping": {
+    "first_name": "James",
+    "last_name": "Doe",
+    "company": "",
+    "address_1": "969 Market",
+    "address_2": "",
+    "city": "San Francisco",
+    "state": "CA",
+    "postcode": "94103",
+    "country": "US"
+  },
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/customers/2"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/customers"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+#### Available parameters
+| Parameter |  Type  |                          Description                          |
+|-----------|--------|---------------------------------------------------------------|
+| `force`   | string | Required to be `true`, as resource does not support trashing. |
+
+## Batch update customers
+This API helps you to batch create, update and delete multiple customers.
+
+:::note
+Note: By default it's limited to up to 100 objects to be created, updated or deleted.
+:::
+
+```http
+POST /wp-json/wc/v1/customers/batch
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X POST https://example.com/wp-json/wc/v1/customers/batch \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{
+  "create": [
+    {
+      "email": "john.doe2@example.com",
+      "first_name": "John",
+      "last_name": "Doe",
+      "username": "john.doe2",
+      "billing": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "company": "",
+        "address_1": "969 Market",
+        "address_2": "",
+        "city": "San Francisco",
+        "state": "CA",
+        "postcode": "94103",
+        "country": "US",
+        "email": "john.doe@example.com",
+        "phone": "(555) 555-5555"
+      },
+      "shipping": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "company": "",
+        "address_1": "969 Market",
+        "address_2": "",
+        "city": "San Francisco",
+        "state": "CA",
+        "postcode": "94103",
+        "country": "US"
+      }
+    },
+    {
+      "email": "joao.silva2@example.com",
+      "first_name": "João",
+      "last_name": "Silva",
+      "username": "joao.silva2",
+      "billing": {
+        "first_name": "João",
+        "last_name": "Silva",
+        "company": "",
+        "address_1": "Av. Brasil, 432",
+        "address_2": "",
+        "city": "Rio de Janeiro",
+        "state": "RJ",
+        "postcode": "12345-000",
+        "country": "BR",
+        "email": "joao.silva@example.com",
+        "phone": "(55) 5555-5555"
+      },
+      "shipping": {
+        "first_name": "João",
+        "last_name": "Silva",
+        "company": "",
+        "address_1": "Av. Brasil, 432",
+        "address_2": "",
+        "city": "Rio de Janeiro",
+        "state": "RJ",
+        "postcode": "12345-000",
+        "country": "BR"
+      }
+    }
+  ],
+  "update": [
+    {
+      "id": 5,
+      "billing": {
+        "phone": "(11) 1111-1111"
+      }
+    }
+  ],
+  "delete": [
+    2
+  ]
+}'
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+const data = {
+  create: [
+    {
+      email: "john.doe2@example.com",
+      first_name: "John",
+      last_name: "Doe",
+      username: "john.doe2",
+      billing: {
+        first_name: "John",
+        last_name: "Doe",
+        company: "",
+        address_1: "969 Market",
+        address_2: "",
+        city: "San Francisco",
+        state: "CA",
+        postcode: "94103",
+        country: "US",
+        email: "john.doe@example.com",
+        phone: "(555) 555-5555"
+      },
+      shipping: {
+        first_name: "John",
+        last_name: "Doe",
+        company: "",
+        address_1: "969 Market",
+        address_2: "",
+        city: "San Francisco",
+        state: "CA",
+        postcode: "94103",
+        country: "US"
+      }
+    },
+    {
+      email: "joao.silva2@example.com",
+      first_name: "João",
+      last_name: "Silva",
+      username: "joao.silva2",
+      billing: {
+        first_name: "João",
+        last_name: "Silva",
+        company: "",
+        address_1: "Av. Brasil, 432",
+        address_2: "",
+        city: "Rio de Janeiro",
+        state: "RJ",
+        postcode: "12345-000",
+        country: "BR",
+        email: "joao.silva@example.com",
+        phone: "(55) 5555-5555"
+      },
+      shipping: {
+        first_name: "João",
+        last_name: "Silva",
+        company: "",
+        address_1: "Av. Brasil, 432",
+        address_2: "",
+        city: "Rio de Janeiro",
+        state: "RJ",
+        postcode: "12345-000",
+        country: "BR"
+      }
+    }
+  ],
+  update: [
+    {
+      id: 5,
+      billing: {
+        phone: "(11) 1111-1111"
+      }
+    }
+  ],
+  delete: [
+    2
+  ]
+};
+
+WooCommerce.post("customers/batch", data)
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php 
+$data = [
+    'create' => [
+        [
+            'email' => 'john.doe2@example.com',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'username' => 'john.doe2',
+            'billing' => [
+                'first_name' => 'John',
+                'last_name' => 'Doe',
+                'company' => '',
+                'address_1' => '969 Market',
+                'address_2' => '',
+                'city' => 'San Francisco',
+                'state' => 'CA',
+                'postcode' => '94103',
+                'country' => 'US',
+                'email' => 'john.doe@example.com',
+                'phone' => '(555) 555-5555'
+            ],
+            'shipping' => [
+                'first_name' => 'John',
+                'last_name' => 'Doe',
+                'company' => '',
+                'address_1' => '969 Market',
+                'address_2' => '',
+                'city' => 'San Francisco',
+                'state' => 'CA',
+                'postcode' => '94103',
+                'country' => 'US'
+            ]
+        ],
+        [
+            'email' => 'joao.silva2@example.com',
+            'first_name' => 'João',
+            'last_name' => 'Silva',
+            'username' => 'joao.silva2',
+            'billing' => [
+                'first_name' => 'João',
+                'last_name' => 'Silva',
+                'company' => '',
+                'address_1' => 'Av. Brasil, 432',
+                'address_2' => '',
+                'city' => 'Rio de Janeiro',
+                'state' => 'RJ',
+                'postcode' => '12345-000',
+                'country' => 'BR',
+                'email' => 'joao.silva@example.com',
+                'phone' => '(55) 5555-5555'
+            ],
+            'shipping' => [
+                'first_name' => 'João',
+                'last_name' => 'Silva',
+                'company' => '',
+                'address_1' => 'Av. Brasil, 432',
+                'address_2' => '',
+                'city' => 'Rio de Janeiro',
+                'state' => 'RJ',
+                'postcode' => '12345-000',
+                'country' => 'BR'
+            ]
+        ]
+    ],
+    'update' => [
+        [
+            'id' => 5,
+            'billing' => [
+                'phone' => '(11) 1111-1111'
+            ]
+        ]
+    ],
+    'delete' => [
+        2
+    ]
+];
+
+print_r($woocommerce->post('customers/batch', $data));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+data = {
+    "create": [
+        {
+            "email": "john.doe2@example.com",
+            "first_name": "John",
+            "last_name": "Doe",
+            "username": "john.doe2",
+            "billing": {
+                "first_name": "John",
+                "last_name": "Doe",
+                "company": "",
+                "address_1": "969 Market",
+                "address_2": "",
+                "city": "San Francisco",
+                "state": "CA",
+                "postcode": "94103",
+                "country": "US",
+                "email": "john.doe@example.com",
+                "phone": "(555) 555-5555"
+            },
+            "shipping": {
+                "first_name": "John",
+                "last_name": "Doe",
+                "company": "",
+                "address_1": "969 Market",
+                "address_2": "",
+                "city": "San Francisco",
+                "state": "CA",
+                "postcode": "94103",
+                "country": "US"
+            }
+        },
+        {
+            "email": "joao.silva2@example.com",
+            "first_name": "João",
+            "last_name": "Silva",
+            "username": "joao.silva2",
+            "billing": {
+                "first_name": "João",
+                "last_name": "Silva",
+                "company": "",
+                "address_1": "Av. Brasil, 432",
+                "address_2": "",
+                "city": "Rio de Janeiro",
+                "state": "RJ",
+                "postcode": "12345-000",
+                "country": "BR",
+                "email": "joao.silva@example.com",
+                "phone": "(55) 5555-5555"
+            },
+            "shipping": {
+                "first_name": "João",
+                "last_name": "Silva",
+                "company": "",
+                "address_1": "Av. Brasil, 432",
+                "address_2": "",
+                "city": "Rio de Janeiro",
+                "state": "RJ",
+                "postcode": "12345-000",
+                "country": "BR"
+            }
+        }
+    ],
+    "update": [
+        {
+            "id": 5,
+            "billing": {
+                "phone": "(11) 1111-1111"
+            }
+        }
+    ],
+    "delete": [
+        2
+    ]
+}
+
+print(wcapi.post("customers/batch", data).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+data = {
+  create: [
+    {
+      email: "john.doe2@example.com",
+      first_name: "John",
+      last_name: "Doe",
+      username: "john.doe2",
+      billing: {
+        first_name: "John",
+        last_name: "Doe",
+        company: "",
+        address_1: "969 Market",
+        address_2: "",
+        city: "San Francisco",
+        state: "CA",
+        postcode: "94103",
+        country: "US",
+        email: "john.doe@example.com",
+        phone: "(555) 555-5555"
+      },
+      shipping: {
+        first_name: "John",
+        last_name: "Doe",
+        company: "",
+        address_1: "969 Market",
+        address_2: "",
+        city: "San Francisco",
+        state: "CA",
+        postcode: "94103",
+        country: "US"
+      }
+    },
+    {
+      email: "joao.silva2@example.com",
+      first_name: "João",
+      last_name: "Silva",
+      username: "joao.silva2",
+      billing: {
+        first_name: "João",
+        last_name: "Silva",
+        company: "",
+        address_1: "Av. Brasil, 432",
+        address_2: "",
+        city: "Rio de Janeiro",
+        state: "RJ",
+        postcode: "12345-000",
+        country: "BR",
+        email: "joao.silva@example.com",
+        phone: "(55) 5555-5555"
+      },
+      shipping: {
+        first_name: "João",
+        last_name: "Silva",
+        company: "",
+        address_1: "Av. Brasil, 432",
+        address_2: "",
+        city: "Rio de Janeiro",
+        state: "RJ",
+        postcode: "12345-000",
+        country: "BR"
+      }
+    }
+  ],
+  update: [
+    {
+      id: 5,
+      billing: {
+        phone: "(11) 1111-1111"
+      }
+    }
+  ],
+  delete: [
+    2
+  ]
+}
+
+woocommerce.post("customers/batch", data).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "create": [
+    {
+      "id": 6,
+      "date_created": "2016-05-11T22:06:32",
+      "date_modified": "2016-05-11T22:07:31",
+      "email": "john.doe2@example.com",
+      "first_name": "John",
+      "last_name": "Doe",
+      "username": "john.doe2",
+      "last_order": {
+        "id": null,
+        "date": null
+      },
+      "orders_count": 0,
+      "total_spent": "0.00",
+      "avatar_url": "https://secure.gravatar.com/avatar/?s=96",
+      "billing": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "company": "",
+        "address_1": "969 Market",
+        "address_2": "",
+        "city": "San Francisco",
+        "state": "CA",
+        "postcode": "94103",
+        "country": "US",
+        "email": "john.doe@example.com",
+        "phone": "(555) 555-5555"
+      },
+      "shipping": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "company": "",
+        "address_1": "969 Market",
+        "address_2": "",
+        "city": "San Francisco",
+        "state": "CA",
+        "postcode": "94103",
+        "country": "US"
+      },
+      "_links": {
+        "self": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/customers/6"
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/customers"
+          }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "date_created": "2016-05-11T22:07:33",
+      "date_modified": "2016-05-11T22:07:37",
+      "email": "joao.silva2@example.com",
+      "first_name": "João",
+      "last_name": "Silva",
+      "username": "joao.silva2",
+      "last_order": {
+        "id": null,
+        "date": null
+      },
+      "orders_count": 0,
+      "total_spent": "0.00",
+      "avatar_url": "https://secure.gravatar.com/avatar/?s=96",
+      "billing": {
+        "first_name": "João",
+        "last_name": "Silva",
+        "company": "",
+        "address_1": "Av. Brasil, 432",
+        "address_2": "",
+        "city": "Rio de Janeiro",
+        "state": "RJ",
+        "postcode": "12345-000",
+        "country": "BR",
+        "email": "joao.silva@example.com",
+        "phone": "(55) 5555-5555"
+      },
+      "shipping": {
+        "first_name": "João",
+        "last_name": "Silva",
+        "company": "",
+        "address_1": "Av. Brasil, 432",
+        "address_2": "",
+        "city": "Rio de Janeiro",
+        "state": "RJ",
+        "postcode": "12345-000",
+        "country": "BR"
+      },
+      "_links": {
+        "self": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/customers/7"
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/customers"
+          }
+        ]
+      }
+    }
+  ],
+  "update": [
+    {
+      "id": 5,
+      "date_created": "2016-05-11T21:39:01",
+      "date_modified": "2016-05-11T22:04:36",
+      "email": "joao.silva@example.com",
+      "first_name": "João",
+      "last_name": "Silva",
+      "username": "joao.silva",
+      "last_order": {
+        "id": null,
+        "date": null
+      },
+      "orders_count": 0,
+      "total_spent": "0.00",
+      "avatar_url": "https://secure.gravatar.com/avatar/?s=96",
+      "billing": {
+        "first_name": "João",
+        "last_name": "Silva",
+        "company": "",
+        "address_1": "Av. Brasil, 432",
+        "address_2": "",
+        "city": "Rio de Janeiro",
+        "state": "RJ",
+        "postcode": "12345-000",
+        "country": "BR",
+        "email": "joao.silva@example.com",
+        "phone": "(11) 1111-1111"
+      },
+      "shipping": {
+        "first_name": "João",
+        "last_name": "Silva",
+        "company": "",
+        "address_1": "Av. Brasil, 432",
+        "address_2": "",
+        "city": "Rio de Janeiro",
+        "state": "RJ",
+        "postcode": "12345-000",
+        "country": "BR"
+      },
+      "_links": {
+        "self": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/customers/5"
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/customers"
+          }
+        ]
+      }
+    }
+  ],
+  "delete": [
+    {
+      "id": 2,
+      "date_created": "2016-05-03T17:58:35",
+      "date_modified": "2016-05-11T21:43:45",
+      "email": "john.doe@example.com",
+      "first_name": "James",
+      "last_name": "Doe",
+      "username": "john.doe",
+      "last_order": {
+        "id": 118,
+        "date": "2016-05-03T18:10:43"
+      },
+      "orders_count": 3,
+      "total_spent": "28.00",
+      "avatar_url": "https://secure.gravatar.com/avatar/?s=96",
+      "billing": {
+        "first_name": "James",
+        "last_name": "Doe",
+        "company": "",
+        "address_1": "969 Market",
+        "address_2": "",
+        "city": "San Francisco",
+        "state": "CA",
+        "postcode": "94103",
+        "country": "US",
+        "email": "john.doe@example.com",
+        "phone": "(555) 555-5555"
+      },
+      "shipping": {
+        "first_name": "James",
+        "last_name": "Doe",
+        "company": "",
+        "address_1": "969 Market",
+        "address_2": "",
+        "city": "San Francisco",
+        "state": "CA",
+        "postcode": "94103",
+        "country": "US"
+      },
+      "_links": {
+        "self": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/customers/2"
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/customers"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Retrieve customer downloads
+This API lets you retrieve customer downloads permissions.
+
+```http
+GET /wp-json/wc/v1/customers/<id>/downloads
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v1/customers/2/downloads \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get("customers/2/downloads")
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('customers/2/downloads')); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("customers/2/downloads").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("customers/2/downloads").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+  {
+    "download_url": "https://example.com/?download_file=96&order=wc_order_571a7260c0da5&email=john.dow@xanmple.com&key=1789931e0c14ad9909a50c826f10c169",
+    "download_id": "1789931e0c14ad9909a50c826f10c169",
+    "product_id": 96,
+    "download_name": "Woo Album #4 &ndash; Testing",
+    "order_id": 105,
+    "order_key": "wc_order_571a7260c0da5",
+    "downloads_remaining": "unlimited",
+    "access_expires": "never",
+    "file": {
+      "name": "Testing",
+      "file": "http://example.com/wp-content/uploads/2013/06/cd_5_angle.jpg"
+    },
+    "_links": {
+      "collection": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/customers/1/downloads"
+        }
+      ],
+      "product": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/96"
+        }
+      ],
+      "order": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/orders/105"
+        }
+      ]
+    }
+  }
+]
+```
+
+  </TabItem>
+</Tabs>
+
+### Customer downloads properties
+|       Attribute       |   Type  |                                                   Description                                                    |
+|-----------------------|---------|------------------------------------------------------------------------------------------------------------------|
+| `download_url`        | string  | Download file URL. `READ-ONLY`                                                     |
+| `download_id`         | string  | Download ID (MD5). `READ-ONLY`                                                     |
+| `product_id`          | integer | Downloadable product ID. `READ-ONLY`                                               |
+| `download_name`       | string  | Downloadable file name. `READ-ONLY`                                                |
+| `order_id`            | integer | Order ID. `READ-ONLY`                                                              |
+| `order_key`           | string  | Order key. `READ-ONLY`                                                             |
+| `downloads_remaining` | string  | Amount of downloads remaining. `READ-ONLY`                                         |
+| `access_expires`      | string  | The date when the download access expires, in the site's timezone. `READ-ONLY`     |
+| `file`                | array   | File details with `name` (file name) and `file` (file URL) attributes. `READ-ONLY` |

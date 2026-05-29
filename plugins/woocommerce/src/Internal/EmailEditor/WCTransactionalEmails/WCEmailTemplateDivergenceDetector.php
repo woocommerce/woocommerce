@@ -106,6 +106,39 @@ class WCEmailTemplateDivergenceDetector {
 	public const LAST_SYNCED_AT_META_KEY = '_wc_email_last_synced_at';
 
 	/**
+	 * Informational flag intended to be set to `true` by the RSM-149 backfill
+	 * on every pre-existing `woo_email` post it stamps. Registered + surfaced
+	 * read-only over REST here so RSM-145 Tracks instrumentation can distinguish
+	 * backfilled posts from natively generated ones, but the writer is staged
+	 * in a separate follow-up PR after the 10.8 feature freeze for the backfill
+	 * class. Until then, the field defaults to `false` everywhere — Tracks will
+	 * report `was_backfilled: false` for all posts. Safe default; no behavior
+	 * depends on it being `true`.
+	 *
+	 * @var string
+	 */
+	public const BACKFILLED_META_KEY = '_wc_email_backfilled';
+
+	/**
+	 * Post meta key for the canonical core render at the moment of the last
+	 * system write. Used as the `base` reference in three-way diff
+	 * comparisons (yours-vs-base, core-vs-base) so the engine can attribute
+	 * each block's change to either the merchant or to core, eliminating the
+	 * inversion guard's need to fall back to "see release notes" on
+	 * heavily-customized posts.
+	 *
+	 * Written by every code path that mutates `post_content` for a sync-
+	 * eligible `woo_email` post: the generator (initial stamp), the auto-
+	 * applier and reset endpoint (wholesale writes align yours with core),
+	 * the selective applier (records the new canonical the merchant just
+	 * synced against), and the RSM-149 backfill (seeds for legacy posts).
+	 *
+	 * @var string
+	 * @since 10.9.0
+	 */
+	public const LAST_CORE_RENDER_META_KEY = '_wc_email_template_last_core_render';
+
+	/**
 	 * Classification outcomes.
 	 */
 	public const STATUS_IN_SYNC                   = 'in_sync';
@@ -120,18 +153,24 @@ class WCEmailTemplateDivergenceDetector {
 	private static $logger = null;
 
 	/**
-	 * Register `_wc_email_template_status` and `_wc_email_template_version` post meta on
-	 * the `woo_email` post type as REST-readable, server-write-only meta.
+	 * Register the four sync-related post meta keys on the `woo_email` post type as
+	 * REST-readable, server-write-only meta:
+	 *
+	 * - {@see self::STATUS_META_KEY} (`_wc_email_template_status`)
+	 * - {@see self::VERSION_META_KEY} (`_wc_email_template_version`)
+	 * - {@see self::SOURCE_HASH_META_KEY} (`_wc_email_template_source_hash`)
+	 * - {@see self::BACKFILLED_META_KEY} (`_wc_email_backfilled`)
 	 *
 	 * Because the `woo_email` post type declares `'custom-fields'` support (see
 	 * {@see Integration::add_email_post_type()}), WP core auto-surfaces every
 	 * `show_in_rest = true` meta key under the standard `meta` property of the
 	 * `wp/v2/woo_email` response — no custom REST field registration is needed.
 	 *
-	 * This is a stable read contract for the email list UI and any downstream consumer
-	 * (extensions, headless admins). Renaming or removing either meta key, or changing
-	 * the meaning of an existing status string value, is a breaking change. Vocabulary
-	 * expansion (adding new status values) is fine.
+	 * This is a stable read contract for the email list UI, the RSM-141 editor
+	 * "update available" banner, and the RSM-145 Tracks instrumentation. Renaming
+	 * or removing any of these meta keys, or changing the meaning of an existing
+	 * status string value, is a breaking change. Vocabulary expansion (adding new
+	 * status values) is fine.
 	 *
 	 * Hook: `init`.
 	 *
@@ -165,6 +204,32 @@ class WCEmailTemplateDivergenceDetector {
 				'sanitize_callback' => 'sanitize_text_field',
 			)
 		);
+
+		register_post_meta(
+			'woo_email',
+			self::SOURCE_HASH_META_KEY,
+			array(
+				'type'              => 'string',
+				'description'       => 'SHA-1 stamp of the canonical core post content recorded the last time this email post was generated, applied, or reset. Consumed by RSM-145 Tracks instrumentation to fingerprint the baseline the merchant was reviewing. Read-only over REST.',
+				'single'            => true,
+				'show_in_rest'      => true,
+				'auth_callback'     => array( self::class, 'rest_meta_auth_read_only' ),
+				'sanitize_callback' => 'sanitize_text_field',
+			)
+		);
+
+		register_post_meta(
+			'woo_email',
+			self::BACKFILLED_META_KEY,
+			array(
+				'type'              => 'boolean',
+				'description'       => 'True when the post was stamped by the RSM-149 backfill rather than created natively by the modern generator. Consumed by RSM-145 Tracks instrumentation to segment update-banner interactions on backfilled posts. Read-only over REST.',
+				'single'            => true,
+				'show_in_rest'      => true,
+				'auth_callback'     => array( self::class, 'rest_meta_auth_read_only' ),
+				'sanitize_callback' => 'rest_sanitize_boolean',
+			)
+		);
 	}
 
 	/**
@@ -194,6 +259,33 @@ class WCEmailTemplateDivergenceDetector {
 		}
 		// For reads, defer to whether the user can edit the post.
 		return user_can( $user_id, 'edit_post', $object_id );
+	}
+
+	/**
+	 * Stamp {@see self::BACKFILL_COMPLETE_OPTION} on fresh WooCommerce installs.
+	 *
+	 * The RSM-149 backfill runs as a 10.8 db-update migration callback. Fresh
+	 * installs on 10.9 (or any later release) never cross the 10.8 db-update
+	 * boundary — {@see \WC_Install::needs_db_update()} short-circuits on a null
+	 * `woocommerce_db_version` — so the migration never runs and the backfill
+	 * option never flips. Without this fix, {@see self::run_sweep()} would
+	 * early-return on every subsequent WC upgrade for the lifetime of the site
+	 * and Tracks instrumentation would be silently dead.
+	 *
+	 * A fresh install has no legacy `woo_email` posts to backfill: every post
+	 * the generator creates is already 10.9-stamped at creation. The migration
+	 * is trivially complete; recording that here is the truthful statement.
+	 *
+	 * Hooked on `woocommerce_newly_installed`, the WP-style public action
+	 * contract WC fires from {@see \WC_Install::newly_installed()} after the
+	 * fresh-install flag flips.
+	 *
+	 * @return void
+	 *
+	 * @since 10.9.0
+	 */
+	public static function mark_backfill_complete_on_fresh_install(): void {
+		update_option( self::BACKFILL_COMPLETE_OPTION, 'yes' );
 	}
 
 	/**
@@ -382,6 +474,28 @@ class WCEmailTemplateDivergenceDetector {
 			return null;
 		}
 
+		// Fire `_update_available` on every sweep where the merchant hasn't yet
+		// reviewed the current registry version, *before* the idempotency early-
+		// return below. A post that stays `core_updated_customized` across
+		// multiple core releases (merchant sits on the divergence through 10.7,
+		// 10.8, 10.9…) still represents a fresh "update available" signal at
+		// each new `version_to`: the status meta is unchanged but the registry
+		// version has advanced, so analytics should see one event per release
+		// boundary. The per-`(post_id, version_to)` dedup transient in the
+		// tracker prevents same-release re-fires; the suppress-during-backfill
+		// gate lives there too. Order matters: we fire here rather than after
+		// the meta write so the cross-release case isn't accidentally
+		// short-circuited by the status-unchanged guard.
+		if ( self::STATUS_CORE_UPDATED_CUSTOMIZED === $status ) {
+			$sync_config  = WCEmailTemplateSyncRegistry::get_email_sync_config( $email_id );
+			$version_to   = null !== $sync_config ? (string) ( $sync_config['version'] ?? '' ) : '';
+			$version_from = (string) get_post_meta( $post_id, self::VERSION_META_KEY, true );
+
+			if ( '' !== $version_to && version_compare( $version_from, $version_to, '<' ) ) {
+				WCEmailTemplateSyncTracker::record_update_available( $post_id );
+			}
+		}
+
 		// Idempotent write: skip the meta call entirely when the status hasn't shifted,
 		// so successive reclassifies on unchanged state produce zero DB writes (and zero
 		// `update_post_metadata` filter calls observed by tests / observers).
@@ -391,6 +505,7 @@ class WCEmailTemplateDivergenceDetector {
 		}
 
 		update_post_meta( $post_id, self::STATUS_META_KEY, $status );
+
 		return $status;
 	}
 

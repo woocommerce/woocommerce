@@ -123,6 +123,37 @@ describe( 'product filters interactivity store', () => {
 		expect( mockRegisteredStore.state.selectableItems ).toEqual( [] );
 	} );
 
+	it( 'does not add child-owned index metadata to selectable items', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+
+		mockGetServerContext.mockReturnValue( {
+			items: [
+				{
+					id: 'attribute-blue',
+					label: 'Blue',
+					value: 'blue',
+					type: 'attribute/color',
+				},
+			],
+			activeFilters: [],
+		} );
+		mockGetContext.mockReturnValue( {
+			activeFilters: [],
+		} );
+
+		expect( mockRegisteredStore.state.selectableItems ).toEqual( [
+			{
+				id: 'attribute-blue',
+				label: 'Blue',
+				value: 'blue',
+				type: 'attribute/color',
+				selected: false,
+			},
+		] );
+	} );
+
 	[
 		{
 			description: 'unicode value',

@@ -29,7 +29,7 @@ export function FormattedPrice( {
 					) }
 				>
 					{ product.on_sale && (
-						<span>
+						<span translate="no">
 							{ product.sale_price
 								? formatAmount( product.sale_price )
 								: formatAmount( product.price ) }
@@ -38,6 +38,7 @@ export function FormattedPrice( {
 
 					{ product.regular_price && (
 						<span
+							translate="no"
 							className={ clsx( {
 								'woocommerce-product-formatted-price--on-sale':
 									product.on_sale,

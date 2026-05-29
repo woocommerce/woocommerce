@@ -246,11 +246,12 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 
 					$type   = 'taxonomy/' . $taxonomy;
 					$option = array(
-						'id'       => $type . '-' . $term['slug'],
-						'label'    => $term['name'],
-						'value'    => $term['slug'],
-						'selected' => in_array( $term['slug'], $selected_terms, true ),
-						'type'     => $type,
+						'id'        => $type . '-' . $term['slug'],
+						'label'     => $term['name'],
+						'ariaLabel' => $term['name'],
+						'value'     => $term['slug'],
+						'selected'  => in_array( $term['slug'], $selected_terms, true ),
+						'type'      => $type,
 					);
 
 					if ( $show_counts ) {
@@ -278,7 +279,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filters',
-			'data-wp-key'         => wp_unique_prefixed_id( $this->get_block_type() ),
+			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context'     => wp_json_encode(
 				array(
 					'activeLabelTemplate' => $taxonomy_object->labels->singular_name . ': {{label}}',
@@ -300,7 +301,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
 				function ( $carry, $parsed_block ) use ( $filter_context ) {
-					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerceSelectableItems' => $filter_context ) ) )->render();
+					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerce/selectableItems' => $filter_context ) ) )->render();
 					return $carry;
 				},
 				''
