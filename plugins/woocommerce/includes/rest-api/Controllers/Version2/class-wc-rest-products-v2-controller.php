@@ -1064,7 +1064,6 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @param bool            $creating If is creating a new object.
-	 * @throws WC_REST_Exception If product media gallery data is invalid.
 	 *
 	 * @return WP_Error|WC_Data
 	 */
