@@ -5,7 +5,6 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import { SlotFillProvider } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
-import { select } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -30,11 +29,23 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 
+const mockGetEditedEntityRecord = jest.fn().mockReturnValue( {
+	type: 'simple',
+} );
+
 jest.mock( '@wordpress/data', () => {
 	const originalModule = jest.requireActual( '@wordpress/data' );
 	return {
 		...originalModule,
-		select: jest.fn( ( ...args ) => originalModule.select( ...args ) ),
+		select: jest.fn( ( storeName, ...args ) => {
+			if ( storeName === 'core' ) {
+				return {
+					getEditedEntityRecord: mockGetEditedEntityRecord,
+				};
+			}
+
+			return originalModule.select( storeName, ...args );
+		} ),
 	};
 } );
 
@@ -168,11 +179,6 @@ describe( 'Tabs', () => {
 	} );
 
 	it( 'should trigger wcadmin_product_tab_click track event when tab is clicked', async () => {
-		( select as jest.Mock ).mockImplementation( () => ( {
-			getEditedEntityRecord: () => ( {
-				type: 'simple',
-			} ),
-		} ) );
 		render( <MockTabs /> );
 
 		const button = screen.getByText( 'Test button 2' );
