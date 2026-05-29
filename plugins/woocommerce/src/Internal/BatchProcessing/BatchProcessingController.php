@@ -547,11 +547,27 @@ class BatchProcessingController {
 			return;
 		}
 
+		// Bail out if the database connection is in an unhealthy state. Under heavy load, a previous
+		// query may leave the mysqli connection with error 2014 ("Commands out of sync"), which would
+		// cause every subsequent query in this shutdown handler to fail and cascade errors to other
+		// shutdown handlers. This cleanup is non-critical and will be retried on the next request.
+		if ( $this->is_db_connection_in_error() ) {
+			return;
+		}
+
 		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
 		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
 		$has_scheduled_action = function_exists( 'as_has_scheduled_action') ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
 
 		if ( call_user_func( $has_scheduled_action, self::WATCHDOG_ACTION_NAME ) ) {
+			return;
+		}
+
+		// Re-check the connection after the Action Scheduler query. The AS query can leave the
+		// connection in error state 2014 under certain conditions (heavy request load, many prior
+		// queries). If that happened, bail out to prevent cascading failures.
+		// @phpstan-ignore-next-line -- Connection state can change after AS query side effects.
+		if ( $this->is_db_connection_in_error() ) {
 			return;
 		}
 
@@ -576,5 +592,33 @@ class BatchProcessingController {
 				$this->schedule_batch_processing( $processor, true );
 			}
 		}
+	}
+
+	/**
+	 * Check if the database connection is in an error state.
+	 *
+	 * Detects mysqli error 2014 ("Commands out of sync") and other connection-level errors
+	 * that would cause all subsequent queries to fail. This is used as a guard in shutdown
+	 * handlers to prevent cascading database failures.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return bool True if the database connection has an active error, false otherwise.
+	 */
+	private function is_db_connection_in_error(): bool {
+		global $wpdb;
+
+		if ( ! empty( $wpdb->last_error ) ) {
+			return true;
+		}
+
+		// Check the underlying mysqli connection for error state 2014 ("Commands out of sync")
+		// which $wpdb->last_error may not always capture (e.g. if the error occurs between queries).
+		// phpcs:ignore WordPress.DB.RestrictedClasses.mysql__mysqli
+		if ( isset( $wpdb->dbh ) && $wpdb->dbh instanceof \mysqli && mysqli_errno( $wpdb->dbh ) !== 0 ) { // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_errno
+			return true;
+		}
+
+		return false;
 	}
 }

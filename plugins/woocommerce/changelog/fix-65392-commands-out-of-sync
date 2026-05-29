@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add database connection health check in BatchProcessingController shutdown handler to prevent cascading errno 2014 ("Commands out of sync") failures.
