@@ -11,11 +11,11 @@ use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 
 /**
- * Integration tests for GET /wc-pos/v1/staff.
+ * Integration tests for GET /wc/pos/v1/staff.
  */
 class POSStaffControllerTest extends WC_REST_Unit_Test_Case {
 
-	private const ROUTE = '/wc-pos/v1/staff';
+	private const ROUTE = '/wc/pos/v1/staff';
 
 	/**
 	 * Set up roles + route registration once for the whole class.

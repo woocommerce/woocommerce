@@ -13,7 +13,7 @@ use WP_REST_Server;
 /**
  * REST controller for the POS staff list.
  *
- * Exposes GET /wc-pos/v1/staff — the canonical staff list the mobile client caches
+ * Exposes GET /wc/pos/v1/staff — the canonical staff list the mobile client caches
  * and validates PIN entry against locally. Each entry includes the user's display
  * name, role, capability map, and stored PIN hash record (or null if no PIN set).
  *
@@ -36,7 +36,7 @@ class POSStaffController extends RestApiControllerBase {
 	/**
 	 * @inheritDoc
 	 */
-	protected string $route_namespace = 'wc-pos/v1';
+	protected string $route_namespace = 'wc/pos/v1';
 
 	/**
 	 * Initialize dependencies via the DI container.
@@ -53,7 +53,7 @@ class POSStaffController extends RestApiControllerBase {
 	 * @inheritDoc
 	 */
 	protected function get_rest_api_namespace(): string {
-		return 'wc-pos';
+		return 'pos-staff';
 	}
 
 	/**

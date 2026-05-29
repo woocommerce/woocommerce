@@ -77,7 +77,7 @@ class POSController implements RegisterHooksInterface {
 
 		// Defensive: flush rewrite rules when the gating flag is flipped, so any host
 		// where the wp-json catch-all rewrite is stale (managed hosting, page-cache
-		// plugins, partial wp-env state) doesn't 404 the new /wc-pos/* routes after
+		// plugins, partial wp-env state) doesn't 404 the new /wc/pos/* routes after
 		// the feature is enabled. REST dispatch normally doesn't depend on per-route
 		// rewrites, but the global wp-json rule must exist for any REST URL to work.
 		$flag_option = 'woocommerce_feature_' . self::FEATURE_FLAG . '_enabled';

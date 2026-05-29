@@ -45,7 +45,7 @@ defined( 'ABSPATH' ) || exit;
  *  enforcement returns in milestone 3 alongside the manager override design.
  *
  * Two rows DO enforce server-side in M1:
- *   - `manage_pos_staff` gates GET /wc-pos/v1/staff (POSStaffController) and the
+ *   - `manage_pos_staff` gates GET /wc/pos/v1/staff (POSStaffController) and the
  *     wp-admin → Settings → Point of Sale → Staff page.
  *   - `Access wp-admin` is enforced by an admin_init redirect in POSController
  *     that bounces any user with `view_pos` but without `manage_woocommerce` away
