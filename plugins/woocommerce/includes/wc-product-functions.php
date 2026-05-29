@@ -18,8 +18,22 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
+
+if ( ! function_exists( 'wc_product_gallery_videos_enabled' ) ) {
+	/**
+	 * Check if product gallery videos are enabled.
+	 *
+	 * @since 10.9.0
+	 * @return bool
+	 */
+	function wc_product_gallery_videos_enabled() {
+		return FeaturesUtil::feature_is_enabled( ProductMediaGallery::FEATURE_ID );
+	}
+}
 
 /**
  * Standard way of retrieving products based on certain parameters.
@@ -921,6 +935,14 @@ add_filter( 'wp_get_attachment_image_attributes', 'wc_get_attachment_image_attri
  * @return array
  */
 function wc_prepare_attachment_for_js( $response ) {
+	if ( isset( $response['id'], $response['type'] ) && 'video' === $response['type'] ) {
+		$poster_id = absint( get_post_thumbnail_id( $response['id'] ) );
+
+		if ( $poster_id ) {
+			$response['poster_id'] = $poster_id;
+		}
+	}
+
 	/*
 	 * If the user can manage woocommerce, allow them to
 	 * see the image content.

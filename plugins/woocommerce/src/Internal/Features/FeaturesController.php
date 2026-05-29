@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -304,6 +305,16 @@ class FeaturesController {
 				'name'                         => __( 'New product editor', 'woocommerce' ),
 				'description'                  => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 				'is_experimental'              => true,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
+			ProductMediaGallery::FEATURE_ID      => array(
+				'name'                         => __( 'Product gallery videos (Beta)', 'woocommerce' ),
+				'description'                  => __( 'Enable videos in product galleries and product gallery APIs.', 'woocommerce' ),
+				'option_key'                   => ProductMediaGallery::ENABLE_OPTION_NAME,
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
