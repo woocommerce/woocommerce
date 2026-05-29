@@ -405,6 +405,55 @@ class ProductCollectionData extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Requesting the same attribute taxonomy with both "or" and "and" query types is not duplicated.
+	 */
+	public function test_calculate_attribute_counts_deduplicates_across_query_types() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_variable_product(
+			array(),
+			array(
+				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+			)
+		);
+		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
+
+		$single_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$single_request->set_param(
+			'calculate_attribute_counts',
+			array(
+				array(
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'or',
+				),
+			)
+		);
+		$single = rest_get_server()->dispatch( $single_request )->get_data();
+
+		$both_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$both_request->set_param(
+			'calculate_attribute_counts',
+			array(
+				array(
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'or',
+				),
+				array(
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'and',
+				),
+			)
+		);
+		$both = rest_get_server()->dispatch( $both_request )->get_data();
+
+		$this->assertNotEmpty( $single['attribute_counts'], 'Baseline single-taxonomy request should return counts.' );
+		$this->assertEquals(
+			$single['attribute_counts'],
+			$both['attribute_counts'],
+			'A taxonomy requested with both query types must be counted once, not duplicated.'
+		);
+	}
+
+	/**
 	 * @testdox The count cap is filterable so large stores can raise it.
 	 */
 	public function test_counts_max_items_is_filterable() {
@@ -438,8 +487,9 @@ class ProductCollectionData extends ControllerTestCase {
 		);
 		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
 
-		// Clear any filter-data transients left by other requests so this assertion is isolated.
-		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wc_filter_data_%'" );
+		// Clear any filter-data transients left by other requests so this assertion is isolated. The
+		// entry-count counter is excluded so the assertion below proves a real data entry was written.
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wc_filter_data_%' AND option_name <> '_transient_wc_filter_data_entry_count'" );
 
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
 		$request->set_param(
@@ -452,10 +502,14 @@ class ProductCollectionData extends ControllerTestCase {
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
+		// The returned counts must be correct, not merely present.
+		$this->assertNotEmpty( $data['attribute_counts'], 'Attribute counts should be returned.' );
 
-		$cached_entries = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '_transient_wc_filter_data_%'" );
+		// A data-cache entry (not just the entry-count counter) must have been written.
+		$cached_entries = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '_transient_wc_filter_data_%' AND option_name <> '_transient_wc_filter_data_entry_count'" );
 		$this->assertGreaterThan(
 			0,
 			$cached_entries,

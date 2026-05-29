@@ -125,9 +125,11 @@ class ProductCollectionData extends AbstractRoute {
 			}
 
 			// Deduplicate so each distinct taxonomy is counted with a single query, regardless of how
-			// many times it was requested.
+			// many times it was requested. A taxonomy requested with both query types is counted once
+			// via the "or" branch (which removes the active attribute from the query first), so it is
+			// dropped from the "and" list to avoid duplicate entries in the response.
 			$taxonomy__or_queries  = array_unique( $taxonomy__or_queries );
-			$taxonomy__and_queries = array_unique( $taxonomy__and_queries );
+			$taxonomy__and_queries = array_diff( array_unique( $taxonomy__and_queries ), $taxonomy__or_queries );
 
 			$data['attribute_counts'] = [];
 			// Or type queries need special handling because the attribute, if set, needs removing from the query first otherwise counts would not be correct.

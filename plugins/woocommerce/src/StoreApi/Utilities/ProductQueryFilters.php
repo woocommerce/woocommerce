@@ -149,7 +149,8 @@ class ProductQueryFilters {
 				continue;
 			}
 			$counts = $filter_data->get_attribute_counts( $query_vars, $taxonomy );
-			// Use + operator to preserve keys.
+			// Each attribute taxonomy owns a disjoint set of term IDs, so the union operator safely
+			// merges the term_id => count pairs without colliding or overwriting between taxonomies.
 			$all_counts = $all_counts + $counts;
 		}
 
