@@ -290,6 +290,218 @@ class ProductCollectionData extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox The count array params declare a default maxItems bound to limit query fan-out.
+	 */
+	public function test_count_params_declare_default_max_items() {
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'product-collection-data' );
+		$params     = $controller->get_collection_params();
+
+		$this->assertArrayHasKey( 'maxItems', $params['calculate_attribute_counts'], 'calculate_attribute_counts must be bounded.' );
+		$this->assertArrayHasKey( 'maxItems', $params['calculate_taxonomy_counts'], 'calculate_taxonomy_counts must be bounded.' );
+		$this->assertSame( 25, $params['calculate_attribute_counts']['maxItems'], 'Default attribute-counts cap should be 25.' );
+		$this->assertSame( 25, $params['calculate_taxonomy_counts']['maxItems'], 'Default taxonomy-counts cap should be 25.' );
+	}
+
+	/**
+	 * @testdox An oversized calculate_attribute_counts array is rejected with HTTP 400.
+	 */
+	public function test_calculate_attribute_counts_rejects_oversized_array() {
+		$request  = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$too_many = array_fill(
+			0,
+			26,
+			array(
+				'taxonomy'   => 'pa_size',
+				'query_type' => 'or',
+			)
+		);
+		$request->set_param( 'calculate_attribute_counts', $too_many );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status(), 'More than 25 attribute-count entries should be rejected.' );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox An oversized calculate_taxonomy_counts array is rejected with HTTP 400.
+	 */
+	public function test_calculate_taxonomy_counts_rejects_oversized_array() {
+		$request  = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$too_many = array_fill( 0, 26, 'product_cat' );
+		$request->set_param( 'calculate_taxonomy_counts', $too_many );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status(), 'More than 25 taxonomy-count entries should be rejected.' );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox An array exactly at the cap is accepted.
+	 */
+	public function test_calculate_taxonomy_counts_at_cap_is_accepted() {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$at_cap  = array_fill( 0, 25, 'product_cat' );
+		$request->set_param( 'calculate_taxonomy_counts', $at_cap );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status(), 'Exactly 25 entries should be accepted.' );
+	}
+
+	/**
+	 * @testdox Repeating the same attribute taxonomy is de-duplicated to a single set of counts.
+	 */
+	public function test_calculate_attribute_counts_deduplicates_taxonomies() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_variable_product(
+			array(),
+			array(
+				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+			)
+		);
+		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
+
+		$single_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$single_request->set_param(
+			'calculate_attribute_counts',
+			array(
+				array(
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'or',
+				),
+			)
+		);
+		$single = rest_get_server()->dispatch( $single_request )->get_data();
+
+		$repeated_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$repeated_request->set_param(
+			'calculate_attribute_counts',
+			array(
+				array(
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'or',
+				),
+				array(
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'or',
+				),
+				array(
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'or',
+				),
+			)
+		);
+		$repeated = rest_get_server()->dispatch( $repeated_request )->get_data();
+
+		$this->assertNotEmpty( $single['attribute_counts'], 'Baseline single-taxonomy request should return counts.' );
+		$this->assertEquals(
+			$single['attribute_counts'],
+			$repeated['attribute_counts'],
+			'Requesting the same taxonomy multiple times must not duplicate or alter the counts.'
+		);
+	}
+
+	/**
+	 * @testdox The count cap is filterable so large stores can raise it.
+	 */
+	public function test_counts_max_items_is_filterable() {
+		$callback = static function () {
+			return 100;
+		};
+		add_filter( 'woocommerce_store_api_collection_data_counts_max_items', $callback );
+
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'product-collection-data' );
+		$params     = $controller->get_collection_params();
+
+		remove_filter( 'woocommerce_store_api_collection_data_counts_max_items', $callback );
+
+		$this->assertSame( 100, $params['calculate_attribute_counts']['maxItems'], 'Filter should raise the attribute-counts cap.' );
+		$this->assertSame( 100, $params['calculate_taxonomy_counts']['maxItems'], 'Filter should raise the taxonomy-counts cap.' );
+	}
+
+	/**
+	 * @testdox Attribute counts are computed through the cached filter-data path.
+	 */
+	public function test_calculate_attribute_counts_uses_filter_data_cache() {
+		global $wpdb;
+
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_variable_product(
+			array(),
+			array(
+				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+			)
+		);
+		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
+
+		// Clear any filter-data transients left by other requests so this assertion is isolated.
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wc_filter_data_%'" );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$request->set_param(
+			'calculate_attribute_counts',
+			array(
+				array(
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'or',
+				),
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$cached_entries = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '_transient_wc_filter_data_%'" );
+		$this->assertGreaterThan(
+			0,
+			$cached_entries,
+			'Attribute counts should be written to the shared filter-data cache (proves the cached path is used).'
+		);
+	}
+
+	/**
+	 * @testdox Repeated attribute-count requests return stable, correct counts (cache does not corrupt results).
+	 */
+	public function test_calculate_attribute_counts_stable_across_repeated_requests() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_variable_product(
+			array(),
+			array(
+				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+			)
+		);
+		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
+
+		$make_request = function () {
+			$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+			$request->set_param(
+				'calculate_attribute_counts',
+				array(
+					array(
+						'taxonomy'   => 'pa_size',
+						'query_type' => 'or',
+					),
+				)
+			);
+			return rest_get_server()->dispatch( $request )->get_data();
+		};
+
+		$first  = $make_request();
+		$second = $make_request();
+
+		$this->assertNotEmpty( $first['attribute_counts'], 'First request should return counts.' );
+		$this->assertEquals(
+			$first['attribute_counts'],
+			$second['attribute_counts'],
+			'Repeated identical requests must return identical counts.'
+		);
+	}
+
+	/**
 	 * Test schema matches responses.
 	 */
 	public function test_get_item_schema() {
