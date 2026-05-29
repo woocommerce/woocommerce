@@ -368,6 +368,41 @@ class OrderController {
 	 * @param bool      $needs_shipping Whether the order needs shipping.
 	 */
 	protected function validate_addresses( \WC_Order $order, bool $needs_shipping ) {
+		/*
+		 * NOTE for the non-POC version: this filter should be added in a
+		 * standalone, small PR targeting trunk separately from the POS
+		 * spike. Mirrors the existing
+		 * `woocommerce_store_api_checkout_require_payment_method` and
+		 * `woocommerce_store_api_disable_nonce_check` patterns — a
+		 * documented opt-out for trusted-actor callers (POS, agentic
+		 * commerce, headless apps) that legitimately don't have customer
+		 * address info to capture (e.g. cash sale of physical goods over
+		 * the counter). Default behaviour is unchanged.
+		 */
+
+		/**
+		 * Filters whether the Store API runs address validation on a
+		 * Checkout request. Returning false short-circuits the address
+		 * field-presence checks (country, postcode, phone, etc.) — for
+		 * trusted-actor callers that legitimately accept orders with
+		 * incomplete or missing address data.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param bool      $validate         Whether to run validation. Default true.
+		 * @param \WC_Order $order            The order being validated.
+		 * @param bool      $needs_shipping   Whether the order needs shipping.
+		 */
+		$validate = (bool) apply_filters(
+			'woocommerce_store_api_validate_addresses',
+			true,
+			$order,
+			$needs_shipping
+		);
+		if ( ! $validate ) {
+			return;
+		}
+
 		$errors           = new \WP_Error();
 		$billing_country  = $order->get_billing_country();
 		$shipping_country = $order->get_shipping_country();

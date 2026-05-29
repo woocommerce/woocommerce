@@ -16,6 +16,7 @@ namespace Automattic\WooCommerce\Tests\Internal\POS\StoreApi\Routes;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Context;
+use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutAddressPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutPaymentMethodPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Routes\Controller;
 use Automattic\WooCommerce\StoreApi\RoutesController;
@@ -51,11 +52,11 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 
 		Context::set_test_override( true );
 
-		// Engage the POS opt-out so the Store API's require-payment_method guard
-		// is relaxed for these requests. In production this is registered in
-		// class-woocommerce.php; in tests we register it explicitly so the test
-		// is self-contained.
+		// Engage the POS opt-outs so the Store API guards are relaxed for these
+		// requests. In production these are registered in class-woocommerce.php;
+		// in tests we register them explicitly so the test is self-contained.
 		( new CheckoutPaymentMethodPolicy() )->register();
+		( new CheckoutAddressPolicy() )->register();
 
 		$this->admin_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
 
@@ -77,6 +78,7 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 	 */
 	protected function tearDown(): void {
 		remove_all_filters( 'woocommerce_store_api_checkout_require_payment_method' );
+		remove_all_filters( 'woocommerce_store_api_validate_addresses' );
 		Context::set_test_override( null );
 		wp_delete_user( $this->admin_id );
 		parent::tearDown();
@@ -142,9 +144,9 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Add-item then checkout with no payment_method creates a pending order with the same line item.
+	 * @testdox Add-item then checkout with a truly empty body creates a pending order with the same line item.
 	 */
-	public function test_checkout_without_payment_method_creates_pending_order_from_cart(): void {
+	public function test_checkout_with_empty_body_creates_pending_order_from_cart(): void {
 		wp_set_current_user( $this->admin_id );
 
 		// Build the cart with one item.
@@ -167,22 +169,16 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		}
 		$this->assertNotEmpty( $cart_token, 'add-item should emit a Cart-Token header for checkout to use.' );
 
-		// Run checkout against the same cart. Deliberately NO payment_method
-		// (the POS opt-out lets it be deferred). Addresses are sent as
-		// minimal placeholders — the schema-level requirement has been
-		// relaxed for POS, but OrderController::validate_addresses still
-		// enforces store-configured per-field validation (postcode, phone,
-		// etc.) at the pipeline layer. Relaxing that is a larger upstream
-		// change tracked in DECISIONS.md; for now mobile sends placeholder
-		// values for those fields.
+		// Run checkout against the same cart with a truly empty body — no
+		// payment_method, no billing_address, no shipping_address. POS legitimately
+		// defers all of these past order creation:
+		//   - payment_method: the existing post-checkout flow records it
+		//     (WooPayments terminal capture for cards, cash mark-paid endpoint).
+		//   - addresses: in-store retail (cash sale of physical goods) often has
+		//     no customer address to capture; the cashier can edit the order
+		//     later via admin if needed for products that genuinely need one.
 		$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
 		$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );
-		$checkout_request->set_body_params(
-			array(
-				'billing_address'  => $this->minimal_address(),
-				'shipping_address' => $this->minimal_address(),
-			)
-		);
 		$checkout_response = rest_get_server()->dispatch( $checkout_request );
 
 		$this->assertSame(
