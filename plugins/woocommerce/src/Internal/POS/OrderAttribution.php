@@ -22,7 +22,7 @@ use WP_REST_Request;
  *       { "key": "_pos_staff_user_id",     "value": 42 },
  *       // Optional — only present when a manager authorized an override:
  *       { "key": "_pos_override_user_id",  "value": 7  },
- *       { "key": "_pos_override_reason",   "value": "refund_shop_orders" }
+ *       { "key": "_pos_override_reason",   "value": "issue_refunds" }
  *     ]
  *
  * Validation runs in the pre-insert filter so bogus attribution or override data
@@ -59,8 +59,8 @@ class OrderAttribution implements RegisterHooksInterface {
 	 * endpoint.
 	 */
 	private const OVERRIDABLE_CAPABILITIES = array(
-		'refund_shop_orders',
-		'publish_shop_coupons',
+		Capabilities::CAP_ISSUE_REFUNDS,
+		Capabilities::CAP_CREATE_COUPONS,
 	);
 
 	/**
@@ -252,8 +252,7 @@ class OrderAttribution implements RegisterHooksInterface {
 			);
 		}
 
-		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- Registered in WC_Install::create_roles() via POSCapabilities::pos_specific_capabilities().
-		if ( ! user_can( $staff_user_id, 'view_pos' ) ) {
+		if ( ! Capabilities::has_pos_access( $staff_user_id ) ) {
 			return new WP_Error(
 				'woocommerce_pos_invalid_attribution',
 				__( 'POS attribution user does not have POS access.', 'woocommerce' ),
@@ -298,8 +297,7 @@ class OrderAttribution implements RegisterHooksInterface {
 			);
 		}
 
-		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- Registered in WC_Install::create_roles() via POSCapabilities::pos_specific_capabilities().
-		if ( ! user_can( $override_user_id, 'view_pos' ) ) {
+		if ( ! Capabilities::has_pos_access( $override_user_id ) ) {
 			return new WP_Error(
 				'woocommerce_pos_invalid_override',
 				__( 'POS override approver does not have POS access.', 'woocommerce' ),
@@ -307,7 +305,11 @@ class OrderAttribution implements RegisterHooksInterface {
 			);
 		}
 
-		if ( ! user_can( $override_user_id, $override_reason ) ) {
+		$approver_pos_role = Capabilities::get_pos_role( $override_user_id );
+		$approver_caps     = null !== $approver_pos_role
+			? Capabilities::capabilities_for_role( $approver_pos_role )
+			: array();
+		if ( empty( $approver_caps[ $override_reason ] ) ) {
 			return new WP_Error(
 				'woocommerce_pos_override_forbidden',
 				__( 'POS override approver does not hold the required capability.', 'woocommerce' ),

@@ -6,158 +6,211 @@ namespace Automattic\WooCommerce\Internal\POS;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Canonical capability lists for the two POS roles (POS Cashier, POS Manager).
+ * POS access + capability model (Proposal 1 — user-meta-based).
  *
- * These lists are consumed by:
- *  - WC_Install::create_roles() when registering the roles on install/upgrade.
- *  - WC_Install::remove_roles() and uninstall.php when tearing them down.
+ * Replaces the per-role WP capability surface from the earlier draft with a single
+ * user-meta key (`_pos_role`) and a static capability matrix computed server-side
+ * and shipped to the mobile client. No new WP roles, no new WP capabilities.
  *
- * Server-side capability enforcement is intentionally NOT wired in milestones 1–2
- * of the POS staff iteration; roles + capabilities exist so the mobile client can
- * gate UI actions client-side based on the cached /staff payload, and so future
- * milestones can flip enforcement on without re-registering roles.
+ * Why this shape:
+ *  - POS role is orthogonal to the WordPress role. The merchant explicitly assigns
+ *    one of three POS roles (pos_cashier / pos_manager / pos_admin) to whichever
+ *    users need to use the POS app — including WP administrators and shop managers,
+ *    who do NOT get implicit POS access. This avoids the "if a POS user somehow
+ *    auths, they get refund_shop_orders for the whole REST API" risk raised in
+ *    proposal review.
+ *  - The POS cap names (`process_sales`, `issue_refunds`, …) are NOT WP caps. They
+ *    are client-side gating keys served in the /staff payload. The WC REST surface
+ *    is unaffected by them, so a POS user without an underlying WP role with
+ *    elevated caps cannot perform privileged operations via the public REST API.
  *
- * # POS capability matrix (M1)
- *
- * Each row in the product table maps to exactly one gating capability. Override
- * behavior (cashier or manager temporarily acquiring a higher cap via a manager
- * PIN) is reintroduced in milestone 3; until then, override rows resolve to NO.
- *
- *     Action                         | Capability             | Cashier | Manager | Admin/SM | Gated where (M1)
- *     -------------------------------|------------------------|:-------:|:-------:|:--------:|------------------
- *     Process sales                  | publish_shop_orders    |  yes    |  yes    |  yes     | client only*
- *     View orders                    | read_shop_order        |  yes    |  yes    |  yes     | client only*
- *     Apply existing coupons         | read_shop_coupon       |  yes    |  yes    |  yes     | client only*
- *     Create coupons                 | publish_shop_coupons   |  no     |  yes    |  yes     | client only*
- *     Issue refunds                  | refund_shop_orders     |  no     |  yes    |  yes     | client only*
- *     View POS settings              | view_pos_settings      |  no     |  yes    |  yes     | client only
- *     Edit POS settings              | edit_pos_settings      |  no     |  no     |  yes     | client only
- *     Manage POS staff (wp-admin)    | manage_pos_staff       |  no     |  no     |  yes     | server (admin page + REST)
- *     Exit POS                       | exit_pos               |  no     |  no     |  yes     | client only
- *     Access wp-admin                | (implicit; no new cap) |  no     |  no     |  yes     | server (admin_init redirect)
- *
- * *"client only" caveat for M1: standard WC REST endpoints (orders, coupons, refunds)
- *  do run `current_user_can()` server-side against the requesting capability — but
- *  because every mobile request authenticates as the device admin in this iteration,
- *  those checks are always satisfied. The cashier/manager caps in the table govern
- *  the mobile app's UI gating (which reads them from the cached /staff payload),
- *  not the request-level authorization on the wire. Server-side per-operator
- *  enforcement returns in milestone 3 alongside the manager override design.
- *
- * Two rows DO enforce server-side in M1:
- *   - `manage_pos_staff` gates GET /wc/pos/v1/staff (POSStaffController) and the
- *     wp-admin → Settings → Point of Sale → Staff page.
- *   - `Access wp-admin` is enforced by an admin_init redirect in POSController
- *     that bounces any user with `view_pos` but without `manage_woocommerce` away
- *     from wp-admin pages (per the i2 proposal: POS-only roles get access only
- *     within POS, not within wp-admin).
+ * Trade-off (accepted): wp_usermeta is broadly readable by any plugin via
+ * get_user_meta() and rides along in user exports / backups. Indexing for
+ * multi-condition queries (multi-location, etc.) is weaker than a dedicated table.
+ * If those constraints bite, the model can be lifted into a dedicated table later
+ * without changing the wire shape — only this class needs to change.
  *
  * @since 10.9.0
  * @internal
  */
 class Capabilities {
 
-	public const ROLE_CASHIER = 'pos_cashier';
-	public const ROLE_MANAGER = 'pos_manager';
-
 	/**
-	 * Capabilities granted to the POS Cashier role.
-	 *
-	 * Minimum set needed to process sales at the counter: read products, read coupons,
-	 * create + edit own orders, create customers. No refunds, no settings access.
-	 *
-	 * @return array<string, bool>
-	 *
-	 * @since 10.9.0
+	 * User meta key storing the explicit POS role assignment.
 	 */
-	public static function cashier_capabilities(): array {
-		return array(
-			'read'                       => true,
-			// POS entry.
-			'view_pos'                   => true,
-			// Process sales + view orders.
-			'edit_shop_order'            => true,
-			'edit_shop_orders'           => true,
-			'edit_published_shop_orders' => true,
-			'publish_shop_orders'        => true,
-			'read_shop_order'            => true,
-			'read_private_shop_orders'   => true,
-			// Read products.
-			'read_product'               => true,
-			'read_private_products'      => true,
-			// Apply (read) existing coupons only — no publish.
-			'read_shop_coupon'           => true,
-			'read_private_shop_coupons'  => true,
-			// Allow ad-hoc customer creation at checkout.
-			'create_customers'           => true,
-		);
-	}
+	public const POS_ROLE_META_KEY = '_pos_role';
 
 	/**
-	 * Capabilities granted to the POS Manager role.
+	 * POS role identifiers.
 	 *
-	 * Cashier baseline + create coupons, issue refunds, view POS settings, edit products,
-	 * see WooCommerce reports. Still no full wp-admin access (no manage_woocommerce, no
-	 * edit_pos_settings, no manage_pos_staff, no exit_pos).
-	 *
-	 * @return array<string, bool>
-	 *
-	 * @since 10.9.0
+	 * All three are explicit `_pos_role` meta values. There is no implicit POS
+	 * access from a WP role — administrators and shop managers must be assigned
+	 * a POS role in the Staff settings page like any other user.
 	 */
-	public static function manager_capabilities(): array {
-		return array(
-			'read'                        => true,
-			'upload_files'                => true,
-			// POS entry + view settings.
-			'view_pos'                    => true,
-			'view_pos_settings'           => true,
-			// Issue refunds.
-			'refund_shop_orders'          => true,
-			// Process sales + view orders.
-			'edit_shop_order'             => true,
-			'edit_shop_orders'            => true,
-			'edit_others_shop_orders'     => true,
-			'edit_published_shop_orders'  => true,
-			'publish_shop_orders'         => true,
-			'read_shop_order'             => true,
-			'read_private_shop_orders'    => true,
-			'create_customers'            => true,
-			'view_woocommerce_reports'    => true,
-			// Read + edit products.
-			'edit_products'               => true,
-			'edit_published_products'     => true,
-			'read_product'                => true,
-			'read_private_products'       => true,
-			// Read + create coupons.
-			'edit_shop_coupon'            => true,
-			'edit_shop_coupons'           => true,
-			'edit_others_shop_coupons'    => true,
-			'edit_published_shop_coupons' => true,
-			'publish_shop_coupons'        => true,
-			'read_shop_coupon'            => true,
-			'read_private_shop_coupons'   => true,
-		);
-	}
+	public const POS_ROLE_CASHIER = 'pos_cashier';
+	public const POS_ROLE_MANAGER = 'pos_manager';
+	public const POS_ROLE_ADMIN   = 'pos_admin';
 
 	/**
-	 * POS-specific capabilities introduced by this iteration.
+	 * Client-side POS capability identifiers.
 	 *
-	 * Granted to administrator + shop_manager on install/upgrade so privileged users
-	 * have full POS access without needing to switch to the dedicated POS roles.
-	 * Removed from those roles on uninstall.
+	 * These are JSON keys in the /staff payload, not WP capabilities. The mobile
+	 * client gates UI by reading them from the cached staff record for the
+	 * PIN-authenticated operator.
+	 */
+	public const CAP_PROCESS_SALES     = 'process_sales';
+	public const CAP_VIEW_ORDERS       = 'view_orders';
+	public const CAP_APPLY_COUPONS     = 'apply_coupons';
+	public const CAP_CREATE_COUPONS    = 'create_coupons';
+	public const CAP_ISSUE_REFUNDS     = 'issue_refunds';
+	public const CAP_VIEW_POS_SETTINGS = 'view_pos_settings';
+	public const CAP_EDIT_POS_SETTINGS = 'edit_pos_settings';
+	public const CAP_MANAGE_POS_STAFF  = 'manage_pos_staff';
+	public const CAP_EXIT_POS          = 'exit_pos';
+
+	/**
+	 * All assignable POS role values, in ascending capability order.
 	 *
 	 * @return string[]
+	 */
+	public static function assignable_pos_roles(): array {
+		return array(
+			self::POS_ROLE_CASHIER,
+			self::POS_ROLE_MANAGER,
+			self::POS_ROLE_ADMIN,
+		);
+	}
+
+	/**
+	 * Resolve the assigned POS role for a user, or null if they have none.
+	 *
+	 * Reads the `_pos_role` user meta value and returns it only if it matches an
+	 * assignable POS role. No implicit fallback to WP role — a wp administrator
+	 * without an explicit POS role assignment has no POS access.
+	 *
+	 * @param int $user_id Target user.
+	 * @return string|null One of self::POS_ROLE_* or null.
 	 *
 	 * @since 10.9.0
 	 */
-	public static function pos_specific_capabilities(): array {
-		return array(
-			'view_pos',
-			'view_pos_settings',
-			'edit_pos_settings',
-			'refund_shop_orders',
-			'manage_pos_staff',
-			'exit_pos',
+	public static function get_pos_role( int $user_id ): ?string {
+		$meta = get_user_meta( $user_id, self::POS_ROLE_META_KEY, true );
+		if ( in_array( $meta, self::assignable_pos_roles(), true ) ) {
+			return (string) $meta;
+		}
+		return null;
+	}
+
+	/**
+	 * Whether a user has any POS access at all.
+	 *
+	 * @param int $user_id Target user.
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public static function has_pos_access( int $user_id ): bool {
+		return null !== self::get_pos_role( $user_id );
+	}
+
+	/**
+	 * Assign or clear the POS role for a user.
+	 *
+	 * Passing null removes the meta entry — the user loses POS access entirely.
+	 *
+	 * @param int         $user_id  Target user.
+	 * @param string|null $pos_role One of self::assignable_pos_roles(), or null.
+	 * @return bool True if accepted (including clears); false if the value is
+	 *              not an assignable POS role.
+	 *
+	 * @since 10.9.0
+	 */
+	public static function set_pos_role( int $user_id, ?string $pos_role ): bool {
+		if ( null === $pos_role ) {
+			delete_user_meta( $user_id, self::POS_ROLE_META_KEY );
+			return true;
+		}
+
+		if ( ! in_array( $pos_role, self::assignable_pos_roles(), true ) ) {
+			return false;
+		}
+
+		update_user_meta( $user_id, self::POS_ROLE_META_KEY, $pos_role );
+		return true;
+	}
+
+	/**
+	 * The client-side POS capability map for a given POS role.
+	 *
+	 *     Capability             Cashier   Manager   Admin
+	 *     process_sales            yes       yes      yes
+	 *     view_orders              yes       yes      yes
+	 *     apply_coupons            yes       yes      yes
+	 *     create_coupons           no        yes      yes
+	 *     issue_refunds            no        yes      yes
+	 *     view_pos_settings        no        yes      yes
+	 *     edit_pos_settings        no        no       yes
+	 *     manage_pos_staff         no        no       yes
+	 *     exit_pos                 no        no       yes
+	 *
+	 * Override rows in the i2 proposal (cashier creating coupons, etc.) live on
+	 * the override approver's role, not on the operator — i.e. a cashier never
+	 * receives `create_coupons` here, even temporarily.
+	 *
+	 * @param string $pos_role One of self::POS_ROLE_* constants.
+	 * @return array<string, true>
+	 *
+	 * @since 10.9.0
+	 */
+	public static function capabilities_for_role( string $pos_role ): array {
+		$cashier = array(
+			self::CAP_PROCESS_SALES => true,
+			self::CAP_VIEW_ORDERS   => true,
+			self::CAP_APPLY_COUPONS => true,
 		);
+
+		$manager = $cashier + array(
+			self::CAP_CREATE_COUPONS    => true,
+			self::CAP_ISSUE_REFUNDS     => true,
+			self::CAP_VIEW_POS_SETTINGS => true,
+		);
+
+		$admin = $manager + array(
+			self::CAP_EDIT_POS_SETTINGS => true,
+			self::CAP_MANAGE_POS_STAFF  => true,
+			self::CAP_EXIT_POS          => true,
+		);
+
+		switch ( $pos_role ) {
+			case self::POS_ROLE_CASHIER:
+				return $cashier;
+			case self::POS_ROLE_MANAGER:
+				return $manager;
+			case self::POS_ROLE_ADMIN:
+				return $admin;
+			default:
+				return array();
+		}
+	}
+
+	/**
+	 * Translated label for a POS role.
+	 *
+	 * @param string $pos_role One of self::POS_ROLE_* constants.
+	 * @return string Empty string if the role is unknown.
+	 *
+	 * @since 10.9.0
+	 */
+	public static function role_label( string $pos_role ): string {
+		switch ( $pos_role ) {
+			case self::POS_ROLE_CASHIER:
+				return __( 'POS Cashier', 'woocommerce' );
+			case self::POS_ROLE_MANAGER:
+				return __( 'POS Manager', 'woocommerce' );
+			case self::POS_ROLE_ADMIN:
+				return __( 'POS Admin', 'woocommerce' );
+			default:
+				return '';
+		}
 	}
 }

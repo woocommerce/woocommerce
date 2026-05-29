@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Internal\POS;
 
 use Automattic\WooCommerce\Internal\POS\Capabilities;
 use Automattic\WooCommerce\Internal\POS\OrderAttribution;
-use WC_Install;
 use WC_Order;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
@@ -14,7 +13,8 @@ use WP_REST_Request;
  * Tests for the OrderAttribution lifecycle hooks.
  *
  * Hooks are exercised directly (rather than through the full REST stack) to keep the
- * test focused on the validation + note-writing behavior.
+ * test focused on the validation + note-writing behavior. POS access is granted via
+ * the user-meta model (Capabilities::set_pos_role) rather than dedicated WP roles.
  */
 class OrderAttributionTest extends WC_Unit_Test_Case {
 
@@ -30,8 +30,20 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		WC_Install::create_roles();
 		$this->sut = new OrderAttribution();
+	}
+
+	/**
+	 * Create a user with a specific assignable POS role via user meta.
+	 *
+	 * @param string $pos_role     One of Capabilities::POS_ROLE_CASHIER / POS_ROLE_MANAGER.
+	 * @param array  $user_args    Optional overrides for the user factory.
+	 * @return int                 The created user ID.
+	 */
+	private function make_pos_user( string $pos_role, array $user_args = array() ): int {
+		$user_id = self::factory()->user->create( array_merge( array( 'role' => 'subscriber' ), $user_args ) );
+		Capabilities::set_pos_role( $user_id, $pos_role );
+		return $user_id;
 	}
 
 	/**
@@ -61,9 +73,9 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return a WP_Error when the staff user lacks view_pos.
+	 * @testdox Should return a WP_Error when the staff user lacks POS access.
 	 */
-	public function test_pre_insert_rejects_staff_user_without_view_pos(): void {
+	public function test_pre_insert_rejects_staff_user_without_pos_access(): void {
 		$customer = self::factory()->user->create( array( 'role' => 'customer' ) );
 		$order    = wc_create_order();
 		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $customer );
@@ -80,7 +92,7 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Should return the draft order unchanged when only valid attribution is present.
 	 */
 	public function test_pre_insert_accepts_valid_attribution(): void {
-		$cashier = self::factory()->user->create( array( 'role' => Capabilities::ROLE_CASHIER ) );
+		$cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
 		$order   = wc_create_order();
 		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
 
@@ -95,8 +107,8 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Should reject the override pair when only one half is present.
 	 */
 	public function test_pre_insert_rejects_partial_override_pair(): void {
-		$cashier = self::factory()->user->create( array( 'role' => Capabilities::ROLE_CASHIER ) );
-		$manager = self::factory()->user->create( array( 'role' => Capabilities::ROLE_MANAGER ) );
+		$cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
+		$manager = $this->make_pos_user( Capabilities::POS_ROLE_MANAGER );
 
 		$order_missing_reason = wc_create_order();
 		$order_missing_reason->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
@@ -108,7 +120,7 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 
 		$order_missing_user = wc_create_order();
 		$order_missing_user->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
-		$order_missing_user->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, 'refund_shop_orders' );
+		$order_missing_user->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, Capabilities::CAP_ISSUE_REFUNDS );
 
 		$result = $this->sut->handle_pre_insert( $order_missing_user, new WP_REST_Request(), true );
 		$this->assertWPError( $result );
@@ -122,12 +134,12 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Should reject a self-override (granted_by equals staff_user_id).
 	 */
 	public function test_pre_insert_rejects_self_override(): void {
-		$manager = self::factory()->user->create( array( 'role' => Capabilities::ROLE_MANAGER ) );
+		$manager = $this->make_pos_user( Capabilities::POS_ROLE_MANAGER );
 
 		$order = wc_create_order();
 		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $manager );
 		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_USER_ID, $manager );
-		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, 'refund_shop_orders' );
+		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, Capabilities::CAP_ISSUE_REFUNDS );
 
 		$result = $this->sut->handle_pre_insert( $order, new WP_REST_Request(), true );
 
@@ -138,11 +150,11 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject override when reason is not an overridable capability.
+	 * @testdox Should reject override when reason is not an overridable POS capability.
 	 */
 	public function test_pre_insert_rejects_non_overridable_reason(): void {
-		$cashier = self::factory()->user->create( array( 'role' => Capabilities::ROLE_CASHIER ) );
-		$manager = self::factory()->user->create( array( 'role' => Capabilities::ROLE_MANAGER ) );
+		$cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
+		$manager = $this->make_pos_user( Capabilities::POS_ROLE_MANAGER );
 
 		$order = wc_create_order();
 		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
@@ -159,16 +171,16 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject override when the granter does not hold the named cap.
+	 * @testdox Should reject override when the granter does not hold the named POS cap.
 	 */
 	public function test_pre_insert_rejects_forbidden_granter(): void {
-		$cashier         = self::factory()->user->create( array( 'role' => Capabilities::ROLE_CASHIER ) );
-		$another_cashier = self::factory()->user->create( array( 'role' => Capabilities::ROLE_CASHIER ) );
+		$cashier         = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
+		$another_cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
 
 		$order = wc_create_order();
 		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
 		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_USER_ID, $another_cashier );
-		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, 'refund_shop_orders' );
+		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, Capabilities::CAP_ISSUE_REFUNDS );
 
 		$result = $this->sut->handle_pre_insert( $order, new WP_REST_Request(), true );
 
@@ -180,16 +192,16 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should accept a valid override pair (manager has the elevated cap).
+	 * @testdox Should accept a valid override pair (manager has the elevated POS cap).
 	 */
 	public function test_pre_insert_accepts_valid_override(): void {
-		$cashier = self::factory()->user->create( array( 'role' => Capabilities::ROLE_CASHIER ) );
-		$manager = self::factory()->user->create( array( 'role' => Capabilities::ROLE_MANAGER ) );
+		$cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
+		$manager = $this->make_pos_user( Capabilities::POS_ROLE_MANAGER );
 
 		$order = wc_create_order();
 		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
 		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_USER_ID, $manager );
-		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, 'refund_shop_orders' );
+		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, Capabilities::CAP_ISSUE_REFUNDS );
 
 		$result = $this->sut->handle_pre_insert( $order, new WP_REST_Request(), true );
 
@@ -203,9 +215,9 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Should add a simple attribution note when no override is present.
 	 */
 	public function test_post_insert_writes_attribution_note_without_override(): void {
-		$cashier = self::factory()->user->create(
+		$cashier = $this->make_pos_user(
+			Capabilities::POS_ROLE_CASHIER,
 			array(
-				'role'         => Capabilities::ROLE_CASHIER,
 				'display_name' => 'Mike Cashier',
 				'user_login'   => 'mike',
 			)
@@ -227,16 +239,16 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Should add a single combined override note when override is present (no separate attribution note).
 	 */
 	public function test_post_insert_writes_combined_override_note(): void {
-		$cashier = self::factory()->user->create(
+		$cashier = $this->make_pos_user(
+			Capabilities::POS_ROLE_CASHIER,
 			array(
-				'role'         => Capabilities::ROLE_CASHIER,
 				'display_name' => 'Mike Cashier',
 				'user_login'   => 'mike',
 			)
 		);
-		$manager = self::factory()->user->create(
+		$manager = $this->make_pos_user(
+			Capabilities::POS_ROLE_MANAGER,
 			array(
-				'role'         => Capabilities::ROLE_MANAGER,
 				'display_name' => 'Sarah Manager',
 				'user_login'   => 'sarah',
 			)
@@ -245,14 +257,14 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 		$order = wc_create_order();
 		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
 		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_USER_ID, $manager );
-		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, 'refund_shop_orders' );
+		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, Capabilities::CAP_ISSUE_REFUNDS );
 		$order->save();
 
 		$this->sut->handle_post_insert( $order, new WP_REST_Request(), true );
 
 		$this->assert_order_note_contains(
 			$order,
-			'POS override: refund_shop_orders granted to Mike Cashier (mike), approved by Sarah Manager (sarah).'
+			'POS override: ' . Capabilities::CAP_ISSUE_REFUNDS . ' granted to Mike Cashier (mike), approved by Sarah Manager (sarah).'
 		);
 		$this->assert_order_note_not_contains( $order, 'POS: created by' );
 

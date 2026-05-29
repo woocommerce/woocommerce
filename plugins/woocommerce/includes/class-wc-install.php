@@ -14,7 +14,6 @@ use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\POS\Capabilities as POSCapabilities;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
@@ -2258,20 +2257,6 @@ $stock_notifications_table_schema;
 			)
 		);
 
-		// POS Cashier role - minimum capabilities to process sales at the counter.
-		add_role(
-			POSCapabilities::ROLE_CASHIER,
-			'POS Cashier',
-			POSCapabilities::cashier_capabilities()
-		);
-
-		// POS Manager role - cashier + refunds, coupons, reports.
-		add_role(
-			POSCapabilities::ROLE_MANAGER,
-			'POS Manager',
-			POSCapabilities::manager_capabilities()
-		);
-
 		$capabilities = self::get_core_capabilities();
 
 		foreach ( $capabilities as $cap_group ) {
@@ -2279,13 +2264,6 @@ $stock_notifications_table_schema;
 				$wp_roles->add_cap( 'shop_manager', $cap );
 				$wp_roles->add_cap( 'administrator', $cap );
 			}
-		}
-
-		// Grant POS-specific capabilities to existing privileged roles so admins / shop managers
-		// can access POS and POS settings without needing the dedicated POS roles.
-		foreach ( POSCapabilities::pos_specific_capabilities() as $pos_cap ) {
-			$wp_roles->add_cap( 'shop_manager', $pos_cap );
-			$wp_roles->add_cap( 'administrator', $pos_cap );
 		}
 	}
 
@@ -2359,14 +2337,6 @@ $stock_notifications_table_schema;
 			}
 		}
 
-		// Remove POS-specific capabilities from privileged roles.
-		foreach ( POSCapabilities::pos_specific_capabilities() as $pos_cap ) {
-			$wp_roles->remove_cap( 'shop_manager', $pos_cap );
-			$wp_roles->remove_cap( 'administrator', $pos_cap );
-		}
-
-		remove_role( POSCapabilities::ROLE_CASHIER );
-		remove_role( POSCapabilities::ROLE_MANAGER );
 		remove_role( 'customer' );
 		remove_role( 'shop_manager' );
 	}
