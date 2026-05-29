@@ -13,10 +13,11 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Hides metabox reorder arrows by default and exposes them via a Screen Options checkbox.
+ * State is stored in a cookie so no AJAX or user meta is needed.
  */
 class ReorderControls {
 
-	const USER_META_KEY = 'wc_proto_show_reorder_controls';
+	const COOKIE_KEY = 'wc_proto_reorder_controls';
 
 	/**
 	 * Register hooks. No-ops if the dev panel flag is off.
@@ -29,16 +30,21 @@ class ReorderControls {
 		}
 		add_filter( 'screen_settings', array( self::class, 'add_screen_option' ), 10, 2 );
 		add_action( 'admin_head', array( self::class, 'maybe_hide_controls' ) );
-		add_filter( 'set_screen_option_' . self::USER_META_KEY, array( self::class, 'save_screen_option' ), 10, 3 );
+	}
+
+	/**
+	 * Check whether the user has opted in to showing reorder controls via cookie.
+	 */
+	private static function is_showing(): bool {
+		return ! empty( $_COOKIE[ self::COOKIE_KEY ] ) && '1' === $_COOKIE[ self::COOKIE_KEY ]; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 	}
 
 	/**
 	 * Add a "Show reorder controls" checkbox to Screen Options.
-	 *
-	 * Uses a hidden input + checkbox pattern so unchecking saves '0' correctly.
+	 * The checkbox writes a cookie directly and reloads — no Apply button needed.
 	 *
 	 * @param string     $settings Existing screen settings HTML.
-	 * @param \WP_Screen $screen  Current screen.
+	 * @param \WP_Screen $screen   Current screen.
 	 * @return string
 	 */
 	public static function add_screen_option( string $settings, \WP_Screen $screen ): string {
@@ -46,20 +52,28 @@ class ReorderControls {
 			return $settings;
 		}
 
-		$checked = get_user_meta( get_current_user_id(), self::USER_META_KEY, true );
+		$checked    = self::is_showing() ? 'checked' : '';
+		$cookie_key = self::COOKIE_KEY;
 
 		$settings .= '<fieldset><legend>' . esc_html__( 'Reorder controls', 'woocommerce' ) . '</legend>';
 		$settings .= '<label for="wc-proto-reorder-controls">';
-		$settings .= '<input type="hidden" name="' . esc_attr( self::USER_META_KEY ) . '" value="0" />';
-		$settings .= '<input type="checkbox" id="wc-proto-reorder-controls" name="' . esc_attr( self::USER_META_KEY ) . '" value="1" ' . checked( $checked, '1', false ) . ' />';
+		$settings .= '<input type="checkbox" id="wc-proto-reorder-controls" ' . esc_attr( $checked ) . ' />';
 		$settings .= ' ' . esc_html__( 'Show reorder controls', 'woocommerce' );
 		$settings .= '</label></fieldset>';
+		$settings .= '<script>
+( function () {
+	document.getElementById( "wc-proto-reorder-controls" ).addEventListener( "change", function () {
+		document.cookie = "' . esc_js( $cookie_key ) . '=" + ( this.checked ? "1" : "0" ) + ";path=/;max-age=86400";
+		location.reload();
+	} );
+}() );
+</script>';
 
 		return $settings;
 	}
 
 	/**
-	 * Inject CSS to hide reorder arrows when the user opted out.
+	 * Inject CSS to hide reorder arrows unless the user opted in.
 	 */
 	public static function maybe_hide_controls(): void {
 		$screen = get_current_screen();
@@ -67,22 +81,8 @@ class ReorderControls {
 			return;
 		}
 
-		$show = get_user_meta( get_current_user_id(), self::USER_META_KEY, true );
-
-		if ( '1' !== $show ) {
+		if ( ! self::is_showing() ) {
 			echo '<style>.postbox-header .handle-order-higher, .postbox-header .handle-order-lower { display: none !important; }</style>';
 		}
-	}
-
-	/**
-	 * Allow WordPress to save this screen option to user meta.
-	 *
-	 * @param mixed  $status Filtered value (false by default).
-	 * @param string $option Option name.
-	 * @param mixed  $value  Submitted value.
-	 * @return string '1' or '0'.
-	 */
-	public static function save_screen_option( $status, string $option, $value ): string {
-		return '1' === (string) $value ? '1' : '0';
 	}
 }
