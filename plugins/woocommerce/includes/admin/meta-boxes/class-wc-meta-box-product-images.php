@@ -166,8 +166,8 @@ class WC_Meta_Box_Product_Images {
 			$product->set_image_ids( $image_ids );
 		} else {
 			// Legacy field only (e.g. submitted by extensions): update gallery images only, leave featured untouched.
-			$raw_gallery = is_scalar( $_POST['product_image_gallery'] )
-				? wc_clean( wp_unslash( (string) $_POST['product_image_gallery'] ) )
+			$raw_gallery = isset( $_POST['product_image_gallery'] ) && is_scalar( $_POST['product_image_gallery'] )
+				? (string) wc_clean( wp_unslash( (string) $_POST['product_image_gallery'] ) )
 				: '';
 			$gallery_ids = '' === $raw_gallery ? array() : array_filter( array_map( 'absint', explode( ',', $raw_gallery ) ) );
 			$product->set_gallery_image_ids( $gallery_ids );
