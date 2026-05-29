@@ -305,7 +305,8 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 
 		update_post_meta( $video_id, '_thumbnail_id', $poster_id );
 
-		$product->set_media_gallery(
+		ProductMediaGallery::set_stored_media_gallery_items(
+			$product,
 			array(
 				array(
 					'media_type'  => 'video',
@@ -334,7 +335,6 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 				),
 			)
 		);
-		$product->save();
 
 		$media_data = ProductGalleryUtils::get_product_gallery_media_data( $product, 'woocommerce_thumbnail' );
 
@@ -380,7 +380,8 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		);
 
 		$product->set_image_id( $featured_image_id );
-		$product->set_media_gallery(
+		ProductMediaGallery::set_stored_media_gallery_items(
+			$product,
 			array(
 				array(
 					'media_type'  => 'video',
@@ -390,7 +391,6 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 				),
 			)
 		);
-		$product->save();
 
 		$media_data = ProductGalleryUtils::get_product_gallery_media_data( $product, 'woocommerce_thumbnail' );
 
@@ -430,7 +430,8 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		);
 
 		$product->set_image_id( $featured_image_id );
-		$product->set_media_gallery(
+		ProductMediaGallery::set_stored_media_gallery_items(
+			$product,
 			array(
 				array(
 					'media_type'  => 'video',
@@ -439,7 +440,6 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 				),
 			)
 		);
-		$product->save();
 
 		$media_data = ProductGalleryUtils::get_product_gallery_media_data( $product, 'woocommerce_thumbnail' );
 
