@@ -1,6 +1,6 @@
-diff -ruN a/types/@wordpress/data/components/registry-provider/use-registry.d.ts b/types/@wordpress/data/components/registry-provider/use-registry.d.ts
---- a/types/@wordpress/data/components/registry-provider/use-registry.d.ts
-+++ b/types/@wordpress/data/components/registry-provider/use-registry.d.ts
+diff -ruN a/type-overrides/@wordpress/data/components/registry-provider/use-registry.d.ts b/type-overrides/@wordpress/data/components/registry-provider/use-registry.d.ts
+--- a/type-overrides/@wordpress/data/components/registry-provider/use-registry.d.ts
++++ b/type-overrides/@wordpress/data/components/registry-provider/use-registry.d.ts
 @@ -1,4 +1,7 @@
 +/// <reference path="../../registry.d.ts" />
 +
@@ -16,9 +16,9 @@ diff -ruN a/types/@wordpress/data/components/registry-provider/use-registry.d.ts
 -	export default function useRegistry(): Function;
 +	export default function useRegistry(): WPDataRegistry;
  }
-diff -ruN a/types/@wordpress/data/components/use-dispatch/use-dispatch.d.ts b/types/@wordpress/data/components/use-dispatch/use-dispatch.d.ts
---- a/types/@wordpress/data/components/use-dispatch/use-dispatch.d.ts
-+++ b/types/@wordpress/data/components/use-dispatch/use-dispatch.d.ts
+diff -ruN a/type-overrides/@wordpress/data/components/use-dispatch/use-dispatch.d.ts b/type-overrides/@wordpress/data/components/use-dispatch/use-dispatch.d.ts
+--- a/type-overrides/@wordpress/data/components/use-dispatch/use-dispatch.d.ts
++++ b/type-overrides/@wordpress/data/components/use-dispatch/use-dispatch.d.ts
 @@ -1,62 +1,17 @@
  /// <reference path="../../types.d.ts" />
 +/// <reference path="../../registry.d.ts" />
@@ -89,9 +89,9 @@ diff -ruN a/types/@wordpress/data/components/use-dispatch/use-dispatch.d.ts b/ty
 +	declare function useDispatch(storeNameOrDescriptor: StoreNameOrDescriptor): ActionCreatorsOf<StoreDescriptor>;
 +	export default useDispatch;
  }
-diff -ruN a/types/@wordpress/data/components/use-select/index.d.ts b/types/@wordpress/data/components/use-select/index.d.ts
---- a/types/@wordpress/data/components/use-select/index.d.ts
-+++ b/types/@wordpress/data/components/use-select/index.d.ts
+diff -ruN a/type-overrides/@wordpress/data/components/use-select/index.d.ts b/type-overrides/@wordpress/data/components/use-select/index.d.ts
+--- a/type-overrides/@wordpress/data/components/use-select/index.d.ts
++++ b/type-overrides/@wordpress/data/components/use-select/index.d.ts
 @@ -1,93 +1,29 @@
  /// <reference path="../../types.d.ts" />
  
@@ -197,9 +197,9 @@ diff -ruN a/types/@wordpress/data/components/use-select/index.d.ts b/types/@word
 -	export type UseSelectReturn<T extends MapSelect | StoreDescriptor<any>> = import("@wordpress/data/build-types/types").UseSelectReturn<T>;
 +	export function useSuspenseSelect<T extends MapSelect>(mapSelect: T, deps: unknown[]): ReturnType<T>;
  }
-diff -ruN a/types/@wordpress/data/components/with-dispatch/index.d.ts b/types/@wordpress/data/components/with-dispatch/index.d.ts
---- a/types/@wordpress/data/components/with-dispatch/index.d.ts
-+++ b/types/@wordpress/data/components/with-dispatch/index.d.ts
+diff -ruN a/type-overrides/@wordpress/data/components/with-dispatch/index.d.ts b/type-overrides/@wordpress/data/components/with-dispatch/index.d.ts
+--- a/type-overrides/@wordpress/data/components/with-dispatch/index.d.ts
++++ b/type-overrides/@wordpress/data/components/with-dispatch/index.d.ts
 @@ -1,4 +1,8 @@
 +/// <reference path="../../types.d.ts" />
 +/// <reference path="../../registry.d.ts" />
@@ -216,9 +216,9 @@ diff -ruN a/types/@wordpress/data/components/with-dispatch/index.d.ts b/types/@w
 -	declare function withDispatch(mapDispatchToProps: Function): ComponentType;
 +	declare const withDispatch: (mapDispatchToProps: (dispatch: WPDataRegistry['dispatch'], ownProps: Record<string, unknown>, registry: WPDataRegistry) => Record<string, (...args: unknown[]) => unknown>) => (Inner: ComponentType<any>) => (ownProps: Record<string, unknown>) => import("react").JSX.Element;
  }
-diff -ruN a/types/@wordpress/data/components/with-select/index.d.ts b/types/@wordpress/data/components/with-select/index.d.ts
---- a/types/@wordpress/data/components/with-select/index.d.ts
-+++ b/types/@wordpress/data/components/with-select/index.d.ts
+diff -ruN a/type-overrides/@wordpress/data/components/with-select/index.d.ts b/type-overrides/@wordpress/data/components/with-select/index.d.ts
+--- a/type-overrides/@wordpress/data/components/with-select/index.d.ts
++++ b/type-overrides/@wordpress/data/components/with-select/index.d.ts
 @@ -1,4 +1,8 @@
 +/// <reference path="../../types.d.ts" />
 +/// <reference path="../../registry.d.ts" />
@@ -235,9 +235,9 @@ diff -ruN a/types/@wordpress/data/components/with-select/index.d.ts b/types/@wor
 -	declare function withSelect(mapSelectToProps: Function): ComponentType;
 +	declare const withSelect: (mapSelectToProps: (select: WPDataRegistry['select'], ownProps: Record<string, unknown>, registry: WPDataRegistry) => Record<string, unknown>) => (Inner: ComponentType<any>) => ComponentType<Record<string, unknown>>;
  }
-diff -ruN a/types/@wordpress/data/dispatch.d.ts b/types/@wordpress/data/dispatch.d.ts
---- a/types/@wordpress/data/dispatch.d.ts
-+++ b/types/@wordpress/data/dispatch.d.ts
+diff -ruN a/type-overrides/@wordpress/data/dispatch.d.ts b/type-overrides/@wordpress/data/dispatch.d.ts
+--- a/type-overrides/@wordpress/data/dispatch.d.ts
++++ b/type-overrides/@wordpress/data/dispatch.d.ts
 @@ -4,7 +4,7 @@
  	/**
  	 * Internal dependencies
@@ -266,9 +266,9 @@ diff -ruN a/types/@wordpress/data/dispatch.d.ts b/types/@wordpress/data/dispatch
 +	export declare function dispatch<K extends keyof StoreRegistry>(storeName: K): ActionCreatorsOf<StoreRegistry[K]>;
 +	export declare function dispatch(storeNameOrDescriptor: StoreNameOrDescriptor): ActionCreatorsOf<StoreDescriptor>;
  }
-diff -ruN a/types/@wordpress/data/factory.d.ts b/types/@wordpress/data/factory.d.ts
---- a/types/@wordpress/data/factory.d.ts
-+++ b/types/@wordpress/data/factory.d.ts
+diff -ruN a/type-overrides/@wordpress/data/factory.d.ts b/type-overrides/@wordpress/data/factory.d.ts
+--- a/type-overrides/@wordpress/data/factory.d.ts
++++ b/type-overrides/@wordpress/data/factory.d.ts
 @@ -1,3 +1,4 @@
 +/// <reference path="./types.d.ts" />
  /// <reference path="./select.d.ts" />
@@ -291,9 +291,9 @@ diff -ruN a/types/@wordpress/data/factory.d.ts b/types/@wordpress/data/factory.d
  	    isRegistryControl?: boolean;
  	}): T & {
  	    isRegistryControl?: boolean;
-diff -ruN a/types/@wordpress/data/index.d.ts b/types/@wordpress/data/index.d.ts
---- a/types/@wordpress/data/index.d.ts
-+++ b/types/@wordpress/data/index.d.ts
+diff -ruN a/type-overrides/@wordpress/data/index.d.ts b/type-overrides/@wordpress/data/index.d.ts
+--- a/type-overrides/@wordpress/data/index.d.ts
++++ b/type-overrides/@wordpress/data/index.d.ts
 @@ -16,6 +16,15 @@
  /// <reference path="./types.d.ts" />
  
@@ -355,9 +355,9 @@ diff -ruN a/types/@wordpress/data/index.d.ts b/types/@wordpress/data/index.d.ts
 +	export type StoreDescriptor = import("@wordpress/data/build-types/types").StoreDescriptor<any>;
 +	export { StoreRegistry } from "@wordpress/data/build-types/types";
  }
-diff -ruN a/types/@wordpress/data/registry.d.ts b/types/@wordpress/data/registry.d.ts
---- a/types/@wordpress/data/registry.d.ts
-+++ b/types/@wordpress/data/registry.d.ts
+diff -ruN a/type-overrides/@wordpress/data/registry.d.ts b/type-overrides/@wordpress/data/registry.d.ts
+--- a/type-overrides/@wordpress/data/registry.d.ts
++++ b/type-overrides/@wordpress/data/registry.d.ts
 @@ -1,59 +1,62 @@
  /// <reference path="./types.d.ts" />
  
@@ -461,9 +461,9 @@ diff -ruN a/types/@wordpress/data/registry.d.ts b/types/@wordpress/data/registry
 +	    options?: Record<string, unknown>
 +	) => Partial<WPDataRegistry>;
  }
-diff -ruN a/types/@wordpress/data/select.d.ts b/types/@wordpress/data/select.d.ts
---- a/types/@wordpress/data/select.d.ts
-+++ b/types/@wordpress/data/select.d.ts
+diff -ruN a/type-overrides/@wordpress/data/select.d.ts b/type-overrides/@wordpress/data/select.d.ts
+--- a/type-overrides/@wordpress/data/select.d.ts
++++ b/type-overrides/@wordpress/data/select.d.ts
 @@ -4,16 +4,12 @@
  	/**
  	 * Internal dependencies
@@ -491,9 +491,9 @@ diff -ruN a/types/@wordpress/data/select.d.ts b/types/@wordpress/data/select.d.t
 +	export declare function select<K extends keyof StoreRegistry>(storeName: K): CurriedSelectorsOf<StoreRegistry[K]>;
 +	export declare function select(storeNameOrDescriptor: StoreNameOrDescriptor): CurriedSelectorsOf<StoreDescriptor>;
  }
-diff -ruN a/types/@wordpress/data/types.d.ts b/types/@wordpress/data/types.d.ts
---- a/types/@wordpress/data/types.d.ts
-+++ b/types/@wordpress/data/types.d.ts
+diff -ruN a/type-overrides/@wordpress/data/types.d.ts b/type-overrides/@wordpress/data/types.d.ts
+--- a/type-overrides/@wordpress/data/types.d.ts
++++ b/type-overrides/@wordpress/data/types.d.ts
 @@ -15,7 +15,7 @@
  	    getActions: () => ActionCreatorsOf<Config>;
  	    subscribe: (listener: () => void) => () => void;

@@ -40,7 +40,12 @@ module.exports = {
 						options: {
 							sassOptions: {
 								includePaths: [
-									path.resolve( __dirname, 'abstracts' ),
+									path.resolve(
+										__dirname,
+										'..',
+										'..',
+										'styles'
+									),
 								],
 							},
 							webpackImporter: true,

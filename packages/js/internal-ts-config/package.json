@@ -14,13 +14,7 @@
 		"tsconfig-jest.json",
 		"types"
 	],
-	"scripts": {
-		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
-		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:types": "node scripts/generate-types.mjs generate",
-		"postinstall": "pnpm build:project:types",
-		"types:update-patch": "node scripts/generate-types.mjs update-patch"
-	},
+	"scripts": {},
 	"devDependencies": {
 		"@types/wordpress__block-editor": "14.21.8",
 		"@wordpress/core-data": "7.19.6",

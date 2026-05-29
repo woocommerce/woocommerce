@@ -1,6 +1,6 @@
-diff -ruN a/types/@wordpress/core-data/dynamic-entities.d.ts b/types/@wordpress/core-data/dynamic-entities.d.ts
---- a/types/@wordpress/core-data/dynamic-entities.d.ts
-+++ b/types/@wordpress/core-data/dynamic-entities.d.ts
+diff -ruN a/type-overrides/@wordpress/core-data/dynamic-entities.d.ts b/type-overrides/@wordpress/core-data/dynamic-entities.d.ts
+--- a/type-overrides/@wordpress/core-data/dynamic-entities.d.ts
++++ b/type-overrides/@wordpress/core-data/dynamic-entities.d.ts
 @@ -60,10 +60,10 @@
  	};
  	type DeleteRecordsHttpQuery = Record<string, any>;
@@ -14,9 +14,9 @@ diff -ruN a/types/@wordpress/core-data/dynamic-entities.d.ts b/types/@wordpress/
  	};
  	export declare let dynamicActions: SaveActions & DeleteActions;
  	export declare let dynamicSelectors: SingularGetters & PluralGetters;
-diff -ruN a/types/@wordpress/core-data/hooks/use-entity-prop.d.ts b/types/@wordpress/core-data/hooks/use-entity-prop.d.ts
---- a/types/@wordpress/core-data/hooks/use-entity-prop.d.ts
-+++ b/types/@wordpress/core-data/hooks/use-entity-prop.d.ts
+diff -ruN a/type-overrides/@wordpress/core-data/hooks/use-entity-prop.d.ts b/type-overrides/@wordpress/core-data/hooks/use-entity-prop.d.ts
+--- a/type-overrides/@wordpress/core-data/hooks/use-entity-prop.d.ts
++++ b/type-overrides/@wordpress/core-data/hooks/use-entity-prop.d.ts
 @@ -16,5 +16,5 @@
  	 * 							  information like `raw`, `rendered` and
  	 * 							  `protected` props.
@@ -24,9 +24,9 @@ diff -ruN a/types/@wordpress/core-data/hooks/use-entity-prop.d.ts b/types/@wordp
 -	export default function useEntityProp(kind: string, name: string, prop: string, _id?: number | string): [any, Function, any];
 +	export default function useEntityProp<PropType>(kind: string, name: string, prop: string, _id?: number | string): [PropType, (value: PropType) => void, PropType];
  }
-diff -ruN a/types/@wordpress/core-data/index.d.ts b/types/@wordpress/core-data/index.d.ts
---- a/types/@wordpress/core-data/index.d.ts
-+++ b/types/@wordpress/core-data/index.d.ts
+diff -ruN a/type-overrides/@wordpress/core-data/index.d.ts b/type-overrides/@wordpress/core-data/index.d.ts
+--- a/type-overrides/@wordpress/core-data/index.d.ts
++++ b/type-overrides/@wordpress/core-data/index.d.ts
 @@ -80,156 +80,156 @@
  	    }) => Promise<void>;
  	    saveMenu: (data: Partial<import("@wordpress/core-data/build-types/entity-types").NavMenu<"edit">>, options?: {

@@ -43,7 +43,7 @@ const PACKAGE_NAMES = [
 ];
 
 const PKG_ROOT = resolve( dirname( new URL( import.meta.url ).pathname ), '..' );
-const TYPES_DIR = join( PKG_ROOT, 'types' );
+const TYPES_DIR = join( PKG_ROOT, 'type-overrides' );
 
 function dtPackageName( packageName ) {
 	return '@types/' + packageName.slice( 1 ).replace( '/', '__' );
@@ -422,7 +422,7 @@ function generate( outputDir ) {
 /**
  * Apply a patch file if it exists.
  *
- * Patch paths are relative to PKG_ROOT (e.g. `types/@wordpress/core-data/index.d.ts`),
+ * Patch paths are relative to PKG_ROOT (e.g. `type-overrides/@wordpress/core-data/index.d.ts`),
  * so `git apply` runs from PKG_ROOT without `--directory`.
  *
  * @param {string} patchFile - Path to the patch file.
@@ -496,8 +496,8 @@ function runUpdatePatch() {
 					// diff returns 1 when files differ — this is our patch content.
 					// Rewrite paths so the patch applies from the package root.
 					const patchContent = error.stdout
-						.replaceAll( cleanPkgDir, `a/types/${ pkg.name }` )
-						.replaceAll( currentPkgDir, `b/types/${ pkg.name }` )
+						.replaceAll( cleanPkgDir, `a/type-overrides/${ pkg.name }` )
+						.replaceAll( currentPkgDir, `b/type-overrides/${ pkg.name }` )
 						// Strip timestamps from diff headers to avoid noisy diffs.
 						.replace( /^(---\s+\S+)\t.+$/gm, '$1' )
 						.replace( /^(\+\+\+\s+\S+)\t.+$/gm, '$1' );

@@ -1,6 +1,6 @@
-diff -ruN a/types/@wordpress/notices/index.d.ts b/types/@wordpress/notices/index.d.ts
---- a/types/@wordpress/notices/index.d.ts
-+++ b/types/@wordpress/notices/index.d.ts
+diff -ruN a/type-overrides/@wordpress/notices/index.d.ts b/type-overrides/@wordpress/notices/index.d.ts
+--- a/type-overrides/@wordpress/notices/index.d.ts
++++ b/type-overrides/@wordpress/notices/index.d.ts
 @@ -3,3 +3,9 @@
  declare module '@wordpress/notices' {
  	export { store } from "@wordpress/notices/build-types/store";
