@@ -52,10 +52,6 @@ export type ThunkArgs = {
 	registry: WPDataRegistry;
 };
 
-export const getCoreDataLockActions = ( registry: WPDataRegistry ) => {
-	return registry.dispatch( coreDataStore );
-};
-
 /**
  * Action creator for receiving groups.
  *
@@ -238,12 +234,9 @@ const saveSettingRequest = async (
 	groupId: string,
 	settingId: string,
 	value: SettingValue,
-	dispatch: ActionDispatchersForThunk,
-	registry: WPDataRegistry
+	dispatch: ActionDispatchersForThunk
 ): Promise< Setting > => {
-	const { __unstableAcquireStoreLock, __unstableReleaseStoreLock } =
-		getCoreDataLockActions( registry );
-	const lock = await __unstableAcquireStoreLock(
+	const lock = await dispatch.__unstableAcquireStoreLock(
 		STORE_NAME,
 		[ 'settings', groupId, settingId ],
 		{ exclusive: true }
@@ -265,7 +258,7 @@ const saveSettingRequest = async (
 		throw error;
 	} finally {
 		dispatch( setSaving( groupId, settingId, false ) );
-		__unstableReleaseStoreLock( lock );
+		dispatch.__unstableReleaseStoreLock( lock );
 	}
 };
 
@@ -275,12 +268,9 @@ const saveSettingRequest = async (
 const saveSettingsGroupRequest = async (
 	groupId: string,
 	updates: SettingEdit[],
-	dispatch: ActionDispatchersForThunk,
-	registry: WPDataRegistry
+	dispatch: ActionDispatchersForThunk
 ) => {
-	const { __unstableAcquireStoreLock, __unstableReleaseStoreLock } =
-		getCoreDataLockActions( registry );
-	const lock = await __unstableAcquireStoreLock(
+	const lock = await dispatch.__unstableAcquireStoreLock(
 		STORE_NAME,
 		[ 'settings', groupId ],
 		{ exclusive: true }
@@ -345,7 +335,7 @@ const saveSettingsGroupRequest = async (
 		throw error;
 	} finally {
 		dispatch( setSaving( groupId, null, false ) );
-		__unstableReleaseStoreLock( lock );
+		dispatch.__unstableReleaseStoreLock( lock );
 	}
 };
 
@@ -358,7 +348,7 @@ const saveSettingsGroupRequest = async (
  */
 export const saveSettingsGroup =
 	( groupId: string, updates: SettingEdit[] | SettingsEditObject ) =>
-	async ( { dispatch, registry }: ThunkArgs ) => {
+	async ( { dispatch }: ThunkArgs ) => {
 		const updatesArray = Array.isArray( updates )
 			? updates
 			: Object.entries( updates ).map( ( [ id, value ] ) => ( {
@@ -366,12 +356,7 @@ export const saveSettingsGroup =
 					value,
 			  } ) );
 
-		return saveSettingsGroupRequest(
-			groupId,
-			updatesArray,
-			dispatch,
-			registry
-		);
+		return saveSettingsGroupRequest( groupId, updatesArray, dispatch );
 	};
 
 /**
@@ -384,14 +369,8 @@ export const saveSettingsGroup =
  */
 export const saveSetting =
 	( groupId: string, settingId: string, value: SettingValue ) =>
-	async ( { dispatch, registry }: ThunkArgs ) => {
-		return saveSettingRequest(
-			groupId,
-			settingId,
-			value,
-			dispatch,
-			registry
-		);
+	async ( { dispatch }: ThunkArgs ) => {
+		return saveSettingRequest( groupId, settingId, value, dispatch );
 	};
 
 /**
@@ -402,7 +381,7 @@ export const saveSetting =
  */
 export const saveEditedSettingsGroup =
 	( groupId: string ) =>
-	async ( { select, dispatch, registry }: ThunkArgs ) => {
+	async ( { select, dispatch }: ThunkArgs ) => {
 		const editedSettings = select
 			.getEditedSettingIds( groupId )
 			.map( ( settingId: string ) => ( {
@@ -417,12 +396,7 @@ export const saveEditedSettingsGroup =
 			return;
 		}
 
-		return saveSettingsGroupRequest(
-			groupId,
-			editedSettings,
-			dispatch,
-			registry
-		);
+		return saveSettingsGroupRequest( groupId, editedSettings, dispatch );
 	};
 
 /**
@@ -434,7 +408,7 @@ export const saveEditedSettingsGroup =
  */
 export const saveEditedSetting =
 	( groupId: string, settingId: string ) =>
-	async ( { select, dispatch, registry }: ThunkArgs ) => {
+	async ( { select, dispatch }: ThunkArgs ) => {
 		// Check if this setting has any edits
 		const editedSettingIds = select.getEditedSettingIds( groupId );
 		if ( ! editedSettingIds.includes( settingId ) ) {
@@ -444,13 +418,7 @@ export const saveEditedSetting =
 		const value = select.getSettingValue( groupId, settingId, {
 			includeEdits: true,
 		} );
-		return saveSettingRequest(
-			groupId,
-			settingId,
-			value,
-			dispatch,
-			registry
-		);
+		return saveSettingRequest( groupId, settingId, value, dispatch );
 	};
 
 const getCoreDataLockDispatch = (
