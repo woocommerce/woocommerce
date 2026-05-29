@@ -372,7 +372,7 @@ class EmailPreview {
 		$variation            = $this->get_dummy_product_variation();
 		$downloadable_product = $this->get_dummy_downloadable_product();
 
-		$order = new WC_Order();
+		$order = new PreviewOrder();
 		$order->set_id( 12345 );
 
 		// Create and add product items manually without saving to database.
