@@ -85,7 +85,7 @@ class NotificationProcessor {
 	 * @param WpcomNotificationDispatcher    $dispatcher          The WPCOM dispatcher.
 	 * @param PushTokensDataStore            $data_store          The push tokens data store.
 	 * @param NotificationPreferencesService $preferences_service The notification preferences service.
-	 * @param NotificationRetryHandler    $retry_handler The retry handler.
+	 * @param NotificationRetryHandler       $retry_handler The retry handler.
 	 *
 	 * @since 10.7.0
 	 */
