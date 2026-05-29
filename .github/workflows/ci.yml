@@ -195,7 +195,7 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+            MESSAGE=$(head -1 <<< "$HEAD_COMMIT_MESSAGE")
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
             MESSAGE="$PR_TITLE"
           else
@@ -355,7 +355,7 @@ jobs:
           HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
           INPUT_TRIGGER: ${{ inputs.trigger }}
         run: |
-          COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+          COMMIT_MESSAGE=$(head -1 <<< "$HEAD_COMMIT_MESSAGE")
 
           if [[ -n "${INPUT_TRIGGER}" ]]; then
               CHECKS_TYPE="${INPUT_TRIGGER}"
@@ -411,7 +411,7 @@ jobs:
             REPORT_TITLE="$PR_TITLE"
             REF_NAME="$GITHUB_HEAD_REF"
           elif [[ "${{ github.event_name }}" == "push" ]]; then
-            REPORT_TITLE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+            REPORT_TITLE=$(head -1 <<< "$HEAD_COMMIT_MESSAGE")
           else
             REPORT_TITLE="$EVENT_NAME"
           fi
