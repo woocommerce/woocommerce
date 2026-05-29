@@ -3,7 +3,6 @@
  */
 import {
 	BlockInstance,
-	parse,
 	synchronizeBlocksWithTemplate,
 } from '@wordpress/blocks';
 import {
@@ -44,8 +43,7 @@ import { wooProductEditorUiStore } from '../../store/product-editor-ui';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { LoadingState } from './loading-state';
-import type { ProductFormPostProps, ProductTemplate } from '../../types';
-import isProductFormTemplateSystemEnabled from '../../utils/is-product-form-template-system-enabled';
+import type { ProductTemplate } from '../../types';
 
 const PluginArea = lazy( () =>
 	import( '@wordpress/plugins' ).then( ( module ) => ( {
@@ -81,10 +79,6 @@ export function BlockEditor( {
 	productId,
 	setIsEditorLoading,
 }: BlockEditorProps ) {
-	const [ selectedProductFormId, setSelectedProductFormId ] = useState<
-		number | null
-	>( null );
-
 	useConfirmUnsavedProductChanges( postType );
 
 	/**
@@ -212,24 +206,6 @@ export function BlockEditor( {
 		{ id: productId !== -1 ? productId : 0 }
 	) as [ BlockInstance[], BlockChangeHandler, BlockChangeHandler ];
 
-	// Pull the product templates from the store.
-	const productForms = useSelect( ( sel ) => {
-		return (
-			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
-				per_page: -1,
-			} ) || []
-		);
-	}, [] ) as ProductFormPostProps[];
-
-	// Set the default product form template ID.
-	useEffect( () => {
-		if ( ! productForms.length ) {
-			return;
-		}
-
-		setSelectedProductFormId( productForms[ 0 ].id );
-	}, [ productForms ] );
-
 	const isEditorLoading =
 		! settings ||
 		! layoutTemplate ||
@@ -237,28 +213,6 @@ export function BlockEditor( {
 		( postType !== 'product_variation' && ! productTemplate ) ||
 		productId === -1 ||
 		! hasResolved;
-
-	const productFormTemplate = useMemo(
-		function pickAndParseTheProductFormTemplate() {
-			if (
-				! isProductFormTemplateSystemEnabled() ||
-				! selectedProductFormId
-			) {
-				return undefined;
-			}
-
-			const productFormPost = productForms.find(
-				( form ) => form.id === selectedProductFormId
-			);
-
-			if ( productFormPost ) {
-				return parse( productFormPost.content.raw );
-			}
-
-			return undefined;
-		},
-		[ productForms, selectedProductFormId ]
-	);
 
 	useLayoutEffect(
 		function setupEditor() {
@@ -272,13 +226,7 @@ export function BlockEditor( {
 				layoutTemplate.blockTemplates
 			);
 
-			/*
-			 * If the product form template is not available, use the block instances.
-			 * ToDo: Remove this fallback once the product form template is stable/available.
-			 */
-			const editorTemplate = blockInstances ?? productFormTemplate;
-
-			onChange( editorTemplate, {} );
+			onChange( blockInstances, {} );
 
 			dispatch( 'core/editor' ).updateEditorSettings( {
 				...settings,
@@ -294,7 +242,6 @@ export function BlockEditor( {
 			layoutTemplate,
 			settings,
 			productTemplate,
-			productFormTemplate,
 			productId,
 		]
 	);

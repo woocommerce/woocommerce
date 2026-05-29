@@ -369,7 +369,6 @@
 			],
 			"packages": [
 				"@woocommerce/product-editor",
-				"@woocommerce/settings-editor",
 				"@woocommerce/admin-library"
 			],
 			"isIgnored": true
@@ -648,21 +647,30 @@
 		},
 		{
 			"dependencies": [
+				"esbuild"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "0.24.x"
+		},
+		{
+			"dependencies": [
+				"chokidar"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "3.6.x"
+		},
+		{
+			"dependencies": [
 				"dompurify"
 			],
 			"packages": [
 				"**"
 			],
 			"pinVersion": "^3.2.6"
-		},
-		{
-			"dependencies": [
-				"@automattic/site-admin"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^0.0.1"
 		},
 		{
 			"label": "Only manage versions for these dependencies",
