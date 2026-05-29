@@ -110,7 +110,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'downloads'          => array(),
 		'image_id'           => '',
 		'gallery_image_ids'  => array(),
-		'media_gallery'      => array(),
 		'download_limit'     => -1,
 		'download_expiry'    => -1,
 		'rating_counts'      => array(),
@@ -646,18 +645,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_gallery_image_ids( $context = 'view' ) {
 		return $this->get_prop( 'gallery_image_ids', $context );
-	}
-
-	/**
-	 * Returns the mixed media gallery items.
-	 *
-	 * @param string $context What the value is for. Valid values are view and edit.
-	 * @return array<int, array<string, mixed>>
-	 *
-	 * @since 10.9.0
-	 */
-	public function get_media_gallery( $context = 'view' ) {
-		return $this->get_prop( 'media_gallery', $context );
 	}
 
 	/**
@@ -1479,20 +1466,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set mixed media gallery items.
-	 *
-	 * @param array $media_gallery List of media gallery items.
-	 * @return void
-	 *
-	 * @since 10.9.0
-	 */
-	public function set_media_gallery( $media_gallery ) {
-		$media_gallery = is_array( $media_gallery ) ? self::normalize_media_gallery( $media_gallery ) : array();
-
-		$this->set_prop( 'media_gallery', $media_gallery );
-	}
-
-	/**
 	 * Set main image ID.
 	 *
 	 * @since 3.0.0
@@ -1501,124 +1474,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function set_image_id( $image_id = '' ) {
 		$this->set_prop( 'image_id', $image_id );
-	}
-
-	/**
-	 * Normalize mixed media gallery items.
-	 *
-	 * @param array $media_gallery List of media gallery items.
-	 * @return array<int, array<string, mixed>>
-	 */
-	private static function normalize_media_gallery( array $media_gallery ) {
-		$normalized = array();
-
-		foreach ( $media_gallery as $item ) {
-			$item = self::normalize_media_gallery_item( $item );
-
-			if ( ! empty( $item ) ) {
-				$normalized[] = $item;
-			}
-		}
-
-		return $normalized;
-	}
-
-	/**
-	 * Normalize a single media gallery item.
-	 *
-	 * @param mixed $item Media gallery item.
-	 * @return array<string, mixed>
-	 */
-	private static function normalize_media_gallery_item( $item ) {
-		if ( ! is_array( $item ) ) {
-			return array();
-		}
-
-		$media_type = isset( $item['media_type'] ) ? sanitize_key( $item['media_type'] ) : '';
-
-		if ( ! in_array( $media_type, array( 'image', 'video' ), true ) ) {
-			return array();
-		}
-
-		$source_type = isset( $item['source_type'] ) ? sanitize_key( $item['source_type'] ) : 'attachment';
-
-		if ( 'attachment' !== $source_type ) {
-			return array();
-		}
-
-		return self::normalize_attachment_media_gallery_item( $item, $media_type );
-	}
-
-	/**
-	 * Normalize an attachment-backed media gallery item.
-	 *
-	 * @param array<string, mixed> $item       Media gallery item.
-	 * @param string               $media_type Media type.
-	 * @return array<string, mixed>
-	 */
-	private static function normalize_attachment_media_gallery_item( array $item, string $media_type ) {
-		$id = isset( $item['id'] ) ? absint( $item['id'] ) : 0;
-
-		if ( ! $id ) {
-			return array();
-		}
-
-		$normalized = array(
-			'media_type'  => $media_type,
-			'source_type' => 'attachment',
-			'id'          => $id,
-		);
-
-		if ( 'video' !== $media_type ) {
-			return $normalized;
-		}
-
-		return self::normalize_video_media_gallery_item( $normalized, $item );
-	}
-
-	/**
-	 * Normalize video-specific media gallery item data.
-	 *
-	 * @param array<string, mixed> $normalized Normalized item data.
-	 * @param array<string, mixed> $item       Original item data.
-	 * @return array<string, mixed>
-	 */
-	private static function normalize_video_media_gallery_item( array $normalized, array $item ) {
-		$poster_id = isset( $item['poster_id'] ) ? absint( $item['poster_id'] ) : 0;
-
-		if ( $poster_id ) {
-			$normalized['poster_id'] = $poster_id;
-		}
-
-		if ( ! empty( $item['settings'] ) && is_array( $item['settings'] ) ) {
-			$settings = self::normalize_media_gallery_video_settings( $item['settings'] );
-
-			if ( ! empty( $settings ) ) {
-				$normalized['settings'] = $settings;
-			}
-		}
-
-		return $normalized;
-	}
-
-	/**
-	 * Normalize video media settings.
-	 *
-	 * @param array<string, mixed> $settings Video media settings.
-	 * @return array<string, mixed>
-	 */
-	private static function normalize_media_gallery_video_settings( array $settings ) {
-		$normalized = array();
-
-		if ( ! empty( $settings['preload'] ) ) {
-			$preload = sanitize_key( $settings['preload'] );
-
-			if ( in_array( $preload, array( 'auto', 'metadata', 'none' ), true ) ) {
-				$normalized['preload'] = $preload;
-			}
-		}
-
-		return $normalized;
 	}
 
 	/**

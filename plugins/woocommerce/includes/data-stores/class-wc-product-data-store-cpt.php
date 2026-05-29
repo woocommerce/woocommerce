@@ -481,7 +481,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_wc_rating_count'       => 'rating_counts',
 			'_wc_review_count'       => 'review_count',
 			'_product_image_gallery' => 'gallery_image_ids',
-			'_wc_media_gallery'      => 'media_gallery',
 		);
 
 		$set_props = array();
@@ -496,7 +495,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props['brand_ids']         = $this->get_term_ids( $product, 'product_brand' );
 		$set_props['shipping_class_id'] = current( $this->get_term_ids( $product, 'product_shipping_class' ) );
 		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ?? '' ) );
-		$set_props['media_gallery']     = $this->decode_media_gallery_meta( $set_props['media_gallery'] ?? array() );
 
 		$product->set_props( $set_props );
 
@@ -731,7 +729,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_virtual'               => 'virtual',
 			'_downloadable'          => 'downloadable',
 			'_product_image_gallery' => 'gallery_image_ids',
-			'_wc_media_gallery'      => 'media_gallery',
 			'_download_limit'        => 'download_limit',
 			'_download_expiry'       => 'download_expiry',
 			'_thumbnail_id'          => 'image_id',
@@ -763,14 +760,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					break;
 				case 'gallery_image_ids':
 					$value = implode( ',', $value );
-					break;
-				case 'media_gallery':
-					if ( empty( $value ) ) {
-						$value = '';
-					} else {
-						$value = wp_json_encode( $value );
-						$value = false === $value ? '' : wp_slash( $value );
-					}
 					break;
 				case 'date_on_sale_from':
 				case 'date_on_sale_to':
@@ -2571,25 +2560,5 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected function use_cogs_lookup_column(): bool {
 		$cogs_controller = wc_get_container()->get( CostOfGoodsSoldController::class );
 		return $cogs_controller->feature_is_enabled() && $cogs_controller->product_meta_lookup_table_cogs_value_columns_exist();
-	}
-
-	/**
-	 * Decode media gallery post meta before passing it to the product setter.
-	 *
-	 * @param mixed $value Raw media gallery meta value.
-	 * @return array
-	 */
-	private function decode_media_gallery_meta( $value ): array {
-		if ( is_array( $value ) ) {
-			return $value;
-		}
-
-		if ( ! is_string( $value ) || '' === $value ) {
-			return array();
-		}
-
-		$decoded = json_decode( $value, true );
-
-		return is_array( $decoded ) ? $decoded : array();
 	}
 }

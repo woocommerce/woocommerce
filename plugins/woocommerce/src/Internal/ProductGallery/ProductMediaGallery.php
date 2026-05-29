@@ -19,6 +19,11 @@ defined( 'ABSPATH' ) || exit;
 class ProductMediaGallery {
 
 	/**
+	 * Product meta key used for beta product media gallery storage.
+	 */
+	private const MEDIA_GALLERY_META_KEY = '_wc_media_gallery';
+
+	/**
 	 * The feature id used by `FeaturesController` (Settings → Advanced → Features).
 	 */
 	public const FEATURE_ID = 'product_gallery_videos';
@@ -53,7 +58,7 @@ class ProductMediaGallery {
 				'include_placeholder'   => false,
 				'feature_enabled'       => self::is_feature_enabled(),
 				'validate_attachments'  => false,
-				'preserve_video_data'   => true,
+				'preserve_video_data'   => false,
 				'resolve_video_posters' => true,
 				'deduplicate'           => false,
 			)
@@ -64,7 +69,7 @@ class ProductMediaGallery {
 
 		if ( $args['feature_enabled'] ) {
 			$media_items = self::normalize_media_gallery_items(
-				$product->get_media_gallery( $context ),
+				self::get_stored_media_gallery_items( $product ),
 				(bool) $args['validate_attachments'],
 				(bool) $args['preserve_video_data']
 			);
@@ -100,6 +105,58 @@ class ProductMediaGallery {
 	}
 
 	/**
+	 * Get media gallery items stored for a product.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @return array
+	 */
+	public static function get_stored_media_gallery_items( WC_Product $product ): array {
+		$value = $product->get_id()
+			? get_post_meta( $product->get_id(), self::MEDIA_GALLERY_META_KEY, true )
+			: $product->get_meta( self::MEDIA_GALLERY_META_KEY, true, 'edit' );
+
+		return self::decode_media_gallery_meta( $value );
+	}
+
+	/**
+	 * Copy stored media gallery items between products.
+	 *
+	 * @param WC_Product $source_product Source product.
+	 * @param WC_Product $target_product Target product.
+	 * @return array Stored media gallery items.
+	 */
+	public static function copy_stored_media_gallery_items( WC_Product $source_product, WC_Product $target_product ): array {
+		$media_gallery = self::get_stored_media_gallery_items( $source_product );
+
+		return self::set_stored_media_gallery_items(
+			$target_product,
+			self::has_videos( $media_gallery ) ? $media_gallery : array()
+		);
+	}
+
+	/**
+	 * Normalize and store media gallery items for a product.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @param array      $media_gallery Media gallery data.
+	 * @param bool       $validate_attachments Whether attachment IDs should be type-checked.
+	 * @param bool       $preserve_video_data Whether to preserve additional video item keys.
+	 * @return array Stored media gallery items.
+	 */
+	public static function set_stored_media_gallery_items(
+		WC_Product $product,
+		array $media_gallery,
+		bool $validate_attachments = false,
+		bool $preserve_video_data = false
+	): array {
+		$media_gallery = self::normalize_media_gallery_items( $media_gallery, $validate_attachments, $preserve_video_data );
+
+		self::update_media_gallery_meta( $product, $media_gallery );
+
+		return $media_gallery;
+	}
+
+	/**
 	 * Normalize media gallery items.
 	 *
 	 * @param array $media_gallery Media gallery data.
@@ -110,7 +167,7 @@ class ProductMediaGallery {
 	public static function normalize_media_gallery_items(
 		array $media_gallery,
 		bool $validate_attachments = false,
-		bool $preserve_video_data = true
+		bool $preserve_video_data = false
 	): array {
 		$items = array();
 
@@ -159,6 +216,18 @@ class ProductMediaGallery {
 			$video_item['media_type']  = 'video';
 			$video_item['source_type'] = 'attachment';
 			$video_item['id']          = $attachment_id;
+
+			if ( ! empty( $item['settings'] ) && is_array( $item['settings'] ) ) {
+				$settings = self::normalize_video_settings( $item['settings'] );
+
+				if ( ! empty( $settings ) ) {
+					$video_item['settings'] = $settings;
+				} else {
+					unset( $video_item['settings'] );
+				}
+			} else {
+				unset( $video_item['settings'] );
+			}
 
 			if (
 				$poster_id &&
@@ -441,5 +510,75 @@ class ProductMediaGallery {
 		}
 
 		return $items;
+	}
+
+	/**
+	 * Normalize video media settings.
+	 *
+	 * @param array $settings Video media settings.
+	 * @return array
+	 */
+	private static function normalize_video_settings( array $settings ): array {
+		$normalized = array();
+
+		if ( ! empty( $settings['preload'] ) ) {
+			$preload = sanitize_key( $settings['preload'] );
+
+			if ( in_array( $preload, array( 'auto', 'metadata', 'none' ), true ) ) {
+				$normalized['preload'] = $preload;
+			}
+		}
+
+		return $normalized;
+	}
+
+	/**
+	 * Decode media gallery post meta.
+	 *
+	 * @param mixed $value Raw media gallery meta value.
+	 * @return array
+	 */
+	private static function decode_media_gallery_meta( $value ): array {
+		if ( is_array( $value ) ) {
+			return $value;
+		}
+
+		if ( ! is_string( $value ) || '' === $value ) {
+			return array();
+		}
+
+		$decoded = json_decode( $value, true );
+
+		return is_array( $decoded ) ? $decoded : array();
+	}
+
+	/**
+	 * Update media gallery post meta.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @param array      $media_gallery Media gallery items.
+	 * @return void
+	 */
+	private static function update_media_gallery_meta( WC_Product $product, array $media_gallery ): void {
+		if ( empty( $media_gallery ) ) {
+			if ( $product->get_id() ) {
+				delete_post_meta( $product->get_id(), self::MEDIA_GALLERY_META_KEY );
+			} else {
+				$product->delete_meta_data( self::MEDIA_GALLERY_META_KEY );
+			}
+			return;
+		}
+
+		$value = wp_json_encode( $media_gallery );
+
+		if ( false === $value ) {
+			return;
+		}
+
+		if ( $product->get_id() ) {
+			update_post_meta( $product->get_id(), self::MEDIA_GALLERY_META_KEY, wp_slash( $value ) );
+		} else {
+			$product->update_meta_data( self::MEDIA_GALLERY_META_KEY, $value );
+		}
 	}
 }
