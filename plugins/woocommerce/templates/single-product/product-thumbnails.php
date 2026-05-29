@@ -12,7 +12,7 @@
  *
  * @see         https://woocommerce.com/document/template-structure/
  * @package     WooCommerce\Templates
- * @version     9.8.0
+ * @version     10.9.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -28,18 +28,47 @@ if ( ! $product || ! $product instanceof WC_Product ) {
 	return '';
 }
 
-$attachment_ids = $product->get_gallery_image_ids();
+$media_items = function_exists( 'wc_get_product_media_gallery_items' )
+	? wc_get_product_media_gallery_items( $product )
+	: array();
 
-if ( $attachment_ids && $product->get_image_id() ) {
-	foreach ( $attachment_ids as $key => $attachment_id ) {
-		/**
-		 * Filter product image thumbnail HTML string.
-		 *
-		 * @since 1.6.4
-		 *
-		 * @param string $html          Product image thumbnail HTML string.
-		 * @param int    $attachment_id Attachment ID.
-		 */
-		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', wc_get_gallery_image_html( $attachment_id, false, $key ), $attachment_id ); // PHPCS:Ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+if ( count( $media_items ) > 1 ) {
+	foreach ( array_slice( $media_items, 1 ) as $key => $media_item ) {
+		$attachment_id = isset( $media_item['id'] ) ? absint( $media_item['id'] ) : 0;
+
+		if ( ! $attachment_id ) {
+			continue;
+		}
+
+		$is_video = 'video' === ( $media_item['media_type'] ?? '' ) && function_exists( 'wc_get_gallery_video_html' );
+
+		if ( $is_video ) {
+			$html = wc_get_gallery_video_html( $media_item, false );
+		} else {
+			$html = wc_get_gallery_image_html( $attachment_id, false, $key );
+		}
+
+		if ( $is_video ) {
+			/**
+			 * Filter product video thumbnail HTML string.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param string $html          Product video thumbnail HTML string.
+			 * @param int    $attachment_id Video attachment ID.
+			 * @param array  $media_item    Product media gallery item.
+			 */
+			echo apply_filters( 'woocommerce_single_product_video_thumbnail_html', $html, $attachment_id, $media_item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		} else {
+			/**
+			 * Filter product image thumbnail HTML string.
+			 *
+			 * @since 1.6.4
+			 *
+			 * @param string $html          Product image thumbnail HTML string.
+			 * @param int    $attachment_id Attachment ID.
+			 */
+			echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $html, $attachment_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
 	}
 }
