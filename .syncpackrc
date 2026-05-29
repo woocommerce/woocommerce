@@ -499,15 +499,6 @@
 		},
 		{
 			"dependencies": [
-				"glob"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^10.3.10"
-		},
-		{
-			"dependencies": [
 				"postcss-loader"
 			],
 			"packages": [
@@ -641,24 +632,6 @@
 				"**"
 			],
 			"pinVersion": "0.14.12"
-		},
-		{
-			"dependencies": [
-				"esbuild"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "0.24.x"
-		},
-		{
-			"dependencies": [
-				"chokidar"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "3.6.x"
 		},
 		{
 			"dependencies": [
