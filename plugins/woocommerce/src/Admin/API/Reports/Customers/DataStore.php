@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\Overrides\Order as OverridesOrder;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
@@ -704,10 +705,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			?? $order->get_date_modified( 'edit' )
 			?? $order->get_date_paid( 'edit' );
 		$data       = array(
-			'first_name'       => method_exists( $order, 'get_customer_first_name' )
+			'first_name'       => $order instanceof OverridesOrder
 				? $order->get_customer_first_name()
 				: $order->get_billing_first_name( 'edit' ),
-			'last_name'        => method_exists( $order, 'get_customer_last_name' )
+			'last_name'        => $order instanceof OverridesOrder
 				? $order->get_customer_last_name()
 				: $order->get_billing_last_name( 'edit' ),
 			'email'            => $order->get_billing_email( 'edit' ),
