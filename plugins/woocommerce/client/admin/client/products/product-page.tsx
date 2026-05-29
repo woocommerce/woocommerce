@@ -24,6 +24,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { useProductEntityRecord } from './hooks/use-product-entity-record';
 import { MoreMenuFill } from './fills/product-block-editor-fills';
+import { PrototypeFlagsProvider, DevPanel } from './prototype';
 import './product-page.scss';
 
 productEditorHeaderApiFetchMiddleware();
@@ -135,5 +136,10 @@ export default function ProductPage() {
 		);
 	}
 
-	return <Editor productId={ productId } />;
+	return (
+		<PrototypeFlagsProvider>
+			<Editor productId={ productId } />
+			<DevPanel />
+		</PrototypeFlagsProvider>
+	);
 }
