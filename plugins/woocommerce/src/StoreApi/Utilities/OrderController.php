@@ -113,10 +113,46 @@ class OrderController {
 		$this->update_addresses_from_cart( $order );
 		$order->set_currency( get_woocommerce_currency() );
 		$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
-		$order->set_customer_id( get_current_user_id() );
+
+		// NOTE(POS spike): the two filters below (`woocommerce_store_api_order_customer_id`
+		// and `woocommerce_store_api_order_default_payment_method`) were added by the
+		// POS Store API spike to let trusted-actor callers (POS, agentic) override the
+		// web-checkout assumptions baked into this method. They should land as a
+		// standalone trunk PR independent of the POS spike.
+		/**
+		 * Filters the customer_id stamped onto a draft order built from cart.
+		 *
+		 * The default behaviour assumes the authenticated user IS the customer,
+		 * which is true for web checkout but wrong for trusted-actor scenarios
+		 * such as in-store POS (the cashier is authenticated but is not the
+		 * customer; the order may be anonymous).
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param int       $customer_id The customer id to set on the order. Defaults to the current user id.
+		 * @param \WC_Order $order       Order object being updated.
+		 */
+		$customer_id = (int) apply_filters( 'woocommerce_store_api_order_customer_id', get_current_user_id(), $order );
+		$order->set_customer_id( $customer_id );
 		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
 		$order->set_customer_user_agent( wc_get_user_agent() );
-		$order->set_payment_method( PaymentUtils::get_default_payment_method() );
+
+		/**
+		 * Filters the default payment_method stamped onto a draft order built from cart.
+		 *
+		 * The default ({@see PaymentUtils::get_default_payment_method()}) returns
+		 * the first enabled gateway, which fits web checkout where the UI offers
+		 * the shopper a chance to switch. Trusted-actor callers that legitimately
+		 * defer payment selection past order creation (POS picks tender after
+		 * order creation via a separate REST flow) can return an empty string.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param string    $payment_method The default payment method id. Defaults to the first enabled gateway.
+		 * @param \WC_Order $order          Order object being updated.
+		 */
+		$payment_method = (string) apply_filters( 'woocommerce_store_api_order_default_payment_method', PaymentUtils::get_default_payment_method(), $order );
+		$order->set_payment_method( $payment_method );
 		$order->update_meta_data( 'is_vat_exempt', wc_bool_to_string( wc()->cart->get_customer()->get_is_vat_exempt() ) );
 		$order->calculate_totals();
 	}
@@ -338,6 +374,30 @@ class OrderController {
 	 */
 	protected function validate_email( \WC_Order $order ) {
 		$email = $order->get_billing_email();
+
+		// NOTE(POS spike): the filter below was added by the POS Store API
+		// spike so trusted-actor callers can opt out of the require-email
+		// guard. POS in-store sales legitimately don't capture a customer
+		// email at order-creation time. Should land as a standalone trunk PR
+		// independent of the POS spike.
+		/**
+		 * Filters whether billing_email is required on a Store API order.
+		 *
+		 * Defaults to true (web-checkout semantics: every order has a customer
+		 * email so that order confirmations etc. can be delivered). Trusted-actor
+		 * callers that legitimately omit a customer email — e.g. anonymous
+		 * in-store POS sales — can return false to skip both the empty and
+		 * the format check.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param bool      $require Whether to require an email on the order. Default true.
+		 * @param \WC_Order $order   Order object being validated.
+		 */
+		$require_email = (bool) apply_filters( 'woocommerce_store_api_require_billing_email', true, $order );
+		if ( ! $require_email ) {
+			return;
+		}
 
 		if ( empty( $email ) ) {
 			throw new RouteException(

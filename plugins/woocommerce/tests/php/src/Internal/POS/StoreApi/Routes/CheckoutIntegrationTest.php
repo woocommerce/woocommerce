@@ -17,8 +17,14 @@ namespace Automattic\WooCommerce\Tests\Internal\POS\StoreApi\Routes;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Context;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutAddressPolicy;
+use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutEmailPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutPaymentMethodPolicy;
+use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerIdPolicy;
+use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerSwap;
+use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\DefaultPaymentMethodPolicy;
+use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\ShippingPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Routes\Controller;
+use WC_Customer;
 use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\ControllerTestCase;
@@ -27,6 +33,12 @@ use WC_Product_Simple;
 /**
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\Routes\Controller
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutPaymentMethodPolicy
+ * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutAddressPolicy
+ * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutEmailPolicy
+ * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerIdPolicy
+ * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerSwap
+ * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\DefaultPaymentMethodPolicy
+ * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\ShippingPolicy
  */
 class CheckoutIntegrationTest extends ControllerTestCase {
 
@@ -45,6 +57,13 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 	private $product;
 
 	/**
+	 * Original WC()->customer captured in setUp so it can be restored.
+	 *
+	 * @var WC_Customer|null
+	 */
+	private $original_customer;
+
+	/**
 	 * Setup.
 	 */
 	protected function setUp(): void {
@@ -52,11 +71,19 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 
 		Context::set_test_override( true );
 
+		$this->original_customer = WC()->customer;
+
 		// Engage the POS opt-outs so the Store API guards are relaxed for these
 		// requests. In production these are registered in class-woocommerce.php;
-		// in tests we register them explicitly so the test is self-contained.
+		// in tests we register them explicitly so the test is self-contained
+		// and exercises the production wiring path end-to-end.
 		( new CheckoutPaymentMethodPolicy() )->register();
 		( new CheckoutAddressPolicy() )->register();
+		( new CheckoutEmailPolicy() )->register();
+		( new CustomerIdPolicy() )->register();
+		( new DefaultPaymentMethodPolicy() )->register();
+		( new ShippingPolicy() )->register();
+		( new CustomerSwap() )->register();
 
 		$this->admin_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
 
@@ -79,7 +106,13 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 	protected function tearDown(): void {
 		remove_all_filters( 'woocommerce_store_api_checkout_require_payment_method' );
 		remove_all_filters( 'woocommerce_store_api_validate_addresses' );
+		remove_all_filters( 'woocommerce_store_api_require_billing_email' );
+		remove_all_filters( 'woocommerce_store_api_order_customer_id' );
+		remove_all_filters( 'woocommerce_store_api_order_default_payment_method' );
+		remove_all_filters( 'woocommerce_cart_needs_shipping' );
+		remove_all_filters( 'rest_pre_dispatch' );
 		Context::set_test_override( null );
+		WC()->customer = $this->original_customer;
 		wp_delete_user( $this->admin_id );
 		parent::tearDown();
 	}
@@ -204,6 +237,105 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		$this->assertCount( 1, $items );
 		$first_item = reset( $items );
 		$this->assertSame( $this->product->get_id(), $first_item->get_product_id() );
+
+		/*
+		 * Source-level guarantees (asserted here so the wiring is exercised
+		 * end to end through the real Store API checkout pipeline, not just
+		 * the per-callback unit tests):
+		 *
+		 *   - CustomerIdPolicy gates `woocommerce_store_api_order_customer_id`
+		 *     in OrderController::update_order_from_cart to 0 for POS, so
+		 *     the cashier's WP user is never attributed.
+		 *   - DefaultPaymentMethodPolicy gates
+		 *     `woocommerce_store_api_order_default_payment_method` to '' so
+		 *     no gateway is stamped before the cashier picks tender.
+		 *   - CustomerSwap replaces WC()->customer with a guest WC_Customer
+		 *     at rest_pre_dispatch, so update_addresses_from_cart reads
+		 *     empties from session instead of the cashier's saved profile.
+		 */
+		$this->assertSame( 0, $order->get_customer_id(), 'POS orders must not be attributed to the cashier.' );
+		$this->assertSame( '', $order->get_billing_first_name() );
+		$this->assertSame( '', $order->get_billing_email() );
+		$this->assertSame( '', $order->get_shipping_first_name() );
+	}
+
+	/**
+	 * End-to-end regression for the four web-checkout assumptions that the
+	 * Store API's update_order_from_cart bakes in:
+	 *
+	 *   - customer_id = get_current_user_id() (cashier leaks as customer)
+	 *   - billing/shipping copied from wc()->customer (cashier profile leaks)
+	 *   - payment_method = default gateway (woocommerce_payments stamped)
+	 *   - wc()->cart->needs_shipping() triggers a shipping line
+	 *
+	 * Each is addressed at its source by a dedicated policy class. This test
+	 * seeds the cashier's WP user profile with a recognisable billing address,
+	 * uses a shipping-needing physical product, and asserts the resulting
+	 * order shows none of the leaks — proving the fix works end-to-end through
+	 * the real checkout pipeline rather than only at the per-callback level.
+	 *
+	 * @testdox A POS checkout with a shipping-needing product strips admin attribution, addresses, default payment_method and shipping at the source.
+	 */
+	public function test_checkout_does_not_leak_admin_or_shipping_at_source(): void {
+		wp_set_current_user( $this->admin_id );
+
+		update_user_meta( $this->admin_id, 'billing_first_name', 'CashierFirstNameLeak' );
+		update_user_meta( $this->admin_id, 'billing_address_1', '999 Admin Lane' );
+		update_user_meta( $this->admin_id, 'billing_city', 'AdminCity' );
+		update_user_meta( $this->admin_id, 'billing_email', 'admin-leak@example.com' );
+		update_user_meta( $this->admin_id, 'shipping_first_name', 'CashierShipLeak' );
+		update_user_meta( $this->admin_id, 'shipping_address_1', '999 Admin Lane' );
+
+		$shipping_needing_product = ( new FixtureData() )->get_simple_product(
+			array(
+				'name'          => 'POS Physical Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 50,
+				'virtual'       => false,
+				'weight'        => 1,
+			)
+		);
+
+		$add_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/cart/add-item' );
+		$add_request->set_body_params(
+			array(
+				'id'       => $shipping_needing_product->get_id(),
+				'quantity' => 1,
+			)
+		);
+		$add_response = rest_get_server()->dispatch( $add_request );
+		$this->assertSame( 201, $add_response->get_status() );
+
+		$cart_token = '';
+		foreach ( $add_response->get_headers() as $key => $value ) {
+			if ( strtolower( $key ) === 'cart-token' ) {
+				$cart_token = (string) $value;
+				break;
+			}
+		}
+		$this->assertNotEmpty( $cart_token );
+
+		$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
+		$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );
+		$checkout_response = rest_get_server()->dispatch( $checkout_request );
+
+		$this->assertSame(
+			200,
+			$checkout_response->get_status(),
+			'Checkout failed: ' . wp_json_encode( $checkout_response->get_data() )
+		);
+
+		$order = wc_get_order( $checkout_response->get_data()['order_id'] );
+
+		$this->assertSame( 0, $order->get_customer_id() );
+		$this->assertSame( '', $order->get_payment_method() );
+		$this->assertSame( '', $order->get_billing_first_name(), 'Cashier profile must not leak onto billing.' );
+		$this->assertSame( '', $order->get_billing_address_1() );
+		$this->assertSame( '', $order->get_billing_email() );
+		$this->assertSame( '', $order->get_shipping_first_name(), 'Cashier profile must not leak onto shipping.' );
+		$this->assertSame( '', $order->get_shipping_address_1() );
+		$this->assertCount( 0, $order->get_items( 'shipping' ), 'In-person POS sales must not carry a shipping line.' );
+		$this->assertSame( 0.0, (float) $order->get_shipping_total() );
 	}
 
 	/**
