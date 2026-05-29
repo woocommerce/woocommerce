@@ -11,9 +11,6 @@
 	"engines": {
 		"node": "^24.15.0"
 	},
-	"main": "build/index.js",
-	"module": "build-module/index.js",
-	"types": "build-types/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./build-types/index.d.ts",
@@ -21,6 +18,9 @@
 			"require": "./build/index.js"
 		}
 	},
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"types": "build-types/index.d.ts",
 	"files": [
 		"build",
 		"build-module",
@@ -28,7 +28,7 @@
 	],
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
-		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project": "pnpm --stream --if-present '/^build:project:.*$/'",
 		"build:project:cjs": "node build.mjs --cjs",
 		"build:project:esm": "node build.mjs",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
@@ -85,6 +85,13 @@
 		"oauth-1.0a": "^2.2.6"
 	},
 	"publishConfig": {
-		"access": "public"
+		"access": "public",
+		"exports": {
+			".": {
+				"types": "./build-types/index.d.ts",
+				"import": "./build-module/index.js",
+				"require": "./build/index.js"
+			}
+		}
 	}
 }
