@@ -73,6 +73,12 @@
 			"@woocommerce/blocks/*": [
 				"assets/js/blocks/*"
 			],
+			"@woocommerce/blocks-test-utils": [
+				"tests/utils"
+			],
+			"@woocommerce/blocks-test-utils/*": [
+				"tests/utils/*"
+			],
 			"@woocommerce/editor-components/*": [
 				"assets/js/editor-components/*"
 			],

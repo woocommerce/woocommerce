@@ -99,7 +99,7 @@ class NotificationProcessor {
 	 * @since 10.7.0
 	 */
 	public function register(): void {
-		add_action( self::SAFETY_NET_HOOK, array( $this, 'handle_safety_net' ), 10, 2 );
+		add_action( self::SAFETY_NET_HOOK, array( $this, 'handle_safety_net' ), 10, 3 );
 	}
 
 	/**
@@ -233,18 +233,23 @@ class NotificationProcessor {
 	 *
 	 * @param string $type        The notification type.
 	 * @param int    $resource_id The resource ID.
+	 * @param array  $extra       Optional subclass-specific extras (e.g. event_type, stock_quantity_at_trigger).
+	 *                            Empty for notification types whose state is fully described by type + resource_id.
 	 * @return void
 	 *
 	 * @since 10.7.0
 	 */
-	public function handle_safety_net( string $type, int $resource_id ): void {
+	public function handle_safety_net( string $type, int $resource_id, array $extra = array() ): void {
 		try {
-			$notification = Notification::from_array(
-				array(
-					'type'        => $type,
-					'resource_id' => $resource_id,
-				)
-			);
+			// Use the `+` array union operator (not array_merge) so the positional
+			// $type and $resource_id always win over any colliding keys in $extra.
+			// Defends against a malformed payload reconstructing the wrong target.
+			$data = array(
+				'type'        => $type,
+				'resource_id' => $resource_id,
+			) + $extra;
+
+			$notification = Notification::from_array( $data );
 
 			$this->process( $notification, true );
 		} catch ( Exception $e ) {
