@@ -127,16 +127,20 @@ module.exports = {
 			'(?:src|client|assets/js)/.*\\.[jt]sx?$': [
 				'ts-jest',
 				{
-					// A dedicated test tsconfig sidesteps per-package
-					// include/exclude/rootDir restrictions that block
-					// ts-jest from compiling cross-package source files
-					// (resolved via the @woocommerce/* moduleNameMapper).
-					// The compiler emits CJS so Jest's runtime can execute
-					// it; package builds keep their own tsconfigs for
-					// publishing.
-					tsconfig: require.resolve(
-						'@woocommerce/internal-ts-config/tsconfig-jest.json'
-					),
+					// Inline override: extends the shared config but flips
+					// jsx to the automatic runtime that Jest expects.
+					// Sidesteps per-package include/exclude/rootDir
+					// restrictions that block ts-jest from compiling
+					// cross-package source files (resolved via the
+					// @woocommerce/* moduleNameMapper). The compiler emits
+					// CJS so Jest's runtime can execute it; package builds
+					// keep their own tsconfigs for publishing.
+					tsconfig: {
+						extends: require.resolve(
+							'@woocommerce/internal-build/configs/tsconfig.json'
+						),
+						compilerOptions: { jsx: 'react-jsx', module: 'commonjs' },
+					},
 					diagnostics: false,
 				},
 			],
