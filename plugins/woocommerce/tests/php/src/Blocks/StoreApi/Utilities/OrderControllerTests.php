@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use WC_Helper_Order;
+use WC_Helper_Product;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
@@ -323,6 +324,68 @@ class OrderControllerTests extends TestCase {
 		$this->sut->validate_address_fields( $order, 'shipping', $errors );
 		$this->assertEmpty( $errors->get_error_messages() );
 		remove_filter( 'woocommerce_get_country_locale', $hide_postcode );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() leaves no woocommerce_order_get_tax_location callbacks registered, so the filter chain does not grow across calls.
+	 */
+	public function test_update_order_from_cart_removes_tax_location_filter(): void {
+		$hook           = 'woocommerce_order_get_tax_location';
+		$filters_before = has_filter( $hook );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+		$this->assertFalse( WC()->cart->is_empty(), 'The cart must contain a product so update_order_from_cart() exercises the filter.' );
+
+		try {
+			$order = new \WC_Order();
+			$this->sut->update_order_from_cart( $order );
+			$this->sut->update_order_from_cart( $order );
+		} finally {
+			WC()->cart->empty_cart();
+		}
+
+		$this->assertSame(
+			$filters_before,
+			has_filter( $hook ),
+			'update_order_from_cart() must remove its woocommerce_order_get_tax_location filter; the chain must not grow across repeated calls.'
+		);
+	}
+
+	/**
+	 * @testdox update_order_from_cart() removes its woocommerce_order_get_tax_location filter even when totals calculation throws.
+	 */
+	public function test_update_order_from_cart_removes_tax_location_filter_on_exception(): void {
+		$hook           = 'woocommerce_order_get_tax_location';
+		$filters_before = has_filter( $hook );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+		$this->assertFalse( WC()->cart->is_empty(), 'The cart must be non-empty so totals calculation runs and fires the throwing hook.' );
+
+		$thrower = static function () {
+			throw new \RuntimeException( 'Forced failure during totals calculation.' );
+		};
+		add_action( 'woocommerce_before_calculate_totals', $thrower );
+
+		$threw = false;
+		try {
+			$this->sut->update_order_from_cart( new \WC_Order() );
+		} catch ( \Throwable $e ) {
+			$threw = true;
+		} finally {
+			remove_action( 'woocommerce_before_calculate_totals', $thrower );
+			WC()->cart->empty_cart();
+		}
+
+		$this->assertTrue( $threw, 'The injected exception should propagate out of update_order_from_cart().' );
+		$this->assertSame(
+			$filters_before,
+			has_filter( $hook ),
+			'The woocommerce_order_get_tax_location filter must be removed via the finally block even when totals calculation throws.'
+		);
 	}
 
 	/**
