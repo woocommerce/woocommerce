@@ -147,6 +147,22 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that non-visual attribute terms do not render swatch markup.
+	 *
+	 * @testdox VariationSelectorAttribute does not render swatches for non-visual attributes.
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::build_variation_selectable_items
+	 */
+	public function test_does_not_render_swatches_for_non_visual_attribute(): void {
+		$variable_product = $this->create_variable_product_with_variations();
+		$inner_blocks     = $this->get_attribute_name_block_markup() . $this->get_chips_block_markup();
+
+		$markup = $this->render_variation_selector_attribute( $variable_product, $inner_blocks );
+
+		$this->assertStringNotContainsString( 'is-style-swatch', $markup, 'Chips wrapper should not use swatch style for non-visual attributes.' );
+		$this->assertStringNotContainsString( 'wc-block-product-filter-chips__swatch', $markup, 'Swatch elements should not be rendered for non-visual attributes.' );
+	}
+
+	/**
 	 * Tests that wc-visual attribute terms render chips with swatch markup and classes.
 	 *
 	 * @testdox VariationSelectorAttribute renders wc-visual attribute options with swatch classes and colors.

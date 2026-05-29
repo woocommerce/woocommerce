@@ -257,7 +257,9 @@ class VariationSelectorAttribute extends AbstractBlock {
 	private function build_variation_selectable_items( string $attribute_name, string $attribute_slug, array $attribute_terms, ?string $default_selected ): array {
 		$id_prefix    = sanitize_title( $attribute_slug );
 		$items        = array();
-		$term_visuals = VisualAttributeTermMeta::get_term_visuals( wp_list_pluck( $attribute_terms, 'term_id' ) );
+		$term_visuals = VisualAttributeTermMeta::is_visual_attribute_taxonomy( $attribute_name )
+			? VisualAttributeTermMeta::get_term_visuals( wp_list_pluck( $attribute_terms, 'term_id' ) )
+			: array();
 
 		foreach ( $attribute_terms as $attribute_term ) {
 			if ( ! is_array( $attribute_term ) || ! isset( $attribute_term['value'], $attribute_term['label'] ) ) {
