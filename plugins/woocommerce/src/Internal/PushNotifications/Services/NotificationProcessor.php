@@ -208,7 +208,7 @@ class NotificationProcessor {
 	 *
 	 * @return PushToken[] The tokens whose owner wants the notification.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 */
 	private function filter_tokens_by_preferences( array $tokens, Notification $notification ): array {
 		$type           = $notification->get_type();
