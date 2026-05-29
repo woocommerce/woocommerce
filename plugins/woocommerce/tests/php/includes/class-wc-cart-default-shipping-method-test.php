@@ -87,9 +87,9 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	/**
 	 * Persist the Local Pickup settings used by the SUT.
 	 *
-	 * @param string $default_tab Either 'yes' or 'no'.
+	 * @param string $auto_select_pickup_tab Either 'yes' or 'no'.
 	 */
-	private function set_pickup_default_tab( string $default_tab ): void {
+	private function set_auto_select_pickup_tab( string $auto_select_pickup_tab ): void {
 		update_option(
 			'woocommerce_pickup_location_settings',
 			array(
@@ -97,7 +97,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 				'title'                  => 'Pickup',
 				'tax_status'             => 'taxable',
 				'cost'                   => '',
-				'auto_select_pickup_tab' => $default_tab,
+				'auto_select_pickup_tab' => $auto_select_pickup_tab,
 			)
 		);
 	}
@@ -128,6 +128,16 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Set a full customer shipping address so WC_Customer::has_full_shipping_address() returns true.
+	 */
+	private function set_full_customer_address(): void {
+		WC()->customer->set_shipping_country( 'US' );
+		WC()->customer->set_shipping_state( 'CA' );
+		WC()->customer->set_shipping_postcode( '90210' );
+		WC()->customer->set_shipping_city( 'Beverly Hills' );
+	}
+
+	/**
 	 * Test default method with only pickup rates and no address.
 	 *
 	 * @testdox Returns empty string when only pickup rates remain and hide-shipping-costs is enabled with no address.
@@ -150,7 +160,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	 * @testdox Returns empty when only pickup is available and hide-shipping-costs is enabled, even if the merchant opted in to auto-select pickup.
 	 */
 	public function test_returns_empty_when_hide_shipping_costs_overrides_auto_select_pickup(): void {
-		$this->set_pickup_default_tab( 'yes' );
+		$this->set_auto_select_pickup_tab( 'yes' );
 		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
 		$this->clear_customer_address();
 
@@ -176,21 +186,39 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test default method selects shipping rate when setting is enabled but address exists.
+	 * A real shipping rate always wins as the default, even when hide-shipping-costs is enabled and
+	 * the customer has a full address. Shipping is chosen in the rate loop before the address gate is
+	 * ever evaluated, so this locks in shipping priority rather than the address-gate behaviour.
 	 *
-	 * @testdox Returns shipping rate when hide-shipping-costs is enabled but customer has a full address.
+	 * @testdox A shipping rate is selected when both rates exist, hide-shipping-costs is enabled and the customer has a full address.
 	 */
-	public function test_returns_shipping_rate_when_setting_enabled_and_address_complete(): void {
+	public function test_shipping_rate_wins_when_hide_shipping_costs_enabled_and_address_complete(): void {
 		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
-		WC()->customer->set_shipping_country( 'US' );
-		WC()->customer->set_shipping_state( 'CA' );
-		WC()->customer->set_shipping_postcode( '90210' );
-		WC()->customer->set_shipping_city( 'Beverly Hills' );
+		$this->set_full_customer_address();
 
 		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
 		$result  = wc_get_default_shipping_method_for_package( 0, $package, '' );
 
-		$this->assertSame( 'flat_rate:1', $result, 'Should select shipping rate when customer has a full address' );
+		$this->assertSame( 'flat_rate:1', $result, 'A shipping rate should win regardless of the address gate' );
+	}
+
+	/**
+	 * Once the customer has entered a full address, the "Hide shipping costs until an address is
+	 * entered" gate no longer applies, so a pickup-only package falls through to the pickup
+	 * auto-default when the merchant opted in. This exercises the negative branch of the address
+	 * gate ( has_full_shipping_address() === true ), which is otherwise uncovered.
+	 *
+	 * @testdox Auto-selects pickup for a pickup-only package when hide-shipping-costs is enabled and the customer has a full address.
+	 */
+	public function test_auto_selects_pickup_when_hide_shipping_costs_enabled_and_address_complete(): void {
+		$this->set_auto_select_pickup_tab( 'yes' );
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->set_full_customer_address();
+
+		$package = $this->build_package( array( 'local_pickup:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, '' );
+
+		$this->assertSame( 'local_pickup:1', $result, 'With a full address the hide-shipping-costs gate is cleared, so pickup is auto-selected for a pickup-only package' );
 	}
 
 	/**
@@ -224,10 +252,10 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Shipping rate takes priority over pickup even when default_tab is yes.
+	 * @testdox Shipping rate takes priority over pickup even when auto-select pickup tab is enabled.
 	 */
-	public function test_shipping_takes_priority_over_pickup_when_both_available_and_default_tab_yes(): void {
-		$this->set_pickup_default_tab( 'yes' );
+	public function test_shipping_takes_priority_over_pickup_when_both_available_and_auto_select_pickup_tab_yes(): void {
+		$this->set_auto_select_pickup_tab( 'yes' );
 
 		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
 		$result  = wc_get_default_shipping_method_for_package( 0, $package, '' );
@@ -236,10 +264,10 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Selects pickup as default when only pickup is available and default_tab is yes.
+	 * @testdox Selects pickup as default when only pickup is available and auto-select pickup tab is enabled.
 	 */
-	public function test_selects_pickup_when_only_pickup_available_and_default_tab_yes(): void {
-		$this->set_pickup_default_tab( 'yes' );
+	public function test_selects_pickup_when_only_pickup_available_and_auto_select_pickup_tab_yes(): void {
+		$this->set_auto_select_pickup_tab( 'yes' );
 
 		$package = $this->build_package( array( 'local_pickup:1' ) );
 		$result  = wc_get_default_shipping_method_for_package( 0, $package, '' );
@@ -248,10 +276,10 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Returns empty when only pickup is available and default_tab is no.
+	 * @testdox Returns empty when only pickup is available and auto-select pickup tab is disabled.
 	 */
-	public function test_returns_empty_when_only_pickup_available_and_default_tab_no(): void {
-		$this->set_pickup_default_tab( 'no' );
+	public function test_returns_empty_when_only_pickup_available_and_auto_select_pickup_tab_no(): void {
+		$this->set_auto_select_pickup_tab( 'no' );
 
 		$package = $this->build_package( array( 'local_pickup:1' ) );
 		$result  = wc_get_default_shipping_method_for_package( 0, $package, '' );
@@ -260,10 +288,10 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Preserves chosen pickup regardless of the default_tab setting.
+	 * @testdox Preserves chosen pickup regardless of the auto-select pickup tab setting.
 	 */
-	public function test_preserves_chosen_pickup_regardless_of_default_tab(): void {
-		$this->set_pickup_default_tab( 'no' );
+	public function test_preserves_chosen_pickup_regardless_of_auto_select_pickup_tab(): void {
+		$this->set_auto_select_pickup_tab( 'no' );
 
 		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
 		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'local_pickup:1' );
@@ -275,7 +303,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	 * @testdox Does not auto-select pickup when the shopper had previously chosen a shipping rate that is no longer available.
 	 */
 	public function test_does_not_auto_select_pickup_when_prior_shipping_choice_vanished(): void {
-		$this->set_pickup_default_tab( 'yes' );
+		$this->set_auto_select_pickup_tab( 'yes' );
 
 		// Shopper previously chose flat_rate:1, but it's no longer in the package after recalculation.
 		$package = $this->build_package( array( 'local_pickup:1' ) );
@@ -288,15 +316,15 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	 * Block cart/checkout runs shipping calculation during server-side render where the cart context
 	 * is still 'shortcode'. The default-tab-aware path must apply to block-based stores in that case.
 	 *
-	 * @testdox Block-based stores route through the default-tab-aware path even when cart_context is 'shortcode' (server-side render).
+	 * @testdox Block-based stores route through the auto-select-aware path even when cart_context is 'shortcode' (server-side render).
 	 */
-	public function test_block_based_store_uses_default_tab_path_when_cart_context_is_shortcode(): void {
+	public function test_block_based_store_uses_auto_select_path_when_cart_context_is_shortcode(): void {
 		$this->make_page_block_based( 'cart', 'woocommerce/cart' );
 		$this->make_page_block_based( 'checkout', 'woocommerce/checkout' );
 
 		// Reproduce the SSR condition: block-based store, but cart_context still reads 'shortcode'.
 		WC()->cart->cart_context = 'shortcode';
-		$this->set_pickup_default_tab( 'no' );
+		$this->set_auto_select_pickup_tab( 'no' );
 
 		$package = $this->build_package( array( 'local_pickup:1' ) );
 		$result  = wc_get_default_shipping_method_for_package( 0, $package, '' );
@@ -306,7 +334,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		$this->assertSame(
 			'',
 			$result,
-			'Block-based stores should honour the default_tab opt-out even when cart_context is still the SSR-time shortcode value'
+			'Block-based stores should honour the auto-select pickup tab opt-out even when cart_context is still the SSR-time shortcode value'
 		);
 	}
 

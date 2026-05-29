@@ -53,6 +53,10 @@ class LocalPickupUtilsTest extends \WC_Unit_Test_Case {
 		// Reset mocked value.
 		$this->mocked_pickup_locations = null;
 
+		// Remove Local Pickup settings written by individual tests so option state can't leak,
+		// even if a test fails before reaching any in-body cleanup.
+		delete_option( 'woocommerce_pickup_location_settings' );
+
 		parent::tearDown();
 	}
 
@@ -294,8 +298,6 @@ class LocalPickupUtilsTest extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'auto_select_pickup_tab', $settings );
 		$this->assertTrue( $settings['auto_select_pickup_tab'], 'auto_select_pickup_tab should default to true when the option is missing the key' );
-
-		delete_option( 'woocommerce_pickup_location_settings' );
 	}
 
 	/**
@@ -316,8 +318,6 @@ class LocalPickupUtilsTest extends \WC_Unit_Test_Case {
 		$settings = LocalPickupUtils::get_local_pickup_settings();
 
 		$this->assertFalse( $settings['auto_select_pickup_tab'], "auto_select_pickup_tab should be false when stored as 'no'" );
-
-		delete_option( 'woocommerce_pickup_location_settings' );
 	}
 
 	/**
@@ -338,8 +338,6 @@ class LocalPickupUtilsTest extends \WC_Unit_Test_Case {
 		$settings = LocalPickupUtils::get_local_pickup_settings();
 
 		$this->assertTrue( $settings['auto_select_pickup_tab'], "auto_select_pickup_tab should be true when stored as 'yes'" );
-
-		delete_option( 'woocommerce_pickup_location_settings' );
 	}
 
 	/**
@@ -360,8 +358,6 @@ class LocalPickupUtilsTest extends \WC_Unit_Test_Case {
 		$settings = LocalPickupUtils::get_local_pickup_settings( 'edit' );
 
 		$this->assertSame( 'no', $settings['auto_select_pickup_tab'], "Edit context should return the raw 'no' string for auto_select_pickup_tab" );
-
-		delete_option( 'woocommerce_pickup_location_settings' );
 	}
 
 	/**
@@ -396,8 +392,6 @@ class LocalPickupUtilsTest extends \WC_Unit_Test_Case {
 			LocalPickupUtils::prefers_pickup_default_tab(),
 			'Should fall back to the AUTO_SELECT_PICKUP_TAB_DEFAULT constant when the key is missing'
 		);
-
-		delete_option( 'woocommerce_pickup_location_settings' );
 	}
 
 	/**
@@ -416,7 +410,5 @@ class LocalPickupUtilsTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertFalse( LocalPickupUtils::prefers_pickup_default_tab() );
-
-		delete_option( 'woocommerce_pickup_location_settings' );
 	}
 }
