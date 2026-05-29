@@ -8,6 +8,7 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Internal\POS\Capabilities as POSCapabilities;
 use Automattic\WooCommerce\Internal\POS\Service\POSPinService;
 
 defined( 'ABSPATH' ) || exit;
@@ -101,7 +102,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_role( $user ) {
-		return esc_html( WC_Admin_POS_Staff::get_role_name( $user ) );
+		return esc_html( WC_Admin_POS_Staff::get_pos_role_label( $user ) );
 	}
 
 	/**
@@ -142,17 +143,22 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 		$offset                = ( $current_page - 1 ) * $per_page;
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
 
-		$pos_roles = array( 'pos_cashier', 'pos_manager', 'administrator', 'shop_manager' );
-
-		$query_args = array(
-			'role__in' => $pos_roles,
-			'orderby'  => 'display_name',
-			'order'    => 'ASC',
-			'number'   => $per_page,
-			'offset'   => $offset,
+		$user_query = new \WP_User_Query(
+			array(
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'     => POSCapabilities::POS_ROLE_META_KEY,
+						'value'   => POSCapabilities::assignable_pos_roles(),
+						'compare' => 'IN',
+					),
+				),
+				'orderby'    => 'display_name',
+				'order'      => 'ASC',
+				'number'     => $per_page,
+				'offset'     => $offset,
+			)
 		);
 
-		$user_query  = new \WP_User_Query( $query_args );
 		$this->items = $user_query->get_results();
 		$total       = $user_query->get_total();
 
@@ -160,7 +166,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 			array(
 				'total_items' => $total,
 				'per_page'    => $per_page,
-				'total_pages' => (int) ceil( $total / $per_page ),
+				'total_pages' => (int) ceil( $total / max( 1, $per_page ) ),
 			)
 		);
 	}
@@ -203,34 +209,25 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 			admin_url( 'admin.php' )
 		);
 
-		$actions = array(
-			'<a href="' . esc_url( $edit_url ) . '">'
-				. ( $this->pin_service->has_pin( $user->ID )
-					? esc_html__( 'Reset PIN', 'woocommerce' )
-					: esc_html__( 'Set PIN', 'woocommerce' ) )
-				. '</a>',
+		$post_url = add_query_arg(
+			array(
+				'page'    => 'wc-settings',
+				'tab'     => 'point-of-sale',
+				'section' => 'staff',
+			),
+			admin_url( 'admin.php' )
 		);
 
-		if ( $this->pin_service->has_pin( $user->ID ) ) {
-			$action_url = add_query_arg(
-				array(
-					'page'    => 'wc-settings',
-					'tab'     => 'point-of-sale',
-					'section' => 'staff',
-				),
-				admin_url( 'admin.php' )
-			);
+		$remove  = '<form method="post" action="' . esc_url( $post_url ) . '" class="wc-pos-staff-remove-staff-form" style="display:inline;">';
+		$remove .= wp_nonce_field( 'remove-pos-staff', 'woocommerce_pos_staff_remove_nonce', true, false );
+		$remove .= '<input type="hidden" name="user_id" value="' . esc_attr( (string) $user->ID ) . '" />';
+		$remove .= '<button type="submit" name="remove_pos_staff" class="button-link submitdelete">'
+			. esc_html__( 'Remove staff', 'woocommerce' ) . '</button>';
+		$remove .= '</form>';
 
-			$form  = '<form method="post" action="' . esc_url( $action_url ) . '" class="wc-pos-staff-remove-pin-form" style="display:inline;">';
-			$form .= wp_nonce_field( 'remove-pos-pin', 'woocommerce_pos_staff_remove_nonce', true, false );
-			$form .= '<input type="hidden" name="user_id" value="' . esc_attr( (string) $user->ID ) . '" />';
-			$form .= '<button type="submit" name="remove_pos_staff_pin" class="button-link submitdelete">'
-				. esc_html__( 'Remove PIN', 'woocommerce' ) . '</button>';
-			$form .= '</form>';
-
-			$actions[] = $form;
-		}
-
-		return $actions;
+		return array(
+			'<a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Edit', 'woocommerce' ) . '</a>',
+			$remove,
+		);
 	}
 }
