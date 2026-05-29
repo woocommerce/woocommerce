@@ -138,7 +138,7 @@ defined( 'ABSPATH' ) || exit;
 				<?php if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) : ?>
 					<label class="tips" data-tip="<?php esc_attr_e( 'Enable this option to enable stock management at variation level', 'woocommerce' ); ?>">
 						<?php esc_html_e( 'Manage stock?', 'woocommerce' ); ?>
-						<input type="checkbox" class="checkbox variable_manage_stock" name="variable_manage_stock[<?php echo esc_attr( (string) $loop ); ?>]" <?php checked( $variation_object->get_manage_stock(), true ); // Use view context so 'parent' is considered. ?> />
+						<input type="checkbox" class="checkbox variable_manage_stock" name="variable_manage_stock[<?php echo esc_attr( (string) $loop ); ?>]" <?php checked( $variation_object->get_manage_stock(), true ); ?> />
 					</label>
 				<?php endif; ?>
 

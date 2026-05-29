@@ -183,7 +183,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php
 			$date_created  = $webhook->get_date_created();
 			$date_modified = $webhook->get_date_modified();
-			if ( $date_created && '0000-00-00 00:00:00' !== $date_created->date( 'Y-m-d H:i:s' ) ) : ?>
+			if ( $date_created && '0000-00-00 00:00:00' !== $date_created->date( 'Y-m-d H:i:s' ) ) :
+				?>
 				<?php if ( is_null( $date_modified ) ) : ?>
 					<tr valign="top">
 						<th scope="row" class="titledesc">
