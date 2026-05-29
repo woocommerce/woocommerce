@@ -128,7 +128,7 @@ class ProductAttributeTerms extends ControllerTestCase {
 		$this->assertArrayNotHasKey( '__experimentalVisual', $data );
 
 		$diff = $validate->get_diff_from_object( $data );
-		$this->assertEmpty( $diff, print_r( $diff, true ) );
+		$this->assertEmpty( $diff, print_r( $diff, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 	}
 
 	/**
@@ -153,6 +153,6 @@ class ProductAttributeTerms extends ControllerTestCase {
 		$data['__experimentalVisual'] = (object) $data['__experimentalVisual'];
 
 		$diff = $validate->get_diff_from_object( $data );
-		$this->assertEmpty( $diff, print_r( $diff, true ) );
+		$this->assertEmpty( $diff, print_r( $diff, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 	}
 }
