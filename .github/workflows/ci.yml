@@ -187,7 +187,35 @@ jobs:
       - name: 'Start Test Environment'
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
-        run: pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cleanup_test_environment() {
+            if [ "${{ matrix.testEnv.start }}" = "env:start:blocks" ]; then
+              pnpm --filter="@woocommerce/block-library" env:stop || true
+            else
+              pnpm --filter="${{ matrix.projectName }}" env:stop || true
+            fi
+          }
+
+          max_attempts=2
+          attempt=1
+
+          until pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}; do
+            exit_code=$?
+
+            if [ "$attempt" -ge "$max_attempts" ]; then
+              echo "::error::Unable to start the test environment after $attempt attempts."
+              exit "$exit_code"
+            fi
+
+            delay=$(( attempt * 30 ))
+            echo "::warning::Unable to start the test environment on attempt $attempt. Cleaning up and retrying in ${delay}s."
+            cleanup_test_environment
+            sleep "$delay"
+            attempt=$(( attempt + 1 ))
+          done
 
       - name: 'Determine BuildKite Analytics Message'
         env:
