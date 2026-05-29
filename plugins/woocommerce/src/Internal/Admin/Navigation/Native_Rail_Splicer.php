@@ -40,6 +40,8 @@ class Native_Rail_Splicer {
 	 *
 	 * @param array $menu    WP global $menu before any nav-v2 mutations.
 	 * @param array $submenu WP global $submenu before any nav-v2 mutations.
+	 *
+	 * @since 10.9.0
 	 */
 	public function set_original_menu( array $menu, array $submenu ): void {
 		$this->original_menu    = $menu;
@@ -53,9 +55,15 @@ class Native_Rail_Splicer {
 	 * the existing `$submenu['woocommerce']` flyout (built by Menu_Reconciler).
 	 *
 	 * @param array $tree Final reconciled tree.
+	 *
+	 * @since 10.9.0
 	 */
 	public function splice( array $tree ): void {
-		if ( ! Context::is_woo_page( $tree ) ) {
+		// Resolve once here and reuse for force_current_highlight() below — both
+		// are pure functions of ( $pagenow, $_GET, $tree ), which do not change
+		// during splice(). null means we are off a Woo page, so this is a no-op.
+		$current = Context::resolve_current_slug( $tree );
+		if ( null === $current ) {
 			return;
 		}
 
@@ -69,7 +77,7 @@ class Native_Rail_Splicer {
 		$this->preserve_access_check_entries( $tree, $pre_splice_submenu_woocommerce );
 		$this->map_real_parents_for_access_checks( $tree );
 		$this->register_rail_root_hooknames( $tree );
-		$this->force_current_highlight( $tree );
+		$this->force_current_highlight( $tree, $current );
 
 		// Some WC subsystems (importers, exporters) register
 		// `add_submenu_page` entries on `admin_menu` and then unset them
@@ -251,23 +259,19 @@ class Native_Rail_Splicer {
 	}
 
 	/**
-	 * Resolve the current tree slug (via Context) and force WP's `parent_file`
-	 * and `submenu_file` filters to emit it so the renderer applies `current`
-	 * highlighting to the correct rail root and submenu item.
+	 * Force WP's `parent_file` and `submenu_file` filters to emit the current
+	 * slug so the renderer applies `current` highlighting to the correct rail
+	 * root and submenu item.
 	 *
 	 * `parent_file` returns the rail root (the ancestor whose parent is
 	 * `woocommerce`). `submenu_file` returns the resolved slug itself when it
 	 * is a first-level child; for grandchild pages the JS cascade applies
 	 * `current` separately at render time.
 	 *
-	 * @param array $tree Final reconciled tree.
+	 * @param array  $tree    Final reconciled tree.
+	 * @param string $current Current tree slug (already resolved by splice()).
 	 */
-	private function force_current_highlight( array $tree ): void {
-		$current = Context::resolve_current_slug( $tree );
-		if ( null === $current ) {
-			return;
-		}
-
+	private function force_current_highlight( array $tree, string $current ): void {
 		$root = $this->ancestor_root_slug( $tree, $current );
 		if ( null === $root ) {
 			return;
@@ -362,8 +366,12 @@ class Native_Rail_Splicer {
 	 */
 	private function ancestor_root_slug( array $tree, string $slug ): ?string {
 		$walk = $slug;
-		while ( isset( $tree[ $walk ] ) ) {
-			$parent = $tree[ $walk ]['parent'] ?? null;
+		// A visited set keeps the walk terminating if an extension introduced a
+		// parent cycle via the woocommerce_admin_menu_tree filter.
+		$seen = array();
+		while ( isset( $tree[ $walk ] ) && ! isset( $seen[ $walk ] ) ) {
+			$seen[ $walk ] = true;
+			$parent        = $tree[ $walk ]['parent'] ?? null;
 			if ( 'woocommerce' === $parent ) {
 				return $walk;
 			}
@@ -523,6 +531,8 @@ class Native_Rail_Splicer {
 	 * Renders the original WordPress menu (captured before our mutations) as a
 	 * sibling element to #adminmenu. CSS slides it in from off-screen when the
 	 * back link is clicked; JS handles the open/close interaction.
+	 *
+	 * @internal
 	 */
 	public function print_wp_rail_panel(): void {
 		if ( empty( $this->original_menu ) ) {
@@ -556,6 +566,12 @@ class Native_Rail_Splicer {
 		$menu      = $this->original_menu;
 		$ordered_slugs = (array) apply_filters( 'menu_order', $raw_slugs );
 		$menu      = $live_menu;
+
+		// Computed once: $menu is the restored live menu and is not mutated in the
+		// loop below. Slugs still present in the live $menu (index.php, woocommerce)
+		// get a custom id prefix; stripped slugs reuse WP's `toplevel_page_<slug>` id
+		// so plugin icon CSS still applies.
+		$live_slugs = array_column( (array) $menu, 2 );
 
 		// Index by slug for ordered access; first entry wins on slug collision.
 		$by_slug = array();
@@ -607,7 +623,7 @@ class Native_Rail_Splicer {
 			// Skip items that nav-v2 rehomes into the WC rail. They're already
 			// accessible inside the WooCommerce flyout; showing them again as
 			// separate top-level entries would create confusing duplicates.
-			if ( in_array( $slug, Rehomed_Slugs::ALL, true ) ) {
+			if ( in_array( $slug, Menu_Reconciler::REHOMED_TOP_LEVEL_SLUGS, true ) ) {
 				continue;
 			}
 
@@ -643,15 +659,11 @@ class Native_Rail_Splicer {
 				. ( $has_sub ? ' wp-has-submenu wp-not-current-submenu' : '' );
 			$a_class  = 'menu-top' . ( $has_sub ? ' wp-has-submenu wp-not-current-submenu' : '' );
 
-			// Use WP's standard `toplevel_page_<slug>` id for items that have
-			// been stripped from $menu by strip_non_woo_top_level(). This lets
-			// plugin CSS rules (e.g. mask-image icon rules targeting that id)
-			// apply automatically to our panel items.
-			// Items still present in $menu (index.php, woocommerce) get a
-			// custom prefix to avoid duplicate id attributes.
-			// $menu is already declared global above and restored to the live menu.
-			$live_slugs = array_column( (array) $menu, 2 );
-			$css_id     = in_array( $slug, $live_slugs, true )
+			// Use WP's standard `toplevel_page_<slug>` id for items stripped from
+			// $menu (so plugin icon CSS applies); items still present in $menu get
+			// a custom prefix to avoid duplicate id attributes. $live_slugs is
+			// computed once above the loop.
+			$css_id = in_array( $slug, $live_slugs, true )
 				? 'wc-wp-item-' . self::css_slug( $slug )
 				: 'toplevel_page_' . self::css_slug( $slug );
 
@@ -686,11 +698,10 @@ class Native_Rail_Splicer {
 	/**
 	 * Render the `<div class="wp-menu-image">` HTML for a menu icon spec.
 	 *
-	 * @param string $icon Icon value from $menu[i][6].
-	 */
-	/**
-	 * Mirror WP's menu-header.php icon rendering exactly so panel icons match
+	 * Mirrors WP's menu-header.php icon rendering exactly so panel icons match
 	 * the real top-level rail.
+	 *
+	 * @param string $icon Icon value from $menu[i][6].
 	 */
 	private static function wp_menu_icon_html( string $icon ): string {
 		// Mirrors the logic in wp-admin/menu-header.php _wp_menu_output().

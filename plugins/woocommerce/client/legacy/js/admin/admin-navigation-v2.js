@@ -385,48 +385,31 @@
 					}
 				}
 
-				// Hover background — scan the active color-scheme stylesheet for
-				// the `#adminmenu li.menu-top:hover` background-color and expose
-				// it as --wc-rail-hover-bg so the panel matches the chosen scheme.
-				//
-				// We require the rule to target `menu-top` or `opensub` to avoid
-				// matching plugin-specific hover rules scoped to #adminmenu (e.g.
-				// Code Snippets' .code-snippets-upgrade-button:hover is teal and
-				// loads after the color-scheme sheet, so "last match wins" picks it
-				// up incorrectly if we scan at DOMContentLoaded).
-				//
-				// The color-scheme stylesheet is loaded via a separate <link> that
-				// may not have been processed into cssRules yet at DOMContentLoaded.
-				// Deferring to window.load guarantees all external CSS is parsed.
-				$( window ).one( 'load', function () {
-					var hoverBg    = null;
-					var hoverColor = null;
-					for ( var si = 0; si < document.styleSheets.length; si++ ) {
-						try {
-							var sheetRules = document.styleSheets[ si ].cssRules;
-							for ( var ri = 0; ri < sheetRules.length; ri++ ) {
-								var r   = sheetRules[ ri ];
-								var s   = r.selectorText || '';
-								var bg  = r.style && r.style.backgroundColor;
-								var col = r.style && r.style.color;
-								var isHoverRule = s.indexOf( '#adminmenu' ) !== -1 &&
-									s.indexOf( 'submenu' ) === -1 &&
-									( s.indexOf( 'menu-top' ) !== -1 || s.indexOf( 'opensub' ) !== -1 ) &&
-									( s.indexOf( ':hover' ) !== -1 || s.indexOf( 'opensub' ) !== -1 );
-								if ( isHoverRule ) {
-									if ( bg )  { hoverBg    = bg; }  // last match wins
-									if ( col ) { hoverColor = col; }
-								}
-							}
-						} catch ( e ) {}
+				// Hover background/text — derive from the active rail root (the
+				// current Woo section), which WordPress paints with the active
+				// color scheme's highlight. Reading its computed style is
+				// scheme-accurate and available synchronously here at DOM-ready, so
+				// the panel always inherits the scheme. The previous approach
+				// scanned the color-scheme stylesheet on window.load, which fired
+				// unreliably and left the panel on the hardcoded CSS fallback —
+				// a wrong, scheme-mismatched blue.
+				var currentRootLi = document.querySelector( '#adminmenu li.wc-nav-v2-current-root' )
+					|| document.querySelector( '#adminmenu li.menu-top.current' )
+					|| document.querySelector( '#adminmenu li.menu-top.wp-has-current-submenu' );
+				if ( currentRootLi ) {
+					var currentRootA = currentRootLi.querySelector( 'a.menu-top' ) || currentRootLi;
+					var rootStyle    = window.getComputedStyle( currentRootA );
+					var hoverBg      = rootStyle.backgroundColor;
+					if ( ! hoverBg || hoverBg === 'rgba(0, 0, 0, 0)' || hoverBg === 'transparent' ) {
+						hoverBg = window.getComputedStyle( currentRootLi ).backgroundColor;
 					}
-					if ( hoverBg ) {
+					if ( hoverBg && hoverBg !== 'rgba(0, 0, 0, 0)' && hoverBg !== 'transparent' ) {
 						$wpRail[ 0 ].style.setProperty( '--wc-rail-hover-bg', hoverBg );
 					}
-					if ( hoverColor ) {
-						$wpRail[ 0 ].style.setProperty( '--wc-rail-hover-color', hoverColor );
+					if ( rootStyle.color ) {
+						$wpRail[ 0 ].style.setProperty( '--wc-rail-hover-color', rootStyle.color );
 					}
-				} );
+				}
 
 				// Icon mirror — some plugins (e.g. Code Snippets) register their
 				// admin menu icon via CSS rules scoped to

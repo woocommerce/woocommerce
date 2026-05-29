@@ -47,7 +47,7 @@ return array(
 	),
 	'post-new.php?post_type=product'                                         => array(
 		'parent'   => 'edit.php?post_type=product',
-		'title'    => __( 'Add Product', 'woocommerce' ),
+		'title'    => __( 'Add product', 'woocommerce' ),
 		'position' => 2,
 	),
 	'wc-admin&path=/analytics/overview'                                      => array(
@@ -114,7 +114,7 @@ return array(
 	// `url` override points the click through to the real Marketplace URL.
 	'wc-admin&path=/extensions&marketplace'                                  => array(
 		'parent'   => 'wc-admin&path=/extensions',
-		'title'    => __( 'Browse Marketplace', 'woocommerce' ),
+		'title'    => __( 'Browse marketplace', 'woocommerce' ),
 		'position' => 1,
 		'url'      => 'wc-admin&path=/extensions',
 	),
@@ -132,7 +132,7 @@ return array(
 	// entry is hidden via Menu_Reconciler::hide_non_woo_relocated_items().
 	'action-scheduler'                                                       => array(
 		'parent'   => 'wc-settings',
-		'title'    => __( 'Scheduled Actions', 'woocommerce' ),
+		'title'    => __( 'Scheduled actions', 'woocommerce' ),
 		'position' => 100,
 		'url'      => 'tools.php?page=action-scheduler',
 	),

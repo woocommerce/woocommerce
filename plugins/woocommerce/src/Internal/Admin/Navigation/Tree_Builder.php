@@ -16,12 +16,40 @@ defined( 'ABSPATH' ) || exit;
 class Tree_Builder {
 
 	/**
+	 * WC-internal submenu slugs that should NOT be auto-attached into the
+	 * Woo tree — either legacy redirects or duplicates of items already
+	 * declared in the default tree.
+	 */
+	private const AUTO_ATTACH_EXCLUDE = array(
+		// Pre-HPOS Orders — HPOS (`wc-orders`) is the default tree entry.
+		'edit.php?post_type=shop_order',
+		// Legacy redirect page.
+		'coupons-moved',
+		// Legacy reports page (deprecated).
+		'wc-reports',
+		// Legacy Extensions page — the default tree uses the modern
+		// `wc-admin&path=/extensions` Marketplace path instead.
+		'wc-addons',
+		// "Add Product" is explicitly declared in default-tree.php at
+		// position 2 under Products. Keep it excluded here so auto-attach
+		// doesn't also hoist it and create a duplicate.
+		'post-new.php?post_type=product',
+		// Product Import / Export — the All Products list view exposes
+		// these actions in its toolbar already, so a duplicate menu entry
+		// is noise.
+		'product_importer',
+		'product_exporter',
+	);
+
+	/**
 	 * Build the tree.
 	 *
 	 * @param array $default_tree Default tree as loaded from default-tree.php.
 	 * @param array $raw_menu     WP's $menu global.
 	 * @param array $raw_submenu  WP's $submenu global.
 	 * @return array Final tree, keyed by slug.
+	 *
+	 * @since 10.9.0
 	 */
 	public function build( array $default_tree, array $raw_menu, array $raw_submenu ): array {
 		$registered_slugs = $this->collect_registered_slugs( $raw_menu, $raw_submenu );
@@ -40,7 +68,6 @@ class Tree_Builder {
 
 		$tree = $this->auto_attach_woocommerce_children( $tree, $default_tree, $raw_submenu );
 		$tree = $this->attach_rehomed_submenu_children( $tree, $raw_submenu );
-		$tree = $this->break_cycles( $tree );
 		$tree = $this->drop_unknown_parents( $tree );
 
 		return $tree;
@@ -77,7 +104,7 @@ class Tree_Builder {
 				if ( null === $child_slug ) {
 					continue;
 				}
-				if ( in_array( $child_slug, Rehomed_Slugs::AUTO_ATTACH_EXCLUDE, true ) ) {
+				if ( in_array( $child_slug, self::AUTO_ATTACH_EXCLUDE, true ) ) {
 					continue;
 				}
 				// WP's CPT submenus include the parent slug as the first "self" entry
@@ -130,6 +157,8 @@ class Tree_Builder {
 	 *
 	 * @param string $slug Raw slug.
 	 * @return string
+	 *
+	 * @since 10.9.0
 	 */
 	public static function normalize_slug( string $slug ): string {
 		return trim( html_entity_decode( $slug, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
@@ -142,75 +171,12 @@ class Tree_Builder {
 	 *
 	 * @param string $raw Raw title, possibly containing `<span class="update-plugins count-N">N</span>` etc.
 	 * @return string
+	 *
+	 * @since 10.9.0
 	 */
 	public static function clean_title( string $raw ): string {
 		$stripped = preg_replace( '/\s*<span class=["\'](?:update-plugins|awaiting-mod|menu-counter)[^"\']*["\'][^>]*>.*?<\/span>\s*/i', '', $raw );
 		return trim( html_entity_decode( wp_strip_all_tags( $stripped ?? $raw ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
-	}
-
-	/**
-	 * Detect cycles in parent chains and break them by demoting the lowest-position
-	 * node in each cycle to the Woo root.
-	 *
-	 * @param array $tree Tree.
-	 * @return array Tree with cycles broken.
-	 */
-	private function break_cycles( array $tree ): array {
-		foreach ( array_keys( $tree ) as $slug ) {
-			$cycle = $this->find_cycle( $tree, $slug );
-			if ( null === $cycle ) {
-				continue;
-			}
-
-			$demote = $cycle[0];
-			foreach ( $cycle as $node ) {
-				if ( $tree[ $node ]['position'] < $tree[ $demote ]['position'] ) {
-					$demote = $node;
-				}
-			}
-
-			$tree[ $demote ]['parent'] = 'woocommerce';
-
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					sprintf(
-						'[woocommerce] navigation_v2: cycle detected in admin menu tree (%s); demoted %s to root.',
-						implode( ' -> ', $cycle ),
-						$demote
-					)
-				);
-			}
-		}
-
-		return $tree;
-	}
-
-	/**
-	 * Walk the parent chain starting from $slug. If it revisits any node,
-	 * return the cycle (array of slugs). Otherwise return null.
-	 *
-	 * @param array  $tree Tree.
-	 * @param string $slug Start slug.
-	 * @return array|null
-	 */
-	private function find_cycle( array $tree, string $slug ): ?array {
-		$visited = array();
-		$current = $slug;
-		while ( true ) {
-			if ( isset( $visited[ $current ] ) ) {
-				$offset = array_search( $current, array_keys( $visited ), true );
-				if ( false === $offset ) {
-					return null;
-				}
-				return array_keys( array_slice( $visited, (int) $offset ) );
-			}
-			$visited[ $current ] = true;
-			$parent              = $tree[ $current ]['parent'] ?? null;
-			if ( ! is_string( $parent ) || ! isset( $tree[ $parent ] ) ) {
-				return null;
-			}
-			$current = $parent;
-		}
 	}
 
 	/**
@@ -294,7 +260,7 @@ class Tree_Builder {
 			}
 
 			// Known WC-internal legacy / redirect / duplicate slugs — never surface.
-			if ( in_array( $slug, Rehomed_Slugs::AUTO_ATTACH_EXCLUDE, true ) ) {
+			if ( in_array( $slug, self::AUTO_ATTACH_EXCLUDE, true ) ) {
 				continue;
 			}
 
@@ -329,6 +295,8 @@ class Tree_Builder {
 	 *
 	 * @param array $tree Tree.
 	 * @return array Tree with capability-filtered nodes.
+	 *
+	 * @since 10.9.0
 	 */
 	public function apply_capability_filter( array $tree ): array {
 		// Pass 1: mark every node's visibility based on capability.
@@ -349,7 +317,12 @@ class Tree_Builder {
 				continue;
 			}
 			$ancestor = $node['parent'];
-			while ( null !== $ancestor && isset( $tree[ $ancestor ] ) ) {
+			// Guard against a parent cycle (an extension could introduce one via
+			// the woocommerce_admin_menu_tree filter); a visited set keeps the
+			// walk terminating instead of hanging the request.
+			$seen = array();
+			while ( null !== $ancestor && isset( $tree[ $ancestor ] ) && ! isset( $seen[ $ancestor ] ) ) {
+				$seen[ $ancestor ]                   = true;
 				$has_visible_descendant[ $ancestor ] = true;
 				$ancestor                            = $tree[ $ancestor ]['parent'];
 			}

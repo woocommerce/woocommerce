@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Internal\Admin\Navigation\Tree_Builder;
 /**
  * @covers \Automattic\WooCommerce\Internal\Admin\Navigation\Tree_Builder
  */
-class Tree_Builder_Test extends \WC_Unit_Test_Case {
+class TreeBuilderTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Given the default tree and no extra $menu/$submenu entries, the builder
@@ -330,7 +330,7 @@ class Tree_Builder_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Slugs in `Rehomed_Slugs::AUTO_ATTACH_EXCLUDE` (e.g. `post-new.php?post_type=product`)
+	 * Slugs in `Tree_Builder::AUTO_ATTACH_EXCLUDE` (e.g. `post-new.php?post_type=product`)
 	 * are filtered out when hoisting submenu children — they're either
 	 * legacy redirects or duplicates of more idiomatic actions surfaced
 	 * elsewhere in the UI.

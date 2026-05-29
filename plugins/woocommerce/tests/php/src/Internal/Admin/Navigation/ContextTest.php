@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Internal\Admin\Navigation\Context;
 /**
  * @covers \Automattic\WooCommerce\Internal\Admin\Navigation\Context
  */
-class Context_Test extends \WC_Unit_Test_Case {
+class ContextTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @var string|null

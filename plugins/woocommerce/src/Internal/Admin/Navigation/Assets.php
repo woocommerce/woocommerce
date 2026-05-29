@@ -39,6 +39,23 @@ class Assets {
 		// JS loads, so CSS :hover can show cascades during page load. The
 		// footer JS is idempotent and skips items already injected.
 		add_action( 'adminmenu', array( $this, 'print_early_cascade_script' ) );
+		add_filter( 'admin_body_class', array( $this, 'add_body_class' ) );
+	}
+
+	/**
+	 * Add `wc-nav-v2-active` to the body on Woo pages so CSS/JS can key off it.
+	 *
+	 * @internal
+	 *
+	 * @param string $classes Existing classes.
+	 * @return string
+	 */
+	public function add_body_class( string $classes ): string {
+		$tree = Menu_Reconciler::get_tree();
+		if ( null !== $tree && Context::is_woo_page( $tree ) ) {
+			$classes .= ' wc-nav-v2-active';
+		}
+		return $classes;
 	}
 
 	/**
@@ -46,6 +63,8 @@ class Assets {
 	 *
 	 * Only runs when our stylesheet hasn't already been queued (i.e. when
 	 * admin_enqueue_scripts was cleared before we could enqueue).
+	 *
+	 * @internal
 	 */
 	public function print_critical_css(): void {
 		if ( wp_style_is( self::STYLE_HANDLE, 'done' ) ) {
@@ -63,6 +82,14 @@ class Assets {
 	 *
 	 * Vanilla JS (no jQuery) so it runs immediately. The footer script's
 	 * injectNativeCascade() is idempotent and will skip items already injected.
+	 *
+	 * Kept behaviorally in sync with injectNativeCascade() in
+	 * client/legacy/js/admin/admin-navigation-v2.js and the slug regex in
+	 * Native_Rail_Splicer::css_slug(): the `li.menu-top` selector, the
+	 * `wc-nav-v2-subflyout` markup, the `/[^A-Za-z0-9_-]/` slug regex, and the
+	 * `toplevel_page_` id keying must match across all three sites.
+	 *
+	 * @internal
 	 */
 	public function print_early_cascade_script(): void {
 		$tree = Menu_Reconciler::get_tree();
@@ -116,6 +143,8 @@ JS;
 
 	/**
 	 * Enqueue.
+	 *
+	 * @internal
 	 */
 	public function enqueue(): void {
 		if ( ! is_admin() ) {

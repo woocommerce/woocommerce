@@ -5,12 +5,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Navigation;
 
-use Automattic\WooCommerce\Internal\Admin\Navigation\Rehomed_Slugs;
-
-/**
- * @covers \Automattic\WooCommerce\Internal\Admin\Navigation\Rehomed_Slugs
- */
-class Default_Tree_Test extends \WC_Unit_Test_Case {
+class DefaultTreeTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * The default tree must be well-formed: every non-null parent must reference
@@ -36,26 +31,5 @@ class Default_Tree_Test extends \WC_Unit_Test_Case {
 				);
 			}
 		}
-	}
-
-	/**
-	 * The rehomed-slugs list must match the spec.
-	 */
-	public function test_rehomed_slugs_constant() {
-		// `woocommerce` itself is intentionally absent — the feature keeps
-		// Woo's own top-level registration as the single consolidated rail
-		// item, and only rehomes the sibling Woo-related top-levels.
-		$expected = array(
-			'edit.php?post_type=product',
-			'wc-admin&path=/analytics/overview',
-			'woocommerce-marketing',
-			'admin.php?page=wc-settings&tab=checkout&from=PAYMENTS_MENU_ITEM',
-			'wc-admin&path=/payments/connect',
-			'wc-admin&path=/payments/overview',
-			'woocommerce-payments',
-			'klaviyo_settings',
-		);
-
-		$this->assertSame( $expected, Rehomed_Slugs::ALL );
 	}
 }

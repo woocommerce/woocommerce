@@ -25,6 +25,8 @@ final class Context {
 	 *
 	 * @param array $tree Final tree.
 	 * @return bool
+	 *
+	 * @since 10.9.0
 	 */
 	public static function is_woo_page( array $tree ): bool {
 		return null !== self::resolve_current_slug( $tree );
@@ -43,6 +45,8 @@ final class Context {
 	 *
 	 * @param array $tree Final tree.
 	 * @return string|null
+	 *
+	 * @since 10.9.0
 	 */
 	public static function resolve_current_slug( array $tree ): ?string {
 		global $pagenow;

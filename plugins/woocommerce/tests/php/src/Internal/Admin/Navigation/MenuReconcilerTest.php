@@ -6,12 +6,12 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Navigation;
 
 use Automattic\WooCommerce\Internal\Admin\Navigation\Menu_Reconciler;
-use Automattic\WooCommerce\Internal\Admin\Navigation\Rehomed_Slugs;
+use Automattic\WooCommerce\Internal\Admin\Navigation\Native_Rail_Splicer;
 
 /**
  * @covers \Automattic\WooCommerce\Internal\Admin\Navigation\Menu_Reconciler
  */
-class Menu_Reconciler_Test extends \WC_Unit_Test_Case {
+class MenuReconcilerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @var array|null
@@ -74,6 +74,7 @@ class Menu_Reconciler_Test extends \WC_Unit_Test_Case {
 		);
 
 		$reconciler = new Menu_Reconciler();
+		$reconciler->init( new Native_Rail_Splicer() );
 		$reconciler->reconcile();
 
 		$remaining_slugs = array_column( $menu, 2 );
@@ -98,6 +99,7 @@ class Menu_Reconciler_Test extends \WC_Unit_Test_Case {
 		);
 
 		$reconciler = new Menu_Reconciler();
+		$reconciler->init( new Native_Rail_Splicer() );
 		$reconciler->reconcile();
 
 		$tree = Menu_Reconciler::get_tree();
@@ -139,6 +141,7 @@ class Menu_Reconciler_Test extends \WC_Unit_Test_Case {
 		);
 
 		$reconciler = new Menu_Reconciler();
+		$reconciler->init( new Native_Rail_Splicer() );
 		$reconciler->reconcile();
 
 		$tree = Menu_Reconciler::get_tree();
@@ -163,6 +166,7 @@ class Menu_Reconciler_Test extends \WC_Unit_Test_Case {
 		);
 
 		$reconciler = new Menu_Reconciler();
+		$reconciler->init( new Native_Rail_Splicer() );
 		$reconciler->reconcile();
 
 		$tree = Menu_Reconciler::get_tree();
@@ -198,6 +202,7 @@ class Menu_Reconciler_Test extends \WC_Unit_Test_Case {
 		);
 
 		$reconciler = new Menu_Reconciler();
+		$reconciler->init( new Native_Rail_Splicer() );
 		$reconciler->reconcile();
 
 		$tree = Menu_Reconciler::get_tree();
@@ -237,6 +242,7 @@ class Menu_Reconciler_Test extends \WC_Unit_Test_Case {
 		);
 
 		$reconciler = new Menu_Reconciler();
+		$reconciler->init( new Native_Rail_Splicer() );
 		$reconciler->reconcile();
 
 		$this->assertIsArray( $captured_raw_menu );
@@ -260,7 +266,9 @@ class Menu_Reconciler_Test extends \WC_Unit_Test_Case {
 		$GLOBALS['pagenow'] = 'admin.php';
 
 		wp_set_current_user( $this->admin_user_id );
-		( new Menu_Reconciler() )->reconcile();
+		$reconciler = new Menu_Reconciler();
+		$reconciler->init( new Native_Rail_Splicer() );
+		$reconciler->reconcile();
 
 		$top_slugs = array_values( array_filter( array_map(
 			static fn( $entry ) => is_array( $entry ) && isset( $entry[2] ) ? $entry[2] : null,

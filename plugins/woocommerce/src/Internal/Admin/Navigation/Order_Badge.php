@@ -49,6 +49,8 @@ class Order_Badge {
 	 * would run into WP's hover-flyout arrow at the right edge of the
 	 * rail row, and because the actual number lives on whichever
 	 * drill-down item triggered the attention.
+	 *
+	 * @internal
 	 */
 	public function apply(): void {
 		$this->maybe_apply_orders_badge();
@@ -74,9 +76,9 @@ class Order_Badge {
 		 * parity with the legacy `WC_Admin_Menus::menu_order_count()` hook
 		 * so existing customizers keep working.
 		 *
-		 * @since 11.1.0
-		 *
 		 * @param int $count Processing-order count.
+		 *
+		 * @since 10.9.0
 		 */
 		$count = (int) apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
 		if ( $count < 1 ) {

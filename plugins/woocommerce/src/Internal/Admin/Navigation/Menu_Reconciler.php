@@ -5,10 +5,12 @@ declare( strict_types = 1 );
 /**
  * Menu reconciler.
  *
- * Runs at admin_menu priority 999 (after Woo's own menu registration at 9
- * and WP's default at 10). Captures $menu and $submenu, loads the default
- * tree, applies the woocommerce_admin_menu_tree filter, removes rehomed
- * top-level items from $menu, stores the final tree for the renderer.
+ * Runs at admin_menu priority PHP_INT_MAX (after every other admin_menu
+ * registration, so late/high-priority plugin menus are captured too).
+ * Captures $menu and $submenu, loads the default tree, applies the
+ * woocommerce_admin_menu_tree filter, removes rehomed top-level items from
+ * $menu, stores the final tree (exposed via get_tree()), and hands it to
+ * Native_Rail_Splicer for native rendering on Woo pages.
  *
  * @package WooCommerce\Internal\Admin\Navigation
  */
@@ -23,14 +25,34 @@ defined( 'ABSPATH' ) || exit;
 class Menu_Reconciler {
 
 	/**
+	 * Top-level slugs that are removed from `$menu` and re-homed inside the
+	 * Woo tree when the feature is enabled. Hard-coded — we control which
+	 * items get rehomed, not the plugins that register them.
+	 *
+	 * The `woocommerce` slug itself is intentionally NOT in this list — we
+	 * keep Woo's own top-level registration (with its native submenu of
+	 * Home/Orders/Products/etc.) as the single consolidated rail item.
+	 */
+	public const REHOMED_TOP_LEVEL_SLUGS = array(
+		'edit.php?post_type=product',
+		'wc-admin&path=/analytics/overview',
+		'woocommerce-marketing',
+		'admin.php?page=wc-settings&tab=checkout&from=PAYMENTS_MENU_ITEM',
+		'wc-admin&path=/payments/connect',
+		'wc-admin&path=/payments/overview',
+		'woocommerce-payments',
+		'klaviyo_settings',
+	);
+
+	/**
 	 * Splicer that mutates $menu/$submenu for native rail rendering on Woo pages.
 	 *
 	 * @var Native_Rail_Splicer
 	 */
-	private $splicer;
+	private Native_Rail_Splicer $splicer;
 
 	/**
-	 * The computed tree. Static so Renderer/Assets can read it without coupling.
+	 * The computed tree. Static so Assets can read it without coupling.
 	 *
 	 * @var array|null
 	 */
@@ -49,11 +71,8 @@ class Menu_Reconciler {
 	 * which cascades into visible reordering of unrelated items (Posts
 	 * shifting down, etc.). Our filter removes slugs from $menu_order that
 	 * no longer exist in $menu, leaving native WP ordering intact.
-	 *
-	 * @param Native_Rail_Splicer|null $splicer Optional splicer (injectable for tests).
 	 */
-	public function __construct( ?Native_Rail_Splicer $splicer = null ) {
-		$this->splicer = $splicer ?? new Native_Rail_Splicer();
+	public function __construct() {
 		// PHP_INT_MAX so we run after every other admin_menu registration —
 		// including ones that hook at high priorities (e.g. Klaviyo registers
 		// its `woocommerce-marketing` submenu at priority 1000, well after
@@ -67,7 +86,20 @@ class Menu_Reconciler {
 	}
 
 	/**
+	 * Inject dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param Native_Rail_Splicer $splicer Splicer that mutates $menu/$submenu for native rail rendering on Woo pages.
+	 */
+	final public function init( Native_Rail_Splicer $splicer ): void {
+		$this->splicer = $splicer;
+	}
+
+	/**
 	 * Remove slugs from $menu_order that don't correspond to live $menu entries.
+	 *
+	 * @internal
 	 *
 	 * @param array $menu_order Menu order array.
 	 * @return array
@@ -89,6 +121,8 @@ class Menu_Reconciler {
 	/**
 	 * Move the `woocommerce` slug to sit directly after `index.php` (Dashboard)
 	 * in the rail. Spec §5.1 / §8.
+	 *
+	 * @internal
 	 *
 	 * @param array $menu_order Menu slugs in current order.
 	 * @return array
@@ -123,6 +157,8 @@ class Menu_Reconciler {
 
 	/**
 	 * Run the reconciliation.
+	 *
+	 * @internal
 	 */
 	public function reconcile(): void {
 		global $menu, $submenu;
@@ -151,6 +187,8 @@ class Menu_Reconciler {
 		 * @param array $tree        Flat tree keyed by slug.
 		 * @param array $raw_menu    WP's $menu at the time of reconciliation.
 		 * @param array $raw_submenu WP's $submenu at the time of reconciliation.
+		 *
+		 * @since 10.9.0
 		 */
 		$tree = apply_filters( 'woocommerce_admin_menu_tree', $tree, (array) $menu, (array) $submenu );
 
@@ -388,17 +426,14 @@ class Menu_Reconciler {
 	private function remove_rehomed_top_level_items(): void {
 		global $menu;
 
-		foreach ( Rehomed_Slugs::ALL as $slug ) {
-			foreach ( $menu as $key => $entry ) {
-				if ( isset( $entry[2] ) && $entry[2] === $slug ) {
-					unset( $menu[ $key ] );
-				}
-			}
-		}
-
-		// Also strip Woo's menu separator.
+		// Single pass: drop rehomed top-level slugs and Woo's separator together.
+		// unset() preserves the numeric position keys (see the method docblock);
+		// do not array_values() here.
 		foreach ( $menu as $key => $entry ) {
-			if ( isset( $entry[2] ) && 'separator-woocommerce' === $entry[2] ) {
+			if ( ! isset( $entry[2] ) ) {
+				continue;
+			}
+			if ( in_array( $entry[2], self::REHOMED_TOP_LEVEL_SLUGS, true ) || 'separator-woocommerce' === $entry[2] ) {
 				unset( $menu[ $key ] );
 			}
 		}
@@ -454,12 +489,13 @@ class Menu_Reconciler {
 	}
 
 	/**
-	 * Expose the computed tree for the renderer. Static because the tree is
-	 * stored in a static property — callers (Renderer, Assets) must not
-	 * instantiate Menu_Reconciler just to read it, or they'd double-register
-	 * the admin_menu hook.
+	 * Expose the computed tree for Assets. Static because the tree is stored
+	 * in a static property — callers must not instantiate Menu_Reconciler
+	 * just to read it, or they'd double-register the admin_menu hook.
 	 *
 	 * @return array|null Tree, or null if reconcile() hasn't run.
+	 *
+	 * @since 10.9.0
 	 */
 	public static function get_tree(): ?array {
 		return self::$tree;

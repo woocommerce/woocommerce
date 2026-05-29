@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 /**
  * @covers \Automattic\WooCommerce\Internal\Admin\Navigation\Bootstrap
  */
-class Bootstrap_Test extends \WC_Unit_Test_Case {
+class BootstrapTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * The feature id must be registered as an experimental, disabled-by-default feature.

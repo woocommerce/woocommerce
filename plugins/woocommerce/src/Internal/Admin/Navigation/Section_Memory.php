@@ -42,6 +42,8 @@ class Section_Memory {
 	 * On every admin page load: refresh / delete the cookie based on the
 	 * current page's Woo-ness, and redirect Dashboard root entries to the
 	 * stored Woo URL when the cookie is set.
+	 *
+	 * @internal
 	 */
 	public function sync_section(): void {
 		if ( $this->is_non_page_request() || headers_sent() ) {
@@ -118,7 +120,7 @@ class Section_Memory {
 	 * cookie value when on a Woo page.
 	 */
 	private function current_path(): string {
-		return (string) ( $_SERVER['REQUEST_URI'] ?? '' );
+		return esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 	}
 
 	/**
@@ -179,11 +181,13 @@ class Section_Memory {
 	 * a tampered cookie producing an open-redirect path).
 	 */
 	private function read_cookie_target(): ?string {
-		$raw = $_COOKIE[ self::COOKIE_NAME ] ?? '';
+		$raw = isset( $_COOKIE[ self::COOKIE_NAME ] )
+			? sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) )
+			: '';
 		if ( '' === $raw ) {
 			return null;
 		}
-		$path = rawurldecode( (string) $raw );
+		$path = rawurldecode( $raw );
 		if ( 0 !== strpos( $path, $this->cookie_path() ) ) {
 			return null;
 		}

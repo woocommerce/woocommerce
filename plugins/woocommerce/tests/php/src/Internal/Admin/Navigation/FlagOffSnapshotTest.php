@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
  * navigation_v2 feature has leaked a side effect into the flag-off path.
  * Fix it before shipping.
  */
-class Flag_Off_Snapshot_Test extends \WC_Unit_Test_Case {
+class FlagOffSnapshotTest extends \WC_Unit_Test_Case {
 
 	/** @var mixed */
 	private $option_backup;

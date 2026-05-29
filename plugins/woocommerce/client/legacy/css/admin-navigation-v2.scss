@@ -265,11 +265,12 @@ body.rtl #adminmenu .wp-submenu li.wc-nav-v2-has-subflyout {
 	}
 }
 
-// On Woo pages #adminmenu has its top-level items replaced by the nav-v2
-// rail roots. WP's native rule `#adminmenu { margin: 12px 0 }` adds 12px
-// above the first item; remove it when the rail contains our items.
-// :has() is supported by all browsers WP requires (Chrome 105+, FF 121+).
-#adminmenu:has(> li.wc-nav-v2-item) {
+// WP's native rule `#adminmenu { margin: 12px 0 }` adds a 12px gap above the
+// first rail item. Remove it on every admin page (this stylesheet only loads
+// when nav-v2 is enabled) so the top of the rail sits flush — keeping the
+// non-Woo WordPress rail, the Woo rail, and the slide-in WP overlay panel
+// aligned instead of letting the plain WP rail keep the 12px gap.
+#adminmenu {
 	margin-top: 0;
 }
 

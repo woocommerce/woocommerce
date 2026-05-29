@@ -6,7 +6,7 @@ declare( strict_types = 1 );
  * Navigation v2 bootstrap.
  *
  * Registers the feature flag and, when enabled, wires up the reconciler,
- * renderer, assets, and telemetry.
+ * assets, and telemetry.
  */
 
 namespace Automattic\WooCommerce\Internal\Admin\Navigation;
@@ -60,8 +60,8 @@ class Bootstrap {
 	}
 
 	/**
-	 * When the flag is enabled, instantiate the reconciler, renderer, assets,
-	 * and telemetry. Each of those classes registers its own hooks.
+	 * When the flag is enabled, instantiate the reconciler, assets, and
+	 * telemetry. Each of those classes registers its own hooks.
 	 *
 	 * Called on `init` priority 20 so Menu_Reconciler's admin_menu hook lands
 	 * before WordPress fires admin_menu (see constructor note).
@@ -81,7 +81,6 @@ class Bootstrap {
 
 		$container = wc_get_container();
 		$container->get( Menu_Reconciler::class );
-		$container->get( Renderer::class );
 		$container->get( Assets::class );
 		$container->get( Telemetry::class );
 		$container->get( Section_Memory::class );

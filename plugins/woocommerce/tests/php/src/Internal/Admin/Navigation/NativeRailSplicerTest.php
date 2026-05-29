@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Internal\Admin\Navigation\Native_Rail_Splicer;
 /**
  * @covers \Automattic\WooCommerce\Internal\Admin\Navigation\Native_Rail_Splicer
  */
-class Native_Rail_Splicer_Test extends \WC_Unit_Test_Case {
+class NativeRailSplicerTest extends \WC_Unit_Test_Case {
 
 	/** @var array|null */
 	private $menu_backup;
@@ -25,6 +25,7 @@ class Native_Rail_Splicer_Test extends \WC_Unit_Test_Case {
 		$submenu              = array();
 		remove_all_filters( 'parent_file' );
 		remove_all_filters( 'submenu_file' );
+		remove_all_filters( 'menu_order' );
 	}
 
 	public function tearDown(): void {
@@ -332,5 +333,35 @@ class Native_Rail_Splicer_Test extends \WC_Unit_Test_Case {
 		$this->assertNotFalse( has_action( 'product_page_wc-orders' ) );
 		$this->assertNotFalse( has_action( 'admin_page_wc-orders' ) );
 		$this->assertNotFalse( has_action( 'toplevel_page_wc-orders' ) );
+	}
+
+	/**
+	 * The WP-rail overlay renders the pre-splice menu (so users can still reach
+	 * non-Woo screens) but omits the Woo top-levels that nav-v2 rehomes, which
+	 * would otherwise appear as confusing duplicates.
+	 */
+	public function test_print_wp_rail_panel_renders_original_menu_excluding_rehomed_items(): void {
+		$original_menu = array(
+			2  => array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' ),
+			10 => array( 'Plugins', 'activate_plugins', 'plugins.php', 'Plugins', '', 'menu-plugins', 'dashicons-admin-plugins' ),
+			55 => array( 'WooCommerce', 'manage_woocommerce', 'woocommerce', 'WooCommerce', '', 'toplevel_page_woocommerce', 'dashicons-cart' ),
+			// A rehomed Woo top-level — must be excluded from the overlay.
+			56 => array( 'Products', 'manage_woocommerce', 'edit.php?post_type=product', 'Products', '', '', 'dashicons-products' ),
+		);
+
+		$splicer = new Native_Rail_Splicer();
+		$splicer->set_original_menu( $original_menu, array() );
+
+		ob_start();
+		$splicer->print_wp_rail_panel();
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'id="wc-nav-v2-wp-rail"', $html );
+		$this->assertStringContainsString( 'plugins.php', $html, 'Non-Woo top-levels remain reachable from the overlay.' );
+		$this->assertStringNotContainsString(
+			'edit.php?post_type=product',
+			$html,
+			'Rehomed Woo top-levels must not be duplicated in the overlay.'
+		);
 	}
 }

@@ -26,27 +26,42 @@ When enabled, the flag:
 - On non-Woo pages, leaves the native rail intact; hovering the
   `WooCommerce` item reveals the curated tree as a native flyout
   (built into `$submenu['woocommerce']` server-side).
-- A small JS module (`admin-navigation-v2.js`) handles only the third-level
-  cascade — flyouts deeper than one level, which WP's native admin rail
-  doesn't render. It walks each rail root's submenu after DOM load and
-  attaches grandchild items.
+- A JS module (`admin-navigation-v2.js`) handles the pieces WP's native admin
+  rail can't: the third-level cascade (flyouts deeper than one level — it
+  walks each rail root's submenu after DOM load and attaches grandchild
+  items), the slide-out "back to WordPress" overlay panel and its
+  color-scheme inheritance, hover-intent timing, and keeping the current item
+  highlighted across wc-admin SPA navigation.
 
 ## Filter hook
 
-Extensions can override placement via the `woocommerce_admin_menu_tree` filter:
+Extensions can override placement via the `woocommerce_admin_menu_tree` filter.
+The tree is a flat array keyed by slug — mutate it directly:
 
 ```php
 add_filter(
     'woocommerce_admin_menu_tree',
     function ( $tree, $raw_menu, $raw_submenu ) {
-        \Automattic\WooCommerce\Internal\Admin\Navigation\WC_Admin_Nav::add(
-            $tree,
-            'my-plugin-reports',
-            array(
-                'parent' => 'wc-admin&path=/analytics/overview',
-                'title'  => 'My Reports',
-            )
+        // Add an item.
+        $tree['my-plugin-reports'] = array(
+            'parent'   => 'wc-admin&path=/analytics/overview',
+            'title'    => 'My Reports',
+            'position' => 50,
         );
+
+        // Move an item: repoint its `parent`.
+        if ( isset( $tree['some-slug'] ) ) {
+            $tree['some-slug']['parent'] = 'wc-settings';
+        }
+
+        // Rename an item: change its `title`.
+        if ( isset( $tree['another-slug'] ) ) {
+            $tree['another-slug']['title'] = 'New label';
+        }
+
+        // Remove an item: unset its key.
+        unset( $tree['unwanted-slug'] );
+
         return $tree;
     },
     10,
@@ -54,8 +69,9 @@ add_filter(
 );
 ```
 
-Four helpers are available on `WC_Admin_Nav`: `add()`, `move()`, `remove()`,
-`rename()`. All mutate `$tree` by reference.
+Each node is an array with `parent` (a slug, or `null` for the WooCommerce
+root), `title`, and `position`; `capability` and `icon` are optional. Nodes
+whose `parent` is not present in the tree are dropped.
 
 ## Auto-nesting
 
@@ -66,7 +82,6 @@ This covers the majority of existing extensions without migration.
 ## Known limitations
 
 - Multisite network admin — flag is ignored; native rail only.
-- Plugins registering menu items after priority 999 stay in the native rail.
 - Plugins rewriting `parent_file` via the `parent_file` filter (which runs
   after the reconciler) — the tree reflects pre-filter state. Affects a small
   number of known plugins.
