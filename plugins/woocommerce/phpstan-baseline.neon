@@ -6337,12 +6337,6 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-variation-admin.php
 
 		-
-			message: '#^Variable \$loop might not be defined\.$#'
-			identifier: variable.undefined
-			count: 52
-			path: includes/admin/meta-boxes/views/html-variation-admin.php
-
-		-
 			message: '#^Variable \$product_object might not be defined\.$#'
 			identifier: variable.undefined
 			count: 10

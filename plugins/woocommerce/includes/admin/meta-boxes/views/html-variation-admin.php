@@ -7,6 +7,7 @@
  * @var WP_POST $variation
  * @var WC_Product_Variation $variation_object
  * @var array $variation_data array of variation data @deprecated 4.4.0.
+ * @var int $loop
  */
 
 use Automattic\WooCommerce\Utilities\I18nUtil;
