@@ -30982,12 +30982,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-terms-controller.php
 
 		-
-			message: '#^Argument of an invalid type array\|WP_Error supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-terms-controller.php
-
-		-
 			message: '#^Call to an undefined method WP_Error\|WP_REST_Response\:\:header\(\)\.$#'
 			identifier: method.notFound
 			count: 1
