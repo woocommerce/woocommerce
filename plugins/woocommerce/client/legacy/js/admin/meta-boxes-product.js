@@ -1351,23 +1351,20 @@ jQuery( function ( $ ) {
 			const attachmentId = $item.data( 'attachment-id' );
 			const currentSrc = $img.attr( 'src' ) || '';
 
-			if (
-				currentSrc.indexOf( '-150x150' ) !== -1 ||
-				currentSrc.indexOf( '-100x100' ) !== -1
-			) {
-				const attachment = wp.media.attachment( attachmentId );
-				attachment.fetch().then( function () {
-					const sizes = attachment.get( 'sizes' );
-					const medium = sizes && sizes.medium;
-					const full = sizes && sizes.full;
-					const newSrc =
-						( medium && medium.url ) ||
-						( full && full.url ) ||
-						currentSrc;
+			const attachment = wp.media.attachment( attachmentId );
+			attachment.fetch().then( function () {
+				const sizes = attachment.get( 'sizes' );
+				const medium = sizes && sizes.medium;
+				const full = sizes && sizes.full;
+				const newSrc =
+					( medium && medium.url ) ||
+					( full && full.url ) ||
+					currentSrc;
+				if ( newSrc !== currentSrc ) {
 					$img.attr( 'src', newSrc );
 					$img.removeAttr( 'width' ).removeAttr( 'height' );
-				} );
-			}
+				}
+			} );
 		}
 
 		function maybeDowngradeImage( $item ) {
@@ -1375,20 +1372,15 @@ jQuery( function ( $ ) {
 			const attachmentId = $item.data( 'attachment-id' );
 			const currentSrc = $img.attr( 'src' ) || '';
 
-			if (
-				currentSrc.indexOf( '-150x150' ) === -1 &&
-				currentSrc.indexOf( '-100x100' ) === -1
-			) {
-				const attachment = wp.media.attachment( attachmentId );
-				attachment.fetch().then( function () {
-					const sizes = attachment.get( 'sizes' );
-					const thumb = sizes && sizes.thumbnail;
-					if ( thumb && thumb.url ) {
-						$img.attr( 'src', thumb.url );
-						$img.removeAttr( 'width' ).removeAttr( 'height' );
-					}
-				} );
-			}
+			const attachment = wp.media.attachment( attachmentId );
+			attachment.fetch().then( function () {
+				const sizes = attachment.get( 'sizes' );
+				const thumb = sizes && sizes.thumbnail;
+				if ( thumb && thumb.url && thumb.url !== currentSrc ) {
+					$img.attr( 'src', thumb.url );
+					$img.removeAttr( 'width' ).removeAttr( 'height' );
+				}
+			} );
 		}
 
 		function buildImageHtml( attachmentId, imgUrl, modifier ) {
@@ -1463,6 +1455,7 @@ jQuery( function ( $ ) {
 			},
 			update: function () {
 				syncIds();
+				refreshFeaturedState();
 				announce(
 					woocommerce_admin_meta_boxes.i18n_product_images_reordered
 				);
@@ -1503,23 +1496,25 @@ jQuery( function ( $ ) {
 				}
 
 				if ( i === 0 ) {
-					if (
-						$el.hasClass( 'wc-product-images__image--gallery' )
-					) {
-						$el.removeClass(
-							'wc-product-images__image--gallery'
-						).addClass( 'wc-product-images__image--featured' );
-						maybeUpgradeImage( $el );
-					}
+					$el
+						.toggleClass(
+							'wc-product-images__image--featured',
+							true
+						)
+						.toggleClass(
+							'wc-product-images__image--gallery',
+							false
+						);
 				} else {
-					if (
-						$el.hasClass( 'wc-product-images__image--featured' )
-					) {
-						$el.removeClass(
-							'wc-product-images__image--featured'
-						).addClass( 'wc-product-images__image--gallery' );
-						maybeDowngradeImage( $el );
-					}
+					$el
+						.toggleClass(
+							'wc-product-images__image--featured',
+							false
+						)
+						.toggleClass(
+							'wc-product-images__image--gallery',
+							true
+						);
 				}
 			} );
 		}
