@@ -111,9 +111,12 @@ class VisualAttributeTermMeta {
 	 * @since 10.9.0
 	 */
 	public static function is_visual_attribute_taxonomy( string $taxonomy ): bool {
-		static $visual_attribute_taxonomies = null;
+		static $visual_attribute_taxonomies = array();
+		static $cache_prefix                = '';
 
-		if ( null === $visual_attribute_taxonomies ) {
+		$current_cache_prefix = \WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
+		if ( $cache_prefix !== $current_cache_prefix ) {
+			$cache_prefix                = $current_cache_prefix;
 			$visual_attribute_taxonomies = array();
 
 			foreach ( wc_get_attribute_taxonomies() as $attribute ) {
