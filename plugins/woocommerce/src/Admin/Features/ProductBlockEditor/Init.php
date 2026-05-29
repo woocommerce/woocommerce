@@ -7,7 +7,6 @@ declare(strict_types = 1);
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -20,8 +19,15 @@ use WP_Block_Editor_Context;
 
 /**
  * Loads assets related to the product block editor.
+ *
+ * @deprecated 10.9.0 Product editor extension APIs will be removed in WooCommerce 11.0.
  */
 class Init {
+	/**
+	 * Version that product editor APIs were deprecated in.
+	 */
+	const DEPRECATED_SINCE = '10.9.0';
+
 	/**
 	 * The context name used to identify the editor.
 	 */
@@ -104,11 +110,21 @@ class Init {
 			return $response;
 		}
 		if ( ! $product->meta_exists( '_product_template_id' ) ) {
+			if ( has_filter( 'experimental_woocommerce_product_editor_product_template_id_for_product' ) ) {
+				wc_deprecated_hook(
+					'experimental_woocommerce_product_editor_product_template_id_for_product',
+					$this::DEPRECATED_SINCE,
+					null,
+					'This product editor extension filter will be removed in WooCommerce 11.0.'
+				);
+			}
+
 			/**
 			 * Experimental: Allows to determine a product template id based on the product data.
 			 *
 			 * @ignore
 			 * @since 9.1.0
+			 * @deprecated 10.9.0 Product editor extension APIs will be removed in WooCommerce 11.0.
 			 */
 			$product_template_id = apply_filters( 'experimental_woocommerce_product_editor_product_template_id_for_product', '', $product );
 			if ( $product_template_id ) {
@@ -402,10 +418,20 @@ class Init {
 	 * Register product templates.
 	 */
 	public function register_product_templates() {
+		if ( has_filter( 'woocommerce_product_editor_product_templates' ) ) {
+			wc_deprecated_hook(
+				'woocommerce_product_editor_product_templates',
+				self::DEPRECATED_SINCE,
+				null,
+				'This product editor extension filter will be removed in WooCommerce 11.0.'
+			);
+		}
+
 		/**
 		 * Allows for new product template registration.
 		 *
 		 * @since 8.5.0
+		 * @deprecated 10.9.0 Product editor extension APIs will be removed in WooCommerce 11.0.
 		 */
 		$this->product_templates = apply_filters( 'woocommerce_product_editor_product_templates', $this->get_default_product_templates() );
 		$this->product_templates = $this->create_default_product_template_by_custom_product_type( $this->product_templates );
@@ -418,12 +444,6 @@ class Init {
 		);
 
 		$this->redirection_controller->set_product_templates( $this->product_templates );
-
-		// PFT: Initialize the product form controller.
-		if ( Features::is_enabled( 'product-editor-template-system' ) ) {
-			$product_form_controller = new ProductFormsController();
-			$product_form_controller->init();
-		}
 	}
 
 	/**

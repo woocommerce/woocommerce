@@ -18,6 +18,8 @@ import { unlock } from '../../lock-unlock';
 import type { ProductEntityRecord } from '../types';
 
 import { getCurrencyObject } from '../utils/currency';
+import type { ProductBulkEditFormData } from '../../product-edit/bulk-edit';
+import { isBulkNumericPercentEdit } from '../../product-edit/bulk-edit';
 
 const { ValidatedInputControl } = unlock( privateApis );
 
@@ -37,6 +39,10 @@ type CurrencyControlProps = {
 	customValidity?: NonNullable<
 		DataFormControlProps< ProductEntityRecord >[ 'validity' ]
 	>[ 'custom' ];
+	disabled?: boolean;
+	placeholder?: string;
+	hideLabelFromVision?: boolean;
+	showPercentAdornment?: boolean;
 };
 
 export function CurrencyControl( {
@@ -45,32 +51,41 @@ export function CurrencyControl( {
 	value,
 	onChange,
 	customValidity,
+	disabled = false,
+	placeholder,
+	hideLabelFromVision,
+	showPercentAdornment = false,
 }: CurrencyControlProps ) {
+	const prefix =
+		! showPercentAdornment && isCurrencyLeft ? (
+			<InputControlPrefixWrapper>{ symbol }</InputControlPrefixWrapper>
+		) : undefined;
+	let suffix;
+
+	if ( showPercentAdornment ) {
+		suffix = <InputControlSuffixWrapper>%</InputControlSuffixWrapper>;
+	} else if ( ! isCurrencyLeft ) {
+		suffix = (
+			<InputControlSuffixWrapper>{ symbol }</InputControlSuffixWrapper>
+		);
+	}
+
 	return (
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call -- ValidatedInputControl is a private API
 		<ValidatedInputControl
 			id={ id }
 			label={ label }
+			hideLabelFromVision={ hideLabelFromVision }
 			value={ value }
 			onChange={ onChange }
+			placeholder={ placeholder }
 			type="number"
 			min={ 0 }
 			step={ step }
 			customValidity={ customValidity }
-			prefix={
-				isCurrencyLeft ? (
-					<InputControlPrefixWrapper>
-						{ symbol }
-					</InputControlPrefixWrapper>
-				) : undefined
-			}
-			suffix={
-				! isCurrencyLeft ? (
-					<InputControlSuffixWrapper>
-						{ symbol }
-					</InputControlSuffixWrapper>
-				) : undefined
-			}
+			disabled={ disabled }
+			prefix={ prefix }
+			suffix={ suffix }
 		/>
 	);
 }
@@ -79,29 +94,39 @@ export function CurrencyControl( {
  * Shared Edit component for currency fields.
  * Renders a number input with min=0 and currency prefix/suffix.
  *
- * @param root0          Props from DataForm.
- * @param root0.data     Current product entity record.
- * @param root0.field    Normalized field definition.
- * @param root0.onChange Callback to update entity values.
- * @param root0.validity Per-rule validation state from useFormValidity.
+ * @param root0                     Props from DataForm.
+ * @param root0.data                Current product entity record.
+ * @param root0.field               Normalized field definition.
+ * @param root0.hideLabelFromVision Whether to visually hide the control label.
+ * @param root0.onChange            Callback to update entity values.
+ * @param root0.validity            Per-rule validation state from useFormValidity.
  */
 export function CurrencyInput( {
 	data,
 	field,
+	hideLabelFromVision,
 	onChange,
 	validity,
 }: DataFormControlProps< ProductEntityRecord > ) {
 	const fieldId = field.id as CurrencyField;
+	const disabled = field.isDisabled( { item: data, field } );
 
 	return (
 		<CurrencyControl
 			id={ `currency-input-${ fieldId }` }
 			label={ field.label }
+			hideLabelFromVision={ hideLabelFromVision }
 			value={ data[ fieldId ] ?? '' }
+			placeholder={ field.placeholder }
 			onChange={ ( newValue: string ) => {
 				onChange( { [ fieldId ]: newValue } );
 			} }
 			customValidity={ validity?.custom }
+			disabled={ disabled }
+			showPercentAdornment={ isBulkNumericPercentEdit(
+				data as ProductBulkEditFormData,
+				fieldId
+			) }
 		/>
 	);
 }

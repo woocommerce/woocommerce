@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Send the merchant a transactional email after a successful QR mobile-app sign-in summarizing the device, OS, app version, and timestamp, with a "revoke access" link. Wrapped in a `woocommerce_qr_login_should_send_signin_email` filter so site owners can suppress the send.

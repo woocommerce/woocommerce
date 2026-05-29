@@ -3534,3 +3534,15 @@ function wc_update_10802_restore_orders_meta_key_value_index(): void {
 function wc_update_1080_backfill_email_template_sync_meta(): bool {
 	return WCEmailTemplateSyncBackfill::run();
 }
+
+/**
+ * Remove the option woocommerce_task_list_reminder_bar_hidden.
+ * The task list reminder bar was removed in 10.9.0; this option is no longer used.
+ *
+ * @since 10.9.0
+ *
+ * @return void
+ */
+function wc_update_1090_remove_task_list_reminder_bar_hidden_option() {
+	delete_option( 'woocommerce_task_list_reminder_bar_hidden' );
+}

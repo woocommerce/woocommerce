@@ -7,6 +7,8 @@ use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
 
 /**
  * Interface for group containers, which contain sections and blocks.
+ *
+ * @deprecated 10.9.0 Product editor extension APIs will be removed in WooCommerce 11.0.
  */
 interface GroupInterface extends BlockContainerInterface {
 

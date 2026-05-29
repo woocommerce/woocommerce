@@ -33,11 +33,11 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( empty( $block->context['woocommerceSelectableItems'] ) ) {
+		if ( empty( $block->context['woocommerce/selectableItems'] ) ) {
 			return '';
 		}
 
-		$block_context   = $block->context['woocommerceSelectableItems'];
+		$block_context   = $block->context['woocommerce/selectableItems'];
 		$items           = is_array( $block_context['items'] ?? null ) ? $block_context['items'] : array();
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
 		$filter_type     = $block_context['filterType'] ?? '';
@@ -94,19 +94,15 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
 					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
-				<div
-					class="wc-block-product-filter-checkbox-list__items"
-					data-wp-interactive="<?php echo esc_attr( $store_namespace ); ?>"
-				>
+				<div class="wc-block-product-filter-checkbox-list__items">
 					<?php
-					foreach ( $visible_items as $index => $item ) :
-						$context_item = array_merge( $item, array( 'index' => $index ) );
+					foreach ( $visible_items as $item ) :
 						?>
 						<div
 							class="wc-block-product-filter-checkbox-list__item"
 							data-wp-each-child
-							<?php echo wp_interactivity_data_wp_context( array( 'item' => $context_item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							data-wp-bind--hidden="woocommerce/product-filter-checkbox-list::state.itemHidden"
+							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							data-wp-bind--hidden="context.item.hidden"
 						>
 							<label
 								class="wc-block-product-filter-checkbox-list__label"
@@ -164,12 +160,12 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 						</div>
 					<?php endforeach; ?>
 					<template
-						data-wp-each--item="state.selectableItems"
+						data-wp-each--item="state.items"
 						data-wp-each-key="context.item.id"
 					>
 						<div
 							class="wc-block-product-filter-checkbox-list__item"
-							data-wp-bind--hidden="woocommerce/product-filter-checkbox-list::state.itemHidden"
+							data-wp-bind--hidden="context.item.hidden"
 						>
 							<label
 								class="wc-block-product-filter-checkbox-list__label"

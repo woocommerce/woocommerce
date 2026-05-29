@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Shopper Collection: add a built-in heading inner block (defaults to "Saved for later" at H2). Editable in the block editor.
