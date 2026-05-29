@@ -148,8 +148,6 @@ class ProductCollectionPage {
 	}
 
 	async chooseCollectionInPost( collection?: Collections ) {
-		await this.editor.closeGlobalBlockInserter();
-
 		const buttonName = collection
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
@@ -186,8 +184,6 @@ class ProductCollectionPage {
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
-		await this.editor.closeGlobalBlockInserter();
-
 		const buttonName = collection
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
