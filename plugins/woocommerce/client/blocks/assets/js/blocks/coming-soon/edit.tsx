@@ -23,8 +23,6 @@ export type Attributes = {
 
 export type EditProps = BlockEditProps< Attributes >;
 
-const DEFAULT_COLOR = '#bea0f2';
-
 /**
  * Internal dependencies
  */
@@ -43,6 +41,8 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 			</div>
 		);
 	}
+
+	const DEFAULT_COLOR = '#bea0f2';
 
 	return (
 		<>
