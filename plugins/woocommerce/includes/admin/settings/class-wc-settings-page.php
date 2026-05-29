@@ -314,28 +314,41 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$schema_failed    = ! empty( $GLOBALS['wc_settings_ui_schema_failed'][ $page_id ][ $section_key ] );
 
 			if ( Features::is_enabled( 'settings-ui' ) && $settings_ui_page instanceof SettingsUIPageInterface && ! $schema_failed ) {
+				$render_settings_ui = true;
+
 				try {
 					$script_handles = $settings_ui_page->get_script_handles( $current_section );
-				} catch ( \Exception $e ) {
-					$script_handles = array();
-					wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
-				}
+				} catch ( \Throwable $e ) {
+					$script_handles     = array();
+					$render_settings_ui = false;
 
-				foreach ( $script_handles as $script_handle ) {
-					if ( '' !== $script_handle ) {
-						wp_enqueue_script( $script_handle );
+					if ( $e instanceof \Exception ) {
+						wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
 					}
 				}
 
-				$GLOBALS['hide_save_button'] = true;
+				if ( $render_settings_ui ) {
+					/**
+					 * Extension-provided handles may violate the interface contract.
+					 *
+					 * @var mixed[] $script_handles
+					 */
+					foreach ( $script_handles as $script_handle ) {
+						if ( is_string( $script_handle ) && '' !== $script_handle ) {
+							wp_enqueue_script( $script_handle );
+						}
+					}
 
-				printf(
-					'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
-					esc_attr( 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $current_section ? 'default' : $current_section ) ),
-					esc_attr( $settings_ui_page->get_page_id() ),
-					esc_attr( $current_section )
-				);
-				return;
+					$GLOBALS['hide_save_button'] = true;
+
+					printf(
+						'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
+						esc_attr( 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $current_section ? 'default' : $current_section ) ),
+						esc_attr( $settings_ui_page->get_page_id() ),
+						esc_attr( $current_section )
+					);
+					return;
+				}
 			}
 
 			// We can't use "get_settings_for_section" here

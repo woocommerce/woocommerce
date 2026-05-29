@@ -37,8 +37,9 @@ if ( ! $tab_exists ) {
 	exit;
 }
 
-$hide_nav            = 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true );
-$is_settings_ui_page = false;
+$hide_nav                  = 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true );
+$is_settings_ui_page       = false;
+$settings_ui_settings_page = null;
 
 if ( Features::is_enabled( 'settings-ui' ) ) {
 	foreach ( WC_Admin_Settings::get_settings_pages() as $settings_page ) {
@@ -46,9 +47,14 @@ if ( Features::is_enabled( 'settings-ui' ) ) {
 			continue;
 		}
 
-		$is_settings_ui_page = $settings_page->get_settings_ui_page() instanceof SettingsUIPageInterface;
+		$is_settings_ui_page       = $settings_page->get_settings_ui_page() instanceof SettingsUIPageInterface;
+		$settings_ui_settings_page = $is_settings_ui_page ? $settings_page : null;
 		break;
 	}
+}
+
+if ( $settings_ui_settings_page instanceof WC_Settings_Page ) {
+	remove_action( 'woocommerce_sections_' . $current_tab, array( $settings_ui_settings_page, 'output_sections' ) );
 }
 
 // Move 'Advanced' to the last.
@@ -127,9 +133,7 @@ $marketplace_links = array(
 		<?php endif; ?>
 			<h1 class="screen-reader-text"><?php echo esc_html( $current_tab_label ); ?></h1>
 			<?php
-			if ( ! $is_settings_ui_page ) {
-				do_action( 'woocommerce_sections_' . $current_tab );
-			}
+			do_action( 'woocommerce_sections_' . $current_tab );
 
 			WC_Admin_Settings::show_messages();
 

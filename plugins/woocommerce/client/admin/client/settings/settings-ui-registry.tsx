@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { createElement, createRoot } from '@wordpress/element';
+import type { ComponentType, ReactNode } from 'react';
 import type { SettingsUISchema } from '@woocommerce/settings-ui-sdk';
 
 /**
@@ -13,6 +14,9 @@ declare global {
 	interface Window {
 		wc?: {
 			settingsUiSdk?: {
+				SettingsUIErrorBoundary: ComponentType< {
+					children: ReactNode;
+				} >;
 				SettingsUIPage: ( props: {
 					schema: SettingsUISchema;
 					page: string;
@@ -33,9 +37,11 @@ const getSchema = (
 };
 
 export const registerSettingsUIScreens = () => {
+	const SettingsUIErrorBoundary =
+		window.wc?.settingsUiSdk?.SettingsUIErrorBoundary;
 	const SettingsUIPage = window.wc?.settingsUiSdk?.SettingsUIPage;
 
-	if ( ! SettingsUIPage ) {
+	if ( ! SettingsUIErrorBoundary || ! SettingsUIPage ) {
 		if (
 			document.querySelector< HTMLElement >( '[data-wc-settings-ui="1"]' )
 		) {
@@ -62,11 +68,15 @@ export const registerSettingsUIScreens = () => {
 			}
 
 			createRoot( element ).render(
-				createElement( SettingsUIPage, {
-					schema,
-					page,
-					section: section || schema.section,
-				} )
+				createElement(
+					SettingsUIErrorBoundary,
+					null,
+					createElement( SettingsUIPage, {
+						schema,
+						page,
+						section: section || schema.section,
+					} )
+				)
 			);
 		} );
 };

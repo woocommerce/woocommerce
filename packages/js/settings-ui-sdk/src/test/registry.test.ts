@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import {
+	__resetRegistry,
 	registerSettingsExtension,
 	resolveFieldComponent,
 	resolveFieldVisibilityPredicate,
@@ -18,6 +19,10 @@ import type {
 } from '../types';
 
 describe( 'settings extension registry', () => {
+	afterEach( () => {
+		__resetRegistry();
+	} );
+
 	it( 'resolves named field components within the matching scope', () => {
 		const component: SettingsFieldComponent = () => null;
 

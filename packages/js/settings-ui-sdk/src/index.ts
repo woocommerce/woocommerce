@@ -1,4 +1,4 @@
-export { SettingsUIPage } from './settings-ui-page';
+export { SettingsUIErrorBoundary, SettingsUIPage } from './settings-ui-page';
 export { NativeSettingsField } from './native-fields';
 export { HiddenInputs, getHiddenInputs } from './hidden-inputs';
 export {

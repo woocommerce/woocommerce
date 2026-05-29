@@ -205,7 +205,7 @@ type ErrorBoundaryState = {
 	hasError: boolean;
 };
 
-class SettingsUIErrorBoundary extends Component<
+export class SettingsUIErrorBoundary extends Component<
 	ErrorBoundaryProps,
 	ErrorBoundaryState
 > {
@@ -547,87 +547,75 @@ export const SettingsUIPage = ( {
 		saveStrategy.adapter === 'form_post' ? getAllFields( schema ) : [];
 
 	return (
-		<SettingsUIErrorBoundary>
-			<ShellHeader
-				schema={ schema }
-				context={ context }
-				values={ values }
-				initialValues={ initialValues }
-				isDirty={ isDirty }
-				isSaving={ isSaving }
-				saveStrategy={ saveStrategy }
-				onSave={ handleCustomSave }
-			>
-				{ saveNotice ? (
-					<Notice
-						className="wc-settings-ui-shell__notice"
-						status={ saveNotice.status }
-						isDismissible
-						onRemove={ () => setSaveNotice( null ) }
-					>
-						{ saveNotice.message }
-					</Notice>
-				) : null }
-				<div className="wc-settings-ui">
-					{ visibleGroups.map( ( group ) => (
-						<section
-							className="wc-settings-ui__group"
-							key={ group.id }
-						>
-							<GroupHeader group={ group } />
-							<div className="wc-settings-ui__group-panel">
-								{ group.fields.map( ( field ) => {
-									const FieldComponent =
-										resolveFieldComponent(
-											field,
-											context
-										) || NativeSettingsField;
-									const value = values[ field.id ];
+		<ShellHeader
+			schema={ schema }
+			context={ context }
+			values={ values }
+			initialValues={ initialValues }
+			isDirty={ isDirty }
+			isSaving={ isSaving }
+			saveStrategy={ saveStrategy }
+			onSave={ handleCustomSave }
+		>
+			{ saveNotice ? (
+				<Notice
+					className="wc-settings-ui-shell__notice"
+					status={ saveNotice.status }
+					isDismissible
+					onRemove={ () => setSaveNotice( null ) }
+				>
+					{ saveNotice.message }
+				</Notice>
+			) : null }
+			<div className="wc-settings-ui">
+				{ visibleGroups.map( ( group ) => (
+					<section className="wc-settings-ui__group" key={ group.id }>
+						<GroupHeader group={ group } />
+						<div className="wc-settings-ui__group-panel">
+							{ group.fields.map( ( field ) => {
+								const FieldComponent =
+									resolveFieldComponent( field, context ) ||
+									NativeSettingsField;
+								const value = values[ field.id ];
 
-									return (
-										<div
-											className={ [
-												'wc-settings-ui__field',
-												getFieldTypeClassName(
-													field.type
-												),
-											].join( ' ' ) }
-											key={ field.id }
-										>
-											<FieldComponent
-												field={ field }
-												value={ value }
-												context={ context }
-												values={ values }
-												initialValues={ initialValues }
-												setValue={ setValue }
-												setValues={ setValues }
-												onChange={ ( nextValue ) =>
-													setValue(
-														field.id,
-														nextValue
-													)
-												}
-											/>
-										</div>
-									);
-								} ) }
-							</div>
-						</section>
+								return (
+									<div
+										className={ [
+											'wc-settings-ui__field',
+											getFieldTypeClassName( field.type ),
+										].join( ' ' ) }
+										key={ field.id }
+									>
+										<FieldComponent
+											field={ field }
+											value={ value }
+											context={ context }
+											values={ values }
+											initialValues={ initialValues }
+											setValue={ setValue }
+											setValues={ setValues }
+											onChange={ ( nextValue ) =>
+												setValue( field.id, nextValue )
+											}
+										/>
+									</div>
+								);
+							} ) }
+						</div>
+					</section>
+				) ) }
+			</div>
+			{ formPostFields.length > 0 ? (
+				<div className="wc-settings-ui__hidden-inputs">
+					{ formPostFields.map( ( field ) => (
+						<HiddenInputs
+							field={ field }
+							value={ values[ field.id ] }
+							key={ field.id }
+						/>
 					) ) }
 				</div>
-				{ formPostFields.length > 0 ? (
-					<div className="wc-settings-ui__hidden-inputs">
-						{ formPostFields.map( ( field ) => (
-							<HiddenInputs
-								field={ field }
-								value={ values[ field.id ] }
-								key={ field.id }
-							/>
-						) ) }
-					</div>
-				) : null }
-			</ShellHeader>
-		</SettingsUIErrorBoundary>
+			) : null }
+		</ShellHeader>
 	);
 };
