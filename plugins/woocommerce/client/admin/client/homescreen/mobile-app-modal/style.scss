@@ -288,6 +288,17 @@ button.components-button.send-magic-link-button {
 		max-width: 32em;
 	}
 
+	// Single-line device summary (device · app version) shown above the
+	// revoke prompt — mirrors the standalone QRLoginConsumedPanel subline so
+	// the merchant can confirm which device signed in.
+	.qr-login-success-step__device-details {
+		font-size: 13px;
+		line-height: 1.5;
+		color: $gray-700;
+		margin: 0 0 12px;
+		max-width: 32em;
+	}
+
 	// "It wasn't you?" prompt + "Revoke access" CTA on the same row to make
 	// better use of the horizontal space the stepper layout already gives us.
 	.qr-login-success-step__revoke-row {
