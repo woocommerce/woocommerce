@@ -196,7 +196,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		if ( ! empty( $attribute_counts ) ) {
 			$show_counts         = $block_attributes['showCounts'] ?? false;
-			$is_visual_attribute = 'wc-visual' === $product_attribute->type;
+			$is_visual_attribute = VisualAttributeTermMeta::is_visual_attribute_taxonomy( $product_attribute->slug );
 			$visual_values       = array();
 
 			if ( $is_visual_attribute ) {
