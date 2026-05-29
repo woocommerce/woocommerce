@@ -563,7 +563,9 @@ class BatchProcessingController {
 			return;
 		}
 
-		// Re-check the connection after the Action Scheduler query. The AS query can leave the
+		$enqueued_processors = $this->get_enqueued_processors();
+
+		// Re-check the connection after the Action Scheduler and option queries. These can leave the
 		// connection in error state 2014 under certain conditions (heavy request load, many prior
 		// queries). If that happened, bail out to prevent cascading failures.
 		// @phpstan-ignore-next-line -- Connection state can change after AS query side effects.
@@ -571,7 +573,6 @@ class BatchProcessingController {
 			return;
 		}
 
-		$enqueued_processors    = $this->get_enqueued_processors();
 		$unscheduled_processors = array_diff( $enqueued_processors, array_filter( $enqueued_processors, array( $this, 'is_scheduled' ) ) );
 
 		foreach ( $unscheduled_processors as $processor ) {
