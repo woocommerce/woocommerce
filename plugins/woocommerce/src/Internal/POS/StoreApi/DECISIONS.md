@@ -195,6 +195,52 @@ Option 1 is the cleaner long-term shape. The integration test in
 this spike uses a temporary `PosCheckoutTestGateway` defined inline
 to prove the route works end-to-end.
 
+## POS requests run as guest in the business logic
+
+The cashier's WP user authenticates the *request* (so `permission_callback`
+can verify `manage_woocommerce`), but the moment that gate passes the
+global current user is downgraded to `0` for the rest of the request via
+`CurrentUserSwap` (hooked on `rest_dispatch_request`, which fires after
+permission check and before the route callback).
+
+The conceptual model mirrors agentic commerce: agentic uses
+Jetpack-blog-token authentication, so no WP user is ever logged in
+during the request — extension code reading `get_current_user_id()` or
+`is_user_logged_in()` naturally sees a guest. POS gets the same property
+by explicit swap, because POS auth has to use the cashier's WP user to
+satisfy capability checks.
+
+This is the conceptually-correct alternative to whack-a-mole policy
+hooks. Without the swap, every extension that reads `get_current_user_id()`
+(coupons "1 use per customer", customer order history, analytics
+attribution, countless third-party fulfillment plugins) leaks the
+cashier as if they were the customer. Each one would need an
+extension-specific policy fix. With the swap, none of them do — the
+business logic sees a guest because that's what an anonymous in-store
+sale actually is.
+
+`CustomerSwap` runs immediately after at priority 11 on the same hook
+and replaces `WC()->customer` with a fresh `WC_Customer(0, true)` whose
+`set_defaults` no longer fills `billing_email` from the cashier (because
+`is_user_logged_in()` is now false). The country/state defaults from
+`wc_get_customer_default_location()` are still stripped so the order
+carries no address at all; `TaxLocationPolicy` supplies the store base
+address directly for tax computation via a separate filter.
+
+The swap is intentionally not restored after the request. WordPress
+PHP requests are isolated (PHP globals don't survive past the request
+boundary), so cashier B's request doesn't see cashier A's swap.
+Restoring mid-request would risk re-leaking the cashier identity into
+shutdown hooks like `WC_Customer::save` that auto-fire at the end of
+the request.
+
+The cashier identity is intentionally not preserved for audit purposes
+in this spike. If/when POS reporting wants to record "cashier Jane
+processed this order" the cashier's user_id can be captured at the
+request boundary (before the swap) and stashed in a request-scoped
+property; that's a follow-up rather than a load-bearing piece of the
+spike.
+
 ## Tax location for POS uses store base, not POS physical address
 
 For in-person retail, tax follows the register's location — not the

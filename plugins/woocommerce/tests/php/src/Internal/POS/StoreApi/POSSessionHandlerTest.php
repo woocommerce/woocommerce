@@ -14,6 +14,23 @@ use WC_Unit_Test_Case;
 class POSSessionHandlerTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Original current_user_id captured in setUp so it can be restored.
+	 *
+	 * @var int
+	 */
+	private $original_user_id;
+
+	public function setUp(): void {
+		parent::setUp();
+		$this->original_user_id = get_current_user_id();
+	}
+
+	public function tearDown(): void {
+		wp_set_current_user( $this->original_user_id );
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox generate_customer_id ignores authenticated user and returns a guest-style id.
 	 */
 	public function test_generate_customer_id_is_guest_even_when_user_logged_in(): void {

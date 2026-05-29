@@ -19,7 +19,7 @@ use Automattic\WooCommerce\Internal\POS\StoreApi\Context;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutAddressPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutEmailPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutPaymentMethodPolicy;
-use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerIdPolicy;
+use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CurrentUserSwap;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerSwap;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\DefaultPaymentMethodPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\ShippingPolicy;
@@ -36,7 +36,7 @@ use WC_Product_Simple;
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutPaymentMethodPolicy
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutAddressPolicy
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutEmailPolicy
- * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerIdPolicy
+ * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CurrentUserSwap
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerSwap
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\DefaultPaymentMethodPolicy
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\ShippingPolicy
@@ -66,6 +66,16 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 	private $original_customer;
 
 	/**
+	 * Original current_user_id captured in setUp so it can be restored.
+	 *
+	 * CurrentUserSwap mutates the global user mid-test; without restoring
+	 * it in tearDown, a stray user id would leak into subsequent tests.
+	 *
+	 * @var int
+	 */
+	private $original_user_id;
+
+	/**
 	 * Setup.
 	 */
 	protected function setUp(): void {
@@ -74,6 +84,7 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		Context::set_test_override( true );
 
 		$this->original_customer = WC()->customer;
+		$this->original_user_id  = get_current_user_id();
 
 		// Engage the POS opt-outs so the Store API guards are relaxed for these
 		// requests. In production these are registered in class-woocommerce.php;
@@ -82,10 +93,10 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		( new CheckoutPaymentMethodPolicy() )->register();
 		( new CheckoutAddressPolicy() )->register();
 		( new CheckoutEmailPolicy() )->register();
-		( new CustomerIdPolicy() )->register();
 		( new DefaultPaymentMethodPolicy() )->register();
 		( new ShippingPolicy() )->register();
 		( new TaxLocationPolicy() )->register();
+		( new CurrentUserSwap() )->register();
 		( new CustomerSwap() )->register();
 
 		$this->admin_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
@@ -110,14 +121,14 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		remove_all_filters( 'woocommerce_store_api_checkout_require_payment_method' );
 		remove_all_filters( 'woocommerce_store_api_validate_addresses' );
 		remove_all_filters( 'woocommerce_store_api_require_billing_email' );
-		remove_all_filters( 'woocommerce_store_api_order_customer_id' );
 		remove_all_filters( 'woocommerce_store_api_order_default_payment_method' );
 		remove_all_filters( 'woocommerce_cart_needs_shipping' );
 		remove_all_filters( 'woocommerce_customer_taxable_address' );
 		remove_all_filters( 'woocommerce_pos_tax_location' );
-		remove_all_filters( 'rest_pre_dispatch' );
+		remove_all_filters( 'rest_dispatch_request' );
 		Context::set_test_override( null );
 		WC()->customer = $this->original_customer;
+		wp_set_current_user( $this->original_user_id );
 		wp_delete_user( $this->admin_id );
 		parent::tearDown();
 	}
@@ -206,6 +217,12 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 			}
 		}
 		$this->assertNotEmpty( $cart_token, 'add-item should emit a Cart-Token header for checkout to use.' );
+
+		// CurrentUserSwap in the prior dispatch set current_user to 0 (the entire
+		// point of Nadir's model). In production the next HTTP request would
+		// re-authenticate the cashier from scratch; here we mirror that by
+		// re-asserting the authenticated user before dispatching again.
+		wp_set_current_user( $this->admin_id );
 
 		// Run checkout against the same cart with a truly empty body — no
 		// payment_method, no billing_address, no shipping_address. POS legitimately
@@ -320,6 +337,10 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		}
 		$this->assertNotEmpty( $cart_token );
 
+		// Prior dispatch's CurrentUserSwap set current_user to 0; re-auth
+		// the cashier so the next request's permission check sees them.
+		wp_set_current_user( $this->admin_id );
+
 		$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
 		$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );
 		$checkout_response = rest_get_server()->dispatch( $checkout_request );
@@ -417,6 +438,10 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 			}
 			$this->assertNotEmpty( $cart_token );
 
+			// Prior dispatch swapped current_user to 0; re-auth so the
+			// next request's permission check sees the cashier.
+			wp_set_current_user( $this->admin_id );
+
 			$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
 			$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );
 			$checkout_response = rest_get_server()->dispatch( $checkout_request );
@@ -480,6 +505,10 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 				break;
 			}
 		}
+
+		// Prior dispatch swapped current_user to 0; re-auth so the
+		// next request's permission check sees the cashier.
+		wp_set_current_user( $this->admin_id );
 
 		$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
 		$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );

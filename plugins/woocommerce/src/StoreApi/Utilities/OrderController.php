@@ -113,30 +113,14 @@ class OrderController {
 		$this->update_addresses_from_cart( $order );
 		$order->set_currency( get_woocommerce_currency() );
 		$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
-
-		// NOTE(POS spike): the two filters below (`woocommerce_store_api_order_customer_id`
-		// and `woocommerce_store_api_order_default_payment_method`) were added by the
-		// POS Store API spike to let trusted-actor callers (POS, agentic) override the
-		// web-checkout assumptions baked into this method. They should land as a
-		// standalone trunk PR independent of the POS spike.
-		/**
-		 * Filters the customer_id stamped onto a draft order built from cart.
-		 *
-		 * The default behaviour assumes the authenticated user IS the customer,
-		 * which is true for web checkout but wrong for trusted-actor scenarios
-		 * such as in-store POS (the cashier is authenticated but is not the
-		 * customer; the order may be anonymous).
-		 *
-		 * @since 10.9.0
-		 *
-		 * @param int       $customer_id The customer id to set on the order. Defaults to the current user id.
-		 * @param \WC_Order $order       Order object being updated.
-		 */
-		$customer_id = (int) apply_filters( 'woocommerce_store_api_order_customer_id', get_current_user_id(), $order );
-		$order->set_customer_id( $customer_id );
+		$order->set_customer_id( get_current_user_id() );
 		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
 		$order->set_customer_user_agent( wc_get_user_agent() );
 
+		// NOTE(POS spike): the filter below (`woocommerce_store_api_order_default_payment_method`)
+		// was added by the POS Store API spike so trusted-actor callers can override the
+		// web-checkout default-gateway assumption baked into this method. Should land as a
+		// standalone trunk PR independent of the POS spike.
 		/**
 		 * Filters the default payment_method stamped onto a draft order built from cart.
 		 *

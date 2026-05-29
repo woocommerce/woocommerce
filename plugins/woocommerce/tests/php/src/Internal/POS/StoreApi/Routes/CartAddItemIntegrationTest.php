@@ -60,6 +60,15 @@ class CartAddItemIntegrationTest extends ControllerTestCase {
 	private $out_of_stock_product;
 
 	/**
+	 * Original current_user_id captured in setUp so it can be restored —
+	 * individual tests call wp_set_current_user() and must not leak into
+	 * neighbours.
+	 *
+	 * @var int
+	 */
+	private $original_user_id;
+
+	/**
 	 * Setup.
 	 */
 	protected function setUp(): void {
@@ -71,7 +80,8 @@ class CartAddItemIntegrationTest extends ControllerTestCase {
 		// individual tests that exercise detection itself can clear this override.
 		Context::set_test_override( true );
 
-		$this->admin_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->original_user_id = get_current_user_id();
+		$this->admin_id         = $this->factory()->user->create( array( 'role' => 'administrator' ) );
 
 		// Engage the POS persistent-cart opt-out so the per-user-meta cart row
 		// doesn't leak into POS requests. In production this is registered in
@@ -106,6 +116,7 @@ class CartAddItemIntegrationTest extends ControllerTestCase {
 	protected function tearDown(): void {
 		remove_all_filters( 'woocommerce_persistent_cart_enabled' );
 		Context::set_test_override( null );
+		wp_set_current_user( $this->original_user_id );
 		wp_delete_user( $this->admin_id );
 		parent::tearDown();
 	}
@@ -176,6 +187,11 @@ class CartAddItemIntegrationTest extends ControllerTestCase {
 		$this->assertSame( 201, $first->get_status() );
 		$cart_token = $this->cart_token_header( $first );
 		$this->assertNotEmpty( $cart_token );
+
+		// CurrentUserSwap (registered globally via class-woocommerce.php for the test
+		// environment) set current_user to 0 during the prior dispatch; re-auth the
+		// cashier so the next request's permission check sees them.
+		wp_set_current_user( $this->admin_id );
 
 		$second = $this->add_item( $this->product->get_id(), 1, array( 'cart_token' => $cart_token ) );
 		$this->assertSame( 201, $second->get_status() );
