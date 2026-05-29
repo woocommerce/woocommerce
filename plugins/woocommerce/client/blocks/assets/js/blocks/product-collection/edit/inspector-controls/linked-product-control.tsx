@@ -10,16 +10,18 @@ import type { WooCommerceBlockLocation } from '@woocommerce/blocks/product-templ
 import { type ProductResponseItem, isEmpty } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
-	PanelBody,
-	PanelRow,
 	Button,
 	Flex,
 	FlexItem,
 	Dropdown,
 	RadioControl,
+	Spinner,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalText as Text,
-	Spinner,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 
 /**
@@ -231,9 +233,25 @@ const LinkedProductControl = ( {
 	);
 
 	return (
-		<PanelBody title={ __( 'Linked Product', 'woocommerce' ) }>
-			{ showRadioControl && (
-				<PanelRow>
+		<ToolsPanel
+			label={ __( 'Linked Product', 'woocommerce' ) }
+			resetAll={ () =>
+				handleRadioControlChange(
+					PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT
+				)
+			}
+		>
+			<ToolsPanelItem
+				label={ __( 'Linked Product', 'woocommerce' ) }
+				hasValue={ () => ! isEmpty( productReference ) }
+				onDeselect={ () =>
+					handleRadioControlChange(
+						PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT
+					)
+				}
+				isShownByDefault
+			>
+				{ showRadioControl && (
 					<RadioControl
 						className="wc-block-product-collection-product-reference-radio"
 						label={ __( 'Products to show', 'woocommerce' ) }
@@ -254,10 +272,8 @@ const LinkedProductControl = ( {
 						] }
 						onChange={ handleRadioControlChange }
 					/>
-				</PanelRow>
-			) }
-			{ showSpecificProductSelector && (
-				<PanelRow>
+				) }
+				{ showSpecificProductSelector && (
 					<Dropdown
 						className="wc-block-product-collection-linked-product-control"
 						contentClassName="wc-block-product-collection-linked-product__popover-content"
@@ -280,9 +296,9 @@ const LinkedProductControl = ( {
 						open={ isDropdownOpen }
 						onToggle={ () => setIsDropdownOpen( ! isDropdownOpen ) }
 					/>
-				</PanelRow>
-			) }
-		</PanelBody>
+				) }
+			</ToolsPanelItem>
+		</ToolsPanel>
 	);
 };
 
