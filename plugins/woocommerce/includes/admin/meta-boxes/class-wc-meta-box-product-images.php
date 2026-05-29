@@ -171,7 +171,6 @@ class WC_Meta_Box_Product_Images {
 
 		if ( ! $videos_enabled ) {
 			$product->set_gallery_image_ids( $attachment_ids );
-			$product->set_media_gallery( array() );
 			$product->save();
 			return;
 		}
@@ -189,9 +188,12 @@ class WC_Meta_Box_Product_Images {
 		}
 
 		$product->set_gallery_image_ids( $attachment_ids );
-		$product->set_media_gallery( ProductMediaGallery::has_videos( $media_gallery ) ? $media_gallery : array() );
-
 		$product->save();
+
+		ProductMediaGallery::set_stored_media_gallery_items(
+			$product,
+			ProductMediaGallery::has_videos( $media_gallery ) ? $media_gallery : array()
+		);
 	}
 
 	/**
