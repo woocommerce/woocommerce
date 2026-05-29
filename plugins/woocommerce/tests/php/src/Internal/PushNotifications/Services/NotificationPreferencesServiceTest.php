@@ -285,6 +285,7 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $defaults );
 		$this->assertArrayHasKey( 'store_order', $defaults );
 		$this->assertArrayHasKey( 'store_review', $defaults );
+		$this->assertArrayHasKey( 'store_stock', $defaults );
 
 		foreach ( $defaults as $type => $shape ) {
 			$this->assertIsArray( $shape, "Default for {$type} should be an object/array." );
@@ -443,6 +444,100 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 		$this->sut->save_preferences(
 			$this->user_id,
 			array( 'store_review' => array( 'enabled' => false ) )
+		);
+	}
+
+	/**
+	 * @testdox Should include stock sub-flag defaults for store_stock.
+	 */
+	public function test_get_defaults_includes_stock_sub_flags(): void {
+		$defaults = $this->sut->get_defaults();
+
+		$this->assertArrayHasKey( 'low_stock', $defaults['store_stock'] );
+		$this->assertTrue( $defaults['store_stock']['low_stock'] );
+		$this->assertArrayHasKey( 'out_of_stock', $defaults['store_stock'] );
+		$this->assertTrue( $defaults['store_stock']['out_of_stock'] );
+		$this->assertArrayHasKey( 'on_backorder', $defaults['store_stock'] );
+		$this->assertTrue( $defaults['store_stock']['on_backorder'] );
+	}
+
+	/**
+	 * @testdox Should coerce stock sub-flags to booleans.
+	 */
+	public function test_sanitize_coerces_stock_sub_flags_to_bool(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array(
+				'store_stock' => array(
+					'low_stock'    => 1,
+					'out_of_stock' => 0,
+				),
+			)
+		);
+
+		$this->assertTrue( $result['store_stock']['low_stock'] );
+		$this->assertFalse( $result['store_stock']['out_of_stock'] );
+	}
+
+	/**
+	 * @testdox Should drop unknown sub-fields within store_stock.
+	 */
+	public function test_save_preferences_drops_unknown_stock_sub_fields(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array(
+				'store_stock' => array(
+					'enabled'       => true,
+					'low_stock'     => true,
+					'unknown_event' => true,
+				),
+			)
+		);
+
+		$this->assertArrayHasKey( 'store_stock', $result );
+		$this->assertArrayNotHasKey( 'unknown_event', $result['store_stock'] );
+	}
+
+	/**
+	 * @testdox Should deep-merge partial store_stock updates preserving unrelated sub-fields.
+	 */
+	public function test_save_preferences_deep_merges_stock_sub_flags(): void {
+		$this->data_store->method( 'read' )->willReturn(
+			array(
+				'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
+				'preferences'    => array(
+					'store_stock' => array(
+						'enabled'      => true,
+						'low_stock'    => true,
+						'out_of_stock' => true,
+						'on_backorder' => false,
+					),
+				),
+			)
+		);
+
+		$this->data_store
+			->expects( $this->once() )
+			->method( 'write' )
+			->with(
+				$this->anything(),
+				$this->callback(
+					function ( $envelope ) {
+						$prefs = $envelope['preferences']['store_stock'];
+						return false === $prefs['low_stock']
+							&& true === $prefs['out_of_stock']
+							&& false === $prefs['on_backorder'];
+					}
+				)
+			);
+
+		$this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_stock' => array( 'low_stock' => false ) )
 		);
 	}
 }

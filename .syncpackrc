@@ -51,8 +51,6 @@
 				"@typescript-eslint/*",
 				"@wordpress/a11y",
 				"@wordpress/autop",
-				"@wordpress/interactivity",
-				"@wordpress/interactivity-router",
 				"@wordpress/prettier-config",
 				"@wordpress/private-apis",
 				"@wordpress/scripts",
@@ -647,21 +645,30 @@
 		},
 		{
 			"dependencies": [
+				"esbuild"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "0.24.x"
+		},
+		{
+			"dependencies": [
+				"chokidar"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "3.6.x"
+		},
+		{
+			"dependencies": [
 				"dompurify"
 			],
 			"packages": [
 				"**"
 			],
 			"pinVersion": "^3.2.6"
-		},
-		{
-			"dependencies": [
-				"@automattic/site-admin"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^0.0.1"
 		},
 		{
 			"label": "Only manage versions for these dependencies",

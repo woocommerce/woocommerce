@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add Interactivity API packages to the WordPress minimum-version dependency catalog.

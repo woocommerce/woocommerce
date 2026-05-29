@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Drop the outdated "app version needs to be 15.7" helper text from the mobile-app modal QR view and surface the underlying Jetpack error in the magic-link failure notice so support and merchants can diagnose the problem instead of hitting a generic retry message.
