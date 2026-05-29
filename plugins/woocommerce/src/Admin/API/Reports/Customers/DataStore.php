@@ -193,10 +193,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		$order = wc_get_order( $post_id );
-		if ( ! $order instanceof \WC_Order ) {
+		if ( ! $order ) {
 			return -1;
 		}
-
 		$customer_id = self::get_existing_customer_id_from_order( $order );
 		if ( false === $customer_id ) {
 			return -1;
@@ -657,7 +656,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Get or create a customer from a given order.
 	 *
-	 * @param object $order WC Order.
+	 * A plain WC_Order will be converted to an Overrides\Order internally
+	 * to ensure consistent name resolution (user meta → billing → shipping fallback).
+	 *
+	 * @param \WC_Order $order WC Order.
 	 * @return int|bool
 	 */
 	public static function get_or_create_customer_from_order( $order ) {
@@ -669,6 +671,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		if ( ! is_a( $order, 'WC_Order' ) ) {
 			return false;
+		}
+
+		if ( ! $order instanceof OverridesOrder ) {
+			$order = new OverridesOrder( $order->get_id() );
 		}
 
 		$returning_customer_id = self::get_existing_customer_id_from_order( $order );
@@ -696,29 +702,31 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Returns a data object and format object of the customers data coming from the order.
 	 *
-	 * @param \WC_Order   $order         WC_Order where we get customer info from.
+	 * A plain WC_Order will be converted to an Overrides\Order internally
+	 * to ensure consistent name resolution (user meta → billing → shipping fallback).
+	 *
+	 * @param \WC_Order         $order         WC_Order where we get customer info from.
 	 * @param \WC_Customer|null $customer_user WC_Customer registered customer WP user.
 	 * @return array ($data, $format)
 	 */
 	public static function get_customer_order_data_and_format( $order, $customer_user = null ) {
-		$order_date = $order->get_date_created( 'edit' )
+		if ( ! $order instanceof OverridesOrder ) {
+			$order = new OverridesOrder( $order->get_id() );
+		}
+
+		$date_created = $order->get_date_created( 'edit' )
 			?? $order->get_date_modified( 'edit' )
 			?? $order->get_date_paid( 'edit' );
-		$data       = array(
-			'first_name'       => $order instanceof OverridesOrder
-				? $order->get_customer_first_name()
-				: $order->get_billing_first_name( 'edit' ),
-			'last_name'        => $order instanceof OverridesOrder
-				? $order->get_customer_last_name()
-				: $order->get_billing_last_name( 'edit' ),
+
+		$data   = array(
+			'first_name'       => $order->get_customer_first_name(),
+			'last_name'        => $order->get_customer_last_name(),
 			'email'            => $order->get_billing_email( 'edit' ),
 			'city'             => $order->get_billing_city( 'edit' ),
 			'state'            => $order->get_billing_state( 'edit' ),
 			'postcode'         => $order->get_billing_postcode( 'edit' ),
 			'country'          => $order->get_billing_country( 'edit' ),
-			'date_last_active' => $order_date
-				? gmdate( 'Y-m-d H:i:s', $order_date->getTimestamp() )
-				: null,
+			'date_last_active' => $date_created ? gmdate( 'Y-m-d H:i:s', $date_created->getTimestamp() ) : null,
 		);
 		$format = array(
 			'%s',
