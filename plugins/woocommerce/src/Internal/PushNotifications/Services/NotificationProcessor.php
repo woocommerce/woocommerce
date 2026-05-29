@@ -98,7 +98,7 @@ class NotificationProcessor {
 		$this->dispatcher          = $dispatcher;
 		$this->data_store          = $data_store;
 		$this->preferences_service = $preferences_service;
-		$this->retry_handler = $retry_handler;
+		$this->retry_handler       = $retry_handler;
 	}
 
 	/**
