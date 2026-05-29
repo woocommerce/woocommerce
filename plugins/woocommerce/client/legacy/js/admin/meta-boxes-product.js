@@ -1552,7 +1552,7 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			mediaFrame = wp.media( {
+			mediaFrame = wp.media.frames.product_gallery = wp.media( {
 				title: woocommerce_admin_meta_boxes.i18n_add_product_images,
 				button: {
 					text: woocommerce_admin_meta_boxes.i18n_add_to_product,

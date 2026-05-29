@@ -183,7 +183,6 @@ class WC_Admin_Meta_Boxes {
 	 */
 	public function remove_meta_boxes() {
 		remove_meta_box( 'postexcerpt', 'product', 'normal' );
-		remove_meta_box( 'postimagediv', 'product', 'side' );
 		remove_meta_box( 'product_shipping_classdiv', 'product', 'side' );
 		remove_meta_box( 'commentsdiv', 'product', 'normal' );
 		remove_meta_box( 'commentstatusdiv', 'product', 'side' );
