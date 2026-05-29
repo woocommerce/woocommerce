@@ -789,11 +789,47 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		// Restore the filter.
 		add_filter( 'woocommerce_order_class', array( \Automattic\WooCommerce\Admin\Overrides\Order::class, 'order_class_name' ), 10, 3 );
 
-		// This should not fatal — it should return an int customer ID.
 		$customer_id = CustomersDataStore::get_or_create_customer_from_order( $order );
 
 		$this->assertIsInt( $customer_id );
 		$this->assertGreaterThan( 0, $customer_id );
+
+		// Verify the converted order resolved billing names via Overrides\Order.
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wc_customer_lookup';
+		$record     = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table_name} WHERE customer_id = %d", $customer_id ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		$this->assertEquals( 'Plain', $record->first_name );
+		$this->assertEquals( 'Order', $record->last_name );
+		$this->assertEquals( 'plain.order@example.com', $record->email );
+		$this->assertNotNull( $record->date_last_active );
+	}
+
+	/**
+	 * Test that get_or_create_customer_from_order returns false for unsaved orders.
+	 *
+	 * Bug condition: An unsaved order has get_id() === 0. Constructing
+	 * new OverridesOrder( 0 ) returns an empty order, which would write
+	 * a blank customer row.
+	 */
+	public function test_get_or_create_customer_from_unsaved_order() {
+		// Remove the filter that converts WC_Order to Overrides\Order so we get a plain WC_Order.
+		remove_filter( 'woocommerce_order_class', array( \Automattic\WooCommerce\Admin\Overrides\Order::class, 'order_class_name' ), 10 );
+
+		$order = new \WC_Order();
+		$order->set_billing_first_name( 'Unsaved' );
+		$order->set_billing_last_name( 'Order' );
+		$order->set_billing_email( 'unsaved@example.com' );
+		// Do NOT call save() — order has no ID yet.
+
+		$result = CustomersDataStore::get_or_create_customer_from_order( $order );
+
+		$this->assertFalse( $result );
+
+		// Restore the filter.
+		add_filter( 'woocommerce_order_class', array( \Automattic\WooCommerce\Admin\Overrides\Order::class, 'order_class_name' ), 10, 3 );
 	}
 
 	/**

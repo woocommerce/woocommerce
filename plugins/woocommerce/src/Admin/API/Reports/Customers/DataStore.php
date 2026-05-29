@@ -674,6 +674,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		if ( ! $order instanceof OverridesOrder ) {
+			if ( ! $order->get_id() ) {
+				return false;
+			}
 			$order = new OverridesOrder( $order->get_id() );
 		}
 
@@ -711,6 +714,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function get_customer_order_data_and_format( $order, $customer_user = null ) {
 		if ( ! $order instanceof OverridesOrder ) {
+			if ( ! $order->get_id() ) {
+				return array( array(), array() );
+			}
 			$order = new OverridesOrder( $order->get_id() );
 		}
 
