@@ -23,6 +23,7 @@ namespace Automattic\WooCommerce\Tests\Internal\POS\StoreApi\Routes;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Context;
+use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CartPersistencePolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Routes\CartAddItem;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Routes\Controller;
 use Automattic\WooCommerce\StoreApi\RoutesController;
@@ -72,6 +73,12 @@ class CartAddItemIntegrationTest extends ControllerTestCase {
 
 		$this->admin_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
 
+		// Engage the POS persistent-cart opt-out so the per-user-meta cart row
+		// doesn't leak into POS requests. In production this is registered in
+		// class-woocommerce.php; in tests we register it explicitly so the test
+		// is self-contained and exercises the production wiring path.
+		( new CartPersistencePolicy() )->register();
+
 		// Make sure the POS routes register themselves into our fresh REST server.
 		wc_get_container()->get( Controller::class )->register_routes();
 		wc_get_container()->get( RoutesController::class )->register_all_routes();
@@ -97,6 +104,7 @@ class CartAddItemIntegrationTest extends ControllerTestCase {
 	 * Tear down.
 	 */
 	protected function tearDown(): void {
+		remove_all_filters( 'woocommerce_persistent_cart_enabled' );
 		Context::set_test_override( null );
 		wp_delete_user( $this->admin_id );
 		parent::tearDown();
@@ -244,6 +252,72 @@ class CartAddItemIntegrationTest extends ControllerTestCase {
 			}
 		}
 		return '';
+	}
+
+	/**
+	 * Regression for "items from a previous transaction reappear in the cart
+	 * even after clearing the app, with a fresh session and a different
+	 * cart-token." Root cause: `WC_Cart_Session` saves the cart to
+	 * `_woocommerce_persistent_cart_{blog_id}` in `wp_usermeta` keyed by the
+	 * logged-in WP user_id. Since every POS request authenticates as the
+	 * same admin, that row leaks across transactions, devices and app
+	 * restarts. `CartPersistencePolicy` disables this via the
+	 * `woocommerce_persistent_cart_enabled` filter for POS context.
+	 *
+	 * @testdox A pre-existing persistent-cart user_meta row does not leak items into a POS add-item.
+	 */
+	public function test_persistent_cart_user_meta_does_not_leak_into_pos(): void {
+		wp_set_current_user( $this->admin_id );
+
+		// Prime the admin's persistent-cart user_meta with a different
+		// product. Without the policy hook, WC_Cart_Session::get_saved_cart
+		// would read this on the next cart load and merge it into the cart.
+		$leaked_product   = ( new FixtureData() )->get_simple_product(
+			array(
+				'name'          => 'Leaked Persistent Cart Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 999,
+			)
+		);
+		$persistent_cart  = array(
+			'cart' => array(
+				wp_generate_password( 32, false ) => array(
+					'key'          => wp_generate_password( 32, false ),
+					'product_id'   => $leaked_product->get_id(),
+					'variation_id' => 0,
+					'variation'    => array(),
+					'quantity'     => 1000000,
+					'data_hash'    => wc_get_cart_item_data_hash( $leaked_product ),
+				),
+			),
+		);
+		update_user_meta(
+			$this->admin_id,
+			'_woocommerce_persistent_cart_' . get_current_blog_id(),
+			$persistent_cart
+		);
+
+		// Now do a fresh POS add-item with quantity 1 of the test product.
+		$response = $this->add_item( $this->product->get_id(), 1 );
+
+		$this->assertSame( 201, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertCount(
+			1,
+			$data['items'],
+			'POS cart should contain only the one item just added, not the leaked persistent-cart line.'
+		);
+		$this->assertSame(
+			$this->product->get_id(),
+			$data['items'][0]['id'],
+			'POS cart line should be the freshly added product, not the leaked one.'
+		);
+		$this->assertSame(
+			1,
+			$data['items'][0]['quantity'],
+			'POS cart line quantity should be exactly 1.'
+		);
 	}
 
 	/**
