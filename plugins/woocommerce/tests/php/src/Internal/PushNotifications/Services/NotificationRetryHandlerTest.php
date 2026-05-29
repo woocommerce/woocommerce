@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\WpcomNotificat
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
@@ -196,9 +197,14 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 	 * @testdox Should delegate to NotificationProcessor with is_retry and attempt on retry callback.
 	 */
 	public function test_handle_retry_delegates_to_processor(): void {
-		$dispatcher    = $this->createMock( WpcomNotificationDispatcher::class );
-		$data_store    = $this->createMock( PushTokensDataStore::class );
-		$retry_handler = $this->createMock( NotificationRetryHandler::class );
+		$dispatcher          = $this->createMock( WpcomNotificationDispatcher::class );
+		$data_store          = $this->createMock( PushTokensDataStore::class );
+		$preferences_service = $this->createMock( NotificationPreferencesService::class );
+		$retry_handler       = $this->createMock( NotificationRetryHandler::class );
+
+		$preferences_service->method( 'get_preferences' )->willReturn(
+			array( 'store_order' => array( 'enabled' => true ) )
+		);
 
 		$dispatcher->expects( $this->once() )->method( 'dispatch' )->willReturn(
 			array(
@@ -223,7 +229,7 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 		);
 
 		$processor = new NotificationProcessor();
-		$processor->init( $dispatcher, $data_store, $retry_handler );
+		$processor->init( $dispatcher, $data_store, $preferences_service, $retry_handler );
 		wc_get_container()->replace( NotificationProcessor::class, $processor );
 
 		$this->sut->handle_retry( 'store_order', $this->order_id, 2 );

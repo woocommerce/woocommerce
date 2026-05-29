@@ -948,7 +948,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $this->data_store, $preferences_service );
+		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler );
 
 		$notification = new StockNotification( $product->get_id(), StockNotification::EVENT_LOW_STOCK );
 		$result       = $sut->process( $notification );
