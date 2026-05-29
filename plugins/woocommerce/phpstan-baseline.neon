@@ -5755,12 +5755,6 @@ parameters:
 			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
 
 		-
-			message: '#^Parameter \#2 \$str of function explode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$comment_ID\.$#'
 			identifier: property.notFound
 			count: 1

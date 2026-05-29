@@ -160,7 +160,7 @@ class WC_Meta_Box_Product_Images {
 		if ( isset( $_POST['wc_product_image_ids'] ) ) {
 			// New unified field: first ID is the featured image, remainder are gallery.
 			$raw_ids   = is_scalar( $_POST['wc_product_image_ids'] )
-				? wc_clean( wp_unslash( (string) $_POST['wc_product_image_ids'] ) )
+				? (string) wc_clean( wp_unslash( (string) $_POST['wc_product_image_ids'] ) )
 				: '';
 			$image_ids = '' === $raw_ids ? array() : array_filter( array_map( 'absint', explode( ',', $raw_ids ) ) );
 			$product->set_image_ids( $image_ids );
