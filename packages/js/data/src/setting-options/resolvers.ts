@@ -6,12 +6,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import {
-	getCoreDataLockActions,
-	receiveGroups,
-	receiveSettings,
-	setError,
-} from './actions';
+import { receiveGroups, receiveSettings, setError } from './actions';
 import type { Setting, SettingsGroup } from './types';
 import type { ThunkArgs } from './actions';
 import { NAMESPACE } from '../constants';
@@ -40,10 +35,8 @@ export const getGroups =
  */
 export const getSettings =
 	( groupId: string ) =>
-	async ( { dispatch, registry }: ThunkArgs ) => {
-		const { __unstableAcquireStoreLock, __unstableReleaseStoreLock } =
-			getCoreDataLockActions( registry );
-		const lock = await __unstableAcquireStoreLock(
+	async ( { dispatch }: ThunkArgs ) => {
+		const lock = await dispatch.__unstableAcquireStoreLock(
 			STORE_NAME,
 			[ 'settings', groupId ],
 			{ exclusive: false }
@@ -68,7 +61,7 @@ export const getSettings =
 			);
 			throw error;
 		} finally {
-			__unstableReleaseStoreLock( lock );
+			dispatch.__unstableReleaseStoreLock( lock );
 		}
 	};
 
@@ -77,10 +70,8 @@ export const getSettings =
  */
 export const getSetting =
 	( groupId: string, settingId: string ) =>
-	async ( { dispatch, registry }: ThunkArgs ) => {
-		const { __unstableAcquireStoreLock, __unstableReleaseStoreLock } =
-			getCoreDataLockActions( registry );
-		const lock = await __unstableAcquireStoreLock(
+	async ( { dispatch }: ThunkArgs ) => {
+		const lock = await dispatch.__unstableAcquireStoreLock(
 			STORE_NAME,
 			[ 'settings', groupId, settingId ],
 			{ exclusive: false }
@@ -105,7 +96,7 @@ export const getSetting =
 			);
 			throw error;
 		} finally {
-			__unstableReleaseStoreLock( lock );
+			dispatch.__unstableReleaseStoreLock( lock );
 		}
 	};
 

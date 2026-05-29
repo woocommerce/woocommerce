@@ -224,6 +224,20 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 				);
 			}
 
+			$boolean_sub_fields = array( 'low_stock', 'out_of_stock', 'on_backorder' );
+			foreach ( $boolean_sub_fields as $sub_field ) {
+				if ( array_key_exists( $sub_field, $shape ) ) {
+					$properties[ $sub_field ] = array(
+						'type'        => 'boolean',
+						'description' => sprintf(
+							/* translators: %s: sub-field name (e.g. low_stock). */
+							__( 'Whether %s notifications are enabled for this type.', 'woocommerce' ),
+							$sub_field
+						),
+					);
+				}
+			}
+
 			$args[ $key ] = array(
 				'description'       => sprintf(
 					/* translators: %s: notification preference key (e.g. store_order). */
