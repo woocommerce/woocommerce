@@ -53975,12 +53975,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 5
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
 			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 1

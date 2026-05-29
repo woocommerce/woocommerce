@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Internal\ProductFilters\Params;
+use WP_Block;
 
 /**
  * ProductFilters class.
@@ -60,6 +61,10 @@ class ProductFilters extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		if ( ! $block instanceof WP_Block ) {
+			return $content;
+		}
+
 		wp_enqueue_script( 'wc-settings' );
 
 		$query_id      = $block->context['queryId'] ?? 0;
