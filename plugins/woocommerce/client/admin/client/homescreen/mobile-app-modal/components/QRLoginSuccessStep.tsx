@@ -10,26 +10,32 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { useRevokeQRLoginAccess } from './useRevokeQRLoginAccess';
+import type { QRLoginDeviceInfo } from './useQRLoginToken';
+import { buildQRLoginDeviceSubline } from './qrLoginDeviceCopy';
 
 type QRLoginSuccessStepProps = {
 	apUuid: string | null;
+	deviceInfo: QRLoginDeviceInfo | null;
 };
 
 /**
  * Step 3 of the modal flow — shown after the mobile app exchanges the QR
  * token for an Application Password.
  *
- * Doesn't repeat the device info — the stepper label already says "Signed
- * in successfully" and the prior step (number-match) already showed the
- * device. The single piece of inline content is the "It wasn't you? Revoke
- * access" pair, which sits on one row to make better use of the vertical
- * space the stepper already consumes.
+ * Shows the device that signed in on a single line (device details + app
+ * version), mirroring the standalone flow's `QRLoginConsumedPanel`. Alongside
+ * it sits the "It wasn't you? Revoke access" pair, which sits on one row to
+ * make better use of the vertical space the stepper already consumes.
  *
  * The "Revoke access" CTA opens a confirmation modal before issuing the
  * DELETE call — a stray click should not silently sign the merchant out of
  * their own phone.
  */
-export const QRLoginSuccessStep = ( { apUuid }: QRLoginSuccessStepProps ) => {
+export const QRLoginSuccessStep = ( {
+	apUuid,
+	deviceInfo,
+}: QRLoginSuccessStepProps ) => {
+	const deviceDetails = buildQRLoginDeviceSubline( deviceInfo );
 	const [ isConfirmingRevoke, setIsConfirmingRevoke ] =
 		useState< boolean >( false );
 	const { revoke, isRevoking, isRevoked, errorMessage } =
@@ -82,6 +88,12 @@ export const QRLoginSuccessStep = ( { apUuid }: QRLoginSuccessStepProps ) => {
 				role="status"
 				aria-live="polite"
 			>
+				{ deviceDetails && (
+					<p className="qr-login-success-step__device-details">
+						{ deviceDetails }
+					</p>
+				) }
+
 				<div className="qr-login-success-step__revoke-row">
 					<p className="qr-login-success-step__challenge">
 						{ __( "It wasn't you?", 'woocommerce' ) }

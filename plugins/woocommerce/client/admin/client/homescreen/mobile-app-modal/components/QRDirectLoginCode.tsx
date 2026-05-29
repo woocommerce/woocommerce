@@ -11,6 +11,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { useQRLoginToken, QRLoginTokenStates } from './useQRLoginToken';
+import type { QRLoginDeviceInfo } from './useQRLoginToken';
 import { useQRLoginAvailability } from './useQRLoginAvailability';
 import { QRLoginConsumedPanel } from './QRLoginConsumedPanel';
 import { QRLoginRevokedPanel } from './QRLoginRevokedPanel';
@@ -20,11 +21,14 @@ import { QRLoginUnavailableCard } from './QRLoginUnavailableCard';
 /**
  * Snapshot the parent receives via `onConsumed`. The success step uses its
  * own `useRevokeQRLoginAccess` hook (so it stays self-contained after the QR
- * component is unmounted), so the only field the parent actually needs is the
- * AP UUID to drive the revoke CTA.
+ * component is unmounted), so it needs the AP UUID to drive the revoke CTA.
+ * It also carries the `deviceInfo` so the success step can show which device
+ * signed in — mirroring the standalone `QRLoginConsumedPanel` — since the QR
+ * component is unmounted by the time the success step renders.
  */
 export type QRLoginConsumedSnapshot = {
 	apUuid: string | null;
+	deviceInfo: QRLoginDeviceInfo | null;
 };
 
 type QRDirectLoginCodeProps = {
@@ -105,9 +109,9 @@ export const QRDirectLoginCode = ( {
 	// `onConsumed` and keep using the inline `QRLoginConsumedPanel`.
 	useEffect( () => {
 		if ( state === QRLoginTokenStates.CONSUMED && onConsumed ) {
-			onConsumed( { apUuid } );
+			onConsumed( { apUuid, deviceInfo } );
 		}
-	}, [ state, apUuid, onConsumed ] );
+	}, [ state, apUuid, deviceInfo, onConsumed ] );
 
 	const formatTime = ( seconds: number ) => {
 		const mins = Math.floor( seconds / 60 );
