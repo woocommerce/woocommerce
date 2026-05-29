@@ -104,6 +104,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 	} ) => {
 		await admin.createNewPost();
 		await editor.insertBlockUsingGlobalInserter( pageObject.BLOCK_NAME );
+		await editor.closeGlobalBlockInserter();
 		await editor.canvas
 			.getByRole( 'button', {
 				name: 'Choose collection',
