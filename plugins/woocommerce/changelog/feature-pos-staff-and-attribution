@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add server-side POS staff roles and order attribution (dev-only `point_of_sale_staff` feature flag).
+Add server-side POS staff (user-meta `_pos_role` model) and order attribution under the dev-only `point_of_sale_staff` feature flag.
