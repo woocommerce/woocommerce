@@ -375,32 +375,54 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Location is recognized', () => {
-		const filterRequest = ( request: Request ) => {
-			const url = request.url();
-			return (
-				url.includes( 'wp/v2/product' ) &&
-				url.includes( 'isProductCollectionBlock=true' )
-			);
-		};
+		const getSearchParamsFromRequest = ( request: Request ) =>
+			new URL( request.url() ).searchParams;
 
-		const filterProductRequest = ( request: Request ) => {
-			const url = request.url();
-			const searchParams = new URLSearchParams( request.url() );
+		const filterLocationRequest =
+			( {
+				type,
+				taxonomy,
+				withProductId = false,
+			}: {
+				type: 'archive' | 'product' | 'site';
+				taxonomy?: string;
+				withProductId?: boolean;
+			} ) =>
+			( request: Request ) => {
+				const url = request.url();
+				const searchParams = getSearchParamsFromRequest( request );
 
-			return (
-				url.includes( 'wp/v2/product' ) &&
-				searchParams.get( 'isProductCollectionBlock' ) === 'true' &&
-				!! searchParams.get(
-					`productCollectionLocation[sourceData][productId]`
-				)
-			);
-		};
+				if (
+					! url.includes( 'wp/v2/product' ) ||
+					searchParams.get( 'isProductCollectionBlock' ) !== 'true' ||
+					searchParams.get( 'productCollectionLocation[type]' ) !==
+						type
+				) {
+					return false;
+				}
+
+				if ( taxonomy ) {
+					return (
+						searchParams.get(
+							`productCollectionLocation[sourceData][taxonomy]`
+						) === taxonomy
+					);
+				}
+
+				if ( withProductId ) {
+					return !! searchParams.get(
+						`productCollectionLocation[sourceData][productId]`
+					);
+				}
+
+				return true;
+			};
 
 		const getLocationDetailsFromRequest = (
 			request: Request,
 			locationType?: string
 		) => {
-			const searchParams = new URLSearchParams( request.url() );
+			const searchParams = getSearchParamsFromRequest( request );
 
 			if ( locationType === 'product' ) {
 				return {
@@ -472,8 +494,12 @@ test.describe( 'Product Collection', () => {
 
 			await editor.closeGlobalBlockInserter();
 
-			const locationRequestPromise =
-				page.waitForRequest( filterProductRequest );
+			const locationRequestPromise = page.waitForRequest(
+				filterLocationRequest( {
+					type: 'product',
+					withProductId: true,
+				} )
+			);
 			await pageObject.chooseCollectionInTemplate( 'featured' );
 			const locationRequest = await locationRequestPromise;
 
@@ -501,7 +527,12 @@ test.describe( 'Product Collection', () => {
 				pageObject.BLOCK_NAME
 			);
 
-			const locationRequestPromise = page.waitForRequest( filterRequest );
+			const locationRequestPromise = page.waitForRequest(
+				filterLocationRequest( {
+					type: 'archive',
+					taxonomy: 'product_cat',
+				} )
+			);
 			await pageObject.chooseCollectionInTemplate( 'featured' );
 			const locationRequest = await locationRequestPromise;
 			const { type, taxonomy, termId } = getLocationDetailsFromRequest(
@@ -531,7 +562,12 @@ test.describe( 'Product Collection', () => {
 				pageObject.BLOCK_NAME
 			);
 
-			const locationRequestPromise = page.waitForRequest( filterRequest );
+			const locationRequestPromise = page.waitForRequest(
+				filterLocationRequest( {
+					type: 'archive',
+					taxonomy: 'product_tag',
+				} )
+			);
 			await pageObject.chooseCollectionInTemplate( 'featured' );
 			const locationRequest = await locationRequestPromise;
 			const { type, taxonomy, termId } = getLocationDetailsFromRequest(
@@ -556,7 +592,9 @@ test.describe( 'Product Collection', () => {
 				pageObject.BLOCK_NAME
 			);
 
-			const locationRequestPromise = page.waitForRequest( filterRequest );
+			const locationRequestPromise = page.waitForRequest(
+				filterLocationRequest( { type: 'site' } )
+			);
 			await pageObject.chooseCollectionInPost( 'featured' );
 			const locationRequest = await locationRequestPromise;
 			const { type, sourceData } =
@@ -575,8 +613,12 @@ test.describe( 'Product Collection', () => {
 		} ) => {
 			await admin.createNewPost();
 			await pageObject.insertProductCollectionInSingleProductBlock();
-			const locationRequestPromise =
-				page.waitForRequest( filterProductRequest );
+			const locationRequestPromise = page.waitForRequest(
+				filterLocationRequest( {
+					type: 'product',
+					withProductId: true,
+				} )
+			);
 			await pageObject.chooseCollectionInPost( 'featured' );
 			const locationRequest = await locationRequestPromise;
 			const { type, productId } = getLocationDetailsFromRequest(
