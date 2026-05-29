@@ -42,5 +42,5 @@ export const getVisualAttributeTermStyleString = (
 		return `background-image: url('${ getEscapedUrl( visual.value ) }');`;
 	}
 
-	return `background-color: ${ visual.value }`;
+	return `background-color: ${ visual.value };`;
 };
