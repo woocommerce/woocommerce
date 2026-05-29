@@ -5,8 +5,8 @@ const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const path = require( 'path' );
 const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
 const postcssPlugins = require( '@wordpress/postcss-plugins-preset' );
-const StyleAssetPlugin = require( './style-asset-plugin' );
-const WebpackRTLPlugin = require( './webpack-rtl-plugin' );
+const StyleAssetPlugin = require( './style-asset-plugin.cjs' );
+const WebpackRTLPlugin = require( './webpack-rtl-plugin.cjs' );
 
 module.exports = {
 	plugin: MiniCssExtractPlugin,

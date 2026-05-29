@@ -27,8 +27,8 @@
 			"import": "./build-module/index.js",
 			"require": "./build-module/index.js"
 		},
-		"./webpack": {
-			"require": "./src/webpack/index.cjs"
+		"./style-build": {
+			"require": "./src/style-build/index.cjs"
 		},
 		"./configs/tsconfig.json": "./configs/tsconfig.json",
 		"./type-overrides/*": "./type-overrides/*",
@@ -38,7 +38,7 @@
 		"build-module",
 		"build-types",
 		"configs",
-		"src/webpack",
+		"src/style-build",
 		"styles",
 		"type-overrides",
 		"scripts"
@@ -52,8 +52,8 @@
 		"type-overrides:update-patch": "node scripts/generate-types.mjs update-patch",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "eslint --ext=cjs src/webpack --fix",
-		"lint:lang:js": "eslint --ext=cjs src/webpack"
+		"lint:fix:lang:js": "eslint --ext=cjs src/style-build --fix",
+		"lint:lang:js": "eslint --ext=cjs src/style-build"
 	},
 	"dependencies": {
 		"@automattic/color-studio": "^4.0.0",
@@ -84,7 +84,7 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/webpack/**/*.cjs"
+				"changes": "src/style-build/**/*.cjs"
 			}
 		}
 	}

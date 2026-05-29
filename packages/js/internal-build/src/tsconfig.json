@@ -16,5 +16,5 @@
 		"resolveJsonModule": true
 	},
 	"include": [ "**/*.ts" ],
-	"exclude": [ "webpack/**" ]
+	"exclude": [ "style-build/**" ]
 }

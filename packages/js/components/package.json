@@ -168,7 +168,6 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/babel-preset-default": "next",
 		"@wordpress/browserslist-config": "next",
 		"css-loader": "6.11.x",

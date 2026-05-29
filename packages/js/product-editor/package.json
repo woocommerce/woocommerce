@@ -113,7 +113,6 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/block-editor": "catalog:wp-min",
 		"@wordpress/browserslist-config": "next",
 		"copy-webpack-plugin": "13.0.x",
