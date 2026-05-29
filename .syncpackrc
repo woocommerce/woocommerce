@@ -647,6 +647,24 @@
 		},
 		{
 			"dependencies": [
+				"esbuild"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "0.24.x"
+		},
+		{
+			"dependencies": [
+				"chokidar"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "3.6.x"
+		},
+		{
+			"dependencies": [
 				"dompurify"
 			],
 			"packages": [

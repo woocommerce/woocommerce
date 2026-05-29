@@ -40,7 +40,6 @@
 		"wc-pay-welcome-page": true,
 		"async-product-editor-category-field": true,
 		"launch-your-store": true,
-		"product-editor-template-system": false,
 		"use-wp-horizon": false,
 		"rest-api-v4": false,
 		"order-detail-redesign": false,
