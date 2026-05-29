@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix dimension inputs in the experimental products app quick edit when product dimensions are empty or mixed.

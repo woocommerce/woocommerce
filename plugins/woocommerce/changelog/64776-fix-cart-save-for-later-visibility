@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Hide the cart "Save for later" link when the user is logged out, the `cart_save_for_later` feature is disabled, or the cart page has no `woocommerce/shopper-collection` block.

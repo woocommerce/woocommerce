@@ -5,5 +5,7 @@ export const EXCLUDED_BLOCKS = [
 	'woocommerce/product-filter-price',
 	'woocommerce/product-filter-status',
 	'woocommerce/product-collection',
+	'woocommerce/add-to-cart-form',
+	'woocommerce/add-to-cart-with-options',
 	'core/query',
 ];

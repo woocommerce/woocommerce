@@ -73,6 +73,12 @@
 			"@woocommerce/blocks/*": [
 				"assets/js/blocks/*"
 			],
+			"@woocommerce/blocks-test-utils": [
+				"tests/utils"
+			],
+			"@woocommerce/blocks-test-utils/*": [
+				"tests/utils/*"
+			],
 			"@woocommerce/editor-components/*": [
 				"assets/js/editor-components/*"
 			],
@@ -123,6 +129,9 @@
 			],
 			"@woocommerce/stores/woocommerce/products": [
 				"assets/js/base/stores/woocommerce/products"
+			],
+			"@woocommerce/stores/woocommerce/shopper-lists": [
+				"assets/js/base/stores/woocommerce/shopper-lists"
 			],
 			"@woocommerce/type-defs/*": [
 				"assets/js/types/type-defs/*"

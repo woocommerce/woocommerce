@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: address circular dependencies surfaced by SWC TDZ.

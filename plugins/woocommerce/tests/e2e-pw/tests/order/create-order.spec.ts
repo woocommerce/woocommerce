@@ -510,9 +510,12 @@ test.describe(
 			await expect( page.locator( '#order_status' ) ).toHaveValue(
 				'wc-processing'
 			);
-			await expect( page.locator( 'div.note_content' ) ).toContainText(
-				'Order status changed from Pending payment to Processing.'
-			);
+			await expect(
+				page.locator( 'div.note_content' ).filter( {
+					hasText:
+						'Order status changed from Pending payment to Processing.',
+				} )
+			).toBeVisible();
 		} );
 
 		test( 'can create new complex order with multiple product types & tax classes', async ( {

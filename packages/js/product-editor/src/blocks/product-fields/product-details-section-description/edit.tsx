@@ -32,12 +32,10 @@ import { TRACKS_SOURCE } from '../../../constants';
 import { WPError, useErrorHandler } from '../../../hooks/use-error-handler';
 import type {
 	ProductEditorBlockEditProps,
-	ProductFormPostProps,
 	ProductTemplate,
 } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
 import * as wooIcons from '../../../icons';
-import isProductFormTemplateSystemEnabled from '../../../utils/is-product-form-template-system-enabled';
 import { formatProductError } from '../../../utils/format-product-error';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
@@ -99,20 +97,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	const [ unsupportedProductTemplate, setUnsupportedProductTemplate ] =
 		useState< ProductTemplate >();
-
-	// Pull the product templates from the store.
-	const productFormPosts = useSelect( ( sel ) => {
-		// Do not fetch product form posts if the feature is not enabled.
-		if ( ! isProductFormTemplateSystemEnabled() ) {
-			return [];
-		}
-
-		return (
-			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
-				per_page: -1,
-			} ) || []
-		);
-	}, [] ) as ProductFormPostProps[];
 
 	const { isSaving } = useSelect(
 		( select ) => {
@@ -381,22 +365,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 									getMenuItem( onClose )
 								) }
 							</MenuGroup>
-
-							{ isProductFormTemplateSystemEnabled() && (
-								<MenuGroup>
-									{ productFormPosts.map( ( formPost ) => (
-										<MenuItem
-											key={ formPost.id }
-											icon={ resolveIcon( 'external' ) }
-											info={ formPost.excerpt.raw }
-											iconPosition="left"
-											onClick={ onClose } // close the dropdown for now
-										>
-											{ formPost.title.rendered }
-										</MenuItem>
-									) ) }
-								</MenuGroup>
-							) }
 
 							{ unsupportedProductTemplates.length > 0 && (
 								<MenuGroup>

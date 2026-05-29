@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix PHP 8.5 fatal error when unsetting string offsets in StoreApi AbstractSchema
