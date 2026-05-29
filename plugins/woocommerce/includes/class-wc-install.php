@@ -333,7 +333,6 @@ class WC_Install {
 		),
 		'10.9.0'   => array(
 			'wc_update_1090_remove_task_list_reminder_bar_hidden_option',
-			'wc_update_1090_create_pos_roles',
 		),
 	);
 
