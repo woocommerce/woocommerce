@@ -236,7 +236,6 @@ export class Editor extends CoreEditor {
 			.getByRole( 'option', { name: blockTitle, exact: true } )
 			.first()
 			.click();
-		await this.closeGlobalBlockInserter();
 	}
 
 	/**

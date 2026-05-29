@@ -2,4 +2,4 @@ Significance: patch
 Type: dev
 Comment: Test-only change; no user-facing impact.
 
-Product Collection E2E: close the global inserter after inserting a block so hover previews do not block placeholder controls.
+Product Collection E2E: close the global inserter before choosing a collection so hover previews do not block the placeholder controls.
