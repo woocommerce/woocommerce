@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedValidatorInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductMapperInterface;
+use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductQueryInterface;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -87,4 +88,18 @@ interface IntegrationInterface {
 	 * @return FeedValidatorInterface The feed validator.
 	 */
 	public function get_feed_validator(): FeedValidatorInterface;
+
+	/**
+	 * Create a query provider for pull/query consumers.
+	 *
+	 * Returns a ProductQueryInterface implementation that allows consumers to
+	 * query mapped product data without depending on file delivery semantics.
+	 * Useful for live query integrations (e.g., UCP) that need paginated or
+	 * individual product lookups.
+	 *
+	 * @since 10.10.0
+	 *
+	 * @return ProductQueryInterface|null The query provider, or null if not supported.
+	 */
+	public function create_query_provider(): ?ProductQueryInterface;
 }

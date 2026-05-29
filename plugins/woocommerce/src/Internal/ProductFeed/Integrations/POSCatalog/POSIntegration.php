@@ -12,6 +12,9 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 use Automattic\WooCommerce\Container;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedValidatorInterface;
+use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductLoader;
+use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductQueryInterface;
+use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductQueryService;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\IntegrationInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Storage\JsonFileFeed;
 
@@ -119,5 +122,40 @@ class POSIntegration implements IntegrationInterface {
 	 */
 	public function get_feed_validator(): FeedValidatorInterface {
 		return $this->container->get( FeedValidator::class );
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function create_query_provider(): ProductQueryInterface {
+		$query_args = array_merge(
+			array(
+				'status' => array( 'publish' ),
+				'return' => 'objects',
+			),
+			$this->get_product_feed_query_args()
+		);
+
+		/**
+		 * Filters the product query arguments.
+		 *
+		 * @since 10.10.0
+		 *
+		 * @param array                $query_args  The arguments to pass to wc_get_products().
+		 * @param IntegrationInterface $integration The integration that the query belongs to.
+		 * @return array
+		 */
+		$query_args = apply_filters(
+			'woocommerce_product_feed_args',
+			$query_args,
+			$this
+		);
+
+		return new ProductQueryService(
+			$this->get_product_mapper(),
+			$this->get_feed_validator(),
+			$this->container->get( ProductLoader::class ),
+			$query_args
+		);
 	}
 }
