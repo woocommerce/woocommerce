@@ -410,6 +410,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutPaymentMethodPolicy::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutAddressPolicy::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CartPersistencePolicy::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\OrderDefaultsPolicy::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\Routes\Controller::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
 
