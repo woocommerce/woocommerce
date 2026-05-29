@@ -850,6 +850,7 @@ class WC_Checkout {
 					continue;
 				}
 				$required    = ! empty( $field['required'] );
+				$hidden      = ! empty( $field['hidden'] );
 				$format      = array_filter( isset( $field['validate'] ) ? (array) $field['validate'] : array() );
 				$field_label = isset( $field['label'] ) ? $field['label'] : '';
 
@@ -930,7 +931,7 @@ class WC_Checkout {
 					}
 				}
 
-				if ( $validate_fieldset && $required && '' === $data[ $key ] ) {
+				if ( $validate_fieldset && $required && ! $hidden && '' === $data[ $key ] ) {
 					/* translators: %s: field name */
 					$errors->add( $key . '_required', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label, $key ), array( 'id' => $key ) );
 				}
