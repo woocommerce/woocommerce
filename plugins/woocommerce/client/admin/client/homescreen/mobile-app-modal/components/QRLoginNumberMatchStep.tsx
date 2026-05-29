@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
  * Internal dependencies
  */
 import type { QRLoginDeviceInfo } from './useQRLoginToken';
+import { buildQRLoginDeviceLine } from './qrLoginDeviceCopy';
 
 type QRLoginNumberMatchStepProps = {
 	/**
@@ -39,46 +40,6 @@ type QRLoginNumberMatchStepProps = {
 	 * transition.
 	 */
 	errorMessage?: ReactNode | null;
-};
-
-/**
- * Build a one-line device summary line for the device card. The server-side
- * `/qr-login-scan` requires a device payload, so by the time this renders
- * we always have at least an OS label. We still skip any *individual* field
- * the platform didn't populate (e.g. an Android build with no os_version)
- * so we never produce " · undefined" garbage.
- */
-const buildDeviceLine = ( device: QRLoginDeviceInfo | null ): string => {
-	const parts: string[] = [];
-
-	const model = device?.model?.trim();
-	if ( model ) {
-		parts.push( model );
-	}
-
-	if ( device?.os ) {
-		parts.push(
-			device.os_version
-				? `${ device.os } ${ device.os_version }`
-				: device.os
-		);
-	}
-
-	if ( device?.app_version ) {
-		parts.push(
-			sprintf(
-				/* translators: %s: mobile app version, e.g. "24.7.0". */
-				__( 'App version %s', 'woocommerce' ),
-				device.app_version
-			)
-		);
-	}
-
-	// Defensive: only triggered if device is null (brief pre-poll render
-	// window) or every field is empty (would be a server contract bug).
-	return parts.length > 0
-		? parts.join( ' · ' )
-		: __( 'Mobile app', 'woocommerce' );
 };
 
 /**
@@ -136,7 +97,7 @@ export const QRLoginNumberMatchStep = ( {
 	}, [] );
 
 	const deviceLine = useMemo(
-		() => buildDeviceLine( deviceInfo ),
+		() => buildQRLoginDeviceLine( deviceInfo ),
 		[ deviceInfo ]
 	);
 

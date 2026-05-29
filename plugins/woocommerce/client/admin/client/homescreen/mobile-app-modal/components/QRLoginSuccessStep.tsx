@@ -11,7 +11,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { useRevokeQRLoginAccess } from './useRevokeQRLoginAccess';
 import type { QRLoginDeviceInfo } from './useQRLoginToken';
-import { buildQRLoginDeviceSubline } from './qrLoginDeviceCopy';
+import { buildQRLoginDeviceLine } from './qrLoginDeviceCopy';
 
 type QRLoginSuccessStepProps = {
 	apUuid: string | null;
@@ -35,7 +35,7 @@ export const QRLoginSuccessStep = ( {
 	apUuid,
 	deviceInfo,
 }: QRLoginSuccessStepProps ) => {
-	const deviceDetails = buildQRLoginDeviceSubline( deviceInfo );
+	const deviceDetails = buildQRLoginDeviceLine( deviceInfo );
 	const [ isConfirmingRevoke, setIsConfirmingRevoke ] =
 		useState< boolean >( false );
 	const { revoke, isRevoking, isRevoked, errorMessage } =
