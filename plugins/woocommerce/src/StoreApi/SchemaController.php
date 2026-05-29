@@ -51,6 +51,7 @@ class SchemaController {
 				Schemas\V1\OrderSchema::IDENTIFIER         => Schemas\V1\OrderSchema::class,
 				Schemas\V1\ProductSchema::IDENTIFIER       => Schemas\V1\ProductSchema::class,
 				Schemas\V1\ProductAttributeSchema::IDENTIFIER => Schemas\V1\ProductAttributeSchema::class,
+				Schemas\V1\ProductAttributeTermSchema::IDENTIFIER => Schemas\V1\ProductAttributeTermSchema::class,
 				Schemas\V1\ProductCategorySchema::IDENTIFIER => Schemas\V1\ProductCategorySchema::class,
 				Schemas\V1\ProductBrandSchema::IDENTIFIER  => Schemas\V1\ProductBrandSchema::class,
 				Schemas\V1\ProductCollectionDataSchema::IDENTIFIER => Schemas\V1\ProductCollectionDataSchema::class,

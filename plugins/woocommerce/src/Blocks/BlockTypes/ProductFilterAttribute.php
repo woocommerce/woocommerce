@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
@@ -18,13 +19,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'product-filter-attribute';
-
-	/**
-	 * Cached map of term ID to visual values for wc-visual attribute terms.
-	 *
-	 * @var array<int, array{color?: string, image?: string}>|null
-	 */
-	private $term_visuals = null;
 
 	/**
 	 * Initialize this block type.
@@ -52,66 +46,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		if ( is_admin() ) {
 			$this->asset_data_registry->add( 'defaultProductFilterAttribute', $this->get_default_product_attribute() );
-			$this->asset_data_registry->add( 'productFilterTermVisuals', $this->get_visual_attribute_term_visuals() );
 		}
-	}
-
-	/**
-	 * Get visual values for all wc-visual attribute terms.
-	 *
-	 * @return array<int, array{color?: string, image?: string}> Map of term ID to color/image values.
-	 */
-	private function get_visual_attribute_term_visuals(): array {
-		if ( null !== $this->term_visuals ) {
-			return $this->term_visuals;
-		}
-
-		$visuals    = array();
-		$attributes = wc_get_attribute_taxonomies();
-
-		foreach ( $attributes as $attribute ) {
-			if ( 'wc-visual' !== $attribute->attribute_type ) {
-				continue;
-			}
-
-			$terms = get_terms(
-				array(
-					'taxonomy'   => 'pa_' . $attribute->attribute_name,
-					'hide_empty' => false,
-				)
-			);
-
-			if ( is_wp_error( $terms ) ) {
-				continue;
-			}
-
-			foreach ( $terms as $term ) {
-				$image_id = absint( get_term_meta( $term->term_id, 'image', true ) );
-
-				if ( $image_id && wp_attachment_is_image( $image_id ) ) {
-					$image = wp_get_attachment_image_url( $image_id, 'thumbnail' );
-
-					if ( $image ) {
-						$visuals[ $term->term_id ] = array(
-							'image' => $image,
-						);
-						continue;
-					}
-				}
-
-				$color = sanitize_hex_color( get_term_meta( $term->term_id, 'color', true ) );
-
-				if ( $color ) {
-					$visuals[ $term->term_id ] = array(
-						'color' => $color,
-					);
-				}
-			}
-		}
-
-		$this->term_visuals = $visuals;
-
-		return $this->term_visuals;
 	}
 
 	/**
@@ -124,8 +59,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 			delete_transient( 'wc_block_product_filter_attribute_default_attribute' );
 		}
 	}
-
-
 
 	/**
 	 * Prepare the active filter items.
@@ -242,6 +175,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		$attribute_terms = get_terms( $args );
 
+		if ( is_wp_error( $attribute_terms ) ) {
+			$attribute_terms = array();
+		}
+
 		$filter_param_key = 'filter_' . str_replace( 'pa_', '', $product_attribute->slug );
 		$filter_params    = $block->context['filterParams'] ?? array();
 		$selected_terms   = array();
@@ -258,10 +195,16 @@ final class ProductFilterAttribute extends AbstractBlock {
 		);
 
 		if ( ! empty( $attribute_counts ) ) {
-			$show_counts       = $block_attributes['showCounts'] ?? false;
-			$visual_values     = $this->get_visual_attribute_term_visuals();
+			$show_counts         = $block_attributes['showCounts'] ?? false;
+			$is_visual_attribute = VisualAttributeTermMeta::is_visual_attribute_taxonomy( $product_attribute->slug );
+			$visual_values       = array();
+
+			if ( $is_visual_attribute ) {
+				$visual_values = VisualAttributeTermMeta::get_term_visuals( wp_list_pluck( $attribute_terms, 'term_id' ) );
+			}
+
 			$attribute_options = array_map(
-				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute, $show_counts, $visual_values ) {
+				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute, $show_counts, $is_visual_attribute, $visual_values ) {
 					$term          = (array) $term;
 					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
 
@@ -280,9 +223,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 						$item['count'] = $term['count'];
 					}
 
-					if ( 'wc-visual' === $product_attribute->type ) {
-						$item['color'] = $visual_values[ $term['term_id'] ]['color'] ?? '';
-						$item['image'] = $visual_values[ $term['term_id'] ]['image'] ?? '';
+					if ( $is_visual_attribute ) {
+						$item['visual'] = $visual_values[ $term['term_id'] ] ?? VisualAttributeTermMeta::get_empty_visual();
 					}
 
 					return $item;

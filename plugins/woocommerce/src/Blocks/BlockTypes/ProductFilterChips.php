@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
+
 /**
  * Product Filter: Chips Block.
  */
@@ -94,7 +96,7 @@ final class ProductFilterChips extends AbstractBlock {
 
 		$first_item          = reset( $items );
 		$show_counts         = is_array( $first_item ) && array_key_exists( 'count', $first_item );
-		$has_visual_swatches = is_array( $first_item ) && ( array_key_exists( 'color', $first_item ) || array_key_exists( 'image', $first_item ) );
+		$has_visual_swatches = self::has_visual_swatches( $items );
 		$button_role         = 'single' === $block_context['selectionMode'] ? 'radio' : 'checkbox';
 
 		if ( $has_visual_swatches && is_string( $classes ) && ! str_contains( $classes, 'is-style-swatch' ) ) {
@@ -220,22 +222,30 @@ final class ProductFilterChips extends AbstractBlock {
 	}
 
 	/**
+	 * Check whether any item has visual swatch data.
+	 *
+	 * @param array $items Selectable items.
+	 * @return bool
+	 */
+	private static function has_visual_swatches( array $items ): bool {
+		foreach ( $items as $item ) {
+			if ( is_array( $item ) && array_key_exists( 'visual', $item ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Build inline swatch style from item visual data.
 	 *
 	 * @param array $item Selectable item data.
 	 * @return string
 	 */
 	private function get_item_swatch_style( array $item ): string {
-		$image = isset( $item['image'] ) ? esc_url_raw( (string) $item['image'] ) : '';
-		if ( $image ) {
-			return sprintf( "background-image:url('%s')", str_replace( "'", '%27', $image ) );
-		}
+		$visual = isset( $item['visual'] ) && is_array( $item['visual'] ) ? $item['visual'] : array();
 
-		$color = isset( $item['color'] ) ? sanitize_hex_color( (string) $item['color'] ) : '';
-		if ( $color ) {
-			return sprintf( 'background-color:%s', $color );
-		}
-
-		return '';
+		return VisualAttributeTermMeta::get_swatch_style( $visual );
 	}
 }

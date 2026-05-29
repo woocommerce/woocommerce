@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use WP_Block;
 
 /**
@@ -20,76 +21,6 @@ class VariationSelectorAttribute extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'add-to-cart-with-options-variation-selector-attribute';
-
-	/**
-	 * Extra data passed through from server to client for block.
-	 *
-	 * @param array $attributes Any attributes that currently are available from the block.
-	 * @return void
-	 */
-	protected function enqueue_data( array $attributes = array() ) {
-		parent::enqueue_data( $attributes );
-
-		if ( is_admin() ) {
-			$this->asset_data_registry->add( 'variationSelectorTermVisuals', $this->get_visual_attribute_term_visuals() );
-		}
-	}
-
-	/**
-	 * Get visual values for wc-visual attribute terms.
-	 *
-	 * @param string|null $attribute_name Optional product attribute taxonomy name (e.g. `pa_color`). When omitted, values for every wc-visual attribute are loaded.
-	 * @return array<int, array{color?: string, image?: string}> Map of term ID to color/image values.
-	 */
-	private function get_visual_attribute_term_visuals( ?string $attribute_name = null ): array {
-		$visuals    = array();
-		$attributes = wc_get_attribute_taxonomies();
-
-		foreach ( $attributes as $attribute ) {
-			if ( 'wc-visual' !== $attribute->attribute_type ) {
-				continue;
-			}
-			if ( $attribute_name && 'pa_' . $attribute->attribute_name !== $attribute_name ) {
-				continue;
-			}
-
-			$terms = get_terms(
-				array(
-					'taxonomy'   => 'pa_' . $attribute->attribute_name,
-					'hide_empty' => false,
-				)
-			);
-
-			if ( is_wp_error( $terms ) ) {
-				continue;
-			}
-
-			foreach ( $terms as $term ) {
-				$image_id = absint( get_term_meta( $term->term_id, 'image', true ) );
-
-				if ( $image_id && wp_attachment_is_image( $image_id ) ) {
-					$image = wp_get_attachment_image_url( $image_id, 'thumbnail' );
-
-					if ( $image ) {
-						$visuals[ $term->term_id ] = array(
-							'image' => $image,
-						);
-						continue;
-					}
-				}
-
-				$color = sanitize_hex_color( get_term_meta( $term->term_id, 'color', true ) );
-
-				if ( $color ) {
-					$visuals[ $term->term_id ] = array(
-						'color' => $color,
-					);
-				}
-			}
-		}
-
-		return $visuals;
-	}
 
 	/**
 	 * Render the block.
@@ -326,7 +257,9 @@ class VariationSelectorAttribute extends AbstractBlock {
 	private function build_variation_selectable_items( string $attribute_name, string $attribute_slug, array $attribute_terms, ?string $default_selected ): array {
 		$id_prefix    = sanitize_title( $attribute_slug );
 		$items        = array();
-		$term_visuals = $this->get_visual_attribute_term_visuals( $attribute_name );
+		$term_visuals = VisualAttributeTermMeta::is_visual_attribute_taxonomy( $attribute_name )
+			? VisualAttributeTermMeta::get_term_visuals( wp_list_pluck( $attribute_terms, 'term_id' ) )
+			: array();
 
 		foreach ( $attribute_terms as $attribute_term ) {
 			if ( ! is_array( $attribute_term ) || ! isset( $attribute_term['value'], $attribute_term['label'] ) ) {
@@ -343,8 +276,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 			);
 
 			if ( isset( $attribute_term['term_id'], $term_visuals[ $attribute_term['term_id'] ] ) ) {
-				$item['color'] = $term_visuals[ $attribute_term['term_id'] ]['color'] ?? '';
-				$item['image'] = $term_visuals[ $attribute_term['term_id'] ]['image'] ?? '';
+				$item['visual'] = $term_visuals[ $attribute_term['term_id'] ];
 			}
 
 			$items[] = $item;

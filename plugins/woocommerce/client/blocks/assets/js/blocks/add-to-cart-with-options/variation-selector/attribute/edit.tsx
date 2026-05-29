@@ -20,7 +20,6 @@ import {
 import { isProductResponseItem } from '@woocommerce/entities';
 import type { ProductResponseAttributeItem } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
-import { getSetting } from '@woocommerce/settings';
 import {
 	DisplayStyleSwitcher,
 	resetDisplayStyleBlock,
@@ -36,11 +35,12 @@ import {
 /**
  * Internal dependencies
  */
-import { DEFAULT_ATTRIBUTES, EMPTY_TERM_COLORS } from './constants';
+import { DEFAULT_ATTRIBUTES, EMPTY_TERM_VISUALS } from './constants';
 import type {
 	SelectableItem,
 	SelectableItemsContext,
 } from '../../../../types/type-defs/selectable-items';
+import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 
 const INNER_CHIPS = 'woocommerce/product-filter-chips';
 
@@ -81,14 +81,11 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
 
-	const termVisuals = getSetting<
-		Record< string, { color?: string; image?: string } >
-	>( 'variationSelectorTermVisuals', {} );
-
 	const selectableContext = useMemo( () => {
 		let items: SelectableItem< {
 			label: string;
 			ariaLabel: string;
+			visual?: VisualAttributeTerm;
 		} >[] = [];
 		if (
 			attribute &&
@@ -96,23 +93,15 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			attribute.terms.length > 0
 		) {
 			items = attribute.terms.map( ( term ) => {
-				let color: string | undefined;
-				let image: string | undefined;
-
-				if ( term.id in termVisuals ) {
-					color = termVisuals[ term.id ]?.color || '';
-					image = termVisuals[ term.id ]?.image || '';
-				} else if ( term.id in EMPTY_TERM_COLORS ) {
-					color = EMPTY_TERM_COLORS[ term.id ];
-				}
+				const visual =
+					term.__experimentalVisual || EMPTY_TERM_VISUALS[ term.id ];
 
 				return {
 					id: `${ attribute.taxonomy }-${ term.slug }`,
 					label: term.name,
 					value: term.slug,
 					ariaLabel: term.name,
-					...( color ? { color } : {} ),
-					...( image ? { image } : {} ),
+					...( visual ? { visual } : {} ),
 				};
 			} );
 		}
@@ -125,8 +114,9 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 		} satisfies SelectableItemsContext< {
 			label: string;
 			ariaLabel: string;
+			visual?: VisualAttributeTerm;
 		} >;
-	}, [ attribute, termVisuals ] );
+	}, [ attribute ] );
 
 	const blockPreviewProps = useBlockPreview( {
 		blocks,

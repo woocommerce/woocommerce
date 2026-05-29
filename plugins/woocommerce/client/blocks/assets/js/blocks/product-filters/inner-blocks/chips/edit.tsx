@@ -25,21 +25,10 @@ import {
 import { EditProps } from './types';
 import './editor.scss';
 import { getColorClasses, getColorVars } from './utils';
-
-const getSwatchStyle = ( item: { color?: string; image?: string } ) => {
-	if ( item.image ) {
-		const escapedImage = item.image.split( "'" ).join( '%27' );
-		return {
-			backgroundImage: `url('${ escapedImage }')`,
-		};
-	} else if ( item.color ) {
-		return {
-			backgroundColor: item.color,
-		};
-	}
-
-	return undefined;
-};
+import {
+	getVisualAttributeTermStyle,
+	isVisualAttributeTermEmpty,
+} from '../../../../base/utils/visual-attribute-terms';
 
 const Edit = ( props: EditProps ): JSX.Element => {
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
@@ -72,9 +61,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	const { isLoading = false, items = [] } =
 		context?.[ 'woocommerce/selectableItems' ] ?? {};
 
-	const hasVisualSwatches = items.some(
-		( item ) => 'color' in item || 'image' in item
-	);
+	const hasVisualSwatches = items.some( ( item ) => 'visual' in item );
 
 	const globalColors = getSetting< { background?: string; text?: string } >(
 		'globalStylesColors',
@@ -144,11 +131,14 @@ const Edit = ( props: EditProps ): JSX.Element => {
 												'wc-block-product-filter-chips__swatch',
 												{
 													'wc-block-product-filter-chips__swatch--no-color':
-														! item.color &&
-														! item.image,
+														isVisualAttributeTermEmpty(
+															item.visual
+														),
 												}
 											) }
-											style={ getSwatchStyle( item ) }
+											style={ getVisualAttributeTermStyle(
+												item.visual
+											) }
 											aria-hidden="true"
 										/>
 										<span className="wc-block-product-filter-chips__text">

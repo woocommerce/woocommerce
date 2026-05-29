@@ -10,11 +10,15 @@ import type {
 	SelectableItem,
 	SelectableItemsParentStore,
 } from '../../../../types/type-defs/selectable-items';
+import {
+	getVisualAttributeTermStyleString,
+	isVisualAttributeTermEmpty,
+} from '../../../../base/utils/visual-attribute-terms';
+import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 import { getClosestColor } from '../../utils/get-closest-color';
 
 type ChipsItem = SelectableItem< {
-	color?: string;
-	image?: string;
+	visual?: VisualAttributeTerm;
 	index?: number;
 } >;
 
@@ -46,7 +50,7 @@ type ChipsStore = {
 function getParentStore( storeNamespace?: string ) {
 	if ( ! storeNamespace ) return undefined;
 	return store<
-		SelectableItemsParentStore< { color?: string; image?: string } >
+		SelectableItemsParentStore< { visual?: VisualAttributeTerm } >
 	>( storeNamespace );
 }
 
@@ -88,19 +92,6 @@ function initChipColors( element: HTMLElement ): void {
 	}
 }
 
-function getSwatchStyle( item?: ChipsItem ): string {
-	if ( item?.image ) {
-		const escapedImage = item.image.split( "'" ).join( '%27' );
-		return `background-image: url('${ escapedImage }');`;
-	}
-
-	if ( item?.color ) {
-		return `background-color: ${ item.color }`;
-	}
-
-	return '';
-}
-
 const { state }: ChipsStore = store< ChipsStore >(
 	'woocommerce/product-filter-chips',
 	{
@@ -125,11 +116,11 @@ const { state }: ChipsStore = store< ChipsStore >(
 			},
 			get swatchHidden(): boolean {
 				const item = getCurrentItem();
-				return ! item?.color && ! item?.image;
+				return isVisualAttributeTermEmpty( item?.visual );
 			},
 			get swatchStyle(): string {
 				const item = getCurrentItem();
-				return getSwatchStyle( item );
+				return getVisualAttributeTermStyleString( item?.visual );
 			},
 		},
 		actions: {

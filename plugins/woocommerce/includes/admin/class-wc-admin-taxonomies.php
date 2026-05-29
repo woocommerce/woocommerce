@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 
 /**
  * WC_Admin_Taxonomies class.
@@ -328,29 +329,6 @@ class WC_Admin_Taxonomies {
 	}
 
 	/**
-	 * Check if the current taxonomy should show visual swatch controls.
-	 *
-	 * @param string $taxonomy Taxonomy slug.
-	 * @return bool
-	 *
-	 * @internal
-	 */
-	private function is_visual_product_attribute_taxonomy( $taxonomy ) {
-		if ( ! taxonomy_is_product_attribute( $taxonomy ) ) {
-			return false;
-		}
-
-		if ( ! array_key_exists( 'wc-visual', wc_get_attribute_types() ) ) {
-			return false;
-		}
-
-		$attribute_id = wc_attribute_taxonomy_id_by_name( $taxonomy );
-		$attribute    = $attribute_id ? wc_get_attribute( $attribute_id ) : null;
-
-		return $attribute && 'wc-visual' === $attribute->type;
-	}
-
-	/**
 	 * Add custom fields for product attribute terms.
 	 *
 	 * @param string $taxonomy Taxonomy slug.
@@ -359,7 +337,7 @@ class WC_Admin_Taxonomies {
 	 * @internal
 	 */
 	public function add_product_attribute_term_fields( $taxonomy ) {
-		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
+		if ( ! VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
 			return;
 		}
 		?>
@@ -407,7 +385,7 @@ class WC_Admin_Taxonomies {
 	 * @internal
 	 */
 	public function edit_product_attribute_term_fields( $term ) {
-		if ( ! $this->is_visual_product_attribute_taxonomy( $term->taxonomy ) ) {
+		if ( ! VisualAttributeTermMeta::is_visual_attribute_taxonomy( $term->taxonomy ) ) {
 			return;
 		}
 
@@ -482,7 +460,7 @@ class WC_Admin_Taxonomies {
 		$is_attribute_term_screen = 0 === strpos( $screen->id, 'edit-pa_' );
 		$taxonomy                 = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		if ( $is_attribute_term_screen && $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
+		if ( $is_attribute_term_screen && VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
 			wp_enqueue_media();
 			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-color-picker', true, array( 'wp-components' ) );
 		}
@@ -515,14 +493,14 @@ class WC_Admin_Taxonomies {
 	 * @internal
 	 */
 	public function save_product_attribute_term_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
-		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
+		if ( ! VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
 			return;
 		}
 
 		$color_value = isset( $_POST['term_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['term_color'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$image_id    = isset( $_POST['term_image'] ) ? absint( wp_unslash( $_POST['term_image'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
-		wc_save_visual_attribute_term_meta( (int) $term_id, $color_value ?? '', $image_id );
+		VisualAttributeTermMeta::save_term_visual( (int) $term_id, $color_value ?? '', $image_id );
 	}
 
 	/**
@@ -578,7 +556,7 @@ class WC_Admin_Taxonomies {
 	 * @internal
 	 */
 	public function add_term_visual_column( $columns, $taxonomy ) {
-		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
+		if ( ! VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
 			return $columns;
 		}
 
@@ -615,7 +593,7 @@ class WC_Admin_Taxonomies {
 			return $content;
 		}
 
-		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
+		if ( ! VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
 			return $content;
 		}
 
@@ -799,7 +777,7 @@ class WC_Admin_Taxonomies {
 	 */
 	public function scripts_at_visual_attribute_screen_footer() {
 		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
+		if ( ! VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
 			return;
 		}
 

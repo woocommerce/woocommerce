@@ -10,10 +10,14 @@ import type {
 	SelectableItem,
 	SelectableItemsParentStore,
 } from '../../../../types/type-defs/selectable-items';
+import {
+	getVisualAttributeTermStyleString,
+	isVisualAttributeTermEmpty,
+} from '../../../../base/utils/visual-attribute-terms';
+import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 
 type CheckboxListItem = SelectableItem< {
-	color?: string;
-	image?: string;
+	visual?: VisualAttributeTerm;
 	index?: number;
 } >;
 
@@ -41,7 +45,7 @@ type CheckboxListStore = {
 function getParentStore( storeNamespace?: string ) {
 	if ( ! storeNamespace ) return undefined;
 	return store<
-		SelectableItemsParentStore< { color?: string; image?: string } >
+		SelectableItemsParentStore< { visual?: VisualAttributeTerm } >
 	>( storeNamespace );
 }
 
@@ -56,19 +60,6 @@ function normalizeDisplayLimit( displayLimit: number ): number {
 function getCurrentItem(): CheckboxListItem | undefined {
 	const context = getContext< { item?: CheckboxListItem } >();
 	return context.item;
-}
-
-function getSwatchStyle( item?: CheckboxListItem ): string {
-	if ( item?.image ) {
-		const escapedImage = item.image.split( "'" ).join( '%27' );
-		return `background-image: url('${ escapedImage }');`;
-	}
-
-	if ( item?.color ) {
-		return `background-color: ${ item.color }`;
-	}
-
-	return '';
 }
 
 const { state }: CheckboxListStore = store< CheckboxListStore >(
@@ -100,11 +91,11 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 			},
 			get colorSwatchStyle(): string {
 				const item = getCurrentItem();
-				return getSwatchStyle( item );
+				return getVisualAttributeTermStyleString( item?.visual );
 			},
 			get isColorSwatchEmpty(): boolean {
 				const item = getCurrentItem();
-				return ! item?.color && ! item?.image;
+				return isVisualAttributeTermEmpty( item?.visual );
 			},
 		},
 		actions: {
