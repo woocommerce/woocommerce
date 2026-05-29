@@ -8,6 +8,7 @@
 		"node": "^24.15.0"
 	},
 	"private": true,
+	"type": "module",
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/internal-build/README.md",
 	"repository": {
 		"type": "git",
@@ -27,7 +28,7 @@
 			"require": "./build-module/index.js"
 		},
 		"./webpack": {
-			"require": "./src/webpack/index.js"
+			"require": "./src/webpack/index.cjs"
 		},
 		"./configs/tsconfig.json": "./configs/tsconfig.json",
 		"./type-overrides/*": "./type-overrides/*",
@@ -51,8 +52,8 @@
 		"type-overrides:update-patch": "node scripts/generate-types.mjs update-patch",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "eslint src/webpack --fix",
-		"lint:lang:js": "eslint src/webpack"
+		"lint:fix:lang:js": "eslint --ext=cjs src/webpack --fix",
+		"lint:lang:js": "eslint --ext=cjs src/webpack"
 	},
 	"dependencies": {
 		"@automattic/color-studio": "^4.0.0",
@@ -83,7 +84,7 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/webpack/**/*.js"
+				"changes": "src/webpack/**/*.cjs"
 			}
 		}
 	}
