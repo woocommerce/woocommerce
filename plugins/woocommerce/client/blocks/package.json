@@ -260,7 +260,7 @@
 		"@woocommerce/email-editor": "workspace:*",
 		"@woocommerce/sanitize": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
-		"@wordpress/a11y": "4.19.1",
+		"@wordpress/a11y": "catalog:wp-min",
 		"@wordpress/autop": "3.16.0",
 		"@wordpress/compose": "catalog:wp-min",
 		"@wordpress/deprecated": "catalog:wp-min",

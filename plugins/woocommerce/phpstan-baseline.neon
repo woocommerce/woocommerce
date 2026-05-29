@@ -50344,12 +50344,6 @@ parameters:
 			path: src/Blocks/AssetsController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:reregister_core_iapi_runtime\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/AssetsController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:set_block_asset_resource_hints_cache\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
