@@ -25,6 +25,15 @@ class ProductCollectionData extends AbstractRoute {
 	const SCHEMA_TYPE = 'product-collection-data';
 
 	/**
+	 * Default maximum number of entries accepted in the `calculate_attribute_counts` and
+	 * `calculate_taxonomy_counts` parameters. Each entry triggers a full-collection aggregate
+	 * query, so this bounds the per-request query fan-out. Matches the batch route's request cap.
+	 *
+	 * @var int
+	 */
+	const COUNTS_MAX_ITEMS = 25;
+
+	/**
 	 * Get the path of this REST route.
 	 *
 	 * @return string
@@ -115,6 +124,11 @@ class ProductCollectionData extends AbstractRoute {
 				}
 			}
 
+			// Deduplicate so each distinct taxonomy is counted with a single query, regardless of how
+			// many times it was requested.
+			$taxonomy__or_queries  = array_unique( $taxonomy__or_queries );
+			$taxonomy__and_queries = array_unique( $taxonomy__and_queries );
+
 			$data['attribute_counts'] = [];
 			// Or type queries need special handling because the attribute, if set, needs removing from the query first otherwise counts would not be correct.
 			if ( $taxonomy__or_queries ) {
@@ -169,7 +183,7 @@ class ProductCollectionData extends AbstractRoute {
 		}
 
 		if ( ! empty( $request['calculate_taxonomy_counts'] ) ) {
-			$taxonomies              = $request['calculate_taxonomy_counts'];
+			$taxonomies              = array_unique( $request['calculate_taxonomy_counts'] );
 			$data['taxonomy_counts'] = [];
 
 			if ( $taxonomies ) {
@@ -229,6 +243,7 @@ class ProductCollectionData extends AbstractRoute {
 				],
 			],
 			'default'     => [],
+			'maxItems'    => $this->get_counts_max_items(),
 		];
 
 		$params['calculate_rating_counts'] = [
@@ -245,8 +260,36 @@ class ProductCollectionData extends AbstractRoute {
 				'description' => __( 'Taxonomy name.', 'woocommerce' ),
 			],
 			'default'     => [],
+			'maxItems'    => $this->get_counts_max_items(),
 		];
 
 		return $params;
+	}
+
+	/**
+	 * Get the maximum number of entries accepted in the `calculate_attribute_counts` and
+	 * `calculate_taxonomy_counts` parameters.
+	 *
+	 * Each entry triggers a separate full-collection aggregate query, so this caps the per-request
+	 * query fan-out. Stores with many attributes/taxonomies can raise it via the filter below.
+	 *
+	 * @return int
+	 */
+	protected function get_counts_max_items() {
+		/**
+		 * Filters the maximum number of entries accepted in the `calculate_attribute_counts` and
+		 * `calculate_taxonomy_counts` parameters of the products/collection-data endpoint.
+		 *
+		 * Each entry results in a full-collection aggregate query, so this value bounds the amount
+		 * of work a single request can request. Requests exceeding it are rejected during schema
+		 * validation with an HTTP 400 response.
+		 *
+		 * @param int $max_items Maximum number of count entries per request. Default 25.
+		 *
+		 * @since 10.9.0
+		 */
+		$max_items = apply_filters( 'woocommerce_store_api_collection_data_counts_max_items', self::COUNTS_MAX_ITEMS );
+
+		return max( 1, (int) $max_items );
 	}
 }
