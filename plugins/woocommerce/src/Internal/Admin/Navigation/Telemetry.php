@@ -1,7 +1,4 @@
 <?php
-
-declare( strict_types = 1 );
-
 /**
  * Navigation v2 telemetry.
  *
@@ -15,6 +12,8 @@ declare( strict_types = 1 );
  *
  * @package WooCommerce\Internal\Admin\Navigation
  */
+
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Navigation;
 
@@ -41,10 +40,10 @@ class Telemetry {
 	 * @internal
 	 *
 	 * @param string $_old Old value (unused; required by hook signature).
-	 * @param string $new  New value.
+	 * @param string $new_value New value.
 	 */
-	public function on_flag_toggled( $_old, $new ): void {
-		$this->record_toggled( 'yes' === $new );
+	public function on_flag_toggled( $_old, $new_value ): void {
+		$this->record_toggled( 'yes' === $new_value );
 	}
 
 	/**

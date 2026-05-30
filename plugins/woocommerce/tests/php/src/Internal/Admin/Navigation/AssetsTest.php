@@ -7,6 +7,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Navigation;
 use Automattic\WooCommerce\Internal\Admin\Navigation\Assets;
 use Automattic\WooCommerce\Internal\Admin\Navigation\Menu_Reconciler;
 
+// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.Commenting.FunctionComment.Missing -- Test sets WP globals for fixtures; setUp/tearDown self-document.
+
 /**
  * @covers \Automattic\WooCommerce\Internal\Admin\Navigation\Assets
  */
@@ -55,8 +57,16 @@ class AssetsTest extends \WC_Unit_Test_Case {
 	 */
 	private function sample_tree(): array {
 		return array(
-			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
-			'wc-admin'    => array( 'parent' => 'woocommerce', 'title' => 'Home', 'position' => 10 ),
+			'woocommerce' => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'wc-admin'    => array(
+				'parent'   => 'woocommerce',
+				'title'    => 'Home',
+				'position' => 10,
+			),
 		);
 	}
 

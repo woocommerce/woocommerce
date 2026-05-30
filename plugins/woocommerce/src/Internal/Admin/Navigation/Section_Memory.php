@@ -1,16 +1,17 @@
 <?php
-
-declare( strict_types = 1 );
-
 /**
  * Lightweight section-memory tracker for navigation_v2.
  *
  * @package WooCommerce\Internal\Admin\Navigation
  */
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Internal\Admin\Navigation;
 
 defined( 'ABSPATH' ) || exit;
+
+// phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps -- Underscore class name is the feature convention.
 
 /**
  * Tracks whether the user is currently inside the WooCommerce admin section

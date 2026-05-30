@@ -1,7 +1,4 @@
 <?php
-
-declare( strict_types = 1 );
-
 /**
  * Asset enqueuing for navigation_v2.
  *
@@ -12,6 +9,8 @@ declare( strict_types = 1 );
  *
  * @package WooCommerce\Internal\Admin\Navigation
  */
+
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Navigation;
 

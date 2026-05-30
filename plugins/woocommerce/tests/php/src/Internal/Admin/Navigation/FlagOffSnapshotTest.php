@@ -8,6 +8,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Navigation;
 use Automattic\WooCommerce\Internal\Admin\Navigation\Bootstrap;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
+// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.Commenting.FunctionComment.Missing, WooCommerce.Commenting.CommentHooks -- Test sets WP globals for fixtures; setUp/tearDown self-document.
+
 /**
  * @covers \Automattic\WooCommerce\Internal\Admin\Navigation\Bootstrap
  *
@@ -58,10 +60,10 @@ class FlagOffSnapshotTest extends \WC_Unit_Test_Case {
 
 		// Seed $menu with Woo-related top-level entries the reconciler would remove.
 		$menu = array(
-			array( 'WooCommerce', 'read', 'woocommerce',                'wc-icon', '' ),
-			array( 'Products',    'read', 'edit.php?post_type=product', '',       '' ),
-			array( 'Marketing',   'read', 'woocommerce-marketing',      '',       '' ),
-			array( 'Plugins',     'read', 'plugins.php',                '',       '' ),
+			array( 'WooCommerce', 'read', 'woocommerce', 'wc-icon', '' ),
+			array( 'Products', 'read', 'edit.php?post_type=product', '', '' ),
+			array( 'Marketing', 'read', 'woocommerce-marketing', '', '' ),
+			array( 'Plugins', 'read', 'plugins.php', '', '' ),
 		);
 
 		// Force Bootstrap to exist (as it would in production) and call the

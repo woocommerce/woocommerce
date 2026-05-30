@@ -1,7 +1,4 @@
 <?php
-
-declare( strict_types = 1 );
-
 /**
  * Menu reconciler.
  *
@@ -15,9 +12,13 @@ declare( strict_types = 1 );
  * @package WooCommerce\Internal\Admin\Navigation
  */
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Internal\Admin\Navigation;
 
 defined( 'ABSPATH' ) || exit;
+
+// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.Classes.ValidClassName.NotCamelCaps, WooCommerce.Commenting.CommentHooks -- Mutates the WP $menu/$submenu globals by design; underscore class name and hook re-application are intentional.
 
 /**
  * Reconciles WP's admin menu against the Woo tree.
@@ -233,7 +234,7 @@ class Menu_Reconciler {
 				if ( ! isset( $entry[2] ) || $entry[2] !== $child ) {
 					continue;
 				}
-				$existing                   = isset( $entry[4] ) ? (string) $entry[4] : '';
+				$existing                      = isset( $entry[4] ) ? (string) $entry[4] : '';
 				$submenu[ $parent ][ $key ][4] = trim( $existing . ' hide-if-js' );
 			}
 		}
@@ -270,7 +271,8 @@ class Menu_Reconciler {
 		\WC_Admin_Settings::get_settings_pages();
 		$tabs = (array) apply_filters( 'woocommerce_settings_tabs_array', array() );
 
-		$pos = 30; // After WooPayments (20); before Status (99). Checkout/Payments tab is placed on the rail directly via default-tree.php and skipped here.
+		$pos = 30;
+		// After WooPayments (20); before Status (99). Checkout/Payments tab is placed on the rail directly via default-tree.php and skipped here.
 		foreach ( $tabs as $id => $label ) {
 			$id    = (string) $id;
 			$label = Tree_Builder::clean_title( (string) $label );
@@ -288,7 +290,7 @@ class Menu_Reconciler {
 				'source'     => 'settings-tab',
 				'capability' => 'manage_woocommerce',
 			);
-			$pos += 5;
+			$pos          += 5;
 		}
 
 		return $tree;
@@ -363,12 +365,12 @@ class Menu_Reconciler {
 			$effective_slug = $node['url'] ?? $slug;
 
 			if ( isset( $original_by_slug[ $effective_slug ] ) ) {
-				$entry    = $original_by_slug[ $effective_slug ];
-				$entry[0] = $node['title'];
+				$entry                    = $original_by_slug[ $effective_slug ];
+				$entry[0]                 = $node['title'];
 				$submenu['woocommerce'][] = $entry;
 			} elseif ( isset( $original_by_slug[ $slug ] ) && ! isset( $node['url'] ) ) {
-				$entry    = $original_by_slug[ $slug ];
-				$entry[0] = $node['title'];
+				$entry                    = $original_by_slug[ $slug ];
+				$entry[0]                 = $node['title'];
 				$submenu['woocommerce'][] = $entry;
 			} else {
 				// Synthesized entry. Use $effective_slug so the rendered link

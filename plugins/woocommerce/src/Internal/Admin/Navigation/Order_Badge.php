@@ -1,16 +1,17 @@
 <?php
-
-declare( strict_types = 1 );
-
 /**
  * Order-count badge for navigation_v2.
  *
  * @package WooCommerce\Internal\Admin\Navigation
  */
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Internal\Admin\Navigation;
 
 defined( 'ABSPATH' ) || exit;
+
+// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.Classes.ValidClassName.NotCamelCaps -- Stamps badges onto the WP $menu/$submenu globals by design; underscore class name is intentional.
 
 /**
  * Appends a notification bubble carrying the count of orders that need
@@ -197,18 +198,18 @@ class Order_Badge {
 
 	/**
 	 * Like `append_to_menu_entry()` but for a child entry inside
-	 * `$submenu[$parent]`.
+	 * `$submenu[$parent_slug]`.
 	 *
-	 * @param string $parent Parent slug.
+	 * @param string $parent_slug Parent slug.
 	 * @param string $slug   Child slug to match (`$entry[2]`).
 	 * @param string $badge  Badge HTML to append.
 	 */
-	private function append_to_submenu_entry( string $parent, string $slug, string $badge ): void {
+	private function append_to_submenu_entry( string $parent_slug, string $slug, string $badge ): void {
 		global $submenu;
-		if ( ! isset( $submenu[ $parent ] ) || ! is_array( $submenu[ $parent ] ) ) {
+		if ( ! isset( $submenu[ $parent_slug ] ) || ! is_array( $submenu[ $parent_slug ] ) ) {
 			return;
 		}
-		foreach ( $submenu[ $parent ] as $key => $entry ) {
+		foreach ( $submenu[ $parent_slug ] as $key => $entry ) {
 			if ( ! isset( $entry[2] ) || $entry[2] !== $slug ) {
 				continue;
 			}
@@ -216,7 +217,7 @@ class Order_Badge {
 			if ( false !== strpos( $title, 'wc-order-attention' ) ) {
 				continue;
 			}
-			$submenu[ $parent ][ $key ][0] = $title . $badge;
+			$submenu[ $parent_slug ][ $key ][0] = $title . $badge;
 		}
 	}
 }

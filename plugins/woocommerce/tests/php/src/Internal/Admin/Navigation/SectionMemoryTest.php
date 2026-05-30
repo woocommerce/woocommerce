@@ -7,6 +7,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Navigation;
 use Automattic\WooCommerce\Internal\Admin\Navigation\Menu_Reconciler;
 use Automattic\WooCommerce\Internal\Admin\Navigation\Section_Memory;
 
+// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.Commenting.FunctionComment.Missing -- Test sets WP globals for fixtures; setUp/tearDown self-document.
+
 /**
  * @covers \Automattic\WooCommerce\Internal\Admin\Navigation\Section_Memory
  */
@@ -83,7 +85,7 @@ class SectionMemoryTest extends \WC_Unit_Test_Case {
 	 * and returned verbatim.
 	 */
 	public function test_read_cookie_target_returns_stored_admin_path() {
-		$target = $this->invoke( 'cookie_path' ) . 'admin.php?page=wc-admin';
+		$target                                 = $this->invoke( 'cookie_path' ) . 'admin.php?page=wc-admin';
 		$_COOKIE[ Section_Memory::COOKIE_NAME ] = rawurlencode( $target );
 
 		$this->assertSame( $target, $this->invoke( 'read_cookie_target' ) );
@@ -121,12 +123,20 @@ class SectionMemoryTest extends \WC_Unit_Test_Case {
 	public function test_dashboard_entry_redirects_to_remembered_woo_url() {
 		$this->set_tree(
 			array(
-				'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
-				'wc-admin'    => array( 'parent' => 'woocommerce', 'title' => 'Home', 'position' => 10 ),
+				'woocommerce' => array(
+					'parent'   => null,
+					'title'    => 'WooCommerce',
+					'position' => 2,
+				),
+				'wc-admin'    => array(
+					'parent'   => 'woocommerce',
+					'title'    => 'Home',
+					'position' => 10,
+				),
 			)
 		);
-		$GLOBALS['pagenow'] = 'index.php';
-		$target             = $this->invoke( 'cookie_path' ) . 'admin.php?page=wc-admin';
+		$GLOBALS['pagenow']                     = 'index.php';
+		$target                                 = $this->invoke( 'cookie_path' ) . 'admin.php?page=wc-admin';
 		$_COOKIE[ Section_Memory::COOKIE_NAME ] = rawurlencode( $target );
 
 		// Intercept the redirect so the production `exit` never runs. The

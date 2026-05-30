@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Navigation;
 
 use Automattic\WooCommerce\Internal\Admin\Navigation\Order_Badge;
 
+// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.Commenting.FunctionComment.Missing -- Test sets WP globals for fixtures; setUp/tearDown self-document.
+
 /**
  * @covers \Automattic\WooCommerce\Internal\Admin\Navigation\Order_Badge
  */

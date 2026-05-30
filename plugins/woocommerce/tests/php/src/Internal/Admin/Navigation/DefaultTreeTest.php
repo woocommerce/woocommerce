@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Navigation;
 
+// phpcs:disable Squiz.Commenting.ClassComment.Missing -- Self-documenting test class.
 class DefaultTreeTest extends \WC_Unit_Test_Case {
 
 	/**

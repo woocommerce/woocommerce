@@ -8,6 +8,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Navigation;
 use Automattic\WooCommerce\Internal\Admin\Navigation\Menu_Reconciler;
 use Automattic\WooCommerce\Internal\Admin\Navigation\Native_Rail_Splicer;
 
+// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.Commenting.FunctionComment.Missing -- Test sets WP globals for fixtures; setUp/tearDown self-document.
+
 /**
  * @covers \Automattic\WooCommerce\Internal\Admin\Navigation\Menu_Reconciler
  */
@@ -60,11 +62,11 @@ class MenuReconcilerTest extends \WC_Unit_Test_Case {
 	public function test_rehomed_top_level_items_are_removed() {
 		global $menu;
 		$menu = array(
-			array( 'WooCommerce', 'read', 'woocommerce',                        '', '' ),
-			array( 'Products',    'read', 'edit.php?post_type=product',         '', '' ),
-			array( 'Marketing',   'read', 'woocommerce-marketing',              '', '' ),
+			array( 'WooCommerce', 'read', 'woocommerce', '', '' ),
+			array( 'Products', 'read', 'edit.php?post_type=product', '', '' ),
+			array( 'Marketing', 'read', 'woocommerce-marketing', '', '' ),
 			// Non-Woo item — must NOT be removed.
-			array( 'Plugins',     'read', 'plugins.php',                        '', '' ),
+			array( 'Plugins', 'read', 'plugins.php', '', '' ),
 		);
 		global $submenu;
 		$submenu = array(
@@ -116,9 +118,9 @@ class MenuReconcilerTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_third_party_top_level_icon_is_carried_onto_tree_node() {
 		global $menu, $submenu;
-		$menu = array(
-			array( 'WooCommerce', 'read', 'woocommerce',  '', '', '', 'dashicons-cart' ),
-			array( 'My Plugin',   'read', 'my-plugin',    '', '', '', 'dashicons-cloud' ),
+		$menu    = array(
+			array( 'WooCommerce', 'read', 'woocommerce', '', '', '', 'dashicons-cart' ),
+			array( 'My Plugin', 'read', 'my-plugin', '', '', '', 'dashicons-cloud' ),
 		);
 		$submenu = array(
 			'woocommerce' => array(
@@ -155,9 +157,9 @@ class MenuReconcilerTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_explicit_tree_icon_wins_over_captured_menu_icon() {
 		global $menu, $submenu;
-		$menu = array(
+		$menu    = array(
 			array( 'WooCommerce', 'read', 'woocommerce', '', '', '', 'dashicons-cart' ),
-			array( 'Products',    'read', 'edit.php?post_type=product', '', '', '', 'dashicons-admin-post' ),
+			array( 'Products', 'read', 'edit.php?post_type=product', '', '', '', 'dashicons-admin-post' ),
 		);
 		$submenu = array(
 			'woocommerce' => array(
@@ -183,10 +185,10 @@ class MenuReconcilerTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_none_and_div_icon_sentinels_are_not_applied() {
 		global $menu, $submenu;
-		$menu = array(
-			array( 'WooCommerce', 'read', 'woocommerce',  '', '', '', 'dashicons-cart' ),
-			array( 'Plugin None', 'read', 'plugin-none',  '', '', '', 'none' ),
-			array( 'Plugin Div',  'read', 'plugin-div',   '', '', '', 'div' ),
+		$menu    = array(
+			array( 'WooCommerce', 'read', 'woocommerce', '', '', '', 'dashicons-cart' ),
+			array( 'Plugin None', 'read', 'plugin-none', '', '', '', 'none' ),
+			array( 'Plugin Div', 'read', 'plugin-div', '', '', '', 'div' ),
 		);
 		$submenu = array(
 			'woocommerce' => array( array( 'Home', 'read', 'wc-admin' ) ),
@@ -195,8 +197,18 @@ class MenuReconcilerTest extends \WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_admin_menu_tree',
 			function ( $tree ) {
-				$tree['plugin-none'] = array( 'parent' => 'woocommerce', 'title' => 'None', 'position' => 500, 'capability' => 'read' );
-				$tree['plugin-div']  = array( 'parent' => 'woocommerce', 'title' => 'Div',  'position' => 510, 'capability' => 'read' );
+				$tree['plugin-none'] = array(
+					'parent'     => 'woocommerce',
+					'title'      => 'None',
+					'position'   => 500,
+					'capability' => 'read',
+				);
+				$tree['plugin-div']  = array(
+					'parent'     => 'woocommerce',
+					'title'      => 'Div',
+					'position'   => 510,
+					'capability' => 'read',
+				);
 				return $tree;
 			}
 		);
@@ -253,7 +265,7 @@ class MenuReconcilerTest extends \WC_Unit_Test_Case {
 
 	public function test_reconcile_invokes_native_rail_splicer_on_woo_pages(): void {
 		global $menu, $submenu;
-		$menu = array(
+		$menu                   = array(
 			2  => array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' ),
 			5  => array( 'Posts', 'edit_posts', 'edit.php', 'Posts', '', 'menu-posts', 'dashicons-admin-post' ),
 			55 => array( 'WooCommerce', 'manage_woocommerce', 'woocommerce', 'WooCommerce', '', 'toplevel_page_woocommerce', 'dashicons-cart' ),
@@ -270,10 +282,14 @@ class MenuReconcilerTest extends \WC_Unit_Test_Case {
 		$reconciler->init( new Native_Rail_Splicer() );
 		$reconciler->reconcile();
 
-		$top_slugs = array_values( array_filter( array_map(
-			static fn( $entry ) => is_array( $entry ) && isset( $entry[2] ) ? $entry[2] : null,
-			$menu
-		) ) );
+		$top_slugs = array_values(
+			array_filter(
+				array_map(
+					static fn( $entry ) => is_array( $entry ) && isset( $entry[2] ) ? $entry[2] : null,
+					$menu
+				)
+			)
+		);
 		$this->assertNotContains( 'edit.php', $top_slugs, 'Posts should be stripped on Woo pages.' );
 		$this->assertContains( 'wc-admin', $top_slugs, 'Home root should be spliced in.' );
 	}

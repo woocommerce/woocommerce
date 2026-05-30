@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Navigation;
 
 use Automattic\WooCommerce\Internal\Admin\Navigation\Native_Rail_Splicer;
 
+// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.Commenting.FunctionComment.Missing, WooCommerce.Commenting.CommentHooks -- Test sets WP globals for fixtures; setUp/tearDown self-document.
+
 /**
  * @covers \Automattic\WooCommerce\Internal\Admin\Navigation\Native_Rail_Splicer
  */
@@ -44,20 +46,29 @@ class NativeRailSplicerTest extends \WC_Unit_Test_Case {
 		// WP's typical index.php registration: position 2, title "Dashboard",
 		// cap "read", slug "index.php", page_title "Dashboard", empty class,
 		// hookname "menu-dashboard", icon "dashicons-dashboard".
-		$menu[2] = array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' );
+		$menu[2]              = array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' );
 		$submenu['index.php'] = array(
 			array( 'Home', 'read', 'index.php' ),
 			array( 'Updates', 'read', 'update-core.php' ),
 		);
 
 		$tree = array(
-			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
-			'wc-admin'    => array( 'parent' => 'woocommerce', 'title' => 'Home', 'position' => 10, 'capability' => 'manage_woocommerce' ),
+			'woocommerce' => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'wc-admin'    => array(
+				'parent'     => 'woocommerce',
+				'title'      => 'Home',
+				'position'   => 10,
+				'capability' => 'manage_woocommerce',
+			),
 		);
 
 		// Force is_woo_page to true by visiting wc-admin.
-		$_GET['page']               = 'wc-admin';
-		$GLOBALS['pagenow']         = 'admin.php';
+		$_GET['page']       = 'wc-admin';
+		$GLOBALS['pagenow'] = 'admin.php';
 
 		( new Native_Rail_Splicer() )->splice( $tree );
 
@@ -69,30 +80,43 @@ class NativeRailSplicerTest extends \WC_Unit_Test_Case {
 
 	public function test_splice_removes_non_woo_top_level_entries_keeping_dashboard_and_woocommerce(): void {
 		global $menu, $submenu;
-		$menu = array(
+		$menu                   = array(
 			2  => array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' ),
 			5  => array( 'Posts', 'edit_posts', 'edit.php', 'Posts', '', 'menu-posts', 'dashicons-admin-post' ),
 			10 => array( 'Media', 'upload_files', 'upload.php', 'Media', '', 'menu-media', 'dashicons-admin-media' ),
 			55 => array( 'WooCommerce', 'manage_woocommerce', 'woocommerce', 'WooCommerce', '', 'toplevel_page_woocommerce', 'dashicons-cart' ),
 			56 => array( 'Plugins', 'activate_plugins', 'plugins.php', 'Plugins', '', 'menu-plugins', 'dashicons-admin-plugins' ),
 		);
-		$submenu['index.php']  = array( array( 'Home', 'read', 'index.php' ) );
+		$submenu['index.php']   = array( array( 'Home', 'read', 'index.php' ) );
 		$submenu['woocommerce'] = array( array( 'Home', 'manage_woocommerce', 'wc-admin' ) );
 
 		$tree = array(
-			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
-			'wc-admin'    => array( 'parent' => 'woocommerce', 'title' => 'Home', 'position' => 10, 'capability' => 'manage_woocommerce' ),
+			'woocommerce' => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'wc-admin'    => array(
+				'parent'     => 'woocommerce',
+				'title'      => 'Home',
+				'position'   => 10,
+				'capability' => 'manage_woocommerce',
+			),
 		);
 
-		$_GET['page']               = 'wc-admin';
-		$GLOBALS['pagenow']         = 'admin.php';
+		$_GET['page']       = 'wc-admin';
+		$GLOBALS['pagenow'] = 'admin.php';
 
 		( new Native_Rail_Splicer() )->splice( $tree );
 
-		$remaining_slugs = array_values( array_filter( array_map(
-			static fn( $entry ) => is_array( $entry ) && isset( $entry[2] ) ? $entry[2] : null,
-			$menu
-		) ) );
+		$remaining_slugs = array_values(
+			array_filter(
+				array_map(
+					static fn( $entry ) => is_array( $entry ) && isset( $entry[2] ) ? $entry[2] : null,
+					$menu
+				)
+			)
+		);
 		sort( $remaining_slugs );
 		// `wc-admin` is inserted as a native top-level entry by insert_woo_roots().
 		$this->assertSame( array( 'index.php', 'wc-admin', 'woocommerce' ), $remaining_slugs );
@@ -100,14 +124,18 @@ class NativeRailSplicerTest extends \WC_Unit_Test_Case {
 
 	public function test_splice_inserts_woo_roots_into_menu_with_icon_and_capability(): void {
 		global $menu, $submenu;
-		$menu = array(
+		$menu                   = array(
 			2  => array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' ),
 			55 => array( 'WooCommerce', 'manage_woocommerce', 'woocommerce', 'WooCommerce', '', 'toplevel_page_woocommerce', 'dashicons-cart' ),
 		);
 		$submenu['woocommerce'] = array( array( 'Home', 'manage_woocommerce', 'wc-admin' ) );
 
 		$tree = array(
-			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+			'woocommerce' => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
 			'wc-admin'    => array(
 				'parent'     => 'woocommerce',
 				'title'      => 'Home',
@@ -147,10 +175,12 @@ class NativeRailSplicerTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'edit_shop_orders', $entries_by_slug['wc-orders'][1] );
 
 		// Rail order: Dashboard (preserved), woocommerce (hidden), then Woo roots in tree position order.
-		$ordered_slugs = array_values( array_map(
-			static fn( $entry ) => $entry[2] ?? null,
-			$menu
-		) );
+		$ordered_slugs = array_values(
+			array_map(
+				static fn( $entry ) => $entry[2] ?? null,
+				$menu
+			)
+		);
 		$this->assertSame(
 			array( 'index.php', 'woocommerce', 'wc-admin', 'wc-orders' ),
 			$ordered_slugs,
@@ -170,8 +200,12 @@ class NativeRailSplicerTest extends \WC_Unit_Test_Case {
 		);
 
 		$tree = array(
-			'woocommerce'           => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
-			'wc-admin&path=/marketing' => array(
+			'woocommerce'                       => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'wc-admin&path=/marketing'          => array(
 				'parent'     => 'woocommerce',
 				'title'      => 'Marketing',
 				'icon'       => 'dashicons-megaphone',
@@ -215,20 +249,24 @@ class NativeRailSplicerTest extends \WC_Unit_Test_Case {
 
 	public function test_splice_sets_parent_file_and_submenu_file_via_filters_for_compound_current_slug(): void {
 		global $menu, $submenu;
-		$menu                  = array(
+		$menu = array(
 			2  => array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' ),
 			55 => array( 'WooCommerce', 'manage_woocommerce', 'woocommerce', 'WooCommerce', '', 'toplevel_page_woocommerce', 'dashicons-cart' ),
 		);
 
 		$tree = array(
-			'woocommerce'                       => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
-			'wc-admin&path=/marketing'          => array(
+			'woocommerce'                      => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'wc-admin&path=/marketing'         => array(
 				'parent'     => 'woocommerce',
 				'title'      => 'Marketing',
 				'position'   => 40,
 				'capability' => 'manage_woocommerce',
 			),
-			'wc-admin&path=/marketing/coupons'  => array(
+			'wc-admin&path=/marketing/coupons' => array(
 				'parent'     => 'wc-admin&path=/marketing',
 				'title'      => 'Coupons',
 				'position'   => 20,
@@ -259,14 +297,28 @@ class NativeRailSplicerTest extends \WC_Unit_Test_Case {
 		// Pretend WP already had `wc-status` registered as a child of woocommerce
 		// so direct visits to ?page=wc-status pass the access check.
 		$submenu['woocommerce'] = array(
-			array( 'Home',   'manage_woocommerce', 'wc-admin' ),
+			array( 'Home', 'manage_woocommerce', 'wc-admin' ),
 			array( 'Status', 'manage_woocommerce', 'wc-status' ),
 		);
 
 		$tree = array(
-			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
-			'wc-admin'    => array( 'parent' => 'woocommerce', 'title' => 'Home',    'position' => 10, 'capability' => 'manage_woocommerce' ),
-			'wc-tools'    => array( 'parent' => 'woocommerce', 'title' => 'Tools',   'position' => 80, 'capability' => 'manage_woocommerce' ),
+			'woocommerce' => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'wc-admin'    => array(
+				'parent'     => 'woocommerce',
+				'title'      => 'Home',
+				'position'   => 10,
+				'capability' => 'manage_woocommerce',
+			),
+			'wc-tools'    => array(
+				'parent'     => 'woocommerce',
+				'title'      => 'Tools',
+				'position'   => 80,
+				'capability' => 'manage_woocommerce',
+			),
 			'wc-status'   => array(
 				// `wc-status` is a grandchild of `woocommerce` in the tree
 				// (nested under Tools) but WP registered it as a direct child
@@ -312,13 +364,22 @@ class NativeRailSplicerTest extends \WC_Unit_Test_Case {
 		// page type (`product` for the Products CPT toplevel) — that's the
 		// page_type whose absence on `woocommerce_page_wc-orders` caused
 		// the Products-page naked-href regression.
-		$admin_page_hooks                                  = is_array( $admin_page_hooks ) ? $admin_page_hooks : array();
-		$admin_page_hooks['woocommerce']                   = 'woocommerce';
-		$admin_page_hooks['edit.php?post_type=product']    = 'product';
+		$admin_page_hooks                               = is_array( $admin_page_hooks ) ? $admin_page_hooks : array();
+		$admin_page_hooks['woocommerce']                = 'woocommerce';
+		$admin_page_hooks['edit.php?post_type=product'] = 'product';
 
 		$tree = array(
-			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
-			'wc-orders'   => array( 'parent' => 'woocommerce', 'title' => 'Orders', 'position' => 20, 'capability' => 'manage_woocommerce' ),
+			'woocommerce' => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'wc-orders'   => array(
+				'parent'     => 'woocommerce',
+				'title'      => 'Orders',
+				'position'   => 20,
+				'capability' => 'manage_woocommerce',
+			),
 		);
 
 		$_GET['page']       = 'wc-admin';

@@ -1,7 +1,4 @@
 <?php
-
-declare( strict_types = 1 );
-
 /**
  * Default tree for nested admin navigation.
  *
@@ -14,16 +11,18 @@ declare( strict_types = 1 );
  * extension authors can override placement.
  */
 
+declare( strict_types = 1 );
+
 defined( 'ABSPATH' ) || exit;
 
 return array(
-	'woocommerce'                                                            => array(
+	'woocommerce'                           => array(
 		'parent'   => null,
 		'title'    => __( 'WooCommerce', 'woocommerce' ),
 		'icon'     => 'dashicons-cart',
 		'position' => 2,
 	),
-	'wc-admin'                                                               => array(
+	'wc-admin'                              => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Home', 'woocommerce' ),
 		// WooCommerce logo — CSS mask in admin-navigation-v2.scss targets
@@ -33,30 +32,30 @@ return array(
 	),
 	// HPOS slug. The legacy CPT slug `edit.php?post_type=shop_order` is used
 	// when HPOS is disabled; auto-attach picks it up in that case.
-	'wc-orders'                                                              => array(
+	'wc-orders'                             => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Orders', 'woocommerce' ),
 		'icon'     => 'dashicons-list-view',
 		'position' => 20,
 	),
-	'edit.php?post_type=product'                                             => array(
+	'edit.php?post_type=product'            => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Products', 'woocommerce' ),
 		'icon'     => 'dashicons-products',
 		'position' => 30,
 	),
-	'post-new.php?post_type=product'                                         => array(
+	'post-new.php?post_type=product'        => array(
 		'parent'   => 'edit.php?post_type=product',
 		'title'    => __( 'Add product', 'woocommerce' ),
 		'position' => 2,
 	),
-	'wc-admin&path=/analytics/overview'                                      => array(
+	'wc-admin&path=/analytics/overview'     => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Analytics', 'woocommerce' ),
 		'icon'     => 'dashicons-chart-bar',
 		'position' => 40,
 	),
-	'wc-admin&path=/customers'                                               => array(
+	'wc-admin&path=/customers'              => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Customers', 'woocommerce' ),
 		'icon'     => 'dashicons-groups',
@@ -67,14 +66,14 @@ return array(
 	// click-through URL to the real wc-admin React route — the `woocommerce-
 	// marketing` slug itself is a placeholder registered with a null callback
 	// and errors on direct load.
-	'woocommerce-marketing'                                                  => array(
+	'woocommerce-marketing'                 => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Marketing', 'woocommerce' ),
 		'icon'     => 'dashicons-megaphone',
 		'position' => 60,
 		'url'      => 'admin.php?page=wc-admin&path=/marketing',
 	),
-	'wc-settings'                                                            => array(
+	'wc-settings'                           => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Settings', 'woocommerce' ),
 		'icon'     => 'dashicons-admin-settings',
@@ -84,7 +83,7 @@ return array(
 	// tab slug as the key with a `url` override makes it a synthetic node
 	// (bypasses the registered-slugs check) and causes add_settings_tabs()
 	// to skip adding it a second time under Settings.
-	'wc-settings&tab=checkout'                                               => array(
+	'wc-settings&tab=checkout'              => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Payments', 'woocommerce' ),
 		// Dollar-sign-in-rounded-rectangle: same icon WC's PaymentsController registers.
@@ -94,7 +93,7 @@ return array(
 		'position' => 35,
 		'url'      => 'admin.php?page=wc-settings&tab=checkout',
 	),
-	'woocommerce-payments'                                                   => array(
+	'woocommerce-payments'                  => array(
 		'parent'   => 'wc-settings',
 		'title'    => __( 'WooPayments', 'woocommerce' ),
 		'position' => 20,
@@ -102,7 +101,7 @@ return array(
 	// Use the modern wc-admin Marketplace path so the rail highlights when
 	// users land on Extensions (the classic `wc-addons` slug 302-redirects to
 	// this URL anyway).
-	'wc-admin&path=/extensions'                                              => array(
+	'wc-admin&path=/extensions'             => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Extensions', 'woocommerce' ),
 		'icon'     => 'dashicons-admin-plugins',
@@ -112,7 +111,7 @@ return array(
 	// (WooCommerce > Extensions in the classic menu). The synthetic key
 	// keeps the tree out of a key collision with the rail-root above; the
 	// `url` override points the click through to the real Marketplace URL.
-	'wc-admin&path=/extensions&marketplace'                                  => array(
+	'wc-admin&path=/extensions&marketplace' => array(
 		'parent'   => 'wc-admin&path=/extensions',
 		'title'    => __( 'Browse marketplace', 'woocommerce' ),
 		'position' => 1,
@@ -121,7 +120,7 @@ return array(
 	// Status always sits at the end of Settings; use a high position so
 	// later additions (Scheduled Actions at 100, third-party tabs, etc.)
 	// still sort before it.
-	'wc-status'                                                              => array(
+	'wc-status'                             => array(
 		'parent'   => 'wc-settings',
 		'title'    => __( 'Status', 'woocommerce' ),
 		'position' => 9999,
@@ -130,7 +129,7 @@ return array(
 	// slug `action-scheduler`; surface it inside Settings here and override
 	// the click-through URL to point at `tools.php?page=...`. The Tools
 	// entry is hidden via Menu_Reconciler::hide_non_woo_relocated_items().
-	'action-scheduler'                                                       => array(
+	'action-scheduler'                      => array(
 		'parent'   => 'wc-settings',
 		'title'    => __( 'Scheduled actions', 'woocommerce' ),
 		'position' => 100,

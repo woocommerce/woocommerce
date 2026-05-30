@@ -19,8 +19,16 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_default_tree_passes_through_unchanged() {
 		$default = array(
-			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
-			'wc-admin'    => array( 'parent' => 'woocommerce', 'title' => 'Home', 'position' => 10 ),
+			'woocommerce' => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'wc-admin'    => array(
+				'parent'   => 'woocommerce',
+				'title'    => 'Home',
+				'position' => 10,
+			),
 		);
 
 		// Simulate WP having registered both pages.
@@ -47,8 +55,16 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_unregistered_slugs_are_skipped() {
 		$default = array(
-			'woocommerce'           => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
-			'woocommerce-payments'  => array( 'parent' => 'woocommerce', 'title' => 'WooPayments', 'position' => 20 ),
+			'woocommerce'          => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'woocommerce-payments' => array(
+				'parent'   => 'woocommerce',
+				'title'    => 'WooPayments',
+				'position' => 20,
+			),
 		);
 
 		$raw_menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
@@ -67,14 +83,18 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_auto_attach_woocommerce_submenu_items() {
 		$default = array(
-			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+			'woocommerce' => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
 		);
 
 		$raw_menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
 		$raw_submenu = array(
 			'woocommerce' => array(
 				array( 'Third-party Tool', 'manage_woocommerce', 'my-plugin-page' ),
-				array( 'Another Tool',     'manage_woocommerce', 'my-plugin-other' ),
+				array( 'Another Tool', 'manage_woocommerce', 'my-plugin-other' ),
 			),
 		);
 
@@ -104,13 +124,21 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_auto_attach_nests_under_extensions_when_present() {
 		$default = array(
-			'woocommerce'             => array( 'parent' => null,          'title' => 'WooCommerce', 'position' => 2 ),
-			'wc-admin&path=/extensions' => array( 'parent' => 'woocommerce', 'title' => 'Extensions',  'position' => 95 ),
+			'woocommerce'               => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'wc-admin&path=/extensions' => array(
+				'parent'   => 'woocommerce',
+				'title'    => 'Extensions',
+				'position' => 95,
+			),
 		);
 
 		$raw_menu    = array(
-			array( 'WooCommerce', 'read', 'woocommerce',                 '', '' ),
-			array( 'Extensions',  'read', 'wc-admin&path=/extensions',   '', '' ),
+			array( 'WooCommerce', 'read', 'woocommerce', '', '' ),
+			array( 'Extensions', 'read', 'wc-admin&path=/extensions', '', '' ),
 		);
 		$raw_submenu = array(
 			'woocommerce' => array(
@@ -133,7 +161,11 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_auto_attach_falls_back_to_root_when_extensions_absent() {
 		$default = array(
-			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+			'woocommerce' => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
 		);
 
 		$raw_menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
@@ -157,9 +189,21 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 	public function test_cycle_detection_breaks_lowest_position_to_root() {
 		// Simulated cycle introduced via the filter.
 		$default = array(
-			'woocommerce' => array( 'parent' => null,            'title' => 'WooCommerce', 'position' => 2  ),
-			'node-a'      => array( 'parent' => 'node-b',        'title' => 'A',           'position' => 30 ),
-			'node-b'      => array( 'parent' => 'node-a',        'title' => 'B',           'position' => 40 ),
+			'woocommerce' => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'node-a'      => array(
+				'parent'   => 'node-b',
+				'title'    => 'A',
+				'position' => 30,
+			),
+			'node-b'      => array(
+				'parent'   => 'node-a',
+				'title'    => 'B',
+				'position' => 40,
+			),
 		);
 
 		// Register both so they aren't dropped for being unregistered.
@@ -185,7 +229,11 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_auto_attached_items_preserve_capability() {
 		$default = array(
-			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+			'woocommerce' => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
 		);
 
 		$raw_menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
@@ -207,8 +255,16 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_unknown_parent_drops_node() {
 		$default = array(
-			'woocommerce' => array( 'parent' => null,                 'title' => 'WooCommerce', 'position' => 2  ),
-			'orphan'      => array( 'parent' => 'does-not-exist-yet', 'title' => 'Orphan',      'position' => 30 ),
+			'woocommerce' => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'orphan'      => array(
+				'parent'   => 'does-not-exist-yet',
+				'title'    => 'Orphan',
+				'position' => 30,
+			),
 		);
 
 		$raw_menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
@@ -231,16 +287,30 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capability_filtering_with_breadcrumb_passthrough() {
 		$default = array(
-			'woocommerce' => array( 'parent' => null,          'title' => 'WooCommerce', 'position' => 2  ),
-			'parent-cap'  => array( 'parent' => 'woocommerce', 'title' => 'Parent',      'position' => 30, 'capability' => 'manage_options' ),
-			'child-cap'   => array( 'parent' => 'parent-cap',  'title' => 'Child',       'position' => 10, 'capability' => 'read' ),
+			'woocommerce' => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'parent-cap'  => array(
+				'parent'     => 'woocommerce',
+				'title'      => 'Parent',
+				'position'   => 30,
+				'capability' => 'manage_options',
+			),
+			'child-cap'   => array(
+				'parent'     => 'parent-cap',
+				'title'      => 'Child',
+				'position'   => 10,
+				'capability' => 'read',
+			),
 		);
 
 		$raw_menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
 		$raw_submenu = array(
 			'woocommerce' => array(
 				array( 'Parent', 'manage_options', 'parent-cap' ),
-				array( 'Child',  'read',           'child-cap' ),
+				array( 'Child', 'read', 'child-cap' ),
 			),
 		);
 
@@ -267,8 +337,17 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capability_hidden_without_descendants_removes_parent() {
 		$default = array(
-			'woocommerce' => array( 'parent' => null,          'title' => 'WooCommerce', 'position' => 2  ),
-			'parent-cap'  => array( 'parent' => 'woocommerce', 'title' => 'Parent',      'position' => 30, 'capability' => 'manage_options' ),
+			'woocommerce' => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'parent-cap'  => array(
+				'parent'     => 'woocommerce',
+				'title'      => 'Parent',
+				'position'   => 30,
+				'capability' => 'manage_options',
+			),
 		);
 
 		$raw_menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
@@ -295,8 +374,16 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_cpt_self_reference_is_hoisted_under_synthetic_key() {
 		$default = array(
-			'woocommerce'                => array( 'parent' => null,          'title' => 'WooCommerce', 'position' => 2  ),
-			'edit.php?post_type=product' => array( 'parent' => 'woocommerce', 'title' => 'Products',    'position' => 30 ),
+			'woocommerce'                => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'edit.php?post_type=product' => array(
+				'parent'   => 'woocommerce',
+				'title'    => 'Products',
+				'position' => 30,
+			),
 		);
 
 		$raw_menu    = array(
@@ -306,7 +393,7 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 		$raw_submenu = array(
 			'edit.php?post_type=product' => array(
 				array( 'All Products', 'edit_products', 'edit.php?post_type=product' ),
-				array( 'Reviews',      'edit_products', 'product-reviews' ),
+				array( 'Reviews', 'edit_products', 'product-reviews' ),
 			),
 		);
 
@@ -337,8 +424,16 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_auto_attach_exclude_filters_rehomed_children() {
 		$default = array(
-			'woocommerce'                => array( 'parent' => null,          'title' => 'WooCommerce', 'position' => 2  ),
-			'edit.php?post_type=product' => array( 'parent' => 'woocommerce', 'title' => 'Products',    'position' => 30 ),
+			'woocommerce'                => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'edit.php?post_type=product' => array(
+				'parent'   => 'woocommerce',
+				'title'    => 'Products',
+				'position' => 30,
+			),
 		);
 
 		$raw_menu    = array(
@@ -348,7 +443,7 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 		$raw_submenu = array(
 			'edit.php?post_type=product' => array(
 				array( 'Add New Product', 'edit_products', 'post-new.php?post_type=product' ),
-				array( 'Reviews',         'edit_products', 'product-reviews' ),
+				array( 'Reviews', 'edit_products', 'product-reviews' ),
 			),
 		);
 

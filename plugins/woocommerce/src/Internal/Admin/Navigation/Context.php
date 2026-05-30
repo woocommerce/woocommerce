@@ -1,7 +1,4 @@
 <?php
-
-declare( strict_types = 1 );
-
 /**
  * Woo-page context detection.
  *
@@ -10,6 +7,8 @@ declare( strict_types = 1 );
  *
  * @package WooCommerce\Internal\Admin\Navigation
  */
+
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Navigation;
 
@@ -51,7 +50,7 @@ final class Context {
 	public static function resolve_current_slug( array $tree ): ?string {
 		global $pagenow;
 
-		$current_pagenow = $pagenow ?: 'admin.php';
+		$current_pagenow = ! empty( $pagenow ) ? $pagenow : 'admin.php';
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$current_params = wp_unslash( $_GET );
 		// phpcs:enable
@@ -68,7 +67,7 @@ final class Context {
 			// If the node declares a `url` override, match against that URL
 			// (the slug may be a bare handle like `action-scheduler` while
 			// the page actually lives at `tools.php?page=action-scheduler`).
-			$match_target = $node['url'] ?? $slug;
+			$match_target                   = $node['url'] ?? $slug;
 			list( $path, $expected_params ) = self::decompose_slug( $match_target );
 
 			// Pagenow check: only enforce when the slug declares an explicit
@@ -124,7 +123,8 @@ final class Context {
 		if ( null === $best ) {
 			$post_type = null;
 			if ( 'post.php' === $current_pagenow && isset( $current_params['post'] ) ) {
-				$post_type = get_post_type( (int) $current_params['post'] ) ?: null;
+				$resolved_type = get_post_type( (int) $current_params['post'] );
+				$post_type     = false !== $resolved_type ? $resolved_type : null;
 			} elseif ( 'post-new.php' === $current_pagenow ) {
 				$post_type = isset( $current_params['post_type'] ) ? (string) $current_params['post_type'] : 'post';
 			}

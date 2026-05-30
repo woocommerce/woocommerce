@@ -1,13 +1,12 @@
 <?php
-
-declare( strict_types = 1 );
-
 /**
  * Navigation v2 bootstrap.
  *
  * Registers the feature flag and, when enabled, wires up the reconciler,
  * assets, and telemetry.
  */
+
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Navigation;
 

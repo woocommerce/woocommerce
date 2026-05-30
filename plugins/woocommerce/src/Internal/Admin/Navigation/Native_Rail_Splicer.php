@@ -1,7 +1,4 @@
 <?php
-
-declare( strict_types = 1 );
-
 /**
  * Native rail splicer for navigation_v2.
  *
@@ -13,9 +10,13 @@ declare( strict_types = 1 );
  * @package WooCommerce\Internal\Admin\Navigation
  */
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Internal\Admin\Navigation;
 
 defined( 'ABSPATH' ) || exit;
+
+// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.Classes.ValidClassName.NotCamelCaps, WooCommerce.Commenting.CommentHooks -- Splices the WP $menu/$submenu globals by design; underscore class name and hook re-application are intentional.
 
 /**
  * Splices the tree into `$menu`/`$submenu` for native rail rendering.
@@ -29,7 +30,13 @@ class Native_Rail_Splicer {
 	 *
 	 * @var array
 	 */
-	private array $original_menu    = array();
+	private array $original_menu = array();
+
+	/**
+	 * Snapshot of the pre-mutation $submenu global (companion to $original_menu).
+	 *
+	 * @var array
+	 */
 	private array $original_submenu = array();
 
 	/**
@@ -279,7 +286,7 @@ class Native_Rail_Splicer {
 
 		add_filter(
 			'parent_file',
-			static fn( $_ ): string => $root,
+			static fn(): string => $root,
 			PHP_INT_MAX
 		);
 		// Must mirror how `populate_root_submenus` writes `$entry[2]`: the
@@ -290,7 +297,7 @@ class Native_Rail_Splicer {
 		$current_url = self::renderable_url( (string) ( $tree[ $current ]['url'] ?? $current ) );
 		add_filter(
 			'submenu_file',
-			static fn( $_ ): string => $current_url,
+			static fn(): string => $current_url,
 			PHP_INT_MAX
 		);
 
@@ -345,7 +352,7 @@ class Native_Rail_Splicer {
 			if ( ! isset( $entry[2] ) || $entry[2] !== $root ) {
 				continue;
 			}
-			$existing        = isset( $entry[4] ) ? (string) $entry[4] : '';
+			$existing = isset( $entry[4] ) ? (string) $entry[4] : '';
 			// `wc-nav-v2-current-root` is a stable marker class that
 			// survives wc-admin's `wpNavMenuClassChange` (controller.js)
 			// — that function strips `wp-has-current-submenu`/`wp-menu-open`
@@ -497,7 +504,7 @@ class Native_Rail_Splicer {
 
 			// Avoid clobbering an existing key (e.g. if `position` collides).
 			while ( isset( $menu[ $key ] ) ) {
-				$key++;
+				++$key;
 			}
 			// `menu-top` is the class WP keys positioning + hover styles off;
 			// `menu-header.php` does NOT add it automatically. Without it the
@@ -562,10 +569,10 @@ class Native_Rail_Splicer {
 		// Fix: temporarily swap global $menu to our original snapshot so strip_phantom_slugs
 		// sees all items and keeps them. We restore immediately after the filter runs.
 		global $menu;
-		$live_menu = $menu;
-		$menu      = $this->original_menu;
+		$live_menu     = $menu;
+		$menu          = $this->original_menu;
 		$ordered_slugs = (array) apply_filters( 'menu_order', $raw_slugs );
-		$menu      = $live_menu;
+		$menu          = $live_menu;
 
 		// Computed once: $menu is the restored live menu and is not mutated in the
 		// loop below. Slugs still present in the live $menu (index.php, woocommerce)
@@ -610,9 +617,9 @@ class Native_Rail_Splicer {
 			}
 			// hide-if-js  → item must be hidden when JS is present (skip).
 			// hide-if-no-js → item is hidden by CSS and only shown by WP's JS
-			//                 for specific conditions (e.g. Links Manager when
-			//                 there are no links stays hidden even with JS).
-			//                 Exclude these so the panel matches the real rail.
+			// for specific conditions (e.g. Links Manager when
+			// there are no links stays hidden even with JS).
+			// Exclude these so the panel matches the real rail.
 			if ( false !== strpos( $css_classes, 'hide-if-js' ) ||
 				false !== strpos( $css_classes, 'hide-if-no-js' ) ) {
 				continue;
@@ -648,7 +655,7 @@ class Native_Rail_Splicer {
 			// The WooCommerce item acts as a "back to Woo rail" button — suppress
 			// its flyout so clicking it just closes the overlay rather than showing
 			// the WC section submenu (which is already accessible in the Woo rail).
-			$has_sub  = ! empty( $children ) && 'woocommerce' !== $slug;
+			$has_sub = ! empty( $children ) && 'woocommerce' !== $slug;
 
 			// Pass through the menu-icon-* class from $item[4] so CSS-based
 			// icons (e.g. built-in WP pages) render with their correct icon

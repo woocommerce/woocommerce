@@ -7,6 +7,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Navigation;
 
 use Automattic\WooCommerce\Internal\Admin\Navigation\Telemetry;
 
+// phpcs:disable Squiz.Commenting.FunctionComment.Missing -- setUp/tearDown and self-documenting tests need no docblocks.
+
 /**
  * @covers \Automattic\WooCommerce\Internal\Admin\Navigation\Telemetry
  */

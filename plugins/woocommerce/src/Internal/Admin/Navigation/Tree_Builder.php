@@ -1,14 +1,15 @@
 <?php
-
-declare( strict_types = 1 );
-
 /**
  * Pure-logic tree builder. No side effects, no $menu/$submenu mutation.
  */
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Internal\Admin\Navigation;
 
 defined( 'ABSPATH' ) || exit;
+
+// phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps -- Underscore class name is the feature convention.
 
 /**
  * Builds the final nav tree from WP's raw $menu/$submenu and the default-tree map.
@@ -117,7 +118,7 @@ class Tree_Builder {
 				// the URL from the `url` override. (Must run BEFORE the
 				// "already in tree" check below — the rail-root itself
 				// shares this slug, so that check would always short-circuit
-				// the self-ref entry.)
+				// the self-ref entry).
 				if ( $child_slug === $slug ) {
 					$self_key = $child_slug . '--all';
 					if ( ! isset( $tree[ $self_key ] ) ) {
@@ -143,7 +144,7 @@ class Tree_Builder {
 					'source'     => 'rehomed',
 					'capability' => $entry[1] ?? 'read',
 				);
-				$auto_pos += 10;
+				$auto_pos           += 10;
 			}
 		}
 		return $tree;
@@ -244,7 +245,7 @@ class Tree_Builder {
 		// WC's internal legacy redirects alongside default-tree entries).
 		$existing_titles = array();
 		foreach ( $tree as $existing_slug => $node ) {
-			if ( $auto_parent === ( $node['parent'] ?? null ) ) {
+			if ( ( $node['parent'] ?? null ) === $auto_parent ) {
 				$key = strtolower( trim( (string) ( $node['title'] ?? '' ) ) );
 				if ( '' !== $key ) {
 					$existing_titles[ $key ] = true;
@@ -271,7 +272,7 @@ class Tree_Builder {
 				continue;
 			}
 
-			$tree[ $slug ] = array(
+			$tree[ $slug ]                 = array(
 				'parent'     => $auto_parent,
 				'title'      => $title,
 				'position'   => $auto_position,
