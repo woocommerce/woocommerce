@@ -148,10 +148,11 @@ class ProductQueryService implements ProductQueryInterface {
 			array_merge(
 				$this->query_args,
 				array(
-					'include' => array( $product_id ),
-					'limit'   => 1,
-					'page'    => 1,
-					'return'  => 'objects',
+					'include'  => array( $product_id ),
+					'limit'    => 1,
+					'page'     => 1,
+					'paginate' => true,
+					'return'   => 'objects',
 				)
 			)
 		);

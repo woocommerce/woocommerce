@@ -269,6 +269,10 @@ class ProductQueryServiceTest extends \WC_Unit_Test_Case {
 						$this->assertSame( array( 'publish' ), $args['status'] );
 						$this->assertSame( array( 'simple' ), $args['type'] );
 						$this->assertSame( array( 42 ), $args['include'] );
+						$this->assertArrayHasKey( 'paginate', $args );
+						$this->assertTrue( $args['paginate'] );
+						$this->assertSame( 1, $args['limit'] );
+						$this->assertSame( 1, $args['page'] );
 						return true;
 					}
 				)
