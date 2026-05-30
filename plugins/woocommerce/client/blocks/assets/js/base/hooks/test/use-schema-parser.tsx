@@ -100,14 +100,19 @@ describe( 'useSchemaParser', () => {
 			},
 		};
 
-		// Mock checkout data
+		// Mock checkout data — includes fields from all locations
 		mockCheckoutData = {
 			prefersCollection: false,
 			shouldCreateAccount: true,
 			orderNotes: 'Please deliver after 6 PM',
 			additionalFields: {
+				// Contact-level field
 				'namespace/contact_field': 'value1',
+				// Order-level field
 				'namespace/order_field': 'value2',
+				// Address-level field (e.g., VAT number shown conditionally)
+				'namespace/vat_number': 'IT123456789',
+				'namespace/customer_type': 'business',
 			},
 			customerId: 123,
 		};
@@ -304,10 +309,11 @@ describe( 'useSchemaParser', () => {
 			expect( checkout ).toHaveProperty( 'payment_method' );
 			expect( checkout.payment_method ).toBe( 'stripe' );
 
+			// All additional fields available for cross-location conditions
 			expect( checkout ).toHaveProperty( 'additional_fields' );
-			expect( checkout.additional_fields ).toEqual( {
-				'namespace/order_field': 'value2',
-			} );
+			expect( checkout.additional_fields ).toEqual(
+				mockCheckoutData.additionalFields
+			);
 		} );
 
 		it( 'should transform customer data correctly', () => {
@@ -337,11 +343,11 @@ describe( 'useSchemaParser', () => {
 			expect( customer ).toHaveProperty( 'address' );
 			expect( customer.address ).toEqual( mockCartData.billingAddress );
 
+			// All additional fields available for cross-location conditions
 			expect( customer ).toHaveProperty( 'additional_fields' );
-			// Additional fields should be filtered to only include contact form keys
-			expect( customer.additional_fields ).toEqual( {
-				'namespace/contact_field': 'value1',
-			} );
+			expect( customer.additional_fields ).toEqual(
+				mockCheckoutData.additionalFields
+			);
 		} );
 	} );
 
@@ -412,23 +418,24 @@ describe( 'useSchemaParser', () => {
 		} );
 	} );
 
-	describe( 'additional fields filtering', () => {
-		it( 'should filter additional fields for contact form keys', () => {
+	describe( 'cross-location additional fields', () => {
+		it( 'should expose all additional fields in customer for billing form type', () => {
 			const { result } = renderHook(
 				( { formType } ) => useSchemaParser( formType ),
 				{
-					initialProps: { formType: 'contact' as FormType },
+					initialProps: { formType: 'billing' as FormType },
 					wrapper,
 				}
 			);
 
 			const { customer } = result.current.data!;
-			expect( customer.additional_fields ).toEqual( {
-				'namespace/contact_field': 'value1',
-			} );
+			// All additional fields available, not filtered by location
+			expect( customer.additional_fields ).toEqual(
+				mockCheckoutData.additionalFields
+			);
 		} );
 
-		it( 'should filter additional fields for order form keys', () => {
+		it( 'should expose all additional fields in checkout for order form type', () => {
 			const { result } = renderHook(
 				( { formType } ) => useSchemaParser( formType ),
 				{
@@ -438,9 +445,26 @@ describe( 'useSchemaParser', () => {
 			);
 
 			const { checkout } = result.current.data!;
-			expect( checkout.additional_fields ).toEqual( {
-				'namespace/order_field': 'value2',
-			} );
+			// All additional fields available, not filtered by location
+			expect( checkout.additional_fields ).toEqual(
+				mockCheckoutData.additionalFields
+			);
+		} );
+
+		it( 'should expose all additional fields in customer for contact form type', () => {
+			const { result } = renderHook(
+				( { formType } ) => useSchemaParser( formType ),
+				{
+					initialProps: { formType: 'contact' as FormType },
+					wrapper,
+				}
+			);
+
+			const { customer } = result.current.data!;
+			// All additional fields available, not filtered by location
+			expect( customer.additional_fields ).toEqual(
+				mockCheckoutData.additionalFields
+			);
 		} );
 	} );
 } );

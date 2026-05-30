@@ -5,15 +5,9 @@ import { useRef, useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { snakeCaseKeys } from '@woocommerce/base-utils';
 import type {
-	OrderFormValues,
 	AddressFormValues,
 	FormType,
-	ContactFormValues,
 } from '@woocommerce/settings';
-import {
-	ORDER_FORM_KEYS,
-	CONTACT_FORM_KEYS,
-} from '@woocommerce/block-settings';
 import fastDeepEqual from 'fast-deep-equal/es6';
 import {
 	cartStore,
@@ -106,38 +100,14 @@ const useDocumentObject = < T extends FormType | 'global' >(
 			checkout: {
 				createAccount: shouldCreateAccount,
 				customerNote: orderNotes,
-				additionalFields: Object.entries( additionalFields ).reduce(
-					( acc, [ key, value ] ) => {
-						if (
-							ORDER_FORM_KEYS.includes(
-								key as keyof OrderFormValues
-							)
-						) {
-							acc[ key as keyof OrderFormValues ] = value;
-						}
-						return acc;
-					},
-					{} as OrderFormValues
-				),
+				additionalFields: additionalFields,
 				paymentMethod: activePaymentMethod,
 			},
 			customer: {
 				id: customerId,
 				billingAddress,
 				shippingAddress,
-				additionalFields: Object.entries( additionalFields ).reduce(
-					( acc, [ key, value ] ) => {
-						if (
-							CONTACT_FORM_KEYS.includes(
-								key as keyof ContactFormValues
-							)
-						) {
-							acc[ key as keyof ContactFormValues ] = value;
-						}
-						return acc;
-					},
-					{} as ContactFormValues
-				),
+				additionalFields: additionalFields,
 				...( formType === 'billing' || formType === 'shipping'
 					? {
 							address:
@@ -223,7 +193,7 @@ export interface DocumentObject< T extends FormType | 'global' > {
 				create_account: boolean;
 				customer_note: string;
 				payment_method: string;
-				additional_fields: OrderFormValues;
+				additional_fields: Record< string, string | boolean >;
 		  }
 		| Record< string, never >;
 	customer:
@@ -231,7 +201,7 @@ export interface DocumentObject< T extends FormType | 'global' > {
 				id: number;
 				billing_address: AddressFormValues;
 				shipping_address: AddressFormValues;
-				additional_fields: ContactFormValues;
+				additional_fields: Record< string, string | boolean >;
 				address: T extends 'billing'
 					? AddressFormValues
 					: T extends 'shipping'
