@@ -1,7 +1,7 @@
 ---
 post_title: Nested admin navigation (experimental)
 menu_title: Nested admin navigation
-tags: admin, navigation, experimental
+tags: [ admin, navigation, experimental ]
 ---
 
 # Nested admin navigation
