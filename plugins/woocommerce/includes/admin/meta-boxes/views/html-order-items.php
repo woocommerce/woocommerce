@@ -172,8 +172,7 @@ if ( wc_tax_enabled() ) {
 				<td width="1%"></td>
 				<td class="total">
 				<?php
-					$adjust_non_base = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
-					if ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) && ! $adjust_non_base ) {
+					if ( $order->has_fixed_end_prices() ) {
 						$subtotal_ex_tax = $order->get_subtotal() - $order->get_cart_tax();
 						echo wc_price( $subtotal_ex_tax, array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					} else {

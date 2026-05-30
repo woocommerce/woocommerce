@@ -1635,8 +1635,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $product ) {
 			$order = ArrayUtil::get_value_or_default( $args, 'order' );
 
-			if ( 'yes' === get_option( 'woocommerce_prices_include_tax' )
-				&& ! apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
+			if ( $this->has_fixed_end_prices() ) {
+				// Note: storing inclusive price as-is relies on the filter being a
+				// code-level constant. If the filter changes at runtime, existing
+				// line totals will be misinterpreted on recalculate since the gross
+				// price is reused without re-deriving from the product.
 				$total = (float) $product->get_price() * $qty;
 			} else {
 				$total = wc_get_price_excluding_tax(
@@ -1871,15 +1874,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function calculate_taxes( $args = array() ) {
-		/**
-		 * Filters whether to adjust product prices for non-base tax locations.
-		 *
-		 * @since 2.4.7
-		 *
-		 * @param bool $adjust_non_base_location_prices True by default.
-		 */
-		$adjust_non_base_location_prices = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
-
 		do_action( 'woocommerce_order_before_calculate_taxes', $args, $this );
 
 		$calculate_tax_for  = $this->get_tax_location( $args );
@@ -1892,7 +1886,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
 
-		if ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) && ! $adjust_non_base_location_prices ) {
+		if ( $this->has_fixed_end_prices() ) {
 			$calculate_tax_for['prices_include_tax'] = true;
 		}
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
@@ -2021,6 +2015,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Whether this store uses fixed end-prices across tax jurisdictions.
+	 * True when prices include tax and woocommerce_adjust_non_base_location_prices is false.
+	 *
+	 * @return bool
+	 */
+	public function has_fixed_end_prices(): bool {
+		return 'yes' === get_option( 'woocommerce_prices_include_tax' )
+			&& ! apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
+	}
+
+	/**
 	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
 	 *
 	 * @since 2.2
@@ -2060,15 +2065,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$fees_total += (float) $item->get_total();
 		}
 
-		/**
-		 * Filters whether to adjust product prices for non-base tax locations.
-		 *
-		 * @since 2.4.7
-		 *
-		 * @param bool $adjust_non_base_location_prices True by default.
-		 */
-		$adjust_non_base_location_prices = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
-
 		// Calculate taxes for items, shipping, discounts. Note; this also triggers save().
 		if ( $and_taxes ) {
 			$this->calculate_taxes();
@@ -2093,7 +2089,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Fixed end-price orders keep inclusive item totals; compare net values and add tax back below.
-		if ( 'yes' === get_option( 'woocommerce_prices_include_tax' ) && ! $adjust_non_base_location_prices ) {
+		if ( $this->has_fixed_end_prices() ) {
 			$cart_subtotal = $cart_subtotal - $cart_subtotal_tax;
 			$cart_total    = $cart_total - $cart_total_tax;
 		}
