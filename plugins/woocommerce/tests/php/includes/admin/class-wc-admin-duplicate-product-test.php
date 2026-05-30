@@ -110,4 +110,50 @@ class WC_Admin_Duplicate_Product_Test extends WC_Unit_Test_Case {
 
 		remove_filter( 'wc_product_has_unique_sku', array( $this, 'dont_allow_skus_with_numbers_lower_than_8' ) );
 	}
+
+	/**
+	 * Tests that duplicating a product with hyphens in the SKU correctly appends the suffix.
+	 *
+	 * For SKUs like "SKU-123", the duplicate should get "SKU-123-1", not "SKU-124".
+	 * This tests the fix for issue #65378.
+	 */
+	public function test_duplicate_product_with_hyphenated_sku_preserves_original() {
+		// Test case 1: Simple hyphen with number.
+		$product1 = WC_Helper_Product::create_simple_product();
+		$product1->set_sku( 'SKU-123' );
+		$product1->save();
+
+		$duplicate1 = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product1 );
+		$this->assertEquals( 'SKU-123-1', $duplicate1->get_sku(), 'Duplicate of SKU-123 should be SKU-123-1' );
+
+		// Test case 2: Multiple hyphens.
+		$product2 = WC_Helper_Product::create_simple_product();
+		$product2->set_sku( 'my-product-456' );
+		$product2->save();
+
+		$duplicate2 = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product2 );
+		$this->assertEquals( 'my-product-456-1', $duplicate2->get_sku(), 'Duplicate of my-product-456 should be my-product-456-1' );
+
+		// Test case 3: Non-numeric suffix (should still work).
+		$product3 = WC_Helper_Product::create_simple_product();
+		$product3->set_sku( 'PROD-A' );
+		$product3->save();
+
+		$duplicate3 = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product3 );
+		$this->assertEquals( 'PROD-A-1', $duplicate3->get_sku(), 'Duplicate of PROD-A should be PROD-A-1' );
+
+		// Test case 4: Sequential duplicates.
+		$product4 = WC_Helper_Product::create_simple_product();
+		$product4->set_sku( 'SEQ-100' );
+		$product4->save();
+
+		$dup_a = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product4 );
+		$this->assertEquals( 'SEQ-100-1', $dup_a->get_sku() );
+
+		$dup_b = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product4 );
+		$this->assertEquals( 'SEQ-100-2', $dup_b->get_sku() );
+
+		$dup_c = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product4 );
+		$this->assertEquals( 'SEQ-100-3', $dup_c->get_sku() );
+	}
 }
