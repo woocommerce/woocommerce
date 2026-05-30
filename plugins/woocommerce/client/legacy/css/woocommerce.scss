@@ -2051,12 +2051,6 @@ p.demo_store,
 		background: desaturate(rgba(#7f54b3, 0.14), 21%);
 		border-radius: 5px;
 
-		.wc_payment_methods_fieldset {
-			border: 0;
-			margin: 0;
-			padding: 0;
-		}
-
 		ul.payment_methods {
 			@include clearfix();
 			text-align: left;
