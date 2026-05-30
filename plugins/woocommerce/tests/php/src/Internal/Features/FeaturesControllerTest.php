@@ -1043,7 +1043,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		$controller = new FeaturesController();
 		$controller->init( wc_get_container()->get( \Automattic\WooCommerce\Proxies\LegacyProxy::class ), $this->fake_plugin_util );
-		$features   = $controller->get_features( true );
+		$features = $controller->get_features( true );
 
 		remove_action( 'woocommerce_register_feature_definitions', array( $bootstrap, 'register_feature' ), 12 );
 		// Bootstrap also registered an `init` hook in its constructor; clean
@@ -1313,7 +1313,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			->onlyMethods( array( 'get_wp_plugin_id', 'get_woocommerce_aware_plugins' ) )
 			->getMock();
 
-		$plugin_util_mock->expects( $this->exactly( 2 ) ) // Called once per each file during processing.
+		$plugin_util_mock->expects( $this->exactly( 2 ) )
+		// Called once per each file during processing.
 			->method( 'get_wp_plugin_id' )
 			->willReturnMap(
 				array(
@@ -1323,7 +1324,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			);
 
 		$plugin_util_mock->method( 'get_woocommerce_aware_plugins' )
-			->willReturn( array() ); // Mock to empty to avoid real/environmental plugins in 'uncertain'.
+			->willReturn( array() );
+		// Mock to empty to avoid real/environmental plugins in 'uncertain'.
 
 		// Manually set private $proxy on the mock via reflection on the parent class.
 		// If we don't, the mocked PluginUtil will try to call things using ->proxy, which hasn't
@@ -1389,7 +1391,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		$plugin_util_mock->expects( $this->atLeastOnce() )
 			->method( 'get_wp_plugin_id' )
-			->willReturn( 'plugin/plugin.php' ); // All plugins resolve to the same path (we only register 1 anyway).
+			->willReturn( 'plugin/plugin.php' );
+		// All plugins resolve to the same path (we only register 1 anyway).
 
 		// Set private $proxy on the mock via reflection on parent.
 		// If we don't, the mocked PluginUtil will try to call things using ->proxy, which hasn't
@@ -1437,8 +1440,10 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			->willReturn( 'plugin/plugin.php' );
 
 		// Control get_woocommerce_aware_plugins to simulate before/after deactivation.
-		$deactivated   = false; // Flag to toggle in callback.
-		$aware_plugins = array( 'plugin/plugin.php', 'other/plugin.php' ); // Controlled list.
+		$deactivated = false;
+		// Flag to toggle in callback.
+		$aware_plugins = array( 'plugin/plugin.php', 'other/plugin.php' );
+		// Controlled list.
 		$plugin_util_mock->method( 'get_woocommerce_aware_plugins' )
 					->will(
 						$this->returnCallback(
