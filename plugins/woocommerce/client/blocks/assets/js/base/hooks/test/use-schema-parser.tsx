@@ -466,5 +466,24 @@ describe( 'useSchemaParser', () => {
 				mockCheckoutData.additionalFields
 			);
 		} );
+
+		it( 'should preserve original key format in additional_fields (snakeCaseKeys is shallow)', () => {
+			const { result } = renderHook(
+				( { formType } ) => useSchemaParser( formType ),
+				{
+					initialProps: { formType: 'billing' as FormType },
+					wrapper,
+				}
+			);
+
+			const { customer } = result.current.data!;
+			// Inner keys preserved as-is (snakeCaseKeys is shallow, only transforms top-level)
+			expect( customer.additional_fields ).toHaveProperty(
+				'namespace/contact_field'
+			);
+			expect( customer.additional_fields ).toHaveProperty(
+				'namespace/vat_number'
+			);
+		} );
 	} );
 } );
