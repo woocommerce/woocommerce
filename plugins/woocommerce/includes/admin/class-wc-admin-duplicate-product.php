@@ -396,8 +396,8 @@ class WC_Admin_Duplicate_Product {
 			}
 		}
 
-		// Fallback: just append -1 to original SKU if all else fails.
-		$product->set_sku( $original_sku . '-1' );
+		// Fallback: use the standard unique SKU generator which loops until it finds a unique value.
+		$product->set_sku( wc_product_generate_unique_sku( $product_id, $original_sku, 1 ) );
 	}
 }
 
