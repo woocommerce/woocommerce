@@ -21,6 +21,15 @@ type ProductVariationEntityRecord = ProductEntityRecord & {
 	parent_id: number;
 };
 
+type ProductVariationSaveData = Omit<
+	Partial< ProductEntityRecord >,
+	'images'
+> & {
+	image?:
+		| NonNullable< ProductVariation[ 'image' ] >
+		| Record< string, never >;
+};
+
 type ProductSaveResult = PromiseSettledResult<
 	ProductEntityRecord | ProductVariation
 >;
@@ -50,6 +59,35 @@ function getEditedProduct( productId: number ) {
 	return product !== false ? product : undefined;
 }
 
+function getVariationImageSaveData(
+	image: ProductEntityRecord[ 'images' ][ number ] | undefined
+) {
+	if ( ! image ) {
+		return {};
+	}
+
+	const { thumbnail, ...variationImage } = image;
+
+	return variationImage;
+}
+
+function getVariationSaveData(
+	variation: ProductEntityRecord
+): ProductVariationSaveData {
+	const { images, cost_of_goods_sold: costOfGoodsSold, ...data } = variation;
+	const hasNullCostOfGoodsSoldValue = costOfGoodsSold?.values?.some(
+		( value ) => value.defined_value === null
+	);
+
+	return {
+		...data,
+		...( ! hasNullCostOfGoodsSoldValue && costOfGoodsSold !== undefined
+			? { cost_of_goods_sold: costOfGoodsSold }
+			: {} ),
+		image: getVariationImageSaveData( images?.[ 0 ] ),
+	};
+}
+
 async function saveVariation(
 	product: ProductVariationEntityRecord,
 	editEntityRecord: EditProductRecord
@@ -62,7 +100,7 @@ async function saveVariation(
 	const savedVariation = await apiFetch< ProductVariation >( {
 		path: getProductVariationUpdatePath( product ),
 		method: 'PUT',
-		data: editedVariation,
+		data: getVariationSaveData( editedVariation ),
 	} );
 
 	if ( parentProduct ) {

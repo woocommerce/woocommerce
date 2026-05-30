@@ -23,11 +23,13 @@
 .product_page_woocommerce-products-dashboard,
 #woocommerce-variations-classic-root,
 .woocommerce-product-edit__drawer-portal {
+	@import "./fields/grouped_products/style.scss";
 	@import "./fields/components/list-item/style.scss";
 	@import "./fields/components/searchable-chip-select/style.scss";
 	@import "./fields/components/taxonomy-edit/style.scss";
 	@import "./fields/downloadable/style.scss";
 	@import "./fields/images/style.scss";
+	@import "./fields/schedule_sale/style.scss";
 	@import "./fields/stock/style.scss";
 	@import "./fields/visibility_summary/style.scss";
 	--wp-ui-drawer-z-index: 100000;
@@ -36,6 +38,17 @@
 
 .product_page_woocommerce-products-dashboard-snackbar {
 	@include snackbar-container;
+	z-index: 100002;
+}
+
+.woocommerce-experimental-products-app-error {
+	box-sizing: border-box;
+	min-height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
+	padding: var(--wpds-dimension-padding-2xl, 24px);
+}
+
+.woocommerce-experimental-products-app-error__description {
+	max-width: 520px;
 }
 
 .product_page_woocommerce-products-dashboard .edit-site-layout__content {
@@ -131,16 +144,17 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
-	padding: 12px 16px;
+	padding: 12px var(--wpds-dimension-padding-2xl, 24px);
 	border-bottom: 1px solid var(--wp-components-color-gray-300, #ddd);
 }
 
-// Qualified to beat `@wordpress/ui`'s unlayered `:is(h1-h6).heading` defense rule, which would otherwise apply heading-xl (20px).
+// Qualified to beat `@wordpress/ui`'s unlayered `:is(h1-h6).heading` defense rule.
+// Matches the design-system Drawer header treatment (heading-xl, 20px).
 .woocommerce-product-edit__drawer .woocommerce-product-edit__title {
 	margin: 0;
-	font-size: 15px;
+	font-size: 20px;
 	font-weight: 500;
-	line-height: 20px;
+	line-height: 28px;
 	color: var(--wp-components-color-foreground, #1e1e1e);
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -169,6 +183,21 @@
 		font-size: 15px !important;
 	}
 
+	.dataforms-layouts-row__header {
+		gap: 0 !important;
+		margin-bottom: 8px;
+
+		:is(h1, h2, h3, h4, h5, h6) {
+			margin: 0 !important;
+			color: var(--wpds-color-fg-content-neutral, #1e1e1e);
+			font-family: var(--wpds-typography-font-family-body);
+			font-size: 11px !important;
+			font-weight: 500;
+			line-height: 1.4;
+			text-transform: uppercase;
+		}
+	}
+
 	.dataforms-layouts-regular__header + .dataforms-layouts__wrapper {
 		gap: 16px !important;
 		margin-top: 16px;
@@ -185,4 +214,5 @@
 	gap: 8px;
 }
 
+@import "./product-list/empty-state/style.scss";
 @import "./variation-view/style.scss";
