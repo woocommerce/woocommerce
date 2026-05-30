@@ -40,6 +40,20 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	private $original_current_tab = null;
 
 	/**
+	 * Whether the hide save button global existed before the test.
+	 *
+	 * @var bool
+	 */
+	private bool $original_hide_save_button_exists = false;
+
+	/**
+	 * Original hide save button global value.
+	 *
+	 * @var mixed
+	 */
+	private $original_hide_save_button = null;
+
+	/**
 	 * Set up test environment.
 	 */
 	public function setUp(): void {
@@ -50,9 +64,12 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		global $current_section, $current_tab;
 
-		$this->original_get             = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$this->original_current_section = $current_section ?? null;
-		$this->original_current_tab     = $current_tab ?? null;
+		$this->original_get                     = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->original_current_section         = $current_section ?? null;
+		$this->original_current_tab             = $current_tab ?? null;
+		$this->original_hide_save_button_exists = array_key_exists( 'hide_save_button', $GLOBALS );
+		$this->original_hide_save_button        = $this->original_hide_save_button_exists ? $GLOBALS['hide_save_button'] : null;
+		unset( $GLOBALS['hide_save_button'] );
 	}
 
 	/**
@@ -64,7 +81,12 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$_GET            = $this->original_get;
 		$current_section = $this->original_current_section;
 		$current_tab     = $this->original_current_tab;
-		unset( $GLOBALS['hide_save_button'] );
+
+		if ( $this->original_hide_save_button_exists ) {
+			$GLOBALS['hide_save_button'] = $this->original_hide_save_button;
+		} else {
+			unset( $GLOBALS['hide_save_button'] );
+		}
 
 		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
