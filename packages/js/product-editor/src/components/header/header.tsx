@@ -33,7 +33,6 @@ import { SaveDraftButton } from './save-draft-button';
 import { LoadingState } from './loading-state';
 import { Tabs } from '../tabs';
 import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
-import { useShowPrepublishChecks } from '../../hooks/use-show-prepublish-checks';
 import { HeaderProps, Image } from './types';
 
 const PublishButton = lazy( () =>
@@ -76,8 +75,6 @@ export function Header( {
 	const editedProductName = product?.name;
 	const catalogVisibility = product?.catalog_visibility;
 	const productStatus = product?.status;
-
-	const { showPrepublishChecks } = useShowPrepublishChecks();
 
 	const sidebarWidth = useAdminSidebarWidth();
 
@@ -254,7 +251,6 @@ export function Header( {
 					<Suspense fallback={ null }>
 						<PublishButton
 							productType={ productType }
-							isPrePublishPanelVisible={ showPrepublishChecks }
 							isMenuButton
 							visibleTab={ selectedTab }
 						/>

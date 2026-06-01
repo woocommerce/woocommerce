@@ -84,6 +84,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 
 			add_action( 'woocommerce_block_template_area_uncategorized_after_add_block_test-block-id', $specific_after_add_block_hook );
 
+			$this->setExpectedDeprecated( 'woocommerce_block_template_after_add_block' );
+			$this->setExpectedDeprecated( 'woocommerce_block_template_area_uncategorized_after_add_block_test-block-id' );
+
 			$template->add_block(
 				[
 					'id'        => 'test-block-id',
@@ -140,6 +143,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 		try {
 			add_action( 'woocommerce_block_template_after_remove_block', $after_remove_block_hook );
 			add_action( 'woocommerce_block_template_area_uncategorized_after_remove_block_test-block-id', $specific_after_remove_block_hook );
+
+			$this->setExpectedDeprecated( 'woocommerce_block_template_after_remove_block' );
+			$this->setExpectedDeprecated( 'woocommerce_block_template_area_uncategorized_after_remove_block_test-block-id' );
 
 			$block = $template->add_block(
 				[

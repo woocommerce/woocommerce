@@ -10,17 +10,24 @@ import {
 	store as blockEditorStore,
 	__experimentalUseBlockPreview as useBlockPreview,
 } from '@wordpress/block-editor';
-import { BlockInstance, type BlockEditProps } from '@wordpress/blocks';
+import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
+import { useCollection } from '@woocommerce/base-context/hooks';
 import {
 	CustomDataProvider,
 	useCustomDataContext,
 	useProductDataContext,
 } from '@woocommerce/shared-context';
 import { isProductResponseItem } from '@woocommerce/entities';
-import type { ProductResponseAttributeItem } from '@woocommerce/types';
+import type {
+	AttributeTerm,
+	ProductResponseAttributeItem,
+} from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
-import { getSetting } from '@woocommerce/settings';
+import {
+	DisplayStyleSwitcher,
+	resetDisplayStyleBlock,
+} from '@woocommerce/editor-components/display-style-switcher';
 import {
 	ToggleControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
@@ -32,17 +39,34 @@ import {
 /**
  * Internal dependencies
  */
-import { DEFAULT_ATTRIBUTES, EMPTY_TERM_COLORS } from './constants';
-import {
-	DisplayStyleSwitcher,
-	resetDisplayStyleBlock,
-} from '../../../product-filters/components/display-style-switcher';
+import { DEFAULT_ATTRIBUTES, EMPTY_TERM_VISUALS } from './constants';
 import type {
 	SelectableItem,
 	SelectableItemsContext,
 } from '../../../../types/type-defs/selectable-items';
+import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 
 const INNER_CHIPS = 'woocommerce/product-filter-chips';
+
+const getFallbackDisplayStyleInsertionPoint = (
+	parentBlock: BlockInstance
+) => {
+	const groupBlock = parentBlock.innerBlocks.find(
+		( block ) => block.name === 'core/group'
+	);
+
+	if ( groupBlock ) {
+		return {
+			rootClientId: groupBlock.clientId,
+			index: groupBlock.innerBlocks.length,
+		};
+	}
+
+	return {
+		rootClientId: parentBlock.clientId,
+		index: parentBlock.innerBlocks.length,
+	};
+};
 
 interface Attributes {
 	className?: string;
@@ -60,16 +84,42 @@ type AttributeItemProps = {
 function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
+	const termIds = useMemo( () => {
+		return attribute?.terms
+			? attribute.terms
+					.map( ( term ) => term.id )
+					.filter( ( termId ) => termId > 0 )
+			: [];
+	}, [ attribute ] );
+	const { results: attributeTerms } = useCollection< AttributeTerm >( {
+		namespace: '/wc/store/v1',
+		resourceName: 'products/attributes/terms',
+		resourceValues: [ attribute?.id || 0 ],
+		shouldSelect: !! attribute?.id && termIds.length > 0,
+		query: {
+			include: termIds,
+			hide_empty: false,
+			__experimental_visual: true,
+		},
+	} );
+	const visualByTermId = useMemo( () => {
+		return attributeTerms.reduce< Record< number, VisualAttributeTerm > >(
+			( accumulator, term ) => {
+				if ( term.__experimentalVisual ) {
+					accumulator[ term.id ] = term.__experimentalVisual;
+				}
 
-	const termColors = getSetting< Record< string, string > >(
-		'variationSelectorTermColors',
-		{} as Record< string, string >
-	);
+				return accumulator;
+			},
+			{}
+		);
+	}, [ attributeTerms ] );
 
 	const selectableContext = useMemo( () => {
 		let items: SelectableItem< {
 			label: string;
 			ariaLabel: string;
+			visual?: VisualAttributeTerm;
 		} >[] = [];
 		if (
 			attribute &&
@@ -77,18 +127,15 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			attribute.terms.length > 0
 		) {
 			items = attribute.terms.map( ( term ) => {
-				let color: string | null = null;
-				if ( term.id in termColors ) {
-					color = termColors[ term.id ];
-				} else if ( term.id in EMPTY_TERM_COLORS ) {
-					color = EMPTY_TERM_COLORS[ term.id ];
-				}
+				const visual =
+					visualByTermId[ term.id ] || EMPTY_TERM_VISUALS[ term.id ];
+
 				return {
 					id: `${ attribute.taxonomy }-${ term.slug }`,
 					label: term.name,
 					value: term.slug,
 					ariaLabel: term.name,
-					...( color !== null ? { color } : {} ),
+					...( visual ? { visual } : {} ),
 				};
 			} );
 		}
@@ -101,13 +148,14 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 		} satisfies SelectableItemsContext< {
 			label: string;
 			ariaLabel: string;
+			visual?: VisualAttributeTerm;
 		} >;
-	}, [ attribute, termColors ] );
+	}, [ attribute, visualByTermId ] );
 
 	const blockPreviewProps = useBlockPreview( {
 		blocks,
 	} );
-	const innerBlocksProps = useInnerBlocksProps( { role: 'listitem' } );
+	const innerBlocksProps = useInnerBlocksProps();
 
 	if ( ! attribute ) {
 		return null;
@@ -127,13 +175,7 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 				// editable. We allow clicking on the blocks of other attributes
 				// but it's not critical, so we disable the keyboard events.
 				// eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-				<div
-					{ ...blockPreviewProps }
-					tabIndex={ 0 }
-					onClick={ onSelect }
-				>
-					<div { ...innerBlocksProps } />
-				</div>
+				<div { ...blockPreviewProps } onClick={ onSelect } />
 			) }
 		</BlockContextProvider>
 	);
@@ -177,7 +219,11 @@ export default function AttributeItemTemplateEdit(
 					label={ __( 'Style', 'woocommerce' ) }
 					resetAll={ () => {
 						setAttributes( { displayStyle: INNER_CHIPS } );
-						resetDisplayStyleBlock( clientId, INNER_CHIPS );
+						resetDisplayStyleBlock(
+							clientId,
+							INNER_CHIPS,
+							getFallbackDisplayStyleInsertionPoint
+						);
 					} }
 				>
 					<ToolsPanelItem
@@ -185,7 +231,11 @@ export default function AttributeItemTemplateEdit(
 						label={ __( 'Style', 'woocommerce' ) }
 						onDeselect={ () => {
 							setAttributes( { displayStyle: INNER_CHIPS } );
-							resetDisplayStyleBlock( clientId, INNER_CHIPS );
+							resetDisplayStyleBlock(
+								clientId,
+								INNER_CHIPS,
+								getFallbackDisplayStyleInsertionPoint
+							);
 						} }
 						isShownByDefault
 					>
@@ -196,6 +246,9 @@ export default function AttributeItemTemplateEdit(
 							<DisplayStyleSwitcher
 								clientId={ clientId }
 								currentStyle={ displayStyle }
+								getFallbackDisplayStyleInsertionPoint={
+									getFallbackDisplayStyleInsertionPoint
+								}
 								onChange={ ( value ) => {
 									setAttributes( {
 										displayStyle: value,
@@ -283,7 +336,7 @@ export default function AttributeItemTemplateEdit(
 				</ToolsPanel>
 			</InspectorControls>
 
-			<div { ...blockProps } role="list">
+			<div { ...blockProps }>
 				{ productAttributes.map( ( attribute ) => (
 					<CustomDataProvider
 						key={ attribute.id }
