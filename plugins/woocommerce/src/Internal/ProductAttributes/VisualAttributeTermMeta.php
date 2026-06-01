@@ -158,6 +158,26 @@ class VisualAttributeTermMeta {
 	}
 
 	/**
+	 * Save visual attribute term meta using the selected visual type.
+	 *
+	 * @param int    $term_id Term ID.
+	 * @param string $type Selected visual type.
+	 * @param string $color Hex color value.
+	 * @param int    $image_id Attachment ID for the term image.
+	 * @return void
+	 *
+	 * @since 10.9.0
+	 */
+	public static function save_term_visual_by_type( int $term_id, string $type, string $color = '', int $image_id = 0 ): void {
+		if ( self::TYPE_IMAGE === $type ) {
+			self::save_term_visual( $term_id, '', $image_id );
+			return;
+		}
+
+		self::save_term_visual( $term_id, $color, 0 );
+	}
+
+	/**
 	 * Build an inline swatch style from a normalized visual value.
 	 *
 	 * @param array{type?: string, value?: string} $visual Normalized visual value.

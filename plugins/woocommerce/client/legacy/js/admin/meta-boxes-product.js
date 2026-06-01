@@ -996,6 +996,11 @@ jQuery( function ( $ ) {
 				currentAttributeTermCreationContext.isVisualAttribute &&
 				postedData
 			) {
+				if ( postedData.wc_visual_attribute_type ) {
+					data.wc_visual_attribute_type =
+						postedData.wc_visual_attribute_type;
+				}
+
 				if ( postedData.term_color ) {
 					data.term_color = postedData.term_color;
 				}

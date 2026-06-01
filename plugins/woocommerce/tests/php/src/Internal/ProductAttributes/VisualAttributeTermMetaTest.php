@@ -77,6 +77,16 @@ class VisualAttributeTermMetaTest extends WC_Unit_Test_Case {
 
 			$this->assertSame( '', get_term_meta( $term_id, 'color', true ), 'Color meta should be removed when image takes precedence.' );
 			$this->assertSame( (string) $image_id, get_term_meta( $term_id, 'image', true ), 'Image should take precedence when both values are provided.' );
+
+			VisualAttributeTermMeta::save_term_visual_by_type( $term_id, VisualAttributeTermMeta::TYPE_COLOR, '#445566', $image_id );
+
+			$this->assertSame( '#445566', get_term_meta( $term_id, 'color', true ), 'Selected color type should save color even when image is posted.' );
+			$this->assertSame( '', get_term_meta( $term_id, 'image', true ), 'Selected color type should remove stale image meta.' );
+
+			VisualAttributeTermMeta::save_term_visual_by_type( $term_id, VisualAttributeTermMeta::TYPE_IMAGE, '#778899', $image_id );
+
+			$this->assertSame( '', get_term_meta( $term_id, 'color', true ), 'Selected image type should remove stale color meta.' );
+			$this->assertSame( (string) $image_id, get_term_meta( $term_id, 'image', true ), 'Selected image type should save image even when color is posted.' );
 		} finally {
 			if ( $term_id ) {
 				wp_delete_term( $term_id, 'product_cat' );

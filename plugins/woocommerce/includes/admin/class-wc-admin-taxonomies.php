@@ -497,10 +497,16 @@ class WC_Admin_Taxonomies {
 			return;
 		}
 
+		$visual_type = VisualAttributeTermMeta::TYPE_COLOR;
+		if ( isset( $_POST['wc_visual_attribute_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$posted_visual_type = wc_clean( wp_unslash( $_POST['wc_visual_attribute_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$visual_type        = is_string( $posted_visual_type ) ? $posted_visual_type : VisualAttributeTermMeta::TYPE_COLOR;
+		}
+
 		$color_value = isset( $_POST['term_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['term_color'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$image_id    = isset( $_POST['term_image'] ) ? absint( wp_unslash( $_POST['term_image'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
-		VisualAttributeTermMeta::save_term_visual( (int) $term_id, $color_value ?? '', $image_id );
+		VisualAttributeTermMeta::save_term_visual_by_type( (int) $term_id, $visual_type, $color_value ?? '', $image_id );
 	}
 
 	/**

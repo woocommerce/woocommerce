@@ -142,6 +142,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$visual_taxonomy     = null;
 		$text_taxonomy       = null;
 		$visual_term_id      = 0;
+		$image_term_id       = 0;
+		$color_type_term_id  = 0;
 		$text_term_id        = 0;
 		$image_id            = 0;
 		$suffix              = (string) wp_rand( 1000, 9999 );
@@ -175,10 +177,11 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 			$this->_setRole( 'administrator' );
 
-			$_POST['security']   = wp_create_nonce( 'add-attribute' );
-			$_POST['taxonomy']   = $visual_taxonomy;
-			$_POST['term']       = 'Cerulean ' . $suffix;
-			$_POST['term_color'] = '#336699';
+			$_POST['security']                 = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']                 = $visual_taxonomy;
+			$_POST['term']                     = 'Cerulean ' . $suffix;
+			$_POST['wc_visual_attribute_type'] = 'color';
+			$_POST['term_color']               = '#336699';
 
 			$visual_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
 			$visual_term_id  = isset( $visual_response['term_id'] ) ? absint( $visual_response['term_id'] ) : 0;
@@ -198,22 +201,33 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 			update_post_meta( $image_id, '_wp_attached_file', 'visual-ajax-term-image.jpg' );
 
-			$_POST['security'] = wp_create_nonce( 'add-attribute' );
-			$_POST['taxonomy'] = $visual_taxonomy;
-			$_POST['term']     = 'Pattern ' . $suffix;
-			unset( $_POST['term_color'] );
-			$_POST['term_image'] = (string) $image_id;
+			$_POST['security']                 = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']                 = $visual_taxonomy;
+			$_POST['term']                     = 'Color selected ' . $suffix;
+			$_POST['wc_visual_attribute_type'] = 'color';
+			$_POST['term_color']               = '#445566';
+			$_POST['term_image']               = (string) $image_id;
+
+			$color_type_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
+			$color_type_term_id  = isset( $color_type_response['term_id'] ) ? absint( $color_type_response['term_id'] ) : 0;
+
+			$this->assertNotEmpty( $color_type_term_id, 'The visual attribute term with selected color type should be created.' );
+			$this->assertSame( '#445566', get_term_meta( $color_type_term_id, 'color', true ), 'Selected color type should store color even when image is posted.' );
+			$this->assertSame( '', get_term_meta( $color_type_term_id, 'image', true ), 'Selected color type should ignore stale image values.' );
+
+			$_POST['security']                 = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']                 = $visual_taxonomy;
+			$_POST['term']                     = 'Pattern ' . $suffix;
+			$_POST['wc_visual_attribute_type'] = 'image';
+			$_POST['term_color']               = '#abcdef';
+			$_POST['term_image']               = (string) $image_id;
 
 			$image_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
 			$image_term_id  = isset( $image_response['term_id'] ) ? absint( $image_response['term_id'] ) : 0;
 
 			$this->assertNotEmpty( $image_term_id, 'The visual attribute term with image should be created.' );
-			$this->assertSame( (string) $image_id, get_term_meta( $image_term_id, 'image', true ), 'Visual attribute terms should store the posted image.' );
-			$this->assertSame( '', get_term_meta( $image_term_id, 'color', true ), 'Visual attribute terms should not store color meta when only image is posted.' );
-
-			if ( $image_term_id && taxonomy_exists( $visual_taxonomy ) ) {
-				wp_delete_term( $image_term_id, $visual_taxonomy );
-			}
+			$this->assertSame( (string) $image_id, get_term_meta( $image_term_id, 'image', true ), 'Selected image type should store image even when color is posted.' );
+			$this->assertSame( '', get_term_meta( $image_term_id, 'color', true ), 'Selected image type should ignore stale color values.' );
 
 			$_POST['security']   = wp_create_nonce( 'add-attribute' );
 			$_POST['taxonomy']   = $text_taxonomy;
@@ -226,7 +240,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			$this->assertNotEmpty( $text_term_id, 'The text attribute term should be created.' );
 			$this->assertSame( '', get_term_meta( $text_term_id, 'color', true ), 'Text attribute terms should ignore posted colors.' );
 		} finally {
-			unset( $_POST['security'], $_POST['taxonomy'], $_POST['term'], $_POST['term_color'], $_POST['term_image'] );
+			unset( $_POST['security'], $_POST['taxonomy'], $_POST['term'], $_POST['wc_visual_attribute_type'], $_POST['term_color'], $_POST['term_image'] );
 
 			if ( $image_id ) {
 				wp_delete_attachment( $image_id, true );
@@ -234,6 +248,14 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 			if ( $visual_term_id && taxonomy_exists( $visual_taxonomy ) ) {
 				wp_delete_term( $visual_term_id, $visual_taxonomy );
+			}
+
+			if ( $image_term_id && taxonomy_exists( $visual_taxonomy ) ) {
+				wp_delete_term( $image_term_id, $visual_taxonomy );
+			}
+
+			if ( $color_type_term_id && taxonomy_exists( $visual_taxonomy ) ) {
+				wp_delete_term( $color_type_term_id, $visual_taxonomy );
 			}
 
 			if ( $text_term_id && taxonomy_exists( $text_taxonomy ) ) {
