@@ -65,7 +65,11 @@ const Edit = ( props: EditProps ) => {
 			resourceName: 'products/attributes/terms',
 			resourceValues: [ attributeObject?.id || 0 ],
 			shouldSelect: !! attributeObject?.id,
-			query: { orderby: 'menu_order', hide_empty: hideEmpty },
+			query: {
+				orderby: 'menu_order',
+				hide_empty: hideEmpty,
+				__experimental_visual: true,
+			},
 		} );
 
 	const { data: filteredCounts, isLoading: isFilterCountsLoading } =
