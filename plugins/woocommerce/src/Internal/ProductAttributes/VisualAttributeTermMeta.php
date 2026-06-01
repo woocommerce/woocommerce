@@ -71,10 +71,28 @@ class VisualAttributeTermMeta {
 	 */
 	public static function get_term_visuals( array $term_ids, string $image_size = 'thumbnail' ): array {
 		$visuals  = array();
+		$term_ids = self::prime_term_visual_caches( $term_ids );
+
+		foreach ( $term_ids as $term_id ) {
+			$visuals[ $term_id ] = self::build_term_visual( $term_id, $image_size );
+		}
+
+		return $visuals;
+	}
+
+	/**
+	 * Prime caches needed to build visual values for terms.
+	 *
+	 * @param array $term_ids Term IDs.
+	 * @return array<int> Normalized term IDs.
+	 *
+	 * @since 10.9.0
+	 */
+	public static function prime_term_visual_caches( array $term_ids ): array {
 		$term_ids = array_values( array_unique( array_filter( array_map( 'absint', $term_ids ) ) ) );
 
 		if ( empty( $term_ids ) ) {
-			return $visuals;
+			return array();
 		}
 
 		update_meta_cache( 'term', $term_ids );
@@ -90,15 +108,10 @@ class VisualAttributeTermMeta {
 
 		$image_ids = array_values( array_unique( $image_ids ) );
 		if ( ! empty( $image_ids ) ) {
-			// Prime caches to reduce future queries.
 			_prime_post_caches( $image_ids, false, true );
 		}
 
-		foreach ( $term_ids as $term_id ) {
-			$visuals[ $term_id ] = self::build_term_visual( $term_id, $image_size );
-		}
-
-		return $visuals;
+		return $term_ids;
 	}
 
 	/**

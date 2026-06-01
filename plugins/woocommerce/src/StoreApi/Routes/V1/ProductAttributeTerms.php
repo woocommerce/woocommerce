@@ -96,7 +96,7 @@ class ProductAttributeTerms extends AbstractTermsRoute {
 	}
 
 	/**
-	 * Prepare attribute terms with batched visual data.
+	 * Prepare attribute terms with primed visual data caches.
 	 *
 	 * @param array            $objects Term objects.
 	 * @param \WP_REST_Request $request Request object.
@@ -106,21 +106,11 @@ class ProductAttributeTerms extends AbstractTermsRoute {
 	 * @since 10.9.0
 	 */
 	protected function prepare_terms_for_response( array $objects, \WP_REST_Request $request ): array {
-		if ( ! $this->schema instanceof ProductAttributeTermSchema || empty( $objects ) ) {
-			return parent::prepare_terms_for_response( $objects, $request );
-		}
-
 		$first_term = reset( $objects );
-		if ( ! $first_term instanceof \WP_Term || ! VisualAttributeTermMeta::is_visual_attribute_taxonomy( $first_term->taxonomy ) ) {
-			return parent::prepare_terms_for_response( $objects, $request );
+		if ( $first_term instanceof \WP_Term && VisualAttributeTermMeta::is_visual_attribute_taxonomy( $first_term->taxonomy ) ) {
+			VisualAttributeTermMeta::prime_term_visual_caches( wp_list_pluck( $objects, 'term_id' ) );
 		}
 
-		$this->schema->set_preloaded_visual_data( VisualAttributeTermMeta::get_term_visuals( wp_list_pluck( $objects, 'term_id' ) ) );
-
-		try {
-			return parent::prepare_terms_for_response( $objects, $request );
-		} finally {
-			$this->schema->clear_preloaded_visual_data();
-		}
+		return parent::prepare_terms_for_response( $objects, $request );
 	}
 }
