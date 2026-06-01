@@ -639,6 +639,30 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
+			'cart_save_for_later'                => array(
+				'name'                         => __( 'Save for Later in Cart', 'woocommerce' ),
+				'description'                  => __(
+					'Let shoppers save cart items to a list to purchase later.',
+					'woocommerce'
+				),
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				// Custom option_key as we expect this setting to move out of features to
+				// a cart/checkout settings section.
+				'option_key'                   => 'woocommerce_cart_save_for_later_enabled',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
+			'product_wishlist'                   => array(
+				'name'                         => __( 'Wishlists', 'woocommerce' ),
+				'description'                  => __(
+					'Let shoppers save products to a wishlist from product pages. Requires the Add to Cart + Options block on the single-product template.',
+					'woocommerce'
+				),
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'option_key'                   => 'woocommerce_product_wishlist_enabled',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			ProductCacheController::FEATURE_NAME => array(
 				'name'                         => __( 'Cache Product Objects', 'woocommerce' ),
 				'description'                  => __(

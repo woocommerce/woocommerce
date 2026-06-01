@@ -29,10 +29,6 @@ const blocks = {
 	'add-to-cart-with-options-variation-selector-attribute-name': {
 		customDir: 'add-to-cart-with-options/variation-selector/attribute-name',
 	},
-	'add-to-cart-with-options-variation-selector-attribute-options': {
-		customDir:
-			'add-to-cart-with-options/variation-selector/attribute-options',
-	},
 	'add-to-cart-with-options-grouped-product-selector': {
 		customDir: 'add-to-cart-with-options/grouped-product-selector',
 	},
@@ -62,6 +58,7 @@ const blocks = {
 	'coming-soon': {},
 	'coupon-code': {},
 	'customer-account': {},
+	dropdown: {},
 	'email-content': {},
 	'featured-category': {
 		customDir: 'featured-items/featured-category',
@@ -118,6 +115,9 @@ const blocks = {
 	'reviews-by-product': {
 		customDir: 'reviews/reviews-by-product',
 	},
+	'saved-for-later': {},
+	wishlist: {},
+	'add-to-wishlist-button': {},
 	'single-product': {},
 	'stock-filter': {},
 	'store-notices': {},

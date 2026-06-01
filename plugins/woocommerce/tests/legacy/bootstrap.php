@@ -180,24 +180,37 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Echo a "Not running GraphQL infrastructure tests" message when the
-	 * current invocation does not include the `wc-phpunit-graphql-infra` suite,
-	 * mirroring the "Not running ajax tests" line printed by WP's own bootstrap
-	 * for the `ajax`, `ms-files` and `external-http` groups.
+	 * Echo "Not running GraphQL …" messages when the current invocation
+	 * does not include the `wc-phpunit-graphql-infra` and/or
+	 * `wc-phpunit-graphql-api` suites, mirroring the "Not running ajax
+	 * tests" line printed by WP's own bootstrap for the `ajax`, `ms-files`
+	 * and `external-http` groups.
 	 *
-	 * The GraphQL infrastructure tests live in their own suite because they
-	 * require PHP 8.1+ and are excluded from the default suite.
+	 * Both GraphQL suites live in their own suites because they require
+	 * PHP 8.1+ and are excluded from the default suite.
 	 */
 	private function maybe_announce_skipped_graphql_infra_tests() {
-		$argv = isset( $GLOBALS['argv'] ) && is_array( $GLOBALS['argv'] ) ? $GLOBALS['argv'] : array();
+		$argv          = isset( $GLOBALS['argv'] ) && is_array( $GLOBALS['argv'] ) ? $GLOBALS['argv'] : array();
+		$running_infra = false;
+		$running_api   = false;
 		foreach ( $argv as $arg ) {
-			if ( 'wc-phpunit-graphql-infra' === $arg || 'wc-phpunit-full' === $arg
-				|| '--testsuite=wc-phpunit-graphql-infra' === $arg || '--testsuite=wc-phpunit-full' === $arg ) {
+			if ( 'wc-phpunit-full' === $arg || '--testsuite=wc-phpunit-full' === $arg ) {
 				return;
+			}
+			if ( 'wc-phpunit-graphql-infra' === $arg || '--testsuite=wc-phpunit-graphql-infra' === $arg ) {
+				$running_infra = true;
+			}
+			if ( 'wc-phpunit-graphql-api' === $arg || '--testsuite=wc-phpunit-graphql-api' === $arg ) {
+				$running_api = true;
 			}
 		}
 
-		echo 'Not running GraphQL infrastructure tests. To execute these, use --testsuite=wc-phpunit-graphql-infra or wc-phpunit-full.' . PHP_EOL;
+		if ( ! $running_infra ) {
+			echo 'Not running GraphQL infrastructure tests. To execute these, use --testsuite=wc-phpunit-graphql-infra or wc-phpunit-full.' . PHP_EOL;
+		}
+		if ( ! $running_api ) {
+			echo 'Not running GraphQL API command tests. To execute these, use --testsuite=wc-phpunit-graphql-api or wc-phpunit-full.' . PHP_EOL;
+		}
 	}
 
 	/**

@@ -28,6 +28,7 @@ import {
 import { productFields } from './fields';
 import {
 	getItemId,
+	getProductEditPostId,
 	getProductListNavigationPath,
 	getProductListTab,
 	getProductsWithEmbeddedVariations,
@@ -318,7 +319,7 @@ export default function ProductList( {
 						{ ...props }
 						href={ getAdminLink(
 							addQueryArgs( 'post.php', {
-								post: item.id,
+								post: getProductEditPostId( item ),
 								action: 'edit',
 							} )
 						) }

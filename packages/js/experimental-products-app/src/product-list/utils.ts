@@ -33,6 +33,10 @@ export function getItemId( item: ProductEntityRecord ) {
 	return item.id.toString();
 }
 
+export function getProductEditPostId( item: ProductEntityRecord ) {
+	return item.parent_id && item.parent_id > 0 ? item.parent_id : item.id;
+}
+
 export function getProductsWithEmbeddedVariations(
 	items: ProductEntityRecord[]
 ): ProductEntityRecord[] {

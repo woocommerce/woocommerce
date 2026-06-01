@@ -3,8 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
+import { Disabled } from '@wordpress/components';
 import clsx from 'clsx';
 import { decodeHtmlEntities } from '@woocommerce/utils';
+import { getSetting } from '@woocommerce/settings';
 import {
 	InspectorControls,
 	useBlockProps,
@@ -53,9 +55,15 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		customSelectedChipBorder,
 	} = attributes;
 	const { isLoading = false, items = [] } =
-		context?.woocommerceSelectableItems ?? {};
+		context?.[ 'woocommerce/selectableItems' ] ?? {};
 
 	const hasColorSwatches = items.some( ( item ) => 'color' in item );
+
+	const globalColors = getSetting< { background?: string; text?: string } >(
+		'globalStylesColors',
+		{}
+	);
+	const colorVars = getColorVars( attributes );
 
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-chips', {
@@ -63,7 +71,16 @@ const Edit = ( props: EditProps ): JSX.Element => {
 			'is-style-swatch': hasColorSwatches,
 			...getColorClasses( attributes ),
 		} ),
-		style: getColorVars( attributes ),
+		style: {
+			'--wc-product-filter-chips-text':
+				colorVars[ '--wc-product-filter-chips-text' ] ||
+				globalColors.text ||
+				undefined,
+			'--wc-product-filter-chips-background':
+				colorVars[ '--wc-product-filter-chips-background' ] ||
+				globalColors.background ||
+				undefined,
+		},
 	} );
 
 	const loadingState = useMemo( () => {
@@ -91,81 +108,93 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	return (
 		<>
 			<div { ...blockProps }>
-				<div className="wc-block-product-filter-chips__items">
-					{ isLoading && loadingState }
-					{ ! isLoading &&
-						( isLongList
-							? items.slice( 0, threshold )
-							: items
-						).map( ( item, index ) => (
-							<div
-								key={ index }
-								className="wc-block-product-filter-chips__item"
-								aria-checked={ !! item.selected }
-							>
-								<span className="wc-block-product-filter-chips__label">
-									<span
-										className={ clsx(
-											'wc-block-product-filter-chips__swatch',
-											{
-												'wc-block-product-filter-chips__swatch--no-color':
-													! item.color,
+				<Disabled>
+					<div className="wc-block-product-filter-chips__items">
+						{ isLoading && loadingState }
+						{ ! isLoading &&
+							( isLongList
+								? items.slice( 0, threshold )
+								: items
+							).map( ( item, index ) => (
+								<div
+									key={ index }
+									className="wc-block-product-filter-chips__item"
+									aria-checked={ !! item.selected }
+								>
+									<span className="wc-block-product-filter-chips__label">
+										<span
+											className={ clsx(
+												'wc-block-product-filter-chips__swatch',
+												{
+													'wc-block-product-filter-chips__swatch--no-color':
+														! item.color,
+												}
+											) }
+											style={
+												item.color
+													? {
+															backgroundColor:
+																item.color,
+													  }
+													: undefined
 											}
-										) }
-										style={
-											item.color
-												? {
-														backgroundColor:
-															item.color,
-												  }
-												: undefined
-										}
-										aria-hidden="true"
-									/>
-									<span className="wc-block-product-filter-chips__text">
-										{ typeof item.label === 'string'
-											? decodeHtmlEntities( item.label )
-											: item.label }
-									</span>
-									{ item.count !== undefined && (
-										<span className="wc-block-product-filter-chips__count">
-											{ ` (${ item.count })` }
+											aria-hidden="true"
+										/>
+										<span className="wc-block-product-filter-chips__text">
+											{ typeof item.label === 'string'
+												? decodeHtmlEntities(
+														item.label
+												  )
+												: item.label }
 										</span>
-									) }
-								</span>
-							</div>
-						) ) }
-				</div>
-				{ ! isLoading && isLongList && (
-					<button className="wc-block-product-filter-chips__show-more">
-						{ __( 'Show more…', 'woocommerce' ) }
-					</button>
-				) }
+										{ item.count !== undefined && (
+											<span className="wc-block-product-filter-chips__count">
+												{ ` (${ item.count })` }
+											</span>
+										) }
+									</span>
+								</div>
+							) ) }
+					</div>
+					{ ! isLoading && isLongList && (
+						<button className="wc-block-product-filter-chips__show-more">
+							{ __( 'Show more…', 'woocommerce' ) }
+						</button>
+					) }
+				</Disabled>
 			</div>
 			<InspectorControls group="color">
 				{ colorGradientSettings.hasColorsOrGradients && (
 					<ColorGradientSettingsDropdown
 						__experimentalIsRenderedInSidebar
 						settings={ [
-							{
-								label: __(
-									'Unselected Chip Text',
-									'woocommerce'
-								),
-								colorValue: chipText.color || customChipText,
-								onColorChange: ( colorValue: string ) => {
-									setChipText( colorValue );
-									setAttributes( {
-										customChipText: colorValue,
-									} );
-								},
-								resetAllFilter: () => {
-									setChipText( '' );
-									setAttributes( {
-										customChipText: '',
-									} );
-								},
-							},
+							...( ! hasColorSwatches
+								? [
+										{
+											label: __(
+												'Unselected Chip Text',
+												'woocommerce'
+											),
+											colorValue:
+												chipText.color ||
+												customChipText,
+											onColorChange: (
+												colorValue: string
+											) => {
+												setChipText( colorValue );
+												setAttributes( {
+													customChipText: colorValue,
+												} );
+											},
+											resetAllFilter: () => {
+												setChipText( '' );
+												setAttributes( {
+													customChipText: '',
+												} );
+											},
+										},
+								  ]
+								: [] ),
 							{
 								label: __(
 									'Unselected Chip Border',
@@ -186,48 +215,60 @@ const Edit = ( props: EditProps ): JSX.Element => {
 									} );
 								},
 							},
-							{
-								label: __(
-									'Unselected Chip Background',
-									'woocommerce'
-								),
-								colorValue:
-									chipBackground.color ||
-									customChipBackground,
-								onColorChange: ( colorValue: string ) => {
-									setChipBackground( colorValue );
-									setAttributes( {
-										customChipBackground: colorValue,
-									} );
-								},
-								resetAllFilter: () => {
-									setChipBackground( '' );
-									setAttributes( {
-										customChipBackground: '',
-									} );
-								},
-							},
-							{
-								label: __(
-									'Selected Chip Text',
-									'woocommerce'
-								),
-								colorValue:
-									selectedChipText.color ||
-									customSelectedChipText,
-								onColorChange: ( colorValue: string ) => {
-									setSelectedChipText( colorValue );
-									setAttributes( {
-										customSelectedChipText: colorValue,
-									} );
-								},
-								resetAllFilter: () => {
-									setSelectedChipText( '' );
-									setAttributes( {
-										customSelectedChipText: '',
-									} );
-								},
-							},
+							...( ! hasColorSwatches
+								? [
+										{
+											label: __(
+												'Unselected Chip Background',
+												'woocommerce'
+											),
+											colorValue:
+												chipBackground.color ||
+												customChipBackground,
+											onColorChange: (
+												colorValue: string
+											) => {
+												setChipBackground( colorValue );
+												setAttributes( {
+													customChipBackground:
+														colorValue,
+												} );
+											},
+											resetAllFilter: () => {
+												setChipBackground( '' );
+												setAttributes( {
+													customChipBackground: '',
+												} );
+											},
+										},
+										{
+											label: __(
+												'Selected Chip Text',
+												'woocommerce'
+											),
+											colorValue:
+												selectedChipText.color ||
+												customSelectedChipText,
+											onColorChange: (
+												colorValue: string
+											) => {
+												setSelectedChipText(
+													colorValue
+												);
+												setAttributes( {
+													customSelectedChipText:
+														colorValue,
+												} );
+											},
+											resetAllFilter: () => {
+												setSelectedChipText( '' );
+												setAttributes( {
+													customSelectedChipText: '',
+												} );
+											},
+										},
+								  ]
+								: [] ),
 							{
 								label: __(
 									'Selected Chip Border',
@@ -249,28 +290,37 @@ const Edit = ( props: EditProps ): JSX.Element => {
 									} );
 								},
 							},
-							{
-								label: __(
-									'Selected Chip Background',
-									'woocommerce'
-								),
-								colorValue:
-									selectedChipBackground.color ||
-									customSelectedChipBackground,
-								onColorChange: ( colorValue: string ) => {
-									setSelectedChipBackground( colorValue );
-									setAttributes( {
-										customSelectedChipBackground:
-											colorValue,
-									} );
-								},
-								resetAllFilter: () => {
-									setSelectedChipBackground( '' );
-									setAttributes( {
-										customSelectedChipBackground: '',
-									} );
-								},
-							},
+							...( ! hasColorSwatches
+								? [
+										{
+											label: __(
+												'Selected Chip Background',
+												'woocommerce'
+											),
+											colorValue:
+												selectedChipBackground.color ||
+												customSelectedChipBackground,
+											onColorChange: (
+												colorValue: string
+											) => {
+												setSelectedChipBackground(
+													colorValue
+												);
+												setAttributes( {
+													customSelectedChipBackground:
+														colorValue,
+												} );
+											},
+											resetAllFilter: () => {
+												setSelectedChipBackground( '' );
+												setAttributes( {
+													customSelectedChipBackground:
+														'',
+												} );
+											},
+										},
+								  ]
+								: [] ),
 						] }
 						panelId={ clientId }
 						{ ...colorGradientSettings }

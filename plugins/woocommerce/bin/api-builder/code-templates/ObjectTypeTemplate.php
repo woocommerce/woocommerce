@@ -8,8 +8,9 @@
  * @var string $description
  * @var array  $use_statements
  * @var array  $interfaces - each: ['alias' => string]
- * @var array  $fields - each: ['name', 'type_expr', 'description', 'args' => [], 'deprecation_reason' => ?string, 'paginated_connection' => bool, 'metadata' => array]
- * @var array  $metadata - type-level metadata, name => scalar value.
+ * @var array  $fields - each: ['name', 'type_expr', 'description', 'args' => [], 'deprecation_reason' => ?string, 'paginated_connection' => bool, 'metadata' => array, 'metadata_runtime' => array]
+ * @var array  $metadata - type-level metadata for discovery (`_apiMetadata`); blank when the type opts out via shows_in_metadata_query().
+ * @var array  $metadata_runtime - full type-level metadata, threaded into field gates' $_metadata['type'] slice regardless of discovery opt-out.
  */
 
 $escaped_description = addslashes( $description );
@@ -24,18 +25,24 @@ namespace <?php echo $namespace; ?>;
 
 <?php
 $has_paginated_connection = false;
+$has_authorized_field     = false;
 foreach ( $fields as $f ) {
 	if ( ! empty( $f['paginated_connection'] ) ) {
 		$has_paginated_connection = true;
-		break;
+	}
+	if ( ! empty( $f['authorization']['attribute_expr'] ) && 'true' !== $f['authorization']['attribute_expr'] ) {
+		$has_authorized_field = true;
 	}
 }
+$needs_utils_import = $has_paginated_connection || $has_authorized_field;
 // Drop any caller-supplied import whose effective short name would collide
 // with one of the hardcoded imports emitted below, otherwise the generated
 // file wouldn't compile ("Cannot use ... because the name is already in use").
 $reserved_short_names = array( 'ObjectType', 'Type' );
 if ( $has_paginated_connection ) {
 	$reserved_short_names[] = 'Connection';
+}
+if ( $needs_utils_import ) {
 	$reserved_short_names[] = 'ResolverHelpers';
 }
 // PHP class-name resolution (including `use`) is case-insensitive, so the
@@ -61,8 +68,10 @@ $use_statements             = array_values(
 <?php foreach ( $use_statements as $use ) : ?>
 use <?php echo $use; ?>;
 <?php endforeach; ?>
-<?php if ( $has_paginated_connection ) : ?>
+<?php if ( $needs_utils_import ) : ?>
 use Automattic\WooCommerce\Api\Infrastructure\ResolverHelpers;
+<?php endif; ?>
+<?php if ( $has_paginated_connection ) : ?>
 use Automattic\WooCommerce\Api\Pagination\Connection;
 <?php endif; ?>
 use Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType;
@@ -86,6 +95,16 @@ class <?php echo $class_name; ?> {
 <?php endforeach; ?>
 					),
 <?php endif; ?>
+<?php if ( ! empty( $authorization ) ) : ?>
+					'authorization' => array(
+<?php foreach ( $authorization as $descriptor ) : ?>
+						array(
+							'attribute' => <?php echo var_export( $descriptor['attribute'], true ); ?>,
+							'args'      => <?php echo var_export( $descriptor['args'], true ); ?>,
+						),
+<?php endforeach; ?>
+					),
+<?php endif; ?>
 <?php if ( ! empty( $interfaces ) ) : ?>
 					'interfaces' => fn() => array(
 	<?php foreach ( $interfaces as $iface ) : ?>
@@ -104,6 +123,16 @@ class <?php echo $class_name; ?> {
 							'metadata' => array(
 		<?php foreach ( $field['metadata'] as $meta_name => $meta_value ) : ?>
 								<?php echo var_export( $meta_name, true ); ?> => <?php echo var_export( $meta_value, true ); ?>,
+<?php endforeach; ?>
+							),
+<?php endif; ?>
+		<?php if ( ! empty( $field['authorization']['descriptors'] ) ) : ?>
+							'authorization' => array(
+		<?php foreach ( $field['authorization']['descriptors'] as $descriptor ) : ?>
+								array(
+									'attribute' => <?php echo var_export( $descriptor['attribute'], true ); ?>,
+									'args'      => <?php echo var_export( $descriptor['args'], true ); ?>,
+								),
 <?php endforeach; ?>
 							),
 <?php endif; ?>
@@ -132,8 +161,35 @@ class <?php echo $class_name; ?> {
 	<?php if ( ! empty( $field['deprecation_reason'] ) ) : ?>
 							'deprecationReason' => '<?php echo addslashes( $field['deprecation_reason'] ); ?>',
 <?php endif; ?>
-	<?php if ( ! empty( $field['paginated_connection'] ) ) : ?>
+	<?php
+	$has_field_auth      = ! empty( $field['authorization']['attribute_expr'] ) && 'true' !== $field['authorization']['attribute_expr'];
+	$is_paginated        = ! empty( $field['paginated_connection'] );
+	$field_metadata_expr = var_export( $field['metadata_runtime'], true );
+	$type_metadata_expr  = var_export( $metadata_runtime, true );
+	?>
+	<?php if ( $is_paginated ) : ?>
 							'complexity' => ResolverHelpers::complexity_from_pagination(...),
+<?php endif; ?>
+		<?php if ( $has_field_auth ) : ?>
+							'resolve'    => function( $parent, $args, $context ) {
+								$principal = $context['principal'];
+								$_metadata = array(
+									'query' => $context['_query_metadata'] ?? array(),
+									'type'  => <?php echo $type_metadata_expr; ?>,
+									'field' => <?php echo $field_metadata_expr; ?>,
+								);
+								$_args     = $args;
+								$_parent   = $parent;
+								if ( ! ( <?php echo $field['authorization']['attribute_expr']; ?> ) ) {
+									throw ResolverHelpers::build_field_authorization_error( $principal, '<?php echo $graphql_name; ?>', '<?php echo $field['name']; ?>', '<?php echo $field['authorization']['first_attribute_short']; ?>' );
+								}
+								<?php if ( $is_paginated ) : ?>
+								return ResolverHelpers::translate_exceptions( fn() => $parent-><?php echo $field['name']; ?>->slice( $args ) );
+<?php else : ?>
+								return $parent-><?php echo $field['name']; ?>;
+<?php endif; ?>
+							},
+		<?php elseif ( $is_paginated ) : ?>
 							'resolve'    => fn( $parent, array $args ): Connection => ResolverHelpers::translate_exceptions( fn() => $parent-><?php echo $field['name']; ?>->slice( $args ) ),
 <?php endif; ?>
 						),

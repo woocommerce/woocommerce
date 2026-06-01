@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getContext, getElement } from '@wordpress/interactivity';
 
 /**
  * Internal dependencies
@@ -10,6 +10,7 @@ import type {
 	SelectableItem,
 	SelectableItemsParentStore,
 } from '../../../../types/type-defs/selectable-items';
+import { getClosestColor } from '../../utils/get-closest-color';
 
 type ChipsItem = SelectableItem< {
 	color?: string;
@@ -17,6 +18,8 @@ type ChipsItem = SelectableItem< {
 } >;
 
 const DEFAULT_DISPLAY_LIMIT = 15;
+const CHIP_BACKGROUND_VAR = '--wc-product-filter-chips-background';
+const CHIP_TEXT_VAR = '--wc-product-filter-chips-text';
 
 type ChipsContext = {
 	storeNamespace: string;
@@ -33,6 +36,9 @@ type ChipsStore = {
 	actions: {
 		toggle: () => void;
 		showAll: () => void;
+	};
+	callbacks: {
+		initColors: () => void;
 	};
 };
 
@@ -54,6 +60,31 @@ function normalizeDisplayLimit( displayLimit: number ): number {
 function getCurrentItem(): ChipsItem | undefined {
 	const context = getContext< { item?: ChipsItem } >();
 	return context.item;
+}
+
+function getCssVariable( element: HTMLElement, property: string ): string {
+	return (
+		element.style.getPropertyValue( property ) ||
+		window.getComputedStyle( element ).getPropertyValue( property )
+	).trim();
+}
+
+function initChipColors( element: HTMLElement ): void {
+	const style = element.style;
+
+	if ( ! getCssVariable( element, CHIP_BACKGROUND_VAR ) ) {
+		const backgroundColor = getClosestColor( element, 'backgroundColor' );
+		if ( backgroundColor ) {
+			style.setProperty( CHIP_BACKGROUND_VAR, backgroundColor );
+		}
+	}
+
+	if ( ! getCssVariable( element, CHIP_TEXT_VAR ) ) {
+		const textColor = getClosestColor( element, 'color' );
+		if ( textColor ) {
+			style.setProperty( CHIP_TEXT_VAR, textColor );
+		}
+	}
 }
 
 const { state }: ChipsStore = store< ChipsStore >(
@@ -98,6 +129,16 @@ const { state }: ChipsStore = store< ChipsStore >(
 			showAll() {
 				const context = getContext< ChipsContext >();
 				context.isExpanded = true;
+			},
+		},
+		callbacks: {
+			initColors: () => {
+				const el = getElement();
+				if ( ! el.ref ) {
+					return;
+				}
+
+				initChipColors( el.ref );
 			},
 		},
 	},

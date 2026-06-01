@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Replace hardcoded /wp-content path with WP_CONTENT_DIR constant.

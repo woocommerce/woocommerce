@@ -8,6 +8,7 @@ import type { View } from '@wordpress/dataviews';
  */
 import type { ProductEntityRecord } from '../fields/types';
 import {
+	getProductEditPostId,
 	hasActiveProductListSearchOrFilters,
 	getProductListNavigationPath,
 	getProductsWithEmbeddedVariations,
@@ -64,6 +65,20 @@ describe( 'product list utils', () => {
 					}
 				)
 			).toBe( 'woocommerce-products-dashboard?post_type=product' );
+		} );
+	} );
+
+	describe( 'getProductEditPostId', () => {
+		it( 'returns the product ID for parent products', () => {
+			expect( getProductEditPostId( createProduct( 1 ) ) ).toBe( 1 );
+		} );
+
+		it( 'returns the parent product ID for variations', () => {
+			expect( getProductEditPostId( createProduct( 2, 1 ) ) ).toBe( 1 );
+		} );
+
+		it( 'falls back to the variation ID when a parent ID is missing', () => {
+			expect( getProductEditPostId( createProduct( 2, 0 ) ) ).toBe( 2 );
 		} );
 	} );
 

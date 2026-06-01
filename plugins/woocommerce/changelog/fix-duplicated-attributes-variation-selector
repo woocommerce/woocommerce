@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fix Variation Selector inner blocks showing duplicate attributes in the sidebar
+
+
