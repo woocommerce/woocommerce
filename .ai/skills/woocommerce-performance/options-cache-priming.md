@@ -98,8 +98,6 @@ if ( ! wp_using_ext_object_cache() ) {
 
 **Audit rule:** Any call to `wp_prime_option_caches()` whose key list contains names beginning with `_transient_` or `_site_transient_` must be guarded with `! wp_using_ext_object_cache()`.
 
-**Known instance fixed:** `WC_Product_Variable_Data_Store_CPT::read_product_data()` — primed `_transient_wc_var_prices_<id>` and `_transient_wc_product_children_<id>` unconditionally. Fixed in PR #65440. The same pattern was removed from `WC_Order::needs_processing()` (`prime_needs_processing_transients()`, deprecated 10.8.0) — the order-side shape was more dangerous because it grew without bound (one entry per order ID); the product-side was bounded by catalog size but the root cause was identical.
-
 ---
 
 ## Notes
