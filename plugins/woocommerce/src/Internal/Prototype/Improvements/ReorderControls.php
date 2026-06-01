@@ -114,17 +114,17 @@ class ReorderControls {
 	var RESET_URL         = "' . esc_js( $reset_url ) . '";
 
 	function setVisible( show ) {
-		document.querySelectorAll( ARROW_SELECTOR ).forEach( function ( el ) {
-			el.style.display = show ? "" : "none";
-		} );
-		document.querySelectorAll( HANDLE_SELECTOR ).forEach( function ( el ) {
-			el.style.pointerEvents = show ? "" : "none";
-			el.style.cursor        = show ? "" : "default";
-		} );
-		document.querySelectorAll( INTERACT_SELECTOR ).forEach( function ( el ) {
-			el.style.pointerEvents = show ? "" : "auto";
-			el.style.cursor        = show ? "" : "auto";
-		} );
+		var hideStyle = document.getElementById( "wc-proto-reorder-hide" );
+		if ( show ) {
+			if ( hideStyle ) { hideStyle.remove(); }
+		} else {
+			if ( ! hideStyle ) {
+				var s = document.createElement( "style" );
+				s.id = "wc-proto-reorder-hide";
+				s.textContent = ".postbox-header .handle-order-higher, .postbox-header .handle-order-lower { display: none !important; }";
+				document.head.appendChild( s );
+			}
+		}
 		document.cookie = COOKIE + "=" + ( show ? "1" : "0" ) + ";path=/;max-age=86400";
 	}
 
@@ -161,12 +161,6 @@ class ReorderControls {
 			echo '<style id="wc-proto-reorder-hide">
 				.postbox-header .handle-order-higher,
 				.postbox-header .handle-order-lower { display: none !important; }
-				.meta-box-sortables .postbox-header .hndle { pointer-events: none !important; cursor: default !important; }
-				.meta-box-sortables .postbox-header .hndle a,
-				.meta-box-sortables .postbox-header .hndle button,
-				.meta-box-sortables .postbox-header .hndle select,
-				.meta-box-sortables .postbox-header .hndle input,
-				.meta-box-sortables .postbox-header .hndle label { pointer-events: auto !important; cursor: auto !important; }
 			</style>';
 		}
 	}
@@ -183,8 +177,8 @@ class ReorderControls {
 		?>
 		<script>
 		( function () {
-			var UP_SVG   = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="18 15 12 9 6 15"></polyline></svg>';
-			var DOWN_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+			var UP_SVG   = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 3.9 6.5 9.5l1 1 3.8-3.7V20h1.5V6.8l3.7 3.7 1-1z"/></svg>';
+			var DOWN_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="m16.5 13.5-3.7 3.7V4h-1.5v13.2l-3.8-3.7-1 1 5.5 5.6 5.5-5.6z"/></svg>';
 
 			function replaceButton( btn, svgIcon ) {
 				var srText    = btn.querySelector( '.screen-reader-text' );
@@ -200,17 +194,6 @@ class ReorderControls {
 				btn.style.color        = '#787c82';
 				btn.style.borderRadius = '2px';
 				btn.style.padding      = '0';
-				btn.style.boxShadow    = 'none';
-				btn.style.outline      = 'none';
-
-				btn.addEventListener( 'focus', function () {
-					this.style.boxShadow = 'inset 0 0 0 2px #2271b1';
-					this.style.outline   = '2px solid transparent';
-				} );
-				btn.addEventListener( 'blur', function () {
-					this.style.boxShadow = 'none';
-					this.style.outline   = 'none';
-				} );
 			}
 
 			document.querySelectorAll( '.handle-order-higher' ).forEach( function ( btn ) {
