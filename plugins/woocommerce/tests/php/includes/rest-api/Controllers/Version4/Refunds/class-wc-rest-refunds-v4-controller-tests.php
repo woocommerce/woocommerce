@@ -1639,6 +1639,62 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The 'created' hook receives a request whose line_items include the auto-computed refund_total.
+	 */
+	public function test_refunds_create_hook_sees_normalised_line_items(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 25.00 );
+		$product->save();
+
+		$order = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+					),
+				),
+			)
+		);
+		$items     = $order->get_items();
+		$line_item = reset( $items );
+
+		$captured_line_items = null;
+		$hook                = 'woocommerce_rest_api_v4_refunds_created';
+		$listener            = function ( $refund, $captured_request ) use ( &$captured_line_items ) {
+			$captured_line_items = $captured_request['line_items'];
+		};
+		add_action( $hook, $listener, 10, 2 );
+
+		try {
+			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+			$request->set_body_params(
+				array(
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						array(
+							'line_item_id' => $line_item->get_id(),
+							'quantity'     => 1,
+						),
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 201, $response->get_status() );
+			$this->created_refunds[] = $response->get_data()['id'];
+
+			$this->assertIsArray( $captured_line_items, 'Hook should have fired and captured the request line_items' );
+			$this->assertNotEmpty( $captured_line_items );
+			$this->assertArrayHasKey( 'refund_total', $captured_line_items[0], 'Hook listener should see the auto-computed refund_total on the request' );
+			$this->assertSame( 25.00, (float) $captured_line_items[0]['refund_total'] );
+		} finally {
+			remove_action( $hook, $listener, 10 );
+			$product->delete( true );
+		}
+	}
+
+	/**
 	 * @testdox Refund creation with missing quantity returns a clear invalid_line_item error (not the misleading "amount > 0" cascade).
 	 */
 	public function test_refunds_create_missing_quantity_returns_clear_error(): void {

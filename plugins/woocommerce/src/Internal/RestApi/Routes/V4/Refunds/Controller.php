@@ -298,6 +298,11 @@ class Controller extends AbstractController {
 			// the tax-inclusive total from the order's unit price × quantity.
 			$line_items = $this->data_utils->fill_missing_refund_totals( $request['line_items'] ?? array(), $order );
 
+			// Mirror the augmented array back onto the request so the 'created' hook
+			// and any other downstream readers of $request['line_items'] see
+			// normalised data with refund_total populated.
+			$request->set_param( 'line_items', $line_items );
+
 			// Validate request line_items before proceeding against the order being refunded.
 			$validation_error = $this->data_utils->validate_line_items( $line_items, $order );
 
