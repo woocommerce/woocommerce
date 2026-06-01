@@ -169,7 +169,7 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 			? get_delete_post_link( $post->ID )
 			: '';
 		?>
-<div id="wc-proto-save-header">
+<div id="wc-proto-save-header" data-visibility-label="<?php echo esc_attr__( 'Visibility', 'woocommerce' ); ?>">
 	<a href="<?php echo esc_url( $products_url ); ?>" class="wc-proto-back">
 		&larr; <?php esc_html_e( 'Back to products', 'woocommerce' ); ?>
 	</a>
@@ -248,9 +248,10 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 	}
 
 	/* ── Rename "Publish" metabox title to "Visibility" ────── */
+	var headerEl     = document.getElementById( 'wc-proto-save-header' );
 	var metaboxTitle = document.querySelector( '#submitdiv .hndle span' );
-	if ( metaboxTitle ) {
-		metaboxTitle.textContent = 'Visibility';
+	if ( headerEl && metaboxTitle ) {
+		metaboxTitle.textContent = headerEl.dataset.visibilityLabel || 'Visibility';
 	}
 }() );
 </script>
