@@ -60646,12 +60646,6 @@ parameters:
 			path: src/Internal/Admin/Schedulers/ImportInterface.php
 
 		-
-			message: '#^Access to an undefined static property static\(Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\)\:\:\$name\.$#'
-			identifier: staticProperty.notFound
-			count: 13
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
 			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:delete\(\)\.$#'
 			identifier: staticMethod.notFound
 			count: 1
