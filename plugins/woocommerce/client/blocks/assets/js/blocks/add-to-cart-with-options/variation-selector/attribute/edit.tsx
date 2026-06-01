@@ -96,7 +96,11 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 		resourceName: 'products/attributes/terms',
 		resourceValues: [ attribute?.id || 0 ],
 		shouldSelect: !! attribute?.id && termIds.length > 0,
-		query: { include: termIds, hide_empty: false },
+		query: {
+			include: termIds,
+			hide_empty: false,
+			__experimental_visual: true,
+		},
 	} );
 	const visualByTermId = useMemo( () => {
 		return attributeTerms.reduce< Record< number, VisualAttributeTerm > >(

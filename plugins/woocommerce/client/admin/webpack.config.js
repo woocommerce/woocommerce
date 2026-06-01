@@ -59,6 +59,7 @@ const wcAdminPackages = [
 	'block-templates',
 	'product-editor',
 	'sanitize',
+	'settings-ui-sdk',
 	'remote-logging',
 	'email-editor',
 ];
