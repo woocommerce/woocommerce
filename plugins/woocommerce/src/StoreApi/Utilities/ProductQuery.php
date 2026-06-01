@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use WC_Tax;
 
@@ -360,7 +361,7 @@ class ProductQuery implements QueryClausesGenerator {
 
 		// Batch-prime image attachment caches for the whole collection, rather than once per
 		// product when ProductSchema::get_images() runs during serialization.
-		\Automattic\WooCommerce\Internal\Utilities\ProductUtil::prime_image_caches( $objects );
+		ProductUtil::prime_image_caches( $objects );
 
 		return array(
 			'objects' => $objects,

@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 
@@ -523,7 +524,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// Batch-prime image attachment caches for the whole collection, rather than once per
 		// product when get_images() runs during serialization.
 		if ( ! empty( $result['objects'] ) ) {
-			\Automattic\WooCommerce\Internal\Utilities\ProductUtil::prime_image_caches( $result['objects'] );
+			ProductUtil::prime_image_caches( $result['objects'] );
 		}
 
 		return $result;
