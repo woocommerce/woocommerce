@@ -52,13 +52,15 @@ final class ProductAttributeTermVisualSchema {
 	 *
 	 * @param array    $response Term response.
 	 * @param \WP_Term $term Term object.
+	 * @param array    $visuals_by_term_id Preloaded visual data keyed by term ID.
 	 * @return array
 	 *
 	 * @since 10.9.0
 	 */
-	public static function add_visual_data( array $response, \WP_Term $term ): array {
+	public static function add_visual_data( array $response, \WP_Term $term, array $visuals_by_term_id = array() ): array {
 		if ( VisualAttributeTermMeta::is_visual_attribute_taxonomy( $term->taxonomy ) ) {
-			$response[ self::PROPERTY_NAME ] = VisualAttributeTermMeta::get_term_visual( (int) $term->term_id );
+			$term_id                         = (int) $term->term_id;
+			$response[ self::PROPERTY_NAME ] = $visuals_by_term_id[ $term_id ] ?? VisualAttributeTermMeta::get_term_visual( $term_id );
 		}
 
 		return $response;

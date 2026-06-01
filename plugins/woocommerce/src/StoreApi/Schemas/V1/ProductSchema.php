@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
@@ -861,7 +862,21 @@ class ProductSchema extends AbstractSchema {
 				continue;
 			}
 
-			$terms = $attribute->is_taxonomy() ? array_map( [ $this, 'prepare_product_attribute_taxonomy_value' ], $attribute->get_terms() ) : array_map( [ $this, 'prepare_product_attribute_value' ], $attribute->get_options() );
+			if ( $attribute->is_taxonomy() ) {
+				$attribute_terms = $attribute->get_terms();
+				$term_visuals    = VisualAttributeTermMeta::is_visual_attribute_taxonomy( $attribute->get_name() )
+					? VisualAttributeTermMeta::get_term_visuals( wp_list_pluck( $attribute_terms, 'term_id' ) )
+					: array();
+				$terms           = array_map(
+					function ( $term ) use ( $term_visuals ) {
+						return $this->prepare_product_attribute_taxonomy_value( $term, $term_visuals );
+					},
+					$attribute_terms
+				);
+			} else {
+				$terms = array_map( [ $this, 'prepare_product_attribute_value' ], $attribute->get_options() );
+			}
+
 			// Custom attribute names are sanitized to be the array keys.
 			// So when we do the array_key_exists check below we also need to sanitize the attribute names.
 
@@ -889,12 +904,13 @@ class ProductSchema extends AbstractSchema {
 	 * Prepare an attribute term for the response.
 	 *
 	 * @param \WP_Term $term Term object.
+	 * @param array    $visuals_by_term_id Preloaded visual data keyed by term ID.
 	 * @return object
 	 */
-	protected function prepare_product_attribute_taxonomy_value( \WP_Term $term ) {
+	protected function prepare_product_attribute_taxonomy_value( \WP_Term $term, array $visuals_by_term_id = array() ) {
 		$value = (array) $this->prepare_product_attribute_value( $term->name, $term->term_id, $term->slug );
 
-		return (object) ProductAttributeTermVisualSchema::add_visual_data( $value, $term );
+		return (object) ProductAttributeTermVisualSchema::add_visual_data( $value, $term, $visuals_by_term_id );
 	}
 
 	/**
