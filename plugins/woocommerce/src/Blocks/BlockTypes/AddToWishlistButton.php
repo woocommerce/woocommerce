@@ -8,10 +8,21 @@ use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListRenderer;
 
 /**
- * Add to Wishlist Button block. Single-product toggle for the wishlist, shipped as an inner block of
- * `woocommerce/add-to-cart-with-options` so it renders inside the form's iAPI scope and can read its
- * selected variation. On click, toggles the configured product in the shopper's wishlist via the shared
- * `woocommerce/shopper-lists` iAPI store. Logged-in only and behind the `product_wishlist` feature flag.
+ * Add to Wishlist Button block.
+ *
+ * Single-product trigger UI for the wishlist. Shipped as an inner block of
+ * `woocommerce/add-to-cart-with-options` (ATCWO) via the per-product-type
+ * template parts, so it always renders inside the form's iAPI scope and can
+ * read its `selectedAttributes` context directly. The `ancestor` restriction
+ * in `block.json` prevents merchants from inserting the block outside ATCWO
+ * (where it'd lose iAPI scope and the variation-attribute read would break).
+ *
+ * Hidden for guests and gated by the `product_wishlist` feature flag. On
+ * click, toggles the currently configured product (parent or selected
+ * variation) in the shopper's wishlist via the shared
+ * `woocommerce/shopper-lists` iAPI store. Errors are surfaced through the
+ * page's existing `woocommerce/store-notices` region — no inline notices
+ * area of its own.
  */
 final class AddToWishlistButton extends AbstractBlock {
 	/**
@@ -35,7 +46,8 @@ final class AddToWishlistButton extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		// Guests have no personal list. Bail before enqueuing assets or seeding state.
+		// Guests can't have a wishlist — bail before enqueuing assets or
+		// seeding state.
 		if ( ! is_user_logged_in() ) {
 			return '';
 		}
@@ -57,7 +69,12 @@ final class AddToWishlistButton extends AbstractBlock {
 
 		$items = $this->prefetch_items();
 
-		// Seed the shared shopper-lists store with the REST URL, prefetched items, and a bootstrap nonce.
+		// Seed the shared shopper-lists store the same way the Wishlist
+		// block does — restUrl + starter nonce + prefetched items. The
+		// two blocks may both render on the same page (e.g. the merchant
+		// drops the Wishlist block into a sidebar of single-product); iAPI's
+		// deep-merge keeps the first writer's payload, so seeding identical
+		// values here is a no-op when Wishlist already ran.
 		wp_interactivity_state(
 			'woocommerce/shopper-lists',
 			array(
@@ -72,7 +89,10 @@ final class AddToWishlistButton extends AbstractBlock {
 			)
 		);
 
-		// Visible labels passed through `wp_interactivity_config` for the JS-side getter.
+		// Visible labels flow through `wp_interactivity_config` so the
+		// JS-side getter can pick the right one based on
+		// `state.isInWishlist`. PHP renders the matching one as the
+		// initial server-side label.
 		wp_interactivity_config(
 			'woocommerce/add-to-wishlist-button',
 			array(
@@ -143,8 +163,10 @@ final class AddToWishlistButton extends AbstractBlock {
 	}
 
 	/**
-	 * Prefetch the wishlist items via `rest_do_request()`. Returns an empty
-	 * list for logged-out users, since the route requires authentication.
+	 * Prefetch the wishlist items via `rest_do_request()`. Logged-out
+	 * users short-circuit to an empty list — the route requires
+	 * authentication and we don't want to fire an API call that's only
+	 * going to 401.
 	 *
 	 * @return array<int, array<string, mixed>> Items in the schema response shape.
 	 */
@@ -179,8 +201,10 @@ final class AddToWishlistButton extends AbstractBlock {
 	}
 
 	/**
-	 * Whether the current product is already in the prefetched wishlist. Always false for variable
-	 * products, since the selected variation is not known until JS hydrates.
+	 * Whether the current product (or its parent, for a variable parent
+	 * with no selection yet) is already in the prefetched wishlist. For
+	 * variable products the SSR star is always empty — we can't know which
+	 * variation the shopper will pick before JS hydrates.
 	 *
 	 * @param array<int, array<string, mixed>> $items   Schema-shape items.
 	 * @param \WC_Product                      $product The product being viewed.
@@ -213,7 +237,9 @@ final class AddToWishlistButton extends AbstractBlock {
 	}
 
 	/**
-	 * Visible label shown until the shopper picks variation attributes.
+	 * Visible label when the shopper still needs to pick variation
+	 * attributes before the wishlist toggle can resolve to a specific
+	 * variation.
 	 */
 	private function get_select_options_label(): string {
 		return __( 'Select options first', 'woocommerce' );

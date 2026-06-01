@@ -8,10 +8,10 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
- * Tracks which shopper-list types are enabled and registers the user-facing
- * endpoints, menu items, and rewrite rules that depend on each.
+ * Tracks which shopper-list types are turned on and registers the
+ * user-facing pieces that depend on each.
  *
- * @internal
+ * @internal Just for internal use.
  */
 final class ShopperListsController implements RegisterHooksInterface {
 
@@ -24,17 +24,19 @@ final class ShopperListsController implements RegisterHooksInterface {
 	);
 
 	/**
-	 * Wishlist My Account endpoint slug.
+	 * Wishlist My Account endpoint slug. Wrapped in a method (rather than
+	 * a constant) so a future filter or settings hook can override it
+	 * without touching every call site.
 	 */
 	public function get_wishlist_endpoint(): string {
 		return 'wishlist';
 	}
 
 	/**
-	 * Whether a given list type is enabled, or whether any list type is enabled
+	 * Whether a given list type is on, or whether any list type is on
 	 * when no slug is passed.
 	 *
-	 * @param string|null $list_slug List slug, or null to check any list type.
+	 * @param string|null $list_slug List slug, or null to ask about any type.
 	 */
 	public function is_enabled( ?string $list_slug = null ): bool {
 		if ( null === $list_slug ) {
@@ -147,10 +149,12 @@ final class ShopperListsController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Render the `woocommerce/wishlist` block.
+	 * Render the wishlist endpoint by dispatching to the
+	 * `woocommerce/wishlist` block. The block handles the empty state,
+	 * logged-out guard, asset enqueues, and item rendering.
 	 */
 	public function render_wishlist_endpoint(): void {
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the block string is a static literal, and `do_blocks()` invokes the registered block's render callback, which is responsible for its own escaping.
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the block string is a static literal; `do_blocks()` invokes the registered block's render callback, which is responsible for its own escaping.
 		echo do_blocks( '<!-- wp:woocommerce/wishlist /-->' );
 	}
 }

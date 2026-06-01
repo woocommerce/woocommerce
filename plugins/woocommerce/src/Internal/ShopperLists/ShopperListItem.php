@@ -166,9 +166,9 @@ class ShopperListItem {
 	/**
 	 * Resolve and validate the variation attribute array against the variation product.
 	 *
-	 * Mirrors {@see CartController::parse_variation_data()}: specific values come from the variation
-	 * (server-authoritative). "Any" slots must be supplied by the caller with a value that exists on the
-	 * parent product.
+	 * Mirrors {@see CartController::parse_variation_data()}: specific values come from
+	 * the variation (server-authoritative); "any" slots must be supplied by the caller
+	 * with a value that exists on the parent product.
 	 *
 	 * @throws \InvalidArgumentException When the supplied variation attributes are
 	 *                                   missing required values or don't match the
@@ -245,7 +245,7 @@ class ShopperListItem {
 	}
 
 	/**
-	 * Storage key. Also used as the response identifier.
+	 * Storage key — also used as the response identifier.
 	 */
 	public function get_key(): string {
 		return $this->key;
@@ -307,8 +307,9 @@ class ShopperListItem {
 	}
 
 	/**
-	 * Whether the row serves live product data. True when the product (and its parent, for variations) is
-	 * `publish`. Password-protected products still qualify since their page renders behind a prompt.
+	 * Whether the row serves live product data. True when the product (and its
+	 * parent, for variations) is `publish`; password-gated products still
+	 * qualify since their page renders behind a prompt.
 	 */
 	public function is_live(): bool {
 		$product = $this->get_product();
@@ -329,9 +330,10 @@ class ShopperListItem {
 	}
 
 	/**
-	 * Whether the product can be added to the cart. Requires `is_purchasable()`, `is_in_stock()`, and
-	 * a live row. Password-protected products (self or parent) are rejected because the cart-add flow
-	 * cannot prompt for a password.
+	 * Whether the product can be added to the cart. Mirrors the catalog gate
+	 * (`is_purchasable()` && `is_in_stock()`), but additionally requires the
+	 * row to be live and rejects password-gated products (self or parent) —
+	 * cart-add can't prompt for a password.
 	 */
 	public function is_purchasable(): bool {
 		$product = $this->get_product();

@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperList;
 
 /**
- * GET /shopper-lists: collection of the current user's shopper lists.
+ * GET /shopper-lists — collection of the current user's shopper lists.
  */
 class ShopperLists extends AbstractRoute {
 	/**

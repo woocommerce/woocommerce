@@ -35,12 +35,16 @@ type ButtonConfig = {
 type BlockContext = {
 	productId: number;
 	isVariableType: boolean;
-	// Mid-click flag so the button can be disabled while the request is in flight.
+	// Mid-click flag, gated per-block so the button can be disabled while
+	// the request is in flight. Single-instance block, no `pendingKeys`
+	// map needed (Wishlist/SFL use one because they're per-row).
 	isPending: boolean;
 };
 
-// The slice of ATCWO's iAPI context this block reads. Reuses the cart store's `SelectedAttributes`
-// so shape changes flow through automatically.
+// The narrow slice of ATCWO's iAPI context this block consumes. Reuses
+// `SelectedAttributes` from the cart store — the same type ATCWO uses for
+// its own `selectedAttributes` context field — so any shape change there
+// (e.g. adding a `taxonomy` field) flows through here automatically.
 type ATCWOContext = {
 	selectedAttributes: SelectedAttributes[];
 };
@@ -75,8 +79,13 @@ const { state } = store< BlockStore >(
 	'woocommerce/add-to-wishlist-button',
 	{
 		state: {
-			// Resolves to the selected variation's product ID via the products store. Returns 0 while a
-			// variable product has no selection, which `isDisabled` treats as not yet selectable.
+			// For variable products, the effective product is the selected
+			// variation — resolved through the products store's
+			// `productInContext` derived getter, which already encapsulates
+			// "variation if one is selected, otherwise the parent." Returns
+			// 0 when the current resolution is still the variable parent
+			// (i.e. the shopper hasn't picked attributes yet), which
+			// `isDisabled` reads as "not yet selectable."
 			get effectiveProductId(): number {
 				const product = productsState.productInContext;
 				if ( ! product ) {
@@ -99,8 +108,12 @@ const { state } = store< BlockStore >(
 					return null;
 				}
 				const context = getContext< BlockContext >();
-				// For variable products, several attribute combinations can map to the same variation,
-				// so the picked attributes disambiguate the row. See `matchVariationItem`.
+				// For non-variable products, id alone uniquely identifies
+				// the wishlist row. For variable products with "any"
+				// attribute slots, several attribute combinations can map
+				// to the same variation product, so we additionally
+				// disambiguate by the shopper's picked attributes — see
+				// `matchVariationItem` for details.
 				if ( ! context.isVariableType ) {
 					return (
 						list.items.find( ( item ) => item.id === id ) ?? null
@@ -161,10 +174,21 @@ const { state } = store< BlockStore >(
 							existing.key
 						);
 					} else {
-						// ATCWO stores selected attributes by display label ("Color"), but the
-						// shopper-lists route expects taxonomy slugs ("pa_color"). Map via the parent
-						// product's `attributes` table, falling back to the raw name for custom attributes.
-						// TODO: drop this mapping once ATCWO exposes the taxonomy on `selectedAttributes`.
+						// We inherit ATCWO's iAPI context because this block
+						// is an inner block of ATCWO (enforced by
+						// `ancestor` in `block.json`). That lets us read
+						// the shopper-picked attributes — needed for
+						// variations with "any" slots, where the server
+						// can't resolve the line item without them.
+						//
+						// ATCWO stores them by display label ("Color"), but
+						// the shopper-lists route expects taxonomy slugs
+						// ("pa_color"). Map via the parent product's
+						// `attributes` table; fall back to the raw name for
+						// non-taxonomy custom attributes.
+						//
+						// TODO: drop this mapping once ATCWO exposes the
+						// taxonomy on `selectedAttributes` directly.
 						const addToCartContext = getContext< ATCWOContext >(
 							'woocommerce/add-to-cart-with-options'
 						);

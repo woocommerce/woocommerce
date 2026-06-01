@@ -14,7 +14,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
  * POST saves an item to the list either from an existing cart line or from direct item payload fields.
  */
 class ShopperListItems extends AbstractRoute {
-	// Temporary CSRF guard. Will be removed once a Store API-wide trait lands on trunk.
+	// Stopgap CSRF guard, replaced once the upstream trait lands on trunk.
 	use ShopperListsNonceCheck;
 
 	/**
