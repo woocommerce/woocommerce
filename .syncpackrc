@@ -69,7 +69,8 @@
 				"@wordpress/core-data",
 				"@wordpress/data",
 				"@wordpress/editor",
-				"@wordpress/notices"
+				"@wordpress/notices",
+				"@wordpress/postcss-plugins-preset"
 			],
 			"packages": [
 				"@woocommerce/internal-build"

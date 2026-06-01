@@ -31,6 +31,7 @@ const transformModules = {
  */
 const mapWpModules = [
 	'@wordpress/private-apis',
+	'@wordpress/data',
 	'@wordpress/core-data',
 	'@wordpress/components',
 	'@wordpress/html-entities',
@@ -127,20 +128,12 @@ module.exports = {
 			'(?:src|client|assets/js)/.*\\.[jt]sx?$': [
 				'ts-jest',
 				{
-					// Inline override: extends the shared config but flips
-					// jsx to the automatic runtime that Jest expects.
-					// Sidesteps per-package include/exclude/rootDir
-					// restrictions that block ts-jest from compiling
-					// cross-package source files (resolved via the
-					// @woocommerce/* moduleNameMapper). The compiler emits
-					// CJS so Jest's runtime can execute it; package builds
-					// keep their own tsconfigs for publishing.
-					tsconfig: {
-						extends: require.resolve(
-							'@woocommerce/internal-build/configs/tsconfig.json'
-						),
-						compilerOptions: { jsx: 'react-jsx', module: 'commonjs' },
-					},
+					// Dedicated jest tsconfig flips jsx to the automatic
+					// runtime and emits CJS for jest's runtime. Sidesteps
+					// per-package include/exclude/rootDir restrictions that
+					// block ts-jest from compiling cross-package source
+					// files (resolved via the @woocommerce/* moduleNameMapper).
+					tsconfig: path.resolve( __dirname, 'tsconfig-jest.json' ),
 					diagnostics: false,
 				},
 			],
