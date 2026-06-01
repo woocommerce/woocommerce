@@ -47,7 +47,7 @@ class ProductUtil {
 
 	/**
 	 * Prime featured and gallery image attachment caches for a collection of products in a single
-	 * batched query, instead of priming each product's images separately during per-item serialization.
+	 * batched query, instead of priming each product's images separately.
 	 *
 	 * @param array $products Products whose image attachments should be primed. Non-product items are ignored.
 	 * @return void
