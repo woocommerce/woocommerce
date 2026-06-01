@@ -25,12 +25,24 @@ defined( 'ABSPATH' ) || exit;
 if ( ! isset( $has_pin, $user_id, $user, $current_pos_role, $assignable_pos_roles ) || ! $user instanceof WP_User ) {
 	return;
 }
+
+// Post back to the same edit URL so a failed save (e.g. PIN collision) re-renders
+// the form pre-filled instead of bouncing to the list view.
+$form_action_url = add_query_arg(
+	array(
+		'page'       => 'wc-settings',
+		'tab'        => 'point-of-sale',
+		'section'    => 'staff',
+		'edit-staff' => $user_id,
+	),
+	admin_url( 'admin.php' )
+);
 ?>
 
 <div id="pos-staff-fields" class="settings-panel">
 	<h2><?php esc_html_e( 'Edit staff', 'woocommerce' ); ?></h2>
 
-	<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=point-of-sale&section=staff' ) ); ?>">
+	<form method="post" action="<?php echo esc_url( $form_action_url ); ?>">
 		<table class="form-table" role="presentation">
 			<tbody>
 				<tr>

@@ -30,6 +30,19 @@ class WC_Admin_POS_Staff {
 	private const EDIT_NEW = 'new';
 
 	/**
+	 * Submitted form values from a failed add/save submission, keyed by field name.
+	 *
+	 * Set by add()/save() before they bail on error so the form view can re-render
+	 * the user's input — letting them fix only the offending field (typically PIN)
+	 * instead of re-typing everything. PIN is intentionally never stashed: a
+	 * collision means the value was unusable, and asking for a fresh PIN entry on
+	 * retry is both safer and more obvious to the merchant than pre-filling.
+	 *
+	 * @var array<string, string>
+	 */
+	private static array $form_retry = array();
+
+	/**
 	 * Initialize the POS Staff admin actions.
 	 *
 	 * @since 10.9.0
@@ -131,13 +144,28 @@ class WC_Admin_POS_Staff {
 
 	/**
 	 * Add-staff output: pick an existing wp_user (via AJAX search) or create a
-	 * new one inline, assign a POS role, and optionally set a PIN.
+	 * new one inline, assign a POS role, and set a PIN.
 	 *
 	 * @since 10.9.0
 	 */
 	private static function add_output(): void {
 		$assignable_pos_roles  = POSCapabilities::assignable_pos_roles();
 		$assigned_user_ids_csv = self::existing_staff_user_ids_csv();
+
+		// On error, $form_retry is set by add() so the view can re-render the form
+		// pre-filled with the merchant's prior input. On a fresh open, this is empty.
+		$retry_values = self::$form_retry;
+
+		// Render an <option selected> for the previously-chosen existing user so
+		// the wc-customer-search dropdown re-displays them after a failed submit —
+		// the select2 widget needs the option in the DOM to show it as selected.
+		$retry_existing_user = null;
+		if ( ! empty( $retry_values['user_id'] ) ) {
+			$candidate = get_userdata( (int) $retry_values['user_id'] );
+			if ( $candidate instanceof WP_User ) {
+				$retry_existing_user = $candidate;
+			}
+		}
 
 		echo '<div class="wc-pos-staff-page">';
 		include __DIR__ . '/settings/views/html-pos-staff-add.php';
@@ -191,6 +219,13 @@ class WC_Admin_POS_Staff {
 		$current_pos_role     = (string) POSCapabilities::get_pos_role( $user_id );
 		$assignable_pos_roles = POSCapabilities::assignable_pos_roles();
 
+		// On error, save() stashes the chosen role so the view can re-select it
+		// instead of falling back to the stored value.
+		$retry_pos_role = self::$form_retry['pos_role'] ?? '';
+		if ( '' !== $retry_pos_role && in_array( $retry_pos_role, $assignable_pos_roles, true ) ) {
+			$current_pos_role = $retry_pos_role;
+		}
+
 		echo '<div class="wc-pos-staff-page">';
 		include __DIR__ . '/settings/views/html-pos-staff-edit.php';
 		echo '</div>';
@@ -238,7 +273,9 @@ class WC_Admin_POS_Staff {
 	 *    wp_user with an unreachable placeholder email (unless an override is
 	 *    provided) and then assign the POS role.
 	 *
-	 * The PIN is always optional — see the form copy for the rationale.
+	 * A PIN is mandatory — the device authenticates the operator solely by PIN,
+	 * so a row without one would be unusable. PIN uniqueness across staff is
+	 * enforced by POSPinService::set_pin.
 	 */
 	private function add(): void {
 		check_admin_referer( 'woocommerce-pos-staff-add', 'woocommerce_pos_staff_nonce' );
@@ -253,6 +290,15 @@ class WC_Admin_POS_Staff {
 		$pos_role       = isset( $_POST['pos_role'] ) ? sanitize_key( wp_unslash( $_POST['pos_role'] ) ) : '';
 		$pin            = isset( $_POST['pos_pin'] ) ? sanitize_text_field( wp_unslash( $_POST['pos_pin'] ) ) : '';
 
+		// Stash sanitized values so the view can re-render the form pre-filled if
+		// we bail below. PIN is deliberately omitted — the merchant must re-enter it.
+		self::$form_retry = array(
+			'user_id'        => (string) $user_id,
+			'new_user_login' => $new_user_login,
+			'new_user_email' => $new_user_email,
+			'pos_role'       => $pos_role,
+		);
+
 		if ( ! in_array( $pos_role, POSCapabilities::assignable_pos_roles(), true ) ) {
 			WC_Admin_Settings::add_error( __( 'Please choose a valid POS role.', 'woocommerce' ) );
 			return;
@@ -260,13 +306,15 @@ class WC_Admin_POS_Staff {
 
 		$pin_service = wc_get_container()->get( POSPinService::class );
 
-		// Pre-validate the PIN format so a bad value doesn't create a half-rolled-back
-		// user (we'd otherwise insert the wp_user, assign the role, and then fail).
-		if ( '' !== $pin && ! $pin_service->validate_pin_format( $pin ) ) {
+		// Pre-validate the PIN format so a bad value doesn't create a wp_user that
+		// can't be finished (we'd otherwise insert the user and then fail at set_pin).
+		// PIN uniqueness across staff is re-checked inside set_pin below.
+		if ( ! $pin_service->validate_pin_format( $pin ) ) {
 			WC_Admin_Settings::add_error( __( 'PIN must be exactly 4 digits.', 'woocommerce' ) );
 			return;
 		}
 
+		$created_user_id = 0;
 		if ( $user_id > 0 ) {
 			if ( ! get_userdata( $user_id ) ) {
 				WC_Admin_Settings::add_error( __( 'Invalid user.', 'woocommerce' ) );
@@ -282,14 +330,23 @@ class WC_Admin_POS_Staff {
 				WC_Admin_Settings::add_error( $created->get_error_message() );
 				return;
 			}
-			$user_id = $created;
+			$user_id         = $created;
+			$created_user_id = $created;
+		}
+
+		// Set the PIN before the role so a uniqueness collision (or any other
+		// set_pin failure) doesn't leave a user with a role and no PIN. Roll back
+		// a freshly-created user on failure so the form is safe to retry.
+		$pin_result = $pin_service->set_pin( $user_id, $pin );
+		if ( is_wp_error( $pin_result ) ) {
+			if ( $created_user_id > 0 ) {
+				wp_delete_user( $created_user_id );
+			}
+			WC_Admin_Settings::add_error( $pin_result->get_error_message() );
+			return;
 		}
 
 		POSCapabilities::set_pos_role( $user_id, $pos_role );
-
-		if ( '' !== $pin ) {
-			$pin_service->set_pin( $user_id, $pin );
-		}
 
 		wp_safe_redirect( self::list_redirect_url( array( 'added' => '1' ) ) );
 		exit();
@@ -441,7 +498,9 @@ class WC_Admin_POS_Staff {
 	/**
 	 * Handle the "Save staff" form submission for an existing staff member.
 	 *
-	 * Lets the admin change the POS role and/or set/replace the PIN.
+	 * Lets the admin change the POS role and/or replace the PIN. A blank PIN field
+	 * means "keep the existing PIN" — every staff row already has one because PIN
+	 * is required at add time.
 	 */
 	private function save(): void {
 		check_admin_referer( 'woocommerce-pos-staff-edit', 'woocommerce_pos_staff_nonce' );
@@ -454,6 +513,12 @@ class WC_Admin_POS_Staff {
 		$pos_role = isset( $_POST['pos_role'] ) ? sanitize_key( wp_unslash( $_POST['pos_role'] ) ) : '';
 		$pin      = isset( $_POST['pos_pin'] ) ? sanitize_text_field( wp_unslash( $_POST['pos_pin'] ) ) : '';
 
+		// Stash the chosen role so the form view can re-render the selected option
+		// if we bail below. PIN is deliberately omitted — see $form_retry doc.
+		self::$form_retry = array(
+			'pos_role' => $pos_role,
+		);
+
 		if ( ! $user_id || ! POSCapabilities::has_pos_access( $user_id ) ) {
 			WC_Admin_Settings::add_error( __( 'Invalid user or user does not have POS access.', 'woocommerce' ) );
 			return;
@@ -464,8 +529,8 @@ class WC_Admin_POS_Staff {
 			return;
 		}
 
-		POSCapabilities::set_pos_role( $user_id, $pos_role );
-
+		// Apply the PIN first so a uniqueness collision (or any other set_pin
+		// failure) doesn't change the role partway through the request.
 		if ( '' !== $pin ) {
 			$pin_service = wc_get_container()->get( POSPinService::class );
 			$result      = $pin_service->set_pin( $user_id, $pin );
@@ -474,6 +539,8 @@ class WC_Admin_POS_Staff {
 				return;
 			}
 		}
+
+		POSCapabilities::set_pos_role( $user_id, $pos_role );
 
 		wp_safe_redirect( self::list_redirect_url( array( 'saved' => '1' ) ) );
 		exit();
