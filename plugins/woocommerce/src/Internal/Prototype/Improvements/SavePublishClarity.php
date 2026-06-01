@@ -223,18 +223,20 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( $ba
 	var kebabToggle = document.getElementById( 'wc-proto-kebab-toggle' );
 	var kebabMenu   = document.getElementById( 'wc-proto-kebab-menu' );
 
-	function closeKebab() {
-		kebabMenu.classList.remove( 'is-open' );
-		kebabToggle.setAttribute( 'aria-expanded', 'false' );
+	if ( kebabToggle && kebabMenu ) {
+		var closeKebab = function () {
+			kebabMenu.classList.remove( 'is-open' );
+			kebabToggle.setAttribute( 'aria-expanded', 'false' );
+		};
+
+		kebabToggle.addEventListener( 'click', function ( e ) {
+			e.stopPropagation();
+			var isOpen = kebabMenu.classList.toggle( 'is-open' );
+			kebabToggle.setAttribute( 'aria-expanded', isOpen ? 'true' : 'false' );
+		} );
+
+		document.addEventListener( 'click', closeKebab );
 	}
-
-	kebabToggle.addEventListener( 'click', function ( e ) {
-		e.stopPropagation();
-		var isOpen = kebabMenu.classList.toggle( 'is-open' );
-		kebabToggle.setAttribute( 'aria-expanded', isOpen ? 'true' : 'false' );
-	} );
-
-	document.addEventListener( 'click', closeKebab );
 
 	/* ── Wire "Copy to a new draft" URL from hidden metabox link ── */
 	// WooCommerce renders this link inside #submitdiv; we pull its href at runtime.
