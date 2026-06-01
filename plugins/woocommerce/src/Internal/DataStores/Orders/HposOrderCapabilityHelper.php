@@ -8,6 +8,9 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use WC_Order;
+use WP_Post;
+use WP_Post_Type;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -47,44 +50,186 @@ class HposOrderCapabilityHelper {
 			return $caps;
 		}
 
-		// If it's a real (non-placeholder) post, let WordPress handle it normally.
-		$post_type = get_post_type( $args[0] );
-		if ( $post_type && DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE !== $post_type ) {
+		$order_id = absint( $args[0] );
+		if ( ! $order_id ) {
 			return $caps;
 		}
 
-		// Check if the ID corresponds to an HPOS order whose post type uses map_meta_cap.
-		$order_type    = OrderUtil::get_order_type( $args[0] );
+		$post = get_post( $order_id );
+		if ( $post instanceof WP_Post && DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE !== $post->post_type ) {
+			return $caps;
+		}
+
+		$order_type    = OrderUtil::get_order_type( $order_id );
 		$order_type_ob = $order_type ? get_post_type_object( $order_type ) : null;
-		if ( ! $order_type_ob || ! $order_type_ob->map_meta_cap ) {
+		if ( ! ( $order_type_ob instanceof WP_Post_Type ) || ! $order_type_ob->map_meta_cap ) {
 			return $caps;
 		}
 
-		// Build a mapping from generic 'post' caps to the order type's caps.
-		$default_post_type = get_post_type_object( 'post' );
-		if ( ! $default_post_type ) {
+		$order = wc_get_order( $order_id );
+		if ( ! $order instanceof WC_Order ) {
 			return $caps;
 		}
-		$default_caps   = $default_post_type->cap;
-		$order_type_cap = $order_type_ob->cap;
-		$cap_map        = array();
-		foreach ( (array) $default_caps as $key => $generic_cap ) {
-			if ( isset( $order_type_cap->$key ) ) {
-				$cap_map[ $generic_cap ] = $order_type_cap->$key;
+
+		switch ( $cap ) {
+			case 'edit_post':
+				return $this->map_edit_order_caps( $order, $order_type_ob, (int) $user_id, $post );
+			case 'delete_post':
+				return $this->map_delete_order_caps( $order, $order_type_ob, (int) $user_id, $post );
+			case 'read_post':
+				return $this->map_read_order_caps( $order, $order_type_ob, (int) $user_id, $post );
+		}
+
+		return $caps;
+	}
+
+	/**
+	 * Map edit capabilities for an HPOS order without a real order post.
+	 *
+	 * @param WC_Order          $order         Order object.
+	 * @param WP_Post_Type      $order_type_ob Order post type object.
+	 * @param int               $user_id       User ID.
+	 * @param WP_Post|null      $post          Placeholder post, if one exists.
+	 * @return string[] Required primitive capabilities.
+	 */
+	private function map_edit_order_caps( WC_Order $order, WP_Post_Type $order_type_ob, int $user_id, ?WP_Post $post ): array {
+		$status  = $this->get_wp_status_for_order( $order );
+		$is_mine = $user_id === $this->get_author_id( $post );
+
+		if ( $is_mine ) {
+			if ( $this->is_published_status( $status ) ) {
+				return array( $order_type_ob->cap->edit_published_posts );
 			}
+			if ( 'trash' === $status && $this->is_published_status( $this->get_trashed_status( $order ) ) ) {
+				return array( $order_type_ob->cap->edit_published_posts );
+			}
+			return array( $order_type_ob->cap->edit_posts );
 		}
 
-		$new_caps = array_map( fn( $c ) => $cap_map[ $c ] ?? $c, $caps );
-
-		// If WordPress returned 'do_not_allow' (no post found), replace with
-		// the appropriate "others" cap since we confirmed the order exists in HPOS.
-		if ( in_array( 'do_not_allow', $new_caps, true ) ) {
-			$others_cap = 'delete_post' === $cap
-				? $order_type_ob->cap->delete_others_posts
-				: $order_type_ob->cap->edit_others_posts;
-			$new_caps   = array( $others_cap );
+		$caps = array( $order_type_ob->cap->edit_others_posts );
+		if ( $this->is_published_status( $status ) ) {
+			$caps[] = $order_type_ob->cap->edit_published_posts;
+		} elseif ( $this->is_private_status( $status ) ) {
+			$caps[] = $order_type_ob->cap->edit_private_posts;
 		}
 
-		return $new_caps;
+		return $caps;
+	}
+
+	/**
+	 * Map delete capabilities for an HPOS order without a real order post.
+	 *
+	 * @param WC_Order          $order         Order object.
+	 * @param WP_Post_Type      $order_type_ob Order post type object.
+	 * @param int               $user_id       User ID.
+	 * @param WP_Post|null      $post          Placeholder post, if one exists.
+	 * @return string[] Required primitive capabilities.
+	 */
+	private function map_delete_order_caps( WC_Order $order, WP_Post_Type $order_type_ob, int $user_id, ?WP_Post $post ): array {
+		$status  = $this->get_wp_status_for_order( $order );
+		$is_mine = $user_id === $this->get_author_id( $post );
+
+		if ( $is_mine ) {
+			if ( $this->is_published_status( $status ) ) {
+				return array( $order_type_ob->cap->delete_published_posts );
+			}
+			if ( 'trash' === $status && $this->is_published_status( $this->get_trashed_status( $order ) ) ) {
+				return array( $order_type_ob->cap->delete_published_posts );
+			}
+			return array( $order_type_ob->cap->delete_posts );
+		}
+
+		$caps = array( $order_type_ob->cap->delete_others_posts );
+		if ( $this->is_published_status( $status ) ) {
+			$caps[] = $order_type_ob->cap->delete_published_posts;
+		} elseif ( $this->is_private_status( $status ) ) {
+			$caps[] = $order_type_ob->cap->delete_private_posts;
+		}
+
+		return $caps;
+	}
+
+	/**
+	 * Map read capabilities for an HPOS order without a real order post.
+	 *
+	 * @param WC_Order          $order         Order object.
+	 * @param WP_Post_Type      $order_type_ob Order post type object.
+	 * @param int               $user_id       User ID.
+	 * @param WP_Post|null      $post          Placeholder post, if one exists.
+	 * @return string[] Required primitive capabilities.
+	 */
+	private function map_read_order_caps( WC_Order $order, WP_Post_Type $order_type_ob, int $user_id, ?WP_Post $post ): array {
+		$status_obj = get_post_status_object( $this->get_wp_status_for_order( $order ) );
+		if ( ! $status_obj ) {
+			return array( $order_type_ob->cap->edit_others_posts );
+		}
+
+		if ( $status_obj->public || $user_id === $this->get_author_id( $post ) ) {
+			return array( $order_type_ob->cap->read );
+		}
+
+		if ( $status_obj->private ) {
+			return array( $order_type_ob->cap->read_private_posts );
+		}
+
+		return $this->map_edit_order_caps( $order, $order_type_ob, $user_id, $post );
+	}
+
+	/**
+	 * Get the WordPress post status equivalent for an order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return string Post status.
+	 */
+	private function get_wp_status_for_order( WC_Order $order ): string {
+		$status = $order->get_status( 'edit' );
+		return wc_is_order_status( 'wc-' . $status ) ? 'wc-' . $status : $status;
+	}
+
+	/**
+	 * Check whether a post status should require published post caps.
+	 *
+	 * @param string $status Post status.
+	 * @return bool True when published caps should be required.
+	 */
+	private function is_published_status( string $status ): bool {
+		$status_obj = get_post_status_object( $status );
+		return in_array( $status, array( 'publish', 'future' ), true ) || ( $status_obj && $status_obj->public );
+	}
+
+	/**
+	 * Check whether a post status should require private post caps.
+	 *
+	 * @param string $status Post status.
+	 * @return bool True when private caps should be required.
+	 */
+	private function is_private_status( string $status ): bool {
+		$status_obj = get_post_status_object( $status );
+		return 'private' === $status || ( $status_obj && $status_obj->private );
+	}
+
+	/**
+	 * Get the previous status stored when an order is trashed.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return string Previous post status.
+	 */
+	private function get_trashed_status( WC_Order $order ): string {
+		$status = $order->get_meta( '_wp_trash_meta_status', true, 'edit' );
+		return is_string( $status ) ? $status : '';
+	}
+
+	/**
+	 * Get the author ID to use for WordPress-style capability checks.
+	 *
+	 * @param WP_Post|null $post Placeholder post, if one exists.
+	 * @return int Author ID.
+	 */
+	private function get_author_id( ?WP_Post $post ): int {
+		if ( $post instanceof WP_Post && 0 < (int) $post->post_author ) {
+			return (int) $post->post_author;
+		}
+
+		return 1;
 	}
 }
