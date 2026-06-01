@@ -69,16 +69,22 @@ const ImageField = ( { input }: { input: HTMLInputElement } ) => {
 	}, [ imageId, input ] );
 
 	useEffect( () => {
+		let isCurrent = true;
+
 		if ( ! imageId ) {
 			setPreviewUrl( '' );
-			return;
+			return () => {
+				isCurrent = false;
+			};
 		}
 
 		const attachmentId = Number.parseInt( imageId, 10 );
 
 		if ( Number.isNaN( attachmentId ) || attachmentId <= 0 ) {
 			setPreviewUrl( '' );
-			return;
+			return () => {
+				isCurrent = false;
+			};
 		}
 
 		const attachment = window.wp.media.attachment( attachmentId );
@@ -86,6 +92,10 @@ const ImageField = ( { input }: { input: HTMLInputElement } ) => {
 		attachment
 			.fetch()
 			.then( () => {
+				if ( ! isCurrent ) {
+					return;
+				}
+
 				const sizes = attachment.get(
 					'sizes'
 				) as MediaAttachment[ 'sizes' ];
@@ -97,8 +107,14 @@ const ImageField = ( { input }: { input: HTMLInputElement } ) => {
 				setPreviewUrl( url );
 			} )
 			.catch( () => {
-				setPreviewUrl( '' );
+				if ( isCurrent ) {
+					setPreviewUrl( '' );
+				}
 			} );
+
+		return () => {
+			isCurrent = false;
+		};
 	}, [ imageId ] );
 
 	const setImageValue = ( attachment: MediaAttachment ) => {
