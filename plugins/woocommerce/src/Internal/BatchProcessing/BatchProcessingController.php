@@ -97,10 +97,18 @@ class BatchProcessingController {
 	 */
 	public function enqueue_processor( string $processor_class_name ): void {
 		$pending_updates = $this->get_enqueued_processors();
-		if ( ! in_array( $processor_class_name, array_keys( $pending_updates ), true ) ) {
-			$pending_updates[] = $processor_class_name;
-			$this->set_enqueued_processors( $pending_updates );
+
+		// De-duplicate defensively. Historically this method compared the class name against array_keys() rather
+		// than the stored values, so the same processor was appended on every call and bloated the option. Collapsing
+		// here also heals stores already carrying duplicate entries on their next enqueue.
+		$deduplicated_updates = array_values( array_unique( $pending_updates ) );
+		if ( ! in_array( $processor_class_name, $deduplicated_updates, true ) ) {
+			$deduplicated_updates[] = $processor_class_name;
 		}
+		if ( $deduplicated_updates !== $pending_updates ) {
+			$this->set_enqueued_processors( $deduplicated_updates );
+		}
+
 		$this->schedule_watchdog_action( false, true );
 	}
 

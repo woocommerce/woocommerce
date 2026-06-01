@@ -51,6 +51,40 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Enqueuing the same processor repeatedly keeps a single entry.
+	 */
+	public function test_enqueue_processor_is_idempotent(): void {
+		$processor = get_class( $this->test_process );
+
+		$this->sut->enqueue_processor( $processor );
+		$this->sut->enqueue_processor( $processor );
+		$this->sut->enqueue_processor( $processor );
+
+		$enqueued = $this->sut->get_enqueued_processors();
+		$this->assertCount( 1, $enqueued, 'Repeated enqueues of the same processor must not create duplicates.' );
+		$this->assertContains( $processor, $enqueued, 'The enqueued processor should still be present.' );
+	}
+
+	/**
+	 * @testdox Enqueuing collapses a pre-existing list bloated with duplicates and persists the cleanup.
+	 */
+	public function test_enqueue_processor_collapses_preexisting_duplicates(): void {
+		$processor = get_class( $this->test_process );
+
+		// Simulate an option bloated by the historical duplicate bug.
+		update_option(
+			BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
+			array_fill( 0, 5, $processor ),
+			false
+		);
+
+		$this->sut->enqueue_processor( $processor );
+
+		$this->assertCount( 1, $this->sut->get_enqueued_processors(), 'Existing duplicates should collapse to a single entry.' );
+		$this->assertCount( 1, get_option( BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME ), 'The de-duplicated list should be persisted.' );
+	}
+
+	/**
 	 * @testdox 'remove_processor' dequeues and unschedules a processor, but the watchdog is kept alive if more processors are still enqueued.
 	 */
 	public function test_remove_processor_when_others_are_still_enqueued() {
