@@ -34,13 +34,6 @@ class ProductSchema extends AbstractSchema {
 	protected $image_attachment_schema;
 
 	/**
-	 * Product attribute term schema instance.
-	 *
-	 * @var ProductAttributeTermSchema
-	 */
-	protected $product_attribute_term_schema;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param ExtendSchema     $extend Rest Extending instance.
@@ -48,24 +41,7 @@ class ProductSchema extends AbstractSchema {
 	 */
 	public function __construct( ExtendSchema $extend, SchemaController $controller ) {
 		parent::__construct( $extend, $controller );
-		$this->image_attachment_schema       = $this->controller->get( ImageAttachmentSchema::IDENTIFIER );
-		$this->product_attribute_term_schema = $this->get_product_attribute_term_schema();
-	}
-
-	/**
-	 * Get the product attribute term schema instance.
-	 *
-	 * @return ProductAttributeTermSchema
-	 * @throws \RuntimeException If the schema controller returns an unexpected schema.
-	 */
-	private function get_product_attribute_term_schema(): ProductAttributeTermSchema {
-		$schema = $this->controller->get( ProductAttributeTermSchema::IDENTIFIER );
-
-		if ( ! $schema instanceof ProductAttributeTermSchema ) {
-			throw new \RuntimeException( 'Product attribute term schema is not available.' );
-		}
-
-		return $schema;
+		$this->image_attachment_schema = $this->controller->get( ImageAttachmentSchema::IDENTIFIER );
 	}
 
 	/**
@@ -352,31 +328,31 @@ class ProductSchema extends AbstractSchema {
 							'items'       => [
 								'type'       => 'object',
 								'properties' => [
-									'id'                   => [
+									'id'      => [
 										'description' => __( 'The term ID, or 0 if the attribute is not a global attribute.', 'woocommerce' ),
 										'type'        => 'integer',
 										'context'     => [ 'view', 'edit', 'embed' ],
 										'readonly'    => true,
 									],
-									'name'                 => [
+									'name'    => [
 										'description' => __( 'The term name.', 'woocommerce' ),
 										'type'        => 'string',
 										'context'     => [ 'view', 'edit', 'embed' ],
 										'readonly'    => true,
 									],
-									'slug'                 => [
+									'slug'    => [
 										'description' => __( 'The term slug.', 'woocommerce' ),
 										'type'        => 'string',
 										'context'     => [ 'view', 'edit', 'embed' ],
 										'readonly'    => true,
 									],
-									'default'              => [
+									'default' => [
 										'description' => __( 'If this is a default attribute', 'woocommerce' ),
 										'type'        => 'boolean',
 										'context'     => [ 'view', 'edit', 'embed' ],
 										'readonly'    => true,
 									],
-									'__experimentalVisual' => $this->product_attribute_term_schema->get_visual_property_schema( [ 'view', 'edit', 'embed' ] ),
+									ProductAttributeTermVisualSchema::PROPERTY_NAME => ProductAttributeTermVisualSchema::get_property_schema( [ 'view', 'edit', 'embed' ] ),
 								],
 							],
 						],
@@ -918,7 +894,7 @@ class ProductSchema extends AbstractSchema {
 	protected function prepare_product_attribute_taxonomy_value( \WP_Term $term ) {
 		$value = (array) $this->prepare_product_attribute_value( $term->name, $term->term_id, $term->slug );
 
-		return (object) $this->product_attribute_term_schema->add_visual_data( $value, $term );
+		return (object) ProductAttributeTermVisualSchema::add_visual_data( $value, $term );
 	}
 
 	/**
