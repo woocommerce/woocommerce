@@ -34,6 +34,15 @@ defined( 'ABSPATH' ) || exit;
 			</a>
 		</p>
 	<?php elseif ( $order ) : ?>
+		<?php
+		$preserved_reason = '';
+		if ( function_exists( 'WC' ) && WC()->session ) {
+			$session_data = WC()->session->get( 'woocommerce_withdrawal_request_data', array() );
+			if ( is_array( $session_data ) && isset( $session_data['order_id'] ) && (int) $session_data['order_id'] === $order->get_id() && ! empty( $session_data['reason'] ) ) {
+				$preserved_reason = (string) $session_data['reason'];
+			}
+		}
+		?>
 		<p><strong><?php esc_html_e( 'Order details', 'woocommerce' ); ?></strong></p>
 		<table class="woocommerce-table shop_table">
 			<tbody>
@@ -71,7 +80,7 @@ defined( 'ABSPATH' ) || exit;
 					rows="4"
 					style="width:100%;"
 					placeholder="<?php esc_attr_e( 'You may optionally provide a reason for your withdrawal. This is not required.', 'woocommerce' ); ?>"
-				></textarea>
+				><?php echo esc_textarea( $preserved_reason ); ?></textarea>
 			</p>
 
 			<p>
@@ -94,15 +103,15 @@ defined( 'ABSPATH' ) || exit;
 			<tbody>
 				<?php foreach ( $eligible_orders as $eligible_order ) : ?>
 					<tr>
-						<td><?php echo esc_html( $eligible_order->get_order_number() ); ?></td>
-						<td>
+						<td data-title="<?php esc_attr_e( 'Order', 'woocommerce' ); ?>"><?php echo esc_html( $eligible_order->get_order_number() ); ?></td>
+						<td data-title="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>">
 							<?php
 							$date = $eligible_order->get_date_completed() ? $eligible_order->get_date_completed() : $eligible_order->get_date_created();
 							echo esc_html( wc_format_datetime( $date ) );
 							?>
 						</td>
-						<td><?php echo wp_kses_post( $eligible_order->get_formatted_order_total() ); ?></td>
-						<td>
+						<td data-title="<?php esc_attr_e( 'Total', 'woocommerce' ); ?>"><?php echo wp_kses_post( $eligible_order->get_formatted_order_total() ); ?></td>
+						<td data-title="<?php esc_attr_e( 'Action', 'woocommerce' ); ?>">
 							<a class="button" href="<?php echo esc_url( wc_get_endpoint_url( 'request-withdrawal', $eligible_order->get_id(), wc_get_page_permalink( 'myaccount' ) ) ); ?>">
 								<?php esc_html_e( 'Select', 'woocommerce' ); ?>
 							</a>

@@ -13,12 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-// Clear session data after rendering.
-if ( function_exists( 'WC' ) && WC()->session ) {
-	WC()->session->set( 'woocommerce_withdrawal_request_data', null );
-}
-
-$date_created = isset( $request_data['date_created'] ) ? (int) $request_data['date_created'] : time();
+$date_created = isset( $request_data['date_created'] ) ? (int) $request_data['date_created'] : 0;
 $request_id   = isset( $request_id ) && is_string( $request_id ) ? $request_id : '';
 $order_number = ( is_object( $order ) && method_exists( $order, 'get_order_number' ) ) ? $order->get_order_number() : '';
 ?>

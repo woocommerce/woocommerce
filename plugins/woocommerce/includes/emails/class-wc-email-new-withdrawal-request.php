@@ -50,7 +50,7 @@ if ( ! class_exists( 'WC_Email_New_Withdrawal_Request', false ) ) :
 			);
 
 			// Triggers for this email.
-			add_action( 'woocommerce_new_withdrawal_request_notification', array( $this, 'trigger' ), 10, 2 );
+			add_action( 'woocommerce_withdrawal_request_submitted_notification', array( $this, 'trigger' ), 10, 2 );
 
 			// Call parent constructor.
 			parent::__construct();
@@ -80,9 +80,7 @@ if ( ! class_exists( 'WC_Email_New_Withdrawal_Request', false ) ) :
 			$this->placeholders['{site_title}']           = $this->get_blogname();
 			$this->placeholders['{request_date_created}'] = $this->get_request_date_created( $order, $request_id );
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send_notification();
-			}
+			$this->send_notification();
 
 			$this->restore_locale();
 		}
@@ -107,6 +105,9 @@ if ( ! class_exists( 'WC_Email_New_Withdrawal_Request', false ) ) :
 					$date = $request['date_created'];
 					if ( ! $date instanceof WC_DateTime ) {
 						$date = wc_string_to_datetime( (string) $date );
+						if ( false === $date ) {
+							return '';
+						}
 					}
 					return wc_format_datetime( $date );
 				}

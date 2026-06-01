@@ -108,12 +108,12 @@ function wc_get_account_menu_items() {
 	$items = array(
 		'dashboard'       => __( 'Dashboard', 'woocommerce' ),
 		'orders'          => __( 'Orders', 'woocommerce' ),
+		'withdrawals'     => __( 'Withdrawals', 'woocommerce' ),
 		'downloads'       => __( 'Downloads', 'woocommerce' ),
 		'edit-address'    => _n( 'Address', 'Addresses', ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) ? 2 : 1, 'woocommerce' ),
 		'payment-methods' => __( 'Payment methods', 'woocommerce' ),
 		'edit-account'    => __( 'Account details', 'woocommerce' ),
 		'customer-logout' => __( 'Log out', 'woocommerce' ),
-		'withdrawals'     => __( 'Withdrawals', 'woocommerce' ),
 	);
 
 	// Remove missing endpoints.

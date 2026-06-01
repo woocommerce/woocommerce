@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix EU withdrawal flow: show acknowledgment after submit, use order number in admin meta box, limit eligibility to completed orders, replace generic order note with proper withdrawal emails (admin + customer), and notify customer when admin approves or rejects a request.

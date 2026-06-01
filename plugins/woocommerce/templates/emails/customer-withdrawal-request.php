@@ -46,7 +46,7 @@ if ( ! empty( $order->get_billing_first_name() ) ) {
 	</tr>
 	<tr>
 		<th class="td" scope="row" style="text-align:left;"><?php esc_html_e( 'Date of request', 'woocommerce' ); ?></th>
-		<td class="td" style="text-align:left;"><?php echo esc_html( current_time( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ) ); ?></td>
+		<td class="td" style="text-align:left;"><?php echo '' !== $request_date_created ? esc_html( $request_date_created ) : esc_html__( 'N/A', 'woocommerce' ); ?></td>
 	</tr>
 	<tr>
 		<th class="td" scope="row" style="text-align:left;"><?php esc_html_e( 'Status', 'woocommerce' ); ?></th>

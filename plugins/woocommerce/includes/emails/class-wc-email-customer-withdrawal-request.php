@@ -43,13 +43,14 @@ if ( ! class_exists( 'WC_Email_Customer_Withdrawal_Request', false ) ) :
 			$this->template_html  = 'emails/customer-withdrawal-request.php';
 			$this->template_plain = 'emails/plain/customer-withdrawal-request.php';
 			$this->placeholders   = array(
-				'{order_date}'   => '',
-				'{order_number}' => '',
-				'{site_title}'   => '',
+				'{order_date}'           => '',
+				'{order_number}'         => '',
+				'{site_title}'           => '',
+				'{request_date_created}' => '',
 			);
 
 			// Triggers for this email.
-			add_action( 'woocommerce_customer_withdrawal_request_notification', array( $this, 'trigger' ), 10, 2 );
+			add_action( 'woocommerce_withdrawal_request_submitted_notification', array( $this, 'trigger' ), 10, 2 );
 
 			// Call parent constructor.
 			parent::__construct();
@@ -71,18 +72,47 @@ if ( ! class_exists( 'WC_Email_Customer_Withdrawal_Request', false ) ) :
 				return;
 			}
 
-			$this->object                         = $order;
-			$this->request_id                     = $request_id;
-			$this->recipient                      = $order->get_billing_email();
-			$this->placeholders['{order_date}']   = wc_format_datetime( $order->get_date_created() );
-			$this->placeholders['{order_number}'] = $order->get_order_number();
-			$this->placeholders['{site_title}']   = $this->get_blogname();
+			$this->object                                 = $order;
+			$this->request_id                             = $request_id;
+			$this->recipient                              = $order->get_billing_email();
+			$this->placeholders['{order_date}']           = wc_format_datetime( $order->get_date_created() );
+			$this->placeholders['{order_number}']         = $order->get_order_number();
+			$this->placeholders['{site_title}']           = $this->get_blogname();
+			$this->placeholders['{request_date_created}'] = $this->get_request_date_created( $order, $request_id );
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send_notification();
-			}
+			$this->send_notification();
 
 			$this->restore_locale();
+		}
+
+		/**
+		 * Get the date the withdrawal request was created from the order meta.
+		 *
+		 * @param WC_Order $order      Order object.
+		 * @param string   $request_id Withdrawal request ID.
+		 * @return string Formatted date or empty string.
+		 */
+		private function get_request_date_created( $order, $request_id ) {
+			if ( ! is_a( $order, 'WC_Order' ) || '' === $request_id ) {
+				return '';
+			}
+			$requests = $order->get_meta( '_withdrawal_requests', true );
+			if ( ! is_array( $requests ) ) {
+				return '';
+			}
+			foreach ( $requests as $request ) {
+				if ( isset( $request['request_id'] ) && $request['request_id'] === $request_id && ! empty( $request['date_created'] ) ) {
+					$date = $request['date_created'];
+					if ( ! $date instanceof WC_DateTime ) {
+						$date = wc_string_to_datetime( (string) $date );
+						if ( false === $date ) {
+							return '';
+						}
+					}
+					return wc_format_datetime( $date );
+				}
+			}
+			return '';
 		}
 
 		/**
@@ -114,13 +144,14 @@ if ( ! class_exists( 'WC_Email_Customer_Withdrawal_Request', false ) ) :
 			return wc_get_template_html(
 				$this->template_html,
 				array(
-					'order'              => $this->object,
-					'request_id'         => $this->request_id,
-					'email_heading'      => $this->get_heading(),
-					'additional_content' => $this->get_additional_content(),
-					'sent_to_admin'      => false,
-					'plain_text'         => false,
-					'email'              => $this,
+					'order'                => $this->object,
+					'request_id'           => $this->request_id,
+					'request_date_created' => $this->placeholders['{request_date_created}'],
+					'email_heading'        => $this->get_heading(),
+					'additional_content'   => $this->get_additional_content(),
+					'sent_to_admin'        => false,
+					'plain_text'           => false,
+					'email'                => $this,
 				)
 			);
 		}
@@ -134,13 +165,14 @@ if ( ! class_exists( 'WC_Email_Customer_Withdrawal_Request', false ) ) :
 			return wc_get_template_html(
 				$this->template_plain,
 				array(
-					'order'              => $this->object,
-					'request_id'         => $this->request_id,
-					'email_heading'      => $this->get_heading(),
-					'additional_content' => $this->get_additional_content(),
-					'sent_to_admin'      => false,
-					'plain_text'         => true,
-					'email'              => $this,
+					'order'                => $this->object,
+					'request_id'           => $this->request_id,
+					'request_date_created' => $this->placeholders['{request_date_created}'],
+					'email_heading'        => $this->get_heading(),
+					'additional_content'   => $this->get_additional_content(),
+					'sent_to_admin'        => false,
+					'plain_text'           => true,
+					'email'                => $this,
 				)
 			);
 		}

@@ -42,10 +42,6 @@ class WithdrawalController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function register() {
-		// Endpoint content handlers.
-		add_action( 'woocommerce_account_withdrawals_endpoint', array( $this, 'output_withdrawals' ) );
-		add_action( 'woocommerce_account_request-withdrawal_endpoint', array( $this, 'output_request_withdrawal' ) );
-
 		// Form submission handler.
 		add_action( 'template_redirect', array( $this, 'handle_withdrawal_request' ) );
 
@@ -130,7 +126,13 @@ class WithdrawalController implements RegisterHooksInterface {
 			?>
 			<div class="withdrawal-request" style="margin-bottom:1em;padding-bottom:1em;border-bottom:1px solid #ddd;">
 				<p>
-					<strong><?php esc_html_e( 'Request', 'woocommerce' ); ?> #<?php echo esc_html( $request['request_id'] ?? '' ); ?></strong><br>
+					<strong>
+						<?php
+						/* translators: %s: order number */
+						printf( esc_html__( 'Withdrawal request for Order #%s', 'woocommerce' ), esc_html( $order->get_order_number() ) );
+						?>
+					</strong>
+					<code style="display:block;margin-top:4px;font-size:11px;color:#666;"><?php echo esc_html( $request['request_id'] ?? '' ); ?></code><br>
 					<?php echo esc_html( $date ); ?><br>
 					<span class="withdrawal-status" style="display:inline-block;padding:2px 8px;border-radius:3px;background:#f0f0f1;">
 						<?php echo esc_html( $status_label ); ?>
@@ -224,6 +226,16 @@ class WithdrawalController implements RegisterHooksInterface {
 		$requests = $this->get_withdrawal_requests( $order );
 		if ( ! isset( $requests[ $request_index ] ) ) {
 			wp_send_json_error( __( 'Withdrawal request not found.', 'woocommerce' ) );
+		}
+
+		// Race condition guard: only update if the indexed request is still pending
+		// and matches the request_id supplied in the form.
+		if (
+			! isset( $requests[ $request_index ]['request_id'] ) ||
+			$requests[ $request_index ]['request_id'] !== $raw_request_id ||
+			'pending' !== ( $requests[ $request_index ]['status'] ?? '' )
+		) {
+			wp_send_json_error( __( 'This withdrawal request has already been processed.', 'woocommerce' ) );
 		}
 
 		$new_status                                 = 'approve' === $request_action ? 'approved' : 'rejected';
@@ -336,14 +348,13 @@ class WithdrawalController implements RegisterHooksInterface {
 		$requests = $this->get_withdrawal_requests( $order );
 
 		$withdrawal_data = array(
-			'request_id'                  => $request_id,
-			'date_created'                => time(),
-			'status'                      => 'pending',
-			'reason'                      => $reason,
-			'items'                       => array(),
+			'request_id'   => $request_id,
+			'date_created' => time(),
+			'status'       => 'pending',
+			'reason'       => $reason,
+			'items'        => array(),
 			// Full withdrawal by default.
-							'admin_notes' => '',
-			'ip_address'                  => wc_get_ip_address(),
+			'admin_notes'  => '',
 		);
 
 		$requests[] = $withdrawal_data;
@@ -360,9 +371,9 @@ class WithdrawalController implements RegisterHooksInterface {
 		 */
 		do_action( 'woocommerce_withdrawal_request_submitted', $order->get_id(), $request_id );
 
-		// Add customer-visible order note.
+		// Add admin-only order note (customer notification sent via dedicated email class).
 		/* translators: %s: withdrawal request ID */
-		$order->add_order_note( sprintf( __( 'Withdrawal request #%s submitted by customer.', 'woocommerce' ), $request_id ), true );
+		$order->add_order_note( sprintf( __( 'Withdrawal request #%s submitted by customer.', 'woocommerce' ), $request_id ) );
 		$order->save();
 
 		// Redirect to acknowledgment page.
@@ -387,12 +398,20 @@ class WithdrawalController implements RegisterHooksInterface {
 	public function output_withdrawals( $current_page ) {
 		$current_page = max( 1, absint( $current_page ) );
 
+		// Only fetch orders that already have at least one withdrawal request, so pagination
+		// surfaces older withdrawal history (not just the most recent N orders).
 		$customer_orders = wc_get_orders(
 			array(
-				'customer' => get_current_user_id(),
-				'limit'    => 10,
-				'page'     => $current_page,
-				'return'   => 'ids',
+				'customer'   => get_current_user_id(),
+				'limit'      => 10,
+				'page'       => $current_page,
+				'return'     => 'ids',
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'     => self::WITHDRAWAL_REQUESTS_META_KEY,
+						'compare' => 'EXISTS',
+					),
+				),
 			)
 		);
 
@@ -447,17 +466,12 @@ class WithdrawalController implements RegisterHooksInterface {
 			return;
 		}
 
-		if ( ! $this->is_order_eligible_for_withdrawal( $order ) ) {
-			wc_add_notice( __( 'This order is not eligible for withdrawal.', 'woocommerce' ), 'error' );
-			return;
-		}
-
 		$submitted  = ! empty( $_GET['submitted'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$request_id = ! empty( $_GET['request_id'] ) ? sanitize_text_field( wp_unslash( $_GET['request_id'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$step       = ! empty( $_GET['step'] ) ? sanitize_text_field( wp_unslash( $_GET['step'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( $submitted && $request_id ) {
-			// Acknowledgment screen.
+			// Acknowledgment screen — bypass eligibility gate (request already exists).
 			$requests     = $this->get_withdrawal_requests( $order );
 			$request_data = null;
 			foreach ( $requests as $r ) {
@@ -474,6 +488,11 @@ class WithdrawalController implements RegisterHooksInterface {
 				exit;
 			}
 
+			// Clear session data before rendering so a theme override that drops the cleanup still works.
+			if ( function_exists( 'WC' ) && WC()->session ) {
+				WC()->session->set( 'woocommerce_withdrawal_request_data', null );
+			}
+
 			wc_get_template(
 				'myaccount/form-request-withdrawal-submitted.php',
 				array(
@@ -482,6 +501,11 @@ class WithdrawalController implements RegisterHooksInterface {
 					'request_data' => $request_data,
 				)
 			);
+			return;
+		}
+
+		if ( ! $this->is_order_eligible_for_withdrawal( $order ) ) {
+			wc_add_notice( __( 'This order is not eligible for withdrawal.', 'woocommerce' ), 'error' );
 			return;
 		}
 
@@ -552,6 +576,8 @@ class WithdrawalController implements RegisterHooksInterface {
 		 */
 		$window_days = apply_filters( 'woocommerce_withdrawal_window_days', self::DEFAULT_WITHDRAWAL_WINDOW_DAYS );
 
+		// Withdrawal window starts on the order completion date (delivery/service fulfillment).
+		// Fall back to creation date only if completion is missing (rare, e.g. legacy orders).
 		$date_object = $order->get_date_completed() ? $order->get_date_completed() : $order->get_date_created();
 		if ( ! $date_object ) {
 			return false;
@@ -563,10 +589,11 @@ class WithdrawalController implements RegisterHooksInterface {
 			return false;
 		}
 
-		// Must not already have a pending withdrawal request.
+		// Block if any withdrawal request already exists for this order (pending, approved, or rejected).
+		// Per EU Directive 2023/2673, only one withdrawal request per contract.
 		$requests = $this->get_withdrawal_requests( $order );
 		foreach ( $requests as $request ) {
-			if ( 'pending' === $request['status'] ) {
+			if ( ! empty( $request['status'] ) ) {
 				return false;
 			}
 		}
@@ -596,8 +623,6 @@ class WithdrawalController implements RegisterHooksInterface {
 		return apply_filters(
 			'woocommerce_valid_order_statuses_for_withdrawal',
 			array(
-				'processing',
-				'on-hold',
 				'completed',
 			)
 		);

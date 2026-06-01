@@ -123,6 +123,8 @@ class WC_Emails {
 				'woocommerce_new_customer_note',
 				'woocommerce_created_customer',
 				'woocommerce_payment_gateway_enabled',
+				'woocommerce_withdrawal_request_submitted',
+				'woocommerce_withdrawal_request_updated',
 			)
 		);
 
@@ -301,6 +303,7 @@ class WC_Emails {
 			'WC_Email_Admin_Payment_Gateway_Enabled' => __DIR__ . '/emails/class-wc-email-admin-payment-gateway-enabled.php',
 			'WC_Email_Customer_Withdrawal_Request'   => __DIR__ . '/emails/class-wc-email-customer-withdrawal-request.php',
 			'WC_Email_New_Withdrawal_Request'        => __DIR__ . '/emails/class-wc-email-new-withdrawal-request.php',
+			'WC_Email_Customer_Withdrawal_Status'    => __DIR__ . '/emails/class-wc-email-customer-withdrawal-status.php',
 		);
 		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
 			$emails['WC_Email_Customer_POS_Completed_Order'] = __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php';
