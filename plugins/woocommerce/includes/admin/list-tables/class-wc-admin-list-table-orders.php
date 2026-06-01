@@ -598,6 +598,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	protected function render_filters() {
 		$this->orders_list_table->created_via_filter();
 		$this->orders_list_table->customers_filter();
+		$this->orders_list_table->billing_country_filter();
 	}
 
 	/**
@@ -649,6 +650,18 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 					'value'   => $created_via,
 					'compare' => 'IN',
 				),
+			);
+			// @codingStandardsIgnoreEnd
+		}
+
+		// Filter the orders by billing country.
+		if ( ! empty( $_GET['_billing_country'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// @codingStandardsIgnoreStart
+			$query_vars['meta_query']   = $query_vars['meta_query'] ?? array();
+			$query_vars['meta_query'][] = array(
+				'key'     => '_billing_country',
+				'value'   => sanitize_text_field( wp_unslash( $_GET['_billing_country'] ) ),
+				'compare' => '=',
 			);
 			// @codingStandardsIgnoreEnd
 		}

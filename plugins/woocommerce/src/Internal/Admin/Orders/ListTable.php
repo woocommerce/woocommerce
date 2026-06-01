@@ -608,6 +608,12 @@ class ListTable extends WP_List_Table {
 			return;
 		}
 
+		// Validate against the list of valid countries to prevent URL injection of invalid codes.
+		$countries = WC()->countries->get_countries();
+		if ( ! isset( $countries[ $country ] ) ) {
+			return;
+		}
+
 		$this->order_query_args['billing_country'] = $country;
 		$this->has_filter                          = true;
 	}
@@ -1084,9 +1090,9 @@ class ListTable extends WP_List_Table {
 		return apply_filters(
 			'woocommerce_' . $this->order_type . '_list_table_sortable_columns',
 			array(
-				'order_number' => 'ID',
-				'order_date'   => 'date',
-				'order_total'  => 'order_total',
+				'order_number'    => 'ID',
+				'order_date'      => 'date',
+				'order_total'     => 'order_total',
 				'billing_country' => 'billing_country',
 			)
 		);
@@ -1348,11 +1354,14 @@ class ListTable extends WP_List_Table {
 
 		if ( $country_code ) {
 			$countries = WC()->countries->get_countries();
-			$name      = $countries[ $country_code ] ?? $country_code;
-			echo esc_html( $name );
-		} else {
-			echo '&ndash;';
+
+			if ( isset( $countries[ $country_code ] ) ) {
+				echo esc_html( $countries[ $country_code ] );
+				return;
+			}
 		}
+
+		echo '&ndash;';
 	}
 
 	/**
