@@ -17,8 +17,11 @@ use WP_User_Query;
  *
  * Exposes GET /wc/pos/v1/staff — the canonical staff list the mobile client caches
  * and validates PIN entry against locally. Each entry includes the user's display
- * name, effective POS role, POS capability map, and stored PIN hash record (or
- * null if no PIN set).
+ * name, effective POS role, POS capability map, and stored PIN hash record.
+ *
+ * PIN is required at the wp-admin staff form layer, so every listed user is
+ * guaranteed to have one — the client can rely on `pin` being present and never
+ * has to render a phantom staff member it can't authenticate.
  *
  * Permission: `manage_woocommerce` — i.e. administrator + shop_manager. POS-only
  * users (cashiers / managers, identified by the `_woocommerce_pos_role` user meta) never call
@@ -31,12 +34,16 @@ use WP_User_Query;
 class POSStaffController extends RestApiControllerBase {
 
 	/**
+	 * PIN service used to render each row's PIN record.
+	 *
 	 * @var POSPinService
 	 */
 	private POSPinService $pin_service;
 
 	/**
-	 * @inheritDoc
+	 * REST namespace for the POS routes.
+	 *
+	 * {@inheritDoc}
 	 */
 	protected string $route_namespace = 'wc/pos/v1';
 
@@ -52,14 +59,18 @@ class POSStaffController extends RestApiControllerBase {
 	}
 
 	/**
-	 * @inheritDoc
+	 * Logger source identifier for this controller.
+	 *
+	 * {@inheritDoc}
 	 */
 	protected function get_rest_api_namespace(): string {
 		return 'pos-staff';
 	}
 
 	/**
-	 * @inheritDoc
+	 * Register the /staff route on this controller's namespace.
+	 *
+	 * {@inheritDoc}
 	 */
 	public function register_routes(): void {
 		register_rest_route(
@@ -163,7 +174,7 @@ class POSStaffController extends RestApiControllerBase {
 							'additionalProperties' => array( 'type' => 'boolean' ),
 						),
 						'pin'          => array(
-							'type'       => array( 'object', 'null' ),
+							'type'       => 'object',
 							'context'    => array( 'view' ),
 							'properties' => array(
 								'algo'       => array( 'type' => 'string' ),

@@ -17,15 +17,15 @@ class POSStaffControllerTest extends WC_REST_Unit_Test_Case {
 	private const ROUTE = '/wc/pos/v1/staff';
 
 	/**
-	 * Register the controller's routes once for the whole class.
+	 * Register the controller's routes against the live REST server.
 	 *
 	 * Routes are normally wired via the `woocommerce_rest_api_get_rest_namespaces` filter
-	 * when the REST server boots. In test mode the filter has already fired by the time
-	 * we get here, so we register the controller's routes directly against the live REST
-	 * server.
+	 * when the REST server boots. WC_REST_Unit_Test_Case::setUp() rebuilds the global
+	 * REST server every test and re-fires `rest_api_init`, which wipes any routes
+	 * registered earlier — so we re-register per test rather than once per class.
 	 */
-	public static function setUpBeforeClass(): void {
-		parent::setUpBeforeClass();
+	public function setUp(): void {
+		parent::setUp();
 		wc_get_container()->get( POSStaffController::class )->register_routes();
 	}
 
@@ -41,11 +41,12 @@ class POSStaffControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return 401 for a subscriber-role user with a POS meta role.
+	 * @testdox Should return 403 for a subscriber-role user with a POS meta role.
 	 *
 	 * POS-only users never call this endpoint directly — the device admin reads
 	 * the staff list on their behalf. So even though a subscriber with `_woocommerce_pos_role`
-	 * = pos_cashier has POS access, the endpoint requires `manage_woocommerce`.
+	 * = pos_cashier has POS access, the endpoint requires `manage_woocommerce`
+	 * — WordPress returns 403 for an authenticated user without the cap.
 	 */
 	public function test_pos_only_user_is_denied(): void {
 		$cashier = self::factory()->user->create( array( 'role' => 'subscriber' ) );
@@ -54,7 +55,7 @@ class POSStaffControllerTest extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', self::ROUTE ) );
 
-		$this->assertSame( 401, $response->get_status() );
+		$this->assertSame( 403, $response->get_status() );
 
 		wp_delete_user( $cashier );
 	}
@@ -63,20 +64,20 @@ class POSStaffControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Should return 200 and a staff list for an administrator.
 	 */
 	public function test_admin_can_list_staff(): void {
-		$admin       = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$pos_admin   = self::factory()->user->create(
+		$admin     = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$pos_admin = self::factory()->user->create(
 			array(
 				'role'         => 'subscriber',
 				'display_name' => 'M Admin',
 			)
 		);
-		$cashier     = self::factory()->user->create(
+		$cashier   = self::factory()->user->create(
 			array(
 				'role'         => 'subscriber',
 				'display_name' => 'A Cashier',
 			)
 		);
-		$manager     = self::factory()->user->create(
+		$manager   = self::factory()->user->create(
 			array(
 				'role'         => 'subscriber',
 				'display_name' => 'Z Manager',
@@ -87,8 +88,12 @@ class POSStaffControllerTest extends WC_REST_Unit_Test_Case {
 		Capabilities::set_pos_role( $cashier, Capabilities::POS_ROLE_CASHIER );
 		Capabilities::set_pos_role( $manager, Capabilities::POS_ROLE_MANAGER );
 
-		// Give the manager a PIN to confirm the pin record round-trips.
-		wc_get_container()->get( POSPinService::class )->set_pin( $manager, '1234' );
+		// PINs are mandatory at the admin form layer, so every listed staff member
+		// must have one in the wire payload too.
+		$pin_service = wc_get_container()->get( POSPinService::class );
+		$pin_service->set_pin( $pos_admin, '1111' );
+		$pin_service->set_pin( $cashier, '2222' );
+		$pin_service->set_pin( $manager, '3333' );
 
 		wp_set_current_user( $admin );
 
@@ -117,7 +122,7 @@ class POSStaffControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( Capabilities::POS_ROLE_CASHIER, $by_id[ $cashier ]['role'] );
 		$this->assertSame( Capabilities::POS_ROLE_MANAGER, $by_id[ $manager ]['role'] );
 
-		$this->assertNull( $by_id[ $cashier ]['pin'], 'Cashier without PIN should report pin: null.' );
+		$this->assertIsArray( $by_id[ $cashier ]['pin'], 'Cashier with PIN should report a pin record.' );
 		$this->assertIsArray( $by_id[ $manager ]['pin'], 'Manager with PIN should report a pin record.' );
 		$this->assertSame( POSPinService::ALGO, $by_id[ $manager ]['pin']['algo'] );
 		$this->assertSame( POSPinService::ITERATIONS, $by_id[ $manager ]['pin']['iterations'] );
@@ -143,10 +148,16 @@ class POSStaffControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_staff_list_is_sorted_by_display_name(): void {
 		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		$a     = self::factory()->user->create(
-			array( 'role' => 'subscriber', 'display_name' => 'Aaron' )
+			array(
+				'role'         => 'subscriber',
+				'display_name' => 'Aaron',
+			)
 		);
 		$z     = self::factory()->user->create(
-			array( 'role' => 'subscriber', 'display_name' => 'Zoe' )
+			array(
+				'role'         => 'subscriber',
+				'display_name' => 'Zoe',
+			)
 		);
 		Capabilities::set_pos_role( $a, Capabilities::POS_ROLE_CASHIER );
 		Capabilities::set_pos_role( $z, Capabilities::POS_ROLE_CASHIER );

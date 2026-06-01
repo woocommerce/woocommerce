@@ -65,8 +65,18 @@ class Capabilities {
 	public const CAP_ISSUE_REFUNDS     = 'issue_refunds';
 	public const CAP_VIEW_POS_SETTINGS = 'view_pos_settings';
 	public const CAP_EDIT_POS_SETTINGS = 'edit_pos_settings';
-	public const CAP_MANAGE_POS_STAFF  = 'manage_pos_staff';
 	public const CAP_EXIT_POS          = 'exit_pos';
+
+	/**
+	 * Forward-compat capability for the M2 REST staff-management endpoints.
+	 *
+	 * In M1 the wp-admin Staff page is gated on `manage_woocommerce`, so a
+	 * pos_admin who is not also a WP administrator or shop_manager cannot use it
+	 * — this cap is intentionally inert on the server today. It is shipped to the
+	 * mobile client now so the client capability shape is stable when M2 adds
+	 * REST endpoints that let a pos_admin manage staff from the device.
+	 */
+	public const CAP_MANAGE_POS_STAFF = 'manage_pos_staff';
 
 	/**
 	 * All assignable POS role values, in ascending capability order.
