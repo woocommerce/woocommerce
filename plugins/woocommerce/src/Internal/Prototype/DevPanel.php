@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Prototype;
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -18,7 +20,9 @@ class DevPanel {
 	const COOKIE_KEY = 'wc_prototype_flags';
 
 	const FLAGS = array(
-		'reorder_controls' => 'Reorder controls via Screen Options',
+		'reorder_controls'   => 'Reorder controls via Screen Options',
+		'icon_modernisation' => 'Icon modernisation (SVG icons)',
+		'max_width'          => 'Max-width cap (1200 px, centered)',
 	);
 
 	/**
@@ -28,6 +32,21 @@ class DevPanel {
 	 */
 	final public static function init(): void {
 		add_action( 'admin_footer', array( self::class, 'render' ) );
+	}
+
+	/**
+	 * Whether the current admin screen is one the prototype panel should appear on.
+	 * Covers the classic product editor and both classic/HPOS order edit screens.
+	 */
+	public static function is_supported_screen(): bool {
+		$screen = get_current_screen();
+		if ( ! $screen ) {
+			return false;
+		}
+		if ( 'post' === $screen->base && 'product' === $screen->post_type ) {
+			return true;
+		}
+		return OrderUtil::is_order_edit_screen();
 	}
 
 	/**
@@ -48,11 +67,10 @@ class DevPanel {
 	}
 
 	/**
-	 * Render the dev panel on the product edit screen.
+	 * Render the dev panel on supported edit screens.
 	 */
 	public static function render(): void {
-		$screen = get_current_screen();
-		if ( ! $screen || 'post' !== $screen->base || 'product' !== $screen->post_type ) {
+		if ( ! self::is_supported_screen() ) {
 			return;
 		}
 		self::output_panel_html();

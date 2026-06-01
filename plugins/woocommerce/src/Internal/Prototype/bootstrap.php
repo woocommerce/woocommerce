@@ -9,7 +9,11 @@
 declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Internal\Prototype\DevPanel;
+use Automattic\WooCommerce\Internal\Prototype\Improvements\IconModernisation;
+use Automattic\WooCommerce\Internal\Prototype\Improvements\MaxWidth;
 use Automattic\WooCommerce\Internal\Prototype\Improvements\ReorderControls;
 
 DevPanel::init();
 ReorderControls::init();
+IconModernisation::init();
+MaxWidth::init();
