@@ -170,7 +170,7 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 		$order = OrderHelper::create_order();
 		$this->login_as_role( 'shop_manager' );
 
-		$list_table = new ListTable();
+		$list_table    = new ListTable();
 		$set_post_type = function () {
 			$this->wp_post_type = get_post_type_object( 'shop_order' );
 		};
