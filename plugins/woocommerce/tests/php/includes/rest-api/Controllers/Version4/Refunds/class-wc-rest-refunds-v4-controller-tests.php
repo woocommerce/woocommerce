@@ -1314,6 +1314,308 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Refund creation auto-computes refund_total from the order line item when omitted.
+	 */
+	public function test_refunds_create_simplified_form_no_tax(): void {
+		// Two-quantity product at $10 each = $20 order total.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 10.00 );
+		$product->save();
+
+		$order = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 2,
+					),
+				),
+			)
+		);
+		$items     = $order->get_items();
+		$line_item = reset( $items );
+
+		// Refund 1 of 2 — refund_total OMITTED.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $line_item->get_id(),
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( '10.00', $data['amount'], 'Auto-computed amount should be unit price × quantity' );
+
+		$this->created_refunds[] = $data['id'];
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Refund creation with omitted refund_total extracts tax correctly.
+	 */
+	public function test_refunds_create_simplified_form_with_tax(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 10.00 ),
+				'subtotal' => array( $tax_rate_id => 10.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$tax_item = new \WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 10.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+
+		$order->set_billing_country( 'US' );
+		$order->calculate_totals( false );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		// Refund the line — refund_total OMITTED.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( '110.00', $data['amount'], 'Auto-computed amount should include tax ($100 + 10% = $110)' );
+
+		// Verify the per-line refund_tax was extracted (not 0).
+		$this->assertNotEmpty( $data['line_items'] );
+		$line_item_response = $data['line_items'][0];
+		$this->assertEquals( '100.00', $line_item_response['refund_total'], 'Per-line refund_total should be tax-exclusive after extraction' );
+		$this->assertNotEmpty( $line_item_response['refund_tax'], 'refund_tax should be populated from extraction' );
+		$this->assertEquals( '10.00', $line_item_response['refund_tax'][0]['refund_total'] );
+
+		$this->created_refunds[] = $data['id'];
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Simplified form (no refund_total) produces the same amount as explicit refund_total.
+	 */
+	public function test_refunds_create_simplified_matches_explicit(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 25.00 );
+		$product->save();
+
+		// Order A: refunded via simplified form.
+		$order_a = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 4,
+					),
+				),
+			)
+		);
+		$items_a    = $order_a->get_items();
+		$item_a     = reset( $items_a );
+		$request_a  = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request_a->set_body_params(
+			array(
+				'order_id'   => $order_a->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_a->get_id(),
+						'quantity'     => 2,
+					),
+				),
+			)
+		);
+		$response_a = $this->server->dispatch( $request_a );
+		$this->assertEquals( 201, $response_a->get_status() );
+		$amount_a               = $response_a->get_data()['amount'];
+		$this->created_refunds[] = $response_a->get_data()['id'];
+
+		// Order B: same shape but with explicit refund_total computed by the client.
+		$order_b = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 4,
+					),
+				),
+			)
+		);
+		$items_b    = $order_b->get_items();
+		$item_b     = reset( $items_b );
+		$request_b  = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request_b->set_body_params(
+			array(
+				'order_id'   => $order_b->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_b->get_id(),
+						'quantity'     => 2,
+						'refund_total' => 50.00,
+					),
+				),
+			)
+		);
+		$response_b = $this->server->dispatch( $request_b );
+		$this->assertEquals( 201, $response_b->get_status() );
+		$amount_b               = $response_b->get_data()['amount'];
+		$this->created_refunds[] = $response_b->get_data()['id'];
+
+		$this->assertEquals( $amount_b, $amount_a, 'Simplified form should produce the same amount as the explicit form.' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Refund creation supports mixing items with and without refund_total in the same request.
+	 */
+	public function test_refunds_create_mixed_with_and_without_refund_total(): void {
+		$product_a = WC_Helper_Product::create_simple_product();
+		$product_a->set_price( 10.00 );
+		$product_a->save();
+		$product_b = WC_Helper_Product::create_simple_product();
+		$product_b->set_price( 20.00 );
+		$product_b->save();
+
+		$order  = wc_create_order();
+		$item_a = new WC_Order_Item_Product();
+		$item_a->set_props( array( 'product' => $product_a, 'quantity' => 1, 'subtotal' => 10.00, 'total' => 10.00 ) );
+		$item_a->save();
+		$order->add_item( $item_a );
+		$item_b = new WC_Order_Item_Product();
+		$item_b->set_props( array( 'product' => $product_b, 'quantity' => 1, 'subtotal' => 20.00, 'total' => 20.00 ) );
+		$item_b->save();
+		$order->add_item( $item_b );
+		$order->set_total( 30.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					// Item A — no refund_total, will be auto-computed to 10.00.
+					array(
+						'line_item_id' => $item_a->get_id(),
+						'quantity'     => 1,
+					),
+					// Item B — explicit refund_total (less than item total — over-refund allowed for B).
+					array(
+						'line_item_id' => $item_b->get_id(),
+						'quantity'     => 1,
+						'refund_total' => 15.00,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( '25.00', $data['amount'], 'Total = 10 (auto) + 15 (explicit) = 25' );
+
+		$this->created_refunds[] = $data['id'];
+		$product_a->delete( true );
+		$product_b->delete( true );
+	}
+
+	/**
+	 * @testdox Simplified form preserves existing quantity validation: over-quantity is still rejected.
+	 */
+	public function test_refunds_create_simplified_form_rejects_over_quantity(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 10.00 );
+		$product->save();
+
+		$order = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+					),
+				),
+			)
+		);
+		$items     = $order->get_items();
+		$line_item = reset( $items );
+
+		// Request refund_total omitted AND quantity > original.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $line_item->get_id(),
+						'quantity'     => 99,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status(), 'Over-quantity must still be rejected even when refund_total is auto-computed.' );
+
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox Creating a V4 refund with incomplete meta_data entries does not cause errors.
 	 */
 	public function test_create_refund_meta_data_with_incomplete_entries(): void {
