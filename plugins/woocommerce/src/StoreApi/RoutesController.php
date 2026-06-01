@@ -77,7 +77,7 @@ class RoutesController {
 				Routes\V1\Patterns::IDENTIFIER => Routes\V1\Patterns::class,
 			],
 			'shopper_lists' => [
-				// Gated by ShopperListsController — registered only when at least one shopper-list feature is enabled.
+				// Registered only when at least one shopper-list feature flag is enabled (see ShopperListsController).
 				Routes\V1\ShopperLists::IDENTIFIER       => Routes\V1\ShopperLists::class,
 				Routes\V1\ShopperListsBySlug::IDENTIFIER => Routes\V1\ShopperListsBySlug::class,
 				Routes\V1\ShopperListItems::IDENTIFIER   => Routes\V1\ShopperListItems::class,

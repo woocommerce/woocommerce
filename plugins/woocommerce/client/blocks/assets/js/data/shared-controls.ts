@@ -130,9 +130,9 @@ const preventBatching = [
 	'/wc/store/v1/checkout',
 	'/wc/store/v1/checkout?__experimental_calc_totals=true',
 	'/wc/store/v1/cart/update-item',
-	// Shopper-lists routes don't declare allow_batch yet. Drop these once
-	// the routes opt into batching server-side.
+	// Shopper-lists routes do not declare `allow_batch` server-side yet.
 	'/wc/store/v1/shopper-lists/saved-for-later/items',
+	'/wc/store/v1/shopper-lists/wishlist/items',
 ];
 
 /**

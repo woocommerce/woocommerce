@@ -70,8 +70,6 @@ class ShopperList {
 	 * @return self|false
 	 */
 	public static function get_by_slug( string $slug, ?int $user_id = null ) {
-		// Gate disabled or unknown slugs upfront so previously-persisted lists
-		// don't bypass the feature flag (the Store API surfaces this as 404).
 		if ( ! wc_get_container()->get( ShopperListsController::class )->is_enabled( $slug ) ) {
 			return false;
 		}
@@ -87,7 +85,7 @@ class ShopperList {
 			return self::from_array( $stored, $user_id );
 		}
 
-		// In-memory list; saved on the first save().
+		// In-memory list. Persisted on the first save().
 		return new self(
 			$user_id,
 			$slug,

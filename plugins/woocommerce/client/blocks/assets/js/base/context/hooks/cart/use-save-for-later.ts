@@ -8,17 +8,9 @@ import { store as noticesStore } from '@wordpress/notices';
 import { cartStore } from '@woocommerce/block-data';
 
 /**
- * Save a cart line item to the saved-for-later shopper list.
- *
- * Dispatches the wp.data cart store's `saveForLater` thunk, which POSTs the
- * item and emits a `wc-blocks_store_sync_required` event. A Saved for Later
- * block on the same page picks up that event in its iAPI store and applies
- * the new row reactively.
- *
- * Resolves to `true` on success so the caller can chain the cart removal;
- * on failure surfaces an error notice in the cart context and resolves to
- * `false`. The cart removal is the caller's responsibility — keep the two
- * awaits separate so save and remove errors stay distinct.
+ * Save a cart line item to the saved-for-later shopper list. Resolves to `true` on success. On failure,
+ * surfaces an error notice in the cart context and resolves to `false`. Removing the line from the cart
+ * is the caller's responsibility, so save and remove errors can be reported independently.
  */
 export const useSaveForLater = (): {
 	isSaving: boolean;

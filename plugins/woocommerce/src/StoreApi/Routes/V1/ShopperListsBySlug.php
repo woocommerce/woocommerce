@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Internal\ShopperLists\ShopperList;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 
 /**
- * GET /shopper-lists/{slug} — metadata for a single list.
+ * GET /shopper-lists/{slug}: metadata for a single list.
  */
 class ShopperListsBySlug extends AbstractRoute {
 	/**

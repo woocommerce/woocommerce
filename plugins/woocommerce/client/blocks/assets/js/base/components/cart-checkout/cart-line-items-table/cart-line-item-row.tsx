@@ -131,14 +131,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 			false,
 			isBoolean
 		);
-		// Three signals, each catching a distinct failure mode.
-		// Disabling the `cart_save_for_later` feature unregisters the
-		// saved-for-later block but leaves any prior insertion in the
-		// cart page's post content (the editor renders it as an
-		// "unsupported block" notice) — so presence alone could render
-		// this link with no working destination. Inversely, the feature
-		// can be enabled on cart pages that never inserted the block.
-		// And the REST endpoints behind the click are auth-only.
+		// User has to be logged in, feature enabled, and on the cart page with the block present.
 		const showSaveForLater =
 			isUserLoggedIn &&
 			isSaveForLaterFeatureEnabled &&
@@ -376,16 +369,14 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 										if ( ! saved ) {
 											return;
 										}
-										// removeItem surfaces its own errors
-										// via processErrorResponse; we still
-										// fire the analytics event and a11y
-										// announcement to mirror the regular
-										// remove flow.
+										// `removeItem` surfaces its own errors via `processErrorResponse`. The
+										// analytics event and a11y announcement still fire to mirror the
+										// regular remove flow.
 										await removeItem();
-										// TODO: consider a dedicated
-										// 'cart-save-for-later' store event so
-										// analytics can distinguish a save
-										// from a plain remove.
+										// TODO: emit a dedicated
+										// `cart-save-for-later` store event so
+										// analytics can distinguish a save from
+										// a plain remove.
 										dispatchStoreEvent(
 											'cart-remove-item',
 											{

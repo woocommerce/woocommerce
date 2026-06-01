@@ -1,7 +1,5 @@
 /**
- * Items in the wishlist whose variation values we can compare against the
- * shopper's currently picked attributes. Narrowed from `RawShopperListItem`
- * so this helper stays pure (no iAPI deps) and unit-testable in isolation.
+ * Narrowed `RawShopperListItem` shape so this helper stays pure and unit-testable.
  */
 type MatchableItem = {
 	id: number;
@@ -12,9 +10,7 @@ type MatchableItem = {
 };
 
 /**
- * The shopper's currently picked attributes — same shape as ATCWO's
- * `selectedAttributes` context entries (also re-exported from the cart store
- * as `SelectedAttributes`).
+ * The shopper's currently picked attributes. Same shape as the cart store's `SelectedAttributes`.
  */
 type SelectedPair = {
 	attribute: string;
@@ -22,21 +18,13 @@ type SelectedPair = {
 };
 
 /**
- * Decide whether a wishlist item represents the exact variation + attribute
- * combination the shopper has currently picked. For fully-constrained
- * variations a single `id` match is enough, but for "any" attribute slots
- * several attribute combinations can share the same variation product (and
- * therefore the same `item.id`), so we additionally compare the attribute
- * sets. The asymmetric `value` comparison is case-insensitive because the
- * Store API returns each entry's `value` as the term display name ("Red")
- * while ATCWO carries the term slug ("red") in `selectedAttributes`.
- *
- * Edge cases out of scope here (would need a slug→name lookup via the parent
- * product's `terms`): slugs whose shape differs from the display name beyond
- * capitalization, e.g. `"bright-red"` vs `"Bright Red"`.
+ * Whether a wishlist item matches the picked variation and attributes. An `id` match alone is not
+ * enough for "any" attribute slots, where several combinations share one variation product, so the
+ * attribute sets are compared too. The value comparison is case-insensitive because the Store API
+ * returns the term display name ("Red") while ATCWO carries the slug ("red").
  *
  * @param item     Wishlist item from the shopper-lists store.
- * @param id       Effective product/variation id we're comparing against.
+ * @param id       Effective product/variation id to compare against.
  * @param selected Shopper's picked attribute/value pairs.
  */
 export function matchVariationItem(

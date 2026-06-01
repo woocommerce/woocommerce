@@ -53,10 +53,8 @@ type BlockStore = {
 	};
 };
 
-// Allow-list for sanitizing the schema's preformatted strings on innerHTML
-// swap. Covers what `wc_price` (sale/discount markup, currency symbol) and
-// `wp_get_attachment_image` / `wc_placeholder_img` emit (responsive image
-// + dimensions + lazy loading).
+// Allow-list for sanitizing the schema's preformatted strings on innerHTML swap. Covers the markup
+// emitted by `wc_price` and `wp_get_attachment_image` / `wc_placeholder_img`.
 const ALLOWED_TAGS = [
 	'a',
 	'b',
@@ -139,10 +137,9 @@ store< BlockStore >(
 				return !! listItem && !! pendingKeys[ listItem.key ];
 			},
 
-			// No `hasShownItems` gate: the visitor reached this block
-			// deliberately (My Account endpoint or merchant-placed), so
-			// showing the empty message immediately when the list is
-			// empty is the right signal.
+			// Unlike Saved for Later, Wishlist has no `hasShownItems` first-paint guard. The block is
+			// reached deliberately (My Account endpoint or a merchant-placed instance), so the empty
+			// state should be visible immediately on first paint when the list is empty.
 			get isEmpty(): boolean {
 				const list = getList( LIST_SLUG );
 				if ( ! list ) {
@@ -164,12 +161,9 @@ store< BlockStore >(
 				return ! listItem.is_purchasable;
 			},
 
-			// `data-wp-text` writes its argument as text-content without
-			// running entity decoding, so a name returned by the schema as
-			// `Tom &amp; Jerry` would render literally that way. Bind
-			// templates and SSR text spans to this getter instead of the
-			// raw context field so what the browser shows matches what
-			// PHP wrote on first paint.
+			// `data-wp-text` writes its argument as text-content without entity decoding, so a name like
+			// `Tom &amp; Jerry` would render with the literal entity. Bind templates and SSR text spans
+			// to this getter (not the raw context field) so rendered text matches PHP's first paint.
 			get currentItemDisplayName(): string {
 				const { listItem } = getContext< BlockContext >();
 				return listItem ? decodeEntities( listItem.name ) : '';
@@ -222,13 +216,10 @@ store< BlockStore >(
 					return;
 				}
 
-				// Map the schema's `variation` shape to the cart's
-				// SelectedAttributes shape. The schema returns the
-				// slug-form attribute under `raw_attribute` (e.g.
-				// `attribute_pa_color`) plus a display label under
-				// `attribute` (e.g. "Color"); the cart matches by the
-				// slug-form, so override `attribute` with `raw_attribute`.
-				// Empty for simple products.
+				// Map the schema's `variation` shape to the cart's `SelectedAttributes` shape. The schema
+				// exposes the slug-form attribute under `raw_attribute` and a display label under
+				// `attribute`. The cart matches by the slug form, so `attribute` is overridden with
+				// `raw_attribute`. Empty for simple products.
 				const variation = listItem.variation.map(
 					( { raw_attribute: rawAttribute, value, attribute } ) => ( {
 						attribute: rawAttribute || attribute,
@@ -237,14 +228,11 @@ store< BlockStore >(
 				);
 				const isVariation = listItem.variation_id > 0;
 
-				// Wishlist always adds quantity 1 (no quantity column).
-				// `cartActions.addCartItem` catches its own errors and
-				// surfaces them as store notices, so the yield resolves
-				// the same way on success and failure. Snapshot the
-				// matching line's quantity, run the add, then only remove
-				// from the wishlist if the cart line actually grew — that
-				// guards against partial-stock and silent-failure paths
-				// where we shouldn't drop the wishlist entry.
+				// Wishlist always adds quantity 1 (no quantity column). `cartActions.addCartItem` catches
+				// its own errors and surfaces them as store notices, so the yield resolves identically
+				// on success and failure. Snapshot the matching line's quantity, run the add, and only
+				// remove from the wishlist if the cart line grew. Guards against partial-stock paths
+				// where the wishlist entry must remain.
 				const lookup = {
 					id: listItem.id,
 					...( isVariation && { variation } ),
@@ -279,16 +267,11 @@ store< BlockStore >(
 		},
 
 		callbacks: {
-			// Single shared innerHTML-swap callback for any slot whose
-			// content is one of the schema's preformatted HTML fields.
-			// Mirrors the atomic product-elements `updateValue` callback:
-			// the watched element carries `data-wp-context='{"htmlField":"price_html"}'`
-			// (or `"image_html"`), and this callback reads that field
-			// off the row's `listItem` and pastes its sanitized HTML into
-			// `element.ref`. PHP renders the same HTML server-side, so
-			// hydration is a no-op when the row's listItem hasn't changed,
-			// and a clean swap when it has (e.g. after Remove shifts the
-			// next item into this slot).
+			// Shared innerHTML-swap callback for slots whose content is one of the schema's preformatted
+			// HTML fields. The watched element carries `data-wp-context='{"htmlField":"price_html"}'` (or
+			// `"image_html"`). This reads the named field off the row's `listItem` and writes its
+			// sanitized HTML into `element.ref`. PHP renders the same HTML server-side, so hydration is
+			// a no-op until the row's `listItem` changes.
 			updateInnerHtml: () => {
 				const { ref } = getElement();
 				const { listItem, htmlField } = getContext< BlockContext >();

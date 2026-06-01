@@ -15,7 +15,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\ProductItemTrait;
  * item reports `is_live`, and falls back to at-save snapshot data otherwise.
  */
 class ShopperListItemSchema extends AbstractSchema {
-	// We only call format_variation_data(); see phpstan.neon for the related suppressions.
+	// Only `format_variation_data()` is used from this trait. See phpstan.neon for related suppressions.
 	use ProductItemTrait;
 
 	/**
@@ -264,10 +264,8 @@ class ShopperListItemSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Get the main image for a shopper list item.
-	 *
-	 * Returns the product's main image only — shopper list rows are compact and
-	 * the gallery isn't needed at the row level.
+	 * Get the main image for a shopper list item. Only the product's main image is returned. The
+	 * gallery is not exposed at the row level.
 	 *
 	 * @param \WC_Product $product Live product instance.
 	 * @return array
@@ -283,13 +281,10 @@ class ShopperListItemSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Get the thumbnail image HTML for a shopper list item, falling back to the
-	 * WooCommerce placeholder when the product has no image or has been deleted.
-	 *
-	 * Pre-formatting on the server lets renderers (PHP SSR + JS hydration)
-	 * consume one canonical string instead of each side composing the markup
-	 * from the structured `images` array. Mirrors the pattern WC uses in
-	 * `ProductSchema::price_html` / `ProductImage::render`.
+	 * Get the thumbnail image HTML for a shopper list item, with a WooCommerce
+	 * placeholder fallback when the product has no image or has been deleted.
+	 * Pre-formatted on the server so SSR and JS hydration consume one canonical
+	 * string. Follows the pattern used by `ProductSchema::price_html`.
 	 *
 	 * @param \WC_Product|null $product Live product instance, or null for tombstones.
 	 * @return string
@@ -303,10 +298,7 @@ class ShopperListItemSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Compute live prices for the saved item.
-	 *
-	 * We don't extend ProductSchema because saved items aren't products. The shape
-	 * here is a thin subset of cart-item prices.
+	 * Compute live prices for the saved item. Returns a thin subset of cart-item prices.
 	 *
 	 * @param \WC_Product $product Live product instance.
 	 * @return array
