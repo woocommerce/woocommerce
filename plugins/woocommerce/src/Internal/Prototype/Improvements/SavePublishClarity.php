@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 class SavePublishClarity {
 
 	const FLAG_KEY = 'save_publish_clarity';
-	const HEADER_H = 52;
+	const HEADER_H = 46;
 	// px — height of our action bar.
 	const ADMINBAR_H = 32;
 	// px — standard WP admin bar.
@@ -73,7 +73,6 @@ body.folded #wc-proto-save-header {
 	max-width: 1200px;
 	margin: 0 auto;
 	width: 100%;
-	padding: 0 16px;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -98,7 +97,7 @@ body.folded #wc-proto-save-header {
 /* ── Button group ───────────────────────────────────────── */
 .wc-proto-actions {
 	display: flex;
-	gap: 8px;
+	gap: 4px;
 	align-items: center;
 	position: relative;
 }
@@ -184,8 +183,8 @@ body.folded #wc-proto-save-header {
 #submitdiv #misc-publishing-actions .misc-pub-section:last-child,
 #submitdiv .misc-pub-copy-draft { display: none !important; }
 
-/* Push all wrap content (including page heading) below the fixed bar */
-body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (string) $bar_h ); ?>px; }
+/* Push all wrap content (including page heading) below the fixed bar, with 8px breathing room */
+body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (string) ( $bar_h + 8 ) ); ?>px; }
 </style>
 		<?php
 	}
@@ -224,10 +223,10 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 				<?php esc_html_e( 'Preview', 'woocommerce' ); ?>
 			</button>
 			<?php endif; ?>
-			<button type="button" id="wc-proto-btn-save-draft" class="button">
+			<button type="button" id="wc-proto-btn-save-draft" class="button button-small">
 				<?php esc_html_e( 'Save draft', 'woocommerce' ); ?>
 			</button>
-			<button type="button" id="wc-proto-btn-publish" class="button button-primary">
+			<button type="button" id="wc-proto-btn-publish" class="button button-primary button-small">
 				<?php echo esc_html( $primary_label ); ?>
 			</button>
 			<details class="wc-proto-kebab">
