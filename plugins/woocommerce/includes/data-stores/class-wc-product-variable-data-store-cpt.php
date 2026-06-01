@@ -128,14 +128,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @since 3.0.0
 	 */
 	protected function read_product_data( &$product ) {
-		// Only prime the transient option caches when there is no persistent object
-		// cache. When one is active, get_transient() reads these values from the
-		// 'transient' cache group and never from wp_options, so priming the option
-		// names cannot help. Instead each missing name is recorded in core's
-		// 'notoptions' cache, and because the options never exist the entries are
-		// never cleared, so notoptions grows by four per variable product across the
-		// catalog. WC_Order::needs_processing() stopped using transients for the same
-		// reason in 10.8.0.
+		// Prime caches to reduce future queries.
 		if ( ! wp_using_ext_object_cache() ) {
 			$product_id = $product->get_id();
 			wp_prime_option_caches(
