@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\POS\Service;
 defined( 'ABSPATH' ) || exit;
 
 use WP_Error;
+use WP_User_Query;
 
 /**
  * Stores and verifies POS PINs.
@@ -23,19 +24,26 @@ use WP_Error;
  */
 class POSPinService {
 
-	public const PIN_META_KEY  = '_woocommerce_pos_pin';
-	public const ALGO          = 'pbkdf2-sha256';
-	public const ITERATIONS    = 10000;
-	public const SALT_BYTES    = 16;
-	public const HASH_BYTES    = 32;
-	public const PIN_LENGTH    = 4;
+	public const PIN_META_KEY = '_woocommerce_pos_pin';
+	public const ALGO         = 'pbkdf2-sha256';
+	public const ITERATIONS   = 10000;
+	public const SALT_BYTES   = 16;
+	public const HASH_BYTES   = 32;
+	public const PIN_LENGTH   = 4;
 
 	/**
 	 * Set or replace a user's POS PIN.
 	 *
+	 * PINs are the sole operator identifier on the POS device (the merchant taps a
+	 * 4-digit code to identify themselves at the till), so a collision between two
+	 * staff members is unresolvable — the device would have no way to tell who is
+	 * keying in 1234. To prevent that, this method PBKDF2-verifies the candidate
+	 * against every other stored PIN record and rejects on first match.
+	 *
 	 * @param int    $user_id The target user ID.
 	 * @param string $pin     The plaintext 4-digit PIN. Must match the PIN_LENGTH constant.
-	 * @return true|WP_Error  True on success, WP_Error on invalid PIN format.
+	 * @return true|WP_Error  True on success, WP_Error on invalid PIN format or
+	 *                        when the PIN is already in use by another user.
 	 *
 	 * @since 10.9.0
 	 */
@@ -48,19 +56,69 @@ class POSPinService {
 			);
 		}
 
+		if ( $this->is_pin_used_by_other_user( $pin, $user_id ) ) {
+			return new WP_Error(
+				'woocommerce_pos_pin_in_use',
+				__( 'This PIN is already in use by another staff member. Choose a different PIN.', 'woocommerce' ),
+				array( 'status' => 409 )
+			);
+		}
+
 		$salt = random_bytes( self::SALT_BYTES );
 		$hash = hash_pbkdf2( 'sha256', $pin, $salt, self::ITERATIONS, self::HASH_BYTES, true );
 
+		// base64 encoding here is used purely to make the binary salt/hash storable in
+		// user meta and JSON-serializable on the wire; it is not used to obscure code.
 		$record = array(
 			'algo'       => self::ALGO,
 			'iterations' => self::ITERATIONS,
-			'salt'       => base64_encode( $salt ),
-			'hash'       => base64_encode( $hash ),
+			'salt'       => base64_encode( $salt ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+			'hash'       => base64_encode( $hash ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 		);
 
 		update_user_meta( $user_id, self::PIN_META_KEY, $record );
 
 		return true;
+	}
+
+	/**
+	 * Whether the given plaintext PIN matches a PIN record stored on any user
+	 * other than $exclude_user_id.
+	 *
+	 * Cost is bounded by the number of staff with PINs (typically a handful), and
+	 * each row costs one PBKDF2 evaluation. The candidate user is excluded so that
+	 * idempotent re-sets ("save same PIN again") are allowed.
+	 *
+	 * @param string $pin             Plaintext PIN candidate. Assumed format-validated.
+	 * @param int    $exclude_user_id User being assigned the PIN; excluded from the scan.
+	 * @return bool
+	 */
+	private function is_pin_used_by_other_user( string $pin, int $exclude_user_id ): bool {
+		$user_query = new WP_User_Query(
+			array(
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'     => self::PIN_META_KEY,
+						'compare' => 'EXISTS',
+					),
+				),
+				'fields'     => 'ID',
+				'number'     => -1,
+				'exclude'    => array( $exclude_user_id ),
+			)
+		);
+
+		foreach ( $user_query->get_results() as $other_id ) {
+			$record = get_user_meta( (int) $other_id, self::PIN_META_KEY, true );
+			if ( ! is_array( $record ) || empty( $record['hash'] ) ) {
+				continue;
+			}
+			if ( $this->verify_pin( $pin, $record ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -138,8 +196,9 @@ class POSPinService {
 			return false;
 		}
 
-		$salt          = base64_decode( $salt_b64, true );
-		$expected_hash = base64_decode( $hash_b64, true );
+		// Decode the stored binary salt/hash back from their base64 envelope (see set_pin).
+		$salt          = base64_decode( $salt_b64, true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+		$expected_hash = base64_decode( $hash_b64, true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 		if ( false === $salt || false === $expected_hash ) {
 			return false;
 		}

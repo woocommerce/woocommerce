@@ -35,9 +35,20 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Extra users created mid-test that should be cleaned up.
+	 *
+	 * @var int[]
+	 */
+	private array $extra_user_ids = array();
+
+	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
+		foreach ( $this->extra_user_ids as $extra_id ) {
+			wp_delete_user( $extra_id );
+		}
+		$this->extra_user_ids = array();
 		wp_delete_user( $this->user_id );
 		parent::tearDown();
 	}
@@ -151,7 +162,15 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $this->sut->verify_pin( '12', $record ), 'Bad format input must be rejected.' );
 		$this->assertFalse( $this->sut->verify_pin( '4321', array() ), 'Empty record must be rejected.' );
 		$this->assertFalse(
-			$this->sut->verify_pin( '4321', array( 'algo' => 'unknown', 'iterations' => 10000, 'salt' => 'x', 'hash' => 'y' ) ),
+			$this->sut->verify_pin(
+				'4321',
+				array(
+					'algo'       => 'unknown',
+					'iterations' => 10000,
+					'salt'       => 'x',
+					'hash'       => 'y',
+				)
+			),
 			'Unknown algo must be rejected.'
 		);
 	}
@@ -161,5 +180,35 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_public_pin_record_returns_null_when_unset(): void {
 		$this->assertNull( $this->sut->get_public_pin_record( $this->user_id ) );
+	}
+
+	/**
+	 * @testdox Should reject set_pin when the PIN is already used by another staff member.
+	 */
+	public function test_set_pin_rejects_pin_in_use_by_another_user(): void {
+		$other_id               = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->extra_user_ids[] = $other_id;
+
+		$this->assertTrue( $this->sut->set_pin( $other_id, '1234' ) );
+
+		$result = $this->sut->set_pin( $this->user_id, '1234' );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_pos_pin_in_use', $result->get_error_code() );
+		$this->assertFalse(
+			$this->sut->has_pin( $this->user_id ),
+			'No PIN should have been persisted when the candidate is taken.'
+		);
+	}
+
+	/**
+	 * @testdox Should allow set_pin to re-save the same PIN for the same user (idempotent update).
+	 */
+	public function test_set_pin_allows_same_user_to_resave_same_pin(): void {
+		$this->assertTrue( $this->sut->set_pin( $this->user_id, '1234' ) );
+
+		// Re-saving the same PIN for the same user must succeed — the user is excluded
+		// from the uniqueness scan so their own existing hash does not falsely collide.
+		$this->assertTrue( $this->sut->set_pin( $this->user_id, '1234' ) );
 	}
 }
