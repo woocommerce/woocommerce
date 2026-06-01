@@ -57,7 +57,7 @@ class SavePublishClarity {
 	right: 0;
 	left: 160px;
 	z-index: 9998;
-	background: #fff;
+	background: #f0f0f1;
 	border-bottom: 1px solid #c3c4c7;
 	height: <?php echo esc_attr( (string) $bar_h ); ?>px;
 	display: flex;
@@ -153,8 +153,8 @@ body.folded #wc-proto-save-header {
 #submitdiv #misc-publishing-actions .misc-pub-section:last-child,
 #submitdiv .misc-pub-copy-draft { display: none !important; }
 
-/* Push metabox content below the fixed bar; leaves the page heading untouched */
-body.product-php #poststuff { margin-top: <?php echo esc_attr( (string) $bar_h ); ?>px; }
+/* Push all wrap content (including page heading) below the fixed bar */
+body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (string) $bar_h ); ?>px; }
 </style>
 		<?php
 	}
