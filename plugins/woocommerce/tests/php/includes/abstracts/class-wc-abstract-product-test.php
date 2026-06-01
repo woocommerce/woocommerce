@@ -399,6 +399,43 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox validate_props() treats a negative woocommerce_notify_no_stock_amount threshold by its magnitude (absolute value), matching the pre-#37855 absint() behaviour.
+	 *
+	 * Without the abs() wrap, a negative threshold would let every positive stock value compare as "above threshold"
+	 * and stay in stock. With abs(), the threshold is compared by magnitude, so -5 behaves like 5.
+	 */
+	public function test_validate_props_treats_negative_no_stock_threshold_by_magnitude() {
+		$previous_threshold = get_option( 'woocommerce_notify_no_stock_amount' );
+		update_option( 'woocommerce_notify_no_stock_amount', -5 );
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		$below_magnitude = new WC_Product_Simple();
+		$below_magnitude->set_manage_stock( true );
+		$below_magnitude->set_stock_quantity( 3.5 );
+		$below_magnitude->set_stock_status( 'instock' );
+
+		$below_magnitude->validate_props();
+
+		$this->assertSame( 3.5, $below_magnitude->get_stock_quantity() );
+		$this->assertSame( 'outofstock', $below_magnitude->get_stock_status(), 'A stock quantity below the threshold magnitude (3.5 vs abs(-5)=5) should flip to out of stock.' );
+
+		$above_magnitude = new WC_Product_Simple();
+		$above_magnitude->set_manage_stock( true );
+		$above_magnitude->set_stock_quantity( 5.5 );
+		$above_magnitude->set_stock_status( 'instock' );
+
+		$above_magnitude->validate_props();
+
+		$this->assertSame( 5.5, $above_magnitude->get_stock_quantity() );
+		$this->assertSame( 'instock', $above_magnitude->get_stock_status(), 'A stock quantity above the threshold magnitude (5.5 vs abs(-5)=5) should stay in stock.' );
+
+		remove_filter( 'woocommerce_stock_amount', 'floatval' );
+		add_filter( 'woocommerce_stock_amount', 'intval' );
+		update_option( 'woocommerce_notify_no_stock_amount', $previous_threshold );
+	}
+
+	/**
 	 * @testdox validate_props() marks a product as out of stock when the stock quantity drops to zero.
 	 */
 	public function test_validate_props_marks_zero_stock_as_out_of_stock() {
