@@ -1086,6 +1086,85 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox fill_missing_refund_totals treats refund_total: null the same as a missing key (computes it).
+	 */
+	public function test_fill_missing_refund_totals_treats_null_as_missing(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 15.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 30.00,
+				'total'    => 30.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => null,
+				),
+			),
+			$order
+		);
+
+		$this->assertArrayHasKey( 'refund_total', $result[0] );
+		$this->assertSame( 15.00, $result[0]['refund_total'], 'null should be treated the same as omitted — auto-computed' );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox fill_missing_refund_totals leaves explicit refund_total: 0 untouched.
+	 */
+	public function test_fill_missing_refund_totals_leaves_explicit_zero_untouched(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10.00,
+				'total'    => 10.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 0,
+				),
+			),
+			$order
+		);
+
+		$this->assertSame( 0, $result[0]['refund_total'], 'Explicit zero must not be replaced by the auto-computed value' );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
 	 * @testdox fill_missing_refund_totals leaves explicit refund_total untouched.
 	 */
 	public function test_fill_missing_refund_totals_preserves_explicit(): void {

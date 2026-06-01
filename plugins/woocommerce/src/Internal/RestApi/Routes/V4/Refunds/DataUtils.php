@@ -362,7 +362,11 @@ class DataUtils {
 	 */
 	public function fill_missing_refund_totals( array $line_items, WC_Order $order ): array {
 		foreach ( $line_items as $key => $line_item ) {
-			if ( isset( $line_item['refund_total'] ) ) {
+			// Treat a missing key and an explicit `null` value the same — both mean
+			// "compute it for me". An explicit `0` is treated as a zero refund for
+			// that line (existing behaviour: calculate_refund_amount skips it from
+			// the sum, the under-refund check may then trip).
+			if ( array_key_exists( 'refund_total', $line_item ) && null !== $line_item['refund_total'] ) {
 				continue;
 			}
 
