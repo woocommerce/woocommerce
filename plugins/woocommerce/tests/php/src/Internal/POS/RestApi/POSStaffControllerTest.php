@@ -44,7 +44,7 @@ class POSStaffControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Should return 401 for a subscriber-role user with a POS meta role.
 	 *
 	 * POS-only users never call this endpoint directly — the device admin reads
-	 * the staff list on their behalf. So even though a subscriber with `_pos_role`
+	 * the staff list on their behalf. So even though a subscriber with `_woocommerce_pos_role`
 	 * = pos_cashier has POS access, the endpoint requires `manage_woocommerce`.
 	 */
 	public function test_pos_only_user_is_denied(): void {
@@ -109,9 +109,9 @@ class POSStaffControllerTest extends WC_REST_Unit_Test_Case {
 			$by_id,
 			'A wp administrator without an explicit POS role must not appear in the staff list.'
 		);
-		$this->assertArrayHasKey( $pos_admin, $by_id, 'pos_admin should appear via _pos_role meta.' );
-		$this->assertArrayHasKey( $cashier, $by_id, 'Cashier should appear via _pos_role meta.' );
-		$this->assertArrayHasKey( $manager, $by_id, 'Manager should appear via _pos_role meta.' );
+		$this->assertArrayHasKey( $pos_admin, $by_id, 'pos_admin should appear via _woocommerce_pos_role meta.' );
+		$this->assertArrayHasKey( $cashier, $by_id, 'Cashier should appear via _woocommerce_pos_role meta.' );
+		$this->assertArrayHasKey( $manager, $by_id, 'Manager should appear via _woocommerce_pos_role meta.' );
 
 		$this->assertSame( Capabilities::POS_ROLE_ADMIN, $by_id[ $pos_admin ]['role'] );
 		$this->assertSame( Capabilities::POS_ROLE_CASHIER, $by_id[ $cashier ]['role'] );
@@ -167,7 +167,7 @@ class POSStaffControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should exclude users without `_pos_role` meta — including administrators.
+	 * @testdox Should exclude users without `_woocommerce_pos_role` meta — including administrators.
 	 */
 	public function test_users_without_pos_role_are_excluded(): void {
 		$admin        = self::factory()->user->create( array( 'role' => 'administrator' ) );

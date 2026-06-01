@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
  * POS access + capability model (Proposal 1 — user-meta-based).
  *
  * Replaces the per-role WP capability surface from the earlier draft with a single
- * user-meta key (`_pos_role`) and a static capability matrix computed server-side
+ * user-meta key (`_woocommerce_pos_role`) and a static capability matrix computed server-side
  * and shipped to the mobile client. No new WP roles, no new WP capabilities.
  *
  * Why this shape:
@@ -38,12 +38,12 @@ class Capabilities {
 	/**
 	 * User meta key storing the explicit POS role assignment.
 	 */
-	public const POS_ROLE_META_KEY = '_pos_role';
+	public const POS_ROLE_META_KEY = '_woocommerce_pos_role';
 
 	/**
 	 * POS role identifiers.
 	 *
-	 * All three are explicit `_pos_role` meta values. There is no implicit POS
+	 * All three are explicit `_woocommerce_pos_role` meta values. There is no implicit POS
 	 * access from a WP role — administrators and shop managers must be assigned
 	 * a POS role in the Staff settings page like any other user.
 	 */
@@ -84,7 +84,7 @@ class Capabilities {
 	/**
 	 * Resolve the assigned POS role for a user, or null if they have none.
 	 *
-	 * Reads the `_pos_role` user meta value and returns it only if it matches an
+	 * Reads the `_woocommerce_pos_role` user meta value and returns it only if it matches an
 	 * assignable POS role. No implicit fallback to WP role — a wp administrator
 	 * without an explicit POS role assignment has no POS access.
 	 *

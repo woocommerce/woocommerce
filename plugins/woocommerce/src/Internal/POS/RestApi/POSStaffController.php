@@ -21,7 +21,7 @@ use WP_User_Query;
  * null if no PIN set).
  *
  * Permission: `manage_woocommerce` — i.e. administrator + shop_manager. POS-only
- * users (cashiers / managers, identified by the `_pos_role` user meta) never call
+ * users (cashiers / managers, identified by the `_woocommerce_pos_role` user meta) never call
  * this endpoint directly; the device admin reads the staff list on their behalf
  * and PIN entry is validated client-side against the cached payload.
  *
