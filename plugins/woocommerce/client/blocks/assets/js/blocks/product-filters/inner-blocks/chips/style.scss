@@ -138,9 +138,12 @@
 	}
 
 	:where(.wc-block-product-filter-chips__swatch) {
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
 		display: inline-block;
-		width: 1.25em;
-		height: 1.25em;
+		width: 1.8em;
+		height: 1.8em;
 		border-radius: 50%;
 		border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
 		flex-shrink: 0;

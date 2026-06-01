@@ -1006,7 +1006,16 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 		width: 100%;
 	}
 
-	.wc-admin-visual-attribute-color-picker-trigger {
+	.wc-admin-visual-attribute-type {
+		margin: 1.5em 0 1em;
+
+		label {
+			margin-top: 0;
+		}
+	}
+
+	.wc-admin-visual-attribute-color-picker-trigger,
+	.wc-admin-visual-attribute-image-picker-trigger {
 		width: 100%;
 	}
 }
@@ -9730,7 +9739,13 @@ body.woocommerce-settings-payments-section_legacy {
 	}
 }
 
-.wc-admin-visual-attribute-color-picker-trigger {
+.wc-admin-visual-attribute-type fieldset {
+	display: flex;
+	gap: 1.5em;
+}
+
+.wc-admin-visual-attribute-color-picker-trigger,
+.wc-admin-visual-attribute-image-picker-trigger {
 	width: 95%;
 	display: flex;
 	align-items: center;
@@ -9745,12 +9760,39 @@ body.woocommerce-settings-payments-section_legacy {
 	line-height: 1.4;
 	cursor: pointer;
 
-	+ .wc-admin-visual-attribute-color-picker-clear {
+	+ .wc-admin-visual-attribute-color-picker-clear,
+	+ .wc-admin-visual-attribute-image-picker-clear {
 		display: block;
 		margin: 2px 0 5px;
 	}
 
 	.wc-admin-color-swatch {
 		margin-right: 0;
+	}
+
+	.wc-admin-image-swatch {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1em;
+		min-width: 24px;
+		height: 1em;
+		min-height: 24px;
+		flex-shrink: 0;
+		border: 1px solid #c3c4c7;
+		border-radius: 2px;
+		overflow: hidden;
+		background: #f0f0f1;
+
+		&.is-empty {
+			background: #f0f0f1;
+		}
+
+		img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
 	}
 }
