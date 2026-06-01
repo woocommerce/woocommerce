@@ -44,22 +44,6 @@ class ProductAttributeTermSchema extends TermSchema {
 	}
 
 	/**
-	 * Convert a product attribute term object into an object suitable for the response.
-	 *
-	 * @param \WP_Term $term Term object.
-	 * @return array
-	 */
-	public function get_item_response( $term ) {
-		$response = parent::get_item_response( $term );
-
-		if ( VisualAttributeTermMeta::is_visual_attribute_taxonomy( $term->taxonomy ) ) {
-			$response[ self::VISUAL_PROPERTY_NAME ] = VisualAttributeTermMeta::get_term_visual( (int) $term->term_id );
-		}
-
-		return $response;
-	}
-
-	/**
 	 * Get the visual data property schema.
 	 *
 	 * @return array
