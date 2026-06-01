@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add coupon validation filters for product_ids, product_categories, excluded_items, and eligible_items in WC_Discounts.
