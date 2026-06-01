@@ -209,20 +209,11 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function save_product_attribute_term_fields( $term_id, $tt_id = '', $taxonomy = '' ): void {
-		if ( ! VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
+		if ( $this->is_ajax_add_attribute_request() ) {
 			return;
 		}
 
-		$visual_type = VisualAttributeTermMeta::TYPE_COLOR;
-		if ( isset( $_POST['wc_visual_attribute_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$posted_visual_type = wc_clean( wp_unslash( $_POST['wc_visual_attribute_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$visual_type        = is_string( $posted_visual_type ) ? $posted_visual_type : VisualAttributeTermMeta::TYPE_COLOR;
-		}
-
-		$color_value = isset( $_POST['term_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['term_color'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$image_id    = isset( $_POST['term_image'] ) ? absint( wp_unslash( $_POST['term_image'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-
-		VisualAttributeTermMeta::save_term_visual_by_type( (int) $term_id, $visual_type, $color_value ?? '', $image_id );
+		VisualAttributeTermMeta::save_term_visual_from_request( (int) $term_id, $taxonomy, $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 	}
 
 	/**
@@ -341,6 +332,17 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 				}
 			})();"
 		);
+	}
+
+	/**
+	 * Check whether the current request is the add attribute AJAX action.
+	 *
+	 * @return bool
+	 */
+	private function is_ajax_add_attribute_request(): bool {
+		$action = isset( $_REQUEST['action'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		return wp_doing_ajax() && 'woocommerce_add_new_attribute' === $action;
 	}
 
 	/**

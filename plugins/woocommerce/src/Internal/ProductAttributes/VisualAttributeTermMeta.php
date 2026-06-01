@@ -162,6 +162,66 @@ class VisualAttributeTermMeta {
 	}
 
 	/**
+	 * Save visual attribute term meta from request data.
+	 *
+	 * @param int    $term_id Term ID.
+	 * @param string $taxonomy Taxonomy slug.
+	 * @param array  $request_data Request data.
+	 * @return void
+	 *
+	 * @since 10.9.0
+	 */
+	public static function save_term_visual_from_request( int $term_id, string $taxonomy, array $request_data ): void {
+		if ( ! self::is_visual_attribute_taxonomy( $taxonomy ) || ! self::has_visual_request_data( $request_data ) ) {
+			return;
+		}
+
+		$visual_type = isset( $request_data['wc_visual_attribute_type'] ) ? self::sanitize_visual_type( $request_data['wc_visual_attribute_type'] ) : '';
+		$color_value = isset( $request_data['term_color'] ) ? sanitize_hex_color( self::sanitize_request_string( $request_data['term_color'] ) ) : '';
+		$image_id    = isset( $request_data['term_image'] ) ? absint( self::sanitize_request_string( $request_data['term_image'] ) ) : 0;
+
+		if ( '' === $visual_type ) {
+			$visual_type = $image_id ? self::TYPE_IMAGE : self::TYPE_COLOR;
+		}
+
+		self::save_term_visual_by_type( $term_id, $visual_type, $color_value ? $color_value : '', $image_id );
+	}
+
+	/**
+	 * Check whether request data contains visual fields.
+	 *
+	 * @param array $request_data Request data.
+	 * @return bool
+	 */
+	private static function has_visual_request_data( array $request_data ): bool {
+		return isset( $request_data['wc_visual_attribute_type'] ) || isset( $request_data['term_color'] ) || isset( $request_data['term_image'] );
+	}
+
+	/**
+	 * Sanitize a request value to a string.
+	 *
+	 * @param mixed $value Request value.
+	 * @return string
+	 */
+	private static function sanitize_request_string( $value ): string {
+		$value = wp_unslash( $value );
+
+		return is_scalar( $value ) ? (string) $value : '';
+	}
+
+	/**
+	 * Sanitize the visual type request value.
+	 *
+	 * @param mixed $type Visual type value.
+	 * @return string
+	 */
+	private static function sanitize_visual_type( $type ): string {
+		$type = self::sanitize_request_string( $type );
+
+		return in_array( $type, array( self::TYPE_COLOR, self::TYPE_IMAGE ), true ) ? $type : '';
+	}
+
+	/**
 	 * Save mutually exclusive visual attribute term meta.
 	 *
 	 * @param int    $term_id Term ID.
