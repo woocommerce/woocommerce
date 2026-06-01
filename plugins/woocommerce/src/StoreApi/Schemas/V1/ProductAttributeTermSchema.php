@@ -44,22 +44,6 @@ class ProductAttributeTermSchema extends TermSchema {
 	}
 
 	/**
-	 * Convert a product attribute term object into an object suitable for the response.
-	 *
-	 * @param \WP_Term $term Term object.
-	 * @return array
-	 */
-	public function get_item_response( $term ) {
-		$response = parent::get_item_response( $term );
-
-		$response[ self::VISUAL_PROPERTY_NAME ] = VisualAttributeTermMeta::is_visual_attribute_taxonomy( $term->taxonomy )
-			? VisualAttributeTermMeta::get_term_visual( (int) $term->term_id )
-			: null;
-
-		return $response;
-	}
-
-	/**
 	 * Get the visual data property schema.
 	 *
 	 * @return array
@@ -67,7 +51,7 @@ class ProductAttributeTermSchema extends TermSchema {
 	private function get_visual_property_schema(): array {
 		return array(
 			'description' => __( 'Experimental visual swatch data for wc-visual attribute terms.', 'woocommerce' ),
-			'type'        => array( 'object', 'null' ),
+			'type'        => 'object',
 			'context'     => array( 'view', 'edit' ),
 			'readonly'    => true,
 			'properties'  => array(
