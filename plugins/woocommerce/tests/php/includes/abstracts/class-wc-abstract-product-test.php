@@ -342,29 +342,60 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox validate_props() keeps a product in stock when stock quantity is a positive float below 1 and the woocommerce_stock_amount filter is set to floatval.
 	 *
-	 * Regression test for https://github.com/woocommerce/woocommerce/issues/41676 — the
-	 * (int) cast on get_stock_quantity() inside validate_props() truncated 0.5 to 0,
-	 * which is not above the default no-stock threshold (0), so the product was
-	 * incorrectly flipped to "outofstock".
+	 * See https://github.com/woocommerce/woocommerce/issues/41676 for more details.
 	 */
 	public function test_validate_props_preserves_in_stock_for_float_stock_quantity() {
-		remove_all_filters( 'woocommerce_stock_amount' );
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
 		add_filter( 'woocommerce_stock_amount', 'floatval' );
 
-		try {
-			$product = new WC_Product_Simple();
-			$product->set_manage_stock( true );
-			$product->set_stock_quantity( 0.5 );
-			$product->set_stock_status( 'instock' );
+		$product = new WC_Product_Simple();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 0.5 );
+		$product->set_stock_status( 'instock' );
 
-			$product->validate_props();
+		$product->validate_props();
 
-			$this->assertSame( 0.5, $product->get_stock_quantity() );
-			$this->assertSame( 'instock', $product->get_stock_status() );
-		} finally {
-			remove_filter( 'woocommerce_stock_amount', 'floatval' );
-			add_filter( 'woocommerce_stock_amount', 'intval' );
-		}
+		$this->assertSame( 0.5, $product->get_stock_quantity() );
+		$this->assertSame( 'instock', $product->get_stock_status() );
+
+		remove_filter( 'woocommerce_stock_amount', 'floatval' );
+		add_filter( 'woocommerce_stock_amount', 'intval' );
+	}
+
+	/**
+	 * @testdox validate_props() compares fractional stock against a non-default woocommerce_notify_no_stock_amount threshold using a float comparison.
+	 *
+	 * See https://github.com/woocommerce/woocommerce/issues/41676 for more details.
+	 */
+	public function test_validate_props_respects_non_default_no_stock_threshold_for_float_stock_quantity() {
+		$previous_threshold = get_option( 'woocommerce_notify_no_stock_amount' );
+		update_option( 'woocommerce_notify_no_stock_amount', 5 );
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		$above_threshold = new WC_Product_Simple();
+		$above_threshold->set_manage_stock( true );
+		$above_threshold->set_stock_quantity( 5.5 );
+		$above_threshold->set_stock_status( 'instock' );
+
+		$above_threshold->validate_props();
+
+		$this->assertSame( 5.5, $above_threshold->get_stock_quantity() );
+		$this->assertSame( 'instock', $above_threshold->get_stock_status(), 'A fractional stock quantity above the threshold should stay in stock.' );
+
+		$at_threshold = new WC_Product_Simple();
+		$at_threshold->set_manage_stock( true );
+		$at_threshold->set_stock_quantity( 4.5 );
+		$at_threshold->set_stock_status( 'instock' );
+
+		$at_threshold->validate_props();
+
+		$this->assertSame( 4.5, $at_threshold->get_stock_quantity() );
+		$this->assertSame( 'outofstock', $at_threshold->get_stock_status(), 'A fractional stock quantity below the threshold should flip to out of stock.' );
+
+		remove_filter( 'woocommerce_stock_amount', 'floatval' );
+		add_filter( 'woocommerce_stock_amount', 'intval' );
+		update_option( 'woocommerce_notify_no_stock_amount', $previous_threshold );
 	}
 
 	/**
