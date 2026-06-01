@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix date range input height increase on WP 7.0 by aligning with WordPress input styling

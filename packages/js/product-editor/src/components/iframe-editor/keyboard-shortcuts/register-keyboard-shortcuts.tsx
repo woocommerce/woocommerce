@@ -8,8 +8,7 @@ import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { isAppleOS } from '@wordpress/keycodes';
 
 export const RegisterKeyboardShortcuts = () => {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore registerShortcut is not defined in the types
+	// @ts-expect-error keyboard-shortcuts store's registerShortcut action is not exposed on the public dispatch type.
 	const { registerShortcut } = useDispatch( keyboardShortcutsStore );
 
 	useEffect( () => {

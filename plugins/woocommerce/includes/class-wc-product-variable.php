@@ -10,6 +10,7 @@
 
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -154,7 +155,7 @@ class WC_Product_Variable extends WC_Product {
 	 * Note: Variable prices do not show suffixes like other product types. This
 	 * is due to some things like tax classes being set at variation level which
 	 * could differ from the parent price. The only way to show accurate prices
-	 * would be to load the variation and get it's price, which adds extra
+	 * would be to load the variation and get its price, which adds extra
 	 * overhead and still has edge cases where the values would be inaccurate.
 	 *
 	 * Additionally, ranges of prices no longer show 'striked out' sale prices
@@ -329,7 +330,8 @@ class WC_Product_Variable extends WC_Product {
 		$hide_out_of_stock_items = ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
 		$available_variations    = array();
 
-		if ( is_callable( '_prime_post_caches' ) ) {
+		if ( ! empty( $variation_ids ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
 		}
 
@@ -380,7 +382,8 @@ class WC_Product_Variable extends WC_Product {
 	public function has_purchasable_variations() {
 		$variation_ids = $this->get_children();
 
-		if ( is_callable( '_prime_post_caches' ) ) {
+		if ( ! empty( $variation_ids ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
 		}
 
@@ -414,6 +417,45 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! $variation instanceof WC_Product_Variation ) {
 			return false;
 		}
+
+		$variation_featured_id    = (int) $variation->get_image_id();
+		$variation_featured_valid = $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
+		$parent_featured_id       = (int) $this->get_image_id();
+		$parent_featured_valid    = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
+
+		$variation_gallery_image_ids = array();
+		$variation_gallery_html      = '';
+
+		if ( VariationGalleryPackage::is_enabled() ) {
+			$variation_gallery_image_ids = array_values(
+				array_filter(
+					array_map( 'intval', $variation->get_gallery_image_ids() ),
+					'wp_attachment_is_image'
+				)
+			);
+		}
+
+		// Prefer variation-owned images over the parent fallback.
+		if ( $variation_featured_valid ) {
+			$selected_image_id = $variation_featured_id;
+		} elseif ( ! empty( $variation_gallery_image_ids ) ) {
+			$selected_image_id = $variation_gallery_image_ids[0];
+		} elseif ( $parent_featured_valid ) {
+			$selected_image_id = $parent_featured_id;
+		} else {
+			$selected_image_id = 0;
+		}
+
+		if ( ! empty( $variation_gallery_image_ids ) ) {
+			$gallery_html_ids = $variation_gallery_image_ids;
+
+			if ( $selected_image_id && ! in_array( $selected_image_id, $gallery_html_ids, true ) ) {
+				array_unshift( $gallery_html_ids, $selected_image_id );
+			}
+
+			$variation_gallery_html = wc_get_product_gallery_html( $this, $gallery_html_ids );
+		}
+
 		// See if prices should be shown for each variation after selection.
 		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === '' || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
 
@@ -427,8 +469,10 @@ class WC_Product_Variable extends WC_Product {
 				'dimensions_html'       => wc_format_dimensions( $variation->get_dimensions( false ) ),
 				'display_price'         => wc_get_price_to_display( $variation ),
 				'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
-				'image'                 => wc_get_product_attachment_props( $variation->get_image_id() ),
-				'image_id'              => $variation->get_image_id(),
+				'gallery_image_ids'     => $variation_gallery_image_ids,
+				'gallery_images_html'   => $variation_gallery_html,
+				'image'                 => wc_get_product_attachment_props( $selected_image_id ),
+				'image_id'              => $selected_image_id,
 				'is_downloadable'       => $variation->is_downloadable(),
 				'is_in_stock'           => $variation->is_in_stock(),
 				'is_purchasable'        => $variation->is_purchasable(),
@@ -657,7 +701,8 @@ class WC_Product_Variable extends WC_Product {
 			$data_store = WC_Data_Store::load( 'product-' . $product->get_type() );
 			$data_store->sync_price( $product );
 			$data_store->sync_stock_status( $product );
-			self::sync_attributes( $product ); // Legacy update of attributes.
+			self::sync_attributes( $product );
+			// Legacy update of attributes.
 
 			do_action( 'woocommerce_variable_product_sync_data', $product );
 

@@ -17,6 +17,7 @@ import {
 	CoreFilterNames,
 	ETimeFrameOperator,
 } from '../types';
+import { setEmailEditorPreviewState } from '../utils';
 
 const collection = {
 	name: CoreCollectionNames.NEW_ARRIVALS,
@@ -65,4 +66,7 @@ export default {
 	...collection,
 	attributes,
 	innerBlocks,
+	preview: {
+		setPreviewState: setEmailEditorPreviewState,
+	},
 };

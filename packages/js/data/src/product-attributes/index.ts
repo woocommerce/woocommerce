@@ -16,3 +16,9 @@ export const store = createCrudDataStore<
 } );
 
 export const EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME = STORE_NAME;
+
+declare module '@wordpress/data' {
+	interface StoreRegistry {
+		[ STORE_NAME ]: typeof store;
+	}
+}

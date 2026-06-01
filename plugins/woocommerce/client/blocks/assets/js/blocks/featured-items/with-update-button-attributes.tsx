@@ -45,7 +45,6 @@ export const withUpdateButtonAttributes =
 
 		const block: BlockInstance = useSelect(
 			( select ) => {
-				// @ts-expect-error getBlock is not typed.
 				return select( 'core/block-editor' ).getBlock( clientId );
 			},
 			[ clientId ]

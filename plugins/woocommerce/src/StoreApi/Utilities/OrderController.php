@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Internal\Customers\SearchService as CustomerSearchService;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Exception;
@@ -126,8 +127,9 @@ class OrderController {
 	 * @param \WC_Order $order Order object.
 	 */
 	public function sync_customer_data_with_order( \WC_Order $order ) {
-		if ( $order->get_customer_id() ) {
-			$customer = new \WC_Customer( $order->get_customer_id() );
+		$customer_id = $order->get_customer_id();
+		if ( $customer_id ) {
+			$customer = new \WC_Customer( $customer_id );
 			$customer->set_props(
 				array(
 					'billing_first_name'  => $order->get_billing_first_name(),
@@ -153,9 +155,7 @@ class OrderController {
 					'shipping_phone'      => $order->get_shipping_phone(),
 				)
 			);
-
 			$this->additional_fields_controller->sync_customer_additional_fields_with_order( $order, $customer );
-
 			$customer->save();
 		}
 	}
@@ -384,12 +384,14 @@ class OrderController {
 
 			// If only local pickup is selected, we don't need to validate the shipping country.
 			if ( ! $selected_shipping_rates_are_all_local_pickup && ! $this->validate_allowed_country( $shipping_country, (array) wc()->countries->get_shipping_countries() ) ) {
+				$countries             = WC()->countries->get_countries();
+				$shipping_country_name = $countries[ $shipping_country ] ?? $shipping_country;
 				throw new RouteException(
 					'woocommerce_rest_invalid_address_country',
 					sprintf(
-						/* translators: %s country code. */
+						/* translators: %s country name. */
 						esc_html__( 'Sorry, we do not ship orders to the provided country (%s)', 'woocommerce' ),
-						esc_html( $shipping_country )
+						esc_html( $shipping_country_name )
 					),
 					400,
 					array(
@@ -400,12 +402,14 @@ class OrderController {
 		}
 
 		if ( ! $this->validate_allowed_country( $billing_country, (array) wc()->countries->get_allowed_countries() ) ) {
+			$countries            = WC()->countries->get_countries();
+			$billing_country_name = $countries[ $billing_country ] ?? $billing_country;
 			throw new RouteException(
 				'woocommerce_rest_invalid_address_country',
 				sprintf(
-					/* translators: %s country code. */
+					/* translators: %s country name. */
 					esc_html__( 'Sorry, we do not allow orders from the provided country (%s)', 'woocommerce' ),
-					esc_html( $billing_country )
+					esc_html( $billing_country_name )
 				),
 				400,
 				array(
@@ -806,31 +810,31 @@ class OrderController {
 
 		if ( $order->get_cart_hash() !== $cart_hashes['line_items'] ) {
 			$order->set_cart_hash( $cart_hashes['line_items'] );
-			$order->remove_order_items( 'line_item' );
+			$order->remove_order_items( OrderItemType::LINE_ITEM );
 			wc()->checkout->create_order_line_items( $order, $cart );
 		}
 
 		if ( $order->get_meta( '_shipping_hash' ) !== $cart_hashes['shipping'] ) {
 			$order->update_meta_data( '_shipping_hash', $cart_hashes['shipping'] );
-			$order->remove_order_items( 'shipping' );
+			$order->remove_order_items( OrderItemType::SHIPPING );
 			wc()->checkout->create_order_shipping_lines( $order, wc()->session->get( 'chosen_shipping_methods' ), wc()->shipping()->get_packages() );
 		}
 
 		if ( $order->get_meta( '_coupons_hash' ) !== $cart_hashes['coupons'] ) {
-			$order->remove_order_items( 'coupon' );
+			$order->remove_order_items( OrderItemType::COUPON );
 			$order->update_meta_data( '_coupons_hash', $cart_hashes['coupons'] );
 			wc()->checkout->create_order_coupon_lines( $order, $cart );
 		}
 
 		if ( $order->get_meta( '_fees_hash' ) !== $cart_hashes['fees'] ) {
 			$order->update_meta_data( '_fees_hash', $cart_hashes['fees'] );
-			$order->remove_order_items( 'fee' );
+			$order->remove_order_items( OrderItemType::FEE );
 			wc()->checkout->create_order_fee_lines( $order, $cart );
 		}
 
 		if ( $order->get_meta( '_taxes_hash' ) !== $cart_hashes['taxes'] ) {
 			$order->update_meta_data( '_taxes_hash', $cart_hashes['taxes'] );
-			$order->remove_order_items( 'tax' );
+			$order->remove_order_items( OrderItemType::TAX );
 			wc()->checkout->create_order_tax_lines( $order, $cart );
 		}
 	}

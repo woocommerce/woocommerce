@@ -8,8 +8,7 @@ import {
 } from '@wordpress/blocks';
 import {
 	registerCoreBlocks,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore We need this to import the block modules for registration.
+	// @ts-expect-error __experimentalGetCoreBlocks is not exported from @wordpress/block-library's public types.
 	__experimentalGetCoreBlocks,
 } from '@wordpress/block-library';
 
@@ -23,8 +22,7 @@ export function initBlocks() {
 	const blocks = coreBlocks.filter( ( block: BlockInstance ) => {
 		return ! getBlockType( block.name );
 	} );
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore An argument is allowed to specify which blocks to register.
+	// @ts-expect-error registerCoreBlocks' public type has no arguments, but the runtime accepts an optional blocks array.
 	registerCoreBlocks( blocks );
 
 	const woocommerceBlocks = Object.values( productBlocks ).map( ( init ) =>

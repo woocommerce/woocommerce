@@ -51,7 +51,6 @@ const maybeHideInventoryAdvancedCollapsible = createHigherOrderComponent(
 						);
 						const advancedCollapsibleBlock = select(
 							'core/block-editor'
-							// @ts-expect-error Selector is not typed
 						).getBlock( props?.clientId as string );
 
 						let allBlocksInvisible = false;

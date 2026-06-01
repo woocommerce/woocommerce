@@ -1,7 +1,7 @@
 export type ValidatorResponse = Promise< ValidationError >;
 
 export type Validator< T > = (
-	initialValue?: T,
+	initialValue?: T | null,
 	newData?: Record< string, unknown >
 ) => ValidatorResponse;
 

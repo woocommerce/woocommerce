@@ -136,6 +136,11 @@ class Totals extends \WP_UnitTestCase {
 
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
+		// Phone defaults to 'required' for classic checkout (no option set).
+		// Set it to optional since the test sends empty phone values.
+		update_option( 'woocommerce_checkout_phone_field', 'optional' );
+		// Reset cached locale so the option change takes effect.
+		WC()->countries->locale = array();
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );

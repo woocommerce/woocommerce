@@ -19,6 +19,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
 use Automattic\WooCommerce\Utilities\I18nUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use WC_REST_Products_V2_Controller;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -26,7 +27,11 @@ use WP_REST_Response;
 use WP_Error;
 use WC_Admin_Duplicate_Product;
 use WC_REST_CRUD_Controller;
+use WC_Data_Store;
+use WC_Product_Attribute;
 use WC_Product_Factory;
+use WC_Product_Simple;
+use WC_REST_Exception;
 
 
 defined( 'ABSPATH' ) || exit;
@@ -39,6 +44,21 @@ defined( 'ABSPATH' ) || exit;
 class Controller extends WC_REST_Products_V2_Controller {
 
 	use CogsAwareRestControllerTrait;
+
+	/**
+	 * Fields stripped from the response for users without product management capabilities
+	 * (e.g. authors who can view published products via the edit_posts fallback).
+	 *
+	 * @since 10.8.0
+	 */
+	private const SENSITIVE_FIELDS = array(
+		'cost_of_goods_sold',
+		'downloads',
+		'download_limit',
+		'download_expiry',
+		'meta_data',
+		'purchase_note',
+	);
 
 	/**
 	 * Endpoint namespace.
@@ -85,6 +105,13 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 * @var array
 	 */
 	private $exclude_status = array();
+
+	/**
+	 * Stock quantity bounds for the current collection query.
+	 *
+	 * @var array
+	 */
+	private $stock_quantity_filter = array();
 
 	/**
 	 * Stores attachment IDs processed during the current request for potential cleanup.
@@ -222,6 +249,30 @@ class Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
+	 * Prepare links for the request.
+	 *
+	 * @param \WC_Product                          $product  Object data.
+	 * @param WP_REST_Request<array<string,mixed>> $request Request object.
+	 * @return array Links for the given post.
+	 */
+	protected function prepare_links( $product, $request ) {
+		$links = parent::prepare_links( $product, $request );
+
+		if ( $product->is_type( ProductType::VARIABLE ) && $product->has_child() ) {
+			$links['variations'] = array();
+
+			foreach ( $product->get_children() as $variation_id ) {
+				$links['variations'][] = array(
+					'href'       => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $variation_id ) ),
+					'embeddable' => true,
+				);
+			}
+		}
+
+		return $links;
+	}
+
+	/**
 	 * Get the images for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product Product instance.
@@ -238,6 +289,11 @@ class Controller extends WC_REST_Products_V2_Controller {
 
 		// Add gallery images.
 		$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
+
+		if ( ! empty( $attachment_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $attachment_ids );
+		}
 
 		// Build image data.
 		foreach ( $attachment_ids as $attachment_id ) {
@@ -486,13 +542,28 @@ class Controller extends WC_REST_Products_V2_Controller {
 			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		}
 
+		$min_stock_quantity = $request['min_stock_quantity'];
+		$max_stock_quantity = $request['max_stock_quantity'];
+
+		if ( null !== $min_stock_quantity || null !== $max_stock_quantity ) {
+			$this->stock_quantity_filter = array(
+				'min'               => $min_stock_quantity,
+				'max'               => $max_stock_quantity,
+				'post_statuses'     => (array) $args['post_status'],
+				'excluded_statuses' => $this->exclude_status,
+			);
+		} else {
+			$this->stock_quantity_filter = array();
+		}
+
 		// Filter product by stock_status.
 		if ( ! empty( $request['stock_status'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				$args,
 				array(
-					'key'   => '_stock_status',
-					'value' => $request['stock_status'],
+					'key'     => '_stock_status',
+					'value'   => $request['stock_status'],
+					'compare' => 'IN',
 				)
 			);
 		}
@@ -505,7 +576,15 @@ class Controller extends WC_REST_Products_V2_Controller {
 			// Use 0 when there's no on sale products to avoid return all products.
 			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
 
-			$args[ $on_sale_key ] += $on_sale_ids;
+			if ( true === $request['on_sale'] && ! empty( $this->stock_quantity_filter ) && ! empty( $args['post__in'] ) ) {
+				$args['post__in'] = array_values( array_intersect( array_map( 'absint', $args['post__in'] ), array_map( 'absint', $on_sale_ids ) ) );
+
+				if ( empty( $args['post__in'] ) ) {
+					$args['post__in'] = array( 0 );
+				}
+			} else {
+				$args[ $on_sale_key ] += $on_sale_ids;
+			}
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
@@ -540,18 +619,63 @@ class Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
+	 * Build the variation post status SQL fragment for stock quantity filtering.
+	 *
+	 * @param array  $post_statuses Product statuses included in the collection query.
+	 * @param array  $excluded_statuses Product statuses excluded from the collection query.
+	 * @param string $posts_alias Posts table alias.
+	 * @return string
+	 */
+	private function get_stock_quantity_variation_status_where( array $post_statuses, array $excluded_statuses, string $posts_alias = 'posts' ): string {
+		global $wpdb;
+
+		$clauses       = array();
+		$post_statuses = array_filter( $post_statuses );
+
+		if ( in_array( 'any', $post_statuses, true ) ) {
+			$post_statuses = array( ProductStatus::PUBLISH );
+		}
+
+		if ( ! empty( $post_statuses ) ) {
+			$prepared_statuses = array();
+			foreach ( $post_statuses as $post_status ) {
+				$prepared_statuses[] = $wpdb->prepare( '%s', $post_status );
+			}
+
+			$clauses[] = "{$posts_alias}.post_status IN ( " . implode( ', ', $prepared_statuses ) . ' )';
+		}
+
+		if ( ! empty( $excluded_statuses ) ) {
+			$prepared_statuses = array();
+			foreach ( $excluded_statuses as $post_status ) {
+				$prepared_statuses[] = $wpdb->prepare( '%s', $post_status );
+			}
+
+			$clauses[] = "{$posts_alias}.post_status NOT IN ( " . implode( ', ', $prepared_statuses ) . ' )';
+		}
+
+		return $clauses ? 'AND ' . implode( ' AND ', $clauses ) : '';
+	}
+
+	/**
 	 * Get objects.
 	 *
 	 * @param array $query_args Query args.
 	 * @return array
 	 */
 	protected function get_objects( $query_args ) {
-		$add_search_criteria = $this->search_sku_arg_value || $this->search_name_or_sku_tokens || $this->search_fields_tokens;
+		$add_search_criteria       = $this->search_sku_arg_value || $this->search_name_or_sku_tokens || $this->search_fields_tokens;
+		$add_stock_quantity_filter = ! empty( $this->stock_quantity_filter );
 
 		// Add filters for search criteria in product postmeta via the lookup table.
 		if ( $add_search_criteria ) {
 			add_filter( 'posts_join', array( $this, 'add_search_criteria_to_wp_query_join' ) );
 			add_filter( 'posts_where', array( $this, 'add_search_criteria_to_wp_query_where' ) );
+		}
+
+		// Add filters for stock quantity ranges.
+		if ( $add_stock_quantity_filter ) {
+			add_filter( 'posts_where', array( $this, 'add_stock_quantity_to_wp_query_where' ) );
 		}
 
 		// Add filters for excluding product statuses.
@@ -571,6 +695,13 @@ class Controller extends WC_REST_Products_V2_Controller {
 			$this->search_fields_tokens      = null;
 		}
 
+		// Remove filters for stock quantity ranges.
+		if ( $add_stock_quantity_filter ) {
+			remove_filter( 'posts_where', array( $this, 'add_stock_quantity_to_wp_query_where' ) );
+
+			$this->stock_quantity_filter = array();
+		}
+
 		// Remove filters for excluding product statuses.
 		if ( ! empty( $this->exclude_status ) ) {
 			remove_filter( 'posts_where', array( $this, 'exclude_product_statuses' ) );
@@ -579,6 +710,84 @@ class Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Add stock quantity bounds to the product collection query.
+	 *
+	 * Product variation stock is stored against the variation, but the products
+	 * collection returns variable parent products by default. Matching variation
+	 * rows are also mapped back to their parent product IDs.
+	 *
+	 * @param string $where Where clause used to search posts.
+	 * @return string
+	 */
+	public function add_stock_quantity_to_wp_query_where( $where ) {
+		if ( empty( $this->stock_quantity_filter ) ) {
+			return $where;
+		}
+
+		global $wpdb;
+
+		$direct_stock_where    = $this->get_stock_quantity_where_clause( 'direct_lookup' );
+		$variation_stock_where = $this->get_stock_quantity_where_clause( 'variation_lookup' );
+		$variation_status      = $this->get_stock_quantity_variation_status_where(
+			$this->stock_quantity_filter['post_statuses'],
+			$this->stock_quantity_filter['excluded_statuses'],
+			'variation_posts'
+		);
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return $where . "
+			AND (
+				EXISTS (
+					SELECT 1
+					FROM {$wpdb->wc_product_meta_lookup} AS direct_lookup
+					WHERE direct_lookup.product_id = {$wpdb->posts}.ID
+						AND direct_lookup.stock_quantity IS NOT NULL
+						AND {$direct_stock_where}
+				)
+				OR EXISTS (
+					SELECT 1
+					FROM {$wpdb->posts} AS variation_posts
+					INNER JOIN {$wpdb->wc_product_meta_lookup} AS variation_lookup
+						ON variation_posts.ID = variation_lookup.product_id
+					WHERE variation_posts.post_type = 'product_variation'
+						AND variation_posts.post_parent = {$wpdb->posts}.ID
+						AND variation_posts.post_parent > 0
+						{$variation_status}
+						AND variation_lookup.stock_quantity IS NOT NULL
+						AND {$variation_stock_where}
+				)
+			)";
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
+	 * Build the stock quantity SQL fragment for the provided lookup table alias.
+	 *
+	 * @param string $lookup_alias Product lookup table alias.
+	 * @return string
+	 */
+	private function get_stock_quantity_where_clause( string $lookup_alias ): string {
+		global $wpdb;
+
+		$min_stock_quantity = $this->stock_quantity_filter['min'];
+		$max_stock_quantity = $this->stock_quantity_filter['max'];
+
+		if ( null !== $min_stock_quantity && null !== $max_stock_quantity ) {
+			return $wpdb->prepare(
+				"{$lookup_alias}.stock_quantity BETWEEN %f AND %f", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				(float) $min_stock_quantity,
+				(float) $max_stock_quantity
+			);
+		}
+
+		if ( null !== $min_stock_quantity ) {
+			return $wpdb->prepare( "{$lookup_alias}.stock_quantity >= %f", (float) $min_stock_quantity ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		}
+
+		return $wpdb->prepare( "{$lookup_alias}.stock_quantity <= %f", (float) $max_stock_quantity ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -1196,11 +1405,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Allow set meta_data.
-		if ( is_array( $request['meta_data'] ) ) {
-			foreach ( $request['meta_data'] as $meta ) {
-				$product->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-			}
-		}
+		MetaDataUtil::update( $request['meta_data'], $product ); // @phpstan-ignore argument.type (missing `use WC_Product` causes phantom namespace-local type)
 
 		if ( ! empty( $request['date_created'] ) ) {
 			$date = rest_parse_date( $request['date_created'] );
@@ -1960,7 +2165,76 @@ class Controller extends WC_REST_Products_V2_Controller {
 			'readonly'    => true,
 		);
 
-			return $this->add_additional_fields_schema( $schema );
+		$schema = $this->add_embed_context_to_schema( $schema );
+
+		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Add the embed context to product schema properties available in view context.
+	 *
+	 * @param array $schema Product schema.
+	 * @return array Product schema with embed context support.
+	 */
+	private function add_embed_context_to_schema( array $schema ): array {
+		if ( empty( $schema['properties'] ) || ! is_array( $schema['properties'] ) ) {
+			return $schema;
+		}
+
+		// WordPress REST embeds cannot be narrowed with _fields. Keep all non-sensitive
+		// view fields embeddable for now; scalability is tracked in https://github.com/woocommerce/woocommerce/issues/64652.
+		foreach ( $schema['properties'] as $property => $property_schema ) {
+			if ( ! is_array( $property_schema ) ) {
+				continue;
+			}
+
+			if ( in_array( $property, self::SENSITIVE_FIELDS, true ) ) {
+				continue;
+			}
+
+			$schema['properties'][ $property ] = $this->add_embed_context_to_schema_property( $property_schema );
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Add the embed context to a schema property and its nested properties.
+	 *
+	 * @param array $property_schema Schema property.
+	 * @return array Schema property with embed context support.
+	 */
+	private function add_embed_context_to_schema_property( array $property_schema ): array {
+		if (
+			! empty( $property_schema['context'] ) &&
+			is_array( $property_schema['context'] ) &&
+			in_array( 'view', $property_schema['context'], true ) &&
+			! in_array( 'embed', $property_schema['context'], true )
+		) {
+			$property_schema['context'][] = 'embed';
+		}
+
+		if ( ! empty( $property_schema['properties'] ) && is_array( $property_schema['properties'] ) ) {
+			foreach ( $property_schema['properties'] as $property => $nested_property_schema ) {
+				if ( ! is_array( $nested_property_schema ) ) {
+					continue;
+				}
+
+				$property_schema['properties'][ $property ] = $this->add_embed_context_to_schema_property( $nested_property_schema );
+			}
+		}
+
+		if ( ! empty( $property_schema['items']['properties'] ) && is_array( $property_schema['items']['properties'] ) ) {
+			foreach ( $property_schema['items']['properties'] as $property => $nested_property_schema ) {
+				if ( ! is_array( $nested_property_schema ) ) {
+					continue;
+				}
+
+				$property_schema['items']['properties'][ $property ] = $this->add_embed_context_to_schema_property( $nested_property_schema );
+			}
+		}
+
+		return $property_schema;
 	}
 
 	/**
@@ -1974,10 +2248,13 @@ class Controller extends WC_REST_Products_V2_Controller {
 
 		unset( $params['in_stock'] );
 		$params['stock_status'] = array(
-			'description'       => __( 'Limit result set to products with specified stock status.', 'woocommerce' ),
-			'type'              => 'string',
-			'enum'              => array_keys( wc_get_product_stock_status_options() ),
-			'sanitize_callback' => 'sanitize_text_field',
+			'description'       => __( 'Limit result set to products with any of the specified stock statuses.', 'woocommerce' ),
+			'type'              => array( 'string', 'array' ),
+			'items'             => array(
+				'type' => 'string',
+				'enum' => array_keys( wc_get_product_stock_status_options() ),
+			),
+			'sanitize_callback' => 'wp_parse_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
@@ -2067,6 +2344,20 @@ class Controller extends WC_REST_Products_V2_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+		$params['min_stock_quantity'] = array(
+			'description'       => __( 'Limit result set to products with stock quantity greater than or equal to the specified amount.', 'woocommerce' ),
+			'type'              => wc_is_stock_amount_integer() ? 'integer' : 'number',
+			'sanitize_callback' => 'wc_stock_amount',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['max_stock_quantity'] = array(
+			'description'       => __( 'Limit result set to products with stock quantity less than or equal to the specified amount.', 'woocommerce' ),
+			'type'              => wc_is_stock_amount_integer() ? 'integer' : 'number',
+			'sanitize_callback' => 'wc_stock_amount',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
 		$params['downloadable'] = array(
 			'description'       => __( 'Limit result set to downloadable products.', 'woocommerce' ),
 			'type'              => 'boolean',
@@ -2140,9 +2431,10 @@ class Controller extends WC_REST_Products_V2_Controller {
 		if ( $product->is_downloadable() || 'edit' === $context ) {
 			foreach ( $product->get_downloads() as $file_id => $file ) {
 				$downloads[] = array(
-					'id'   => $file_id, // MD5 hash.
-					'name' => $file['name'],
-					'file' => $file['file'],
+					'id'                           => $file_id,
+					// MD5 hash.
+											'name' => $file['name'],
+					'file'                         => $file['file'],
 				);
 			}
 		}
@@ -2230,14 +2522,15 @@ class Controller extends WC_REST_Products_V2_Controller {
 		$exclude_ids = $request->get_param( 'exclude' );
 		$limit       = $request->get_param( 'limit' ) ? $request->get_param( 'limit' ) : 5;
 
-		$data_store = \WC_Data_Store::load( 'product' );
+		$data_store = WC_Data_Store::load( 'product' );
 		// @phpstan-ignore-next-line method.notFound
 		$this->suggested_products_ids = $data_store->get_related_products(
 			$categories,
 			$tags,
 			$exclude_ids,
 			$limit,
-			null // No need to pass the product ID.
+			null
+			// No need to pass the product ID.
 		);
 
 		// When no suggested products are found, return an empty array.
@@ -2256,8 +2549,8 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 * (doesn't fire hooks, ensure_response, or add links).
 	 *
 	 * @param WC_Data         $object_data Object data.
-	 * @param WP_REST_Request $request Request object.
-	 * @param string          $context Request context.
+	 * @param WP_REST_Request $request     Request object.
+	 * @param string          $context     Request context.
 	 * @return array Product data to be included in the response.
 	 */
 	protected function prepare_object_for_response_core( $object_data, $request, $context ): array {
@@ -2273,6 +2566,15 @@ class Controller extends WC_REST_Products_V2_Controller {
 			'text'        => $object_data->add_to_cart_text(),
 			'single_text' => $object_data->single_add_to_cart_text(),
 		);
+
+		$post_type_object = get_post_type_object( 'product' );
+
+		if ( $post_type_object instanceof \WP_Post_Type && ! current_user_can( $post_type_object->cap->read_private_posts ) ) {
+			foreach ( self::SENSITIVE_FIELDS as $field ) {
+				unset( $data[ $field ] );
+			}
+		}
+
 		return $data;
 	}
 

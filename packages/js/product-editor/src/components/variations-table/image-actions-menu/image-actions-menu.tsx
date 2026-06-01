@@ -5,7 +5,7 @@ import { Dropdown, MenuGroup } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { createElement, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { MediaItem } from '@wordpress/media-utils';
+import type { Attachment } from '@wordpress/media-utils';
 import { MediaUploaderErrorCallback } from '@woocommerce/components';
 
 /**
@@ -13,7 +13,10 @@ import { MediaUploaderErrorCallback } from '@woocommerce/components';
  */
 import { MediaLibraryMenuItem } from '../../menu-items/media-library-menu-item';
 import { UploadFilesMenuItem } from '../../menu-items/upload-files-menu-item';
-import { mapUploadImageToImage } from '../../../utils/map-upload-image-to-image';
+import {
+	mapUploadImageToImage,
+	UploadImage,
+} from '../../../utils/map-upload-image-to-image';
 import { VariationQuickUpdateMenuItem } from '../variation-actions-menus';
 import type { ImageActionsMenuProps } from './types';
 
@@ -28,9 +31,12 @@ export function ImageActionsMenu( {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	function uploadSuccessHandler( onClose: () => void ) {
-		return function handleUploadSuccess( files: MediaItem[] ) {
+		return function handleUploadSuccess( files: Attachment[] ) {
 			const image =
-				( files.length && mapUploadImageToImage( files[ 0 ] ) ) ||
+				( files.length &&
+					mapUploadImageToImage(
+						files[ 0 ] as unknown as UploadImage
+					) ) ||
 				undefined;
 			const variation = {
 				id: selection[ 0 ].id,
@@ -56,10 +62,12 @@ export function ImageActionsMenu( {
 	};
 
 	function mediaLibraryMenuItemSelectHandler( onClose: () => void ) {
-		return function handleMediaLibraryMenuItemSelect( media: never ) {
+		return function handleMediaLibraryMenuItemSelect( media: unknown ) {
 			const variation = {
 				id: selection[ 0 ].id,
-				image: mapUploadImageToImage( media ) || undefined,
+				image:
+					mapUploadImageToImage( media as unknown as UploadImage ) ||
+					undefined,
 			};
 			onChange( [ variation ], false );
 			onClose();

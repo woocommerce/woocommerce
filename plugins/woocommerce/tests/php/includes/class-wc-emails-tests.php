@@ -1,7 +1,8 @@
 <?php
+declare( strict_types = 1 );
 
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
-use Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers\FulfillmentsHelper;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 
 /**
  * Class WC_Emails_Tests.
@@ -41,6 +42,26 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that replace_placeholders safely handles null values.
+	 */
+	public function test_replace_placeholders_handles_null_value() {
+		$email_object = new WC_Emails();
+		$this->assertSame( '', $email_object->replace_placeholders( null ) );
+	}
+
+	/**
+	 * Test that replace_placeholders replaces known placeholders.
+	 */
+	public function test_replace_placeholders_replaces_site_title() {
+		$email_object = new WC_Emails();
+		$placeholder  = '{site_title}';
+		$actual       = $email_object->replace_placeholders( $placeholder );
+		$expected     = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
+
+		$this->assertSame( $expected, $actual );
+	}
+
+	/**
 	 * Test that order meta function outputs linked meta.
 	 */
 	public function test_order_meta() {
@@ -68,9 +89,11 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 	 */
 	public function test_fulfillment_meta() {
 		// Ensure the FulfillmentsController is registered, which is necessary for the translation of meta keys.
+		// Delete the DB tables flag to force recreation in case another test class left stale state.
+		delete_option( 'woocommerce_fulfillments_db_tables_created' );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
 		$container  = wc_get_container();
-		$controller = $container->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
+		$controller = $container->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
 		$controller->register();
 		$controller->initialize_fulfillments();
 

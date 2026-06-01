@@ -47,6 +47,18 @@ class AddToCartWithOptions extends AbstractBlock {
 	}
 
 	/**
+	 * Product type string used to resolve add-to-cart template parts.
+	 * It returns the product type in most cases, except for variations,
+	 * which use the simple product template.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return string Product type slug.
+	 */
+	private function get_product_type_for_add_to_cart_template( \WC_Product $product ): string {
+		return ProductType::VARIATION === $product->get_type() ? ProductType::SIMPLE : $product->get_type();
+	}
+
+	/**
 	 * Enqueue assets specific to this block.
 	 * We enqueue frontend scripts only if the product type has a block template
 	 * part (that's WC core product types and extensions that migrated to block
@@ -65,7 +77,8 @@ class AddToCartWithOptions extends AbstractBlock {
 			$rendered_product = wc_get_product( $product_id );
 
 			if ( $rendered_product instanceof \WC_Product ) {
-				$template_part_path = $this->get_template_part_path( $rendered_product->get_type() );
+				$product_type       = $this->get_product_type_for_add_to_cart_template( $rendered_product );
+				$template_part_path = $this->get_template_part_path( $product_type );
 
 				if ( is_string( $template_part_path ) && '' !== $template_part_path && file_exists( $template_part_path ) ) {
 					wp_enqueue_script_module( 'woocommerce/add-to-cart-with-options' );
@@ -177,8 +190,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			return '';
 		}
 
-		// For variations, we display the simple product form.
-		$product_type = ProductType::VARIATION === $product->get_type() ? ProductType::SIMPLE : $product->get_type();
+		$product_type = $this->get_product_type_for_add_to_cart_template( $product );
 
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 		$classes            = implode(
@@ -555,7 +567,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					<input type="hidden" name="product_id" value="' . esc_attr( $product_id ) . '" />
 					<input type="hidden"
 						name="variation_id"
-						data-wp-bind--value="woocommerce/product-data::state.variationId"
+						data-wp-bind--value="woocommerce/products::state.productVariationInContext.id"
 					/>
 				</div>';
 			}
@@ -632,7 +644,21 @@ class AddToCartWithOptions extends AbstractBlock {
 			);
 
 			$form_html = ob_get_clean();
-			$form_html = sprintf( '<div %1$s>%2$s</div>', get_block_wrapper_attributes( $wrapper_attributes ), $form_html );
+
+			$has_visible_quantity_input = $form_html ? Utils::has_visible_quantity_input( $form_html ) : false;
+			if ( $has_visible_quantity_input ) {
+				$product_name                              = $product->get_name();
+				$form_html                                 = Utils::add_quantity_steppers( $form_html, $product_name );
+				$form_html                                 = Utils::add_quantity_stepper_classes( $form_html );
+				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/add-to-cart-form';
+				wp_enqueue_script_module( 'woocommerce/add-to-cart-form' );
+			}
+
+			$form_html = sprintf(
+				'<div %1$s>%2$s</div>',
+				get_block_wrapper_attributes( $wrapper_attributes ),
+				$form_html
+			);
 		}
 
 		$product = $previous_product;

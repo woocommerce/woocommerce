@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Export MediaUploadProps and MediaUploadComponentType for typed MediaUpload component props (native types are Component<any>).

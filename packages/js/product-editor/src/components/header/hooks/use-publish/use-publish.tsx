@@ -27,7 +27,7 @@ export function usePublish< T = Product >( {
 	onPublishError?( error: WPError ): void;
 } ) {
 	const { isValidating, isDirty, isPublishing, publish } =
-		useProductManager( productType );
+		useProductManager< T >( productType );
 
 	const [ , , prevStatus ] = useEntityProp< Product[ 'status' ] >(
 		'postType',

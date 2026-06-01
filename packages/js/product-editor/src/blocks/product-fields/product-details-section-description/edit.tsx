@@ -21,9 +21,6 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import type { ProductStatus, Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityId, useEntityProp } from '@wordpress/core-data';
 
 /**
@@ -35,12 +32,10 @@ import { TRACKS_SOURCE } from '../../../constants';
 import { WPError, useErrorHandler } from '../../../hooks/use-error-handler';
 import type {
 	ProductEditorBlockEditProps,
-	ProductFormPostProps,
 	ProductTemplate,
 } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
 import * as wooIcons from '../../../icons';
-import isProductFormTemplateSystemEnabled from '../../../utils/is-product-form-template-system-enabled';
 import { formatProductError } from '../../../utils/format-product-error';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
@@ -52,10 +47,10 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	const { getProductErrorMessageAndProps } = useErrorHandler();
 
+	// @ts-expect-error getEditorSettings's return type is the generic Object; productTemplates/productTemplate are WooCommerce additions injected at runtime.
 	const { productTemplates, productTemplate: selectedProductTemplate } =
 		useSelect( ( select ) => {
 			const { getEditorSettings } = select( 'core/editor' );
-			// @ts-expect-error Selector is not typed
 			return getEditorSettings();
 		}, [] );
 
@@ -87,8 +82,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	);
 
 	const { validate } = useValidations< Product >();
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	const { editEntityRecord, saveEditedEntityRecord, saveEntityRecord } =
 		useDispatch( 'core' );
 	const { createSuccessNotice, createErrorNotice } =
@@ -97,7 +90,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const rootClientId = useSelect(
 		( select ) => {
 			const { getBlockRootClientId } = select( 'core/block-editor' );
-			// @ts-expect-error Selector is not typed
 			return getBlockRootClientId( clientId );
 		},
 		[ clientId ]
@@ -106,39 +98,11 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const [ unsupportedProductTemplate, setUnsupportedProductTemplate ] =
 		useState< ProductTemplate >();
 
-	// Pull the product templates from the store.
-	const productFormPosts = useSelect(
-		(
-			sel: ( key: string ) => {
-				getEntityRecords: (
-					kind: string,
-					name: string,
-					query: Record< string, unknown >
-				) => ProductFormPostProps[] | undefined;
-			}
-		) => {
-			// Do not fetch product form posts if the feature is not enabled.
-			if ( ! isProductFormTemplateSystemEnabled() ) {
-				return [];
-			}
-
-			return (
-				sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
-					per_page: -1,
-				} ) || []
-			);
-		},
-		[]
-	) as ProductFormPostProps[];
-
 	const { isSaving } = useSelect(
 		( select ) => {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
-				// @ts-expect-error Selector is not typed
 				isSaving: isSavingEntityRecord(
 					'postType',
 					'product',
@@ -307,8 +271,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						},
 					],
 				},
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				{
 					throwOnError: true,
 				}
@@ -403,22 +365,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 									getMenuItem( onClose )
 								) }
 							</MenuGroup>
-
-							{ isProductFormTemplateSystemEnabled() && (
-								<MenuGroup>
-									{ productFormPosts.map( ( formPost ) => (
-										<MenuItem
-											key={ formPost.id }
-											icon={ resolveIcon( 'external' ) }
-											info={ formPost.excerpt.raw }
-											iconPosition="left"
-											onClick={ onClose } // close the dropdown for now
-										>
-											{ formPost.title.rendered }
-										</MenuItem>
-									) ) }
-								</MenuGroup>
-							) }
 
 							{ unsupportedProductTemplates.length > 0 && (
 								<MenuGroup>

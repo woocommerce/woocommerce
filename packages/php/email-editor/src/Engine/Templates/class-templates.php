@@ -107,8 +107,11 @@ class Templates {
 	public function register_post_types_to_api(): void {
 		$controller = new \WP_REST_Templates_Controller( 'wp_template' );
 		$schema     = $controller->get_item_schema();
-		// Future compatibility check if the post_types property is already registered.
-		if ( isset( $schema['properties']['post_types'] ) ) {
+		// Skip registration only when post_types is natively available in the view context.
+		// WP 7.0 adds the property but only in the edit context; we must still register
+		// the field so that context=view responses include it.
+		$post_types_context = $schema['properties']['post_types']['context'] ?? array();
+		if ( in_array( 'view', $post_types_context, true ) ) {
 			return;
 		}
 		register_rest_field(

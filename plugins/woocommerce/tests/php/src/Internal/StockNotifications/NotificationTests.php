@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
-use Automattic\WooCommerce\Internal\StockNotifications\Utilities\HasherHelper;
 
 /**
  * NotificationTests data tests.
@@ -171,7 +170,7 @@ class NotificationTests extends \WC_Unit_Test_Case {
 
 		// Refetch.
 		$notification = new Notification( $notification->get_id() );
-		$this->assertEmpty( $notification->get_meta( 'email_link_action_key' ) );
+		$this->assertEmpty( $notification->get_meta( 'verification_action_key' ) );
 		$this->assertFalse( $notification->check_verification_key( $key ) );
 
 		// Re-create.
@@ -180,7 +179,7 @@ class NotificationTests extends \WC_Unit_Test_Case {
 
 		// Refetch.
 		$notification = new Notification( $notification->get_id() );
-		$this->assertNotEmpty( $notification->get_meta( 'email_link_action_key' ) );
+		$this->assertNotEmpty( $notification->get_meta( 'verification_action_key' ) );
 		$this->assertTrue( $notification->check_verification_key( $key2 ) );
 	}
 
@@ -198,7 +197,7 @@ class NotificationTests extends \WC_Unit_Test_Case {
 
 		// Refetch.
 		$notification = new Notification( $notification->get_id() );
-		$this->assertEmpty( $notification->get_meta( 'email_link_action_key' ) );
+		$this->assertEmpty( $notification->get_meta( 'unsubscribe_action_key' ) );
 		$this->assertFalse( $notification->check_unsubscribe_key( $key ) );
 
 		// Re-create.
@@ -207,7 +206,7 @@ class NotificationTests extends \WC_Unit_Test_Case {
 
 		// Refetch.
 		$notification = new Notification( $notification->get_id() );
-		$this->assertNotEmpty( $notification->get_meta( 'email_link_action_key' ) );
+		$this->assertNotEmpty( $notification->get_meta( 'unsubscribe_action_key' ) );
 		$this->assertTrue( $notification->check_unsubscribe_key( $key2 ) );
 	}
 
@@ -221,8 +220,8 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		$notification->save();
 
 		// Save a custom key.
-		$key = time() - Config::get_verification_expiration_time_threshold() - 1 . ':' . HasherHelper::wp_fast_hash( 'test' );
-		$notification->update_meta_data( 'email_link_action_key', $key );
+		$key = ( time() - Config::get_verification_expiration_time_threshold() - 1 ) . ':' . wp_fast_hash( 'test' );
+		$notification->update_meta_data( 'verification_action_key', $key );
 		$notification->save();
 
 		$this->assertFalse( $notification->check_verification_key( 'test' ) );

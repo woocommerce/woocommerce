@@ -11,7 +11,7 @@ permissions:
 jobs:
   check-upcoming-release-events:
     name: Check for upcoming release events
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.check-upcoming-release-build.outputs.version }}
       milestone: ${{ steps.check-upcoming-release-build.outputs.milestone }}
@@ -76,7 +76,7 @@ jobs:
   check-milestones:
     name: Check all open milestones
     needs: check-upcoming-release-events
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
       - name: Get and process open milestones
         id: process-milestones

@@ -1,0 +1,104 @@
+{
+	"name": "@woocommerce/settings-ui-sdk",
+	"version": "0.1.0",
+	"description": "React utilities for rendering extensible WooCommerce settings pages.",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"wordpress",
+		"woocommerce",
+		"settings"
+	],
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/settings-ui-sdk/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"types": "build-types",
+	"react-native": "src/index",
+	"files": [
+		"build",
+		"build-module",
+		"build-types"
+	],
+	"dependencies": {
+		"@woocommerce/sanitize": "workspace:*",
+		"@wordpress/admin-ui": "catalog:wp-min",
+		"@wordpress/components": "catalog:wp-min",
+		"@wordpress/element": "catalog:wp-min",
+		"@wordpress/i18n": "catalog:wp-min"
+	},
+	"devDependencies": {
+		"@babel/core": "7.25.7",
+		"@types/jest": "29.5.x",
+		"@types/react": "18.3.x",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
+		"@woocommerce/internal-ts-config": "workspace:*",
+		"chokidar": "3.6.x",
+		"esbuild": "0.24.x",
+		"eslint": "^8.55.0",
+		"glob": "^10.3.10",
+		"jest": "29.5.x",
+		"jest-cli": "29.5.x",
+		"jest-environment-jsdom": "29.5.x",
+		"rimraf": "5.0.5",
+		"ts-jest": "29.1.x",
+		"typescript": "5.7.x"
+	},
+	"peerDependencies": {
+		"@types/react": "18.3.x",
+		"react": "18.3.x",
+		"react-dom": "18.3.x"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
+		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project:esm": "node build.mjs",
+		"build:publish:project": "pnpm --if-present '/^build:publish:project:.*$/'",
+		"build:publish:project:cjs": "node build.mjs --cjs",
+		"build:publish:project:types": "tsc --build --emitDeclarationOnly",
+		"build:publish:project:deps": "pnpm build",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint src",
+		"lint:lang:types": "tsc --build --emitDeclarationOnly",
+		"prepack": "pnpm build:publish:project",
+		"test:js": "jest --config ./jest.config.json --passWithNoTests",
+		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
+		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
+		"watch:build:project:esm": "node build.mjs --watch"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.json",
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
+		}
+	}
+}

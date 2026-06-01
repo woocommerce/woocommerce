@@ -76,7 +76,8 @@ async function userDeletionTest( page: Page, username: string ) {
 
 		await expect(
 			page
-				.getByText( 'Delete Users You have' )
+				.locator( 'div', { hasText: 'Delete Users' } )
+				.filter( { hasText: 'You have' } )
 				.getByText( `${ username }` )
 		).toBeVisible();
 		await page.getByRole( 'button', { name: 'Confirm Deletion' } ).click();

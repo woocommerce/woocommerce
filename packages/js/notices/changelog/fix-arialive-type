@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Narrow ariaLive type to 'polite' | 'assertive' to match @wordpress/a11y speak() signature.

@@ -8,10 +8,6 @@ import { filledCart, removeCart } from '@woocommerce/icons';
 
 export const blockName = 'woocommerce/cart';
 export const blockAttributes = {
-	isPreview: {
-		type: 'boolean',
-		default: false,
-	},
 	currentView: {
 		type: 'string',
 		default: 'woocommerce/filled-cart-block',

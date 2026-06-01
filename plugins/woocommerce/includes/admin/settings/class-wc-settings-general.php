@@ -6,9 +6,29 @@
  */
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 
 defined( 'ABSPATH' ) || exit;
+
+/*
+ * Pre-load the enum file because the in-process Jetpack autoloader classmap is
+ * captured at request start by the pre-upgrade plugin version, so during a same-
+ * request in-place upgrade it will not contain new src/Enums/* classes added in
+ * the new version. Without this, the DefaultCustomerAddress::* references below
+ * would trigger an autoloader miss and a "Class not found" fatal during the
+ * upgrade-completion iframe of /wp-admin/update.php.
+ *
+ * The class_exists() guard (with autoload disabled) matches the defensive
+ * pattern used elsewhere in includes/, e.g. class-wc-gateway-paypal.php, and
+ * keeps this safe under opcache.preload or any other mechanism that may have
+ * already defined the class before the file is included.
+ *
+ * The architectural fix lives in https://github.com/woocommerce/woocommerce/issues/54657.
+ */
+if ( ! class_exists( '\Automattic\WooCommerce\Enums\DefaultCustomerAddress', false ) ) {
+	require_once dirname( WC_PLUGIN_FILE ) . '/src/Enums/DefaultCustomerAddress.php';
+}
 
 if ( class_exists( 'WC_Settings_General', false ) ) {
 	return new WC_Settings_General();
@@ -233,14 +253,14 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'    => __( 'Default customer location', 'woocommerce' ),
 					'id'       => 'woocommerce_default_customer_address',
 					'desc_tip' => __( 'This option determines a customers default location. The MaxMind GeoLite Database will be periodically downloaded to your wp-content directory if using geolocation.', 'woocommerce' ),
-					'default'  => 'base',
+					'default'  => DefaultCustomerAddress::BASE,
 					'type'     => 'select',
 					'class'    => 'wc-enhanced-select',
 					'options'  => array(
-						''                 => __( 'No location by default', 'woocommerce' ),
-						'base'             => __( 'Shop country/region', 'woocommerce' ),
-						'geolocation'      => __( 'Geolocate', 'woocommerce' ),
-						'geolocation_ajax' => __( 'Geolocate (with page caching support)', 'woocommerce' ),
+						DefaultCustomerAddress::NO_DEFAULT => __( 'No location by default', 'woocommerce' ),
+						DefaultCustomerAddress::BASE => __( 'Shop country/region', 'woocommerce' ),
+						DefaultCustomerAddress::GEOLOCATION => __( 'Geolocate', 'woocommerce' ),
+						DefaultCustomerAddress::GEOLOCATION_AJAX => __( 'Geolocate (with page caching support)', 'woocommerce' ),
 					),
 				),
 

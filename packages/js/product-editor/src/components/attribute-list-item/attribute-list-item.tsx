@@ -66,7 +66,6 @@ export const AttributeListItem = ( {
 			<div className="woocommerce-attribute-list-item__actions">
 				{ attribute.id === 0 && (
 					<Tooltip
-						// @ts-expect-error className is missing in TS, should remove this when it is included.
 						className="woocommerce-attribute-list-item__actions-tooltip"
 						position="top center"
 						text={ NOT_FILTERABLE_CUSTOM_ATTR_TEXT }
@@ -78,7 +77,6 @@ export const AttributeListItem = ( {
 				) }
 				{ attribute.visible && (
 					<Tooltip
-						// @ts-expect-error className is missing in TS, should remove this when it is included.
 						className="woocommerce-attribute-list-item__actions-tooltip"
 						placement="top"
 						text={ VISIBLE_TEXT }

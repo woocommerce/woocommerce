@@ -41,11 +41,8 @@ export function usePreview( {
 
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
-			// @ts-expect-error Selector is not typed
 			const isSaving = isSavingEntityRecord(
 				'postType',
 				productType,
@@ -54,7 +51,6 @@ export function usePreview( {
 
 			return {
 				isDisabled: isSaving,
-				// @ts-expect-error Selector is not typed
 				hasEdits: hasEditsForEntityRecord(
 					'postType',
 					productType,
@@ -69,8 +65,6 @@ export function usePreview( {
 
 	const ariaDisabled = disabled || isDisabled || isValidating;
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	/**

@@ -36,9 +36,7 @@ class LaunchYourStore {
 	 */
 	public function save_site_visibility_options() {
 		$nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
-		// New Settings API uses wp_rest nonce.
-		$nonce_string = Features::is_enabled( 'settings' ) ? 'wp_rest' : 'woocommerce-settings';
-		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, $nonce_string ) ) {
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'woocommerce-settings' ) ) {
 			return;
 		}
 
@@ -197,7 +195,7 @@ class LaunchYourStore {
 			// translators: no need to translate it. It's a link.
 			__(
 				"
-			This page is in \"Coming soon\" mode and is only visible to you and those who have permission. To make it public to everyone,&nbsp;<a href='%s'>change visibility settings</a>
+			This page is in \"Coming soon\" mode and is only visible to you and those who have permission. To make it public to everyone,&nbsp;<a href='%s'>change visibility settings</a>.
 		",
 				'woocommerce'
 			),

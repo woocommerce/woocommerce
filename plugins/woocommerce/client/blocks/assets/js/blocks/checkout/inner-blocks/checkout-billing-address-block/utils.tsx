@@ -10,10 +10,11 @@ import {
 
 export const getBillingAddresssBlockTitle = (
 	title: string,
-	forcedBillingAddress: boolean
+	forcedBillingAddress: boolean,
+	isLocalPickup: boolean
 ): string => {
-	if ( forcedBillingAddress ) {
-		// Returns default forced billing title when forced billing address is enabled and there is no title set.
+	if ( forcedBillingAddress && ! isLocalPickup ) {
+		// Returns the combined "Billing and shipping address" title only if forced billing is enabled and Local Pickup is not selected, and no custom title is set.
 		return title === DEFAULT_TITLE ? DEFAULT_FORCED_BILLING_TITLE : title;
 	}
 	// Returns default title when forced billing address is disabled and there is no title set.
@@ -22,10 +23,11 @@ export const getBillingAddresssBlockTitle = (
 
 export const getBillingAddresssBlockDescription = (
 	description: string,
-	forcedBillingAddress: boolean
+	forcedBillingAddress: boolean,
+	isLocalPickup: boolean
 ): string => {
-	if ( forcedBillingAddress ) {
-		// Returns default forced billing description when forced billing address is enabled and there is no description set.
+	if ( forcedBillingAddress && ! isLocalPickup ) {
+		// Returns the combined "Billing and shipping address" description if forced billing is enabled, Local Pickup is not selected, and the default description is used.
 		return description === DEFAULT_DESCRIPTION
 			? DEFAULT_FORCED_BILLING_DESCRIPTION
 			: description;

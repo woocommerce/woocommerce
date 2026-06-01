@@ -300,7 +300,7 @@ export const StoreAlerts = () => {
 	};
 
 	return (
-		<Card className={ className } size={ null }>
+		<Card className={ className } size="none">
 			<CardHeader
 				className="woocommerce-store-alerts__header"
 				isBorderless

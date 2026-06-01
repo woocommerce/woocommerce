@@ -38,7 +38,7 @@ concurrency:
 jobs:
   bump-version:
     name: Bump WooCommerce Version
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
       - name: Normalize branch input
         id: normalize-branch

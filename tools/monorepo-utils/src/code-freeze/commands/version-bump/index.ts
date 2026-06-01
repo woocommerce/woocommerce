@@ -86,6 +86,9 @@ export const versionBumpCommand = new Command( 'version-bump' )
 
 		const git = simpleGit( {
 			baseDir: tmpRepoPath,
+			unsafe: {
+				allowUnsafeHooksPath: true,
+			},
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
 

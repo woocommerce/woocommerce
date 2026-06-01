@@ -284,4 +284,47 @@ class WC_REST_Product_Categories_Controller_Test extends WC_REST_Unit_Test_Case 
 		// Clean up.
 		wp_delete_term( $category['term_id'], 'product_cat' );
 	}
+
+	/**
+	 * @testdox Product categories v3 item schema contains expected properties.
+	 */
+	public function test_get_item_schema() {
+		wp_set_current_user( $this->user );
+
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v3/products/categories' );
+		$response   = $this->server->dispatch( $request );
+		$data       = $response->get_data();
+		$properties = $data['schema']['properties'];
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assertArrayHasKey( 'id', $properties );
+		$this->assertArrayHasKey( 'name', $properties );
+		$this->assertArrayHasKey( 'slug', $properties );
+		$this->assertArrayHasKey( 'parent', $properties );
+		$this->assertArrayHasKey( 'description', $properties );
+		$this->assertArrayHasKey( 'display', $properties );
+		$this->assertArrayHasKey( 'image', $properties );
+		$this->assertArrayHasKey( 'menu_order', $properties );
+		$this->assertArrayHasKey( 'count', $properties );
+	}
+
+	/**
+	 * @testdox Creating a product category in v3 with an empty slug succeeds.
+	 */
+	public function test_create_with_empty_slug() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/categories' );
+		$request->set_body_params(
+			array(
+				'name' => 'Test category',
+				'slug' => '',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+	}
 }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an opt-in "Product type" column to the experimental products app product list, showing whether each row is a Simple, Variable, Grouped, Affiliate, or Variation product.

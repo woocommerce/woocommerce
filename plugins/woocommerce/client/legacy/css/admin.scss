@@ -246,7 +246,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 	}
 
 	.addons-button {
-		border-radius: 3px;
+		border-radius: $radius-s;
 		cursor: pointer;
 		display: block;
 		height: 37px;
@@ -626,7 +626,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 				}
 
 				p {
-					color: #2c3338;
+					color: $gray-900;
 					font-size: 14px;
 					line-height: 20px;
 					margin: 14px 64px 0 0;
@@ -679,7 +679,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 				}
 
 				.price-suffix {
-					color: #646970; // Gray 50
+					color: $gray-700;
 				}
 
 				.product-reviews-block {
@@ -708,7 +708,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 					}
 
 					.product-reviews-count {
-						color: #646970; // Gray 50
+						color: $gray-700;
 						font-size: 12px;
 						font-family: sans-serif;
 						line-height: 24px;
@@ -912,10 +912,6 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 	position: relative;
 	overflow: hidden;
 
-	&.updated {
-		border-left-color: var(--wp-admin-theme-color, $woocommerce) !important;
-	}
-
 	a.skip,
 	a.docs {
 		text-decoration: none !important;
@@ -979,26 +975,48 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 	}
 }
 
-.woocommerce-set-price-variations {
-	.woocommerce-usage-modal__wrapper {
-		.woocommerce-usage-modal__message {
-			height: 60px;
-			flex-wrap: wrap;
-			display: flex;
-			> span {
-				padding-bottom: 16px;
-			}
+/**
+ * Product editor modals
+ */
+.wc-backbone-modal-set-price-variations.wc-backbone-modal,
+.wc-backbone-modal-add-attribute-term.wc-backbone-modal {
+	@media screen and (min-width: 783px) {
+		.wc-backbone-modal-content {
+			max-width: 400px;
+			min-width: auto;
+			width: 100%;
 		}
-		.woocommerce-usage-modal__actions {
-			display: flex;
-			justify-content: flex-end;
-			margin-top: 20px;
-			> button {
-				margin-left: 16px;
-				width: auto;
-				display: unset;
-			}
+	}
+
+	article {
+		padding-bottom: 2em;
+	}
+
+	label:not(:first-child) {
+		display: block;
+		margin-top: 1.5em;
+	}
+
+	input[type="text"] {
+		display: block;
+		font-size: 13px;
+		line-height: 16px;
+		margin: 6px 0;
+		padding: 12px;
+		width: 100%;
+	}
+
+	.wc-admin-visual-attribute-type {
+		margin: 1.5em 0 1em;
+
+		label {
+			margin-top: 0;
 		}
+	}
+
+	.wc-admin-visual-attribute-color-picker-trigger,
+	.wc-admin-visual-attribute-image-picker-trigger {
+		width: 100%;
 	}
 }
 
@@ -1313,6 +1331,24 @@ table.wc_status_table--tools {
 		font-size: 12px;
 		line-height: 20px;
 		outline: 0;
+	}
+}
+
+@media screen and (max-width: 500px) {
+	body.woocommerce_page_wc-status {
+		.updated.woocommerce-message.inline {
+			p.submit {
+				a,
+				button {
+					display: block;
+					width: 100%;
+					margin-bottom: 0.5em;
+					margin-left: 0;
+					text-align: center;
+					box-sizing: border-box;
+				}
+			}
+		}
 	}
 }
 
@@ -2262,6 +2298,8 @@ ul.wc_coupon_list_block {
 }
 
 #woocommerce-order-items .woocommerce_order_items_wrapper, .wc-order-preview-table-wrapper {
+	padding-bottom: 1.5em;
+
 	small.refunded {
 		display: block;
 		color: red;
@@ -2862,10 +2900,6 @@ ul.wc_coupon_list_block {
 	margin: 0;
 	padding: 0;
 
-	ul.order_notes li {
-		padding: 0 10px;
-	}
-
 	button {
 		margin: 1px;
 		vertical-align: top;
@@ -2998,6 +3032,13 @@ ul.wc_coupon_list_block {
 
 .woocommerce_page_wc-orders,
 .post-type-shop_order {
+	// Gated behind the `order-detail-redesign` feature flag (body class added by OrderDetailRedesign\Init).
+	// `:has(#poststuff)` excludes the orders list screen (which doesn't render #poststuff).
+	&.woocommerce-feature-enabled-order-detail-redesign .wrap:has(#poststuff) {
+		max-width: 1200px;
+		margin-inline: auto;
+	}
+
 	.tablenav .one-page .displaying-num {
 		display: none;
 	}
@@ -3271,7 +3312,13 @@ ul.wc_coupon_list_block {
 
 		td:first-child,
 		th:first-child {
+			padding-left: 2em;
 			text-align: left;
+		}
+
+		td:last-child,
+		th:last-child {
+			padding-right: 2em;
 		}
 
 		th {
@@ -3305,7 +3352,7 @@ ul.wc_coupon_list_block {
 
 	.wc-order-preview-addresses {
 		overflow: hidden;
-		padding-bottom: 1.5em;
+		padding: 0 0.5em 1.5em;
 
 		.wc-order-preview-address,
 		.wc-order-preview-note {
@@ -3331,15 +3378,8 @@ ul.wc_coupon_list_block {
 	}
 
 	footer {
-		.wc-action-button-group {
-			display: inline-block;
-			float: left;
-		}
-
 		.button.button-large {
 			margin-left: 10px;
-			padding: 0 10px !important;
-			line-height: 28px;
 			height: auto;
 			display: inline-block;
 		}
@@ -3351,31 +3391,10 @@ ul.wc_coupon_list_block {
 }
 
 .wc-action-button-group {
-	vertical-align: middle;
-	line-height: 26px;
-	text-align: left;
-
-	label {
-		margin-right: 6px;
-		cursor: default;
-		font-weight: bold;
-		line-height: 28px;
-	}
-
-	.wc-action-button-group__items {
-		display: inline-flex;
-		flex-flow: row wrap;
-		align-content: flex-start;
-		justify-content: flex-start;
-	}
-
 	.wc-action-button {
 		margin: 0 0 0 -1px !important;
 		border: 1px solid #ccc;
-		padding: 0 10px !important;
 		border-radius: 0 !important;
-		float: none;
-		line-height: 28px;
 		height: auto;
 		z-index: 1;
 		position: relative;
@@ -3408,26 +3427,6 @@ ul.wc_coupon_list_block {
 @media screen and (max-width: 782px) {
 	.woocommerce_page_wc-orders #order-search-filter {
 		display: none;
-	}
-
-	.wc-order-preview footer {
-		.wc-action-button-group .wc-action-button-group__items {
-			display: flex;
-		}
-
-		.wc-action-button-group {
-			float: none;
-			display: block;
-			margin-bottom: 4px;
-		}
-
-		.button.button-large {
-			width: 100%;
-			float: none;
-			text-align: center;
-			margin: 0;
-			display: block;
-		}
 	}
 
 	.woocommerce_page_wc-orders .wc-orders-list-table.wp-list-table,
@@ -3561,13 +3560,18 @@ ul.wc_coupon_list_block {
 
 /* Order notes */
 ul.order_notes {
-	padding: 2px 0 0;
+	list-style: none;
+	padding: 16px 12px;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 
 	li {
 		.note_content {
-			padding: 10px;
-			background: #efefef;
-			position: relative;
+			background: #fff;
+			border: 1px solid $gray-200;
+			border-radius: 4px;
 
 			p {
 				margin: 0;
@@ -3576,67 +3580,96 @@ ul.order_notes {
 			}
 		}
 
+		.note_header {
+			margin: 0;
+			padding: 6px 12px;
+			// Mirrors @wordpress/components Notice is-warning variant
+			// (bg #fef8ee, accent #f0b849). Supplementary cue — info is
+			// also in the label text itself.
+			background: #fef8ee;
+			border-bottom: 1px solid $gray-200;
+			border-top-left-radius: 3px;
+			border-top-right-radius: 3px;
+			font-size: 11px;
+			font-weight: 600;
+		}
+
+		.note_body {
+			padding: 8px 12px;
+		}
+
 		p.meta {
-			padding: 10px;
-			color: #999;
+			padding: 4px 0 0;
+			color: $subtext;
 			margin: 0;
 			font-size: 11px;
 
 			.exact-date {
-				border-bottom: 1px dotted #999;
+				border-bottom: 0;
+				text-decoration: none;
 			}
 		}
 
 		a.delete_note {
 			color: $red;
-		}
-
-		.note_content::after {
-			content: "";
-			display: block;
-			position: absolute;
-			bottom: -10px;
-			left: 20px;
-			width: 0;
-			height: 0;
-			border-width: 10px 10px 0 0;
-			border-style: solid;
-			border-color: #efefef transparent;
+			margin-left: 4px;
 		}
 	}
 
-	li.system-note {
-		.note_content {
-			background: #d7cad2;
-		}
-
-		.note_content::after {
-			border-color: #d7cad2 transparent;
-		}
+	li.no-items {
+		color: $subtext;
+		padding: 16px 0;
+		text-align: center;
 	}
 
-	li.customer-note {
-		.note_content {
-			background: #a7cedc;
-		}
-
-		.note_content::after {
-			border-color: #a7cedc transparent;
-		}
+	li.system-note .note_content {
+		// Auto-generated notes (status changes, webhooks, etc.) are
+		// visually de-emphasised so manual notes scan more easily.
+		background: $gray-100;
 	}
 }
 
 .add_note {
-	border-top: 1px solid #ddd;
-	padding: 10px 10px 0;
+	border-bottom: 1px solid $gray-200;
+	padding: 16px 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 
-	h4 {
-		margin-top: 5px !important;
+	> p {
+		margin: 0;
+	}
+
+	label {
+		display: block;
+		margin-bottom: 4px;
 	}
 
 	#add_order_note {
 		width: 100%;
-		height: 50px;
+		height: 60px;
+	}
+
+	.order_note_visibility {
+		select {
+			width: 100%;
+			max-width: 100%;
+		}
+
+		.add_note_email_settings {
+			margin: 6px 0 0;
+			font-size: 12px;
+			color: $subtext;
+
+			a {
+				color: inherit;
+			}
+		}
+	}
+
+	.add_note_actions button.add_note {
+		width: 100%;
+		text-align: center;
 	}
 }
 
@@ -4265,66 +4298,19 @@ table.wc_shipping {
 /**
 * New Shipping Settings Refresh Modal Styles
 **/
-
 .wc-backbone-modal-add-shipping-method,
 .wc-backbone-modal-shipping-method-settings,
 .wc-shipping-class-modal {
-	font-size: 13px;
-	font-weight: 400;
-	line-height: 16px;
-	color: #1e1e1e;
-
 	&.wc-backbone-modal .wc-backbone-modal-content {
-		border-radius: 8px;
-		border-top: 8px solid transparent;
-		border-bottom: 8px solid transparent;
 		max-width: 600px;
-
-		@media screen and (max-width: 782px) {
-			border-radius: none;
-			border-top: none;
-			border-bottom: none;
-		}
-	}
-
-	.wc-backbone-modal-main article {
-		padding: 0 32px 32px 32px;
-	}
-
-	.wc-backbone-modal-main header{
-		padding: 20px 32px;
-	}
-
-	.wc-backbone-modal-main footer {
-		padding: 20px 32px 12px 32px;
 	}
 
 	.wc-backbone-modal-main .wc-backbone-modal-header h1 {
 		font-weight: 400;
 	}
 
-	.wc-backbone-modal-main .wc-backbone-modal-header {
-		background-color: #fff;
-		border-bottom: none;
-		font-size: 20px;
-		line-height: 28px;
-
-		.modal-close-link {
-			border-left: none;
-
-			&:hover {
-				background-color: #fff;
-			}
-		}
-	}
 	.wc-backbone-modal-main footer {
-		box-shadow: none;
-		border-top: 1px solid #E0E0E0;
-		background-color: #fff;
-
 		.inner {
-			display: flex;
-			justify-content: space-between;
 			flex-direction: row-reverse;
 		}
 
@@ -4514,6 +4500,11 @@ table.wc_shipping {
 		}
 	}
 
+	.wc-shipping-invalid-price-message ~ #wc-shipping-advanced-costs-help-text {
+		display: block;
+		margin-top: 30px;
+	}
+
 	.wc-backbone-modal-back-inactive {
 		display: none;
 	}
@@ -4532,10 +4523,6 @@ table.wc_shipping {
 		animation-range-start: normal;
 		color: #757575;
 	}
-}
-
-.wc-backbone-modal-add-shipping-method .wc-backbone-modal-main article {
-	padding: 0 32px 50px 32px;
 }
 
 table {
@@ -4832,7 +4819,7 @@ table.wc-shipping-classes {
 
 		a.wc-shipping-zone-actions,
 		a.wc-shipping-zone-actions:hover {
-			color: var(--wc-red);
+			color: var(--wc-destructive, #cc1818);
 		}
 	}
 
@@ -5373,6 +5360,7 @@ img.help_tip {
 			display: inline-block;
 			width: 26px;
 			border: 1px solid #ddd;
+			border-radius: $radius-s;
 			font-size: 14px;
 		}
 
@@ -5476,7 +5464,6 @@ img.help_tip {
 				height: 30px;
 				box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
 				font-size: 16px;
-				border-radius: 4px;
 				margin-right: 3px;
 
 				@media only screen and (max-width: 782px) {
@@ -5866,6 +5853,14 @@ img.help_tip {
 				text-decoration: none;
 				line-height: 20px !important;
 				border-bottom: 1px solid #eee;
+
+				// The rule above suppresses the global box-shadow focus ring; reinstate a
+				// visible focus indicator via outline. Negative offset keeps the outline
+				// inside the parent .panel-wrap, which uses overflow: hidden.
+				&:focus {
+					outline: 2px solid #2271b1;
+					outline-offset: -2px;
+				}
 
 				span {
 					margin-left: 0.618em;
@@ -6381,6 +6376,7 @@ img.help_tip {
 		input {
 			width: 30.75%;
 			margin-right: 3.8%;
+			border-radius: $radius-s;
 		}
 
 		.last {
@@ -7859,6 +7855,7 @@ table.bar_chart {
 	}
 
 	.wc-backbone-modal-content {
+		border-radius: var(--wc-card-border-radius, 8px);
 		position: fixed;
 		background: #fff;
 		z-index: 100000;
@@ -7874,24 +7871,12 @@ table.bar_chart {
 		}
 	}
 
-	&.wc-backbone-modal-shipping-method-settings .wc-backbone-modal-content {
-		min-width: 500px;
-	}
-
 	&.wc-backbone-modal-add-shipping-method .wc-backbone-modal-content article {
 		min-height: 180px
 	}
 
 	.select2-container {
 		width: 100% !important;
-	}
-}
-
-@media screen and (max-width: 782px) {
-	.wc-backbone-modal .wc-backbone-modal-content {
-		width: 100%;
-		height: 100%;
-		min-width: 100%;
 	}
 }
 
@@ -7908,7 +7893,7 @@ table.bar_chart {
 }
 
 .wc-backbone-modal-main {
-	padding-bottom: 55px;
+	padding-bottom: calc( 1.5rem + 40px );
 
 	header,
 	article {
@@ -7918,18 +7903,17 @@ table.bar_chart {
 
 	.wc-backbone-modal-header {
 		height: auto;
-		background: #fcfcfc;
-		padding: 1em 1.5em;
-		border-bottom: 1px solid #ddd;
+		padding: 1.25em 2em 1em;
 
 		h1 {
 			margin: 0;
 			font-size: 18px;
-			font-weight: 700;
+			font-weight: 400;
 			line-height: 1.5em;
 		}
 
 		.modal-close-link {
+			border-radius: 0 var(--wc-card-border-radius, 8px) 0 0;
 			cursor: pointer;
 			color: #777;
 			height: 54px;
@@ -7940,7 +7924,6 @@ table.bar_chart {
 			right: 0;
 			text-align: center;
 			border: 0;
-			border-left: 1px solid #ddd;
 			background-color: transparent;
 			transition: color 0.1s ease-in-out, background 0.1s ease-in-out;
 
@@ -7966,7 +7949,7 @@ table.bar_chart {
 	}
 
 	article {
-		padding: 1.5em;
+		padding: 1em 2em 1.5em;
 
 		p {
 			margin: 1.5em 0;
@@ -8034,19 +8017,39 @@ table.bar_chart {
 		right: 0;
 		bottom: 0;
 		z-index: 100;
-		padding: 1em 1.5em;
-		background: #fcfcfc;
-		border-top: 1px solid #dfdfdf;
-		box-shadow: 0 -4px 4px -4px rgba(0, 0, 0, 0.1);
+		padding: 1em 2em 1.5em;
 
 		.inner {
-			text-align: right;
-			line-height: 23px;
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.wc-backbone-modal-buttons {
+			display: flex;
+			align-items: end;
+			justify-content: end;
+			gap: 8px;
 
 			.button {
 				margin-bottom: 0;
 			}
 		}
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.wc-backbone-modal .wc-backbone-modal-content {
+		border-radius: 0;
+		transform: none;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		min-width: auto;
+		width: 100%;
+	}
+	.wc-backbone-modal-main .wc-backbone-modal-header .modal-close-link {
+		border-radius: 0;
 	}
 }
 
@@ -8201,6 +8204,7 @@ table.bar_chart {
 		.select2-selection--single {
 			height: 30px;
 			border-color: #7e8993;
+			border-radius: $radius-s;
 
 			@media only screen and (max-width: 782px) {
 				height: 40px;
@@ -8250,7 +8254,7 @@ table.bar_chart {
 		.select2-selection--multiple {
 			min-height: 30px;
 			border-color: #7e8993;
-			border-radius: 4px;
+			border-radius: $radius-s;
 		}
 
 		.select2-search--inline .select2-search__field {
@@ -8278,6 +8282,375 @@ table.bar_chart {
 				vertical-align: baseline;
 			}
 		}
+	}
+}
+
+/**
+ * WP 7.0+ compatibility.
+ * WP 7.0 increased default form element sizing from 30px to 40px min-height.
+ */
+.wc-wp-version-gte-70 {
+	// Settings page labels: vertically centre with taller WP 7.0 fields.
+	.woocommerce table.form-table th {
+		padding-top: 25px;
+	}
+	.woocommerce table.form-table td.forminp-checkbox,
+	.woocommerce table.form-table td.forminp-radio,
+	.woocommerce table.form-table td.forminp-textarea {
+		padding-top: 20px;
+	}
+	.woocommerce table.form-table textarea {
+		padding: 6px 8px;
+	}
+
+	// Adopt WP 7.0 12px horizontal padding on settings inputs.
+	.woocommerce table.form-table {
+		input[type="text"],
+		input[type="email"],
+		input[type="number"],
+		input[type="password"],
+		input[type="datetime-local"],
+		input[type="date"],
+		input[type="time"],
+		input[type="week"],
+		input[type="url"],
+		input[type="tel"],
+		input.regular-input {
+			padding: 0 12px;
+		}
+	}
+
+	// Colour picker swatch: match WP 7.0 input height (40px).
+	.woocommerce table.form-table .colorpickpreview {
+		height: 40px;
+		width: 40px;
+		box-sizing: border-box;
+	}
+
+	// Select2 single: match WP 7.0 native select height (40px).
+	.select2-container {
+		.select2-selection--single {
+			height: 40px; // Match WP 7.0 native select height.
+
+			.select2-selection__rendered {
+				line-height: 38px;
+				padding: 0 12px; // Match WP 7.0 native input padding so text aligns with sibling inputs.
+			}
+
+			.select2-selection__arrow {
+				height: 38px;
+			}
+		}
+
+		.select2-selection--multiple {
+			min-height: 40px;
+			border-radius: 2px; // Match WP 7.0 native select border-radius.
+
+			.select2-selection__rendered {
+				display: block;
+
+				.select2-search--inline {
+					margin: 0;
+				}
+			}
+		}
+
+		.select2-search--inline .select2-search__field {
+			min-height: 38px;
+		}
+	}
+
+	// Order edit address Select2: escape legacy 32px override at admin.scss:2019
+	// so Country/State selects match the 40px WP 7.0 input height of their sibling
+	// fields. Selector mirrors the legacy structure exactly (#order_data
+	// .order_data_column div.edit_address ...) to outrank it on specificity (1,5,1).
+	#order_data .order_data_column div.edit_address .select2-container .select2-selection--single {
+		height: 40px;
+
+		.select2-selection__rendered {
+			line-height: 38px;
+			padding: 0 12px; // Match WP 7.0 native input padding.
+		}
+
+		.select2-selection__arrow {
+			height: 38px;
+		}
+	}
+
+	// Table action icon buttons: prevent WP 7.0 min-height from stretching them.
+	.widefat {
+		.column-wc_actions {
+			a.button {
+				min-height: 0 !important;
+				line-height: 1 !important;
+
+				&::after {
+					line-height: 1.85;
+					margin-top: 0;
+				}
+			}
+		}
+	}
+
+	// Order preview action buttons.
+	.wc-order-preview footer {
+		.button.button-large {
+			min-height: 32px;
+		}
+
+		// Adopt WP 7.0 secondary outline: theme-color border and 2px radius.
+		.wc-action-button {
+			min-height: 32px !important;
+			border-color: var(--wp-admin-theme-color);
+
+			&:first-child {
+				border-top-left-radius: 2px !important;
+				border-bottom-left-radius: 2px !important;
+			}
+
+			&:last-child {
+				border-top-right-radius: 2px !important;
+				border-bottom-right-radius: 2px !important;
+			}
+		}
+	}
+
+
+	// Order actions: select + button overflow container due to WP 7.0 select margins.
+	.order_actions {
+		#actions select {
+			width: calc(100% - 32px);
+		}
+
+		// Move to trash: make sure it aligns better vertically with 7.0's increased button height.
+		#delete-action {
+			line-height: 35px;
+		}
+	}
+
+	// Order actions reload button: icon line-height must match WP 7.0 button height.
+	.button.wc-reload {
+		&::after {
+			line-height: 40px;
+		}
+	}
+
+	// Order actions button margin causes overflow with WP 7.0 sizing.
+	#poststuff #woocommerce-order-actions .inside button {
+		margin: 0;
+	}
+
+	// Order date hour/minute inputs: WP 7.0 padding pushes stepper controls inward.
+	#order_data .order_data_column .form-field-wide {
+		input.hour,
+		input.minute {
+			padding-right: 0;
+		}
+	}
+
+	// Publish box: WP 7.0 flex-row breaks layout when #duplicate-action is present.
+	// Revert to block + float to stack copy/trash links on the left, button on the right.
+	#major-publishing-actions {
+		display: block;
+		overflow: hidden;
+
+		#delete-action {
+			float: left;
+		}
+	}
+
+	// Search box select: match WP 7.0 compact search-box sizing (32px).
+	.search-box select {
+		min-height: 32px;
+		line-height: 2.14285714; /* 30px for 32px height */
+		padding: 0 24px 0 8px;
+	}
+
+	// Short inputs are wider to compensate for WP 7.0 increased padding.
+	.woocommerce_options_panel {
+		.short,
+		input[type="text"].short,
+		input[type="number"].short,
+		input[type="email"].short,
+		input[type="password"].short {
+			width: 55%;
+		}
+
+		input[type="number"] {
+			padding-right: 0; // Keep stepper controls flush right.
+		}
+
+		.dimensions_field .wrap {
+			width: 55%; // Wider to compensate for increased padding.
+		}
+	}
+
+	// Variable product selects need more height to accommodate WP 7.0 padding.
+	#variable_product_options .form-row select {
+		height: 50px;
+	}
+
+	// Variable product low stock row: clear preceding floats to prevent vertical stretching.
+	#variable_product_options .form-row[class*="variable_low_stock_amount"] {
+		clear: both;
+	}
+
+	#poststuff #woocommerce-order-notes .inside button {
+		margin: 0 1px 1px;
+	}
+
+	@media screen and (max-width: 850px), screen and (min-width: 931px) {
+		#woocommerce-order-downloads .buttons button {
+			margin: 0;
+		}
+	}
+
+	// 782px breakpoint, when the admin sidebar is hidden.
+	@media screen and (max-width: 782px) {
+		// Make buttons match the now taller selects.
+		#poststuff #woocommerce-order-actions .inside button {
+			height: 42px;
+
+			&::after {
+				line-height: 40px;
+			}
+		}
+
+		#poststuff #woocommerce-order-notes .inside button {
+			line-height: 40px;
+		}
+	}
+
+	// Action button rows wrap/stack at ~1200px viewports.
+	@media screen and (max-width: 1200px) {
+		// Order items meta box: reduce button padding to prevent wrapping prematurely.
+		#woocommerce-order-items .wc-order-data-row {
+			.button {
+				padding-left: 8px;
+				padding-right: 8px;
+			}
+		}
+
+		// Refund action buttons: switch to flex layout so long labels wrap gracefully.
+		#woocommerce-order-items .refund-actions {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 4px;
+			align-items: center;
+
+			.button,
+			.cancel-action {
+				float: none;
+			}
+
+			.button {
+				margin: 0;
+				font-size: 12px;
+			}
+
+			.cancel-action {
+				margin-right: auto;
+				order: -1;
+			}
+
+			.clear {
+				display: none;
+			}
+		}
+	}
+
+	// Current page in pagination gets smaller than surrounding buttons at 782px breakpoint.
+	&.woocommerce_page_wc-customer-stock-notifications .tablenav,
+	&.woocommerce_page_wc-orders .tablenav,
+	&.post-type-product .tablenav,
+	&.post-type-shop_order .tablenav {
+		@media screen and (max-width: 782px) {
+			#current-page-selector {
+				height: 44px;
+			}
+		}
+	}
+
+	// .woocommerce-embed-page sets notice padding to 1px 12px, which is too small for WP 7.0's dismiss button positioning.
+	// Restore WP 7.0's padding so the dismiss button aligns correctly.
+	&.woocommerce-embed-page .notice {
+		padding: 8px 12px;
+	}
+
+	// WP 7.0 sets display:flex, width:24px, height:24px on .notice-dismiss.
+	// Reset these so the floated .woocommerce-message-close layout still works.
+	.woocommerce-message a.woocommerce-message-close {
+		display: inline;
+		width: auto;
+		height: auto;
+		color: #1e1e1e;
+	}
+
+	// Align editor meta box border-radius with WP 7.0's dashboard widgets (8px).
+	// Product, order (CPT + HPOS), and coupon editor screens.
+	//
+	// BRIDGE: WP 7.0 rounded dashboard widgets but left editor .postbox square,
+	// creating an inconsistency (dashboard widgets vs. Posts/Pages/Media/Woo
+	// editors all use the same .postbox class). We're applying the radius
+	// ourselves, scoped to Woo editor screens, as a bridge until Core unifies
+	// this.
+	//
+	// TODO: Remove these rules when Core rounds editor .postbox containers.
+	// Upstream proposal: https://core.trac.wordpress.org/ticket/65142
+	&.post-type-product,
+	&.post-type-shop_order,
+	&.post-type-shop_coupon,
+	&.woocommerce_page_wc-orders {
+		.postbox,
+		#postdivrich {
+			border-radius: var(--wc-card-border-radius, 8px);
+			overflow: hidden; // Clip internal elements (tab sidebar, action bars) to rounded corners.
+		}
+
+		// Inner collapsible panels (attributes, variations) should stay square.
+		.wc-metabox.postbox {
+			border-radius: 0;
+			overflow: visible;
+		}
+	}
+
+	// Align the product description editor with the meta boxes below it.
+	// #normal-sortables adds 4px of padding around postboxes, which #post-body-content
+	// doesn't, so the description editor ends up 8px wider than neighbouring postboxes
+	// on WP 7.0 (where the radius makes the misalignment visible).
+	&.post-type-product #postdivrich.woocommerce-product-description {
+		margin-left: 4px;
+		margin-right: 4px;
+	}
+
+	// Shipping zone name input: ID selector in the base rule outranks the form-table override above.
+	.wc-shipping-zone-settings #zone_name {
+		padding: 0 12px;
+	}
+
+	// Zone regions TreeSelectControl: match WP 7.0 native select border-radius.
+	#wc-shipping-zone-region-picker-root .woocommerce-tree-select-control .components-base-control {
+		border-radius: 2px;
+	}
+
+	// Product / Coupon Data panel labels: vertically centre with 40px inputs.
+	// Skip checkbox and radio rows — their controls are ~16px, so the taller
+	// line-height pushes the label below them instead of aligning with it.
+	.woocommerce_options_panel .form-field:not(:has(input[type="checkbox"], input[type="radio"])) label,
+	.woocommerce_options_panel .form-field:not(:has(input[type="checkbox"], input[type="radio"])) legend {
+		line-height: 40px;
+	}
+
+	// Help-tip icon: vertical-align middle aligns to text baseline, not line-box middle,
+	// so it lands near the top of the 40px row. Push down to visual centre — but
+	// skip checkbox/radio rows, whose inputs are still ~16px and don't need the offset.
+	.woocommerce_options_panel .form-field:not(:has(input[type="checkbox"], input[type="radio"])) .woocommerce-help-tip {
+		margin-top: 12px;
+	}
+
+	// Checkbox/radio rows: small nudge so the help-tip visually centres with the control.
+	.woocommerce_options_panel .form-field:has(input[type="checkbox"], input[type="radio"]) .woocommerce-help-tip {
+		margin-bottom: 3px;
 	}
 }
 
@@ -8340,6 +8713,26 @@ table.bar_chart {
 		font-size: 14px;
 		vertical-align: middle;
 		margin: 1px 6px 4px 1px;
+	}
+}
+
+// Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
+// Match Select2 to 32px here (not the global 40px).
+.wc-wp-version-gte-70 .tablenav {
+	.select2-container {
+		margin-top: 0; // Align with other tablenav elements.
+	}
+
+	.select2-container .select2-selection--single {
+		height: 32px; // WP 7.0 tablenav uses compact 32px, not 40px.
+
+		.select2-selection__rendered {
+			line-height: 30px;
+		}
+
+		.select2-selection__arrow {
+			height: 30px;
+		}
 	}
 }
 
@@ -8806,7 +9199,7 @@ table.bar_chart {
 				a:visited,
 				a:hover,
 				a:active {
-					color: #2c3338;
+					color: $gray-900;
 					padding: 10px 16px !important;
 				}
 			}
@@ -8971,6 +9364,15 @@ body.woocommerce_page_wc-settings {
 		padding-bottom: 0px;
 	}
 
+	// Floating header on Settings sits directly above the tab nav with no
+	// content between — treat both strips as one continuous title region
+	// by dropping the header's bottom border. The tab strip keeps its own
+	// bottom border (separating tabs from content); we just colour it to
+	// match the rest of the chrome.
+	.woocommerce-layout__header {
+		border-bottom: 0;
+	}
+
 	p.submit {
 		margin-bottom: 0;
 	}
@@ -8992,12 +9394,15 @@ body.woocommerce_page_wc-settings {
 		}
 	}
 
-	.woocommerce-layout__header-heading {
-		padding: 0 0 0 30px;
-		font-weight: 600;
-		font-size: 16px;
-		color: #070707;
-	}
+	// Heading typography (font-size, font-weight, colour) AND left
+	// padding now all live in the shared
+	// `client/admin/client/header/style.scss` rule (15px / 500 /
+	// $gray-900 / $gutter-large — aligned to Gutenberg's WPDS tokens
+	// and the unified admin header direction in
+	// WordPress/gutenberg#76709). Dropped the entire Settings-specific
+	// override (font-size 16px, font-weight 600, color #070707, padding
+	// 30px) so Settings renders identically to Home and every other
+	// floating-header page on every axis.
 
 	#wpbody .woocommerce-layout,
 	.woocommerce-layout__notice-list-hide + .wrap {
@@ -9043,7 +9448,15 @@ body.woocommerce_page_wc-settings {
 		display: flex;
 		flex-wrap: wrap;
 		list-style: none;
-		padding-left: 30px;
+		// 24px to match the floating-header title's `$gap-large` (from
+		// @wordpress/base-styles) so the "Settings" h1 above and the
+		// "General / Products / ..." tab labels below line up on the
+		// same left edge. Also matches the future-state design and
+		// `$grid-unit-30` / `--wp-admin-grid-unit-30` in the admin
+		// tokens proposal at https://core.trac.wordpress.org/ticket/65085.
+		// Legacy admin.scss can't import the shared SCSS variables file
+		// directly, hence the literal.
+		padding-left: 24px;
 		padding-right: 24px;
 		gap: 24px;
 
@@ -9066,7 +9479,13 @@ body.woocommerce_page_wc-settings {
 			border: 0;
 			background: none;
 			font-weight: 500;
-			font-size: 14px;
+			// 13px to match WP's `$default-font-size` (from
+			// @wordpress/base-styles) and Gutenberg's
+			// `--wpds-typography-font-size-md` (13px). Reads as quieter
+			// chrome below the 15px floating-header h1, restoring the
+			// chrome → tabs → content hierarchy the previous 14px size
+			// was already aiming at.
+			font-size: 13px;
 			line-height: 20px;
 			color: #505050;
 			padding: 0 0 10px 0;
@@ -9077,8 +9496,13 @@ body.woocommerce_page_wc-settings {
 			}
 		}
 		margin: 0;
-		background: #FFF;
-		border-bottom: 1px solid #EBEBEB;
+		// Tab strip inherits the wp-admin body bg so it reads as one
+		// continuous title region with the floating header above. Bottom
+		// border colour matches the rest of the wp-admin chrome borders
+		// ($wp-admin-border in packages/js/internal-style-build); kept as
+		// a literal here because legacy admin.scss doesn't import the
+		// shared variables file.
+		border-bottom: 1px solid #dcdcde;
 
 		.nav-tab-active, .nav-tab-active:focus, .nav-tab-active:focus:active, .nav-tab-active:hover {
 			border-bottom: 2px solid var(--wp-admin-theme-color, #3858e9);
@@ -9288,5 +9712,87 @@ body.woocommerce-settings-payments-section_legacy {
 
 	#wpbody-content {
 		background: #f0f0f1;
+	}
+}
+
+.wc-admin-color-swatch {
+	background-color: #fff;
+	display: inline-block;
+	vertical-align: middle;
+	border: 1px solid #7e8993;
+	border-radius: 50%;
+	margin-right: 0.5em;
+	height: 1em;
+	width: 1em;
+	position: relative;
+	top: -1px;
+
+	&.is-empty::before {
+		content: '';
+		border-radius: 50%;
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background: linear-gradient(to bottom right, transparent 47%, #7e8993 47%, #7e8993 53%, transparent 53%);
+	}
+}
+
+.wc-admin-visual-attribute-type fieldset {
+	display: flex;
+	gap: 1.5em;
+}
+
+.wc-admin-visual-attribute-color-picker-trigger,
+.wc-admin-visual-attribute-image-picker-trigger {
+	width: 95%;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0 12px;
+	min-height: 40px;
+	background: #fff;
+	border: 1px solid #949494;
+	border-radius: 2px;
+	text-align: left;
+	font-size: 13px;
+	line-height: 1.4;
+	cursor: pointer;
+
+	+ .wc-admin-visual-attribute-color-picker-clear,
+	+ .wc-admin-visual-attribute-image-picker-clear {
+		display: block;
+		margin: 2px 0 5px;
+	}
+
+	.wc-admin-color-swatch {
+		margin-right: 0;
+	}
+
+	.wc-admin-image-swatch {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1em;
+		min-width: 24px;
+		height: 1em;
+		min-height: 24px;
+		flex-shrink: 0;
+		border: 1px solid #c3c4c7;
+		border-radius: 2px;
+		overflow: hidden;
+		background: #f0f0f1;
+
+		&.is-empty {
+			background: #f0f0f1;
+		}
+
+		img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
 	}
 }

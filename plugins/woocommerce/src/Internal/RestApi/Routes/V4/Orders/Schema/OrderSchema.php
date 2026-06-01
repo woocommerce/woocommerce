@@ -12,12 +12,14 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WP_REST_Request;
-use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 
 /**
  * OrderSchema class.
@@ -68,21 +70,31 @@ class OrderSchema extends AbstractSchema {
 	private $order_shipping_schema;
 
 	/**
+	 * Refund data utils.
+	 *
+	 * @var DataUtils
+	 */
+	private $data_utils;
+
+	/**
 	 * Initialize the schema.
 	 *
 	 * @internal
+	 *
 	 * @param OrderItemSchema     $order_item_schema The order item schema.
 	 * @param OrderCouponSchema   $order_coupon_schema The order coupon schema.
 	 * @param OrderFeeSchema      $order_fee_schema The order fee schema.
 	 * @param OrderTaxSchema      $order_tax_schema The order tax schema.
 	 * @param OrderShippingSchema $order_shipping_schema The order shipping schema.
+	 * @param DataUtils           $data_utils Refund data utils.
 	 */
-	final public function init( OrderItemSchema $order_item_schema, OrderCouponSchema $order_coupon_schema, OrderFeeSchema $order_fee_schema, OrderTaxSchema $order_tax_schema, OrderShippingSchema $order_shipping_schema ) {
+	final public function init( OrderItemSchema $order_item_schema, OrderCouponSchema $order_coupon_schema, OrderFeeSchema $order_fee_schema, OrderTaxSchema $order_tax_schema, OrderShippingSchema $order_shipping_schema, DataUtils $data_utils ) {
 		$this->order_item_schema     = $order_item_schema;
 		$this->order_coupon_schema   = $order_coupon_schema;
 		$this->order_fee_schema      = $order_fee_schema;
 		$this->order_tax_schema      = $order_tax_schema;
 		$this->order_shipping_schema = $order_shipping_schema;
+		$this->data_utils            = $data_utils;
 	}
 
 	/**
@@ -536,6 +548,12 @@ class OrderSchema extends AbstractSchema {
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
+			'can_be_refunded'      => array(
+				'description' => __( 'Whether the order can be refunded, based on its status and remaining refundable amount.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
 		);
 
 		if ( $this->cogs_is_enabled() ) {
@@ -642,6 +660,7 @@ class OrderSchema extends AbstractSchema {
 			'needs_payment'        => $order->needs_payment(),
 			'needs_processing'     => $order->needs_processing(),
 			'fulfillment_status'   => FulfillmentUtils::get_order_fulfillment_status( $order ),
+			'can_be_refunded'      => $this->calculate_order_can_be_refunded( $order ),
 		);
 
 		if ( in_array( 'refund_total', $include_fields, true ) ) {
@@ -652,24 +671,53 @@ class OrderSchema extends AbstractSchema {
 			$data['refund_tax'] = wc_format_decimal( $order->get_total_tax_refunded(), $dp );
 		}
 
+		// Pre-compute refund data once per order, only when line item fields are requested.
+		$needs_refund_data = array_intersect( array( 'line_items', 'shipping_lines', 'fee_lines' ), $include_fields );
+		$refund_data       = ! empty( $needs_refund_data )
+			? $this->data_utils->compute_refunded_quantities_and_totals( $order )
+			: array(
+				'qtys'   => array(),
+				'totals' => array(),
+			);
+
 		if ( in_array( 'line_items', $include_fields, true ) ) {
-			$line_items         = $order->get_items( 'line_item' );
+			/**
+			 * Product line items.
+			 *
+			 * @var \WC_Order_Item_Product[] $line_items
+			 */
+			$line_items         = $order->get_items( OrderItemType::LINE_ITEM );
 			$data['line_items'] = array();
 			foreach ( $line_items as $line_item ) {
-				$data['line_items'][] = $this->order_item_schema->get_item_response( $line_item, $request );
+				$item_data = $this->order_item_schema->get_item_response( $line_item, $request );
+
+				$item_data['can_be_refunded'] = 0 !== $line_item->get_product_id()
+					&& ( $line_item->get_quantity() + ( $refund_data['qtys'][ $line_item->get_id() ] ?? 0 ) ) > 0;
+
+				$data['line_items'][] = $item_data;
 			}
 		}
 
 		if ( in_array( 'shipping_lines', $include_fields, true ) ) {
-			$line_items             = $order->get_items( 'shipping' );
+			/**
+			 * Shipping line items.
+			 *
+			 * @var \WC_Order_Item_Shipping[] $shipping_lines
+			 */
+			$shipping_lines         = $order->get_items( OrderItemType::SHIPPING );
 			$data['shipping_lines'] = array();
-			foreach ( $line_items as $line_item ) {
-				$data['shipping_lines'][] = $this->order_shipping_schema->get_item_response( $line_item, $request );
+			foreach ( $shipping_lines as $shipping_line ) {
+				$item_data = $this->order_shipping_schema->get_item_response( $shipping_line, $request );
+				$refunded  = $refund_data['totals'][ $shipping_line->get_id() ] ?? 0.0;
+
+				$item_data['can_be_refunded'] = ( (float) $shipping_line->get_total() - $refunded ) > 0;
+
+				$data['shipping_lines'][] = $item_data;
 			}
 		}
 
 		if ( in_array( 'coupon_lines', $include_fields, true ) ) {
-			$line_items           = $order->get_items( 'coupon' );
+			$line_items           = $order->get_items( OrderItemType::COUPON );
 			$data['coupon_lines'] = array();
 			foreach ( $line_items as $line_item ) {
 				$data['coupon_lines'][] = $this->order_coupon_schema->get_item_response( $line_item, $request );
@@ -677,15 +725,25 @@ class OrderSchema extends AbstractSchema {
 		}
 
 		if ( in_array( 'fee_lines', $include_fields, true ) ) {
-			$line_items        = $order->get_items( 'fee' );
+			/**
+			 * Fee line items.
+			 *
+			 * @var \WC_Order_Item_Fee[] $fee_lines
+			 */
+			$fee_lines         = $order->get_items( OrderItemType::FEE );
 			$data['fee_lines'] = array();
-			foreach ( $line_items as $line_item ) {
-				$data['fee_lines'][] = $this->order_fee_schema->get_item_response( $line_item, $request );
+			foreach ( $fee_lines as $fee_line ) {
+				$item_data = $this->order_fee_schema->get_item_response( $fee_line, $request );
+				$refunded  = $refund_data['totals'][ $fee_line->get_id() ] ?? 0.0;
+
+				$item_data['can_be_refunded'] = ( (float) $fee_line->get_total() - $refunded ) > 0;
+
+				$data['fee_lines'][] = $item_data;
 			}
 		}
 
 		if ( in_array( 'tax_lines', $include_fields, true ) ) {
-			$line_items        = $order->get_items( 'tax' );
+			$line_items        = $order->get_items( OrderItemType::TAX );
 			$data['tax_lines'] = array();
 			foreach ( $line_items as $line_item ) {
 				$data['tax_lines'][] = $this->order_tax_schema->get_item_response( $line_item, $request );
@@ -712,6 +770,21 @@ class OrderSchema extends AbstractSchema {
 		$data = array_intersect_key( $data, array_flip( $include_fields ) );
 
 		return $data;
+	}
+
+	/**
+	 * Determine whether an order can be refunded.
+	 *
+	 * An order can be refunded when its status allows refunds and it has remaining refundable amount.
+	 *
+	 * @param WC_Order $order Order instance.
+	 * @return bool
+	 */
+	private function calculate_order_can_be_refunded( WC_Order $order ): bool {
+		if ( ! in_array( $order->get_status(), DataUtils::REFUNDABLE_STATUSES, true ) ) {
+			return false;
+		}
+		return (float) $order->get_remaining_refund_amount() > 0;
 	}
 
 	/**

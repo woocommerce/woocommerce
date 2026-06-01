@@ -3,11 +3,9 @@
  */
 import { act, render, screen } from '@testing-library/react';
 import { validationStore } from '@woocommerce/block-data';
-import { dispatch, select, StoreDescriptor } from '@wordpress/data';
+import { dispatch, select, useDispatch } from '@wordpress/data';
 import userEvent from '@testing-library/user-event';
 import { useState } from '@wordpress/element';
-import * as wpData from '@wordpress/data';
-
 /**
  * Internal dependencies
  */
@@ -16,12 +14,18 @@ import ValidatedTextInput from '../validated-text-input';
 jest.mock( '@wordpress/data', () => ( {
 	__esModule: true,
 	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: jest.fn().mockImplementation( ( args ) => {
-		return jest.requireActual( '@wordpress/data' ).useDispatch( args );
-	} ),
+	useDispatch: jest.fn(),
 } ) );
 
+const mockUseDispatch = useDispatch as jest.Mock;
+
 describe( 'ValidatedTextInput', () => {
+	beforeAll( () => {
+		mockUseDispatch.mockImplementation( ( args ) => {
+			return jest.requireActual( '@wordpress/data' ).useDispatch( args );
+		} );
+	} );
+
 	it( 'Removes related validation error on change', async () => {
 		const user = userEvent.setup();
 
@@ -339,8 +343,8 @@ describe( 'ValidatedTextInput', () => {
 	describe( 'correctly validates on mount', () => {
 		it( 'validates when focusOnMount is true and validateOnMount is not set', async () => {
 			const setValidationErrors = jest.fn();
-			wpData.useDispatch.mockImplementation(
-				( store: StoreDescriptor | string ) => {
+			mockUseDispatch.mockImplementation(
+				( store: string | { name: string } ) => {
 					if ( store === validationStore ) {
 						return {
 							...jest
@@ -383,8 +387,8 @@ describe( 'ValidatedTextInput', () => {
 		} );
 		it( 'validates when focusOnMount is false, regardless of validateOnMount value', async () => {
 			const setValidationErrors = jest.fn();
-			wpData.useDispatch.mockImplementation(
-				( store: StoreDescriptor | string ) => {
+			mockUseDispatch.mockImplementation(
+				( store: string | { name: string } ) => {
 					if ( store === validationStore ) {
 						return {
 							...jest
@@ -427,8 +431,8 @@ describe( 'ValidatedTextInput', () => {
 		} );
 		it( 'does not validate when validateOnMount is false and focusOnMount is true', async () => {
 			const setValidationErrors = jest.fn();
-			wpData.useDispatch.mockImplementation(
-				( store: StoreDescriptor | string ) => {
+			mockUseDispatch.mockImplementation(
+				( store: string | { name: string } ) => {
 					if ( store === validationStore ) {
 						return {
 							...jest

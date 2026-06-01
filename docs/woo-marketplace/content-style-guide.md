@@ -15,11 +15,11 @@ For product page structure, required elements, and asset specifications, refer t
 
 Use the format "Product Name for WooCommerce" rather than "WooCommerce Product Name" throughout the product copy.
 
-This format ensures your product name complies with [trademark rules](https://automattic.com/trademark-policy/) and leads with its unique identifier, improving discoverability and clarity.
+This format ensures your product name complies with [trademark rules](https://woocommerce.com/trademark-guidelines/) and leads with its unique identifier, improving discoverability and clarity.
 
 ### Grammar and Punctuation
 
-Follow the [WooCommerce Grammar, Punctuation, and Capitalization Guide](https://woocommerce.com/document/woocommerce-grammar-punctuation-and-capitalization-guide/) for comprehensive guidance. Key points include:
+Follow the [WooCommerce grammar, punctuation, and capitalization guide](/docs/best-practices/coding-standards/grammar-punctuation-capitalization/) for comprehensive guidance. Key points include:
 
 **Use the Oxford comma** when listing three or more items:
 
@@ -207,7 +207,7 @@ When creating documentation for your product, follow these additional guidelines
 - Document all your product's features and settings
 - Provide troubleshooting guidance for common issues
 
-For detailed documentation frameworks, refer to [Support and Documentation Best Practices](https://woocommerce.com/document/extension-development-best-practices/#support-and-documentation).
+For detailed documentation frameworks, refer to [Support and Documentation Best Practices](/docs/extensions/best-practices-extensions/support-and-documentation/).
 
 ### Images and Screenshots
 

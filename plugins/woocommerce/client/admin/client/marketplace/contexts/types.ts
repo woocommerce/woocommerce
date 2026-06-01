@@ -1,12 +1,10 @@
 /**
- * External dependencies
- */
-import type { Options } from 'wordpress__notices';
-
-/**
  * Internal dependencies
  */
+import type { NoticeOptions } from '~/lib/notices/types';
 import { Subscription } from '../components/my-subscriptions/types';
+
+export type { NoticeAction, NoticeOptions } from '~/lib/notices/types';
 
 export interface SearchResultsCountType {
 	extensions: number;
@@ -48,7 +46,7 @@ export interface Notice {
 	productKey: string;
 	message: string;
 	status: NoticeStatus;
-	options?: Partial< Options > | undefined;
+	options?: Partial< NoticeOptions > | undefined;
 }
 
 export interface NoticeState {

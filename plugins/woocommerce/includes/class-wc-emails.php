@@ -11,10 +11,11 @@
 declare( strict_types = 1 );
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -39,11 +40,12 @@ class WC_Emails {
 	protected static $instance = null;
 
 	/**
-	 * Background emailer class.
+	 * Deferred email queue instance.
 	 *
-	 * @var WC_Background_Emailer
+	 * @since 10.8.0
+	 * @var DeferredEmailQueue|null
 	 */
-	protected static $background_emailer = null;
+	protected static $deferred_queue = null;
 
 	/**
 	 * Main WC_Emails Instance.
@@ -117,10 +119,14 @@ class WC_Emails {
 				'woocommerce_order_status_failed',
 				'woocommerce_order_fully_refunded',
 				'woocommerce_order_partially_refunded',
+				'woocommerce_send_review_request',
 				'woocommerce_new_customer_note',
 				'woocommerce_created_customer',
+				'woocommerce_payment_gateway_enabled',
 			)
 		);
+
+		$defer_default = FeaturesUtil::feature_is_enabled( 'deferred_transactional_emails' );
 
 		/**
 		 * Filter whether to defer transactional emails.
@@ -128,8 +134,8 @@ class WC_Emails {
 		 * @since 3.0.0
 		 * @param bool $defer Whether to defer transactional emails.
 		 */
-		if ( apply_filters( 'woocommerce_defer_transactional_emails', false ) ) {
-			self::$background_emailer = new WC_Background_Emailer();
+		if ( apply_filters( 'woocommerce_defer_transactional_emails', $defer_default ) ) {
+			self::$deferred_queue = wc_get_container()->get( DeferredEmailQueue::class );
 
 			foreach ( $email_actions as $action ) {
 				add_action( $action, array( __CLASS__, 'queue_transactional_email' ), 10, 10 );
@@ -149,16 +155,11 @@ class WC_Emails {
 	 * @return void
 	 */
 	public static function queue_transactional_email( ...$args ) {
-		if ( is_a( self::$background_emailer, 'WC_Background_Emailer' ) ) {
-			self::$background_emailer->push_to_queue(
-				array(
-					'filter' => current_filter(),
-					'args'   => func_get_args(),
-				)
-			);
-		} else {
-			self::send_transactional_email( ...$args );
+		if ( self::$deferred_queue instanceof DeferredEmailQueue && self::$deferred_queue->push( current_filter(), $args ) ) {
+			return;
 		}
+
+		self::send_transactional_email( ...$args );
 	}
 
 	/**
@@ -282,19 +283,20 @@ class WC_Emails {
 		include_once __DIR__ . '/emails/class-wc-email.php';
 
 		$emails = array(
-			'WC_Email_New_Order'                 => __DIR__ . '/emails/class-wc-email-new-order.php',
-			'WC_Email_Cancelled_Order'           => __DIR__ . '/emails/class-wc-email-cancelled-order.php',
-			'WC_Email_Customer_Cancelled_Order'  => __DIR__ . '/emails/class-wc-email-customer-cancelled-order.php',
-			'WC_Email_Failed_Order'              => __DIR__ . '/emails/class-wc-email-failed-order.php',
-			'WC_Email_Customer_Failed_Order'     => __DIR__ . '/emails/class-wc-email-customer-failed-order.php',
-			'WC_Email_Customer_On_Hold_Order'    => __DIR__ . '/emails/class-wc-email-customer-on-hold-order.php',
-			'WC_Email_Customer_Processing_Order' => __DIR__ . '/emails/class-wc-email-customer-processing-order.php',
-			'WC_Email_Customer_Completed_Order'  => __DIR__ . '/emails/class-wc-email-customer-completed-order.php',
-			'WC_Email_Customer_Refunded_Order'   => __DIR__ . '/emails/class-wc-email-customer-refunded-order.php',
-			'WC_Email_Customer_Invoice'          => __DIR__ . '/emails/class-wc-email-customer-invoice.php',
-			'WC_Email_Customer_Note'             => __DIR__ . '/emails/class-wc-email-customer-note.php',
-			'WC_Email_Customer_Reset_Password'   => __DIR__ . '/emails/class-wc-email-customer-reset-password.php',
-			'WC_Email_Customer_New_Account'      => __DIR__ . '/emails/class-wc-email-customer-new-account.php',
+			'WC_Email_New_Order'                     => __DIR__ . '/emails/class-wc-email-new-order.php',
+			'WC_Email_Cancelled_Order'               => __DIR__ . '/emails/class-wc-email-cancelled-order.php',
+			'WC_Email_Customer_Cancelled_Order'      => __DIR__ . '/emails/class-wc-email-customer-cancelled-order.php',
+			'WC_Email_Failed_Order'                  => __DIR__ . '/emails/class-wc-email-failed-order.php',
+			'WC_Email_Customer_Failed_Order'         => __DIR__ . '/emails/class-wc-email-customer-failed-order.php',
+			'WC_Email_Customer_On_Hold_Order'        => __DIR__ . '/emails/class-wc-email-customer-on-hold-order.php',
+			'WC_Email_Customer_Processing_Order'     => __DIR__ . '/emails/class-wc-email-customer-processing-order.php',
+			'WC_Email_Customer_Completed_Order'      => __DIR__ . '/emails/class-wc-email-customer-completed-order.php',
+			'WC_Email_Customer_Refunded_Order'       => __DIR__ . '/emails/class-wc-email-customer-refunded-order.php',
+			'WC_Email_Customer_Invoice'              => __DIR__ . '/emails/class-wc-email-customer-invoice.php',
+			'WC_Email_Customer_Note'                 => __DIR__ . '/emails/class-wc-email-customer-note.php',
+			'WC_Email_Customer_Reset_Password'       => __DIR__ . '/emails/class-wc-email-customer-reset-password.php',
+			'WC_Email_Customer_New_Account'          => __DIR__ . '/emails/class-wc-email-customer-new-account.php',
+			'WC_Email_Admin_Payment_Gateway_Enabled' => __DIR__ . '/emails/class-wc-email-admin-payment-gateway-enabled.php',
 		);
 		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
 			$emails['WC_Email_Customer_POS_Completed_Order'] = __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php';
@@ -305,8 +307,11 @@ class WC_Emails {
 			$emails['WC_Email_Customer_Fulfillment_Updated'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-updated.php';
 			$emails['WC_Email_Customer_Fulfillment_Deleted'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-deleted.php';
 		}
+		if ( FeaturesUtil::feature_is_enabled( 'customer_review_request' ) ) {
+			$emails['WC_Email_Customer_Review_Request'] = __DIR__ . '/emails/class-wc-email-customer-review-request.php';
+		}
 
-		// Preload the options which will be used when emails are getting initialized in the loop below (reduces the number of SQL-queries).
+		// Prime caches to reduce future queries.
 		wp_prime_option_caches(
 			array_map(
 				fn( string $class_name ) => sprintf( 'woocommerce_%s_settings', strtolower( str_replace( 'WC_Email_', '', $class_name ) ) ),
@@ -392,6 +397,10 @@ class WC_Emails {
 	 * @return string       Email footer text with any replacements done.
 	 */
 	public function replace_placeholders( $text ) {
+		if ( ! is_string( $text ) ) {
+			$text = is_scalar( $text ) ? (string) $text : '';
+		}
+
 		$domain = wp_parse_url( home_url(), PHP_URL_HOST );
 
 		return str_replace(

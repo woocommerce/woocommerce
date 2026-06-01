@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -49,6 +49,8 @@ describe( 'FeedbackModal', () => {
 		// Press cancel button.
 		fireEvent.click( screen.getByRole( 'button', { name: /Close/i } ) );
 
-		expect( screen.queryByRole( 'dialog' ) ).not.toBeInTheDocument();
+		await waitFor( () => {
+			expect( screen.queryByRole( 'dialog' ) ).not.toBeInTheDocument();
+		} );
 	} );
 } );

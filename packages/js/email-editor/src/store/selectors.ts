@@ -33,14 +33,40 @@ function getContentFromEntity( entity ): string {
 	return '';
 }
 
-const patternsWithParsedBlocks = new WeakMap();
-function enhancePatternWithParsedBlocks( pattern ) {
+type PatternWithContent = {
+	content: string;
+	emailContent?: string;
+	categories?: string[];
+	[ key: string ]: unknown;
+};
+
+type EnhancedPattern = PatternWithContent & {
+	readonly blocks: BlockInstance[];
+	readonly emailBlocks: BlockInstance[] | null;
+};
+
+const patternsWithParsedBlocks = new WeakMap<
+	PatternWithContent,
+	EnhancedPattern
+>();
+function enhancePatternWithParsedBlocks(
+	pattern: PatternWithContent
+): EnhancedPattern {
 	let enhancedPattern = patternsWithParsedBlocks.get( pattern );
 	if ( ! enhancedPattern ) {
 		enhancedPattern = {
 			...pattern,
 			get blocks() {
 				return parse( pattern.content );
+			},
+			// emailContent is an optional property that integrations (e.g. MailPoet)
+			// may add to patterns via REST API filters. It contains dynamic blocks
+			// (e.g. product-collection) for editor insertion, while `content` holds
+			// static HTML for template picker previews.
+			get emailBlocks() {
+				return pattern.emailContent
+					? parse( pattern.emailContent )
+					: null;
 			},
 		};
 		patternsWithParsedBlocks.set( pattern, enhancedPattern );
@@ -186,7 +212,6 @@ export const getBlockPatternsForEmailTemplate = createRegistrySelector(
 
 export const canUserEditTemplates = createRegistrySelector(
 	( select ) => () => {
-		// @ts-expect-error Selector is not typed
 		return select( coreDataStore ).canUser( 'create', {
 			kind: 'postType',
 			name: 'wp_template',
@@ -283,7 +308,6 @@ export const getCurrentTemplateContent = () => {
 export const canUserEditGlobalEmailStyles = createRegistrySelector(
 	( select ) => () => {
 		const postId = select( storeName ).getGlobalStylesPostId();
-		// @ts-expect-error Selector is not typed
 		const canEdit = select( coreDataStore ).canUser( 'update', {
 			kind: 'root',
 			name: 'globalStyles',
@@ -448,4 +472,8 @@ export function getContentValidation(
 	state: State
 ): State[ 'contentValidation' ] {
 	return state.contentValidation;
+}
+
+export function isTemplateSelected( state: State ): boolean {
+	return state.templateSelected;
 }

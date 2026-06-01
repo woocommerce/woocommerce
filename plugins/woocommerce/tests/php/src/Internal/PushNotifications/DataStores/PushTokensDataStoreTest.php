@@ -704,6 +704,156 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return tokens for users with matching roles.
+	 */
+	public function test_get_tokens_for_roles_returns_tokens_for_matching_users(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$data_store->create(
+			array(
+				'user_id'       => $admin_id,
+				'token'         => 'admin_token_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'admin-device-' . wp_rand(),
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertCount( 1, $tokens );
+		$this->assertInstanceOf( PushToken::class, $tokens[0] );
+		$this->assertSame( $admin_id, $tokens[0]->get_user_id() );
+	}
+
+	/**
+	 * @testdox Should return empty array when no users have the specified role.
+	 */
+	public function test_get_tokens_for_roles_returns_empty_when_no_users_have_role(): void {
+		$data_store = new PushTokensDataStore();
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'shop_manager' ) );
+
+		$this->assertSame( array(), $tokens );
+	}
+
+	/**
+	 * @testdox Should return empty array when users have the role but no tokens.
+	 */
+	public function test_get_tokens_for_roles_returns_empty_when_users_have_no_tokens(): void {
+		$this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame( array(), $tokens );
+	}
+
+	/**
+	 * @testdox Should skip malformed tokens and return only valid ones.
+	 */
+	public function test_get_tokens_for_roles_skips_malformed_tokens(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		wp_insert_post(
+			array(
+				'post_author' => $admin_id,
+				'post_type'   => PushToken::POST_TYPE,
+				'post_status' => 'private',
+				'meta_input'  => array(
+					'platform' => PushToken::PLATFORM_APPLE,
+					'token'    => 'partial_token',
+				),
+			)
+		);
+
+		$data_store->create(
+			array(
+				'user_id'       => $admin_id,
+				'token'         => 'valid_token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'valid-device',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertCount( 1, $tokens );
+		$this->assertSame( 'valid-device', $tokens[0]->get_device_uuid() );
+	}
+
+	/**
+	 * @testdox Should return tokens from multiple users with different matching roles.
+	 */
+	public function test_get_tokens_for_roles_returns_tokens_from_multiple_roles(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$manager_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+		$data_store = new PushTokensDataStore();
+
+		$data_store->create(
+			array(
+				'user_id'       => $admin_id,
+				'token'         => 'admin_token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'admin-device',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$data_store->create(
+			array(
+				'user_id'       => $manager_id,
+				'token'         => 'manager_token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'manager-device',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$tokens     = $data_store->get_tokens_for_roles( array( 'administrator', 'shop_manager' ) );
+		$device_ids = array_map( fn ( PushToken $t ) => $t->get_device_uuid(), $tokens );
+
+		$this->assertCount( 2, $tokens );
+		$this->assertContains( 'admin-device', $device_ids );
+		$this->assertContains( 'manager-device', $device_ids );
+	}
+
+	/**
+	 * @testdox Should not return tokens for users without the specified role.
+	 */
+	public function test_get_tokens_for_roles_excludes_users_without_role(): void {
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$data_store    = new PushTokensDataStore();
+
+		$data_store->create(
+			array(
+				'user_id'       => $subscriber_id,
+				'token'         => 'subscriber_token_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'subscriber-device-' . wp_rand(),
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame( array(), $tokens );
+	}
+
+	/**
 	 * Creates a test push token and saves it to the database.
 	 *
 	 * @return PushToken The created push token object.

@@ -36,7 +36,6 @@ const trackSetPreference = ( scope, name, value ) => {
 };
 
 const trackBlockAndPatternInsertion = ( ...args ) => {
-	// @ts-expect-error - isInserterOpened is not in editor types
 	const inserterPanelOpened = select( editorStore ).isInserterOpened();
 	const insQuickInsertOpened = !! document.getElementsByClassName(
 		'block-editor-inserter__quick-inserter'
@@ -71,7 +70,6 @@ const trackBlockAndPatternInsertion = ( ...args ) => {
 };
 
 const trackSetRenderingMode = ( renderingMode: string ) => {
-	// @ts-expect-error - getRenderingMode is not in editor types
 	const currentRenderingMode = select( editorStore ).getRenderingMode();
 	if ( currentRenderingMode === renderingMode ) {
 		return;

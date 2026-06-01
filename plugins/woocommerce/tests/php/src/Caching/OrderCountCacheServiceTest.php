@@ -148,7 +148,7 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test that refresh cache works.
 	 */
-	public function test_refresh_cache() {
+	public function test_refresh_cache(): void {
 		$count         = OrderUtil::get_count_for_type( 'shop_order' );
 		$pending_count = $count[ OrderInternalStatus::PENDING ];
 		// Set the pending count to a higher value to ensure it is refreshed.
@@ -158,5 +158,61 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 		$order_count_cache_service->refresh_cache( 'shop_order' );
 
 		$this->assertSame( $pending_count, $this->order_cache->get( 'shop_order', array( OrderInternalStatus::PENDING ) )[ OrderInternalStatus::PENDING ] );
+	}
+
+	/**
+	 * Test prime_cache_if_cold method: engaging when the cache is cold.
+	 */
+	public function test_prime_cache_if_cold_when_cache_is_cold(): void {
+		global $_wp_using_ext_object_cache;
+		$_before                    = $_wp_using_ext_object_cache;
+		$_wp_using_ext_object_cache = true; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->order_cache->flush();
+		$this->assertNull( $this->order_cache->get( 'shop_order', array( OrderInternalStatus::PENDING ) ) );
+
+		// We expect the cache to be populated with the relevant values.
+		$order_count_cache_service = wc_get_container()->get( OrderCountCacheService::class );
+		$order_count_cache_service->prime_cache_if_cold( 'shop_order' );
+
+		$cached = $this->order_cache->get( 'shop_order', array( OrderInternalStatus::PENDING ) );
+		$this->assertNotNull( $cached );
+		$this->assertArrayHasKey( OrderInternalStatus::PENDING, $cached );
+
+		$_wp_using_ext_object_cache = $_before; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
+
+	/**
+	 * Test prime_cache_if_cold method: not engaging when cache is warm.
+	 */
+	public function test_prime_cache_if_cold_when_cache_is_warm(): void {
+		global $_wp_using_ext_object_cache;
+		$_before                    = $_wp_using_ext_object_cache;
+		$_wp_using_ext_object_cache = true; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$pending_count = OrderUtil::get_count_for_type( 'shop_order' )[ OrderInternalStatus::PENDING ];
+		$this->order_cache->set( 'shop_order', OrderInternalStatus::PENDING, $pending_count + 10 );
+
+		// We expect the cached values to remain same as counting skipped for warm caches.
+		$order_count_cache_service = wc_get_container()->get( OrderCountCacheService::class );
+		$order_count_cache_service->prime_cache_if_cold( 'shop_order' );
+
+		$this->assertSame( $pending_count + 10, $this->order_cache->get( 'shop_order', array( OrderInternalStatus::PENDING ) )[ OrderInternalStatus::PENDING ] );
+
+		$_wp_using_ext_object_cache = $_before; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
+
+	/**
+	 * Test prime_cache_if_cold method: not engaging when no object caching plugins are in use.
+	 */
+	public function test_prime_cache_if_cold_when_object_cache_unavailable(): void {
+		$this->order_cache->flush();
+		$this->assertNull( $this->order_cache->get( 'shop_order', array( OrderInternalStatus::PENDING ) ) );
+
+		// We expect the cache to remain unpopulated as object caching is unavailable.
+		$order_count_cache_service = wc_get_container()->get( OrderCountCacheService::class );
+		$order_count_cache_service->prime_cache_if_cold( 'shop_order' );
+
+		$this->assertNull( $this->order_cache->get( 'shop_order', array( OrderInternalStatus::PENDING ) ) );
 	}
 }

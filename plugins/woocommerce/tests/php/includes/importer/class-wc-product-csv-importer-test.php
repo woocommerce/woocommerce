@@ -120,4 +120,108 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $error );
 		$this->assertEquals( 'A product with this SKU already exists.', $error->get_error_message() );
 	}
+
+	/**
+	 * @testdox Test that attributes with non-ASCII characters are correctly set to "Used for Variations" during import.
+	 */
+	public function test_variable_product_attributes_with_non_ascii_characters_set_to_used_for_variations() {
+		// Set admin user to allow term creation.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		// Create a CSV importer instance to access protected methods.
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		// Create a variable product with non-ASCII attributes (Chinese characters).
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Test Product with Chinese Attributes' );
+		$product->set_sku( 'test-non-ascii-attr' );
+		$product->save();
+
+		// Create global attributes with Chinese names.
+		$color_attr_id = wc_create_attribute(
+			array(
+				'name'         => '颜色',
+				'type'         => 'select',
+				'order_by'     => 'menu_order',
+				'has_archives' => false,
+			)
+		);
+		$size_attr_id  = wc_create_attribute(
+			array(
+				'name'         => '尺寸',
+				'type'         => 'select',
+				'order_by'     => 'menu_order',
+				'has_archives' => false,
+			)
+		);
+
+		// Register taxonomies.
+		$color_taxonomy = wc_attribute_taxonomy_name_by_id( $color_attr_id );
+		$size_taxonomy  = wc_attribute_taxonomy_name_by_id( $size_attr_id );
+		register_taxonomy( $color_taxonomy, 'product' );
+		register_taxonomy( $size_taxonomy, 'product' );
+
+		// Create terms for the attributes.
+		wp_insert_term( '红色', $color_taxonomy );
+		wp_insert_term( '绿色', $color_taxonomy );
+		wp_insert_term( '大码', $size_taxonomy );
+		wp_insert_term( '小码', $size_taxonomy );
+
+		// Set attributes on the product (initially NOT set to "Used for Variations").
+		$color_attribute = new WC_Product_Attribute();
+		$color_attribute->set_id( $color_attr_id );
+		$color_attribute->set_name( $color_taxonomy );
+		$color_attribute->set_options( array( '红色', '绿色' ) );
+		$color_attribute->set_visible( true );
+		$color_attribute->set_variation( false ); // Initially false.
+
+		$size_attribute = new WC_Product_Attribute();
+		$size_attribute->set_id( $size_attr_id );
+		$size_attribute->set_name( $size_taxonomy );
+		$size_attribute->set_options( array( '大码', '小码' ) );
+		$size_attribute->set_visible( true );
+		$size_attribute->set_variation( false ); // Initially false.
+
+		$product->set_attributes( array( $color_attribute, $size_attribute ) );
+		$product->save();
+
+		// Verify attributes are initially NOT set to "Used for Variations".
+		$attributes_before = $product->get_attributes();
+		$this->assertFalse( $attributes_before[ sanitize_title( $color_taxonomy ) ]->get_variation(), 'Color attribute should initially NOT be set to "Used for Variations"' );
+		$this->assertFalse( $attributes_before[ sanitize_title( $size_taxonomy ) ]->get_variation(), 'Size attribute should initially NOT be set to "Used for Variations"' );
+
+		// Simulate variation import data (as would come from CSV).
+		$variation_attributes = array(
+			array(
+				'name'     => '颜色',
+				'taxonomy' => true,
+			),
+			array(
+				'name'     => '尺寸',
+				'taxonomy' => true,
+			),
+		);
+
+		// Use reflection to call the protected method.
+		$reflection = new ReflectionClass( $importer );
+		$method     = $reflection->getMethod( 'get_variation_parent_attributes' );
+		$method->setAccessible( true );
+
+		// Call the method (this should set "Used for Variations" to true).
+		$method->invoke( $importer, $variation_attributes, $product );
+
+		// Reload product to get updated attributes.
+		$product          = wc_get_product( $product->get_id() );
+		$attributes_after = $product->get_attributes();
+
+		// Verify attributes are now set to "Used for Variations".
+		$this->assertTrue( $attributes_after[ sanitize_title( $color_taxonomy ) ]->get_variation(), 'Color attribute should be set to "Used for Variations" after processing variations' );
+		$this->assertTrue( $attributes_after[ sanitize_title( $size_taxonomy ) ]->get_variation(), 'Size attribute should be set to "Used for Variations" after processing variations' );
+
+		// Clean up.
+		WC_Helper_Product::delete_product( $product->get_id() );
+		wc_delete_attribute( $color_attr_id );
+		wc_delete_attribute( $size_attr_id );
+	}
 }

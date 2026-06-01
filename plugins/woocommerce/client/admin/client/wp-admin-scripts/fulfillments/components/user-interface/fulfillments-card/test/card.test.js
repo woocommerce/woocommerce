@@ -9,10 +9,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import FulfillmentCard from '../card';
 
 jest.mock( '@wordpress/components', () => ( {
-	Button: ( { onClick, children } ) => (
-		<button data-testid="button" onClick={ onClick }>
-			{ children }
-		</button>
+	Button: ( { children, ...props } ) => (
+		<button { ...props }>{ children }</button>
 	),
 	Icon: ( { icon } ) => <span data-testid="icon">{ icon }</span>,
 } ) );
@@ -28,8 +26,10 @@ describe( 'FulfillmentCard', () => {
 		expect( screen.getByText( 'Header' ) ).toBeInTheDocument();
 		// Children should not be visible by default for collapsable
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
-		// Click to expand
-		fireEvent.click( screen.getByTestId( 'button' ) );
+		// Click the header div (role="button") to expand
+		fireEvent.click(
+			screen.getByText( 'Header' ).closest( '[role="button"]' )
+		);
 		expect( screen.getByText( 'Child content' ) ).toBeInTheDocument();
 	} );
 
@@ -40,42 +40,42 @@ describe( 'FulfillmentCard', () => {
 			</FulfillmentCard>
 		);
 
-		const button = screen.getByTestId( 'button' );
+		const header = screen
+			.getByText( 'Header' )
+			.closest( '[role="button"]' );
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 
-		fireEvent.click( button );
+		fireEvent.click( header );
 		expect( screen.getByText( 'Child content' ) ).toBeInTheDocument();
 
-		fireEvent.click( button );
+		fireEvent.click( header );
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 	} );
 
-	it( 'renders without collapse button when not collapsable', () => {
+	it( 'renders without clickable header when not collapsable', () => {
 		render(
 			<FulfillmentCard header={ <h1>Header</h1> } isCollapsable={ false }>
 				<p>Child content</p>
 			</FulfillmentCard>
 		);
 
-		expect( screen.queryByTestId( 'button' ) ).not.toBeInTheDocument();
+		expect( screen.queryByRole( 'button' ) ).not.toBeInTheDocument();
 		// Children should not be visible if not collapsable (matches component behavior)
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 	} );
 
-	it( 'renders children if initialState is open (collapsable)', () => {
+	it( 'renders children if initialState is expanded (collapsable)', () => {
 		render(
 			<FulfillmentCard
 				header={ <h1>Header</h1> }
 				isCollapsable
-				initialState="open"
+				initialState="expanded"
 			>
 				<p>Child content</p>
 			</FulfillmentCard>
 		);
 
-		const button = screen.getByTestId( 'button' );
-		// Children may not be visible by default, so click to expand
-		fireEvent.click( button );
+		// Children should be visible immediately when initialState is expanded
 		expect( screen.getByText( 'Child content' ) ).toBeInTheDocument();
 	} );
 
@@ -90,7 +90,28 @@ describe( 'FulfillmentCard', () => {
 			</FulfillmentCard>
 		);
 
-		expect( screen.getByTestId( 'button' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( 'Header' ).closest( '[role="button"]' )
+		).toBeInTheDocument();
+		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'supports keyboard interaction on collapsable header', () => {
+		render(
+			<FulfillmentCard header={ <h1>Header</h1> } isCollapsable>
+				<p>Child content</p>
+			</FulfillmentCard>
+		);
+
+		const header = screen
+			.getByText( 'Header' )
+			.closest( '[role="button"]' );
+		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
+
+		fireEvent.keyUp( header, { key: 'Enter' } );
+		expect( screen.getByText( 'Child content' ) ).toBeInTheDocument();
+
+		fireEvent.keyUp( header, { key: ' ' } );
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 	} );
 } );

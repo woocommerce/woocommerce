@@ -45,6 +45,9 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
 
+		// Inject the mock gateway directly — avoids filter pollution and a second init() call.
+		WC()->payment_gateways()->payment_gateways[] = new WCGatewayMockPassword();
+
 		$this->sut = new Controller();
 		$this->sut->register_routes();
 	}
@@ -217,16 +220,158 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test updating a payment gateway without values parameter.
+	 * Test updating a payment gateway with no parameters performs a no-op.
+	 *
+	 * All parameters are optional, so an empty PUT should succeed without
+	 * modifying any gateway settings.
 	 */
-	public function test_update_payment_gateway_missing_values() {
+	public function test_update_payment_gateway_with_no_params() {
+		// Arrange.
+		$gateway        = WC()->payment_gateways->payment_gateways()['bacs'];
+		$enabled_before = $gateway->enabled;
+		$title_before   = $gateway->title;
+
 		// Act.
 		$request  = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'rest_missing_callback_param', $response->get_data()['code'] );
+		$this->assertSame( 200, $response->get_status() );
+
+		// Verify gateway state was not changed.
+		$gateway_after = WC()->payment_gateways->payment_gateways()['bacs'];
+		$this->assertSame( $enabled_before, $gateway_after->enabled );
+		$this->assertSame( $title_before, $gateway_after->title );
+	}
+
+	/**
+	 * Test updating a payment gateway with top-level enabled field.
+	 *
+	 * Core-data sends edits as top-level fields (matching the GET response shape)
+	 * rather than nested under the values parameter.
+	 */
+	public function test_update_payment_gateway_with_top_level_enabled() {
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'enabled', true );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertTrue( $data['enabled'] );
+
+		// Verify persisted state.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'yes', $saved_settings['enabled'] );
+	}
+
+	/**
+	 * Test updating a payment gateway with top-level description field.
+	 */
+	public function test_update_payment_gateway_with_top_level_description() {
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'description', 'Pay via bank transfer.' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame( 'Pay via bank transfer.', $data['description'] );
+
+		// Verify persisted state.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'Pay via bank transfer.', $saved_settings['description'] );
+	}
+
+	/**
+	 * Test that legacy values.enabled with string 'yes' still works.
+	 *
+	 * Existing callers send enabled as 'yes'/'no' strings inside the values
+	 * parameter. This must remain supported for backwards compatibility.
+	 */
+	public function test_update_payment_gateway_with_legacy_yes_string() {
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'values', array( 'enabled' => 'yes' ) );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertTrue( $data['enabled'] );
+
+		// Verify persisted state.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'yes', $saved_settings['enabled'] );
+	}
+
+	/**
+	 * Test that top-level fields take precedence over values.
+	 */
+	public function test_top_level_fields_take_precedence_over_values() {
+		// Act - send enabled=true at top level and enabled=false in values.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'enabled', true );
+		$request->set_param( 'values', array( 'enabled' => false ) );
+		$response = $this->server->dispatch( $request );
+
+		// Assert - top-level should win.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertTrue( $data['enabled'] );
+
+		// Verify persisted state matches top-level value.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'yes', $saved_settings['enabled'] );
+	}
+
+	/**
+	 * Test updating a payment gateway with top-level title field.
+	 */
+	public function test_update_payment_gateway_with_top_level_title() {
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'title', 'Wire Transfer' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame( 'Wire Transfer', $data['title'] );
+
+		// Verify persisted state.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'Wire Transfer', $saved_settings['title'] );
+	}
+
+	/**
+	 * Test updating a payment gateway with top-level order field.
+	 */
+	public function test_update_payment_gateway_with_top_level_order() {
+		// Arrange.
+		delete_option( 'woocommerce_gateway_order' );
+
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'order', 3 );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame( 3, $data['order'] );
+
+		// Verify persisted state.
+		$gateway_order = get_option( 'woocommerce_gateway_order' );
+		$this->assertSame( 3, $gateway_order['bacs'] );
 	}
 
 	/**
@@ -549,6 +694,153 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'title', $data['values'] );
 		$this->assertArrayHasKey( 'description', $data['values'] );
 		$this->assertArrayHasKey( 'instructions', $data['values'] );
+	}
+
+	/**
+	 * @testdox Should preserve percent-encoded characters in password fields.
+	 */
+	public function test_update_payment_gateway_preserves_percent_encoded_chars_in_password_fields() {
+		// Arrange — mock gateway has a password-type field (api_password).
+		$password = 'NlP4%EcCx}Na';
+
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/mock_password' );
+		$request->set_param(
+			'values',
+			array(
+				'api_password' => $password,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
+		$this->assertSame( $password, $gateway->settings['api_password'], 'Password with %Ec sequence should be preserved' );
+
+		// Verify DB persistence — the value that reached the database must also be intact.
+		$stored = get_option( 'woocommerce_mock_password_settings', array() );
+		$this->assertSame( $password, $stored['api_password'] ?? null, 'Password should be persisted to database without corruption' );
+	}
+
+	/**
+	 * @testdox Should preserve HTML-like characters in password fields.
+	 *
+	 * Password fields use minimal sanitization (trim only) to avoid corrupting
+	 * passwords and API keys, matching WC_Settings_API::validate_password_field().
+	 * Characters like '<' and '>' are valid in secrets and must not be stripped.
+	 */
+	public function test_update_payment_gateway_preserves_html_like_chars_in_password_fields() {
+		// Arrange.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/mock_password' );
+		$request->set_param(
+			'values',
+			array(
+				'api_password' => '<b>bold</b>secret%E0pass',
+			)
+		);
+
+		// Act.
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
+		$this->assertSame( '<b>bold</b>secret%E0pass', $gateway->settings['api_password'], 'HTML-like characters should be preserved in password fields' );
+
+		// Verify DB persistence.
+		$stored = get_option( 'woocommerce_mock_password_settings', array() );
+		$this->assertSame( '<b>bold</b>secret%E0pass', $stored['api_password'] ?? null, 'Password should be persisted to database without corruption' );
+	}
+
+	/**
+	 * @testdox Should preserve a lone '<' in password field values without truncation.
+	 *
+	 * PHP's strip_tags() treats a lone '<' as the start of a malformed HTML tag and drops
+	 * everything from the '<' onward (e.g. "abc<def" becomes "abc"). Password fields must
+	 * not use strip_tags() or wp_strip_all_tags() for this reason.
+	 */
+	public function test_update_payment_gateway_preserves_lone_less_than_in_password_fields() {
+		// Arrange.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/mock_password' );
+		$request->set_param(
+			'values',
+			array(
+				'api_password' => 'pass<word123',
+			)
+		);
+
+		// Act.
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
+		$this->assertSame( 'pass<word123', $gateway->settings['api_password'], 'A lone < must not truncate the password' );
+
+		// Verify DB persistence.
+		$stored = get_option( 'woocommerce_mock_password_settings', array() );
+		$this->assertSame( 'pass<word123', $stored['api_password'] ?? null, 'Password should be persisted to database without corruption' );
+	}
+
+	/**
+	 * @testdox Should trim whitespace from password fields while preserving percent-encoded characters.
+	 */
+	public function test_update_payment_gateway_trims_whitespace_from_password_fields() {
+		// Arrange.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/mock_password' );
+		$request->set_param(
+			'values',
+			array(
+				'api_password' => '  my%20password  ',
+			)
+		);
+
+		// Act.
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
+		$this->assertSame( 'my%20password', $gateway->settings['api_password'], 'Password should be trimmed but percent sequences preserved' );
+
+		// Verify DB persistence.
+		$stored = get_option( 'woocommerce_mock_password_settings', array() );
+		$this->assertSame( 'my%20password', $stored['api_password'] ?? null, 'Password should be persisted to database without corruption' );
+	}
+
+	/**
+	 * @testdox Should coerce a numeric JSON value for a password field to string instead of blanking it.
+	 *
+	 * json_decode() returns an int when the client sends a bare number (e.g. a 6-digit PIN).
+	 * The sanitizer must not silently clear numeric-only secrets.
+	 */
+	public function test_update_payment_gateway_coerces_numeric_password_to_string() {
+		// Arrange — WP REST API delivers the value as an int after JSON decoding.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/mock_password' );
+		$request->set_param(
+			'values',
+			array(
+				'api_password' => 123456,
+			)
+		);
+
+		// Act.
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
+		$this->assertSame( '123456', $gateway->settings['api_password'], 'Numeric password value should be coerced to string, not blanked' );
+
+		// Verify DB persistence.
+		$stored = get_option( 'woocommerce_mock_password_settings', array() );
+		$this->assertSame( '123456', $stored['api_password'] ?? null, 'Password should be persisted to database without corruption' );
 	}
 
 	/**

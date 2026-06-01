@@ -41,6 +41,7 @@ class WC_Product_Factory {
 				return $product;
 			}
 		}
+		// Prime caches to reduce future queries.
 		_prime_post_caches( array( $product_id ) );
 
 		$product_type = self::get_product_type( $product_id );

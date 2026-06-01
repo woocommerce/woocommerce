@@ -32,6 +32,83 @@
 		"couponCode": {
 			"type": "string",
 			"default": ""
+		},
+		"source": {
+			"type": "string",
+			"default": "createNew",
+			"enum": [ "createNew", "existing" ]
+		},
+		"discountType": {
+			"type": "string",
+			"default": "percent"
+		},
+		"amount": {
+			"type": "number",
+			"default": 10
+		},
+		"expiryDay": {
+			"type": "number",
+			"default": 10
+		},
+		"freeShipping": {
+			"type": "boolean",
+			"default": false
+		},
+		"usageLimit": {
+			"type": "number",
+			"default": 0
+		},
+		"usageLimitPerUser": {
+			"type": "number",
+			"default": 0
+		},
+		"minimumAmount": {
+			"type": "string",
+			"default": ""
+		},
+		"maximumAmount": {
+			"type": "string",
+			"default": ""
+		},
+		"individualUse": {
+			"type": "boolean",
+			"default": false
+		},
+		"excludeSaleItems": {
+			"type": "boolean",
+			"default": false
+		},
+		"productIds": {
+			"type": "array",
+			"default": [],
+			"items": {
+				"type": "object"
+			}
+		},
+		"excludedProductIds": {
+			"type": "array",
+			"default": [],
+			"items": {
+				"type": "object"
+			}
+		},
+		"productCategoryIds": {
+			"type": "array",
+			"default": [],
+			"items": {
+				"type": "object"
+			}
+		},
+		"excludedProductCategoryIds": {
+			"type": "array",
+			"default": [],
+			"items": {
+				"type": "object"
+			}
+		},
+		"emailRestrictions": {
+			"type": "string",
+			"default": ""
 		}
 	},
 	"textdomain": "woocommerce"

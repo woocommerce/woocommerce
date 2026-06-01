@@ -76,6 +76,9 @@ export const acceleratedPrepCommand = new Command( 'accelerated-prep' )
 
 		const git = simpleGit( {
 			baseDir: tmpRepoPath,
+			unsafe: {
+				allowUnsafeHooksPath: true,
+			},
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
 

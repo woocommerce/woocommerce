@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { parse, synchronizeBlocksWithTemplate } from '@wordpress/blocks';
+import {
+	BlockInstance,
+	synchronizeBlocksWithTemplate,
+} from '@wordpress/blocks';
 import {
 	createElement,
 	useMemo,
@@ -14,32 +17,24 @@ import {
 import { dispatch, select, useDispatch, useSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import apiFetch from '@wordpress/api-fetch';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { Product } from '@woocommerce/data';
 import { getPath, getQuery } from '@woocommerce/navigation';
+import { getAdminLink, getSetting } from '@woocommerce/settings';
 import {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
 	BlockContextProvider,
 	BlockEditorKeyboardShortcuts,
 	BlockEditorProvider,
 	BlockList,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
+	// @ts-expect-error BlockTools is not exported from @wordpress/block-editor's public types.
 	BlockTools,
 	ObserveTyping,
 } from '@wordpress/block-editor';
-// It doesn't seem to notice the External dependency block when @ts-ignore is added.
 // eslint-disable-next-line @woocommerce/dependency-group
-import {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore store should be included.
-	useEntityBlockEditor,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore store should be included.
-	useEntityRecord,
-} from '@wordpress/core-data';
+import { useEntityBlockEditor, useEntityRecord } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -49,10 +44,13 @@ import { useProductTemplate } from '../../hooks/use-product-template';
 import { PostTypeContext } from '../../contexts/post-type-context';
 import { wooProductEditorUiStore } from '../../store/product-editor-ui';
 import { ProductEditorSettings } from '../editor';
+import { Notice } from '../notice';
 import { BlockEditorProps } from './types';
 import { LoadingState } from './loading-state';
-import type { ProductFormPostProps, ProductTemplate } from '../../types';
-import isProductFormTemplateSystemEnabled from '../../utils/is-product-form-template-system-enabled';
+import type { ProductTemplate } from '../../types';
+
+const PRODUCT_BLOCK_EDITOR_FEATURE_OPTION =
+	'woocommerce_feature_product_block_editor_enabled';
 
 const PluginArea = lazy( () =>
 	import( '@wordpress/plugins' ).then( ( module ) => ( {
@@ -82,16 +80,32 @@ function getLayoutTemplateId(
 	return 'simple-product';
 }
 
+function getClassicProductEditorUrl(
+	productId: number,
+	postType: string,
+	product: Partial< Product > | undefined
+) {
+	const parentProductId =
+		postType === 'product_variation' &&
+		product &&
+		'parent_id' in product &&
+		typeof product.parent_id === 'number'
+			? product.parent_id
+			: productId;
+
+	if ( parentProductId > 0 ) {
+		return getAdminLink( `post.php?post=${ parentProductId }&action=edit` );
+	}
+
+	return getAdminLink( 'post-new.php?post_type=product' );
+}
+
 export function BlockEditor( {
 	context,
 	postType,
 	productId,
 	setIsEditorLoading,
 }: BlockEditorProps ) {
-	const [ selectedProductFormId, setSelectedProductFormId ] = useState<
-		number | null
-	>( null );
-
 	useConfirmUnsavedProductChanges( postType );
 
 	/**
@@ -108,7 +122,7 @@ export function BlockEditor( {
 	}, [] );
 
 	useEffect( () => {
-		// @ts-expect-error Type definitions are missing
+		// @ts-expect-error @wordpress/keyboard-shortcuts store is not fully typed.
 		const { registerShortcut } = dispatch( keyboardShortcutsStore );
 		if ( registerShortcut ) {
 			registerShortcut( {
@@ -163,8 +177,7 @@ export function BlockEditor( {
 					}: {
 						onError: ( message: string ) => void;
 					} ) {
-						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-						// @ts-ignore No types for this exist yet.
+						// @ts-expect-error uploadMedia's upstream UploadMediaArgs type rejects undefined for wpAllowedMimeTypes, but the runtime accepts it.
 						uploadMedia( {
 							wpAllowedMimeTypes:
 								settingsGlobal.allowedMimeTypes || undefined,
@@ -190,6 +203,52 @@ export function BlockEditor( {
 		{ enabled: productId !== -1 }
 	);
 
+	const { _feature_nonce: featureNonce = '' } = getSetting< {
+		_feature_nonce?: string;
+	} >( 'admin', {} );
+	const classicProductEditorUrl = getClassicProductEditorUrl(
+		productId,
+		postType,
+		product
+	);
+	const disableProductBlockEditorUrl = new URL( classicProductEditorUrl );
+	disableProductBlockEditorUrl.searchParams.set(
+		'product_block_editor',
+		'0'
+	);
+	disableProductBlockEditorUrl.searchParams.set(
+		'_feature_nonce',
+		featureNonce
+	);
+	const [ isDisablingProductBlockEditor, setIsDisablingProductBlockEditor ] =
+		useState( false );
+
+	const disableProductBlockEditor = async (
+		event: React.MouseEvent< HTMLAnchorElement >
+	) => {
+		event.preventDefault();
+
+		if ( isDisablingProductBlockEditor ) {
+			return;
+		}
+
+		setIsDisablingProductBlockEditor( true );
+
+		try {
+			await apiFetch( {
+				path: `/wc/v3/settings/advanced/${ PRODUCT_BLOCK_EDITOR_FEATURE_OPTION }`,
+				method: 'POST',
+				data: {
+					value: 'no',
+				},
+			} );
+
+			window.location.href = classicProductEditorUrl;
+		} catch {
+			window.location.href = disableProductBlockEditorUrl.toString();
+		}
+	};
+
 	const productTemplateId = useMemo(
 		() =>
 			product?.meta_data?.find(
@@ -208,41 +267,17 @@ export function BlockEditor( {
 		hasResolved ? getLayoutTemplateId( productTemplate, postType ) : null
 	);
 
+	type BlockChangeHandler = (
+		blocks: BlockInstance[],
+		options?: Record< string, unknown >
+	) => void;
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
 		postType,
 		// useEntityBlockEditor will not try to fetch the product if productId is falsy.
+		// @ts-expect-error useEntityBlockEditor's upstream types declare id as string, but the REST API uses number.
 		{ id: productId !== -1 ? productId : 0 }
-	);
-
-	// Pull the product templates from the store.
-	const productForms = useSelect(
-		(
-			sel: ( key: string ) => {
-				getEntityRecords: (
-					kind: string,
-					name: string,
-					query: Record< string, unknown >
-				) => ProductFormPostProps[] | undefined;
-			}
-		) => {
-			return (
-				sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
-					per_page: -1,
-				} ) || []
-			);
-		},
-		[]
-	) as ProductFormPostProps[];
-
-	// Set the default product form template ID.
-	useEffect( () => {
-		if ( ! productForms.length ) {
-			return;
-		}
-
-		setSelectedProductFormId( productForms[ 0 ].id );
-	}, [ productForms ] );
+	) as [ BlockInstance[], BlockChangeHandler, BlockChangeHandler ];
 
 	const isEditorLoading =
 		! settings ||
@@ -252,28 +287,6 @@ export function BlockEditor( {
 		productId === -1 ||
 		! hasResolved;
 
-	const productFormTemplate = useMemo(
-		function pickAndParseTheProductFormTemplate() {
-			if (
-				! isProductFormTemplateSystemEnabled() ||
-				! selectedProductFormId
-			) {
-				return undefined;
-			}
-
-			const productFormPost = productForms.find(
-				( form ) => form.id === selectedProductFormId
-			);
-
-			if ( productFormPost ) {
-				return parse( productFormPost.content.raw );
-			}
-
-			return undefined;
-		},
-		[ productForms, selectedProductFormId ]
-	);
-
 	useLayoutEffect(
 		function setupEditor() {
 			if ( isEditorLoading ) {
@@ -282,19 +295,12 @@ export function BlockEditor( {
 
 			const blockInstances = synchronizeBlocksWithTemplate(
 				[],
-				// @ts-expect-error Type definitions are missing
+				// @ts-expect-error layoutTemplate is not typed - it's a custom entity from useEntityRecord
 				layoutTemplate.blockTemplates
 			);
 
-			/*
-			 * If the product form template is not available, use the block instances.
-			 * ToDo: Remove this fallback once the product form template is stable/available.
-			 */
-			const editorTemplate = blockInstances ?? productFormTemplate;
+			onChange( blockInstances, {} );
 
-			onChange( editorTemplate, {} );
-
-			// @ts-expect-error Type definitions are missing
 			dispatch( 'core/editor' ).updateEditorSettings( {
 				...settings,
 				productTemplate,
@@ -309,7 +315,6 @@ export function BlockEditor( {
 			layoutTemplate,
 			settings,
 			productTemplate,
-			productFormTemplate,
 			productId,
 		]
 	);
@@ -318,8 +323,6 @@ export function BlockEditor( {
 		setIsEditorLoading( isEditorLoading );
 	}, [ isEditorLoading, setIsEditorLoading ] );
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	const { editEntityRecord } = useDispatch( 'core' );
 
 	useEffect( function maybeSetProductTemplateFromURL() {
@@ -348,16 +351,9 @@ export function BlockEditor( {
 	}, [] );
 
 	// Check if the Modal editor is open from the store.
-	const isModalEditorOpen = useSelect(
-		(
-			selectCore: ( key: typeof wooProductEditorUiStore ) => {
-				isModalEditorOpen: () => boolean | undefined;
-			}
-		) => {
-			return selectCore( wooProductEditorUiStore ).isModalEditorOpen();
-		},
-		[]
-	);
+	const isModalEditorOpen = useSelect( ( selectCore ) => {
+		return selectCore( wooProductEditorUiStore ).isModalEditorOpen();
+	}, [] );
 
 	if ( isEditorLoading ) {
 		return (
@@ -376,7 +372,7 @@ export function BlockEditor( {
 					}
 					title={ __( 'Edit description', 'woocommerce' ) }
 					name={
-						product.name === 'AUTO-DRAFT'
+						! product?.name || product.name === 'AUTO-DRAFT'
 							? __( '(no product name)', 'woocommerce' )
 							: product.name
 					}
@@ -387,6 +383,28 @@ export function BlockEditor( {
 
 	return (
 		<div className="woocommerce-product-block-editor">
+			<Notice
+				className="woocommerce-product-block-editor__deprecation-notice"
+				type="warning"
+				title={ __(
+					'Switch to the classic editor before WooCommerce 11.0',
+					'woocommerce'
+				) }
+				content={ __(
+					"We're removing this version of the product editor in WooCommerce 11.0. The classic editor has the same features and your products won't change, so we recommend switching now.",
+					'woocommerce'
+				) }
+			>
+				<Button
+					className="woocommerce-product-block-editor__deprecation-notice-action"
+					href={ disableProductBlockEditorUrl.toString() }
+					isBusy={ isDisablingProductBlockEditor }
+					onClick={ disableProductBlockEditor }
+					variant="secondary"
+				>
+					{ __( 'Switch to classic editor', 'woocommerce' ) }
+				</Button>
+			</Notice>
 			<BlockContextProvider value={ context }>
 				<BlockEditorProvider
 					value={ blocks }
@@ -395,8 +413,7 @@ export function BlockEditor( {
 					settings={ settings }
 					useSubRegistry={ false }
 				>
-					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-					{ /* @ts-ignore No types for this exist yet. */ }
+					{ /* @ts-expect-error BlockEditorKeyboardShortcuts.Register is not exposed on the component's public types. */ }
 					<BlockEditorKeyboardShortcuts.Register />
 					<BlockTools>
 						<ObserveTyping>

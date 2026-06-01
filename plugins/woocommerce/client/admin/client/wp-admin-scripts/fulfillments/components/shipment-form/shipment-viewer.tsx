@@ -52,9 +52,9 @@ export default function ShipmentViewer() {
 			header={
 				isShipmentInformationProvided ? (
 					<>
-						{ shipmentProviderObject ? (
+						{ shipmentProviderObject?.icon ? (
 							<img
-								src={ shipmentProviderObject.icon || '' }
+								src={ shipmentProviderObject.icon }
 								alt={ shipmentProviderObject.label || '' }
 							/>
 						) : (
@@ -92,6 +92,7 @@ export default function ShipmentViewer() {
 						{
 							label: __( 'Tracking URL', 'woocommerce' ),
 							value: trackingUrl,
+							href: trackingUrl || undefined,
 						},
 					] }
 				/>

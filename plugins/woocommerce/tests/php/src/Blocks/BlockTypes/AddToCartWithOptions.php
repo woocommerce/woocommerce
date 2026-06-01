@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProduct
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeOptionsMock;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 
 /**
  * Tests for the AddToCartWithOptions block type
@@ -46,7 +46,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			new AddToCartWithOptionsVariationSelectorMock();
 			new AddToCartWithOptionsVariationSelectorAttributeMock();
 			new AddToCartWithOptionsVariationSelectorAttributeNameMock();
-			new AddToCartWithOptionsVariationSelectorAttributeOptionsMock();
 
 			self::$are_blocks_registered = true;
 		}
@@ -347,9 +346,9 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertDoesNotMatchRegularExpression(
-			'/<input[^>]*type="radio"[^>]* checked(?:="checked")?[^>]*>/',
+			'/<button[^>]*aria-checked="true"[^>]*>/',
 			$markup,
-			'No radio options should be checked by default.'
+			'No options should be checked by default.'
 		);
 
 		$product->set_default_attributes( array( 'pa_size' => 'small-slug' ) );
@@ -359,7 +358,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertMatchesRegularExpression(
-			'/<input[^>]*checked(?:="checked")?[^>]*type="radio"[^>]*value="small-slug"[^>]*>/',
+			'/<button[^>]*value="small-slug"[^>]*aria-checked="true"[^>]*>/',
 			$markup,
 			'The "small" size option should be checked when set as the default attribute.'
 		);
@@ -369,7 +368,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertMatchesRegularExpression(
-			'/<input[^>]*checked(?:="checked")?[^>]*type="radio"[^>]*value="medium-slug"[^>]*>/',
+			'/<button[^>]*value="medium-slug"[^>]*aria-checked="true"[^>]*>/',
 			$markup,
 			'The "medium" size option should be checked when set in the URL parameters.'
 		);
@@ -445,6 +444,32 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that the stepper buttons render with correct aria labels when the product name contains a dollar sign.
+	 */
+	public function test_stepper_renders_correctly_with_dollar_sign_in_product_name() {
+		$simple_product = new \WC_Product_Simple();
+		$simple_product->set_regular_price( 10 );
+		$simple_product->set_name( 'CANADA, $1' );
+		$simple_product->set_manage_stock( true );
+		$simple_product->set_stock_quantity( 10 );
+		$simple_product_id = $simple_product->save();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $simple_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringContainsString( 'wc-block-components-quantity-selector__button--minus', $markup, 'The minus stepper button is rendered.' );
+		$this->assertStringContainsString( 'wc-block-components-quantity-selector__button--plus', $markup, 'The plus stepper button is rendered.' );
+		$this->assertStringContainsString( 'Reduce quantity of CANADA, $1', $markup, 'The minus button aria-label contains the full product name with dollar sign.' );
+		$this->assertStringContainsString( 'Increase quantity of CANADA, $1', $markup, 'The plus button aria-label contains the full product name with dollar sign.' );
+
+		// Verify $1 was not interpreted as a backreference (which would inject the captured <input> HTML into the aria-label).
+		$this->assertDoesNotMatchRegularExpression(
+			'/aria-label="[^"]*<input[^"]*"/',
+			$markup,
+			'The aria-label should not contain HTML from backreference expansion.'
+		);
+	}
+
+	/**
 	 * Tests that the quantity selector and its steppers are hidden when
 	 * a filter sets min and max quantity to the same value for a product.
 	 */
@@ -476,5 +501,20 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		} finally {
 			remove_filter( 'woocommerce_quantity_input_args', $filter, 10 );
 		}
+	}
+
+	/**
+	 * Tests that add_quantity_stepper_classes adds wrapper and input classes to inputs.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::add_quantity_stepper_classes
+	 */
+	public function test_add_quantity_stepper_classes() {
+		$quantity_html = '<div class="quantity"><input type="number" class="input-text qty text" name="custom_name" value="1" /></div>';
+
+		$result = Utils::add_quantity_stepper_classes( $quantity_html );
+
+		$this->assertStringContainsString( 'wc-block-components-quantity-selector', $result, 'The quantity wrapper should receive the stepper wrapper class.' );
+		$this->assertStringContainsString( 'wc-block-components-quantity-selector__input', $result, 'The input should receive the stepper input class.' );
+		$this->assertStringContainsString( 'custom_name', $result, 'The original input name value should be preserved.' );
 	}
 }

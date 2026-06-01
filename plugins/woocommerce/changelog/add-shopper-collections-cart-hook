@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Auto-inject the Shopper Collection block on the cart page when the shopper lists feature is enabled.

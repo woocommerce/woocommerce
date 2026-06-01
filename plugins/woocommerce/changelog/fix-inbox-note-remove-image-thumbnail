@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop rendering thumbnail images in inbox notes; deprecate `Note::set_image()`, `Note::get_image()`, `Note::set_layout()`, `Note::get_layout()` and the `'thumbnail'` layout value, all of which will be removed in a future release.

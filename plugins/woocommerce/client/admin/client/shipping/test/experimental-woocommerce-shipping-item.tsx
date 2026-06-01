@@ -34,6 +34,7 @@ jest.mock( '@woocommerce/admin-layout', () => {
 
 describe( 'WooCommerceShippingItem', () => {
 	const defaultProps = {
+		isPluginActive: false,
 		pluginsBeingSetup: [] as string[],
 		onInstallClick: jest.fn( () => Promise.resolve() ),
 		onActivateClick: jest.fn( () => Promise.resolve() ),
@@ -79,11 +80,33 @@ describe( 'WooCommerceShippingItem', () => {
 		).toBeInTheDocument();
 	} );
 
+	it( 'should render an "Active" pill instead of a CTA button when WC Shipping is active', () => {
+		render(
+			<WooCommerceShippingItem
+				{ ...defaultProps }
+				isPluginInstalled={ true }
+				isPluginActive={ true }
+			/>
+		);
+
+		expect(
+			screen.queryByText( 'WooCommerce Shipping' )
+		).toBeInTheDocument();
+		expect( screen.queryByText( 'Active' ) ).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Install' } )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Activate' } )
+		).not.toBeInTheDocument();
+	} );
+
 	it( 'should call onInstallClick when clicking Install button', () => {
 		const onInstallClick = jest.fn( () => Promise.resolve() );
 		render(
 			<WooCommerceShippingItem
 				isPluginInstalled={ false }
+				isPluginActive={ false }
 				pluginsBeingSetup={ [] }
 				onInstallClick={ onInstallClick }
 				onActivateClick={ jest.fn( () => Promise.resolve() ) }
@@ -140,11 +163,48 @@ describe( 'WooCommerceShippingItem', () => {
 		} );
 	} );
 
+	it( 'should record settings_shipping_recommendation_setup_click with action=install when clicking Install button', () => {
+		render(
+			<WooCommerceShippingItem
+				isPluginInstalled={ false }
+				{ ...defaultProps }
+			/>
+		);
+
+		screen.queryByRole( 'button', { name: 'Install' } )?.click();
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'settings_shipping_recommendation_setup_click',
+			{
+				plugin: 'woocommerce-shipping',
+				action: 'install',
+			}
+		);
+	} );
+
+	it( 'should record settings_shipping_recommendation_setup_click with action=activate when clicking Activate button', () => {
+		render(
+			<WooCommerceShippingItem
+				isPluginInstalled={ true }
+				{ ...defaultProps }
+			/>
+		);
+
+		screen.queryByRole( 'button', { name: 'Activate' } )?.click();
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'settings_shipping_recommendation_setup_click',
+			{
+				plugin: 'woocommerce-shipping',
+				action: 'activate',
+			}
+		);
+	} );
+
 	it( 'should call onActivateClick when clicking Activate button', () => {
 		const onActivateClick = jest.fn( () => Promise.resolve() );
 		render(
 			<WooCommerceShippingItem
 				isPluginInstalled={ true }
+				isPluginActive={ false }
 				pluginsBeingSetup={ [] }
 				onInstallClick={ jest.fn( () => Promise.resolve() ) }
 				onActivateClick={ onActivateClick }

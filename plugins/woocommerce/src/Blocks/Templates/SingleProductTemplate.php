@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
@@ -84,13 +85,20 @@ class SingleProductTemplate extends AbstractTemplate {
 
 			$product = wc_get_product( $post->ID );
 			if ( $product ) {
+				$consent = 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
+
+				// Load the product data into the products store so derived
+				// state closures can resolve it during server-side rendering.
+				ProductsStore::load_product( $consent, $product->get_id() );
+
+				// Set the current product context. The derived state
+				// closures (mainProductInContext, productVariationInContext, productInContext)
+				// are registered by ProductsStore::register_state().
 				wp_interactivity_state(
-					'woocommerce/product-data',
+					'woocommerce/products',
 					array(
-						'templateState' => array(
-							'productId'   => $product->get_id(),
-							'variationId' => null,
-						),
+						'productId'   => $product->get_id(),
+						'variationId' => null,
 					)
 				);
 			}

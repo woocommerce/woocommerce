@@ -5,7 +5,7 @@ import { speak } from '@wordpress/a11y';
 
 export type Action = {
 	message: string;
-	ariaLive?: string;
+	ariaLive?: 'polite' | 'assertive';
 };
 
 export default {

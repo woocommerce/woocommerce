@@ -1,0 +1,13 @@
+diff -ruN a/types/@wordpress/notices/index.d.ts b/types/@wordpress/notices/index.d.ts
+--- a/types/@wordpress/notices/index.d.ts
++++ b/types/@wordpress/notices/index.d.ts
+@@ -3,3 +3,9 @@
+ declare module '@wordpress/notices' {
+ 	export { store } from "@wordpress/notices/build-types/store";
+ }
++
++declare module '@wordpress/data' {
++	interface StoreRegistry {
++		'core/notices': typeof import("@wordpress/notices/build-types/store").store;
++	}
++}

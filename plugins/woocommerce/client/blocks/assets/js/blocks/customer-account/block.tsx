@@ -6,6 +6,7 @@ import {
 	customerAccountStyle,
 	customerAccountStyleAlt,
 	customerAccountStyleLine,
+	caret,
 } from '@woocommerce/icons';
 import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
@@ -56,7 +57,8 @@ export const CustomerAccountBlock = ( {
 }: {
 	attributes: Attributes;
 } ): JSX.Element => {
-	const { displayStyle, iconStyle, iconClass } = attributes;
+	const { displayStyle, hasDropdownNavigation, iconStyle, iconClass } =
+		attributes;
 
 	const ariaAttributes =
 		displayStyle === DisplayStyle.ICON_ONLY
@@ -65,20 +67,44 @@ export const CustomerAccountBlock = ( {
 			  }
 			: {};
 
-	return (
-		<a
-			href={ getSetting(
-				'dashboardUrl',
-				getSetting( 'wpLoginUrl', '/wp-login.php' )
-			) }
-			{ ...ariaAttributes }
-		>
+	const content = (
+		<>
 			<AccountIcon
 				iconStyle={ iconStyle }
 				displayStyle={ displayStyle }
 				iconClass={ iconClass }
 			/>
 			<Label displayStyle={ displayStyle } />
+		</>
+	);
+
+	if ( hasDropdownNavigation ) {
+		return (
+			<button
+				type="button"
+				className="wc-block-customer-account__toggle"
+				{ ...ariaAttributes }
+			>
+				{ content }
+				<Icon
+					className="wc-block-customer-account__caret"
+					icon={ caret }
+					size={ 10 }
+				/>
+			</button>
+		);
+	}
+
+	return (
+		<a
+			className="wc-block-customer-account__link"
+			href={ getSetting(
+				'dashboardUrl',
+				getSetting( 'wpLoginUrl', '/wp-login.php' )
+			) }
+			{ ...ariaAttributes }
+		>
+			{ content }
 		</a>
 	);
 };

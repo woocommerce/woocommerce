@@ -26,11 +26,9 @@ import {
 	type MutationQueue,
 	type MutationResult,
 } from './mutation-batcher';
+import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 
 export type WooCommerceConfig = {
-	products?: {
-		[ productId: number ]: ProductData;
-	};
 	messages?: {
 		addedToCartText?: string;
 	};
@@ -60,38 +58,6 @@ export type ClientCartItem = Omit<
 	quantityToAdd?: number;
 };
 
-export type VariationData = {
-	attributes: Record< string, string >;
-	is_in_stock: boolean;
-	sold_individually: boolean;
-	price_html?: string;
-	image_id?: number;
-	availability?: string;
-	variation_description?: string;
-	sku?: string;
-	weight?: string;
-	dimensions?: string;
-	min?: number;
-	max?: number;
-	step?: number;
-};
-
-export type ProductData = {
-	type: string;
-	is_in_stock: boolean;
-	sold_individually: boolean;
-	price_html?: string;
-	image_id?: number;
-	availability?: string;
-	sku?: string;
-	weight?: string;
-	dimensions?: string;
-	min?: number;
-	max?: number;
-	step?: number;
-	variations?: Record< number, VariationData >;
-};
-
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
 export type Store = {
@@ -101,6 +67,11 @@ export type Store = {
 		};
 		restUrl: string;
 		nonce: string;
+		findItemInCart: ( args: {
+			id: ClientCartItem[ 'id' ];
+			key?: ClientCartItem[ 'key' ];
+			variation?: ClientCartItem[ 'variation' ];
+		} ) => CartItem | OptimisticCartItem | undefined;
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
@@ -165,37 +136,30 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 
 const getInfoNoticesFromCartUpdates = (
 	oldCart: Store[ 'state' ][ 'cart' ],
-	newCart: Cart,
-	quantityChanges: QuantityChanges
+	newCart: Cart
 ): Notice[] => {
 	const oldItems = oldCart.items;
 	const newItems = newCart.items;
 
-	const {
-		productsPendingAdd: pendingAdd = [],
-		cartItemsPendingQuantity: pendingQuantity = [],
-		cartItemsPendingDelete: pendingDelete = [],
-	} = quantityChanges;
+	// Items auto-removed by the server (stock change, product deleted, etc.).
+	// We pass the optimistic snapshot as oldCart, so user-initiated removals
+	// are already absent and do not generate spurious notices here.
+	const autoDeletedToNotify = oldItems.filter(
+		( old ) =>
+			isCartItem( old ) &&
+			! newItems.some( ( item ) => old.key === item.key )
+	);
 
-	const autoDeletedToNotify = oldItems
-		.filter( isCartItem )
-		.filter(
-			( old ) =>
-				! newItems.some( ( item ) => old.key === item.key ) &&
-				! pendingDelete.includes( old.key )
-		);
-
+	// Items whose quantity was adjusted by the server (stock cap, sold-individually).
+	// Comparing optimistic → server means intentional user changes are already
+	// reflected in oldItems and will not trigger this notice.
 	const autoUpdatedToNotify = newItems.filter( ( item ) => {
 		if ( ! isCartItem( item ) ) {
 			return false;
 		}
 		const old = oldItems.find( ( o ) => o.key === item.key );
-		return old
-			? ! pendingQuantity.includes( item.key ) &&
-					item.quantity !== old.quantity
-			: ! pendingAdd.includes( item.id );
+		return old && item.quantity !== old.quantity;
 	} );
-
 	return [
 		...autoDeletedToNotify.map( ( item ) =>
 			// TODO: move the message template to iAPI config.
@@ -212,41 +176,6 @@ const getInfoNoticesFromCartUpdates = (
 			)
 		),
 	];
-};
-
-// Same as the one in /assets/js/base/utils/variations/does-cart-item-match-attributes.ts.
-const doesCartItemMatchAttributes = (
-	cartItem: OptimisticCartItem,
-	selectedAttributes: SelectedAttributes[]
-) => {
-	if (
-		! Array.isArray( cartItem.variation ) ||
-		! Array.isArray( selectedAttributes )
-	) {
-		return false;
-	}
-
-	if ( cartItem.variation.length !== selectedAttributes.length ) {
-		return false;
-	}
-
-	return cartItem.variation.every(
-		( {
-			// eslint-disable-next-line
-			raw_attribute,
-			value,
-		}: {
-			raw_attribute: string;
-			value: string;
-		} ) =>
-			selectedAttributes.some( ( item: SelectedAttributes ) => {
-				return (
-					item.attribute === raw_attribute &&
-					( item.value.toLowerCase() === value.toLowerCase() ||
-						( item.value && value === '' ) ) // Handle "any" attribute type
-				);
-			} )
-	);
 };
 
 let pendingRefresh = false;
@@ -314,14 +243,50 @@ async function sendCartRequest(
 
 	return cartQueue.submit( options );
 }
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 // Todo: export this store once the store is public.
-const { state, actions } = store< Store >(
+const { state } = store< Store >( 'woocommerce', {}, { lock: universalLock } );
+const { actions } = store< Store >(
 	'woocommerce',
 	{
+		state: {
+			findItemInCart( {
+				id,
+				key,
+				variation,
+			}: {
+				id: ClientCartItem[ 'id' ];
+				key?: ClientCartItem[ 'key' ];
+				variation?: ClientCartItem[ 'variation' ];
+			} ) {
+				return state.cart.items.find( ( cartItem ) => {
+					if ( key ) {
+						return key === cartItem.key;
+					}
+					if ( cartItem.type === 'variation' ) {
+						if (
+							id !== cartItem.id ||
+							! cartItem.variation ||
+							! variation ||
+							cartItem.variation.length !== variation.length
+						) {
+							return false;
+						}
+						return doesCartItemMatchAttributes(
+							cartItem,
+							variation
+						);
+					}
+					return id === cartItem.id;
+				} );
+			},
+		},
 		actions: {
 			*removeCartItem( key: string ): AsyncAction< void > {
-				// Track what changes we're making for notice comparison.
+				// Track what changes we're making for the sync event.
 				const quantityChanges: QuantityChanges = {
 					cartItemsPendingDelete: [ key ],
 				};
@@ -358,8 +323,7 @@ const { state, actions } = store< Store >(
 					if ( cart && cartAfterOptimistic ) {
 						const infoNotices = getInfoNoticesFromCartUpdates(
 							cartAfterOptimistic,
-							cart,
-							quantityChanges
+							cart
 						);
 						const errorNotices =
 							cart.errors.map( generateErrorNotice );
@@ -386,22 +350,10 @@ const { state, actions } = store< Store >(
 				const a11yModulePromise = import( '@wordpress/a11y' );
 
 				// Find existing item
-				const existingItem = state.cart.items.find( ( cartItem ) => {
-					if ( cartItem.type === 'variation' ) {
-						if (
-							id !== cartItem.id ||
-							! cartItem.variation ||
-							! variation ||
-							cartItem.variation.length !== variation.length
-						) {
-							return false;
-						}
-						return doesCartItemMatchAttributes(
-							cartItem,
-							variation
-						);
-					}
-					return key ? key === cartItem.key : id === cartItem.id;
+				const existingItem = state.findItemInCart( {
+					id,
+					key,
+					variation,
 				} );
 
 				// Determine the target quantity.
@@ -506,8 +458,7 @@ const { state, actions } = store< Store >(
 					) {
 						const infoNotices = getInfoNoticesFromCartUpdates(
 							cartAfterOptimistic,
-							cart,
-							quantityChanges
+							cart
 						);
 						const errorNotices =
 							cart.errors.map( generateErrorNotice );
@@ -545,9 +496,11 @@ const { state, actions } = store< Store >(
 					// Submit each item through the batcher. They'll be
 					// collected into a single batch request automatically.
 					const promises = items.map( ( item, index ) => {
-						const existingItem = state.cart.items.find(
-							( { id: productId } ) => item.id === productId
-						);
+						const existingItem = state.findItemInCart( {
+							id: item.id,
+							key: item.key,
+							variation: item.variation,
+						} );
 
 						let quantity: number;
 						if ( typeof item.quantityToAdd === 'number' ) {
@@ -648,8 +601,7 @@ const { state, actions } = store< Store >(
 						if ( showCartUpdatesNotices ) {
 							const infoNotices = getInfoNoticesFromCartUpdates(
 								cartAfterOptimistic,
-								cart,
-								quantityChanges
+								cart
 							);
 							const errorNotices =
 								cart.errors.map( generateErrorNotice );
@@ -813,7 +765,7 @@ const { state, actions } = store< Store >(
 			},
 		},
 	},
-	{ lock: true }
+	{ lock: universalLock }
 );
 
 // Trigger initial cart refresh.

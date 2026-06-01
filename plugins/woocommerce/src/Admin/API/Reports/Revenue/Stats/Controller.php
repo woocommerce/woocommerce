@@ -270,7 +270,7 @@ class Controller extends GenericStatsController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Label.
 	 */
 	public function get_export_columns() {
-		return array(
+		$export_columns = array(
 			'date'         => __( 'Date', 'woocommerce' ),
 			'orders_count' => __( 'Orders', 'woocommerce' ),
 			'gross_sales'  => __( 'Gross sales', 'woocommerce' ),
@@ -281,6 +281,15 @@ class Controller extends GenericStatsController implements ExportableInterface {
 			'shipping'     => __( 'Shipping', 'woocommerce' ),
 			'total_sales'  => __( 'Total sales', 'woocommerce' ),
 		);
+
+		/**
+		 * Filter to add or remove column names from the revenue stats report for
+		 * export.
+		 *
+		 * @since 10.7.0
+		 * @param array $export_columns Key value pair of column ID and label.
+		 */
+		return apply_filters( 'woocommerce_report_revenue_stats_export_columns', $export_columns );
 	}
 
 	/**
@@ -292,7 +301,7 @@ class Controller extends GenericStatsController implements ExportableInterface {
 	public function prepare_item_for_export( $item ) {
 		$subtotals = (array) $item['subtotals'];
 
-		return array(
+		$export_item = array(
 			'date'         => $item['date_start'],
 			'orders_count' => $subtotals['orders_count'],
 			'gross_sales'  => self::csv_number_format( $subtotals['gross_sales'] ),
@@ -303,5 +312,15 @@ class Controller extends GenericStatsController implements ExportableInterface {
 			'shipping'     => self::csv_number_format( $subtotals['shipping'] ),
 			'total_sales'  => self::csv_number_format( $subtotals['total_sales'] ),
 		);
+
+		/**
+		 * Filter to prepare extra columns in the export item for the revenue
+		 * stats report.
+		 *
+		 * @since 10.7.0
+		 * @param array $export_item Key value pair of column ID and row value.
+		 * @param array $item        The original report item.
+		 */
+		return apply_filters( 'woocommerce_report_revenue_stats_prepare_export_item', $export_item, $item );
 	}
 }

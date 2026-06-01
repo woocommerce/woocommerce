@@ -2,6 +2,20 @@
 
 The store products API provides public product data so it can be rendered on the client side.
 
+## Product Visibility
+
+### Draft and non-published products
+
+Only published products are accessible via the Store API. Requesting a draft, pending, or other non-published product by ID or slug returns a `404` error. Non-published products are also excluded from the collection endpoint.
+
+### Password-protected products
+
+Password-protected products are visible in the API, but their `description` and `short_description` fields are redacted (returned as empty strings) until the correct password has been submitted. The response includes an `is_password_protected` boolean field so clients can detect this state and prompt the user.
+
+Password verification uses WordPress's native `wp-postpass_*` cookie, set when a user submits the password form on the frontend. The Store API does not accept passwords directly.
+
+Other product data (price, images, categories, etc.) remains accessible regardless of password status.
+
 ## List Products
 
 ```http
@@ -119,6 +133,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/products"
 		"has_options": false,
 		"is_purchasable": true,
 		"is_in_stock": true,
+		"is_password_protected": false,
 		"low_stock_remaining": null,
 		"add_to_cart": {
 			"text": "Add to cart",
@@ -187,6 +202,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/34"
 	"has_options": false,
 	"is_purchasable": true,
 	"is_in_stock": true,
+	"is_password_protected": false,
 	"low_stock_remaining": null,
 	"add_to_cart": {
 		"text": "Add to cart",
@@ -254,6 +270,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/wordpress-pennant"
 	"has_options": false,
 	"is_purchasable": true,
 	"is_in_stock": true,
+	"is_password_protected": false,
 	"low_stock_remaining": null,
 	"add_to_cart": {
 		"text": "Add to cart",

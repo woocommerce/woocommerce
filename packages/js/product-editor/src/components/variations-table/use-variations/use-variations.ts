@@ -290,8 +290,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			{ product_id: productId, id: variationId },
 			variation
 		).then( async ( response ) => {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product_variation',
@@ -319,16 +317,12 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		} ).then( async ( response: ProductVariation ) => {
 			onSelect( response )( false );
 
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product',
 				productId,
 			] );
 
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product_variation',
@@ -347,8 +341,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}
 
 	async function onBatchUpdate( values: PartialProductVariation[] ) {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
 
@@ -414,8 +406,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}
 
 	async function onBatchDelete( values: PartialProductVariation[] ) {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
 

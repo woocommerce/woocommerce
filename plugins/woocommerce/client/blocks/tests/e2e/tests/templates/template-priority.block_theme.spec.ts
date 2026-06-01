@@ -49,6 +49,7 @@ test.describe( 'Template priority', () => {
 				templateName: 'Product Catalog',
 				templatePath: 'archive-product',
 			},
+			isTaxonomyTemplate: true,
 			identifiableText: 'Showing all 9 results',
 		},
 	];
@@ -132,33 +133,54 @@ test.describe( 'Template priority', () => {
 				} );
 			}
 
-			await test.step( 'custom template with WooCommerce slug', async () => {
-				await pageObject.addParagraphToTemplate(
-					`woocommerce/woocommerce//${ testData.templatePath }`,
-					'Custom template with WooCommerce slug'
-				);
+			// Note: we skip taxonomy templates because since
+			// https://github.com/woocommerce/woocommerce/pull/62018
+			// it's no longer possible to create those templates using the
+			// WooCommerce slug.
+			// Since https://github.com/woocommerce/woocommerce/pull/60191, the
+			// only way to achieve that was hardcoding `woocommerce/woocommerce//`
+			// to the URL. So we are only testing for backwards-compatibility.
+			if (
+				! ( 'isTaxonomyTemplate' in testData ) ||
+				! testData.isTaxonomyTemplate
+			) {
+				await test.step( 'custom template with WooCommerce slug', async () => {
+					await pageObject.addParagraphToTemplate(
+						`woocommerce/woocommerce//${ testData.templatePath }`,
+						'Custom template with WooCommerce slug'
+					);
 
-				await page.goto( testData.path );
+					await page.goto( testData.path );
 
-				await expect(
-					page.getByText( testData.identifiableText )
-				).toBeVisible();
-				await expect(
-					page.getByText( 'Custom fallback template with theme slug' )
-				).toBeHidden();
-				await expect(
-					page.getByText( 'Custom template with WooCommerce slug' )
-				).toBeVisible();
-			} );
-
-			await test.step( 'custom template with theme slug', async () => {
-				await admin.visitSiteEditor( {
-					postType: 'wp_template',
+					await expect(
+						page.getByText( testData.identifiableText )
+					).toBeVisible();
+					await expect(
+						page.getByText(
+							'Custom fallback template with theme slug'
+						)
+					).toBeHidden();
+					await expect(
+						page.getByText(
+							'Custom template with WooCommerce slug'
+						)
+					).toBeVisible();
 				} );
+			}
+
+			await admin.visitSiteEditor( {
+				postType: 'wp_template',
+			} );
+			if (
+				! ( 'isTaxonomyTemplate' in testData ) ||
+				! testData.isTaxonomyTemplate
+			) {
 				await editor.revertTemplate( {
 					templateName: testData.templateName,
 				} );
+			}
 
+			await test.step( 'custom template with theme slug', async () => {
 				if ( testData.fallbackTemplate ) {
 					await editor.createTemplate( {
 						templateName: testData.templateName,

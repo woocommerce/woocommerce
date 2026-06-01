@@ -61,6 +61,16 @@ class OrdersScheduler extends ImportScheduler {
 	const SCHEDULED_IMPORT_OPTION = 'woocommerce_analytics_scheduled_import';
 
 	/**
+	 * Legacy option name before the rename in 10.5.0.
+	 *
+	 * Used as a fallback during upgrades before the migration routine runs.
+	 * The old option stored inverted semantics: 'yes' = immediate, 'no' = scheduled.
+	 *
+	 * @var string
+	 */
+	const LEGACY_IMMEDIATE_IMPORT_OPTION = 'woocommerce_analytics_immediate_import';
+
+	/**
 	 * Default value for the scheduled import option.
 	 *
 	 * @var string
@@ -346,6 +356,15 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
+		// Skip test orders (e.g., WCPay test mode) from analytics.
+		if ( self::is_test_order( $order ) ) {
+			wc_get_logger()->debug(
+				sprintf( 'Skipping test order #%d from analytics import.', $order_id ),
+				array( 'source' => 'wc-analytics-order-import' )
+			);
+			return;
+		}
+
 		$results = array(
 			OrdersStatsDataStore::sync_order( $order_id ),
 			ProductsDataStore::sync_order_products( $order_id ),
@@ -522,6 +541,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
+		$orders_count    = count( $orders );
 		$processed_count = 0;
 		foreach ( $orders as $order ) {
 			try {
@@ -530,15 +550,14 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 				// Advance cursor after each successful import. Since orders are sorted by
 				// date ASC, id ASC, we can simply overwrite with the current order's values.
-				// If an error occurs, we break and save the last successful position.
 				$cursor_date = $order->date_updated_gmt;
 				$cursor_id   = $order->id;
-			} catch ( \Exception $e ) {
-				$logger->error(
-					sprintf( 'Failed to import order %d: %s', $order->id, $e->getMessage() ),
-					$context
-				);
-				break;
+			} catch ( \Throwable $e ) {
+				// Log the failure and advance the cursor past the failing order so that
+				// it is skipped on the next run rather than blocking the entire pipeline.
+				static::log_import_error( $order->id, $e, $context );
+				$cursor_date = $order->date_updated_gmt;
+				$cursor_id   = $order->id;
 			}
 		}
 
@@ -549,8 +568,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		$elapsed_time = microtime( true ) - $start_time;
 		$logger->info(
 			sprintf(
-				'Batch import completed. Processed: %d orders in %.2f seconds. Cursor: %s (ID: %d)',
+				'Batch import completed. Processed: %d/%d orders in %.2f seconds. Cursor: %s (ID: %d)',
 				$processed_count,
+				$orders_count,
 				$elapsed_time,
 				$cursor_date,
 				$cursor_id
@@ -558,9 +578,10 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			$context
 		);
 
-		// If we got a full batch, there might be more orders to process.
-		// Schedule immediate next batch.
-		if ( $processed_count === $batch_size ) {
+		// If we fetched a full batch, there might be more orders to process.
+		// Use the fetched count rather than successful count so that skipped
+		// failing orders do not suppress scheduling of the next batch.
+		if ( $orders_count === $batch_size ) {
 			$logger->info( 'Full batch processed, scheduling next batch', $context );
 			self::schedule_action(
 				'process_pending_batch',
@@ -685,6 +706,48 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
+	 * Check if an order is a test order that should be excluded from analytics.
+	 *
+	 * For refunds, the parent order is checked instead, since refunds do not
+	 * carry the test mode metadata directly.
+	 *
+	 * @param \WC_Abstract_Order $order Order object.
+	 * @return bool
+	 *
+	 * @since 10.7.0
+	 */
+	public static function is_test_order( $order ) {
+		if ( ! $order instanceof \WC_Abstract_Order ) {
+			return false;
+		}
+
+		// For refunds, check the parent order.
+		$check_order = $order;
+		if ( 'shop_order_refund' === $order->get_type() ) {
+			$check_order = wc_get_order( $order->get_parent_id() );
+			if ( ! $check_order instanceof \WC_Abstract_Order ) {
+				return false;
+			}
+		}
+
+		$is_test = 'test' === $check_order->get_meta( '_wcpay_mode' );
+
+		/**
+		 * Filter whether an order is a test order excluded from analytics.
+		 *
+		 * Use this filter to customize test order detection beyond the default
+		 * WCPay test mode check, e.g., to exclude orders from other payment
+		 * gateways' test/sandbox modes.
+		 *
+		 * @param bool               $is_test Whether the order is a test order.
+		 * @param \WC_Abstract_Order $order   The order being checked (for refunds, this is the parent order).
+		 *
+		 * @since 10.7.0
+		 */
+		return apply_filters( 'woocommerce_analytics_is_test_order', $is_test, $check_order );
+	}
+
+	/**
 	 * Delete a batch of orders.
 	 *
 	 * @internal
@@ -721,6 +784,21 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return false;
 		}
 
-		return 'yes' === get_option( self::SCHEDULED_IMPORT_OPTION, self::SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE );
+		$value = get_option( self::SCHEDULED_IMPORT_OPTION, false );
+
+		if ( false !== $value ) {
+			return 'yes' === $value;
+		}
+
+		// Fall back to the legacy option (pre-10.5.0) which used inverted semantics:
+		// 'yes' meant immediate import (= not scheduled), 'no' meant scheduled.
+		$legacy_value = get_option( self::LEGACY_IMMEDIATE_IMPORT_OPTION, false );
+
+		if ( false !== $legacy_value ) {
+			return 'no' === $legacy_value;
+		}
+
+		// Neither option exists — use the default (not scheduled).
+		return false;
 	}
 }

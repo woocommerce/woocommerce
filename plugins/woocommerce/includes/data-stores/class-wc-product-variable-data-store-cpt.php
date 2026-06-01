@@ -128,6 +128,19 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @since 3.0.0
 	 */
 	protected function read_product_data( &$product ) {
+		// Prime caches to reduce future queries.
+		if ( ! wp_using_ext_object_cache() ) {
+			$product_id = $product->get_id();
+			wp_prime_option_caches(
+				array(
+					'_transient_wc_var_prices_' . $product_id,
+					'_transient_timeout_wc_var_prices_' . $product_id,
+					'_transient_wc_product_children_' . $product_id,
+					'_transient_timeout_wc_product_children_' . $product_id,
+				)
+			);
+		}
+
 		parent::read_product_data( $product );
 
 		// Make sure data which does not apply to variables is unset.
@@ -338,6 +351,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$variation_ids = $product->get_visible_children();
 
 				if ( ! empty( $variation_ids ) ) {
+					// Prime caches to reduce future queries.
 					_prime_post_caches( $variation_ids );
 				}
 
@@ -562,9 +576,12 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			return false;
 		}
 
-		if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) {
-			return false;
-		}
+		// Taxes influence the price regardless of VAT exempt status. Even when a
+		// customer is VAT exempt, the displayed prices differ from non-exempt
+		// prices, so they need separate cache entries and the opposite_price_hash
+		// optimization should not apply. Returning false here was causing cached
+		// non-exempt prices to be served to VAT exempt customers.
+		// See: https://github.com/woocommerce/woocommerce/issues/63716
 
 		return true;
 	}

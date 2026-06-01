@@ -57,13 +57,13 @@ Note that `wc_get_orders()` is mostly a shortcut to `WC_Order_Query::get_orders(
 
 ## API reference
 
-| Method                                   | Description                              |
-|-------------------------------------------|------------------------------------------|
-| `wc_get_orders ( $args )`            | Retrieve orders matching query `$args`. |
-| `WC_Order_Query::get_query_vars()`        | Get an array of all of the current query variables set on the query object.         |
-| `WC_Order_Query::get( string $key, mixed $default = '' )`               | Get the value of a query variable or the default if the query variable is not set.            |
-| `WC_Order_Query::set( string $key, mixed $value )`       | Set a query variable.                     |
-| `WC_Order_Query::get_orders()`            | Get all orders matching the current query variables.  |
+| Method | Description |
+| --- | --- |
+| `wc_get_orders ( $args )` | Retrieve orders matching query `$args`. |
+| `WC_Order_Query::get_query_vars()` | Get an array of all of the current query variables set on the query object. |
+| `WC_Order_Query::get( string $key, mixed $default = '' )` | Get the value of a query variable or the default if the query variable is not set. |
+| `WC_Order_Query::set( string $key, mixed $value )` | Set a query variable. |
+| `WC_Order_Query::get_orders()` | Get all orders matching the current query variables. |
 
 Query parameters/arguments that can be used with these functions are described below.
 
@@ -71,18 +71,18 @@ Query parameters/arguments that can be used with these functions are described b
 
 ### General
 
-|Parameter|Description|
-|-|-|
-|**status**|Accepts an array of strings: by default is set to the keys of `wc_get_order_statuses()`.|
-|**type**|Accepts a string: `'shop_order'`, `'shop_order_refund'`, or a custom order type.|
-|**version**|Accepts a string: WooCommerce version number the order was created in.|
-|**created_via**|Accepts a string: 'checkout', 'rest-api', or a custom creation method slug.|
-|**parent**|Accepts an integer: post ID of the order parent.|
-|**parent_exclude**|Accepts an array of integers: Excludes orders with parent ids in the array.|
-|**exclude**|Accepts an array of integers: excludes orders that have the ids.|
-|**order**|Accepts a string: 'DESC' or 'ASC'. Use with 'orderby'. Default: 'DESC'.|
-|**orderby**|Accepts a string: 'none', 'ID', 'name', 'type', 'rand', 'date', 'modified'. Default: 'date'.|
-|**return**|Return type. Accepts a string: 'ids' or 'objects'. Default: 'objects'.|
+| Parameter | Description |
+| --- | --- |
+| **status** | Accepts an array of strings: by default is set to the keys of `wc_get_order_statuses()`. |
+| **type** | Accepts a string: `'shop_order'`, `'shop_order_refund'`, or a custom order type. |
+| **version** | Accepts a string: WooCommerce version number the order was created in. |
+| **created_via** | Accepts a string: 'checkout', 'rest-api', or a custom creation method slug. |
+| **parent** | Accepts an integer: post ID of the order parent. |
+| **parent_exclude** | Accepts an array of integers: Excludes orders with parent ids in the array. |
+| **exclude** | Accepts an array of integers: excludes orders that have the ids. |
+| **order** | Accepts a string: 'DESC' or 'ASC'. Use with 'orderby'. Default: 'DESC'. |
+| **orderby** | Accepts a string: 'none', 'ID', 'name', 'type', 'rand', 'date', 'modified'. Default: 'date'. |
+| **return** | Return type. Accepts a string: 'ids' or 'objects'. Default: 'objects'. |
 
 #### Examples
 
@@ -142,12 +142,12 @@ $orders = wc_get_orders( $args );
 
 ### Pagination
 
-|Parameter|Description|
-|-|-|
-|**limit**|Accepts an integer: Maximum number of results to retrieve or `-1` for unlimited. Default: Site 'posts_per_page' setting.|
-|**paged**|Accepts an integer: Page of results to retrieve. Does nothing if 'offset' is used.|
-|**offset**|Accepts an integer: Amount to offset order results.|
-|**paginate**|Accepts a boolean: True for pagination, or false for not (default: false). If enabled, modifies the return results to give an object with fields: `orders` (array of found orders), `total` (number of found orders) and `max_num_pages` (total number of pages).|
+| Parameter | Description |
+| --- | --- |
+| **limit** | Accepts an integer: Maximum number of results to retrieve or `-1` for unlimited. Default: Site 'posts_per_page' setting. |
+| **paged** | Accepts an integer: Page of results to retrieve. Does nothing if 'offset' is used. |
+| **offset** | Accepts an integer: Amount to offset order results. |
+| **paginate** | Accepts a boolean: True for pagination, or false for not (default: false). If enabled, modifies the return results to give an object with fields: `orders` (array of found orders), `total` (number of found orders) and `max_num_pages` (total number of pages). |
 
 #### Examples
 
@@ -324,11 +324,9 @@ $orders = wc_get_orders( $args );
 
 ### Metadata
 
-<!-- markdownlint-disable MD033 -->
-|Parameter|Description|
-|-|-|
-|**meta_query**|One or more arrays with keys `key` (meta key), `value` (optional, string or array) and optionally `type` and `compare`.<br />This parameter is analogous to [WP_Query's `meta_query`](https://developer.wordpress.org/reference/classes/wp_query/#custom-field-post-meta-parameters), supporting various comparison operators and levels of queries joined by AND/OR relations.|
-<!-- markdownlint-enable MD033 -->
+| Parameter | Description |
+| --- | --- |
+| **meta_query** | One or more arrays with keys `key` (meta key), `value` (optional, string or array) and optionally `type` and `compare`.<br />This parameter is analogous to [WP_Query's `meta_query`](https://developer.wordpress.org/reference/classes/wp_query/#custom-field-post-meta-parameters), supporting various comparison operators and levels of queries joined by AND/OR relations. |
 
 For more details and examples, refer to the [HPOS order querying](/docs/features/high-performance-order-storage/wc-order-query-improvements#metadata-queries-meta_query) guide.
 
@@ -365,11 +363,9 @@ $orders = wc_get_orders(
 
 ### Order fields
 
-<!-- markdownlint-disable MD033 -->
 |Parameter|Description|
 |-|-|
 |**field_query**|One or more arrays with keys `field` (any order property), `value` and optionally `type` and `compare`.<br />This parameter is analogous to those of `meta_query` described in the previous section, supporting various comparison operators and levels of queries joined by AND/OR relations.|
-<!-- markdownlint-enable MD033 -->
 
 For more details and examples, refer to the [HPOS order querying](/docs/features/high-performance-order-storage/wc-order-query-improvements#order-field-queries-field_query) guide.
 
@@ -405,11 +401,9 @@ $orders = wc_get_orders(
 
 ### Advanced date queries
 
-<!-- markdownlint-disable MD033 -->
-|Parameter|Description|
-|-|-|
-|**date_query**|One or more arrays with keys `column` (an order date: `date_completed`, `date_created`, `date_updated` or `date_paid`, optionally followed by `_gmt` for UTC dates), `value` and optionally `type` and `compare`.<br />This parameter is analogous to [WP_Query's `date_query`](https://developer.wordpress.org/reference/classes/wp_query/#date-parameters), supporting various comparison operators and levels of queries joined by AND/OR relations.|
-<!-- markdownlint-enable MD033 -->
+| Parameter | Description |
+| --- | --- |
+| **date_query** | One or more arrays with keys `column` (an order date: `date_completed`, `date_created`, `date_updated` or `date_paid`, optionally followed by `_gmt` for UTC dates), `value` and optionally `type` and `compare`.<br />This parameter is analogous to [WP_Query's `date_query`](https://developer.wordpress.org/reference/classes/wp_query/#date-parameters), supporting various comparison operators and levels of queries joined by AND/OR relations. |
 
 For more details and examples, refer to the [HPOS order querying](/docs/features/high-performance-order-storage/wc-order-query-improvements#date-queries-date_query) guide.
 

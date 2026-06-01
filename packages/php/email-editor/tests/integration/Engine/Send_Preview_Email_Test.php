@@ -120,6 +120,47 @@ class Send_Preview_Email_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test the preview email subject defaults to the post title.
+	 */
+	public function testGetPreviewEmailSubjectDefaultsToPostTitle(): void {
+		$post = $this->factory->post->create_and_get(
+			array(
+				'post_title' => 'My Email Subject',
+			)
+		);
+		$this->assertInstanceOf( \WP_Post::class, $post );
+
+		$result = $this->send_preview_email->get_preview_email_subject( $post );
+
+		$this->assertEquals( 'My Email Subject', $result );
+	}
+
+	/**
+	 * Test the preview email subject can be filtered.
+	 */
+	public function testGetPreviewEmailSubjectCanBeFiltered(): void {
+		$post = $this->factory->post->create_and_get(
+			array(
+				'post_title' => 'Original Subject',
+			)
+		);
+		$this->assertInstanceOf( \WP_Post::class, $post );
+
+		$filter = function ( $subject, $filter_post ) use ( $post ) {
+			$this->assertInstanceOf( \WP_Post::class, $filter_post );
+			$this->assertEquals( $post->ID, $filter_post->ID );
+			return 'Filtered: ' . $subject;
+		};
+		add_filter( 'woocommerce_email_editor_send_preview_email_subject', $filter, 10, 2 );
+
+		$result = $this->send_preview_email->get_preview_email_subject( $post );
+
+		$this->assertEquals( 'Filtered: Original Subject', $result );
+
+		remove_filter( 'woocommerce_email_editor_send_preview_email_subject', $filter );
+	}
+
+	/**
 	 * Test it throws an exception with invalid email
 	 */
 	public function testItThrowsAnExceptionWithInvalidEmail(): void {

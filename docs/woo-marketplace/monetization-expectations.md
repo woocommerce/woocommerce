@@ -49,6 +49,8 @@ We strongly prefer that integration plugins are built and maintained by the comp
 - Technical support comes from the team with deepest product knowledge
 - Long-term maintenance aligns with the external system's roadmap
 
+In particular, payment extensions must be developed/maintained by Woo or the payment provider directly, and meet minimum quality standards.
+
 If you're a third-party developer building an integration for a system you don't operate, we encourage you to connect with that company directly or [contact our Marketplace team](#questions-about-your-billing-structure) to discuss your specific situation.
 
 ### Appropriate billing structure

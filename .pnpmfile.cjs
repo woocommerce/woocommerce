@@ -49,6 +49,188 @@ function updatePackageFile( packagePath, packageFile ) {
 }
 
 /**
+ * Loads a tsconfig.json, or null if missing or not plain JSON.
+ *
+ * Returning null on a parse failure keeps the hook from clobbering JSONC
+ * tsconfigs that include structural comments. Affected packages must be
+ * converted to plain JSON to participate in the references sync.
+ *
+ * @param {string} tsconfigPath Absolute path to the tsconfig.json file.
+ * @return {Object|null} Parsed config, or null if missing or unparseable.
+ */
+function loadTsconfig( tsconfigPath ) {
+	if ( ! fs.existsSync( tsconfigPath ) ) {
+		return null;
+	}
+	try {
+		return JSON.parse( fs.readFileSync( tsconfigPath, 'utf8' ) );
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * Writes a tsconfig.json with the project's standard tab indentation.
+ *
+ * @param {string} tsconfigPath Absolute path to the tsconfig.json file.
+ * @param {Object} tsconfig     Config object to serialize.
+ */
+function writeTsconfig( tsconfigPath, tsconfig ) {
+	fs.writeFileSync(
+		tsconfigPath,
+		JSON.stringify( tsconfig, null, '\t' ) + '\n',
+		'utf8'
+	);
+}
+
+/**
+ * Identify workspace packages that consume @woocommerce/internal-ts-config.
+ *
+ * A TS consumer has @woocommerce/internal-ts-config in dependencies or
+ * devDependencies. Whether the package has a tsconfig.json on disk is
+ * verified by loadTsconfig later in syncTsReferences.
+ *
+ * @param {Object} lockfile The lockfile passed to afterAllResolved.
+ * @return {Map<string, { packagePath: string, absolutePath: string }>}
+ */
+function identifyTsConsumers( lockfile ) {
+	const consumers = new Map();
+
+	for ( const packagePath in lockfile.importers ) {
+		const packageFile = loadPackageFile( packagePath );
+		const allDeps = {
+			...( packageFile.dependencies || {} ),
+			...( packageFile.devDependencies || {} ),
+		};
+		if ( ! ( '@woocommerce/internal-ts-config' in allDeps ) ) {
+			continue;
+		}
+
+		const absolutePath = path.resolve( __dirname, packagePath );
+		consumers.set( packageFile.name, { packagePath, absolutePath } );
+	}
+
+	return consumers;
+}
+
+/**
+ * Compute the list of project references for a given consumer.
+ *
+ * References include workspace dependencies (from `dependencies`, not
+ * `devDependencies`) that are themselves TS consumers. Paths are stored
+ * as posix-style relative paths from the consumer to the dep.
+ *
+ * @param {Object} packageFile          The consumer's package.json contents.
+ * @param {Object} resolvedDependencies The lockfile importer entry for the consumer.
+ * @param {Map}    consumers            Output of identifyTsConsumers.
+ * @param {string} consumerAbsolutePath Absolute path to the consumer's directory.
+ * @return {Array<{ path: string }>} Sorted references array.
+ */
+function computeReferences(
+	packageFile,
+	resolvedDependencies,
+	consumers,
+	consumerAbsolutePath
+) {
+	const references = [];
+	const declared = packageFile.dependencies || {};
+	const resolved = resolvedDependencies.dependencies || {};
+
+	for ( const depName of Object.keys( declared ) ) {
+		if ( ! declared[ depName ].startsWith( 'workspace:' ) ) {
+			continue;
+		}
+		if ( ! consumers.has( depName ) ) {
+			continue;
+		}
+		const resolvedDep = resolved[ depName ];
+		if ( ! resolvedDep || ! resolvedDep.startsWith( 'link:' ) ) {
+			continue;
+		}
+
+		const depAbsolutePath = path.resolve(
+			consumerAbsolutePath,
+			resolvedDep.slice( 'link:'.length )
+		);
+		const relPath = path
+			.relative( consumerAbsolutePath, depAbsolutePath )
+			.split( path.sep )
+			.join( '/' );
+
+		references.push( { path: relPath } );
+	}
+
+	references.sort( ( a, b ) => a.path.localeCompare( b.path ) );
+	return references;
+}
+
+/**
+ * Synchronize TypeScript project references across all TS-consuming packages.
+ *
+ * For each consumer:
+ *   - Set compilerOptions.composite = true
+ *   - Replace the top-level `references` array with the computed list
+ *
+ * Workspace deps that are themselves TS consumers become references so that
+ * `tsc -b` can walk the graph and build/type-check dependencies in order.
+ *
+ * @param {Object} lockfile The lockfile passed to afterAllResolved.
+ * @param {Object} context  The pnpm hook context.
+ */
+function syncTsReferences( lockfile, context ) {
+	context.log( '[tsrefs] Synchronizing TypeScript project references' );
+
+	const consumers = identifyTsConsumers( lockfile );
+	if ( consumers.size === 0 ) {
+		context.log( '[tsrefs] No TS consumers found' );
+		return;
+	}
+
+	// Update each consumer's own tsconfig.json with composite + references.
+	for ( const [ name, { packagePath, absolutePath } ] of consumers ) {
+		const tsconfigPath = path.join( absolutePath, 'tsconfig.json' );
+		const tsconfig = loadTsconfig( tsconfigPath );
+		if ( ! tsconfig ) {
+			context.log(
+				`[tsrefs][${ name }]    Skipped — tsconfig.json could not be parsed as plain JSON.`
+			);
+			continue;
+		}
+
+		const packageFile = loadPackageFile( packagePath );
+		const references = computeReferences(
+			packageFile,
+			lockfile.importers[ packagePath ],
+			consumers,
+			absolutePath
+		);
+
+		const originalState = JSON.stringify( {
+			composite: tsconfig.compilerOptions?.composite,
+			references: tsconfig.references,
+		} );
+
+		tsconfig.compilerOptions = tsconfig.compilerOptions || {};
+		tsconfig.compilerOptions.composite = true;
+		tsconfig.references = references;
+
+		const newState = JSON.stringify( {
+			composite: tsconfig.compilerOptions.composite,
+			references: tsconfig.references,
+		} );
+
+		if ( newState !== originalState ) {
+			context.log(
+				`[tsrefs][${ name }]    Updating references (${ references.length } entries)`
+			);
+			writeTsconfig( tsconfigPath, tsconfig );
+		}
+	}
+
+	context.log( '[tsrefs] Done' );
+}
+
+/**
  * Populated config object based on declared and resolved dependencies.
  *
  * @param {string}            packageName          Package name.
@@ -84,6 +266,12 @@ function updateConfig(
 			if ( dependencyFile.files ) {
 				for ( const entry in dependencyFile.files ) {
 					const entryValue = dependencyFile.files[ entry ];
+					// Since 'build-module' and 'build-types' are generated simultaneously, it is more efficient for WireIt to track changes
+					// to 'build-types' only. This approach also enables a clear separation of the CJS and ESM watch build cascades.
+					if ( entryValue === 'build-module' && dependencyFile.files.includes( 'build-types' ) ) {
+						continue;
+					}
+
 					let normalizedValue;
 					if ( entryValue.startsWith( '!' ) ) {
 						normalizedValue =
@@ -134,10 +322,16 @@ function afterAllResolved( lockfile, context ) {
 				`[wireit][${ packageFile.name }] Verifying 'wireit.dependencyOutputs'`
 			);
 
+			// Include the lock file in the fingerprint in case resolved versions change.
+			const lockfilePath = path.join(
+				path.relative( packagePath, '.' ),
+				'pnpm-lock.yaml'
+			);
+
 			// Initialize outputs storage and hash it's original state.
 			const config = {
 				allowUsuallyExcludedPaths: true, // This is needed so we can reference files in `node_modules`.
-				files: [ 'package.json' ], // The files list will include globs for dependency files that we should fingerprint.
+				files: [ 'package.json', lockfilePath ], // The files list will include globs for dependency files that we should fingerprint.
 			};
 			const originalConfigState = JSON.stringify( config );
 
@@ -185,6 +379,8 @@ function afterAllResolved( lockfile, context ) {
 
 	context.log( '[wireit] Done' );
 
+	syncTsReferences( lockfile, context );
+
 	return lockfile;
 }
 
@@ -192,35 +388,5 @@ function afterAllResolved( lockfile, context ) {
 module.exports = {
 	hooks: {
 		afterAllResolved,
-		readPackage( pkg ) {
-			// We resolve @wordpress/interactivity and @wordpress/interactivity-router via pnpm's git sub dir feature
-			// and as a result need to resolve some of their dependencies also via sub dir.
-			if ( pkg.name === '@wordpress/interactivity-router' ) {
-				if (
-					pkg.dependencies &&
-					pkg.dependencies[ '@wordpress/a11y' ] &&
-					pkg.dependencies[ '@wordpress/interactivity' ]
-				) {
-					const blocksPackageJsonPath = path.resolve(
-						__dirname,
-						'plugins/woocommerce/client/blocks/package.json'
-					);
-
-					const blocksPackageJson = require( blocksPackageJsonPath );
-					const a11yVersion =
-						blocksPackageJson.dependencies?.[ '@wordpress/a11y' ];
-
-					//  Use the version installed in @woocommerce/block-library, fallback if the version is somehow no longer installed.
-					pkg.dependencies[ '@wordpress/a11y' ] =
-						a11yVersion || '4.22.0';
-
-					// Use the WooCommerce fork
-					pkg.dependencies[ '@wordpress/interactivity' ] =
-						'github:woocommerce/gutenberg#interactivity-api-001&path:/packages/interactivity';
-				}
-			}
-
-			return pkg;
-		},
 	},
 };
