@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\POS;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\POS\CouponAttribution;
 use Automattic\WooCommerce\Internal\POS\OrderAttribution;
 use Automattic\WooCommerce\Internal\POS\RestApi\POSStaffController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
@@ -42,6 +43,13 @@ class POSController implements RegisterHooksInterface {
 	private OrderAttribution $order_attribution;
 
 	/**
+	 * Coupon attribution lifecycle handler.
+	 *
+	 * @var CouponAttribution
+	 */
+	private CouponAttribution $coupon_attribution;
+
+	/**
 	 * Initialize dependencies via the DI container.
 	 *
 	 * @internal
@@ -49,15 +57,18 @@ class POSController implements RegisterHooksInterface {
 	 * @param FeaturesController $features_controller The features controller.
 	 * @param POSStaffController $staff_controller    The staff REST controller.
 	 * @param OrderAttribution   $order_attribution   The order attribution lifecycle handler.
+	 * @param CouponAttribution  $coupon_attribution  The coupon attribution lifecycle handler.
 	 */
 	final public function init(
 		FeaturesController $features_controller,
 		POSStaffController $staff_controller,
-		OrderAttribution $order_attribution
+		OrderAttribution $order_attribution,
+		CouponAttribution $coupon_attribution
 	): void {
 		$this->features_controller = $features_controller;
 		$this->staff_controller    = $staff_controller;
 		$this->order_attribution   = $order_attribution;
+		$this->coupon_attribution  = $coupon_attribution;
 	}
 
 	/**
@@ -123,5 +134,6 @@ class POSController implements RegisterHooksInterface {
 
 		$this->staff_controller->register();
 		$this->order_attribution->register();
+		$this->coupon_attribution->register();
 	}
 }
