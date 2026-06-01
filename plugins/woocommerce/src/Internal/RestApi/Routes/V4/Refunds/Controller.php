@@ -373,6 +373,20 @@ class Controller extends AbstractController {
 			return $this->get_route_error_response( $e->getErrorCode(), $e->getMessage() );
 		} catch ( \WC_REST_Exception $e ) {
 			return $this->get_route_error_response( $e->getErrorCode(), $e->getMessage() );
+		} catch ( \InvalidArgumentException $e ) {
+			// fill_missing_refund_totals pre-checks quantity before calling
+			// compute_line_item_refund_total, so this branch should be unreachable
+			// in normal flow. Defensive — if a future refactor breaks the invariant,
+			// we surface a 500 with logging instead of bubbling as a fatal.
+			wc_get_logger()->error(
+				sprintf( 'Refund creation invariant violation on order %d: %s', (int) ( $request['order_id'] ?? 0 ), $e->getMessage() ),
+				array( 'source' => 'wc-v4-refunds' )
+			);
+			return $this->get_route_error_response(
+				'invalid_refund_request',
+				__( 'The refund could not be created due to an unexpected error.', 'woocommerce' ),
+				WP_Http::INTERNAL_SERVER_ERROR
+			);
 		}
 	}
 
