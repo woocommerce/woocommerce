@@ -31,6 +31,7 @@ class ReorderControls {
 		add_action( 'admin_init', array( self::class, 'maybe_handle_reset' ) );
 		add_filter( 'screen_settings', array( self::class, 'add_screen_option' ), 10, 2 );
 		add_action( 'admin_head', array( self::class, 'output_styles' ) );
+		add_action( 'admin_footer', array( self::class, 'replace_arrow_buttons' ) );
 	}
 
 	/**
@@ -65,7 +66,6 @@ class ReorderControls {
 			delete_user_meta( $user_id, 'screen_layout_' . $screen_base );
 		}
 
-		// Clear our reorder controls cookie.
 		setcookie( self::COOKIE_KEY, '', time() - 3600, '/' ); // phpcs:ignore WordPress.Arrays.ArrayKeySpacingRestrictions
 
 		wp_safe_redirect( remove_query_arg( array( 'wc-proto-reset-screen', '_wpnonce', 'screen_id', 'screen_base' ) ) );
@@ -73,8 +73,8 @@ class ReorderControls {
 	}
 
 	/**
-	 * Add a "Show reorder controls" checkbox to Screen Options, and inject a
-	 * "Reset to defaults" link below the Screen elements heading via JS.
+	 * Add a "Show reorder controls" checkbox to Screen Options.
+	 * Also replaces the WordPress-generated description with updated copy and a reset link.
 	 *
 	 * @param string     $settings Existing screen settings HTML.
 	 * @param \WP_Screen $screen   Current screen.
@@ -132,7 +132,6 @@ class ReorderControls {
 		setVisible( this.checked );
 	} );
 
-	// Replace the WordPress-generated description with updated copy + reset link.
 	var descP = document.querySelector( ".metabox-prefs-container > p, .metabox-prefs > p" );
 	if ( descP ) {
 		descP.innerHTML = "' . esc_js( __( 'Use checkboxes to show or hide screen elements, and click headings to expand or collapse them. Reorder controls are off by default and can be enabled below.', 'woocommerce' ) ) . ' <a href=\"" + RESET_URL + "\">' . esc_js( __( 'Reset to defaults', 'woocommerce' ) ) . '</a>";
@@ -154,10 +153,8 @@ class ReorderControls {
 
 		echo '<style id="wc-proto-reorder-style">
 			.postbox-header .handle-actions { padding-right: var(--wpds-dimension-padding-sm, 8px); }
-			.postbox .handle-order-higher:focus,
-			.postbox .handle-order-higher:focus-visible,
-			.postbox .handle-order-lower:focus,
-			.postbox .handle-order-lower:focus-visible { border-radius: var(--wpds-border-radius-xs, 2px) !important; box-shadow: 0 0 0 2px #2271b1 !important; }
+			.postbox .handle-order-higher,
+			.postbox .handle-order-lower { display: inline-flex; align-items: center; justify-content: center; }
 		</style>';
 
 		if ( ! self::is_showing() ) {
@@ -172,5 +169,58 @@ class ReorderControls {
 				.meta-box-sortables .postbox-header .hndle label { pointer-events: auto !important; cursor: auto !important; }
 			</style>';
 		}
+	}
+
+	/**
+	 * Replace the WordPress-generated arrow button contents with inline SVG chevrons
+	 * and wire focus/blur handlers directly so we fully own the focus ring appearance.
+	 * Runs in admin_footer so all metabox HTML is in the DOM.
+	 */
+	public static function replace_arrow_buttons(): void {
+		if ( ! DevPanel::is_supported_screen() ) {
+			return;
+		}
+		?>
+		<script>
+		( function () {
+			var UP_SVG   = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="18 15 12 9 6 15"></polyline></svg>';
+			var DOWN_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
+			function replaceButton( btn, svgIcon ) {
+				var srText    = btn.querySelector( '.screen-reader-text' );
+				var srContent = srText ? srText.innerHTML : '';
+
+				btn.innerHTML = svgIcon + '<span class="screen-reader-text">' + srContent + '</span>';
+
+				btn.style.background   = 'none';
+				btn.style.border       = '0';
+				btn.style.cursor       = 'pointer';
+				btn.style.width        = '1.62rem';
+				btn.style.height       = '1.62rem';
+				btn.style.color        = '#787c82';
+				btn.style.borderRadius = '2px';
+				btn.style.padding      = '0';
+				btn.style.boxShadow    = 'none';
+				btn.style.outline      = 'none';
+
+				btn.addEventListener( 'focus', function () {
+					this.style.boxShadow = 'inset 0 0 0 2px #2271b1';
+					this.style.outline   = '2px solid transparent';
+				} );
+				btn.addEventListener( 'blur', function () {
+					this.style.boxShadow = 'none';
+					this.style.outline   = 'none';
+				} );
+			}
+
+			document.querySelectorAll( '.handle-order-higher' ).forEach( function ( btn ) {
+				replaceButton( btn, UP_SVG );
+			} );
+			document.querySelectorAll( '.handle-order-lower' ).forEach( function ( btn ) {
+				replaceButton( btn, DOWN_SVG );
+			} );
+		}() );
+		</script>
+		<?php
 	}
 }
