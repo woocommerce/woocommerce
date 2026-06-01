@@ -7,7 +7,6 @@
 		"product-data-views": false,
 		"experimental-blocks": false,
 		"experimental-iapi-mini-cart": true,
-		"experimental-iapi-runtime": false,
 		"coming-soon-newsletter-template": false,
 		"coupons": true,
 		"core-profiler": true,
