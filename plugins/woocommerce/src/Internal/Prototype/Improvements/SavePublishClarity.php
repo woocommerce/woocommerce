@@ -18,13 +18,10 @@ defined( 'ABSPATH' ) || exit;
  */
 class SavePublishClarity {
 
-	const FLAG_KEY = 'save_publish_clarity';
-	const HEADER_H = 46;
-	// px — height of our action bar.
-	const ADMINBAR_H = 32;
-	// px — standard WP admin bar.
-	const WC_HDR_H = 33;
-	// px — .woocommerce-layout__header.
+	const FLAG_KEY   = 'save_publish_clarity';
+	const HEADER_H   = 46; // px — height of our action bar.
+	const ADMINBAR_H = 32; // px — standard WP admin bar.
+	const WC_HDR_H   = 33; // px — .woocommerce-layout__header.
 
 	/**
 	 * Register hooks. No-ops if the dev panel flag is off.
@@ -55,28 +52,19 @@ class SavePublishClarity {
 	position: fixed;
 	top: <?php echo esc_attr( (string) $top ); ?>px;
 	right: 0;
-	left: 160px;
+	left: 160px; /* WP sidebar normal */
 	z-index: 9998;
 	background: #1d2327;
-	height: <?php echo esc_attr( (string) $bar_h ); ?>px;
-	display: flex;
-	align-items: center;
-	box-sizing: border-box;
-}
-body.folded #wc-proto-save-header {
-	left: 36px;
-}
-
-/* Inner container aligns to the same max-width as page content */
-.wc-proto-inner {
-	max-width: 1200px;
-	margin: 0 auto;
-	width: 100%;
 	padding: 0 16px;
+	height: <?php echo esc_attr( (string) $bar_h ); ?>px;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	box-sizing: border-box;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+body.folded #wc-proto-save-header {
+	left: 36px; /* WP sidebar collapsed */
 }
 
 /* ── Back link ──────────────────────────────────────────── */
@@ -94,12 +82,30 @@ body.folded #wc-proto-save-header {
 	align-items: center;
 	position: relative;
 }
-
-/* Reset WP button margins inside the header */
-#wc-proto-save-header .button,
-#wc-proto-save-header .button-primary {
-	margin: 0;
-	vertical-align: middle;
+.wc-proto-btn {
+	font-size: 13px;
+	line-height: 1;
+	border-radius: 3px;
+	padding: 6px 12px;
+	cursor: pointer;
+	border: 1px solid #50575e;
+	background: transparent;
+	color: #a7aaad;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.wc-proto-btn:hover { color: #fff; border-color: #a7aaad; }
+.wc-proto-btn-primary {
+	background: #2271b1;
+	color: #fff;
+	border-color: #2271b1;
+	font-weight: 600;
+}
+.wc-proto-btn-primary:hover { background: #135e96; border-color: #135e96; color: #fff; }
+.wc-proto-btn-kebab {
+	padding: 6px 9px;
+	font-size: 16px;
+	letter-spacing: 1px;
 }
 
 /* ── Kebab dropdown ─────────────────────────────────────── */
@@ -135,8 +141,8 @@ body.folded #wc-proto-save-header {
 #submitdiv #misc-publishing-actions .misc-pub-section:last-child,
 #submitdiv .misc-pub-copy-draft { display: none !important; }
 
-/* Push metabox content below the fixed bar; leaves the page heading untouched */
-body.product-php #poststuff { margin-top: <?php echo esc_attr( (string) $bar_h ); ?>px; }
+/* Add space so content is not hidden under the fixed bar */
+body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (string) $bar_h ); ?>px; }
 </style>
 		<?php
 	}
@@ -164,37 +170,35 @@ body.product-php #poststuff { margin-top: <?php echo esc_attr( (string) $bar_h )
 			: '';
 		?>
 <div id="wc-proto-save-header" data-visibility-label="<?php echo esc_attr__( 'Visibility', 'woocommerce' ); ?>">
-	<div class="wc-proto-inner">
-		<a href="<?php echo esc_url( $products_url ); ?>" class="wc-proto-back">
-			&larr; <?php esc_html_e( 'Back to products', 'woocommerce' ); ?>
+	<a href="<?php echo esc_url( $products_url ); ?>" class="wc-proto-back">
+		&larr; <?php esc_html_e( 'Back to products', 'woocommerce' ); ?>
+	</a>
+	<div class="wc-proto-actions">
+		<?php if ( $preview_url ) : ?>
+		<a href="<?php echo esc_url( $preview_url ); ?>" class="wc-proto-btn" target="_blank" rel="noopener noreferrer">
+			<?php esc_html_e( 'Preview', 'woocommerce' ); ?>
 		</a>
-		<div class="wc-proto-actions">
-			<?php if ( $preview_url ) : ?>
-			<a href="<?php echo esc_url( $preview_url ); ?>" class="button" target="_blank" rel="noopener noreferrer">
-				<?php esc_html_e( 'Preview', 'woocommerce' ); ?>
-			</a>
-			<?php endif; ?>
-			<button type="button" id="wc-proto-btn-save-draft" class="button">
-				<?php esc_html_e( 'Save draft', 'woocommerce' ); ?>
+		<?php endif; ?>
+		<button type="button" id="wc-proto-btn-save-draft" class="wc-proto-btn">
+			<?php esc_html_e( 'Save draft', 'woocommerce' ); ?>
+		</button>
+		<button type="button" id="wc-proto-btn-publish" class="wc-proto-btn wc-proto-btn-primary">
+			<?php echo esc_html( $primary_label ); ?>
+		</button>
+		<div style="position:relative">
+			<button type="button" id="wc-proto-kebab-toggle" class="wc-proto-btn wc-proto-btn-kebab" aria-label="<?php esc_attr_e( 'More actions', 'woocommerce' ); ?>" aria-haspopup="true" aria-expanded="false">
+				&bull;&bull;&bull;
 			</button>
-			<button type="button" id="wc-proto-btn-publish" class="button button-primary">
-				<?php echo esc_html( $primary_label ); ?>
-			</button>
-			<div style="position:relative">
-				<button type="button" id="wc-proto-kebab-toggle" class="button" aria-label="<?php esc_attr_e( 'More actions', 'woocommerce' ); ?>" aria-haspopup="true" aria-expanded="false">
-					<span class="dashicons dashicons-ellipsis" style="vertical-align:middle;margin-top:-2px"></span>
-				</button>
-				<div id="wc-proto-kebab-menu" role="menu">
-					<a id="wc-proto-copy-draft" href="#" class="wc-proto-kebab-item" role="menuitem" style="display:none">
-						<?php esc_html_e( 'Copy to a new draft', 'woocommerce' ); ?>
-					</a>
-					<?php if ( $trash_url ) : ?>
-					<a href="<?php echo esc_url( $trash_url ); ?>" class="wc-proto-kebab-item is-destructive" role="menuitem"
-						onclick="return confirm('<?php echo esc_js( __( 'Move this product to the trash?', 'woocommerce' ) ); ?>')">
-						<?php esc_html_e( 'Move to Trash', 'woocommerce' ); ?>
-					</a>
-					<?php endif; ?>
-				</div>
+			<div id="wc-proto-kebab-menu" role="menu">
+				<a id="wc-proto-copy-draft" href="#" class="wc-proto-kebab-item" role="menuitem" style="display:none">
+					<?php esc_html_e( 'Copy to a new draft', 'woocommerce' ); ?>
+				</a>
+				<?php if ( $trash_url ) : ?>
+				<a href="<?php echo esc_url( $trash_url ); ?>" class="wc-proto-kebab-item is-destructive" role="menuitem"
+				   onclick="return confirm('<?php echo esc_js( __( 'Move this product to the trash?', 'woocommerce' ) ); ?>')">
+					<?php esc_html_e( 'Move to Trash', 'woocommerce' ); ?>
+				</a>
+				<?php endif; ?>
 			</div>
 		</div>
 	</div>
