@@ -210,6 +210,10 @@ class CustomOrdersTableController {
 			return $caps;
 		}
 
+		if ( ! $this->data_synchronizer instanceof DataSynchronizer ) {
+			return $caps;
+		}
+
 		if ( $this->data_synchronizer->data_sync_is_enabled() ) {
 			return $caps;
 		}
