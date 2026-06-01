@@ -2,7 +2,6 @@
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
 /**
@@ -83,7 +82,7 @@ class LaunchYourStore extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		return Features::is_enabled( 'launch-your-store' );
+		return true;
 	}
 
 	/**

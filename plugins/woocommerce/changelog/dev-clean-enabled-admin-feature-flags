@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Remove enabled WooCommerce Admin feature flags from JSON config files.
+Remove graduated WooCommerce Admin feature flags from JSON config and runtime checks.

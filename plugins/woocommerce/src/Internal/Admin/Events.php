@@ -145,9 +145,7 @@ class Events {
 			RemoteInboxNotificationsEngine::run();
 		}
 
-		if ( Features::is_enabled( 'core-profiler' ) ) {
-			( new MailchimpScheduler() )->run();
-		}
+		( new MailchimpScheduler() )->run();
 	}
 
 	/**

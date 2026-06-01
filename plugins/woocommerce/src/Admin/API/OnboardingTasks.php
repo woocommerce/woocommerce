@@ -10,7 +10,6 @@ namespace Automattic\WooCommerce\Admin\API;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingIndustries;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
 
@@ -345,8 +344,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public static function import_sample_products() {
-		$sample_csv_file = Features::is_enabled( 'experimental-fashion-sample-products' ) ? WC_ABSPATH . 'sample-data/experimental_fashion_sample_9_products.csv' :
-		WC_ABSPATH . 'sample-data/experimental_sample_9_products.csv';
+		$sample_csv_file = WC_ABSPATH . 'sample-data/experimental_fashion_sample_9_products.csv';
 
 		$import = self::import_sample_products_from_csv( $sample_csv_file );
 		return rest_ensure_response( $import );

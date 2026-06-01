@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
@@ -75,9 +74,7 @@ class BlockPatterns {
 
 		add_action( 'init', array( $this, 'register_block_patterns' ) );
 
-		if ( Features::is_enabled( 'pattern-toolkit-full-composability' ) ) {
-			add_action( 'init', array( $this, 'register_ptk_patterns' ) );
-		}
+		add_action( 'init', array( $this, 'register_ptk_patterns' ) );
 	}
 
 	/**

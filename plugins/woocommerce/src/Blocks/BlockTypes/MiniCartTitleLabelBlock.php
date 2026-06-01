@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-
 /**
  * MiniCartTitleLabelBlock class.
  */
@@ -23,10 +21,7 @@ class MiniCartTitleLabelBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return $this->render_experimental_iapi_title_label_block( $attributes, $content, $block );
-		}
-		return $content;
+		return $this->render_experimental_iapi_title_label_block( $attributes, $content, $block );
 	}
 
 	/**

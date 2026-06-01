@@ -66,11 +66,9 @@ class Init {
 		$rest_api_util = wc_get_container()->get( RestApiUtil::class );
 		$rest_api_util->lazy_load_namespace( 'wc-analytics', array( $this, 'rest_api_init_wc_analytics' ) );
 
-		if ( Features::is_enabled( 'launch-your-store' ) ) {
-			$controller        = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
-			$this->$controller = new $controller();
-			$this->$controller->register_routes();
-		}
+		$controller        = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
+		$this->$controller = new $controller();
+		$this->$controller->register_routes();
 	}
 
 	/**
@@ -186,9 +184,7 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\Controller',
 			);
 
-			if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
-				$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\AnalyticsImports';
-			}
+			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\AnalyticsImports';
 
 			// The performance indicators controllerq must be registered last, after other /stats endpoints have been registered.
 			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';

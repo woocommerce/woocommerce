@@ -171,9 +171,7 @@ class FeaturePlugin {
 		// Initialize API.
 		API\Init::instance();
 
-		if ( Features::is_enabled( 'onboarding' ) ) {
-			Onboarding::init();
-		}
+		Onboarding::init();
 
 		if ( Features::is_enabled( 'analytics' ) ) {
 			// Initialize Reports syncing.
@@ -219,6 +217,7 @@ class FeaturePlugin {
 		 * @since 6.5.0
 		 */
 		$feature_config = apply_filters( 'woocommerce_admin_get_feature_config', wc_admin_get_feature_config() );
+		$feature_config = Features::merge_default_enabled_features( $feature_config );
 		$features       = array_keys( array_filter( $feature_config ) );
 		return $features;
 	}

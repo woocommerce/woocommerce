@@ -7,7 +7,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
@@ -187,7 +186,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 				return false;
 			}
 
-			if ( ! Features::is_enabled( 'onboarding' ) || ! WC()->is_wc_admin_active() ) {
+			if ( ! WC()->is_wc_admin_active() ) {
 				return false;
 			}
 
