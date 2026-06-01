@@ -12,8 +12,10 @@ use Automattic\WooCommerce\Internal\Prototype\DevPanel;
 use Automattic\WooCommerce\Internal\Prototype\Improvements\IconModernisation;
 use Automattic\WooCommerce\Internal\Prototype\Improvements\MaxWidth;
 use Automattic\WooCommerce\Internal\Prototype\Improvements\ReorderControls;
+use Automattic\WooCommerce\Internal\Prototype\Improvements\SavePublishClarity;
 
 DevPanel::init();
 ReorderControls::init();
 IconModernisation::init();
 MaxWidth::init();
+SavePublishClarity::init();
