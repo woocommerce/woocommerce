@@ -27,6 +27,9 @@ export function initBlock<
 >( block: BlockRepresentation< T > ): Block< T > | undefined {
 	deprecated( 'initBlock()', {
 		alternative: 'registerProductEditorBlockType()',
+		version: '10.9.0',
+		plugin: 'WooCommerce',
+		hint: 'Product editor extension APIs are deprecated and will be removed in WooCommerce 11.0.',
 	} );
 
 	if ( ! block ) {

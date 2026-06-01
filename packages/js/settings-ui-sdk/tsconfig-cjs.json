@@ -1,0 +1,10 @@
+{
+	"extends": "@woocommerce/internal-ts-config/tsconfig-cjs.json",
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "build",
+		"typeRoots": [ "./node_modules/@types" ]
+	},
+	"include": [ "src/**/*" ],
+	"exclude": [ "**/test/**" ]
+}

@@ -7,6 +7,7 @@ import type { BlockEditProps } from '@wordpress/blocks';
  * Internal dependencies
  */
 import type { SelectableItem } from '../../types/type-defs/selectable-items';
+import type { VisualAttributeTerm } from '../../base/utils/visual-attribute-terms';
 
 // ----------------------------------------
 // Filter-specific item fields
@@ -18,7 +19,7 @@ export type FilterItemFields = {
 	depth?: number;
 	menuOrder?: number;
 	attributeQueryType?: 'and' | 'or';
-	color?: string;
+	visual?: VisualAttributeTerm;
 };
 
 export type FilterOptionItem = SelectableItem< FilterItemFields >;
