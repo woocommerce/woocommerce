@@ -74,11 +74,16 @@ class Privacy extends \WC_Abstract_Privacy {
 				continue;
 			}
 
-			$group_id = self::GROUP_ID_PREFIX . $slug;
+			$group_id    = self::GROUP_ID_PREFIX . $slug;
+			$group_label = sprintf(
+				/* translators: %s: shopper-list slug. */
+				__( 'Shopper List: %s', 'woocommerce' ),
+				$slug
+			);
 			foreach ( $list->get_items() as $item ) {
 				$data[] = array(
 					'group_id'    => $group_id,
-					'group_label' => $slug,
+					'group_label' => $group_label,
 					'item_id'     => $item->get_key(),
 					'data'        => self::item_export_rows( $item ),
 				);
@@ -124,7 +129,7 @@ class Privacy extends \WC_Abstract_Privacy {
 			$response['items_removed'] = true;
 			$response['messages'][]    = sprintf(
 				/* translators: %s: shopper-list slug. */
-				__( 'Removed shopper list: %s', 'woocommerce' ),
+				__( 'Shopper List: %s', 'woocommerce' ),
 				$slug
 			);
 		}

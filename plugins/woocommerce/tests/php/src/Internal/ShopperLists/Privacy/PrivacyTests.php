@@ -114,8 +114,11 @@ class PrivacyTests extends WC_Unit_Test_Case {
 		$this->assertContains( 'woocommerce-shopper-lists-saved-for-later', $group_ids );
 		$this->assertContains( 'woocommerce-shopper-lists-wishlist', $group_ids );
 
+		$labels = array_column( $result['data'], 'group_label', 'group_id' );
+		$this->assertSame( 'Shopper List: saved-for-later', $labels['woocommerce-shopper-lists-saved-for-later'] );
+		$this->assertSame( 'Shopper List: wishlist', $labels['woocommerce-shopper-lists-wishlist'] );
+
 		foreach ( $result['data'] as $entry ) {
-			$this->assertArrayHasKey( 'group_label', $entry );
 			$this->assertArrayHasKey( 'item_id', $entry );
 			$this->assertArrayHasKey( 'data', $entry );
 			$this->assertNotEmpty( $entry['data'] );
@@ -243,7 +246,7 @@ class PrivacyTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Eraser deletes stored shopper-list meta and emits one slug-named message per removed slug.
+	 * @testdox Eraser deletes stored shopper-list meta and emits one prefixed message per removed slug.
 	 */
 	public function test_erase_removes_meta_and_emits_message_per_removed_slug(): void {
 		$this->seed_list( self::SAVED_FOR_LATER_SLUG );
@@ -253,13 +256,12 @@ class PrivacyTests extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $result['items_removed'] );
 		$this->assertCount( count( self::LIST_OPTIONS ), $result['messages'] );
-		$joined = implode( "\n", $result['messages'] );
 		foreach ( array_keys( self::LIST_OPTIONS ) as $slug ) {
 			$this->assertFalse(
 				is_array( Users::get_site_user_meta( $this->user_id, ShopperList::META_KEY_PREFIX . $slug ) ),
 				"Meta for slug {$slug} should be removed."
 			);
-			$this->assertStringContainsString( $slug, $joined, "Eraser message should reference {$slug}." );
+			$this->assertContains( "Shopper List: {$slug}", $result['messages'], "Eraser message should reference {$slug}." );
 		}
 	}
 

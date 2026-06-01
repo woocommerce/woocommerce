@@ -78,13 +78,8 @@ class ShopperList {
 	}
 
 	/**
-	 * Load a list by slug without the feature-flag gate. Rejects unknown slugs and
-	 * falls back to an in-memory list (saved on the first save()) when nothing is stored.
-	 *
-	 * For internal callers (privacy export/erase) that must reach stored data
-	 * regardless of feature state. Do not use for user-facing reads.
-	 *
-	 * @internal
+	 * Load a list by slug without the feature-flag gate, for internal callers
+	 * (e.g. privacy export/erase). Do not use for user-facing reads.
 	 *
 	 * @param string   $slug    List identifier.
 	 * @param int|null $user_id Defaults to the current user.
