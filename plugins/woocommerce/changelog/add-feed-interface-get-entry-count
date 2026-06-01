@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add `get_entry_count()` to `FeedInterface` so product feed consumers can report the number of rows actually written to the feed (distinct from the number of products iterated by `ProductWalker`).

@@ -2,10 +2,16 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
+import {
+	Button,
+	__experimentalHStack as HStack,
+	__experimentalText as Text,
+	__experimentalVStack as VStack,
+} from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { dispatch } from '@wordpress/data';
-import { edit, external, trash } from '@wordpress/icons';
-import { __, _n, _x, sprintf } from '@wordpress/i18n';
+import { backup, edit, trash } from '@wordpress/icons';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { addQueryArgs } from '@wordpress/url';
@@ -18,7 +24,10 @@ import { useMemo } from '@wordpress/element';
  */
 import type { ProductEntityRecord } from '../fields/types';
 import { unlock } from '../lock-unlock';
-import { getProductListNavigationPath } from '../product-list/utils';
+import {
+	getProductEditPostId,
+	getProductListNavigationPath,
+} from '../product-list/utils';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
@@ -31,7 +40,7 @@ type EditActionOptions = {
 function getQuickEditPath(
 	path: string,
 	query: Record< string, string | undefined >,
-	productId: number
+	productIds: number[]
 ) {
 	const nextQuery = Object.entries( query ).reduce(
 		( acc, [ key, value ] ) => {
@@ -46,8 +55,31 @@ function getQuickEditPath(
 
 	return getProductListNavigationPath( path, {
 		...nextQuery,
-		postId: String( productId ),
+		postId: productIds.join( ',' ),
 		quickEdit: 'true',
+	} );
+}
+
+function getSelectionPath(
+	path: string,
+	query: Record< string, string | undefined >,
+	productIds: number[]
+) {
+	const nextQuery = Object.entries( query ).reduce(
+		( acc, [ key, value ] ) => {
+			if ( typeof value === 'string' ) {
+				acc[ key ] = value;
+			}
+
+			return acc;
+		},
+		{} as Record< string, string >
+	);
+
+	return getProductListNavigationPath( path, {
+		...nextQuery,
+		postId: productIds.join( ',' ),
+		quickEdit: undefined,
 	} );
 }
 
@@ -118,23 +150,27 @@ function getNoticeFromSettledResults( {
 	};
 }
 
-export const editAction = ( {
+export const quickEditAction = ( {
 	navigate,
 	path = '/',
 	query = {},
 }: EditActionOptions ): Action< ProductEntityRecord > => ( {
-	id: 'edit-product',
-	label: __( 'Edit', 'woocommerce' ),
+	id: 'quick-edit-product',
+	label: ( items ) =>
+		items.length > 1
+			? __( 'Bulk editing', 'woocommerce' )
+			: __( 'Quick edit', 'woocommerce' ),
 	isPrimary: true,
+	supportsBulk: true,
 	icon: edit,
 	isEligible( product ) {
 		return product.status !== 'trash';
 	},
 	callback( items, { onActionPerformed } ) {
-		const product = items[ 0 ];
+		const productIds = items.map( ( product ) => product.id );
 
-		if ( product ) {
-			navigate( getQuickEditPath( path, query, product.id ) );
+		if ( productIds.length > 0 ) {
+			navigate( getQuickEditPath( path, query, productIds ) );
 		}
 
 		if ( onActionPerformed ) {
@@ -143,23 +179,60 @@ export const editAction = ( {
 	},
 } );
 
-export const viewAction = (): Action< ProductEntityRecord > => ( {
-	id: 'view-product',
-	label: _x( 'View', 'verb', 'woocommerce' ),
+export const editAction = (): Action< ProductEntityRecord > => ( {
+	id: 'edit-product',
+	label: __( 'Edit', 'woocommerce' ),
 	isPrimary: true,
-	icon: external,
 	isEligible( product ) {
-		return product.status !== 'trash' && !! product.permalink;
+		return product.status !== 'trash';
 	},
 	callback( items, { onActionPerformed } ) {
 		const product = items[ 0 ];
 
-		if ( product?.permalink ) {
-			window.open( product.permalink, '_blank' );
+		if ( product ) {
+			window.location.href = getAdminLink(
+				addQueryArgs( 'post.php', {
+					post: getProductEditPostId( product ),
+					action: 'edit',
+				} )
+			);
 		}
 
 		if ( onActionPerformed ) {
 			onActionPerformed( items );
+		}
+	},
+} );
+
+export const selectAllVariationsAction = ( {
+	navigate,
+	path = '/',
+	query = {},
+}: EditActionOptions ): Action< ProductEntityRecord > => ( {
+	id: 'select-all-variations',
+	label: __( 'Select all variations', 'woocommerce' ),
+	isPrimary: true,
+	isEligible( product ) {
+		return (
+			product.status !== 'trash' &&
+			product.type === 'variable' &&
+			Boolean( product._embedded?.variations?.length )
+		);
+	},
+	callback( items, { onActionPerformed } ) {
+		const variations = items.flatMap(
+			( product ) => product._embedded?.variations ?? []
+		);
+		const variationIds = Array.from(
+			new Set( variations.map( ( variation ) => variation.id ) )
+		);
+
+		if ( variationIds.length > 0 ) {
+			navigate( getSelectionPath( path, query, variationIds ) );
+		}
+
+		if ( onActionPerformed ) {
+			onActionPerformed( variations );
 		}
 	},
 } );
@@ -262,7 +335,10 @@ export const duplicateProductAction = (): Action< ProductEntityRecord > => ( {
 	supportsBulk: true,
 	isEligible( item ) {
 		return (
-			!! item && item.status !== 'trash' && item.status !== 'auto-draft'
+			!! item &&
+			item.status !== 'trash' &&
+			item.status !== 'auto-draft' &&
+			item.type !== 'variation'
 		);
 	},
 	async callback( items, { onActionPerformed } ) {
@@ -289,7 +365,10 @@ export const moveToTrashAction = (): Action< ProductEntityRecord > => ( {
 	supportsBulk: true,
 	icon: trash,
 	isEligible( product ) {
-		return product.status !== 'trash';
+		// Variations skip the trash and go straight to permanent delete
+		// (see `permanentlyDeleteAction`), since the variations REST endpoint
+		// doesn't support a soft-trash state.
+		return product.status !== 'trash' && product.type !== 'variation';
 	},
 	async callback( items, { onActionPerformed } ) {
 		const { deleteEntityRecord } = dispatch( coreStore );
@@ -343,20 +422,203 @@ export const moveToTrashAction = (): Action< ProductEntityRecord > => ( {
 	},
 } );
 
+export const restoreAction = (): Action< ProductEntityRecord > => ( {
+	id: 'restore-product',
+	label: __( 'Restore', 'woocommerce' ),
+	supportsBulk: true,
+	icon: backup,
+	isEligible( product ) {
+		return product.status === 'trash';
+	},
+	async callback( items, { onActionPerformed } ) {
+		const {
+			editEntityRecord,
+			saveEditedEntityRecord,
+			invalidateResolutionForStoreSelector,
+		} = dispatch( coreStore );
+		const { createErrorNotice, createSuccessNotice } =
+			dispatch( noticesStore );
+
+		const results = await Promise.allSettled(
+			items.map( async ( product ) => {
+				await editEntityRecord( 'root', 'product', product.id, {
+					status: 'draft',
+				} );
+				return saveEditedEntityRecord( 'root', 'product', product.id, {
+					throwOnError: true,
+				} );
+			} )
+		);
+		const successfulItems = getSuccessfulItems( items, results );
+		const failedResults = results.filter(
+			( result ) => result.status === 'rejected'
+		);
+
+		if ( successfulItems.length > 0 ) {
+			await invalidateResolutionForStoreSelector( 'getEntityRecords' );
+			createSuccessNotice(
+				successfulItems.length === 1
+					? __( 'Product successfully restored', 'woocommerce' )
+					: sprintf(
+							/* translators: %s: number of products. */
+							_n(
+								'%s product successfully restored',
+								'%s products successfully restored',
+								successfulItems.length,
+								'woocommerce'
+							),
+							successfulItems.length
+					  ),
+				{ type: 'snackbar' }
+			);
+			onActionPerformed?.( successfulItems );
+		}
+
+		if ( failedResults.length > 0 ) {
+			createErrorNotice(
+				getErrorMessage(
+					( failedResults[ 0 ] as PromiseRejectedResult ).reason
+				),
+				{ type: 'snackbar' }
+			);
+		}
+	},
+} );
+
+export const permanentlyDeleteAction = (): Action< ProductEntityRecord > => ( {
+	id: 'permanently-delete-product',
+	label: __( 'Permanently delete', 'woocommerce' ),
+	supportsBulk: true,
+	icon: trash,
+	isEligible( product ) {
+		// Variations are deleted directly (no trash step), so show this
+		// action for them regardless of status.
+		return product.status === 'trash' || product.type === 'variation';
+	},
+	modalHeader: ( items ) =>
+		items.length === 1
+			? __( 'Delete product?', 'woocommerce' )
+			: __( 'Delete products?', 'woocommerce' ),
+	RenderModal: ( { items, closeModal, onActionPerformed } ) => {
+		const onConfirm = async () => {
+			const { deleteEntityRecord, invalidateResolutionForStoreSelector } =
+				dispatch( coreStore );
+			const { createErrorNotice, createSuccessNotice } =
+				dispatch( noticesStore );
+
+			const results = await Promise.allSettled(
+				items.map( ( product ) =>
+					deleteEntityRecord( 'root', 'product', product.id, {
+						force: true,
+						throwOnError: true,
+					} )
+				)
+			);
+			const successfulItems = getSuccessfulItems( items, results );
+			const failedResults = results.filter(
+				( result ) => result.status === 'rejected'
+			);
+
+			if ( successfulItems.length > 0 ) {
+				await invalidateResolutionForStoreSelector(
+					'getEntityRecords'
+				);
+				createSuccessNotice(
+					successfulItems.length === 1
+						? __( 'Product permanently deleted', 'woocommerce' )
+						: sprintf(
+								/* translators: %s: number of products. */
+								_n(
+									'%s product permanently deleted',
+									'%s products permanently deleted',
+									successfulItems.length,
+									'woocommerce'
+								),
+								successfulItems.length
+						  ),
+					{ type: 'snackbar' }
+				);
+				onActionPerformed?.( successfulItems );
+			}
+
+			if ( failedResults.length > 0 ) {
+				createErrorNotice(
+					getErrorMessage(
+						( failedResults[ 0 ] as PromiseRejectedResult ).reason
+					),
+					{ type: 'snackbar' }
+				);
+			}
+
+			closeModal?.();
+		};
+
+		return (
+			<VStack spacing="5">
+				<Text>
+					{ items.length === 1
+						? sprintf(
+								/* translators: %s: The product's name. */
+								__(
+									"%s will be permanently deleted and can't be restored.",
+									'woocommerce'
+								),
+								items[ 0 ]?.name ?? ''
+						  )
+						: sprintf(
+								/* translators: %s: number of products. */
+								_n(
+									"%s product will be permanently deleted and can't be restored.",
+									"%s products will be permanently deleted and can't be restored.",
+									items.length,
+									'woocommerce'
+								),
+								items.length
+						  ) }
+				</Text>
+				<HStack justify="flex-end">
+					<Button
+						__next40pxDefaultSize
+						variant="tertiary"
+						onClick={ closeModal }
+					>
+						{ __( 'Cancel', 'woocommerce' ) }
+					</Button>
+					<Button
+						__next40pxDefaultSize
+						variant="primary"
+						isDestructive
+						onClick={ onConfirm }
+					>
+						{ __( 'Delete permanently', 'woocommerce' ) }
+					</Button>
+				</HStack>
+			</VStack>
+		);
+	},
+} );
+
 export const useProductActions = () => {
 	const { navigate } = useHistory();
 	const { path, query = {} } = useLocation();
 
 	return useMemo(
 		() => [
-			editAction( {
+			quickEditAction( {
 				navigate,
 				path,
 				query,
 			} ),
-			viewAction(),
+			editAction(),
+			selectAllVariationsAction( {
+				navigate,
+				path,
+				query,
+			} ),
 			duplicateProductAction(),
 			moveToTrashAction(),
+			restoreAction(),
+			permanentlyDeleteAction(),
 		],
 		[ navigate, path, query ]
 	);

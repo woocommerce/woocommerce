@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Left-align the QR number-match cancel row and the modal FAQ paragraph so they match the rest of the "Sign into the app" step content.

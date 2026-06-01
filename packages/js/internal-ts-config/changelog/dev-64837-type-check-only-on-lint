@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add postinstall hook so that generated `@wordpress/*` type declarations exist immediately after a fresh install.

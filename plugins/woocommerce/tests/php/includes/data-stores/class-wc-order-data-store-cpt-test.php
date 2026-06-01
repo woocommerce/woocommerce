@@ -69,16 +69,16 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			)
 		)[0];
 
-		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order->get_id();
-		$cached_refunds   = wp_cache_get( $refund_cache_key, 'orders' );
+		$refund_cache_key  = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $order->get_id();
+		$cached_refund_ids = wp_cache_get( $refund_cache_key, 'orders' );
 
-		$this->assertEquals( $cached_refunds[0]->get_id(), $fetched_order->get_refunds()[0]->get_id() );
+		$this->assertEquals( $cached_refund_ids[0], $fetched_order->get_refunds()[0]->get_id() );
 
 		$refund->delete( true );
 
 		// Cache should be cleared now.
-		$cached_refunds = wp_cache_get( $refund_cache_key, 'orders' );
-		$this->assertEquals( false, $cached_refunds );
+		$cached_refund_ids = wp_cache_get( $refund_cache_key, 'orders' );
+		$this->assertEquals( false, $cached_refund_ids );
 	}
 
 	/**

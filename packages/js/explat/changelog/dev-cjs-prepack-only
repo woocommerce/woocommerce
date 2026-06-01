@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move the CommonJS build to prepack so day-to-day development only builds the ESM output.

@@ -3,6 +3,8 @@
  * WooCommerce Homescreen.
  */
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Features\Features;
@@ -86,7 +88,7 @@ class Homescreen {
 
 		// Abort if we already created the shipping options.
 		$already_created = get_option( 'woocommerce_admin_created_default_shipping_zones' );
-		if ( $already_created === 'yes' ) {
+		if ( 'yes' === $already_created ) {
 			return $settings;
 		}
 
