@@ -310,7 +310,7 @@ const Edit = ( props: EditProps ) => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						woocommerceSelectableItems: {
+						'woocommerce/selectableItems': {
 							items:
 								termOptions.length === 0 && isPreview
 									? termOptionsPreview

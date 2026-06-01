@@ -1135,6 +1135,11 @@ class OrdersTableQuery {
 			$this->where[] = $this->where( $this->tables['orders'], $arg_key, '=', $this->args[ $arg_key ], $this->mappings['orders'][ $arg_key ]['type'] );
 		}
 
+		// customer_note allows empty string to match orders with no note, so it cannot use arg_isset (which skips '').
+		if ( isset( $this->args['customer_note'] ) ) {
+			$this->where[] = $this->where( $this->tables['orders'], 'customer_note', '=', $this->args['customer_note'], $this->mappings['orders']['customer_note']['type'] );
+		}
+
 		if ( $this->arg_isset( 'parent_exclude' ) ) {
 			$this->where[] = $this->where( $this->tables['orders'], 'parent_order_id', '!=', $this->args['parent_exclude'], 'int' );
 		}
@@ -1267,7 +1272,6 @@ class OrdersTableQuery {
 				'discount_tax_amount',
 				'shipping_total_amount',
 				'shipping_tax_amount',
-				'customer_note',
 			),
 			array( $this, 'arg_isset' )
 		);

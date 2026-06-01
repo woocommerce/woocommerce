@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Use the NOTICE log level (instead of INFO) for transactional email entries with status `disabled` or `skipped`, so admins can distinguish "normal but significant" non-send outcomes from routine successful sends.

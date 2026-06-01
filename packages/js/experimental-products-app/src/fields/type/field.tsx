@@ -13,7 +13,6 @@ const fieldDefinition = {
 	type: 'text',
 	label: __( 'Product type', 'woocommerce' ),
 	enableSorting: false,
-	enableHiding: false,
 	filterBy: {
 		operators: [ 'isAny', 'isNone' ],
 	},
@@ -21,11 +20,18 @@ const fieldDefinition = {
 		{ label: __( 'Simple', 'woocommerce' ), value: 'simple' },
 		{ label: __( 'Variable', 'woocommerce' ), value: 'variable' },
 		{ label: __( 'Grouped', 'woocommerce' ), value: 'grouped' },
-		{ label: __( 'External', 'woocommerce' ), value: 'external' },
+		{ label: __( 'Affiliate', 'woocommerce' ), value: 'external' },
+		{ label: __( 'Variation', 'woocommerce' ), value: 'variation' },
 	],
 } satisfies Partial< Field< ProductEntityRecord > >;
 
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
 	getValue: ( { item } ) => item.type,
+	render: ( { item }: { item: ProductEntityRecord } ) => {
+		const match = fieldDefinition.elements.find(
+			( element ) => element.value === item.type
+		);
+		return match ? match.label : item.type;
+	},
 };

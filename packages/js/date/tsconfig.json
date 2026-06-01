@@ -9,7 +9,8 @@
 		"typeRoots": [
 			"./typings",
 			"./node_modules/@types"
-		]
+		],
+		"composite": true
 	},
 	"include": [
 		"typings/**/*",
@@ -17,5 +18,6 @@
 	],
 	"exclude": [
 		"**/test/**"
-	]
+	],
+	"references": []
 }

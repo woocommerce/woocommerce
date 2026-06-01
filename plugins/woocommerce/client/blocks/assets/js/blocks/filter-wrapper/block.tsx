@@ -6,7 +6,6 @@ import { useRef } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './register-components';
 import { FilterBlockContext } from './context';
 
 type Props = {

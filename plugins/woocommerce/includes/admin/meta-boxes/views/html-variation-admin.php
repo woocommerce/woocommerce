@@ -71,11 +71,23 @@ defined( 'ABSPATH' ) || exit;
 	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
 		<div class="data">
 			<div class="form-flex-box">
-				<p class="form-row upload_image">
+				<div class="form-row upload_image">
 					<a href="#" class="upload_image_button tips <?php echo $variation_object->get_image_id( 'edit' ) ? 'remove' : ''; ?>" data-tip="<?php echo $variation_object->get_image_id( 'edit' ) ? esc_attr__( 'Remove this image', 'woocommerce' ) : esc_attr__( 'Upload an image', 'woocommerce' ); ?>" rel="<?php echo esc_attr( $variation_id ); ?>">
 						<img src="<?php echo $variation_object->get_image_id( 'edit' ) ? esc_url( wp_get_attachment_thumb_url( $variation_object->get_image_id( 'edit' ) ) ) : esc_url( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo esc_attr( $loop ); ?>]" class="upload_image_id" value="<?php echo esc_attr( $variation_object->get_image_id( 'edit' ) ); ?>" />
 					</a>
-				</p>
+					<?php
+					/**
+					 * Variation upload image action.
+					 *
+					 * @since 10.8.0
+					 *
+					 * @param int     $loop           Position in the loop.
+					 * @param array   $variation_data Variation data.
+					 * @param WP_Post $variation      Post data.
+					 */
+					do_action( 'woocommerce_variation_after_upload_image', $loop, $variation_data, $variation );
+					?>
+				</div>
 				<div class="form-row form-row-last">
 				<?php
 				if ( wc_product_sku_enabled() ) {

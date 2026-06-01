@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Bump the experimental products app product edit drawer header's horizontal padding to 24px so the title and close button align with the 24px-padded form below (vertical padding unchanged at 12px).

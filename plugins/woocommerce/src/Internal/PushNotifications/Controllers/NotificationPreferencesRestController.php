@@ -6,8 +6,8 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService;
+use Automattic\WooCommerce\Internal\PushNotifications\Traits\AuthorizesPushNotificationRequests;
 use Automattic\WooCommerce\Internal\PushNotifications\Traits\ConvertsExceptionsToWpError;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Exception;
@@ -24,6 +24,7 @@ use WP_REST_Server;
  * @since 10.8.0
  */
 class NotificationPreferencesRestController extends RestApiControllerBase {
+	use AuthorizesPushNotificationRequests;
 	use ConvertsExceptionsToWpError;
 
 	/**
@@ -48,28 +49,16 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 	private NotificationPreferencesService $preferences_service;
 
 	/**
-	 * The push notifications module enablement gate.
-	 *
-	 * @var PushNotifications
-	 */
-	private PushNotifications $push_notifications;
-
-	/**
 	 * Initialize injected dependencies.
 	 *
 	 * @internal
 	 *
 	 * @param NotificationPreferencesService $preferences_service The preferences service.
-	 * @param PushNotifications              $push_notifications  The push notifications module.
 	 *
 	 * @since 10.8.0
 	 */
-	final public function init(
-		NotificationPreferencesService $preferences_service,
-		PushNotifications $push_notifications
-	): void {
+	final public function init( NotificationPreferencesService $preferences_service ): void {
 		$this->preferences_service = $preferences_service;
-		$this->push_notifications  = $push_notifications;
 	}
 
 	/**
@@ -155,37 +144,6 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Checks user is authenticated and authorized to access this endpoint.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @return bool|WP_Error
-	 */
-	public function authorize_as_authenticated( WP_REST_Request $request ) {
-		if ( ! get_current_user_id() ) {
-			return new WP_Error(
-				'woocommerce_rest_cannot_view',
-				__( 'Sorry, you are not allowed to do that.', 'woocommerce' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
-		}
-
-		if ( ! $this->push_notifications->should_be_enabled() ) {
-			return false;
-		}
-
-		$has_valid_role = array_reduce(
-			PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED,
-			fn ( $carry, $role ) => $this->check_permission( $request, $role ) === true ? true : $carry,
-			false
-		);
-
-		return $has_valid_role ? true : false;
-	}
-
-	/**
 	 * Get the accepted arguments for the POST request.
 	 *
 	 * Each preference is an object so future sub-fields can be added without
@@ -198,7 +156,46 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 		$args     = array();
 		$defaults = $this->preferences_service->get_defaults();
 
-		foreach ( array_keys( $defaults ) as $key ) {
+		foreach ( $defaults as $key => $shape ) {
+			$properties = array(
+				'enabled' => array(
+					'type'        => 'boolean',
+					'description' => __( 'Whether this notification type is enabled.', 'woocommerce' ),
+				),
+			);
+
+			if ( array_key_exists( 'min_amount', $shape ) ) {
+				$properties['min_amount'] = array(
+					'type'             => array( 'number', 'null' ),
+					'minimum'          => 0,
+					'exclusiveMinimum' => true,
+					'description'      => __( 'Minimum order amount required to trigger this notification, or null to disable the threshold.', 'woocommerce' ),
+				);
+			}
+
+			if ( array_key_exists( 'max_rating', $shape ) ) {
+				$properties['max_rating'] = array(
+					'type'        => array( 'integer', 'null' ),
+					'minimum'     => 1,
+					'maximum'     => 5,
+					'description' => __( 'Maximum star rating that triggers a review notification (1–5), or null to disable the threshold.', 'woocommerce' ),
+				);
+			}
+
+			$boolean_sub_fields = array( 'low_stock', 'out_of_stock', 'on_backorder' );
+			foreach ( $boolean_sub_fields as $sub_field ) {
+				if ( array_key_exists( $sub_field, $shape ) ) {
+					$properties[ $sub_field ] = array(
+						'type'        => 'boolean',
+						'description' => sprintf(
+							/* translators: %s: sub-field name (e.g. low_stock). */
+							__( 'Whether %s notifications are enabled for this type.', 'woocommerce' ),
+							$sub_field
+						),
+					);
+				}
+			}
+
 			$args[ $key ] = array(
 				'description'       => sprintf(
 					/* translators: %s: notification preference key (e.g. store_order). */
@@ -206,16 +203,11 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 					$key
 				),
 				'type'              => 'object',
-				'properties'        => array(
-					'enabled' => array(
-						'type'        => 'boolean',
-						'description' => __( 'Whether this notification type is enabled.', 'woocommerce' ),
-					),
-				),
+				'properties'        => $properties,
 				'required'          => false,
 				'validate_callback' => 'rest_validate_request_arg',
 			);
-		}
+		}//end foreach
 
 		return $args;
 	}

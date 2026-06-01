@@ -8,15 +8,20 @@ import type {
 	ProductType,
 } from '@woocommerce/data';
 
-export type ProductListQuery = Omit< ProductQuery, 'status' > & {
+type ProductStockStatus = 'instock' | 'outofstock' | 'onbackorder';
+
+export type ProductListQuery = Omit<
+	ProductQuery,
+	'status' | 'stock_status'
+> & {
 	status?: ProductStatus | ProductStatus[];
+	stock_status?: ProductStockStatus | ProductStockStatus[];
 	_embed?: number;
 	search_name_or_sku?: string;
 	exclude_status?: ProductStatus[];
 	include_types?: ProductType[];
 	exclude_types?: ProductType[];
 	exclude_category?: number[];
-	exclude_shipping_class?: number[];
 	exclude_tag?: number[];
 	min_stock_quantity?: string;
 	max_stock_quantity?: string;
@@ -24,6 +29,7 @@ export type ProductListQuery = Omit< ProductQuery, 'status' > & {
 };
 
 const SUPPORTED_STATUS_FILTER_FIELDS = [ 'status', 'product_status' ];
+const DISABLED_SORT_FIELDS = [ 'name', 'price' ];
 
 function isStringArray( value: unknown ): value is string[] {
 	return (
@@ -46,15 +52,17 @@ function getStringValues( value: unknown ): string[] {
 
 function getNumericValues( value: unknown ): number[] {
 	const values = Array.isArray( value ) ? value : [ value ];
-	return values.map( ( item ) => {
-		if ( typeof item === 'number' ) {
-			return item;
-		}
-		if ( typeof item === 'string' ) {
-			return Number( item );
-		}
-		return Number.NaN;
-	} );
+	return values
+		.map( ( item ) => {
+			if ( typeof item === 'number' ) {
+				return item;
+			}
+			if ( typeof item === 'string' && item.trim() !== '' ) {
+				return Number( item );
+			}
+			return Number.NaN;
+		} )
+		.filter( Number.isFinite );
 }
 
 function getPriceValue( value: unknown ): string | undefined {
@@ -139,26 +147,14 @@ function applyBrandFilter( query: ProductListQuery, filter: Filter ) {
 	query.brand = values.join( ',' );
 }
 
-function applyShippingClassFilter( query: ProductListQuery, filter: Filter ) {
-	const values = getNumericValues( filter.value );
-
-	if ( values.length === 0 ) {
-		return;
-	}
-
-	if ( filter.operator === 'isNone' ) {
-		query.exclude_shipping_class = values;
-		return;
-	}
-
-	query.shipping_class = values.join( ',' );
-}
-
 function applyStockFilter( query: ProductListQuery, filter: Filter ) {
-	const [ stockStatus ] = getStringValues( filter.value );
+	const stockStatuses = getStringValues(
+		filter.value
+	) as ProductStockStatus[];
 
-	if ( stockStatus ) {
-		query.stock_status = stockStatus as ProductListQuery[ 'stock_status' ];
+	if ( stockStatuses.length > 0 ) {
+		query.stock_status =
+			stockStatuses.length === 1 ? stockStatuses[ 0 ] : stockStatuses;
 	}
 }
 
@@ -190,16 +186,66 @@ function applyPriceFilter( query: ProductListQuery, filter: Filter ) {
 	query.max_price = price;
 }
 
+function applyStockQuantityFilter( query: ProductListQuery, filter: Filter ) {
+	if ( filter.operator === 'between' && Array.isArray( filter.value ) ) {
+		const [ min, max ] = filter.value;
+		query.min_stock_quantity = getPriceValue( min );
+		query.max_stock_quantity = getPriceValue( max );
+		return;
+	}
+
+	if ( filter.operator === 'isNot' ) {
+		// No WC REST param for stock_quantity exclusion; intentionally
+		// unsupported server-side. The operator is exposed because the user
+		// explicitly asked for it in the UI.
+		return;
+	}
+
+	const raw = getPriceValue( filter.value );
+
+	if ( ! raw ) {
+		return;
+	}
+
+	const numeric = Number( raw );
+
+	if ( ! Number.isFinite( numeric ) ) {
+		return;
+	}
+
+	switch ( filter.operator ) {
+		case 'is':
+			query.min_stock_quantity = raw;
+			query.max_stock_quantity = raw;
+			return;
+		case 'greaterThan':
+			query.min_stock_quantity = String( numeric + 1 );
+			return;
+		case 'greaterThanOrEqual':
+			query.min_stock_quantity = raw;
+			return;
+		case 'lessThan':
+			query.max_stock_quantity = String( numeric - 1 );
+			return;
+		case 'lessThanOrEqual':
+			query.max_stock_quantity = raw;
+	}
+}
+
 export function buildProductListQuery( view: View ): ProductListQuery {
+	const sort =
+		view.sort && ! DISABLED_SORT_FIELDS.includes( view.sort.field )
+			? view.sort
+			: undefined;
 	const query: ProductListQuery = {
 		_embed: 1,
 		per_page: view.perPage,
 		page: view.page,
-		order: view.sort?.direction,
+		order: sort?.direction,
 		orderby:
-			view.sort?.field === 'name'
+			sort?.field === 'name'
 				? 'title'
-				: ( view.sort?.field as ProductQuery[ 'orderby' ] ),
+				: ( sort?.field as ProductQuery[ 'orderby' ] ),
 		search_name_or_sku: view.search || undefined,
 	};
 
@@ -216,9 +262,6 @@ export function buildProductListQuery( view: View ): ProductListQuery {
 			case 'categories':
 				applyCategoryFilter( query, filter );
 				break;
-			case 'shipping_class':
-				applyShippingClassFilter( query, filter );
-				break;
 			case 'tags':
 				applyTagFilter( query, filter );
 				break;
@@ -230,6 +273,9 @@ export function buildProductListQuery( view: View ): ProductListQuery {
 				break;
 			case 'price':
 				applyPriceFilter( query, filter );
+				break;
+			case 'stock_quantity':
+				applyStockQuantityFilter( query, filter );
 				break;
 		}
 	} );
