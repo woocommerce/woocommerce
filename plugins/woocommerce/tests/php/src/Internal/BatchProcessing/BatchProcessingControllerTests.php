@@ -146,6 +146,24 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Enqueuing collapses a heavily bloated list of thousands of duplicates to a single entry.
+	 */
+	public function test_enqueue_processor_collapses_heavily_bloated_list(): void {
+		$processor = get_class( $this->test_process );
+
+		// Mirror the reported production case (thousands of identical entries).
+		update_option(
+			BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
+			array_fill( 0, 3000, $processor ),
+			false
+		);
+
+		$this->sut->enqueue_processor( $processor );
+
+		$this->assertSame( array( $processor ), $this->sut->get_enqueued_processors(), 'A heavily bloated list must collapse to a single entry.' );
+	}
+
+	/**
 	 * @testdox 'remove_processor' dequeues and unschedules a processor, but the watchdog is kept alive if more processors are still enqueued.
 	 */
 	public function test_remove_processor_when_others_are_still_enqueued() {
