@@ -1104,7 +1104,14 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$product->save();
 		$order = wc_create_order();
 		$item  = new WC_Order_Item_Product();
-		$item->set_props( array( 'product' => $product, 'quantity' => 2, 'subtotal' => 20.00, 'total' => 20.00 ) );
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 20.00,
+				'total'    => 20.00,
+			)
+		);
 		$item->save();
 		$order->add_item( $item );
 		$order->save();
@@ -1141,7 +1148,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	public function test_fill_missing_refund_totals_shipping(): void {
 		$order    = wc_create_order();
 		$shipping = new WC_Order_Item_Shipping();
-		$shipping->set_props( array( 'method_title' => 'Flat Rate', 'total' => 12.50 ) );
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => 12.50,
+			)
+		);
 		$shipping->save();
 		$order->add_item( $shipping );
 		$order->save();
@@ -1171,20 +1183,43 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 
 		$order  = wc_create_order();
 		$item_a = new WC_Order_Item_Product();
-		$item_a->set_props( array( 'product' => $product, 'quantity' => 1, 'subtotal' => 10.00, 'total' => 10.00 ) );
+		$item_a->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10.00,
+				'total'    => 10.00,
+			)
+		);
 		$item_a->save();
 		$order->add_item( $item_a );
 
 		$item_b = new WC_Order_Item_Product();
-		$item_b->set_props( array( 'product' => $product, 'quantity' => 1, 'subtotal' => 10.00, 'total' => 10.00 ) );
+		$item_b->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10.00,
+				'total'    => 10.00,
+			)
+		);
 		$item_b->save();
 		$order->add_item( $item_b );
 		$order->save();
 
 		$result = $this->data_utils->fill_missing_refund_totals(
 			array(
-				array( 'line_item_id' => $item_a->get_id(), 'quantity' => 1 ),                       // missing → 10.00
-				array( 'line_item_id' => $item_b->get_id(), 'quantity' => 1, 'refund_total' => 7.0 ), // explicit → 7.0
+				array(
+					'line_item_id' => $item_a->get_id(),
+					'quantity'     => 1,
+				),
+				// missing → 10.00
+				array(
+					'line_item_id' => $item_b->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 7.0,
+				),
+			// explicit → 7.0
 			),
 			$order
 		);

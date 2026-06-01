@@ -558,7 +558,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				array(
 					'line_item_id' => $item->get_id(),
 					'quantity'     => 1,
-					'refund_total' => 128.00, // Includes 23.00 + 5.00 tax.
+					'refund_total' => 128.00,
+		// Includes 23.00 + 5.00 tax.
 				),
 			),
 		);
@@ -705,7 +706,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				array(
 					'line_item_id' => $item->get_id(),
 					'quantity'     => 1,
-					'refund_total' => 115.50, // Includes 10.00 + 5.50 compound tax.
+					'refund_total' => 115.50,
+		// Includes 10.00 + 5.50 compound tax.
 				),
 			),
 		);
@@ -842,19 +844,22 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'reason'     => 'Testing explicit tax array (legacy format)',
 			'line_items' => array(
 				array(
-					'line_item_id' => $item->get_id(),
-					'quantity'     => 1,
-					'refund_total' => 30.00, // Excluding tax.
-					'refund_tax'   => array(
-						array(
-							'id'           => $tax_rate_id_1,
-							'refund_total' => 6.90, // 23% of 30.00.
-						),
-						array(
-							'id'           => $tax_rate_id_2,
-							'refund_total' => 1.50, // 5% of 30.00.
-						),
-					),
+					'line_item_id'           => $item->get_id(),
+					'quantity'               => 1,
+					'refund_total'           => 30.00,
+					// Excluding tax.
+								'refund_tax' => array(
+									array(
+										'id'           => $tax_rate_id_1,
+										'refund_total' => 6.90,
+					// 23% of 30.00.
+									),
+									array(
+										'id'           => $tax_rate_id_2,
+										'refund_total' => 1.50,
+								// 5% of 30.00.
+									),
+								),
 				),
 			),
 		);
@@ -958,7 +963,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				array(
 					'line_item_id' => $item->get_id(),
 					'quantity'     => 1,
-					'refund_total' => 500.00, // Exceeds 110.00 (item total with tax).
+					'refund_total' => 500.00,
+		// Exceeds 110.00 (item total with tax).
 				),
 			),
 		);
@@ -1048,7 +1054,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				array(
 					'line_item_id' => $item->get_id(),
 					'quantity'     => 1,
-					'refund_total' => 110.00, // Line items total is 110.00.
+					'refund_total' => 110.00,
+		// Line items total is 110.00.
 				),
 			),
 		);
@@ -1228,7 +1235,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$order->set_billing_country( 'US' );
 		$order->set_billing_state( 'CA' );
-		$order->set_total( 55.26 ); // 50.00 + 0.50 + 1.63 + 3.13.
+		$order->set_total( 55.26 );
+		// 50.00 + 0.50 + 1.63 + 3.13.
 		$order->save();
 
 		$this->created_orders[] = $order->get_id();
@@ -1243,7 +1251,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				array(
 					'line_item_id' => $item->get_id(),
 					'quantity'     => 1,
-					'refund_total' => 55.26, // Includes all taxes.
+					'refund_total' => 55.26,
+		// Includes all taxes.
 				),
 			),
 		);
@@ -1322,7 +1331,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$product->set_price( 10.00 );
 		$product->save();
 
-		$order = $this->create_test_order(
+		$order     = $this->create_test_order(
 			array(
 				'line_items' => array(
 					array(
@@ -1454,7 +1463,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$product->save();
 
 		// Order A: refunded via simplified form.
-		$order_a = $this->create_test_order(
+		$order_a   = $this->create_test_order(
 			array(
 				'line_items' => array(
 					array(
@@ -1464,9 +1473,9 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				),
 			)
 		);
-		$items_a    = $order_a->get_items();
-		$item_a     = reset( $items_a );
-		$request_a  = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$items_a   = $order_a->get_items();
+		$item_a    = reset( $items_a );
+		$request_a = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
 		$request_a->set_body_params(
 			array(
 				'order_id'   => $order_a->get_id(),
@@ -1480,11 +1489,11 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 		$response_a = $this->server->dispatch( $request_a );
 		$this->assertEquals( 201, $response_a->get_status() );
-		$amount_a               = $response_a->get_data()['amount'];
+		$amount_a                = $response_a->get_data()['amount'];
 		$this->created_refunds[] = $response_a->get_data()['id'];
 
 		// Order B: same shape but with explicit refund_total computed by the client.
-		$order_b = $this->create_test_order(
+		$order_b   = $this->create_test_order(
 			array(
 				'line_items' => array(
 					array(
@@ -1494,9 +1503,9 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				),
 			)
 		);
-		$items_b    = $order_b->get_items();
-		$item_b     = reset( $items_b );
-		$request_b  = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$items_b   = $order_b->get_items();
+		$item_b    = reset( $items_b );
+		$request_b = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
 		$request_b->set_body_params(
 			array(
 				'order_id'   => $order_b->get_id(),
@@ -1511,7 +1520,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 		$response_b = $this->server->dispatch( $request_b );
 		$this->assertEquals( 201, $response_b->get_status() );
-		$amount_b               = $response_b->get_data()['amount'];
+		$amount_b                = $response_b->get_data()['amount'];
 		$this->created_refunds[] = $response_b->get_data()['id'];
 
 		$this->assertEquals( $amount_b, $amount_a, 'Simplified form should produce the same amount as the explicit form.' );
@@ -1532,11 +1541,25 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$order  = wc_create_order();
 		$item_a = new WC_Order_Item_Product();
-		$item_a->set_props( array( 'product' => $product_a, 'quantity' => 1, 'subtotal' => 10.00, 'total' => 10.00 ) );
+		$item_a->set_props(
+			array(
+				'product'  => $product_a,
+				'quantity' => 1,
+				'subtotal' => 10.00,
+				'total'    => 10.00,
+			)
+		);
 		$item_a->save();
 		$order->add_item( $item_a );
 		$item_b = new WC_Order_Item_Product();
-		$item_b->set_props( array( 'product' => $product_b, 'quantity' => 1, 'subtotal' => 20.00, 'total' => 20.00 ) );
+		$item_b->set_props(
+			array(
+				'product'  => $product_b,
+				'quantity' => 1,
+				'subtotal' => 20.00,
+				'total'    => 20.00,
+			)
+		);
 		$item_b->save();
 		$order->add_item( $item_b );
 		$order->set_total( 30.00 );
@@ -1582,7 +1605,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$product->set_price( 10.00 );
 		$product->save();
 
-		$order = $this->create_test_order(
+		$order     = $this->create_test_order(
 			array(
 				'line_items' => array(
 					array(
