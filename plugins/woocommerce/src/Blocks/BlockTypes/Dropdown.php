@@ -61,6 +61,7 @@ final class Dropdown extends AbstractBlock {
 			: wp_unique_id( 'wc-block-dropdown-' );
 
 		$wrapper_attributes = array(
+			'class'               => 'wc-block-dropdown',
 			'data-wp-interactive' => 'woocommerce/dropdown',
 			'data-wp-context'     => (string) wp_json_encode(
 				array(

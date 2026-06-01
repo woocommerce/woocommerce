@@ -10,10 +10,15 @@ import type {
 	SelectableItem,
 	SelectableItemsParentStore,
 } from '../../../../types/type-defs/selectable-items';
+import {
+	getVisualAttributeTermStyleString,
+	isVisualAttributeTermEmpty,
+} from '../../../../base/utils/visual-attribute-terms';
+import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 import { getClosestColor } from '../../utils/get-closest-color';
 
 type ChipsItem = SelectableItem< {
-	color?: string;
+	visual?: VisualAttributeTerm;
 	index?: number;
 } >;
 
@@ -44,9 +49,9 @@ type ChipsStore = {
 
 function getParentStore( storeNamespace?: string ) {
 	if ( ! storeNamespace ) return undefined;
-	return store< SelectableItemsParentStore< { color?: string } > >(
-		storeNamespace
-	);
+	return store<
+		SelectableItemsParentStore< { visual?: VisualAttributeTerm } >
+	>( storeNamespace );
 }
 
 function normalizeDisplayLimit( displayLimit: number ): number {
@@ -111,12 +116,11 @@ const { state }: ChipsStore = store< ChipsStore >(
 			},
 			get swatchHidden(): boolean {
 				const item = getCurrentItem();
-				return ! item?.color;
+				return isVisualAttributeTermEmpty( item?.visual );
 			},
 			get swatchStyle(): string {
 				const item = getCurrentItem();
-				if ( ! item?.color ) return '';
-				return `background-color: ${ item.color }`;
+				return getVisualAttributeTermStyleString( item?.visual );
 			},
 		},
 		actions: {
