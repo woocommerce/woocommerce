@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep Store API visual attribute term data opt-in with `__experimental_visual`.

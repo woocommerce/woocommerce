@@ -14,6 +14,7 @@ module.exports = [
 	'@woocommerce/experimental',
 	'@woocommerce/explat',
 	'@woocommerce/extend-cart-checkout-block',
+	'@woocommerce/settings-ui-sdk',
 	'@woocommerce/navigation',
 	'@woocommerce/notices',
 	'@woocommerce/number',
