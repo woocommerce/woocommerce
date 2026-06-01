@@ -338,6 +338,44 @@ class DataUtils {
 	}
 
 	/**
+	 * Fill in refund_total for any line item that omits it, computing the value from
+	 * the order item's unit price × quantity via compute_line_item_refund_total().
+	 *
+	 * Items that already have refund_total are left untouched (existing v3-style clients
+	 * keep working). Items that can't be resolved (missing line_item_id, item not on
+	 * order, invalid quantity, unsupported item type) are also left untouched — the
+	 * downstream validator surfaces the right error.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param array    $line_items Line items from the request (schema format).
+	 * @param WC_Order $order      The order being refunded.
+	 * @return array The line items with refund_total populated where possible.
+	 */
+	public function fill_missing_refund_totals( array $line_items, WC_Order $order ): array {
+		foreach ( $line_items as $key => $line_item ) {
+			if ( isset( $line_item['refund_total'] ) ) {
+				continue;
+			}
+
+			$line_item_id = $line_item['line_item_id'] ?? null;
+			$quantity     = $line_item['quantity'] ?? null;
+			if ( ! $line_item_id || ! is_int( $quantity ) || $quantity < 1 ) {
+				continue;
+			}
+
+			$item = $order->get_item( $line_item_id );
+			if ( ! $item || ! ( $item instanceof WC_Order_Item_Product || $item instanceof WC_Order_Item_Shipping || $item instanceof WC_Order_Item_Fee ) ) {
+				continue;
+			}
+
+			$line_items[ $key ]['refund_total'] = $this->compute_line_item_refund_total( $item, $quantity );
+		}
+
+		return $line_items;
+	}
+
+	/**
 	 * Build a refund preview showing authoritative totals and breakdowns.
 	 *
 	 * Callers must invoke {@see validate_preview_line_items()} first — this

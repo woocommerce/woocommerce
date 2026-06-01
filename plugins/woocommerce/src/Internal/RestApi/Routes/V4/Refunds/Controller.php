@@ -293,16 +293,21 @@ class Controller extends AbstractController {
 				return $this->get_route_error_by_code( self::INVALID_ID );
 			}
 
+			// Fill in refund_total for any line items that omit it. The simplified
+			// request form sends only {line_item_id, quantity}; the backend derives
+			// the tax-inclusive total from the order's unit price × quantity.
+			$line_items = $this->data_utils->fill_missing_refund_totals( $request['line_items'] ?? array(), $order );
+
 			// Validate request line_items before proceeding against the order being refunded.
-			$validation_error = $this->data_utils->validate_line_items( $request['line_items'], $order );
+			$validation_error = $this->data_utils->validate_line_items( $line_items, $order );
 
 			if ( is_wp_error( $validation_error ) ) {
 				return $this->get_route_error_response( $validation_error->get_error_code(), $validation_error->get_error_message() );
 			}
 
 			// Convert line items to internal format.
-			$line_item_data   = $this->data_utils->convert_line_items_to_internal_format( $request['line_items'], $order );
-			$calculated_total = ! empty( $request['line_items'] ) ? $this->data_utils->calculate_refund_amount( $request['line_items'] ) : 0;
+			$line_item_data   = $this->data_utils->convert_line_items_to_internal_format( $line_items, $order );
+			$calculated_total = ! empty( $line_items ) ? $this->data_utils->calculate_refund_amount( $line_items ) : 0;
 			$refund_amount    = ! empty( $request['amount'] ) ? $request['amount'] : $calculated_total;
 
 			if ( 0 > $refund_amount || ! $refund_amount ) {
