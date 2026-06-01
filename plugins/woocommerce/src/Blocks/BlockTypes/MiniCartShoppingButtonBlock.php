@@ -21,18 +21,6 @@ class MiniCartShoppingButtonBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		return $this->render_experimental_iapi_markup( $attributes, $content, $block );
-	}
-
-	/**
-	 * Render experimental iAPI powered  markup for the Mini-Cart Contents block.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
 		ob_start();
 		$shop_url                     = wc_get_page_permalink( 'shop' );
 		$default_start_shopping_label = __( 'Start shopping', 'woocommerce' );

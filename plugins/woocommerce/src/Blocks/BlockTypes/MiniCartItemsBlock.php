@@ -21,18 +21,6 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		return $this->render_experimental_iapi_markup( $attributes, $content, $block );
-	}
-
-	/**
-	 * Render experimental iAPI block markup.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class'    => 'wc-block-mini-cart__items',
