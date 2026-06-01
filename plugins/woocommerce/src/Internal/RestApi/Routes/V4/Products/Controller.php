@@ -709,6 +709,12 @@ class Controller extends WC_REST_Products_V2_Controller {
 			$this->exclude_status = array();
 		}
 
+		// Batch-prime image attachment caches for the whole collection, rather than once per
+		// product when get_images() runs during serialization.
+		if ( ! empty( $result['objects'] ) ) {
+			\Automattic\WooCommerce\Internal\Utilities\ProductUtil::prime_image_caches( $result['objects'] );
+		}
+
 		return $result;
 	}
 
