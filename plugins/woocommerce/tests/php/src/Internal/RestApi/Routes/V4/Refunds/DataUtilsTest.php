@@ -993,6 +993,60 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox validate_line_items rejects missing or non-positive quantity with a clear invalid_line_item error.
+	 *
+	 * @dataProvider provider_invalid_quantities_for_validate_line_items
+	 *
+	 * @param mixed $quantity The quantity value to test (or null to omit the key).
+	 */
+	public function test_validate_line_items_rejects_missing_quantity( $quantity ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 20.00,
+				'total'    => 20.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$line_item = array( 'line_item_id' => $item->get_id() );
+		if ( null !== $quantity ) {
+			$line_item['quantity'] = $quantity;
+		}
+
+		$result = $this->data_utils->validate_line_items( array( $line_item ), $order );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'invalid_line_item', $result->get_error_code() );
+		$this->assertStringContainsString( 'positive integer', $result->get_error_message() );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @return array<string, array<int, mixed>>
+	 */
+	public function provider_invalid_quantities_for_validate_line_items(): array {
+		return array(
+			'missing'  => array( null ),
+			'zero'     => array( 0 ),
+			'negative' => array( -1 ),
+			'string'   => array( '2' ),
+			'float'    => array( 1.5 ),
+		);
+	}
+
+	/**
 	 * @testdox fill_missing_refund_totals computes refund_total for a product line item when missing.
 	 */
 	public function test_fill_missing_refund_totals_product(): void {

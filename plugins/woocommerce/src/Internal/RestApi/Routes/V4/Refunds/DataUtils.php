@@ -191,6 +191,14 @@ class DataUtils {
 				return new WP_Error( 'invalid_line_item', __( 'Line item is not a product, fee, or shipping line.', 'woocommerce' ) );
 			}
 
+			// Validate quantity is a positive integer. Without this guard, a request
+			// like {line_item_id: X} (no quantity) would silently pass downstream
+			// checks (int < null is false in PHP) and surface as a misleading
+			// "Refund total must be greater than zero" error.
+			if ( ! isset( $line_item['quantity'] ) || ! is_int( $line_item['quantity'] ) || $line_item['quantity'] < 1 ) {
+				return new WP_Error( 'invalid_line_item', __( 'Line item quantity must be a positive integer.', 'woocommerce' ) );
+			}
+
 			// Validate item quantity is not greater than the item quantity.
 			if ( $item->get_quantity() < $line_item['quantity'] ) {
 				/* translators: %s: item quantity */
@@ -199,7 +207,7 @@ class DataUtils {
 
 			// Validate refund total is not greater than the item total (including tax).
 			$item_total_with_tax = $item->get_total() + $item->get_total_tax();
-			if ( $item_total_with_tax < $line_item['refund_total'] ) {
+			if ( isset( $line_item['refund_total'] ) && $item_total_with_tax < $line_item['refund_total'] ) {
 				return new WP_Error(
 					'invalid_refund_amount',
 					sprintf(

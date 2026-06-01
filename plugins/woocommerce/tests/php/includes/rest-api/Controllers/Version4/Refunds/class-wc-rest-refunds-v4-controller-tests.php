@@ -1639,6 +1639,49 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Refund creation with missing quantity returns a clear invalid_line_item error (not the misleading "amount > 0" cascade).
+	 */
+	public function test_refunds_create_missing_quantity_returns_clear_error(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 10.00 );
+		$product->save();
+
+		$order = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+					),
+				),
+			)
+		);
+		$items     = $order->get_items();
+		$line_item = reset( $items );
+
+		// Send a line item with NO quantity and NO refund_total — both required for auto-compute.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $line_item->get_id(),
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'invalid_line_item', $data['code'], 'Should fail validation with a specific quantity error, not cascade to invalid_refund_amount.' );
+		$this->assertStringContainsString( 'positive integer', $data['message'] );
+
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox Creating a V4 refund with incomplete meta_data entries does not cause errors.
 	 */
 	public function test_create_refund_meta_data_with_incomplete_entries(): void {
