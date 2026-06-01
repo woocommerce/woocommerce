@@ -63,22 +63,35 @@ class ShopperList {
 	}
 
 	/**
-	 * Load a list by slug. Returns false for any other list that doesn't exist.
+	 * Load a list by slug. Returns false for a disabled, unknown, or unloadable list.
 	 *
-	 * @param string   $slug        List identifier.
-	 * @param int|null $user_id     Defaults to the current user.
-	 * @param bool     $skip_checks Bypass the feature-flag gate (slug validity is still
-	 *                              enforced). For internal callers like privacy export.
+	 * @param string   $slug    List identifier.
+	 * @param int|null $user_id Defaults to the current user.
 	 * @return self|false
 	 */
-	public static function get_by_slug( string $slug, ?int $user_id = null, bool $skip_checks = false ) {
-		$controller = wc_get_container()->get( ShopperListsController::class );
-
-		if ( ! in_array( $slug, $controller->get_supported_slugs(), true ) ) {
+	public static function get_by_slug( string $slug, ?int $user_id = null ) {
+		if ( ! wc_get_container()->get( ShopperListsController::class )->is_enabled( $slug ) ) {
 			return false;
 		}
 
-		if ( ! $skip_checks && ! $controller->is_enabled( $slug ) ) {
+		return self::get_by_slug_raw( $slug, $user_id );
+	}
+
+	/**
+	 * Load a list by slug without the feature-flag gate. Rejects unknown slugs and
+	 * falls back to an in-memory list (saved on the first save()) when nothing is stored.
+	 *
+	 * For internal callers (privacy export/erase) that must reach stored data
+	 * regardless of feature state. Do not use for user-facing reads.
+	 *
+	 * @internal
+	 *
+	 * @param string   $slug    List identifier.
+	 * @param int|null $user_id Defaults to the current user.
+	 * @return self|false
+	 */
+	public static function get_by_slug_raw( string $slug, ?int $user_id = null ) {
+		if ( ! in_array( $slug, wc_get_container()->get( ShopperListsController::class )->get_supported_slugs(), true ) ) {
 			return false;
 		}
 
@@ -93,7 +106,6 @@ class ShopperList {
 			return self::from_array( $stored, $user_id );
 		}
 
-		// In-memory list; saved on the first save().
 		return new self(
 			$user_id,
 			$slug,

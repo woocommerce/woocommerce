@@ -69,7 +69,7 @@ class Privacy extends \WC_Abstract_Privacy {
 		$data       = array();
 
 		foreach ( $controller->get_supported_slugs() as $slug ) {
-			$list = ShopperList::get_by_slug( $slug, $user_id, true );
+			$list = ShopperList::get_by_slug_raw( $slug, $user_id );
 			if ( ! $list || ! $list->get_items() ) {
 				continue;
 			}

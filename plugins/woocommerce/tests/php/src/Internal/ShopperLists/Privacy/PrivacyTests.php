@@ -330,7 +330,7 @@ class PrivacyTests extends WC_Unit_Test_Case {
 	 * @param string $slug List slug.
 	 */
 	private function seed_list( string $slug ): void {
-		$list = ShopperList::get_by_slug( $slug, $this->user_id, true );
+		$list = ShopperList::get_by_slug_raw( $slug, $this->user_id );
 		$this->assertNotFalse( $list );
 		$list->add_item( ShopperListItem::from_product( $this->product->get_id() ) );
 		$list->save();
