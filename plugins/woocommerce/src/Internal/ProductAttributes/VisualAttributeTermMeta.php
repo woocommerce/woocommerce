@@ -57,6 +57,58 @@ class VisualAttributeTermMeta {
 	 * @since 10.9.0
 	 */
 	public static function get_term_visual( int $term_id, string $image_size = 'thumbnail' ): array {
+		return self::build_term_visual( $term_id, $image_size );
+	}
+
+	/**
+	 * Get normalized visual values for the given terms.
+	 *
+	 * @param array  $term_ids Term IDs.
+	 * @param string $image_size Image size for image visual URLs.
+	 * @return array<int, array{type: string, value: string}> Map of term ID to visual values.
+	 *
+	 * @since 10.9.0
+	 */
+	public static function get_term_visuals( array $term_ids, string $image_size = 'thumbnail' ): array {
+		$visuals  = array();
+		$term_ids = array_values( array_unique( array_filter( array_map( 'absint', $term_ids ) ) ) );
+
+		if ( empty( $term_ids ) ) {
+			return $visuals;
+		}
+
+		update_meta_cache( 'term', $term_ids );
+
+		$image_ids = array();
+		foreach ( $term_ids as $term_id ) {
+			$image_id = absint( get_term_meta( $term_id, 'image', true ) );
+
+			if ( $image_id ) {
+				$image_ids[] = $image_id;
+			}
+		}
+
+		$image_ids = array_values( array_unique( $image_ids ) );
+		if ( ! empty( $image_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $image_ids, false, true );
+		}
+
+		foreach ( $term_ids as $term_id ) {
+			$visuals[ $term_id ] = self::build_term_visual( $term_id, $image_size );
+		}
+
+		return $visuals;
+	}
+
+	/**
+	 * Build a normalized visual value for a term.
+	 *
+	 * @param int    $term_id Term ID.
+	 * @param string $image_size Image size for image visual URLs.
+	 * @return array{type: string, value: string}
+	 */
+	private static function build_term_visual( int $term_id, string $image_size ): array {
 		$image_id = absint( get_term_meta( $term_id, 'image', true ) );
 
 		if ( $image_id && wp_attachment_is_image( $image_id ) ) {
@@ -80,26 +132,6 @@ class VisualAttributeTermMeta {
 		}
 
 		return self::get_empty_visual();
-	}
-
-	/**
-	 * Get normalized visual values for the given terms.
-	 *
-	 * @param array  $term_ids Term IDs.
-	 * @param string $image_size Image size for image visual URLs.
-	 * @return array<int, array{type: string, value: string}> Map of term ID to visual values.
-	 *
-	 * @since 10.9.0
-	 */
-	public static function get_term_visuals( array $term_ids, string $image_size = 'thumbnail' ): array {
-		$visuals  = array();
-		$term_ids = array_unique( array_filter( array_map( 'absint', $term_ids ) ) );
-
-		foreach ( $term_ids as $term_id ) {
-			$visuals[ $term_id ] = self::get_term_visual( $term_id, $image_size );
-		}
-
-		return $visuals;
 	}
 
 	/**
