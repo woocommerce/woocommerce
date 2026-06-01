@@ -1639,6 +1639,143 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Simplified form auto-computes refund_total for a positive-total fee line.
+	 */
+	public function test_refunds_create_simplified_form_fee_line(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 10.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10.00,
+				'total'    => 10.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Service fee',
+				'total' => 7.50,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+
+		$order->set_total( 17.50 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		// Refund the fee line via the simplified form.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $fee->get_id(),
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( '7.50', $data['amount'], 'Auto-computed fee refund should equal the full fee total' );
+
+		$this->created_refunds[] = $data['id'];
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Simplified form does not silently break on a negative-total fee (discount-as-fee).
+	 *
+	 * The compute helper preserves the sign of negative fees, but the existing
+	 * validate_line_items has an item_total_with_tax < refund_total check that
+	 * normally guards over-refunds. For a negative fee (e.g. total: -10), the
+	 * auto-computed refund_total is also -10. The validator's comparison
+	 * (-10 < -10) is false, so the request passes. The downstream
+	 * wc_create_refund() call is what ultimately accepts or rejects the
+	 * negative refund — assert the request reaches that point without an
+	 * earlier silent failure.
+	 */
+	public function test_refunds_create_simplified_form_negative_fee(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 10.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10.00,
+				'total'    => 10.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Discount',
+				'total' => -3.00,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+
+		$order->set_total( 7.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $fee->get_id(),
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$status = $response->get_status();
+		$data   = $response->get_data();
+
+		// Two acceptable outcomes:
+		//  - 201 if the platform allows negative-fee refunds (the spec's discount-as-fee scenario)
+		//  - A 4xx with a specific code if the platform rejects them.
+		// The point of this test is to lock the contract — whatever the
+		// behaviour is, it must NOT be a misleading "Refund total must be
+		// greater than zero" cascade.
+		if ( 201 === $status ) {
+			$this->assertEquals( '-3.00', $data['amount'] );
+			$this->created_refunds[] = $data['id'];
+		} else {
+			$this->assertNotEquals( 'invalid_refund_amount', $data['code'], 'Negative-fee refund should not surface the generic invalid_refund_amount cascade.' );
+		}
+
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox The 'created' hook receives a request whose line_items include the auto-computed refund_total.
 	 */
 	public function test_refunds_create_hook_sees_normalised_line_items(): void {
