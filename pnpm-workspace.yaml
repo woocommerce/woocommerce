@@ -123,10 +123,7 @@ allowBuilds:
     yarn: false
 
 # Block odd protocols (git+ssh, etc.) in transitive dependencies.
-# DISABLED: @wordpress/interactivity uses a git-hosted fork (via .pnpmfile.cjs readPackage hook)
-# for @wordpress/interactivity-router. pnpm has no exclude mechanism for blockExoticSubdeps.
-# TODO: Re-enable once the WooCommerce Gutenberg fork of @wordpress/interactivity is no longer needed.
-blockExoticSubdeps: false
+blockExoticSubdeps: true
 
 # Prevent trust downgrades (e.g., replacing a signed version with unsigned).
 trustPolicy: no-downgrade
