@@ -129,15 +129,17 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	protected function read_product_data( &$product ) {
 		// Prime caches to reduce future queries.
-		$product_id = $product->get_id();
-		wp_prime_option_caches(
-			array(
-				'_transient_wc_var_prices_' . $product_id,
-				'_transient_timeout_wc_var_prices_' . $product_id,
-				'_transient_wc_product_children_' . $product_id,
-				'_transient_timeout_wc_product_children_' . $product_id,
-			)
-		);
+		if ( ! wp_using_ext_object_cache() ) {
+			$product_id = $product->get_id();
+			wp_prime_option_caches(
+				array(
+					'_transient_wc_var_prices_' . $product_id,
+					'_transient_timeout_wc_var_prices_' . $product_id,
+					'_transient_wc_product_children_' . $product_id,
+					'_transient_timeout_wc_product_children_' . $product_id,
+				)
+			);
+		}
 
 		parent::read_product_data( $product );
 
