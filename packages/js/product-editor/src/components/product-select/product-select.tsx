@@ -13,7 +13,10 @@ import clsx from 'clsx';
 import { FormattedPrice } from '../formatted-price';
 import { ProductImage } from '../product-image';
 import { ProductSelectProps } from './types';
-import { ComboboxControl, ComboboxControlOption } from '../combobox-control';
+import {
+	ComboboxControl,
+	type ComboboxControlOption,
+} from '../combobox-control';
 
 /**
  * Map the product item to the Combobox core option.

@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataS
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Traits\AuthorizesPushNotificationRequests;
 use Automattic\WooCommerce\Internal\PushNotifications\Traits\ConvertsExceptionsToWpError;
 use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
@@ -29,6 +30,7 @@ use WP_Http;
  * @since 10.6.0
  */
 class PushTokenRestController extends RestApiControllerBase {
+	use AuthorizesPushNotificationRequests;
 	use ConvertsExceptionsToWpError;
 
 	/**
@@ -291,41 +293,6 @@ class PushTokenRestController extends RestApiControllerBase {
 				),
 			)
 		);
-	}
-
-	/**
-	 * Checks user is authenticated and authorized to access this endpoint.
-	 *
-	 * @since 10.6.0
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @return bool|WP_Error
-	 */
-	public function authorize_as_authenticated( WP_REST_Request $request ) {
-		if ( ! get_current_user_id() ) {
-			return new WP_Error(
-				'woocommerce_rest_cannot_view',
-				__( 'Sorry, you are not allowed to do that.', 'woocommerce' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
-		}
-
-		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
-			return false;
-		}
-
-		$has_valid_role = array_reduce(
-			PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED,
-			fn ( $carry, $role ) => $this->check_permission( $request, $role ) === true ? true : $carry,
-			false
-		);
-
-		if ( ! $has_valid_role ) {
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
