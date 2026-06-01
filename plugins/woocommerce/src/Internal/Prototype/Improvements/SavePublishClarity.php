@@ -90,11 +90,9 @@ body.folded #wc-proto-save-header {
 	gap: 2px;
 }
 .wc-proto-back:hover { color: #2271b1; text-decoration: none; }
-.wc-proto-back .dashicons {
-	font-size: 16px;
-	width: 16px;
-	height: 16px;
-	line-height: 1;
+.wc-proto-back svg {
+	fill: currentColor;
+	flex: 0 0 24px;
 }
 
 /* ── Button group ───────────────────────────────────────── */
@@ -112,20 +110,48 @@ body.folded #wc-proto-save-header {
 	vertical-align: middle;
 }
 
-/* Size the kebab SVG icon correctly */
-#wc-proto-kebab-toggle svg {
+/* ── Kebab toggle (details/summary) ────────────────────── */
+.wc-proto-kebab {
+	position: relative;
+}
+.wc-proto-kebab summary {
+	list-style: none;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	border-radius: 4px;
+	background: transparent;
+	border: 1px solid transparent;
+}
+.wc-proto-kebab summary::-webkit-details-marker { display: none; }
+.wc-proto-kebab summary svg {
 	display: block;
-	width: 16px;
-	height: 16px;
-	fill: currentColor;
+	width: 24px;
+	height: 24px;
+	fill: #1e1e1e;
+}
+.wc-proto-kebab summary:hover,
+.wc-proto-kebab summary:focus {
+	background: #dcdcde;
+	border-color: #c3c4c7;
+	outline: none;
+}
+.wc-proto-kebab[open] summary {
+	background: #dcdcde;
+	border-color: #c3c4c7;
 }
 
 /* ── Kebab dropdown ─────────────────────────────────────── */
-#wc-proto-kebab-menu {
-	display: none;
+.wc-proto-kebab-list {
 	position: absolute;
 	top: calc(100% + 4px);
 	right: 0;
+	margin: 0;
+	padding: 4px 0;
+	list-style: none;
 	background: #fff;
 	border: 1px solid #c3c4c7;
 	border-radius: 4px;
@@ -133,13 +159,18 @@ body.folded #wc-proto-save-header {
 	min-width: 190px;
 	z-index: 9999;
 }
-#wc-proto-kebab-menu.is-open { display: block; }
 .wc-proto-kebab-item {
 	display: block;
 	padding: 9px 14px;
 	font-size: 13px;
 	color: #1d2327;
 	text-decoration: none;
+	cursor: pointer;
+	width: 100%;
+	text-align: left;
+	background: none;
+	border: none;
+	box-sizing: border-box;
 }
 .wc-proto-kebab-item:hover { background: #f0f0f1; color: #1d2327; }
 .wc-proto-kebab-item.is-destructive { color: #b32d2e; }
@@ -184,7 +215,7 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 <div id="wc-proto-save-header" data-visibility-label="<?php echo esc_attr__( 'Visibility', 'woocommerce' ); ?>">
 	<div class="wc-proto-inner">
 		<a href="<?php echo esc_url( $products_url ); ?>" class="wc-proto-back">
-			<span class="dashicons dashicons-arrow-left-alt2" aria-hidden="true"></span>
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14.6 7-1.2-1L8 12l5.4 6 1.2-1-4.6-5z"></path></svg>
 			<?php esc_html_e( 'Back to products', 'woocommerce' ); ?>
 		</a>
 		<div class="wc-proto-actions">
@@ -199,22 +230,22 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 			<button type="button" id="wc-proto-btn-publish" class="button button-primary button-small">
 				<?php echo esc_html( $primary_label ); ?>
 			</button>
-			<div style="position:relative">
-				<button type="button" id="wc-proto-kebab-toggle" class="button-link button-small" aria-label="<?php esc_attr_e( 'More actions', 'woocommerce' ); ?>" aria-haspopup="true" aria-expanded="false">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
-				</button>
-				<div id="wc-proto-kebab-menu" role="menu">
-					<a id="wc-proto-copy-draft" href="#" class="wc-proto-kebab-item" role="menuitem" style="display:none">
+			<details class="wc-proto-kebab">
+				<summary aria-label="<?php esc_attr_e( 'More actions', 'woocommerce' ); ?>">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13 19h-2v-2h2v2zm0-6h-2v-2h2v2zm0-6h-2V5h2v2z"></path></svg>
+				</summary>
+				<ul class="wc-proto-kebab-list">
+					<li><a id="wc-proto-copy-draft" href="#" class="wc-proto-kebab-item" style="display:none">
 						<?php esc_html_e( 'Copy to a new draft', 'woocommerce' ); ?>
-					</a>
+					</a></li>
 					<?php if ( $trash_url ) : ?>
-					<a href="<?php echo esc_url( $trash_url ); ?>" class="wc-proto-kebab-item is-destructive" role="menuitem"
+					<li><a href="<?php echo esc_url( $trash_url ); ?>" class="wc-proto-kebab-item is-destructive"
 						onclick="return confirm('<?php echo esc_js( __( 'Move this product to the trash?', 'woocommerce' ) ); ?>')">
 						<?php esc_html_e( 'Move to Trash', 'woocommerce' ); ?>
-					</a>
+					</a></li>
 					<?php endif; ?>
-				</div>
-			</div>
+				</ul>
+			</details>
 		</div>
 	</div>
 </div>
@@ -234,24 +265,24 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 		btnPublish.addEventListener( 'click', function () { wpPublish.click(); } );
 	}
 
-	/* ── Kebab menu ────────────────────────────────────────── */
-	var kebabToggle = document.getElementById( 'wc-proto-kebab-toggle' );
-	var kebabMenu   = document.getElementById( 'wc-proto-kebab-menu' );
-
-	if ( kebabToggle && kebabMenu ) {
-		var closeKebab = function () {
-			kebabMenu.classList.remove( 'is-open' );
-			kebabToggle.setAttribute( 'aria-expanded', 'false' );
-		};
-
-		kebabToggle.addEventListener( 'click', function ( e ) {
-			e.stopPropagation();
-			var isOpen = kebabMenu.classList.toggle( 'is-open' );
-			kebabToggle.setAttribute( 'aria-expanded', isOpen ? 'true' : 'false' );
+	/* ── Kebab menu (details/summary — close on outside click or Escape) ── */
+	document.addEventListener( 'click', function ( e ) {
+		var openMenus = document.querySelectorAll( '.wc-proto-kebab[open]' );
+		if ( ! openMenus.length ) { return; }
+		openMenus.forEach( function ( menu ) {
+			if ( ! ( e.target instanceof Node ) || ! menu.contains( e.target ) ) {
+				menu.removeAttribute( 'open' );
+			}
 		} );
+	}, true );
 
-		document.addEventListener( 'click', closeKebab );
-	}
+	document.addEventListener( 'keydown', function ( e ) {
+		if ( e.key === 'Escape' || e.key === 'Esc' ) {
+			document.querySelectorAll( '.wc-proto-kebab[open]' ).forEach( function ( menu ) {
+				menu.removeAttribute( 'open' );
+			} );
+		}
+	} );
 
 	/* ── Wire "Copy to a new draft" URL from hidden metabox link ── */
 	// WooCommerce renders this link inside #submitdiv; we pull its href at runtime.
