@@ -12,13 +12,17 @@ import {
 } from '@wordpress/block-editor';
 import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
+import { useCollection } from '@woocommerce/base-context/hooks';
 import {
 	CustomDataProvider,
 	useCustomDataContext,
 	useProductDataContext,
 } from '@woocommerce/shared-context';
 import { isProductResponseItem } from '@woocommerce/entities';
-import type { ProductResponseAttributeItem } from '@woocommerce/types';
+import type {
+	AttributeTerm,
+	ProductResponseAttributeItem,
+} from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 import {
 	DisplayStyleSwitcher,
@@ -80,6 +84,32 @@ type AttributeItemProps = {
 function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
+	const termIds = useMemo( () => {
+		return attribute?.terms
+			? attribute.terms
+					.map( ( term ) => term.id )
+					.filter( ( termId ) => termId > 0 )
+			: [];
+	}, [ attribute ] );
+	const { results: attributeTerms } = useCollection< AttributeTerm >( {
+		namespace: '/wc/store/v1',
+		resourceName: 'products/attributes/terms',
+		resourceValues: [ attribute?.id || 0 ],
+		shouldSelect: !! attribute?.id && termIds.length > 0,
+		query: { include: termIds, hide_empty: false },
+	} );
+	const visualByTermId = useMemo( () => {
+		return attributeTerms.reduce< Record< number, VisualAttributeTerm > >(
+			( accumulator, term ) => {
+				if ( term.__experimentalVisual ) {
+					accumulator[ term.id ] = term.__experimentalVisual;
+				}
+
+				return accumulator;
+			},
+			{}
+		);
+	}, [ attributeTerms ] );
 
 	const selectableContext = useMemo( () => {
 		let items: SelectableItem< {
@@ -94,7 +124,7 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 		) {
 			items = attribute.terms.map( ( term ) => {
 				const visual =
-					term.__experimentalVisual || EMPTY_TERM_VISUALS[ term.id ];
+					visualByTermId[ term.id ] || EMPTY_TERM_VISUALS[ term.id ];
 
 				return {
 					id: `${ attribute.taxonomy }-${ term.slug }`,
@@ -116,7 +146,7 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			ariaLabel: string;
 			visual?: VisualAttributeTerm;
 		} >;
-	}, [ attribute ] );
+	}, [ attribute, visualByTermId ] );
 
 	const blockPreviewProps = useBlockPreview( {
 		blocks,

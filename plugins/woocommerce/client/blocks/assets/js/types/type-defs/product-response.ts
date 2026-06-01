@@ -1,7 +1,6 @@
 /**
  * Internal dependencies
  */
-import type { VisualAttributeTerm } from '../../base/utils/visual-attribute-terms';
 import type { CurrencyResponse } from './currency';
 
 export interface ProductResponseItemPrices extends CurrencyResponse {
@@ -37,8 +36,6 @@ export interface ProductResponseTermItem {
 	name: string;
 	slug: string;
 	link?: string;
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__experimentalVisual?: VisualAttributeTerm;
 }
 
 export interface ProductResponseAttributeItem {

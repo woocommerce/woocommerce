@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
-use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\ProductAttributeTermSchema;
 
@@ -93,24 +92,5 @@ class ProductAttributeTerms extends AbstractTermsRoute {
 		}
 
 		return $this->get_terms_response( $attribute->slug, $request );
-	}
-
-	/**
-	 * Prepare attribute terms with primed visual data caches.
-	 *
-	 * @param array            $objects Term objects.
-	 * @param \WP_REST_Request $request Request object.
-	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
-	 * @return array
-	 *
-	 * @since 10.9.0
-	 */
-	protected function prepare_terms_for_response( array $objects, \WP_REST_Request $request ): array {
-		$first_term = reset( $objects );
-		if ( $first_term instanceof \WP_Term && VisualAttributeTermMeta::is_visual_attribute_taxonomy( $first_term->taxonomy ) ) {
-			VisualAttributeTermMeta::prime_term_visual_caches( wp_list_pluck( $objects, 'term_id' ) );
-		}
-
-		return parent::prepare_terms_for_response( $objects, $request );
 	}
 }

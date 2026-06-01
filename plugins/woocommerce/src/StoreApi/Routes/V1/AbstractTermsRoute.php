@@ -134,8 +134,12 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 
 		$term_query = new WP_Term_Query();
 		$objects    = $term_query->query( $prepared_args );
-		$objects    = is_array( $objects ) ? $objects : [];
-		$return     = $this->prepare_terms_for_response( $objects, $request );
+		$return     = [];
+
+		foreach ( $objects as $object ) {
+			$data     = $this->prepare_item_for_response( $object, $request );
+			$return[] = $this->prepare_response_for_collection( $data );
+		}
 
 		$response = rest_ensure_response( $return );
 
@@ -146,27 +150,6 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 		}
 
 		return $response;
-	}
-
-	/**
-	 * Prepare terms for a collection response.
-	 *
-	 * @param array            $objects Term objects.
-	 * @param \WP_REST_Request $request Request object.
-	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
-	 * @return array
-	 *
-	 * @since 10.9.0
-	 */
-	protected function prepare_terms_for_response( array $objects, \WP_REST_Request $request ): array {
-		$return = [];
-
-		foreach ( $objects as $object ) {
-			$data     = $this->prepare_item_for_response( $object, $request );
-			$return[] = $this->prepare_response_for_collection( $data );
-		}
-
-		return $return;
 	}
 
 	/**

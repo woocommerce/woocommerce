@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
+
 /**
  * ProductAttributeTermSchema class.
  */
@@ -22,6 +24,13 @@ class ProductAttributeTermSchema extends TermSchema {
 	const IDENTIFIER = 'product-attribute-term';
 
 	/**
+	 * Visual data property name.
+	 *
+	 * @var string
+	 */
+	const VISUAL_PROPERTY_NAME = '__experimentalVisual';
+
+	/**
 	 * Term properties.
 	 *
 	 * @return array
@@ -29,7 +38,7 @@ class ProductAttributeTermSchema extends TermSchema {
 	public function get_properties() {
 		$schema = parent::get_properties();
 
-		$schema[ ProductAttributeTermVisualSchema::PROPERTY_NAME ] = ProductAttributeTermVisualSchema::get_property_schema();
+		$schema[ self::VISUAL_PROPERTY_NAME ] = $this->get_visual_property_schema();
 
 		return $schema;
 	}
@@ -41,6 +50,35 @@ class ProductAttributeTermSchema extends TermSchema {
 	 * @return array
 	 */
 	public function get_item_response( $term ) {
-		return ProductAttributeTermVisualSchema::add_visual_data( parent::get_item_response( $term ), $term );
+		$response = parent::get_item_response( $term );
+
+		if ( VisualAttributeTermMeta::is_visual_attribute_taxonomy( $term->taxonomy ) ) {
+			$response[ self::VISUAL_PROPERTY_NAME ] = VisualAttributeTermMeta::get_term_visual( (int) $term->term_id );
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Get the visual data property schema.
+	 *
+	 * @return array
+	 */
+	private function get_visual_property_schema(): array {
+		return array(
+			'description' => __( 'Experimental visual swatch data for wc-visual attribute terms.', 'woocommerce' ),
+			'type'        => 'object',
+			'context'     => array( 'view', 'edit' ),
+			'readonly'    => true,
+			'properties'  => array(
+				'type'  => array(
+					'type' => 'string',
+					'enum' => array( VisualAttributeTermMeta::TYPE_COLOR, VisualAttributeTermMeta::TYPE_IMAGE, VisualAttributeTermMeta::TYPE_NONE ),
+				),
+				'value' => array(
+					'type' => 'string',
+				),
+			),
+		);
 	}
 }
