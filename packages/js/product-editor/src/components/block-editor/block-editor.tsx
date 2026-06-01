@@ -17,10 +17,13 @@ import {
 import { dispatch, select, useDispatch, useSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import apiFetch from '@wordpress/api-fetch';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { Product } from '@woocommerce/data';
 import { getPath, getQuery } from '@woocommerce/navigation';
+import { getAdminLink, getSetting } from '@woocommerce/settings';
 import {
 	BlockContextProvider,
 	BlockEditorKeyboardShortcuts,
@@ -41,9 +44,13 @@ import { useProductTemplate } from '../../hooks/use-product-template';
 import { PostTypeContext } from '../../contexts/post-type-context';
 import { wooProductEditorUiStore } from '../../store/product-editor-ui';
 import { ProductEditorSettings } from '../editor';
+import { Notice } from '../notice';
 import { BlockEditorProps } from './types';
 import { LoadingState } from './loading-state';
 import type { ProductTemplate } from '../../types';
+
+const PRODUCT_BLOCK_EDITOR_FEATURE_OPTION =
+	'woocommerce_feature_product_block_editor_enabled';
 
 const PluginArea = lazy( () =>
 	import( '@wordpress/plugins' ).then( ( module ) => ( {
@@ -71,6 +78,26 @@ function getLayoutTemplateId(
 
 	// Fallback to simple product if no layout template is set.
 	return 'simple-product';
+}
+
+function getClassicProductEditorUrl(
+	productId: number,
+	postType: string,
+	product: Partial< Product > | undefined
+) {
+	const parentProductId =
+		postType === 'product_variation' &&
+		product &&
+		'parent_id' in product &&
+		typeof product.parent_id === 'number'
+			? product.parent_id
+			: productId;
+
+	if ( parentProductId > 0 ) {
+		return getAdminLink( `post.php?post=${ parentProductId }&action=edit` );
+	}
+
+	return getAdminLink( 'post-new.php?post_type=product' );
 }
 
 export function BlockEditor( {
@@ -175,6 +202,52 @@ export function BlockEditor( {
 		// Only perform the query when the productId is valid.
 		{ enabled: productId !== -1 }
 	);
+
+	const { _feature_nonce: featureNonce = '' } = getSetting< {
+		_feature_nonce?: string;
+	} >( 'admin', {} );
+	const classicProductEditorUrl = getClassicProductEditorUrl(
+		productId,
+		postType,
+		product
+	);
+	const disableProductBlockEditorUrl = new URL( classicProductEditorUrl );
+	disableProductBlockEditorUrl.searchParams.set(
+		'product_block_editor',
+		'0'
+	);
+	disableProductBlockEditorUrl.searchParams.set(
+		'_feature_nonce',
+		featureNonce
+	);
+	const [ isDisablingProductBlockEditor, setIsDisablingProductBlockEditor ] =
+		useState( false );
+
+	const disableProductBlockEditor = async (
+		event: React.MouseEvent< HTMLAnchorElement >
+	) => {
+		event.preventDefault();
+
+		if ( isDisablingProductBlockEditor ) {
+			return;
+		}
+
+		setIsDisablingProductBlockEditor( true );
+
+		try {
+			await apiFetch( {
+				path: `/wc/v3/settings/advanced/${ PRODUCT_BLOCK_EDITOR_FEATURE_OPTION }`,
+				method: 'POST',
+				data: {
+					value: 'no',
+				},
+			} );
+
+			window.location.href = classicProductEditorUrl;
+		} catch {
+			window.location.href = disableProductBlockEditorUrl.toString();
+		}
+	};
 
 	const productTemplateId = useMemo(
 		() =>
@@ -310,6 +383,28 @@ export function BlockEditor( {
 
 	return (
 		<div className="woocommerce-product-block-editor">
+			<Notice
+				className="woocommerce-product-block-editor__deprecation-notice"
+				type="warning"
+				title={ __(
+					'Switch to the classic editor before WooCommerce 11.0',
+					'woocommerce'
+				) }
+				content={ __(
+					"We're removing this version of the product editor in WooCommerce 11.0. The classic editor has the same features and your products won't change, so we recommend switching now.",
+					'woocommerce'
+				) }
+			>
+				<Button
+					className="woocommerce-product-block-editor__deprecation-notice-action"
+					href={ disableProductBlockEditorUrl.toString() }
+					isBusy={ isDisablingProductBlockEditor }
+					onClick={ disableProductBlockEditor }
+					variant="secondary"
+				>
+					{ __( 'Switch to classic editor', 'woocommerce' ) }
+				</Button>
+			</Notice>
 			<BlockContextProvider value={ context }>
 				<BlockEditorProvider
 					value={ blocks }
