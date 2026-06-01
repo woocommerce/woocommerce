@@ -349,16 +349,22 @@ class DataUtils {
 	 * Fill in refund_total for any line item that omits it, computing the value from
 	 * the order item's unit price × quantity via compute_line_item_refund_total().
 	 *
-	 * Items that already have refund_total are left untouched (existing v3-style clients
-	 * keep working). Items that can't be resolved (missing line_item_id, item not on
-	 * order, invalid quantity, unsupported item type) are also left untouched — the
-	 * downstream validator surfaces the right error.
+	 * Items that already have refund_total (including an explicit 0) are left
+	 * untouched, so existing v3-style clients keep working. Items where refund_total
+	 * is omitted OR is explicitly null are treated as "compute it for me". Items
+	 * that can't be resolved (missing line_item_id, item not on order, invalid
+	 * quantity, unsupported item type) are also left untouched — validate_line_items
+	 * surfaces the right error for those cases.
+	 *
+	 * Auto-computed values are tax-inclusive, matching the convention enforced by
+	 * the existing converter (convert_line_items_to_internal_format extracts tax
+	 * from a tax-inclusive refund_total).
 	 *
 	 * @since 10.8.0
 	 *
-	 * @param array    $line_items Line items from the request (schema format).
-	 * @param WC_Order $order      The order being refunded.
-	 * @return array The line items with refund_total populated where possible.
+	 * @param list<array{line_item_id?: int, quantity?: int, refund_total?: float|int|null, refund_tax?: array<int, mixed>}> $line_items Line items from the request (schema format).
+	 * @param WC_Order $order The order being refunded.
+	 * @return list<array{line_item_id?: int, quantity?: int, refund_total?: float|int|null, refund_tax?: array<int, mixed>}> The line items with refund_total populated where possible.
 	 */
 	public function fill_missing_refund_totals( array $line_items, WC_Order $order ): array {
 		foreach ( $line_items as $key => $line_item ) {
