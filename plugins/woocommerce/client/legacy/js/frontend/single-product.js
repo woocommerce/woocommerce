@@ -365,12 +365,24 @@ jQuery( function( $ ) {
 				muted: 'muted',
 				playsinline: 'playsinline',
 				'aria-hidden': 'true',
+			} ).css( {
+				position: 'absolute',
+				top: 0,
+				right: 0,
+				bottom: 0,
+				left: 0,
+				width: '100%',
+				height: '100%',
+				objectFit: 'cover',
+				pointerEvents: 'none',
 			} );
 
 			$thumbItem
-				.addClass( 'woocommerce-product-gallery__video-thumbnail' );
+				.addClass( 'woocommerce-product-gallery__video-thumbnail' )
+				.css( 'position', 'relative' );
 			$thumb
 				.addClass( 'woocommerce-product-gallery__video-thumbnail-placeholder' )
+				.css( 'opacity', 0 )
 				.after( video );
 		} );
 	};
@@ -503,6 +515,8 @@ jQuery( function( $ ) {
 					if ( media.is( 'video' ) ) {
 						item = {
 							html: gallery.getPhotoswipeVideoHtml( media ),
+							w: large_image_w,
+							h: large_image_h,
 							title,
 							video: true,
 						};
@@ -538,6 +552,13 @@ jQuery( function( $ ) {
 			loop: 'loop',
 			playsinline: 'playsinline',
 			'aria-label': media.attr( 'aria-label' ) || '',
+		} ).css( {
+			display: 'block',
+			width: '100%',
+			height: '100%',
+			maxWidth: '100%',
+			maxHeight: '100%',
+			objectFit: 'contain',
 		} );
 		const poster = media.attr( 'poster' );
 
@@ -547,6 +568,12 @@ jQuery( function( $ ) {
 
 		return $( '<div />', {
 			class: 'woocommerce-product-gallery__photoswipe-video-wrapper',
+		} ).css( {
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'center',
+			width: '100%',
+			height: '100%',
 		} )
 			.append( $video )
 			.prop( 'outerHTML' );
