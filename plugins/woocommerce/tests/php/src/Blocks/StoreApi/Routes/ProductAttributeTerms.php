@@ -124,9 +124,9 @@ class ProductAttributeTerms extends ControllerTestCase {
 		$schema     = $controller->get_item_schema();
 		$request    = new \WP_REST_Request();
 		$request->set_param( '__experimental_visual', true );
-		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'red', 'pa_color' ), $request );
-		$data       = $response->get_data();
-		$validate   = new ValidateSchema( $schema );
+		$response = $controller->prepare_item_for_response( get_term_by( 'name', 'red', 'pa_color' ), $request );
+		$data     = $response->get_data();
+		$validate = new ValidateSchema( $schema );
 
 		$this->assertArrayHasKey( '__experimentalVisual', $data );
 		$this->assertSame( 'none', $data['__experimentalVisual']['type'] );

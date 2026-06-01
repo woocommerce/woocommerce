@@ -71,10 +71,10 @@ class ProductAttributeTerms extends AbstractTermsRoute {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                      = parent::get_collection_params();
-		$params['orderby']['enum'][] = 'menu_order';
-		$params['orderby']['enum'][] = 'name_num';
-		$params['orderby']['enum'][] = 'id';
+		$params                          = parent::get_collection_params();
+		$params['orderby']['enum'][]     = 'menu_order';
+		$params['orderby']['enum'][]     = 'name_num';
+		$params['orderby']['enum'][]     = 'id';
 		$params['__experimental_visual'] = array(
 			'description'       => __( 'If true, include experimental visual swatch data for wc-visual attribute terms.', 'woocommerce' ),
 			'type'              => 'boolean',
