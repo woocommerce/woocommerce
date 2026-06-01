@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 class SavePublishClarity {
 
 	const FLAG_KEY = 'save_publish_clarity';
-	const HEADER_H = 46;
+	const HEADER_H = 48;
 	// px — height of our action bar.
 	const ADMINBAR_H = 32;
 	// px — standard WP admin bar.
@@ -102,10 +102,19 @@ body.folded #wc-proto-save-header {
 	position: relative;
 }
 
-/* Reset WP button margins inside the header */
-#wc-proto-save-header .button,
+/* Reset WP button margins and set compact size (32px) inside the header */
+#wc-proto-save-header .button {
+	margin: 0;
+	height: 32px;
+	line-height: 30px;
+	padding: 0 12px;
+	font-size: 13px;
+	vertical-align: middle;
+}
 #wc-proto-save-header .button-link {
 	margin: 0;
+	height: 32px;
+	line-height: 32px;
 	vertical-align: middle;
 }
 
@@ -223,10 +232,10 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 				<?php esc_html_e( 'Preview', 'woocommerce' ); ?>
 			</button>
 			<?php endif; ?>
-			<button type="button" id="wc-proto-btn-save-draft" class="button button-small">
+			<button type="button" id="wc-proto-btn-save-draft" class="button">
 				<?php esc_html_e( 'Save draft', 'woocommerce' ); ?>
 			</button>
-			<button type="button" id="wc-proto-btn-publish" class="button button-primary button-small">
+			<button type="button" id="wc-proto-btn-publish" class="button button-primary">
 				<?php echo esc_html( $primary_label ); ?>
 			</button>
 			<details class="wc-proto-kebab">
