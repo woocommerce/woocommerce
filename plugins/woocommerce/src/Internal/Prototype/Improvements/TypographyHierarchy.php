@@ -41,7 +41,7 @@ class TypographyHierarchy {
 		?>
 <style id="wc-proto-typo-styles">
 /* ── Tier 1: Metabox titles ─────────────────────────────── */
-body.post-type-product .postbox .hndle h2 {
+body.post-type-product .postbox h2.hndle {
     font-size: var(--wpds-typography-font-size-md, 13px);
     font-weight: var(--wpds-typography-font-weight-medium, 499);
     color: var(--wpds-color-fg-content-neutral, #1e1e1e);
