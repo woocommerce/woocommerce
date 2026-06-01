@@ -77,6 +77,31 @@ Guard with `! empty()` when the list is dynamically built and may be empty. When
 
 ---
 
+### 4. Transient names passed to `wp_prime_option_caches()` — unsafe under persistent object cache
+
+**Anti-pattern:** Passing `_transient_*` or `_transient_timeout_*` (or `_site_transient_*`) option names to `wp_prime_option_caches()`.
+
+**Why it is wrong:** When a persistent object cache is active, WordPress stores transients in the object cache under the `transient` group — not as rows in `wp_options`. `wp_prime_option_caches()` reads from the options table. On a persistent-cache site the named rows never exist, so each prime call records every transient name as a `notoptions` entry. Because those options never exist, the entries are never evicted. The `notoptions` cache key grows by two entries per variable product per call (`_transient_<name>` + `_transient_timeout_<name>`). On a sharded object cache (e.g. Redis split across nodes), `notoptions` is a single key on one shard that is read on every request — unbounded growth directly increases per-request latency on that shard.
+
+**Correct pattern:**
+
+```php
+// Transients are stored in the options table only when no persistent object cache is active.
+// wp_prime_option_caches() operates on the options table; passing transient names under a
+// persistent object cache records them as notoptions entries that are never cleared.
+if ( ! wp_using_ext_object_cache() ) {
+    wp_prime_option_caches( $transient_option_names );
+}
+```
+
+`wp_using_ext_object_cache()` is the same guard WordPress itself uses inside `get_transient()` and `set_transient()` to switch between the options table and the object cache. Sites without a persistent cache keep the existing batching behaviour. Sites with one are not affected.
+
+**Audit rule:** Any call to `wp_prime_option_caches()` whose key list contains names beginning with `_transient_` or `_site_transient_` must be guarded with `! wp_using_ext_object_cache()`.
+
+**Known instance fixed:** `WC_Product_Variable_Data_Store_CPT::read_product_data()` — primed `_transient_wc_var_prices_<id>` and `_transient_wc_product_children_<id>` unconditionally. Fixed in PR #65440. The same pattern was removed from `WC_Order::needs_processing()` (`prime_needs_processing_transients()`, deprecated 10.8.0) — the order-side shape was more dangerous because it grew without bound (one entry per order ID); the product-side was bounded by catalog size but the root cause was identical.
+
+---
+
 ## Notes
 
 `wp_prime_option_caches()` is a stable public WordPress function (no underscore prefix), available since WP 6.4. WooCommerce's minimum supported WordPress version guarantees its presence — no `is_callable()` guard is needed.
