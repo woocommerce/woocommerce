@@ -97,6 +97,7 @@ class ProductAttributeTerms extends ControllerTestCase {
 		$this->assertEquals( 'small-slug', $data['slug'] );
 		$this->assertEquals( 'Description of small', $data['description'] );
 		$this->assertEquals( 0, $data['count'] );
+		$this->assertArrayNotHasKey( '__experimentalVisual', $data );
 	}
 
 	/**
@@ -119,12 +120,15 @@ class ProductAttributeTerms extends ControllerTestCase {
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'product-attribute-terms' );
 		$schema     = $controller->get_item_schema();
-		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'small', 'pa_size' ), new \WP_REST_Request() );
+		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'red', 'pa_color' ), new \WP_REST_Request() );
 		$data       = $response->get_data();
 		$validate   = new ValidateSchema( $schema );
 
 		$this->assertArrayHasKey( '__experimentalVisual', $data );
-		$this->assertNull( $data['__experimentalVisual'] );
+		$this->assertSame( 'none', $data['__experimentalVisual']['type'] );
+		$this->assertSame( '', $data['__experimentalVisual']['value'] );
+
+		$data['__experimentalVisual'] = (object) $data['__experimentalVisual'];
 
 		$diff = $validate->get_diff_from_object( $data );
 		$this->assertEmpty( $diff, print_r( $diff, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r

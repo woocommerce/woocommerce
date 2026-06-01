@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve existing Store API responses for non-visual attribute terms.
