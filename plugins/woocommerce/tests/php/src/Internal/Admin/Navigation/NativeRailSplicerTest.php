@@ -382,7 +382,10 @@ class NativeRailSplicerTest extends \WC_Unit_Test_Case {
 			),
 		);
 
-		$_GET['page']       = 'wc-admin';
+		// Current page must resolve to a node in the tree above, otherwise
+		// splice() treats this as a non-Woo page and no-ops before registering
+		// any hooknames. `wc-orders` is the only navigable child here.
+		$_GET['page']       = 'wc-orders';
 		$GLOBALS['pagenow'] = 'admin.php';
 
 		( new Native_Rail_Splicer() )->splice( $tree );

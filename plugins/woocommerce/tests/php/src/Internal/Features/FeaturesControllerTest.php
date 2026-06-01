@@ -1043,7 +1043,9 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		$controller = new FeaturesController();
 		$controller->init( wc_get_container()->get( \Automattic\WooCommerce\Proxies\LegacyProxy::class ), $this->fake_plugin_util );
-		$features = $controller->get_features( true );
+		// include_enabled_info=true so each feature carries the `is_enabled` key
+		// the disabled-by-default assertion below reads.
+		$features = $controller->get_features( true, true );
 
 		remove_action( 'woocommerce_register_feature_definitions', array( $bootstrap, 'register_feature' ), 12 );
 		// Bootstrap also registered an `init` hook in its constructor; clean

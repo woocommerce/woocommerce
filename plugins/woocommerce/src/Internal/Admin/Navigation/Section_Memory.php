@@ -182,13 +182,18 @@ class Section_Memory {
 	 * a tampered cookie producing an open-redirect path).
 	 */
 	private function read_cookie_target(): ?string {
-		$raw = isset( $_COOKIE[ self::COOKIE_NAME ] )
-			? sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) )
-			: '';
-		if ( '' === $raw ) {
+		if ( ! isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
 			return null;
 		}
-		$path = rawurldecode( $raw );
+		// Decode the rawurlencoded cookie value BEFORE sanitizing: running
+		// sanitize_text_field() on the still-encoded value strips every `%XX`
+		// octet, which would mangle the stored path so the admin-scope check
+		// below could never match a legitimate target.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Value is sanitized by sanitize_text_field(); the sniff can't trace it through rawurldecode().
+		$path = sanitize_text_field( rawurldecode( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) ) );
+		if ( '' === $path ) {
+			return null;
+		}
 		if ( 0 !== strpos( $path, $this->cookie_path() ) ) {
 			return null;
 		}

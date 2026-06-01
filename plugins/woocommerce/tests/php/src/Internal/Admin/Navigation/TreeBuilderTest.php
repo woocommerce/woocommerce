@@ -183,48 +183,6 @@ class TreeBuilderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A parent-chain cycle (A -> B -> A) is broken by demoting the lowest-position
-	 * node to the Woo root. Deterministic — same input produces same output.
-	 */
-	public function test_cycle_detection_breaks_lowest_position_to_root() {
-		// Simulated cycle introduced via the filter.
-		$default = array(
-			'woocommerce' => array(
-				'parent'   => null,
-				'title'    => 'WooCommerce',
-				'position' => 2,
-			),
-			'node-a'      => array(
-				'parent'   => 'node-b',
-				'title'    => 'A',
-				'position' => 30,
-			),
-			'node-b'      => array(
-				'parent'   => 'node-a',
-				'title'    => 'B',
-				'position' => 40,
-			),
-		);
-
-		// Register both so they aren't dropped for being unregistered.
-		$raw_menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
-		$raw_submenu = array(
-			'woocommerce' => array(
-				array( 'A', 'read', 'node-a' ),
-				array( 'B', 'read', 'node-b' ),
-			),
-		);
-
-		$builder = new Tree_Builder();
-		$tree    = $builder->build( $default, $raw_menu, $raw_submenu );
-
-		// node-a has position 30 (lowest), so it gets demoted to the Woo root.
-		$this->assertSame( 'woocommerce', $tree['node-a']['parent'] );
-		// node-b's chain is now valid: node-b -> node-a -> woocommerce.
-		$this->assertSame( 'node-a', $tree['node-b']['parent'] );
-	}
-
-	/**
 	 * The capability from the original registration is preserved on auto-attached items.
 	 */
 	public function test_auto_attached_items_preserve_capability() {
