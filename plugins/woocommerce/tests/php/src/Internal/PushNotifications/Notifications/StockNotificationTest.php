@@ -85,7 +85,7 @@ class StockNotificationTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'message', $payload );
 		$this->assertArrayHasKey( 'format', $payload['message'] );
 		$this->assertArrayHasKey( 'args', $payload['message'] );
-		$this->assertArrayHasKey( 'icon', $payload );
+		$this->assertArrayNotHasKey( 'icon', $payload );
 		$this->assertArrayHasKey( 'meta', $payload );
 		$this->assertArrayHasKey( 'product_id', $payload['meta'] );
 		$this->assertArrayHasKey( 'event_type', $payload['meta'] );
@@ -104,6 +104,21 @@ class StockNotificationTest extends WC_Unit_Test_Case {
 		$payload      = $notification->to_payload();
 
 		$this->assertStringStartsWith( $expected_prefix, $payload['title']['format'] );
+	}
+
+	/**
+	 * @testdox Should include the event-specific emoji as the last title arg.
+	 * @dataProvider event_type_emoji_provider
+	 *
+	 * @param string $event_type     The event type constant.
+	 * @param string $expected_emoji The emoji expected for that event type.
+	 */
+	public function test_to_payload_title_args_contain_event_emoji( string $event_type, string $expected_emoji ): void {
+		$product      = WC_Helper_Product::create_simple_product();
+		$notification = new StockNotification( $product->get_id(), $event_type );
+		$payload      = $notification->to_payload();
+
+		$this->assertSame( $expected_emoji, $payload['title']['args'][1] );
 	}
 
 	/**
@@ -409,6 +424,19 @@ class StockNotificationTest extends WC_Unit_Test_Case {
 			'low_stock'    => array( StockNotification::EVENT_LOW_STOCK, 'Low stock:' ),
 			'out_of_stock' => array( StockNotification::EVENT_OUT_OF_STOCK, 'Out of stock:' ),
 			'on_backorder' => array( StockNotification::EVENT_ON_BACKORDER, 'Backordered:' ),
+		);
+	}
+
+	/**
+	 * Data provider mapping event types to their expected title emoji.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function event_type_emoji_provider(): array {
+		return array(
+			'low_stock'    => array( StockNotification::EVENT_LOW_STOCK, StockNotification::EMOJI_LOW_STOCK ),
+			'out_of_stock' => array( StockNotification::EVENT_OUT_OF_STOCK, StockNotification::EMOJI_OUT_OF_STOCK ),
+			'on_backorder' => array( StockNotification::EVENT_ON_BACKORDER, StockNotification::EMOJI_ON_BACKORDER ),
 		);
 	}
 }

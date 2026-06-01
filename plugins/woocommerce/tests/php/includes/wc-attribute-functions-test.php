@@ -291,6 +291,11 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Data provider for test_wc_get_attribute_taxonomy_slug().
+	 *
+	 * @return array
+	 */
 	public function get_attribute_names_and_slugs() {
 		return array(
 			array( 'Dash Me', 'dash-me' ),
