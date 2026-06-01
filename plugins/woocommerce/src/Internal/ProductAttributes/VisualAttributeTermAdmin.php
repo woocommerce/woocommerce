@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\ProductAttributes;
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
  * Admin UI for wc-visual attribute term metadata.
@@ -18,25 +19,17 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
  *
  * @since 10.9.0
  */
-class VisualAttributeTermAdmin {
-
-	/**
-	 * Hook visual attribute term admin behavior.
-	 */
-	public function __construct() {
-		if ( ! is_admin() ) {
-			return;
-		}
-
-		$this->init_hooks();
-	}
+class VisualAttributeTermAdmin implements RegisterHooksInterface {
 
 	/**
 	 * Register hooks.
 	 *
 	 * @return void
 	 */
-	private function init_hooks(): void {
+	public function register(): void {
+		if ( ! is_admin() ) {
+			return;
+		}
 		add_action( 'created_term', array( $this, 'save_product_attribute_term_fields' ), 10, 3 );
 		add_action( 'edit_term', array( $this, 'save_product_attribute_term_fields' ), 10, 3 );
 
