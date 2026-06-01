@@ -101,6 +101,8 @@ class WC_Query {
 			'add-payment-method'         => get_option( 'woocommerce_myaccount_add_payment_method_endpoint', 'add-payment-method' ),
 			'delete-payment-method'      => get_option( 'woocommerce_myaccount_delete_payment_method_endpoint', 'delete-payment-method' ),
 			'set-default-payment-method' => get_option( 'woocommerce_myaccount_set_default_payment_method_endpoint', 'set-default-payment-method' ),
+			'withdrawals'                => get_option( 'woocommerce_myaccount_withdrawals_endpoint', 'withdrawals' ),
+			'request-withdrawal'         => get_option( 'woocommerce_myaccount_request_withdrawal_endpoint', 'request-withdrawal' ),
 		);
 	}
 
@@ -151,6 +153,17 @@ class WC_Query {
 				break;
 			case 'add-payment-method':
 				$title = __( 'Add payment method', 'woocommerce' );
+				break;
+			case 'withdrawals':
+				if ( ! empty( $wp->query_vars['withdrawals'] ) ) {
+					/* translators: %d: page number */
+					$title = sprintf( __( 'Withdrawals (page %d)', 'woocommerce' ), intval( $wp->query_vars['withdrawals'] ) );
+				} else {
+					$title = __( 'Withdrawals', 'woocommerce' );
+				}
+				break;
+			case 'request-withdrawal':
+				$title = __( 'Request withdrawal', 'woocommerce' );
 				break;
 			case 'lost-password':
 				if ( in_array( $action, array( 'rp', 'resetpass', 'newaccount' ), true ) ) {
@@ -788,7 +801,8 @@ class WC_Query {
 		 * Kicks in when prices excluding tax are displayed including tax.
 		 */
 		if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
-			$tax_class = apply_filters( 'woocommerce_price_filter_widget_tax_class', '' ); // Uses standard tax class.
+			$tax_class = apply_filters( 'woocommerce_price_filter_widget_tax_class', '' );
+			// Uses standard tax class.
 			$tax_rates = WC_Tax::get_rates( $tax_class );
 
 			if ( $tax_rates ) {
@@ -1058,7 +1072,8 @@ class WC_Query {
 						}
 
 						$query_type                                    = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ), true ) ? wc_clean( wp_unslash( $_GET[ 'query_type_' . $attribute ] ) ) : '';
-						self::$chosen_attributes[ $taxonomy ]['terms'] = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding.
+						self::$chosen_attributes[ $taxonomy ]['terms'] = array_map( 'sanitize_title', $filter_terms );
+						// Ensures correct encoding.
 						self::$chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
 					}
 				}

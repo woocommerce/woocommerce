@@ -240,7 +240,8 @@ add_action( 'woocommerce_after_shop_loop', 'woocommerce_reset_loop', 999 );
  * @return mixed
  */
 function wc_get_loop_prop( $prop, $default = '' ) {
-	wc_setup_loop(); // Ensure shop loop is setup.
+	wc_setup_loop();
+	// Ensure shop loop is setup.
 
 	return isset( $GLOBALS['woocommerce_loop'], $GLOBALS['woocommerce_loop'][ $prop ] ) ? $GLOBALS['woocommerce_loop'][ $prop ] : $default;
 }
@@ -443,7 +444,8 @@ function wc_get_default_products_per_row() {
 		update_option( 'woocommerce_catalog_columns', $columns );
 	}
 
-	if ( has_filter( 'loop_shop_columns' ) ) { // Legacy filter handling.
+	if ( has_filter( 'loop_shop_columns' ) ) {
+		// Legacy filter handling.
 		$columns = apply_filters( 'loop_shop_columns', $columns );
 	}
 
@@ -492,7 +494,8 @@ function wc_reset_product_grid_settings() {
 		update_option( 'woocommerce_catalog_columns', absint( $product_grid['default_columns'] ) );
 	}
 
-	wp_cache_flush(); // Flush any caches which could impact settings or templates.
+	wp_cache_flush();
+	// Flush any caches which could impact settings or templates.
 }
 add_action( 'after_switch_theme', 'wc_reset_product_grid_settings' );
 
@@ -1464,8 +1467,9 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 				array_filter(
 					array(
 						'button',
-						wc_wp_theme_get_element_class_name( 'button' ), // escaped in the template.
-						'product_type_' . $product->get_type(),
+						wc_wp_theme_get_element_class_name( 'button' ),
+						// escaped in the template.
+																						'product_type_' . $product->get_type(),
 						$product->is_purchasable() && $product->is_in_stock() ? 'add_to_cart_button' : '',
 						$product->supports( 'ajax_add_to_cart' ) && $product->is_purchasable() && $product->is_in_stock() ? 'ajax_add_to_cart' : '',
 					)
@@ -3733,7 +3737,8 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		$class                 = $args['class'];
 		$required              = (bool) $args['required'];
 		$show_option_none      = (bool) $args['show_option_none'];
-		$show_option_none_text = $args['show_option_none'] ? $args['show_option_none'] : __( 'Choose an option', 'woocommerce' ); // We'll do our best to hide the placeholder, but we'll need to show something when resetting options.
+		$show_option_none_text = $args['show_option_none'] ? $args['show_option_none'] : __( 'Choose an option', 'woocommerce' );
+		// We'll do our best to hide the placeholder, but we'll need to show something when resetting options.
 
 		if ( empty( $options ) && ! empty( $product ) && ! empty( $attribute ) ) {
 			$attributes = $product->get_variation_attributes();
@@ -3915,6 +3920,40 @@ if ( ! function_exists( 'woocommerce_account_add_payment_method' ) ) {
 	 */
 	function woocommerce_account_add_payment_method() {
 		WC_Shortcode_My_Account::add_payment_method();
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_withdrawals' ) ) {
+
+	/**
+	 * My Account > Withdrawals list template.
+	 *
+	 * @param int $current_page Current page number.
+	 * @return void
+	 */
+	function woocommerce_account_withdrawals( $current_page ) {
+		$container        = wc_get_container();
+		$controller_class = \Automattic\WooCommerce\Internal\Orders\WithdrawalController::class;
+		if ( $container->has( $controller_class ) ) {
+			$container->get( $controller_class )->output_withdrawals( max( 1, absint( $current_page ) ) );
+		}
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_request_withdrawal' ) ) {
+
+	/**
+	 * My Account > Request withdrawal template.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return void
+	 */
+	function woocommerce_account_request_withdrawal( $order_id ) {
+		$container        = wc_get_container();
+		$controller_class = \Automattic\WooCommerce\Internal\Orders\WithdrawalController::class;
+		if ( $container->has( $controller_class ) ) {
+			$container->get( $controller_class )->output_request_withdrawal( absint( $order_id ) );
+		}
 	}
 }
 

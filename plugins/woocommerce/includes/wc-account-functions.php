@@ -31,7 +31,8 @@ function wc_lostpassword_url( $default_url = '' ) {
 	}
 
 	// Don't redirect to the woocommerce endpoint on global network admin lost passwords.
-	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( wp_unslash( $_GET['redirect_to'] ), network_admin_url() ) ) { // WPCS: input var ok, sanitization ok, CSRF ok.
+	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( wp_unslash( $_GET['redirect_to'] ), network_admin_url() ) ) {
+		// WPCS: input var ok, sanitization ok, CSRF ok.
 		return $default_url;
 	}
 
@@ -101,6 +102,7 @@ function wc_get_account_menu_items() {
 		'payment-methods' => get_option( 'woocommerce_myaccount_payment_methods_endpoint', 'payment-methods' ),
 		'edit-account'    => get_option( 'woocommerce_myaccount_edit_account_endpoint', 'edit-account' ),
 		'customer-logout' => get_option( 'woocommerce_logout_endpoint', 'customer-logout' ),
+		'withdrawals'     => get_option( 'woocommerce_myaccount_withdrawals_endpoint', 'withdrawals' ),
 	);
 
 	$items = array(
@@ -111,6 +113,7 @@ function wc_get_account_menu_items() {
 		'payment-methods' => __( 'Payment methods', 'woocommerce' ),
 		'edit-account'    => __( 'Account details', 'woocommerce' ),
 		'customer-logout' => __( 'Log out', 'woocommerce' ),
+		'withdrawals'     => __( 'Withdrawals', 'woocommerce' ),
 	);
 
 	// Remove missing endpoints.
@@ -150,9 +153,11 @@ function wc_is_current_account_menu_item( $endpoint ) {
 
 	$current = isset( $wp->query_vars[ $endpoint ] );
 	if ( 'dashboard' === $endpoint && ( isset( $wp->query_vars['page'] ) || empty( $wp->query_vars ) ) ) {
-		$current = true; // Dashboard is not an endpoint, so needs a custom check.
+		$current = true;
+		// Dashboard is not an endpoint, so needs a custom check.
 	} elseif ( 'orders' === $endpoint && isset( $wp->query_vars['view-order'] ) ) {
-		$current = true; // When looking at individual order, highlight Orders list item (to signify where in the menu the user currently is).
+		$current = true;
+		// When looking at individual order, highlight Orders list item (to signify where in the menu the user currently is).
 	} elseif ( 'payment-methods' === $endpoint && isset( $wp->query_vars['add-payment-method'] ) ) {
 		$current = true;
 	}
@@ -339,6 +344,23 @@ function wc_get_account_orders_actions( $order ) {
 	$statuses_for_cancel = apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order );
 	if ( ! in_array( $order->get_status(), $statuses_for_cancel, true ) ) {
 		unset( $actions['cancel'] );
+	}
+
+	// Add EU withdrawal action (Directive 2023/2673).
+	if ( class_exists( '\\Automattic\\WooCommerce\\Internal\\Orders\\WithdrawalController' ) ) {
+		$withdrawal_controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Orders\WithdrawalController::class );
+		if ( $withdrawal_controller->is_order_eligible_for_withdrawal( $order ) ) {
+			$withdrawal_url      = wp_nonce_url(
+				wc_get_endpoint_url( 'request-withdrawal', $order->get_id(), wc_get_page_permalink( 'myaccount' ) ),
+				'woocommerce-view_withdrawal_' . $order->get_id()
+			);
+			$actions['withdraw'] = array(
+				'url'        => $withdrawal_url,
+				'name'       => __( 'Withdraw', 'woocommerce' ),
+				/* translators: %s: order number */
+				'aria-label' => sprintf( __( 'Withdraw from order %s', 'woocommerce' ), $order->get_order_number() ),
+			);
+		}
 	}
 
 	/**

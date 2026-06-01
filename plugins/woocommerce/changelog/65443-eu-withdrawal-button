@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Comment: Add native support for the EU mandatory right of withdrawal function (Directive 2023/2673). Introduces new My Account endpoints for withdrawal requests, a two-step confirmation flow, customer/admin email notifications, and an admin meta box to manage requests.

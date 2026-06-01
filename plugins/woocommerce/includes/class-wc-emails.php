@@ -181,7 +181,8 @@ class WC_Emails {
 		 * @param array  $args Email args.
 		 */
 		if ( apply_filters( 'woocommerce_allow_send_queued_transactional_email', true, $filter, $args ) ) {
-			self::instance(); // Init self so emails exist.
+			self::instance();
+			// Init self so emails exist.
 
 			// Ensure gateways are loaded in case they need to insert data into the emails.
 			WC()->payment_gateways();
@@ -204,7 +205,8 @@ class WC_Emails {
 	public static function send_transactional_email( $args = array() ) {
 		try {
 			$args = func_get_args();
-			self::instance(); // Init self so emails exist.
+			self::instance();
+			// Init self so emails exist.
 
 			/**
 			 * Action hook for email template classes to trigger the sending of an email.
@@ -297,6 +299,8 @@ class WC_Emails {
 			'WC_Email_Customer_Reset_Password'       => __DIR__ . '/emails/class-wc-email-customer-reset-password.php',
 			'WC_Email_Customer_New_Account'          => __DIR__ . '/emails/class-wc-email-customer-new-account.php',
 			'WC_Email_Admin_Payment_Gateway_Enabled' => __DIR__ . '/emails/class-wc-email-admin-payment-gateway-enabled.php',
+			'WC_Email_Customer_Withdrawal_Request'   => __DIR__ . '/emails/class-wc-email-customer-withdrawal-request.php',
+			'WC_Email_New_Withdrawal_Request'        => __DIR__ . '/emails/class-wc-email-new-withdrawal-request.php',
 		);
 		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
 			$emails['WC_Email_Customer_POS_Completed_Order'] = __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php';
@@ -668,14 +672,16 @@ class WC_Emails {
 
 				foreach ( $fields as $field ) {
 					if ( isset( $field['label'], $field['value'] ) && $field['value'] ) {
-						echo wp_kses_post( $field['label'] . ': ' . $field['value'] ) . "\n"; // WPCS: XSS ok.
+						echo wp_kses_post( $field['label'] . ': ' . $field['value'] ) . "\n";
+						// WPCS: XSS ok.
 					}
 				}
 			} else {
 
 				foreach ( $fields as $field ) {
 					if ( isset( $field['label'], $field['value'] ) && $field['value'] ) {
-						echo '<p><strong>' . wp_kses_post( $field['label'] ) . ':</strong> ' . wp_kses_post( $field['value'] ) . '</p>'; // WPCS: XSS ok.
+						echo '<p><strong>' . wp_kses_post( $field['label'] ) . ':</strong> ' . wp_kses_post( $field['value'] ) . '</p>';
+						// WPCS: XSS ok.
 					}
 				}
 			}
