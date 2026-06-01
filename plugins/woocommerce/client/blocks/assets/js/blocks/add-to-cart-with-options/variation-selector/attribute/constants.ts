@@ -4,6 +4,11 @@
 import type { TemplateArray } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
+
 export const ATTRIBUTE_ITEM_TEMPLATE: TemplateArray = [
 	[
 		'woocommerce/add-to-cart-with-options-variation-selector-attribute',
@@ -66,8 +71,8 @@ export const DEFAULT_ATTRIBUTES = [
 	},
 ] as const;
 
-export const EMPTY_TERM_COLORS: Record< string, string > = {
-	'-1': '#0000ff',
-	'-2': '#e10000',
-	'-3': '#009b00',
+export const EMPTY_TERM_VISUALS: Record< string, VisualAttributeTerm > = {
+	'-1': { type: 'color', value: '#0000ff' },
+	'-2': { type: 'color', value: '#e10000' },
+	'-3': { type: 'color', value: '#009b00' },
 };

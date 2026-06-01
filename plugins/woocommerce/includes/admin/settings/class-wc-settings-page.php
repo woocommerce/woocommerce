@@ -8,6 +8,9 @@
 
 declare( strict_types = 1);
 
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -83,6 +86,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
 			add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
 			add_action( 'woocommerce_admin_field_add_settings_slot', array( $this, 'add_settings_slot' ) );
+			add_filter( 'admin_body_class', array( $this, 'add_settings_ui_body_class' ) );
 		}
 
 		/**
@@ -103,6 +107,45 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 */
 		public function get_label() {
 			return $this->label;
+		}
+
+		/**
+		 * Get the settings UI page adapter for this settings page.
+		 *
+		 * Settings pages can override this to opt in to the settings UI renderer
+		 * while retaining the classic WooCommerce settings page route and save flow.
+		 *
+		 * @since 10.9.0
+		 * @return SettingsUIPageInterface|null
+		 */
+		public function get_settings_ui_page(): ?SettingsUIPageInterface {
+			return null;
+		}
+
+		/**
+		 * Add a body class for settings pages rendered through the settings UI SDK.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param string $classes The existing body classes for the admin area.
+		 * @return string The modified body classes for the admin area.
+		 */
+		public function add_settings_ui_body_class( $classes ) {
+			global $current_tab;
+
+			if ( ! is_string( $classes ) || $this->id !== $current_tab ) {
+				return $classes;
+			}
+
+			if ( ! Features::is_enabled( 'settings-ui' ) || ! $this->get_settings_ui_page() instanceof SettingsUIPageInterface ) {
+				return $classes;
+			}
+
+			if ( str_contains( $classes, 'woocommerce-settings-ui-page' ) ) {
+				return $classes;
+			}
+
+			return "$classes woocommerce-settings-ui-page";
 		}
 
 		/**
@@ -264,6 +307,49 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 */
 		public function output() {
 			global $current_section;
+
+			$settings_ui_page = $this->get_settings_ui_page();
+			$section_key      = '' === $current_section ? 'default' : $current_section;
+			$page_id          = $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page->get_page_id() : '';
+			$schema_failed    = ! empty( $GLOBALS['wc_settings_ui_schema_failed'][ $page_id ][ $section_key ] );
+
+			if ( Features::is_enabled( 'settings-ui' ) && $settings_ui_page instanceof SettingsUIPageInterface && ! $schema_failed ) {
+				$render_settings_ui = true;
+
+				try {
+					$script_handles = $settings_ui_page->get_script_handles( $current_section );
+				} catch ( \Throwable $e ) {
+					$script_handles     = array();
+					$render_settings_ui = false;
+
+					if ( $e instanceof \Exception ) {
+						wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
+					}
+				}
+
+				if ( $render_settings_ui ) {
+					/**
+					 * Extension-provided handles may violate the interface contract.
+					 *
+					 * @var mixed[] $script_handles
+					 */
+					foreach ( $script_handles as $script_handle ) {
+						if ( is_string( $script_handle ) && '' !== $script_handle ) {
+							wp_enqueue_script( $script_handle );
+						}
+					}
+
+					$GLOBALS['hide_save_button'] = true;
+
+					printf(
+						'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
+						esc_attr( 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $current_section ? 'default' : $current_section ) ),
+						esc_attr( $settings_ui_page->get_page_id() ),
+						esc_attr( $current_section )
+					);
+					return;
+				}
+			}
 
 			// We can't use "get_settings_for_section" here
 			// for compatibility with derived classes overriding "get_settings".
