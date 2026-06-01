@@ -20,9 +20,10 @@ class DevPanel {
 	const COOKIE_KEY = 'wc_prototype_flags';
 
 	const FLAGS = array(
-		'reorder_controls'   => 'Reorder controls via Screen Options',
-		'icon_modernisation' => 'Icon modernisation (SVG icons)',
-		'max_width'          => 'Max-width cap (1200 px, centered)',
+		'reorder_controls'      => 'Reorder controls via Screen Options',
+		'icon_modernisation'    => 'Icon modernisation (SVG icons)',
+		'max_width'             => 'Max-width cap (1200 px, centered)',
+		'save_publish_clarity'  => 'Save & publish header',
 	);
 
 	/**
