@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 class SavePublishClarity {
 
 	const FLAG_KEY = 'save_publish_clarity';
-	const HEADER_H = 46;
+	const HEADER_H = 52;
 	// px — height of our action bar.
 	const ADMINBAR_H = 32;
 	// px — standard WP admin bar.
@@ -98,7 +98,7 @@ body.folded #wc-proto-save-header {
 /* ── Button group ───────────────────────────────────────── */
 .wc-proto-actions {
 	display: flex;
-	gap: 4px;
+	gap: 8px;
 	align-items: center;
 	position: relative;
 }
@@ -220,14 +220,14 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 		</a>
 		<div class="wc-proto-actions">
 			<?php if ( $preview_url ) : ?>
-			<a href="<?php echo esc_url( $preview_url ); ?>" class="button-link button-small" target="_blank" rel="noopener noreferrer">
+			<button type="button" id="wc-proto-btn-preview" class="button-link" onclick="window.open( '<?php echo esc_js( $preview_url ); ?>', '_blank' )">
 				<?php esc_html_e( 'Preview', 'woocommerce' ); ?>
-			</a>
+			</button>
 			<?php endif; ?>
-			<button type="button" id="wc-proto-btn-save-draft" class="button button-small">
+			<button type="button" id="wc-proto-btn-save-draft" class="button">
 				<?php esc_html_e( 'Save draft', 'woocommerce' ); ?>
 			</button>
-			<button type="button" id="wc-proto-btn-publish" class="button button-primary button-small">
+			<button type="button" id="wc-proto-btn-publish" class="button button-primary">
 				<?php echo esc_html( $primary_label ); ?>
 			</button>
 			<details class="wc-proto-kebab">
