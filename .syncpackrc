@@ -49,7 +49,6 @@
 				"@storybook/*",
 				"@testing-library/*",
 				"@typescript-eslint/*",
-				"@wordpress/a11y",
 				"@wordpress/autop",
 				"@wordpress/prettier-config",
 				"@wordpress/private-apis",

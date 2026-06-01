@@ -105,6 +105,7 @@ declare global {
 					img_select?: wp.media.frame;
 				};
 				( options: wp.media.frameOptions ): wp.media.frame;
+				attachment: ( id: number ) => wp.media.attachment;
 			};
 		};
 		tinymce?: {
@@ -133,9 +134,19 @@ declare global {
 		}
 
 		interface frameOptions {
+			title?: string;
+			button?: {
+				text: string;
+			};
 			library: {
 				type: string;
 			};
+			multiple?: boolean;
+		}
+
+		interface attachment {
+			fetch(): Promise< void >;
+			get( key: string ): unknown;
 		}
 	}
 }
