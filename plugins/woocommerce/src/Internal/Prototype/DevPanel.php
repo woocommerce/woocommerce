@@ -25,7 +25,6 @@ class DevPanel {
 		'max_width'             => 'Max-width cap (1200 px, centered)',
 		'save_publish_clarity'  => 'Save & publish header',
 		'typography_hierarchy'  => 'Typography hierarchy',
-		'spacing_refinement'    => 'Spacing refinement',
 	);
 
 	/**
