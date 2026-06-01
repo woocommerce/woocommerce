@@ -1759,12 +1759,11 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$status = $response->get_status();
 		$data   = $response->get_data();
 
-		// Two acceptable outcomes:
-		//  - 201 if the platform allows negative-fee refunds (the spec's discount-as-fee scenario)
-		//  - A 4xx with a specific code if the platform rejects them.
-		// The point of this test is to lock the contract — whatever the
-		// behaviour is, it must NOT be a misleading "Refund total must be
-		// greater than zero" cascade.
+		// Two acceptable outcomes: 201 if the platform allows negative-fee refunds
+		// (the spec's discount-as-fee scenario), or a 4xx with a specific code if
+		// the platform rejects them. The point of this test is to lock the contract
+		// — whatever the behaviour is, it must NOT be a misleading "Refund total
+		// must be greater than zero" cascade.
 		if ( 201 === $status ) {
 			$this->assertEquals( '-3.00', $data['amount'] );
 			$this->created_refunds[] = $data['id'];
@@ -1783,7 +1782,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$product->set_price( 25.00 );
 		$product->save();
 
-		$order = $this->create_test_order(
+		$order     = $this->create_test_order(
 			array(
 				'line_items' => array(
 					array(
@@ -1839,7 +1838,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$product->set_price( 10.00 );
 		$product->save();
 
-		$order = $this->create_test_order(
+		$order     = $this->create_test_order(
 			array(
 				'line_items' => array(
 					array(

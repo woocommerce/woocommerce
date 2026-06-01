@@ -362,9 +362,11 @@ class DataUtils {
 	 *
 	 * @since 10.8.0
 	 *
-	 * @param list<array{line_item_id?: int, quantity?: int, refund_total?: float|int|null, refund_tax?: array<int, mixed>}> $line_items Line items from the request (schema format).
-	 * @param WC_Order $order The order being refunded.
-	 * @return list<array{line_item_id?: int, quantity?: int, refund_total?: float|int|null, refund_tax?: array<int, mixed>}> The line items with refund_total populated where possible.
+	 * @param array    $line_items Line items from the request (schema format).
+	 *                             Each item: array{line_item_id?: int, quantity?: int,
+	 *                             refund_total?: float|int|null, refund_tax?: array<int, mixed>}.
+	 * @param WC_Order $order      The order being refunded.
+	 * @return array The line items with refund_total populated where possible (same shape as input).
 	 */
 	public function fill_missing_refund_totals( array $line_items, WC_Order $order ): array {
 		foreach ( $line_items as $key => $line_item ) {
