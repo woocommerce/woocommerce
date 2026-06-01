@@ -121,11 +121,10 @@ class ProductAttributeTerms extends ControllerTestCase {
 		$schema     = $controller->get_item_schema();
 		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'small', 'pa_size' ), new \WP_REST_Request() );
 		$data       = $response->get_data();
+		$validate   = new ValidateSchema( $schema );
 
-		// In non wc-visual attributes, the __experimentalVisual property is expected not to be present.
-		unset( $schema['properties']['__experimentalVisual'] );
-		$validate = new ValidateSchema( $schema );
-		$this->assertArrayNotHasKey( '__experimentalVisual', $data );
+		$this->assertArrayHasKey( '__experimentalVisual', $data );
+		$this->assertNull( $data['__experimentalVisual'] );
 
 		$diff = $validate->get_diff_from_object( $data );
 		$this->assertEmpty( $diff, print_r( $diff, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
