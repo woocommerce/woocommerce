@@ -166,6 +166,25 @@ class IconModernisation {
 			$css .= "}\n";
 		}
 
+		// Add Media button icon — replace Dashicons \f104 with the image SVG.
+		$image_icon = self::mask_url(
+			self::path( 'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM5 4.5h14c.3 0 .5.2.5.5v8.4l-3-2.9c-.3-.3-.8-.3-1 0L11.9 14 9 12c-.3-.2-.6-.2-.8 0l-3.6 2.6V5c-.1-.3.1-.5.4-.5zm14 15H5c-.3 0-.5-.2-.5-.5v-2.4l4.1-3 3 1.9c.3.2.7.2.9-.1L16 12l3.5 3.4V19c0 .3-.2.5-.5.5z' )
+		);
+		$css .= 'span.wp-media-buttons-icon::before {' . "\n";
+		$css .= "\tfont-family: none !important;\n";
+		$css .= "\tcontent: '' !important;\n";
+		$css .= "\tdisplay: inline-block !important;\n";
+		$css .= "\twidth: 18px !important;\n";
+		$css .= "\theight: 18px !important;\n";
+		$css .= "\tbackground-color: currentColor !important;\n";
+		$css .= "\tmask-image: {$image_icon};\n";
+		$css .= "\t-webkit-mask-image: {$image_icon};\n";
+		$css .= "\tmask-repeat: no-repeat !important;\n";
+		$css .= "\tmask-size: contain !important;\n";
+		$css .= "\tmask-position: center !important;\n";
+		$css .= "\tvertical-align: middle !important;\n";
+		$css .= "}\n";
+
 		// Help tip icons — replace Dashicons \f223 on ::after with the help SVG.
 		$help_icon = self::mask_url(
 			self::path( 'M12 4a8 8 0 1 1 .001 16.001A8 8 0 0 1 12 4Zm0 1.5a6.5 6.5 0 1 0-.001 13.001A6.5 6.5 0 0 0 12 5.5Zm.75 11h-1.5V15h1.5v1.5Zm-.445-9.234a3 3 0 0 1 .445 5.89V14h-1.5v-1.25c0-.57.452-.958.917-1.01A1.5 1.5 0 0 0 12 8.75a1.5 1.5 0 0 0-1.5 1.5H9a3 3 0 0 1 3.305-2.984Z' )
