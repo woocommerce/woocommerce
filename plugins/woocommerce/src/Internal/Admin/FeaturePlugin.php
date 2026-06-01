@@ -171,7 +171,22 @@ class FeaturePlugin {
 		// Initialize API.
 		API\Init::instance();
 
-		$this->load_admin_components();
+		// Initialize always-available WooCommerce Admin components.
+		new ActivityPanels();
+		new Analytics();
+		new Coupons();
+		new CustomerEffortScoreTracks();
+		new Homescreen();
+		new Marketing();
+		new MobileAppBanner();
+		new RemoteFreeExtensions\Init();
+		new RemoteInboxNotifications();
+		new ShippingLabelBanner();
+		new \Automattic\WooCommerce\Admin\Features\LaunchYourStore();
+		new \Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init();
+		new \Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init();
+		new \Automattic\WooCommerce\Admin\Features\ProductBlockEditor\Init();
+		new \Automattic\WooCommerce\Admin\Features\TransientNotices();
 
 		Onboarding::init();
 
@@ -194,33 +209,6 @@ class FeaturePlugin {
 		new SellingOnlineCourses();
 		new MagentoMigration();
 		new ScheduledUpdatesPromotion();
-	}
-
-	/**
-	 * Load WooCommerce Admin components that are always available.
-	 */
-	private function load_admin_components() {
-		$component_classes = array(
-			ActivityPanels::class,
-			Analytics::class,
-			Coupons::class,
-			CustomerEffortScoreTracks::class,
-			Homescreen::class,
-			Marketing::class,
-			MobileAppBanner::class,
-			RemoteFreeExtensions\Init::class,
-			RemoteInboxNotifications::class,
-			ShippingLabelBanner::class,
-			\Automattic\WooCommerce\Admin\Features\LaunchYourStore::class,
-			\Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init::class,
-			\Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init::class,
-			\Automattic\WooCommerce\Admin\Features\ProductBlockEditor\Init::class,
-			\Automattic\WooCommerce\Admin\Features\TransientNotices::class,
-		);
-
-		foreach ( $component_classes as $component_class ) {
-			new $component_class();
-		}
 	}
 
 	/**
