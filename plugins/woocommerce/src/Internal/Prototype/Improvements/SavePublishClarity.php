@@ -50,13 +50,13 @@ class SavePublishClarity {
 /* ── Action bar ─────────────────────────────────────────── */
 #wc-proto-save-header {
 	position: fixed;
-	top: <?php echo esc_attr( $top ); ?>px;
+	top: <?php echo esc_attr( (string) $top ); ?>px;
 	right: 0;
 	left: 160px; /* WP sidebar normal */
 	z-index: 9998;
 	background: #1d2327;
 	padding: 0 16px;
-	height: <?php echo esc_attr( $bar_h ); ?>px;
+	height: <?php echo esc_attr( (string) $bar_h ); ?>px;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -142,7 +142,7 @@ body.folded #wc-proto-save-header {
 #submitdiv .misc-pub-copy-draft { display: none !important; }
 
 /* Add space so content is not hidden under the fixed bar */
-body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( $bar_h ); ?>px; }
+body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (string) $bar_h ); ?>px; }
 </style>
 		<?php
 	}
