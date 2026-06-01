@@ -55,7 +55,6 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 		}
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_visual_attribute_script' ) );
-		add_action( 'admin_footer', array( $this, 'move_visual_attribute_fields' ) );
 	}
 
 	/**
@@ -70,40 +69,8 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 		if ( ! VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
 			return;
 		}
-		?>
-		<div class="form-field wc-admin-visual-attribute-type">
-			<label><?php esc_html_e( 'Swatch type', 'woocommerce' ); ?></label>
-			<fieldset>
-				<label for="term_visual_type_color">
-					<input
-						type="radio"
-						id="term_visual_type_color"
-						name="wc_visual_attribute_type"
-						value="color"
-						checked
-					/>
-					<?php esc_html_e( 'Color', 'woocommerce' ); ?>
-				</label>
-				<label for="term_visual_type_image">
-					<input
-						type="radio"
-						id="term_visual_type_image"
-						name="wc_visual_attribute_type"
-						value="image"
-					/>
-					<?php esc_html_e( 'Image', 'woocommerce' ); ?>
-				</label>
-			</fieldset>
-		</div>
-		<div class="form-field wc-admin-visual-attribute-color">
-			<label for="term_color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label>
-			<input name="term_color" id="term_color" class="wc-admin-visual-attribute-color-input" type="text" value="" />
-		</div>
-		<div class="form-field wc-admin-visual-attribute-image">
-			<label for="term_image"><?php esc_html_e( 'Image value', 'woocommerce' ); ?></label>
-			<input name="term_image" id="term_image" class="wc-admin-visual-attribute-image-input" type="hidden" value="" />
-		</div>
-		<?php
+
+		self::render_div_visual_attribute_fields( 'term-' );
 	}
 
 	/**
@@ -119,52 +86,183 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 			return;
 		}
 
-		$color_value = get_term_meta( $term->term_id, 'color', true );
-		$image_value = get_term_meta( $term->term_id, 'image', true );
-		$has_image   = absint( $image_value ) > 0;
+		self::render_table_visual_attribute_fields( $term );
+	}
+
+	/**
+	 * Render visual fields for the add attribute term modal.
+	 *
+	 * @internal
+	 *
+	 * @return void
+	 */
+	public static function render_add_attribute_term_modal_fields(): void {
+		self::render_div_visual_attribute_fields( 'wc-modal-add-attribute-term-' );
+	}
+
+	/**
+	 * Render visual attribute fields for add forms.
+	 *
+	 * @param string $field_id_prefix Field ID prefix.
+	 * @return void
+	 */
+	private static function render_div_visual_attribute_fields( string $field_id_prefix ): void {
+		?>
+		<div class="form-field wc-admin-visual-attribute-type">
+			<label><?php esc_html_e( 'Swatch type', 'woocommerce' ); ?></label>
+			<?php self::render_visual_type_inputs( $field_id_prefix, VisualAttributeTermMeta::TYPE_COLOR ); ?>
+		</div>
+		<div class="form-field wc-admin-visual-attribute-color">
+			<?php self::render_color_input( $field_id_prefix, '' ); ?>
+		</div>
+		<div class="form-field wc-admin-visual-attribute-image">
+			<?php self::render_image_input( $field_id_prefix, 0 ); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render visual attribute fields for edit forms.
+	 *
+	 * @param \WP_Term $term Current term.
+	 * @return void
+	 */
+	private static function render_table_visual_attribute_fields( \WP_Term $term ): void {
+		$color_value  = get_term_meta( $term->term_id, 'color', true );
+		$color_value  = is_string( $color_value ) ? $color_value : '';
+		$image_value  = absint( get_term_meta( $term->term_id, 'image', true ) );
+		$visual_type  = $image_value > 0 ? VisualAttributeTermMeta::TYPE_IMAGE : VisualAttributeTermMeta::TYPE_COLOR;
+		$field_prefix = 'term-';
 		?>
 		<tr class="form-field wc-admin-visual-attribute-type">
 			<th scope="row" valign="top">
 				<label><?php esc_html_e( 'Swatch type', 'woocommerce' ); ?></label>
 			</th>
-			<td>
-				<fieldset>
-					<label for="term_visual_type_color">
-						<input
-							type="radio"
-							id="term_visual_type_color"
-							name="wc_visual_attribute_type"
-							value="color"
-							<?php checked( ! $has_image ); ?>
-						/>
-						<?php esc_html_e( 'Color', 'woocommerce' ); ?>
-					</label>
-					<label for="term_visual_type_image">
-						<input
-							type="radio"
-							id="term_visual_type_image"
-							name="wc_visual_attribute_type"
-							value="image"
-							<?php checked( $has_image ); ?>
-						/>
-						<?php esc_html_e( 'Image', 'woocommerce' ); ?>
-					</label>
-				</fieldset>
-			</td>
+			<td><?php self::render_visual_type_inputs( $field_prefix, $visual_type ); ?></td>
 		</tr>
 		<tr class="form-field wc-admin-visual-attribute-color">
-			<th scope="row" valign="top"><label for="term_color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label></th>
-			<td>
-				<input name="term_color" id="term_color" class="wc-admin-visual-attribute-color-input" type="text" value="<?php echo esc_attr( $color_value ); ?>" />
-			</td>
+			<th scope="row" valign="top">
+				<label for="<?php echo esc_attr( self::get_color_input_id( $field_prefix ) ); ?>"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label>
+			</th>
+			<td><?php self::render_color_input_control( $field_prefix, $color_value ); ?></td>
 		</tr>
 		<tr class="form-field wc-admin-visual-attribute-image">
-			<th scope="row" valign="top"><label for="term_image"><?php esc_html_e( 'Image value', 'woocommerce' ); ?></label></th>
-			<td>
-				<input name="term_image" id="term_image" class="wc-admin-visual-attribute-image-input" type="hidden" value="<?php echo absint( $image_value ); ?>" />
-			</td>
+			<th scope="row" valign="top">
+				<label for="<?php echo esc_attr( self::get_image_input_id( $field_prefix ) ); ?>"><?php esc_html_e( 'Image value', 'woocommerce' ); ?></label>
+			</th>
+			<td><?php self::render_image_input_control( $field_prefix, $image_value ); ?></td>
 		</tr>
 		<?php
+	}
+
+	/**
+	 * Render visual type radio inputs.
+	 *
+	 * @param string $field_id_prefix Field ID prefix.
+	 * @param string $selected_type Selected visual type.
+	 * @return void
+	 */
+	private static function render_visual_type_inputs( string $field_id_prefix, string $selected_type ): void {
+		$color_id = $field_id_prefix . 'visual-type-color';
+		$image_id = $field_id_prefix . 'visual-type-image';
+		?>
+		<fieldset>
+			<label for="<?php echo esc_attr( $color_id ); ?>">
+				<input
+					type="radio"
+					id="<?php echo esc_attr( $color_id ); ?>"
+					name="wc_visual_attribute_type"
+					value="<?php echo esc_attr( VisualAttributeTermMeta::TYPE_COLOR ); ?>"
+					<?php checked( VisualAttributeTermMeta::TYPE_COLOR, $selected_type ); ?>
+				/>
+				<?php esc_html_e( 'Color', 'woocommerce' ); ?>
+			</label>
+			<label for="<?php echo esc_attr( $image_id ); ?>">
+				<input
+					type="radio"
+					id="<?php echo esc_attr( $image_id ); ?>"
+					name="wc_visual_attribute_type"
+					value="<?php echo esc_attr( VisualAttributeTermMeta::TYPE_IMAGE ); ?>"
+					<?php checked( VisualAttributeTermMeta::TYPE_IMAGE, $selected_type ); ?>
+				/>
+				<?php esc_html_e( 'Image', 'woocommerce' ); ?>
+			</label>
+		</fieldset>
+		<?php
+	}
+
+	/**
+	 * Render the color input and label.
+	 *
+	 * @param string $field_id_prefix Field ID prefix.
+	 * @param string $color_value Color value.
+	 * @return void
+	 */
+	private static function render_color_input( string $field_id_prefix, string $color_value ): void {
+		?>
+		<label for="<?php echo esc_attr( self::get_color_input_id( $field_id_prefix ) ); ?>"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label>
+		<?php self::render_color_input_control( $field_id_prefix, $color_value ); ?>
+		<?php
+	}
+
+	/**
+	 * Render the color input control.
+	 *
+	 * @param string $field_id_prefix Field ID prefix.
+	 * @param string $color_value Color value.
+	 * @return void
+	 */
+	private static function render_color_input_control( string $field_id_prefix, string $color_value ): void {
+		?>
+		<input name="term_color" id="<?php echo esc_attr( self::get_color_input_id( $field_id_prefix ) ); ?>" class="wc-admin-visual-attribute-color-input" type="text" value="<?php echo esc_attr( $color_value ); ?>" />
+		<?php
+	}
+
+	/**
+	 * Render the image input and label.
+	 *
+	 * @param string $field_id_prefix Field ID prefix.
+	 * @param int    $image_value Image attachment ID.
+	 * @return void
+	 */
+	private static function render_image_input( string $field_id_prefix, int $image_value ): void {
+		?>
+		<label for="<?php echo esc_attr( self::get_image_input_id( $field_id_prefix ) ); ?>"><?php esc_html_e( 'Image value', 'woocommerce' ); ?></label>
+		<?php self::render_image_input_control( $field_id_prefix, $image_value ); ?>
+		<?php
+	}
+
+	/**
+	 * Render the image input control.
+	 *
+	 * @param string $field_id_prefix Field ID prefix.
+	 * @param int    $image_value Image attachment ID.
+	 * @return void
+	 */
+	private static function render_image_input_control( string $field_id_prefix, int $image_value ): void {
+		?>
+		<input name="term_image" id="<?php echo esc_attr( self::get_image_input_id( $field_id_prefix ) ); ?>" class="wc-admin-visual-attribute-image-input" type="hidden" value="<?php echo absint( $image_value ); ?>" />
+		<?php
+	}
+
+	/**
+	 * Get color input ID.
+	 *
+	 * @param string $field_id_prefix Field ID prefix.
+	 * @return string
+	 */
+	private static function get_color_input_id( string $field_id_prefix ): string {
+		return $field_id_prefix . 'color';
+	}
+
+	/**
+	 * Get image input ID.
+	 *
+	 * @param string $field_id_prefix Field ID prefix.
+	 * @return string
+	 */
+	private static function get_image_input_id( string $field_id_prefix ): string {
+		return $field_id_prefix . 'image';
 	}
 
 	/**
@@ -281,57 +379,6 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 		);
 
 		return $swatch . esc_html( strtoupper( $color_value ) );
-	}
-
-	/**
-	 * Move visual fields near taxonomy name fields.
-	 *
-	 * @internal
-	 *
-	 * @return void
-	 */
-	public function move_visual_attribute_fields(): void {
-		$taxonomy = $this->get_current_taxonomy();
-		if ( ! VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
-			return;
-		}
-
-		$handle = 'wc-admin-visual-attribute';
-		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
-		wp_enqueue_script( $handle );
-		wp_add_inline_script(
-			$handle,
-			"(function() {
-				'use strict';
-				const addFormVisualType = document.querySelector('.form-field.wc-admin-visual-attribute-type');
-				const addFormColor = document.querySelector('.form-field.wc-admin-visual-attribute-color');
-				const addFormImage = document.querySelector('.form-field.wc-admin-visual-attribute-image');
-				const addFormSlug = document.querySelector('.form-field.term-slug-wrap');
-				if (addFormVisualType && addFormSlug) {
-					addFormSlug.parentNode.insertBefore(addFormVisualType, addFormSlug);
-				}
-				if (addFormColor && addFormSlug) {
-					addFormSlug.parentNode.insertBefore(addFormColor, addFormSlug);
-				}
-				if (addFormImage && addFormSlug) {
-					addFormSlug.parentNode.insertBefore(addFormImage, addFormSlug);
-				}
-
-				const editFormVisualType = document.querySelector('tr.form-field.wc-admin-visual-attribute-type');
-				const editFormColor = document.querySelector('tr.form-field.wc-admin-visual-attribute-color');
-				const editFormImage = document.querySelector('tr.form-field.wc-admin-visual-attribute-image');
-				const editFormSlug = document.querySelector('tr.form-field.term-slug-wrap');
-				if (editFormVisualType && editFormSlug) {
-					editFormSlug.parentNode.insertBefore(editFormVisualType, editFormSlug);
-				}
-				if (editFormColor && editFormSlug) {
-					editFormSlug.parentNode.insertBefore(editFormColor, editFormSlug);
-				}
-				if (editFormImage && editFormSlug) {
-					editFormSlug.parentNode.insertBefore(editFormImage, editFormSlug);
-				}
-			})();"
-		);
 	}
 
 	/**
