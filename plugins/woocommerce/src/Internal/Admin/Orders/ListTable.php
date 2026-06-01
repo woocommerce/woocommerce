@@ -115,6 +115,7 @@ class ListTable extends WP_List_Table {
 		add_action( 'admin_footer', array( $this, 'enqueue_scripts' ) );
 		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'created_via_filter' ) );
 		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'customers_filter' ) );
+		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'billing_country_filter' ) );
 
 		$this->items_per_page();
 		set_screen_options();
@@ -406,6 +407,7 @@ class ListTable extends WP_List_Table {
 		$this->set_customer_args();
 		$this->set_search_args();
 		$this->set_created_via_args();
+		$this->set_billing_country_args();
 
 		/**
 		 * Provides an opportunity to modify the query arguments used in the (Custom Order Table-powered) order list
@@ -593,6 +595,21 @@ class ListTable extends WP_List_Table {
 		$this->order_query_args['created_via'] = array_map( 'trim', explode( ',', $created_via ) );
 
 		$this->has_filter = true;
+	}
+
+	/**
+	 * Implements filtering of orders by billing country.
+	 */
+	private function set_billing_country_args(): void {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$country = sanitize_text_field( wp_unslash( $_GET['_billing_country'] ?? '' ) );
+
+		if ( empty( $country ) ) {
+			return;
+		}
+
+		$this->order_query_args['billing_country'] = $country;
+		$this->has_filter                          = true;
 	}
 
 	/**
@@ -997,6 +1014,32 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Render the billing country filter dropdown.
+	 *
+	 * @return void
+	 */
+	public function billing_country_filter() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$current_country = isset( $_GET['_billing_country'] ) ? sanitize_text_field( wp_unslash( $_GET['_billing_country'] ) ) : '';
+		$countries       = WC()->countries->get_countries();
+		?>
+		<select name="_billing_country" id="filter-by-billing-country">
+			<option value=""><?php esc_html_e( 'All countries', 'woocommerce' ); ?></option>
+			<?php
+			foreach ( $countries as $code => $name ) {
+				printf(
+					'<option value="%s"%s>%s</option>',
+					esc_attr( $code ),
+					selected( $code, $current_country, false ),
+					esc_html( $name )
+				);
+			}
+			?>
+		</select>
+		<?php
+	}
+
+	/**
 	 * Get list columns.
 	 *
 	 * @return array
@@ -1018,6 +1061,7 @@ class ListTable extends WP_List_Table {
 				'order_status'     => esc_html__( 'Status', 'woocommerce' ),
 				'billing_address'  => esc_html__( 'Billing', 'woocommerce' ),
 				'shipping_address' => esc_html__( 'Ship to', 'woocommerce' ),
+				'billing_country'  => esc_html__( 'Country', 'woocommerce' ),
 				'order_total'      => esc_html__( 'Total', 'woocommerce' ),
 				'wc_actions'       => esc_html__( 'Actions', 'woocommerce' ),
 			)
@@ -1043,6 +1087,7 @@ class ListTable extends WP_List_Table {
 				'order_number' => 'ID',
 				'order_date'   => 'date',
 				'order_total'  => 'order_total',
+				'billing_country' => 'billing_country',
 			)
 		);
 	}
@@ -1062,6 +1107,7 @@ class ListTable extends WP_List_Table {
 				array(
 					'billing_address',
 					'shipping_address',
+					'billing_country',
 					'wc_actions',
 				)
 			);
@@ -1285,6 +1331,25 @@ class ListTable extends WP_List_Table {
 				/* translators: %s: shipping method */
 				echo '<span class="description">' . sprintf( esc_html__( 'via %s', 'woocommerce' ), esc_html( $order->get_shipping_method() ) ) . '</span>';
 			}
+		} else {
+			echo '&ndash;';
+		}
+	}
+
+	/**
+	 * Renders order billing country.
+	 *
+	 * @param WC_Order $order The order object for the current row.
+	 *
+	 * @return void
+	 */
+	public function render_billing_country_column( WC_Order $order ): void {
+		$country_code = $order->get_billing_country();
+
+		if ( $country_code ) {
+			$countries = WC()->countries->get_countries();
+			$name      = $countries[ $country_code ] ?? $country_code;
+			echo esc_html( $name );
 		} else {
 			echo '&ndash;';
 		}

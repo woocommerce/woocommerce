@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add "Country" column and billing country filter to the admin order list table. Column is hidden by default (enable via Screen Options). Filter uses a dropdown of all countries. Column is sortable.

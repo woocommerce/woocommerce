@@ -125,6 +125,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$show_columns['order_status']     = __( 'Status', 'woocommerce' );
 		$show_columns['billing_address']  = __( 'Billing', 'woocommerce' );
 		$show_columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
+		$show_columns['billing_country']  = __( 'Country', 'woocommerce' );
 		$show_columns['order_total']      = __( 'Total', 'woocommerce' );
 		$show_columns['wc_actions']       = __( 'Actions', 'woocommerce' );
 
@@ -217,6 +218,13 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 */
 	protected function render_shipping_address_column() {
 		$this->orders_list_table->render_shipping_address_column( $this->object );
+	}
+
+	/**
+	 * Render column: billing_country.
+	 */
+	protected function render_billing_country_column() {
+		$this->orders_list_table->render_billing_country_column( $this->object );
 	}
 
 	/**
