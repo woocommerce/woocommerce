@@ -56,3 +56,18 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/attributes/1/terms"
 	}
 ]
 ```
+
+**Example response for non-visual attribute terms:**
+
+```json
+[
+	{
+		"id": 12,
+		"name": "Large",
+		"slug": "large",
+		"description": "",
+		"parent": 0,
+		"count": 7
+	}
+]
+```
