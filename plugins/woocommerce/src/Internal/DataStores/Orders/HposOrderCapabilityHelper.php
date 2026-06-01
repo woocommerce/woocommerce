@@ -8,7 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Utilities\OrderUtil;
-use WC_Order;
+use WC_Abstract_Order;
 use WP_Post;
 use WP_Post_Type;
 
@@ -67,7 +67,7 @@ class HposOrderCapabilityHelper {
 		}
 
 		$order = wc_get_order( $order_id );
-		if ( ! $order instanceof WC_Order ) {
+		if ( ! $order instanceof WC_Abstract_Order ) {
 			return $caps;
 		}
 
@@ -86,13 +86,13 @@ class HposOrderCapabilityHelper {
 	/**
 	 * Map edit capabilities for an HPOS order without a real order post.
 	 *
-	 * @param WC_Order          $order         Order object.
+	 * @param WC_Abstract_Order $order         Order object.
 	 * @param WP_Post_Type      $order_type_ob Order post type object.
 	 * @param int               $user_id       User ID.
 	 * @param WP_Post|null      $post          Placeholder post, if one exists.
 	 * @return string[] Required primitive capabilities.
 	 */
-	private function map_edit_order_caps( WC_Order $order, WP_Post_Type $order_type_ob, int $user_id, ?WP_Post $post ): array {
+	private function map_edit_order_caps( WC_Abstract_Order $order, WP_Post_Type $order_type_ob, int $user_id, ?WP_Post $post ): array {
 		$status  = $this->get_wp_status_for_order( $order );
 		$is_mine = $user_id === $this->get_author_id( $post );
 
@@ -119,13 +119,13 @@ class HposOrderCapabilityHelper {
 	/**
 	 * Map delete capabilities for an HPOS order without a real order post.
 	 *
-	 * @param WC_Order          $order         Order object.
+	 * @param WC_Abstract_Order $order         Order object.
 	 * @param WP_Post_Type      $order_type_ob Order post type object.
 	 * @param int               $user_id       User ID.
 	 * @param WP_Post|null      $post          Placeholder post, if one exists.
 	 * @return string[] Required primitive capabilities.
 	 */
-	private function map_delete_order_caps( WC_Order $order, WP_Post_Type $order_type_ob, int $user_id, ?WP_Post $post ): array {
+	private function map_delete_order_caps( WC_Abstract_Order $order, WP_Post_Type $order_type_ob, int $user_id, ?WP_Post $post ): array {
 		$status  = $this->get_wp_status_for_order( $order );
 		$is_mine = $user_id === $this->get_author_id( $post );
 
@@ -152,13 +152,13 @@ class HposOrderCapabilityHelper {
 	/**
 	 * Map read capabilities for an HPOS order without a real order post.
 	 *
-	 * @param WC_Order          $order         Order object.
+	 * @param WC_Abstract_Order $order         Order object.
 	 * @param WP_Post_Type      $order_type_ob Order post type object.
 	 * @param int               $user_id       User ID.
 	 * @param WP_Post|null      $post          Placeholder post, if one exists.
 	 * @return string[] Required primitive capabilities.
 	 */
-	private function map_read_order_caps( WC_Order $order, WP_Post_Type $order_type_ob, int $user_id, ?WP_Post $post ): array {
+	private function map_read_order_caps( WC_Abstract_Order $order, WP_Post_Type $order_type_ob, int $user_id, ?WP_Post $post ): array {
 		$status_obj = get_post_status_object( $this->get_wp_status_for_order( $order ) );
 		if ( ! $status_obj ) {
 			return array( $order_type_ob->cap->edit_others_posts );
@@ -178,10 +178,10 @@ class HposOrderCapabilityHelper {
 	/**
 	 * Get the WordPress post status equivalent for an order.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Abstract_Order $order Order object.
 	 * @return string Post status.
 	 */
-	private function get_wp_status_for_order( WC_Order $order ): string {
+	private function get_wp_status_for_order( WC_Abstract_Order $order ): string {
 		$status = $order->get_status( 'edit' );
 		return wc_is_order_status( 'wc-' . $status ) ? 'wc-' . $status : $status;
 	}
@@ -211,10 +211,10 @@ class HposOrderCapabilityHelper {
 	/**
 	 * Get the previous status stored when an order is trashed.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Abstract_Order $order Order object.
 	 * @return string Previous post status.
 	 */
-	private function get_trashed_status( WC_Order $order ): string {
+	private function get_trashed_status( WC_Abstract_Order $order ): string {
 		$status = $order->get_meta( '_wp_trash_meta_status', true, 'edit' );
 		return is_string( $status ) ? $status : '';
 	}
