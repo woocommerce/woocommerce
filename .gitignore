@@ -139,3 +139,6 @@ CLAUDE.local.md
 .docusaurus
 
 .mcp.json
+.gstack/
+
+.superpowers/
