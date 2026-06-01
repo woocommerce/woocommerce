@@ -100,8 +100,9 @@ class BatchProcessingController {
 
 		// De-duplicate defensively. Historically this method compared the class name against array_keys() rather
 		// than the stored values, so the same processor was appended on every call and bloated the option. Collapsing
-		// here also heals stores already carrying duplicate entries on their next enqueue.
-		$deduplicated_updates = array_values( array_unique( $pending_updates ) );
+		// here also heals stores already carrying duplicate entries on their next enqueue. Filtering to strings keeps
+		// array_unique() from fataling on (and silently strips) any non-string values a corrupted option may contain.
+		$deduplicated_updates = array_values( array_unique( array_filter( $pending_updates, 'is_string' ) ) );
 		if ( ! in_array( $processor_class_name, $deduplicated_updates, true ) ) {
 			$deduplicated_updates[] = $processor_class_name;
 		}
