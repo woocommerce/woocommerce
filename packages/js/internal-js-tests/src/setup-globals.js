@@ -113,55 +113,9 @@ wooCommercePackages.forEach( ( lib ) => {
 
 const config = require( '../../../../plugins/woocommerce/client/admin/config/development.json' );
 
-const defaultEnabledFeatures = [
-	'activity-panels',
-	'analytics',
-	'analytics-scheduled-import',
-	'product-block-editor',
-	'experimental-blocks',
-	'experimental-iapi-mini-cart',
-	'coupons',
-	'core-profiler',
-	'customize-store',
-	'customer-effort-score-tracks',
-	'import-products-task',
-	'experimental-fashion-sample-products',
-	'shipping-smart-defaults',
-	'shipping-setting-tour',
-	'homescreen',
-	'marketing',
-	'minified-js',
-	'mobile-app-banner',
-	'onboarding',
-	'onboarding-tasks',
-	'pattern-toolkit-full-composability',
-	'payment-gateway-suggestions',
-	'product-custom-fields',
-	'products-catalog-api',
-	'printful',
-	'remote-inbox-notifications',
-	'remote-free-extensions',
-	'shipping-label-banner',
-	'subscriptions',
-	'store-alerts',
-	'transient-notices',
-	'woo-mobile-welcome',
-	'wc-pay-promotion',
-	'wc-pay-welcome-page',
-	'async-product-editor-category-field',
-	'launch-your-store',
-];
-
-const normalizeFeatureConfig = ( features = {} ) => ( {
-	...Object.fromEntries(
-		defaultEnabledFeatures.map( ( feature ) => [ feature, true ] )
-	),
-	...features,
-} );
-
 // Check if test is jsdom or node
 if ( global.window ) {
-	window.wcAdminFeatures = normalizeFeatureConfig( config?.features );
+	window.wcAdminFeatures = config?.features || {};
 }
 
 setLocaleData(

@@ -44,7 +44,6 @@ jest.mock( '@woocommerce/navigation', () => ( {
 } ) );
 
 global.window.wcNavigation = {};
-global.window.wcAdminFeatures = { 'activity-panels': false };
 
 const encodedBreadcrumb = [
 	[ 'admin.php?page=wc-settings', 'Settings' ],

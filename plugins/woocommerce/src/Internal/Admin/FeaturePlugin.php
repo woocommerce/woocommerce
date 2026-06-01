@@ -171,6 +171,8 @@ class FeaturePlugin {
 		// Initialize API.
 		API\Init::instance();
 
+		$this->load_admin_components();
+
 		Onboarding::init();
 
 		if ( Features::is_enabled( 'analytics' ) ) {
@@ -192,6 +194,33 @@ class FeaturePlugin {
 		new SellingOnlineCourses();
 		new MagentoMigration();
 		new ScheduledUpdatesPromotion();
+	}
+
+	/**
+	 * Load WooCommerce Admin components that are always available.
+	 */
+	private function load_admin_components() {
+		$component_classes = array(
+			ActivityPanels::class,
+			Analytics::class,
+			Coupons::class,
+			CustomerEffortScoreTracks::class,
+			Homescreen::class,
+			Marketing::class,
+			MobileAppBanner::class,
+			RemoteFreeExtensions\Init::class,
+			RemoteInboxNotifications::class,
+			ShippingLabelBanner::class,
+			\Automattic\WooCommerce\Admin\Features\LaunchYourStore::class,
+			\Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init::class,
+			\Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init::class,
+			\Automattic\WooCommerce\Admin\Features\ProductBlockEditor\Init::class,
+			\Automattic\WooCommerce\Admin\Features\TransientNotices::class,
+		);
+
+		foreach ( $component_classes as $component_class ) {
+			new $component_class();
+		}
 	}
 
 	/**
@@ -217,7 +246,6 @@ class FeaturePlugin {
 		 * @since 6.5.0
 		 */
 		$feature_config = apply_filters( 'woocommerce_admin_get_feature_config', wc_admin_get_feature_config() );
-		$feature_config = Features::merge_default_enabled_features( $feature_config );
 		$features       = array_keys( array_filter( $feature_config ) );
 		return $features;
 	}

@@ -74,7 +74,6 @@ class SystemStatusReport {
 		 * @since 6.5.0
 		 */
 		$features          = apply_filters( 'woocommerce_admin_get_feature_config', wc_admin_get_feature_config() );
-		$features          = \Automattic\WooCommerce\Admin\Features\Features::merge_default_enabled_features( $features );
 		$enabled_features  = array_filter( $features );
 		$disabled_features = array_filter(
 			$features,

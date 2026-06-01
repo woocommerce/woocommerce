@@ -32,51 +32,6 @@ class Features {
 	);
 
 	/**
-	 * WooCommerce Admin features that are enabled by default and no longer need
-	 * explicit `true` entries in the build config.
-	 *
-	 * @var array
-	 */
-	private const DEFAULT_ENABLED_FEATURES = array(
-		'activity-panels',
-		'analytics',
-		'analytics-scheduled-import',
-		'product-block-editor',
-		'experimental-blocks',
-		'experimental-iapi-mini-cart',
-		'coupons',
-		'core-profiler',
-		'customize-store',
-		'customer-effort-score-tracks',
-		'import-products-task',
-		'experimental-fashion-sample-products',
-		'shipping-smart-defaults',
-		'shipping-setting-tour',
-		'homescreen',
-		'marketing',
-		'minified-js',
-		'mobile-app-banner',
-		'onboarding',
-		'onboarding-tasks',
-		'pattern-toolkit-full-composability',
-		'payment-gateway-suggestions',
-		'product-custom-fields',
-		'products-catalog-api',
-		'printful',
-		'remote-inbox-notifications',
-		'remote-free-extensions',
-		'shipping-label-banner',
-		'subscriptions',
-		'store-alerts',
-		'transient-notices',
-		'woo-mobile-welcome',
-		'wc-pay-promotion',
-		'wc-pay-welcome-page',
-		'async-product-editor-category-field',
-		'launch-your-store',
-	);
-
-	/**
 	 * Get class instance.
 	 */
 	public static function get_instance() {
@@ -110,16 +65,6 @@ class Features {
 	 */
 	public static function get_features() {
 		return apply_filters( 'woocommerce_admin_features', array() );
-	}
-
-	/**
-	 * Merges default-enabled features with feature config overrides.
-	 *
-	 * @param array $feature_config Feature config overrides.
-	 * @return array
-	 */
-	public static function merge_default_enabled_features( $feature_config ) {
-		return array_merge( array_fill_keys( self::DEFAULT_ENABLED_FEATURES, true ), $feature_config );
 	}
 
 	/**
@@ -207,8 +152,8 @@ class Features {
 	 * @return array Enabled Woocommerce Admin features/sections.
 	 */
 	public static function get_available_features() {
-		$features                      = self::get_features();
 		$optional_feature_keys         = array_keys( self::$optional_features );
+		$features                      = array_unique( array_merge( self::get_features(), $optional_feature_keys ) );
 		$optional_features_unavailable = array();
 
 		/**
@@ -322,7 +267,7 @@ class Features {
 			return;
 		}
 
-		$features         = self::get_features();
+		$features         = array_unique( array_merge( self::get_features(), array_keys( self::$optional_features ) ) );
 		$enabled_features = array();
 		foreach ( $features as $key ) {
 			$enabled_features[ $key ] = self::is_enabled( $key );

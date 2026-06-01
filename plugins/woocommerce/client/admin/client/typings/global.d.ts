@@ -48,39 +48,7 @@ declare global {
 				siteVisibilitySettings: Record< string, string >;
 			};
 		};
-		wcAdminFeatures: {
-			'analytics-scheduled-import': boolean;
-			'activity-panels': boolean;
-			analytics: boolean;
-			'coming-soon-newsletter-template': boolean;
-			coupons: boolean;
-			'customer-effort-score-tracks': boolean;
-			homescreen: boolean;
-			marketing: boolean;
-			'minified-js': boolean;
-			'mobile-app-banner': boolean;
-			navigation: boolean;
-			onboarding: boolean;
-			'onboarding-tasks': boolean;
-			'payment-gateway-suggestions': boolean;
-			'pattern-toolkit-full-composability': boolean;
-			printful: boolean;
-			'product-custom-fields': boolean;
-			'remote-inbox-notifications': boolean;
-			'remote-free-extensions': boolean;
-			settings: boolean;
-			'shipping-label-banner': boolean;
-			subscriptions: boolean;
-			'store-alerts': boolean;
-			'transient-notices': boolean;
-			'wc-pay-promotion': boolean;
-			'wc-pay-welcome-page': boolean;
-			'woo-mobile-welcome': boolean;
-			'shipping-smart-defaults': boolean;
-			'shipping-setting-tour': boolean;
-			'launch-your-store': boolean;
-			blueprint: boolean;
-		};
+		wcAdminFeatures: Record< string, boolean >;
 		wp: {
 			updates?: {
 				ajax: (

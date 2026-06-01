@@ -73,11 +73,6 @@ describe( 'Products', () => {
 
 		// Reset location.href
 		mockLocation.href = '';
-
-		// @ts-expect-error -- partial mock
-		window.wcAdminFeatures = {
-			printful: true,
-		};
 	} );
 
 	it( 'should render default products types when onboardingData.profile.productType is null', () => {
@@ -310,7 +305,7 @@ describe( 'Products', () => {
 	} );
 
 	describe( 'Printful banner visibility', () => {
-		it( 'should show Printful banner when feature is enabled and plugin is not installed', async () => {
+		it( 'should show Printful banner when plugin is not installed', async () => {
 			( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
 				callback( () => ( {
 					getInstalledPlugins: () => [],
@@ -336,25 +331,6 @@ describe( 'Products', () => {
 					isPluginsRequesting: () => false,
 				} ) )
 			);
-
-			const { queryByText } = render( <Products /> );
-
-			await waitFor( () => {
-				expect(
-					queryByText( 'Print-on-demand products' )
-				).not.toBeInTheDocument();
-			} );
-		} );
-
-		it( 'should hide Printful banner when feature is disabled', async () => {
-			( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
-				callback( () => ( {
-					getInstalledPlugins: () => [],
-					isPluginsRequesting: () => false,
-				} ) )
-			);
-
-			window.wcAdminFeatures.printful = false;
 
 			const { queryByText } = render( <Products /> );
 

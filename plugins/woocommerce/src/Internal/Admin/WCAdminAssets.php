@@ -6,7 +6,6 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use _WP_Dependency;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Loader;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -45,7 +44,6 @@ class WCAdminAssets {
 	 * Hooks added here should be removed in `wc_admin_initialize` via the feature plugin.
 	 */
 	public function __construct() {
-		Features::get_instance();
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'inject_wc_settings_dependencies' ), 14 );
@@ -69,11 +67,6 @@ class WCAdminAssets {
 	 * @return boolean If js asset should use minified version.
 	 */
 	public static function should_use_minified_js_file( $script_debug ) {
-		// minified files are only shipped in non-core versions of wc-admin, return false if minified files are not available.
-		if ( ! Features::exists( 'minified-js' ) ) {
-			return false;
-		}
-
 		// Otherwise we will serve un-minified files if SCRIPT_DEBUG is on, or if anything truthy is passed in-lieu of SCRIPT_DEBUG.
 		return ! $script_debug;
 	}
@@ -91,7 +84,8 @@ class WCAdminAssets {
 		// Potentially enqueue minified JavaScript.
 		if ( $ext === 'js' ) {
 			$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
-			$suffix       = self::should_use_minified_js_file( $script_debug ) ? '.min' : '';
+			$minified_js  = WC_ADMIN_ABSPATH . self::get_path( $ext ) . $file . '.min.' . $ext;
+			$suffix       = self::should_use_minified_js_file( $script_debug ) && file_exists( $minified_js ) ? '.min' : '';
 		}
 
 		return plugins_url( self::get_path( $ext ) . $file . $suffix . '.' . $ext, WC_ADMIN_PLUGIN_FILE );
@@ -127,14 +121,11 @@ class WCAdminAssets {
 	 * @throws \Exception Throws an exception when a readable asset registry file cannot be found.
 	 */
 	public static function get_script_asset_filename( $script_path_name, $file ) {
-		$minification_supported = Features::exists( 'minified-js' );
 		$script_min_filename    = $file . '.min.asset.php';
 		$script_nonmin_filename = $file . '.asset.php';
 		$script_asset_path      = WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/';
 
-		// Check minification is supported first, to avoid multiple is_readable checks when minification is
-		// not supported.
-		if ( $minification_supported && is_readable( $script_asset_path . $script_min_filename ) ) {
+		if ( is_readable( $script_asset_path . $script_min_filename ) ) {
 			return $script_min_filename;
 		} elseif ( is_readable( $script_asset_path . $script_nonmin_filename ) ) {
 			return $script_nonmin_filename;
