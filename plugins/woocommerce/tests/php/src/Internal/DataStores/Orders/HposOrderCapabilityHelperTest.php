@@ -49,9 +49,7 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 		$this->custom_roles = array();
 
 		remove_filter( 'wc_order_statuses', array( $this, 'add_private_test_order_status' ) );
-		if ( function_exists( 'unregister_post_status' ) ) {
-			unregister_post_status( 'wc-private-test' );
-		}
+		$this->unregister_private_test_order_status();
 		$this->clean_up_cot_setup();
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		parent::tearDown();
@@ -66,6 +64,15 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 	public function add_private_test_order_status( array $statuses ): array {
 		$statuses['wc-private-test'] = 'Private test';
 		return $statuses;
+	}
+
+	/**
+	 * Unregister the private order status added for capability mapping tests.
+	 */
+	private function unregister_private_test_order_status(): void {
+		global $wp_post_statuses;
+
+		unset( $wp_post_statuses['wc-private-test'] );
 	}
 
 	/**
