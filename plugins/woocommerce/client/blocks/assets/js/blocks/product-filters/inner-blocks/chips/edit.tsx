@@ -76,6 +76,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 			...getColorClasses( attributes ),
 		} ),
 		style: {
+			...colorVars,
 			'--wc-product-filter-chips-text':
 				colorVars[ '--wc-product-filter-chips-text' ] ||
 				globalColors.text ||
