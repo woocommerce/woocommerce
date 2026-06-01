@@ -50344,12 +50344,6 @@ parameters:
 			path: src/Blocks/AssetsController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:reregister_core_iapi_runtime\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/AssetsController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:set_block_asset_resource_hints_cache\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -53297,12 +53291,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$var of function intval expects array\|bool\|float\|int\|resource\|string\|null, string\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, array\<int, WP_Term\>\|WP_Error given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
@@ -60656,12 +60644,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Schedulers/ImportInterface.php
-
-		-
-			message: '#^Access to an undefined static property static\(Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\)\:\:\$name\.$#'
-			identifier: staticProperty.notFound
-			count: 13
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
 
 		-
 			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:delete\(\)\.$#'

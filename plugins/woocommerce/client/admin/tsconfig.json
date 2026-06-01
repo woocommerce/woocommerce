@@ -78,6 +78,9 @@
 			"path": "../../../../packages/js/sanitize"
 		},
 		{
+			"path": "../../../../packages/js/settings-ui-sdk"
+		},
+		{
 			"path": "../../../../packages/js/tracks"
 		}
 	]

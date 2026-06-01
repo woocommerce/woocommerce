@@ -388,35 +388,5 @@ function afterAllResolved( lockfile, context ) {
 module.exports = {
 	hooks: {
 		afterAllResolved,
-		readPackage( pkg ) {
-			// We resolve @wordpress/interactivity and @wordpress/interactivity-router via pnpm's git sub dir feature
-			// and as a result need to resolve some of their dependencies also via sub dir.
-			if ( pkg.name === '@wordpress/interactivity-router' ) {
-				if (
-					pkg.dependencies &&
-					pkg.dependencies[ '@wordpress/a11y' ] &&
-					pkg.dependencies[ '@wordpress/interactivity' ]
-				) {
-					const blocksPackageJsonPath = path.resolve(
-						__dirname,
-						'plugins/woocommerce/client/blocks/package.json'
-					);
-
-					const blocksPackageJson = require( blocksPackageJsonPath );
-					const a11yVersion =
-						blocksPackageJson.dependencies?.[ '@wordpress/a11y' ];
-
-					//  Use the version installed in @woocommerce/block-library, fallback if the version is somehow no longer installed.
-					pkg.dependencies[ '@wordpress/a11y' ] =
-						a11yVersion || '4.22.0';
-
-					// Use the WooCommerce fork
-					pkg.dependencies[ '@wordpress/interactivity' ] =
-						'github:woocommerce/gutenberg#interactivity-api-001&path:/packages/interactivity';
-				}
-			}
-
-			return pkg;
-		},
 	},
 };
