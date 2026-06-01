@@ -154,6 +154,104 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( $ba
 		if ( ! DevPanel::is_supported_screen() ) {
 			return;
 		}
-		// HTML/JS implemented in Task 4.
+		global $post;
+		if ( ! $post ) {
+			return;
+		}
+
+		$products_url  = admin_url( 'edit.php?post_type=product' );
+		$preview_url   = get_preview_post_link( $post );
+		$is_published  = in_array( $post->post_status, array( 'publish', 'future' ), true );
+		$primary_label = $is_published ? __( 'Update', 'woocommerce' ) : __( 'Publish', 'woocommerce' );
+
+		// Trash URL — only for existing (saved) posts.
+		$trash_url = ( $post->ID && 'auto-draft' !== $post->post_status )
+			? get_delete_post_link( $post->ID )
+			: '';
+		?>
+<div id="wc-proto-save-header">
+	<a href="<?php echo esc_url( $products_url ); ?>" class="wc-proto-back">
+		&larr; <?php esc_html_e( 'Back to products', 'woocommerce' ); ?>
+	</a>
+	<div class="wc-proto-actions">
+		<?php if ( $preview_url ) : ?>
+		<a href="<?php echo esc_url( $preview_url ); ?>" class="wc-proto-btn" target="_blank" rel="noopener noreferrer">
+			<?php esc_html_e( 'Preview', 'woocommerce' ); ?>
+		</a>
+		<?php endif; ?>
+		<button type="button" id="wc-proto-btn-save-draft" class="wc-proto-btn">
+			<?php esc_html_e( 'Save draft', 'woocommerce' ); ?>
+		</button>
+		<button type="button" id="wc-proto-btn-publish" class="wc-proto-btn wc-proto-btn-primary">
+			<?php echo esc_html( $primary_label ); ?>
+		</button>
+		<div style="position:relative">
+			<button type="button" id="wc-proto-kebab-toggle" class="wc-proto-btn wc-proto-btn-kebab" aria-label="<?php esc_attr_e( 'More actions', 'woocommerce' ); ?>" aria-haspopup="true" aria-expanded="false">
+				&bull;&bull;&bull;
+			</button>
+			<div id="wc-proto-kebab-menu" role="menu">
+				<a id="wc-proto-copy-draft" href="#" class="wc-proto-kebab-item" role="menuitem" style="display:none">
+					<?php esc_html_e( 'Copy to a new draft', 'woocommerce' ); ?>
+				</a>
+				<?php if ( $trash_url ) : ?>
+				<a href="<?php echo esc_url( $trash_url ); ?>" class="wc-proto-kebab-item is-destructive" role="menuitem"
+				   onclick="return confirm('<?php echo esc_js( __( 'Move this product to the trash?', 'woocommerce' ) ); ?>')">
+					<?php esc_html_e( 'Move to Trash', 'woocommerce' ); ?>
+				</a>
+				<?php endif; ?>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+( function () {
+	/* ── Button delegation ─────────────────────────────────── */
+	// Delegate to hidden WP form buttons so their nonce/submit logic is unchanged.
+	var btnSaveDraft = document.getElementById( 'wc-proto-btn-save-draft' );
+	var btnPublish   = document.getElementById( 'wc-proto-btn-publish' );
+	var wpSave       = document.getElementById( 'save-post' );    // "Save Draft" in WP form.
+	var wpPublish    = document.getElementById( 'publish' );      // "Update" / "Publish" in WP form.
+
+	if ( btnSaveDraft && wpSave ) {
+		btnSaveDraft.addEventListener( 'click', function () { wpSave.click(); } );
+	}
+	if ( btnPublish && wpPublish ) {
+		btnPublish.addEventListener( 'click', function () { wpPublish.click(); } );
+	}
+
+	/* ── Kebab menu ────────────────────────────────────────── */
+	var kebabToggle = document.getElementById( 'wc-proto-kebab-toggle' );
+	var kebabMenu   = document.getElementById( 'wc-proto-kebab-menu' );
+
+	function closeKebab() {
+		kebabMenu.classList.remove( 'is-open' );
+		kebabToggle.setAttribute( 'aria-expanded', 'false' );
+	}
+
+	kebabToggle.addEventListener( 'click', function ( e ) {
+		e.stopPropagation();
+		var isOpen = kebabMenu.classList.toggle( 'is-open' );
+		kebabToggle.setAttribute( 'aria-expanded', isOpen ? 'true' : 'false' );
+	} );
+
+	document.addEventListener( 'click', closeKebab );
+
+	/* ── Wire "Copy to a new draft" URL from hidden metabox link ── */
+	// WooCommerce renders this link inside #submitdiv; we pull its href at runtime.
+	var origCopyLink  = document.querySelector( '#submitdiv .misc-pub-copy-draft a, #submitdiv a[href*="wc-product-duplicate"], #submitdiv a[href*="duplicate"]' );
+	var protoCopyLink = document.getElementById( 'wc-proto-copy-draft' );
+	if ( origCopyLink && protoCopyLink ) {
+		protoCopyLink.href = origCopyLink.href;
+		protoCopyLink.style.display = '';
+	}
+
+	/* ── Rename "Publish" metabox title to "Visibility" ────── */
+	var metaboxTitle = document.querySelector( '#submitdiv .hndle span' );
+	if ( metaboxTitle ) {
+		metaboxTitle.textContent = 'Visibility';
+	}
+}() );
+</script>
+		<?php
 	}
 }
