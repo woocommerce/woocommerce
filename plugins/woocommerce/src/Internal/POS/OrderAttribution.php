@@ -19,18 +19,21 @@ use WP_REST_Request;
  * array on POST/PUT /wc/v3/orders (and the equivalent refunds endpoint):
  *
  *     "meta_data": [
- *       { "key": "_pos_staff_user_id",     "value": 42 },
- *       // Optional — only present when a manager authorized an override:
- *       { "key": "_pos_override_user_id",  "value": 7  },
- *       { "key": "_pos_override_reason",   "value": "issue_refunds" }
+ *       { "key": "_pos_staff_user_id",          "value": 42 },
+ *       // Optional — only present when a manager authorized an override on a refund:
+ *       { "key": "_pos_override_staff_user_id", "value": 7  }
  *     ]
  *
+ * Which action the override authorizes is implied by the endpoint, not carried as a
+ * separate meta value — refunds require `issue_refunds` on the approver, and the
+ * order endpoint does not accept overrides (since `process_sales` is universal).
+ *
  * Validation runs in the pre-insert filter so bogus attribution or override data
- * rolls back the entire order request (HTTP 400, no DB row). After successful
- * persistence, a single order note is written:
+ * rolls back the entire request (HTTP 400, no DB row). After successful persistence,
+ * a single order note is written:
  *
  *   - Without override: `POS: {action} by {display_name} ({login}).`
- *   - With override:    `POS override: {reason} granted to {actor}, approved by {approver}.`
+ *   - With override:    `POS override: {action} by {actor}, approved by {approver}.`
  *
  * The single-combined-note format on override matches the prior POC; a separate
  * attribution note alongside the override note would clutter the order timeline.
@@ -46,22 +49,9 @@ use WP_REST_Request;
  */
 class OrderAttribution implements RegisterHooksInterface {
 
-	public const META_KEY_STAFF_USER_ID    = '_pos_staff_user_id';
-	public const META_KEY_OVERRIDE_USER_ID = '_pos_override_user_id';
-	public const META_KEY_OVERRIDE_REASON  = '_pos_override_reason';
-	public const LOG_SOURCE                = 'woocommerce-pos';
-
-	/**
-	 * Capabilities that may be granted via manager override.
-	 *
-	 * Order-scoped only in M1. Non-order overrides (e.g. opening POS settings)
-	 * are tracked client-side until a follow-up milestone adds a dedicated audit
-	 * endpoint.
-	 */
-	private const OVERRIDABLE_CAPABILITIES = array(
-		Capabilities::CAP_ISSUE_REFUNDS,
-		Capabilities::CAP_CREATE_COUPONS,
-	);
+	public const META_KEY_STAFF_USER_ID          = '_pos_staff_user_id';
+	public const META_KEY_OVERRIDE_STAFF_USER_ID = '_pos_override_staff_user_id';
+	public const LOG_SOURCE                      = 'woocommerce-pos';
 
 	/**
 	 * Register the lifecycle hooks for shop_order + shop_order_refund.
@@ -102,11 +92,9 @@ class OrderAttribution implements RegisterHooksInterface {
 			return $order_or_error;
 		}
 
-		$staff_user_id     = $this->read_int_meta( $order_or_error, self::META_KEY_STAFF_USER_ID );
-		$override_user_id  = $this->read_int_meta( $order_or_error, self::META_KEY_OVERRIDE_USER_ID );
-		$override_reason   = $this->read_string_meta( $order_or_error, self::META_KEY_OVERRIDE_REASON );
-		$has_any_pos_meta  = $staff_user_id > 0 || $override_user_id > 0 || '' !== $override_reason;
-		$has_override_part = $override_user_id > 0 || '' !== $override_reason;
+		$staff_user_id    = $this->read_int_meta( $order_or_error, self::META_KEY_STAFF_USER_ID );
+		$override_user_id = $this->read_int_meta( $order_or_error, self::META_KEY_OVERRIDE_STAFF_USER_ID );
+		$has_any_pos_meta = $staff_user_id > 0 || $override_user_id > 0;
 
 		if ( ! $has_any_pos_meta ) {
 			return $order_or_error;
@@ -118,17 +106,18 @@ class OrderAttribution implements RegisterHooksInterface {
 			return $attribution_error;
 		}
 
-		// Override pair must appear together; reject partial sets.
-		if ( $has_override_part && ( $override_user_id <= 0 || '' === $override_reason ) ) {
-			return new WP_Error(
-				'woocommerce_pos_invalid_override',
-				__( 'POS override requires both _pos_override_user_id and _pos_override_reason.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
 		if ( $override_user_id > 0 ) {
-			$override_error = $this->validate_override( $override_user_id, $override_reason, $staff_user_id );
+			// Plain orders do not accept overrides: `process_sales` is universal across POS roles,
+			// so there is no scenario in M1 where an order create/update needs a manager override.
+			if ( ! $order_or_error instanceof WC_Order_Refund ) {
+				return new WP_Error(
+					'woocommerce_pos_invalid_override',
+					__( 'POS override is not supported on order creation or updates.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$override_error = $this->validate_override( $override_user_id, Capabilities::CAP_ISSUE_REFUNDS, $staff_user_id );
 			if ( is_wp_error( $override_error ) ) {
 				return $override_error;
 			}
@@ -185,11 +174,10 @@ class OrderAttribution implements RegisterHooksInterface {
 			return;
 		}
 
-		$override_user_id = $this->read_int_meta( $order, self::META_KEY_OVERRIDE_USER_ID );
-		$override_reason  = $this->read_string_meta( $order, self::META_KEY_OVERRIDE_REASON );
+		$override_user_id = $this->read_int_meta( $order, self::META_KEY_OVERRIDE_STAFF_USER_ID );
 
-		if ( $override_user_id > 0 && '' !== $override_reason ) {
-			$this->write_override_note( $note_target, $order, $staff_user, $override_user_id, $override_reason );
+		if ( $override_user_id > 0 ) {
+			$this->write_override_note( $note_target, $order, $staff_user, $override_user_id, $is_refund );
 		} else {
 			$this->write_attribution_note( $note_target, $order, $staff_user, $creating, $is_refund );
 		}
@@ -211,21 +199,6 @@ class OrderAttribution implements RegisterHooksInterface {
 			return 0;
 		}
 		return (int) $value;
-	}
-
-	/**
-	 * Read a string scalar from order meta. Returns '' if absent or invalid.
-	 *
-	 * @param WC_Abstract_Order $order The order.
-	 * @param string            $key   The meta key.
-	 * @return string
-	 */
-	private function read_string_meta( WC_Abstract_Order $order, string $key ): string {
-		$value = $order->get_meta( $key, true );
-		if ( ! is_string( $value ) ) {
-			return '';
-		}
-		return $value;
 	}
 
 	/**
@@ -267,19 +240,11 @@ class OrderAttribution implements RegisterHooksInterface {
 	 * Validate the manager-override fields.
 	 *
 	 * @param int    $override_user_id The asserted approver (manager) user id.
-	 * @param string $override_reason  The capability the override elevates.
+	 * @param string $required_cap     The POS capability the approver must hold for this action.
 	 * @param int    $staff_user_id    The operator user id (for self-override check).
 	 * @return true|WP_Error
 	 */
-	private function validate_override( int $override_user_id, string $override_reason, int $staff_user_id ) {
-		if ( ! in_array( $override_reason, self::OVERRIDABLE_CAPABILITIES, true ) ) {
-			return new WP_Error(
-				'woocommerce_pos_invalid_override',
-				__( 'POS override reason is not a supported overridable capability.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
+	private function validate_override( int $override_user_id, string $required_cap, int $staff_user_id ) {
 		if ( $override_user_id === $staff_user_id ) {
 			return new WP_Error(
 				'woocommerce_pos_self_override',
@@ -305,11 +270,7 @@ class OrderAttribution implements RegisterHooksInterface {
 			);
 		}
 
-		$approver_pos_role = Capabilities::get_pos_role( $override_user_id );
-		$approver_caps     = null !== $approver_pos_role
-			? Capabilities::capabilities_for_role( $approver_pos_role )
-			: array();
-		if ( empty( $approver_caps[ $override_reason ] ) ) {
+		if ( ! Capabilities::user_has_pos_capability( $override_user_id, $required_cap ) ) {
 			return new WP_Error(
 				'woocommerce_pos_override_forbidden',
 				__( 'POS override approver does not hold the required capability.', 'woocommerce' ),
@@ -366,34 +327,38 @@ class OrderAttribution implements RegisterHooksInterface {
 	/**
 	 * Write the combined override order note (override case).
 	 *
-	 * Matches the prior POC's format: "POS override: {capability} granted to {actor},
-	 * approved by {approver}." — a single line capturing both the attribution and
-	 * the authorization, instead of two separate notes that would clutter the
-	 * order timeline.
+	 * Single-line format capturing both the attribution and the authorization,
+	 * instead of two separate notes that would clutter the order timeline. The
+	 * action label is derived from the object type — refunds are the only override
+	 * surface today, but the shape generalises to future overridable order actions.
 	 *
 	 * @param WC_Order          $note_target      The order to attach the note to.
 	 * @param WC_Abstract_Order $order            The actual order or refund object.
 	 * @param \WP_User          $staff_user       The staff member who performed the action.
 	 * @param int               $override_user_id The approver's user id.
-	 * @param string            $override_reason  The capability being elevated.
+	 * @param bool              $is_refund        Whether the override applies to a refund.
 	 */
 	private function write_override_note(
 		WC_Order $note_target,
 		WC_Abstract_Order $order,
 		\WP_User $staff_user,
 		int $override_user_id,
-		string $override_reason
+		bool $is_refund
 	): void {
 		$approver       = get_userdata( $override_user_id );
 		$approver_label = $approver
 			? sprintf( '%s (%s)', $approver->display_name, $approver->user_login )
 			: sprintf( 'ID %d', $override_user_id );
 
+		$action_label = $is_refund
+			? __( 'refund', 'woocommerce' )
+			: __( 'order action', 'woocommerce' );
+
 		$note_target->add_order_note(
 			sprintf(
-				/* translators: 1: capability name, 2: actor display name + login, 3: approver display name + login. */
-				__( 'POS override: %1$s granted to %2$s, approved by %3$s.', 'woocommerce' ),
-				$override_reason,
+				/* translators: 1: action label (e.g. "refund"), 2: actor display name + login, 3: approver display name + login. */
+				__( 'POS override: %1$s by %2$s, approved by %3$s.', 'woocommerce' ),
+				$action_label,
 				sprintf( '%s (%s)', $staff_user->display_name, $staff_user->user_login ),
 				$approver_label
 			),
@@ -403,9 +368,8 @@ class OrderAttribution implements RegisterHooksInterface {
 
 		wc_get_logger()->info(
 			sprintf(
-				'POS override: %1$s on %2$s %3$d granted to %4$s (ID %5$d), approved by user ID %6$d.',
-				$override_reason,
-				$order instanceof WC_Order_Refund ? 'refund' : 'order',
+				'POS override on %1$s %2$d by %3$s (ID %4$d), approved by user ID %5$d.',
+				$is_refund ? 'refund' : 'order',
 				$order->get_id(),
 				$staff_user->user_login,
 				$staff_user->ID,

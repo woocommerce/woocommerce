@@ -104,25 +104,18 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject the override pair when only one half is present.
+	 * @testdox Should reject override meta on a plain order (process_sales is universal, no override needed).
 	 */
-	public function test_pre_insert_rejects_partial_override_pair(): void {
+	public function test_pre_insert_rejects_override_on_plain_order(): void {
 		$cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
 		$manager = $this->make_pos_user( Capabilities::POS_ROLE_MANAGER );
 
-		$order_missing_reason = wc_create_order();
-		$order_missing_reason->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
-		$order_missing_reason->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_USER_ID, $manager );
+		$order = wc_create_order();
+		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
+		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_STAFF_USER_ID, $manager );
 
-		$result = $this->sut->handle_pre_insert( $order_missing_reason, new WP_REST_Request(), true );
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_pos_invalid_override', $result->get_error_code() );
+		$result = $this->sut->handle_pre_insert( $order, new WP_REST_Request(), true );
 
-		$order_missing_user = wc_create_order();
-		$order_missing_user->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
-		$order_missing_user->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, Capabilities::CAP_ISSUE_REFUNDS );
-
-		$result = $this->sut->handle_pre_insert( $order_missing_user, new WP_REST_Request(), true );
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_pos_invalid_override', $result->get_error_code() );
 
@@ -131,17 +124,18 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject a self-override (granted_by equals staff_user_id).
+	 * @testdox Should reject a self-override on a refund (approver equals staff_user_id).
 	 */
 	public function test_pre_insert_rejects_self_override(): void {
 		$manager = $this->make_pos_user( Capabilities::POS_ROLE_MANAGER );
 
-		$order = wc_create_order();
-		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $manager );
-		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_USER_ID, $manager );
-		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, Capabilities::CAP_ISSUE_REFUNDS );
+		$parent_order = wc_create_order();
+		$parent_order->save();
+		$refund = wc_create_refund( array( 'order_id' => $parent_order->get_id() ) );
+		$refund->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $manager );
+		$refund->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_STAFF_USER_ID, $manager );
 
-		$result = $this->sut->handle_pre_insert( $order, new WP_REST_Request(), true );
+		$result = $this->sut->handle_pre_insert( $refund, new WP_REST_Request(), true );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_pos_self_override', $result->get_error_code() );
@@ -150,39 +144,19 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject override when reason is not an overridable POS capability.
+	 * @testdox Should reject refund override when the approver lacks issue_refunds.
 	 */
-	public function test_pre_insert_rejects_non_overridable_reason(): void {
-		$cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
-		$manager = $this->make_pos_user( Capabilities::POS_ROLE_MANAGER );
-
-		$order = wc_create_order();
-		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
-		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_USER_ID, $manager );
-		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, 'manage_woocommerce' );
-
-		$result = $this->sut->handle_pre_insert( $order, new WP_REST_Request(), true );
-
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_pos_invalid_override', $result->get_error_code() );
-
-		wp_delete_user( $cashier );
-		wp_delete_user( $manager );
-	}
-
-	/**
-	 * @testdox Should reject override when the granter does not hold the named POS cap.
-	 */
-	public function test_pre_insert_rejects_forbidden_granter(): void {
+	public function test_pre_insert_rejects_forbidden_refund_approver(): void {
 		$cashier         = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
 		$another_cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
 
-		$order = wc_create_order();
-		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
-		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_USER_ID, $another_cashier );
-		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, Capabilities::CAP_ISSUE_REFUNDS );
+		$parent_order = wc_create_order();
+		$parent_order->save();
+		$refund = wc_create_refund( array( 'order_id' => $parent_order->get_id() ) );
+		$refund->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
+		$refund->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_STAFF_USER_ID, $another_cashier );
 
-		$result = $this->sut->handle_pre_insert( $order, new WP_REST_Request(), true );
+		$result = $this->sut->handle_pre_insert( $refund, new WP_REST_Request(), true );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_pos_override_forbidden', $result->get_error_code() );
@@ -192,20 +166,21 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should accept a valid override pair (manager has the elevated POS cap).
+	 * @testdox Should accept a valid refund override (approver holds issue_refunds).
 	 */
-	public function test_pre_insert_accepts_valid_override(): void {
+	public function test_pre_insert_accepts_valid_refund_override(): void {
 		$cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
 		$manager = $this->make_pos_user( Capabilities::POS_ROLE_MANAGER );
 
-		$order = wc_create_order();
-		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
-		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_USER_ID, $manager );
-		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, Capabilities::CAP_ISSUE_REFUNDS );
+		$parent_order = wc_create_order();
+		$parent_order->save();
+		$refund = wc_create_refund( array( 'order_id' => $parent_order->get_id() ) );
+		$refund->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
+		$refund->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_STAFF_USER_ID, $manager );
 
-		$result = $this->sut->handle_pre_insert( $order, new WP_REST_Request(), true );
+		$result = $this->sut->handle_pre_insert( $refund, new WP_REST_Request(), true );
 
-		$this->assertSame( $order, $result );
+		$this->assertSame( $refund, $result );
 
 		wp_delete_user( $cashier );
 		wp_delete_user( $manager );
@@ -236,9 +211,9 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add a single combined override note when override is present (no separate attribution note).
+	 * @testdox Should add a single combined override note when refund override is present (no separate attribution note).
 	 */
-	public function test_post_insert_writes_combined_override_note(): void {
+	public function test_post_insert_writes_combined_refund_override_note(): void {
 		$cashier = $this->make_pos_user(
 			Capabilities::POS_ROLE_CASHIER,
 			array(
@@ -254,19 +229,20 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$order = wc_create_order();
-		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
-		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_USER_ID, $manager );
-		$order->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_REASON, Capabilities::CAP_ISSUE_REFUNDS );
-		$order->save();
+		$parent_order = wc_create_order();
+		$parent_order->save();
+		$refund = wc_create_refund( array( 'order_id' => $parent_order->get_id() ) );
+		$refund->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
+		$refund->update_meta_data( OrderAttribution::META_KEY_OVERRIDE_STAFF_USER_ID, $manager );
+		$refund->save();
 
-		$this->sut->handle_post_insert( $order, new WP_REST_Request(), true );
+		$this->sut->handle_post_insert( $refund, new WP_REST_Request(), true );
 
 		$this->assert_order_note_contains(
-			$order,
-			'POS override: ' . Capabilities::CAP_ISSUE_REFUNDS . ' granted to Mike Cashier (mike), approved by Sarah Manager (sarah).'
+			$parent_order,
+			'POS override: refund by Mike Cashier (mike), approved by Sarah Manager (sarah).'
 		);
-		$this->assert_order_note_not_contains( $order, 'POS: created by' );
+		$this->assert_order_note_not_contains( $parent_order, 'POS: refunded by' );
 
 		wp_delete_user( $cashier );
 		wp_delete_user( $manager );

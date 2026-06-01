@@ -114,6 +114,27 @@ class Capabilities {
 	}
 
 	/**
+	 * Whether a user's POS role grants the given POS capability.
+	 *
+	 * Returns false if the user has no POS role assigned.
+	 *
+	 * @param int    $user_id    Target user.
+	 * @param string $capability One of self::CAP_* constants.
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public static function user_has_pos_capability( int $user_id, string $capability ): bool {
+		$pos_role = self::get_pos_role( $user_id );
+		if ( null === $pos_role ) {
+			return false;
+		}
+
+		$caps = self::capabilities_for_role( $pos_role );
+		return ! empty( $caps[ $capability ] );
+	}
+
+	/**
 	 * Assign or clear the POS role for a user.
 	 *
 	 * Passing null removes the meta entry — the user loses POS access entirely.
