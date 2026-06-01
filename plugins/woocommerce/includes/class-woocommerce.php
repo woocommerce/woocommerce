@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
@@ -400,6 +401,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
 		$container->get( EmailLogger::class )->register();
+		$container->get( VisualAttributeTermAdmin::class )->register();
 		$container->get( Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Agentic\AgenticController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();

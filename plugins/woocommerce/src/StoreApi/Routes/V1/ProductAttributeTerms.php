@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\ProductAttributeTermSchema;
 
 /**
  * ProductAttributeTerms class.
@@ -13,6 +14,13 @@ class ProductAttributeTerms extends AbstractTermsRoute {
 	 * @var string
 	 */
 	const IDENTIFIER = 'product-attribute-terms';
+
+	/**
+	 * The routes schema.
+	 *
+	 * @var string
+	 */
+	const SCHEMA_TYPE = ProductAttributeTermSchema::IDENTIFIER;
 
 	/**
 	 * Get the path of this REST route.

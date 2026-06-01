@@ -994,10 +994,20 @@ jQuery( function ( $ ) {
 
 			if (
 				currentAttributeTermCreationContext.isVisualAttribute &&
-				postedData &&
-				postedData.term_color
+				postedData
 			) {
-				data.term_color = postedData.term_color;
+				if ( postedData.wc_visual_attribute_type ) {
+					data.wc_visual_attribute_type =
+						postedData.wc_visual_attribute_type;
+				}
+
+				if ( postedData.term_color ) {
+					data.term_color = postedData.term_color;
+				}
+
+				if ( postedData.term_image ) {
+					data.term_image = postedData.term_image;
+				}
 			}
 
 			$.post(

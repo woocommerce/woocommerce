@@ -5,7 +5,18 @@ import { ColorPicker, Popover } from '@wordpress/components';
 import { createRoot, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-const INPUT_SELECTOR = 'input.wc-admin-visual-attribute-color-input';
+/**
+ * Internal dependencies
+ */
+import { mountAllImagePickers } from './image-field';
+import { mountAllVisualTypeSwitchers } from './type-switcher';
+import {
+	COLOR_INPUT_SELECTOR,
+	IMAGE_INPUT_SELECTOR,
+	clearSiblingVisualInput,
+	observeInputValueChanges,
+} from './utils';
+
 const WRAPPER_CLASS = 'wc-admin-visual-attribute-color-picker-root';
 const FALLBACK_COLOR = '#000000';
 const EMPTY_COLOR_VALUE = '';
@@ -36,35 +47,10 @@ const ColorField = ( { input }: { input: HTMLInputElement } ) => {
 	// the `value` property to sync input changes to the color picker.
 	// @see https://github.com/WordPress/wordpress-develop/blob/bd4e3c97903743ab455682f32dbf38d1b38b715a/src/js/_enqueues/admin/tags.js#L194
 	useEffect( () => {
-		const syncColorWithInput = ( nextValue: string ) => {
+		return observeInputValueChanges( input, ( nextValue ) => {
 			const nextColor = normalizeColor( nextValue );
-
 			setColor( nextColor );
-		};
-		const inputPrototype = HTMLInputElement.prototype;
-		const valueDescriptor = Object.getOwnPropertyDescriptor(
-			inputPrototype,
-			'value'
-		);
-		let hasValueOverride = false;
-
-		if ( valueDescriptor?.get && valueDescriptor.set ) {
-			Object.defineProperty( input, 'value', {
-				...valueDescriptor,
-				configurable: true,
-				set( nextValue: string ) {
-					valueDescriptor.set?.call( this, nextValue );
-					syncColorWithInput( nextValue );
-				},
-			} );
-			hasValueOverride = true;
-		}
-
-		return () => {
-			if ( hasValueOverride ) {
-				delete ( input as { value?: string } ).value;
-			}
-		};
+		} );
 	}, [ input ] );
 
 	useEffect( () => {
@@ -78,6 +64,11 @@ const ColorField = ( { input }: { input: HTMLInputElement } ) => {
 
 	const handleColorSelection = ( value: string ) => {
 		const nextColor = normalizeColor( value );
+
+		if ( nextColor ) {
+			clearSiblingVisualInput( input, IMAGE_INPUT_SELECTOR );
+		}
+
 		setColor( nextColor );
 	};
 
@@ -175,7 +166,7 @@ const mountColorPicker = ( input: HTMLInputElement ) => {
 };
 
 const mountAllColorPickers = ( context: ParentNode = document ) => {
-	const colorInputs = context.querySelectorAll( INPUT_SELECTOR );
+	const colorInputs = context.querySelectorAll( COLOR_INPUT_SELECTOR );
 
 	colorInputs.forEach( ( inputElement ) => {
 		if ( inputElement instanceof HTMLInputElement ) {
@@ -184,12 +175,18 @@ const mountAllColorPickers = ( context: ParentNode = document ) => {
 	} );
 };
 
+const mountAllVisualAttributeFields = ( context: ParentNode = document ) => {
+	mountAllColorPickers( context );
+	mountAllImagePickers( context );
+	mountAllVisualTypeSwitchers( context );
+};
+
 const startObserver = () => {
 	const observer = new MutationObserver( ( mutationList ) => {
 		mutationList.forEach( ( mutation ) => {
 			mutation.addedNodes.forEach( ( node ) => {
 				if ( node instanceof HTMLElement ) {
-					mountAllColorPickers( node );
+					mountAllVisualAttributeFields( node );
 				}
 			} );
 		} );
@@ -201,5 +198,5 @@ const startObserver = () => {
 	} );
 };
 
-mountAllColorPickers();
+mountAllVisualAttributeFields();
 startObserver();

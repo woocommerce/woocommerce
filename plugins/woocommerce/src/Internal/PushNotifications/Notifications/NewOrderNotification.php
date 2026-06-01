@@ -20,11 +20,6 @@ class NewOrderNotification extends Notification {
 	const TYPE = 'store_order';
 
 	/**
-	 * The icon to use in the notification.
-	 */
-	const ICON = 'https://s.wp.com/wp-content/mu-plugins/notes/images/update-payment-2x.png';
-
-	/**
 	 * An array of emojis to select from when forming the payload.
 	 */
 	const EMOJI_LIST = array( '🎉', '🎊', '🥳', '👏', '🙌' );
@@ -54,7 +49,6 @@ class NewOrderNotification extends Notification {
 
 		return array(
 			'type'        => $this->get_type(),
-			'icon'        => self::ICON,
 			// This represents the time the notification was triggered, so we can monitor age of notification at delivery.
 			'timestamp'   => gmdate( 'c' ),
 			'resource_id' => $this->get_resource_id(),
