@@ -85,22 +85,39 @@ body.folded #wc-proto-save-header {
 	color: #2c3338;
 	text-decoration: none;
 	font-size: 13px;
+	display: flex;
+	align-items: center;
+	gap: 2px;
 }
-.wc-proto-back:hover { color: #2271b1; }
+.wc-proto-back:hover { color: #2271b1; text-decoration: none; }
+.wc-proto-back .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+	line-height: 1;
+}
 
 /* ── Button group ───────────────────────────────────────── */
 .wc-proto-actions {
 	display: flex;
-	gap: 8px;
+	gap: 4px;
 	align-items: center;
 	position: relative;
 }
 
 /* Reset WP button margins inside the header */
 #wc-proto-save-header .button,
-#wc-proto-save-header .button-primary {
+#wc-proto-save-header .button-link {
 	margin: 0;
 	vertical-align: middle;
+}
+
+/* Size the kebab SVG icon correctly */
+#wc-proto-kebab-toggle svg {
+	display: block;
+	width: 16px;
+	height: 16px;
+	fill: currentColor;
 }
 
 /* ── Kebab dropdown ─────────────────────────────────────── */
@@ -167,23 +184,24 @@ body.product-php #poststuff { margin-top: <?php echo esc_attr( (string) $bar_h )
 <div id="wc-proto-save-header" data-visibility-label="<?php echo esc_attr__( 'Visibility', 'woocommerce' ); ?>">
 	<div class="wc-proto-inner">
 		<a href="<?php echo esc_url( $products_url ); ?>" class="wc-proto-back">
-			&larr; <?php esc_html_e( 'Back to products', 'woocommerce' ); ?>
+			<span class="dashicons dashicons-arrow-left-alt2" aria-hidden="true"></span>
+			<?php esc_html_e( 'Back to products', 'woocommerce' ); ?>
 		</a>
 		<div class="wc-proto-actions">
 			<?php if ( $preview_url ) : ?>
-			<a href="<?php echo esc_url( $preview_url ); ?>" class="button" target="_blank" rel="noopener noreferrer">
+			<a href="<?php echo esc_url( $preview_url ); ?>" class="button-link button-small" target="_blank" rel="noopener noreferrer">
 				<?php esc_html_e( 'Preview', 'woocommerce' ); ?>
 			</a>
 			<?php endif; ?>
-			<button type="button" id="wc-proto-btn-save-draft" class="button">
+			<button type="button" id="wc-proto-btn-save-draft" class="button button-small">
 				<?php esc_html_e( 'Save draft', 'woocommerce' ); ?>
 			</button>
-			<button type="button" id="wc-proto-btn-publish" class="button button-primary">
+			<button type="button" id="wc-proto-btn-publish" class="button button-primary button-small">
 				<?php echo esc_html( $primary_label ); ?>
 			</button>
 			<div style="position:relative">
-				<button type="button" id="wc-proto-kebab-toggle" class="button" aria-label="<?php esc_attr_e( 'More actions', 'woocommerce' ); ?>" aria-haspopup="true" aria-expanded="false">
-					&#8942;
+				<button type="button" id="wc-proto-kebab-toggle" class="button-link button-small" aria-label="<?php esc_attr_e( 'More actions', 'woocommerce' ); ?>" aria-haspopup="true" aria-expanded="false">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
 				</button>
 				<div id="wc-proto-kebab-menu" role="menu">
 					<a id="wc-proto-copy-draft" href="#" class="wc-proto-kebab-item" role="menuitem" style="display:none">
