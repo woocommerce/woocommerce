@@ -800,18 +800,22 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Simulate a persistent object cache and start from a clean notoptions cache.
 		$previous = wp_using_ext_object_cache( true );
-		wp_cache_delete( 'notoptions', 'options' );
 
-		// Force a fresh read so read_product_data() runs.
-		$data_store = new WC_Product_Variable_Data_Store_CPT();
-		$fresh      = new WC_Product_Variable();
-		$fresh->set_id( $product_id );
-		$data_store->read( $fresh );
+		try {
+			wp_cache_delete( 'notoptions', 'options' );
 
-		$notoptions = wp_cache_get( 'notoptions', 'options' );
+			// Force a fresh read so read_product_data() runs.
+			$data_store = new WC_Product_Variable_Data_Store_CPT();
+			$fresh      = new WC_Product_Variable();
+			$fresh->set_id( $product_id );
+			$data_store->read( $fresh );
 
-		// Restore the flag before asserting so a failed assertion cannot leak into other tests.
-		wp_using_ext_object_cache( $previous );
+			$notoptions = wp_cache_get( 'notoptions', 'options' );
+		} finally {
+			// Always restore. Cast to bool because wp_using_ext_object_cache( null ) is a
+			// no-op, which would otherwise leak the simulated true state into later tests.
+			wp_using_ext_object_cache( (bool) $previous );
+		}
 
 		$notoptions = is_array( $notoptions ) ? $notoptions : array();
 		foreach ( $option_names as $option_name ) {
