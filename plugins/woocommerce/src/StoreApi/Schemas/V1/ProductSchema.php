@@ -2,7 +2,6 @@
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
@@ -35,6 +34,13 @@ class ProductSchema extends AbstractSchema {
 	protected $image_attachment_schema;
 
 	/**
+	 * Product attribute term schema instance.
+	 *
+	 * @var ProductAttributeTermSchema
+	 */
+	protected $product_attribute_term_schema;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param ExtendSchema     $extend Rest Extending instance.
@@ -42,7 +48,24 @@ class ProductSchema extends AbstractSchema {
 	 */
 	public function __construct( ExtendSchema $extend, SchemaController $controller ) {
 		parent::__construct( $extend, $controller );
-		$this->image_attachment_schema = $this->controller->get( ImageAttachmentSchema::IDENTIFIER );
+		$this->image_attachment_schema       = $this->controller->get( ImageAttachmentSchema::IDENTIFIER );
+		$this->product_attribute_term_schema = $this->get_product_attribute_term_schema();
+	}
+
+	/**
+	 * Get the product attribute term schema instance.
+	 *
+	 * @return ProductAttributeTermSchema
+	 * @throws \RuntimeException If the schema controller returns an unexpected schema.
+	 */
+	private function get_product_attribute_term_schema(): ProductAttributeTermSchema {
+		$schema = $this->controller->get( ProductAttributeTermSchema::IDENTIFIER );
+
+		if ( ! $schema instanceof ProductAttributeTermSchema ) {
+			throw new \RuntimeException( 'Product attribute term schema is not available.' );
+		}
+
+		return $schema;
 	}
 
 	/**
@@ -353,21 +376,7 @@ class ProductSchema extends AbstractSchema {
 										'context'     => [ 'view', 'edit', 'embed' ],
 										'readonly'    => true,
 									],
-									'__experimentalVisual' => [
-										'description' => __( 'Experimental visual swatch data for wc-visual attribute terms.', 'woocommerce' ),
-										'type'        => 'object',
-										'context'     => [ 'view', 'edit', 'embed' ],
-										'readonly'    => true,
-										'properties'  => [
-											'type'  => [
-												'type' => 'string',
-												'enum' => [ VisualAttributeTermMeta::TYPE_COLOR, VisualAttributeTermMeta::TYPE_IMAGE, VisualAttributeTermMeta::TYPE_NONE ],
-											],
-											'value' => [
-												'type' => 'string',
-											],
-										],
-									],
+									'__experimentalVisual' => $this->product_attribute_term_schema->get_visual_property_schema( [ 'view', 'edit', 'embed' ] ),
 								],
 							],
 						],
@@ -909,11 +918,7 @@ class ProductSchema extends AbstractSchema {
 	protected function prepare_product_attribute_taxonomy_value( \WP_Term $term ) {
 		$value = (array) $this->prepare_product_attribute_value( $term->name, $term->term_id, $term->slug );
 
-		if ( VisualAttributeTermMeta::is_visual_attribute_taxonomy( $term->taxonomy ) ) {
-			$value['__experimentalVisual'] = VisualAttributeTermMeta::get_term_visual( (int) $term->term_id );
-		}
-
-		return (object) $value;
+		return (object) $this->product_attribute_term_schema->add_visual_data( $value, $term );
 	}
 
 	/**
