@@ -1213,13 +1213,13 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 					'line_item_id' => $item_a->get_id(),
 					'quantity'     => 1,
 				),
-				// missing → 10.00
+				// Item A above has no refund_total, expected to be filled with 10.00.
 				array(
 					'line_item_id' => $item_b->get_id(),
 					'quantity'     => 1,
 					'refund_total' => 7.0,
 				),
-			// explicit → 7.0
+				// Item B has explicit refund_total 7.0, expected to be preserved.
 			),
 			$order
 		);
