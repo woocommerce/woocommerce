@@ -326,7 +326,7 @@ class WC_Admin_Duplicate_Product {
 		$original_sku = $product->get_sku();
 
 		// If the product has no SKU, don't do anything.
-		if ( ! $original_sku ) {
+		if ( '' === $original_sku ) {
 			return;
 		}
 
@@ -344,7 +344,8 @@ class WC_Admin_Duplicate_Product {
 
 		// Find the maximum suffix.
 		$max_suffix = 0;
-		$prefix_len = strlen( $original_sku ) + 1; // +1 for the hyphen
+		// +1 for the hyphen separator between original SKU and suffix.
+		$prefix_len = strlen( $original_sku ) + 1;
 		foreach ( $existing_skus as $existing_sku ) {
 			// Check if the SKU starts with our base and has a numeric suffix.
 			if ( strpos( $existing_sku, $original_sku . '-' ) === 0 ) {
