@@ -78,6 +78,11 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->download_directories->disable_by_id( $this->download_directories->get_by_url( 'https://new.supplier/' )->get_id() );
+
+		// Approved Download Directory rule changes don't invalidate the product object cache, so
+		// flush to force a fresh read that reflects the updated rules.
+		wp_cache_flush();
+
 		$product_downloads = wc_get_product( $this->product->get_id() )->get_downloads();
 
 		$this->assertCount(
@@ -92,6 +97,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->download_directories->set_mode( Download_Directories::MODE_DISABLED );
+		wp_cache_flush();
 
 		$this->assertCount(
 			2,
