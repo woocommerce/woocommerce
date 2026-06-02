@@ -41,7 +41,8 @@ class TypographyHierarchy {
 		?>
 <style id="wc-proto-typo-styles">
 /* ── Tier 1: Metabox titles ─────────────────────────────── */
-body.post-type-product #poststuff h2.hndle {
+body.post-type-product #poststuff h2.hndle,
+body.post-type-product #postdivrich h2.postbox-header label {
     font-size: var(--wpds-typography-font-size-md, 13px);
     font-weight: var(--wpds-typography-font-weight-medium, 499);
     color: var(--wpds-color-fg-content-neutral, #1e1e1e);
@@ -56,7 +57,8 @@ body.post-type-product .woocommerce_options_panel fieldset.form-field legend {
 }
 
 /* ── Tier 3: Helper/description text ────────────────────── */
-body.post-type-product .woocommerce_options_panel .form-field .description {
+body.post-type-product .woocommerce_options_panel .form-field .description,
+body.post-type-product p.howto {
     font-size: var(--wpds-typography-font-size-xs, 11px);
     font-weight: var(--wpds-typography-font-weight-regular, 400);
     color: var(--wpds-color-fg-content-neutral-weak, #707070);
@@ -64,7 +66,7 @@ body.post-type-product .woocommerce_options_panel .form-field .description {
 
 /* ── Product data tab labels ────────────────────────────── */
 body.post-type-product ul.product_data_tabs li a {
-    font-size: var(--wpds-typography-font-size-sm, 12px);
+    font-size: var(--wpds-typography-font-size-md, 13px);
     font-weight: var(--wpds-typography-font-weight-regular, 400);
     color: var(--wpds-color-fg-content-neutral, #1e1e1e);
 }
@@ -79,9 +81,16 @@ body.post-type-product .woocommerce_variation h3 {
 
 /* ── Sidebar publish / status text ──────────────────────── */
 body.post-type-product .misc-pub-section {
+    font-size: var(--wpds-typography-font-size-md, 13px);
+    font-weight: var(--wpds-typography-font-weight-regular, 400);
+    color: var(--wpds-color-fg-content-neutral, #1e1e1e);
+}
+
+/* ── Taxonomy tab links (All categories / Most Used) ────── */
+body.post-type-product ul.category-tabs li a {
     font-size: var(--wpds-typography-font-size-sm, 12px);
     font-weight: var(--wpds-typography-font-weight-regular, 400);
-    color: var(--wpds-color-fg-content-neutral-weak, #707070);
+    color: var(--wpds-color-fg-content-neutral, #1e1e1e);
 }
 
 /* ── Taxonomy checkbox labels ───────────────────────────── */
