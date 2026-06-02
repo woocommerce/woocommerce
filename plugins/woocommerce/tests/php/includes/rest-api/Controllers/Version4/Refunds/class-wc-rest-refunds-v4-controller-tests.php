@@ -1533,6 +1533,124 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Simplified form produces the same amount as explicit refund_total on a tax-inclusive store.
+	 *
+	 * The no-tax equivalence test is trivial — compute_line_item_refund_total
+	 * returns the raw line total. The interesting regression risk is the
+	 * tax round-trip: auto-compute returns a tax-inclusive value, the converter
+	 * runs WC_Tax::calc_inclusive_tax to split it. A future refactor that
+	 * yielded a tax-exclusive auto-computed value would diverge from the
+	 * explicit-form total by the tax delta with no other test catching it.
+	 */
+	public function test_refunds_create_simplified_matches_explicit_tax_inclusive(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
+		$dispatch_refund = function ( array $line_item_overrides ) use ( $tax_rate_id ): array {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 100.00 );
+			$product->set_tax_status( 'taxable' );
+			$product->save();
+
+			$order = wc_create_order();
+			$item  = new WC_Order_Item_Product();
+			$item->set_props(
+				array(
+					'product'  => $product,
+					'quantity' => 1,
+					'subtotal' => 100.00,
+					'total'    => 100.00,
+				)
+			);
+			$item->set_taxes(
+				array(
+					'total'    => array( $tax_rate_id => 10.00 ),
+					'subtotal' => array( $tax_rate_id => 10.00 ),
+				)
+			);
+			$item->save();
+			$order->add_item( $item );
+
+			$tax_item = new \WC_Order_Item_Tax();
+			$tax_item->set_rate( $tax_rate_id );
+			$tax_item->set_tax_total( 10.00 );
+			$tax_item->save();
+			$order->add_item( $tax_item );
+
+			$order->set_billing_country( 'US' );
+			$order->set_total( 110.00 );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->save();
+			$this->created_orders[] = $order->get_id();
+
+			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+			$request->set_body_params(
+				array(
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						array_merge( array( 'line_item_id' => $item->get_id() ), $line_item_overrides ),
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 201, $response->get_status() );
+			$data                    = $response->get_data();
+			$this->created_refunds[] = $data['id'];
+			$product->delete( true );
+
+			return $data;
+		};
+
+		// Path A: simplified form — no refund_total, backend auto-computes via compute_line_item_refund_total.
+		$data_simplified = $dispatch_refund( array( 'quantity' => 1 ) );
+		// Path B: explicit form — client supplies the tax-inclusive refund_total.
+		$data_explicit = $dispatch_refund(
+			array(
+				'quantity'     => 1,
+				'refund_total' => 110.00,
+			)
+		);
+
+		$this->assertEquals(
+			$data_explicit['amount'],
+			$data_simplified['amount'],
+			'Tax-inclusive store: simplified and explicit forms must produce the same amount.'
+		);
+		$this->assertEquals( '110.00', $data_simplified['amount'] );
+
+		// The per-line refund_total / refund_tax must round-trip identically too.
+		$this->assertEquals(
+			$data_explicit['line_items'][0]['refund_total'],
+			$data_simplified['line_items'][0]['refund_total'],
+			'Per-line refund_total must match (tax-exclusive after extraction).'
+		);
+		$this->assertEquals( '100.00', $data_simplified['line_items'][0]['refund_total'] );
+
+		$this->assertNotEmpty( $data_simplified['line_items'][0]['refund_tax'] );
+		$this->assertEquals(
+			$data_explicit['line_items'][0]['refund_tax'][0]['refund_total'],
+			$data_simplified['line_items'][0]['refund_tax'][0]['refund_total'],
+			'Extracted refund_tax must match between paths.'
+		);
+		$this->assertEquals( '10.00', $data_simplified['line_items'][0]['refund_tax'][0]['refund_total'] );
+	}
+
+	/**
 	 * @testdox Refund creation supports mixing items with and without refund_total in the same request.
 	 */
 	public function test_refunds_create_mixed_with_and_without_refund_total(): void {
@@ -1760,23 +1878,15 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 		$response = $this->server->dispatch( $request );
 
-		$status = $response->get_status();
-		$data   = $response->get_data();
-
-		// Two acceptable outcomes: 201 if the platform allows negative-fee refunds
-		// (the spec's discount-as-fee scenario), or a 4xx if it rejects them.
-		// Under current platform behaviour the controller's `0 > $refund_amount`
-		// guard fires for any negative total and surfaces `invalid_refund_amount`
-		// — that's accepted here. The point of this test is to lock in that the
-		// pipeline does not throw (no 5xx) and the request reaches a defined
-		// terminal state for the negative-fee scenario.
-		$this->assertLessThan( 500, $status, 'Negative-fee refund must not 500.' );
-		if ( 201 === $status ) {
-			$this->assertEquals( '-3.00', $data['amount'] );
-			$this->created_refunds[] = $data['id'];
-		} else {
-			$this->assertArrayHasKey( 'code', $data );
-		}
+		// Current platform behaviour: the controller's `0 > $refund_amount`
+		// guard fires for any negative auto-computed total and surfaces
+		// `invalid_refund_amount`. Pin the exact response so a future change
+		// (e.g. platform support for negative-fee refunds, or a different
+		// rejection code) is loud rather than silent. If the platform later
+		// allows negative refunds, this test will fail and force the
+		// conversation about whether to update it to assert 201 + `-3.00`.
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'invalid_refund_amount', $response->get_data()['code'] );
 
 		$product->delete( true );
 	}
@@ -2123,6 +2233,77 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertEquals( 'invalid_line_item', $data['code'] );
 		$this->assertStringContainsString( 'source quantity is zero', $data['message'] );
+	}
+
+	/**
+	 * @testdox Scoped catch around fill_missing_refund_totals returns a 500 with invalid_refund_request when the helper throws.
+	 *
+	 * The catch is defensive — fill_missing_refund_totals pre-checks the
+	 * invariant that compute_line_item_refund_total cares about, so the
+	 * throw is unreachable from public input. Locking in the response shape
+	 * here means a future refactor that broadens the catch (e.g. to
+	 * \Throwable) or accidentally re-narrows fill's pre-check is caught.
+	 */
+	public function test_refunds_create_invariant_violation_returns_500(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 50.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		// Inject a DataUtils stub that throws on fill_missing_refund_totals
+		// into the *DI-resolved* RefundsController instance — that's the one
+		// the REST server dispatches against. $this->endpoint in setUp is a
+		// separate instance and mutating it would not affect dispatch.
+		$throwing_utils = $this->getMockBuilder( DataUtils::class )
+			->onlyMethods( array( 'fill_missing_refund_totals' ) )
+			->getMock();
+		$throwing_utils->method( 'fill_missing_refund_totals' )
+			->willThrowException( new \InvalidArgumentException( 'simulated invariant violation' ) );
+
+		$container       = wc_get_container();
+		$dispatch_target = $container->get( RefundsController::class );
+		$dispatch_target->init( $this->refund_schema, new CollectionQuery(), $throwing_utils );
+
+		try {
+			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+			$request->set_body_params(
+				array(
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						array(
+							'line_item_id' => $item->get_id(),
+							'quantity'     => 1,
+						),
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 500, $response->get_status() );
+			$data = $response->get_data();
+			$this->assertEquals( 'invalid_refund_request', $data['code'] );
+		} finally {
+			// Restore the real data_utils on the dispatch-target controller
+			// so the rest of the suite is unaffected.
+			$dispatch_target->init( $this->refund_schema, new CollectionQuery(), new DataUtils() );
+			$product->delete( true );
+		}
 	}
 
 	/**
