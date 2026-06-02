@@ -231,6 +231,19 @@ select#wc-proto-vis-select,
 		} );
 	}
 
+	/* ── Hide display value while its panel is open ─────────── */
+	function watchPanel( panelId, displayId ) {
+		var panel   = document.getElementById( panelId );
+		var display = document.getElementById( displayId );
+		if ( ! panel || ! display ) { return; }
+		new MutationObserver( function () {
+			var open = 'none' !== window.getComputedStyle( panel ).display;
+			display.style.display = open ? 'none' : '';
+		} ).observe( panel, { attributes: true, attributeFilter: [ 'style' ] } );
+	}
+	watchPanel( 'post-visibility-select', 'post-visibility-display' );
+	watchPanel( 'post-status-select',     'post-status-display' );
+	watchPanel( 'timestampdiv',           'timestamp' );
 }() );
 </script>
 		<?php
