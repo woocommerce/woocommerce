@@ -55,7 +55,7 @@ class SavePublishClarity {
 	position: fixed;
 	top: <?php echo esc_attr( (string) $top ); ?>px;
 	right: 0;
-	left: 160px;
+	left: 0;
 	z-index: 9998;
 	background: #f0f0f1;
 	border-bottom: 1px solid #c3c4c7;
@@ -64,19 +64,22 @@ class SavePublishClarity {
 	align-items: center;
 	box-sizing: border-box;
 }
-body.folded #wc-proto-save-header {
-	left: 36px;
-}
 
-/* Inner container aligns to the same max-width as page content */
+/* Inner container aligns to the same max-width as page content.
+   max-width = 1200px content + 160px sidebar offset so box-sizing works. */
 .wc-proto-inner {
-	max-width: 1200px;
+	max-width: 1360px;
 	margin: 0 auto;
+	padding-left: 160px;
 	width: 100%;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	box-sizing: border-box;
+}
+body.folded .wc-proto-inner {
+	padding-left: 36px;
+	max-width: 1236px;
 }
 
 /* ── Left side: back link + title breadcrumb ────────── */
@@ -218,8 +221,8 @@ h1.wp-heading-inline,
 #submitdiv #misc-publishing-actions .misc-pub-section:last-child,
 #submitdiv .misc-pub-copy-draft { display: none !important; }
 
-/* Push all wrap content (including page heading) below the fixed bar, with 8px breathing room */
-body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (string) ( $bar_h + 8 ) ); ?>px; }
+/* Push wrap content below both the WC sub-header and our fixed bar, with 8px breathing room */
+body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (string) ( $bar_h + self::WC_HDR_H + 8 ) ); ?>px; }
 </style>
 		<?php
 	}
@@ -354,13 +357,29 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 	} );
 
 	/* ── Screen options: push header down when panel opens ── */
-	var screenMeta = document.getElementById( 'screen-meta' );
-	if ( headerEl && screenMeta ) {
-		var baseTop = <?php echo (int) $top; ?>;
-		new ResizeObserver( function () {
-			headerEl.style.top = ( baseTop + screenMeta.offsetHeight ) + 'px';
-		} ).observe( screenMeta );
-	}
+	( function () {
+		var screenMeta  = document.getElementById( 'screen-meta' );
+		var hdr         = document.getElementById( 'wc-proto-save-header' );
+		var baseTop     = <?php echo (int) $top; ?>;
+		if ( ! screenMeta || ! hdr ) { return; }
+
+		function syncTop() {
+			hdr.style.top = ( baseTop + screenMeta.offsetHeight ) + 'px';
+		}
+
+		// Watch for the screen-meta-active class WP toggles when screen options open/close.
+		new MutationObserver( function () {
+			// Poll during the jQuery slide animation (max 600ms).
+			var ticks = 0;
+			var id = setInterval( function () {
+				syncTop();
+				if ( ++ticks >= 12 ) { clearInterval( id ); }
+			}, 50 );
+		} ).observe( screenMeta, { attributes: true, attributeFilter: [ 'class' ] } );
+
+		// Initial sync in case panel is already open on page load.
+		syncTop();
+	}() );
 
 	/* ── Dirty-state: disable primary button until changes are made ── */
 	var isNewPost = '<?php echo esc_js( $post->post_status ); ?>' === 'auto-draft';
