@@ -114,9 +114,9 @@ body.post-type-product #tagsdiv-product_tag .jaxtag p.howto {
 
 /* ── Taxonomy checkbox labels ───────────────────────────── */
 body.post-type-product .categorychecklist li label {
-	font-size: var(--wpds-typography-font-size-sm, 12px);
+	font-size: var(--wpds-typography-font-size-md, 13px);
 	font-weight: var(--wpds-typography-font-weight-regular, 400);
-	color: var(--wpds-color-fg-content-neutral-weak, #707070);
+	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
 }
 
 /* ── "Add new" taxonomy links ───────────────────────────── */
