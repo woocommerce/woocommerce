@@ -56,6 +56,8 @@ declare global {
 			'customer-effort-score-tracks': boolean;
 			homescreen: boolean;
 			marketing: boolean;
+			'product-data-views': boolean;
+			'experimental-blocks': boolean;
 			'minified-js': boolean;
 			'mobile-app-banner': boolean;
 			navigation: boolean;
@@ -68,6 +70,7 @@ declare global {
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;
+			'products-catalog-api': boolean;
 			'settings-ui': boolean;
 			'shipping-label-banner': boolean;
 			subscriptions: boolean;
@@ -79,6 +82,10 @@ declare global {
 			'shipping-smart-defaults': boolean;
 			'shipping-setting-tour': boolean;
 			'launch-your-store': boolean;
+			'use-wp-horizon': boolean;
+			'rest-api-v4': boolean;
+			'order-detail-redesign': boolean;
+			'product-variations-classic-redesign': boolean;
 			blueprint: boolean;
 		};
 		wp: {

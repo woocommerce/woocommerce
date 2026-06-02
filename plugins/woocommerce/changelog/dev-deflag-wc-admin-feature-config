@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove stable WooCommerce Admin flags from the legacy feature config and load their classes directly.
