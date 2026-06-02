@@ -9,6 +9,8 @@
 declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Internal\Prototype\DevPanel;
+use Automattic\WooCommerce\Internal\Prototype\Improvements\CustomFieldsPolish;
+use Automattic\WooCommerce\Internal\Prototype\Improvements\DownloadableFilesPolish;
 use Automattic\WooCommerce\Internal\Prototype\Improvements\EditorControls;
 use Automattic\WooCommerce\Internal\Prototype\Improvements\IconModernisation;
 use Automattic\WooCommerce\Internal\Prototype\Improvements\MaxWidth;
@@ -26,6 +28,8 @@ MaxWidth::init();
 SavePublishClarity::init();
 SpacingRefinement::init();
 TaxonomyPanelPolish::init();
+DownloadableFilesPolish::init();
+CustomFieldsPolish::init();
 TypographyHierarchy::init();
 EditorControls::init();
 PublishMetabox::init();

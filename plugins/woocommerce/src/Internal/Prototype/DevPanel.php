@@ -26,9 +26,10 @@ class DevPanel {
 		'save_publish_clarity'      => 'Save & publish header bar',
 		'typography_hierarchy'      => 'Typography hierarchy',
 		'spacing_refinement'        => 'Tighter spacing',
-		'compact_editor_ui'         => 'Compact CTAs & inputs (32px)',
+		'compact_editor_ui'         => 'Compact UI & layout polish',
 		'taxonomy_panel_polish'     => 'Modern taxonomy panel',
 		'downloadable_files_polish' => 'Cleaner downloadable files list',
+		'custom_fields_polish'      => 'Cleaner custom fields',
 		'publish_metabox'           => 'Modern visibility (publish) metabox',
 	);
 
@@ -104,7 +105,10 @@ class DevPanel {
 					/>
 				</div>
 				<?php endforeach; ?>
-				<div style="border-top:1px solid rgba(255,255,255,0.15);margin-top:4px;padding-top:8px;display:flex;justify-content:flex-end;">
+				<div style="border-top:1px solid rgba(255,255,255,0.15);margin-top:4px;padding-top:8px;display:flex;gap:6px;justify-content:flex-end;">
+					<button id="wc-proto-enable-all" type="button" style="background:none;border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:4px;padding:2px 10px;cursor:pointer;font-family:inherit;font-size:11px;">
+						Enable all
+					</button>
 					<button id="wc-proto-disable-all" type="button" style="background:none;border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:4px;padding:2px 10px;cursor:pointer;font-family:inherit;font-size:11px;">
 						Disable all
 					</button>
@@ -148,6 +152,15 @@ class DevPanel {
 
 			document.getElementById( 'wc-proto-disable-all' ).addEventListener( 'click', function () {
 				setFlags( {} );
+				location.reload();
+			} );
+
+			document.getElementById( 'wc-proto-enable-all' ).addEventListener( 'click', function () {
+				var all = {};
+				document.querySelectorAll( '[data-flag]' ).forEach( function ( checkbox ) {
+					all[ checkbox.dataset.flag ] = true;
+				} );
+				setFlags( all );
 				location.reload();
 			} );
 		}() );
