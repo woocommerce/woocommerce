@@ -76,6 +76,10 @@ const LaunchStore = lazy( () =>
 	import( /* webpackChunkName: "launch-store" */ '../launch-your-store/hub' )
 );
 
+const MobileAppLoginPage = lazy( () =>
+	import( /* webpackChunkName: "mobile-app-login" */ '../mobile-app-login' )
+);
+
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
 
 export const getPages = ( reports = [] ) => {
@@ -328,6 +332,20 @@ export const getPages = ( reports = [] ) => {
 			capability: 'manage_woocommerce',
 		} );
 	}
+
+	pages.push( {
+		container: MobileAppLoginPage,
+		path: '/mobile-app-login',
+		breadcrumbs: [
+			...initialBreadcrumbs,
+			__( 'Mobile app login', 'woocommerce' ),
+		],
+		wpOpenMenu: 'toplevel_page_woocommerce',
+		navArgs: {
+			id: 'woocommerce-mobile-app-login',
+		},
+		capability: 'manage_woocommerce',
+	} );
 
 	/**
 	 * List of WooCommerce Admin pages.

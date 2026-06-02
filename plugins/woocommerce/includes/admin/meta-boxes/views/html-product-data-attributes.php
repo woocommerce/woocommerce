@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -90,8 +91,7 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 						<label for="wc-modal-add-attribute-term-input"><?php esc_html_e( 'Name', 'woocommerce' ); ?></label>
 						<input id="wc-modal-add-attribute-term-input" type="text" name="term" value="" />
 						<# if ( data.isVisualAttribute ) { #>
-							<label for="wc-modal-add-attribute-term-color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label>
-							<input id="wc-modal-add-attribute-term-color" class="wc-admin-visual-attribute-color-input" type="text" name="term_color" value="" />
+							<?php VisualAttributeTermAdmin::render_add_attribute_term_modal_fields(); ?>
 						<# } #>
 					</form>
 				</article>

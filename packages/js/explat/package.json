@@ -21,9 +21,17 @@
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
+	"exports": {
+		".": {
+			"wc-source": "./src/index.ts",
+			"types": "./build-types/index.d.ts",
+			"import": "./build-module/index.js",
+			"require": "./build/index.js"
+		}
+	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
-	"types": "build-types",
+	"types": "build-types/index.d.ts",
 	"files": [
 		"build",
 		"build-module",
@@ -31,10 +39,11 @@
 	],
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
-		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:esm": "wireit",
+		"build:project": "pnpm --stream --if-present '/^build:project:.*$/'",
+		"build:project:esm": "node build.mjs",
 		"build:publish:project": "pnpm --if-present '/^build:publish:project:.*$/'",
-		"build:publish:project:cjs": "tsc --project tsconfig-cjs.json --noCheck",
+		"build:publish:project:cjs": "node build.mjs --commonjs",
+		"build:publish:project:types": "tsc --build --emitDeclarationOnly",
 		"build:publish:project:deps": "pnpm build",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
@@ -47,7 +56,7 @@
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:esm": "wireit"
+		"watch:build:project:esm": "node build.mjs --watch"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
@@ -71,19 +80,25 @@
 		"@types/qs": "^6.9.10",
 		"@types/react": "18.3.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"@woocommerce/internal-ts-config": "workspace:*",
 		"eslint": "^8.55.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
-		"typescript": "5.7.x",
-		"wireit": "0.14.12"
+		"typescript": "5.7.x"
 	},
 	"publishConfig": {
-		"access": "public"
+		"access": "public",
+		"exports": {
+			".": {
+				"types": "./build-types/index.d.ts",
+				"import": "./build-module/index.js",
+				"require": "./build/index.js"
+			}
+		}
 	},
 	"config": {
 		"ci": {
@@ -107,46 +122,6 @@
 						"push"
 					]
 				}
-			]
-		}
-	},
-	"wireit": {
-		"build:project:esm": {
-			"command": "tsc --project tsconfig.json --noCheck",
-			"clean": "if-file-deleted",
-			"files": [
-				"tsconfig.json",
-				"src/**/*.{js,jsx,ts,tsx}",
-				"typings/**/*.ts"
-			],
-			"output": [
-				"build-module",
-				"build-types",
-				"tsconfig.tsbuildinfo"
-			],
-			"dependencies": [
-				"dependencyOutputs"
-			]
-		},
-		"watch:build:project:esm": {
-			"command": "tsc --project tsconfig.json --noCheck --watch",
-			"service": true
-		},
-		"dependencyOutputs": {
-			"allowUsuallyExcludedPaths": true,
-			"files": [
-				"package.json",
-				"../../../pnpm-lock.yaml",
-				"node_modules/@woocommerce/eslint-plugin/configs",
-				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js",
-				"node_modules/@woocommerce/internal-js-tests/build",
-				"node_modules/@woocommerce/internal-js-tests/build-module",
-				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
-				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
-				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
-				"node_modules/@woocommerce/internal-ts-config/tsconfig-jest.json",
-				"node_modules/@woocommerce/internal-ts-config/types"
 			]
 		}
 	}

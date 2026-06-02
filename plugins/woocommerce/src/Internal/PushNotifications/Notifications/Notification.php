@@ -196,7 +196,7 @@ abstract class Notification {
 	 * @param mixed $pref_value The user's stored preference value, or null.
 	 * @return bool True if this notification should be sent to that user.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 */
 	public function should_send_to_user( $pref_value ): bool {
 		if ( null === $pref_value ) {

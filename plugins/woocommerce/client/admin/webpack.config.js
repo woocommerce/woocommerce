@@ -16,7 +16,7 @@ const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-
 const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 const {
 	webpackConfig: styleConfig,
-} = require( '@woocommerce/internal-style-build' );
+} = require( '@woocommerce/internal-build/style-build' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
@@ -59,6 +59,7 @@ const wcAdminPackages = [
 	'block-templates',
 	'product-editor',
 	'sanitize',
+	'settings-ui-sdk',
 	'remote-logging',
 	'email-editor',
 ];
@@ -105,7 +106,7 @@ const webpackConfig = {
 								'@woocommerce/dependency-extraction-webpack-plugin'
 							),
 							require.resolve(
-								'@woocommerce/internal-style-build'
+								'@woocommerce/internal-build/style-build'
 							),
 						],
 					},
