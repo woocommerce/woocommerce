@@ -59,18 +59,32 @@ class Section_Memory {
 		// Dashboard root entry: redirect BEFORE we touch the cookie. Otherwise
 		// we'd delete (Dashboard isn't a Woo page) the value we want to
 		// redirect to.
-		if ( $this->is_dashboard_entry() && $this->is_fresh_entry() ) {
-			$target = $this->read_cookie_target();
-			if ( null !== $target ) {
-				wp_safe_redirect( $target );
-				exit;
-			}
-		}
+		$this->maybe_redirect_dashboard_entry();
 
 		if ( Context::is_woo_page( $tree ) ) {
 			$this->write_cookie( $this->current_path() );
 		} else {
 			$this->delete_cookie();
+		}
+	}
+
+	/**
+	 * When a fresh Dashboard-root entry carries a remembered Woo URL, redirect
+	 * to it (and exit). Returns without redirecting otherwise.
+	 *
+	 * Split out from sync_section() so the redirect decision is unit-testable
+	 * on its own: sync_section()'s `headers_sent()` guard is unreliable inside
+	 * a shared PHPUnit process (an earlier test's output flips it to true),
+	 * which would mask this behaviour.
+	 */
+	private function maybe_redirect_dashboard_entry(): void {
+		if ( ! $this->is_dashboard_entry() || ! $this->is_fresh_entry() ) {
+			return;
+		}
+		$target = $this->read_cookie_target();
+		if ( null !== $target ) {
+			wp_safe_redirect( $target );
+			exit;
 		}
 	}
 

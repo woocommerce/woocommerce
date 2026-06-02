@@ -151,13 +151,15 @@ class SectionMemoryTest extends \WC_Unit_Test_Case {
 			}
 		);
 
+		$redirected = false;
 		try {
-			$this->sut->sync_section();
-			$this->fail( 'Expected a redirect to the remembered Woo URL.' );
+			$this->invoke( 'maybe_redirect_dashboard_entry' );
 		} catch ( \RuntimeException $e ) {
+			$redirected = true;
 			$this->assertStringContainsString( 'redirect intercepted', $e->getMessage() );
 		}
 
+		$this->assertTrue( $redirected, 'Expected a redirect to the remembered Woo URL.' );
 		$this->assertNotNull( $captured, 'A redirect should have been issued.' );
 		$this->assertStringContainsString( 'admin.php?page=wc-admin', (string) $captured );
 	}
