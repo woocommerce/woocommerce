@@ -20,15 +20,15 @@ class DevPanel {
 	const COOKIE_KEY = 'wc_prototype_flags';
 
 	const FLAGS = array(
-		'reorder_controls'      => 'Reorder controls via Screen Options',
-		'icon_modernisation'    => 'Icon modernisation (SVG icons)',
-		'max_width'             => 'Max-width cap (1200 px, centered)',
-		'save_publish_clarity'  => 'Save & publish header',
+		'reorder_controls'      => 'Reorderable controls (Screen Options)',
+		'icon_modernisation'    => 'Modern SVG icons',
+		'max_width'             => 'Centered layout (1200px max)',
+		'save_publish_clarity'  => 'Save & publish header bar',
 		'typography_hierarchy'  => 'Typography hierarchy',
-		'spacing_refinement'    => 'Spacing refinement',
-		'compact_editor_ui'     => 'Compact editor UI (Add Media button)',
-		'taxonomy_panel_polish' => 'Taxonomy panel polish (modern tabs, flat checklist)',
-		'publish_metabox'       => 'Publish metabox redesign (visibility, scheduling)',
+		'spacing_refinement'    => 'Tighter spacing',
+		'compact_editor_ui'     => 'Compact CTAs & inputs (32px)',
+		'taxonomy_panel_polish' => 'Modern taxonomy panel',
+		'publish_metabox'       => 'Modern visibility (publish) metabox',
 	);
 
 	/**
