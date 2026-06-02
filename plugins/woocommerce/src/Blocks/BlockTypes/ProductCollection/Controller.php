@@ -353,7 +353,7 @@ class Controller extends AbstractBlock {
 		 */
 		if (
 			( $parsed_block['attrs']['forcePageReload'] ?? false ) &&
-			( $parsed_block['attrs']['inherit'] ?? false )
+			( $parsed_block['attrs']['query']['inherit'] ?? false )
 		) {
 			wp_interactivity_config( 'woocommerce/product-filters', array( 'forcePageReload' => true ) );
 		}

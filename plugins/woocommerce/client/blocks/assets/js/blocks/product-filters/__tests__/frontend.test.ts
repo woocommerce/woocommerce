@@ -335,8 +335,6 @@ describe( 'product filters interactivity store', () => {
 			get: () => ( { color: 'blue' } ),
 		} );
 
-		const routerNavigate = jest.fn();
-
 		try {
 			const iterator = mockRegisteredStore.actions.navigate();
 
@@ -348,7 +346,6 @@ describe( 'product filters interactivity store', () => {
 			expect( assignMock ).toHaveBeenCalledWith(
 				'https://example.com/shop/?color=blue'
 			);
-			expect( routerNavigate ).not.toHaveBeenCalled();
 		} finally {
 			Object.defineProperty( window, 'location', {
 				value: originalLocation,
