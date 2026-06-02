@@ -60,35 +60,54 @@ select#wc-proto-vis-select {
 	margin-bottom: 4px;
 }
 
-/* OK / Cancel: side-by-side row. */
-#post-visibility-select p,
-#timestampdiv p {
+/* ── OK / Cancel: right-aligned row, compact 32px, 8px gap ── */
+#post-visibility-select > p,
+#post-status-select > p,
+#timestampdiv > p {
 	display: flex !important;
 	align-items: center !important;
+	justify-content: flex-end !important;
 	gap: 8px !important;
-	margin-top: 6px !important;
+	margin: 8px 0 0 !important;
 }
-/* Cancel: minimal/tertiary — no background or border, just colored text. */
+/* OK: compact 32px — matches @wordpress/components Button compact height. */
+.save-post-visibility.button,
+.save-post-status.button,
+.save-timestamp.button {
+	height: 32px !important;
+	min-height: 0 !important;
+	line-height: 30px !important;
+	padding: 0 12px !important;
+	font-size: 13px !important;
+	margin: 0 !important;
+	vertical-align: middle !important;
+}
+/* Cancel: tertiary/minimal — 32px, no background. Matches Preview changes style. */
 .cancel-post-visibility,
+.cancel-post-status,
 .cancel-timestamp {
 	order: -1 !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	height: 32px !important;
+	padding: 0 12px !important;
+	font-size: 13px !important;
 	background: none !important;
-	border: none !important;
+	border: 1px solid transparent !important;
+	border-radius: var(--wpds-border-radius-xs, 2px) !important;
+	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
 	box-shadow: none !important;
 	text-shadow: none !important;
-	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
-	padding: 0 !important;
-	height: auto !important;
-	line-height: inherit !important;
 	text-decoration: none !important;
-	font-size: 13px !important;
 	cursor: pointer !important;
+	margin: 0 !important;
 }
 .cancel-post-visibility:hover,
+.cancel-post-status:hover,
 .cancel-timestamp:hover {
-	background: none !important;
+	background: var(--wpds-color-bg-interactive-neutral-weak-active, #f0f0f1) !important;
 	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
-	text-decoration: underline !important;
+	text-decoration: none !important;
 }
 </style>
 		<?php
@@ -138,6 +157,19 @@ select#wc-proto-vis-select {
 	if ( tsDisplay ) {
 		tsDisplay.innerHTML = tsDisplay.innerHTML.replace( /^Publish </, 'Publish: <' );
 	}
+
+	/* ── Hide display label when edit panel is open to avoid repetition ── */
+	function watchPanel( panelId, displayId ) {
+		var panel   = document.getElementById( panelId );
+		var display = document.getElementById( displayId );
+		if ( ! panel || ! display ) { return; }
+		new MutationObserver( function () {
+			display.style.display = ( 'none' !== window.getComputedStyle( panel ).display ) ? 'none' : '';
+		} ).observe( panel, { attributes: true, attributeFilter: [ 'style' ] } );
+	}
+	watchPanel( 'post-visibility-select', 'post-visibility-display' );
+	watchPanel( 'post-status-select',     'post-status-display' );
+	watchPanel( 'timestampdiv',           'timestamp' );
 }() );
 </script>
 		<?php

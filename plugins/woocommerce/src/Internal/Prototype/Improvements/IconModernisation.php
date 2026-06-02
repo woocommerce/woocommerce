@@ -261,6 +261,44 @@ class IconModernisation {
 		$css       .= "\tmask-position: center !important;\n";
 		$css       .= "}\n";
 
+		// Publish metabox row icons — replace Dashicons \f173/\f177/\f145 with SVG mask-image.
+		$icon_status     = self::mask_url(
+			self::path( 'M7 5h10v2H7V5zm0 4h10v2H7V9zm0 4h7v2H7v-2zM5 3H3v18h18V3H5zm14 16H5V5h14v14z' )
+		);
+		$icon_visibility = self::mask_url(
+			self::path( 'M12 4C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 13c-3.03 0-5.5-2.47-5.5-5.5S8.97 6 12 6s5.5 2.47 5.5 5.5S15.03 17 12 17zm0-9c-1.93 0-3.5 1.57-3.5 3.5S10.07 15 12 15s3.5-1.57 3.5-3.5S13.93 8 12 8z' )
+		);
+		$icon_calendar   = self::mask_url(
+			self::path( 'M19 4h-1V2h-2v2H8V2H6v2H5C3.89 4 3 4.9 3 6v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5z' )
+		);
+
+		$css .= '#post-body .misc-pub-post-status::before,' . "\n";
+		$css .= '#post-body #visibility::before,' . "\n";
+		$css .= '.curtime #timestamp::before {' . "\n";
+		$css .= "\tfont-family: none !important;\n";
+		$css .= "\tcontent: '' !important;\n";
+		$css .= "\tdisplay: inline-block !important;\n";
+		$css .= "\twidth: 20px !important;\n";
+		$css .= "\theight: 20px !important;\n";
+		$css .= "\tbackground-color: currentColor !important;\n";
+		$css .= "\tmask-repeat: no-repeat !important;\n";
+		$css .= "\tmask-size: contain !important;\n";
+		$css .= "\tmask-position: center !important;\n";
+		$css .= "\tvertical-align: top !important;\n";
+		$css .= "}\n";
+		$css .= '#post-body .misc-pub-post-status::before {' . "\n";
+		$css .= "\tmask-image: {$icon_status};\n";
+		$css .= "\t-webkit-mask-image: {$icon_status};\n";
+		$css .= "}\n";
+		$css .= '#post-body #visibility::before {' . "\n";
+		$css .= "\tmask-image: {$icon_visibility};\n";
+		$css .= "\t-webkit-mask-image: {$icon_visibility};\n";
+		$css .= "}\n";
+		$css .= '.curtime #timestamp::before {' . "\n";
+		$css .= "\tmask-image: {$icon_calendar};\n";
+		$css .= "\t-webkit-mask-image: {$icon_calendar};\n";
+		$css .= "}\n";
+
 		$css .= '</style>';
 		return $css;
 	}
