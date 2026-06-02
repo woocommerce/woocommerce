@@ -286,23 +286,45 @@ class Controller extends AbstractController {
 			return $this->get_route_error_by_code( self::RESOURCE_EXISTS );
 		}
 
+		$order = wc_get_order( $request['order_id'] );
+
+		// wc_get_order can return a WC_Order_Refund for refund IDs — reject those
+		// here since refunds are not refundable themselves.
+		if ( ! $order instanceof \WC_Order ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		// Fill in refund_total for any line items that omit it. The simplified
+		// request form sends only {line_item_id, quantity}; the backend derives
+		// the tax-inclusive total from the order's unit price × quantity.
+		// Scoped try: compute_line_item_refund_total throws InvalidArgumentException
+		// on quantity < 1, but fill_missing_refund_totals pre-checks that condition,
+		// so this branch is defensive against a future invariant break only.
 		try {
-			$order = wc_get_order( $request['order_id'] );
-
-			if ( ! $order ) {
-				return $this->get_route_error_by_code( self::INVALID_ID );
-			}
-
-			// Fill in refund_total for any line items that omit it. The simplified
-			// request form sends only {line_item_id, quantity}; the backend derives
-			// the tax-inclusive total from the order's unit price × quantity.
 			$line_items = $this->data_utils->fill_missing_refund_totals( $request['line_items'] ?? array(), $order );
+		} catch ( \InvalidArgumentException $e ) {
+			wc_get_logger()->error(
+				sprintf(
+					'Refund creation invariant violation on order %d (%s): %s',
+					$order->get_id(),
+					get_class( $e ),
+					$e->getMessage()
+				),
+				array( 'source' => 'wc-v4-refunds' )
+			);
+			return $this->get_route_error_response(
+				'invalid_refund_request',
+				__( 'The refund could not be created due to an unexpected error.', 'woocommerce' ),
+				WP_Http::INTERNAL_SERVER_ERROR
+			);
+		}
 
-			// Mirror the augmented array back onto the request so the 'created' hook
-			// and any other downstream readers of $request['line_items'] see
-			// normalised data with refund_total populated.
-			$request->set_param( 'line_items', $line_items );
+		// Mirror the augmented array back onto the request so the 'created' hook
+		// and any other downstream readers of $request['line_items'] see
+		// normalised data with refund_total populated.
+		$request->set_param( 'line_items', $line_items );
 
+		try {
 			// Validate request line_items before proceeding against the order being refunded.
 			$validation_error = $this->data_utils->validate_line_items( $line_items, $order );
 
@@ -382,20 +404,6 @@ class Controller extends AbstractController {
 			return $this->get_route_error_response( $e->getErrorCode(), $e->getMessage() );
 		} catch ( \WC_REST_Exception $e ) {
 			return $this->get_route_error_response( $e->getErrorCode(), $e->getMessage() );
-		} catch ( \InvalidArgumentException $e ) {
-			// fill_missing_refund_totals pre-checks quantity before calling
-			// compute_line_item_refund_total, so this branch should be unreachable
-			// in normal flow. Defensive — if a future refactor breaks the invariant,
-			// we surface a 500 with logging instead of bubbling as a fatal.
-			wc_get_logger()->error(
-				sprintf( 'Refund creation invariant violation on order %d: %s', (int) ( $request['order_id'] ?? 0 ), $e->getMessage() ),
-				array( 'source' => 'wc-v4-refunds' )
-			);
-			return $this->get_route_error_response(
-				'invalid_refund_request',
-				__( 'The refund could not be created due to an unexpected error.', 'woocommerce' ),
-				WP_Http::INTERNAL_SERVER_ERROR
-			);
 		}
 	}
 

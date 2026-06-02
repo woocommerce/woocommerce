@@ -839,27 +839,25 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Create partial refund with explicit refund_tax array (legacy backward compatibility).
 		// Refunding 30.00 out of 50.00 subtotal (30.00 + 6.90 + 1.50 = 38.40).
 		// Don't specify amount - let it auto-calculate from line items.
+		// refund_total values exclude tax; refund_tax entries are 23% and 5% of 30.00.
 		$refund_data = array(
 			'order_id'   => $order->get_id(),
 			'reason'     => 'Testing explicit tax array (legacy format)',
 			'line_items' => array(
 				array(
-					'line_item_id'           => $item->get_id(),
-					'quantity'               => 1,
-					'refund_total'           => 30.00,
-					// Excluding tax.
-								'refund_tax' => array(
-									array(
-										'id'           => $tax_rate_id_1,
-										'refund_total' => 6.90,
-					// 23% of 30.00.
-									),
-									array(
-										'id'           => $tax_rate_id_2,
-										'refund_total' => 1.50,
-								// 5% of 30.00.
-									),
-								),
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 30.00,
+					'refund_tax'   => array(
+						array(
+							'id'           => $tax_rate_id_1,
+							'refund_total' => 6.90,
+						),
+						array(
+							'id'           => $tax_rate_id_2,
+							'refund_total' => 1.50,
+						),
+					),
 				),
 			),
 		);
@@ -963,8 +961,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				array(
 					'line_item_id' => $item->get_id(),
 					'quantity'     => 1,
+					// Exceeds 110.00 (item total with tax) to trigger the over-refund check.
 					'refund_total' => 500.00,
-		// Exceeds 110.00 (item total with tax).
 				),
 			),
 		);
@@ -1772,6 +1770,201 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		}
 
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Simplified form on a tax-inclusive store ($prices_include_tax = yes) produces the correct tax-inclusive amount.
+	 */
+	public function test_refunds_create_simplified_form_tax_inclusive_store(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		try {
+			// Product price $110 entered tax-inclusive; tax-exclusive total is $100, tax is $10.
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 110.00 );
+			$product->set_tax_status( 'taxable' );
+			$product->save();
+
+			$order = wc_create_order();
+			$item  = new WC_Order_Item_Product();
+			$item->set_props(
+				array(
+					'product'  => $product,
+					'quantity' => 1,
+					'subtotal' => 100.00,
+					'total'    => 100.00,
+				)
+			);
+			$item->set_taxes(
+				array(
+					'total'    => array( $tax_rate_id => 10.00 ),
+					'subtotal' => array( $tax_rate_id => 10.00 ),
+				)
+			);
+			$item->save();
+			$order->add_item( $item );
+
+			$tax_item = new \WC_Order_Item_Tax();
+			$tax_item->set_rate( $tax_rate_id );
+			$tax_item->set_tax_total( 10.00 );
+			$tax_item->save();
+			$order->add_item( $tax_item );
+
+			$order->set_billing_country( 'US' );
+			$order->set_total( 110.00 );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->save();
+			$this->created_orders[] = $order->get_id();
+
+			// Refund via the simplified form (no refund_total).
+			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+			$request->set_body_params(
+				array(
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						array(
+							'line_item_id' => $item->get_id(),
+							'quantity'     => 1,
+						),
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 201, $response->get_status() );
+			$data = $response->get_data();
+			// Tax-inclusive store: refund amount must still be $110 ($100 + $10 tax),
+			// confirming the auto-compute round-trip works under prices_include_tax=yes.
+			$this->assertEquals( '110.00', $data['amount'], 'Tax-inclusive store: auto-computed amount must equal the tax-inclusive line total.' );
+
+			$this->assertNotEmpty( $data['line_items'] );
+			$line_item_response = $data['line_items'][0];
+			$this->assertEquals( '100.00', $line_item_response['refund_total'], 'Per-line refund_total should be tax-exclusive after extraction.' );
+			$this->assertNotEmpty( $line_item_response['refund_tax'] );
+			$this->assertEquals( '10.00', $line_item_response['refund_tax'][0]['refund_total'] );
+
+			$this->created_refunds[] = $data['id'];
+			$product->delete( true );
+		} finally {
+			// Restore the option so a failing assertion above can't leak state into other tests.
+			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
+		}
+	}
+
+	/**
+	 * @testdox Simplified form rejects a line_item_id that belongs to a different order with invalid_line_item.
+	 */
+	public function test_refunds_create_simplified_form_rejects_cross_order_line_item_id(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 10.00 );
+		$product->save();
+
+		// Order A: target of the refund request.
+		$order_a = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+					),
+				),
+			)
+		);
+
+		// Order B: holds the line_item the client will mistakenly reference.
+		$order_b       = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+					),
+				),
+			)
+		);
+		$order_b_items = $order_b->get_items();
+		$order_b_item  = reset( $order_b_items );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order_a->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $order_b_item->get_id(),
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status(), 'Cross-order line_item_id must be rejected, not silently auto-computed.' );
+		$data = $response->get_data();
+		$this->assertEquals( 'invalid_line_item', $data['code'] );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Simplified form surfaces a specific error when the source product line has zero original quantity.
+	 *
+	 * Without explicit handling, fill_missing_refund_totals would compute 0.0 from a divide-by-zero
+	 * scenario and the request would fall through to the misleading "Refund total must be greater
+	 * than zero" cascade. Lock in the clear error.
+	 */
+	public function test_refunds_create_simplified_form_zero_source_quantity(): void {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'quantity' => 0,
+				'subtotal' => 0,
+				'total'    => 0,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_status( OrderStatus::COMPLETED );
+		// A non-zero order total is needed so the order is not considered fully refunded.
+		$order->set_total( 10.00 );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'invalid_line_item', $data['code'] );
+		$this->assertStringContainsString( 'source quantity is zero', $data['message'] );
 	}
 
 	/**

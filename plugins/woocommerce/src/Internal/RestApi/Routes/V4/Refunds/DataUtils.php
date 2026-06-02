@@ -199,6 +199,23 @@ class DataUtils {
 				return new WP_Error( 'invalid_line_item', __( 'Line item quantity must be a positive integer.', 'woocommerce' ) );
 			}
 
+			// Auto-compute requires a non-zero source quantity to derive the unit
+			// price from. If the client omitted refund_total (or sent null) and the
+			// source product has zero quantity, surface a clear error rather than
+			// letting the request slip into the misleading "must be greater than
+			// zero" branch downstream.
+			$refund_total_missing = ! array_key_exists( 'refund_total', $line_item ) || null === $line_item['refund_total'];
+			if ( $refund_total_missing && $item instanceof \WC_Order_Item_Product && 0 === $item->get_quantity() ) {
+				return new WP_Error(
+					'invalid_line_item',
+					sprintf(
+						/* translators: %d: line item id */
+						__( 'Cannot auto-compute refund for line item %d: source quantity is zero. Provide an explicit refund_total.', 'woocommerce' ),
+						(int) $line_item_id
+					)
+				);
+			}
+
 			// Validate item quantity is not greater than the item quantity.
 			if ( $item->get_quantity() < $line_item['quantity'] ) {
 				/* translators: %s: item quantity */
@@ -353,8 +370,9 @@ class DataUtils {
 	 * untouched, so existing v3-style clients keep working. Items where refund_total
 	 * is omitted OR is explicitly null are treated as "compute it for me". Items
 	 * that can't be resolved (missing line_item_id, item not on order, invalid
-	 * quantity, unsupported item type) are also left untouched — validate_line_items
-	 * surfaces the right error for those cases.
+	 * quantity, unsupported item type, product with zero source quantity) are
+	 * also left untouched — validate_line_items surfaces the right error for
+	 * those cases.
 	 *
 	 * Auto-computed values are tax-inclusive, matching the convention enforced by
 	 * the existing converter (convert_line_items_to_internal_format extracts tax
@@ -386,6 +404,15 @@ class DataUtils {
 
 			$item = $order->get_item( $line_item_id );
 			if ( ! $item || ! ( $item instanceof WC_Order_Item_Product || $item instanceof WC_Order_Item_Shipping || $item instanceof WC_Order_Item_Fee ) ) {
+				continue;
+			}
+
+			// A product whose source line has zero quantity has no unit price to
+			// derive a refund from. Skip so validate_line_items surfaces a clear
+			// 'invalid_line_item' error to the API consumer instead of letting a
+			// silent 0.0 propagate into the misleading "must be greater than zero"
+			// branch downstream.
+			if ( $item instanceof WC_Order_Item_Product && 0 === $item->get_quantity() ) {
 				continue;
 			}
 

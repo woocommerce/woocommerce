@@ -1276,6 +1276,72 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox fill_missing_refund_totals leaves refund_total unset for product items whose source has zero quantity.
+	 */
+	public function test_fill_missing_refund_totals_skips_zero_source_quantity_product(): void {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'quantity' => 0,
+				'subtotal' => 0,
+				'total'    => 0,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
+
+		$this->assertArrayNotHasKey( 'refund_total', $result[0], 'Helper must leave refund_total unset so validate_line_items can surface a specific error.' );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox validate_line_items returns a specific error when refund_total is omitted and source product has zero quantity.
+	 */
+	public function test_validate_line_items_zero_source_quantity_with_missing_refund_total(): void {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'quantity' => 0,
+				'subtotal' => 0,
+				'total'    => 0,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->data_utils->validate_line_items(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'invalid_line_item', $result->get_error_code() );
+		$this->assertStringContainsString( 'source quantity is zero', $result->get_error_message() );
+
+		$order->delete( true );
+	}
+
+	/**
 	 * @testdox fill_missing_refund_totals returns full item total for shipping items, ignoring quantity.
 	 */
 	public function test_fill_missing_refund_totals_shipping(): void {
