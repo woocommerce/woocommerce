@@ -64,11 +64,11 @@ body.post-type-product .woocommerce_options_panel fieldset.form-field legend {
     color: var(--wpds-color-fg-content-neutral-weak, #707070);
 }
 
-/* ── Radio/checkbox option labels: restore WP default ───── */
+/* ── Radio option labels: 13px neutral ──────────────────── */
 body.post-type-product .woocommerce_options_panel .wc-radios label {
-	font-size: inherit;
-	font-weight: inherit;
-	color: inherit;
+	font-size: var(--wpds-typography-font-size-md, 13px);
+	font-weight: var(--wpds-typography-font-weight-regular, 400);
+	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
 }
 
 /* ── Tier 3: Helper/description text ────────────────────── */
@@ -77,6 +77,12 @@ body.post-type-product p.howto {
     font-size: var(--wpds-typography-font-size-sm, 12px);
     font-weight: var(--wpds-typography-font-weight-regular, 400);
     color: var(--wpds-color-fg-content-neutral-weak, #707070);
+}
+
+/* ── Checkbox inline text: 13px neutral (not tier 3 grey) ── */
+body.post-type-product .woocommerce_options_panel .form-field input[type="checkbox"] ~ span.description {
+	font-size: var(--wpds-typography-font-size-md, 13px);
+	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
 }
 
 /* ── Product data tab labels ────────────────────────────── */
