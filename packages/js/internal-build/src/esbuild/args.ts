@@ -4,7 +4,9 @@ export interface ParsedArgs {
 	debug: boolean;
 }
 
-export function parseBuildArgs( argv: readonly string[] = process.argv ): ParsedArgs {
+export function parseBuildArgs(
+	argv: readonly string[] = process.argv
+): ParsedArgs {
 	return {
 		watch: argv.includes( '--watch' ),
 		format: argv.includes( '--commonjs' ) ? 'commonjs' : 'esmodules',

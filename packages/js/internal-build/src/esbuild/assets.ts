@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { copyFile, mkdir } from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
 import { glob } from 'glob';

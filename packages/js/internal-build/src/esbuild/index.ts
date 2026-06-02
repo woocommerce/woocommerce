@@ -1,8 +1,15 @@
+/**
+ * External dependencies
+ */
 import { build, context } from 'esbuild';
 import type { BuildResult } from 'esbuild';
 import { glob } from 'glob';
 import { rm } from 'node:fs/promises';
 import chokidar from 'chokidar';
+
+/**
+ * Internal dependencies
+ */
 import { parseBuildArgs } from './args.js';
 import {
 	DEFAULT_IGNORE,
@@ -21,16 +28,21 @@ async function resolveEntryPoints(
 	entryPoints: string | string[],
 	ignore: readonly string[]
 ): Promise< string[] > {
-	const patterns = Array.isArray( entryPoints ) ? entryPoints : [ entryPoints ];
+	const patterns = Array.isArray( entryPoints )
+		? entryPoints
+		: [ entryPoints ];
 	const results = await Promise.all(
-		patterns.map( ( pattern ) => glob( pattern, { ignore: [ ...ignore ] } ) )
+		patterns.map( ( pattern ) =>
+			glob( pattern, { ignore: [ ...ignore ] } )
+		)
 	);
 	return Array.from( new Set( results.flat() ) ).sort();
 }
 
 function summarize( result: BuildResult ): string {
 	const parts: string[] = [];
-	if ( result.errors.length ) parts.push( `${ result.errors.length } error(s)` );
+	if ( result.errors.length )
+		parts.push( `${ result.errors.length } error(s)` );
 	if ( result.warnings.length )
 		parts.push( `${ result.warnings.length } warning(s)` );
 	return parts.length ? ` — ${ parts.join( ', ' ) }` : '';
@@ -51,7 +63,8 @@ export async function buildPackage( options: BuildOptions ): Promise< void > {
 	const entryPoints = await resolveEntryPoints( options.entryPoints, ignore );
 
 	log.debug( 'build', `format: ${ format }, outdir: ${ outdir }` );
-	for ( const entry of entryPoints ) log.debug( 'build', `entry: ${ entry }` );
+	for ( const entry of entryPoints )
+		log.debug( 'build', `entry: ${ entry }` );
 
 	const t0 = Date.now();
 	log.info( 'build', `${ entryPoints.length } entry point(s)...` );
@@ -84,17 +97,23 @@ export async function watchPackage( options: BuildOptions ): Promise< void > {
 
 	log.debug( 'watch', `format: ${ format }, outdir: ${ outdir }` );
 	log.debug( 'watch', `watching: ${ watchedPatterns.join( ', ' ) }` );
-	for ( const entry of entryPoints ) log.debug( 'watch', `entry: ${ entry }` );
+	for ( const entry of entryPoints )
+		log.debug( 'watch', `entry: ${ entry }` );
 
 	try {
 		const initial = await ctx.rebuild();
 		if ( assets.length ) await copyAssets( assets, outdir );
 		log.info(
 			'watch',
-			`ready in ${ Date.now() - startupT0 }ms — ${ entryPoints.length } entry point(s)${ summarize( initial ) }`
+			`ready in ${ Date.now() - startupT0 }ms — ${
+				entryPoints.length
+			} entry point(s)${ summarize( initial ) }`
 		);
 	} catch ( error ) {
-		log.error( 'watch', `startup build failed: ${ errorMessage( error ) }` );
+		log.error(
+			'watch',
+			`startup build failed: ${ errorMessage( error ) }`
+		);
 	}
 
 	// esbuild's own watcher polls the filesystem, which can miss or delay
@@ -121,18 +140,30 @@ export async function watchPackage( options: BuildOptions ): Promise< void > {
 				try {
 					await ctx.dispose();
 					await rm( outdir, { recursive: true, force: true } );
-					entryPoints = await resolveEntryPoints( options.entryPoints, ignore );
+					entryPoints = await resolveEntryPoints(
+						options.entryPoints,
+						ignore
+					);
 					ctx = await context(
-						prepareEsbuildOptions( format, entryPoints, options.esbuild )
+						prepareEsbuildOptions(
+							format,
+							entryPoints,
+							options.esbuild
+						)
 					);
 					const result = await ctx.rebuild();
 					if ( assets.length ) await copyAssets( assets, outdir );
 					log.info(
 						'ok',
-						`rebuilt in ${ Date.now() - t0 }ms — ${ entryPoints.length } entry point(s)${ summarize( result ) }`
+						`rebuilt in ${ Date.now() - t0 }ms — ${
+							entryPoints.length
+						} entry point(s)${ summarize( result ) }`
 					);
 				} catch ( error ) {
-					log.error( 'watch', `restart failed: ${ errorMessage( error ) }` );
+					log.error(
+						'watch',
+						`restart failed: ${ errorMessage( error ) }`
+					);
 				}
 			} )();
 		}, RESTART_DEBOUNCE_MS );
@@ -157,10 +188,15 @@ export async function watchPackage( options: BuildOptions ): Promise< void > {
 					}
 					log.info(
 						'ok',
-						`rebuilt ${ path } in ${ Date.now() - t0 }ms${ summarize( result ) }`
+						`rebuilt ${ path } in ${
+							Date.now() - t0
+						}ms${ summarize( result ) }`
 					);
 				} catch ( error ) {
-					log.error( 'watch', `rebuild ${ path } failed: ${ errorMessage( error ) }` );
+					log.error(
+						'watch',
+						`rebuild ${ path } failed: ${ errorMessage( error ) }`
+					);
 				}
 			} )();
 		} );
@@ -175,10 +211,15 @@ export async function watchPackage( options: BuildOptions ): Promise< void > {
 	process.once( 'SIGTERM', () => void shutdown() );
 }
 
-export async function runPackageBuilder( options: BuildOptions ): Promise< void > {
+export async function runPackageBuilder(
+	options: BuildOptions
+): Promise< void > {
 	const args = parseBuildArgs();
 	setDebugEnabled( args.debug );
-	const merged: BuildOptions = { ...options, format: options.format ?? args.format };
+	const merged: BuildOptions = {
+		...options,
+		format: options.format ?? args.format,
+	};
 	if ( args.watch ) {
 		await watchPackage( merged );
 	} else {

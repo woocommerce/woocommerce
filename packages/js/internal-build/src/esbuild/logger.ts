@@ -1,3 +1,5 @@
+/* eslint-disable no-console -- This module is the build logger; console output is its purpose. */
+
 const PRETTY =
 	Boolean( process.stdout.isTTY ) &&
 	! process.env.NO_COLOR &&
@@ -42,7 +44,8 @@ export const log = {
 		console.log( format( prefix, message ) );
 	},
 	debug( context: string, message: string ): void {
-		if ( debugEnabled ) console.log( format( 'debug', `${ context }: ${ message }` ) );
+		if ( debugEnabled )
+			console.log( format( 'debug', `${ context }: ${ message }` ) );
 	},
 	warn( prefix: LoggerPrefix, message: string ): void {
 		console.warn( format( prefix, message ) );

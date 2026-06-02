@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import type { BuildOptions as EsbuildOptions } from 'esbuild';
 
 export interface BuildOptions {

@@ -52,8 +52,8 @@
 		"type-overrides:update-patch": "node scripts/generate-types.mjs update-patch",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "eslint --ext=cjs src/style-build --fix",
-		"lint:lang:js": "eslint --ext=cjs src/style-build"
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint src"
 	},
 	"dependencies": {
 		"@automattic/color-studio": "^4.0.0",
@@ -84,7 +84,7 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/style-build/**/*.cjs"
+				"changes": "src/**/*.{js,jsx,ts,tsx,cjs}"
 			}
 		}
 	}
