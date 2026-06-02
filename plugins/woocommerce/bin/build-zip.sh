@@ -30,7 +30,8 @@ composer install --no-dev --quiet || exit "$?"
 echo "Run makepot..."
 pnpm --filter=@woocommerce/plugin-woocommerce makepot || exit "$?"
 echo "Syncing files..."
-rsync -rc --exclude-from="$PROJECT_PATH/.distignore" "$PROJECT_PATH/" "$DEST_PATH/" --delete --delete-excluded
+# Make sure to dereference the symlinks from Composer or the archive won't have all of the files!
+rsync -rcL --exclude-from="$PROJECT_PATH/.distignore" "$PROJECT_PATH/" "$DEST_PATH/" --delete --delete-excluded
 
 echo "Regenerating autoloader for production..."
 cd "$DEST_PATH" || exit

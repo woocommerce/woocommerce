@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "37bed2e19d8b44bc71451de7683919df",
+    "content-hash": "f10144d0e0f84b944aa2bd6d6d2135ca",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1117,7 +1117,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/blueprint",
-                "reference": "f996d43977196b9670d783b58c167243950876d3"
+                "reference": "d8cca86ddfc18da226ca1c1afa020431129b296e"
             },
             "require": {
                 "opis/json-schema": "^2.3"
@@ -1172,7 +1172,7 @@
                 ]
             },
             "transport-options": {
-                "symlink": false,
+                "symlink": true,
                 "relative": true
             }
         },
@@ -1182,7 +1182,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/email-editor",
-                "reference": "da46bc3b7b39e7a3ff8476a762b50cdaf7e1299d"
+                "reference": "c4bd66622c49a6b6548acdd5d01471f7ed822ef7"
             },
             "require": {
                 "php": ">=7.4"
@@ -1256,7 +1256,7 @@
             ],
             "description": "Email editor based on WordPress Gutenberg package.",
             "transport-options": {
-                "symlink": false,
+                "symlink": true,
                 "relative": true
             }
         },
@@ -5434,11 +5434,11 @@
         },
         {
             "name": "woocommerce/monorepo-plugin",
-            "version": "dev-add/phpstan",
+            "version": "dev-refactor/64839-admin-blocks-build-packages",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",
-                "reference": "a453d8512de88aa25c97ff84d3acebd3ea7b8a21"
+                "reference": "7f69fe34c807c3037d7d158893893e8d1a67879b"
             },
             "require": {
                 "composer-plugin-api": "^2.0"
@@ -5457,7 +5457,7 @@
                 }
             },
             "transport-options": {
-                "symlink": false,
+                "symlink": true,
                 "relative": true
             }
         },
@@ -5594,5 +5594,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
