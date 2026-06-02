@@ -151,6 +151,17 @@ select#wc-proto-vis-select,
 		?>
 <script>
 ( function () {
+	/* ── Rename metabox heading "Publish" → "Visibility" ────── */
+	var pubHeading = document.querySelector( '#submitdiv .hndle' );
+	if ( pubHeading ) {
+		for ( var i = 0; i < pubHeading.childNodes.length; i++ ) {
+			var node = pubHeading.childNodes[ i ];
+			if ( 3 === node.nodeType && /Publish/.test( node.textContent ) ) {
+				node.textContent = node.textContent.replace( /Publish/g, 'Visibility' );
+			}
+		}
+	}
+
 	/* ── Visibility dropdown ────────────────────────────────── */
 	var visPanel = document.getElementById( 'post-visibility-select' );
 	if ( visPanel ) {
