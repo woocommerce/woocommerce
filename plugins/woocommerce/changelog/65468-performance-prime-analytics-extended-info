@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Batch-prime post caches up front in the analytics Products and Variations Reports data stores so per-row hydration in `include_extended_info()` reads from cache instead of issuing one query per row.
