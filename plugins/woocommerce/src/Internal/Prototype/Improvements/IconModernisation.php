@@ -224,7 +224,6 @@ class IconModernisation {
 		$css         .= "\tdisplay: inline-block !important;\n";
 		$css         .= "\twidth: 20px !important;\n";
 		$css         .= "\theight: 20px !important;\n";
-		$css         .= "\tcolor: transparent !important;\n";
 		$css         .= "\tbackground-color: currentColor !important;\n";
 		$css         .= "\tmask-image: {$chevron_down} !important;\n";
 		$css         .= "\t-webkit-mask-image: {$chevron_down} !important;\n";
@@ -237,10 +236,6 @@ class IconModernisation {
 		$css         .= "\tmask-image: {$chevron_up} !important;\n";
 		$css         .= "\t-webkit-mask-image: {$chevron_up} !important;\n";
 		$css         .= "}\n";
-		// The handlediv button inherits currentColor for its icon; force it back so the mask is visible.
-		$css .= '.postbox .handlediv {' . "\n";
-		$css .= "\tcolor: var(--wpds-color-fg-content-neutral, #1e1e1e) !important;\n";
-		$css .= "}\n";
 
 		// Meta box reorder arrows — replace Dashicons \f343/\f347 with arrow-up/arrow-down.
 		$arrow_up   = self::mask_url( self::path( 'M12 3.9 6.5 9.5l1 1 3.8-3.7V20h1.5V6.8l3.7 3.7 1-1z' ) );
