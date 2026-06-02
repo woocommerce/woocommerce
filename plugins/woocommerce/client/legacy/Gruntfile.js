@@ -145,30 +145,6 @@ module.exports = function ( grunt ) {
 			},
 		},
 
-		// Watch changes for assets.
-		watch: {
-			css: {
-				files: [ '<%= dirs.css %>/*.scss' ],
-				tasks: [
-					'sass',
-					'rtlcss',
-					'postcss',
-					'cssmin',
-					'concat:css',
-					'move:css',
-					'copy:css',
-				],
-			},
-			js: {
-				files: [
-					'GruntFile.js',
-					'<%= dirs.js %>/**/*.js',
-					'!<%= dirs.js %>/**/*.min.js',
-				],
-				tasks: [ 'eslint', 'copy:js', 'concat:js', 'newer:uglify' ],
-			},
-		},
-
 		// PHP Code Sniffer.
 		phpcs: {
 			options: {
@@ -266,11 +242,11 @@ module.exports = function ( grunt ) {
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
+	grunt.loadNpmTasks( 'gruntify-eslint' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify-es' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
-	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-newer' );
 	grunt.loadNpmTasks( 'grunt-move' );
@@ -296,4 +272,71 @@ module.exports = function ( grunt ) {
 
 	// Only an alias to 'default' task.
 	grunt.registerTask( 'dev', [ 'default' ] );
+
+	grunt.registerTask(
+		'watch',
+		'Rebuild js/css assets when their sources change.',
+		function () {
+			const chokidar = require( 'chokidar' );
+			this.async(); // Keep this task alive until SIGINT.
+
+			let running = false;
+			let pending = null;
+			const runQueued = ( tasks ) => {
+				if ( running ) {
+					pending = tasks;
+					return;
+				}
+				running = true;
+				grunt.util.spawn(
+					{
+						grunt: true,
+						args: tasks,
+						opts: { stdio: 'inherit' },
+					},
+					() => {
+						running = false;
+						if ( pending ) {
+							const next = pending;
+							pending = null;
+							runQueued( next );
+						}
+					}
+				);
+			};
+
+			chokidar
+				.watch( [ 'css/*.scss' ], { ignoreInitial: true } )
+				.on( 'all', () =>
+					runQueued( [
+						'sass',
+						'rtlcss',
+						'postcss',
+						'cssmin',
+						'concat:css',
+						'move:css',
+						'copy:css',
+					] )
+				);
+
+			chokidar
+				.watch(
+					[
+						'js/**/*.js',
+						'!js/**/*.min.js',
+						'Gruntfile.js',
+					],
+					{ ignoreInitial: true }
+				)
+				.on( 'all', () =>
+					runQueued( [
+						'copy:js',
+						'concat:js',
+						'newer:uglify',
+					] )
+				);
+
+			grunt.log.writeln( 'Watching css/ and js/ for changes...' );
+		}
+	);
 };
