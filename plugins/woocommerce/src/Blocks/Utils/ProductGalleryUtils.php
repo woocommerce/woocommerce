@@ -208,11 +208,12 @@ class ProductGalleryUtils {
 		$featured_id    = (int) $variation->get_image_id();
 		$featured_valid = $featured_id && wp_attachment_is_image( $featured_id );
 
-		$variation_gallery_ids = VariationGalleryPackage::is_enabled()
-			? array_values(
-				array_filter( array_map( 'intval', $variation->get_gallery_image_ids() ), 'wp_attachment_is_image' )
-			)
-			: array();
+		$variation_gallery_ids = array();
+		if ( VariationGalleryPackage::is_enabled() ) {
+			$variation_gallery_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
+			$variation_gallery_ids = array_filter( $variation_gallery_ids, 'wp_attachment_is_image' );
+			$variation_gallery_ids = array_values( $variation_gallery_ids );
+		}
 
 		// No images from variation - full parent fallback.
 		if ( ! $featured_valid && empty( $variation_gallery_ids ) ) {
