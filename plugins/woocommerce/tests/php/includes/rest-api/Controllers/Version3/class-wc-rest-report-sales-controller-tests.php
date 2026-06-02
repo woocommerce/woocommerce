@@ -4,10 +4,10 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
 /**
- * Tests for WC_REST_Report_Sales_V1_Controller, focused on the per-period
+ * Tests for WC_REST_Report_Sales_Controller (v3), focused on the per-period
  * `refunds` field added to fix WOOPLUG-104 / GH #27552.
  */
-class WC_REST_Report_Sales_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
+class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Stores the previous HPOS state. The legacy sales report queries posts directly.
@@ -58,16 +58,16 @@ class WC_REST_Report_Sales_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Helper: invoke the controller and return the response body as an array.
+	 * Helper: invoke the v3 controller and return the response body as an array.
 	 *
 	 * @param string $period Period to request.
 	 * @return array
 	 */
 	private function get_report( string $period = 'month' ): array {
-		$request = new WP_REST_Request( 'GET', '/wc/v1/reports/sales' );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/reports/sales' );
 		$request->set_param( 'period', $period );
 
-		$controller = new WC_REST_Report_Sales_V1_Controller();
+		$controller = new WC_REST_Report_Sales_Controller();
 		$response   = $controller->prepare_item_for_response( null, $request );
 		$this->assertInstanceOf( WP_REST_Response::class, $response );
 
@@ -177,8 +177,8 @@ class WC_REST_Report_Sales_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 			);
 
 			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- Need local-zone date for the assertion.
-			$local_today      = date( 'Y-m-d' );
-			$local_post_date  = $local_today . ' 02:00:00';
+			$local_today     = date( 'Y-m-d' );
+			$local_post_date = $local_today . ' 02:00:00';
 			wp_update_post(
 				array(
 					'ID'        => $refund->get_id(),
@@ -208,7 +208,7 @@ class WC_REST_Report_Sales_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox Should advertise refunds in the totals schema as a decimal string property.
 	 */
 	public function test_schema_describes_refunds_field(): void {
-		$controller = new WC_REST_Report_Sales_V1_Controller();
+		$controller = new WC_REST_Report_Sales_Controller();
 		$schema     = $controller->get_item_schema();
 
 		$this->assertSame( 'object', $schema['properties']['totals']['type'], 'totals should be an object, not an array.' );
@@ -218,5 +218,37 @@ class WC_REST_Report_Sales_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'object', $bucket_schema['type'] );
 		$this->assertArrayHasKey( 'refunds', $bucket_schema['properties'], 'Per-period bucket should declare a refunds property.' );
 		$this->assertSame( 'string', $bucket_schema['properties']['refunds']['type'], 'refunds should be a string (decimal).' );
+	}
+
+	/**
+	 * @testdox Should not add a refunds field to v1 or v2 responses (v3-scoped change).
+	 */
+	public function test_refunds_field_absent_from_v1_and_v2_responses(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'amount'   => 4,
+				'order_id' => $order->get_id(),
+			)
+		);
+
+		foreach ( array( 'WC_REST_Report_Sales_V1_Controller', 'WC_REST_Report_Sales_V2_Controller' ) as $controller_class ) {
+			$request    = new WP_REST_Request( 'GET', '/' );
+			$request->set_param( 'period', 'month' );
+			$controller = new $controller_class();
+			$response   = $controller->prepare_item_for_response( null, $request );
+			$data       = $response->get_data();
+			$today      = gmdate( 'Y-m-d', current_time( 'timestamp' ) );
+
+			$this->assertArrayHasKey( $today, $data['totals'], "$controller_class: today's bucket should exist." );
+			$this->assertArrayNotHasKey(
+				'refunds',
+				$data['totals'][ $today ],
+				"$controller_class: legacy v1/v2 responses must NOT include the new refunds field."
+			);
+		}
 	}
 }
