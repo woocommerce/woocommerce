@@ -125,12 +125,21 @@ select#wc-proto-vis-select,
 	text-decoration: none !important;
 }
 
-/* ── Flatpickr date/time input (only when JS confirms flatpickr loaded) ── */
+/* ── Flatpickr date/time input ── */
+/* Wrapper flatpickr injects must be full width. */
+.flatpickr-wrapper {
+	width: 100% !important;
+}
 #wc-proto-datetime {
 	display: block;
 	width: 100%;
 	box-sizing: border-box;
 	margin-bottom: 4px;
+}
+
+/* Hide label colon while edit panel is open. */
+.misc-pub-section.wc-proto-editing .wc-proto-label-colon {
+	display: none;
 }
 </style>
 		<?php
@@ -219,6 +228,7 @@ select#wc-proto-vis-select,
 			dateFormat:  'F j, Y H:i',
 			defaultDate: new Date( year, month, day, hour, min ),
 			time_24hr:   true,
+			position:    'auto left',
 			onChange: function ( dates ) {
 				if ( ! dates.length ) { return; }
 				var d   = dates[ 0 ];
@@ -247,19 +257,56 @@ select#wc-proto-vis-select,
 		document.head.appendChild( fpJs );
 	}
 
-	/* ── Hide display value while its panel is open ─────────── */
+	/* ── Hide display value + colon while panel is open ────── */
+	function wrapLabelColon( section ) {
+		var nodes = section.childNodes;
+		for ( var i = 0; i < nodes.length; i++ ) {
+			var node = nodes[ i ];
+			if ( 3 !== node.nodeType ) { continue; }
+			var idx = node.textContent.indexOf( ':' );
+			if ( -1 === idx ) { continue; }
+			var before = document.createTextNode( node.textContent.slice( 0, idx ) );
+			var colon  = document.createElement( 'span' );
+			colon.className   = 'wc-proto-label-colon';
+			colon.textContent = ':';
+			var after = document.createTextNode( node.textContent.slice( idx + 1 ) );
+			section.insertBefore( before, node );
+			section.insertBefore( colon,  node );
+			section.insertBefore( after,  node );
+			section.removeChild( node );
+			return;
+		}
+	}
+
+	/* Status and visibility: MutationObserver on <div> works reliably. */
 	function watchPanel( panelId, displayId ) {
 		var panel   = document.getElementById( panelId );
 		var display = document.getElementById( displayId );
-		if ( ! panel || ! display ) { return; }
+		if ( ! panel ) { return; }
+		var section = panel.closest ? panel.closest( '.misc-pub-section' ) : null;
+		if ( section ) { wrapLabelColon( section ); }
 		new MutationObserver( function () {
 			var open = 'none' !== window.getComputedStyle( panel ).display;
-			display.style.display = open ? 'none' : '';
+			if ( display ) { display.style.display = open ? 'none' : ''; }
+			if ( section ) { section.classList.toggle( 'wc-proto-editing', open ); }
 		} ).observe( panel, { attributes: true, attributeFilter: [ 'style' ] } );
 	}
 	watchPanel( 'post-visibility-select', 'post-visibility-display' );
 	watchPanel( 'post-status-select',     'post-status-display' );
-	watchPanel( 'timestampdiv',           'timestamp' );
+
+	/* Timestamp: use click handlers — <fieldset> style mutations are unreliable. */
+	var tsDisplay   = document.getElementById( 'timestamp' );
+	var tsSection   = tsDisplay ? ( tsDisplay.closest ? tsDisplay.closest( '.misc-pub-section' ) : null ) : null;
+	var tsEditBtn   = document.querySelector( '.edit-timestamp' );
+	var tsCancelBtn = document.querySelector( '.cancel-timestamp' );
+	var tsOkBtn     = document.querySelector( '.save-timestamp' );
+	function tsSetEditing( open ) {
+		if ( tsDisplay ) { tsDisplay.style.display = open ? 'none' : ''; }
+		if ( tsSection ) { tsSection.classList.toggle( 'wc-proto-editing', open ); }
+	}
+	if ( tsEditBtn )   { tsEditBtn.addEventListener( 'click',   function () { tsSetEditing( true ); } ); }
+	if ( tsCancelBtn ) { tsCancelBtn.addEventListener( 'click', function () { tsSetEditing( false ); } ); }
+	if ( tsOkBtn )     { tsOkBtn.addEventListener( 'click',     function () { tsSetEditing( false ); } ); }
 }() );
 </script>
 		<?php
