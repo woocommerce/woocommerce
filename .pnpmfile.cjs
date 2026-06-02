@@ -84,9 +84,9 @@ function writeTsconfig( tsconfigPath, tsconfig ) {
 }
 
 /**
- * Identify workspace packages that consume @woocommerce/internal-ts-config.
+ * Identify workspace packages that consume @woocommerce/internal-build.
  *
- * A TS consumer has @woocommerce/internal-ts-config in dependencies or
+ * A TS consumer has @woocommerce/internal-build in dependencies or
  * devDependencies. Whether the package has a tsconfig.json on disk is
  * verified by loadTsconfig later in syncTsReferences.
  *
@@ -102,7 +102,7 @@ function identifyTsConsumers( lockfile ) {
 			...( packageFile.dependencies || {} ),
 			...( packageFile.devDependencies || {} ),
 		};
-		if ( ! ( '@woocommerce/internal-ts-config' in allDeps ) ) {
+		if ( ! ( '@woocommerce/internal-build' in allDeps ) ) {
 			continue;
 		}
 
