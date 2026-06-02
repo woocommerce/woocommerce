@@ -178,10 +178,10 @@ select#wc-proto-vis-select,
 		}
 	}
 
-	/* ── Relabel "OK" buttons to "Save" ─────────────────────── */
+	/* ── Relabel "OK" buttons to "Confirm" ──────────────────── */
 	[ '.save-post-visibility', '.save-post-status', '.save-timestamp' ].forEach( function ( sel ) {
 		var btn = document.querySelector( sel );
-		if ( btn ) { btn.textContent = 'Save'; }
+		if ( btn ) { btn.textContent = 'Confirm'; }
 	} );
 
 	/* ── Visibility dropdown ────────────────────────────────── */
