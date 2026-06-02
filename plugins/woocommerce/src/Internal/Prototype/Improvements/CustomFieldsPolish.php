@@ -66,24 +66,21 @@ body.post-type-product #postcustomstuff table td {
 	box-shadow: none !important;
 }
 
-body.post-type-product #postcustomstuff #list-table,
-body.post-type-product #postcustomstuff #newmeta {
+/* ── Existing meta list (#list-table) — keep table layout, just strip chrome ── */
+body.post-type-product #postcustomstuff #list-table {
 	border: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
 	border-radius: 4px !important;
 	border-collapse: separate !important;
 	border-spacing: 0;
-	margin: 0 0 8px;
+	margin: 0 0 16px;
 }
-
-body.post-type-product #postcustomstuff table th,
-body.post-type-product #postcustomstuff table td {
+body.post-type-product #postcustomstuff #list-table th,
+body.post-type-product #postcustomstuff #list-table td {
 	border: none !important;
 	padding: 8px 10px;
 	vertical-align: middle;
 }
-
-/* Single thin divider below the header row */
-body.post-type-product #postcustomstuff table thead th {
+body.post-type-product #postcustomstuff #list-table thead th {
 	border-bottom: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
 	font-size: var(--wpds-typography-font-size-sm, 12px);
 	font-weight: var(--wpds-typography-font-weight-regular, 400);
@@ -91,16 +88,10 @@ body.post-type-product #postcustomstuff table thead th {
 	text-align: left;
 	line-height: 16px;
 }
-
-/* Hide the empty-state column headers on #list-table when no meta yet */
 body.post-type-product #postcustomstuff #list-table:not(:has(#the-list tr)) thead {
 	display: none;
 }
-
-/* ── Inputs: full-width, compact ────────────────────────── */
-body.post-type-product #postcustomstuff #list-table input[type="text"],
-body.post-type-product #postcustomstuff #newmeta input[type="text"],
-body.post-type-product #postcustomstuff #newmeta select {
+body.post-type-product #postcustomstuff #list-table input[type="text"] {
 	width: 100%;
 	box-sizing: border-box;
 }
@@ -112,6 +103,48 @@ body.post-type-product #postcustomstuff textarea {
 	font-size: 13px;
 }
 
+/* ── Add Custom Field (#newmeta) — unwrap from table, stack as labeled form ── */
+body.post-type-product #postcustomstuff #newmeta,
+body.post-type-product #postcustomstuff #newmeta tbody,
+body.post-type-product #postcustomstuff #newmeta tr,
+body.post-type-product #postcustomstuff #newmeta td {
+	display: block !important;
+	width: 100% !important;
+	padding: 0 !important;
+	border: none !important;
+	background: transparent !important;
+}
+body.post-type-product #postcustomstuff #newmeta thead {
+	display: none !important;
+}
+body.post-type-product #postcustomstuff #newmeta tr:first-child > td.left {
+	margin-bottom: 12px;
+}
+/* Inject "Name" label above the first cell */
+body.post-type-product #postcustomstuff #newmeta tr:first-child > td.left::before {
+	content: 'Name';
+	display: block;
+	font-size: var(--wpds-typography-font-size-sm, 12px);
+	font-weight: var(--wpds-typography-font-weight-medium, 500);
+	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
+	margin-bottom: 4px;
+}
+/* Inject "Value" label above the second cell */
+body.post-type-product #postcustomstuff #newmeta tr:first-child > td:not(.left)::before {
+	content: 'Value';
+	display: block;
+	font-size: var(--wpds-typography-font-size-sm, 12px);
+	font-weight: var(--wpds-typography-font-weight-medium, 500);
+	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
+	margin-bottom: 4px;
+}
+body.post-type-product #postcustomstuff #newmeta select#metakeyselect,
+body.post-type-product #postcustomstuff #newmeta input#metakeyinput {
+	width: 100%;
+	box-sizing: border-box;
+	margin: 0;
+}
+
 /* ── Hide Update + submit wrapper, repurpose existing row for X delete ── */
 body.post-type-product #postcustomstuff .submit {
 	display: contents !important;
@@ -120,36 +153,31 @@ body.post-type-product #postcustomstuff .updatemeta {
 	display: none !important;
 }
 
-/* ── Delete button → centered X icon, like the downloads table ───── */
+/* ── Delete button → centered X icon (mask applied directly to <input>) ───── */
 body.post-type-product #postcustomstuff #the-list tr {
 	position: relative;
 }
 body.post-type-product #postcustomstuff .deletemeta {
 	position: absolute !important;
-	top: 12px !important;
+	top: 50% !important;
 	right: 10px !important;
+	transform: translateY( -50% ) !important;
 	width: 20px !important;
 	height: 20px !important;
 	padding: 0 !important;
 	margin: 0 !important;
 	font-size: 0 !important;
 	color: transparent !important;
-	background: transparent !important;
 	border: none !important;
 	box-shadow: none !important;
 	text-shadow: none !important;
 	cursor: pointer !important;
+	background-color: var(--wpds-color-fg-content-neutral-weak, #757575) !important;
+	-webkit-mask: <?php echo $close_url; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> no-repeat center / 16px 16px !important;
+	mask: <?php echo $close_url; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> no-repeat center / 16px 16px !important;
 }
-body.post-type-product #postcustomstuff .deletemeta::before {
-	content: '';
-	position: absolute;
-	inset: 0;
-	background-color: var(--wpds-color-fg-content-neutral-weak, #757575);
-	-webkit-mask: <?php echo $close_url; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> no-repeat center / 16px 16px;
-	mask: <?php echo $close_url; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> no-repeat center / 16px 16px;
-}
-body.post-type-product #postcustomstuff .deletemeta:hover::before {
-	background-color: var(--wpds-color-fg-content-error, #cc1818);
+body.post-type-product #postcustomstuff .deletemeta:hover {
+	background-color: var(--wpds-color-fg-content-error, #cc1818) !important;
 }
 
 /* Pad the value column so the X never sits on the textarea */
@@ -157,28 +185,30 @@ body.post-type-product #postcustomstuff #the-list td:last-child {
 	padding-right: 36px !important;
 }
 
-/* ── "Enter new" / "Cancel" inline links ────────────────── */
+/* ── "Enter new" / "Cancel" plain inline text links ─────
+   Targets both the <a> parent (where WP may apply button styling) and the inner span. */
+body.post-type-product #postcustomstuff #newmetaleft > a,
 body.post-type-product #postcustomstuff #enternew,
-body.post-type-product #postcustomstuff #cancel {
-	display: inline-flex !important;
-	align-items: center !important;
-	height: 28px !important;
-	line-height: 26px !important;
-	padding: 0 8px !important;
-	margin: 4px 4px 0 0 !important;
-	font-size: 12px !important;
+body.post-type-product #postcustomstuff #cancelnew {
+	display: inline !important;
+	padding: 0 !important;
+	margin: 4px 12px 0 0 !important;
+	font-size: var(--wpds-typography-font-size-sm, 12px) !important;
 	background: none !important;
-	border: 1px solid transparent !important;
-	border-radius: var(--wpds-border-radius-xs, 2px) !important;
+	border: none !important;
 	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
 	box-shadow: none !important;
-	text-shadow: none !important;
-	text-decoration: none !important;
+	text-decoration: underline !important;
 	cursor: pointer !important;
+	line-height: inherit !important;
+	height: auto !important;
+	min-height: 0 !important;
 }
+body.post-type-product #postcustomstuff #newmetaleft > a:hover,
 body.post-type-product #postcustomstuff #enternew:hover,
-body.post-type-product #postcustomstuff #cancel:hover {
-	background: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff) !important;
+body.post-type-product #postcustomstuff #cancelnew:hover {
+	background: none !important;
+	text-decoration: none !important;
 }
 
 /* "Add Custom Field" submit — secondary outlined */
