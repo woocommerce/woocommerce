@@ -241,9 +241,19 @@ h1.wp-heading-inline,
 body.post-type-product #wpbody-content > .wrap,
 body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (string) ( $bar_h + 8 ) ); ?>px; }
 
-/* Screen Options panel: render below our fixed header instead of underneath it */
+/* Screen Options panel: render below our fixed header, match page background, bottom divider */
 body.post-type-product #screen-meta {
 	margin-top: <?php echo esc_attr( (string) $bar_h ); ?>px;
+	background: #f0f0f1 !important;
+	border: none !important;
+	border-bottom: 1px solid #c3c4c7 !important;
+	box-shadow: none !important;
+}
+body.post-type-product #screen-options-wrap,
+body.post-type-product #contextual-help-wrap {
+	background: #f0f0f1 !important;
+	border: none !important;
+	box-shadow: none !important;
 }
 /* Constrain the Screen Options content to match the 1200px page content width */
 body.post-type-product #screen-meta-links,
