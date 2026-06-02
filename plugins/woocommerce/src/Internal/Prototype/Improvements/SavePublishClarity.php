@@ -67,12 +67,19 @@ class SavePublishClarity {
 body.folded #wc-proto-save-header {
 	left: 36px;
 }
+/* WP auto-folds the sidebar to 36px between 783px and 960px viewports */
+@media (max-width: 960px) {
+	#wc-proto-save-header {
+		left: 36px;
+	}
+}
 
-/* Inner container aligns to the same max-width as page content */
+/* Inner container — capped at 1200px and centered so it aligns with the page content's MaxWidth */
 .wc-proto-inner {
 	max-width: 1200px;
-	margin: 0 auto;
 	width: 100%;
+	margin: 0 auto;
+	padding: 0 20px;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -94,7 +101,7 @@ body.folded #wc-proto-save-header {
 	font-weight: var(--wpds-typography-font-weight-regular, 400);
 	flex-shrink: 0;
 }
-.wc-proto-back:hover { color: #2271b1; text-decoration: underline; }
+.wc-proto-back:hover { color: var(--wpds-color-fg-interactive-brand, #3858e9); text-decoration: underline; }
 .wc-proto-separator {
 	color: #1d2327;
 	font-size: var(--wpds-typography-font-size-lg, 15px);
@@ -150,7 +157,7 @@ h1.wp-heading-inline,
 	margin: 0;
 	height: 32px;
 	line-height: 30px;
-	padding: 0 12px;
+	padding: 0 6px;
 	font-size: 13px;
 	background: none;
 	border: none;
@@ -163,71 +170,91 @@ h1.wp-heading-inline,
 	background: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff);
 }
 
-/* ── Kebab toggle (details/summary) ────────────────────── */
+/* ── Kebab toggle — borderless icon button per Gutenberg pattern ────── */
 .wc-proto-kebab {
 	position: relative;
 }
 .wc-proto-kebab summary {
 	list-style: none;
-	cursor: pointer;
+	cursor: var(--wpds-cursor-control, pointer);
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 30px;
-	height: 30px;
-	border-radius: 4px;
+	width: 32px;
+	height: 32px;
+	border-radius: var(--wpds-border-radius-xs, 2px);
 	background: transparent;
-	border: 1px solid transparent;
+	border: none;
 }
 .wc-proto-kebab summary::-webkit-details-marker { display: none; }
 .wc-proto-kebab summary svg {
 	display: block;
 	width: 24px;
 	height: 24px;
-	fill: #1e1e1e;
+	fill: var(--wpds-color-fg-content-neutral, #1e1e1e);
 }
 .wc-proto-kebab summary:hover,
-.wc-proto-kebab summary:focus {
-	background: #dcdcde;
-	border-color: #c3c4c7;
+.wc-proto-kebab summary:focus,
+.wc-proto-kebab[open] summary {
+	background: var(--wpds-color-bg-interactive-neutral-weak-active, #f0f0f1);
 	outline: none;
 }
-.wc-proto-kebab[open] summary {
-	background: #dcdcde;
-	border-color: #c3c4c7;
-}
 
-/* ── Kebab dropdown ─────────────────────────────────────── */
+/* ── Kebab dropdown — matches the Gutenberg Menu component ──────── */
 .wc-proto-kebab-list {
 	position: absolute;
 	top: calc(100% + 4px);
 	right: 0;
 	margin: 0;
-	padding: 4px 0;
+	padding: var(--wpds-dimension-padding-xs, 4px);
 	list-style: none;
 	background: #fff;
-	border: 1px solid #c3c4c7;
-	border-radius: 4px;
-	box-shadow: 0 2px 6px rgba(0,0,0,0.18);
-	min-width: 190px;
+	border: 1px solid var(--wpds-color-stroke-surface-neutral, #c3c4c7);
+	border-radius: var(--wpds-border-radius-sm, 4px);
+	box-shadow: var(--wpds-elevation-md, 0 2px 6px rgba(0,0,0,0.18));
+	min-width: 200px;
 	z-index: 9999;
 }
-.wc-proto-kebab-item {
+.wc-proto-kebab-list li {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.wc-proto-kebab-list a.wc-proto-kebab-item,
+.wc-proto-kebab-list button.wc-proto-kebab-item {
 	display: block;
-	padding: 9px 14px;
-	font-size: 13px;
-	color: #1d2327;
+	padding: 8px 12px;
+	font-size: var(--wpds-typography-font-size-md, 13px);
+	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
 	text-decoration: none;
-	cursor: pointer;
+	cursor: var(--wpds-cursor-control, pointer);
 	width: 100%;
 	text-align: left;
 	background: none;
 	border: none;
 	box-sizing: border-box;
+	border-radius: var(--wpds-border-radius-xs, 2px);
 }
-.wc-proto-kebab-item:hover { background: #f0f0f1; color: #1d2327; }
-.wc-proto-kebab-item.is-destructive { color: #b32d2e; }
-.wc-proto-kebab-item.is-destructive:hover { background: #f0f0f1; }
+.wc-proto-kebab-list a.wc-proto-kebab-item:hover,
+.wc-proto-kebab-list a.wc-proto-kebab-item:focus,
+.wc-proto-kebab-list button.wc-proto-kebab-item:hover,
+.wc-proto-kebab-list button.wc-proto-kebab-item:focus {
+	background: var(--wpds-color-bg-interactive-brand-strong, #3858e9);
+	color: #fff;
+	outline: none;
+}
+/* Destructive: red text idle, red strong background on hover */
+.wc-proto-kebab-list a.wc-proto-kebab-item.is-destructive,
+.wc-proto-kebab-list button.wc-proto-kebab-item.is-destructive {
+	color: var(--wpds-color-fg-content-error, #b32d2e);
+}
+.wc-proto-kebab-list a.wc-proto-kebab-item.is-destructive:hover,
+.wc-proto-kebab-list a.wc-proto-kebab-item.is-destructive:focus,
+.wc-proto-kebab-list button.wc-proto-kebab-item.is-destructive:hover,
+.wc-proto-kebab-list button.wc-proto-kebab-item.is-destructive:focus {
+	background: var(--wpds-color-bg-interactive-error-strong, #b32d2e);
+	color: #fff;
+}
 
 /* ── Hide publish metabox action areas ──────────────────── */
 #minor-publishing-actions,
@@ -240,6 +267,33 @@ h1.wp-heading-inline,
 /* Push wrap content below both the WC sub-header and our fixed bar, with 8px breathing room */
 body.post-type-product #wpbody-content > .wrap,
 body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (string) ( $bar_h + 8 ) ); ?>px; }
+
+/* ── Mobile (≤782px, WP admin's mobile breakpoint) ─────────────── */
+@media (max-width: 782px) {
+	#wc-proto-save-header {
+		/* Mobile admin bar is 46px instead of 32px, so push our header down by 14px more */
+		top: <?php echo esc_attr( (string) ( $top + 14 ) ); ?>px;
+		left: 0;
+	}
+	.wc-proto-inner {
+		padding: 0 12px;
+	}
+	/* Drop the "Products /" breadcrumb prefix — title alone is enough */
+	.wc-proto-back,
+	.wc-proto-separator {
+		display: none;
+	}
+	/* Hide Preview on mobile — it's available via the kebab/metabox link */
+	#wc-proto-btn-preview {
+		display: none;
+	}
+	.wc-proto-actions {
+		gap: 8px;
+	}
+	.wc-proto-page-title {
+		max-width: none;
+	}
+}
 
 /* Screen Options panel: render below our fixed header, match page background, bottom divider */
 body.post-type-product #screen-meta {
