@@ -220,15 +220,15 @@ class IconModernisation {
 		$css         .= "\twidth: 20px !important;\n";
 		$css         .= "\theight: 20px !important;\n";
 		$css         .= "\tbackground-color: currentColor !important;\n";
-		$css         .= "\tmask-image: {$chevron_down};\n";
-		$css         .= "\t-webkit-mask-image: {$chevron_down};\n";
+		$css         .= "\tmask-image: {$chevron_up};\n";
+		$css         .= "\t-webkit-mask-image: {$chevron_up};\n";
 		$css         .= "\tmask-repeat: no-repeat !important;\n";
 		$css         .= "\tmask-size: contain !important;\n";
 		$css         .= "\tmask-position: center !important;\n";
 		$css         .= "}\n";
 		$css         .= '.postbox.closed .toggle-indicator::before {' . "\n";
-		$css         .= "\tmask-image: {$chevron_up};\n";
-		$css         .= "\t-webkit-mask-image: {$chevron_up};\n";
+		$css         .= "\tmask-image: {$chevron_down};\n";
+		$css         .= "\t-webkit-mask-image: {$chevron_down};\n";
 		$css         .= "}\n";
 
 		// Meta box reorder arrows — replace Dashicons \f343/\f347 with arrow-up/arrow-down.
