@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Skip required-field validation for address fields hidden by country locale, preventing spurious "required field" errors on checkout and My Account address forms for countries like Austria, France, and Netherlands.

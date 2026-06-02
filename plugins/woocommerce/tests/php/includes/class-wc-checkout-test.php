@@ -250,6 +250,57 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'validate_posted_data' skips required validation for fields hidden by country locale.
+	 *
+	 * @testWith ["US", "billing_state", true, false]
+	 *           ["US", "billing_state", false, true]
+	 *
+	 * @param string $country The billing country code.
+	 * @param string $field_key The field key to check for errors.
+	 * @param bool   $hidden Whether the field should be hidden.
+	 * @param bool   $expect_error Whether an error is expected.
+	 */
+	public function test_validate_posted_data_skips_required_check_for_hidden_fields( $country, $field_key, $hidden, $expect_error ) {
+		add_filter(
+			'woocommerce_get_country_locale',
+			function ( $locale ) use ( $country, $hidden ) {
+				$locale[ $country ]['state']['required'] = true;
+				$locale[ $country ]['state']['hidden']   = $hidden;
+				return $locale;
+			}
+		);
+
+		// Force locale re-evaluation.
+		unset( WC()->countries->locale );
+
+		$data = array(
+			'billing_country'           => $country,
+			'shipping_country'          => $country,
+			'ship_to_different_address' => false,
+			'billing_state'             => '',
+			'billing_first_name'        => 'Test',
+			'billing_last_name'         => 'User',
+			'billing_address_1'         => '123 Test St',
+			'billing_city'              => 'Test City',
+			'billing_postcode'          => '12345',
+			'billing_email'             => 'test@example.com',
+		);
+
+		$errors = new WP_Error();
+
+		$this->sut->validate_posted_data( $data, $errors );
+
+		if ( $expect_error ) {
+			$this->assertNotEmpty( $errors->get_error_message( $field_key . '_required' ), 'Expected required field error but none was found.' );
+		} else {
+			$this->assertEmpty( $errors->get_error_message( $field_key . '_required' ), 'Unexpected required field error for hidden field.' );
+		}
+
+		remove_all_filters( 'woocommerce_get_country_locale' );
+		unset( WC()->countries->locale );
+	}
+
+	/**
 	 * @testdox Checkout page contains login form for guests.
 	 */
 	public function test_checkout_page_contains_login_form_for_guests() {
