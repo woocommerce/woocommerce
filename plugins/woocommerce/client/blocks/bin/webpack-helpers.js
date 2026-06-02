@@ -108,6 +108,19 @@ const getAlias = ( options = {} ) => {
 	};
 };
 
+// Activates the `"wc-source"` conditional export declared in each
+// `packages/js/*` package.json. Webpack walks the package's exports map and
+// picks `./src/index.ts` directly — eliminating the need to pre-build the few
+// `@woocommerce/*` packages that blocks bundles (i.e. not externalized via
+// `wcDepMap`). The condition is namespaced (`wc-` prefix) so it never collides
+// with third-party packages that publish their own `"source"` conditional
+// export. `'...'` extends the default webpack condition list.
+const getResolve = ( { alias, resolvePlugins = [] } = {} ) => ( {
+	conditionNames: [ 'wc-source', '...' ],
+	plugins: resolvePlugins,
+	...( alias ? { alias } : {} ),
+} );
+
 const requestToExternal = ( request ) => {
 	if ( request in wcDepMap ) {
 		return wcDepMap[ request ];
@@ -198,6 +211,7 @@ module.exports = {
 	CHECK_CIRCULAR_DEPS,
 	ASSET_CHECK,
 	getAlias,
+	getResolve,
 	requestToHandle,
 	requestToExternal,
 	getProgressBarPluginConfig,
