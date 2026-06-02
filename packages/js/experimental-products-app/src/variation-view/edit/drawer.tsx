@@ -235,8 +235,10 @@ export function VariationEditDrawer( {
 
 	if ( isReady ) {
 		if ( selectedProducts.length === 1 ) {
+			// @ts-expect-error This code is a POC. It needs to be refactored.
 			title = selectedProducts[ 0 ]?.name || title;
 		} else {
+			// @ts-expect-error This code is a POC. It needs to be refactored.
 			title = sprintf(
 				/* translators: %d number of selected variations. */
 				__( 'Edit %d variations', 'woocommerce' ),
