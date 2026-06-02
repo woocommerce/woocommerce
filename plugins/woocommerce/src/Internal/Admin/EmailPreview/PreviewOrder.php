@@ -12,21 +12,31 @@ use WC_Order;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Order subclass for the email preview. Its writes are no-ops and its
- * items/meta caches start empty, so it can't accidentally touch a real order
- * in the database.
+ * WC_Order subclass for the email preview.
  *
- * The preview gives its dummy order a hard-coded id of 12345. If a store has
- * a real order with that id, $order->save() (called directly or via
- * update_status, payment_complete, etc.) would overwrite that real row, and
- * $order->get_items() / get_meta() would lazy-load the real order's data
- * into the dummy.
+ * The preview needs an order to render, but it must never read from or write
+ * to a real order in the database. The key to that is the id: order methods
+ * that touch the database key off get_id() and resolve to nothing when it is
+ * 0 (add_order_note(), remove_order_items(), get_refunds(), the refund totals,
+ * item/meta reads, etc.). So this order keeps id 0 and exposes the preview's
+ * display number through get_order_number() instead.
  *
- * Other reads still go through the data store (get_total_refunded etc.) and
- * return 0/empty against the non-existent row, which keeps the rendering code
- * unchanged.
+ * Two cases aren't safe at id 0 and are handled explicitly:
+ * - save() and its siblings would insert a new row, so they are no-ops.
+ * - get_customer_order_notes() passes the id to get_comments(), which treats
+ *   0 as "no filter" and would return every order note on the site, so it is
+ *   overridden to return nothing.
+ *
+ * The item/meta caches are pre-filled as empty too, as a guard against any
+ * future read path that doesn't check the id first.
  */
 class PreviewOrder extends WC_Order {
+
+	/**
+	 * The order number shown in the preview. Not a real order id, so it can't
+	 * collide with a row in the database.
+	 */
+	const PREVIEW_ORDER_NUMBER = '12345';
 
 	/**
 	 * Constructor.
@@ -36,7 +46,6 @@ class PreviewOrder extends WC_Order {
 	public function __construct( $order = 0 ) {
 		parent::__construct( $order );
 
-		// Pre-populate so get_items() / get_meta() never lazy-read from a real row.
 		foreach ( $this->item_types_to_group as $group ) {
 			$this->items[ $group ] = array();
 		}
@@ -44,13 +53,25 @@ class PreviewOrder extends WC_Order {
 	}
 
 	/**
-	 * Block save(). Replaces the parent's data-store write path with a no-op.
+	 * Get the order number to display.
+	 *
+	 * The real id stays 0, so this provides a representative number for the
+	 * preview without tying the order to a database row.
+	 *
+	 * @return string
+	 */
+	public function get_order_number() {
+		return self::PREVIEW_ORDER_NUMBER;
+	}
+
+	/**
+	 * Block save(). A preview order should never be written to the database.
 	 *
 	 * @return int The order id (unchanged).
 	 */
 	public function save() {
 		wc_get_logger()->warning(
-			'Email preview order save() blocked to prevent overwriting a real order.',
+			'Email preview order save() blocked to prevent writing to the database.',
 			array( 'source' => 'email-preview' )
 		);
 		return $this->get_id();
@@ -65,13 +86,22 @@ class PreviewOrder extends WC_Order {
 	}
 
 	/**
-	 * Block delete(). A preview order has no row to delete; allowing the call
-	 * would target a real order with the same id.
+	 * Block delete(). A preview order has no row to delete.
 	 *
 	 * @param bool $force_delete Should the order be deleted permanently.
 	 * @return bool Always false.
 	 */
 	public function delete( $force_delete = false ) {
 		return false;
+	}
+
+	/**
+	 * A preview order has no customer notes. The parent passes the id straight
+	 * to get_comments(), which treats id 0 as "return every order note".
+	 *
+	 * @return array
+	 */
+	public function get_customer_order_notes() {
+		return array();
 	}
 }

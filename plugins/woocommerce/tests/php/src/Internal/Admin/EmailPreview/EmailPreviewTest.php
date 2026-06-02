@@ -408,4 +408,35 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 0, $order->get_id(), 'PreviewOrder must not be assigned a real database id on save().' );
 	}
+
+	/**
+	 * @testdox PreviewOrder keeps its id at 0 but still shows a representative order number.
+	 */
+	public function test_preview_order_displays_number_without_a_real_id(): void {
+		$order = new PreviewOrder();
+
+		$this->assertSame( 0, $order->get_id(), 'PreviewOrder must not carry a real order id.' );
+		$this->assertSame( '12345', $order->get_order_number(), 'PreviewOrder must expose a display order number.' );
+	}
+
+	/**
+	 * @testdox PreviewOrder database methods that key off the order id are inert.
+	 */
+	public function test_preview_order_database_methods_are_inert(): void {
+		$real_order = WC_Helper_Order::create_order();
+		$real_order->add_order_note( 'Customer note', 1 );
+		$real_order->save();
+		wc_create_refund(
+			array(
+				'order_id' => $real_order->get_id(),
+				'amount'   => 5,
+			)
+		);
+
+		$order = new PreviewOrder();
+
+		$this->assertSame( 0, $order->add_order_note( 'Preview note' ), 'add_order_note() must not write a note.' );
+		$this->assertSame( array(), $order->get_refunds(), 'get_refunds() must not read refunds from the database.' );
+		$this->assertSame( array(), $order->get_customer_order_notes(), 'get_customer_order_notes() must not read notes from the database.' );
+	}
 }
