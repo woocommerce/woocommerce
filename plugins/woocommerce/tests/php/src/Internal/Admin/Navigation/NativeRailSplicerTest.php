@@ -192,6 +192,60 @@ class NativeRailSplicerTest extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'hide-if-js', (string) $entries_by_slug['woocommerce'][4] );
 	}
 
+	/**
+	 * Inserted rail roots must carry the WP-native `toplevel_page_<slug>` class
+	 * (not just the matching id). Marketing-channel extensions — e.g. Reddit for
+	 * WooCommerce — locate their menu item in the DOM by that class, so dropping
+	 * it when nav-v2 rebuilds the rail crashes their onboarding.
+	 */
+	public function test_splice_keeps_native_toplevel_page_class_on_rail_roots(): void {
+		global $menu, $submenu;
+		$menu                   = array(
+			2  => array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' ),
+			55 => array( 'WooCommerce', 'manage_woocommerce', 'woocommerce', 'WooCommerce', '', 'toplevel_page_woocommerce', 'dashicons-cart' ),
+		);
+		$submenu['woocommerce'] = array( array( 'Marketing', 'manage_woocommerce', 'woocommerce-marketing' ) );
+
+		$tree = array(
+			'woocommerce'           => array(
+				'parent'   => null,
+				'title'    => 'WooCommerce',
+				'position' => 2,
+			),
+			'woocommerce-marketing' => array(
+				'parent'     => 'woocommerce',
+				'title'      => 'Marketing',
+				'position'   => 10,
+				'capability' => 'manage_woocommerce',
+			),
+		);
+
+		$_GET['page']       = 'woocommerce-marketing';
+		$GLOBALS['pagenow'] = 'admin.php';
+
+		( new Native_Rail_Splicer() )->splice( $tree );
+
+		$entry = null;
+		foreach ( $menu as $item ) {
+			if ( ( $item[2] ?? null ) === 'woocommerce-marketing' ) {
+				$entry = $item;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $entry, 'Marketing rail root must be inserted into $menu.' );
+		$this->assertStringContainsString(
+			'toplevel_page_woocommerce-marketing',
+			(string) $entry[4],
+			'Rail-root LI must keep the WP-native toplevel_page_<slug> class so menu-scraping extensions can find it.'
+		);
+		// The class must match the id WP renders from the hookname field.
+		$this->assertSame( 'toplevel_page_woocommerce-marketing', $entry[5] );
+		// nav-v2 markers and WP's positioning class must survive alongside it.
+		$this->assertStringContainsString( 'menu-top', (string) $entry[4] );
+		$this->assertStringContainsString( 'wc-nav-v2-item', (string) $entry[4] );
+	}
+
 	public function test_splice_populates_submenu_for_each_root_with_first_level_children(): void {
 		global $menu, $submenu;
 		$menu = array(

@@ -510,13 +510,22 @@ class Native_Rail_Splicer {
 			// `menu-header.php` does NOT add it automatically. Without it the
 			// rail LI loses `position: relative`, so the absolutely-positioned
 			// `.wp-submenu` flyout anchors to `#adminmenu` instead of its row.
+			//
+			// The `toplevel_page_<slug>` class mirrors the hookname/id and
+			// reproduces WP's own top-level markup (`add_menu_page` stores
+			// `'menu-top ' . $hookname` as the CSS-class field, so native items
+			// carry this slug as a class as well as the id). Some extensions —
+			// notably marketing channels — locate their menu item by this class
+			// in the DOM; preserving it keeps them working once nav-v2 has
+			// rebuilt the rail.
+			$hookname     = 'toplevel_page_' . self::css_slug( $slug );
 			$menu[ $key ] = array(
 				$title,
 				$cap,
 				$slug,
 				$title,
-				'menu-top wc-nav-v2-item',
-				'toplevel_page_' . self::css_slug( $slug ),
+				'menu-top wc-nav-v2-item ' . $hookname,
+				$hookname,
 				$icon,
 			);
 		}
