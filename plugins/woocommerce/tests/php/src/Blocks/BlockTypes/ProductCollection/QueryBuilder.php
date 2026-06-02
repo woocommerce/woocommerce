@@ -642,14 +642,73 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test the random sorting functionality.
+	 * @testdox Should use a deterministic random seed for frontend random sorting.
 	 */
-	public function test_random_sorting() {
+	public function test_random_sorting_uses_deterministic_seed(): void {
 		$parsed_block                              = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'random';
-		$merged_query                              = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
-		$this->assertEquals( 'rand', $merged_query['orderby'] );
+		$first_merged_query  = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+		$second_merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+
+		$this->assertMatchesRegularExpression(
+			'/^RAND\([1-9][0-9]*\)$/',
+			$first_merged_query['orderby'],
+			'Random sorting should use a seeded random order.'
+		);
+		$this->assertSame(
+			$first_merged_query['orderby'],
+			$second_merged_query['orderby'],
+			'Random sorting should use the same seed for the same Product Collection query.'
+		);
+	}
+
+	/**
+	 * @testdox Should include the Product Collection query ID in the random seed.
+	 */
+	public function test_random_sorting_seed_uses_query_id(): void {
+		$first_parsed_block                              = Utils::get_base_parsed_block();
+		$first_parsed_block['attrs']['queryId']          = 53919;
+		$first_parsed_block['attrs']['query']['orderBy'] = 'random';
+
+		$second_parsed_block                     = $first_parsed_block;
+		$second_parsed_block['attrs']['queryId'] = 53920;
+
+		$first_merged_query  = Utils::initialize_merged_query( $this->block_instance, $first_parsed_block );
+		$second_merged_query = Utils::initialize_merged_query( $this->block_instance, $second_parsed_block );
+
+		$this->assertNotSame(
+			$first_merged_query['orderby'],
+			$second_merged_query['orderby'],
+			'Random sorting should use a different seed for different Product Collection query IDs.'
+		);
+	}
+
+	/**
+	 * @testdox Should include the published product count in the random seed.
+	 */
+	public function test_random_sorting_seed_uses_published_product_count(): void {
+		wp_cache_delete( 'posts-product', 'counts' );
+
+		$parsed_block                              = Utils::get_base_parsed_block();
+		$parsed_block['attrs']['queryId']          = 53919;
+		$parsed_block['attrs']['query']['orderBy'] = 'random';
+		$first_merged_query                        = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+		$product                                   = WC_Helper_Product::create_simple_product();
+
+		try {
+			wp_cache_delete( 'posts-product', 'counts' );
+			$second_merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+
+			$this->assertNotSame(
+				$first_merged_query['orderby'],
+				$second_merged_query['orderby'],
+				'Random sorting should use a different seed when the published product count changes.'
+			);
+		} finally {
+			$product->delete( true );
+			wp_cache_delete( 'posts-product', 'counts' );
+		}
 	}
 
 	/**

@@ -37,6 +37,31 @@ class Utils {
 	}
 
 	/**
+	 * Get the random order seed for a Product Collection.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param int|null $query_id      Product Collection query ID.
+	 * @param array    $query_context Product Collection query context.
+	 * @return int Random order seed.
+	 */
+	public static function get_random_order_seed( $query_id = null, $query_context = array() ) {
+		$product_counts          = wp_count_posts( 'product' );
+		$published_product_count = isset( $product_counts->publish ) ? (int) $product_counts->publish : 0;
+		$seed_context            = array(
+			'blog_id'                 => get_current_blog_id(),
+			'published_product_count' => $published_product_count,
+			'queried_object_id'       => get_queried_object_id(),
+			'query_id'                => is_numeric( $query_id ) ? absint( $query_id ) : 0,
+			'query'                   => $query_context,
+		);
+		$encoded_seed_context    = wp_json_encode( $seed_context );
+		$seed_hash               = (int) sprintf( '%u', crc32( is_string( $encoded_seed_context ) ? $encoded_seed_context : '' ) );
+
+		return ( $seed_hash % 2147483646 ) + 1;
+	}
+
+	/**
 	 * Helper function that constructs a WP_Query args array from
 	 * a Product Collection or global query.
 	 *
