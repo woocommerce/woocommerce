@@ -74,8 +74,7 @@ export const Layout = ( {
 	const isDashboardShown = ! isTaskScreen;
 	const twoColumns = hasTwoColumnLayout(
 		userPrefs.homepage_layout,
-		defaultHomescreenLayout,
-		isSetupTaskListActive
+		defaultHomescreenLayout
 	);
 
 	const isWideViewport = useRef( true );
@@ -148,7 +147,7 @@ export const Layout = ( {
 					<InboxPanel />
 				</Column>
 				<Column shouldStick={ shouldStickColumns }>
-					{ window.wcAdminFeatures.analytics && <StatsOverview /> }
+					<StatsOverview />
 					{ ! isSetupTaskListActive && <StoreManagementLinks /> }
 				</Column>
 			</>

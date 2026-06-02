@@ -18,7 +18,6 @@ import { recordEvent } from '@woocommerce/tracks';
 import { DisplayIcon } from './icons/display';
 import { SingleColumnIcon } from './icons/single-column';
 import { TwoColumnsIcon } from './icons/two-columns';
-import { isTaskListActive } from '../../hooks/use-tasklists-state';
 
 const { Fill, Slot } = createSlotFill( 'DisplayOptions' );
 
@@ -61,8 +60,7 @@ export const DisplayOptions = () => {
 	const { updateUserPreferences, homepage_layout: layout } =
 		useUserPreferences();
 
-	const hasTwoColumnContent =
-		! isTaskListActive( 'setup' ) || window.wcAdminFeatures.analytics;
+	const hasTwoColumnContent = true;
 
 	return (
 		<Slot>

@@ -38,7 +38,6 @@ import StoreAlertsPlaceholder from './placeholder';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getScreenName } from '../../utils';
 import { hasTwoColumnLayout } from '~/homescreen/utils';
-import { isTaskListActive } from '../../hooks/use-tasklists-state';
 
 import './style.scss';
 
@@ -240,8 +239,7 @@ export const StoreAlerts = () => {
 
 	const hasTwoColumns = hasTwoColumnLayout(
 		userPrefs.homepage_layout,
-		defaultHomescreenLayout,
-		isTaskListActive( 'setup' )
+		defaultHomescreenLayout
 	);
 
 	if ( preloadAlertCount > 0 && isLoading ) {

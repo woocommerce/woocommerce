@@ -50,16 +50,11 @@ declare global {
 		};
 		wcAdminFeatures: {
 			'analytics-scheduled-import': boolean;
-			'activity-panels': boolean;
 			analytics: boolean;
 			coupons: boolean;
-			'customer-effort-score-tracks': boolean;
-			homescreen: boolean;
-			marketing: boolean;
 			'product-data-views': boolean;
 			'experimental-blocks': boolean;
 			'minified-js': boolean;
-			'mobile-app-banner': boolean;
 			navigation: boolean;
 			onboarding: boolean;
 			'onboarding-tasks': boolean;
@@ -72,15 +67,9 @@ declare global {
 			settings: boolean;
 			'products-catalog-api': boolean;
 			'settings-ui': boolean;
-			'shipping-label-banner': boolean;
 			subscriptions: boolean;
-			'store-alerts': boolean;
-			'transient-notices': boolean;
 			'wc-pay-promotion': boolean;
-			'wc-pay-welcome-page': boolean;
-			'woo-mobile-welcome': boolean;
 			'shipping-smart-defaults': boolean;
-			'shipping-setting-tour': boolean;
 			'launch-your-store': boolean;
 			'use-wp-horizon': boolean;
 			'rest-api-v4': boolean;

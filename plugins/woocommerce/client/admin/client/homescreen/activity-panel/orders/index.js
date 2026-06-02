@@ -93,12 +93,10 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 			customers.find( ( c ) => c.user_id === customerId ) || {};
 		let customerUrl = null;
 		if ( customer && customer.id ) {
-			customerUrl = window.wcAdminFeatures.analytics
-				? getNewPath( {}, '/analytics/customers', {
-						filter: 'single_customer',
-						customers: customer.id,
-				  } )
-				: getAdminLink( 'user-edit.php?user_id=' + customer.id );
+			customerUrl = getNewPath( {}, '/analytics/customers', {
+				filter: 'single_customer',
+				customers: customer.id,
+			} );
 		}
 
 		const formattedString = sprintf(
@@ -304,7 +302,7 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 	} );
 
 	if ( isError ) {
-		if ( ! orderStatuses.length && window.wcAdminFeatures.analytics ) {
+		if ( ! orderStatuses.length ) {
 			return (
 				<EmptyContent
 					title={ __(

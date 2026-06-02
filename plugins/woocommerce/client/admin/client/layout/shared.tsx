@@ -27,7 +27,7 @@ export const PrimaryLayout = ( {
 			className="woocommerce-layout__primary"
 			id="woocommerce-layout__primary"
 		>
-			{ window.wcAdminFeatures[ 'store-alerts' ] && showStoreAlerts && (
+			{ showStoreAlerts && (
 				<Suspense fallback={ null }>
 					<StoreAlerts />
 				</Suspense>

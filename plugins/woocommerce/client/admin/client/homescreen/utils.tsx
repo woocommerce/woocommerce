@@ -1,13 +1,6 @@
 export const hasTwoColumnLayout = (
 	userPrefLayout: string,
-	defaultHomescreenLayout: string,
-	isSetupTaskListActive: boolean
+	defaultHomescreenLayout: string
 ) => {
-	const hasTwoColumnContent =
-		! isSetupTaskListActive || window.wcAdminFeatures.analytics;
-
-	return (
-		( userPrefLayout || defaultHomescreenLayout ) === 'two_columns' &&
-		hasTwoColumnContent
-	);
+	return ( userPrefLayout || defaultHomescreenLayout ) === 'two_columns';
 };
