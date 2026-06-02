@@ -48,8 +48,8 @@ body.post-type-product #postdivrich h2.postbox-header label {
     color: var(--wpds-color-fg-content-neutral, #1e1e1e);
 }
 
-/* ── Tier 2: Field labels ───────────────────────────────── */
-body.post-type-product .woocommerce_options_panel .form-field label,
+/* ── Tier 2: Field labels (exclude checkbox/radio labels) ── */
+body.post-type-product .woocommerce_options_panel .form-field label:not(:has(input[type="checkbox"])):not(:has(input[type="radio"])),
 body.post-type-product .woocommerce_options_panel fieldset.form-field legend {
     font-size: var(--wpds-typography-font-size-sm, 12px);
     font-weight: var(--wpds-typography-font-weight-regular, 400);
@@ -99,6 +99,7 @@ body.post-type-product .categorychecklist li label {
     font-weight: var(--wpds-typography-font-weight-regular, 400);
     color: var(--wpds-color-fg-content-neutral-weak, #707070);
 }
+
 </style>
 		<?php
 	}

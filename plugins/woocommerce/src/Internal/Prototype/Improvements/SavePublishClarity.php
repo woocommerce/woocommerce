@@ -79,7 +79,14 @@ body.folded #wc-proto-save-header {
 	box-sizing: border-box;
 }
 
-/* ── Back link ──────────────────────────────────────────── */
+/* ── Left side: back link + title breadcrumb ────────── */
+.wc-proto-left {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+	overflow: hidden;
+}
 .wc-proto-back {
 	color: #2c3338;
 	text-decoration: none;
@@ -87,12 +94,31 @@ body.folded #wc-proto-save-header {
 	display: flex;
 	align-items: center;
 	gap: 2px;
+	flex-shrink: 0;
 }
 .wc-proto-back:hover { color: #2271b1; text-decoration: none; }
 .wc-proto-back svg {
 	fill: currentColor;
 	flex: 0 0 24px;
 }
+.wc-proto-separator {
+	color: #a7aaad;
+	font-size: 13px;
+	flex-shrink: 0;
+}
+.wc-proto-page-title {
+	font-size: 13px;
+	color: #1d2327;
+	font-weight: 600;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 320px;
+}
+
+/* The h1 is now represented in the header breadcrumb */
+h1.wp-heading-inline,
+.page-title-action { display: none !important; }
 
 /* ── Button group ───────────────────────────────────────── */
 .wc-proto-actions {
@@ -222,10 +248,14 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 		?>
 <div id="wc-proto-save-header" data-visibility-label="<?php echo esc_attr__( 'Visibility', 'woocommerce' ); ?>">
 	<div class="wc-proto-inner">
-		<a href="<?php echo esc_url( $products_url ); ?>" class="wc-proto-back">
-			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14.6 7-1.2-1L8 12l5.4 6 1.2-1-4.6-5z"></path></svg>
-			<?php esc_html_e( 'Back to products', 'woocommerce' ); ?>
-		</a>
+		<div class="wc-proto-left">
+			<a href="<?php echo esc_url( $products_url ); ?>" class="wc-proto-back">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14.6 7-1.2-1L8 12l5.4 6 1.2-1-4.6-5z"></path></svg>
+				<?php esc_html_e( 'Products', 'woocommerce' ); ?>
+			</a>
+			<span class="wc-proto-separator" aria-hidden="true">/</span>
+			<span class="wc-proto-page-title" id="wc-proto-page-title"><?php echo esc_html( $post->post_title ? $post->post_title : __( 'New product', 'woocommerce' ) ); ?></span>
+		</div>
 		<div class="wc-proto-actions">
 			<?php if ( $preview_url ) : ?>
 			<button type="button" id="wc-proto-btn-preview" class="button-link" onclick="window.open( '<?php echo esc_js( $preview_url ); ?>', '_blank' )">
@@ -306,6 +336,30 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 	var metaboxTitle = document.querySelector( '#submitdiv .hndle span' );
 	if ( headerEl && metaboxTitle ) {
 		metaboxTitle.textContent = headerEl.dataset.visibilityLabel || 'Visibility';
+	}
+
+	/* ── Live title breadcrumb ──────────────────────────────── */
+	// Defer until after React finishes hydrating (runs during page parse, React still initializing).
+	var newLabel = '<?php echo esc_js( __( 'New product', 'woocommerce' ) ); ?>';
+	window.addEventListener( 'load', function () {
+		setInterval( function () {
+			var d   = document.getElementById( 'wc-proto-page-title' );
+			var el  = document.getElementById( 'title' );
+			if ( ! d ) { return; }
+			var val = ( el ? el.value.trim() : '' ) || newLabel;
+			if ( d.textContent !== val ) {
+				d.textContent = val;
+			}
+		}, 250 );
+	} );
+
+	/* ── Screen options: push header down when panel opens ── */
+	var screenMeta = document.getElementById( 'screen-meta' );
+	if ( headerEl && screenMeta ) {
+		var baseTop = <?php echo (int) $top; ?>;
+		new ResizeObserver( function () {
+			headerEl.style.top = ( baseTop + screenMeta.offsetHeight ) + 'px';
+		} ).observe( screenMeta );
 	}
 
 	/* ── Dirty-state: disable primary button until changes are made ── */
