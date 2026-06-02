@@ -261,29 +261,6 @@ class IconModernisation {
 		$css       .= "\tmask-position: center !important;\n";
 		$css       .= "}\n";
 
-		// Publish metabox edit links — replace "Edit" text with pencil SVG.
-		$pencil = self::mask_url(
-			self::path( 'M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z' )
-		);
-		$css   .= '.edit-visibility span[aria-hidden],' . "\n";
-		$css   .= '.edit-timestamp span[aria-hidden] {' . "\n";
-		$css   .= "\tfont-size: 0 !important;\n";
-		$css   .= "}\n";
-		$css   .= '.edit-visibility span[aria-hidden]::before,' . "\n";
-		$css   .= '.edit-timestamp span[aria-hidden]::before {' . "\n";
-		$css   .= "\tcontent: '' !important;\n";
-		$css   .= "\tdisplay: inline-block !important;\n";
-		$css   .= "\twidth: 16px !important;\n";
-		$css   .= "\theight: 16px !important;\n";
-		$css   .= "\tbackground-color: currentColor !important;\n";
-		$css   .= "\tmask-image: {$pencil};\n";
-		$css   .= "\t-webkit-mask-image: {$pencil};\n";
-		$css   .= "\tmask-repeat: no-repeat !important;\n";
-		$css   .= "\tmask-size: contain !important;\n";
-		$css   .= "\tmask-position: center !important;\n";
-		$css   .= "\tvertical-align: middle !important;\n";
-		$css   .= "}\n";
-
 		$css .= '</style>';
 		return $css;
 	}

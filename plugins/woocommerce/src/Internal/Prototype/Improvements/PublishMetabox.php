@@ -41,36 +41,54 @@ class PublishMetabox {
 		}
 		?>
 <style id="wc-proto-publish-metabox">
-/* Hide native radio buttons and labels; show only the injected select. */
-#post-visibility-select .post-visibility-choice {
+/* Hide radio inputs, their labels, sticky checkbox, and <br> spacers. */
+#post-visibility-select input[type="radio"],
+#post-visibility-select label.selectit,
+#post-visibility-select br,
+#sticky-span {
 	display: none !important;
 }
+/* Password span hidden by default; JS shows it when password option is chosen. */
 #post-visibility-select #password-span {
 	display: none;
 	margin-top: 4px;
 }
+/* Injected visibility dropdown. */
 select#wc-proto-vis-select {
 	display: block;
 	width: 100%;
 	margin-bottom: 4px;
 }
 
-/* OK / Cancel: right-aligned flex row, Cancel left of OK. */
-.misc-pub-section .save-post-visibility,
-.misc-pub-section .save-timestamp {
+/* OK / Cancel: side-by-side row. */
+#post-visibility-select p,
+#timestampdiv p {
 	display: flex !important;
-	justify-content: flex-end !important;
-	gap: 4px !important;
+	align-items: center !important;
+	gap: 8px !important;
 	margin-top: 6px !important;
 }
-.misc-pub-section .save-post-visibility a.cancel-post-visibility,
-.misc-pub-section .save-timestamp a.cancel-timestamp {
-	order: 1 !important;
-	margin-right: auto !important;
+/* Cancel: minimal/tertiary — no background or border, just colored text. */
+.cancel-post-visibility,
+.cancel-timestamp {
+	order: -1 !important;
+	background: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
+	padding: 0 !important;
+	height: auto !important;
+	line-height: inherit !important;
+	text-decoration: none !important;
+	font-size: 13px !important;
+	cursor: pointer !important;
 }
-.misc-pub-section .save-post-visibility a.save-post-visibility,
-.misc-pub-section .save-timestamp a.save-timestamp {
-	order: 2 !important;
+.cancel-post-visibility:hover,
+.cancel-timestamp:hover {
+	background: none !important;
+	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
+	text-decoration: underline !important;
 }
 </style>
 		<?php

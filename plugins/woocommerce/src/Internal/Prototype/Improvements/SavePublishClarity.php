@@ -261,6 +261,7 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 		$is_published   = in_array( $post->post_status, array( 'publish', 'future' ), true );
 		$primary_label  = $is_published ? __( 'Update', 'woocommerce' ) : __( 'Publish', 'woocommerce' );
 		$preview_label  = $is_published ? __( 'Preview changes', 'woocommerce' ) : __( 'Preview', 'woocommerce' );
+		$top           = self::ADMINBAR_H + self::WC_HDR_H;
 
 		// Trash URL — only for existing (saved) posts.
 		$trash_url = ( $post->ID && 'auto-draft' !== $post->post_status )
@@ -317,6 +318,16 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 	var btnPublish   = document.getElementById( 'wc-proto-btn-publish' );
 	var wpSave       = document.getElementById( 'save-post' );    // "Save Draft" in WP form.
 	var wpPublish    = document.getElementById( 'publish' );      // "Update" / "Publish" in WP form.
+
+	/* ── Dirty-state set up FIRST so it's guaranteed to attach before anything below ── */
+	function markDirty() {
+		if ( btnPublish )   { btnPublish.disabled   = false; }
+		if ( btnSaveDraft ) { btnSaveDraft.disabled = false; }
+	}
+	document.addEventListener( 'input',  function ( e ) { if ( e.isTrusted ) markDirty(); }, true );
+	document.addEventListener( 'change', function ( e ) { if ( e.isTrusted ) markDirty(); }, true );
+	document.addEventListener( 'paste',  function ( e ) { if ( e.isTrusted ) markDirty(); }, true );
+	document.addEventListener( 'cut',    function ( e ) { if ( e.isTrusted ) markDirty(); }, true );
 
 	function relayClick( targetId ) {
 		// Prefer jQuery — it handles WP's hidden field setup and form submit
@@ -425,25 +436,7 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 		syncTop();
 	}() );
 
-	/* ── Dirty-state: enable Update/Publish/Save-draft on first real user input ── */
-	var markDirty = function () {
-		if ( btnPublish )   { btnPublish.disabled   = false; }
-		if ( btnSaveDraft ) { btnSaveDraft.disabled = false; }
-	};
-
-	// `input` fires natively for typing in any input/textarea (isTrusted=true),
-	// and is NOT fired by jQuery's .trigger('change')/('input') programmatic calls
-	// that WC uses on init. Capture phase guards against stopPropagation.
-	document.addEventListener( 'input', function ( e ) {
-		if ( e.isTrusted ) { markDirty(); }
-	}, true );
-
-	// Change covers selects/checkboxes/radios. isTrusted filters WC init triggers.
-	document.addEventListener( 'change', function ( e ) {
-		if ( e.isTrusted ) { markDirty(); }
-	}, true );
-
-	// TinyMCE — visual editor typing.
+	/* ── TinyMCE editors: hook into typing in the visual editor ── */
 	function hookTinymce( editor ) {
 		editor.on( 'input keydown Change', markDirty );
 	}
