@@ -61,7 +61,7 @@ select#wc-proto-vis-select,
 	margin-bottom: 4px;
 }
 
-/* ── OK / Cancel: own row, right-aligned, compact 32px, 8px gap ── */
+/* ── OK / Cancel: own row, left-aligned, compact 32px, 8px gap ── */
 #post-visibility-select > p,
 #post-status-select > p,
 #timestampdiv > p {
@@ -69,7 +69,7 @@ select#wc-proto-vis-select,
 	width: 100% !important;
 	box-sizing: border-box !important;
 	align-items: center !important;
-	justify-content: flex-end !important;
+	justify-content: flex-start !important;
 	gap: 8px !important;
 	margin: 8px 0 0 !important;
 }
@@ -89,7 +89,6 @@ select#wc-proto-vis-select,
 .cancel-post-visibility,
 .cancel-post-status,
 .cancel-timestamp {
-	order: -1 !important;
 	display: inline-flex !important;
 	align-items: center !important;
 	height: 32px !important;
@@ -122,6 +121,7 @@ select#wc-proto-vis-select,
 	height: 32px;
 	padding: 0 8px;
 	font-size: 13px;
+	text-align: left;
 }
 
 /* Hide label colon while edit panel is open. */
@@ -272,6 +272,12 @@ select#wc-proto-vis-select,
 	if ( tsEditBtn )   { tsEditBtn.addEventListener( 'click',   function () { tsSetEditing( true ); } ); }
 	if ( tsCancelBtn ) { tsCancelBtn.addEventListener( 'click', function () { tsSetEditing( false ); } ); }
 	if ( tsOkBtn )     { tsOkBtn.addEventListener( 'click',     function () { tsSetEditing( false ); } ); }
+
+	/* WP auto-opens the timestamp panel for published posts — sync initial state. */
+	var tsDivEl = document.getElementById( 'timestampdiv' );
+	if ( tsDivEl && 'none' !== window.getComputedStyle( tsDivEl ).display ) {
+		tsSetEditing( true );
+	}
 }() );
 </script>
 		<?php
