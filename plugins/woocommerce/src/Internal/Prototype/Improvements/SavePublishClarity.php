@@ -55,8 +55,8 @@ class SavePublishClarity {
 	position: fixed;
 	top: <?php echo esc_attr( (string) $top ); ?>px;
 	right: 0;
-	left: 0;
-	z-index: 9998;
+	left: 160px;
+	z-index: 99998;
 	background: #f0f0f1;
 	border-bottom: 1px solid #c3c4c7;
 	height: <?php echo esc_attr( (string) $bar_h ); ?>px;
@@ -64,22 +64,19 @@ class SavePublishClarity {
 	align-items: center;
 	box-sizing: border-box;
 }
+body.folded #wc-proto-save-header {
+	left: 36px;
+}
 
-/* Inner container aligns to the same max-width as page content.
-   max-width = 1200px content + 160px sidebar offset so box-sizing works. */
+/* Inner container aligns to the same max-width as page content */
 .wc-proto-inner {
-	max-width: 1360px;
+	max-width: 1200px;
 	margin: 0 auto;
-	padding-left: 160px;
 	width: 100%;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	box-sizing: border-box;
-}
-body.folded .wc-proto-inner {
-	padding-left: 36px;
-	max-width: 1236px;
 }
 
 /* ── Left side: back link + title breadcrumb ────────── */
@@ -91,28 +88,23 @@ body.folded .wc-proto-inner {
 	overflow: hidden;
 }
 .wc-proto-back {
-	color: #2c3338;
-	text-decoration: none;
-	font-size: 13px;
-	display: flex;
-	align-items: center;
-	gap: 2px;
+	color: #1d2327;
+	text-decoration: underline;
+	font-size: var(--wpds-typography-font-size-lg, 15px);
+	font-weight: var(--wpds-typography-font-weight-regular, 400);
 	flex-shrink: 0;
 }
-.wc-proto-back:hover { color: #2271b1; text-decoration: none; }
-.wc-proto-back svg {
-	fill: currentColor;
-	flex: 0 0 24px;
-}
+.wc-proto-back:hover { color: #2271b1; text-decoration: underline; }
 .wc-proto-separator {
-	color: #a7aaad;
-	font-size: 13px;
+	color: #1d2327;
+	font-size: var(--wpds-typography-font-size-lg, 15px);
+	font-weight: var(--wpds-typography-font-weight-regular, 400);
 	flex-shrink: 0;
 }
 .wc-proto-page-title {
-	font-size: 13px;
+	font-size: var(--wpds-typography-font-size-lg, 15px);
 	color: #1d2327;
-	font-weight: 600;
+	font-weight: var(--wpds-typography-font-weight-medium, 499);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -126,25 +118,46 @@ h1.wp-heading-inline,
 /* ── Button group ───────────────────────────────────────── */
 .wc-proto-actions {
 	display: flex;
-	gap: 4px;
+	gap: 12px;
 	align-items: center;
 	position: relative;
 }
 
-/* Reset WP button margins and set compact size (32px) inside the header */
-#wc-proto-save-header .button {
+/* Compact buttons inside the header — 32px is the @wordpress/components compact button height */
+#wc-proto-btn-save-draft,
+#wc-proto-btn-publish {
+	margin: 0 !important;
+	height: 32px !important;
+	min-height: 0 !important;
+	line-height: 30px !important;
+	padding: 0 12px !important;
+	font-size: 13px !important;
+	vertical-align: middle !important;
+}
+/* Disabled state — make it obviously inactive (WP's default is a faint lighter blue) */
+#wc-proto-btn-publish:disabled,
+#wc-proto-btn-publish[disabled] {
+	background: var(--wpds-color-bg-interactive-neutral-strong-disabled, #dcdcde) !important;
+	border-color: var(--wpds-color-stroke-interactive-neutral-disabled, #dcdcde) !important;
+	color: var(--wpds-color-fg-interactive-neutral-strong-disabled, #a7aaad) !important;
+	cursor: not-allowed !important;
+	box-shadow: none !important;
+}
+#wc-proto-save-header .wc-proto-btn-tertiary {
 	margin: 0;
 	height: 32px;
 	line-height: 30px;
 	padding: 0 12px;
 	font-size: 13px;
+	background: none;
+	border: none;
+	border-radius: var(--wpds-border-radius-xs, 2px);
+	color: var(--wpds-color-fg-interactive-brand, #3858e9);
+	cursor: var(--wpds-cursor-control, pointer);
 	vertical-align: middle;
 }
-#wc-proto-save-header .button-link {
-	margin: 0;
-	height: 32px;
-	line-height: 32px;
-	vertical-align: middle;
+#wc-proto-save-header .wc-proto-btn-tertiary:hover {
+	background: var(--wpds-color-bg-interactive-neutral-weak-active, #f0f0f1);
 }
 
 /* ── Kebab toggle (details/summary) ────────────────────── */
@@ -221,8 +234,61 @@ h1.wp-heading-inline,
 #submitdiv #misc-publishing-actions .misc-pub-section:last-child,
 #submitdiv .misc-pub-copy-draft { display: none !important; }
 
+/* ── Visibility: select replaces radio buttons ──────────── */
+#post-visibility-select input[type="radio"],
+#post-visibility-select > label,
+#post-visibility-select > br {
+	display: none;
+}
+.wc-proto-vis-select {
+	display: block;
+	width: 100%;
+	margin: 4px 0 8px;
+}
+#password-span {
+	display: none;
+	margin-bottom: 8px;
+}
+
+/* ── Edit links: show pencil SVG only ───────────────────── */
+.edit-visibility span[aria-hidden],
+.edit-timestamp span[aria-hidden] {
+	display: inline-flex;
+	align-items: center;
+}
+.edit-visibility span[aria-hidden] svg,
+.edit-timestamp span[aria-hidden] svg {
+	width: 16px;
+	height: 16px;
+	fill: currentColor;
+}
+
+/* ── OK/Cancel: right-aligned, Cancel on the left ──────── */
+#post-visibility-select > p,
+.timestamp-wrap > p {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 8px;
+	margin: 4px 0 0;
+}
+.save-post-visibility,
+.save-timestamp { order: 2; }
+.cancel-post-visibility,
+.cancel-timestamp {
+	order: 1;
+	color: #2271b1;
+	text-decoration: none;
+}
+.cancel-post-visibility:hover,
+.cancel-timestamp:hover {
+	text-decoration: underline;
+	color: #135e96;
+}
+
 /* Push wrap content below both the WC sub-header and our fixed bar, with 8px breathing room */
-body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (string) ( $bar_h + self::WC_HDR_H + 8 ) ); ?>px; }
+body.post-type-product #wpbody-content > .wrap,
+body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (string) ( $bar_h + 8 ) ); ?>px; }
 </style>
 		<?php
 	}
@@ -239,10 +305,11 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 			return;
 		}
 
-		$products_url  = admin_url( 'edit.php?post_type=product' );
-		$preview_url   = get_preview_post_link( $post );
-		$is_published  = in_array( $post->post_status, array( 'publish', 'future' ), true );
-		$primary_label = $is_published ? __( 'Update', 'woocommerce' ) : __( 'Publish', 'woocommerce' );
+		$products_url   = admin_url( 'edit.php?post_type=product' );
+		$preview_url    = get_preview_post_link( $post );
+		$is_published   = in_array( $post->post_status, array( 'publish', 'future' ), true );
+		$primary_label  = $is_published ? __( 'Update', 'woocommerce' ) : __( 'Publish', 'woocommerce' );
+		$preview_label  = $is_published ? __( 'Preview changes', 'woocommerce' ) : __( 'Preview', 'woocommerce' );
 
 		// Trash URL — only for existing (saved) posts.
 		$trash_url = ( $post->ID && 'auto-draft' !== $post->post_status )
@@ -253,7 +320,6 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 	<div class="wc-proto-inner">
 		<div class="wc-proto-left">
 			<a href="<?php echo esc_url( $products_url ); ?>" class="wc-proto-back">
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14.6 7-1.2-1L8 12l5.4 6 1.2-1-4.6-5z"></path></svg>
 				<?php esc_html_e( 'Products', 'woocommerce' ); ?>
 			</a>
 			<span class="wc-proto-separator" aria-hidden="true">/</span>
@@ -261,14 +327,16 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 		</div>
 		<div class="wc-proto-actions">
 			<?php if ( $preview_url ) : ?>
-			<button type="button" id="wc-proto-btn-preview" class="button-link" onclick="window.open( '<?php echo esc_js( $preview_url ); ?>', '_blank' )">
-				<?php esc_html_e( 'Preview', 'woocommerce' ); ?>
+			<button type="button" id="wc-proto-btn-preview" class="wc-proto-btn-tertiary" onclick="window.open( '<?php echo esc_js( $preview_url ); ?>', '_blank' )">
+				<?php echo esc_html( $preview_label ); ?>
 			</button>
 			<?php endif; ?>
+			<?php if ( ! $is_published ) : ?>
 			<button type="button" id="wc-proto-btn-save-draft" class="button">
 				<?php esc_html_e( 'Save draft', 'woocommerce' ); ?>
 			</button>
-			<button type="button" id="wc-proto-btn-publish" class="button button-primary">
+			<?php endif; ?>
+			<button type="button" id="wc-proto-btn-publish" class="button button-primary" disabled>
 				<?php echo esc_html( $primary_label ); ?>
 			</button>
 			<details class="wc-proto-kebab">
@@ -299,11 +367,21 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 	var wpSave       = document.getElementById( 'save-post' );    // "Save Draft" in WP form.
 	var wpPublish    = document.getElementById( 'publish' );      // "Update" / "Publish" in WP form.
 
-	if ( btnSaveDraft && wpSave ) {
-		btnSaveDraft.addEventListener( 'click', function () { wpSave.click(); } );
+	function relayClick( targetId ) {
+		// Prefer jQuery — it handles WP's hidden field setup and form submit
+		// more reliably than native .click() on display:none elements.
+		if ( typeof jQuery !== 'undefined' ) {
+			var $t = jQuery( '#' + targetId );
+			if ( $t.length ) { $t.trigger( 'click' ); return; }
+		}
+		var t = document.getElementById( targetId );
+		if ( t ) { t.click(); }
 	}
-	if ( btnPublish && wpPublish ) {
-		btnPublish.addEventListener( 'click', function () { wpPublish.click(); } );
+	if ( btnSaveDraft ) {
+		btnSaveDraft.addEventListener( 'click', function () { relayClick( 'save-post' ); } );
+	}
+	if ( btnPublish ) {
+		btnPublish.addEventListener( 'click', function () { relayClick( 'publish' ); } );
 	}
 
 	/* ── Kebab menu (details/summary — close on outside click or Escape) ── */
@@ -381,26 +459,38 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 		syncTop();
 	}() );
 
-	/* ── Dirty-state: disable primary button until changes are made ── */
-	var isNewPost = '<?php echo esc_js( $post->post_status ); ?>' === 'auto-draft';
-	var form      = document.getElementById( 'post' );
+	/* ── Dirty-state: disable Update/Publish until a real change is made ── */
+	var form = document.getElementById( 'post' );
 
-	if ( btnPublish && ! isNewPost ) {
+	if ( btnPublish ) {
 		btnPublish.disabled = true;
 
 		var markDirty = function () {
 			btnPublish.disabled = false;
 		};
 
+		// Only react to real user input. event.isTrusted is true for native
+		// user actions and false for programmatic .trigger('change') / .dispatchEvent,
+		// which is how WC and select2/chosen fire change events on init.
+		var markDirtyIfTrusted = function ( e ) {
+			if ( e && e.isTrusted ) { markDirty(); }
+		};
+
 		if ( form ) {
-			form.addEventListener( 'input', markDirty );
-			form.addEventListener( 'change', markDirty );
+			form.addEventListener( 'input', markDirtyIfTrusted );
+			form.addEventListener( 'change', markDirtyIfTrusted );
 		}
 
-		// TinyMCE doesn't bubble events to the form — hook in via WP's init event.
+		// TinyMCE: typing in the visual editor is always a real user action.
+		function hookTinymce( editor ) {
+			editor.on( 'input keydown Change', markDirty );
+		}
+		if ( typeof window.tinymce !== 'undefined' ) {
+			window.tinymce.editors.forEach( hookTinymce );
+		}
 		if ( typeof jQuery !== 'undefined' ) {
-			jQuery( document ).on( 'tinymce-editor-init', function ( event, editor ) {
-				editor.on( 'input keydown', markDirty );
+			jQuery( document ).on( 'tinymce-editor-init', function ( e, editor ) {
+				hookTinymce( editor );
 			} );
 		}
 	}
