@@ -2,11 +2,11 @@
 
 ## Context
 
-Ann and Sam are exploring a shipping-first TreeCombo pattern for the WooCommerce shipping setup flow. The source of truth for the current interaction is the standalone prototype at:
+Ann and Sam are exploring a shipping-first TreeCombo pattern for the WooCommerce shipping setup flow. The source interaction is documented in shareable prototype and P2 artifacts:
 
-- `/Users/anntai/Documents/Claude/Projects/Radical speed month/shipping-hub-react/src/components/WizardDestinations.jsx`
-- `/Users/anntai/Documents/Claude/Projects/Radical speed month/shipping-hub-react/src/components/TreeCombo.jsx`
-- `/Users/anntai/Documents/Claude/Projects/Radical speed month/shipping-hub-react/src/data/countryTree.js`
+- [Shipping Native in Woo update 1](https://radicalupdates.wordpress.com/2026/05/05/shipping-native-in-woo-update-1/)
+- [Shipping Native in Woo update 2](https://radicalupdates.wordpress.com/2026/05/11/shipping-native-in-woo-update-2/)
+- [Combobox / TreeSelect breakout update 1](https://radicalupdates.wordpress.com/2026/05/14/combobox-treeselect-breakout-update-1/)
 
 The first production-facing use case is the setup step titled "Where do you ship?". The long-term concern is that a TreeSelect/TreeCombo is difficult to make accessible and should not become a one-off component only shipping can use.
 
