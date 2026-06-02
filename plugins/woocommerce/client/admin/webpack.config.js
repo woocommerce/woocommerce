@@ -69,15 +69,34 @@ const wcAdminPackages = [
 	'email-editor',
 ];
 
+// Resolve each entry to the package's `wc-source` export as an absolute path.
+// Using the package name (`@woocommerce/<name>`) as the entry request would
+// match WooCommerceDependencyExtractionWebpackPlugin's externals list and
+// collapse the entry into a `window.wc.<name>` shim that re-exports itself.
+// Pointing entries at the filesystem dodges that match while still letting
+// transitive `@woocommerce/*` imports inside the bundle externalize normally.
+const resolvePackageSourceEntry = ( name ) => {
+	const pkgJsonPath = path.resolve(
+		__dirname,
+		`${ WC_ADMIN_PACKAGES_DIR }/${ name }/package.json`
+	);
+	const pkgJson = require( pkgJsonPath );
+	const source = pkgJson.exports?.[ '.' ]?.[ 'wc-source' ];
+	if ( ! source ) {
+		throw new Error(
+			`Package @woocommerce/${ name } has no exports["."]["wc-source"] entry in ${ pkgJsonPath }`
+		);
+	}
+	return path.resolve( path.dirname( pkgJsonPath ), source );
+};
+
 const getEntryPoints = () => {
 	const entryPoints = {
 		app: './client/index.tsx',
 		embed: './client/embed.tsx',
 	};
 	wcAdminPackages.forEach( ( name ) => {
-		// Resolve via the package name so webpack walks the package's `exports`
-		// map and picks `"source": "./src/index.ts"` via resolve.conditionNames.
-		entryPoints[ name ] = `@woocommerce/${ name }`;
+		entryPoints[ name ] = resolvePackageSourceEntry( name );
 	} );
 	wpAdminScripts.forEach( ( name ) => {
 		entryPoints[ name ] = `${ WP_ADMIN_SCRIPTS_DIR }/${ name }`;
