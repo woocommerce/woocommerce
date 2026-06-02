@@ -29,6 +29,7 @@ class TypographyHierarchy {
 			return;
 		}
 		add_action( 'admin_head', array( self::class, 'output_styles' ) );
+		add_action( 'admin_footer', array( self::class, 'output_scripts' ) );
 	}
 
 	/**
@@ -49,7 +50,7 @@ body.post-type-product #postdivrich h2.postbox-header label {
 }
 
 /* ── Tier 2: Field labels (exclude checkbox/radio labels) ── */
-body.post-type-product .woocommerce_options_panel .form-field label:not(:has(input[type="checkbox"])):not(:has(input[type="radio"])),
+body.post-type-product .woocommerce_options_panel .form-field label:not(:has(input[type="checkbox"])):not(:has(input[type="radio"])):not(:has(~ input[type="checkbox"])):not(:has(~ input[type="radio"])),
 body.post-type-product .woocommerce_options_panel fieldset.form-field legend {
     font-size: var(--wpds-typography-font-size-sm, 12px);
     font-weight: var(--wpds-typography-font-weight-regular, 400);
@@ -86,6 +87,12 @@ body.post-type-product .misc-pub-section {
     color: var(--wpds-color-fg-content-neutral, #1e1e1e);
 }
 
+/* ── Tags howto — moved inside .jaxtag, sits tight below input ── */
+body.post-type-product #tagsdiv-product_tag .jaxtag p.howto {
+	margin-top: 2px;
+	margin-bottom: 0;
+}
+
 /* ── Taxonomy tab links (All categories / Most Used) ────── */
 body.post-type-product ul.category-tabs li a {
     font-size: var(--wpds-typography-font-size-sm, 12px);
@@ -101,6 +108,26 @@ body.post-type-product .categorychecklist li label {
 }
 
 </style>
+		<?php
+	}
+
+	/**
+	 * Move the tags howto hint inside the input container so it reads as helper text.
+	 */
+	public static function output_scripts(): void {
+		if ( ! DevPanel::is_supported_screen() ) {
+			return;
+		}
+		?>
+<script>
+( function () {
+	var howto  = document.querySelector( '#tagsdiv-product_tag p.howto' );
+	var jaxtag = document.querySelector( '#tagsdiv-product_tag .jaxtag' );
+	if ( howto && jaxtag ) {
+		jaxtag.appendChild( howto );
+	}
+}() );
+</script>
 		<?php
 	}
 }
