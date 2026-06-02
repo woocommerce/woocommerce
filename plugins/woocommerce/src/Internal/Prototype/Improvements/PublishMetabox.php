@@ -81,8 +81,9 @@ class PublishMetabox {
 	display: none;
 	margin-top: 4px;
 }
-/* Injected visibility dropdown. */
-select#wc-proto-vis-select {
+/* Dropdowns: full width. */
+select#wc-proto-vis-select,
+#post-status-select select {
 	display: block;
 	width: 100%;
 	margin-bottom: 4px;
