@@ -53,22 +53,6 @@ class PublishMetabox {
 		}
 		?>
 <style id="wc-proto-publish-metabox">
-/* Hide Edit links — panels are permanently open. */
-.edit-post-status,
-.edit-visibility,
-.edit-timestamp {
-	display: none !important;
-}
-
-/* Keep panels open even after WP jQuery animates them shut. */
-#post-visibility-select,
-#post-status-select,
-#timestampdiv {
-	display: block !important;
-	height: auto !important;
-	overflow: visible !important;
-}
-
 /* Hide radio inputs, their labels, sticky checkbox, and <br> spacers. */
 #post-visibility-select input[type="radio"],
 #post-visibility-select label.selectit,
@@ -139,11 +123,6 @@ select#wc-proto-vis-select,
 	background: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff) !important;
 	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
 	text-decoration: none !important;
-}
-
-/* Hide the label colon while the edit panel is open. */
-.misc-pub-section.wc-proto-editing .wc-proto-label-colon {
-	display: none;
 }
 
 /* ── Flatpickr date/time input ── */
@@ -252,48 +231,6 @@ select#wc-proto-vis-select,
 		} );
 	}
 
-	/* ── "Publish:" colon for draft/immediate state ─────────── */
-	var tsDisplay = document.getElementById( 'timestamp' );
-	if ( tsDisplay ) {
-		tsDisplay.innerHTML = tsDisplay.innerHTML.replace( /^Publish </, 'Publish: <' );
-	}
-
-	/* ── Watch edit panels: hide display text and colon ────── */
-	function wrapLabelColon( section ) {
-		var nodes = section.childNodes;
-		for ( var i = 0; i < nodes.length; i++ ) {
-			var node = nodes[ i ];
-			if ( 3 !== node.nodeType ) { continue; }
-			var colonIdx = node.textContent.indexOf( ':' );
-			if ( -1 === colonIdx ) { continue; }
-			var before = document.createTextNode( node.textContent.slice( 0, colonIdx ) );
-			var colon  = document.createElement( 'span' );
-			colon.className = 'wc-proto-label-colon';
-			colon.textContent = ':';
-			var after  = document.createTextNode( node.textContent.slice( colonIdx + 1 ) );
-			section.insertBefore( before, node );
-			section.insertBefore( colon,  node );
-			section.insertBefore( after,  node );
-			section.removeChild( node );
-			return;
-		}
-	}
-
-	function watchPanel( panelId, displayId ) {
-		var panel   = document.getElementById( panelId );
-		var display = document.getElementById( displayId );
-		if ( ! panel ) { return; }
-		var section = panel.closest ? panel.closest( '.misc-pub-section' ) : null;
-		if ( section ) { wrapLabelColon( section ); }
-		new MutationObserver( function () {
-			var open = 'none' !== window.getComputedStyle( panel ).display;
-			if ( display ) { display.style.display = open ? 'none' : ''; }
-			if ( section ) { section.classList.toggle( 'wc-proto-editing', open ); }
-		} ).observe( panel, { attributes: true, attributeFilter: [ 'style' ] } );
-	}
-	watchPanel( 'post-visibility-select', 'post-visibility-display' );
-	watchPanel( 'post-status-select',     'post-status-display' );
-	watchPanel( 'timestampdiv',           'timestamp' );
 }() );
 </script>
 		<?php
