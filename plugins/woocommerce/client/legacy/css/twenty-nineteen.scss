@@ -248,10 +248,12 @@ a.remove {
 }
 
 dl.variation,
+.variation,
 .wc-item-meta {
 	list-style: none outside;
 
 	dt,
+	.variation-label,
 	.wc-item-meta-label {
 		float: left;
 		clear: both;
@@ -259,7 +261,8 @@ dl.variation,
 		list-style: none outside;
 	}
 
-	dd {
+	dd,
+	.variation-value {
 		margin: 0;
 	}
 
@@ -800,7 +803,8 @@ table.variations {
 		display: block;
 	}
 
-	dl.variation {
+	dl.variation,
+	.variation {
 		margin-top: 0;
 
 		p,
@@ -1033,7 +1037,8 @@ table.variations {
 		padding: 1rem 0.5rem;
 	}
 
-	dl.variation {
+	dl.variation,
+	.variation {
 		margin: 0;
 
 		p {

@@ -411,10 +411,12 @@ a.remove {
 }
 
 dl.variation,
+.variation,
 .wc-item-meta {
 	list-style: none outside;
 
 	dt,
+	.variation-label,
 	.wc-item-meta-label {
 		float: left;
 		clear: both;
@@ -424,7 +426,8 @@ dl.variation,
 		font-weight: 400;
 	}
 
-	dd {
+	dd,
+	.variation-value {
 		margin: 0;
 	}
 
@@ -1652,7 +1655,8 @@ a.reset_variations {
 		padding: 1rem 0.5em;
 	}
 
-	dl.variation {
+	dl.variation,
+	.variation {
 		margin: 0;
 
 		p {
@@ -1660,7 +1664,9 @@ a.reset_variations {
 		}
 
 		dt,
-		dd {
+		dd,
+		.variation-label,
+		.variation-value {
 			font-family: $headings;
 
 			p {

@@ -12,15 +12,16 @@
  *
  * @see         https://woocommerce.com/document/template-structure/
  * @package     WooCommerce\Templates
- * @version     2.4.0
+ * @version     11.0.0
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<dl class="variation">
+<?php // Non-semantic markup is used intentionally: this data is not a list of terms and definitions, so the previously used <dl>/<dt>/<dd> tags were announced incorrectly by screen readers. See https://github.com/woocommerce/woocommerce/issues/61076. ?>
+<div class="variation">
 	<?php foreach ( $item_data as $data ) : ?>
-		<dt class="<?php echo sanitize_html_class( 'variation-' . $data['key'] ); ?>"><?php echo wp_kses_post( $data['key'] ); ?>:</dt>
-		<dd class="<?php echo sanitize_html_class( 'variation-' . $data['key'] ); ?>"><?php echo wp_kses_post( wpautop( $data['display'] ) ); ?></dd>
+		<div class="<?php echo sanitize_html_class( 'variation-' . $data['key'] ); ?> variation-label"><?php echo wp_kses_post( $data['key'] ); ?>:</div>
+		<div class="<?php echo sanitize_html_class( 'variation-' . $data['key'] ); ?> variation-value"><?php echo wp_kses_post( wpautop( $data['display'] ) ); ?></div>
 	<?php endforeach; ?>
-</dl>
+</div>

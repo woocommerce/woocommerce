@@ -1023,10 +1023,12 @@ p.demo_store,
 
 	td.product-name {
 		dl.variation,
+		.variation,
 		.wc-item-meta {
 			list-style: none outside;
 
 			dt,
+			.variation-label,
 			.wc-item-meta-label {
 				float: left;
 				clear: both;
@@ -1035,7 +1037,8 @@ p.demo_store,
 				list-style: none outside;
 			}
 
-			dd {
+			dd,
+			.variation-value {
 				margin: 0;
 			}
 

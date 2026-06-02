@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Accessibility: Replace the semantic dl/dt/dd markup in the cart item data template with non-semantic elements so screen readers no longer announce cart item meta (e.g. variations, vendor) as a definition list.
