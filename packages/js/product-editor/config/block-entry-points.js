@@ -5,7 +5,7 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const { sync: glob } = require( 'fast-glob' );
 
-const srcDir = path.resolve( process.cwd(), 'src' );
+const srcDir = path.resolve( __dirname, '..', 'src' );
 const blocksBuildDir = '/build/blocks';
 
 /**
