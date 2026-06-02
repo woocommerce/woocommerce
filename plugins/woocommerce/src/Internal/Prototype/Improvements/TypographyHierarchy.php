@@ -121,6 +121,11 @@ body.post-type-product .categorychecklist li label {
     color: var(--wpds-color-fg-content-neutral-weak, #707070);
 }
 
+/* ── "Add new" taxonomy links ───────────────────────────── */
+body.post-type-product a.taxonomy-add-new {
+	font-weight: var(--wpds-typography-font-weight-regular, 400);
+}
+
 </style>
 		<?php
 	}
