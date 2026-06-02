@@ -41,6 +41,13 @@ class TypographyHierarchy {
 		}
 		?>
 <style id="wc-proto-typo-styles">
+/* ── Normalize inputs to 13px (WP admin sets 14px in forms.css) ── */
+body.post-type-product input,
+body.post-type-product select,
+body.post-type-product textarea {
+	font-size: var(--wpds-typography-font-size-md, 13px);
+}
+
 /* ── Tier 1: Metabox titles ─────────────────────────────── */
 body.post-type-product #poststuff h2.hndle,
 body.post-type-product #postdivrich h2.postbox-header label {
