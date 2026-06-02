@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 
 /**
@@ -24,11 +23,7 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return $this->render_experimental_filled_mini_cart_contents( $attributes, $content, $block );
-		}
-
-		return $content;
+		return $this->render_experimental_filled_mini_cart_contents( $attributes, $content, $block );
 	}
 
 	/**
