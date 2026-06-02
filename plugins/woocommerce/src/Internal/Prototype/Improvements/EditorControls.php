@@ -43,19 +43,28 @@ class EditorControls {
 <style id="wc-proto-editor-controls">
 .wp-media-buttons { padding-top: 2px; }
 
-/* ── Compact CTAs (32px) inside product editor metaboxes ── */
-body.post-type-product .inside .button,
-body.post-type-product .inside .button-primary,
-body.post-type-product .inside .button-secondary,
+/* ── Compact CTAs (32px) inside product editor metaboxes — leave .button-small alone ── */
+body.post-type-product .inside .button:not(.button-small),
+body.post-type-product .inside .button-primary:not(.button-small),
+body.post-type-product .inside .button-secondary:not(.button-small),
 body.post-type-product .inside .button.button-large,
-body.post-type-product .inside input[type="submit"].button,
-body.post-type-product .inside input[type="button"].button {
+body.post-type-product .inside input[type="submit"].button:not(.button-small),
+body.post-type-product .inside input[type="button"].button:not(.button-small) {
 	height: 32px;
 	min-height: 32px;
 	line-height: 30px;
 	padding: 0 12px;
 	font-size: var(--wpds-typography-font-size-md, 13px);
 	box-sizing: border-box;
+}
+
+/* Keep small utility buttons (e.g. "Change Permalink Structure") at their native compact size. */
+body.post-type-product .button.button-small {
+	height: auto;
+	min-height: 26px;
+	line-height: 2.18181818;
+	padding: 0 8px;
+	font-size: 11px;
 }
 
 /* Keep media library / modal buttons untouched */
