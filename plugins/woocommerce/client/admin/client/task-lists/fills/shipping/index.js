@@ -59,9 +59,7 @@ export class Shipping extends Component {
 		this.state = this.initialState;
 		this.completeStep = this.completeStep.bind( this );
 
-		this.shippingSmartDefaultsEnabled =
-			window.wcAdminFeatures &&
-			window.wcAdminFeatures[ 'shipping-smart-defaults' ];
+		this.shippingSmartDefaultsEnabled = true;
 
 		this.storeLocationCompleted = false;
 		this.shippingPartners = props.shippingPartners;

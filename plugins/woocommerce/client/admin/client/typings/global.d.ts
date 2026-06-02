@@ -54,8 +54,6 @@ declare global {
 			'experimental-blocks': boolean;
 			'minified-js': boolean;
 			navigation: boolean;
-			onboarding: boolean;
-			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
 			'pattern-toolkit-full-composability': boolean;
 			printful: boolean;
@@ -64,9 +62,7 @@ declare global {
 			settings: boolean;
 			'products-catalog-api': boolean;
 			'settings-ui': boolean;
-			subscriptions: boolean;
 			'wc-pay-promotion': boolean;
-			'shipping-smart-defaults': boolean;
 			'launch-your-store': boolean;
 			'use-wp-horizon': boolean;
 			'rest-api-v4': boolean;
