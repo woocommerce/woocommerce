@@ -125,10 +125,7 @@ select#wc-proto-vis-select,
 	text-decoration: none !important;
 }
 
-/* ── Flatpickr date/time input ── */
-#timestampdiv .timestamp-wrap {
-	display: none !important;
-}
+/* ── Flatpickr date/time input (only when JS confirms flatpickr loaded) ── */
 #wc-proto-datetime {
 	display: block;
 	width: 100%;
@@ -192,8 +189,10 @@ select#wc-proto-vis-select,
 	}
 
 	/* ── Flatpickr date/time picker ─────────────────────────── */
-	var tsDiv = document.getElementById( 'timestampdiv' );
-	if ( tsDiv && window.flatpickr ) {
+	function initFlatpickr() {
+		var tsDiv = document.getElementById( 'timestampdiv' );
+		if ( ! tsDiv || ! window.flatpickr ) { return; }
+
 		var aa    = document.getElementById( 'aa' );
 		var mm    = document.getElementById( 'mm' );
 		var jj    = document.getElementById( 'jj' );
@@ -208,9 +207,11 @@ select#wc-proto-vis-select,
 		var fpInput = document.createElement( 'input' );
 		fpInput.type = 'text';
 		fpInput.id   = 'wc-proto-datetime';
+
 		var tsWrap = tsDiv.querySelector( '.timestamp-wrap' );
 		if ( tsWrap ) {
 			tsDiv.insertBefore( fpInput, tsWrap );
+			tsWrap.style.display = 'none';
 		}
 
 		flatpickr( fpInput, {
@@ -220,7 +221,7 @@ select#wc-proto-vis-select,
 			time_24hr:   true,
 			onChange: function ( dates ) {
 				if ( ! dates.length ) { return; }
-				var d  = dates[ 0 ];
+				var d   = dates[ 0 ];
 				var pad = function ( n ) { return String( n ).padStart( 2, '0' ); };
 				if ( aa ) { aa.value = d.getFullYear(); }
 				if ( mm ) { mm.value = pad( d.getMonth() + 1 ); }
@@ -229,6 +230,21 @@ select#wc-proto-vis-select,
 				if ( mn ) { mn.value = pad( d.getMinutes() ); }
 			},
 		} );
+	}
+
+	if ( window.flatpickr ) {
+		initFlatpickr();
+	} else {
+		/* Fallback: load flatpickr from CDN if WordPress didn't bundle it. */
+		var fpCss = document.createElement( 'link' );
+		fpCss.rel  = 'stylesheet';
+		fpCss.href = 'https://cdn.jsdelivr.net/npm/flatpickr@4/dist/flatpickr.min.css';
+		document.head.appendChild( fpCss );
+
+		var fpJs = document.createElement( 'script' );
+		fpJs.src = 'https://cdn.jsdelivr.net/npm/flatpickr@4/dist/flatpickr.min.js';
+		fpJs.onload = initFlatpickr;
+		document.head.appendChild( fpJs );
 	}
 
 	/* ── Hide display value while its panel is open ─────────── */
