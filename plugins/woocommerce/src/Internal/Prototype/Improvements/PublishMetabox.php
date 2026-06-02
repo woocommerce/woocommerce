@@ -121,7 +121,16 @@ select#wc-proto-vis-select,
 	height: 32px;
 	padding: 0 8px;
 	font-size: 13px;
+}
+/* Left-align the date edit fields (browsers center by default in wide inputs). */
+#wc-proto-datetime::-webkit-datetime-edit {
 	text-align: left;
+}
+#wc-proto-datetime::-webkit-datetime-edit-fields-wrapper {
+	justify-content: flex-start;
+}
+#wc-proto-datetime::-webkit-calendar-picker-indicator {
+	margin-left: auto;
 }
 
 /* Hide label colon while edit panel is open. */
@@ -273,10 +282,18 @@ select#wc-proto-vis-select,
 	if ( tsCancelBtn ) { tsCancelBtn.addEventListener( 'click', function () { tsSetEditing( false ); } ); }
 	if ( tsOkBtn )     { tsOkBtn.addEventListener( 'click',     function () { tsSetEditing( false ); } ); }
 
-	/* WP auto-opens the timestamp panel for published posts — sync initial state. */
+	/* WP may auto-open the timestamp panel after our script runs — sync state on load + observe changes. */
 	var tsDivEl = document.getElementById( 'timestampdiv' );
-	if ( tsDivEl && 'none' !== window.getComputedStyle( tsDivEl ).display ) {
-		tsSetEditing( true );
+	if ( tsDivEl ) {
+		function syncTsState() {
+			tsSetEditing( 'none' !== window.getComputedStyle( tsDivEl ).display );
+		}
+		new MutationObserver( syncTsState ).observe( tsDivEl, {
+			attributes: true,
+			attributeFilter: [ 'style', 'class' ],
+		} );
+		window.addEventListener( 'load', syncTsState );
+		syncTsState();
 	}
 }() );
 </script>
