@@ -166,12 +166,9 @@ class ProductGalleryUtils {
 			$parent_featured_id = $product_image_id;
 		}
 
-		$parent_gallery_extras = array_values(
-			array_diff(
-				array_filter( array_map( 'intval', $product->get_gallery_image_ids() ), 'wp_attachment_is_image' ),
-				array( $parent_featured_id )
-			)
-		);
+		$parent_gallery_ids    = array_map( 'intval', $product->get_gallery_image_ids() );
+		$parent_gallery_ids    = array_filter( $parent_gallery_ids, 'wp_attachment_is_image' );
+		$parent_gallery_extras = array_values( array_diff( $parent_gallery_ids, array( $parent_featured_id ) ) );
 
 		foreach ( $variations as $variation_id ) {
 			$variation_id = (int) $variation_id;
