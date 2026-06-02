@@ -27,6 +27,7 @@ class DevPanel {
 		'typography_hierarchy'  => 'Typography hierarchy',
 		'spacing_refinement'   => 'Spacing refinement',
 		'compact_editor_ui'    => 'Compact editor UI (Add Media button)',
+		'publish_metabox'      => 'Publish metabox redesign (visibility, scheduling)',
 	);
 
 	/**

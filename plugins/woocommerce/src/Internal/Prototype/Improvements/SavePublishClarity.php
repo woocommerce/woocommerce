@@ -134,14 +134,17 @@ h1.wp-heading-inline,
 	font-size: 13px !important;
 	vertical-align: middle !important;
 }
-/* Disabled state — make it obviously inactive (WP's default is a faint lighter blue) */
+/* Disabled state — match the @wordpress/components Button disabled tokens */
 #wc-proto-btn-publish:disabled,
-#wc-proto-btn-publish[disabled] {
+#wc-proto-btn-publish[disabled],
+#wc-proto-btn-save-draft:disabled,
+#wc-proto-btn-save-draft[disabled] {
 	background: var(--wpds-color-bg-interactive-neutral-strong-disabled, #dcdcde) !important;
-	border-color: var(--wpds-color-stroke-interactive-neutral-disabled, #dcdcde) !important;
-	color: var(--wpds-color-fg-interactive-neutral-strong-disabled, #a7aaad) !important;
-	cursor: not-allowed !important;
+	color: var(--wpds-color-fg-interactive-neutral-strong-disabled, #757575) !important;
+	border-color: transparent !important;
+	text-shadow: none !important;
 	box-shadow: none !important;
+	cursor: not-allowed !important;
 }
 #wc-proto-save-header .wc-proto-btn-tertiary {
 	margin: 0;
@@ -234,58 +237,6 @@ h1.wp-heading-inline,
 #submitdiv #misc-publishing-actions .misc-pub-section:last-child,
 #submitdiv .misc-pub-copy-draft { display: none !important; }
 
-/* ── Visibility: select replaces radio buttons ──────────── */
-#post-visibility-select input[type="radio"],
-#post-visibility-select > label,
-#post-visibility-select > br {
-	display: none;
-}
-.wc-proto-vis-select {
-	display: block;
-	width: 100%;
-	margin: 4px 0 8px;
-}
-#password-span {
-	display: none;
-	margin-bottom: 8px;
-}
-
-/* ── Edit links: show pencil SVG only ───────────────────── */
-.edit-visibility span[aria-hidden],
-.edit-timestamp span[aria-hidden] {
-	display: inline-flex;
-	align-items: center;
-}
-.edit-visibility span[aria-hidden] svg,
-.edit-timestamp span[aria-hidden] svg {
-	width: 16px;
-	height: 16px;
-	fill: currentColor;
-}
-
-/* ── OK/Cancel: right-aligned, Cancel on the left ──────── */
-#post-visibility-select > p,
-.timestamp-wrap > p {
-	display: flex;
-	justify-content: flex-end;
-	align-items: center;
-	gap: 8px;
-	margin: 4px 0 0;
-}
-.save-post-visibility,
-.save-timestamp { order: 2; }
-.cancel-post-visibility,
-.cancel-timestamp {
-	order: 1;
-	color: #2271b1;
-	text-decoration: none;
-}
-.cancel-post-visibility:hover,
-.cancel-timestamp:hover {
-	text-decoration: underline;
-	color: #135e96;
-}
-
 /* Push wrap content below both the WC sub-header and our fixed bar, with 8px breathing room */
 body.post-type-product #wpbody-content > .wrap,
 body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (string) ( $bar_h + 8 ) ); ?>px; }
@@ -332,7 +283,7 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 			</button>
 			<?php endif; ?>
 			<?php if ( ! $is_published ) : ?>
-			<button type="button" id="wc-proto-btn-save-draft" class="button">
+			<button type="button" id="wc-proto-btn-save-draft" class="button" disabled>
 				<?php esc_html_e( 'Save draft', 'woocommerce' ); ?>
 			</button>
 			<?php endif; ?>
@@ -474,87 +425,37 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 		syncTop();
 	}() );
 
-	/* ── Dirty-state: disable Update/Publish until a real change is made ── */
-	var form = document.getElementById( 'post' );
+	/* ── Dirty-state: enable Update/Publish/Save-draft on first real user input ── */
+	var markDirty = function () {
+		if ( btnPublish )   { btnPublish.disabled   = false; }
+		if ( btnSaveDraft ) { btnSaveDraft.disabled = false; }
+	};
 
-	if ( btnPublish ) {
-		btnPublish.disabled = true;
+	// `input` fires natively for typing in any input/textarea (isTrusted=true),
+	// and is NOT fired by jQuery's .trigger('change')/('input') programmatic calls
+	// that WC uses on init. Capture phase guards against stopPropagation.
+	document.addEventListener( 'input', function ( e ) {
+		if ( e.isTrusted ) { markDirty(); }
+	}, true );
 
-		var markDirty = function () {
-			btnPublish.disabled = false;
-		};
+	// Change covers selects/checkboxes/radios. isTrusted filters WC init triggers.
+	document.addEventListener( 'change', function ( e ) {
+		if ( e.isTrusted ) { markDirty(); }
+	}, true );
 
-		// Only react to real user input. event.isTrusted is true for native
-		// user actions and false for programmatic .trigger('change') / .dispatchEvent,
-		// which is how WC and select2/chosen fire change events on init.
-		var markDirtyIfTrusted = function ( e ) {
-			if ( e && e.isTrusted ) { markDirty(); }
-		};
-
-		if ( form ) {
-			form.addEventListener( 'input', markDirtyIfTrusted );
-			form.addEventListener( 'change', markDirtyIfTrusted );
-		}
-
-		// TinyMCE: typing in the visual editor is always a real user action.
-		function hookTinymce( editor ) {
-			editor.on( 'input keydown Change', markDirty );
-		}
-		if ( typeof window.tinymce !== 'undefined' ) {
-			window.tinymce.editors.forEach( hookTinymce );
-		}
-		if ( typeof jQuery !== 'undefined' ) {
-			jQuery( document ).on( 'tinymce-editor-init', function ( e, editor ) {
-				hookTinymce( editor );
-			} );
-		}
+	// TinyMCE — visual editor typing.
+	function hookTinymce( editor ) {
+		editor.on( 'input keydown Change', markDirty );
+	}
+	if ( typeof window.tinymce !== 'undefined' && window.tinymce.editors ) {
+		window.tinymce.editors.forEach( hookTinymce );
+	}
+	if ( typeof jQuery !== 'undefined' ) {
+		jQuery( document ).on( 'tinymce-editor-init', function ( e, editor ) {
+			hookTinymce( editor );
+		} );
 	}
 
-	/* ── Visibility dropdown ────────────────────────────────── */
-	( function () {
-		var visPanel = document.getElementById( 'post-visibility-select' );
-		if ( ! visPanel ) { return; }
-		var checked = visPanel.querySelector( 'input[type="radio"]:checked' );
-		var curVal  = checked ? checked.value : 'public';
-		var sel     = document.createElement( 'select' );
-		sel.id        = 'wc-proto-vis-select';
-		sel.className = 'wc-proto-vis-select';
-		[
-			{ value: 'public',   label: 'Public' },
-			{ value: 'password', label: 'Password protected' },
-			{ value: 'private',  label: 'Private' },
-		].forEach( function ( opt ) {
-			var o         = document.createElement( 'option' );
-			o.value       = opt.value;
-			o.textContent = opt.label;
-			if ( opt.value === curVal ) { o.selected = true; }
-			sel.appendChild( o );
-		} );
-		sel.addEventListener( 'change', function () {
-			var radio = document.getElementById( 'visibility-radio-' + sel.value );
-			if ( radio ) { radio.checked = true; }
-			var pwSpan = document.getElementById( 'password-span' );
-			if ( pwSpan ) {
-				pwSpan.style.display = ( 'password' === sel.value ) ? 'block' : 'none';
-			}
-		} );
-		visPanel.insertBefore( sel, visPanel.firstChild );
-	}() );
-
-	/* ── "Publish:" colon in all timestamp states ───────────── */
-	var tsDisplay = document.getElementById( 'timestamp' );
-	if ( tsDisplay ) {
-		tsDisplay.innerHTML = tsDisplay.innerHTML.replace( /^Publish </, 'Publish: <' );
-	}
-
-	/* ── Replace "Edit" text with pencil SVG in metabox links ── */
-	var pencilSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>';
-	[ '.edit-visibility', '.edit-timestamp' ].forEach( function ( cls ) {
-		var link = document.querySelector( cls );
-		if ( ! link ) { return; }
-		var span = link.querySelector( 'span[aria-hidden]' );
-		if ( span ) { span.innerHTML = pencilSvg; }
-	} );
 }() );
 </script>
 		<?php

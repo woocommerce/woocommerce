@@ -89,7 +89,6 @@ body.post-type-product .woocommerce_options_panel .form-field input[type="checkb
 body.post-type-product ul.product_data_tabs li a {
     font-size: var(--wpds-typography-font-size-md, 13px);
     font-weight: var(--wpds-typography-font-weight-regular, 400);
-    color: var(--wpds-color-fg-content-neutral, #1e1e1e);
 }
 
 /* ── Attribute / variation sub-headers ──────────────────── */
