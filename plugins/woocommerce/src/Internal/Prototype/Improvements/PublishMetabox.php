@@ -149,8 +149,8 @@ select#wc-proto-vis-select,
 .misc-pub-section.wc-proto-editing .wc-proto-label-colon {
 	display: none;
 }
-/* Hide the date display when timestamp panel is open (CSS wins over any conflicting WP rule). */
-.misc-pub-section.wc-proto-editing #timestamp {
+/* When timestamp panel is open, hide only the bold date value — keep the label. */
+.misc-pub-section.wc-proto-editing #timestamp b {
 	display: none !important;
 }
 </style>
@@ -307,8 +307,9 @@ select#wc-proto-vis-select,
 	var tsEditBtn   = document.querySelector( '.edit-timestamp' );
 	var tsCancelBtn = document.querySelector( '.cancel-timestamp' );
 	var tsOkBtn     = document.querySelector( '.save-timestamp' );
+	/* Wrap the colon inside #timestamp so CSS can hide it when editing — label stays visible. */
+	if ( tsDisplay ) { wrapLabelColon( tsDisplay ); }
 	function tsSetEditing( open ) {
-		if ( tsDisplay ) { tsDisplay.style.display = open ? 'none' : ''; }
 		if ( tsSection ) { tsSection.classList.toggle( 'wc-proto-editing', open ); }
 	}
 	if ( tsEditBtn )   { tsEditBtn.addEventListener( 'click',   function () { tsSetEditing( true ); } ); }
