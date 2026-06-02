@@ -11,7 +11,6 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import './style.scss';
-import { isTaskListActive } from '~/hooks/use-tasklists-state';
 import { BaseHeader } from './shared';
 import { useWpAdminChrome } from './use-wp-admin-chrome';
 
@@ -22,13 +21,6 @@ export const EmbedHeader = ( {
 	sections: string[];
 	query: Record< string, string >;
 } ) => {
-	const isReactifyPaymentsSettingsScreen = Boolean(
-		query?.page === 'wc-settings' && query?.tab === 'checkout'
-	);
-	const showReminderBar = Boolean(
-		isTaskListActive( 'setup' ) && ! isReactifyPaymentsSettingsScreen
-	);
-
 	// Embed pages live on top of classic wp-admin screens. Detect the wp-admin
 	// chrome wp-admin already rendered so we can suppress the duplicate <h1>,
 	// proxy the Screen Options / Help dropdowns through floating-header icons,
@@ -105,7 +97,6 @@ export const EmbedHeader = ( {
 			isEmbedded={ true }
 			query={ query }
 			sections={ sections }
-			showReminderBar={ showReminderBar }
 			suppressTitle={ hasWpAdminH1 }
 			compact={ hasWpAdminH1 }
 			trailingItems={ trailingItems }

@@ -46,6 +46,10 @@ export type SearchableChipSelectProps = Omit<
 		 */
 		chipsContent?: ( value: SearchableChipSelectItem[] ) => ReactNode;
 		/**
+		 * Chip content to show when there are no selected values.
+		 */
+		placeholderChip?: ReactNode;
+		/**
 		 * The custom content to use instead of the default empty state.
 		 */
 		emptyContent?: ComboboxEmptyProps[ 'children' ];

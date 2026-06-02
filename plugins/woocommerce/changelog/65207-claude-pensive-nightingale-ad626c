@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Trap `wp_safe_redirect()` in `EmailActionControllerTests` so PHPUnit no longer silently halts mid-suite on the Back in Stock Notifications redirect tests.

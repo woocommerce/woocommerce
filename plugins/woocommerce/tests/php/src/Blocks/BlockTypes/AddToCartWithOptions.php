@@ -15,7 +15,6 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProduct
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeOptionsMock;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 
 /**
@@ -47,7 +46,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			new AddToCartWithOptionsVariationSelectorMock();
 			new AddToCartWithOptionsVariationSelectorAttributeMock();
 			new AddToCartWithOptionsVariationSelectorAttributeNameMock();
-			new AddToCartWithOptionsVariationSelectorAttributeOptionsMock();
 
 			self::$are_blocks_registered = true;
 		}
@@ -348,9 +346,9 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertDoesNotMatchRegularExpression(
-			'/<input[^>]*type="radio"[^>]* checked(?:="checked")?[^>]*>/',
+			'/<button[^>]*aria-checked="true"[^>]*>/',
 			$markup,
-			'No radio options should be checked by default.'
+			'No options should be checked by default.'
 		);
 
 		$product->set_default_attributes( array( 'pa_size' => 'small-slug' ) );
@@ -360,7 +358,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertMatchesRegularExpression(
-			'/<input[^>]*checked(?:="checked")?[^>]*type="radio"[^>]*value="small-slug"[^>]*>/',
+			'/<button[^>]*value="small-slug"[^>]*aria-checked="true"[^>]*>/',
 			$markup,
 			'The "small" size option should be checked when set as the default attribute.'
 		);
@@ -370,7 +368,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertMatchesRegularExpression(
-			'/<input[^>]*checked(?:="checked")?[^>]*type="radio"[^>]*value="medium-slug"[^>]*>/',
+			'/<button[^>]*value="medium-slug"[^>]*aria-checked="true"[^>]*>/',
 			$markup,
 			'The "medium" size option should be checked when set in the URL parameters.'
 		);
@@ -469,54 +467,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			$markup,
 			'The aria-label should not contain HTML from backreference expansion.'
 		);
-	}
-
-	/**
-	 * Tests that the VariationSelectorAttribute block returns empty string
-	 * for non-variable products (simple, grouped, external) to prevent
-	 * a fatal error from calling get_variation_attributes() on unsupported
-	 * product types.
-	 *
-	 * @covers VariationSelectorAttribute::render
-	 */
-	public function test_variation_selector_attribute_returns_empty_for_non_variable_products() {
-		global $product;
-		$original_product = $product;
-
-		$block_markup = '<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute /-->';
-
-		try {
-			// Test with a missing/invalid product context.
-			$product = null;
-			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string when the global product is null.' );
-
-			$product = false;
-			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string when the global product is false.' );
-
-			// Test with a simple product.
-			$simple_product = new \WC_Product_Simple();
-			$simple_product->set_regular_price( 10 );
-			$simple_product->save();
-
-			$product = $simple_product;
-			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string for simple products.' );
-
-			// Test with a grouped product.
-			$grouped_product = new \WC_Product_Grouped();
-			$grouped_product->save();
-
-			$product = $grouped_product;
-			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string for grouped products.' );
-
-			// Test with an external product.
-			$external_product = new \WC_Product_External();
-			$external_product->save();
-
-			$product = $external_product;
-			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string for external products.' );
-		} finally {
-			$product = $original_product;
-		}//end try
 	}
 
 	/**

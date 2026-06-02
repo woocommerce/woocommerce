@@ -217,8 +217,15 @@ trait BlockContainerTrait {
 			 * @param BlockInterface $block The block.
 			 *
 			 * @since 8.2.0
+			 * @deprecated 10.9.0 This hook will be removed in WooCommerce 11.0.
 			 */
-			do_action( 'woocommerce_block_template_after_add_block', $block );
+			wc_do_deprecated_action(
+				'woocommerce_block_template_after_add_block',
+				array( $block ),
+				'10.9.0',
+				null,
+				'This block template hook will be removed in WooCommerce 11.0.'
+			);
 		} catch ( \Exception $e ) {
 			$this->do_after_add_block_error_action( $block, 'woocommerce_block_template_after_add_block', $e );
 		}
@@ -231,6 +238,8 @@ trait BlockContainerTrait {
 	 * @param BlockInterface $block The block.
 	 */
 	private function do_after_add_specific_block_action( BlockInterface $block ) {
+		$hook_name = "woocommerce_block_template_area_{$this->get_root_template()->get_area()}_after_add_block_{$block->get_id()}";
+
 		try {
 			/**
 			 * Action called after a specific block is added to a template with a specific area.
@@ -241,10 +250,17 @@ trait BlockContainerTrait {
 			 * @param BlockInterface $block The block.
 			 *
 			 * @since 8.2.0
+			 * @deprecated 10.9.0 This hook will be removed in WooCommerce 11.0.
 			 */
-			do_action( "woocommerce_block_template_area_{$this->get_root_template()->get_area()}_after_add_block_{$block->get_id()}", $block );
+			wc_do_deprecated_action(
+				$hook_name,
+				array( $block ),
+				'10.9.0',
+				null,
+				'This block template hook will be removed in WooCommerce 11.0.'
+			);
 		} catch ( \Exception $e ) {
-			$this->do_after_add_block_error_action( $block, "woocommerce_block_template_area_{$this->get_root_template()->get_area()}_after_add_block_{$block->get_id()}", $e );
+			$this->do_after_add_block_error_action( $block, $hook_name, $e );
 		}
 	}
 
@@ -264,12 +280,14 @@ trait BlockContainerTrait {
 		 * @param \Exception     $exception The exception.
 		 *
 		 * @since 8.4.0
+		 * @deprecated 10.9.0 This hook will be removed in WooCommerce 11.0.
 		 */
-		do_action(
+		wc_do_deprecated_action(
 			'woocommerce_block_template_after_add_block_error',
-			$block,
-			$action,
-			$e,
+			array( $block, $action, $e ),
+			'10.9.0',
+			null,
+			'This block template hook will be removed in WooCommerce 11.0.'
 		);
 	}
 
@@ -290,8 +308,15 @@ trait BlockContainerTrait {
 			 * @param BlockInterface $block The block.
 			 *
 			 * @since 8.2.0
+			 * @deprecated 10.9.0 This hook will be removed in WooCommerce 11.0.
 			 */
-			do_action( 'woocommerce_block_template_after_remove_block', $block );
+			wc_do_deprecated_action(
+				'woocommerce_block_template_after_remove_block',
+				array( $block ),
+				'10.9.0',
+				null,
+				'This block template hook will be removed in WooCommerce 11.0.'
+			);
 		} catch ( \Exception $e ) {
 			$this->do_after_remove_block_error_action( $block, 'woocommerce_block_template_after_remove_block', $e );
 		}
@@ -304,6 +329,8 @@ trait BlockContainerTrait {
 	 * @param BlockInterface $block The block.
 	 */
 	private function do_after_remove_specific_block_action( BlockInterface $block ) {
+		$hook_name = "woocommerce_block_template_area_{$this->get_root_template()->get_area()}_after_remove_block_{$block->get_id()}";
+
 		try {
 			/**
 			 * Action called after a specific block is removed from a template with a specific area.
@@ -314,10 +341,17 @@ trait BlockContainerTrait {
 			 * @param BlockInterface $block The block.
 			 *
 			 * @since 8.2.0
+			 * @deprecated 10.9.0 This hook will be removed in WooCommerce 11.0.
 			 */
-			do_action( "woocommerce_block_template_area_{$this->get_root_template()->get_area()}_after_remove_block_{$block->get_id()}", $block );
+			wc_do_deprecated_action(
+				$hook_name,
+				array( $block ),
+				'10.9.0',
+				null,
+				'This block template hook will be removed in WooCommerce 11.0.'
+			);
 		} catch ( \Exception $e ) {
-			$this->do_after_remove_block_error_action( $block, "woocommerce_block_template_area_{$this->get_root_template()->get_area()}_after_remove_block_{$block->get_id()}", $e );
+			$this->do_after_remove_block_error_action( $block, $hook_name, $e );
 		}
 	}
 
@@ -337,12 +371,14 @@ trait BlockContainerTrait {
 		 * @param \Exception     $exception The exception.
 		 *
 		 * @since 8.4.0
+		 * @deprecated 10.9.0 This hook will be removed in WooCommerce 11.0.
 		 */
-		do_action(
+		wc_do_deprecated_action(
 			'woocommerce_block_template_after_remove_block_error',
-			$block,
-			$action,
-			$e,
+			array( $block, $action, $e ),
+			'10.9.0',
+			null,
+			'This block template hook will be removed in WooCommerce 11.0.'
 		);
 	}
 }
