@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\AttributeFilter;
 use Automattic\WooCommerce\Blocks\BlockTypes\PriceFilter;
 use Automattic\WooCommerce\Blocks\BlockTypes\RatingFilter;
 use Automattic\WooCommerce\Blocks\BlockTypes\StockFilter;
-use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
+use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use WP_Query;
 use WC_Tax;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -536,7 +536,7 @@ class QueryBuilder {
 			return array();
 		}
 
-		if ( wc_get_container()->get( Filterer::class )->filtering_via_lookup_table_is_active() ) {
+		if ( 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' ) ) {
 			return array(
 				'isProductCollection'         => true,
 				'woocommerceAttributeFilters' => $chosen_attributes,
@@ -951,21 +951,9 @@ class QueryBuilder {
 			return $clauses;
 		}
 
-		// The shared lookup filterer only runs for main queries by default. Product Collection uses block queries,
-		// so filtering is enabled here for this WP_Query instance only.
-		$enable_filtering_for_current_query = function ( $enable_filtering, $wp_query ) use ( $query ) {
-			return $query === $wp_query ? true : $enable_filtering;
-		};
-
-		add_filter( 'woocommerce_enable_post_clause_filtering', $enable_filtering_for_current_query, 10, 2 );
-
-		try {
-			return wc_get_container()
-				->get( Filterer::class )
-				->filter_by_attribute_post_clauses( $clauses, $query, $chosen_attributes );
-		} finally {
-			remove_filter( 'woocommerce_enable_post_clause_filtering', $enable_filtering_for_current_query, 10 );
-		}
+		return wc_get_container()
+			->get( QueryClauses::class )
+			->add_attribute_clauses( $clauses, $chosen_attributes );
 	}
 
 	/**
