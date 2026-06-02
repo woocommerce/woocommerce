@@ -216,6 +216,21 @@ class ReorderControls {
 			document.querySelectorAll( '.handle-order-lower' ).forEach( function ( btn ) {
 				replaceButton( btn, DOWN_SVG );
 			} );
+
+			/* Block metabox drag at the event level when reorder controls are disabled.
+			   Capture-phase listener runs before jQuery UI sortable's bubble-phase handler. */
+			function isReorderEnabled() {
+				return /(?:^|; )wc_proto_reorder_controls=1(?:;|$)/.test( document.cookie );
+			}
+			document.addEventListener( 'mousedown', function ( e ) {
+				if ( isReorderEnabled() ) { return; }
+				var header = e.target.closest && e.target.closest( '.meta-box-sortables .postbox > .postbox-header' );
+				if ( ! header ) { return; }
+				/* Let interactive controls inside the header work normally. */
+				if ( e.target.closest( '.handlediv, .handle-actions, button, a, input, select, label' ) ) { return; }
+				e.stopPropagation();
+				e.preventDefault();
+			}, true );
 		}() );
 		</script>
 		<?php
