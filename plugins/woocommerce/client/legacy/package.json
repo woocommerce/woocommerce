@@ -5,14 +5,11 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"main": "Gruntfile.js",
-	"files": [
-		"build"
-	],
 	"scripts": {
-		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
+		"build": "pnpm build:project",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:assets": "wireit",
-		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
+		"build:project:assets": "grunt js && grunt css",
+		"watch:build": "pnpm --if-present --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:assets": "pnpm build:project --watch",
 		"test:js": "wp-scripts test-unit-js --config jest.config.json"
@@ -41,53 +38,10 @@
 		"gruntify-eslint": "5.0.0",
 		"jest-fixed-jsdom": "^0.0.10",
 		"sass": "^1.69.5",
-		"stylelint": "^14.16.1",
-		"wireit": "0.14.12"
+		"stylelint": "^14.16.1"
 	},
 	"dependencies": {
 		"sourcebuster": "github:woocommerce/sourcebuster-js#d7f4616d5a17e17db925ca1842457f309379d861"
-	},
-	"wireit": {
-		"build:project:assets": {
-			"dependencies": [
-				"build:project:assets:js",
-				"build:project:assets:css"
-			]
-		},
-		"build:project:assets:js": {
-			"command": "grunt js",
-			"clean": "if-file-deleted",
-			"files": [
-				"Gruntfile.js",
-				"js/**/*.js"
-			],
-			"output": [
-				"build/js"
-			],
-			"dependencies": [
-				"dependencyOutputs"
-			]
-		},
-		"build:project:assets:css": {
-			"command": "grunt css",
-			"clean": "if-file-deleted",
-			"files": [
-				"Gruntfile.js",
-				"css/**/*.scss"
-			],
-			"output": [
-				"build/css"
-			],
-			"dependencies": [
-				"dependencyOutputs"
-			]
-		},
-		"dependencyOutputs": {
-			"allowUsuallyExcludedPaths": true,
-			"files": [
-				"package.json"
-			]
-		}
 	},
 	"config": {
 		"ci": {
