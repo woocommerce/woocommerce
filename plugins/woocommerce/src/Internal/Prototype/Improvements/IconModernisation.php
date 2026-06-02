@@ -281,6 +281,7 @@ class IconModernisation {
 
 		$css .= '#post-body .misc-pub-post-status::before,' . "\n";
 		$css .= '#post-body #visibility::before,' . "\n";
+		$css .= '#post-body #catalog-visibility::before,' . "\n";
 		$css .= '.curtime #timestamp::before {' . "\n";
 		$css .= "\tfont-family: none !important;\n";
 		$css .= "\tcontent: '' !important;\n";
@@ -320,6 +321,15 @@ class IconModernisation {
 		$css .= '.curtime #timestamp::before {' . "\n";
 		$css .= "\tmask-image: {$icon_calendar};\n";
 		$css .= "\t-webkit-mask-image: {$icon_calendar};\n";
+		$css .= "}\n";
+
+		// Catalog visibility — outlined 2×2 grid (matches the line-icon style of the other rows).
+		$icon_category = self::mask_url(
+			self::path( 'M3 3h8v8H3V3zm1.5 1.5v5h5v-5h-5zM13 3h8v8h-8V3zm1.5 1.5v5h5v-5h-5zM3 13h8v8H3v-8zm1.5 1.5v5h5v-5h-5zM13 13h8v8h-8v-8zm1.5 1.5v5h5v-5h-5z', true )
+		);
+		$css .= '#post-body #catalog-visibility::before {' . "\n";
+		$css .= "\tmask-image: {$icon_category};\n";
+		$css .= "\t-webkit-mask-image: {$icon_category};\n";
 		$css .= "}\n";
 
 		$css .= '</style>';

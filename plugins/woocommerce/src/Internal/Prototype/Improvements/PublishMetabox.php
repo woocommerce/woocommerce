@@ -45,6 +45,9 @@ class PublishMetabox {
 #post-visibility-select input[type="radio"],
 #post-visibility-select label.selectit,
 #post-visibility-select br,
+#catalog-visibility-select input[type="radio"],
+#catalog-visibility-select label.selectit,
+#catalog-visibility-select br,
 #sticky-span {
 	display: none !important;
 }
@@ -53,17 +56,32 @@ class PublishMetabox {
 	display: none;
 	margin-top: 4px;
 }
-/* Dropdowns: full width. */
+/* Dropdowns: full width with breathing room above. */
 select#wc-proto-vis-select,
+select#wc-proto-cat-vis-select,
 #post-status-select select {
 	display: block;
 	width: 100%;
+	margin-top: 8px;
 	margin-bottom: 4px;
+}
+/* Catalog visibility helper text — small muted paragraph under the select */
+#catalog-visibility-select > p:first-of-type {
+	font-size: var(--wpds-typography-font-size-xs, 11px);
+	color: var(--wpds-color-fg-content-neutral-weak, #707070);
+	margin: 0 0 8px 0;
+}
+/* Featured checkbox row — sits between helper text and OK/Cancel */
+#catalog-visibility-select label[for="_featured"] {
+	display: inline-block;
+	margin-left: 4px;
+	font-size: var(--wpds-typography-font-size-md, 13px);
 }
 
 /* ── OK / Cancel: own row, left-aligned, compact 32px, 8px gap ── */
 #post-visibility-select > p,
 #post-status-select > p,
+#catalog-visibility-select > p:last-of-type,
 #timestampdiv > p {
 	display: flex !important;
 	width: 100% !important;
@@ -178,10 +196,11 @@ select#wc-proto-vis-select,
 		}
 	}
 
-	/* ── Relabel "OK" buttons to "Confirm" ──────────────────── */
+	/* ── Relabel all "OK" buttons to "Confirm" (multiple panels share class names) ── */
 	[ '.save-post-visibility', '.save-post-status', '.save-timestamp' ].forEach( function ( sel ) {
-		var btn = document.querySelector( sel );
-		if ( btn ) { btn.textContent = 'Confirm'; }
+		document.querySelectorAll( sel ).forEach( function ( btn ) {
+			btn.textContent = 'Confirm';
+		} );
 	} );
 
 	/* ── Visibility dropdown ────────────────────────────────── */
@@ -211,6 +230,46 @@ select#wc-proto-vis-select,
 			}
 		} );
 		visPanel.insertBefore( sel, visPanel.firstChild );
+	}
+
+	/* ── "Published on:" / "Publish on:" → "Published:" / "Publish:" ── */
+	var tsLabel = document.getElementById( 'timestamp' );
+	if ( tsLabel ) {
+		var tsNodes = tsLabel.childNodes;
+		for ( var ti = 0; ti < tsNodes.length; ti++ ) {
+			var tNode = tsNodes[ ti ];
+			if ( 3 === tNode.nodeType ) {
+				tNode.textContent = tNode.textContent.replace( /\b(Publish(?:ed)?) on\b/, '$1' );
+			}
+		}
+	}
+
+	/* ── Catalog visibility dropdown ─────────────────────────── */
+	var catVisPanel = document.getElementById( 'catalog-visibility-select' );
+	if ( catVisPanel ) {
+		var catRadios = catVisPanel.querySelectorAll( 'input[type="radio"][name="_visibility"]' );
+		var catChecked = catVisPanel.querySelector( 'input[type="radio"][name="_visibility"]:checked' );
+		var catCurVal  = catChecked ? catChecked.value : 'visible';
+		var catSel     = document.createElement( 'select' );
+		catSel.id      = 'wc-proto-cat-vis-select';
+		catRadios.forEach( function ( radio ) {
+			var o         = document.createElement( 'option' );
+			o.value       = radio.value;
+			o.textContent = radio.dataset.label || radio.value;
+			if ( radio.value === catCurVal ) { o.selected = true; }
+			catSel.appendChild( o );
+		} );
+		catSel.addEventListener( 'change', function () {
+			var r = document.getElementById( '_visibility_' + catSel.value );
+			if ( r ) { r.checked = true; }
+		} );
+		catVisPanel.insertBefore( catSel, catVisPanel.firstChild );
+
+		// Reorder: helper paragraph moves below the select (it's the first <p>).
+		var helperP = catVisPanel.querySelector( 'p' );
+		if ( helperP ) {
+			catVisPanel.insertBefore( helperP, catSel.nextSibling );
+		}
 	}
 
 	/* ── Wrap status OK/Cancel in <p> so flex row CSS applies ── */
@@ -298,8 +357,9 @@ select#wc-proto-vis-select,
 			if ( section ) { section.classList.toggle( 'wc-proto-editing', open ); }
 		} ).observe( panel, { attributes: true, attributeFilter: [ 'style' ] } );
 	}
-	watchPanel( 'post-visibility-select', 'post-visibility-display' );
-	watchPanel( 'post-status-select',     'post-status-display' );
+	watchPanel( 'post-visibility-select',    'post-visibility-display' );
+	watchPanel( 'post-status-select',        'post-status-display' );
+	watchPanel( 'catalog-visibility-select', 'catalog-visibility-display' );
 
 	/* Timestamp: use click handlers — <fieldset> style mutations are unreliable. */
 	var tsDisplay   = document.getElementById( 'timestamp' );

@@ -43,6 +43,11 @@ class EditorControls {
 <style id="wc-proto-editor-controls">
 .wp-media-buttons { padding-top: 2px; }
 
+/* ── Breathing room between metabox header and its first input ── */
+body.post-type-product .postbox > .inside {
+	padding-top: 8px;
+}
+
 /* ── Compact CTAs (32px) inside product editor metaboxes — leave .button-small alone ── */
 body.post-type-product .inside .button:not(.button-small),
 body.post-type-product .inside .button-primary:not(.button-small),
@@ -104,16 +109,47 @@ body.post-type-product .media-modal select {
 	line-height: inherit;
 }
 
-/* ── Helper text (.description) sits tight under its input — matches Product Tags pattern ── */
-body.post-type-product .form-field .description,
-body.post-type-product .woocommerce_options_panel .form-field .description,
-body.post-type-product p.form-field span.description {
-	display: block !important;
-	clear: both !important;
-	float: none !important;
-	margin: 2px 0 0 0 !important;
+/* ── Row alignment for compact 32px rows.
+	WC keeps the float-based layout (label floats left, input floats left to wrap the
+	help-tip to the right). We don't disturb that — we just ensure each element's
+	box-center sits on the same y as the others. ── */
+body.post-type-product .woocommerce_options_panel .form-field > label {
+	line-height: 32px !important;
+	min-height: 32px !important;
+	margin-top: 0 !important;
+	padding-top: 0 !important;
+}
+body.post-type-product .woocommerce_options_panel .form-field > .woocommerce-help-tip {
+	margin-top: 8px !important;
+}
+/* Center 16px checkboxes/radios in the 32px row to match the label center. */
+body.post-type-product .woocommerce_options_panel .form-field > input[type="checkbox"],
+body.post-type-product .woocommerce_options_panel .form-field > input[type="radio"] {
+	margin-top: 8px !important;
+	vertical-align: top !important;
+}
+/* For radio groups (.wc-radios is taller than one row) — align the label to the top
+	so it lines up with the first option. */
+body.post-type-product .woocommerce_options_panel .form-field .wc-radios {
+	margin: 0 !important;
 	padding: 0 !important;
-	line-height: 1.4 !important;
+	list-style: none;
+}
+body.post-type-product .woocommerce_options_panel .form-field .wc-radios li {
+	display: flex;
+	align-items: center;
+	min-height: 32px;
+}
+body.post-type-product .woocommerce_options_panel .form-field .wc-radios input[type="radio"] {
+	margin: 0 6px 0 0 !important;
+}
+
+/* ── Helper text (.description) — minimal style override.
+	Excludes inline labels next to checkboxes/radios, which are styled
+	by TypographyHierarchy at 13px neutral, not 12px helper-text grey. ── */
+body.post-type-product .woocommerce_options_panel .form-field input:not([type="checkbox"]):not([type="radio"]) ~ .description,
+body.post-type-product .woocommerce_options_panel .form-field > select ~ .description,
+body.post-type-product .woocommerce_options_panel .form-field > textarea ~ .description {
 	font-size: var(--wpds-typography-font-size-sm, 12px) !important;
 	color: var(--wpds-color-fg-content-neutral-weak, #757575) !important;
 	font-style: normal !important;
@@ -143,6 +179,18 @@ body.post-type-product p.form-field span.description {
 				btn.style.paddingRight = '8px';
 				btn.innerHTML = ICON + 'Add Media';
 			} );
+
+			/* Sale price dates: WC outputs the help-tip after the Cancel link, which floats
+			 * to the bottom-left under the date inputs. Move it next to the first date input
+			 * so it sits in the conventional right-of-input position. */
+			var saleDatesRow = document.querySelector( 'p.form-field.sale_price_dates_fields' );
+			if ( saleDatesRow ) {
+				var fromInput = saleDatesRow.querySelector( '#_sale_price_dates_from' );
+				var tip       = saleDatesRow.querySelector( '.woocommerce-help-tip' );
+				if ( fromInput && tip && fromInput.nextSibling !== tip ) {
+					saleDatesRow.insertBefore( tip, fromInput.nextSibling );
+				}
+			}
 		}() );
 		</script>
 		<?php

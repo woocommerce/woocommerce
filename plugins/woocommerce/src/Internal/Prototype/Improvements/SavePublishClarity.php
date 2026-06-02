@@ -261,7 +261,6 @@ h1.wp-heading-inline,
 #major-publishing-actions { display: none !important; }
 
 /* Hide "Copy to a new draft" in the misc-pub area */
-#submitdiv #misc-publishing-actions .misc-pub-section:last-child,
 #submitdiv .misc-pub-copy-draft { display: none !important; }
 
 /* Push wrap content below both the WC sub-header and our fixed bar, with 8px breathing room */

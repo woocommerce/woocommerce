@@ -48,6 +48,24 @@ body.post-type-product textarea {
 	font-size: var(--wpds-typography-font-size-md, 13px);
 }
 
+/* ── Select2 product search fields (Upsells, Cross-sells, etc.) ── */
+body.post-type-product .select2-container .select2-selection__rendered,
+body.post-type-product .select2-container .select2-selection__placeholder,
+body.post-type-product .select2-container .select2-search__field,
+body.post-type-product .select2-container--open .select2-results__option,
+body.post-type-product .select2-container--open .select2-results__message {
+	font-size: var(--wpds-typography-font-size-md, 13px);
+}
+
+/* ── Field-value note text (Point of Sale "not supported" message etc.) — vertically center in the row ── */
+body.post-type-product .form-field output {
+	display: inline-flex;
+	align-items: center;
+	min-height: 32px;
+	font-size: var(--wpds-typography-font-size-md, 13px);
+	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
+}
+
 /* ── Tier 1: Metabox titles ─────────────────────────────── */
 body.post-type-product #poststuff h2.hndle,
 body.post-type-product #postdivrich h2.postbox-header label {
@@ -79,11 +97,17 @@ body.post-type-product p.howto {
 	color: var(--wpds-color-fg-content-neutral-weak, #707070);
 }
 
-/* ── Checkbox inline text: 13px neutral (not tier 3 grey) ── */
+/* ── Checkbox inline text: 13px neutral, on the same row as the checkbox.
+   WC core sets clear: left on .form-field .description, which pushes it below the floated label. ── */
 body.post-type-product .woocommerce_options_panel .form-field input[type="checkbox"] ~ span.description {
+	clear: none;
+	display: inline-block;
+	margin: 0 0 0 8px;
+	vertical-align: middle;
 	font-size: var(--wpds-typography-font-size-md, 13px);
 	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
 }
+
 
 /* ── Product data tab labels ────────────────────────────── */
 body.post-type-product ul.product_data_tabs li a {
@@ -143,6 +167,7 @@ body.post-type-product a.taxonomy-add-new {
 	if ( howto && jaxtag ) {
 		jaxtag.appendChild( howto );
 	}
+
 }() );
 </script>
 		<?php

@@ -52,6 +52,7 @@ class SpacingRefinement {
 				margin-left: 0 !important;
 				margin-right: 0 !important;
 			}
+			#edit-slug-box { padding-left: 0 !important; }
 		</style>' . "\n";
 	}
 
