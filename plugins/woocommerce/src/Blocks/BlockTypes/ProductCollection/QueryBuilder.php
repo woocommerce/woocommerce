@@ -499,7 +499,7 @@ class QueryBuilder {
 	 * @return array
 	 */
 	private function get_filter_by_attributes_query() {
-		$attributes_filter_query_args  = $this->get_filter_by_attributes_query_vars();
+		$attributes_filter_query_args = $this->get_filter_by_attributes_query_vars();
 		$queries                      = array();
 		$chosen_attributes            = array();
 
