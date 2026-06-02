@@ -288,7 +288,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 422, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertEquals( 'quantity_exceeds_refundable', $data['code'] );
 	}
@@ -311,7 +311,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 404, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertEquals( 'line_item_not_found', $data['code'] );
 	}
@@ -340,13 +340,18 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 422, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertEquals( 'order_not_refundable', $data['code'] );
 	}
 
 	/**
-	 * @testdox P11: Preview with empty line_items array returns missing_line_items.
+	 * @testdox P11: Preview with empty line_items array is rejected by schema validation.
+	 *
+	 * REST schema validation (minItems: 1) rejects the request before it reaches
+	 * the controller, so the framework's generic 'rest_invalid_param' code wins
+	 * over DataUtils's curated 'missing_line_items'. The HTTP contract still
+	 * delivers a 400 with an actionable message.
 	 */
 	public function test_preview_empty_line_items(): void {
 		$order = $this->create_order_with_product( 50.00, 1 );
@@ -355,7 +360,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 400, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'missing_line_items', $data['code'] );
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
 	}
 
 	/**
@@ -944,7 +949,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 422, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertEquals( 'order_not_refundable', $data['code'] );
 

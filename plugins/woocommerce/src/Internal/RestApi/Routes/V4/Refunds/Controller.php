@@ -21,6 +21,7 @@ use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use WP_Http;
 use WP_Error;
+use WC_Order;
 use WC_Order_Refund;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -443,7 +444,9 @@ class Controller extends AbstractController {
 	public function preview_item( $request ) {
 		$order = wc_get_order( $request['order_id'] );
 
-		if ( ! $order || 'shop_order' !== $order->get_type() ) {
+		// wc_get_order returns WC_Order|WC_Order_Refund|false; only a WC_Order
+		// (shop_order) is previewable here — refunds and missing IDs are rejected.
+		if ( ! $order instanceof WC_Order ) {
 			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
@@ -457,10 +460,6 @@ class Controller extends AbstractController {
 
 		try {
 			$preview = $this->data_utils->build_refund_preview( $order, $request['line_items'] );
-		} catch ( \WC_Data_Exception $e ) {
-			return $this->get_route_error_response( (string) $e->getErrorCode(), $e->getMessage() );
-		} catch ( \WC_REST_Exception $e ) {
-			return $this->get_route_error_response( (string) $e->getErrorCode(), $e->getMessage() );
 		} catch ( \InvalidArgumentException $e ) {
 			// validate_preview_line_items above should have caught any bad input.
 			// If build_refund_preview still throws InvalidArgumentException, treat

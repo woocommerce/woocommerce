@@ -39,6 +39,9 @@ class RefundPreviewSchema extends AbstractSchema {
 	 * @param mixed           $item           Item data.
 	 * @param WP_REST_Request $request        Request object.
 	 * @param array           $include_fields Fields to include.
+	 *
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 *
 	 * @return array
 	 * @throws \LogicException Always — this method should never be called for the preview route.
 	 */
