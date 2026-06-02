@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\Utils;
 
@@ -224,24 +225,16 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	 * stay. Applies whether the feature flag is on or off.
 	 */
 	public function test_get_product_variation_gallery_data_case_3_single_image_appends_parent_gallery_extras() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
-
-		$variable_product       = \WC_Helper_Product::create_variation_product();
 		$parent_featured_id     = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
 		$parent_gallery_extra_a = $this->create_image_attachment( 'Parent Gallery A', 'parent-gallery-a.jpg' );
 		$parent_gallery_extra_b = $this->create_image_attachment( 'Parent Gallery B', 'parent-gallery-b.jpg' );
 		$variation_featured_id  = $this->create_image_attachment( 'Variation Featured', 'variation-featured.jpg' );
 
-		$variable_product->set_image_id( $parent_featured_id );
-		$variable_product->set_gallery_image_ids( array( $parent_gallery_extra_a, $parent_gallery_extra_b ) );
-		$variable_product->save();
-
-		$variation = wc_get_product( $variable_product->get_children()[0] );
-		$variation->set_image_id( $variation_featured_id );
-		$variation->set_gallery_image_ids( array() );
-		$variation->save();
-
-		$entry = ProductGalleryUtils::get_product_variation_gallery_data( $variable_product )[ $variation->get_id() ];
+		$entry = $this->create_variation_gallery_entry(
+			$parent_featured_id,
+			array( $parent_gallery_extra_a, $parent_gallery_extra_b ),
+			$variation_featured_id
+		);
 
 		$this->assertSame( $variation_featured_id, $entry['image_id'] );
 		$this->assertSame(
@@ -255,25 +248,18 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	 * on) → the variation's images replace the parent's entirely.
 	 */
 	public function test_get_product_variation_gallery_data_case_4_multiple_images_replaces_parent_set() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
-
-		$variable_product       = \WC_Helper_Product::create_variation_product();
 		$parent_featured_id     = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
 		$parent_gallery_extra   = $this->create_image_attachment( 'Parent Gallery', 'parent-gallery.jpg' );
 		$variation_featured_id  = $this->create_image_attachment( 'Variation Featured', 'variation-featured.jpg' );
 		$variation_gallery_id_a = $this->create_image_attachment( 'Variation Gallery A', 'variation-gallery-a.jpg' );
 		$variation_gallery_id_b = $this->create_image_attachment( 'Variation Gallery B', 'variation-gallery-b.jpg' );
 
-		$variable_product->set_image_id( $parent_featured_id );
-		$variable_product->set_gallery_image_ids( array( $parent_gallery_extra ) );
-		$variable_product->save();
-
-		$variation = wc_get_product( $variable_product->get_children()[0] );
-		$variation->set_image_id( $variation_featured_id );
-		$variation->set_gallery_image_ids( array( $variation_gallery_id_a, $variation_gallery_id_b ) );
-		$variation->save();
-
-		$entry = ProductGalleryUtils::get_product_variation_gallery_data( $variable_product )[ $variation->get_id() ];
+		$entry = $this->create_variation_gallery_entry(
+			$parent_featured_id,
+			array( $parent_gallery_extra ),
+			$variation_featured_id,
+			array( $variation_gallery_id_a, $variation_gallery_id_b )
+		);
 
 		$this->assertSame( $variation_featured_id, $entry['image_id'] );
 		$this->assertSame(
@@ -288,24 +274,17 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	 * gallery extras appear — the variation owns the rest of the lineup.
 	 */
 	public function test_get_product_variation_gallery_data_case_5_avi_shape_uses_parent_featured_plus_variation_gallery() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
-
-		$variable_product       = \WC_Helper_Product::create_variation_product();
 		$parent_featured_id     = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
 		$parent_gallery_extra   = $this->create_image_attachment( 'Parent Gallery Extra', 'parent-gallery-extra.jpg' );
 		$variation_gallery_id_a = $this->create_image_attachment( 'Variation Gallery A', 'variation-gallery-a.jpg' );
 		$variation_gallery_id_b = $this->create_image_attachment( 'Variation Gallery B', 'variation-gallery-b.jpg' );
 
-		$variable_product->set_image_id( $parent_featured_id );
-		$variable_product->set_gallery_image_ids( array( $parent_gallery_extra ) );
-		$variable_product->save();
-
-		$variation = wc_get_product( $variable_product->get_children()[0] );
-		$variation->set_image_id( 0 );
-		$variation->set_gallery_image_ids( array( $variation_gallery_id_a, $variation_gallery_id_b ) );
-		$variation->save();
-
-		$entry = ProductGalleryUtils::get_product_variation_gallery_data( $variable_product )[ $variation->get_id() ];
+		$entry = $this->create_variation_gallery_entry(
+			$parent_featured_id,
+			array( $parent_gallery_extra ),
+			0,
+			array( $variation_gallery_id_a, $variation_gallery_id_b )
+		);
 
 		$this->assertSame( $parent_featured_id, $entry['image_id'] );
 		$this->assertSame(
@@ -319,22 +298,13 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	 * (featured + extras) is used as a fallback.
 	 */
 	public function test_get_product_variation_gallery_data_case_2_no_variation_images_uses_full_parent_gallery() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
-
-		$variable_product     = \WC_Helper_Product::create_variation_product();
 		$parent_featured_id   = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
 		$parent_gallery_extra = $this->create_image_attachment( 'Parent Gallery Extra', 'parent-gallery-extra.jpg' );
 
-		$variable_product->set_image_id( $parent_featured_id );
-		$variable_product->set_gallery_image_ids( array( $parent_gallery_extra ) );
-		$variable_product->save();
-
-		$variation = wc_get_product( $variable_product->get_children()[0] );
-		$variation->set_image_id( 0 );
-		$variation->set_gallery_image_ids( array() );
-		$variation->save();
-
-		$entry = ProductGalleryUtils::get_product_variation_gallery_data( $variable_product )[ $variation->get_id() ];
+		$entry = $this->create_variation_gallery_entry(
+			$parent_featured_id,
+			array( $parent_gallery_extra )
+		);
 
 		$this->assertSame( $parent_featured_id, $entry['image_id'] );
 		$this->assertSame(
@@ -348,24 +318,18 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	 * so the single-image rule applies (variation featured + parent gallery extras).
 	 */
 	public function test_get_product_variation_gallery_data_case_3_applies_with_feature_flag_off() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'no' );
-
-		$variable_product       = \WC_Helper_Product::create_variation_product();
 		$parent_featured_id     = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
 		$parent_gallery_extra   = $this->create_image_attachment( 'Parent Gallery Extra', 'parent-gallery-extra.jpg' );
 		$variation_featured_id  = $this->create_image_attachment( 'Variation Featured', 'variation-featured.jpg' );
 		$variation_gallery_id_a = $this->create_image_attachment( 'Variation Gallery A (ignored)', 'variation-gallery-a.jpg' );
 
-		$variable_product->set_image_id( $parent_featured_id );
-		$variable_product->set_gallery_image_ids( array( $parent_gallery_extra ) );
-		$variable_product->save();
-
-		$variation = wc_get_product( $variable_product->get_children()[0] );
-		$variation->set_image_id( $variation_featured_id );
-		$variation->set_gallery_image_ids( array( $variation_gallery_id_a ) );
-		$variation->save();
-
-		$entry = ProductGalleryUtils::get_product_variation_gallery_data( $variable_product )[ $variation->get_id() ];
+		$entry = $this->create_variation_gallery_entry(
+			$parent_featured_id,
+			array( $parent_gallery_extra ),
+			$variation_featured_id,
+			array( $variation_gallery_id_a ),
+			'no'
+		);
 
 		$this->assertSame( $variation_featured_id, $entry['image_id'] );
 		$this->assertSame(
@@ -379,29 +343,53 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	 * must dedup so the image doesn't render twice in a row.
 	 */
 	public function test_get_product_variation_gallery_data_dedups_variation_featured_overlapping_parent_gallery() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
-
-		$variable_product     = \WC_Helper_Product::create_variation_product();
 		$parent_featured_id   = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
 		$shared_id            = $this->create_image_attachment( 'Shared Image', 'shared.jpg' );
 		$parent_gallery_extra = $this->create_image_attachment( 'Parent Gallery Extra', 'parent-gallery-extra.jpg' );
 
-		$variable_product->set_image_id( $parent_featured_id );
-		$variable_product->set_gallery_image_ids( array( $shared_id, $parent_gallery_extra ) );
-		$variable_product->save();
-
-		$variation = wc_get_product( $variable_product->get_children()[0] );
-		$variation->set_image_id( $shared_id );
-		$variation->set_gallery_image_ids( array() );
-		$variation->save();
-
-		$entry = ProductGalleryUtils::get_product_variation_gallery_data( $variable_product )[ $variation->get_id() ];
+		$entry = $this->create_variation_gallery_entry(
+			$parent_featured_id,
+			array( $shared_id, $parent_gallery_extra ),
+			$shared_id
+		);
 
 		$this->assertSame( $shared_id, $entry['image_id'] );
 		$this->assertSame(
 			array( $shared_id, $parent_gallery_extra ),
 			$entry['image_ids']
 		);
+	}
+
+	/**
+	 * Create a variation gallery fixture and return the selected variation entry.
+	 *
+	 * @param int    $parent_featured_id    Parent product featured image ID.
+	 * @param int[]  $parent_gallery_ids    Parent product gallery image IDs.
+	 * @param int    $variation_featured_id Variation featured image ID.
+	 * @param int[]  $variation_gallery_ids Variation gallery image IDs.
+	 * @param string $feature_flag          Variation gallery feature flag value.
+	 * @return array<string, mixed>
+	 */
+	private function create_variation_gallery_entry(
+		int $parent_featured_id,
+		array $parent_gallery_ids = array(),
+		int $variation_featured_id = 0,
+		array $variation_gallery_ids = array(),
+		string $feature_flag = 'yes'
+	): array {
+		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, $feature_flag );
+
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		$variable_product->set_image_id( $parent_featured_id );
+		$variable_product->set_gallery_image_ids( $parent_gallery_ids );
+		$variable_product->save();
+
+		$variation = wc_get_product( $variable_product->get_children()[0] );
+		$variation->set_image_id( $variation_featured_id );
+		$variation->set_gallery_image_ids( $variation_gallery_ids );
+		$variation->save();
+
+		return ProductGalleryUtils::get_product_variation_gallery_data( $variable_product )[ $variation->get_id() ];
 	}
 
 	/**
