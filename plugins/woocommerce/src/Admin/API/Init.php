@@ -6,8 +6,6 @@
 namespace Automattic\WooCommerce\Admin\API;
 
 use AllowDynamicProperties;
-use Automattic\WooCommerce\Admin\Features\Features;
-
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Utilities\RestApiUtil;
@@ -66,11 +64,9 @@ class Init {
 		$rest_api_util = wc_get_container()->get( RestApiUtil::class );
 		$rest_api_util->lazy_load_namespace( 'wc-analytics', array( $this, 'rest_api_init_wc_analytics' ) );
 
-		if ( Features::is_enabled( 'launch-your-store' ) ) {
-			$controller        = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
-			$this->$controller = new $controller();
-			$this->$controller->register_routes();
-		}
+		$controller        = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
+		$this->$controller = new $controller();
+		$this->$controller->register_routes();
 	}
 
 	/**
@@ -158,41 +154,35 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\Taxes',
 		);
 
-		$analytics_controllers = array();
-		if ( Features::is_enabled( 'analytics' ) ) {
-			$analytics_controllers = array(
-				'Automattic\WooCommerce\Admin\API\Customers',
-				'Automattic\WooCommerce\Admin\API\Leaderboards',
-				'Automattic\WooCommerce\Admin\API\Reports\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Import\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Export\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Products\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Variations\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Products\Stats\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Variations\Stats\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Revenue\Stats\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Orders\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Categories\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Coupons\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Stock\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Stock\Stats\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Downloads\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Downloads\Stats\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Customers\Controller',
-				'Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\Controller',
-			);
+		$analytics_controllers = array(
+			'Automattic\WooCommerce\Admin\API\Customers',
+			'Automattic\WooCommerce\Admin\API\Leaderboards',
+			'Automattic\WooCommerce\Admin\API\Reports\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Import\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Export\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Products\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Variations\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Products\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Variations\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Revenue\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Orders\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Categories\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Coupons\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Stock\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Stock\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Downloads\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Downloads\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Customers\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\AnalyticsImports',
+		);
 
-			if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
-				$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\AnalyticsImports';
-			}
-
-			// The performance indicators controllerq must be registered last, after other /stats endpoints have been registered.
-			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
-		}
+		// The performance indicators controllerq must be registered last, after other /stats endpoints have been registered.
+		$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
 
 		$controllers = array_merge( $analytics_controllers, $controllers );
 
