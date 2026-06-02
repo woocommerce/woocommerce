@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow additional checkout fields to be referenced from JSON Schema conditional visibility rules across locations (contact, order, address).
