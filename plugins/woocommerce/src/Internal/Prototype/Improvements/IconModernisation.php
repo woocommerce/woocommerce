@@ -28,6 +28,7 @@ class IconModernisation {
 		}
 		add_action( 'admin_enqueue_scripts', array( self::class, 'enqueue_dependencies' ) );
 		add_action( 'admin_head', array( self::class, 'inject_icon_css' ) );
+		add_action( 'admin_footer', array( self::class, 'output_scripts' ) );
 	}
 
 	/**
@@ -54,10 +55,8 @@ class IconModernisation {
 		if ( ! $screen || 'post' !== $screen->base || 'product' !== $screen->post_type ) {
 			return;
 		}
-		global $post;
-		$post_status = $post ? $post->post_status : 'publish';
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo self::build_css( $post_status );
+		echo self::build_css();
 	}
 
 	/**
@@ -82,10 +81,8 @@ class IconModernisation {
 
 	/**
 	 * Build the full CSS block replacing product data tab icons.
-	 *
-	 * @param string $post_status Current post status, used to pick the status icon variant.
 	 */
-	private static function build_css( string $post_status = 'publish' ): string {
+	private static function build_css(): string {
 		$tabs = array(
 			'general_tab'                 => self::mask_url(
 				self::path( 'M4.75 4a.75.75 0 0 0-.75.75v7.826c0 .2.08.39.22.53l6.72 6.716a2.313 2.313 0 0 0 3.276-.001l5.61-5.611-.531-.53.532.528a2.315 2.315 0 0 0 0-3.264L13.104 4.22a.75.75 0 0 0-.53-.22H4.75ZM19 12.576a.815.815 0 0 1-.236.574l-5.61 5.611a.814.814 0 0 1-1.153 0L5.5 12.264V5.5h6.763l6.5 6.502a.816.816 0 0 1 .237.574ZM8.75 9.75a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z' )
@@ -215,25 +212,35 @@ class IconModernisation {
 		$css .= "}\n";
 
 		// Meta box toggle — replace Dashicons \f142 with chevron-down (open) / chevron-up (closed).
+		// NOTE: WP core sets dashicon glyphs on `.meta-box-sortables .postbox .toggle-indicator::before`
+		// (and a 4-class variant for .closed). We must match that specificity, kill the icon font, and
+		// !important the mask itself — otherwise the dashicon glyph wins and the chevrons look swapped.
 		$chevron_down = self::mask_url( self::path( 'M17.5 11.6L12 16l-5.5-4.4.9-1.2L12 14l4.5-3.6 1 1.2z' ) );
 		$chevron_up   = self::mask_url( self::path( 'M6.5 12.4L12 8l5.5 4.4-.9 1.2L12 10l-4.5 3.6-1-1.2z' ) );
-		$css         .= '.postbox .toggle-indicator::before {' . "\n";
-		$css         .= "\tfont-family: none !important;\n";
+		$css         .= '.meta-box-sortables .postbox .handlediv .toggle-indicator::before,' . "\n";
+		$css         .= '.postbox .handlediv .toggle-indicator::before {' . "\n";
+		$css         .= "\tfont-family: sans-serif !important;\n";
 		$css         .= "\tcontent: '' !important;\n";
 		$css         .= "\tdisplay: inline-block !important;\n";
 		$css         .= "\twidth: 20px !important;\n";
 		$css         .= "\theight: 20px !important;\n";
+		$css         .= "\tcolor: transparent !important;\n";
 		$css         .= "\tbackground-color: currentColor !important;\n";
-		$css         .= "\tmask-image: {$chevron_down};\n";
-		$css         .= "\t-webkit-mask-image: {$chevron_down};\n";
+		$css         .= "\tmask-image: {$chevron_down} !important;\n";
+		$css         .= "\t-webkit-mask-image: {$chevron_down} !important;\n";
 		$css         .= "\tmask-repeat: no-repeat !important;\n";
 		$css         .= "\tmask-size: contain !important;\n";
 		$css         .= "\tmask-position: center !important;\n";
 		$css         .= "}\n";
-		$css         .= '.postbox.closed .toggle-indicator::before {' . "\n";
-		$css         .= "\tmask-image: {$chevron_up};\n";
-		$css         .= "\t-webkit-mask-image: {$chevron_up};\n";
+		$css         .= '.meta-box-sortables .postbox.closed .handlediv .toggle-indicator::before,' . "\n";
+		$css         .= '.postbox.closed .handlediv .toggle-indicator::before {' . "\n";
+		$css         .= "\tmask-image: {$chevron_up} !important;\n";
+		$css         .= "\t-webkit-mask-image: {$chevron_up} !important;\n";
 		$css         .= "}\n";
+		// The handlediv button inherits currentColor for its icon; force it back so the mask is visible.
+		$css .= '.postbox .handlediv {' . "\n";
+		$css .= "\tcolor: var(--wpds-color-fg-content-neutral, #1e1e1e) !important;\n";
+		$css .= "}\n";
 
 		// Meta box reorder arrows — replace Dashicons \f343/\f347 with arrow-up/arrow-down.
 		$arrow_up   = self::mask_url( self::path( 'M12 3.9 6.5 9.5l1 1 3.8-3.7V20h1.5V6.8l3.7 3.7 1-1z' ) );
@@ -291,14 +298,24 @@ class IconModernisation {
 		$css .= "\tvertical-align: top !important;\n";
 		$css .= "}\n";
 
-		$is_draft      = in_array( $post_status, array( 'draft', 'auto-draft' ), true );
-		$active_status = $is_draft
-			? self::mask_url( self::path( 'M12 18.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13ZM4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0Zm8 4a4 4 0 0 0 4-4H8a4 4 0 0 0 4 4Z', true ) )
-			: $icon_status;
+		$icon_draft   = self::mask_url(
+			self::path( 'M12 18.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13ZM4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0Zm8 4a4 4 0 0 0 4-4H8a4 4 0 0 0 4 4Z', true )
+		);
+		$icon_pending = self::mask_url(
+			self::path( 'M12 18.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13ZM4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0Z', true )
+		);
 
 		$css .= '#post-body .misc-pub-post-status::before {' . "\n";
-		$css .= "\tmask-image: {$active_status};\n";
-		$css .= "\t-webkit-mask-image: {$active_status};\n";
+		$css .= "\tmask-image: {$icon_status};\n";
+		$css .= "\t-webkit-mask-image: {$icon_status};\n";
+		$css .= "}\n";
+		$css .= '#post-body .misc-pub-post-status.wc-proto-is-draft::before {' . "\n";
+		$css .= "\tmask-image: {$icon_draft};\n";
+		$css .= "\t-webkit-mask-image: {$icon_draft};\n";
+		$css .= "}\n";
+		$css .= '#post-body .misc-pub-post-status.wc-proto-is-pending::before {' . "\n";
+		$css .= "\tmask-image: {$icon_pending};\n";
+		$css .= "\t-webkit-mask-image: {$icon_pending};\n";
 		$css .= "}\n";
 		$css .= '#post-body #visibility::before {' . "\n";
 		$css .= "\tmask-image: {$icon_visibility};\n";
@@ -311,5 +328,35 @@ class IconModernisation {
 
 		$css .= '</style>';
 		return $css;
+	}
+
+	/**
+	 * Output JS to keep the status icon in sync with the status select.
+	 */
+	public static function output_scripts(): void {
+		$screen = get_current_screen();
+		if ( ! $screen || 'post' !== $screen->base || 'product' !== $screen->post_type ) {
+			return;
+		}
+		?>
+		<script>
+		( function () {
+			var statusRow    = document.querySelector( '#post-body .misc-pub-post-status' );
+			var statusSelect = document.getElementById( 'post_status' );
+
+			function syncStatusIcon() {
+				if ( ! statusRow || ! statusSelect ) { return; }
+				statusRow.classList.toggle( 'wc-proto-is-draft',   statusSelect.value === 'draft' );
+				statusRow.classList.toggle( 'wc-proto-is-pending', statusSelect.value === 'pending' );
+			}
+
+			syncStatusIcon();
+
+			if ( statusSelect ) {
+				statusSelect.addEventListener( 'change', syncStatusIcon );
+			}
+		}() );
+		</script>
+		<?php
 	}
 }

@@ -73,17 +73,29 @@ select#wc-proto-vis-select,
 	gap: 8px !important;
 	margin: 8px 0 0 !important;
 }
-/* OK: compact 32px — matches @wordpress/components Button compact height. */
+/* OK: primary filled — matches @wordpress/components Button "primary" variant. */
 .save-post-visibility.button,
 .save-post-status.button,
 .save-timestamp.button {
 	height: 32px !important;
 	min-height: 0 !important;
-	line-height: 30px !important;
+	line-height: 32px !important;
 	padding: 0 12px !important;
 	font-size: 13px !important;
 	margin: 0 !important;
 	vertical-align: middle !important;
+	background: var(--wpds-color-bg-interactive-brand, #3858e9) !important;
+	color: #fff !important;
+	border: none !important;
+	border-radius: var(--wpds-border-radius-xs, 2px) !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+}
+.save-post-visibility.button:hover,
+.save-post-status.button:hover,
+.save-timestamp.button:hover {
+	background: var(--wpds-color-bg-interactive-brand-hover, #1d35b4) !important;
+	color: #fff !important;
 }
 /* Cancel: tertiary/minimal — 32px, no background. */
 .cancel-post-visibility,
@@ -136,6 +148,10 @@ select#wc-proto-vis-select,
 /* Hide label colon while edit panel is open. */
 .misc-pub-section.wc-proto-editing .wc-proto-label-colon {
 	display: none;
+}
+/* Hide the date display when timestamp panel is open (CSS wins over any conflicting WP rule). */
+.misc-pub-section.wc-proto-editing #timestamp {
+	display: none !important;
 }
 </style>
 		<?php
