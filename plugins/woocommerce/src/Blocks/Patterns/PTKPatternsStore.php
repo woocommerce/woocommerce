@@ -2,7 +2,6 @@
 
 namespace Automattic\WooCommerce\Blocks\Patterns;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use WP_Upgrader;
 
 /**
@@ -37,25 +36,22 @@ class PTKPatternsStore {
 	public function __construct( PTKClient $ptk_client ) {
 		$this->ptk_client = $ptk_client;
 
-		if ( Features::is_enabled( 'pattern-toolkit-full-composability' ) ) {
-			// We want to flush the cached patterns when:
-			// - The WooCommerce plugin is deactivated.
-			// - The `woocommerce_allow_tracking` option is disabled.
-			//
-			// We also want to re-fetch the patterns and update the cache when:
-			// - The `woocommerce_allow_tracking` option changes to enabled.
-			// - The WooCommerce plugin is activated (if `woocommerce_allow_tracking` is enabled).
-			// - The WooCommerce plugin is updated.
+		// We want to flush the cached patterns when:
+		// - The WooCommerce plugin is deactivated.
+		// - The `woocommerce_allow_tracking` option is disabled.
+		//
+		// We also want to re-fetch the patterns and update the cache when:
+		// - The `woocommerce_allow_tracking` option changes to enabled.
+		// - The WooCommerce plugin is activated (if `woocommerce_allow_tracking` is enabled).
+		// - The WooCommerce plugin is updated.
+		add_action( 'woocommerce_activated_plugin', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
+		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
+		add_action( 'deactivated_plugin', array( $this, 'flush_cached_patterns' ), 10, 2 );
+		add_action( 'upgrader_process_complete', array( $this, 'fetch_patterns_on_plugin_update' ), 10, 2 );
+		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'ensure_recurring_fetch_patterns_if_enabled' ) );
 
-			add_action( 'woocommerce_activated_plugin', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
-			add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
-			add_action( 'deactivated_plugin', array( $this, 'flush_cached_patterns' ), 10, 2 );
-			add_action( 'upgrader_process_complete', array( $this, 'fetch_patterns_on_plugin_update' ), 10, 2 );
-			add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'ensure_recurring_fetch_patterns_if_enabled' ) );
-
-			// This is the scheduled action that takes care of flushing and re-fetching the patterns from the PTK API.
-			add_action( self::FETCH_PATTERNS_ACTION, array( $this, 'fetch_patterns' ) );
-		}
+		// This is the scheduled action that takes care of flushing and re-fetching the patterns from the PTK API.
+		add_action( self::FETCH_PATTERNS_ACTION, array( $this, 'fetch_patterns' ) );
 	}
 
 	/**

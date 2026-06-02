@@ -55,9 +55,7 @@ declare global {
 			'minified-js': boolean;
 			navigation: boolean;
 			'payment-gateway-suggestions': boolean;
-			'pattern-toolkit-full-composability': boolean;
 			printful: boolean;
-			'product-custom-fields': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;
 			'products-catalog-api': boolean;
