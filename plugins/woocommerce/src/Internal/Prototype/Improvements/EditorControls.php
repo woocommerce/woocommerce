@@ -97,14 +97,17 @@ body.post-type-product .media-modal select {
 
 /* ── Helper text (.description) sits tight under its input — matches Product Tags pattern ── */
 body.post-type-product .form-field .description,
-body.post-type-product .form-field span.description,
-body.post-type-product p.form-field .description {
-	display: block;
-	margin-top: 4px !important;
+body.post-type-product .woocommerce_options_panel .form-field .description,
+body.post-type-product p.form-field span.description {
+	display: block !important;
+	clear: both !important;
+	float: none !important;
+	margin: 2px 0 0 0 !important;
 	padding: 0 !important;
 	line-height: 1.4 !important;
-	font-size: var(--wpds-typography-font-size-sm, 12px);
-	color: var(--wpds-color-fg-content-neutral-weak, #757575);
+	font-size: var(--wpds-typography-font-size-sm, 12px) !important;
+	color: var(--wpds-color-fg-content-neutral-weak, #757575) !important;
+	font-style: normal !important;
 }
 </style>
 		<?php
