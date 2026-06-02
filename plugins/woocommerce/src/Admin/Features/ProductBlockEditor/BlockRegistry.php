@@ -10,8 +10,15 @@ use Automattic\WooCommerce\Blocks\Utils\Utils;
 
 /**
  * Product block registration and style registration functionality.
+ *
+ * @deprecated 10.9.0 Product editor extension APIs will be removed in WooCommerce 11.0.
  */
 class BlockRegistry {
+
+	/**
+	 * Version that product editor APIs were deprecated in.
+	 */
+	const DEPRECATED_SINCE = '10.9.0';
 
 	/**
 	 * Generic blocks directory.
@@ -255,7 +262,7 @@ class BlockRegistry {
 		$block_name      = $this->remove_block_prefix( $block_name );
 		$block_json_file = $this->get_file_path( $block_name . '/block.json', $block_dir );
 
-		return $this->register_block_type_from_metadata( $block_json_file );
+		return $this->register_block_type_from_metadata_without_deprecation_notice( $block_json_file );
 	}
 
 	/**
@@ -289,8 +296,27 @@ class BlockRegistry {
 	 * path to the folder where the `block.json` file is located.
 	 *
 	 * @return \WP_Block_Type|false The registered block type on success, or false on failure.
+	 *
+	 * @deprecated 10.9.0 Product editor extension APIs will be removed in WooCommerce 11.0.
 	 */
 	public function register_block_type_from_metadata( $file_or_folder ) {
+		wc_deprecated_function(
+			'Automattic\WooCommerce\Admin\Features\ProductBlockEditor\BlockRegistry::register_block_type_from_metadata, which will be removed in WooCommerce 11.0',
+			self::DEPRECATED_SINCE
+		);
+
+		return $this->register_block_type_from_metadata_without_deprecation_notice( $file_or_folder );
+	}
+
+	/**
+	 * Register a block type from metadata without emitting a deprecation notice for internal block registration.
+	 *
+	 * @param string $file_or_folder Path to the JSON file with metadata definition for the block or
+	 * path to the folder where the `block.json` file is located.
+	 *
+	 * @return \WP_Block_Type|false The registered block type on success, or false on failure.
+	 */
+	private function register_block_type_from_metadata_without_deprecation_notice( $file_or_folder ) {
 		$metadata_file = ( ! str_ends_with( $file_or_folder, 'block.json' ) )
 			? trailingslashit( $file_or_folder ) . 'block.json'
 			: $file_or_folder;

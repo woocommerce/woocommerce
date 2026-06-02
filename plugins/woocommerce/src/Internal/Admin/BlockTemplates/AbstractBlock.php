@@ -268,8 +268,15 @@ class AbstractBlock implements BlockInterface {
 		 * @param BlockInterface $block The block.
 		 *
 		 * @since 8.4.0
+		 * @deprecated 10.9.0 This hook will be removed in WooCommerce 11.0.
 		 */
-		do_action( 'woocommerce_block_template_after_add_hide_condition', $this );
+		wc_do_deprecated_action(
+			'woocommerce_block_template_after_add_hide_condition',
+			array( $this ),
+			'10.9.0',
+			null,
+			'This block template hook will be removed in WooCommerce 11.0.'
+		);
 
 		return $key;
 	}
@@ -288,8 +295,15 @@ class AbstractBlock implements BlockInterface {
 		 * @param BlockInterface $block The block.
 		 *
 		 * @since 8.4.0
+		 * @deprecated 10.9.0 This hook will be removed in WooCommerce 11.0.
 		 */
-		do_action( 'woocommerce_block_template_after_remove_hide_condition', $this );
+		wc_do_deprecated_action(
+			'woocommerce_block_template_after_remove_hide_condition',
+			array( $this ),
+			'10.9.0',
+			null,
+			'This block template hook will be removed in WooCommerce 11.0.'
+		);
 	}
 
 	/**

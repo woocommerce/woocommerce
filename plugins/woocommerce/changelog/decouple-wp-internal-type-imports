@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Switch `Taxonomy` type imports in product collection taxonomy controls from `@wordpress/core-data/src/entity-types` to the package's public root export.

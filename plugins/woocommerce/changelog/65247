@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Email Logger: add a private order note for every transactional email send or failure tied to a WC_Order, making the event visible directly on the order admin page.
