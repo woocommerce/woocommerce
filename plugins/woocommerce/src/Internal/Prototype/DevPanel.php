@@ -26,6 +26,7 @@ class DevPanel {
 		'save_publish_clarity'  => 'Save & publish header',
 		'typography_hierarchy'  => 'Typography hierarchy',
 		'spacing_refinement'   => 'Spacing refinement',
+		'compact_editor_ui'    => 'Compact editor UI (Add Media button)',
 	);
 
 	/**

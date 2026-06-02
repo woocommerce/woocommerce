@@ -9,6 +9,7 @@
 declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Internal\Prototype\DevPanel;
+use Automattic\WooCommerce\Internal\Prototype\Improvements\EditorControls;
 use Automattic\WooCommerce\Internal\Prototype\Improvements\IconModernisation;
 use Automattic\WooCommerce\Internal\Prototype\Improvements\MaxWidth;
 use Automattic\WooCommerce\Internal\Prototype\Improvements\ReorderControls;
@@ -23,3 +24,4 @@ MaxWidth::init();
 SavePublishClarity::init();
 SpacingRefinement::init();
 TypographyHierarchy::init();
+EditorControls::init();
