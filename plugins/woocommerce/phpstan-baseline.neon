@@ -45994,18 +45994,6 @@ parameters:
 			path: src/Admin/FeaturePlugin.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\AsyncProductEditorCategoryField\\Init\:\:enqueue_scripts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/AsyncProductEditorCategoryField/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\AsyncProductEditorCategoryField\\Init\:\:enqueue_styles\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/AsyncProductEditorCategoryField/Init.php
-
-		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
 			count: 1
@@ -56394,12 +56382,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_query_for_stock\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Checkout\\Helpers\\ReserveStock\:\:get_query_for_reserved_stock\(\) never returns void so it can be removed from the return type\.$#'
-			identifier: return.unusedType
 			count: 1
 			path: src/Checkout/Helpers/ReserveStock.php
 
