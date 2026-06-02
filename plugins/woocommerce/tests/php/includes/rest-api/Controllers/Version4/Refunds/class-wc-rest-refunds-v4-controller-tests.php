@@ -558,8 +558,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				array(
 					'line_item_id' => $item->get_id(),
 					'quantity'     => 1,
+					// Includes 23.00 + 5.00 tax.
 					'refund_total' => 128.00,
-		// Includes 23.00 + 5.00 tax.
 				),
 			),
 		);
@@ -706,8 +706,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				array(
 					'line_item_id' => $item->get_id(),
 					'quantity'     => 1,
+					// Includes 10.00 + 5.50 compound tax.
 					'refund_total' => 115.50,
-		// Includes 10.00 + 5.50 compound tax.
 				),
 			),
 		);
@@ -1052,8 +1052,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				array(
 					'line_item_id' => $item->get_id(),
 					'quantity'     => 1,
+					// Line items total is 110.00.
 					'refund_total' => 110.00,
-		// Line items total is 110.00.
 				),
 			),
 		);
@@ -1249,8 +1249,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				array(
 					'line_item_id' => $item->get_id(),
 					'quantity'     => 1,
+					// Includes all taxes.
 					'refund_total' => 55.26,
-		// Includes all taxes.
 				),
 			),
 		);
