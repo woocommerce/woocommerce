@@ -12,34 +12,20 @@ use WC_Session_Handler;
 /**
  * Session handler used during POS Store API requests.
  *
- * The default WC_Session_Handler keys carts by the authenticated WP user ID
- * whenever one is present, and resolves the session from a browser cookie
- * when one is sent. Both behaviours are wrong for POS:
+ * The default WC_Session_Handler keys carts by the authenticated WP user and
+ * resolves the session from a browser cookie. Both are wrong for POS: cashiers
+ * share a store-manager account (user-id keying would collide their carts), and
+ * headless clients with persistent cookie jars would re-load a prior cart on
+ * every request, even across app restarts. This handler treats every POS
+ * request as a brand-new guest — fresh customer_id, cookie never read.
  *
- *   - Multiple cashiers, registers, and concurrent in-progress sales
- *     typically authenticate as the same store-manager account; user-id
- *     keying would collide them onto a single shared cart row.
- *   - Headless API clients (such as the mobile POS app) frequently have
- *     HTTP stacks with persistent cookie jars, so a previously-issued
- *     `wp_woocommerce_session_…` cookie would re-load the prior cart on
- *     every subsequent request — even across app restarts — and the
- *     parent's `migrate_guest_session_to_user_session` block would then
- *     re-key that cart onto the cashier's WP user ID.
+ * Continuity across the requests in a single POS transaction comes from the
+ * `cart_token` URL parameter (see the routes' `has_cart_token` override), which
+ * engages the Store API's existing header-based session swap. Cookies play no
+ * role in the POS request lifecycle.
  *
- * This handler addresses both by treating every POS request as a brand-new
- * guest from the session's perspective. Each request starts with a fresh
- * customer_id; the cookie is never read.
- *
- * Session continuity across the requests in a single POS transaction is
- * provided by the `cart_token` URL parameter, handled in the POS routes'
- * `has_cart_token` override — which engages the Store API's existing
- * header-based session swap (`StoreApi\SessionHandler` via
- * `Authentication::maybe_use_store_api_session_handler`-style logic in
- * `AbstractCartRoute::load_cart_session`). Cookies have no role to play
- * in the POS request lifecycle.
- *
- * Only swapped in when {@see Context::is_pos_request()} is true, so the
- * default cart/session behaviour for web checkout is unaffected.
+ * Only swapped in when {@see Context::is_pos_request()} is true, so web checkout
+ * is unaffected.
  *
  * @internal Just for internal use.
  *
@@ -63,18 +49,10 @@ class POSSessionHandler extends WC_Session_Handler {
 	/**
 	 * Ignore the WC session cookie entirely.
 	 *
-	 * Without this override the parent would read any previously-issued
-	 * `wp_woocommerce_session_…` cookie that the mobile HTTP stack
-	 * persisted from an earlier response, re-load the prior cart, and (because
-	 * the cashier is logged in but the cookie's customer_id is a guest hash)
-	 * migrate that cart onto the cashier's WP user ID via
-	 * `migrate_guest_session_to_user_session`. Items would then leak across
-	 * transactions and even across app restarts — exactly the
-	 * "1,000,000 of product X is still in the cart on the next checkout"
-	 * failure mode.
-	 *
-	 * Cart continuity across the requests in one POS transaction is
-	 * provided by the `cart_token` URL parameter, not by the cookie.
+	 * Otherwise the parent would read a persisted `wp_woocommerce_session_…`
+	 * cookie, re-load the prior cart, and migrate it onto the cashier's WP user
+	 * ID — leaking items across transactions and app restarts. Continuity comes
+	 * from the `cart_token` URL parameter instead.
 	 *
 	 * @return void
 	 */

@@ -42,13 +42,9 @@ class Checkout extends StoreApiCheckout {
 			__( 'Cart session token returned by a prior POS Store API response. Pass it back here to check out the cart you previously built.', 'woocommerce' )
 		);
 
-		// Drop the schema-level required flag on billing/shipping address.
-		// The Store API marks these as required for web checkout, but for
-		// in-store POS sales the cashier often doesn't have customer
-		// address info to capture (cash sale of physical goods that the
-		// customer is leaving with). The deeper validation pipeline is
-		// already cart-aware via the POS policy hooks; this just relaxes
-		// the schema layer so empty addresses are accepted at parse time.
+		// Drop the schema-level required flag on billing/shipping address so
+		// POS can submit empty addresses at parse time. The deeper validation
+		// pipeline is already relaxed via the POS policy hooks.
 		foreach ( $endpoints as $key => &$endpoint ) {
 			if ( ! is_int( $key ) || ! is_array( $endpoint ) || ! isset( $endpoint['methods'] ) ) {
 				continue;

@@ -13,34 +13,14 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 /**
  * Disables WooCommerce's persistent-cart feature for POS requests.
  *
- * WC_Cart_Session::persistent_cart_update saves the cart to
- * `_woocommerce_persistent_cart_{blog_id}` in `wp_usermeta`, keyed by the
- * currently logged-in WP user ID. WC_Cart_Session::get_saved_cart then
- * restores it on the next page load when the user is logged in and the
- * session cart is empty. The feature exists for web shoppers who add to
- * cart, leave the site, log in later and want their cart back.
+ * Persistent cart saves/restores the cart keyed by the logged-in WP user. In
+ * POS every cashier authenticates as the same store-manager account, so carts
+ * would leak between transactions, registers and devices — the feature is both
+ * useless and dangerous here. Disabling the `woocommerce_persistent_cart_enabled`
+ * filter short-circuits both the save and read paths.
  *
- * For POS that's a disaster: every cashier authenticates as the same
- * store-manager account, so the user-meta cart row is constantly written
- * to AND read from by every transaction. Items added in one transaction
- * leak into the next one — across registers, across devices, across app
- * restarts — because they're attached to the admin's WP user_id, not to
- * any per-transaction identifier. POSSessionHandler can mint all the
- * fresh `t_xxx` session IDs it wants and it won't help, because the cart
- * load path reads from user_meta before the session.
- *
- * Disabling via the `woocommerce_persistent_cart_enabled` filter
- * short-circuits both the save path (`persistent_cart_update`) and the
- * read path (`get_saved_cart`), so:
- *
- *   - POS requests neither pollute the admin's user-meta cart row
- *     nor read from it.
- *   - Non-POS requests (e.g. the admin browsing the storefront in a
- *     browser) keep the persistent-cart behaviour exactly as today.
- *
- * Mirrors the other `PolicyHooks/` classes: registration is gated on
- * {@see Context::is_pos_request()}, so the filter is installed only when
- * the current request is POS.
+ * Registration is gated on {@see Context::is_pos_request()}, so the filter is
+ * installed only when the current request is POS.
  *
  * @internal Just for internal use.
  *

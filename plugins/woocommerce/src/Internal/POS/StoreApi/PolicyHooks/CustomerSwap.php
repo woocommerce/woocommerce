@@ -12,32 +12,20 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WC_Customer;
 
 /**
- * Swaps {@see WC()->customer} to a fresh guest object with no address for
- * POS requests.
+ * Swaps {@see WC()->customer} to a fresh guest object with no address for POS
+ * requests.
  *
- * With {@see CurrentUserSwap} setting `wp_set_current_user( 0 )` right
- * after the permission check, the eventual {@see WC::initialize_cart}
- * call would already construct `WC()->customer` as a guest because
- * `get_current_user_id()` is 0. That alone is enough to keep the
- * cashier's saved profile out of the customer object, but the session
- * data store's `set_defaults` then populates `billing_country`,
- * `billing_state`, `shipping_country`, `shipping_state` from
- * `wc_get_customer_default_location()` — i.e. the store's base address.
+ * {@see CurrentUserSwap} already makes the customer a guest, but the session's
+ * `set_defaults` then fills billing/shipping country and state from the store's
+ * base address. An in-store POS order must carry no customer address at all, so
+ * we replace the customer with a blank guest and clear those defaults. Tax is
+ * unaffected — {@see TaxLocationPolicy} supplies the store base address via a
+ * separate filter.
  *
- * For an in-store POS sale the order must carry no customer address at
- * all (the cashier never entered one and the customer is anonymous), so
- * we still need to explicitly clear those four store-base defaults.
- * Tax computation is unaffected — {@see TaxLocationPolicy} provides the
- * store base address directly via the `woocommerce_customer_taxable_address`
- * filter, independently of any property on the customer object.
- *
- * Hooked on `rest_dispatch_request` at priority 11 so it runs after
- * `CurrentUserSwap` (priority 10) — by then `is_user_logged_in()` is
- * false, so `set_defaults` skips the email fallback that would
- * otherwise have populated `billing_email` from the cashier's WP user.
- * {@see WC::initialize_cart} only creates `WC()->customer` when it is
- * null, so pre-setting it here keeps our blank-guest object in place
- * for the rest of the request.
+ * Hooked on `rest_dispatch_request` at priority 11 (after CurrentUserSwap at
+ * 10), so by the time we build the customer `is_user_logged_in()` is already
+ * false. {@see WC::initialize_cart} only creates the customer when null, so
+ * pre-setting it here keeps our blank guest in place for the request.
  *
  * @internal Just for internal use.
  *

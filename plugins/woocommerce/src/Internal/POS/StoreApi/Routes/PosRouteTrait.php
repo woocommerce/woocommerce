@@ -15,13 +15,10 @@ use WP_REST_Request;
  * Shared POS-specific overrides for routes that subclass Store API concrete
  * route classes (e.g. `StoreApi\Routes\V1\CartAddItem`).
  *
- * Used by every POS route under {@see Controller::ROUTE_CLASSES}. The
- * routes can't share a base class because each one extends a different
- * Store API parent; a trait sidesteps that and keeps the POS-specific
- * surface in one file.
- *
- * Each consuming class is expected to declare a `REQUIRED_CAPABILITY`
- * constant ({@see self::check_permission()} resolves it via `static::`).
+ * The routes can't share a base class (each extends a different Store API
+ * parent), so a trait keeps the POS-specific surface in one file. Each consumer
+ * declares a `REQUIRED_CAPABILITY` constant, resolved via `static::` in
+ * {@see self::check_permission()}.
  *
  * @internal Just for internal use.
  *
@@ -30,10 +27,9 @@ use WP_REST_Request;
 trait PosRouteTrait {
 
 	/**
-	 * Capability-based permission check used in place of the Store API's
-	 * `__return_true` default. Resolves {@see REQUIRED_CAPABILITY} from the
-	 * concrete subclass via late static binding so per-route overrides are
-	 * possible.
+	 * Capability-based permission check replacing the Store API's `__return_true`
+	 * default. Resolves {@see REQUIRED_CAPABILITY} from the subclass via late
+	 * static binding.
 	 *
 	 * @return bool|WP_Error
 	 *
@@ -66,14 +62,11 @@ trait PosRouteTrait {
 	}
 
 	/**
-	 * Detect a Cart-Token sent as either the `cart_token` URL parameter or
-	 * the `Cart-Token` HTTP header, and inject it as the header so the Store
-	 * API's existing header-based session swap
-	 * ({@see \Automattic\WooCommerce\StoreApi\Authentication::maybe_use_store_api_session_handler})
-	 * picks it up. Accepting the URL parameter lets mobile clients participate
-	 * without needing custom-header support in their HTTP stack — mirrors the
-	 * `checkout_session_id` URL-parameter pattern used by agentic commerce
-	 * in {@see \Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\CheckoutSessionsUpdate::has_cart_token}.
+	 * Detect a Cart-Token sent as the `cart_token` URL parameter or the
+	 * `Cart-Token` header, and inject it as the header so the Store API's
+	 * header-based session swap picks it up. Accepting the URL parameter lets
+	 * mobile clients participate without custom-header support — mirroring the
+	 * `checkout_session_id` pattern used by agentic commerce.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return bool
@@ -98,11 +91,10 @@ trait PosRouteTrait {
 	}
 
 	/**
-	 * Mutate the parent's {@see get_args()} return value to apply POS
-	 * overrides: swap the permission callback and add the `cart_token` URL
-	 * parameter. The parent's array mixes int-indexed endpoint definitions
-	 * with string-keyed metadata (`schema`, `allow_batch`); only the
-	 * endpoint definitions are touched.
+	 * Apply POS overrides to the parent's {@see get_args()} return value: swap
+	 * the permission callback and add the `cart_token` URL parameter. Only the
+	 * int-indexed endpoint definitions are touched, not the string-keyed
+	 * metadata (`schema`, `allow_batch`).
 	 *
 	 * @param array  $endpoints              Result of `parent::get_args()`.
 	 * @param string $cart_token_description Per-route description for the `cart_token` URL parameter.

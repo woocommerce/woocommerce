@@ -13,19 +13,12 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 /**
  * Relaxes the in-stock check for POS Store API requests.
  *
- * Physical retail almost always wants overselling allowed: the customer is
- * standing at the counter holding the item, so the stock-system answer of
- * "out of stock" is wrong by construction. Stock is still decremented on
- * order completion, which is the behaviour merchants rely on for inventory
- * reconciliation.
+ * Physical retail wants overselling allowed: the customer is at the counter
+ * holding the item, so "out of stock" is wrong by construction. Stock is still
+ * decremented on order completion, so inventory reconciliation is unaffected.
  *
- * The hook only takes effect when {@see Context::is_pos_request()} is true,
- * so web checkout behaviour is unaffected.
- *
- * Canonical example of the "POS policy point" pattern: a single filter
- * callback whose only POS-specific logic is the context flag check. See
- * DECISIONS.md for the full pattern rationale and the broader policy-point
- * audit that this hook is one entry in.
+ * Registration is gated on {@see Context::is_pos_request()}, so the filters are
+ * installed only when the current request is POS.
  *
  * @internal Just for internal use.
  *

@@ -13,24 +13,15 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WC_Order;
 
 /**
- * Cart-aware policy for the Store API's "billing_email is required" guard
- * on POS requests.
+ * Cart-aware policy for the Store API's "billing_email is required" guard on
+ * POS requests.
  *
- * The typical in-store sale is a cash transaction for physical goods the
- * customer is walking out with — there's no email to capture and no
- * confirmation to deliver. But some cart contents genuinely need an email:
- * a downloadable product has to be sent somewhere. {@see PosCheckoutRequirements}
- * decides per-cart; this hook just consumes its verdict.
- *
- * When the cart doesn't need an email, the standard Store API validation is
- * skipped and the order proceeds with an empty `billing_email`. When the
- * cart does need one and the cashier hasn't supplied it, validation runs
- * unchanged and Store API returns the standard
- * `woocommerce_rest_missing_email_address` 400 — the mobile client gets the
- * same error shape web checkout would produce.
- *
- * Relies on the `woocommerce_store_api_require_billing_email` filter added
- * in {@see \Automattic\WooCommerce\StoreApi\Utilities\OrderController::validate_email}.
+ * The typical in-store cash sale has no email to capture, but some cart
+ * contents need one (a downloadable must be delivered somewhere).
+ * {@see PosCheckoutRequirements} decides per-cart; when no email is needed the
+ * order proceeds with an empty `billing_email`, otherwise the standard
+ * validation runs unchanged. Uses the `woocommerce_store_api_require_billing_email`
+ * filter added in {@see \Automattic\WooCommerce\StoreApi\Utilities\OrderController::validate_email}.
  *
  * @internal Just for internal use.
  *

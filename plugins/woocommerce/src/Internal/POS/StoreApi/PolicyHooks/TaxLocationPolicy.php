@@ -14,33 +14,16 @@ use WC_Customer;
 /**
  * Sets the tax location for POS transactions.
  *
- * In-person retail tax is location-based — the jurisdiction is determined by
- * where the transaction physically happens, not by the customer's address.
- * For POS that means tax always resolves to the store's location, regardless
- * of whether a customer is attached to the order and regardless of any
- * address fields on the order.
+ * In-person retail tax is location-based: the jurisdiction is where the sale
+ * happens, not the customer's address, so tax always resolves to the store's
+ * location. Since {@see CustomerSwap} leaves the customer address blank, the
+ * tax engine would otherwise match no rate; hooking
+ * `woocommerce_customer_taxable_address` lets the address stay empty on the
+ * order while tax still computes correctly. The merchant's
+ * `woocommerce_tax_based_on` setting is intentionally bypassed for POS.
  *
- * The Store API's checkout pipeline computes tax through
- * {@see \WC_Customer::get_taxable_address()} (called both directly by
- * `WC_Tax` and by the `woocommerce_order_get_tax_location` callback that
- * `OrderController::update_order_from_cart` installs). With {@see CustomerSwap}
- * replacing `WC()->customer` with a blank guest for POS, that taxable
- * address would otherwise be empty and the tax engine would match no rate
- * (zero tax). Hooking `woocommerce_customer_taxable_address` for POS
- * overrides this at the source: the customer's address can stay genuinely
- * empty on the order while tax computation still produces the right rate.
- *
- * The merchant's `woocommerce_tax_based_on` setting (base/billing/shipping)
- * is intentionally bypassed for POS — for in-person sales the answer is
- * always "where the register is," not the configured online-checkout
- * default. Rate tables themselves continue to govern which rate applies.
- *
- * The wrapping `woocommerce_pos_tax_location` filter exists so that future
- * POS work which adds structured per-register address fields (the existing
- * "Settings → Point of Sale → Physical address" setting is currently a
- * free-text textarea that cannot be parsed into country/state/postcode/city
- * reliably) can plug those values in without changing this class. See
- * DECISIONS.md for context.
+ * The wrapping `woocommerce_pos_tax_location` filter lets future POS work plug
+ * in structured per-register address fields without changing this class.
  *
  * @internal Just for internal use.
  *
@@ -80,13 +63,9 @@ class TaxLocationPolicy implements RegisterHooksInterface {
 		/**
 		 * Filters the tax location used for POS transactions.
 		 *
-		 * Defaults to the store's base address from
-		 * Settings → General → Store Address. The POS-specific Physical
-		 * address setting (Settings → Point of Sale → Physical address) is
-		 * currently a free-text textarea and can't safely be parsed into
-		 * the structured country/state/postcode/city tuple required for
-		 * tax lookup; when that setting grows structured fields, the
-		 * follow-up work can hook this filter to return them.
+		 * Defaults to the store's base address (Settings → General → Store
+		 * Address). When the POS Physical address setting grows structured
+		 * fields, follow-up work can hook this filter to return them.
 		 *
 		 * @since 10.9.0
 		 *

@@ -13,17 +13,12 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 /**
  * Suppresses the default payment-method stamp on POS draft orders.
  *
- * The Store API's web-checkout default stamps the first enabled gateway
- * (typically WooPayments) onto the draft order. POS legitimately defers
- * payment-method selection past order creation — the cashier picks tender
- * post-order and the chosen gateway is recorded via the existing per-tender
- * REST flows (WooPayments terminal capture for cards, the established
- * cash mark-paid endpoint). The order should therefore be created with no
- * `payment_method` so an unfinished POS sale never carries a misleading
- * gateway attribution.
- *
- * Relies on the `woocommerce_store_api_order_default_payment_method` filter
- * added in {@see \Automattic\WooCommerce\StoreApi\Utilities\OrderController::update_order_from_cart}.
+ * Web checkout stamps the first enabled gateway (typically WooPayments) onto
+ * the draft order, but POS picks tender after order creation (recorded via
+ * per-tender REST flows). Creating the order with no `payment_method` keeps an
+ * unfinished POS sale from carrying a misleading gateway attribution. Uses the
+ * `woocommerce_store_api_order_default_payment_method` filter added in
+ * {@see \Automattic\WooCommerce\StoreApi\Utilities\OrderController::update_order_from_cart}.
  *
  * @internal Just for internal use.
  *

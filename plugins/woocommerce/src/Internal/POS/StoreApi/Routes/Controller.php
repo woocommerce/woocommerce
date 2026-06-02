@@ -14,19 +14,11 @@ use Automattic\WooCommerce\StoreApi\StoreApi;
 /**
  * Registers POS Store API REST routes.
  *
- * Routes live under the `wc/pos/v1` namespace, intentionally separate
- * from `wc/store/v1`. Each POS route directly subclasses the corresponding
- * Store API concrete route (e.g. {@see CartAddItem} extends Store API's
- * `CartAddItem`), mirroring the agentic commerce pattern. This:
- *
- *   - Reuses the Store API request schema, sanitisation, validation, and
- *     response shape (`ExtendSchema` extensions apply automatically since
- *     the route is the same class).
- *   - Lets each POS route override only what's POS-specific (permission
- *     callback, nonce policy).
- *
- * Adding a new POS route is: write the subclass and add one entry to
- * {@see ROUTE_CLASSES}.
+ * Routes live under the `wc/pos/v1` namespace, separate from `wc/store/v1`.
+ * Each POS route subclasses the corresponding Store API concrete route
+ * (mirroring the agentic commerce pattern), so it reuses the Store API schema,
+ * validation and response shape while overriding only what's POS-specific.
+ * Adding a route: write the subclass and add one entry to {@see ROUTE_CLASSES}.
  *
  * @internal Just for internal use.
  *

@@ -10,14 +10,10 @@ namespace Automattic\WooCommerce\Internal\POS\StoreApi;
 /**
  * Request-scoped detection of POS Store API requests.
  *
- * Mirrors the URI-prefix detection that WooCommerce uses for the Store API itself
- * (see WooCommerce::is_store_api_request). The result is consulted by the POS
- * session handler and by policy hooks that need to relax pipeline rules for POS
- * (e.g. allowing oversell). Detection is cheap and idempotent, so callers may
- * invoke it freely.
- *
- * A test override is provided so PHPUnit cases can simulate POS context without
- * constructing a full REST request.
+ * Mirrors the URI-prefix detection WooCommerce uses for the Store API itself
+ * (see WooCommerce::is_store_api_request). Consulted by the POS session handler
+ * and policy hooks; detection is cheap and idempotent. A test override lets
+ * PHPUnit simulate POS context without a full REST request.
  *
  * @internal Just for internal use.
  *

@@ -13,16 +13,11 @@ use WC_Order_Item_Product;
 /**
  * Cart-driven view of what POS needs to capture before checkout can succeed.
  *
- * POS opts out of several Store API checkout guards (email, address) because
- * the typical in-store sale doesn't have customer contact info to capture.
- * Some cart contents reverse that — a downloadable product needs to be
- * delivered somewhere. This class answers those per-cart questions in one
- * place so each policy hook stays a one-liner.
- *
- * Currently only `requires_email()` is implemented. As more drivers are
- * added (gift cards, subscriptions, an explicit "deliver" transaction flag),
- * they plug in here without each policy hook growing its own copy of the
- * line-item walk.
+ * POS opts out of several Store API checkout guards (email, address), but some
+ * cart contents reverse that — a downloadable needs to be delivered somewhere.
+ * This class answers those per-cart questions in one place so each policy hook
+ * stays a one-liner. Currently only `requires_email()`; future drivers (gift
+ * cards, subscriptions) plug in here rather than duplicating the line-item walk.
  *
  * @internal Just for internal use.
  *

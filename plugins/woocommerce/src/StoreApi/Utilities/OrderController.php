@@ -117,18 +117,15 @@ class OrderController {
 		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
 		$order->set_customer_user_agent( wc_get_user_agent() );
 
-		// NOTE(POS spike): the filter below (`woocommerce_store_api_order_default_payment_method`)
-		// was added by the POS Store API spike so trusted-actor callers can override the
-		// web-checkout default-gateway assumption baked into this method. Should land as a
-		// standalone trunk PR independent of the POS spike.
+		// NOTE (POS spike): land this filter as a standalone trunk PR,
+		// separate from the POS spike.
 		/**
 		 * Filters the default payment_method stamped onto a draft order built from cart.
 		 *
 		 * The default ({@see PaymentUtils::get_default_payment_method()}) returns
-		 * the first enabled gateway, which fits web checkout where the UI offers
-		 * the shopper a chance to switch. Trusted-actor callers that legitimately
-		 * defer payment selection past order creation (POS picks tender after
-		 * order creation via a separate REST flow) can return an empty string.
+		 * the first enabled gateway, which fits web checkout. Trusted-actor callers
+		 * that defer payment selection past order creation (e.g. POS) can return
+		 * an empty string.
 		 *
 		 * @since 10.9.0
 		 *
@@ -359,19 +356,15 @@ class OrderController {
 	protected function validate_email( \WC_Order $order ) {
 		$email = $order->get_billing_email();
 
-		// NOTE(POS spike): the filter below was added by the POS Store API
-		// spike so trusted-actor callers can opt out of the require-email
-		// guard. POS in-store sales legitimately don't capture a customer
-		// email at order-creation time. Should land as a standalone trunk PR
-		// independent of the POS spike.
+		// NOTE (POS spike): land this filter as a standalone trunk PR,
+		// separate from the POS spike.
 		/**
 		 * Filters whether billing_email is required on a Store API order.
 		 *
-		 * Defaults to true (web-checkout semantics: every order has a customer
-		 * email so that order confirmations etc. can be delivered). Trusted-actor
-		 * callers that legitimately omit a customer email — e.g. anonymous
-		 * in-store POS sales — can return false to skip both the empty and
-		 * the format check.
+		 * Defaults to true (web checkout: every order has a customer email for
+		 * confirmations). Trusted-actor callers that omit a customer email —
+		 * e.g. anonymous in-store POS sales — can return false to skip both the
+		 * empty and format checks.
 		 *
 		 * @since 10.9.0
 		 *
@@ -412,24 +405,15 @@ class OrderController {
 	 * @param bool      $needs_shipping Whether the order needs shipping.
 	 */
 	protected function validate_addresses( \WC_Order $order, bool $needs_shipping ) {
-		/*
-		 * NOTE for the non-POC version: this filter should be added in a
-		 * standalone, small PR targeting trunk separately from the POS
-		 * spike. Mirrors the existing
-		 * `woocommerce_store_api_checkout_require_payment_method` and
-		 * `woocommerce_store_api_disable_nonce_check` patterns — a
-		 * documented opt-out for trusted-actor callers (POS, agentic
-		 * commerce, headless apps) that legitimately don't have customer
-		 * address info to capture (e.g. cash sale of physical goods over
-		 * the counter). Default behaviour is unchanged.
-		 */
+		// NOTE (POS spike): land this filter as a standalone trunk PR,
+		// separate from the POS spike. Mirrors the
+		// `woocommerce_store_api_checkout_require_payment_method` opt-out pattern.
 
 		/**
-		 * Filters whether the Store API runs address validation on a
-		 * Checkout request. Returning false short-circuits the address
-		 * field-presence checks (country, postcode, phone, etc.) — for
-		 * trusted-actor callers that legitimately accept orders with
-		 * incomplete or missing address data.
+		 * Filters whether the Store API runs address validation on a Checkout
+		 * request. Returning false short-circuits the address field-presence
+		 * checks (country, postcode, phone, etc.) for trusted-actor callers that
+		 * accept orders with incomplete or missing address data.
 		 *
 		 * @since 10.9.0
 		 *

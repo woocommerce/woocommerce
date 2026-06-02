@@ -185,26 +185,18 @@ trait CheckoutTrait {
 		} else {
 			$order_needs_payment = $order->needs_payment();
 
-			/*
-			 * NOTE for the non-POC version: this filter should be added in a
-			 * standalone, small PR targeting trunk separately from the POS
-			 * spike. Mirrors the existing `woocommerce_store_api_disable_nonce_check`
-			 * pattern — a documented opt-out for trusted-actor callers (POS,
-			 * agentic commerce, headless apps) that legitimately defer
-			 * payment-method selection past the order-creation step. Default
-			 * behaviour is unchanged.
-			 */
+			// NOTE (POS spike): land this filter as a standalone trunk PR,
+			// separate from the POS spike. Mirrors the
+			// `woocommerce_store_api_disable_nonce_check` opt-out pattern.
 
 			/**
 			 * Filters whether a payment_method is required for a POST /checkout
 			 * request that creates an order which needs payment.
 			 *
 			 * Returning false lets trusted-actor callers (e.g. POS) create the
-			 * order without immediately committing a payment method. Downstream
-			 * `process_payment` already tolerates an empty payment_method, so
-			 * the order is created in `pending` and a later flow (terminal
-			 * capture, cash mark-paid, etc.) supplies the method when payment
-			 * is taken.
+			 * order without committing a payment method; `process_payment`
+			 * already tolerates an empty one, so the order stays `pending` until
+			 * a later flow (terminal capture, cash mark-paid) supplies it.
 			 *
 			 * @since 10.9.0
 			 *

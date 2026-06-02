@@ -14,10 +14,8 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 /**
  * Swaps WC_Session_Handler for POSSessionHandler on POS Store API requests.
  *
- * Lives in PolicyHooks/ alongside other request-context-aware filter wiring.
- * Registration itself is gated on {@see Context::is_pos_request()}, so the
- * filter is installed only when the current request is POS. The callback
- * therefore needs no per-invocation context check.
+ * Registration is gated on {@see Context::is_pos_request()}, so the filter is
+ * installed only when the current request is POS.
  *
  * @internal Just for internal use.
  *
