@@ -49,18 +49,13 @@ declare global {
 			};
 		};
 		wcAdminFeatures: {
-			coupons: boolean;
 			'product-data-views': boolean;
 			'experimental-blocks': boolean;
 			'minified-js': boolean;
 			navigation: boolean;
-			'payment-gateway-suggestions': boolean;
-			printful: boolean;
-			'remote-free-extensions': boolean;
 			settings: boolean;
 			'products-catalog-api': boolean;
 			'settings-ui': boolean;
-			'wc-pay-promotion': boolean;
 			'use-wp-horizon': boolean;
 			'rest-api-v4': boolean;
 			'order-detail-redesign': boolean;
