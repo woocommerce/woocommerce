@@ -263,9 +263,10 @@ const Table: React.VFC< TableProps > = ( {
 												'Sort by %s in ascending order',
 												'woocommerce'
 											),
-											screenReaderLabel ||
-												( label as string ) ||
-												''
+											screenReaderLabel ??
+												( typeof label === 'string'
+													? label
+													: '' )
 									  )
 									: sprintf(
 											/* translators: %s: column label */
@@ -273,9 +274,10 @@ const Table: React.VFC< TableProps > = ( {
 												'Sort by %s in descending order',
 												'woocommerce'
 											),
-											screenReaderLabel ||
-												( label as string ) ||
-												''
+											screenReaderLabel ??
+												( typeof label === 'string'
+													? label
+													: '' )
 									  );
 
 							const textLabel = (
