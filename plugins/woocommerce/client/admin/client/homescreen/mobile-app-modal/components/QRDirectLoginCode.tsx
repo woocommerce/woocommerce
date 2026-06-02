@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { QRCodeSVG } from 'qrcode.react';
-import React, { useEffect, useRef } from '@wordpress/element';
+import React from 'react';
+import {  useEffect, useRef  } from '@wordpress/element';
 import { Button, Spinner } from '@wordpress/components';
 import { sprintf, __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';

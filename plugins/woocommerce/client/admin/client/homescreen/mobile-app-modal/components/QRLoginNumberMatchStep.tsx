@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import React, { useEffect, useMemo, useState } from '@wordpress/element';
+import React from 'react';
+import {  useEffect, useMemo, useState  } from '@wordpress/element';
 import { Button, Spinner } from '@wordpress/components';
 import { sprintf, __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';

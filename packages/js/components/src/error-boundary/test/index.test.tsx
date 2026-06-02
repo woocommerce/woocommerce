@@ -3,7 +3,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import React, { createElement } from '@wordpress/element';
+import React from 'react';
+import {  createElement  } from '@wordpress/element';
 
 /**
  * Internal dependencies

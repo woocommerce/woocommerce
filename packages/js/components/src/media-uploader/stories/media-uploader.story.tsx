@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement } from 'react';
+import { createElement } from '@wordpress/element';
 import { Notice } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { cloudUpload } from '@wordpress/icons';

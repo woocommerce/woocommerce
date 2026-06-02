@@ -3,7 +3,8 @@
 /**
  * External dependencies
  */
-import React, { createElement } from '@wordpress/element';
+import React from 'react';
+import {  createElement  } from '@wordpress/element';
 import { Meta, Story } from '@storybook/react';
 /**
  * Internal dependencies

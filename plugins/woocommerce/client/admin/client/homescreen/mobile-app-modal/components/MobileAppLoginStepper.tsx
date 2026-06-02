@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import React, { useState, useEffect } from '@wordpress/element';
+import React from 'react';
+import {  useState, useEffect  } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Stepper, StepperProps, Link } from '@woocommerce/components';
