@@ -51,31 +51,44 @@ const attributeList: ProductProductAttribute[] = [
 
 let triggerDrag: ( items: Array< { key: string } > ) => void;
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	resolveSelect: jest.fn().mockReturnValue( {
-		getProductAttributeTerms: ( {
-			attribute_id,
-		}: {
-			attribute_id: number;
-		} ) =>
-			new Promise( ( resolve ) => {
-				const attr = attributeList.find(
-					( item ) => item.id === attribute_id
-				);
-				resolve(
-					attr?.options.map( ( itemName, index ) => ( {
-						id: ++index,
-						slug: itemName.toLowerCase(),
-						name: itemName,
-						description: '',
-						menu_order: ++index,
-						count: ++index,
-					} ) )
-				);
-			} ),
-	} ),
-} ) );
+const mockBlockEditorSelectors = {
+	getBlockParentsByBlockName: jest.fn().mockReturnValue( [ 'section-id' ] ),
+};
+
+jest.mock( '@wordpress/data', () => {
+	const actual = jest.requireActual( '@wordpress/data' );
+
+	return {
+		...actual,
+		useSelect: jest.fn( ( mapSelect ) =>
+			mapSelect( ( storeName: string ) => {
+				return actual.select( storeName ) || mockBlockEditorSelectors;
+			} )
+		),
+		resolveSelect: jest.fn().mockReturnValue( {
+			getProductAttributeTerms: ( {
+				attribute_id,
+			}: {
+				attribute_id: number;
+			} ) =>
+				new Promise( ( resolve ) => {
+					const attr = attributeList.find(
+						( item ) => item.id === attribute_id
+					);
+					resolve(
+						attr?.options.map( ( itemName, index ) => ( {
+							id: ++index,
+							slug: itemName.toLowerCase(),
+							name: itemName,
+							description: '',
+							menu_order: ++index,
+							count: ++index,
+						} ) )
+					);
+				} ),
+		} ),
+	};
+} );
 
 jest.mock( '@woocommerce/components', () => ( {
 	__esModule: true,

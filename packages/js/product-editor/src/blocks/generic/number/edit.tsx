@@ -70,7 +70,7 @@ export function Edit( {
 							'Value must be less than or equal to %d',
 							'woocommerce'
 						),
-						min
+						max
 					),
 				};
 			}
