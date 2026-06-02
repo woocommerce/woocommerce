@@ -159,9 +159,11 @@ class ProductGalleryUtils {
 			_prime_post_caches( $variations );
 		}
 
-		$parent_featured_id = (int) $product->get_image_id();
-		if ( ! $parent_featured_id || ! wp_attachment_is_image( $parent_featured_id ) ) {
-			$parent_featured_id = 0;
+		// 0 is placeholder image ID.
+		$parent_featured_id = 0;
+		$product_image_id   = (int) $product->get_image_id();
+		if ( $product_image_id && wp_attachment_is_image( $product_image_id ) ) {
+			$parent_featured_id = $product_image_id;
 		}
 
 		$parent_gallery_extras = array_values(
