@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\AttributeFilter;
 use Automattic\WooCommerce\Blocks\BlockTypes\PriceFilter;
 use Automattic\WooCommerce\Blocks\BlockTypes\RatingFilter;
 use Automattic\WooCommerce\Blocks\BlockTypes\StockFilter;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use WP_Query;
 use WC_Tax;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -51,6 +52,7 @@ class QueryBuilder {
 	public function __construct() {
 		$this->valid_query_vars = $this->get_valid_query_vars();
 		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter_posts_clauses' ), 10, 2 );
+		add_filter( 'posts_clauses', array( $this, 'add_attribute_filter_posts_clauses' ), 10, 2 );
 	}
 
 	/**
@@ -114,6 +116,7 @@ class QueryBuilder {
 				'posts_per_page',
 				'suppress_filters',
 				'tax_query',
+				'woocommerceAttributeFilters',
 				'isProductCollection',
 				'priceRange',
 			)
@@ -497,37 +500,47 @@ class QueryBuilder {
 	 */
 	private function get_filter_by_attributes_query() {
 		$attributes_filter_query_args = $this->get_filter_by_attributes_query_vars();
+		$queries                     = array();
+		$chosen_attributes           = array();
 
-		$queries = array_reduce(
-			$attributes_filter_query_args,
-			function ( $acc, $query_args ) {
-				$attribute_name       = $query_args['filter'];
-				$attribute_query_type = $query_args['query_type'];
+		foreach ( $attributes_filter_query_args as $query_args ) {
+			$attribute_name       = $query_args['filter'];
+			$attribute_query_type = $query_args['query_type'];
 
-				$attribute_value = get_query_var( $attribute_name );
-				$attribute_query = get_query_var( $attribute_query_type );
+			$attribute_value = get_query_var( $attribute_name );
+			$attribute_query = get_query_var( $attribute_query_type );
 
-				if ( empty( $attribute_value ) ) {
-					return $acc;
-				}
+			if ( empty( $attribute_value ) ) {
+				continue;
+			}
 
-				// It is necessary explode the value because $attribute_value can be a string with multiple values (e.g. "red,blue").
-				$attribute_value = explode( ',', $attribute_value );
+			// It is necessary explode the value because $attribute_value can be a string with multiple values (e.g. "red,blue").
+			$attribute_terms = explode( ',', $attribute_value );
+			$taxonomy        = str_replace( AttributeFilter::FILTER_QUERY_VAR_PREFIX, 'pa_', $attribute_name );
+			$query_type      = 'and' === $attribute_query ? 'and' : 'or';
 
-				$acc[] = array(
-					'taxonomy' => str_replace( AttributeFilter::FILTER_QUERY_VAR_PREFIX, 'pa_', $attribute_name ),
-					'field'    => 'slug',
-					'terms'    => $attribute_value,
-					'operator' => 'and' === $attribute_query ? 'AND' : 'IN',
-				);
+			$queries[] = array(
+				'taxonomy' => $taxonomy,
+				'field'    => 'slug',
+				'terms'    => $attribute_terms,
+				'operator' => 'and' === $query_type ? 'AND' : 'IN',
+			);
 
-				return $acc;
-			},
-			array()
-		);
+			$chosen_attributes[ $taxonomy ] = array(
+				'terms'      => array_map( 'sanitize_title', $attribute_terms ),
+				'query_type' => $query_type,
+			);
+		}
 
 		if ( empty( $queries ) ) {
 			return array();
+		}
+
+		if ( wc_get_container()->get( Filterer::class )->filtering_via_lookup_table_is_active() ) {
+			return array(
+				'isProductCollection'        => true,
+				'woocommerceAttributeFilters' => $chosen_attributes,
+			);
 		}
 
 		return array(
@@ -921,6 +934,38 @@ class QueryBuilder {
 		}
 
 		return $clauses;
+	}
+
+	/**
+	 * Add attribute lookup filtering clauses for Product Collection queries.
+	 *
+	 * @param array    $clauses The query clauses.
+	 * @param WP_Query $query   The WP_Query instance.
+	 */
+	public function add_attribute_filter_posts_clauses( $clauses, $query ): array {
+		$query_vars                  = $query->query_vars;
+		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
+		$chosen_attributes           = $query_vars['woocommerceAttributeFilters'] ?? array();
+
+		if ( ! $is_product_collection_block || empty( $chosen_attributes ) || ! is_array( $chosen_attributes ) ) {
+			return $clauses;
+		}
+
+		// The shared lookup filterer only runs for main queries by default. Product Collection uses block queries,
+		// so filtering is enabled here for this WP_Query instance only.
+		$enable_filtering_for_current_query = function ( $enable_filtering, $wp_query ) use ( $query ) {
+			return $query === $wp_query ? true : $enable_filtering;
+		};
+
+		add_filter( 'woocommerce_enable_post_clause_filtering', $enable_filtering_for_current_query, 10, 2 );
+
+		try {
+			return wc_get_container()
+				->get( Filterer::class )
+				->filter_by_attribute_post_clauses( $clauses, $query, $chosen_attributes );
+		} finally {
+			remove_filter( 'woocommerce_enable_post_clause_filtering', $enable_filtering_for_current_query, 10 );
+		}
 	}
 
 	/**

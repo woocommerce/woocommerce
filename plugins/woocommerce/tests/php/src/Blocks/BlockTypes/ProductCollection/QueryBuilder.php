@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection\Utils;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use WC_Helper_Product;
@@ -24,10 +26,42 @@ class QueryBuilder extends \WP_UnitTestCase {
 	private $block_instance;
 
 	/**
+	 * Backup of the attribute lookup table option.
+	 *
+	 * @var mixed
+	 */
+	private $attribute_lookup_enabled;
+
+	/**
 	 * Initiate the mock object.
 	 */
 	protected function setUp(): void {
+		parent::setUp();
+
+		$this->attribute_lookup_enabled = get_option( 'woocommerce_attribute_lookup_enabled' );
 		$this->block_instance = new ProductCollectionMock();
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	protected function tearDown(): void {
+		global $wpdb;
+
+		if ( false === $this->attribute_lookup_enabled ) {
+			delete_option( 'woocommerce_attribute_lookup_enabled' );
+		} else {
+			update_option( 'woocommerce_attribute_lookup_enabled', $this->attribute_lookup_enabled );
+		}
+
+		$wpdb->delete( $wpdb->prefix . 'wc_product_attributes_lookup', array( 'taxonomy' => 'pa_color' ), array( '%s' ) );
+
+		set_query_var( 'filter_color', '' );
+		set_query_var( 'query_type_color', '' );
+		set_query_var( 'filter_size', '' );
+		set_query_var( 'query_type_size', '' );
+
+		parent::tearDown();
 	}
 
 	/**
@@ -393,9 +427,11 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test merging filter by stock status queries.
+	 * @testdox Should fall back to taxonomy queries for attribute filters when lookup filtering is disabled.
 	 */
 	public function test_merging_filter_by_attribute_queries() {
+		update_option( 'woocommerce_attribute_lookup_enabled', 'no' );
+
 		// Mock the attribute data.
 		$this->block_instance->set_attributes_filter_query_args(
 			array(
@@ -459,6 +495,68 @@ class QueryBuilder extends \WP_UnitTestCase {
 		set_query_var( 'query_type_color', '' );
 		set_query_var( 'filter_size', '' );
 		set_query_var( 'query_type_size', '' );
+	}
+
+	/**
+	 * @testdox Should only match variable products that have a variation with the selected attribute term.
+	 */
+	public function test_filter_by_attribute_matches_variation_terms_with_lookup_table() {
+		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
+
+		$fixture_data    = new FixtureData();
+		$color_attribute = FixtureData::get_product_attribute( 'color', array( 'red', 'yellow', 'black' ) );
+		$product         = $fixture_data->get_variable_product(
+			array(
+				'stock_status' => ProductStockStatus::IN_STOCK,
+			),
+			array(
+				$color_attribute,
+			)
+		);
+
+		$fixture_data->get_variation_product(
+			$product->get_id(),
+			array(
+				'pa_color' => 'red-slug',
+			),
+			array(
+				'stock_status' => ProductStockStatus::IN_STOCK,
+			)
+		);
+		$fixture_data->get_variation_product(
+			$product->get_id(),
+			array(
+				'pa_color' => 'black-slug',
+			),
+			array(
+				'stock_status' => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		$product = wc_get_product( $product->get_id() );
+		\WC_Product_Variable::sync( $product );
+		wc_get_container()->get( LookupDataStore::class )->create_data_for_product( $product );
+
+		$this->block_instance->set_attributes_filter_query_args(
+			array(
+				array(
+					'filter'     => 'filter_color',
+					'query_type' => 'query_type_color',
+				),
+			)
+		);
+
+		set_query_var( 'query_type_color', 'or' );
+		set_query_var( 'filter_color', 'yellow-slug' );
+		$yellow_query = Utils::initialize_merged_query( $this->block_instance );
+		$yellow_query = new WP_Query( array_merge( $yellow_query, array( 'fields' => 'ids' ) ) );
+
+		set_query_var( 'filter_color', 'red-slug' );
+		$red_query = Utils::initialize_merged_query( $this->block_instance );
+		$red_query = new WP_Query( array_merge( $red_query, array( 'fields' => 'ids' ) ) );
+
+		$this->assertNotContains( $product->get_id(), array_map( 'absint', $yellow_query->posts ) );
+		$this->assertContains( $product->get_id(), array_map( 'absint', $red_query->posts ) );
 	}
 
 	/**
