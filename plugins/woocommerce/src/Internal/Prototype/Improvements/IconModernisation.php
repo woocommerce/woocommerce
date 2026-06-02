@@ -211,7 +211,8 @@ class IconModernisation {
 		$css .= "\toutline-offset: 2px !important;\n";
 		$css .= "}\n";
 
-		// Meta box toggle — replace Dashicons \f142 with chevron-down (open) / chevron-up (closed).
+		// Meta box toggle — replace Dashicons \f142 with chevron-up (open) / chevron-down (closed).
+		// Block editor convention: arrow points in the direction the click action will take.
 		// NOTE: WP core sets dashicon glyphs on `.meta-box-sortables .postbox .toggle-indicator::before`
 		// (and a 4-class variant for .closed). We must match that specificity, kill the icon font, and
 		// !important the mask itself — otherwise the dashicon glyph wins and the chevrons look swapped.
@@ -225,16 +226,16 @@ class IconModernisation {
 		$css         .= "\twidth: 20px !important;\n";
 		$css         .= "\theight: 20px !important;\n";
 		$css         .= "\tbackground-color: currentColor !important;\n";
-		$css         .= "\tmask-image: {$chevron_down} !important;\n";
-		$css         .= "\t-webkit-mask-image: {$chevron_down} !important;\n";
+		$css         .= "\tmask-image: {$chevron_up} !important;\n";
+		$css         .= "\t-webkit-mask-image: {$chevron_up} !important;\n";
 		$css         .= "\tmask-repeat: no-repeat !important;\n";
 		$css         .= "\tmask-size: contain !important;\n";
 		$css         .= "\tmask-position: center !important;\n";
 		$css         .= "}\n";
 		$css         .= '.meta-box-sortables .postbox.closed .handlediv .toggle-indicator::before,' . "\n";
 		$css         .= '.postbox.closed .handlediv .toggle-indicator::before {' . "\n";
-		$css         .= "\tmask-image: {$chevron_up} !important;\n";
-		$css         .= "\t-webkit-mask-image: {$chevron_up} !important;\n";
+		$css         .= "\tmask-image: {$chevron_down} !important;\n";
+		$css         .= "\t-webkit-mask-image: {$chevron_down} !important;\n";
 		$css         .= "}\n";
 
 		// Meta box reorder arrows — replace Dashicons \f343/\f347 with arrow-up/arrow-down.
