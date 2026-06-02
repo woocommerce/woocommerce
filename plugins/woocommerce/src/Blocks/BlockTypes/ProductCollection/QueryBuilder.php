@@ -499,9 +499,9 @@ class QueryBuilder {
 	 * @return array
 	 */
 	private function get_filter_by_attributes_query() {
-		$attributes_filter_query_args = $this->get_filter_by_attributes_query_vars();
-		$queries                     = array();
-		$chosen_attributes           = array();
+		$attributes_filter_query_args  = $this->get_filter_by_attributes_query_vars();
+		$queries                      = array();
+		$chosen_attributes            = array();
 
 		foreach ( $attributes_filter_query_args as $query_args ) {
 			$attribute_name       = $query_args['filter'];
@@ -538,7 +538,7 @@ class QueryBuilder {
 
 		if ( wc_get_container()->get( Filterer::class )->filtering_via_lookup_table_is_active() ) {
 			return array(
-				'isProductCollection'        => true,
+				'isProductCollection'         => true,
 				'woocommerceAttributeFilters' => $chosen_attributes,
 			);
 		}

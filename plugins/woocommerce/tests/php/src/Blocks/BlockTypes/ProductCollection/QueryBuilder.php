@@ -39,7 +39,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		parent::setUp();
 
 		$this->attribute_lookup_enabled = get_option( 'woocommerce_attribute_lookup_enabled' );
-		$this->block_instance = new ProductCollectionMock();
+		$this->block_instance           = new ProductCollectionMock();
 	}
 
 	/**
