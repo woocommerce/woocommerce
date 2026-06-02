@@ -1316,7 +1316,7 @@ class WC_Install {
 	 * Only newly installed stores get the feature enabled here; existing installs keep the
 	 * opt-in default so their behavior is unchanged on upgrade.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 *
 	 * @return void
 	 */
