@@ -548,4 +548,162 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 			'phone'      => '5551234567',
 		);
 	}
+
+	/**
+	 * End-to-end regression for downloadable products on POS. PosCheckoutRequirements
+	 * marks downloadables as email-requiring; this verifies the supplied email
+	 * actually flows through CustomerSwap onto the order, and that the standard WC
+	 * download-permission grant fires once the order transitions to processing.
+	 *
+	 * @testdox A downloadable in the cart with an email supplied creates a pending order carrying the email and grants download permissions on payment_complete.
+	 */
+	public function test_checkout_downloadable_product_with_email_seeds_download_permissions(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$download = new \WC_Product_Download();
+		$download->set_id( wp_generate_uuid4() );
+		$download->set_name( 'POS Test Download' );
+		$download->set_file( 'https://example.com/pos-test-download.zip' );
+
+		$downloadable_product = ( new FixtureData() )->get_simple_product(
+			array(
+				'name'          => 'POS Downloadable Test Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 15,
+				'virtual'       => true,
+				'downloadable'  => true,
+				'downloads'     => array( $download ),
+			)
+		);
+
+		$add_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/cart/add-item' );
+		$add_request->set_body_params(
+			array(
+				'id'       => $downloadable_product->get_id(),
+				'quantity' => 1,
+			)
+		);
+		$add_response = rest_get_server()->dispatch( $add_request );
+		$this->assertSame( 201, $add_response->get_status() );
+
+		$cart_token = '';
+		foreach ( $add_response->get_headers() as $key => $value ) {
+			if ( strtolower( $key ) === 'cart-token' ) {
+				$cart_token = (string) $value;
+				break;
+			}
+		}
+		$this->assertNotEmpty( $cart_token );
+
+		// Prior dispatch's CurrentUserSwap set current_user to 0; re-auth.
+		wp_set_current_user( $this->admin_id );
+
+		$customer_email = 'pos-downloadable-customer@example.com';
+
+		$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
+		$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );
+		$checkout_request->set_body_params(
+			array(
+				'billing_address' => array( 'email' => $customer_email ),
+			)
+		);
+		$checkout_response = rest_get_server()->dispatch( $checkout_request );
+
+		$this->assertSame(
+			200,
+			$checkout_response->get_status(),
+			'Checkout failed: ' . wp_json_encode( $checkout_response->get_data() )
+		);
+
+		$order = wc_get_order( $checkout_response->get_data()['order_id'] );
+		$this->assertNotFalse( $order );
+		$this->assertSame(
+			$customer_email,
+			$order->get_billing_email(),
+			'The customer email supplied on the request must land on the order so the download-link email can be delivered.'
+		);
+		$this->assertFalse(
+			(bool) $order->get_data_store()->get_download_permissions_granted( $order ),
+			'Download permissions should not be granted yet — the order is still pending.'
+		);
+
+		// Simulate the payment-complete that the existing post-checkout flow
+		// triggers (cash mark-paid or WooPayments terminal capture). For pure
+		// downloadables WC auto-completes; here we just transition explicitly
+		// so the test exercises the WC core hook chain
+		// (wc_downloadable_product_permissions on order_status_processing).
+		$order->update_status( 'processing' );
+
+		$this->assertTrue(
+			(bool) $order->get_data_store()->get_download_permissions_granted( $order ),
+			'Standard WC download-permission grant must fire once the POS order transitions to processing.'
+		);
+
+		$downloads_for_order = $order->get_downloadable_items();
+		$this->assertCount(
+			1,
+			$downloads_for_order,
+			'The order should expose exactly one downloadable item linkable from the customer email.'
+		);
+	}
+
+	/**
+	 * The cart-aware email rule short-circuits to "required" when a
+	 * downloadable is in the cart. Without an email, /checkout must surface
+	 * the standard Store API error so the mobile client can prompt for one
+	 * and retry — mirroring the web flow.
+	 *
+	 * @testdox A downloadable in the cart with no email returns the standard missing-email 400.
+	 */
+	public function test_checkout_downloadable_without_email_returns_missing_email_error(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$download = new \WC_Product_Download();
+		$download->set_id( wp_generate_uuid4() );
+		$download->set_name( 'POS Test Download' );
+		$download->set_file( 'https://example.com/pos-test-download.zip' );
+
+		$downloadable_product = ( new FixtureData() )->get_simple_product(
+			array(
+				'name'          => 'POS Downloadable Test Product (no-email regression)',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 15,
+				'virtual'       => true,
+				'downloadable'  => true,
+				'downloads'     => array( $download ),
+			)
+		);
+
+		$add_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/cart/add-item' );
+		$add_request->set_body_params(
+			array(
+				'id'       => $downloadable_product->get_id(),
+				'quantity' => 1,
+			)
+		);
+		$add_response = rest_get_server()->dispatch( $add_request );
+		$this->assertSame( 201, $add_response->get_status() );
+
+		$cart_token = '';
+		foreach ( $add_response->get_headers() as $key => $value ) {
+			if ( strtolower( $key ) === 'cart-token' ) {
+				$cart_token = (string) $value;
+				break;
+			}
+		}
+		$this->assertNotEmpty( $cart_token );
+
+		wp_set_current_user( $this->admin_id );
+
+		$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
+		$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );
+		$checkout_response = rest_get_server()->dispatch( $checkout_request );
+
+		$this->assertSame( 400, $checkout_response->get_status() );
+		$this->assertSame(
+			'woocommerce_rest_missing_email_address',
+			$checkout_response->get_data()['code'] ?? null,
+			'A downloadable in the cart must surface the standard Store API missing-email error when no email was supplied.'
+		);
+	}
 }
