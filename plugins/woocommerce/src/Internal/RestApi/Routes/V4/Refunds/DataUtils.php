@@ -58,12 +58,24 @@ class DataUtils {
 		$prepared_line_items = array();
 
 		foreach ( $line_items as $line_item ) {
-			if ( ! isset( $line_item['line_item_id'], $line_item['quantity'], $line_item['refund_total'] ) ) {
+			// A line item is processable when it has an ID and at least one of
+			// quantity or refund_total. The legacy v3-style form may omit
+			// quantity entirely; in that case qty=0 is recorded on the refund,
+			// matching v3 semantics ("refunded $X of this line without consuming
+			// specific units"). Dollar accounting via get_remaining_refund_amount
+			// still bounds subsequent refunds, so per-unit looseness here does
+			// not enable over-refunding.
+			if ( ! isset( $line_item['line_item_id'] ) ) {
+				continue;
+			}
+			if ( ! isset( $line_item['quantity'] ) && ! isset( $line_item['refund_total'] ) ) {
 				continue;
 			}
 
-			// If no explicit refund_tax provided, extract tax from refund_total using WC_Tax.
-			if ( ! isset( $line_item['refund_tax'] ) ) {
+			// If no explicit refund_tax provided, extract tax from refund_total
+			// using WC_Tax. Skip when refund_total is also missing — there's
+			// nothing to extract tax from.
+			if ( ! isset( $line_item['refund_tax'] ) && isset( $line_item['refund_total'] ) ) {
 				$original_item = $order->get_item( $line_item['line_item_id'] );
 				if ( $original_item ) {
 					$original_taxes = $original_item->get_taxes();
@@ -106,9 +118,12 @@ class DataUtils {
 				}
 			}
 
+			// Default qty=0 when quantity was omitted (legacy v3-style explicit
+			// refund_total path). Default refund_total=0 defensively; in practice
+			// validate_line_items ensures one of them is set by this point.
 			$prepared_line_items[ $line_item['line_item_id'] ] = array(
-				'qty'          => $line_item['quantity'],
-				'refund_total' => $line_item['refund_total'],
+				'qty'          => $line_item['quantity'] ?? 0,
+				'refund_total' => $line_item['refund_total'] ?? 0,
 				'refund_tax'   => $this->convert_line_item_taxes_to_internal_format( $line_item['refund_tax'] ?? array() ),
 			);
 		}
@@ -149,13 +164,16 @@ class DataUtils {
 		$amount = 0;
 
 		foreach ( $line_items as $line_item ) {
-			if ( ! empty( $line_item['refund_total'] ) && is_numeric( $line_item['refund_total'] ) ) {
+			// is_numeric() (not !empty) — an explicit refund_total of 0 is a valid
+			// "zero refund for this line" value and must round-trip cleanly, not
+			// be silently dropped from the sum.
+			if ( isset( $line_item['refund_total'] ) && is_numeric( $line_item['refund_total'] ) ) {
 				$amount += $line_item['refund_total'];
 			}
 
 			if ( ! empty( $line_item['refund_tax'] ) && is_array( $line_item['refund_tax'] ) ) {
 				foreach ( $line_item['refund_tax'] as $tax ) {
-					if ( ! empty( $tax['refund_total'] ) && is_numeric( $tax['refund_total'] ) ) {
+					if ( isset( $tax['refund_total'] ) && is_numeric( $tax['refund_total'] ) ) {
 						$amount += $tax['refund_total'];
 					}
 				}

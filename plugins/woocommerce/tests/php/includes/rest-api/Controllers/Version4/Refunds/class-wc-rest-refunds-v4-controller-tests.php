@@ -1895,19 +1895,19 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$item->set_props(
 			array(
 				'product'  => $product,
-				'quantity' => 1,
-				'subtotal' => 50.00,
-				'total'    => 50.00,
+				'quantity' => 2,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
 			)
 		);
 		$item->save();
 		$order->add_item( $item );
-		$order->set_total( 50.00 );
+		$order->set_total( 100.00 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 		$this->created_orders[] = $order->get_id();
 
-		// Legacy explicit form: refund_total provided, no quantity.
+		// Step 1: legacy explicit form — refund_total provided, no quantity.
 		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
 		$request->set_body_params(
 			array(
@@ -1915,7 +1915,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'line_items' => array(
 					array(
 						'line_item_id' => $item->get_id(),
-						'refund_total' => 50.00,
+						'refund_total' => 30.00,
 					),
 				),
 			)
@@ -1924,9 +1924,104 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( '50.00', $data['amount'] );
-
+		$this->assertEquals( '30.00', $data['amount'] );
 		$this->created_refunds[] = $data['id'];
+
+		// The line item must be attached to the refund record (B regression guard).
+		// qty=0 matches v3 semantics — refund_total recorded without consuming specific units.
+		$refund       = wc_get_order( $data['id'] );
+		$refund_items = $refund->get_items( 'line_item' );
+		$this->assertCount( 1, $refund_items, 'Refund record must have the line item attached, not an empty array.' );
+		$refund_item = reset( $refund_items );
+		$this->assertSame( 0, $refund_item->get_quantity(), 'qty=0 expected for legacy-no-quantity path.' );
+		$this->assertEquals( -30.00, (float) $refund_item->get_total(), 'Refund line item total should be -30.00.' );
+
+		// Step 2: dollar accounting still gates subsequent refunds.
+		// Remaining refundable = 100 - 30 = 70. A simplified-form request for the
+		// full remaining 2 units would compute 100 (2 * $50), which exceeds 70,
+		// so wc_create_refund must reject it.
+		$request2 = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request2->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'quantity'     => 2,
+					),
+				),
+			)
+		);
+		$response2 = $this->server->dispatch( $request2 );
+
+		$this->assertEquals( 400, $response2->get_status(), 'Follow-up refund exceeding remaining dollars must be rejected.' );
+		$this->assertEquals( 'cannot_create_refund', $response2->get_data()['code'] );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Legacy form with api_restock=true does not restock anything (qty=0 semantics).
+	 *
+	 * When no quantity is provided, qty defaults to 0 on the refund line item.
+	 * api_restock therefore has no units to add back to inventory. Pin that
+	 * behavior so future contract changes don't silently start restocking
+	 * a guessed unit count.
+	 */
+	public function test_refunds_create_legacy_form_api_restock_does_not_restock(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50.00 );
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 5 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 100.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		// Capture stock after order completion (the order may or may not have
+		// reduced stock depending on settings) — what matters is the refund
+		// step does not change it.
+		$stock_before_refund = wc_get_product( $product->get_id() )->get_stock_quantity();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'    => $order->get_id(),
+				'api_restock' => true,
+				'line_items'  => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'refund_total' => 30.00,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$this->created_refunds[] = $response->get_data()['id'];
+
+		$stock_after_refund = wc_get_product( $product->get_id() )->get_stock_quantity();
+		$this->assertSame(
+			$stock_before_refund,
+			$stock_after_refund,
+			'Legacy form (no quantity) + api_restock must not restock — qty=0 means no units to put back.'
+		);
+
 		$product->delete( true );
 	}
 

@@ -270,6 +270,68 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox calculate_refund_amount treats explicit refund_total: 0 as a valid zero contribution, not as missing.
+	 *
+	 * Regression guard: a previous implementation used `!empty($line_item['refund_total'])`
+	 * which is `true` for `0` / `0.0` / `"0"`. A mixed request like
+	 * `[{refund_total: 50}, {refund_total: 0}]` therefore summed to 50 with the
+	 * second line silently absent. The current implementation uses `isset() && is_numeric()`,
+	 * which preserves the explicit-zero contract documented in the schema.
+	 */
+	public function test_calculate_refund_amount_includes_explicit_zero(): void {
+		$line_items = array(
+			array(
+				'line_item_id' => 1,
+				'quantity'     => 1,
+				'refund_total' => 50.00,
+			),
+			array(
+				'line_item_id' => 2,
+				'quantity'     => 1,
+				'refund_total' => 0,
+			),
+		);
+
+		$result = $this->data_utils->calculate_refund_amount( $line_items );
+
+		$this->assertSame( 50.0, $result, 'Explicit-zero line contributes 0; total stays 50.' );
+	}
+
+	/**
+	 * @testdox convert_line_items_to_internal_format accepts the legacy v3-style shape (refund_total without quantity) and records qty=0.
+	 */
+	public function test_convert_line_items_legacy_no_quantity_defaults_qty_zero(): void {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'quantity' => 2,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->data_utils->convert_line_items_to_internal_format(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 30.00,
+				),
+			),
+			$order
+		);
+
+		$this->assertArrayHasKey( $item->get_id(), $result, 'Line item must be attached, not silently dropped.' );
+		$this->assertSame( 0, $result[ $item->get_id() ]['qty'] );
+		$this->assertSame( 30.00, $result[ $item->get_id() ]['refund_total'] );
+
+		$order->delete( true );
+	}
+
+	/**
 	 * @testdox Should compute line item refund total for a product based on unit price and quantity.
 	 */
 	public function test_compute_line_item_refund_total_product(): void {
