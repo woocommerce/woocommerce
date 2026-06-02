@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, sprintf, TranslatableText } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { store as coreStore, type WpTemplate } from '@wordpress/core-data';
 import { backup } from '@wordpress/icons';
@@ -177,7 +177,7 @@ const getResetEmailTemplateAction = () => {
 									setIsBusy( false );
 									closeModal?.();
 								} catch ( error ) {
-									let errorMessage = __(
+									let errorMessage = __< string >(
 										'An error occurred while resetting the template.',
 										__i18n_text_domain__
 									);
@@ -187,7 +187,8 @@ const getResetEmailTemplateAction = () => {
 										typeof error === 'object' &&
 										'message' in error
 									) {
-										errorMessage = String( error.message );
+										errorMessage =
+											error.message as TranslatableText< string >;
 									}
 
 									recordEvent( 'reset_modal_error', {
