@@ -74,7 +74,7 @@ body.post-type-product .woocommerce_options_panel .wc-radios label {
 /* ── Tier 3: Helper/description text ────────────────────── */
 body.post-type-product .woocommerce_options_panel .form-field .description,
 body.post-type-product p.howto {
-    font-size: var(--wpds-typography-font-size-xs, 11px);
+    font-size: var(--wpds-typography-font-size-sm, 12px);
     font-weight: var(--wpds-typography-font-weight-regular, 400);
     color: var(--wpds-color-fg-content-neutral-weak, #707070);
 }
