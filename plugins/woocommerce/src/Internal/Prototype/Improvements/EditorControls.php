@@ -12,8 +12,10 @@ use Automattic\WooCommerce\Internal\Prototype\DevPanel;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Replaces the legacy "Add Media" button with a compact @wordpress/components-style button.
- * The insert-media class is preserved so WordPress's media upload event delegation still works.
+ * Compact CTA treatment for the classic product editor:
+ * normalises all .button / .button-primary / .button-secondary inside metabox `.inside`
+ * containers to the 32px WPDS compact button size, and replaces the legacy
+ * "Add Media" button with a compact @wordpress/components-style button.
  */
 class EditorControls {
 
@@ -37,9 +39,63 @@ class EditorControls {
 		if ( ! DevPanel::is_supported_screen() ) {
 			return;
 		}
-		echo '<style id="wc-proto-editor-controls">
-			.wp-media-buttons { padding-top: 2px; }
-		</style>';
+		?>
+<style id="wc-proto-editor-controls">
+.wp-media-buttons { padding-top: 2px; }
+
+/* ── Compact CTAs (32px) inside product editor metaboxes ── */
+body.post-type-product .inside .button,
+body.post-type-product .inside .button-primary,
+body.post-type-product .inside .button-secondary,
+body.post-type-product .inside .button.button-large,
+body.post-type-product .inside input[type="submit"].button,
+body.post-type-product .inside input[type="button"].button {
+	height: 32px;
+	min-height: 32px;
+	line-height: 30px;
+	padding: 0 12px;
+	font-size: var(--wpds-typography-font-size-md, 13px);
+	box-sizing: border-box;
+}
+
+/* Keep media library / modal buttons untouched */
+body.post-type-product .media-modal .button,
+body.post-type-product .media-modal .button-primary,
+body.post-type-product .media-modal .button-secondary {
+	height: auto;
+	line-height: inherit;
+	padding: revert;
+	font-size: revert;
+}
+
+/* ── Compact inputs (32px) inside product editor metaboxes ── */
+body.post-type-product .inside input[type="text"],
+body.post-type-product .inside input[type="number"],
+body.post-type-product .inside input[type="email"],
+body.post-type-product .inside input[type="url"],
+body.post-type-product .inside input[type="search"],
+body.post-type-product .inside input[type="password"],
+body.post-type-product .inside input[type="tel"],
+body.post-type-product .inside input[type="date"],
+body.post-type-product .inside input[type="datetime-local"],
+body.post-type-product .inside input[type="time"],
+body.post-type-product .inside select,
+body.post-type-product #woocommerce-product-data select#product-type {
+	height: 32px;
+	min-height: 32px;
+	line-height: 30px;
+	box-sizing: border-box;
+}
+
+/* Keep modal inputs (media library, etc.) untouched */
+body.post-type-product .media-modal input,
+body.post-type-product .media-modal select {
+	height: auto;
+	min-height: 0;
+	line-height: inherit;
+}
+</style>
+		<?php
 	}
 
 	/**
