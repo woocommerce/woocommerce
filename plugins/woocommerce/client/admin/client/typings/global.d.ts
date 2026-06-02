@@ -63,7 +63,6 @@ declare global {
 			'products-catalog-api': boolean;
 			'settings-ui': boolean;
 			'wc-pay-promotion': boolean;
-			'launch-your-store': boolean;
 			'use-wp-horizon': boolean;
 			'rest-api-v4': boolean;
 			'order-detail-redesign': boolean;

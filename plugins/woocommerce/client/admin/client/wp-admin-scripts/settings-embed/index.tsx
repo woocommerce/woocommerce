@@ -77,10 +77,7 @@ const registerSlotFills = () => {
 	registerTaxSettingsConflictErrorFill();
 	registerPaymentsSettingsBannerFill();
 
-	const features = window.wcAdminFeatures;
-	if ( features?.[ 'launch-your-store' ] === true ) {
-		registerSiteVisibilitySlotFill();
-	}
+	registerSiteVisibilitySlotFill();
 
 	if ( isFeatureEnabled( 'blueprint' ) ) {
 		registerBlueprintSlotfill();
