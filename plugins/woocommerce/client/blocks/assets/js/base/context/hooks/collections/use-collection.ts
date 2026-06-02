@@ -6,56 +6,7 @@ import { useSelect } from '@wordpress/data';
 import { useRef } from '@wordpress/element';
 import { useShallowEqual, useThrowError } from '@woocommerce/base-hooks';
 import { isError } from '@woocommerce/types';
-import { __, sprintf } from '@wordpress/i18n';
-
-/**
- * Wrap a non-Error value from the store into a real Error while preserving
- * the original metadata (name, code, status, statusText, data). When the raw
- * value has no usable message, build a contextual fallback that names the
- * collection being loaded so the BlockErrorBoundary renders something
- * actionable instead of "something went wrong".
- */
-function wrapNonError(
-	error: unknown,
-	namespace: string,
-	resourceName: string
-): Error {
-	const source =
-		typeof error === 'object' && error !== null
-			? ( error as {
-					message?: unknown;
-					name?: unknown;
-					code?: unknown;
-					status?: unknown;
-					statusText?: unknown;
-					data?: unknown;
-			  } )
-			: {};
-	const trimmed =
-		typeof source.message === 'string' ? source.message.trim() : '';
-	const codeSuffix =
-		typeof source.code === 'string' || typeof source.code === 'number'
-			? ` (code: ${ source.code })`
-			: '';
-	const fallback =
-		sprintf(
-			// translators: %1$s: store namespace, %2$s: resource name.
-			__( 'Failed to load %2$s from %1$s', 'woocommerce' ),
-			namespace,
-			resourceName
-		) + codeSuffix;
-	const wrapped = Object.assign(
-		new Error( trimmed || fallback ),
-		{
-			code: source.code,
-			status: source.status,
-			statusText: source.statusText,
-			data: source.data,
-		},
-		typeof source.name === 'string' ? { name: source.name } : {}
-	);
-	return wrapped;
-}
+import { __ } from '@wordpress/i18n';
 
 /**
  * This is a custom hook that is wired up to the `wc/store/collections` data
@@ -122,12 +73,6 @@ export const useCollection = < T >(
 		results: [],
 		isLoading: true,
 	} );
-	// Tracks the last raw non-Error value we've logged. wp-data's useSelect
-	// mapSelect callback can be invoked multiple times per render (notably
-	// via SCRIPT_DEBUG's unstable-reference double-invoke check), so guarding
-	// on reference identity prevents duplicate console output for a single
-	// underlying error.
-	const lastLoggedError = useRef< unknown >();
 	// ensure we feed the previous reference if it's equivalent
 	const currentQuery = useShallowEqual( query );
 	const currentResourceValues = useShallowEqual( resourceValues );
@@ -151,17 +96,20 @@ export const useCollection = < T >(
 				if ( isError( error ) ) {
 					throwError( error );
 				} else {
-					if ( lastLoggedError.current !== error ) {
-						lastLoggedError.current = error;
-						// eslint-disable-next-line no-console
-						console.error(
-							'useCollection received a non-Error value from the store:',
-							error
-						);
-					}
-					throwError(
-						wrapNonError( error, namespace, resourceName )
-					);
+					// Store errors (e.g. from the Store API) normally carry a
+					// message, but guard against non-Error values that don't so
+					// the error boundary always receives a real Error instance.
+					const message =
+						typeof error === 'object' &&
+						error !== null &&
+						typeof ( error as { message?: unknown } ).message ===
+							'string'
+							? ( error as { message: string } ).message
+							: __(
+									'Something went wrong while loading data.',
+									'woocommerce'
+							  );
+					throwError( new Error( message ) );
 				}
 			}
 

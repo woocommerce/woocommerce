@@ -354,154 +354,28 @@ describe( 'useCollection', () => {
 		expect( console ).toHaveErrored( /your React components:/ );
 		renderer.unmount();
 	} );
-	it( 'should convert a plain-object error from the store to an Error instance via the error boundary', () => {
+	it( 'should convert a non-Error object with a message into an Error instance', () => {
 		const error = { code: 'rest_no_route', message: 'No route found.' };
 		const props = renderWithStoreError( error );
 		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
 		expect( props[ 'data-error' ].message ).toBe( 'No route found.' );
-		expect( console ).toHaveErrored(
-			/useCollection received a non-Error value/
-		);
 		expect( console ).toHaveErrored( /your React components:/ );
 		renderer.unmount();
 	} );
-	it( 'should preserve status and statusText on the wrapped Error so the boundary can render HTTP context', () => {
-		const error = {
-			status: 404,
-			statusText: 'Not Found',
-			message: 'No route',
-			code: 'rest_no_route',
-			data: { params: { per_page: 10 } },
-		};
-		const props = renderWithStoreError( error );
-		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
-		expect( props[ 'data-error' ].status ).toBe( 404 );
-		expect( props[ 'data-error' ].statusText ).toBe( 'Not Found' );
-		expect( props[ 'data-error' ].code ).toBe( 'rest_no_route' );
-		expect( props[ 'data-error' ].data ).toEqual( {
-			params: { per_page: 10 },
-		} );
-		expect( console ).toHaveErrored(
-			/useCollection received a non-Error value/
-		);
-		expect( console ).toHaveErrored( /your React components:/ );
-		renderer.unmount();
-	} );
-	it( 'should log the original non-Error value so devtools keep the raw shape', () => {
-		const error = { code: 'rest_no_route', message: 'No route found.' };
-		renderWithStoreError( error );
-		// eslint-disable-next-line no-console
-		const loggedCall = console.error.mock.calls.find(
-			( call ) =>
-				typeof call[ 0 ] === 'string' &&
-				call[ 0 ].includes( 'useCollection received a non-Error value' )
-		);
-		expect( loggedCall ).toBeDefined();
-		expect( loggedCall[ 1 ] ).toBe( error );
-		expect( console ).toHaveErrored(
-			/useCollection received a non-Error value/
-		);
-		expect( console ).toHaveErrored( /your React components:/ );
-		renderer.unmount();
-	} );
-	it( 'should include a numeric code in the fallback message when a non-Error object has no message', () => {
+	it( 'should use a fallback message when a non-Error object has no message', () => {
 		const props = renderWithStoreError( { code: 500 } );
 		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
 		expect( props[ 'data-error' ].message ).toBe(
-			'Failed to load products from test/store (code: 500)'
-		);
-		expect( console ).toHaveErrored(
-			/useCollection received a non-Error value/
+			'Something went wrong while loading data.'
 		);
 		expect( console ).toHaveErrored( /your React components:/ );
 		renderer.unmount();
 	} );
-	it( 'should include a string code in the fallback message when a non-Error object has no message', () => {
-		const props = renderWithStoreError( { code: 'rest_no_route' } );
-		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
-		expect( props[ 'data-error' ].message ).toBe(
-			'Failed to load products from test/store (code: rest_no_route)'
-		);
-		expect( console ).toHaveErrored(
-			/useCollection received a non-Error value/
-		);
-		expect( console ).toHaveErrored( /your React components:/ );
-		renderer.unmount();
-	} );
-	it( 'should use the contextual fallback when a non-Error object has neither message nor code', () => {
-		const props = renderWithStoreError( { foo: 'bar' } );
-		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
-		expect( props[ 'data-error' ].message ).toBe(
-			'Failed to load products from test/store'
-		);
-		expect( console ).toHaveErrored(
-			/useCollection received a non-Error value/
-		);
-		expect( console ).toHaveErrored( /your React components:/ );
-		renderer.unmount();
-	} );
-	it( 'should preserve the original name on the wrapped Error when one is provided', () => {
-		const error = { name: 'ApiFetchError', message: 'boom' };
-		const props = renderWithStoreError( error );
-		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
-		expect( props[ 'data-error' ].name ).toBe( 'ApiFetchError' );
-		expect( props[ 'data-error' ].message ).toBe( 'boom' );
-		expect( console ).toHaveErrored(
-			/useCollection received a non-Error value/
-		);
-		expect( console ).toHaveErrored( /your React components:/ );
-		renderer.unmount();
-	} );
-	it( 'should use the fallback message when the message property is undefined', () => {
-		const props = renderWithStoreError( {
-			code: 500,
-			message: undefined,
-		} );
-		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
-		expect( props[ 'data-error' ].message ).toBe(
-			'Failed to load products from test/store (code: 500)'
-		);
-		expect( console ).toHaveErrored(
-			/useCollection received a non-Error value/
-		);
-		expect( console ).toHaveErrored( /your React components:/ );
-		renderer.unmount();
-	} );
-	it( 'should use the fallback message when the message property is whitespace only', () => {
-		const props = renderWithStoreError( {
-			code: 500,
-			message: '   ',
-		} );
-		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
-		expect( props[ 'data-error' ].message ).toBe(
-			'Failed to load products from test/store (code: 500)'
-		);
-		expect( console ).toHaveErrored(
-			/useCollection received a non-Error value/
-		);
-		expect( console ).toHaveErrored( /your React components:/ );
-		renderer.unmount();
-	} );
-	it( 'should use the fallback message when the message property is not a string', () => {
-		const props = renderWithStoreError( { code: 500, message: 42 } );
-		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
-		expect( props[ 'data-error' ].message ).toBe(
-			'Failed to load products from test/store (code: 500)'
-		);
-		expect( console ).toHaveErrored(
-			/useCollection received a non-Error value/
-		);
-		expect( console ).toHaveErrored( /your React components:/ );
-		renderer.unmount();
-	} );
-	it( 'should fall back gracefully when a primitive value is returned from the store', () => {
+	it( 'should use a fallback message when a primitive value is returned from the store', () => {
 		const props = renderWithStoreError( 'oops' );
 		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
 		expect( props[ 'data-error' ].message ).toBe(
-			'Failed to load products from test/store'
-		);
-		expect( console ).toHaveErrored(
-			/useCollection received a non-Error value/
+			'Something went wrong while loading data.'
 		);
 		expect( console ).toHaveErrored( /your React components:/ );
 		renderer.unmount();
