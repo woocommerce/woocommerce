@@ -28,8 +28,20 @@ class PublishMetabox {
 		if ( ! DevPanel::is_flag_enabled( self::FLAG_KEY ) ) {
 			return;
 		}
+		add_action( 'admin_enqueue_scripts', array( self::class, 'enqueue_assets' ) );
 		add_action( 'admin_head', array( self::class, 'output_styles' ) );
 		add_action( 'admin_footer', array( self::class, 'output_scripts' ) );
+	}
+
+	/**
+	 * Enqueue flatpickr (bundled with WordPress 5.5+).
+	 */
+	public static function enqueue_assets(): void {
+		if ( ! DevPanel::is_supported_screen() ) {
+			return;
+		}
+		wp_enqueue_script( 'flatpickr' );
+		wp_enqueue_style( 'flatpickr' );
 	}
 
 	/**
@@ -41,6 +53,22 @@ class PublishMetabox {
 		}
 		?>
 <style id="wc-proto-publish-metabox">
+/* Hide Edit links — panels are permanently open. */
+.edit-post-status,
+.edit-visibility,
+.edit-timestamp {
+	display: none !important;
+}
+
+/* Keep panels open even after WP jQuery animates them shut. */
+#post-visibility-select,
+#post-status-select,
+#timestampdiv {
+	display: block !important;
+	height: auto !important;
+	overflow: visible !important;
+}
+
 /* Hide radio inputs, their labels, sticky checkbox, and <br> spacers. */
 #post-visibility-select input[type="radio"],
 #post-visibility-select label.selectit,
@@ -58,12 +86,6 @@ select#wc-proto-vis-select {
 	display: block;
 	width: 100%;
 	margin-bottom: 4px;
-}
-
-/* Ensure panel containers are block so the select and OK/Cancel row stack vertically. */
-#post-visibility-select,
-#post-status-select {
-	display: block !important;
 }
 
 /* ── OK / Cancel: own row, right-aligned, compact 32px, 8px gap ── */
@@ -90,7 +112,7 @@ select#wc-proto-vis-select {
 	margin: 0 !important;
 	vertical-align: middle !important;
 }
-/* Cancel: tertiary/minimal — 32px, no background. Matches Preview changes style. */
+/* Cancel: tertiary/minimal — 32px, no background. */
 .cancel-post-visibility,
 .cancel-post-status,
 .cancel-timestamp {
@@ -121,6 +143,17 @@ select#wc-proto-vis-select {
 /* Hide the label colon while the edit panel is open. */
 .misc-pub-section.wc-proto-editing .wc-proto-label-colon {
 	display: none;
+}
+
+/* ── Flatpickr date/time input ── */
+#timestampdiv .timestamp-wrap {
+	display: none !important;
+}
+#wc-proto-datetime {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	margin-bottom: 4px;
 }
 </style>
 		<?php
@@ -165,13 +198,66 @@ select#wc-proto-vis-select {
 		visPanel.insertBefore( sel, visPanel.firstChild );
 	}
 
+	/* ── Wrap status OK/Cancel in <p> so flex row CSS applies ── */
+	var statusDiv = document.getElementById( 'post-status-select' );
+	if ( statusDiv ) {
+		var saveBtn   = statusDiv.querySelector( '.save-post-status' );
+		var cancelBtn = statusDiv.querySelector( '.cancel-post-status' );
+		if ( saveBtn && cancelBtn && saveBtn.parentElement === statusDiv ) {
+			var btnRow = document.createElement( 'p' );
+			statusDiv.insertBefore( btnRow, saveBtn );
+			btnRow.appendChild( saveBtn );
+			btnRow.appendChild( cancelBtn );
+		}
+	}
+
+	/* ── Flatpickr date/time picker ─────────────────────────── */
+	var tsDiv = document.getElementById( 'timestampdiv' );
+	if ( tsDiv && window.flatpickr ) {
+		var aa    = document.getElementById( 'aa' );
+		var mm    = document.getElementById( 'mm' );
+		var jj    = document.getElementById( 'jj' );
+		var hh    = document.getElementById( 'hh' );
+		var mn    = document.getElementById( 'mn' );
+		var year  = aa ? parseInt( aa.value, 10 ) : new Date().getFullYear();
+		var month = mm ? parseInt( mm.value, 10 ) - 1 : new Date().getMonth();
+		var day   = jj ? parseInt( jj.value, 10 ) : new Date().getDate();
+		var hour  = hh ? parseInt( hh.value, 10 ) : 0;
+		var min   = mn ? parseInt( mn.value, 10 ) : 0;
+
+		var fpInput = document.createElement( 'input' );
+		fpInput.type = 'text';
+		fpInput.id   = 'wc-proto-datetime';
+		var tsWrap = tsDiv.querySelector( '.timestamp-wrap' );
+		if ( tsWrap ) {
+			tsDiv.insertBefore( fpInput, tsWrap );
+		}
+
+		flatpickr( fpInput, {
+			enableTime:  true,
+			dateFormat:  'F j, Y H:i',
+			defaultDate: new Date( year, month, day, hour, min ),
+			time_24hr:   true,
+			onChange: function ( dates ) {
+				if ( ! dates.length ) { return; }
+				var d  = dates[ 0 ];
+				var pad = function ( n ) { return String( n ).padStart( 2, '0' ); };
+				if ( aa ) { aa.value = d.getFullYear(); }
+				if ( mm ) { mm.value = pad( d.getMonth() + 1 ); }
+				if ( jj ) { jj.value = pad( d.getDate() ); }
+				if ( hh ) { hh.value = pad( d.getHours() ); }
+				if ( mn ) { mn.value = pad( d.getMinutes() ); }
+			},
+		} );
+	}
+
 	/* ── "Publish:" colon for draft/immediate state ─────────── */
 	var tsDisplay = document.getElementById( 'timestamp' );
 	if ( tsDisplay ) {
 		tsDisplay.innerHTML = tsDisplay.innerHTML.replace( /^Publish </, 'Publish: <' );
 	}
 
-	/* ── Watch edit panels: hide repeated label text and colon ── */
+	/* ── Watch edit panels: hide display text and colon ────── */
 	function wrapLabelColon( section ) {
 		var nodes = section.childNodes;
 		for ( var i = 0; i < nodes.length; i++ ) {
