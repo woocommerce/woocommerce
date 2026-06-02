@@ -92,7 +92,7 @@ class POSStaffController extends RestApiControllerBase {
 	 * List every user with an explicit POS role assignment.
 	 *
 	 * @param WP_REST_Request $request The incoming request.
-	 * @return array{staff: array<int, array<string, mixed>>}
+	 * @return list<array<string, mixed>>
 	 *
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 */
@@ -131,7 +131,7 @@ class POSStaffController extends RestApiControllerBase {
 			);
 		}
 
-		return array( 'staff' => $staff );
+		return $staff;
 	}
 
 	/**
@@ -140,49 +140,42 @@ class POSStaffController extends RestApiControllerBase {
 	 * @return array<string, mixed>
 	 */
 	private function get_staff_list_schema(): array {
-		$schema               = $this->get_base_schema();
-		$schema['title']      = 'pos_staff_list';
-		$schema['properties'] = array(
-			'staff' => array(
-				'description' => __( 'List of users with POS access.', 'woocommerce' ),
-				'type'        => 'array',
-				'context'     => array( 'view' ),
-				'readonly'    => true,
-				'items'       => array(
+		$schema          = $this->get_base_schema();
+		$schema['title'] = 'pos_staff_list';
+		$schema['type']  = 'array';
+		$schema['items'] = array(
+			'type'       => 'object',
+			'properties' => array(
+				'user_id'      => array(
+					'type'    => 'integer',
+					'context' => array( 'view' ),
+				),
+				'user_login'   => array(
+					'type'    => 'string',
+					'context' => array( 'view' ),
+				),
+				'display_name' => array(
+					'type'    => 'string',
+					'context' => array( 'view' ),
+				),
+				'role'         => array(
+					'type'    => 'string',
+					'context' => array( 'view' ),
+					'enum'    => Capabilities::assignable_pos_roles(),
+				),
+				'capabilities' => array(
+					'type'                 => 'object',
+					'context'              => array( 'view' ),
+					'additionalProperties' => array( 'type' => 'boolean' ),
+				),
+				'pin'          => array(
 					'type'       => 'object',
+					'context'    => array( 'view' ),
 					'properties' => array(
-						'user_id'      => array(
-							'type'    => 'integer',
-							'context' => array( 'view' ),
-						),
-						'user_login'   => array(
-							'type'    => 'string',
-							'context' => array( 'view' ),
-						),
-						'display_name' => array(
-							'type'    => 'string',
-							'context' => array( 'view' ),
-						),
-						'role'         => array(
-							'type'    => 'string',
-							'context' => array( 'view' ),
-							'enum'    => Capabilities::assignable_pos_roles(),
-						),
-						'capabilities' => array(
-							'type'                 => 'object',
-							'context'              => array( 'view' ),
-							'additionalProperties' => array( 'type' => 'boolean' ),
-						),
-						'pin'          => array(
-							'type'       => 'object',
-							'context'    => array( 'view' ),
-							'properties' => array(
-								'algo'       => array( 'type' => 'string' ),
-								'iterations' => array( 'type' => 'integer' ),
-								'salt'       => array( 'type' => 'string' ),
-								'hash'       => array( 'type' => 'string' ),
-							),
-						),
+						'algo'       => array( 'type' => 'string' ),
+						'iterations' => array( 'type' => 'integer' ),
+						'salt'       => array( 'type' => 'string' ),
+						'hash'       => array( 'type' => 'string' ),
 					),
 				),
 			),

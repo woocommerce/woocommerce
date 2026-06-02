@@ -102,10 +102,9 @@ class POSStaffControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertIsArray( $data );
-		$this->assertArrayHasKey( 'staff', $data );
 
 		$by_id = array();
-		foreach ( $data['staff'] as $entry ) {
+		foreach ( $data as $entry ) {
 			$by_id[ $entry['user_id'] ] = $entry;
 		}
 
@@ -167,7 +166,7 @@ class POSStaffControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', self::ROUTE ) );
 		$data     = $response->get_data();
 
-		$names  = array_column( $data['staff'], 'display_name' );
+		$names  = array_column( $data, 'display_name' );
 		$sorted = $names;
 		sort( $sorted );
 		$this->assertSame( $sorted, $names, 'Staff list must be sorted by display_name ASC.' );
@@ -190,7 +189,7 @@ class POSStaffControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', self::ROUTE ) );
 		$data     = $response->get_data();
 
-		$user_ids = array_column( $data['staff'], 'user_id' );
+		$user_ids = array_column( $data, 'user_id' );
 		$this->assertNotContains( $admin, $user_ids );
 		$this->assertNotContains( $shop_manager, $user_ids );
 		$this->assertNotContains( $customer, $user_ids );
