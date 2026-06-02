@@ -94,6 +94,18 @@ body.post-type-product .media-modal select {
 	min-height: 0;
 	line-height: inherit;
 }
+
+/* ── Helper text (.description) sits tight under its input — matches Product Tags pattern ── */
+body.post-type-product .form-field .description,
+body.post-type-product .form-field span.description,
+body.post-type-product p.form-field .description {
+	display: block;
+	margin-top: 4px !important;
+	padding: 0 !important;
+	line-height: 1.4 !important;
+	font-size: var(--wpds-typography-font-size-sm, 12px);
+	color: var(--wpds-color-fg-content-neutral-weak, #757575);
+}
 </style>
 		<?php
 	}
