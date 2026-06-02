@@ -17,15 +17,13 @@
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
-	"main": "build-module/index.js",
 	"module": "build-module/index.js",
 	"types": "build-types/index.d.ts",
 	"exports": {
 		".": {
 			"source": "./src/index.ts",
 			"types": "./build-types/index.d.ts",
-			"import": "./build-module/index.js",
-			"require": "./build-module/index.js"
+			"import": "./build-module/index.js"
 		},
 		"./style-build": {
 			"require": "./src/style-build/index.cjs"
