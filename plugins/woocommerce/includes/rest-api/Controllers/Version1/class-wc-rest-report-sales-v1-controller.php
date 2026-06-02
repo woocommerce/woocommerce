@@ -149,6 +149,7 @@ class WC_REST_Report_Sales_V1_Controller extends WC_REST_Controller {
 				'tax'       => wc_format_decimal( 0.00, 2 ),
 				'shipping'  => wc_format_decimal( 0.00, 2 ),
 				'discount'  => wc_format_decimal( 0.00, 2 ),
+				'refunds'   => wc_format_decimal( 0.00, 2 ),
 				'customers' => $customer_count,
 			);
 		}
@@ -196,6 +197,20 @@ class WC_REST_Report_Sales_V1_Controller extends WC_REST_Controller {
 			}
 
 			$period_totals[ $time ]['discount'] = wc_format_decimal( $discount->discount_amount, 2 );
+		}
+
+		// Add total refunds for each period. Use date() (not gmdate()) to match the bucket
+		// key format used by the sales/orders/items/coupons loops above; otherwise refunds
+		// would attribute to a different day than the corresponding sales in non-UTC sites.
+		foreach ( $report_data->refund_lines as $refund ) {
+			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- Match adjacent bucket loops; see comment above.
+			$time = ( 'day' === $this->report->chart_groupby ) ? date( 'Y-m-d', strtotime( $refund->post_date ) ) : date( 'Y-m', strtotime( $refund->post_date ) );
+
+			if ( ! isset( $period_totals[ $time ] ) ) {
+				continue;
+			}
+
+			$period_totals[ $time ]['refunds'] = wc_format_decimal( (float) $period_totals[ $time ]['refunds'] + (float) $refund->total_refund, 2 );
 		}
 
 		$sales_data = array(
@@ -347,13 +362,63 @@ class WC_REST_Report_Sales_V1_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 				),
 				'totals' => array(
-					'description' => __( 'Totals.', 'woocommerce' ),
-					'type'        => 'array',
-					'items'       => array(
-						'type'    => 'array',
+					'description'          => __( 'Totals.', 'woocommerce' ),
+					'type'                 => 'object',
+					'context'              => array( 'view' ),
+					'readonly'             => true,
+					'additionalProperties' => array(
+						'type'       => 'object',
+						'properties' => array(
+							'sales'     => array(
+								'description' => __( 'Gross sales in the period.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+							),
+							'orders'    => array(
+								'description' => __( 'Number of orders in the period.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+							),
+							'items'     => array(
+								'description' => __( 'Number of items sold in the period.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+							),
+							'tax'       => array(
+								'description' => __( 'Tax charged in the period.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+							),
+							'shipping'  => array(
+								'description' => __( 'Shipping charged in the period.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+							),
+							'discount'  => array(
+								'description' => __( 'Discounts applied in the period.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+							),
+							'refunds'   => array(
+								'description' => __( 'Refunds issued in the period.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+							),
+							'customers' => array(
+								'description' => __( 'New customers in the period.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+							),
+						),
 					),
-					'context'     => array( 'view' ),
-					'readonly'    => true,
 				),
 			),
 		);
