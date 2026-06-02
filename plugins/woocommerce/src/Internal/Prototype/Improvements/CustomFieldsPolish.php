@@ -12,10 +12,11 @@ use Automattic\WooCommerce\Internal\Prototype\DevPanel;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Strips the table chrome from the Custom Fields metabox (#postcustom):
- * removes alternating-row backgrounds and inner borders on #list-table and #newmeta,
- * gives both tables a single subtle outer border, modernises the Delete/Update/Enter new
- * controls, and tightens helper-text spacing.
+ * Polishes the Custom Fields metabox (#postcustom):
+ * - Strips table chrome (alt-row backgrounds, inner borders) and replaces with one outer border.
+ * - Hides the per-row "Update" button; key/value edits auto-save on blur via the existing WP AJAX endpoint.
+ * - Replaces the textual "Delete" button with a compact centered X icon — same pattern as DownloadableFilesPolish.
+ * - Modernises "Enter new" / "Add Custom Field" controls to brand-blue text-buttons.
  */
 class CustomFieldsPolish {
 
@@ -31,6 +32,18 @@ class CustomFieldsPolish {
 			return;
 		}
 		add_action( 'admin_head', array( self::class, 'output_styles' ) );
+		add_action( 'admin_footer', array( self::class, 'output_scripts' ) );
+	}
+
+	/**
+	 * Build a CSS mask-image value from an inline SVG path.
+	 *
+	 * @param string $path SVG path d="" attribute.
+	 * @return string CSS url(...) value.
+	 */
+	private static function mask_url( string $path ): string {
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="' . $path . '"/></svg>';
+		return 'url("data:image/svg+xml;utf8,' . rawurlencode( $svg ) . '")';
 	}
 
 	/**
@@ -40,6 +53,8 @@ class CustomFieldsPolish {
 		if ( ! DevPanel::is_supported_screen() ) {
 			return;
 		}
+
+		$close_url = self::mask_url( 'M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z' );
 		?>
 <style id="wc-proto-custom-fields">
 /* ── Strip stripe/background chrome on both tables, keep outer border ─ */
@@ -64,7 +79,7 @@ body.post-type-product #postcustomstuff table th,
 body.post-type-product #postcustomstuff table td {
 	border: none !important;
 	padding: 8px 10px;
-	vertical-align: top;
+	vertical-align: middle;
 }
 
 /* Single thin divider below the header row */
@@ -82,7 +97,7 @@ body.post-type-product #postcustomstuff #list-table:not(:has(#the-list tr)) thea
 	display: none;
 }
 
-/* ── Existing meta rows — compact inputs/textarea ─────────── */
+/* ── Inputs: full-width, compact ────────────────────────── */
 body.post-type-product #postcustomstuff #list-table input[type="text"],
 body.post-type-product #postcustomstuff #newmeta input[type="text"],
 body.post-type-product #postcustomstuff #newmeta select {
@@ -97,16 +112,57 @@ body.post-type-product #postcustomstuff textarea {
 	font-size: 13px;
 }
 
-/* ── Delete / Update / Enter new actions: text-link buttons ─ */
-body.post-type-product #postcustomstuff .submit,
-body.post-type-product #postcustomstuff .updatemeta,
-body.post-type-product #postcustomstuff .deletemeta,
+/* ── Hide Update + submit wrapper, repurpose existing row for X delete ── */
+body.post-type-product #postcustomstuff .submit {
+	display: contents !important;
+}
+body.post-type-product #postcustomstuff .updatemeta {
+	display: none !important;
+}
+
+/* ── Delete button → centered X icon, like the downloads table ───── */
+body.post-type-product #postcustomstuff #the-list tr {
+	position: relative;
+}
+body.post-type-product #postcustomstuff .deletemeta {
+	position: absolute !important;
+	top: 12px !important;
+	right: 10px !important;
+	width: 20px !important;
+	height: 20px !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	font-size: 0 !important;
+	color: transparent !important;
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	cursor: pointer !important;
+}
+body.post-type-product #postcustomstuff .deletemeta::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background-color: var(--wpds-color-fg-content-neutral-weak, #757575);
+	-webkit-mask: <?php echo $close_url; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> no-repeat center / 16px 16px;
+	mask: <?php echo $close_url; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> no-repeat center / 16px 16px;
+}
+body.post-type-product #postcustomstuff .deletemeta:hover::before {
+	background-color: var(--wpds-color-fg-content-error, #cc1818);
+}
+
+/* Pad the value column so the X never sits on the textarea */
+body.post-type-product #postcustomstuff #the-list td:last-child {
+	padding-right: 36px !important;
+}
+
+/* ── "Enter new" / "Cancel" inline links ────────────────── */
 body.post-type-product #postcustomstuff #enternew,
 body.post-type-product #postcustomstuff #cancel {
 	display: inline-flex !important;
 	align-items: center !important;
 	height: 28px !important;
-	min-height: 0 !important;
 	line-height: 26px !important;
 	padding: 0 8px !important;
 	margin: 4px 4px 0 0 !important;
@@ -120,23 +176,12 @@ body.post-type-product #postcustomstuff #cancel {
 	text-decoration: none !important;
 	cursor: pointer !important;
 }
-
-body.post-type-product #postcustomstuff .deletemeta {
-	color: var(--wpds-color-fg-content-error, #b32d2e) !important;
-}
-
-body.post-type-product #postcustomstuff .submit:hover,
-body.post-type-product #postcustomstuff .updatemeta:hover,
 body.post-type-product #postcustomstuff #enternew:hover,
 body.post-type-product #postcustomstuff #cancel:hover {
 	background: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff) !important;
 }
 
-body.post-type-product #postcustomstuff .deletemeta:hover {
-	background: var(--wpds-color-bg-interactive-error-weak-active, #fcf0f1) !important;
-}
-
-/* "Add Custom Field" primary submit — keep visually distinct */
+/* "Add Custom Field" submit — secondary outlined */
 body.post-type-product #postcustomstuff #newmeta-submit {
 	height: 32px !important;
 	line-height: 30px !important;
@@ -151,7 +196,6 @@ body.post-type-product #postcustomstuff #newmeta-submit {
 	text-shadow: none !important;
 	cursor: pointer !important;
 }
-
 body.post-type-product #postcustomstuff #newmeta-submit:hover {
 	background: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff) !important;
 }
@@ -176,7 +220,64 @@ body.post-type-product #postcustom > .inside > p:last-child {
 	font-style: normal !important;
 	line-height: 1.4 !important;
 }
+
+/* Subtle saved-flash on the row */
+body.post-type-product #postcustomstuff #the-list tr.wc-proto-saved {
+	transition: background-color 600ms ease-out;
+	background-color: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff) !important;
+}
 </style>
+		<?php
+	}
+
+	/**
+	 * Output JS that auto-triggers the per-row Update AJAX when key/value fields lose focus.
+	 * This makes the now-hidden Update button unnecessary while keeping WP's AJAX path intact.
+	 */
+	public static function output_scripts(): void {
+		if ( ! DevPanel::is_supported_screen() ) {
+			return;
+		}
+		?>
+<script>
+( function () {
+	var list = document.getElementById( 'the-list' );
+	if ( ! list ) { return; }
+
+	function autoSaveRow( row ) {
+		var updateBtn = row.querySelector( '.updatemeta' );
+		if ( ! updateBtn ) { return; }
+		updateBtn.click();
+		row.classList.add( 'wc-proto-saved' );
+		setTimeout( function () { row.classList.remove( 'wc-proto-saved' ); }, 700 );
+	}
+
+	function wire( row ) {
+		if ( row.dataset.wcProtoWired ) { return; }
+		row.dataset.wcProtoWired = '1';
+		row.querySelectorAll( 'input[type="text"], textarea' ).forEach( function ( field ) {
+			var initial = field.value;
+			field.addEventListener( 'blur', function () {
+				if ( field.value !== initial ) {
+					initial = field.value;
+					autoSaveRow( row );
+				}
+			} );
+		} );
+	}
+
+	list.querySelectorAll( 'tr' ).forEach( wire );
+
+	/* When WPList AJAX swaps in a new row after add/update, wire it too. */
+	new MutationObserver( function ( mutations ) {
+		mutations.forEach( function ( m ) {
+			m.addedNodes.forEach( function ( node ) {
+				if ( node.nodeType === 1 && node.tagName === 'TR' ) { wire( node ); }
+			} );
+		} );
+	} ).observe( list, { childList: true } );
+}() );
+</script>
 		<?php
 	}
 }
