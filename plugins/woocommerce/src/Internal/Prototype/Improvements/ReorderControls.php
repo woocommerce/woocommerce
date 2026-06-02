@@ -113,6 +113,11 @@ class ReorderControls {
 	var COOKIE            = "' . esc_js( $cookie_key ) . '";
 	var RESET_URL         = "' . esc_js( $reset_url ) . '";
 
+	function toggleSortable( enable ) {
+		if ( ! window.jQuery ) { return; }
+		try { window.jQuery( ".meta-box-sortables" ).sortable( enable ? "enable" : "disable" ); } catch ( e ) {}
+	}
+
 	function setVisible( show ) {
 		var hideStyle = document.getElementById( "wc-proto-reorder-hide" );
 		if ( show ) {
@@ -121,15 +126,22 @@ class ReorderControls {
 			if ( ! hideStyle ) {
 				var s = document.createElement( "style" );
 				s.id = "wc-proto-reorder-hide";
-				s.textContent = ".postbox-header .handle-order-higher, .postbox-header .handle-order-lower { display: none !important; }";
+				s.textContent = ".postbox-header .handle-order-higher, .postbox-header .handle-order-lower { display: none !important; } .meta-box-sortables .postbox > .postbox-header, .meta-box-sortables .postbox > .postbox-header .hndle { cursor: default !important; }";
 				document.head.appendChild( s );
 			}
 		}
+		toggleSortable( show );
 		document.cookie = COOKIE + "=" + ( show ? "1" : "0" ) + ";path=/;max-age=86400";
 	}
 
 	document.getElementById( "wc-proto-reorder-controls" ).addEventListener( "change", function () {
 		setVisible( this.checked );
+	} );
+
+	/* On load, sync sortable state with the cookie (postbox.js initialises sortable after our script). */
+	window.addEventListener( "load", function () {
+		var checkbox = document.getElementById( "wc-proto-reorder-controls" );
+		toggleSortable( !! ( checkbox && checkbox.checked ) );
 	} );
 
 	var descP = document.querySelector( ".metabox-prefs-container > p, .metabox-prefs > p" );
@@ -161,6 +173,8 @@ class ReorderControls {
 			echo '<style id="wc-proto-reorder-hide">
 				.postbox-header .handle-order-higher,
 				.postbox-header .handle-order-lower { display: none !important; }
+				.meta-box-sortables .postbox > .postbox-header { cursor: default !important; }
+				.meta-box-sortables .postbox > .postbox-header .hndle { cursor: default !important; }
 			</style>';
 		}
 	}
