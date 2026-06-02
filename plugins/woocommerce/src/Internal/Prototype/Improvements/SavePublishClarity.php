@@ -377,11 +377,26 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 		var t = document.getElementById( targetId );
 		if ( t ) { t.click(); }
 	}
+
+	// Ensure any open WP metabox panels commit their values before form submission.
+	function ensureMetaboxOk() {
+		var visPanel = document.getElementById( 'post-visibility-select' );
+		if ( visPanel && visPanel.style.display !== 'none' ) {
+			var visOk = visPanel.querySelector( '.save-post-visibility' );
+			if ( visOk ) { visOk.click(); }
+		}
+		var tsWrap = document.querySelector( '.timestamp-wrap' );
+		if ( tsWrap && tsWrap.style.display !== 'none' ) {
+			var tsOk = tsWrap.querySelector( '.save-timestamp' );
+			if ( tsOk ) { tsOk.click(); }
+		}
+	}
+
 	if ( btnSaveDraft ) {
-		btnSaveDraft.addEventListener( 'click', function () { relayClick( 'save-post' ); } );
+		btnSaveDraft.addEventListener( 'click', function () { ensureMetaboxOk(); relayClick( 'save-post' ); } );
 	}
 	if ( btnPublish ) {
-		btnPublish.addEventListener( 'click', function () { relayClick( 'publish' ); } );
+		btnPublish.addEventListener( 'click', function () { ensureMetaboxOk(); relayClick( 'publish' ); } );
 	}
 
 	/* ── Kebab menu (details/summary — close on outside click or Escape) ── */
@@ -494,6 +509,52 @@ body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (st
 			} );
 		}
 	}
+
+	/* ── Visibility dropdown ────────────────────────────────── */
+	( function () {
+		var visPanel = document.getElementById( 'post-visibility-select' );
+		if ( ! visPanel ) { return; }
+		var checked = visPanel.querySelector( 'input[type="radio"]:checked' );
+		var curVal  = checked ? checked.value : 'public';
+		var sel     = document.createElement( 'select' );
+		sel.id        = 'wc-proto-vis-select';
+		sel.className = 'wc-proto-vis-select';
+		[
+			{ value: 'public',   label: 'Public' },
+			{ value: 'password', label: 'Password protected' },
+			{ value: 'private',  label: 'Private' },
+		].forEach( function ( opt ) {
+			var o         = document.createElement( 'option' );
+			o.value       = opt.value;
+			o.textContent = opt.label;
+			if ( opt.value === curVal ) { o.selected = true; }
+			sel.appendChild( o );
+		} );
+		sel.addEventListener( 'change', function () {
+			var radio = document.getElementById( 'visibility-radio-' + sel.value );
+			if ( radio ) { radio.checked = true; }
+			var pwSpan = document.getElementById( 'password-span' );
+			if ( pwSpan ) {
+				pwSpan.style.display = ( 'password' === sel.value ) ? 'block' : 'none';
+			}
+		} );
+		visPanel.insertBefore( sel, visPanel.firstChild );
+	}() );
+
+	/* ── "Publish:" colon in all timestamp states ───────────── */
+	var tsDisplay = document.getElementById( 'timestamp' );
+	if ( tsDisplay ) {
+		tsDisplay.innerHTML = tsDisplay.innerHTML.replace( /^Publish </, 'Publish: <' );
+	}
+
+	/* ── Replace "Edit" text with pencil SVG in metabox links ── */
+	var pencilSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>';
+	[ '.edit-visibility', '.edit-timestamp' ].forEach( function ( cls ) {
+		var link = document.querySelector( cls );
+		if ( ! link ) { return; }
+		var span = link.querySelector( 'span[aria-hidden]' );
+		if ( span ) { span.innerHTML = pencilSvg; }
+	} );
 }() );
 </script>
 		<?php
