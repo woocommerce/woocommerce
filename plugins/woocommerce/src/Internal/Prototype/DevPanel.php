@@ -20,15 +20,16 @@ class DevPanel {
 	const COOKIE_KEY = 'wc_prototype_flags';
 
 	const FLAGS = array(
-		'reorder_controls'      => 'Reorderable controls (Screen Options)',
-		'icon_modernisation'    => 'Modern SVG icons',
-		'max_width'             => 'Centered layout (1200px max)',
-		'save_publish_clarity'  => 'Save & publish header bar',
-		'typography_hierarchy'  => 'Typography hierarchy',
-		'spacing_refinement'    => 'Tighter spacing',
-		'compact_editor_ui'     => 'Compact CTAs & inputs (32px)',
-		'taxonomy_panel_polish' => 'Modern taxonomy panel',
-		'publish_metabox'       => 'Modern visibility (publish) metabox',
+		'reorder_controls'          => 'Reorderable controls (Screen Options)',
+		'icon_modernisation'        => 'Modern SVG icons',
+		'max_width'                 => 'Centered layout (1200px max)',
+		'save_publish_clarity'      => 'Save & publish header bar',
+		'typography_hierarchy'      => 'Typography hierarchy',
+		'spacing_refinement'        => 'Tighter spacing',
+		'compact_editor_ui'         => 'Compact CTAs & inputs (32px)',
+		'taxonomy_panel_polish'     => 'Modern taxonomy panel',
+		'downloadable_files_polish' => 'Cleaner downloadable files list',
+		'publish_metabox'           => 'Modern visibility (publish) metabox',
 	);
 
 	/**
@@ -103,6 +104,11 @@ class DevPanel {
 					/>
 				</div>
 				<?php endforeach; ?>
+				<div style="border-top:1px solid rgba(255,255,255,0.15);margin-top:4px;padding-top:8px;display:flex;justify-content:flex-end;">
+					<button id="wc-proto-disable-all" type="button" style="background:none;border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:4px;padding:2px 10px;cursor:pointer;font-family:inherit;font-size:11px;">
+						Disable all
+					</button>
+				</div>
 			</div>
 			<button id="wc-proto-toggle" style="background:rgba(0,0,0,0.75);color:#fff;border:none;border-radius:12px;padding:4px 12px;cursor:pointer;display:block;margin-left:auto;">Dev</button>
 		</div>
@@ -138,6 +144,11 @@ class DevPanel {
 					setFlags( flags );
 					location.reload();
 				} );
+			} );
+
+			document.getElementById( 'wc-proto-disable-all' ).addEventListener( 'click', function () {
+				setFlags( {} );
+				location.reload();
 			} );
 		}() );
 		</script>
