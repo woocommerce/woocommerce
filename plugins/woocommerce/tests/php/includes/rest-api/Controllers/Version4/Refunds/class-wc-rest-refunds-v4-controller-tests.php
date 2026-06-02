@@ -1877,6 +1877,60 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Legacy v3-style path: explicit refund_total with no quantity still works (201).
+	 *
+	 * The PR added a strict quantity check in validate_line_items because the
+	 * new auto-compute path needs a real quantity, but that check must NOT
+	 * affect requests that supply refund_total directly — those are the
+	 * pre-existing v4 contract and POS clients integrating against v3 will
+	 * eventually depend on it too.
+	 */
+	public function test_refunds_create_legacy_form_no_quantity_with_explicit_refund_total(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 50.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		// Legacy explicit form: refund_total provided, no quantity.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'refund_total' => 50.00,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( '50.00', $data['amount'] );
+
+		$this->created_refunds[] = $data['id'];
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox Simplified form rejects a line_item_id that belongs to a different order with invalid_line_item.
 	 */
 	public function test_refunds_create_simplified_form_rejects_cross_order_line_item_id(): void {

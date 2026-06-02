@@ -191,12 +191,17 @@ class DataUtils {
 				return new WP_Error( 'invalid_line_item', __( 'Line item is not a product, fee, or shipping line.', 'woocommerce' ) );
 			}
 
-			// Validate quantity is a positive integer. Without this guard, a request
-			// like {line_item_id: X} (no quantity) would silently pass downstream
-			// checks (int < null is false in PHP) and surface as a misleading
-			// "Refund total must be greater than zero" error.
-			if ( ! isset( $line_item['quantity'] ) || ! is_int( $line_item['quantity'] ) || $line_item['quantity'] < 1 ) {
-				return new WP_Error( 'invalid_line_item', __( 'Line item quantity must be a positive integer.', 'woocommerce' ) );
+			// Quantity is required only when the client omits refund_total — the
+			// auto-compute path needs a real quantity to derive the unit price.
+			// When refund_total is provided explicitly (legacy v3-style path),
+			// quantity is informational and can be missing/zero, matching the
+			// original v4 schema's `default: 0` behavior.
+			$refund_total_missing = ! array_key_exists( 'refund_total', $line_item ) || null === $line_item['refund_total'];
+			if ( $refund_total_missing && ( ! isset( $line_item['quantity'] ) || ! is_int( $line_item['quantity'] ) || $line_item['quantity'] < 1 ) ) {
+				return new WP_Error(
+					'invalid_line_item',
+					__( 'Line item quantity must be a positive integer when refund_total is omitted.', 'woocommerce' )
+				);
 			}
 
 			// Auto-compute requires a non-zero source quantity to derive the unit
@@ -204,7 +209,6 @@ class DataUtils {
 			// source product has zero quantity, surface a clear error rather than
 			// letting the request slip into the misleading "must be greater than
 			// zero" branch downstream.
-			$refund_total_missing = ! array_key_exists( 'refund_total', $line_item ) || null === $line_item['refund_total'];
 			if ( $refund_total_missing && $item instanceof \WC_Order_Item_Product && 0 === $item->get_quantity() ) {
 				return new WP_Error(
 					'invalid_line_item',
@@ -216,8 +220,10 @@ class DataUtils {
 				);
 			}
 
-			// Validate item quantity is not greater than the item quantity.
-			if ( $item->get_quantity() < $line_item['quantity'] ) {
+			// Validate refund quantity is not greater than the source item quantity.
+			// Only fires when a quantity was provided — the legacy explicit-refund_total
+			// path may omit it.
+			if ( isset( $line_item['quantity'] ) && $item->get_quantity() < $line_item['quantity'] ) {
 				/* translators: %s: item quantity */
 				return new WP_Error( 'invalid_line_item', sprintf( __( 'Line item quantity cannot be greater than the item quantity (%s).', 'woocommerce' ), $item->get_quantity() ) );
 			}

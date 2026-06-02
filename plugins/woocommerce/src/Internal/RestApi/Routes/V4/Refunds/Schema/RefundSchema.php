@@ -228,10 +228,9 @@ class RefundSchema extends AbstractSchema {
 							'validate_callback' => 'rest_validate_request_arg',
 						),
 						'quantity'     => array(
-							'description'       => __( 'Quantity refunded.', 'woocommerce' ),
+							'description'       => __( 'Quantity refunded. Required when refund_total is omitted (the backend computes the total from unit price × quantity); optional when refund_total is provided explicitly.', 'woocommerce' ),
 							'type'              => 'integer',
 							'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
-							'default'           => 0,
 							'sanitize_callback' => 'wc_stock_amount',
 							'validate_callback' => 'rest_validate_request_arg',
 						),
