@@ -228,7 +228,6 @@ select#wc-proto-vis-select,
 			dateFormat:  'F j, Y H:i',
 			defaultDate: new Date( year, month, day, hour, min ),
 			time_24hr:   true,
-			position:    'auto left',
 			onChange: function ( dates ) {
 				if ( ! dates.length ) { return; }
 				var d   = dates[ 0 ];
