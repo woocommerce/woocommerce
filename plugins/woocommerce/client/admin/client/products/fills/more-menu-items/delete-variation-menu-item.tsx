@@ -80,7 +80,7 @@ export const DeleteVariationMenuItem = ( {
 					sprintf(
 						// translators: %s is the variation name.
 						__( '%s deleted.', 'woocommerce' ),
-						name
+						name as string
 					)
 				);
 				setShowModal( false );
@@ -129,7 +129,7 @@ export const DeleteVariationMenuItem = ( {
 					title={ sprintf(
 						// translators: %s is the variation name.
 						__( 'Delete %s?', 'woocommerce' ),
-						name
+						name as string
 					) }
 					description={
 						<>
