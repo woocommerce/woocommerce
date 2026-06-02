@@ -22,7 +22,7 @@
 	},
 	"exports": {
 		".": {
-			"source": "./src/index.js",
+			"wc-source": "./src/index.js",
 			"types": "./build-types/index.d.ts",
 			"import": "./build-module/index.js",
 			"require": "./build/index.js"

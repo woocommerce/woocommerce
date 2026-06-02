@@ -19,7 +19,7 @@
 	"private": true,
 	"exports": {
 		".": {
-			"source": "./src/util/index.js",
+			"wc-source": "./src/util/index.js",
 			"types": "./build-types/util/index.d.ts",
 			"import": "./build-module/util/index.js",
 			"require": "./build/util/index.js"
