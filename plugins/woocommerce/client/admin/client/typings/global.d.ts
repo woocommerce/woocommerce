@@ -52,7 +52,6 @@ declare global {
 			'analytics-scheduled-import': boolean;
 			'activity-panels': boolean;
 			analytics: boolean;
-			'coming-soon-newsletter-template': boolean;
 			coupons: boolean;
 			'customer-effort-score-tracks': boolean;
 			homescreen: boolean;
