@@ -54,8 +54,10 @@ class IconModernisation {
 		if ( ! $screen || 'post' !== $screen->base || 'product' !== $screen->post_type ) {
 			return;
 		}
+		global $post;
+		$post_status = $post ? $post->post_status : 'publish';
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo self::build_css();
+		echo self::build_css( $post_status );
 	}
 
 	/**
@@ -80,8 +82,10 @@ class IconModernisation {
 
 	/**
 	 * Build the full CSS block replacing product data tab icons.
+	 *
+	 * @param string $post_status Current post status, used to pick the status icon variant.
 	 */
-	private static function build_css(): string {
+	private static function build_css( string $post_status = 'publish' ): string {
 		$tabs = array(
 			'general_tab'                 => self::mask_url(
 				self::path( 'M4.75 4a.75.75 0 0 0-.75.75v7.826c0 .2.08.39.22.53l6.72 6.716a2.313 2.313 0 0 0 3.276-.001l5.61-5.611-.531-.53.532.528a2.315 2.315 0 0 0 0-3.264L13.104 4.22a.75.75 0 0 0-.53-.22H4.75ZM19 12.576a.815.815 0 0 1-.236.574l-5.61 5.611a.814.814 0 0 1-1.153 0L5.5 12.264V5.5h6.763l6.5 6.502a.816.816 0 0 1 .237.574ZM8.75 9.75a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z' )
@@ -261,15 +265,15 @@ class IconModernisation {
 		$css       .= "\tmask-position: center !important;\n";
 		$css       .= "}\n";
 
-		// Publish metabox row icons — replace Dashicons \f173/\f177/\f145 with SVG mask-image.
+		// Publish metabox row icons — replace Dashicons \f173/\f177/\f145 with @wordpress/icons SVGs.
 		$icon_status     = self::mask_url(
-			self::path( 'M7 5h10v2H7V5zm0 4h10v2H7V9zm0 4h7v2H7v-2zM5 3H3v18h18V3H5zm14 16H5V5h14v14z' )
+			self::path( 'M12 18.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13ZM4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0Zm11.53-1.47-1.06-1.06L11 12.94l-1.47-1.47-1.06 1.06L11 15.06l4.53-4.53Z', true )
 		);
 		$icon_visibility = self::mask_url(
-			self::path( 'M12 4C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 13c-3.03 0-5.5-2.47-5.5-5.5S8.97 6 12 6s5.5 2.47 5.5 5.5S15.03 17 12 17zm0-9c-1.93 0-3.5 1.57-3.5 3.5S10.07 15 12 15s3.5-1.57 3.5-3.5S13.93 8 12 8z' )
+			self::path( 'M3.99961 13C4.67043 13.3354 4.6703 13.3357 4.67017 13.3359L4.67298 13.3305C4.67621 13.3242 4.68184 13.3135 4.68988 13.2985C4.70595 13.2686 4.7316 13.2218 4.76695 13.1608C4.8377 13.0385 4.94692 12.8592 5.09541 12.6419C5.39312 12.2062 5.84436 11.624 6.45435 11.0431C7.67308 9.88241 9.49719 8.75 11.9996 8.75C14.502 8.75 16.3261 9.88241 17.5449 11.0431C18.1549 11.624 18.6061 12.2062 18.9038 12.6419C19.0523 12.8592 19.1615 13.0385 19.2323 13.1608C19.2676 13.2218 19.2933 13.2686 19.3093 13.2985C19.3174 13.3135 19.323 13.3242 19.3262 13.3305L19.3291 13.3359C19.3289 13.3357 19.3288 13.3354 19.9996 13C20.6704 12.6646 20.6703 12.6643 20.6701 12.664L20.6697 12.6632L20.6688 12.6614L20.6662 12.6563L20.6583 12.6408C20.6517 12.6282 20.6427 12.6108 20.631 12.5892C20.6078 12.5459 20.5744 12.4852 20.5306 12.4096C20.4432 12.2584 20.3141 12.0471 20.1423 11.7956C19.7994 11.2938 19.2819 10.626 18.5794 9.9569C17.1731 8.61759 14.9972 7.25 11.9996 7.25C9.00203 7.25 6.82614 8.61759 5.41987 9.9569C4.71736 10.626 4.19984 11.2938 3.85694 11.7956C3.68511 12.0471 3.55605 12.2584 3.4686 12.4096C3.42484 12.4852 3.39142 12.5459 3.36818 12.5892C3.35656 12.6108 3.34748 12.6282 3.34092 12.6408L3.33297 12.6563L3.33041 12.6614L3.32948 12.6632L3.32911 12.664C3.32894 12.6643 3.32879 12.6646 3.99961 13ZM11.9996 16C13.9326 16 15.4996 14.433 15.4996 12.5C15.4996 10.567 13.9326 9 11.9996 9C10.0666 9 8.49961 10.567 8.49961 12.5C8.49961 14.433 10.0666 16 11.9996 16Z' )
 		);
 		$icon_calendar   = self::mask_url(
-			self::path( 'M19 4h-1V2h-2v2H8V2H6v2H5C3.89 4 3 4.9 3 6v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5z' )
+			self::path( 'M12 18.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13ZM4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0Zm9 1V8h-1.5v3.5h-2V13H13Z', true )
 		);
 
 		$css .= '#post-body .misc-pub-post-status::before,' . "\n";
@@ -286,9 +290,15 @@ class IconModernisation {
 		$css .= "\tmask-position: center !important;\n";
 		$css .= "\tvertical-align: top !important;\n";
 		$css .= "}\n";
+
+		$is_draft      = in_array( $post_status, array( 'draft', 'auto-draft' ), true );
+		$active_status = $is_draft
+			? self::mask_url( self::path( 'M12 18.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13ZM4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0Zm8 4a4 4 0 0 0 4-4H8a4 4 0 0 0 4 4Z', true ) )
+			: $icon_status;
+
 		$css .= '#post-body .misc-pub-post-status::before {' . "\n";
-		$css .= "\tmask-image: {$icon_status};\n";
-		$css .= "\t-webkit-mask-image: {$icon_status};\n";
+		$css .= "\tmask-image: {$active_status};\n";
+		$css .= "\t-webkit-mask-image: {$active_status};\n";
 		$css .= "}\n";
 		$css .= '#post-body #visibility::before {' . "\n";
 		$css .= "\tmask-image: {$icon_visibility};\n";

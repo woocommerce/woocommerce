@@ -60,11 +60,19 @@ select#wc-proto-vis-select {
 	margin-bottom: 4px;
 }
 
-/* ── OK / Cancel: right-aligned row, compact 32px, 8px gap ── */
+/* Ensure panel containers are block so the select and OK/Cancel row stack vertically. */
+#post-visibility-select,
+#post-status-select {
+	display: block !important;
+}
+
+/* ── OK / Cancel: own row, right-aligned, compact 32px, 8px gap ── */
 #post-visibility-select > p,
 #post-status-select > p,
 #timestampdiv > p {
 	display: flex !important;
+	width: 100% !important;
+	box-sizing: border-box !important;
 	align-items: center !important;
 	justify-content: flex-end !important;
 	gap: 8px !important;
@@ -109,6 +117,11 @@ select#wc-proto-vis-select {
 	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
 	text-decoration: none !important;
 }
+
+/* Hide the label colon while the edit panel is open. */
+.misc-pub-section.wc-proto-editing .wc-proto-label-colon {
+	display: none;
+}
 </style>
 		<?php
 	}
@@ -152,19 +165,43 @@ select#wc-proto-vis-select {
 		visPanel.insertBefore( sel, visPanel.firstChild );
 	}
 
-	/* ── "Publish:" colon in all timestamp states ───────────── */
+	/* ── "Publish:" colon for draft/immediate state ─────────── */
 	var tsDisplay = document.getElementById( 'timestamp' );
 	if ( tsDisplay ) {
 		tsDisplay.innerHTML = tsDisplay.innerHTML.replace( /^Publish </, 'Publish: <' );
 	}
 
-	/* ── Hide display label when edit panel is open to avoid repetition ── */
+	/* ── Watch edit panels: hide repeated label text and colon ── */
+	function wrapLabelColon( section ) {
+		var nodes = section.childNodes;
+		for ( var i = 0; i < nodes.length; i++ ) {
+			var node = nodes[ i ];
+			if ( 3 !== node.nodeType ) { continue; }
+			var colonIdx = node.textContent.indexOf( ':' );
+			if ( -1 === colonIdx ) { continue; }
+			var before = document.createTextNode( node.textContent.slice( 0, colonIdx ) );
+			var colon  = document.createElement( 'span' );
+			colon.className = 'wc-proto-label-colon';
+			colon.textContent = ':';
+			var after  = document.createTextNode( node.textContent.slice( colonIdx + 1 ) );
+			section.insertBefore( before, node );
+			section.insertBefore( colon,  node );
+			section.insertBefore( after,  node );
+			section.removeChild( node );
+			return;
+		}
+	}
+
 	function watchPanel( panelId, displayId ) {
 		var panel   = document.getElementById( panelId );
 		var display = document.getElementById( displayId );
-		if ( ! panel || ! display ) { return; }
+		if ( ! panel ) { return; }
+		var section = panel.closest ? panel.closest( '.misc-pub-section' ) : null;
+		if ( section ) { wrapLabelColon( section ); }
 		new MutationObserver( function () {
-			display.style.display = ( 'none' !== window.getComputedStyle( panel ).display ) ? 'none' : '';
+			var open = 'none' !== window.getComputedStyle( panel ).display;
+			if ( display ) { display.style.display = open ? 'none' : ''; }
+			if ( section ) { section.classList.toggle( 'wc-proto-editing', open ); }
 		} ).observe( panel, { attributes: true, attributeFilter: [ 'style' ] } );
 	}
 	watchPanel( 'post-visibility-select', 'post-visibility-display' );

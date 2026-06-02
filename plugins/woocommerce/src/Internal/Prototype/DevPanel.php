@@ -25,9 +25,10 @@ class DevPanel {
 		'max_width'             => 'Max-width cap (1200 px, centered)',
 		'save_publish_clarity'  => 'Save & publish header',
 		'typography_hierarchy'  => 'Typography hierarchy',
-		'spacing_refinement'   => 'Spacing refinement',
-		'compact_editor_ui'    => 'Compact editor UI (Add Media button)',
-		'publish_metabox'      => 'Publish metabox redesign (visibility, scheduling)',
+		'spacing_refinement'    => 'Spacing refinement',
+		'compact_editor_ui'     => 'Compact editor UI (Add Media button)',
+		'taxonomy_panel_polish' => 'Taxonomy panel polish (modern tabs, flat checklist)',
+		'publish_metabox'       => 'Publish metabox redesign (visibility, scheduling)',
 	);
 
 	/**

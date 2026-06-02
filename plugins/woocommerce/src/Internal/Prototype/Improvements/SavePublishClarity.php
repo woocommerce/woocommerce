@@ -423,30 +423,7 @@ body.post-type-product #screen-meta > div {
 		}, 250 );
 	} );
 
-	/* ── Screen options: push header down when panel opens ── */
-	( function () {
-		var screenMeta  = document.getElementById( 'screen-meta' );
-		var hdr         = document.getElementById( 'wc-proto-save-header' );
-		var baseTop     = <?php echo (int) $top; ?>;
-		if ( ! screenMeta || ! hdr ) { return; }
-
-		function syncTop() {
-			hdr.style.top = ( baseTop + screenMeta.offsetHeight ) + 'px';
-		}
-
-		// Watch for the screen-meta-active class WP toggles when screen options open/close.
-		new MutationObserver( function () {
-			// Poll during the jQuery slide animation (max 600ms).
-			var ticks = 0;
-			var id = setInterval( function () {
-				syncTop();
-				if ( ++ticks >= 12 ) { clearInterval( id ); }
-			}, 50 );
-		} ).observe( screenMeta, { attributes: true, attributeFilter: [ 'class' ] } );
-
-		// Initial sync in case panel is already open on page load.
-		syncTop();
-	}() );
+	/* Screen Options is now positioned below the header via CSS margin-top — no JS needed. */
 
 	/* ── TinyMCE editors: hook into typing in the visual editor ── */
 	function hookTinymce( editor ) {

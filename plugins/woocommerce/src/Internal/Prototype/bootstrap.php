@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\Prototype\Improvements\PublishMetabox;
 use Automattic\WooCommerce\Internal\Prototype\Improvements\ReorderControls;
 use Automattic\WooCommerce\Internal\Prototype\Improvements\SavePublishClarity;
 use Automattic\WooCommerce\Internal\Prototype\Improvements\SpacingRefinement;
+use Automattic\WooCommerce\Internal\Prototype\Improvements\TaxonomyPanelPolish;
 use Automattic\WooCommerce\Internal\Prototype\Improvements\TypographyHierarchy;
 
 DevPanel::init();
@@ -24,6 +25,7 @@ IconModernisation::init();
 MaxWidth::init();
 SavePublishClarity::init();
 SpacingRefinement::init();
+TaxonomyPanelPolish::init();
 TypographyHierarchy::init();
 EditorControls::init();
 PublishMetabox::init();
