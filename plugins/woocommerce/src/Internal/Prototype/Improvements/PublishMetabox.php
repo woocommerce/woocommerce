@@ -105,7 +105,7 @@ select#wc-proto-vis-select {
 .cancel-post-visibility:hover,
 .cancel-post-status:hover,
 .cancel-timestamp:hover {
-	background: var(--wpds-color-bg-interactive-neutral-weak-active, #f0f0f1) !important;
+	background: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff) !important;
 	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
 	text-decoration: none !important;
 }
