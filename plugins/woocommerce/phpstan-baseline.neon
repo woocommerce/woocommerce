@@ -52780,12 +52780,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCategory.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 6
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
 			message: '#^Call to method get_param\(\) on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_REST_Request\.$#'
 			identifier: class.notFound
 			count: 12
@@ -52842,12 +52836,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$callback of function remove_filter expects array\|\(callable\(\)\: mixed\)\|string, \(Closure\(mixed, mixed\)\: mixed\)\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Controller\:\:build_frontend_query\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
 
