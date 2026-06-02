@@ -28,20 +28,8 @@ class PublishMetabox {
 		if ( ! DevPanel::is_flag_enabled( self::FLAG_KEY ) ) {
 			return;
 		}
-		add_action( 'admin_enqueue_scripts', array( self::class, 'enqueue_assets' ) );
 		add_action( 'admin_head', array( self::class, 'output_styles' ) );
 		add_action( 'admin_footer', array( self::class, 'output_scripts' ) );
-	}
-
-	/**
-	 * Enqueue flatpickr (bundled with WordPress 5.5+).
-	 */
-	public static function enqueue_assets(): void {
-		if ( ! DevPanel::is_supported_screen() ) {
-			return;
-		}
-		wp_enqueue_script( 'flatpickr' );
-		wp_enqueue_style( 'flatpickr' );
 	}
 
 	/**
@@ -125,16 +113,15 @@ select#wc-proto-vis-select,
 	text-decoration: none !important;
 }
 
-/* ── Flatpickr date/time input ── */
-/* Wrapper flatpickr injects must be full width. */
-.flatpickr-wrapper {
-	width: 100% !important;
-}
+/* ── Native datetime-local input ── */
 #wc-proto-datetime {
 	display: block;
 	width: 100%;
 	box-sizing: border-box;
 	margin-bottom: 4px;
+	height: 32px;
+	padding: 0 8px;
+	font-size: 13px;
 }
 
 /* Hide label colon while edit panel is open. */
@@ -197,63 +184,42 @@ select#wc-proto-vis-select,
 		}
 	}
 
-	/* ── Flatpickr date/time picker ─────────────────────────── */
-	function initFlatpickr() {
-		var tsDiv = document.getElementById( 'timestampdiv' );
-		if ( ! tsDiv || ! window.flatpickr ) { return; }
+	/* ── Native datetime-local input replaces WP's month/day/year/hour/minute fields ── */
+	var tsDiv = document.getElementById( 'timestampdiv' );
+	if ( tsDiv ) {
+		var aa  = document.getElementById( 'aa' );
+		var mm  = document.getElementById( 'mm' );
+		var jj  = document.getElementById( 'jj' );
+		var hh  = document.getElementById( 'hh' );
+		var mn  = document.getElementById( 'mn' );
+		var pad = function ( n ) { return String( n ).padStart( 2, '0' ); };
+		var now = new Date();
 
-		var aa    = document.getElementById( 'aa' );
-		var mm    = document.getElementById( 'mm' );
-		var jj    = document.getElementById( 'jj' );
-		var hh    = document.getElementById( 'hh' );
-		var mn    = document.getElementById( 'mn' );
-		var year  = aa ? parseInt( aa.value, 10 ) : new Date().getFullYear();
-		var month = mm ? parseInt( mm.value, 10 ) - 1 : new Date().getMonth();
-		var day   = jj ? parseInt( jj.value, 10 ) : new Date().getDate();
-		var hour  = hh ? parseInt( hh.value, 10 ) : 0;
-		var min   = mn ? parseInt( mn.value, 10 ) : 0;
-
-		var fpInput = document.createElement( 'input' );
-		fpInput.type = 'text';
-		fpInput.id   = 'wc-proto-datetime';
+		var dtInput = document.createElement( 'input' );
+		dtInput.type = 'datetime-local';
+		dtInput.id   = 'wc-proto-datetime';
+		dtInput.value =
+			( aa ? aa.value : now.getFullYear() ) + '-' +
+			pad( mm ? mm.value : now.getMonth() + 1 ) + '-' +
+			pad( jj ? jj.value : now.getDate() ) + 'T' +
+			pad( hh ? hh.value : 0 ) + ':' +
+			pad( mn ? mn.value : 0 );
 
 		var tsWrap = tsDiv.querySelector( '.timestamp-wrap' );
 		if ( tsWrap ) {
-			tsDiv.insertBefore( fpInput, tsWrap );
+			tsDiv.insertBefore( dtInput, tsWrap );
 			tsWrap.style.display = 'none';
 		}
 
-		flatpickr( fpInput, {
-			enableTime:  true,
-			dateFormat:  'F j, Y H:i',
-			defaultDate: new Date( year, month, day, hour, min ),
-			time_24hr:   true,
-			onChange: function ( dates ) {
-				if ( ! dates.length ) { return; }
-				var d   = dates[ 0 ];
-				var pad = function ( n ) { return String( n ).padStart( 2, '0' ); };
-				if ( aa ) { aa.value = d.getFullYear(); }
-				if ( mm ) { mm.value = pad( d.getMonth() + 1 ); }
-				if ( jj ) { jj.value = pad( d.getDate() ); }
-				if ( hh ) { hh.value = pad( d.getHours() ); }
-				if ( mn ) { mn.value = pad( d.getMinutes() ); }
-			},
+		dtInput.addEventListener( 'change', function () {
+			var parts = dtInput.value.split( /[-T:]/ );
+			if ( parts.length < 5 ) { return; }
+			if ( aa ) { aa.value = parts[ 0 ]; }
+			if ( mm ) { mm.value = parts[ 1 ]; }
+			if ( jj ) { jj.value = parts[ 2 ]; }
+			if ( hh ) { hh.value = parts[ 3 ]; }
+			if ( mn ) { mn.value = parts[ 4 ]; }
 		} );
-	}
-
-	if ( window.flatpickr ) {
-		initFlatpickr();
-	} else {
-		/* Fallback: load flatpickr from CDN if WordPress didn't bundle it. */
-		var fpCss = document.createElement( 'link' );
-		fpCss.rel  = 'stylesheet';
-		fpCss.href = 'https://cdn.jsdelivr.net/npm/flatpickr@4/dist/flatpickr.min.css';
-		document.head.appendChild( fpCss );
-
-		var fpJs = document.createElement( 'script' );
-		fpJs.src = 'https://cdn.jsdelivr.net/npm/flatpickr@4/dist/flatpickr.min.js';
-		fpJs.onload = initFlatpickr;
-		document.head.appendChild( fpJs );
 	}
 
 	/* ── Hide display value + colon while panel is open ────── */
