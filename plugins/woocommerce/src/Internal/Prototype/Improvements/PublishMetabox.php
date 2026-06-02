@@ -73,20 +73,20 @@ select#wc-proto-vis-select,
 	gap: 8px !important;
 	margin: 8px 0 0 !important;
 }
-/* OK: primary filled — matches @wordpress/components Button "primary" variant. */
+/* Save: secondary outlined — matches @wordpress/components Button "secondary" variant. */
 .save-post-visibility.button,
 .save-post-status.button,
 .save-timestamp.button {
 	height: 32px !important;
 	min-height: 0 !important;
-	line-height: 32px !important;
+	line-height: 30px !important;
 	padding: 0 12px !important;
 	font-size: 13px !important;
 	margin: 0 !important;
 	vertical-align: middle !important;
-	background: var(--wpds-color-bg-interactive-brand, #3858e9) !important;
-	color: #fff !important;
-	border: none !important;
+	background: transparent !important;
+	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
+	border: 1px solid var(--wpds-color-fg-interactive-brand, #3858e9) !important;
 	border-radius: var(--wpds-border-radius-xs, 2px) !important;
 	box-shadow: none !important;
 	text-shadow: none !important;
@@ -94,8 +94,8 @@ select#wc-proto-vis-select,
 .save-post-visibility.button:hover,
 .save-post-status.button:hover,
 .save-timestamp.button:hover {
-	background: var(--wpds-color-bg-interactive-brand-hover, #1d35b4) !important;
-	color: #fff !important;
+	background: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff) !important;
+	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
 }
 /* Cancel: tertiary/minimal — 32px, no background. */
 .cancel-post-visibility,
@@ -177,6 +177,12 @@ select#wc-proto-vis-select,
 			}
 		}
 	}
+
+	/* ── Relabel "OK" buttons to "Save" ─────────────────────── */
+	[ '.save-post-visibility', '.save-post-status', '.save-timestamp' ].forEach( function ( sel ) {
+		var btn = document.querySelector( sel );
+		if ( btn ) { btn.textContent = 'Save'; }
+	} );
 
 	/* ── Visibility dropdown ────────────────────────────────── */
 	var visPanel = document.getElementById( 'post-visibility-select' );
