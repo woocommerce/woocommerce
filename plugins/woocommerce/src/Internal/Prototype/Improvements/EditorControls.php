@@ -26,7 +26,20 @@ class EditorControls {
 		if ( ! DevPanel::is_flag_enabled( 'compact_editor_ui' ) ) {
 			return;
 		}
+		add_action( 'admin_head', array( self::class, 'output_styles' ) );
 		add_action( 'admin_footer', array( self::class, 'replace_media_buttons' ) );
+	}
+
+	/**
+	 * Output styles for the compact editor controls.
+	 */
+	public static function output_styles(): void {
+		if ( ! DevPanel::is_supported_screen() ) {
+			return;
+		}
+		echo '<style id="wc-proto-editor-controls">
+			.wp-media-buttons { padding-top: 2px; }
+		</style>';
 	}
 
 	/**
@@ -39,13 +52,15 @@ class EditorControls {
 		?>
 		<script>
 		( function () {
-			var ICON = '<span class="dashicons dashicons-admin-media" aria-hidden="true" style="font-size:16px;width:16px;height:16px;line-height:1;flex-shrink:0;margin-top:1px"></span>';
+			var ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" style="flex-shrink:0"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM5 4.5h14c.3 0 .5.2.5.5v8.4l-3-2.9c-.3-.3-.8-.3-1 0L11 14l-2.5-2.5c-.3-.3-.8-.3-1.1 0L5 14V5c0-.3.2-.5.5-.5zm14 15H5c-.3 0-.5-.2-.5-.5v-2.4l4-4 2.5 2.5c.3.3.8.3 1.1 0L16 11l3.5 3.4V19c0 .3-.2.5-.5.5z"/></svg>';
 
 			document.querySelectorAll( '.add_media' ).forEach( function ( btn ) {
 				var editorId = btn.getAttribute( 'data-editor' ) || 'content';
 				btn.className = 'components-button is-secondary is-compact insert-media add_media';
 				btn.setAttribute( 'data-editor', editorId );
 				btn.style.gap = '4px';
+				btn.style.paddingLeft = '8px';
+				btn.style.paddingRight = '8px';
 				btn.innerHTML = ICON + 'Add Media';
 			} );
 		}() );
