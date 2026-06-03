@@ -170,7 +170,7 @@ class Server {
 	 * @return array
 	 */
 	protected function get_v3_controllers() {
-		$controllers = array(
+		return array(
 			'coupons'                  => 'WC_REST_Coupons_Controller',
 			'customer-downloads'       => 'WC_REST_Customer_Downloads_Controller',
 			'customers'                => 'WC_REST_Customers_Controller',
@@ -218,12 +218,6 @@ class Server {
 			'paypal-webhooks'          => 'WC_REST_Paypal_Webhooks_Controller',
 			'paypal-buttons'           => 'WC_REST_Paypal_Buttons_Controller',
 		);
-
-		if ( Features::is_enabled( 'products-catalog-api' ) ) {
-			$controllers['products-catalog'] = 'WC_REST_Products_Catalog_Controller';
-		}
-
-		return $controllers;
 	}
 
 	/**
