@@ -199,19 +199,15 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should persist media gallery items.
+	 * @testdox Should persist video gallery items.
 	 */
-	public function test_media_gallery_persists_items() {
-		$media_gallery          = array(
-			array(
-				'media_type'  => 'image',
-				'source_type' => 'attachment',
-				'id'          => 123,
-			),
+	public function test_video_gallery_persists_items() {
+		$video_gallery          = array(
 			array(
 				'media_type'  => 'video',
 				'source_type' => 'attachment',
 				'id'          => 456,
+				'position'    => 1,
 				'poster_id'   => 789,
 				'settings'    => array(
 					'controls' => true,
@@ -219,16 +215,11 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 				),
 			),
 		);
-		$expected_media_gallery = array(
+		$expected_video_gallery = array(
 			array(
-				'media_type'  => 'image',
-				'source_type' => 'attachment',
-				'id'          => 123,
-			),
-			array(
-				'media_type'  => 'video',
 				'source_type' => 'attachment',
 				'id'          => 456,
+				'position'    => 1,
 				'poster_id'   => 789,
 				'settings'    => array(
 					'preload' => 'metadata',
@@ -237,30 +228,30 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		);
 		$product                = new WC_Product_Simple();
 
-		$product->set_name( 'Product with media gallery' );
-		ProductMediaGallery::set_stored_media_gallery_items( $product, $media_gallery, false, false );
+		$product->set_name( 'Product with video gallery' );
+		ProductMediaGallery::set_stored_video_gallery_items( $product, $video_gallery );
 		$product->save();
 
 		$this->assertEquals(
-			$expected_media_gallery,
-			json_decode( get_post_meta( $product->get_id(), '_wc_media_gallery', true ), true ),
-			'Media gallery should be stored as JSON product meta.'
+			$expected_video_gallery,
+			json_decode( get_post_meta( $product->get_id(), '_wc_video_gallery', true ), true ),
+			'Video gallery should be stored as JSON product meta.'
 		);
 
 		$reloaded_product = wc_get_product( $product->get_id() );
 
 		$this->assertInstanceOf( WC_Product::class, $reloaded_product );
 		$this->assertEquals(
-			$expected_media_gallery,
-			ProductMediaGallery::get_stored_media_gallery_items( $reloaded_product ),
-			'Reloaded product should expose stored media gallery items through the internal helper.'
+			$expected_video_gallery,
+			ProductMediaGallery::get_stored_video_gallery_items( $reloaded_product ),
+			'Reloaded product should expose stored video gallery items through the internal helper.'
 		);
 	}
 
 	/**
-	 * @testdox Should save video media gallery items from the classic product gallery metabox.
+	 * @testdox Should save video gallery items from the classic product gallery metabox.
 	 */
-	public function test_product_gallery_meta_box_saves_video_media_gallery_items() {
+	public function test_product_gallery_meta_box_saves_video_gallery_items() {
 		if ( ! class_exists( 'WC_Meta_Box_Product_Images' ) ) {
 			require_once WC_ABSPATH . 'includes/admin/meta-boxes/class-wc-meta-box-product-images.php';
 		}
@@ -317,17 +308,12 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			array(
 				array(
-					'media_type'  => 'video',
 					'source_type' => 'attachment',
 					'id'          => $video_id,
-				),
-				array(
-					'media_type'  => 'image',
-					'source_type' => 'attachment',
-					'id'          => $image_id,
+					'position'    => 0,
 				),
 			),
-			ProductMediaGallery::get_stored_media_gallery_items( $updated_product )
+			ProductMediaGallery::get_stored_video_gallery_items( $updated_product )
 		);
 
 		$product->delete( true );
@@ -336,9 +322,9 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave stored media gallery data untouched when videos are disabled.
+	 * @testdox Should leave stored video gallery data untouched when videos are disabled.
 	 */
-	public function test_product_gallery_meta_box_does_not_touch_media_gallery_items_when_videos_disabled() {
+	public function test_product_gallery_meta_box_does_not_touch_video_gallery_items_when_videos_disabled() {
 		if ( ! class_exists( 'WC_Meta_Box_Product_Images' ) ) {
 			require_once WC_ABSPATH . 'includes/admin/meta-boxes/class-wc-meta-box-product-images.php';
 		}
@@ -346,13 +332,6 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'no' );
 
 		$product       = WC_Helper_Product::create_simple_product();
-		$old_image_id  = wp_insert_attachment(
-			array(
-				'post_title'     => 'Old gallery image',
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'image/jpeg',
-			)
-		);
 		$video_id      = wp_insert_attachment(
 			array(
 				'post_title'     => 'Product video',
@@ -369,22 +348,17 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		);
 		$post          = get_post( $product->get_id() );
 		$_post         = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$media_gallery = array(
+		$video_gallery = array(
 			array(
-				'media_type'  => 'video',
 				'source_type' => 'attachment',
 				'id'          => $video_id,
-			),
-			array(
-				'media_type'  => 'image',
-				'source_type' => 'attachment',
-				'id'          => $old_image_id,
+				'position'    => 0,
 			),
 		);
 
-		ProductMediaGallery::set_stored_media_gallery_items(
+		ProductMediaGallery::set_stored_video_gallery_items(
 			$product,
-			$media_gallery
+			$video_gallery
 		);
 
 		try {
@@ -403,11 +377,10 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( WC_Product::class, $updated_product );
 		$this->assertSame( array( $new_image_id ), $updated_product->get_gallery_image_ids() );
-		$this->assertSame( $media_gallery, ProductMediaGallery::get_stored_media_gallery_items( $updated_product ) );
-		$this->assertTrue( metadata_exists( 'post', $product->get_id(), '_wc_media_gallery' ) );
+		$this->assertSame( $video_gallery, ProductMediaGallery::get_stored_video_gallery_items( $updated_product ) );
+		$this->assertTrue( metadata_exists( 'post', $product->get_id(), '_wc_video_gallery' ) );
 
 		$product->delete( true );
-		wp_delete_attachment( $old_image_id, true );
 		wp_delete_attachment( $video_id, true );
 		wp_delete_attachment( $new_image_id, true );
 	}

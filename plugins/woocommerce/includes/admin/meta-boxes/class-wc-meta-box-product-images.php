@@ -190,9 +190,9 @@ class WC_Meta_Box_Product_Images {
 		$product->set_gallery_image_ids( $attachment_ids );
 		$product->save();
 
-		ProductMediaGallery::set_stored_media_gallery_items(
+		ProductMediaGallery::set_stored_video_gallery_items(
 			$product,
-			ProductMediaGallery::has_videos( $media_gallery ) ? $media_gallery : array()
+			ProductMediaGallery::get_video_gallery_items_from_media_gallery( $media_gallery )
 		);
 	}
 

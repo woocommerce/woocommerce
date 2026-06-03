@@ -271,9 +271,9 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_product_gallery_media_data method with mixed image and video items.
+	 * Test get_product_gallery_media_data method with composed image and video items.
 	 *
-	 * @testdox Should include unique video items in product gallery media data.
+	 * @testdox Should include positioned video items in product gallery media data.
 	 */
 	public function test_get_product_gallery_media_data_supports_videos() {
 		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
@@ -305,33 +305,21 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 
 		update_post_meta( $video_id, '_thumbnail_id', $poster_id );
 
-		ProductMediaGallery::set_stored_media_gallery_items(
+		$product->set_gallery_image_ids( array( $image_id ) );
+		$product->save();
+
+		ProductMediaGallery::set_stored_video_gallery_items(
 			$product,
 			array(
 				array(
-					'media_type'  => 'video',
 					'source_type' => 'attachment',
 					'id'          => $video_id,
+					'position'    => 0,
 					'settings'    => array(
 						'controls'     => true,
 						'preload'      => 'metadata',
 						'plays_inline' => false,
 					),
-				),
-				array(
-					'media_type'  => 'image',
-					'source_type' => 'attachment',
-					'id'          => $image_id,
-				),
-				array(
-					'media_type'  => 'video',
-					'source_type' => 'attachment',
-					'id'          => $video_id,
-				),
-				array(
-					'media_type'  => 'image',
-					'source_type' => 'attachment',
-					'id'          => $image_id,
 				),
 			)
 		);
@@ -354,9 +342,9 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_product_gallery_media_data method with gallery-only media gallery items.
+	 * Test get_product_gallery_media_data method with stored gallery videos.
 	 *
-	 * @testdox Should prepend the featured image to gallery-only media gallery data.
+	 * @testdox Should keep the featured image before positioned gallery videos.
 	 */
 	public function test_get_product_gallery_media_data_prepends_featured_image_to_gallery_only_media() {
 		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
@@ -380,13 +368,13 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		);
 
 		$product->set_image_id( $featured_image_id );
-		ProductMediaGallery::set_stored_media_gallery_items(
+		ProductMediaGallery::set_stored_video_gallery_items(
 			$product,
 			array(
 				array(
-					'media_type'  => 'video',
 					'source_type' => 'attachment',
 					'id'          => $video_id,
+					'position'    => 0,
 					'poster_id'   => $featured_image_id,
 				),
 			)
@@ -430,13 +418,13 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		);
 
 		$product->set_image_id( $featured_image_id );
-		ProductMediaGallery::set_stored_media_gallery_items(
+		ProductMediaGallery::set_stored_video_gallery_items(
 			$product,
 			array(
 				array(
-					'media_type'  => 'video',
 					'source_type' => 'attachment',
 					'id'          => $video_id,
+					'position'    => 0,
 				),
 			)
 		);
