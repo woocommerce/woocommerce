@@ -261,14 +261,13 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @param bool   $expect_error Whether an error is expected.
 	 */
 	public function test_validate_posted_data_skips_required_check_for_hidden_fields( $country, $field_key, $hidden, $expect_error ) {
-		add_filter(
-			'woocommerce_get_country_locale',
-			function ( $locale ) use ( $country, $hidden ) {
-				$locale[ $country ]['state']['required'] = true;
-				$locale[ $country ]['state']['hidden']   = $hidden;
-				return $locale;
-			}
-		);
+		$locale_filter = function ( $locale ) use ( $country, $hidden ) {
+			$locale[ $country ]['state']['required'] = true;
+			$locale[ $country ]['state']['hidden']   = $hidden;
+			return $locale;
+		};
+
+		add_filter( 'woocommerce_get_country_locale', $locale_filter );
 
 		// Force locale re-evaluation.
 		unset( WC()->countries->locale );
@@ -296,7 +295,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$this->assertEmpty( $errors->get_error_message( $field_key . '_required' ), 'Unexpected required field error for hidden field.' );
 		}
 
-		remove_all_filters( 'woocommerce_get_country_locale' );
+		remove_filter( 'woocommerce_get_country_locale', $locale_filter );
 		unset( WC()->countries->locale );
 	}
 
