@@ -39,7 +39,16 @@
 		  	enter: function(){},
 		  	exit: function(){}
 	  	};
+		var shared_close_timeout = null;
 	 	var opts = $.extend(defaults, options);
+
+		// Remove timeout when hovering over tooltip.
+		function cancel_shared_timeout() {
+			if (shared_close_timeout) {
+				clearTimeout(shared_close_timeout);
+				shared_close_timeout = null;
+			}
+		}
 
 	 	// Setup tip tip elements and render them to the DOM
 	 	if($("#tiptip_holder").length <= 0){
@@ -82,11 +91,12 @@
 							deactive_tiptip();
 						}
 					}).on( 'focus', function(){
+						cancel_shared_timeout();
 						cancel_deactive_tiptip();
 						active_tiptip();
 					}).on( 'blur', function(){
 						if(opts.keepAlive){
-							close_timeout = setTimeout(function(){
+							shared_close_timeout = setTimeout(function(){
 								if(!tiptip_holder.is(':hover') && !tiptip_holder.is(':focus-within')){
 									deactive_tiptip();
 								}
