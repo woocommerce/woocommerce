@@ -693,15 +693,26 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$query_context = array(
 			'orderby' => 'random',
 		);
+		$rotation_key  = '2026-06-03';
+		$wp_date_mock  = static function ( $date, $format ) use ( &$rotation_key ) {
+			return 'Y-m-d' === $format ? $rotation_key : $date;
+		};
 
-		$first_seed  = ProductCollectionUtils::get_random_order_seed( 53919, $query_context, '2026-06-03' );
-		$second_seed = ProductCollectionUtils::get_random_order_seed( 53919, $query_context, '2026-06-04' );
+		add_filter( 'wp_date', $wp_date_mock, 10, 2 );
 
-		$this->assertNotSame(
-			$first_seed,
-			$second_seed,
-			'Random sorting should use a different seed when the daily rotation key changes.'
-		);
+		try {
+			$first_seed   = ProductCollectionUtils::get_random_order_seed( 53919, $query_context );
+			$rotation_key = '2026-06-04';
+			$second_seed  = ProductCollectionUtils::get_random_order_seed( 53919, $query_context );
+
+			$this->assertNotSame(
+				$first_seed,
+				$second_seed,
+				'Random sorting should use a different seed when the daily rotation key changes.'
+			);
+		} finally {
+			remove_filter( 'wp_date', $wp_date_mock, 10 );
+		}
 	}
 
 	/**
