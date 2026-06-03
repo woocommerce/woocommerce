@@ -90,13 +90,31 @@ const resolvePackageSourceEntry = ( name ) => {
 	return path.resolve( path.dirname( pkgJsonPath ), source );
 };
 
+// Packages opt into having admin bundle their stylesheet by exporting a
+// `src/style.scss` next to `src/index.ts`. The file isn't imported from
+// `src/index.ts` (consumers historically relied on a separate `style.css`
+// asset), so we add it as a second entry tuple. Webpack bundles both into
+// the same chunk and MiniCssExtractPlugin emits `<pkg>/style.css`.
+const resolvePackageStyleEntry = ( name ) => {
+	const styleScss = path.resolve(
+		__dirname,
+		`${ WC_ADMIN_PACKAGES_DIR }/${ name }/src/style.scss`
+	);
+	return fs.existsSync( styleScss ) ? styleScss : null;
+};
+
 const getEntryPoints = () => {
 	const entryPoints = {
 		app: './client/index.tsx',
 		embed: './client/embed.tsx',
 	};
 	wcAdminPackages.forEach( ( name ) => {
-		entryPoints[ name ] = resolvePackageSourceEntry( name );
+		const source = resolvePackageSourceEntry( name );
+		const style = resolvePackageStyleEntry( name );
+		// Order matters: webpack uses the last item in an array entry as the
+		// chunk's export source. Stylesheet first so `src/index.ts`'s exports
+		// land on the `window.wc.<name>` global.
+		entryPoints[ name ] = style ? [ style, source ] : source;
 	} );
 	wpAdminScripts.forEach( ( name ) => {
 		entryPoints[ name ] = `${ WP_ADMIN_SCRIPTS_DIR }/${ name }`;
@@ -229,16 +247,6 @@ const jsConfig = {
 	},
 	plugins: [
 		...styleConfig.plugins,
-		// SCSS imports coming from workspace packages or `node_modules` are
-		// compiled by the per-package style configs composed into the
-		// multi-compiler array below, not by this JS compiler. The IgnorePlugin
-		// keeps babel-loader from being handed `.scss` requests that surface
-		// from transitive imports (e.g. story files reachable from src trees).
-		new webpack.IgnorePlugin( {
-			resourceRegExp: /\.s?css$/,
-			contextRegExp:
-				/[\/\\]packages[\/\\]js[\/\\]|[\/\\]node_modules[\/\\]/,
-		} ),
 		// Substitute the `__i18n_text_domain__` identifier used by the
 		// @woocommerce/email-editor package with the WooCommerce text
 		// domain so strings extract and translate under `woocommerce`.
@@ -374,59 +382,4 @@ if ( ! isProduction || WC_ADMIN_PHASE === 'development' ) {
 	}
 }
 
-// Compose each `packages/js/*/webpack.config.js` (style-only) into the
-// multi-compiler array so a single webpack invocation emits the per-package
-// `style.css` files admin used to receive via a pre-build copy step. Each
-// loaded config is rewritten to:
-//   1. Carry a `name` so the JS compiler can list it under `dependencies` for
-//      ordering.
-//   2. Redirect `output.path` to admin's `BUILD_DIR`.
-//   3. Prefix entry keys with `<pkg>/` so files land under `<BUILD_DIR>/<pkg>/`
-//      (the `build-style` entry is renamed to just `<pkg>` to match the legacy
-//      filename pattern).
-//   4. Drop any CopyWebpackPlugin instances — their `to:` paths assume the
-//      package's own webpack output layout. Admin's own copy plugin already
-//      handles the only case that mattered (product-editor block.json).
-const packageCssConfigs = wcAdminPackages.flatMap( ( name ) => {
-	const cfgPath = path.resolve(
-		__dirname,
-		`${ WC_ADMIN_PACKAGES_DIR }/${ name }/webpack.config.js`
-	);
-	if ( ! fs.existsSync( cfgPath ) ) {
-		return [];
-	}
-	const cfg = require( cfgPath );
-	return [
-		{
-			...cfg,
-			name,
-			entry: Object.fromEntries(
-				Object.entries( cfg.entry ).map( ( [ key, value ] ) => {
-					if ( key === 'build-style' ) {
-						return [ name, value ];
-					}
-					if ( key.startsWith( '/build/' ) ) {
-						return [
-							`${ name }/${ key.slice( '/build/'.length ) }`,
-							value,
-						];
-					}
-					return [ `${ name }/${ key }`, value ];
-				} )
-			),
-			output: {
-				...cfg.output,
-				path: BUILD_DIR,
-			},
-			plugins: ( cfg.plugins || [] ).filter(
-				( p ) => p.constructor.name !== 'CopyPlugin'
-			),
-		},
-	];
-} );
-
-// Make the JS compiler wait for all CSS compilers to finish so any
-// CopyWebpackPlugin operations on emitted CSS see a complete set.
-jsConfig.dependencies = packageCssConfigs.map( ( c ) => c.name );
-
-module.exports = [ ...packageCssConfigs, jsConfig ];
+module.exports = jsConfig;
