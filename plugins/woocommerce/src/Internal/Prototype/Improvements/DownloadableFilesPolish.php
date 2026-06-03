@@ -30,6 +30,27 @@ class DownloadableFilesPolish {
 			return;
 		}
 		add_action( 'admin_head', array( self::class, 'output_styles' ) );
+		add_action( 'admin_footer', array( self::class, 'output_scripts' ) );
+	}
+
+	/**
+	 * Relabel the "Add File" link in the downloadable files footer to "+ Add file".
+	 */
+	public static function output_scripts(): void {
+		if ( ! DevPanel::is_supported_screen() ) {
+			return;
+		}
+		?>
+<script>
+( function () {
+	document.querySelectorAll( '.downloadable_files a.button.insert' ).forEach( function ( a ) {
+		if ( /^\s*Add File\s*$/.test( a.textContent ) ) {
+			a.textContent = '+ Add file';
+		}
+	} );
+}() );
+</script>
+		<?php
 	}
 
 	/**
