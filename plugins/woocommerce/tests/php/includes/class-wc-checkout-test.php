@@ -30,6 +30,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			public function validate_checkout( &$data, &$errors ) {
 				return parent::validate_checkout( $data, $errors );
 			}
+
+			public function reset_fields(): void {
+				$this->fields = null;
+			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 
@@ -267,10 +271,18 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			return $locale;
 		};
 
-		add_filter( 'woocommerce_get_country_locale', $locale_filter );
+		// Set customer country to ensure get_address_fields() uses correct locale.
+		WC()->customer->set_billing_country( $country );
+		WC()->customer->set_shipping_country( $country );
 
 		// Force locale re-evaluation.
 		unset( WC()->countries->locale );
+
+		add_filter( 'woocommerce_get_country_locale', $locale_filter );
+
+		// Force locale and checkout fields re-evaluation to pick up filter.
+		unset( WC()->countries->locale );
+		$this->sut->reset_fields();
 
 		$data = array(
 			'billing_country'           => $country,

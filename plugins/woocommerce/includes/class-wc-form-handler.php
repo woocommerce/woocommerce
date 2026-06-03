@@ -131,7 +131,19 @@ class WC_Form_Handler {
 			$value = apply_filters( 'woocommerce_process_myaccount_field_' . $key, $value );
 
 			// Validation: Required fields.
-			if ( ! empty( $field['required'] ) && empty( $field['hidden'] ) && empty( $value ) ) {
+			// Hidden may not be present in field data if wc_array_overlay() didn't
+			// merge it (it only copies keys that exist in the base array). Check
+			// both the field and the locale array directly.
+			$field_hidden = ! empty( $field['hidden'] );
+			if ( ! $field_hidden ) {
+				$field_base    = preg_replace( '/^(billing|shipping)_/', '', $key );
+				$locale        = WC()->countries->get_country_locale();
+				$field_country = $field['country'] ?? '';
+				if ( isset( $locale[ $field_country ][ $field_base ]['hidden'] ) ) {
+					$field_hidden = (bool) $locale[ $field_country ][ $field_base ]['hidden'];
+				}
+			}
+			if ( ! empty( $field['required'] ) && ! $field_hidden && empty( $value ) ) {
 				/* translators: %s: Field name. */
 				wc_add_notice( sprintf( __( '%s is a required field.', 'woocommerce' ), $field['label'] ), 'error', array( 'id' => $key ) );
 			}
