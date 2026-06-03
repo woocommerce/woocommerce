@@ -43,8 +43,11 @@ class EditorControls {
 <style id="wc-proto-editor-controls">
 .wp-media-buttons { padding-top: 2px; }
 
-/* ── Breathing room between metabox header and its first input ── */
-body.post-type-product .postbox > .inside {
+/* ── Breathing room between metabox header and its first input.
+   #postdivrich (main editor) doesn't use the .postbox > .inside pattern, so
+   match it with an equivalent rule on its content wrapper. ── */
+body.post-type-product .postbox > .inside,
+body.post-type-product #postdivrich > #wp-content-wrap {
 	padding-top: 8px;
 }
 
@@ -125,9 +128,12 @@ body.post-type-product .media-modal select {
 }
 
 /* ── Row alignment for compact 32px rows.
-	WC keeps the float-based layout (label floats left, input floats left to wrap the
-	help-tip to the right). We don't disturb that — we just ensure each element's
-	box-center sits on the same y as the others. ── */
+	Setting line-height: 32px on the form-field itself makes every inline element's
+	line box 32px tall, so the checkbox/radio (via vertical-align: middle), the floated
+	label, and the description span all center on the same y axis. ── */
+body.post-type-product .woocommerce_options_panel .form-field {
+	line-height: 32px !important;
+}
 body.post-type-product .woocommerce_options_panel .form-field > label {
 	line-height: 32px !important;
 	min-height: 32px !important;
@@ -137,11 +143,11 @@ body.post-type-product .woocommerce_options_panel .form-field > label {
 body.post-type-product .woocommerce_options_panel .form-field > .woocommerce-help-tip {
 	margin-top: 8px !important;
 }
-/* Center 16px checkboxes/radios in the 32px row, aligned with the description text next to them.
-   vertical-align: middle must match the description's alignment in TypographyHierarchy. */
+/* Center 16px checkboxes/radios in the 32px row. With line-height: 32px on the form-field,
+   vertical-align: middle naturally centers them on the same y axis as the label text. */
 body.post-type-product .woocommerce_options_panel .form-field > input[type="checkbox"],
 body.post-type-product .woocommerce_options_panel .form-field > input[type="radio"] {
-	margin: 8px 0 !important;
+	margin: 0 !important;
 	vertical-align: middle !important;
 }
 /* For radio groups (.wc-radios is taller than one row) — align the label to the top
