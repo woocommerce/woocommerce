@@ -14,12 +14,15 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Polishes the Custom Fields metabox (#postcustom):
  * - Strips table chrome and replaces it with a single outer border.
- * - Per-row Update button is hidden; key/value edits auto-save on blur via WP's AJAX endpoint.
+ * - Per-row Update button is hidden; edits to existing fields are tracked by the main post
+ *   form, so the main Update button reflects them and saves on submit (matches WP's
+ *   $_POST['meta'] handling). No more silent inline AJAX saves.
  * - Delete button becomes a compact X icon.
  * - The separate "Add New Custom Field" form is hidden; its real <select>, <input>, and the
  *   Enter new / Cancel link wrappers are relocated into an inline-add area in a <tfoot> of
  *   #list-table. A "+ Add custom field" trigger reveals them, a Confirm CTA submits via WP's
- *   existing #newmeta-submit endpoint.
+ *   existing #newmeta-submit endpoint (the add-new path still uses AJAX so the row appears
+ *   immediately without a page reload).
  * - Empty state: with no meta rows, the column headers hide so the metabox starts with the
  *   trigger button only (matches DownloadableFilesPolish pattern).
  */
@@ -106,8 +109,9 @@ body.post-type-product #postcustomstuff #list-table thead th {
 	text-align: left;
 	line-height: 16px;
 }
-/* Empty state: no meta rows yet → no need for column headers. */
-body.post-type-product #postcustomstuff #list-table:not(:has(#the-list tr)) thead {
+/* Empty state: no meta rows → hide column headers. CSS :has() + JS class fallback. */
+body.post-type-product #postcustomstuff #list-table:not(:has(#the-list tr)) thead,
+body.post-type-product #postcustomstuff #list-table.wc-proto-empty thead {
 	display: none;
 }
 
@@ -315,18 +319,13 @@ body.post-type-product #postcustom > .inside > p:last-child {
 	line-height: 1.4 !important;
 }
 
-/* Saved-flash on existing rows after auto-save */
-body.post-type-product #postcustomstuff #the-list tr.wc-proto-saved {
-	transition: background-color 600ms ease-out;
-	background-color: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff) !important;
-}
 </style>
 		<?php
 	}
 
 	/**
 	 * Output JS: relocate WP's add-form controls into a <tfoot> trigger/entry/confirm UI,
-	 * wire auto-save on blur for existing rows.
+	 * and toggle an empty-state class on #list-table so the column headers can hide.
 	 */
 	public static function output_scripts(): void {
 		if ( ! DevPanel::is_supported_screen() ) {
@@ -339,35 +338,13 @@ body.post-type-product #postcustomstuff #the-list tr.wc-proto-saved {
 	var listTable = document.getElementById( 'list-table' );
 	if ( ! list || ! listTable ) { return; }
 
-	/* ── Auto-save existing meta on blur ─────────────────── */
-	function autoSaveRow( row ) {
-		var updateBtn = row.querySelector( '.updatemeta' );
-		if ( ! updateBtn ) { return; }
-		updateBtn.click();
-		row.classList.add( 'wc-proto-saved' );
-		setTimeout( function () { row.classList.remove( 'wc-proto-saved' ); }, 700 );
+	/* ── Empty-state toggle on #list-table when there are no meta rows ─ */
+	function syncEmptyState() {
+		var hasMeta = !! list.querySelector( 'tr' );
+		listTable.classList.toggle( 'wc-proto-empty', ! hasMeta );
 	}
-	function wire( row ) {
-		if ( row.dataset.wcProtoWired ) { return; }
-		row.dataset.wcProtoWired = '1';
-		row.querySelectorAll( 'input[type="text"], textarea' ).forEach( function ( field ) {
-			var initial = field.value;
-			field.addEventListener( 'blur', function () {
-				if ( field.value !== initial ) {
-					initial = field.value;
-					autoSaveRow( row );
-				}
-			} );
-		} );
-	}
-	list.querySelectorAll( 'tr' ).forEach( wire );
-	new MutationObserver( function ( mutations ) {
-		mutations.forEach( function ( m ) {
-			m.addedNodes.forEach( function ( node ) {
-				if ( node.nodeType === 1 && node.tagName === 'TR' ) { wire( node ); }
-			} );
-		} );
-	} ).observe( list, { childList: true } );
+	syncEmptyState();
+	new MutationObserver( syncEmptyState ).observe( list, { childList: true } );
 
 	/* ── Inline add UI in <tfoot> ────────────────────────── */
 	var newmetaSubmit = document.getElementById( 'newmeta-submit' );
