@@ -53,6 +53,20 @@ class SpacingRefinement {
 				margin-right: 0 !important;
 			}
 			#edit-slug-box { padding-left: 0 !important; }
+			/* Slug edit input: full-width override (WP defaults to width:16em). */
+			#edit-slug-box #editable-post-name,
+			#edit-slug-box #editable-post-name-full {
+				display: inline-block !important;
+				width: 100% !important;
+				max-width: 100% !important;
+			}
+			#edit-slug-box #editable-post-name input,
+			#edit-slug-box input#new-post-slug {
+				width: 100% !important;
+				max-width: 100% !important;
+				box-sizing: border-box !important;
+				margin: 0 !important;
+			}
 		</style>' . "\n";
 	}
 
