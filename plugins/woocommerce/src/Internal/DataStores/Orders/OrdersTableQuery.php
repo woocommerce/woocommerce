@@ -899,6 +899,15 @@ class OrdersTableQuery {
 		$groupby = $groupby ? ( 'GROUP BY ' . $groupby ) : '';
 		$orderby = $orderby ? ( 'ORDER BY ' . $orderby ) : '';
 
+		// Performance note: simplify the query to allow the query optimizer to select a more efficient execution plan. As of
+		// version 10.9, this logic is implemented here as alternative changes above are getting flagged by regression analysis.
+		if ( '' === $join && "{$orders_table}.id" === $fields ) {
+			$groupby = '';
+		}
+		if ( 'LIMIT 0, ' . self::MYSQL_MAX_UNSIGNED_BIGINT === $limits ) {
+			$limits = '';
+		}
+
 		$this->sql = "SELECT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
 
 		if ( ! $this->suppress_filters ) {

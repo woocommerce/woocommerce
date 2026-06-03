@@ -116,8 +116,11 @@ class NotificationPreferencesService {
 			$defaults[ $type ] = array( 'enabled' => true );
 		}
 
-		$defaults['store_order']['min_amount']  = null;
-		$defaults['store_review']['max_rating'] = null;
+		$defaults['store_order']['min_amount']   = null;
+		$defaults['store_review']['max_rating']  = null;
+		$defaults['store_stock']['low_stock']    = true;
+		$defaults['store_stock']['out_of_stock'] = true;
+		$defaults['store_stock']['on_backorder'] = true;
 
 		return $defaults;
 	}
@@ -186,6 +189,13 @@ class NotificationPreferencesService {
 				}
 				$rating                = (int) $value[ $sub_key ];
 				$sanitized[ $sub_key ] = ( $rating >= 1 && $rating <= 5 ) ? $rating : null;
+				continue;
+			}
+
+			if ( in_array( $sub_key, array( 'low_stock', 'out_of_stock', 'on_backorder' ), true ) ) {
+				$sanitized[ $sub_key ] = array_key_exists( $sub_key, $value )
+					? (bool) $value[ $sub_key ]
+					: (bool) $sub_default;
 				continue;
 			}
 		}//end foreach
