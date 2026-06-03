@@ -74,12 +74,12 @@ body.folded #wc-proto-save-header {
 	}
 }
 
-/* Inner container — capped at 1200px and centered so it aligns with the page content's MaxWidth */
+/* Inner container — same 1200px cap and centering as the page's MaxWidth .wrap, no padding,
+	so header content lines up exactly with the page content's edges at every viewport. */
 .wc-proto-inner {
 	max-width: 1200px;
 	width: 100%;
 	margin: 0 auto;
-	padding: 0 20px;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -267,6 +267,15 @@ h1.wp-heading-inline,
 body.post-type-product #wpbody-content > .wrap,
 body.product-php #wpbody-content > .wrap { padding-top: <?php echo esc_attr( (string) ( $bar_h + 8 ) ); ?>px; }
 
+/* ── Narrower viewports (below the 1200px page cap) — add side padding so
+	the breadcrumb and action group don't touch the screen edges. ── */
+@media (max-width: 1199px) {
+	.wc-proto-inner {
+		padding: 0 20px;
+		box-sizing: border-box;
+	}
+}
+
 /* ── Mobile (≤782px, WP admin's mobile breakpoint) ─────────────── */
 @media (max-width: 782px) {
 	#wc-proto-save-header {
@@ -331,11 +340,11 @@ body.post-type-product #screen-meta > div {
 			return;
 		}
 
-		$products_url   = admin_url( 'edit.php?post_type=product' );
-		$preview_url    = get_preview_post_link( $post );
-		$is_published   = in_array( $post->post_status, array( 'publish', 'future' ), true );
-		$primary_label  = $is_published ? __( 'Update', 'woocommerce' ) : __( 'Publish', 'woocommerce' );
-		$preview_label  = $is_published ? __( 'Preview changes', 'woocommerce' ) : __( 'Preview', 'woocommerce' );
+		$products_url  = admin_url( 'edit.php?post_type=product' );
+		$preview_url   = get_preview_post_link( $post );
+		$is_published  = in_array( $post->post_status, array( 'publish', 'future' ), true );
+		$primary_label = $is_published ? __( 'Update', 'woocommerce' ) : __( 'Publish', 'woocommerce' );
+		$preview_label = $is_published ? __( 'Preview changes', 'woocommerce' ) : __( 'Preview', 'woocommerce' );
 		$top           = self::ADMINBAR_H + self::WC_HDR_H;
 
 		// Trash URL — only for existing (saved) posts.
@@ -405,14 +414,14 @@ body.post-type-product #screen-meta > div {
 	document.addEventListener( 'cut',    function ( e ) { if ( e.isTrusted ) markDirty(); }, true );
 
 	function relayClick( targetId ) {
-		// Prefer jQuery — it handles WP's hidden field setup and form submit
-		// more reliably than native .click() on display:none elements.
-		if ( typeof jQuery !== 'undefined' ) {
-			var $t = jQuery( '#' + targetId );
-			if ( $t.length ) { $t.trigger( 'click' ); return; }
-		}
+		// Native .click() on a submit input fires BOTH the click handlers AND the
+		// browser's native form-submit behaviour — jQuery's .trigger('click') only
+		// fires handlers, so the form never actually submitted. Use native first.
 		var t = document.getElementById( targetId );
-		if ( t ) { t.click(); }
+		if ( t ) { t.click(); return; }
+		if ( typeof jQuery !== 'undefined' ) {
+			jQuery( '#' + targetId ).trigger( 'click' );
+		}
 	}
 
 	// Ensure any open WP metabox panels commit their values before form submission.

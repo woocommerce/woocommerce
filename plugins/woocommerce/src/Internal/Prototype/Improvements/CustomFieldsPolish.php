@@ -121,8 +121,8 @@ body.post-type-product #postcustomstuff #list-table.wc-proto-empty thead {
 }
 
 /* Full-width for existing-row inputs only — EXCLUDE #metakeyinput, whose visibility
-   is toggled by WP's $.toggle() on Enter new / Cancel. Forcing display:block on it
-   would override the inline display:none we set in JS for the initial hidden state. */
+	is toggled by WP's $.toggle() on Enter new / Cancel. Forcing display:block on it
+	would override the inline display:none we set in JS for the initial hidden state. */
 body.post-type-product #postcustomstuff #list-table input[type="text"]:not(#metakeyinput) {
 	width: 100% !important;
 	max-width: 100% !important;
@@ -212,16 +212,45 @@ body.post-type-product #postcustomstuff .wc-proto-add-name #metakeyinput {
 	margin: 0 0 6px !important;
 }
 /* Only apply block display when the element isn't hidden via WP class/inline style.
-   WP toggles via $.show()/$.hide() which sets inline style — those win regardless. */
+	WP toggles via $.show()/$.hide() which sets inline style — those win regardless. */
 body.post-type-product #postcustomstuff .wc-proto-add-name #metakeyselect:not([style*="display: none"]):not(.hide-if-js),
 body.post-type-product #postcustomstuff .wc-proto-add-name #metakeyinput:not([style*="display: none"]):not(.hide-if-js) {
 	display: block;
 }
 
-/* Enter new / Cancel <a> wrappers — plain underlined text links, fully reset. */
-body.post-type-product #postcustomstuff .wc-proto-add-name a,
-body.post-type-product #postcustomstuff .wc-proto-add-name a.hide-if-no-js,
-body.post-type-product #postcustomstuff td.wc-proto-add-name > a {
+/* Our injected Enter new / Cancel text links (replace WP's button-styled anchors).
+   NOTE: display is intentionally NOT !important — JS toggles `style.display` to hide
+   one link while the other shows. */
+body.post-type-product #postcustomstuff .wc-proto-textlink,
+body.post-type-product #postcustomstuff a.wc-proto-textlink {
+	display: inline-block;
+	margin: 6px 12px 0 0 !important;
+	padding: 0 !important;
+	background: transparent !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
+	text-decoration: underline !important;
+	font-size: var(--wpds-typography-font-size-sm, 12px) !important;
+	line-height: 1.4 !important;
+	cursor: pointer !important;
+	height: auto !important;
+	min-height: 0 !important;
+	border-radius: 0 !important;
+}
+body.post-type-product #postcustomstuff .wc-proto-textlink:hover {
+	text-decoration: none !important;
+}
+body.post-type-product #postcustomstuff .wc-proto-textlink:focus,
+body.post-type-product #postcustomstuff .wc-proto-textlink:focus-visible {
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+/* Legacy WP "Enter new" / "Cancel" anchors — we drop them in JS, but if anything ever
+	reintroduces them, hide them so they never re-appear as button-styled blobs. */
+body.post-type-product #postcustomstuff .wc-proto-add-name a.postcustomstuff,
+body.post-type-product #postcustomstuff .wc-proto-add-name a.hide-if-no-js {
 	display: inline !important;
 	margin: 4px 0 0 !important;
 	padding: 0 !important;
@@ -406,26 +435,56 @@ body.post-type-product #postcustom > .inside > p:last-child {
 	tfoot.appendChild( triggerRow );
 	listTable.appendChild( tfoot );
 
-	/* Move WP's add-form controls into our entry row (preserves WP's JS handlers + form data). */
+	/* Move WP's REAL controls (select, text input, textarea) into our cells, but DROP
+		WP's <a> "Enter new" / "Cancel" wrappers — we render our own clean links that we
+		fully control, instead of fighting unknown classes/inline styles. */
 	var nameCell    = entryRow.querySelector( '.wc-proto-add-name' );
 	var valueCell   = entryRow.querySelector( '.wc-proto-add-value' );
 	var newmetaLeft = document.getElementById( 'newmetaleft' );
+	var metaSelect  = document.getElementById( 'metakeyselect' );
+	var metaInput   = document.getElementById( 'metakeyinput' );
 	var metaValue   = document.getElementById( 'metavalue' );
-	if ( newmetaLeft && nameCell ) {
-		while ( newmetaLeft.firstChild ) {
-			nameCell.appendChild( newmetaLeft.firstChild );
-		}
-	}
-	if ( metaValue && valueCell ) {
-		valueCell.appendChild( metaValue );
+
+	if ( metaSelect && nameCell ) { nameCell.appendChild( metaSelect ); }
+	if ( metaInput  && nameCell ) { nameCell.appendChild( metaInput  ); }
+	if ( metaValue  && valueCell ) { valueCell.appendChild( metaValue ); }
+
+	/* Inject our own toggle links (initial state: "Enter new" visible, "Cancel" hidden). */
+	var enterLink  = document.createElement( 'a' );
+	enterLink.href      = '#';
+	enterLink.className = 'wc-proto-textlink wc-proto-enter-new';
+	enterLink.textContent = 'Enter new';
+
+	var cancelLink = document.createElement( 'a' );
+	cancelLink.href      = '#';
+	cancelLink.className = 'wc-proto-textlink wc-proto-cancel-new';
+	cancelLink.textContent = 'Cancel';
+	cancelLink.style.display = 'none';
+
+	if ( nameCell ) {
+		nameCell.appendChild( enterLink );
+		nameCell.appendChild( cancelLink );
 	}
 
-	/* Initial hidden state for the text input — WP's $.show()/$.hide() will toggle from here.
-	   We set inline style:none so my CSS display:block can't accidentally reveal it. */
-	var metaKeyInput = document.getElementById( 'metakeyinput' );
-	if ( metaKeyInput ) {
-		metaKeyInput.style.display = 'none';
+	/* Initial state: hide the text-input variant. */
+	if ( metaInput ) { metaInput.style.display = 'none'; }
+
+	function showSelectMode() {
+		if ( metaSelect ) { metaSelect.style.display = ''; }
+		if ( metaInput )  { metaInput.style.display  = 'none'; }
+		enterLink.style.display  = '';
+		cancelLink.style.display = 'none';
+		if ( metaSelect ) { metaSelect.focus(); }
 	}
+	function showInputMode() {
+		if ( metaSelect ) { metaSelect.style.display = 'none'; }
+		if ( metaInput )  { metaInput.style.display  = ''; }
+		enterLink.style.display  = 'none';
+		cancelLink.style.display = '';
+		if ( metaInput ) { metaInput.focus(); }
+	}
+	enterLink.addEventListener(  'click', function ( e ) { e.preventDefault(); showInputMode();  } );
+	cancelLink.addEventListener( 'click', function ( e ) { e.preventDefault(); showSelectMode(); } );
 
 	function openAdder() {
 		tfoot.classList.add( 'is-adding' );
@@ -434,18 +493,44 @@ body.post-type-product #postcustom > .inside > p:last-child {
 	}
 	function closeAdder() {
 		tfoot.classList.remove( 'is-adding' );
-		var sel = document.getElementById( 'metakeyselect' );
-		var inp = document.getElementById( 'metakeyinput' );
-		var tx  = document.getElementById( 'metavalue' );
-		if ( sel ) { sel.value = '#NONE#'; }
-		if ( inp ) { inp.value = ''; }
-		if ( tx )  { tx.value  = ''; }
+		if ( metaSelect ) { metaSelect.value = '#NONE#'; metaSelect.style.display = ''; }
+		if ( metaInput  ) { metaInput.value  = '';        metaInput.style.display  = 'none'; }
+		if ( metaValue  ) { metaValue.value  = ''; }
+		enterLink.style.display  = '';
+		cancelLink.style.display = 'none';
 	}
 
 	triggerRow.querySelector( '.wc-proto-add-trigger' ).addEventListener( 'click', openAdder );
 	confirmRow.querySelector( '.wc-proto-cancel' ).addEventListener( 'click', closeAdder );
+
+	/* Capture the original #newmeta cells so we can re-home the inputs at submit time.
+		WP's wpList serialises inputs INSIDE #newmeta when reading add-meta payload — if we
+		leave the inputs in our tfoot, nothing gets submitted. */
+	var newmeta              = document.getElementById( 'newmeta' );
+	var newmetaValueCell     = newmeta && newmeta.querySelector( 'tbody tr:first-child td:not(.left)' );
 	confirmRow.querySelector( '.wc-proto-confirm' ).addEventListener( 'click', function () {
+		var moved = [];
+
+		/* Move ONLY the real WP inputs back into #newmeta so wpList serialises them.
+			Skip our injected text links — they don't belong in WP's form payload. */
+		[ metaSelect, metaInput ].forEach( function ( el ) {
+			if ( el && newmetaLeft && el.parentNode !== newmetaLeft ) {
+				moved.push( { node: el, prev: el.parentNode } );
+				newmetaLeft.appendChild( el );
+			}
+		} );
+		if ( newmetaValueCell && metaValue && metaValue.parentNode !== newmetaValueCell ) {
+			moved.push( { node: metaValue, prev: valueCell } );
+			newmetaValueCell.appendChild( metaValue );
+		}
+
 		newmetaSubmit.click();
+
+		/* Restore the inputs to our entry row so the UI keeps working visually. */
+		moved.forEach( function ( o ) {
+			o.prev.appendChild( o.node );
+		} );
+
 		closeAdder();
 	} );
 }() );

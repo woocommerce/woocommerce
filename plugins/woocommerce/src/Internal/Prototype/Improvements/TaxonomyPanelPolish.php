@@ -42,11 +42,19 @@ class TaxonomyPanelPolish {
 		}
 		?>
 <style id="wc-proto-taxonomy-panel">
-/* ── Category tabs: WPDS minimal style ──────────────────── */
+/* ── Tighten metabox top padding for taxonomy panels ── */
+body.post-type-product #categorydiv .inside,
+body.post-type-product #tagsdiv-product_tag .inside,
+body.post-type-product .categorydiv,
+body.post-type-product [id^="taxonomy-"] .inside {
+	padding-top: 0 !important;
+}
+
+/* ── Category tabs: WPDS minimal style, tight spacing ──────────────────── */
 body.post-type-product ul.category-tabs {
 	display: flex;
 	flex-direction: row;
-	margin: 0 0 8px;
+	margin: 0 0 4px;
 	padding: 0;
 	border-bottom: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcdc);
 	list-style: none;
@@ -60,7 +68,7 @@ body.post-type-product ul.category-tabs li {
 }
 body.post-type-product ul.category-tabs li a {
 	display: inline-block;
-	padding: 6px 12px;
+	padding: 4px 10px;
 	font-size: var(--wpds-typography-font-size-sm, 12px);
 	font-weight: var(--wpds-typography-font-weight-regular, 400);
 	color: var(--wpds-color-fg-content-neutral-weak, #707070);
@@ -100,13 +108,22 @@ body.post-type-product .tabs-panel {
 	max-height: 200px;
 	overflow-y: auto;
 }
+/* Replace the default UL top margin with a tighter 6px gap below the tabs */
+body.post-type-product .tabs-panel > ul,
+body.post-type-product ul.categorychecklist {
+	margin: 6px 0 0;
+	padding: 0;
+}
+body.post-type-product ul.categorychecklist > li {
+	margin: 0;
+}
 
 /* ── Product tag chips: pill style with X on the right ──── */
 body.post-type-product #tagsdiv-product_tag .tagchecklist {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 6px;
-	margin: 8px 0 0;
+	margin: 14px 0 0;
 	padding: 0;
 	list-style: none;
 }

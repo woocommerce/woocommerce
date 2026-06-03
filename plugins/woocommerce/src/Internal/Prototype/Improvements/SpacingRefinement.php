@@ -76,6 +76,17 @@ class SpacingRefinement {
 				padding: 4px 8px !important;
 				height: 32px !important;
 			}
+			/* Standalone Slug metabox input — WP defaults to size=13 / small width */
+			#slugdiv .inside input#post_name {
+				display: block !important;
+				width: 100% !important;
+				max-width: 100% !important;
+				box-sizing: border-box !important;
+			}
+			#slugdiv .inside label[for="post_name"] {
+				display: block;
+				margin-bottom: 4px;
+			}
 		</style>' . "\n";
 	}
 

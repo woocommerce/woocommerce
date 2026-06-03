@@ -44,16 +44,27 @@ class EditorControls {
 .wp-media-buttons { padding-top: 2px; }
 
 /* ── Breathing room between metabox header and its first input.
-   #postdivrich (main editor) doesn't use the .postbox > .inside pattern, so
-   match it with an equivalent rule on its content wrapper. ── */
-body.post-type-product .postbox > .inside,
-body.post-type-product #postdivrich > #wp-content-wrap {
+   Regular postboxes use .inside as the content area — add padding-top there. ── */
+body.post-type-product .postbox > .inside {
 	padding-top: 8px;
+}
+/* #postdivrich (main editor) is different: #wp-content-editor-tools is position:absolute
+   at top:0 of #wp-content-wrap (which has padding-top: 45px to make room). Push the
+   tools down 8px and increase the wrap's padding-top to match — same visual gap. */
+body.post-type-product #postdivrich #wp-content-wrap {
+	padding-top: 53px !important;
+}
+body.post-type-product #postdivrich #wp-content-editor-tools {
+	top: 8px !important;
 }
 
 /* ── Screen Options panel: white background to match the metabox cards below ── */
-body.post-type-product #screen-options-wrap {
-	background: #fff;
+body.post-type-product #screen-meta,
+body.post-type-product #screen-options-wrap,
+body.post-type-product #screen-options-wrap #adv-settings,
+body.post-type-product #screen-meta-links,
+body.post-type-product #screen-options-link-wrap {
+	background: #fff !important;
 }
 
 /* ── Product Data header: align the product-type help-tip with the 32px select ── */
@@ -140,15 +151,18 @@ body.post-type-product .woocommerce_options_panel .form-field > label {
 	margin-top: 0 !important;
 	padding-top: 0 !important;
 }
-body.post-type-product .woocommerce_options_panel .form-field > .woocommerce-help-tip {
-	margin-top: 8px !important;
+/* Match WC core's selector specificity so we deterministically beat its 12px rule.
+   3px lands the tip center on the 32px row center given vertical-align:middle context. */
+body.wc-wp-version-gte-70.post-type-product .woocommerce_options_panel .form-field .woocommerce-help-tip,
+body.post-type-product .woocommerce_options_panel .form-field .woocommerce-help-tip {
+	margin-top: 3px !important;
 }
-/* Center 16px checkboxes/radios in the 32px row. With line-height: 32px on the form-field,
-   vertical-align: middle naturally centers them on the same y axis as the label text. */
+/* Center 16px checkboxes/radios in the 32px row. WC core floats them left, which
+   removes them from inline flow — vertical-align doesn't apply. Use margin-top to
+   manually push the 16px box down to the row centerline. */
 body.post-type-product .woocommerce_options_panel .form-field > input[type="checkbox"],
 body.post-type-product .woocommerce_options_panel .form-field > input[type="radio"] {
-	margin: 0 !important;
-	vertical-align: middle !important;
+	margin: 8px 8px 0 0 !important;
 }
 /* For radio groups (.wc-radios is taller than one row) — align the label to the top
 	so it lines up with the first option. */

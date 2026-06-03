@@ -102,8 +102,7 @@ body.post-type-product p.howto {
 body.post-type-product .woocommerce_options_panel .form-field input[type="checkbox"] ~ span.description {
 	clear: none;
 	display: inline-block;
-	margin: 0 0 0 8px;
-	vertical-align: middle;
+	margin: 0;
 	font-size: var(--wpds-typography-font-size-md, 13px);
 	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
 }
