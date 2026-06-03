@@ -7,7 +7,6 @@
 		"product-data-views": false,
 		"experimental-blocks": true,
 		"experimental-iapi-mini-cart": true,
-		"coming-soon-newsletter-template": false,
 		"coupons": true,
 		"core-profiler": true,
 		"customize-store": true,
@@ -37,9 +36,7 @@
 		"woo-mobile-welcome": true,
 		"wc-pay-promotion": true,
 		"wc-pay-welcome-page": true,
-		"async-product-editor-category-field": true,
 		"launch-your-store": true,
-		"use-wp-horizon": false,
 		"rest-api-v4": false,
 		"order-detail-redesign": false,
 		"product-variations-classic-redesign": false

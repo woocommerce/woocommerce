@@ -11,9 +11,6 @@
 	"engines": {
 		"node": "^24.15.0"
 	},
-	"main": "build/index.js",
-	"module": "build-module/index.js",
-	"types": "build-types/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./build-types/index.d.ts",
@@ -21,6 +18,9 @@
 			"require": "./build/index.js"
 		}
 	},
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"types": "build-types/index.d.ts",
 	"files": [
 		"build",
 		"build-module",
@@ -28,8 +28,8 @@
 	],
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
-		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:cjs": "node build.mjs --cjs",
+		"build:project": "pnpm --stream --if-present '/^build:project:.*$/'",
+		"build:project:cjs": "node build.mjs --commonjs",
 		"build:project:esm": "node build.mjs",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"lint": "eslint --ext=js,ts,tsx src",
@@ -41,7 +41,7 @@
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:cjs": "node build.mjs --cjs --watch",
+		"watch:build:project:cjs": "node build.mjs --commonjs --watch",
 		"watch:build:project:esm": "node build.mjs --watch"
 	},
 	"config": {
@@ -72,12 +72,9 @@
 		"@types/jest": "29.5.x",
 		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"@woocommerce/internal-ts-config": "workspace:*",
-		"chokidar": "3.6.x",
-		"esbuild": "0.24.x",
 		"eslint": "^8.55.0",
-		"glob": "^10.3.10",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"ts-jest": "29.1.x",
@@ -88,6 +85,13 @@
 		"oauth-1.0a": "^2.2.6"
 	},
 	"publishConfig": {
-		"access": "public"
+		"access": "public",
+		"exports": {
+			".": {
+				"types": "./build-types/index.d.ts",
+				"import": "./build-module/index.js",
+				"require": "./build/index.js"
+			}
+		}
 	}
 }

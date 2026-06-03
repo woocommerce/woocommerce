@@ -1,4 +1,0 @@
-Significance: patch
-Type: fixed
-
-Guard cart hook handlers against missing cart item data to prevent PHP warnings.

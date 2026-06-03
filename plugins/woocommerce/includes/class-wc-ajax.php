@@ -2054,9 +2054,13 @@ class WC_AJAX {
 	/**
 	 * Search for categories and return json.
 	 *
+	 * @deprecated 10.9.0 This callback was used by the removed async product editor category field.
+	 *
 	 * @return void
 	 */
 	public static function json_search_categories_tree() {
+		wc_deprecated_function( __METHOD__, '10.9.0' );
+
 		ob_start();
 
 		check_ajax_referer( 'search-categories', 'security' );
