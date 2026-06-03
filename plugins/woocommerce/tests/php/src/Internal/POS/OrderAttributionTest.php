@@ -14,7 +14,7 @@ use WP_REST_Request;
  *
  * Hooks are exercised directly (rather than through the full REST stack) to keep the
  * test focused on the validation + note-writing behavior. POS access is granted via
- * the user-meta model (Capabilities::set_pos_role) rather than dedicated WP roles.
+ * the preset meta + pos_staff role model (Capabilities::set_pos_preset).
  */
 class OrderAttributionTest extends WC_Unit_Test_Case {
 
@@ -36,13 +36,13 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	/**
 	 * Create a user with a specific assignable POS role via user meta.
 	 *
-	 * @param string $pos_role     One of Capabilities::POS_ROLE_CASHIER / POS_ROLE_MANAGER.
+	 * @param string $pos_preset   One of Capabilities::POS_PRESET_CASHIER / POS_PRESET_MANAGER.
 	 * @param array  $user_args    Optional overrides for the user factory.
 	 * @return int                 The created user ID.
 	 */
-	private function make_pos_user( string $pos_role, array $user_args = array() ): int {
+	private function make_pos_user( string $pos_preset, array $user_args = array() ): int {
 		$user_id = self::factory()->user->create( array_merge( array( 'role' => 'subscriber' ), $user_args ) );
-		Capabilities::set_pos_role( $user_id, $pos_role );
+		Capabilities::set_pos_preset( $user_id, $pos_preset );
 		return $user_id;
 	}
 
@@ -92,7 +92,7 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Should return the draft order unchanged when only valid attribution is present.
 	 */
 	public function test_pre_insert_accepts_valid_attribution(): void {
-		$cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
+		$cashier = $this->make_pos_user( Capabilities::POS_PRESET_CASHIER );
 		$order   = wc_create_order();
 		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
 
@@ -107,8 +107,8 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Should reject override meta on a plain order (process_sales is universal, no override needed).
 	 */
 	public function test_pre_insert_rejects_override_on_plain_order(): void {
-		$cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
-		$manager = $this->make_pos_user( Capabilities::POS_ROLE_MANAGER );
+		$cashier = $this->make_pos_user( Capabilities::POS_PRESET_CASHIER );
+		$manager = $this->make_pos_user( Capabilities::POS_PRESET_MANAGER );
 
 		$order = wc_create_order();
 		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
@@ -127,7 +127,7 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Should reject a self-override on a refund (approver equals staff_user_id).
 	 */
 	public function test_pre_insert_rejects_self_override(): void {
-		$manager = $this->make_pos_user( Capabilities::POS_ROLE_MANAGER );
+		$manager = $this->make_pos_user( Capabilities::POS_PRESET_MANAGER );
 
 		$parent_order = wc_create_order();
 		$parent_order->save();
@@ -147,8 +147,8 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Should reject refund override when the approver lacks issue_refunds.
 	 */
 	public function test_pre_insert_rejects_forbidden_refund_approver(): void {
-		$cashier         = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
-		$another_cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
+		$cashier         = $this->make_pos_user( Capabilities::POS_PRESET_CASHIER );
+		$another_cashier = $this->make_pos_user( Capabilities::POS_PRESET_CASHIER );
 
 		$parent_order = wc_create_order();
 		$parent_order->save();
@@ -169,8 +169,8 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Should accept a valid refund override (approver holds issue_refunds).
 	 */
 	public function test_pre_insert_accepts_valid_refund_override(): void {
-		$cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
-		$manager = $this->make_pos_user( Capabilities::POS_ROLE_MANAGER );
+		$cashier = $this->make_pos_user( Capabilities::POS_PRESET_CASHIER );
+		$manager = $this->make_pos_user( Capabilities::POS_PRESET_MANAGER );
 
 		$parent_order = wc_create_order();
 		$parent_order->save();
@@ -191,7 +191,7 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 */
 	public function test_post_insert_writes_attribution_note_without_override(): void {
 		$cashier = $this->make_pos_user(
-			Capabilities::POS_ROLE_CASHIER,
+			Capabilities::POS_PRESET_CASHIER,
 			array(
 				'display_name' => 'Mike Cashier',
 				'user_login'   => 'mike',
@@ -215,14 +215,14 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 */
 	public function test_post_insert_writes_combined_refund_override_note(): void {
 		$cashier = $this->make_pos_user(
-			Capabilities::POS_ROLE_CASHIER,
+			Capabilities::POS_PRESET_CASHIER,
 			array(
 				'display_name' => 'Mike Cashier',
 				'user_login'   => 'mike',
 			)
 		);
 		$manager = $this->make_pos_user(
-			Capabilities::POS_ROLE_MANAGER,
+			Capabilities::POS_PRESET_MANAGER,
 			array(
 				'display_name' => 'Sarah Manager',
 				'user_login'   => 'sarah',

@@ -11,24 +11,25 @@ use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use WP_REST_Request;
 use WP_REST_Server;
 use WP_User_Query;
+use WP_User;
 
 /**
  * REST controller for the POS staff list.
  *
  * Exposes GET /wc/pos/v1/staff — the canonical staff list the mobile client caches
  * and validates PIN entry against locally. Each entry includes the user's display
- * name, effective POS role, POS capability map, and stored PIN hash record.
+ * name, assigned POS preset, POS capability map, and stored PIN hash record.
  *
  * PIN is required at the wp-admin staff form layer, so every listed user is
  * guaranteed to have one — the client can rely on `pin` being present and never
  * has to render a phantom staff member it can't authenticate.
  *
  * Permission: `manage_woocommerce` — i.e. administrator + shop_manager. POS-only
- * users (cashiers / managers, identified by the `_woocommerce_pos_role` user meta) never call
- * this endpoint directly; the device admin reads the staff list on their behalf
- * and PIN entry is validated client-side against the cached payload.
+ * users (cashiers / managers, holding the `pos_staff` WP role) never call this
+ * endpoint directly; the device admin reads the staff list on their behalf and
+ * PIN entry is validated client-side against the cached payload.
  *
- * @since 10.9.0
+ * @since 11.0.0
  * @internal
  */
 class POSStaffController extends RestApiControllerBase {
@@ -43,7 +44,7 @@ class POSStaffController extends RestApiControllerBase {
 	/**
 	 * REST namespace for the POS routes.
 	 *
-	 * {@inheritDoc}
+	 * @var string
 	 */
 	protected string $route_namespace = 'wc/pos/v1';
 
@@ -89,7 +90,7 @@ class POSStaffController extends RestApiControllerBase {
 	}
 
 	/**
-	 * List every user with an explicit POS role assignment.
+	 * List every user holding the pos_staff role with a valid preset assignment.
 	 *
 	 * @param WP_REST_Request $request The incoming request.
 	 * @return list<array<string, mixed>>
@@ -101,23 +102,34 @@ class POSStaffController extends RestApiControllerBase {
 
 		$user_query = new WP_User_Query(
 			array(
-				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					array(
-						'key'     => Capabilities::POS_ROLE_META_KEY,
-						'value'   => Capabilities::assignable_pos_roles(),
-						'compare' => 'IN',
-					),
-				),
-				'orderby'    => 'display_name',
-				'order'      => 'ASC',
-				'number'     => -1,
+				'role'    => Capabilities::POS_STAFF_ROLE,
+				'orderby' => 'display_name',
+				'order'   => 'ASC',
+				'number'  => -1,
 			)
 		);
 
 		$staff = array();
 		foreach ( $user_query->get_results() as $user ) {
-			$pos_role = Capabilities::get_pos_role( (int) $user->ID );
-			if ( null === $pos_role ) {
+			if ( ! $user instanceof WP_User ) {
+				continue;
+			}
+
+			// Defensive: a user could have pos_staff role but no preset assigned
+			// (e.g. manually granted in wp-admin Users). Skip rather than ship a
+			// half-formed row the client can't render.
+			$preset = Capabilities::get_pos_preset( (int) $user->ID );
+			if ( null === $preset ) {
+				continue;
+			}
+
+			// PIN is the sole operator credential at the till; a row without one
+			// would be unauthenticatable on the device. The admin form enforces
+			// PIN at add/save time, but a manual edit could leave a pos_staff
+			// user without one — skip them so `pin` is guaranteed non-null in
+			// the wire payload.
+			$pin_record = $this->pin_service->get_public_pin_record( (int) $user->ID );
+			if ( null === $pin_record ) {
 				continue;
 			}
 
@@ -125,9 +137,9 @@ class POSStaffController extends RestApiControllerBase {
 				'user_id'      => (int) $user->ID,
 				'user_login'   => (string) $user->user_login,
 				'display_name' => (string) $user->display_name,
-				'role'         => $pos_role,
-				'capabilities' => Capabilities::capabilities_for_role( $pos_role ),
-				'pin'          => $this->pin_service->get_public_pin_record( (int) $user->ID ),
+				'preset'       => $preset,
+				'capabilities' => Capabilities::capabilities_for_preset( $preset ),
+				'pin'          => $pin_record,
 			);
 		}
 
@@ -158,10 +170,10 @@ class POSStaffController extends RestApiControllerBase {
 					'type'    => 'string',
 					'context' => array( 'view' ),
 				),
-				'role'         => array(
+				'preset'       => array(
 					'type'    => 'string',
 					'context' => array( 'view' ),
-					'enum'    => Capabilities::assignable_pos_roles(),
+					'enum'    => Capabilities::assignable_pos_presets(),
 				),
 				'capabilities' => array(
 					'type'                 => 'object',
@@ -169,9 +181,11 @@ class POSStaffController extends RestApiControllerBase {
 					'additionalProperties' => array( 'type' => 'boolean' ),
 				),
 				'pin'          => array(
-					'type'       => 'object',
-					'context'    => array( 'view' ),
-					'properties' => array(
+					'type'        => 'object',
+					'context'     => array( 'view' ),
+					'description' => 'PIN record. Always present — staff without a PIN are excluded from the list.',
+					'required'    => true,
+					'properties'  => array(
 						'algo'       => array( 'type' => 'string' ),
 						'iterations' => array( 'type' => 'integer' ),
 						'salt'       => array( 'type' => 'string' ),

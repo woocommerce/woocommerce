@@ -38,7 +38,7 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 	/**
 	 * Display POS staff notices when on the staff sub-section and the feature is enabled.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	private function maybe_show_staff_notices(): void {
 		if ( ! class_exists( 'WC_Admin_POS_Staff' ) || ! WC_Admin_POS_Staff::is_enabled() ) {
@@ -76,7 +76,7 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 	/**
 	 * Get own sections.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @return array
 	 */
 	protected function get_own_sections() {
@@ -94,7 +94,7 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 	/**
 	 * Output the settings.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function output(): void {
 		global $current_section, $hide_save_button;

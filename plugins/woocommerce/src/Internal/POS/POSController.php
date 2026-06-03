@@ -19,7 +19,7 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
  * the staff REST endpoint and the order-attribution lifecycle hooks via the DI
  * container.
  *
- * @since 10.9.0
+ * @since 11.0.0
  * @internal
  */
 class POSController implements RegisterHooksInterface {
@@ -28,16 +28,22 @@ class POSController implements RegisterHooksInterface {
 	public const PARENT_FLAG  = 'point_of_sale';
 
 	/**
+	 * Features controller used to gate hook registration on the POS feature flags.
+	 *
 	 * @var FeaturesController
 	 */
 	private FeaturesController $features_controller;
 
 	/**
+	 * REST controller for the /wc/pos/v1/staff endpoint.
+	 *
 	 * @var POSStaffController
 	 */
 	private POSStaffController $staff_controller;
 
 	/**
+	 * Order attribution lifecycle handler.
+	 *
 	 * @var OrderAttribution
 	 */
 	private OrderAttribution $order_attribution;
@@ -80,7 +86,7 @@ class POSController implements RegisterHooksInterface {
 	 * WP 6.7's "translation loading … too early" notice (and the headers-already-sent
 	 * cascade that follows).
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function register(): void {
 		add_action( 'init', array( $this, 'on_init' ) );
@@ -104,7 +110,7 @@ class POSController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function handle_flag_option_changed(): void {
 		add_action(
@@ -122,7 +128,7 @@ class POSController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function on_init(): void {
 		if ( ! $this->features_controller->feature_is_enabled( self::PARENT_FLAG ) ) {

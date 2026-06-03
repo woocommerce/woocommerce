@@ -31,7 +31,7 @@ use WP_REST_Request;
  * Capability enforcement for the action itself is intentionally client-side in M1 —
  * the same trust model as {@see OrderAttribution}.
  *
- * @since 10.9.0
+ * @since 11.0.0
  * @internal
  */
 class CouponAttribution implements RegisterHooksInterface {
@@ -41,7 +41,7 @@ class CouponAttribution implements RegisterHooksInterface {
 	/**
 	 * Register the lifecycle hooks for shop_coupon.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function register(): void {
 		add_filter( 'woocommerce_rest_pre_insert_shop_coupon_object', array( $this, 'handle_pre_insert' ), 10, 3 );

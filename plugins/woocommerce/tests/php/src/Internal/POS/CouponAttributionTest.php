@@ -35,15 +35,15 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a user with the given POS role via user meta.
+	 * Create a user with the given POS preset.
 	 *
-	 * @param string $pos_role  One of Capabilities::POS_ROLE_* constants.
+	 * @param string $pos_preset One of Capabilities::POS_PRESET_* constants.
 	 * @param array  $user_args Optional overrides for the user factory.
 	 * @return int              The created user ID.
 	 */
-	private function make_pos_user( string $pos_role, array $user_args = array() ): int {
+	private function make_pos_user( string $pos_preset, array $user_args = array() ): int {
 		$user_id = self::factory()->user->create( array_merge( array( 'role' => 'subscriber' ), $user_args ) );
-		Capabilities::set_pos_role( $user_id, $pos_role );
+		Capabilities::set_pos_preset( $user_id, $pos_preset );
 		return $user_id;
 	}
 
@@ -108,7 +108,7 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Should accept a coupon with valid attribution and no override.
 	 */
 	public function test_pre_insert_accepts_valid_attribution(): void {
-		$manager = $this->make_pos_user( Capabilities::POS_ROLE_MANAGER );
+		$manager = $this->make_pos_user( Capabilities::POS_PRESET_MANAGER );
 		$coupon  = $this->make_coupon_with_meta(
 			array( OrderAttribution::META_KEY_STAFF_USER_ID => $manager )
 		);
@@ -124,7 +124,7 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Should reject a self-override on a coupon.
 	 */
 	public function test_pre_insert_rejects_self_override(): void {
-		$manager = $this->make_pos_user( Capabilities::POS_ROLE_MANAGER );
+		$manager = $this->make_pos_user( Capabilities::POS_PRESET_MANAGER );
 		$coupon  = $this->make_coupon_with_meta(
 			array(
 				OrderAttribution::META_KEY_STAFF_USER_ID => $manager,
@@ -144,8 +144,8 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Should reject coupon override when approver lacks create_coupons.
 	 */
 	public function test_pre_insert_rejects_forbidden_approver(): void {
-		$cashier         = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
-		$another_cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
+		$cashier         = $this->make_pos_user( Capabilities::POS_PRESET_CASHIER );
+		$another_cashier = $this->make_pos_user( Capabilities::POS_PRESET_CASHIER );
 
 		$coupon = $this->make_coupon_with_meta(
 			array(
@@ -167,8 +167,8 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Should accept a valid coupon override (approver holds create_coupons).
 	 */
 	public function test_pre_insert_accepts_valid_override(): void {
-		$cashier = $this->make_pos_user( Capabilities::POS_ROLE_CASHIER );
-		$manager = $this->make_pos_user( Capabilities::POS_ROLE_MANAGER );
+		$cashier = $this->make_pos_user( Capabilities::POS_PRESET_CASHIER );
+		$manager = $this->make_pos_user( Capabilities::POS_PRESET_MANAGER );
 
 		$coupon = $this->make_coupon_with_meta(
 			array(

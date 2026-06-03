@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\POS\Service;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\POS\Capabilities;
 use WP_Error;
 use WP_User_Query;
 
@@ -19,7 +20,7 @@ use WP_User_Query;
  * PBKDF2WithHmacSHA256, API 26+). Brute-forcing the 4-digit PIN space against a stolen
  * hash takes ~100 seconds with the chosen cost factor.
  *
- * @since 10.9.0
+ * @since 11.0.0
  * @internal
  */
 class POSPinService {
@@ -45,7 +46,7 @@ class POSPinService {
 	 * @return true|WP_Error  True on success, WP_Error on invalid PIN format or
 	 *                        when the PIN is already in use by another user.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function set_pin( int $user_id, string $pin ) {
 		if ( ! $this->validate_pin_format( $pin ) ) {
@@ -82,12 +83,15 @@ class POSPinService {
 	}
 
 	/**
-	 * Whether the given plaintext PIN matches a PIN record stored on any user
-	 * other than $exclude_user_id.
+	 * Whether the given plaintext PIN matches a PIN record stored on any other
+	 * user holding the pos_staff WP role.
 	 *
-	 * Cost is bounded by the number of staff with PINs (typically a handful), and
-	 * each row costs one PBKDF2 evaluation. The candidate user is excluded so that
-	 * idempotent re-sets ("save same PIN again") are allowed.
+	 * Scoping to pos_staff (rather than every user with a PIN meta entry) keeps
+	 * stale meta on non-POS users from causing phantom collisions and lets the
+	 * scan use the role index instead of a meta-key scan. Cost is bounded by
+	 * the number of active staff — typically a handful — and each row costs one
+	 * PBKDF2 evaluation. The candidate user is excluded so that idempotent
+	 * re-sets ("save same PIN again") are allowed.
 	 *
 	 * @param string $pin             Plaintext PIN candidate. Assumed format-validated.
 	 * @param int    $exclude_user_id User being assigned the PIN; excluded from the scan.
@@ -96,15 +100,10 @@ class POSPinService {
 	private function is_pin_used_by_other_user( string $pin, int $exclude_user_id ): bool {
 		$user_query = new WP_User_Query(
 			array(
-				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					array(
-						'key'     => self::PIN_META_KEY,
-						'compare' => 'EXISTS',
-					),
-				),
-				'fields'     => 'ID',
-				'number'     => -1,
-				'exclude'    => array( $exclude_user_id ),
+				'role'    => Capabilities::POS_STAFF_ROLE,
+				'fields'  => 'ID',
+				'number'  => -1,
+				'exclude' => array( $exclude_user_id ),
 			)
 		);
 
@@ -126,7 +125,7 @@ class POSPinService {
 	 *
 	 * @param int $user_id The target user ID.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function delete_pin( int $user_id ): void {
 		delete_user_meta( $user_id, self::PIN_META_KEY );
@@ -138,7 +137,7 @@ class POSPinService {
 	 * @param int $user_id The target user ID.
 	 * @return bool
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function has_pin( int $user_id ): bool {
 		$record = get_user_meta( $user_id, self::PIN_META_KEY, true );
@@ -156,7 +155,7 @@ class POSPinService {
 	 * @param int $user_id The target user ID.
 	 * @return array{algo:string,iterations:int,salt:string,hash:string}|null
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function get_public_pin_record( int $user_id ): ?array {
 		$record = get_user_meta( $user_id, self::PIN_META_KEY, true );
@@ -180,7 +179,7 @@ class POSPinService {
 	 * @param array  $record The stored PIN record (algo, iterations, salt, hash).
 	 * @return bool          True if the PIN matches, false otherwise.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function verify_pin( string $pin, array $record ): bool {
 		if ( ! $this->validate_pin_format( $pin ) ) {
@@ -214,7 +213,7 @@ class POSPinService {
 	 * @param string $pin The PIN to validate.
 	 * @return bool
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function validate_pin_format( string $pin ): bool {
 		return 1 === preg_match( '/^\d{' . self::PIN_LENGTH . '}$/', $pin );

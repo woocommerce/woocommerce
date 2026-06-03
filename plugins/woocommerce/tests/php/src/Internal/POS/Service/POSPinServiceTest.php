@@ -31,7 +31,7 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut     = new POSPinService();
-		$this->user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->user_id = self::factory()->user->create( array( 'role' => 'pos_staff' ) );
 	}
 
 	/**
@@ -186,7 +186,7 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	 * @testdox Should reject set_pin when the PIN is already used by another staff member.
 	 */
 	public function test_set_pin_rejects_pin_in_use_by_another_user(): void {
-		$other_id               = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$other_id               = self::factory()->user->create( array( 'role' => 'pos_staff' ) );
 		$this->extra_user_ids[] = $other_id;
 
 		$this->assertTrue( $this->sut->set_pin( $other_id, '1234' ) );
@@ -199,6 +199,33 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 			$this->sut->has_pin( $this->user_id ),
 			'No PIN should have been persisted when the candidate is taken.'
 		);
+	}
+
+	/**
+	 * @testdox Should ignore PINs on users who do not hold the pos_staff role.
+	 *
+	 * A non-POS user with a stale `_woocommerce_pos_pin` meta entry (e.g. left over
+	 * from v1 or a manual edit) must not block a real POS staff member from using
+	 * the same plaintext PIN. Uniqueness is scoped to pos_staff role holders.
+	 */
+	public function test_set_pin_ignores_non_pos_staff_users_with_stale_pin_meta(): void {
+		$non_pos_user           = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$this->extra_user_ids[] = $non_pos_user;
+
+		// Plant a stale PIN record directly so we don't depend on set_pin's role
+		// check accepting a non-pos_staff user.
+		update_user_meta(
+			$non_pos_user,
+			POSPinService::PIN_META_KEY,
+			array(
+				'algo'       => POSPinService::ALGO,
+				'iterations' => POSPinService::ITERATIONS,
+				'salt'       => base64_encode( random_bytes( POSPinService::SALT_BYTES ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+				'hash'       => base64_encode( hash_pbkdf2( 'sha256', '1234', random_bytes( POSPinService::SALT_BYTES ), POSPinService::ITERATIONS, POSPinService::HASH_BYTES, true ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+			)
+		);
+
+		$this->assertTrue( $this->sut->set_pin( $this->user_id, '1234' ) );
 	}
 
 	/**
