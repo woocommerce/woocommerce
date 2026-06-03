@@ -86,8 +86,8 @@ body.post-type-product #postcustomstuff #list-table {
 body.post-type-product #postcustomstuff #list-table th,
 body.post-type-product #postcustomstuff #list-table td {
 	border: none !important;
-	padding: 8px 10px;
-	vertical-align: middle;
+	padding: 10px;
+	vertical-align: top;
 }
 /* Column widths — Name 35%, Value 65% (X icon sits in the value column's right padding) */
 body.post-type-product #postcustomstuff #list-table th:first-child,
@@ -129,9 +129,9 @@ body.post-type-product #postcustomstuff #the-list tr {
 }
 body.post-type-product #postcustomstuff .deletemeta {
 	position: absolute !important;
-	top: 50% !important;
+	top: 16px !important;
 	right: 12px !important;
-	transform: translateY( -50% ) !important;
+	transform: none !important;
 	width: 20px !important;
 	height: 20px !important;
 	padding: 0 !important;
@@ -156,16 +156,11 @@ body.post-type-product #postcustomstuff #the-list td:last-child {
 }
 
 /* ── Inline-add UI inside #list-table ────────────────────── */
-/* The new-entry row (hidden until the trigger is clicked) */
-body.post-type-product #postcustomstuff #list-table tr.wc-proto-add-entry-row {
-	border-top: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde);
-}
-body.post-type-product #postcustomstuff #list-table tr.wc-proto-add-entry-row > td {
+/* The new-entry row (hidden until the trigger is clicked) — symmetric 10px padding both sides */
+body.post-type-product #postcustomstuff #list-table tr.wc-proto-add-entry-row > td,
+body.post-type-product #postcustomstuff #list-table tr.wc-proto-add-entry-row > td:last-child {
 	border-top: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
 	padding: 12px 10px !important;
-}
-body.post-type-product #postcustomstuff #list-table tr.wc-proto-add-entry-row td:last-child {
-	padding-right: 10px !important;
 }
 
 /* The Confirm/Cancel row sits below the inputs, no top divider */
@@ -332,8 +327,25 @@ body.post-type-product #postcustomstuff #the-list tr.wc-proto-saved {
 		return tr;
 	}
 
+	/* Build a <datalist> from WP's #metakeyselect options so the Name input
+	   offers existing keys as autocomplete suggestions while still allowing free text. */
+	var datalistHtml = '';
+	if ( metaKeySelect ) {
+		datalistHtml = '<datalist id="wc-proto-key-suggestions">';
+		Array.prototype.forEach.call( metaKeySelect.options, function ( opt ) {
+			if ( opt.value && opt.value !== '#NONE#' ) {
+				datalistHtml += '<option value="' + opt.value.replace( /"/g, '&quot;' ) + '">';
+			}
+		} );
+		datalistHtml += '</datalist>';
+	}
+
 	var entryRow = makeRow( 'wc-proto-add-entry-row',
-		'<td class="left"><input type="text" id="wc-proto-new-key" placeholder="Name"></td>' +
+		'<td class="left">' +
+			'<input type="text" id="wc-proto-new-key" placeholder="Name"' +
+			( datalistHtml ? ' list="wc-proto-key-suggestions" autocomplete="off"' : '' ) +
+			'>' + datalistHtml +
+		'</td>' +
 		'<td><textarea id="wc-proto-new-value" placeholder="Value" rows="2"></textarea></td>'
 	);
 	var confirmRow = makeRow( 'wc-proto-add-confirm-row',
