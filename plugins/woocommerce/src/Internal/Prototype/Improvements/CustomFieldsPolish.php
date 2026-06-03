@@ -80,6 +80,11 @@ body.post-type-product #postcustomstuff #list-table td {
 	padding: 8px 10px;
 	vertical-align: middle;
 }
+/* Column widths — match #newmeta so the headers line up with the cells below */
+body.post-type-product #postcustomstuff #list-table th:first-child,
+body.post-type-product #postcustomstuff #list-table td:first-child {
+	width: 35%;
+}
 body.post-type-product #postcustomstuff #list-table thead th {
 	border-bottom: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
 	font-size: var(--wpds-typography-font-size-sm, 12px);
@@ -92,8 +97,11 @@ body.post-type-product #postcustomstuff #list-table:not(:has(#the-list tr)) thea
 	display: none;
 }
 body.post-type-product #postcustomstuff #list-table input[type="text"] {
-	width: 100%;
-	box-sizing: border-box;
+	width: 100% !important;
+	max-width: 100% !important;
+	box-sizing: border-box !important;
+	margin: 0 !important;
+	display: block !important;
 }
 
 body.post-type-product #postcustomstuff textarea {
@@ -103,52 +111,46 @@ body.post-type-product #postcustomstuff textarea {
 	font-size: 13px;
 }
 
-/* ── Add Custom Field (#newmeta) — unwrap from table, stack as labeled form ── */
-body.post-type-product #postcustomstuff #newmeta,
-body.post-type-product #postcustomstuff #newmeta tbody,
-body.post-type-product #postcustomstuff #newmeta tr,
-body.post-type-product #postcustomstuff #newmeta td {
-	display: block !important;
+/* ── Add Custom Field (#newmeta) — keep the WP two-column table layout,
+	restyle with our outer border + rounded corners, header bar visible. ── */
+body.post-type-product #postcustomstuff #newmeta {
+	border: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
+	border-radius: 4px !important;
+	border-collapse: separate !important;
+	border-spacing: 0 !important;
 	width: 100% !important;
-	padding: 0 !important;
+	margin: 0 !important;
+}
+body.post-type-product #postcustomstuff #newmeta thead th,
+body.post-type-product #postcustomstuff #newmeta td {
 	border: none !important;
-	background: transparent !important;
+	padding: 8px 10px !important;
+	vertical-align: top !important;
 }
-body.post-type-product #postcustomstuff #newmeta thead {
-	display: none !important;
+body.post-type-product #postcustomstuff #newmeta thead th {
+	border-bottom: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
+	background: var(--wpds-color-bg-content-neutral-subtle, #f6f7f7) !important;
+	font-size: var(--wpds-typography-font-size-sm, 12px) !important;
+	font-weight: var(--wpds-typography-font-weight-medium, 499) !important;
+	color: var(--wpds-color-fg-content-neutral, #1e1e1e) !important;
+	text-align: left !important;
+	line-height: 1.4 !important;
 }
-body.post-type-product #postcustomstuff #newmeta tr:first-child > td.left {
-	margin-bottom: 12px;
-}
-/* Inject "Name" label above the first cell */
-body.post-type-product #postcustomstuff #newmeta tr:first-child > td.left::before {
-	content: 'Name';
-	display: block;
-	font-size: var(--wpds-typography-font-size-sm, 12px);
-	font-weight: var(--wpds-typography-font-weight-medium, 500);
-	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
-	margin-bottom: 4px;
-}
-/* Inject "Value" label above the second cell */
-body.post-type-product #postcustomstuff #newmeta tr:first-child > td:not(.left)::before {
-	content: 'Value';
-	display: block;
-	font-size: var(--wpds-typography-font-size-sm, 12px);
-	font-weight: var(--wpds-typography-font-weight-medium, 500);
-	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
-	margin-bottom: 4px;
+body.post-type-product #postcustomstuff #newmeta td.left {
+	width: 35% !important;
 }
 body.post-type-product #postcustomstuff #newmeta select#metakeyselect,
 body.post-type-product #postcustomstuff #newmeta input#metakeyinput {
-	width: 100%;
-	box-sizing: border-box;
-	margin: 0;
+	width: 100% !important;
+	box-sizing: border-box !important;
+	margin: 0 !important;
+}
+body.post-type-product #postcustomstuff #newmeta td.submit {
+	border-top: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
+	text-align: right !important;
 }
 
-/* ── Hide Update + submit wrapper, repurpose existing row for X delete ── */
-body.post-type-product #postcustomstuff .submit {
-	display: contents !important;
-}
+/* Hide the per-row Update button (auto-save on blur in JS) */
 body.post-type-product #postcustomstuff .updatemeta {
 	display: none !important;
 }
@@ -159,9 +161,9 @@ body.post-type-product #postcustomstuff #the-list tr {
 }
 body.post-type-product #postcustomstuff .deletemeta {
 	position: absolute !important;
-	top: 50% !important;
-	right: 10px !important;
-	transform: translateY( -50% ) !important;
+	top: 14px !important;
+	right: 12px !important;
+	transform: none !important;
 	width: 20px !important;
 	height: 20px !important;
 	padding: 0 !important;
@@ -180,13 +182,13 @@ body.post-type-product #postcustomstuff .deletemeta:hover {
 	background-color: var(--wpds-color-fg-content-error, #cc1818) !important;
 }
 
-/* Pad the value column so the X never sits on the textarea */
+/* Pad the value column so there's clear breathing room between the textarea and the X icon */
 body.post-type-product #postcustomstuff #the-list td:last-child {
-	padding-right: 36px !important;
+	padding-right: 56px !important;
 }
 
 /* ── "Enter new" / "Cancel" plain inline text links ─────
-   Targets both the <a> parent (where WP may apply button styling) and the inner span. */
+	Targets both the <a> parent (where WP may apply button styling) and the inner span. */
 body.post-type-product #postcustomstuff #newmetaleft > a,
 body.post-type-product #postcustomstuff #enternew,
 body.post-type-product #postcustomstuff #cancelnew {
@@ -237,6 +239,37 @@ body.post-type-product #postcustomstuff > p:first-of-type {
 	font-weight: var(--wpds-typography-font-weight-medium, 499);
 	font-size: var(--wpds-typography-font-size-md, 13px);
 	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
+}
+
+/* ── Reveal-button mechanic — hide the new-field form by default. ── */
+body.post-type-product #postcustomstuff #newmeta,
+body.post-type-product #postcustomstuff p.label-required {
+	display: none;
+}
+body.post-type-product #postcustomstuff.wc-proto-newmeta-open #newmeta {
+	display: table;
+}
+body.post-type-product #postcustomstuff.wc-proto-newmeta-open p.label-required {
+	display: block;
+}
+body.post-type-product #postcustomstuff .wc-proto-add-meta-trigger {
+	display: inline-block;
+	height: 32px;
+	line-height: 30px;
+	padding: 0 12px;
+	margin: 12px 0;
+	font-size: 13px;
+	background: transparent;
+	color: var(--wpds-color-fg-interactive-brand, #3858e9);
+	border: 1px solid var(--wpds-color-fg-interactive-brand, #3858e9);
+	border-radius: var(--wpds-border-radius-xs, 2px);
+	cursor: pointer;
+}
+body.post-type-product #postcustomstuff .wc-proto-add-meta-trigger:hover {
+	background: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff);
+}
+body.post-type-product #postcustomstuff.wc-proto-newmeta-open .wc-proto-add-meta-trigger {
+	display: none;
 }
 
 /* ── Helper text footer ─────────────────────────────────── */
@@ -306,6 +339,23 @@ body.post-type-product #postcustomstuff #the-list tr.wc-proto-saved {
 			} );
 		} );
 	} ).observe( list, { childList: true } );
+
+	/* Inject "Add Custom Field" trigger button that reveals the new-field form. */
+	var container = document.getElementById( 'postcustomstuff' );
+	var newmeta   = document.getElementById( 'newmeta' );
+	var label     = container && container.querySelector( 'p.label-required' );
+	if ( container && newmeta ) {
+		var trigger = document.createElement( 'button' );
+		trigger.type        = 'button';
+		trigger.className   = 'wc-proto-add-meta-trigger';
+		trigger.textContent = 'Add Custom Field';
+		( label || newmeta ).parentNode.insertBefore( trigger, label || newmeta );
+		trigger.addEventListener( 'click', function () {
+			container.classList.add( 'wc-proto-newmeta-open' );
+			var firstField = newmeta.querySelector( 'select, input[type="text"], textarea' );
+			if ( firstField ) { firstField.focus(); }
+		} );
+	}
 }() );
 </script>
 		<?php
