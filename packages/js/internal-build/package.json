@@ -43,7 +43,7 @@
 	],
 	"scripts": {
 		"build": "pnpm build:project",
-		"build:project": "pnpm '/^build:project:.*$/'",
+		"build:project": "pnpm --stream '/^build:project:.*$/'",
 		"build:project:lib": "tsc --build src/tsconfig.json",
 		"build:project:type-overrides": "node scripts/generate-types.mjs generate",
 		"postinstall": "pnpm build:project",

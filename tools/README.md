@@ -14,7 +14,7 @@ Each project within the monorepo follows a small, consistent script naming schem
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"watch:build": "pnpm watch:build:project",
-		"watch:build:project": "pnpm '/^watch:build:project:.*$/'"
+		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'"
 	}
 }
 ```
