@@ -198,8 +198,10 @@ body.post-type-product #postcustomstuff #list-table.wc-proto-empty tfoot.wc-prot
 body.post-type-product #postcustomstuff #list-table.wc-proto-empty tfoot.wc-proto-add tr.wc-proto-add-entry-row > td {
 	border-top: none !important;
 }
-/* Match the existing-row padding-right on the value column so textareas align. */
-body.post-type-product #postcustomstuff tfoot.wc-proto-add tr.wc-proto-add-entry-row > td.wc-proto-add-value {
+/* Match the existing-row padding-right on the value column so textareas align.
+   Needs #list-table in the selector to outweigh the `tfoot.wc-proto-add tr td` shorthand
+   padding rule (which has 2 IDs). */
+body.post-type-product #postcustomstuff #list-table tfoot.wc-proto-add tr.wc-proto-add-entry-row > td.wc-proto-add-value {
 	padding-right: 56px !important;
 }
 
