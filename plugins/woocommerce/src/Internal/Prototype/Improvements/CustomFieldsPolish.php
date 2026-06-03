@@ -83,12 +83,17 @@ body.post-type-product #postcustomstuff #list-table td {
 	box-shadow: none !important;
 }
 body.post-type-product #postcustomstuff #list-table {
+	display: table !important; /* WP sets inline display:none when no meta; we still want the table for the inline-add UI. */
 	border: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
 	border-radius: 4px !important;
 	border-collapse: separate !important;
 	border-spacing: 0;
 	margin: 0 0 16px;
 	width: 100% !important;
+}
+/* Hide WP's placeholder empty <tr><td></td></tr> that ships in the no-meta state. */
+body.post-type-product #postcustomstuff #the-list > tr:not([id^="meta-"]) {
+	display: none;
 }
 body.post-type-product #postcustomstuff #list-table th,
 body.post-type-product #postcustomstuff #list-table td {
@@ -338,9 +343,9 @@ body.post-type-product #postcustom > .inside > p:last-child {
 	var listTable = document.getElementById( 'list-table' );
 	if ( ! list || ! listTable ) { return; }
 
-	/* ── Empty-state toggle on #list-table when there are no meta rows ─ */
+	/* ── Empty-state toggle: only count real meta rows (id="meta-XXX"). ── */
 	function syncEmptyState() {
-		var hasMeta = !! list.querySelector( 'tr' );
+		var hasMeta = !! list.querySelector( 'tr[id^="meta-"]' );
 		listTable.classList.toggle( 'wc-proto-empty', ! hasMeta );
 	}
 	syncEmptyState();
