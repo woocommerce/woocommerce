@@ -17,7 +17,7 @@ use WP_REST_Request;
 /**
  * Schema for the refund preview response.
  *
- * @since 10.8.0
+ * @since 10.9.0
  */
 class RefundPreviewSchema extends AbstractSchema {
 
@@ -44,6 +44,8 @@ class RefundPreviewSchema extends AbstractSchema {
 	 *
 	 * @return array
 	 * @throws \LogicException Always — this method should never be called for the preview route.
+	 *
+	 * @since 10.9.0
 	 */
 	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
 		throw new \LogicException(
@@ -56,6 +58,8 @@ class RefundPreviewSchema extends AbstractSchema {
 	 * Return all properties for the item schema.
 	 *
 	 * @return array
+	 *
+	 * @since 10.9.0
 	 */
 	public function get_item_schema_properties(): array {
 		return array(

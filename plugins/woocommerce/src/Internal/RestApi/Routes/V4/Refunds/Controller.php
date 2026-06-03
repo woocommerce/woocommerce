@@ -436,10 +436,10 @@ class Controller extends AbstractController {
 	/**
 	 * Preview a refund without creating it.
 	 *
-	 * @since 10.8.0
-	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
+	 *
+	 * @since 10.9.0
 	 */
 	public function preview_item( $request ) {
 		$order = wc_get_order( $request['order_id'] );
@@ -483,6 +483,24 @@ class Controller extends AbstractController {
 				'unexpected_preview_error',
 				__( 'An unexpected error occurred while generating the refund preview.', 'woocommerce' ),
 				WP_Http::INTERNAL_SERVER_ERROR
+			);
+		}
+
+		// Final guard: even when per-line validation passes, the aggregate
+		// preview total can still exceed the order's remaining refundable
+		// amount (e.g. an amount-only partial refund applied previously).
+		// Reject up-front so the eventual create call doesn't fail with the
+		// generic 'cannot_create_refund' error from wc_create_refund.
+		if ( abs( (float) $preview['total'] ) > (float) $preview['max_refundable'] ) {
+			return $this->get_route_error_response(
+				'preview_exceeds_max_refundable',
+				sprintf(
+					/* translators: 1: requested preview total, 2: remaining refundable */
+					__( 'Requested refund preview (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
+					$preview['total'],
+					$preview['max_refundable']
+				),
+				422
 			);
 		}
 

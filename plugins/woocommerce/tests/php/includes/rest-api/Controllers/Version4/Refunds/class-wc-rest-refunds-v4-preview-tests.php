@@ -317,6 +317,46 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Preview returns 422 preview_exceeds_max_refundable when the computed total exceeds the order's remaining refundable amount.
+	 *
+	 * An amount-only partial refund (no line items attached) drops
+	 * `get_remaining_refund_amount()` but leaves per-line quantities intact,
+	 * so the per-line validation can still let a preview through that would
+	 * over-refund in aggregate. The endpoint's grand-total guard catches it.
+	 *
+	 * Setup: 2 × $100 order ($200 refundable) → $50 amount-only refund applied
+	 * → remaining = $150. Previewing qty 2 would compute total $200, exceeding
+	 * the $150 remaining → 422 `preview_exceeds_max_refundable`.
+	 */
+	public function test_preview_returns_422_when_total_exceeds_max_refundable(): void {
+		$order   = $this->create_order_with_product( 100.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		// Amount-only partial refund — drops remaining refundable to $150
+		// without consuming any specific units of the line item.
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 50.00,
+			)
+		);
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 2,
+				),
+			)
+		);
+
+		$this->assertEquals( 422, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'preview_exceeds_max_refundable', $data['code'] );
+	}
+
+	/**
 	 * @testdox P9: Preview on fully refunded order returns error.
 	 */
 	public function test_preview_fully_refunded_order(): void {
