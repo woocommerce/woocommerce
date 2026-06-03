@@ -328,8 +328,15 @@ class ProductMediaGallery {
 	/**
 	 * Insert positioned video items into product image media items.
 	 *
-	 * Video positions are relative to product gallery items, excluding the
-	 * featured product image. The offset keeps featured image first when present.
+	 * Video positions are 0-based indexes in the final mixed gallery, excluding
+	 * the featured product image. The positions are not anchors to the image-only
+	 * gallery; they already describe where videos should land after images and
+	 * earlier videos are composed together.
+	 *
+	 * Example:
+	 * - Images: array( 'image A', 'image B', 'image C' )
+	 * - Videos: array( 'video 1' => 1, 'video 2' => 2 )
+	 * - Outcome: array( 'image A', 'video 1', 'video 2', 'image B', 'image C' )
 	 *
 	 * @param array $media_items     Product image media items.
 	 * @param array $video_gallery   Stored video gallery items.
