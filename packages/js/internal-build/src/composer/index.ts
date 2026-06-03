@@ -164,27 +164,25 @@ function debounce( fn: () => Promise< void >, wait: number ): () => void {
 	let pending = false;
 	let running = false;
 
-	const schedule = (): void => {
+	function schedule(): void {
 		if ( timer ) clearTimeout( timer );
-		timer = setTimeout( trigger, wait );
-	};
-
-	const trigger = (): void => {
-		if ( running ) {
-			pending = true;
-			return;
-		}
-		running = true;
-		fn()
-			.catch( ( err: Error ) => log.error( 'error', err.message ) )
-			.finally( () => {
-				running = false;
-				if ( pending ) {
-					pending = false;
-					schedule();
-				}
-			} );
-	};
+		timer = setTimeout( () => {
+			if ( running ) {
+				pending = true;
+				return;
+			}
+			running = true;
+			fn()
+				.catch( ( err: Error ) => log.error( 'error', err.message ) )
+				.finally( () => {
+					running = false;
+					if ( pending ) {
+						pending = false;
+						schedule();
+					}
+				} );
+		}, wait );
+	}
 
 	return schedule;
 }
