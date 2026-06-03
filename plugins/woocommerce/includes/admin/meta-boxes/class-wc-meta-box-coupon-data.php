@@ -39,7 +39,13 @@ class WC_Meta_Box_Coupon_Data {
 
 			<div class="wc-tabs-back"></div>
 
-			<ul class="coupon_data_tabs wc-tabs" style="display:none;" role="tablist">
+			<ul
+				class="coupon_data_tabs wc-tabs"
+				style="display:none;"
+				role="tablist"
+				aria-orientation="vertical"
+				aria-label="<?php esc_attr_e( 'Coupon data', 'woocommerce' ); ?>"
+			>
 				<?php
 				$coupon_data_tabs = apply_filters(
 					'woocommerce_coupon_data_tabs',
@@ -64,8 +70,17 @@ class WC_Meta_Box_Coupon_Data {
 
 				foreach ( $coupon_data_tabs as $key => $tab ) :
 					?>
-					<li class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_tab <?php echo esc_attr( implode( ' ', (array) $tab['class'] ) ); ?>" role="presentation">
-						<a href="#<?php echo esc_attr( $tab['target'] ); ?>" role="tab" aria-controls="<?php echo esc_attr( $tab['target'] ); ?>" aria-selected="false" tabindex="-1">
+					<li
+						class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_tab <?php echo esc_attr( isset( $tab['class'] ) ? implode( ' ', (array) $tab['class'] ) : '' ); ?>"
+						role="presentation"
+					>
+						<a
+							href="#<?php echo esc_attr( $tab['target'] ); ?>"
+							role="tab"
+							aria-controls="<?php echo esc_attr( $tab['target'] ); ?>"
+							aria-selected="false"
+							tabindex="-1"
+						>
 							<span><?php echo esc_html( $tab['label'] ); ?></span>
 						</a>
 					</li>
