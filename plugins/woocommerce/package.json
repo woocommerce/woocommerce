@@ -19,6 +19,7 @@
 		"build:project:admin": "pnpm --filter='@woocommerce/admin-library' build",
 		"build:project:blocks": "pnpm --filter='@woocommerce/block-library' build",
 		"build:project:classic-assets": "pnpm --filter='@woocommerce/classic-assets' build",
+		"build:project:packages": "XDEBUG_MODE=off composer install --quiet",
 		"build:project:actualize-translation-domains": "node ./bin/package-update-textdomain.js",
 		"build:api": "php bin/api-builder/build-api.php",
 		"build:api:check": "php bin/api-builder/check-api-staleness.php",
@@ -101,6 +102,7 @@
 		"watch:build:project:admin": "pnpm --filter='@woocommerce/admin-library' watch:build",
 		"watch:build:project:blocks": "pnpm --filter='@woocommerce/block-library' watch:build",
 		"watch:build:project:classic-assets": "pnpm --filter='@woocommerce/classic-assets' watch:build",
+		"watch:build:project:packages": "node ./bin/watch-packages.mjs",
 		"wp-env": "wp-env"
 	},
 	"lint-staged": {
@@ -928,6 +930,7 @@
 		"@typescript-eslint/parser": "^5.62.0",
 		"@woocommerce/e2e-utils-playwright": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-build": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "wp-6.8",
 		"@wordpress/env": "11.0.1-next.v.20260206T143.0",

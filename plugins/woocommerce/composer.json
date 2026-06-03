@@ -16,21 +16,21 @@
 			"type": "path",
 			"url": "../../packages/php/monorepo-plugin",
 			"options": {
-				"symlink": true
+				"symlink": false
 			}
 		},
 		{
 			"type": "path",
 			"url": "../../packages/php/blueprint",
 			"options": {
-				"symlink": true
+				"symlink": false
 			}
 		},
 		{
 			"type": "path",
 			"url": "../../packages/php/email-editor",
 			"options": {
-				"symlink": true
+				"symlink": false
 			}
 		},
 		{
