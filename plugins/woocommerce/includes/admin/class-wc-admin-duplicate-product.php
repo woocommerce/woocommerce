@@ -190,7 +190,7 @@ class WC_Admin_Duplicate_Product {
 		$duplicate->save();
 
 		if ( ProductMediaGallery::is_feature_enabled() ) {
-			ProductMediaGallery::copy_stored_media_gallery_items( $product, $duplicate );
+			ProductMediaGallery::copy_stored_video_gallery_items( $product, $duplicate );
 		}
 
 		/**
