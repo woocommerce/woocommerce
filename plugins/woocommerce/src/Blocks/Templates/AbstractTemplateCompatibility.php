@@ -240,20 +240,17 @@ abstract class AbstractTemplateCompatibility {
 	 * @internal
 	 */
 	public function set_compatibility_layer_flag() {
+		$current_template_has_legacy_template_block = $this->current_template_has_legacy_template_block();
+
 		/**
-		 * Filter to disable the compatibility layer for the blockified templates.
+		 * Filter to determine whether the compatibility layer should be disabled.
 		 *
-		 * @since 10.9.0
-		 * @param bool|null $compatibility_layer_status The compatibility layer status. If `null`, the compatibility layer will be enabled or disabled based on the current template.
+		 * @since 11.0.0
+		 * @param bool $should_disable_compatibility_layer Whether the compatibility layer should be disabled.
 		 */
-		$compatibility_layer_status = apply_filters( 'woocommerce_disable_compatibility_layer', null );
+		$should_disable_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', $current_template_has_legacy_template_block );
 
-		// If an extension has already set the compatibility layer status, use it.
-		if ( is_bool( $compatibility_layer_status ) ) {
-			return;
-		}
-
-		if ( $this->current_template_has_legacy_template_block() ) {
+		if ( $should_disable_compatibility_layer ) {
 			add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 		}
 	}
