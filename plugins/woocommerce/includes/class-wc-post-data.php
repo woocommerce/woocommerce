@@ -220,7 +220,7 @@ class WC_Post_Data {
 	 *
 	 * @return void
 	 */
-	public static function update_stale_product_objects_tracking_cache( $post_id, $post ): void { // phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter
+	public static function update_stale_product_objects_tracking_cache( $post_id, $post ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
 		wc_deprecated_function( __METHOD__, '11.0.0' );
 	}
 
