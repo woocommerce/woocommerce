@@ -527,12 +527,15 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$count = absint( $wpdb->get_var( implode( ' ', $term_query ) ) );
 
+		$term_id = absint( $term_id );
+
 		/**
 		 * Filter the product count for a term before it is saved.
 		 *
 		 * @since 10.9.0
-		 * @param int              $count    The product count for the term.
-		 * @param int              $term_id  The term ID.
+		 *
+		 * @param int          $count    The product count for the term.
+		 * @param int          $term_id  The term ID.
 		 * @param WP_Taxonomy $taxonomy The taxonomy object.
 		 */
 		$count = apply_filters( 'woocommerce_term_recount_product_count', $count, $term_id, $taxonomy );
