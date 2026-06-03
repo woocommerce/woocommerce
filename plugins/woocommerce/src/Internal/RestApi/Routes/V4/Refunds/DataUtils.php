@@ -191,6 +191,10 @@ class DataUtils {
 	 * @return boolean|WP_Error
 	 */
 	public function validate_line_items( $line_items, WC_Order $order ) {
+		// Precompute refunded quantities/totals once so the over-refund check
+		// below caps against remaining refundable quantity, not the original.
+		$refund_data = $this->compute_refunded_quantities_and_totals( $order );
+
 		foreach ( $line_items as $line_item ) {
 			$line_item_id = $line_item['line_item_id'] ?? null;
 
@@ -215,6 +219,21 @@ class DataUtils {
 			// quantity is informational and can be missing/zero, matching the
 			// original v4 schema's `default: 0` behavior.
 			$refund_total_missing = ! array_key_exists( 'refund_total', $line_item ) || null === $line_item['refund_total'];
+
+			// Reject the ambiguous "auto-computed refund_total + explicit refund_tax"
+			// combination. Auto-compute writes a tax-inclusive value; the
+			// converter then skips tax extraction because refund_tax is set,
+			// and calculate_refund_amount double-counts the tax. The client
+			// must either supply refund_total explicitly (and may then supply
+			// refund_tax to override the auto-extracted split) or let the
+			// server handle taxes (omit both).
+			if ( $refund_total_missing && isset( $line_item['refund_tax'] ) ) {
+				return new WP_Error(
+					'invalid_line_item',
+					__( 'refund_tax cannot be combined with an auto-computed refund_total. Provide refund_total explicitly when supplying refund_tax.', 'woocommerce' )
+				);
+			}
+
 			if ( $refund_total_missing && ( ! isset( $line_item['quantity'] ) || ! is_int( $line_item['quantity'] ) || $line_item['quantity'] < 1 ) ) {
 				return new WP_Error(
 					'invalid_line_item',
@@ -238,10 +257,28 @@ class DataUtils {
 				);
 			}
 
-			// Validate refund quantity is not greater than the source item quantity.
-			// Only fires when a quantity was provided — the legacy explicit-refund_total
-			// path may omit it.
-			if ( isset( $line_item['quantity'] ) && $item->get_quantity() < $line_item['quantity'] ) {
+			// Validate refund quantity does not exceed remaining refundable
+			// quantity for this line. compute_refunded_quantities_and_totals
+			// returns negative values for already-refunded units (matches the
+			// convention used by validate_preview_line_items), so adding to
+			// $item->get_quantity() yields the remaining count.
+			// Only fires when a quantity was provided — the legacy
+			// explicit-refund_total path may omit it.
+			if ( isset( $line_item['quantity'] ) && $item instanceof \WC_Order_Item_Product ) {
+				$remaining_qty = $item->get_quantity() + ( $refund_data['qtys'][ $line_item_id ] ?? 0 );
+				if ( $line_item['quantity'] > $remaining_qty ) {
+					return new WP_Error(
+						'invalid_line_item',
+						sprintf(
+							/* translators: %d: remaining refundable quantity */
+							__( 'Line item quantity cannot be greater than the remaining refundable quantity (%d).', 'woocommerce' ),
+							$remaining_qty
+						)
+					);
+				}
+			} elseif ( isset( $line_item['quantity'] ) && $item->get_quantity() < $line_item['quantity'] ) {
+				// Shipping/fees: fall back to the simple original-quantity check
+				// (they don't track per-unit refund history in `qtys`).
 				/* translators: %s: item quantity */
 				return new WP_Error( 'invalid_line_item', sprintf( __( 'Line item quantity cannot be greater than the item quantity (%s).', 'woocommerce' ), $item->get_quantity() ) );
 			}
@@ -402,13 +439,13 @@ class DataUtils {
 	 * the existing converter (convert_line_items_to_internal_format extracts tax
 	 * from a tax-inclusive refund_total).
 	 *
-	 * @since 10.8.0
-	 *
 	 * @param array    $line_items Line items from the request (schema format).
 	 *                             Each item: array{line_item_id?: int, quantity?: int,
 	 *                             refund_total?: float|int|null, refund_tax?: array<int, mixed>}.
 	 * @param WC_Order $order      The order being refunded.
 	 * @return array The line items with refund_total populated where possible (same shape as input).
+	 *
+	 * @since 10.9.0
 	 */
 	public function fill_missing_refund_totals( array $line_items, WC_Order $order ): array {
 		foreach ( $line_items as $key => $line_item ) {
@@ -417,6 +454,17 @@ class DataUtils {
 			// that line (existing behaviour: calculate_refund_amount skips it from
 			// the sum, the under-refund check may then trip).
 			if ( array_key_exists( 'refund_total', $line_item ) && null !== $line_item['refund_total'] ) {
+				continue;
+			}
+
+			// Skip auto-compute when the client also supplied an explicit
+			// refund_tax. Auto-compute writes a tax-inclusive refund_total, but
+			// the converter then skips tax extraction whenever refund_tax is
+			// already present — and calculate_refund_amount would add both,
+			// inflating the total by the tax amount. Leave refund_total unset;
+			// validate_line_items rejects this ambiguous combination with a
+			// clear error.
+			if ( isset( $line_item['refund_tax'] ) ) {
 				continue;
 			}
 

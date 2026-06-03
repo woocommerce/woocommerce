@@ -2494,6 +2494,199 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Simplified form rejects a second refund of an already-fully-refunded product line.
+	 *
+	 * Codex regression guard: a previous implementation compared the request's
+	 * quantity to `$item->get_quantity()` (the ORIGINAL count) rather than the
+	 * remaining-after-prior-refunds count. On a multi-line order, refunding
+	 * item A once would leave it look unrefunded to the validator on the next
+	 * request — and if item B left enough order-level dollar room, the second
+	 * `{line_item_id: A, quantity: 1}` request would be accepted and refund
+	 * item A twice. The fix uses compute_refunded_quantities_and_totals to
+	 * cap against remaining qty.
+	 */
+	public function test_refunds_create_simplified_form_rejects_already_refunded_product(): void {
+		$product_a = WC_Helper_Product::create_simple_product();
+		$product_a->set_price( 50.00 );
+		$product_a->save();
+		$product_b = WC_Helper_Product::create_simple_product();
+		$product_b->set_price( 50.00 );
+		$product_b->save();
+
+		$order  = wc_create_order();
+		$item_a = new WC_Order_Item_Product();
+		$item_a->set_props(
+			array(
+				'product'  => $product_a,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item_a->save();
+		$order->add_item( $item_a );
+
+		$item_b = new WC_Order_Item_Product();
+		$item_b->set_props(
+			array(
+				'product'  => $product_b,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item_b->save();
+		$order->add_item( $item_b );
+
+		$order->set_total( 100.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		// First simplified refund of item A — must succeed.
+		$request1 = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request1->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_a->get_id(),
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+		$response1 = $this->server->dispatch( $request1 );
+		$this->assertEquals( 201, $response1->get_status() );
+		$this->created_refunds[] = $response1->get_data()['id'];
+
+		// Second simplified refund of item A — must be rejected by the
+		// remaining-qty check (item A is fully refunded). Without the fix,
+		// item B's dollar room would let this through.
+		$request2 = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request2->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_a->get_id(),
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+		$response2 = $this->server->dispatch( $request2 );
+
+		$this->assertEquals( 400, $response2->get_status() );
+		$data2 = $response2->get_data();
+		$this->assertEquals( 'invalid_line_item', $data2['code'] );
+		$this->assertStringContainsString( 'remaining refundable quantity', $data2['message'] );
+
+		$product_a->delete( true );
+		$product_b->delete( true );
+	}
+
+	/**
+	 * @testdox Simplified form rejects auto-computed refund_total combined with explicit refund_tax.
+	 *
+	 * Codex regression guard: with refund_total omitted and refund_tax
+	 * supplied, fill_missing_refund_totals would have written a tax-inclusive
+	 * refund_total (110 for a $100 item with $10 tax) and the converter would
+	 * then skip tax extraction because refund_tax was already present —
+	 * calculate_refund_amount summed both and emitted amount=120 (overstated
+	 * by the tax). The combination is now rejected up-front.
+	 */
+	public function test_refunds_create_rejects_auto_compute_with_explicit_refund_tax(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes', 'no' );
+		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 100.00 );
+			$product->set_tax_status( 'taxable' );
+			$product->save();
+
+			$order = wc_create_order();
+			$item  = new WC_Order_Item_Product();
+			$item->set_props(
+				array(
+					'product'  => $product,
+					'quantity' => 1,
+					'subtotal' => 100.00,
+					'total'    => 100.00,
+				)
+			);
+			$item->set_taxes(
+				array(
+					'total'    => array( $tax_rate_id => 10.00 ),
+					'subtotal' => array( $tax_rate_id => 10.00 ),
+				)
+			);
+			$item->save();
+			$order->add_item( $item );
+
+			$tax_item = new \WC_Order_Item_Tax();
+			$tax_item->set_rate( $tax_rate_id );
+			$tax_item->set_tax_total( 10.00 );
+			$tax_item->save();
+			$order->add_item( $tax_item );
+
+			$order->set_billing_country( 'US' );
+			$order->set_total( 110.00 );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->save();
+			$this->created_orders[] = $order->get_id();
+
+			// Auto-compute (no refund_total) + explicit refund_tax.
+			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+			$request->set_body_params(
+				array(
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						array(
+							'line_item_id' => $item->get_id(),
+							'quantity'     => 1,
+							'refund_tax'   => array(
+								array(
+									'id'           => $tax_rate_id,
+									'refund_total' => 10.00,
+								),
+							),
+						),
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 400, $response->get_status() );
+			$data = $response->get_data();
+			$this->assertEquals( 'invalid_line_item', $data['code'] );
+			$this->assertStringContainsString( 'refund_tax cannot be combined', $data['message'] );
+
+			$product->delete( true );
+		} finally {
+			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
+			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
+		}
+	}
+
+	/**
 	 * @testdox Scoped catch around fill_missing_refund_totals returns a 500 with invalid_refund_request when the helper throws.
 	 *
 	 * The catch is defensive — fill_missing_refund_totals pre-checks the
