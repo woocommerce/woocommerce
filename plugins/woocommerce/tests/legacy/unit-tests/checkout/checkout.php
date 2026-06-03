@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 /**
  * Checkout tests.
  *
@@ -335,7 +336,6 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 
 		// Build cart attributes: use the variation's fixed values for non-number attributes, supply an arbitrary value for
 		// any remaining "any" attributes, and the customer's chosen value (1) for the "any" pa_number attribute under test.
-		$attrs          = $any_number_variation->get_variation_attributes();
 		$cart_variation = array(
 			'attribute_pa_size'   => 'small',
 			'attribute_pa_colour' => 'red',
