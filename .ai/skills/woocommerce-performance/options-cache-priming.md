@@ -77,6 +77,40 @@ Guard with `! empty()` when the list is dynamically built and may be empty. When
 
 ---
 
+### 4. Transient names passed to `wp_prime_option_caches()` — unsafe under persistent object cache
+
+**Anti-pattern:** Passing `_transient_*`, `_transient_timeout_*`, `_site_transient_*`, or `_site_transient_timeout_*` option names to `wp_prime_option_caches()`.
+
+**Why it is wrong:** When a persistent object cache is active, WordPress stores transients in the object cache under the `transient` group — not as rows in `wp_options`. `wp_prime_option_caches()` reads from the options table. On a persistent-cache site the named rows never exist, so each prime call records every transient name as a `notoptions` entry. Those entries persist indefinitely: the corresponding `wp_options` rows are never created for transients stored exclusively in the object cache, so the normal invalidation path (`add_option` / `update_option`) never fires. The `notoptions` cache grows by two entries per transient name per call (`_transient_<name>` + `_transient_timeout_<name>`). On backends where `notoptions` resolves to a single cache key read on every request (observed with sharded Redis), this growth increases per-request retrieval cost over time.
+
+**Correct pattern:**
+
+```php
+// Transients are stored in the options table only when no persistent object cache is active.
+// Passing transient names to wp_prime_option_caches() under a persistent object cache
+// records them in the notoptions negative-cache indefinitely, since those rows are never
+// created in wp_options. Sites with a persistent cache already retrieve transients from the
+// object cache in O(1) — no priming is needed or beneficial.
+if ( ! wp_using_ext_object_cache() ) {
+    wp_prime_option_caches( $transient_option_names );
+}
+```
+
+`wp_using_ext_object_cache()` is the same guard WordPress itself uses inside `get_transient()` and `set_transient()` to switch between the options table and the object cache. Sites without a persistent cache keep the existing batching behaviour. Sites with one already retrieve transients from the object cache directly — skipping the prime loses nothing.
+
+**Mixed key list:** If the array passed to `wp_prime_option_caches()` mixes regular option names with transient names, split the call: prime the regular option names unconditionally; prime the transient names only under `! wp_using_ext_object_cache()`. Wrapping the entire call in the guard would silently drop the regular option priming on persistent-cache sites.
+
+```php
+wp_prime_option_caches( $regular_option_names );
+if ( ! wp_using_ext_object_cache() ) {
+    wp_prime_option_caches( $transient_option_names );
+}
+```
+
+**Audit rule:** Any call to `wp_prime_option_caches()` whose key list contains names beginning with `_transient_`, `_transient_timeout_`, `_site_transient_`, or `_site_transient_timeout_` must be guarded with `! wp_using_ext_object_cache()`.
+
+---
+
 ## Notes
 
 `wp_prime_option_caches()` is a stable public WordPress function (no underscore prefix), available since WP 6.4. WooCommerce's minimum supported WordPress version guarantees its presence — no `is_callable()` guard is needed.

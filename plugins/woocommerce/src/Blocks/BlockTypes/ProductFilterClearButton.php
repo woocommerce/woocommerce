@@ -37,7 +37,7 @@ final class ProductFilterClearButton extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		// don't render if its admin, or ajax in progress.
-		$removable_context = $block->context['woocommerceRemovableItems'] ?? null;
+		$removable_context = $block->context['woocommerce/removableItems'] ?? null;
 		if (
 			is_admin() ||
 			wp_doing_ajax() ||

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getContext, getElement } from '@wordpress/interactivity';
 
 /**
  * Internal dependencies
@@ -10,13 +10,21 @@ import type {
 	SelectableItem,
 	SelectableItemsParentStore,
 } from '../../../../types/type-defs/selectable-items';
+import {
+	getVisualAttributeTermStyleString,
+	isVisualAttributeTermEmpty,
+} from '../../../../base/utils/visual-attribute-terms';
+import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
+import { getClosestColor } from '../../utils/get-closest-color';
 
 type ChipsItem = SelectableItem< {
-	color?: string;
+	visual?: VisualAttributeTerm;
 	index?: number;
 } >;
 
 const DEFAULT_DISPLAY_LIMIT = 15;
+const CHIP_BACKGROUND_VAR = '--wc-product-filter-chips-background';
+const CHIP_TEXT_VAR = '--wc-product-filter-chips-text';
 
 type ChipsContext = {
 	storeNamespace: string;
@@ -34,13 +42,16 @@ type ChipsStore = {
 		toggle: () => void;
 		showAll: () => void;
 	};
+	callbacks: {
+		initColors: () => void;
+	};
 };
 
 function getParentStore( storeNamespace?: string ) {
 	if ( ! storeNamespace ) return undefined;
-	return store< SelectableItemsParentStore< { color?: string } > >(
-		storeNamespace
-	);
+	return store<
+		SelectableItemsParentStore< { visual?: VisualAttributeTerm } >
+	>( storeNamespace );
 }
 
 function normalizeDisplayLimit( displayLimit: number ): number {
@@ -54,6 +65,31 @@ function normalizeDisplayLimit( displayLimit: number ): number {
 function getCurrentItem(): ChipsItem | undefined {
 	const context = getContext< { item?: ChipsItem } >();
 	return context.item;
+}
+
+function getCssVariable( element: HTMLElement, property: string ): string {
+	return (
+		element.style.getPropertyValue( property ) ||
+		window.getComputedStyle( element ).getPropertyValue( property )
+	).trim();
+}
+
+function initChipColors( element: HTMLElement ): void {
+	const style = element.style;
+
+	if ( ! getCssVariable( element, CHIP_BACKGROUND_VAR ) ) {
+		const backgroundColor = getClosestColor( element, 'backgroundColor' );
+		if ( backgroundColor ) {
+			style.setProperty( CHIP_BACKGROUND_VAR, backgroundColor );
+		}
+	}
+
+	if ( ! getCssVariable( element, CHIP_TEXT_VAR ) ) {
+		const textColor = getClosestColor( element, 'color' );
+		if ( textColor ) {
+			style.setProperty( CHIP_TEXT_VAR, textColor );
+		}
+	}
 }
 
 const { state }: ChipsStore = store< ChipsStore >(
@@ -80,12 +116,11 @@ const { state }: ChipsStore = store< ChipsStore >(
 			},
 			get swatchHidden(): boolean {
 				const item = getCurrentItem();
-				return ! item?.color;
+				return isVisualAttributeTermEmpty( item?.visual );
 			},
 			get swatchStyle(): string {
 				const item = getCurrentItem();
-				if ( ! item?.color ) return '';
-				return `background-color: ${ item.color }`;
+				return getVisualAttributeTermStyleString( item?.visual );
 			},
 		},
 		actions: {
@@ -98,6 +133,16 @@ const { state }: ChipsStore = store< ChipsStore >(
 			showAll() {
 				const context = getContext< ChipsContext >();
 				context.isExpanded = true;
+			},
+		},
+		callbacks: {
+			initColors: () => {
+				const el = getElement();
+				if ( ! el.ref ) {
+					return;
+				}
+
+				initChipColors( el.ref );
 			},
 		},
 	},

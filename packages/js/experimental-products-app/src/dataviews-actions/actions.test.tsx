@@ -343,6 +343,37 @@ describe( 'product list actions', () => {
 		} );
 	} );
 
+	it( 'opens the parent product editor when the Edit action is triggered for a variation', () => {
+		const { result } = renderHook( () => useProductActions() );
+		const editProductAction = result.current.find(
+			( action ) => action.id === 'edit-product'
+		);
+
+		expect( editProductAction ).toBeDefined();
+
+		if ( ! editProductAction ) {
+			throw new Error( 'Edit action not found.' );
+		}
+
+		const originalLocation = window.location;
+		Object.defineProperty( window, 'location', {
+			writable: true,
+			value: { href: '' },
+		} );
+
+		getCallbackAction( editProductAction ).callback( [ blueVariation ], {
+			onActionPerformed,
+		} );
+
+		expect( window.location.href ).toBe( 'post.php?post=78&action=edit' );
+		expect( onActionPerformed ).toHaveBeenCalledWith( [ blueVariation ] );
+
+		Object.defineProperty( window, 'location', {
+			writable: true,
+			value: originalLocation,
+		} );
+	} );
+
 	it( 'duplicates products through the WooCommerce duplicate endpoint', async () => {
 		const duplicatedProduct = {
 			...product,

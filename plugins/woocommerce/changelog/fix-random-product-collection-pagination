@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep random Product Collection pagination consistent across pages.

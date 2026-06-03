@@ -595,7 +595,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( $this->is_order_meta_box_screen( $screen_id ) ) {
 				$default_location = wc_get_customer_default_location();
 
-				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard' ), $version );
+				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard', 'wp-a11y' ), $version );
 				wp_localize_script(
 					'wc-admin-order-meta-boxes',
 					'woocommerce_admin_meta_boxes_order',
@@ -704,6 +704,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_delete_note'                                => __( 'Are you sure you wish to delete this note? This action cannot be undone.', 'woocommerce' ),
 					'i18n_delete_customer_note'                       => __( 'Are you sure you wish to delete this note? This action cannot be undone. Caution: This only removes the note from your records — it does not recall the email already sent to the customer.', 'woocommerce' ),
 					'i18n_no_notes_yet'                               => __( 'There are no notes yet.', 'woocommerce' ),
+					'i18n_order_note_added'                           => __( 'Order note added.', 'woocommerce' ),
+					'i18n_customer_order_note_added'                  => __( 'Order note added and emailed to the customer.', 'woocommerce' ),
 					'i18n_apply_coupon'                               => __( 'Enter a coupon code to apply. Discounts are applied to line totals, before taxes.', 'woocommerce' ),
 					'i18n_add_fee'                                    => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ),
 					'i18n_attribute_name_placeholder'                 => __( 'New attribute', 'woocommerce' ),

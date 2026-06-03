@@ -6,9 +6,9 @@ WooCommerce reusable inner blocks use small context protocols so they can render
 
 | Context key | Purpose | Inner blocks |
 | --- | --- | --- |
-| `woocommerceSelectableItems` | Select/deselect items | checkbox-list, chips |
-| `woocommerceRemovableItems` | Remove active items | removable-chips |
-| `woocommerceRangeInput` | Numeric range input | price-slider |
+| `woocommerce/selectableItems` | Select/deselect items (filters, variation attributes) | checkbox-list, chips, dropdown |
+| `woocommerce/removableItems` | Remove individual items (active filters) | removable-chips |
+| `woocommerce/rangeInput` | Numeric range input (price, slider) | price-slider |
 
 ## Shared pattern
 
@@ -20,9 +20,33 @@ WooCommerce reusable inner blocks use small context protocols so they can render
 - Inner blocks may derive presentation-only data locally. Parent data should not include child-owned fields such as list indexes.
 - Server-rendered fallback items use `data-wp-each-child` with per-item `data-wp-context`; hydration reconciles them with the inner store.
 
+## Display styles
+
+A display style block is an inner block that renders a protocol context for a specific parent block. Display style blocks opt in through block support metadata:
+
+```json
+{
+    "supports": {
+        "woocommerce": {
+            "innerBlockDisplayStyle": true
+        }
+    }
+}
+```
+
+Display style blocks must:
+
+- Declare `supports.woocommerce.innerBlockDisplayStyle` as `true`.
+- Declare the protocol context in `usesContext`.
+- Declare the supported parent block in `ancestor`.
+- Render from protocol fields, not from parent-specific stores.
+- Treat extension fields as optional.
+
+The editor uses the support flag for discovery. `usesContext` and `ancestor` are validation signals so unrelated inner blocks do not appear in display style controls.
+
 ## Selectable Items
 
-Context key: `woocommerceSelectableItems`
+Context key: `woocommerce/selectableItems`
 
 Used by selectable list UIs such as checkbox-list and chips.
 
@@ -30,7 +54,7 @@ Parents pass the context directly when rendering inner blocks because items are 
 
 ```php
 ( new \WP_Block( $parsed_block, array(
-    'woocommerceSelectableItems' => $context,
+    'woocommerce/selectableItems' => $context,
 ) ) )->render();
 ```
 
@@ -104,20 +128,23 @@ export type FilterItemFields = {
 	depth?: number;
 	menuOrder?: number;
 	attributeQueryType?: 'and' | 'or';
-	color?: string;
+	visual?: {
+		type: 'color' | 'image' | 'none';
+		value: string;
+	};
 };
 ```
 
 | Consumer | Optional fields read | Fallback |
 | --- | --- | --- |
-| `checkbox-list` | `count`, `color`, `depth`, `filterType === 'rating'` | Text label, no count, no swatch, no indent |
-| `chips` | `count`, `color` | Text label, no count, no swatch |
+| `checkbox-list` | `count`, `visual`, `depth`, `filterType === 'rating'` | Text label, no count, no swatch, no indent |
+| `chips` | `count`, `visual` | Text label, no count, no swatch |
 
 Checkbox-list and chips mirror parent items into child `state.items`, adding local `index` for show-more and setting `hidden` when an item should be hidden. Their templates bind overflow visibility with `context.item.hidden`.
 
 ## Removable Items
 
-Context key: `woocommerceRemovableItems`
+Context key: `woocommerce/removableItems`
 
 Used by active-filter chips and similar removable item lists.
 
@@ -160,7 +187,7 @@ Reference implementations: `ProductFilterRemovableChips.php`, `ProductFilterClea
 
 ## Range Input
 
-Context key: `woocommerceRangeInput`
+Context key: `woocommerce/rangeInput`
 
 Used by two-ended numeric controls such as price sliders.
 
