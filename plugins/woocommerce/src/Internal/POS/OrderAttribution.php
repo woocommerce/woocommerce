@@ -44,7 +44,7 @@ use WP_REST_Request;
  * underlying action even if the override is malformed. This matches the trust
  * model accepted in the i1 local-mode proposal.
  *
- * @since 10.9.0
+ * @since 11.0.0
  * @internal
  */
 class OrderAttribution implements RegisterHooksInterface {
@@ -56,7 +56,7 @@ class OrderAttribution implements RegisterHooksInterface {
 	/**
 	 * Register the lifecycle hooks for shop_order + shop_order_refund.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function register(): void {
 		add_filter( 'woocommerce_rest_pre_insert_shop_order_object', array( $this, 'handle_pre_insert' ), 10, 3 );
@@ -297,16 +297,8 @@ class OrderAttribution implements RegisterHooksInterface {
 		bool $creating,
 		bool $is_refund
 	): void {
-		$action_verb = $this->describe_action( $creating, $is_refund );
-
 		$note_target->add_order_note(
-			sprintf(
-				/* translators: 1: action verb (created/updated/refunded), 2: staff display name, 3: staff login. */
-				__( 'POS: %1$s by %2$s (%3$s).', 'woocommerce' ),
-				$action_verb,
-				$staff_user->display_name,
-				$staff_user->user_login
-			),
+			$this->build_attribution_note( $staff_user, $creating, $is_refund ),
 			0,
 			false
 		);
@@ -316,12 +308,40 @@ class OrderAttribution implements RegisterHooksInterface {
 				'POS %1$s %2$d %3$s by user %4$s (ID %5$d).',
 				$is_refund ? 'refund' : 'order',
 				$order->get_id(),
-				$action_verb,
+				$this->describe_action( $creating, $is_refund ),
 				$staff_user->user_login,
 				$staff_user->ID
 			),
 			array( 'source' => self::LOG_SOURCE )
 		);
+	}
+
+	/**
+	 * Build the localized attribution note body. Each variant is its own full
+	 * sentence so translators get an intact, grammatically-correct string instead
+	 * of having to splice an English verb into a translated template.
+	 *
+	 * @param \WP_User $staff_user The staff member who performed the action.
+	 * @param bool     $creating   Whether this was a create (vs update).
+	 * @param bool     $is_refund  Whether the object being attributed is a refund.
+	 * @return string
+	 */
+	private function build_attribution_note( \WP_User $staff_user, bool $creating, bool $is_refund ): string {
+		if ( $is_refund ) {
+			$template = $creating
+				/* translators: 1: staff display name, 2: staff login. */
+				? __( 'POS: refunded by %1$s (%2$s).', 'woocommerce' )
+				/* translators: 1: staff display name, 2: staff login. */
+				: __( 'POS: refund updated by %1$s (%2$s).', 'woocommerce' );
+		} else {
+			$template = $creating
+				/* translators: 1: staff display name, 2: staff login. */
+				? __( 'POS: created by %1$s (%2$s).', 'woocommerce' )
+				/* translators: 1: staff display name, 2: staff login. */
+				: __( 'POS: updated by %1$s (%2$s).', 'woocommerce' );
+		}
+
+		return sprintf( $template, $staff_user->display_name, $staff_user->user_login );
 	}
 
 	/**
@@ -380,7 +400,8 @@ class OrderAttribution implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Return the human-readable action verb for the attribution order note + log line.
+	 * English action verb for the log line. The order-note copy uses full localized
+	 * sentences via build_attribution_note() instead, so this verb is log-only.
 	 *
 	 * @param bool $creating  Whether this is a create (true) or update (false).
 	 * @param bool $is_refund Whether the object being processed is a refund.
