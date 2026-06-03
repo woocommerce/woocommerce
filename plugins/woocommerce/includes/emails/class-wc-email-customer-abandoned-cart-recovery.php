@@ -6,6 +6,10 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\AbandonedCartRecovery\ManualSendHandler;
+use Automattic\WooCommerce\Internal\Email\Unsubscribes\Endpoint as UnsubscribesEndpoint;
+use Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage as UnsubscribesStorage;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -26,6 +30,14 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 	class WC_Email_Customer_Abandoned_Cart_Recovery extends WC_Email {
 
 		/**
+		 * Email identifier — kept in `$this->id` for the rest of WC_Email's
+		 * machinery but also exposed as a constant so static methods (and
+		 * external callers using the unsubscribe storage) can reference the
+		 * same string without it drifting out of sync with the constructor.
+		 */
+		public const EMAIL_ID = 'customer_abandoned_cart_recovery';
+
+		/**
 		 * Plugins known to provide their own abandoned cart recovery flow.
 		 *
 		 * Detection is install-only.
@@ -36,10 +48,50 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		);
 
 		/**
+		 * Order meta key recording the timestamp of the most recent send.
+		 *
+		 * Written by `trigger()` after a successful dispatch (manual or automated) of the abandoned cart recovery email.
+		 */
+		public const META_KEY_SENT_AT = '_abandoned_cart_recovery_email_sent_at';
+
+		/**
+		 * Order action id used by the recovery email send item on the order edit page.
+		 *
+		 * Re-exports `ManualSendHandler::MANUAL_SEND_ACTION` so external callers
+		 * (and tests) can reference it from the email class. Source of truth lives
+		 * on the dispatcher because its hook registration runs before this email
+		 * class file is included.
+		 */
+		public const MANUAL_RECOVERY_EMAIL_SEND_ACTION = ManualSendHandler::MANUAL_SEND_ACTION;
+
+		/**
+		 * Order statuses that represent an abandoned checkout for the purposes of
+		 * the manual-send action and the trigger-level status gate.
+		 *
+		 * - `pending`        — classic checkout reached "place order" but no payment yet.
+		 * - `checkout-draft` — block checkout (Store API) parks the order here while
+		 *                     the customer is mid-flow. May have no billing email yet,
+		 *                     in which case `trigger()` no-ops.
+		 *
+		 * @var string[]
+		 */
+		private const ABANDONED_STATUSES = array(
+			OrderStatus::PENDING,
+			OrderStatus::CHECKOUT_DRAFT,
+		);
+
+		/**
+		 * Minimum age (in seconds, from `date_created`) before an order is considered
+		 * actually abandoned. Gives the customer a window to come back and complete
+		 * the checkout on their own before merchants can nudge them.
+		 */
+		public const ABANDONMENT_THRESHOLD_SECONDS = HOUR_IN_SECONDS;
+
+		/**
 		 * Constructor.
 		 */
 		public function __construct() {
-			$this->id             = 'customer_abandoned_cart_recovery';
+			$this->id             = self::EMAIL_ID;
 			$this->customer_email = true;
 			$this->title          = __( 'Abandoned cart recovery', 'woocommerce' );
 			$this->email_group    = 'order-updates';
@@ -55,6 +107,9 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 
 			// Trigger fires after Action Scheduler dispatches `woocommerce_send_abandoned_cart_recovery_notification`,
 			// or when the merchant invokes the manual-send action from the order edit page.
+			// The order-edit action hooks live in `Internal\AbandonedCartRecovery\ManualSendHandler`
+			// so the listener is in place before the admin POST runs the order-meta save flow
+			// (which happens before the mailer would otherwise be instantiated).
 			add_action( 'woocommerce_send_abandoned_cart_recovery_notification', array( $this, 'trigger' ), 10, 1 );
 
 			parent::__construct();
@@ -98,42 +153,195 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				$this->placeholders['{order_number}'] = $order->get_order_number();
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() && $this->is_order_eligible_for_send() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+			if (
+				$this->is_enabled()
+				&& $this->get_recipient()
+				&& $this->object instanceof WC_Order
+				&& $this->is_order_eligible_for_recovery( $this->object )
+				&& ! self::is_recipient_unsubscribed( $this->get_recipient() )
+			) {
+				$sent = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+
+				// Only record the send timestamp when the dispatch actually succeeded.
+				if ( $sent ) {
+					$this->object->update_meta_data( self::META_KEY_SENT_AT, (string) time() );
+					$this->object->save_meta_data();
+				}
 			}
 
 			$this->restore_locale();
 		}
 
 		/**
-		 * Defence-in-depth status check at send time.
+		 * Add the manual-send item to the order actions dropdown.
+		 *
+		 * Surfaced for the statuses listed in `ABANDONED_STATUSES` (pending +
+		 * checkout-draft) so merchants can't accidentally email a "pick up where
+		 * you left off" prompt to a customer whose order has already moved past
+		 * abandonment. A capability check guards against role configurations that
+		 * grant the order edit page to users without `edit_shop_orders`.
 		 *
 		 * @since 10.9.0
-		 * @return bool
+		 *
+		 * @param array         $actions Existing order actions keyed by action id.
+		 * @param WC_Order|null $order   Order being rendered, or null in contexts without one.
+		 * @return array
 		 */
-		protected function is_order_eligible_for_send(): bool {
-			if ( ! $this->object instanceof WC_Order ) {
-				return false;
+		public function register_order_action( $actions, $order ): array {
+			if ( ! $order instanceof WC_Order ) {
+				return $actions;
 			}
 
+			if ( ! current_user_can( 'edit_shop_orders' ) ) {
+				return $actions;
+			}
+
+			// Mirror trigger()'s preconditions: don't surface an action that would
+			// silently no-op when the merchant clicks it.
+			if ( ! $this->is_enabled() || self::is_suppressed() ) {
+				return $actions;
+			}
+
+			if ( ! $this->is_order_eligible_for_recovery( $order ) ) {
+				return $actions;
+			}
+
+			// Customer-side preference wins over merchant action — don't surface
+			// "Send" if the recipient has already opted out.
+			if ( self::is_recipient_unsubscribed( $order->get_billing_email() ) ) {
+				return $actions;
+			}
+
+			$actions[ self::MANUAL_RECOVERY_EMAIL_SEND_ACTION ] = __( 'Send abandoned cart recovery email', 'woocommerce' );
+
+			return $actions;
+		}
+
+		/**
+		 * Whether an order is in a state that warrants a recovery email.
+		 *
+		 * The order must (a) be in one of the eligible statuses, (b) have lived
+		 * in that state for at least `ABANDONMENT_THRESHOLD_SECONDS` (so we don't
+		 * nudge customers who are actively still on the page), and (c) have a
+		 * valid billing email — checkout-draft orders in particular can land in
+		 * the eligible status without a recipient.
+		 *
+		 * Single source of truth: called both by `trigger()` (defence-in-depth at
+		 * send time) and by the manual-send dropdown gates. Partners can widen the
+		 * eligible-status set via `woocommerce_abandoned_cart_recovery_eligible_statuses`
+		 * and both paths will agree.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param WC_Order $order Order to evaluate.
+		 * @return bool
+		 */
+		protected function is_order_eligible_for_recovery( WC_Order $order ): bool {
 			/**
 			 * Filter the order statuses that are eligible to receive the abandoned cart recovery email.
 			 *
-			 * Defaults to `pending` only. Partner integrations or merchants who want recovery
-			 * to fire for other states (e.g. `failed`) can widen the list here.
+			 * Defaults to the abandoned-checkout statuses (`pending`, `checkout-draft`). Partner
+			 * integrations or merchants who want recovery to fire for other states (e.g. `failed`)
+			 * can widen the list here.
 			 *
 			 * @since 10.9.0
 			 *
-			 * @param string[] $eligible_statuses Default: `[ 'pending' ]`.
+			 * @param string[] $eligible_statuses Default: ABANDONED_STATUSES.
 			 * @param WC_Order $order             Order being inspected.
 			 */
 			$eligible_statuses = (array) apply_filters(
 				'woocommerce_abandoned_cart_recovery_eligible_statuses',
-				array( OrderStatus::PENDING ),
-				$this->object
+				self::ABANDONED_STATUSES,
+				$order
+			);
+			if ( ! in_array( $order->get_status(), $eligible_statuses, true ) ) {
+				return false;
+			}
+
+			$date_created = $order->get_date_created();
+			if ( ! $date_created ) {
+				return false;
+			}
+
+			if ( ( time() - $date_created->getTimestamp() ) < self::ABANDONMENT_THRESHOLD_SECONDS ) {
+				return false;
+			}
+
+			return is_email( $order->get_billing_email() ) !== false;
+		}
+
+		/**
+		 * Handle a merchant-initiated send from the order edit page.
+		 *
+		 * Fired by `woocommerce_order_action_send_abandoned_cart_recovery_email` after
+		 * the order metabox save flow has validated the request. We re-check the
+		 * capability and order status as defense in depth in case the hook is
+		 * invoked from a non-metabox path.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param WC_Order $order The order whose customer should receive the email.
+		 * @return void
+		 */
+		public function handle_recovery_email_send( $order ): void {
+			if ( ! $order instanceof WC_Order ) {
+				return;
+			}
+
+			if ( ! current_user_can( 'edit_shop_orders' ) ) {
+				return;
+			}
+
+			// Don't record an order note for a send that the underlying trigger
+			// would silently bail on.
+			if ( ! $this->is_enabled() || self::is_suppressed() ) {
+				return;
+			}
+
+			if ( ! $this->is_order_eligible_for_recovery( $order ) ) {
+				return;
+			}
+
+			// Customer-side preference wins over merchant action — don't bypass
+			// an unsubscribe by manual send.
+			if ( self::is_recipient_unsubscribed( $order->get_billing_email() ) ) {
+				return;
+			}
+
+			/**
+			 * Fires before the abandoned cart recovery email is manually resent.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param WC_Order $order      Order being recovered.
+			 * @param string   $email_type Email identifier ('customer_abandoned_cart_recovery').
+			 */
+			do_action( 'woocommerce_before_resend_order_emails', $order, $this->id );
+
+			$this->trigger( $order->get_id() );
+
+			$order->add_order_note(
+				__( 'Abandoned cart recovery email sent from the order actions menu.', 'woocommerce' ),
+				0,
+				true,
+				array( 'note_group' => OrderNoteGroup::EMAIL_NOTIFICATION )
 			);
 
-			return in_array( $this->object->get_status(), $eligible_statuses, true );
+			/**
+			 * Fires after the abandoned cart recovery email has been manually resent.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param WC_Order $order      Order being recovered.
+			 * @param string   $email_type Email identifier ('customer_abandoned_cart_recovery').
+			 */
+			do_action( 'woocommerce_after_resend_order_email', $order, $this->id );
+
+			// Reuse the existing "Order updated. Email sent." admin notice (message id 11) on the
+			// classic order edit page. HPOS uses a different redirect pipeline that sets the
+			// message directly in Edit.php, so this filter is a no-op there — matching the
+			// behavior of the built-in `send_order_details` action.
+			add_filter( 'redirect_post_location', array( 'WC_Meta_Box_Order_Actions', 'set_email_sent_message' ) );
 		}
 
 		/**
@@ -223,6 +431,48 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		}
 
 		/**
+		 * Get the unsubscribe URL for the currently-bound order's recipient.
+		 *
+		 * Returns an HMAC-signed URL routed through `Endpoint::QUERY_VAR`
+		 * (`?wc-email-unsubscribe=…`) and handled by `UnsubscribesEndpoint`.
+		 * Empty when no order is bound or the order has no billing email —
+		 * both states mean there's no recipient to unsubscribe and the
+		 * template should suppress the footer link.
+		 *
+		 * @since  10.9.0
+		 * @return string
+		 */
+		public function get_unsubscribe_url() {
+			if ( ! $this->object instanceof WC_Order ) {
+				return '';
+			}
+			$email = $this->object->get_billing_email();
+			if ( '' === $email ) {
+				return '';
+			}
+			return UnsubscribesEndpoint::url_for( $this->object->get_id(), $email, $this->id );
+		}
+
+		/**
+		 * Whether the given email has opted out of checkout recovery emails.
+		 *
+		 * Static so the gate can be reused from the trigger-side check, the
+		 * dropdown gate, and any future auto-send scheduler — without each
+		 * caller needing to thread the repository through.
+		 *
+		 * @since  10.9.0
+		 *
+		 * @param string $email Raw recipient email.
+		 * @return bool
+		 */
+		public static function is_recipient_unsubscribed( string $email ): bool {
+			if ( '' === $email ) {
+				return false;
+			}
+			return wc_get_container()->get( UnsubscribesStorage::class )->is_unsubscribed( $email, self::EMAIL_ID );
+		}
+
+		/**
 		 * Get default email subject.
 		 *
 		 * @since  10.9.0
@@ -264,6 +514,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 					'order'              => $this->object,
 					'email_heading'      => $this->get_heading(),
 					'recovery_url'       => $this->get_recovery_url(),
+					'unsubscribe_url'    => $this->get_unsubscribe_url(),
 					'additional_content' => $this->get_additional_content(),
 					'sent_to_admin'      => false,
 					'plain_text'         => false,
@@ -284,6 +535,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 					'order'              => $this->object,
 					'email_heading'      => $this->get_heading(),
 					'recovery_url'       => $this->get_recovery_url(),
+					'unsubscribe_url'    => $this->get_unsubscribe_url(),
 					'additional_content' => $this->get_additional_content(),
 					'sent_to_admin'      => false,
 					'plain_text'         => true,
