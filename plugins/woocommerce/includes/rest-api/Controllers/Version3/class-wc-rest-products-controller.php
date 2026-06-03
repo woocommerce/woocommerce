@@ -524,7 +524,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// Batch-prime image attachment caches for the whole collection, rather than once per
 		// product when get_images() runs during serialization.
 		if ( ! empty( $result['objects'] ) ) {
-			ProductUtil::prime_image_caches( $result['objects'] );
+			wc_get_container()->get( ProductUtil::class )->prime_image_caches( $result['objects'] );
 		}
 
 		return $result;

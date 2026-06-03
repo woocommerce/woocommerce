@@ -52,7 +52,7 @@ class ProductUtil {
 	 * @param array $products Products whose image attachments should be primed. Non-product items are ignored.
 	 * @return void
 	 */
-	public static function prime_image_caches( array $products ): void {
+	public function prime_image_caches( array $products ): void {
 		$products  = array_filter( $products, static fn( $product ) => $product instanceof \WC_Product );
 		$featured  = array_map( static fn( $product ) => $product->get_image_id(), $products );
 		$gallery   = array_map( static fn( $product ) => $product->get_gallery_image_ids(), $products );

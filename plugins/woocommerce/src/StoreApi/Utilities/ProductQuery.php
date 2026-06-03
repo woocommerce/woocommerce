@@ -361,7 +361,7 @@ class ProductQuery implements QueryClausesGenerator {
 
 		// Batch-prime image attachment caches for the whole collection, rather than once per
 		// product when ProductSchema::get_images() runs during serialization.
-		ProductUtil::prime_image_caches( $objects );
+		wc_get_container()->get( ProductUtil::class )->prime_image_caches( $objects );
 
 		return array(
 			'objects' => $objects,

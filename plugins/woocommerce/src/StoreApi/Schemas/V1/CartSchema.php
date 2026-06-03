@@ -355,7 +355,7 @@ class CartSchema extends AbstractSchema {
 		$cart_line_items = array_values( array_filter( $cart_all_items, static fn( $item ) => ( $item['data'] ?? null ) instanceof \WC_Product ) );
 
 		// Batch-prime image attachment caches for cross-sells and cart line items in one query.
-		ProductUtil::prime_image_caches( array_merge( $cross_sells, array_column( $cart_line_items, 'data' ) ) );
+		wc_get_container()->get( ProductUtil::class )->prime_image_caches( array_merge( $cross_sells, array_column( $cart_line_items, 'data' ) ) );
 
 		return [
 			'items'                   => $this->get_item_responses_from_schema( $this->item_schema, $cart_all_items ),
