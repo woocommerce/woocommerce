@@ -366,7 +366,6 @@
 				"@wordpress/icons"
 			],
 			"packages": [
-				"@woocommerce/product-editor",
 				"@woocommerce/admin-library"
 			],
 			"isIgnored": true

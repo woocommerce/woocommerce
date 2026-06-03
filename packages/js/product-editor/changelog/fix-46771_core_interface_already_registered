@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix duplicate interface store warning, by bundling in and lazy loading some @wordpress/interface dependencies.

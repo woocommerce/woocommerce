@@ -70,7 +70,43 @@ class PageController {
 		// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
 		add_action( 'admin_head', array( $this, 'remove_app_entry_page_menu_item' ), 20 );
 		// Using low priority to run before other hooks.
+		add_action( 'admin_init', array( $this, 'redirect_removed_product_editor_routes' ), 1 );
 		add_action( 'admin_init', array( $this, 'maybe_redirect_payment_tasks_to_settings' ), 1 );
+	}
+
+	/**
+	 * Redirect removed product editor routes to the classic product editor.
+	 */
+	public function redirect_removed_product_editor_routes() {
+		if (
+			! isset( $_GET['page'], $_GET['path'] ) || // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			self::PAGE_ROOT !== sanitize_text_field( wp_unslash( $_GET['page'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$path        = trim( (string) wp_parse_url( esc_url_raw( wp_unslash( $_GET['path'] ) ), PHP_URL_PATH ), '/' );
+		$path_pieces = explode( '/', $path );
+
+		if ( 'add-product' === $path ) {
+			wp_safe_redirect( admin_url( 'post-new.php?post_type=product' ) );
+			exit;
+		}
+
+		if ( 'product' !== ( $path_pieces[0] ?? '' ) || empty( $path_pieces[1] ) ) {
+			return;
+		}
+
+		$product_id = absint( $path_pieces[1] );
+		if ( ! $product_id ) {
+			return;
+		}
+
+		if ( 2 === count( $path_pieces ) || ( 4 === count( $path_pieces ) && 'variation' === $path_pieces[2] ) ) {
+			wp_safe_redirect( admin_url( 'post.php?post=' . $product_id . '&action=edit' ) );
+			exit;
+		}
 	}
 
 	/**
