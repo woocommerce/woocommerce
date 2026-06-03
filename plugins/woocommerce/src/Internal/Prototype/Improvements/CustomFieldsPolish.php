@@ -120,12 +120,22 @@ body.post-type-product #postcustomstuff #list-table.wc-proto-empty thead {
 	display: none;
 }
 
-body.post-type-product #postcustomstuff #list-table input[type="text"] {
+/* Full-width for existing-row inputs only — EXCLUDE #metakeyinput, whose visibility
+   is toggled by WP's $.toggle() on Enter new / Cancel. Forcing display:block on it
+   would override the inline display:none we set in JS for the initial hidden state. */
+body.post-type-product #postcustomstuff #list-table input[type="text"]:not(#metakeyinput) {
 	width: 100% !important;
 	max-width: 100% !important;
 	box-sizing: border-box !important;
 	margin: 0 !important;
 	display: block !important;
+}
+/* #metakeyinput: full-width + spacing only when WP shows it; never force display. */
+body.post-type-product #postcustomstuff #metakeyinput {
+	width: 100% !important;
+	max-width: 100% !important;
+	box-sizing: border-box !important;
+	margin: 0 0 6px !important;
 }
 body.post-type-product #postcustomstuff textarea {
 	width: 100%;
@@ -183,8 +193,9 @@ body.post-type-product #postcustomstuff #list-table tfoot.wc-proto-add tr.wc-pro
 body.post-type-product #postcustomstuff #list-table tfoot.wc-proto-add tr.wc-proto-add-trigger-row > td {
 	border-top: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
 }
-/* In the empty state there's no content above the trigger row, so no divider needed. */
-body.post-type-product #postcustomstuff #list-table.wc-proto-empty tfoot.wc-proto-add tr.wc-proto-add-trigger-row > td {
+/* In the empty state there's no content above the trigger or entry row, so no divider needed. */
+body.post-type-product #postcustomstuff #list-table.wc-proto-empty tfoot.wc-proto-add tr.wc-proto-add-trigger-row > td,
+body.post-type-product #postcustomstuff #list-table.wc-proto-empty tfoot.wc-proto-add tr.wc-proto-add-entry-row > td {
 	border-top: none !important;
 }
 /* Match the existing-row padding-right on the value column so textareas align. */
@@ -230,6 +241,14 @@ body.post-type-product #postcustomstuff td.wc-proto-add-name > a {
 }
 body.post-type-product #postcustomstuff .wc-proto-add-name a:hover {
 	text-decoration: none !important;
+	background: transparent !important;
+}
+/* Kill the browser default focus outline that looks like a button border. */
+body.post-type-product #postcustomstuff .wc-proto-add-name a:focus,
+body.post-type-product #postcustomstuff .wc-proto-add-name a:focus-visible {
+	outline: none !important;
+	box-shadow: none !important;
+	border: 0 !important;
 	background: transparent !important;
 }
 /* The inner #enternew/#cancelnew spans should inherit, no extra styling */
