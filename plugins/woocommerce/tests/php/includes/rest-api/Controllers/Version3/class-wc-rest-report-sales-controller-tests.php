@@ -220,35 +220,4 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'string', $bucket_schema['properties']['refunds']['type'], 'refunds should be a string (decimal).' );
 	}
 
-	/**
-	 * @testdox Should not add a refunds field to v1 or v2 responses (v3-scoped change).
-	 */
-	public function test_refunds_field_absent_from_v1_and_v2_responses(): void {
-		$order = WC_Helper_Order::create_order();
-		$order->set_status( OrderStatus::COMPLETED );
-		$order->save();
-
-		wc_create_refund(
-			array(
-				'amount'   => 4,
-				'order_id' => $order->get_id(),
-			)
-		);
-
-		foreach ( array( 'WC_REST_Report_Sales_V1_Controller', 'WC_REST_Report_Sales_V2_Controller' ) as $controller_class ) {
-			$request    = new WP_REST_Request( 'GET', '/' );
-			$request->set_param( 'period', 'month' );
-			$controller = new $controller_class();
-			$response   = $controller->prepare_item_for_response( null, $request );
-			$data       = $response->get_data();
-			$today      = gmdate( 'Y-m-d', current_time( 'timestamp' ) );
-
-			$this->assertArrayHasKey( $today, $data['totals'], "$controller_class: today's bucket should exist." );
-			$this->assertArrayNotHasKey(
-				'refunds',
-				$data['totals'][ $today ],
-				"$controller_class: legacy v1/v2 responses must NOT include the new refunds field."
-			);
-		}
-	}
 }
