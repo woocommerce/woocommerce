@@ -6882,7 +6882,10 @@ img.tips {
 	z-index: 8675309;
 	position: absolute;
 	top: 0;
-	pointer-events: none;
+
+	&.no-pointer-events {
+        pointer-events: none;
+    }
 
 	/*rtl:ignore*/
 	left: 0;

@@ -35,6 +35,7 @@
 			fadeOut: 200,
 			attribute: "title",
 			content: false, // HTML or String or callback to fill TipTIp with
+			closeOnEscape: true,
 		  	enter: function(){},
 		  	exit: function(){}
 	  	};
@@ -63,23 +64,59 @@
 				} );
 			}
 			if(org_title != ""){
-				if(!opts.content){
-					org_elem.removeAttr(opts.attribute); //remove original Attribute
-				}
 				var timeout = false;
+				var close_timeout = false;
 
 				if(opts.activation == "hover"){
 					org_elem.on( 'mouseenter', function(){
+						cancel_deactive_tiptip();
 						active_tiptip();
 					} ).on( 'mouseleave', function(){
-						if(!opts.keepAlive || !tiptip_holder.is(':hover')){
+						if(opts.keepAlive){
+							close_timeout = setTimeout(function(){
+								if(!tiptip_holder.is(':hover')){
+									deactive_tiptip();
+								}
+							}, 300);
+						} else {
 							deactive_tiptip();
+						}
+					}).on( 'focus', function(){
+						cancel_deactive_tiptip();
+						active_tiptip();
+					}).on( 'blur', function(){
+						if(opts.keepAlive){
+							close_timeout = setTimeout(function(){
+								if(!tiptip_holder.is(':hover') && !tiptip_holder.is(':focus-within')){
+									deactive_tiptip();
+								}
+							}, 300);
+						} else {
+							deactive_tiptip();
+						}
+					}).on( 'keydown', function( event ){
+						if ( event.key === 'Escape' || event.keyCode === 27 ) {
+							if(opts.closeOnEscape){
+								deactive_tiptip();
+							}
+						} else if ( event.key === ' ' || event.key === 'Enter' ||
+							event.keyCode === 32 || event.keyCode === 13 ) {
+							event.preventDefault();
+							if ( tiptip_holder.is(':visible') ) {
+								deactive_tiptip();
+							} else {
+								cancel_deactive_tiptip();
+								active_tiptip();
+							}
 						}
 					});
 					if(opts.keepAlive){
-						tiptip_holder.on( 'mouseenter', function(){} ).on( 'mouseleave', function(){
-							deactive_tiptip();
-						});
+						tiptip_holder.off('mouseenter.tiptip mouseleave.tiptip')
+							.on('mouseenter.tiptip', function(){
+								cancel_deactive_tiptip();
+							}).on('mouseleave.tiptip', function(){
+								deactive_tiptip();
+							});
 					}
 				} else if(opts.activation == "focus"){
 					org_elem.on( 'focus', function(){
@@ -104,6 +141,12 @@
 				}
 
 				function active_tiptip(){
+					if(!opts.keepAlive){
+						tiptip_holder.addClass('no-pointer-events');
+					} else {
+						tiptip_holder.removeClass('no-pointer-events');
+					}
+
 					var content = typeof opts.content === 'function' ? opts.content() : org_title;
 					if (!content) {
 						return;
@@ -194,7 +237,12 @@
 				function deactive_tiptip(){
 					opts.exit.call(this);
 					if (timeout){ clearTimeout(timeout); }
+					cancel_deactive_tiptip();
 					tiptip_holder.fadeOut(opts.fadeOut);
+				}
+
+				function cancel_deactive_tiptip(){
+					if (close_timeout){ clearTimeout(close_timeout); }
 				}
 			}
 		});
