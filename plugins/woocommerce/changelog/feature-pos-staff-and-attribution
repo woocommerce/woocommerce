@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add server-side POS staff (user-meta `_woocommerce_pos_role` model) and order attribution under the dev-only `point_of_sale_staff` feature flag.
+Add server-side POS staff and order attribution under the dev-only `point_of_sale_staff` feature flag. Introduces the `pos_staff` WP role as the marker for users who can use the POS app, with cashier/manager/admin presets stored in `_woocommerce_pos_preset` user meta.

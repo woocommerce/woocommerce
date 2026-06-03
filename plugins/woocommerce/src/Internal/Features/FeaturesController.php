@@ -565,6 +565,10 @@ class FeaturesController {
 					'woocommerce'
 				),
 				'enabled_by_default'           => false,
+				// phpcs:ignore Generic.Commenting.Todo.TaskFound
+				// TODO: flip to true before the parent `point_of_sale` feature ships
+				// so this experimental sub-flag stays hidden from merchants in the
+				// Features UI. Kept false for now to ease testing while the POC lands.
 				'disable_ui'                   => false,
 				'is_experimental'              => true,
 				'skip_compatibility_checks'    => true,
