@@ -30214,30 +30214,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
 
 		-
-			message: '#^Method WC_REST_Products_Catalog_Controller\:\:register_routes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-catalog-controller.php
-
-		-
-			message: '#^Method WC_REST_Products_Catalog_Controller\:\:request_catalog\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-catalog-controller.php
-
-		-
-			message: '#^Method WC_REST_Products_Catalog_Controller\:\:request_catalog_permissions_check\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-catalog-controller.php
-
-		-
-			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 116 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-catalog-controller.php
-
-		-
 			message: '#^Access to offset ''cost_of_goods_sold'' on an unknown class Automattic\\WooCommerce\\Internal\\CostOfGoodsSold\\WP_Rest_Request\.$#'
 			identifier: class.notFound
 			count: 2
@@ -45994,18 +45970,6 @@ parameters:
 			path: src/Admin/FeaturePlugin.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\AsyncProductEditorCategoryField\\Init\:\:enqueue_scripts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/AsyncProductEditorCategoryField/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\AsyncProductEditorCategoryField\\Init\:\:enqueue_styles\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/AsyncProductEditorCategoryField/Init.php
-
-		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
 			count: 1
@@ -46624,24 +46588,6 @@ parameters:
 			path: src/Admin/Features/LaunchYourStore.php
 
 		-
-			message: '#^Access to property \$post_content on an unknown class Automattic\\WooCommerce\\Admin\\Features\\WP_Post\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/LaunchYourStore.php
-
-		-
-			message: '#^Access to property \$post_name on an unknown class Automattic\\WooCommerce\\Admin\\Features\\WP_Post\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/Features/LaunchYourStore.php
-
-		-
-			message: '#^Access to property \$post_title on an unknown class Automattic\\WooCommerce\\Admin\\Features\\WP_Post\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/Features/LaunchYourStore.php
-
-		-
 			message: '#^Callback expects 1 parameter, \$accepted_args is set to 2\.$#'
 			identifier: arguments.count
 			count: 1
@@ -46649,12 +46595,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\LaunchYourStore\:\:maybe_add_coming_soon_banner_on_frontend\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/LaunchYourStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\LaunchYourStore\:\:maybe_track_template_change\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Admin/Features/LaunchYourStore.php
@@ -46668,24 +46608,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\LaunchYourStore\:\:reset_woocommerce_coming_soon_banner_dismissed\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/LaunchYourStore.php
-
-		-
-			message: '#^Parameter \$post of method Automattic\\WooCommerce\\Admin\\Features\\LaunchYourStore\:\:maybe_track_template_change\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\WP_Post\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/LaunchYourStore.php
-
-		-
-			message: '#^Property WP_Post\:\:\$post_name \(string\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 1
-			path: src/Admin/Features/LaunchYourStore.php
-
-		-
-			message: '#^Property WP_Post\:\:\$post_title \(string\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
 			count: 1
 			path: src/Admin/Features/LaunchYourStore.php
 
@@ -53650,18 +53572,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilters\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -53682,12 +53592,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilters\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilters.php
 
@@ -56398,12 +56302,6 @@ parameters:
 			path: src/Checkout/Helpers/ReserveStock.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Checkout\\Helpers\\ReserveStock\:\:get_query_for_reserved_stock\(\) never returns void so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Checkout\\Helpers\\ReserveStock\:\:release_stock_for_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -58162,12 +58060,6 @@ parameters:
 			path: src/Internal/Admin/Logging/FileV2/FileController.php
 
 		-
-			message: '#^Parameter \#1 \$directory of class RecursiveDirectoryIterator constructor expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Logging/FileV2/FileController.php
-
-		-
 			message: '#^Parameter \#1 \$fp of function feof expects resource, resource\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -58175,12 +58067,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$fp of function fgets expects resource, resource\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Logging/FileV2/FileController.php
-
-		-
-			message: '#^Parameter \#1 \$path of function wp_is_writable expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Logging/FileV2/FileController.php
