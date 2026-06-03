@@ -281,25 +281,26 @@ module.exports = function ( grunt ) {
 			this.async(); // Keep this task alive until SIGINT.
 
 			let running = false;
-			let pending = null;
+			const pending = new Set();
 			const runQueued = ( tasks ) => {
+				tasks.forEach( ( task ) => pending.add( task ) );
 				if ( running ) {
-					pending = tasks;
 					return;
 				}
 				running = true;
+				const next = [ ...pending ];
+				pending.clear();
 				grunt.util.spawn(
 					{
 						grunt: true,
-						args: tasks,
+						args: next,
 						opts: { stdio: 'inherit' },
 					},
 					() => {
 						running = false;
-						if ( pending ) {
-							const next = pending;
-							pending = null;
-							runQueued( next );
+						if ( pending.size > 0 ) {
+							// Drain the queue.
+							runQueued( [] );
 						}
 					}
 				);
@@ -320,14 +321,10 @@ module.exports = function ( grunt ) {
 				);
 
 			chokidar
-				.watch(
-					[
-						'js/**/*.js',
-						'!js/**/*.min.js',
-						'Gruntfile.js',
-					],
-					{ ignoreInitial: true }
-				)
+				.watch( [ 'js/**/*.js', 'Gruntfile.js' ], {
+					ignoreInitial: true,
+					ignored: '**/*.min.js',
+				} )
 				.on( 'all', () =>
 					runQueued( [
 						'copy:js',
