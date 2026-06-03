@@ -506,7 +506,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'export_selected_products_nonce' => current_user_can( 'export' ) ? wp_create_nonce( 'export-selected-products' ) : null,
 					),
 					'urls'                              => array(
-						'add_product'     => esc_url_raw( admin_url( 'post-new.php?post_type=product' ) ),
+						'add_product'     => null,
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
