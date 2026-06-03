@@ -806,4 +806,102 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 			'Suppressed email must not record a "sent from the order actions menu" order note.'
 		);
 	}
+
+	/**
+	 * @testdox trigger() does not dispatch when the recipient has previously unsubscribed — customer preference wins over the merchant's enabled setting.
+	 */
+	public function test_trigger_bails_when_recipient_unsubscribed(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
+
+		$repository = wc_get_container()->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class );
+		$repository->mark_unsubscribed( $order->get_billing_email(), 'customer_abandoned_cart_recovery' );
+
+		try {
+			$mailer = tests_retrieve_phpmailer_instance();
+			$before = count( $mailer->mock_sent );
+			$this->sut->trigger( $order->get_id() );
+			$after = count( $mailer->mock_sent );
+
+			$this->assertSame( $before, $after, 'Unsubscribed recipient must not receive a recovery email.' );
+		} finally {
+			// Cleanup so the row doesn't leak into later tests in this run.
+			$repository->erase_for_email( $order->get_billing_email() );
+		}
+	}
+
+	/**
+	 * @testdox register_order_action() hides the entry when the recipient has unsubscribed, so the merchant can't accidentally override the customer's preference from the dropdown.
+	 */
+	public function test_register_order_action_skips_unsubscribed_recipient(): void {
+		$this->become_admin();
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
+
+		$repository = wc_get_container()->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class );
+		$repository->mark_unsubscribed( $order->get_billing_email(), 'customer_abandoned_cart_recovery' );
+
+		try {
+			$actions = $this->sut->register_order_action( array(), $order );
+
+			$this->assertArrayNotHasKey( WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+		} finally {
+			$repository->erase_for_email( $order->get_billing_email() );
+		}
+	}
+
+	/**
+	 * @testdox handle_recovery_email_send() is a no-op when the recipient has unsubscribed — defense in depth in case the action hook is fired from outside the metabox.
+	 */
+	public function test_handle_recovery_email_send_bails_when_recipient_unsubscribed(): void {
+		$this->become_admin();
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
+
+		$repository = wc_get_container()->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class );
+		$repository->mark_unsubscribed( $order->get_billing_email(), 'customer_abandoned_cart_recovery' );
+
+		try {
+			$mailer = tests_retrieve_phpmailer_instance();
+			$before = count( $mailer->mock_sent );
+			$this->sut->handle_recovery_email_send( $order );
+
+			$this->assertSame( $before, count( $mailer->mock_sent ), 'Unsubscribed recipient must not receive a manual send.' );
+
+			$notes        = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+			$note_strings = wp_list_pluck( $notes, 'content' );
+			$this->assertEmpty(
+				array_filter(
+					$note_strings,
+					static fn ( $note ) => false !== strpos( $note, 'sent from the order actions menu' )
+				),
+				'Unsubscribed recipient must not have a "sent from the order actions menu" order note written.'
+			);
+		} finally {
+			$repository->erase_for_email( $order->get_billing_email() );
+		}
+	}
+
+	/**
+	 * @testdox get_unsubscribe_url() returns a signed URL pointing at the public endpoint once a valid order is bound; empty when there's no order to derive it from.
+	 */
+	public function test_get_unsubscribe_url(): void {
+		$this->assertSame( '', $this->sut->get_unsubscribe_url(), 'No order bound — no URL.' );
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$this->sut->trigger( $order->get_id() );
+
+		$url = $this->sut->get_unsubscribe_url();
+
+		$this->assertNotEmpty( $url );
+		$this->assertStringContainsString( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Endpoint::QUERY_VAR . '=' . $order->get_id(), $url );
+		$this->assertStringContainsString( 'sig=', $url );
+	}
 }

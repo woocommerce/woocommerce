@@ -7,6 +7,8 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\AbandonedCartRecovery\ManualSendHandler;
+use Automattic\WooCommerce\Internal\Email\Unsubscribes\Endpoint as UnsubscribesEndpoint;
+use Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage as UnsubscribesStorage;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
 defined( 'ABSPATH' ) || exit;
@@ -26,6 +28,14 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 	 * @package  WooCommerce\Classes\Emails
 	 */
 	class WC_Email_Customer_Abandoned_Cart_Recovery extends WC_Email {
+
+		/**
+		 * Email identifier — kept in `$this->id` for the rest of WC_Email's
+		 * machinery but also exposed as a constant so static methods (and
+		 * external callers using the unsubscribe storage) can reference the
+		 * same string without it drifting out of sync with the constructor.
+		 */
+		public const EMAIL_ID = 'customer_abandoned_cart_recovery';
 
 		/**
 		 * Plugins known to provide their own abandoned cart recovery flow.
@@ -81,7 +91,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * Constructor.
 		 */
 		public function __construct() {
-			$this->id             = 'customer_abandoned_cart_recovery';
+			$this->id             = self::EMAIL_ID;
 			$this->customer_email = true;
 			$this->title          = __( 'Abandoned cart recovery', 'woocommerce' );
 			$this->email_group    = 'order-updates';
@@ -148,6 +158,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				&& $this->get_recipient()
 				&& $this->object instanceof WC_Order
 				&& $this->is_order_eligible_for_recovery( $this->object )
+				&& ! self::is_recipient_unsubscribed( $this->get_recipient() )
 			) {
 				$sent = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 
@@ -192,6 +203,12 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			}
 
 			if ( ! $this->is_order_eligible_for_recovery( $order ) ) {
+				return $actions;
+			}
+
+			// Customer-side preference wins over merchant action — don't surface
+			// "Send" if the recipient has already opted out.
+			if ( self::is_recipient_unsubscribed( $order->get_billing_email() ) ) {
 				return $actions;
 			}
 
@@ -282,6 +299,12 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			}
 
 			if ( ! $this->is_order_eligible_for_recovery( $order ) ) {
+				return;
+			}
+
+			// Customer-side preference wins over merchant action — don't bypass
+			// an unsubscribe by manual send.
+			if ( self::is_recipient_unsubscribed( $order->get_billing_email() ) ) {
 				return;
 			}
 
@@ -408,6 +431,48 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		}
 
 		/**
+		 * Get the unsubscribe URL for the currently-bound order's recipient.
+		 *
+		 * Returns an HMAC-signed URL routed through `Endpoint::QUERY_VAR`
+		 * (`?wc-email-unsubscribe=…`) and handled by `UnsubscribesEndpoint`.
+		 * Empty when no order is bound or the order has no billing email —
+		 * both states mean there's no recipient to unsubscribe and the
+		 * template should suppress the footer link.
+		 *
+		 * @since  10.9.0
+		 * @return string
+		 */
+		public function get_unsubscribe_url() {
+			if ( ! $this->object instanceof WC_Order ) {
+				return '';
+			}
+			$email = $this->object->get_billing_email();
+			if ( '' === $email ) {
+				return '';
+			}
+			return UnsubscribesEndpoint::url_for( $this->object->get_id(), $email, $this->id );
+		}
+
+		/**
+		 * Whether the given email has opted out of checkout recovery emails.
+		 *
+		 * Static so the gate can be reused from the trigger-side check, the
+		 * dropdown gate, and any future auto-send scheduler — without each
+		 * caller needing to thread the repository through.
+		 *
+		 * @since  10.9.0
+		 *
+		 * @param string $email Raw recipient email.
+		 * @return bool
+		 */
+		public static function is_recipient_unsubscribed( string $email ): bool {
+			if ( '' === $email ) {
+				return false;
+			}
+			return wc_get_container()->get( UnsubscribesStorage::class )->is_unsubscribed( $email, self::EMAIL_ID );
+		}
+
+		/**
 		 * Get default email subject.
 		 *
 		 * @since  10.9.0
@@ -449,6 +514,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 					'order'              => $this->object,
 					'email_heading'      => $this->get_heading(),
 					'recovery_url'       => $this->get_recovery_url(),
+					'unsubscribe_url'    => $this->get_unsubscribe_url(),
 					'additional_content' => $this->get_additional_content(),
 					'sent_to_admin'      => false,
 					'plain_text'         => false,
@@ -469,6 +535,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 					'order'              => $this->object,
 					'email_heading'      => $this->get_heading(),
 					'recovery_url'       => $this->get_recovery_url(),
+					'unsubscribe_url'    => $this->get_unsubscribe_url(),
 					'additional_content' => $this->get_additional_content(),
 					'sent_to_admin'      => false,
 					'plain_text'         => true,

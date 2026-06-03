@@ -325,6 +325,7 @@ final class WooCommerce {
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( $this, 'maybe_init_order_reviews' ), 1 );
 		add_action( 'init', array( $this, 'maybe_init_abandoned_cart_recovery' ), 1 );
+		add_action( 'init', array( $this, 'init_email_unsubscribes' ), 1 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
@@ -997,6 +998,27 @@ final class WooCommerce {
 			return;
 		}
 		wc_get_container()->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\ManualSendHandler::class );
+	}
+
+	/**
+	 * Resolve the generic email-unsubscribe services unconditionally.
+	 *
+	 * The `wc_email_unsubscribes` table can contain rows for any email kind
+	 * — current and future — and is installed via `WC_Install::get_schema()`
+	 * regardless of any feature flag. Registering the storage's privacy eraser
+	 * and the public unsubscribe endpoint from a feature-gated init point
+	 * would mean a site that later turns off `abandoned_cart_recovery` would
+	 * lose the GDPR eraser coverage and the existing unsubscribe links would
+	 * stop working. Both consequences are wrong, so this method runs even
+	 * when no specific email kind that uses it is currently active.
+	 *
+	 * @since 10.9.0
+	 * @internal
+	 */
+	public function init_email_unsubscribes(): void {
+		$container = wc_get_container();
+		$container->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class );
+		$container->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Endpoint::class );
 	}
 
 	/**
