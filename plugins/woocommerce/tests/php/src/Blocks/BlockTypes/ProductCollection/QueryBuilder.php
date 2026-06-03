@@ -646,6 +646,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 */
 	public function test_random_sorting_uses_deterministic_seed(): void {
 		$parsed_block                              = Utils::get_base_parsed_block();
+		$parsed_block['attrs']['queryId']          = 53919;
 		$parsed_block['attrs']['query']['orderBy'] = 'random';
 
 		$first_merged_query  = Utils::initialize_merged_query( $this->block_instance, $parsed_block );

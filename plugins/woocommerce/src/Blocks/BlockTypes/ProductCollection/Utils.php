@@ -41,18 +41,18 @@ class Utils {
 	 *
 	 * @since 11.0.0
 	 *
-	 * @param int|null $query_id      Product Collection query ID.
-	 * @param array    $query_context Product Collection query context.
+	 * @param int   $query_id      Product Collection query ID.
+	 * @param array $query_context Product Collection query context.
 	 * @return int Random order seed.
 	 */
-	public static function get_random_order_seed( $query_id = null, $query_context = array() ) {
+	public static function get_random_order_seed( int $query_id, $query_context = array() ) {
 		$product_counts          = wp_count_posts( 'product' );
 		$published_product_count = isset( $product_counts->publish ) ? (int) $product_counts->publish : 0;
 		$seed_context            = array(
 			'blog_id'                 => get_current_blog_id(),
 			'published_product_count' => $published_product_count,
 			'queried_object_id'       => get_queried_object_id(),
-			'query_id'                => is_numeric( $query_id ) ? absint( $query_id ) : 0,
+			'query_id'                => absint( $query_id ),
 			'query'                   => $query_context,
 		);
 		$encoded_seed_context    = wp_json_encode( $seed_context );

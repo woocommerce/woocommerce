@@ -258,9 +258,9 @@ class QueryBuilder {
 		$query,
 		$is_exclude_applied_filters = false
 	) {
-		$seed_query_id    = array_key_exists( 'queryId', $query ) ? $query['queryId'] : false;
+		$query_id         = is_int( $query['queryId'] ?? null ) ? $query['queryId'] : null;
 		$orderby_query    = $query['orderby']
-			? $this->get_custom_orderby_query( $query['orderby'], $seed_query_id, $query )
+			? $this->get_custom_orderby_query( $query['orderby'], $query_id, $query )
 			: array();
 		$on_sale_query    = $this->get_on_sale_products_query( $query['on_sale'] );
 		$stock_query      = $this->get_stock_status_query( $query['stock_status'] );
@@ -1107,13 +1107,13 @@ class QueryBuilder {
 	/**
 	 * Return query params to support custom sort values
 	 *
-	 * @param string         $orderby  Sort order option.
-	 * @param int|null|false $query_id Product Collection query ID, or false to leave random ordering unseeded.
-	 * @param array          $query    Product Collection query context.
+	 * @param string   $orderby  Sort order option.
+	 * @param int|null $query_id Product Collection query ID, or null to leave random ordering unseeded.
+	 * @param array    $query    Product Collection query context.
 	 *
 	 * @return array
 	 */
-	private function get_custom_orderby_query( $orderby, $query_id = false, $query = array() ) {
+	private function get_custom_orderby_query( $orderby, ?int $query_id = null, $query = array() ) {
 		if ( ! in_array( $orderby, $this->custom_order_opts, true ) || 'post__in' === $orderby ) {
 			return array( 'orderby' => $orderby );
 		}
@@ -1144,7 +1144,7 @@ class QueryBuilder {
 		}
 
 		if ( 'random' === $orderby ) {
-			if ( false === $query_id ) {
+			if ( null === $query_id ) {
 				return array(
 					'orderby' => 'rand',
 				);
