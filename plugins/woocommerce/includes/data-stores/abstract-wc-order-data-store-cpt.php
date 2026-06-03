@@ -252,8 +252,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			} else {
 				wp_update_post( array_merge( array( 'ID' => $order->get_id() ), $post_data ) );
 			}
-			$order->read_meta_data( true );
-			// Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
+			$order->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 		}
 		$this->update_post_meta( $order );
 		$order->apply_changes();
