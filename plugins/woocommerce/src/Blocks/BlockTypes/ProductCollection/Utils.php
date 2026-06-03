@@ -45,7 +45,7 @@ class Utils {
 	 * @param array $query_context Product Collection query context.
 	 * @return int Random order seed.
 	 */
-	public static function get_random_order_seed( int $query_id, $query_context = array() ) {
+	public static function get_random_order_seed( $query_id, $query_context = array() ) {
 		$product_counts          = wp_count_posts( 'product' );
 		$published_product_count = isset( $product_counts->publish ) ? (int) $product_counts->publish : 0;
 		$seed_context            = array(
