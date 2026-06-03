@@ -342,18 +342,13 @@ class Controller extends AbstractBlock {
 
 		/*
 		 * When forcePageReload is enabled, the product collection has no data-wp-router-region,
-		 * so the Interactivity Router cannot update it client-side. Signal the product-filters
-		 * block so its navigate action falls back to a full page reload instead of using the
-		 * router, without affecting other blocks on the page.
-		 *
-		 * This is only needed when the query is inherited from the template, as that's the
-		 * only case where the Product Filters block can be a sibling rather than a descendant
-		 * of the Product Collection. When it's a descendant, forcePageReload is passed through
-		 * the block context instead.
+		 * so the Interactivity Router cannot update it client-side. Signal sibling Product
+		 * Filters blocks to perform a full reload when this collection consumes applied filters.
+		 * Descendant filters get the same value through block context instead.
 		 */
 		if (
 			( $parsed_block['attrs']['forcePageReload'] ?? false ) &&
-			( $parsed_block['attrs']['query']['inherit'] ?? false )
+			self::query_uses_applied_filters( $parsed_block['attrs']['query'] ?? array() )
 		) {
 			wp_interactivity_config( 'woocommerce/product-filters', array( 'forcePageReload' => true ) );
 		}
@@ -382,10 +377,7 @@ class Controller extends AbstractBlock {
 		// phpcs:ignore WordPress.DB.SlowDBQuery
 		$block_context_query['tax_query'] = ! empty( $query['tax_query'] ) ? $query['tax_query'] : array();
 
-		$inherit    = $block->context['query']['inherit'] ?? false;
-		$filterable = $block->context['query']['filterable'] ?? false;
-
-		$is_exclude_applied_filters = ! ( $inherit || $filterable );
+		$is_exclude_applied_filters = ! self::query_uses_applied_filters( $block_context_query );
 
 		$collection_args = array(
 			'name'                      => $block->context['collection'] ?? '',
@@ -398,6 +390,19 @@ class Controller extends AbstractBlock {
 			$block_context_query,
 			$page,
 			$is_exclude_applied_filters
+		);
+	}
+
+	/**
+	 * Check whether a product collection query should consume applied filter params.
+	 *
+	 * @param array $query Product collection query attributes.
+	 * @return bool
+	 */
+	private static function query_uses_applied_filters( array $query ): bool {
+		return (bool) (
+			( $query['inherit'] ?? false ) ||
+			( $query['filterable'] ?? false )
 		);
 	}
 

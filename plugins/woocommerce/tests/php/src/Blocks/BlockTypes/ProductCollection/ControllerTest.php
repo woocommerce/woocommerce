@@ -62,20 +62,47 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should configure product filters full page reload for inherited product collections.
+	 * @testdox Should configure product filters full page reload only for filter-consuming product collections.
+	 * @dataProvider product_filters_full_page_reload_config_data
+	 *
+	 * @param bool $force_page_reload Whether Product Collection forces full page reload.
+	 * @param bool $inherit           Whether Product Collection inherits the template query.
+	 * @param bool $filterable        Whether Product Collection consumes Product Filters params.
+	 * @param bool $expected          Expected Product Filters forcePageReload config.
 	 */
-	public function test_configures_product_filters_full_page_reload_for_inherited_product_collections(): void {
-		$parsed_block                              = Utils::get_base_parsed_block();
-		$parsed_block['attrs']['forcePageReload']  = true;
-		$parsed_block['attrs']['query']['inherit'] = true;
+	public function test_configures_product_filters_full_page_reload_only_for_filter_consuming_product_collections(
+		bool $force_page_reload,
+		bool $inherit,
+		bool $filterable,
+		bool $expected
+	): void {
+		$parsed_block                                 = Utils::get_base_parsed_block();
+		$parsed_block['attrs']['forcePageReload']     = $force_page_reload;
+		$parsed_block['attrs']['query']['inherit']    = $inherit;
+		$parsed_block['attrs']['query']['filterable'] = $filterable;
 
 		$this->sut->add_support_for_filter_blocks( null, $parsed_block );
 
 		$config = wp_interactivity_config( 'woocommerce/product-filters' );
 
-		$this->assertTrue(
+		$this->assertSame(
+			$expected,
 			$config['forcePageReload'] ?? false,
-			'Product Filters should be configured to reload when the inherited Product Collection forces page reload.'
+			'Product Filters full page reload config should match Product Collection filter behavior.'
+		);
+	}
+
+	/**
+	 * Data provider for Product Filters full page reload config tests.
+	 *
+	 * @return array<string, array{0: bool, 1: bool, 2: bool, 3: bool}>
+	 */
+	public function product_filters_full_page_reload_config_data(): array {
+		return array(
+			'inherited query with full reload'  => array( true, true, false, true ),
+			'filterable query with full reload' => array( true, false, true, true ),
+			'fixed query with full reload'      => array( true, false, false, false ),
+			'filterable query without reload'   => array( false, false, true, false ),
 		);
 	}
 }
