@@ -143,6 +143,7 @@ class QueryBuilder {
 		$product_ids  = $query['post__in'] ?? array();
 		$offset_raw   = $query['offset'] ?? 0;
 		$per_page_raw = $query['perPage'] ?? null;
+		$query_id     = $query['queryId'] ?? null;
 		$offset       = is_numeric( $offset_raw ) ? max( 0, (int) $offset_raw ) : 0;
 		$per_page     = is_numeric( $per_page_raw ) ? max( 1, (int) $per_page_raw ) : 9;
 		$order        = $query['order'] ?? 'asc';
@@ -192,6 +193,7 @@ class QueryBuilder {
 				'featured'            => $featured,
 				'timeFrame'           => $time_frame,
 				'priceRange'          => $price_range,
+				'queryId'             => $query_id,
 			),
 			$is_exclude_applied_filters
 		);
@@ -256,7 +258,10 @@ class QueryBuilder {
 		$query,
 		$is_exclude_applied_filters = false
 	) {
-		$orderby_query    = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : array();
+		$query_id         = is_int( $query['queryId'] ?? null ) ? $query['queryId'] : null;
+		$orderby_query    = $query['orderby']
+			? $this->get_custom_orderby_query( $query['orderby'], $query_id, $query )
+			: array();
 		$on_sale_query    = $this->get_on_sale_products_query( $query['on_sale'] );
 		$stock_query      = $this->get_stock_status_query( $query['stock_status'] );
 		$visibility_query = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query, $query['stock_status'] ) : array();
@@ -1102,11 +1107,13 @@ class QueryBuilder {
 	/**
 	 * Return query params to support custom sort values
 	 *
-	 * @param string $orderby  Sort order option.
+	 * @param string   $orderby  Sort order option.
+	 * @param int|null $query_id Product Collection query ID, or null to leave random ordering unseeded.
+	 * @param array    $query    Product Collection query context.
 	 *
 	 * @return array
 	 */
-	private function get_custom_orderby_query( $orderby ) {
+	private function get_custom_orderby_query( $orderby, ?int $query_id = null, $query = array() ) {
 		if ( ! in_array( $orderby, $this->custom_order_opts, true ) || 'post__in' === $orderby ) {
 			return array( 'orderby' => $orderby );
 		}
@@ -1137,8 +1144,16 @@ class QueryBuilder {
 		}
 
 		if ( 'random' === $orderby ) {
+			if ( null === $query_id ) {
+				return array(
+					'orderby' => 'rand',
+				);
+			}
+
+			$seed = Utils::get_random_order_seed( $query_id, $query );
+
 			return array(
-				'orderby' => 'rand',
+				'orderby' => 'RAND(' . $seed . ')',
 			);
 		}
 

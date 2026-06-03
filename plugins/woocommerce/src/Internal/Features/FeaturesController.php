@@ -166,6 +166,8 @@ class FeaturesController {
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'set_change_feature_enable_nonce' ), 20, 1 );
 		add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
 		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'display_email_improvements_feedback_notice' ), 10, 2 );
+		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'flag_abandoned_cart_recovery_enabled_notice' ), 10, 2 );
+		add_action( 'woocommerce_settings_advanced', array( $this, 'maybe_render_abandoned_cart_recovery_enabled_notice' ), 1 );
 	}
 
 	/**
@@ -443,6 +445,18 @@ class FeaturesController {
 				'name'                         => __( 'Customer review request (beta)', 'woocommerce' ),
 				'description'                  => __(
 					'Send customers a transactional email after order completion inviting them to review the products they bought, and host the per-order Review Order landing page.',
+					'woocommerce'
+				),
+				// Skip compatibility checks like the other opt-in transactional-email features.
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'enabled_by_default'           => false,
+				'is_experimental'              => false,
+			),
+			'abandoned_cart_recovery'            => array(
+				'name'                         => __( 'Abandoned cart recovery', 'woocommerce' ),
+				'description'                  => __(
+					'Send a reminder email to shoppers who didn\'t finish checking out.',
 					'woocommerce'
 				),
 				// Skip compatibility checks like the other opt-in transactional-email features.
@@ -2064,6 +2078,58 @@ class FeaturesController {
 				}
 			);
 		}
+	}
+
+	/**
+	 * Flag a one-shot transient when the merchant turns on Abandoned cart recovery.
+	 *
+	 * `change_feature_enable` fires this action mid-request before the post-save
+	 * redirect, so the actual notice has to render on the next page load. We
+	 * stash a transient here and `maybe_render_abandoned_cart_recovery_enabled_notice`
+	 * picks it up the next time `woocommerce_settings_advanced` fires.
+	 *
+	 * @param string $feature_id Feature being toggled.
+	 * @param bool   $is_enabled True when turned on, false when turned off.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function flag_abandoned_cart_recovery_enabled_notice( $feature_id, $is_enabled ): void {
+		if ( 'abandoned_cart_recovery' === $feature_id && $is_enabled ) {
+			set_transient( 'wc_abandoned_cart_recovery_enabled_notice', 'yes', MINUTE_IN_SECONDS );
+		}
+	}
+
+	/**
+	 * Render a success notice after the merchant enables Abandoned cart recovery,
+	 * pointing them straight at the email settings page where they actually
+	 * configure it.
+	 *
+	 * Hooks into `woocommerce_settings_advanced` at priority 1, which fires
+	 * inside the settings template right after `WC_Admin_Settings::show_messages()`
+	 * (the "Your settings have been saved." notice) and before the form fields.
+	 * That places our notice in the same visual slot below the tabs, alongside
+	 * the standard save confirmation.
+	 *
+	 * `WC_Admin_Settings::add_message()` would be the cleaner API but escapes
+	 * its input via `esc_html()`, which strips the link tag. Direct echo here
+	 * keeps the markup intact while still matching the surrounding notice style.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function maybe_render_abandoned_cart_recovery_enabled_notice(): void {
+		if ( 'yes' !== get_transient( 'wc_abandoned_cart_recovery_enabled_notice' ) ) {
+			return;
+		}
+		delete_transient( 'wc_abandoned_cart_recovery_enabled_notice' );
+
+		$settings_url = admin_url( 'admin.php?page=wc-settings&tab=email&section=wc_email_customer_abandoned_cart_recovery' );
+
+		printf(
+			'<div id="wc-abandoned-cart-recovery-enabled-notice" class="updated inline"><p><strong>%1$s <a href="%2$s">%3$s</a></strong></p></div>',
+			esc_html__( 'Abandoned cart recovery is enabled.', 'woocommerce' ),
+			esc_url( $settings_url ),
+			esc_html__( 'Configure the recovery email →', 'woocommerce' )
+		);
 	}
 
 	/**
