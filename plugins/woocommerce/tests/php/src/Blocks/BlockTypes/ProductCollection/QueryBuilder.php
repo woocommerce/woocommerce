@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
 use Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection\Utils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -682,6 +683,24 @@ class QueryBuilder extends \WP_UnitTestCase {
 			$first_merged_query['orderby'],
 			$second_merged_query['orderby'],
 			'Random sorting should use a different seed for different Product Collection query IDs.'
+		);
+	}
+
+	/**
+	 * @testdox Should include the daily rotation key in the random seed.
+	 */
+	public function test_random_sorting_seed_uses_rotation_key(): void {
+		$query_context = array(
+			'orderby' => 'random',
+		);
+
+		$first_seed  = ProductCollectionUtils::get_random_order_seed( 53919, $query_context, '2026-06-03' );
+		$second_seed = ProductCollectionUtils::get_random_order_seed( 53919, $query_context, '2026-06-04' );
+
+		$this->assertNotSame(
+			$first_seed,
+			$second_seed,
+			'Random sorting should use a different seed when the daily rotation key changes.'
 		);
 	}
 
