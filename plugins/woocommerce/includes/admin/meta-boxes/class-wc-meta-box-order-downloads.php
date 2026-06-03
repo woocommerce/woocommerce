@@ -28,6 +28,7 @@ class WC_Meta_Box_Order_Downloads {
 		}
 		?>
 		<div class="order_download_permissions wc-metaboxes-wrapper">
+			<p><?php echo wc_help_tip( __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) ); ?></p>
 
 			<div class="wc-metaboxes">
 				<?php
