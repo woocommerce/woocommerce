@@ -1,0 +1,63 @@
+diff -ruN a/type-overrides/@wordpress/data/types.d.ts b/type-overrides/@wordpress/data/types.d.ts
+--- a/type-overrides/@wordpress/data/types.d.ts
++++ b/type-overrides/@wordpress/data/types.d.ts
+@@ -39,14 +39,39 @@
+ 	export type DispatchReturn<StoreNameOrDescriptor> = StoreNameOrDescriptor extends StoreDescriptor<any> ? ActionCreatorsOf<ConfigOf<StoreNameOrDescriptor>> : unknown;
+ 	export type MapSelect = (select: SelectFunction, registry: DataRegistry) => any;
+ 	export type SelectFunction = <S>(store: S) => CurriedSelectorsOf<S>;
++	type SelectorStringKeys<Selectors> = Extract<keyof Selectors, string> extends never ? string : Extract<keyof Selectors, string>;
++	export type SelectorKeysOf<S> = S extends ReduxStoreConfig<any, any, infer Selectors> ? SelectorStringKeys<Selectors> : string;
++	export type MetadataActions<S = unknown> = {
++	    startResolution: (selectorName: SelectorKeysOf<S>, args?: unknown[]) => Promise<void>;
++	    finishResolution: (selectorName: SelectorKeysOf<S>, args?: unknown[]) => Promise<void>;
++	    failResolution: (selectorName: SelectorKeysOf<S>, args: unknown[] | undefined, error: unknown) => Promise<void>;
++	    startResolutions: (selectorName: SelectorKeysOf<S>, args: unknown[][]) => Promise<void>;
++	    finishResolutions: (selectorName: SelectorKeysOf<S>, args: unknown[][]) => Promise<void>;
++	    failResolutions: (selectorName: SelectorKeysOf<S>, args: unknown[], errors: unknown[]) => Promise<void>;
++	    invalidateResolution: (selectorName: SelectorKeysOf<S>, args?: unknown[]) => Promise<void>;
++	    invalidateResolutionForStore: () => Promise<void>;
++	    invalidateResolutionForStoreSelector: (selectorName: SelectorKeysOf<S>) => Promise<void>;
++	};
++	export type MetadataSelectors<S = unknown> = {
++	    getResolutionState: (selectorName: SelectorKeysOf<S>, args?: unknown[]) => unknown;
++	    getIsResolving: (selectorName: SelectorKeysOf<S>, args?: unknown[]) => boolean | undefined;
++	    hasStartedResolution: (selectorName: SelectorKeysOf<S>, args?: unknown[]) => boolean;
++	    hasFinishedResolution: (selectorName: SelectorKeysOf<S>, args?: unknown[]) => boolean;
++	    hasResolutionFailed: (selectorName: SelectorKeysOf<S>, args?: unknown[]) => boolean;
++	    getResolutionError: (selectorName: SelectorKeysOf<S>, args?: unknown[]) => unknown;
++	    isResolving: (selectorName: SelectorKeysOf<S>, args?: unknown[]) => boolean;
++	    getCachedResolvers: () => unknown;
++	    hasResolvingSelectors: () => boolean;
++	    countSelectorsByStatus: () => Record<string, number>;
++	};
+ 	/**
+ 	 * Callback for store's `subscribe()` method that
+ 	 * runs when the store data has changed.
+ 	 */
+ 	export type ListenerFunction = () => void;
+-	export type CurriedSelectorsOf<S> = S extends StoreDescriptor<ReduxStoreConfig<any, any, infer Selectors>> ? {
++	export type CurriedSelectorsOf<S> = S extends StoreDescriptor<infer Config> ? Config extends ReduxStoreConfig<any, any, infer Selectors> ? {
+ 	    [key in keyof Selectors]: CurriedState<Selectors[key]>;
+-	} : never;
++	} & MetadataSelectors<Config> : never : never;
+ 	/**
+ 	 * Removes the first argument from a function.
+ 	 *
+@@ -115,14 +140,14 @@
+ 	    register: (store: StoreDescriptor<any>) => void;
+ 	}
+ 	export type ConfigOf<S> = S extends StoreDescriptor<infer C> ? C : never;
+-	export type ActionCreatorsOf<Config extends AnyConfig> = Config extends ReduxStoreConfig<any, infer ActionCreators, any> ? PromisifiedActionCreators<ActionCreators> : never;
++	export type ActionCreatorsOf<Config extends AnyConfig> = Config extends ReduxStoreConfig<any, infer ActionCreators, any> ? PromisifiedActionCreators<ActionCreators> & MetadataActions<Config> : never;
+ 	export type PromisifiedActionCreators<ActionCreators extends MapOf<ActionCreator>> = {
+ 	    [Action in keyof ActionCreators]: PromisifyActionCreator<ActionCreators[Action]>;
+ 	};
+-	export type PromisifyActionCreator<Action extends ActionCreator> = (...args: Parameters<Action>) => Promise<ReturnType<Action> extends (..._args: any[]) => any ? ThunkReturnType<Action> : ReturnType<Action>>;
++	export type PromisifyActionCreator<Action extends ActionCreator> = (...args: Parameters<Action>) => Promise<ReturnType<Action> extends (..._args: any[]) => any ? ThunkReturnType<Action> : Awaited<ReturnType<Action>>>;
+ 	export type ThunkReturnType<Action extends ActionCreator> = Awaited<ReturnType<ReturnType<Action>>>;
+ 	type SelectorsOf<Config extends AnyConfig> = Config extends ReduxStoreConfig<any, any, infer Selectors> ? {
+-	    [name in keyof Selectors]: Function;
++	    [name in keyof (Selectors & MetadataSelectors<Config>)]: Function;
+ 	} : never;
+ 	export type combineReducers = typeof reduxCombineReducers;
+ 	export {};
