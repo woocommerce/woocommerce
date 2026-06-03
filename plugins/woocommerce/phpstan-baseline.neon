@@ -13075,12 +13075,6 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^Binary operation "\-" between float and non\-falsy\-string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/class-wc-order.php
-
-		-
 			message: '#^Binary operation "\-" between float and string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
