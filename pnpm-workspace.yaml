@@ -10,6 +10,7 @@ catalogs:
         '@types/wordpress__viewport': 5.5.3
         '@wordpress/a11y': 4.33.1
         '@wordpress/api-fetch': 7.33.1
+        '@wordpress/admin-ui': 1.1.5
         '@wordpress/base-styles': 6.9.1
         '@wordpress/blob': 4.33.1
         '@wordpress/block-editor': 15.6.9
@@ -36,6 +37,8 @@ catalogs:
         '@wordpress/i18n': 6.6.1
         '@wordpress/icons': 11.0.1
         '@wordpress/interface': 9.18.5
+        '@wordpress/interactivity': 6.33.3
+        '@wordpress/interactivity-router': 2.33.3
         '@wordpress/is-shallow-equal': 5.33.1
         '@wordpress/keyboard-shortcuts': 5.33.1
         '@wordpress/keycodes': 4.33.1
@@ -43,6 +46,7 @@ catalogs:
         '@wordpress/notices': 5.33.1
         '@wordpress/patterns': 2.33.9
         '@wordpress/plugins': 7.33.5
+        '@wordpress/postcss-plugins-preset': 5.33.1
         '@wordpress/preferences': 4.33.5
         '@wordpress/primitives': 4.33.1
         '@wordpress/priority-queue': 3.33.1

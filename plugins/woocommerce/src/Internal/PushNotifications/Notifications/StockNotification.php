@@ -27,7 +27,12 @@ class StockNotification extends Notification {
 		self::EVENT_ON_BACKORDER,
 	);
 
-	const ICON = 'https://s.wp.com/wp-content/mu-plugins/notes/images/tos-warning-note-icon.png';
+	/**
+	 * Emoji appended to the notification title, one per stock event type.
+	 */
+	const EMOJI_OUT_OF_STOCK = '🚨';
+	const EMOJI_ON_BACKORDER = '🕐';
+	const EMOJI_LOW_STOCK    = '⚠️';
 
 	/**
 	 * The stock event that triggered this notification.
@@ -195,7 +200,6 @@ class StockNotification extends Notification {
 
 		return array(
 			'type'        => $this->get_type(),
-			'icon'        => self::ICON,
 			'timestamp'   => gmdate( 'c' ),
 			'resource_id' => $this->get_resource_id(),
 			'title'       => $this->build_title( $product_name ),
@@ -277,20 +281,20 @@ class StockNotification extends Notification {
 		switch ( $this->event_type ) {
 			case self::EVENT_OUT_OF_STOCK:
 				return array(
-					'format' => 'Out of stock: %1$s',
-					'args'   => array( $product_name ),
+					'format' => 'Out of stock: %1$s %2$s',
+					'args'   => array( $product_name, self::EMOJI_OUT_OF_STOCK ),
 				);
 
 			case self::EVENT_ON_BACKORDER:
 				return array(
-					'format' => 'Backordered: %1$s',
-					'args'   => array( $product_name ),
+					'format' => 'Backordered: %1$s %2$s',
+					'args'   => array( $product_name, self::EMOJI_ON_BACKORDER ),
 				);
 
 			default:
 				return array(
-					'format' => 'Low stock: %1$s',
-					'args'   => array( $product_name ),
+					'format' => 'Low stock: %1$s %2$s',
+					'args'   => array( $product_name, self::EMOJI_LOW_STOCK ),
 				);
 		}
 	}

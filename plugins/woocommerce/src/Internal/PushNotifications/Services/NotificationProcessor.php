@@ -71,6 +71,13 @@ class NotificationProcessor {
 	private NotificationPreferencesService $preferences_service;
 
 	/**
+	 * The retry handler.
+	 *
+	 * @var NotificationRetryHandler
+	 */
+	private NotificationRetryHandler $retry_handler;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
@@ -78,17 +85,20 @@ class NotificationProcessor {
 	 * @param WpcomNotificationDispatcher    $dispatcher          The WPCOM dispatcher.
 	 * @param PushTokensDataStore            $data_store          The push tokens data store.
 	 * @param NotificationPreferencesService $preferences_service The notification preferences service.
+	 * @param NotificationRetryHandler       $retry_handler The retry handler.
 	 *
 	 * @since 10.7.0
 	 */
 	final public function init(
 		WpcomNotificationDispatcher $dispatcher,
 		PushTokensDataStore $data_store,
-		NotificationPreferencesService $preferences_service
+		NotificationPreferencesService $preferences_service,
+		NotificationRetryHandler $retry_handler
 	): void {
 		$this->dispatcher          = $dispatcher;
 		$this->data_store          = $data_store;
 		$this->preferences_service = $preferences_service;
+		$this->retry_handler       = $retry_handler;
 	}
 
 	/**
@@ -107,11 +117,12 @@ class NotificationProcessor {
 	 *
 	 * @param Notification $notification The notification to process.
 	 * @param bool         $is_retry     Whether this is a retry or safety net attempt.
+	 * @param int          $attempt      The current attempt number (0 = first attempt).
 	 * @return bool True if successfully sent (or already sent).
 	 *
 	 * @since 10.7.0
 	 */
-	public function process( Notification $notification, bool $is_retry = false ): bool {
+	public function process( Notification $notification, bool $is_retry = false, int $attempt = 0 ): bool {
 		/**
 		 * This notification has already been sent - don't continue.
 		 */
@@ -159,6 +170,7 @@ class NotificationProcessor {
 		 */
 		if ( empty( $tokens ) ) {
 			$notification->write_meta( self::SENT_META_KEY );
+			$this->cancel_safety_net( $notification );
 			return true;
 		}
 
@@ -167,13 +179,12 @@ class NotificationProcessor {
 		if ( ! empty( $result['success'] ) ) {
 			$notification->write_meta( self::SENT_META_KEY );
 			$notification->delete_meta( self::CLAIMED_META_KEY );
+			$this->cancel_safety_net( $notification );
 			return true;
 		}
 
-		/**
-		 * Retry scheduling and safety net deletion will be added here when
-		 * NotificationRetryHandler is added.
-		 */
+		$this->retry_handler->schedule( $notification, $result['retry_after'] ?? null, $attempt );
+		$this->cancel_safety_net( $notification );
 
 		return false;
 	}
@@ -197,7 +208,7 @@ class NotificationProcessor {
 	 *
 	 * @return PushToken[] The tokens whose owner wants the notification.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 */
 	private function filter_tokens_by_preferences( array $tokens, Notification $notification ): array {
 		$type           = $notification->get_type();
@@ -220,6 +231,28 @@ class NotificationProcessor {
 					return $decision_cache[ $user_id ];
 				}
 			)
+		);
+	}
+
+	/**
+	 * Cancels the pending safety net ActionScheduler job for a notification.
+	 *
+	 * Called after the processor handles the notification (whether success or
+	 * failure with retry scheduled) so the safety net doesn't fire redundantly.
+	 *
+	 * @param Notification $notification The notification whose safety net to cancel.
+	 * @return void
+	 *
+	 * @since 10.9.0
+	 */
+	private function cancel_safety_net( Notification $notification ): void {
+		as_unschedule_all_actions(
+			self::SAFETY_NET_HOOK,
+			array(
+				'type'        => $notification->get_type(),
+				'resource_id' => $notification->get_resource_id(),
+			),
+			self::ACTION_SCHEDULER_GROUP
 		);
 	}
 
@@ -250,13 +283,22 @@ class NotificationProcessor {
 			) + $extra;
 
 			$notification = Notification::from_array( $data );
+		} catch ( Exception $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Safety net failed: %s', $e->getMessage() ),
+				array( 'source' => PushNotifications::FEATURE_NAME )
+			);
+			return;
+		}
 
+		try {
 			$this->process( $notification, true );
 		} catch ( Exception $e ) {
 			wc_get_logger()->error(
 				sprintf( 'Safety net failed: %s', $e->getMessage() ),
 				array( 'source' => PushNotifications::FEATURE_NAME )
 			);
+			$this->retry_handler->schedule( $notification, null, 0 );
 		}
 	}
 }

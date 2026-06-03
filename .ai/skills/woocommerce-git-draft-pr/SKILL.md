@@ -30,7 +30,7 @@ From the dynamic context above (read full diffs only if the stat summary is ambi
 - **Significance**: Patch (most common), Minor (new features), Major (breaking — rare)
 - **Bug fix?** Look for issue refs in commits/branch name (e.g., `#12345`, `fix/issue-12345`)
 - **UI changes?** Changes in `client/`, `templates/`, CSS/SCSS, JSX/TSX
-- **Plugin-affecting?** Code shipped to users = yes. CI/CD, workflows, tooling, docs = no. This drives changelog, milestone, and PR body complexity — non-plugin PRs use a simplified body (see Step 3).
+- **Plugin-affecting?** Code shipped to users = yes. CI/CD, workflows, tooling, docs = no. This drives changelog, testing, and PR body complexity — non-plugin PRs use a simplified body (see Step 3).
 
 ### 2. Gather Context
 
@@ -58,8 +58,9 @@ Use a simplified body with only these sections:
 
 - **Submission Review Guidelines**: Keep as-is from template.
 - **Changes proposed**: 2-3 sentences. Lead with WHY, then WHAT.
+- **Milestone**: Keep the section and check auto-assign `[x]` unless a milestone will be assigned manually. Keep the surrounding template comments, including `<!-- milestone-target-selection -->` and `<!-- /milestone-target-selection -->`.
 
-Skip Screenshots, Testing instructions, Testing done, Milestone, and Changelog sections entirely.
+Skip Screenshots, Testing instructions, Testing done, and Changelog sections entirely.
 
 #### Plugin-affecting changes
 
@@ -70,7 +71,7 @@ Use the full template:
 - **Screenshots**: Remove section if no UI changes. For UI changes, use Chrome DevTools MCP to capture screenshots if available; otherwise remind user to add them before marking ready.
 - **Testing instructions**: Concrete numbered steps with expected outcomes derived from the diff. Each step must be actionable — don't reference links that won't exist yet.
 - **Testing done**: Fill with what's verifiable from the session (commits, test runs, lint runs). If nothing is verifiable, write "Author to fill in before marking ready."
-- **Milestone**: Check auto-assign `[x]` if plugin-affecting. Keep the surrounding template comments, including `<!-- milestone-target-selection -->` and `<!-- /milestone-target-selection -->`.
+- **Milestone**: Check auto-assign `[x]` unless a milestone will be assigned manually. Keep the surrounding template comments, including `<!-- milestone-target-selection -->` and `<!-- /milestone-target-selection -->`.
 - **Changelog**: If changelogs already in diff → "does not require" (created manually). Otherwise → "Automatically create" `[x]` with Significance, Type, and a user-facing Message. Keep the template comments in this section, including inline comments after headings such as `#### Message <!-- Add a changelog message here -->`.
 
 Do not strip HTML comments (`<!-- -->`) from retained template sections. They support PR automation and GitHub tests. Remove only unfilled placeholder lines that are actual visible placeholders (e.g., `Closes # .`, `Bug introduced in PR # .`).
@@ -95,5 +96,5 @@ Output the PR URL. If UI changes need screenshots, remind the user.
 
 - No Co-Authored-By lines or self-attribution
 - Never commit code — pushing is fine
-- Preserve the PR template section headings and HTML comments exactly in retained sections (for plugin-affecting PRs)
+- Preserve the PR template section headings and HTML comments exactly in retained sections; the Milestone section is required for all PRs unless a milestone is assigned manually
 - Changelog checkboxes must match CI automation format

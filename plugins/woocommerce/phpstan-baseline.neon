@@ -45994,18 +45994,6 @@ parameters:
 			path: src/Admin/FeaturePlugin.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\AsyncProductEditorCategoryField\\Init\:\:enqueue_scripts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/AsyncProductEditorCategoryField/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\AsyncProductEditorCategoryField\\Init\:\:enqueue_styles\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/AsyncProductEditorCategoryField/Init.php
-
-		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
 			count: 1
@@ -46624,24 +46612,6 @@ parameters:
 			path: src/Admin/Features/LaunchYourStore.php
 
 		-
-			message: '#^Access to property \$post_content on an unknown class Automattic\\WooCommerce\\Admin\\Features\\WP_Post\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/LaunchYourStore.php
-
-		-
-			message: '#^Access to property \$post_name on an unknown class Automattic\\WooCommerce\\Admin\\Features\\WP_Post\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/Features/LaunchYourStore.php
-
-		-
-			message: '#^Access to property \$post_title on an unknown class Automattic\\WooCommerce\\Admin\\Features\\WP_Post\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/Features/LaunchYourStore.php
-
-		-
 			message: '#^Callback expects 1 parameter, \$accepted_args is set to 2\.$#'
 			identifier: arguments.count
 			count: 1
@@ -46649,12 +46619,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\LaunchYourStore\:\:maybe_add_coming_soon_banner_on_frontend\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/LaunchYourStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\LaunchYourStore\:\:maybe_track_template_change\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Admin/Features/LaunchYourStore.php
@@ -46668,24 +46632,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\LaunchYourStore\:\:reset_woocommerce_coming_soon_banner_dismissed\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/LaunchYourStore.php
-
-		-
-			message: '#^Parameter \$post of method Automattic\\WooCommerce\\Admin\\Features\\LaunchYourStore\:\:maybe_track_template_change\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\WP_Post\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/LaunchYourStore.php
-
-		-
-			message: '#^Property WP_Post\:\:\$post_name \(string\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 1
-			path: src/Admin/Features/LaunchYourStore.php
-
-		-
-			message: '#^Property WP_Post\:\:\$post_title \(string\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
 			count: 1
 			path: src/Admin/Features/LaunchYourStore.php
 
@@ -50344,12 +50290,6 @@ parameters:
 			path: src/Blocks/AssetsController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:reregister_core_iapi_runtime\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/AssetsController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:set_block_asset_resource_hints_cache\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -53302,12 +53242,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
 		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, array\<int, WP_Term\>\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
 			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterAttribute\:\:get_attribute_counts\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 1
@@ -53662,18 +53596,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilters\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -53694,12 +53616,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilters\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilters.php
 
@@ -56406,12 +56322,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_query_for_stock\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Checkout\\Helpers\\ReserveStock\:\:get_query_for_reserved_stock\(\) never returns void so it can be removed from the return type\.$#'
-			identifier: return.unusedType
 			count: 1
 			path: src/Checkout/Helpers/ReserveStock.php
 
@@ -60656,12 +60566,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Schedulers/ImportInterface.php
-
-		-
-			message: '#^Access to an undefined static property static\(Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\)\:\:\$name\.$#'
-			identifier: staticProperty.notFound
-			count: 13
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
 
 		-
 			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:delete\(\)\.$#'
