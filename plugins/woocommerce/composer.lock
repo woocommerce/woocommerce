@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f10144d0e0f84b944aa2bd6d6d2135ca",
+    "content-hash": "c98895a33d6c250d18ac5dd360435329",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1117,7 +1117,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/blueprint",
-                "reference": "d8cca86ddfc18da226ca1c1afa020431129b296e"
+                "reference": "f996d43977196b9670d783b58c167243950876d3"
             },
             "require": {
                 "opis/json-schema": "^2.3"
@@ -1172,7 +1172,7 @@
                 ]
             },
             "transport-options": {
-                "symlink": true,
+                "symlink": false,
                 "relative": true
             }
         },
@@ -1182,7 +1182,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/email-editor",
-                "reference": "c4bd66622c49a6b6548acdd5d01471f7ed822ef7"
+                "reference": "da46bc3b7b39e7a3ff8476a762b50cdaf7e1299d"
             },
             "require": {
                 "php": ">=7.4"
@@ -1256,7 +1256,7 @@
             ],
             "description": "Email editor based on WordPress Gutenberg package.",
             "transport-options": {
-                "symlink": true,
+                "symlink": false,
                 "relative": true
             }
         },
@@ -5438,7 +5438,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",
-                "reference": "7f69fe34c807c3037d7d158893893e8d1a67879b"
+                "reference": "a453d8512de88aa25c97ff84d3acebd3ea7b8a21"
             },
             "require": {
                 "composer-plugin-api": "^2.0"
@@ -5457,7 +5457,7 @@
                 }
             },
             "transport-options": {
-                "symlink": true,
+                "symlink": false,
                 "relative": true
             }
         },
