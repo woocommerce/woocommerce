@@ -1824,8 +1824,8 @@ if ( ! function_exists( 'wc_get_product_media_gallery_items' ) ) {
 	/**
 	 * Get ordered media gallery items for a product.
 	 *
-	 * Falls back to the legacy featured image and product gallery image IDs when
-	 * the product does not have a media gallery saved yet.
+	 * Composes the legacy featured image and product gallery image IDs with
+	 * positioned product gallery videos when the feature is enabled.
 	 *
 	 * @since 10.9.0
 	 * @param WC_Product $product Product object.
