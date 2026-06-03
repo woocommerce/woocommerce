@@ -155,7 +155,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			<th scope="row" class="titledesc">
 				<label>
 					<?php esc_html_e( 'Account details:', 'woocommerce' ); ?>
-					<?php echo wp_kses_post( wc_help_tip( __( 'These account details will be displayed within the order thank you page and confirmation email.', 'woocommerce' ) ) ); ?>
+					<?php echo wp_kses( wc_help_tip( __( 'These account details will be displayed within the order thank you page and confirmation email.', 'woocommerce' ) ), wc_help_tip_kses_allowed_html() ); ?>
 				</label>
 			</th>
 			<td class="forminp" id="bacs_accounts">

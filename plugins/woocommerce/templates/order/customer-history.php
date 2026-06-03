@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
 	<h4>
 		<?php
 		esc_html_e( 'Total orders', 'woocommerce' );
-		echo wp_kses_post( wc_help_tip( $tooltip ) );
+		echo wp_kses( wc_help_tip( $tooltip ), wc_help_tip_kses_allowed_html() );
 		?>
 	</h4>
 
@@ -38,10 +38,11 @@ defined( 'ABSPATH' ) || exit;
 	<h4>
 		<?php
 		esc_html_e( 'Total revenue', 'woocommerce' );
-		echo wp_kses_post(
+		echo wp_kses(
 			wc_help_tip(
 				__( "This is the Customer Lifetime Value, or the total amount you have earned from this customer's orders.", 'woocommerce' )
-			)
+			),
+			wc_help_tip_kses_allowed_html()
 		);
 		?>
 	</h4>
