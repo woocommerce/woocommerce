@@ -20,7 +20,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
  * This renderer handles core/embed blocks, detecting audio and video provider embeds and rendering them appropriately.
  *
  * Audio providers: Spotify, SoundCloud, Pocket Casts, Mixcloud, ReverbNation - rendered as audio players.
- * Video providers: YouTube - rendered as video thumbnails with play buttons.
+ * Video providers: YouTube, VideoPress, Vimeo - rendered as video thumbnails with play buttons.
  */
 class Embed extends Abstract_Block_Renderer {
 	/**
@@ -78,6 +78,10 @@ class Embed extends Abstract_Block_Renderer {
 		'videopress' => array(
 			'domains'  => array( 'videopress.com', 'video.wordpress.com' ),
 			'base_url' => 'https://videopress.com/',
+		),
+		'vimeo'      => array(
+			'domains'  => array( 'vimeo.com', 'player.vimeo.com' ),
+			'base_url' => 'https://vimeo.com/',
 		),
 	);
 
@@ -359,6 +363,8 @@ class Embed extends Abstract_Block_Renderer {
 				return __( 'Watch on YouTube', 'woocommerce' );
 			case 'videopress':
 				return __( 'Watch on VideoPress', 'woocommerce' );
+			case 'vimeo':
+				return __( 'Watch on Vimeo', 'woocommerce' );
 			default:
 				return __( 'Listen to the audio', 'woocommerce' );
 		}
@@ -567,8 +573,9 @@ class Embed extends Abstract_Block_Renderer {
 			return $this->get_youtube_thumbnail( $url );
 		}
 
-		if ( 'videopress' === $provider ) {
-			return $this->get_videopress_thumbnail( $url );
+		// VideoPress and Vimeo both expose their thumbnails through the WordPress oEmbed API.
+		if ( 'videopress' === $provider || 'vimeo' === $provider ) {
+			return $this->get_oembed_thumbnail( $url );
 		}
 
 		// For other providers, we don't have thumbnail extraction implemented.
@@ -600,19 +607,19 @@ class Embed extends Abstract_Block_Renderer {
 	}
 
 	/**
-	 * Extract VideoPress video thumbnail URL.
-	 * Uses WordPress oEmbed API to get thumbnail_url from the provider response.
+	 * Extract a video thumbnail URL via the WordPress oEmbed API.
+	 * Used by providers that expose thumbnails through oEmbed (e.g. VideoPress, Vimeo).
 	 * Results are cached using transients to avoid repeated HTTP requests.
 	 *
-	 * Note: URL validation against VideoPress domains is done in render_video_embed()
+	 * Note: URL validation against the provider's domains is done in render_video_embed()
 	 * via url_matches_provider() before this method is called.
 	 *
-	 * @param string $url VideoPress video URL (pre-validated by caller).
+	 * @param string $url Video URL (pre-validated by caller).
 	 * @return string Thumbnail URL or empty string.
 	 */
-	private function get_videopress_thumbnail( string $url ): string {
+	private function get_oembed_thumbnail( string $url ): string {
 		// Generate a cache key based on the URL.
-		$cache_key = 'wc_email_vp_thumb_' . md5( $url );
+		$cache_key = 'wc_email_oembed_thumb_' . md5( $url );
 
 		// Check for cached thumbnail URL.
 		$cached_thumbnail = get_transient( $cache_key );
@@ -623,7 +630,7 @@ class Embed extends Abstract_Block_Renderer {
 
 		// Use WP_oEmbed::get_data() to fetch thumbnail from oEmbed endpoint.
 		// URL is pre-validated by render_video_embed() via url_matches_provider(),
-		// ensuring only VideoPress domains reach this point (SSRF mitigation).
+		// ensuring only the matched provider's domains reach this point (SSRF mitigation).
 		$oembed      = new \WP_oEmbed();
 		$oembed_data = $oembed->get_data( $url );
 

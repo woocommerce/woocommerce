@@ -726,6 +726,129 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that Vimeo embed is detected and renders as video player, including handling URLs with query parameters.
+	 */
+	public function test_renders_vimeo_embed(): void {
+		// Mock the oEmbed HTTP response to avoid external calls in CI.
+		// Return a thumbnail URL with query parameters to test the URL encoding fix.
+		$mock_thumbnail_url   = 'https://i.vimeocdn.com/video/123456789.jpg?w=500&h=281';
+		$mock_oembed_response = wp_json_encode(
+			array(
+				'type'          => 'video',
+				'thumbnail_url' => $mock_thumbnail_url,
+				'title'         => 'Test Video',
+			)
+		);
+
+		// Use pre_http_request filter to intercept oEmbed HTTP calls.
+		$filter_callback = function ( $preempt, $args, $url ) use ( $mock_oembed_response ) {
+			// Intercept Vimeo oEmbed requests.
+			if ( strpos( $url, 'vimeo.com/api/oembed' ) !== false ) {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => $mock_oembed_response,
+				);
+			}
+			return $preempt;
+		};
+
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
+		$parsed_vimeo_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://vimeo.com/123456789?w=500&h=281',
+				'type'             => 'video',
+				'providerNameSlug' => 'vimeo',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-vimeo wp-block-embed-vimeo"><div class="wp-block-embed__wrapper">https://vimeo.com/123456789?w=500&h=281</div></figure>',
+		);
+
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_vimeo_embed['innerHTML'], $parsed_vimeo_embed, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
+
+		// Should detect Vimeo and render as video with thumbnail.
+		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'play2x.png', $rendered, 'Vimeo embed should render with play button' );
+		// Verify background-image is present (not stripped by WP_Style_Engine).
+		$this->assertStringContainsString( 'background-image', $rendered, 'Background image should be present in CSS' );
+		// Verify query parameters are present (as &amp; in HTML, which is correct).
+		$this->assertStringContainsString( 'w=500', $rendered, 'Query parameters should be present' );
+		$this->assertStringContainsString( 'h=281', $rendered, 'Query parameters should be present' );
+	}
+
+	/**
+	 * Test that Vimeo embed detects Vimeo by providerNameSlug
+	 */
+	public function test_vimeo_embed_detects_vimeo_by_provider_name_slug(): void {
+		$parsed_vimeo_by_slug = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'providerNameSlug' => 'vimeo',
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-vimeo"><div class="wp-block-embed__wrapper">Some content</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_vimeo_by_slug['innerHTML'], $parsed_vimeo_by_slug, $this->rendering_context );
+
+		// Should return graceful fallback link since provider is detected but no URL is available for thumbnail extraction.
+		$this->assertStringContainsString( '<a href="https://vimeo.com/"', $rendered );
+		$this->assertStringContainsString( 'Watch on Vimeo', $rendered );
+		$this->assertStringContainsString( 'target="_blank"', $rendered );
+		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );
+	}
+
+	/**
+	 * Test that Vimeo embed detects Vimeo by URL in attributes
+	 */
+	public function test_vimeo_embed_detects_vimeo_by_url_in_attributes(): void {
+		// Mock the oEmbed HTTP response to avoid external calls in CI.
+		$mock_thumbnail_url   = 'https://i.vimeocdn.com/video/123456789.jpg';
+		$mock_oembed_response = wp_json_encode(
+			array(
+				'type'          => 'video',
+				'thumbnail_url' => $mock_thumbnail_url,
+				'title'         => 'Test Video',
+			)
+		);
+
+		// Use pre_http_request filter to intercept oEmbed HTTP calls.
+		$filter_callback = function ( $preempt, $args, $url ) use ( $mock_oembed_response ) {
+			if ( strpos( $url, 'vimeo.com/api/oembed' ) !== false ) {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => $mock_oembed_response,
+				);
+			}
+			return $preempt;
+		};
+
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
+		$parsed_vimeo_by_url = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url' => 'https://vimeo.com/123456789',
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-vimeo"><div class="wp-block-embed__wrapper">https://vimeo.com/123456789</div></figure>',
+		);
+
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_vimeo_by_url['innerHTML'], $parsed_vimeo_by_url, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
+
+		// Should detect Vimeo by URL domain and render with thumbnail.
+		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'background-image', $rendered, 'Vimeo embed should have background image' );
+	}
+
+	/**
 	 * Helper to mock the embed page HTTP response for example.com URLs.
 	 *
 	 * @param string $embed_page_html HTML for the embed page response.
