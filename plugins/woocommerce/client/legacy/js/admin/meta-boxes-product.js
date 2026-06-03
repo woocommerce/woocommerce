@@ -1,6 +1,30 @@
-/*global woocommerce_admin_meta_boxes, _ */
+/*global woocommerce_admin_meta_boxes */
 jQuery( function ( $ ) {
 	let isPageUnloading = false;
+	let helpTipId = 0;
+
+	function makeAccessibleHelpTip( helpTip, content ) {
+		const tip = $( helpTip );
+		let tooltip = tip.find( '[role="tooltip"]' );
+
+		if ( ! tooltip.length ) {
+			helpTipId++;
+			tooltip = $( '<span role="tooltip" class="screen-reader-text"></span>' ).attr(
+				'id',
+				`woocommerce-help-tip-js-${ helpTipId }`
+			);
+			tip.append( tooltip );
+		}
+
+		tip.removeAttr( 'aria-label' ).attr( {
+			'aria-describedby': tooltip.attr( 'id' ),
+			'data-tip': content,
+			tabindex: '0',
+		} );
+		tooltip.text( $( '<div />' ).html( content ).text() );
+
+		return tip;
+	}
 
 	$( window ).on( 'beforeunload', function () {
 		isPageUnloading = true;
@@ -151,9 +175,8 @@ jQuery( function ( $ ) {
 				'variable' === select_val
 					? woocommerce_admin_meta_boxes.cogs_value_tooltip_variable_products
 					: woocommerce_admin_meta_boxes.cogs_value_tooltip_simple_products;
-			$( cogs_field_tip ).attr( 'aria-label', cogs_field_tip_text );
-			$( cogs_field_tip ).tipTip( {
-				attribute: 'aria-label',
+			makeAccessibleHelpTip( cogs_field_tip, cogs_field_tip_text ).tipTip( {
+				attribute: 'data-tip',
 				fadeIn: 50,
 				fadeOut: 50,
 				delay: 200,
@@ -192,17 +215,14 @@ jQuery( function ( $ ) {
 	function change_product_type_tip( content ) {
 		$( '#tiptip_holder' ).removeAttr( 'style' );
 		$( '#tiptip_arrow' ).removeAttr( 'style' );
-		$( '.woocommerce-product-type-tip' )
-			.attr( 'tabindex', '0' )
-			.attr( 'aria-label', $( '<div />' ).html( content ).text() ) // Remove HTML tags.
-			.tipTip( {
+		makeAccessibleHelpTip( $( '.woocommerce-product-type-tip' ), content ).tipTip( {
 				attribute: 'data-tip',
 				content: content,
 				fadeIn: 50,
 				fadeOut: 50,
 				delay: 200,
 				keepAlive: true,
-			} );
+		} );
 	}
 
 	function get_product_tip_content( product_type ) {
@@ -1417,12 +1437,13 @@ jQuery( function ( $ ) {
 	$( '#wp-content-media-buttons' )
 		.append( '<span class="woocommerce-help-tip" tabindex="0"></span>' )
 		.find( '.woocommerce-help-tip' )
-		.attr( 'tabindex', '0' )
 		.attr( 'for', 'content' )
-		.attr(
-			'aria-label',
-			woocommerce_admin_meta_boxes.i18n_product_description_tip
-		)
+		.each( function () {
+			makeAccessibleHelpTip(
+				this,
+				woocommerce_admin_meta_boxes.i18n_product_description_tip
+			);
+		} )
 		.tipTip( {
 			attribute: 'data-tip',
 			content: woocommerce_admin_meta_boxes.i18n_product_description_tip,
@@ -1436,11 +1457,12 @@ jQuery( function ( $ ) {
 	$( '#postexcerpt > .postbox-header > .hndle' )
 		.append( '<span class="woocommerce-help-tip"></span>' )
 		.find( '.woocommerce-help-tip' )
-		.attr( 'tabindex', '0' )
-		.attr(
-			'aria-label',
-			woocommerce_admin_meta_boxes.i18n_product_short_description_tip
-		)
+		.each( function () {
+			makeAccessibleHelpTip(
+				this,
+				woocommerce_admin_meta_boxes.i18n_product_short_description_tip
+			);
+		} )
 		.tipTip( {
 			attribute: 'data-tip',
 			content:
@@ -1453,11 +1475,12 @@ jQuery( function ( $ ) {
 
 	// add a tooltip to the right of the product image meta box "Set product image" and "Add product gallery images"
 	const setProductImageLink = $( '#set-post-thumbnail' );
-	// Escape the translated label before interpolating into the attribute so a
-	// translation containing quotes or markup cannot break the rendered span.
-	const tooltipMarkup = `<span class="woocommerce-help-tip" tabindex="0" aria-label="${
-		_.escape( woocommerce_admin_meta_boxes.i18n_product_image_tip )
-	}"></span>`;
+	const createProductImageTip = function () {
+		return makeAccessibleHelpTip(
+			$( '<span class="woocommerce-help-tip" tabindex="0"></span>' ),
+			woocommerce_admin_meta_boxes.i18n_product_image_tip
+		);
+	};
 	const tooltipData = {
 		attribute: 'data-tip',
 		content: woocommerce_admin_meta_boxes.i18n_product_image_tip,
@@ -1468,16 +1491,12 @@ jQuery( function ( $ ) {
 	};
 
 	if ( setProductImageLink ) {
-		$( tooltipMarkup )
-			.insertAfter( setProductImageLink )
-			.tipTip( tooltipData );
+		createProductImageTip().insertAfter( setProductImageLink ).tipTip( tooltipData );
 	}
 
 	const addProductImagesLink = $( '.add_product_images > a' );
 
 	if ( addProductImagesLink ) {
-		$( tooltipMarkup )
-			.insertAfter( addProductImagesLink )
-			.tipTip( tooltipData );
+		createProductImageTip().insertAfter( addProductImagesLink ).tipTip( tooltipData );
 	}
 } );

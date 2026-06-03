@@ -348,6 +348,7 @@
 					fadeOut: 50,
 					delay: 200,
 					keepAlive: true,
+					closeOnEscape: true,
 				} );
 
 				$( '.column-wc_actions .wc-action-button' ).tipTip( {
