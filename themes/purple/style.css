@@ -50,3 +50,9 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 .woocommerce-account .addresses address {
     font-style: normal;
 }
+
+/* Checkbox alignment for reviews form */
+
+.wp-block-woocommerce-product-review-form .comment-form-cookies-consent {
+    align-items: flex-start;
+}
