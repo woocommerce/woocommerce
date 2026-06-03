@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid priming transient option caches for variable products when a persistent object cache is active, which prevents unbounded growth of the notoptions cache.

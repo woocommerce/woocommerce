@@ -16,9 +16,17 @@
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
+	"exports": {
+		".": {
+			"wc-source": "./src/index.ts",
+			"types": "./build-types/index.d.ts",
+			"import": "./build-module/index.js",
+			"require": "./build/index.js"
+		}
+	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
-	"types": "build-types",
+	"types": "build-types/index.d.ts",
 	"react-native": "src/index",
 	"files": [
 		"build",
@@ -31,15 +39,22 @@
 		"src/**/*.scss"
 	],
 	"publishConfig": {
-		"access": "public"
+		"access": "public",
+		"exports": {
+			".": {
+				"types": "./build-types/index.d.ts",
+				"import": "./build-module/index.js",
+				"require": "./build/index.js"
+			}
+		}
 	},
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
-		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project": "pnpm --stream --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "NODE_ENV=production webpack",
 		"build:project:esm": "node build.mjs",
 		"build:publish:project": "pnpm --if-present '/^build:publish:project:.*$/'",
-		"build:publish:project:cjs": "node build.mjs --cjs",
+		"build:publish:project:cjs": "node build.mjs --commonjs",
 		"build:publish:project:types": "tsc --build --emitDeclarationOnly",
 		"build:publish:project:deps": "pnpm build",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
@@ -63,14 +78,10 @@
 	"devDependencies": {
 		"@types/react": "18.3.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@woocommerce/internal-style-build": "workspace:*",
-		"@woocommerce/internal-ts-config": "workspace:*",
+		"@woocommerce/internal-build": "workspace:*",
 		"@wordpress/browserslist-config": "next",
-		"chokidar": "3.6.x",
 		"css-loader": "6.11.x",
-		"esbuild": "0.24.x",
 		"eslint": "^8.55.0",
-		"glob": "^10.3.10",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"postcss-loader": "4.3.x",

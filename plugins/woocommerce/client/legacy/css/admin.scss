@@ -9499,7 +9499,7 @@ body.woocommerce_page_wc-settings {
 		// Tab strip inherits the wp-admin body bg so it reads as one
 		// continuous title region with the floating header above. Bottom
 		// border colour matches the rest of the wp-admin chrome borders
-		// ($wp-admin-border in packages/js/internal-style-build); kept as
+		// ($wp-admin-border in packages/js/internal-build/styles); kept as
 		// a literal here because legacy admin.scss doesn't import the
 		// shared variables file.
 		border-bottom: 1px solid #dcdcde;
