@@ -50,12 +50,14 @@ class OrderController {
 
 		add_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ) );
 
-		$order = new \WC_Order();
-		$order->set_status( 'checkout-draft' );
-		$order->set_created_via( 'store-api' );
-		$this->update_order_from_cart( $order );
-
-		remove_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ) );
+		try {
+			$order = new \WC_Order();
+			$order->set_status( 'checkout-draft' );
+			$order->set_created_via( 'store-api' );
+			$this->update_order_from_cart( $order );
+		} finally {
+			remove_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ) );
+		}
 
 		return $order;
 	}
