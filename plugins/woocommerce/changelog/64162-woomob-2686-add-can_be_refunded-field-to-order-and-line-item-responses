@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add `can_be_refunded` field to v4 order and line item REST API responses.

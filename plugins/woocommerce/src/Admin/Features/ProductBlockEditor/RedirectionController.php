@@ -11,6 +11,8 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 /**
  * Handle redirecting to the old or new editor based on features and support.
+ *
+ * @deprecated 10.9.0 Product editor extension APIs will be removed in WooCommerce 11.0.
  */
 class RedirectionController {
 	/**

@@ -35,9 +35,34 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		// Intercept redirects so headers aren't emitted, and throw so the trailing `exit;`
+		// in production code never runs during the test.
+		add_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
+
 		$this->email_manager = $this->createMock( EmailManager::class );
 		$this->sut           = new EmailActionController();
 		$this->sut->init( $this->email_manager );
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
+		parent::tearDown();
+	}
+
+	/**
+	 * `wp_redirect` filter callback that throws so the SUT's trailing `exit;`
+	 * never executes and the test can still assert state after the method.
+	 *
+	 * @param string $location Redirect target.
+	 * @return never
+	 * @throws \RuntimeException Always.
+	 */
+	public function intercept_redirect( string $location ): void {
+		throw new \RuntimeException( 'wp_redirect intercepted: ' . esc_url_raw( $location ) );
 	}
 
 	/**
@@ -68,7 +93,12 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 			time() . ':' . wp_fast_hash( 'test' )
 		);
 
-		$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
+		try {
+			$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'wp_redirect intercepted', $e->getMessage() );
+		}
 
 		$this->assertEquals( NotificationStatus::ACTIVE, Factory::get_notification( $id )->get_status() );
 	}
@@ -94,7 +124,12 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 				)
 			);
 
-		$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
+		try {
+			$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'wp_redirect intercepted', $e->getMessage() );
+		}
 	}
 
 	/**
@@ -131,8 +166,14 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 			->expects( $this->once() )
 			->method( 'send_verified_email' );
 
-		// First hit transitions PENDING -> ACTIVE and dispatches the verified email.
-		$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
+		// First hit transitions PENDING -> ACTIVE and dispatches the verified email. The
+		// trailing redirect throws via the intercept filter so the SUT's `exit;` is skipped.
+		try {
+			$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'wp_redirect intercepted', $e->getMessage() );
+		}
 
 		// Second hit (double-click, email prefetch, bot) must short-circuit without re-dispatch.
 		$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
@@ -148,7 +189,12 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 			wp_fast_hash( 'test' )
 		);
 
-		$this->sut->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
+		try {
+			$this->sut->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'wp_redirect intercepted', $e->getMessage() );
+		}
 
 		$updated = Factory::get_notification( $id );
 		$this->assertEquals( NotificationStatus::CANCELLED, $updated->get_status() );

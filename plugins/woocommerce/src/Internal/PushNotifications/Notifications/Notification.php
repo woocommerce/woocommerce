@@ -25,6 +25,7 @@ abstract class Notification {
 	const NOTIFICATION_CLASSES = array(
 		'store_order'  => NewOrderNotification::class,
 		'store_review' => NewReviewNotification::class,
+		'store_stock'  => StockNotification::class,
 	);
 
 	/**
@@ -139,7 +140,13 @@ abstract class Notification {
 			throw new InvalidArgumentException( sprintf( 'Unknown notification type: %s', $type ) );
 		}
 
-		return new $class( $resource_id );
+		$instance = new $class( $resource_id );
+
+		if ( method_exists( $instance, 'hydrate' ) ) {
+			$instance->hydrate( $data );
+		}
+
+		return $instance;
 	}
 
 	/**
@@ -189,7 +196,7 @@ abstract class Notification {
 	 * @param mixed $pref_value The user's stored preference value, or null.
 	 * @return bool True if this notification should be sent to that user.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 */
 	public function should_send_to_user( $pref_value ): bool {
 		if ( null === $pref_value ) {

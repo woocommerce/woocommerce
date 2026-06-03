@@ -2,8 +2,10 @@
  * External dependencies
  */
 import { DataViews, type Action, type View } from '@wordpress/dataviews';
-import { Button, Stack } from '@wordpress/ui';
+import { DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
+import { Stack } from '@wordpress/ui';
 import { __ } from '@wordpress/i18n';
+import { moreVertical } from '@wordpress/icons';
 import { useMemo, useState, useCallback, useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
@@ -17,14 +19,17 @@ import { buildVariationViewQuery } from './query';
 import { normalizeVariation } from './normalization';
 import { variationFields } from './fields';
 import type { VariationEntityRecord } from './types';
-import ProductEdit from '../product-edit';
+import { VariationEditDrawer } from './edit/drawer';
 import { getProductWithUpdatedVariation } from '../product-edit/utils';
 import type { ProductEntityRecord } from '../fields/types';
 import { unlock } from '../lock-unlock';
+import { VariationAttributes } from './variation-attributes';
 import {
 	getProductListNavigationPath,
 	getSelectionFromPostId,
 } from '../product-list/utils';
+
+export { ProductAttributes } from './variation-attributes';
 
 const EMPTY_ARRAY: VariationEntityRecord[] = [];
 const EMPTY_PRODUCT_RECORDS: ProductEntityRecord[] = [];
@@ -32,6 +37,11 @@ const { useHistory, useLocation } = unlock( routerPrivateApis );
 
 type VariationViewProps = {
 	productId: number;
+};
+
+type VariationMoreActionsProps = {
+	disabled: boolean;
+	onEditSelected: () => void;
 };
 
 function variationMatchesSearch(
@@ -75,6 +85,46 @@ function sortVariations( variations: VariationEntityRecord[], view: View ) {
 			directionModifier
 		);
 	} );
+}
+
+function VariationMoreActions( {
+	disabled,
+	onEditSelected,
+}: VariationMoreActionsProps ) {
+	return (
+		<DropdownMenu
+			icon={ moreVertical }
+			label={ __( 'More actions', 'woocommerce' ) }
+			className="woocommerce-variation-view__more-actions"
+			popoverProps={ {
+				placement: 'bottom-end',
+			} }
+			toggleProps={ {
+				size: 'compact',
+			} }
+		>
+			{ ( { onClose } ) => (
+				<MenuGroup>
+					<MenuItem
+						disabled={ disabled }
+						onClick={ () => {
+							onEditSelected();
+							onClose();
+						} }
+					>
+						{ __( 'Edit', 'woocommerce' ) }
+					</MenuItem>
+					<MenuItem
+						disabled={ disabled }
+						isDestructive
+						onClick={ onClose }
+					>
+						{ __( 'Delete variation', 'woocommerce' ) }
+					</MenuItem>
+				</MenuGroup>
+			) }
+		</DropdownMenu>
+	);
 }
 
 export function VariationView( { productId }: VariationViewProps ) {
@@ -122,7 +172,7 @@ export function VariationView( { productId }: VariationViewProps ) {
 					: undefined,
 			};
 		},
-		[ productId, query ]
+		[ query ]
 	);
 
 	const allVariations = useMemo< VariationEntityRecord[] >(
@@ -182,7 +232,7 @@ export function VariationView( { productId }: VariationViewProps ) {
 			if ( items.length > 0 ) {
 				nextQuery.postId = items.join( ',' );
 			} else {
-				delete nextQuery.postId;
+				nextQuery.postId = undefined;
 			}
 
 			navigate(
@@ -216,6 +266,15 @@ export function VariationView( { productId }: VariationViewProps ) {
 		[ handleEditSelectedVariations ]
 	);
 
+	const handleCloseDrawer = useCallback( () => {
+		navigate(
+			getProductListNavigationPath( location.path, {
+				...currentQuery,
+				quickEdit: undefined,
+			} )
+		);
+	}, [ currentQuery, location.path, navigate ] );
+
 	const actions: Action< VariationEntityRecord >[] = useMemo(
 		() => [
 			{
@@ -240,6 +299,10 @@ export function VariationView( { productId }: VariationViewProps ) {
 
 	return (
 		<div className="woocommerce-variation-view">
+			<VariationAttributes productId={ productId } />
+			<h3 className="woocommerce-variation-view__title">
+				{ __( 'Variations', 'woocommerce' ) }
+			</h3>
 			<DataViews
 				data={ variations }
 				fields={ variationFields }
@@ -260,30 +323,45 @@ export function VariationView( { productId }: VariationViewProps ) {
 					direction="row"
 					align="center"
 					justify="space-between"
+					gap="sm"
 					className="woocommerce-variation-view__toolbar"
 				>
-					<DataViews.Search
-						label={ __( 'Search variations', 'woocommerce' ) }
-					/>
-					<Stack direction="row" gap="xs">
+					<Stack
+						direction="row"
+						align="center"
+						gap="xs"
+						className="woocommerce-variation-view__toolbar-search"
+					>
+						<DataViews.Search
+							label={ __( 'Search variations', 'woocommerce' ) }
+						/>
+						<DataViews.FiltersToggle />
+					</Stack>
+					<Stack
+						direction="row"
+						align="center"
+						gap="xs"
+						className="woocommerce-variation-view__toolbar-actions"
+					>
 						<DataViews.ViewConfig />
-						<Button
+						<VariationMoreActions
 							disabled={ selection.length === 0 }
-							onClick={ () =>
+							onEditSelected={ () =>
 								handleEditSelectedVariations( selection )
 							}
-						>
-							{ __( 'Edit options', 'woocommerce' ) }
-						</Button>
+						/>
 					</Stack>
 				</Stack>
+				<DataViews.FiltersToggled className="woocommerce-variation-view__filters" />
 				<DataViews.Layout />
 				<DataViews.Footer />
 			</DataViews>
 			{ productWithVariations && (
-				<ProductEdit
+				<VariationEditDrawer
 					products={ [ productWithVariations ] }
 					isOpen={ showQuickEdit }
+					productId={ productId }
+					onClose={ handleCloseDrawer }
 				/>
 			) }
 		</div>

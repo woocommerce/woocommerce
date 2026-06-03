@@ -96,6 +96,21 @@ table.wc-block-cart-items {
 				}
 			}
 		}
+		.wc-block-cart-item__save-for-later {
+			.wc-block-cart-item__save-for-later-link {
+				@include link-button();
+				@include hover-effect();
+				@include font-small-locked;
+
+				text-transform: none;
+				white-space: nowrap;
+
+				&:disabled {
+					cursor: default;
+					opacity: 0.5;
+				}
+			}
+		}
 		.wc-block-components-product-name {
 			@include font-small-locked;
 			display: block;
@@ -118,6 +133,10 @@ table.wc-block-cart-items {
 			pointer-events: none;
 			transition: opacity 200ms ease;
 		}
+	}
+
+	&.wc-block-mini-cart-items .wc-block-cart-item__save-for-later {
+		display: none;
 	}
 }
 

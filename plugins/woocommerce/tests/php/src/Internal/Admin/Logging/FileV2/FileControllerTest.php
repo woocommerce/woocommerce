@@ -411,6 +411,22 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_log_directory_size returns 0 when log directory does not exist.
+	 */
+	public function test_get_log_directory_size_missing_directory(): void {
+		$missing  = wp_upload_dir()['basedir'] . '/wc-logs-nonexistent/';
+		$callback = function () use ( $missing ) {
+			return $missing;
+		};
+		add_filter( 'woocommerce_log_directory', $callback );
+
+		$result = $this->sut->get_log_directory_size();
+		$this->assertSame( 0, $result );
+
+		remove_filter( 'woocommerce_log_directory', $callback );
+	}
+
+	/**
 	 * @testdox The get_log_directory_size method should return an accurate size of the directory in bytes.
 	 */
 	public function test_get_log_directory_size(): void {

@@ -899,6 +899,15 @@ class OrdersTableQuery {
 		$groupby = $groupby ? ( 'GROUP BY ' . $groupby ) : '';
 		$orderby = $orderby ? ( 'ORDER BY ' . $orderby ) : '';
 
+		// Performance note: simplify the query to allow the query optimizer to select a more efficient execution plan. As of
+		// version 10.9, this logic is implemented here as alternative changes above are getting flagged by regression analysis.
+		if ( '' === $join && "{$orders_table}.id" === $fields ) {
+			$groupby = '';
+		}
+		if ( 'LIMIT 0, ' . self::MYSQL_MAX_UNSIGNED_BIGINT === $limits ) {
+			$limits = '';
+		}
+
 		$this->sql = "SELECT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
 
 		if ( ! $this->suppress_filters ) {
@@ -1135,6 +1144,11 @@ class OrdersTableQuery {
 			$this->where[] = $this->where( $this->tables['orders'], $arg_key, '=', $this->args[ $arg_key ], $this->mappings['orders'][ $arg_key ]['type'] );
 		}
 
+		// customer_note allows empty string to match orders with no note, so it cannot use arg_isset (which skips '').
+		if ( isset( $this->args['customer_note'] ) ) {
+			$this->where[] = $this->where( $this->tables['orders'], 'customer_note', '=', $this->args['customer_note'], $this->mappings['orders']['customer_note']['type'] );
+		}
+
 		if ( $this->arg_isset( 'parent_exclude' ) ) {
 			$this->where[] = $this->where( $this->tables['orders'], 'parent_order_id', '!=', $this->args['parent_exclude'], 'int' );
 		}
@@ -1267,7 +1281,6 @@ class OrdersTableQuery {
 				'discount_tax_amount',
 				'shipping_total_amount',
 				'shipping_tax_amount',
-				'customer_note',
 			),
 			array( $this, 'arg_isset' )
 		);

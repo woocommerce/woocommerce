@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Internal\ProductFilters\Params;
+use WP_Block;
 
 /**
  * ProductFilters class.
@@ -26,7 +27,7 @@ class ProductFilters extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return array( 'postId', 'query', 'queryId' );
+		return array( 'postId', 'query', 'queryId', 'forcePageReload' );
 	}
 
 	/**
@@ -39,7 +40,9 @@ class ProductFilters extends AbstractBlock {
 	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 
-		$this->asset_data_registry->add( 'globalStylesColors', wp_get_global_styles( array( 'color' ) ) );
+		if ( is_admin() ) {
+			$this->asset_data_registry->add( 'globalStylesColors', wp_get_global_styles( array( 'color' ) ) );
+		}
 
 		BlocksSharedState::load_store_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
@@ -60,6 +63,10 @@ class ProductFilters extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		if ( ! $block instanceof WP_Block ) {
+			return $content;
+		}
+
 		wp_enqueue_script( 'wc-settings' );
 
 		$query_id      = $block->context['queryId'] ?? 0;
@@ -97,8 +104,11 @@ class ProductFilters extends AbstractBlock {
 			''
 		);
 		$interactivity_context = array(
-			'params'        => $filter_params,
-			'activeFilters' => $active_filters,
+			'params'          => $filter_params,
+			'activeFilters'   => $active_filters,
+			// Null when not a descendant of a Product Collection block, so the
+			// frontend can fall back to the global interactivity config.
+			'forcePageReload' => isset( $block->context['forcePageReload'] ) ? (bool) $block->context['forcePageReload'] : null,
 		);
 
 		$wrapper_attributes = array(

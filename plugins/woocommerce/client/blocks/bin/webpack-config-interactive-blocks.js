@@ -14,7 +14,9 @@ const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
  */
 const DependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
 const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
-const { WebpackRTLPlugin } = require( '@woocommerce/internal-style-build' );
+const {
+	WebpackRTLPlugin,
+} = require( '@woocommerce/internal-build/style-build' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 const {
 	scriptModuleEntries,
@@ -46,6 +48,8 @@ const entries = {
 		'./assets/js/base/stores/store-notices.ts',
 	'@woocommerce/stores/woocommerce/products':
 		'./assets/js/base/stores/woocommerce/products.ts',
+	'@woocommerce/stores/woocommerce/shopper-lists':
+		'./assets/js/base/stores/woocommerce/shopper-lists.ts',
 };
 
 module.exports = {
