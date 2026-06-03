@@ -163,6 +163,12 @@ function debounce( fn: () => Promise< void >, wait: number ): () => void {
 	let timer: NodeJS.Timeout | null = null;
 	let pending = false;
 	let running = false;
+
+	const schedule = (): void => {
+		if ( timer ) clearTimeout( timer );
+		timer = setTimeout( trigger, wait );
+	};
+
 	const trigger = (): void => {
 		if ( running ) {
 			pending = true;
@@ -179,10 +185,7 @@ function debounce( fn: () => Promise< void >, wait: number ): () => void {
 				}
 			} );
 	};
-	const schedule = (): void => {
-		if ( timer ) clearTimeout( timer );
-		timer = setTimeout( trigger, wait );
-	};
+
 	return schedule;
 }
 
@@ -230,9 +233,15 @@ export async function watchComposerPackages(
 	const ignoredPackages = new Set( options.ignoredPackages ?? [] );
 
 	const startWatching = async (): Promise< void > => {
-		const packages = await resolvePackages( composerJsonPath, ignoredPackages );
+		const packages = await resolvePackages(
+			composerJsonPath,
+			ignoredPackages
+		);
 		if ( packages.length === 0 ) {
-			log.info( 'watch', 'no copy-mode path-repository packages to watch' );
+			log.info(
+				'watch',
+				'no copy-mode path-repository packages to watch'
+			);
 			return;
 		}
 
@@ -291,7 +300,10 @@ export async function watchComposerPackages(
 				return;
 			}
 			composerInstallRunning = false;
-			const next = await resolvePackages( composerJsonPath, ignoredPackages );
+			const next = await resolvePackages(
+				composerJsonPath,
+				ignoredPackages
+			);
 			if ( packageFingerprint( next ) !== fingerprint ) {
 				log.info( 'watch', 'package set changed; restarting watcher' );
 				await watcher.close();
