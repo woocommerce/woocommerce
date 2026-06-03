@@ -132,9 +132,41 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 	 * Test wc_help_tip() function.
 	 */
 	public function test_wc_help_tip_strips_html() {
-		$expected = '<span class="woocommerce-help-tip" tabindex="0" aria-label="Strong text regular text" data-tip="&lt;strong&gt;Strong text&lt;/strong&gt; regular text"></span>';
-		$this->assertEquals( $expected, wc_help_tip( '<strong>Strong text</strong> regular text', false ) );
-		$this->assertEquals( $expected, wc_help_tip( '<strong>Strong text</strong> regular text', true ) );
+		$expected_pattern = '/^<span class="woocommerce-help-tip" tabindex="0" aria-describedby="(woocommerce-help-tip-\d+)" data-tip="&lt;strong&gt;Strong text&lt;\/strong&gt; regular text"><span id="\1" role="tooltip" class="screen-reader-text">Strong text regular text<\/span><\/span>$/';
+
+		$this->assertMatchesRegularExpression( $expected_pattern, wc_help_tip( '<strong>Strong text</strong> regular text', false ) );
+
+		$this->assertMatchesRegularExpression( $expected_pattern, wc_help_tip( '<strong>Strong text</strong> regular text', true ) );
+	}
+
+	/**
+	 * Test wc_help_tip_kses_allowed_html() function.
+	 */
+	public function test_wc_help_tip_kses_allowed_html() {
+		$allowed = wc_help_tip_kses_allowed_html();
+
+		$this->assertIsArray( $allowed );
+		$this->assertArrayHasKey( 'span', $allowed );
+
+		$span_attrs = $allowed['span'];
+		$this->assertArrayHasKey( 'class', $span_attrs );
+		$this->assertArrayHasKey( 'tabindex', $span_attrs );
+		$this->assertArrayHasKey( 'aria-describedby', $span_attrs );
+		$this->assertArrayHasKey( 'data-tip', $span_attrs );
+		$this->assertArrayHasKey( 'id', $span_attrs );
+		$this->assertArrayHasKey( 'role', $span_attrs );
+	}
+
+	/**
+	 * Test that wc_help_tip_kses_allowed_html() preserves tabindex through wp_kses.
+	 */
+	public function test_wc_help_tip_kses_preserves_tabindex() {
+		$tip      = wc_help_tip( 'Test tip' );
+		$filtered = wp_kses( $tip, wc_help_tip_kses_allowed_html() );
+
+		$this->assertStringContainsString( 'tabindex="0"', $filtered );
+		$this->assertStringContainsString( 'aria-describedby=', $filtered );
+		$this->assertStringContainsString( 'role="tooltip"', $filtered );
 	}
 
 	/**

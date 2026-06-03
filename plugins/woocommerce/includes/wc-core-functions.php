@@ -1541,7 +1541,8 @@ function wc_help_tip( $tip, $allow_html = false ) {
 		$sanitized_tip = esc_attr( $tip );
 	}
 
-	$aria_label = wp_strip_all_tags( $tip );
+	$tooltip_id   = wp_unique_id( 'woocommerce-help-tip-' );
+	$tooltip_text = wp_strip_all_tags( $tip );
 
 	/**
 	 * Filter the help tip.
@@ -1555,7 +1556,25 @@ function wc_help_tip( $tip, $allow_html = false ) {
 	 *
 	 * @return string
 	 */
-	return apply_filters( 'wc_help_tip', '<span class="woocommerce-help-tip" tabindex="0" aria-label="' . esc_attr( $aria_label ) . '" data-tip="' . $sanitized_tip . '"></span>', $sanitized_tip, $tip, $allow_html );
+	return apply_filters( 'wc_help_tip', '<span class="woocommerce-help-tip" tabindex="0" aria-describedby="' . esc_attr( $tooltip_id ) . '" data-tip="' . $sanitized_tip . '"><span id="' . esc_attr( $tooltip_id ) . '" role="tooltip" class="screen-reader-text">' . esc_html( $tooltip_text ) . '</span></span>', $sanitized_tip, $tip, $allow_html );
+}
+
+/**
+ * Returns allowed HTML for wc_help_tip output via wp_kses.
+ *
+ * @return array
+ */
+function wc_help_tip_kses_allowed_html() {
+	return array(
+		'span' => array(
+			'class'            => true,
+			'tabindex'         => true,
+			'aria-describedby' => true,
+			'data-tip'         => true,
+			'id'               => true,
+			'role'             => true,
+		),
+	);
 }
 
 /**
