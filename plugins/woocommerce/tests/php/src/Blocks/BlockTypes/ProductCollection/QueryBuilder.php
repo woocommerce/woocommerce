@@ -716,33 +716,6 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should include the published product count in the random seed.
-	 */
-	public function test_random_sorting_seed_uses_published_product_count(): void {
-		wp_cache_delete( 'posts-product', 'counts' );
-
-		$parsed_block                              = Utils::get_base_parsed_block();
-		$parsed_block['attrs']['queryId']          = 53919;
-		$parsed_block['attrs']['query']['orderBy'] = 'random';
-		$first_merged_query                        = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
-		$product                                   = WC_Helper_Product::create_simple_product();
-
-		try {
-			wp_cache_delete( 'posts-product', 'counts' );
-			$second_merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
-
-			$this->assertNotSame(
-				$first_merged_query['orderby'],
-				$second_merged_query['orderby'],
-				'Random sorting should use a different seed when the published product count changes.'
-			);
-		} finally {
-			$product->delete( true );
-			wp_cache_delete( 'posts-product', 'counts' );
-		}
-	}
-
-	/**
 	 * Tests that the by-category collection handler works as expected.
 	 */
 	public function test_collection_by_category() {

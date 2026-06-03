@@ -46,18 +46,15 @@ class Utils {
 	 * @return int Random order seed.
 	 */
 	public static function get_random_order_seed( $query_id, $query_context = array() ) {
-		$product_counts          = wp_count_posts( 'product' );
-		$published_product_count = isset( $product_counts->publish ) ? (int) $product_counts->publish : 0;
-		$seed_context            = array(
-			'blog_id'                 => get_current_blog_id(),
-			'published_product_count' => $published_product_count,
-			'queried_object_id'       => get_queried_object_id(),
-			'query_id'                => absint( $query_id ),
-			'rotation_key'            => wp_date( 'Y-m-d' ),
-			'query'                   => $query_context,
+		$seed_context         = array(
+			'blog_id'           => get_current_blog_id(),
+			'queried_object_id' => get_queried_object_id(),
+			'query_id'          => absint( $query_id ),
+			'rotation_key'      => wp_date( 'Y-m-d' ),
+			'query'             => $query_context,
 		);
-		$encoded_seed_context    = wp_json_encode( $seed_context );
-		$seed_hash               = (int) sprintf( '%u', crc32( is_string( $encoded_seed_context ) ? $encoded_seed_context : '' ) );
+		$encoded_seed_context = wp_json_encode( $seed_context );
+		$seed_hash            = (int) sprintf( '%u', crc32( is_string( $encoded_seed_context ) ? $encoded_seed_context : '' ) );
 
 		return ( $seed_hash % 2147483646 ) + 1;
 	}
