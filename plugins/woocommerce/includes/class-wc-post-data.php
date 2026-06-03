@@ -209,22 +209,6 @@ class WC_Post_Data {
 	}
 
 	/**
-	 * Updates product save/delete operation timestamp as part of stale objects trackings.
-	 *
-	 * @param int      $post_id Post ID.
-	 * @param \WP_Post $post    Post object.
-	 *
-	 * @internal
-	 * @deprecated 11.0.0
-	 * @since 10.9.0
-	 *
-	 * @return void
-	 */
-	public static function update_stale_product_objects_tracking_cache( $post_id, $post ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
-		wc_deprecated_function( __METHOD__, '11.0.0' );
-	}
-
-	/**
 	 * Handle type changes.
 	 *
 	 * @since 3.0.0
