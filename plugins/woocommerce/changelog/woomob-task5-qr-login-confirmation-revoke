@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an in-app confirmation flow to the mobile-app QR login: wc-admin polls a new status endpoint while the QR is on screen, transitions to a "Signed in successfully on {device}" panel after the mobile app exchanges the token, exposes an "It wasn't you? Revoke access" button, and adds a persistent "Renew code" button alongside the countdown. The Application Password is now named with the device model and date so the merchant can identify it in Users → Profile → Application Passwords.

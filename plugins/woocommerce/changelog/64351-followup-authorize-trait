@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Extract shared authorize_as_authenticated logic from the push notifications REST controllers into a new AuthorizesPushNotificationRequests trait.
