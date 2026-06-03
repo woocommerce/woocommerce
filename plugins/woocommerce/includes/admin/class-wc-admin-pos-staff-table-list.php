@@ -3,7 +3,7 @@
  * WooCommerce Admin POS Staff Table List
  *
  * @package WooCommerce\Admin
- * @since   10.9.0
+ * @since   11.0.0
  */
 
 declare(strict_types=1);
@@ -20,7 +20,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * POS Staff table list class.
  *
- * @since 10.9.0
+ * @since 11.0.0
  */
 class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 
@@ -34,7 +34,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	/**
 	 * Initialize the POS Staff table list.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function __construct() {
 		parent::__construct(
@@ -51,7 +51,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	/**
 	 * No items found text.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function no_items(): void {
 		esc_html_e( 'No staff found.', 'woocommerce' );
@@ -60,13 +60,13 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	/**
 	 * Get list columns.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @return array
 	 */
 	public function get_columns() {
 		return array(
 			'user'       => __( 'User', 'woocommerce' ),
-			'role'       => __( 'Role', 'woocommerce' ),
+			'role'       => __( 'POS role', 'woocommerce' ),
 			'pin_status' => __( 'PIN', 'woocommerce' ),
 			'actions'    => __( 'Actions', 'woocommerce' ),
 		);
@@ -75,7 +75,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	/**
 	 * Return user column.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @param WP_User $user User object.
 	 * @return string
 	 */
@@ -97,18 +97,18 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	/**
 	 * Return role column.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @param WP_User $user User object.
 	 * @return string
 	 */
 	public function column_role( $user ) {
-		return esc_html( WC_Admin_POS_Staff::get_pos_role_label( $user ) );
+		return esc_html( WC_Admin_POS_Staff::get_pos_preset_label( $user ) );
 	}
 
 	/**
 	 * Return PIN status column.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @param WP_User $user User object.
 	 * @return string
 	 */
@@ -124,7 +124,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	/**
 	 * Return actions column.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @param WP_User $user User object.
 	 * @return string
 	 */
@@ -135,7 +135,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	/**
 	 * Prepare table list items.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 */
 	public function prepare_items(): void {
 		$per_page              = 20;
@@ -145,17 +145,11 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 
 		$user_query = new \WP_User_Query(
 			array(
-				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					array(
-						'key'     => POSCapabilities::POS_ROLE_META_KEY,
-						'value'   => POSCapabilities::assignable_pos_roles(),
-						'compare' => 'IN',
-					),
-				),
-				'orderby'    => 'display_name',
-				'order'      => 'ASC',
-				'number'     => $per_page,
-				'offset'     => $offset,
+				'role'    => POSCapabilities::POS_STAFF_ROLE,
+				'orderby' => 'display_name',
+				'order'   => 'ASC',
+				'number'  => $per_page,
+				'offset'  => $offset,
 			)
 		);
 
@@ -174,7 +168,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	/**
 	 * Generate table navigation markup.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @param 'top'|'bottom' $which The location of the navigation.
 	 */
 	protected function display_tablenav( $which ): void {
@@ -218,11 +212,30 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 			admin_url( 'admin.php' )
 		);
 
+		$pos_only = array( POSCapabilities::POS_STAFF_ROLE ) === $user->roles;
+		$confirm  = $pos_only
+			? sprintf(
+				/* translators: %s: staff display name. */
+				__( 'This will permanently delete the user account %s. Continue?', 'woocommerce' ),
+				$user->display_name
+			)
+			: sprintf(
+				/* translators: %s: staff display name. */
+				__( 'Remove POS access for %s? Their WP account will remain.', 'woocommerce' ),
+				$user->display_name
+			);
+
+		// Inline onclick is robust against script-load order and event-bubbling edge
+		// cases. wp_json_encode renders a safely-quoted JS string literal that we then
+		// drop into the HTML attribute through esc_attr.
+		$onclick = sprintf( 'return confirm(%s);', wp_json_encode( $confirm ) );
+
 		$remove  = '<form method="post" action="' . esc_url( $post_url ) . '" class="wc-pos-staff-remove-staff-form" style="display:inline;">';
 		$remove .= wp_nonce_field( 'remove-pos-staff', 'woocommerce_pos_staff_remove_nonce', true, false );
 		$remove .= '<input type="hidden" name="user_id" value="' . esc_attr( (string) $user->ID ) . '" />';
-		$remove .= '<button type="submit" name="remove_pos_staff" class="button-link submitdelete">'
-			. esc_html__( 'Remove staff', 'woocommerce' ) . '</button>';
+		$remove .= '<button type="submit" name="remove_pos_staff" class="button-link submitdelete" onclick="' . esc_attr( $onclick ) . '">'
+			. ( $pos_only ? esc_html__( 'Delete user', 'woocommerce' ) : esc_html__( 'Remove staff', 'woocommerce' ) )
+			. '</button>';
 		$remove .= '</form>';
 
 		return array(

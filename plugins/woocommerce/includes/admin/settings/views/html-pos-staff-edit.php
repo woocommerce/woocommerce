@@ -1,9 +1,9 @@
 <?php
 /**
- * Admin view: edit an existing POS staff member (role + PIN).
+ * Admin view: edit an existing POS staff member (preset + PIN).
  *
  * @package WooCommerce\Admin\Settings
- * @since   10.9.0
+ * @since   11.0.0
  */
 
 declare( strict_types = 1 );
@@ -15,14 +15,14 @@ defined( 'ABSPATH' ) || exit;
 /*
  * Template variables passed from WC_Admin_POS_Staff::edit_output().
  *
- * @var bool     $has_pin              Whether the user already has a PIN.
- * @var int      $user_id              User ID.
- * @var WP_User  $user                 User object.
- * @var string   $current_pos_role     Current POS role meta value.
- * @var string[] $assignable_pos_roles List of assignable POS role identifiers.
+ * @var bool     $has_pin                Whether the user already has a PIN.
+ * @var int      $user_id                User ID.
+ * @var WP_User  $user                   User object.
+ * @var string   $current_pos_preset     Current POS preset meta value.
+ * @var string[] $assignable_pos_presets List of assignable POS preset identifiers.
  */
 
-if ( ! isset( $has_pin, $user_id, $user, $current_pos_role, $assignable_pos_roles ) || ! $user instanceof WP_User ) {
+if ( ! isset( $has_pin, $user_id, $user, $current_pos_preset, $assignable_pos_presets ) || ! $user instanceof WP_User ) {
 	return;
 }
 
@@ -36,6 +36,18 @@ $form_action_url = add_query_arg(
 		'edit-staff' => $user_id,
 	),
 	admin_url( 'admin.php' )
+);
+
+$cap_labels = array(
+	POSCapabilities::CAP_PROCESS_SALES  => __( 'Process sales', 'woocommerce' ),
+	POSCapabilities::CAP_VIEW_ORDERS    => __( 'View orders', 'woocommerce' ),
+	POSCapabilities::CAP_APPLY_COUPONS  => __( 'Apply coupons', 'woocommerce' ),
+	POSCapabilities::CAP_CREATE_COUPONS => __( 'Create coupons', 'woocommerce' ),
+	POSCapabilities::CAP_ISSUE_REFUNDS  => __( 'Issue refunds', 'woocommerce' ),
+	POSCapabilities::CAP_VIEW_SETTINGS  => __( 'View POS settings', 'woocommerce' ),
+	POSCapabilities::CAP_EDIT_SETTINGS  => __( 'Edit POS settings', 'woocommerce' ),
+	POSCapabilities::CAP_MANAGE_STAFF   => __( 'Manage POS staff', 'woocommerce' ),
+	POSCapabilities::CAP_EXIT_POS       => __( 'Exit POS', 'woocommerce' ),
 );
 ?>
 
@@ -56,16 +68,36 @@ $form_action_url = add_query_arg(
 				</tr>
 				<tr>
 					<th scope="row" class="titledesc">
-						<label for="pos_role"><?php esc_html_e( 'POS role', 'woocommerce' ); ?></label>
+						<label for="pos_preset"><?php esc_html_e( 'POS role', 'woocommerce' ); ?></label>
 					</th>
 					<td class="forminp">
-						<select id="pos_role" name="pos_role" required>
-							<?php foreach ( $assignable_pos_roles as $role_value ) : ?>
-								<option value="<?php echo esc_attr( $role_value ); ?>"<?php selected( $role_value, $current_pos_role ); ?>>
-									<?php echo esc_html( POSCapabilities::role_label( $role_value ) ); ?>
+						<select id="pos_preset" name="pos_preset" required>
+							<?php foreach ( $assignable_pos_presets as $preset_value ) : ?>
+								<option value="<?php echo esc_attr( $preset_value ); ?>"<?php selected( $preset_value, $current_pos_preset ); ?>>
+									<?php echo esc_html( POSCapabilities::preset_label( $preset_value ) ); ?>
 								</option>
 							<?php endforeach; ?>
 						</select>
+
+						<div class="wc-pos-staff-cap-preview">
+							<p class="description"><?php esc_html_e( 'Permissions granted by this role:', 'woocommerce' ); ?></p>
+							<?php foreach ( $assignable_pos_presets as $preset_value ) : ?>
+								<ul
+									class="wc-pos-staff-cap-list"
+									data-preset="<?php echo esc_attr( $preset_value ); ?>"
+									<?php echo $preset_value === $current_pos_preset ? '' : 'hidden'; ?>>
+									<?php
+									$caps = POSCapabilities::capabilities_for_preset( $preset_value );
+									foreach ( $cap_labels as $cap_key => $cap_label ) :
+										if ( empty( $caps[ $cap_key ] ) ) {
+											continue;
+										}
+										?>
+										<li><?php echo esc_html( $cap_label ); ?></li>
+									<?php endforeach; ?>
+								</ul>
+							<?php endforeach; ?>
+						</div>
 					</td>
 				</tr>
 				<tr>
@@ -116,3 +148,20 @@ $form_action_url = add_query_arg(
 		</p>
 	</form>
 </div>
+
+<script>
+( function ( $ ) {
+	$( function () {
+		var $preset     = $( '#pos_preset' );
+		var $capPreview = $( '.wc-pos-staff-cap-preview' );
+
+		$preset.on( 'change', function () {
+			var selected = $preset.val();
+			$capPreview.find( '.wc-pos-staff-cap-list' ).attr( 'hidden', true );
+			if ( selected ) {
+				$capPreview.find( '[data-preset="' + selected + '"]' ).removeAttr( 'hidden' );
+			}
+		} );
+	} );
+}( jQuery ) );
+</script>
