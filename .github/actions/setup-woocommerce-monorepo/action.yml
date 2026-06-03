@@ -98,6 +98,17 @@ runs:
             else
               pnpm install ${{ steps.project-filters.outputs.install }} --frozen-lockfile
             fi
+        - name: 'Cache Build Outputs'
+          # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
+          if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
+          uses: 'actions/cache@v4'
+          with:
+              path: |
+                  packages/**/node_modules/.cache
+                  plugins/**/node_modules/.cache
+                  tools/**/node_modules/.cache
+              key: "${{ runner.os }}-build-cache-${{ inputs.build }}-build:${{ inputs.build-type }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
+              restore-keys: "${{ runner.os }}-build-cache-${{ inputs.build }}-build:${{ inputs.build-type }}-"
         - name: 'Build'
           # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
           if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
