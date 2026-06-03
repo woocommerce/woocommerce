@@ -42,6 +42,10 @@ export type ProductFiltersContext = {
 	item: FilterOptionItem;
 	activeLabelTemplate: string;
 	filterType: string;
+	// Set when Product Filters is a descendant of Product Collection. Null
+	// signals the frontend to fall back to the global interactivity config
+	// (sibling-block layout).
+	forcePageReload?: boolean | null;
 };
 
 // ----------------------------------------
