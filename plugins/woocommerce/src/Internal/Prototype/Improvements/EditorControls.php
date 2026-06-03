@@ -48,6 +48,21 @@ body.post-type-product .postbox > .inside {
 	padding-top: 8px;
 }
 
+/* ── Screen Options panel: white background to match the metabox cards below ── */
+body.post-type-product #screen-options-wrap {
+	background: #fff;
+}
+
+/* ── Product Data header: align the product-type help-tip with the 32px select ── */
+body.post-type-product .product-data-wrapper label[for="product-type"] {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+body.post-type-product .product-data-wrapper .woocommerce-product-type-tip {
+	margin: 0 !important;
+}
+
 /* ── Compact CTAs (32px) inside product editor metaboxes — leave .button-small alone ── */
 body.post-type-product .inside .button:not(.button-small),
 body.post-type-product .inside .button-primary:not(.button-small),
@@ -122,11 +137,12 @@ body.post-type-product .woocommerce_options_panel .form-field > label {
 body.post-type-product .woocommerce_options_panel .form-field > .woocommerce-help-tip {
 	margin-top: 8px !important;
 }
-/* Center 16px checkboxes/radios in the 32px row to match the label center. */
+/* Center 16px checkboxes/radios in the 32px row, aligned with the description text next to them.
+   vertical-align: middle must match the description's alignment in TypographyHierarchy. */
 body.post-type-product .woocommerce_options_panel .form-field > input[type="checkbox"],
 body.post-type-product .woocommerce_options_panel .form-field > input[type="radio"] {
-	margin-top: 8px !important;
-	vertical-align: top !important;
+	margin: 8px 0 !important;
+	vertical-align: middle !important;
 }
 /* For radio groups (.wc-radios is taller than one row) — align the label to the top
 	so it lines up with the first option. */
@@ -190,6 +206,31 @@ body.post-type-product .woocommerce_options_panel .form-field > textarea ~ .desc
 				if ( fromInput && tip && fromInput.nextSibling !== tip ) {
 					saleDatesRow.insertBefore( tip, fromInput.nextSibling );
 				}
+			}
+
+			/* "Available for POS": replace its tooltip with inline description text. */
+			var posRow = document.querySelector( 'p.form-field._visible_in_pos_field' );
+			if ( posRow ) {
+				var posTip = posRow.querySelector( '.woocommerce-help-tip' );
+				if ( posTip ) {
+					var text = posTip.getAttribute( 'data-tip' ) || posTip.getAttribute( 'aria-label' ) || '';
+					posTip.remove();
+					if ( text ) {
+						var posDesc = document.createElement( 'span' );
+						posDesc.className   = 'description';
+						posDesc.textContent = text;
+						posRow.appendChild( posDesc );
+					}
+				}
+			}
+
+			/* "Enable reviews": no description by default — add inline helper text. */
+			var reviewsRow = document.querySelector( 'p.form-field.comment_status_field' );
+			if ( reviewsRow && ! reviewsRow.querySelector( '.description' ) ) {
+				var revDesc = document.createElement( 'span' );
+				revDesc.className   = 'description';
+				revDesc.textContent = '<?php echo esc_js( __( 'Allow customers to leave reviews on this product.', 'woocommerce' ) ); ?>';
+				reviewsRow.appendChild( revDesc );
 			}
 		}() );
 		</script>
