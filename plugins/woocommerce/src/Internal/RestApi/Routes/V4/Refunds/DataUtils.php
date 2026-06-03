@@ -117,10 +117,12 @@ class DataUtils {
 	}
 
 	/**
-	 * Convert line item taxes (schema format) to internal format. This keys arrays by tax ID and has some different naming
+	 * Convert line item taxes (schema format) to internal format. This keys arrays by tax ID and has some different naming.
 	 *
 	 * @param array $line_item_taxes The taxes to convert.
 	 * @return array The converted taxes.
+	 *
+	 * @since 10.9.0
 	 */
 	protected function convert_line_item_taxes_to_internal_format( $line_item_taxes ) {
 		$prepared_taxes = array();
@@ -257,6 +259,8 @@ class DataUtils {
 	 *
 	 * @param array $calculated_taxes Taxes keyed by tax ID with amounts.
 	 * @return array Schema format with id and refund_total keys.
+	 *
+	 * @since 10.9.0
 	 */
 	protected function convert_proportional_taxes_to_schema_format( array $calculated_taxes ): array {
 		$result = array();
@@ -275,6 +279,8 @@ class DataUtils {
 	 * @param WC_Order $order The order.
 	 * @param array    $tax_ids Array of tax rate IDs that apply to an item.
 	 * @return array Tax rates array formatted for WC_Tax::calc_*_tax() methods.
+	 *
+	 * @since 10.9.0
 	 */
 	protected function build_tax_rates_array( WC_Order $order, array $tax_ids ): array {
 		$tax_rates = array();
@@ -305,12 +311,12 @@ class DataUtils {
 	 * total is returned regardless. Callers using untrusted input should validate
 	 * via {@see validate_preview_line_items()} first.
 	 *
-	 * @since 10.8.0
-	 *
 	 * @param WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item     The order item.
 	 * @param int                                                            $quantity The quantity to refund (>= 1).
 	 * @return float The tax-inclusive refund total. May be negative for items with negative totals (e.g. discount fees).
 	 * @throws \InvalidArgumentException When $quantity is less than 1.
+	 *
+	 * @since 10.9.0
 	 */
 	public function compute_line_item_refund_total( $item, int $quantity ): float {
 		if ( $quantity < 1 ) {
@@ -343,12 +349,12 @@ class DataUtils {
 	 * Callers must invoke {@see validate_preview_line_items()} first — this
 	 * method assumes inputs have been validated and throws on missing items.
 	 *
-	 * @since 10.8.0
-	 *
 	 * @param WC_Order $order      The order being previewed for refund.
 	 * @param array    $line_items Array of line items with 'line_item_id' and 'quantity' keys.
 	 * @return array The structured preview response.
 	 * @throws \InvalidArgumentException When a line_item_id does not resolve to an item on the order.
+	 *
+	 * @since 10.9.0
 	 */
 	public function build_refund_preview( WC_Order $order, array $line_items ): array {
 		$price_decimals = wc_get_price_decimals();
@@ -391,17 +397,22 @@ class DataUtils {
 			$tax                   = 0.0;
 
 			$original_taxes = $item->get_taxes();
-			$tax_totals     = array_filter(
+			// Keep any non-zero stored tax (positive or negative). Negative-tax
+			// discount fees (e.g. a -$10 fee with -$1 stored tax) must retain
+			// their tax breakdown — filtering on `> 0` previously dropped them
+			// and emitted subtotal=$line_total / tax=0 instead of the correct
+			// signed split.
+			$tax_totals = array_filter(
 				$original_taxes['total'] ?? array(),
 				function ( $amount ) {
-					return is_numeric( $amount ) && $amount > 0;
+					return is_numeric( $amount ) && 0.0 !== (float) $amount;
 				}
 			);
 
 			if ( ! empty( $original_taxes['total'] ?? array() ) && empty( $tax_totals ) ) {
 				wc_get_logger()->warning(
 					sprintf(
-						'Refund preview: tax totals filtered to empty for item %d on order %d (non-numeric or non-positive values).',
+						'Refund preview: tax totals filtered to empty for item %d on order %d (non-numeric or zero values).',
 						(int) $line_item['line_item_id'],
 						$order->get_id()
 					),
@@ -477,11 +488,11 @@ class DataUtils {
 	/**
 	 * Validate line items for a preview request.
 	 *
-	 * @since 10.8.0
-	 *
 	 * @param array    $line_items The line items to validate.
 	 * @param WC_Order $order      The order object.
 	 * @return true|WP_Error True on success, WP_Error on failure.
+	 *
+	 * @since 10.9.0
 	 */
 	public function validate_preview_line_items( array $line_items, WC_Order $order ) {
 		if ( empty( $line_items ) ) {
@@ -576,6 +587,24 @@ class DataUtils {
 					return new WP_Error(
 						'quantity_exceeds_refundable',
 						__( 'This line item has already been fully refunded.', 'woocommerce' ),
+						array( 'status' => 422 )
+					);
+				}
+
+				// Cap against the line's remaining refundable amount. The preview
+				// shape only takes quantity, so a fee/shipping line that's been
+				// partially refunded cannot be previewed again at the full original
+				// total — the request would over-refund and the eventual create
+				// call would fail. Reject up-front with a clear error.
+				$requested_total = abs( $this->compute_line_item_refund_total( $item, $quantity ) );
+				if ( $requested_total > NumberUtil::round( $remaining_total, wc_get_price_decimals() ) ) {
+					return new WP_Error(
+						'quantity_exceeds_refundable',
+						sprintf(
+							/* translators: %s: remaining refundable amount */
+							__( 'Requested refund exceeds the remaining refundable amount for this line item (%s).', 'woocommerce' ),
+							wc_format_decimal( $remaining_total, wc_get_price_decimals() )
+						),
 						array( 'status' => 422 )
 					);
 				}

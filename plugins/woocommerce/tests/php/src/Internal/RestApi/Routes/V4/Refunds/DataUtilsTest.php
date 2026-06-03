@@ -895,7 +895,11 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return quantity_exceeds_refundable when shipping line is fully refunded.
+	 * @testdox Should return order_not_refundable when shipping line is fully refunded.
+	 *
+	 * Once the shipping line is fully refunded the order's remaining refundable
+	 * amount drops to zero, so the order-level guard fires before the per-line
+	 * `quantity_exceeds_refundable` check is reached.
 	 */
 	public function test_validate_preview_line_items_shipping_fully_refunded(): void {
 		$order    = wc_create_order();
@@ -939,6 +943,146 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( \WP_Error::class, $result );
 		// 'order_not_refundable' is returned first because the order's total refundable amount is now zero.
 		$this->assertEquals( 'order_not_refundable', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should return quantity_exceeds_refundable when a partially-refunded shipping line cannot fit a full preview at its original total.
+	 *
+	 * Order has a $10 shipping line + a $50 product line so the order is still
+	 * refundable after a $5 partial shipping refund. Previewing the shipping
+	 * line at qty=1 would refund the full $10 — exceeds the $5 remaining on
+	 * that line — so validation must reject with `quantity_exceeds_refundable`.
+	 * Without the per-line cap, validate would pass and `build_refund_preview`
+	 * would return an oversized total.
+	 */
+	public function test_validate_preview_line_items_shipping_partial_remaining(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => 10.00,
+			)
+		);
+		$shipping->save();
+		$order->add_item( $shipping );
+
+		$order->set_total( 60.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		// Pre-refund $5 of the shipping line, leaving $5 remaining on it but
+		// keeping the order overall refundable ($55 of $60 remains).
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 5.00,
+				'line_items' => array(
+					$shipping->get_id() => array(
+						'qty'          => 0,
+						'refund_total' => 5.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$result = $this->data_utils->validate_preview_line_items(
+			array(
+				array(
+					'line_item_id' => $shipping->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'quantity_exceeds_refundable', $result->get_error_code() );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox build_refund_preview preserves the negative tax split on a fee with a negative stored tax.
+	 *
+	 * Regression guard: a previous implementation filtered tax IDs by `amount > 0`,
+	 * which dropped negative tax entries entirely and emitted `tax: 0.00` on
+	 * negative-fee discount lines. The fix keeps any non-zero stored tax so the
+	 * preview returns the signed split.
+	 */
+	public function test_build_refund_preview_negative_fee_with_negative_tax(): void {
+		// A 10% rate is needed so WC_Tax::calc_inclusive_tax can split a tax-inclusive total.
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$order = wc_create_order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Loyalty discount',
+				'total' => -10.00,
+			)
+		);
+		$fee->set_taxes( array( 'total' => array( $tax_rate_id => -1.00 ) ) );
+		$fee->save();
+		$order->add_item( $fee );
+
+		$tax_item = new \WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( -1.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+
+		$order->save();
+
+		$result = $this->data_utils->build_refund_preview(
+			$order,
+			array(
+				array(
+					'line_item_id' => $fee->get_id(),
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		// Total stays at the tax-inclusive -$11. The split between subtotal
+		// (-$10) and tax (-$1) must be preserved on the fee item entry.
+		$this->assertSame( '-11.00', $result['breakdown']['fees']['total'] );
+		$this->assertCount( 1, $result['breakdown']['fees']['items'] );
+		$this->assertEquals( '-10.00', $result['breakdown']['fees']['items'][0]['subtotal'] );
+		$this->assertEquals( '-1.00', $result['breakdown']['fees']['items'][0]['tax'] );
+		$this->assertEquals( '-11.00', $result['breakdown']['fees']['items'][0]['total'] );
+
+		$order->delete( true );
 	}
 
 	/**
