@@ -154,7 +154,6 @@ body.post-type-product .woocommerce_options_panel .form-field .wc-radios {
 body.post-type-product .woocommerce_options_panel .form-field .wc-radios li {
 	display: flex;
 	align-items: center;
-	min-height: 32px;
 }
 body.post-type-product .woocommerce_options_panel .form-field .wc-radios input[type="radio"] {
 	margin: 0 6px 0 0 !important;
@@ -170,6 +169,7 @@ body.post-type-product .woocommerce_options_panel .form-field > textarea ~ .desc
 	color: var(--wpds-color-fg-content-neutral-weak, #757575) !important;
 	font-style: normal !important;
 }
+
 </style>
 		<?php
 	}
