@@ -317,7 +317,7 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	/**
 	 * Test that a customer-chosen value for an "any" variation attribute is preserved on the order line item.
 	 */
-	public function test_create_order_preserves_customer_chosen_any_attribute_value() {
+	public function test_create_order_preserves_customer_chosen_any_attribute_value(): void {
 		$parent_product = WC_Helper_Product::create_variation_product();
 
 		// Find the first variation that has pa_number as "any" (stored as '').
