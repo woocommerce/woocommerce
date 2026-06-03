@@ -15,8 +15,9 @@ defined( 'ABSPATH' ) || exit;
  * Polishes the Custom Fields metabox (#postcustom):
  * - Strips table chrome (alt-row backgrounds, inner borders) and replaces with one outer border.
  * - Hides the per-row "Update" button; key/value edits auto-save on blur via the existing WP AJAX endpoint.
- * - Replaces the textual "Delete" button with a compact centered X icon — same pattern as DownloadableFilesPolish.
- * - Modernises "Enter new" / "Add Custom Field" controls to brand-blue text-buttons.
+ * - Replaces the textual "Delete" button with a compact centered X icon.
+ * - Merges the "Add Custom Field" workflow into the main table as an inline-add row:
+ *   one trigger button reveals Name/Value inputs and a Confirm CTA below them.
  */
 class CustomFieldsPolish {
 
@@ -57,22 +58,30 @@ class CustomFieldsPolish {
 		$close_url = self::mask_url( 'M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z' );
 		?>
 <style id="wc-proto-custom-fields">
-/* ── Strip stripe/background chrome on both tables, keep outer border ─ */
-body.post-type-product #postcustomstuff table,
-body.post-type-product #postcustomstuff table tr,
-body.post-type-product #postcustomstuff table th,
-body.post-type-product #postcustomstuff table td {
+/* ── Hide WP's separate "Add Custom Field" UI — we replace it with inline rows in #list-table ── */
+body.post-type-product #postcustomstuff #newmeta,
+body.post-type-product #postcustomstuff p.label-required,
+body.post-type-product #postcustomstuff > p.label-required,
+body.post-type-product #postcustomstuff > p:first-of-type {
+	display: none !important;
+}
+
+/* ── Strip stripe/background chrome on #list-table, keep outer border ─ */
+body.post-type-product #postcustomstuff #list-table,
+body.post-type-product #postcustomstuff #list-table tr,
+body.post-type-product #postcustomstuff #list-table th,
+body.post-type-product #postcustomstuff #list-table td {
 	background: transparent !important;
 	box-shadow: none !important;
 }
 
-/* ── Existing meta list (#list-table) — keep table layout, just strip chrome ── */
 body.post-type-product #postcustomstuff #list-table {
 	border: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
 	border-radius: 4px !important;
 	border-collapse: separate !important;
 	border-spacing: 0;
 	margin: 0 0 16px;
+	width: 100% !important;
 }
 body.post-type-product #postcustomstuff #list-table th,
 body.post-type-product #postcustomstuff #list-table td {
@@ -80,7 +89,7 @@ body.post-type-product #postcustomstuff #list-table td {
 	padding: 8px 10px;
 	vertical-align: middle;
 }
-/* Column widths — match #newmeta so the headers line up with the cells below */
+/* Column widths — Name 35%, Value 65% (X icon sits in the value column's right padding) */
 body.post-type-product #postcustomstuff #list-table th:first-child,
 body.post-type-product #postcustomstuff #list-table td:first-child {
 	width: 35%;
@@ -93,9 +102,7 @@ body.post-type-product #postcustomstuff #list-table thead th {
 	text-align: left;
 	line-height: 16px;
 }
-body.post-type-product #postcustomstuff #list-table:not(:has(#the-list tr)) thead {
-	display: none;
-}
+
 body.post-type-product #postcustomstuff #list-table input[type="text"] {
 	width: 100% !important;
 	max-width: 100% !important;
@@ -111,45 +118,6 @@ body.post-type-product #postcustomstuff textarea {
 	font-size: 13px;
 }
 
-/* ── Add Custom Field (#newmeta) — keep the WP two-column table layout,
-	restyle with our outer border + rounded corners, header bar visible. ── */
-body.post-type-product #postcustomstuff #newmeta {
-	border: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
-	border-radius: 4px !important;
-	border-collapse: separate !important;
-	border-spacing: 0 !important;
-	width: 100% !important;
-	margin: 0 !important;
-}
-body.post-type-product #postcustomstuff #newmeta thead th,
-body.post-type-product #postcustomstuff #newmeta td {
-	border: none !important;
-	padding: 8px 10px !important;
-	vertical-align: top !important;
-}
-body.post-type-product #postcustomstuff #newmeta thead th {
-	border-bottom: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
-	background: var(--wpds-color-bg-content-neutral-subtle, #f6f7f7) !important;
-	font-size: var(--wpds-typography-font-size-sm, 12px) !important;
-	font-weight: var(--wpds-typography-font-weight-medium, 499) !important;
-	color: var(--wpds-color-fg-content-neutral, #1e1e1e) !important;
-	text-align: left !important;
-	line-height: 1.4 !important;
-}
-body.post-type-product #postcustomstuff #newmeta td.left {
-	width: 35% !important;
-}
-body.post-type-product #postcustomstuff #newmeta select#metakeyselect,
-body.post-type-product #postcustomstuff #newmeta input#metakeyinput {
-	width: 100% !important;
-	box-sizing: border-box !important;
-	margin: 0 !important;
-}
-body.post-type-product #postcustomstuff #newmeta td.submit {
-	border-top: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
-	text-align: right !important;
-}
-
 /* Hide the per-row Update button (auto-save on blur in JS) */
 body.post-type-product #postcustomstuff .updatemeta {
 	display: none !important;
@@ -161,9 +129,9 @@ body.post-type-product #postcustomstuff #the-list tr {
 }
 body.post-type-product #postcustomstuff .deletemeta {
 	position: absolute !important;
-	top: 14px !important;
+	top: 50% !important;
 	right: 12px !important;
-	transform: none !important;
+	transform: translateY( -50% ) !important;
 	width: 20px !important;
 	height: 20px !important;
 	padding: 0 !important;
@@ -182,82 +150,43 @@ body.post-type-product #postcustomstuff .deletemeta:hover {
 	background-color: var(--wpds-color-fg-content-error, #cc1818) !important;
 }
 
-/* Pad the value column so there's clear breathing room between the textarea and the X icon */
+/* Pad the value column so there's clear breathing room between textarea and X */
 body.post-type-product #postcustomstuff #the-list td:last-child {
 	padding-right: 56px !important;
 }
 
-/* ── "Enter new" / "Cancel" plain inline text links ─────
-	Targets both the <a> parent (where WP may apply button styling) and the inner span. */
-body.post-type-product #postcustomstuff #newmetaleft > a,
-body.post-type-product #postcustomstuff #enternew,
-body.post-type-product #postcustomstuff #cancelnew {
-	display: inline !important;
-	padding: 0 !important;
-	margin: 4px 12px 0 0 !important;
-	font-size: var(--wpds-typography-font-size-sm, 12px) !important;
-	background: none !important;
-	border: none !important;
-	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
-	box-shadow: none !important;
-	text-decoration: underline !important;
-	cursor: pointer !important;
-	line-height: inherit !important;
-	height: auto !important;
-	min-height: 0 !important;
+/* ── Inline-add UI inside #list-table ────────────────────── */
+/* The new-entry row (hidden until the trigger is clicked) */
+body.post-type-product #postcustomstuff #list-table tr.wc-proto-add-entry-row {
+	border-top: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde);
 }
-body.post-type-product #postcustomstuff #newmetaleft > a:hover,
-body.post-type-product #postcustomstuff #enternew:hover,
-body.post-type-product #postcustomstuff #cancelnew:hover {
-	background: none !important;
-	text-decoration: none !important;
+body.post-type-product #postcustomstuff #list-table tr.wc-proto-add-entry-row > td {
+	border-top: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
+	padding: 12px 10px !important;
+}
+body.post-type-product #postcustomstuff #list-table tr.wc-proto-add-entry-row td:last-child {
+	padding-right: 10px !important;
 }
 
-/* "Add Custom Field" submit — secondary outlined */
-body.post-type-product #postcustomstuff #newmeta-submit {
-	height: 32px !important;
-	line-height: 30px !important;
-	padding: 0 12px !important;
-	font-size: 13px !important;
-	margin: 8px 0 0 !important;
-	background: transparent !important;
-	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
-	border: 1px solid var(--wpds-color-fg-interactive-brand, #3858e9) !important;
-	border-radius: var(--wpds-border-radius-xs, 2px) !important;
-	box-shadow: none !important;
-	text-shadow: none !important;
-	cursor: pointer !important;
-}
-body.post-type-product #postcustomstuff #newmeta-submit:hover {
-	background: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff) !important;
+/* The Confirm/Cancel row sits below the inputs, no top divider */
+body.post-type-product #postcustomstuff #list-table tr.wc-proto-add-confirm-row > td {
+	padding: 8px 10px 12px !important;
+	text-align: left;
 }
 
-/* ── "Add Custom Field:" label — tighter spacing ────────── */
-body.post-type-product #postcustomstuff p.label-required,
-body.post-type-product #postcustomstuff > p:first-of-type {
-	margin: 16px 0 8px;
-	font-weight: var(--wpds-typography-font-weight-medium, 499);
-	font-size: var(--wpds-typography-font-size-md, 13px);
-	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
+/* The trigger row sits at the bottom of the table */
+body.post-type-product #postcustomstuff #list-table tr.wc-proto-add-trigger-row > td {
+	border-top: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
+	padding: 12px 10px !important;
 }
 
-/* ── Reveal-button mechanic — hide the new-field form by default. ── */
-body.post-type-product #postcustomstuff #newmeta,
-body.post-type-product #postcustomstuff p.label-required {
-	display: none;
-}
-body.post-type-product #postcustomstuff.wc-proto-newmeta-open #newmeta {
-	display: table;
-}
-body.post-type-product #postcustomstuff.wc-proto-newmeta-open p.label-required {
-	display: block;
-}
-body.post-type-product #postcustomstuff .wc-proto-add-meta-trigger {
-	display: inline-block;
+/* The "+ Add custom field" trigger — text-link styled for low chrome */
+body.post-type-product .wc-proto-add-trigger {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
 	height: 32px;
-	line-height: 30px;
-	padding: 0 12px;
-	margin: 12px 0;
+	padding: 0 10px;
 	font-size: 13px;
 	background: transparent;
 	color: var(--wpds-color-fg-interactive-brand, #3858e9);
@@ -265,10 +194,57 @@ body.post-type-product #postcustomstuff .wc-proto-add-meta-trigger {
 	border-radius: var(--wpds-border-radius-xs, 2px);
 	cursor: pointer;
 }
-body.post-type-product #postcustomstuff .wc-proto-add-meta-trigger:hover {
+body.post-type-product .wc-proto-add-trigger:hover {
 	background: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff);
 }
-body.post-type-product #postcustomstuff.wc-proto-newmeta-open .wc-proto-add-meta-trigger {
+
+/* Confirm CTA — secondary outlined (matches the publish metabox Confirm) */
+body.post-type-product .wc-proto-confirm {
+	display: inline-flex;
+	align-items: center;
+	height: 32px;
+	padding: 0 12px;
+	font-size: 13px;
+	background: transparent;
+	color: var(--wpds-color-fg-interactive-brand, #3858e9);
+	border: 1px solid var(--wpds-color-fg-interactive-brand, #3858e9);
+	border-radius: var(--wpds-border-radius-xs, 2px);
+	cursor: pointer;
+	margin-right: 8px;
+}
+body.post-type-product .wc-proto-confirm:hover {
+	background: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff);
+}
+
+/* Cancel — tertiary text link */
+body.post-type-product .wc-proto-cancel {
+	display: inline-flex;
+	align-items: center;
+	height: 32px;
+	padding: 0 8px;
+	font-size: 13px;
+	background: none;
+	color: var(--wpds-color-fg-interactive-brand, #3858e9);
+	border: 1px solid transparent;
+	border-radius: var(--wpds-border-radius-xs, 2px);
+	cursor: pointer;
+	text-decoration: underline;
+}
+body.post-type-product .wc-proto-cancel:hover {
+	background: none;
+	text-decoration: none;
+}
+
+/* Hide entry/confirm rows by default (revealed via .wc-proto-adding class on tbody) */
+body.post-type-product #postcustomstuff tr.wc-proto-add-entry-row,
+body.post-type-product #postcustomstuff tr.wc-proto-add-confirm-row {
+	display: none;
+}
+body.post-type-product #postcustomstuff #the-list.wc-proto-adding tr.wc-proto-add-entry-row,
+body.post-type-product #postcustomstuff #the-list.wc-proto-adding tr.wc-proto-add-confirm-row {
+	display: table-row;
+}
+body.post-type-product #postcustomstuff #the-list.wc-proto-adding tr.wc-proto-add-trigger-row {
 	display: none;
 }
 
@@ -284,7 +260,7 @@ body.post-type-product #postcustom > .inside > p:last-child {
 	line-height: 1.4 !important;
 }
 
-/* Subtle saved-flash on the row */
+/* Subtle saved-flash on existing rows after auto-save */
 body.post-type-product #postcustomstuff #the-list tr.wc-proto-saved {
 	transition: background-color 600ms ease-out;
 	background-color: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff) !important;
@@ -294,8 +270,7 @@ body.post-type-product #postcustomstuff #the-list tr.wc-proto-saved {
 	}
 
 	/**
-	 * Output JS that auto-triggers the per-row Update AJAX when key/value fields lose focus.
-	 * This makes the now-hidden Update button unnecessary while keeping WP's AJAX path intact.
+	 * Output JS for inline-add UI plus auto-save on blur for existing rows.
 	 */
 	public static function output_scripts(): void {
 		if ( ! DevPanel::is_supported_screen() ) {
@@ -307,6 +282,7 @@ body.post-type-product #postcustomstuff #the-list tr.wc-proto-saved {
 	var list = document.getElementById( 'the-list' );
 	if ( ! list ) { return; }
 
+	/* ── Auto-save existing meta on blur ─────────────────── */
 	function autoSaveRow( row ) {
 		var updateBtn = row.querySelector( '.updatemeta' );
 		if ( ! updateBtn ) { return; }
@@ -314,11 +290,16 @@ body.post-type-product #postcustomstuff #the-list tr.wc-proto-saved {
 		row.classList.add( 'wc-proto-saved' );
 		setTimeout( function () { row.classList.remove( 'wc-proto-saved' ); }, 700 );
 	}
-
 	function wire( row ) {
 		if ( row.dataset.wcProtoWired ) { return; }
+		if ( row.classList && (
+			row.classList.contains( 'wc-proto-add-entry-row' ) ||
+			row.classList.contains( 'wc-proto-add-confirm-row' ) ||
+			row.classList.contains( 'wc-proto-add-trigger-row' )
+		) ) { return; }
 		row.dataset.wcProtoWired = '1';
 		row.querySelectorAll( 'input[type="text"], textarea' ).forEach( function ( field ) {
+			if ( field.id === 'wc-proto-new-key' || field.id === 'wc-proto-new-value' ) { return; }
 			var initial = field.value;
 			field.addEventListener( 'blur', function () {
 				if ( field.value !== initial ) {
@@ -328,10 +309,7 @@ body.post-type-product #postcustomstuff #the-list tr.wc-proto-saved {
 			} );
 		} );
 	}
-
 	list.querySelectorAll( 'tr' ).forEach( wire );
-
-	/* When WPList AJAX swaps in a new row after add/update, wire it too. */
 	new MutationObserver( function ( mutations ) {
 		mutations.forEach( function ( m ) {
 			m.addedNodes.forEach( function ( node ) {
@@ -340,22 +318,62 @@ body.post-type-product #postcustomstuff #the-list tr.wc-proto-saved {
 		} );
 	} ).observe( list, { childList: true } );
 
-	/* Inject "Add Custom Field" trigger button that reveals the new-field form. */
-	var container = document.getElementById( 'postcustomstuff' );
-	var newmeta   = document.getElementById( 'newmeta' );
-	var label     = container && container.querySelector( 'p.label-required' );
-	if ( container && newmeta ) {
-		var trigger = document.createElement( 'button' );
-		trigger.type        = 'button';
-		trigger.className   = 'wc-proto-add-meta-trigger';
-		trigger.textContent = 'Add Custom Field';
-		( label || newmeta ).parentNode.insertBefore( trigger, label || newmeta );
-		trigger.addEventListener( 'click', function () {
-			container.classList.add( 'wc-proto-newmeta-open' );
-			var firstField = newmeta.querySelector( 'select, input[type="text"], textarea' );
-			if ( firstField ) { firstField.focus(); }
-		} );
+	/* ── Inline add-row UI ───────────────────────────────── */
+	var newmetaSubmit = document.getElementById( 'newmeta-submit' );
+	var metaKeyInput  = document.getElementById( 'metakeyinput' );
+	var metaKeySelect = document.getElementById( 'metakeyselect' );
+	var metaValue     = document.getElementById( 'metavalue' );
+	if ( ! newmetaSubmit ) { return; }
+
+	function makeRow( cls, inner ) {
+		var tr = document.createElement( 'tr' );
+		tr.className = cls;
+		tr.innerHTML = inner;
+		return tr;
 	}
+
+	var entryRow = makeRow( 'wc-proto-add-entry-row',
+		'<td class="left"><input type="text" id="wc-proto-new-key" placeholder="Name"></td>' +
+		'<td><textarea id="wc-proto-new-value" placeholder="Value" rows="2"></textarea></td>'
+	);
+	var confirmRow = makeRow( 'wc-proto-add-confirm-row',
+		'<td colspan="2">' +
+			'<button type="button" class="wc-proto-confirm">Confirm</button>' +
+			'<button type="button" class="wc-proto-cancel">Cancel</button>' +
+		'</td>'
+	);
+	var triggerRow = makeRow( 'wc-proto-add-trigger-row',
+		'<td colspan="2"><button type="button" class="wc-proto-add-trigger">+ Add custom field</button></td>'
+	);
+	list.appendChild( entryRow );
+	list.appendChild( confirmRow );
+	list.appendChild( triggerRow );
+
+	function openAdder() {
+		list.classList.add( 'wc-proto-adding' );
+		document.getElementById( 'wc-proto-new-key' ).focus();
+	}
+	function closeAdder() {
+		list.classList.remove( 'wc-proto-adding' );
+		document.getElementById( 'wc-proto-new-key' ).value = '';
+		document.getElementById( 'wc-proto-new-value' ).value = '';
+	}
+
+	triggerRow.querySelector( '.wc-proto-add-trigger' ).addEventListener( 'click', openAdder );
+	confirmRow.querySelector( '.wc-proto-cancel' ).addEventListener( 'click', closeAdder );
+	confirmRow.querySelector( '.wc-proto-confirm' ).addEventListener( 'click', function () {
+		var key   = document.getElementById( 'wc-proto-new-key' ).value.trim();
+		var value = document.getElementById( 'wc-proto-new-value' ).value;
+		if ( ! key ) {
+			document.getElementById( 'wc-proto-new-key' ).focus();
+			return;
+		}
+		if ( metaKeySelect ) { metaKeySelect.value = '#NONE#'; }
+		if ( metaKeyInput )  { metaKeyInput.value  = key; }
+		if ( metaValue )     { metaValue.value     = value; }
+		newmetaSubmit.click();
+		closeAdder();
+	} );
 }() );
 </script>
 		<?php
