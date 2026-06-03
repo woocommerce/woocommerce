@@ -117,7 +117,6 @@ class QueryBuilder {
 				'tax_query',
 				'isProductCollection',
 				'priceRange',
-				'productCollectionFilters',
 			)
 		);
 
@@ -666,8 +665,7 @@ class QueryBuilder {
 	 */
 	private function get_queries_by_applied_filters() {
 		return array(
-			'rating_filter'            => $this->get_filter_by_rating_query(),
-			'productCollectionFilters' => true,
+			'rating_filter' => $this->get_filter_by_rating_query(),
 		);
 	}
 
@@ -815,7 +813,7 @@ class QueryBuilder {
 	 * @return array
 	 */
 	public function add_filter_by_applied_filters_clauses( $clauses, $query ) {
-		if ( ! ( $query->query_vars['productCollectionFilters'] ?? false ) ) {
+		if ( ! ( $query->query_vars['isProductCollection'] ?? false ) ) {
 			return $clauses;
 		}
 
@@ -829,16 +827,19 @@ class QueryBuilder {
 		}
 
 		// Price filter (from PriceFilter block URL params, not the block's priceRange setting).
-		$min_price = get_query_var( PriceFilter::MIN_PRICE_QUERY_VAR );
-		$max_price = get_query_var( PriceFilter::MAX_PRICE_QUERY_VAR );
-		if ( ! empty( $min_price ) || ! empty( $max_price ) ) {
-			$price_range = array_filter(
-				array(
-					'min_price' => $min_price,
-					'max_price' => $max_price,
-				)
-			);
-			$clauses     = $query_clauses->add_price_clauses( $clauses, $price_range );
+		// Skip if priceRange is already set to avoid contradictory WHERE clauses.
+		if ( empty( $query->query_vars['priceRange'] ) ) {
+			$min_price = get_query_var( PriceFilter::MIN_PRICE_QUERY_VAR );
+			$max_price = get_query_var( PriceFilter::MAX_PRICE_QUERY_VAR );
+			if ( ! empty( $min_price ) || ! empty( $max_price ) ) {
+				$price_range = array_filter(
+					array(
+						'min_price' => $min_price,
+						'max_price' => $max_price,
+					)
+				);
+				$clauses     = $query_clauses->add_price_clauses( $clauses, $price_range );
+			}
 		}
 
 		// Attribute filter.
