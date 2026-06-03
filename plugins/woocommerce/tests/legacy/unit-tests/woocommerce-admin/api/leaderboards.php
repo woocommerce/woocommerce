@@ -187,6 +187,22 @@ class WC_Admin_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that a user with only the `manage_woocommerce` capability can read
+	 * the leaderboards endpoint (backwards compatibility with the previous
+	 * behavior inherited from `\WC_REST_Data_Controller`).
+	 */
+	public function test_get_leaderboards_with_manage_woocommerce_cap() {
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$user    = new WP_User( $user_id );
+		$user->add_cap( 'manage_woocommerce' );
+		wp_set_current_user( $user_id );
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
 	 * Test that a user without report-viewing capabilities is denied access to
 	 * the leaderboards endpoint.
 	 */
