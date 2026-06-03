@@ -174,22 +174,38 @@ body.post-type-product #postcustomstuff #list-table tfoot.wc-proto-add tr.wc-pro
 body.post-type-product #postcustomstuff #list-table tfoot.wc-proto-add tr.wc-proto-add-trigger-row > td {
 	border-top: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
 }
+/* Match the existing-row padding-right on the value column so textareas align. */
+body.post-type-product #postcustomstuff tfoot.wc-proto-add tr.wc-proto-add-entry-row > td.wc-proto-add-value {
+	padding-right: 56px !important;
+}
 
-/* Stack the moved Name controls (select / input / Enter new link) vertically */
+/* Name controls: full-width select / input (when visible) */
 body.post-type-product #postcustomstuff .wc-proto-add-name #metakeyselect,
 body.post-type-product #postcustomstuff .wc-proto-add-name #metakeyinput {
-	display: block !important;
 	width: 100% !important;
 	max-width: 100% !important;
 	box-sizing: border-box !important;
 	margin: 0 0 6px !important;
 }
-body.post-type-product #postcustomstuff .wc-proto-add-name > a {
-	display: inline-block !important;
-	margin-top: 4px !important;
+/* Only apply block display when the element isn't hidden via WP class/inline style.
+   WP toggles via $.show()/$.hide() which sets inline style — those win regardless. */
+body.post-type-product #postcustomstuff .wc-proto-add-name #metakeyselect:not([style*="display: none"]):not(.hide-if-js),
+body.post-type-product #postcustomstuff .wc-proto-add-name #metakeyinput:not([style*="display: none"]):not(.hide-if-js) {
+	display: block;
+}
+
+/* Enter new / Cancel <a> wrappers — plain underlined text links, fully reset. */
+body.post-type-product #postcustomstuff .wc-proto-add-name a,
+body.post-type-product #postcustomstuff .wc-proto-add-name a.hide-if-no-js,
+body.post-type-product #postcustomstuff td.wc-proto-add-name > a {
+	display: inline !important;
+	margin: 4px 0 0 !important;
 	padding: 0 !important;
-	background: none !important;
-	border: none !important;
+	background: transparent !important;
+	background-color: transparent !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
 	color: var(--wpds-color-fg-interactive-brand, #3858e9) !important;
 	text-decoration: underline !important;
 	font-size: var(--wpds-typography-font-size-sm, 12px) !important;
@@ -197,9 +213,19 @@ body.post-type-product #postcustomstuff .wc-proto-add-name > a {
 	cursor: pointer !important;
 	height: auto !important;
 	min-height: 0 !important;
+	border-radius: 0 !important;
 }
-body.post-type-product #postcustomstuff .wc-proto-add-name > a:hover {
+body.post-type-product #postcustomstuff .wc-proto-add-name a:hover {
 	text-decoration: none !important;
+	background: transparent !important;
+}
+/* The inner #enternew/#cancelnew spans should inherit, no extra styling */
+body.post-type-product #postcustomstuff #enternew,
+body.post-type-product #postcustomstuff #cancelnew {
+	background: transparent !important;
+	border: 0 !important;
+	padding: 0 !important;
+	font-weight: inherit !important;
 }
 
 /* Show the entry/confirm rows only while adding */
@@ -253,22 +279,27 @@ body.post-type-product .wc-proto-confirm:hover {
 	background: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff);
 }
 
-/* Cancel — tertiary text link */
+/* Cancel — minimal/tertiary button, matches visibility metabox Cancel */
 body.post-type-product .wc-proto-cancel {
 	display: inline-flex;
 	align-items: center;
 	height: 32px;
-	padding: 0 8px;
+	padding: 0 12px;
 	font-size: 13px;
+	font-weight: var(--wpds-typography-font-weight-regular, 400);
 	background: none;
 	color: var(--wpds-color-fg-interactive-brand, #3858e9);
 	border: 1px solid transparent;
 	border-radius: var(--wpds-border-radius-xs, 2px);
+	box-shadow: none;
+	text-shadow: none;
+	text-decoration: none;
 	cursor: pointer;
-	text-decoration: underline;
+	margin: 0;
 }
 body.post-type-product .wc-proto-cancel:hover {
-	background: none;
+	background: var(--wpds-color-bg-interactive-brand-weak-active, #e8eaff);
+	color: var(--wpds-color-fg-interactive-brand, #3858e9);
 	text-decoration: none;
 }
 
@@ -382,6 +413,13 @@ body.post-type-product #postcustomstuff #the-list tr.wc-proto-saved {
 	}
 	if ( metaValue && valueCell ) {
 		valueCell.appendChild( metaValue );
+	}
+
+	/* Initial hidden state for the text input — WP's $.show()/$.hide() will toggle from here.
+	   We set inline style:none so my CSS display:block can't accidentally reveal it. */
+	var metaKeyInput = document.getElementById( 'metakeyinput' );
+	if ( metaKeyInput ) {
+		metaKeyInput.style.display = 'none';
 	}
 
 	function openAdder() {
