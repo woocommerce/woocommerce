@@ -183,6 +183,10 @@ body.post-type-product #postcustomstuff #list-table tfoot.wc-proto-add tr.wc-pro
 body.post-type-product #postcustomstuff #list-table tfoot.wc-proto-add tr.wc-proto-add-trigger-row > td {
 	border-top: 1px solid var(--wpds-color-border-neutral-subtle, #dcdcde) !important;
 }
+/* In the empty state there's no content above the trigger row, so no divider needed. */
+body.post-type-product #postcustomstuff #list-table.wc-proto-empty tfoot.wc-proto-add tr.wc-proto-add-trigger-row > td {
+	border-top: none !important;
+}
 /* Match the existing-row padding-right on the value column so textareas align. */
 body.post-type-product #postcustomstuff tfoot.wc-proto-add tr.wc-proto-add-entry-row > td.wc-proto-add-value {
 	padding-right: 56px !important;
