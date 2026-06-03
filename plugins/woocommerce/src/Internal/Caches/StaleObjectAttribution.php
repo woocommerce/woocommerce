@@ -5,7 +5,10 @@ namespace Automattic\WooCommerce\Internal\Caches;
 /**
  * Tracks stale object instances. The decentralized hooks architecture allows multiple modification routes in both
  * WooCommerce core and its extensions. This feature enables the identification of stale objects under those constraints.
+ *
+ * @deprecated 11.0.0
  */
+// @phpstan-ignore-next-line trait.unused
 trait StaleObjectAttribution {
 	/**
 	 * Object instantiation timestamp.
@@ -24,9 +27,12 @@ trait StaleObjectAttribution {
 	/**
 	 * Tracks object instantiation timestamp.
 	 *
+	 * @deprecated 11.0.0
+	 *
 	 * @return void
 	 */
 	private function _woocommerce_object_instantiated(): void { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+		wc_deprecated_function( __METHOD__, '11.0.0' );
 		$this->_woocommerce_instance_created_at = microtime( true );
 	}
 
@@ -36,10 +42,13 @@ trait StaleObjectAttribution {
 	 * Do not use this method for customization. Although it is public due to architectural constraints, improper use
 	 * may result in stale instance usage, which is critical for functions such as product inventory management.
 	 *
+	 * @deprecated 11.0.0
+	 *
 	 * @param int $entity_id Object ID.
 	 * @return void
 	 */
 	public function _woocommerce_entity_persisted( int $entity_id ): void { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+		wc_deprecated_function( __METHOD__, '11.0.0' );
 		$object_type = $this instanceof \WC_Product ? 'product' : $this->object_type;
 		self::$_woocommerce_entity_persisted_at[ $object_type . ':' . $entity_id ] = microtime( true );
 	}
@@ -48,9 +57,12 @@ trait StaleObjectAttribution {
 	 * Enables verification of whether the object instance is stale. If it is stale, the object must be re-created,
 	 * as the current architecture does not support refreshing object attributes without replacing the object.
 	 *
+	 * @deprecated 11.0.0
+	 *
 	 * @return bool
 	 */
 	public function _woocommerce_object_is_stale(): bool { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+		wc_deprecated_function( __METHOD__, '11.0.0' );
 		// Unknown instantiation timestamp means freshness cannot be determined — treat as stale to fail safe.
 		if ( null !== $this->_woocommerce_instance_created_at ) {
 			$instance_timestamp  = (float) ( $this->_woocommerce_instance_created_at );
@@ -66,9 +78,12 @@ trait StaleObjectAttribution {
 	/**
 	 * Enables verification of whether the object instance is modified.
 	 *
+	 * @deprecated 11.0.0
+	 *
 	 * @return bool
 	 */
 	public function _woocommerce_object_is_dirty(): bool { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+		wc_deprecated_function( __METHOD__, '11.0.0' );
 		$meta_data = $this->meta_data ?? array();
 		$is_dirty  = ! empty( $this->changes );
 		$is_dirty  = $is_dirty || ! empty( array_filter( $meta_data, static fn( $meta ) => ! $meta->id || ! empty( $meta->get_changes() ) ) );
