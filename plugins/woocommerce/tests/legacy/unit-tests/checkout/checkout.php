@@ -1,10 +1,11 @@
-<?php declare(strict_types=1);
-
+<?php
 /**
  * Checkout tests.
  *
  * @package WooCommerce\Tests\Checkout
  */
+
+declare(strict_types=1);
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 
