@@ -52,20 +52,29 @@ class SpacingRefinement {
 				margin-left: 0 !important;
 				margin-right: 0 !important;
 			}
-			#edit-slug-box { padding-left: 0 !important; }
+			#edit-slug-box {
+				padding: 0 !important;
+				width: 100% !important;
+			}
 			/* Slug edit input: full-width override (WP defaults to width:16em). */
 			#edit-slug-box #editable-post-name,
 			#edit-slug-box #editable-post-name-full {
-				display: inline-block !important;
+				display: block !important;
 				width: 100% !important;
 				max-width: 100% !important;
+				padding: 0 !important;
+				margin: 0 !important;
 			}
 			#edit-slug-box #editable-post-name input,
-			#edit-slug-box input#new-post-slug {
+			#edit-slug-box input#new-post-slug,
+			#edit-slug-box input[type="text"] {
+				display: block !important;
 				width: 100% !important;
 				max-width: 100% !important;
 				box-sizing: border-box !important;
 				margin: 0 !important;
+				padding: 4px 8px !important;
+				height: 32px !important;
 			}
 		</style>' . "\n";
 	}
