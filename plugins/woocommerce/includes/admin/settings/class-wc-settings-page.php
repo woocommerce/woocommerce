@@ -149,6 +149,27 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		}
 
 		/**
+		 * Log a developer-facing notice when settings UI rendering falls back to the legacy renderer.
+		 *
+		 * @param SettingsUIPageInterface $settings_ui_page Settings UI page adapter.
+		 * @param string                  $section_id Section id.
+		 * @param string                  $reason Fallback reason.
+		 */
+		private function log_settings_ui_fallback( SettingsUIPageInterface $settings_ui_page, string $section_id, string $reason ): void {
+			wc_doing_it_wrong(
+				'WC_Settings_Page::output',
+				sprintf(
+					/* translators: 1: settings page id, 2: settings section id, 3: fallback reason. */
+					__( 'Settings UI rendering for page "%1$s" section "%2$s" fell back to the legacy settings renderer. Reason: %3$s', 'woocommerce' ),
+					$settings_ui_page->get_page_id(),
+					'' === $section_id ? 'default' : $section_id,
+					$reason
+				),
+				'10.9.0'
+			);
+		}
+
+		/**
 		 * Creates the React mount point for settings slot.
 		 */
 		public function add_settings_slot() {
@@ -313,6 +334,14 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$page_id          = $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page->get_page_id() : '';
 			$schema_failed    = ! empty( $GLOBALS['wc_settings_ui_schema_failed'][ $page_id ][ $section_key ] );
 
+			if ( Features::is_enabled( 'settings-ui' ) && $settings_ui_page instanceof SettingsUIPageInterface && $schema_failed ) {
+				$this->log_settings_ui_fallback(
+					$settings_ui_page,
+					$current_section,
+					__( 'Settings UI schema generation failed.', 'woocommerce' )
+				);
+			}
+
 			if ( Features::is_enabled( 'settings-ui' ) && $settings_ui_page instanceof SettingsUIPageInterface && ! $schema_failed ) {
 				$render_settings_ui = true;
 
@@ -321,10 +350,18 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 				} catch ( \Throwable $e ) {
 					$script_handles     = array();
 					$render_settings_ui = false;
+					$reason             = __( 'Settings UI script handles could not be resolved.', 'woocommerce' );
 
 					if ( $e instanceof \Exception ) {
+						$reason = sprintf(
+							/* translators: %s: exception message. */
+							__( 'Settings UI script handles could not be resolved: %s', 'woocommerce' ),
+							$e->getMessage()
+						);
 						wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
 					}
+
+					$this->log_settings_ui_fallback( $settings_ui_page, $current_section, $reason );
 				}
 
 				if ( $render_settings_ui ) {
