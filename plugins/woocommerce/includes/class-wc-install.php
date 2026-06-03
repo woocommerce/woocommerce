@@ -2199,11 +2199,22 @@ $stock_notifications_table_schema;
 		_x( 'Customer', 'User role', 'woocommerce' );
 		/* translators: user role */
 		_x( 'Shop manager', 'User role', 'woocommerce' );
+		/* translators: user role */
+		_x( 'POS staff', 'User role', 'woocommerce' );
 
 		// Customer role.
 		add_role(
 			'customer',
 			'Customer',
+			array(
+				'read' => true,
+			)
+		);
+
+		// POS Staff role.
+		add_role(
+			'pos_staff',
+			'POS staff',
 			array(
 				'read' => true,
 			)
@@ -2338,6 +2349,7 @@ $stock_notifications_table_schema;
 
 		remove_role( 'customer' );
 		remove_role( 'shop_manager' );
+		remove_role( 'pos_staff' );
 	}
 
 	/**
