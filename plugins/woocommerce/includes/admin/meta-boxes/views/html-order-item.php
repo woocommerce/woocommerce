@@ -83,12 +83,12 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 	<td class="item_cost" width="1%" data-sort-value="<?php echo esc_attr( $order->get_item_subtotal( $item, false, true ) ); ?>">
 		<div class="view">
 			<?php
-				if ( $order->has_fixed_end_prices() ) {
-					$subtotal_ex_tax = ( (float) $item->get_subtotal() - (float) $item->get_subtotal_tax() ) / $item->get_quantity();
-					echo wc_price( round( $subtotal_ex_tax, wc_get_price_decimals() ), $wc_price_arg ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				} else {
-					echo wc_price( $order->get_item_subtotal( $item, false, true ), $wc_price_arg ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				}
+			if ( $order->has_fixed_end_prices() ) {
+				$subtotal_ex_tax = ( (float) $item->get_subtotal() - (float) $item->get_subtotal_tax() ) / $item->get_quantity();
+				echo wc_price( round( $subtotal_ex_tax, wc_get_price_decimals() ), $wc_price_arg ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			} else {
+				echo wc_price( $order->get_item_subtotal( $item, false, true ), $wc_price_arg ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			}
 			?>
 		</div>
 	</td>

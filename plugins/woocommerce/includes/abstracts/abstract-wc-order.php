@@ -2015,15 +2015,28 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Whether this store uses fixed end-prices across tax jurisdictions.
-	 * True when prices include tax and woocommerce_adjust_non_base_location_prices is false.
-	 *
-	 * @return bool
-	 */
-	public function has_fixed_end_prices(): bool {
-		return 'yes' === get_option( 'woocommerce_prices_include_tax' )
-			&& ! apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
-	}
+     * Whether this store uses fixed end-prices across tax jurisdictions.
+     * True when prices include tax and woocommerce_adjust_non_base_location_prices is false.
+     *
+     * @return bool
+     */
+    public function has_fixed_end_prices(): bool {
+        /**
+         * Filters if taxes should be removed from locations outside the store base location.
+         *
+         * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing
+         * with out of base locations. e.g. If a product costs 10 including tax, all users will pay 10
+         * regardless of location and taxes.
+         *
+         * @since 2.4.7
+         *
+         * @param bool $adjust_non_base_location_prices True by default.
+         */
+        $adjust_non_base_location_prices = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
+
+        return 'yes' === get_option( 'woocommerce_prices_include_tax' )
+            && ! $adjust_non_base_location_prices;
+    }
 
 	/**
 	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
