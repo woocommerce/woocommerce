@@ -130,6 +130,35 @@ class WC_Tests_User_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that wc_modify_map_meta_cap does not fatal when $args[0] is not a valid user ID.
+	 *
+	 * On PHP 8+, property_exists() throws a TypeError when passed false (the return value
+	 * of get_userdata() for a missing user). This test ensures no fatal occurs and that
+	 * $caps is returned unchanged when the target user ID is invalid (e.g. 0).
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/65171
+	 */
+	public function test_wc_modify_map_meta_cap_invalid_user_id() {
+		$password = wp_generate_password();
+
+		$manager_id = wp_insert_user(
+			array(
+				'user_login' => 'test_manager_invalid',
+				'user_pass'  => $password,
+				'user_email' => 'manager_invalid@example.com',
+				'role'       => 'shop_manager',
+			)
+		);
+
+		wp_set_current_user( $manager_id );
+
+		// Passing user ID 0 (invalid) should not throw a TypeError on PHP 8+.
+		// The caps array should be returned unchanged (no 'do_not_allow' added).
+		$caps = map_meta_cap( 'edit_user', $manager_id, 0 );
+		$this->assertNotContains( 'do_not_allow', $caps );
+	}
+
+	/**
 	 * Test wc_shop_manager_has_capability function.
 	 *
 	 * @since 3.5.4
