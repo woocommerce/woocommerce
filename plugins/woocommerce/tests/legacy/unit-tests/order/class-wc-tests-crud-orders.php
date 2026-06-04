@@ -1041,6 +1041,40 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: get_formatted_order_total with refunded amount does not throw TypeError on PHP 8.3.
+	 */
+	public function test_get_formatted_order_total_with_refund() {
+		$object = new WC_Order();
+		$object->set_total( 100 );
+		$object->set_currency( 'USD' );
+		$id = $object->save();
+
+		wc_create_refund(
+			array(
+				'order_id'   => $id,
+				'amount'     => '25',
+				'line_items' => array(),
+			)
+		);
+
+		// Reload the order so it picks up the refund.
+		$order = wc_get_order( $id );
+
+		// Force a non-numeric total via filter to confirm the (float) cast prevents a TypeError on
+		// PHP 8.x. Without the cast, `non-numeric-string − float` is a fatal TypeError.
+		$non_numeric_filter = fn() => 'not-a-number';
+		add_filter( 'woocommerce_order_get_total', $non_numeric_filter );
+
+		// Should not throw a TypeError when the filter returns a non-numeric string.
+		$formatted_total = $order->get_formatted_order_total();
+
+		remove_filter( 'woocommerce_order_get_total', $non_numeric_filter );
+
+		$this->assertStringContainsString( '<del', $formatted_total );
+		$this->assertStringContainsString( '<ins', $formatted_total );
+	}
+
+	/**
 	 * Test: set_status
 	 */
 	public function test_set_status() {

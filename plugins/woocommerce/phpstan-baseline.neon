@@ -13075,24 +13075,6 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^Binary operation "\-" between float and non\-falsy\-string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/class-wc-order.php
-
-		-
-			message: '#^Binary operation "\-" between float and string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/class-wc-order.php
-
-		-
-			message: '#^Binary operation "\-" between int\|string and string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/class-wc-order.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_item_downloads\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -37957,12 +37939,6 @@ parameters:
 			message: '#^Access to property \$data on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
 			identifier: class.notFound
 			count: 3
-			path: src/Admin/API/Leaderboards.php
-
-		-
-			message: '#^Call to method get_query_params\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Admin/API/Leaderboards.php
 
 		-
