@@ -8,10 +8,11 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Internal\POS\Admin\POSAccessFields;
+use Automattic\WooCommerce\Internal\POS\Admin\UserFormIntegration;
 use Automattic\WooCommerce\Internal\POS\Capabilities as POSCapabilities;
 use Automattic\WooCommerce\Internal\POS\POSController;
 use Automattic\WooCommerce\Internal\POS\Service\POSPinService;
-use Automattic\WooCommerce\Internal\POS\Service\POSStaffService;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -28,16 +29,16 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Admin_POS_Staff {
 
-	private const EDIT_NEW = 'new';
+	private const EDIT_PICK_USER = 'pick-user';
 
 	/**
-	 * Submitted form values from a failed add/save submission, keyed by field name.
+	 * Submitted form values from a failed save submission, keyed by field name.
 	 *
-	 * Set by add()/save() before they bail on error so the form view can re-render
-	 * the user's input — letting them fix only the offending field (typically PIN)
-	 * instead of re-typing everything. PIN is intentionally never stashed: a
-	 * collision means the value was unusable, and asking for a fresh PIN entry on
-	 * retry is both safer and more obvious to the merchant than pre-filling.
+	 * Set by save() before it bails on error so the edit view can re-render the
+	 * admin's input — letting them fix only the offending field (typically PIN)
+	 * instead of re-choosing the role. PIN is intentionally never stashed: a
+	 * collision means the value was unusable, and asking for a fresh PIN entry
+	 * on retry is both safer and more obvious to the merchant than pre-filling.
 	 *
 	 * @var array<string, string>
 	 */
@@ -95,8 +96,8 @@ class WC_Admin_POS_Staff {
 			}
 
 			$edit_param = sanitize_text_field( wp_unslash( $_GET['edit-staff'] ) );
-			if ( self::EDIT_NEW === $edit_param ) {
-				self::add_output();
+			if ( self::EDIT_PICK_USER === $edit_param ) {
+				self::pick_user_output();
 				return;
 			}
 
@@ -120,12 +121,19 @@ class WC_Admin_POS_Staff {
 		$staff_table = new WC_Admin_POS_Staff_Table_List();
 		$staff_table->prepare_items();
 
-		$add_url = add_query_arg(
+		$add_url   = add_query_arg(
+			array(
+				UserFormIntegration::REQUEST_FLAG_PARAM => '1',
+				'role'                                  => POSCapabilities::POS_STAFF_ROLE,
+			),
+			admin_url( 'user-new.php' )
+		);
+		$grant_url = add_query_arg(
 			array(
 				'page'       => 'wc-settings',
 				'tab'        => 'point-of-sale',
 				'section'    => 'staff',
-				'edit-staff' => self::EDIT_NEW,
+				'edit-staff' => self::EDIT_PICK_USER,
 			),
 			admin_url( 'admin.php' )
 		);
@@ -134,7 +142,9 @@ class WC_Admin_POS_Staff {
 		echo '<div class="wc-pos-staff-header">';
 		echo '<h2 class="wc-table-list-header">' . esc_html__( 'Staff', 'woocommerce' ) . '</h2>';
 		echo '<a href="' . esc_url( $add_url ) . '" class="page-title-action">'
-			. esc_html__( 'Add staff', 'woocommerce' ) . '</a>';
+			. esc_html__( 'Add new staff', 'woocommerce' ) . '</a>';
+		echo '<a href="' . esc_url( $grant_url ) . '" class="page-title-action">'
+			. esc_html__( 'Grant access to existing user', 'woocommerce' ) . '</a>';
 		echo '</div>';
 		echo '<p class="wc-pos-staff-description">';
 		esc_html_e( 'Assign a Point of Sale role to a user and set their PIN.', 'woocommerce' );
@@ -144,49 +154,48 @@ class WC_Admin_POS_Staff {
 	}
 
 	/**
-	 * Add-staff output: pick an existing wp_user (via AJAX search) or create a
-	 * new one inline, assign a POS role, and set a PIN.
+	 * Render the "Grant POS access to existing user" picker page.
+	 *
+	 * Fronts the regular edit screen: the admin picks a user via the
+	 * wc-customer-search autocomplete, the form POSTs back to this page, and
+	 * the action handler redirects them to ?edit-staff=<id> to finish setup.
 	 *
 	 * @since 11.0.0
 	 */
-	private static function add_output(): void {
-		$assignable_pos_presets = POSCapabilities::assignable_pos_presets();
-		$assigned_user_ids_csv  = self::existing_staff_user_ids_csv();
+	private static function pick_user_output(): void {
+		$assigned_user_ids_csv = self::existing_staff_user_ids_csv();
 
-		// On error, $form_retry is set by add() so the view can re-render the form
-		// pre-filled with the merchant's prior input. On a fresh open, this is empty.
-		$retry_values = self::$form_retry;
-
-		// Render an <option selected> for the previously-chosen existing user so
-		// the wc-customer-search dropdown re-displays them after a failed submit —
-		// the select2 widget needs the option in the DOM to show it as selected.
-		$retry_existing_user = null;
-		if ( ! empty( $retry_values['user_id'] ) ) {
-			$candidate = get_userdata( (int) $retry_values['user_id'] );
-			if ( $candidate instanceof WP_User ) {
-				$retry_existing_user = $candidate;
-			}
-		}
+		$form_action_url = add_query_arg(
+			array(
+				'page'       => 'wc-settings',
+				'tab'        => 'point-of-sale',
+				'section'    => 'staff',
+				'edit-staff' => self::EDIT_PICK_USER,
+			),
+			admin_url( 'admin.php' )
+		);
 
 		echo '<div class="wc-pos-staff-page">';
-		include __DIR__ . '/settings/views/html-pos-staff-add.php';
+		include __DIR__ . '/settings/views/html-pos-staff-pick-user.php';
 		echo '</div>';
 	}
 
 	/**
-	 * Return a CSV string of user IDs that already have POS access.
+	 * CSV of user IDs that already have POS access.
 	 *
-	 * Used as the `data-exclude` attribute on the wc-customer-search dropdown so
-	 * the AJAX search doesn't surface users we'd then reject server-side anyway.
+	 * Fed to the wc-customer-search dropdown via its `data-exclude` attribute so
+	 * the AJAX search doesn't surface users we'd reject server-side anyway.
 	 *
 	 * @return string
 	 */
 	private static function existing_staff_user_ids_csv(): string {
 		$user_query = new \WP_User_Query(
-			array(
-				'role'   => POSCapabilities::POS_STAFF_ROLE,
-				'fields' => 'ID',
-				'number' => -1,
+			array_merge(
+				POSCapabilities::pos_staff_user_query_args(),
+				array(
+					'fields' => 'ID',
+					'number' => -1,
+				)
 			)
 		);
 
@@ -194,7 +203,17 @@ class WC_Admin_POS_Staff {
 	}
 
 	/**
-	 * Edit output for an existing staff member.
+	 * Edit output for a staff member.
+	 *
+	 * Handles two flows on the same URL:
+	 *  - Edit: target user already has POS access — PIN is optional ("leave blank
+	 *    to keep"), submit redirects with ?saved=1.
+	 *  - Grant: target user does not yet have POS access — PIN is required,
+	 *    submit redirects with ?added=1.
+	 *
+	 * Distinguishing on has_pos_access() means the screen handles both the
+	 * "promote existing user" flow (entered via the picker page) and the
+	 * "edit existing POS user" flow without a separate route.
 	 *
 	 * @since 11.0.0
 	 * @param int $user_id User ID.
@@ -205,13 +224,10 @@ class WC_Admin_POS_Staff {
 			wp_die( esc_html__( 'Invalid user.', 'woocommerce' ) );
 		}
 
-		if ( ! POSCapabilities::has_pos_access( $user_id ) ) {
-			wp_die( esc_html__( 'This user does not have POS access.', 'woocommerce' ) );
-		}
-
 		$pin_service            = wc_get_container()->get( POSPinService::class );
-		$has_pin                = $pin_service->has_pin( $user_id );
-		$current_pos_preset     = (string) POSCapabilities::get_pos_preset( $user_id );
+		$has_pos_access         = POSCapabilities::has_pos_access( $user_id );
+		$has_pin                = $has_pos_access ? $pin_service->has_pin( $user_id ) : false;
+		$current_pos_preset     = $has_pos_access ? (string) POSCapabilities::get_pos_preset( $user_id ) : '';
 		$assignable_pos_presets = POSCapabilities::assignable_pos_presets();
 
 		// On error, save() stashes the chosen role so the view can re-select it
@@ -243,8 +259,8 @@ class WC_Admin_POS_Staff {
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		if ( isset( $_POST['add_pos_staff'] ) ) {
-			$this->add();
+		if ( isset( $_POST['pick_pos_staff'] ) ) {
+			$this->handle_pick_user();
 			return;
 		}
 
@@ -260,101 +276,50 @@ class WC_Admin_POS_Staff {
 	}
 
 	/**
-	 * Handle the "Add staff" form submission.
+	 * Handle the picker form submission: validate the chosen user and redirect to edit.
 	 *
-	 * Two paths:
-	 *  - Flow A — existing user: caller picked one from the autocomplete dropdown.
-	 *    The user keeps their existing WP role; pos_staff is added as a secondary
-	 *    role via set_pos_preset() below.
-	 *  - Flow B — create new user: caller entered display name + email. A new WP
-	 *    user is created with pos_staff as their only role.
-	 *
-	 * A PIN is mandatory — the device authenticates the operator solely by PIN,
-	 * so a row without one would be unusable. PIN uniqueness across staff is
-	 * enforced by POSPinService::set_pin.
+	 * The picker is the entry point for the "Grant POS access to existing user"
+	 * flow, but the edit screen we redirect to already handles both grant and
+	 * edit branches — so we accept any valid user_id and let the edit screen do
+	 * the right thing for that user's current access state. The autocomplete
+	 * excludes users who already have access in the common case; if a hand-crafted
+	 * POST sneaks one in, the admin lands harmlessly on their edit screen.
 	 */
-	private function add(): void {
-		check_admin_referer( 'woocommerce-pos-staff-add', 'woocommerce_pos_staff_nonce' );
+	private function handle_pick_user(): void {
+		check_admin_referer( 'woocommerce-pos-staff-pick', 'woocommerce_pos_staff_pick_nonce' );
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_die( esc_html__( 'You do not have permission to manage POS staff.', 'woocommerce' ) );
 		}
 
-		$user_id          = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
-		$new_display_name = isset( $_POST['new_display_name'] ) ? sanitize_text_field( wp_unslash( $_POST['new_display_name'] ) ) : '';
-		$new_user_email   = isset( $_POST['new_user_email'] ) ? sanitize_email( wp_unslash( $_POST['new_user_email'] ) ) : '';
-		$pos_preset       = isset( $_POST['pos_preset'] ) ? sanitize_key( wp_unslash( $_POST['pos_preset'] ) ) : '';
-		$pin              = isset( $_POST['pos_pin'] ) ? sanitize_text_field( wp_unslash( $_POST['pos_pin'] ) ) : '';
+		$user_id = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
+		if ( ! $user_id || ! get_userdata( $user_id ) ) {
+			WC_Admin_Settings::add_error( __( 'Please pick a valid user.', 'woocommerce' ) );
+			return;
+		}
 
-		// Stash sanitized values so the view can re-render the form pre-filled if
-		// we bail below. PIN is deliberately omitted — the merchant must re-enter it.
-		self::$form_retry = array(
-			'user_id'          => (string) $user_id,
-			'new_display_name' => $new_display_name,
-			'new_user_email'   => $new_user_email,
-			'pos_preset'       => $pos_preset,
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'       => 'wc-settings',
+					'tab'        => 'point-of-sale',
+					'section'    => 'staff',
+					'edit-staff' => $user_id,
+				),
+				admin_url( 'admin.php' )
+			)
 		);
-
-		if ( ! in_array( $pos_preset, POSCapabilities::assignable_pos_presets(), true ) ) {
-			WC_Admin_Settings::add_error( __( 'Please choose a valid role.', 'woocommerce' ) );
-			return;
-		}
-
-		$pin_service = wc_get_container()->get( POSPinService::class );
-
-		// Pre-validate the PIN format so a bad value doesn't create a wp_user that
-		// can't be finished. PIN uniqueness across staff is re-checked inside set_pin.
-		if ( ! $pin_service->validate_pin_format( $pin ) ) {
-			WC_Admin_Settings::add_error( __( 'PIN must be exactly 4 digits.', 'woocommerce' ) );
-			return;
-		}
-
-		$created_user_id = 0;
-		if ( $user_id > 0 ) {
-			if ( ! get_userdata( $user_id ) ) {
-				WC_Admin_Settings::add_error( __( 'Invalid user.', 'woocommerce' ) );
-				return;
-			}
-			if ( POSCapabilities::has_pos_access( $user_id ) ) {
-				WC_Admin_Settings::add_error( __( 'This user already has POS access.', 'woocommerce' ) );
-				return;
-			}
-		} else {
-			$staff_service = wc_get_container()->get( POSStaffService::class );
-			$created       = $staff_service->create_staff( $new_user_email, $new_display_name );
-			if ( is_wp_error( $created ) ) {
-				WC_Admin_Settings::add_error( $created->get_error_message() );
-				return;
-			}
-			$user_id         = $created;
-			$created_user_id = $created;
-		}
-
-		// Set the PIN before the preset so a uniqueness collision (or any other
-		// set_pin failure) doesn't leave a user with a preset and no PIN. Roll
-		// back a freshly-created user on failure so the form is safe to retry.
-		$pin_result = $pin_service->set_pin( $user_id, $pin );
-		if ( is_wp_error( $pin_result ) ) {
-			if ( $created_user_id > 0 ) {
-				require_once ABSPATH . 'wp-admin/includes/user.php';
-				wp_delete_user( $created_user_id );
-			}
-			WC_Admin_Settings::add_error( $pin_result->get_error_message() );
-			return;
-		}
-
-		POSCapabilities::set_pos_preset( $user_id, $pos_preset );
-
-		wp_safe_redirect( self::list_redirect_url( array( 'added' => '1' ) ) );
 		exit();
 	}
 
 	/**
-	 * Handle the "Save staff" form submission for an existing staff member.
+	 * Handle the edit-staff form submission.
 	 *
-	 * Lets the admin change the POS role and/or replace the PIN. A blank PIN field
-	 * means "keep the existing PIN" — every staff row already has one because PIN
-	 * is required at add time.
+	 * Branches on whether the target user currently has POS access:
+	 *  - Grant flow (no access yet): PIN is required; on success the user gets
+	 *    POS access for the first time and we redirect with ?added=1.
+	 *  - Edit flow (already has access): a blank PIN means "keep the existing
+	 *    PIN"; on success we redirect with ?saved=1.
 	 */
 	private function save(): void {
 		check_admin_referer( 'woocommerce-pos-staff-edit', 'woocommerce_pos_staff_nonce' );
@@ -373,43 +338,40 @@ class WC_Admin_POS_Staff {
 			'pos_preset' => $pos_preset,
 		);
 
-		if ( ! $user_id || ! POSCapabilities::has_pos_access( $user_id ) ) {
-			WC_Admin_Settings::add_error( __( 'Invalid user or user does not have POS access.', 'woocommerce' ) );
+		if ( ! $user_id || ! get_userdata( $user_id ) ) {
+			WC_Admin_Settings::add_error( __( 'Invalid user.', 'woocommerce' ) );
 			return;
 		}
 
-		if ( ! in_array( $pos_preset, POSCapabilities::assignable_pos_presets(), true ) ) {
-			WC_Admin_Settings::add_error( __( 'Please choose a valid role.', 'woocommerce' ) );
+		$is_granting  = ! POSCapabilities::has_pos_access( $user_id );
+		$pin_optional = ! $is_granting;
+		$pin_service  = wc_get_container()->get( POSPinService::class );
+
+		$validation = POSAccessFields::validate( $pin_service, $pos_preset, $pin, $user_id, $pin_optional );
+		if ( $validation instanceof \WP_Error ) {
+			WC_Admin_Settings::add_error( $validation->get_error_message() );
 			return;
 		}
 
-		// Apply the PIN first so a uniqueness collision (or any other set_pin
-		// failure) doesn't change the preset partway through the request.
-		if ( '' !== $pin ) {
-			$pin_service = wc_get_container()->get( POSPinService::class );
-			$result      = $pin_service->set_pin( $user_id, $pin );
-			if ( is_wp_error( $result ) ) {
-				WC_Admin_Settings::add_error( $result->get_error_message() );
-				return;
-			}
+		$result = POSAccessFields::persist( $pin_service, $user_id, $pos_preset, $pin );
+		if ( $result instanceof \WP_Error ) {
+			WC_Admin_Settings::add_error( $result->get_error_message() );
+			return;
 		}
 
-		POSCapabilities::set_pos_preset( $user_id, $pos_preset );
-
-		wp_safe_redirect( self::list_redirect_url( array( 'saved' => '1' ) ) );
+		$flash = $is_granting ? array( 'added' => '1' ) : array( 'saved' => '1' );
+		wp_safe_redirect( self::list_redirect_url( $flash ) );
 		exit();
 	}
 
 	/**
-	 * Remove a staff member.
+	 * Remove POS access from a staff member.
 	 *
-	 * Two paths, decided by the user's WP role footprint:
-	 *  - User has roles other than pos_staff (e.g. shop_manager): clear the
-	 *    preset meta, drop pos_staff role, delete the PIN. WP user stays.
-	 *  - User has ONLY pos_staff: the WP user account was created exclusively
-	 *    for POS. Removing POS access would orphan them to a roleless state,
-	 *    so we delete the WP user entirely. The table-list confirmation prompt
-	 *    warns the merchant before the form posts.
+	 * A single, non-destructive action: deletes the PIN and clears the preset
+	 * (which strips the pos_* caps and the preset meta, revoking access). The
+	 * WP account is never deleted from here — account deletion is a Users-screen
+	 * concern. The user is never left roleless either: set_pos_preset(null)
+	 * keeps the pos_staff label when it is the user's only role.
 	 */
 	private function remove_staff(): void {
 		check_admin_referer( 'remove-pos-staff', 'woocommerce_pos_staff_remove_nonce' );
@@ -423,22 +385,7 @@ class WC_Admin_POS_Staff {
 			wp_die( esc_html__( 'Invalid user or user does not have POS access.', 'woocommerce' ) );
 		}
 
-		$user = get_userdata( $user_id );
-		if ( ! $user instanceof WP_User ) {
-			wp_die( esc_html__( 'Invalid user.', 'woocommerce' ) );
-		}
-
 		$pin_service = wc_get_container()->get( POSPinService::class );
-
-		if ( array( POSCapabilities::POS_STAFF_ROLE ) === $user->roles ) {
-			require_once ABSPATH . 'wp-admin/includes/user.php';
-			$pin_service->delete_pin( $user_id );
-			wp_delete_user( $user_id, get_current_user_id() );
-
-			wp_safe_redirect( self::list_redirect_url( array( 'deleted' => '1' ) ) );
-			exit();
-		}
-
 		$pin_service->delete_pin( $user_id );
 		POSCapabilities::set_pos_preset( $user_id, null );
 
@@ -543,28 +490,8 @@ class WC_Admin_POS_Staff {
 				padding: 0;
 			}
 
-			.woocommerce .wc-pos-staff-page .wc-pos-staff-cap-preview {
-				margin-top: 12px;
-				padding: 10px 12px;
-				background: #f6f7f7;
-				border-left: 3px solid #2271b1;
-				max-width: 520px;
-			}
-
-			.woocommerce .wc-pos-staff-page .wc-pos-staff-cap-preview .description {
-				margin: 0 0 6px;
-				font-weight: 600;
-				color: #1d2327;
-			}
-
-			.woocommerce .wc-pos-staff-page .wc-pos-staff-cap-list {
-				margin: 0;
-				padding-left: 20px;
+			.woocommerce .wc-pos-staff-page .wc-pos-staff-pos-only {
 				color: #50575e;
-			}
-
-			.woocommerce .wc-pos-staff-page .wc-pos-staff-cap-list li {
-				margin: 2px 0;
 			}
 		</style>
 		<?php
@@ -586,11 +513,7 @@ class WC_Admin_POS_Staff {
 		}
 
 		if ( isset( $_GET['removed'] ) ) {
-			WC_Admin_Settings::add_message( __( 'Staff removed.', 'woocommerce' ) );
-		}
-
-		if ( isset( $_GET['deleted'] ) ) {
-			WC_Admin_Settings::add_message( __( 'Staff member deleted.', 'woocommerce' ) );
+			WC_Admin_Settings::add_message( __( 'POS access removed.', 'woocommerce' ) );
 		}
 		// phpcs:enable
 	}
