@@ -78,6 +78,7 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		$this->clear_scheduled_actions();
 		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
+		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 		parent::tearDown();
 	}
 
@@ -270,5 +271,29 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( 200, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Status endpoint includes failed import counts in both modes.
+	 */
+	public function test_status_includes_failed_counts(): void {
+		wp_set_current_user( $this->admin_user );
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+		update_option(
+			OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION,
+			array(
+				'ids'      => array( 11, 22 ),
+				'overflow' => 3,
+			),
+			false
+		);
+
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/status' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 2, $data['failed_count'] );
+		$this->assertSame( 3, $data['failed_overflow_count'] );
 	}
 }

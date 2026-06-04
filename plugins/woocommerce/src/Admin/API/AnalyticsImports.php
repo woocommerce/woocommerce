@@ -95,11 +95,15 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 		$is_scheduled_mode = $this->is_scheduled_import_enabled();
 		$mode              = $is_scheduled_mode ? 'scheduled' : 'immediate';
 
+		$failed_imports = OrdersScheduler::get_failed_order_imports();
+
 		$response = array(
 			'mode'                      => $mode,
 			'last_processed_date'       => null,
 			'next_scheduled'            => null,
 			'import_in_progress_or_due' => null,
+			'failed_count'              => count( $failed_imports['ids'] ),
+			'failed_overflow_count'     => $failed_imports['overflow'],
 		);
 
 		// For scheduled mode, populate additional fields.
@@ -223,6 +227,18 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 				'import_in_progress_or_due' => array(
 					'type'        => array( 'boolean', 'null' ),
 					'description' => __( 'Whether a batch import is currently running or scheduled to run within the next minute (null in immediate mode).', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'failed_count'              => array(
+					'type'        => 'integer',
+					'description' => __( 'Number of orders that failed analytics import and are pending retry.', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'failed_overflow_count'     => array(
+					'type'        => 'integer',
+					'description' => __( 'Number of failed order IDs dropped because the stored list reached its limit.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
