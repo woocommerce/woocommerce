@@ -272,11 +272,12 @@ const jsConfig = {
 		new CopyWebpackPlugin( {
 			patterns: [
 				{
-					from: path.join(
+					context: path.join(
 						__dirname,
 						'../../../../packages/js/product-editor/src/blocks'
 					),
-					to: './product-editor/blocks',
+					from: '**/block.json',
+					to: './product-editor/blocks/[path][name][ext]',
 				},
 			],
 		} ),
