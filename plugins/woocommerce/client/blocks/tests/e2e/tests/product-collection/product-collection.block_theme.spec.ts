@@ -48,7 +48,7 @@ test.describe( 'Product Collection', () => {
 		await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
 	} );
 
-	test( 'Can be migrated to from Products (Beta) block', async ( {
+	test( 'Can be migrated to from Products (Deprecated) block', async ( {
 		page,
 		editor,
 		admin,
@@ -63,7 +63,7 @@ test.describe( 'Product Collection', () => {
 		} );
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Products (Beta)' )
+			editor.canvas.getByLabel( 'Block: Products (Deprecated)' )
 		).toBeVisible();
 
 		await editor.canvas
@@ -76,7 +76,7 @@ test.describe( 'Product Collection', () => {
 			.click();
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Products (Beta)' )
+			editor.canvas.getByLabel( 'Block: Products (Deprecated)' )
 		).toBeHidden();
 		await expect(
 			editor.canvas.getByLabel( 'Block: Product Collection' ).first()
