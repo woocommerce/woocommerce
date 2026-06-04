@@ -468,13 +468,19 @@
 			"pinVersion": "next"
 		},
 		{
+			"label": "@wordpress/* packages not bundled with WordPress core",
 			"dependencies": [
-				"@wordpress/global-styles-engine"
+				"@wordpress/admin-ui",
+				"@wordpress/dataviews",
+				"@wordpress/global-styles-engine",
+				"@wordpress/router",
+				"@wordpress/theme",
+				"@wordpress/ui"
 			],
 			"packages": [
 				"**"
 			],
-			"isIgnored": true
+			"pinVersion": "catalog:wp-bundled"
 		},
 		{
 			"label": "@wordpress/* runtime-dependencies (pnpm 10 requires valid semver in peerDependencies, so peer deps are excluded here)",
