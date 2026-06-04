@@ -671,6 +671,22 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox import clears the failed record for an order that imports successfully.
+	 */
+	public function test_import_clears_failed_order_on_success(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+
+		OrdersScheduler::record_failed_order_import( $order->get_id() );
+
+		OrdersScheduler::import( $order->get_id() );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertNotContains( $order->get_id(), $failed['ids'] );
+	}
+
+	/**
 	 * Clear any scheduled batch processor actions.
 	 *
 	 * @return void

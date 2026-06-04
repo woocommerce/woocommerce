@@ -404,6 +404,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		ReportsCache::invalidate();
 
+		// A successful import means the order is no longer missing from analytics.
+		self::clear_failed_order_import( $order_id );
+
 		/**
 		 * Fires after an order or refund has been imported into Analytics lookup tables
 		 * and the reports cache has been invalidated.
