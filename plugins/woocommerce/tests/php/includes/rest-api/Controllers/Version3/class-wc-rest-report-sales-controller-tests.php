@@ -98,7 +98,7 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 
 		$data  = $this->get_report( 'month' );
-		$today = gmdate( 'Y-m-d', current_time( 'timestamp' ) );
+		$today = current_datetime()->format( 'Y-m-d' );
 
 		$this->assertArrayHasKey( $today, $data['totals'], 'Today\'s bucket should exist in the response.' );
 		$this->assertArrayHasKey( 'refunds', $data['totals'][ $today ], 'Per-day record should expose a refunds field.' );
@@ -121,7 +121,7 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$yesterday        = gmdate( 'Y-m-d', strtotime( '-1 day', current_time( 'timestamp' ) ) );
+		$yesterday        = current_datetime()->modify( '-1 day' )->format( 'Y-m-d' );
 		$backdated_string = $yesterday . ' 12:00:00';
 		wp_update_post(
 			array(
@@ -132,7 +132,7 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 
 		$data  = $this->get_report( 'month' );
-		$today = gmdate( 'Y-m-d', current_time( 'timestamp' ) );
+		$today = current_datetime()->format( 'Y-m-d' );
 
 		$this->assertArrayHasKey( $yesterday, $data['totals'], 'Yesterday\'s bucket should exist in the response.' );
 		$this->assertSame( '5.00', $data['totals'][ $yesterday ]['refunds'], 'Refund should be attributed to the refund date.' );
