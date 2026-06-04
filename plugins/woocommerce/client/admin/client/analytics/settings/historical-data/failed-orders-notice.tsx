@@ -79,7 +79,7 @@ function FailedOrdersNotice() {
 	const message =
 		overflowCount > 0
 			? sprintf(
-					/* translators: %d: number of stored failed orders */
+					/* translators: %d: the maximum number of stored failed-order IDs (actual failures exceeded this) */
 					__(
 						'More than %d orders failed to import. To recover all missed orders, run the import above with "Skip previously imported customers and orders" checked.',
 						'woocommerce'
@@ -108,6 +108,7 @@ function FailedOrdersNotice() {
 				variant="secondary"
 				isBusy={ isRetrying }
 				disabled={ isRetrying }
+				aria-disabled={ isRetrying }
 				onClick={ handleRetry }
 			>
 				{ __( 'Retry failed imports', 'woocommerce' ) }

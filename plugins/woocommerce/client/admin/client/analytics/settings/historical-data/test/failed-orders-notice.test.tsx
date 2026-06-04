@@ -27,12 +27,18 @@ jest.mock( '@wordpress/components', () => ( {
 		children,
 		onClick,
 		disabled,
+		'aria-disabled': ariaDisabled,
 	}: {
 		children: React.ReactNode;
 		onClick?: () => void;
 		disabled?: boolean;
+		'aria-disabled'?: boolean;
 	} ) => (
-		<button onClick={ onClick } disabled={ disabled }>
+		<button
+			onClick={ onClick }
+			disabled={ disabled }
+			aria-disabled={ ariaDisabled }
+		>
 			{ children }
 		</button>
 	),
@@ -168,5 +174,41 @@ describe( 'FailedOrdersNotice', () => {
 				'retry failed'
 			)
 		);
+	} );
+
+	it( 'disables the retry button while the retry request is in flight', async () => {
+		let resolveRetry: ( value: unknown ) => void = () => {};
+		mockedApiFetch.mockImplementation( ( options ) => {
+			if (
+				( options as { path?: string } ).path ===
+				'/wc-analytics/imports/retry-failed'
+			) {
+				return new Promise( ( resolve ) => {
+					resolveRetry = resolve;
+				} );
+			}
+			return Promise.resolve( {
+				failed_count: 3,
+				failed_overflow_count: 0,
+			} );
+		} );
+
+		render( <FailedOrdersNotice /> );
+
+		const button = await screen.findByRole( 'button', {
+			name: 'Retry failed imports',
+		} );
+		await userEvent.click( button );
+
+		expect( button ).toBeDisabled();
+
+		resolveRetry( {
+			success: true,
+			message: 'Re-import scheduled for 3 orders.',
+			retried_count: 3,
+			pruned_count: 0,
+		} );
+
+		await waitFor( () => expect( button ).not.toBeDisabled() );
 	} );
 } );
