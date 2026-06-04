@@ -19,6 +19,12 @@ jest.mock( '@wordpress/data', () => ( {
 	} ) ),
 } ) );
 
+jest.mock( '@woocommerce/settings', () => ( {
+	getAdminLink: jest.fn(
+		( path: string ) => `https://example.com/wp-admin/${ path }`
+	),
+} ) );
+
 jest.mock( '@wordpress/components', () => ( {
 	Notice: ( { children }: { children: React.ReactNode } ) => (
 		<div role="status">{ children }</div>
@@ -90,6 +96,12 @@ describe( 'FailedOrdersNotice', () => {
 		expect(
 			screen.getByRole( 'button', { name: 'Retry failed imports' } )
 		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'link', { name: 'View the order import log' } )
+		).toHaveAttribute(
+			'href',
+			'https://example.com/wp-admin/admin.php?page=wc-status&tab=logs&source=wc-analytics-order-import'
+		);
 	} );
 
 	it( 'shows overflow guidance when the stored list overflowed', async () => {

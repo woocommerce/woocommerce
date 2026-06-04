@@ -2,10 +2,19 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useCallback,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { Button, Notice } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
+import { getAdminLink } from '@woocommerce/settings';
+
+const LOG_URL_PATH =
+	'admin.php?page=wc-status&tab=logs&source=wc-analytics-order-import';
 
 interface FailedImportsStatus {
 	failed_count: number;
@@ -76,25 +85,38 @@ function FailedOrdersNotice() {
 		}
 	};
 
+	const logLink = (
+		<a
+			href={ getAdminLink( LOG_URL_PATH ) }
+			aria-label={ __( 'View the order import log', 'woocommerce' ) }
+		/>
+	);
+
 	const message =
 		overflowCount > 0
-			? sprintf(
-					/* translators: %d: the maximum number of stored failed-order IDs (actual failures exceeded this) */
-					__(
-						'More than %d orders failed to import. To recover all missed orders, run the import above with "Skip previously imported customers and orders" checked.',
-						'woocommerce'
+			? createInterpolateElement(
+					sprintf(
+						/* translators: %d: the maximum number of stored failed-order IDs (actual failures exceeded this). <link> is a link to the order import log. */
+						__(
+							'More than %d orders failed to import. To recover all missed orders, run the import above with "Skip previously imported customers and orders" checked. <link>View the log</link> for details.',
+							'woocommerce'
+						),
+						failedCount
 					),
-					failedCount
+					{ link: logLink }
 			  )
-			: sprintf(
-					/* translators: %d: number of failed orders */
-					_n(
-						'%d order failed to import. Check the wc-analytics-order-import log for details.',
-						'%d orders failed to import. Check the wc-analytics-order-import log for details.',
-						failedCount,
-						'woocommerce'
+			: createInterpolateElement(
+					sprintf(
+						/* translators: %d: number of failed orders. <link> is a link to the order import log. */
+						_n(
+							'%d order failed to import. <link>View the log</link> for details.',
+							'%d orders failed to import. <link>View the log</link> for details.',
+							failedCount,
+							'woocommerce'
+						),
+						failedCount
 					),
-					failedCount
+					{ link: logLink }
 			  );
 
 	return (
