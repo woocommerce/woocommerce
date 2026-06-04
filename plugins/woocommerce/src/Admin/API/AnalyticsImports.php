@@ -284,10 +284,13 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	/**
 	 * Check if scheduled import is enabled.
 	 *
+	 * Delegates to OrdersScheduler so the API reflects the same mode the
+	 * scheduler actually runs in (feature flag check + legacy option fallback).
+	 *
 	 * @return bool
 	 */
 	private function is_scheduled_import_enabled() {
-		return 'yes' === get_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, OrdersScheduler::SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE );
+		return OrdersScheduler::is_scheduled_import_enabled();
 	}
 
 	/**

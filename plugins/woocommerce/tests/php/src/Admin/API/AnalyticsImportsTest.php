@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\API;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
@@ -48,6 +49,10 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		// Enable the analytics-scheduled-import feature so is_scheduled_import_enabled()
+		// delegates correctly (matches OrdersScheduler's own behaviour).
+		Features::enable( 'analytics-scheduled-import' );
+
 		// Create test users.
 		$this->admin_user = $this->factory->user->create(
 			array(
@@ -79,6 +84,7 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
+		Features::disable( 'analytics-scheduled-import' );
 		parent::tearDown();
 	}
 

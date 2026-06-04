@@ -911,9 +911,10 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * import is supported (returns false). When enabled, checks the option value.
 	 *
 	 * @internal
+	 * @since 11.0.0
 	 * @return bool
 	 */
-	private static function is_scheduled_import_enabled(): bool {
+	public static function is_scheduled_import_enabled(): bool {
 		if ( ! Features::is_enabled( 'analytics-scheduled-import' ) ) {
 			// If the feature is disabled, only immediate import is supported.
 			return false;
