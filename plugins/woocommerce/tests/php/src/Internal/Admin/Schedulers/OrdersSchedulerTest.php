@@ -642,6 +642,35 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox process_pending_batch records the ID of an order that fails to import.
+	 */
+	public function test_process_pending_batch_records_failed_order(): void {
+		global $wpdb;
+		// Anchor the cursor just before test orders so existing DB orders are excluded.
+		$cursor_id = (int) $wpdb->get_var( "SELECT MAX(id) FROM {$wpdb->prefix}wc_orders" );
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$throwing_filter = function ( $is_test, $checked_order ) use ( $order ) {
+			if ( $checked_order instanceof \WC_Abstract_Order && $checked_order->get_id() === $order->get_id() ) {
+				throw new \DivisionByZeroError( 'Division by zero' );
+			}
+
+			return $is_test;
+		};
+
+		OrdersScheduler::clear_queued_actions();
+		add_filter( 'woocommerce_analytics_is_test_order', $throwing_filter, 10, 2 );
+		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', $cursor_id );
+		remove_filter( 'woocommerce_analytics_is_test_order', $throwing_filter, 10 );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertContains( $order->get_id(), $failed['ids'] );
+	}
+
+	/**
 	 * Clear any scheduled batch processor actions.
 	 *
 	 * @return void

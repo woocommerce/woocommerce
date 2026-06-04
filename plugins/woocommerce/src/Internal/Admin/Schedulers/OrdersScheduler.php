@@ -577,6 +577,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				// Log the failure and advance the cursor past the failing order so that
 				// it is skipped on the next run rather than blocking the entire pipeline.
 				static::log_import_error( $order->id, $e, $context );
+				static::record_failed_order_import( $order->id );
 				$cursor_date = $order->date_updated_gmt;
 				$cursor_id   = $order->id;
 			}
