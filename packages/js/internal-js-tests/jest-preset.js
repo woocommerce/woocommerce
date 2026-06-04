@@ -31,9 +31,11 @@ const transformModules = {
  */
 const mapWpModules = [
 	'@wordpress/private-apis',
+	'@wordpress/admin-ui',
 	'@wordpress/block-editor',
 	'@wordpress/blocks',
 	'@wordpress/components',
+	'@wordpress/compose',
 	'@wordpress/core-data',
 	'@wordpress/data',
 	'@wordpress/editor',
@@ -41,6 +43,8 @@ const mapWpModules = [
 	'@wordpress/keyboard-shortcuts',
 	'@wordpress/patterns',
 	'@wordpress/rich-text',
+	'@wordpress/theme',
+	'@wordpress/ui',
 ];
 const wpModulesMapper = mapWpModules.reduce( ( acc, module ) => {
 	try {
