@@ -299,6 +299,15 @@ const jsConfig = {
 							// See https://github.com/WordPress/gutenberg/pull/61692 for more details about the dependency in general.
 							// For backward compatibility reasons we need to skip requesting to external here.
 							return null;
+						case 'react-dom/client':
+							// React 18 split createRoot/hydrateRoot into
+							// react-dom/client. WordPress's wp-react-dom UMD
+							// aggregates both entrypoints onto the same
+							// window.ReactDOM global. DEWP's default mapper
+							// doesn't know about the subpath yet
+							// (https://github.com/WordPress/gutenberg/pull/77326),
+							// so map it here.
+							return 'ReactDOM';
 						case '@wordpress/global-styles-engine':
 							// @wordpress/global-styles-engine is not a standard WordPress package available globally,
 							// so we need to bundle it instead of treating it as an external.
@@ -336,6 +345,9 @@ const jsConfig = {
 				requestToHandle( request ) {
 					if ( request === 'moment-timezone' ) {
 						return 'moment';
+					}
+					if ( request === 'react-dom/client' ) {
+						return 'react-dom';
 					}
 				},
 			} ),

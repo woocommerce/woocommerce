@@ -125,11 +125,23 @@ const requestToExternal = ( request ) => {
 	if ( request in wcDepMap ) {
 		return wcDepMap[ request ];
 	}
+	if ( request === 'react-dom/client' ) {
+		// React 18 split createRoot/hydrateRoot into react-dom/client.
+		// WordPress's wp-react-dom UMD aggregates both entrypoints onto the
+		// same window.ReactDOM global. DEWP's default mapper doesn't know
+		// about the subpath yet
+		// (https://github.com/WordPress/gutenberg/pull/77326),
+		// so map it here.
+		return 'ReactDOM';
+	}
 };
 
 const requestToHandle = ( request ) => {
 	if ( request in wcHandleMap ) {
 		return wcHandleMap[ request ];
+	}
+	if ( request === 'react-dom/client' ) {
+		return 'react-dom';
 	}
 };
 
