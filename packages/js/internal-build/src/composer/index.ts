@@ -35,7 +35,6 @@ interface ComposerJson {
 		options?: { symlink?: boolean };
 	} >;
 	autoload?: ComposerAutoload;
-	extra?: { 'installer-paths'?: Record< string, string[] > };
 }
 
 interface WatchedPackage {
@@ -56,29 +55,67 @@ function isPlatformReq( name: string ): boolean {
 	);
 }
 
-function resolveInstallPath(
-	packageName: string,
-	projectDir: string,
-	installerPaths: Record< string, string[] > | undefined
-): string {
-	const [ vendor, shortName ] = packageName.split( '/' );
-	if ( installerPaths ) {
-		for ( const [ pattern, packageNames ] of Object.entries(
-			installerPaths
-		) ) {
-			if ( ! packageNames.includes( packageName ) ) continue;
-			const resolved = pattern
-				.replace( /\{\$name\}/g, shortName ?? '' )
-				.replace( /\{\$vendor\}/g, vendor ?? '' );
-			return path.join( projectDir, resolved );
-		}
+function execComposer( args: string[], projectDir: string ): Promise< string > {
+	return new Promise( ( resolve, reject ) => {
+		const child = spawn( 'composer', args, {
+			cwd: projectDir,
+			env: { ...process.env, XDEBUG_MODE: 'off' },
+			stdio: [ 'ignore', 'pipe', 'pipe' ],
+		} );
+		const stdoutChunks: Buffer[] = [];
+		const stderrChunks: Buffer[] = [];
+		child.stdout?.on( 'data', ( chunk: Buffer ) =>
+			stdoutChunks.push( chunk )
+		);
+		child.stderr?.on( 'data', ( chunk: Buffer ) =>
+			stderrChunks.push( chunk )
+		);
+		child.on( 'exit', ( code ) => {
+			if ( code === 0 ) {
+				resolve( Buffer.concat( stdoutChunks ).toString( 'utf8' ) );
+				return;
+			}
+			const stderr = Buffer.concat( stderrChunks ).toString( 'utf8' );
+			reject(
+				new Error(
+					`composer ${ args.join( ' ' ) } exited ${ code }${
+						stderr ? `\n${ stderr }` : ''
+					}`
+				)
+			);
+		} );
+		child.on( 'error', reject );
+	} );
+}
+
+interface ComposerShowEntry {
+	name: string;
+	path: string;
+}
+
+interface ComposerShowOutput {
+	installed?: ComposerShowEntry[];
+}
+
+async function fetchPackageInstallPaths(
+	projectDir: string
+): Promise< Map< string, string > > {
+	const stdout = await execComposer(
+		[ 'show', '--path', '--format=json' ],
+		projectDir
+	);
+	const parsed = JSON.parse( stdout ) as ComposerShowOutput;
+	const paths = new Map< string, string >();
+	for ( const entry of parsed.installed ?? [] ) {
+		paths.set( entry.name, entry.path );
 	}
-	return path.join( projectDir, 'vendor', packageName );
+	return paths;
 }
 
 async function resolvePackages(
 	composerJsonPath: string,
-	ignoredPackages: Set< string >
+	ignoredPackages: Set< string >,
+	packageInstallPaths: Map< string, string >
 ): Promise< WatchedPackage[] > {
 	const projectDir = path.dirname( composerJsonPath );
 	const composer = await readJson< ComposerJson >( composerJsonPath );
@@ -91,7 +128,6 @@ async function resolvePackages(
 		if ( ! isPlatformReq( key ) ) wanted.add( key );
 	}
 
-	const installerPaths = composer.extra?.[ 'installer-paths' ];
 	const packages: WatchedPackage[] = [];
 
 	for ( const repo of composer.repositories ?? [] ) {
@@ -135,14 +171,17 @@ async function resolvePackages(
 			continue;
 		}
 
+		const destDir = packageInstallPaths.get( pkgJson.name );
+		if ( ! destDir ) {
+			throw new Error(
+				`Composer reports no install path for '${ pkgJson.name }'. Run 'composer install' in ${ projectDir } first.`
+			);
+		}
+
 		packages.push( {
 			name: pkgJson.name,
 			sourceDir,
-			destDir: resolveInstallPath(
-				pkgJson.name,
-				projectDir,
-				installerPaths
-			),
+			destDir,
 		} );
 	}
 
@@ -231,9 +270,13 @@ export async function watchComposerPackages(
 	const ignoredPackages = new Set( options.ignoredPackages ?? [] );
 
 	const startWatching = async (): Promise< void > => {
+		const packageInstallPaths = await fetchPackageInstallPaths(
+			projectDir
+		);
 		const packages = await resolvePackages(
 			composerJsonPath,
-			ignoredPackages
+			ignoredPackages,
+			packageInstallPaths
 		);
 		if ( packages.length === 0 ) {
 			log.info(
@@ -298,9 +341,13 @@ export async function watchComposerPackages(
 				return;
 			}
 			composerInstallRunning = false;
+			const projectInstallPaths = await fetchPackageInstallPaths(
+				projectDir
+			);
 			const next = await resolvePackages(
 				composerJsonPath,
-				ignoredPackages
+				ignoredPackages,
+				projectInstallPaths
 			);
 			if ( packageFingerprint( next ) !== fingerprint ) {
 				log.info( 'watch', 'package set changed; restarting watcher' );
