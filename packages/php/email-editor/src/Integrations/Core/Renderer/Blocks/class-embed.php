@@ -671,7 +671,7 @@ class Embed extends Abstract_Block_Renderer {
 		);
 
 		// Generate a cache key based on the URL.
-		$cache_key = 'wc_email_oembed_thumb_' . md5( $url );
+		$cache_key = 'wc_email_video_thumb_' . md5( $url );
 
 		// Check for cached thumbnail data.
 		$cached = get_transient( $cache_key );
