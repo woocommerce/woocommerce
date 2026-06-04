@@ -477,6 +477,22 @@
 			"isIgnored": true
 		},
 		{
+			"label": "@wordpress/* dependencies that WooCommerce bundles instead of externalizing to WordPress",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
+			"dependencies": [
+				"@wordpress/admin-ui",
+				"@wordpress/icons",
+				"@wordpress/interface"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "catalog:wp-bundled"
+		},
+		{
 			"label": "@wordpress/* runtime-dependencies (pnpm 10 requires valid semver in peerDependencies, so peer deps are excluded here)",
 			"dependencyTypes": [
 				"prod",
