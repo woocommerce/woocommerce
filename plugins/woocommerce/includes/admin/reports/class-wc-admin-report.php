@@ -6,7 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Internal\Admin\Reports\OrderReportQueryBuilder;
+use Automattic\WooCommerce\Internal\Admin\Reports\HposLegacyOrderReportQueryBuilder;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -122,64 +122,13 @@ class WC_Admin_Report {
 		}
 
 		$order_status = apply_filters( 'woocommerce_reports_order_statuses', $order_status );
+
 		$args['order_status'] = $order_status;
 
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() && class_exists( OrderReportQueryBuilder::class ) ) {
-			$query_builder     = new OrderReportQueryBuilder();
-			$query             = $query_builder->build_query( $args, (int) $this->start_date, (int) $this->end_date );
-			$query_type_for_db = (string) $args['query_type'];
-			$debug_enabled     = (bool) $args['debug'];
-			$nocache_enabled   = (bool) $args['nocache'];
-			$report_data       = $args['data'];
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() && class_exists( HposLegacyOrderReportQueryBuilder::class ) ) {
+			$query = ( new HposLegacyOrderReportQueryBuilder() )->build_query( $args, (int) $this->start_date, (int) $this->end_date );
 
-			/**
-			 * Filters the legacy order report SQL clauses before they are combined into a SQL string.
-			 *
-			 * @param array $query SQL clauses keyed by select/from/join/where/group_by/order_by/limit.
-			 *
-			 * @since 2.1.0
-			 */
-			$query = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
-			$query = implode( ' ', $query );
-
-			if ( $debug_enabled ) {
-				echo '<pre>';
-				wc_print_r( $query );
-				echo '</pre>';
-			}
-
-			if ( $debug_enabled || $nocache_enabled ) {
-				self::enable_big_selects();
-
-				/**
-				 * Filters the legacy order report query result.
-				 *
-				 * @param mixed $result Query result returned by wpdb.
-				 * @param array $data   Report data arguments.
-				 *
-				 * @since 2.1.0
-				 */
-				$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type_for_db( $query ), $report_data );
-			} else {
-				$query_hash = md5( $query_type_for_db . $query );
-				$result     = $this->get_cached_query( $query_hash );
-				if ( null === $result ) {
-					self::enable_big_selects();
-
-					/**
-					 * Filters the legacy order report query result.
-					 *
-					 * @param mixed $result Query result returned by wpdb.
-					 * @param array $data   Report data arguments.
-					 *
-					 * @since 2.1.0
-					 */
-					$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type_for_db( $query ), $report_data );
-				}
-				$this->set_cached_query( $query_hash, $result );
-			}
-
-			return $result;
+			return $this->execute_order_report_query( $query, $args );
 		}
 
 		$query  = array();
@@ -407,6 +356,35 @@ class WC_Admin_Report {
 			$query['limit'] = "LIMIT {$limit}";
 		}
 
+		return $this->execute_order_report_query( $query, $args );
+	}
+
+	/**
+	 * Apply the report filters and execute a legacy-report SQL query, caching the result.
+	 *
+	 * Shared by the HPOS-backed and CPT-backed branches of {@see self::get_order_report_data()}.
+	 *
+	 * @param array $query SQL clauses keyed by select/from/join/where/group_by/order_by/limit.
+	 * @param array $args  The parsed `get_order_report_data` arguments. The `query_type`,
+	 *                     `debug`, `nocache` and `data` entries are read.
+	 *
+	 * @return mixed Query result returned by wpdb (filtered).
+	 */
+	protected function execute_order_report_query( $query, $args ) {
+		global $wpdb;
+
+		$query_type = $args['query_type'];
+		$debug      = $args['debug'];
+		$nocache    = $args['nocache'];
+		$data       = $args['data'];
+
+		/**
+		 * Filters the legacy order report SQL clauses before they are combined into a SQL string.
+		 *
+		 * @param array $query SQL clauses keyed by select/from/join/where/group_by/order_by/limit.
+		 *
+		 * @since 2.1.0
+		 */
 		$query = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
 		$query = implode( ' ', $query );
 
@@ -419,17 +397,33 @@ class WC_Admin_Report {
 		if ( $debug || $nocache ) {
 			self::enable_big_selects();
 
-			$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
-		} else {
-			$query_hash = md5( $query_type . $query );
-			$result     = $this->get_cached_query( $query_hash );
-			if ( null === $result ) {
-				self::enable_big_selects();
-
-				$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
-			}
-			$this->set_cached_query( $query_hash, $result );
+			/**
+			 * Filters the legacy order report query result.
+			 *
+			 * @param mixed $result Query result returned by wpdb.
+			 * @param array $data   Report data arguments.
+			 *
+			 * @since 2.1.0
+			 */
+			return apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 		}
+
+		$query_hash = md5( $query_type . $query );
+		$result     = $this->get_cached_query( $query_hash );
+		if ( null === $result ) {
+			self::enable_big_selects();
+
+			/**
+			 * Filters the legacy order report query result.
+			 *
+			 * @param mixed $result Query result returned by wpdb.
+			 * @param array $data   Report data arguments.
+			 *
+			 * @since 2.1.0
+			 */
+			$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
+		}
+		$this->set_cached_query( $query_hash, $result );
 
 		return $result;
 	}

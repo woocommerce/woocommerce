@@ -9,21 +9,27 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Builds SQL clauses for legacy order reports.
+ * Builds HPOS-backed SQL clauses for the legacy admin order reports.
+ *
+ * Used by {@see WC_Admin_Report::get_order_report_data()} when HPOS is the
+ * authoritative order store, so the same `data` / `where` / `where_meta`
+ * descriptors that legacy reports already pass continue to work against
+ * `wc_orders`, `wc_orders_meta` and `wc_order_operational_data` instead of
+ * `{$wpdb->posts}` / `{$wpdb->postmeta}`.
  *
  * @internal
  */
-class OrderReportQueryBuilder {
+class HposLegacyOrderReportQueryBuilder {
 
 	/**
-	 * Lazy cache for HPOS report schema details built during a single query build.
+	 * Lazy cache for schema details (column mappings, gmt offset) used during one query build.
 	 *
 	 * @var array<string,mixed>|null
 	 */
-	private $report_schema_cache = null;
+	private $report_schema = null;
 
 	/**
-	 * Build the SQL clauses for a legacy order report query.
+	 * Build the SQL clauses for an HPOS-backed legacy order report query.
 	 *
 	 * @param array $args       Parsed report arguments.
 	 * @param int   $start_date Start date as a Unix timestamp.
@@ -32,10 +38,6 @@ class OrderReportQueryBuilder {
 	 * @return array<string,string> SQL clauses keyed by select/from/join/where/group_by/order_by/limit.
 	 */
 	public function build_query( array $args, int $start_date, int $end_date ): array {
-		global $wpdb;
-
-		$this->report_schema_cache = null;
-
 		$data                = $args['data'] ?? array();
 		$where               = $args['where'] ?? array();
 		$where_meta          = $args['where_meta'] ?? array();
@@ -71,13 +73,9 @@ class OrderReportQueryBuilder {
 			$joins = array_merge( $joins, $this->build_parent_orders_join() );
 		}
 
-		$is_hpos = OrderUtil::custom_orders_table_usage_is_enabled();
-
 		$query           = array();
 		$query['select'] = 'SELECT ' . implode( ',', $select );
-		$query['from']   = $is_hpos
-			? 'FROM ' . OrderUtil::get_table_for_orders() . ' AS orders'
-			: "FROM {$wpdb->posts} AS posts";
+		$query['from']   = 'FROM ' . OrderUtil::get_table_for_orders() . ' AS orders';
 		$query['join']   = implode( ' ', $joins );
 		$query['where']  = $this->build_where_clause( $order_types, $order_status, $parent_order_status, (bool) $filter_range, $start_date, $end_date );
 
@@ -90,13 +88,11 @@ class OrderReportQueryBuilder {
 		}
 
 		if ( $group_by ) {
-			$group_by_clause   = $is_hpos ? $this->translate_legacy_sql_fragment_hpos( $group_by ) : $group_by;
-			$query['group_by'] = "GROUP BY {$group_by_clause}";
+			$query['group_by'] = 'GROUP BY ' . $this->translate_legacy_sql_fragment( $group_by );
 		}
 
 		if ( $order_by ) {
-			$order_by_clause   = $is_hpos ? $this->translate_legacy_sql_fragment_hpos( $order_by ) : $order_by;
-			$query['order_by'] = "ORDER BY {$order_by_clause}";
+			$query['order_by'] = 'ORDER BY ' . $this->translate_legacy_sql_fragment( $order_by );
 		}
 
 		if ( $limit ) {
@@ -130,9 +126,7 @@ class OrderReportQueryBuilder {
 				list( $get_key, $joins ) = $this->resolve_parent_meta_select( $raw_key, $key, $join_type );
 				break;
 			case 'post_data':
-				$get_key = OrderUtil::custom_orders_table_usage_is_enabled()
-					? $this->translate_post_column_hpos( $key )
-					: "posts.{$key}";
+				$get_key = $this->translate_post_column( $key );
 				break;
 			case 'order_item_meta':
 				$get_key = "order_item_meta_{$key}.meta_value";
@@ -168,14 +162,12 @@ class OrderReportQueryBuilder {
 	 * @return array{0: string, 1: array<string,string>} SELECT fragment and JOINs.
 	 */
 	private function resolve_meta_select( $raw_key, $key, $join_type ) {
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$schema = $this->get_report_schema();
-			if ( isset( $schema['order_column'][ $raw_key ] ) ) {
-				return array( $schema['order_column'][ $raw_key ], array() );
-			}
-			if ( isset( $schema['op_data_column'][ $raw_key ] ) ) {
-				return array( $schema['op_data_column'][ $raw_key ], $this->build_op_data_join() );
-			}
+		$schema = $this->get_report_schema();
+		if ( isset( $schema['order_column'][ $raw_key ] ) ) {
+			return array( $schema['order_column'][ $raw_key ], array() );
+		}
+		if ( isset( $schema['op_data_column'][ $raw_key ] ) ) {
+			return array( $schema['op_data_column'][ $raw_key ], $this->build_op_data_join() );
 		}
 
 		return array(
@@ -194,17 +186,15 @@ class OrderReportQueryBuilder {
 	 * @return array{0: string, 1: array<string,string>} SELECT fragment and JOINs.
 	 */
 	private function resolve_parent_meta_select( $raw_key, $key, $join_type ) {
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$schema = $this->get_report_schema();
-			if ( isset( $schema['order_column'][ $raw_key ] ) ) {
-				$column = substr( $schema['order_column'][ $raw_key ], strlen( 'orders.' ) );
-				return array( "parent_orders.{$column}", $this->build_parent_orders_join() );
-			}
-			if ( isset( $schema['op_data_column'][ $raw_key ] ) ) {
-				$column = substr( $schema['op_data_column'][ $raw_key ], strlen( 'op_data.' ) );
-				$joins  = array_merge( $this->build_parent_orders_join(), $this->build_parent_op_data_join() );
-				return array( "parent_op_data.{$column}", $joins );
-			}
+		$schema = $this->get_report_schema();
+		if ( isset( $schema['order_column'][ $raw_key ] ) ) {
+			$column = substr( $schema['order_column'][ $raw_key ], strlen( 'orders.' ) );
+			return array( "parent_orders.{$column}", $this->build_parent_orders_join() );
+		}
+		if ( isset( $schema['op_data_column'][ $raw_key ] ) ) {
+			$column = substr( $schema['op_data_column'][ $raw_key ], strlen( 'op_data.' ) );
+			$joins  = array_merge( $this->build_parent_orders_join(), $this->build_parent_op_data_join() );
+			return array( "parent_op_data.{$column}", $joins );
 		}
 
 		return array(
@@ -228,25 +218,20 @@ class OrderReportQueryBuilder {
 
 		if ( 'order_item_meta' === $type ) {
 			global $wpdb;
-			$order_id_col = OrderUtil::custom_orders_table_usage_is_enabled() ? 'orders.id' : 'posts.ID';
-			$alias        = "order_item_meta_{$key}";
+			$alias = "order_item_meta_{$key}";
 			return array(
-				'order_items' => "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON {$order_id_col} = order_items.order_id",
+				'order_items' => "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON orders.id = order_items.order_id",
 				$alias        => "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS {$alias} ON order_items.order_item_id = {$alias}.order_item_id",
 			);
 		}
 
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$schema = $this->get_report_schema();
-			if ( ! is_array( $meta_key ) && isset( $schema['where_meta_column'][ $meta_key ] ) ) {
-				return array();
-			}
-			$alias = "meta_{$key}";
-			return array( $alias => "{$join_type} JOIN " . OrderUtil::get_table_for_order_meta() . " AS {$alias} ON orders.id = {$alias}.order_id" );
+		$schema = $this->get_report_schema();
+		if ( ! is_array( $meta_key ) && isset( $schema['where_meta_column'][ $meta_key ] ) ) {
+			return array();
 		}
 
 		$alias = "meta_{$key}";
-		return array( $alias => "{$join_type} JOIN " . OrderUtil::get_table_for_order_meta() . " AS {$alias} ON posts.ID = {$alias}.post_id" );
+		return array( $alias => "{$join_type} JOIN " . OrderUtil::get_table_for_order_meta() . " AS {$alias} ON orders.id = {$alias}.order_id" );
 	}
 
 	/**
@@ -255,15 +240,8 @@ class OrderReportQueryBuilder {
 	 * @return array<string,string> JOIN keyed by alias.
 	 */
 	private function build_parent_orders_join() {
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			return array(
-				'parent_orders' => 'LEFT JOIN ' . OrderUtil::get_table_for_orders() . ' AS parent_orders ON orders.parent_order_id = parent_orders.id',
-			);
-		}
-
-		global $wpdb;
 		return array(
-			'parent' => "LEFT JOIN {$wpdb->posts} AS parent ON posts.post_parent = parent.ID",
+			'parent_orders' => 'LEFT JOIN ' . OrderUtil::get_table_for_orders() . ' AS parent_orders ON orders.parent_order_id = parent_orders.id',
 		);
 	}
 
@@ -299,14 +277,10 @@ class OrderReportQueryBuilder {
 	 * @return array<string,string> JOIN keyed by alias.
 	 */
 	private function build_meta_join( $key, $raw_key, $join_type ) {
-		$alias      = "meta_{$key}";
-		$meta_table = OrderUtil::get_table_for_order_meta();
-
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			return array( $alias => "{$join_type} JOIN {$meta_table} AS {$alias} ON ( orders.id = {$alias}.order_id AND {$alias}.meta_key = '{$raw_key}' )" );
-		}
-
-		return array( $alias => "{$join_type} JOIN {$meta_table} AS {$alias} ON ( posts.ID = {$alias}.post_id AND {$alias}.meta_key = '{$raw_key}' )" );
+		$alias = "meta_{$key}";
+		return array(
+			$alias => "{$join_type} JOIN " . OrderUtil::get_table_for_order_meta() . " AS {$alias} ON ( orders.id = {$alias}.order_id AND {$alias}.meta_key = '{$raw_key}' )",
+		);
 	}
 
 	/**
@@ -319,14 +293,10 @@ class OrderReportQueryBuilder {
 	 * @return array<string,string> JOIN keyed by alias.
 	 */
 	private function build_parent_meta_join( $key, $raw_key, $join_type ) {
-		$alias      = "parent_meta_{$key}";
-		$meta_table = OrderUtil::get_table_for_order_meta();
-
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			return array( $alias => "{$join_type} JOIN {$meta_table} AS {$alias} ON (orders.parent_order_id = {$alias}.order_id) AND ({$alias}.meta_key = '{$raw_key}')" );
-		}
-
-		return array( $alias => "{$join_type} JOIN {$meta_table} AS {$alias} ON (posts.post_parent = {$alias}.post_id) AND ({$alias}.meta_key = '{$raw_key}')" );
+		$alias = "parent_meta_{$key}";
+		return array(
+			$alias => "{$join_type} JOIN " . OrderUtil::get_table_for_order_meta() . " AS {$alias} ON (orders.parent_order_id = {$alias}.order_id) AND ({$alias}.meta_key = '{$raw_key}')",
+		);
 	}
 
 	/**
@@ -338,10 +308,8 @@ class OrderReportQueryBuilder {
 	 */
 	private function build_order_items_join( $join_type ) {
 		global $wpdb;
-		$order_id_col = OrderUtil::custom_orders_table_usage_is_enabled() ? 'orders.id' : 'posts.ID';
-
 		return array(
-			'order_items' => "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON {$order_id_col} = order_items.order_id",
+			'order_items' => "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON orders.id = order_items.order_id",
 		);
 	}
 
@@ -357,8 +325,7 @@ class OrderReportQueryBuilder {
 	 */
 	private function build_order_item_meta_joins( $key, $raw_key, $order_item_type, $join_type ) {
 		global $wpdb;
-		$order_id_col = OrderUtil::custom_orders_table_usage_is_enabled() ? 'orders.id' : 'posts.ID';
-		$items_join   = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ({$order_id_col} = order_items.order_id)";
+		$items_join = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON (orders.id = order_items.order_id)";
 
 		if ( '' !== $order_item_type ) {
 			$items_join .= " AND (order_items.order_item_type = '{$order_item_type}')";
@@ -386,17 +353,13 @@ class OrderReportQueryBuilder {
 	 * @return string WHERE clause.
 	 */
 	private function build_where_clause( $order_types, $order_status, $parent_order_status, $filter_range, $start_date, $end_date ) {
-		$is_hpos       = OrderUtil::custom_orders_table_usage_is_enabled();
-		$type_column   = $is_hpos ? 'orders.type' : 'posts.post_type';
-		$status_column = $is_hpos ? 'orders.status' : 'posts.post_status';
-
 		$clause = "
-			WHERE 	{$type_column} 	IN ( '" . implode( "','", $order_types ) . "' )
+			WHERE 	orders.type 	IN ( '" . implode( "','", $order_types ) . "' )
 			";
 
 		if ( ! empty( $order_status ) ) {
 			$clause .= "
-				AND 	{$status_column} 	IN ( 'wc-" . implode( "','wc-", $order_status ) . "')
+				AND 	orders.status 	IN ( 'wc-" . implode( "','wc-", $order_status ) . "')
 			";
 		}
 
@@ -420,16 +383,13 @@ class OrderReportQueryBuilder {
 	 * @return string WHERE fragment.
 	 */
 	private function build_parent_order_status_where_clause( $parent_order_status, $order_status ) {
-		$is_hpos        = OrderUtil::custom_orders_table_usage_is_enabled();
-		$status_col     = $is_hpos ? 'parent_orders.status' : 'parent.post_status';
-		$null_check_col = $is_hpos ? 'parent_orders.id' : 'parent.ID';
-		$statuses_in    = "'wc-" . implode( "','wc-", $parent_order_status ) . "'";
+		$statuses_in = "'wc-" . implode( "','wc-", $parent_order_status ) . "'";
 
 		if ( ! empty( $order_status ) ) {
-			return " AND ( {$status_col} IN ( {$statuses_in} ) OR {$null_check_col} IS NULL ) ";
+			return " AND ( parent_orders.status IN ( {$statuses_in} ) OR parent_orders.id IS NULL ) ";
 		}
 
-		return " AND {$status_col} IN ( {$statuses_in} ) ";
+		return " AND parent_orders.status IN ( {$statuses_in} ) ";
 	}
 
 	/**
@@ -441,22 +401,14 @@ class OrderReportQueryBuilder {
 	 * @return string WHERE fragment.
 	 */
 	private function build_filter_range_where_clause( $start_date, $end_date ) {
-		// phpcs:disable WordPress.DateTime.RestrictedFunctions.date_date
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$schema    = $this->get_report_schema();
-			$start_gmt = $start_date - $schema['gmt_offset'];
-			$end_gmt   = strtotime( '+1 DAY', $end_date ) - $schema['gmt_offset'];
-			return "
-				AND 	orders.date_created_gmt >= '" . gmdate( 'Y-m-d H:i:s', $start_gmt ) . "'
-				AND 	orders.date_created_gmt < '" . gmdate( 'Y-m-d H:i:s', $end_gmt ) . "'
-			";
-		}
+		$schema    = $this->get_report_schema();
+		$start_gmt = $start_date - $schema['gmt_offset'];
+		$end_gmt   = strtotime( '+1 DAY', $end_date ) - $schema['gmt_offset'];
 
 		return "
-			AND 	posts.post_date >= '" . date( 'Y-m-d H:i:s', $start_date ) . "'
-			AND 	posts.post_date < '" . date( 'Y-m-d H:i:s', strtotime( '+1 DAY', $end_date ) ) . "'
+			AND 	orders.date_created_gmt >= '" . gmdate( 'Y-m-d H:i:s', $start_gmt ) . "'
+			AND 	orders.date_created_gmt < '" . gmdate( 'Y-m-d H:i:s', $end_gmt ) . "'
 		";
-		// phpcs:enable WordPress.DateTime.RestrictedFunctions.date_date
 	}
 
 	/**
@@ -467,8 +419,7 @@ class OrderReportQueryBuilder {
 	 * @return string WHERE fragment.
 	 */
 	private function build_where_meta_predicates( $where_meta ) {
-		$is_hpos  = OrderUtil::custom_orders_table_usage_is_enabled();
-		$schema   = $is_hpos ? $this->get_report_schema() : array();
+		$schema   = $this->get_report_schema();
 		$relation = $where_meta['relation'] ?? 'AND';
 
 		$clause = ' AND (';
@@ -479,7 +430,7 @@ class OrderReportQueryBuilder {
 				continue;
 			}
 
-			$where_value = $this->prepare_where_meta_value( $value );
+			$where_value = $this->prepare_predicate_value( $value, 'meta_value' );
 			if ( '' === $where_value ) {
 				continue;
 			}
@@ -499,7 +450,7 @@ class OrderReportQueryBuilder {
 					$clause .= " ( order_item_meta_{$key}.meta_key   = '{$meta_key}'";
 				}
 				$clause .= " AND order_item_meta_{$key}.meta_value {$where_value} )";
-			} elseif ( $is_hpos && ! is_array( $meta_key ) && isset( $schema['where_meta_column'][ $meta_key ] ) ) {
+			} elseif ( ! is_array( $meta_key ) && isset( $schema['where_meta_column'][ $meta_key ] ) ) {
 				$clause .= ' ( ' . $schema['where_meta_column'][ $meta_key ] . " {$where_value} )";
 			} else {
 				if ( is_array( $meta_key ) ) {
@@ -522,93 +473,67 @@ class OrderReportQueryBuilder {
 	 * @return string WHERE fragment.
 	 */
 	private function build_where_predicates( $where ) {
-		$is_hpos = OrderUtil::custom_orders_table_usage_is_enabled();
-		$clause  = '';
+		$clause = '';
 
 		foreach ( $where as $value ) {
-			$where_value = $this->prepare_where_value( $value );
+			$where_value = $this->prepare_predicate_value( $value, 'value' );
 			if ( '' === $where_value ) {
 				continue;
 			}
-			$column  = $is_hpos ? $this->translate_legacy_sql_fragment_hpos( $value['key'] ) : $value['key'];
-			$clause .= " AND {$column} {$where_value}";
+			$clause .= ' AND ' . $this->translate_legacy_sql_fragment( $value['key'] ) . " {$where_value}";
 		}
 
 		return $clause;
 	}
 
 	/**
-	 * Prepare the right-hand side of a `where_meta` predicate.
+	 * Prepare the right-hand side of a predicate (e.g. `= '5'` or `IN ('a','b')`).
 	 *
-	 * @param array $value A `where_meta` row.
+	 * Used by both the `where` (`value` / `operator`) and `where_meta`
+	 * (`meta_value` / `operator`) builders.
 	 *
-	 * @return string SQL fragment, or empty string when no predicate is emitted.
-	 */
-	private function prepare_where_meta_value( $value ) {
-		global $wpdb;
-		$op_lc = strtolower( $value['operator'] );
-
-		if ( 'in' === $op_lc || 'not in' === $op_lc ) {
-			if ( ! empty( $value['meta_value'] ) && ! is_array( $value['meta_value'] ) ) {
-				$value['meta_value'] = (array) $value['meta_value']; // @phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-			}
-			if ( empty( $value['meta_value'] ) ) {
-				return '';
-			}
-			$formats = implode( ', ', array_fill( 0, count( $value['meta_value'] ), '%s' ) );
-			return $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['meta_value'] ) . ')'; // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		}
-
-		return $value['operator'] . ' ' . $wpdb->prepare( '%s', $value['meta_value'] );
-	}
-
-	/**
-	 * Prepare the right-hand side of a `where` predicate.
-	 *
-	 * @param array $value A `where` row.
+	 * @param array  $value     A `where` or `where_meta` row.
+	 * @param string $value_key The array key holding the RHS value (`value` or `meta_value`).
 	 *
 	 * @return string SQL fragment, or empty string when no predicate is emitted.
 	 */
-	private function prepare_where_value( $value ) {
+	private function prepare_predicate_value( array $value, string $value_key ): string {
 		global $wpdb;
 		$op_lc = strtolower( $value['operator'] );
+		$rhs   = $value[ $value_key ] ?? '';
 
 		if ( 'in' === $op_lc || 'not in' === $op_lc ) {
-			if ( ! empty( $value['value'] ) && ! is_array( $value['value'] ) ) {
-				$value['value'] = (array) $value['value'];
+			if ( ! empty( $rhs ) && ! is_array( $rhs ) ) {
+				$rhs = (array) $rhs;
 			}
-			if ( empty( $value['value'] ) ) {
+			if ( empty( $rhs ) ) {
 				return '';
 			}
-			$formats = implode( ', ', array_fill( 0, count( $value['value'] ), '%s' ) );
-			return $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['value'] ) . ')'; // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$formats = implode( ', ', array_fill( 0, count( $rhs ), '%s' ) );
+			return $value['operator'] . ' (' . $wpdb->prepare( $formats, $rhs ) . ')'; // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 
-		return $value['operator'] . ' ' . $wpdb->prepare( '%s', $value['value'] );
+		return $value['operator'] . ' ' . $wpdb->prepare( '%s', $rhs );
 	}
 
 	/**
-	 * Get HPOS-only schema details used by the report SQL builder.
+	 * Get HPOS schema details used by the report SQL builder (column mappings and gmt offset).
 	 *
 	 * @return array<string,mixed>
 	 */
-	private function get_report_schema() {
-		if ( null !== $this->report_schema_cache ) {
-			return $this->report_schema_cache;
+	private function get_report_schema(): array {
+		if ( null !== $this->report_schema ) {
+			return $this->report_schema;
 		}
 
-		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$this->report_schema_cache = array();
-			return $this->report_schema_cache;
-		}
-
-		$this->report_schema_cache = array(
+		$this->report_schema = array(
 			'gmt_offset'        => (int) ( (float) get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ),
 			'order_column'      => array(
 				'_order_total' => 'orders.total_amount',
 				'_order_tax'   => 'orders.tax_amount',
 				// On a refund row, wc_orders.total_amount stores the negative refund total.
-				// Legacy callers expect the positive `_refund_amount` meta value.
+				// Legacy callers expect the positive `_refund_amount` meta value, so it
+				// is intentionally not mapped here.
 			),
 			'op_data_column'    => array(
 				'_order_shipping'     => 'op_data.shipping_total_amount',
@@ -619,7 +544,25 @@ class OrderReportQueryBuilder {
 			),
 		);
 
-		return $this->report_schema_cache;
+		return $this->report_schema;
+	}
+
+	/**
+	 * Map of bare legacy `posts` column names to their HPOS equivalents.
+	 *
+	 * Source of truth shared by {@see self::translate_post_column()} and
+	 * {@see self::translate_legacy_sql_fragment()}.
+	 *
+	 * @return array<string,string>
+	 */
+	private function legacy_to_hpos_column_map(): array {
+		return array(
+			'ID'          => 'orders.id',
+			'post_date'   => $this->hpos_local_date_expr(),
+			'post_parent' => 'orders.parent_order_id',
+			'post_status' => 'orders.status',
+			'post_type'   => 'orders.type',
+		);
 	}
 
 	/**
@@ -629,43 +572,32 @@ class OrderReportQueryBuilder {
 	 *
 	 * @return string SQL fragment referencing the equivalent HPOS column.
 	 */
-	private function translate_post_column_hpos( $key ) {
-		switch ( $key ) {
-			case 'id':
-			case 'ID':
-				return 'orders.id';
-			case 'post_date':
-				return $this->hpos_local_date_expr();
-			case 'post_parent':
-				return 'orders.parent_order_id';
-			case 'post_status':
-				return 'orders.status';
-			case 'post_type':
-				return 'orders.type';
-			default:
-				return "orders.{$key}";
+	private function translate_post_column( string $key ): string {
+		$map = $this->legacy_to_hpos_column_map();
+
+		// `sanitize_key()` lowercases `ID` to `id`; treat both forms as the orders.id column.
+		if ( 'id' === $key ) {
+			return $map['ID'];
 		}
+		return $map[ $key ] ?? "orders.{$key}";
 	}
 
 	/**
-	 * Translate legacy `posts.<col>` references in an arbitrary SQL fragment.
+	 * Translate legacy `posts.<col>` (and bare `ID` / `post_date`) references in an arbitrary SQL fragment.
 	 *
 	 * @param string $fragment Caller-supplied SQL fragment.
 	 *
 	 * @return string Translated fragment safe to drop into an HPOS query.
 	 */
-	private function translate_legacy_sql_fragment_hpos( $fragment ) {
-		$local_date_expr = $this->hpos_local_date_expr();
-
-		$replacements = array(
-			'posts.post_date'   => $local_date_expr,
-			'posts.post_parent' => 'orders.parent_order_id',
-			'posts.post_status' => 'orders.status',
-			'posts.post_type'   => 'orders.type',
-			'posts.ID'          => 'orders.id',
-			'post_date'         => $local_date_expr,
-			'ID'                => 'orders.id',
-		);
+	private function translate_legacy_sql_fragment( string $fragment ): string {
+		$map          = $this->legacy_to_hpos_column_map();
+		$replacements = array();
+		foreach ( $map as $bare => $hpos ) {
+			$replacements[ "posts.{$bare}" ] = $hpos;
+		}
+		// Bare matches that are safe to translate without the `posts.` prefix.
+		$replacements['post_date'] = $map['post_date'];
+		$replacements['ID']        = $map['ID'];
 
 		return strtr( $fragment, $replacements );
 	}
@@ -675,10 +607,8 @@ class OrderReportQueryBuilder {
 	 *
 	 * @return string SQL fragment that produces a local DATETIME.
 	 */
-	private function hpos_local_date_expr() {
+	private function hpos_local_date_expr(): string {
 		$schema = $this->get_report_schema();
-		$offset = isset( $schema['gmt_offset'] ) ? (int) $schema['gmt_offset'] : 0;
-
-		return "DATE_ADD(orders.date_created_gmt, INTERVAL {$offset} SECOND)";
+		return "DATE_ADD(orders.date_created_gmt, INTERVAL {$schema['gmt_offset']} SECOND)";
 	}
 }

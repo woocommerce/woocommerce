@@ -4,15 +4,15 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Reports;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Internal\Admin\Reports\OrderReportQueryBuilder;
+use Automattic\WooCommerce\Internal\Admin\Reports\HposLegacyOrderReportQueryBuilder;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for the legacy order report query builder.
+ * Tests for the HPOS-backed legacy order report query builder.
  */
-class OrderReportQueryBuilderTest extends WC_Unit_Test_Case {
+class HposLegacyOrderReportQueryBuilderTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Original HPOS usage state.
@@ -47,69 +47,13 @@ class OrderReportQueryBuilderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should build CPT-backed clauses when HPOS is disabled.
+	 * @testdox Should build HPOS-backed clauses with the expected columns, joins and date bounds.
 	 */
-	public function test_build_query_uses_cpt_clauses_when_hpos_disabled(): void {
-		global $wpdb;
-
-		OrderHelper::toggle_cot_feature_and_usage( false );
-
-		$query = ( new OrderReportQueryBuilder() )->build_query(
-			array(
-				'data'                => array(
-					'_order_total' => array(
-						'type'     => 'meta',
-						'function' => 'SUM',
-						'name'     => 'total_sales',
-					),
-					'post_date'    => array(
-						'type'     => 'post_data',
-						'function' => null,
-						'name'     => 'post_date',
-					),
-				),
-				'where'               => array(),
-				'where_meta'          => array(
-					// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-					array(
-						'meta_key'   => '_customer_user',
-						'meta_value' => '0',
-						'operator'   => '>',
-					),
-					// phpcs:enable
-				),
-				'group_by'            => 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)',
-				'order_by'            => 'posts.post_date ASC',
-				'limit'               => '10',
-				'filter_range'        => true,
-				'order_types'         => array( 'shop_order' ),
-				'order_status'        => array( OrderStatus::COMPLETED ),
-				'parent_order_status' => false,
-			),
-			strtotime( '2026-06-01 00:00:00' ),
-			strtotime( '2026-06-30 00:00:00' )
-		);
-
-		$this->assertSame( "FROM {$wpdb->posts} AS posts", $query['from'] );
-		$this->assertStringContainsString( 'meta__order_total.meta_value', $query['select'] );
-		$this->assertStringContainsString( "JOIN {$wpdb->postmeta} AS meta__order_total", $query['join'] );
-		$this->assertStringContainsString( 'posts.post_type', $query['where'] );
-		$this->assertStringContainsString( 'posts.post_status', $query['where'] );
-		$this->assertStringContainsString( 'posts.post_date', $query['where'] );
-		$this->assertStringContainsString( "meta__customer_user.meta_key   = '_customer_user'", $query['where'] );
-		$this->assertSame( 'GROUP BY YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)', $query['group_by'] );
-		$this->assertSame( 'ORDER BY posts.post_date ASC', $query['order_by'] );
-		$this->assertSame( 'LIMIT 10', $query['limit'] );
-	}
-
-	/**
-	 * @testdox Should build HPOS-backed clauses when HPOS is enabled.
-	 */
-	public function test_build_query_uses_hpos_clauses_when_hpos_enabled(): void {
+	public function test_build_query_uses_hpos_clauses(): void {
 		OrderHelper::toggle_cot_feature_and_usage( true );
 		update_option( 'gmt_offset', 2 );
 
-		$query = ( new OrderReportQueryBuilder() )->build_query(
+		$query = ( new HposLegacyOrderReportQueryBuilder() )->build_query(
 			array(
 				'data'                => array(
 					'_order_total'    => array(
