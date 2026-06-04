@@ -125,7 +125,8 @@ class Video extends Cover {
 			'blockName'   => 'core/cover',
 			'attrs'       => array(
 				'url'       => $poster_url,
-				'minHeight' => '390px', // Custom attribute for video blocks.
+				// Use the provided height (e.g. aspect-ratio-based from the Embed renderer) or the default for video blocks.
+				'minHeight' => ! empty( $block_attrs['minHeight'] ) ? $block_attrs['minHeight'] : '390px',
 			),
 			'innerBlocks' => array(
 				array(

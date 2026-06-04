@@ -13,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Audio;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Video;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
@@ -29,6 +30,13 @@ class Embed extends Abstract_Block_Renderer {
 	 * Counts attempts, not successes, to cap outbound HTTP requests.
 	 */
 	private const MAX_EMBED_FETCHES = 5;
+
+	/**
+	 * Maximum rendered height for video embed thumbnails, in pixels.
+	 * Caps the aspect-ratio-based height so portrait videos (e.g. TikTok)
+	 * don't dominate the email layout.
+	 */
+	private const MAX_VIDEO_THUMBNAIL_HEIGHT = 600;
 
 	/**
 	 * Number of embed page fetch attempts so far by this instance.
@@ -526,22 +534,31 @@ class Embed extends Abstract_Block_Renderer {
 			return $this->render_link_fallback( $fallback_attr, $block_content, $parsed_block, $rendering_context );
 		}
 
-		// Try to get video thumbnail URL.
-		$poster_url = $this->get_video_thumbnail_url( $url, $provider );
+		// Try to get video thumbnail data (URL plus intrinsic dimensions when available).
+		$thumbnail = $this->get_video_thumbnail_data( $url, $provider );
 
 		// If no poster available, fall back to a simple link.
-		if ( empty( $poster_url ) ) {
+		if ( empty( $thumbnail['url'] ) ) {
 			$fallback_attr = $this->create_fallback_attributes( $url, $url );
 			return $this->render_link_fallback( $fallback_attr, $block_content, $parsed_block, $rendering_context );
+		}
+
+		$mock_video_attrs = array(
+			'poster'   => $thumbnail['url'],
+			'videoUrl' => $url,
+		);
+
+		// Size the thumbnail to its real aspect ratio when dimensions are known,
+		// so portrait videos (e.g. TikTok) aren't heavily cropped by the default height.
+		$min_height = $this->calculate_video_min_height( $thumbnail['width'], $thumbnail['height'], $rendering_context );
+		if ( '' !== $min_height ) {
+			$mock_video_attrs['minHeight'] = $min_height;
 		}
 
 		// Create a mock video block structure to reuse the Video renderer.
 		$mock_video_block = array(
 			'blockName' => 'core/video',
-			'attrs'     => array(
-				'poster'   => $poster_url,
-				'videoUrl' => $url,
-			),
+			'attrs'     => $mock_video_attrs,
 			'innerHTML' => '<figure class="wp-block-video wp-block-embed is-type-video is-provider-' . esc_attr( $provider ) . '"><div class="wp-block-embed__wrapper">' . esc_url( $url ) . '</div></figure>',
 		);
 
@@ -564,22 +581,52 @@ class Embed extends Abstract_Block_Renderer {
 	}
 
 	/**
-	 * Get video thumbnail URL for supported providers.
+	 * Get video thumbnail data for supported providers.
 	 *
 	 * @param string $url Video URL.
 	 * @param string $provider Provider name.
-	 * @return string Thumbnail URL or empty string.
+	 * @return array{url: string, width: int, height: int} Thumbnail URL and intrinsic dimensions (0 when unknown).
 	 */
-	private function get_video_thumbnail_url( string $url, string $provider ): string {
+	private function get_video_thumbnail_data( string $url, string $provider ): array {
 		// YouTube thumbnails follow a predictable URL pattern, so no HTTP request is needed.
+		// Dimensions are left unknown so the default video block height applies.
 		if ( 'youtube' === $provider ) {
-			return $this->get_youtube_thumbnail( $url );
+			return array(
+				'url'    => $this->get_youtube_thumbnail( $url ),
+				'width'  => 0,
+				'height' => 0,
+			);
 		}
 
 		// All other supported video providers (VideoPress, Vimeo, TikTok, Dailymotion)
 		// expose their thumbnails through the WordPress oEmbed API.
-		// Returns empty string on failure, which triggers the link fallback.
-		return $this->get_oembed_thumbnail( $url );
+		// Returns an empty URL on failure, which triggers the link fallback.
+		return $this->get_oembed_thumbnail_data( $url );
+	}
+
+	/**
+	 * Calculate the display height for a video thumbnail from its intrinsic dimensions.
+	 * Scales the thumbnail's aspect ratio to the email layout width and caps the
+	 * result so portrait videos (e.g. TikTok) don't dominate the email.
+	 *
+	 * @param int               $width Thumbnail intrinsic width.
+	 * @param int               $height Thumbnail intrinsic height.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string Height value with px unit, or empty string when dimensions are unknown.
+	 */
+	private function calculate_video_min_height( int $width, int $height, Rendering_Context $rendering_context ): string {
+		if ( $width <= 0 || $height <= 0 ) {
+			return '';
+		}
+
+		$layout_width = (int) Styles_Helper::parse_value( $rendering_context->get_layout_width_without_padding() );
+		if ( $layout_width <= 0 ) {
+			return '';
+		}
+
+		$scaled_height = (int) round( $layout_width * $height / $width );
+
+		return min( $scaled_height, self::MAX_VIDEO_THUMBNAIL_HEIGHT ) . 'px';
 	}
 
 	/**
@@ -606,7 +653,7 @@ class Embed extends Abstract_Block_Renderer {
 	}
 
 	/**
-	 * Extract a video thumbnail URL via the WordPress oEmbed API.
+	 * Extract video thumbnail data (URL and intrinsic dimensions) via the WordPress oEmbed API.
 	 * Used by providers that expose thumbnails through oEmbed (e.g. VideoPress, Vimeo).
 	 * Results are cached using transients to avoid repeated HTTP requests.
 	 *
@@ -614,17 +661,30 @@ class Embed extends Abstract_Block_Renderer {
 	 * via url_matches_provider() before this method is called.
 	 *
 	 * @param string $url Video URL (pre-validated by caller).
-	 * @return string Thumbnail URL or empty string.
+	 * @return array{url: string, width: int, height: int} Thumbnail URL and intrinsic dimensions (0 when unknown).
 	 */
-	private function get_oembed_thumbnail( string $url ): string {
+	private function get_oembed_thumbnail_data( string $url ): array {
+		$empty_result = array(
+			'url'    => '',
+			'width'  => 0,
+			'height' => 0,
+		);
+
 		// Generate a cache key based on the URL.
 		$cache_key = 'wc_email_oembed_thumb_' . md5( $url );
 
-		// Check for cached thumbnail URL.
-		$cached_thumbnail = get_transient( $cache_key );
-		if ( false !== $cached_thumbnail ) {
-			// Return cached value (empty string means previous lookup failed).
-			return is_string( $cached_thumbnail ) ? $cached_thumbnail : '';
+		// Check for cached thumbnail data.
+		$cached = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			// An empty string is cached when a previous lookup failed.
+			if ( is_array( $cached ) && isset( $cached['url'] ) && is_string( $cached['url'] ) ) {
+				return array(
+					'url'    => $cached['url'],
+					'width'  => (int) ( $cached['width'] ?? 0 ),
+					'height' => (int) ( $cached['height'] ?? 0 ),
+				);
+			}
+			return $empty_result;
 		}
 
 		// Use WP_oEmbed::get_data() to fetch thumbnail from oEmbed endpoint.
@@ -654,28 +714,38 @@ class Embed extends Abstract_Block_Renderer {
 		if ( false === $oembed_data || ! is_object( $oembed_data ) ) {
 			// Cache empty result to avoid repeated failed lookups.
 			set_transient( $cache_key, '', $cache_ttl );
-			return '';
+			return $empty_result;
 		}
 
 		// Extract thumbnail_url from oEmbed response.
 		if ( ! isset( $oembed_data->thumbnail_url ) ) {
 			// Cache empty result.
 			set_transient( $cache_key, '', $cache_ttl );
-			return '';
+			return $empty_result;
 		}
 
 		$thumbnail_url = $oembed_data->thumbnail_url;
 
 		// Validate the thumbnail URL.
-		if ( ! empty( $thumbnail_url ) && $this->is_valid_url( $thumbnail_url ) ) {
-			// Cache the valid thumbnail URL.
-			set_transient( $cache_key, $thumbnail_url, $cache_ttl );
-			return $thumbnail_url;
+		if ( is_string( $thumbnail_url ) && '' !== $thumbnail_url && $this->is_valid_url( $thumbnail_url ) ) {
+			// Extract intrinsic thumbnail dimensions when the provider supplies them.
+			$thumbnail_width  = isset( $oembed_data->thumbnail_width ) && is_numeric( $oembed_data->thumbnail_width ) ? max( 0, (int) $oembed_data->thumbnail_width ) : 0;
+			$thumbnail_height = isset( $oembed_data->thumbnail_height ) && is_numeric( $oembed_data->thumbnail_height ) ? max( 0, (int) $oembed_data->thumbnail_height ) : 0;
+
+			$result = array(
+				'url'    => $thumbnail_url,
+				'width'  => $thumbnail_width,
+				'height' => $thumbnail_height,
+			);
+
+			// Cache the valid thumbnail data.
+			set_transient( $cache_key, $result, $cache_ttl );
+			return $result;
 		}
 
 		// Cache empty result for invalid URLs.
 		set_transient( $cache_key, '', $cache_ttl );
-		return '';
+		return $empty_result;
 	}
 
 	/**

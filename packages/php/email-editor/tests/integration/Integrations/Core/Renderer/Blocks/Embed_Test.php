@@ -12,6 +12,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Embed;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 
 /**
  * Integration test for Embed class
@@ -730,16 +731,23 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	 *
 	 * @param string $endpoint_fragment Substring identifying the provider's oEmbed endpoint URL.
 	 * @param string $thumbnail_url Thumbnail URL to return in the mocked response.
+	 * @param int    $thumbnail_width Optional thumbnail width to include in the mocked response.
+	 * @param int    $thumbnail_height Optional thumbnail height to include in the mocked response.
 	 * @return callable The HTTP filter callback (for removal in cleanup).
 	 */
-	private function mock_oembed_thumbnail_response( string $endpoint_fragment, string $thumbnail_url ): callable {
-		$mock_oembed_response = wp_json_encode(
-			array(
-				'type'          => 'video',
-				'thumbnail_url' => $thumbnail_url,
-				'title'         => 'Test Video',
-			)
+	private function mock_oembed_thumbnail_response( string $endpoint_fragment, string $thumbnail_url, int $thumbnail_width = 0, int $thumbnail_height = 0 ): callable {
+		$response_data = array(
+			'type'          => 'video',
+			'thumbnail_url' => $thumbnail_url,
+			'title'         => 'Test Video',
 		);
+
+		if ( $thumbnail_width > 0 && $thumbnail_height > 0 ) {
+			$response_data['thumbnail_width']  = $thumbnail_width;
+			$response_data['thumbnail_height'] = $thumbnail_height;
+		}
+
+		$mock_oembed_response = wp_json_encode( $response_data );
 
 		// Use pre_http_request filter to intercept oEmbed HTTP calls.
 		$filter_callback = function ( $preempt, $args, $url ) use ( $endpoint_fragment, $mock_oembed_response ) {
@@ -787,6 +795,8 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'play2x.png', $rendered, 'Vimeo embed should render with play button' );
 		// Verify background-image is present (not stripped by WP_Style_Engine).
 		$this->assertStringContainsString( 'background-image', $rendered, 'Background image should be present in CSS' );
+		// Without thumbnail dimensions in the oEmbed response, the default video height applies.
+		$this->assertStringContainsString( 'min-height:390px', $rendered, 'Default video height should apply when thumbnail dimensions are unknown' );
 		// Verify query parameters are present (as &amp; in HTML, which is correct).
 		$this->assertStringContainsString( 'w=500', $rendered, 'Query parameters should be present' );
 		$this->assertStringContainsString( 'h=281', $rendered, 'Query parameters should be present' );
@@ -965,6 +975,69 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		// Should detect Dailymotion by dai.ly domain and render with thumbnail.
 		$this->assertNotEmpty( $rendered );
 		$this->assertStringContainsString( 'background-image', $rendered, 'Dailymotion embed should have background image' );
+	}
+
+	/**
+	 * Test that a portrait video thumbnail (e.g. TikTok) gets a taller height capped at the maximum.
+	 */
+	public function test_portrait_video_thumbnail_height_is_capped(): void {
+		// Mock a portrait (9:16) thumbnail. The aspect-ratio-based height exceeds
+		// the cap at any realistic layout width, so it should be capped at 600px.
+		$filter_callback = $this->mock_oembed_thumbnail_response( 'tiktok.com/oembed', 'https://p16-sign.tiktokcdn-us.com/obj/tos-useast5-p-0068-tx/portrait-thumbnail.jpg', 720, 1280 );
+
+		$parsed_tiktok_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://www.tiktok.com/@wordpress/video/7311111111111111111',
+				'type'             => 'video',
+				'providerNameSlug' => 'tiktok',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-tiktok wp-block-embed-tiktok"><div class="wp-block-embed__wrapper">https://www.tiktok.com/@wordpress/video/7311111111111111111</div></figure>',
+		);
+
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_tiktok_embed['innerHTML'], $parsed_tiktok_embed, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
+
+		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'background-image', $rendered, 'TikTok embed should have background image' );
+		$this->assertStringContainsString( 'min-height:600px', $rendered, 'Portrait thumbnail height should be capped at 600px' );
+	}
+
+	/**
+	 * Test that a landscape video thumbnail height is derived from its aspect ratio.
+	 */
+	public function test_landscape_video_thumbnail_height_uses_aspect_ratio(): void {
+		// Mock a landscape (16:9) thumbnail and compute the expected height
+		// from the rendering context's layout width.
+		$filter_callback = $this->mock_oembed_thumbnail_response( 'vimeo.com/api/oembed', 'https://i.vimeocdn.com/video/987654321.jpg', 640, 360 );
+
+		$parsed_vimeo_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://vimeo.com/987654321',
+				'type'             => 'video',
+				'providerNameSlug' => 'vimeo',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-vimeo wp-block-embed-vimeo"><div class="wp-block-embed__wrapper">https://vimeo.com/987654321</div></figure>',
+		);
+
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_vimeo_embed['innerHTML'], $parsed_vimeo_embed, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
+
+		$layout_width    = (int) Styles_Helper::parse_value( $this->rendering_context->get_layout_width_without_padding() );
+		$expected_height = min( 600, (int) round( $layout_width * 360 / 640 ) );
+
+		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'background-image', $rendered, 'Vimeo embed should have background image' );
+		$this->assertStringContainsString( 'min-height:' . $expected_height . 'px', $rendered, 'Landscape thumbnail height should follow its aspect ratio' );
 	}
 
 	/**
