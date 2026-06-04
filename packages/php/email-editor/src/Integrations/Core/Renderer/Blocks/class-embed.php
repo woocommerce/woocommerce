@@ -356,20 +356,30 @@ class Embed extends Abstract_Block_Renderer {
 	 * @return string Translated label for the provider.
 	 */
 	private function get_translated_provider_label( string $provider ): string {
-		$labels = array(
-			'spotify'      => __( 'Listen on Spotify', 'woocommerce' ),
-			'soundcloud'   => __( 'Listen on SoundCloud', 'woocommerce' ),
-			'pocket-casts' => __( 'Listen on Pocket Casts', 'woocommerce' ),
-			'mixcloud'     => __( 'Listen on Mixcloud', 'woocommerce' ),
-			'reverbnation' => __( 'Listen on ReverbNation', 'woocommerce' ),
-			'youtube'      => __( 'Watch on YouTube', 'woocommerce' ),
-			'videopress'   => __( 'Watch on VideoPress', 'woocommerce' ),
-			'vimeo'        => __( 'Watch on Vimeo', 'woocommerce' ),
-			'tiktok'       => __( 'Watch on TikTok', 'woocommerce' ),
-			'dailymotion'  => __( 'Watch on Dailymotion', 'woocommerce' ),
-		);
-
-		return $labels[ $provider ] ?? __( 'Listen to the audio', 'woocommerce' );
+		switch ( $provider ) {
+			case 'spotify':
+				return __( 'Listen on Spotify', 'woocommerce' );
+			case 'soundcloud':
+				return __( 'Listen on SoundCloud', 'woocommerce' );
+			case 'pocket-casts':
+				return __( 'Listen on Pocket Casts', 'woocommerce' );
+			case 'mixcloud':
+				return __( 'Listen on Mixcloud', 'woocommerce' );
+			case 'reverbnation':
+				return __( 'Listen on ReverbNation', 'woocommerce' );
+			case 'youtube':
+				return __( 'Watch on YouTube', 'woocommerce' );
+			case 'videopress':
+				return __( 'Watch on VideoPress', 'woocommerce' );
+			case 'vimeo':
+				return __( 'Watch on Vimeo', 'woocommerce' );
+			case 'tiktok':
+				return __( 'Watch on TikTok', 'woocommerce' );
+			case 'dailymotion':
+				return __( 'Watch on Dailymotion', 'woocommerce' );
+			default:
+				return __( 'Listen to the audio', 'woocommerce' );
+		}
 	}
 
 	/**
@@ -618,7 +628,8 @@ class Embed extends Abstract_Block_Renderer {
 	 */
 	private function get_oembed_thumbnail( string $url ): string {
 		// Generate a cache key based on the URL.
-		$cache_key = 'wc_email_oembed_thumb_' . md5( $url );
+		// The legacy "vp" prefix is kept so existing VideoPress caches survive; the key is used for all oEmbed video thumbnails.
+		$cache_key = 'wc_email_vp_thumb_' . md5( $url );
 
 		// Check for cached thumbnail URL.
 		$cached_thumbnail = get_transient( $cache_key );
