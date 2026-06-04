@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
@@ -76,8 +78,14 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * @testdox Should populate per-day refunds when an order is refunded on the same day.
+	 *
+	 * The sum assertion holds for this scenario (single same-day refund inside the range), but
+	 * is not a general invariant: `total_refunds` comes from a different query (`full_refunds`)
+	 * that counts a refunded-status order's full parent total whenever any of its refund posts
+	 * falls in the range, while per-period `refunds` come from `refund_lines` (per-refund-post
+	 * amounts). The two can diverge when refunds straddle the report range boundary.
 	 */
-	public function test_refunds_field_populated_for_same_day_refund(): void {
+	public function test_refunds_field_populated_for_same_day_refund_in_range(): void {
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
@@ -95,7 +103,7 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( $today, $data['totals'], 'Today\'s bucket should exist in the response.' );
 		$this->assertArrayHasKey( 'refunds', $data['totals'][ $today ], 'Per-day record should expose a refunds field.' );
 		$this->assertSame( '7.00', $data['totals'][ $today ]['refunds'], 'Today\'s refunds should equal the refund amount.' );
-		$this->assertSame( $data['total_refunds'], (float) array_sum( wp_list_pluck( $data['totals'], 'refunds' ) ), 'Per-period refunds should sum to top-level total_refunds.' );
+		$this->assertSame( $data['total_refunds'], (float) array_sum( wp_list_pluck( $data['totals'], 'refunds' ) ), 'Per-period refunds should sum to top-level total_refunds in this same-day scenario.' );
 	}
 
 	/**
