@@ -12,7 +12,7 @@ declare( strict_types = 1 );
 
 if ( ! function_exists( 'purple_unregister_patterns' ) ) :
 	/**
-	 * Unregister Jetpack patterns and core patterns bundled in WordPress.
+	 * Unregister Jetpack patterns, WooCommerce patterns, and core patterns bundled in WordPress.
 	 */
 	function purple_unregister_patterns() {
 		$pattern_names = array(
@@ -23,6 +23,47 @@ if ( ! function_exists( 'purple_unregister_patterns' ) ) :
 			'registration-form',
 			'appointment-form',
 			'feedback-form',
+			// WooCommerce patterns. Keep only a curated set in the WooCommerce
+			// inserter category; everything else gets unregistered.
+			'woocommerce-blocks/banner',
+			'woocommerce-blocks/centered-content-with-image-below',
+			'woocommerce-blocks/content-right-with-image-left',
+			'woocommerce-blocks/featured-category-cover-image',
+			'woocommerce-blocks/featured-category-triple',
+			'woocommerce-blocks/footer-large',
+			'woocommerce-blocks/footer-simple-menu',
+			'woocommerce-blocks/footer-with-3-menus',
+			'woocommerce-blocks/four-image-grid-content-left',
+			'woocommerce-blocks/header-centered-menu',
+			'woocommerce-blocks/header-distraction-free',
+			'woocommerce-blocks/header-essential',
+			'woocommerce-blocks/header-large',
+			'woocommerce-blocks/header-minimal',
+			'woocommerce-blocks/heading-with-three-columns-of-content-with-link',
+			'woocommerce-blocks/hero-product-3-split',
+			'woocommerce-blocks/hero-product-chessboard',
+			'woocommerce-blocks/just-arrived-full-hero',
+			'woocommerce-blocks/product-collection-3-columns',
+			'woocommerce-blocks/product-collection-5-columns',
+			'woocommerce-blocks/product-collection-featured-products-5-columns',
+			'woocommerce-blocks/product-query-product-gallery',
+			'woocommerce-blocks/related-products',
+			'woocommerce-blocks/social-follow-us-in-social-media',
+			'woocommerce-blocks/testimonials-3-columns',
+			'woocommerce-blocks/testimonials-single',
+			'woocommerce-blocks/three-columns-with-images-and-content',
+			'woocommerce/coming-soon',
+			'woocommerce/coming-soon-entire-site',
+			'woocommerce/coming-soon-store-only',
+			'woocommerce/no-products-found',
+			'woocommerce/no-products-found-clear-filters',
+			'woocommerce/page-coming-soon-default',
+			'woocommerce/page-coming-soon-image-gallery',
+			'woocommerce/page-coming-soon-minimal-left-image',
+			'woocommerce/page-coming-soon-modern-black',
+			'woocommerce/page-coming-soon-split-right-image',
+			'woocommerce/page-coming-soon-with-header-footer',
+			'woocommerce/product-search-form',
 			// Patterns bundled in WordPress core.
 			// These would be removed by remove_theme_support( 'core-block-patterns' )
 			// if it's called on the init action with priority 9 from a plugin, not from a theme.
@@ -70,6 +111,75 @@ if ( ! function_exists( 'purple_setup' ) ) :
 endif;
 
 add_action( 'after_setup_theme', 'purple_setup' );
+
+if ( ! function_exists( 'purple_register_pattern_categories' ) ) :
+	/**
+	 * Register the "Purple" block pattern category so the theme's
+	 * internally-used patterns can be grouped together in the inserter.
+	 */
+	function purple_register_pattern_categories() {
+		register_block_pattern_category(
+			'purple',
+			array( 'label' => __( 'Purple', 'purple' ) )
+		);
+	}
+
+endif;
+
+add_action( 'init', 'purple_register_pattern_categories' );
+
+if ( ! function_exists( 'purple_rename_woocommerce_pattern_category' ) ) :
+	/**
+	 * Rename the "WooCommerce" pattern category to "Shop" in the inserter.
+	 *
+	 * The slug stays "woo-commerce" so patterns categorised under it
+	 * (Purple's and the WC plugin's) don't need re-tagging; only the
+	 * label displayed in the editor changes. Hooked late so it runs
+	 * after WooCommerce's own registration.
+	 */
+	function purple_rename_woocommerce_pattern_category() {
+		$registry = \WP_Block_Pattern_Categories_Registry::get_instance();
+		if ( $registry->is_registered( 'woo-commerce' ) ) {
+			unregister_block_pattern_category( 'woo-commerce' );
+		}
+		register_block_pattern_category(
+			'woo-commerce',
+			array( 'label' => __( 'Shop', 'purple' ) )
+		);
+	}
+
+endif;
+
+add_action( 'init', 'purple_rename_woocommerce_pattern_category', 99 );
+
+if ( ! function_exists( 'purple_unregister_pattern_categories' ) ) :
+	/**
+	 * Unregister block pattern categories the theme doesn't want to expose
+	 * in the inserter. Hooked late so it runs after core and plugins.
+	 */
+	function purple_unregister_pattern_categories() {
+		$categories = array(
+			'banner',
+			'call-to-action',
+			'featured',
+			'featured-selling',
+			'gallery',
+			'intro',
+			'media',
+			'posts',
+			'text',
+		);
+		$registry = \WP_Block_Pattern_Categories_Registry::get_instance();
+		foreach ( $categories as $cat ) {
+			if ( $registry->is_registered( $cat ) ) {
+				unregister_block_pattern_category( $cat );
+			}
+		}
+	}
+
+endif;
+
+add_action( 'init', 'purple_unregister_pattern_categories', 99 );
 
 if ( ! function_exists( 'purple_styles' ) ) :
 	/**

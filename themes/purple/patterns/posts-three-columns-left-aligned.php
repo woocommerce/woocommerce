@@ -2,7 +2,7 @@
 /**
  * Title: List of posts with left aligned heading
  * Slug: purple/posts-three-columns-left-aligned
- * Categories: posts
+ * Categories: purple
  * Block Types: core/query
  */
 ?>

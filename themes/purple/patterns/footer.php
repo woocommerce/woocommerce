@@ -2,7 +2,7 @@
 /**
  * Title: Footer
  * Slug: purple/footer
- * Categories: footer
+ * Categories: footer, purple
  * Block Types: core/template-part/footer
  * Description: A footer pattern with social links and navigation.
  */

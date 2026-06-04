@@ -2,7 +2,7 @@
 /**
  * Title: Hero with text and one button
  * Slug: purple/hero-with-text-and-one-button
- * Categories: banner, media, call-to-action
+ * Categories: woo-commerce, purple
  * Keywords: banner, media, call-to-action
  * Description: A hero section with text and one button.
  */

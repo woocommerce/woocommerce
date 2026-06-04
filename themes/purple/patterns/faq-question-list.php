@@ -2,7 +2,7 @@
 /**
  * Title: FAQ list of questions and answers
  * Slug: purple/faq-question-list
- * Categories: text, about
+ * Categories: about, purple
  * Keywords: faq, text
  * Description: A list of questions and answers.
  */

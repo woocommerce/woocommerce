@@ -2,7 +2,7 @@
 /**
  * Title: Left-aligned product, text on the right
  * Slug: purple/left-aligned-product-right-text
- * Categories: text, about, media
+ * Categories: purple
  * Keywords: about, text, intro
  * Description: A section with a product image and a large sized paragraph.
  */

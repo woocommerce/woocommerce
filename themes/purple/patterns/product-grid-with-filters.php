@@ -2,7 +2,7 @@
 /**
  * Title: Product grids with filters
  * Slug: purple/product-grid-with-filters
- * Categories: woo-commerce
+ * Categories: purple
  * Keywords: woo-commerce, product, grid, filters
  * Description: A product grid with filters.
  */

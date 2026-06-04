@@ -2,7 +2,7 @@
 /**
  * Title: Left-aligned image, text on the right
  * Slug: purple/left-aligned-image-right-text
- * Categories: text, about, media
+ * Categories: purple
  * Keywords: about, text, intro
  * Description: An intro section with a heading, paragraph, button and image.
  */

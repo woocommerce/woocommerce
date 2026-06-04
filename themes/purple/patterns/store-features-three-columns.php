@@ -2,7 +2,7 @@
 /**
  * Title: Three columns of store features with icons
  * Slug: purple/store-features-three-columns
- * Categories: text, about, media, columns
+ * Categories: columns, purple
  * Keywords: about, text, media, columns
  * Description: A three-column section with store featured services.
  */

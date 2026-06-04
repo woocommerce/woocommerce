@@ -2,7 +2,7 @@
 /**
  * Title: Social media call to action with hero image
  * Slug: purple/social-media-call-to-action-with-hero-image
- * Categories: banner, call-to-action, media
+ * Categories: purple
  * Keywords: banner, call-to-action, media
  * Description: A social media call to action with a hero image.
  */

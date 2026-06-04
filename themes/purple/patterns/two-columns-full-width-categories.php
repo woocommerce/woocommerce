@@ -2,7 +2,7 @@
 /**
  * Title: Two columns full width categories
  * Slug: purple/two-columns-full-width-categories
- * Categories: columns, gallery, media, featured
+ * Categories: woo-commerce, columns, purple
  * Keywords: columns, gallery, media, featured
  * Description: A section with a heading and a 2 column product grid.
  */

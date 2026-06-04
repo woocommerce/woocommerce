@@ -2,7 +2,7 @@
 /**
  * Title: Centered text
  * Slug: purple/centered-text
- * Categories: text, about
+ * Categories: purple
  * Keywords: about, text
  * Description: A description section aligned center.
  */

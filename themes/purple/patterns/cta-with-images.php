@@ -2,7 +2,7 @@
 /**
  * Title: CTA with images
  * Slug: purple/cta-with-images
- * Categories: call-to-action, gallery, columns
+ * Categories: columns, purple
  * Keywords: call-to-action, gallery, images
  * Description: A call to action with three images of different sizes.
  */

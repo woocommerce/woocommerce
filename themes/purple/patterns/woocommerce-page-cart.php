@@ -2,7 +2,7 @@
 /**
  * Title: WooCommerce Page Cart
  * Slug: purple/woocommerce-page-cart
- * Categories: page
+ * Categories: page, purple
  * Post Types: page, wp_template
  * Viewport width: 1400
  * Description: A page template for the WooCommerce cart page.

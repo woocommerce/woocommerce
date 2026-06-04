@@ -2,7 +2,7 @@
 /**
  * Title: Products, 4 column with Heading
  * Slug: purple/product-related-4-column
- * Categories: woo-commerce, columns, featured, featured-selling
+ * Categories: columns, purple
  * Block Types: woocommerce/product-collection
  * Description: A section with a heading and a 4 column product grid.
  */

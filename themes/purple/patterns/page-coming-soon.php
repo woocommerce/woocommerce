@@ -2,7 +2,7 @@
 /**
  * Title: Coming Soon
  * Slug: purple/coming-soon
- * Categories: woo-commerce, banner, media
+ * Categories: purple
  * Block Types: core/post-content
  * Post Types: page, wp_template
  * Viewport width: 1400

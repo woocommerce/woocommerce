@@ -2,7 +2,7 @@
 /**
  * Title: Stockists
  * Slug: purple/stockists
- * Categories: woo-commerce, text, columns
+ * Categories: columns
  * Keywords: stockists, locations, columns
  * Description: A column layout to display stockists.
  * Block Types: core/columns

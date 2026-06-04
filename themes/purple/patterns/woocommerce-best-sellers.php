@@ -2,7 +2,7 @@
 /**
  * Title: Best Sellers Collection
  * Slug: purple/woocommerce-best-sellers
- * Categories: woo-commerce, featured-selling
+ * Categories: purple
  * Block Types: woocommerce/product-collection
  * Description: A section with a heading and a 4 column product grid.
  */

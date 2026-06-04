@@ -2,7 +2,7 @@
 /**
  * Title: Testimonial with logo
  * Slug: purple/testimonial-with-logo
- * Categories: testimonials, text, media
+ * Categories: testimonials, purple
  * Keywords: testimonials, text, media
  * Description: A testimonial with centered text and a logo.
  */

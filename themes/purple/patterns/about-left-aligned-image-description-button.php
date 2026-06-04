@@ -2,7 +2,7 @@
 /**
  * Title: Image on the left, description on the right
  * Slug: purple/left-aligned-image-description-button
- * Categories: text, about, media
+ * Categories: purple
  * Keywords: about, text, media, image
  * Description: A section with an image on the left, description and button on the right.
  */

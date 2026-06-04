@@ -2,7 +2,7 @@
 /**
  * Title: Size chart
  * Slug: purple/size-chart
- * Categories: woo-commerce, text
+ * Categories: woo-commerce
  * Keywords: size chart, table
  * Description: A size chart table.
  * Block Types: core/table

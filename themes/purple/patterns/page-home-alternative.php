@@ -2,7 +2,7 @@
 /**
  * Title: Shop homepage alternative
  * Slug: purple/page-home-alternative
- * Categories: woo-commerce, about, text, media, columns
+ * Categories: columns
  * Keywords: starter
  * Block Types: core/post-content
  * Post Types: page, wp_template

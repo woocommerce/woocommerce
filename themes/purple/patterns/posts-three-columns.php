@@ -2,7 +2,7 @@
 /**
  * Title: List of posts in three columns
  * Slug: purple/posts-three-columns
- * Categories: posts, featured
+ * Categories: purple
  * Description: A list of posts, 3 columns, with featured image, post date and title.
  * Block Types: core/query
  */

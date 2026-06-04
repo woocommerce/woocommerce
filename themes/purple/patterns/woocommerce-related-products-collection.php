@@ -2,7 +2,7 @@
 /**
  * Title: Related products collection
  * Slug: purple/related-products-collection
- * Categories: woo-commerce, featured, featured-selling, call-to-action
+ * Categories: purple
  * Keywords: woo-commerce, featured, featured-selling, call-to-action
  * Description: A section with a heading and a carousel of related products.
  */
