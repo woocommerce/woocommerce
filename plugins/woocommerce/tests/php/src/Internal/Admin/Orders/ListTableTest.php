@@ -421,7 +421,9 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_handle_bulk_actions_empty_trash_blocked_without_delete_capability(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->delete( false ); // Move to the trash.
+
+		// Move the order to the trash.
+		$order->delete( false );
 
 		$this->login_as_user_with_caps(
 			'orders_editor_without_delete_empty_trash',
