@@ -62,9 +62,9 @@ exports[`PhoneNumberInput should match snapshot with custom renders 1`] = `
     <button
       aria-expanded="false"
       aria-haspopup="listbox"
-      aria-labelledby="downshift-2-label downshift-2-toggle-button"
+      aria-labelledby="downshift-1-label downshift-1-toggle-button"
       class="wcpay-component-phone-number-input__button"
-      id="downshift-2-toggle-button"
+      id="downshift-1-toggle-button"
       type="button"
     >
       US
@@ -82,9 +82,9 @@ exports[`PhoneNumberInput should match snapshot with custom renders 1`] = `
     />
     <ul
       aria-hidden="true"
-      aria-labelledby="downshift-2-label"
+      aria-labelledby="downshift-1-label"
       class="wcpay-component-phone-number-input__menu"
-      id="downshift-2-menu"
+      id="downshift-1-menu"
       role="listbox"
       tabindex="-1"
     />

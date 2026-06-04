@@ -8,7 +8,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -18,7 +18,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -26,7 +26,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -54,13 +54,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
             >
               <label
                 class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
-                for="inspector-text-control-12"
+                for="inspector-text-control-10"
               >
                 Search for items
               </label>
               <input
                 class="components-text-control__input"
-                id="inspector-text-control-12"
+                id="inspector-text-control-10"
                 type="search"
                 value=""
               />
@@ -253,13 +253,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           >
             <label
               class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
-              for="inspector-text-control-12"
+              for="inspector-text-control-10"
             >
               Search for items
             </label>
             <input
               class="components-text-control__input"
-              id="inspector-text-control-12"
+              id="inspector-text-control-10"
               type="search"
               value=""
             />
@@ -487,7 +487,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -497,7 +497,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -505,7 +505,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -936,7 +936,7 @@ exports[`SearchListControl should render a search box and list of options with a
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -946,7 +946,7 @@ exports[`SearchListControl should render a search box and list of options with a
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -954,7 +954,7 @@ exports[`SearchListControl should render a search box and list of options with a
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -1385,7 +1385,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -1395,7 +1395,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -1403,7 +1403,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -1431,13 +1431,13 @@ exports[`SearchListControl should render a search box and list of options, with 
             >
               <label
                 class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
-                for="inspector-text-control-11"
+                for="inspector-text-control-9"
               >
                 Search for items
               </label>
               <input
                 class="components-text-control__input"
-                id="inspector-text-control-11"
+                id="inspector-text-control-9"
                 type="search"
                 value=""
               />
@@ -1513,13 +1513,13 @@ exports[`SearchListControl should render a search box and list of options, with 
           >
             <label
               class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
-              for="inspector-text-control-11"
+              for="inspector-text-control-9"
             >
               Search for items
             </label>
             <input
               class="components-text-control__input"
-              id="inspector-text-control-11"
+              id="inspector-text-control-9"
               type="search"
               value=""
             />
@@ -1630,7 +1630,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -1640,7 +1640,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -1648,7 +1648,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -1676,13 +1676,13 @@ exports[`SearchListControl should render a search box and list of options, with 
             >
               <label
                 class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
-                for="inspector-text-control-10"
+                for="inspector-text-control-8"
               >
                 Testing search label
               </label>
               <input
                 class="components-text-control__input"
-                id="inspector-text-control-10"
+                id="inspector-text-control-8"
                 type="search"
                 value=""
               />
@@ -1860,13 +1860,13 @@ exports[`SearchListControl should render a search box and list of options, with 
           >
             <label
               class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
-              for="inspector-text-control-10"
+              for="inspector-text-control-8"
             >
               Testing search label
             </label>
             <input
               class="components-text-control__input"
-              id="inspector-text-control-10"
+              id="inspector-text-control-8"
               type="search"
               value=""
             />
@@ -2079,7 +2079,7 @@ exports[`SearchListControl should render a search box and no options 1`] = `
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -2089,7 +2089,7 @@ exports[`SearchListControl should render a search box and no options 1`] = `
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -2097,7 +2097,7 @@ exports[`SearchListControl should render a search box and no options 1`] = `
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -2125,13 +2125,13 @@ exports[`SearchListControl should render a search box and no options 1`] = `
             >
               <label
                 class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
-                for="inspector-text-control-6"
+                for="inspector-text-control-4"
               >
                 Search for items
               </label>
               <input
                 class="components-text-control__input"
-                id="inspector-text-control-6"
+                id="inspector-text-control-4"
                 type="search"
                 value=""
               />
@@ -2196,13 +2196,13 @@ exports[`SearchListControl should render a search box and no options 1`] = `
           >
             <label
               class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
-              for="inspector-text-control-6"
+              for="inspector-text-control-4"
             >
               Search for items
             </label>
             <input
               class="components-text-control__input"
-              id="inspector-text-control-6"
+              id="inspector-text-control-4"
               type="search"
               value=""
             />
@@ -2302,7 +2302,7 @@ exports[`SearchListControl should render a search box with a search term, and no
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -2312,7 +2312,7 @@ exports[`SearchListControl should render a search box with a search term, and no
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -2320,7 +2320,7 @@ exports[`SearchListControl should render a search box with a search term, and no
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -2348,13 +2348,13 @@ exports[`SearchListControl should render a search box with a search term, and no
             >
               <label
                 class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
-                for="inspector-text-control-9"
+                for="inspector-text-control-7"
               >
                 Search for items
               </label>
               <input
                 class="components-text-control__input"
-                id="inspector-text-control-9"
+                id="inspector-text-control-7"
                 type="search"
                 value="no matches"
               />
@@ -2419,13 +2419,13 @@ exports[`SearchListControl should render a search box with a search term, and no
           >
             <label
               class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
-              for="inspector-text-control-9"
+              for="inspector-text-control-7"
             >
               Search for items
             </label>
             <input
               class="components-text-control__input"
-              id="inspector-text-control-9"
+              id="inspector-text-control-7"
               type="search"
               value="no matches"
             />
@@ -2525,7 +2525,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -2535,7 +2535,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -2543,7 +2543,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -2571,13 +2571,13 @@ exports[`SearchListControl should render a search box with a search term, and on
             >
               <label
                 class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
-                for="inspector-text-control-7"
+                for="inspector-text-control-5"
               >
                 Search for items
               </label>
               <input
                 class="components-text-control__input"
-                id="inspector-text-control-7"
+                id="inspector-text-control-5"
                 type="search"
                 value="berry"
               />
@@ -2669,13 +2669,13 @@ exports[`SearchListControl should render a search box with a search term, and on
           >
             <label
               class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
-              for="inspector-text-control-7"
+              for="inspector-text-control-5"
             >
               Search for items
             </label>
             <input
               class="components-text-control__input"
-              id="inspector-text-control-7"
+              id="inspector-text-control-5"
               type="search"
               value="berry"
             />
@@ -2802,7 +2802,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -2812,7 +2812,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -2820,7 +2820,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -2848,13 +2848,13 @@ exports[`SearchListControl should render a search box with a search term, and on
             >
               <label
                 class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
-                for="inspector-text-control-8"
+                for="inspector-text-control-6"
               >
                 Search for items
               </label>
               <input
                 class="components-text-control__input"
-                id="inspector-text-control-8"
+                id="inspector-text-control-6"
                 type="search"
                 value="bERry"
               />
@@ -2946,13 +2946,13 @@ exports[`SearchListControl should render a search box with a search term, and on
           >
             <label
               class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
-              for="inspector-text-control-8"
+              for="inspector-text-control-6"
             >
               Search for items
             </label>
             <input
               class="components-text-control__input"
-              id="inspector-text-control-8"
+              id="inspector-text-control-6"
               type="search"
               value="bERry"
             />
