@@ -58,7 +58,7 @@ catalogs:
         '@wordpress/wordcount': 4.33.1
     # A curated set of `@wordpress/*` packages that are not bundled with WordPress core and can use current npm versions.
     wp-bundled:
-        '@wordpress/admin-ui': 2.1.0
+        '@wordpress/admin-ui': 1.12.0
         '@wordpress/dataviews': 15.0.0
         '@wordpress/global-styles-engine': 1.14.0
         '@wordpress/router': 1.47.0
