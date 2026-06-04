@@ -60,6 +60,8 @@ class Autoloader {
 	 * Returns the configured (but NOT registered) loader so the caller controls
 	 * registration and tests can exercise it without touching the global SPL stack.
 	 *
+	 * @since 11.0.0
+	 *
 	 * @return \Composer\Autoload\ClassLoader|null The loader, or null if the
 	 *                                             Composer files are unavailable or
 	 *                                             a foreign ClassLoader shape is present.

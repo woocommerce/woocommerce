@@ -20,29 +20,29 @@ class AutoloaderTest extends \WP_UnitTestCase {
 	 * @testdox build_woocommerce_psr4_fallback() resolves WooCommerce classes only
 	 */
 	public function test_build_woocommerce_psr4_fallback_scopes_to_woocommerce(): void {
-		$loader = Autoloader::build_woocommerce_psr4_fallback();
+		$sut = Autoloader::build_woocommerce_psr4_fallback();
 
 		$this->assertInstanceOf(
 			\Composer\Autoload\ClassLoader::class,
-			$loader,
+			$sut,
 			'Builder must return a ClassLoader when the Composer files are present (they ship in the build).'
 		);
 
 		// Positive: resolves a real WooCommerce src class from disk via PSR-4.
 		$this->assertNotFalse(
-			$loader->findFile( 'Automattic\\WooCommerce\\Enums\\DefaultCustomerAddress' ),
+			$sut->findFile( 'Automattic\\WooCommerce\\Enums\\DefaultCustomerAddress' ),
 			'Fallback must resolve a WooCommerce src class.'
 		);
 
 		// Scoping: must NOT resolve a non-WooCommerce vendor namespace that exists in the full map.
 		$this->assertFalse(
-			$loader->findFile( 'Opis\\JsonSchema\\Validator' ),
+			$sut->findFile( 'Opis\\JsonSchema\\Validator' ),
 			'Fallback must be scoped to WooCommerce namespaces and refuse non-WooCommerce ones.'
 		);
 
 		// Bogus: must not invent files for non-existent WooCommerce classes.
 		$this->assertFalse(
-			$loader->findFile( 'Automattic\\WooCommerce\\Nope\\Does_Not_Exist_XYZ' ),
+			$sut->findFile( 'Automattic\\WooCommerce\\Nope\\Does_Not_Exist_XYZ' ),
 			'Fallback must not resolve non-existent classes.'
 		);
 	}
