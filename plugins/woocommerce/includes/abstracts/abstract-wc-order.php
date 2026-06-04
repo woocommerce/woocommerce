@@ -2020,7 +2020,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @return bool
 	 */
-	public function has_fixed_end_prices(): bool {
+	private function has_fixed_end_prices(): bool {
 		/**
 		 * Filters if taxes should be removed from locations outside the store base location.
 		 *
@@ -2144,6 +2144,37 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		return apply_filters( 'woocommerce_order_amount_item_subtotal', $subtotal, $this, $item, $inc_tax, $round );
+	}
+
+	/**
+	 * Get the items subtotal amount to display in the admin order screen.
+	 *
+	 * For stores with fixed end-prices (prices entered including tax with the
+	 * woocommerce_adjust_non_base_location_prices adjustment disabled), the cart
+	 * tax is removed so the displayed subtotal matches the ex-tax cart display.
+	 *
+	 * @return float
+	 */
+	public function get_subtotal_amount_to_display() {
+		return $this->has_fixed_end_prices()
+			? (float) $this->get_subtotal() - (float) $this->get_cart_tax()
+			: (float) $this->get_subtotal();
+	}
+
+	/**
+	 * Get the per-unit item subtotal amount to display in the admin order screen.
+	 *
+	 * For stores with fixed end-prices (prices entered including tax with the
+	 * woocommerce_adjust_non_base_location_prices adjustment disabled), the item
+	 * tax is removed so the displayed amount matches the ex-tax cart display.
+	 *
+	 * @param object $item Item to get the subtotal from.
+	 * @return float
+	 */
+	public function get_item_subtotal_to_display( $item ) {
+		return ( $this->has_fixed_end_prices() && $item instanceof WC_Order_Item_Product && $item->get_quantity() )
+			? NumberUtil::round( ( (float) $item->get_subtotal() - (float) $item->get_subtotal_tax() ) / $item->get_quantity(), wc_get_price_decimals() )
+			: $this->get_item_subtotal( $item, false, true );
 	}
 
 	/**
