@@ -39,6 +39,7 @@ const mapWpModules = [
 	'@wordpress/core-data',
 	'@wordpress/data',
 	'@wordpress/editor',
+	'@wordpress/element',
 	'@wordpress/html-entities',
 	'@wordpress/keyboard-shortcuts',
 	'@wordpress/patterns',
