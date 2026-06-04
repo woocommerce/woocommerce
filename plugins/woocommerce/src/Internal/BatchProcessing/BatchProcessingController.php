@@ -97,7 +97,7 @@ class BatchProcessingController {
 	 */
 	public function enqueue_processor( string $processor_class_name ): void {
 		$pending_updates = $this->get_enqueued_processors();
-		if ( ! in_array( $processor_class_name, array_keys( $pending_updates ), true ) ) {
+		if ( ! in_array( $processor_class_name, $pending_updates, true ) ) {
 			$pending_updates[] = $processor_class_name;
 			$this->set_enqueued_processors( $pending_updates );
 		}
