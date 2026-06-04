@@ -1060,10 +1060,16 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		// Reload the order so it picks up the refund.
 		$order = wc_get_order( $id );
 
-		// Should not throw a TypeError (string - string arithmetic) on PHP 8.x.
+		// Force a non-numeric total via filter to confirm the (float) cast prevents a TypeError on
+		// PHP 8.x. Without the cast, `non-numeric-string − float` is a fatal TypeError.
+		$non_numeric_filter = fn( $value ) => 'not-a-number';
+		add_filter( 'woocommerce_order_get_total', $non_numeric_filter );
+
+		// Should not throw a TypeError when the filter returns a non-numeric string.
 		$formatted_total = $order->get_formatted_order_total();
 
-		$this->assertStringContainsString( '75.00', wp_strip_all_tags( $formatted_total ) );
+		remove_filter( 'woocommerce_order_get_total', $non_numeric_filter );
+
 		$this->assertStringContainsString( '<del', $formatted_total );
 		$this->assertStringContainsString( '<ins', $formatted_total );
 	}
