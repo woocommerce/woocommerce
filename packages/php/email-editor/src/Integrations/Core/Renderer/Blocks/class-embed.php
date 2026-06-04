@@ -356,30 +356,20 @@ class Embed extends Abstract_Block_Renderer {
 	 * @return string Translated label for the provider.
 	 */
 	private function get_translated_provider_label( string $provider ): string {
-		switch ( $provider ) {
-			case 'spotify':
-				return __( 'Listen on Spotify', 'woocommerce' );
-			case 'soundcloud':
-				return __( 'Listen on SoundCloud', 'woocommerce' );
-			case 'pocket-casts':
-				return __( 'Listen on Pocket Casts', 'woocommerce' );
-			case 'mixcloud':
-				return __( 'Listen on Mixcloud', 'woocommerce' );
-			case 'reverbnation':
-				return __( 'Listen on ReverbNation', 'woocommerce' );
-			case 'youtube':
-				return __( 'Watch on YouTube', 'woocommerce' );
-			case 'videopress':
-				return __( 'Watch on VideoPress', 'woocommerce' );
-			case 'vimeo':
-				return __( 'Watch on Vimeo', 'woocommerce' );
-			case 'tiktok':
-				return __( 'Watch on TikTok', 'woocommerce' );
-			case 'dailymotion':
-				return __( 'Watch on Dailymotion', 'woocommerce' );
-			default:
-				return __( 'Listen to the audio', 'woocommerce' );
-		}
+		$labels = array(
+			'spotify'      => __( 'Listen on Spotify', 'woocommerce' ),
+			'soundcloud'   => __( 'Listen on SoundCloud', 'woocommerce' ),
+			'pocket-casts' => __( 'Listen on Pocket Casts', 'woocommerce' ),
+			'mixcloud'     => __( 'Listen on Mixcloud', 'woocommerce' ),
+			'reverbnation' => __( 'Listen on ReverbNation', 'woocommerce' ),
+			'youtube'      => __( 'Watch on YouTube', 'woocommerce' ),
+			'videopress'   => __( 'Watch on VideoPress', 'woocommerce' ),
+			'vimeo'        => __( 'Watch on Vimeo', 'woocommerce' ),
+			'tiktok'       => __( 'Watch on TikTok', 'woocommerce' ),
+			'dailymotion'  => __( 'Watch on Dailymotion', 'woocommerce' ),
+		);
+
+		return $labels[ $provider ] ?? __( 'Listen to the audio', 'woocommerce' );
 	}
 
 	/**
