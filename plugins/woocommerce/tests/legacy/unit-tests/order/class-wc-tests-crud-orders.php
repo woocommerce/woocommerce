@@ -1062,7 +1062,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		// Force a non-numeric total via filter to confirm the (float) cast prevents a TypeError on
 		// PHP 8.x. Without the cast, `non-numeric-string − float` is a fatal TypeError.
-		$non_numeric_filter = fn( $value ) => 'not-a-number';
+		$non_numeric_filter = fn() => 'not-a-number';
 		add_filter( 'woocommerce_order_get_total', $non_numeric_filter );
 
 		// Should not throw a TypeError when the filter returns a non-numeric string.
