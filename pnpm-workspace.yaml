@@ -10,7 +10,6 @@ catalogs:
         '@types/wordpress__viewport': 5.5.3
         '@wordpress/a11y': 4.33.1
         '@wordpress/api-fetch': 7.33.1
-        '@wordpress/admin-ui': 1.1.5
         '@wordpress/base-styles': 6.9.1
         '@wordpress/blob': 4.33.1
         '@wordpress/block-editor': 15.6.9
@@ -57,6 +56,14 @@ catalogs:
         '@wordpress/viewport': 6.33.1
         '@wordpress/warning': 3.33.1
         '@wordpress/wordcount': 4.33.1
+    # A curated set of `@wordpress/*` packages that are not bundled with WordPress core and can use current npm versions.
+    wp-bundled:
+        '@wordpress/admin-ui': 2.1.0
+        '@wordpress/dataviews': 15.0.0
+        '@wordpress/global-styles-engine': 1.14.0
+        '@wordpress/router': 1.47.0
+        '@wordpress/theme': 0.14.0
+        '@wordpress/ui': 0.14.0
 
 packages:
     - 'packages/js/*'
