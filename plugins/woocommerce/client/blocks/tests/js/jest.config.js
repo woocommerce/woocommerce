@@ -20,6 +20,7 @@ const singletonWpModules = [
 	'@wordpress/data',
 	'@wordpress/editor',
 	'@wordpress/html-entities',
+	'@wordpress/icons',
 	'@wordpress/keyboard-shortcuts',
 	'@wordpress/patterns',
 	'@wordpress/rich-text',
@@ -85,7 +86,9 @@ module.exports = {
 		'@woocommerce/entities': 'assets/js/entities',
 		'@woocommerce/stores/(.*)$': 'assets/js/base/stores/$1',
 		'^react$': '<rootDir>/node_modules/react',
+		'^react/(.*)$': '<rootDir>/node_modules/react/$1',
 		'^react-dom$': '<rootDir>/node_modules/react-dom',
+		'^react-dom/(.*)$': '<rootDir>/node_modules/react-dom/$1',
 		// Catch-all for monorepo @woocommerce/* packages: route bare and
 		// subpath imports through source so tests don't depend on built
 		// artifacts. Must come after all blocks-internal aliases above and

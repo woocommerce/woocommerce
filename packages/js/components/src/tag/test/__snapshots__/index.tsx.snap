@@ -8,7 +8,7 @@ exports[`Tag <Tag label="foo" /> should render a tag with the label foo 1`] = `
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     >
       Notifications
     </p>
@@ -18,7 +18,7 @@ exports[`Tag <Tag label="foo" /> should render a tag with the label foo 1`] = `
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -26,7 +26,7 @@ exports[`Tag <Tag label="foo" /> should render a tag with the label foo 1`] = `
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div>
       <span
@@ -133,7 +133,7 @@ exports[`Tag <Tag label="foo" popoverContents={ <p>This is a popover</p> } /> sh
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     >
       Notifications
     </p>
@@ -143,7 +143,7 @@ exports[`Tag <Tag label="foo" popoverContents={ <p>This is a popover</p> } /> sh
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -151,7 +151,7 @@ exports[`Tag <Tag label="foo" popoverContents={ <p>This is a popover</p> } /> sh
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div>
       <span
@@ -159,7 +159,7 @@ exports[`Tag <Tag label="foo" popoverContents={ <p>This is a popover</p> } /> sh
       >
         <button
           class="components-button woocommerce-tag__text"
-          id="woocommerce-tag__label-2"
+          id="woocommerce-tag__label-3"
           type="button"
         >
           <span
@@ -182,7 +182,7 @@ exports[`Tag <Tag label="foo" popoverContents={ <p>This is a popover</p> } /> sh
     >
       <button
         class="components-button woocommerce-tag__text"
-        id="woocommerce-tag__label-2"
+        id="woocommerce-tag__label-3"
         type="button"
       >
         <span
@@ -425,7 +425,7 @@ exports[`Tag <Tag label="foo" screenReaderLabel="FooBar" /> should render a tag 
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     >
       Notifications
     </p>
@@ -435,7 +435,7 @@ exports[`Tag <Tag label="foo" screenReaderLabel="FooBar" /> should render a tag 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -443,7 +443,7 @@ exports[`Tag <Tag label="foo" screenReaderLabel="FooBar" /> should render a tag 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div>
       <span
@@ -451,7 +451,7 @@ exports[`Tag <Tag label="foo" screenReaderLabel="FooBar" /> should render a tag 
       >
         <span
           class="woocommerce-tag__text"
-          id="woocommerce-tag__label-3"
+          id="woocommerce-tag__label-4"
         >
           <span
             class="screen-reader-text"
@@ -473,7 +473,7 @@ exports[`Tag <Tag label="foo" screenReaderLabel="FooBar" /> should render a tag 
     >
       <span
         class="woocommerce-tag__text"
-        id="woocommerce-tag__label-3"
+        id="woocommerce-tag__label-4"
       >
         <span
           class="screen-reader-text"

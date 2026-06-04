@@ -8,7 +8,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     >
       Notifications
     </p>
@@ -18,7 +18,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -26,7 +26,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div>
       <div
@@ -409,7 +409,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     >
       Notifications
     </p>
@@ -419,7 +419,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -427,7 +427,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div>
       <div
@@ -1038,7 +1038,7 @@ exports[`SearchListControl should render a search box and list of options with a
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     >
       Notifications
     </p>
@@ -1048,7 +1048,7 @@ exports[`SearchListControl should render a search box and list of options with a
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -1056,7 +1056,7 @@ exports[`SearchListControl should render a search box and list of options with a
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div>
       <div
@@ -1667,7 +1667,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     >
       Notifications
     </p>
@@ -1677,7 +1677,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -1685,7 +1685,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div>
       <div
@@ -1912,7 +1912,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     >
       Notifications
     </p>
@@ -1922,7 +1922,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -1930,7 +1930,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div>
       <div
@@ -2541,7 +2541,7 @@ exports[`SearchListControl should render a search box and no options 1`] = `
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     >
       Notifications
     </p>
@@ -2551,7 +2551,7 @@ exports[`SearchListControl should render a search box and no options 1`] = `
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -2559,7 +2559,7 @@ exports[`SearchListControl should render a search box and no options 1`] = `
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div>
       <div
@@ -2762,7 +2762,7 @@ exports[`SearchListControl should render a search box with a search term, and no
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     >
       Notifications
     </p>
@@ -2772,7 +2772,7 @@ exports[`SearchListControl should render a search box with a search term, and no
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -2780,7 +2780,7 @@ exports[`SearchListControl should render a search box with a search term, and no
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div>
       <div
@@ -3391,7 +3391,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     >
       Notifications
     </p>
@@ -3401,7 +3401,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -3409,7 +3409,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div>
       <div
@@ -4020,7 +4020,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     >
       Notifications
     </p>
@@ -4030,7 +4030,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -4038,7 +4038,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div>
       <div
@@ -4357,7 +4357,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     >
       Notifications
     </p>
@@ -4367,7 +4367,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -4375,7 +4375,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div>
       <div
@@ -5118,7 +5118,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       class="a11y-speak-intro-text"
       hidden=""
       id="a11y-speak-intro-text"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     >
       Notifications
     </p>
@@ -5128,7 +5128,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -5136,7 +5136,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;"
     />
     <div>
       <div
