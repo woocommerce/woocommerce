@@ -10,26 +10,31 @@ use WP_User;
 /**
  * POS access + capability model.
  *
- * A user has POS access if and only if they hold the `pos_staff` WP role.
- * That role is the sole source of truth — the assigned preset meta is a
- * convenience for selecting which `pos_*` capabilities to grant, but the
- * meta key may disappear in a future iteration and must not be treated as
- * an authorization signal. The preset (cashier / manager / admin) is a
- * UI-curated bundle — selecting one applies the matching `pos_*`
- * capabilities to the user as **real WP capabilities** (stored in
- * `wp_capabilities` user meta, visible via `current_user_can( 'pos_*' )`
- * and the standard `/wp/v2/users` response).
+ * A user has POS access if and only if they hold at least one `pos_*`
+ * capability — the same primitive WP uses for every other authorization
+ * decision. The `_woocommerce_pos_preset` user meta records which preset was
+ * assigned (for the UI to render and for set_pos_preset() to translate into
+ * concrete caps), but it is not the gate: a stray or planted meta value alone
+ * cannot grant access.
  *
- * The `pos_staff` WP role itself holds only `read`, matching the
- * customer/subscriber shape, so POS-only users can manage their own profile
- * without gaining any non-POS capabilities. Existing WP users (shop_manager,
- * administrator, etc.) get `pos_staff` added as a secondary role; their
- * original role capabilities are untouched.
+ * set_pos_preset() never touches WP roles — it only manages caps + meta. POS
+ * access can therefore be granted to any existing user (shop_manager,
+ * administrator, …) without altering their role, and revoked without leaving
+ * them roleless. This sidesteps the original concern entirely: there is no
+ * `pos_staff` role bolted onto existing users for the users.php "Change role
+ * to…" dropdown to overwrite.
+ *
+ * The `pos_staff` WP role exists only as the default role for brand-new
+ * POS-only accounts created from the Add New Staff form (the form's role
+ * dropdown defaults to it). It holds only `read`, matching the
+ * customer/subscriber shape, so a POS-only user can manage their own profile
+ * without gaining any non-POS capabilities. It is a convenience label, never
+ * the authorization signal — see has_pos_access().
  *
  * Preset bundles live in capabilities_for_preset(). Changing a preset
  * definition does NOT retroactively update users — they keep whatever caps
  * were applied when the preset was last set. A future preset-version
- * migration will reapply caps across all pos_staff users when needed.
+ * migration will reapply caps across all POS-access users when needed.
  *
  * @since 11.0.0
  * @internal
@@ -37,10 +42,12 @@ use WP_User;
 class Capabilities {
 
 	/**
-	 * WP role marking that a user can use the POS app.
+	 * Default WP role for brand-new POS-only accounts.
 	 *
-	 * Registered in WC_Install::create_roles(). Added to a user via
-	 * set_pos_preset() and removed when the preset is cleared.
+	 * Registered in WC_Install::create_roles() and assigned at account creation
+	 * by the Add New Staff form (its role dropdown defaults to this). NOT added
+	 * to existing users who are granted POS access — they keep their own role —
+	 * and NOT the authorization signal. See has_pos_access().
 	 */
 	public const POS_STAFF_ROLE = 'pos_staff';
 
@@ -141,12 +148,39 @@ class Capabilities {
 	}
 
 	/**
+	 * WP_User_Query args that select every user with POS access.
+	 *
+	 * Keyed off the preset meta so the result is stable even if the `pos_staff`
+	 * role label has been dropped (e.g. by a users.php role overwrite). Callers
+	 * still need to filter individual results through get_pos_preset() to skip
+	 * stale or invalid preset values.
+	 *
+	 * @return array<string, mixed>
+	 *
+	 * @since 11.0.0
+	 */
+	public static function pos_staff_user_query_args(): array {
+		return array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- POS access is keyed on this meta key; the row count is bounded by the number of staff (typically a handful).
+			'meta_key'     => self::POS_PRESET_META_KEY,
+			'meta_compare' => 'EXISTS',
+		);
+	}
+
+	/**
 	 * Whether a user has any POS access at all.
 	 *
-	 * Checks the `pos_staff` WP role only. Preset meta is intentionally not
-	 * consulted — it is informational about which preset was last assigned,
-	 * not an access flag, and a stale or manually-set value must not grant
-	 * access on its own.
+	 * Returns true if the user holds at least one `pos_*` capability. The
+	 * any-cap definition is the right shape for both fixed presets (where each
+	 * preset's caps are granted as a bundle) and the future granular model
+	 * (where individual `pos_*` caps may be assigned without any baseline
+	 * cap like `pos_process_sales`).
+	 *
+	 * The `pos_staff` WP role is intentionally NOT consulted: it can be
+	 * silently overwritten by the users.php "Change role to…" dropdown, which
+	 * is the bug this access model exists to avoid. The preset meta is also
+	 * not consulted — it records *which* preset was last assigned but is not
+	 * the authorization signal in WP's capability model.
 	 *
 	 * @param int $user_id Target user.
 	 * @return bool
@@ -154,11 +188,15 @@ class Capabilities {
 	 * @since 11.0.0
 	 */
 	public static function has_pos_access( int $user_id ): bool {
-		$user = get_user_by( 'id', $user_id );
-		if ( ! $user instanceof WP_User ) {
+		if ( $user_id <= 0 ) {
 			return false;
 		}
-		return in_array( self::POS_STAFF_ROLE, $user->roles, true );
+		foreach ( self::all_pos_capabilities() as $cap ) {
+			if ( user_can( $user_id, $cap ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -181,21 +219,19 @@ class Capabilities {
 	/**
 	 * Assign or clear the POS preset for a user.
 	 *
+	 * WP roles are never touched here — only caps + meta. Granting access to an
+	 * existing user leaves their role intact; revoking it never leaves them
+	 * roleless. The `pos_staff` role is assigned at account creation for new
+	 * POS-only accounts (see POS_STAFF_ROLE), not by this method.
+	 *
 	 * Side effects:
-	 *  - On assign: stores the preset in user meta, adds the `pos_staff` WP
-	 *    role to the user (alongside any existing roles), and grants the
-	 *    preset's `pos_*` capabilities via add_cap() so they are real WP
-	 *    caps visible to current_user_can() and /wp/v2/users.
-	 *  - On clear (null): strips every pos_* cap, removes the `pos_staff`
-	 *    WP role, and deletes the preset meta. The user's other roles and
-	 *    non-POS capabilities are preserved.
+	 *  - On assign: stores the preset in user meta and grants the preset's
+	 *    `pos_*` capabilities via add_cap() (these are the access signal).
+	 *  - On clear (null): strips every pos_* cap and deletes the preset meta,
+	 *    which is what revokes access. Other roles and non-POS caps are kept.
 	 *  - On preset change: strips the prior pos_* caps before granting the
 	 *    new ones, so a user moving from Manager to Cashier doesn't keep
 	 *    issue_refunds, etc.
-	 *
-	 * If `pos_staff` would become the user's only role, the admin staff
-	 * handler is responsible for offering to delete the user entirely —
-	 * this method does not orphan users to a roleless state.
 	 *
 	 * @param int         $user_id Target user.
 	 * @param string|null $preset  One of self::assignable_pos_presets(), or null to clear.
@@ -224,17 +260,10 @@ class Capabilities {
 
 		if ( null === $preset ) {
 			delete_user_meta( $user_id, self::POS_PRESET_META_KEY );
-			if ( in_array( self::POS_STAFF_ROLE, $user->roles, true ) ) {
-				$user->remove_role( self::POS_STAFF_ROLE );
-			}
 			return true;
 		}
 
 		update_user_meta( $user_id, self::POS_PRESET_META_KEY, $preset );
-
-		if ( ! in_array( self::POS_STAFF_ROLE, $user->roles, true ) ) {
-			$user->add_role( self::POS_STAFF_ROLE );
-		}
 
 		foreach ( array_keys( self::capabilities_for_preset( $preset ) ) as $cap ) {
 			$user->add_cap( $cap );

@@ -84,26 +84,31 @@ class POSPinService {
 
 	/**
 	 * Whether the given plaintext PIN matches a PIN record stored on any other
-	 * user holding the pos_staff WP role.
+	 * user with POS access.
 	 *
-	 * Scoping to pos_staff (rather than every user with a PIN meta entry) keeps
-	 * stale meta on non-POS users from causing phantom collisions and lets the
-	 * scan use the role index instead of a meta-key scan. Cost is bounded by
-	 * the number of active staff — typically a handful — and each row costs one
-	 * PBKDF2 evaluation. The candidate user is excluded so that idempotent
-	 * re-sets ("save same PIN again") are allowed.
+	 * Scoping to POS-access users (rather than every user with a PIN meta entry)
+	 * keeps stale meta on non-POS users from causing phantom collisions. The
+	 * query is keyed off the preset meta — the authoritative POS-access signal —
+	 * not the `pos_staff` role, which is only a label that can briefly drop on
+	 * role overwrites. Cost is bounded by the number of active staff (typically
+	 * a handful), and each row costs one PBKDF2 evaluation. The candidate user
+	 * is excluded so idempotent re-sets ("save same PIN again") are allowed;
+	 * pass 0 (the default) to check uniqueness against every existing record,
+	 * which the wp-admin add flow needs because the user does not exist yet.
 	 *
 	 * @param string $pin             Plaintext PIN candidate. Assumed format-validated.
-	 * @param int    $exclude_user_id User being assigned the PIN; excluded from the scan.
+	 * @param int    $exclude_user_id User being assigned the PIN; excluded from the scan. Pass 0 for create-time checks.
 	 * @return bool
 	 */
-	private function is_pin_used_by_other_user( string $pin, int $exclude_user_id ): bool {
+	public function is_pin_used_by_other_user( string $pin, int $exclude_user_id = 0 ): bool {
 		$user_query = new WP_User_Query(
-			array(
-				'role'    => Capabilities::POS_STAFF_ROLE,
-				'fields'  => 'ID',
-				'number'  => -1,
-				'exclude' => array( $exclude_user_id ),
+			array_merge(
+				Capabilities::pos_staff_user_query_args(),
+				array(
+					'fields'  => 'ID',
+					'number'  => -1,
+					'exclude' => array( $exclude_user_id ),
+				)
 			)
 		);
 

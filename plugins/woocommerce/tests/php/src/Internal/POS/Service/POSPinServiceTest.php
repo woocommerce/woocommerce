@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\POS\Service;
 
+use Automattic\WooCommerce\Internal\POS\Capabilities;
 use Automattic\WooCommerce\Internal\POS\Service\POSPinService;
 use WC_Unit_Test_Case;
 
@@ -31,7 +32,8 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut     = new POSPinService();
-		$this->user_id = self::factory()->user->create( array( 'role' => 'pos_staff' ) );
+		$this->user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		Capabilities::set_pos_preset( $this->user_id, Capabilities::POS_PRESET_CASHIER );
 	}
 
 	/**
@@ -186,8 +188,9 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	 * @testdox Should reject set_pin when the PIN is already used by another staff member.
 	 */
 	public function test_set_pin_rejects_pin_in_use_by_another_user(): void {
-		$other_id               = self::factory()->user->create( array( 'role' => 'pos_staff' ) );
+		$other_id               = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 		$this->extra_user_ids[] = $other_id;
+		Capabilities::set_pos_preset( $other_id, Capabilities::POS_PRESET_CASHIER );
 
 		$this->assertTrue( $this->sut->set_pin( $other_id, '1234' ) );
 
@@ -202,18 +205,19 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should ignore PINs on users who do not hold the pos_staff role.
+	 * @testdox Should ignore PINs on users who do not have POS access.
 	 *
 	 * A non-POS user with a stale `_woocommerce_pos_pin` meta entry (e.g. left over
 	 * from v1 or a manual edit) must not block a real POS staff member from using
-	 * the same plaintext PIN. Uniqueness is scoped to pos_staff role holders.
+	 * the same plaintext PIN. Uniqueness is scoped to users with the POS preset
+	 * meta set — non-POS users are invisible to the uniqueness scan.
 	 */
 	public function test_set_pin_ignores_non_pos_staff_users_with_stale_pin_meta(): void {
 		$non_pos_user           = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 		$this->extra_user_ids[] = $non_pos_user;
 
-		// Plant a stale PIN record directly so we don't depend on set_pin's role
-		// check accepting a non-pos_staff user.
+		// Plant a stale PIN record directly so we don't depend on set_pin's
+		// preset check accepting a non-POS user.
 		update_user_meta(
 			$non_pos_user,
 			POSPinService::PIN_META_KEY,

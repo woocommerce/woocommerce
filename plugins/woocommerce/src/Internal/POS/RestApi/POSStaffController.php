@@ -25,9 +25,9 @@ use WP_User;
  * has to render a phantom staff member it can't authenticate.
  *
  * Permission: `manage_woocommerce` — i.e. administrator + shop_manager. POS-only
- * users (cashiers / managers, holding the `pos_staff` WP role) never call this
- * endpoint directly; the device admin reads the staff list on their behalf and
- * PIN entry is validated client-side against the cached payload.
+ * users (cashiers / managers, labelled with the `pos_staff` WP role) never call
+ * this endpoint directly; the device admin reads the staff list on their behalf
+ * and PIN entry is validated client-side against the cached payload.
  *
  * @since 11.0.0
  * @internal
@@ -90,7 +90,7 @@ class POSStaffController extends RestApiControllerBase {
 	}
 
 	/**
-	 * List every user holding the pos_staff role with a valid preset assignment.
+	 * List every user with POS access that has a valid preset and PIN.
 	 *
 	 * @param WP_REST_Request $request The incoming request.
 	 * @return list<array<string, mixed>>
@@ -101,11 +101,13 @@ class POSStaffController extends RestApiControllerBase {
 		unset( $request );
 
 		$user_query = new WP_User_Query(
-			array(
-				'role'    => Capabilities::POS_STAFF_ROLE,
-				'orderby' => 'display_name',
-				'order'   => 'ASC',
-				'number'  => -1,
+			array_merge(
+				Capabilities::pos_staff_user_query_args(),
+				array(
+					'orderby' => 'display_name',
+					'order'   => 'ASC',
+					'number'  => -1,
+				)
 			)
 		);
 
@@ -115,9 +117,9 @@ class POSStaffController extends RestApiControllerBase {
 				continue;
 			}
 
-			// Defensive: a user could have pos_staff role but no preset assigned
-			// (e.g. manually granted in wp-admin Users). Skip rather than ship a
-			// half-formed row the client can't render.
+			// Defensive: a preset meta value can be stale or non-assignable
+			// (e.g. set manually via wp-admin Users meta edit). Skip rather
+			// than ship a half-formed row the client can't render.
 			$preset = Capabilities::get_pos_preset( (int) $user->ID );
 			if ( null === $preset ) {
 				continue;
@@ -125,7 +127,7 @@ class POSStaffController extends RestApiControllerBase {
 
 			// PIN is the sole operator credential at the till; a row without one
 			// would be unauthenticatable on the device. The admin form enforces
-			// PIN at add/save time, but a manual edit could leave a pos_staff
+			// PIN at add/save time, but a manual edit could leave a POS-access
 			// user without one — skip them so `pin` is guaranteed non-null in
 			// the wire payload.
 			$pin_record = $this->pin_service->get_public_pin_record( (int) $user->ID );

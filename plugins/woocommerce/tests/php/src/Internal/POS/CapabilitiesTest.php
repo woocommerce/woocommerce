@@ -11,7 +11,8 @@ use WC_Unit_Test_Case;
  *
  * Covers preset assignment, the absence of implicit access from WP roles, the
  * capability matrix per preset, set_pos_preset validation, and the pos_staff
- * WP role wiring.
+ * WP role label wiring (added/removed by set_pos_preset; not auto-reapplied
+ * when the users.php dropdown overwrites it — admin's explicit intent wins).
  */
 class CapabilitiesTest extends WC_Unit_Test_Case {
 
@@ -102,50 +103,52 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Assigning a preset adds the pos_staff WP role to the user.
+	 * @testdox Assigning a preset to an existing user leaves their WP role untouched.
+	 *
+	 * Granting POS access must not bolt the pos_staff role onto an existing user
+	 * (e.g. a shop_manager) — that is the role that the users.php dropdown could
+	 * silently overwrite, the bug this model avoids. Access comes from the caps,
+	 * not a role.
 	 */
-	public function test_set_pos_preset_adds_pos_staff_role(): void {
+	public function test_set_pos_preset_does_not_add_pos_staff_role(): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
 
 		Capabilities::set_pos_preset( $user_id, Capabilities::POS_PRESET_MANAGER );
 
 		$user = get_userdata( $user_id );
-		$this->assertContains( Capabilities::POS_STAFF_ROLE, $user->roles );
-		$this->assertContains( 'shop_manager', $user->roles );
+		$this->assertSame(
+			array( 'shop_manager' ),
+			$user->roles,
+			'Granting POS access must not change the user\'s WP roles.'
+		);
+		$this->assertTrue( Capabilities::has_pos_access( $user_id ) );
 
 		wp_delete_user( $user_id );
 	}
 
 	/**
-	 * @testdox Clearing a preset removes the pos_staff WP role but preserves other roles.
+	 * @testdox Clearing a preset leaves the user's WP roles untouched.
+	 *
+	 * A POS-only account (created with pos_staff as its sole role) keeps that
+	 * role — revoking access never leaves it roleless — and an existing user
+	 * keeps their own role. Access is revoked purely by stripping the caps.
 	 */
-	public function test_set_pos_preset_null_removes_pos_staff_role(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
-		Capabilities::set_pos_preset( $user_id, Capabilities::POS_PRESET_MANAGER );
+	public function test_set_pos_preset_null_leaves_roles_untouched(): void {
+		$pos_only = self::factory()->user->create( array( 'role' => Capabilities::POS_STAFF_ROLE ) );
+		$existing = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+		Capabilities::set_pos_preset( $pos_only, Capabilities::POS_PRESET_CASHIER );
+		Capabilities::set_pos_preset( $existing, Capabilities::POS_PRESET_MANAGER );
 
-		Capabilities::set_pos_preset( $user_id, null );
+		Capabilities::set_pos_preset( $pos_only, null );
+		Capabilities::set_pos_preset( $existing, null );
 
-		$user = get_userdata( $user_id );
-		$this->assertNotContains( Capabilities::POS_STAFF_ROLE, $user->roles );
-		$this->assertContains( 'shop_manager', $user->roles );
+		$this->assertSame( array( Capabilities::POS_STAFF_ROLE ), get_userdata( $pos_only )->roles );
+		$this->assertSame( array( 'shop_manager' ), get_userdata( $existing )->roles );
+		$this->assertFalse( Capabilities::has_pos_access( $pos_only ), 'Caps stripped → no access.' );
+		$this->assertFalse( Capabilities::has_pos_access( $existing ), 'Caps stripped → no access.' );
 
-		wp_delete_user( $user_id );
-	}
-
-	/**
-	 * @testdox Re-assigning a preset on a user who already has pos_staff is a no-op for roles.
-	 */
-	public function test_set_pos_preset_idempotent_role_addition(): void {
-		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
-
-		Capabilities::set_pos_preset( $user_id, Capabilities::POS_PRESET_CASHIER );
-		Capabilities::set_pos_preset( $user_id, Capabilities::POS_PRESET_MANAGER );
-
-		$user            = get_userdata( $user_id );
-		$pos_staff_count = count( array_keys( $user->roles, Capabilities::POS_STAFF_ROLE, true ) );
-		$this->assertSame( 1, $pos_staff_count, 'pos_staff role should appear exactly once after re-assignment.' );
-
-		wp_delete_user( $user_id );
+		wp_delete_user( $pos_only );
+		wp_delete_user( $existing );
 	}
 
 	/**
@@ -297,30 +300,36 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox has_pos_access requires the pos_staff role — preset meta alone does NOT grant access.
-	 *
-	 * The preset meta is a UI convenience for selecting which capability bundle to
-	 * apply; the WP role is the authorization signal. A stale or manually-set
-	 * preset value on a user who does not hold pos_staff must not be treated as
-	 * POS access.
+	 * @testdox has_pos_access is false when the user holds no pos_* caps, even with stale preset meta.
 	 */
-	public function test_has_pos_access_requires_pos_staff_role_not_just_preset_meta(): void {
+	public function test_has_pos_access_false_when_no_pos_caps(): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 
-		// Plant the preset meta directly, bypassing set_pos_preset() so the
-		// pos_staff role is NOT added. This simulates stale meta on a user who
-		// never held the role or whose role was removed but meta wasn't cleaned up.
+		// Plant the preset meta directly, bypassing set_pos_preset() so no
+		// pos_* caps are granted. Simulates tampered meta or a partial migration.
 		update_user_meta( $user_id, Capabilities::POS_PRESET_META_KEY, Capabilities::POS_PRESET_CASHIER );
 
-		$this->assertSame(
-			Capabilities::POS_PRESET_CASHIER,
-			Capabilities::get_pos_preset( $user_id ),
-			'Preset meta should still be readable as a UI hint.'
-		);
 		$this->assertFalse(
 			Capabilities::has_pos_access( $user_id ),
-			'Preset meta without the pos_staff role must not grant POS access.'
+			'Preset meta without any pos_* cap must not grant POS access.'
 		);
+
+		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox has_pos_access is true once the user holds any pos_* cap.
+	 *
+	 * Locks in the granular-caps semantics: a back-office refunds user who
+	 * holds only `pos_issue_refunds` (no baseline `pos_process_sales`) still
+	 * counts as POS staff for access checks.
+	 */
+	public function test_has_pos_access_true_with_a_single_non_baseline_cap(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$user    = get_userdata( $user_id );
+		$user->add_cap( Capabilities::CAP_ISSUE_REFUNDS );
+
+		$this->assertTrue( Capabilities::has_pos_access( $user_id ) );
 
 		wp_delete_user( $user_id );
 	}
@@ -334,13 +343,40 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox has_pos_access returns true once set_pos_preset has added the pos_staff role.
+	 * @testdox has_pos_access returns true once set_pos_preset has been applied.
 	 */
 	public function test_has_pos_access_true_after_set_pos_preset(): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 		Capabilities::set_pos_preset( $user_id, Capabilities::POS_PRESET_CASHIER );
 
 		$this->assertTrue( Capabilities::has_pos_access( $user_id ) );
+
+		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox has_pos_access survives WP_User::set_role() because access is cap-keyed.
+	 *
+	 * The wp-admin users.php "Change role to…" dropdown calls set_role(), which
+	 * replaces all roles with the single chosen one. POS access must survive
+	 * this — individual `pos_*` caps added via add_cap() are not cleared by
+	 * set_role(), so the access gate stays stable. The pos_staff label is
+	 * intentionally dropped (admin's explicit intent), but functional access
+	 * is preserved.
+	 */
+	public function test_has_pos_access_survives_set_role_overwrite(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+		Capabilities::set_pos_preset( $user_id, Capabilities::POS_PRESET_MANAGER );
+
+		$this->assertTrue( Capabilities::has_pos_access( $user_id ) );
+
+		$user = get_userdata( $user_id );
+		$user->set_role( 'subscriber' );
+
+		$this->assertTrue(
+			Capabilities::has_pos_access( $user_id ),
+			'POS access must survive a role overwrite — caps remain intact.'
+		);
 
 		wp_delete_user( $user_id );
 	}
