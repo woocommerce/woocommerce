@@ -33,8 +33,8 @@ class WC_REST_Report_Sales_Controller extends WC_REST_Report_Sales_V2_Controller
 	 * without a second request. Top-level `total_refunds` and per-period
 	 * `sales` semantics are unchanged.
 	 *
-	 * @param null                                   $_       Unused.
-	 * @param WP_REST_Request<array<string, mixed>>  $request Request object.
+	 * @param null                                  $_       Unused.
+	 * @param WP_REST_Request<array<string, mixed>> $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $_, $request ) {
@@ -54,7 +54,6 @@ class WC_REST_Report_Sales_Controller extends WC_REST_Report_Sales_V2_Controller
 		// `$this->report` is a WC_Report_Sales_By_Date (the v1 base annotates
 		// it as the abstract WC_Admin_Report). Cast locally so the call to
 		// the concrete `get_report_data()` typechecks.
-		/** @var WC_Report_Sales_By_Date $report */
 		$report      = $this->report;
 		$report_data = $report->get_report_data();
 		if ( ! empty( $report_data->refund_lines ) ) {
