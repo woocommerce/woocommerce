@@ -859,8 +859,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	/**
 	 * Reset the failed order imports overflow counter.
 	 *
-	 * Called when a full historical import starts, since that import covers
-	 * the orders whose IDs were dropped from the list.
+	 * Called when a full (non-windowed) historical import starts, since that
+	 * import covers the orders whose IDs were dropped from the list. Windowed
+	 * imports must not reset the counter.
 	 *
 	 * @internal
 	 * @since 11.0.0

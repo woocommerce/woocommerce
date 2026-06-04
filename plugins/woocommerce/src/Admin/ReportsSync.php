@@ -83,6 +83,13 @@ class ReportsSync {
 		}
 
 		self::reset_import_stats( $days, $skip_existing );
+		// A full (non-windowed) import covers the orders whose failed-import
+		// records were dropped due to the storage cap, so reset the overflow
+		// counter. Windowed imports may not reach those orders, so the counter
+		// is kept to keep the UI warning accurate.
+		if ( false === $days ) {
+			OrdersScheduler::reset_failed_order_imports_overflow();
+		}
 		foreach ( self::get_schedulers() as $scheduler ) {
 			$scheduler::schedule_action( 'import_batch_init', array( $days, $skip_existing ) );
 		}
@@ -178,6 +185,7 @@ class ReportsSync {
 
 		// Delete import options.
 		delete_option( ImportScheduler::IMPORT_STATS_OPTION );
+		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 
 		return __( 'Report table data is being deleted.', 'woocommerce' );
 	}
