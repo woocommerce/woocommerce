@@ -390,6 +390,33 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox handle_bulk_actions() blocks trashing for a role that has delete_others but not the base delete capability.
+	 */
+	public function test_handle_bulk_actions_trash_blocked_without_base_delete_capability(): void {
+		$order = \WC_Helper_Order::create_order();
+
+		$this->login_as_user_with_caps(
+			'orders_editor_delete_others_only',
+			array(
+				'read'                      => true,
+				'edit_shop_orders'          => true,
+				'edit_others_shop_orders'   => true,
+				'delete_others_shop_orders' => true,
+			)
+		);
+
+		$_REQUEST['action']   = 'trash';
+		$_REQUEST['id']       = array( $order->get_id() );
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'bulk-orders' );
+
+		$this->invoke_handle_bulk_actions();
+
+		unset( $_REQUEST['action'], $_REQUEST['id'], $_REQUEST['_wpnonce'] );
+
+		$this->assertNotSame( 'trash', wc_get_order( $order->get_id() )->get_status(), 'Removing delete_shop_orders should block deletion even when delete_others_shop_orders remains' );
+	}
+
+	/**
 	 * @testdox handle_bulk_actions() blocks emptying the trash for a user without the delete capability.
 	 */
 	public function test_handle_bulk_actions_empty_trash_blocked_without_delete_capability(): void {
