@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix BatchProcessingController enqueue dedup check so processors are no longer stored repeatedly in the wc_pending_batch_processes option.
