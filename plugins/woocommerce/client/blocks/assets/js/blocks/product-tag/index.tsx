@@ -2,19 +2,15 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { getSetting } from '@woocommerce/settings';
 import { Icon, tag } from '@wordpress/icons';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
+import { DeprecatedBlockWarning } from '../../editor-components/deprecated-block-warning';
 import metadata from './block.json';
-import { Edit } from './edit';
-import './editor.scss';
 
-/**
- * Register and run the "Products by Tag" block.
- */
 registerBlockType( metadata, {
 	icon: {
 		src: (
@@ -26,25 +22,15 @@ registerBlockType( metadata, {
 	},
 	attributes: {
 		...metadata.attributes,
-		columns: {
-			type: 'number',
-			default: getSetting( 'defaultColumns', 3 ),
-		},
-		rows: {
-			type: 'number',
-			default: getSetting( 'defaultRows', 3 ),
-		},
-		tags: {
-			type: 'array',
-			default: [],
-		},
-		stockStatus: {
-			type: 'array',
-			default: Object.keys( getSetting( 'stockStatusOptions', [] ) ),
-		},
 	},
 
-	edit: Edit,
+	edit: () => {
+		return (
+			<DeprecatedBlockWarning
+				blockName={ __( 'Products by Tag', 'woocommerce' ) }
+			/>
+		);
+	},
 
 	save: () => {
 		return null;

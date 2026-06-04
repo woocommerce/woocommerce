@@ -3,20 +3,17 @@
  */
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { Icon, file } from '@wordpress/icons';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import './editor.scss';
+import { DeprecatedBlockWarning } from '../../editor-components/deprecated-block-warning';
 import metadata from './block.json';
 import sharedAttributes, {
 	sharedAttributeBlockTypes,
 } from '../../utils/shared-attributes';
-import { Edit } from './edit';
 
-/**
- * Register and run the "Products by Category" block.
- */
 registerBlockType( metadata, {
 	icon: {
 		src: (
@@ -47,7 +44,13 @@ registerBlockType( metadata, {
 		],
 	},
 
-	edit: Edit,
+	edit: () => {
+		return (
+			<DeprecatedBlockWarning
+				blockName={ __( 'Products by Category', 'woocommerce' ) }
+			/>
+		);
+	},
 
 	save: () => {
 		return null;

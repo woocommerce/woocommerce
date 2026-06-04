@@ -3,13 +3,18 @@
  */
 import { expect, test } from '@woocommerce/e2e-utils';
 
+/**
+ * Internal dependencies
+ */
+import { getDeprecatedBlockWarning } from '../../utils/deprecated-php-product-grid';
+
 const blockData = {
 	name: 'Best Selling Products',
 	slug: 'woocommerce/product-best-sellers',
 };
 
 test.describe( `${ blockData.slug } Block`, () => {
-	test( 'can be inserted in Post Editor and it is visible on the frontend', async ( {
+	test( 'shows a deprecation warning in the editor and renders on the frontend', async ( {
 		editor,
 		admin,
 		frontendUtils,
@@ -17,7 +22,9 @@ test.describe( `${ blockData.slug } Block`, () => {
 		await admin.createNewPost();
 		await editor.insertBlock( { name: blockData.slug } );
 		const blockLocator = await editor.getBlockByName( blockData.slug );
-		await expect( blockLocator.getByRole( 'listitem' ) ).toHaveCount( 9 );
+		await expect(
+			blockLocator.getByText( getDeprecatedBlockWarning( blockData.name ) )
+		).toBeVisible();
 		await editor.publishAndVisitPost();
 		const blockLocatorFrontend = await frontendUtils.getBlockByName(
 			blockData.slug

@@ -1,17 +1,18 @@
 /**
  * External dependencies
  */
-import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { Icon, percent } from '@wordpress/icons';
+import { createBlock, registerBlockType } from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
+
 /**
  * Internal dependencies
  */
-import Block from './block';
-import './editor.scss';
+import { DeprecatedBlockWarning } from '../../editor-components/deprecated-block-warning';
+import metadata from './block.json';
 import sharedAttributes, {
 	sharedAttributeBlockTypes,
 } from '../../utils/shared-attributes';
-import metadata from './block.json';
 
 registerBlockType( metadata, {
 	icon: {
@@ -41,14 +42,16 @@ registerBlockType( metadata, {
 
 	/**
 	 * Renders and manages the block.
-	 *
-	 * @param {Object} props Props to pass to block.
 	 */
-	edit( props ) {
-		return <Block { ...props } />;
+	edit: () => {
+		return (
+			<DeprecatedBlockWarning
+				blockName={ __( 'On Sale Products', 'woocommerce' ) }
+			/>
+		);
 	},
 
-	save() {
+	save: () => {
 		return null;
 	},
 } );

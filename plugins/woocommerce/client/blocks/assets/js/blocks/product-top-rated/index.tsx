@@ -1,19 +1,19 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
-import { thumbUp } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
+import { __ } from '@wordpress/i18n';
+import { thumbUp } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
  */
+import { DeprecatedBlockWarning } from '../../editor-components/deprecated-block-warning';
 import metadata from './block.json';
 import sharedAttributes, {
 	sharedAttributeBlockTypes,
 } from '../../utils/shared-attributes';
-import { Edit } from './edit';
 
 registerBlockType( metadata, {
 	icon: {
@@ -24,12 +24,6 @@ registerBlockType( metadata, {
 			/>
 		),
 	},
-	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
-	description: __(
-		'Display a grid of your top rated products.',
-		'woocommerce'
-	),
 	attributes: {
 		...sharedAttributes,
 		...metadata.attributes,
@@ -49,12 +43,16 @@ registerBlockType( metadata, {
 
 	/**
 	 * Renders and manages the block.
-	 *
-	 * @param {Object} props Props to pass to block.
 	 */
-	edit: Edit,
+	edit: () => {
+		return (
+			<DeprecatedBlockWarning
+				blockName={ __( 'Top Rated Products', 'woocommerce' ) }
+			/>
+		);
+	},
 
-	save() {
+	save: () => {
 		return null;
 	},
 } );

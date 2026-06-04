@@ -2,15 +2,14 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { getSetting } from '@woocommerce/settings';
 import { Icon, stack } from '@wordpress/icons';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import './editor.scss';
+import { DeprecatedBlockWarning } from '../../editor-components/deprecated-block-warning';
 import metadata from './block.json';
-import { Edit } from './edit';
 
 registerBlockType( metadata, {
 	icon: {
@@ -23,13 +22,15 @@ registerBlockType( metadata, {
 	},
 	attributes: {
 		...metadata.attributes,
-		columns: {
-			type: 'number',
-			default: getSetting( 'defaultColumns', 3 ),
-		},
 	},
 
-	edit: Edit,
+	edit: () => {
+		return (
+			<DeprecatedBlockWarning
+				blockName={ __( 'Hand-picked Products', 'woocommerce' ) }
+			/>
+		);
+	},
 
 	save: () => {
 		return null;

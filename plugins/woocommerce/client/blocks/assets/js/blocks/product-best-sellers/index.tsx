@@ -3,12 +3,13 @@
  */
 import { Icon, trendingUp } from '@wordpress/icons';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
+import { DeprecatedBlockWarning } from '../../editor-components/deprecated-block-warning';
 import metadata from './block.json';
-import { Edit } from './edit';
 import sharedAttributes, {
 	sharedAttributeBlockTypes,
 } from '../../utils/shared-attributes';
@@ -48,7 +49,13 @@ registerBlockType( metadata, {
 	 *
 	 * @param {Object} props Props to pass to block.
 	 */
-	edit: Edit,
+	edit: () => {
+		return (
+			<DeprecatedBlockWarning
+				blockName={ __( 'Best Selling Products', 'woocommerce' ) }
+			/>
+		);
+	},
 
 	save: () => {
 		return null;

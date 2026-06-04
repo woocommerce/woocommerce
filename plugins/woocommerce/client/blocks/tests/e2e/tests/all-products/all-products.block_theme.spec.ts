@@ -6,17 +6,23 @@ import { BLOCK_THEME_SLUG, expect, test } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
+import { getDeprecatedBlockWarning } from '../../utils/deprecated-php-product-grid';
 
 const BLOCK_NAME = 'woocommerce/all-products';
+const BLOCK_TITLE = 'All Products';
 
 test.describe( `${ BLOCK_NAME } Block`, () => {
-	test( 'block can be inserted and it is rendered on the frontend', async ( {
+	test( 'shows a deprecation warning in the editor and renders on the frontend', async ( {
 		editor,
 		admin,
 		page,
 	} ) => {
 		await admin.createNewPost();
 		await editor.insertBlock( { name: BLOCK_NAME } );
+		const blockLocator = await editor.getBlockByName( BLOCK_NAME );
+		await expect(
+			blockLocator.getByText( getDeprecatedBlockWarning( BLOCK_TITLE ) )
+		).toBeVisible();
 		await editor.publishAndVisitPost();
 
 		await page.waitForResponse(
@@ -33,7 +39,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 	// Check this regression: hhttps://github.com/woocommerce/woocommerce/pull/58741.
 	// The block has a dependency on the Mini Cart block/Checkout/Cart blocks.
 	// This test checks that the block can be inserted and it is rendered on the frontend without the mini cart block.
-	test( 'block can be inserted and it is rendered on the frontend without the mini cart block', async ( {
+	test( 'renders on the frontend without the mini cart block', async ( {
 		editor,
 		admin,
 		page,
