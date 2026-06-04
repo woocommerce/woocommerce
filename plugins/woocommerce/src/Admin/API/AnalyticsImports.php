@@ -65,6 +65,19 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_trigger_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/retry-failed',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'retry_failed_imports' ),
+					'permission_callback' => array( $this, 'permissions_check' ),
+				),
+				'schema' => array( $this, 'get_retry_failed_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -163,6 +176,109 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 				'message' => __( 'Batch import triggered successfully.', 'woocommerce' ),
 			)
 		);
+	}
+
+	/**
+	 * Re-schedule imports for orders that previously failed.
+	 *
+	 * Order IDs whose orders no longer exist are pruned (they can never import
+	 * successfully). The remaining IDs stay recorded until their import
+	 * succeeds, so a retry that fails again remains visible.
+	 *
+	 * @param  \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function retry_failed_imports( $request ) {
+		$failed = OrdersScheduler::get_failed_order_imports();
+
+		if ( empty( $failed['ids'] ) ) {
+			return new WP_Error(
+				'woocommerce_rest_analytics_no_failed_imports',
+				__( 'There are no failed order imports to retry.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$retried_count = 0;
+		$pruned_count  = 0;
+		foreach ( $failed['ids'] as $order_id ) {
+			if ( ! wc_get_order( $order_id ) ) {
+				OrdersScheduler::clear_failed_order_import( $order_id );
+				++$pruned_count;
+				continue;
+			}
+
+			try {
+				OrdersScheduler::schedule_action( 'import', array( $order_id ) );
+				++$retried_count;
+			} catch ( \Throwable $e ) {
+				// schedule_action() may run the import synchronously (e.g. when
+				// Action Scheduler is unavailable); a failing order must not
+				// abort the whole retry request.
+				wc_get_logger()->error(
+					sprintf( 'Failed to schedule analytics re-import for order %d: %s', $order_id, $e->getMessage() ),
+					array( 'source' => 'wc-analytics-order-import' )
+				);
+			}
+		}
+
+		$message = $retried_count > 0
+			? sprintf(
+				/* translators: %d: number of orders scheduled for re-import */
+				_n( 'Re-import scheduled for %d order.', 'Re-import scheduled for %d orders.', $retried_count, 'woocommerce' ),
+				$retried_count
+			)
+			: __( 'No orders were scheduled for re-import. The previously failed orders no longer exist.', 'woocommerce' );
+
+		return rest_ensure_response(
+			array(
+				'success'       => true,
+				'message'       => $message,
+				'retried_count' => $retried_count,
+				'pruned_count'  => $pruned_count,
+			)
+		);
+	}
+
+	/**
+	 * Get the schema for the retry-failed endpoint, conforming to JSON Schema.
+	 *
+	 * @return array
+	 */
+	public function get_retry_failed_schema() {
+		$schema = array(
+			'$schema'    => 'https://json-schema.org/draft-04/schema#',
+			'title'      => 'analytics_import_retry_failed',
+			'type'       => 'object',
+			'properties' => array(
+				'success'       => array(
+					'type'        => 'boolean',
+					'description' => __( 'Whether the retry was scheduled successfully.', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'message'       => array(
+					'type'        => 'string',
+					'description' => __( 'Result message.', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'retried_count' => array(
+					'type'        => 'integer',
+					'description' => __( 'Number of orders scheduled for re-import.', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'pruned_count'  => array(
+					'type'        => 'integer',
+					'description' => __( 'Number of failed records removed because their orders no longer exist.', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+			),
+		);
+
+		return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**

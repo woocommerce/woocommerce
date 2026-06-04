@@ -88,6 +88,7 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 	private function clear_scheduled_actions() {
 		$hook = OrdersScheduler::get_action( OrdersScheduler::PROCESS_PENDING_ORDERS_BATCH_ACTION );
 		as_unschedule_all_actions( $hook );
+		as_unschedule_all_actions( OrdersScheduler::get_action( 'import' ) );
 	}
 
 	/**
@@ -271,6 +272,99 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( 200, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Retry-failed schedules an import action per failed order and keeps IDs until success.
+	 */
+	public function test_retry_failed_schedules_import_actions(): void {
+		wp_set_current_user( $this->admin_user );
+		$order = \WC_Helper_Order::create_order();
+		OrdersScheduler::record_failed_order_import( $order->get_id() );
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/retry-failed' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $data['success'] );
+		$this->assertSame( 1, $data['retried_count'] );
+
+		$hook = OrdersScheduler::get_action( 'import' );
+		$this->assertNotFalse(
+			as_next_scheduled_action( $hook, array( $order->get_id() ), OrdersScheduler::$group ),
+			'A single-order import action should be scheduled'
+		);
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertContains( $order->get_id(), $failed['ids'], 'ID stays recorded until the import succeeds' );
+	}
+
+	/**
+	 * @testdox Retry-failed prunes orders that no longer exist.
+	 */
+	public function test_retry_failed_prunes_deleted_orders(): void {
+		wp_set_current_user( $this->admin_user );
+		OrdersScheduler::record_failed_order_import( 99999999 );
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/retry-failed' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 0, $data['retried_count'] );
+		$this->assertTrue( $data['success'] );
+		$this->assertSame( 1, $data['pruned_count'] );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertNotContains( 99999999, $failed['ids'], 'Deleted orders can never succeed and should be pruned' );
+	}
+
+	/**
+	 * @testdox Retry-failed returns an error when there are no failed orders.
+	 */
+	public function test_retry_failed_returns_error_when_no_failed_orders(): void {
+		wp_set_current_user( $this->admin_user );
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/retry-failed' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Retry-failed requires the manage_woocommerce capability.
+	 */
+	public function test_retry_failed_requires_permission(): void {
+		wp_set_current_user( $this->customer_user );
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/retry-failed' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Retry-failed does not schedule duplicate import actions on repeated requests.
+	 */
+	public function test_retry_failed_is_idempotent_for_pending_actions(): void {
+		wp_set_current_user( $this->admin_user );
+		$order = \WC_Helper_Order::create_order();
+		OrdersScheduler::record_failed_order_import( $order->get_id() );
+
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/retry-failed' );
+		$this->server->dispatch( $request );
+		$this->server->dispatch( $request );
+
+		$pending = WC()->queue()->search(
+			array(
+				'hook'     => OrdersScheduler::get_action( 'import' ),
+				'search'   => '[' . $order->get_id() . ']',
+				'status'   => 'pending',
+				'per_page' => 10,
+			)
+		);
+		$this->assertCount( 1, $pending, 'Repeated retry requests must not duplicate pending import actions' );
 	}
 
 	/**
