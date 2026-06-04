@@ -726,24 +726,24 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that Vimeo embed is detected and renders as video player, including handling URLs with query parameters.
+	 * Helper to mock the oEmbed HTTP response for video thumbnail lookups.
+	 *
+	 * @param string $endpoint_fragment Substring identifying the provider's oEmbed endpoint URL.
+	 * @param string $thumbnail_url Thumbnail URL to return in the mocked response.
+	 * @return callable The HTTP filter callback (for removal in cleanup).
 	 */
-	public function test_renders_vimeo_embed(): void {
-		// Mock the oEmbed HTTP response to avoid external calls in CI.
-		// Return a thumbnail URL with query parameters to test the URL encoding fix.
-		$mock_thumbnail_url   = 'https://i.vimeocdn.com/video/123456789.jpg?w=500&h=281';
+	private function mock_oembed_thumbnail_response( string $endpoint_fragment, string $thumbnail_url ): callable {
 		$mock_oembed_response = wp_json_encode(
 			array(
 				'type'          => 'video',
-				'thumbnail_url' => $mock_thumbnail_url,
+				'thumbnail_url' => $thumbnail_url,
 				'title'         => 'Test Video',
 			)
 		);
 
 		// Use pre_http_request filter to intercept oEmbed HTTP calls.
-		$filter_callback = function ( $preempt, $args, $url ) use ( $mock_oembed_response ) {
-			// Intercept Vimeo oEmbed requests.
-			if ( strpos( $url, 'vimeo.com/api/oembed' ) !== false ) {
+		$filter_callback = function ( $preempt, $args, $url ) use ( $endpoint_fragment, $mock_oembed_response ) {
+			if ( strpos( $url, $endpoint_fragment ) !== false ) {
 				return array(
 					'response' => array( 'code' => 200 ),
 					'body'     => $mock_oembed_response,
@@ -753,6 +753,17 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		};
 
 		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
+		return $filter_callback;
+	}
+
+	/**
+	 * Test that Vimeo embed is detected and renders as video player, including handling URLs with query parameters.
+	 */
+	public function test_renders_vimeo_embed(): void {
+		// Mock the oEmbed HTTP response to avoid external calls in CI.
+		// Return a thumbnail URL with query parameters to verify URL encoding is preserved.
+		$filter_callback = $this->mock_oembed_thumbnail_response( 'vimeo.com/api/oembed', 'https://i.vimeocdn.com/video/123456789.jpg?w=500&h=281' );
 
 		$parsed_vimeo_embed = array(
 			'blockName' => 'core/embed',
@@ -807,27 +818,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function test_vimeo_embed_detects_vimeo_by_url_in_attributes(): void {
 		// Mock the oEmbed HTTP response to avoid external calls in CI.
-		$mock_thumbnail_url   = 'https://i.vimeocdn.com/video/123456789.jpg';
-		$mock_oembed_response = wp_json_encode(
-			array(
-				'type'          => 'video',
-				'thumbnail_url' => $mock_thumbnail_url,
-				'title'         => 'Test Video',
-			)
-		);
-
-		// Use pre_http_request filter to intercept oEmbed HTTP calls.
-		$filter_callback = function ( $preempt, $args, $url ) use ( $mock_oembed_response ) {
-			if ( strpos( $url, 'vimeo.com/api/oembed' ) !== false ) {
-				return array(
-					'response' => array( 'code' => 200 ),
-					'body'     => $mock_oembed_response,
-				);
-			}
-			return $preempt;
-		};
-
-		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+		$filter_callback = $this->mock_oembed_thumbnail_response( 'vimeo.com/api/oembed', 'https://i.vimeocdn.com/video/123456789.jpg' );
 
 		$parsed_vimeo_by_url = array(
 			'blockName' => 'core/embed',
@@ -846,6 +837,134 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		// Should detect Vimeo by URL domain and render with thumbnail.
 		$this->assertNotEmpty( $rendered );
 		$this->assertStringContainsString( 'background-image', $rendered, 'Vimeo embed should have background image' );
+	}
+
+	/**
+	 * Test that TikTok embed is detected and renders as video player
+	 */
+	public function test_renders_tiktok_embed(): void {
+		// Mock the oEmbed HTTP response to avoid external calls in CI.
+		$filter_callback = $this->mock_oembed_thumbnail_response( 'tiktok.com/oembed', 'https://p16-sign.tiktokcdn-us.com/obj/tos-useast5-p-0068-tx/thumbnail.jpg' );
+
+		$parsed_tiktok_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://www.tiktok.com/@wordpress/video/7228005059881544986',
+				'type'             => 'video',
+				'providerNameSlug' => 'tiktok',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-tiktok wp-block-embed-tiktok"><div class="wp-block-embed__wrapper">https://www.tiktok.com/@wordpress/video/7228005059881544986</div></figure>',
+		);
+
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_tiktok_embed['innerHTML'], $parsed_tiktok_embed, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
+
+		// Should detect TikTok and render as video with thumbnail.
+		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'play2x.png', $rendered, 'TikTok embed should render with play button' );
+		$this->assertStringContainsString( 'background-image', $rendered, 'Background image should be present in CSS' );
+	}
+
+	/**
+	 * Test that TikTok embed detects TikTok by providerNameSlug
+	 */
+	public function test_tiktok_embed_detects_tiktok_by_provider_name_slug(): void {
+		$parsed_tiktok_by_slug = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'providerNameSlug' => 'tiktok',
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-tiktok"><div class="wp-block-embed__wrapper">Some content</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_tiktok_by_slug['innerHTML'], $parsed_tiktok_by_slug, $this->rendering_context );
+
+		// Should return graceful fallback link since provider is detected but no URL is available for thumbnail extraction.
+		$this->assertStringContainsString( '<a href="https://www.tiktok.com/"', $rendered );
+		$this->assertStringContainsString( 'Watch on TikTok', $rendered );
+		$this->assertStringContainsString( 'target="_blank"', $rendered );
+		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );
+	}
+
+	/**
+	 * Test that Dailymotion embed is detected and renders as video player
+	 */
+	public function test_renders_dailymotion_embed(): void {
+		// Mock the oEmbed HTTP response to avoid external calls in CI.
+		$filter_callback = $this->mock_oembed_thumbnail_response( 'dailymotion.com/services/oembed', 'https://s1.dmcdn.net/v/X8x9abc/x720-thumbnail.jpg' );
+
+		$parsed_dailymotion_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://www.dailymotion.com/video/x8x9abc',
+				'type'             => 'video',
+				'providerNameSlug' => 'dailymotion',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-dailymotion wp-block-embed-dailymotion"><div class="wp-block-embed__wrapper">https://www.dailymotion.com/video/x8x9abc</div></figure>',
+		);
+
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_dailymotion_embed['innerHTML'], $parsed_dailymotion_embed, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
+
+		// Should detect Dailymotion and render as video with thumbnail.
+		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'play2x.png', $rendered, 'Dailymotion embed should render with play button' );
+		$this->assertStringContainsString( 'background-image', $rendered, 'Background image should be present in CSS' );
+	}
+
+	/**
+	 * Test that Dailymotion embed detects Dailymotion by providerNameSlug
+	 */
+	public function test_dailymotion_embed_detects_dailymotion_by_provider_name_slug(): void {
+		$parsed_dailymotion_by_slug = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'providerNameSlug' => 'dailymotion',
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-dailymotion"><div class="wp-block-embed__wrapper">Some content</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_dailymotion_by_slug['innerHTML'], $parsed_dailymotion_by_slug, $this->rendering_context );
+
+		// Should return graceful fallback link since provider is detected but no URL is available for thumbnail extraction.
+		$this->assertStringContainsString( '<a href="https://www.dailymotion.com/"', $rendered );
+		$this->assertStringContainsString( 'Watch on Dailymotion', $rendered );
+		$this->assertStringContainsString( 'target="_blank"', $rendered );
+		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );
+	}
+
+	/**
+	 * Test that Dailymotion embed detects dai.ly short URLs by domain
+	 */
+	public function test_dailymotion_embed_detects_dai_ly_short_url(): void {
+		// Mock the oEmbed HTTP response to avoid external calls in CI.
+		$filter_callback = $this->mock_oembed_thumbnail_response( 'dailymotion.com/services/oembed', 'https://s1.dmcdn.net/v/X8x9abc/x720-thumbnail.jpg' );
+
+		$parsed_dai_ly_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url' => 'https://dai.ly/x8x9abc',
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video"><div class="wp-block-embed__wrapper">https://dai.ly/x8x9abc</div></figure>',
+		);
+
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_dai_ly_embed['innerHTML'], $parsed_dai_ly_embed, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
+
+		// Should detect Dailymotion by dai.ly domain and render with thumbnail.
+		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'background-image', $rendered, 'Dailymotion embed should have background image' );
 	}
 
 	/**

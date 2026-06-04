@@ -20,7 +20,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
  * This renderer handles core/embed blocks, detecting audio and video provider embeds and rendering them appropriately.
  *
  * Audio providers: Spotify, SoundCloud, Pocket Casts, Mixcloud, ReverbNation - rendered as audio players.
- * Video providers: YouTube, VideoPress, Vimeo - rendered as video thumbnails with play buttons.
+ * Video providers: YouTube, VideoPress, Vimeo, TikTok, Dailymotion - rendered as video thumbnails with play buttons.
  */
 class Embed extends Abstract_Block_Renderer {
 	/**
@@ -71,17 +71,25 @@ class Embed extends Abstract_Block_Renderer {
 	 * @var array
 	 */
 	private const VIDEO_PROVIDERS = array(
-		'youtube'    => array(
+		'youtube'     => array(
 			'domains'  => array( 'youtube.com', 'youtu.be' ),
 			'base_url' => 'https://www.youtube.com/',
 		),
-		'videopress' => array(
+		'videopress'  => array(
 			'domains'  => array( 'videopress.com', 'video.wordpress.com' ),
 			'base_url' => 'https://videopress.com/',
 		),
-		'vimeo'      => array(
+		'vimeo'       => array(
 			'domains'  => array( 'vimeo.com', 'player.vimeo.com' ),
 			'base_url' => 'https://vimeo.com/',
+		),
+		'tiktok'      => array(
+			'domains'  => array( 'tiktok.com' ),
+			'base_url' => 'https://www.tiktok.com/',
+		),
+		'dailymotion' => array(
+			'domains'  => array( 'dailymotion.com', 'dai.ly' ),
+			'base_url' => 'https://www.dailymotion.com/',
 		),
 	);
 
@@ -365,6 +373,10 @@ class Embed extends Abstract_Block_Renderer {
 				return __( 'Watch on VideoPress', 'woocommerce' );
 			case 'vimeo':
 				return __( 'Watch on Vimeo', 'woocommerce' );
+			case 'tiktok':
+				return __( 'Watch on TikTok', 'woocommerce' );
+			case 'dailymotion':
+				return __( 'Watch on Dailymotion', 'woocommerce' );
 			default:
 				return __( 'Listen to the audio', 'woocommerce' );
 		}
@@ -569,18 +581,15 @@ class Embed extends Abstract_Block_Renderer {
 	 * @return string Thumbnail URL or empty string.
 	 */
 	private function get_video_thumbnail_url( string $url, string $provider ): string {
+		// YouTube thumbnails follow a predictable URL pattern, so no HTTP request is needed.
 		if ( 'youtube' === $provider ) {
 			return $this->get_youtube_thumbnail( $url );
 		}
 
-		// VideoPress and Vimeo both expose their thumbnails through the WordPress oEmbed API.
-		if ( 'videopress' === $provider || 'vimeo' === $provider ) {
-			return $this->get_oembed_thumbnail( $url );
-		}
-
-		// For other providers, we don't have thumbnail extraction implemented.
-		// Return empty to trigger link fallback.
-		return '';
+		// All other supported video providers (VideoPress, Vimeo, TikTok, Dailymotion)
+		// expose their thumbnails through the WordPress oEmbed API.
+		// Returns empty string on failure, which triggers the link fallback.
+		return $this->get_oembed_thumbnail( $url );
 	}
 
 	/**
