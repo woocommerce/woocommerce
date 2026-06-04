@@ -36,6 +36,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION );
 		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
 		delete_option( OrdersScheduler::LEGACY_IMMEDIATE_IMPORT_OPTION );
+		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 
 		// Clean up any scheduled actions.
 		$this->clear_scheduled_batch_processor();
@@ -509,6 +510,135 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 			$method->invoke( null ),
 			'New option "no" should take precedence over legacy option "no" (which would mean scheduled)'
 		);
+	}
+
+	/**
+	 * @testdox record_failed_order_import stores deduplicated order IDs.
+	 */
+	public function test_record_failed_order_import_dedupes(): void {
+		OrdersScheduler::record_failed_order_import( 11 );
+		OrdersScheduler::record_failed_order_import( 22 );
+		OrdersScheduler::record_failed_order_import( 11 );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+
+		$this->assertSame( array( 11, 22 ), $failed['ids'] );
+		$this->assertSame( 0, $failed['overflow'] );
+	}
+
+	/**
+	 * @testdox record_failed_order_import ignores invalid order IDs.
+	 */
+	public function test_record_failed_order_import_ignores_invalid_ids(): void {
+		OrdersScheduler::record_failed_order_import( 0 );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+
+		$this->assertSame( array(), $failed['ids'] );
+	}
+
+	/**
+	 * @testdox record_failed_order_import drops the oldest ID and counts overflow when the cap is reached.
+	 */
+	public function test_record_failed_order_import_caps_list_and_counts_overflow(): void {
+		update_option(
+			OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION,
+			array(
+				'ids'      => range( 1, 1000 ),
+				'overflow' => 2,
+			),
+			false
+		);
+
+		OrdersScheduler::record_failed_order_import( 1001 );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertCount( 1000, $failed['ids'], 'List should stay at the cap' );
+		$this->assertNotContains( 1, $failed['ids'], 'Oldest ID should be dropped' );
+		$this->assertContains( 1001, $failed['ids'], 'New ID should be recorded' );
+		$this->assertSame( 3, $failed['overflow'] );
+	}
+
+	/**
+	 * @testdox clear_failed_order_import removes a recorded ID.
+	 */
+	public function test_clear_failed_order_import_removes_id(): void {
+		OrdersScheduler::record_failed_order_import( 11 );
+		OrdersScheduler::record_failed_order_import( 22 );
+
+		OrdersScheduler::clear_failed_order_import( 11 );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertSame( array( 22 ), $failed['ids'] );
+	}
+
+	/**
+	 * @testdox clear_failed_order_import deletes the option when nothing is left.
+	 */
+	public function test_clear_failed_order_import_deletes_option_when_empty(): void {
+		OrdersScheduler::record_failed_order_import( 11 );
+
+		OrdersScheduler::clear_failed_order_import( 11 );
+
+		$this->assertFalse( get_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION ) );
+	}
+
+	/**
+	 * @testdox reset_failed_order_imports_overflow resets the counter but keeps stored IDs.
+	 */
+	public function test_reset_failed_order_imports_overflow(): void {
+		update_option(
+			OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION,
+			array(
+				'ids'      => array( 5 ),
+				'overflow' => 7,
+			),
+			false
+		);
+
+		OrdersScheduler::reset_failed_order_imports_overflow();
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertSame( array( 5 ), $failed['ids'] );
+		$this->assertSame( 0, $failed['overflow'] );
+	}
+
+	/**
+	 * @testdox clear_failed_order_import preserves the option when overflow is non-zero after clearing all IDs.
+	 */
+	public function test_clear_failed_order_import_keeps_option_when_overflow_remains(): void {
+		update_option(
+			OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION,
+			array(
+				'ids'      => array( 11 ),
+				'overflow' => 3,
+			),
+			false
+		);
+
+		OrdersScheduler::clear_failed_order_import( 11 );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertSame( array(), $failed['ids'] );
+		$this->assertSame( 3, $failed['overflow'] );
+	}
+
+	/**
+	 * @testdox reset_failed_order_imports_overflow deletes the option when IDs are empty after reset.
+	 */
+	public function test_reset_failed_order_imports_overflow_deletes_option_when_ids_empty(): void {
+		update_option(
+			OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION,
+			array(
+				'ids'      => array(),
+				'overflow' => 5,
+			),
+			false
+		);
+
+		OrdersScheduler::reset_failed_order_imports_overflow();
+
+		$this->assertFalse( get_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION ) );
 	}
 
 	/**
