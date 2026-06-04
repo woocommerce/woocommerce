@@ -455,8 +455,6 @@ class Leaderboards extends \WC_REST_Data_Controller {
 		$response->header( 'X-WP-Total', count( $data ) );
 		$response->header( 'X-WP-TotalPages', 1 );
 
-		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-
 		return $response;
 	}
 
