@@ -85,6 +85,7 @@ class ReportsSyncTest extends WC_Unit_Test_Case {
 
 		$this->assertNotWPError( $result, 'Import guard unexpectedly fired; ensure no import is in progress.' );
 		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertSame( array( 11 ), $failed['ids'], 'Stored failed IDs must survive a windowed import' );
 		$this->assertSame( 3, $failed['overflow'] );
 	}
 }

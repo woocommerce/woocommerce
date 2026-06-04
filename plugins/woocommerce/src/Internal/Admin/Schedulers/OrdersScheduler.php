@@ -94,6 +94,14 @@ class OrdersScheduler extends ImportScheduler {
 	 * Shape: array( 'ids' => int[], 'overflow' => int ). 'overflow' counts IDs
 	 * dropped because the list reached FAILED_ORDER_IMPORTS_CAP.
 	 *
+	 * Updates to this option are best-effort, not atomic: a concurrent
+	 * read-modify-write (e.g. the batch processor recording a failure while a
+	 * retry request prunes an ID) can lose one of the writes. This is accepted
+	 * because the list is advisory and self-healing — a stale ID is cleared on
+	 * the order's next successful import, and every failure is also logged to
+	 * the 'wc-analytics-order-import' source. If stronger guarantees are ever
+	 * needed, store each failed ID as its own row instead.
+	 *
 	 * @var string
 	 */
 	const FAILED_ORDER_IMPORTS_OPTION = 'woocommerce_admin_analytics_failed_order_imports';
@@ -911,7 +919,8 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * import is supported (returns false). When enabled, checks the option value.
 	 *
 	 * @internal
-	 * @since 11.0.0
+	 * @since 10.5.0 Introduced as a private method.
+	 * @since 11.0.0 Made public.
 	 * @return bool
 	 */
 	public static function is_scheduled_import_enabled(): bool {

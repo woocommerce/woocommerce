@@ -26,6 +26,28 @@ interface RetryFailedResponse {
 	message: string;
 	retried_count: number;
 	pruned_count: number;
+	already_scheduled_count: number;
+	error_count: number;
+}
+
+/**
+ * Extract a user-facing message from a caught request error.
+ *
+ * `@wordpress/api-fetch` rejects with the parsed REST error object
+ * (`{ code, message }`), which is a plain object — not an `Error` instance —
+ * so narrow on the `message` property instead of the constructor.
+ */
+function getErrorMessage( err: unknown, fallback: string ): string {
+	if (
+		typeof err === 'object' &&
+		err !== null &&
+		'message' in err &&
+		typeof err.message === 'string' &&
+		err.message !== ''
+	) {
+		return err.message;
+	}
+	return fallback;
 }
 
 /**
@@ -76,9 +98,10 @@ function FailedOrdersNotice() {
 		} catch ( err ) {
 			createNotice(
 				'error',
-				err instanceof Error
-					? err.message
-					: __( 'Failed to retry order imports.', 'woocommerce' )
+				getErrorMessage(
+					err,
+					__( 'Failed to retry order imports.', 'woocommerce' )
+				)
 			);
 		} finally {
 			setIsRetrying( false );
@@ -92,32 +115,25 @@ function FailedOrdersNotice() {
 		/>
 	);
 
-	const message =
+	const template =
 		overflowCount > 0
-			? createInterpolateElement(
-					sprintf(
-						/* translators: %d: the maximum number of stored failed-order IDs (actual failures exceeded this). <link> is a link to the order import log. */
-						__(
-							'More than %d orders failed to import. To recover all missed orders, run the import above with "Skip previously imported customers and orders" checked. <link>View the log</link> for details.',
-							'woocommerce'
-						),
-						failedCount
-					),
-					{ link: logLink }
+			? /* translators: %d: number of failed orders currently stored (additional failures were dropped past the storage limit). <link> is a link to the order import log. */
+			  __(
+					'More than %d orders failed to import. To recover all missed orders, run the import above with "Skip previously imported customers and orders" checked. <link>View the log</link> for details.',
+					'woocommerce'
 			  )
-			: createInterpolateElement(
-					sprintf(
-						/* translators: %d: number of failed orders. <link> is a link to the order import log. */
-						_n(
-							'%d order failed to import. <link>View the log</link> for details.',
-							'%d orders failed to import. <link>View the log</link> for details.',
-							failedCount,
-							'woocommerce'
-						),
-						failedCount
-					),
-					{ link: logLink }
+			: /* translators: %d: number of failed orders. <link> is a link to the order import log. */
+			  _n(
+					'%d order failed to import. <link>View the log</link> for details.',
+					'%d orders failed to import. <link>View the log</link> for details.',
+					failedCount,
+					'woocommerce'
 			  );
+
+	const message = createInterpolateElement(
+		sprintf( template, failedCount ),
+		{ link: logLink }
+	);
 
 	return (
 		<Notice

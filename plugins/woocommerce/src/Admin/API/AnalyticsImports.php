@@ -182,8 +182,10 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	 * Re-schedule imports for orders that previously failed.
 	 *
 	 * Order IDs whose orders no longer exist are pruned (they can never import
-	 * successfully). The remaining IDs stay recorded until their import
-	 * succeeds, so a retry that fails again remains visible.
+	 * successfully). Orders with an import already pending are skipped and
+	 * reported separately, so repeated requests don't claim to schedule new
+	 * work. The remaining IDs stay recorded until their import succeeds, so a
+	 * retry that fails again remains visible.
 	 *
 	 * @param  \WP_REST_Request<array<string, mixed>> $request Full details about the request.
 	 * @return \WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
@@ -199,12 +201,21 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 			);
 		}
 
-		$retried_count = 0;
-		$pruned_count  = 0;
+		$retried_count           = 0;
+		$pruned_count            = 0;
+		$already_scheduled_count = 0;
+		$error_count             = 0;
 		foreach ( $failed['ids'] as $order_id ) {
 			if ( ! wc_get_order( $order_id ) ) {
 				OrdersScheduler::clear_failed_order_import( $order_id );
 				++$pruned_count;
+				continue;
+			}
+
+			// schedule_action() silently no-ops when the same import is
+			// already pending, so check first to report an accurate count.
+			if ( OrdersScheduler::has_existing_jobs( 'import', array( $order_id ) ) ) {
+				++$already_scheduled_count;
 				continue;
 			}
 
@@ -215,6 +226,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 				// schedule_action() may run the import synchronously (e.g. when
 				// Action Scheduler is unavailable); a failing order must not
 				// abort the whole retry request.
+				++$error_count;
 				wc_get_logger()->error(
 					sprintf( 'Failed to schedule analytics re-import for order %d: %s', $order_id, $e->getMessage() ),
 					array( 'source' => 'wc-analytics-order-import' )
@@ -222,20 +234,44 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 			}
 		}
 
-		$message = $retried_count > 0
-			? sprintf(
+		// Nothing was scheduled and nothing is pending: surface the failure
+		// instead of reporting success for work that didn't happen.
+		if ( 0 === $retried_count && 0 === $already_scheduled_count && $error_count > 0 ) {
+			return new WP_Error(
+				'woocommerce_rest_analytics_retry_failed',
+				__( 'The failed orders could not be scheduled for re-import. Check the order import log for details.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		if ( $retried_count > 0 ) {
+			$message = sprintf(
 				/* translators: %d: number of orders scheduled for re-import */
 				_n( 'Re-import scheduled for %d order.', 'Re-import scheduled for %d orders.', $retried_count, 'woocommerce' ),
 				$retried_count
-			)
-			: __( 'No orders were scheduled for re-import. The previously failed orders no longer exist.', 'woocommerce' );
+			);
+		} elseif ( $already_scheduled_count > 0 ) {
+			$message = __( 'Re-import is already scheduled for the previously failed orders.', 'woocommerce' );
+		} else {
+			$message = __( 'No orders were scheduled for re-import. The previously failed orders no longer exist.', 'woocommerce' );
+		}
+
+		if ( $error_count > 0 ) {
+			$message .= ' ' . sprintf(
+				/* translators: %d: number of orders that could not be scheduled for re-import */
+				_n( '%d order could not be scheduled. Check the order import log for details.', '%d orders could not be scheduled. Check the order import log for details.', $error_count, 'woocommerce' ),
+				$error_count
+			);
+		}
 
 		return rest_ensure_response(
 			array(
-				'success'       => true,
-				'message'       => $message,
-				'retried_count' => $retried_count,
-				'pruned_count'  => $pruned_count,
+				'success'                 => true,
+				'message'                 => $message,
+				'retried_count'           => $retried_count,
+				'pruned_count'            => $pruned_count,
+				'already_scheduled_count' => $already_scheduled_count,
+				'error_count'             => $error_count,
 			)
 		);
 	}
@@ -251,27 +287,39 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 			'title'      => 'analytics_import_retry_failed',
 			'type'       => 'object',
 			'properties' => array(
-				'success'       => array(
+				'success'                 => array(
 					'type'        => 'boolean',
 					'description' => __( 'Whether the retry was scheduled successfully.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'message'       => array(
+				'message'                 => array(
 					'type'        => 'string',
 					'description' => __( 'Result message.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'retried_count' => array(
+				'retried_count'           => array(
 					'type'        => 'integer',
 					'description' => __( 'Number of orders scheduled for re-import.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'pruned_count'  => array(
+				'pruned_count'            => array(
 					'type'        => 'integer',
 					'description' => __( 'Number of failed records removed because their orders no longer exist.', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'already_scheduled_count' => array(
+					'type'        => 'integer',
+					'description' => __( 'Number of orders skipped because their re-import is already pending.', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'error_count'             => array(
+					'type'        => 'integer',
+					'description' => __( 'Number of orders that could not be scheduled for re-import.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),

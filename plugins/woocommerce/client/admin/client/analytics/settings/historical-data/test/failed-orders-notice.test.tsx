@@ -128,6 +128,8 @@ describe( 'FailedOrdersNotice', () => {
 					message: 'Re-import scheduled for 3 orders.',
 					retried_count: 3,
 					pruned_count: 0,
+					already_scheduled_count: 0,
+					error_count: 0,
 				} );
 			}
 			return Promise.resolve( {
@@ -158,13 +160,19 @@ describe( 'FailedOrdersNotice', () => {
 		);
 	} );
 
-	it( 'shows an error notice when the retry request fails', async () => {
+	it( 'shows the server message when the retry request rejects with a REST error object', async () => {
 		mockedApiFetch.mockImplementation( ( options ) => {
 			if (
 				( options as { path?: string } ).path ===
 				'/wc-analytics/imports/retry-failed'
 			) {
-				return Promise.reject( new Error( 'retry failed' ) );
+				// @wordpress/api-fetch rejects with the parsed REST error
+				// object — a plain object, not an Error instance.
+				return Promise.reject( {
+					code: 'woocommerce_rest_analytics_retry_failed',
+					message:
+						'The failed orders could not be scheduled for re-import. Check the order import log for details.',
+				} );
 			}
 			return Promise.resolve( {
 				failed_count: 3,
@@ -183,7 +191,37 @@ describe( 'FailedOrdersNotice', () => {
 		await waitFor( () =>
 			expect( mockCreateNotice ).toHaveBeenCalledWith(
 				'error',
-				'retry failed'
+				'The failed orders could not be scheduled for re-import. Check the order import log for details.'
+			)
+		);
+	} );
+
+	it( 'shows a fallback message when the retry rejection has no message', async () => {
+		mockedApiFetch.mockImplementation( ( options ) => {
+			if (
+				( options as { path?: string } ).path ===
+				'/wc-analytics/imports/retry-failed'
+			) {
+				return Promise.reject( { code: 'fetch_error' } );
+			}
+			return Promise.resolve( {
+				failed_count: 3,
+				failed_overflow_count: 0,
+			} );
+		} );
+
+		render( <FailedOrdersNotice /> );
+
+		await userEvent.click(
+			await screen.findByRole( 'button', {
+				name: 'Retry failed imports',
+			} )
+		);
+
+		await waitFor( () =>
+			expect( mockCreateNotice ).toHaveBeenCalledWith(
+				'error',
+				'Failed to retry order imports.'
 			)
 		);
 	} );
@@ -219,6 +257,8 @@ describe( 'FailedOrdersNotice', () => {
 			message: 'Re-import scheduled for 3 orders.',
 			retried_count: 3,
 			pruned_count: 0,
+			already_scheduled_count: 0,
+			error_count: 0,
 		} );
 
 		await waitFor( () => expect( button ).not.toBeDisabled() );

@@ -287,6 +287,9 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->admin_user );
 		$order = \WC_Helper_Order::create_order();
 		OrdersScheduler::record_failed_order_import( $order->get_id() );
+		// Saving the order schedules an immediate-mode import action; clear it
+		// so the test verifies the endpoint scheduled the action itself.
+		$this->clear_scheduled_actions();
 
 		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/retry-failed' );
 		$response = $this->server->dispatch( $request );
@@ -357,10 +360,13 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->admin_user );
 		$order = \WC_Helper_Order::create_order();
 		OrdersScheduler::record_failed_order_import( $order->get_id() );
+		// Saving the order schedules an immediate-mode import action; clear it
+		// so the first request is the one that schedules the action.
+		$this->clear_scheduled_actions();
 
-		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/retry-failed' );
-		$this->server->dispatch( $request );
-		$this->server->dispatch( $request );
+		$request         = new WP_REST_Request( 'POST', self::ENDPOINT . '/retry-failed' );
+		$first_response  = $this->server->dispatch( $request );
+		$second_response = $this->server->dispatch( $request );
 
 		$pending = WC()->queue()->search(
 			array(
@@ -371,6 +377,47 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$this->assertCount( 1, $pending, 'Repeated retry requests must not duplicate pending import actions' );
+
+		// The response must not claim new work was scheduled on the second request.
+		$this->assertSame( 1, $first_response->get_data()['retried_count'] );
+		$this->assertSame( 0, $second_response->get_data()['retried_count'] );
+		$this->assertSame( 1, $second_response->get_data()['already_scheduled_count'] );
+		$this->assertSame(
+			'Re-import is already scheduled for the previously failed orders.',
+			$second_response->get_data()['message']
+		);
+	}
+
+	/**
+	 * @testdox Retry-failed returns an error when no order could be scheduled for re-import.
+	 */
+	public function test_retry_failed_surfaces_scheduling_errors(): void {
+		wp_set_current_user( $this->admin_user );
+		$order = \WC_Helper_Order::create_order();
+		OrdersScheduler::record_failed_order_import( $order->get_id() );
+		// Saving the order schedules an immediate-mode import action; clear it
+		// so the endpoint reaches the (synchronous, throwing) scheduling path.
+		$this->clear_scheduled_actions();
+
+		// Force schedule_action() to run the import synchronously, and make
+		// the import itself throw, so the scheduling attempt errors.
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		$throwing_filter = function () {
+			throw new \DivisionByZeroError( 'Division by zero' );
+		};
+		add_filter( 'woocommerce_analytics_is_test_order', $throwing_filter );
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/retry-failed' );
+		$response = $this->server->dispatch( $request );
+
+		remove_filter( 'woocommerce_analytics_is_test_order', $throwing_filter );
+		remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+
+		$this->assertSame( 500, $response->get_status(), 'A fully failed retry must not report success' );
+		$this->assertSame( 'woocommerce_rest_analytics_retry_failed', $response->get_data()['code'] );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertContains( $order->get_id(), $failed['ids'], 'Orders that failed again stay recorded' );
 	}
 
 	/**
@@ -395,5 +442,21 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 2, $data['failed_count'] );
 		$this->assertSame( 3, $data['failed_overflow_count'] );
+	}
+
+	/**
+	 * @testdox Status endpoint reports zero failed imports for a malformed option value.
+	 */
+	public function test_status_handles_malformed_failed_imports_option(): void {
+		wp_set_current_user( $this->admin_user );
+		update_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION, 'yes', false );
+
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/status' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 0, $data['failed_count'] );
+		$this->assertSame( 0, $data['failed_overflow_count'] );
 	}
 }

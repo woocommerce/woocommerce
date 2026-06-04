@@ -513,6 +513,36 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_failed_order_imports normalizes malformed or legacy option values.
+	 */
+	public function test_get_failed_order_imports_normalizes_malformed_option(): void {
+		// A scalar value (e.g. from a corrupted or manually edited option).
+		update_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION, 'yes', false );
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertSame( array(), $failed['ids'] );
+		$this->assertSame( 0, $failed['overflow'] );
+
+		// An array missing the 'ids' key, with a non-int overflow.
+		update_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION, array( 'overflow' => '4' ), false );
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertSame( array(), $failed['ids'] );
+		$this->assertSame( 4, $failed['overflow'] );
+
+		// 'ids' set to a non-array value.
+		update_option(
+			OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION,
+			array(
+				'ids'      => 'not-an-array',
+				'overflow' => 1,
+			),
+			false
+		);
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertSame( array(), $failed['ids'] );
+		$this->assertSame( 1, $failed['overflow'] );
+	}
+
+	/**
 	 * @testdox record_failed_order_import stores deduplicated order IDs.
 	 */
 	public function test_record_failed_order_import_dedupes(): void {
