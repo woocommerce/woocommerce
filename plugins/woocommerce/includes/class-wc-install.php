@@ -373,6 +373,7 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'maybe_enable_hpos' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'add_coming_soon_option' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements_for_newly_installed' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_abandoned_cart_recovery_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_analytics_scheduled_import' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_product_instance_caching_for_newly_installed' ), 20 );
@@ -1285,6 +1286,20 @@ class WC_Install {
 	}
 
 	/**
+	 * Enable the abandoned cart recovery feature by default for new shops.
+	 *
+	 * Existing stores receiving this as a plugin update remain default-off and
+	 * must opt in via WooCommerce → Settings → Advanced → Features.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return void
+	 */
+	public static function enable_abandoned_cart_recovery_for_newly_installed() {
+		wc_get_container()->get( FeaturesController::class )->change_feature_enable( 'abandoned_cart_recovery', true );
+	}
+
+	/**
 	 * Enable customer stock notifications signups by default for new shops.
 	 *
 	 * @since 0.0.0
@@ -1751,7 +1766,10 @@ class WC_Install {
 
 		// Stock Notifications Table Schema.
 		$stock_notifications_table_schema = wc_get_container()->get( StockNotificationsDataStore::class )->get_database_schema();
-		$order_stats_table_schema         = self::get_order_stats_table_schema( $collate );
+
+		// Email Unsubscribes table — generic across email types; each row pairs an email hash with an email-kind identifier.
+		$email_unsubscribes_table_schema = wc_get_container()->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class )->get_database_schema();
+		$order_stats_table_schema        = self::get_order_stats_table_schema( $collate );
 
 		$mysql_version = wc_get_server_database_version()['number'];
 		if ( version_compare( $mysql_version, '5.6', '>=' ) ) {
@@ -2095,6 +2113,7 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 ) $collate;
 $hpos_table_schema;
 $stock_notifications_table_schema;
+$email_unsubscribes_table_schema;
 		";
 
 		return $tables;
@@ -2134,6 +2153,7 @@ $stock_notifications_table_schema;
 			"{$wpdb->prefix}wc_product_attributes_lookup",
 			"{$wpdb->prefix}wc_stock_notifications",
 			"{$wpdb->prefix}wc_stock_notificationmeta",
+			"{$wpdb->prefix}wc_email_unsubscribes",
 
 			// WCA Tables.
 			"{$wpdb->prefix}wc_order_stats",

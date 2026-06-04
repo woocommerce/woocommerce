@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\EmailEditor\PersonalizationTags\CustomerTags
 use Automattic\WooCommerce\Internal\EmailEditor\PersonalizationTags\OrderTagsProvider;
 use Automattic\WooCommerce\Internal\EmailEditor\PersonalizationTags\SiteTagsProvider;
 use Automattic\WooCommerce\Internal\EmailEditor\PersonalizationTags\StoreTagsProvider;
+use Automattic\WooCommerce\Internal\EmailEditor\PersonalizationTags\UnsubscribeTagsProvider;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -48,13 +49,21 @@ class PersonalizationTagManager {
 	private $store_tags_provider;
 
 	/**
+	 * The unsubscribe related tags provider.
+	 *
+	 * @var UnsubscribeTagsProvider
+	 */
+	private $unsubscribe_tags_provider;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->customer_tags_provider = new CustomerTagsProvider();
-		$this->order_tags_provider    = new OrderTagsProvider();
-		$this->site_tags_provider     = new SiteTagsProvider();
-		$this->store_tags_provider    = new StoreTagsProvider();
+		$this->customer_tags_provider    = new CustomerTagsProvider();
+		$this->order_tags_provider       = new OrderTagsProvider();
+		$this->site_tags_provider        = new SiteTagsProvider();
+		$this->store_tags_provider       = new StoreTagsProvider();
+		$this->unsubscribe_tags_provider = new UnsubscribeTagsProvider();
 	}
 
 	/**
@@ -78,6 +87,7 @@ class PersonalizationTagManager {
 		$this->order_tags_provider->register_tags( $registry );
 		$this->site_tags_provider->register_tags( $registry );
 		$this->store_tags_provider->register_tags( $registry );
+		$this->unsubscribe_tags_provider->register_tags( $registry );
 
 		return $registry;
 	}
