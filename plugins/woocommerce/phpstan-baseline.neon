@@ -30214,30 +30214,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
 
 		-
-			message: '#^Method WC_REST_Products_Catalog_Controller\:\:register_routes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-catalog-controller.php
-
-		-
-			message: '#^Method WC_REST_Products_Catalog_Controller\:\:request_catalog\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-catalog-controller.php
-
-		-
-			message: '#^Method WC_REST_Products_Catalog_Controller\:\:request_catalog_permissions_check\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-catalog-controller.php
-
-		-
-			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 116 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-catalog-controller.php
-
-		-
 			message: '#^Access to offset ''cost_of_goods_sold'' on an unknown class Automattic\\WooCommerce\\Internal\\CostOfGoodsSold\\WP_Rest_Request\.$#'
 			identifier: class.notFound
 			count: 2
@@ -37981,12 +37957,6 @@ parameters:
 			message: '#^Access to property \$data on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
 			identifier: class.notFound
 			count: 3
-			path: src/Admin/API/Leaderboards.php
-
-		-
-			message: '#^Call to method get_query_params\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Admin/API/Leaderboards.php
 
 		-
@@ -52726,12 +52696,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCategory.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 6
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
 			message: '#^Call to method get_param\(\) on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_REST_Request\.$#'
 			identifier: class.notFound
 			count: 12
@@ -52788,12 +52752,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$callback of function remove_filter expects array\|\(callable\(\)\: mixed\)\|string, \(Closure\(mixed, mixed\)\: mixed\)\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Controller\:\:build_frontend_query\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
 
@@ -55576,24 +55534,6 @@ parameters:
 			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
 
 		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean\.\)\: Unexpected token "\.", expected variable at offset 211 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean\.\)\: Unexpected token "\.", expected variable at offset 221 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
 			message: '#^Parameter \$parent_block of method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:update_render_block_data\(\) has invalid type Automattic\\WooCommerce\\Blocks\\Templates\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 1
@@ -58084,12 +58024,6 @@ parameters:
 			path: src/Internal/Admin/Logging/FileV2/FileController.php
 
 		-
-			message: '#^Parameter \#1 \$directory of class RecursiveDirectoryIterator constructor expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Logging/FileV2/FileController.php
-
-		-
 			message: '#^Parameter \#1 \$fp of function feof expects resource, resource\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -58097,12 +58031,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$fp of function fgets expects resource, resource\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Logging/FileV2/FileController.php
-
-		-
-			message: '#^Parameter \#1 \$path of function wp_is_writable expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Logging/FileV2/FileController.php
