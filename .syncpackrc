@@ -473,6 +473,7 @@
 				"@wordpress/admin-ui",
 				"@wordpress/dataviews",
 				"@wordpress/global-styles-engine",
+				"@wordpress/icons",
 				"@wordpress/router",
 				"@wordpress/theme",
 				"@wordpress/ui"
