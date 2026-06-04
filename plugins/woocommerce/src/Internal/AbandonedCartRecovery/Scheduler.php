@@ -64,7 +64,7 @@ class Scheduler {
 	 * @internal
 	 */
 	final public function init(): void {
-		add_action( 'woocommerce_new_order', array( $this, 'handle_new_order' ), 10, 1 );
+		add_action( 'woocommerce_new_order', array( $this, 'handle_new_order' ), 10, 2 );
 		// Catch every transition out of the abandoned set (processing, completed,
 		// cancelled, failed, refunded, custom statuses…) so the pending send is
 		// unscheduled regardless of which status the order moves to.
@@ -83,10 +83,14 @@ class Scheduler {
 	 *
 	 * @internal
 	 *
-	 * @param int $order_id The new order ID.
+	 * @param int           $order_id The new order ID.
+	 * @param WC_Order|null $order    The order object passed by `woocommerce_new_order`;
+	 *                                falls back to a lookup only when absent.
 	 */
-	public function handle_new_order( int $order_id ): void {
-		$order = wc_get_order( $order_id );
+	public function handle_new_order( int $order_id, $order = null ): void {
+		if ( ! $order instanceof WC_Order ) {
+			$order = wc_get_order( $order_id );
+		}
 		if ( ! $order instanceof WC_Order ) {
 			return;
 		}
@@ -116,7 +120,7 @@ class Scheduler {
 		as_schedule_single_action( $when, self::ACTION_HOOK, array( $order_id ) );
 
 		$order->update_meta_data( self::SCHEDULED_META_KEY, (string) $when );
-		$order->save();
+		$order->save_meta_data();
 	}
 
 	/**
@@ -168,7 +172,7 @@ class Scheduler {
 		$order = wc_get_order( $order_id );
 		if ( $order instanceof WC_Order && '' !== (string) $order->get_meta( self::SCHEDULED_META_KEY ) ) {
 			$order->delete_meta_data( self::SCHEDULED_META_KEY );
-			$order->save();
+			$order->save_meta_data();
 		}
 	}
 
