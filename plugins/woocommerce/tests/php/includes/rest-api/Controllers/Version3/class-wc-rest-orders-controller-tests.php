@@ -1023,4 +1023,70 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_order( $order->get_id() ) );
 	}
+
+	/**
+	 * @testdox Updating an order accepts round-tripped line item meta_data display values with complex values.
+	 */
+	public function test_update_line_item_meta_data_ignores_display_values_with_complex_values(): void {
+		$product            = WC_Helper_Product::create_simple_product();
+		$complex_meta_value = array(
+			array(
+				'guid'      => 'https://example.com/wp-content/uploads/2022/03/upload.jpg',
+				'file_type' => 'image/jpeg',
+				'file_name' => 'upload.jpg',
+				'title'     => 'upload',
+				'key'       => 'file-key',
+			),
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+						'meta_data'  => array(
+							array(
+								'key'   => '_file_upload_data',
+								'value' => $complex_meta_value,
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+
+		$response_data  = $response->get_data();
+		$line_item_data = $response_data['line_items'][0];
+		$meta_data      = $line_item_data['meta_data'][0];
+		$this->assertIsArray( $meta_data['display_value'] );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $response_data['id'] );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'     => OrderStatus::PROCESSING,
+					'line_items' => array(
+						array(
+							'id'        => $line_item_data['id'],
+							'meta_data' => array( $meta_data ),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$order      = wc_get_order( $response_data['id'] );
+		$line_items = $order->get_items();
+		$line_item  = reset( $line_items );
+		$this->assertEquals( $complex_meta_value, $line_item->get_meta( '_file_upload_data' ) );
+	}
 }
