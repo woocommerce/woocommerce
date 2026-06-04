@@ -116,7 +116,9 @@ test.describe( `${ blockData.name } Block `, () => {
 		} );
 		await frontendUtils.goToShop();
 
-		const addToCartButton = page.getByRole( 'button', { name: 'Add to cart: “Single”' } );
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart: “Single”',
+		} );
 		await addToCartButton.click();
 		await expect( addToCartButton ).toHaveText( '1 in cart' );
 		const cartLink = page.getByRole( 'link', { name: 'View cart' } );
@@ -132,7 +134,9 @@ test.describe( `${ blockData.name } Block `, () => {
 		await insertProductsQuery( editor, { inherit: false } );
 		await editor.publishAndVisitPost();
 
-		const addToCartButton = page.getByRole( 'button', { name: 'Add to cart: “Single”' } );
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart: “Single”',
+		} );
 		await addToCartButton.click();
 		await expect( addToCartButton ).toHaveText( '1 in cart' );
 		const cartLink = page.getByRole( 'link', { name: 'View cart' } );
