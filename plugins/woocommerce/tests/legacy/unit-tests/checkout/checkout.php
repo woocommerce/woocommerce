@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Checkout
  */
 
+declare(strict_types=1);
+
 use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
@@ -312,5 +314,54 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( false, WC()->cart->check_cart_items() );
+	}
+
+	/**
+	 * Test that a customer-chosen value for an "any" variation attribute is preserved on the order line item.
+	 */
+	public function test_create_order_preserves_customer_chosen_any_attribute_value(): void {
+		$parent_product = WC_Helper_Product::create_variation_product();
+
+		// Find the first variation that has pa_number as "any" (stored as '').
+		$any_number_variation_id = 0;
+		$any_number_variation    = null;
+		foreach ( $parent_product->get_children() as $child_id ) {
+			$child = wc_get_product( $child_id );
+			if ( '' === ( $child->get_variation_attributes()['attribute_pa_number'] ?? null ) ) {
+				$any_number_variation_id = $child_id;
+				$any_number_variation    = $child;
+				break;
+			}
+		}
+		$this->assertGreaterThan( 0, $any_number_variation_id, 'Expected a variation with an "any" pa_number attribute.' );
+
+		// Build cart attributes: use the variation's fixed values for non-number attributes, supply an arbitrary value for
+		// any remaining "any" attributes, and the customer's chosen value (1) for the "any" pa_number attribute under test.
+		$cart_variation = array(
+			'attribute_pa_size'   => 'small',
+			'attribute_pa_colour' => 'red',
+			'attribute_pa_number' => '1',
+		);
+		WC()->cart->add_to_cart( $parent_product->get_id(), 1, $any_number_variation_id, $cart_variation );
+
+		$order_id = WC_Checkout::instance()->create_order(
+			array(
+				'payment_method' => WC_Gateway_COD::ID,
+				'billing_email'  => 'a@b.com',
+			)
+		);
+		$this->assertNotWPError( $order_id );
+
+		// Re-read from storage to assert the persisted value.
+		/** @var WC_Order_Item_Product[] $items */
+		$items = wc_get_order( $order_id )->get_items();
+		$this->assertCount( 1, $items );
+
+		// The chosen value must survive; premature set_product() overwrites it with '' (empty).
+		$this->assertSame(
+			'1',
+			array_values( $items )[0]->get_meta( 'pa_number' ),
+			'The customer-chosen value for an "Any" variation attribute must be persisted on the order line item.'
+		);
 	}
 }
