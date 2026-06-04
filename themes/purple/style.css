@@ -56,3 +56,23 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 .wp-block-woocommerce-product-review-form .comment-form-cookies-consent {
     align-items: flex-start;
 }
+
+/* Navigation dropdown panel — desktop only.
+ * Above the mobile overlay breakpoint, give the submenu its own
+ * floating-panel styling (page-color background + soft shadow).
+ * Below 600px the nav opens as a full overlay and WordPress's own
+ * styles already render flat submenus, so this rule stays out.
+ *
+ * !important is needed because WordPress core ships a hardcoded
+ * .wp-block-navigation:not(.has-background) .wp-block-navigation__submenu-container
+ * rule at higher specificity than any theme.json output.
+ *
+ * This lives in style.css (rather than theme.json's css field)
+ * because that field strips @media queries during sanitization. */
+@media (min-width: 600px) {
+    .wp-block-navigation .wp-block-navigation__submenu-container {
+        background-color: var(--wp--preset--color--theme-1) !important;
+        border: none !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+}

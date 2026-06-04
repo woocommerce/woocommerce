@@ -304,9 +304,6 @@
 					"blockGap": "var(--wp--preset--spacing--40)"
 				}
 			},
-			"core/navigation-submenu": {
-				"css": "& .wp-block-navigation__submenu-container{background-color:var(--wp--preset--color--theme-1)!important;border:none!important;box-shadow:0 4px 16px rgba(0,0,0,0.12);}"
-			},
 			"core/post-date": {
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--small)" 
