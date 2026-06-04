@@ -37960,12 +37960,6 @@ parameters:
 			path: src/Admin/API/Leaderboards.php
 
 		-
-			message: '#^Call to method get_query_params\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Leaderboards.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Leaderboards\:\:get_allowed_items\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
 			identifier: class.notFound
 			count: 1
