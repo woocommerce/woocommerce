@@ -109,14 +109,25 @@
 							if(opts.closeOnEscape){
 								deactive_tiptip();
 							}
-						} else if ( event.key === ' ' || event.key === 'Enter' ||
-							event.keyCode === 32 || event.keyCode === 13 ) {
+						} else if ( event.key === ' ' || event.keyCode === 32 ) {
 							event.preventDefault();
 							if ( tiptip_holder.is(':visible') ) {
 								deactive_tiptip();
 							} else {
+								cancel_shared_timeout();
 								cancel_deactive_tiptip();
 								active_tiptip();
+							}
+						} else if ( event.key === 'Enter' || event.keyCode === 13 ) {
+							const tag = event.target.tagName.toLowerCase();
+							if ( tag !== 'a' && tag !== 'button' && tag !== 'input' && tag !== 'select' ) {
+								if ( tiptip_holder.is(':visible') ) {
+									deactive_tiptip();
+								} else {
+									cancel_shared_timeout();
+									cancel_deactive_tiptip();
+									active_tiptip();
+								}
 							}
 						}
 					});
@@ -151,12 +162,6 @@
 				}
 
 				function active_tiptip(){
-					if(!opts.keepAlive){
-						tiptip_holder.addClass('no-pointer-events');
-					} else {
-						tiptip_holder.removeClass('no-pointer-events');
-					}
-
 					var content = typeof opts.content === 'function' ? opts.content() : org_title;
 					if (!content) {
 						return;
@@ -238,7 +243,8 @@
 						marg_left = marg_left + 5;
 					}
 					tiptip_arrow.css({"margin-left": arrow_left+"px", "margin-top": arrow_top+"px"});
-					tiptip_holder.css({"margin-left": marg_left+"px", "margin-top": marg_top+"px"}).attr("class","tip"+t_class);
+					var holderClass = "tip" + t_class + ( opts.keepAlive ? "" : " no-pointer-events" );
+					tiptip_holder.css({"margin-left": marg_left+"px", "margin-top": marg_top+"px"}).attr("class", holderClass);
 
 					if (timeout){ clearTimeout(timeout); }
 					timeout = setTimeout(function(){ tiptip_holder.stop(true,true).fadeIn(opts.fadeIn); }, opts.delay);
