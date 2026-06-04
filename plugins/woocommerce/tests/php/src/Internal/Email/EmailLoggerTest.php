@@ -205,6 +205,28 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A failed send is opted into remote logging so proactive support can detect it.
+	 */
+	public function test_failure_opts_into_remote_logging(): void {
+		$email = $this->create_mock_email( 'customer_processing_order', 'customer@example.com' );
+
+		$this->sut->handle_woocommerce_email_sent( false, 'customer_processing_order', $email );
+
+		$this->assertLogged( 'warning', 'customer_processing_order', array( 'remote-logging' => true ) );
+	}
+
+	/**
+	 * @testdox A successful send is not opted into remote logging.
+	 */
+	public function test_success_is_not_opted_into_remote_logging(): void {
+		$email = $this->create_mock_email( 'customer_processing_order', 'customer@example.com' );
+
+		$this->sut->handle_woocommerce_email_sent( true, 'customer_processing_order', $email );
+
+		$this->assertArrayNotHasKey( 'remote-logging', $this->captured_logs[0]['context'] );
+	}
+
+	/**
 	 * @testdox Success message does not include an error reason.
 	 */
 	public function test_success_message_has_no_error_reason(): void {

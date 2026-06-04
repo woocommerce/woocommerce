@@ -1,3 +1,3 @@
 Significance: minor
 Type: add
-Comment: Log failed transactional email sends and opt them into remote logging so proactive support can detect silently-broken order emails (recipient address is not logged).
+Comment: Opt transactional email send failures (logged by EmailLogger) into remote logging so proactive support can detect silently-broken order emails. Recipient remains redacted; successful sends are not shipped.

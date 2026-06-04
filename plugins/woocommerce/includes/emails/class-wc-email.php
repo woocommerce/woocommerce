@@ -1242,21 +1242,6 @@ class WC_Email extends WC_Settings_API {
 		// Clear the AltBody (if set) so that it does not leak across to different emails.
 		$this->clear_alt_body_field();
 
-		// Surface email-delivery failures to remote logging so proactive support can catch
-		// silently-broken transactional email (e.g. order confirmations / invoices) before a
-		// merchant or customer notices. Opted in via the `remote-logging` context flag that
-		// RemoteLogger consumes. The email id is safe to log; the recipient address is PII and
-		// is intentionally omitted.
-		if ( false === $return ) {
-			wc_get_logger()->error(
-				sprintf( 'Failed to send "%s" email.', $this->id ),
-				array(
-					'source'         => 'wc-email-delivery',
-					'remote-logging' => true,
-				)
-			);
-		}
-
 		/**
 		 * Action hook fired when an email is sent.
 		 *
