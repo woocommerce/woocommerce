@@ -789,6 +789,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 */
 	public static function get_failed_order_imports(): array {
 		$value = get_option( self::FAILED_ORDER_IMPORTS_OPTION, array() );
+		if ( ! is_array( $value ) ) {
+			$value = array();
+		}
 
 		return array(
 			'ids'      => isset( $value['ids'] ) && is_array( $value['ids'] ) ? array_map( 'absint', $value['ids'] ) : array(),

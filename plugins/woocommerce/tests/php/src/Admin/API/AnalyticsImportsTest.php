@@ -407,11 +407,13 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_analytics_is_test_order', $throwing_filter );
 
-		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/retry-failed' );
-		$response = $this->server->dispatch( $request );
-
-		remove_filter( 'woocommerce_analytics_is_test_order', $throwing_filter );
-		remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		try {
+			$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/retry-failed' );
+			$response = $this->server->dispatch( $request );
+		} finally {
+			remove_filter( 'woocommerce_analytics_is_test_order', $throwing_filter );
+			remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		}
 
 		$this->assertSame( 500, $response->get_status(), 'A fully failed retry must not report success' );
 		$this->assertSame( 'woocommerce_rest_analytics_retry_failed', $response->get_data()['code'] );
