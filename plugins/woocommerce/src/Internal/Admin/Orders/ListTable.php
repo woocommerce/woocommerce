@@ -327,19 +327,31 @@ class ListTable extends WP_List_Table {
 			return array();
 		}
 
+		// Trashing and deleting orders is gated behind the order delete capabilities, mirroring how
+		// WP_List_Table handles the shop_order CPT. This lets roles drop delete_shop_orders to remove
+		// the option entirely (see https://github.com/woocommerce/woocommerce/issues/39289).
+		$post_type         = get_post_type_object( $this->order_type );
+		$can_delete_orders = $post_type && current_user_can( $post_type->cap->delete_posts );
+
 		if ( array( 'trash' ) === $selected_status ) {
 			$actions = array(
 				'untrash' => __( 'Restore', 'woocommerce' ),
-				'delete'  => __( 'Delete permanently', 'woocommerce' ),
 			);
+
+			if ( $can_delete_orders ) {
+				$actions['delete'] = __( 'Delete permanently', 'woocommerce' );
+			}
 		} else {
 			$actions = array(
 				'mark_processing' => __( 'Change status to processing', 'woocommerce' ),
 				'mark_on-hold'    => __( 'Change status to on-hold', 'woocommerce' ),
 				'mark_completed'  => __( 'Change status to completed', 'woocommerce' ),
 				'mark_cancelled'  => __( 'Change status to cancelled', 'woocommerce' ),
-				'trash'           => __( 'Move to Trash', 'woocommerce' ),
 			);
+
+			if ( $can_delete_orders ) {
+				$actions['trash'] = __( 'Move to Trash', 'woocommerce' );
+			}
 		}
 
 		if ( wc_string_to_bool( get_option( 'woocommerce_allow_bulk_remove_personal_data', 'no' ) ) ) {
@@ -800,7 +812,9 @@ class ListTable extends WP_List_Table {
 			}
 		}
 
-		if ( $this->is_trash && $this->has_items() && current_user_can( 'edit_others_shop_orders' ) ) {
+		// Emptying the trash permanently deletes orders, so it also requires the order delete capability.
+		$post_type = get_post_type_object( $this->order_type );
+		if ( $this->is_trash && $this->has_items() && current_user_can( 'edit_others_shop_orders' ) && $post_type && current_user_can( $post_type->cap->delete_posts ) ) {
 			submit_button( __( 'Empty Trash', 'woocommerce' ), 'apply', 'delete_all', false );
 		}
 
@@ -1418,6 +1432,13 @@ class ListTable extends WP_List_Table {
 			return;
 		}
 
+		// Emptying the trash permanently deletes every trashed order, so require the order delete
+		// capability (see https://github.com/woocommerce/woocommerce/issues/39289).
+		$post_type = get_post_type_object( $this->order_type );
+		if ( 'delete_all' === $action && ( ! $post_type || ! current_user_can( $post_type->cap->delete_posts ) ) ) {
+			return;
+		}
+
 		check_admin_referer( 'bulk-orders' );
 
 		$redirect_to = remove_query_arg( array( 'deleted', 'ids' ), wp_get_referer() );
@@ -1450,6 +1471,19 @@ class ListTable extends WP_List_Table {
 			$action,
 			'order'
 		);
+
+		// Trashing or permanently deleting an order requires the per-order delete capability, consistent
+		// with the order actions meta box and WP core (see https://github.com/woocommerce/woocommerce/issues/39289).
+		if ( in_array( $action, array( 'trash', 'delete' ), true ) ) {
+			$ids = array_values(
+				array_filter(
+					$ids,
+					function ( $id ) {
+						return current_user_can( 'delete_post', $id );
+					}
+				)
+			);
+		}
 
 		if ( ! $ids ) {
 			wp_safe_redirect( $redirect_to );

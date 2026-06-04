@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Respect order delete capabilities for the HPOS order list table trash, delete, and empty trash actions so roles without delete_shop_orders can no longer delete orders.

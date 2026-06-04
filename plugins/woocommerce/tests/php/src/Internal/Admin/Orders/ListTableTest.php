@@ -19,6 +19,13 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Custom roles registered during a test.
+	 *
+	 * @var string[]
+	 */
+	private array $custom_roles = array();
+
+	/**
 	 * Setup - enables HPOS.
 	 */
 	public function setUp(): void {
@@ -30,6 +37,18 @@ class ListTableTest extends \WC_Unit_Test_Case {
 			$this->order_type = $order_type;
 		};
 		$set_order_type->call( $this->sut, 'shop_order' );
+	}
+
+	/**
+	 * Tear down - removes any custom roles registered during a test.
+	 */
+	public function tearDown(): void {
+		foreach ( $this->custom_roles as $role ) {
+			remove_role( $role );
+		}
+		$this->custom_roles = array();
+
+		parent::tearDown();
 	}
 
 	/**
@@ -231,5 +250,110 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$filtered_items = $get_items->call( $this->sut );
 
 		$this->assertCount( 2, $filtered_items ); // Both orders should be shown.
+	}
+
+	/**
+	 * @testdox Bulk actions include "Move to Trash" when the user can delete orders.
+	 */
+	public function test_bulk_actions_include_trash_when_user_can_delete_orders(): void {
+		$this->login_as_role( 'shop_manager' );
+
+		$actions = $this->call_get_bulk_actions();
+
+		$this->assertArrayHasKey( 'trash', $actions, 'Users who can delete orders should see the Move to Trash bulk action' );
+		$this->assertArrayHasKey( 'mark_completed', $actions, 'Status-change bulk actions should remain available' );
+	}
+
+	/**
+	 * @testdox Bulk actions include "Delete permanently" in the trash when the user can delete orders.
+	 */
+	public function test_bulk_actions_include_delete_permanently_when_user_can_delete_orders(): void {
+		$this->login_as_role( 'shop_manager' );
+
+		$actions = $this->call_get_bulk_actions( array( 'trash' ) );
+
+		$this->assertArrayHasKey( 'delete', $actions, 'Users who can delete orders should see the Delete permanently bulk action' );
+		$this->assertArrayHasKey( 'untrash', $actions, 'The Restore bulk action should remain available in the trash' );
+	}
+
+	/**
+	 * @testdox Bulk actions exclude "Move to Trash" when the user cannot delete orders.
+	 */
+	public function test_bulk_actions_exclude_trash_when_user_cannot_delete_orders(): void {
+		$this->login_as_user_with_caps(
+			'orders_editor_without_delete',
+			array(
+				'read'                    => true,
+				'edit_shop_orders'        => true,
+				'edit_others_shop_orders' => true,
+			)
+		);
+
+		$actions = $this->call_get_bulk_actions();
+
+		$this->assertArrayNotHasKey( 'trash', $actions, 'Users without the delete capability should not see the Move to Trash bulk action' );
+		$this->assertArrayHasKey( 'mark_completed', $actions, 'Status-change bulk actions should still be available without the delete capability' );
+	}
+
+	/**
+	 * @testdox Bulk actions exclude "Delete permanently" in the trash when the user cannot delete orders.
+	 */
+	public function test_bulk_actions_exclude_delete_permanently_when_user_cannot_delete_orders(): void {
+		$this->login_as_user_with_caps(
+			'orders_editor_without_delete_trash',
+			array(
+				'read'                    => true,
+				'edit_shop_orders'        => true,
+				'edit_others_shop_orders' => true,
+			)
+		);
+
+		$actions = $this->call_get_bulk_actions( array( 'trash' ) );
+
+		$this->assertArrayNotHasKey( 'delete', $actions, 'Users without the delete capability should not see the Delete permanently bulk action' );
+		$this->assertArrayHasKey( 'untrash', $actions, 'The Restore bulk action should still be available without the delete capability' );
+	}
+
+	/**
+	 * @testdox Bulk actions are empty for users without the edit others capability.
+	 */
+	public function test_bulk_actions_empty_for_users_without_edit_others_capability(): void {
+		$this->login_as_role( 'customer' );
+
+		$actions = $this->call_get_bulk_actions();
+
+		$this->assertSame( array(), $actions, 'Users without the edit others capability should not see any bulk actions' );
+	}
+
+	/**
+	 * Helper to invoke the protected get_bulk_actions() method with a given status view.
+	 *
+	 * @param string[]|null $status The status filter applied to the list table, or null for the default view.
+	 * @return array<string, string> The available bulk actions.
+	 */
+	private function call_get_bulk_actions( ?array $status = null ): array {
+		$closure = function ( $status ) {
+			$this->wp_post_type               = get_post_type_object( $this->order_type );
+			$this->order_query_args['status'] = $status;
+
+			return $this->get_bulk_actions();
+		};
+
+		return $closure->call( $this->sut, $status );
+	}
+
+	/**
+	 * Create a user with a custom role and set it as the current user.
+	 *
+	 * @param string             $role Role name.
+	 * @param array<string,bool> $caps Capabilities.
+	 * @return int User ID.
+	 */
+	private function login_as_user_with_caps( string $role, array $caps ): int {
+		remove_role( $role );
+		add_role( $role, $role, $caps );
+		$this->custom_roles[] = $role;
+
+		return $this->login_as_role( $role );
 	}
 }
