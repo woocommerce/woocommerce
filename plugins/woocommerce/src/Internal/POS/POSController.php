@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\POS;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\POS\Admin\UserFormIntegration;
 use Automattic\WooCommerce\Internal\POS\CouponAttribution;
 use Automattic\WooCommerce\Internal\POS\OrderAttribution;
 use Automattic\WooCommerce\Internal\POS\RestApi\POSStaffController;
@@ -56,25 +57,35 @@ class POSController implements RegisterHooksInterface {
 	private CouponAttribution $coupon_attribution;
 
 	/**
+	 * Wp-admin Add New User form integration.
+	 *
+	 * @var UserFormIntegration
+	 */
+	private UserFormIntegration $user_form_integration;
+
+	/**
 	 * Initialize dependencies via the DI container.
 	 *
 	 * @internal
 	 *
-	 * @param FeaturesController $features_controller The features controller.
-	 * @param POSStaffController $staff_controller    The staff REST controller.
-	 * @param OrderAttribution   $order_attribution   The order attribution lifecycle handler.
-	 * @param CouponAttribution  $coupon_attribution  The coupon attribution lifecycle handler.
+	 * @param FeaturesController  $features_controller   The features controller.
+	 * @param POSStaffController  $staff_controller      The staff REST controller.
+	 * @param OrderAttribution    $order_attribution     The order attribution lifecycle handler.
+	 * @param CouponAttribution   $coupon_attribution    The coupon attribution lifecycle handler.
+	 * @param UserFormIntegration $user_form_integration The Add New User form integration.
 	 */
 	final public function init(
 		FeaturesController $features_controller,
 		POSStaffController $staff_controller,
 		OrderAttribution $order_attribution,
-		CouponAttribution $coupon_attribution
+		CouponAttribution $coupon_attribution,
+		UserFormIntegration $user_form_integration
 	): void {
-		$this->features_controller = $features_controller;
-		$this->staff_controller    = $staff_controller;
-		$this->order_attribution   = $order_attribution;
-		$this->coupon_attribution  = $coupon_attribution;
+		$this->features_controller   = $features_controller;
+		$this->staff_controller      = $staff_controller;
+		$this->order_attribution     = $order_attribution;
+		$this->coupon_attribution    = $coupon_attribution;
+		$this->user_form_integration = $user_form_integration;
 	}
 
 	/**
@@ -141,5 +152,6 @@ class POSController implements RegisterHooksInterface {
 		$this->staff_controller->register();
 		$this->order_attribution->register();
 		$this->coupon_attribution->register();
+		$this->user_form_integration->register();
 	}
 }
