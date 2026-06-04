@@ -43,6 +43,8 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	 * Tear down - removes any custom roles registered during a test.
 	 */
 	public function tearDown(): void {
+		$this->clean_up_cot_setup();
+
 		foreach ( $this->custom_roles as $role ) {
 			remove_role( $role );
 		}
@@ -340,6 +342,104 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		};
 
 		return $closure->call( $this->sut, $status );
+	}
+
+	/**
+	 * @testdox handle_bulk_actions() does not trash selected orders for a user without the delete capability.
+	 */
+	public function test_handle_bulk_actions_trash_blocked_without_delete_capability(): void {
+		$order = \WC_Helper_Order::create_order();
+
+		$this->login_as_user_with_caps(
+			'orders_editor_without_delete_handler',
+			array(
+				'read'                    => true,
+				'edit_shop_orders'        => true,
+				'edit_others_shop_orders' => true,
+			)
+		);
+
+		$_REQUEST['action']   = 'trash';
+		$_REQUEST['id']       = array( $order->get_id() );
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'bulk-orders' );
+
+		$this->invoke_handle_bulk_actions();
+
+		unset( $_REQUEST['action'], $_REQUEST['id'], $_REQUEST['_wpnonce'] );
+
+		$this->assertNotSame( 'trash', wc_get_order( $order->get_id() )->get_status(), 'Orders should not be trashed for a user without the delete capability' );
+	}
+
+	/**
+	 * @testdox handle_bulk_actions() trashes selected orders for a user with the delete capability.
+	 */
+	public function test_handle_bulk_actions_trash_allowed_with_delete_capability(): void {
+		$order = \WC_Helper_Order::create_order();
+
+		$this->login_as_role( 'shop_manager' );
+
+		$_REQUEST['action']   = 'trash';
+		$_REQUEST['id']       = array( $order->get_id() );
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'bulk-orders' );
+
+		$this->invoke_handle_bulk_actions();
+
+		unset( $_REQUEST['action'], $_REQUEST['id'], $_REQUEST['_wpnonce'] );
+
+		$this->assertSame( 'trash', wc_get_order( $order->get_id() )->get_status(), 'Orders should be trashed for a user with the delete capability' );
+	}
+
+	/**
+	 * @testdox handle_bulk_actions() blocks emptying the trash for a user without the delete capability.
+	 */
+	public function test_handle_bulk_actions_empty_trash_blocked_without_delete_capability(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->delete( false ); // Move to the trash.
+
+		$this->login_as_user_with_caps(
+			'orders_editor_without_delete_empty_trash',
+			array(
+				'read'                    => true,
+				'edit_shop_orders'        => true,
+				'edit_others_shop_orders' => true,
+			)
+		);
+
+		$_REQUEST['delete_all'] = '1';
+
+		$this->invoke_handle_bulk_actions();
+
+		unset( $_REQUEST['delete_all'] );
+
+		$this->assertNotFalse( wc_get_order( $order->get_id() ), 'Trashed orders should not be permanently deleted for a user without the delete capability' );
+	}
+
+	/**
+	 * Invoke the protected handle_bulk_actions() method, trapping its terminal redirect.
+	 *
+	 * handle_bulk_actions() ends in wp_safe_redirect()/exit; the wp_redirect filter below converts
+	 * that redirect into a catchable exception so the assertions can run afterwards. Paths that
+	 * return early (such as a blocked Empty Trash) never redirect and simply fall through.
+	 */
+	private function invoke_handle_bulk_actions(): void {
+		$set_post_type = function () {
+			$this->wp_post_type = get_post_type_object( $this->order_type );
+		};
+		$set_post_type->call( $this->sut );
+
+		$throw_on_redirect = static function () {
+			throw new \RuntimeException( 'redirected' );
+		};
+		add_filter( 'wp_redirect', $throw_on_redirect );
+
+		try {
+			$this->sut->handle_bulk_actions();
+		} catch ( \RuntimeException $e ) {
+			// Expected when the handler reaches its terminal redirect.
+			unset( $e );
+		} finally {
+			remove_filter( 'wp_redirect', $throw_on_redirect );
+		}
 	}
 
 	/**
