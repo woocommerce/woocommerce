@@ -58,6 +58,7 @@
 		"@testing-library/jest-dom": "^6.x.x",
 		"@testing-library/react": "^16.x.x",
 		"@wordpress/i18n": "catalog:wp-min",
+		"@wordpress/private-apis": "catalog:wp-min",
 		"@wordpress/jest-console": "^5.4.0",
 		"regenerator-runtime": "^0.13.11"
 	},

@@ -31,28 +31,15 @@ const transformModules = {
  */
 const mapWpModules = [
 	'@wordpress/private-apis',
-	'@wordpress/admin-ui',
-	'@wordpress/block-editor',
-	'@wordpress/blocks',
-	'@wordpress/components',
-	'@wordpress/compose',
-	'@wordpress/core-data',
 	'@wordpress/data',
-	'@wordpress/editor',
-	'@wordpress/element',
+	'@wordpress/core-data',
+	'@wordpress/components',
 	'@wordpress/html-entities',
-	'@wordpress/keyboard-shortcuts',
-	'@wordpress/patterns',
-	'@wordpress/rich-text',
-	'@wordpress/theme',
-	'@wordpress/ui',
 ];
 const wpModulesMapper = mapWpModules.reduce( ( acc, module ) => {
 	try {
 		// Excluding mappings for imports with suffixes like /build/index.js so that we can import the build/index.js file directly.
-		acc[ `^${ module }$` ] = require.resolve( module, {
-			paths: [ process.cwd() ],
-		} );
+		acc[ `^${ module }$` ] = require.resolve( module, { paths: [ process.cwd() ] } );
 	} catch ( error ) {
 		// If the module is not found, no need to add it to the mapper.
 	}
