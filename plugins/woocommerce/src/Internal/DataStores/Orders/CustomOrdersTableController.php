@@ -708,7 +708,7 @@ class CustomOrdersTableController {
 					);
 
 					$sync_message[] = sprintf(
-						'<a href="%1$s" class="button button-link">%2$s</a>',
+						'<a href="%1$s" class="button-link">%2$s</a>',
 						esc_url( $stop_sync_url ),
 						__( 'Stop sync', 'woocommerce' )
 					);
@@ -731,7 +731,7 @@ class CustomOrdersTableController {
 				}
 
 				$sync_message[] = sprintf(
-					'<a href="%1$s" class="button button-link">%2$s</a>',
+					'<a href="%1$s" class="button-link">%2$s</a>',
 					esc_url( $sync_now_url ),
 					__( 'Sync orders now', 'woocommerce' )
 				);

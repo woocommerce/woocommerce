@@ -4,6 +4,23 @@
 import { getStateForContext } from './utils';
 
 /**
+ * Cache of parsed query-state contexts keyed by the serialized string stored
+ * in Redux state. `state[ context ]` is stored as a JSON string so it can be
+ * used as a stable cache key elsewhere, and this cache guarantees that parsing
+ * the same string twice returns the same object reference. Without this, the
+ * selector would produce a fresh object every call, which `@wordpress/data`'s
+ * SCRIPT_DEBUG unstable-reference check (added in wp-6.8) correctly flags.
+ */
+const parsedContextCache = new Map();
+
+const getParsedContext = ( serialized ) => {
+	if ( ! parsedContextCache.has( serialized ) ) {
+		parsedContextCache.set( serialized, JSON.parse( serialized ) );
+	}
+	return parsedContextCache.get( serialized );
+};
+
+/**
  * Selector for retrieving a specific query-state for the given context.
  *
  * @param {Object} state        Current state.
@@ -20,13 +37,13 @@ export const getValueForQueryKey = (
 	queryKey,
 	defaultValue = {}
 ) => {
-	let stateContext = getStateForContext( state, context );
+	const stateContext = getStateForContext( state, context );
 	if ( stateContext === null ) {
 		return defaultValue;
 	}
-	stateContext = JSON.parse( stateContext );
-	return typeof stateContext[ queryKey ] !== 'undefined'
-		? stateContext[ queryKey ]
+	const parsed = getParsedContext( stateContext );
+	return typeof parsed[ queryKey ] !== 'undefined'
+		? parsed[ queryKey ]
 		: defaultValue;
 };
 
@@ -47,5 +64,7 @@ export const getValueForQueryContext = (
 	defaultValue = {}
 ) => {
 	const stateContext = getStateForContext( state, context );
-	return stateContext === null ? defaultValue : JSON.parse( stateContext );
+	return stateContext === null
+		? defaultValue
+		: getParsedContext( stateContext );
 };

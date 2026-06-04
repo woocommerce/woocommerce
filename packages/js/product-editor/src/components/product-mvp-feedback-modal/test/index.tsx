@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import {
+	render,
+	screen,
+	fireEvent,
+	act,
+	waitFor,
+} from '@testing-library/react';
 import { createElement } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 
@@ -38,7 +44,9 @@ describe( 'ProductMVPFeedbackModal', () => {
 		await screen.findByRole( 'dialog' );
 		// Press cancel button.
 		fireEvent.click( screen.getByRole( 'button', { name: /Close/i } ) );
-		expect( screen.queryByRole( 'dialog' ) ).not.toBeInTheDocument();
+		await waitFor( () => {
+			expect( screen.queryByRole( 'dialog' ) ).not.toBeInTheDocument();
+		} );
 	} );
 	it( 'should enable Send button when an option is checked', async () => {
 		render(

@@ -127,9 +127,7 @@ export const AttributeTableRow = ( {
 	 * used in the token field suggestions and values.
 	 */
 	const globalAttributeTerms = useSelect(
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		( select: WCDataSelector ) => {
+		( select ) => {
 			const { getProductAttributeTerms } = select(
 				experimentalProductAttributeTermsStore
 			);

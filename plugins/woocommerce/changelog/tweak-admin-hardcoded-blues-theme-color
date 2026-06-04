@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Replace hardcoded admin blue colors with WP admin theme color CSS custom properties so Woo inherits the active color scheme

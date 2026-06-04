@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Replaced patched `@wordpress/data` types with opt-in internal package types.

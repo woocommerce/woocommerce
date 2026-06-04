@@ -31,6 +31,9 @@ class WC_REST_Layout_Templates_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test getting all layout templates.
 	 */
 	public function test_get_all_items() {
+		$this->setExpectedDeprecated( 'woocommerce_block_template_after_add_block' );
+		$this->setExpectedDeprecated( 'woocommerce_block_template_after_add_hide_condition' );
+
 		$response = $this->do_rest_get_request( 'layout-templates' );
 
 		$this->assertEquals( 200, $response->get_status() );

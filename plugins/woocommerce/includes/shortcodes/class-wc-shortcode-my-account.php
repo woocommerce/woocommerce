@@ -369,8 +369,8 @@ class WC_Shortcode_My_Account {
 	 *
 	 * @since 9.4.0 This will log the user in after resetting the password/session.
 	 *
-	 * @param object $user     The user.
-	 * @param string $new_pass New password for the user in plaintext.
+	 * @param WP_User $user     The user.
+	 * @param string  $new_pass New password for the user in plaintext.
 	 */
 	public static function reset_password( $user, $new_pass ) {
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
@@ -378,6 +378,17 @@ class WC_Shortcode_My_Account {
 
 		wp_set_password( $new_pass, $user->ID );
 		update_user_meta( $user->ID, 'default_password_nag', false );
+
+		/**
+		 * Fires after the user's password has been reset via WooCommerce.
+		 *
+		 * This provides parity with WordPress core's reset_password() function.
+		 *
+		 * @since 10.9.0
+		 * @param WP_User $user     The user.
+		 * @param string  $new_pass New user password in plaintext.
+		 */
+		do_action( 'after_password_reset', $user, $new_pass );
 		self::set_reset_password_cookie();
 		wc_set_customer_auth_cookie( $user->ID );
 

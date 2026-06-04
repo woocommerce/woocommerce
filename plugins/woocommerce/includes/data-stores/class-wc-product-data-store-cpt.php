@@ -943,6 +943,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
+	 * Refresh the product meta lookup table row for a given product.
+	 *
+	 * @since 10.8.0
+	 * @param int $product_id Product ID.
+	 * @return void
+	 */
+	public function refresh_product_lookup_table( int $product_id ): void {
+		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
+	}
+
+	/**
 	 * For all stored terms in all taxonomies, save them to the DB.
 	 *
 	 * @param WC_Product $product Product object.
@@ -1610,18 +1621,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function sort_all_product_variations( $parent_id ) {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+		$index = 1;
 		$ids   = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product_variation' AND post_parent = %d AND post_status in ( 'publish', 'private' ) ORDER BY menu_order ASC, ID ASC",
 				$parent_id
 			)
 		);
-		$index = 1;
 
 		foreach ( $ids as $id ) {
-			// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
-			$wpdb->update( $wpdb->posts, array( 'menu_order' => ( $index++ ) ), array( 'ID' => absint( $id ) ) );
+			$product_id = absint( $id );
+			$updated    = (bool) $wpdb->update( $wpdb->posts, array( 'menu_order' => ( $index++ ) ), array( 'ID' => $product_id ) );
+			if ( $updated ) {
+				clean_post_cache( $product_id );
+			}
 		}
 	}
 

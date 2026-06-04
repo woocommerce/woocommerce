@@ -29,9 +29,6 @@ import {
 import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 
 export type WooCommerceConfig = {
-	products?: {
-		[ productId: number ]: ProductData;
-	};
 	messages?: {
 		addedToCartText?: string;
 	};
@@ -59,38 +56,6 @@ export type ClientCartItem = Omit<
 	quantity?: number;
 	/** Optional: add this delta to current quantity instead of setting absolute quantity */
 	quantityToAdd?: number;
-};
-
-export type VariationData = {
-	attributes: Record< string, string >;
-	is_in_stock: boolean;
-	sold_individually: boolean;
-	price_html?: string;
-	image_id?: number;
-	availability?: string;
-	variation_description?: string;
-	sku?: string;
-	weight?: string;
-	dimensions?: string;
-	min?: number;
-	max?: number;
-	step?: number;
-};
-
-export type ProductData = {
-	type: string;
-	is_in_stock: boolean;
-	sold_individually: boolean;
-	price_html?: string;
-	image_id?: number;
-	availability?: string;
-	sku?: string;
-	weight?: string;
-	dimensions?: string;
-	min?: number;
-	max?: number;
-	step?: number;
-	variations?: Record< number, VariationData >;
 };
 
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
@@ -278,9 +243,13 @@ async function sendCartRequest(
 
 	return cartQueue.submit( options );
 }
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 // Todo: export this store once the store is public.
-const { state, actions } = store< Store >(
+const { state } = store< Store >( 'woocommerce', {}, { lock: universalLock } );
+const { actions } = store< Store >(
 	'woocommerce',
 	{
 		state: {
@@ -796,7 +765,7 @@ const { state, actions } = store< Store >(
 			},
 		},
 	},
-	{ lock: true }
+	{ lock: universalLock }
 );
 
 // Trigger initial cart refresh.

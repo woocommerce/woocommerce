@@ -23,3 +23,9 @@ export const store = createReduxStore( SHIPPING_METHODS_STORE_NAME, {
 } );
 
 register( store );
+
+declare module '@wordpress/data' {
+	interface StoreRegistry {
+		[ STORE_KEY ]: typeof store;
+	}
+}

@@ -23,6 +23,24 @@ import './style.scss';
 import { Suggestions } from './suggestions';
 import { useUpdatePreferredAutocompleteProvider } from '../../../hooks/use-update-preferred-autocomplete-provider';
 
+// Maximum gap (ms) between a keydown event and the resulting React onChange.
+// After this window, userIsTypingRef resets to false so that programmatic
+// value changes (e.g. late-arriving autofill) are not mistaken for typing.
+const TYPING_RESET_MS = 200;
+
+/**
+ * Check whether an element is currently in the browser's autofill state.
+ * Safari Contacts applies :-webkit-autofill during/after its fill.
+ * Firefox does not support this selector and throws, so we catch that.
+ */
+function isAutofilled( el: HTMLInputElement ): boolean {
+	try {
+		return el.matches( ':-webkit-autofill' );
+	} catch {
+		return false;
+	}
+}
+
 /**
  * Address Autocomplete component.
  *
@@ -123,6 +141,15 @@ export const AddressAutocomplete = ( {
 	const [ isSettingAddress, setIsSettingAddress ] = useState( false );
 	const suppressSearchTimeoutRef = useRef< NodeJS.Timeout | null >( null );
 
+	// Tracks whether the current value change originated from the user typing
+	// (as opposed to browser autofill). Browser autofill fires onChange but
+	// does NOT fire keydown events, and its native input event has
+	// inputType "insertReplacementText" rather than "insertText".
+	const userIsTypingRef = useRef( false );
+	const typingTimeoutRef = useRef< NodeJS.Timeout | null >( null );
+	const autofillDetectedRef = useRef( false );
+	const searchGenerationRef = useRef( 0 );
+
 	// Trigger search when searchValue changes
 	useEffect( () => {
 		if (
@@ -141,9 +168,23 @@ export const AddressAutocomplete = ( {
 			];
 
 		if ( provider ) {
+			const generation = ++searchGenerationRef.current;
 			provider
 				.search( searchValue, country )
 				.then( ( results ) => {
+					// Discard stale results from a superseded search.
+					if ( generation !== searchGenerationRef.current ) {
+						return;
+					}
+
+					// Discard results if the field entered browser autofill
+					// state while the search was in-flight (Safari Contacts).
+					const el = inputRef.current?.inputRef?.current;
+					if ( el && isAutofilled( el ) ) {
+						setSuggestions( [] );
+						return;
+					}
+
 					if ( results && results.length ) {
 						setSuggestions( results );
 					} else {
@@ -162,6 +203,9 @@ export const AddressAutocomplete = ( {
 		return () => {
 			if ( suppressSearchTimeoutRef.current ) {
 				clearTimeout( suppressSearchTimeoutRef.current );
+			}
+			if ( typingTimeoutRef.current ) {
+				clearTimeout( typingTimeoutRef.current );
 			}
 		};
 	}, [] );
@@ -232,12 +276,66 @@ export const AddressAutocomplete = ( {
 		};
 	}, [ props.autoComplete ] );
 
+	// Detect browser autofill vs user typing via the native input event's
+	// inputType property. Browser autofill produces "insertReplacementText"
+	// while user typing produces "insertText" (or "insertCompositionText"
+	// for CJK/IME input). This listener sets flags that addressChangeHandler
+	// checks before triggering a provider search.
+	useEffect( () => {
+		const inputElement = inputRef.current?.inputRef?.current;
+		if ( ! inputElement ) {
+			return;
+		}
+
+		const handleNativeInput = ( event: Event ) => {
+			const inputEvent = event as InputEvent;
+			const { inputType } = inputEvent;
+
+			if ( inputType === 'insertReplacementText' ) {
+				// Browser autofill (Chrome/Firefox). Flag it so
+				// addressChangeHandler suppresses the search.
+				autofillDetectedRef.current = true;
+			} else if ( inputType ) {
+				// Any other known inputType is user-initiated (typing,
+				// paste, drag-drop, IME, undo/redo, etc.).
+				userIsTypingRef.current = true;
+				if ( typingTimeoutRef.current ) {
+					clearTimeout( typingTimeoutRef.current );
+				}
+				typingTimeoutRef.current = setTimeout( () => {
+					userIsTypingRef.current = false;
+				}, TYPING_RESET_MS );
+			}
+		};
+
+		inputElement.addEventListener( 'input', handleNativeInput );
+		return () => {
+			inputElement.removeEventListener( 'input', handleNativeInput );
+		};
+	}, [] );
+
 	const addressChangeHandler = ( value: string ) => {
 		props.onChange( value );
 
 		// Don't trigger search when we're programmatically setting the address
-		// or when search is temporarily suppressed after address selection
-		if ( ! isSettingAddress && ! suppressSearchTimeoutRef.current ) {
+		// or when search is temporarily suppressed after address selection.
+		if ( isSettingAddress || suppressSearchTimeoutRef.current ) {
+			return;
+		}
+
+		// Suppress search when browser autofill was detected via inputType
+		// (Chrome/Firefox fire "insertReplacementText" for autofill).
+		if ( autofillDetectedRef.current ) {
+			autofillDetectedRef.current = false;
+			setSearchValue( '' );
+			setSuggestions( [] );
+			return;
+		}
+
+		// Only trigger search when keyboard or IME activity preceded the
+		// change. This is the fallback for browsers that don't support
+		// inputType or :-webkit-autofill.
+		if ( userIsTypingRef.current ) {
 			setSearchValue( value );
 		}
 	};

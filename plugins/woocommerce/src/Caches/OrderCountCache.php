@@ -161,9 +161,9 @@ class OrderCountCache {
 	/**
 	 * Get the cache value for a given order type and set of statuses.
 	 *
-	 * @param string $order_type The type of order.
+	 * @param string   $order_type     The type of order.
 	 * @param string[] $order_statuses The statuses of the order.
-	 * @return int[] The cache value.
+	 * @return null|array<string, int> The cache value.
 	 */
 	public function get( $order_type, $order_statuses = array() ) {
 		$order_type = (string) $order_type;

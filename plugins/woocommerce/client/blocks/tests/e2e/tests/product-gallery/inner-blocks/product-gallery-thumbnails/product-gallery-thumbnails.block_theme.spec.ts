@@ -61,7 +61,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		} );
 
 		await test.step( 'in frontend', async () => {
-			await page.goto( '/product/hoodie/' );
+			await page.goto( '/product/beanie/' );
 
 			const productGalleryBlock = page.locator(
 				'[data-block-name="woocommerce/product-gallery"]'
@@ -134,7 +134,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		} );
 
 		await test.step( 'in frontend', async () => {
-			await page.goto( '/product/hoodie/' );
+			await page.goto( '/product/beanie/' );
 
 			const thumbnailsBlock = page.locator(
 				'[data-block-name="woocommerce/product-gallery-thumbnails"]'
@@ -192,7 +192,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		} );
 
 		await test.step( 'in frontend', async () => {
-			await page.goto( '/product/hoodie/' );
+			await page.goto( '/product/beanie/' );
 
 			const thumbnailsContainer = page.locator(
 				'[data-block-name="woocommerce/product-gallery-thumbnails"]'

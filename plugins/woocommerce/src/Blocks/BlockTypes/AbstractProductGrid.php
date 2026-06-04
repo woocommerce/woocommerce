@@ -83,6 +83,9 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			return '';
 		}
 
+		// Prime caches to reduce future queries.
+		_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $products ) ) );
+
 		/**
 		 * Override product description to prevent infinite loop.
 		 *

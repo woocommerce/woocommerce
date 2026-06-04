@@ -33,7 +33,6 @@ import { SaveDraftButton } from './save-draft-button';
 import { LoadingState } from './loading-state';
 import { Tabs } from '../tabs';
 import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
-import { useShowPrepublishChecks } from '../../hooks/use-show-prepublish-checks';
 import { HeaderProps, Image } from './types';
 
 const PublishButton = lazy( () =>
@@ -67,8 +66,7 @@ export function Header( {
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
 			return productId !== -1
-				? // @ts-expect-error getEntityRecord is not typed correctly.
-				  getEntityRecord( 'postType', productType, productId )
+				? getEntityRecord( 'postType', productType, productId )
 				: null;
 		},
 		[ productType, productId ]
@@ -77,8 +75,6 @@ export function Header( {
 	const editedProductName = product?.name;
 	const catalogVisibility = product?.catalog_visibility;
 	const productStatus = product?.status;
-
-	const { showPrepublishChecks } = useShowPrepublishChecks();
 
 	const sidebarWidth = useAdminSidebarWidth();
 
@@ -94,11 +90,13 @@ export function Header( {
 			} );
 	}, [ sidebarWidth ] );
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	const isVariation = lastPersistedProduct?.parent_id > 0;
 
-	const selectedImage = isVariation ? product?.image : product?.images;
+	const selectedImage = isVariation
+		? // @ts-expect-error @woocommerce/data's Product type is missing the `image` field (see products/types.ts).
+		  product?.image
+		: // @ts-expect-error @woocommerce/data's Product type is missing the `images` field (see products/types.ts).
+		  product?.images;
 
 	if ( isEditorLoading ) {
 		return <LoadingState />;
@@ -163,7 +161,6 @@ export function Header( {
 				{ isVariation ? (
 					<div className="woocommerce-product-header__back">
 						<Tooltip
-							// @ts-expect-error className is missing in TS, should remove this when it is included.
 							className="woocommerce-product-header__back-tooltip"
 							text={ RETURN_TO_MAIN_PRODUCT }
 						>
@@ -227,8 +224,6 @@ export function Header( {
 						) : (
 							getHeaderTitle(
 								editedProductName,
-								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-								// @ts-ignore - Arg is not typed correctly.
 								lastPersistedProduct?.name
 							)
 						) }
@@ -243,8 +238,6 @@ export function Header( {
 						<SaveDraftButton
 							productType={ productType }
 							visibleTab={ selectedTab }
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore - Prop is not typed correctly.
 							productStatus={ lastPersistedProduct?.status }
 						/>
 					) }
@@ -252,15 +245,12 @@ export function Header( {
 					<PreviewButton
 						productType={ productType }
 						visibleTab={ selectedTab }
-						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-						// @ts-ignore - Prop is not typed correctly.
 						productStatus={ lastPersistedProduct?.status }
 					/>
 
 					<Suspense fallback={ null }>
 						<PublishButton
 							productType={ productType }
-							isPrePublishPanelVisible={ showPrepublishChecks }
 							isMenuButton
 							visibleTab={ selectedTab }
 						/>

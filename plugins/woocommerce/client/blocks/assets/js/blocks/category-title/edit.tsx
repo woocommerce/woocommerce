@@ -8,15 +8,15 @@ import { createElement, forwardRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { WP_REST_API_Category } from 'wp-types';
 import {
-	// @ts-expect-error AlignmentControl is not exported from @wordpress/block-editor
 	AlignmentControl,
 	BlockControls,
 	InspectorControls,
 	useBlockProps,
 	PlainText,
-	// @ts-expect-error HeadingLevelDropdown is not exported from @wordpress/block-editor
 	HeadingLevelDropdown,
 } from '@wordpress/block-editor';
+import { usePreviewMode } from '@woocommerce/base-hooks';
+import { previewCategories } from '@woocommerce/resource-previews';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	ToggleControl,
@@ -70,7 +70,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	const userCanEdit = useSelect(
 		( select ) => {
 			if ( ! termId ) return false;
-			// @ts-expect-error canUser is not typed correctly
 			// This use actually reflects the use seen in `core/post-title` block.
 			return select( coreStore ).canUser( 'update', {
 				kind: 'taxonomy',
@@ -81,12 +80,32 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		[ termId, termTaxonomy ]
 	);
 
+	const isPreviewMode = usePreviewMode();
 	const [ rawTitle = '', setTitle, fullTitle ] = useEntityProp(
 		'taxonomy',
 		termTaxonomy || 'product_cat',
 		'name',
 		termId ? String( termId ) : undefined
 	);
+
+	let displayRawTitle = '';
+	if ( isPreviewMode ) {
+		displayRawTitle = previewCategories[ 0 ].description;
+	} else if ( typeof rawTitle === 'string' ) {
+		displayRawTitle = rawTitle;
+	}
+
+	let displayFullTitle = '';
+	if ( isPreviewMode ) {
+		displayFullTitle = previewCategories[ 0 ].description;
+	} else if (
+		typeof fullTitle === 'object' &&
+		fullTitle !== null &&
+		'rendered' in fullTitle &&
+		typeof fullTitle.rendered === 'string'
+	) {
+		displayFullTitle = fullTitle.rendered;
+	}
 
 	const link = useSelect(
 		( select ) => {
@@ -117,10 +136,9 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	if ( termId ) {
 		titleElement = userCanEdit ? (
 			<PlainText
-				// @ts-expect-error PlainText component types are not up-to-date
 				tagName={ TagName }
 				placeholder={ __( 'No title', 'woocommerce' ) }
-				value={ rawTitle }
+				value={ displayRawTitle }
 				onChange={ ( v ) => setTitle( v ) }
 				__experimentalVersion={ 2 }
 				{ ...blockProps }
@@ -130,7 +148,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 				tagName={ TagName }
 				{ ...blockProps }
 				dangerouslySetInnerHTML={ {
-					__html: fullTitle?.rendered,
+					__html: displayFullTitle,
 				} }
 			/>
 		);
@@ -140,17 +158,16 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		titleElement = userCanEdit ? (
 			<ContainerElement tagName={ TagName } { ...blockProps }>
 				<PlainText
-					// @ts-expect-error PlainText component types are not up-to-date
 					tagName="a"
 					href={ link }
 					target={ linkTarget }
 					rel={ rel }
 					placeholder={
-						! rawTitle?.length
+						! displayRawTitle?.length
 							? __( 'No title', 'woocommerce' )
 							: undefined
 					}
-					value={ rawTitle }
+					value={ displayRawTitle }
 					onChange={ ( v ) => setTitle( v ) }
 					__experimentalVersion={ 2 }
 				/>
@@ -163,7 +180,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 					rel={ rel }
 					onClick={ ( event ) => event.preventDefault() }
 					dangerouslySetInnerHTML={ {
-						__html: fullTitle?.rendered,
+						__html: displayFullTitle,
 					} }
 				/>
 			</ContainerElement>
@@ -172,7 +189,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	return (
 		<>
-			{ /* @ts-expect-error BlockControls typing */ }
 			<BlockControls group="block">
 				<HeadingLevelDropdown
 					value={ level }

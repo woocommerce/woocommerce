@@ -59,11 +59,12 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 		$number   = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
 		$comments = get_comments(
 			array(
-				'number'      => $number,
-				'status'      => 'approve',
-				'post_status' => 'publish',
-				'post_type'   => 'product',
-				'parent'      => 0,
+				'number'                    => $number,
+				'status'                    => 'approve',
+				'post_status'               => 'publish',
+				'post_type'                 => 'product',
+				'parent'                    => 0,
+				'update_comment_post_cache' => true,
 			)
 		); // WPCS: override ok.
 

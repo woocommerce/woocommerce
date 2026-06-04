@@ -85,6 +85,45 @@
 	}
 
 	/**
+	 * Product attributes table
+	 */
+	table.shop_attributes {
+		tr {
+			display: block;
+
+			th,
+			td {
+				display: block;
+				max-width: 100%;
+				width: auto;
+				text-align: left;
+				padding: 0.5em;
+			}
+
+			th {
+				padding-bottom: 0.25em;
+				border-bottom: 0;
+			}
+
+			td {
+				padding-top: 0.25em;
+			}
+
+			th > :first-child,
+			td > :first-child {
+				padding-top: 0;
+				margin-top: 0;
+			}
+
+			th > :last-child,
+			td > :last-child {
+				padding-bottom: 0;
+				margin-bottom: 0;
+			}
+		}
+	}
+
+	/**
 	 * General layout
 	 */
 	.col2-set {

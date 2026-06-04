@@ -7,6 +7,8 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use WC_Tax;
 
 /**
@@ -20,6 +22,7 @@ class ProductQuery implements QueryClausesGenerator {
 	 *
 	 * @param \WP_REST_Request $request Request data.
 	 * @return array
+	 * @throws RouteException If the related product ID is invalid or the product is not visible.
 	 */
 	public function prepare_objects_query( $request ) {
 		$args = array(
@@ -253,9 +256,19 @@ class ProductQuery implements QueryClausesGenerator {
 
 		// Filter by related products.
 		if ( ! empty( $request['related'] ) ) {
-			$product_id = absint( $request['related'] );
-			$limit      = ! empty( $request['per_page'] ) ? (int) $request['per_page'] : 100;
-			$related    = wc_get_related_products( $product_id, $limit );
+			$product_id      = absint( $request['related'] );
+			$related_product = wc_get_product( $product_id );
+
+			if ( ! $related_product || ! $related_product->is_visible() ) {
+				throw new RouteException(
+					'woocommerce_rest_product_not_found',
+					__( 'The related product ID is invalid or the product is not visible.', 'woocommerce' ), // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
+					404
+				);
+			}
+
+			$limit   = ! empty( $request['per_page'] ) ? (int) $request['per_page'] : 100;
+			$related = wc_get_related_products( $product_id, $limit );
 
 			if ( ! empty( $related ) ) {
 				$args['post__in'] = ! empty( $args['post__in'] )
@@ -344,8 +357,14 @@ class ProductQuery implements QueryClausesGenerator {
 			_prime_post_caches( $results['results'] );
 		}
 
+		$objects = array_map( 'wc_get_product', $results['results'] );
+
+		// Batch-prime image attachment caches for the whole collection, rather than once per
+		// product when ProductSchema::get_images() runs during serialization.
+		wc_get_container()->get( ProductUtil::class )->prime_image_caches( $objects );
+
 		return array(
-			'objects' => array_map( 'wc_get_product', $results['results'] ),
+			'objects' => $objects,
 			'total'   => $results['total'],
 			'pages'   => $results['pages'],
 		);

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix session cookie when guest creates account during checkout.

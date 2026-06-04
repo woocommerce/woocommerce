@@ -39,6 +39,10 @@ describe( 'Classic Shortcode block', () => {
 		} );
 
 		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeInTheDocument();
+
+		// wp-6.8: @wordpress/block-editor's RichText fires an internal
+		// __unstableUseRichText deprecation via @wordpress/deprecated.
+		expect( console ).toHaveWarned();
 	} );
 	test( 'can convert to Checkout block', async () => {
 		await setup( { shortcode: 'checkout' } );

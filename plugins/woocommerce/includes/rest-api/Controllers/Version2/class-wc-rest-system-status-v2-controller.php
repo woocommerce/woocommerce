@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer as Order_DataSynchronizer;
 use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
@@ -1469,7 +1470,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 
 		// Return array of useful settings for debugging.
 		return array(
-			'api_enabled'                    => 'yes' === get_option( 'woocommerce_api_enabled' ),
+			'api_enabled'                    => WC()->legacy_rest_api_is_available(),
 			'force_ssl'                      => 'yes' === get_option( 'woocommerce_force_ssl_checkout' ),
 			'currency'                       => get_woocommerce_currency(),
 			'currency_symbol'                => get_woocommerce_currency_symbol(),
@@ -1480,8 +1481,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'geolocation_enabled'            => in_array(
 				get_option( 'woocommerce_default_customer_address' ),
 				array(
-					'geolocation_ajax',
-					'geolocation',
+					DefaultCustomerAddress::GEOLOCATION_AJAX,
+					DefaultCustomerAddress::GEOLOCATION,
 				),
 				true
 			),

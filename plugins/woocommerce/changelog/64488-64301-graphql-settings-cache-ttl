@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add configurable parsed query cache TTL to GraphQL settings

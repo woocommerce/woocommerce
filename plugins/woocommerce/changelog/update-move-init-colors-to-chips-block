@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Move logic to init chips colors to the Chips inner block

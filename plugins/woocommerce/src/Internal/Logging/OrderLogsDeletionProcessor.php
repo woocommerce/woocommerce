@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Internal\Logging;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
@@ -44,11 +43,11 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 	private LegacyProxy $legacy_proxy;
 
 	/**
-	 * The instance of DataSynchronizer to use.
+	 * The instance of OrderLogsCleanupHelper to use.
 	 *
-	 * @var DataSynchronizer
+	 * @var OrderLogsCleanupHelper
 	 */
-	private DataSynchronizer $data_synchronizer;
+	private OrderLogsCleanupHelper $order_logs_cleanup_helper;
 
 	/**
 	 * Initialize the instance.
@@ -56,18 +55,18 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 	 *
 	 * @param CustomOrdersTableController $hpos_controller The instance of CustomOrdersTableController to use.
 	 * @param LegacyProxy                 $legacy_proxy The instance of LegacyProxy to use.
-	 * @param DataSynchronizer            $data_synchronizer The instance of DataSynchronizer to use.
+	 * @param OrderLogsCleanupHelper      $order_logs_cleanup_helper The instance of OrderLogsCleanupHelper to use.
 	 *
 	 * @internal
 	 */
-	final public function init( CustomOrdersTableController $hpos_controller, LegacyProxy $legacy_proxy, DataSynchronizer $data_synchronizer ) {
+	final public function init( CustomOrdersTableController $hpos_controller, LegacyProxy $legacy_proxy, OrderLogsCleanupHelper $order_logs_cleanup_helper ) {
 		$this->hpos_in_use = $hpos_controller->custom_orders_table_usage_is_enabled();
 		if ( ! $this->hpos_in_use ) {
 			$this->cpt_in_use = \WC_Order_Data_Store_CPT::class === \WC_Data_Store::load( 'order' )->get_current_class_name();
 		}
 
-		$this->legacy_proxy      = $legacy_proxy;
-		$this->data_synchronizer = $data_synchronizer;
+		$this->legacy_proxy              = $legacy_proxy;
+		$this->order_logs_cleanup_helper = $order_logs_cleanup_helper;
 	}
 
 	/**
@@ -235,52 +234,15 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 			return;
 		}
 
-		$logger = $this->legacy_proxy->call_function( 'wc_get_logger' );
+		$items = array();
 		foreach ( $batch as $item ) {
 			if ( ! is_array( $item ) || ! isset( $item['meta_value'] ) || ! isset( $item['order_id'] ) ) {
 				throw new \Exception( "\$batch must be an array of arrays, each having a 'meta_value' key and an 'order_id' key" );
 			}
-			if ( $logger instanceof \WC_Logger ) {
-				$logger->clear( $item['meta_value'] );
-			}
+			$items[ $item['order_id'] ] = $item['meta_value'];
 		}
 
-		$order_ids = array_map( 'absint', array_column( $batch, 'order_id' ) );
-
-		// Delete from the authoritative meta table.
-		$this->delete_debug_log_source_meta_entries( true, $order_ids );
-
-		if ( $this->data_synchronizer->data_sync_is_enabled() ) {
-			// When HPOS data sync is enabled we need to manually delete the entries in the backup meta table too,
-			// otherwise the next sync process will restore the rows we just deleted from the authoritative meta table.
-			$this->delete_debug_log_source_meta_entries( false, $order_ids );
-		}
-	}
-
-	/**
-	 * Delete meta entries for the given order IDs.
-	 *
-	 * @param bool  $from_authoritative_table True to delete from the authoritative table, false for the backup table.
-	 * @param array $order_ids Array of order IDs to delete.
-	 */
-	private function delete_debug_log_source_meta_entries( bool $from_authoritative_table, array $order_ids ): void {
-		global $wpdb;
-
-		$use_hpos_table = $this->hpos_in_use === $from_authoritative_table;
-		$table_name     = $use_hpos_table ? "{$wpdb->prefix}wc_orders_meta" : $wpdb->postmeta;
-		$id_column_name = $use_hpos_table ? 'order_id' : 'post_id';
-		$placeholders   = implode( ',', array_fill( 0, count( $order_ids ), '%d' ) );
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$table_name}
-				 WHERE {$id_column_name} IN ({$placeholders})
-				 AND meta_key = %s",
-				array_merge( $order_ids, array( '_debug_log_source_pending_deletion' ) )
-			)
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->order_logs_cleanup_helper->clear_logs_and_delete_meta( $items );
 	}
 
 	/**

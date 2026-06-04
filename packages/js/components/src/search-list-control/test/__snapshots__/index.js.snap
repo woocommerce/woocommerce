@@ -6,9 +6,9 @@ exports[`SearchListControl should render a search box and list of hierarchical o
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -18,7 +18,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -26,7 +26,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -47,13 +47,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-10"
               >
                 Search for items
@@ -246,13 +246,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-10"
             >
               Search for items
@@ -485,9 +485,9 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -497,7 +497,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -505,7 +505,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -526,13 +526,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-0"
               >
                 Search for items
@@ -710,13 +710,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-0"
             >
               Search for items
@@ -934,9 +934,9 @@ exports[`SearchListControl should render a search box and list of options with a
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -946,7 +946,7 @@ exports[`SearchListControl should render a search box and list of options with a
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -954,7 +954,7 @@ exports[`SearchListControl should render a search box and list of options with a
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -975,13 +975,13 @@ exports[`SearchListControl should render a search box and list of options with a
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-1"
               >
                 Search for items
@@ -1159,13 +1159,13 @@ exports[`SearchListControl should render a search box and list of options with a
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-1"
             >
               Search for items
@@ -1383,9 +1383,9 @@ exports[`SearchListControl should render a search box and list of options, with 
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -1395,7 +1395,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -1403,7 +1403,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -1424,13 +1424,13 @@ exports[`SearchListControl should render a search box and list of options, with 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-9"
               >
                 Search for items
@@ -1506,13 +1506,13 @@ exports[`SearchListControl should render a search box and list of options, with 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-9"
             >
               Search for items
@@ -1628,9 +1628,9 @@ exports[`SearchListControl should render a search box and list of options, with 
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -1640,7 +1640,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -1648,7 +1648,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -1669,13 +1669,13 @@ exports[`SearchListControl should render a search box and list of options, with 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-8"
               >
                 Testing search label
@@ -1853,13 +1853,13 @@ exports[`SearchListControl should render a search box and list of options, with 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-8"
             >
               Testing search label
@@ -2077,9 +2077,9 @@ exports[`SearchListControl should render a search box and no options 1`] = `
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -2089,7 +2089,7 @@ exports[`SearchListControl should render a search box and no options 1`] = `
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -2097,7 +2097,7 @@ exports[`SearchListControl should render a search box and no options 1`] = `
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -2118,13 +2118,13 @@ exports[`SearchListControl should render a search box and no options 1`] = `
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-4"
               >
                 Search for items
@@ -2189,13 +2189,13 @@ exports[`SearchListControl should render a search box and no options 1`] = `
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-4"
             >
               Search for items
@@ -2300,9 +2300,9 @@ exports[`SearchListControl should render a search box with a search term, and no
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -2312,7 +2312,7 @@ exports[`SearchListControl should render a search box with a search term, and no
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -2320,7 +2320,7 @@ exports[`SearchListControl should render a search box with a search term, and no
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -2341,13 +2341,13 @@ exports[`SearchListControl should render a search box with a search term, and no
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-7"
               >
                 Search for items
@@ -2412,13 +2412,13 @@ exports[`SearchListControl should render a search box with a search term, and no
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-7"
             >
               Search for items
@@ -2523,9 +2523,9 @@ exports[`SearchListControl should render a search box with a search term, and on
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -2535,7 +2535,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -2543,7 +2543,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -2564,13 +2564,13 @@ exports[`SearchListControl should render a search box with a search term, and on
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-5"
               >
                 Search for items
@@ -2662,13 +2662,13 @@ exports[`SearchListControl should render a search box with a search term, and on
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-5"
             >
               Search for items
@@ -2800,9 +2800,9 @@ exports[`SearchListControl should render a search box with a search term, and on
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -2812,7 +2812,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -2820,7 +2820,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -2841,13 +2841,13 @@ exports[`SearchListControl should render a search box with a search term, and on
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-6"
               >
                 Search for items
@@ -2939,13 +2939,13 @@ exports[`SearchListControl should render a search box with a search term, and on
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-6"
             >
               Search for items
@@ -3077,9 +3077,9 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -3089,7 +3089,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -3097,7 +3097,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -3168,13 +3168,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-2"
               >
                 Search for items
@@ -3403,13 +3403,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-2"
             >
               Search for items
@@ -3628,9 +3628,9 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -3640,7 +3640,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -3648,7 +3648,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <div
@@ -3760,13 +3760,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-3"
               >
                 Search for items
@@ -4037,13 +4037,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-3"
             >
               Search for items

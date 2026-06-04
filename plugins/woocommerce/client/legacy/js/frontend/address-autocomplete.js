@@ -679,6 +679,7 @@ if (
 			const setFieldValue = ( input, value ) => {
 				if ( input ) {
 					input.value = value;
+					input.setAttribute( 'value', value );
 					input.dispatchEvent( new Event( 'change' ) );
 
 					// Also trigger Select2 update if it's a Select2 field.

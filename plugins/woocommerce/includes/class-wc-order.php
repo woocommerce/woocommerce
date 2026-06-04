@@ -228,11 +228,11 @@ class WC_Order extends WC_Abstract_Order {
 
 			if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) {
 				foreach ( $tax_totals as $code => $tax ) {
-					$tax_amount         = ( $total_refunded && $display_refunded ) ? wc_price( WC_Tax::round( $tax->amount - $this->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ), array( 'currency' => $this->get_currency() ) ) : $tax->formatted_amount;
+					$tax_amount         = ( $total_refunded && $display_refunded ) ? wc_price( WC_Tax::round( (float) $tax->amount - (float) $this->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ), array( 'currency' => $this->get_currency() ) ) : $tax->formatted_amount;
 					$tax_string_array[] = sprintf( '%s %s', $tax_amount, $tax->label );
 				}
 			} elseif ( ! empty( $tax_totals ) ) {
-				$tax_amount         = ( $total_refunded && $display_refunded ) ? $this->get_total_tax() - $this->get_total_tax_refunded() : $this->get_total_tax();
+				$tax_amount         = ( $total_refunded && $display_refunded ) ? (float) $this->get_total_tax() - (float) $this->get_total_tax_refunded() : $this->get_total_tax();
 				$tax_string_array[] = sprintf( '%s %s', wc_price( $tax_amount, array( 'currency' => $this->get_currency() ) ), WC()->countries->tax_or_vat() );
 			}
 
@@ -243,7 +243,7 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		if ( $total_refunded && $display_refunded ) {
-			$formatted_total = '<del aria-hidden="true">' . wp_strip_all_tags( $formatted_total ) . '</del> <ins>' . wc_price( $order_total - $total_refunded, array( 'currency' => $this->get_currency() ) ) . $tax_string . '</ins>';
+			$formatted_total = '<del aria-hidden="true">' . wp_strip_all_tags( $formatted_total ) . '</del> <ins>' . wc_price( (float) $order_total - (float) $total_refunded, array( 'currency' => $this->get_currency() ) ) . $tax_string . '</ins>';
 		} else {
 			$formatted_total .= $tax_string;
 		}
@@ -1862,16 +1862,15 @@ class WC_Order extends WC_Abstract_Order {
 	 * Orders which only contain virtual, downloadable items do not need admin
 	 * intervention.
 	 *
-	 * Uses a transient so these calls are not repeated multiple times, and because
-	 * once the order is processed this code/transient does not need to persist.
-	 *
+	 * @since 10.8.0 the method no longer uses transients.
 	 * @since 3.0.0
+	 *
 	 * @return bool
 	 */
 	public function needs_processing() {
-		$transient_name   = 'wc_order_' . $this->get_id() . '_needs_processing';
-		$needs_processing = get_transient( $transient_name );
-
+		$order_id         = $this->get_id();
+		$cache_key        = 'order-needs-processing-' . $order_id;
+		$needs_processing = wp_cache_get( $cache_key, 'orders' );
 		if ( false === $needs_processing ) {
 			$needs_processing = 0;
 
@@ -1880,22 +1879,30 @@ class WC_Order extends WC_Abstract_Order {
 				foreach ( $line_items as $item ) {
 					if ( $item->is_type( 'line_item' ) ) {
 						$product = $item->get_product();
-
-						if ( ! $product ) {
-							continue;
-						}
-
-						$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
-
-						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
-							$needs_processing = 1;
-							break;
+						if ( $product ) {
+							$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
+							/**
+							 * Filters whether an order line item requires processing. By default, only
+							 * virtual downloadable items do not require processing; all other items do.
+							 *
+							 * @since 2.7.0
+							 *
+							 * @param bool        $needs_processing
+							 * @param \WC_Product $product
+							 * @param int         $order_id
+							 * @return bool
+							 */
+							$custom_needs_processing = (bool) apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $order_id );
+							if ( $custom_needs_processing ) {
+								$needs_processing = 1;
+								break;
+							}
 						}
 					}
 				}
 			}
 
-			set_transient( $transient_name, $needs_processing, DAY_IN_SECONDS );
+			wp_cache_set( $cache_key, $needs_processing, 'orders', DAY_IN_SECONDS );
 		}
 
 		return 1 === absint( $needs_processing );
@@ -2192,24 +2199,42 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * Utilizes object cache to store refunds to avoid extra DB calls.
 	 *
-	 * @see WC_Order_Data_Store_CPT::prime_refund_caches_for_order()
+	 * @see Abstract_WC_Order_Data_Store_CPT::prime_refund_caches_for_orders()
 	 * @since 2.2
 	 *
 	 * @return WC_Order_Refund[]
 	 */
 	public function get_refunds() {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $this->get_id();
-		$refunds   = wp_cache_get( $cache_key, $this->cache_group );
+		$cache_key  = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $this->get_id();
+		$refund_ids = wp_cache_get( $cache_key, $this->cache_group );
 
-		if ( false === $refunds ) {
-			$refunds = wc_get_orders(
+		if ( false === $refund_ids ) {
+			$refunds    = (array) wc_get_orders(
 				array(
 					'type'   => 'shop_order_refund',
 					'parent' => $this->get_id(),
 					'limit'  => -1,
 				)
 			);
-			wp_cache_set( $cache_key, $refunds, $this->cache_group );
+			$refund_ids = array();
+			foreach ( $refunds as $refund ) {
+				if ( $refund instanceof WC_Order_Refund ) {
+					$refund_ids[] = $refund->get_id();
+				}
+			}
+			wp_cache_set( $cache_key, $refund_ids, $this->cache_group );
+		} else {
+			$refunds = ! empty( $refund_ids )
+				? wc_get_orders(
+					array(
+						'type'          => 'shop_order_refund',
+						'post__in'      => $refund_ids,
+						'orderby'       => 'post__in',
+						'limit'         => -1,
+						'no_found_rows' => true,
+					)
+				)
+				: array();
 		}
 
 		$this->refunds = array();
@@ -2465,7 +2490,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_remaining_refund_amount() {
-		return wc_format_decimal( $this->get_total() - $this->get_total_refunded(), wc_get_price_decimals() );
+		return wc_format_decimal( (float) $this->get_total() - (float) $this->get_total_refunded(), wc_get_price_decimals() );
 	}
 
 	/**
@@ -2474,7 +2499,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_remaining_refund_items() {
-		return absint( $this->get_item_count() - $this->get_item_count_refunded() );
+		return absint( (int) $this->get_item_count() - (int) $this->get_item_count_refunded() );
 	}
 
 	/**

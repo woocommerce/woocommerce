@@ -17,7 +17,6 @@ import {
 	FlexItem,
 	Dropdown,
 	RadioControl,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalText as Text,
 	Spinner,

@@ -263,12 +263,22 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	public function test_wc_customer_bought_product() {
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
+		$customer_id_3 = wc_create_new_customer( 'account@example.com', 'testuser3', 'testpassword3' );
 		$product_1     = new WC_Product_Simple();
 		$product_1->save();
 		$product_id_1 = $product_1->get_id();
 		$product_2    = new WC_Product_Simple();
 		$product_2->save();
 		$product_id_2 = $product_2->get_id();
+		$product_3    = new WC_Product_Simple();
+		$product_3->save();
+		$product_id_3 = $product_3->get_id();
+		$product_4    = new WC_Product_Simple();
+		$product_4->save();
+		$product_id_4 = $product_4->get_id();
+		$product_5    = new WC_Product_Simple();
+		$product_5->save();
+		$product_id_5 = $product_5->get_id();
 
 		$order_1 = WC_Helper_Order::create_order( $customer_id_1, $product_1 );
 		$order_1->set_billing_email( 'test@example.com' );
@@ -283,16 +293,44 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$order_3->set_status( OrderStatus::PENDING );
 		$order_3->save();
 
+		$guest_order = wc_create_order();
+		$guest_order->add_product( $product_3 );
+		$guest_order->set_billing_email( 'guest@example.com' );
+		$guest_order->set_status( OrderStatus::COMPLETED );
+		$guest_order->save();
+
+		$different_billing_email_order = WC_Helper_Order::create_order( $customer_id_3, $product_4 );
+		$different_billing_email_order->set_billing_email( 'billing@example.com' );
+		$different_billing_email_order->set_status( OrderStatus::COMPLETED );
+		$different_billing_email_order->save();
+
+		$unlinked_guest_order = wc_create_order();
+		$unlinked_guest_order->add_product( $product_5 );
+		$unlinked_guest_order->set_billing_email( 'test@example.com' );
+		$unlinked_guest_order->set_status( OrderStatus::COMPLETED );
+		$unlinked_guest_order->save();
+
 		// Manually trigger the product lookup tables update, since it may take a few moments for it to happen automatically.
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		foreach ( array( '__return_true', '__return_false' ) as $lookup_tables ) {
 			add_filter( 'woocommerce_customer_bought_product_use_lookup_tables', $lookup_tables );
+
 			$this->assertTrue( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_1 ) );
 			$this->assertTrue( wc_customer_bought_product( '', $customer_id_1, $product_id_1 ) );
 			$this->assertTrue( wc_customer_bought_product( 'test@example.com', 0, $product_id_1 ) );
 			$this->assertFalse( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_2 ) );
 			$this->assertFalse( wc_customer_bought_product( 'test2@example.com', $customer_id_2, $product_id_1 ) );
+
+			$this->assertTrue( wc_customer_bought_product( 'guest@example.com', 0, $product_id_3 ) );
+			$this->assertFalse( wc_customer_bought_product( 'other@example.com', 0, $product_id_3 ) );
+
+			$this->assertTrue( wc_customer_bought_product( 'billing@example.com', $customer_id_3, $product_id_4 ) );
+			$this->assertTrue( wc_customer_bought_product( '', $customer_id_3, $product_id_4 ) );
+			$this->assertTrue( wc_customer_bought_product( 'billing@example.com', 0, $product_id_4 ) );
+
+			$this->assertTrue( wc_customer_bought_product( 'test@example.com', 0, $product_id_5 ) );
+
 			remove_filter( 'woocommerce_customer_bought_product_use_lookup_tables', $lookup_tables );
 		}
 	}

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Mini-Cart badge becoming invisible after client-side navigation.

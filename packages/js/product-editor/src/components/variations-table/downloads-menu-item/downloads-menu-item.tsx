@@ -55,6 +55,7 @@ export function DownloadsMenuItem( {
 		};
 
 		onChange(
+			// @ts-expect-error Inferred downloads shape doesn't match ProductVariation.downloads (see product-variations/types.ts).
 			selection.map( ( { id } ) => ( {
 				...partialVariation,
 				id,
@@ -159,7 +160,7 @@ export function DownloadsMenuItem( {
 							multiple={ 'add' }
 							value={ downloadsIds }
 							onSelect={ handleMediaUploadSelect }
-							render={ ( { open } ) => (
+							render={ ( { open }: { open: () => void } ) => (
 								<MenuItem
 									onClick={ uploadFilesClickHandler( open ) }
 								>

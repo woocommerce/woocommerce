@@ -44,7 +44,9 @@ export function recordProductEvent(
 		product_type: type,
 	};
 
+	// @ts-expect-error @woocommerce/data's Product type is missing `parent_id` (see products/types.ts).
 	if ( product.parent_id > 0 ) {
+		// @ts-expect-error @woocommerce/data's Product type is missing `note` (see products/types.ts).
 		product.note = product.description;
 		delete product.description;
 	}
@@ -55,16 +57,18 @@ export function recordProductEvent(
 				trackableProductValueKeyMap[ productValueKey ] ||
 				productValueKey;
 			if (
+				// @ts-expect-error Dynamic string indexing on Product is not supported until @woocommerce/data's Product type adds an index signature.
 				Array.isArray( product[ productValueKey ] ) ||
+				// @ts-expect-error Dynamic string indexing on Product is not supported until @woocommerce/data's Product type adds an index signature.
 				typeof product[ productValueKey ] === 'string'
 			) {
-				eventProps[ eventPropKey ] = product[ productValueKey ].length
-					? 'yes'
-					: 'no';
+				eventProps[ eventPropKey ] =
+					// @ts-expect-error Dynamic string indexing on Product is not supported until @woocommerce/data's Product type adds an index signature.
+					product[ productValueKey ].length ? 'yes' : 'no';
 			} else {
-				eventProps[ eventPropKey ] = product[ productValueKey ]
-					? 'yes'
-					: 'no';
+				eventProps[ eventPropKey ] =
+					// @ts-expect-error Dynamic string indexing on Product is not supported until @woocommerce/data's Product type adds an index signature.
+					product[ productValueKey ] ? 'yes' : 'no';
 			}
 		}
 	}
@@ -80,6 +84,7 @@ export function recordProductEvent(
 	}
 
 	if ( 'images' in product ) {
+		// @ts-expect-error @woocommerce/data's Product type is missing `images` (see products/types.ts).
 		eventProps.product_image = product.images.length ? 'yes' : 'no';
 	}
 

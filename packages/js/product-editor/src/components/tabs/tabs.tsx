@@ -121,10 +121,9 @@ export function Tabs( { selected, onChange }: TabsProps ) {
 						onClick: ( tabId ) => {
 							onChange( tabId );
 
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore
 							const { getEditedEntityRecord } = select( 'core' );
 
+							// @ts-expect-error getEditedEntityRecord's curried form strips its generic, returning a wide entity union; Product is the correct narrow type.
 							const product: Product = getEditedEntityRecord(
 								'postType',
 								'product',

@@ -50,7 +50,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		'minimum_amount'              => '',
 		'maximum_amount'              => '',
 		'email_restrictions'          => array(),
-		'used_by'                     => array(),
+		'used_by'                     => null,
 		'virtual'                     => false,
 	);
 
@@ -152,6 +152,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return array
 	 */
 	public function get_data() {
+		// Ensure used_by is populated before the raw data array is returned, since
+		// parent::get_data() reads $this->data directly and bypasses get_used_by().
+		$this->get_used_by( 'edit' );
 		$data = parent::get_data();
 		if ( '' === $data['minimum_amount'] ) {
 			$data['minimum_amount'] = '0';
@@ -455,11 +458,22 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Get records of all users who have used the current coupon.
 	 *
+	 * The list is loaded lazily on first access rather than during object construction,
+	 * because a coupon with hundreds of thousands of usages would otherwise allocate an
+	 * enormous PHP array on every WC_Coupon instantiation — even for code paths such as
+	 * order-status changes or cart validation that never need this data.
+	 *
 	 * @since  3.0.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return array
 	 */
 	public function get_used_by( $context = 'view' ) {
+		if ( is_null( $this->data['used_by'] ) ) {
+			// Bypass set_prop() so the lazy fetch does not mark the object as dirty.
+			$this->data['used_by'] = $this->get_id()
+				? array_filter( (array) get_post_meta( $this->get_id(), '_used_by', false ) )
+				: array();
+		}
 		return $this->get_prop( 'used_by', $context );
 	}
 

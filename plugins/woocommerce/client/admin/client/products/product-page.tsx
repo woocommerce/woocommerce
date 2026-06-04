@@ -8,7 +8,6 @@ import {
 	productApiFetchMiddleware,
 	productEditorHeaderApiFetchMiddleware,
 	TRACKS_SOURCE,
-	__experimentalProductMVPCESFooter as FeedbackBar,
 	__experimentalEditorLoadingContext as EditorLoadingContext,
 } from '@woocommerce/product-editor';
 import { Spinner } from '@woocommerce/components';
@@ -78,7 +77,6 @@ export default function ProductPage() {
 
 						<WooFooterItem>
 							<>
-								<FeedbackBar productType="product" />
 								<Suspense fallback={ <Spinner /> }>
 									<ProductMVPFeedbackModalContainer
 										productId={

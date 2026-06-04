@@ -28,11 +28,12 @@ function templateDataMatchesProductData(
 		( [ key, value ] ) => {
 			if ( key === 'meta_data' ) {
 				return matchesAllTemplateMetaFields(
-					value,
-					product.meta_data || []
+					value as Metadata< string >[],
+					( product.meta_data as Metadata< string >[] ) || []
 				);
 			}
 
+			// @ts-expect-error Dynamic string indexing on Product is not supported until @woocommerce/data's Product type adds an index signature.
 			return product[ key ] === value;
 		}
 	);

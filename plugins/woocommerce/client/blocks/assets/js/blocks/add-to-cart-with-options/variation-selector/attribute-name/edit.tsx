@@ -48,7 +48,7 @@ export default function AttributeNameEdit(
 			spacingProps.className
 		),
 		style: {
-			...colorProps.stye,
+			...colorProps.style,
 			...typographyProps.style,
 			...spacingProps.style,
 		},

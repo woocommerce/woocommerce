@@ -151,6 +151,31 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it renders full alignment as center
+	 */
+	public function testItRendersFullAlignmentAsCenter(): void {
+		$image_content                  = str_replace( 'alignleft', 'alignfull', $this->image_content );
+		$parsed_image                   = $this->parsed_image;
+		$parsed_image['attrs']['align'] = 'full';
+		$parsed_image['attrs']['width'] = '640px';
+		$parsed_image['innerHTML']      = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		// "full" is not a valid HTML align value, so it should be mapped to "center".
+		$this->assertStringNotContainsString( 'align="full"', $rendered );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$html->next_tag(
+			array(
+				'tag_name'   => 'td',
+				'class_name' => 'email-image-cell',
+			)
+		);
+		$this->assertEquals( 'center', $html->get_attribute( 'align' ) );
+	}
+
+	/**
 	 * Test it renders image with borders
 	 */
 	public function testItRendersBorders(): void {

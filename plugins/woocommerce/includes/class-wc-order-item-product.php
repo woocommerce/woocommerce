@@ -244,12 +244,13 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Set properties based on passed in product object.
+	 * Aggregate and set properties based on passed in product object.
 	 *
 	 * @param WC_Product $product Product instance.
+	 * @return void
 	 */
 	public function set_product( $product ) {
-		if ( ! is_a( $product, 'WC_Product' ) ) {
+		if ( ! ( $product instanceof \WC_Product ) ) {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
 		if ( $product->is_type( ProductType::VARIATION ) ) {
@@ -386,18 +387,34 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return WC_Product|bool
 	 */
 	public function get_product() {
-		if ( $this->get_variation_id() ) {
-			$product = wc_get_product( $this->get_variation_id() );
-		} else {
-			$product = wc_get_product( $this->get_product_id() );
-		}
+		$product_id = $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id();
+		$product    = wc_get_product( $product_id );
 
 		// Backwards compatible filter from WC_Order::get_product_from_item().
+		/** @var WC_Product|false $product */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		if ( has_filter( 'woocommerce_get_product_from_item' ) ) {
+			/**
+			 * Modifies the product object returned by \WC_Order_Item_Product::get_product.
+			 *
+			 * @since 2.7.0 filter introduction.
+			 *
+			 * @param WC_Product|false      $product   Product instance.
+			 * @param WC_Order_Item_Product $line_item Line item instance.
+			 * @param WC_Order              $order     Order Instance.
+			 */
 			$product = apply_filters( 'woocommerce_get_product_from_item', $product, $this, $this->get_order() );
 		}
+		/**
+		 * Modifies the product object returned by \WC_Order_Item_Product::get_product.
+		 *
+		 * @since 2.7.0 filter introduction.
+		 *
+		 * @param WC_Product|false      $product   Product instance.
+		 * @param WC_Order_Item_Product $line_item Line item instance.
+		 */
+		$product = apply_filters( 'woocommerce_order_item_product', $product, $this );
 
-		return apply_filters( 'woocommerce_order_item_product', $product, $this );
+		return $product;
 	}
 
 	/**
@@ -431,47 +448,55 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$order      = $this->get_order();
 		$product_id = $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id();
 
-		if ( $product && $order && $product->is_downloadable() && $order->is_download_permitted() ) {
-			$email_hash         = function_exists( 'hash' ) ? hash( 'sha256', $order->get_billing_email() ) : sha1( $order->get_billing_email() );
-			$data_store         = WC_Data_Store::load( 'customer-download' );
-			$customer_downloads = $data_store->get_downloads(
-				array(
-					'user_email' => $order->get_billing_email(),
-					'order_id'   => $order->get_id(),
-					'product_id' => $product_id,
-				)
-			);
-			foreach ( $customer_downloads as $customer_download ) {
-				$download_id = $customer_download->get_download_id();
-
-				if ( $product->has_file( $download_id ) ) {
-					$file                  = $product->get_file( $download_id );
-					$files[ $download_id ] = $file->get_data();
-					$files[ $download_id ]['downloads_remaining'] = $customer_download->get_downloads_remaining();
-					$files[ $download_id ]['access_expires']      = $customer_download->get_access_expires();
-					$files[ $download_id ]['download_url']        = add_query_arg(
-						array(
-							'download_file' => $product_id,
-							'order'         => $order->get_order_key(),
-							'uid'           => $email_hash,
-							'key'           => $download_id,
-						),
-						trailingslashit( home_url() )
-					);
-				}
-			}
-
-			/**
-			 * Filters the list of downloadable files for an order item.
-			 *
-			 * @since 2.7.0
-			 *
-			 * @param array                 $files Array of downloadable file data.
-			 * @param WC_Order_Item_Product $item  The order item product object.
-			 * @param WC_Order              $order The order object.
-			 */
-			return apply_filters( 'woocommerce_get_item_downloads', $files, $this, $order );
+		if ( ! $product || ! $order || ! $product->is_downloadable() || ! $order->is_download_permitted() ) {
+			return array();
 		}
+
+		$email_hash         = function_exists( 'hash' ) ? hash( 'sha256', $order->get_billing_email() ) : sha1( $order->get_billing_email() );
+		$data_store         = WC_Data_Store::load( 'customer-download' );
+		$customer_downloads = $data_store->get_downloads(
+			array(
+				'user_email' => $order->get_billing_email(),
+				'order_id'   => $order->get_id(),
+				'product_id' => $product_id,
+			)
+		);
+		foreach ( $customer_downloads as $customer_download ) {
+			$download_id = $customer_download->get_download_id();
+
+			if ( $product->has_file( $download_id ) ) {
+				$file                  = $product->get_file( $download_id );
+				$files[ $download_id ] = $file->get_data();
+				$files[ $download_id ]['downloads_remaining'] = $customer_download->get_downloads_remaining();
+				$files[ $download_id ]['access_expires']      = $customer_download->get_access_expires();
+				$files[ $download_id ]['download_url']        = add_query_arg(
+					array(
+						'download_file' => $product_id,
+						'order'         => $order->get_order_key(),
+						'uid'           => $email_hash,
+						'key'           => $download_id,
+					),
+					trailingslashit( home_url() )
+				);
+			}
+		}
+
+		/**
+		 * Filters the list of downloadable files for an order item.
+		 *
+		 * @since 2.7.0
+		 *
+		 * @param array                 $files Array of downloadable file data.
+		 * @param WC_Order_Item_Product $item  The order item product object.
+		 * @param WC_Order              $order The order object.
+		 */
+		$files = apply_filters( 'woocommerce_get_item_downloads', $files, $this, $order );
+
+		if ( ! is_array( $files ) ) {
+			return array();
+		}
+
+		return $files;
 	}
 
 	/**

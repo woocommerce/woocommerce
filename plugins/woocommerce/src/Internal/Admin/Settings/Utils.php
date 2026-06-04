@@ -163,6 +163,13 @@ class Utils {
 	 * @return array The normalized order map.
 	 */
 	public static function order_map_normalize( array $order_map ): array {
+		// Remove entries with non-string keys (legacy/corrupt data).
+		$order_map = array_filter(
+			$order_map,
+			fn( $key ) => is_string( $key ),
+			ARRAY_FILTER_USE_KEY
+		);
+
 		asort( $order_map );
 
 		return array_flip( array_keys( $order_map ) );

@@ -1,10 +1,8 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import { MediaUpload } from '@wordpress/media-utils';
+import type { MediaUploadComponentType } from '../media-uploader/types';
 
 export type ImageGalleryChild = JSX.Element;
 
-export type MediaUploadComponentType = < T extends boolean = false >(
-	props: MediaUpload.Props< T >
-) => JSX.Element;
+export type { MediaUploadComponentType };

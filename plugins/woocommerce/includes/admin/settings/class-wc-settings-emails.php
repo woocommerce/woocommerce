@@ -12,6 +12,8 @@ use Automattic\WooCommerce\Internal\Email\EmailFont;
 use Automattic\WooCommerce\Internal\Email\EmailStyleSync;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -600,16 +602,38 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$email_types          = array();
 		$post_id_for_template = null;
 		foreach ( $emails as $email_key => $email ) {
-			$post_id       = $email_post_manager->get_email_template_post_id( $email->id );
+			$post_id     = $email_post_manager->get_email_template_post_id( $email->id );
+			$sync_config = WCEmailTemplateSyncRegistry::get_email_sync_config( $email->id );
+			// `current_version` is the canonical version core ships right now;
+			// the list view's "Review update" cell and RSM-141's editor banner
+			// gate on `merchant_reviewed_version < current_version` so a row
+			// stays customized but stops showing the indicator once the
+			// merchant has reviewed this release.
+			$current_version = is_array( $sync_config ) ? (string) ( $sync_config['version'] ?? '' ) : '';
+
+			// Project the template-sync meta directly onto the slotfill payload
+			// so the RSM-145 `_list_viewed` aggregate event can compute
+			// `eligible_count` immediately on mount without waiting for the
+			// REST enrichment in `useTransactionalEmails` to resolve. REST
+			// enrichment still runs and overrides these values once it lands —
+			// both sources read from the same post meta, so they always agree.
+			$template_status  = $post_id ? (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ) : '';
+			$template_version = $post_id ? (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ) : '';
+			$was_backfilled   = $post_id ? (bool) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY, true ) : false;
+
 			$email_types[] = array(
-				'title'       => $email->get_title(),
-				'description' => $email->get_description(),
-				'id'          => $email->id,
-				'email_key'   => strtolower( $email_key ),
-				'post_id'     => $post_id,
-				'enabled'     => $email->is_enabled(),
-				'manual'      => $email->is_manual(),
-				'recipients'  => array(
+				'title'            => $email->get_title(),
+				'description'      => $email->get_description(),
+				'id'               => $email->id,
+				'email_key'        => strtolower( $email_key ),
+				'post_id'          => $post_id,
+				'enabled'          => $email->is_enabled(),
+				'manual'           => $email->is_manual(),
+				'current_version'  => '' !== $current_version ? $current_version : null,
+				'template_status'  => '' !== $template_status ? $template_status : null,
+				'template_version' => '' !== $template_version ? $template_version : null,
+				'was_backfilled'   => $was_backfilled,
+				'recipients'       => array(
 					'to'  => $email->is_customer_email() ? __( 'Customers', 'woocommerce' ) : $email->get_recipient(),
 					'cc'  => $email->get_cc_recipient(),
 					'bcc' => $email->get_bcc_recipient(),

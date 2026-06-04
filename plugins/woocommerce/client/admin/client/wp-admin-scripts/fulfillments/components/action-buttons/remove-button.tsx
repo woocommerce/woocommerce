@@ -5,6 +5,7 @@ import { Button, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, select } from '@wordpress/data';
 import { useState } from 'react';
+import { useInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -24,6 +25,10 @@ export default function RemoveButton( {
 	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
 	const [ isExecuting, setIsExecuting ] = useState< boolean >( false );
 	const { deleteFulfillment } = useDispatch( FulfillmentStore );
+	const descriptionId = useInstanceId(
+		RemoveButton,
+		'remove-button-description'
+	) as string;
 
 	const [ isOpen, setOpen ] = useState( false );
 	const openModal = () => setOpen( true );
@@ -68,9 +73,16 @@ export default function RemoveButton( {
 				onClick={ handleRemoveButtonClick }
 				isBusy={ isExecuting }
 				__next40pxDefaultSize
+				aria-describedby={ descriptionId }
+				disabled={ isExecuting }
 			>
-				{ __( 'Remove', 'woocommerce' ) }
+				{ isExecuting
+					? __( 'Removing…', 'woocommerce' )
+					: __( 'Remove', 'woocommerce' ) }
 			</Button>
+			<span id={ descriptionId } className="screen-reader-text">
+				{ __( 'Deletes this fulfillment permanently', 'woocommerce' ) }
+			</span>
 			{ isOpen && (
 				<Modal
 					title={ __( 'Remove fulfillment', 'woocommerce' ) }
@@ -91,6 +103,10 @@ export default function RemoveButton( {
 							variant="link"
 							onClick={ closeModal }
 							__next40pxDefaultSize
+							aria-label={ __(
+								'Cancel removal and close dialog',
+								'woocommerce'
+							) }
 						>
 							{ __( 'Cancel', 'woocommerce' ) }
 						</Button>
@@ -102,8 +118,11 @@ export default function RemoveButton( {
 							} }
 							isBusy={ isExecuting }
 							__next40pxDefaultSize
+							disabled={ isExecuting }
 						>
-							{ __( 'Remove fulfillment', 'woocommerce' ) }
+							{ isExecuting
+								? __( 'Removing…', 'woocommerce' )
+								: __( 'Remove fulfillment', 'woocommerce' ) }
 						</Button>
 					</div>
 				</Modal>

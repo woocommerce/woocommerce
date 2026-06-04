@@ -5,6 +5,14 @@
  */
 class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	/**
+	 * Reset variation gallery feature-flag option leaked by individual tests.
+	 */
+	public function tearDown(): void {
+		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox 'get_available_variations' returns the variations as arrays if no parameters is passed.
 	 */
 	public function test_get_available_variations_returns_array_when_no_parameter_is_passed() {
@@ -161,5 +169,177 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		$has_purchasable_variations = $product->has_purchasable_variations();
 		$this->assertIsBool( $has_purchasable_variations );
 		$this->assertFalse( $has_purchasable_variations );
+	}
+
+	/**
+	 * @testdox 'get_available_variation' exposes typed variation gallery image IDs.
+	 */
+	public function test_get_available_variation_includes_gallery_image_ids() {
+		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
+
+		$product   = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+		$image_id  = wp_insert_attachment(
+			array(
+				'post_title'     => 'Variation Image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$image_ids = array(
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 1',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 2',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+		);
+
+		update_post_meta( $image_id, '_wp_attached_file', 'variation-featured.jpg' );
+		foreach ( $image_ids as $i => $gallery_image_id ) {
+			update_post_meta( $gallery_image_id, '_wp_attached_file', 'variation-gallery-' . ( $i + 1 ) . '.jpg' );
+		}
+
+		$variation->set_image_id( $image_id );
+		$variation->set_gallery_image_ids( $image_ids );
+		$variation->save();
+
+		$available_variation = $product->get_available_variation( $variation );
+
+		$this->assertSame( $image_ids, $available_variation['gallery_image_ids'] );
+		$this->assertNotEmpty( $available_variation['gallery_images_html'] );
+	}
+
+	/**
+	 * @testdox 'get_available_variation' omits multi-image gallery data when the variation gallery feature flag is disabled.
+	 */
+	public function test_get_available_variation_returns_single_image_shape_when_feature_flag_disabled() {
+		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'no' );
+
+		$product   = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+		$image_id  = wp_insert_attachment(
+			array(
+				'post_title'     => 'Variation Image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$image_ids = array(
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 1',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 2',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+		);
+
+		update_post_meta( $image_id, '_wp_attached_file', 'variation-disabled.jpg' );
+
+		$variation->set_image_id( $image_id );
+		$variation->set_gallery_image_ids( $image_ids );
+		$variation->save();
+
+		$available_variation = $product->get_available_variation( $variation );
+
+		$this->assertSame( array(), $available_variation['gallery_image_ids'] );
+		$this->assertSame( '', $available_variation['gallery_images_html'] );
+		$this->assertSame( $image_id, $available_variation['image_id'] );
+	}
+
+	/**
+	 * @testdox 'get_available_variation' falls back to the variation's own gallery when the variation featured image is stale.
+	 */
+	public function test_get_available_variation_falls_back_to_variation_gallery_when_featured_is_stale() {
+		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
+
+		$product              = WC_Helper_Product::create_variation_product();
+		$variation            = wc_get_product( $product->get_children()[0] );
+		$parent_featured_id   = $this->create_image_attachment( 'Parent Featured Image', 'parent-featured.jpg' );
+		$stale_featured_id    = $this->create_image_attachment( 'Stale Variation Image', 'stale-featured.jpg' );
+		$variation_gallery_id = $this->create_image_attachment( 'Variation Gallery Image', 'variation-gallery.jpg' );
+
+		// Delete-then-assign: set_image_id() doesn't validate the attachment,
+		// but wp_delete_attachment() would clear _thumbnail_id on any post
+		// pointing at it. Doing it in this order leaves the variation
+		// referencing a deleted attachment, which is the bug we're testing.
+
+		$product->set_image_id( $parent_featured_id );
+		$product->save();
+
+		wp_delete_attachment( $stale_featured_id, true );
+
+		$variation->set_image_id( $stale_featured_id );
+		$variation->set_gallery_image_ids( array( $variation_gallery_id ) );
+		$variation->save();
+
+		$available_variation = $product->get_available_variation( $variation );
+
+		$this->assertSame( $variation_gallery_id, $available_variation['image_id'] );
+		$this->assertStringContainsString( 'variation-gallery.jpg', $available_variation['gallery_images_html'] );
+		$this->assertStringNotContainsString( 'parent-featured.jpg', $available_variation['gallery_images_html'] );
+	}
+
+	/**
+	 * @testdox 'get_available_variation' falls back to the parent featured image when both the variation featured image and gallery are absent.
+	 */
+	public function test_get_available_variation_falls_back_to_parent_featured_when_variation_has_no_images() {
+		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
+
+		$product            = WC_Helper_Product::create_variation_product();
+		$variation          = wc_get_product( $product->get_children()[0] );
+		$parent_featured_id = $this->create_image_attachment( 'Parent Featured Image', 'parent-featured.jpg' );
+		$stale_featured_id  = $this->create_image_attachment( 'Stale Variation Image', 'stale-featured.jpg' );
+
+		$product->set_image_id( $parent_featured_id );
+		$product->save();
+
+		wp_delete_attachment( $stale_featured_id, true );
+
+		$variation->set_image_id( $stale_featured_id );
+		$variation->set_gallery_image_ids( array() );
+		$variation->save();
+
+		$available_variation = $product->get_available_variation( $variation );
+
+		$this->assertSame( $parent_featured_id, $available_variation['image_id'] );
+		$this->assertSame( '', $available_variation['gallery_images_html'] );
+	}
+
+	/**
+	 * Create a real image attachment that passes `wp_attachment_is_image()`.
+	 *
+	 * @param string $title         Post title.
+	 * @param string $attached_file Synthetic file path.
+	 * @return int
+	 */
+	private function create_image_attachment( string $title, string $attached_file ): int {
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => $title,
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+
+		update_post_meta( $attachment_id, '_wp_attached_file', $attached_file );
+
+		return $attachment_id;
 	}
 }

@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Make email header image/logo clickable with a link to the store homepage in classic email templates. Adds `woocommerce_email_header_image_url` filter for customization.

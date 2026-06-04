@@ -135,7 +135,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		// Get term order.
-		$menu_order = get_term_meta( $item->term_id, 'order_' . $this->taxonomy, true );
+		$menu_order = get_term_meta( $item->term_id, 'order', true );
 
 		$data = array(
 			'id'          => (int) $item->term_id,
@@ -176,7 +176,9 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 	protected function update_term_meta_fields( $term, $request ) {
 		$id = (int) $term->term_id;
 
-		update_term_meta( $id, 'order_' . $this->taxonomy, $request['menu_order'] );
+		if ( isset( $request['menu_order'] ) ) {
+			update_term_meta( $id, 'order', $request['menu_order'] );
+		}
 
 		return true;
 	}
@@ -211,7 +213,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_title',
+						'sanitize_callback' => array( $this, 'sanitize_slug' ),
 					),
 				),
 				'description' => array(
