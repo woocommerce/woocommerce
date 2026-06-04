@@ -27,13 +27,11 @@ registerBlockType( name, {
 			/>
 		),
 	},
-	edit: () => {
-		return (
-			<DeprecatedBlockWarning
-				blockName={ __( 'All Products', 'woocommerce' ) }
-			/>
-		);
-	},
+	edit: () => (
+		<DeprecatedBlockWarning
+			blockName={ __( 'All Products', 'woocommerce' ) }
+		/>
+	),
 	save,
 	deprecated,
 	defaults,

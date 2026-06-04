@@ -8,8 +8,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { DeprecatedBlockWarning } from '../../editor-components/deprecated-block-warning';
 import metadata from './block.json';
+import { DeprecatedBlockWarning } from '../../editor-components/deprecated-block-warning';
 
 registerBlockType( metadata, {
 	icon: {
@@ -20,19 +20,12 @@ registerBlockType( metadata, {
 			/>
 		),
 	},
-	attributes: {
-		...metadata.attributes,
-	},
 
-	edit: () => {
-		return (
-			<DeprecatedBlockWarning
-				blockName={ __( 'Hand-picked Products', 'woocommerce' ) }
-			/>
-		);
-	},
+	edit: () => (
+		<DeprecatedBlockWarning
+			blockName={ __( 'Hand-picked Products', 'woocommerce' ) }
+		/>
+	),
 
-	save: () => {
-		return null;
-	},
+	save: () => null,
 } );

@@ -24,15 +24,11 @@ registerBlockType( metadata, {
 		...metadata.attributes,
 	},
 
-	edit: () => {
-		return (
-			<DeprecatedBlockWarning
-				blockName={ __( 'Products by Attribute', 'woocommerce' ) }
-			/>
-		);
-	},
+	edit: () => (
+		<DeprecatedBlockWarning
+			blockName={ __( 'Products by Attribute', 'woocommerce' ) }
+		/>
+	),
 
-	save: () => {
-		return null;
-	},
+	save: () => null,
 } );

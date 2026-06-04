@@ -20,19 +20,12 @@ registerBlockType( metadata, {
 			/>
 		),
 	},
-	attributes: {
-		...metadata.attributes,
-	},
 
-	edit: () => {
-		return (
-			<DeprecatedBlockWarning
-				blockName={ __( 'Products by Tag', 'woocommerce' ) }
-			/>
-		);
-	},
+	edit: () => (
+		<DeprecatedBlockWarning
+			blockName={ __( 'Products by Tag', 'woocommerce' ) }
+		/>
+	),
 
-	save: () => {
-		return null;
-	},
+	save: () => null,
 } );

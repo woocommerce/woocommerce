@@ -7,7 +7,7 @@ import type { Page } from '@playwright/test';
  * Returns the deprecation warning copy shown in the block editor.
  */
 export function getDeprecatedBlockWarning( blockName: string ): string {
-	return `This version of the ${ blockName } block is outdated. Upgrade to the Product Collection block.`;
+	return `This version of the ${ blockName } block is outdated. You can delete it and use the Product Collection block instead.`;
 }
 
 /**

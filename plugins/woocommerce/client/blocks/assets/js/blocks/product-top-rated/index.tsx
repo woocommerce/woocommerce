@@ -1,19 +1,16 @@
 /**
  * External dependencies
  */
-import { createBlock, registerBlockType } from '@wordpress/blocks';
-import { Icon } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
+import { registerBlockType } from '@wordpress/blocks';
 import { thumbUp } from '@woocommerce/icons';
+import { Icon } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
 import { DeprecatedBlockWarning } from '../../editor-components/deprecated-block-warning';
 import metadata from './block.json';
-import sharedAttributes, {
-	sharedAttributeBlockTypes,
-} from '../../utils/shared-attributes';
 
 registerBlockType( metadata, {
 	icon: {
@@ -24,35 +21,15 @@ registerBlockType( metadata, {
 			/>
 		),
 	},
-	attributes: {
-		...sharedAttributes,
-		...metadata.attributes,
-	},
-	transforms: {
-		from: [
-			{
-				type: 'block',
-				blocks: sharedAttributeBlockTypes.filter(
-					( value ) => value !== 'woocommerce/product-top-rated'
-				),
-				transform: ( attributes ) =>
-					createBlock( 'woocommerce/product-top-rated', attributes ),
-			},
-		],
-	},
 
 	/**
 	 * Renders and manages the block.
 	 */
-	edit: () => {
-		return (
-			<DeprecatedBlockWarning
-				blockName={ __( 'Top Rated Products', 'woocommerce' ) }
-			/>
-		);
-	},
+	edit: () => (
+		<DeprecatedBlockWarning
+			blockName={ __( 'Top Rated Products', 'woocommerce' ) }
+		/>
+	),
 
-	save: () => {
-		return null;
-	},
+	save: () => null,
 } );

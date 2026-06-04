@@ -13,7 +13,7 @@ export const DeprecatedBlockWarning = ( {
 
 	return (
 		<div { ...blockProps }>
-			<Warning className="wc-block-components-actions">
+			<Warning>
 				{ sprintf(
 					/* translators: %s block name */
 					__(

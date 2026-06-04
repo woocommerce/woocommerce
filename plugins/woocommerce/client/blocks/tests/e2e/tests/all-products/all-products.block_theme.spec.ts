@@ -39,7 +39,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 	// Check this regression: hhttps://github.com/woocommerce/woocommerce/pull/58741.
 	// The block has a dependency on the Mini Cart block/Checkout/Cart blocks.
 	// This test checks that the block can be inserted and it is rendered on the frontend without the mini cart block.
-	test( 'renders on the frontend without the mini cart block', async ( {
+	test( 'block can be inserted and it is rendered on the frontend without the mini cart block', async ( {
 		editor,
 		admin,
 		page,
