@@ -22,7 +22,7 @@ $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 if ( $available_gateways ) : ?>
 	<form id="add_payment_method" method="post">
 		<div id="payment" class="woocommerce-Payment">
-			<ul class="woocommerce-PaymentMethods payment_methods methods" role="group" aria-label="<?php esc_attr_e( 'Payment methods', 'woocommerce' ); ?>">
+			<ul class="woocommerce-PaymentMethods payment_methods methods" aria-label="<?php esc_attr_e( 'Payment methods', 'woocommerce' ); ?>">
 				<?php
 				// Chosen Method.
 				if ( count( $available_gateways ) ) {
