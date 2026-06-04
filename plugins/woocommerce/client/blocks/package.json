@@ -263,7 +263,7 @@
 		"@wordpress/autop": "3.16.0",
 		"@wordpress/compose": "catalog:wp-min",
 		"@wordpress/deprecated": "catalog:wp-min",
-		"@wordpress/icons": "catalog:wp-min",
+		"@wordpress/icons": "catalog:wp-bundled",
 		"@wordpress/notices": "catalog:wp-min",
 		"@wordpress/plugins": "catalog:wp-min",
 		"@wordpress/primitives": "catalog:wp-min",
