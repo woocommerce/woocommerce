@@ -97,6 +97,51 @@ test.describe( `${ blockData.name } Block `, () => {
 		await expect( advancedFilterOption ).toBeVisible();
 		await expect( inheritQueryFromTemplateOption ).toBeVisible();
 	} );
+
+	test( 'product button should add product to the cart when inheriting query from template', async ( {
+		admin,
+		editor,
+		page,
+		frontendUtils,
+	} ) => {
+		await admin.visitSiteEditor( {
+			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+		await editor.setContent( '' );
+		await insertProductsQuery( editor );
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+		await frontendUtils.goToShop();
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart: “Single”',
+		} );
+		await addToCartButton.click();
+		await expect( addToCartButton ).toHaveText( '1 in cart' );
+		const cartLink = page.getByRole( 'link', { name: 'View cart' } );
+		await expect( cartLink ).toBeVisible();
+	} );
+
+	test( 'product button should add product to the cart when not inheriting query from template', async ( {
+		admin,
+		editor,
+		page,
+	} ) => {
+		await admin.createNewPost();
+		await insertProductsQuery( editor, { inherit: false } );
+		await editor.publishAndVisitPost();
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart: “Single”',
+		} );
+		await addToCartButton.click();
+		await expect( addToCartButton ).toHaveText( '1 in cart' );
+		const cartLink = page.getByRole( 'link', { name: 'View cart' } );
+		await expect( cartLink ).toBeVisible();
+	} );
 } );
 
 for ( const {
