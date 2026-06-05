@@ -27,7 +27,7 @@ class Breadcrumbs extends AbstractBlock {
 	 *
 	 * @return string | void Rendered block output.
 	 */
-	protected function render( $attributes, $content, $block ) {
+	protected function render( $attributes, $content, WP_Block $block ) {
 		ob_start();
 		woocommerce_breadcrumb();
 		$breadcrumb = ob_get_clean();
@@ -51,7 +51,7 @@ class Breadcrumbs extends AbstractBlock {
 
 		$has_non_small_custom_font_size = strpos( $font_size_classes_and_styles['class'] ?? '', 'has-small-font-size' ) === false;
 
-		// Remove the default 'has-small-font-size' class added by default when the block has a custom font size.
+		// Remove the default 'has-small-font-size' class when the block has a custom font size different from small.
 		// This is needed because the block.json defines a default font size, which is considered an anti-pattern
 		// since styles should be defined by themes and plugins instead.
 		if ( $has_non_small_custom_font_size ) {
@@ -81,7 +81,7 @@ class Breadcrumbs extends AbstractBlock {
 	 * @param WP_Block $block      The block instance.
 	 * @return array The font size classes and styles.
 	 */
-	private function get_font_size_classes_and_styles( $attributes, $block ) {
+	private function get_font_size_classes_and_styles( array $attributes, WP_Block $block ) {
 		$custom_font_size = $attributes['style']['typography']['fontSize'] ?? '';
 
 		if ( '' !== $custom_font_size ) {
