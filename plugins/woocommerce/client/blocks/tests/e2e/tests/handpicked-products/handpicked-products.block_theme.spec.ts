@@ -6,11 +6,7 @@ import { expect, test } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import {
-	getDeprecatedBlockWarning,
-	getProductIdBySlug,
-	updateBlockAttributesBySlug,
-} from '../../utils/deprecated-php-product-grid';
+import { getDeprecatedBlockWarning } from '../../utils/deprecated-php-product-grid';
 
 const blockData = {
 	name: 'Hand-picked Products',
@@ -22,20 +18,19 @@ test.describe( `${ blockData.slug } Block`, () => {
 		editor,
 		admin,
 		frontendUtils,
-		page,
 	} ) => {
 		await admin.createNewPost();
-		await editor.insertBlock( { name: blockData.slug } );
+		const albumId = 18;
+		await editor.insertBlock( {
+			name: blockData.slug,
+			attributes: { products: [ albumId ] },
+		} );
 		const blockLocator = await editor.getBlockByName( blockData.slug );
 		await expect(
-			blockLocator.getByText( getDeprecatedBlockWarning( blockData.name ) )
+			blockLocator.getByText(
+				getDeprecatedBlockWarning( blockData.name )
+			)
 		).toBeVisible();
-
-		const albumId = await getProductIdBySlug( page, 'woo-album' );
-		await updateBlockAttributesBySlug( page, blockData.slug, {
-			products: [ albumId ],
-			editMode: false,
-		} );
 
 		await editor.publishAndVisitPost();
 		const blockLocatorFrontend = await frontendUtils.getBlockByName(

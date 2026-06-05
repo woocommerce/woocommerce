@@ -9,7 +9,6 @@ import { expect, test } from '@woocommerce/e2e-utils';
 import {
 	getDeprecatedBlockWarning,
 	getProductCategoryIdByName,
-	updateBlockAttributesBySlug,
 } from '../../utils/deprecated-php-product-grid';
 
 const blockData = {
@@ -25,20 +24,22 @@ test.describe( `${ blockData.slug } Block`, () => {
 		page,
 	} ) => {
 		await admin.createNewPost();
-		await editor.insertBlock( { name: blockData.slug } );
-		const blockLocator = await editor.getBlockByName( blockData.slug );
-		await expect(
-			blockLocator.getByText( getDeprecatedBlockWarning( blockData.name ) )
-		).toBeVisible();
-
 		const categoryId = await getProductCategoryIdByName(
 			page,
 			'Accessories'
 		);
-		await updateBlockAttributesBySlug( page, blockData.slug, {
-			categories: [ categoryId ],
-			editMode: false,
+		await editor.insertBlock( {
+			name: blockData.slug,
+			attributes: {
+				categories: [ categoryId ],
+			},
 		} );
+		const blockLocator = await editor.getBlockByName( blockData.slug );
+		await expect(
+			blockLocator.getByText(
+				getDeprecatedBlockWarning( blockData.name )
+			)
+		).toBeVisible();
 
 		await editor.publishAndVisitPost();
 		const blockLocatorFrontend = await frontendUtils.getBlockByName(
