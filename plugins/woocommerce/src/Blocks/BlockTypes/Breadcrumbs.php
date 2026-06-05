@@ -47,6 +47,24 @@ class Breadcrumbs extends AbstractBlock {
 			)
 		);
 
+		$theme_font_size                = wp_get_global_styles(
+			array( 'blocks', 'woocommerce/breadcrumbs', 'typography', 'fontSize' )
+		);
+		$has_non_small_theme_font_size  = is_string( $theme_font_size ) && 'var(--wp--preset--font-size--small)' !== $theme_font_size;
+		$has_custom_font_size           = $attributes['style']['typography']['fontSize'] ?? '';
+		$has_non_small_custom_font_size = $has_custom_font_size && strpos( $font_size_classes_and_styles['class'] ?? '', 'has-small-font-size' ) === false;
+
+		// Remove the default 'has-small-font-size' class added by default when the block has a custom font size.
+		// This is needed because the block.json defines a default fontSize, which is considered an anti-pattern
+		// since styles should be defined by themes and plugins instead.
+		if ( $has_custom_font_size ) {
+			if ( $has_non_small_custom_font_size ) {
+				$wrapper_attributes = str_replace( 'has-small-font-size', '', $wrapper_attributes );
+			}
+		} elseif ( $has_non_small_theme_font_size ) {
+			$wrapper_attributes = str_replace( 'has-small-font-size', '', $wrapper_attributes );
+		}
+
 		return sprintf(
 			'<div %1$s>%2$s</div>',
 			$wrapper_attributes,
@@ -65,11 +83,6 @@ class Breadcrumbs extends AbstractBlock {
 
 	/**
 	 * Gets font size classes and styles for the breadcrumbs block.
-	 *
-	 * Note: This implementation intentionally avoids using StyleAttributesUtils::get_font_size_class_and_style()
-	 * and get_block_wrapper_attributes() to ensure style attributes take precedence over the class attribute fontSize.
-	 * This is needed because the block.json defines a default fontSize, which is considered an anti-pattern
-	 * since styles should be defined by themes and plugins instead.
 	 *
 	 * @param array $attributes The block attributes.
 	 * @return array The font size classes and styles.
