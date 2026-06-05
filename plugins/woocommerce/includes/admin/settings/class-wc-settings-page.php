@@ -151,8 +151,6 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		/**
 		 * Log a developer-facing notice when settings UI rendering falls back to the legacy renderer.
 		 *
-		 * @since 11.0.0
-		 *
 		 * @param SettingsUIPageInterface $settings_ui_page Settings UI page adapter.
 		 * @param string                  $section_id Section id.
 		 * @param string                  $reason Fallback reason.
@@ -167,7 +165,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 					'' === $section_id ? 'default' : $section_id,
 					$reason
 				),
-				'11.0.0'
+				'10.9.0'
 			);
 		}
 
