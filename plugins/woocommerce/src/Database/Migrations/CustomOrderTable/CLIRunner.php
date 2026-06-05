@@ -1028,6 +1028,25 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	/**
 	 * Displays a summary of HPOS situation on this site.
 	 *
+	 * ## OPTIONS
+	 *
+	 * [--format=<format>]
+	 * : Render output in a particular format.
+	 * ---
+	 * default: text
+	 * options:
+	 *   - text
+	 *   - json
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 *    # Display the HPOS status summary.
+	 *    $ wp wc hpos status
+	 *
+	 *    # Display the HPOS status summary as JSON.
+	 *    $ wp wc hpos status --format=json
+	 *
 	 * @since 8.6.0
 	 *
 	 * @param array $args       Positional arguments passed to the command.
@@ -1036,24 +1055,40 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	public function status( array $args = array(), array $assoc_args = array() ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- for backwards compat.
 		$legacy_handler = wc_get_container()->get( LegacyDataHandler::class );
 
-		// translators: %s is either 'yes' or 'no'.
-		WP_CLI::log( sprintf( __( 'HPOS enabled?: %s', 'woocommerce' ), wc_bool_to_string( $this->controller->custom_orders_table_usage_is_enabled() ) ) );
+		$status = array(
+			'hpos_enabled'               => $this->controller->custom_orders_table_usage_is_enabled(),
+			'compatibility_mode_enabled' => $this->synchronizer->data_sync_is_enabled(),
+			'unsynced_orders'            => $this->synchronizer->get_current_orders_pending_sync_count(),
+			'orders_subject_to_cleanup'  => ( $this->synchronizer->custom_orders_table_is_authoritative() && ! $this->synchronizer->data_sync_is_enabled() )
+				? $legacy_handler->count_orders_for_cleanup()
+				: 0,
+		);
+
+		$format = $assoc_args['format'] ?? 'text';
+		if ( ! in_array( $format, array( 'text', 'json' ), true ) ) {
+			// The PHPDoc `options:` block above is the WP-CLI-level guard, so this
+			// only fires for direct method calls with an unknown value. Fall back to
+			// the default text output rather than failing.
+			$format = 'text';
+		}
+
+		if ( 'json' === $format ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WP CLI JSON output.
+			echo wp_json_encode( $status ) . PHP_EOL;
+			return;
+		}
 
 		// translators: %s is either 'yes' or 'no'.
-		WP_CLI::log( sprintf( __( 'Compatibility mode enabled?: %s', 'woocommerce' ), wc_bool_to_string( $this->synchronizer->data_sync_is_enabled() ) ) );
+		WP_CLI::log( sprintf( __( 'HPOS enabled?: %s', 'woocommerce' ), wc_bool_to_string( $status['hpos_enabled'] ) ) );
+
+		// translators: %s is either 'yes' or 'no'.
+		WP_CLI::log( sprintf( __( 'Compatibility mode enabled?: %s', 'woocommerce' ), wc_bool_to_string( $status['compatibility_mode_enabled'] ) ) );
 
 		// translators: %d is an order count.
-		WP_CLI::log( sprintf( __( 'Unsynced orders: %d', 'woocommerce' ), $this->synchronizer->get_current_orders_pending_sync_count() ) );
+		WP_CLI::log( sprintf( __( 'Unsynced orders: %d', 'woocommerce' ), $status['unsynced_orders'] ) );
 
-		WP_CLI::log(
-			sprintf(
-				/* translators: %d is an order count. */
-				__( 'Orders subject to cleanup: %d', 'woocommerce' ),
-				( $this->synchronizer->custom_orders_table_is_authoritative() && ! $this->synchronizer->data_sync_is_enabled() )
-				? $legacy_handler->count_orders_for_cleanup()
-				: 0
-			)
-		);
+		// translators: %d is an order count.
+		WP_CLI::log( sprintf( __( 'Orders subject to cleanup: %d', 'woocommerce' ), $status['orders_subject_to_cleanup'] ) );
 	}
 
 	/**

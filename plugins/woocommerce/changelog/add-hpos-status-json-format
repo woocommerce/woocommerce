@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add `--format=json` support to the `wp wc hpos status` CLI command. The default text output is unchanged; passing `--format=json` emits a single line of JSON with stable keys (`hpos_enabled`, `compatibility_mode_enabled`, `unsynced_orders`, `orders_subject_to_cleanup`) for programmatic checks of HPOS state.
