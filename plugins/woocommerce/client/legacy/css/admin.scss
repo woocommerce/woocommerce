@@ -2252,6 +2252,19 @@ ul.wc_coupon_list_block {
 		}
 	}
 
+	// Stack the coupons/totals columns full width once the admin sidebar hides.
+	@media screen and (max-width: 782px) {
+		.wc-used-coupons,
+		.wc-order-totals {
+			float: none;
+			width: 100%;
+		}
+
+		.wc-used-coupons {
+			margin-bottom: 12px;
+		}
+	}
+
 	.refund-actions {
 		margin-top: 5px;
 		padding-top: 12px;

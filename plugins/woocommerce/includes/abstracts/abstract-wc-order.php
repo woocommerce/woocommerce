@@ -1634,13 +1634,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		if ( $product ) {
 			$order = ArrayUtil::get_value_or_default( $args, 'order' );
-			$total = wc_get_price_excluding_tax(
-				$product,
-				array(
-					'qty'   => $qty,
-					'order' => $order,
-				)
-			);
+
+			if ( $this->has_fixed_end_prices() ) {
+				// Note: storing inclusive price as-is relies on the filter being a
+				// code-level constant. If the filter changes at runtime, existing
+				// line totals will be misinterpreted on recalculate since the gross
+				// price is reused without re-deriving from the product.
+				$total = (float) $product->get_price() * $qty;
+			} else {
+				$total = wc_get_price_excluding_tax(
+					$product,
+					array(
+						'qty'   => $qty,
+						'order' => $order,
+					)
+				);
+			}
 
 			$default_args = array(
 				'name'         => $product->get_name(),
@@ -1877,7 +1886,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
 
-		// Trigger tax recalculation for all items.
+		if ( $this->has_fixed_end_prices() ) {
+			$calculate_tax_for['prices_include_tax'] = true;
+		}
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			if ( ! $is_vat_exempt ) {
 				$item->calculate_taxes( $calculate_tax_for );
@@ -2004,6 +2015,30 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Whether this store uses fixed end-prices across tax jurisdictions.
+	 * True when prices include tax and woocommerce_adjust_non_base_location_prices is false.
+	 *
+	 * @return bool
+	 */
+	private function has_fixed_end_prices(): bool {
+		/**
+		 * Filters if taxes should be removed from locations outside the store base location.
+		 *
+		 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing
+		 * with out of base locations. e.g. If a product costs 10 including tax, all users will pay 10
+		 * regardless of location and taxes.
+		 *
+		 * @since 2.4.7
+		 *
+		 * @param bool $adjust_non_base_location_prices True by default.
+		 */
+		$adjust_non_base_location_prices = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
+
+		return 'yes' === get_option( 'woocommerce_prices_include_tax' )
+			&& ! $adjust_non_base_location_prices;
+	}
+
+	/**
 	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
 	 *
 	 * @since 2.2
@@ -2048,6 +2083,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->calculate_taxes();
 		}
 
+		// Re-read cart totals after calculate_taxes().
+		// Negative fees may have been capped while calculating totals.
+		$cart_subtotal = $this->get_cart_subtotal_for_order();
+		$cart_total    = (float) $this->get_cart_total_for_order();
+
 		// Sum taxes again so we can work out how much tax was discounted. This uses original values, not those possibly rounded to 2dp.
 		foreach ( $this->get_items() as $item ) {
 			$taxes = $item->get_taxes();
@@ -2059,6 +2099,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			foreach ( $taxes['subtotal'] as $tax_rate_id => $tax ) {
 				$cart_subtotal_tax += (float) $tax;
 			}
+		}
+
+		// Fixed end-price orders keep inclusive item totals; compare net values and add tax back below.
+		if ( $this->has_fixed_end_prices() ) {
+			$cart_subtotal = $cart_subtotal - $cart_subtotal_tax;
+			$cart_total    = $cart_total - $cart_total_tax;
 		}
 
 		$this->set_discount_total( NumberUtil::round( $cart_subtotal - $cart_total, $price_decimals ) );
@@ -2098,6 +2144,37 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		return apply_filters( 'woocommerce_order_amount_item_subtotal', $subtotal, $this, $item, $inc_tax, $round );
+	}
+
+	/**
+	 * Get the items subtotal amount to display in the admin order screen.
+	 *
+	 * For stores with fixed end-prices (prices entered including tax with the
+	 * woocommerce_adjust_non_base_location_prices adjustment disabled), the cart
+	 * tax is removed so the displayed subtotal matches the ex-tax cart display.
+	 *
+	 * @return float
+	 */
+	public function get_subtotal_amount_to_display() {
+		return $this->has_fixed_end_prices()
+			? (float) $this->get_subtotal() - (float) $this->get_cart_tax()
+			: (float) $this->get_subtotal();
+	}
+
+	/**
+	 * Get the per-unit item subtotal amount to display in the admin order screen.
+	 *
+	 * For stores with fixed end-prices (prices entered including tax with the
+	 * woocommerce_adjust_non_base_location_prices adjustment disabled), the item
+	 * tax is removed so the displayed amount matches the ex-tax cart display.
+	 *
+	 * @param object $item Item to get the subtotal from.
+	 * @return float
+	 */
+	public function get_item_subtotal_to_display( $item ) {
+		return ( $this->has_fixed_end_prices() && $item instanceof WC_Order_Item_Product && $item->get_quantity() )
+			? NumberUtil::round( ( (float) $item->get_subtotal() - (float) $item->get_subtotal_tax() ) / $item->get_quantity(), wc_get_price_decimals() )
+			: $this->get_item_subtotal( $item, false, true );
 	}
 
 	/**
