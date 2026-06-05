@@ -159,7 +159,8 @@ class BreadcrumbsTest extends WP_UnitTestCase {
 		$markup = $this->render_breadcrumbs( '{"fontSize":"small"}' );
 
 		$this->assertStringContainsString( 'has-font-size', $markup, 'Preset small font size should add the has-font-size class.' );
-		$this->assertStringNotContainsString( 'has-small-font-size', $markup, 'Theme large font size removes the default small class when no custom typography is set.' );
+		$this->assertStringContainsString( 'has-small-font-size', $markup, 'Breadcrumbs block font size should take priority over theme font size.' );
+		$this->assertStringNotContainsString( 'has-large-font-size', $markup, 'Theme large font size should not be applied.' );
 	}
 
 	/**
@@ -173,6 +174,7 @@ class BreadcrumbsTest extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'font-size:', $markup, 'Custom typography font size should be applied as inline style.' );
 		$this->assertStringContainsString( '3rem', $markup, 'Custom typography value should appear in the rendered style.' );
-		$this->assertStringNotContainsString( 'has-small-font-size', $markup, 'Custom typography should remove the default small class despite theme override.' );
+		$this->assertStringNotContainsString( 'has-small-font-size', $markup, 'Custom typography should remove the default small class.' );
+		$this->assertStringNotContainsString( 'has-large-font-size', $markup, 'Theme large font size should not be applied.' );
 	}
 }
