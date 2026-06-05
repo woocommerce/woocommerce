@@ -854,6 +854,63 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Updating an order ignores response-only line item meta display fields.
+	 */
+	public function test_order_update_ignores_line_item_meta_display_fields(): void {
+		$order       = WC_Helper_Order::create_order();
+		$line_items  = $order->get_items( 'line_item' );
+		$line_item   = reset( $line_items );
+		$meta_value  = array(
+			array(
+				'guid'      => 'https://example.com/wp-content/uploads/custom-image.jpg',
+				'file_type' => 'image/jpeg',
+				'file_name' => 'custom-image.jpg',
+				'title'     => 'custom-image',
+				'key'       => 'custom-image-key',
+			),
+		);
+		$meta_key    = '_file_upload_data';
+
+		$line_item->add_meta_data( $meta_key, $meta_value, true );
+		$line_item->save();
+
+		$line_item_meta = $line_item->get_meta_data();
+		$line_item_meta = reset( $line_item_meta );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'status'     => OrderStatus::PROCESSING,
+				'line_items' => array(
+					array(
+						'id'        => $line_item->get_id(),
+						'meta_data' => array(
+							array(
+								'id'            => $line_item_meta->id,
+								'key'           => $meta_key,
+								'value'         => $meta_value,
+								'display_key'   => $meta_key,
+								'display_value' => $meta_value,
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+
+		$order      = wc_get_order( $order->get_id() );
+		$line_items = $order->get_items( 'line_item' );
+		$line_item  = reset( $line_items );
+
+		$this->assertEquals( OrderStatus::PROCESSING, $order->get_status() );
+		$this->assertEquals( $meta_value, $line_item->get_meta( $meta_key ) );
+	}
+
+	/**
 	 * @testdox When a line item quantity in an order is updated via REST API, the product's stock should
 	 *          only be updated when the order is set to certain statuses.
 	 */

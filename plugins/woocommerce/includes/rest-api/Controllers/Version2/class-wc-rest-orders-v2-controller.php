@@ -143,6 +143,39 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Get endpoint args for item schema.
+	 *
+	 * @param string $method Optional. HTTP method of the request.
+	 * @return array Endpoint arguments.
+	 */
+	public function get_endpoint_args_for_item_schema( $method = WP_REST_Server::CREATABLE ) {
+		$endpoint_args = parent::get_endpoint_args_for_item_schema( $method );
+
+		if ( false === strpos( WP_REST_Server::EDITABLE, $method ) ) {
+			return $endpoint_args;
+		}
+
+		return $this->remove_response_only_line_item_meta_fields( $endpoint_args );
+	}
+
+	/**
+	 * Remove response-only line item meta fields from request validation.
+	 *
+	 * @param array $endpoint_args Endpoint arguments.
+	 * @return array Endpoint arguments.
+	 */
+	protected function remove_response_only_line_item_meta_fields( $endpoint_args ) {
+		if ( isset( $endpoint_args['line_items']['items']['properties']['meta_data']['items']['properties'] ) ) {
+			unset(
+				$endpoint_args['line_items']['items']['properties']['meta_data']['items']['properties']['display_key'],
+				$endpoint_args['line_items']['items']['properties']['meta_data']['items']['properties']['display_value']
+			);
+		}
+
+		return $endpoint_args;
+	}
+
+	/**
 	 * Get object. Return false if object is not of required type.
 	 *
 	 * @since  3.0.0
@@ -1604,11 +1637,13 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 											'description' => __( 'Meta key for UI display.', 'woocommerce' ),
 											'type'        => 'string',
 											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
 										),
 										'display_value' => array(
 											'description' => __( 'Meta value for UI display.', 'woocommerce' ),
 											'type'        => 'string',
 											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
 										),
 									),
 								),
