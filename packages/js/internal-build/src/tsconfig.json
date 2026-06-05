@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"target": "es2022",
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"lib": [ "es2022" ],
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"isolatedModules": true,
+		"declaration": true,
+		"declarationMap": true,
+		"declarationDir": "../build-types",
+		"outDir": "../build-module",
+		"rootDir": ".",
+		"resolveJsonModule": true
+	},
+	"include": [ "**/*.ts" ],
+	"exclude": [ "style-build/**" ]
+}

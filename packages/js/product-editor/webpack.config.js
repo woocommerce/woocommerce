@@ -13,7 +13,7 @@ const {
 	plugin,
 	StyleAssetPlugin,
 	WebpackRTLPlugin,
-} = require( '@woocommerce/internal-style-build' );
+} = require( '@woocommerce/internal-build/style-build' );
 const {
 	blockEntryPoints,
 	getBlockMetaData,
@@ -34,7 +34,7 @@ module.exports = {
 			config: [
 				__filename,
 				path.resolve( __dirname, '../../../pnpm-lock.yaml' ),
-				require.resolve( '@woocommerce/internal-style-build' ),
+				require.resolve( '@woocommerce/internal-build/style-build' ),
 			],
 		},
 	},
