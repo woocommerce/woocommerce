@@ -36292,12 +36292,6 @@ parameters:
 			path: includes/wc-term-functions.php
 
 		-
-			message: '#^Parameter \#1 \$term_id of function update_term_meta expects int, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-term-functions.php
-
-		-
 			message: '#^Parameter \#1 \$terms of function _wc_term_recount expects array, array\<int, int\>\|WP_Error given\.$#'
 			identifier: argument.type
 			count: 2
