@@ -1,4 +1,5 @@
 <?php
+
 /**
  * WooCommerce Block Templates block interface compatibility shim.
  */
