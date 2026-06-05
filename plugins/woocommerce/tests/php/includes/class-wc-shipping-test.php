@@ -190,18 +190,25 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		);
 
 		$filter_calls = 0;
-		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+		// The filter reorganizes the packages (adds a marker) so we can assert the cached result returned on
+		// a memo hit reflects the filter output, not the raw pre-filter packages.
+		$filter = function ( $shipping_packages ) use ( &$filter_calls ) {
 			++$filter_calls;
+			$shipping_packages['reorganized'] = true;
 			return $shipping_packages;
 		};
 
 		add_filter( 'woocommerce_shipping_packages', $filter );
 
-		$this->sut->calculate_shipping( $packages );
-		$this->sut->calculate_shipping( $packages );
-		$this->sut->calculate_shipping( $packages );
+		$first  = $this->sut->calculate_shipping( $packages );
+		$second = $this->sut->calculate_shipping( $packages );
+		$third  = $this->sut->calculate_shipping( $packages );
 
 		$this->assertEquals( 1, $filter_calls, 'Filter should run once for repeated identical calls.' );
+		$this->assertArrayHasKey( 'reorganized', $first, 'First call returns the filtered packages.' );
+		$this->assertArrayHasKey( 'reorganized', $second, 'Memoized call returns the filtered (reorganized) packages.' );
+		$this->assertEquals( $first, $second, 'Memoized result matches the originally filtered result.' );
+		$this->assertEquals( $first, $third, 'Memoized result is stable across repeated calls.' );
 
 		// Changing the packages should bust the memo and re-run the filter.
 		$packages[0]['destination']['country'] = 'GB';
