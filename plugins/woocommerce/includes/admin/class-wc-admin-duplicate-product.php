@@ -330,6 +330,22 @@ class WC_Admin_Duplicate_Product {
 			return;
 		}
 
+		// If the source SKU is not used by any saved product, use it as-is.
+		// This preserves backward compatibility with the REST API duplicate endpoint,
+		// which lets callers set a custom SKU on the duplicate and expects that SKU
+		// to be applied directly when it is unique.
+		$source_sku_in_use = (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->wc_product_meta_lookup} WHERE sku = %s",
+				$original_sku
+			)
+		);
+
+		if ( ! $source_sku_in_use ) {
+			$product->set_sku( $original_sku );
+			return;
+		}
+
 		// Query existing SKUs that match the pattern: original SKU + hyphen + number.
 		$existing_skus = $wpdb->get_col(
 			$wpdb->prepare(
