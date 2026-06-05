@@ -614,6 +614,18 @@ class ListTable extends WP_List_Table {
 			return;
 		}
 
+		/**
+		 * Fires when a valid billing country filter value has been read from the request, before
+		 * it is added to the order query args. Extensions can use this to map custom request
+		 * values to additional query args (e.g. supporting comma-separated country lists).
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param string                $country   The validated ISO country code.
+		 * @param ListTable             $list_table The current list table instance.
+		 */
+		do_action( 'woocommerce_order_list_table_set_billing_country_args', $country, $this );
+
 		$this->order_query_args['billing_country'] = $country;
 		$this->has_filter                          = true;
 	}
@@ -1027,7 +1039,19 @@ class ListTable extends WP_List_Table {
 	public function billing_country_filter() {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$current_country = isset( $_GET['_billing_country'] ) ? sanitize_text_field( wp_unslash( $_GET['_billing_country'] ) ) : '';
-		$countries       = WC()->countries->get_countries();
+
+		/**
+		 * Filters the list of countries available in the billing country filter dropdown on the order list table.
+		 *
+		 * This filter enables extensions to add, remove, or reorder the countries shown in the
+		 * billing country filter without modifying the underlying template. It also lets extensions
+		 * align the dropdown options with any custom address field schemas they register.
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param array $countries Associative array of country code => country name.
+		 */
+		$countries = apply_filters( 'woocommerce_order_list_table_billing_country_filter', WC()->countries->get_countries() );
 		?>
 		<select name="_billing_country" id="filter-by-billing-country">
 			<option value=""><?php esc_html_e( 'All countries', 'woocommerce' ); ?></option>
