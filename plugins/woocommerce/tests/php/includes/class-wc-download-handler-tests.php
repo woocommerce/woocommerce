@@ -112,6 +112,11 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 
 		// And now with one of the approved directory rules disabled...
 		$approved_directories->disable_by_id( $approved_directory_rule_id );
+
+		// Approved Download Directory rule changes don't invalidate the product object cache, so
+		// flush to force a fresh read that reflects the updated rules.
+		wp_cache_flush();
+
 		$_GET['key']     = $download_keys[1];
 		$wp_die_happened = false;
 

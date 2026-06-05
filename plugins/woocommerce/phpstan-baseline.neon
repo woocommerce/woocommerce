@@ -13075,24 +13075,6 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^Binary operation "\-" between float and non\-falsy\-string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/class-wc-order.php
-
-		-
-			message: '#^Binary operation "\-" between float and string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/class-wc-order.php
-
-		-
-			message: '#^Binary operation "\-" between int\|string and string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/class-wc-order.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_item_downloads\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -28699,36 +28681,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-data-currencies-controller.php
 
 		-
-			message: '#^Method WC_REST_Layout_Templates_Controller\:\:get_item\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-layout-templates-controller.php
-
-		-
-			message: '#^Method WC_REST_Layout_Templates_Controller\:\:get_item_permissions_check\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-layout-templates-controller.php
-
-		-
-			message: '#^Method WC_REST_Layout_Templates_Controller\:\:get_items\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-layout-templates-controller.php
-
-		-
-			message: '#^Method WC_REST_Layout_Templates_Controller\:\:get_items_permissions_check\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-layout-templates-controller.php
-
-		-
-			message: '#^Method WC_REST_Layout_Templates_Controller\:\:register_routes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-layout-templates-controller.php
-
-		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Network_Orders_V2_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 132 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -30212,30 +30164,6 @@ parameters:
 			identifier: isset.variable
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Method WC_REST_Products_Catalog_Controller\:\:register_routes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-catalog-controller.php
-
-		-
-			message: '#^Method WC_REST_Products_Catalog_Controller\:\:request_catalog\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-catalog-controller.php
-
-		-
-			message: '#^Method WC_REST_Products_Catalog_Controller\:\:request_catalog_permissions_check\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-catalog-controller.php
-
-		-
-			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 116 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-catalog-controller.php
 
 		-
 			message: '#^Access to offset ''cost_of_goods_sold'' on an unknown class Automattic\\WooCommerce\\Internal\\CostOfGoodsSold\\WP_Rest_Request\.$#'
@@ -36334,12 +36262,6 @@ parameters:
 			path: includes/wc-term-functions.php
 
 		-
-			message: '#^Parameter \#1 \$term_id of function update_term_meta expects int, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-term-functions.php
-
-		-
 			message: '#^Parameter \#1 \$terms of function _wc_term_recount expects array, array\<int, int\>\|WP_Error given\.$#'
 			identifier: argument.type
 			count: 2
@@ -37981,12 +37903,6 @@ parameters:
 			message: '#^Access to property \$data on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
 			identifier: class.notFound
 			count: 3
-			path: src/Admin/API/Leaderboards.php
-
-		-
-			message: '#^Call to method get_query_params\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Admin/API/Leaderboards.php
 
 		-
@@ -47404,306 +47320,6 @@ parameters:
 			path: src/Admin/Features/PaymentGatewaySuggestions/PaymentGatewaysController.php
 
 		-
-			message: '#^Access to property \$name on an unknown class Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\WP_Block_Editor_Context\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
-
-		-
-			message: '#^Class Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init referenced with incorrect case\: Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\INIT\.$#'
-			identifier: class.nameCase
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\BlockRegistry\:\:augment_attributes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\BlockRegistry\:\:augment_uses_context\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\BlockRegistry\:\:get_file_path\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\BlockRegistry\:\:has_role_support\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\BlockRegistry\:\:register_block\(\) has invalid return type Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\WP_Block_Type\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\BlockRegistry\:\:register_block\(\) should return Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\WP_Block_Type\|false but returns WP_Block_Type\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\BlockRegistry\:\:register_categories\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\BlockRegistry\:\:register_product_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\BlockRegistry\:\:unregister\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
-
-		-
-			message: '#^Parameter \$editor_context of method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\BlockRegistry\:\:register_categories\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\WP_Block_Editor_Context\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\BlockTemplateUtils\:\:get_template_content\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockTemplateUtils.php
-
-		-
-			message: '#^Access to property \$data on an unknown class Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Action callback returns string but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Call to method meta_exists\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Cannot call method is_block_editor\(\) on WP_Screen\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init\:\:dequeue_conflicting_styles\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init\:\:enqueue_scripts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init\:\:enqueue_styles\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init\:\:get_product_editor_settings\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init\:\:possibly_add_template_id\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init\:\:register_layout_templates\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init\:\:register_product_templates\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init\:\:register_user_metas\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init\:\:set_current_screen_to_block_editor_if_wc_admin\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init\:\:possibly_add_template_id\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Parameter \$response of method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init\:\:possibly_add_template_id\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductFormsController\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/ProductFormsController.php
-
-		-
-			message: '#^Parameter \#1 \$file_path of static method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\BlockTemplateUtils\:\:get_template_content\(\) expects string, string\|true given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Admin/Features/ProductBlockEditor/ProductFormsController.php
-
-		-
-			message: '#^Parameter \#1 \$file_path of static method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\BlockTemplateUtils\:\:get_template_file_data\(\) expects string, string\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/ProductFormsController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplate\:\:set_description\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/ProductTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplate\:\:set_icon\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/ProductTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplate\:\:set_layout_template_id\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/ProductTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplate\:\:set_order\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/ProductTemplate.php
-
-		-
-			message: '#^Cannot access property \$action on WP_Screen\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/RedirectionController.php
-
-		-
-			message: '#^Cannot access property \$base on WP_Screen\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: src/Admin/Features/ProductBlockEditor/RedirectionController.php
-
-		-
-			message: '#^Cannot access property \$post_type on WP_Screen\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: src/Admin/Features/ProductBlockEditor/RedirectionController.php
-
-		-
-			message: '#^Cannot call method get_meta\(\) on WC_Product\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/RedirectionController.php
-
-		-
-			message: '#^Cannot call method get_type\(\) on WC_Product\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Admin/Features/ProductBlockEditor/RedirectionController.php
-
-		-
-			message: '#^Cannot call method is_downloadable\(\) on WC_Product\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/RedirectionController.php
-
-		-
-			message: '#^Cannot call method is_virtual\(\) on WC_Product\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/RedirectionController.php
-
-		-
-			message: '#^Parameter \#1 \$product_id of method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\RedirectionController\:\:is_product_supported\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/RedirectionController.php
-
-		-
-			message: '#^Parameter \#2 \$str of function explode expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/RedirectionController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Tracks\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Tracks.php
-
-		-
-			message: '#^Parameter \#1 \$encoded_string of function parse_str expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Tracks.php
-
-		-
-			message: '#^Parameter \#1 \$url of function wp_parse_url expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Tracks.php
-
-		-
-			message: '#^Parameter \#1 \$url of method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Tracks\:\:is_product_editor_page\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Tracks.php
-
-		-
-			message: '#^Parameter \#2 \$str of function explode expects string, array\<mixed\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/Tracks.php
-
-		-
 			message: '#^Cannot access property \$labels on WP_Post_Type\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -52726,12 +52342,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCategory.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 6
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
 			message: '#^Call to method get_param\(\) on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_REST_Request\.$#'
 			identifier: class.notFound
 			count: 12
@@ -52788,12 +52398,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$callback of function remove_filter expects array\|\(callable\(\)\: mixed\)\|string, \(Closure\(mixed, mixed\)\: mixed\)\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Controller\:\:build_frontend_query\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
 
@@ -53596,18 +53200,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilters\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -53628,12 +53220,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilters\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilters.php
 
@@ -55590,24 +55176,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:set_hook_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean\.\)\: Unexpected token "\.", expected variable at offset 211 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean\.\)\: Unexpected token "\.", expected variable at offset 221 on line 7$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
 
@@ -58102,12 +57670,6 @@ parameters:
 			path: src/Internal/Admin/Logging/FileV2/FileController.php
 
 		-
-			message: '#^Parameter \#1 \$directory of class RecursiveDirectoryIterator constructor expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Logging/FileV2/FileController.php
-
-		-
 			message: '#^Parameter \#1 \$fp of function feof expects resource, resource\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -58115,12 +57677,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$fp of function fgets expects resource, resource\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Logging/FileV2/FileController.php
-
-		-
-			message: '#^Parameter \#1 \$path of function wp_is_writable expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Logging/FileV2/FileController.php
@@ -64417,330 +63973,6 @@ parameters:
 			path: src/Internal/Features/FeaturesController.php
 
 		-
-			message: '#^ Parameter \#2 \$root_template of class Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Group constructor is passed by reference, so it expects variables only$#'
-			identifier: argument.byRef
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/AbstractProductFormTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\AbstractProductFormTemplate\:\:add_group\(\) should return Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplates\\GroupInterface but returns Automattic\\WooCommerce\\Admin\\BlockTemplates\\BlockInterface\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/AbstractProductFormTemplate.php
-
-		-
-			message: '#^ Parameter \#2 \$root_template of class Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Section constructor is passed by reference, so it expects variables only$#'
-			identifier: argument.byRef
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^Call to an undefined method Automattic\\WooCommerce\\Admin\\BlockTemplates\\BlockTemplateInterface\:\:cache_block\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^Call to an undefined method Automattic\\WooCommerce\\Admin\\BlockTemplates\\BlockTemplateInterface\:\:uncache_block\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^Call to an undefined method Automattic\\WooCommerce\\Admin\\BlockTemplates\\ContainerInterface\:\:remove_inner_block\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^Call to function method_exists\(\) with \$this\(Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Group\) and ''is_detached'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Group\:\:add_section\(\) should return Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplates\\SectionInterface but returns Automattic\\WooCommerce\\Admin\\BlockTemplates\\BlockInterface\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Group\:\:do_after_add_block_action\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Group\:\:do_after_add_block_error_action\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Group\:\:do_after_add_specific_block_action\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Group\:\:do_after_remove_block_action\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Group\:\:do_after_remove_block_error_action\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Group\:\:do_after_remove_specific_block_action\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Group\:\:remove_block\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Group\:\:remove_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Group\:\:remove_inner_block\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Group.php
-
-		-
-			message: '#^ Parameter \#2 \$root_template of class Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductBlock constructor is passed by reference, so it expects variables only$#'
-			identifier: argument.byRef
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductBlock.php
-
-		-
-			message: '#^Call to an undefined method Automattic\\WooCommerce\\Admin\\BlockTemplates\\BlockTemplateInterface\:\:cache_block\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductBlock.php
-
-		-
-			message: '#^Call to an undefined method Automattic\\WooCommerce\\Admin\\BlockTemplates\\BlockTemplateInterface\:\:uncache_block\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductBlock.php
-
-		-
-			message: '#^Call to an undefined method Automattic\\WooCommerce\\Admin\\BlockTemplates\\ContainerInterface\:\:remove_inner_block\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductBlock.php
-
-		-
-			message: '#^Call to function method_exists\(\) with \$this\(Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductBlock\) and ''is_detached'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductBlock\:\:do_after_add_block_action\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductBlock\:\:do_after_add_block_error_action\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductBlock\:\:do_after_add_specific_block_action\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductBlock\:\:do_after_remove_block_action\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductBlock\:\:do_after_remove_block_error_action\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductBlock\:\:do_after_remove_specific_block_action\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductBlock\:\:remove_block\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductBlock\:\:remove_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductBlock\:\:remove_inner_block\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductBlock.php
-
-		-
-			message: '#^Call to an undefined method Automattic\\WooCommerce\\Admin\\BlockTemplates\\BlockInterface\:\:add_block\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductVariationTemplate.php
-
-		-
-			message: '#^Cannot call method add_block\(\) on Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplates\\GroupInterface\|null\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductVariationTemplate.php
-
-		-
-			message: '#^Cannot call method add_section\(\) on Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplates\\GroupInterface\|null\.$#'
-			identifier: method.nonObject
-			count: 5
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductVariationTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductVariationTemplate\:\:add_downloadable_product_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductVariationTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductVariationTemplate\:\:add_general_group_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductVariationTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductVariationTemplate\:\:add_group_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductVariationTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductVariationTemplate\:\:add_inventory_group_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductVariationTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductVariationTemplate\:\:add_shipping_group_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductVariationTemplate.php
-
-		-
-			message: '#^Parameter \#1 \$parent_block of method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\ProductVariationTemplate\:\:add_downloadable_product_blocks\(\) expects Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplates\\GroupInterface, Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplates\\GroupInterface\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/ProductVariationTemplate.php
-
-		-
-			message: '#^ Parameter \#2 \$root_template of class Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Subsection constructor is passed by reference, so it expects variables only$#'
-			identifier: argument.byRef
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Section.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\Section\:\:add_subsection\(\) should return Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplates\\SubsectionInterface but returns Automattic\\WooCommerce\\Admin\\BlockTemplates\\BlockInterface\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/Section.php
-
-		-
-			message: '#^Call to an undefined method Automattic\\WooCommerce\\Admin\\BlockTemplates\\BlockInterface\:\:add_block\(\)\.$#'
-			identifier: method.notFound
-			count: 10
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
-
-		-
-			message: '#^Cannot call method add_block\(\) on Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplates\\GroupInterface\|null\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
-
-		-
-			message: '#^Cannot call method add_section\(\) on Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplates\\GroupInterface\|null\.$#'
-			identifier: method.nonObject
-			count: 11
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\SimpleProductTemplate\:\:add_downloadable_product_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\SimpleProductTemplate\:\:add_general_group_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\SimpleProductTemplate\:\:add_group_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\SimpleProductTemplate\:\:add_inventory_group_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\SimpleProductTemplate\:\:add_linked_products_group_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\SimpleProductTemplate\:\:add_organization_group_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\SimpleProductTemplate\:\:add_shipping_group_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\SimpleProductTemplate\:\:add_variation_group_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
-
-		-
-			message: '#^Parameter \#1 \$parent_block of method Automattic\\WooCommerce\\Internal\\Features\\ProductBlockEditor\\ProductTemplates\\SimpleProductTemplate\:\:add_downloadable_product_blocks\(\) expects Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplates\\GroupInterface, Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\ProductTemplates\\GroupInterface\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
-
-		-
 			message: '#^Action callback returns array but should not return anything\.$#'
 			identifier: return.void
 			count: 1
@@ -70751,30 +69983,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: src/Internal/Utilities/WebhookUtil.php
-
-		-
-			message: '#^@param Automattic\\WooCommerce\\Admin\\BlockTemplates\\BlockTemplateInterface \$layout_template does not accept actual type of parameter\: object\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/LayoutTemplates/LayoutTemplateRegistry.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\LayoutTemplates\\LayoutTemplateRegistry\:\:get_layout_template_instance\(\) should return Automattic\\WooCommerce\\Admin\\BlockTemplates\\BlockTemplateInterface but returns object\.$#'
-			identifier: return.type
-			count: 1
-			path: src/LayoutTemplates/LayoutTemplateRegistry.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\LayoutTemplates\\LayoutTemplateRegistry\:\:register\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/LayoutTemplates/LayoutTemplateRegistry.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\LayoutTemplates\\LayoutTemplateRegistry\:\:unregister_all\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/LayoutTemplates/LayoutTemplateRegistry.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Packages\:\:deactivate_merged_packages\(\) has no return type specified\.$#'

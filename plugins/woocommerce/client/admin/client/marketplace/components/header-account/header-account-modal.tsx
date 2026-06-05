@@ -16,7 +16,7 @@ export interface HeaderAccountModalProps {
 
 export default function HeaderAccountModal(
 	props: HeaderAccountModalProps
-): JSX.Element {
+): React.JSX.Element {
 	const { setIsModalOpen, disconnectURL } = props;
 	const [ isBusy, setIsBusy ] = useState( false );
 	const toggleIsBusy = () => setIsBusy( ! isBusy );
