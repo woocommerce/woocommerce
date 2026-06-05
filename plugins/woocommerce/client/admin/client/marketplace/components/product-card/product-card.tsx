@@ -32,7 +32,7 @@ export interface ProductCardProps {
 	cardType?: ProductCardType;
 }
 
-function ProductCard( props: ProductCardProps ): JSX.Element {
+function ProductCard( props: ProductCardProps ): React.JSX.Element {
 	const SPONSORED_PRODUCT_LABEL = 'promoted'; // what product.label indicates a sponsored placement
 	const SPONSORED_PRODUCT_STRIPE_SIZE = '5px'; // unfortunately can't be defined in CSS - height of "stripe"
 
@@ -40,7 +40,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	const isCompact = cardType === 'compact';
 	const query = useQuery();
 	const [ isPreviewModalOpen, setIsPreviewModalOpen ] = useState( false );
-	const linkRef = useRef< HTMLAnchorElement >( null );
+	const linkRef = useRef< HTMLAnchorElement | null >( null );
 	// Get the product if provided; if not provided, render a skeleton loader
 	const product = props.product ?? {
 		id: null,

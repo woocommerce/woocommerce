@@ -62,7 +62,7 @@ const getDisplay = ( cell: { display?: React.ReactNode } ) =>
  * | March    |      9 | $460.00 |
  */
 
-const Table: React.VFC< TableProps > = ( {
+const Table: React.FC< TableProps > = ( {
 	instanceId,
 	headers = [],
 	rows = [],
@@ -83,7 +83,7 @@ const Table: React.VFC< TableProps > = ( {
 	const [ isScrollableRight, setIsScrollableRight ] = useState( false );
 	const [ isScrollableLeft, setIsScrollableLeft ] = useState( false );
 
-	const container = useRef< HTMLDivElement >( null );
+	const container = useRef< HTMLDivElement | null >( null );
 
 	if ( classNames ) {
 		deprecated( `Table component's classNames prop`, {

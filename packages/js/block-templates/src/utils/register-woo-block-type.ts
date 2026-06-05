@@ -97,8 +97,6 @@ function augmentAttributes<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Record< string, any > = Record< string, any >
 >( attributes: T ) {
-	// Note: If you modify this function, also update the server-side
-	// Automattic\WooCommerce\Admin\Features\ProductBlockEditor\BlockRegistry::augment_attributes() function.
 	const augmentedAttributes = {
 		...attributes,
 		...{
