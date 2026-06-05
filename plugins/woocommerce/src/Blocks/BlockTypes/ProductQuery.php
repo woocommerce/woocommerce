@@ -82,6 +82,12 @@ class ProductQuery extends AbstractBlock {
 			10,
 			2
 		);
+		add_filter(
+			'render_block_core/post-template',
+			array( $this, 'add_iapi_context' ),
+			10,
+			2
+		);
 		add_filter( 'rest_product_query', array( $this, 'update_rest_query' ), 10, 2 );
 		add_filter( 'rest_product_collection_params', array( $this, 'extend_rest_query_allowed_params' ), 10, 1 );
 	}
@@ -164,6 +170,86 @@ class ProductQuery extends AbstractBlock {
 		}
 
 		return $block_content;
+	}
+
+	/**
+	 * Add product interactivity directives to each loop item in Products (Beta).
+	 *
+	 * @internal
+	 *
+	 * @param string $block_content Rendered block HTML.
+	 * @param array  $block         Parsed block data.
+	 * @return string
+	 */
+	public function add_iapi_context( string $block_content, array $block ): string {
+		$namespace = $block['attrs']['__woocommerceNamespace'] ?? '';
+		if ( 'woocommerce/product-query/product-template' !== $namespace ) {
+			return $block_content;
+		}
+
+		$processor = new \WP_HTML_Tag_Processor( $block_content );
+
+		while (
+			$processor->next_tag(
+				array(
+					'tag_name'   => 'LI',
+					'class_name' => 'wp-block-post',
+				)
+			)
+		) {
+			$class_attribute = $processor->get_attribute( 'class' );
+			$product_id      = $this->get_product_id_from_class_attribute( is_string( $class_attribute ) ? $class_attribute : '' );
+
+			if ( ! $product_id || 'product' !== get_post_type( $product_id ) ) {
+				continue;
+			}
+
+			wc_interactivity_api_load_product( 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce', $product_id );
+
+			$product_context = array(
+				'productId'   => $product_id,
+				'variationId' => null,
+			);
+
+			$processor->set_attribute( 'data-wp-interactive', 'woocommerce/products' );
+			$processor->set_attribute(
+				'data-wp-context',
+				'woocommerce/products::' . wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP )
+			);
+			$processor->set_attribute( 'data-wp-key', 'product-item-' . $product_id );
+		}
+
+		return $processor->get_updated_html();
+	}
+
+	/**
+	 * Extract a post ID from the `post-{id}` class WordPress adds to loop items.
+	 *
+	 * @internal
+	 *
+	 * @param string $class_attribute The element class attribute.
+	 * @return int|null
+	 */
+	private function get_product_id_from_class_attribute( $class_attribute ): ?int {
+		if ( '' === $class_attribute ) {
+			return null;
+		}
+
+		$classes = explode( ' ', $class_attribute );
+
+		foreach ( $classes as $class ) {
+			if ( ! str_starts_with( $class, 'post-' ) ) {
+				continue;
+			}
+
+			$product_id = (int) substr( $class, 5 );
+
+			if ( $product_id > 0 ) {
+				return $product_id;
+			}
+		}
+
+		return null;
 	}
 
 	/**

@@ -11,10 +11,10 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"scripts": {
-		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:(project:|storybook).*$/'",
-		"build:storybook": "wireit",
-		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:storybook$/'",
-		"watch:build:storybook": "wireit",
+		"build": "pnpm build:storybook",
+		"build:storybook": "./import-wp-css-storybook.sh && STORYBOOK=true BABEL_ENV=storybook storybook build -c ./.storybook --quiet && pnpm run copy-blocks-storybook-iframe",
+		"watch:build": "pnpm watch:build:storybook",
+		"watch:build:storybook": "./import-wp-css-storybook.sh && STORYBOOK=true BABEL_ENV=storybook storybook dev -c ./.storybook -p 6007 --ci",
 		"copy-blocks-storybook-iframe": "cp ../../plugins/woocommerce/client/blocks/storybook/dist/iframe.html ./storybook-static/assets/woocommerce-blocks",
 		"storybook-rtl": "USE_RTL_STYLE=true pnpm storybook",
 		"preinstall": "npx only-allow pnpm"
@@ -53,63 +53,6 @@
 		"react-dom": "18.3.x",
 		"storybook": "7.6.19",
 		"typescript": "5.7.x",
-		"webpack": "5.97.x",
-		"wireit": "0.14.12"
-	},
-	"wireit": {
-		"build:storybook": {
-			"command": "storybook build -c ./.storybook --quiet && pnpm run copy-blocks-storybook-iframe",
-			"env": {
-				"STORYBOOK": "true",
-				"BABEL_ENV": "storybook"
-			},
-			"clean": "if-file-deleted",
-			"files": [
-				".storybook/*.{js,jsx,ts,tsx,html}",
-				"import-wp-css-storybook.sh",
-				"../../packages/js/components/src/**/stories/*.story.@(js|tsx)",
-				"../../packages/js/experimental/src/**/stories/*.story.@(js|tsx)",
-				"../../packages/js/onboarding/src/**/stories/*.story.@(js|tsx)",
-				"../../packages/js/product-editor/src/**/*.(stories|story).@(js|tsx)",
-				"../../plugins/woocommerce-admin/client/**/stories/*.story.@(js|tsx)"
-			],
-			"output": [
-				"storybook-static"
-			],
-			"dependencies": [
-				"import-wp-css-for-storybook",
-				"dependencyOutputs"
-			]
-		},
-		"watch:build:storybook": {
-			"command": "storybook dev -c ./.storybook -p 6007 --ci",
-			"service": true,
-			"env": {
-				"STORYBOOK": "true",
-				"BABEL_ENV": "storybook"
-			},
-			"dependencies": [
-				"import-wp-css-for-storybook",
-				"dependencyOutputs"
-			]
-		},
-		"import-wp-css-for-storybook": {
-			"command": "./import-wp-css-storybook.sh",
-			"output": [
-				"wordpress"
-			]
-		},
-		"dependencyOutputs": {
-			"allowUsuallyExcludedPaths": true,
-			"files": [
-				"package.json",
-				"../../pnpm-lock.yaml",
-				"node_modules/@woocommerce/admin-library/build",
-				"node_modules/@woocommerce/block-library/build",
-				"node_modules/@woocommerce/eslint-plugin/configs",
-				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js"
-			]
-		}
+		"webpack": "5.97.x"
 	}
 }
