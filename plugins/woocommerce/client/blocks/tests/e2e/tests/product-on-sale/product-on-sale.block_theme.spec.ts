@@ -23,7 +23,9 @@ test.describe( `${ blockData.slug } Block`, () => {
 		await editor.insertBlock( { name: blockData.slug } );
 		const blockLocator = await editor.getBlockByName( blockData.slug );
 		await expect(
-			blockLocator.getByText( getDeprecatedBlockWarning( blockData.name ) )
+			blockLocator.getByText(
+				getDeprecatedBlockWarning( blockData.name )
+			)
 		).toBeVisible();
 		await editor.publishAndVisitPost();
 		const blockLocatorFrontend = await frontendUtils.getBlockByName(
