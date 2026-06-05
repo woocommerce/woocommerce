@@ -12,6 +12,38 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
  */
 class BlockRegistry {
 	/**
+	 * Version that product editor APIs were deprecated in.
+	 */
+	const DEPRECATED_SINCE = '10.9.0';
+
+	/**
+	 * Generic blocks directory.
+	 */
+	const GENERIC_BLOCKS_DIR = '';
+
+	/**
+	 * Product fields blocks directory.
+	 */
+	const PRODUCT_FIELDS_BLOCKS_DIR = '';
+
+	/**
+	 * Array of all available generic blocks.
+	 */
+	const GENERIC_BLOCKS = array();
+
+	/**
+	 * Array of all available product fields blocks.
+	 */
+	const PRODUCT_FIELDS_BLOCKS = array();
+
+	/**
+	 * Singleton instance.
+	 *
+	 * @var BlockRegistry|null
+	 */
+	private static $instance = null;
+
+	/**
 	 * Whether the removal warning has already been logged for the current request.
 	 *
 	 * @var bool
@@ -29,9 +61,16 @@ class BlockRegistry {
 	 * @return BlockRegistry
 	 */
 	public static function get_instance(): BlockRegistry {
+		$instance = self::$instance;
+
+		if ( null === $instance ) {
+			$instance       = new self();
+			self::$instance = $instance;
+		}
+
 		self::maybe_log_removal_warning();
 
-		return new self();
+		return $instance;
 	}
 
 	/**
@@ -40,9 +79,9 @@ class BlockRegistry {
 	 * @param array $block_categories Array of categories for block types.
 	 * @param mixed $editor_context   The current block editor context.
 	 *
-	 * @return array
+	 * @return array[]
 	 */
-	public static function register_categories( $block_categories, $editor_context ): array {
+	public function register_categories( $block_categories, $editor_context ) {
 		unset( $editor_context );
 
 		self::maybe_log_removal_warning();
@@ -57,7 +96,7 @@ class BlockRegistry {
 	 *
 	 * @return bool
 	 */
-	public static function is_registered( $block_name ): bool {
+	public function is_registered( $block_name ): bool {
 		unset( $block_name );
 
 		self::maybe_log_removal_warning();
@@ -69,8 +108,9 @@ class BlockRegistry {
 	 * Unregister a block.
 	 *
 	 * @param string $block_name Block name.
+	 * @return void
 	 */
-	public static function unregister( $block_name ): void {
+	public function unregister( $block_name ) {
 		unset( $block_name );
 
 		self::maybe_log_removal_warning();
@@ -84,7 +124,7 @@ class BlockRegistry {
 	 *
 	 * @return false
 	 */
-	public static function register_block_type_from_metadata( $file_or_folder ) {
+	public function register_block_type_from_metadata( $file_or_folder ) {
 		unset( $file_or_folder );
 
 		self::maybe_log_removal_warning();
