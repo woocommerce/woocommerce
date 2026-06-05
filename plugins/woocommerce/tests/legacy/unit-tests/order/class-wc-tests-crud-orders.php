@@ -2356,6 +2356,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 			$line_item = current( $order->get_items() );
 
+			// Guard the precondition: the fee must be taxed, otherwise get_cart_tax()
+			// would equal the item tax and the buggy code would also yield €22.02.
+			$this->assertEquals( 0.90, round( (float) $fee->get_total_tax(), 2 ), 'Test setup must include taxable fee tax' );
+
 			// The €24 tax-inclusive item carries €1.98 tax, so the ex-tax items subtotal is €22.02.
 			// The €0.90 taxable-fee tax (also part of get_cart_tax()) must not be subtracted from it.
 			$this->assertEquals( 22.02, round( (float) $order->get_subtotal_amount_to_display(), 2 ), 'Displayed items subtotal must exclude fee tax' );
