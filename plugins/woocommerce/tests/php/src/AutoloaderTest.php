@@ -10,14 +10,14 @@ use Automattic\WooCommerce\Autoloader;
  *
  * @package Automattic\WooCommerce\Tests
  */
-class AutoloaderTest extends \WP_UnitTestCase {
+class AutoloaderTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * The builder returns a ClassLoader scoped to WooCommerce namespaces only:
 	 * it resolves a real WooCommerce src class, refuses non-WooCommerce vendor
 	 * namespaces, and refuses non-existent WooCommerce classes.
 	 *
-	 * @testdox build_woocommerce_psr4_fallback() resolves WooCommerce classes only
+	 * @testdox build_woocommerce_psr4_fallback() resolves WooCommerce classes only.
 	 */
 	public function test_build_woocommerce_psr4_fallback_scopes_to_woocommerce(): void {
 		$sut = Autoloader::build_woocommerce_psr4_fallback();
@@ -48,38 +48,66 @@ class AutoloaderTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * The plugin bootstrap must register a WooCommerce-scoped Composer PSR-4
-	 * fallback. We identify it among the live SPL autoloaders by its signature:
-	 * a Composer ClassLoader that resolves a WooCommerce class but refuses a
-	 * non-WooCommerce vendor namespace. (An ambient full-map Composer loader,
-	 * e.g. from wp-cli, would resolve the non-WooCommerce namespace and so does
-	 * not match — this avoids a false pass.)
+	 * Each builder call returns a distinct ClassLoader, so Composer's per-instance
+	 * negative cache (missingClasses) is never shared across resolutions. This is
+	 * what lets a class missed before an in-place upgrade still resolve once the new
+	 * file is on disk later in the same request.
 	 *
-	 * @testdox woocommerce.php registers a WooCommerce-scoped PSR-4 fallback
+	 * @testdox build_woocommerce_psr4_fallback() returns a fresh loader each call.
 	 */
-	public function test_bootstrap_registers_scoped_psr4_fallback(): void {
-		$found = false;
+	public function test_build_woocommerce_psr4_fallback_is_not_shared(): void {
+		$first  = Autoloader::build_woocommerce_psr4_fallback();
+		$second = Autoloader::build_woocommerce_psr4_fallback();
 
-		foreach ( spl_autoload_functions() as $callback ) {
-			if ( ! is_array( $callback ) || ! isset( $callback[0] ) ) {
-				continue;
-			}
-			if ( ! ( $callback[0] instanceof \Composer\Autoload\ClassLoader ) ) {
-				continue;
-			}
+		$this->assertInstanceOf( \Composer\Autoload\ClassLoader::class, $first );
+		$this->assertInstanceOf( \Composer\Autoload\ClassLoader::class, $second );
+		$this->assertNotSame(
+			$first,
+			$second,
+			'Each call must return a distinct loader so the negative cache is never shared across resolutions.'
+		);
+	}
 
-			$resolves_wc  = false !== $callback[0]->findFile( 'Automattic\\WooCommerce\\Enums\\DefaultCustomerAddress' );
-			$refuses_opis = false === $callback[0]->findFile( 'Opis\\JsonSchema\\Validator' );
+	/**
+	 * The registrar appends a WooCommerce-scoped autoloader to the SPL stack — this
+	 * is the method `woocommerce.php` calls at bootstrap. The handler ignores
+	 * non-WooCommerce classes and never fatals on a miss.
+	 *
+	 * @testdox register_woocommerce_psr4_fallback() appends a WooCommerce-scoped handler.
+	 */
+	public function test_register_woocommerce_psr4_fallback_appends_scoped_handler(): void {
+		$before  = spl_autoload_functions();
+		$handler = Autoloader::register_woocommerce_psr4_fallback();
 
-			if ( $resolves_wc && $refuses_opis ) {
-				$found = true;
-				break;
-			}
+		if ( ! is_callable( $handler ) ) {
+			$this->fail( 'Registrar must return the registered autoloader when the Composer files are present.' );
 		}
 
-		$this->assertTrue(
-			$found,
-			'woocommerce.php must register a WooCommerce-scoped Composer PSR-4 fallback loader.'
-		);
+		try {
+			$after = spl_autoload_functions();
+			$this->assertCount(
+				count( $before ) + 1,
+				$after,
+				'Registrar must append exactly one autoloader to the SPL stack.'
+			);
+			$this->assertTrue(
+				in_array( $handler, $after, true ),
+				'The registered handler must be present on the SPL stack.'
+			);
+
+			// Non-WooCommerce class: the handler must no-op without resolving or fataling.
+			$this->assertNull(
+				$handler( 'Opis\\JsonSchema\\Validator' ),
+				'Handler must ignore non-WooCommerce classes.'
+			);
+
+			// WooCommerce but non-existent: the handler must miss without fataling (no require).
+			$this->assertNull(
+				$handler( 'Automattic\\WooCommerce\\Nope\\Does_Not_Exist_XYZ' ),
+				'Handler must miss gracefully on a non-existent WooCommerce class.'
+			);
+		} finally {
+			spl_autoload_unregister( $handler );
+		}
 	}
 }

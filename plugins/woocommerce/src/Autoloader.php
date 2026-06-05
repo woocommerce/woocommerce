@@ -105,6 +105,65 @@ class Autoloader {
 	}
 
 	/**
+	 * Register the WooCommerce-scoped PSR-4 fallback as an appended (lowest-priority)
+	 * SPL autoloader, so it is consulted only after every other autoloader — including
+	 * the primary Jetpack autoloader — has missed.
+	 *
+	 * Rather than registering a single long-lived `ClassLoader` instance, this builds a
+	 * fresh loader on each miss. Composer's `ClassLoader` records a per-instance negative
+	 * cache (`missingClasses`) on a PSR-4 miss and short-circuits subsequent lookups for
+	 * that class. A shared instance would therefore cache a miss for a class probed
+	 * *before* an in-place upgrade swaps the files, then keep refusing that same class
+	 * *after* the new file is on disk — for the remainder of the request. A new loader per
+	 * miss keeps every resolution honest while still reusing Composer's PSR-4 resolution.
+	 *
+	 * The handler is scoped to `Automattic\WooCommerce*` classes and degrades gracefully:
+	 * a foreign/malformed `ClassLoader` yields a miss rather than fataling the autoload path.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return \Closure|null The registered autoloader, or null if the Composer files are
+	 *                       unavailable (nothing was registered).
+	 */
+	public static function register_woocommerce_psr4_fallback(): ?\Closure {
+		// Build once to validate availability and capture the WooCommerce-scoped PSR-4 map;
+		// the handler rebuilds a fresh loader per miss from these captured entries.
+		$prototype = self::build_woocommerce_psr4_fallback();
+		if ( null === $prototype ) {
+			return null;
+		}
+		$psr4_entries = $prototype->getPrefixesPsr4();
+
+		$handler = static function ( string $class_name ) use ( $psr4_entries ) {
+			if ( 0 !== strpos( $class_name, 'Automattic\\WooCommerce\\' ) ) {
+				return;
+			}
+
+			$file = false;
+			try {
+				// Fresh loader per miss — see the method docblock for why a shared
+				// instance would poison its own negative cache across the file swap.
+				$loader = new \Composer\Autoload\ClassLoader();
+				foreach ( $psr4_entries as $namespace => $paths ) {
+					$loader->setPsr4( $namespace, $paths );
+				}
+				$file = $loader->findFile( $class_name );
+			} catch ( \Throwable $e ) {
+				// Foreign/malformed ClassLoader — miss rather than fatal the autoload path.
+				return;
+			}
+
+			if ( false !== $file ) {
+				require $file;
+			}
+		};
+
+		spl_autoload_register( $handler, true, false );
+
+		return $handler;
+	}
+
+	/**
 	 * If the autoloader is missing, add an admin notice.
 	 */
 	protected static function missing_autoloader() {
