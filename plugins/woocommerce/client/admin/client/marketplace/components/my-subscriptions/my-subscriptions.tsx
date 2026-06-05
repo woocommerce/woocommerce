@@ -26,7 +26,7 @@ import { connectUrl } from '../../utils/functions';
 import Notice from '../notice/notice';
 import MySubscriptionsAccount from './my-subscriptions-account';
 
-export default function MySubscriptions(): JSX.Element {
+export default function MySubscriptions(): React.JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
