@@ -445,9 +445,6 @@ checkoutPages.forEach( ( { name, slug } ) => {
 					.locator( '#shipping_postcode' )
 					.fill( shippingAddress.zip );
 			} else {
-				await page
-					.getByRole( 'button', { name: 'Edit shipping address' } )
-					.click();
 				await fillShippingCheckoutBlocks( page, shippingAddress );
 			}
 
