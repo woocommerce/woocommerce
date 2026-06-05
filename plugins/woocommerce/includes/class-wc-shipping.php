@@ -49,6 +49,15 @@ class WC_Shipping {
 	public $packages = array();
 
 	/**
+	 * Hash of the packages last processed by calculate_shipping(). Used to skip
+	 * re-running the (potentially expensive) `woocommerce_shipping_packages`
+	 * filter when the packages have not changed within the same request.
+	 *
+	 * @var string
+	 */
+	private $calculated_packages_hash = '';
+
+	/**
 	 * The single instance of the class
 	 *
 	 * @var WC_Shipping
@@ -253,11 +262,24 @@ class WC_Shipping {
 	 * @return array Array of calculated packages.
 	 */
 	public function calculate_shipping( $packages = array() ) {
-		$this->packages = array();
-
 		if ( ! $this->enabled || empty( $packages ) ) {
+			$this->packages                 = array();
+			$this->calculated_packages_hash = '';
 			return array();
 		}
+
+		// The per-package rates are cached in the session (see calculate_shipping_for_package()), but the
+		// `woocommerce_shipping_packages` filter below runs on every call and can be expensive for some
+		// extensions. calculate_shipping() is invoked several times per request (cart totals, fragments,
+		// Store API, etc.), so memoize the filtered result and skip recalculation when the packages have
+		// not changed since the last call within this request. See WOOPLUG-6486 / #63920.
+		$packages_hash = $this->get_packages_hash( $packages );
+
+		if ( ! empty( $this->packages ) && $packages_hash === $this->calculated_packages_hash && 'yes' !== get_option( 'woocommerce_shipping_debug_mode', 'no' ) ) {
+			return $this->packages;
+		}
+
+		$this->packages = array();
 
 		// Calculate costs for passed packages.
 		foreach ( $packages as $package_key => $package ) {
@@ -277,7 +299,32 @@ class WC_Shipping {
 		 */
 		$this->packages = array_filter( (array) apply_filters( 'woocommerce_shipping_packages', $this->packages ) );
 
+		$this->calculated_packages_hash = $packages_hash;
+
 		return $this->packages;
+	}
+
+	/**
+	 * Generate a hash for a set of packages so we can tell whether they have changed between calls to
+	 * calculate_shipping() within the same request. Data objects are removed so the hash is consistent,
+	 * mirroring the per-package hashing in calculate_shipping_for_package().
+	 *
+	 * @param array $packages Multi-dimensional array of cart items to calc shipping for.
+	 * @return string
+	 */
+	private function get_packages_hash( $packages ) {
+		$packages_to_hash = $packages;
+
+		foreach ( $packages_to_hash as $package_key => $package ) {
+			if ( empty( $package['contents'] ) || ! is_array( $package['contents'] ) ) {
+				continue;
+			}
+			foreach ( $package['contents'] as $item_id => $item ) {
+				unset( $packages_to_hash[ $package_key ]['contents'][ $item_id ]['data'] );
+			}
+		}
+
+		return md5( wp_json_encode( $packages_to_hash ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
 	}
 
 	/**
@@ -434,7 +481,8 @@ class WC_Shipping {
 	 */
 	public function reset_shipping() {
 		unset( WC()->session->chosen_shipping_methods );
-		$this->packages = array();
+		$this->packages                 = array();
+		$this->calculated_packages_hash = '';
 	}
 
 	/**
