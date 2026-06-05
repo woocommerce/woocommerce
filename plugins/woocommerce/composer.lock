@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "37bed2e19d8b44bc71451de7683919df",
+    "content-hash": "c98895a33d6c250d18ac5dd360435329",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -5434,7 +5434,7 @@
         },
         {
             "name": "woocommerce/monorepo-plugin",
-            "version": "dev-add/phpstan",
+            "version": "dev-refactor/64839-admin-blocks-build-packages",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",
@@ -5594,5 +5594,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

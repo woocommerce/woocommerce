@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
@@ -343,29 +344,18 @@ class CartSchema extends AbstractSchema {
 		// Get visible cross sells products.
 		$cross_sells    = array();
 		$cross_sell_ids = $cart->get_cross_sells();
-		$image_ids      = array();
 		if ( ! empty( $cross_sell_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $cross_sell_ids );
 			$cross_sells = array_values( array_filter( array_map( 'wc_get_product', $cross_sell_ids ), 'wc_products_array_filter_visible' ) );
 			/** @var \WC_Product[] $cross_sells */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
-			// Identify which images need priming.
-			$ids         = array_map( static fn( $product ) => array( (int) $product->get_image_id(), ...$product->get_gallery_image_ids() ), $cross_sells );
-			$image_ids[] = array_values( array_filter( array_merge( ...$ids ) ) );
 		}
 
 		$cart_all_items  = $cart->get_cart();
 		$cart_line_items = array_values( array_filter( $cart_all_items, static fn( $item ) => ( $item['data'] ?? null ) instanceof \WC_Product ) );
-		if ( ! empty( $cart_line_items ) ) {
-			// Identify which images need priming.
-			$ids         = array_map( static fn( $item ) => array( (int) $item['data']->get_image_id(), ...$item['data']->get_gallery_image_ids() ), $cart_line_items );
-			$image_ids[] = array_values( array_filter( array_merge( ...array_values( $ids ) ) ) );
-		}
 
-		if ( ! empty( $image_ids ) ) {
-			// Prime caches to reduce future queries.
-			_prime_post_caches( array_unique( array_merge( ...$image_ids ) ) );
-		}
+		// Batch-prime image attachment caches for cross-sells and cart line items in one query.
+		wc_get_container()->get( ProductUtil::class )->prime_image_caches( array_merge( $cross_sells, array_column( $cart_line_items, 'data' ) ) );
 
 		return [
 			'items'                   => $this->get_item_responses_from_schema( $this->item_schema, $cart_all_items ),

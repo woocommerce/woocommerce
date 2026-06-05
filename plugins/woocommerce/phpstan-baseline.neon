@@ -13075,24 +13075,6 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^Binary operation "\-" between float and non\-falsy\-string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/class-wc-order.php
-
-		-
-			message: '#^Binary operation "\-" between float and string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/class-wc-order.php
-
-		-
-			message: '#^Binary operation "\-" between int\|string and string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/class-wc-order.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_item_downloads\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -37930,12 +37912,6 @@ parameters:
 			path: src/Admin/API/Leaderboards.php
 
 		-
-			message: '#^Call to method get_query_params\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Leaderboards.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Leaderboards\:\:get_allowed_items\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
 			identifier: class.notFound
 			count: 1
@@ -52372,12 +52348,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCategory.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 6
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
 			message: '#^Call to method get_param\(\) on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_REST_Request\.$#'
 			identifier: class.notFound
 			count: 12
@@ -52434,12 +52404,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$callback of function remove_filter expects array\|\(callable\(\)\: mixed\)\|string, \(Closure\(mixed, mixed\)\: mixed\)\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Controller\:\:build_frontend_query\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
 
@@ -55218,24 +55182,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:set_hook_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean\.\)\: Unexpected token "\.", expected variable at offset 211 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean\.\)\: Unexpected token "\.", expected variable at offset 221 on line 7$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
 

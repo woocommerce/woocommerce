@@ -626,15 +626,6 @@
 		},
 		{
 			"dependencies": [
-				"wireit"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "0.14.12"
-		},
-		{
-			"dependencies": [
 				"dompurify"
 			],
 			"packages": [
