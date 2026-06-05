@@ -227,6 +227,40 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox the woocommerce_shipping_packages filter is run on every call when shipping debug mode is enabled.
+	 */
+	public function test_calculate_shipping_does_not_memoize_in_debug_mode() {
+		// Debug mode is enabled in setUp(); the memo should be bypassed so developers see fresh results.
+		$packages = array(
+			array(
+				'contents'      => array(),
+				'contents_cost' => 10,
+				'destination'   => array(
+					'country'  => 'US',
+					'state'    => 'CA',
+					'postcode' => '00000',
+				),
+			),
+		);
+
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $shipping_packages;
+		};
+
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$this->sut->calculate_shipping( $packages );
+		$this->sut->calculate_shipping( $packages );
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertEquals( 3, $filter_calls, 'Filter should run on every call while debug mode is enabled.' );
+
+		remove_filter( 'woocommerce_shipping_packages', $filter );
+	}
+
+	/**
 	 * Data provider for test_calculate_shipping_for_hide_rates_when_free.
 	 *
 	 * @return array[]
