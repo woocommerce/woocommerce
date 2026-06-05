@@ -13,9 +13,9 @@
 		"build"
 	],
 	"scripts": {
-		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
-		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:bundle": "wireit",
+		"build": "pnpm build:project",
+		"build:project": "pnpm --stream '/^build:project:.*$/'",
+		"build:project:bundle": "NODE_ENV=\"${NODE_ENV:-production}\" WC_ADMIN_PHASE=\"${WC_ADMIN_PHASE:-core}\" webpack",
 		"build:project:feature-config": "php ../../bin/generate-feature-config.php",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
@@ -30,9 +30,9 @@
 		"postinstall": "node bin/xstate5-symlink.js",
 		"test:js": "jest --config client/jest.config.js",
 		"ts:check": "tsc --build",
-		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
-		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:bundle": "wireit",
+		"watch:build": "pnpm watch:build:project",
+		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
+		"watch:build:project:bundle": "webpack --watch",
 		"watch:build:project:feature-config": "WC_ADMIN_PHASE=development php ../../bin/generate-feature-config.php"
 	},
 	"lint-staged": {
@@ -221,8 +221,7 @@
 		"webpack-cli": "5.1.x",
 		"webpack-dev-server": "4.15.x",
 		"webpack-fix-style-only-entries": "^0.6.1",
-		"whatwg-fetch": "^3.6.20",
-		"wireit": "0.14.12"
+		"whatwg-fetch": "^3.6.20"
 	},
 	"peerDependencies": {
 		"@wordpress/data": "^10.0.2"
@@ -252,111 +251,6 @@
 						"push"
 					]
 				}
-			]
-		}
-	},
-	"wireit": {
-		"build:project:bundle": {
-			"command": "webpack",
-			"clean": "if-file-deleted",
-			"env": {
-				"NODE_ENV": {
-					"external": true,
-					"default": "production"
-				},
-				"WC_ADMIN_PHASE": {
-					"external": true,
-					"default": "core"
-				}
-			},
-			"files": [
-				"webpack.config.js",
-				"tsconfig.json",
-				"client/**/*.{js,jsx,ts,tsx,scss}"
-			],
-			"output": [
-				"build"
-			],
-			"dependencies": [
-				"dependencyOutputs"
-			]
-		},
-		"watch:build:project:bundle": {
-			"command": "webpack --watch",
-			"service": true
-		},
-		"dependencyOutputs": {
-			"allowUsuallyExcludedPaths": true,
-			"files": [
-				"package.json",
-				"../../../../pnpm-lock.yaml",
-				"node_modules/@woocommerce/admin-layout/build",
-				"node_modules/@woocommerce/admin-layout/build-style",
-				"node_modules/@woocommerce/admin-layout/build-types",
-				"node_modules/@woocommerce/components/build",
-				"node_modules/@woocommerce/components/build-style",
-				"node_modules/@woocommerce/components/build-types",
-				"node_modules/@woocommerce/csv-export/build",
-				"node_modules/@woocommerce/csv-export/build-types",
-				"node_modules/@woocommerce/currency/build",
-				"node_modules/@woocommerce/currency/build-types",
-				"node_modules/@woocommerce/customer-effort-score/build",
-				"node_modules/@woocommerce/customer-effort-score/build-style",
-				"node_modules/@woocommerce/customer-effort-score/build-types",
-				"node_modules/@woocommerce/data/build",
-				"node_modules/@woocommerce/data/build-types",
-				"node_modules/@woocommerce/date/build",
-				"node_modules/@woocommerce/date/build-types",
-				"node_modules/@woocommerce/email-editor/build",
-				"node_modules/@woocommerce/email-editor/build-style",
-				"node_modules/@woocommerce/email-editor/build-types",
-				"node_modules/@woocommerce/email-editor/assets",
-				"node_modules/@woocommerce/experimental/build",
-				"node_modules/@woocommerce/experimental/build-style",
-				"node_modules/@woocommerce/experimental/build-types",
-				"node_modules/@woocommerce/explat/build",
-				"node_modules/@woocommerce/explat/build-types",
-				"node_modules/@woocommerce/settings-ui-sdk/build",
-				"node_modules/@woocommerce/settings-ui-sdk/build-types",
-				"node_modules/@woocommerce/navigation/build",
-				"node_modules/@woocommerce/navigation/build-types",
-				"node_modules/@woocommerce/number/build",
-				"node_modules/@woocommerce/number/build-types",
-				"node_modules/@woocommerce/onboarding/build",
-				"node_modules/@woocommerce/onboarding/build-style",
-				"node_modules/@woocommerce/onboarding/build-types",
-				"node_modules/@woocommerce/product-editor/build",
-				"node_modules/@woocommerce/product-editor/build-style",
-				"node_modules/@woocommerce/product-editor/build-types",
-				"node_modules/@woocommerce/remote-logging/build",
-				"node_modules/@woocommerce/remote-logging/build-types",
-				"node_modules/@woocommerce/sanitize/build",
-				"node_modules/@woocommerce/sanitize/build-style",
-				"node_modules/@woocommerce/sanitize/build-types",
-				"node_modules/@woocommerce/tracks/build",
-				"node_modules/@woocommerce/tracks/build-types",
-				"node_modules/@woocommerce/block-templates/build",
-				"node_modules/@woocommerce/block-templates/build-style",
-				"node_modules/@woocommerce/block-templates/build-types",
-				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/src/",
-				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/assets/",
-				"node_modules/@woocommerce/eslint-plugin/configs",
-				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js",
-				"node_modules/@woocommerce/experimental-products-app/build",
-				"node_modules/@woocommerce/experimental-products-app/build-style",
-				"node_modules/@woocommerce/experimental-products-app/build-types",
-				"node_modules/@woocommerce/internal-build/build-types",
-				"node_modules/@woocommerce/internal-build/configs",
-				"node_modules/@woocommerce/internal-build/src/style-build",
-				"node_modules/@woocommerce/internal-build/styles",
-				"node_modules/@woocommerce/internal-build/type-overrides",
-				"node_modules/@woocommerce/internal-build/scripts",
-				"node_modules/@woocommerce/internal-js-tests/build",
-				"node_modules/@woocommerce/internal-js-tests/build-types",
-				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
-				"node_modules/@woocommerce/notices/build",
-				"node_modules/@woocommerce/notices/build-types"
 			]
 		}
 	}

@@ -170,7 +170,7 @@ overrides:
   react-resize-aware: 3.1.1
   sass: 1.69.5
 
-pnpmfileChecksum: sha256-0mGO2uxSzpGcsYJBjrnH8vcgzXYYgU2kSQKpHvcFKPM=
+pnpmfileChecksum: sha256-7lEtYKkj9MKUQ1wDfOySWQ01OX5tYIUQTnfpMq5epMI=
 
 patchedDependencies:
   '@wordpress/edit-site@5.15.0':
@@ -2966,6 +2966,9 @@ importers:
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../../packages/js/eslint-plugin
+      '@woocommerce/internal-build':
+        specifier: workspace:*
+        version: link:../../packages/js/internal-build
       '@wordpress/browserslist-config':
         specifier: next
         version: 6.43.1-next.v.202604091042.0
@@ -3017,9 +3020,6 @@ importers:
       jest:
         specifier: 29.5.x
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      nodemon:
-        specifier: ^3.0.2
-        version: 3.1.14
       playwright-ctrf-json-reporter:
         specifier: 0.0.27
         version: 0.0.27
@@ -3035,9 +3035,6 @@ importers:
       typescript:
         specifier: 5.7.x
         version: 5.7.3
-      wireit:
-        specifier: 0.14.12
-        version: 0.14.12
       wp-textdomain:
         specifier: 1.0.1
         version: 1.0.1
@@ -3153,9 +3150,6 @@ importers:
       uglify-js:
         specifier: ^3.17.4
         version: 3.19.3
-      wireit:
-        specifier: 0.14.12
-        version: 0.14.12
 
   plugins/woocommerce/client/admin:
     dependencies:
@@ -3688,9 +3682,6 @@ importers:
       whatwg-fetch:
         specifier: ^3.6.20
         version: 3.6.20
-      wireit:
-        specifier: 0.14.12
-        version: 0.14.12
 
   plugins/woocommerce/client/blocks:
     dependencies:
@@ -4265,9 +4256,6 @@ importers:
       webpack-cli:
         specifier: 5.1.x
         version: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.2)(webpack@5.97.1)
-      wireit:
-        specifier: 0.14.12
-        version: 0.14.12
       wp-types:
         specifier: 3.63.0
         version: 3.63.0
@@ -4306,6 +4294,9 @@ importers:
       caniuse-lite:
         specifier: 1.0.30001146
         version: 1.0.30001146
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       grunt:
         specifier: 1.3.0
         version: 1.3.0
@@ -4324,9 +4315,6 @@ importers:
       grunt-contrib-uglify-es:
         specifier: ^3.3.0
         version: 3.3.0
-      grunt-contrib-watch:
-        specifier: 1.1.0
-        version: 1.1.0
       grunt-move:
         specifier: 1.0.3
         version: 1.0.3
@@ -4360,9 +4348,6 @@ importers:
       stylelint:
         specifier: ^14.16.1
         version: 14.16.1
-      wireit:
-        specifier: 0.14.12
-        version: 0.14.12
 
   tools/code-analyzer:
     dependencies:
@@ -4418,9 +4403,6 @@ importers:
       typescript:
         specifier: 5.7.x
         version: 5.7.3
-      wireit:
-        specifier: 0.14.12
-        version: 0.14.12
 
   tools/compare-perf:
     dependencies:
@@ -4497,9 +4479,6 @@ importers:
       typescript:
         specifier: 5.7.x
         version: 5.7.3
-      wireit:
-        specifier: 0.14.12
-        version: 0.14.12
 
   tools/monorepo-utils:
     dependencies:
@@ -4609,9 +4588,6 @@ importers:
       webpack-cli:
         specifier: 5.1.x
         version: 5.1.4(webpack@5.97.1)
-      wireit:
-        specifier: 0.14.12
-        version: 0.14.12
 
   tools/package-release:
     dependencies:
@@ -4652,9 +4628,6 @@ importers:
       typescript:
         specifier: 5.7.x
         version: 5.7.3
-      wireit:
-        specifier: 0.14.12
-        version: 0.14.12
 
   tools/release-posts:
     dependencies:
@@ -4728,9 +4701,6 @@ importers:
       typescript:
         specifier: 5.7.x
         version: 5.7.3
-      wireit:
-        specifier: 0.14.12
-        version: 0.14.12
 
   tools/storybook:
     devDependencies:
@@ -4818,9 +4788,6 @@ importers:
       webpack:
         specifier: 5.97.x
         version: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
-      wireit:
-        specifier: 0.14.12
-        version: 0.14.12
 
 packages:
 
@@ -12816,10 +12783,6 @@ packages:
   balanced-match@2.0.0:
     resolution: {integrity: sha512-1ugUSr8BHXRnK23KfuYS+gVMC3LB8QGH9W1iGtDPsNWoQbgtXSExkBu2aDR4epiGWZOjZsj6lDl/N/AqqTC3UA==}
 
-  balanced-match@3.0.1:
-    resolution: {integrity: sha512-vjtV3hiLqYDNRoiAv0zC4QaGAMPomEoq83PRmYIofPswwZurCeWR5LByXm7SyoL0Zh5+2z0+HC7jG8gSZJUh0w==}
-    engines: {node: '>= 16'}
-
   balanced-match@4.0.4:
     resolution: {integrity: sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==}
     engines: {node: 18 || 20 || >=22}
@@ -12975,10 +12938,6 @@ packages:
 
   brace-expansion@2.1.0:
     resolution: {integrity: sha512-TN1kCZAgdgweJhWWpgKYrQaMNHcDULHkWwQIspdtjV4Y5aurRdZpjAqn6yX3FPqTA9ngHCc4hJxMAMgGfve85w==}
-
-  brace-expansion@4.0.1:
-    resolution: {integrity: sha512-YClrbvTCXGe70pU2JiEiPLYXO9gQkyxYeKpJIQHVS/gOs6EWMQP2RYBwjFLNT322Ji8TOC3IMPfsYCedNpzKfA==}
-    engines: {node: '>= 18'}
 
   brace-expansion@5.0.5:
     resolution: {integrity: sha512-VZznLgtwhn+Mact9tfiwx64fA9erHH/MCXEUfB/0bX/6Fz6ny5EGTXYltMocqg4xFAQZtnO3DHWWXi8RiuN7cQ==}
@@ -15988,10 +15947,6 @@ packages:
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
     deprecated: This package is no longer supported.
 
-  gaze@1.1.3:
-    resolution: {integrity: sha512-BRdNm8hbWzFzWHERTrejLqwHDfS4GibPoq5wjTPIoJHoBtKGPg3xAFfxmM+9ztbXelxcf2hwQcaz1PtmFeue8g==}
-    engines: {node: '>= 4.0.0'}
-
   generator-function@2.0.1:
     resolution: {integrity: sha512-SFdFmIJi+ybC0vjlHN0ZGVGHc3lgE0DxPAT0djjVg+kjOnSqclqmj0KQ7ykTOLP6YxoqOvuAODGdcHJn+43q3g==}
     engines: {node: '>= 0.4'}
@@ -16222,10 +16177,6 @@ packages:
   globjoin@0.1.4:
     resolution: {integrity: sha512-xYfnw62CKG8nLkZBfWbhWwDw02CHty86jfPcc2cr3ZfeuK9ysoVPPEUxf21bAD/rWAgk52SuBrLJlefNy8mvFg==}
 
-  globule@1.3.4:
-    resolution: {integrity: sha512-OPTIfhMBh7JbBYDpa5b+Q5ptmMWKwcNcFSR/0c6t8V4f3ZAVBEsKNY37QdVqmLRYSMhOUGYrY0QhSoEpzGr/Eg==}
-    engines: {node: '>= 0.10'}
-
   gonzales-pe@4.3.0:
     resolution: {integrity: sha512-otgSPpUmdWJ43VXyiNgEYE4luzHCL2pz4wQ0OnDluC6Eg4Ko3Vexy/SrSynglw/eR+OhkzmqFCZa/OFa/RgAOQ==}
     engines: {node: '>=0.6.0'}
@@ -16325,10 +16276,6 @@ packages:
     resolution: {integrity: sha512-E+9EbUQiBjFynaZp4wsdjktMo2oHEetGaBIhy9XTbhneHiXomXQWlfgY5Ib5c/FU9WiL/OfXbmo6nwgIN1hLAA==}
     engines: {node: '>=0.10.0'}
     deprecated: deprecated
-
-  grunt-contrib-watch@1.1.0:
-    resolution: {integrity: sha512-yGweN+0DW5yM+oo58fRu/XIRrPcn3r4tQx+nL7eMRwjpvk+rQY6R8o94BPK0i2UhTg9FN21hS+m8vR8v9vXfeg==}
-    engines: {node: '>=0.10.0'}
 
   grunt-known-options@1.1.1:
     resolution: {integrity: sha512-cHwsLqoighpu7TuYj5RonnEuxGVFnztcUqTqp5rXFGYL4OuPFofwC4Ycg7n9fYwvK6F5WbYgeVOwph9Crs2fsQ==}
@@ -16819,9 +16766,6 @@ packages:
 
   iferr@0.1.5:
     resolution: {integrity: sha512-DUNFN5j7Tln0D+TxzloUjKB+CtVu6myn0JEFak6dG18mNt9YkQ6lzGCdafwofISZ1lLF3xRHJ98VKy9ynkcFaA==}
-
-  ignore-by-default@1.0.1:
-    resolution: {integrity: sha512-Ius2VYcGNk7T90CppJqcIkS5ooHUZyIQK+ClZfMfMNFEF9VSE73Fq+906u/CWu92x4gzZMWOwfFYckPObzdEbA==}
 
   ignore-loader@0.1.2:
     resolution: {integrity: sha512-yOJQEKrNwoYqrWLS4DcnzM7SEQhRKis5mB+LdKKh4cPmGYlLPR0ozRzHV5jmEk2IxptqJNQA5Cc0gw8Fj12bXA==}
@@ -19143,11 +19087,6 @@ packages:
     resolution: {integrity: sha512-RinNxoz4W1cep1b928fuFhvAQ5ag/+1UlMDV7rbyGthBIgsiEouS4kvRayvvboxii4m8eolKOIBo3OjDqbc+uQ==}
     engines: {node: '>=6'}
 
-  nodemon@3.1.14:
-    resolution: {integrity: sha512-jakjZi93UtB3jHMWsXL68FXSAosbLfY0In5gtKq3niLSkrWznrVBzXFNOEMJUfc9+Ke7SHWoAZsiMkNP3vq6Jw==}
-    engines: {node: '>=10'}
-    hasBin: true
-
   nopt@3.0.6:
     resolution: {integrity: sha512-4GUt3kSEYmk4ITxzB/b9vaIDfUVWN/Ml1Fwl11IlnIG2iaJ9O6WXZ9SrYM9NLI8OCBieN2Y8SWC2oJV0RQ7qYg==}
     hasBin: true
@@ -20592,9 +20531,6 @@ packages:
   prop-types@15.8.1:
     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}
 
-  proper-lockfile@4.1.2:
-    resolution: {integrity: sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA==}
-
   properties@1.2.1:
     resolution: {integrity: sha512-qYNxyMj1JeW54i/EWEFsM1cVwxJbtgPp8+0Wg9XjNaK6VE/c4oRi6PNu5p7w1mNXEIQIjV5Wwn8v8Gz82/QzdQ==}
     engines: {node: '>=0.10'}
@@ -20639,9 +20575,6 @@ packages:
 
   psl@1.15.0:
     resolution: {integrity: sha512-JZd3gMVBAVQkSs6HdNZo9Sdo0LNcQeMNP3CozBJb3JYC/QUYZTnKxP+f8oWRX4rHP5EurWxqAHTSwUCjlNKa1w==}
-
-  pstree.remy@1.1.8:
-    resolution: {integrity: sha512-77DZwxQmxKnu3aR542U+X8FypNzbfJ+C5XQDk3uWjWxn6151aIMGthWYRXTqT1E5oJvg+ljaa2OJi+VfvCOQ8w==}
 
   public-encrypt@4.0.3:
     resolution: {integrity: sha512-zVpa8oKZSz5bTMTFClc1fQOnyyEzpl5ozpi1B5YcvBrdohMjH2rfsBtyXcuNuwjsDIXmBYlF2N5FlJYhR29t8Q==}
@@ -21994,10 +21927,6 @@ packages:
   simple-peer@9.11.1:
     resolution: {integrity: sha512-D1SaWpOW8afq1CZGWB8xTfrT3FekjQmPValrqncJMX7QFl8YwhrPTZvMCANLtgBwwdS+7zURyqxDDEmY558tTw==}
 
-  simple-update-notifier@2.0.0:
-    resolution: {integrity: sha512-a2B9Y0KlNXl9u/vsW6sTIu9vGEpfKu2wRV6l1H3XEas/0gUIzGzBoP/IouTcUQbm9JWZLH3COxyn03TYlFax6w==}
-    engines: {node: '>=10'}
-
   sirv@2.0.4:
     resolution: {integrity: sha512-94Bdh3cC2PKrbgSOUqTiGPWVZeSiXfKOVZNJniWoqrWrRkB1CJzBU3NEbiTsPcYy1lDsANA/THzS+9WBiy5nfQ==}
     engines: {node: '>= 10'}
@@ -22921,10 +22850,6 @@ packages:
     resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
     engines: {node: '>=6'}
 
-  touch@3.1.1:
-    resolution: {integrity: sha512-r0eojU4bI8MnHr8c5bNo7lJDdI2qXlWWJk6a9EAFG7vbhTjElYhBVS3/miuE0uOuoLdb8Mc/rVfsmm6eo5o9GA==}
-    hasBin: true
-
   tough-cookie@2.5.0:
     resolution: {integrity: sha512-nlLsUzgm1kfLXSXfRZMc1KLAugd4hqJHDTvc2hDIwS3mZAfMEuMbc03SujMF+GEcpaX/qboeycw6iO8JwVv2+g==}
     engines: {node: '>=0.8'}
@@ -23205,9 +23130,6 @@ packages:
   unc-path-regex@0.1.2:
     resolution: {integrity: sha512-eXL4nmJT7oCpkZsHZUOJo8hcX3GbsiDOa0Qu9F646fi8dT3XuSVopVqAcEiVzSKKH7UoDti23wNX3qGFxcW5Qg==}
     engines: {node: '>=0.10.0'}
-
-  undefsafe@2.0.5:
-    resolution: {integrity: sha512-WxONCrssBM8TSPRqN5EmsjVrsv4A8X12J4ArBiiayv3DyyG3ZlIg6yysuuSYdZsVz3TKcTg2fd//Ujd4CHV1iA==}
 
   underscore.string@3.3.6:
     resolution: {integrity: sha512-VoC83HWXmCrF6rgkyxS9GHv8W9Q5nhMKho+OadDJGzL2oDYbYEppBaCMH6pFlwLeqj2QS+hhkw2kpXkSdD1JxQ==}
@@ -23988,11 +23910,6 @@ packages:
   window-size@0.2.0:
     resolution: {integrity: sha512-UD7d8HFA2+PZsbKyaOCEy8gMh1oDtHgJh1LfgjQ4zVXmYjAT/kvz3PueITKuqDiIXQe7yzpPnxX3lNc+AhQMyw==}
     engines: {node: '>= 0.10.0'}
-    hasBin: true
-
-  wireit@0.14.12:
-    resolution: {integrity: sha512-gNSd+nZmMo6cuICezYXRIayu6TSOeCSCDzjSF0q6g8FKDsRbdqrONrSZYzdk/uBISmRcv4vZtsno6GyGvdXwGA==}
-    engines: {node: '>=18.0.0'}
     hasBin: true
 
   word-wrap@1.2.5:
@@ -28924,7 +28841,7 @@ snapshots:
       '@remote-ui/rpc': 1.4.7
     optionalDependencies:
       '@babel/core': 7.25.7
-      webpack: 5.97.1(@swc/core@1.15.24)(uglify-js@3.19.3)(webpack-cli@4.10.0)
+      webpack: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
       webpack-virtual-modules: 0.6.2
 
   '@sideway/address@4.1.5':
@@ -40235,8 +40152,6 @@ snapshots:
 
   balanced-match@2.0.0: {}
 
-  balanced-match@3.0.1: {}
-
   balanced-match@4.0.4: {}
 
   bare-events@2.8.2: {}
@@ -40414,10 +40329,6 @@ snapshots:
   brace-expansion@2.1.0:
     dependencies:
       balanced-match: 1.0.2
-
-  brace-expansion@4.0.1:
-    dependencies:
-      balanced-match: 3.0.1
 
   brace-expansion@5.0.5:
     dependencies:
@@ -42003,12 +41914,6 @@ snapshots:
   debug@4.3.4:
     dependencies:
       ms: 2.1.2
-
-  debug@4.4.3(supports-color@5.5.0):
-    dependencies:
-      ms: 2.1.3
-    optionalDependencies:
-      supports-color: 5.5.0
 
   debug@4.4.3(supports-color@8.1.1):
     dependencies:
@@ -44470,10 +44375,6 @@ snapshots:
       strip-ansi: 6.0.1
       wide-align: 1.1.5
 
-  gaze@1.1.3:
-    dependencies:
-      globule: 1.3.4
-
   generator-function@2.0.1: {}
 
   gensync@1.0.0-beta.2: {}
@@ -44770,12 +44671,6 @@ snapshots:
 
   globjoin@0.1.4: {}
 
-  globule@1.3.4:
-    dependencies:
-      glob: 7.1.7
-      lodash: 4.17.21
-      minimatch: 3.0.8
-
   gonzales-pe@4.3.0:
     dependencies:
       minimist: 1.2.8
@@ -44896,15 +44791,6 @@ snapshots:
       maxmin: 1.1.0
       uglify-es: 3.3.9
       uri-path: 1.0.0
-
-  grunt-contrib-watch@1.1.0:
-    dependencies:
-      async: 2.6.4
-      gaze: 1.1.3
-      lodash: 4.17.21
-      tiny-lr: 1.1.1
-    transitivePeerDependencies:
-      - supports-color
 
   grunt-known-options@1.1.1: {}
 
@@ -45542,8 +45428,6 @@ snapshots:
   ieee754@1.2.1: {}
 
   iferr@0.1.5: {}
-
-  ignore-by-default@1.0.1: {}
 
   ignore-loader@0.1.2: {}
 
@@ -48765,19 +48649,6 @@ snapshots:
 
   node-watch@0.7.4: {}
 
-  nodemon@3.1.14:
-    dependencies:
-      chokidar: 3.6.0
-      debug: 4.4.3(supports-color@5.5.0)
-      ignore-by-default: 1.0.1
-      minimatch: 10.2.5
-      pstree.remy: 1.1.8
-      semver: 7.7.4
-      simple-update-notifier: 2.0.0
-      supports-color: 5.5.0
-      touch: 3.1.1
-      undefsafe: 2.0.5
-
   nopt@3.0.6:
     dependencies:
       abbrev: 1.1.1
@@ -50430,12 +50301,6 @@ snapshots:
       object-assign: 4.1.1
       react-is: 16.13.1
 
-  proper-lockfile@4.1.2:
-    dependencies:
-      graceful-fs: 4.2.11
-      retry: 0.12.0
-      signal-exit: 3.0.7
-
   properties@1.2.1: {}
 
   property-information@5.6.0:
@@ -50490,8 +50355,6 @@ snapshots:
   psl@1.15.0:
     dependencies:
       punycode: 2.3.1
-
-  pstree.remy@1.1.8: {}
 
   public-encrypt@4.0.3:
     dependencies:
@@ -52209,10 +52072,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  simple-update-notifier@2.0.0:
-    dependencies:
-      semver: 7.7.4
-
   sirv@2.0.4:
     dependencies:
       '@polka/url': 1.0.0-next.29
@@ -53558,8 +53417,6 @@ snapshots:
 
   totalist@3.0.1: {}
 
-  touch@3.1.1: {}
-
   tough-cookie@2.5.0:
     dependencies:
       psl: 1.15.0
@@ -53829,8 +53686,6 @@ snapshots:
       through: 2.3.8
 
   unc-path-regex@0.1.2: {}
-
-  undefsafe@2.0.5: {}
 
   underscore.string@3.3.6:
     dependencies:
@@ -54963,14 +54818,6 @@ snapshots:
   wildcard@2.0.1: {}
 
   window-size@0.2.0: {}
-
-  wireit@0.14.12:
-    dependencies:
-      brace-expansion: 4.0.1
-      chokidar: 3.6.0
-      fast-glob: 3.3.3
-      jsonc-parser: 3.3.1
-      proper-lockfile: 4.1.2
 
   word-wrap@1.2.5: {}
 
