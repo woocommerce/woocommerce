@@ -91,9 +91,9 @@ class Breadcrumbs extends AbstractBlock {
 			);
 		}
 
-		$explicit_font_size = $block->parsed_block['attrs']['fontSize'] ?? null;
+		$explicit_font_size = isset( $block->parsed_block['attrs']['fontSize'] ) ? $block->parsed_block['attrs']['fontSize'] : null;
 
-		if ( null !== $explicit_font_size ) {
+		if ( is_string( $explicit_font_size ) && '' !== $explicit_font_size ) {
 			return array(
 				'class' => sprintf( 'has-font-size has-%s-font-size', $explicit_font_size ),
 				'style' => null,
