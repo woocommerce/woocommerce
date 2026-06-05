@@ -48,11 +48,10 @@ class Breadcrumbs extends AbstractBlock {
 			)
 		);
 
-		$has_custom_font_size           = $font_size_classes_and_styles['class'] || $font_size_classes_and_styles['style'];
-		$has_non_small_custom_font_size = $has_custom_font_size && strpos( $font_size_classes_and_styles['class'] ?? '', 'has-small-font-size' ) === false;
+		$has_non_small_custom_font_size = strpos( $font_size_classes_and_styles['class'] ?? '', 'has-small-font-size' ) === false;
 
 		// Remove the default 'has-small-font-size' class added by default when the block has a custom font size.
-		// This is needed because the block.json defines a default fontSize, which is considered an anti-pattern
+		// This is needed because the block.json defines a default font size, which is considered an anti-pattern
 		// since styles should be defined by themes and plugins instead.
 		if ( $has_non_small_custom_font_size ) {
 			$wrapper_attributes = str_replace( 'has-small-font-size', '', $wrapper_attributes );
