@@ -20,6 +20,7 @@ test.describe( 'Settings UI feature flag', { tag: tags.NOT_E2E }, () => {
 	test.beforeEach( async ( { baseURL } ) => {
 		const url = getBaseURL( baseURL );
 
+		await setFeatureFlag( request, url, 'settings-ui', false );
 		await setOption( request, url, 'woocommerce_enable_reviews', 'yes' );
 	} );
 
@@ -32,14 +33,12 @@ test.describe( 'Settings UI feature flag', { tag: tags.NOT_E2E }, () => {
 
 	test( 'does not mount the settings UI when the feature flag is disabled', async ( {
 		page,
-		baseURL,
 	} ) => {
-		const url = getBaseURL( baseURL );
-
-		await setFeatureFlag( request, url, 'settings-ui', false );
-
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=products' );
 
+		await expect(
+			page.locator( '#woocommerce_enable_reviews' )
+		).toBeVisible();
 		await expect( page.locator( '[data-wc-settings-ui]' ) ).toHaveCount(
 			0
 		);
