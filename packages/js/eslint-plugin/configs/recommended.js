@@ -11,7 +11,18 @@ module.exports = {
 		'jest/globals': true,
 		jest: true,
 	},
-	plugins: [ '@wordpress', '@typescript-eslint' ],
+	plugins: [
+		'@wordpress',
+		'@typescript-eslint',
+		// Additional plugin namespaces referenced by rules below. Listing
+		// them explicitly keeps flat-config (ESLint v9+) translation working:
+		// FlatCompat only registers the plugins that are declared here, while
+		// legacy eslintrc resolves plugin namespaces on demand from rule
+		// references. Both plugins ship transitively via
+		// @wordpress/eslint-plugin@14.x.
+		'import',
+		'jest',
+	],
 	rules: {
 		radix: 'error',
 		yoda: [ 'error', 'never' ],

@@ -29,6 +29,7 @@
 	],
 	"main": "index.js",
 	"dependencies": {
+		"@eslint/eslintrc": "^3.0.0",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
 		"@wordpress/eslint-plugin": "14.7.0",
@@ -45,7 +46,8 @@
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint ./rules ./configs --fix",
-		"lint:lang:js": "eslint ./rules ./configs"
+		"lint:lang:js": "eslint ./rules ./configs",
+		"test": "jest"
 	},
 	"devDependencies": {
 		"@babel/core": "7.25.7",

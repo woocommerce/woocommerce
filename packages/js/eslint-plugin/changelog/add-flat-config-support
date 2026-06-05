@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add Flat Config export (`configs['flat/recommended']`) for ESLint v9/v10 compatibility. #65458

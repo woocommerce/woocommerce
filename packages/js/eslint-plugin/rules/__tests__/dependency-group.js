@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import { RuleTester } from 'eslint';
+const { RuleTester } = require( 'eslint' );
 
 /**
  * Internal dependencies
  */
-import rule from '../dependency-group';
+const rule = require( '../dependency-group' );
 
 const ruleTester = new RuleTester( {
 	parserOptions: {
