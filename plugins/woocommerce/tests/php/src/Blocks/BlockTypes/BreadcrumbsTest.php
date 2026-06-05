@@ -150,6 +150,21 @@ class BreadcrumbsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should apply theme custom numeric font-size as inline style and remove the default small class.
+	 */
+	public function test_theme_custom_numeric_font_size(): void {
+		$this->switch_to_block_theme();
+		$this->assertTrue( wp_is_block_theme(), 'Block theme is required for wp_get_global_styles().' );
+
+		$this->set_breadcrumbs_theme_font_size( '50px' );
+
+		$markup = $this->render_breadcrumbs();
+
+		$this->assertStringContainsString( 'font-size: 50px', $markup, 'Theme custom numeric font size should be applied as inline style.' );
+		$this->assertStringNotContainsString( 'has-small-font-size', $markup, 'Theme custom numeric font size should remove the default small class.' );
+	}
+
+	/**
 	 * @testdox Should apply preset font-size class when theme font size is also set.
 	 */
 	public function test_preset_font_size_with_theme_override(): void {
