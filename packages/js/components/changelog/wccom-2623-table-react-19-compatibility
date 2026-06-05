@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Prepare table component typings for React 19 compatibility.

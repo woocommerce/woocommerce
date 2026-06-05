@@ -47,6 +47,7 @@ dist/
 oclif.manifest.json
 
 # Project files
+.pnpm-store/
 node_modules/
 vendor/
 

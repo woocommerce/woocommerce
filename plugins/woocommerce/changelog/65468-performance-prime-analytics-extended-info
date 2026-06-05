@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improve the performance of the analytics Products and Variations reports by batch-priming product caches.
