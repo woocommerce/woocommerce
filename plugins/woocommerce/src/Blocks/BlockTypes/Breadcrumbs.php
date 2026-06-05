@@ -27,7 +27,7 @@ class Breadcrumbs extends AbstractBlock {
 	 *
 	 * @return string | void Rendered block output.
 	 */
-	protected function render( $attributes, $content, WP_Block $block ) {
+	protected function render( $attributes, $content, $block ) {
 		ob_start();
 		woocommerce_breadcrumb();
 		$breadcrumb = ob_get_clean();
@@ -39,8 +39,8 @@ class Breadcrumbs extends AbstractBlock {
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'font_size' ) );
 
 		$font_size_classes_and_styles  = $this->get_font_size_classes_and_styles( $attributes, $block );
-		$classes_and_styles['classes'] = $classes_and_styles['classes'] . ' ' . $font_size_classes_and_styles['class'] . ' ';
-		$classes_and_styles['styles']  = $classes_and_styles['styles'] . ' ' . $font_size_classes_and_styles['style'] . ' ';
+		$classes_and_styles['classes'] = $classes_and_styles['classes'] . ' ' . ( $font_size_classes_and_styles['class'] ?? '' ) . ' ';
+		$classes_and_styles['styles']  = $classes_and_styles['styles'] . ' ' . ( $font_size_classes_and_styles['style'] ?? '' ) . ' ';
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
@@ -81,7 +81,7 @@ class Breadcrumbs extends AbstractBlock {
 	 * @param WP_Block $block      The block instance.
 	 * @return array The font size classes and styles.
 	 */
-	private function get_font_size_classes_and_styles( array $attributes, WP_Block $block ) {
+	private function get_font_size_classes_and_styles( array $attributes, $block ) {
 		$custom_font_size = $attributes['style']['typography']['fontSize'] ?? '';
 
 		if ( '' !== $custom_font_size ) {
