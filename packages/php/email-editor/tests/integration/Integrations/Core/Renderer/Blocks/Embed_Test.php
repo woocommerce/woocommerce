@@ -829,6 +829,62 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that oEmbed thumbnail lookups count toward the per-render HTTP fetch cap.
+	 */
+	public function test_caps_oembed_thumbnail_fetches_at_five_per_render(): void {
+		$request_count   = 0;
+		$filter_callback = function ( $preempt, $args, $url ) use ( &$request_count ) {
+			if ( strpos( $url, 'vimeo.com/api/oembed' ) !== false ) {
+				++$request_count;
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => wp_json_encode(
+						array(
+							'type'          => 'video',
+							'thumbnail_url' => 'https://i.vimeocdn.com/video/123456789.jpg',
+						)
+					),
+				);
+			}
+			return $preempt;
+		};
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
+		$urls = array();
+		try {
+			for ( $i = 1; $i <= 6; $i++ ) {
+				$url    = 'https://vimeo.com/10000000' . $i;
+				$urls[] = $url;
+
+				$parsed_block = array(
+					'blockName' => 'core/embed',
+					'attrs'     => array(
+						'url'              => $url,
+						'providerNameSlug' => 'vimeo',
+					),
+					'innerHTML' => '<figure class="wp-block-embed is-type-video"><div class="wp-block-embed__wrapper">' . $url . '</div></figure>',
+				);
+
+				$rendered = $this->embed_renderer->render( $parsed_block['innerHTML'], $parsed_block, $this->rendering_context );
+
+				if ( $i <= 5 ) {
+					$this->assertStringContainsString( 'background-image', $rendered, "Embed #{$i} should render with a thumbnail" );
+				} else {
+					$this->assertStringNotContainsString( 'background-image', $rendered, 'Embed #6 should NOT render with a thumbnail' );
+					$this->assertStringContainsString( '<a href="https://vimeo.com/100000006"', $rendered, 'Embed #6 should render as a link fallback' );
+				}
+			}
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+			foreach ( $urls as $url ) {
+				delete_transient( 'wc_email_vp_thumb_' . md5( $url ) );
+			}
+		}
+
+		$this->assertSame( 5, $request_count, 'Only five oEmbed thumbnail fetches should be made per render' );
+	}
+
+	/**
 	 * Helper to mock the embed page HTTP response for example.com URLs.
 	 *
 	 * @param string $embed_page_html HTML for the embed page response.

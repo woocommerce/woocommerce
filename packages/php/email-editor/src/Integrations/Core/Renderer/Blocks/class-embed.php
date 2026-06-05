@@ -24,18 +24,33 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
  */
 class Embed extends Abstract_Block_Renderer {
 	/**
-	 * Maximum number of embed page fetch attempts per email render.
-	 * Beyond this limit, embeds render as compact link cards (no HTTP fetch).
+	 * Maximum number of embed HTTP fetch attempts per email render.
+	 * Covers both embed page fetches (rich cards) and oEmbed thumbnail lookups.
+	 * Beyond this limit, embeds render without fetching (compact link cards or link fallbacks).
 	 * Counts attempts, not successes, to cap outbound HTTP requests.
 	 */
 	private const MAX_EMBED_FETCHES = 5;
 
 	/**
-	 * Number of embed page fetch attempts so far by this instance.
+	 * Number of embed HTTP fetch attempts so far by this instance.
 	 *
 	 * @var int
 	 */
 	private int $embed_fetch_count = 0;
+
+	/**
+	 * Check whether an embed HTTP fetch may be performed and count the attempt.
+	 * Enforces the MAX_EMBED_FETCHES cap shared by embed page fetches and oEmbed thumbnail lookups.
+	 *
+	 * @return bool True if the fetch is within the limit and may proceed.
+	 */
+	private function may_attempt_embed_fetch(): bool {
+		if ( $this->embed_fetch_count >= self::MAX_EMBED_FETCHES ) {
+			return false;
+		}
+		++$this->embed_fetch_count;
+		return true;
+	}
 
 	/**
 	 * Supported audio providers with their configuration.
@@ -181,10 +196,9 @@ class Embed extends Abstract_Block_Renderer {
 			$url         = $this->extract_provider_url( $attr, $block_content );
 			$is_wp_embed = isset( $attr['type'] ) && 'wp-embed' === $attr['type'];
 			if ( ! empty( $url ) && $is_wp_embed ) {
-				if ( $this->embed_fetch_count >= self::MAX_EMBED_FETCHES ) {
+				if ( ! $this->may_attempt_embed_fetch() ) {
 					return $this->render_compact_link_card( $url, $parsed_block, $rendering_context );
 				}
-				++$this->embed_fetch_count;
 				$card_result = $this->render_link_embed_card( $url, $parsed_block, $rendering_context );
 				if ( ! empty( $card_result ) ) {
 					return $card_result;
@@ -636,6 +650,12 @@ class Embed extends Abstract_Block_Renderer {
 		if ( false !== $cached_thumbnail ) {
 			// Return cached value (empty string means previous lookup failed).
 			return is_string( $cached_thumbnail ) ? $cached_thumbnail : '';
+		}
+
+		// Enforce the per-render fetch cap before making an HTTP request.
+		// The result is intentionally not cached here, so the thumbnail can still be fetched on a later render.
+		if ( ! $this->may_attempt_embed_fetch() ) {
+			return '';
 		}
 
 		// Use WP_oEmbed::get_data() to fetch thumbnail from oEmbed endpoint.
