@@ -1229,6 +1229,12 @@ class WC_Checkout {
 				$customer->set_display_name( $customer->get_first_name() . ' ' . $customer->get_last_name() );
 			}
 
+			$shipping_fields = array(
+				'shipping_method' => true,
+				'shipping_total'  => true,
+				'shipping_tax'    => true,
+			);
+
 			foreach ( $data as $key => $value ) {
 				// Use setters where available.
 				if ( is_callable( array( $customer, "set_{$key}" ) ) ) {
@@ -1236,7 +1242,9 @@ class WC_Checkout {
 
 					// Store custom fields prefixed with either shipping_ or billing_.
 				} elseif ( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) ) {
-					$customer->update_meta_data( $key, $value );
+					if ( ! isset( $shipping_fields[ $key ] ) ) {
+						$customer->update_meta_data( $key, $value );
+					}
 				}
 			}
 
