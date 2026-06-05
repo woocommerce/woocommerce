@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix custom font sizes not working on the Breadcrumbs block
