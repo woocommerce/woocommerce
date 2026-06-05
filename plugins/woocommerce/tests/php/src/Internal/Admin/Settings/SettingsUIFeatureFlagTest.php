@@ -168,7 +168,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
 		$this->assertNotEmpty( $notices );
 		$this->assertSame( 'WC_Settings_Page::output', $notices[0]['function_name'] );
-		$this->assertSame( '10.9.0', $notices[0]['version'] );
+		$this->assertSame( '11.0.0', $notices[0]['version'] );
 		$this->assertStringContainsString( 'settings_ui_flag_test', $notices[0]['message'] );
 		$this->assertStringContainsString( 'advanced', $notices[0]['message'] );
 		$this->assertStringContainsString( 'Unable to load extension script handles.', $notices[0]['message'] );
@@ -212,7 +212,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
 		$this->assertNotEmpty( $notices );
 		$this->assertSame( 'WC_Settings_Page::output', $notices[0]['function_name'] );
-		$this->assertSame( '10.9.0', $notices[0]['version'] );
+		$this->assertSame( '11.0.0', $notices[0]['version'] );
 		$this->assertStringContainsString( 'settings_ui_flag_test', $notices[0]['message'] );
 		$this->assertStringContainsString( 'advanced', $notices[0]['message'] );
 		$this->assertStringContainsString( 'Settings UI schema generation failed.', $notices[0]['message'] );
