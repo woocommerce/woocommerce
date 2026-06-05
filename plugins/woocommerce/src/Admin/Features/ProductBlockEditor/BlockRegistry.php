@@ -3,8 +3,6 @@
  * WooCommerce Product Editor Block Registration compatibility shim.
  */
 
-declare( strict_types = 1 );
-
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 /**

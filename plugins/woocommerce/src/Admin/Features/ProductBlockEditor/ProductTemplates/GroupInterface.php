@@ -3,8 +3,6 @@
  * WooCommerce Product Editor group interface compatibility shim.
  */
 
-declare( strict_types = 1 );
-
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
 
 /**
