@@ -835,7 +835,7 @@ add_action( 'deleted_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change',
  * price while a sale is scheduled cannot be distinguished from a stale schedule price
  * and will be reconciled; a custom price unrelated to either is left untouched.
  *
- * @since 10.9.0
+ * @since 11.0.0
  *
  * @param string     $price   The product's active price.
  * @param WC_Product $product The product object.

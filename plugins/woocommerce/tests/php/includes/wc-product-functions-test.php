@@ -381,6 +381,39 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A third-party price wins over the heal even when the heal would otherwise fire.
+	 */
+	public function test_scheduled_sale_active_price_respects_third_party_price_during_started_gap(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		// Future sale, so the saved _price is the regular price (50).
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + 2 * HOUR_IN_SECONDS ) );
+		$product->save();
+
+		// Start time elapses without the AS event running: the sale is active but _price is
+		// still 50, so the heal would reconcile 50 -> 20 absent a third-party override.
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		$product_id = $product->get_id();
+		// Third party sets a deliberate price that is neither the stored value nor the heal target.
+		$callback = function ( $price, $filtered_product ) use ( $product_id ) {
+			return ( $filtered_product instanceof WC_Product && $filtered_product->get_id() === $product_id ) ? '42' : $price;
+		};
+		add_filter( 'woocommerce_product_get_price', $callback, 50, 2 );
+
+		$this->assertEquals(
+			42,
+			wc_get_product( $product_id )->get_price(),
+			'The third-party price wins over the scheduled-sale heal (which would otherwise return 20).'
+		);
+
+		remove_filter( 'woocommerce_product_get_price', $callback, 50 );
+	}
+
+	/**
 	 * @testdox An external product reconciles like a simple product.
 	 */
 	public function test_scheduled_sale_active_price_heals_external_product(): void {
