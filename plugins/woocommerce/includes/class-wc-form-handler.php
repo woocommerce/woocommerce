@@ -113,7 +113,9 @@ class WC_Form_Handler {
 			return;
 		}
 
-		$address = WC()->countries->get_address_fields( wc_clean( wp_unslash( $_POST[ $address_type . '_country' ] ) ), $address_type . '_' );
+		$address_country = wc_clean( wp_unslash( $_POST[ $address_type . '_country' ] ) );
+		$address         = WC()->countries->get_address_fields( $address_country, $address_type . '_' );
+		$locale          = WC()->countries->get_country_locale();
 
 		foreach ( $address as $key => $field ) {
 			if ( ! isset( $field['type'] ) ) {
@@ -131,16 +133,11 @@ class WC_Form_Handler {
 			$value = apply_filters( 'woocommerce_process_myaccount_field_' . $key, $value );
 
 			// Validation: Required fields.
-			// Hidden may not be present in field data if wc_array_overlay() didn't
-			// merge it (it only copies keys that exist in the base array). Check
-			// both the field and the locale array directly.
 			$field_hidden = ! empty( $field['hidden'] );
 			if ( ! $field_hidden ) {
-				$field_base    = preg_replace( '/^(billing|shipping)_/', '', $key );
-				$locale        = WC()->countries->get_country_locale();
-				$field_country = $field['country'] ?? '';
-				if ( isset( $locale[ $field_country ][ $field_base ]['hidden'] ) ) {
-					$field_hidden = (bool) $locale[ $field_country ][ $field_base ]['hidden'];
+				$field_base = preg_replace( '/^(billing|shipping)_/', '', $key );
+				if ( isset( $locale[ $address_country ][ $field_base ]['hidden'] ) ) {
+					$field_hidden = (bool) $locale[ $address_country ][ $field_base ]['hidden'];
 				}
 			}
 			if ( ! empty( $field['required'] ) && ! $field_hidden && empty( $value ) ) {

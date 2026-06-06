@@ -845,6 +845,9 @@ class WC_Checkout {
 				$validate_fieldset = false;
 			}
 
+			$country = isset( $data[ $fieldset_key . '_country' ] ) ? $data[ $fieldset_key . '_country' ] : WC()->customer->{"get_{$fieldset_key}_country"}();
+			$locale  = WC()->countries->get_country_locale();
+
 			foreach ( $fieldset as $key => $field ) {
 				if ( ! isset( $data[ $key ] ) ) {
 					continue;
@@ -854,13 +857,8 @@ class WC_Checkout {
 				$format      = array_filter( isset( $field['validate'] ) ? (array) $field['validate'] : array() );
 				$field_label = isset( $field['label'] ) ? $field['label'] : '';
 
-				// Hidden may not be present in field data if wc_array_overlay() didn't
-				// merge it (it only copies keys that exist in the base array). Check
-				// the locale array directly as a fallback.
 				if ( ! $hidden ) {
 					$field_base = preg_replace( '/^(billing|shipping)_/', '', $key );
-					$locale     = WC()->countries->get_country_locale();
-					$country    = $field['country'] ?? '';
 					if ( isset( $locale[ $country ][ $field_base ]['hidden'] ) ) {
 						$hidden = (bool) $locale[ $country ][ $field_base ]['hidden'];
 					}
