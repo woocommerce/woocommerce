@@ -235,7 +235,7 @@ jobs:
           E2E_BUILD_ARTIFACT_NAME: e2e-woocommerce-build-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           for attempt in {1..60}; do
-            if gh run download "$GITHUB_RUN_ID" --name "$E2E_BUILD_ARTIFACT_NAME" --dir "$GITHUB_WORKSPACE"; then
+            if gh run download "$GITHUB_RUN_ID" --name "$E2E_BUILD_ARTIFACT_NAME" --dir "$GITHUB_WORKSPACE/plugins/woocommerce"; then
               exit 0
             fi
 
