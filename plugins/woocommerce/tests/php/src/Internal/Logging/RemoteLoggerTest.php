@@ -23,13 +23,29 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		private $sut;
 
 		/**
+		 * Original WooCommerce.com helper data option value.
+		 *
+		 * @var mixed
+		 */
+		private $original_helper_data;
+
+		/**
+		 * Whether the WooCommerce.com helper data option existed before the test.
+		 *
+		 * @var bool
+		 */
+		private $helper_data_option_exists = false;
+
+		/**
 		 * Set up test
 		 *
 		 * @return void
 		 */
 		public function setUp(): void {
 			parent::setUp();
-			$this->sut = wc_get_container()->get( RemoteLogger::class );
+			$this->original_helper_data      = get_option( 'woocommerce_helper_data', null );
+			$this->helper_data_option_exists = null !== $this->original_helper_data;
+			$this->sut                       = wc_get_container()->get( RemoteLogger::class );
 		}
 
 		/**
@@ -40,7 +56,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		public function tearDown(): void {
 			$this->cleanup_filters();
 			delete_option( 'woocommerce_feature_remote_logging_enabled' );
-			delete_option( 'woocommerce_helper_data' );
+			$this->restore_helper_data_option();
 			delete_transient( RemoteLogger::WC_NEW_VERSION_TRANSIENT );
 			global $wpdb;
 			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_rate_limits" );
@@ -107,15 +123,26 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		public function remote_logging_disallowed_provider() {
 			return array(
-				'feature flag disabled'        => array(
+				'feature flag disabled'           => array(
 					'condition' => 'feature flag disabled',
 					'setup'     => fn() => update_option( 'woocommerce_feature_remote_logging_enabled', 'no' ),
 				),
-				'woocommerce.com disconnected' => array(
+				'woocommerce.com disconnected'    => array(
 					'condition' => 'woocommerce.com disconnected',
 					'setup'     => fn() => delete_option( 'woocommerce_helper_data' ),
 				),
-				'outdated version'             => array(
+				'woocommerce.com auth incomplete' => array(
+					'condition' => 'woocommerce.com auth incomplete',
+					'setup'     => fn() => update_option(
+						'woocommerce_helper_data',
+						array(
+							'auth' => array(
+								'access_token' => 'non-empty-value',
+							),
+						)
+					),
+				),
+				'outdated version'                => array(
 					'condition' => 'outdated version',
 					'setup'     => function () {
 						$version = WC()->version;
@@ -692,15 +719,42 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		private function setup_remote_logging_conditions( $enabled = true ) {
 			update_option( 'woocommerce_feature_remote_logging_enabled', $enabled ? 'yes' : 'no' );
+			$this->set_wccom_connection_state( true );
+			$this->setup_mock_plugin_updates( $enabled ? WC()->version : '9.0.0' );
+		}
+
+		/**
+		 * Set the WooCommerce.com connection state for tests.
+		 *
+		 * @param bool $connected Whether the site should be considered connected.
+		 */
+		private function set_wccom_connection_state( bool $connected ) {
+			if ( ! $connected ) {
+				delete_option( 'woocommerce_helper_data' );
+				return;
+			}
+
 			update_option(
 				'woocommerce_helper_data',
 				array(
 					'auth' => array(
-						'access_token' => 'test-token',
+						'access_token'        => 'non-empty-value',
+						'access_token_secret' => 'non-empty-value',
 					),
 				)
 			);
-			$this->setup_mock_plugin_updates( $enabled ? WC()->version : '9.0.0' );
+		}
+
+		/**
+		 * Restore the original WooCommerce.com helper data option.
+		 */
+		private function restore_helper_data_option() {
+			if ( $this->helper_data_option_exists ) {
+				update_option( 'woocommerce_helper_data', $this->original_helper_data );
+				return;
+			}
+
+			delete_option( 'woocommerce_helper_data' );
 		}
 
 			/**

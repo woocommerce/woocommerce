@@ -8,6 +8,14 @@ use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper;
  * Class ConnectionHelperTest.
  */
 class ConnectionHelperTest extends \WC_Unit_Test_Case {
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		delete_option( 'woocommerce_helper_data' );
+
+		parent::tearDown();
+	}
 
 	/**
 	 * Test is_connected method based on option value.
@@ -16,7 +24,38 @@ class ConnectionHelperTest extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_helper_data' );
 		$this->assertEquals( false, ConnectionHelper::is_connected() );
 
-		update_option( 'woocommerce_helper_data', array( 'auth' => 'random token' ) );
+		update_option( 'woocommerce_helper_data', array( 'auth' => 'non-empty-value' ) );
+		$this->assertEquals( false, ConnectionHelper::is_connected() );
+
+		update_option(
+			'woocommerce_helper_data',
+			array(
+				'auth' => array(
+					'access_token' => 'non-empty-value',
+				),
+			)
+		);
+		$this->assertEquals( false, ConnectionHelper::is_connected() );
+
+		update_option(
+			'woocommerce_helper_data',
+			array(
+				'auth' => array(
+					'access_token_secret' => 'non-empty-value',
+				),
+			)
+		);
+		$this->assertEquals( false, ConnectionHelper::is_connected() );
+
+		update_option(
+			'woocommerce_helper_data',
+			array(
+				'auth' => array(
+					'access_token'        => 'non-empty-value',
+					'access_token_secret' => 'non-empty-value',
+				),
+			)
+		);
 		$this->assertEquals( true, ConnectionHelper::is_connected() );
 	}
 }

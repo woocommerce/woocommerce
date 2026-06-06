@@ -20,10 +20,9 @@ final class ConnectionHelper {
 	 * @return bool Whether account is connected.
 	 */
 	public static function is_connected() {
-		$helper_options    = get_option( 'woocommerce_helper_data', array() );
-		if ( is_array( $helper_options ) && array_key_exists( 'auth', $helper_options ) && ! empty( $helper_options['auth'] ) ) {
-			return true;
-		}
-		return false;
+		$helper_options = get_option( 'woocommerce_helper_data', array() );
+		$auth           = is_array( $helper_options ) ? $helper_options['auth'] ?? array() : array();
+
+		return is_array( $auth ) && ! empty( $auth['access_token'] ) && ! empty( $auth['access_token_secret'] );
 	}
 }

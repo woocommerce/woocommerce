@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Features;
 
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
+use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper;
 use WC_Tracks;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
@@ -347,6 +348,15 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
+				'setting'                      => array(
+					'desc_tip' => function () {
+						if ( ! ConnectionHelper::is_connected() ) {
+							return __( 'Connect your store to WooCommerce.com to send remote logs.', 'woocommerce' );
+						}
+
+						return '';
+					},
+				),
 			),
 			'site_visibility_badge'              => array(
 				'name'                         => __( 'Site visibility badge', 'woocommerce' ),

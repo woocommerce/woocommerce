@@ -54,11 +54,11 @@ The WooCommerce Remote Logging package offers the following features:
 
 Remote logging is subject to the following conditions:
 
-1. **Remote Logging Enabled**: The package checks `window.wcSettings.isRemoteLoggingEnabled` to determine if the feature should be enabled. The value is set via PHP and passed to JS as a boolean. It requires tracks to be enabled and a few other conditions internally. Please see the [RemoteLogger.php](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Logging/RemoteLogger.php) for more details.
+1. **Remote Logging Enabled**: The package checks `window.wcSettings.isRemoteLoggingEnabled` to determine if the feature should be enabled. The value is set via PHP and passed to JS as a boolean. It requires the Remote Logging feature to be enabled, a valid WooCommerce.com connection, and a supported WooCommerce version. Please see the [RemoteLogger.php](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Logging/RemoteLogger.php) for more details.
 
 2. **Non-Development Environment**: It also checks `process.env.NODE_ENV` to ensure logging only occurs in non-development environments.
 
-If either of these conditions are not met (Tracks is not enabled or the environment is development), no logs will be transmitted to the remote server.
+If either of these conditions are not met, no logs will be transmitted to the remote server.
 
 ## API Reference
 
