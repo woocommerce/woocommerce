@@ -154,7 +154,7 @@ jobs:
     needs: 'project-jobs'
     if: ${{ !cancelled() && needs.project-jobs.result == 'success' }}
     env:
-      E2E_BUILD_ARTIFACT_NAME: e2e-woocommerce-build-${{ github.run_id }}-${{ github.run_attempt }}
+      E2E_BUILD_ARTIFACT_NAME: e2e-woocommerce-build-${{ github.run_id }}
     steps:
       - name: 'Detect e2e asset requirement'
         id: 'e2e-build'
@@ -200,6 +200,7 @@ jobs:
             plugins/woocommerce/includes/react-admin/feature-config.php
           if-no-files-found: error
           retention-days: 1
+          overwrite: true
 
   project-test-jobs:
     name: '${{ matrix.name }}'
@@ -232,7 +233,7 @@ jobs:
         if: ${{ matrix.testType == 'e2e' && matrix.testEnv.shouldCreate && inputs.artifactName == '' }}
         env:
           GH_TOKEN: ${{ github.token }}
-          E2E_BUILD_ARTIFACT_NAME: e2e-woocommerce-build-${{ github.run_id }}-${{ github.run_attempt }}
+          E2E_BUILD_ARTIFACT_NAME: e2e-woocommerce-build-${{ github.run_id }}
         run: |
           for attempt in {1..60}; do
             if gh run download "$GITHUB_RUN_ID" --name "$E2E_BUILD_ARTIFACT_NAME" --dir "$GITHUB_WORKSPACE/plugins/woocommerce"; then
