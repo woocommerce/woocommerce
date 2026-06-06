@@ -38,13 +38,18 @@ export const productQueryInnerBlocksTemplate = [
 	{ name: 'core/query-no-results' },
 ];
 
-export const insertProductsQuery = async ( editor: Editor ) => {
+export const insertProductsQuery = async (
+	editor: Editor,
+	options: {
+		inherit?: boolean;
+	} = {}
+) => {
 	await editor.insertBlock( {
 		name: 'core/query',
 		attributes: {
 			namespace: 'woocommerce/product-query',
 			query: {
-				inherit: true,
+				inherit: options.inherit ?? true,
 			},
 		},
 		innerBlocks: productQueryInnerBlocksTemplate,

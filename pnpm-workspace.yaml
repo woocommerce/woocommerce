@@ -45,6 +45,7 @@ catalogs:
         '@wordpress/notices': 5.19.2
         '@wordpress/patterns': 2.19.6
         '@wordpress/plugins': 7.19.4
+        '@wordpress/postcss-plugins-preset': 4.42.0
         '@wordpress/preferences': 4.19.4
         '@wordpress/primitives': 4.19.1
         '@wordpress/priority-queue': 3.19.1

@@ -144,7 +144,7 @@ class Settings {
 
 		//phpcs:ignore
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
-		$preload_data_endpoints['jetpackStatus'] = '/jetpack/v4/connection';
+
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$preload_data = array_reduce(
 				array_values( $preload_data_endpoints ),
@@ -223,10 +223,17 @@ class Settings {
 		$settings['variationTitleAttributesSeparator'] = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
 
 		$settings = $this->add_settings_ui_schema( $settings );
+
+		// Performance note: refer back to https://github.com/woocommerce/woocommerce/pull/41092: unconditionally loading /jetpack/v4/connection.
+		// As automattic/jetpack-connection package is a direct dependency, we can return the Jetpack connection status via its public API.
+		$settings['dataEndpoints'] = $settings['dataEndpoints'] ?? array();
+		try {
+			$settings['dataEndpoints']['jetpackStatus'] = \Automattic\Jetpack\Connection\REST_Connector::connection_status( false );
+		} catch ( \Throwable $e ) {
+			$settings['dataEndpoints']['jetpackStatus'] = array();
+		}
+
 		if ( ! empty( $preload_data_endpoints ) ) {
-			$settings['dataEndpoints'] = isset( $settings['dataEndpoints'] )
-				? $settings['dataEndpoints']
-				: array();
 			foreach ( $preload_data_endpoints as $key => $endpoint ) {
 				// Handle error case: rest_do_request() doesn't guarantee success.
 				if ( empty( $preload_data[ $endpoint ] ) ) {
