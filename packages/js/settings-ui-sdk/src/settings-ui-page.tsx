@@ -109,17 +109,19 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 	}
 
 	return (
-		<div className="wc-settings-ui__group-header">
-			{ group.title ? <h2>{ group.title }</h2> : null }
-			{ group.description ? (
-				<div className="wc-settings-ui__group-description">
-					<RawHTML>
-						{ sanitizeSettingsHtml( group.description ) }
-					</RawHTML>
-				</div>
-			) : null }
+		<header className="wc-settings-ui__section-header">
+			<div className="wc-settings-ui__section-heading">
+				{ group.title ? <h2>{ group.title }</h2> : null }
+				{ group.description ? (
+					<div className="wc-settings-ui__section-description">
+						<RawHTML>
+							{ sanitizeSettingsHtml( group.description ) }
+						</RawHTML>
+					</div>
+				) : null }
+			</div>
 			{ group.actions && group.actions.length > 0 ? (
-				<div className="wc-settings-ui__group-actions">
+				<div className="wc-settings-ui__section-actions">
 					{ group.actions.map( ( action ) => (
 						<Button
 							key={ action.id }
@@ -133,7 +135,7 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 					) ) }
 				</div>
 			) : null }
-		</div>
+		</header>
 	);
 };
 
@@ -294,13 +296,15 @@ const ShellHeader = ( {
 			</nav>
 		) : undefined;
 
+	const saveButtonLabel = __( 'Save', 'woocommerce' );
+
 	const actions = showSaveButton ? (
 		<Button
 			className="woocommerce-save-button"
 			variant="primary"
 			type={ saveButtonType }
 			name="save"
-			value={ __( 'Save changes', 'woocommerce' ) }
+			value={ saveButtonLabel }
 			disabled={ ! isDirty || isSaving }
 			isBusy={ isSaving }
 			onClick={
@@ -309,7 +313,7 @@ const ShellHeader = ( {
 					: onSave
 			}
 		>
-			{ __( 'Save changes', 'woocommerce' ) }
+			{ saveButtonLabel }
 		</Button>
 	) : undefined;
 
@@ -569,38 +573,50 @@ export const SettingsUIPage = ( {
 			) : null }
 			<div className="wc-settings-ui">
 				{ visibleGroups.map( ( group ) => (
-					<section className="wc-settings-ui__group" key={ group.id }>
-						<GroupHeader group={ group } />
-						<div className="wc-settings-ui__group-panel">
-							{ group.fields.map( ( field ) => {
-								const FieldComponent =
-									resolveFieldComponent( field, context ) ||
-									NativeSettingsField;
-								const value = values[ field.id ];
+					<section
+						className="wc-settings-ui__section"
+						key={ group.id }
+					>
+						<div className="wc-settings-ui__section-card">
+							<GroupHeader group={ group } />
+							<div className="wc-settings-ui__section-fields">
+								{ group.fields.map( ( field ) => {
+									const FieldComponent =
+										resolveFieldComponent(
+											field,
+											context
+										) || NativeSettingsField;
+									const value = values[ field.id ];
 
-								return (
-									<div
-										className={ [
-											'wc-settings-ui__field',
-											getFieldTypeClassName( field.type ),
-										].join( ' ' ) }
-										key={ field.id }
-									>
-										<FieldComponent
-											field={ field }
-											value={ value }
-											context={ context }
-											values={ values }
-											initialValues={ initialValues }
-											setValue={ setValue }
-											setValues={ setValues }
-											onChange={ ( nextValue ) =>
-												setValue( field.id, nextValue )
-											}
-										/>
-									</div>
-								);
-							} ) }
+									return (
+										<div
+											className={ [
+												'wc-settings-ui__field',
+												getFieldTypeClassName(
+													field.type
+												),
+											].join( ' ' ) }
+											key={ field.id }
+										>
+											<FieldComponent
+												field={ field }
+												value={ value }
+												context={ context }
+												values={ values }
+												initialValues={ initialValues }
+												setValue={ setValue }
+												setValues={ setValues }
+												onChange={ ( nextValue ) =>
+													setValue(
+														field.id,
+														nextValue
+													)
+												}
+											/>
+										</div>
+									);
+								} ) }
+							</div>
 						</div>
 					</section>
 				) ) }

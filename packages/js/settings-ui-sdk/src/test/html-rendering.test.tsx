@@ -14,7 +14,6 @@ jest.mock( '@wordpress/admin-ui', () => ( {
  * Internal dependencies
  */
 import { SettingsUIPage } from '../settings-ui-page';
-import { NativeSettingsField } from '../native-fields';
 import type { SettingsUISchema } from '../types';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -45,23 +44,82 @@ const expectUnsafeMarkupRemoved = ( container: HTMLElement ) => {
 };
 
 describe( 'settings HTML rendering', () => {
-	it( 'sanitizes native field help before rendering', () => {
+	it( 'renders settings as centered sections and cards', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'none' },
+			groups: {
+				general: {
+					id: 'general',
+					title: 'General settings',
+					description: 'Configure the basics.',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							description: 'Shown as field description.',
+						},
+					],
+				},
+			},
+		};
+
 		const { container, root } = renderElement(
-			<NativeSettingsField
-				field={ {
-					id: 'test_field',
-					label: 'Test field',
-					type: 'text',
-					description: unsafeDescription,
-				} }
-				value=""
-				onChange={ jest.fn() }
-				context={ { page: 'test' } }
-				values={ {} }
-				initialValues={ {} }
-				setValue={ jest.fn() }
-				setValues={ jest.fn() }
-			/>
+			<SettingsUIPage schema={ schema } />
+		);
+
+		expect(
+			container.querySelector( '.wc-settings-ui__section' )
+		).not.toBeNull();
+		expect(
+			container.querySelector( '.wc-settings-ui__section-card' )
+		).not.toBeNull();
+		expect(
+			container.querySelector( '.wc-settings-ui__section-fields' )
+		).not.toBeNull();
+		expect( container.querySelector( '.wc-settings-ui__row' ) ).toBeNull();
+		expect(
+			container.querySelector( '.wc-settings-ui__group-panel' )
+		).toBeNull();
+		expect(
+			container.querySelector( '.wc-settings-ui__group-header' )
+		).toBeNull();
+		expect( container.textContent ).toContain( 'General settings' );
+		expect( container.textContent ).toContain( 'Test field' );
+		expect( container.textContent ).toContain(
+			'Shown as field description.'
+		);
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'sanitizes native field descriptions before rendering', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'none' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							description: unsafeDescription,
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
 		);
 
 		expectUnsafeMarkupRemoved( container );
