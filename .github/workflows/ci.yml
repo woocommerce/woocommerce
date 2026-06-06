@@ -148,6 +148,58 @@ jobs:
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
+  e2e-build-artifacts:
+    name: 'Build e2e assets'
+    runs-on: ubuntu-latest
+    needs: 'project-jobs'
+    if: ${{ !cancelled() && needs.project-jobs.result == 'success' }}
+    env:
+      E2E_BUILD_ARTIFACT_NAME: e2e-woocommerce-build-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: 'Detect e2e asset requirement'
+        id: 'e2e-build'
+        env:
+          RELEASE_ARTIFACT_NAME: ${{ inputs.artifactName }}
+          TEST_JOBS: ${{ needs.project-jobs.outputs.test-jobs }}
+        run: |
+          if [[ -n "$RELEASE_ARTIFACT_NAME" ]]; then
+            echo "Release artifact provided; skipping local e2e asset build."
+            echo "required=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if jq -e 'any(.[]; .testType == "e2e" and .testEnv.shouldCreate == true)' <<< "$TEST_JOBS" > /dev/null; then
+            echo "required=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "required=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: 'actions/checkout@v4'
+        name: 'Checkout'
+        if: ${{ steps.e2e-build.outputs.required == 'true' }}
+        with:
+          ref: ${{ inputs.refName != '' && inputs.refName || '' }}
+
+      - uses: './.github/actions/setup-woocommerce-monorepo'
+        name: 'Build WooCommerce assets'
+        if: ${{ steps.e2e-build.outputs.required == 'true' }}
+        with:
+          install: '@woocommerce/plugin-woocommerce...'
+          build: '@woocommerce/plugin-woocommerce'
+          pull-package-deps: '@woocommerce/plugin-woocommerce'
+
+      - name: 'Upload e2e build assets'
+        if: ${{ steps.e2e-build.outputs.required == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.E2E_BUILD_ARTIFACT_NAME }}
+          path: |
+            plugins/woocommerce/assets/client
+            plugins/woocommerce/assets/css
+            plugins/woocommerce/assets/js
+          if-no-files-found: error
+          retention-days: 1
+
   project-test-jobs:
     name: '${{ matrix.name }}'
     runs-on: ubuntu-latest
@@ -170,10 +222,28 @@ jobs:
         id: 'install-monorepo'
         with:
           install: '${{ matrix.projectName }}...'
-          build: ${{ matrix.projectName }}
+          build: ${{ ( matrix.testType == 'e2e' && matrix.testEnv.shouldCreate && inputs.artifactName == '' && 'false' ) || matrix.projectName }}
           build-type: ${{ ( matrix.testType == 'unit:php' && 'backend' ) || ( matrix.testType == 'unit' && 'dependencies' ) || 'full' }}
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && ( matrix.testType == 'e2e' || matrix.testType == 'performance' ) }}
           pull-package-deps: '${{ matrix.projectName }}'
+
+      - name: 'Download e2e build assets'
+        if: ${{ matrix.testType == 'e2e' && matrix.testEnv.shouldCreate && inputs.artifactName == '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          E2E_BUILD_ARTIFACT_NAME: e2e-woocommerce-build-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          for attempt in {1..60}; do
+            if gh run download "$GITHUB_RUN_ID" --name "$E2E_BUILD_ARTIFACT_NAME" --dir "$GITHUB_WORKSPACE"; then
+              exit 0
+            fi
+
+            echo "Build artifact not available yet (attempt $attempt/60). Waiting..."
+            sleep 10
+          done
+
+          echo "Timed out waiting for build artifact: $E2E_BUILD_ARTIFACT_NAME" >&2
+          exit 1
 
       - name: 'Update wp-env config'
         if: ${{ inputs.artifactName != '' }}
