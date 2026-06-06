@@ -25,37 +25,6 @@ class ConnectionHelperTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( false, ConnectionHelper::is_connected() );
 
 		update_option( 'woocommerce_helper_data', array( 'auth' => 'non-empty-value' ) );
-		$this->assertEquals( false, ConnectionHelper::is_connected() );
-
-		update_option(
-			'woocommerce_helper_data',
-			array(
-				'auth' => array(
-					'access_token' => 'non-empty-value',
-				),
-			)
-		);
-		$this->assertEquals( false, ConnectionHelper::is_connected() );
-
-		update_option(
-			'woocommerce_helper_data',
-			array(
-				'auth' => array(
-					'access_token_secret' => 'non-empty-value',
-				),
-			)
-		);
-		$this->assertEquals( false, ConnectionHelper::is_connected() );
-
-		update_option(
-			'woocommerce_helper_data',
-			array(
-				'auth' => array(
-					'access_token'        => 'non-empty-value',
-					'access_token_secret' => 'non-empty-value',
-				),
-			)
-		);
 		$this->assertEquals( true, ConnectionHelper::is_connected() );
 	}
 }

@@ -104,6 +104,23 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		}
 
 		/**
+		 * @testdox Remote logging is allowed when WooCommerce.com helper reports the site is connected.
+		 */
+		public function test_remote_logging_allowed_when_helper_site_is_connected() {
+			$this->setup_remote_logging_conditions( true );
+			update_option(
+				'woocommerce_helper_data',
+				array(
+					'auth' => array(
+						'access_token' => 'non-empty-value',
+					),
+				)
+			);
+
+			$this->assertTrue( $this->sut->is_remote_logging_allowed() );
+		}
+
+		/**
 		 * @testdox Remote logging is not allowed under various conditions
 		 * @dataProvider remote_logging_disallowed_provider
 		 *
@@ -123,26 +140,30 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		public function remote_logging_disallowed_provider() {
 			return array(
-				'feature flag disabled'           => array(
+				'feature flag disabled'              => array(
 					'condition' => 'feature flag disabled',
 					'setup'     => fn() => update_option( 'woocommerce_feature_remote_logging_enabled', 'no' ),
 				),
-				'woocommerce.com disconnected'    => array(
+				'woocommerce.com disconnected'       => array(
 					'condition' => 'woocommerce.com disconnected',
 					'setup'     => fn() => delete_option( 'woocommerce_helper_data' ),
 				),
-				'woocommerce.com auth incomplete' => array(
-					'condition' => 'woocommerce.com auth incomplete',
+				'woocommerce.com auth malformed'     => array(
+					'condition' => 'woocommerce.com auth malformed',
+					'setup'     => fn() => update_option( 'woocommerce_helper_data', array( 'auth' => 'non-empty-value' ) ),
+				),
+				'woocommerce.com auth missing token' => array(
+					'condition' => 'woocommerce.com auth missing token',
 					'setup'     => fn() => update_option(
 						'woocommerce_helper_data',
 						array(
 							'auth' => array(
-								'access_token' => 'non-empty-value',
+								'access_token_secret' => 'non-empty-value',
 							),
 						)
 					),
 				),
-				'outdated version'                => array(
+				'outdated version'                   => array(
 					'condition' => 'outdated version',
 					'setup'     => function () {
 						$version = WC()->version;

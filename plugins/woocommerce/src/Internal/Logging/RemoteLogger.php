@@ -147,7 +147,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		if ( ! ConnectionHelper::is_connected() ) {
+		if ( ! $this->is_wccom_connected_for_remote_logging() ) {
 			return false;
 		}
 
@@ -156,6 +156,28 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Determine whether the store has enough WooCommerce.com connection state to allow remote logging.
+	 *
+	 * @return bool
+	 */
+	private function is_wccom_connected_for_remote_logging() {
+		if ( ! ConnectionHelper::is_connected() ) {
+			return false;
+		}
+
+		if ( ! class_exists( 'WC_Helper' ) || ! class_exists( 'WC_Helper_Options' ) ) {
+			return false;
+		}
+
+		$auth = \WC_Helper_Options::get( 'auth' );
+		if ( ! is_array( $auth ) ) {
+			return false;
+		}
+
+		return \WC_Helper::is_site_connected();
 	}
 
 	/**
