@@ -40,6 +40,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		public function tearDown(): void {
 			$this->cleanup_filters();
 			delete_option( 'woocommerce_feature_remote_logging_enabled' );
+			delete_option( 'woocommerce_helper_data' );
 			delete_transient( RemoteLogger::WC_NEW_VERSION_TRANSIENT );
 			global $wpdb;
 			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_rate_limits" );
@@ -77,6 +78,16 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		}
 
 		/**
+		 * @testdox Remote logging is allowed when usage tracking is disabled and WooCommerce.com is connected
+		 */
+		public function test_remote_logging_allowed_when_tracking_is_disabled() {
+			$this->setup_remote_logging_conditions( true );
+			add_filter( 'option_woocommerce_allow_tracking', fn() => 'no' );
+
+			$this->assertTrue( $this->sut->is_remote_logging_allowed() );
+		}
+
+		/**
 		 * @testdox Remote logging is not allowed under various conditions
 		 * @dataProvider remote_logging_disallowed_provider
 		 *
@@ -96,15 +107,15 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		public function remote_logging_disallowed_provider() {
 			return array(
-				'feature flag disabled' => array(
+				'feature flag disabled'        => array(
 					'condition' => 'feature flag disabled',
 					'setup'     => fn() => update_option( 'woocommerce_feature_remote_logging_enabled', 'no' ),
 				),
-				'tracking opted out'    => array(
-					'condition' => 'tracking opted out',
-					'setup'     => fn() => add_filter( 'option_woocommerce_allow_tracking', fn() => 'no' ),
+				'woocommerce.com disconnected' => array(
+					'condition' => 'woocommerce.com disconnected',
+					'setup'     => fn() => delete_option( 'woocommerce_helper_data' ),
 				),
-				'outdated version'      => array(
+				'outdated version'             => array(
 					'condition' => 'outdated version',
 					'setup'     => function () {
 						$version = WC()->version;
@@ -681,7 +692,14 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		private function setup_remote_logging_conditions( $enabled = true ) {
 			update_option( 'woocommerce_feature_remote_logging_enabled', $enabled ? 'yes' : 'no' );
-			add_filter( 'option_woocommerce_allow_tracking', fn() => 'yes' );
+			update_option(
+				'woocommerce_helper_data',
+				array(
+					'auth' => array(
+						'access_token' => 'test-token',
+					),
+				)
+			);
 			$this->setup_mock_plugin_updates( $enabled ? WC()->version : '9.0.0' );
 		}
 

@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Internal\Features;
 
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use WC_Tracks;
-use WC_Site_Tracking;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
@@ -289,7 +288,6 @@ class FeaturesController {
 	 */
 	private function init_feature_definitions(): void {
 		$alpha_feature_testing_is_enabled = Constants::is_true( 'WOOCOMMERCE_ENABLE_ALPHA_FEATURE_TESTING' );
-		$tracking_enabled                 = WC_Site_Tracking::is_tracking_enabled();
 
 		$legacy_features = array(
 			'analytics'                          => array(
@@ -390,12 +388,7 @@ class FeaturesController {
 			),
 			'remote_logging'                     => array(
 				'name'                         => __( 'Remote Logging', 'woocommerce' ),
-				'description'                  => sprintf(
-					/* translators: %1$s: opening link tag, %2$s: closing link tag */
-					__( 'Allow WooCommerce to send error logs and non-sensitive diagnostic data to help improve WooCommerce. This feature requires %1$susage tracking%2$s to be enabled.', 'woocommerce' ),
-					'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' ) . '">',
-					'</a>'
-				),
+				'description'                  => __( 'Allow WooCommerce to send error logs and non-sensitive diagnostic data to help improve WooCommerce. Logs are sent only when the store is connected to WooCommerce.com.', 'woocommerce' ),
 				'enabled_by_default'           => true,
 				'disable_ui'                   => false,
 
@@ -410,18 +403,6 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
-				'setting'                      => array(
-					'disabled' => function () use ( $tracking_enabled ) {
-						return ! $tracking_enabled;
-					},
-					'desc_tip' => function () use ( $tracking_enabled ) {
-						if ( ! $tracking_enabled ) {
-							return __( '⚠ Usage tracking must be enabled to use remote logging.', 'woocommerce' );
-						}
-
-						return '';
-					},
-				),
 			),
 			'deferred_transactional_emails'      => array(
 				'name'                         => __( 'Deferred emails', 'woocommerce' ),
@@ -681,11 +662,6 @@ class FeaturesController {
 				'disable_ui'                   => false,
 			),
 		);
-
-		if ( ! $tracking_enabled ) {
-			// Uncheck the remote logging feature when usage tracking is disabled.
-			$legacy_features['remote_logging']['setting']['value'] = 'no';
-		}
 
 		foreach ( $legacy_features as $slug => $definition ) {
 			$this->add_feature_definition( $slug, $definition['name'], $definition );

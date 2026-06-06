@@ -6,15 +6,15 @@ namespace Automattic\WooCommerce\Internal\Logging;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Internal\McStats;
+use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper;
 use Jetpack_Options;
 use WC_Rate_Limiter;
 use WC_Log_Levels;
-use WC_Site_Tracking;
 
 /**
  * WooCommerce Remote Logger
  *
- * The WooCommerce remote logger class adds functionality to log WooCommerce errors remotely based on if the customer opted in and several other conditions.
+ * The WooCommerce remote logger class adds functionality to log WooCommerce errors remotely based on WooCommerce.com connection status and several other conditions.
  *
  * No personal information is logged, only error information and relevant context.
  *
@@ -137,9 +137,8 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * Determines if remote logging is allowed based on the following conditions:
 	 *
 	 * 1. The feature flag for remote error logging is enabled.
-	 * 2. The user has opted into tracking/logging.
-	 * 3. The store is allowed to log based on the variant assignment percentage.
-	 * 4. The current WooCommerce version is the latest so we don't log errors that might have been fixed in a newer version.
+	 * 2. The store is connected to WooCommerce.com.
+	 * 3. The current WooCommerce version is the latest so we don't log errors that might have been fixed in a newer version.
 	 *
 	 * @return bool
 	 */
@@ -148,7 +147,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		if ( ! WC_Site_Tracking::is_tracking_enabled() ) {
+		if ( ! ConnectionHelper::is_connected() ) {
 			return false;
 		}
 
