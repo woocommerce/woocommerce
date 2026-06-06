@@ -32,7 +32,6 @@
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/data": "workspace:*",
 		"@woocommerce/expression-evaluation": "workspace:*",
-		"@woocommerce/product-editor": "workspace:*",
 		"@woocommerce/remote-logging": "workspace:*",
 		"@wordpress/api-fetch": "catalog:wp-min",
 		"@wordpress/block-editor": "catalog:wp-min",

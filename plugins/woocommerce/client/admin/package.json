@@ -69,7 +69,6 @@
 		"@woocommerce/navigation": "workspace:*",
 		"@woocommerce/number": "workspace:*",
 		"@woocommerce/onboarding": "workspace:*",
-		"@woocommerce/product-editor": "workspace:*",
 		"@woocommerce/remote-logging": "workspace:*",
 		"@woocommerce/sanitize": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
