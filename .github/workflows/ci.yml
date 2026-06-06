@@ -153,6 +153,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: 'project-jobs'
     if: ${{ !cancelled() && needs.project-jobs.result == 'success' }}
+    permissions:
+      contents: read
     env:
       E2E_BUILD_ARTIFACT_NAME: e2e-woocommerce-build-${{ github.run_id }}
     steps:
@@ -179,6 +181,7 @@ jobs:
         if: ${{ steps.e2e-build.outputs.required == 'true' }}
         with:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
+          persist-credentials: false
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Build WooCommerce assets'
