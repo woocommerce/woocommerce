@@ -1301,6 +1301,73 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that cached rich cards render even after the per-render fetch cap is exhausted.
+	 */
+	public function test_renders_cached_rich_card_after_fetch_cap_exhausted(): void {
+		// Pre-warm the embed page cache for one URL to simulate a previous render.
+		$cached_url = 'https://example.com/cached-post';
+		set_transient(
+			'wc_email_embed_pg_' . md5( $cached_url ),
+			array(
+				'title'         => 'Cached Card Title',
+				'thumbnail_url' => '',
+				'provider_name' => 'Example Blog',
+				'provider_url'  => 'https://example.com',
+				'excerpt'       => '',
+				'site_icon_url' => '',
+			),
+			DAY_IN_SECONDS
+		);
+
+		$embed_page_html = '<html><body><div class="wp-embed">'
+			. '<p class="wp-embed-heading"><a href="https://example.com/post" target="_top">Fetched Card Title</a></p>'
+			. '<div class="wp-embed-site-title"><a href="https://example.com" target="_top">'
+			. '<span>Example Blog</span></a></div>'
+			. '</div></body></html>';
+		$filter_callback = $this->mock_embed_page_for_example_com( $embed_page_html );
+
+		$urls = array();
+		try {
+			// Exhaust the five fetch slots with uncached embeds.
+			for ( $i = 1; $i <= 5; $i++ ) {
+				$url    = 'https://example.com/uncached-' . $i;
+				$urls[] = $url;
+
+				$parsed_block = array(
+					'blockName' => 'core/embed',
+					'attrs'     => array(
+						'url'              => $url,
+						'type'             => 'wp-embed',
+						'providerNameSlug' => 'example-blog',
+					),
+					'innerHTML' => '<figure class="wp-block-embed is-type-wp-embed"><div class="wp-block-embed__wrapper">' . $url . '</div></figure>',
+				);
+				$this->embed_renderer->render( $parsed_block['innerHTML'], $parsed_block, $this->rendering_context );
+			}
+
+			// The cached embed should still render as a rich card without an HTTP fetch.
+			$parsed_cached_block = array(
+				'blockName' => 'core/embed',
+				'attrs'     => array(
+					'url'              => $cached_url,
+					'type'             => 'wp-embed',
+					'providerNameSlug' => 'example-blog',
+				),
+				'innerHTML' => '<figure class="wp-block-embed is-type-wp-embed"><div class="wp-block-embed__wrapper">' . $cached_url . '</div></figure>',
+			);
+			$rendered            = $this->embed_renderer->render( $parsed_cached_block['innerHTML'], $parsed_cached_block, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+			delete_transient( 'wc_email_embed_pg_' . md5( $cached_url ) );
+			foreach ( $urls as $url ) {
+				delete_transient( 'wc_email_embed_pg_' . md5( $url ) );
+			}
+		}
+
+		$this->assertStringContainsString( 'Cached Card Title', $rendered, 'Cached embed should render as a rich card after the fetch cap is exhausted' );
+	}
+
+	/**
 	 * Test that compact link card shows URL in a styled card with theme link color
 	 */
 	public function test_compact_link_card_shows_url_in_card(): void {

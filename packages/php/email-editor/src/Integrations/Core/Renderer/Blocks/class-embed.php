@@ -28,6 +28,7 @@ class Embed extends Abstract_Block_Renderer {
 	 * Covers both embed page fetches (rich cards) and oEmbed thumbnail lookups.
 	 * Beyond this limit, embeds render without fetching (compact link cards or link fallbacks).
 	 * Counts attempts, not successes, to cap outbound HTTP requests.
+	 * Cached results render normally and do not count toward the limit.
 	 */
 	private const MAX_EMBED_FETCHES = 5;
 
@@ -196,14 +197,11 @@ class Embed extends Abstract_Block_Renderer {
 			$url         = $this->extract_provider_url( $attr, $block_content );
 			$is_wp_embed = isset( $attr['type'] ) && 'wp-embed' === $attr['type'];
 			if ( ! empty( $url ) && $is_wp_embed ) {
-				if ( ! $this->may_attempt_embed_fetch() ) {
-					return $this->render_compact_link_card( $url, $parsed_block, $rendering_context );
-				}
 				$card_result = $this->render_link_embed_card( $url, $parsed_block, $rendering_context );
 				if ( ! empty( $card_result ) ) {
 					return $card_result;
 				}
-				// Fetch failed — render as compact link card instead of plain link.
+				// Fetch failed or over the fetch cap — render as compact link card instead of plain link.
 				return $this->render_compact_link_card( $url, $parsed_block, $rendering_context );
 			}
 			return $this->render_link_fallback( $attr, $block_content, $parsed_block, $rendering_context );
@@ -761,6 +759,12 @@ class Embed extends Abstract_Block_Renderer {
 		}
 		if ( is_string( $cached ) ) {
 			// Negative cache (empty string from previous failure).
+			return $empty_result;
+		}
+
+		// Enforce the per-render fetch cap before making an HTTP request.
+		// The result is intentionally not cached, so the page can still be fetched on a later render.
+		if ( ! $this->may_attempt_embed_fetch() ) {
 			return $empty_result;
 		}
 
