@@ -197,6 +197,7 @@ jobs:
             plugins/woocommerce/assets/client
             plugins/woocommerce/assets/css
             plugins/woocommerce/assets/js
+            plugins/woocommerce/includes/react-admin/feature-config.php
           if-no-files-found: error
           retention-days: 1
 
