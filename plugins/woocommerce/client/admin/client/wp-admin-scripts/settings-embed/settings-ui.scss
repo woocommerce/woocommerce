@@ -298,6 +298,36 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 	}
 
+	.wc-settings-ui__unsaved-changes-modal {
+		.components-modal__header {
+			min-height: 72px;
+			padding: 24px 32px 8px;
+		}
+
+		.components-modal__header-heading {
+			font-size: 20px;
+			font-weight: 500;
+			line-height: 24px;
+		}
+
+		.components-modal__content {
+			padding: 4px 32px 32px;
+		}
+
+		p {
+			font-size: 13px;
+			line-height: 20px;
+			margin: 0;
+		}
+	}
+
+	.wc-settings-ui__unsaved-changes-actions {
+		display: flex;
+		gap: 8px;
+		justify-content: flex-end;
+		margin-top: 24px;
+	}
+
 	@media (max-width: 960px) {
 		#mainform {
 			padding: 0 24px 32px;

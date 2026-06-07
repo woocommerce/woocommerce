@@ -7,7 +7,13 @@ import { createRoot } from 'react-dom/client';
 import type { ReactNode } from 'react';
 
 jest.mock( '@wordpress/admin-ui', () => ( {
-	Page: ( { children }: { children: ReactNode } ) => <>{ children }</>,
+	Page: ( {
+		children,
+		className,
+	}: {
+		children: ReactNode;
+		className?: string;
+	} ) => <div className={ className }>{ children }</div>,
 } ) );
 
 /**
@@ -164,6 +170,85 @@ describe( 'settings HTML rendering', () => {
 
 		expect( container.textContent ).toContain( 'Controller' );
 		expect( container.textContent ).not.toContain( 'Dependent field' );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'prompts before navigating away with unsaved changes', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			shell: {
+				navigation: [
+					{
+						id: 'next-page',
+						label: 'Next page',
+						href: 'https://example.com/next',
+					},
+				],
+			},
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							value: 'Initial value',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		const input = container.querySelector( 'input[type="text"]' );
+		const link = container.querySelector(
+			'a[href="https://example.com/next"]'
+		);
+
+		expect( input ).not.toBeNull();
+		expect( link ).not.toBeNull();
+
+		act( () => {
+			if ( input instanceof HTMLInputElement ) {
+				const valueSetter = Object.getOwnPropertyDescriptor(
+					HTMLInputElement.prototype,
+					'value'
+				)?.set;
+
+				valueSetter?.call( input, 'Changed value' );
+				input.dispatchEvent(
+					new Event( 'input', { bubbles: true, cancelable: true } )
+				);
+			}
+		} );
+
+		act( () => {
+			link?.dispatchEvent(
+				new MouseEvent( 'click', {
+					bubbles: true,
+					cancelable: true,
+					button: 0,
+				} )
+			);
+		} );
+
+		expect( document.body.textContent ).toContain(
+			'You have unsaved changes'
+		);
+		expect( document.body.textContent ).toContain(
+			"If you leave now, your changes won't be saved."
+		);
+		expect( document.body.textContent ).toContain( 'Discard' );
+		expect( document.body.textContent ).toContain( 'Save' );
 
 		act( () => root.unmount() );
 		container.remove();
