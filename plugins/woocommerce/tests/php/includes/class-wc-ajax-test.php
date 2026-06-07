@@ -632,4 +632,70 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		return $result;
 	}
+
+	/**
+	 * @group ajax
+	 * @testdox Should auto-cap line item refunds to the remaining order balance to prevent gateway rejection due to tax rounding.
+	 * @see Issue #64668
+	 */
+	public function test_refund_line_items_auto_caps_tax_rounding_discrepancy(): void {
+		$this->_setRole( 'administrator' );
+
+		// 1. Setup the Tax Environment (20% VAT)
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'base' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		
+		WC_Tax::_insert_tax_rate( array(
+			'tax_rate' => '20.0000',
+			'tax_rate_name' => 'VAT',
+		) );
+
+		// 2. Create the Product (£23.90) and Order
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 23.90 );
+		$product->save();
+
+		$order = wc_create_order();
+		
+		// 3. Add 10 items (Simulating the exact bug report conditions)
+		$item_id = $order->add_product( $product, 10 );
+		$order->calculate_taxes();
+		$order->calculate_totals();
+		
+		// The math error occurs when we apply a 25% discount. 
+		// We mock the exact remaining total from the issue: 179.25
+		$order->set_total( 179.25 ); 
+		$order->save();
+
+		// 4. Construct the AJAX Payload for a Full Refund
+		// The UI calculates the line items to 179.26 (1p too high)
+		$line_item_qtys = array( $item_id => 10 );
+		$line_item_totals = array( $item_id => 149.38 );
+		$line_item_tax_totals = array( $item_id => array( 1 => 29.88 ) ); // 179.26 total
+
+		$_POST['order_id']             = $order->get_id();
+		$_POST['refund_amount']        = 179.26; // 1p higher than order total
+		$_POST['line_item_qtys']       = wp_json_encode( $line_item_qtys );
+		$_POST['line_item_totals']     = wp_json_encode( $line_item_totals );
+		$_POST['line_item_tax_totals'] = wp_json_encode( $line_item_tax_totals );
+		$_POST['security']             = wp_create_nonce( 'refund' );
+
+		// 5. Execute the AJAX request
+		$response = $this->do_ajax( 'woocommerce_refund_line_items' );
+
+		// Refresh the order from the database
+		$order = wc_get_order( $order->get_id() );
+
+		// 6. The Invariant Verification
+		$this->assertIsArray( $response );
+		$this->assertTrue( $response['success'], 'The refund should succeed silently by auto-capping the 1p discrepancy.' );
+		
+		// The most critical check: The ledger must balance exactly to the original order total.
+		$this->assertEquals( 179.25, $order->get_total_refunded(), 'The total refunded amount must not exceed the order total.' );
+
+		// Cleanup
+		$product->delete( true );
+		$order->delete( true );
+	}
 }
