@@ -271,7 +271,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 						</a>
 					) }
 				</td>
-				<th scope="row" className="wc-block-cart-item__product">
+				<td role="rowheader" className="wc-block-cart-item__product">
 					<div className="wc-block-cart-item__wrap">
 						<ProductName
 							disabled={
@@ -418,7 +418,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 							</div>
 						) }
 					</div>
-				</th>
+				</td>
 				<td className="wc-block-cart-item__total">
 					<div className="wc-block-cart-item__total-price-and-sale-badge-wrapper">
 						<ProductPrice
