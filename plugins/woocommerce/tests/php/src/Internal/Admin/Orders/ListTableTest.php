@@ -30,6 +30,7 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$this->setup_cot();
 		$this->toggle_cot_authoritative( true );
 		$this->sut      = new ListTable();
@@ -44,6 +45,7 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->clean_up_cot_setup();
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 
 		foreach ( $this->custom_roles as $role ) {
 			remove_role( $role );
@@ -422,8 +424,9 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	public function test_handle_bulk_actions_empty_trash_blocked_without_delete_capability(): void {
 		$order = \WC_Helper_Order::create_order();
 
-		// Move the order to the trash.
-		$order->delete( false );
+		// Move the order to the trash without permanently deleting it.
+		$order->set_status( OrderStatus::TRASH );
+		$order->save();
 
 		$this->login_as_user_with_caps(
 			'orders_editor_without_delete_empty_trash',
