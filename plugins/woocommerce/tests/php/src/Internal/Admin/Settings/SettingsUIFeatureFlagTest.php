@@ -164,14 +164,15 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 		}
 
+		$settings_page_notices = $this->get_settings_page_output_notices( $notices );
+
 		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
 		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
-		$this->assertNotEmpty( $notices );
-		$this->assertSame( 'WC_Settings_Page::output', $notices[0]['function_name'] );
-		$this->assertSame( '10.9.0', $notices[0]['version'] );
-		$this->assertStringContainsString( 'settings_ui_flag_test', $notices[0]['message'] );
-		$this->assertStringContainsString( 'advanced', $notices[0]['message'] );
-		$this->assertStringContainsString( 'Unable to load extension script handles.', $notices[0]['message'] );
+		$this->assertNotEmpty( $settings_page_notices );
+		$this->assertSame( '10.9.0', $settings_page_notices[0]['version'] );
+		$this->assertStringContainsString( 'settings_ui_flag_test', $settings_page_notices[0]['message'] );
+		$this->assertStringContainsString( 'advanced', $settings_page_notices[0]['message'] );
+		$this->assertStringContainsString( 'Unable to load extension script handles.', $settings_page_notices[0]['message'] );
 	}
 
 	/**
@@ -208,14 +209,15 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 		}
 
+		$settings_page_notices = $this->get_settings_page_output_notices( $notices );
+
 		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
 		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
-		$this->assertNotEmpty( $notices );
-		$this->assertSame( 'WC_Settings_Page::output', $notices[0]['function_name'] );
-		$this->assertSame( '10.9.0', $notices[0]['version'] );
-		$this->assertStringContainsString( 'settings_ui_flag_test', $notices[0]['message'] );
-		$this->assertStringContainsString( 'advanced', $notices[0]['message'] );
-		$this->assertStringContainsString( 'Settings UI schema generation failed.', $notices[0]['message'] );
+		$this->assertNotEmpty( $settings_page_notices );
+		$this->assertSame( '10.9.0', $settings_page_notices[0]['version'] );
+		$this->assertStringContainsString( 'settings_ui_flag_test', $settings_page_notices[0]['message'] );
+		$this->assertStringContainsString( 'advanced', $settings_page_notices[0]['message'] );
+		$this->assertStringContainsString( 'Settings UI schema generation failed.', $settings_page_notices[0]['message'] );
 	}
 
 	/**
@@ -353,6 +355,23 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 				);
 			}
 		};
+	}
+
+	/**
+	 * Get captured doing-it-wrong notices emitted by the settings page output method.
+	 *
+	 * @param array $notices Captured doing-it-wrong notices.
+	 * @return array
+	 */
+	private function get_settings_page_output_notices( array $notices ): array {
+		return array_values(
+			array_filter(
+				$notices,
+				static function ( array $notice ): bool {
+					return 'WC_Settings_Page::output' === $notice['function_name'];
+				}
+			)
+		);
 	}
 
 	/**
