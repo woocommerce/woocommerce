@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add native variation gallery support: each variation can now have its own ordered image set, replacing the retired Additional Variation Images extension. Includes a migrator for legacy data and a runtime fallback so existing stores keep displaying their galleries.
