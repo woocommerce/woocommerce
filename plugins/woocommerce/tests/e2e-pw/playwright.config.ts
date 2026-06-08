@@ -145,11 +145,6 @@ export default defineConfig( {
 			dependencies: [ 'site setup' ],
 		},
 		{
-			name: 'legacy-mini-cart',
-			testMatch: [ '**/tests/cart/**', '**/tests/checkout/**' ],
-			dependencies: [ 'site setup' ],
-		},
-		{
 			name: 'paypal-standard',
 			testMatch: [ '**/tests/paypal/**' ],
 			dependencies: [ 'site setup' ],
