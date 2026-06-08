@@ -130,15 +130,30 @@ class WC_Tests_User_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for test_wc_modify_map_meta_cap_invalid_user_id.
+	 *
+	 * @return array[]
+	 */
+	public function invalid_user_id_provider() {
+		return array(
+			'zero id'        => array( 0 ),
+			'stale non-zero' => array( 999999 ),
+		);
+	}
+
+	/**
 	 * Test that wc_modify_map_meta_cap does not fatal when $args[0] is not a valid user ID.
 	 *
 	 * On PHP 8+, property_exists() throws a TypeError when passed false (the return value
 	 * of get_userdata() for a missing user). This test ensures no fatal occurs and that
-	 * $caps is returned unchanged when the target user ID is invalid (e.g. 0).
+	 * $caps is returned unchanged when the target user ID is invalid (e.g. 0 or a stale id).
 	 *
+	 * @dataProvider invalid_user_id_provider
 	 * @see https://github.com/woocommerce/woocommerce/issues/65171
+	 *
+	 * @param int $invalid_id A user ID that does not correspond to an existing user.
 	 */
-	public function test_wc_modify_map_meta_cap_invalid_user_id() {
+	public function test_wc_modify_map_meta_cap_invalid_user_id( $invalid_id ) {
 		$password = wp_generate_password();
 
 		$manager_id = wp_insert_user(
@@ -152,10 +167,10 @@ class WC_Tests_User_Functions extends WC_Unit_Test_Case {
 
 		wp_set_current_user( $manager_id );
 
-		// Passing user ID 0 (invalid) should not throw a TypeError on PHP 8+.
-		// The caps array should be returned unchanged (no 'do_not_allow' added).
-		$caps = map_meta_cap( 'edit_user', $manager_id, 0 );
-		$this->assertNotContains( 'do_not_allow', $caps );
+		// Passing an invalid user ID should not throw a TypeError on PHP 8+.
+		// The caps array must be returned unchanged — exactly the WordPress default.
+		$caps = map_meta_cap( 'edit_user', $manager_id, $invalid_id );
+		$this->assertEquals( array( 'edit_users' ), $caps );
 	}
 
 	/**
