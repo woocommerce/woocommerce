@@ -57,6 +57,56 @@ const WOO_PAYMENTS_PROVIDER = {
 	_links: {},
 };
 
+const ONBOARDING_FIELDS = {
+	available_countries: {
+		US: 'United States (US)',
+		GB: 'United Kingdom (UK)',
+	},
+	business_types: [
+		{
+			key: 'US',
+			name: 'United States (US)',
+			types: [
+				{
+					key: 'individual',
+					name: 'Individual',
+					description: '',
+					structures: [],
+				},
+				{
+					key: 'company',
+					name: 'Company',
+					description: '',
+					structures: [
+						{
+							key: 'llc',
+							name: 'Limited liability company',
+						},
+					],
+				},
+			],
+		},
+	],
+	mccs_display_tree: [
+		{
+			id: 'food-and-drink',
+			type: 'category',
+			title: 'Food and drink',
+			items: [
+				{
+					id: '5812',
+					type: 'mcc',
+					title: 'Restaurants',
+					mcc: 5812,
+					keywords: [ 'food' ],
+				},
+			],
+		},
+	],
+	industry_to_mcc: {},
+	location: 'US',
+};
+
 const ONBOARDING_RESPONSE = {
 	steps: [
 		{
@@ -90,7 +140,14 @@ const ONBOARDING_RESPONSE = {
 			status: 'started',
 			dependencies: [ 'test_or_live_account' ],
 			actions: {},
-			context: {},
+			context: {
+				fields: ONBOARDING_FIELDS,
+				self_assessment: {},
+				sub_steps: {
+					business: { status: 'not_started' },
+					embedded: { status: 'not_started' },
+				},
+			},
 		},
 	],
 	context: {},
