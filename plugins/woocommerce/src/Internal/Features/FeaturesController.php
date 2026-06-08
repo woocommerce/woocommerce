@@ -348,15 +348,6 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
-				'setting'                      => array(
-					'desc_tip' => function () {
-						if ( ! ConnectionHelper::is_connected() ) {
-							return __( 'Connect your store to WooCommerce.com to send remote logs.', 'woocommerce' );
-						}
-
-						return '';
-					},
-				),
 			),
 			'site_visibility_badge'              => array(
 				'name'                         => __( 'Site visibility badge', 'woocommerce' ),
@@ -401,6 +392,15 @@ class FeaturesController {
 				'description'                  => __( 'Allow WooCommerce to send error logs and non-sensitive diagnostic data to help improve WooCommerce. Logs are sent only when the store is connected to WooCommerce.com.', 'woocommerce' ),
 				'enabled_by_default'           => true,
 				'disable_ui'                   => false,
+				'setting'                      => array(
+					'desc_tip' => function () {
+						if ( ! ConnectionHelper::is_connected() ) {
+							return __( 'Connect your store to WooCommerce.com to send remote logs.', 'woocommerce' );
+						}
+
+						return '';
+					},
+				),
 
 				/*
 				 * This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),

@@ -74,6 +74,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				'option_woocommerce_admin_remote_feature_enabled',
 				'option_woocommerce_allow_tracking',
 				'option_woocommerce_version',
+				'pre_option_woocommerce_helper_data',
 				'plugins_api',
 				'pre_http_request',
 				'woocommerce_remote_logger_formatted_log_data',
@@ -113,6 +114,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				array(
 					'auth' => array(
 						'access_token' => 'non-empty-value',
+						'site_id'      => 1,
 					),
 				)
 			);
@@ -150,7 +152,10 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				),
 				'woocommerce.com auth malformed'     => array(
 					'condition' => 'woocommerce.com auth malformed',
-					'setup'     => fn() => update_option( 'woocommerce_helper_data', array( 'auth' => 'non-empty-value' ) ),
+					'setup'     => fn() => add_filter(
+						'pre_option_woocommerce_helper_data',
+						fn() => array( 'auth' => 'non-empty-value' )
+					),
 				),
 				'woocommerce.com auth missing token' => array(
 					'condition' => 'woocommerce.com auth missing token',
