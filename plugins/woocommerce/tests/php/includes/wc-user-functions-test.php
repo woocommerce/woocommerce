@@ -108,6 +108,8 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 			$this->assertTrue( wc_customer_bought_product( 'billing@example.com', 0, $product_id_4 ) );
 
 			$this->assertTrue( wc_customer_bought_product( 'test@example.com', 0, $product_id_5 ) );
+			$this->assertTrue( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_5 ) );
+			$this->assertFalse( wc_customer_bought_product( '', $customer_id_1, $product_id_5 ) );
 
 			remove_filter( 'woocommerce_customer_bought_product_use_lookup_tables', $lookup_tables );
 		}
