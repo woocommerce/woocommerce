@@ -2649,6 +2649,9 @@ importers:
       eslint-plugin-playwright:
         specifier: 1.6.0
         version: 1.6.0(eslint-plugin-jest@23.20.0(eslint@8.57.1)(typescript@5.7.3))(eslint@8.57.1)
+      handlebars:
+        specifier: ^4.7.8
+        version: 4.7.9
       jest:
         specifier: 29.5.x
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))

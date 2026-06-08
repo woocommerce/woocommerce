@@ -17,13 +17,13 @@ export interface PostCompiler {
 
 /**
  * Creates a post from a Handlebars template file located in the
- * tests/e2e/content-templates directory.
+ * tests/e2e-pw/content-templates/blocks directory.
  */
 export async function createPostFromFile( this: RequestUtils, name: string ) {
 	const filePrefix = 'post';
 	const filePath = path.resolve(
 		__dirname,
-		'../../content-templates',
+		'../../../content-templates/blocks',
 		`${ filePrefix }_${ name }.handlebars` // e.g. post_with-custom-filters.handlebars
 	);
 

@@ -62,7 +62,7 @@ export async function revertTemplate( this: RequestUtils, slug: string ) {
 
 /**
  * Creates a WP template from a Handlebars template file located in the
- * tests/e2e/content-templates directory.
+ * tests/e2e-pw/content-templates/blocks directory.
  */
 export async function createTemplateFromFile(
 	this: RequestUtils,
@@ -76,7 +76,7 @@ export async function createTemplateFromFile(
 	const filePrefix = 'template';
 	const filePath = path.resolve(
 		__dirname,
-		'../../content-templates',
+		'../../../content-templates/blocks',
 		`${ filePrefix }_${ name }.handlebars` // e.g. template_product-archive_with-custom-filters.handlebars
 	);
 
