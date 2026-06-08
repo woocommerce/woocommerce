@@ -272,8 +272,10 @@ class JsonFileFeed implements FeedInterface {
 		$directory_path = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . self::UPLOAD_DIR . DIRECTORY_SEPARATOR;
 
 		// Try to create the directory if it does not exist.
+		// Allow file access so the generated feed files can be served by URL, while
+		// still preventing directory listing.
 		if ( ! is_dir( $directory_path ) ) {
-			FilesystemUtil::mkdir_p_not_indexable( $directory_path );
+			FilesystemUtil::mkdir_p_not_indexable( $directory_path, true );
 		}
 
 		// `mkdir_p_not_indexable()` returns `void`, we have to check again.
