@@ -427,8 +427,13 @@ class WC_Meta_Box_Product_Data {
 		// Remove _product_template_id for products that were created with the new product editor.
 		$product->delete_meta_data( '_product_template_id' );
 
-		$visible_in_pos = isset( $_POST['_visible_in_pos'] ) && 'yes' === wc_clean( wp_unslash( $_POST['_visible_in_pos'] ) );
-		wc_get_container()->get( POSProductVisibilitySync::class )->set_product_pos_visibility( $post_id, $visible_in_pos );
+		// Only sync POS visibility for product types where the "Available for POS" checkbox is rendered.
+		// Keeps unsupported types (downloadable, grouped, external) from silently acquiring the pos-hidden term.
+		$is_pos_supported = in_array( $product_type, array( ProductType::SIMPLE, ProductType::VARIABLE ), true ) && empty( $_POST['_downloadable'] );
+		if ( $is_pos_supported ) {
+			$visible_in_pos = isset( $_POST['_visible_in_pos'] ) && 'yes' === wc_clean( wp_unslash( $_POST['_visible_in_pos'] ) );
+			wc_get_container()->get( POSProductVisibilitySync::class )->set_product_pos_visibility( $post_id, $visible_in_pos );
+		}
 
 		/**
 		 * Set props before save.

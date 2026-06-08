@@ -2863,12 +2863,6 @@ parameters:
 			path: includes/admin/class-wc-admin-settings.php
 
 		-
-			message: '#^Method WC_Admin_Settings\:\:reset_settings_pages_on_feature_change\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-wc-admin-settings.php
-
-		-
 			message: '#^Method WC_Admin_Settings\:\:save\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

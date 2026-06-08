@@ -543,6 +543,16 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
+			'point_of_sale'                      => array(
+				'name'                         => __( 'Point of Sale', 'woocommerce' ),
+				'is_experimental'              => false,
+				'enabled_by_default'           => true,
+				'disable_ui'                   => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'deprecated_since'             => '11.0.0',
+				'deprecated_value'             => true,
+			),
 			'fulfillments'                       => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
 				'description'                  => __(
