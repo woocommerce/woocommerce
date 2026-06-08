@@ -33,6 +33,8 @@ export type ProductAddToCartStore = {
 	actions: {
 		initializeQuantity: ( productId: number, value: number ) => void;
 		setQuantity: ( productId: number, value: number ) => void;
+		setAttribute: ( attribute: string, value: string ) => void;
+		removeAttribute: ( attribute: string ) => void;
 		addError: ( error: ProductAddToCartError ) => string;
 		clearErrors: ( group?: string ) => void;
 	};
@@ -41,6 +43,15 @@ export type ProductAddToCartStore = {
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const normalizeAttributeName = ( name: string ): string =>
+	name
+		.replace( /^attribute_(pa_)?/, '' )
+		.replace( /-/g, ' ' )
+		.toLowerCase();
+
+const attributeNamesMatch = ( a: string, b: string ): boolean =>
+	normalizeAttributeName( a ) === normalizeAttributeName( b );
 
 const fallbackState: Pick<
 	ProductAddToCartStore[ 'state' ],
@@ -151,6 +162,35 @@ export const getProductAddToCartPayload = (
 			setQuantity( productId: number, value: number ) {
 				const quantity = getQuantityTarget();
 				quantity[ productId ] = value;
+			},
+			setAttribute( attribute: string, value: string ) {
+				const selectedAttributes = getSelectedAttributesTarget();
+				const index = selectedAttributes.findIndex( ( selectedAttribute ) =>
+					attributeNamesMatch( selectedAttribute.attribute, attribute )
+				);
+
+				if ( value === '' ) {
+					if ( index >= 0 ) {
+						selectedAttributes.splice( index, 1 );
+					}
+					return;
+				}
+
+				if ( index >= 0 ) {
+					selectedAttributes[ index ] = { attribute, value };
+				} else {
+					selectedAttributes.push( { attribute, value } );
+				}
+			},
+			removeAttribute( attribute: string ) {
+				const selectedAttributes = getSelectedAttributesTarget();
+				const index = selectedAttributes.findIndex( ( selectedAttribute ) =>
+					attributeNamesMatch( selectedAttribute.attribute, attribute )
+				);
+
+				if ( index >= 0 ) {
+					selectedAttributes.splice( index, 1 );
+				}
 			},
 			addError( error: ProductAddToCartError ): string {
 				getValidationErrorsTarget().push( error );

@@ -13,10 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import type {
-	Context as AddToCartWithOptionsContext,
-	AddToCartWithOptionsStore,
-} from '../../../../blocks/add-to-cart-with-options/frontend';
+import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -45,16 +42,6 @@ type ServerState = {
 		addToCartText: string;
 		noticeId: string;
 	};
-};
-
-const getAddToCartWithOptionsContext = () => {
-	try {
-		return getContext< AddToCartWithOptionsContext >(
-			'woocommerce/add-to-cart-with-options'
-		);
-	} catch {
-		return undefined;
-	}
 };
 
 const getProductAddToCartContext = () => {
@@ -94,14 +81,11 @@ const productButtonStore = {
 				return 0;
 			}
 
-			const formContext = getAddToCartWithOptionsContext();
 			const productAddToCartContext = getProductAddToCartContext();
 
 			const item = wooState.findItemInCart( {
 				id: product.id,
-				variation:
-					formContext?.selectedAttributes ??
-					productAddToCartContext?.selectedAttributes,
+				variation: productAddToCartContext?.selectedAttributes,
 			} );
 
 			return item?.quantity ?? 0;
