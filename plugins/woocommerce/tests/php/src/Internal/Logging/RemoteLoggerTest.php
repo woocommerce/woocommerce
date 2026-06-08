@@ -766,6 +766,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					'auth' => array(
 						'access_token'        => 'non-empty-value',
 						'access_token_secret' => 'non-empty-value',
+						'site_id'             => 1,
 					),
 				)
 			);

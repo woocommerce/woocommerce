@@ -289,6 +289,7 @@ class FeaturesController {
 	 */
 	private function init_feature_definitions(): void {
 		$alpha_feature_testing_is_enabled = Constants::is_true( 'WOOCOMMERCE_ENABLE_ALPHA_FEATURE_TESTING' );
+		$wccom_connected                  = ConnectionHelper::is_site_connected();
 
 		$legacy_features = array(
 			'analytics'                          => array(
@@ -389,12 +390,20 @@ class FeaturesController {
 			),
 			'remote_logging'                     => array(
 				'name'                         => __( 'Remote Logging', 'woocommerce' ),
-				'description'                  => __( 'Allow WooCommerce to send error logs and non-sensitive diagnostic data to help improve WooCommerce. Logs are sent only when the store is connected to WooCommerce.com.', 'woocommerce' ),
+				'description'                  => sprintf(
+					/* translators: %1$s: opening link tag, %2$s: closing link tag */
+					__( 'Allow WooCommerce to send error logs and non-sensitive diagnostic data to help improve WooCommerce. Logs are sent only when the store is %1$sconnected to WooCommerce.com%2$s.', 'woocommerce' ),
+					'<a href="' . esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ) . '">',
+					'</a>'
+				),
 				'enabled_by_default'           => true,
 				'disable_ui'                   => false,
 				'setting'                      => array(
-					'desc_tip' => function () {
-						if ( ! ConnectionHelper::is_connected() ) {
+					'disabled' => function () use ( $wccom_connected ) {
+						return ! $wccom_connected;
+					},
+					'desc_tip' => function () use ( $wccom_connected ) {
+						if ( ! $wccom_connected ) {
 							return __( 'Connect your store to WooCommerce.com to send remote logs for assistance from Woo Support with debugging your site.', 'woocommerce' );
 						}
 
@@ -672,6 +681,10 @@ class FeaturesController {
 				'disable_ui'                   => false,
 			),
 		);
+
+		if ( ! $wccom_connected ) {
+			$legacy_features['remote_logging']['setting']['value'] = 'no';
+		}
 
 		foreach ( $legacy_features as $slug => $definition ) {
 			$this->add_feature_definition( $slug, $definition['name'], $definition );

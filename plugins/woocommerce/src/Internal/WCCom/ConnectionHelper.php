@@ -26,4 +26,18 @@ final class ConnectionHelper {
 		}
 		return false;
 	}
+
+	/**
+	 * Check if the site is connected to WooCommerce.com.
+	 *
+	 * @return bool Whether the site is connected.
+	 */
+	public static function is_site_connected(): bool {
+		$auth = \WC_Helper_Options::get( 'auth' );
+		if ( ! is_array( $auth ) ) {
+			return false;
+		}
+
+		return \WC_Helper::is_site_connected();
+	}
 }

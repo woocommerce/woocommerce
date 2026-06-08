@@ -14,7 +14,8 @@ use WC_Log_Levels;
 /**
  * WooCommerce Remote Logger
  *
- * The WooCommerce remote logger class adds functionality to log WooCommerce errors remotely based on WooCommerce.com connection status and several other conditions.
+ * The WooCommerce remote logger class adds functionality to log WooCommerce errors remotely based on the Remote Logging feature opt-in,
+ * WooCommerce.com connection status, and several other conditions.
  *
  * No personal information is logged, only error information and relevant context.
  *
@@ -136,7 +137,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	/**
 	 * Determines if remote logging is allowed based on the following conditions:
 	 *
-	 * 1. The feature flag for remote error logging is enabled.
+	 * 1. The user opted in by enabling the Remote Logging feature.
 	 * 2. The store is connected to WooCommerce.com.
 	 * 3. The current WooCommerce version is the latest so we don't log errors that might have been fixed in a newer version.
 	 *
@@ -168,16 +169,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		if ( ! class_exists( 'WC_Helper' ) || ! class_exists( 'WC_Helper_Options' ) ) {
-			return false;
-		}
-
-		$auth = \WC_Helper_Options::get( 'auth' );
-		if ( ! is_array( $auth ) ) {
-			return false;
-		}
-
-		return \WC_Helper::is_site_connected();
+		return ConnectionHelper::is_site_connected();
 	}
 
 	/**
