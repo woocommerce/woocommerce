@@ -17,7 +17,7 @@ import {
 	type BuildOptions,
 } from './options.js';
 import { copyAssets } from './assets.js';
-import { log, setDebugEnabled } from './logger.js';
+import { log, setDebugEnabled } from '../utils/logger.js';
 
 export type { BuildOptions } from './options.js';
 export { parseBuildArgs } from './args.js';

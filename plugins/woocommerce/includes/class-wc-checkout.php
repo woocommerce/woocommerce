@@ -470,6 +470,23 @@ class WC_Checkout {
 			// Save the order.
 			$order_id = $order->save();
 
+			// Defense-in-depth: if the cart still has items but the persisted order has none,
+			// the save silently dropped every line item (e.g. a $wpdb->insert() returning false
+			// in save_items()). Re-read the order from the data store so we check DB state, not
+			// the in-memory copy that save_items() populated. Bail out so the caller can retry
+			// rather than completing a paid-but-empty order.
+			//
+			// This is intentionally narrow: it catches the catastrophic "no items at all" case,
+			// not partial item loss where some inserts succeed and some fail. Wider parity checks
+			// would need to reconcile quantities across products, bundles, fees, shipping, etc.,
+			// which is out of scope for the silent-failure guard.
+			if ( WC()->cart->get_cart_contents_count() > 0 ) {
+				$persisted_order = wc_get_order( $order_id );
+				if ( ! $persisted_order || 0 === count( $persisted_order->get_items() ) ) {
+					throw new Exception( __( 'Order items could not be saved. Please try again.', 'woocommerce' ) );
+				}
+			}
+
 			/**
 			 * Action hook fired after an order is created used to add custom meta to the order.
 			 *
