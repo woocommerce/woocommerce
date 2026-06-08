@@ -353,7 +353,16 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 						$render_settings_ui = false;
 						$reason             = __( 'Settings UI script handles could not be resolved.', 'woocommerce' );
 
-						wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
+						wc_get_logger()->debug(
+							sprintf(
+								'Settings UI script handles could not be resolved for page "%1$s" section "%2$s": %3$s: %4$s',
+								$settings_ui_page->get_page_id(),
+								'' === $current_section ? 'default' : $current_section,
+								get_class( $e ),
+								$e->getMessage()
+							),
+							array( 'source' => 'settings-ui' )
+						);
 
 						if ( $e instanceof \Exception ) {
 							$reason = sprintf(
@@ -361,6 +370,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 								__( 'Settings UI script handles could not be resolved: %s', 'woocommerce' ),
 								$e->getMessage()
 							);
+							wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
 						}
 
 						$this->log_settings_ui_fallback( $settings_ui_page, $current_section, $reason );
