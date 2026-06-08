@@ -68,12 +68,6 @@
 		"email": true,
 		"__experimentalSelector": ".wp-block-button.wc-block-components-product-button .wc-block-components-product-button__button"
 	},
-	"ancestor": [
-		"woocommerce/all-products",
-		"woocommerce/single-product",
-		"core/post-template",
-		"woocommerce/product-template"
-	],
 	"styles": [
 		{
 			"name": "fill",

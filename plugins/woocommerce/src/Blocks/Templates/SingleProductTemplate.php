@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
+use Automattic\WooCommerce\Blocks\Utils\ProductAddToCartUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
@@ -73,6 +74,7 @@ class SingleProductTemplate extends AbstractTemplate {
 						'variationId' => null,
 					)
 				);
+				ProductAddToCartUtils::initialize_state( $product );
 			}
 		}
 	}

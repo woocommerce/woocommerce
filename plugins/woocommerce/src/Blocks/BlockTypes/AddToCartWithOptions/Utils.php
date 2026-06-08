@@ -110,10 +110,11 @@ class Utils {
 	 *                                    the one provided by the inherited context (e.g. child items in grouped products).
 	 *                                    Setting this unnecessarily shadows the parent context and prevents
 	 *                                    variationId updates from propagating.
+	 * @param bool   $bind_value Whether to bind the input value to the quantity selector state.
 	 *
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
-	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array(), $set_product_context = false ) {
+	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array(), $set_product_context = false, $bind_value = true ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 		global $product;
 
@@ -161,7 +162,9 @@ class Utils {
 			);
 
 			$processor->set_attribute( 'data-wp-on--blur', 'actions.handleQuantityBlur' );
-			$processor->set_attribute( 'data-wp-bind--value', 'state.inputQuantity' );
+			if ( $bind_value ) {
+				$processor->set_attribute( 'data-wp-bind--value', 'state.inputQuantity' );
+			}
 			foreach ( $input_attributes as $attribute => $value ) {
 				$processor->set_attribute( $attribute, $value );
 			}
@@ -204,6 +207,10 @@ class Utils {
 
 		if ( ! $product instanceof \WC_Product && $previous_product instanceof \WC_Product ) {
 			$product = $previous_product;
+		}
+
+		if ( ! $product instanceof \WC_Product && is_singular( 'product' ) ) {
+			$product = wc_get_product( get_queried_object_id() );
 		}
 
 		return $product instanceof \WC_Product ? $product : null;

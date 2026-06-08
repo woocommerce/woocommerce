@@ -83,7 +83,10 @@ class ProductButton extends AbstractBlock {
 		// Try to load the product from the block context, if not available,
 		// use the global $product.
 		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
-		$post    = $post_id ? wc_get_product( $post_id ) : null;
+		if ( empty( $post_id ) && is_singular( 'product' ) ) {
+			$post_id = get_queried_object_id();
+		}
+		$post = $post_id ? wc_get_product( $post_id ) : null;
 		if ( $post instanceof \WC_Product ) {
 			$product = $post;
 		} elseif ( ! $product instanceof \WC_Product ) {
@@ -104,7 +107,7 @@ class ProductButton extends AbstractBlock {
 		$is_product_purchasable   = $this->is_product_purchasable( $product );
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
 		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
-		$is_ajax_button           = ( ( $ajax_add_to_cart_enabled && $product->supports( 'ajax_add_to_cart' ) ) || $is_descendant_of_add_to_cart_form ) && $is_product_purchasable && ! $cart_redirect_after_add;
+		$is_ajax_button           = ( $product->supports( 'ajax_add_to_cart' ) || $is_descendant_of_add_to_cart_form ) && $is_product_purchasable && ! $cart_redirect_after_add;
 		$html_element             = $is_ajax_button || ( $is_descendant_of_add_to_cart_form && ! $product->is_type( ProductType::EXTERNAL ) ) ? 'button' : 'a';
 		$styles_and_classes       = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 		$classname                = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );

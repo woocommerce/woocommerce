@@ -56,11 +56,12 @@ class QuantitySelector extends AbstractBlock {
 			return '';
 		}
 
-		$is_external_product_with_url        = $product instanceof \WC_Product_External && $product->get_product_url();
-		$can_only_be_purchased_one_at_a_time = $product->is_sold_individually();
-		$managing_stock                      = $product->managing_stock();
-		$stock_quantity                      = $product->get_stock_quantity();
-		$allows_backorders                   = $product->backorders_allowed();
+		$is_descendant_of_add_to_cart_with_options = $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] ?? false;
+		$is_external_product_with_url              = $product instanceof \WC_Product_External && $product->get_product_url();
+		$can_only_be_purchased_one_at_a_time       = $product->is_sold_individually();
+		$managing_stock                            = $product->managing_stock();
+		$stock_quantity                            = $product->get_stock_quantity();
+		$allows_backorders                         = $product->backorders_allowed();
 
 		if ( AddToCartWithOptionsUtils::is_min_max_quantity_same( $product ) ) {
 			$product = $previous_product;
@@ -92,6 +93,17 @@ class QuantitySelector extends AbstractBlock {
 			$product_name = $product->get_name();
 			$product_html = AddToCartWithOptionsUtils::add_quantity_steppers( $product_html, $product_name );
 			$product_html = AddToCartWithOptionsUtils::add_quantity_stepper_classes( $product_html );
+
+			if ( ! $is_descendant_of_add_to_cart_with_options ) {
+				$product_html = str_replace(
+					array(
+						' data-wp-bind--disabled="!state.allowsDecrease"',
+						' data-wp-bind--disabled="!state.allowsIncrease"',
+					),
+					'',
+					$product_html
+				);
+			}
 		}
 
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
@@ -108,12 +120,11 @@ class QuantitySelector extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
-			'class' => $classes,
-			'style' => esc_attr( $classes_and_styles['styles'] ),
+			'class'                                  => $classes,
+			'style'                                  => esc_attr( $classes_and_styles['styles'] ),
+			'data-wc-product-add-to-cart-product-id' => (string) $product->get_id(),
 		);
 		$input_attributes   = array();
-
-		$product_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $product );
 
 		if ( $product->is_type( ProductType::VARIABLE ) ) {
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
@@ -122,10 +133,20 @@ class QuantitySelector extends AbstractBlock {
 			$input_attributes['data-wp-bind--min']      = 'woocommerce/products::state.productInContext.add_to_cart.minimum';
 			$input_attributes['data-wp-bind--max']      = 'woocommerce/products::state.productInContext.add_to_cart.maximum';
 			$input_attributes['data-wp-bind--step']     = 'woocommerce/products::state.productInContext.add_to_cart.multiple_of';
-			$input_attributes['data-wp-watch']          = 'woocommerce/add-to-cart-with-options::callbacks.watchQuantityConstraints';
+
+			if ( $is_descendant_of_add_to_cart_with_options ) {
+				$input_attributes['data-wp-watch'] = 'woocommerce/add-to-cart-with-options::callbacks.watchQuantityConstraints';
+			}
 		}
 
-		$form = AddToCartWithOptionsUtils::make_quantity_input_interactive( $product_html, $wrapper_attributes, $input_attributes );
+		$form = AddToCartWithOptionsUtils::make_quantity_input_interactive(
+			$product_html,
+			$wrapper_attributes,
+			$input_attributes,
+			array(),
+			! $is_descendant_of_add_to_cart_with_options,
+			$is_descendant_of_add_to_cart_with_options
+		);
 
 		$product = $previous_product;
 
