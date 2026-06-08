@@ -211,7 +211,7 @@ class Settings {
 		// 'WooCommerce' to wcSettings.
 		$settings['woocommerceTranslation'] = __( 'WooCommerce', 'woocommerce' );
 
-		if ( PageController::is_admin_page() && Features::is_enabled( 'analytics' ) ) {
+		if ( PageController::is_admin_page() && FeaturesUtil::feature_is_enabled( 'analytics' ) ) {
 			// We may have synced orders with a now-unregistered status.
 			// E.g. an extension that added statuses is now inactive or removed.
 			$settings['unregisteredOrderStatuses'] = $this->get_unregistered_order_statuses();
