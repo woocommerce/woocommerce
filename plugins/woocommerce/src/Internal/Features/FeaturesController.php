@@ -625,7 +625,7 @@ class FeaturesController {
 					'Enable push notifications for the WooCommerce mobile apps to receive order notifications and store updates.',
 					'woocommerce'
 				),
-				'enabled_by_default'           => false,
+				'enabled_by_default'           => true,
 				'is_experimental'              => true,
 				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => false,
