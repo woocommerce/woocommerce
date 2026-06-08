@@ -366,7 +366,6 @@
 				"@wordpress/icons"
 			],
 			"packages": [
-				"@woocommerce/product-editor",
 				"@woocommerce/admin-library"
 			],
 			"isIgnored": true
@@ -624,15 +623,6 @@
 				"**"
 			],
 			"pinVersion": "9.5.x"
-		},
-		{
-			"dependencies": [
-				"wireit"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "0.14.12"
 		},
 		{
 			"dependencies": [

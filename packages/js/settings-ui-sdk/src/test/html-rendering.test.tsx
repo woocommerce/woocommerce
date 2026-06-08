@@ -7,14 +7,20 @@ import { createRoot } from 'react-dom/client';
 import type { ReactNode } from 'react';
 
 jest.mock( '@wordpress/admin-ui', () => ( {
-	Page: ( { children }: { children: ReactNode } ) => <>{ children }</>,
+	Page: ( {
+		children,
+		className,
+	}: {
+		children: ReactNode;
+		className?: string;
+	} ) => <div className={ className }>{ children }</div>,
 } ) );
 
 /**
  * Internal dependencies
  */
 import { SettingsUIPage } from '../settings-ui-page';
-import { NativeSettingsField } from '../native-fields';
+import { __resetRegistry, registerSettingsExtension } from '../registry';
 import type { SettingsUISchema } from '../types';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -45,23 +51,86 @@ const expectUnsafeMarkupRemoved = ( container: HTMLElement ) => {
 };
 
 describe( 'settings HTML rendering', () => {
-	it( 'sanitizes native field help before rendering', () => {
+	afterEach( () => {
+		__resetRegistry();
+	} );
+
+	it( 'renders settings as centered sections and cards', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'none' },
+			groups: {
+				general: {
+					id: 'general',
+					title: 'General settings',
+					description: 'Configure the basics.',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							description: 'Shown as field description.',
+						},
+					],
+				},
+			},
+		};
+
 		const { container, root } = renderElement(
-			<NativeSettingsField
-				field={ {
-					id: 'test_field',
-					label: 'Test field',
-					type: 'text',
-					description: unsafeDescription,
-				} }
-				value=""
-				onChange={ jest.fn() }
-				context={ { page: 'test' } }
-				values={ {} }
-				initialValues={ {} }
-				setValue={ jest.fn() }
-				setValues={ jest.fn() }
-			/>
+			<SettingsUIPage schema={ schema } />
+		);
+
+		expect(
+			container.querySelector( '.wc-settings-ui__section' )
+		).not.toBeNull();
+		expect(
+			container.querySelector( '.wc-settings-ui__section-card' )
+		).not.toBeNull();
+		expect(
+			container.querySelector( '.wc-settings-ui__section-fields' )
+		).not.toBeNull();
+		expect( container.querySelector( '.wc-settings-ui__row' ) ).toBeNull();
+		expect(
+			container.querySelector( '.wc-settings-ui__group-panel' )
+		).toBeNull();
+		expect(
+			container.querySelector( '.wc-settings-ui__group-header' )
+		).toBeNull();
+		expect( container.textContent ).toContain( 'General settings' );
+		expect( container.textContent ).toContain( 'Test field' );
+		expect( container.textContent ).toContain(
+			'Shown as field description.'
+		);
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'sanitizes native field descriptions before rendering', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'none' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							description: unsafeDescription,
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
 		);
 
 		expectUnsafeMarkupRemoved( container );
@@ -106,6 +175,189 @@ describe( 'settings HTML rendering', () => {
 
 		expect( container.textContent ).toContain( 'Controller' );
 		expect( container.textContent ).not.toContain( 'Dependent field' );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'prompts before navigating away with unsaved changes', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			shell: {
+				navigation: [
+					{
+						id: 'next-page',
+						label: 'Next page',
+						href: 'https://example.com/next',
+					},
+				],
+			},
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							value: 'Initial value',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		const input = container.querySelector( 'input[type="text"]' );
+		const link = container.querySelector(
+			'a[href="https://example.com/next"]'
+		);
+
+		expect( input ).not.toBeNull();
+		expect( link ).not.toBeNull();
+
+		act( () => {
+			if ( input instanceof HTMLInputElement ) {
+				const valueSetter = Object.getOwnPropertyDescriptor(
+					HTMLInputElement.prototype,
+					'value'
+				)?.set;
+
+				valueSetter?.call( input, 'Changed value' );
+				input.dispatchEvent(
+					new Event( 'input', { bubbles: true, cancelable: true } )
+				);
+			}
+		} );
+
+		act( () => {
+			link?.dispatchEvent(
+				new MouseEvent( 'click', {
+					bubbles: true,
+					cancelable: true,
+					button: 0,
+				} )
+			);
+		} );
+
+		expect( document.body.textContent ).toContain(
+			'You have unsaved changes'
+		);
+		expect( document.body.textContent ).toContain(
+			"If you leave now, your changes won't be saved."
+		);
+		expect( document.body.textContent ).toContain( 'Discard' );
+		expect( document.body.textContent ).toContain( 'Save' );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'keeps unload protection when custom save before navigation fails', async () => {
+		const saveHandler = jest
+			.fn()
+			.mockRejectedValue( new Error( 'Save failed.' ) );
+
+		registerSettingsExtension( {
+			scope: { page: 'test-page', section: 'default' },
+			saveHandlers: {
+				fail: saveHandler,
+			},
+		} );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'custom', handler: 'fail' },
+			shell: {
+				navigation: [
+					{
+						id: 'next-page',
+						label: 'Next page',
+						href: 'https://example.com/next',
+					},
+				],
+			},
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							value: 'Initial value',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		const input = container.querySelector( 'input[type="text"]' );
+		const link = container.querySelector(
+			'a[href="https://example.com/next"]'
+		);
+
+		act( () => {
+			if ( input instanceof HTMLInputElement ) {
+				const valueSetter = Object.getOwnPropertyDescriptor(
+					HTMLInputElement.prototype,
+					'value'
+				)?.set;
+
+				valueSetter?.call( input, 'Changed value' );
+				input.dispatchEvent(
+					new Event( 'input', { bubbles: true, cancelable: true } )
+				);
+			}
+		} );
+
+		act( () => {
+			link?.dispatchEvent(
+				new MouseEvent( 'click', {
+					bubbles: true,
+					cancelable: true,
+					button: 0,
+				} )
+			);
+		} );
+
+		const saveButton = Array.from(
+			document.body.querySelectorAll(
+				'.wc-settings-ui__unsaved-changes-actions button'
+			)
+		).find( ( button ) => button.textContent === 'Save' );
+
+		await act( async () => {
+			saveButton?.dispatchEvent(
+				new MouseEvent( 'click', {
+					bubbles: true,
+					cancelable: true,
+					button: 0,
+				} )
+			);
+		} );
+
+		const beforeUnloadEvent = new Event( 'beforeunload', {
+			cancelable: true,
+		} );
+
+		window.dispatchEvent( beforeUnloadEvent );
+
+		expect( saveHandler ).toHaveBeenCalledTimes( 1 );
+		expect( beforeUnloadEvent.defaultPrevented ).toBe( true );
+		expect( document.body.textContent ).toContain( 'Save failed.' );
 
 		act( () => root.unmount() );
 		container.remove();
