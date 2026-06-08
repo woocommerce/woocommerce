@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Pilot `@wordpress/build` block-library migration with category title block.
