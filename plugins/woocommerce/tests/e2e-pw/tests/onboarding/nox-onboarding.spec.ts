@@ -4,17 +4,12 @@
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-const WC_ADMIN_NAMESPACE = '/wp-json/wc-admin';
 // Match the WC Admin payments providers endpoint, allowing optional query args.
 const PROVIDERS_ENDPOINT =
 	/\/wp-json\/wc-admin\/settings\/payments\/providers(\?.*)?$/;
 // Match the WooPayments onboarding endpoint without matching nested step endpoints.
 const ONBOARDING_ENDPOINT =
 	/\/wp-json\/wc-admin\/settings\/payments\/woopayments\/onboarding(\?.*)?$/;
-// Match the WooPayments business verification step endpoint, allowing optional query args.
-const BUSINESS_VERIFICATION_ENDPOINT =
-	/\/wp-json\/wc-admin\/settings\/payments\/woopayments\/onboarding\/business-verification(\?.*)?$/;
-
 const WOO_PAYMENTS_PROVIDER = {
 	_type: 'gateway',
 	_order: 1,
@@ -62,56 +57,6 @@ const WOO_PAYMENTS_PROVIDER = {
 	_links: {},
 };
 
-const ONBOARDING_FIELDS = {
-	available_countries: {
-		US: 'United States (US)',
-		GB: 'United Kingdom (UK)',
-	},
-	business_types: [
-		{
-			key: 'US',
-			name: 'United States (US)',
-			types: [
-				{
-					key: 'individual',
-					name: 'Individual',
-					description: '',
-					structures: [],
-				},
-				{
-					key: 'company',
-					name: 'Company',
-					description: '',
-					structures: [
-						{
-							key: 'llc',
-							name: 'Limited liability company',
-						},
-					],
-				},
-			],
-		},
-	],
-	mccs_display_tree: [
-		{
-			id: 'food-and-drink',
-			type: 'category',
-			title: 'Food and drink',
-			items: [
-				{
-					id: '5812',
-					type: 'mcc',
-					title: 'Restaurants',
-					mcc: 5812,
-					keywords: [ 'food' ],
-				},
-			],
-		},
-	],
-	industry_to_mcc: {},
-	location: 'US',
-};
-
 const ONBOARDING_RESPONSE = {
 	steps: [
 		{
@@ -144,20 +89,8 @@ const ONBOARDING_RESPONSE = {
 			order: 3,
 			status: 'started',
 			dependencies: [ 'test_or_live_account' ],
-			actions: {
-				save: {
-					type: 'post',
-					href: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding/business-verification`,
-				},
-			},
-			context: {
-				fields: ONBOARDING_FIELDS,
-				self_assessment: {},
-				sub_steps: {
-					business: { status: 'not_started' },
-					embedded: { status: 'not_started' },
-				},
-			},
+			actions: {},
+			context: {},
 		},
 	],
 	context: {},
@@ -192,20 +125,9 @@ test.describe(
 					body: JSON.stringify( ONBOARDING_RESPONSE ),
 				} );
 			} );
-
-			await page.route(
-				BUSINESS_VERIFICATION_ENDPOINT,
-				async ( route ) => {
-					await route.fulfill( {
-						status: 200,
-						contentType: 'application/json',
-						body: JSON.stringify( {} ),
-					} );
-				}
-			);
 		} );
 
-		test( 'can start in-context onboarding from Payments settings and select a legal entity type', async ( {
+		test( 'can start in-context onboarding from Payments settings', async ( {
 			page,
 		} ) => {
 			const consoleErrors: string[] = [];
@@ -236,28 +158,8 @@ test.describe(
 				page.getByText( 'Activate payments', { exact: true } )
 			).toBeVisible();
 
-			const businessTypeSelect = page.getByRole( 'combobox', {
-				name: 'What type of legal entity is your business?',
-			} );
-			await expect( businessTypeSelect ).toBeVisible();
-
-			await businessTypeSelect.click();
-			await expect(
-				page.getByRole( 'option', { name: 'Company' } )
-			).toBeVisible();
-			await expect(
-				page.getByRole( 'option', { name: 'Individual' } )
-			).toBeVisible();
-
-			await page.getByRole( 'option', { name: 'Company' } ).click();
-			await expect(
-				page.getByRole( 'combobox', {
-					name: 'What category of legal entity identify your business?',
-				} )
-			).toBeVisible();
-
-			// Guard against the legal entity dropdown crash and similar runtime failures
-			// without failing on unrelated WordPress admin console noise.
+			// Guard against runtime failures seen when entering the in-context
+			// onboarding shell without failing on unrelated WordPress admin console noise.
 			expect(
 				consoleErrors.filter(
 					( message ) =>

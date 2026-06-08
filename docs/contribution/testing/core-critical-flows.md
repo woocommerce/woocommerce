@@ -1,7 +1,6 @@
 ---
 post_title: WooCommerce core critical flows
 sidebar_label: Core critical flows
-
 ---
 
 # WooCommerce core critical flows
@@ -131,7 +130,6 @@ These flows will continually evolve as the platform evolves with flows updated, 
 | Merchant  | Core Profiler  | Complete site setup                                            | activate-and-setup/core-profiler.spec.js |
 | Merchant  | Core Profiler  | Skip introduction and confirm business location                | activate-and-setup/core-profiler.spec.js |
 | Merchant  | NOX Onboarding | Open onboarding from Payments settings                         | onboarding/nox-onboarding.spec.ts        |
-| Merchant  | NOX Onboarding | Select legal entity type and show fields                       | onboarding/nox-onboarding.spec.ts        |
 
 ### Merchant - Dashboard
 
@@ -151,7 +149,7 @@ These flows will continually evolve as the platform evolves with flows updated, 
 ### Merchant - Settings
 
 | User Type | Flow Area | Flow Name                              | Test File                                |
-| --------- | --------- |----------------------------------------|------------------------------------------|
+| --------- | --------- | -------------------------------------- | ---------------------------------------- |
 | Merchant  | Settings  | Update General Settings                | merchant/settings-general.spec.js        |
 | Merchant  | Settings  | Add Tax Rates                          | merchant/settings-tax.spec.js            |
 | Merchant  | Settings  | Add Shipping Zones                     | merchant/create-shipping-zones.spec.js   |
