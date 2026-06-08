@@ -175,6 +175,44 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * It records caught errors when settings UI script handles cannot be resolved.
+	 */
+	public function test_settings_ui_script_handle_error_is_logged_before_fallback(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Settings_Page::output' );
+
+		$caught = null;
+		$action = function ( $exception_object, $function_name ) use ( &$caught ) {
+			$caught = array(
+				'exception_object' => $exception_object,
+				'function'         => $function_name,
+			);
+		};
+		add_action( 'woocommerce_caught_exception', $action, 10, 2 );
+
+		global $current_section;
+		$current_section = 'advanced';
+		$error           = new \Error( 'Unable to load extension script handles.' );
+		$page            = $this->get_settings_ui_test_page_with_failing_script_handles( $error );
+
+		try {
+			ob_start();
+			$page->output();
+			$output = ob_get_clean();
+		} finally {
+			remove_action( 'woocommerce_caught_exception', $action, 10 );
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
+
+		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertNotNull( $caught );
+		$this->assertSame( $error, $caught['exception_object'] );
+		$this->assertSame( 'WC_Settings_Page::output', $caught['function'] );
+	}
+
+	/**
 	 * It emits developer feedback when settings UI schema generation has failed.
 	 */
 	public function test_settings_ui_schema_failure_fallback_emits_doing_it_wrong_notice(): void {
@@ -358,16 +396,27 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	/**
 	 * Build a settings page whose settings UI adapter cannot provide script handles.
 	 *
+	 * @param \Throwable|null $throwable Throwable to throw when resolving script handles.
 	 * @return \WC_Settings_Page
 	 */
-	private function get_settings_ui_test_page_with_failing_script_handles(): \WC_Settings_Page {
-		return new class() extends \WC_Settings_Page {
+	private function get_settings_ui_test_page_with_failing_script_handles( ?\Throwable $throwable = null ): \WC_Settings_Page {
+		return new class( $throwable ) extends \WC_Settings_Page {
+			/**
+			 * Throwable to throw when resolving script handles.
+			 *
+			 * @var \Throwable
+			 */
+			private $throwable;
+
 			/**
 			 * Constructor.
+			 *
+			 * @param \Throwable|null $throwable Throwable to throw when resolving script handles.
 			 */
-			public function __construct() {
-				$this->id    = 'settings_ui_flag_test';
-				$this->label = 'Settings UI flag test';
+			public function __construct( ?\Throwable $throwable = null ) {
+				$this->id        = 'settings_ui_flag_test';
+				$this->label     = 'Settings UI flag test';
+				$this->throwable = $throwable ?? new \RuntimeException( 'Unable to load extension script handles.' );
 			}
 
 			/**
@@ -376,7 +425,26 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
 			 */
 			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
-				return new class( $this ) extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
+				return new class( $this, $this->throwable ) extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
+					/**
+					 * Throwable to throw when resolving script handles.
+					 *
+					 * @var \Throwable
+					 */
+					private $throwable;
+
+					/**
+					 * Constructor.
+					 *
+					 * @param \WC_Settings_Page $page Settings page.
+					 * @param \Throwable        $throwable Throwable to throw when resolving script handles.
+					 */
+					public function __construct( \WC_Settings_Page $page, \Throwable $throwable ) {
+						parent::__construct( $page );
+
+						$this->throwable = $throwable;
+					}
+
 					/**
 					 * Get script handles.
 					 *
@@ -385,7 +453,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 					 */
 					public function get_script_handles( string $section_id ): array {
 						if ( 'advanced' === $section_id ) {
-							throw new \RuntimeException( 'Unable to load extension script handles.' );
+							throw $this->throwable;
 						}
 
 						return array();

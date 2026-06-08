@@ -353,13 +353,14 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 						$render_settings_ui = false;
 						$reason             = __( 'Settings UI script handles could not be resolved.', 'woocommerce' );
 
+						wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
+
 						if ( $e instanceof \Exception ) {
 							$reason = sprintf(
 								/* translators: %s: exception message. */
 								__( 'Settings UI script handles could not be resolved: %s', 'woocommerce' ),
 								$e->getMessage()
 							);
-							wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
 						}
 
 						$this->log_settings_ui_fallback( $settings_ui_page, $current_section, $reason );
