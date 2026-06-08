@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Wait for the Gutenberg editor canvas iframe before falling back to the page context in Playwright tests.
