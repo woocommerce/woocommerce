@@ -11,19 +11,5 @@
 			"require": "./build/index.cjs"
 		}
 	},
-	"wpScript": true,
-	"dependencies": {
-		"@wordpress/block-editor": "catalog:wp-min",
-		"@wordpress/blocks": "catalog:wp-min",
-		"@wordpress/components": "catalog:wp-min",
-		"@wordpress/core-data": "catalog:wp-min",
-		"@wordpress/data": "catalog:wp-min",
-		"@wordpress/element": "catalog:wp-min",
-		"@wordpress/i18n": "catalog:wp-min",
-		"@wordpress/icons": "catalog:wp-min",
-		"clsx": "2.1.x"
-	},
-	"devDependencies": {
-		"wp-types": "3.63.0"
-	}
+	"wpScript": true
 }
