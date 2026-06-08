@@ -326,6 +326,7 @@ export class Shipping extends Component {
 							recordEvent( 'tasklist_shipping_set_location', {
 								country,
 							} );
+							this.completeStep();
 						} }
 					/>
 				),
