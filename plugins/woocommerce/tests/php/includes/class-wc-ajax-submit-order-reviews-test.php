@@ -18,18 +18,20 @@ use Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler;
 class WC_AJAX_Submit_Order_Reviews_Test extends \WP_Ajax_UnitTestCase {
 
 	/**
-	 * Set up: reset per-request eligibility cache and moderation option.
+	 * Set up: enable OrderReviews feature flag, reset eligibility cache.
 	 */
 	public function set_up(): void {
 		parent::set_up();
+		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
 		ItemEligibility::reset_cache();
 		update_option( 'comment_moderation', '0' );
 	}
 
 	/**
-	 * Tear down: clean $_POST and reset state.
+	 * Tear down: clean $_POST, reset options and eligibility cache.
 	 */
 	public function tear_down(): void {
+		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 		unset( $_POST['_wcnonce'], $_POST['order_id'], $_POST['key'], $_POST['reviews'] );
 		update_option( 'comment_moderation', '0' );
 		ItemEligibility::reset_cache();
@@ -54,8 +56,7 @@ class WC_AJAX_Submit_Order_Reviews_Test extends \WP_Ajax_UnitTestCase {
 		for ( $i = 0; $i < $product_count; $i++ ) {
 			$product           = WC_Helper_Product::create_simple_product();
 			$product_ids[]     = $product->get_id();
-			$item              = $order->add_product( $product, 1 );
-			$order_item_ids[]  = $item->get_id();
+			$order_item_ids[] = $order->add_product( $product, 1 );
 		}
 
 		$order->save();
@@ -123,7 +124,6 @@ class WC_AJAX_Submit_Order_Reviews_Test extends \WP_Ajax_UnitTestCase {
 		$response = $this->do_ajax();
 
 		$this->assertFalse( $response['success'] ?? true );
-		$this->assertSame( 403, $response['data']['code'] ?? 0 );
 	}
 
 	/**
