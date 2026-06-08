@@ -2631,9 +2631,6 @@ importers:
       axios:
         specifier: ^0.24.0
         version: 0.24.0
-      buildkite-test-collector:
-        specifier: ^1.7.1
-        version: 1.9.5
       config:
         specifier: 3.3.7
         version: 3.3.7
@@ -3714,9 +3711,6 @@ importers:
       babel-plugin-transform-react-remove-prop-types:
         specifier: 0.4.24
         version: 0.4.24
-      buildkite-test-collector:
-        specifier: ^1.7.1
-        version: 1.9.5
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -12608,10 +12602,6 @@ packages:
   buffer@6.0.3:
     resolution: {integrity: sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==}
 
-  buildkite-test-collector@1.9.5:
-    resolution: {integrity: sha512-xb1jLDKDEAI/FfJ2X/br2SfJviI7kH5PqPLn1PC5F+XRA95d0IxN7EcUH6PsEt21nZmmXFohyl4JpWRz8cCAeg==}
-    engines: {npm: '>=7.0.0'}
-
   builtin-status-codes@3.0.0:
     resolution: {integrity: sha512-HpGFw18DgFWlncDfjTa2rcQ4W88O1mC8e8yZ2AvQY5KDaktSTwo+KRf6nHK6FRI5FyRyb/5T6+TSxfP7QyGsmQ==}
 
@@ -18440,9 +18430,6 @@ packages:
   moment@2.30.1:
     resolution: {integrity: sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==}
 
-  monkeypatch@1.0.0:
-    resolution: {integrity: sha512-6tG0IrCUUIBuAspnbdmOAd+D/AptB/ya9JLujp88NIAuFuTGdGvCKtDkc6pwNOcIJ6nKLm3FjJlaCdx8vr3r2w==}
-
   moo@0.5.3:
     resolution: {integrity: sha512-m2fmM2dDm7GZQsY7KK2cme8agi+AAljILjQnof7p1ZMDe6dQ4bdnSMx0cPppudoeNv5hEFQirN6u+O4fDE0IWA==}
 
@@ -20918,9 +20905,6 @@ packages:
     deprecated: request-promise has been deprecated because it extends the now deprecated request package, see https://github.com/request/request/issues/3142
     peerDependencies:
       request: ^2.34
-
-  request-spy@0.0.10:
-    resolution: {integrity: sha512-va+4vLamK9Pwu/WJnJrQcTjCjYdIcl0KDKOKEkfvNmer4f+K+OhgbpU4DCiPyzBGnTpYXbrVLrnD8O5fS/cmKA==}
 
   request@2.88.2:
     resolution: {integrity: sha512-MsvtOrfG9ZcrOwAW+Qi+F6HbD0CWXEh9ou77uOb7FM2WPhwT7smM833PzanhJLsgXjN89Ir6V2PczXNnMpwKhw==}
@@ -39579,16 +39563,6 @@ snapshots:
       base64-js: 1.5.1
       ieee754: 1.2.1
 
-  buildkite-test-collector@1.9.5:
-    dependencies:
-      axios: 1.15.0
-      dotenv: 16.6.1
-      request-spy: 0.0.10
-      strip-ansi: 6.0.1
-      uuid: 8.3.2
-    transitivePeerDependencies:
-      - debug
-
   builtin-status-codes@3.0.0: {}
 
   builtins@1.0.3: {}
@@ -47474,8 +47448,6 @@ snapshots:
 
   moment@2.30.1: {}
 
-  monkeypatch@1.0.0: {}
-
   moo@0.5.3: {}
 
   motion-dom@11.18.1:
@@ -50527,10 +50499,6 @@ snapshots:
       request-promise-core: 1.1.4(request@2.88.2)
       stealthy-require: 1.1.1
       tough-cookie: 2.5.0
-
-  request-spy@0.0.10:
-    dependencies:
-      monkeypatch: 1.0.0
 
   request@2.88.2:
     dependencies:

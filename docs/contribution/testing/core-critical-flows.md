@@ -1,7 +1,6 @@
 ---
 post_title: WooCommerce core critical flows
 sidebar_label: Core critical flows
-
 ---
 
 # WooCommerce core critical flows
@@ -119,17 +118,18 @@ These flows will continually evolve as the platform evolves with flows updated, 
 
 ### Merchant - Onboarding
 
-| User Type | Flow Area     | Flow Name                                                      |
-| --------- | ------------- | -------------------------------------------------------------- |
-| Merchant  | Core Profiler | Introduction & opt-in                                          |
-| Merchant  | Core Profiler | User profile information                                       |
-| Merchant  | Core Profiler | Business information                                           |
-| Merchant  | Core Profiler | Extensions page                                                |
-| Merchant  | Core Profiler | WooPayments included in extensions for eligible criteria       |
-| Merchant  | Core Profiler | WooPayments not included in extensions for ineligible criteria |
-| Merchant  | Core Profiler | Install all default extensions                                 |
-| Merchant  | Core Profiler | Complete site setup                                            |
-| Merchant  | Core Profiler | Skip introduction and confirm business location                |
+| User Type | Flow Area      | Flow Name                                                      |
+| --------- | -------------- | -------------------------------------------------------------- |
+| Merchant  | Core Profiler  | Introduction & opt-in                                          |
+| Merchant  | Core Profiler  | User profile information                                       |
+| Merchant  | Core Profiler  | Business information                                           |
+| Merchant  | Core Profiler  | Extensions page                                                |
+| Merchant  | Core Profiler  | WooPayments included in extensions for eligible criteria       |
+| Merchant  | Core Profiler  | WooPayments not included in extensions for ineligible criteria |
+| Merchant  | Core Profiler  | Install all default extensions                                 |
+| Merchant  | Core Profiler  | Complete site setup                                            |
+| Merchant  | Core Profiler  | Skip introduction and confirm business location                |
+| Merchant  | NOX Onboarding | Open onboarding from Payments settings                         |
 
 ### Merchant - Dashboard
 
@@ -149,7 +149,7 @@ These flows will continually evolve as the platform evolves with flows updated, 
 ### Merchant - Settings
 
 | User Type | Flow Area | Flow Name                              |
-| --------- | --------- |----------------------------------------|
+| --------- | --------- | -------------------------------------- |
 | Merchant  | Settings  | Update General Settings                |
 | Merchant  | Settings  | Add Tax Rates                          |
 | Merchant  | Settings  | Add Shipping Zones                     |
