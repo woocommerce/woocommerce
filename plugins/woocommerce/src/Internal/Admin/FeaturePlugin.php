@@ -22,6 +22,7 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstaller;
 use Automattic\WooCommerce\Admin\ReportExporter;
 use Automattic\WooCommerce\Admin\ReportsSync;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Admin\CategoryLookup;
 use Automattic\WooCommerce\Internal\Admin\Events;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\Onboarding;
@@ -173,10 +174,11 @@ class FeaturePlugin {
 
 		Onboarding::init();
 
-		// Initialize Reports syncing.
-		ReportsSync::init();
-		CategoryLookup::instance()->init();
-
+		if ( FeaturesUtil::feature_is_enabled( 'analytics' ) ) {
+			// Initialize Reports syncing.
+			ReportsSync::init();
+			CategoryLookup::instance()->init();
+		}
 		// Initialize Reports exporter.
 		ReportExporter::init();
 
