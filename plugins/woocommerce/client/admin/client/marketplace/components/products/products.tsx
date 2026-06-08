@@ -130,26 +130,29 @@ export default function Products( props: ProductsProps ) {
 						'woocommerce-marketplace__browse-wp-theme-directory'
 					}
 				>
-					<b>
+					<b key="wp-theme-directory-heading">
 						{ __( 'Didn’t find a theme you like?', 'woocommerce' ) }
 					</b>
-					{ createInterpolateElement(
-						__(
-							' Browse the <a>WordPress.org theme directory</a> to discover more.',
-							'woocommerce'
-						),
-						{
-							a: (
-								// eslint-disable-next-line jsx-a11y/anchor-has-content
-								<a
-									href={
-										ADMIN_URL +
-										'theme-install.php?search=e-commerce'
-									}
-								/>
+					<span key="wp-theme-directory-copy">
+						{ createInterpolateElement(
+							__(
+								' Browse the <a>WordPress.org theme directory</a> to discover more.',
+								'woocommerce'
 							),
-						}
-					) }
+							{
+								a: (
+									// eslint-disable-next-line jsx-a11y/anchor-has-content
+									<a
+										key="wp-theme-directory"
+										href={
+											ADMIN_URL +
+											'theme-install.php?search=e-commerce'
+										}
+									/>
+								),
+							}
+						) }
+					</span>
 				</div>
 			) }
 			{ showAllButton && (

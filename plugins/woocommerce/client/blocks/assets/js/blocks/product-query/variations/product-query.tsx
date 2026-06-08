@@ -45,7 +45,7 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 		),
 		name: PRODUCT_QUERY_VARIATION_NAME,
 		/* translators: "Products" is the name of the block. */
-		title: __( 'Products (Beta)', 'woocommerce' ),
+		title: __( 'Products (Deprecated)', 'woocommerce' ),
 		isActive: ( blockAttributes ) =>
 			blockAttributes.namespace === PRODUCT_QUERY_VARIATION_NAME,
 		icon: (
