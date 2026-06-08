@@ -748,9 +748,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 			return parent::batch_items( $request );
 		} finally {
 			remove_filter( 'woocommerce_defer_product_transient_deletion', $defer_product_transient_deletion, 10 );
-			foreach ( array_keys( $deferred_product_transient_ids ) as $deferred_product_id ) {
-				wc_delete_product_transients( $deferred_product_id );
-			}
+			wc_delete_product_transients_for_product_ids( array_keys( $deferred_product_transient_ids ) );
 		}
 	}
 

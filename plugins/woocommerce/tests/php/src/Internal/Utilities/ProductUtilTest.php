@@ -53,4 +53,25 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( get_transient( $parent_transient_name ) );
 		$this->assertFalse( get_transient( $child_transient_name ) );
 	}
+
+	/**
+	 * @testdox delete_product_specific_transients_for_products deletes parent variation transients once for multiple variations.
+	 */
+	public function test_delete_product_specific_transients_for_products_coalesces_parent_variation_transient_deletes() {
+		$parent_product  = ProductHelper::create_variation_product();
+		$child_ids       = array_slice( $parent_product->get_children(), 0, 2 );
+		$delete_attempts = 0;
+		$track_deletes   = static function () use ( &$delete_attempts ) {
+			++$delete_attempts;
+		};
+
+		add_action( 'delete_transient_wc_product_children_' . $parent_product->get_id(), $track_deletes );
+		try {
+			wc_get_container()->get( ProductUtil::class )->delete_product_specific_transients_for_products( $child_ids );
+		} finally {
+			remove_action( 'delete_transient_wc_product_children_' . $parent_product->get_id(), $track_deletes );
+		}
+
+		$this->assertSame( 1, $delete_attempts );
+	}
 }

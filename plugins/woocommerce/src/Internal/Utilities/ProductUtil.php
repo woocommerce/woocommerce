@@ -16,18 +16,40 @@ class ProductUtil {
 	 * @return void
 	 */
 	public function delete_product_specific_transients( $product_or_id ) {
-		$parent_id = 0;
-		if ( $product_or_id instanceof \WC_Product ) {
-			$product    = $product_or_id;
-			$product_id = $product->get_id();
-		} else {
-			$product_id = $product_or_id;
-			$product    = wc_get_product( $product_id );
+		$this->delete_product_specific_transients_for_products( array( $product_or_id ) );
+	}
+
+	/**
+	 * Delete the transients related to a set of products.
+	 * If a product is a variation, delete the transients for the parent too.
+	 *
+	 * @param array $products_or_ids Products or product ids.
+	 * @return void
+	 */
+	public function delete_product_specific_transients_for_products( array $products_or_ids ) {
+		$product_ids = array();
+
+		foreach ( $products_or_ids as $product_or_id ) {
+			$parent_id = 0;
+			if ( $product_or_id instanceof \WC_Product ) {
+				$product    = $product_or_id;
+				$product_id = $product->get_id();
+			} else {
+				$product_id = $product_or_id;
+				$product    = wc_get_product( $product_id );
+			}
+
+			if ( $product instanceof \WC_Product_Variation ) {
+				$parent_id = $product->get_parent_id();
+			}
+
+			$product_ids[] = $product_id;
+			if ( $parent_id ) {
+				$product_ids[] = $parent_id;
+			}
 		}
 
-		if ( $product instanceof \WC_Product_Variation ) {
-			$parent_id = $product->get_parent_id();
-		}
+		$product_ids = array_unique( array_filter( array_map( 'absint', $product_ids ) ) );
 
 		$product_specific_transient_names = array(
 			'wc_product_children_',
@@ -37,10 +59,9 @@ class ProductUtil {
 			'wc_child_has_dimensions_',
 		);
 
-		foreach ( $product_specific_transient_names as $transient ) {
-			delete_transient( $transient . $product_id );
-			if ( $parent_id ) {
-				delete_transient( $transient . $parent_id );
+		foreach ( $product_ids as $product_id ) {
+			foreach ( $product_specific_transient_names as $transient ) {
+				delete_transient( $transient . $product_id );
 			}
 		}
 	}
