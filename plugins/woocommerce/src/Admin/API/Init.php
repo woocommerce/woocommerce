@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\API;
 
 use AllowDynamicProperties;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -159,7 +160,7 @@ class Init {
 		);
 
 		$analytics_controllers = array();
-		if ( Features::is_enabled( 'analytics' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'analytics' ) ) {
 			$analytics_controllers = array(
 				'Automattic\WooCommerce\Admin\API\Customers',
 				'Automattic\WooCommerce\Admin\API\Leaderboards',

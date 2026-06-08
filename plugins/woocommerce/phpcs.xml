@@ -19,6 +19,9 @@
 	<exclude-pattern>php-stubs/</exclude-pattern>
 	<!-- GraphQL test fixtures used only by unit tests. -->
 	<exclude-pattern>tests/php/src/Internal/Api/Fixtures/</exclude-pattern>
+	<!-- Fixture PHP files used in e2e tests. -->
+	<exclude-pattern>tests/e2e-pw/themes/blocks/</exclude-pattern>
+	<exclude-pattern>tests/e2e-pw/test-plugins/blocks/</exclude-pattern>
 
 	<!-- Only check PHP files. -->
 	<arg name="extensions" value="php" />
