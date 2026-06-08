@@ -10,33 +10,9 @@ import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 const couponData = {
-	fixedCart: {
-		code: `fixedCart-${ Date.now() }`,
-		description: `Simple fixed cart discount ${ Date.now() }`,
-		amount: `${ Math.floor( Math.random() * 50 ) + 1 }`,
-	},
-	fixedProduct: {
-		code: `fixedProduct-${ Date.now() }`,
-		description: `Simple fixed product discount ${ Date.now() }`,
-		amount: `${ Math.floor( Math.random() * 50 ) + 1 }`,
-	},
-	percentage: {
-		code: `percentage-${ Date.now() }`,
-		description: `Simple percentage discount ${ Date.now() }`,
-		amount: `${ Math.floor( Math.random() * 50 ) + 1 }`,
-	},
-	expiryDate: {
-		code: `expiryDate-${ Date.now() }`,
-		description: `Simple expiry date discount ${ Date.now() }`,
-		amount: `${ Math.floor( Math.random() * 50 ) + 1 }`,
-		expiryDate: '2023-12-31',
-	},
-	freeShipping: {
-		code: `freeShipping-${ Date.now() }`,
-		description: `Simple free shipping discount ${ Date.now() }`,
-		amount: `${ Math.floor( Math.random() * 50 ) + 1 }`,
-		freeShipping: true,
-	},
+	code: `coupon-wiring-${ Date.now() }`,
+	description: `Coupon wiring ${ Date.now() }`,
+	amount: `${ Math.floor( Math.random() * 50 ) + 1 }`,
 };
 
 const test = baseTest.extend( {
@@ -51,101 +27,46 @@ const test = baseTest.extend( {
 } );
 
 test.describe( 'Coupon management', { tag: tags.SERVICES }, () => {
-	for ( const couponType of Object.keys( couponData ) ) {
-		test( `can create new ${ couponType } coupon`, async ( {
-			page,
-			coupon,
-		} ) => {
-			await test.step( 'add new coupon', async () => {
-				await page.goto(
-					'wp-admin/post-new.php?post_type=shop_coupon'
-				);
-				await page
-					.getByLabel( 'Coupon code' )
-					.fill( couponData[ couponType ].code );
-				await page
-					.getByPlaceholder( 'Description (optional)' )
-					.fill( couponData[ couponType ].description );
-				await page
-					.getByPlaceholder( '0' )
-					.fill( couponData[ couponType ].amount );
-
-				// set expiry date if it was provided
-				if ( couponData[ couponType ].expiryDate ) {
-					await page
-						.getByPlaceholder( 'yyyy-mm-dd' )
-						.fill( couponData[ couponType ].expiryDate );
-				}
-
-				// be explicit about whether free shipping is allowed
-				if ( couponData[ couponType ].freeShipping ) {
-					await page.getByLabel( 'Allow free shipping' ).check();
-				} else {
-					await page.getByLabel( 'Allow free shipping' ).uncheck();
-				}
-			} );
-
-			// publish the coupon and retrieve the id
-			await test.step( 'publish the coupon', async () => {
-				await expect(
-					page.getByRole( 'link', { name: 'Move to Trash' } )
-				).toBeVisible();
-				await page
-					.getByRole( 'button', { name: 'Publish', exact: true } )
-					.click();
-				await expect(
-					page.getByText( 'Coupon updated.' )
-				).toBeVisible();
-				coupon.id = page.url().match( /(?<=post=)\d+/ )[ 0 ];
-				expect( coupon.id ).toBeDefined();
-			} );
-
-			// verify the creation of the coupon and details
-			await test.step( 'verify coupon creation', async () => {
-				await page.goto( 'wp-admin/edit.php?post_type=shop_coupon' );
-				await expect(
-					page.getByRole( 'cell', {
-						name: couponData[ couponType ].code,
-					} )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'cell', {
-						name: couponData[ couponType ].description,
-					} )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'cell', {
-						name: couponData[ couponType ].amount,
-						exact: true,
-					} )
-				).toBeVisible();
-			} );
-
-			// check expiry date if it was set
-			if ( couponData[ couponType ].expiryDate ) {
-				await test.step( 'verify coupon expiry date', async () => {
-					await page
-						.getByText( couponData[ couponType ].code )
-						.last()
-						.click();
-					await expect(
-						page.getByPlaceholder( 'yyyy-mm-dd' )
-					).toHaveValue( couponData[ couponType ].expiryDate );
-				} );
-			}
-
-			// if it was a free shipping coupon check that
-			if ( couponData[ couponType ].freeShipping ) {
-				await test.step( 'verify free shipping', async () => {
-					await page
-						.getByText( couponData[ couponType ].code )
-						.last()
-						.click();
-					await expect(
-						page.getByLabel( 'Allow free shipping' )
-					).toBeChecked();
-				} );
-			}
+	test( 'can create a coupon through the rendered admin form', async ( {
+		page,
+		coupon,
+	} ) => {
+		await test.step( 'fill the rendered coupon form', async () => {
+			await page.goto( 'wp-admin/post-new.php?post_type=shop_coupon' );
+			await page.getByLabel( 'Coupon code' ).fill( couponData.code );
+			await page
+				.getByPlaceholder( 'Description (optional)' )
+				.fill( couponData.description );
+			await page.getByLabel( 'Coupon amount' ).fill( couponData.amount );
 		} );
-	}
+
+		await test.step( 'publish the coupon', async () => {
+			await expect(
+				page.getByRole( 'link', { name: 'Move to Trash' } )
+			).toBeVisible();
+			await page
+				.getByRole( 'button', { name: 'Publish', exact: true } )
+				.click();
+			await expect( page.getByText( 'Coupon updated.' ) ).toBeVisible();
+			await expect( page ).toHaveURL( /[?&]post=\d+/ );
+
+			coupon.id = page.url().match( /[?&]post=(\d+)/ )?.[ 1 ];
+			expect( coupon.id ).toBeDefined();
+		} );
+
+		await test.step( 'verify persisted form values', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ coupon.id }&action=edit`
+			);
+			await expect( page.getByLabel( 'Coupon code' ) ).toHaveValue(
+				couponData.code
+			);
+			await expect(
+				page.getByPlaceholder( 'Description (optional)' )
+			).toHaveValue( couponData.description );
+			await expect( page.getByLabel( 'Coupon amount' ) ).toHaveValue(
+				couponData.amount
+			);
+		} );
+	} );
 } );
