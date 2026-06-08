@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Push notifications: cancel the safety-net Action Scheduler action on delivery by matching schedule and cancel on a single identity-keyed args shape, so stale actions no longer fire ~60s later (and the retry path can no longer produce duplicate pushes).
