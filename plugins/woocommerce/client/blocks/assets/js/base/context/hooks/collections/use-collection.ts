@@ -6,6 +6,7 @@ import { useSelect } from '@wordpress/data';
 import { useRef } from '@wordpress/element';
 import { useShallowEqual, useThrowError } from '@woocommerce/base-hooks';
 import { isError } from '@woocommerce/types';
+import { __ } from '@wordpress/i18n';
 
 /**
  * This is a custom hook that is wired up to the `wc/store/collections` data
@@ -95,9 +96,20 @@ export const useCollection = < T >(
 				if ( isError( error ) ) {
 					throwError( error );
 				} else {
-					throw new Error(
-						'TypeError: `error` object is not an instance of Error constructor'
-					);
+					// Store errors (e.g. from the Store API) normally carry a
+					// message, but guard against non-Error values that don't so
+					// the error boundary always receives a real Error instance.
+					const message =
+						typeof error === 'object' &&
+						error !== null &&
+						typeof ( error as { message?: unknown } ).message ===
+							'string'
+							? ( error as { message: string } ).message
+							: __(
+									'Something went wrong while loading data.',
+									'woocommerce'
+							  );
+					throwError( new Error( message ) );
 				}
 			}
 

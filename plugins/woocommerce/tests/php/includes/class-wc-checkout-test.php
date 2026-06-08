@@ -268,4 +268,40 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		// Assert that the login form is present.
 		$this->assertStringContainsString( 'woocommerce-form-login', $output );
 	}
+
+	/**
+	 * @testdox Returns WP_Error when line items fail to persist to the DB despite save() completing.
+	 */
+	public function test_create_order_returns_error_when_items_not_persisted() {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$simulate_silent_insert_failure = function ( $order ) use ( $wpdb ) {
+			$wpdb->delete(
+				$wpdb->prefix . 'woocommerce_order_items',
+				array( 'order_id' => $order->get_id() )
+			);
+			wp_cache_flush();
+		};
+		add_action( 'woocommerce_after_order_object_save', $simulate_silent_insert_failure );
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'customer@example.com',
+		);
+
+		try {
+			$result = $this->sut->create_order( $data );
+		} finally {
+			remove_action( 'woocommerce_after_order_object_save', $simulate_silent_insert_failure );
+			WC()->cart->empty_cart();
+		}
+
+		$this->assertInstanceOf( WP_Error::class, $result, 'create_order() should return a WP_Error when line items were not persisted.' );
+		$this->assertSame( 'checkout-error', $result->get_error_code(), 'Error code should come from the checkout try/catch path.' );
+		$this->assertStringContainsString( 'Order items could not be saved', $result->get_error_message(), 'Error message should surface the defense-in-depth guard message.' );
+	}
 }

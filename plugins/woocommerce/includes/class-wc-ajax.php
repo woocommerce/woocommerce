@@ -618,6 +618,10 @@ class WC_AJAX {
 			wp_die();
 		}
 
+		if ( ProductStatus::PUBLISH !== $variable_product->get_status() && ! current_user_can( 'edit_post', $variable_product->get_id() ) ) {
+			wp_die();
+		}
+
 		$data_store   = WC_Data_Store::load( 'product' );
 		$variation_id = $data_store->find_matching_product_variation( $variable_product, wp_unslash( $_POST ) );
 		$variation    = $variation_id ? $variable_product->get_available_variation( $variation_id ) : false;
@@ -2054,9 +2058,13 @@ class WC_AJAX {
 	/**
 	 * Search for categories and return json.
 	 *
+	 * @deprecated 10.9.0 This callback was used by the removed async product editor category field.
+	 *
 	 * @return void
 	 */
 	public static function json_search_categories_tree() {
+		wc_deprecated_function( __METHOD__, '10.9.0' );
+
 		ob_start();
 
 		check_ajax_referer( 'search-categories', 'security' );
