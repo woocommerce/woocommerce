@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add test coverage for the existing `woocommerce_submit_order_reviews` AJAX endpoint handled by `OrderReviews\SubmissionHandler`.
