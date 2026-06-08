@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix toggle state issue within description modal editor when toggling block inserter and document overview.
