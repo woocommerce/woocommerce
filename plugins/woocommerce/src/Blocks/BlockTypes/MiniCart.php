@@ -638,7 +638,7 @@ class MiniCart extends AbstractBlock {
 						<?php endif; ?>
 					</span>
 					<?php if ( $cart_always_shows_price ) : ?>
-						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
+						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" translate="no" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
 						</span>
 						<?php if ( ! empty( $this->tax_label ) ) : ?>
 							<small

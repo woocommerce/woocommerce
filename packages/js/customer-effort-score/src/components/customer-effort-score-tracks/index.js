@@ -12,7 +12,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { CustomerEffortScore } from '../';
+import { CustomerEffortScore } from '../customer-effort-score';
 import {
 	ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
 	ALLOW_TRACKING_OPTION_NAME,

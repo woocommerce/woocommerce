@@ -9,7 +9,7 @@
 	},
 	"versionGroups": [
 		{
-			"label": "Banned dependencies: classnames(->clsx), concurrently(->pnpm), cross-env(->wsl),@automattic/webpack-rtl-plugin(->internal-style-build)",
+			"label": "Banned dependencies: classnames(->clsx), concurrently(->pnpm), cross-env(->wsl),@automattic/webpack-rtl-plugin(->internal-build)",
 			"dependencies": [
 				"classnames",
 				"concurrently",
@@ -49,10 +49,7 @@
 				"@storybook/*",
 				"@testing-library/*",
 				"@typescript-eslint/*",
-				"@wordpress/a11y",
 				"@wordpress/autop",
-				"@wordpress/interactivity",
-				"@wordpress/interactivity-router",
 				"@wordpress/prettier-config",
 				"@wordpress/private-apis",
 				"@wordpress/scripts",
@@ -67,15 +64,16 @@
 			"isIgnored": true
 		},
 		{
-			"label": "internal-ts-config generates version-constrained vendored types for these dependencies",
+			"label": "internal-build generates version-constrained vendored types for these dependencies",
 			"dependencies": [
 				"@wordpress/core-data",
 				"@wordpress/data",
 				"@wordpress/editor",
-				"@wordpress/notices"
+				"@wordpress/notices",
+				"@wordpress/postcss-plugins-preset"
 			],
 			"packages": [
-				"@woocommerce/internal-ts-config"
+				"@woocommerce/internal-build"
 			],
 			"isIgnored": true
 		},
@@ -368,8 +366,6 @@
 				"@wordpress/icons"
 			],
 			"packages": [
-				"@woocommerce/product-editor",
-				"@woocommerce/settings-editor",
 				"@woocommerce/admin-library"
 			],
 			"isIgnored": true
@@ -503,15 +499,6 @@
 		},
 		{
 			"dependencies": [
-				"glob"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^10.3.10"
-		},
-		{
-			"dependencies": [
 				"postcss-loader"
 			],
 			"packages": [
@@ -639,30 +626,12 @@
 		},
 		{
 			"dependencies": [
-				"wireit"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "0.14.12"
-		},
-		{
-			"dependencies": [
 				"dompurify"
 			],
 			"packages": [
 				"**"
 			],
 			"pinVersion": "^3.2.6"
-		},
-		{
-			"dependencies": [
-				"@automattic/site-admin"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^0.0.1"
 		},
 		{
 			"label": "Only manage versions for these dependencies",

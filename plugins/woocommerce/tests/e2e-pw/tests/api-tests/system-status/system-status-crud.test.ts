@@ -152,7 +152,6 @@ const schemas = {
 		{ field: 'parent_author_url', type: any( String ) },
 	],
 	settings: [
-		{ field: 'api_enabled', type: any( Boolean ) },
 		{ field: 'force_ssl', type: any( Boolean ) },
 		{ field: 'currency', type: any( String ) },
 		{ field: 'currency_symbol', type: any( String ) },

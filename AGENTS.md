@@ -24,6 +24,7 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 
 - **`woocommerce-backend-dev`** - Backend PHP conventions and unit tests. **Invoke before writing any PHP test files.**
 - **`woocommerce-dev-cycle`** - Testing and linting workflows (PHP, JS, markdown)
+- **`woocommerce-local-env`** - Local environment setup, wp-env commands, and WooCommerce build watchers
 - **`woocommerce-copy-guidelines`** - UI text standards (sentence case rules)
 - **`woocommerce-code-review`** - Code review standards and critical violations to flag
 - **`woocommerce-markdown`** - Markdown writing and editing guidelines

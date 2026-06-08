@@ -7,6 +7,7 @@ import { getRegisteredBlockComponents } from '@woocommerce/blocks-registry';
 /**
  * Internal dependencies
  */
+import './register-components';
 import Block from './block';
 
 renderParentBlock( {

@@ -323,6 +323,119 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Bug 04 regression: parallel additions on yours and core both survive the apply when last_core_render meta is set.
+	 *
+	 * Without 3-way, the applier's LCS pairs yours' added paragraph with core's added paragraph
+	 * (name-only match) and they end up in copy_changes; default keep_yours preserves yours' text
+	 * and core's added paragraph never gets inserted. With 3-way (base meta present), the change-
+	 * summary correctly classifies them as separate add+remove and the applier's merge inserts
+	 * core's addition while preserving yours.
+	 */
+	public function test_apply_selectively_three_way_keeps_parallel_additions_separate(): void {
+		$email_id = 'sa_three_way_parallel_additions';
+		$this->register_fixture_email( $email_id );
+
+		$base_render = "<!-- wp:heading -->\n<h2>H</h2>\n<!-- /wp:heading -->";
+
+		$core_content = "<!-- wp:heading -->\n<h2>H</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>PS from core.</p>\n<!-- /wp:paragraph -->";
+
+		$post_content = "<!-- wp:heading -->\n<h2>H</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Reach out anytime.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $core_content );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			$base_render
+		);
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'applied', $result['status'] );
+		$this->assertStringContainsString( 'Reach out anytime.', $result['merged_content'], 'Yours\' added paragraph must be preserved.' );
+		$this->assertStringContainsString( 'PS from core.', $result['merged_content'], 'Core\'s added paragraph must be inserted.' );
+	}
+
+	/**
+	 * @testdox Three-way: a yours-only edit is preserved even when use_core is requested explicitly — the summary doesn't classify it as a conflict.
+	 */
+	public function test_apply_selectively_three_way_ignores_use_core_for_yours_only_edit(): void {
+		$email_id = 'sa_three_way_yours_only_edit';
+		$this->register_fixture_email( $email_id );
+
+		$base_and_core = "<!-- wp:paragraph -->\n<p>Hi.</p>\n<!-- /wp:paragraph -->";
+		$post_content  = "<!-- wp:paragraph -->\n<p>Hi friend.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $base_and_core );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			$base_and_core
+		);
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively(
+			$post_id,
+			array(
+				array(
+					'path'     => array( 0 ),
+					'decision' => 'use_core',
+				),
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertStringContainsString(
+			'Hi friend.',
+			$result['merged_content'],
+			'Three-way must preserve yours-only edits even when use_core is explicitly requested — they are not conflicts.'
+		);
+		$this->assertStringNotContainsString(
+			'Hi.</p>',
+			$result['merged_content'],
+			'Yours\' edit must not have been replaced with core\'s text.'
+		);
+	}
+
+	/**
+	 * @testdox Should stamp _wc_email_template_last_core_render with current canonical (not merged content) after apply.
+	 *
+	 * Per the three-way diff design: base = "what core looked like the last time we synced".
+	 * Selective apply IS a sync against the new canonical even if the merchant kept some
+	 * yours-blocks, so base advances to the current canonical regardless of merge result.
+	 */
+	public function test_apply_selectively_stamps_last_core_render_with_canonical(): void {
+		$email_id = 'sa_last_core_render';
+		$this->register_fixture_email( $email_id );
+
+		$core_content = "<!-- wp:paragraph -->\n<p>Core.</p>\n<!-- /wp:paragraph -->";
+		$post_content = "<!-- wp:paragraph -->\n<p>Merchant.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $core_content );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+		$this->assertIsArray( $result );
+		$this->assertSame( 'applied', $result['status'] );
+
+		$stored_render = (string) get_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			true
+		);
+
+		$this->assertSame(
+			$core_content,
+			$stored_render,
+			'last_core_render after selective apply should equal the current canonical core content, not the merged content.'
+		);
+	}
+
+	/**
 	 * @testdox Should stamp source_hash from the post_content WordPress actually persisted on a use_core apply.
 	 *
 	 * Pins the saved-content invariant for the `merged_content === $core_content`
@@ -411,6 +524,59 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should stamp STATUS_IN_SYNC when use_core resolves the only conflict and merged differs from canonical only in tag-boundary whitespace.
+	 *
+	 * Regression: prior to Option B, `is_aligned_with_canonical` was a raw
+	 * `===` against `compute_canonical_post_content()`. Canonical comes from
+	 * the PHP template (literal `\n` between blocks, leading/trailing
+	 * whitespace), while merged comes from `serialize_blocks()`. The two are
+	 * semantically equal but never byte-equal, so the fully-resolved scenario
+	 * could never reach STATUS_IN_SYNC — posts got pinned at CUSTOMIZED
+	 * forever, and the banner / email-list indicator never cleared.
+	 */
+	public function test_apply_selectively_use_core_reaches_in_sync_when_merged_matches_canonical_modulo_whitespace(): void {
+		$email_id = 'sa_use_core_aligned_in_sync';
+		$this->register_fixture_email( $email_id );
+
+		// Canonical mimics what `wc_get_template_html()` produces: leading and
+		// trailing newlines that `serialize_blocks()` will not reproduce.
+		$canonical = "\n<!-- wp:paragraph -->\n<p>Canonical copy.</p>\n<!-- /wp:paragraph -->\n";
+		$post_html = "<!-- wp:paragraph -->\n<p>Merchant copy.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $canonical );
+		$post_id = $this->create_woo_email_post( $email_id, $post_html );
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively(
+			$post_id,
+			array(
+				array(
+					'path'     => array( 0 ),
+					'decision' => 'use_core',
+				),
+			)
+		);
+		$this->assertIsArray( $result );
+
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'Fully-resolved apply must reach STATUS_IN_SYNC even when serialize_blocks output differs from canonical only in tag-boundary whitespace.'
+		);
+
+		$persisted = get_post( $post_id );
+		$this->assertInstanceOf( \WP_Post::class, $persisted );
+		$this->assertSame(
+			$canonical,
+			(string) $persisted->post_content,
+			'Aligned merged must be persisted as canonical verbatim so source_hash and classify_post hold without normalization.'
+		);
+		$this->assertSame(
+			sha1( $canonical ),
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true )
+		);
+	}
+
+	/**
 	 * @testdox Should restore post_content and consume the snapshot meta on undo.
 	 *
 	 * Apply → undo round-trip: post_content matches the original and the
@@ -459,6 +625,142 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 			'',
 			(string) get_post_meta( $post_id, WCEmailTemplateSelectiveApplier::SNAPSHOT_META_KEY, true ),
 			'Snapshot meta must be consumed by undo.'
+		);
+	}
+
+	/**
+	 * @testdox Undo restores the prior _wc_email_template_last_core_render alongside post_content (CodeRabbit feedback on PR 64716).
+	 *
+	 * Without this, the restored content would diff against the post-apply base and the
+	 * pending core update would silently disappear from the drawer.
+	 */
+	public function test_undo_restores_prior_last_core_render(): void {
+		$email_id = 'undo_restores_three_way_base';
+		$this->register_fixture_email( $email_id );
+
+		$old_canonical = "<!-- wp:paragraph -->\n<p>Old core.</p>\n<!-- /wp:paragraph -->";
+		$post_content  = "<!-- wp:paragraph -->\n<p>Yours.</p>\n<!-- /wp:paragraph -->";
+		$new_canonical = "<!-- wp:paragraph -->\n<p>New core.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $new_canonical );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		// Pre-apply: post is on the OLD canonical as its base reference.
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			$old_canonical
+		);
+
+		$apply_result = WCEmailTemplateSelectiveApplier::apply_selectively(
+			$post_id,
+			array(
+				array(
+					'path'     => array( 0 ),
+					'decision' => 'use_core',
+				),
+			)
+		);
+		$this->assertIsArray( $apply_result );
+
+		// Sanity: apply advanced the base reference to the new canonical.
+		$this->assertSame(
+			$new_canonical,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true )
+		);
+
+		$undo_result = WCEmailTemplateSelectiveApplier::undo( $post_id, $apply_result['revision_id'] );
+		$this->assertIsArray( $undo_result );
+		$this->assertSame( 'restored', $undo_result['status'] );
+
+		// Post-apply: undo must have rolled back the base to the old canonical so summarize()
+		// recognizes the pending core update on the next read.
+		$this->assertSame(
+			$old_canonical,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true ),
+			'Undo must restore the pre-apply last_core_render so the pending core update stays surfaced.'
+		);
+	}
+
+	/**
+	 * @testdox Undo restores version, source_hash, and last_synced_at alongside last_core_render and content.
+	 *
+	 * Without full meta restoration the post lands in an inconsistent state after undo: the
+	 * `_wc_email_template_version` meta stays at the post-apply value, which defeats the
+	 * editor-banner and email-list indicator gates (both require
+	 * `templateVersion < currentVersion`) and hides the pending update from the merchant on
+	 * every surface despite `summarize()` still reporting it.
+	 */
+	public function test_undo_restores_full_meta_tuple_not_just_content_and_base(): void {
+		$email_id = 'undo_restores_full_meta_tuple';
+		$this->register_fixture_email( $email_id );
+
+		$old_canonical = "<!-- wp:paragraph -->\n<p>Old core.</p>\n<!-- /wp:paragraph -->";
+		$new_canonical = "<!-- wp:paragraph -->\n<p>New core.</p>\n<!-- /wp:paragraph -->";
+		$post_content  = "<!-- wp:paragraph -->\n<p>Old core.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $new_canonical );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		// Stage the post on a stale baseline. The fixture template's `@version`
+		// (parsed by the registry) is 1.2.3, so apply stamps post version to
+		// 1.2.3 regardless. A pre-apply value of `0.9.0` proves restoration
+		// without needing to bump the registry mid-test.
+		$pre_apply_version        = '0.9.0';
+		$pre_apply_source_hash    = sha1( $old_canonical );
+		$pre_apply_last_synced_at = '2026-04-01 00:00:00';
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $old_canonical );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, $pre_apply_version );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $pre_apply_source_hash );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, $pre_apply_last_synced_at );
+
+		$apply_result = WCEmailTemplateSelectiveApplier::apply_selectively(
+			$post_id,
+			array(
+				array(
+					'path'     => array( 0 ),
+					'decision' => 'use_core',
+				),
+			)
+		);
+		$this->assertIsArray( $apply_result );
+
+		// Sanity: apply advanced every stamped meta.
+		$this->assertNotSame(
+			$pre_apply_source_hash,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ),
+			'Sanity: apply should have advanced source_hash.'
+		);
+		$this->assertNotSame(
+			$pre_apply_last_synced_at,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ),
+			'Sanity: apply should have advanced last_synced_at.'
+		);
+
+		$undo_result = WCEmailTemplateSelectiveApplier::undo( $post_id, $apply_result['revision_id'] );
+		$this->assertIsArray( $undo_result );
+		$this->assertSame( 'restored', $undo_result['status'] );
+
+		// All four metas must be restored to their pre-apply values.
+		$this->assertSame(
+			$old_canonical,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true ),
+			'Undo must restore last_core_render.'
+		);
+		$this->assertSame(
+			$pre_apply_version,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ),
+			'Undo must restore version — the indicator gate depends on it.'
+		);
+		$this->assertSame(
+			$pre_apply_source_hash,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ),
+			'Undo must restore source_hash so classify_post sees the pre-apply baseline.'
+		);
+		$this->assertSame(
+			$pre_apply_last_synced_at,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ),
+			'Undo must restore last_synced_at.'
 		);
 	}
 

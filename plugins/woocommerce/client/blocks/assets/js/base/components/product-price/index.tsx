@@ -144,6 +144,7 @@ const SalePrice = ( {
 							regularPriceClassName
 						) }
 						style={ regularPriceStyle }
+						translate="no"
 					>
 						{ value }
 					</del>
@@ -163,6 +164,7 @@ const SalePrice = ( {
 							priceClassName
 						) }
 						style={ priceStyle }
+						translate="no"
 					>
 						{ value }
 					</ins>

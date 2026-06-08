@@ -8,6 +8,7 @@ export const DEFAULT_PRODUCT_TABLE_MEDIA_FIELD = 'images';
 
 export const DEFAULT_PRODUCT_TABLE_FIELDS = [
 	'product_status',
+	'type',
 	'sku',
 	'stock',
 	'categories',
@@ -24,6 +25,7 @@ export const DEFAULT_PRODUCT_TABLE_LAYOUT: NonNullable<
 				align: 'end',
 			},
 		},
+		hierarchyStyle: 'tree',
 	},
 };
 
@@ -34,7 +36,7 @@ export const DEFAULT_PRODUCT_TABLE_VIEW: ViewTable = {
 	mediaField: DEFAULT_PRODUCT_TABLE_MEDIA_FIELD,
 	titleField: DEFAULT_PRODUCT_TABLE_TITLE_FIELD,
 	fields: [ ...DEFAULT_PRODUCT_TABLE_FIELDS ],
-	showLevels: false,
+	showLevels: true,
 	showMedia: true,
 	layout: DEFAULT_PRODUCT_TABLE_LAYOUT.layout,
 };

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show a search and filter empty state when product filters return no results.

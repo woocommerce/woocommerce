@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Shopper Collection: skip rendering and asset enqueue for logged-out shoppers.
