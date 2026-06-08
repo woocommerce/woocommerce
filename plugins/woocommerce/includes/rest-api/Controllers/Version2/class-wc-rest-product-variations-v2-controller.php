@@ -706,11 +706,16 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	 * @return array Of WP_Error or WP_REST_Response.
 	 */
 	public function batch_items( $request ) {
-		$items       = array_filter( $request->get_params() );
-		$params      = $request->get_url_params();
-		$query       = $request->get_query_params();
-		$product_id  = $params['product_id'];
-		$body_params = array();
+		$items                            = array_filter( $request->get_params() );
+		$params                           = $request->get_url_params();
+		$query                            = $request->get_query_params();
+		$product_id                       = $params['product_id'];
+		$body_params                      = array();
+		$deferred_product_transient_ids   = array();
+		$defer_product_transient_deletion = static function ( $defer, $post_id ) use ( &$deferred_product_transient_ids ) {
+			$deferred_product_transient_ids[ (int) $post_id ] = true;
+			return true;
+		};
 
 		foreach ( array( 'update', 'create', 'delete' ) as $batch_type ) {
 			if ( ! empty( $items[ $batch_type ] ) ) {
@@ -738,7 +743,15 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 		$request->set_body_params( $body_params );
 		$request->set_query_params( $query );
 
-		return parent::batch_items( $request );
+		add_filter( 'woocommerce_defer_product_transient_deletion', $defer_product_transient_deletion, 10, 2 );
+		try {
+			return parent::batch_items( $request );
+		} finally {
+			remove_filter( 'woocommerce_defer_product_transient_deletion', $defer_product_transient_deletion, 10 );
+			foreach ( array_keys( $deferred_product_transient_ids ) as $deferred_product_id ) {
+				wc_delete_product_transients( $deferred_product_id );
+			}
+		}
 	}
 
 	/**

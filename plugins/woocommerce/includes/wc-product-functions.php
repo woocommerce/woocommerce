@@ -126,6 +126,21 @@ function wc_product_dimensions_enabled() {
  * @param int $post_id (default: 0) The product ID.
  */
 function wc_delete_product_transients( $post_id = 0 ) {
+	/**
+	 * Short-circuit product transient deletion.
+	 *
+	 * This allows bulk write paths to coalesce repeated invalidations and flush the
+	 * affected product IDs once after the batch completes.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param bool $defer   Whether to defer deleting product transients.
+	 * @param int  $post_id Product ID whose transients are being deleted.
+	 */
+	if ( apply_filters( 'woocommerce_defer_product_transient_deletion', false, $post_id ) ) {
+		return;
+	}
+
 	// Transient data to clear with a fixed name which may be stale after product updates.
 	$transients_to_clear = array(
 		'wc_products_onsale',
