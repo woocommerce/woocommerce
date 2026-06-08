@@ -11,7 +11,7 @@ class ProductAddToCartUtils {
 	/**
 	 * Product add to cart store namespace.
 	 */
-	public const STORE_NAMESPACE = 'woocommerce/product-add-to-cart';
+	public const STORE_NAMESPACE = 'woocommerce/add-to-cart';
 
 	/**
 	 * Get the default product-scoped add to cart context.

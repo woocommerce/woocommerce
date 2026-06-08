@@ -6,9 +6,9 @@ import '@woocommerce/stores/woocommerce/products';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import {
-	getProductAddToCartPayload,
-	type ProductAddToCartContext,
-} from '@woocommerce/stores/woocommerce/product-add-to-cart';
+	getAddToCartPayload,
+	type AddToCartContext,
+} from '@woocommerce/stores/woocommerce/add-to-cart';
 
 /**
  * Internal dependencies
@@ -44,10 +44,10 @@ type ServerState = {
 	};
 };
 
-const getProductAddToCartContext = () => {
+const getAddToCartContext = () => {
 	try {
-		return getContext< ProductAddToCartContext >(
-			'woocommerce/product-add-to-cart'
+		return getContext< AddToCartContext >(
+			'woocommerce/add-to-cart'
 		);
 	} catch {
 		return undefined;
@@ -81,11 +81,11 @@ const productButtonStore = {
 				return 0;
 			}
 
-			const productAddToCartContext = getProductAddToCartContext();
+			const addToCartContext = getAddToCartContext();
 
 			const item = wooState.findItemInCart( {
 				id: product.id,
-				variation: productAddToCartContext?.selectedAttributes,
+				variation: addToCartContext?.selectedAttributes,
 			} );
 
 			return item?.quantity ?? 0;
@@ -170,7 +170,7 @@ const productButtonStore = {
 			// Pass quantityToAdd as a delta. The cart store will add this
 			// to the current quantity, ensuring rapid clicks compound correctly.
 			yield actions.addCartItem(
-				getProductAddToCartPayload( product, context.quantityToAdd ),
+				getAddToCartPayload( product, context.quantityToAdd ),
 				{
 					showCartUpdatesNotices: false,
 				}

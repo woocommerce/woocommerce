@@ -167,7 +167,7 @@ class SingleProduct extends \WP_UnitTestCase {
 			);
 
 			$this->assertStringContainsString( 'woocommerce/products::', $markup, 'The Single Product wrapper should expose the product data context.' );
-			$this->assertStringContainsString( 'woocommerce/product-add-to-cart::', $markup, 'The Single Product wrapper should expose the product add to cart context when Product Quantity is present.' );
+			$this->assertStringContainsString( 'woocommerce/add-to-cart::', $markup, 'The Single Product wrapper should expose the product add to cart context when Product Quantity is present.' );
 		} finally {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}

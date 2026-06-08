@@ -7,23 +7,23 @@ import type { ProductResponseItem } from '@woocommerce/types';
  * Internal dependencies
  */
 import type {
-	ProductAddToCartContext,
-	ProductAddToCartStore,
-} from '../product-add-to-cart';
+	AddToCartContext,
+	AddToCartStore,
+} from '../add-to-cart';
 
 type MockStore = {
-	state: ProductAddToCartStore[ 'state' ];
-	actions: ProductAddToCartStore[ 'actions' ];
+	state: AddToCartStore[ 'state' ];
+	actions: AddToCartStore[ 'actions' ];
 };
 
 let mockRegisteredStore: MockStore | null = null;
-let mockContext: ProductAddToCartContext | undefined;
+let mockContext: AddToCartContext | undefined;
 
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		store: jest.fn( ( namespace, definition ) => {
-			if ( namespace !== 'woocommerce/product-add-to-cart' ) {
+			if ( namespace !== 'woocommerce/add-to-cart' ) {
 				return {};
 			}
 
@@ -34,14 +34,14 @@ jest.mock(
 			);
 
 			mockRegisteredStore = {
-				state: stateBase as ProductAddToCartStore[ 'state' ],
+				state: stateBase as AddToCartStore[ 'state' ],
 				actions: definition.actions,
 			};
 
 			return mockRegisteredStore;
 		} ),
 		getContext: jest.fn( ( namespace ) => {
-			if ( namespace === 'woocommerce/product-add-to-cart' ) {
+			if ( namespace === 'woocommerce/add-to-cart' ) {
 				return mockContext;
 			}
 			return undefined;
@@ -51,15 +51,15 @@ jest.mock(
 );
 
 const loadStore = () => {
-	let storeModule: typeof import( '../product-add-to-cart' );
+	let storeModule: typeof import( '../add-to-cart' );
 	jest.isolateModules( () => {
-		storeModule = require( '../product-add-to-cart' );
+		storeModule = require( '../add-to-cart' );
 	} );
 
 	return storeModule!;
 };
 
-describe( 'woocommerce/product-add-to-cart store', () => {
+describe( 'woocommerce/add-to-cart store', () => {
 	beforeEach( () => {
 		jest.resetModules();
 		mockRegisteredStore = null;
@@ -84,13 +84,13 @@ describe( 'woocommerce/product-add-to-cart store', () => {
 	} );
 
 	it( 'falls back to store state when there is no product-scoped context', () => {
-		const { getProductAddToCartPayload } = loadStore();
+		const { getAddToCartPayload } = loadStore();
 		const product = { id: 42, type: 'simple' } as ProductResponseItem;
 
 		mockRegisteredStore!.actions.setQuantity( 42, 2 );
 
 		expect( mockRegisteredStore!.state.quantity[ 42 ] ).toBe( 2 );
-		expect( getProductAddToCartPayload( product, 1 ) ).toEqual( {
+		expect( getAddToCartPayload( product, 1 ) ).toEqual( {
 			id: 42,
 			quantityToAdd: 2,
 			type: 'simple',
@@ -103,10 +103,10 @@ describe( 'woocommerce/product-add-to-cart store', () => {
 			selectedAttributes: [],
 			validationErrors: [],
 		};
-		const { getProductAddToCartPayload } = loadStore();
+		const { getAddToCartPayload } = loadStore();
 		const product = { id: 42, type: 'simple' } as ProductResponseItem;
 
-		expect( getProductAddToCartPayload( product, 7 ) ).toEqual( {
+		expect( getAddToCartPayload( product, 7 ) ).toEqual( {
 			id: 42,
 			quantityToAdd: 7,
 			type: 'simple',
@@ -137,10 +137,10 @@ describe( 'woocommerce/product-add-to-cart store', () => {
 			],
 			validationErrors: [],
 		};
-		const { getProductAddToCartPayload } = loadStore();
+		const { getAddToCartPayload } = loadStore();
 		const product = { id: 99, type: 'variation' } as ProductResponseItem;
 
-		expect( getProductAddToCartPayload( product, 1 ) ).toEqual( {
+		expect( getAddToCartPayload( product, 1 ) ).toEqual( {
 			id: 99,
 			quantityToAdd: 3,
 			type: 'variation',

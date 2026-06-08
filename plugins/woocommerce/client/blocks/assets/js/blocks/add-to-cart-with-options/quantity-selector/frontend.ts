@@ -4,8 +4,8 @@
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
-import '@woocommerce/stores/woocommerce/product-add-to-cart';
-import type { ProductAddToCartStore } from '@woocommerce/stores/woocommerce/product-add-to-cart';
+import '@woocommerce/stores/woocommerce/add-to-cart';
+import type { AddToCartStore } from '@woocommerce/stores/woocommerce/add-to-cart';
 
 /**
  * Internal dependencies
@@ -41,8 +41,8 @@ const addToCartWithOptionsStore = store< OptionalAddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
-const productAddToCartStore = store< ProductAddToCartStore >(
-	'woocommerce/product-add-to-cart',
+const addToCartStore = store< AddToCartStore >(
+	'woocommerce/add-to-cart',
 	{},
 	{ lock: universalLock }
 );
@@ -99,15 +99,15 @@ const getCurrentQuantity = ( productId: number, fallback = 0 ): number => {
 	const addToCartWithOptionsQuantity =
 		addToCartWithOptionsContext?.quantity?.[ productId ] ??
 		addToCartWithOptionsStore.state.quantity?.[ productId ];
-	const productAddToCartQuantity =
-		productAddToCartStore.state.quantityInContext?.[ productId ];
-	const quantity = productAddToCartQuantity ?? addToCartWithOptionsQuantity;
+	const addToCartQuantity =
+		addToCartStore.state.quantityInContext?.[ productId ];
+	const quantity = addToCartQuantity ?? addToCartWithOptionsQuantity;
 
 	return quantity === undefined ? fallback : quantity;
 };
 
 const setQuantity = ( productId: number, value: number ) => {
-	productAddToCartStore.actions.setQuantity( productId, value );
+	addToCartStore.actions.setQuantity( productId, value );
 
 	if (
 		getAddToCartWithOptionsContext()?.quantity &&
@@ -326,7 +326,7 @@ store< QuantitySelectorStore >(
 							? product.add_to_cart.minimum
 							: inputValue;
 
-						productAddToCartStore.actions.initializeQuantity(
+						addToCartStore.actions.initializeQuantity(
 							product.id,
 							initialQuantity
 						);

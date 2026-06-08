@@ -8,34 +8,34 @@ import type {
 	ClientCartItem,
 } from '@woocommerce/stores/woocommerce/cart';
 
-export type ProductAddToCartError = {
+export type AddToCartError = {
 	code: string;
 	group: string;
 	message: string;
 };
 
-export type ProductAddToCartContext = {
+export type AddToCartContext = {
 	quantity?: Record< number, number >;
 	selectedAttributes?: SelectedAttributes[];
-	validationErrors?: ProductAddToCartError[];
+	validationErrors?: AddToCartError[];
 	groupedProductIds?: number[];
 };
 
-export type ProductAddToCartStore = {
+export type AddToCartStore = {
 	state: {
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
-		validationErrors: ProductAddToCartError[];
+		validationErrors: AddToCartError[];
 		quantityInContext: Record< number, number >;
 		selectedAttributesInContext: SelectedAttributes[];
-		validationErrorsInContext: ProductAddToCartError[];
+		validationErrorsInContext: AddToCartError[];
 	};
 	actions: {
 		initializeQuantity: ( productId: number, value: number ) => void;
 		setQuantity: ( productId: number, value: number ) => void;
 		setAttribute: ( attribute: string, value: string ) => void;
 		removeAttribute: ( attribute: string ) => void;
-		addError: ( error: ProductAddToCartError ) => string;
+		addError: ( error: AddToCartError ) => string;
 		clearErrors: ( group?: string ) => void;
 	};
 };
@@ -54,7 +54,7 @@ const attributeNamesMatch = ( a: string, b: string ): boolean =>
 	normalizeAttributeName( a ) === normalizeAttributeName( b );
 
 const fallbackState: Pick<
-	ProductAddToCartStore[ 'state' ],
+	AddToCartStore[ 'state' ],
 	'quantity' | 'selectedAttributes' | 'validationErrors'
 > = {
 	quantity: {},
@@ -62,12 +62,12 @@ const fallbackState: Pick<
 	validationErrors: [],
 };
 
-let productAddToCartState: ProductAddToCartStore[ 'state' ];
+let addToCartState: AddToCartStore[ 'state' ];
 
-const getProductAddToCartContext = (): ProductAddToCartContext | undefined => {
+const getAddToCartContext = (): AddToCartContext | undefined => {
 	try {
-		const context = getContext< ProductAddToCartContext >(
-			'woocommerce/product-add-to-cart'
+		const context = getContext< AddToCartContext >(
+			'woocommerce/add-to-cart'
 		);
 
 		return context &&
@@ -83,46 +83,46 @@ const getProductAddToCartContext = (): ProductAddToCartContext | undefined => {
 };
 
 const getQuantityTarget = (): Record< number, number > => {
-	const context = getProductAddToCartContext();
+	const context = getAddToCartContext();
 	if ( context ) {
 		context.quantity = context.quantity || {};
 		return context.quantity;
 	}
 
-	return productAddToCartState?.quantity ?? fallbackState.quantity;
+	return addToCartState?.quantity ?? fallbackState.quantity;
 };
 
 const getSelectedAttributesTarget = (): SelectedAttributes[] => {
-	const context = getProductAddToCartContext();
+	const context = getAddToCartContext();
 	if ( context ) {
 		context.selectedAttributes = context.selectedAttributes || [];
 		return context.selectedAttributes;
 	}
 
 	return (
-		productAddToCartState?.selectedAttributes ??
+		addToCartState?.selectedAttributes ??
 		fallbackState.selectedAttributes
 	);
 };
 
-const getValidationErrorsTarget = (): ProductAddToCartError[] => {
-	const context = getProductAddToCartContext();
+const getValidationErrorsTarget = (): AddToCartError[] => {
+	const context = getAddToCartContext();
 	if ( context ) {
 		context.validationErrors = context.validationErrors || [];
 		return context.validationErrors;
 	}
 
 	return (
-		productAddToCartState?.validationErrors ?? fallbackState.validationErrors
+		addToCartState?.validationErrors ?? fallbackState.validationErrors
 	);
 };
 
-export const getProductAddToCartPayload = (
+export const getAddToCartPayload = (
 	product: ProductResponseItem,
 	fallbackQuantity = 1
 ): ClientCartItem => {
-	const quantity = productAddToCartState.quantityInContext[ product.id ];
-	const selectedAttributes = productAddToCartState.selectedAttributesInContext;
+	const quantity = addToCartState.quantityInContext[ product.id ];
+	const selectedAttributes = addToCartState.selectedAttributesInContext;
 
 	const payload: ClientCartItem = {
 		id: product.id,
@@ -137,8 +137,8 @@ export const getProductAddToCartPayload = (
 	return payload;
 };
 
-( { state: productAddToCartState } = store< ProductAddToCartStore >(
-	'woocommerce/product-add-to-cart',
+( { state: addToCartState } = store< AddToCartStore >(
+	'woocommerce/add-to-cart',
 	{
 		state: {
 			...fallbackState,
@@ -148,7 +148,7 @@ export const getProductAddToCartPayload = (
 			get selectedAttributesInContext(): SelectedAttributes[] {
 				return getSelectedAttributesTarget();
 			},
-			get validationErrorsInContext(): ProductAddToCartError[] {
+			get validationErrorsInContext(): AddToCartError[] {
 				return getValidationErrorsTarget();
 			},
 		},
@@ -192,7 +192,7 @@ export const getProductAddToCartPayload = (
 					selectedAttributes.splice( index, 1 );
 				}
 			},
-			addError( error: ProductAddToCartError ): string {
+			addError( error: AddToCartError ): string {
 				getValidationErrorsTarget().push( error );
 				return error.code;
 			},
