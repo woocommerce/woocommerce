@@ -1,7 +1,6 @@
 ---
 post_title: WooCommerce core critical flows
 sidebar_label: Core critical flows
-
 ---
 
 # WooCommerce core critical flows
@@ -119,17 +118,18 @@ These flows will continually evolve as the platform evolves with flows updated, 
 
 ### Merchant - Onboarding
 
-| User Type | Flow Area     | Flow Name                                                      | Test File                                |
-| --------- | ------------- | -------------------------------------------------------------- | ---------------------------------------- |
-| Merchant  | Core Profiler | Introduction & opt-in                                          | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | User profile information                                       | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | Business information                                           | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | Extensions page                                                | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | WooPayments included in extensions for eligible criteria       | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | WooPayments not included in extensions for ineligible criteria | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | Install all default extensions                                 | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | Complete site setup                                            | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | Skip introduction and confirm business location                | activate-and-setup/core-profiler.spec.js |
+| User Type | Flow Area      | Flow Name                                                      | Test File                                |
+| --------- | -------------- | -------------------------------------------------------------- | ---------------------------------------- |
+| Merchant  | Core Profiler  | Introduction & opt-in                                          | activate-and-setup/core-profiler.spec.js |
+| Merchant  | Core Profiler  | User profile information                                       | activate-and-setup/core-profiler.spec.js |
+| Merchant  | Core Profiler  | Business information                                           | activate-and-setup/core-profiler.spec.js |
+| Merchant  | Core Profiler  | Extensions page                                                | activate-and-setup/core-profiler.spec.js |
+| Merchant  | Core Profiler  | WooPayments included in extensions for eligible criteria       | activate-and-setup/core-profiler.spec.js |
+| Merchant  | Core Profiler  | WooPayments not included in extensions for ineligible criteria | activate-and-setup/core-profiler.spec.js |
+| Merchant  | Core Profiler  | Install all default extensions                                 | activate-and-setup/core-profiler.spec.js |
+| Merchant  | Core Profiler  | Complete site setup                                            | activate-and-setup/core-profiler.spec.js |
+| Merchant  | Core Profiler  | Skip introduction and confirm business location                | activate-and-setup/core-profiler.spec.js |
+| Merchant  | NOX Onboarding | Open onboarding from Payments settings                         | onboarding/nox-onboarding.spec.ts        |
 
 ### Merchant - Dashboard
 
@@ -149,7 +149,7 @@ These flows will continually evolve as the platform evolves with flows updated, 
 ### Merchant - Settings
 
 | User Type | Flow Area | Flow Name                              | Test File                                |
-| --------- | --------- |----------------------------------------|------------------------------------------|
+| --------- | --------- | -------------------------------------- | ---------------------------------------- |
 | Merchant  | Settings  | Update General Settings                | merchant/settings-general.spec.js        |
 | Merchant  | Settings  | Add Tax Rates                          | merchant/settings-tax.spec.js            |
 | Merchant  | Settings  | Add Shipping Zones                     | merchant/create-shipping-zones.spec.js   |
