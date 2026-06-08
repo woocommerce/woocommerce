@@ -90,8 +90,8 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		unset( $context_for_entry['source'] );
 
 		if ( ! empty( $context_for_entry ) ) {
-			$formatted_context = wp_json_encode( $context_for_entry, JSON_UNESCAPED_UNICODE );
-			$message          .= stripslashes( " CONTEXT: $formatted_context" );
+			$formatted_context = wp_json_encode( $context_for_entry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+			$message          .= " CONTEXT: $formatted_context";
 		}
 
 		$entry = "$time_string $level_string $message";

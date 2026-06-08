@@ -192,7 +192,13 @@ MESSAGE;
 				'multibyte'   => '中文字',
 				'backslashes' => 'C:\MS-DOS\\',
 			),
-			$context_delineator . '{"multibyte":"中文字","backslashes":"C:\MS-DOS\"}',
+			$context_delineator . wp_json_encode(
+				array(
+					'multibyte'   => '中文字',
+					'backslashes' => 'C:\MS-DOS\\',
+				),
+				JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+			),
 		);
 		yield 'backtrace boolean only' => array(
 			array( 'backtrace' => true ),
@@ -254,6 +260,40 @@ MESSAGE;
 		$expected_prefix = gmdate( 'c', $time ) . ' DEBUG ' . $message;
 
 		$this->assertEquals( $expected_prefix . $expected . "\n", $actual_content );
+	}
+
+	/**
+	 * @testdox The CONTEXT portion of a log entry is valid JSON even when values contain backslashes.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/62830
+	 */
+	public function test_handle_context_is_valid_json_with_backslashes(): void {
+		$this->sut->handle(
+			time(),
+			'debug',
+			'It is time for lunch.',
+			array(
+				'source' => 'your_stomach',
+				'class'  => 'Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2',
+				'url'    => 'https://example.com/wp-content/uploads',
+			)
+		);
+
+		$paths = glob( Settings::get_log_directory() . '*.log' );
+		$this->assertCount( 1, $paths );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$content     = file_get_contents( reset( $paths ) );
+		$delineator  = ' CONTEXT: ';
+		$json_string = trim( substr( $content, strpos( $content, $delineator ) + strlen( $delineator ) ) );
+
+		$decoded = json_decode( $json_string, true );
+
+		$this->assertSame( JSON_ERROR_NONE, json_last_error(), 'The logged CONTEXT should be valid JSON.' );
+		$this->assertSame( 'Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2', $decoded['class'] );
+		$this->assertSame( 'https://example.com/wp-content/uploads', $decoded['url'] );
+		// Forward slashes should be left readable, not escaped as "\/".
+		$this->assertStringContainsString( 'https://example.com/wp-content/uploads', $json_string );
 	}
 
 	/**
