@@ -9,10 +9,12 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+	exit;
+	// Exit if accessed directly.
 }
 
 if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
@@ -161,7 +163,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 */
 		public function status_widget_content() {
 			//phpcs:ignore
-			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false );
+			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false ) || ! FeaturesUtil::feature_is_enabled( 'analytics' );
 
 			$status_widget_reports = array(
 				'net_sales_link'      => 'admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue&chart=net_revenue&orderby=net_revenue&period=month&compare=previous_period',
