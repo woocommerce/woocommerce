@@ -254,6 +254,10 @@ class ReserveStockTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Insert a reserved_stock row without going through reserve_stock_for_order (which would trigger flush internally).
+	 *
+	 * @param int   $order_id   Order ID to associate the reservation with.
+	 * @param int   $product_id Product ID being reserved.
+	 * @param float $qty        Quantity to reserve.
 	 */
 	private function reserve_directly( int $order_id, int $product_id, float $qty ): void {
 		global $wpdb;
