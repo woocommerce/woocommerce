@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix LogHandlerFileV2 writing invalid JSON for the log entry context (e.g. with backtraces) by removing a stripslashes() call that corrupted the encoded JSON.
