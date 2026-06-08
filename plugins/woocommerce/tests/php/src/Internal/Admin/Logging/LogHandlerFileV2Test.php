@@ -271,9 +271,9 @@ MESSAGE;
 		$this->sut->handle(
 			time(),
 			'debug',
-			'It is time for lunch.',
+			'Test log entry.',
 			array(
-				'source' => 'your_stomach',
+				'source' => 'test',
 				'class'  => 'Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2',
 				'url'    => 'https://example.com/wp-content/uploads',
 			)
