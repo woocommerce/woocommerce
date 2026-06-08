@@ -304,4 +304,132 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'checkout-error', $result->get_error_code(), 'Error code should come from the checkout try/catch path.' );
 		$this->assertStringContainsString( 'Order items could not be saved', $result->get_error_message(), 'Error message should surface the defense-in-depth guard message.' );
 	}
+
+	/**
+	 * @testdox create_order reuses the pending checkout order for repeated attempts from the same cart.
+	 */
+	public function test_create_order_reuses_pending_order_for_same_cart_retry() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'customer@example.com',
+		);
+
+		try {
+			$first_order_id  = $this->sut->create_order( $data );
+			$second_order_id = $this->sut->create_order( $data );
+		} finally {
+			WC()->cart->empty_cart();
+			WC()->session->__unset( 'order_awaiting_payment' );
+		}
+
+		$this->assertIsInt( $first_order_id );
+		$this->assertSame( $first_order_id, $second_order_id, 'Repeated order creation for the same cart should resume the pending order.' );
+
+		$order = wc_get_order( $first_order_id );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 1, count( $order->get_items() ) );
+		$this->assertSame( 'pending', $order->get_status() );
+	}
+
+	/**
+	 * @testdox create_order creates a new order when the cart changes after a pending order was created.
+	 */
+	public function test_create_order_creates_new_order_when_cart_changes_after_pending_order() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'customer@example.com',
+		);
+
+		try {
+			$first_order_id = $this->sut->create_order( $data );
+
+			$second_product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $second_product->get_id() );
+			WC()->cart->calculate_totals();
+
+			$second_order_id = $this->sut->create_order( $data );
+		} finally {
+			WC()->cart->empty_cart();
+			WC()->session->__unset( 'order_awaiting_payment' );
+		}
+
+		$this->assertIsInt( $first_order_id );
+		$this->assertIsInt( $second_order_id );
+		$this->assertNotSame( $first_order_id, $second_order_id, 'A changed cart should not reuse the previous pending order.' );
+
+		$second_order = wc_get_order( $second_order_id );
+		$this->assertInstanceOf( WC_Order::class, $second_order );
+		$this->assertSame( 2, count( $second_order->get_items() ) );
+	}
+
+	/**
+	 * @testdox create_order does not reuse a completed order for the same cart.
+	 */
+	public function test_create_order_does_not_reuse_completed_order_for_same_cart_retry() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'customer@example.com',
+		);
+
+		try {
+			$first_order_id = $this->sut->create_order( $data );
+			$first_order    = wc_get_order( $first_order_id );
+			$first_order->set_status( 'completed' );
+			$first_order->save();
+
+			$second_order_id = $this->sut->create_order( $data );
+		} finally {
+			WC()->cart->empty_cart();
+			WC()->session->__unset( 'order_awaiting_payment' );
+		}
+
+		$this->assertIsInt( $first_order_id );
+		$this->assertIsInt( $second_order_id );
+		$this->assertNotSame( $first_order_id, $second_order_id, 'A completed order should not be reused for a checkout retry.' );
+	}
+
+	/**
+	 * @testdox create_order reuses a failed order for the same cart retry.
+	 */
+	public function test_create_order_reuses_failed_order_for_same_cart_retry() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'customer@example.com',
+		);
+
+		try {
+			$first_order_id = $this->sut->create_order( $data );
+			$first_order    = wc_get_order( $first_order_id );
+			$first_order->set_status( 'failed' );
+			$first_order->save();
+
+			$second_order_id = $this->sut->create_order( $data );
+		} finally {
+			WC()->cart->empty_cart();
+			WC()->session->__unset( 'order_awaiting_payment' );
+		}
+
+		$this->assertIsInt( $first_order_id );
+		$this->assertSame( $first_order_id, $second_order_id, 'A failed order should be reused for a same-cart checkout retry.' );
+	}
 }

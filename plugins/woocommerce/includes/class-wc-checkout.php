@@ -487,6 +487,12 @@ class WC_Checkout {
 				}
 			}
 
+			// Store the order as soon as it has been persisted so retries before payment processing reuse it.
+			if ( WC()->session ) {
+				WC()->session->set( 'order_awaiting_payment', $order_id );
+				WC()->session->save_data();
+			}
+
 			/**
 			 * Action hook fired after an order is created used to add custom meta to the order.
 			 *
