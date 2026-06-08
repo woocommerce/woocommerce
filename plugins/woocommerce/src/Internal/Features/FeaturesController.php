@@ -451,11 +451,10 @@ class FeaturesController {
 					'Send a reminder email to shoppers who didn\'t finish checking out.',
 					'woocommerce'
 				),
-				// Skip compatibility checks like the other opt-in transactional-email features.
-				'skip_compatibility_checks'    => true,
+				'skip_compatibility_checks'    => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
-				'is_experimental'              => false,
+				'is_experimental'              => true,
 			),
 			'email_improvements'                 => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
