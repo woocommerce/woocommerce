@@ -1,9 +1,17 @@
 .woocommerce-report-table__scroll-point {
 	position: relative;
-	top: -#{$adminbar-height + $header-height + $gap};
+	top: -#{$adminbar-height + $gap};
 
 	@include breakpoint( "<782px" ) {
-		top: -#{$adminbar-height-mobile + $header-height + $gap};
+		top: -#{$adminbar-height-mobile + $gap};
+	}
+
+	.woocommerce-feature-enabled-activity-panels & {
+		top: -#{$adminbar-height + $header-height + $gap};
+
+		@include breakpoint( "<782px" ) {
+			top: -#{$adminbar-height-mobile + $header-height + $gap};
+		}
 	}
 }
 
