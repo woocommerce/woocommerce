@@ -79,6 +79,8 @@ class HposOrderCapabilityHelper {
 			case 'read_post':
 				return $this->map_read_order_caps( $order, $order_type_ob, (int) $user_id, $post );
 		}
+
+		return $caps;
 	}
 
 	/**
