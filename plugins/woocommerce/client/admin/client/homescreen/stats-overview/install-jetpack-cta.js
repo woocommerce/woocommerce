@@ -8,7 +8,6 @@ import { pluginsStore, useUser, useUserPreferences } from '@woocommerce/data';
 import { H } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { getAdminLink } from '@woocommerce/settings';
-import { createErrorNotice } from '@woocommerce/data/src/plugins/actions';
 
 const getJetpackInstallText = ( jetpackInstallState ) => {
 	return (
@@ -89,6 +88,7 @@ export const InstallJetpackCTA = () => {
 	);
 
 	const { installJetpackAndConnect } = useDispatch( pluginsStore );
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	if ( ! canUserInstallPlugins ) {
 		return null;

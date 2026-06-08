@@ -25,7 +25,7 @@ import {
 	CoreProfilerCompletedSteps,
 } from './types';
 import { Plugin, PluginNames } from '../plugins/types';
-import { optionsStore } from '..';
+import { store as optionsStore } from '../options';
 
 export function getFreeExtensionsError( error: unknown ) {
 	return {

@@ -3,7 +3,7 @@
  */
 
 $woocommerce:   	#720eec !default;
-$green:         	#008a20 !default;
+$green:         	#007518 !default;
 $red:           	#a00 !default;
 $orange:        	#ffba00 !default;
 $blue:          	#2ea2cc !default;
@@ -24,6 +24,18 @@ $highlightext:      desaturate(lighten($highlight, 80%), 18%) !default;  // Text
 $contentbg:         #fff !default;                                     // Content BG - Tabs (active state)
 $subtext:           #767676 !default;                                  // small, breadcrumbs etc
 
+// Mirrors @wordpress/base-styles/colors.scss (WP 7.0 admin gray scale).
+$gray-900:          #1e1e1e !default;                                  // Primary admin text
+$gray-700:          #757575 !default;                                  // Placeholder / secondary admin text
+
+// Border radius tokens — mirrors WP Design System naming.
+$radius-s:          2px !default;                                      // Small radius: inputs, buttons, selects.
+
+// Grayscale tokens — mirror @wordpress/base-styles/_colors.scss for WP 7.0 alignment.
+// Adjacent work in #64280 adds $gray-700 and $gray-900 — coordinate on merge.
+$gray-100:          #f6f7f7 !default;                                  // Subtle backgrounds.
+$gray-200:          #dcdcde !default;                                  // Borders, dividers.
+
 // export vars as CSS vars
 :root {
 	--woocommerce: #{$woocommerce};
@@ -42,6 +54,8 @@ $subtext:           #767676 !default;                                  // small,
 	--wc-form-border-color: rgba(32, 7, 7, 0.8);
 	--wc-form-border-radius: 4px;
 	--wc-form-border-width: 1px;
+	// Matches WP 7.0 $alert-red token for destructive actions.
+	--wc-destructive: #cc1818;
 	// Matches WP 7.0 $radius-l token (used on dashboard widgets).
 	--wc-card-border-radius: 8px;
 }

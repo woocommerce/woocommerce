@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Remove the image and layout fields from the test "Add admin note" tool now that inbox notes no longer render images.
+

@@ -1,0 +1,77 @@
+@import '@automattic/color-studio/dist/color-variables.scss';
+
+// Import Gutenberg variables
+@import '@wordpress/base-styles/colors.scss';
+@import '@wordpress/base-styles/variables.scss';
+@import '@wordpress/base-styles/mixins.scss';
+@import '@wordpress/base-styles/breakpoints.scss';
+@import '@wordpress/base-styles/animations.scss';
+@import '@wordpress/base-styles/z-index.scss';
+@import '@wordpress/base-styles/default-custom-properties.scss';
+
+$fallback-gutter: 24px;
+$fallback-gutter-large: 40px;
+$gutter: var(--main-gap);
+$gutter-large: var(--large-gap);
+
+$gap-largest: 40px;
+$gap-larger: 36px;
+$gap-large: 24px;
+$gap: 16px;
+$gap-small: 12px;
+$gap-smaller: 8px;
+$gap-smallest: 4px;
+
+// Header
+$header-height: 60px;
+$header-border-width: 1px;
+// Matches Gutenberg's `--wpds-elevation-xs` (subtle 4-layer drop with
+// very low alphas) visually without binding to a CSS custom property
+// that isn't loaded on wp-admin pages yet. Previously a single heavy
+// 30% rgba drop — replaced with the modern WPDS layered shadow
+// aesthetic.
+// TODO: swap to `var(--wpds-elevation-xs, [these layers as fallback])`
+// once WP exposes design-tokens.css globally on wp-admin pages
+// (tracked in https://core.trac.wordpress.org/ticket/65085 and the
+// unified admin header discussion at WordPress/gutenberg#76709).
+$header-scroll-shadow:
+	0 1px 1px 0 #00000008,
+	0 1px 2px 0 #00000005,
+	0 3px 3px 0 #00000005,
+	0 4px 4px 0 #00000003;
+
+// Sidebar
+$sidebar-width: 272px;
+
+// @todo Remove this spacing variable
+$spacing: 16px;
+
+// Gutenberg variable overrides.
+$white: $studio-white;
+$black: $studio-black;
+$alert-red: $error-red;
+$alert-yellow: $notice-yellow;
+$alert-green: $valid-green;
+
+// WordPress defaults — aliased from @wordpress/base-styles/variables (already
+// imported above) so these track Core automatically if the upstream values change.
+$adminbar-height: $admin-bar-height;
+$adminbar-height-mobile: $admin-bar-height-big;
+$admin-menu-width: $admin-sidebar-width;
+$admin-menu-width-collapsed: $admin-sidebar-width-collapsed;
+
+// wp-admin colors. Hardcoded because WordPress doesn't expose them as CSS
+// custom properties on `:root` (verified via the `wp-token-check` skill).
+// Centralised here so the next person doesn't have to grep when WP shifts
+// the bar / border palette.
+$wp-admin-background: #f0f0f1; // wp-admin body background grey
+$wp-admin-border: #dcdcde; // wp-admin chrome border colour
+$wp-admin-sidebar: #24292d;
+
+// Muriel
+$muriel-box-shadow-1dp: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
+	0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+$muriel-box-shadow-6dp: 0 3px 5px rgba(0, 0, 0, 0.2),
+	0 1px 18px rgba(0, 0, 0, 0.12), 0 6px 10px rgba(0, 0, 0, 0.14);
+$muriel-box-shadow-8dp: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+	0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);

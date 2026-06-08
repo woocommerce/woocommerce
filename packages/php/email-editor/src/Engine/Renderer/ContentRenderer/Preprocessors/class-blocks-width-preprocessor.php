@@ -9,7 +9,6 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
-
 /**
  * This class sets the width of the blocks based on the layout width or column count.
  * The final width in pixels is stored in the email_attrs array because we would like to avoid changing the original attributes.

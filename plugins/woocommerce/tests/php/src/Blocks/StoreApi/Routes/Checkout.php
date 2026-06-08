@@ -207,7 +207,7 @@ class Checkout extends MockeryTestCase {
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
 	}
 
 	/**
@@ -1317,9 +1317,11 @@ class Checkout extends MockeryTestCase {
 		);
 		array_map( 'woocommerce_register_additional_checkout_field', $fields );
 
-		$request = new \WP_REST_Request( 'PUT', '/wc/store/v1/checkout' );
-		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
-		$request->set_body_params(
+		// PATCH the checkout with the additional fields. Under deferred draft creation,
+		// PATCH does not materialise an order — values are captured to the field store.
+		$put_request = new \WP_REST_Request( 'PUT', '/wc/store/v1/checkout' );
+		$put_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$put_request->set_body_params(
 			array(
 				'additional_fields' => array(
 					'plugin-namespace/student-id'     => '1234567890',
@@ -1331,10 +1333,56 @@ class Checkout extends MockeryTestCase {
 			)
 		);
 
-		$response = rest_get_server()->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
+		$put_response = rest_get_server()->dispatch( $put_request );
+		$this->assertEquals( 200, $put_response->get_status() );
+		$this->assertSame( 0, $put_response->get_data()['order_id'] );
 
-		$order = wc_get_order( $response->get_data()['order_id'] );
+		// POST to materialise the real order. The replayed field store should round-trip
+		// the contact and order additional fields onto the persisted order.
+		$post_request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$post_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$post_request->set_body_params(
+			array(
+				'billing_address'   => array(
+					'first_name'                  => 'Test',
+					'last_name'                   => 'User',
+					'company'                     => '',
+					'address_1'                   => '123 Test St',
+					'address_2'                   => '',
+					'city'                        => 'Test City',
+					'state'                       => 'CA',
+					'postcode'                    => '94016',
+					'country'                     => 'US',
+					'email'                       => 'testaccount@test.com',
+					'phone'                       => '5555555555',
+					'plugin-namespace/student-id' => '1234567890',
+				),
+				'shipping_address'  => array(
+					'first_name'                  => 'Test',
+					'last_name'                   => 'User',
+					'company'                     => '',
+					'address_1'                   => '123 Test St',
+					'address_2'                   => '',
+					'city'                        => 'Test City',
+					'state'                       => 'CA',
+					'postcode'                    => '94016',
+					'country'                     => 'US',
+					'phone'                       => '5555555555',
+					'plugin-namespace/student-id' => '1234567890',
+				),
+				'payment_method'    => 'bacs',
+				'additional_fields' => array(
+					'plugin-namespace/job-function'   => 'engineering',
+					'plugin-namespace/leave-on-porch' => true,
+				),
+			)
+		);
+
+		$post_response = rest_get_server()->dispatch( $post_request );
+		$this->assertEquals( 200, $post_response->get_status(), print_r( $post_response->get_data(), true ) );
+
+		$order = wc_get_order( $post_response->get_data()['order_id'] );
+		$this->assertInstanceOf( \WC_Order::class, $order );
 
 		$checkout_fields           = Package::container()->get( CheckoutFields::class );
 		$additional_fields_address = $checkout_fields->get_order_additional_fields_with_values( $order, 'address', 'other', 'view' );
@@ -1345,6 +1393,13 @@ class Checkout extends MockeryTestCase {
 		$this->assertArrayNotHasKey( 'plugin-namespace/student-id', $additional_fields_address );
 		$this->assertEquals( 'engineering', $additional_fields_contact['plugin-namespace/job-function']['value'] );
 		$this->assertEquals( true, $additional_fields_order['plugin-namespace/leave-on-porch']['value'] );
+
+		// Deregister the fields we registered above so later tests start from a clean
+		// global state. Without this, subsequent tests would fail address validation
+		// because `student-id` is required on every address submission.
+		foreach ( $fields as $field ) {
+			$checkout_fields->deregister_checkout_field( $field['id'] );
+		}
 	}
 
 	/**
@@ -1787,5 +1842,472 @@ class Checkout extends MockeryTestCase {
 
 		// Order shouldn't stay in custom status, instead we let payment gateway set the correct status.
 		$this->assertEquals( 'on-hold', $order->get_status(), 'Order status should be controlled by the payment gateway, not remain custom.' );
+	}
+
+	/**
+	 * GET /wc/store/v1/checkout against a populated cart must not create a draft order.
+	 *
+	 * Prior to 10.8.0, simply rendering the checkout block triggered a draft order creation
+	 * which was the largest source of orphaned `wc-checkout-draft` rows.
+	 */
+	public function test_get_does_not_create_draft_order() {
+		$drafts_before = wc_get_orders(
+			array(
+				'status' => 'checkout-draft',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( 0, $data['order_id'], 'GET response should report order_id 0 — no draft order materialised.' );
+
+		$drafts_after = wc_get_orders(
+			array(
+				'status' => 'checkout-draft',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertCount(
+			count( $drafts_before ),
+			$drafts_after,
+			'GET should not create any wc-checkout-draft rows.'
+		);
+
+		// Session should not hold a draft order id.
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ) );
+	}
+
+	/**
+	 * GET should not fire `woocommerce_store_api_checkout_update_order_meta` (only PATCH/POST do).
+	 */
+	public function test_get_does_not_fire_update_order_meta_action() {
+		$fired = false;
+		add_action(
+			'woocommerce_store_api_checkout_update_order_meta',
+			function () use ( &$fired ) {
+				$fired = true;
+			}
+		);
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		rest_get_server()->dispatch( $request );
+
+		remove_all_actions( 'woocommerce_store_api_checkout_update_order_meta' );
+
+		$this->assertFalse( $fired, 'update_order_meta should not fire on GET — it should only fire when the draft is materialised.' );
+	}
+
+	/**
+	 * Phase 2: POST is the only place that materialises a draft order, and the
+	 * `woocommerce_store_api_checkout_order_created` action fires once at that point.
+	 */
+	public function test_post_creates_order_and_fires_order_created_action() {
+		$created_order_ids = array();
+		add_action(
+			'woocommerce_store_api_checkout_order_created',
+			function ( $order ) use ( &$created_order_ids ) {
+				$created_order_ids[] = $order->get_id();
+			}
+		);
+
+		$post_request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$post_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$post_request->set_body_params(
+			array(
+				'billing_address'  => array(
+					'first_name' => 'Phase',
+					'last_name'  => 'Two',
+					'company'    => '',
+					'address_1'  => '123 Test St',
+					'address_2'  => '',
+					'city'       => 'Test City',
+					'state'      => 'CA',
+					'postcode'   => '94016',
+					'country'    => 'US',
+					'email'      => 'phasetwo@example.com',
+					'phone'      => '5555555555',
+				),
+				'shipping_address' => array(
+					'first_name' => 'Phase',
+					'last_name'  => 'Two',
+					'company'    => '',
+					'address_1'  => '123 Test St',
+					'address_2'  => '',
+					'city'       => 'Test City',
+					'state'      => 'CA',
+					'postcode'   => '94016',
+					'country'    => 'US',
+					'phone'      => '5555555555',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$post_response = rest_get_server()->dispatch( $post_request );
+
+		remove_all_actions( 'woocommerce_store_api_checkout_order_created' );
+
+		$this->assertEquals( 200, $post_response->get_status(), print_r( $post_response->get_data(), true ) );
+
+		$order_id = $post_response->get_data()['order_id'];
+		$this->assertGreaterThan( 0, $order_id );
+
+		$this->assertCount( 1, $created_order_ids );
+		$this->assertSame( $order_id, $created_order_ids[0] );
+	}
+
+	/**
+	 * Phase 2: PATCH should not create a draft order row; the order is materialised at POST.
+	 */
+	public function test_put_does_not_create_draft_order() {
+		$drafts_before = wc_get_orders(
+			array(
+				'status' => 'checkout-draft',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'payment_method' => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 0, $response->get_data()['order_id'], 'PATCH should report order_id 0 — order is now deferred to POST.' );
+
+		$drafts_after = wc_get_orders(
+			array(
+				'status' => 'checkout-draft',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertCount( count( $drafts_before ), $drafts_after, 'PATCH should not create any wc-checkout-draft rows.' );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ), 'No session draft id should be set after PATCH under Phase 2.' );
+	}
+
+	/**
+	 * The persisted-order hooks (`update_order_meta`, `update_order_from_request`)
+	 * MUST NOT fire on PATCH — they are reserved for the real order materialised at
+	 * place-order time.
+	 */
+	public function test_put_does_not_fire_persisted_order_hooks() {
+		$update_meta_orders         = array();
+		$update_from_request_orders = array();
+
+		add_action(
+			'woocommerce_store_api_checkout_update_order_meta',
+			function ( $order ) use ( &$update_meta_orders ) {
+				$update_meta_orders[] = $order->get_id();
+			}
+		);
+		add_action(
+			'woocommerce_store_api_checkout_update_order_from_request',
+			function ( $order ) use ( &$update_from_request_orders ) {
+				$update_from_request_orders[] = $order->get_id();
+			}
+		);
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'payment_method' => WC_Gateway_BACS::ID,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		remove_all_actions( 'woocommerce_store_api_checkout_update_order_meta' );
+		remove_all_actions( 'woocommerce_store_api_checkout_update_order_from_request' );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( array(), $update_meta_orders, 'update_order_meta must not fire on PATCH.' );
+		$this->assertSame( array(), $update_from_request_orders, 'update_order_from_request must not fire on PATCH.' );
+	}
+
+	/**
+	 * The new `woocommerce_store_api_checkout_update_draft` action fires once per PATCH
+	 * with the request, and is the only hook extensions should subscribe to for live
+	 * PATCH-time observation. No `WC_Order` is constructed.
+	 */
+	public function test_put_fires_update_draft_action() {
+		$received_requests = array();
+
+		add_action(
+			'woocommerce_store_api_checkout_update_draft',
+			function ( $request ) use ( &$received_requests ) {
+				$received_requests[] = $request;
+			}
+		);
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'payment_method' => WC_Gateway_BACS::ID,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		remove_all_actions( 'woocommerce_store_api_checkout_update_draft' );
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertCount( 1, $received_requests, 'update_draft should fire exactly once per PATCH.' );
+		$this->assertInstanceOf( \WP_REST_Request::class, $received_requests[0] );
+
+		// The PATCH'd payment method should be reflected in the response and the session.
+		$this->assertSame( WC_Gateway_BACS::ID, $response->get_data()['payment_method'] );
+		$this->assertSame( WC_Gateway_BACS::ID, WC()->session->get( 'chosen_payment_method' ) );
+	}
+
+	/**
+	 * On POST the persisted-order hooks fire against a real, persisted order — exactly
+	 * as they did before deferred draft creation. The new draft action does NOT fire
+	 * on POST.
+	 */
+	public function test_post_fires_persisted_hooks_against_real_order_only() {
+		$meta_ids          = array();
+		$from_request_ids  = array();
+		$draft_request_ids = array();
+
+		add_action(
+			'woocommerce_store_api_checkout_update_order_meta',
+			function ( $order ) use ( &$meta_ids ) {
+				$meta_ids[] = $order->get_id();
+			}
+		);
+		add_action(
+			'woocommerce_store_api_checkout_update_order_from_request',
+			function ( $order ) use ( &$from_request_ids ) {
+				$from_request_ids[] = $order->get_id();
+			}
+		);
+		add_action(
+			'woocommerce_store_api_checkout_update_draft',
+			function ( $request ) use ( &$draft_request_ids ) {
+				$draft_request_ids[] = $request->get_method();
+			}
+		);
+
+		$post_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		remove_all_actions( 'woocommerce_store_api_checkout_update_order_meta' );
+		remove_all_actions( 'woocommerce_store_api_checkout_update_order_from_request' );
+		remove_all_actions( 'woocommerce_store_api_checkout_update_draft' );
+
+		$this->assertEquals( 200, $post_response->get_status(), print_r( $post_response->get_data(), true ) );
+		$order_id = $post_response->get_data()['order_id'];
+		$this->assertGreaterThan( 0, $order_id );
+
+		$this->assertSame( array( $order_id ), $meta_ids, 'update_order_meta must fire exactly once on POST against the real order.' );
+		$this->assertSame( array( $order_id ), $from_request_ids, 'update_order_from_request must fire exactly once on POST against the real order.' );
+		$this->assertSame( array(), $draft_request_ids, 'update_draft must NOT fire on POST.' );
+	}
+
+	/**
+	 * Sample-extension round-trip: an extension uses `update_draft` on PATCH to persist
+	 * live state to its own session bucket, then uses `update_order_meta` on POST to
+	 * apply that state to the real order. State observed during PATCH lands on the
+	 * persisted order. This is the documented pattern under deferred draft creation.
+	 */
+	public function test_extension_round_trip_via_update_draft_and_update_order_meta() {
+		$session_key = 'sample_ext_pending_meta';
+
+		// PATCH handler — capture live state from cart/customer/request into session.
+		add_action(
+			'woocommerce_store_api_checkout_update_draft',
+			function ( $request ) use ( $session_key ) {
+				WC()->session->set(
+					$session_key,
+					array(
+						'_sample_ext_payment_method' => (string) $request['payment_method'],
+						'_sample_ext_observed_total' => (string) WC()->cart->get_total( 'edit' ),
+					)
+				);
+			}
+		);
+
+		// POST handler — apply session-stored state to the real order.
+		add_action(
+			'woocommerce_store_api_checkout_update_order_meta',
+			function ( $order ) use ( $session_key ) {
+				$pending = WC()->session->get( $session_key );
+				if ( ! is_array( $pending ) ) {
+					return;
+				}
+				foreach ( $pending as $key => $value ) {
+					$order->update_meta_data( $key, $value );
+				}
+				WC()->session->__unset( $session_key );
+			}
+		);
+
+		$put_request = new \WP_REST_Request( 'PUT', '/wc/store/v1/checkout' );
+		$put_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$put_request->set_body_params(
+			array(
+				'payment_method' => WC_Gateway_BACS::ID,
+			)
+		);
+		$put_response = rest_get_server()->dispatch( $put_request );
+		$this->assertEquals( 200, $put_response->get_status(), print_r( $put_response->get_data(), true ) );
+		$this->assertSame( 0, $put_response->get_data()['order_id'] );
+		$this->assertIsArray( WC()->session->get( $session_key ) );
+
+		$post_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		remove_all_actions( 'woocommerce_store_api_checkout_update_draft' );
+		remove_all_actions( 'woocommerce_store_api_checkout_update_order_meta' );
+
+		$this->assertEquals( 200, $post_response->get_status(), print_r( $post_response->get_data(), true ) );
+		$order_id = $post_response->get_data()['order_id'];
+		$order    = wc_get_order( $order_id );
+		$this->assertInstanceOf( \WC_Order::class, $order );
+
+		$this->assertSame( WC_Gateway_BACS::ID, $order->get_meta( '_sample_ext_payment_method' ) );
+		$this->assertNotEmpty( $order->get_meta( '_sample_ext_observed_total' ) );
+		$this->assertEmpty( WC()->session->get( $session_key ) );
+	}
+
+	/**
+	 * Sample-extension immediate-place-order case: a logged-in shopper lands on
+	 * checkout with defaults populated and clicks Place Order without any PATCH first.
+	 * The extension's POST handler still runs against the real order (no PATCH state
+	 * to round-trip) and can write meta directly. This validates the user concern that
+	 * a no-PATCH POST is fully supported.
+	 */
+	public function test_extension_immediate_post_without_patch() {
+		add_action(
+			'woocommerce_store_api_checkout_update_order_meta',
+			function ( $order ) {
+				$order->update_meta_data( '_sample_ext_no_patch_meta', 'placed-directly' );
+			}
+		);
+
+		$post_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		remove_all_actions( 'woocommerce_store_api_checkout_update_order_meta' );
+
+		$this->assertEquals( 200, $post_response->get_status(), print_r( $post_response->get_data(), true ) );
+		$order = wc_get_order( $post_response->get_data()['order_id'] );
+		$this->assertSame( 'placed-directly', $order->get_meta( '_sample_ext_no_patch_meta' ) );
+	}
+
+	/**
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/64792.
+	 *
+	 * After a failed payment, the customer's session holds a pointer to the pending
+	 * order. A second POST on the same session must reuse that order — otherwise the
+	 * session pointer is overwritten by `set_draft_order_id()` and the first order is
+	 * orphaned. Prior to the fix, `create_or_update_draft_order()` did not consult the
+	 * session and unconditionally created a new order on every POST.
+	 */
+	public function test_post_reuses_pending_order_from_session_on_retry() {
+		// Force the first POST to fail at the order-processed hook, mirroring the
+		// real failed-payment shape from issue #64792. The throw happens after the
+		// order has been created and the session pointer set, but before the cart-
+		// clear that would normally follow a successful checkout.
+		$fail_hook = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException(
+				'woocommerce_rest_checkout_payment_failed',
+				'Forced failure for issue #64792 repro',
+				400
+			);
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
+
+		$first_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		$this->assertEquals( 400, $first_response->get_status(), 'First POST should fail per the forced-failure hook.' );
+
+		$first_order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		$this->assertGreaterThan( 0, $first_order_id, 'Session should hold the failed order id after a failed POST.' );
+
+		$first_order = wc_get_order( $first_order_id );
+		$this->assertInstanceOf( \WC_Order::class, $first_order );
+		$this->assertTrue( $first_order->has_status( 'pending' ), 'First order should be left in pending status after payment failure.' );
+
+		remove_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
+
+		// Second POST on the same session should reuse the existing pending order.
+		$session_order_id_during_retry = null;
+		$capture_session_order_id      = function () use ( &$session_order_id_during_retry ) {
+			$session_order_id_during_retry = (int) WC()->session->get( 'store_api_draft_order' );
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $capture_session_order_id, 999, 0 );
+
+		try {
+			$second_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_order_processed', $capture_session_order_id, 999 );
+		}
+
+		$this->assertEquals( 200, $second_response->get_status(), print_r( $second_response->get_data(), true ) );
+
+		$second_order_id = (int) $second_response->get_data()['order_id'];
+		$this->assertSame(
+			$first_order_id,
+			$second_order_id,
+			'Second POST must reuse the existing pending order, not create a new one (regression: issue #64792).'
+		);
+		$this->assertSame( $first_order_id, $session_order_id_during_retry, 'Session pointer should reference the reused order while the second POST is being processed.' );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ), 'Successful checkout should clear the draft order pointer when the cart is emptied.' );
+	}
+
+	/**
+	 * Build a valid checkout POST request body for use by the sample-extension tests.
+	 *
+	 * @return \WP_REST_Request
+	 */
+	private function build_valid_post_request() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => array(
+					'first_name' => 'Sample',
+					'last_name'  => 'Extension',
+					'company'    => '',
+					'address_1'  => '123 Test St',
+					'address_2'  => '',
+					'city'       => 'Test City',
+					'state'      => 'CA',
+					'postcode'   => '94016',
+					'country'    => 'US',
+					'email'      => 'sample-ext@example.com',
+					'phone'      => '5555555555',
+				),
+				'shipping_address' => array(
+					'first_name' => 'Sample',
+					'last_name'  => 'Extension',
+					'company'    => '',
+					'address_1'  => '123 Test St',
+					'address_2'  => '',
+					'city'       => 'Test City',
+					'state'      => 'CA',
+					'postcode'   => '94016',
+					'country'    => 'US',
+					'phone'      => '5555555555',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+		return $request;
 	}
 }
