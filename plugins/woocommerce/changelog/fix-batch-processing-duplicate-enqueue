@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix BatchProcessingController::enqueue_processor() appending duplicate entries to the wc_pending_batch_processes option.
