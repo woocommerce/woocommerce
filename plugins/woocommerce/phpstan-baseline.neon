@@ -51322,12 +51322,6 @@ parameters:
 			path: src/Blocks/BlockTypes/EmptyMiniCartContentsBlock.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FilledMiniCartContentsBlock\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/FilledMiniCartContentsBlock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedCategory\:\:get_item_image\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -51424,6 +51418,12 @@ parameters:
 			path: src/Blocks/BlockTypes/FeaturedProduct.php
 
 		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FilledMiniCartContentsBlock\:\:render\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Blocks/BlockTypes/FilledMiniCartContentsBlock.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\HandpickedProducts\:\:set_block_query_args\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -51462,12 +51462,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:get_block_type_script\(\) should return array\|string but empty return statement found\.$#'
-			identifier: return.empty
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCart.php
 
@@ -51580,12 +51574,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Parameter \#1 \$str of function rawurlencode expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Parameter \$context of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:modify_hooked_block_attributes\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block_Template\.$#'
 			identifier: class.notFound
 			count: 1
@@ -51613,12 +51601,6 @@ parameters:
 			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:\$scripts_to_lazy_load \(array\<string\>\) does not accept array\<array\<string, bool\|string\>\|string\>\.$#'
 			identifier: assign.propertyType
 			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:\$scripts_to_lazy_load \(array\<string\>\) does not accept array\<array\<string, mixed\>\|string\>\.$#'
-			identifier: assign.propertyType
-			count: 2
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
@@ -51742,6 +51724,12 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
 
 		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartItemsBlock\:\:render\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Blocks/BlockTypes/MiniCartItemsBlock.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartProductsTableBlock\:\:render\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -51764,12 +51752,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartProductsTableBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartItemsBlock\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartItemsBlock.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartShoppingButtonBlock\:\:render\(\) should return string but returns string\|false\.$#'
