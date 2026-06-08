@@ -13,26 +13,14 @@ class EmptyMiniCartContentsBlock extends AbstractInnerBlock {
 	protected $block_name = 'empty-mini-cart-contents-block';
 
 	/**
-	 * Render the markup for the Filled Mini-Cart Contents block.
+	 * Render the markup for the Empty Mini-Cart Contents block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		return $this->render_experimental_empty_mini_cart_contents( $attributes, $content, $block );
-	}
-
-	/**
-	 * Render the experimental interactivity API powered Filled Mini-Cart Contents block.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_empty_mini_cart_contents( $attributes, $content, $block ) {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'data-wp-bind--aria-hidden' => '!state.cartIsEmpty',

@@ -15,24 +15,12 @@ class MiniCartTitleLabelBlock extends AbstractInnerBlock {
 	/**
 	 * Render the block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		return $this->render_experimental_iapi_title_label_block( $attributes, $content, $block );
-	}
-
-	/**
-	 * Render the interactivity API powered experimental title block.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_iapi_title_label_block( $attributes, $content, $block ) {
 		$default_cart_label = __( 'Your cart', 'woocommerce' );
 		$cart_label         = $attributes['label'] ? $attributes['label'] : $default_cart_label;
 		$wrapper_attributes = get_block_wrapper_attributes();

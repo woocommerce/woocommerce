@@ -74,7 +74,8 @@ export const Layout = ( {
 	const isDashboardShown = ! isTaskScreen;
 	const twoColumns = hasTwoColumnLayout(
 		userPrefs.homepage_layout,
-		defaultHomescreenLayout
+		defaultHomescreenLayout,
+		isSetupTaskListActive
 	);
 
 	const isWideViewport = useRef( true );

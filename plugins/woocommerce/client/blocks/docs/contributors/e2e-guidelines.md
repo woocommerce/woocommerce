@@ -99,7 +99,7 @@ We isolate our tests from each other by resetting the database to its initial st
 
 ### Plugins
 
-To use a custom plugin with your tests, first create the plugin PHP file and save it to the [test plugins folder](../../tests/e2e/plugins/). Here's a handy snippet to help you get started:
+To use a custom plugin with your tests, first create the plugin PHP file and save it to the [test plugins folder](../../../../tests/e2e-pw/test-plugins/blocks/). Here's a handy snippet to help you get started:
 
 ```php
 // plugins/my-fancy-plugin.php
@@ -156,7 +156,7 @@ test.beforeEach( async ( { page, requestUtils } ) => {
 
 #### Adding a new theme
 
-If you've created a custom theme and want to use it in your tests, save it in the [test themes folder](../../tests/e2e/themes/). Check out the themes that are already there for inspiration. The activation part was explained above, so you're good to go!
+If you've created a custom theme and want to use it in your tests, save it in the [test themes folder](../../../../tests/e2e-pw/themes/blocks/). Check out the themes that are already there for inspiration. The activation part was explained above, so you're good to go!
 
 ### Utilities
 

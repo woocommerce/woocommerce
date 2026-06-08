@@ -17,24 +17,12 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 	/**
 	 * Render the markup for the Filled Mini-Cart Contents block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		return $this->render_experimental_filled_mini_cart_contents( $attributes, $content, $block );
-	}
-
-	/**
-	 * Render the experimental interactivity API powered Filled Mini-Cart Contents block.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_filled_mini_cart_contents( $attributes, $content, $block ) {
 		$consent = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 		$notices = BlocksSharedState::get_cart_error_notices( $consent );
 

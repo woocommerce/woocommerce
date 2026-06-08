@@ -15,21 +15,12 @@ class MiniCartTitleItemsCounterBlock extends AbstractInnerBlock {
 	/**
 	 * Render the block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		return $this->render_experimental_iapi_title_label_block();
-	}
-
-	/**
-	 * Render the interactivity API powered experimental title block.
-	 *
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_iapi_title_label_block() {
 		$cart            = $this->get_cart_instance();
 		$cart_item_count = $cart ? $cart->get_cart_contents_count() : 0;
 

@@ -10,7 +10,6 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 use Automattic\WooCommerce\Internal\Admin\Loader;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 /**
  * WCAdminAssets Class.
  */
@@ -274,31 +273,18 @@ class WCAdminAssets {
 			$dependencies
 		);
 
-		switch ( $script ) {
-			case WC_ADMIN_APP:
-				// Remove wp-editor dependency if we're not on a customize store page since we don't use wp-editor in other pages.
-				$is_customize_store_page = (
-					PageController::is_admin_page() &&
-					isset( $_GET['path'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store' ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				);
-				if ( ! $is_customize_store_page ) {
-					$dependencies = array_diff( $dependencies, array( 'wp-editor' ) );
-				}
-
-				// Remove product editor dependency from WC_ADMIN_APP when feature is disabled.
-				if ( ! FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-					$dependencies = array_diff( $dependencies, array( 'wc-product-editor' ) );
-				}
-				break;
-			case 'wc-product-editor':
-				// Remove wp-editor dependency if the product editor feature is disabled as we don't need it.
-				$is_product_data_view_page = \Automattic\WooCommerce\Admin\Features\ProductDataViews\Init::is_product_data_view_page();
-				if ( ! ( FeaturesUtil::feature_is_enabled( 'product_block_editor' ) || $is_product_data_view_page ) ) {
-					$dependencies = array_diff( $dependencies, array( 'wp-editor' ) );
-				}
-				break;
+		if ( WC_ADMIN_APP === $script ) {
+			// Remove wp-editor dependency if we're not on a customize store page since we don't use wp-editor in other pages.
+			$is_customize_store_page = (
+				PageController::is_admin_page() &&
+				isset( $_GET['path'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store' ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			);
+			if ( ! $is_customize_store_page ) {
+				$dependencies = array_diff( $dependencies, array( 'wp-editor' ) );
+			}
 		}
+
 		return $dependencies;
 	}
 
@@ -329,7 +315,6 @@ class WCAdminAssets {
 			'wc-navigation',
 			'wc-block-templates',
 			'wc-experimental-products-app',
-			'wc-product-editor',
 			'wc-settings-ui-sdk',
 			'wc-remote-logging',
 			'wc-sanitize',
@@ -349,7 +334,6 @@ class WCAdminAssets {
 			'wc-experimental-products-app',
 			'wc-experimental',
 			'wc-navigation',
-			'wc-product-editor',
 			'wc-settings-ui-sdk',
 			WC_ADMIN_APP,
 		);
@@ -405,9 +389,6 @@ class WCAdminAssets {
 			),
 			array(
 				'handle' => 'wc-experimental-products-app',
-			),
-			array(
-				'handle' => 'wc-product-editor',
 			),
 			array(
 				'handle' => 'wc-customer-effort-score',
@@ -574,7 +555,6 @@ class WCAdminAssets {
 				'wc-components',
 				'wc-tracks',
 				'wc-block-templates',
-				'wc-product-editor',
 			);
 			foreach ( $handles_for_injection as $handle ) {
 				$script = $wp_scripts->query( $handle, 'registered' );
