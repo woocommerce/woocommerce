@@ -54,7 +54,6 @@ const blocks = {
 	breadcrumbs: {},
 	'catalog-sorting': {},
 	'category-description': {},
-	'category-title': {},
 	'coming-soon': {},
 	'coupon-code': {},
 	'customer-account': {},

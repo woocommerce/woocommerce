@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use WP_Block;
@@ -10,6 +12,9 @@ use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * AbstractBlock class.
+ *
+ * @deprecated 11.0.0 New blocks should use block.json metadata and colocated
+ * PHP render files in the block-library build path.
  */
 abstract class AbstractBlock {
 

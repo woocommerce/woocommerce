@@ -111,13 +111,62 @@ final class BlockTypesController {
 	 */
 	public function register_blocks() {
 		$this->register_block_metadata();
-		$block_types = $this->get_block_types();
+		$block_types               = $this->get_block_types();
+		$block_library_block_types = $this->get_block_library_block_types();
 
 		foreach ( $block_types as $block_type ) {
+			if ( isset( $block_library_block_types[ $block_type ] ) ) {
+				$this->register_block_library_block_type( $block_library_block_types[ $block_type ] );
+				continue;
+			}
+
 			$block_type_class = __NAMESPACE__ . '\\BlockTypes\\' . $block_type;
 
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
+	}
+
+	/**
+	 * Get block types that are registered directly from block-library metadata.
+	 *
+	 * @return array<string, string> Map of legacy block type class names to block metadata directory names.
+	 */
+	protected function get_block_library_block_types() {
+		return array(
+			'CategoryTitle' => 'category-title',
+		);
+	}
+
+	/**
+	 * Register a block from the block-library metadata package.
+	 *
+	 * @param string $block_name Block metadata directory name.
+	 * @return void
+	 */
+	protected function register_block_library_block_type( $block_name ) {
+		$metadata_path = $this->get_block_library_metadata_path( $block_name );
+
+		if ( ! $metadata_path ) {
+			return;
+		}
+
+		register_block_type_from_metadata( $metadata_path );
+	}
+
+	/**
+	 * Get the metadata path for a block-library block.
+	 *
+	 * @param string $block_name Block directory name.
+	 * @return string|false Path to metadata directory, or false if not found.
+	 */
+	protected function get_block_library_metadata_path( $block_name ) {
+		$metadata_path = WC_ABSPATH . 'client/blocks/packages/block-library/src/' . $block_name . '/block.json';
+
+		if ( ! file_exists( $metadata_path ) ) {
+			return false;
+		}
+
+		return dirname( $metadata_path );
 	}
 
 	/**

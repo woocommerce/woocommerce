@@ -64,6 +64,12 @@
 			"@woocommerce/base-hooks": [
 				"assets/js/base/hooks"
 			],
+			"@woocommerce/base-hooks/use-preview-mode": [
+				"assets/js/base/hooks/use-preview-mode"
+			],
+			"@woocommerce/base-hooks/*": [
+				"assets/js/base/hooks/*"
+			],
 			"@woocommerce/base-utils": [
 				"assets/js/base/utils"
 			],
@@ -111,6 +117,12 @@
 			],
 			"@woocommerce/resource-previews": [
 				"assets/js/previews"
+			],
+			"@woocommerce/resource-previews/categories": [
+				"assets/js/previews/categories"
+			],
+			"@woocommerce/resource-previews/*": [
+				"assets/js/previews/*"
 			],
 			"@woocommerce/settings": [
 				"assets/js/settings/shared"

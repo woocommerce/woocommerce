@@ -6,7 +6,7 @@ import { store as coreStore, useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { createElement, forwardRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { WP_REST_API_Category } from 'wp-types';
+import type { WP_REST_API_Category } from 'wp-types';
 import {
 	AlignmentControl,
 	BlockControls,
@@ -15,8 +15,6 @@ import {
 	PlainText,
 	HeadingLevelDropdown,
 } from '@wordpress/block-editor';
-import { usePreviewMode } from '@woocommerce/base-hooks';
-import { previewCategories } from '@woocommerce/resource-previews';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	ToggleControl,
@@ -27,15 +25,22 @@ import {
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 
+/**
+ * Internal dependencies
+ */
+import { usePreviewMode } from '../../../../assets/js/base/hooks/use-preview-mode';
+
+export type CategoryTitleAttributes = {
+	isLink: boolean;
+	level: number;
+	linkTarget: string;
+	rel: string;
+	textAlign?: string;
+};
+
 interface Props {
-	attributes: {
-		isLink: boolean;
-		level: number;
-		linkTarget: string;
-		rel: string;
-		textAlign?: string;
-	};
-	setAttributes: ( attrs: Partial< Props[ 'attributes' ] > ) => void;
+	attributes: CategoryTitleAttributes;
+	setAttributes: ( attrs: Partial< CategoryTitleAttributes > ) => void;
 	context: {
 		termId?: number;
 		termTaxonomy?: string;
@@ -48,7 +53,30 @@ const DEFAULT_ATTRIBUTES = {
 	rel: '',
 };
 
-// Helper component to handle dynamic tag names without TypeScript union type issues
+const PREVIEW_CATEGORY_TITLE = __( 'Hoodies', 'woocommerce' );
+
+type CoreDataSelector = {
+	canUser: (
+		action: string,
+		resource: {
+			kind: string;
+			name: string;
+			id: number;
+		}
+	) => boolean | undefined;
+	getEntityRecord: < T >(
+		kind: string,
+		name: string,
+		id: number
+	) => T | undefined;
+};
+
+type HeadingLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+const PlainTextWithTagName = PlainText as unknown as React.ComponentType<
+	Record< string, unknown >
+>;
+
 const ContainerElement = forwardRef<
 	HTMLElement,
 	React.HTMLAttributes< HTMLElement > & {
@@ -70,12 +98,17 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	const userCanEdit = useSelect(
 		( select ) => {
 			if ( ! termId ) return false;
-			// This use actually reflects the use seen in `core/post-title` block.
-			return select( coreStore ).canUser( 'update', {
-				kind: 'taxonomy',
-				name: termTaxonomy || 'product_cat',
-				id: termId,
-			} );
+			const coreDataSelector = select(
+				coreStore
+			) as unknown as CoreDataSelector;
+
+			return Boolean(
+				coreDataSelector.canUser( 'update', {
+					kind: 'taxonomy',
+					name: termTaxonomy || 'product_cat',
+					id: termId,
+				} )
+			);
 		},
 		[ termId, termTaxonomy ]
 	);
@@ -90,14 +123,14 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	let displayRawTitle = '';
 	if ( isPreviewMode ) {
-		displayRawTitle = previewCategories[ 0 ].description;
+		displayRawTitle = PREVIEW_CATEGORY_TITLE;
 	} else if ( typeof rawTitle === 'string' ) {
 		displayRawTitle = rawTitle;
 	}
 
 	let displayFullTitle = '';
 	if ( isPreviewMode ) {
-		displayFullTitle = previewCategories[ 0 ].description;
+		displayFullTitle = PREVIEW_CATEGORY_TITLE;
 	} else if (
 		typeof fullTitle === 'object' &&
 		fullTitle !== null &&
@@ -110,13 +143,15 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	const link = useSelect(
 		( select ) => {
 			if ( ! termId ) return undefined;
-			const record = select(
+			const coreDataSelector = select(
 				coreStore
-			).getEntityRecord< WP_REST_API_Category >(
-				'taxonomy',
-				termTaxonomy || 'product_cat',
-				termId
-			);
+			) as unknown as CoreDataSelector;
+			const record =
+				coreDataSelector.getEntityRecord< WP_REST_API_Category >(
+					'taxonomy',
+					termTaxonomy || 'product_cat',
+					termId
+				);
 
 			return record?.link;
 		},
@@ -135,11 +170,11 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	if ( termId ) {
 		titleElement = userCanEdit ? (
-			<PlainText
+			<PlainTextWithTagName
 				tagName={ TagName }
 				placeholder={ __( 'No title', 'woocommerce' ) }
 				value={ displayRawTitle }
-				onChange={ ( v ) => setTitle( v ) }
+				onChange={ ( v: string ) => setTitle( v ) }
 				__experimentalVersion={ 2 }
 				{ ...blockProps }
 			/>
@@ -157,7 +192,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	if ( isLink && termId ) {
 		titleElement = userCanEdit ? (
 			<ContainerElement tagName={ TagName } { ...blockProps }>
-				<PlainText
+				<PlainTextWithTagName
 					tagName="a"
 					href={ link }
 					target={ linkTarget }
@@ -168,7 +203,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 							: undefined
 					}
 					value={ displayRawTitle }
-					onChange={ ( v ) => setTitle( v ) }
+					onChange={ ( v: string ) => setTitle( v ) }
 					__experimentalVersion={ 2 }
 				/>
 			</ContainerElement>
@@ -191,9 +226,9 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		<>
 			<BlockControls group="block">
 				<HeadingLevelDropdown
-					value={ level }
-					onChange={ ( newLevel: number ) =>
-						setAttributes( { level: newLevel } )
+					value={ level as HeadingLevel }
+					onChange={ ( newLevel?: HeadingLevel ) =>
+						setAttributes( { level: newLevel ?? 2 } )
 					}
 				/>
 				<AlignmentControl

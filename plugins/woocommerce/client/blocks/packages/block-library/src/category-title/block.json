@@ -1,10 +1,13 @@
 {
+	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "woocommerce/category-title",
 	"title": "Product Category Title",
 	"description": "Displays the current category title and lets permitted users edit it.",
 	"category": "woocommerce",
 	"apiVersion": 3,
 	"textdomain": "woocommerce",
+	"editorScript": "file:../../../../build/scripts/block-library/index.min.js",
+	"render": "file:./render.php",
 	"attributes": {
 		"isLink": {
 			"type": "boolean",
