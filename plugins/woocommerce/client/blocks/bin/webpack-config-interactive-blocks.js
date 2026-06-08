@@ -40,7 +40,7 @@ const entries = {
 	...styleEntries,
 	...editorStyleEntries,
 
-	// Experimental mini cart frontend modules, only enqueued when experimental-iapi-mini-cart feature flag is enabled.
+	// Mini cart frontend modules powered by the Interactivity API.
 	'woocommerce/mini-cart': './assets/js/blocks/mini-cart/iapi-frontend.ts',
 
 	// Product elements frontend module. Share by several blocks.

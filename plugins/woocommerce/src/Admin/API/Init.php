@@ -184,10 +184,11 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\Reports\Customers\Controller',
 				'Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\Controller',
 			);
-		}
 
-		// The performance indicators controllerq must be registered last, after other /stats endpoints have been registered.
-		$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
+			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\AnalyticsImports';
+			// The performance indicators controller must be registered last, after other /stats endpoints have been registered.
+			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
+		}
 
 		$controllers = array_merge( $analytics_controllers, $controllers );
 

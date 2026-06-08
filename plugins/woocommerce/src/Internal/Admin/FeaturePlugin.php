@@ -178,9 +178,9 @@ class FeaturePlugin {
 			// Initialize Reports syncing.
 			ReportsSync::init();
 			CategoryLookup::instance()->init();
+			// Initialize Reports exporter.
+			ReportExporter::init();
 		}
-		// Initialize Reports exporter.
-		ReportExporter::init();
 
 		// Admin note providers.
 		// @todo These should be bundled in the features/ folder, but loading them from there currently has a load order issue.
