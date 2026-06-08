@@ -37,6 +37,8 @@ class RemoteInboxNotifications {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
-		RemoteInboxNotificationsEngine::init();
+		if ( 'yes' === get_option( self::TOGGLE_OPTION_NAME, 'yes' ) ) {
+			RemoteInboxNotificationsEngine::init();
+		}
 	}
 }

@@ -42,8 +42,8 @@
 		"scripts"
 	],
 	"scripts": {
-		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
-		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build": "pnpm build:project",
+		"build:project": "pnpm --stream '/^build:project:.*$/'",
 		"build:project:lib": "tsc --build src/tsconfig.json",
 		"build:project:type-overrides": "node scripts/generate-types.mjs generate",
 		"postinstall": "pnpm build:project",

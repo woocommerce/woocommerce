@@ -379,9 +379,9 @@ class MiniCart extends AbstractBlock {
 	/**
 	 * Render the Mini-Cart block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
@@ -397,23 +397,10 @@ class MiniCart extends AbstractBlock {
 		 * In the cart and checkout pages, the block is either rendered hidden or removed.
 		 * It is not interactive, so it can fall back to the existing implementation.
 		 */
-		if ( ! is_cart() && ! is_checkout() ) {
-			return $this->render_experimental_iapi_mini_cart( $attributes, $content, $block );
+		if ( is_cart() || is_checkout() ) {
+			return $content . $this->get_markup( MiniCartUtils::migrate_attributes_to_color_panel( $attributes ) );
 		}
 
-		return $content . $this->get_markup( MiniCartUtils::migrate_attributes_to_color_panel( $attributes ) );
-	}
-
-
-	/**
-	 * Render an experimental interactivity API powered Mini-Cart block.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_iapi_mini_cart( $attributes, $content, $block ) {
 		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		// Enqueue all integration scripts registered for this block.
@@ -511,7 +498,7 @@ class MiniCart extends AbstractBlock {
 			}
 			ob_start();
 			?>
-		
+
 			<div
 				data-wp-interactive="woocommerce/mini-cart"
 				data-wp-init="callbacks.setupJQueryEventBridge"
@@ -607,7 +594,7 @@ class MiniCart extends AbstractBlock {
 					</div>
 				</div>
 			</div>
-		</div>				
+		</div>
 		<?php
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo wp_interactivity_process_directives( ob_get_clean() );

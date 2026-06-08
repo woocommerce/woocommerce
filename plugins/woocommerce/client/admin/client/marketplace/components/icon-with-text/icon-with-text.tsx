@@ -10,12 +10,14 @@ import { ReactElement } from 'react';
 import './icon-with-text.scss';
 
 export interface IconWithTextProps {
-	icon: JSX.Element;
+	icon: React.JSX.Element;
 	title: ReactElement | string;
 	description: string;
 }
 
-export default function IconWithText( props: IconWithTextProps ): JSX.Element {
+export default function IconWithText(
+	props: IconWithTextProps
+): React.JSX.Element {
 	const { icon, title, description } = props;
 	return (
 		<div className="woocommerce-marketplace__icon-group">

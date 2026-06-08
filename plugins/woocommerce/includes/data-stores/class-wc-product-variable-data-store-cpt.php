@@ -778,6 +778,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		if ( $new_name !== $previous_name ) {
 			global $wpdb;
 
+			$product_id = $product->get_id();
 			$wpdb->query(
 				$wpdb->prepare(
 					"UPDATE {$wpdb->posts}
@@ -786,16 +787,16 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					AND post_parent = %d",
 					$previous_name ? $previous_name : 'AUTO-DRAFT',
 					$new_name,
-					$product->get_id()
+					$product_id
 				)
 			);
 
 			$invalidator = wc_get_container()->get( ProductVersionStringInvalidator::class );
-			$children    = $product->get_children();
-			foreach ( $children as $child_id ) {
+			foreach ( $product->get_children() as $child_id ) {
+				clean_post_cache( $child_id );
 				$invalidator->invalidate( $child_id );
 			}
-			$invalidator->invalidate( $product->get_id() );
+			$invalidator->invalidate( $product_id );
 		}
 	}
 
