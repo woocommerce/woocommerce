@@ -20,6 +20,7 @@ jest.mock( '@wordpress/admin-ui', () => ( {
  * Internal dependencies
  */
 import { SettingsUIPage } from '../settings-ui-page';
+import { __resetRegistry, registerSettingsExtension } from '../registry';
 import type { SettingsUISchema } from '../types';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -50,6 +51,10 @@ const expectUnsafeMarkupRemoved = ( container: HTMLElement ) => {
 };
 
 describe( 'settings HTML rendering', () => {
+	afterEach( () => {
+		__resetRegistry();
+	} );
+
 	it( 'renders settings as centered sections and cards', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
@@ -249,6 +254,110 @@ describe( 'settings HTML rendering', () => {
 		);
 		expect( document.body.textContent ).toContain( 'Discard' );
 		expect( document.body.textContent ).toContain( 'Save' );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'keeps unload protection when custom save before navigation fails', async () => {
+		const saveHandler = jest
+			.fn()
+			.mockRejectedValue( new Error( 'Save failed.' ) );
+
+		registerSettingsExtension( {
+			scope: { page: 'test-page', section: 'default' },
+			saveHandlers: {
+				fail: saveHandler,
+			},
+		} );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'custom', handler: 'fail' },
+			shell: {
+				navigation: [
+					{
+						id: 'next-page',
+						label: 'Next page',
+						href: 'https://example.com/next',
+					},
+				],
+			},
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							value: 'Initial value',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		const input = container.querySelector( 'input[type="text"]' );
+		const link = container.querySelector(
+			'a[href="https://example.com/next"]'
+		);
+
+		act( () => {
+			if ( input instanceof HTMLInputElement ) {
+				const valueSetter = Object.getOwnPropertyDescriptor(
+					HTMLInputElement.prototype,
+					'value'
+				)?.set;
+
+				valueSetter?.call( input, 'Changed value' );
+				input.dispatchEvent(
+					new Event( 'input', { bubbles: true, cancelable: true } )
+				);
+			}
+		} );
+
+		act( () => {
+			link?.dispatchEvent(
+				new MouseEvent( 'click', {
+					bubbles: true,
+					cancelable: true,
+					button: 0,
+				} )
+			);
+		} );
+
+		const saveButton = Array.from(
+			document.body.querySelectorAll(
+				'.wc-settings-ui__unsaved-changes-actions button'
+			)
+		).find( ( button ) => button.textContent === 'Save' );
+
+		await act( async () => {
+			saveButton?.dispatchEvent(
+				new MouseEvent( 'click', {
+					bubbles: true,
+					cancelable: true,
+					button: 0,
+				} )
+			);
+		} );
+
+		const beforeUnloadEvent = new Event( 'beforeunload', {
+			cancelable: true,
+		} );
+
+		window.dispatchEvent( beforeUnloadEvent );
+
+		expect( saveHandler ).toHaveBeenCalledTimes( 1 );
+		expect( beforeUnloadEvent.defaultPrevented ).toBe( true );
+		expect( document.body.textContent ).toContain( 'Save failed.' );
 
 		act( () => root.unmount() );
 		container.remove();

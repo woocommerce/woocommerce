@@ -713,12 +713,11 @@ export const SettingsUIPage = ( {
 			return;
 		}
 
-		allowNavigation();
-
 		if ( saveStrategy.adapter === 'custom' ) {
 			const saved = await handleCustomSave();
 
 			if ( saved ) {
+				allowNavigation();
 				window.location.assign( pendingNavigation.href );
 			}
 		}
