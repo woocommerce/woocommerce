@@ -189,21 +189,6 @@ jobs:
         if: ${{ matrix.testEnv.shouldCreate }}
         run: pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
 
-      - name: 'Determine BuildKite Analytics Message'
-        env:
-          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-        run: |
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
-          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            MESSAGE="$PR_TITLE"
-          else
-            MESSAGE="${{ github.event_name }}"
-          fi
-          echo "BUILDKITE_ANALYTICS_MESSAGE=$MESSAGE" >> "$GITHUB_ENV"
-        shell: bash
-
       - name: 'Resolve artifacts path'
         if: ${{ always() && matrix.report.resultsPath != '' }}
         # Blocks e2e use a relative path which is not supported by actions/upload-artifact@v4
@@ -226,7 +211,6 @@ jobs:
         timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 15 ) ) ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
-          BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
           LAST_FAILED_RUN: ${{ vars.LAST_FAILED_RUN }}
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
