@@ -271,11 +271,14 @@ class JsonFileFeed implements FeedInterface {
 		$upload_dir     = wp_upload_dir( null, true );
 		$directory_path = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . self::UPLOAD_DIR . DIRECTORY_SEPARATOR;
 
-		// Try to create the directory if it does not exist.
-		// Allow file access so the generated feed files can be served by URL, while
-		// still preventing directory listing.
+		// Create the directory if it does not exist, allowing file access so the generated feed
+		// files can be served by URL while directory listing stays disabled. If the directory
+		// already exists, refresh its .htaccess in place so installs created before file access
+		// was enabled also serve feeds correctly.
 		if ( ! is_dir( $directory_path ) ) {
 			FilesystemUtil::mkdir_p_not_indexable( $directory_path, true );
+		} else {
+			$this->ensure_feed_dir_file_access( $directory_path );
 		}
 
 		// `mkdir_p_not_indexable()` returns `void`, we have to check again.
@@ -299,5 +302,36 @@ class JsonFileFeed implements FeedInterface {
 			'url'  => $directory_url,
 		);
 		return $prepared;
+	}
+
+	/**
+	 * Ensures an existing feed directory allows file access while preventing directory listing.
+	 *
+	 * Installs created before file access was enabled have a `deny from all` .htaccess in this
+	 * directory, which blocks feed downloads. This refreshes that file in place on a best-effort
+	 * basis: any failure is swallowed so it can never interrupt feed generation, and the file is
+	 * only rewritten when its contents differ, to avoid needless writes.
+	 *
+	 * @param string $directory_path The feed directory path (trailing-slashed).
+	 * @return void
+	 */
+	private function ensure_feed_dir_file_access( string $directory_path ): void {
+		$htaccess_path   = $directory_path . '.htaccess';
+		$desired_content = 'Options -Indexes';
+
+		try {
+			$wp_fs = FilesystemUtil::get_wp_filesystem();
+		} catch ( Exception $e ) {
+			// Filesystem unavailable; leave the directory untouched.
+			return;
+		}
+
+		// Skip the write when the .htaccess already grants file access.
+		$current_content = $wp_fs->exists( $htaccess_path ) ? trim( (string) $wp_fs->get_contents( $htaccess_path ) ) : '';
+		if ( $desired_content === $current_content ) {
+			return;
+		}
+
+		$wp_fs->put_contents( $htaccess_path, $desired_content );
 	}
 }

@@ -193,6 +193,28 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refresh an existing feed directory's .htaccess to allow file access.
+	 */
+	public function test_existing_feed_dir_htaccess_is_refreshed_for_file_access(): void {
+		// Simulate an install created before file access was enabled: the directory already
+		// exists with a `deny from all` .htaccess that would block feed downloads.
+		$directory = wp_upload_dir()['basedir'] . '/product-feeds';
+		wp_mkdir_p( $directory );
+		file_put_contents( $directory . '/.htaccess', 'deny from all' );
+
+		$feed   = new JsonFileFeed( 'test-feed' );
+		$method = new \ReflectionMethod( $feed, 'ensure_feed_dir_file_access' );
+		$method->setAccessible( true );
+		$method->invoke( $feed, trailingslashit( $directory ) );
+
+		$this->assertSame(
+			'Options -Indexes',
+			trim( (string) file_get_contents( $directory . '/.htaccess' ) ),
+			'Existing feed directory .htaccess should be refreshed to allow file access.'
+		);
+	}
+
+	/**
 	 * Gets the directory for feed files, but also deletes it.
 	 *
 	 * @return string The directory path.
