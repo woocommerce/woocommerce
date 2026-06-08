@@ -395,7 +395,7 @@ class FeaturesController {
 				'setting'                      => array(
 					'desc_tip' => function () {
 						if ( ! ConnectionHelper::is_connected() ) {
-							return __( 'Connect your store to WooCommerce.com to send remote logs.', 'woocommerce' );
+							return __( 'Connect your store to WooCommerce.com to send remote logs for assistance from Woo Support with debugging your site.', 'woocommerce' );
 						}
 
 						return '';
