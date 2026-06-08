@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -40,22 +39,6 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 	 * @var string
 	 */
 	public $icon = 'store';
-
-	/**
-	 * Add Point of Sale page to settings if the feature is enabled.
-	 *
-	 * @param array $pages Existing pages.
-	 * @return array|mixed
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function add_settings_page( $pages ) {
-		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
-			return parent::add_settings_page( $pages );
-		} else {
-			return $pages;
-		}
-	}
 
 	/**
 	 * Get settings for the default section.

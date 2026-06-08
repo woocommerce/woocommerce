@@ -543,27 +543,6 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'point_of_sale'                      => array(
-				'name'                         => __( 'Point of Sale', 'woocommerce' ),
-				'description'                  => __(
-					'Enable Point of Sale functionality in the WooCommerce mobile apps.',
-					'woocommerce'
-				),
-				'enabled_by_default'           => true,
-				'disable_ui'                   => false,
-
-				/*
-				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
-				* but we wish to handle compatibility checking in a similar fashion to legacy features. The
-				* rational for setting legacy to true is therefore similar to that of the 'order_attribution'
-				* feature.
-				*
-				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
-				*/
-				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-				'is_experimental'              => true,
-			),
 			'fulfillments'                       => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
 				'description'                  => __(
