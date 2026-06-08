@@ -364,7 +364,7 @@ class WC_Admin_Duplicate_Product {
 		$prefix_len = strlen( $original_sku ) + 1;
 		foreach ( $existing_skus as $existing_sku ) {
 			// Check if the SKU starts with our base and has a numeric suffix.
-			if ( strpos( $existing_sku, $original_sku . '-' ) === 0 ) {
+			if ( stripos( $existing_sku, $original_sku . '-' ) === 0 ) {
 				$suffix_str = substr( $existing_sku, $prefix_len );
 				// Only consider pure numeric suffixes.
 				if ( is_numeric( $suffix_str ) ) {
@@ -414,7 +414,7 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		// Fallback: use the standard unique SKU generator which loops until it finds a unique value.
-		$product->set_sku( wc_product_generate_unique_sku( $product_id, $original_sku, 1 ) );
+		$product->set_sku( wc_product_generate_unique_sku( $product_id, $original_sku, $max_suffix + 1 ) );
 	}
 }
 

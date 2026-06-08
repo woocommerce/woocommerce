@@ -156,4 +156,28 @@ class WC_Admin_Duplicate_Product_Test extends WC_Unit_Test_Case {
 		$dup_c = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product4 );
 		$this->assertEquals( 'SEQ-100-3', $dup_c->get_sku() );
 	}
+
+	/**
+	 * Tests that case-insensitive SKU matching prevents collisions.
+	 *
+	 * MySQL LIKE is case-insensitive by default, so 'SKU-%' matches 'sku-1'.
+	 * The prefix check must use stripos() to match SQL behavior.
+	 */
+	public function test_duplicate_product_handles_case_insensitive_sku_conflict() {
+		// Create product with uppercase SKU.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'SKU' );
+		$product->save();
+
+		// Create a different product with lowercase variant + suffix.
+		$other = WC_Helper_Product::create_simple_product();
+		$other->set_sku( 'sku-1' );
+		$other->save();
+
+		// Duplicate the uppercase product.
+		// SQL LIKE 'SKU-%' returns 'sku-1', so max_suffix should be 1.
+		// Expected: 'SKU-2', not 'SKU-1' (which collides with 'sku-1').
+		$duplicate = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product );
+		$this->assertEquals( 'SKU-2', $duplicate->get_sku(), 'Duplicate must not collide with case-variant sku-1' );
+	}
 }
