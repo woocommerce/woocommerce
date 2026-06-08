@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrderStatsDataStore;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
@@ -61,6 +62,10 @@ class Analytics {
 	public function __construct() {
 		add_action( 'update_option_' . self::TOGGLE_OPTION_NAME, array( $this, 'reload_page_on_toggle' ), 10, 2 );
 		add_action( 'woocommerce_settings_saved', array( $this, 'maybe_reload_page' ) );
+
+		if ( ! FeaturesUtil::feature_is_enabled( 'analytics' ) ) {
+			return;
+		}
 
 		add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
 		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
@@ -638,7 +643,8 @@ class Analytics {
 			'title'    => __( 'Analytics', 'woocommerce' ),
 			'path'     => '/analytics/overview',
 			'icon'     => 'dashicons-chart-bar',
-			'position' => 57, // After WooCommerce & Product menu items.
+			'position' => 57,
+		// After WooCommerce & Product menu items.
 		);
 
 		$report_pages = array(

@@ -6,7 +6,9 @@
 namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\RemoteInboxNotifications;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -20,13 +22,6 @@ class Features {
 	 * @var Loader instance
 	 */
 	protected static $instance = null;
-
-	/**
-	 * Optional features
-	 *
-	 * @var array
-	 */
-	protected static $optional_features = array();
 
 	/**
 	 * Get class instance.
@@ -67,19 +62,17 @@ class Features {
 	/**
 	 * Gets the optional feature options as an associative array that can be toggled on or off.
 	 *
+	 * @deprecated 11.0.0 Use FeaturesUtil::feature_is_enabled() to check if a feature is enabled.
+	 *
 	 * @return array
 	 */
 	public static function get_optional_feature_options() {
-		$features = array();
+		wc_deprecated_function( __METHOD__, '11.0.0', 'FeaturesUtil::feature_is_enabled()' );
 
-		foreach ( array_keys( self::$optional_features ) as $optional_feature_key ) {
-			$feature_class = self::get_feature_class( $optional_feature_key );
-
-			if ( $feature_class ) {
-				$features[ $optional_feature_key ] = $feature_class::TOGGLE_OPTION_NAME;
-			}
-		}
-		return $features;
+		return array(
+			'analytics'                  => Analytics::TOGGLE_OPTION_NAME,
+			'remote-inbox-notifications' => RemoteInboxNotifications::TOGGLE_OPTION_NAME,
+		);
 	}
 
 	/**
@@ -129,7 +122,6 @@ class Features {
 			array(
 				\Automattic\WooCommerce\Internal\Admin\ActivityPanels::class,
 				\Automattic\WooCommerce\Internal\Admin\Analytics::class,
-				\Automattic\WooCommerce\Admin\Features\ProductBlockEditor\Init::class,
 				\Automattic\WooCommerce\Internal\Admin\Coupons::class,
 				\Automattic\WooCommerce\Internal\Admin\CustomerEffortScoreTracks::class,
 				\Automattic\WooCommerce\Internal\Admin\Homescreen::class,
@@ -173,9 +165,9 @@ class Features {
 	 * @return array Enabled Woocommerce Admin features/sections.
 	 */
 	public static function get_available_features() {
-		$features                      = self::get_features();
-		$optional_feature_keys         = array_keys( self::$optional_features );
-		$optional_features_unavailable = array();
+		$features              = self::get_features();
+		$optional_feature_keys = array( 'analytics', 'remote-inbox-notifications' );
+		$unavailable_features  = array();
 
 		/**
 		 * Filter allowing WooCommerce Admin optional features to be disabled.
@@ -186,28 +178,21 @@ class Features {
 			return array_values( array_diff( $features, $optional_feature_keys ) );
 		}
 
-		foreach ( $optional_feature_keys as $optional_feature_key ) {
-			$feature_class = self::get_feature_class( $optional_feature_key );
-
-			if ( $feature_class ) {
-				$default = isset( self::$optional_features[ $optional_feature_key ]['default'] ) ?
-					self::$optional_features[ $optional_feature_key ]['default'] :
-					'no';
-
-				// Check if the feature is currently being enabled, if it is continue.
-				/* phpcs:disable WordPress.Security.NonceVerification */
-				$feature_option = $feature_class::TOGGLE_OPTION_NAME;
-				if ( isset( $_POST[ $feature_option ] ) && '1' === $_POST[ $feature_option ] ) {
-					continue;
-				}
-
-				if ( 'yes' !== get_option( $feature_class::TOGGLE_OPTION_NAME, $default ) ) {
-					$optional_features_unavailable[] = $optional_feature_key;
-				}
-			}
+		if (
+			in_array( 'analytics', $features, true ) &&
+			! FeaturesUtil::feature_is_enabled( 'analytics' )
+		) {
+			$unavailable_features[] = 'analytics';
 		}
 
-		return array_values( array_diff( $features, $optional_features_unavailable ) );
+		if (
+			in_array( 'remote-inbox-notifications', $features, true ) &&
+			'yes' !== get_option( RemoteInboxNotifications::TOGGLE_OPTION_NAME, 'yes' )
+		) {
+			$unavailable_features[] = 'remote-inbox-notifications';
+		}
+
+		return array_values( array_diff( $features, $unavailable_features ) );
 	}
 
 	/**
@@ -224,14 +209,21 @@ class Features {
 	/**
 	 * Enable a toggleable optional feature.
 	 *
+	 * @deprecated 11.0.0 Use FeaturesUtil::feature_is_enabled() to check if a feature is enabled.
+	 *
 	 * @param string $feature Feature name.
 	 * @return bool
 	 */
 	public static function enable( $feature ) {
-		$features = self::get_optional_feature_options();
+		wc_deprecated_function( __METHOD__, '11.0.0', 'FeaturesUtil::feature_is_enabled()' );
 
-		if ( isset( $features[ $feature ] ) ) {
-			update_option( $features[ $feature ], 'yes' );
+		if ( 'analytics' === $feature ) {
+			update_option( Analytics::TOGGLE_OPTION_NAME, 'yes' );
+			return true;
+		}
+
+		if ( 'remote-inbox-notifications' === $feature ) {
+			update_option( RemoteInboxNotifications::TOGGLE_OPTION_NAME, 'yes' );
 			return true;
 		}
 
@@ -241,14 +233,21 @@ class Features {
 	/**
 	 * Disable a toggleable optional feature.
 	 *
+	 * @deprecated 11.0.0 Use FeaturesUtil::feature_is_enabled() to check if a feature is enabled.
+	 *
 	 * @param string $feature Feature name.
 	 * @return bool
 	 */
 	public static function disable( $feature ) {
-		$features = self::get_optional_feature_options();
+		wc_deprecated_function( __METHOD__, '11.0.0', 'FeaturesUtil::feature_is_enabled()' );
 
-		if ( isset( $features[ $feature ] ) ) {
-			update_option( $features[ $feature ], 'no' );
+		if ( 'analytics' === $feature ) {
+			update_option( Analytics::TOGGLE_OPTION_NAME, 'no' );
+			return true;
+		}
+
+		if ( 'remote-inbox-notifications' === $feature ) {
+			update_option( RemoteInboxNotifications::TOGGLE_OPTION_NAME, 'no' );
 			return true;
 		}
 
