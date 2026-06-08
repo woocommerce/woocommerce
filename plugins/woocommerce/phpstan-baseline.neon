@@ -9295,18 +9295,6 @@ parameters:
 			path: includes/class-wc-brands.php
 
 		-
-			message: '#^Call to method get_id\(\) on an unknown class BlockTemplateInterface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: includes/class-wc-brands.php
-
-		-
-			message: '#^Call to method get_section_by_id\(\) on an unknown class BlockTemplateInterface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: includes/class-wc-brands.php
-
-		-
 			message: '#^Cannot access property \$labels on WP_Taxonomy\|false\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -9499,12 +9487,6 @@ parameters:
 			path: includes/class-wc-brands.php
 
 		-
-			message: '#^Method WC_Brands\:\:wc_brands_on_block_template_register\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-brands.php
-
-		-
 			message: '#^Parameter \#1 \$args of function get_terms expects array\{taxonomy\?\: array\<string\>\|string, object_ids\?\: array\<int\>\|int, orderby\?\: string, order\?\: string, hide_empty\?\: bool\|int, include\?\: array\<int\>\|string, exclude\?\: array\<int\>\|string, exclude_tree\?\: array\<int\>\|string, \.\.\.\}, ''product_brand'' given\.$#'
 			identifier: argument.type
 			count: 2
@@ -9532,12 +9514,6 @@ parameters:
 			message: '#^Parameter \#2 \$taxonomy of function _wc_term_recount expects WP_Taxonomy, WP_Taxonomy\|false given\.$#'
 			identifier: argument.type
 			count: 2
-			path: includes/class-wc-brands.php
-
-		-
-			message: '#^Parameter \$template of method WC_Brands\:\:wc_brands_on_block_template_register\(\) has invalid type BlockTemplateInterface\.$#'
-			identifier: class.notFound
-			count: 1
 			path: includes/class-wc-brands.php
 
 		-
