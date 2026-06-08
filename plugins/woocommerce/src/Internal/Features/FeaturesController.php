@@ -389,12 +389,7 @@ class FeaturesController {
 			),
 			'remote_logging'                     => array(
 				'name'                         => __( 'Remote Logging', 'woocommerce' ),
-				'description'                  => sprintf(
-					/* translators: %1$s: opening link tag, %2$s: closing link tag */
-					__( 'Allow WooCommerce to send error logs and non-sensitive diagnostic data to help improve WooCommerce. Logs are sent only when the store is %1$sconnected to WooCommerce.com%2$s.', 'woocommerce' ),
-					'<a href="' . esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ) . '">',
-					'</a>'
-				),
+				'description'                  => __( 'Allow WooCommerce to send error logs and non-sensitive diagnostic data to help improve WooCommerce. Logs are sent only when the store is connected to WooCommerce.com.', 'woocommerce' ),
 				'enabled_by_default'           => true,
 				'disable_ui'                   => false,
 				'setting'                      => array(
@@ -403,7 +398,18 @@ class FeaturesController {
 					},
 					'desc_tip' => function () use ( $wccom_connected ) {
 						if ( ! $wccom_connected ) {
-							return __( 'Connect your store to WooCommerce.com to send remote logs for assistance from Woo Support with debugging your site.', 'woocommerce' );
+							$connection_url = add_query_arg(
+								'redirect_admin_url',
+								rawurlencode( $this->get_features_page_url() ),
+								\WC_Helper_Admin::get_connection_url()
+							);
+
+							return sprintf(
+								/* translators: %1$s: opening link tag, %2$s: closing link tag */
+								__( '%1$sConnect your store to WooCommerce.com%2$s to send remote logs for assistance from Woo Support with debugging your site.', 'woocommerce' ),
+								'<a href="' . esc_url( $connection_url ) . '">',
+								'</a>'
+							);
 						}
 
 						return '';
