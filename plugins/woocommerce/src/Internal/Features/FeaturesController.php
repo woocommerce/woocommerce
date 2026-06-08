@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Features;
 
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
-use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper;
 use WC_Tracks;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
@@ -289,7 +288,7 @@ class FeaturesController {
 	 */
 	private function init_feature_definitions(): void {
 		$alpha_feature_testing_is_enabled = Constants::is_true( 'WOOCOMMERCE_ENABLE_ALPHA_FEATURE_TESTING' );
-		$wccom_connected                  = ConnectionHelper::is_site_connected();
+		$wccom_connected                  = \WC_Helper::is_site_connected();
 
 		$legacy_features = array(
 			'analytics'                          => array(

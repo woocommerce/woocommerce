@@ -169,7 +169,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		return ConnectionHelper::is_site_connected();
+		return \WC_Helper::is_site_connected();
 	}
 
 	/**
