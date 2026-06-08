@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move an inline comment to its own line in wc_customer_bought_product() to satisfy PHPCS (no functional change).
