@@ -249,7 +249,7 @@ These flows will continually evolve as the platform evolves with flows updated, 
 | Merchant  | Email     | Receive and check content of new order email       |
 | Merchant  | Email     | Receive and check content of cancelled order email |
 | Merchant  | Email     | Receive and check content of failed order email    |
-| Merchant  | Email     | Resent new order email                             |
+| Merchant  | Email     | Resend new order email                             |
 | Merchant  | Email     | Send invoice/order details to customer via Email   |
 
 ### Merchant - Plugins
