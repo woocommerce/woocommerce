@@ -311,12 +311,11 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'yes', $remote_logging_setting['default'] );
 		$this->assertSame( 'no', $remote_logging_setting['value'] );
 		$this->assertStringContainsString( 'WooCommerce.com', $remote_logging_setting['desc_tip'] );
-		$this->assertStringContainsString( 'page=wc-addons', $remote_logging_setting['desc_tip'] );
-		$this->assertStringContainsString( 'section=helper', $remote_logging_setting['desc_tip'] );
-		$this->assertStringContainsString( 'wc-helper-connect=1', $remote_logging_setting['desc_tip'] );
-		$this->assertStringContainsString( 'wc-helper-nonce=', $remote_logging_setting['desc_tip'] );
-		$this->assertStringContainsString( 'redirect_admin_url=', $remote_logging_setting['desc_tip'] );
-		$this->assertStringContainsString( 'section%3Dfeatures', $remote_logging_setting['desc_tip'] );
+		$this->assertStringContainsString( 'page=wc-admin', $remote_logging_setting['desc_tip'] );
+		$this->assertStringContainsString( 'tab=my-subscriptions', $remote_logging_setting['desc_tip'] );
+		$this->assertStringContainsString( 'path=%2Fextensions', $remote_logging_setting['desc_tip'] );
+		$this->assertStringNotContainsString( 'wc-helper-connect=1', $remote_logging_setting['desc_tip'] );
+		$this->assertStringNotContainsString( 'redirect_admin_url=', $remote_logging_setting['desc_tip'] );
 	}
 
 	/**

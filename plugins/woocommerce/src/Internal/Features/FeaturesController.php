@@ -399,9 +399,12 @@ class FeaturesController {
 					'desc_tip' => function () use ( $wccom_connected ) {
 						if ( ! $wccom_connected ) {
 							$connection_url = add_query_arg(
-								'redirect_admin_url',
-								rawurlencode( $this->get_features_page_url() ),
-								\WC_Helper_Admin::get_connection_url()
+								array(
+									'page' => 'wc-admin',
+									'tab'  => 'my-subscriptions',
+									'path' => rawurlencode( '/extensions' ),
+								),
+								admin_url( 'admin.php' )
 							);
 
 							return sprintf(

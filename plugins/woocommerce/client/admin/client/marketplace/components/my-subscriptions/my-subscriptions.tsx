@@ -78,9 +78,14 @@ export default function MySubscriptions(): React.JSX.Element {
 	};
 
 	if ( ! wccomSettings?.isConnected ) {
-		const connectMessage = __(
-			'Connect your WooCommerce.com account to get product updates, manage your subscriptions from your store admin, and get streamlined support.',
-			'woocommerce'
+		const connectMessage = createInterpolateElement(
+			__(
+				'Connect your WooCommerce.com account to get product updates, manage your subscriptions from your store admin, get streamlined support, and use <strong>Remote Logging</strong> when Woo Support helps debug your site.',
+				'woocommerce'
+			),
+			{
+				strong: <strong />,
+			}
 		);
 
 		const handleDisconnectNoticeClose = () => {
