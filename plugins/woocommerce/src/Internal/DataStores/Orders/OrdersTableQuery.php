@@ -849,8 +849,8 @@ class OrdersTableQuery {
 		$limits = '';
 
 		if ( ! empty( $this->limits ) && count( $this->limits ) === 2 ) {
-			list( $offset, $row_count ) = $this->limits;
-			$offset                     = (int) $offset;
+			$offset    = (int) ( $this->limits[0] ?? 0 );
+			$row_count = (int) ( $this->limits[1] ?? 0 );
 
 			if ( -1 === $row_count ) {
 				// For "unlimited" (-1) queries, mirror WP_Query's nopaging behavior and
@@ -861,7 +861,7 @@ class OrdersTableQuery {
 					$limits = 'LIMIT ' . $offset . ', ' . PHP_INT_MAX;
 				}
 			} else {
-				$limits = 'LIMIT ' . $offset . ', ' . (int) $row_count;
+				$limits = 'LIMIT ' . $offset . ', ' . $row_count;
 			}
 		}
 
@@ -907,9 +907,6 @@ class OrdersTableQuery {
 		// version 10.9, this logic is implemented here as alternative changes above are getting flagged by regression analysis.
 		if ( '' === $join && "{$orders_table}.id" === $fields ) {
 			$groupby = '';
-		}
-		if ( 'LIMIT 0, ' . self::MYSQL_MAX_UNSIGNED_BIGINT === $limits ) {
-			$limits = '';
 		}
 
 		$this->sql = "SELECT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
@@ -1445,9 +1442,9 @@ class OrdersTableQuery {
 		}
 
 		$offset    = (int) ( $this->limits[0] ?? 0 );
-		$row_count = $this->limits[1] ?? 0;
+		$row_count = (int) ( $this->limits[1] ?? 0 );
 
-		if ( $this->limits && ( $row_count > 0 || $offset > 0 ) ) {
+		if ( $row_count > 0 || $offset > 0 ) {
 			$this->found_orders  = absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$this->max_num_pages = $row_count > 0
 				? (int) ceil( $this->found_orders / $row_count )
