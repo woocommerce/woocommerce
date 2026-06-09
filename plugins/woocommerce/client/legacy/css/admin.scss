@@ -6561,7 +6561,7 @@ img.help_tip {
 			}
 
 			a.delete {
-				color: red;
+				color: var(--wc-destructive, #cc1818);
 				font-weight: normal;
 				line-height: 26px;
 				text-decoration: none;
