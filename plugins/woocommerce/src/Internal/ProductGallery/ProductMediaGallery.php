@@ -183,7 +183,7 @@ class ProductMediaGallery {
 				continue;
 			}
 
-			$video_item = self::normalize_video_gallery_item( $item, $index );
+			$video_item = self::normalize_video_gallery_item( $item, absint( $index ) );
 
 			if ( ! empty( $video_item ) ) {
 				$items[] = self::get_video_media_item( $video_item );
@@ -232,7 +232,7 @@ class ProductMediaGallery {
 				continue;
 			}
 
-			$item = self::normalize_video_gallery_item( $item, $fallback_position );
+			$item = self::normalize_video_gallery_item( $item, absint( $fallback_position ) );
 
 			if ( ! empty( $item ) ) {
 				$items[] = $item;
