@@ -152,6 +152,10 @@ class WC_REST_System_Status_Tools_V2_Controller_Test extends WC_REST_Unit_Test_C
 	public function test_get_tools_shows_product_lookup_table_regeneration_status() {
 		as_unschedule_all_actions( '', array(), 'wc_update_product_lookup_tables' );
 
+		// The status link text depends on whether WP-Cron is disabled, which it is in the
+		// test environment. Pin it so the assertions are deterministic rather than environment-dependent.
+		\Automattic\Jetpack\Constants::set_constant( 'DISABLE_WP_CRON', false );
+
 		try {
 			WC()->queue()->schedule_single(
 				time() + HOUR_IN_SECONDS,
@@ -171,7 +175,13 @@ class WC_REST_System_Status_Tools_V2_Controller_Test extends WC_REST_Unit_Test_C
 			$this->assertStringContainsString( 'View progress', $tool['status_text'] );
 			$this->assertStringContainsString( 'wc_update_product_lookup_tables', $tool['status_text'] );
 			$this->assertStringNotContainsString( 'dashicons-update', $tool['status_text'] );
+
+			// When WP-Cron is disabled the link nudges to the queued updates instead.
+			\Automattic\Jetpack\Constants::set_constant( 'DISABLE_WP_CRON', true );
+			$tool = $this->endpoint->get_tools()['regenerate_product_lookup_tables'];
+			$this->assertStringContainsString( 'View queued updates', $tool['status_text'] );
 		} finally {
+			\Automattic\Jetpack\Constants::clear_single_constant( 'DISABLE_WP_CRON' );
 			as_unschedule_all_actions( '', array(), 'wc_update_product_lookup_tables' );
 		}
 	}
