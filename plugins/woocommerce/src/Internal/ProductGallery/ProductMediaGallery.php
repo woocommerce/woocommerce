@@ -76,7 +76,7 @@ class ProductMediaGallery {
 			);
 
 			if ( ! empty( $video_gallery ) ) {
-				$media_items = self::insert_video_gallery_items(
+				$media_items = self::merge_positioned_video_gallery_items(
 					$media_items,
 					$video_gallery,
 					self::get_video_position_offset( $product, $include_product_image, $context )
@@ -326,7 +326,7 @@ class ProductMediaGallery {
 	}
 
 	/**
-	 * Insert positioned video items into product image media items.
+	 * Merge positioned video items into product image media items.
 	 *
 	 * Video positions are 0-based indexes in the final mixed gallery, excluding
 	 * the featured product image. The positions are not anchors to the image-only
@@ -346,7 +346,7 @@ class ProductMediaGallery {
 	 * @param int   $position_offset Offset applied when featured image is included.
 	 * @return array
 	 */
-	private static function insert_video_gallery_items( array $media_items, array $video_gallery, int $position_offset ): array {
+	private static function merge_positioned_video_gallery_items( array $media_items, array $video_gallery, int $position_offset ): array {
 		foreach ( $video_gallery as $index => $video_item ) {
 			$video_gallery[ $index ]['_sort_order'] = $index;
 		}
