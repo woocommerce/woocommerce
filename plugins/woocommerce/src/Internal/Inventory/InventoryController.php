@@ -37,9 +37,13 @@ class InventoryController {
 
 	private const MISSING_TABLES_OPTION = 'woocommerce_pos_location_stock_schema_missing_tables';
 
+	public const POS_LOCATION_CREATED_OPTION = 'woocommerce_pos_location_stock_pos_location_created';
+
 	private const ORDER_LOCATION_META = '_inventory_location';
 
 	private const ORDER_LOCATION_STOCK_REDUCED_META = '_location_stock_reduced';
+
+	private const ORDER_LOCATION_STOCK_REDUCTION_FAILED_META = '_location_stock_reduction_failed';
 
 	private const ITEM_LOCATION_STOCK_REDUCED_META = '_reduced_location_stock';
 
@@ -110,7 +114,7 @@ class InventoryController {
 		}
 
 		if ( 'yes' === get_option( self::TABLES_CREATED_OPTION, 'no' ) && $this->location_stock_service->tables_exist() ) {
-			$this->location_stock_service->ensure_pos_location();
+			$this->maybe_ensure_pos_location();
 			return;
 		}
 
@@ -126,7 +130,7 @@ class InventoryController {
 
 		update_option( self::TABLES_CREATED_OPTION, 'yes' );
 		delete_option( self::MISSING_TABLES_OPTION );
-		$this->location_stock_service->ensure_pos_location();
+		$this->ensure_pos_location();
 	}
 
 	/**
@@ -273,6 +277,7 @@ class InventoryController {
 		}
 
 		$changes = array();
+		$errors  = array();
 		foreach ( $order->get_items() as $item ) {
 			if ( ! $item instanceof \WC_Order_Item_Product ) {
 				continue;
@@ -281,6 +286,7 @@ class InventoryController {
 			$change = $this->reduce_location_stock_for_order_item( $order, $item, $location_slug );
 			if ( is_wp_error( $change ) ) {
 				$order->add_order_note( $change->get_error_message(), 0, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
+				$errors[] = $change;
 				continue;
 			}
 
@@ -289,11 +295,21 @@ class InventoryController {
 			}
 		}
 
+		if ( ! empty( $errors ) ) {
+			$order->update_meta_data( self::ORDER_LOCATION_STOCK_REDUCTION_FAILED_META, 'yes' );
+		}
+
 		if ( empty( $changes ) ) {
+			if ( ! empty( $errors ) ) {
+				$order->save();
+			}
 			return;
 		}
 
 		$this->mark_order_location_stock_reduced( $order, $location_slug );
+		if ( empty( $errors ) ) {
+			$order->delete_meta_data( self::ORDER_LOCATION_STOCK_REDUCTION_FAILED_META );
+		}
 		$this->add_location_stock_order_note( $order, __( 'POS stock levels reduced:', 'woocommerce' ), $changes );
 		$order->save();
 	}
@@ -384,11 +400,13 @@ class InventoryController {
 		$change = $this->adjust_location_stock_for_line_item_quantity( $item, $location_slug, $item_quantity );
 		if ( is_wp_error( $change ) ) {
 			$order->add_order_note( $change->get_error_message(), 0, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
+			$order->update_meta_data( self::ORDER_LOCATION_STOCK_REDUCTION_FAILED_META, 'yes' );
 			$order->save();
 			return true;
 		}
 
 		if ( $change ) {
+			$order->delete_meta_data( self::ORDER_LOCATION_STOCK_REDUCTION_FAILED_META );
 			$this->add_location_stock_order_note( $order, __( 'POS stock levels adjusted:', 'woocommerce' ), array( $change ) );
 			$order->save();
 		}
@@ -446,6 +464,25 @@ class InventoryController {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Ensure the POS row once after table creation or upgrade.
+	 */
+	private function maybe_ensure_pos_location(): void {
+		if ( 'yes' === get_option( self::POS_LOCATION_CREATED_OPTION, 'no' ) ) {
+			return;
+		}
+
+		$this->ensure_pos_location();
+	}
+
+	/**
+	 * Ensure the POS row and latch the setup.
+	 */
+	private function ensure_pos_location(): void {
+		$this->location_stock_service->ensure_pos_location();
+		update_option( self::POS_LOCATION_CREATED_OPTION, 'yes' );
 	}
 
 	/**
@@ -559,7 +596,7 @@ class InventoryController {
 	 */
 	private function reduce_location_stock_for_order_item( \WC_Order $order, \WC_Order_Item_Product $item, string $location_slug ) {
 		$product = $item->get_product();
-		if ( ! $product instanceof \WC_Product || ! $product->managing_stock() || $item->get_meta( self::ITEM_LOCATION_STOCK_REDUCED_META, true ) ) {
+		if ( ! $product instanceof \WC_Product || ! $product->managing_stock() || $this->item_location_stock_reduction_is_recorded( $item ) ) {
 			return null;
 		}
 
@@ -603,11 +640,11 @@ class InventoryController {
 		$restock_refunded_items = wc_stock_amount( $item->get_meta( self::ITEM_LOCATION_STOCK_RESTOCKED_META, true ) );
 		$diff                   = $item_quantity - $restock_refunded_items - $already_reduced_stock;
 
-		if ( 0 === $item_quantity ) {
+		if ( 0.0 === (float) $item_quantity ) {
 			$diff = $already_reduced_stock * -1;
 		}
 
-		if ( 0 === $diff ) {
+		if ( 0.0 === (float) $diff ) {
 			return false;
 		}
 
@@ -616,6 +653,10 @@ class InventoryController {
 			: $this->decrease_product_location_stock( $product, $location_slug, $diff );
 
 		if ( is_wp_error( $change ) ) {
+			if ( $diff > 0 ) {
+				$this->restore_line_item_quantity_after_failed_location_stock_adjustment( $item, $already_reduced_stock, $restock_refunded_items );
+			}
+
 			return $change;
 		}
 
@@ -680,15 +721,20 @@ class InventoryController {
 	 */
 	private function decrease_product_location_stock( \WC_Product $product, string $location_slug, $qty ) {
 		$qty       = wc_stock_amount( $qty );
-		$old_stock = $this->location_stock_service->get_location_stock( $product, $location_slug );
-		if ( $old_stock < $qty ) {
-			return $this->get_insufficient_location_stock_error( $location_slug, $product->get_name(), $qty, $old_stock );
+		$new_stock = $this->location_stock_service->decrease_location_stock( $product, $location_slug, $qty );
+		if ( null === $new_stock ) {
+			return $this->get_insufficient_location_stock_error(
+				$location_slug,
+				$product->get_name(),
+				$qty,
+				$this->location_stock_service->get_location_stock( $product, $location_slug )
+			);
 		}
 
 		return array(
 			'product' => $product,
-			'from'    => $old_stock,
-			'to'      => $this->location_stock_service->decrease_location_stock( $product, $location_slug, $qty ),
+			'from'    => $new_stock + $qty,
+			'to'      => $new_stock,
 		);
 	}
 
@@ -702,12 +748,12 @@ class InventoryController {
 	 */
 	private function increase_product_location_stock( \WC_Product $product, string $location_slug, $qty ): array {
 		$qty       = wc_stock_amount( $qty );
-		$old_stock = $this->location_stock_service->get_location_stock( $product, $location_slug );
+		$new_stock = $this->location_stock_service->increase_location_stock( $product, $location_slug, $qty );
 
 		return array(
 			'product' => $product,
-			'from'    => $old_stock,
-			'to'      => $this->location_stock_service->increase_location_stock( $product, $location_slug, $qty ),
+			'from'    => $new_stock - $qty,
+			'to'      => $new_stock,
 		);
 	}
 
@@ -764,6 +810,27 @@ class InventoryController {
 	 */
 	private function get_item_location_stock_reduced_qty( \WC_Order_Item_Product $item ): float {
 		return wc_stock_amount( $item->get_meta( self::ITEM_LOCATION_STOCK_REDUCED_META, true ) );
+	}
+
+	/**
+	 * Check whether location stock reduction meta has been written for an item.
+	 *
+	 * @param \WC_Order_Item_Product $item Order item.
+	 */
+	private function item_location_stock_reduction_is_recorded( \WC_Order_Item_Product $item ): bool {
+		return '' !== $item->get_meta( self::ITEM_LOCATION_STOCK_REDUCED_META, true );
+	}
+
+	/**
+	 * Restore the saved quantity when a location stock increase adjustment fails.
+	 *
+	 * @param \WC_Order_Item_Product $item                   Order item.
+	 * @param int|float              $already_reduced_stock  Already reduced stock.
+	 * @param int|float              $restock_refunded_items Refunded stock already restored.
+	 */
+	private function restore_line_item_quantity_after_failed_location_stock_adjustment( \WC_Order_Item_Product $item, $already_reduced_stock, $restock_refunded_items ): void {
+		$item->set_quantity( (int) max( 0, wc_stock_amount( $already_reduced_stock + $restock_refunded_items ) ) );
+		$item->save();
 	}
 
 	/**

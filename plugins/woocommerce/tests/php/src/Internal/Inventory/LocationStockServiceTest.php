@@ -63,14 +63,22 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	private $previous_tables_created_option;
 
 	/**
+	 * Original POS location latch option value.
+	 *
+	 * @var mixed
+	 */
+	private $previous_pos_location_created_option;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->previous_feature_option        = get_option( InventoryController::FEATURE_OPTION, null );
-		$this->previous_manage_stock_option   = get_option( 'woocommerce_manage_stock', null );
-		$this->previous_tables_created_option = get_option( InventoryController::TABLES_CREATED_OPTION, null );
+		$this->previous_feature_option              = get_option( InventoryController::FEATURE_OPTION, null );
+		$this->previous_manage_stock_option         = get_option( 'woocommerce_manage_stock', null );
+		$this->previous_tables_created_option       = get_option( InventoryController::TABLES_CREATED_OPTION, null );
+		$this->previous_pos_location_created_option = get_option( InventoryController::POS_LOCATION_CREATED_OPTION, null );
 
 		update_option( InventoryController::FEATURE_OPTION, 'yes' );
 		update_option( 'woocommerce_manage_stock', 'yes' );
@@ -100,6 +108,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$this->restore_option( InventoryController::FEATURE_OPTION, $this->previous_feature_option );
 		$this->restore_option( 'woocommerce_manage_stock', $this->previous_manage_stock_option );
 		$this->restore_option( InventoryController::TABLES_CREATED_OPTION, $this->previous_tables_created_option );
+		$this->restore_option( InventoryController::POS_LOCATION_CREATED_OPTION, $this->previous_pos_location_created_option );
 
 		parent::tearDown();
 	}
@@ -138,6 +147,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_existing_tables_configure_pos_location_when_feature_is_enabled(): void {
 		update_option( InventoryController::TABLES_CREATED_OPTION, 'yes' );
+		delete_option( InventoryController::POS_LOCATION_CREATED_OPTION );
 		$this->remove_pos_location();
 
 		$this->controller->maybe_create_db_tables();
@@ -155,6 +165,29 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 4, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
 		$this->assertEquals( 15, wc_get_product( $product->get_id() )->get_stock_quantity() );
+	}
+
+	/**
+	 * @testdox Should not allow negative POS stock through the direct set path.
+	 */
+	public function test_set_pos_location_stock_clamps_negative_stock(): void {
+		$product = $this->create_managed_stock_product();
+
+		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, -5 );
+
+		$this->assertEquals( 0, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
+		$this->assertEquals( 15, wc_get_product( $product->get_id() )->get_stock_quantity() );
+	}
+
+	/**
+	 * @testdox Should not decrease POS stock below zero.
+	 */
+	public function test_decrease_pos_location_stock_does_not_go_negative(): void {
+		$product = $this->create_managed_stock_product();
+		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 1 );
+
+		$this->assertNull( $this->service->decrease_location_stock( $product, LocationStockService::LOCATION_POS, 2 ) );
+		$this->assertEquals( 1, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
 	}
 
 	/**
@@ -396,6 +429,28 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should flag POS orders when stock is no longer available at reduction time.
+	 */
+	public function test_pos_order_reduce_failure_is_flagged_without_negative_stock(): void {
+		$product = $this->create_managed_stock_product();
+		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 1 );
+		$first_order  = $this->create_pos_order_for_product( $product, 1 );
+		$second_order = $this->create_pos_order_for_product( $product, 1 );
+
+		$this->controller->maybe_reduce_location_stock_levels( $first_order->get_id() );
+		$this->controller->maybe_reduce_location_stock_levels( $second_order->get_id() );
+
+		$second_order = wc_get_order( $second_order->get_id() );
+		$items        = $second_order->get_items();
+		$item         = reset( $items );
+
+		$this->assertEquals( 0, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
+		$this->assertEquals( 'yes', $second_order->get_meta( '_location_stock_reduction_failed', true ) );
+		$this->assertEmpty( $item->get_meta( '_reduced_location_stock', true ) );
+		$this->assertEmpty( $item->get_meta( '_reduced_stock', true ) );
+	}
+
+	/**
 	 * @testdox Should reject unknown explicit REST inventory locations.
 	 */
 	public function test_rest_order_rejects_unknown_inventory_location(): void {
@@ -544,6 +599,41 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not reduce POS stock again after refunded stock is fully restored.
+	 */
+	public function test_fully_refunded_pos_order_does_not_reduce_pos_stock_again(): void {
+		$product = $this->create_managed_stock_product();
+		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 5 );
+		$order = $this->create_pos_order_for_product( $product, 2 );
+
+		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
+
+		$order = wc_get_order( $order->get_id() );
+		$items = $order->get_items();
+		$item  = reset( $items );
+
+		wc_restock_refunded_items(
+			$order,
+			array(
+				$item->get_id() => array(
+					'qty' => 2,
+				),
+			)
+		);
+
+		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
+
+		$order = wc_get_order( $order->get_id() );
+		$items = $order->get_items();
+		$item  = reset( $items );
+
+		$this->assertEquals( 5, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
+		$this->assertEquals( 15, wc_get_product( $product->get_id() )->get_stock_quantity() );
+		$this->assertEquals( 0, $item->get_meta( '_reduced_location_stock', true ) );
+		$this->assertEmpty( $item->get_meta( '_reduced_stock', true ) );
+	}
+
+	/**
 	 * @testdox Should reduce POS stock when a POS order item quantity increases.
 	 */
 	public function test_pos_order_item_quantity_increase_adjusts_pos_stock_delta(): void {
@@ -566,6 +656,31 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 15, wc_get_product( $product->get_id() )->get_stock_quantity() );
 		$this->assertEquals( 3, $item->get_meta( '_reduced_location_stock', true ) );
 		$this->assertEmpty( $item->get_meta( '_reduced_stock', true ) );
+	}
+
+	/**
+	 * @testdox Should revert a POS order item quantity increase when POS stock is unavailable.
+	 */
+	public function test_pos_order_item_quantity_increase_failure_reverts_quantity(): void {
+		$product = $this->create_managed_stock_product();
+		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 2 );
+		$order = $this->create_pos_order_for_product( $product, 2 );
+
+		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
+		$item = $this->set_first_order_item_quantity( $order, 3 );
+
+		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
+		$changed_stock = wc_maybe_adjust_line_item_product_stock( $item );
+
+		$order = wc_get_order( $order->get_id() );
+		$items = $order->get_items();
+		$item  = reset( $items );
+
+		$this->assertFalse( $changed_stock );
+		$this->assertEquals( 0, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
+		$this->assertEquals( 2, $item->get_quantity() );
+		$this->assertEquals( 2, $item->get_meta( '_reduced_location_stock', true ) );
+		$this->assertEquals( 'yes', $order->get_meta( '_location_stock_reduction_failed', true ) );
 	}
 
 	/**

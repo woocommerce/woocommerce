@@ -196,7 +196,7 @@ CREATE TABLE $product_inventory_table (
 	public function set_location_stock( $product, string $location_slug, $quantity ): float {
 		global $wpdb;
 
-		$quantity = wc_stock_amount( $quantity );
+		$quantity = max( 0, wc_stock_amount( $quantity ) );
 		if ( ! $this->tables_exist() ) {
 			return $quantity;
 		}
@@ -230,7 +230,32 @@ CREATE TABLE $product_inventory_table (
 	 * @param int|float       $quantity      Quantity.
 	 */
 	public function increase_location_stock( $product, string $location_slug, $quantity ): float {
-		return $this->change_location_stock( $product, $location_slug, wc_stock_amount( $quantity ) );
+		global $wpdb;
+
+		$quantity = wc_stock_amount( $quantity );
+		if ( (float) $quantity <= 0.0 || ! $this->tables_exist() ) {
+			return $this->get_location_stock( $product, $location_slug );
+		}
+
+		$key = $this->get_product_inventory_key( $product );
+		if ( ! $key ) {
+			return $this->get_location_stock( $product, $location_slug );
+		}
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO %i ( product_id, variation_id, location_id, quantity )
+				VALUES ( %d, %d, %d, %f )
+				ON DUPLICATE KEY UPDATE quantity = quantity + VALUES( quantity )",
+				$this->get_product_inventory_table_name(),
+				$key['product_id'],
+				$key['variation_id'],
+				$this->get_required_location_id( $location_slug ),
+				$quantity
+			)
+		);
+
+		return $this->get_location_stock( $product, $location_slug );
 	}
 
 	/**
@@ -239,9 +264,44 @@ CREATE TABLE $product_inventory_table (
 	 * @param \WC_Product|int $product       Product object or ID.
 	 * @param string          $location_slug Location slug.
 	 * @param int|float       $quantity      Quantity.
+	 * @return float|null New stock, or null when the decrease would make stock negative.
 	 */
-	public function decrease_location_stock( $product, string $location_slug, $quantity ): float {
-		return $this->change_location_stock( $product, $location_slug, wc_stock_amount( $quantity ) * -1 );
+	public function decrease_location_stock( $product, string $location_slug, $quantity ): ?float {
+		global $wpdb;
+
+		$quantity = wc_stock_amount( $quantity );
+		if ( (float) $quantity <= 0.0 ) {
+			return $this->get_location_stock( $product, $location_slug );
+		}
+
+		if ( ! $this->tables_exist() ) {
+			return null;
+		}
+
+		$key         = $this->get_product_inventory_key( $product );
+		$location_id = $this->get_location_id( $location_slug );
+		if ( ! $key || 0 === $location_id ) {
+			return null;
+		}
+
+		$updated = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE %i
+				SET quantity = quantity - %f
+				WHERE product_id = %d
+				AND variation_id = %d
+				AND location_id = %d
+				AND quantity >= %f",
+				$this->get_product_inventory_table_name(),
+				$quantity,
+				$key['product_id'],
+				$key['variation_id'],
+				$location_id,
+				$quantity
+			)
+		);
+
+		return 1 === $updated ? $this->get_location_stock( $product, $location_slug ) : null;
 	}
 
 	/**
@@ -270,19 +330,6 @@ CREATE TABLE $product_inventory_table (
 				gmdate( 'Y-m-d H:i:s' )
 			)
 		);
-	}
-
-	/**
-	 * Apply a signed stock delta to one location.
-	 *
-	 * @param \WC_Product|int $product       Product object or ID.
-	 * @param string          $location_slug Location slug.
-	 * @param int|float       $delta         Signed quantity delta.
-	 */
-	private function change_location_stock( $product, string $location_slug, $delta ): float {
-		$new_stock = $this->get_location_stock( $product, $location_slug ) + wc_stock_amount( $delta );
-
-		return $this->set_location_stock( $product, $location_slug, $new_stock );
 	}
 
 	/**
