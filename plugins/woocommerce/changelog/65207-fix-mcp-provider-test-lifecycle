@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix MCP provider test Abilities API registry bootstrap.

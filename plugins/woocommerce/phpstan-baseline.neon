@@ -36526,12 +36526,6 @@ parameters:
 			path: includes/wc-user-functions.php
 
 		-
-			message: '#^Parameter \#1 \$object_or_class of function property_exists expects object\|string, WP_User\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
 			message: '#^Parameter \#1 \$user of function user_can expects int\|WP_User, WP_User\|false given\.$#'
 			identifier: argument.type
 			count: 2
