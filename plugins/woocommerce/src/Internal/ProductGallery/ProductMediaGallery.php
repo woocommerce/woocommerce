@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\ProductGallery;
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Product;
 
 defined( 'ABSPATH' ) || exit;
@@ -39,7 +40,7 @@ class ProductMediaGallery {
 	 * @return bool
 	 */
 	public static function is_feature_enabled(): bool {
-		return function_exists( 'wc_product_gallery_videos_enabled' ) && wc_product_gallery_videos_enabled();
+		return FeaturesUtil::feature_is_enabled( self::FEATURE_ID );
 	}
 
 	/**
@@ -56,9 +57,6 @@ class ProductMediaGallery {
 				'context'               => 'view',
 				'include_product_image' => true,
 				'include_placeholder'   => false,
-				'feature_enabled'       => self::is_feature_enabled(),
-				'validate_attachments'  => false,
-				'preserve_video_data'   => false,
 				'resolve_video_posters' => true,
 				'deduplicate'           => false,
 			)
@@ -68,15 +66,13 @@ class ProductMediaGallery {
 		$include_product_image = (bool) $args['include_product_image'];
 		$media_items           = self::get_product_image_media_items( $product, $include_product_image, $context );
 
-		if ( $args['feature_enabled'] ) {
+		if ( self::is_feature_enabled() ) {
 			$video_gallery = self::normalize_video_gallery_items(
-				self::get_stored_video_gallery_items( $product ),
-				(bool) $args['validate_attachments'],
-				(bool) $args['preserve_video_data']
+				self::get_stored_video_gallery_items( $product )
 			);
 
 			if ( ! empty( $video_gallery ) ) {
-				$media_items = self::insert_video_gallery_items(
+				$media_items = self::merge_positioned_video_gallery_items(
 					$media_items,
 					$video_gallery,
 					self::get_video_position_offset( $product, $include_product_image, $context )
@@ -153,15 +149,9 @@ class ProductMediaGallery {
 	 * Normalize media gallery items.
 	 *
 	 * @param array $media_gallery Media gallery data.
-	 * @param bool  $validate_attachments Whether attachment IDs should be type-checked.
-	 * @param bool  $preserve_video_data Whether to preserve additional video item keys.
 	 * @return array
 	 */
-	public static function normalize_media_gallery_items(
-		array $media_gallery,
-		bool $validate_attachments = false,
-		bool $preserve_video_data = false
-	): array {
+	public static function normalize_media_gallery_items( array $media_gallery ): array {
 		$items = array();
 
 		foreach ( $media_gallery as $index => $item ) {
@@ -179,7 +169,6 @@ class ProductMediaGallery {
 
 			if ( 'image' === $media_type ) {
 				if (
-					$validate_attachments &&
 					! wp_attachment_is_image( $attachment_id ) &&
 					0 !== strpos( (string) get_post_mime_type( $attachment_id ), 'image/' )
 				) {
@@ -194,7 +183,7 @@ class ProductMediaGallery {
 				continue;
 			}
 
-			$video_item = self::normalize_video_gallery_item( $item, $index, $validate_attachments, $preserve_video_data );
+			$video_item = self::normalize_video_gallery_item( $item, $index );
 
 			if ( ! empty( $video_item ) ) {
 				$items[] = self::get_video_media_item( $video_item );
@@ -205,12 +194,16 @@ class ProductMediaGallery {
 	}
 
 	/**
-	 * Get video gallery items from a mixed media gallery.
+	 * Get positioned video gallery items from a mixed media gallery.
+	 *
+	 * The mixed gallery excludes the featured product image. Positions are
+	 * stored as 0-based indexes in that gallery and shifted later only when the
+	 * composed media gallery includes the featured image.
 	 *
 	 * @param array $media_gallery Media gallery items.
 	 * @return array
 	 */
-	public static function get_video_gallery_items_from_media_gallery( array $media_gallery ): array {
+	public static function get_positioned_video_gallery_items_from_media_gallery( array $media_gallery ): array {
 		$video_gallery = array();
 
 		foreach ( array_values( $media_gallery ) as $position => $media_item ) {
@@ -229,15 +222,9 @@ class ProductMediaGallery {
 	 * Normalize video gallery items.
 	 *
 	 * @param array $video_gallery Video gallery data.
-	 * @param bool  $validate_attachments Whether attachment IDs should be type-checked.
-	 * @param bool  $preserve_video_data Whether to preserve additional video item keys.
 	 * @return array
 	 */
-	public static function normalize_video_gallery_items(
-		array $video_gallery,
-		bool $validate_attachments = false,
-		bool $preserve_video_data = false
-	): array {
+	public static function normalize_video_gallery_items( array $video_gallery ): array {
 		$items = array();
 
 		foreach ( $video_gallery as $fallback_position => $item ) {
@@ -245,7 +232,7 @@ class ProductMediaGallery {
 				continue;
 			}
 
-			$item = self::normalize_video_gallery_item( $item, $fallback_position, $validate_attachments, $preserve_video_data );
+			$item = self::normalize_video_gallery_item( $item, $fallback_position );
 
 			if ( ! empty( $item ) ) {
 				$items[] = $item;
@@ -326,17 +313,27 @@ class ProductMediaGallery {
 	}
 
 	/**
-	 * Insert positioned video items into product image media items.
+	 * Merge positioned video items into product image media items.
 	 *
-	 * Video positions are relative to product gallery items, excluding the
-	 * featured product image. The offset keeps featured image first when present.
+	 * Video positions are 0-based indexes in the final mixed gallery, excluding
+	 * the featured product image. The positions are not anchors to the image-only
+	 * gallery; they already describe where videos should land after images and
+	 * earlier videos are composed together.
+	 *
+	 * Example:
+	 * - Images: array( 'image A', 'image B', 'image C' )
+	 * - Videos: array(
+	 *     array( 'id' => 10, 'position' => 1 ),
+	 *     array( 'id' => 11, 'position' => 2 ),
+	 *   )
+	 * - Outcome: array( 'image A', 'video 10', 'video 11', 'image B', 'image C' )
 	 *
 	 * @param array $media_items     Product image media items.
 	 * @param array $video_gallery   Stored video gallery items.
 	 * @param int   $position_offset Offset applied when featured image is included.
 	 * @return array
 	 */
-	private static function insert_video_gallery_items( array $media_items, array $video_gallery, int $position_offset ): array {
+	private static function merge_positioned_video_gallery_items( array $media_items, array $video_gallery, int $position_offset ): array {
 		foreach ( $video_gallery as $index => $video_item ) {
 			$video_gallery[ $index ]['_sort_order'] = $index;
 		}
@@ -383,11 +380,9 @@ class ProductMediaGallery {
 	 *
 	 * @param array $item                 Video gallery item.
 	 * @param int   $fallback_position    Position used when item has no position.
-	 * @param bool  $validate_attachments Whether attachment IDs should be type-checked.
-	 * @param bool  $preserve_video_data  Whether to preserve additional video item keys.
 	 * @return array
 	 */
-	private static function normalize_video_gallery_item( array $item, int $fallback_position, bool $validate_attachments, bool $preserve_video_data ): array {
+	private static function normalize_video_gallery_item( array $item, int $fallback_position ): array {
 		$media_type    = isset( $item['media_type'] ) ? sanitize_key( $item['media_type'] ) : 'video';
 		$source_type   = isset( $item['source_type'] ) ? sanitize_key( $item['source_type'] ) : 'attachment';
 		$attachment_id = isset( $item['id'] ) ? absint( $item['id'] ) : 0;
@@ -396,19 +391,14 @@ class ProductMediaGallery {
 			return array();
 		}
 
-		if ( $validate_attachments ) {
-			$mime_type = get_post_mime_type( $attachment_id );
+		$mime_type = get_post_mime_type( $attachment_id );
 
-			if ( ! is_string( $mime_type ) || 0 !== strpos( $mime_type, 'video/' ) ) {
-				return array();
-			}
+		if ( ! is_string( $mime_type ) || 0 !== strpos( $mime_type, 'video/' ) ) {
+			return array();
 		}
 
-		$video_item = $preserve_video_data ? wc_clean( $item ) : array();
-		$video_item = is_array( $video_item ) ? $video_item : array();
+		$video_item = array();
 		$poster_id  = isset( $item['poster_id'] ) ? absint( $item['poster_id'] ) : 0;
-
-		unset( $video_item['media_type'] );
 
 		$video_item['source_type'] = 'attachment';
 		$video_item['id']          = $attachment_id;
@@ -429,7 +419,6 @@ class ProductMediaGallery {
 		if (
 			$poster_id &&
 			(
-				! $validate_attachments ||
 				wp_attachment_is_image( $poster_id ) ||
 				0 === strpos( (string) get_post_mime_type( $poster_id ), 'image/' )
 			)

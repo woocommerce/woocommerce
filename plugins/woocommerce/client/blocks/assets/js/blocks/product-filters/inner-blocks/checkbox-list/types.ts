@@ -7,6 +7,7 @@ import { BlockEditProps } from '@wordpress/blocks';
  * Internal dependencies
  */
 import type { SelectableItemsBlockContext } from '../../../../types/type-defs/selectable-items';
+import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 
 export type Color = {
 	slug?: string;
@@ -30,7 +31,7 @@ export type BlockAttributes = {
 export type EditProps = BlockEditProps< BlockAttributes > & {
 	context: SelectableItemsBlockContext< {
 		count?: number;
-		color?: string;
+		visual?: VisualAttributeTerm;
 		depth?: number;
 	} >;
 	optionElementBorder: Color;

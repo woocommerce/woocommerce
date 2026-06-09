@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add woocommerce_term_recount_product_count filter to _wc_term_recount.
