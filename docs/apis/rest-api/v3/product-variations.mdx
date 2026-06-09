@@ -313,6 +313,8 @@ This API lets you retrieve and view a specific product variation by ID.
 GET /wp-json/wc/v3/products/<product_id>/variations/<id>
 ```
 
+Optional query parameter: `image_size` (string). Use a specific registered image size for returned variation image `src`. Falls back to the full size when the requested size is not registered. Default is `full`.
+
 <Tabs>
   <TabItem value="curl" label="cURL">
 
