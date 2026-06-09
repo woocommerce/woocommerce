@@ -688,6 +688,75 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests automatic generation of variation slug.
+	 */
+	public function test_generate_product_slug() {
+		$product = new WC_Product();
+		$product->set_name( 'Test Product' );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes(
+			array(
+				'color' => 'Green',
+				'size'  => 'Large',
+			)
+		);
+		$variation->save();
+
+		$loaded_variation = wc_get_product( $variation->get_id() );
+		$this->assertEquals( 'product-variation-' . $product->get_id() . '-color-green-size-large', $loaded_variation->get_slug() );
+	}
+
+	/**
+	 * Tests that automatic variation slug generation preserves explicit slugs.
+	 */
+	public function test_generate_product_slug_preserves_explicit_slug() {
+		$product = new WC_Product();
+		$product->set_name( 'Test Product' );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_slug( 'custom-variation-slug' );
+		$variation->set_attributes( array( 'color' => 'Green' ) );
+		$variation->save();
+
+		$loaded_variation = wc_get_product( $variation->get_id() );
+		$this->assertEquals( 'custom-variation-slug', $loaded_variation->get_slug() );
+	}
+
+	/**
+	 * Tests that automatic variation slug generation still uses WordPress uniqueness handling.
+	 */
+	public function test_generate_product_slug_preserves_wordpress_collision_handling() {
+		$product = new WC_Product();
+		$product->set_name( 'Test Product' );
+		$product->save();
+
+		$attributes = array(
+			'color' => 'Green',
+			'size'  => 'Large',
+		);
+
+		$first_variation = new WC_Product_Variation();
+		$first_variation->set_parent_id( $product->get_id() );
+		$first_variation->set_attributes( $attributes );
+		$first_variation->save();
+
+		$second_variation = new WC_Product_Variation();
+		$second_variation->set_parent_id( $product->get_id() );
+		$second_variation->set_attributes( $attributes );
+		$second_variation->save();
+
+		$base_slug = 'product-variation-' . $product->get_id() . '-color-green-size-large';
+
+		$this->assertEquals( $base_slug, wc_get_product( $first_variation->get_id() )->get_slug() );
+		$this->assertEquals( $base_slug . '-2', wc_get_product( $second_variation->get_id() )->get_slug() );
+	}
+
+	/**
 	 * Tests Product variation attribute_summary prop and its update on data store read.
 	 *
 	 * @since 3.6.0

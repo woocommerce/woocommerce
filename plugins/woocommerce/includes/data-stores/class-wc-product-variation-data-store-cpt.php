@@ -132,6 +132,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_parent_id( 0 );
 		}
 
+		if ( '' === $product->get_slug( 'edit' ) ) {
+			$product->set_slug( $this->generate_product_slug( $product ) );
+		}
+
 		$id = wp_insert_post(
 			apply_filters(
 				'woocommerce_new_product_variation_data',
@@ -316,6 +320,38 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$title_suffix              = $should_include_attributes ? wc_get_formatted_variation( $product, true, false ) : '';
 
 		return apply_filters( 'woocommerce_product_variation_title', $title_suffix ? $title_base . $separator . $title_suffix : $title_base, $product, $title_base, $title_suffix );
+	}
+
+	/**
+	 * Generates a stable slug for a new variation when no explicit slug is set.
+	 *
+	 * @since 11.0.0
+	 * @param WC_Product_Variation $product Product variation to generate a slug for.
+	 * @return string
+	 */
+	protected function generate_product_slug( $product ) {
+		$attributes = (array) $product->get_attributes();
+		ksort( $attributes );
+
+		$slug_parts = array(
+			'product',
+			'variation',
+			(string) $product->get_parent_id(),
+		);
+
+		foreach ( $attributes as $name => $value ) {
+			$slug_parts[] = $name;
+			$slug_parts[] = $value;
+		}
+
+		$slug_parts = array_filter(
+			array_map(
+				'sanitize_title',
+				$slug_parts
+			)
+		);
+
+		return implode( '-', $slug_parts );
 	}
 
 	/**
