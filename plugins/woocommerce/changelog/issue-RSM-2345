@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Clear store_stock push notification dedup meta when product stock recovers above its threshold so future downward crossings emit a fresh push.

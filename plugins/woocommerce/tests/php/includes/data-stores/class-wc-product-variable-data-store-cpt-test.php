@@ -783,4 +783,49 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		}
 		$product->delete();
 	}
+
+	/**
+	 * @testdox read_product_data does not record variable product transient names in the notoptions cache when a persistent object cache is in use.
+	 */
+	public function test_read_product_data_does_not_prime_transients_with_object_cache() {
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+
+		$option_names = array(
+			'_transient_wc_var_prices_' . $product_id,
+			'_transient_timeout_wc_var_prices_' . $product_id,
+			'_transient_wc_product_children_' . $product_id,
+			'_transient_timeout_wc_product_children_' . $product_id,
+		);
+
+		// Simulate a persistent object cache and start from a clean notoptions cache.
+		$previous = wp_using_ext_object_cache( true );
+
+		try {
+			wp_cache_delete( 'notoptions', 'options' );
+
+			// Force a fresh read so read_product_data() runs.
+			$data_store = new WC_Product_Variable_Data_Store_CPT();
+			$fresh      = new WC_Product_Variable();
+			$fresh->set_id( $product_id );
+			$data_store->read( $fresh );
+
+			$notoptions = wp_cache_get( 'notoptions', 'options' );
+		} finally {
+			// Always restore. Cast to bool because wp_using_ext_object_cache( null ) is a
+			// no-op, which would otherwise leak the simulated true state into later tests.
+			wp_using_ext_object_cache( (bool) $previous );
+		}
+
+		$notoptions = is_array( $notoptions ) ? $notoptions : array();
+		foreach ( $option_names as $option_name ) {
+			$this->assertArrayNotHasKey(
+				$option_name,
+				$notoptions,
+				'Variable product transient option names must not be added to notoptions when a persistent object cache is active.'
+			);
+		}
+
+		$product->delete();
+	}
 }

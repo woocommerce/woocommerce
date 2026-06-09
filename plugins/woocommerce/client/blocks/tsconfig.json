@@ -11,7 +11,8 @@
 		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/**/block.json",
 		"./storybook/**/*",
 		"./tests/integration/**/*",
-		"./tests/js/**/*"
+		"./tests/js/**/*",
+		"./tests/utils/**/*"
 	],
 	"exclude": [
 		"./storybook/build",
