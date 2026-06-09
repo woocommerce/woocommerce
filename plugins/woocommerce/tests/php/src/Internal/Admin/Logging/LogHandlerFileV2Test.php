@@ -263,37 +263,61 @@ MESSAGE;
 	}
 
 	/**
-	 * @testdox The CONTEXT portion of a log entry is valid JSON even when values contain backslashes.
+	 * Data provider for test_handle_context_is_valid_json.
+	 *
+	 * @return array
+	 */
+	public function provide_context_values(): array {
+		return array(
+			'namespaced class name' => array( array( 'class' => 'Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2' ) ),
+			'windows path'          => array( array( 'path' => 'C:\Windows\System32' ) ),
+			'double quotes'         => array( array( 'quote' => 'He said "hi" to "you"' ) ),
+			'newlines and tabs'     => array( array( 'multi' => "line1\nline2\ttab" ) ),
+			'multibyte characters'  => array( array( 'text' => '中文字 café 🎉' ) ),
+			'mixed scalar types'    => array(
+				array(
+					'i' => 7,
+					'f' => 3.14,
+					'b' => true,
+					'z' => null,
+				),
+			),
+			'combined'              => array(
+				array(
+					'class' => 'Automattic\WooCommerce\Foo',
+					'url'   => 'https://example.com/x',
+					'quote' => 'He said "hi"',
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox A log entry's CONTEXT is valid JSON that decodes back to the original context values.
+	 *
+	 * @dataProvider provide_context_values
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/62830
+	 *
+	 * @param array $context The context values to log, excluding the source.
 	 */
-	public function test_handle_context_is_valid_json_with_backslashes(): void {
+	public function test_handle_context_is_valid_json( array $context ): void {
 		$this->sut->handle(
 			time(),
 			'debug',
 			'Test log entry.',
-			array(
-				'source' => 'test',
-				'class'  => 'Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2',
-				'url'    => 'https://example.com/wp-content/uploads',
-			)
+			array_merge( array( 'source' => 'test' ), $context )
 		);
 
 		$paths = glob( Settings::get_log_directory() . '*.log' );
-		$this->assertCount( 1, $paths );
-
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$content     = file_get_contents( reset( $paths ) );
-		$delineator  = ' CONTEXT: ';
-		$json_string = trim( substr( $content, strpos( $content, $delineator ) + strlen( $delineator ) ) );
+		$content = file_get_contents( reset( $paths ) );
 
-		$decoded = json_decode( $json_string, true );
+		// The handler appends the context as JSON after " CONTEXT: ".
+		$json    = explode( ' CONTEXT: ', $content, 2 )[1];
+		$decoded = json_decode( trim( $json ), true );
 
-		$this->assertSame( JSON_ERROR_NONE, json_last_error(), 'The logged CONTEXT should be valid JSON.' );
-		$this->assertSame( 'Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2', $decoded['class'] );
-		$this->assertSame( 'https://example.com/wp-content/uploads', $decoded['url'] );
-		// Forward slashes should be left readable, not escaped as "\/".
-		$this->assertStringContainsString( 'https://example.com/wp-content/uploads', $json_string );
+		$this->assertSame( $context, $decoded );
 	}
 
 	/**
