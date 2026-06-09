@@ -34,7 +34,7 @@ class ProductMediaGalleryTest extends WC_Unit_Test_Case {
 	 * @testdox Should merge positioned videos into gallery images.
 	 */
 	public function test_merges_positioned_videos_into_gallery_images(): void {
-		$product = new WC_Product_Simple();
+		$product   = new WC_Product_Simple();
 		$image_ids = array(
 			$this->create_attachment( 'Image A', 'image/jpeg' ),
 			$this->create_attachment( 'Image B', 'image/jpeg' ),
@@ -100,7 +100,7 @@ class ProductMediaGalleryTest extends WC_Unit_Test_Case {
 	 * @testdox Should offset positioned videos when the product image is included.
 	 */
 	public function test_offsets_positioned_videos_when_product_image_is_included(): void {
-		$product = new WC_Product_Simple();
+		$product          = new WC_Product_Simple();
 		$product_image_id = $this->create_attachment( 'Product image', 'image/jpeg' );
 		$image_ids        = array(
 			$this->create_attachment( 'Image A', 'image/jpeg' ),
