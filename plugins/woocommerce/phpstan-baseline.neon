@@ -57424,12 +57424,6 @@ parameters:
 			path: src/Internal/Admin/Logging/PageController.php
 
 		-
-			message: '#^Parameter \#1 \$str of function stripslashes expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Logging/PageController.php
-
-		-
 			message: '#^Parameter \#1 \$var of function count expects array\|Countable, array\<Automattic\\WooCommerce\\Internal\\Admin\\Logging\\FileV2\\File\>\|WP_Error given\.$#'
 			identifier: argument.type
 			count: 1
