@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
+import { expect } from '@woocommerce/e2e-utils';
 import {
 	Admin as CoreAdmin,
 	PageUtils,
@@ -91,6 +92,6 @@ export class Admin extends CoreAdmin {
 			name: 'Save changes',
 		} );
 		await saveButton.click();
-		await saveButton.isDisabled();
+		await expect( saveButton ).toBeDisabled();
 	}
 }
