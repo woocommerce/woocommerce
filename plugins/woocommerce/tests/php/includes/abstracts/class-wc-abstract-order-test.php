@@ -622,9 +622,9 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox update_taxes persists cart and shipping tax totals as order tax items.
+	 * @testdox update_taxes persists cart and shipping tax totals as order tax items, and updates existing items in-place on a second call.
 	 */
-	public function test_update_taxes_persists_cart_and_shipping_tax_totals() {
+	public function test_update_taxes_persists_cart_and_shipping_tax_totals(): void {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
 		// German standard 19% non-compound VAT rate.
@@ -677,6 +677,28 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		// Order-level totals are rolled up from all tax items.
 		$this->assertSame( 1.00, (float) $order->get_cart_tax() );
 		$this->assertSame( 0.50, (float) $order->get_shipping_tax() );
+
+		// Second call: update line item taxes and verify existing tax item is updated in-place, not duplicated.
+		foreach ( $order->get_items() as $item ) {
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$item->set_taxes(
+					array(
+						'total'    => array( $tax_rate_id => '2.00' ),
+						'subtotal' => array( $tax_rate_id => '2.00' ),
+					)
+				);
+				$item->save();
+			}
+		}
+
+		$order->update_taxes();
+
+		$tax_items_after = $order->get_taxes();
+		$this->assertCount( 1, $tax_items_after, 'update_taxes() must update the existing tax item, not create a duplicate.' );
+
+		$tax_item_after = reset( $tax_items_after );
+		$this->assertSame( 2.00, (float) $tax_item_after->get_tax_total() );
+		$this->assertSame( 0.50, (float) $tax_item_after->get_shipping_tax_total() );
 	}
 
 	/**

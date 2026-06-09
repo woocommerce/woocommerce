@@ -253,7 +253,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox create_order_tax_lines sets rate_code, label, compound and rate_percent on order tax items.
 	 */
-	public function test_create_order_tax_lines_sets_correct_tax_item_props() {
+	public function test_create_order_tax_lines_sets_correct_tax_item_props(): void {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
 		// German standard 19% non-compound VAT rate.

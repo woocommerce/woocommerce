@@ -2090,9 +2090,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax->set_rate_percent( WC_Tax::get_rate_percent_value( $tax_rate_object_or_id ) );
 			$tax->set_tax_total( $cart_taxes[ $tax_rate_id ] ?? 0 );
 			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
-			$tax->save();
 
 			$saved_rate_ids[] = $tax_rate_id;
+			$tax->save();
 		}
 
 		$new_rate_ids = wp_parse_id_list( array_diff( array_keys( $cart_taxes + $shipping_taxes ), $saved_rate_ids ) );

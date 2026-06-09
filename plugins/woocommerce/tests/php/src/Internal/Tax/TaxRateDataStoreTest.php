@@ -27,7 +27,7 @@ class TaxRateDataStoreTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox get_rate_objects_for_ids() deduplicates mixed int/string IDs and returns a map keyed by int tax_rate_id.
 	 */
-	public function test_get_rate_objects_for_ids_deduplicates_mixed_types() {
+	public function test_get_rate_objects_for_ids(): void {
 		// Arrange.
 		$tax_rate    = array(
 			'tax_rate_country'  => 'DE',
@@ -43,7 +43,7 @@ class TaxRateDataStoreTest extends \WC_Unit_Test_Case {
 		$tax_rate_id = \WC_Tax::_insert_tax_rate( $tax_rate );
 
 		// Act.
-		$result = $this->sut->get_rate_objects_for_ids( array( $tax_rate_id, (string) $tax_rate_id ) );
+		$result = $this->sut->get_rate_objects_for_ids( array( $tax_rate_id, (string) $tax_rate_id, PHP_INT_MAX ) );
 
 		// Assert.
 		$this->assertCount( 1, $result );
