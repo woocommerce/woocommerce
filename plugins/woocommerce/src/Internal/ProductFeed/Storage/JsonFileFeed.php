@@ -314,8 +314,9 @@ class JsonFileFeed implements FeedInterface {
 	 * Ensures an existing feed directory allows file access while preventing directory listing.
 	 *
 	 * Installs created before file access was enabled have a `deny from all` .htaccess in this
-	 * directory, which blocks feed downloads. This refreshes that file in place, only rewriting it
-	 * when the contents differ to avoid needless writes.
+	 * directory, which blocks feed downloads. This replaces only that known legacy directive (or
+	 * recreates a missing file); any other content — the already-correct directive, or custom rules
+	 * a site or host may have added — is left untouched.
 	 *
 	 * Native file functions are used here (like the feed writes elsewhere in this class) rather
 	 * than WP_Filesystem: the directory is local, and routing through a possibly FTP/SSH-backed
@@ -327,18 +328,19 @@ class JsonFileFeed implements FeedInterface {
 	 * @return void
 	 */
 	private function ensure_feed_dir_file_access( string $directory_path ): void {
-		$htaccess_path   = $directory_path . '.htaccess';
-		$desired_content = FilesystemUtil::HTACCESS_ALLOW_FILE_ACCESS;
+		$htaccess_path = $directory_path . '.htaccess';
 
-		// Skip the write when the .htaccess already grants file access.
 		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 		$current_content = is_file( $htaccess_path ) ? trim( (string) @file_get_contents( $htaccess_path ) ) : '';
-		if ( $desired_content === $current_content ) {
+
+		// Only upgrade the known legacy `deny from all` directive or recreate a missing file.
+		// Leave anything else (already correct, or custom rules) untouched.
+		if ( '' !== $current_content && FilesystemUtil::HTACCESS_DENY_ALL !== $current_content ) {
 			return;
 		}
 
 		// Best effort: a failure here must never interrupt feed generation.
 		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-		@file_put_contents( $htaccess_path, $desired_content );
+		@file_put_contents( $htaccess_path, FilesystemUtil::HTACCESS_ALLOW_FILE_ACCESS );
 	}
 }

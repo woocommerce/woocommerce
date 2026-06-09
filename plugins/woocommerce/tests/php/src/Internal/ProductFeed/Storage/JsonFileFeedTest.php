@@ -248,6 +248,29 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave a custom .htaccess in the feed directory untouched.
+	 */
+	public function test_existing_feed_dir_custom_htaccess_is_preserved(): void {
+		// A site/host may have placed their own rules in the feed directory; only the known legacy
+		// `deny from all` should be upgraded, never custom content.
+		$directory      = wp_upload_dir()['basedir'] . '/product-feeds';
+		$custom_content = "# Custom rules\nHeader set X-Test 1";
+		wp_mkdir_p( $directory );
+		file_put_contents( $directory . '/.htaccess', $custom_content );
+
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->start();
+		$feed->end();
+		$feed->get_file_url();
+
+		$this->assertSame(
+			$custom_content,
+			file_get_contents( $directory . '/.htaccess' ),
+			'Custom .htaccess content must be preserved, not overwritten by the refresh.'
+		);
+	}
+
+	/**
 	 * Gets the directory for feed files, but also deletes it.
 	 *
 	 * @return string The directory path.
