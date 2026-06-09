@@ -233,7 +233,7 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	 * @testdox 'get_wp_filesystem_direct' returns an instance whose method is 'direct' when used to write to a known-writable temp dir.
 	 */
 	public function test_get_wp_filesystem_direct_writes_through_native_php(): void {
-		$dir  = sys_get_temp_dir() . '/wc-fsutil-write-' . wp_generate_uuid4();
+		$dir = sys_get_temp_dir() . '/wc-fsutil-write-' . wp_generate_uuid4();
 		wp_mkdir_p( $dir );
 		$this->temp_dirs[] = $dir;
 
