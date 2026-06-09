@@ -223,6 +223,40 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refresh the feed directory's .htaccess even when WP_Filesystem is unavailable.
+	 *
+	 * Guards the existing-install fix against re-introducing a WP_Filesystem dependency: on installs
+	 * with a broken (e.g. FTP) filesystem, the refresh must still run via native file functions.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_existing_feed_dir_htaccess_is_refreshed_without_wp_filesystem(): void {
+		$directory = wp_upload_dir()['basedir'] . '/product-feeds';
+		wp_mkdir_p( $directory );
+		file_put_contents( $directory . '/.htaccess', 'deny from all' );
+
+		// Force WP_Filesystem initialization to fail; the refresh must not depend on it.
+		$broken_method = fn() => 'this-method-does-not-exist';
+		add_filter( 'filesystem_method', $broken_method );
+
+		try {
+			$feed = new JsonFileFeed( 'test-feed' );
+			$feed->start();
+			$feed->end();
+			$feed->get_file_url();
+
+			$this->assertSame(
+				'Options -Indexes',
+				trim( (string) file_get_contents( $directory . '/.htaccess' ) ),
+				'The .htaccess refresh must succeed without a usable WP_Filesystem.'
+			);
+		} finally {
+			remove_filter( 'filesystem_method', $broken_method );
+		}
+	}
+
+	/**
 	 * Gets the directory for feed files, but also deletes it.
 	 *
 	 * @return string The directory path.

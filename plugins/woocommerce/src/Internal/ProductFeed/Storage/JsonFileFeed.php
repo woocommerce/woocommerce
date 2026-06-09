@@ -308,9 +308,14 @@ class JsonFileFeed implements FeedInterface {
 	 * Ensures an existing feed directory allows file access while preventing directory listing.
 	 *
 	 * Installs created before file access was enabled have a `deny from all` .htaccess in this
-	 * directory, which blocks feed downloads. This refreshes that file in place on a best-effort
-	 * basis: any failure is swallowed so it can never interrupt feed generation, and the file is
-	 * only rewritten when its contents differ, to avoid needless writes.
+	 * directory, which blocks feed downloads. This refreshes that file in place, only rewriting it
+	 * when the contents differ to avoid needless writes.
+	 *
+	 * Native file functions are used here (like the feed writes elsewhere in this class) rather
+	 * than WP_Filesystem: the directory is local, and routing through a possibly FTP/SSH-backed
+	 * filesystem could fail to initialize and leave the old `deny from all` in place even though
+	 * the feed file itself was written natively. Failures are ignored so this can never interrupt
+	 * feed generation.
 	 *
 	 * @param string $directory_path The feed directory path (trailing-slashed).
 	 * @return void
@@ -319,19 +324,15 @@ class JsonFileFeed implements FeedInterface {
 		$htaccess_path   = $directory_path . '.htaccess';
 		$desired_content = FilesystemUtil::HTACCESS_ALLOW_FILE_ACCESS;
 
-		try {
-			$wp_fs = FilesystemUtil::get_wp_filesystem();
-		} catch ( Exception $e ) {
-			// Filesystem unavailable; leave the directory untouched.
-			return;
-		}
-
 		// Skip the write when the .htaccess already grants file access.
-		$current_content = $wp_fs->exists( $htaccess_path ) ? trim( (string) $wp_fs->get_contents( $htaccess_path ) ) : '';
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		$current_content = is_file( $htaccess_path ) ? trim( (string) @file_get_contents( $htaccess_path ) ) : '';
 		if ( $desired_content === $current_content ) {
 			return;
 		}
 
-		$wp_fs->put_contents( $htaccess_path, $desired_content );
+		// Best effort: a failure here must never interrupt feed generation.
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		@file_put_contents( $htaccess_path, $desired_content );
 	}
 }
