@@ -83,6 +83,13 @@ class JsonFileFeed implements FeedInterface {
 	private $is_temp_filepath = false;
 
 	/**
+	 * Cached upload directory details (path and URL), resolved once per feed instance.
+	 *
+	 * @var array|null
+	 */
+	private $prepared_upload_dir = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $base_name The base name of the feed file.
@@ -262,10 +269,9 @@ class JsonFileFeed implements FeedInterface {
 	 * @throws Exception If the upload directory cannot be created.
 	 */
 	private function get_upload_dir(): array {
-		// Only generate everything once.
-		static $prepared;
-		if ( isset( $prepared ) ) {
-			return $prepared;
+		// Resolve once per feed instance.
+		if ( null !== $this->prepared_upload_dir ) {
+			return $this->prepared_upload_dir;
 		}
 
 		$upload_dir     = wp_upload_dir( null, true );
@@ -297,11 +303,11 @@ class JsonFileFeed implements FeedInterface {
 		$directory_url = $upload_dir['baseurl'] . '/' . self::UPLOAD_DIR . '/';
 
 		// Follow the format, returned by `wp_upload_dir()`.
-		$prepared = array(
+		$this->prepared_upload_dir = array(
 			'path' => $directory_path,
 			'url'  => $directory_url,
 		);
-		return $prepared;
+		return $this->prepared_upload_dir;
 	}
 
 	/**

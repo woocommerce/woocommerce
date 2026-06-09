@@ -194,12 +194,6 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should refresh an existing feed directory's .htaccess to allow file access.
-	 *
-	 * Runs in a separate process so the per-process `static` cache in get_upload_dir() starts
-	 * cold; otherwise an earlier test could cache the directory and skip the refresh path.
-	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
 	 */
 	public function test_existing_feed_dir_htaccess_is_refreshed_for_file_access(): void {
 		// Simulate an install created before file access was enabled: the directory already
@@ -227,9 +221,6 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	 *
 	 * Guards the existing-install fix against re-introducing a WP_Filesystem dependency: on installs
 	 * with a broken (e.g. FTP) filesystem, the refresh must still run via native file functions.
-	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
 	 */
 	public function test_existing_feed_dir_htaccess_is_refreshed_without_wp_filesystem(): void {
 		$directory = wp_upload_dir()['basedir'] . '/product-feeds';
