@@ -40,7 +40,7 @@ const entries = {
 	...styleEntries,
 	...editorStyleEntries,
 
-	// Mini cart frontend modules powered by the Interactivity API.
+	// Mini-Cart frontend modules powered by the Interactivity API.
 	'woocommerce/mini-cart': './assets/js/blocks/mini-cart/iapi-frontend.ts',
 
 	// Product elements frontend module. Share by several blocks.
