@@ -34,7 +34,9 @@ const PageSelector = ( { setPageId, pageId, labels } ) => {
 			>
 				<ToolsPanelItem
 					label={ __( 'Link to', 'woocommerce' ) }
-					hasValue={ () => pageId !== 0 }
+					hasValue={ () =>
+						typeof pageId === 'number' && pageId !== 0
+					}
 					onDeselect={ () => setPageId( 0 ) }
 					isShownByDefault
 				>
