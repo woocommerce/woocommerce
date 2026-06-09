@@ -45,7 +45,6 @@ class WC_Meta_Box_Product_Images {
 						array(
 							'context'               => 'edit',
 							'include_product_image' => false,
-							'validate_attachments'  => true,
 						)
 					)
 					: ProductMediaGallery::get_product_image_media_items( $product_object, false, 'edit' );
@@ -180,9 +179,7 @@ class WC_Meta_Box_Product_Images {
 		if ( isset( $_POST['product_media_gallery'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$posted_media_gallery = wc_clean( wp_unslash( $_POST['product_media_gallery'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$media_gallery        = ProductMediaGallery::normalize_media_gallery_items(
-				self::decode_media_gallery_json( $posted_media_gallery ),
-				true,
-				false
+				self::decode_media_gallery_json( $posted_media_gallery )
 			);
 			$attachment_ids       = ProductMediaGallery::get_image_ids( $media_gallery );
 		}
@@ -192,7 +189,7 @@ class WC_Meta_Box_Product_Images {
 
 		ProductMediaGallery::set_stored_video_gallery_items(
 			$product,
-			ProductMediaGallery::get_video_gallery_items_from_media_gallery( $media_gallery )
+			ProductMediaGallery::get_positioned_video_gallery_items_from_media_gallery( $media_gallery )
 		);
 	}
 
