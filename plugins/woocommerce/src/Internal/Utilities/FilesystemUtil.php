@@ -60,7 +60,7 @@ class FilesystemUtil {
 	 * fail on misconfigured FS_METHOD setups, but at least the operation gets
 	 * a chance to succeed instead of immediately fataling on a missing class.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 *
 	 * @return WP_Filesystem_Base Normally a WP_Filesystem_Direct instance.
 	 * @throws Exception If both the direct class and the configured FS_METHOD
@@ -91,7 +91,7 @@ class FilesystemUtil {
 		_doing_it_wrong(
 			__METHOD__,
 			esc_html__( 'WP_Filesystem_Direct could not be loaded. Falling back to the configured FS_METHOD; operations on the uploads directory may fail if FS_METHOD is misconfigured.', 'woocommerce' ),
-			'10.9.0'
+			'11.0.0'
 		);
 
 		$cached_filesystem = self::get_wp_filesystem();
