@@ -13,6 +13,24 @@ use WC_Unit_Test_Case;
 class ProductMediaGalleryTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Enable the product gallery videos feature.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
+	}
+
+	/**
+	 * Clean up feature option state.
+	 */
+	public function tearDown(): void {
+		delete_option( ProductMediaGallery::ENABLE_OPTION_NAME );
+
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox Should merge positioned videos into gallery images.
 	 */
 	public function test_merges_positioned_videos_into_gallery_images(): void {
@@ -35,7 +53,6 @@ class ProductMediaGalleryTest extends WC_Unit_Test_Case {
 		$media_items = ProductMediaGallery::get_product_media_gallery_items(
 			$product,
 			array(
-				'feature_enabled'       => true,
 				'include_product_image' => false,
 				'resolve_video_posters' => false,
 			)
@@ -93,7 +110,6 @@ class ProductMediaGalleryTest extends WC_Unit_Test_Case {
 		$media_items = ProductMediaGallery::get_product_media_gallery_items(
 			$product,
 			array(
-				'feature_enabled'       => true,
 				'include_product_image' => true,
 				'resolve_video_posters' => false,
 			)

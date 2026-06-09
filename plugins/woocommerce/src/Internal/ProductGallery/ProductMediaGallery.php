@@ -57,7 +57,6 @@ class ProductMediaGallery {
 				'context'               => 'view',
 				'include_product_image' => true,
 				'include_placeholder'   => false,
-				'feature_enabled'       => self::is_feature_enabled(),
 				'validate_attachments'  => false,
 				'preserve_video_data'   => false,
 				'resolve_video_posters' => true,
@@ -69,7 +68,7 @@ class ProductMediaGallery {
 		$include_product_image = (bool) $args['include_product_image'];
 		$media_items           = self::get_product_image_media_items( $product, $include_product_image, $context );
 
-		if ( $args['feature_enabled'] ) {
+		if ( self::is_feature_enabled() ) {
 			$video_gallery = self::normalize_video_gallery_items(
 				self::get_stored_video_gallery_items( $product ),
 				(bool) $args['validate_attachments'],
