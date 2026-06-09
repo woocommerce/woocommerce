@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Register the settings UI SDK package with dependency extraction.

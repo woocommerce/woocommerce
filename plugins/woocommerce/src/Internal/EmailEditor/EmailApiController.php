@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\EmailEditor;
 use Automattic\WooCommerce\EmailEditor\Validator\Builder;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateChangeSummary;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateAutoApplier;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSelectiveApplier;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
 use WC_Email;
@@ -327,6 +328,59 @@ class EmailApiController {
 				'schema'              => array( $this, 'get_change_summary_schema' ),
 			)
 		);
+
+		register_rest_route(
+			'woocommerce-email-editor/v1',
+			'/emails/(?P<id>\d+)/apply',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'apply_response' ),
+				'permission_callback' => function () {
+					return current_user_can( 'manage_woocommerce' );
+				},
+				'args'                => array(
+					'id'      => array(
+						'description'       => __( 'The ID of the woo_email post.', 'woocommerce' ),
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+					'choices' => array(
+						'description' => __( 'Per-conflict apply decisions: an array of {path, decision} entries. `decision` is `keep_yours` or `use_core`.', 'woocommerce' ),
+						'type'        => 'array',
+						'required'    => false,
+						'default'     => array(),
+					),
+				),
+				'schema'              => array( $this, 'get_apply_schema' ),
+			)
+		);
+
+		register_rest_route(
+			'woocommerce-email-editor/v1',
+			'/emails/(?P<id>\d+)/undo',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'undo_response' ),
+				'permission_callback' => function () {
+					return current_user_can( 'manage_woocommerce' );
+				},
+				'args'                => array(
+					'id'          => array(
+						'description'       => __( 'The ID of the woo_email post.', 'woocommerce' ),
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+					'revision_id' => array(
+						'description' => __( 'The revision_id returned by the prior /apply call.', 'woocommerce' ),
+						'type'        => 'string',
+						'required'    => true,
+					),
+				),
+				'schema'              => array( $this, 'get_undo_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -643,5 +697,174 @@ class EmailApiController {
 			WCEmailTemplateChangeSummary::summarize( $post_id ),
 			200
 		);
+	}
+
+	/**
+	 * Get the schema for the apply endpoint response.
+	 *
+	 * @return array
+	 */
+	public function get_apply_schema(): array {
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'woo_email_apply',
+			'type'       => 'object',
+			'properties' => array(
+				'merged_content'     => array(
+					'description' => __( 'The merged block content written to the post. May differ from the input `post_content` even when every choice was `keep_yours` — the namespace-alias migration (see `aliases_migrated`) rewrites legacy block names unconditionally.', 'woocommerce' ),
+					'type'        => 'string',
+					'readonly'    => true,
+				),
+				'revision_id'        => array(
+					'description' => __( 'A UUID identifying the pre-apply snapshot. Use as the revision_id on a subsequent /undo call.', 'woocommerce' ),
+					'type'        => 'string',
+					'readonly'    => true,
+				),
+				'version_to'         => array(
+					'description' => __( 'The core template version stamped on the post after applying.', 'woocommerce' ),
+					'type'        => 'string',
+					'readonly'    => true,
+				),
+				'status'             => array(
+					'description' => __( 'The post-apply status (always `applied` on success).', 'woocommerce' ),
+					'type'        => 'string',
+					'readonly'    => true,
+				),
+				'structural_skipped' => array(
+					'description' => __( 'True when one or more structural deltas (nest / reorder) existed in the diff but were not applied. v1 punts structural changes; the merchant\'s structure is preserved.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'readonly'    => true,
+				),
+				'aliases_migrated'   => array(
+					'description' => __( 'List of deprecated block-name aliases rewritten to their canonical form during the apply (e.g. `["woo/email-content"]`). Empty when no migration was needed. Targeted to known deprecated aliases only.', 'woocommerce' ),
+					'type'        => 'array',
+					'items'       => array( 'type' => 'string' ),
+					'readonly'    => true,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Get the schema for the undo endpoint response.
+	 *
+	 * @return array
+	 */
+	public function get_undo_schema(): array {
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'woo_email_undo',
+			'type'       => 'object',
+			'properties' => array(
+				'restored_content' => array(
+					'description' => __( 'The pre-apply post content that was restored.', 'woocommerce' ),
+					'type'        => 'string',
+					'readonly'    => true,
+				),
+				'status'           => array(
+					'description' => __( 'The post-undo status (always `restored` on success).', 'woocommerce' ),
+					'type'        => 'string',
+					'readonly'    => true,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Apply a partial set of core template changes to a `woo_email` post,
+	 * driven by per-conflict merchant choices. Thin wrapper over
+	 * {@see WCEmailTemplateSelectiveApplier::apply_selectively()}.
+	 *
+	 * The 404 path mirrors {@see self::get_change_summary_response()} — when
+	 * the email type cannot be resolved from the post ID, the post is either
+	 * non-existent or not a `woo_email`. 422 fires when the change-summary
+	 * has no actionable diff (e.g. post outside the sync registry, or the
+	 * inversion guard tripped).
+	 *
+	 * @param WP_REST_Request $request The REST request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return WP_REST_Response|WP_Error
+	 *
+	 * @since 10.9.0
+	 */
+	public function apply_response( WP_REST_Request $request ) {
+		if ( ! ( $this->post_manager && $this->posts_generator ) ) {
+			return new WP_Error(
+				'woocommerce_email_editor_not_initialized',
+				__( 'Email editor is not initialized.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$post_id    = (int) $request->get_param( 'id' );
+		$email_type = $this->post_manager->get_email_type_from_post_id( $post_id );
+		$email      = $this->get_email_by_type( $email_type ?? '' );
+
+		if ( ! $email ) {
+			return new WP_Error(
+				'woocommerce_email_not_found',
+				__( 'No email found for the given post ID.', 'woocommerce' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$choices = $request->get_param( 'choices' );
+		if ( ! is_array( $choices ) ) {
+			$choices = array();
+		}
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, $choices );
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Restore the pre-apply snapshot for a `woo_email` post. Thin wrapper
+	 * over {@see WCEmailTemplateSelectiveApplier::undo()}.
+	 *
+	 * Returns 410 Gone when no snapshot exists for the given post or when
+	 * the supplied `revision_id` doesn't match the latest snapshot —
+	 * matches the design's single-step undo model.
+	 *
+	 * @param WP_REST_Request $request The REST request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return WP_REST_Response|WP_Error
+	 *
+	 * @since 10.9.0
+	 */
+	public function undo_response( WP_REST_Request $request ) {
+		if ( ! ( $this->post_manager && $this->posts_generator ) ) {
+			return new WP_Error(
+				'woocommerce_email_editor_not_initialized',
+				__( 'Email editor is not initialized.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$post_id    = (int) $request->get_param( 'id' );
+		$email_type = $this->post_manager->get_email_type_from_post_id( $post_id );
+		$email      = $this->get_email_by_type( $email_type ?? '' );
+
+		if ( ! $email ) {
+			return new WP_Error(
+				'woocommerce_email_not_found',
+				__( 'No email found for the given post ID.', 'woocommerce' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$revision_id = (string) $request->get_param( 'revision_id' );
+
+		$result = WCEmailTemplateSelectiveApplier::undo( $post_id, $revision_id );
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return new WP_REST_Response( $result, 200 );
 	}
 }

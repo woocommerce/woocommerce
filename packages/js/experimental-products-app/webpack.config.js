@@ -12,7 +12,7 @@ const {
 	plugin,
 	StyleAssetPlugin,
 	WebpackRTLPlugin
-} = require( '@woocommerce/internal-style-build' );
+} = require( '@woocommerce/internal-build/style-build' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -24,6 +24,13 @@ module.exports = {
 			__dirname,
 			'node_modules/.cache/webpack'
 		),
+		buildDependencies: {
+			config: [
+				__filename,
+				path.resolve( __dirname, '../../../pnpm-lock.yaml' ),
+				require.resolve( '@woocommerce/internal-build/style-build' ),
+			],
+		},
 	},
 	entry: {
 		'build-style': __dirname + '/src/style.scss',

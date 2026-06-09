@@ -14,7 +14,6 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
-use Automattic\WooCommerce\Internal\Caches\StaleObjectAttribution;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
 
@@ -34,7 +33,6 @@ require_once WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-product.php';
  */
 class WC_Product extends WC_Abstract_Legacy_Product {
 	use CogsAwareTrait;
-	use StaleObjectAttribution;
 
 	/**
 	 * This is the name of this object type.
@@ -148,8 +146,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
-
-		$this->_woocommerce_object_instantiated();
 	}
 
 	/**
@@ -893,7 +889,18 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return void
 	 */
 	public function set_global_unique_id( $global_unique_id ) {
-		$global_unique_id = preg_replace( '/[^0-9\-]/', '', (string) $global_unique_id );
+		// Strip characters that are never valid (digits, hyphens, and X/x for the ISBN-10 check digit).
+		$global_unique_id = preg_replace( '/[^0-9Xx\-]/', '', (string) $global_unique_id );
+
+		// X is only valid as the final ISBN-10 check digit character (ISO 2108) — reject anywhere else.
+		if ( $this->get_object_read() && ! empty( $global_unique_id ) && ! preg_match( '/^[0-9\-]*[0-9Xx]?$/', $global_unique_id ) ) {
+			$this->error(
+				'product_invalid_global_unique_id_format',
+				__( 'Invalid GTIN, UPC, EAN, or ISBN. The letter X is only valid as the final ISBN-10 check digit.', 'woocommerce' ),
+				400
+			);
+		}
+
 		if ( $this->get_object_read() && ! empty( $global_unique_id ) && ! wc_product_has_global_unique_id( $this->get_id(), $global_unique_id ) ) {
 			$global_unique_id_found = wc_get_product_id_by_global_unique_id( $global_unique_id );
 
@@ -1516,7 +1523,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			return;
 		}
 
-		$stock_is_above_notification_threshold = ( (int) $this->get_stock_quantity() > absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) ) );
+		$stock_is_above_notification_threshold = ( (float) $this->get_stock_quantity() > abs( (float) get_option( 'woocommerce_notify_no_stock_amount', 0 ) ) );
 		$backorders_are_allowed                = ( 'no' !== $this->get_backorders() );
 
 		if ( $stock_is_above_notification_threshold ) {

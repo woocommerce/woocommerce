@@ -34,6 +34,7 @@ jest.mock( '@woocommerce/admin-layout', () => {
 
 describe( 'WooCommerceShippingItem', () => {
 	const defaultProps = {
+		isPluginActive: false,
 		pluginsBeingSetup: [] as string[],
 		onInstallClick: jest.fn( () => Promise.resolve() ),
 		onActivateClick: jest.fn( () => Promise.resolve() ),
@@ -79,11 +80,33 @@ describe( 'WooCommerceShippingItem', () => {
 		).toBeInTheDocument();
 	} );
 
+	it( 'should render an "Active" pill instead of a CTA button when WC Shipping is active', () => {
+		render(
+			<WooCommerceShippingItem
+				{ ...defaultProps }
+				isPluginInstalled={ true }
+				isPluginActive={ true }
+			/>
+		);
+
+		expect(
+			screen.queryByText( 'WooCommerce Shipping' )
+		).toBeInTheDocument();
+		expect( screen.queryByText( 'Active' ) ).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Install' } )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Activate' } )
+		).not.toBeInTheDocument();
+	} );
+
 	it( 'should call onInstallClick when clicking Install button', () => {
 		const onInstallClick = jest.fn( () => Promise.resolve() );
 		render(
 			<WooCommerceShippingItem
 				isPluginInstalled={ false }
+				isPluginActive={ false }
 				pluginsBeingSetup={ [] }
 				onInstallClick={ onInstallClick }
 				onActivateClick={ jest.fn( () => Promise.resolve() ) }
@@ -181,6 +204,7 @@ describe( 'WooCommerceShippingItem', () => {
 		render(
 			<WooCommerceShippingItem
 				isPluginInstalled={ true }
+				isPluginActive={ false }
 				pluginsBeingSetup={ [] }
 				onInstallClick={ jest.fn( () => Promise.resolve() ) }
 				onActivateClick={ onActivateClick }

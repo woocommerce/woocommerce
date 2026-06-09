@@ -132,7 +132,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * Finally, record the date of payment.
 	 *
 	 * @param string $transaction_id Optional transaction id to store in post meta.
-	 * @return bool True on success, false if order missing or blocked for lack of checkout evidence.
+	 * @return bool success
 	 */
 	public function payment_complete( $transaction_id = '' ) {
 		if ( ! $this->get_id() ) { // Order must exist.
@@ -140,84 +140,6 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		try {
-			// Validate before pre_payment_complete so blocked orders do not trigger side effects.
-			$created_via           = $this->get_created_via();
-			$cart_hash             = $this->get_cart_hash();
-			$has_checkout_evidence = false;
-
-			/**
-			 * Allowed created_via values for checkout evidence.
-			 *
-			 * @param array    $allowed_created_via_values Allowed created_via values.
-			 * @param WC_Order $order                     Order object.
-			 * @since 10.8.0
-			 */
-			$allowed_created_via_values = apply_filters( 'woocommerce_payment_complete_allowed_created_via_values', array( 'checkout', 'store-api', 'rest-api', 'admin', 'pos-rest-api' ), $this );
-
-			if ( ! empty( $created_via ) && in_array( $created_via, $allowed_created_via_values, true ) ) {
-				$has_checkout_evidence = true;
-			}
-
-			if ( ! empty( $cart_hash ) ) {
-				$has_checkout_evidence = true;
-			}
-
-			if ( ! $has_checkout_evidence ) {
-				/**
-				 * Allow payment completion without checkout evidence.
-				 *
-				 * @param bool     $allow_payment_complete Whether to allow.
-				 * @param WC_Order $order                  Order object.
-				 * @param string   $transaction_id         Transaction ID.
-				 * @since 10.8.0
-				 */
-				$allow_without_checkout_evidence = apply_filters( 'woocommerce_allow_payment_complete_without_checkout_evidence', false, $this, $transaction_id );
-
-				if ( ! $allow_without_checkout_evidence ) {
-					$logger = wc_get_logger();
-					$logger->error(
-						sprintf(
-							'Payment completion blocked for order #%d: Order lacks checkout session evidence (created_via: %s, cart_hash: empty)',
-							$this->get_id(),
-							$created_via ? $created_via : 'empty'
-						),
-						array(
-							'order_id'       => $this->get_id(),
-							'created_via'    => $created_via,
-							'cart_hash'      => 'empty',
-							'payment_method' => $this->get_payment_method(),
-						)
-					);
-					/* translators: %s: created_via value set on the order */
-					$created_via_message = empty( $created_via ) ? __( 'No created_via reference', 'woocommerce' ) : sprintf( __( 'Unexpected created_via value: %s', 'woocommerce' ), esc_html( $created_via ) );
-					$cart_hash_message   = __( 'No cart_hash', 'woocommerce' ); // Always empty inside this guard.
-
-					$this->add_order_note(
-						sprintf(
-							/* translators: %1$s: created_via message, %2$s: cart_hash message */
-							__( 'Payment completion blocked: Order lacks checkout session evidence (%1$s, %2$s).', 'woocommerce' ),
-							$created_via_message,
-							$cart_hash_message
-						),
-						0,
-						false,
-						array( 'note_group' => OrderNoteGroup::ERROR )
-					);
-
-					/**
-					 * Fires when payment completion is blocked due to missing checkout evidence.
-					 *
-					 * @param int    $order_id    Order ID.
-					 * @param string $created_via The order's created_via value.
-					 * @param string $cart_hash   The order's cart_hash value.
-					 * @since 10.8.0
-					 */
-					do_action( 'woocommerce_payment_complete_blocked', $this->get_id(), $created_via, $cart_hash );
-
-					return false;
-				}
-			}
-
 			do_action( 'woocommerce_pre_payment_complete', $this->get_id(), $transaction_id );
 
 			if ( WC()->session ) {
@@ -306,11 +228,11 @@ class WC_Order extends WC_Abstract_Order {
 
 			if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) {
 				foreach ( $tax_totals as $code => $tax ) {
-					$tax_amount         = ( $total_refunded && $display_refunded ) ? wc_price( WC_Tax::round( $tax->amount - $this->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ), array( 'currency' => $this->get_currency() ) ) : $tax->formatted_amount;
+					$tax_amount         = ( $total_refunded && $display_refunded ) ? wc_price( WC_Tax::round( (float) $tax->amount - (float) $this->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ), array( 'currency' => $this->get_currency() ) ) : $tax->formatted_amount;
 					$tax_string_array[] = sprintf( '%s %s', $tax_amount, $tax->label );
 				}
 			} elseif ( ! empty( $tax_totals ) ) {
-				$tax_amount         = ( $total_refunded && $display_refunded ) ? $this->get_total_tax() - $this->get_total_tax_refunded() : $this->get_total_tax();
+				$tax_amount         = ( $total_refunded && $display_refunded ) ? (float) $this->get_total_tax() - (float) $this->get_total_tax_refunded() : $this->get_total_tax();
 				$tax_string_array[] = sprintf( '%s %s', wc_price( $tax_amount, array( 'currency' => $this->get_currency() ) ), WC()->countries->tax_or_vat() );
 			}
 
@@ -321,7 +243,7 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		if ( $total_refunded && $display_refunded ) {
-			$formatted_total = '<del aria-hidden="true">' . wp_strip_all_tags( $formatted_total ) . '</del> <ins>' . wc_price( $order_total - $total_refunded, array( 'currency' => $this->get_currency() ) ) . $tax_string . '</ins>';
+			$formatted_total = '<del aria-hidden="true">' . wp_strip_all_tags( $formatted_total ) . '</del> <ins>' . wc_price( (float) $order_total - (float) $total_refunded, array( 'currency' => $this->get_currency() ) ) . $tax_string . '</ins>';
 		} else {
 			$formatted_total .= $tax_string;
 		}
@@ -2283,18 +2205,36 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return WC_Order_Refund[]
 	 */
 	public function get_refunds() {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $this->get_id();
-		$refunds   = wp_cache_get( $cache_key, $this->cache_group );
+		$cache_key  = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $this->get_id();
+		$refund_ids = wp_cache_get( $cache_key, $this->cache_group );
 
-		if ( false === $refunds ) {
-			$refunds = wc_get_orders(
+		if ( false === $refund_ids ) {
+			$refunds    = (array) wc_get_orders(
 				array(
 					'type'   => 'shop_order_refund',
 					'parent' => $this->get_id(),
 					'limit'  => -1,
 				)
 			);
-			wp_cache_set( $cache_key, $refunds, $this->cache_group );
+			$refund_ids = array();
+			foreach ( $refunds as $refund ) {
+				if ( $refund instanceof WC_Order_Refund ) {
+					$refund_ids[] = $refund->get_id();
+				}
+			}
+			wp_cache_set( $cache_key, $refund_ids, $this->cache_group );
+		} else {
+			$refunds = ! empty( $refund_ids )
+				? wc_get_orders(
+					array(
+						'type'          => 'shop_order_refund',
+						'post__in'      => $refund_ids,
+						'orderby'       => 'post__in',
+						'limit'         => -1,
+						'no_found_rows' => true,
+					)
+				)
+				: array();
 		}
 
 		$this->refunds = array();
@@ -2550,7 +2490,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_remaining_refund_amount() {
-		return wc_format_decimal( $this->get_total() - $this->get_total_refunded(), wc_get_price_decimals() );
+		return wc_format_decimal( (float) $this->get_total() - (float) $this->get_total_refunded(), wc_get_price_decimals() );
 	}
 
 	/**
@@ -2559,7 +2499,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_remaining_refund_items() {
-		return absint( $this->get_item_count() - $this->get_item_count_refunded() );
+		return absint( (int) $this->get_item_count() - (int) $this->get_item_count_refunded() );
 	}
 
 	/**

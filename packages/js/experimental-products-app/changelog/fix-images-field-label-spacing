@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Align the gap between the Images field label and its upload area with other form fields
