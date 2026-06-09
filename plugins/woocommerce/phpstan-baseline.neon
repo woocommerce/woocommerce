@@ -49906,12 +49906,6 @@ parameters:
 			path: src/Blocks/AssetsController.php
 
 		-
-			message: '#^Parameter \#1 \$src of method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:get_absolute_url\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/AssetsController.php
-
-		-
 			message: '#^Parameter \#1 \$text of function esc_js expects string, int\<1, max\> given\.$#'
 			identifier: argument.type
 			count: 1
