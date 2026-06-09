@@ -95,7 +95,7 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 		}
 		$path = tempnam( $dir, 'fsutil_' );
 		if ( false === $path ) {
-			throw new \RuntimeException( "Could not create a temp file in {$dir}." );
+			throw new \RuntimeException( esc_html( "Could not create a temp file in {$dir}." ) );
 		}
 		$this->temp_files[] = $path;
 		return $path;
