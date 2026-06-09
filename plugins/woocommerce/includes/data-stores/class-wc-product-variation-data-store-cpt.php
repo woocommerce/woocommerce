@@ -133,7 +133,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		if ( '' === $product->get_slug( 'edit' ) ) {
-			$product->set_slug( $this->generate_product_slug( $product ) );
+			$product->set_slug( $this->generate_product_variation_slug( $product ) );
 		}
 
 		$id = wp_insert_post(
@@ -329,7 +329,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @param WC_Product_Variation $product Product variation to generate a slug for.
 	 * @return string
 	 */
-	protected function generate_product_slug( $product ) {
+	protected function generate_product_variation_slug( $product ) {
 		$attributes = (array) $product->get_attributes();
 		ksort( $attributes );
 

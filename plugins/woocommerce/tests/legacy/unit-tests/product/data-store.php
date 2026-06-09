@@ -690,7 +690,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	/**
 	 * Tests automatic generation of variation slug.
 	 */
-	public function test_generate_product_slug() {
+	public function test_generate_product_variation_slug() {
 		$product = new WC_Product();
 		$product->set_name( 'Test Product' );
 		$product->save();
@@ -712,7 +712,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	/**
 	 * Tests that automatic variation slug generation preserves explicit slugs.
 	 */
-	public function test_generate_product_slug_preserves_explicit_slug() {
+	public function test_generate_product_variation_slug_preserves_explicit_slug() {
 		$product = new WC_Product();
 		$product->set_name( 'Test Product' );
 		$product->save();
@@ -730,7 +730,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	/**
 	 * Tests that automatic variation slug generation still uses WordPress uniqueness handling.
 	 */
-	public function test_generate_product_slug_preserves_wordpress_collision_handling() {
+	public function test_generate_product_variation_slug_preserves_wordpress_collision_handling() {
 		$product = new WC_Product();
 		$product->set_name( 'Test Product' );
 		$product->save();
