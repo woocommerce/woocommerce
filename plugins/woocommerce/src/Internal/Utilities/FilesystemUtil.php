@@ -82,6 +82,18 @@ class FilesystemUtil {
 
 		if ( class_exists( 'WP_Filesystem_Direct' ) ) {
 			try {
+				// WP_Filesystem_Direct::chmod()/put_contents() fall back to the
+				// FS_CHMOD_* constants when no explicit mode is passed. Core only
+				// defines them inside WP_Filesystem(), which we deliberately skip,
+				// so define them here (mirroring core) to avoid an undefined
+				// constant fatal when those defaults are used.
+				if ( ! defined( 'FS_CHMOD_DIR' ) ) {
+					define( 'FS_CHMOD_DIR', ( fileperms( ABSPATH ) & 0777 | 0755 ) );
+				}
+				if ( ! defined( 'FS_CHMOD_FILE' ) ) {
+					define( 'FS_CHMOD_FILE', ( fileperms( ABSPATH . 'index.php' ) & 0777 | 0644 ) );
+				}
+
 				$cached_filesystem = new WP_Filesystem_Direct( null );
 				return $cached_filesystem;
 			} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- Fall through to the fallback below.
