@@ -36526,12 +36526,6 @@ parameters:
 			path: includes/wc-user-functions.php
 
 		-
-			message: '#^Parameter \#1 \$object_or_class of function property_exists expects object\|string, WP_User\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
 			message: '#^Parameter \#1 \$user of function user_can expects int\|WP_User, WP_User\|false given\.$#'
 			identifier: argument.type
 			count: 2
@@ -54921,23 +54915,6 @@ parameters:
 			count: 1
 			path: src/Blocks/QueryFilters.php
 
-		-
-			message: '#^Parameter \#1 \$input_list of function wp_list_pluck expects array, array\<int, WP_Term\>\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/QueryFilters.php
-
-		-
-			message: '#^Parameter \#2 \$str of function explode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/QueryFilters.php
-
-		-
-			message: '#^Variable \$chosen_attributes in empty\(\) always exists and is not falsy\.$#'
-			identifier: empty.variable
-			count: 1
-			path: src/Blocks/QueryFilters.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Registry\\Container\:\:register\(\) has no return type specified\.$#'
