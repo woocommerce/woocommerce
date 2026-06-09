@@ -89,8 +89,15 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						continue;
 					}
 					// Performance note: at this stage, the product factory has already primed the caches, so wc_get_object_terms does not present a concern.
-					$id      = wc_attribute_taxonomy_id_by_name( $meta_value['name'] );
-					$options = wc_get_object_terms( $product_id, $meta_value['name'], 'term_id' );
+					$id       = wc_attribute_taxonomy_id_by_name( $meta_value['name'] );
+					$options  = wc_get_object_terms( $product_id, $meta_value['name'], 'term_id' );
+					$ordering = array_filter( array_map( 'absint', explode( '|', (string) $meta_value['value'] ) ) );
+					if ( ! empty( $ordering ) ) {
+						$options = array_merge(
+							array_values( array_intersect( $ordering, $options ) ),
+							array_values( array_diff( $options, $ordering ) )
+						);
+					}
 				} else {
 					$id      = 0;
 					$options = wc_get_text_attributes( $meta_value['value'] );
