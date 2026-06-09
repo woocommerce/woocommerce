@@ -305,7 +305,7 @@ class FeaturesController {
 			),
 			ProductMediaGallery::FEATURE_ID      => array(
 				'name'                         => __( 'Product gallery videos (Beta)', 'woocommerce' ),
-				'description'                  => __( 'Enable videos in product galleries and product gallery APIs.', 'woocommerce' ),
+				'description'                  => __( 'Enable videos in product galleries.', 'woocommerce' ),
 				'option_key'                   => ProductMediaGallery::ENABLE_OPTION_NAME,
 				'is_experimental'              => true,
 				'enabled_by_default'           => false,
