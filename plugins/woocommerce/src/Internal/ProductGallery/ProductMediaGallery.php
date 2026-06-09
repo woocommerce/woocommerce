@@ -57,7 +57,6 @@ class ProductMediaGallery {
 				'context'               => 'view',
 				'include_product_image' => true,
 				'include_placeholder'   => false,
-				'validate_attachments'  => false,
 				'preserve_video_data'   => false,
 				'resolve_video_posters' => true,
 				'deduplicate'           => false,
@@ -71,7 +70,7 @@ class ProductMediaGallery {
 		if ( self::is_feature_enabled() ) {
 			$video_gallery = self::normalize_video_gallery_items(
 				self::get_stored_video_gallery_items( $product ),
-				(bool) $args['validate_attachments'],
+				true,
 				(bool) $args['preserve_video_data']
 			);
 
@@ -142,7 +141,7 @@ class ProductMediaGallery {
 		WC_Product $product,
 		array $video_gallery
 	): array {
-		$video_gallery = self::normalize_video_gallery_items( $video_gallery );
+		$video_gallery = self::normalize_video_gallery_items( $video_gallery, true );
 
 		self::update_video_gallery_meta( $product, $video_gallery );
 

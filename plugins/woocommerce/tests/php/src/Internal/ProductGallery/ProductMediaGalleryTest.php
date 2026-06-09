@@ -35,16 +35,26 @@ class ProductMediaGalleryTest extends WC_Unit_Test_Case {
 	 */
 	public function test_merges_positioned_videos_into_gallery_images(): void {
 		$product = new WC_Product_Simple();
-		$product->set_gallery_image_ids( array( 101, 102, 103 ) );
+		$image_ids = array(
+			$this->create_attachment( 'Image A', 'image/jpeg' ),
+			$this->create_attachment( 'Image B', 'image/jpeg' ),
+			$this->create_attachment( 'Image C', 'image/jpeg' ),
+		);
+		$video_ids = array(
+			$this->create_attachment( 'Video 1', 'video/mp4' ),
+			$this->create_attachment( 'Video 2', 'video/mp4' ),
+		);
+
+		$product->set_gallery_image_ids( $image_ids );
 		ProductMediaGallery::set_stored_video_gallery_items(
 			$product,
 			array(
 				array(
-					'id'       => 201,
+					'id'       => $video_ids[0],
 					'position' => 1,
 				),
 				array(
-					'id'       => 202,
+					'id'       => $video_ids[1],
 					'position' => 2,
 				),
 			)
@@ -62,23 +72,23 @@ class ProductMediaGalleryTest extends WC_Unit_Test_Case {
 			array(
 				array(
 					'media_type' => 'image',
-					'id'         => 101,
+					'id'         => $image_ids[0],
 				),
 				array(
 					'media_type' => 'video',
-					'id'         => 201,
+					'id'         => $video_ids[0],
 				),
 				array(
 					'media_type' => 'video',
-					'id'         => 202,
+					'id'         => $video_ids[1],
 				),
 				array(
 					'media_type' => 'image',
-					'id'         => 102,
+					'id'         => $image_ids[1],
 				),
 				array(
 					'media_type' => 'image',
-					'id'         => 103,
+					'id'         => $image_ids[2],
 				),
 			),
 			$this->get_media_item_summary( $media_items ),
@@ -91,17 +101,28 @@ class ProductMediaGalleryTest extends WC_Unit_Test_Case {
 	 */
 	public function test_offsets_positioned_videos_when_product_image_is_included(): void {
 		$product = new WC_Product_Simple();
-		$product->set_image_id( 100 );
-		$product->set_gallery_image_ids( array( 101, 102, 103 ) );
+		$product_image_id = $this->create_attachment( 'Product image', 'image/jpeg' );
+		$image_ids        = array(
+			$this->create_attachment( 'Image A', 'image/jpeg' ),
+			$this->create_attachment( 'Image B', 'image/jpeg' ),
+			$this->create_attachment( 'Image C', 'image/jpeg' ),
+		);
+		$video_ids        = array(
+			$this->create_attachment( 'Video 1', 'video/mp4' ),
+			$this->create_attachment( 'Video 2', 'video/mp4' ),
+		);
+
+		$product->set_image_id( $product_image_id );
+		$product->set_gallery_image_ids( $image_ids );
 		ProductMediaGallery::set_stored_video_gallery_items(
 			$product,
 			array(
 				array(
-					'id'       => 201,
+					'id'       => $video_ids[0],
 					'position' => 1,
 				),
 				array(
-					'id'       => 202,
+					'id'       => $video_ids[1],
 					'position' => 2,
 				),
 			)
@@ -119,27 +140,27 @@ class ProductMediaGalleryTest extends WC_Unit_Test_Case {
 			array(
 				array(
 					'media_type' => 'image',
-					'id'         => 100,
+					'id'         => $product_image_id,
 				),
 				array(
 					'media_type' => 'image',
-					'id'         => 101,
+					'id'         => $image_ids[0],
 				),
 				array(
 					'media_type' => 'video',
-					'id'         => 201,
+					'id'         => $video_ids[0],
 				),
 				array(
 					'media_type' => 'video',
-					'id'         => 202,
+					'id'         => $video_ids[1],
 				),
 				array(
 					'media_type' => 'image',
-					'id'         => 102,
+					'id'         => $image_ids[1],
 				),
 				array(
 					'media_type' => 'image',
-					'id'         => 103,
+					'id'         => $image_ids[2],
 				),
 			),
 			$this->get_media_item_summary( $media_items ),
@@ -211,6 +232,23 @@ class ProductMediaGalleryTest extends WC_Unit_Test_Case {
 				);
 			},
 			$media_items
+		);
+	}
+
+	/**
+	 * Create a test attachment.
+	 *
+	 * @param string $title     Attachment title.
+	 * @param string $mime_type Attachment MIME type.
+	 * @return int
+	 */
+	private function create_attachment( string $title, string $mime_type ): int {
+		return wp_insert_attachment(
+			array(
+				'post_title'     => $title,
+				'post_type'      => 'attachment',
+				'post_mime_type' => $mime_type,
+			)
 		);
 	}
 }
