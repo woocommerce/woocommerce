@@ -145,7 +145,6 @@ export const Products = () => {
 		];
 
 		if (
-			!! window.wcAdminFeatures?.printful &&
 			! isRequestingPlugins &&
 			! installedPlugins.includes( 'printful-shipping-for-woocommerce' )
 		) {
