@@ -134,6 +134,93 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * It emits developer feedback when settings UI rendering falls back to legacy output.
+	 */
+	public function test_settings_ui_fallback_emits_doing_it_wrong_notice(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Settings_Page::output' );
+
+		$notices = array();
+		$action  = function ( $function_name, $message, $version ) use ( &$notices ) {
+			$notices[] = array(
+				'function_name' => $function_name,
+				'message'       => $message,
+				'version'       => $version,
+			);
+		};
+		add_action( 'doing_it_wrong_run', $action, 10, 3 );
+
+		global $current_section;
+		$current_section = 'advanced';
+		$page            = $this->get_settings_ui_test_page_with_failing_script_handles();
+
+		try {
+			ob_start();
+			$page->output();
+			$output = ob_get_clean();
+		} finally {
+			remove_action( 'doing_it_wrong_run', $action, 10 );
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
+
+		$settings_page_notices = $this->get_settings_page_output_notices( $notices );
+
+		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertNotEmpty( $settings_page_notices );
+		$this->assertSame( '10.9.0', $settings_page_notices[0]['version'] );
+		$this->assertStringContainsString( 'settings_ui_flag_test', $settings_page_notices[0]['message'] );
+		$this->assertStringContainsString( 'advanced', $settings_page_notices[0]['message'] );
+		$this->assertStringContainsString( 'Unable to load extension script handles.', $settings_page_notices[0]['message'] );
+	}
+
+	/**
+	 * It emits developer feedback when settings UI schema generation has failed.
+	 */
+	public function test_settings_ui_schema_failure_fallback_emits_doing_it_wrong_notice(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Settings_Page::output' );
+
+		$notices = array();
+		$action  = function ( $function_name, $message, $version ) use ( &$notices ) {
+			$notices[] = array(
+				'function_name' => $function_name,
+				'message'       => $message,
+				'version'       => $version,
+			);
+		};
+		add_action( 'doing_it_wrong_run', $action, 10, 3 );
+
+		global $current_section;
+		$current_section = 'advanced';
+		$page            = $this->get_settings_ui_test_page_with_failing_script_handles();
+
+		try {
+			$GLOBALS['wc_settings_ui_schema_failed']['settings_ui_flag_test']['advanced'] = true;
+
+			ob_start();
+			$page->output();
+			$output = ob_get_clean();
+		} finally {
+			unset( $GLOBALS['wc_settings_ui_schema_failed']['settings_ui_flag_test']['advanced'] );
+			remove_action( 'doing_it_wrong_run', $action, 10 );
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
+
+		$settings_page_notices = $this->get_settings_page_output_notices( $notices );
+
+		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertNotEmpty( $settings_page_notices );
+		$this->assertSame( '10.9.0', $settings_page_notices[0]['version'] );
+		$this->assertStringContainsString( 'settings_ui_flag_test', $settings_page_notices[0]['message'] );
+		$this->assertStringContainsString( 'advanced', $settings_page_notices[0]['message'] );
+		$this->assertStringContainsString( 'Settings UI schema generation failed.', $settings_page_notices[0]['message'] );
+	}
+
+	/**
 	 * It exposes section navigation metadata from legacy settings pages.
 	 */
 	public function test_legacy_adapter_adds_shell_navigation_metadata(): void {
@@ -259,6 +346,79 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			 * @return array
 			 */
 			protected function get_settings_for_default_section() {
+				return array(
+					array(
+						'id'    => 'woocommerce_settings_ui_flag_test',
+						'type'  => 'text',
+						'title' => 'Settings UI flag test',
+					),
+				);
+			}
+		};
+	}
+
+	/**
+	 * Get captured doing-it-wrong notices emitted by the settings page output method.
+	 *
+	 * @param array $notices Captured doing-it-wrong notices.
+	 * @return array
+	 */
+	private function get_settings_page_output_notices( array $notices ): array {
+		return array_values(
+			array_filter(
+				$notices,
+				static function ( array $notice ): bool {
+					return 'WC_Settings_Page::output' === $notice['function_name'];
+				}
+			)
+		);
+	}
+
+	/**
+	 * Build a settings page whose settings UI adapter cannot provide script handles.
+	 *
+	 * @return \WC_Settings_Page
+	 */
+	private function get_settings_ui_test_page_with_failing_script_handles(): \WC_Settings_Page {
+		return new class() extends \WC_Settings_Page {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'settings_ui_flag_test';
+				$this->label = 'Settings UI flag test';
+			}
+
+			/**
+			 * Get the settings UI page adapter.
+			 *
+			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
+				return new class( $this ) extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
+					/**
+					 * Get script handles.
+					 *
+					 * @param string $section_id Section id.
+					 * @return array
+					 */
+					public function get_script_handles( string $section_id ): array {
+						if ( 'advanced' === $section_id ) {
+							throw new \RuntimeException( 'Unable to load extension script handles.' );
+						}
+
+						return array();
+					}
+				};
+			}
+
+			/**
+			 * Get settings for a section.
+			 *
+			 * @param string $section_id Section id.
+			 * @return array
+			 */
+			protected function get_settings_for_section_core( $section_id ) {
 				return array(
 					array(
 						'id'    => 'woocommerce_settings_ui_flag_test',
