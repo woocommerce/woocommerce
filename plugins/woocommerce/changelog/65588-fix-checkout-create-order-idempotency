@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent duplicate checkout orders when the same cart/session retries order creation before payment processing starts.
