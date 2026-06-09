@@ -335,8 +335,11 @@ class ProductMediaGallery {
 	 *
 	 * Example:
 	 * - Images: array( 'image A', 'image B', 'image C' )
-	 * - Videos: array( 'video 1' => 1, 'video 2' => 2 )
-	 * - Outcome: array( 'image A', 'video 1', 'video 2', 'image B', 'image C' )
+	 * - Videos: array(
+	 *     array( 'id' => 10, 'position' => 1 ),
+	 *     array( 'id' => 11, 'position' => 2 ),
+	 *   )
+	 * - Outcome: array( 'image A', 'video 10', 'video 11', 'image B', 'image C' )
 	 *
 	 * @param array $media_items     Product image media items.
 	 * @param array $video_gallery   Stored video gallery items.
