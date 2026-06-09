@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\ProductGallery;
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Product;
 
 defined( 'ABSPATH' ) || exit;
@@ -39,7 +40,7 @@ class ProductMediaGallery {
 	 * @return bool
 	 */
 	public static function is_feature_enabled(): bool {
-		return function_exists( 'wc_product_gallery_videos_enabled' ) && wc_product_gallery_videos_enabled();
+		return FeaturesUtil::feature_is_enabled( self::FEATURE_ID );
 	}
 
 	/**
