@@ -384,6 +384,7 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 				'billing_last_name'  => 'Customer',
 				'billing_email'      => 'checkout-shipping-fields-customer@example.com',
 				'shipping_address_1' => '123 Test Street',
+				'shipping_custom'    => 'custom shipping value',
 				'shipping_method'    => array( 'flat_rate:1' ),
 				'shipping_total'     => '5.00',
 				'shipping_tax'       => '0.50',
@@ -394,6 +395,11 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 			'123 Test Street',
 			get_user_meta( $user_id, 'shipping_address_1', true ),
 			'Regular shipping address fields should still be saved as customer meta.'
+		);
+		$this->assertSame(
+			'custom shipping value',
+			get_user_meta( $user_id, 'shipping_custom', true ),
+			'Custom shipping fields should still be saved as customer meta.'
 		);
 		$this->assertSame(
 			'',
