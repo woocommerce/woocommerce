@@ -93,7 +93,10 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 			wp_mkdir_p( $dir );
 			$this->temp_dirs[] = $dir;
 		}
-		$path               = tempnam( $dir, 'fsutil_' );
+		$path = tempnam( $dir, 'fsutil_' );
+		if ( false === $path ) {
+			throw new \RuntimeException( "Could not create a temp file in {$dir}." );
+		}
 		$this->temp_files[] = $path;
 		return $path;
 	}
@@ -279,13 +282,13 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	public function test_validate_upload_file_path_success(): void {
 		$this->expectNotToPerformAssertions();
 
-		$path = $this->make_temp_file( ABSPATH );
-
-		FilesystemUtil::validate_upload_file_path( $path );
+		// Use an existing readable core file so the test does not depend on
+		// ABSPATH being writable.
+		FilesystemUtil::validate_upload_file_path( ABSPATH . 'index.php' );
 	}
 
 	/**
-	 * @testdox 'validate_upload_file_path' throws if the file does not exist.
+	 * @testdox 'validate_upload_file_path' throws an exception if the file path is not readable.
 	 */
 	public function test_validate_upload_file_path_failure_on_not_readable(): void {
 		$this->expectException( 'Exception' );
@@ -328,9 +331,9 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	public function test_validate_upload_file_path_success_with_file_protocol(): void {
 		$this->expectNotToPerformAssertions();
 
-		$path = $this->make_temp_file( ABSPATH );
-
-		FilesystemUtil::validate_upload_file_path( 'file://' . $path );
+		// Use an existing readable core file so the test does not depend on
+		// ABSPATH being writable.
+		FilesystemUtil::validate_upload_file_path( 'file://' . ABSPATH . 'index.php' );
 	}
 
 	/**
