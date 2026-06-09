@@ -409,11 +409,7 @@ class ProductMediaGallery {
 
 			if ( ! empty( $settings ) ) {
 				$video_item['settings'] = $settings;
-			} else {
-				unset( $video_item['settings'] );
 			}
-		} else {
-			unset( $video_item['settings'] );
 		}
 
 		if (
@@ -424,8 +420,6 @@ class ProductMediaGallery {
 			)
 		) {
 			$video_item['poster_id'] = $poster_id;
-		} else {
-			unset( $video_item['poster_id'] );
 		}
 
 		return $video_item;
