@@ -57,7 +57,6 @@ class ProductMediaGallery {
 				'context'               => 'view',
 				'include_product_image' => true,
 				'include_placeholder'   => false,
-				'preserve_video_data'   => false,
 				'resolve_video_posters' => true,
 				'deduplicate'           => false,
 			)
@@ -70,8 +69,7 @@ class ProductMediaGallery {
 		if ( self::is_feature_enabled() ) {
 			$video_gallery = self::normalize_video_gallery_items(
 				self::get_stored_video_gallery_items( $product ),
-				true,
-				(bool) $args['preserve_video_data']
+				true
 			);
 
 			if ( ! empty( $video_gallery ) ) {
@@ -153,13 +151,11 @@ class ProductMediaGallery {
 	 *
 	 * @param array $media_gallery Media gallery data.
 	 * @param bool  $validate_attachments Whether attachment IDs should be type-checked.
-	 * @param bool  $preserve_video_data Whether to preserve additional video item keys.
 	 * @return array
 	 */
 	public static function normalize_media_gallery_items(
 		array $media_gallery,
-		bool $validate_attachments = false,
-		bool $preserve_video_data = false
+		bool $validate_attachments = false
 	): array {
 		$items = array();
 
@@ -193,7 +189,7 @@ class ProductMediaGallery {
 				continue;
 			}
 
-			$video_item = self::normalize_video_gallery_item( $item, $index, $validate_attachments, $preserve_video_data );
+			$video_item = self::normalize_video_gallery_item( $item, $index, $validate_attachments );
 
 			if ( ! empty( $video_item ) ) {
 				$items[] = self::get_video_media_item( $video_item );
@@ -233,13 +229,11 @@ class ProductMediaGallery {
 	 *
 	 * @param array $video_gallery Video gallery data.
 	 * @param bool  $validate_attachments Whether attachment IDs should be type-checked.
-	 * @param bool  $preserve_video_data Whether to preserve additional video item keys.
 	 * @return array
 	 */
 	public static function normalize_video_gallery_items(
 		array $video_gallery,
-		bool $validate_attachments = false,
-		bool $preserve_video_data = false
+		bool $validate_attachments = false
 	): array {
 		$items = array();
 
@@ -248,7 +242,7 @@ class ProductMediaGallery {
 				continue;
 			}
 
-			$item = self::normalize_video_gallery_item( $item, $fallback_position, $validate_attachments, $preserve_video_data );
+			$item = self::normalize_video_gallery_item( $item, $fallback_position, $validate_attachments );
 
 			if ( ! empty( $item ) ) {
 				$items[] = $item;
@@ -397,10 +391,9 @@ class ProductMediaGallery {
 	 * @param array $item                 Video gallery item.
 	 * @param int   $fallback_position    Position used when item has no position.
 	 * @param bool  $validate_attachments Whether attachment IDs should be type-checked.
-	 * @param bool  $preserve_video_data  Whether to preserve additional video item keys.
 	 * @return array
 	 */
-	private static function normalize_video_gallery_item( array $item, int $fallback_position, bool $validate_attachments, bool $preserve_video_data ): array {
+	private static function normalize_video_gallery_item( array $item, int $fallback_position, bool $validate_attachments ): array {
 		$media_type    = isset( $item['media_type'] ) ? sanitize_key( $item['media_type'] ) : 'video';
 		$source_type   = isset( $item['source_type'] ) ? sanitize_key( $item['source_type'] ) : 'attachment';
 		$attachment_id = isset( $item['id'] ) ? absint( $item['id'] ) : 0;
@@ -417,11 +410,8 @@ class ProductMediaGallery {
 			}
 		}
 
-		$video_item = $preserve_video_data ? wc_clean( $item ) : array();
-		$video_item = is_array( $video_item ) ? $video_item : array();
+		$video_item = array();
 		$poster_id  = isset( $item['poster_id'] ) ? absint( $item['poster_id'] ) : 0;
-
-		unset( $video_item['media_type'] );
 
 		$video_item['source_type'] = 'attachment';
 		$video_item['id']          = $attachment_id;
