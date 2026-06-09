@@ -178,4 +178,37 @@ class WC_Tests_Product_Variable extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $expected_stock_status, $product->get_stock_status() );
 	}
+
+	/**
+	 * @testdox Frontend display preserves taxonomy attribute term order.
+	 */
+	public function test_frontend_display_preserves_taxonomy_attribute_term_order() {
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'size', array( 'S', 'XL', 'M' ) );
+		$term_ids  = $attribute->get_options();
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		// Get expected names in saved order.
+		$expected_names = array_map( fn( $id ) => get_term( $id )->name, $term_ids );
+
+		// Call the REAL function and capture output.
+		ob_start();
+		wc_display_product_attributes( $product );
+		$html = ob_get_clean();
+
+		// Extract term names from rendered HTML in order.
+		preg_match( '/<p>(.*?)<\/p>/s', $html, $matches );
+		$rendered_names = array_map( 'trim', explode( ',', wp_strip_all_tags( $matches[1] ?? '' ) ) );
+
+		$this->assertEquals(
+			$expected_names,
+			$rendered_names,
+			'wc_display_product_attributes() should render terms in saved order, not alphabetical.'
+		);
+
+		$product->delete( true );
+		WC_Helper_Product::delete_attribute( 'size' );
+	}
 }

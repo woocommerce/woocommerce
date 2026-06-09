@@ -1163,6 +1163,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+
 	 * @testdox read_variation_attributes returns the cached result on a second call.
 	 */
 	public function test_read_variation_attributes_returns_cached_result(): void {
