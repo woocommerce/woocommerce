@@ -51448,12 +51448,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:append_script_and_deps_src\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:enable_interactivity_support\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -51478,12 +51472,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:get_inner_blocks_translations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:get_tax_label\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -51497,12 +51485,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:initialize\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:print_lazy_load_scripts\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCart.php
@@ -51594,12 +51576,6 @@ parameters:
 		-
 			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:\$hooked_block_placements \(array\) in isset\(\) is not nullable\.$#'
 			identifier: isset.property
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:\$scripts_to_lazy_load \(array\<string\>\) does not accept array\<array\<string, bool\|string\>\|string\>\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCart.php
 
