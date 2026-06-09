@@ -390,8 +390,6 @@ const entries = {
 		...getBlockEntries( 'frontend.{t,j}s{,x}', cartAndCheckoutBlocks ),
 		blocksCheckout: './packages/checkout/index.js',
 		blocksComponents: './packages/components/index.ts',
-		'mini-cart-component':
-			'./assets/js/blocks/mini-cart/component-frontend.tsx',
 	},
 };
 
