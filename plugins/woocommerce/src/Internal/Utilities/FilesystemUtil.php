@@ -25,6 +25,15 @@ class FilesystemUtil {
 	private const FTP_INIT_COOLDOWN_MINUTES = 2;
 
 	/**
+	 * Memoized direct filesystem instance. Only ever holds a genuine
+	 * WP_Filesystem_Direct; the defensive fallback is never cached so a later
+	 * call can retry direct rather than pin a non-direct instance.
+	 *
+	 * @var WP_Filesystem_Base|null
+	 */
+	private static $cached_direct_filesystem = null;
+
+	/**
 	 * Wrapper to retrieve the class instance contained in the $wp_filesystem global, after initializing if necessary.
 	 *
 	 * @return WP_Filesystem_Base
@@ -67,10 +76,8 @@ class FilesystemUtil {
 	 *                   filesystem fail to initialize (the fallback path).
 	 */
 	public static function get_wp_filesystem_direct(): WP_Filesystem_Base {
-		static $cached_filesystem = null;
-
-		if ( $cached_filesystem instanceof WP_Filesystem_Base ) {
-			return $cached_filesystem;
+		if ( self::$cached_direct_filesystem instanceof WP_Filesystem_Base ) {
+			return self::$cached_direct_filesystem;
 		}
 
 		if ( ! class_exists( 'WP_Filesystem_Base' ) ) {
@@ -94,8 +101,8 @@ class FilesystemUtil {
 					define( 'FS_CHMOD_FILE', ( fileperms( ABSPATH . 'index.php' ) & 0777 | 0644 ) );
 				}
 
-				$cached_filesystem = new WP_Filesystem_Direct( null );
-				return $cached_filesystem;
+				self::$cached_direct_filesystem = new WP_Filesystem_Direct( null );
+				return self::$cached_direct_filesystem;
 			} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- Fall through to the fallback below.
 			}
 		}
@@ -106,9 +113,11 @@ class FilesystemUtil {
 			'11.0.0'
 		);
 
-		$cached_filesystem = self::get_wp_filesystem();
-
-		return $cached_filesystem;
+		// Deliberately not cached: the fallback may be a non-direct (e.g. FTP)
+		// instance, and pinning it would silently route every later "direct"
+		// caller in this request through FS_METHOD. Returning it uncached lets
+		// a subsequent call retry the direct instance once the class is loadable.
+		return self::get_wp_filesystem();
 	}
 
 	/**
