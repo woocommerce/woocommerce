@@ -2,19 +2,9 @@
  * External dependencies
  */
 import { useBlockProps, Warning } from '@wordpress/block-editor';
-import { Disabled } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import ServerSideRender from '@wordpress/server-side-render';
 
-export const DeprecatedBlockWarning = ( {
-	blockTitle,
-	blockName,
-	attributes,
-}: {
-	blockTitle: string;
-	blockName: string;
-	attributes: Record< string, unknown >;
-} ): JSX.Element => {
+const Edit = () => {
 	const blockProps = useBlockProps();
 
 	return (
@@ -26,15 +16,11 @@ export const DeprecatedBlockWarning = ( {
 						'This version of the %s block is outdated. You can delete it and use the Product Collection block instead.',
 						'woocommerce'
 					),
-					blockTitle
+					__( 'All Products', 'woocommerce' )
 				) }
 			</Warning>
-			<Disabled>
-				<ServerSideRender
-					block={ blockName }
-					attributes={ attributes }
-				/>
-			</Disabled>
 		</div>
 	);
 };
+
+export default Edit;

@@ -21,9 +21,11 @@ registerBlockType( metadata, {
 		),
 	},
 
-	edit: () => (
+	edit: ( { attributes } ) => (
 		<DeprecatedBlockWarning
-			blockName={ __( 'On Sale Products', 'woocommerce' ) }
+			blockName={ metadata.name }
+			blockTitle={ __( 'On Sale Products', 'woocommerce' ) }
+			attributes={ attributes }
 		/>
 	),
 

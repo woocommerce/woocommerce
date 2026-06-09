@@ -3,15 +3,13 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, grid } from '@wordpress/icons';
-import { __ } from '@wordpress/i18n';
-import '@woocommerce/atomic-blocks';
 
 /**
  * Internal dependencies
  */
-import { DeprecatedBlockWarning } from '../../../editor-components/deprecated-block-warning';
 import metadata from './block.json';
 import deprecated from './deprecated';
+import edit from './edit';
 import save from './save';
 import defaults from './defaults';
 
@@ -27,11 +25,7 @@ registerBlockType( name, {
 			/>
 		),
 	},
-	edit: () => (
-		<DeprecatedBlockWarning
-			blockName={ __( 'All Products', 'woocommerce' ) }
-		/>
-	),
+	edit,
 	save,
 	deprecated,
 	defaults,
