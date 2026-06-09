@@ -317,7 +317,7 @@ class JsonFileFeed implements FeedInterface {
 	 */
 	private function ensure_feed_dir_file_access( string $directory_path ): void {
 		$htaccess_path   = $directory_path . '.htaccess';
-		$desired_content = 'Options -Indexes';
+		$desired_content = FilesystemUtil::HTACCESS_ALLOW_FILE_ACCESS;
 
 		try {
 			$wp_fs = FilesystemUtil::get_wp_filesystem();
