@@ -137,7 +137,7 @@ jobs:
             exit 1
           fi
 
-          if php -r "die( version_compare( '$RELEASE_TAG', '$svn_plugin_version', '>' ) ? 0 : 1 );"; then
+          if php -r "die( version_compare( '$RELEASE_TAG', '$svn_plugin_version', '>=' ) ? 0 : 1 );"; then
             # Check that the stable tag in the release matches the stable tag in SVN.
             svn_stable_version=$( svn cat "$SVN_URL/trunk/readme.txt" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
             stable_tag_in_release=$(cat woocommerce/readme.txt | grep -oP '(?<=Stable tag: )(.+)' | head -n1)
@@ -213,19 +213,46 @@ jobs:
             --set-depth infinity \
             trunk/
 
-          # Remove previous trunk files.
-          rm -rf trunk/*
-          cp -a ../release/woocommerce/. trunk
+          # Skip the trunk overwrite if it's already at $RELEASE_TAG, so partial-success runs
+          # can recover by simply re-triggering the workflow.
+          trunk_version=$( cat trunk/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+          if [ "$trunk_version" = "$RELEASE_TAG" ]; then
+            echo "::notice::trunk already at $RELEASE_TAG; skipping trunk update."
+          else
+            rm -rf trunk/*
+            cp -a ../release/woocommerce/. trunk
 
-          # SVN add/delete new or removed files as needed.
-          svn status | grep '^?' | awk '{print $2"@"}' | xargs -r svn add
-          svn status | grep '^!' | awk '{print $2"@"}' | xargs -r svn delete
+            svn status | grep '^?' | awk '{print $2"@"}' | xargs -r svn add
+            svn status | grep '^!' | awk '{print $2"@"}' | xargs -r svn delete
+
+            # plugins.svn.wordpress.org can return errors on large changesets even after the
+            # commit has landed; verify against live trunk before treating non-zero as fatal.
+            if ! svn commit \
+              --username "$SVN_USERNAME" \
+              --password "$SVN_PASSWORD" \
+              --message "Updating trunk to version $RELEASE_TAG." \
+              --no-auth-cache \
+              --non-interactive \
+              --config-option=servers:global:http-timeout=3600
+            then
+              echo "::warning::svn commit returned non-zero; verifying whether trunk actually landed."
+              committed_version=$(
+                svn cat "$SVN_URL/trunk/woocommerce.php" \
+                  --username "$SVN_USERNAME" --password "$SVN_PASSWORD" \
+                  | grep -oP '(?<=Version: )(.+)' | head -n1
+              )
+              if [ "$committed_version" != "$RELEASE_TAG" ]; then
+                echo "::error::svn commit failed and trunk is at '$committed_version' (expected '$RELEASE_TAG')."
+                exit 1
+              fi
+              echo "::notice::svn commit reported an error but trunk is at $RELEASE_TAG — continuing to tag copy."
+            fi
+          fi
 
           # Copy trunk to tag.
-          svn copy trunk "tags/$RELEASE_TAG"
-
-          # Commit.
-          svn commit \
+          svn copy \
+            "$SVN_URL/trunk" \
+            "$SVN_URL/tags/$RELEASE_TAG" \
             --username "$SVN_USERNAME" \
             --password "$SVN_PASSWORD" \
             --message "Tagging version $RELEASE_TAG." \
