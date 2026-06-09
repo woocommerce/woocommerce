@@ -18,9 +18,11 @@ const test = baseTest.extend( {
 			amount: `${ Math.floor( Math.random() * 50 ) + 1 }`,
 		};
 		await use( coupon );
-		await restApi.delete( `${ WC_API_PATH }/coupons/${ coupon.id }`, {
-			force: true,
-		} );
+		if ( coupon.id ) {
+			await restApi.delete( `${ WC_API_PATH }/coupons/${ coupon.id }`, {
+				force: true,
+			} );
+		}
 	},
 
 	product: async ( { restApi }, use ) => {
@@ -61,6 +63,10 @@ test.describe( 'Coupon management', { tag: tags.SERVICES }, () => {
 				.getByRole( 'link', { name: 'Usage restriction' } )
 				.click();
 			await page
+				.locator( '#usage_restriction_coupon_data p' )
+				.filter( {
+					has: page.getByText( 'Products', { exact: true } ),
+				} )
 				.getByPlaceholder( 'Search for a product…' )
 				.pressSequentially( product.name );
 			await page.getByRole( 'option', { name: product.name } ).click();
