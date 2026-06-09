@@ -53,3 +53,28 @@ test('does not detect unrelated checklist items', () => {
         checked: false,
     });
 });
+
+test('detects checked auto-assign checkbox with "*" bullet and uppercase marker', () => {
+    const body = checkboxLine.replace('- [x]', '* [X]');
+
+    assert.deepEqual(getAutoAssignMilestoneSelection(body), {
+        found: true,
+        checked: true,
+    });
+});
+
+test('detects indented auto-assign checkbox with CRLF line endings', () => {
+    const body = ['### Milestone', '', `    ${checkboxLine}`, ''].join('\r\n');
+
+    assert.deepEqual(getAutoAssignMilestoneSelection(body), {
+        found: true,
+        checked: true,
+    });
+});
+
+test('returns not found for null or undefined body', () => {
+    const expected = { found: false, checked: false };
+
+    assert.deepEqual(getAutoAssignMilestoneSelection(null), expected);
+    assert.deepEqual(getAutoAssignMilestoneSelection(undefined), expected);
+});

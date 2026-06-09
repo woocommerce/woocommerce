@@ -26,7 +26,7 @@ module.exports = async ({ github, context, core }) => {
     const nextVersionSelection = getAutoAssignMilestoneSelection(body);
 
     if (!nextVersionSelection.found) {
-        core.setFailed('Milestone selection checkbox not found or modified. Please restore the original checkbox format from the PR template.');
+        core.setFailed('Auto-assign milestone checkbox not found. Please add the milestone checkbox from the PR template, or manually assign a milestone.');
         return;
     }
 

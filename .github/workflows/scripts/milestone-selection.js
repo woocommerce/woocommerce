@@ -3,6 +3,10 @@ const AUTO_ASSIGN_MILESTONE_CHECKBOX_PATTERN = /(?:^|\r?\n)\s*[-*]\s*\[\s*([xX]?
 /**
  * Finds the PR template checkbox used to request automatic milestone assignment.
  *
+ * The pattern is non-global, so the first matching checkbox in the body wins.
+ * The PR template only ever renders this checkbox once, so first-match is the
+ * intended contract; duplicate occurrences (if any) are ignored.
+ *
  * @param {string} body PR body.
  * @return {{found: boolean, checked: boolean}} Checkbox state.
  */
