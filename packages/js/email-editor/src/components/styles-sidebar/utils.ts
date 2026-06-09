@@ -47,20 +47,27 @@ export const getElementStyles = (
 	headingLevel = 'heading',
 	merge = false
 ): EmailStyles => {
+	let elementStyles: EmailStyles;
 	switch ( element ) {
 		case 'text':
-			return {
+			elementStyles = {
 				typography: styles.typography,
 				color: styles.color,
 			} as EmailStyles;
+			break;
 		case 'heading':
-			return getHeadingElementStyles(
+			elementStyles = getHeadingElementStyles(
 				styles,
 				headingLevel ?? 'heading',
 				merge
 			);
+			break;
 		default:
-			return ( styles.elements[ element ] ||
+			elementStyles = ( styles.elements?.[ element ] ||
 				defaultStyleObject ) as EmailStyles;
 	}
+
+	// Ensure the `typography` and `color` objects are always available to
+	// consumers so they can safely destructure them.
+	return deepmerge( defaultStyleObject, elementStyles ) as EmailStyles;
 };
