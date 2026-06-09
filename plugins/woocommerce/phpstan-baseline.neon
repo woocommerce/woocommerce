@@ -14365,12 +14365,6 @@ parameters:
 			path: includes/class-wc-regenerate-images.php
 
 		-
-			message: '#^Method WC_Regenerate_Images\:\:regenerating_notice\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
 			message: '#^Method WC_Regenerate_Images\:\:resize_and_return_image\(\) should return string but returns array\.$#'
 			identifier: return.type
 			count: 3
