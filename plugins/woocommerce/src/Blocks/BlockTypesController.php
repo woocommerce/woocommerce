@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypes\Cart;
 use Automattic\WooCommerce\Blocks\BlockTypes\Checkout;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCartContents;
+use Automattic\WooCommerce\Internal\Blocks\BlockLibraryScriptRegistry;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 
 /**
@@ -34,6 +35,13 @@ final class BlockTypesController {
 	protected $asset_data_registry;
 
 	/**
+	 * Instance of the block-library script registry.
+	 *
+	 * @var BlockLibraryScriptRegistry
+	 */
+	protected $block_library_script_registry;
+
+	/**
 	 * Holds the registered blocks that have WooCommerce blocks as their parents.
 	 *
 	 * @var array List of registered blocks.
@@ -43,12 +51,18 @@ final class BlockTypesController {
 	/**
 	 * Constructor.
 	 *
-	 * @param AssetApi          $asset_api Instance of the asset API.
-	 * @param AssetDataRegistry $asset_data_registry Instance of the asset data registry.
+	 * @param AssetApi                   $asset_api Instance of the asset API.
+	 * @param AssetDataRegistry          $asset_data_registry Instance of the asset data registry.
+	 * @param BlockLibraryScriptRegistry $block_library_script_registry Instance of the block-library script registry.
 	 */
-	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry ) {
-		$this->asset_api           = $asset_api;
-		$this->asset_data_registry = $asset_data_registry;
+	public function __construct(
+		AssetApi $asset_api,
+		AssetDataRegistry $asset_data_registry,
+		BlockLibraryScriptRegistry $block_library_script_registry
+	) {
+		$this->asset_api                     = $asset_api;
+		$this->asset_data_registry           = $asset_data_registry;
+		$this->block_library_script_registry = $block_library_script_registry;
 		$this->init();
 	}
 
@@ -144,29 +158,7 @@ final class BlockTypesController {
 	 * @return void
 	 */
 	protected function register_block_library_block_type( $block_name ) {
-		$metadata_path = $this->get_block_library_metadata_path( $block_name );
-
-		if ( ! $metadata_path ) {
-			return;
-		}
-
-		register_block_type_from_metadata( $metadata_path );
-	}
-
-	/**
-	 * Get the metadata path for a block-library block.
-	 *
-	 * @param string $block_name Block directory name.
-	 * @return string|false Path to metadata directory, or false if not found.
-	 */
-	protected function get_block_library_metadata_path( $block_name ) {
-		$metadata_path = WC_ABSPATH . 'client/blocks/packages/block-library/src/' . $block_name . '/block.json';
-
-		if ( ! file_exists( $metadata_path ) ) {
-			return false;
-		}
-
-		return dirname( $metadata_path );
+		$this->block_library_script_registry->register_block_type_from_metadata( $block_name );
 	}
 
 	/**

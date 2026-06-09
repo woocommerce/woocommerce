@@ -28,7 +28,7 @@ import {
 /**
  * Internal dependencies
  */
-import { usePreviewMode } from '../../../../assets/js/base/hooks/use-preview-mode';
+import { usePreviewMode } from '../hooks/use-preview-mode';
 
 export type CategoryTitleAttributes = {
 	isLink: boolean;

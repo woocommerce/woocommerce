@@ -5,14 +5,10 @@
  * @package WooCommerce\Blocks
  */
 
-$term_id       = $block->context['termId'] ?? 0;
-$term_taxonomy = $block->context['termTaxonomy'] ?? 'product_cat';
+declare( strict_types = 1 );
 
-$level      = isset( $attributes['level'] ) ? max( 0, min( 6, intval( $attributes['level'] ) ) ) : 2;
-$text_align = isset( $attributes['textAlign'] ) ? sanitize_key( $attributes['textAlign'] ) : '';
-$is_link    = ! empty( $attributes['isLink'] );
-$rel        = isset( $attributes['rel'] ) ? esc_attr( $attributes['rel'] ) : '';
-$target     = isset( $attributes['linkTarget'] ) ? esc_attr( $attributes['linkTarget'] ) : '_self';
+$term_id       = isset( $block->context['termId'] ) ? absint( $block->context['termId'] ) : 0;
+$term_taxonomy = isset( $block->context['termTaxonomy'] ) ? sanitize_key( $block->context['termTaxonomy'] ) : 'product_cat';
 
 if ( ! $term_id ) {
 	return;
@@ -22,6 +18,12 @@ $category_term = get_term( $term_id, $term_taxonomy );
 if ( ! $category_term || is_wp_error( $category_term ) ) {
 	return;
 }
+
+$level      = isset( $attributes['level'] ) ? max( 0, min( 6, intval( $attributes['level'] ) ) ) : 2;
+$text_align = isset( $attributes['textAlign'] ) ? sanitize_key( $attributes['textAlign'] ) : '';
+$is_link    = ! empty( $attributes['isLink'] );
+$rel        = isset( $attributes['rel'] ) ? esc_attr( $attributes['rel'] ) : '';
+$target     = isset( $attributes['linkTarget'] ) ? esc_attr( $attributes['linkTarget'] ) : '_self';
 
 $tag_name           = 0 === $level ? 'p' : 'h' . $level;
 $classes            = $text_align ? 'has-text-align-' . $text_align : '';

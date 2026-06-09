@@ -7,9 +7,18 @@
 	"module": "build-module/index.mjs",
 	"exports": {
 		".": {
-			"import": "./src/index.tsx",
+			"import": "./build-module/index.mjs",
 			"require": "./build/index.cjs"
-		}
+		},
+		"./build/*": "./build/*",
+		"./build-module/*": "./build-module/*",
+		"./package.json": "./package.json"
 	},
-	"wpScript": true
+	"wpScript": true,
+	"wpCopyFiles": {
+		"files": [
+			"src/**/block.json",
+			"src/**/*.php"
+		]
+	}
 }

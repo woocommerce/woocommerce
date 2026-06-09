@@ -4,9 +4,11 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks;
 
 use Automattic\WooCommerce\Blocks\Assets\Api;
+use Automattic\WooCommerce\Blocks\Domain\Package as BlocksDomainPackage;
 use Automattic\WooCommerce\Blocks\BlockTypesController as TestedBlockTypesController;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Internal\Blocks\BlockLibraryScriptRegistry as TestedBlockLibraryScriptRegistry;
 use WP_Block;
 use WP_Block_Type;
 use WP_Block_Type_Registry;
@@ -24,6 +26,13 @@ class BlockTypesController extends \WP_UnitTestCase {
 	private $block_types_controller;
 
 	/**
+	 * Holds the BlockLibraryScriptRegistry under test.
+	 *
+	 * @var TestedBlockLibraryScriptRegistry The BlockLibraryScriptRegistry under test.
+	 */
+	private $block_library_script_registry;
+
+	/**
 	 * Sets up a new TestedBlockTypesController so it can be tested.
 	 *
 	 * @return void
@@ -31,9 +40,14 @@ class BlockTypesController extends \WP_UnitTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+		$this->block_library_script_registry = new TestedBlockLibraryScriptRegistry(
+			Package::container()->get( BlocksDomainPackage::class )
+		);
+		$this->block_library_script_registry->register_scripts();
 		$this->block_types_controller = new TestedBlockTypesController(
 			Package::container()->get( Api::class ),
-			new AssetDataRegistryMock( Package::container()->get( Api::class ) )
+			new AssetDataRegistryMock( Package::container()->get( Api::class ) ),
+			$this->block_library_script_registry
 		);
 	}
 
@@ -44,6 +58,7 @@ class BlockTypesController extends \WP_UnitTestCase {
 	 */
 	protected function tearDown(): void {
 		$this->unregister_block_type( 'woocommerce/category-title' );
+		wp_deregister_script( 'wc-block-library' );
 
 		parent::tearDown();
 	}
@@ -61,6 +76,7 @@ class BlockTypesController extends \WP_UnitTestCase {
 		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce/category-title' );
 		$this->assertInstanceOf( WP_Block_Type::class, $block_type, 'Category title should be registered.' );
 		$this->assertIsCallable( $block_type->render_callback, 'Category title should use metadata render callback.' );
+		$this->assertTrue( wp_script_is( 'wc-block-library', 'registered' ), 'Category title editor script should be registered.' );
 	}
 
 	/**

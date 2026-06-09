@@ -6,8 +6,8 @@
 	"category": "woocommerce",
 	"apiVersion": 3,
 	"textdomain": "woocommerce",
-	"editorScript": "file:../../../../build/scripts/block-library/index.min.js",
-	"render": "file:./render.php",
+	"editorScript": "wc-block-library",
+	"render": "file:./index.php",
 	"attributes": {
 		"isLink": {
 			"type": "boolean",

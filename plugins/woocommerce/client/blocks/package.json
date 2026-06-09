@@ -45,9 +45,9 @@
 	"scripts": {
 		"analyze-bundles": "WP_BUNDLE_ANALYZER=1 pnpm run build",
 		"build": "pnpm build:project",
-		"build:project": "pnpm build:project:bundle && pnpm build:project:block-library && wp-scripts build-blocks-manifest --input=../../assets/client/blocks --output=../../assets/client/blocks/blocks-json.php",
+		"build:project": "rimraf ../../assets/client/blocks/* && pnpm build:project:bundle && pnpm build:project:block-library && wp-scripts build-blocks-manifest --input=../../assets/client/blocks --output=../../assets/client/blocks/blocks-json.php && node ./bin/copy-block-library-package-build.mjs",
 		"build:project:bundle": "NODE_ENV=\"${NODE_ENV:-production}\" BABEL_ENV=\"${BABEL_ENV:-default}\" WP_EXPERIMENTAL_MODULES=\"${WP_EXPERIMENTAL_MODULES:-true}\" webpack",
-		"build:project:block-library": "wp-build",
+		"build:project:block-library": "wp-build && node ./bin/copy-block-library-package-build.mjs && wp-scripts build-blocks-manifest --input=../../assets/client/blocks --output=../../assets/client/blocks/blocks-json.php && node ./bin/copy-block-library-package-build.mjs",
 		"build:check-assets": "npx ajv validate -s bin/block.json-validation-schema.json -d assets/js/**/block.json -d packages/block-library/*/block.json && rimraf ../../assets/client/blocks/* && ASSET_CHECK=true BABEL_ENV=default NODE_ENV=production webpack && pnpm build:project:block-library",
 		"prebuild:docs": "rimraf docs/extensibility/actions.md & rimraf docs/extensibility/filters.md",
 		"build:docs": "./vendor/bin/wp-hooks-generator --input=src --output=bin/hook-docs/data && node ./bin/hook-docs && pnpm build:docs:block-references",

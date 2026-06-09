@@ -16,7 +16,7 @@ catalogs:
         '@wordpress/block-editor': 14.14.6
         '@wordpress/block-library': 9.19.6
         '@wordpress/blocks': 14.8.2
-        '@wordpress/build': 0.12.0
+        '@wordpress/build': 0.16.0
         '@wordpress/commands': 1.19.4
         '@wordpress/components': 29.5.4
         '@wordpress/compose': 7.19.2

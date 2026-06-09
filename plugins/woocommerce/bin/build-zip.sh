@@ -31,6 +31,19 @@ echo "Run makepot..."
 pnpm --filter=@woocommerce/plugin-woocommerce makepot || exit "$?"
 echo "Syncing files..."
 rsync -rc --exclude-from="$PROJECT_PATH/.distignore" "$PROJECT_PATH/" "$DEST_PATH/" --delete --delete-excluded
+mkdir -p "$DEST_PATH/assets/client/blocks"
+cp -R "$PROJECT_PATH/client/blocks/packages/block-library/build/." "$DEST_PATH/assets/client/blocks/"
+for generated_file in build.php constants.php modules.php pages.php routes.php scripts.php styles.php widgets.php; do
+	if [ -f "$PROJECT_PATH/assets/client/blocks/$generated_file" ]; then
+		cp "$PROJECT_PATH/assets/client/blocks/$generated_file" "$DEST_PATH/assets/client/blocks/$generated_file"
+	fi
+done
+for generated_directory in modules pages routes scripts styles widgets; do
+	if [ -d "$PROJECT_PATH/assets/client/blocks/$generated_directory" ]; then
+		cp -R "$PROJECT_PATH/assets/client/blocks/$generated_directory" "$DEST_PATH/assets/client/blocks/$generated_directory"
+	fi
+done
+cp "$PROJECT_PATH/assets/client/blocks/blocks-json.php" "$DEST_PATH/assets/client/blocks/blocks-json.php"
 
 echo "Regenerating autoloader for production..."
 cd "$DEST_PATH" || exit
