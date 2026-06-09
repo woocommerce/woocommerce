@@ -246,7 +246,7 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 				'wp_upload_dir' => fn() => array( 'basedir' => $upload_base ),
 				// First realpath() call returns false to force the create branch; rely on
 				// the real wp_mkdir_p afterward so the second realpath() (unmocked) succeeds.
-				'realpath'      => function ( $path ) {
+				'realpath'      => function( $path ) {
 					static $first_call = true;
 					if ( $first_call ) {
 						$first_call = false;
