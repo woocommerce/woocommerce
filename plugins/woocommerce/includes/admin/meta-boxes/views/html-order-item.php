@@ -80,10 +80,10 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			</div>
 		</td>
 	<?php endif; ?>
-	<td class="item_cost" width="1%" data-sort-value="<?php echo esc_attr( $order->get_item_subtotal( $item, false, true ) ); ?>">
+	<td class="item_cost" width="1%" data-sort-value="<?php echo esc_attr( $order->get_item_subtotal_to_display( $item ) ); ?>">
 		<div class="view">
 			<?php
-			echo wc_price( $order->get_item_subtotal( $item, false, true ), $wc_price_arg ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo wc_price( $order->get_item_subtotal_to_display( $item ), $wc_price_arg ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			?>
 		</div>
 	</td>

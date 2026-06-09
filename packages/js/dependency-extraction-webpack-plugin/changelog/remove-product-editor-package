@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove the product editor package from dependency extraction.

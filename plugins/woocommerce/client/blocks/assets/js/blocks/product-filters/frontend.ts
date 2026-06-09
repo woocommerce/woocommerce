@@ -209,14 +209,13 @@ const productFiltersStore = {
 			}
 			actions.navigate();
 		},
-		// TODO: Remove the hardcoded type once https://github.com/woocommerce/gutenberg/pull/8 is merged.
-		*navigate(): Generator {
+		*navigate() {
 			const context = getServerContext
 				? getServerContext< ProductFiltersContext >()
 				: getContext< ProductFiltersContext >();
 
-			const canonicalUrl = getConfig( BLOCK_NAME ).canonicalUrl;
-			const url = new URL( canonicalUrl );
+			const config = getConfig( BLOCK_NAME );
+			const url = new URL( config.canonicalUrl );
 			const { searchParams } = url;
 
 			for ( const key in context.params ) {
@@ -244,6 +243,19 @@ const productFiltersStore = {
 			}
 
 			if ( window.location.href === url.href ) {
+				return;
+			}
+
+			// Per-instance context (set when Product Filters is a descendant
+			// of Product Collection) wins over the global config, which is
+			// the fallback for the sibling-block layout.
+			const forcePageReload =
+				typeof context.forcePageReload === 'boolean'
+					? context.forcePageReload
+					: config?.forcePageReload;
+
+			if ( forcePageReload ) {
+				window.location.assign( url.href );
 				return;
 			}
 

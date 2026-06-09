@@ -9,6 +9,7 @@ catalogs:
         '@types/wordpress__edit-post': 8.4.2
         '@types/wordpress__viewport': 5.5.3
         '@wordpress/a11y': 4.19.1
+        '@wordpress/admin-ui': 1.12.0
         '@wordpress/api-fetch': 7.19.2
         '@wordpress/base-styles': 5.19.1
         '@wordpress/blob': 4.19.1
@@ -33,6 +34,8 @@ catalogs:
         '@wordpress/hooks': 4.19.1
         '@wordpress/html-entities': 4.19.1
         '@wordpress/i18n': 5.19.1
+        '@wordpress/interactivity': 6.19.1
+        '@wordpress/interactivity-router': 2.19.1
         '@wordpress/icons': 10.19.1
         '@wordpress/interface': 9.4.4
         '@wordpress/is-shallow-equal': 5.19.1
@@ -40,7 +43,9 @@ catalogs:
         '@wordpress/keycodes': 4.19.1
         '@wordpress/media-utils': 5.19.2
         '@wordpress/notices': 5.19.2
+        '@wordpress/patterns': 2.19.6
         '@wordpress/plugins': 7.19.4
+        '@wordpress/postcss-plugins-preset': 4.42.0
         '@wordpress/preferences': 4.19.4
         '@wordpress/primitives': 4.19.1
         '@wordpress/priority-queue': 3.19.1
@@ -120,10 +125,7 @@ allowBuilds:
     yarn: false
 
 # Block odd protocols (git+ssh, etc.) in transitive dependencies.
-# DISABLED: @wordpress/interactivity uses a git-hosted fork (via .pnpmfile.cjs readPackage hook)
-# for @wordpress/interactivity-router. pnpm has no exclude mechanism for blockExoticSubdeps.
-# TODO: Re-enable once the WooCommerce Gutenberg fork of @wordpress/interactivity is no longer needed.
-blockExoticSubdeps: false
+blockExoticSubdeps: true
 
 # Prevent trust downgrades (e.g., replacing a signed version with unsigned).
 trustPolicy: no-downgrade
