@@ -30,25 +30,6 @@ function loadPackageFile( packagePath ) {
 }
 
 /**
- * Updates a package file on disk and in the cache.
- *
- * @param {string} packagePath The path to the package file to update.
- * @param {Object} packageFile The new package file contents.
- */
-function updatePackageFile( packagePath, packageFile ) {
-	// Resolve the absolute path for consistency when loading and updating.
-	packagePath = path.resolve( __dirname, packagePath );
-	packageFileCache[ packagePath ] = packageFile;
-
-	fs.writeFileSync(
-		path.join( packagePath, 'package.json' ),
-		// Make sure to keep the newline at the end of the file.
-		JSON.stringify( packageFile, null, '\t' ) + '\n',
-		'utf8'
-	);
-}
-
-/**
  * Loads a tsconfig.json, or null if missing or not plain JSON.
  *
  * Returning null on a parse failure keeps the hook from clobbering JSONC
@@ -84,9 +65,9 @@ function writeTsconfig( tsconfigPath, tsconfig ) {
 }
 
 /**
- * Identify workspace packages that consume @woocommerce/internal-ts-config.
+ * Identify workspace packages that consume @woocommerce/internal-build.
  *
- * A TS consumer has @woocommerce/internal-ts-config in dependencies or
+ * A TS consumer has @woocommerce/internal-build in dependencies or
  * devDependencies. Whether the package has a tsconfig.json on disk is
  * verified by loadTsconfig later in syncTsReferences.
  *
@@ -102,7 +83,7 @@ function identifyTsConsumers( lockfile ) {
 			...( packageFile.dependencies || {} ),
 			...( packageFile.devDependencies || {} ),
 		};
-		if ( ! ( '@woocommerce/internal-ts-config' in allDeps ) ) {
+		if ( ! ( '@woocommerce/internal-build' in allDeps ) ) {
 			continue;
 		}
 
@@ -231,77 +212,6 @@ function syncTsReferences( lockfile, context ) {
 }
 
 /**
- * Populated config object based on declared and resolved dependencies.
- *
- * @param {string}            packageName          Package name.
- * @param {string}            packagePath          Package path.
- * @param {Object}            declaredDependencies Declared dependencies from package-file.
- * @param {Object}            resolvedDependencies Resolved dependencies from lock-file.
- * @param {Object}            config               Dependency output path configuration.
- * @param {Object}            context              The hook context object.
- * @param {Function.<string>} context.log          Logs a message to the console.
- *
- * @return void
- */
-function updateConfig(
-	packageName,
-	packagePath,
-	declaredDependencies,
-	resolvedDependencies,
-	config,
-	context
-) {
-	for ( const [ key, value ] of Object.entries( declaredDependencies ) ) {
-		if ( value.startsWith( 'workspace:' ) ) {
-			const normalizedPath = path.join(
-				packagePath,
-				resolvedDependencies[ key ].replace( 'link:', '' )
-			);
-			context.log(
-				`[wireit][${ packageName }]    Inspecting workspace dependency: ${ key } (${ normalizedPath })`
-			);
-
-			// Actualize output storage with the identified entries.
-			const dependencyFile = loadPackageFile( normalizedPath );
-			if ( dependencyFile.files ) {
-				for ( const entry in dependencyFile.files ) {
-					const entryValue = dependencyFile.files[ entry ];
-					// Since 'build-module' and 'build-types' are generated simultaneously, it is more efficient for WireIt to track changes
-					// to 'build-types' only. This approach also enables a clear separation of the CJS and ESM watch build cascades.
-					if ( entryValue === 'build-module' && dependencyFile.files.includes( 'build-types' ) ) {
-						continue;
-					}
-
-					let normalizedValue;
-					if ( entryValue.startsWith( '!' ) ) {
-						normalizedValue =
-							'!' +
-							path.join(
-								'node_modules',
-								key,
-								entryValue.substring( 1 )
-							);
-					} else {
-						normalizedValue = path.join(
-							'node_modules',
-							key,
-							entryValue
-						);
-					}
-					config.files.push( normalizedValue );
-
-					context.log(
-						`[wireit][${ packageName }]        - ${ normalizedValue }`
-					);
-				}
-			} else {
-				context.log( `[wireit][${ packageName }]        ---` );
-			}
-		}
-	}
-}
-
-/**
  * This hook allows for the mutation of the lockfile before it is serialized.
  *
  * @param {Object}					lockfile				 The lock file that was produced by PNPM.
@@ -313,72 +223,6 @@ function updateConfig(
  * @return {Object} lockfile The updated lockfile.
  */
 function afterAllResolved( lockfile, context ) {
-	context.log( '[wireit] Updating Dependency Lists' );
-
-	for ( const packagePath in lockfile.importers ) {
-		const packageFile = loadPackageFile( packagePath );
-		if ( packageFile.wireit ) {
-			context.log(
-				`[wireit][${ packageFile.name }] Verifying 'wireit.dependencyOutputs'`
-			);
-
-			// Include the lock file in the fingerprint in case resolved versions change.
-			const lockfilePath = path.join(
-				path.relative( packagePath, '.' ),
-				'pnpm-lock.yaml'
-			);
-
-			// Initialize outputs storage and hash it's original state.
-			const config = {
-				allowUsuallyExcludedPaths: true, // This is needed so we can reference files in `node_modules`.
-				files: [ 'package.json', lockfilePath ], // The files list will include globs for dependency files that we should fingerprint.
-			};
-			const originalConfigState = JSON.stringify( config );
-
-			// Walk through workspace-located dependencies and provision.
-			updateConfig(
-				packageFile.name,
-				packagePath,
-				{
-					...( packageFile.dependencies || {} ),
-					...( packageFile.devDependencies || {} ),
-				},
-				{
-					...( lockfile.importers[ packagePath ].dependencies || {} ),
-					...( lockfile.importers[ packagePath ].devDependencies ||
-						{} ),
-				},
-				config,
-				context
-			);
-
-			// Verify config state and update manifest on mismatch.
-			let updated = false;
-			const newConfigState = JSON.stringify( config );
-			if ( newConfigState !== originalConfigState ) {
-				const loadedConfigState = JSON.stringify(
-					packageFile.wireit?.dependencyOutputs || {}
-				);
-				if ( newConfigState !== loadedConfigState ) {
-					context.log(
-						`[wireit][${ packageFile.name }]    Conclusion: outdated, updating 'wireit.dependencyOutputs'`
-					);
-
-					packageFile.wireit.dependencyOutputs = config;
-					updatePackageFile( packagePath, packageFile );
-					updated = true;
-				}
-			}
-			if ( ! updated ) {
-				context.log(
-					`[wireit][${ packageFile.name }]    Conclusion: up to date`
-				);
-			}
-		}
-	}
-
-	context.log( '[wireit] Done' );
-
 	syncTsReferences( lockfile, context );
 
 	return lockfile;
@@ -388,35 +232,5 @@ function afterAllResolved( lockfile, context ) {
 module.exports = {
 	hooks: {
 		afterAllResolved,
-		readPackage( pkg ) {
-			// We resolve @wordpress/interactivity and @wordpress/interactivity-router via pnpm's git sub dir feature
-			// and as a result need to resolve some of their dependencies also via sub dir.
-			if ( pkg.name === '@wordpress/interactivity-router' ) {
-				if (
-					pkg.dependencies &&
-					pkg.dependencies[ '@wordpress/a11y' ] &&
-					pkg.dependencies[ '@wordpress/interactivity' ]
-				) {
-					const blocksPackageJsonPath = path.resolve(
-						__dirname,
-						'plugins/woocommerce/client/blocks/package.json'
-					);
-
-					const blocksPackageJson = require( blocksPackageJsonPath );
-					const a11yVersion =
-						blocksPackageJson.dependencies?.[ '@wordpress/a11y' ];
-
-					//  Use the version installed in @woocommerce/block-library, fallback if the version is somehow no longer installed.
-					pkg.dependencies[ '@wordpress/a11y' ] =
-						a11yVersion || '4.22.0';
-
-					// Use the WooCommerce fork
-					pkg.dependencies[ '@wordpress/interactivity' ] =
-						'github:woocommerce/gutenberg#interactivity-api-001&path:/packages/interactivity';
-				}
-			}
-
-			return pkg;
-		},
 	},
 };
