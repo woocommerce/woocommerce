@@ -212,8 +212,11 @@ class WC_Product_Download implements ArrayAccess {
 		}
 
 		// Root-relative paths into the content directory are resolved against WP_CONTENT_DIR.
-		$content_dirname = FilesystemUtil::get_content_directory_relative_path();
-		if ( 0 === strpos( $file_url, $content_dirname ) ) {
+		// Match the content dirname only at a path-segment boundary, so a content dir such as
+		// "/app" does not false-match an unrelated path like "/application/...".
+		$content_dirname     = FilesystemUtil::get_content_directory_relative_path();
+		$is_content_relative = $file_url === $content_dirname || 0 === strpos( $file_url, trailingslashit( $content_dirname ) );
+		if ( $is_content_relative ) {
 			$path_within_content_dir = substr( $file_url, strlen( $content_dirname ) );
 			return realpath( WP_CONTENT_DIR . $path_within_content_dir );
 		}
