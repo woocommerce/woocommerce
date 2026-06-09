@@ -89,6 +89,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $items_to_delete = array();
 
 	/**
+	 * Monotonic counter used to build collision-free temporary array keys for
+	 * not-yet-persisted items.
+	 *
+	 * count() is not safe for this: when items are removed and re-added before
+	 * save(), the count repeats a previous value, so two distinct unsaved items
+	 * map to the same 'new:<type><N>' key and the second silently overwrites the
+	 * first (it is then lost on save()). A never-reused counter guarantees a
+	 * unique key for every unsaved item for the lifetime of the object.
+	 *
+	 * @since 10.9.0
+	 * @var int
+	 */
+	protected $temp_item_id_counter = 0;
+
+	/**
 	 * Bulk order item types scheduled for deletion on save().
 	 *
 	 * Populated by remove_order_items() with a specific item type and processed by
@@ -1296,7 +1311,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $item_id ) {
 			$this->items[ $items_key ][ $item_id ] = $item;
 		} else {
-			$this->items[ $items_key ][ 'new:' . $items_key . count( $this->items[ $items_key ] ) ] = $item;
+			$this->items[ $items_key ][ 'new:' . $items_key . $this->temp_item_id_counter++ ] = $item;
 		}
 	}
 

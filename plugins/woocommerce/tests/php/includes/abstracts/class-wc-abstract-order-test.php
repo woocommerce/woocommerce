@@ -660,6 +660,48 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox add_item() must not overwrite an earlier unsaved item when items are removed and re-added before save().
+	 */
+	public function test_add_item_keeps_unsaved_items_after_remove_and_readd() {
+		$make_fee = function ( $name ) {
+			$fee = new WC_Order_Item_Fee();
+			$fee->set_name( $name );
+			$fee->set_amount( '1' );
+			$fee->set_total( '1' );
+			$fee->set_tax_status( 'none' );
+			return $fee;
+		};
+
+		$order = new WC_Order();
+		$order->add_item( $make_fee( 'Existing 1' ) );
+		$order->add_item( $make_fee( 'Existing 2' ) );
+		$order->save();
+
+		$find = function ( $name ) use ( $order ) {
+			foreach ( $order->get_items( 'fee' ) as $item ) {
+				if ( $name === $item->get_name() ) {
+					return $item;
+				}
+			}
+			return null;
+		};
+
+		// Remove an existing fee and add a fresh one, twice, all before saving.
+		// With count()-based temporary keys the two fresh fees collide on the same
+		// 'new:fee_lines<N>' key and the first ('Fresh A') is silently dropped.
+		$order->remove_item( $find( 'Existing 1' )->get_id() );
+		$order->add_item( $make_fee( 'Fresh A' ) );
+		$order->remove_item( $find( 'Existing 2' )->get_id() );
+		$order->add_item( $make_fee( 'Fresh B' ) );
+		$order->save();
+
+		$names = wp_list_pluck( wc_get_order( $order->get_id() )->get_items( 'fee' ), 'name' );
+		$this->assertContains( 'Fresh A', $names, 'Earlier unsaved fee must survive a later add_item().' );
+		$this->assertContains( 'Fresh B', $names );
+		$this->assertCount( 2, $names );
+	}
+
+	/**
 	 * @testdox Should keep original items in the DB if save() never runs after remove_order_items().
 	 */
 	public function test_remove_order_items_preserves_db_items_if_save_not_called() {
