@@ -39,7 +39,6 @@ class WC_Post_Data {
 	public static function init() {
 		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_products_last_modified' ), 10, 2 );
 		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_db_block_templates_cache' ), 10, 2 );
-		add_action( 'clean_post_cache', array( __CLASS__, 'update_stale_product_objects_tracking_cache' ), 10, 2 );
 		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
@@ -206,24 +205,6 @@ class WC_Post_Data {
 	public static function invalidate_db_block_templates_cache( $post_id, $post ): void {
 		if ( $post instanceof \WP_Post && in_array( $post->post_type, array( 'wp_template_part', 'wp_template' ), true ) ) {
 			wp_cache_delete( $post->post_type . '-ids', 'woocommerce_blocks' );
-		}
-	}
-
-	/**
-	 * Updates product save/delete operation timestamp as part of stale objects trackings.
-	 *
-	 * @param int      $post_id Post ID.
-	 * @param \WP_Post $post    Post object.
-	 *
-	 * @internal
-	 * @since 10.9.0
-	 *
-	 * @return void
-	 */
-	public static function update_stale_product_objects_tracking_cache( $post_id, $post ): void {
-		if ( $post instanceof \WP_Post && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
-			// Not the greatest design, but we need access to non-static 'object_type' property of the product object.
-			( new WC_Product() )->_woocommerce_entity_persisted( $post_id );
 		}
 	}
 

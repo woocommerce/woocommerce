@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Always show the email Reply-to settings, regardless of whether the email block editor feature is enabled.

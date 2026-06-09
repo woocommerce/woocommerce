@@ -11,6 +11,25 @@ use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 
 defined( 'ABSPATH' ) || exit;
 
+/*
+ * Pre-load the enum file because the in-process Jetpack autoloader classmap is
+ * captured at request start by the pre-upgrade plugin version, so during a same-
+ * request in-place upgrade it will not contain new src/Enums/* classes added in
+ * the new version. Without this, the DefaultCustomerAddress::* references below
+ * would trigger an autoloader miss and a "Class not found" fatal during the
+ * upgrade-completion iframe of /wp-admin/update.php.
+ *
+ * The class_exists() guard (with autoload disabled) matches the defensive
+ * pattern used elsewhere in includes/, e.g. class-wc-gateway-paypal.php, and
+ * keeps this safe under opcache.preload or any other mechanism that may have
+ * already defined the class before the file is included.
+ *
+ * The architectural fix lives in https://github.com/woocommerce/woocommerce/issues/54657.
+ */
+if ( ! class_exists( '\Automattic\WooCommerce\Enums\DefaultCustomerAddress', false ) ) {
+	require_once dirname( WC_PLUGIN_FILE ) . '/src/Enums/DefaultCustomerAddress.php';
+}
+
 if ( class_exists( 'WC_Settings_General', false ) ) {
 	return new WC_Settings_General();
 }
