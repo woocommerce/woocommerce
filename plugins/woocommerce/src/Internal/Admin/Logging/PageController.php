@@ -731,7 +731,7 @@ class PageController {
 					$message_chunks[1] = sprintf(
 						'<details><summary>%1$s</summary>%2$s</details>',
 						esc_html__( 'Additional context', 'woocommerce' ),
-						esc_html( $context )
+						esc_html( (string) $context )
 					);
 
 					$segments[2] = implode( ' ', $message_chunks );
