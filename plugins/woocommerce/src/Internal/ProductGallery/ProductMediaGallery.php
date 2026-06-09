@@ -205,12 +205,16 @@ class ProductMediaGallery {
 	}
 
 	/**
-	 * Get video gallery items from a mixed media gallery.
+	 * Get positioned video gallery items from a mixed media gallery.
+	 *
+	 * The mixed gallery excludes the featured product image. Positions are
+	 * stored as 0-based indexes in that gallery and shifted later only when the
+	 * composed media gallery includes the featured image.
 	 *
 	 * @param array $media_gallery Media gallery items.
 	 * @return array
 	 */
-	public static function get_video_gallery_items_from_media_gallery( array $media_gallery ): array {
+	public static function get_positioned_video_gallery_items_from_media_gallery( array $media_gallery ): array {
 		$video_gallery = array();
 
 		foreach ( array_values( $media_gallery ) as $position => $media_item ) {
