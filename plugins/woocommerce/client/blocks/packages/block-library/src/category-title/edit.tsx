@@ -28,7 +28,7 @@ import {
 /**
  * Internal dependencies
  */
-import { usePreviewMode } from '../hooks/use-preview-mode';
+import { usePreviewMode } from '@woocommerce/base-hooks/use-preview-mode';
 
 export type CategoryTitleAttributes = {
 	isLink: boolean;

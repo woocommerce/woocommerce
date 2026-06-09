@@ -15,10 +15,7 @@
 		"./package.json": "./package.json"
 	},
 	"wpScript": true,
-	"wpCopyFiles": {
-		"files": [
-			"src/**/block.json",
-			"src/**/*.php"
-		]
+	"dependencies": {
+		"@wordpress/icons": "catalog:wp-min"
 	}
 }

@@ -102,7 +102,7 @@
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
 		"watch:build:project:bundle": "WP_EXPERIMENTAL_MODULES=\"${WP_EXPERIMENTAL_MODULES:-true}\" webpack --watch",
-		"watch:build:project:block-library": "wp-build --watch",
+		"watch:build:project:block-library": "node ./bin/copy-block-library-package-build.mjs --watch",
 		"knip": "WP_EXPERIMENTAL_MODULES=true knip"
 	},
 	"wpPlugin": {

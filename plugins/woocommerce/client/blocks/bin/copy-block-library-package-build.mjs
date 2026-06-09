@@ -1,69 +1,47 @@
 #!/usr/bin/env node
 
 /**
+ * Syncs the `packages/block-library` build into WooCommerce's runtime assets.
+ *
+ * `wp-build` writes package output into two places:
+ * - `plugins/woocommerce/client/blocks/build` for generated PHP registration
+ *   and bundled browser scripts.
+ * - `plugins/woocommerce/client/blocks/packages/block-library/build` for the
+ *   package's CommonJS build and copied block metadata.
+ *
+ * WooCommerce loads block assets from `plugins/woocommerce/assets/client/blocks`,
+ * so this script copies those generated files into that final folder. In watch
+ * mode it polls the package source content, runs `wp-build` when source changes,
+ * and then copies the fresh output.
+ */
+
+/**
  * External dependencies
  */
-import {
-	copyFile,
-	mkdir,
-	readdir,
-	rm,
-	stat,
-	writeFile,
-} from 'node:fs/promises';
-import { createRequire } from 'node:module';
+import { cp, mkdir, readFile, readdir, stat } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const currentDir = path.dirname( fileURLToPath( import.meta.url ) );
-const requireFromBlocks = createRequire(
-	path.join( currentDir, '../package.json' )
-);
 const blocksRoot = path.resolve( currentDir, '..' );
 const packageRoot = path.join( blocksRoot, 'packages/block-library' );
 const packageBuildDir = path.join( packageRoot, 'build' );
 const packageSourceDir = path.join( packageRoot, 'src' );
-const scriptsBuildDir = path.join( blocksRoot, 'build/scripts/block-library' );
-const blockMetadataBuildDir = path.join( blocksRoot, 'build' );
-const generatedScriptsDir = path.join( blocksRoot, 'build/scripts' );
+const generatedBuildDir = path.join( blocksRoot, 'build' );
 const runtimeAssetsDir = path.resolve(
 	blocksRoot,
 	'../../assets/client/blocks'
 );
-const runtimeBlocksManifestPath = path.join(
-	runtimeAssetsDir,
-	'blocks-json.php'
-);
-const builtPluginDir = path.resolve( blocksRoot, '../../build/woocommerce' );
 const builtPluginAssetsDir = path.resolve(
-	builtPluginDir,
-	'assets/client/blocks'
+	blocksRoot,
+	'../../build/woocommerce/assets/client/blocks'
 );
-const generatedBuildFiles = [
-	'build.php',
-	'constants.php',
-	'modules.php',
-	'pages.php',
-	'routes.php',
-	'scripts.php',
-	'styles.php',
-	'widgets.php',
-];
-const generatedBuildDirectories = [
-	'modules',
-	'pages',
-	'routes',
-	'scripts',
-	'styles',
-	'widgets',
-];
-const wordpressIconsPackage = requireFromBlocks(
-	'@wordpress/icons/package.json'
-);
-const wordpressIconsFallbackDependencies = [
-	'react-jsx-runtime',
-	'wp-primitives',
-];
+const isWatchMode = process.argv.includes( '--watch' );
+const pollIntervalMs = 500;
+let isBuilding = false;
+let needsBuild = false;
 
 async function exists( filePath ) {
 	try {
@@ -77,226 +55,158 @@ async function exists( filePath ) {
 	}
 }
 
-async function getFiles( directory ) {
-	if ( ! ( await exists( directory ) ) ) {
+async function isDirectoryOrPhpFile( filePath ) {
+	return (
+		( await stat( filePath ) ).isDirectory() || filePath.endsWith( '.php' )
+	);
+}
+
+async function getSourceFiles( filePath ) {
+	if ( ! ( await exists( filePath ) ) ) {
 		return [];
 	}
 
-	const files = [];
-	const entries = await readdir( directory, { withFileTypes: true } );
+	const fileStat = await stat( filePath );
 
-	for ( const entry of entries ) {
-		const filePath = path.join( directory, entry.name );
-
-		if ( entry.isDirectory() ) {
-			files.push( ...( await getFiles( filePath ) ) );
-			continue;
-		}
-
-		if ( entry.isFile() ) {
-			files.push( filePath );
-		}
+	if ( fileStat.isFile() ) {
+		return [ filePath ];
 	}
 
-	return files;
-}
-
-async function copyMatchingFiles( sourceRoot, targetRoot, shouldCopy ) {
-	const files = await getFiles( sourceRoot );
-
-	await Promise.all(
-		files.filter( shouldCopy ).map( async ( sourcePath ) => {
-			const targetPath = path.join(
-				targetRoot,
-				path.relative( sourceRoot, sourcePath )
-			);
-
-			await mkdir( path.dirname( targetPath ), { recursive: true } );
-			await copyFile( sourcePath, targetPath );
-		} )
+	const entries = await readdir( filePath, { withFileTypes: true } );
+	const nestedFiles = await Promise.all(
+		entries.map( ( entry ) =>
+			getSourceFiles( path.join( filePath, entry.name ) )
+		)
 	);
+
+	return nestedFiles.flat();
 }
 
-async function copyDirectory( sourceRoot, targetRoot ) {
-	const files = await getFiles( sourceRoot );
+async function getSourceSignature() {
+	// Hash file contents instead of mtimes so build/copy timestamp changes do
+	// not retrigger watch mode.
+	const files = (
+		await Promise.all(
+			[ packageSourceDir, path.join( packageRoot, 'package.json' ) ].map(
+				getSourceFiles
+			)
+		)
+	 )
+		.flat()
+		.sort();
+	const hash = createHash( 'sha256' );
 
-	await rm( targetRoot, { recursive: true, force: true } );
+	for ( const filePath of files ) {
+		hash.update( path.relative( packageRoot, filePath ) );
+		hash.update( '\0' );
+		hash.update( await readFile( filePath ) );
+		hash.update( '\0' );
+	}
 
-	await Promise.all(
-		files.map( async ( sourcePath ) => {
-			const targetPath = path.join(
-				targetRoot,
-				path.relative( sourceRoot, sourcePath )
-			);
-
-			await mkdir( path.dirname( targetPath ), { recursive: true } );
-			await copyFile( sourcePath, targetPath );
-		} )
-	);
+	return hash.digest( 'hex' );
 }
 
-async function copyGeneratedBuildRegistration( sourceRoot, targetRoot ) {
-	await mkdir( targetRoot, { recursive: true } );
-	await rm( path.join( targetRoot, 'registry.php' ), { force: true } );
-	await rm( path.join( targetRoot, 'block-library' ), {
+async function copyBuildOutput( targetDir ) {
+	await mkdir( targetDir, { recursive: true } );
+	await cp( generatedBuildDir, targetDir, { recursive: true, force: true } );
+	await cp( packageBuildDir, targetDir, { recursive: true, force: true } );
+	await cp( packageSourceDir, targetDir, {
 		recursive: true,
 		force: true,
+		filter: isDirectoryOrPhpFile,
 	} );
-
-	await Promise.all(
-		generatedBuildFiles.map( async ( fileName ) => {
-			const sourcePath = path.join( sourceRoot, fileName );
-
-			if ( ! ( await exists( sourcePath ) ) ) {
-				return;
-			}
-
-			await copyFile( sourcePath, path.join( targetRoot, fileName ) );
-		} )
-	);
-
-	await Promise.all(
-		generatedBuildDirectories.map( async ( directoryName ) => {
-			const sourcePath = path.join( sourceRoot, directoryName );
-
-			if ( ! ( await exists( sourcePath ) ) ) {
-				return;
-			}
-
-			await copyDirectory(
-				sourcePath,
-				path.join( targetRoot, directoryName )
-			);
-		} )
-	);
 }
 
-function getWordpressIconsFallbackScript( minified = false ) {
-	const script = `( function ( wp, ReactJSXRuntime ) {
-\tif ( ! wp || wp.icons ) {
-\t\treturn;
-\t}
-
-\tconst primitives = wp.primitives || {};
-\tconst SVG = primitives.SVG;
-\tconst Path = primitives.Path;
-\tconst jsx = ReactJSXRuntime && ReactJSXRuntime.jsx;
-
-\tif ( ! SVG || ! Path || ! jsx ) {
-\t\treturn;
-\t}
-
-\twp.icons = {
-\t\theading: jsx( SVG, {
-\t\t\txmlns: 'http://www.w3.org/2000/svg',
-\t\t\tviewBox: '0 0 24 24',
-\t\t\tchildren: jsx( Path, {
-\t\t\t\td: 'M6 5V18.5911L12 13.8473L18 18.5911V5H6Z',
-\t\t\t} ),
-\t\t} ),
-\t};
-} )( ( window.wp = window.wp || {} ), window.ReactJSXRuntime );
-`;
-
-	if ( ! minified ) {
-		return script;
-	}
-
-	return "(function(wp,ReactJSXRuntime){if(!wp||wp.icons){return;}const primitives=wp.primitives||{};const SVG=primitives.SVG;const Path=primitives.Path;const jsx=ReactJSXRuntime&&ReactJSXRuntime.jsx;if(!SVG||!Path||!jsx){return;}wp.icons={heading:jsx(SVG,{xmlns:'http://www.w3.org/2000/svg',viewBox:'0 0 24 24',children:jsx(Path,{d:'M6 5V18.5911L12 13.8473L18 18.5911V5H6Z'})})};})((window.wp=window.wp||{}),window.ReactJSXRuntime);\n";
-}
-
-async function writeWordpressIconsFallback() {
-	const fallbackDir = path.join( generatedScriptsDir, 'wp-icons' );
-	const assetPhp = `<?php
-/**
- * WordPress Icons fallback asset file.
- *
- * @package woocommerce_blocks_block_library
- */
-
-return array(
-\t'dependencies' => array( '${ wordpressIconsFallbackDependencies.join(
-		"', '"
-	) }' ),
-\t'version'      => '${ wordpressIconsPackage.version }',
-);
-`;
-
-	await mkdir( fallbackDir, { recursive: true } );
-	await writeFile(
-		path.join( fallbackDir, 'index.js' ),
-		getWordpressIconsFallbackScript()
-	);
-	await writeFile(
-		path.join( fallbackDir, 'index.min.js' ),
-		getWordpressIconsFallbackScript( true )
-	);
-	await writeFile(
-		path.join( fallbackDir, 'index.min.asset.php' ),
-		assetPhp
-	);
-}
-
-function isBlockMetadataOrRenderFile( filePath ) {
-	const basename = path.basename( filePath );
-
-	return (
-		basename === 'block.json' ||
-		( path.extname( filePath ) === '.php' &&
-			! basename.endsWith( '.asset.php' ) )
-	);
-}
-
-async function cleanCopiedMetadataFiles( directory ) {
-	const files = await getFiles( directory );
-
-	await Promise.all(
-		files
-			.filter( isBlockMetadataOrRenderFile )
-			.map( ( filePath ) => rm( filePath ) )
-	);
-}
-
-if ( ! ( await exists( packageBuildDir ) ) ) {
-	throw new Error(
-		'Expected packages/block-library/build to exist. Run wp-build before copying block-library package files.'
-	);
-}
-
-await copyMatchingFiles(
-	packageSourceDir,
-	packageBuildDir,
-	( filePath ) => path.extname( filePath ) === '.php'
-);
-await copyMatchingFiles( packageBuildDir, blockMetadataBuildDir, () => true );
-await cleanCopiedMetadataFiles( scriptsBuildDir );
-await writeWordpressIconsFallback();
-await copyMatchingFiles(
-	packageBuildDir,
-	scriptsBuildDir,
-	isBlockMetadataOrRenderFile
-);
-await copyGeneratedBuildRegistration( blockMetadataBuildDir, runtimeAssetsDir );
-await copyMatchingFiles( packageBuildDir, runtimeAssetsDir, () => true );
-
-if ( await exists( builtPluginDir ) ) {
-	await copyGeneratedBuildRegistration(
-		blockMetadataBuildDir,
-		builtPluginAssetsDir
-	);
-	await copyMatchingFiles(
-		packageBuildDir,
-		builtPluginAssetsDir,
-		() => true
-	);
-
-	if ( await exists( runtimeBlocksManifestPath ) ) {
-		await copyFile(
-			runtimeBlocksManifestPath,
-			path.join( builtPluginAssetsDir, 'blocks-json.php' )
+async function copyPackageBuildOutput() {
+	if ( ! ( await exists( packageBuildDir ) ) ) {
+		throw new Error(
+			'Expected packages/block-library/build to exist. Run wp-build before copying block-library package files.'
 		);
 	}
+
+	await copyBuildOutput( runtimeAssetsDir );
+
+	if ( await exists( path.dirname( builtPluginAssetsDir ) ) ) {
+		await copyBuildOutput( builtPluginAssetsDir );
+	}
+
+	// eslint-disable-next-line no-console
+	console.log( 'Copied block-library package build output.' );
 }
 
-// eslint-disable-next-line no-console
-console.log( 'Copied block-library package metadata and generated scripts.' );
+async function runWpBuild() {
+	await new Promise( ( resolve, reject ) => {
+		const wpBuild = spawn( 'wp-build', [], {
+			cwd: blocksRoot,
+			stdio: 'inherit',
+		} );
+
+		wpBuild.once( 'exit', ( code ) => {
+			if ( code === 0 ) {
+				resolve();
+				return;
+			}
+
+			reject( new Error( `wp-build exited with code ${ code }.` ) );
+		} );
+		wpBuild.once( 'error', reject );
+	} );
+}
+
+async function buildAndCopy() {
+	if ( isBuilding ) {
+		needsBuild = true;
+		return;
+	}
+
+	isBuilding = true;
+
+	try {
+		do {
+			needsBuild = false;
+			await runWpBuild();
+			await copyPackageBuildOutput();
+		} while ( needsBuild );
+	} finally {
+		isBuilding = false;
+	}
+}
+
+if ( isWatchMode ) {
+	let sourceSignature = await getSourceSignature();
+	let poll;
+	const shutdown = () => {
+		clearInterval( poll );
+		process.exit( 0 );
+	};
+
+	process.once( 'SIGINT', shutdown );
+	process.once( 'SIGTERM', shutdown );
+
+	await buildAndCopy();
+	sourceSignature = await getSourceSignature();
+
+	poll = setInterval( () => {
+		if ( isBuilding ) {
+			return;
+		}
+
+		getSourceSignature()
+			.then( ( nextSourceSignature ) => {
+				if ( nextSourceSignature !== sourceSignature ) {
+					sourceSignature = nextSourceSignature;
+					return buildAndCopy().then( async () => {
+						sourceSignature = await getSourceSignature();
+					} );
+				}
+
+				return undefined;
+			} )
+			.catch( ( error ) => {
+				// eslint-disable-next-line no-console
+				console.error( error );
+			} );
+	}, pollIntervalMs );
+} else {
+	await copyPackageBuildOutput();
+}
