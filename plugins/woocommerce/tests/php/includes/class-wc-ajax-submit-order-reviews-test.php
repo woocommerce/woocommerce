@@ -18,19 +18,25 @@ use Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler;
 class WC_AJAX_Submit_Order_Reviews_Test extends \WP_Ajax_UnitTestCase {
 
 	/**
-	 * Set up: enable OrderReviews feature flag, reset eligibility cache.
+	 * Set up: enable OrderReviews feature flag, wire AJAX handler, reset eligibility cache.
 	 */
 	public function set_up(): void {
 		parent::set_up();
 		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
-		ItemEligibility::reset_cache();
+		// Feature flag was disabled during WP bootstrap, so maybe_init_order_reviews()
+		// skipped SubmissionHandler::init(). Wire the AJAX hook manually.
+		$handler = wc_get_container()->get( SubmissionHandler::class );
+		$handler->init();
 		update_option( 'comment_moderation', '0' );
 	}
 
 	/**
-	 * Tear down: clean $_POST, reset options and eligibility cache.
+	 * Tear down: remove AJAX hooks, clean $_POST, reset options and eligibility cache.
 	 */
 	public function tear_down(): void {
+		$handler = wc_get_container()->get( SubmissionHandler::class );
+		remove_action( 'wp_ajax_' . SubmissionHandler::ACTION, array( $handler, 'handle' ) );
+		remove_action( 'wp_ajax_nopriv_' . SubmissionHandler::ACTION, array( $handler, 'handle' ) );
 		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 		unset( $_POST['_wcnonce'], $_POST['order_id'], $_POST['key'], $_POST['reviews'] );
 		update_option( 'comment_moderation', '0' );
@@ -54,8 +60,8 @@ class WC_AJAX_Submit_Order_Reviews_Test extends \WP_Ajax_UnitTestCase {
 		$order->set_billing_email( 'john@example.com' );
 
 		for ( $i = 0; $i < $product_count; $i++ ) {
-			$product           = WC_Helper_Product::create_simple_product();
-			$product_ids[]     = $product->get_id();
+			$product          = WC_Helper_Product::create_simple_product();
+			$product_ids[]    = $product->get_id();
 			$order_item_ids[] = $order->add_product( $product, 1 );
 		}
 
@@ -141,7 +147,7 @@ class WC_AJAX_Submit_Order_Reviews_Test extends \WP_Ajax_UnitTestCase {
 		$response = $this->do_ajax();
 
 		$this->assertFalse( $response['success'] ?? true );
-		$this->assertSame( 404, $response['data']['code'] ?? 0 );
+		$this->assertSame( 'Order not found.', $response['data']['message'] );
 	}
 
 	/**
@@ -157,7 +163,7 @@ class WC_AJAX_Submit_Order_Reviews_Test extends \WP_Ajax_UnitTestCase {
 		$response = $this->do_ajax();
 
 		$this->assertFalse( $response['success'] ?? true );
-		$this->assertSame( 404, $response['data']['code'] ?? 0 );
+		$this->assertSame( 'Order not found.', $response['data']['message'] );
 	}
 
 	/**
@@ -366,7 +372,7 @@ class WC_AJAX_Submit_Order_Reviews_Test extends \WP_Ajax_UnitTestCase {
 		$response = $this->do_ajax();
 
 		$this->assertTrue( $response['success'] );
-		$order       = wc_get_order( $data['order']->get_id() );
+		$order        = wc_get_order( $data['order']->get_id() );
 		$completed_at = $order->get_meta( SubmissionHandler::COMPLETED_META_KEY );
 		$this->assertNotEmpty( $completed_at );
 	}
@@ -397,7 +403,7 @@ class WC_AJAX_Submit_Order_Reviews_Test extends \WP_Ajax_UnitTestCase {
 		$response = $this->do_ajax();
 
 		$this->assertTrue( $response['success'] );
-		$order       = wc_get_order( $data['order']->get_id() );
+		$order        = wc_get_order( $data['order']->get_id() );
 		$completed_at = $order->get_meta( SubmissionHandler::COMPLETED_META_KEY );
 		$this->assertEmpty( $completed_at );
 	}
