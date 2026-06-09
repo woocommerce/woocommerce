@@ -49,6 +49,7 @@
 		"@woocommerce/admin-library": "workspace:*",
 		"@woocommerce/block-library": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/base-styles": "catalog:wp-min",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
 		"storybook": "7.6.19",

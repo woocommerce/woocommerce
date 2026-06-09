@@ -9,31 +9,20 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
  */
 const wcAdminWebpackConfig = require( '../../plugins/woocommerce/client/admin/webpack.config.js' );
 
-const wcAdminPackages = [
-	'components',
-	'csv-export',
-	'currency',
-	'date',
-	'navigation',
-	'number',
-	'data',
-	'tracks',
-	'experimental',
-	'onboarding',
-];
-
 module.exports = ( storybookConfig ) => {
 	storybookConfig.module.rules = [
 		...storybookConfig.module.rules,
 		...wcAdminWebpackConfig.module.rules,
 	];
 
-	storybookConfig.resolve.alias = wcAdminWebpackConfig.resolve.alias;
+	// Copy (don't share) the admin alias object since we mutate it below.
+	storybookConfig.resolve.alias = { ...wcAdminWebpackConfig.resolve.alias };
 
-	wcAdminPackages.forEach( ( name ) => {
-		storybookConfig.resolve.alias[ `@woocommerce/${ name }` ] =
-			path.resolve( __dirname, `../../packages/js/${ name }/src` );
-	} );
+	// Bundle every `@woocommerce/*` package from source, mirroring the admin
+	// webpack config. Each package declares a `"wc-source"` conditional export
+	// resolving to its `./src/index.ts`, so activating the condition picks up
+	// all current and future packages without a hardcoded alias list.
+	storybookConfig.resolve.conditionNames = [ 'wc-source', '...' ];
 
 	storybookConfig.resolve.alias[ '@woocommerce/settings' ] = path.resolve(
 		__dirname,
@@ -71,34 +60,6 @@ module.exports = ( storybookConfig ) => {
 						'@wordpress/components/build-style/style.css'
 					),
 					to: 'wordpress/css/components.css',
-				},
-				{
-					from: path.resolve(
-						__dirname,
-						`../../packages/js/components/build-style/*.css`
-					),
-					to: `./component-css/[name][ext]`,
-				},
-				{
-					from: path.resolve(
-						__dirname,
-						`../../packages/js/onboarding/build-style/*.css`
-					),
-					to: `./onboarding-css/[name][ext]`,
-				},
-				{
-					from: path.resolve(
-						__dirname,
-						`../../packages/js/experimental/build-style/*.css`
-					),
-					to: `./experimental-css/[name][ext]`,
-				},
-				{
-					from: path.resolve(
-						__dirname,
-						`../../plugins/woocommerce/assets/client/admin/app/*.css`
-					),
-					to: `./app-css/[name][ext]`,
 				},
 			],
 		} )
