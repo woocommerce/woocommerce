@@ -169,6 +169,55 @@ class ProductMediaGalleryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should clamp positioned videos when gallery images are removed.
+	 */
+	public function test_clamps_positioned_videos_when_gallery_images_are_removed(): void {
+		$product   = new WC_Product_Simple();
+		$image_ids = array(
+			$this->create_attachment( 'Image A', 'image/jpeg' ),
+			$this->create_attachment( 'Image B', 'image/jpeg' ),
+			$this->create_attachment( 'Image C', 'image/jpeg' ),
+		);
+		$video_id  = $this->create_attachment( 'Video', 'video/mp4' );
+
+		$product->set_gallery_image_ids( $image_ids );
+		ProductMediaGallery::set_stored_video_gallery_items(
+			$product,
+			array(
+				array(
+					'id'       => $video_id,
+					'position' => 3,
+				),
+			)
+		);
+
+		$product->set_gallery_image_ids( array( $image_ids[0] ) );
+
+		$media_items = ProductMediaGallery::get_product_media_gallery_items(
+			$product,
+			array(
+				'include_product_image' => false,
+				'resolve_video_posters' => false,
+			)
+		);
+
+		$this->assertSame(
+			array(
+				array(
+					'media_type' => 'image',
+					'id'         => $image_ids[0],
+				),
+				array(
+					'media_type' => 'video',
+					'id'         => $video_id,
+				),
+			),
+			$this->get_media_item_summary( $media_items ),
+			'Videos should move to the end when their stored position is past the remaining images.'
+		);
+	}
+
+	/**
 	 * @testdox Should extract positioned videos from a mixed gallery.
 	 */
 	public function test_extracts_positioned_videos_from_mixed_gallery(): void {
