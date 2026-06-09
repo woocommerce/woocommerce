@@ -304,7 +304,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 				continue;
 			}
 
-			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+			$attachment = wp_get_attachment_image_src( $attachment_id, $image_size );
 
 			if ( ! is_array( $attachment ) ) {
 				continue;
