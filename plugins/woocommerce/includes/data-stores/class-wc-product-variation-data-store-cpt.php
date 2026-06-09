@@ -348,7 +348,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			array_map(
 				'sanitize_title',
 				$slug_parts
-			)
+			),
+			static function ( $part ) {
+				return '' !== $part;
+			}
 		);
 
 		return implode( '-', $slug_parts );

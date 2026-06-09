@@ -699,14 +699,15 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$variation->set_parent_id( $product->get_id() );
 		$variation->set_attributes(
 			array(
-				'color' => 'Green',
 				'size'  => 'Large',
+				'level' => '0',
+				'color' => 'Green',
 			)
 		);
 		$variation->save();
 
 		$loaded_variation = wc_get_product( $variation->get_id() );
-		$this->assertEquals( 'product-variation-' . $product->get_id() . '-color-green-size-large', $loaded_variation->get_slug() );
+		$this->assertEquals( 'product-variation-' . $product->get_id() . '-color-green-level-0-size-large', $loaded_variation->get_slug() );
 	}
 
 	/**
