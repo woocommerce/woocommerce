@@ -23,7 +23,6 @@ module.exports = {
 		'../../../packages/js/experimental/src/**/stories/*.story.@(js|tsx)',
 		// WooCommerce Admin / @woocommerce/onboarding components
 		'../../../packages/js/onboarding/src/**/stories/*.story.@(js|tsx)',
-		'../../../packages/js/product-editor/src/**/*.(stories|story).@(js|tsx)',
 		'../../../plugins/woocommerce/client/admin/client/**/stories/*.story.@(js|tsx)',
 	],
 	refs: ( config, { configType } ) => {
@@ -73,24 +72,6 @@ module.exports = {
 
 	previewHead: ( head ) => `
 		${ head }
-
-		${
-			process.env.USE_RTL_STYLE === 'true'
-				? `
-			<link href="experimental-css/style-rtl.css" rel="stylesheet" />
-			<link href="component-css/style-rtl.css" rel="stylesheet" />
-			<link href="onboarding-css/style-rtl.css" rel="stylesheet" />
-			<link href="product-editor-css/style-rtl.css" rel="stylesheet" />
-			<link href="app-css/style-rtl.css" rel="stylesheet" />
-			`
-				: `
-			<link href="component-css/style.css" rel="stylesheet" />
-			<link href="experimental-css/style.css" rel="stylesheet" />
-			<link href="onboarding-css/style.css" rel="stylesheet" />
-			<link href="product-editor-css/style.css" rel="stylesheet" />
-			<link href="app-css/style.css" rel="stylesheet" />
-			`
-		}
 
 		<style>
 			/* Use system font, consistent with WordPress core (wp-admin) */

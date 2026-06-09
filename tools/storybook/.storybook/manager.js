@@ -16,7 +16,6 @@ addons.setConfig( {
 			'components',
 			'experimental',
 			'onboarding',
-			'product-editor',
 			'woocommerce-admin',
 		],
 	},
