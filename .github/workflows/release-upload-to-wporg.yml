@@ -221,19 +221,11 @@ jobs:
           svn status | grep '^?' | awk '{print $2"@"}' | xargs -r svn add
           svn status | grep '^!' | awk '{print $2"@"}' | xargs -r svn delete
 
+          # Copy trunk to tag.
+          svn copy trunk "tags/$RELEASE_TAG"
+
           # Commit.
           svn commit \
-            --username "$SVN_USERNAME" \
-            --password "$SVN_PASSWORD" \
-            --message "Updating trunk to version $RELEASE_TAG." \
-            --no-auth-cache \
-            --non-interactive \
-            --config-option=servers:global:http-timeout=3600
-
-          # Copy trunk to tag.
-          svn copy \
-            "$SVN_URL/trunk" \
-            "$SVN_URL/tags/$RELEASE_TAG" \
             --username "$SVN_USERNAME" \
             --password "$SVN_PASSWORD" \
             --message "Tagging version $RELEASE_TAG." \
