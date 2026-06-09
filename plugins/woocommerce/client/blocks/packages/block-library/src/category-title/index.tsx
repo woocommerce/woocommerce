@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { type BlockConfiguration } from '@wordpress/blocks';
-import { heading } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -10,6 +9,7 @@ import { heading } from '@wordpress/icons';
 import initBlock from '../utils/init-block';
 import metadata from './block.json';
 import edit, { type CategoryTitleAttributes } from './edit';
+import { heading } from '@wordpress/icons';
 
 const { name } = metadata;
 

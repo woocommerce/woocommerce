@@ -9,7 +9,6 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypes\Cart;
 use Automattic\WooCommerce\Blocks\BlockTypes\Checkout;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCartContents;
-use Automattic\WooCommerce\Internal\Blocks\BlockLibraryScriptRegistry;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 
 /**
@@ -35,13 +34,6 @@ final class BlockTypesController {
 	protected $asset_data_registry;
 
 	/**
-	 * Instance of the block-library script registry.
-	 *
-	 * @var BlockLibraryScriptRegistry
-	 */
-	protected $block_library_script_registry;
-
-	/**
 	 * Holds the registered blocks that have WooCommerce blocks as their parents.
 	 *
 	 * @var array List of registered blocks.
@@ -51,18 +43,12 @@ final class BlockTypesController {
 	/**
 	 * Constructor.
 	 *
-	 * @param AssetApi                   $asset_api Instance of the asset API.
-	 * @param AssetDataRegistry          $asset_data_registry Instance of the asset data registry.
-	 * @param BlockLibraryScriptRegistry $block_library_script_registry Instance of the block-library script registry.
+	 * @param AssetApi          $asset_api Instance of the asset API.
+	 * @param AssetDataRegistry $asset_data_registry Instance of the asset data registry.
 	 */
-	public function __construct(
-		AssetApi $asset_api,
-		AssetDataRegistry $asset_data_registry,
-		BlockLibraryScriptRegistry $block_library_script_registry
-	) {
-		$this->asset_api                     = $asset_api;
-		$this->asset_data_registry           = $asset_data_registry;
-		$this->block_library_script_registry = $block_library_script_registry;
+	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry ) {
+		$this->asset_api           = $asset_api;
+		$this->asset_data_registry = $asset_data_registry;
 		$this->init();
 	}
 
@@ -125,40 +111,13 @@ final class BlockTypesController {
 	 */
 	public function register_blocks() {
 		$this->register_block_metadata();
-		$block_types               = $this->get_block_types();
-		$block_library_block_types = $this->get_block_library_block_types();
+		$block_types = $this->get_block_types();
 
 		foreach ( $block_types as $block_type ) {
-			if ( isset( $block_library_block_types[ $block_type ] ) ) {
-				$this->register_block_library_block_type( $block_library_block_types[ $block_type ] );
-				continue;
-			}
-
 			$block_type_class = __NAMESPACE__ . '\\BlockTypes\\' . $block_type;
 
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
-	}
-
-	/**
-	 * Get block types that are registered directly from block-library metadata.
-	 *
-	 * @return array<string, string> Map of legacy block type class names to block metadata directory names.
-	 */
-	protected function get_block_library_block_types() {
-		return array(
-			'CategoryTitle' => 'category-title',
-		);
-	}
-
-	/**
-	 * Register a block from the block-library metadata package.
-	 *
-	 * @param string $block_name Block metadata directory name.
-	 * @return void
-	 */
-	protected function register_block_library_block_type( $block_name ) {
-		$this->block_library_script_registry->register_block_type_from_metadata( $block_name );
 	}
 
 	/**

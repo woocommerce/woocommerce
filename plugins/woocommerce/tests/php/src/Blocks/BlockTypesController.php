@@ -4,14 +4,9 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks;
 
 use Automattic\WooCommerce\Blocks\Assets\Api;
-use Automattic\WooCommerce\Blocks\Domain\Package as BlocksDomainPackage;
 use Automattic\WooCommerce\Blocks\BlockTypesController as TestedBlockTypesController;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Internal\Blocks\BlockLibraryScriptRegistry as TestedBlockLibraryScriptRegistry;
-use WP_Block;
-use WP_Block_Type;
-use WP_Block_Type_Registry;
 
 /**
  * Unit tests for the PatternRegistry class.
@@ -26,13 +21,6 @@ class BlockTypesController extends \WP_UnitTestCase {
 	private $block_types_controller;
 
 	/**
-	 * Holds the BlockLibraryScriptRegistry under test.
-	 *
-	 * @var TestedBlockLibraryScriptRegistry The BlockLibraryScriptRegistry under test.
-	 */
-	private $block_library_script_registry;
-
-	/**
 	 * Sets up a new TestedBlockTypesController so it can be tested.
 	 *
 	 * @return void
@@ -40,74 +28,10 @@ class BlockTypesController extends \WP_UnitTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
-		$this->block_library_script_registry = new TestedBlockLibraryScriptRegistry(
-			Package::container()->get( BlocksDomainPackage::class )
-		);
-		$this->block_library_script_registry->register_scripts();
 		$this->block_types_controller = new TestedBlockTypesController(
 			Package::container()->get( Api::class ),
-			new AssetDataRegistryMock( Package::container()->get( Api::class ) ),
-			$this->block_library_script_registry
+			new AssetDataRegistryMock( Package::container()->get( API::class ) )
 		);
-	}
-
-	/**
-	 * Tear down test fixtures.
-	 *
-	 * @return void
-	 */
-	protected function tearDown(): void {
-		$this->unregister_block_type( 'woocommerce/category-title' );
-		wp_deregister_script( 'wc-block-library' );
-
-		parent::tearDown();
-	}
-
-	/**
-	 * @testdox Should register category title from block-library metadata.
-	 *
-	 * @return void
-	 */
-	public function test_registers_category_title_from_block_library_metadata(): void {
-		$this->unregister_block_type( 'woocommerce/category-title' );
-
-		$this->register_block_library_block_type( 'category-title' );
-
-		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce/category-title' );
-		$this->assertInstanceOf( WP_Block_Type::class, $block_type, 'Category title should be registered.' );
-		$this->assertIsCallable( $block_type->render_callback, 'Category title should use metadata render callback.' );
-		$this->assertTrue( wp_script_is( 'wc-block-library', 'registered' ), 'Category title editor script should be registered.' );
-	}
-
-	/**
-	 * @testdox Should render category title from the block-library render file.
-	 *
-	 * @return void
-	 */
-	public function test_renders_category_title_from_block_library_render_file(): void {
-		$this->unregister_block_type( 'woocommerce/category-title' );
-		$this->register_block_library_block_type( 'category-title' );
-
-		$term_id      = self::factory()->term->create(
-			array(
-				'name'     => 'Hoodies',
-				'taxonomy' => 'product_cat',
-			)
-		);
-		$parsed_block = parse_blocks( '<!-- wp:woocommerce/category-title {"level":3,"textAlign":"center"} /-->' )[0];
-		$block        = new WP_Block(
-			$parsed_block,
-			array(
-				'termId'       => $term_id,
-				'termTaxonomy' => 'product_cat',
-			)
-		);
-
-		$html = $block->render();
-
-		$this->assertStringContainsString( '<h3', $html, 'Category title should render with the configured heading level.' );
-		$this->assertStringContainsString( 'has-text-align-center', $html, 'Category title should render with text alignment class.' );
-		$this->assertStringContainsString( 'Hoodies', $html, 'Category title should render the current term name.' );
 	}
 
 	/**
@@ -169,31 +93,5 @@ class BlockTypesController extends \WP_UnitTestCase {
 
 		$answer = $this->block_types_controller->block_should_have_data_attributes( 'child-of-woo/block-name' );
 		$this->assertTrue( $answer );
-	}
-
-	/**
-	 * Register a block-library block type.
-	 *
-	 * @param string $block_name Block metadata directory name.
-	 * @return void
-	 */
-	private function register_block_library_block_type( string $block_name ): void {
-		$method = new \ReflectionMethod( $this->block_types_controller, 'register_block_library_block_type' );
-		$method->setAccessible( true );
-		$method->invoke( $this->block_types_controller, $block_name );
-	}
-
-	/**
-	 * Unregister a block type if it is registered.
-	 *
-	 * @param string $block_name Block name.
-	 * @return void
-	 */
-	private function unregister_block_type( string $block_name ): void {
-		$registry = WP_Block_Type_Registry::get_instance();
-
-		if ( $registry->is_registered( $block_name ) ) {
-			$registry->unregister( $block_name );
-		}
 	}
 }

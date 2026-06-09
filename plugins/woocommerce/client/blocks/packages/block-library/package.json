@@ -16,6 +16,6 @@
 	},
 	"wpScript": true,
 	"dependencies": {
-		"@wordpress/icons": "catalog:wp-min"
+		"@wordpress/icons": "13.3.0"
 	}
 }
