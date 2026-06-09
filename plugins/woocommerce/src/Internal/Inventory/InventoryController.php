@@ -43,8 +43,6 @@ class InventoryController {
 
 	private const ORDER_LOCATION_STOCK_REDUCED_META = '_location_stock_reduced';
 
-	private const ORDER_LOCATION_STOCK_REDUCTION_FAILED_META = '_location_stock_reduction_failed';
-
 	private const ITEM_LOCATION_STOCK_REDUCED_META = '_reduced_location_stock';
 
 	private const ITEM_LOCATION_STOCK_RESTOCKED_META = '_restock_refunded_location_items';
@@ -76,6 +74,13 @@ class InventoryController {
 	 * Whether feature hooks have already been registered in this request.
 	 */
 	private bool $feature_hooks_registered = false;
+
+	/**
+	 * Order item snapshots captured before stock-adjustable item saves.
+	 *
+	 * @var array<int,array<int,array{name:string,quantity:int,tax_class:string,subtotal:string,total:string,taxes:array<string,mixed>}>>
+	 */
+	private array $line_item_stock_adjustment_snapshots = array();
 
 	/**
 	 * Initialize dependencies.
@@ -150,6 +155,9 @@ class InventoryController {
 		add_filter( 'woocommerce_can_reduce_order_stock', array( $this, 'allow_core_stock_adjustment_for_location_order' ), 10, 2 );
 		add_filter( 'woocommerce_can_restore_order_stock', array( $this, 'allow_core_stock_adjustment_for_location_order' ), 10, 2 );
 		add_filter( 'woocommerce_can_restock_refunded_items', array( $this, 'handle_location_refunded_items_restock' ), 10, 3 );
+		add_action( 'woocommerce_before_save_order_items', array( $this, 'snapshot_location_order_items_before_admin_save' ), 10, 2 );
+		add_action( 'woocommerce_saved_order_items', array( $this, 'clear_location_order_item_snapshots' ), 10, 2 );
+		add_action( 'woocommerce_rest_set_order_item', array( $this, 'snapshot_location_order_item_before_rest_save' ), 10, 2 );
 		add_filter( 'woocommerce_prevent_adjust_line_item_product_stock', array( $this, 'prevent_core_line_item_product_stock_adjustment' ), 10, 3 );
 		add_action( 'rest_api_init', array( $this, 'register_product_location_stock_rest_fields' ) );
 
@@ -277,7 +285,6 @@ class InventoryController {
 		}
 
 		$changes = array();
-		$errors  = array();
 		foreach ( $order->get_items() as $item ) {
 			if ( ! $item instanceof \WC_Order_Item_Product ) {
 				continue;
@@ -286,7 +293,6 @@ class InventoryController {
 			$change = $this->reduce_location_stock_for_order_item( $order, $item, $location_slug );
 			if ( is_wp_error( $change ) ) {
 				$order->add_order_note( $change->get_error_message(), 0, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
-				$errors[] = $change;
 				continue;
 			}
 
@@ -295,21 +301,11 @@ class InventoryController {
 			}
 		}
 
-		if ( ! empty( $errors ) ) {
-			$order->update_meta_data( self::ORDER_LOCATION_STOCK_REDUCTION_FAILED_META, 'yes' );
-		}
-
 		if ( empty( $changes ) ) {
-			if ( ! empty( $errors ) ) {
-				$order->save();
-			}
 			return;
 		}
 
 		$this->mark_order_location_stock_reduced( $order, $location_slug );
-		if ( empty( $errors ) ) {
-			$order->delete_meta_data( self::ORDER_LOCATION_STOCK_REDUCTION_FAILED_META );
-		}
 		$this->add_location_stock_order_note( $order, __( 'POS stock levels reduced:', 'woocommerce' ), $changes );
 		$order->save();
 	}
@@ -394,24 +390,72 @@ class InventoryController {
 		}
 
 		if ( 'yes' !== get_option( 'woocommerce_manage_stock' ) ) {
+			$this->delete_line_item_stock_adjustment_snapshot( $item );
 			return true;
 		}
 
 		$change = $this->adjust_location_stock_for_line_item_quantity( $item, $location_slug, $item_quantity );
 		if ( is_wp_error( $change ) ) {
 			$order->add_order_note( $change->get_error_message(), 0, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
-			$order->update_meta_data( self::ORDER_LOCATION_STOCK_REDUCTION_FAILED_META, 'yes' );
 			$order->save();
+			$this->delete_line_item_stock_adjustment_snapshot( $item );
 			return true;
 		}
 
 		if ( $change ) {
-			$order->delete_meta_data( self::ORDER_LOCATION_STOCK_REDUCTION_FAILED_META );
 			$this->add_location_stock_order_note( $order, __( 'POS stock levels adjusted:', 'woocommerce' ), array( $change ) );
 			$order->save();
 		}
 
+		$this->delete_line_item_stock_adjustment_snapshot( $item );
+
 		return true;
+	}
+
+	/**
+	 * Snapshot POS order items before classic admin saves mutate them.
+	 *
+	 * @param int   $order_id Order ID.
+	 * @param array $items    Posted order item data.
+	 */
+	public function snapshot_location_order_items_before_admin_save( $order_id, $items ): void {
+		$order = wc_get_order( $order_id );
+		if ( ! $order instanceof \WC_Order || ! $this->get_configured_order_location_slug( $order ) ) {
+			return;
+		}
+
+		foreach ( $order->get_items() as $item ) {
+			if ( $item instanceof \WC_Order_Item_Product ) {
+				$this->snapshot_line_item_stock_adjustment_state( $item );
+			}
+		}
+	}
+
+	/**
+	 * Clear request-local line item snapshots after classic admin saves finish.
+	 *
+	 * @param int   $order_id Order ID.
+	 * @param array $items    Posted order item data.
+	 */
+	public function clear_location_order_item_snapshots( $order_id, $items ): void {
+		unset( $this->line_item_stock_adjustment_snapshots[ absint( $order_id ) ] );
+	}
+
+	/**
+	 * Snapshot a REST-updated line item before it is saved.
+	 *
+	 * @param \WC_Order_Item $item Order item.
+	 * @param array          $data REST order item data.
+	 */
+	public function snapshot_location_order_item_before_rest_save( $item, $data ): void {
+		if ( ! $item instanceof \WC_Order_Item_Product || ! $item->get_id() ) {
+			return;
+		}
+
+		$stored_item = new \WC_Order_Item_Product( $item->get_id() );
+		if ( $stored_item->get_id() ) {
+			$this->snapshot_line_item_stock_adjustment_state( $stored_item );
+		}
 	}
 
 	/**
@@ -654,7 +698,7 @@ class InventoryController {
 
 		if ( is_wp_error( $change ) ) {
 			if ( $diff > 0 ) {
-				$this->restore_line_item_quantity_after_failed_location_stock_adjustment( $item, $already_reduced_stock, $restock_refunded_items );
+				$this->restore_line_item_after_failed_location_stock_adjustment( $item );
 			}
 
 			return $change;
@@ -822,15 +866,73 @@ class InventoryController {
 	}
 
 	/**
-	 * Restore the saved quantity when a location stock increase adjustment fails.
+	 * Snapshot one line item's saved state before stock-adjustable changes.
 	 *
-	 * @param \WC_Order_Item_Product $item                   Order item.
-	 * @param int|float              $already_reduced_stock  Already reduced stock.
-	 * @param int|float              $restock_refunded_items Refunded stock already restored.
+	 * @param \WC_Order_Item_Product $item Order item.
 	 */
-	private function restore_line_item_quantity_after_failed_location_stock_adjustment( \WC_Order_Item_Product $item, $already_reduced_stock, $restock_refunded_items ): void {
-		$item->set_quantity( (int) max( 0, wc_stock_amount( $already_reduced_stock + $restock_refunded_items ) ) );
+	private function snapshot_line_item_stock_adjustment_state( \WC_Order_Item_Product $item ): void {
+		$order = $item->get_order();
+		if ( ! $order instanceof \WC_Order || ! $this->get_configured_order_location_slug( $order ) || ! $item->get_id() ) {
+			return;
+		}
+
+		$this->line_item_stock_adjustment_snapshots[ $order->get_id() ][ $item->get_id() ] = $this->get_line_item_stock_adjustment_snapshot( $item );
+	}
+
+	/**
+	 * Get one line item's stock-adjustable state.
+	 *
+	 * @param \WC_Order_Item_Product $item Order item.
+	 * @return array{name:string,quantity:int,tax_class:string,subtotal:string,total:string,taxes:array<string,mixed>}
+	 */
+	private function get_line_item_stock_adjustment_snapshot( \WC_Order_Item_Product $item ): array {
+		return array(
+			'name'      => $item->get_name( 'edit' ),
+			'quantity'  => $item->get_quantity( 'edit' ),
+			'tax_class' => $item->get_tax_class( 'edit' ),
+			'subtotal'  => $item->get_subtotal( 'edit' ),
+			'total'     => $item->get_total( 'edit' ),
+			'taxes'     => $item->get_taxes( 'edit' ),
+		);
+	}
+
+	/**
+	 * Restore a line item to the state captured before a failed location stock adjustment.
+	 *
+	 * @param \WC_Order_Item_Product $item Order item.
+	 */
+	private function restore_line_item_after_failed_location_stock_adjustment( \WC_Order_Item_Product $item ): void {
+		$snapshot = $this->get_line_item_stock_adjustment_snapshot_for_item( $item );
+		if ( ! $snapshot ) {
+			return;
+		}
+
+		$item->set_name( $snapshot['name'] );
+		$item->set_quantity( $snapshot['quantity'] );
+		$item->set_tax_class( $snapshot['tax_class'] );
+		$item->set_subtotal( $snapshot['subtotal'] );
+		$item->set_total( $snapshot['total'] );
+		$item->set_taxes( $snapshot['taxes'] );
 		$item->save();
+	}
+
+	/**
+	 * Get a captured line item state.
+	 *
+	 * @param \WC_Order_Item_Product $item Order item.
+	 * @return array{name:string,quantity:int,tax_class:string,subtotal:string,total:string,taxes:array<string,mixed>}|null
+	 */
+	private function get_line_item_stock_adjustment_snapshot_for_item( \WC_Order_Item_Product $item ): ?array {
+		return $this->line_item_stock_adjustment_snapshots[ $item->get_order_id() ][ $item->get_id() ] ?? null;
+	}
+
+	/**
+	 * Delete a captured line item state.
+	 *
+	 * @param \WC_Order_Item_Product $item Order item.
+	 */
+	private function delete_line_item_stock_adjustment_snapshot( \WC_Order_Item_Product $item ): void {
+		unset( $this->line_item_stock_adjustment_snapshots[ $item->get_order_id() ][ $item->get_id() ] );
 	}
 
 	/**

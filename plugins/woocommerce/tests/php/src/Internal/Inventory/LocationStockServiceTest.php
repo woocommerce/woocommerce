@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Inventory;
 
 use Automattic\WooCommerce\Internal\Inventory\InventoryController;
 use Automattic\WooCommerce\Internal\Inventory\LocationStockService;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use WC_Helper_Product;
 use WC_Order;
@@ -429,9 +430,9 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should flag POS orders when stock is no longer available at reduction time.
+	 * @testdox Should add an error note when stock is no longer available at reduction time.
 	 */
-	public function test_pos_order_reduce_failure_is_flagged_without_negative_stock(): void {
+	public function test_pos_order_reduce_failure_adds_error_note_without_negative_stock(): void {
 		$product = $this->create_managed_stock_product();
 		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 1 );
 		$first_order  = $this->create_pos_order_for_product( $product, 1 );
@@ -445,7 +446,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$item         = reset( $items );
 
 		$this->assertEquals( 0, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
-		$this->assertEquals( 'yes', $second_order->get_meta( '_location_stock_reduction_failed', true ) );
+		$this->assert_order_has_error_note( $second_order, 'Not enough stock at POS' );
 		$this->assertEmpty( $item->get_meta( '_reduced_location_stock', true ) );
 		$this->assertEmpty( $item->get_meta( '_reduced_stock', true ) );
 	}
@@ -665,22 +666,21 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$product = $this->create_managed_stock_product();
 		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 2 );
 		$order = $this->create_pos_order_for_product( $product, 2 );
+		$this->set_first_order_item_totals( $order, '20.00', '20.00' );
 
 		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
-		$item = $this->set_first_order_item_quantity( $order, 3 );
-
-		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
-		$changed_stock = wc_maybe_adjust_line_item_product_stock( $item );
+		$this->save_first_order_item_with_admin_values( $order, 3, '30.00', '30.00' );
 
 		$order = wc_get_order( $order->get_id() );
 		$items = $order->get_items();
 		$item  = reset( $items );
 
-		$this->assertFalse( $changed_stock );
 		$this->assertEquals( 0, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
 		$this->assertEquals( 2, $item->get_quantity() );
+		$this->assertEquals( 20.0, (float) $item->get_total() );
+		$this->assertEquals( 20.0, (float) $item->get_subtotal() );
 		$this->assertEquals( 2, $item->get_meta( '_reduced_location_stock', true ) );
-		$this->assertEquals( 'yes', $order->get_meta( '_location_stock_reduction_failed', true ) );
+		$this->assert_order_has_error_note( $order, 'Not enough stock at POS' );
 	}
 
 	/**
@@ -847,6 +847,25 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Assert that an order contains an error note.
+	 *
+	 * @param WC_Order $order            Order object.
+	 * @param string   $message_fragment Expected note text fragment.
+	 */
+	private function assert_order_has_error_note( WC_Order $order, string $message_fragment ): void {
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+
+		foreach ( $notes as $note ) {
+			if ( str_contains( $note->content, $message_fragment ) ) {
+				$this->assertSame( OrderNoteGroup::ERROR, get_comment_meta( $note->id, 'note_group', true ) );
+				return;
+			}
+		}
+
+		$this->fail( 'Expected an order error note containing: ' . $message_fragment );
+	}
+
+	/**
 	 * Create a managed-stock product.
 	 */
 	private function create_managed_stock_product(): WC_Product {
@@ -946,5 +965,60 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$item->save();
 
 		return $item;
+	}
+
+	/**
+	 * Set the first line item totals on an order.
+	 *
+	 * @param WC_Order $order    Order object.
+	 * @param string   $subtotal Line subtotal.
+	 * @param string   $total    Line total.
+	 */
+	private function set_first_order_item_totals( WC_Order $order, string $subtotal, string $total ): WC_Order_Item_Product {
+		$order = wc_get_order( $order->get_id() );
+		$items = $order->get_items();
+		$item  = reset( $items );
+
+		$item->set_subtotal( $subtotal );
+		$item->set_total( $total );
+		$item->save();
+
+		return $item;
+	}
+
+	/**
+	 * Save the first line item through the classic admin order item path.
+	 *
+	 * @param WC_Order $order    Order object.
+	 * @param int      $quantity New quantity.
+	 * @param string   $subtotal Line subtotal.
+	 * @param string   $total    Line total.
+	 */
+	private function save_first_order_item_with_admin_values( WC_Order $order, int $quantity, string $subtotal, string $total ): WC_Order_Item_Product {
+		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
+
+		$order   = wc_get_order( $order->get_id() );
+		$items   = $order->get_items();
+		$item    = reset( $items );
+		$item_id = $item->get_id();
+
+		wc_save_order_items(
+			$order->get_id(),
+			array(
+				'order_item_id'        => array( $item_id ),
+				'order_item_name'      => array( $item_id => $item->get_name() ),
+				'order_item_qty'       => array( $item_id => (string) $quantity ),
+				'order_item_tax_class' => array( $item_id => $item->get_tax_class() ),
+				'line_total'           => array( $item_id => $total ),
+				'line_subtotal'        => array( $item_id => $subtotal ),
+				'line_tax'             => array( $item_id => array() ),
+				'line_subtotal_tax'    => array( $item_id => array() ),
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+		$items = $order->get_items();
+
+		return reset( $items );
 	}
 }
