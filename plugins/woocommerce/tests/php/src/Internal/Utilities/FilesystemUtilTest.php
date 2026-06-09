@@ -64,8 +64,22 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 		unset( $GLOBALS['wp_filesystem'] );
 		$this->reset_legacy_proxy_mocks();
 		Constants::clear_constants();
+		$this->reset_direct_filesystem_cache();
 
 		parent::tearDown();
+	}
+
+	/**
+	 * Clear FilesystemUtil's memoized direct filesystem so each test starts
+	 * from a cold cache. Without this, a warm cache makes the FS_METHOD-bypass
+	 * test pass trivially from cache instead of exercising construction.
+	 *
+	 * @return void
+	 */
+	private function reset_direct_filesystem_cache(): void {
+		$property = new \ReflectionProperty( FilesystemUtil::class, 'cached_direct_filesystem' );
+		$property->setAccessible( true );
+		$property->setValue( null, null );
 	}
 
 	/**
@@ -251,6 +265,12 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $result );
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file we just wrote, not a remote URL.
 		$this->assertSame( $value, file_get_contents( $path ) );
+
+		// A successful put_contents() with no explicit mode proves the FS_CHMOD_*
+		// constants were available; assert them directly to lock in the fix for
+		// the "Undefined constant FS_CHMOD_FILE" fatal that motivated this method.
+		$this->assertTrue( defined( 'FS_CHMOD_DIR' ) );
+		$this->assertTrue( defined( 'FS_CHMOD_FILE' ) );
 	}
 
 	/**
@@ -311,5 +331,29 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 		$path = $this->make_temp_file( ABSPATH );
 
 		FilesystemUtil::validate_upload_file_path( 'file://' . $path );
+	}
+
+	/**
+	 * @testdox 'file_is_in_directory' keeps stream-wrapper (e.g. s3://) containment intact for upload paths.
+	 *
+	 * Exercises the non-file:// protocol branch of the containment check. The
+	 * public validate_upload_file_path() gates on is_readable() first, which a
+	 * real direct filesystem cannot satisfy for an unregistered s3:// path in a
+	 * unit test, so the protocol branch is verified directly. This restores the
+	 * coverage previously provided by the (now removed) abspath()-mocking test
+	 * and locks in the no-regression claim for WordPress VIP / S3-Uploads sites.
+	 */
+	public function test_file_is_in_directory_handles_stream_wrapper_protocol(): void {
+		$method = new \ReflectionMethod( FilesystemUtil::class, 'file_is_in_directory' );
+		$method->setAccessible( true );
+
+		// A path inside an s3:// uploads basedir is contained.
+		$this->assertTrue(
+			$method->invoke( null, 's3://mock-bucket/test.txt', 's3://mock-bucket/' )
+		);
+		// A path under a different bucket is rejected.
+		$this->assertFalse(
+			$method->invoke( null, 's3://other-bucket/test.txt', 's3://mock-bucket/' )
+		);
 	}
 }
