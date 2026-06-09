@@ -284,6 +284,13 @@ class WC_Unit_Tests_Bootstrap {
 
 		WC_Install::install();
 
+		// Run the test suite with product object caching enabled (the new-install default).
+		// This ensures tests exercise the cache-on path and fail loudly if any code bypasses
+		// the product CRUD/cache interfaces (e.g. raw SQL or direct postmeta writes without
+		// invalidation). install_wc() runs on `setup_theme`, before `init`, so the option is
+		// set in time for ProductCacheController::on_init() to register its invalidation hooks.
+		update_option( 'woocommerce_feature_product_instance_caching_enabled', 'yes' );
+
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
 		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
 			$GLOBALS['wp_roles']->reinit();

@@ -52,7 +52,6 @@ declare global {
 			'analytics-scheduled-import': boolean;
 			'activity-panels': boolean;
 			analytics: boolean;
-			'coming-soon-newsletter-template': boolean;
 			coupons: boolean;
 			'customer-effort-score-tracks': boolean;
 			homescreen: boolean;
@@ -69,6 +68,7 @@ declare global {
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;
+			'settings-ui': boolean;
 			'shipping-label-banner': boolean;
 			subscriptions: boolean;
 			'store-alerts': boolean;

@@ -13,8 +13,6 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { emailPreviewNonce } from './settings-email-preview-nonce';
 
-// Inlined from @woocommerce/product-editor's src/utils/validate-email.ts to
-// avoid pulling the whole package in for one tiny function.
 const isValidEmail = ( email: string ) => {
 	const re =
 		/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;

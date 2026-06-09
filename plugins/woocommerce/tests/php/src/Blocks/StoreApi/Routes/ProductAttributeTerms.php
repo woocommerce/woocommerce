@@ -81,6 +81,7 @@ class ProductAttributeTerms extends ControllerTestCase {
 		$this->assertArrayHasKey( 'slug', $data[0] );
 		$this->assertArrayHasKey( 'description', $data[0] );
 		$this->assertArrayHasKey( 'count', $data[0] );
+		$this->assertArrayNotHasKey( '__experimentalVisual', $data[0] );
 	}
 
 	/**
@@ -97,6 +98,7 @@ class ProductAttributeTerms extends ControllerTestCase {
 		$this->assertEquals( 'small-slug', $data['slug'] );
 		$this->assertEquals( 'Description of small', $data['description'] );
 		$this->assertEquals( 0, $data['count'] );
+		$this->assertArrayNotHasKey( '__experimentalVisual', $data );
 	}
 
 	/**
@@ -110,6 +112,7 @@ class ProductAttributeTerms extends ControllerTestCase {
 		$this->assertArrayHasKey( 'order', $params );
 		$this->assertArrayHasKey( 'orderby', $params );
 		$this->assertArrayHasKey( 'hide_empty', $params );
+		$this->assertArrayHasKey( '__experimental_visual', $params );
 	}
 
 	/**
@@ -119,12 +122,17 @@ class ProductAttributeTerms extends ControllerTestCase {
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'product-attribute-terms' );
 		$schema     = $controller->get_item_schema();
-		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'small', 'pa_size' ), new \WP_REST_Request() );
-		$data       = $response->get_data();
-		$validate   = new ValidateSchema( $schema );
+		$request    = new \WP_REST_Request();
+		$request->set_param( '__experimental_visual', true );
+		$response = $controller->prepare_item_for_response( get_term_by( 'name', 'red', 'pa_color' ), $request );
+		$data     = $response->get_data();
+		$validate = new ValidateSchema( $schema );
 
 		$this->assertArrayHasKey( '__experimentalVisual', $data );
-		$this->assertNull( $data['__experimentalVisual'] );
+		$this->assertSame( 'none', $data['__experimentalVisual']['type'] );
+		$this->assertSame( '', $data['__experimentalVisual']['value'] );
+
+		$data['__experimentalVisual'] = (object) $data['__experimentalVisual'];
 
 		$diff = $validate->get_diff_from_object( $data );
 		$this->assertEmpty( $diff, print_r( $diff, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
@@ -141,7 +149,10 @@ class ProductAttributeTerms extends ControllerTestCase {
 		$term = get_term_by( 'name', 'red', 'pa_color' );
 		update_term_meta( $term->term_id, 'color', '#00ff00' );
 
-		$response = $controller->prepare_item_for_response( $term, new \WP_REST_Request() );
+		$request = new \WP_REST_Request();
+		$request->set_param( '__experimental_visual', true );
+
+		$response = $controller->prepare_item_for_response( $term, $request );
 		$data     = $response->get_data();
 
 		$validate = new ValidateSchema( $schema );
