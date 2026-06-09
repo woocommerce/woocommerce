@@ -42,8 +42,8 @@ export const MarketplaceContext = createContext< MarketplaceContextType >( {
 } );
 
 export function MarketplaceContextProvider( props: {
-	children: JSX.Element;
-} ): JSX.Element {
+	children: React.JSX.Element;
+} ): React.JSX.Element {
 	const [ isLoading, setIsLoading ] = useState( true );
 	const [ selectedTab, setSelectedTab ] = useState( '' );
 	const [ iamSettings, setIamSettings ] = useState( {} );
