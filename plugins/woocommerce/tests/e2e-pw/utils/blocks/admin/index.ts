@@ -31,10 +31,18 @@ export class Admin extends CoreAdmin {
 
 	async visitWidgetEditor() {
 		await this.page.goto( '/wp-admin/widgets.php' );
-		await this.page
+		const closeWelcomeGuide = this.page
 			.getByRole( 'dialog', { name: 'Welcome to block Widgets' } )
-			.getByRole( 'button', { name: 'Close' } )
-			.click();
+			.getByRole( 'button', { name: 'Close' } );
+		// The welcome guide only shows when it hasn't been dismissed before, so
+		// wait for it briefly and close it only when it actually appears.
+		const guideAppeared = await closeWelcomeGuide
+			.waitFor( { state: 'visible', timeout: 5000 } )
+			.then( () => true )
+			.catch( () => false );
+		if ( guideAppeared ) {
+			await closeWelcomeGuide.click();
+		}
 	}
 
 	async createNewPattern( name: string, synced = true ) {
