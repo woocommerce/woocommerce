@@ -10,7 +10,10 @@ import {
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
-import type { ProductResponseItem } from '@woocommerce/types';
+import type {
+	ProductResponseItem,
+	ProductResponseVariationsItem,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -95,6 +98,13 @@ const isAttributeValueValid = ( {
 	// Check if there is at least one available variation matching the current
 	// selected attributes and the attribute value being checked.
 	return product.variations.some( ( variation ) => {
+		const variationData =
+			productsState.productVariations[ variation.id ] ?? variation;
+
+		if ( ! isVariationInStockAndPurchasable( variationData ) ) {
+			return false;
+		}
+
 		const variationAttrValue = getVariationAttributeValue(
 			variation,
 			attributeName
@@ -144,6 +154,20 @@ const isAttributeValueValid = ( {
 
 		return matchingAttributes >= attributesToMatch;
 	} );
+};
+
+const isVariationInStockAndPurchasable = (
+	variation: ProductResponseItem | ProductResponseVariationsItem
+) => {
+	if (
+		'is_in_stock' in variation &&
+		'is_purchasable' in variation &&
+		( ! variation.is_in_stock || ! variation.is_purchasable )
+	) {
+		return false;
+	}
+
+	return true;
 };
 
 /**
@@ -510,7 +534,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				// Let's not do anything if the user is typing in the input.
-				if ( ref === document.activeElement ) {
+				if ( ref === ref.ownerDocument.activeElement ) {
 					return;
 				}
 
