@@ -940,7 +940,6 @@
 		"allure-playwright": "^3.1.0",
 		"autoprefixer": "9.8.6",
 		"axios": "^0.24.0",
-		"buildkite-test-collector": "^1.7.1",
 		"config": "3.3.7",
 		"dotenv": "^10.0.0",
 		"eslint": "^8.55.0",

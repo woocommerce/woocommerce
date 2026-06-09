@@ -11,7 +11,7 @@ const getProductById = ( products, id ) =>
 	products.find( ( product ) => product.id === id );
 
 const getProductId = ( isDescendentOfQueryLoop, productId, postId ) => {
-	// Keep for backwards compatibility of Products (Beta) block.
+	// Keep for backwards compatibility of Products (Deprecated) block.
 	if ( isDescendentOfQueryLoop ) {
 		return postId;
 	}
