@@ -68,8 +68,7 @@ class ProductMediaGallery {
 
 		if ( self::is_feature_enabled() ) {
 			$video_gallery = self::normalize_video_gallery_items(
-				self::get_stored_video_gallery_items( $product ),
-				true
+				self::get_stored_video_gallery_items( $product )
 			);
 
 			if ( ! empty( $video_gallery ) ) {
@@ -139,7 +138,7 @@ class ProductMediaGallery {
 		WC_Product $product,
 		array $video_gallery
 	): array {
-		$video_gallery = self::normalize_video_gallery_items( $video_gallery, true );
+		$video_gallery = self::normalize_video_gallery_items( $video_gallery );
 
 		self::update_video_gallery_meta( $product, $video_gallery );
 
@@ -150,13 +149,9 @@ class ProductMediaGallery {
 	 * Normalize media gallery items.
 	 *
 	 * @param array $media_gallery Media gallery data.
-	 * @param bool  $validate_attachments Whether attachment IDs should be type-checked.
 	 * @return array
 	 */
-	public static function normalize_media_gallery_items(
-		array $media_gallery,
-		bool $validate_attachments = false
-	): array {
+	public static function normalize_media_gallery_items( array $media_gallery ): array {
 		$items = array();
 
 		foreach ( $media_gallery as $index => $item ) {
@@ -174,7 +169,6 @@ class ProductMediaGallery {
 
 			if ( 'image' === $media_type ) {
 				if (
-					$validate_attachments &&
 					! wp_attachment_is_image( $attachment_id ) &&
 					0 !== strpos( (string) get_post_mime_type( $attachment_id ), 'image/' )
 				) {
@@ -189,7 +183,7 @@ class ProductMediaGallery {
 				continue;
 			}
 
-			$video_item = self::normalize_video_gallery_item( $item, $index, $validate_attachments );
+			$video_item = self::normalize_video_gallery_item( $item, $index );
 
 			if ( ! empty( $video_item ) ) {
 				$items[] = self::get_video_media_item( $video_item );
@@ -228,13 +222,9 @@ class ProductMediaGallery {
 	 * Normalize video gallery items.
 	 *
 	 * @param array $video_gallery Video gallery data.
-	 * @param bool  $validate_attachments Whether attachment IDs should be type-checked.
 	 * @return array
 	 */
-	public static function normalize_video_gallery_items(
-		array $video_gallery,
-		bool $validate_attachments = false
-	): array {
+	public static function normalize_video_gallery_items( array $video_gallery ): array {
 		$items = array();
 
 		foreach ( $video_gallery as $fallback_position => $item ) {
@@ -242,7 +232,7 @@ class ProductMediaGallery {
 				continue;
 			}
 
-			$item = self::normalize_video_gallery_item( $item, $fallback_position, $validate_attachments );
+			$item = self::normalize_video_gallery_item( $item, $fallback_position );
 
 			if ( ! empty( $item ) ) {
 				$items[] = $item;
@@ -390,10 +380,9 @@ class ProductMediaGallery {
 	 *
 	 * @param array $item                 Video gallery item.
 	 * @param int   $fallback_position    Position used when item has no position.
-	 * @param bool  $validate_attachments Whether attachment IDs should be type-checked.
 	 * @return array
 	 */
-	private static function normalize_video_gallery_item( array $item, int $fallback_position, bool $validate_attachments ): array {
+	private static function normalize_video_gallery_item( array $item, int $fallback_position ): array {
 		$media_type    = isset( $item['media_type'] ) ? sanitize_key( $item['media_type'] ) : 'video';
 		$source_type   = isset( $item['source_type'] ) ? sanitize_key( $item['source_type'] ) : 'attachment';
 		$attachment_id = isset( $item['id'] ) ? absint( $item['id'] ) : 0;
@@ -402,12 +391,10 @@ class ProductMediaGallery {
 			return array();
 		}
 
-		if ( $validate_attachments ) {
-			$mime_type = get_post_mime_type( $attachment_id );
+		$mime_type = get_post_mime_type( $attachment_id );
 
-			if ( ! is_string( $mime_type ) || 0 !== strpos( $mime_type, 'video/' ) ) {
-				return array();
-			}
+		if ( ! is_string( $mime_type ) || 0 !== strpos( $mime_type, 'video/' ) ) {
+			return array();
 		}
 
 		$video_item = array();
@@ -432,7 +419,6 @@ class ProductMediaGallery {
 		if (
 			$poster_id &&
 			(
-				! $validate_attachments ||
 				wp_attachment_is_image( $poster_id ) ||
 				0 === strpos( (string) get_post_mime_type( $poster_id ), 'image/' )
 			)
