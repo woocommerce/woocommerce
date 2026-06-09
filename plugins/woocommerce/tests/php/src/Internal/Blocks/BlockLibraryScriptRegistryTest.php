@@ -38,6 +38,7 @@ class BlockLibraryScriptRegistryTest extends WC_Unit_Test_Case {
 		$this->package = BlocksPackage::container()->get( Package::class );
 		$this->sut     = new BlockLibraryScriptRegistry( $this->package );
 		wp_deregister_script( 'wc-block-library' );
+		wp_deregister_script( 'wp-icons' );
 	}
 
 	/**
@@ -46,6 +47,7 @@ class BlockLibraryScriptRegistryTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->unregister_block_type( 'woocommerce/category-title' );
 		wp_deregister_script( 'wc-block-library' );
+		wp_deregister_script( 'wp-icons' );
 
 		parent::tearDown();
 	}
@@ -70,6 +72,44 @@ class BlockLibraryScriptRegistryTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( $asset['dependencies'], $script->deps, 'Block library script dependencies should match generated asset data.' );
 		$this->assertSame( $asset['version'], $script->ver, 'Block library script version should match generated asset data.' );
+	}
+
+	/**
+	 * @testdox Should register the WordPress Icons fallback when Core does not register it.
+	 */
+	public function test_registers_wordpress_icons_fallback_when_core_does_not_register_it(): void {
+		$this->sut->register_scripts();
+
+		$script = wp_scripts()->query( 'wp-icons', 'registered' );
+
+		$this->assertTrue( wp_script_is( 'wp-icons', 'registered' ), 'WordPress Icons fallback should be registered.' );
+		$this->assertStringContainsString(
+			'assets/client/blocks/scripts/wp-icons/index.min.js',
+			$script->src,
+			'WordPress Icons fallback should use the packaged fallback script URL.'
+		);
+		$this->assertSame(
+			array( 'react-jsx-runtime', 'wp-primitives' ),
+			$script->deps,
+			'WordPress Icons fallback dependencies should match generated asset data.'
+		);
+	}
+
+	/**
+	 * @testdox Should not override a WordPress Icons script registered by Core.
+	 */
+	public function test_does_not_override_core_wordpress_icons_script(): void {
+		wp_register_script( 'wp-icons', 'https://example.com/wp-icons.js', array(), '1.0.0', true );
+
+		$this->sut->register_scripts();
+
+		$script = wp_scripts()->query( 'wp-icons', 'registered' );
+
+		$this->assertSame(
+			'https://example.com/wp-icons.js',
+			$script->src,
+			'WordPress Icons fallback should not replace a script registered by Core.'
+		);
 	}
 
 	/**

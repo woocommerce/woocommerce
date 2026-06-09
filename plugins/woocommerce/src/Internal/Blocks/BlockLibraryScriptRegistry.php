@@ -26,6 +26,21 @@ class BlockLibraryScriptRegistry {
 	private const BLOCK_METADATA_BUILD_PATH = 'assets/client/blocks/';
 
 	/**
+	 * WordPress Icons script handle.
+	 */
+	private const WORDPRESS_ICONS_HANDLE = 'wp-icons';
+
+	/**
+	 * Packaged path for the WordPress Icons fallback script.
+	 */
+	private const WORDPRESS_ICONS_FALLBACK_SCRIPT_PATH = 'wp-icons/index';
+
+	/**
+	 * Packaged path for the WordPress Icons fallback asset file.
+	 */
+	private const WORDPRESS_ICONS_FALLBACK_ASSET_PATH = 'wp-icons/index.min.asset.php';
+
+	/**
 	 * Package instance.
 	 *
 	 * @var Package
@@ -81,6 +96,8 @@ class BlockLibraryScriptRegistry {
 				$script['handle']
 			);
 			$dependencies = is_array( $dependencies ) ? $dependencies : array();
+
+			$this->register_wordpress_icons_fallback( $dependencies );
 
 			wp_register_script( $script['handle'], $src, $dependencies, $version, true );
 
@@ -197,23 +214,57 @@ class BlockLibraryScriptRegistry {
 	}
 
 	/**
+	 * Register a local WordPress Icons fallback when Core does not provide it.
+	 *
+	 * @param array<int, string> $dependencies Script dependencies.
+	 */
+	private function register_wordpress_icons_fallback( array $dependencies ): void {
+		if (
+			! in_array( self::WORDPRESS_ICONS_HANDLE, $dependencies, true )
+			|| wp_script_is( self::WORDPRESS_ICONS_HANDLE, 'registered' )
+			|| ! file_exists( $this->package->get_path( $this->get_script_relative_path( self::WORDPRESS_ICONS_FALLBACK_SCRIPT_PATH ) ) )
+		) {
+			return;
+		}
+
+		$asset_data = $this->get_asset_data( self::WORDPRESS_ICONS_FALLBACK_ASSET_PATH );
+
+		wp_register_script(
+			self::WORDPRESS_ICONS_HANDLE,
+			$this->get_script_url( self::WORDPRESS_ICONS_FALLBACK_SCRIPT_PATH ),
+			$asset_data['dependencies'],
+			$asset_data['version'],
+			true
+		);
+	}
+
+	/**
 	 * Get the script URL for a generated script path.
 	 *
 	 * @param string $script_path Script path relative to the generated scripts build path, without extension.
 	 * @return string Script URL.
 	 */
 	private function get_script_url( string $script_path ): string {
-		$scripts_build_path = $this->get_scripts_build_path();
-		$relative_path      = $scripts_build_path . $script_path . $this->get_script_suffix() . '.js';
+		$relative_path = $this->get_script_relative_path( $script_path );
 
 		if (
 			$this->is_script_debug_enabled()
 			&& ! file_exists( $this->package->get_path( $relative_path ) )
 		) {
-			$relative_path = $scripts_build_path . $script_path . '.min.js';
+			$relative_path = $this->get_scripts_build_path() . $script_path . '.min.js';
 		}
 
 		return $this->package->get_url( $relative_path );
+	}
+
+	/**
+	 * Get the relative script path for a generated script path.
+	 *
+	 * @param string $script_path Script path relative to the generated scripts build path, without extension.
+	 * @return string Relative script path.
+	 */
+	private function get_script_relative_path( string $script_path ): string {
+		return $this->get_scripts_build_path() . $script_path . $this->get_script_suffix() . '.js';
 	}
 
 	/**

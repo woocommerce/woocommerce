@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { type BlockConfiguration } from '@wordpress/blocks';
+import { heading } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -18,7 +19,7 @@ export const settings: Partial<
 	BlockConfiguration< CategoryTitleAttributes >
 > = {
 	edit: edit as unknown as BlockConfiguration< CategoryTitleAttributes >[ 'edit' ],
-	icon: 'heading',
+	icon: heading,
 	save: () => null,
 };
 
