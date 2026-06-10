@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import deprecated from '@wordpress/deprecated';
+
 // Keep this dictionary in sync with $retired_feature_compatibility_removal_versions in
 // plugins/woocommerce/src/Admin/Features/Features.php.
 export const RETIRED_FEATURE_FLAGS = {
@@ -41,20 +46,18 @@ export const getRetiredFeatureFlagRemovalVersion = (
 ): string | undefined =>
 	RETIRED_FEATURE_FLAGS[ featureId as RetiredFeatureFlag ];
 
-export const getRetiredFeatureFlagDeprecationMessage = (
-	featureId: string
-): string => {
-	const removalVersion = getRetiredFeatureFlagRemovalVersion( featureId );
-
-	return `Deprecated: The ${ featureId } WC Admin feature flag shim is deprecated and will be removed in WooCommerce ${
-		removalVersion ?? 'a future version'
-	}.`;
-};
-
 export const isRetiredFeatureFlag = ( featureId: string ): boolean =>
 	Object.prototype.hasOwnProperty.call( RETIRED_FEATURE_FLAGS, featureId );
 
 export const warnRetiredFeatureFlag = ( featureId: string ): void => {
-	// eslint-disable-next-line no-console
-	console.warn( getRetiredFeatureFlagDeprecationMessage( featureId ) );
+	const removalVersion = getRetiredFeatureFlagRemovalVersion( featureId );
+
+	deprecated( `wcAdminFeatures.${ featureId }`, {
+		version: '11.0.0',
+		alternative: 'direct feature behavior checks',
+		plugin: 'WooCommerce',
+		hint: `The ${ featureId } WC Admin feature flag shim will be removed in WooCommerce ${
+			removalVersion ?? 'a future version'
+		}.`,
+	} );
 };

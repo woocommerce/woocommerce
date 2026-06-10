@@ -3017,6 +3017,9 @@ importers:
       '@wordpress/date':
         specifier: catalog:wp-min
         version: 5.19.1
+      '@wordpress/deprecated':
+        specifier: catalog:wp-min
+        version: 4.19.1
       '@wordpress/dom':
         specifier: catalog:wp-min
         version: 4.19.2

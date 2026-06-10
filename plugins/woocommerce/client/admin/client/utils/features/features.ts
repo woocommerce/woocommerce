@@ -11,20 +11,14 @@ import {
 const ADMIN_SETTINGS_FEATURES_NAME = 'features';
 const WC_ADMIN_FEATURES_PROXY_MARKER = '__wcRetiredFeatureFlagsProxy';
 
-export function applyRetiredFeatureFlagDeprecationProxy(): void {
-	if (
-		typeof window === 'undefined' ||
-		process.env.NODE_ENV !== 'development' ||
-		! window.wcAdminFeatures ||
-		Boolean(
-			( window.wcAdminFeatures as Record< string, boolean > )[
-				WC_ADMIN_FEATURES_PROXY_MARKER
-			]
-		)
-	) {
-		return;
-	}
-
+// Keep retired feature flags available while warning on direct wcAdminFeatures access.
+if (
+	typeof window !== 'undefined' &&
+	window.wcAdminFeatures &&
+	! ( window.wcAdminFeatures as Record< string, boolean > )[
+		WC_ADMIN_FEATURES_PROXY_MARKER
+	]
+) {
 	window.wcAdminFeatures = new Proxy( window.wcAdminFeatures, {
 		get( target, property, receiver ) {
 			if (
@@ -47,8 +41,6 @@ export function applyRetiredFeatureFlagDeprecationProxy(): void {
 	);
 }
 
-applyRetiredFeatureFlagDeprecationProxy();
-
 /**
  * Get the feature flag from admin settings.
  *
@@ -57,7 +49,7 @@ applyRetiredFeatureFlagDeprecationProxy();
  */
 export function getFeature( featureId: string ): Feature | undefined {
 	const features = getAdminSetting( ADMIN_SETTINGS_FEATURES_NAME );
-	return features ? features[ featureId ] : undefined;
+	return features && features[ featureId ];
 }
 
 /**
