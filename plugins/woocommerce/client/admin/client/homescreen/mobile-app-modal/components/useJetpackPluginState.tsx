@@ -4,7 +4,6 @@
 import { useState, useEffect, useCallback } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { pluginsStore, useUser } from '@woocommerce/data';
-import { createErrorNotice } from '@woocommerce/data/src/plugins/actions';
 
 export const JetpackPluginStates = {
 	/** Jetpack plugin is not installed, can use installHandler() to install */
@@ -53,6 +52,7 @@ export const useJetpackPluginState = () => {
 	);
 
 	const { installJetpackAndConnect } = useDispatch( pluginsStore );
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	const [ pluginState, setPluginState ] = useState< JetpackPluginStates >(
 		JetpackPluginStates.INITIALIZING
@@ -68,7 +68,7 @@ export const useJetpackPluginState = () => {
 			() => thisUrl + '&jetpackState=returning'
 		);
 		setPluginState( JetpackPluginStates.INSTALLING );
-	}, [ installJetpackAndConnect ] );
+	}, [ installJetpackAndConnect, createErrorNotice ] );
 
 	useEffect( () => {
 		if ( ! canUserInstallPlugins ) {

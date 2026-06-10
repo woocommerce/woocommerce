@@ -52,12 +52,6 @@ class ProductCatalogTemplate extends AbstractTemplate {
 		if ( ! is_embed() && ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) && ! is_search() ) {
 			$compatibility_layer = new ArchiveProductTemplatesCompatibility();
 			$compatibility_layer->init();
-
-			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
-
-			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
-				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
-			}
 		}
 	}
 
