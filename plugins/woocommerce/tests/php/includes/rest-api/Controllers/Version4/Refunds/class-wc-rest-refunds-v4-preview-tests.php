@@ -131,10 +131,9 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
 
+		$this->assertEquals( '100.00', $data['subtotal'] );
+		$this->assertEquals( '0.00', $data['tax'] );
 		$this->assertEquals( '100.00', $data['total'] );
-		$this->assertEquals( '0.00', $data['total_tax'] );
-		$this->assertArrayNotHasKey( 'subtotal', $data );
-		$this->assertArrayNotHasKey( 'tax', $data );
 		$this->assertCount( 1, $data['breakdown']['products']['items'] );
 		$this->assertEquals( 2, $data['breakdown']['products']['items'][0]['quantity'] );
 	}
@@ -160,10 +159,9 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
 
-		$this->assertEquals( '100.00', $data['total'] );
-		$this->assertEquals( '10.00', $data['total_tax'] );
-		$this->assertArrayNotHasKey( 'subtotal', $data );
-		$this->assertArrayNotHasKey( 'tax', $data );
+		$this->assertEquals( '100.00', $data['subtotal'] );
+		$this->assertEquals( '10.00', $data['tax'] );
+		$this->assertEquals( '110.00', $data['total'] );
 	}
 
 	/**
@@ -882,10 +880,10 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $preview_response->get_status() );
 		$preview_data = $preview_response->get_data();
 
-		// Create the actual refund. Drive refund_total from the preview total + total_tax so a divergence
+		// Create the actual refund. Drive refund_total from the preview total so a divergence
 		// between preview and create produces an actual mismatch rather than passing by coincidence.
-		// The create endpoint expects refund_total inclusive of tax; preview returns tax excluding total and total_tax separately.
-		$preview_total_with_tax = (float) $preview_data['total'] + (float) $preview_data['total_tax'];
+		// Both preview `total` and create `refund_total` are tax-inclusive.
+		$preview_total_with_tax = (float) $preview_data['total'];
 
 		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
 		$create_request->set_body_params(

@@ -526,19 +526,22 @@ class DataUtils {
 		$price_decimals = wc_get_price_decimals();
 		$sections       = array(
 			'products' => array(
-				'items'     => array(),
-				'total'     => 0.0,
-				'total_tax' => 0.0,
+				'items'    => array(),
+				'subtotal' => 0.0,
+				'tax'      => 0.0,
+				'total'    => 0.0,
 			),
 			'shipping' => array(
-				'items'     => array(),
-				'total'     => 0.0,
-				'total_tax' => 0.0,
+				'items'    => array(),
+				'subtotal' => 0.0,
+				'tax'      => 0.0,
+				'total'    => 0.0,
 			),
 			'fees'     => array(
-				'items'     => array(),
-				'total'     => 0.0,
-				'total_tax' => 0.0,
+				'items'    => array(),
+				'subtotal' => 0.0,
+				'tax'      => 0.0,
+				'total'    => 0.0,
 			),
 		);
 
@@ -560,7 +563,7 @@ class DataUtils {
 			$refund_total_with_tax = isset( $line_item['refund_total'] )
 				? (float) $line_item['refund_total']
 				: $this->compute_line_item_refund_total( $item, (int) $line_item['quantity'] );
-			$total_excluding_tax   = $refund_total_with_tax;
+			$subtotal              = $refund_total_with_tax;
 			$tax                   = 0.0;
 
 			$original_taxes = $item->get_taxes();
@@ -588,29 +591,31 @@ class DataUtils {
 			}
 
 			if ( ! empty( $tax_totals ) ) {
-				$tax_rates           = $this->build_tax_rates_array( $order, array_keys( $tax_totals ) );
-				$calculated_taxes    = WC_Tax::calc_inclusive_tax( $refund_total_with_tax, $tax_rates );
-				$calculated_taxes    = array_map(
+				$tax_rates        = $this->build_tax_rates_array( $order, array_keys( $tax_totals ) );
+				$calculated_taxes = WC_Tax::calc_inclusive_tax( $refund_total_with_tax, $tax_rates );
+				$calculated_taxes = array_map(
 					function ( $t ) use ( $price_decimals ) {
 						return NumberUtil::round( $t, $price_decimals );
 					},
 					$calculated_taxes
 				);
-				$tax                 = NumberUtil::round( array_sum( $calculated_taxes ), $price_decimals );
-				$total_excluding_tax = NumberUtil::round( $refund_total_with_tax - $tax, $price_decimals );
+				$tax              = NumberUtil::round( array_sum( $calculated_taxes ), $price_decimals );
+				$subtotal         = NumberUtil::round( $refund_total_with_tax - $tax, $price_decimals );
 			}
 
 			$item_data = array(
-				'id'        => $line_item['line_item_id'],
-				'quantity'  => $line_item['quantity'] ?? null,
-				'total'     => wc_format_decimal( $total_excluding_tax, $price_decimals ),
-				'total_tax' => wc_format_decimal( $tax, $price_decimals ),
+				'id'       => $line_item['line_item_id'],
+				'quantity' => $line_item['quantity'] ?? null,
+				'subtotal' => wc_format_decimal( $subtotal, $price_decimals ),
+				'tax'      => wc_format_decimal( $tax, $price_decimals ),
+				'total'    => wc_format_decimal( $refund_total_with_tax, $price_decimals ),
 			);
 
 			$item_data['name'] = $item->get_name();
 
 			if ( $item instanceof WC_Order_Item_Product ) {
-				$item_data['product_id'] = $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id();
+				$variation_id            = $item->get_variation_id();
+				$item_data['product_id'] = $variation_id > 0 ? $variation_id : $item->get_product_id();
 				$section_key             = 'products';
 			} elseif ( $item instanceof WC_Order_Item_Shipping ) {
 				$section_key = 'shipping';
@@ -618,21 +623,24 @@ class DataUtils {
 				$section_key = 'fees';
 			}
 
-			$sections[ $section_key ]['items'][]    = $item_data;
-			$sections[ $section_key ]['total']     += $total_excluding_tax;
-			$sections[ $section_key ]['total_tax'] += $tax;
+			$sections[ $section_key ]['items'][]   = $item_data;
+			$sections[ $section_key ]['subtotal'] += $subtotal;
+			$sections[ $section_key ]['tax']      += $tax;
+			$sections[ $section_key ]['total']    += $refund_total_with_tax;
 		}
 
 		$format_section = function ( array $section ) use ( $price_decimals ): array {
 			return array(
-				'items'     => $section['items'],
-				'total'     => wc_format_decimal( $section['total'], $price_decimals ),
-				'total_tax' => wc_format_decimal( $section['total_tax'], $price_decimals ),
+				'items'    => $section['items'],
+				'subtotal' => wc_format_decimal( $section['subtotal'], $price_decimals ),
+				'tax'      => wc_format_decimal( $section['tax'], $price_decimals ),
+				'total'    => wc_format_decimal( $section['total'], $price_decimals ),
 			);
 		};
 
-		$grand_total     = $sections['products']['total'] + $sections['shipping']['total'] + $sections['fees']['total'];
-		$grand_total_tax = $sections['products']['total_tax'] + $sections['shipping']['total_tax'] + $sections['fees']['total_tax'];
+		$grand_subtotal = $sections['products']['subtotal'] + $sections['shipping']['subtotal'] + $sections['fees']['subtotal'];
+		$grand_tax      = $sections['products']['tax'] + $sections['shipping']['tax'] + $sections['fees']['tax'];
+		$grand_total    = $sections['products']['total'] + $sections['shipping']['total'] + $sections['fees']['total'];
 
 		return array(
 			'breakdown'      => array(
@@ -640,8 +648,9 @@ class DataUtils {
 				'shipping' => $format_section( $sections['shipping'] ),
 				'fees'     => $format_section( $sections['fees'] ),
 			),
+			'subtotal'       => wc_format_decimal( $grand_subtotal, $price_decimals ),
+			'tax'            => wc_format_decimal( $grand_tax, $price_decimals ),
 			'total'          => wc_format_decimal( $grand_total, $price_decimals ),
-			'total_tax'      => wc_format_decimal( $grand_total_tax, $price_decimals ),
 			'max_refundable' => wc_format_decimal( $order->get_remaining_refund_amount(), $price_decimals ),
 		);
 	}
