@@ -29,7 +29,7 @@ class PostmetaIndexCheck {
 	 * @return string
 	 */
 	public function get_label(): string {
-		return __( 'Woo: WooCommerce meta_value index', 'woocommerce' );
+		return __( 'WooCommerce meta_value index', 'woocommerce' );
 	}
 
 	/**
@@ -65,10 +65,10 @@ class PostmetaIndexCheck {
 		if ( $present ) {
 			return $this->finish(
 				array(
-					'label'       => __( 'Woo: WooCommerce-related queries can use the postmeta meta_value index', 'woocommerce' ),
+					'label'       => __( 'WooCommerce-related queries can use the postmeta meta_value index', 'woocommerce' ),
 					'status'      => 'good',
 					'badge'       => array(
-						'label' => __( 'Woo: Performance', 'woocommerce' ),
+						'label' => __( 'Performance', 'woocommerce' ),
 						'color' => 'green',
 					),
 					'description' => '<p>' . esc_html__( 'The postmeta table has an index on meta_value, which speeds up many WooCommerce queries.', 'woocommerce' ) . '</p>',
@@ -79,10 +79,10 @@ class PostmetaIndexCheck {
 
 		return $this->finish(
 			array(
-				'label'       => __( 'Woo: postmeta.meta_value index is missing', 'woocommerce' ),
+				'label'       => __( 'postmeta.meta_value index is missing', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array(
-					'label' => __( 'Woo: Performance', 'woocommerce' ),
+					'label' => __( 'Performance', 'woocommerce' ),
 					'color' => 'orange',
 				),
 				'description' => '<p>' . esc_html__( 'Adding an index on wp_postmeta.meta_value can substantially speed up WooCommerce price/SKU/stock queries on large stores. A site administrator (or hosting provider) can add this index manually.', 'woocommerce' ) . '</p>',
@@ -125,10 +125,10 @@ class PostmetaIndexCheck {
 		}
 		return $this->finish(
 			array(
-				'label'       => __( 'Woo: WooCommerce could not run the postmeta index check', 'woocommerce' ),
+				'label'       => __( 'WooCommerce could not run the postmeta index check', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array(
-					'label' => __( 'Woo: Performance', 'woocommerce' ),
+					'label' => __( 'Performance', 'woocommerce' ),
 					'color' => 'gray',
 				),
 				'description' => '<p>' . esc_html__( 'WooCommerce was unable to inspect the postmeta table indexes. Check the site error logs.', 'woocommerce' ) . '</p>',

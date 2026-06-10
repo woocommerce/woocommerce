@@ -21,7 +21,7 @@ class ProductLookupTableCheck {
 	}
 
 	public function get_label(): string {
-		return __( 'Woo: WooCommerce product lookup table', 'woocommerce' );
+		return __( 'WooCommerce product lookup table', 'woocommerce' );
 	}
 
 	public function is_async(): bool {
@@ -45,7 +45,7 @@ class ProductLookupTableCheck {
 
 		if ( ( $lookup === 0 && $products > 0 ) || $drift > $threshold ) {
 			return $this->finish( array(
-				'label'       => __( 'Woo: WooCommerce product lookup table is out of sync', 'woocommerce' ),
+				'label'       => __( 'WooCommerce product lookup table is out of sync', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'orange' ),
 				'description' => '<p>' . esc_html(
@@ -66,7 +66,7 @@ class ProductLookupTableCheck {
 		}
 
 		return $this->finish( array(
-			'label'       => __( 'Woo: WooCommerce product lookup table is in sync', 'woocommerce' ),
+			'label'       => __( 'WooCommerce product lookup table is in sync', 'woocommerce' ),
 			'status'      => 'good',
 			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'green' ),
 			'description' => '<p>' . esc_html__( 'The product lookup table row count is within healthy bounds of the published product count.', 'woocommerce' ) . '</p>',
@@ -109,7 +109,7 @@ class ProductLookupTableCheck {
 			wc_get_logger()->error( $e->getMessage(), array( 'source' => 'site-health' ) );
 		}
 		return $this->finish( array(
-			'label'       => __( 'Woo: WooCommerce could not run a Site Health check', 'woocommerce' ),
+			'label'       => __( 'WooCommerce could not run a Site Health check', 'woocommerce' ),
 			'status'      => 'recommended',
 			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'gray' ),
 			'description' => '<p>' . esc_html__( 'WooCommerce was unable to run this check. See the site-health log channel for details.', 'woocommerce' ) . '</p>',
