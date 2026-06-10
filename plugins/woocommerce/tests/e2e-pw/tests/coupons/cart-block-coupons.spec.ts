@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { Page } from '@playwright/test';
 import {
 	addAProductToCart,
 	WC_API_PATH,
@@ -37,6 +38,25 @@ const customerBilling = {
 };
 
 let productId: number, orderId: number, limitedCouponId: number;
+
+/**
+ * Ensure the cart block coupon form is expanded before interacting with it.
+ *
+ * The coupon form is expanded by default ( the displayCouponForm block
+ * attribute defaults to true ), but it collapses again after each successful
+ * coupon application. Clicking "Add coupons" while it is already open would
+ * collapse it, so only click when the input is not already visible — this
+ * keeps the helper correct on a freshly loaded cart and between applications.
+ */
+const ensureCartCouponFormExpanded = async ( page: Page ) => {
+	const addCoupons = page.getByRole( 'button', { name: 'Add coupons' } );
+	// Wait for the coupon block to hydrate before reading the input's state.
+	await expect( addCoupons ).toBeVisible();
+	if ( ! ( await page.getByLabel( 'Enter code' ).isVisible() ) ) {
+		await addCoupons.click();
+		await expect( page.getByLabel( 'Enter code' ) ).toBeVisible();
+	}
+};
 
 const test = baseTest.extend( {
 	page: async ( { page }, use ) => {
@@ -129,9 +149,7 @@ test.describe(
 
 				// apply all coupon types
 				for ( let i = 0; i < coupons.length; i++ ) {
-					await page
-						.getByRole( 'button', { name: 'Add coupons' } )
-						.click();
+					await ensureCartCouponFormExpanded( page );
 					await page
 						.getByLabel( 'Enter code' )
 						.fill( coupons[ i ].code );
@@ -176,9 +194,7 @@ test.describe(
 
 				// add all coupons and verify prices
 				for ( let i = 0; i < coupons.length; i++ ) {
-					await page
-						.getByRole( 'button', { name: 'Add coupons' } )
-						.click();
+					await ensureCartCouponFormExpanded( page );
 					await page
 						.getByLabel( 'Enter code' )
 						.fill( coupons[ i ].code );
@@ -231,9 +247,7 @@ test.describe(
 			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
 			async ( { page } ) => {
 				// try to add two same coupons and verify the error message
-				await page
-					.getByRole( 'button', { name: 'Add coupons' } )
-					.click();
+				await ensureCartCouponFormExpanded( page );
 				await page.getByLabel( 'Enter code' ).fill( coupons[ 0 ].code );
 				await page.getByText( 'Apply', { exact: true } ).click();
 				await expect(
@@ -245,9 +259,7 @@ test.describe(
 							`Coupon code "${ coupons[ 0 ].code }" has been applied to your cart.`
 						)
 				).toBeVisible();
-				await page
-					.getByRole( 'button', { name: 'Add coupons' } )
-					.click();
+				await ensureCartCouponFormExpanded( page );
 				await page.getByLabel( 'Enter code' ).fill( coupons[ 0 ].code );
 				await page.getByText( 'Apply', { exact: true } ).click();
 				await expect(
@@ -265,9 +277,7 @@ test.describe(
 			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
 			async ( { page } ) => {
 				// add coupon with usage limit
-				await page
-					.getByRole( 'button', { name: 'Add coupons' } )
-					.click();
+				await ensureCartCouponFormExpanded( page );
 				await page.getByLabel( 'Enter code' ).fill( couponLimitedCode );
 				await page.getByText( 'Apply', { exact: true } ).click();
 				await expect(
