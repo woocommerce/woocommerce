@@ -78,10 +78,11 @@ test.describe( 'Coupon management', { tag: tags.SERVICES }, () => {
 				.getByRole( 'button', { name: 'Publish', exact: true } )
 				.click();
 			await expect( page.getByText( 'Coupon updated.' ) ).toBeVisible();
-			await expect( page ).toHaveURL( /[?&]post=\d+/ );
 
-			coupon.id = page.url().match( /[?&]post=(\d+)/ )?.[ 1 ];
+			const searchParams = new URL( page.url() ).searchParams;
+			coupon.id = searchParams.get( 'post' );
 			expect( coupon.id ).toBeDefined();
+			expect( coupon.id ).toMatch( /^\d+$/ );
 		} );
 
 		await test.step( 'verify persisted product restriction', async () => {
