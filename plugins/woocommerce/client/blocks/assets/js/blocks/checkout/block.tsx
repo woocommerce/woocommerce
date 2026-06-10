@@ -17,6 +17,7 @@ import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { checkoutStore, validationStore } from '@woocommerce/block-data';
+import type { CheckoutResponse } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -28,6 +29,13 @@ import { LOGIN_TO_CHECKOUT_URL, isLoginRequired, reloadPage } from './utils';
 import type { Attributes } from './types';
 import { CheckoutBlockContext } from './context';
 import { IncompatibleExtensionsFrontendNotice } from '../cart-checkout-shared/incompatible-extensions-notice';
+
+// Show the error screen only when the hydrated checkout GET response carried an error code.
+const preloadedCheckoutData = getSetting< Partial< CheckoutResponse > >(
+	'checkoutData',
+	{}
+);
+const hasCheckoutError = !! preloadedCheckoutData.code;
 
 const MustLoginPrompt = () => {
 	return (
@@ -47,10 +55,9 @@ const Checkout = ( {
 	attributes: Attributes;
 	children: React.ReactChildren;
 } ): JSX.Element => {
-	const { hasOrder, customerId } = useSelect( ( select ) => {
+	const { customerId } = useSelect( ( select ) => {
 		const store = select( checkoutStore );
 		return {
-			hasOrder: store.hasOrder(),
 			customerId: store.getCustomerId(),
 		};
 	} );
@@ -62,7 +69,7 @@ const Checkout = ( {
 		return <EmptyCart />;
 	}
 
-	if ( ! hasOrder ) {
+	if ( hasCheckoutError ) {
 		return <CheckoutOrderError />;
 	}
 

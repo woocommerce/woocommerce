@@ -203,6 +203,71 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_account_orders_actions() filters out malformed entries from the filter.
+	 *
+	 * @since 10.9.0
+	 */
+	public function test_wc_get_account_orders_actions_filters_malformed_entries() {
+		$order = WC_Helper_Order::create_order();
+
+		// Add malformed entries via the filter.
+		add_filter(
+			'woocommerce_my_account_my_orders_actions',
+			static function ( $actions ) {
+				$actions['invalid_bool']    = false;
+				$actions['invalid_string']  = 'not-an-array';
+				$actions['missing_url']     = array( 'name' => 'No URL' );
+				$actions['missing_name']    = array( 'url' => 'https://example.com' );
+				$actions['non_string_url']  = array(
+					'name' => 'Test',
+					'url'  => 123,
+				);
+				$actions['non_string_name'] = array(
+					'name' => true,
+					'url'  => 'https://example.com',
+				);
+				return $actions;
+			}
+		);
+
+		$result = wc_get_account_orders_actions( $order->get_id() );
+
+		// All malformed entries should be removed, only valid actions remain.
+		$this->assertArrayNotHasKey( 'invalid_bool', $result );
+		$this->assertArrayNotHasKey( 'invalid_string', $result );
+		$this->assertArrayNotHasKey( 'missing_url', $result );
+		$this->assertArrayNotHasKey( 'missing_name', $result );
+		$this->assertArrayNotHasKey( 'non_string_url', $result );
+		$this->assertArrayNotHasKey( 'non_string_name', $result );
+
+		// Valid original actions should still be present.
+		$this->assertArrayHasKey( 'view', $result );
+		$this->assertArrayHasKey( 'pay', $result );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * Test wc_get_account_orders_actions() returns empty array when filter returns non-array.
+	 *
+	 * @since 10.9.0
+	 */
+	public function test_wc_get_account_orders_actions_returns_empty_for_non_array_filter() {
+		$order = WC_Helper_Order::create_order();
+
+		add_filter(
+			'woocommerce_my_account_my_orders_actions',
+			'__return_false'
+		);
+
+		$result = wc_get_account_orders_actions( $order->get_id() );
+
+		$this->assertSame( array(), $result );
+
+		$order->delete( true );
+	}
+
+	/**
 	 * Test wc_get_account_formatted_address().
 	 *
 	 * @since 3.3.0

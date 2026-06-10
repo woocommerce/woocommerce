@@ -36,6 +36,7 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 	const disableMotion = useReducedMotion();
 
 	const { key: routeKey, areas, widths } = route;
+	const mobileArea = areas.mobile === true ? areas.content : areas.mobile;
 
 	return (
 		<>
@@ -90,16 +91,13 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 						</div>
 					) }
 
-					{ ! isMobileViewport && areas.edit && (
-						<div
-							className="edit-site-layout__area"
-							style={ {
-								maxWidth: widths?.edit,
-							} }
-						>
-							{ areas.edit }
+					{ isMobileViewport && mobileArea && (
+						<div className="edit-site-layout__area">
+							{ mobileArea }
 						</div>
 					) }
+
+					{ ! isMobileViewport && areas.edit }
 				</div>
 			</div>
 		</>

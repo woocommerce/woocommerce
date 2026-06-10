@@ -19,9 +19,13 @@ declare(strict_types = 1);
  * @var string $template_html The email template HTML content
  * @var string $meta_robots Meta robots tag content
  * @var array{contentSize: string} $layout Layout configuration
+ * @var Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context $rendering_context Rendering context
  */
+$language_attributes = get_language_attributes();
+$language_attributes = trim( (string) preg_replace( '/\s?dir=(["\']).*?\1/i', '', $language_attributes ) );
+$language_attributes = trim( $language_attributes . ' dir="' . esc_attr( $rendering_context->get_text_direction() ) . '"' );
 ?><!DOCTYPE html>
-<html <?php language_attributes(); ?>>
+<html <?php echo $language_attributes; ?>>
 <head>
 	<title><?php echo esc_html( $subject ); ?></title>
 	<meta charset="<?php bloginfo( 'charset' ); ?>" />
@@ -32,7 +36,7 @@ declare(strict_types = 1);
 	<?php echo $meta_robots; ?>
 	<!-- Forced Styles -->
 </head>
-<body>
+<body dir="<?php echo esc_attr( $rendering_context->get_text_direction() ); ?>">
 	<!--[if mso | IE]><table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" width="<?php echo esc_attr( $layout['contentSize'] ); ?>" style="width:<?php echo esc_attr( $layout['contentSize'] ); ?>"><tr><td><![endif]-->
 	<div class="email_layout_wrapper" style="max-width: <?php echo esc_attr( $layout['contentSize'] ); ?>">
 		<table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">

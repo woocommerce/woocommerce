@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { setLocaleData } from '@wordpress/i18n';
-import { registerStore } from '@wordpress/data';
-import 'regenerator-runtime/runtime';
+const { setLocaleData } = require( '@wordpress/i18n' );
+const { registerStore } = require( '@wordpress/data' );
+require( 'regenerator-runtime/runtime' );
 
 // Due to the dependency @wordpress/compose which introduces the use of
 // ResizeObserver this global mock is required for some tests to work.

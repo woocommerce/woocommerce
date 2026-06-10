@@ -268,6 +268,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 				/>
 				{ ! hasHiddenPrice && (
 					<span
+						translate="no"
 						className="wc-block-mini-cart__amount"
 						style={ { color: priceColor.color } }
 					>

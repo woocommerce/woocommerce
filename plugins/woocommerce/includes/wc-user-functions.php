@@ -439,7 +439,8 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		$cache_version = WC_Cache_Helper::get_transient_version( 'orders' );
 	}
 
-	$aggregation_version = 'v2'; // Update the version when modifying the aggregation implementation to ensure the cache is repopulated.
+	// Update the version when modifying the aggregation implementation to ensure the cache is repopulated.
+	$aggregation_version = 'v3';
 	$cache_group         = 'orders';
 	$cache_key           = 'wc_customer_bought_product_' . md5( $customer_email . '-' . $user_id . '-' . $use_lookup_tables . '-' . $aggregation_version );
 	$cache_value         = wp_cache_get( $cache_key, $cache_group );
@@ -449,8 +450,7 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	} else {
 		// Identify the customer using the provided data. Use Customer ID to optimize performance in the following SQL
 		// queries. If an account has been deleted, use the supplied ID to ensure graceful handling.
-		$user             = null;
-		$original_user_id = $user_id;
+		$user = null;
 		if ( ! $user_id && $customer_email && is_email( $customer_email ) ) {
 			$user    = get_user_by( 'email', $customer_email );
 			$user_id = $user->ID ?? $user_id;
@@ -460,14 +460,7 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			$user_id = $user->ID ?? $user_id;
 		}
 
-		// Deduplicate emails to ensure the Customer ID remains the primary performance driver in subsequent SQL queries.
 		$emails = array( $customer_email );
-		if ( $original_user_id ) {
-			$user_email = $user->user_email ?? '';
-			if ( $user_email && is_email( $user_email ) && strtolower( $user_email ) === strtolower( $customer_email ) ) {
-				$emails = array();
-			}
-		}
 		$emails = array_unique( array_filter( $emails, static fn( $email ) => $email && is_email( $email ) ) );
 
 		if ( empty( $emails ) && ! $user_id ) {
@@ -745,9 +738,12 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 					$caps[] = 'do_not_allow';
 				} elseif ( wc_current_user_has_role( 'shop_manager' ) ) {
 					// Shop managers can only edit customer info.
-					$userdata                    = get_userdata( $args[0] );
+					$userdata = get_userdata( $args[0] );
+					if ( ! $userdata instanceof WP_User ) {
+						break;
+					}
 					$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-					if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
+					if ( ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
 						$caps[] = 'do_not_allow';
 					}
 				}
