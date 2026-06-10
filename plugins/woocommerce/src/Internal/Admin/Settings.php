@@ -282,7 +282,10 @@ class Settings {
 	 * @return array
 	 */
 	public function get_features() {
-		$features     = FeaturesUtil::get_features( true, true );
+		$features     = array_diff_key(
+			FeaturesUtil::get_features( true, true ),
+			Features::get_legacy_feature_compatibility_values()
+		);
 		$new_features = array();
 
 		foreach ( array_keys( $features ) as $feature_id ) {

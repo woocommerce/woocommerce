@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add deprecated compatibility shims for retired WooCommerce Admin feature flags.

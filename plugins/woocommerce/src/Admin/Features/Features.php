@@ -24,6 +24,45 @@ class Features {
 	protected static $instance = null;
 
 	/**
+	 * WC Admin feature flags that graduated and are kept as enabled for backward compatibility.
+	 *
+	 * These shims will be removed in WooCommerce 11.5.
+	 *
+	 * @var array<string, bool>
+	 */
+	private static $retired_feature_compatibility_values = array(
+		'activity-panels'                      => true,
+		'analytics-scheduled-import'           => true,
+		'experimental-iapi-mini-cart'          => true,
+		'coupons'                              => true,
+		'core-profiler'                        => true,
+		'customize-store'                      => true,
+		'customer-effort-score-tracks'         => true,
+		'import-products-task'                 => true,
+		'experimental-fashion-sample-products' => true,
+		'shipping-smart-defaults'              => true,
+		'shipping-setting-tour'                => true,
+		'homescreen'                           => true,
+		'marketing'                            => true,
+		'mobile-app-banner'                    => true,
+		'onboarding'                           => true,
+		'onboarding-tasks'                     => true,
+		'pattern-toolkit-full-composability'   => true,
+		'payment-gateway-suggestions'          => true,
+		'product-custom-fields'                => true,
+		'printful'                             => true,
+		'remote-free-extensions'               => true,
+		'shipping-label-banner'                => true,
+		'subscriptions'                        => true,
+		'store-alerts'                         => true,
+		'transient-notices'                    => true,
+		'wc-pay-promotion'                     => true,
+		'wc-pay-welcome-page'                  => true,
+		'woo-mobile-welcome'                   => true,
+		'launch-your-store'                    => true,
+	);
+
+	/**
 	 * Get class instance.
 	 */
 	public static function get_instance() {
@@ -82,6 +121,11 @@ class Features {
 	 * @return bool Returns true if the feature exists.
 	 */
 	public static function exists( $feature ) {
+		if ( self::is_legacy_compatibility_feature( $feature ) ) {
+			self::warn_legacy_feature_compatibility_usage( __METHOD__, $feature );
+			return true;
+		}
+
 		$features = self::get_features();
 		return in_array( $feature, $features, true );
 	}
@@ -165,9 +209,13 @@ class Features {
 	 * @return array Enabled Woocommerce Admin features/sections.
 	 */
 	public static function get_available_features() {
-		$features              = self::get_features();
-		$optional_feature_keys = array( 'analytics', 'remote-inbox-notifications' );
-		$unavailable_features  = array();
+		$features                     = self::get_features();
+		$optional_feature_keys        = array( 'analytics', 'remote-inbox-notifications' );
+		$legacy_compatibility_values  = self::get_legacy_feature_compatibility_values();
+		$unavailable_features         = array();
+		$available_compatibility_keys = array_keys( array_filter( $legacy_compatibility_values ) );
+
+		$features = array_values( array_unique( array_merge( $features, $available_compatibility_keys ) ) );
 
 		/**
 		 * Filter allowing WooCommerce Admin optional features to be disabled.
@@ -202,6 +250,11 @@ class Features {
 	 * @return bool
 	 */
 	public static function is_enabled( $feature ) {
+		if ( self::is_legacy_compatibility_feature( $feature ) ) {
+			self::warn_legacy_feature_compatibility_usage( __METHOD__, $feature );
+			return self::get_legacy_feature_compatibility_value( $feature );
+		}
+
 		$available_features = self::get_available_features();
 		return in_array( $feature, $available_features, true );
 	}
@@ -287,11 +340,14 @@ class Features {
 			return;
 		}
 
-		$features         = self::get_features();
-		$enabled_features = array();
-		foreach ( $features as $key ) {
-			$enabled_features[ $key ] = self::is_enabled( $key );
+		$available_features = self::get_available_features();
+		$enabled_features   = array();
+		foreach ( self::get_features() as $key ) {
+			$enabled_features[ $key ] = in_array( $key, $available_features, true );
 		}
+
+		$enabled_features = array_merge( $enabled_features, self::get_legacy_feature_compatibility_values() );
+
 		wp_add_inline_script( WC_ADMIN_APP, 'window.wcAdminFeatures = ' . wp_json_encode( $enabled_features, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ), 'before' );
 	}
 
@@ -308,13 +364,69 @@ class Features {
 
 		$classes = explode( ' ', trim( $admin_body_class ) );
 
-		$features = self::get_features();
-		foreach ( $features as $feature_key ) {
+		foreach ( self::get_available_features() as $feature_key ) {
 			$classes[] = sanitize_html_class( 'woocommerce-feature-enabled-' . $feature_key );
 		}
 
 		$admin_body_class = implode( ' ', array_unique( $classes ) );
 		return " $admin_body_class ";
+	}
+
+	/**
+	 * Gets legacy feature flag compatibility values.
+	 *
+	 * This method is intended for passive compatibility paths, such as script globals
+	 * and filtering shared settings, where emitting deprecation notices would warn on
+	 * every admin page load.
+	 *
+	 * @return array<string, bool>
+	 */
+	public static function get_legacy_feature_compatibility_values() {
+		return array_merge(
+			self::$retired_feature_compatibility_values,
+			array(
+				'analytics'                  => FeaturesUtil::feature_is_enabled( 'analytics' ),
+				'remote-inbox-notifications' => 'yes' === get_option( RemoteInboxNotifications::TOGGLE_OPTION_NAME, 'yes' ),
+			)
+		);
+	}
+
+	/**
+	 * Checks if a feature slug is supported only by the legacy compatibility shim.
+	 *
+	 * @param string $feature Feature slug.
+	 * @return bool
+	 */
+	private static function is_legacy_compatibility_feature( $feature ) {
+		return array_key_exists( $feature, self::get_legacy_feature_compatibility_values() );
+	}
+
+	/**
+	 * Gets a single legacy feature flag compatibility value.
+	 *
+	 * @param string $feature Feature slug.
+	 * @return bool
+	 */
+	private static function get_legacy_feature_compatibility_value( $feature ) {
+		$values = self::get_legacy_feature_compatibility_values();
+		return $values[ $feature ] ?? false;
+	}
+
+	/**
+	 * Emits a deprecation notice for a direct legacy feature flag shim lookup.
+	 *
+	 * @param string $method  Method name.
+	 * @param string $feature Feature slug.
+	 */
+	private static function warn_legacy_feature_compatibility_usage( $method, $feature ): void {
+		wc_deprecated_function(
+			sprintf( "%s( '%s' )", $method, $feature ),
+			'11.0.0',
+			sprintf(
+				'direct feature behavior checks. The %s WC Admin feature flag shim will be removed in WooCommerce 11.5.',
+				$feature
+			)
+		);
 	}
 
 	/**
