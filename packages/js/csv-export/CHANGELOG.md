@@ -4,11 +4,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [1.11.0](https://www.npmjs.com/package/@woocommerce/csv-export/v/1.11.0) - 2026-06-10 
 
--   Minor - Bump jest package dependency to 29.5.x [#60324]
+-   Minor - Bump jest package dependency to 29.5.x. [#60324]
+-   Minor - Monorepo: bump pnpm version to 9.15.0. [#54189]
 -   Patch - Bump wireit dependency version to latest. [#57299]
--   Patch - dev: clean-up ci-job config options - remove unused cascading keys [#55863]
+-   Patch - Clean up CI job config options; remove unused cascading keys. [#55863]
 -   Patch - Monorepo: build RAM usage optimization. [#58781]
--   Minor - Monorepo: bump pnpm version to 9.15.0 [#54189]
 -   Patch - Monorepo: consolidate @babel/* dependencies versions across the monorepo. [#56575]
 -   Patch - Monorepo: consolidate packages licenses to `GPL-2.0-or-later`. [#58941]
 -   Patch - Monorepo: drop the unused `concurrently` package from dependencies. [#58765]
@@ -17,7 +17,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Patch - Move TypeScript type-checking from the build to a new `lint:lang:types` script. Builds now emit types and JS without type-checking. [#65168]
 -   Patch - Replaced patched `@wordpress/data` types with opt-in internal package types. [#63483]
 -   Patch - Replaced wireit + tsc package build pipeline with a per-package esbuild script. [#65210]
--   Patch - Update wireit to 0.14.10 [#54996]
+-   Patch - Update wireit to 0.14.10. [#54996]
 
 ## [1.10.0](https://www.npmjs.com/package/@woocommerce/csv-export/v/1.10.0) - 2024-12-19 
 
