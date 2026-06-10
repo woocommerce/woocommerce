@@ -49,19 +49,6 @@ export function applyRetiredFeatureFlagDeprecationProxy(): void {
 
 applyRetiredFeatureFlagDeprecationProxy();
 
-function getWcAdminFeatureValue( featureId: string ): boolean | undefined {
-	if ( typeof window === 'undefined' || ! window.wcAdminFeatures ) {
-		return undefined;
-	}
-
-	const feature = Object.getOwnPropertyDescriptor(
-		window.wcAdminFeatures,
-		featureId
-	);
-
-	return feature ? Boolean( feature.value ) : undefined;
-}
-
 /**
  * Get the feature flag from admin settings.
  *
@@ -80,17 +67,6 @@ export function getFeature( featureId: string ): Feature | undefined {
  * @return `true` or `false` if the given feature is enabled
  */
 export function isFeatureEnabled( featureId: string ): boolean {
-	if ( isRetiredFeatureFlag( featureId ) ) {
-		const wcAdminFeatureValue = getWcAdminFeatureValue( featureId );
-
-		if ( wcAdminFeatureValue !== undefined ) {
-			return wcAdminFeatureValue;
-		}
-
-		warnRetiredFeatureFlag( featureId );
-		return true;
-	}
-
 	const feature = getFeature( featureId );
 	return Boolean( feature?.is_enabled );
 }

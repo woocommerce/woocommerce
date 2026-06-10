@@ -52,10 +52,7 @@ export const getRetiredFeatureFlagDeprecationMessage = (
 };
 
 export const isRetiredFeatureFlag = ( featureId: string ): boolean =>
-	Object.prototype.hasOwnProperty.call(
-		RETIRED_FEATURE_FLAGS,
-		featureId
-	);
+	Object.prototype.hasOwnProperty.call( RETIRED_FEATURE_FLAGS, featureId );
 
 export const warnRetiredFeatureFlag = ( featureId: string ): void => {
 	// eslint-disable-next-line no-console
