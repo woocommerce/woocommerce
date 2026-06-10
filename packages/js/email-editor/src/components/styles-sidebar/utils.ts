@@ -69,5 +69,9 @@ export const getElementStyles = (
 
 	// Ensure the `typography` and `color` objects are always available to
 	// consumers so they can safely destructure them.
-	return deepmerge( defaultStyleObject, elementStyles ) as EmailStyles;
+	return {
+		...elementStyles,
+		typography: elementStyles.typography ?? {},
+		color: elementStyles.color ?? {},
+	} as EmailStyles;
 };
