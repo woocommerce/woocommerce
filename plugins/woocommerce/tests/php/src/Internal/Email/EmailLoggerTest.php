@@ -375,6 +375,7 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	public function test_order_note_added_on_successful_send_for_order(): void {
 		$order = $this->createMock( \WC_Order::class );
 		$order->method( 'get_id' )->willReturn( 42 );
+		$order->method( 'get_object_read' )->willReturn( true );
 		$order->expects( $this->once() )
 			->method( 'add_order_note' )
 			->with(
@@ -394,6 +395,7 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	public function test_order_note_added_on_failed_send_for_order(): void {
 		$order = $this->createMock( \WC_Order::class );
 		$order->method( 'get_id' )->willReturn( 42 );
+		$order->method( 'get_object_read' )->willReturn( true );
 		$order->expects( $this->once() )
 			->method( 'add_order_note' )
 			->with(
@@ -416,6 +418,7 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	public function test_order_note_failure_includes_error_reason(): void {
 		$order = $this->createMock( \WC_Order::class );
 		$order->method( 'get_id' )->willReturn( 42 );
+		$order->method( 'get_object_read' )->willReturn( true );
 		$order->expects( $this->once() )
 			->method( 'add_order_note' )
 			->with(
@@ -438,6 +441,7 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	public function test_order_note_failure_redacts_email_addresses_in_reason(): void {
 		$order = $this->createMock( \WC_Order::class );
 		$order->method( 'get_id' )->willReturn( 42 );
+		$order->method( 'get_object_read' )->willReturn( true );
 		$order->expects( $this->once() )
 			->method( 'add_order_note' )
 			->with(
@@ -473,6 +477,22 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox No order note is added when the order object has not been read from the datastore (e.g. a preview dummy).
+	 */
+	public function test_no_order_note_for_unloaded_order_object(): void {
+		$order = $this->createMock( \WC_Order::class );
+		$order->method( 'get_id' )->willReturn( 12345 );
+		$order->method( 'get_object_read' )->willReturn( false );
+		$order->expects( $this->never() )->method( 'add_order_note' );
+
+		$email = $this->create_mock_email( 'customer_processing_order', 'customer@example.com', $order );
+		$this->sut->handle_woocommerce_email_sent( true, 'customer_processing_order', $email );
+
+		// Logger entry should still be written even though no note is added.
+		$this->assertLogged( 'info', 'customer_processing_order' );
+	}
+
+	/**
 	 * @testdox No order note is added when logging is disabled by the filter.
 	 */
 	public function test_no_order_note_when_logging_disabled_by_filter(): void {
@@ -480,6 +500,7 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 
 		$order = $this->createMock( \WC_Order::class );
 		$order->method( 'get_id' )->willReturn( 42 );
+		$order->method( 'get_object_read' )->willReturn( true );
 		$order->expects( $this->never() )->method( 'add_order_note' );
 
 		$email = $this->create_mock_email( 'customer_processing_order', 'customer@example.com', $order );
@@ -494,6 +515,7 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 
 		$order = $this->createMock( \WC_Order::class );
 		$order->method( 'get_id' )->willReturn( 42 );
+		$order->method( 'get_object_read' )->willReturn( true );
 		$order->expects( $this->never() )->method( 'add_order_note' );
 
 		$email = $this->create_mock_email( 'customer_processing_order', 'customer@example.com', $order );

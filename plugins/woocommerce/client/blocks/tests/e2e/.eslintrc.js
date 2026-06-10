@@ -1,5 +1,5 @@
 const rulesDirPlugin = require( 'eslint-plugin-rulesdir' );
-rulesDirPlugin.RULES_DIR = `${ __dirname }/rules`;
+rulesDirPlugin.RULES_DIR = `${ __dirname }/../../../../tests/e2e-pw/rules/blocks`;
 
 const config = {
 	extends: [

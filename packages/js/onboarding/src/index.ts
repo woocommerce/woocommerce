@@ -21,7 +21,7 @@ export { default as WCPayLogo } from './images/wcpay-logo';
 export { WooPaymentGatewaySetup } from './components/WooPaymentGatewaySetup';
 export { WooPaymentGatewayConfigure } from './components/WooPaymentGatewayConfigure';
 export {
-	TaskReferralRecord,
+	type TaskReferralRecord,
 	accessTaskReferralStorage,
 	createStorageUtils,
 } from './components/WooOnboardingTaskReferral';
