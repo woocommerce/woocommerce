@@ -92,6 +92,10 @@ jQuery( function ( $ ) {
 						self.toolsPollTimer = null;
 					}
 				})
+				.fail( function() {
+					window.clearInterval( self.toolsPollTimer );
+					self.toolsPollTimer = null;
+				})
 				.always( function() {
 					self.toolsPollInProgress = false;
 				});
