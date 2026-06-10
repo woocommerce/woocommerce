@@ -4,7 +4,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [5.0.0](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin/v/5.0.0) - 2026-06-10
 
--   Major - Declare webpack 5 as a peer dependency; webpack 4 is no longer supported. [#65631]
 -   Major - Remove the block templates package from dependency extraction. [#65503]
 -   Major - Remove the product editor package from dependency extraction. [#65500]
 -   Major - Remove the settings editor package from dependency extraction. [#65316]
