@@ -218,8 +218,8 @@ jobs:
           cp -a ../release/woocommerce/. trunk
 
           # SVN add/delete new or removed files as needed.
-          svn status | grep '^?' | awk '{print $2}' | xargs -r svn add
-          svn status | grep '^!' | awk '{print $2}' | xargs -r svn delete
+          svn status | grep '^?' | awk '{print $2"@"}' | xargs -r svn add
+          svn status | grep '^!' | awk '{print $2"@"}' | xargs -r svn delete
 
           # Copy trunk to tag.
           svn copy trunk "tags/$RELEASE_TAG"

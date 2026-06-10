@@ -439,7 +439,8 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		$cache_version = WC_Cache_Helper::get_transient_version( 'orders' );
 	}
 
-	$aggregation_version = 'v3'; // Update the version when modifying the aggregation implementation to ensure the cache is repopulated.
+	// Update the version when modifying the aggregation implementation to ensure the cache is repopulated.
+	$aggregation_version = 'v3';
 	$cache_group         = 'orders';
 	$cache_key           = 'wc_customer_bought_product_' . md5( $customer_email . '-' . $user_id . '-' . $use_lookup_tables . '-' . $aggregation_version );
 	$cache_value         = wp_cache_get( $cache_key, $cache_group );

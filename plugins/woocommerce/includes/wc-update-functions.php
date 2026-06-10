@@ -3494,6 +3494,11 @@ function wc_update_10802_restore_orders_meta_key_value_index(): void {
 	$table_name = $wpdb->prefix . 'wc_orders_meta';
 	$index_name = 'meta_key_value';
 
+	// Table only exists on sites with HPOS enabled. Skip if absent.
+	if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		return;
+	}
+
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 	$columns = $wpdb->get_results(
 		$wpdb->prepare(

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add global HTML translate attribute to currency so it doesn't get auto translated
