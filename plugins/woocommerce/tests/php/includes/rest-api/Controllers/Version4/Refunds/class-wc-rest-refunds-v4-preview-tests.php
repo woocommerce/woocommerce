@@ -616,8 +616,8 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 					$this->assertSchemaKeysMatchData( $spec['items']['properties'], $data[ $name ][0], "{$path}.{$name}[0]" );
 				}
 			} elseif ( ! array_key_exists( $name, $data ) ) {
-				// Scalar field missing from data is OK — products-only fields (product_id,
-				// variation_id) are legitimately absent on shipping/fees sections.
+				// Scalar field missing from data is OK. The products-only `product_id` field is
+				// legitimately absent on shipping/fees sections.
 				continue;
 			}
 		}
@@ -912,7 +912,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Preview response includes product metadata (name, product_id, variation_id).
+	 * @testdox Preview response includes product metadata (name, product_id).
 	 */
 	public function test_preview_includes_product_metadata(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -952,9 +952,9 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$product_item = $data['breakdown']['products']['items'][0];
 		$this->assertArrayHasKey( 'name', $product_item );
 		$this->assertArrayHasKey( 'product_id', $product_item );
-		$this->assertArrayHasKey( 'variation_id', $product_item );
+		$this->assertArrayNotHasKey( 'variation_id', $product_item );
 		$this->assertNotEmpty( $product_item['name'] );
-		$this->assertGreaterThan( 0, $product_item['product_id'] );
+		$this->assertEquals( $product->get_id(), $product_item['product_id'] );
 
 		$product->delete( true );
 	}

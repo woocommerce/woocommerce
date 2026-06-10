@@ -429,9 +429,8 @@ class DataUtils {
 			$item_data['name'] = $item->get_name();
 
 			if ( $item instanceof WC_Order_Item_Product ) {
-				$item_data['product_id']   = $item->get_product_id();
-				$item_data['variation_id'] = $item->get_variation_id();
-				$section_key               = 'products';
+				$item_data['product_id'] = $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id();
+				$section_key             = 'products';
 			} elseif ( $item instanceof WC_Order_Item_Shipping ) {
 				$section_key = 'shipping';
 			} else {

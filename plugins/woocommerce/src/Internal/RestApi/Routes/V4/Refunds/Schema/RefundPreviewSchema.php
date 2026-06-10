@@ -172,20 +172,14 @@ class RefundPreviewSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Schema for an item entry in the products section (extends the base with product_id/variation_id).
+	 * Schema for an item entry in the products section (extends the base with product_id).
 	 *
 	 * @return array
 	 */
 	private function get_product_item_schema(): array {
-		$schema                               = $this->get_base_item_schema();
-		$schema['properties']['product_id']   = array(
-			'description' => __( 'The product ID.', 'woocommerce' ),
-			'type'        => 'integer',
-			'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-			'readonly'    => true,
-		);
-		$schema['properties']['variation_id'] = array(
-			'description' => __( 'The variation ID, if applicable.', 'woocommerce' ),
+		$schema                             = $this->get_base_item_schema();
+		$schema['properties']['product_id'] = array(
+			'description' => __( 'Product or variation ID.', 'woocommerce' ),
 			'type'        => 'integer',
 			'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			'readonly'    => true,
