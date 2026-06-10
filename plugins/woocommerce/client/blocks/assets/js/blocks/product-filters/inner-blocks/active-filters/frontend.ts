@@ -24,14 +24,12 @@ type RemovableItemContext = {
 const activeFiltersStore = {
 	state: {
 		get removableItems(): RemovableItem[] {
-			return state.activeFilters
-				.filter( ( f ) => !! f.value )
-				.map( ( f ) => ( {
-					id: f.type + '_' + f.value,
-					type: f.type,
-					value: f.value,
-					label: f.activeLabel,
-				} ) );
+			return state.activeFilters.map( ( f ) => ( {
+				id: f.type + '_' + f.value,
+				type: f.type,
+				value: f.value,
+				label: f.activeLabel,
+			} ) );
 		},
 		get removeItemLabel() {
 			const { item } = getContext< RemovableItemContext >();

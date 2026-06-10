@@ -160,13 +160,17 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			const grayCheckbox = filterOptionsBlock.getByRole( 'checkbox', {
 				name: 'Gray',
 			} );
-			const grayActiveFilter =
-				activeFiltersBlock.getByText( 'Color: Gray' );
+			const grayActiveFilter = activeFiltersBlock.getByText(
+				'Color: Gray',
+				{ exact: true }
+			);
 
 			await expect( grayActiveFilter ).toBeHidden();
 
 			await grayCheckbox.click();
-			await page.waitForURL( /.*filter_color=gray.*/ );
+			await page.waitForURL(
+				( url ) => url.searchParams.get( 'filter_color' ) === 'gray'
+			);
 
 			await expect( grayActiveFilter ).toBeVisible();
 			await expect( grayCheckbox ).toBeChecked();
