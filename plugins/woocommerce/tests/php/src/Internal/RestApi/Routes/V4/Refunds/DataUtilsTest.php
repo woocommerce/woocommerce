@@ -212,6 +212,72 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should extract a negative tax split when converting a negative-fee line with stored negative tax.
+	 *
+	 * Regression guard for the creation/preview tax-filter divergence: an earlier
+	 * filter rule of `$amount > 0` dropped the negative tax ID for a discount fee,
+	 * so the internal format ended up with refund_total = -$11 and refund_tax = [].
+	 * The preview path (build_refund_preview) already keeps non-zero taxes; the
+	 * create path must agree, otherwise a refund moved from preview to create loses
+	 * the signed split.
+	 */
+	public function test_convert_line_items_extracts_negative_tax_for_negative_fee() {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$order = wc_create_order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Loyalty discount',
+				'total' => -10.00,
+			)
+		);
+		$fee->set_taxes( array( 'total' => array( $tax_rate_id => -1.00 ) ) );
+		$fee->save();
+		$order->add_item( $fee );
+
+		$tax_item = new \WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( -1.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+
+		$order->save();
+
+		// refund_total -11.00 is the tax-inclusive amount; the converter should
+		// split it into a -10.00 base and -1.00 tax for the matching rate ID.
+		$line_items = array(
+			array(
+				'line_item_id' => $fee->get_id(),
+				'quantity'     => 1,
+				'refund_total' => -11.00,
+			),
+		);
+
+		$result = $this->data_utils->convert_line_items_to_internal_format( $line_items, $order );
+
+		$this->assertArrayHasKey( $fee->get_id(), $result );
+		$this->assertArrayHasKey( 'refund_tax', $result[ $fee->get_id() ] );
+		$this->assertArrayHasKey( $tax_rate_id, $result[ $fee->get_id() ]['refund_tax'] );
+		$this->assertEqualsWithDelta( -1.00, $result[ $fee->get_id() ]['refund_tax'][ $tax_rate_id ], 0.01 );
+		$this->assertEqualsWithDelta( -10.00, $result[ $fee->get_id() ]['refund_total'], 0.01 );
+
+		$order->delete( true );
+	}
+
+	/**
 	 * Test that calculate_refund_amount handles floating point precision correctly.
 	 *
 	 * Values like 43.20 + 19.20 can produce 62.400000000000006 in PHP due to IEEE 754

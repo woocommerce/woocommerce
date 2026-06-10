@@ -67,11 +67,15 @@ class DataUtils {
 				$original_item = $order->get_item( $line_item['line_item_id'] );
 				if ( $original_item ) {
 					$original_taxes = $original_item->get_taxes();
-					// Filter to only include tax IDs that have non-zero amounts.
+					// Keep any non-zero stored tax (positive or negative). Negative-tax
+					// discount fees (e.g. a -$10 fee with -$1 stored tax) must retain
+					// their tax breakdown so the create side matches the preview side
+					// in build_refund_preview() — filtering on `> 0` previously dropped
+					// them and emitted refund_total=$line_total / refund_tax=[].
 					$tax_totals = array_filter(
 						$original_taxes['total'] ?? array(),
 						function ( $amount ) {
-							return is_numeric( $amount ) && $amount > 0;
+							return is_numeric( $amount ) && 0.0 !== (float) $amount;
 						}
 					);
 					$tax_ids    = array_keys( $tax_totals );
