@@ -12,6 +12,10 @@ import type {
 	RemovableItem,
 	RemovableItemsParentStore,
 } from '../../../../types/type-defs/removable-items';
+import {
+	PRODUCT_FILTERS_STORE_LOCK,
+	PRODUCT_FILTERS_STORE_NAME,
+} from '../../constants';
 
 type RemovableItemContext = {
 	item: RemovableItem;
@@ -66,4 +70,6 @@ activeFiltersStore satisfies RemovableItemsParentStore;
 
 const { state, actions } = store<
 	ProductFiltersStore & typeof activeFiltersStore
->( 'woocommerce/product-filters', activeFiltersStore );
+>( PRODUCT_FILTERS_STORE_NAME, activeFiltersStore, {
+	lock: PRODUCT_FILTERS_STORE_LOCK,
+} );

@@ -15,10 +15,14 @@ import type {
 	ProductFiltersContext,
 } from './types';
 import { getClosestColor } from './utils/get-closest-color';
+import {
+	PRODUCT_FILTERS_STORE_LOCK,
+	PRODUCT_FILTERS_STORE_NAME,
+} from './constants';
 
 const { getContext, getElement, store, getServerContext, getConfig } = iAPI;
 
-const BLOCK_NAME = 'woocommerce/product-filters';
+const BLOCK_NAME = PRODUCT_FILTERS_STORE_NAME;
 
 type ValidFilterOptionItem = FilterOptionItem & {
 	type: string;
@@ -321,5 +325,6 @@ export type ProductFiltersStore = typeof productFiltersStore;
 
 const { state, actions } = store< ProductFiltersStore >(
 	BLOCK_NAME,
-	productFiltersStore
+	productFiltersStore,
+	{ lock: PRODUCT_FILTERS_STORE_LOCK }
 );

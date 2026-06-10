@@ -11,6 +11,10 @@ import type { ProductFiltersContext } from '../../types';
 import type { ProductFiltersStore } from '../../frontend';
 import { formatPrice, getCurrency } from '../../utils/price-currency';
 import type { RangeInputParentStore } from '../../../../types/type-defs/range-input';
+import {
+	PRODUCT_FILTERS_STORE_LOCK,
+	PRODUCT_FILTERS_STORE_NAME,
+} from '../../constants';
 
 const { store, getContext, getServerContext, getConfig } = iAPI;
 
@@ -179,4 +183,6 @@ export type ProductFilterPriceStore = typeof productFilterPriceStore;
 
 const { state, actions } = store<
 	ProductFiltersStore & ProductFilterPriceStore
->( 'woocommerce/product-filters', productFilterPriceStore );
+>( PRODUCT_FILTERS_STORE_NAME, productFilterPriceStore, {
+	lock: PRODUCT_FILTERS_STORE_LOCK,
+} );
