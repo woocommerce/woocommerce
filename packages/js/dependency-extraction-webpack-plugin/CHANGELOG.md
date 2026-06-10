@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Major - Remove the block templates package from dependency extraction. [#65503]
 -   Major - Remove the product editor package from dependency extraction. [#65500]
 -   Major - Remove the settings editor package from dependency extraction. [#65316]
--   Minor - Include @woocommerce/sanitize package in dependency extraction [#60324]
+-   Minor - Include @woocommerce/sanitize package in dependency extraction. [#60324]
 -   Patch - Monorepo: refresh DependencyExtractionWebpackPlugin for compatibility with filesystem cache, admin build cleanup. [#64111]
 -   Patch - Register the settings UI SDK package with dependency extraction. [#64387]
 -   Patch - Removed stray wireit devDependency. [#65210]
