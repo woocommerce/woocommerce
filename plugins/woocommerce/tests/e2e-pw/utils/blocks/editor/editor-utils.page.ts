@@ -242,8 +242,6 @@ export class Editor extends CoreEditor {
 	 * This extends the upstream `saveSiteEditorEntities` helper to handle cases
 	 * where the save panel opens even when the caller expected only the current
 	 * entity to be dirty.
-	 *
-	 * @see https://github.com/WordPress/gutenberg/issues/69042
 	 */
 	saveSiteEditorEntities = async ( {
 		isOnlyCurrentEntityDirty = false,
