@@ -148,12 +148,6 @@
 			"@woocommerce/e2e-utils": [
 				"tests/e2e/utils"
 			],
-			"@wordpress/interactivity": [
-				"node_modules/@wordpress/interactivity/src/index.ts"
-			],
-			"@wordpress/interactivity-router": [
-				"node_modules/@wordpress/interactivity-router/src/index.ts"
-			],
 			"@woocommerce/test-utils/msw": [
 				"tests/js/config/msw-setup"
 			],

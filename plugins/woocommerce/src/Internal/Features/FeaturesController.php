@@ -166,6 +166,8 @@ class FeaturesController {
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'set_change_feature_enable_nonce' ), 20, 1 );
 		add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
 		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'display_email_improvements_feedback_notice' ), 10, 2 );
+		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'flag_abandoned_cart_recovery_enabled_notice' ), 10, 2 );
+		add_action( 'woocommerce_settings_advanced', array( $this, 'maybe_render_abandoned_cart_recovery_enabled_notice' ), 1 );
 	}
 
 	/**
@@ -296,14 +298,6 @@ class FeaturesController {
 				'option_key'                   => Analytics::TOGGLE_OPTION_NAME,
 				'is_experimental'              => false,
 				'enabled_by_default'           => true,
-				'disable_ui'                   => false,
-				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-			),
-			'product_block_editor'               => array(
-				'name'                         => __( 'New product editor', 'woocommerce' ),
-				'description'                  => __( 'Try the new product editor (Beta)', 'woocommerce' ),
-				'is_experimental'              => true,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
@@ -450,6 +444,17 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
 				'is_experimental'              => false,
+			),
+			'abandoned_cart_recovery'            => array(
+				'name'                         => __( 'Abandoned cart recovery', 'woocommerce' ),
+				'description'                  => __(
+					'Send a reminder email to shoppers who didn\'t finish checking out.',
+					'woocommerce'
+				),
+				'skip_compatibility_checks'    => false,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
 			),
 			'email_improvements'                 => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
@@ -619,7 +624,7 @@ class FeaturesController {
 					'Enable push notifications for the WooCommerce mobile apps to receive order notifications and store updates.',
 					'woocommerce'
 				),
-				'enabled_by_default'           => false,
+				'enabled_by_default'           => true,
 				'is_experimental'              => true,
 				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => false,
@@ -828,14 +833,6 @@ class FeaturesController {
 				}
 				$features[ $feature_id ]['is_enabled'] = $is_enabled;
 			}
-		}
-
-		// We're deprecating the product block editor feature in favor of a v3 coming out.
-		// We want to hide this setting in the UI for users that don't have it enabled.
-		// If users have it enabled, we won't hide it until they explicitly disable it.
-		if ( isset( $features['product_block_editor'] )
-			&& ! $this->feature_is_enabled( 'product_block_editor' ) ) {
-			$features['product_block_editor']['disable_ui'] = true;
 		}
 
 		if ( isset( $features['wc-visual-attribute'] ) && ! wp_is_block_theme() ) {
@@ -2009,8 +2006,8 @@ class FeaturesController {
 	/**
 	 * Changes the feature given it's id, a toggle value and nonce as a query param.
 	 *
-	 * `/wp-admin/post.php?product_block_editor=1&_feature_nonce=1234`, 1 for on
-	 * `/wp-admin/post.php?product_block_editor=0&_feature_nonce=1234`, 0 for off
+	 * `/wp-admin/post.php?feature_id=1&_feature_nonce=1234`, 1 for on
+	 * `/wp-admin/post.php?feature_id=0&_feature_nonce=1234`, 0 for off
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
@@ -2064,6 +2061,58 @@ class FeaturesController {
 				}
 			);
 		}
+	}
+
+	/**
+	 * Flag a one-shot transient when the merchant turns on Abandoned cart recovery.
+	 *
+	 * `change_feature_enable` fires this action mid-request before the post-save
+	 * redirect, so the actual notice has to render on the next page load. We
+	 * stash a transient here and `maybe_render_abandoned_cart_recovery_enabled_notice`
+	 * picks it up the next time `woocommerce_settings_advanced` fires.
+	 *
+	 * @param string $feature_id Feature being toggled.
+	 * @param bool   $is_enabled True when turned on, false when turned off.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function flag_abandoned_cart_recovery_enabled_notice( $feature_id, $is_enabled ): void {
+		if ( 'abandoned_cart_recovery' === $feature_id && $is_enabled ) {
+			set_transient( 'wc_abandoned_cart_recovery_enabled_notice', 'yes', MINUTE_IN_SECONDS );
+		}
+	}
+
+	/**
+	 * Render a success notice after the merchant enables Abandoned cart recovery,
+	 * pointing them straight at the email settings page where they actually
+	 * configure it.
+	 *
+	 * Hooks into `woocommerce_settings_advanced` at priority 1, which fires
+	 * inside the settings template right after `WC_Admin_Settings::show_messages()`
+	 * (the "Your settings have been saved." notice) and before the form fields.
+	 * That places our notice in the same visual slot below the tabs, alongside
+	 * the standard save confirmation.
+	 *
+	 * `WC_Admin_Settings::add_message()` would be the cleaner API but escapes
+	 * its input via `esc_html()`, which strips the link tag. Direct echo here
+	 * keeps the markup intact while still matching the surrounding notice style.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function maybe_render_abandoned_cart_recovery_enabled_notice(): void {
+		if ( 'yes' !== get_transient( 'wc_abandoned_cart_recovery_enabled_notice' ) ) {
+			return;
+		}
+		delete_transient( 'wc_abandoned_cart_recovery_enabled_notice' );
+
+		$settings_url = admin_url( 'admin.php?page=wc-settings&tab=email&section=wc_email_customer_abandoned_cart_recovery' );
+
+		printf(
+			'<div id="wc-abandoned-cart-recovery-enabled-notice" class="updated inline"><p><strong>%1$s <a href="%2$s">%3$s</a></strong></p></div>',
+			esc_html__( 'Abandoned cart recovery is enabled.', 'woocommerce' ),
+			esc_url( $settings_url ),
+			esc_html__( 'Configure the recovery email →', 'woocommerce' )
+		);
 	}
 
 	/**

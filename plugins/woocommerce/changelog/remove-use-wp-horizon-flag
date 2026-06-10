@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Remove the disabled use-wp-horizon feature flag.
