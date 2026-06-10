@@ -150,7 +150,7 @@ class Renderer {
 				if ( $is_enhanced_pagination_enabled && isset( $this->parsed_block ) ) {
 					$p->set_attribute(
 						'data-wp-router-region',
-						'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
+						'wc-product-collection-' . ( $this->parsed_block['attrs']['queryId'] ?? '0' )
 					);
 				}
 			}

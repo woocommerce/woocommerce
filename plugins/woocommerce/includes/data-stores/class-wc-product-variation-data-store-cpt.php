@@ -645,15 +645,20 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	protected function update_guid( $product ) {
 		global $wpdb;
 
-		$guid = home_url(
+		$product_id = $product->get_id();
+		$guid       = home_url(
 			add_query_arg(
 				array(
 					'post_type' => 'product_variation',
-					'p'         => $product->get_id(),
+					'p'         => $product_id,
 				),
 				''
 			)
 		);
-		$wpdb->update( $wpdb->posts, array( 'guid' => $guid ), array( 'ID' => $product->get_id() ) );
+
+		$updated = (bool) $wpdb->update( $wpdb->posts, array( 'guid' => $guid ), array( 'ID' => $product_id ) );
+		if ( $updated ) {
+			clean_post_cache( $product_id );
+		}
 	}
 }

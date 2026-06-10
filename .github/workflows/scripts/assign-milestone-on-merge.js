@@ -1,3 +1,5 @@
+const { getAutoAssignMilestoneSelection } = require('./milestone-selection');
+
 /**
  * Assigns a milestone to a merged PR based on the checkbox selection.
  *
@@ -21,16 +23,14 @@ module.exports = async ({ github, context, core }) => {
         return;
     }
 
-    const nextVersionMatch = body.match(/- \[([ xX])\].*\*\*.*next WooCommerce version.*\*\*/);
+    const nextVersionSelection = getAutoAssignMilestoneSelection(body);
 
-    if (!nextVersionMatch) {
+    if (!nextVersionSelection.found) {
         core.setFailed('Milestone selection checkbox not found in PR description. Cannot assign milestone.');
         return;
     }
 
-    const nextVersionChecked = nextVersionMatch[1].toLowerCase() === 'x';
-
-    if (!nextVersionChecked) {
+    if (!nextVersionSelection.checked) {
         core.setFailed('Auto-assign checkbox not selected. Cannot assign milestone.');
         return;
     }

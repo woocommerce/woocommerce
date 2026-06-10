@@ -150,7 +150,7 @@ class EmailLogger implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function maybe_add_order_note( $wc_object, string $email_id, WC_Email $email, bool $success, ?string $error_reason ): void {
-		if ( ! $wc_object instanceof WC_Order ) {
+		if ( ! $wc_object instanceof WC_Order || ! $wc_object->get_object_read() ) {
 			return;
 		}
 

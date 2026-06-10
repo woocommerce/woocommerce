@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a merchant-configurable minimum-amount threshold to the store_order push notification, so only orders at or above the threshold trigger a notification. Default behaviour (notify on every enabled order) is unchanged.

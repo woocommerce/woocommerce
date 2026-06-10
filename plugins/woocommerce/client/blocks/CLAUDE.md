@@ -182,7 +182,7 @@ Webpack is configured with **11 separate configs** in `bin/webpack-configs.js`:
 
 - Core, Main, Frontend, Extensions, Payments, Styling, Site Editor, Interactivity, Cart/Checkout Frontend, Dependency Detection
 
-Build is orchestrated by **wireit** for caching. TypeScript uses **60+ path aliases** defined in `tsconfig.base.json`.
+Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP enqueues run against the final asset locations with no copy step. TypeScript uses **60+ path aliases** defined in `tsconfig.base.json`.
 
 ## Testing
 
