@@ -1,3 +1,4 @@
 Significance: minor
 Type: enhancement
-Comment: Make the coupon entry field visible by default on Cart and Checkout blocks. Previously, customers had to click "Add coupons" to reveal the input field. Adds a block editor toggle to restore the collapsed behaviour.
+
+Make the coupon entry field visible by default on Cart and Checkout blocks. Previously, customers had to click "Add coupons" to reveal the input field. Adds a block editor toggle to restore the collapsed behaviour.
