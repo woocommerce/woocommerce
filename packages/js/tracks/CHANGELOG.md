@@ -12,15 +12,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [1.5.0](https://www.npmjs.com/package/@woocommerce/tracks/v/1.5.0) - 2026-02-23 
 
 -   Minor - Add bumpStats and fix unit test tooling [#50155]
--   Minor - Bump jest package dependency to 29.5.x [#60324]
--   Minor - Monorepo: bump pnpm version to 9.15.0 [#54189]
--   Minor - Upgraded Typescript in the monorepo to 5.7.2 [#53165]
 -   Patch - Comment: Fix some comment typos. [#50993]
+-   Minor - Bump jest package dependency to 29.5.x [#60324]
 -   Patch - Bump wireit dependency version to latest. [#57299]
 -   Patch - CI: liverage composer packages cache in lint monorepo job [#52054]
 -   Patch - Fix pnpm version to 9.1.3 to avoid dependency installation issues. [#50828]
 -   Patch - Loosens the Node.js engine constraint. [#63406]
 -   Patch - Monorepo: build RAM usage optimization. [#59046]
+-   Minor - Monorepo: bump pnpm version to 9.15.0 [#54189]
 -   Patch - Monorepo: consolidate @babel/* dependencies versions across the monorepo. [#56575]
 -   Patch - Monorepo: consolidate packages licenses to `GPL-2.0-or-later`. [#58941]
 -   Patch - Monorepo: consolidate syncpack config around React 17/18 usage. [#52022]
@@ -28,6 +27,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Patch - Monorepo: drop the unused `concurrently` package from dependencies. [#58765]
 -   Patch - Monorepo: refresh wireit dependencyOutputs configuration synchronization when installing dependencies. [#55095]
 -   Patch - Update wireit to 0.14.10 [#54996]
+-   Minor - Upgraded Typescript in the monorepo to 5.7.2 [#53165]
 
 ## [1.4.0](https://www.npmjs.com/package/@woocommerce/tracks/v/1.4.0) - 2024-06-11 
 
