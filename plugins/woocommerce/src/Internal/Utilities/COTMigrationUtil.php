@@ -92,7 +92,7 @@ class COTMigrationUtil {
 	 *
 	 * @return bool True if data sync is enabled, false otherwise.
 	 */
-	public function custom_orders_table_data_sync_is_enabled() : bool {
+	public function custom_orders_table_data_sync_is_enabled(): bool {
 		return $this->data_synchronizer->data_sync_is_enabled();
 	}
 
