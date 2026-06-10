@@ -2921,6 +2921,95 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The create endpoint's auto-computed amount matches build_refund_preview's grand total for the same line items.
+	 *
+	 * Regression guard for create vs preview drift. Calls `build_refund_preview()`
+	 * directly to capture the authoritative total, then posts the same line items
+	 * (quantity only, no `refund_total`) to the create endpoint. The resulting
+	 * refund amount must equal the preview total exactly. A future change that
+	 * subtly diverges create's auto-compute from the preview-side calculation
+	 * would fail this assertion.
+	 */
+	public function test_refunds_create_auto_compute_matches_build_refund_preview(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 200.00,
+				'total'    => 200.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 20.00 ),
+				'subtotal' => array( $tax_rate_id => 20.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$order->set_total( 220.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		$line_items = array(
+			array(
+				'line_item_id' => $item->get_id(),
+				'quantity'     => 1,
+			),
+		);
+
+		$data_utils = wc_get_container()->get( DataUtils::class );
+		$preview    = $data_utils->build_refund_preview( $order, $line_items );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => $line_items,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$create_data             = $response->get_data();
+		$this->created_refunds[] = $create_data['id'];
+
+		$this->assertEquals(
+			$preview['total'],
+			$create_data['amount'],
+			'Create amount must match build_refund_preview total exactly.'
+		);
+
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox Creating a V4 refund with incomplete meta_data entries does not cause errors.
 	 */
 	public function test_create_refund_meta_data_with_incomplete_entries(): void {
