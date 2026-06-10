@@ -1981,8 +1981,7 @@ ul.wc_coupon_list_block {
 				display: block;
 				margin-bottom: 4px;
 				font-weight: 600;
-				// Inherit default postbox heading color so this matches the
-				// Customer history metabox h4s (Total orders / Total revenue).
+				color: $gray-900; // Field labels use the primary admin text color.
 			}
 		}
 
@@ -2152,39 +2151,35 @@ ul.wc_coupon_list_block {
 			border-top: 0;
 		}
 
-		// Save row: Update / Create primary button stacked above the
-		// destructive "Move to trash" secondary button. Sits beneath the
-		// action dropdown — matches the legacy DOM order so any plugin
-		// hooking woocommerce_order_actions_start (e.g. PayPal Payments,
-		// Mollie) renders above the dropdown as before.
-		&#wc-order-save-action {
+		// Save row: primary Update/Create button stacked above the destructive
+		// trash link, kept beneath the action dropdown to preserve legacy DOM order.
+		&.wc-order-save-action {
 			display: flex;
 			flex-direction: column;
 			gap: 8px;
 
 			button.save_order {
 				width: 100%;
-				// Reset the legacy 1px button margin (line 2870) so the
-				// full-width button doesn't overflow on pre-WP 7.0 installs.
-				// The .wc-wp-version-gte-70 block already zeros this on 7.0+.
+				// Reset the legacy 1px button margin so the full-width button doesn't overflow.
 				margin: 0;
 			}
 
-			// `<div id="delete-action">` is always rendered (preserves the
-			// legacy markup contract for plugin/theme JS that queries it
-			// directly), but is empty when the user lacks `delete_post`.
-			// Without this rule, the empty wrapper still participates in
-			// the flex `gap` and adds 8px of trailing space below Update.
-			#delete-action:empty {
-				display: none;
+			#delete-action {
+				// Extra gap above the destructive action so an accidental click
+				// near the save button is less likely.
+				margin-top: 8px;
+
+				// The div always renders but holds only whitespace when the user
+				// lacks `delete_post`, so `:empty` never matches — detect actual
+				// content with `:has()` and hide the empty wrapper instead.
+				&:not(:has(*)) {
+					display: none;
+				}
 			}
 
-			// Style the trash anchor as a destructive secondary button.
-			// Mirrors @wordpress/components Button variant="secondary"
-			// isDestructive — transparent fill with red text and an inset
-			// box-shadow border, darkened on hover/focus, focus ring around
-			// the outside. See Gutenberg packages/components/src/button/
-			// style.scss `.is-destructive.is-secondary` rules.
+			// Trash link styled as a WP 7.0 destructive secondary button: red text
+			// and inset stroke, error-tint wash on hover. Values are hardcoded WPDS
+			// tokens (noted inline) — the --wpds-* vars aren't loaded in wp-admin yet.
 			#delete-action a.submitdelete {
 				display: block;
 				width: 100%;
@@ -2195,31 +2190,28 @@ ul.wc_coupon_list_block {
 				border: 0;
 				border-radius: 2px;
 				background: transparent;
-				box-shadow: inset 0 0 0 1px #cc1818; // WP alert-red.
-				color: #cc1818;
+				box-shadow: inset 0 0 0 1px #cc1818; // stroke-interactive-error.
+				color: #cc1818; // fg-interactive-error.
 				text-align: center;
 				text-decoration: none;
-				transition: box-shadow 0.1s linear;
+				transition: box-shadow 0.1s linear, background-color 0.1s linear;
 
-				&:hover {
-					color: #710d0d; // WP alert-red darkened.
-					box-shadow: inset 0 0 0 1px #710d0d;
+				&:hover,
+				&:active {
+					color: #cc1818;
+					background: #f6e6e3; // bg-interactive-error-weak-active.
+					box-shadow: inset 0 0 0 1px #9d0000; // stroke-interactive-error-active.
 				}
 
 				&:focus {
-					color: #710d0d;
-					// Inner border + outer focus ring with a 1px white gap,
-					// matching Gutenberg's two-ring destructive focus pattern.
+					color: #cc1818;
+					// Inner stroke + outer ring with a white gap, matching
+					// Gutenberg's two-ring destructive focus pattern.
 					box-shadow:
-						inset 0 0 0 1px #710d0d,
+						inset 0 0 0 1px #9d0000,
 						0 0 0 1.5px #fff,
-						0 0 0 3px #710d0d;
+						0 0 0 3px #cc1818;
 					outline: 2px solid transparent; // a11y for high-contrast.
-				}
-
-				&:active {
-					color: #710d0d;
-					box-shadow: inset 0 0 0 1px #710d0d;
 				}
 			}
 		}
@@ -2242,7 +2234,7 @@ ul.wc_coupon_list_block {
 			.button {
 				flex-shrink: 0;
 				box-sizing: border-box;
-				// See save_order note above — same legacy 1px margin reset.
+				// Same legacy 1px margin reset as the save button.
 				margin: 0;
 			}
 		}
@@ -8464,11 +8456,9 @@ table.bar_chart {
 		}
 	}
 
-	// General column Select2s (Status + Customer): same WP 7.0 alignment as
-	// above, but for the form-field-wide selects that live as direct children
-	// of the column (outside of the address edit form Ann's #64389 covered).
-	// `>` direct-child scopes us to General — Billing/Shipping address fields
-	// are nested inside .edit_address and matched by the rule above.
+	// General column Select2s (Status + Customer): same WP 7.0 sizing as above.
+	// The direct-child `>` scopes this to General — address fields are nested
+	// inside .edit_address and covered by the rule above.
 	#order_data .order_data_column > .form-field-wide .select2-container .select2-selection--single {
 		height: 40px;
 

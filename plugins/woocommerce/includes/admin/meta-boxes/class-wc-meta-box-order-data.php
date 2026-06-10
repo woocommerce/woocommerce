@@ -458,7 +458,7 @@ class WC_Meta_Box_Order_Data {
 									if ( 'billing_phone' === $field_name ) {
 										$field_value = wc_make_phone_clickable( $field_value );
 									} elseif ( 'billing_email' === $field_name ) {
-										$normalized_email = is_scalar( $field_value ) ? trim( (string) $field_value ) : '';
+										$normalized_email = is_string( $field_value ) ? trim( $field_value ) : '';
 										$field_value      = '' === $normalized_email
 											? '<span class="none_set">' . esc_html__( 'No email address set.', 'woocommerce' ) . '</span>'
 											: '<a href="' . esc_url( 'mailto:' . $normalized_email ) . '">' . esc_html( $normalized_email ) . '</a>';
