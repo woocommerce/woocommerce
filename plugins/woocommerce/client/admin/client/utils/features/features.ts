@@ -10,34 +10,6 @@ import {
 
 const ADMIN_SETTINGS_FEATURES_NAME = 'features';
 const WC_ADMIN_FEATURES_PROXY_MARKER = '__wcRetiredFeatureFlagsProxy';
-const proxiedFeatureFlagSources = new WeakMap<
-	Record< string, unknown >,
-	Record< string, unknown >
->();
-
-function createRetiredFeatureFlagsProxy< T extends Record< string, unknown > >(
-	features: T
-): T {
-	const proxy = new Proxy( features, {
-		get( target, property, receiver ) {
-			if (
-				typeof property === 'string' &&
-				isRetiredFeatureFlag( property )
-			) {
-				warnRetiredFeatureFlag( property );
-			}
-
-			return Reflect.get( target, property, receiver );
-		},
-	} );
-
-	Object.defineProperty( proxy, WC_ADMIN_FEATURES_PROXY_MARKER, {
-		value: true,
-	} );
-	proxiedFeatureFlagSources.set( proxy, features );
-
-	return proxy as T;
-}
 
 export function applyRetiredFeatureFlagDeprecationProxy(): void {
 	if (
@@ -53,8 +25,25 @@ export function applyRetiredFeatureFlagDeprecationProxy(): void {
 		return;
 	}
 
-	window.wcAdminFeatures = createRetiredFeatureFlagsProxy(
-		window.wcAdminFeatures
+	window.wcAdminFeatures = new Proxy( window.wcAdminFeatures, {
+		get( target, property, receiver ) {
+			if (
+				typeof property === 'string' &&
+				isRetiredFeatureFlag( property )
+			) {
+				warnRetiredFeatureFlag( property );
+			}
+
+			return Reflect.get( target, property, receiver );
+		},
+	} );
+
+	Object.defineProperty(
+		window.wcAdminFeatures,
+		WC_ADMIN_FEATURES_PROXY_MARKER,
+		{
+			value: true,
+		}
 	);
 }
 
@@ -65,11 +54,10 @@ function getWcAdminFeatureValue( featureId: string ): boolean | undefined {
 		return undefined;
 	}
 
-	const features =
-		proxiedFeatureFlagSources.get(
-			window.wcAdminFeatures as Record< string, unknown >
-		) ?? window.wcAdminFeatures;
-	const feature = Object.getOwnPropertyDescriptor( features, featureId );
+	const feature = Object.getOwnPropertyDescriptor(
+		window.wcAdminFeatures,
+		featureId
+	);
 
 	return feature ? Boolean( feature.value ) : undefined;
 }

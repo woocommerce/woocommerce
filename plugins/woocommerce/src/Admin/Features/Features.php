@@ -24,42 +24,45 @@ class Features {
 	protected static $instance = null;
 
 	/**
-	 * WC Admin feature flags that graduated and are kept as enabled for backward compatibility.
+	 * Removal versions for WC Admin feature flags kept for backward compatibility.
 	 *
-	 * These shims will be removed in WooCommerce 11.5.
+	 * Keep this dictionary in sync with RETIRED_FEATURE_FLAGS in
+	 * plugins/woocommerce/client/admin/client/utils/features/retired-feature-flags.ts.
 	 *
-	 * @var array<string, bool>
+	 * @var array<string, string>
 	 */
-	private static $retired_feature_compatibility_values = array(
-		'activity-panels'                      => true,
-		'analytics-scheduled-import'           => true,
-		'experimental-iapi-mini-cart'          => true,
-		'coupons'                              => true,
-		'core-profiler'                        => true,
-		'customize-store'                      => true,
-		'customer-effort-score-tracks'         => true,
-		'import-products-task'                 => true,
-		'experimental-fashion-sample-products' => true,
-		'shipping-smart-defaults'              => true,
-		'shipping-setting-tour'                => true,
-		'homescreen'                           => true,
-		'marketing'                            => true,
-		'mobile-app-banner'                    => true,
-		'onboarding'                           => true,
-		'onboarding-tasks'                     => true,
-		'pattern-toolkit-full-composability'   => true,
-		'payment-gateway-suggestions'          => true,
-		'product-custom-fields'                => true,
-		'printful'                             => true,
-		'remote-free-extensions'               => true,
-		'shipping-label-banner'                => true,
-		'subscriptions'                        => true,
-		'store-alerts'                         => true,
-		'transient-notices'                    => true,
-		'wc-pay-promotion'                     => true,
-		'wc-pay-welcome-page'                  => true,
-		'woo-mobile-welcome'                   => true,
-		'launch-your-store'                    => true,
+	private static $retired_feature_compatibility_removal_versions = array(
+		'activity-panels'                      => '11.5',
+		'analytics'                            => '11.5',
+		'analytics-scheduled-import'           => '11.5',
+		'experimental-iapi-mini-cart'          => '11.5',
+		'coupons'                              => '11.5',
+		'core-profiler'                        => '11.5',
+		'customize-store'                      => '11.5',
+		'customer-effort-score-tracks'         => '11.5',
+		'import-products-task'                 => '11.5',
+		'experimental-fashion-sample-products' => '11.5',
+		'shipping-smart-defaults'              => '11.5',
+		'shipping-setting-tour'                => '11.5',
+		'homescreen'                           => '11.5',
+		'marketing'                            => '11.5',
+		'mobile-app-banner'                    => '11.5',
+		'onboarding'                           => '11.5',
+		'onboarding-tasks'                     => '11.5',
+		'pattern-toolkit-full-composability'   => '11.5',
+		'payment-gateway-suggestions'          => '11.5',
+		'product-custom-fields'                => '11.5',
+		'printful'                             => '11.5',
+		'remote-inbox-notifications'           => '11.5',
+		'remote-free-extensions'               => '11.5',
+		'shipping-label-banner'                => '11.5',
+		'subscriptions'                        => '11.5',
+		'store-alerts'                         => '11.5',
+		'transient-notices'                    => '11.5',
+		'wc-pay-promotion'                     => '11.5',
+		'wc-pay-welcome-page'                  => '11.5',
+		'woo-mobile-welcome'                   => '11.5',
+		'launch-your-store'                    => '11.5',
 	);
 
 	/**
@@ -383,7 +386,7 @@ class Features {
 	 */
 	public static function get_legacy_feature_compatibility_values() {
 		return array_merge(
-			self::$retired_feature_compatibility_values,
+			array_fill_keys( array_keys( self::$retired_feature_compatibility_removal_versions ), true ),
 			array(
 				'analytics'                  => FeaturesUtil::feature_is_enabled( 'analytics' ),
 				'remote-inbox-notifications' => 'yes' === get_option( RemoteInboxNotifications::TOGGLE_OPTION_NAME, 'yes' ),
@@ -413,6 +416,16 @@ class Features {
 	}
 
 	/**
+	 * Gets the WooCommerce version where a legacy feature flag shim will be removed.
+	 *
+	 * @param string $feature Feature slug.
+	 * @return string
+	 */
+	private static function get_legacy_feature_compatibility_removal_version( $feature ) {
+		return self::$retired_feature_compatibility_removal_versions[ $feature ] ?? 'a future version';
+	}
+
+	/**
 	 * Emits a deprecation notice for a direct legacy feature flag shim lookup.
 	 *
 	 * @param string $method  Method name.
@@ -423,8 +436,9 @@ class Features {
 			sprintf( "%s( '%s' )", $method, $feature ),
 			'11.0.0',
 			sprintf(
-				'direct feature behavior checks. The %s WC Admin feature flag shim will be removed in WooCommerce 11.5.',
-				$feature
+				'direct feature behavior checks. The %1$s WC Admin feature flag shim will be removed in WooCommerce %2$s.',
+				$feature,
+				self::get_legacy_feature_compatibility_removal_version( $feature )
 			)
 		);
 	}
