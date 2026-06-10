@@ -9,6 +9,50 @@ namespace Automattic\WooCommerce\Internal\Utilities;
  */
 class ProductUtil {
 	/**
+	 * Delete all product transients for a set of products.
+	 *
+	 * Fixed-name transients are deleted once for the whole set, and the
+	 * woocommerce_delete_product_transients action fires once per product ID.
+	 *
+	 * @param array $product_ids Product IDs whose transients are being deleted.
+	 * @return void
+	 */
+	public function delete_product_transients_for_products( array $product_ids ) {
+		$product_ids = array_unique( array_map( 'absint', $product_ids ) );
+
+		// Transient data to clear with a fixed name which may be stale after product updates.
+		$transients_to_clear = array(
+			'wc_products_onsale',
+			'wc_featured_products',
+			'wc_outofstock_count',
+			'wc_low_stock_count',
+		);
+
+		foreach ( $transients_to_clear as $transient ) {
+			delete_transient( $transient );
+		}
+
+		$product_ids_to_clear = array_filter( $product_ids );
+		if ( ! empty( $product_ids_to_clear ) ) {
+			$this->delete_product_specific_transients_for_products( $product_ids_to_clear );
+		}
+
+		// Kept for compatibility, WooCommerce core doesn't use product transient versions anymore.
+		\WC_Cache_Helper::get_transient_version( 'product', true );
+
+		foreach ( $product_ids as $product_id ) {
+			/**
+			 * Fires after product transients are deleted.
+			 *
+			 * @since 2.3.0
+			 *
+			 * @param int $product_id Product ID whose transients were deleted.
+			 */
+			do_action( 'woocommerce_delete_product_transients', $product_id );
+		}
+	}
+
+	/**
 	 * Delete the transients related to a specific product.
 	 * If the product is a variation, delete the transients for the parent too.
 	 *

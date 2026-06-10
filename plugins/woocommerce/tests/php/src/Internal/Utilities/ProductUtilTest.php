@@ -12,6 +12,28 @@ use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
  */
 class ProductUtilTest extends \WC_Unit_Test_Case {
 	/**
+	 * @testdox delete_product_transients_for_products deletes fixed-name transients once and fires hooks once per product.
+	 */
+	public function test_delete_product_transients_for_products_deletes_fixed_transients_and_fires_hooks() {
+		$product_ids = array( 0, 123, 123, 456 );
+		$deleted_ids = array();
+		$track_hook  = static function ( $product_id ) use ( &$deleted_ids ) {
+			$deleted_ids[] = (int) $product_id;
+		};
+
+		set_transient( 'wc_products_onsale', 'foobar' );
+		add_action( 'woocommerce_delete_product_transients', $track_hook );
+		try {
+			wc_get_container()->get( ProductUtil::class )->delete_product_transients_for_products( $product_ids );
+		} finally {
+			remove_action( 'woocommerce_delete_product_transients', $track_hook );
+		}
+
+		$this->assertFalse( get_transient( 'wc_products_onsale' ) );
+		$this->assertSame( array( 0, 123, 456 ), $deleted_ids );
+	}
+
+	/**
 	 * @testdox delete_product_specific_transients deletes the transients for a product that is not a variation.
 	 *
 	 * @param bool $use_id True to pass the product id to delete_product_specific_transients, false to pass the product object.

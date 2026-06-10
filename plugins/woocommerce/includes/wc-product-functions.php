@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -126,65 +127,13 @@ function wc_product_dimensions_enabled() {
  * @param int $post_id (default: 0) The product ID.
  */
 function wc_delete_product_transients( $post_id = 0 ) {
-	/**
-	 * Short-circuit product transient deletion.
-	 *
-	 * This allows bulk write paths to coalesce repeated invalidations and flush the
-	 * affected product IDs once after the batch completes.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @param bool $defer   Whether to defer deleting product transients.
-	 * @param int  $post_id Product ID whose transients are being deleted.
-	 */
-	if ( apply_filters( 'woocommerce_defer_product_transient_deletion', false, $post_id ) ) {
+	$container = wc_get_container();
+
+	if ( $container->get( ProductTransientsDeferrer::class )->maybe_defer_deletion( absint( $post_id ) ) ) {
 		return;
 	}
 
-	wc_delete_product_transients_for_product_ids( array( $post_id ) );
-}
-
-/**
- * Delete product transients for one or more product IDs.
- *
- * @since 11.0.0
- *
- * @param array $post_ids Product IDs whose transients are being deleted.
- */
-function wc_delete_product_transients_for_product_ids( array $post_ids ) {
-	$post_ids = array_unique( array_map( 'absint', $post_ids ) );
-
-	// Transient data to clear with a fixed name which may be stale after product updates.
-	$transients_to_clear = array(
-		'wc_products_onsale',
-		'wc_featured_products',
-		'wc_outofstock_count',
-		'wc_low_stock_count',
-	);
-
-	foreach ( $transients_to_clear as $transient ) {
-		delete_transient( $transient );
-	}
-
-	$post_ids_to_clear = array_filter( $post_ids );
-	if ( ! empty( $post_ids_to_clear ) ) {
-		// Transient names that include an ID - since they are dynamic they cannot be cleaned in bulk without the ID.
-		wc_get_container()->get( ProductUtil::class )->delete_product_specific_transients_for_products( $post_ids_to_clear );
-	}
-
-	// Kept for compatibility, WooCommerce core doesn't use product transient versions anymore.
-	WC_Cache_Helper::get_transient_version( 'product', true );
-
-	foreach ( $post_ids as $post_id ) {
-		/**
-		 * Fires after product transients are deleted.
-		 *
-		 * @since 2.3.0
-		 *
-		 * @param int $post_id Product ID whose transients were deleted.
-		 */
-		do_action( 'woocommerce_delete_product_transients', $post_id );
-	}
+	$container->get( ProductUtil::class )->delete_product_transients_for_products( array( $post_id ) );
 }
 
 /**

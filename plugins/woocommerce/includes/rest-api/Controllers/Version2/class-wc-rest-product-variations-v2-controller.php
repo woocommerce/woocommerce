@@ -11,6 +11,7 @@
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 
@@ -706,16 +707,11 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	 * @return array Of WP_Error or WP_REST_Response.
 	 */
 	public function batch_items( $request ) {
-		$items                            = array_filter( $request->get_params() );
-		$params                           = $request->get_url_params();
-		$query                            = $request->get_query_params();
-		$product_id                       = $params['product_id'];
-		$body_params                      = array();
-		$deferred_product_transient_ids   = array();
-		$defer_product_transient_deletion = static function ( $defer, $post_id ) use ( &$deferred_product_transient_ids ) {
-			$deferred_product_transient_ids[ (int) $post_id ] = true;
-			return true;
-		};
+		$items       = array_filter( $request->get_params() );
+		$params      = $request->get_url_params();
+		$query       = $request->get_query_params();
+		$product_id  = $params['product_id'];
+		$body_params = array();
 
 		foreach ( array( 'update', 'create', 'delete' ) as $batch_type ) {
 			if ( ! empty( $items[ $batch_type ] ) ) {
@@ -743,12 +739,13 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 		$request->set_body_params( $body_params );
 		$request->set_query_params( $query );
 
-		add_filter( 'woocommerce_defer_product_transient_deletion', $defer_product_transient_deletion, 10, 2 );
+		$transients_deferrer = wc_get_container()->get( ProductTransientsDeferrer::class );
+
+		$transients_deferrer->start_deferring();
 		try {
 			return parent::batch_items( $request );
 		} finally {
-			remove_filter( 'woocommerce_defer_product_transient_deletion', $defer_product_transient_deletion, 10 );
-			wc_delete_product_transients_for_product_ids( array_keys( $deferred_product_transient_ids ) );
+			$transients_deferrer->stop_deferring();
 		}
 	}
 
