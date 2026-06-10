@@ -49,10 +49,6 @@ jest.mock( '../use-create-product-by-type', () => ( {
 		.mockReturnValue( { createProductByType: jest.fn() } ),
 } ) );
 
-jest.mock( '~/utils/features', () => ( {
-	isFeatureEnabled: jest.fn(),
-} ) );
-
 global.fetch = jest.fn().mockImplementation( () =>
 	Promise.resolve( {
 		json: () => Promise.resolve( {} ),
@@ -73,11 +69,6 @@ describe( 'Products', () => {
 
 		// Reset location.href
 		mockLocation.href = '';
-
-		// @ts-expect-error -- partial mock
-		window.wcAdminFeatures = {
-			printful: true,
-		};
 	} );
 
 	it( 'should render default products types when onboardingData.profile.productType is null', () => {
@@ -293,9 +284,6 @@ describe( 'Products', () => {
 	} );
 
 	it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
-		const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
-		( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
-
 		mockLocation.href = 'test';
 		Object.defineProperty( global.window, 'location', {
 			value: mockLocation,
@@ -336,25 +324,6 @@ describe( 'Products', () => {
 					isPluginsRequesting: () => false,
 				} ) )
 			);
-
-			const { queryByText } = render( <Products /> );
-
-			await waitFor( () => {
-				expect(
-					queryByText( 'Print-on-demand products' )
-				).not.toBeInTheDocument();
-			} );
-		} );
-
-		it( 'should hide Printful banner when feature is disabled', async () => {
-			( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
-				callback( () => ( {
-					getInstalledPlugins: () => [],
-					isPluginsRequesting: () => false,
-				} ) )
-			);
-
-			window.wcAdminFeatures.printful = false;
 
 			const { queryByText } = render( <Products /> );
 
