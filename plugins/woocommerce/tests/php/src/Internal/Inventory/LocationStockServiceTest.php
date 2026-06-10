@@ -91,6 +91,14 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$this->create_inventory_tables();
 		$this->empty_inventory_tables();
 		$this->service->ensure_pos_location();
+
+		// The controller is a shared singleton whose feature-hooks latch survives the
+		// whole run, while WP_UnitTestCase restores $wp_filter between tests. Reset the
+		// latch so the feature hooks re-register for every test rather than only the first.
+		$feature_hooks_registered = new \ReflectionProperty( InventoryController::class, 'feature_hooks_registered' );
+		$feature_hooks_registered->setAccessible( true );
+		$feature_hooks_registered->setValue( $this->controller, false );
+
 		$this->controller->register_feature_hooks();
 
 		wp_set_current_user(
@@ -430,6 +438,49 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should revert a REST order item quantity increase that would take POS stock below zero.
+	 */
+	public function test_pos_rest_order_item_increase_beyond_stock_is_reverted(): void {
+		$product = $this->create_managed_stock_product();
+		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 2 );
+
+		$create = $this->create_rest_order(
+			array(
+				'created_via'        => 'point-of-sale',
+				'inventory_location' => LocationStockService::LOCATION_POS,
+				'line_items'         => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 2,
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 201, $create->get_status() );
+		$order_id = $create->get_data()['id'];
+
+		// The paid POS order reduced its two units, leaving the POS bucket empty.
+		$this->assertEquals( 0, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
+
+		$order   = wc_get_order( $order_id );
+		$items   = $order->get_items();
+		$item    = reset( $items );
+		$item_id = $item->get_id();
+
+		$this->update_rest_order_item_quantity( $order_id, $item_id, 5 );
+
+		$order = wc_get_order( $order_id );
+		$items = $order->get_items();
+		$item  = reset( $items );
+
+		$this->assertEquals( 2, $item->get_quantity() );
+		$this->assertEquals( 0, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
+		$this->assertEquals( 15, wc_get_product( $product->get_id() )->get_stock_quantity() );
+		$this->assert_order_has_error_note( $order, 'Not enough stock at POS' );
+	}
+
+	/**
 	 * @testdox Should add an error note when stock is no longer available at reduction time.
 	 */
 	public function test_pos_order_reduce_failure_adds_error_note_without_negative_stock(): void {
@@ -666,6 +717,8 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$product = $this->create_managed_stock_product();
 		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 2 );
 		$order = $this->create_pos_order_for_product( $product, 2 );
+		$order->set_status( 'processing' );
+		$order->save();
 		$this->set_first_order_item_totals( $order, '20.00', '20.00' );
 
 		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
@@ -681,6 +734,27 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 20.0, (float) $item->get_subtotal() );
 		$this->assertEquals( 2, $item->get_meta( '_reduced_location_stock', true ) );
 		$this->assert_order_has_error_note( $order, 'Not enough stock at POS' );
+	}
+
+	/**
+	 * @testdox Should reduce POS stock and leave Core stock untouched when a pending order transitions to completed.
+	 */
+	public function test_pos_order_status_transition_to_completed_reduces_location_stock(): void {
+		$product = $this->create_managed_stock_product();
+		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 5 );
+		$order = $this->create_pos_order_for_product( $product, 2 );
+
+		$this->assertSame( 'pending', $order->get_status() );
+
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$order   = wc_get_order( $order->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		$this->assertEquals( 3, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
+		$this->assertEquals( 15, $product->get_stock_quantity() );
+		$this->assertEquals( 'yes', $order->get_meta( '_location_stock_reduced', true ) );
 	}
 
 	/**
@@ -825,6 +899,29 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 					'set_paid'       => true,
 				),
 				$params
+			)
+		);
+
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * Update a single line item quantity on an order through the REST API.
+	 *
+	 * @param int $order_id Order ID.
+	 * @param int $item_id  Line item ID.
+	 * @param int $quantity New quantity.
+	 */
+	private function update_rest_order_item_quantity( int $order_id, int $item_id, int $quantity ): \WP_REST_Response {
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'       => $item_id,
+						'quantity' => $quantity,
+					),
+				),
 			)
 		);
 
