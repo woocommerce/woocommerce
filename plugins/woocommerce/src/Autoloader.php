@@ -196,6 +196,7 @@ class Autoloader {
 				if ( isset( $loaded[ $canonical ] ) ) {
 					return;
 				}
+
 				/*
 				 * Executed by another mechanism (the primary autoloader, a manual require) but
 				 * never attempted by us: re-including risks the same redeclare fatal, so skip.
