@@ -39,10 +39,7 @@ const entries = {
 	...scriptModuleEntries,
 	...styleEntries,
 	...editorStyleEntries,
-
-	// Mini cart frontend modules powered by the Interactivity API.
-	'woocommerce/mini-cart': './assets/js/blocks/mini-cart/iapi-frontend.ts',
-
+	'woocommerce/mini-cart': './assets/js/blocks/mini-cart/frontend.ts',
 	// Product elements frontend module. Share by several blocks.
 	'woocommerce/product-elements':
 		'./assets/js/atomic/blocks/product-elements/frontend.ts',
@@ -50,7 +47,6 @@ const entries = {
 	// Product Quantity block and the Grouped Product Selector block.
 	'woocommerce/add-to-cart-with-options-quantity-selector':
 		'./assets/js/blocks/add-to-cart-with-options/quantity-selector/frontend.ts',
-
 	// Other
 	'@woocommerce/stores/woocommerce/cart':
 		'./assets/js/base/stores/woocommerce/cart.ts',

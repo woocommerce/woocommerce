@@ -7,6 +7,7 @@
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
+	"viewScriptModule": "woocommerce/mini-cart",
 	"supports": {
 		"html": false,
 		"multiple": false,
@@ -16,7 +17,8 @@
 		"spacing": {
 			"margin": true,
 			"padding": true
-		}
+		},
+		"interactivity": true
 	},
 	"example": {
 		"attributes": {
