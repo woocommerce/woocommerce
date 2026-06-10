@@ -99,6 +99,7 @@ class PickupLocation extends WC_Shipping_Method {
 				if ( ! $location['enabled'] ) {
 					continue;
 				}
+				$has_valid_address = $this->has_valid_pickup_location( $location['address'] );
 				$this->add_rate(
 					array(
 						'id'        => $this->id . ':' . $index,
@@ -110,9 +111,9 @@ class PickupLocation extends WC_Shipping_Method {
 						// purchase time, used to derive the order tax location. See ShippingController::filter_order_tax_location().
 						'meta_data' => array(
 							'pickup_location'          => wp_kses_post( $location['name'] ),
-							'pickup_address'           => $this->has_valid_pickup_location( $location['address'] ) ? wc()->countries->get_formatted_address( $location['address'], ', ' ) : '',
+							'pickup_address'           => $has_valid_address ? wc()->countries->get_formatted_address( $location['address'], ', ' ) : '',
 							'pickup_details'           => wp_kses_post( $location['details'] ),
-							'_pickup_location_address' => $this->has_valid_pickup_location( $location['address'] ) ? $location['address'] : array(),
+							'_pickup_location_address' => $has_valid_address ? $location['address'] : array(),
 						),
 					)
 				);

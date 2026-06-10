@@ -480,12 +480,12 @@ class ShippingController {
 	 *
 	 * @since 11.0.0
 	 *
-	 * @param array     $location Tax location with 'country', 'state', 'postcode' and 'city' keys.
-	 * @param \WC_Order $order    Order the tax location is being resolved for.
+	 * @param array              $location Tax location with 'country', 'state', 'postcode' and 'city' keys.
+	 * @param \WC_Abstract_Order $order    Order the tax location is being resolved for.
 	 * @return array
 	 */
 	public function filter_order_tax_location( $location, $order ) {
-		if ( ! $order instanceof \WC_Order ) {
+		if ( ! $order instanceof \WC_Abstract_Order ) {
 			return $location;
 		}
 
@@ -494,7 +494,11 @@ class ShippingController {
 			return $location;
 		}
 
-		$local_pickup_method_ids = LocalPickupUtils::get_local_pickup_method_ids();
+		// Use the same canonical local pickup method list that WC_Abstract_Order::get_tax_location() uses to force
+		// the base address. Relying on the currently-registered methods (LocalPickupUtils::get_local_pickup_method_ids())
+		// would miss legacy or deregistered methods on existing orders, leaving them taxed at the store base instead.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Abstract_Order::get_tax_location().
+		$local_pickup_method_ids = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
 
 		foreach ( $order->get_shipping_methods() as $shipping_method ) {
 			if ( ! in_array( $shipping_method->get_method_id(), $local_pickup_method_ids, true ) ) {

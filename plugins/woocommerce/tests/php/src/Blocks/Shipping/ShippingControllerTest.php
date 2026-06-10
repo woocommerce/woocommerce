@@ -227,6 +227,44 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox filter_order_tax_location resolves the pickup location for legacy_local_pickup orders even when the method is no longer registered.
+	 */
+	public function test_filter_order_tax_location_returns_pickup_location_for_legacy_method(): void {
+		$pickup_address = array(
+			'country'  => 'US',
+			'state'    => 'CA',
+			'postcode' => '90210',
+			'city'     => 'Beverly Hills',
+		);
+
+		$order         = new \WC_Order();
+		$shipping_item = new \WC_Order_Item_Shipping();
+		// 'legacy_local_pickup' is in the canonical woocommerce_local_pickup_methods list but is not returned by
+		// LocalPickupUtils::get_local_pickup_method_ids(), so it stands in for any method no longer registered.
+		$shipping_item->set_method_id( 'legacy_local_pickup' );
+		$shipping_item->set_method_title( 'Local pickup' );
+		$shipping_item->add_meta_data( '_pickup_location_address', $pickup_address );
+		$order->add_item( $shipping_item );
+		$order->save();
+
+		$order = wc_get_order( $order->get_id() );
+
+		$default_location = array(
+			'country'  => 'GB',
+			'state'    => '',
+			'postcode' => 'PR1 4SS',
+			'city'     => 'Preston',
+		);
+
+		$location = $this->shipping_controller->filter_order_tax_location( $default_location, $order );
+
+		$this->assertSame( $pickup_address['country'], $location['country'], 'Tax country should match the pickup location for legacy methods.' );
+		$this->assertSame( $pickup_address['state'], $location['state'], 'Tax state should match the pickup location for legacy methods.' );
+		$this->assertSame( $pickup_address['postcode'], $location['postcode'], 'Tax postcode should match the pickup location for legacy methods.' );
+		$this->assertSame( $pickup_address['city'], $location['city'], 'Tax city should match the pickup location for legacy methods.' );
+	}
+
+	/**
 	 * @testdox filter_order_tax_location leaves the resolved location untouched for non local pickup orders.
 	 */
 	public function test_filter_order_tax_location_ignores_non_local_pickup_orders(): void {
