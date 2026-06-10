@@ -1006,7 +1006,7 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return invalid_quantity for missing, zero, negative, string, or float quantity values.
+	 * @testdox Should return missing_quantity_or_refund_total when neither a valid quantity nor refund_total is provided.
 	 *
 	 * @dataProvider provider_invalid_quantities_for_validate
 	 *
@@ -1024,7 +1024,7 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$result = $this->data_utils->validate_preview_line_items( array( $line_item ), $order );
 
 		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertEquals( 'invalid_quantity', $result->get_error_code() );
+		$this->assertEquals( 'missing_quantity_or_refund_total', $result->get_error_code() );
 	}
 
 	/**

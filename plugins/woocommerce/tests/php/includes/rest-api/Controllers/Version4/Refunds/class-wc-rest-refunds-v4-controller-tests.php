@@ -2731,7 +2731,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$container       = wc_get_container();
 		$dispatch_target = $container->get( RefundsController::class );
-		$dispatch_target->init( $this->refund_schema, new CollectionQuery(), $throwing_utils );
+		$dispatch_target->init( $this->refund_schema, new RefundPreviewSchema(), new CollectionQuery(), $throwing_utils );
 
 		try {
 			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
@@ -2754,7 +2754,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		} finally {
 			// Restore the real data_utils on the dispatch-target controller
 			// so the rest of the suite is unaffected.
-			$dispatch_target->init( $this->refund_schema, new CollectionQuery(), new DataUtils() );
+			$dispatch_target->init( $this->refund_schema, new RefundPreviewSchema(), new CollectionQuery(), new DataUtils() );
 			$product->delete( true );
 		}
 	}

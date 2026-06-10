@@ -510,8 +510,13 @@ class DataUtils {
 	 * Callers must invoke {@see validate_preview_line_items()} first — this
 	 * method assumes inputs have been validated and throws on missing items.
 	 *
+	 * Each line item must have 'line_item_id' and at least one of 'quantity'
+	 * (positive int) or 'refund_total' (tax-inclusive float). When 'refund_total'
+	 * is present it is used directly; otherwise the total is computed from quantity
+	 * via {@see compute_line_item_refund_total()}.
+	 *
 	 * @param WC_Order $order      The order being previewed for refund.
-	 * @param array    $line_items Array of line items with 'line_item_id' and 'quantity' keys.
+	 * @param array    $line_items Line items. Each: array{line_item_id: int, quantity?: int, refund_total?: float}.
 	 * @return array The structured preview response.
 	 * @throws \InvalidArgumentException When a line_item_id does not resolve to an item on the order.
 	 *
@@ -550,7 +555,11 @@ class DataUtils {
 			 *
 			 * @var WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item
 			 */
-			$refund_total_with_tax = $this->compute_line_item_refund_total( $item, $line_item['quantity'] );
+			// When the caller provides an explicit refund_total (partial-amount form) use it
+			// directly. The quantity-based form computes the tax-inclusive total from unit price.
+			$refund_total_with_tax = isset( $line_item['refund_total'] )
+				? (float) $line_item['refund_total']
+				: $this->compute_line_item_refund_total( $item, (int) $line_item['quantity'] );
 			$total_excluding_tax   = $refund_total_with_tax;
 			$tax                   = 0.0;
 
@@ -593,7 +602,7 @@ class DataUtils {
 
 			$item_data = array(
 				'id'        => $line_item['line_item_id'],
-				'quantity'  => $line_item['quantity'],
+				'quantity'  => $line_item['quantity'] ?? null,
 				'total'     => wc_format_decimal( $total_excluding_tax, $price_decimals ),
 				'total_tax' => wc_format_decimal( $tax, $price_decimals ),
 			);
@@ -700,69 +709,122 @@ class DataUtils {
 				);
 			}
 
-			if ( ! isset( $line_item['quantity'] ) || ! is_int( $line_item['quantity'] ) || $line_item['quantity'] < 1 ) {
+			$has_quantity     = isset( $line_item['quantity'] ) && is_int( $line_item['quantity'] ) && $line_item['quantity'] >= 1;
+			$has_refund_total = isset( $line_item['refund_total'] ) && is_numeric( $line_item['refund_total'] );
+
+			if ( ! $has_quantity && ! $has_refund_total ) {
 				return new WP_Error(
-					'invalid_quantity',
-					__( 'Quantity must be a positive integer.', 'woocommerce' ),
+					'missing_quantity_or_refund_total',
+					__( 'Either a positive integer quantity or a numeric refund_total is required.', 'woocommerce' ),
 					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			}
-			$quantity = $line_item['quantity'];
 
-			if ( $item instanceof WC_Order_Item_Product ) {
-				$remaining_qty = $item->get_quantity() + ( $refund_data['qtys'][ $line_item_id ] ?? 0 );
-				if ( $quantity > $remaining_qty ) {
+			// Validate explicit refund_total when provided.
+			if ( $has_refund_total ) {
+				$refund_total = (float) $line_item['refund_total'];
+				if ( $refund_total <= 0 ) {
 					return new WP_Error(
-						'quantity_exceeds_refundable',
-						sprintf(
-							/* translators: %d: remaining refundable quantity */
-							__( 'Requested quantity exceeds remaining refundable quantity (%d).', 'woocommerce' ),
-							$remaining_qty
-						),
-						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
-					);
-				}
-			}
-
-			if ( $item instanceof WC_Order_Item_Shipping || $item instanceof WC_Order_Item_Fee ) {
-				if ( 1 !== $quantity ) {
-					return new WP_Error(
-						'invalid_quantity',
-						__( 'Shipping and fee line items must be refunded with quantity of 1.', 'woocommerce' ),
+						'invalid_refund_total',
+						__( 'refund_total must be greater than zero.', 'woocommerce' ),
 						array( 'status' => WP_Http::BAD_REQUEST )
 					);
 				}
 
-				// Compare on a tax-inclusive basis: compute_line_item_refund_total() (and
-				// therefore $requested_total below) already includes tax, and
-				// compute_refunded_quantities_and_totals() also returns tax-inclusive
-				// fee/shipping totals.
-				$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
-				$remaining_total = abs( (float) $item->get_total() + (float) $item->get_total_tax() ) - $refunded_total;
-				if ( $remaining_total <= 0 ) {
+				$item_total_with_tax = abs( (float) $item->get_total() + (float) $item->get_total_tax() );
+				if ( $refund_total > NumberUtil::round( $item_total_with_tax, wc_get_price_decimals() ) ) {
 					return new WP_Error(
-						'quantity_exceeds_refundable',
-						__( 'This line item has already been fully refunded.', 'woocommerce' ),
+						'refund_total_exceeds_line',
+						sprintf(
+							/* translators: %s: line item total including tax */
+							__( 'refund_total cannot exceed the line item total including tax (%s).', 'woocommerce' ),
+							wc_format_decimal( $item_total_with_tax, wc_get_price_decimals() )
+						),
 						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 					);
 				}
 
-				// Cap against the line's remaining refundable amount. The preview
-				// shape only takes quantity, so a fee/shipping line that's been
-				// partially refunded cannot be previewed again at the full original
-				// total — the request would over-refund and the eventual create
-				// call would fail. Reject up-front with a clear error.
-				$requested_total = abs( $this->compute_line_item_refund_total( $item, $quantity ) );
-				if ( $requested_total > NumberUtil::round( $remaining_total, wc_get_price_decimals() ) ) {
-					return new WP_Error(
-						'quantity_exceeds_refundable',
-						sprintf(
-							/* translators: %s: remaining refundable amount */
-							__( 'Requested refund exceeds the remaining refundable amount for this line item (%s).', 'woocommerce' ),
-							wc_format_decimal( $remaining_total, wc_get_price_decimals() )
-						),
-						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
-					);
+				// For fee and shipping, also cap against the remaining refundable amount for this
+				// line. compute_refunded_quantities_and_totals() returns tax-inclusive totals so
+				// the comparison is consistent.
+				if ( $item instanceof WC_Order_Item_Shipping || $item instanceof WC_Order_Item_Fee ) {
+					$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
+					$remaining_total = $item_total_with_tax - $refunded_total;
+					if ( $remaining_total <= 0 ) {
+						return new WP_Error(
+							'line_item_already_refunded',
+							__( 'This line item has already been fully refunded.', 'woocommerce' ),
+							array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+						);
+					}
+					if ( $refund_total > NumberUtil::round( $remaining_total, wc_get_price_decimals() ) ) {
+						return new WP_Error(
+							'refund_total_exceeds_remaining',
+							sprintf(
+								/* translators: %s: remaining refundable amount */
+								__( 'refund_total cannot exceed the remaining refundable amount for this line item (%s).', 'woocommerce' ),
+								wc_format_decimal( $remaining_total, wc_get_price_decimals() )
+							),
+							array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+						);
+					}
+				}
+			}
+
+			// Quantity-based validation — only when refund_total is absent.
+			if ( $has_quantity && ! $has_refund_total ) {
+				$quantity = $line_item['quantity'];
+
+				if ( $item instanceof WC_Order_Item_Product ) {
+					$remaining_qty = $item->get_quantity() + ( $refund_data['qtys'][ $line_item_id ] ?? 0 );
+					if ( $quantity > $remaining_qty ) {
+						return new WP_Error(
+							'quantity_exceeds_refundable',
+							sprintf(
+								/* translators: %d: remaining refundable quantity */
+								__( 'Requested quantity exceeds remaining refundable quantity (%d).', 'woocommerce' ),
+								$remaining_qty
+							),
+							array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+						);
+					}
+				}
+
+				if ( $item instanceof WC_Order_Item_Shipping || $item instanceof WC_Order_Item_Fee ) {
+					if ( 1 !== $quantity ) {
+						return new WP_Error(
+							'invalid_quantity',
+							__( 'Shipping and fee line items must be refunded with quantity of 1.', 'woocommerce' ),
+							array( 'status' => WP_Http::BAD_REQUEST )
+						);
+					}
+
+					// Compare on a tax-inclusive basis: compute_line_item_refund_total() (and
+					// therefore $requested_total below) already includes tax, and
+					// compute_refunded_quantities_and_totals() also returns tax-inclusive
+					// fee/shipping totals.
+					$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
+					$remaining_total = abs( (float) $item->get_total() + (float) $item->get_total_tax() ) - $refunded_total;
+					if ( $remaining_total <= 0 ) {
+						return new WP_Error(
+							'quantity_exceeds_refundable',
+							__( 'This line item has already been fully refunded.', 'woocommerce' ),
+							array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+						);
+					}
+
+					$requested_total = abs( $this->compute_line_item_refund_total( $item, $quantity ) );
+					if ( $requested_total > NumberUtil::round( $remaining_total, wc_get_price_decimals() ) ) {
+						return new WP_Error(
+							'quantity_exceeds_refundable',
+							sprintf(
+								/* translators: %s: remaining refundable amount */
+								__( 'Requested refund exceeds the remaining refundable amount for this line item (%s).', 'woocommerce' ),
+								wc_format_decimal( $remaining_total, wc_get_price_decimals() )
+							),
+							array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+						);
+					}
 				}
 			}
 		}

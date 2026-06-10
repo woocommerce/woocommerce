@@ -195,7 +195,7 @@ class Controller extends AbstractController {
 							'validate_callback' => 'rest_validate_request_arg',
 							'items'             => array(
 								'type'                 => 'object',
-								'required'             => array( 'line_item_id', 'quantity' ),
+								'required'             => array( 'line_item_id' ),
 								'additionalProperties' => false,
 								'properties'           => array(
 									'line_item_id' => array(
@@ -204,9 +204,14 @@ class Controller extends AbstractController {
 										'minimum'     => 1,
 									),
 									'quantity'     => array(
-										'description' => __( 'Quantity to refund.', 'woocommerce' ),
+										'description' => __( 'Quantity to refund. Required when refund_total is omitted.', 'woocommerce' ),
 										'type'        => 'integer',
 										'minimum'     => 1,
+									),
+									'refund_total' => array(
+										'description' => __( 'Tax-inclusive amount to refund for this line item. Required when quantity is omitted.', 'woocommerce' ),
+										'type'        => array( 'number', 'null' ),
+										'minimum'     => 0,
 									),
 								),
 							),
