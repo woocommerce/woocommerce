@@ -136,6 +136,9 @@ class Autoloader {
 	 * foreign/malformed `ClassLoader` shape is present. The handler likewise leaves a class
 	 * unresolved — rather than fataling — if a resolved file is torn/unparseable mid-upgrade,
 	 * so a defensive `class_exists()` probe during an upgrade gets `false` instead of an error.
+	 * The failed attempt stays retryable: once the upgrade finishes writing the file, a later
+	 * probe in the same request loads it (the handler uses a plain `include`, which — unlike
+	 * `require_once` — does not record a parse-failed path as already included).
 	 *
 	 * @since 11.0.0
 	 *
@@ -171,8 +174,27 @@ class Autoloader {
 			if ( null === $file ) {
 				return;
 			}
+
+			// Never re-execute a file that already loaded successfully: re-including a file
+			// whose class is already declared is an UNCATCHABLE "Cannot redeclare class"
+			// fatal (e.g. a repeated probe of a class whose PSR-4 file declares a different
+			// name). The engine's included-files table records successful inclusions only,
+			// so checking it skips exactly those.
+			$canonical = realpath( $file );
+			if ( false !== $canonical && in_array( $canonical, get_included_files(), true ) ) {
+				return;
+			}
+
 			try {
-				require_once $file;
+				// Deliberately a plain `include`, NOT `require_once`: PHP records a path in
+				// the included-files table BEFORE compiling it for the *_once variants, so a
+				// torn file's caught ParseError would mark the path as included and every
+				// later attempt would no-op — the completed file could never load for the
+				// rest of the request, breaking the mid-request recovery guarantee (see
+				// find_scoped_file()). A plain include records the path only on success,
+				// keeping a failed attempt retryable; it also degrades a file deleted
+				// between findFile() and here to a warning, where require would fatal.
+				include $file;
 			} catch ( \Throwable $e ) {
 				// A torn/partially-written file mid-upgrade must not turn a class probe into a fatal:
 				// leave the class unresolved so e.g. class_exists() returns false and the request
