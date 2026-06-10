@@ -342,8 +342,9 @@ class JsonFileFeed implements FeedInterface {
 			}
 		}
 
-		// Best effort: a failure here must never interrupt feed generation, but log it — otherwise
-		// the generated feed would silently remain unreachable (HTTP 403) behind the stale rule.
+		// Reaching here, the .htaccess is either missing or still holds the legacy `deny from all`,
+		// so (re)create it with the file-access directive. Best effort: a failure must never
+		// interrupt feed generation, but log it — otherwise the feed would silently stay 403.
 		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 		if ( false === @file_put_contents( $htaccess_path, FilesystemUtil::HTACCESS_ALLOW_FILE_ACCESS ) ) {
 			wc_get_logger()->warning(

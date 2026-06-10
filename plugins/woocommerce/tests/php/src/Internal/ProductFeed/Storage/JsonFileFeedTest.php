@@ -274,6 +274,29 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should create the .htaccess when the feed directory exists without one.
+	 */
+	public function test_existing_feed_dir_without_htaccess_gets_one_created(): void {
+		// Directory exists but its .htaccess is missing (e.g. it was removed) — the is_file() === false case.
+		$directory = wp_upload_dir()['basedir'] . '/product-feeds';
+		wp_mkdir_p( $directory );
+		if ( file_exists( $directory . '/.htaccess' ) ) {
+			unlink( $directory . '/.htaccess' );
+		}
+
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->start();
+		$feed->end();
+		$feed->get_file_url();
+
+		$this->assertSame(
+			'Options -Indexes',
+			trim( (string) file_get_contents( $directory . '/.htaccess' ) ),
+			'A missing .htaccess in an existing feed directory should be created with file access allowed.'
+		);
+	}
+
+	/**
 	 * @testdox Should log a warning when the feed directory .htaccess cannot be written.
 	 */
 	public function test_logs_warning_when_htaccess_cannot_be_written(): void {
