@@ -200,7 +200,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 												data-wp-bind--hidden="!state.cartItem.quantity_limits.editable"
 												class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus"
 											>
-												＋
+												+
 											</button>
 										</div>
 										<button
