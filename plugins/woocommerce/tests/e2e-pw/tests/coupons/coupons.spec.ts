@@ -91,6 +91,9 @@ test.describe( 'Coupon management', { tag: tags.SERVICES }, () => {
 			await expect( page.getByLabel( 'Coupon code' ) ).toHaveValue(
 				coupon.code
 			);
+			await expect(
+				page.getByPlaceholder( 'Description (optional)' )
+			).toHaveValue( coupon.description );
 			await expect( page.getByLabel( 'Coupon amount' ) ).toHaveValue(
 				coupon.amount
 			);
