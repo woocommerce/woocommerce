@@ -287,4 +287,108 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 
 		$wp_filesystem = $original_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
+
+	/**
+	 * @testdox 'mkdir_p_not_indexable' writes the expected .htaccess based on the allow_file_access flag.
+	 *
+	 * @testWith [false, "deny from all"]
+	 *           [true, "Options -Indexes"]
+	 *
+	 * @param bool   $allow_file_access Whether file access should be allowed.
+	 * @param string $expected_htaccess The expected .htaccess content.
+	 */
+	public function test_mkdir_p_not_indexable_writes_expected_htaccess( bool $allow_file_access, string $expected_htaccess ): void {
+		$callback = fn() => 'direct';
+		add_filter( 'filesystem_method', $callback );
+
+		$dir = trailingslashit( get_temp_dir() ) . 'wc-mkdir-not-indexable-' . ( $allow_file_access ? 'allow' : 'deny' );
+		$this->delete_test_dir( $dir );
+
+		try {
+			FilesystemUtil::mkdir_p_not_indexable( $dir, $allow_file_access );
+
+			$wp_fs = FilesystemUtil::get_wp_filesystem();
+			$this->assertDirectoryExists( $dir, 'The directory should be created.' );
+			$this->assertSame(
+				$expected_htaccess,
+				trim( (string) $wp_fs->get_contents( trailingslashit( $dir ) . '.htaccess' ) ),
+				'The .htaccess content should reflect the allow_file_access flag.'
+			);
+			$this->assertTrue(
+				$wp_fs->exists( trailingslashit( $dir ) . 'index.html' ),
+				'An empty index.html should be created to prevent directory listing.'
+			);
+		} finally {
+			$this->delete_test_dir( $dir );
+			remove_filter( 'filesystem_method', $callback );
+		}
+	}
+
+	/**
+	 * @testdox 'mkdir_p_not_indexable' defaults to denying all access when no flag is passed.
+	 */
+	public function test_mkdir_p_not_indexable_defaults_to_deny_all(): void {
+		$callback = fn() => 'direct';
+		add_filter( 'filesystem_method', $callback );
+
+		$dir = trailingslashit( get_temp_dir() ) . 'wc-mkdir-not-indexable-default';
+		$this->delete_test_dir( $dir );
+
+		try {
+			FilesystemUtil::mkdir_p_not_indexable( $dir );
+
+			$wp_fs = FilesystemUtil::get_wp_filesystem();
+			$this->assertSame(
+				'deny from all',
+				trim( (string) $wp_fs->get_contents( trailingslashit( $dir ) . '.htaccess' ) ),
+				'Omitting the allow_file_access argument should keep the deny-all default.'
+			);
+		} finally {
+			$this->delete_test_dir( $dir );
+			remove_filter( 'filesystem_method', $callback );
+		}
+	}
+
+	/**
+	 * @testdox 'mkdir_p_not_indexable' leaves an existing directory's .htaccess untouched.
+	 */
+	public function test_mkdir_p_not_indexable_does_not_overwrite_existing_directory(): void {
+		$callback = fn() => 'direct';
+		add_filter( 'filesystem_method', $callback );
+
+		$dir = trailingslashit( get_temp_dir() ) . 'wc-mkdir-not-indexable-existing';
+		$this->delete_test_dir( $dir );
+
+		try {
+			// First call creates the directory with the deny-all default.
+			FilesystemUtil::mkdir_p_not_indexable( $dir );
+
+			// A later call requesting file access must not rewrite the existing .htaccess.
+			FilesystemUtil::mkdir_p_not_indexable( $dir, true );
+
+			$wp_fs = FilesystemUtil::get_wp_filesystem();
+			$this->assertSame(
+				'deny from all',
+				trim( (string) $wp_fs->get_contents( trailingslashit( $dir ) . '.htaccess' ) ),
+				'An existing directory should keep its original .htaccess.'
+			);
+		} finally {
+			$this->delete_test_dir( $dir );
+			remove_filter( 'filesystem_method', $callback );
+		}
+	}
+
+	/**
+	 * Removes a test directory and its contents if it exists.
+	 *
+	 * @param string $dir The directory to delete.
+	 * @return void
+	 */
+	private function delete_test_dir( string $dir ): void {
+		if ( ! is_dir( $dir ) ) {
+			return;
+		}
+
+		FilesystemUtil::get_wp_filesystem()->rmdir( $dir, true );
+	}
 }
