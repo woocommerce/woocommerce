@@ -21,6 +21,8 @@ class CheckResultCache {
 	 * @param string   $check_id The check ID (without `woocommerce_` prefix is fine).
 	 * @param callable $factory  Callable that returns the result array.
 	 * @return array
+	 *
+	 * @throws \TypeError When the factory callable does not return an array.
 	 */
 	public function remember( string $check_id, callable $factory ): array {
 		$key    = $this->key( $check_id );
@@ -31,10 +33,12 @@ class CheckResultCache {
 		$result = $factory();
 		if ( ! is_array( $result ) ) {
 			throw new \TypeError(
-				sprintf(
-					'CheckResultCache factory for "%s" must return an array; got %s.',
-					$check_id,
-					get_debug_type( $result )
+				esc_html(
+					sprintf(
+						'CheckResultCache factory for "%s" must return an array; got %s.',
+						$check_id,
+						is_object( $result ) ? get_class( $result ) : gettype( $result )
+					)
 				)
 			);
 		}

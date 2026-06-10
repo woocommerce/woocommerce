@@ -6,8 +6,14 @@ namespace Automattic\WooCommerce\Tests\Internal\SiteHealth\Checks;
 use Automattic\WooCommerce\Internal\SiteHealth\Checks\ActionSchedulerStats;
 use WC_Unit_Test_Case;
 
+/**
+ * Tests for the ActionSchedulerStats class.
+ */
 class ActionSchedulerStatsTest extends WC_Unit_Test_Case {
 
+	/**
+	 * The overdue check is recommended when the number of overdue actions exceeds the threshold.
+	 */
 	public function test_overdue_check_recommended_when_threshold_exceeded() {
 		$stats = $this->getMockBuilder( ActionSchedulerStats::class )
 			->onlyMethods( array( 'count_overdue_actions', 'count_total_actions' ) )
@@ -16,6 +22,9 @@ class ActionSchedulerStatsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'recommended', $stats->run_overdue()['status'] );
 	}
 
+	/**
+	 * The overdue check is good when the number of overdue actions is below the threshold.
+	 */
 	public function test_overdue_check_good_when_below_threshold() {
 		$stats = $this->getMockBuilder( ActionSchedulerStats::class )
 			->onlyMethods( array( 'count_overdue_actions', 'count_total_actions' ) )
@@ -24,6 +33,9 @@ class ActionSchedulerStatsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'good', $stats->run_overdue()['status'] );
 	}
 
+	/**
+	 * The total check is recommended when the total number of actions exceeds the threshold.
+	 */
 	public function test_total_check_recommended_when_threshold_exceeded() {
 		$stats = $this->getMockBuilder( ActionSchedulerStats::class )
 			->onlyMethods( array( 'count_overdue_actions', 'count_total_actions' ) )
@@ -32,6 +44,9 @@ class ActionSchedulerStatsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'recommended', $stats->run_total()['status'] );
 	}
 
+	/**
+	 * The total check is good when the total number of actions is below the threshold.
+	 */
 	public function test_total_check_good_when_below_threshold() {
 		$stats = $this->getMockBuilder( ActionSchedulerStats::class )
 			->onlyMethods( array( 'count_overdue_actions', 'count_total_actions' ) )
@@ -40,6 +55,9 @@ class ActionSchedulerStatsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'good', $stats->run_total()['status'] );
 	}
 
+	/**
+	 * The overdue threshold filter lowers the threshold so a small count is reported as recommended.
+	 */
 	public function test_threshold_filter_applies_to_overdue() {
 		add_filter( 'woocommerce_site_health_check_action_scheduler_overdue_threshold', fn() => 1 );
 		$stats = $this->getMockBuilder( ActionSchedulerStats::class )

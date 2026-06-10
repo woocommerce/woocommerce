@@ -53,6 +53,7 @@ class PostmetaIndexCheck {
 			$rows    = $wpdb->get_results( "SHOW INDEX FROM {$wpdb->postmeta}" );
 			$present = false;
 			foreach ( (array) $rows as $row ) {
+				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Column_name is a fixed column name returned by MySQL's SHOW INDEX, not a local variable.
 				if ( 'meta_value' === ( $row->Column_name ?? '' ) ) {
 					$present = true;
 					break;
@@ -104,9 +105,23 @@ class PostmetaIndexCheck {
 	 */
 	private function finish( array $base ): array {
 		$base['test'] = $this->get_id();
+		/**
+		 * Filters whether this Site Health check is enabled.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param bool $enabled Whether the check is enabled.
+		 */
 		if ( ! apply_filters( 'woocommerce_site_health_check_' . self::ID . '_enabled', true ) ) {
 			return array();
 		}
+		/**
+		 * Filters the result array returned by this Site Health check.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param array $base The Site Health result array.
+		 */
 		return (array) apply_filters( 'woocommerce_site_health_check_' . self::ID . '_result', $base );
 	}
 

@@ -33,13 +33,22 @@ class SiteHealthChecksIntegrationTest extends WC_Unit_Test_Case {
 		'woocommerce_cart_fragments_sitewide',
 	);
 
+	/** Registers the SiteHealthChecks service before each test. */
 	public function setUp(): void {
 		parent::setUp();
 		wc_get_container()->get( SiteHealthChecks::class )->register();
 	}
 
+	/** Verifies every expected direct test is registered with the site_status_tests filter. */
 	public function test_all_expected_direct_tests_registered() {
-		$tests = apply_filters( 'site_status_tests', array( 'direct' => array(), 'async' => array() ) );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Invoking WP core's site_status_tests filter.
+		$tests = apply_filters(
+			'site_status_tests',
+			array(
+				'direct' => array(),
+				'async'  => array(),
+			)
+		);
 		foreach ( self::EXPECTED_DIRECT as $id ) {
 			$this->assertArrayHasKey( $id, $tests['direct'], "Missing direct test {$id}" );
 			$this->assertArrayHasKey( 'label', $tests['direct'][ $id ] );
@@ -47,8 +56,16 @@ class SiteHealthChecksIntegrationTest extends WC_Unit_Test_Case {
 		}
 	}
 
+	/** Verifies every expected async test is registered with the site_status_tests filter. */
 	public function test_all_expected_async_tests_registered() {
-		$tests = apply_filters( 'site_status_tests', array( 'direct' => array(), 'async' => array() ) );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Invoking WP core's site_status_tests filter.
+		$tests = apply_filters(
+			'site_status_tests',
+			array(
+				'direct' => array(),
+				'async'  => array(),
+			)
+		);
 		foreach ( self::EXPECTED_ASYNC as $id ) {
 			$this->assertArrayHasKey( $id, $tests['async'], "Missing async test {$id}" );
 			$this->assertTrue( $tests['async'][ $id ]['async'] ?? false );
@@ -56,8 +73,16 @@ class SiteHealthChecksIntegrationTest extends WC_Unit_Test_Case {
 		}
 	}
 
+	/** Verifies every registered check callback returns a well-formed result array. */
 	public function test_every_callback_returns_valid_result_shape() {
-		$tests = apply_filters( 'site_status_tests', array( 'direct' => array(), 'async' => array() ) );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Invoking WP core's site_status_tests filter.
+		$tests          = apply_filters(
+			'site_status_tests',
+			array(
+				'direct' => array(),
+				'async'  => array(),
+			)
+		);
 		$valid_statuses = array( 'good', 'recommended', 'critical' );
 
 		foreach ( array_merge( $tests['direct'], $tests['async'] ) as $entry ) {
@@ -67,7 +92,8 @@ class SiteHealthChecksIntegrationTest extends WC_Unit_Test_Case {
 			}
 			$result = call_user_func( $callback );
 			if ( empty( $result ) ) {
-				continue; // disabled by filter — allowed.
+				continue;
+				// disabled by filter — allowed.
 			}
 			$this->assertContains( $result['status'], $valid_statuses );
 			foreach ( array( 'label', 'badge', 'description', 'test' ) as $key ) {

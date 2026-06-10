@@ -18,60 +18,115 @@ class ActionSchedulerStats {
 	private const DEFAULT_OVERDUE_THRESHOLD = 50;
 	private const DEFAULT_TOTAL_THRESHOLD   = 500_000;
 
+	/**
+	 * Run the overdue actions check.
+	 *
+	 * @return array WP Site Health result array.
+	 */
 	public function run_overdue(): array {
 		try {
 			$count = $this->count_overdue_actions();
 		} catch ( \Throwable $e ) {
 			return $this->error_result( self::ID_OVERDUE, $e );
 		}
+		/**
+		 * Filter the overdue actions threshold for the Action Scheduler Site Health check.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param int $threshold The overdue actions count threshold.
+		 */
 		$threshold = (int) apply_filters( 'woocommerce_site_health_check_' . self::ID_OVERDUE . '_threshold', self::DEFAULT_OVERDUE_THRESHOLD );
 		if ( $count > $threshold ) {
-			return $this->finish( self::ID_OVERDUE, array(
-				'label'       => __( 'Action Scheduler has overdue actions', 'woocommerce' ),
-				'status'      => 'recommended',
-				'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'orange' ),
-				'description' => '<p>' . esc_html(
-					sprintf( __( 'Action Scheduler has %d actions overdue by more than one hour. This often indicates a stuck cron or background job.', 'woocommerce' ), $count )
-				) . '</p>',
-				'actions'     => sprintf( '<p><a href="%s">%s</a></p>', esc_url( admin_url( 'admin.php?page=wc-status&tab=action-scheduler' ) ), esc_html__( 'View scheduled actions', 'woocommerce' ) ),
-			) );
+			return $this->finish(
+				self::ID_OVERDUE,
+				array(
+					'label'       => __( 'Action Scheduler has overdue actions', 'woocommerce' ),
+					'status'      => 'recommended',
+					'badge'       => array(
+						'label' => __( 'Performance', 'woocommerce' ),
+						'color' => 'orange',
+					),
+					'description' => '<p>' . esc_html(
+						/* translators: %d: number of overdue actions. */
+						sprintf( __( 'Action Scheduler has %d actions overdue by more than one hour. This often indicates a stuck cron or background job.', 'woocommerce' ), $count )
+					) . '</p>',
+					'actions'     => sprintf( '<p><a href="%s">%s</a></p>', esc_url( admin_url( 'admin.php?page=wc-status&tab=action-scheduler' ) ), esc_html__( 'View scheduled actions', 'woocommerce' ) ),
+				)
+			);
 		}
-		return $this->finish( self::ID_OVERDUE, array(
-			'label'       => __( 'Action Scheduler is up to date', 'woocommerce' ),
-			'status'      => 'good',
-			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'green' ),
-			'description' => '<p>' . esc_html__( 'Action Scheduler has no significant backlog of overdue actions.', 'woocommerce' ) . '</p>',
-			'actions'     => '',
-		) );
+		return $this->finish(
+			self::ID_OVERDUE,
+			array(
+				'label'       => __( 'Action Scheduler is up to date', 'woocommerce' ),
+				'status'      => 'good',
+				'badge'       => array(
+					'label' => __( 'Performance', 'woocommerce' ),
+					'color' => 'green',
+				),
+				'description' => '<p>' . esc_html__( 'Action Scheduler has no significant backlog of overdue actions.', 'woocommerce' ) . '</p>',
+				'actions'     => '',
+			)
+		);
 	}
 
+	/**
+	 * Run the total actions table size check.
+	 *
+	 * @return array WP Site Health result array.
+	 */
 	public function run_total(): array {
 		try {
 			$count = $this->count_total_actions();
 		} catch ( \Throwable $e ) {
 			return $this->error_result( self::ID_TOTAL, $e );
 		}
+		/**
+		 * Filter the total actions threshold for the Action Scheduler Site Health check.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param int $threshold The total actions count threshold.
+		 */
 		$threshold = (int) apply_filters( 'woocommerce_site_health_check_' . self::ID_TOTAL . '_threshold', self::DEFAULT_TOTAL_THRESHOLD );
 		if ( $count > $threshold ) {
-			return $this->finish( self::ID_TOTAL, array(
-				'label'       => __( 'Action Scheduler table is large', 'woocommerce' ),
-				'status'      => 'recommended',
-				'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'orange' ),
-				'description' => '<p>' . esc_html(
-					sprintf( __( 'The Action Scheduler actions table contains %s rows. Consider lowering the retention period for completed actions.', 'woocommerce' ), number_format_i18n( $count ) )
-				) . '</p>',
-				'actions'     => '',
-			) );
+			return $this->finish(
+				self::ID_TOTAL,
+				array(
+					'label'       => __( 'Action Scheduler table is large', 'woocommerce' ),
+					'status'      => 'recommended',
+					'badge'       => array(
+						'label' => __( 'Performance', 'woocommerce' ),
+						'color' => 'orange',
+					),
+					'description' => '<p>' . esc_html(
+						/* translators: %s: formatted number of rows in the Action Scheduler actions table. */
+						sprintf( __( 'The Action Scheduler actions table contains %s rows. Consider lowering the retention period for completed actions.', 'woocommerce' ), number_format_i18n( $count ) )
+					) . '</p>',
+					'actions'     => '',
+				)
+			);
 		}
-		return $this->finish( self::ID_TOTAL, array(
-			'label'       => __( 'Action Scheduler table size is healthy', 'woocommerce' ),
-			'status'      => 'good',
-			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'green' ),
-			'description' => '<p>' . esc_html__( 'Action Scheduler retention is within healthy bounds.', 'woocommerce' ) . '</p>',
-			'actions'     => '',
-		) );
+		return $this->finish(
+			self::ID_TOTAL,
+			array(
+				'label'       => __( 'Action Scheduler table size is healthy', 'woocommerce' ),
+				'status'      => 'good',
+				'badge'       => array(
+					'label' => __( 'Performance', 'woocommerce' ),
+					'color' => 'green',
+				),
+				'description' => '<p>' . esc_html__( 'Action Scheduler retention is within healthy bounds.', 'woocommerce' ) . '</p>',
+				'actions'     => '',
+			)
+		);
 	}
 
+	/**
+	 * Count actions that are overdue by more than one hour.
+	 *
+	 * @return int The number of overdue pending actions.
+	 */
 	public function count_overdue_actions(): int {
 		global $wpdb;
 		$table = $wpdb->prefix . 'actionscheduler_actions';
@@ -79,13 +134,21 @@ class ActionSchedulerStats {
 			return 0;
 		}
 		$cutoff = gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return (int) $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM {$table} WHERE status = 'pending' AND scheduled_date_gmt < %s",
-			$cutoff
-		) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is a hardcoded, $wpdb->prefix-based identifier that cannot be passed as a prepared placeholder.
+				"SELECT COUNT(*) FROM {$table} WHERE status = 'pending' AND scheduled_date_gmt < %s",
+				$cutoff
+			)
+		);
 	}
 
+	/**
+	 * Count the total number of rows in the Action Scheduler actions table.
+	 *
+	 * @return int The total number of actions.
+	 */
 	public function count_total_actions(): int {
 		global $wpdb;
 		$table = $wpdb->prefix . 'actionscheduler_actions';
@@ -96,30 +159,70 @@ class ActionSchedulerStats {
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
 	}
 
+	/**
+	 * Check whether a database table exists.
+	 *
+	 * @param string $table The fully-qualified table name.
+	 * @return bool True when the table exists.
+	 */
 	private function table_exists( string $table ): bool {
 		global $wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		return (bool) $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
 	}
 
+	/**
+	 * Finalize a result array, applying the enable and result filters.
+	 *
+	 * @param string $id   The check identifier (without the `woocommerce_` prefix).
+	 * @param array  $base The base result array.
+	 * @return array The filtered result array, or an empty array when the check is disabled.
+	 */
 	private function finish( string $id, array $base ): array {
 		$base['test'] = 'woocommerce_' . $id;
+		/**
+		 * Filter whether an Action Scheduler Site Health check is enabled.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param bool $enabled Whether the check is enabled.
+		 */
 		if ( ! apply_filters( "woocommerce_site_health_check_{$id}_enabled", true ) ) {
 			return array();
 		}
+		/**
+		 * Filter an Action Scheduler Site Health check result before WP renders it.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param array $base The Site Health result array.
+		 */
 		return (array) apply_filters( "woocommerce_site_health_check_{$id}_result", $base );
 	}
 
+	/**
+	 * Build a result array for when a check could not run.
+	 *
+	 * @param string     $id The check identifier (without the `woocommerce_` prefix).
+	 * @param \Throwable $e  The throwable raised while running the check.
+	 * @return array WP Site Health result array.
+	 */
 	private function error_result( string $id, \Throwable $e ): array {
 		if ( function_exists( 'wc_get_logger' ) ) {
 			wc_get_logger()->error( $e->getMessage(), array( 'source' => 'site-health' ) );
 		}
-		return $this->finish( $id, array(
-			'label'       => __( 'WooCommerce could not run an Action Scheduler check', 'woocommerce' ),
-			'status'      => 'recommended',
-			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'gray' ),
-			'description' => '<p>' . esc_html__( 'WooCommerce was unable to query the Action Scheduler tables. Check the site error logs.', 'woocommerce' ) . '</p>',
-			'actions'     => '',
-		) );
+		return $this->finish(
+			$id,
+			array(
+				'label'       => __( 'WooCommerce could not run an Action Scheduler check', 'woocommerce' ),
+				'status'      => 'recommended',
+				'badge'       => array(
+					'label' => __( 'Performance', 'woocommerce' ),
+					'color' => 'gray',
+				),
+				'description' => '<p>' . esc_html__( 'WooCommerce was unable to query the Action Scheduler tables. Check the site error logs.', 'woocommerce' ) . '</p>',
+				'actions'     => '',
+			)
+		);
 	}
 }

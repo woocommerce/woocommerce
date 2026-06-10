@@ -76,7 +76,7 @@ class SiteHealthChecks {
 			'test'  => array( $this, 'check_payment_gateway' ),
 		);
 
-		$postmeta_index = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\PostmetaIndexCheck();
+		$postmeta_index                               = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\PostmetaIndexCheck();
 		$tests['direct'][ $postmeta_index->get_id() ] = array(
 			'label' => $postmeta_index->get_label(),
 			'test'  => array( $postmeta_index, 'run' ),
@@ -90,7 +90,7 @@ class SiteHealthChecks {
 			'async'             => true,
 			'async_direct_test' => static fn() => $cache->remember( 'action_scheduler_overdue', static fn() => $as_stats->run_overdue() ),
 		);
-		$tests['async']['woocommerce_action_scheduler_total'] = array(
+		$tests['async']['woocommerce_action_scheduler_total']   = array(
 			'label'             => __( 'Action Scheduler table size', 'woocommerce' ),
 			'test'              => 'woocommerce_action_scheduler_total',
 			'async'             => true,
@@ -105,7 +105,7 @@ class SiteHealthChecks {
 			'async_direct_test' => static fn() => $cache->remember( 'autoloaded_options', static fn() => $auto->run() ),
 		);
 
-		$sessions = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\SessionsTableCheck();
+		$sessions                                     = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\SessionsTableCheck();
 		$tests['async']['woocommerce_sessions_table'] = array(
 			'label'             => __( 'WooCommerce sessions table size', 'woocommerce' ),
 			'test'              => 'woocommerce_sessions_table',
@@ -121,7 +121,7 @@ class SiteHealthChecks {
 			'async_direct_test' => static fn() => $cache->remember( 'product_lookup_table', static fn() => $lookup->run() ),
 		);
 
-		$webhooks = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\WebhookFailureCheck();
+		$webhooks                                       = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\WebhookFailureCheck();
 		$tests['async']['woocommerce_webhook_failures'] = array(
 			'label'             => __( 'WooCommerce webhook deliveries', 'woocommerce' ),
 			'test'              => 'woocommerce_webhook_failures',
@@ -129,7 +129,7 @@ class SiteHealthChecks {
 			'async_direct_test' => static fn() => $cache->remember( 'webhook_failures', static fn() => $webhooks->run() ),
 		);
 
-		$templates = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\TemplateOverrideScanner();
+		$templates                                        = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\TemplateOverrideScanner();
 		$tests['async']['woocommerce_outdated_templates'] = array(
 			'label'             => __( 'WooCommerce template overrides', 'woocommerce' ),
 			'test'              => 'woocommerce_outdated_templates',
@@ -137,7 +137,7 @@ class SiteHealthChecks {
 			'async_direct_test' => static fn() => $cache->remember( 'outdated_templates', static fn() => $templates->run() ),
 		);
 
-		$cart_fragments = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\CartFragmentsCheck();
+		$cart_fragments                                        = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\CartFragmentsCheck();
 		$tests['async']['woocommerce_cart_fragments_sitewide'] = array(
 			'label'             => __( 'WooCommerce cart fragments load policy', 'woocommerce' ),
 			'test'              => 'woocommerce_cart_fragments_sitewide',
@@ -163,7 +163,10 @@ class SiteHealthChecks {
 			? array(
 				'label'       => __( 'WooCommerce database update required', 'woocommerce' ),
 				'status'      => 'critical',
-				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'red' ),
+				'badge'       => array(
+					'label' => __( 'WooCommerce', 'woocommerce' ),
+					'color' => 'red',
+				),
 				'description' => '<p>' . esc_html__( 'WooCommerce has pending database updates that should be run to keep the store working correctly.', 'woocommerce' ) . '</p>',
 				'actions'     => sprintf(
 					'<p><a href="%s">%s</a></p>',
@@ -175,7 +178,10 @@ class SiteHealthChecks {
 			: array(
 				'label'       => __( 'WooCommerce database is up to date', 'woocommerce' ),
 				'status'      => 'good',
-				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'green' ),
+				'badge'       => array(
+					'label' => __( 'WooCommerce', 'woocommerce' ),
+					'color' => 'green',
+				),
 				'description' => '<p>' . esc_html__( 'No WooCommerce database updates are pending.', 'woocommerce' ) . '</p>',
 				'actions'     => '',
 				'test'        => 'woocommerce_pending_db_update',
@@ -200,7 +206,7 @@ class SiteHealthChecks {
 			'checkout'  => __( 'Checkout', 'woocommerce' ),
 			'myaccount' => __( 'My Account', 'woocommerce' ),
 		);
-		$missing = array();
+		$missing  = array();
 		foreach ( $required as $key => $label ) {
 			$page_id = (int) get_option( "woocommerce_{$key}_page_id" );
 			if ( ! $page_id || 'publish' !== get_post_status( $page_id ) ) {
@@ -212,7 +218,10 @@ class SiteHealthChecks {
 			? array(
 				'label'       => __( 'WooCommerce required pages are configured', 'woocommerce' ),
 				'status'      => 'good',
-				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'green' ),
+				'badge'       => array(
+					'label' => __( 'WooCommerce', 'woocommerce' ),
+					'color' => 'green',
+				),
 				'description' => '<p>' . esc_html__( 'All required WooCommerce pages are assigned and published.', 'woocommerce' ) . '</p>',
 				'actions'     => '',
 				'test'        => 'woocommerce_required_pages',
@@ -220,8 +229,12 @@ class SiteHealthChecks {
 			: array(
 				'label'       => __( 'WooCommerce required pages are missing', 'woocommerce' ),
 				'status'      => 'critical',
-				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'red' ),
+				'badge'       => array(
+					'label' => __( 'WooCommerce', 'woocommerce' ),
+					'color' => 'red',
+				),
 				'description' => '<p>' . esc_html(
+					/* translators: %s: comma-separated list of page names. */
 					sprintf( __( 'These required WooCommerce pages are missing or unpublished: %s.', 'woocommerce' ), implode( ', ', $missing ) )
 				) . '</p>',
 				'actions'     => sprintf(
@@ -262,18 +275,24 @@ class SiteHealthChecks {
 			$desc   = __( 'HPOS is enabled and sync is disabled.', 'woocommerce' );
 		}
 
-		return $this->apply_result_filters( 'hpos_status', array(
-			'label'       => $label,
-			'status'      => $status,
-			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'orange' ),
-			'description' => '<p>' . esc_html( $desc ) . '</p>',
-			'actions'     => sprintf(
-				'<p><a href="%s">%s</a></p>',
-				esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ) ),
-				esc_html__( 'Manage features', 'woocommerce' )
-			),
-			'test'        => 'woocommerce_hpos_status',
-		) );
+		return $this->apply_result_filters(
+			'hpos_status',
+			array(
+				'label'       => $label,
+				'status'      => $status,
+				'badge'       => array(
+					'label' => __( 'Performance', 'woocommerce' ),
+					'color' => 'orange',
+				),
+				'description' => '<p>' . esc_html( $desc ) . '</p>',
+				'actions'     => sprintf(
+					'<p><a href="%s">%s</a></p>',
+					esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ) ),
+					esc_html__( 'Manage features', 'woocommerce' )
+				),
+				'test'        => 'woocommerce_hpos_status',
+			)
+		);
 	}
 
 	/**
@@ -291,7 +310,10 @@ class SiteHealthChecks {
 			? array(
 				'label'       => __( 'WooCommerce Legacy REST API is enabled', 'woocommerce' ),
 				'status'      => 'recommended',
-				'badge'       => array( 'label' => __( 'Security', 'woocommerce' ), 'color' => 'orange' ),
+				'badge'       => array(
+					'label' => __( 'Security', 'woocommerce' ),
+					'color' => 'orange',
+				),
 				'description' => '<p>' . esc_html__( 'The Legacy REST API is deprecated. If no integrations require it, disable it to reduce surface area.', 'woocommerce' ) . '</p>',
 				'actions'     => sprintf(
 					'<p><a href="%s">%s</a></p>',
@@ -303,7 +325,10 @@ class SiteHealthChecks {
 			: array(
 				'label'       => __( 'WooCommerce Legacy REST API is disabled', 'woocommerce' ),
 				'status'      => 'good',
-				'badge'       => array( 'label' => __( 'Security', 'woocommerce' ), 'color' => 'green' ),
+				'badge'       => array(
+					'label' => __( 'Security', 'woocommerce' ),
+					'color' => 'green',
+				),
 				'description' => '<p>' . esc_html__( 'The deprecated Legacy REST API is not enabled.', 'woocommerce' ) . '</p>',
 				'actions'     => '',
 				'test'        => 'woocommerce_legacy_rest_api',
@@ -327,7 +352,10 @@ class SiteHealthChecks {
 			? array(
 				'label'       => __( 'Store URL uses HTTPS', 'woocommerce' ),
 				'status'      => 'good',
-				'badge'       => array( 'label' => __( 'Security', 'woocommerce' ), 'color' => 'green' ),
+				'badge'       => array(
+					'label' => __( 'Security', 'woocommerce' ),
+					'color' => 'green',
+				),
 				'description' => '<p>' . esc_html__( 'Your site URL uses HTTPS.', 'woocommerce' ) . '</p>',
 				'actions'     => '',
 				'test'        => 'woocommerce_https',
@@ -335,7 +363,10 @@ class SiteHealthChecks {
 			: array(
 				'label'       => __( 'Store URL is not using HTTPS', 'woocommerce' ),
 				'status'      => 'critical',
-				'badge'       => array( 'label' => __( 'Security', 'woocommerce' ), 'color' => 'red' ),
+				'badge'       => array(
+					'label' => __( 'Security', 'woocommerce' ),
+					'color' => 'red',
+				),
 				'description' => '<p>' . esc_html__( 'Your store must use HTTPS so checkout and account data are protected in transit. Most payment methods will not work without HTTPS enabled on the checkout page.', 'woocommerce' ) . '</p>',
 				'actions'     => sprintf(
 					'<p><a href="%s">%s</a></p>',
@@ -358,18 +389,22 @@ class SiteHealthChecks {
 	 */
 	public function check_payment_gateway(): array {
 		// This is a direct (synchronous) check rather than async because:
-		//   1. Having no payment gateway is a critical store-functionality issue
-		//      where stale (cached) results would mislead the operator.
-		//   2. Gateway initialization is not free, but happens during normal admin
-		//      navigation anyway, so the marginal cost on Site Health page load is small.
+		// 1. Having no payment gateway is a critical store-functionality issue
+		// where stale (cached) results would mislead the operator.
+		// 2. Gateway initialization is not free, but happens during normal admin
+		// navigation anyway, so the marginal cost on Site Health page load is small.
 		$available = WC()->payment_gateways()->get_available_payment_gateways();
 		$count     = is_array( $available ) ? count( $available ) : 0;
 		$result    = $count > 0
 			? array(
 				'label'       => __( 'WooCommerce has an active payment gateway', 'woocommerce' ),
 				'status'      => 'good',
-				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'green' ),
+				'badge'       => array(
+					'label' => __( 'WooCommerce', 'woocommerce' ),
+					'color' => 'green',
+				),
 				'description' => '<p>' . esc_html(
+					/* translators: %d: number of enabled payment gateways. */
 					sprintf( _n( '%d payment gateway is enabled.', '%d payment gateways are enabled.', $count, 'woocommerce' ), $count )
 				) . '</p>',
 				'actions'     => '',
@@ -378,7 +413,10 @@ class SiteHealthChecks {
 			: array(
 				'label'       => __( 'WooCommerce has no active payment gateway', 'woocommerce' ),
 				'status'      => 'recommended',
-				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'orange' ),
+				'badge'       => array(
+					'label' => __( 'WooCommerce', 'woocommerce' ),
+					'color' => 'orange',
+				),
 				'description' => '<p>' . esc_html__( 'Customers cannot complete purchases until at least one payment gateway is enabled.', 'woocommerce' ) . '</p>',
 				'actions'     => sprintf(
 					'<p><a href="%s">%s</a></p>',
@@ -403,11 +441,23 @@ class SiteHealthChecks {
 	 * @return array Filtered result, or empty array when the check is disabled.
 	 */
 	private function apply_result_filters( string $id, array $result ): array {
+		/**
+		 * Filter whether a WooCommerce Site Health check is enabled.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param bool $enabled Whether the check is enabled.
+		 */
 		if ( ! apply_filters( "woocommerce_site_health_check_{$id}_enabled", true ) ) {
-			return array(); // empty result skips the test in WP's UI.
+			return array();
+			// empty result skips the test in WP's UI.
 		}
 		/**
 		 * Filter a WooCommerce Site Health check result before WP renders it.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param array $result The Site Health result array.
 		 */
 		return (array) apply_filters( "woocommerce_site_health_check_{$id}_result", $result );
 	}
