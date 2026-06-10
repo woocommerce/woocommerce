@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Inventory;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\Inventory\InventoryController;
 use Automattic\WooCommerce\Internal\Inventory\LocationStockService;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
@@ -797,18 +798,38 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals(
 			array(
 				array(
-					'slug'               => LocationStockService::LOCATION_POS,
-					'name'               => 'POS',
-					'quantity'           => 7,
-					'manage_stock'       => true,
-					'stock_status'       => 'instock',
-					'backorders'         => 'no',
-					'backorders_allowed' => false,
-					'backordered'        => false,
-					'low_stock_amount'   => null,
+					'slug'         => LocationStockService::LOCATION_POS,
+					'name'         => 'POS',
+					'quantity'     => 7,
+					'stock_status' => ProductStockStatus::IN_STOCK,
 				),
 			),
 			$response->get_data()['location_stock']
+		);
+	}
+
+	/**
+	 * @testdox Should derive product REST location stock status from location quantity.
+	 */
+	public function test_product_rest_location_stock_status_uses_location_quantity(): void {
+		$product = $this->create_managed_stock_product();
+		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 0 );
+
+		$request  = new \WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$response_data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $response_data['stock_status'] );
+		$this->assertEquals(
+			array(
+				'slug'         => LocationStockService::LOCATION_POS,
+				'name'         => 'POS',
+				'quantity'     => 0,
+				'stock_status' => ProductStockStatus::OUT_OF_STOCK,
+			),
+			$response_data['location_stock'][0]
 		);
 	}
 

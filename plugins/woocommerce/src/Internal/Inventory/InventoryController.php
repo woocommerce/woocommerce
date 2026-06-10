@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Inventory;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
@@ -1018,19 +1019,23 @@ class InventoryController {
 			return array();
 		}
 
-		$low_stock_amount = $product->get_low_stock_amount();
+		$quantity = $this->location_stock_service->get_location_stock( $product, $location_slug );
 
 		return array(
-			'slug'               => $location['slug'],
-			'name'               => $location['name'],
-			'quantity'           => $this->location_stock_service->get_location_stock( $product, $location_slug ),
-			'manage_stock'       => $product->managing_stock(),
-			'stock_status'       => $product->get_stock_status(),
-			'backorders'         => $product->get_backorders(),
-			'backorders_allowed' => $product->backorders_allowed(),
-			'backordered'        => $product->is_on_backorder(),
-			'low_stock_amount'   => is_numeric( $low_stock_amount ) ? wc_stock_amount( (float) $low_stock_amount ) : null,
+			'slug'         => $location['slug'],
+			'name'         => $location['name'],
+			'quantity'     => $quantity,
+			'stock_status' => $this->get_location_stock_status( $quantity ),
 		);
+	}
+
+	/**
+	 * Get the stock status for a location stock quantity.
+	 *
+	 * @param int|float $quantity Location stock quantity.
+	 */
+	private function get_location_stock_status( $quantity ): string {
+		return (float) wc_stock_amount( $quantity ) > 0.0 ? ProductStockStatus::IN_STOCK : ProductStockStatus::OUT_OF_STOCK;
 	}
 
 	/**
@@ -1064,38 +1069,13 @@ class InventoryController {
 						'type'        => $stock_amount_type,
 						'context'     => array( 'view', 'edit' ),
 					),
-					'manage_stock'       => array(
-						'description' => __( 'Stock management at product level.', 'woocommerce' ),
-						'type'        => 'boolean',
-						'context'     => array( 'view', 'edit' ),
-					),
 					'stock_status'       => array(
-						'description' => __( 'Controls the stock status of the product.', 'woocommerce' ),
+						'description' => __( 'Stock status at this inventory location.', 'woocommerce' ),
 						'type'        => 'string',
-						'enum'        => array_keys( wc_get_product_stock_status_options() ),
-						'context'     => array( 'view', 'edit' ),
-					),
-					'backorders'         => array(
-						'description' => __( 'If managing stock, this controls if backorders are allowed.', 'woocommerce' ),
-						'type'        => 'string',
-						'enum'        => array( 'no', 'notify', 'yes' ),
-						'context'     => array( 'view', 'edit' ),
-					),
-					'backorders_allowed' => array(
-						'description' => __( 'Shows if backorders are allowed.', 'woocommerce' ),
-						'type'        => 'boolean',
-						'context'     => array( 'view', 'edit' ),
-						'readonly'    => true,
-					),
-					'backordered'        => array(
-						'description' => __( 'Shows if the product is on backorder.', 'woocommerce' ),
-						'type'        => 'boolean',
-						'context'     => array( 'view', 'edit' ),
-						'readonly'    => true,
-					),
-					'low_stock_amount'   => array(
-						'description' => __( 'Low stock amount for the product.', 'woocommerce' ),
-						'type'        => array( $stock_amount_type, 'null' ),
+						'enum'        => array(
+							ProductStockStatus::IN_STOCK,
+							ProductStockStatus::OUT_OF_STOCK,
+						),
 						'context'     => array( 'view', 'edit' ),
 					),
 				),
