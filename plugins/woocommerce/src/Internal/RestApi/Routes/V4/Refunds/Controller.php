@@ -491,10 +491,8 @@ class Controller extends AbstractController {
 		// amount (e.g. an amount-only partial refund applied previously).
 		// Reject up-front so the eventual create call doesn't fail with the
 		// generic 'cannot_create_refund' error from wc_create_refund.
-		// `total` is excluding tax; `max_refundable` is the inclusive remaining
-		// amount (`get_remaining_refund_amount()`), so add `total_tax` before
-		// comparing.
-		$preview_total_with_tax = abs( (float) $preview['total'] + (float) $preview['total_tax'] );
+		// `total` is already tax-inclusive; compare directly against max_refundable.
+		$preview_total_with_tax = abs( (float) $preview['total'] );
 		if ( $preview_total_with_tax > (float) $preview['max_refundable'] ) {
 			return $this->get_route_error_response(
 				'preview_exceeds_max_refundable',

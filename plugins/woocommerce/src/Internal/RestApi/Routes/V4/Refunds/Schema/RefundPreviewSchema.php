@@ -74,14 +74,20 @@ class RefundPreviewSchema extends AbstractSchema {
 					'fees'     => $this->get_section_schema( 'fees' ),
 				),
 			),
-			'total'          => array(
-				'description' => __( 'Grand total of the refund preview (excluding tax).', 'woocommerce' ),
+			'subtotal'       => array(
+				'description' => __( 'Grand subtotal of the refund preview (excluding tax).', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'total_tax'      => array(
+			'tax'            => array(
 				'description' => __( 'Grand tax total of the refund preview.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
+			'total'          => array(
+				'description' => __( 'Grand total of the refund preview (tax-inclusive).', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
@@ -105,21 +111,27 @@ class RefundPreviewSchema extends AbstractSchema {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'items'     => array(
+				'items'    => array(
 					'description' => __( 'Line items in this section.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => 'products' === $section_key ? $this->get_product_item_schema() : $this->get_base_item_schema(),
 					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 					'readonly'    => true,
 				),
-				'total'     => array(
-					'description' => __( 'Section total (excluding tax).', 'woocommerce' ),
+				'subtotal' => array(
+					'description' => __( 'Section subtotal (excluding tax).', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 					'readonly'    => true,
 				),
-				'total_tax' => array(
+				'tax'      => array(
 					'description' => __( 'Section tax total.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+					'readonly'    => true,
+				),
+				'total'    => array(
+					'description' => __( 'Section total (tax-inclusive).', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 					'readonly'    => true,
@@ -129,7 +141,7 @@ class RefundPreviewSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Schema for an item entry in the shipping or fees sections (no product_id/variation_id).
+	 * Schema for an item entry in the shipping or fees sections.
 	 *
 	 * @return array
 	 */
@@ -137,32 +149,38 @@ class RefundPreviewSchema extends AbstractSchema {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'id'        => array(
+				'id'       => array(
 					'description' => __( 'The original order line item ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 					'readonly'    => true,
 				),
-				'name'      => array(
+				'name'     => array(
 					'description' => __( 'The line item name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 					'readonly'    => true,
 				),
-				'quantity'  => array(
+				'quantity' => array(
 					'description' => __( 'The quantity being refunded.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 					'readonly'    => true,
 				),
-				'total'     => array(
-					'description' => __( 'The refund total for this item (excluding tax).', 'woocommerce' ),
+				'subtotal' => array(
+					'description' => __( 'The refund subtotal for this item (excluding tax).', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 					'readonly'    => true,
 				),
-				'total_tax' => array(
+				'tax'      => array(
 					'description' => __( 'The tax amount for this item.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+					'readonly'    => true,
+				),
+				'total'    => array(
+					'description' => __( 'The refund total for this item (tax-inclusive).', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 					'readonly'    => true,
