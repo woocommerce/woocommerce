@@ -8,6 +8,8 @@ use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 /**
  * Coalesces repeated product transient deletions during bulk write operations.
+ *
+ * @internal
  */
 class ProductTransientsDeferrer {
 

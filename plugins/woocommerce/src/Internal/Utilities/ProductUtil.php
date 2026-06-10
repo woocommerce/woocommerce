@@ -17,7 +17,7 @@ class ProductUtil {
 	 * @param array $product_ids Product IDs whose transients are being deleted.
 	 * @return void
 	 */
-	public function delete_product_transients_for_products( array $product_ids ) {
+	public function delete_product_transients_for_products( array $product_ids ): void {
 		$product_ids = array_unique( array_map( 'absint', $product_ids ) );
 
 		// Transient data to clear with a fixed name which may be stale after product updates.
