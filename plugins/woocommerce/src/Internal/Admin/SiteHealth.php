@@ -592,6 +592,20 @@ class SiteHealth {
 	 * @return bool
 	 */
 	private function needs_maxmind_license_key() {
+		/**
+		 * Filter whether MaxMind geolocation notices should be displayed.
+		 *
+		 * Previously used to suppress the MaxMind license key admin notice. Honoured
+		 * here so the equivalent Site Health warning can be suppressed the same way.
+		 *
+		 * @since 3.9.0
+		 *
+		 * @param bool $display Whether to display MaxMind geolocation notices.
+		 */
+		if ( ! apply_filters( 'woocommerce_maxmind_geolocation_display_notices', true ) ) {
+			return false;
+		}
+
 		$default_address = get_option( 'woocommerce_default_customer_address' );
 
 		if ( ! in_array( $default_address, array( DefaultCustomerAddress::GEOLOCATION, DefaultCustomerAddress::GEOLOCATION_AJAX ), true ) ) {
