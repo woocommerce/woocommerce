@@ -22,11 +22,14 @@ jQuery( function ( $ ) {
 		if ( slugBox && ! slugBox.textContent.trim() ) {
 			slugBox.style.display = 'none';
 
-			new MutationObserver( function () {
+			var observer = new MutationObserver( function () {
 				if ( slugBox.textContent.trim() ) {
 					slugBox.style.removeProperty( 'display' );
+					observer.disconnect();
 				}
-			} ).observe( slugBox, {
+			} );
+
+			observer.observe( slugBox, {
 				childList: true,
 				subtree: true,
 			} );
