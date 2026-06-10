@@ -1053,8 +1053,8 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		// refund_total = 55 (tax-inclusive). Tax extracted from 55 at 10%: ~5.00.
-		$this->assertEquals( '55.00', wc_format_decimal( (float) $data['total'] + (float) $data['total_tax'], wc_get_price_decimals() ) );
-		$this->assertGreaterThan( 0.0, (float) $data['total_tax'] );
+		$this->assertEquals( '55.00', $data['total'] );
+		$this->assertGreaterThan( 0.0, (float) $data['tax'] );
 		// quantity is null because the caller did not supply it.
 		$this->assertNull( $data['breakdown']['products']['items'][0]['quantity'] );
 	}
@@ -1110,7 +1110,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( '8.00', $data['total'] );
-		$this->assertEquals( '0.00', $data['total_tax'] );
+		$this->assertEquals( '0.00', $data['tax'] );
 		$this->assertNull( $data['breakdown']['fees']['items'][0]['quantity'] );
 	}
 
