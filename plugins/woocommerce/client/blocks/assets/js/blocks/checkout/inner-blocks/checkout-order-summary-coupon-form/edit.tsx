@@ -28,7 +28,10 @@ export const Edit = ( {
 			<InspectorControls>
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<ToggleControl
-						label={ __( 'Show coupon form expanded', 'woocommerce' ) }
+						label={ __(
+							'Show coupon form expanded',
+							'woocommerce'
+						) }
 						help={ __(
 							'When enabled, the coupon input field is visible immediately. When disabled, customers click "Add coupons" to reveal it.',
 							'woocommerce'

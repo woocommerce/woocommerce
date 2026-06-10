@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
+import { TotalsCoupon } from '@woocommerce/base-components/cart-checkout';
 
 /**
  * Internal dependencies
  */
 import Block from '../block';
-import { TotalsCoupon } from '@woocommerce/base-components/cart-checkout';
 
 jest.mock( '@woocommerce/settings', () => ( {
 	getSetting: jest.fn( ( setting, defaultValue ) => {
