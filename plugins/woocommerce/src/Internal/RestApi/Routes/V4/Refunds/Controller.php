@@ -500,7 +500,7 @@ class Controller extends AbstractController {
 					$preview['total'],
 					$preview['max_refundable']
 				),
-				422
+				WP_Http::UNPROCESSABLE_ENTITY
 			);
 		}
 
@@ -533,7 +533,7 @@ class Controller extends AbstractController {
 
 		$request->set_param( 'context', 'edit' );
 
-		$response = new WP_REST_Response( null, 204 );
+		$response = new WP_REST_Response( null, WP_Http::NO_CONTENT );
 		$result   = $refund->delete( true );
 
 		if ( ! $result ) {
