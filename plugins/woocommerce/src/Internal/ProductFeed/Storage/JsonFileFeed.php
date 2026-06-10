@@ -83,6 +83,13 @@ class JsonFileFeed implements FeedInterface {
 	private $is_temp_filepath = false;
 
 	/**
+	 * Cached upload directory details (path and URL), resolved once per feed instance.
+	 *
+	 * @var array|null
+	 */
+	private $prepared_upload_dir = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $base_name The base name of the feed file.
@@ -262,18 +269,22 @@ class JsonFileFeed implements FeedInterface {
 	 * @throws Exception If the upload directory cannot be created.
 	 */
 	private function get_upload_dir(): array {
-		// Only generate everything once.
-		static $prepared;
-		if ( isset( $prepared ) ) {
-			return $prepared;
+		// Resolve once per feed instance.
+		if ( null !== $this->prepared_upload_dir ) {
+			return $this->prepared_upload_dir;
 		}
 
 		$upload_dir     = wp_upload_dir( null, true );
 		$directory_path = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . self::UPLOAD_DIR . DIRECTORY_SEPARATOR;
 
-		// Try to create the directory if it does not exist.
+		// Create the directory if it does not exist, allowing file access so the generated feed
+		// files can be served by URL while directory listing stays disabled. If the directory
+		// already exists, refresh its .htaccess in place so installs created before file access
+		// was enabled also serve feeds correctly.
 		if ( ! is_dir( $directory_path ) ) {
-			FilesystemUtil::mkdir_p_not_indexable( $directory_path );
+			FilesystemUtil::mkdir_p_not_indexable( $directory_path, true );
+		} else {
+			$this->ensure_feed_dir_file_access( $directory_path );
 		}
 
 		// `mkdir_p_not_indexable()` returns `void`, we have to check again.
@@ -292,10 +303,44 @@ class JsonFileFeed implements FeedInterface {
 		$directory_url = $upload_dir['baseurl'] . '/' . self::UPLOAD_DIR . '/';
 
 		// Follow the format, returned by `wp_upload_dir()`.
-		$prepared = array(
+		$this->prepared_upload_dir = array(
 			'path' => $directory_path,
 			'url'  => $directory_url,
 		);
-		return $prepared;
+		return $this->prepared_upload_dir;
+	}
+
+	/**
+	 * Ensures an existing feed directory allows file access while preventing directory listing.
+	 *
+	 * Installs created before file access was enabled have a `deny from all` .htaccess in this
+	 * directory, which blocks feed downloads. This replaces only that known legacy directive (or
+	 * recreates a missing file); any other content — the already-correct directive, or custom rules
+	 * a site or host may have added — is left untouched.
+	 *
+	 * Native file functions are used here (like the feed writes elsewhere in this class) rather
+	 * than WP_Filesystem: the directory is local, and routing through a possibly FTP/SSH-backed
+	 * filesystem could fail to initialize and leave the old `deny from all` in place even though
+	 * the feed file itself was written natively. Failures are ignored so this can never interrupt
+	 * feed generation.
+	 *
+	 * @param string $directory_path The feed directory path (trailing-slashed).
+	 * @return void
+	 */
+	private function ensure_feed_dir_file_access( string $directory_path ): void {
+		$htaccess_path = $directory_path . '.htaccess';
+
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		$current_content = is_file( $htaccess_path ) ? trim( (string) @file_get_contents( $htaccess_path ) ) : '';
+
+		// Only upgrade the known legacy `deny from all` directive or recreate a missing file.
+		// Leave anything else (already correct, or custom rules) untouched.
+		if ( '' !== $current_content && FilesystemUtil::HTACCESS_DENY_ALL !== $current_content ) {
+			return;
+		}
+
+		// Best effort: a failure here must never interrupt feed generation.
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		@file_put_contents( $htaccess_path, FilesystemUtil::HTACCESS_ALLOW_FILE_ACCESS );
 	}
 }

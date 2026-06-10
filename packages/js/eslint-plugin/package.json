@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/eslint-plugin",
-	"version": "2.3.0",
+	"version": "3.0.0",
 	"description": "ESLint plugin for WooCommerce development.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -54,8 +54,7 @@
 		"jest-cli": "29.5.x",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
-		"typescript": "5.7.x",
-		"wireit": "0.14.12"
+		"typescript": "5.7.x"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
