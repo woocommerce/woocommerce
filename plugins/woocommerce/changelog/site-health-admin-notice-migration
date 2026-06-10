@@ -1,4 +1,4 @@
-Significance: patch
-Type: tweak
+Significance: minor
+Type: update
 
 Move several WooCommerce admin status notices to Site Health and show regeneration progress in status tools
