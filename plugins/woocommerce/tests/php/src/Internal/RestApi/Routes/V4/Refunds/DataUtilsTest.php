@@ -479,6 +479,27 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox compute_line_item_refund_total returns the same total regardless of the quantity argument for shipping items.
+	 *
+	 * Behavior lock. Shipping lines refund as a whole; the quantity argument
+	 * must not multiply the result. A future refactor that wrongly applied
+	 * unit_price * quantity to shipping would fail this assertion.
+	 */
+	public function test_compute_line_item_refund_total_shipping_ignores_quantity(): void {
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => 10.00,
+			)
+		);
+		$shipping->set_taxes( array( 'total' => array( 1 => 1.50 ) ) );
+		$shipping->save();
+
+		$this->assertSame( 11.50, $this->data_utils->compute_line_item_refund_total( $shipping, 5 ) );
+	}
+
+	/**
 	 * @testdox Should return full item total + tax for fee items.
 	 */
 	public function test_compute_line_item_refund_total_fee_positive(): void {
@@ -493,6 +514,26 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$fee->save();
 
 		$this->assertSame( 23.00, $this->data_utils->compute_line_item_refund_total( $fee, 1 ) );
+	}
+
+	/**
+	 * @testdox compute_line_item_refund_total returns the same total regardless of the quantity argument for fee items.
+	 *
+	 * Behavior lock matching the shipping case. Fees refund as a whole; quantity
+	 * must not multiply the result.
+	 */
+	public function test_compute_line_item_refund_total_fee_ignores_quantity(): void {
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Handling',
+				'total' => 20.00,
+			)
+		);
+		$fee->set_taxes( array( 'total' => array( 1 => 3.00 ) ) );
+		$fee->save();
+
+		$this->assertSame( 23.00, $this->data_utils->compute_line_item_refund_total( $fee, 5 ) );
 	}
 
 	/**
