@@ -14,7 +14,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [4.0.0](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin/v/4.0.0) - 2025-06-24 
 
--   Major - Monorepo: bump @wordpress/dependency-extraction-webpack-plugin dependency version to the latest (breaking changes, see https://github.com/WordPress/gutenberg/blob/trunk/packages/dependency-extraction-webpack-plugin/CHANGELOG.md for details). [#59106]
+-   Major - Monorepo: bump @wordpress/dependency-extraction-webpack-plugin dependency version to the latest (breaking changes, see [upstream CHANGELOG](https://github.com/WordPress/gutenberg/blob/trunk/packages/dependency-extraction-webpack-plugin/CHANGELOG.md) for details). [#59106]
 -   Patch - Monorepo: consolidate @babel/* dependencies versions across the monorepo. [#56575]
 -   Patch - Monorepo: consolidate packages licenses to `GPL-2.0-or-later`. [#58941]
 -   Patch - Monorepo: consolidate Webpack dependencies versions across the monorepo. [#59104]
