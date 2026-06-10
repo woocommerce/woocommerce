@@ -25,12 +25,11 @@ export type ProductFilterPriceContext = {
 
 const productFilterPriceStore = {
 	state: {
-		get minPrice() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
+		get minPrice(): number {
 			const { minRange } = getServerContext
 				? getServerContext< ProductFilterPriceContext >()
 				: getContext< ProductFilterPriceContext >();
-			const priceFilter = activeFilters.find(
+			const priceFilter = state.activeFilters.find(
 				( filter ) => filter.type === 'price'
 			);
 			if ( priceFilter ) {
@@ -39,12 +38,11 @@ const productFilterPriceStore = {
 			}
 			return minRange;
 		},
-		get maxPrice() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
+		get maxPrice(): number {
 			const { maxRange } = getServerContext
 				? getServerContext< ProductFilterPriceContext >()
 				: getContext< ProductFilterPriceContext >();
-			const priceFilter = activeFilters.find(
+			const priceFilter = state.activeFilters.find(
 				( filter ) => filter.type === 'price'
 			);
 			if ( priceFilter ) {

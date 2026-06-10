@@ -77,7 +77,6 @@ function unselectFilter( item: ValidFilterOptionItem ) {
 const productFiltersStore = {
 	state: {
 		get params() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
 			const params: Record< string, string > = {};
 
 			function addParam( key: string, value: string ) {
@@ -89,7 +88,7 @@ const productFiltersStore = {
 			const config = getConfig( BLOCK_NAME );
 			const taxonomyParamsMap = config?.taxonomyParamsMap || {};
 
-			activeFilters.forEach( ( filter ) => {
+			state.activeFilters.forEach( ( filter ) => {
 				// todo: refactor this to use params data from Automattic\WooCommerce\Internal\ProductFilters\Params.
 				const { type, value } = filter;
 
@@ -199,7 +198,7 @@ const productFiltersStore = {
 					? itemArg
 					: context.item;
 			if ( ! item || ! isValidFilterOptionItem( item ) ) return;
-			const isSelected = context.activeFilters.some(
+			const isSelected = state.activeFilters.some(
 				( f ) => f.type === item.type && f.value === item.value
 			);
 			if ( isSelected ) {
@@ -301,6 +300,15 @@ const productFiltersStore = {
 			} else {
 				document.body.style.overflow = 'auto';
 			}
+		},
+		syncActiveFiltersWithServer: () => {
+			if ( ! getServerContext ) return;
+			const context = getContext< ProductFiltersContext >();
+			const serverContext = getServerContext< ProductFiltersContext >();
+
+			context.activeFilters = Array.isArray( serverContext.activeFilters )
+				? serverContext.activeFilters.map( ( item ) => ( { ...item } ) )
+				: [];
 		},
 	},
 };

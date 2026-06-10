@@ -19,9 +19,8 @@ type RemovableItemContext = {
 
 const activeFiltersStore = {
 	state: {
-		get removableItems() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
-			return activeFilters
+		get removableItems(): RemovableItem[] {
+			return state.activeFilters
 				.filter( ( f ) => !! f.value )
 				.map( ( f ) => ( {
 					id: f.type + '_' + f.value,
@@ -40,9 +39,8 @@ const activeFiltersStore = {
 			const label = typeof item?.label === 'string' ? item.label : '';
 			return template.replace( '{{label}}', label );
 		},
-		get hasActiveFilters() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
-			return activeFilters.length > 0;
+		get hasActiveFilters(): boolean {
+			return state.activeFilters.length > 0;
 		},
 	},
 	actions: {
@@ -66,7 +64,6 @@ const activeFiltersStore = {
 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 activeFiltersStore satisfies RemovableItemsParentStore;
 
-const { actions } = store< ProductFiltersStore & typeof activeFiltersStore >(
-	'woocommerce/product-filters',
-	activeFiltersStore
-);
+const { state, actions } = store<
+	ProductFiltersStore & typeof activeFiltersStore
+>( 'woocommerce/product-filters', activeFiltersStore );
