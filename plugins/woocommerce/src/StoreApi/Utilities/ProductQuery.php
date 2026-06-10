@@ -419,10 +419,10 @@ class ProductQuery implements QueryClausesGenerator {
 	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		global $wpdb;
 
-		// SKU/slug lookups include variations; exclude any whose parent product is not published.
+		// SKU and slug lookups can return variations, so exclude any whose parent product is not published.
 		if ( in_array( 'product_variation', (array) $wp_query->get( 'post_type' ), true ) ) {
 			$args['where'] .= $wpdb->prepare(
-				" AND ( {$wpdb->posts}.post_type <> 'product_variation' OR EXISTS (
+				" AND ( {$wpdb->posts}.post_type != 'product_variation' OR EXISTS (
 					SELECT 1 FROM {$wpdb->posts} AS parent
 					WHERE parent.ID = {$wpdb->posts}.post_parent AND parent.post_status = %s
 				) ) ",
