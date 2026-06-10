@@ -511,7 +511,11 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $result['breakdown']['products']['items'] );
 		$this->assertSame( array(), $result['breakdown']['fees']['items'] );
 		$this->assertEquals( '10.00', $result['breakdown']['shipping']['total'] );
+		$this->assertEquals( '0.00', $result['breakdown']['shipping']['total_tax'] );
 		$this->assertEquals( '10.00', $result['total'] );
+		$this->assertEquals( '0.00', $result['total_tax'] );
+		$this->assertArrayNotHasKey( 'subtotal', $result );
+		$this->assertArrayNotHasKey( 'tax', $result );
 
 		$order->delete( true );
 	}
@@ -546,7 +550,9 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $result['breakdown']['products']['items'] );
 		$this->assertSame( array(), $result['breakdown']['shipping']['items'] );
 		$this->assertEquals( '20.00', $result['breakdown']['fees']['total'] );
+		$this->assertEquals( '0.00', $result['breakdown']['fees']['total_tax'] );
 		$this->assertEquals( '20.00', $result['total'] );
+		$this->assertEquals( '0.00', $result['total_tax'] );
 
 		$order->delete( true );
 	}
@@ -615,7 +621,11 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$this->assertEquals( '50.00', $result['breakdown']['products']['total'] );
 		$this->assertEquals( '10.00', $result['breakdown']['shipping']['total'] );
 		$this->assertEquals( '5.00', $result['breakdown']['fees']['total'] );
+		$this->assertEquals( '0.00', $result['breakdown']['products']['total_tax'] );
+		$this->assertEquals( '0.00', $result['breakdown']['shipping']['total_tax'] );
+		$this->assertEquals( '0.00', $result['breakdown']['fees']['total_tax'] );
 		$this->assertEquals( '65.00', $result['total'] );
+		$this->assertEquals( '0.00', $result['total_tax'] );
 
 		$product->delete( true );
 		$order->delete( true );
@@ -1026,14 +1036,23 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertEquals( '100.00', $result['subtotal'] );
-		$this->assertEquals( '10.00', $result['tax'] );
-		$this->assertEquals( '110.00', $result['total'] );
+		$this->assertEquals( '100.00', $result['total'] );
+		$this->assertEquals( '10.00', $result['total_tax'] );
+		$this->assertArrayNotHasKey( 'subtotal', $result );
+		$this->assertArrayNotHasKey( 'tax', $result );
 		$this->assertArrayHasKey( 'breakdown', $result );
 		$this->assertArrayHasKey( 'max_refundable', $result );
 		$this->assertCount( 1, $result['breakdown']['products']['items'] );
 		$this->assertArrayHasKey( 'name', $result['breakdown']['products']['items'][0] );
 		$this->assertArrayHasKey( 'product_id', $result['breakdown']['products']['items'][0] );
+		$this->assertArrayHasKey( 'total', $result['breakdown']['products']['items'][0] );
+		$this->assertArrayHasKey( 'total_tax', $result['breakdown']['products']['items'][0] );
+		$this->assertEquals( '100.00', $result['breakdown']['products']['items'][0]['total'] );
+		$this->assertEquals( '10.00', $result['breakdown']['products']['items'][0]['total_tax'] );
+		$this->assertArrayHasKey( 'total', $result['breakdown']['products'] );
+		$this->assertArrayHasKey( 'total_tax', $result['breakdown']['products'] );
+		$this->assertEquals( '100.00', $result['breakdown']['products']['total'] );
+		$this->assertEquals( '10.00', $result['breakdown']['products']['total_tax'] );
 	}
 
 	/**

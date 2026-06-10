@@ -491,13 +491,17 @@ class Controller extends AbstractController {
 		// amount (e.g. an amount-only partial refund applied previously).
 		// Reject up-front so the eventual create call doesn't fail with the
 		// generic 'cannot_create_refund' error from wc_create_refund.
-		if ( abs( (float) $preview['total'] ) > (float) $preview['max_refundable'] ) {
+		// `total` is excluding tax; `max_refundable` is the inclusive remaining
+		// amount (`get_remaining_refund_amount()`), so add `total_tax` before
+		// comparing.
+		$preview_total_with_tax = abs( (float) $preview['total'] + (float) $preview['total_tax'] );
+		if ( $preview_total_with_tax > (float) $preview['max_refundable'] ) {
 			return $this->get_route_error_response(
 				'preview_exceeds_max_refundable',
 				sprintf(
-					/* translators: 1: requested preview total, 2: remaining refundable */
+					/* translators: 1: requested preview total including tax, 2: remaining refundable */
 					__( 'Requested refund preview (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
-					$preview['total'],
+					wc_format_decimal( $preview_total_with_tax, wc_get_price_decimals() ),
 					$preview['max_refundable']
 				),
 				WP_Http::UNPROCESSABLE_ENTITY
