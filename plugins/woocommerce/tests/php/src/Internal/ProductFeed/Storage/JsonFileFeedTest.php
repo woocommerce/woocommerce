@@ -193,6 +193,84 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refresh an existing feed directory's .htaccess to allow file access.
+	 */
+	public function test_existing_feed_dir_htaccess_is_refreshed_for_file_access(): void {
+		// Simulate an install created before file access was enabled: the directory already
+		// exists with a `deny from all` .htaccess that would block feed downloads.
+		$directory = wp_upload_dir()['basedir'] . '/product-feeds';
+		wp_mkdir_p( $directory );
+		file_put_contents( $directory . '/.htaccess', 'deny from all' );
+
+		// Drive the public feed API; get_file_url() resolves the upload directory, which refreshes
+		// the .htaccess in place when the directory already exists.
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->start();
+		$feed->end();
+		$feed->get_file_url();
+
+		$this->assertSame(
+			'Options -Indexes',
+			trim( (string) file_get_contents( $directory . '/.htaccess' ) ),
+			'Generating a feed into an existing directory should refresh its .htaccess to allow file access.'
+		);
+	}
+
+	/**
+	 * @testdox Should refresh the feed directory's .htaccess even when WP_Filesystem is unavailable.
+	 *
+	 * Guards the existing-install fix against re-introducing a WP_Filesystem dependency: on installs
+	 * with a broken (e.g. FTP) filesystem, the refresh must still run via native file functions.
+	 */
+	public function test_existing_feed_dir_htaccess_is_refreshed_without_wp_filesystem(): void {
+		$directory = wp_upload_dir()['basedir'] . '/product-feeds';
+		wp_mkdir_p( $directory );
+		file_put_contents( $directory . '/.htaccess', 'deny from all' );
+
+		// Force WP_Filesystem initialization to fail; the refresh must not depend on it.
+		$broken_method = fn() => 'this-method-does-not-exist';
+		add_filter( 'filesystem_method', $broken_method );
+
+		try {
+			$feed = new JsonFileFeed( 'test-feed' );
+			$feed->start();
+			$feed->end();
+			$feed->get_file_url();
+
+			$this->assertSame(
+				'Options -Indexes',
+				trim( (string) file_get_contents( $directory . '/.htaccess' ) ),
+				'The .htaccess refresh must succeed without a usable WP_Filesystem.'
+			);
+		} finally {
+			remove_filter( 'filesystem_method', $broken_method );
+		}
+	}
+
+	/**
+	 * @testdox Should leave a custom .htaccess in the feed directory untouched.
+	 */
+	public function test_existing_feed_dir_custom_htaccess_is_preserved(): void {
+		// A site/host may have placed their own rules in the feed directory; only the known legacy
+		// `deny from all` should be upgraded, never custom content.
+		$directory      = wp_upload_dir()['basedir'] . '/product-feeds';
+		$custom_content = "# Custom rules\nHeader set X-Test 1";
+		wp_mkdir_p( $directory );
+		file_put_contents( $directory . '/.htaccess', $custom_content );
+
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->start();
+		$feed->end();
+		$feed->get_file_url();
+
+		$this->assertSame(
+			$custom_content,
+			file_get_contents( $directory . '/.htaccess' ),
+			'Custom .htaccess content must be preserved, not overwritten by the refresh.'
+		);
+	}
+
+	/**
 	 * Gets the directory for feed files, but also deletes it.
 	 *
 	 * @return string The directory path.

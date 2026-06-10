@@ -163,8 +163,6 @@ class Bootstrap {
 				$this->container->get( TemplateOptions::class )->init();
 			}
 		}
-
-		$this->container->get( QueryFilters::class )->init();
 	}
 
 	/**

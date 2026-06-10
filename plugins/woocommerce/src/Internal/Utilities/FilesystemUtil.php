@@ -14,6 +14,16 @@ use WP_Filesystem_Base;
 class FilesystemUtil {
 
 	/**
+	 * `.htaccess` directive that prevents directory listing while still allowing direct access to files.
+	 */
+	public const HTACCESS_ALLOW_FILE_ACCESS = 'Options -Indexes';
+
+	/**
+	 * `.htaccess` directive that denies all access to a directory's contents.
+	 */
+	public const HTACCESS_DENY_ALL = 'deny from all';
+
+	/**
 	 * Transient key for tracking FTP filesystem initialization failures.
 	 */
 	private const FTP_INIT_FAILURE_TRANSIENT = 'wc_ftp_filesystem_init_failed';
@@ -77,9 +87,10 @@ class FilesystemUtil {
 	 * @since 9.3.0
 	 *
 	 * @param string $path Directory to create.
+	 * @param bool   $allow_file_access Whether to allow file access while preventing directory listing. Default false (deny all access).
 	 * @throws \Exception In case of error.
 	 */
-	public static function mkdir_p_not_indexable( string $path ): void {
+	public static function mkdir_p_not_indexable( string $path, bool $allow_file_access = false ): void {
 		$wp_fs = self::get_wp_filesystem();
 
 		if ( $wp_fs->is_dir( $path ) ) {
@@ -90,8 +101,10 @@ class FilesystemUtil {
 			throw new \Exception( esc_html( sprintf( 'Could not create directory: %s.', wp_basename( $path ) ) ) );
 		}
 
+		$htaccess_content = $allow_file_access ? self::HTACCESS_ALLOW_FILE_ACCESS : self::HTACCESS_DENY_ALL;
+
 		$files = array(
-			'.htaccess'  => 'deny from all',
+			'.htaccess'  => $htaccess_content,
 			'index.html' => '',
 		);
 

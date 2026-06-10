@@ -61,8 +61,6 @@ const wcAdminPackages = [
 	'data',
 	'tracks',
 	'onboarding',
-	'block-templates',
-	'product-editor',
 	'sanitize',
 	'settings-ui-sdk',
 	'remote-logging',
@@ -265,21 +263,6 @@ const jsConfig = {
 				}
 				return outputPath;
 			},
-		} ),
-
-		// product-editor's block.json files come straight from source so PHP's
-		// BlockRegistry can load them without a separate package build.
-		new CopyWebpackPlugin( {
-			patterns: [
-				{
-					context: path.join(
-						__dirname,
-						'../../../../packages/js/product-editor/src/blocks'
-					),
-					from: '**/block.json',
-					to: './product-editor/blocks/[path][name][ext]',
-				},
-			],
 		} ),
 
 		// React Fast Refresh.
