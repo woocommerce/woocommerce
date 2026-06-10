@@ -11,7 +11,7 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"scripts": {
-		"build": "pnpm build:storybook",
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:(project:|storybook).*$/'",
 		"build:storybook": "./import-wp-css-storybook.sh && STORYBOOK=true BABEL_ENV=storybook storybook build -c ./.storybook --quiet && pnpm run copy-blocks-storybook-iframe",
 		"watch:build": "pnpm watch:build:storybook",
 		"watch:build:storybook": "./import-wp-css-storybook.sh && STORYBOOK=true BABEL_ENV=storybook storybook dev -c ./.storybook -p 6007 --ci",

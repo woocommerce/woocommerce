@@ -17,8 +17,12 @@ const tsConfig = require( '../tsconfig.base.json' );
 const aliases = Object.keys( tsConfig.compilerOptions.paths ).reduce(
 	( acc, key ) => {
 		// Filter out @wordpress/* paths to allow resolution from node_modules instead of build-types directory specified in tsconfig.
-		if ( ! key.startsWith( '@wordpress' ) ) {
-			const currentPath = tsConfig.compilerOptions.paths[ key ][ 0 ];
+		// Filter out paths targeting declaration files (e.g. dinero.js/currencies); they only exist for type resolution and webpack needs the runtime module instead.
+		const currentPath = tsConfig.compilerOptions.paths[ key ][ 0 ];
+		if (
+			! key.startsWith( '@wordpress' ) &&
+			! currentPath.endsWith( '.d.ts' )
+		) {
 			acc[ key.replace( '/*', '' ) ] = path.resolve(
 				__dirname,
 				'../' + currentPath.replace( '/*', '/' )
