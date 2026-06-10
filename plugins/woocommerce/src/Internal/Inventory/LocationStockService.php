@@ -8,6 +8,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Inventory;
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -206,7 +208,7 @@ CREATE TABLE $product_inventory_table (
 			return $quantity;
 		}
 
-		$wpdb->query(
+		$updated = $wpdb->query(
 			$wpdb->prepare(
 				"INSERT INTO %i ( product_id, variation_id, location_id, quantity )
 				VALUES ( %d, %d, %d, %f )
@@ -218,6 +220,8 @@ CREATE TABLE $product_inventory_table (
 				$quantity
 			)
 		);
+
+		$this->touch_product_modified_date_after_stock_update( $product, $updated );
 
 		return $quantity;
 	}
@@ -242,7 +246,7 @@ CREATE TABLE $product_inventory_table (
 			return $this->get_location_stock( $product, $location_slug );
 		}
 
-		$wpdb->query(
+		$updated = $wpdb->query(
 			$wpdb->prepare(
 				"INSERT INTO %i ( product_id, variation_id, location_id, quantity )
 				VALUES ( %d, %d, %d, %f )
@@ -254,6 +258,8 @@ CREATE TABLE $product_inventory_table (
 				$quantity
 			)
 		);
+
+		$this->touch_product_modified_date_after_stock_update( $product, $updated );
 
 		return $this->get_location_stock( $product, $location_slug );
 	}
@@ -301,7 +307,13 @@ CREATE TABLE $product_inventory_table (
 			)
 		);
 
-		return 1 === $updated ? $this->get_location_stock( $product, $location_slug ) : null;
+		if ( 1 !== $updated ) {
+			return null;
+		}
+
+		$this->touch_product_modified_date_after_stock_update( $product, $updated );
+
+		return $this->get_location_stock( $product, $location_slug );
 	}
 
 	/**
@@ -365,13 +377,8 @@ CREATE TABLE $product_inventory_table (
 	 * @return array{product_id:int,variation_id:int}|null
 	 */
 	private function get_product_inventory_key( $product ): ?array {
-		$product = $product instanceof \WC_Product ? $product : wc_get_product( $product );
-		if ( ! $product instanceof \WC_Product ) {
-			return null;
-		}
-
-		$product_with_stock = wc_get_product( $product->get_stock_managed_by_id() );
-		if ( ! $product_with_stock instanceof \WC_Product ) {
+		$product_with_stock = $this->get_stock_managed_product( $product );
+		if ( ! $product_with_stock ) {
 			return null;
 		}
 
@@ -386,6 +393,85 @@ CREATE TABLE $product_inventory_table (
 			'product_id'   => (int) $product_with_stock->get_id(),
 			'variation_id' => 0,
 		);
+	}
+
+	/**
+	 * Get the product object that owns stock for the supplied product.
+	 *
+	 * @param \WC_Product|int $product Product object or ID.
+	 */
+	private function get_stock_managed_product( $product ): ?\WC_Product {
+		$product = $product instanceof \WC_Product ? $product : wc_get_product( $product );
+		if ( ! $product instanceof \WC_Product ) {
+			return null;
+		}
+
+		$product_with_stock = wc_get_product( $product->get_stock_managed_by_id() );
+
+		return $product_with_stock instanceof \WC_Product ? $product_with_stock : null;
+	}
+
+	/**
+	 * Update product modified dates after a successful location stock write.
+	 *
+	 * @param \WC_Product|int $product      Product object or ID.
+	 * @param int|bool        $rows_updated Rows updated by the stock query.
+	 */
+	private function touch_product_modified_date_after_stock_update( $product, $rows_updated ): void {
+		if ( ! is_int( $rows_updated ) || $rows_updated < 1 ) {
+			return;
+		}
+
+		$product_with_stock = $this->get_stock_managed_product( $product );
+		if ( ! $product_with_stock ) {
+			return;
+		}
+
+		global $wpdb;
+
+		$product_id = $product_with_stock->get_id();
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => current_time( 'mysql' ),
+				'post_modified_gmt' => current_time( 'mysql', 1 ),
+			),
+			array(
+				'ID' => $product_id,
+			),
+			array( '%s', '%s' ),
+			array( '%d' )
+		);
+
+		$this->clear_product_caches_after_modified_date_update( $product_with_stock );
+	}
+
+	/**
+	 * Clear caches affected by directly touching a product modified date.
+	 *
+	 * @param \WC_Product $product Product object.
+	 */
+	private function clear_product_caches_after_modified_date_update( \WC_Product $product ): void {
+		$product_id = $product->get_id();
+		$parent_id  = $product->get_parent_id( 'edit' );
+
+		clean_post_cache( $product_id );
+		wc_delete_product_transients( $product_id );
+		\WC_Cache_Helper::invalidate_cache_group( 'product_' . $product_id );
+
+		if ( $parent_id ) {
+			wc_delete_product_transients( $parent_id );
+			\WC_Cache_Helper::invalidate_cache_group( 'product_' . $parent_id );
+		}
+
+		if ( FeaturesUtil::feature_is_enabled( 'product_instance_caching' ) ) {
+			$product_cache = wc_get_container()->get( ProductCache::class );
+			$product_cache->remove( $product_id );
+
+			if ( $parent_id ) {
+				$product_cache->remove( $parent_id );
+			}
+		}
 	}
 
 	/**
