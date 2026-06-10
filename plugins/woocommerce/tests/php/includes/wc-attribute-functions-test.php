@@ -5,6 +5,9 @@
  * @package WooCommerce\Tests\Functions.
  */
 
+declare( strict_types=1 );
+
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use PHPUnit\Framework\MockObject\Matcher\InvokedRecorder;
 
 /**
@@ -224,15 +227,15 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		$original_theme = wp_get_theme()->get_stylesheet();
 		$attribute_id   = null;
 
-		$enable_visual_attribute_feature = function ( $features ) {
-			$features[] = 'wc-visual-attribute';
-			return array_unique( $features );
-		};
-
-		add_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
 		try {
 			switch_theme( 'twentytwentyfour' );
 
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
+			$this->assertArrayNotHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should require the feature setting.' );
+			$this->assertTrue(
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class )->change_feature_enable( 'wc-visual-attribute', true ),
+				'The visual attribute feature should be toggled on.'
+			);
 			$this->assertArrayHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should be available in block themes.' );
 
 			$attribute_id = wc_create_attribute(
@@ -258,11 +261,41 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 				wc_delete_attribute( $attribute_id );
 			}
 
-			remove_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
 			switch_theme( $original_theme );
 		}//end try
 	}
 
+	/**
+	 * Test visual attribute feature setting visibility.
+	 *
+	 * @testdox Should show the `wc-visual` feature setting only for block themes.
+	 */
+	public function test_wc_visual_attribute_feature_setting_visibility() {
+		$original_theme = wp_get_theme()->get_stylesheet();
+
+		try {
+			switch_theme( 'twentytwentyfour' );
+
+			$features = FeaturesUtil::get_features( true );
+			$this->assertArrayHasKey( 'wc-visual-attribute', $features, 'The visual attribute feature should exist.' );
+			$this->assertFalse( $features['wc-visual-attribute']['disable_ui'], 'The visual attribute feature setting should be visible for block themes.' );
+
+			switch_theme( 'storefront' );
+
+			$features = FeaturesUtil::get_features( true );
+			$this->assertArrayHasKey( 'wc-visual-attribute', $features, 'The visual attribute feature should exist.' );
+			$this->assertTrue( $features['wc-visual-attribute']['disable_ui'], 'The visual attribute feature setting should be hidden for classic themes.' );
+		} finally {
+			switch_theme( $original_theme );
+		}
+	}
+
+	/**
+	 * Data provider for test_wc_get_attribute_taxonomy_slug().
+	 *
+	 * @return array
+	 */
 	public function get_attribute_names_and_slugs() {
 		return array(
 			array( 'Dash Me', 'dash-me' ),

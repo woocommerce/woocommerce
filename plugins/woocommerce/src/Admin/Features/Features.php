@@ -32,15 +32,6 @@ class Features {
 	);
 
 	/**
-	 * Beta features
-	 *
-	 * @var array
-	 */
-	protected static $beta_features = array(
-		'settings',
-	);
-
-	/**
 	 * Get class instance.
 	 */
 	public static function get_instance() {
@@ -63,10 +54,8 @@ class Features {
 
 		// Load feature before WooCommerce update hooks.
 		add_action( 'init', array( __CLASS__, 'load_features' ), 4 );
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_load_beta_features_modal' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_scripts' ), 15 );
 		add_filter( 'admin_body_class', array( __CLASS__, 'add_admin_body_classes' ) );
-		add_filter( 'update_option_woocommerce_allow_tracking', array( __CLASS__, 'maybe_disable_features' ), 10, 2 );
 	}
 
 	/**
@@ -150,6 +139,10 @@ class Features {
 
 		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
 			new \Automattic\WooCommerce\Admin\Features\Blueprint\Init();
+		}
+
+		if ( FeaturesUtil::feature_is_enabled( 'order-detail-redesign' ) ) {
+			new \Automattic\WooCommerce\Internal\Features\OrderDetailRedesign\Init();
 		}
 	}
 
@@ -242,22 +235,6 @@ class Features {
 	}
 
 	/**
-	 * Disable features when opting out of tracking.
-	 *
-	 * @param string $old_value Old value.
-	 * @param string $value New value.
-	 */
-	public static function maybe_disable_features( $old_value, $value ) {
-		if ( 'yes' === $value ) {
-			return;
-		}
-
-		foreach ( self::$beta_features as $feature ) {
-			self::disable( $feature );
-		}
-	}
-
-	/**
 	 * Adds the Features section to the advanced tab of WooCommerce Settings
 	 *
 	 * @deprecated 7.0 The WooCommerce Admin features are now handled by the WooCommerce features engine (see the FeaturesController class).
@@ -280,33 +257,6 @@ class Features {
 	 */
 	public static function add_features_settings( $settings, $current_section ) {
 		return $settings;
-	}
-
-	/**
-	 * Conditionally loads the beta features tracking modal.
-	 *
-	 * @param string $hook Page hook.
-	 */
-	public static function maybe_load_beta_features_modal( $hook ) {
-		if (
-			'woocommerce_page_wc-settings' !== $hook ||
-			! isset( $_GET['tab'] ) || 'advanced' !== $_GET['tab'] || // phpcs:ignore CSRF ok.
-			! isset( $_GET['section'] ) || 'features' !== $_GET['section'] // phpcs:ignore CSRF ok.
-		) {
-			return;
-		}
-		$tracking_enabled = get_option( 'woocommerce_allow_tracking', 'no' );
-
-		if ( empty( self::$beta_features ) ) {
-			return;
-		}
-
-		if ( 'yes' === $tracking_enabled ) {
-			return;
-		}
-
-		WCAdminAssets::register_style( 'beta-features-tracking-modal', 'style', array( 'wp-components' ) );
-		WCAdminAssets::register_script( 'wp-admin-scripts', 'beta-features-tracking-modal', array( 'wp-i18n', 'wp-element', WC_ADMIN_APP ) );
 	}
 
 	/**

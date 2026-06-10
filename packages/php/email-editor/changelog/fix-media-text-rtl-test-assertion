@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Email Editor: fix media-text RTL renderer test assertion.

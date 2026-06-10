@@ -1,6 +1,7 @@
 ---
 post_title: 'Getting Started with WooCommerce APIs'
 sidebar_label: 'Getting started'
+sidebar_position: 0
 ---
 
 # Getting Started with WooCommerce APIs
@@ -11,13 +12,19 @@ WooCommerce provides a number of programmatic APIs to interact with WooCommerce 
 
 The WC REST API is a powerful part of WooCommerce which lets you read and write various parts of WooCommerce data such as orders, products, coupons, customers, and shipping zones. It based on the [WordPress REST API](https://developer.wordpress.org/rest-api/).
 
-Explore the [WC REST API](./rest-api/README.md) documentation.
+Explore the [WC REST API](./rest-api/) documentation.
 
 ## Store API
 
 The Store API provides public REST API endpoints for the development of customer-facing cart, checkout, and product functionality. In contrast to the WooCommerce REST API, the Store API is unauthenticated and does not provide access to sensitive store data or other customer information.
 
 Explore the [Store API](./store-api/README.md) documentation.
+
+## Dual API (code + GraphQL, experimental)
+
+The dual API is an experimental, code-first API: you write plain PHP classes (the code API) and a build script generates a matching GraphQL endpoint from them. WooCommerce core ships its own dual API, and the underlying infrastructure can be reused by plugins to build their own.
+
+Explore the [Dual API](./dual-api/README.md) documentation.
 
 ## Other Resources
 

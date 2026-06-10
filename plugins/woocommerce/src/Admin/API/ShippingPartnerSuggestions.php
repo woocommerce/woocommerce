@@ -132,11 +132,19 @@ class ShippingPartnerSuggestions extends \WC_REST_Data_Controller {
 		$layout_def  = array(
 			'type'       => 'object',
 			'properties' => array(
-				'image'    => array(
+				'image'       => array(
 					'type'        => 'string',
 					'description' => '',
 				),
-				'features' => $feature_def,
+				'image_label' => array(
+					'type'        => 'string',
+					'description' => '',
+				),
+				'description' => array(
+					'type'        => 'string',
+					'description' => '',
+				),
+				'features'    => $feature_def,
 			),
 		);
 

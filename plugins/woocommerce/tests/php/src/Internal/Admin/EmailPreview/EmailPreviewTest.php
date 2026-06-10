@@ -4,7 +4,9 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\EmailPreview;
 
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
+use Automattic\WooCommerce\Internal\Admin\EmailPreview\PreviewOrder;
 use WC_Emails;
+use WC_Helper_Order;
 use WC_Product;
 use WC_Unit_Test_Case;
 
@@ -330,5 +332,111 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		update_option( $additional_key, $additional_value );
 		delete_transient( $heading_key );
 		delete_transient( $additional_key );
+	}
+
+	/**
+	 * @testdox Calling save() on the preview dummy order must not overwrite a real order whose id matches the dummy's.
+	 */
+	public function test_dummy_order_save_does_not_overwrite_real_order(): void {
+		$real_order = WC_Helper_Order::create_order();
+		$real_id    = $real_order->get_id();
+		$real_order->set_billing_first_name( 'Real' );
+		$real_order->set_billing_last_name( 'Customer' );
+		$real_order->set_total( 999 );
+		$real_order->save();
+
+		$snapshot = array(
+			'first_name' => $real_order->get_billing_first_name(),
+			'last_name'  => $real_order->get_billing_last_name(),
+			'total'      => $real_order->get_total(),
+			'status'     => $real_order->get_status(),
+		);
+
+		$listener = function ( $order ) use ( $real_id ) {
+			$order->set_id( $real_id );
+			$order->set_billing_first_name( 'Pwned' );
+			$order->set_billing_last_name( 'Pwned' );
+			$order->set_total( 1 );
+			$order->save();
+			return $order;
+		};
+		add_filter( 'woocommerce_email_preview_dummy_order', $listener );
+
+		$this->sut->render();
+
+		remove_filter( 'woocommerce_email_preview_dummy_order', $listener );
+
+		$reloaded = wc_get_order( $real_id );
+		$this->assertSame( $snapshot['first_name'], $reloaded->get_billing_first_name(), 'Billing first name must be unchanged.' );
+		$this->assertSame( $snapshot['last_name'], $reloaded->get_billing_last_name(), 'Billing last name must be unchanged.' );
+		$this->assertSame( $snapshot['total'], $reloaded->get_total(), 'Order total must be unchanged.' );
+		$this->assertSame( $snapshot['status'], $reloaded->get_status(), 'Order status must be unchanged.' );
+	}
+
+	/**
+	 * @testdox Reading meta on the preview dummy order must not leak real order meta from the database.
+	 */
+	public function test_dummy_order_does_not_leak_real_order_meta(): void {
+		$real_order = WC_Helper_Order::create_order();
+		$real_id    = $real_order->get_id();
+		$real_order->update_meta_data( '_secret_value', 'do-not-leak' );
+		$real_order->save();
+
+		$captured = 'sentinel';
+		$listener = function ( $order ) use ( $real_id, &$captured ) {
+			$order->set_id( $real_id );
+			$captured = $order->get_meta( '_secret_value' );
+			return $order;
+		};
+		add_filter( 'woocommerce_email_preview_dummy_order', $listener );
+
+		$content = $this->sut->render();
+
+		remove_filter( 'woocommerce_email_preview_dummy_order', $listener );
+
+		$this->assertSame( '', $captured, 'Preview dummy must not lazy-load meta from the orders table.' );
+		$this->assertStringNotContainsString( 'do-not-leak', $content, 'Real order meta must not appear in the rendered preview.' );
+	}
+
+	/**
+	 * @testdox PreviewOrder save() is a no-op and does not insert a row when id is unset.
+	 */
+	public function test_preview_order_save_is_noop(): void {
+		$order = new PreviewOrder();
+		$order->set_billing_first_name( 'Phantom' );
+		$order->save();
+
+		$this->assertSame( 0, $order->get_id(), 'PreviewOrder must not be assigned a real database id on save().' );
+	}
+
+	/**
+	 * @testdox PreviewOrder keeps its id at 0 but still shows a representative order number.
+	 */
+	public function test_preview_order_displays_number_without_a_real_id(): void {
+		$order = new PreviewOrder();
+
+		$this->assertSame( 0, $order->get_id(), 'PreviewOrder must not carry a real order id.' );
+		$this->assertSame( '12345', $order->get_order_number(), 'PreviewOrder must expose a display order number.' );
+	}
+
+	/**
+	 * @testdox PreviewOrder database methods that key off the order id are inert.
+	 */
+	public function test_preview_order_database_methods_are_inert(): void {
+		$real_order = WC_Helper_Order::create_order();
+		$real_order->add_order_note( 'Customer note', 1 );
+		$real_order->save();
+		wc_create_refund(
+			array(
+				'order_id' => $real_order->get_id(),
+				'amount'   => 5,
+			)
+		);
+
+		$order = new PreviewOrder();
+
+		$this->assertSame( 0, $order->add_order_note( 'Preview note' ), 'add_order_note() must not write a note.' );
+		$this->assertSame( array(), $order->get_refunds(), 'get_refunds() must not read refunds from the database.' );
+		$this->assertSame( array(), $order->get_customer_order_notes(), 'get_customer_order_notes() must not read notes from the database.' );
 	}
 }

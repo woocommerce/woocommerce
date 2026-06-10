@@ -1,4 +1,4 @@
-/*global woocommerce_admin_meta_boxes */
+/*global woocommerce_admin_meta_boxes, _ */
 jQuery( function ( $ ) {
 	let isPageUnloading = false;
 
@@ -992,6 +992,24 @@ jQuery( function ( $ ) {
 				security: woocommerce_admin_meta_boxes.add_attribute_nonce,
 			};
 
+			if (
+				currentAttributeTermCreationContext.isVisualAttribute &&
+				postedData
+			) {
+				if ( postedData.wc_visual_attribute_type ) {
+					data.wc_visual_attribute_type =
+						postedData.wc_visual_attribute_type;
+				}
+
+				if ( postedData.term_color ) {
+					data.term_color = postedData.term_color;
+				}
+
+				if ( postedData.term_image ) {
+					data.term_image = postedData.term_image;
+				}
+			}
+
 			$.post(
 				woocommerce_admin_meta_boxes.ajax_url,
 				data,
@@ -1044,14 +1062,20 @@ jQuery( function ( $ ) {
 
 			const wrapper = this.closest( '.woocommerce_attribute' );
 			const attribute = wrapper ? wrapper.dataset.taxonomy : '';
+			const isVisualAttribute =
+				this.dataset.isVisualAttribute === 'yes';
 
 			currentAttributeTermCreationContext = {
 				wrapper,
 				attribute,
+				isVisualAttribute,
 			};
 
 			$( this ).WCBackboneModal( {
 				template: 'wc-modal-add-attribute-term',
+				variable: {
+					isVisualAttribute,
+				},
 			} );
 		}
 	);
@@ -1429,8 +1453,10 @@ jQuery( function ( $ ) {
 
 	// add a tooltip to the right of the product image meta box "Set product image" and "Add product gallery images"
 	const setProductImageLink = $( '#set-post-thumbnail' );
+	// Escape the translated label before interpolating into the attribute so a
+	// translation containing quotes or markup cannot break the rendered span.
 	const tooltipMarkup = `<span class="woocommerce-help-tip" tabindex="0" aria-label="${
-		woocommerce_admin_meta_boxes.i18n_product_image_tip
+		_.escape( woocommerce_admin_meta_boxes.i18n_product_image_tip )
 	}"></span>`;
 	const tooltipData = {
 		attribute: 'data-tip',
