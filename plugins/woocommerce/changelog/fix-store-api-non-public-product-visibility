@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure Store API product and review endpoints only return data for published products, including variations whose parent product is published.
