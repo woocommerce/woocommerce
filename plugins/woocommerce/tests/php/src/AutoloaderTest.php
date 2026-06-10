@@ -180,6 +180,55 @@ class AutoloaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A torn/partially-written file resolved mid-upgrade must not fatal: the handler
+	 * leaves the class unresolved (so e.g. class_exists() returns false) rather than
+	 * letting the include's ParseError escape and kill the request.
+	 *
+	 * @testdox the registered handler degrades (does not fatal) on a torn class file.
+	 */
+	public function test_registered_handler_degrades_on_a_torn_class_file(): void {
+		$handler = Autoloader::register_woocommerce_psr4_fallback();
+		$this->assertInstanceOf( \Closure::class, $handler, 'Bootstrap must register a handler.' );
+
+		$suffix = 'ReproTorn' . str_replace( '.', '', uniqid( '', true ) );
+		$dir    = dirname( WC_PLUGIN_FILE ) . '/src/' . $suffix;
+		$file   = $dir . '/Widget.php';
+		$class  = 'Automattic\\WooCommerce\\' . $suffix . '\\Widget';
+
+		try {
+			wp_mkdir_p( $dir );
+			// A torn / partially-written file mid-upgrade: a syntax error (unclosed class body).
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture; WP_Filesystem adds no value here.
+			file_put_contents( $file, "<?php\nnamespace Automattic\\WooCommerce\\{$suffix};\nclass Widget {\n" );
+			clearstatcache( true, $file );
+
+			// The handler must not let the include's ParseError escape.
+			$threw = false;
+			try {
+				$handler( $class );
+			} catch ( \Throwable $e ) {
+				$threw = true;
+			}
+
+			$this->assertFalse(
+				$threw,
+				'Handler must not let a torn-file ParseError escape — it must degrade to a miss.'
+			);
+			$this->assertFalse(
+				class_exists( $class, false ),
+				'A torn class file must be left unresolved, not loaded or fataled.'
+			);
+		} finally {
+			if ( file_exists( $file ) ) {
+				wp_delete_file( $file );
+			}
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture cleanup.
+			}
+		}
+	}
+
+	/**
 	 * Registration is idempotent: repeated calls return the same handler and never
 	 * stack duplicate autoloaders on the SPL stack.
 	 *

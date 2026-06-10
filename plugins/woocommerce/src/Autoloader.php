@@ -132,10 +132,14 @@ class Autoloader {
 	 *
 	 * Registration is idempotent: at most one handler is ever added per request.
 	 *
+	 * Degrades to null (nothing registered) if the Composer files are unavailable or a
+	 * foreign/malformed `ClassLoader` shape is present. The handler likewise leaves a class
+	 * unresolved — rather than fataling — if a resolved file is torn/unparseable mid-upgrade,
+	 * so a defensive `class_exists()` probe during an upgrade gets `false` instead of an error.
+	 *
 	 * @since 11.0.0
 	 *
-	 * @return \Closure|null The registered autoloader, or null if the Composer files are
-	 *                       unavailable (nothing was registered).
+	 * @return \Closure|null The registered autoloader, or null if no fallback was registered.
 	 */
 	public static function register_woocommerce_psr4_fallback(): ?\Closure {
 		static $registered_handler = null;
@@ -150,16 +154,30 @@ class Autoloader {
 		// rebuilds a throwaway loader per miss from this captured map (for performance — the map
 		// is read once, not on every miss). Do NOT collapse this into a shared loader or a per-miss
 		// build() call: either reintroduces the negative-cache bug the fresh-per-miss design avoids.
-		$availability_probe = self::build_woocommerce_psr4_fallback();
-		if ( null === $availability_probe ) {
+		// Wrapped so a foreign/malformed ClassLoader shape (an unexpected getPrefixesPsr4()) degrades
+		// to "no fallback" rather than fataling the bootstrap — matching build()'s own contract.
+		try {
+			$availability_probe = self::build_woocommerce_psr4_fallback();
+			if ( null === $availability_probe ) {
+				return null;
+			}
+			$psr4_entries = $availability_probe->getPrefixesPsr4();
+		} catch ( \Throwable $e ) {
 			return null;
 		}
-		$psr4_entries = $availability_probe->getPrefixesPsr4();
 
 		$handler = static function ( string $class_name ) use ( $psr4_entries ) {
 			$file = self::find_scoped_file( $class_name, $psr4_entries );
-			if ( null !== $file ) {
+			if ( null === $file ) {
+				return;
+			}
+			try {
 				require_once $file;
+			} catch ( \Throwable $e ) {
+				// A torn/partially-written file mid-upgrade must not turn a class probe into a fatal:
+				// leave the class unresolved so e.g. class_exists() returns false and the request
+				// continues, instead of an uncatchable ParseError escaping the autoload handler.
+				return;
 			}
 		};
 
