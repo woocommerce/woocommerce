@@ -1227,13 +1227,15 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Total stays at the tax-inclusive -$11. The split between subtotal
-		// (-$10) and tax (-$1) must be preserved on the fee item entry.
-		$this->assertSame( '-11.00', $result['breakdown']['fees']['total'] );
+		// Section total (excluding tax) is -$10 and section total_tax is -$1.
+		// The item-level split must preserve the signed values on the fee entry.
+		$this->assertSame( '-10.00', $result['breakdown']['fees']['total'] );
+		$this->assertSame( '-1.00', $result['breakdown']['fees']['total_tax'] );
 		$this->assertCount( 1, $result['breakdown']['fees']['items'] );
-		$this->assertEquals( '-10.00', $result['breakdown']['fees']['items'][0]['subtotal'] );
-		$this->assertEquals( '-1.00', $result['breakdown']['fees']['items'][0]['tax'] );
-		$this->assertEquals( '-11.00', $result['breakdown']['fees']['items'][0]['total'] );
+		$this->assertEquals( '-10.00', $result['breakdown']['fees']['items'][0]['total'] );
+		$this->assertEquals( '-1.00', $result['breakdown']['fees']['items'][0]['total_tax'] );
+		$this->assertArrayNotHasKey( 'subtotal', $result['breakdown']['fees']['items'][0] );
+		$this->assertArrayNotHasKey( 'tax', $result['breakdown']['fees']['items'][0] );
 
 		$order->delete( true );
 	}
