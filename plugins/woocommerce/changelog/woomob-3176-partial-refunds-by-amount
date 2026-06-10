@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+POST /wc/v4/refunds/preview: accept refund_total per line item for partial-amount previews (quantity now optional when refund_total is provided).
