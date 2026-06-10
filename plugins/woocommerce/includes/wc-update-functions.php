@@ -3409,6 +3409,9 @@ function wc_update_1060_add_woo_idx_comment_approved_type_index(): void {
  * @return void
  */
 function wc_update_1070_disable_hpos_sync_on_read(): void {
+	// Intentionally empty. The admin notice this update function used to queue has been
+	// replaced by a Site Health check, but the function must be kept so the 10.7.0 entry
+	// in WC_Install::$db_updates remains valid for stores upgrading from older versions.
 }
 
 /**

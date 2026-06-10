@@ -26,6 +26,8 @@ export default function ConnectNotice(): React.JSX.Element | null {
 			? `<strong>${ storeName }</strong>`
 			: storeName;
 
+	// The "outdated plugins / store at risk" (long) state is now surfaced in
+	// Site Health instead of here, so only the short connect nudge renders.
 	if ( noticeType === 'none' || noticeType === 'long' ) {
 		return null;
 	}
