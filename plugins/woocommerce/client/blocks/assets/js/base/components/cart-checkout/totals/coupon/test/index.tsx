@@ -177,7 +177,17 @@ describe( 'TotalsCoupon', () => {
 			const user = userEvent.setup();
 			const mockOnSubmit = jest.fn().mockResolvedValue( false );
 
-			// Set up validation error as would happen from the API response
+			render(
+				<TotalsCoupon
+					instanceId="coupon"
+					onSubmit={ mockOnSubmit }
+					displayCouponForm={ true }
+				/>
+			);
+
+			// Set up validation error as would happen from the API response,
+			// after the form has mounted (mirroring the real apply-coupon
+			// flow, where the error is set in response to a submission).
 			const { setValidationErrors } = dispatch( validationStore );
 			act( () => {
 				setValidationErrors( {
@@ -188,14 +198,6 @@ describe( 'TotalsCoupon', () => {
 					},
 				} );
 			} );
-
-			render(
-				<TotalsCoupon
-					instanceId="coupon"
-					onSubmit={ mockOnSubmit }
-					displayCouponForm={ true }
-				/>
-			);
 
 			// Verify error message is displayed
 			expect(
@@ -228,7 +230,16 @@ describe( 'TotalsCoupon', () => {
 		it( 'handles usage limit exceeded error', async () => {
 			const mockOnSubmit = jest.fn().mockResolvedValue( false );
 
-			// Set up validation error for usage limit
+			render(
+				<TotalsCoupon
+					instanceId="coupon"
+					onSubmit={ mockOnSubmit }
+					displayCouponForm={ true }
+				/>
+			);
+
+			// Set up validation error for usage limit, after the form has
+			// mounted (mirroring the real apply-coupon flow).
 			const { setValidationErrors } = dispatch( validationStore );
 			act( () => {
 				setValidationErrors( {
@@ -239,14 +250,6 @@ describe( 'TotalsCoupon', () => {
 					},
 				} );
 			} );
-
-			render(
-				<TotalsCoupon
-					instanceId="coupon"
-					onSubmit={ mockOnSubmit }
-					displayCouponForm={ true }
-				/>
-			);
 
 			// Verify error message is displayed
 			expect(
@@ -259,7 +262,16 @@ describe( 'TotalsCoupon', () => {
 		it( 'handles coupons disabled error', async () => {
 			const mockOnSubmit = jest.fn().mockResolvedValue( false );
 
-			// Set up validation error for disabled coupons
+			render(
+				<TotalsCoupon
+					instanceId="coupon"
+					onSubmit={ mockOnSubmit }
+					displayCouponForm={ true }
+				/>
+			);
+
+			// Set up validation error for disabled coupons, after the form
+			// has mounted (mirroring the real apply-coupon flow).
 			const { setValidationErrors } = dispatch( validationStore );
 			act( () => {
 				setValidationErrors( {
@@ -269,14 +281,6 @@ describe( 'TotalsCoupon', () => {
 					},
 				} );
 			} );
-
-			render(
-				<TotalsCoupon
-					instanceId="coupon"
-					onSubmit={ mockOnSubmit }
-					displayCouponForm={ true }
-				/>
-			);
 
 			// Verify error message is displayed
 			expect(
