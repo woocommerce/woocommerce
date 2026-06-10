@@ -1021,6 +1021,83 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should allow previewing a full shipping refund when the line carries tax and has no prior refund.
+	 *
+	 * Regression guard: an earlier implementation compared the tax-inclusive
+	 * $requested_total (from compute_line_item_refund_total) against a
+	 * tax-exclusive $remaining_total (only get_total()). For a $10 shipping line
+	 * with $1.50 of tax that produced 11.50 > 10.00 → wrongly rejected.
+	 */
+	public function test_validate_preview_line_items_shipping_with_tax_allows_full_refund(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '15.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => 10.00,
+			)
+		);
+		$shipping->set_taxes( array( 'total' => array( $tax_rate_id => 1.50 ) ) );
+		$shipping->save();
+		$order->add_item( $shipping );
+
+		$tax_item = new \WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_shipping_tax_total( 1.50 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+
+		$order->set_total( 61.50 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$result = $this->data_utils->validate_preview_line_items(
+			array(
+				array(
+					'line_item_id' => $shipping->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
+
+		$this->assertTrue( $result, 'Full shipping refund covering line total + tax with no prior refund should pass validation.' );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
 	 * @testdox build_refund_preview preserves the negative tax split on a fee with a negative stored tax.
 	 *
 	 * Regression guard: a previous implementation filtered tax IDs by `amount > 0`,

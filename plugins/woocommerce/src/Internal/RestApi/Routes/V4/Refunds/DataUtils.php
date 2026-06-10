@@ -507,7 +507,7 @@ class DataUtils {
 			return new WP_Error(
 				'order_not_refundable',
 				__( 'This order cannot be refunded.', 'woocommerce' ),
-				array( 'status' => 422 )
+				array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 			);
 		}
 
@@ -515,7 +515,7 @@ class DataUtils {
 			return new WP_Error(
 				'order_not_refundable',
 				__( 'This order has already been fully refunded.', 'woocommerce' ),
-				array( 'status' => 422 )
+				array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 			);
 		}
 
@@ -544,7 +544,7 @@ class DataUtils {
 				return new WP_Error(
 					'unsupported_item_type',
 					__( 'Line item is not a product, fee, or shipping line.', 'woocommerce' ),
-					array( 'status' => 422 )
+					array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 				);
 			}
 
@@ -567,7 +567,7 @@ class DataUtils {
 							__( 'Requested quantity exceeds remaining refundable quantity (%d).', 'woocommerce' ),
 							$remaining_qty
 						),
-						array( 'status' => 422 )
+						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 					);
 				}
 			}
@@ -581,13 +581,17 @@ class DataUtils {
 					);
 				}
 
+				// Compare on a tax-inclusive basis: compute_line_item_refund_total() (and
+				// therefore $requested_total below) already includes tax, and
+				// compute_refunded_quantities_and_totals() also returns tax-inclusive
+				// fee/shipping totals.
 				$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
-				$remaining_total = abs( (float) $item->get_total() ) - $refunded_total;
+				$remaining_total = abs( (float) $item->get_total() + (float) $item->get_total_tax() ) - $refunded_total;
 				if ( $remaining_total <= 0 ) {
 					return new WP_Error(
 						'quantity_exceeds_refundable',
 						__( 'This line item has already been fully refunded.', 'woocommerce' ),
-						array( 'status' => 422 )
+						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 					);
 				}
 
@@ -605,7 +609,7 @@ class DataUtils {
 							__( 'Requested refund exceeds the remaining refundable amount for this line item (%s).', 'woocommerce' ),
 							wc_format_decimal( $remaining_total, wc_get_price_decimals() )
 						),
-						array( 'status' => 422 )
+						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 					);
 				}
 			}
@@ -618,7 +622,8 @@ class DataUtils {
 	 * Pre-compute refund data for all line items in an order.
 	 *
 	 * Loads refunds once and builds lookup maps for refunded quantities and totals per item ID,
-	 * avoiding repeated get_refunds() calls during serialization.
+	 * avoiding repeated get_refunds() calls during serialization. Fee and shipping totals are
+	 * tax-inclusive so they can be compared directly against {@see compute_line_item_refund_total()}.
 	 *
 	 * @param WC_Order $order Order instance.
 	 * @return array{qtys: array<int, int>, totals: array<int, float>}
@@ -646,7 +651,7 @@ class DataUtils {
 			$refunded_fees = $refund->get_items( 'fee' );
 			foreach ( $refunded_fees as $refunded_item ) {
 				$original_id            = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
-				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + (float) $refunded_item->get_total() * -1;
+				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + ( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ) * -1;
 			}
 			/**
 			 * Refunded shipping items.
@@ -656,7 +661,7 @@ class DataUtils {
 			$refunded_shipping = $refund->get_items( 'shipping' );
 			foreach ( $refunded_shipping as $refunded_item ) {
 				$original_id            = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
-				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + (float) $refunded_item->get_total() * -1;
+				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + ( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ) * -1;
 			}
 		}
 
