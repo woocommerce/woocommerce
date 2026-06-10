@@ -14,7 +14,12 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
  */
 import { store as cartStore } from './index';
 import { processErrorResponse } from '../utils';
-import { getDirtyKeys, validateDirtyProps, BaseAddressKey } from './utils';
+import {
+	getDirtyKeys,
+	validateDirtyProps,
+	filterValidDirtyProps,
+	BaseAddressKey,
+} from './utils';
 
 // This is used to track and cache the local state of push changes.
 const localState = {
@@ -130,33 +135,81 @@ const updateCustomerData = (): void => {
 		return;
 	}
 
-	// Check props are valid, or abort.
-	if ( ! validateDirtyProps( localState.dirtyProps ) ) {
+	// Determine which dirty props to actually push. When all dirty props are
+	// valid, push the full address objects (existing behaviour). When some are
+	// invalid (e.g. state/postcode blanked after a country change), push only
+	// the valid subset so the country persists to the WC session while the
+	// still-empty required fields are withheld until the user fills them in.
+	const allPropsValid = validateDirtyProps( localState.dirtyProps );
+	const propsToPush = allPropsValid
+		? localState.dirtyProps
+		: filterValidDirtyProps( localState.dirtyProps );
+
+	const hasBillingToPush = propsToPush.billingAddress.length > 0;
+	const hasShippingToPush = propsToPush.shippingAddress.length > 0;
+
+	// Nothing valid to push — every dirty prop has a validation error.
+	if ( ! hasBillingToPush && ! hasShippingToPush ) {
 		localState.doingPush = false;
 		return;
 	}
 
 	const haveAddressFieldsForShippingRatesChanged =
-		localState.dirtyProps.shippingAddress.some( ( field ) =>
+		propsToPush.shippingAddress.some( ( field ) =>
 			addressFieldsForShippingRates.includes( field as string )
 		);
+
+	// When all props are valid, send the full cached address (existing
+	// behaviour). When filtering, send only the valid dirty fields so that
+	// temporarily-blanked values are not pushed to the server.
+	const billingPayload = allPropsValid
+		? localState.customerData.billingAddress
+		: ( Object.fromEntries(
+				propsToPush.billingAddress.map( ( key ) => [
+					key,
+					localState.customerData.billingAddress[ key ],
+				] )
+		  ) as CartBillingAddress );
+
+	const shippingPayload = allPropsValid
+		? localState.customerData.shippingAddress
+		: ( Object.fromEntries(
+				propsToPush.shippingAddress.map( ( key ) => [
+					key,
+					localState.customerData.shippingAddress[ key ],
+				] )
+		  ) as CartShippingAddress );
 
 	dispatch( cartStore )
 		.updateCustomerData(
 			{
-				...( isBillingAddressDirty && {
-					billing_address: localState.customerData.billingAddress,
+				...( hasBillingToPush && {
+					billing_address: billingPayload,
 				} ),
-				...( isShippingAddressDirty && {
-					shipping_address: localState.customerData.shippingAddress,
+				...( hasShippingToPush && {
+					shipping_address: shippingPayload,
 				} ),
 			},
 			true,
 			haveAddressFieldsForShippingRatesChanged
 		)
 		.then( () => {
-			localState.dirtyProps.billingAddress = [];
-			localState.dirtyProps.shippingAddress = [];
+			// When only a subset was pushed, keep the invalid (unpushed) props
+			// dirty so they are retried on the next push once filled in.
+			if ( allPropsValid ) {
+				localState.dirtyProps.billingAddress = [];
+				localState.dirtyProps.shippingAddress = [];
+			} else {
+				localState.dirtyProps.billingAddress =
+					localState.dirtyProps.billingAddress.filter(
+						( key ) => ! propsToPush.billingAddress.includes( key )
+					);
+				localState.dirtyProps.shippingAddress =
+					localState.dirtyProps.shippingAddress.filter(
+						( key ) =>
+							! propsToPush.shippingAddress.includes( key )
+					);
+			}
 			localState.doingPush = false;
 		} )
 		.catch( ( response ) => {

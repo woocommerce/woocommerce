@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Block Checkout: persist valid address fields (e.g. country) to the WC session when a country change auto-blanks state/postcode, instead of aborting the entire push because those fields temporarily fail validation.

@@ -124,6 +124,33 @@ export const validateDirtyProps = ( dirtyProps: {
 };
 
 /**
+ * Returns the subset of dirty props that currently have no validation error.
+ * Used when some dirty fields are invalid (e.g. state/postcode blanked after a
+ * country change) so the valid ones can still be pushed to the server.
+ */
+export const filterValidDirtyProps = ( dirtyProps: {
+	billingAddress: BaseAddressKey[];
+	shippingAddress: BaseAddressKey[];
+} ): { billingAddress: BaseAddressKey[]; shippingAddress: BaseAddressKey[] } => {
+	const validationStore = select(
+		VALIDATION_STORE_KEY
+	) as CurriedSelectorsOf< ValidationStoreDescriptor >;
+
+	return {
+		billingAddress: dirtyProps.billingAddress.filter(
+			( key ) =>
+				validationStore.getValidationError( 'billing_' + key ) ===
+				undefined
+		),
+		shippingAddress: dirtyProps.shippingAddress.filter(
+			( key ) =>
+				validationStore.getValidationError( 'shipping_' + key ) ===
+				undefined
+		),
+	};
+};
+
+/**
  * Gets the localStorage flag to indicate whether the customer data is dirty.
  */
 export const getIsCustomerDataDirty = () => {

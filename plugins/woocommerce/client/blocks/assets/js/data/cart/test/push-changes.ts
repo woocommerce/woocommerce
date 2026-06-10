@@ -10,6 +10,7 @@ import { cartStore, validationStore } from '@woocommerce/block-data';
 import { pushChanges } from '../push-changes';
 
 let updateCustomerDataMock = jest.fn();
+let getValidationErrorMock = jest.fn().mockReturnValue( undefined );
 let getCustomerDataMock = jest.fn().mockReturnValue( {
 	billingAddress: {
 		first_name: 'John',
@@ -67,6 +68,7 @@ async function resetToInitialAddressMock() {
 	pushChanges( false );
 	updateCustomerDataMock.mockReset();
 	updateCustomerDataMock.mockResolvedValue( jest.fn() );
+	getValidationErrorMock = jest.fn().mockReturnValue( undefined );
 
 	getCustomerDataMock = jest.fn().mockReturnValue( {
 		billingAddress: {
@@ -114,9 +116,7 @@ describe( 'pushChanges', () => {
 						...jest
 							.requireActual( '@wordpress/data' )
 							.select( storeNameOrDescriptor ),
-						getValidationError: jest
-							.fn()
-							.mockReturnValue( undefined ),
+						getValidationError: getValidationErrorMock,
 					};
 				}
 				return jest
@@ -477,5 +477,105 @@ describe( 'pushChanges', () => {
 			true,
 			false // because no shipping rate impacting fields are changed
 		);
+	} );
+
+	it( 'Pushes only the valid dirty fields (country) when state/postcode have validation errors after a country change', async () => {
+		// Simulate country changing to GB; state/postcode are blanked by
+		// updateDirtyProps and then fail validation because they are required
+		// but now empty for the new country.
+		getValidationErrorMock = jest.fn().mockImplementation( ( key: string ) => {
+			if ( key === 'billing_state' || key === 'billing_postcode' ) {
+				return { message: 'Invalid for selected country', hidden: false };
+			}
+			return undefined;
+		} );
+
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'New York',
+				state: '',
+				postcode: '',
+				country: 'GB',
+				email: 'john.doe@mail.com',
+				phone: '555-555-5555',
+			},
+			shippingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'New York',
+				state: 'NY',
+				postcode: '10001',
+				country: 'US',
+				phone: '555-555-5555',
+			},
+		} );
+
+		pushChanges( false );
+
+		// Country should be pushed; invalid state/postcode should not.
+		await expect( updateCustomerDataMock ).toHaveBeenCalledWith(
+			{
+				billing_address: { country: 'GB' },
+			},
+			true,
+			false // country is not a shipping-rate-impacting field
+		);
+
+		// Flush async resolution so doingPush is cleared before the next test.
+		await expect( updateCustomerDataMock ).toHaveReturned();
+	} );
+
+	it( 'Does not push anything when every dirty prop has a validation error', async () => {
+		// Clear any calls recorded during the beforeEach reset so this test
+		// has a clean baseline for the "not called" assertion.
+		updateCustomerDataMock.mockClear();
+
+		// All three dirty fields (country, state, postcode) report errors.
+		getValidationErrorMock = jest.fn().mockImplementation( ( key: string ) => {
+			if (
+				key === 'billing_country' ||
+				key === 'billing_state' ||
+				key === 'billing_postcode'
+			) {
+				return { message: 'Invalid', hidden: false };
+			}
+			return undefined;
+		} );
+
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'New York',
+				state: '',
+				postcode: '',
+				country: 'XX',
+				email: 'john.doe@mail.com',
+				phone: '555-555-5555',
+			},
+			shippingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'New York',
+				state: 'NY',
+				postcode: '10001',
+				country: 'US',
+				phone: '555-555-5555',
+			},
+		} );
+
+		pushChanges( false );
+
+		expect( updateCustomerDataMock ).not.toHaveBeenCalled();
 	} );
 } );
