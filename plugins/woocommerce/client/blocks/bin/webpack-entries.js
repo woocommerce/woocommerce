@@ -303,6 +303,16 @@ const frontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {
 	),
 } );
 
+const cartAndCheckoutFrontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {
+	...Object.fromEntries(
+		Object.entries( cartAndCheckoutBlocks ).filter( ( [ blockName ] ) => {
+			return ! frontendScriptModuleBlocksToSkip.includes(
+				`woocommerce/${ blockName }`
+			);
+		} )
+	),
+} );
+
 // Remove styles from style build,
 // that are already included in interactivity
 // script modules build.
@@ -387,7 +397,7 @@ const entries = {
 			'./assets/js/extensions/shipping-methods/pickup-location/index.js',
 	},
 	cartAndCheckoutFrontend: {
-		...getBlockEntries( 'frontend.{t,j}s{,x}', cartAndCheckoutBlocks ),
+		...cartAndCheckoutFrontendEntries,
 		blocksCheckout: './packages/checkout/index.js',
 		blocksComponents: './packages/components/index.ts',
 	},
