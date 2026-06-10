@@ -32,13 +32,13 @@ export const getHeadingElementStyles = (
 	merge
 		? ( deepmerge.all( [
 				defaultStyleObject,
-				styles.elements.heading || {},
-				styles.elements[ headingLevel ] || {},
+				styles.elements?.heading || {},
+				styles.elements?.[ headingLevel ] || {},
 		  ] ) as EmailStyles )
 		: ( {
 				...defaultStyleObject,
-				...( styles.elements.heading || {} ),
-				...( styles.elements[ headingLevel ] || {} ),
+				...( styles.elements?.heading || {} ),
+				...( styles.elements?.[ headingLevel ] || {} ),
 		  } as EmailStyles );
 
 export const getElementStyles = (
