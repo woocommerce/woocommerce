@@ -123,12 +123,34 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	 * @testdox Should normalize media gallery items.
 	 */
 	public function test_media_gallery_normalizes_items() {
+		$image_id  = wp_insert_attachment(
+			array(
+				'post_title'     => 'Gallery image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$video_id  = wp_insert_attachment(
+			array(
+				'post_title'     => 'Product video',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'video/mp4',
+			)
+		);
+		$poster_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Video poster',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+
 		$media_gallery = ProductMediaGallery::normalize_media_gallery_items(
 			array(
 				array(
 					'media_type'  => 'image',
-					'id'          => '123',
-					'poster_id'   => 456,
+					'id'          => (string) $image_id,
+					'poster_id'   => $poster_id,
 					'settings'    => array(
 						'controls' => false,
 					),
@@ -137,8 +159,8 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 				array(
 					'media_type'  => 'video',
 					'source_type' => 'attachment',
-					'id'          => '456',
-					'poster_id'   => '789',
+					'id'          => (string) $video_id,
+					'poster_id'   => (string) $poster_id,
 					'settings'    => array(
 						'controls'     => 'yes',
 						'autoplay'     => '0',
@@ -164,16 +186,14 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 				array(
 					'media_type'  => 'audio',
 					'source_type' => 'attachment',
-					'id'          => 999,
+					'id'          => $video_id,
 				),
 				array(
 					'media_type'  => 'image',
 					'source_type' => 'embed',
 					'url'         => 'https://example.com/image.jpg',
 				),
-			),
-			false,
-			false
+			)
 		);
 
 		$this->assertEquals(
@@ -181,13 +201,13 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 				array(
 					'media_type'  => 'image',
 					'source_type' => 'attachment',
-					'id'          => 123,
+					'id'          => $image_id,
 				),
 				array(
 					'media_type'  => 'video',
 					'source_type' => 'attachment',
-					'id'          => 456,
-					'poster_id'   => 789,
+					'id'          => $video_id,
+					'poster_id'   => $poster_id,
 					'settings'    => array(
 						'preload' => 'metadata',
 					),
@@ -196,19 +216,37 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			$media_gallery,
 			'Media gallery should keep only supported normalized items.'
 		);
+
+		wp_delete_attachment( $image_id, true );
+		wp_delete_attachment( $video_id, true );
+		wp_delete_attachment( $poster_id, true );
 	}
 
 	/**
 	 * @testdox Should persist video gallery items.
 	 */
 	public function test_video_gallery_persists_items() {
+		$video_id               = wp_insert_attachment(
+			array(
+				'post_title'     => 'Product video',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'video/mp4',
+			)
+		);
+		$poster_id              = wp_insert_attachment(
+			array(
+				'post_title'     => 'Video poster',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
 		$video_gallery          = array(
 			array(
 				'media_type'  => 'video',
 				'source_type' => 'attachment',
-				'id'          => 456,
+				'id'          => $video_id,
 				'position'    => 1,
-				'poster_id'   => 789,
+				'poster_id'   => $poster_id,
 				'settings'    => array(
 					'controls' => true,
 					'preload'  => 'metadata',
@@ -218,9 +256,9 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$expected_video_gallery = array(
 			array(
 				'source_type' => 'attachment',
-				'id'          => 456,
+				'id'          => $video_id,
 				'position'    => 1,
-				'poster_id'   => 789,
+				'poster_id'   => $poster_id,
 				'settings'    => array(
 					'preload' => 'metadata',
 				),
@@ -246,6 +284,10 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			ProductMediaGallery::get_stored_video_gallery_items( $reloaded_product ),
 			'Reloaded product should expose stored video gallery items through the internal helper.'
 		);
+
+		$product->delete( true );
+		wp_delete_attachment( $video_id, true );
+		wp_delete_attachment( $poster_id, true );
 	}
 
 	/**
