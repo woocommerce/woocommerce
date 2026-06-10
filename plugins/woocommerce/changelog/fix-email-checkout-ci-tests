@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix PHPUnit assertions for deferred email queue object round trips and Store API checkout failed-payment retries.

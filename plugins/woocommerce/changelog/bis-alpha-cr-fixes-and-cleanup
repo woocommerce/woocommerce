@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Address CodeRabbit review feedback on the Back in Stock Notifications alpha and apply small follow-on cleanups: extract email-link action tokens into `EmailActionController` constants, remove the pre-WP-6.8 hasher compatibility shim now that WooCommerce requires WordPress 6.8, delete the in-tree sprint scratch docs (`SPRINT.md`, `CODERABBIT-TRIAGE.md`, `CODERABBIT-TRIAGE-RAW.md`) ahead of merge, and fix the assorted CR-flagged bugs (cancel-action copy-paste, split verification/unsubscribe keys, guard unreadable notifications in retention and privacy erasers, repair admin create-form option tags, correct background-processor operator precedence, rename typo filter, drop unused sprintf arg).

@@ -23,18 +23,9 @@ import { Spinner } from '@woocommerce/components';
  */
 import { useReports } from '../analytics/report/use-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { isFeatureEnabled } from '~/utils/features';
 import { useFilterHook } from '~/utils/use-filter-hook';
 import { NoMatch } from './NoMatch';
 
-const ProductVariationPage = lazy( () =>
-	import(
-		/* webpackChunkName: "edit-product-page" */ '../products/product-variation-page'
-	)
-);
-const ProductPage = lazy( () =>
-	import( /* webpackChunkName: "product-page" */ '../products/product-page' )
-);
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
 );
@@ -74,6 +65,10 @@ const CustomizeStore = lazy( () =>
 
 const LaunchStore = lazy( () =>
 	import( /* webpackChunkName: "launch-store" */ '../launch-your-store/hub' )
+);
+
+const MobileAppLoginPage = lazy( () =>
+	import( /* webpackChunkName: "mobile-app-login" */ '../mobile-app-login' )
 );
 
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
@@ -192,58 +187,6 @@ export const getPages = ( reports = [] ) => {
 		},
 	} );
 
-	if ( isFeatureEnabled( 'product_block_editor' ) ) {
-		const productPage = {
-			container: ProductPage,
-			layout: {
-				header: false,
-			},
-			wpOpenMenu: 'menu-posts-product',
-			capability: 'manage_woocommerce',
-		};
-
-		pages.push( {
-			...productPage,
-			path: '/add-product',
-			breadcrumbs: [
-				[ '/add-product', __( 'Product', 'woocommerce' ) ],
-				__( 'Add New Product', 'woocommerce' ),
-			],
-			navArgs: {
-				id: 'woocommerce-add-product',
-			},
-		} );
-
-		pages.push( {
-			...productPage,
-			path: '/product/:productId',
-			breadcrumbs: [
-				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
-				__( 'Edit Product', 'woocommerce' ),
-			],
-			navArgs: {
-				id: 'woocommerce-edit-product',
-			},
-		} );
-	}
-
-	pages.push( {
-		container: ProductVariationPage,
-		layout: {
-			header: false,
-		},
-		path: '/product/:productId/variation/:variationId',
-		breadcrumbs: [
-			[ '/edit-product', __( 'Product', 'woocommerce' ) ],
-			__( 'Edit Product Variation', 'woocommerce' ),
-		],
-		navArgs: {
-			id: 'woocommerce-edit-product',
-		},
-		wpOpenMenu: 'menu-posts-product',
-		capability: 'edit_products',
-	} );
-
 	if ( window.wcAdminFeatures.onboarding ) {
 		pages.push( {
 			container: CoreProfiler,
@@ -328,6 +271,20 @@ export const getPages = ( reports = [] ) => {
 			capability: 'manage_woocommerce',
 		} );
 	}
+
+	pages.push( {
+		container: MobileAppLoginPage,
+		path: '/mobile-app-login',
+		breadcrumbs: [
+			...initialBreadcrumbs,
+			__( 'Mobile app login', 'woocommerce' ),
+		],
+		wpOpenMenu: 'toplevel_page_woocommerce',
+		navArgs: {
+			id: 'woocommerce-mobile-app-login',
+		},
+		capability: 'manage_woocommerce',
+	} );
 
 	/**
 	 * List of WooCommerce Admin pages.
