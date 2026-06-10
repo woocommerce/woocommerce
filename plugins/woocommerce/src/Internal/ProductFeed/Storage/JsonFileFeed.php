@@ -330,17 +330,29 @@ class JsonFileFeed implements FeedInterface {
 	private function ensure_feed_dir_file_access( string $directory_path ): void {
 		$htaccess_path = $directory_path . '.htaccess';
 
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-		$current_content = is_file( $htaccess_path ) ? trim( (string) @file_get_contents( $htaccess_path ) ) : '';
+		if ( is_file( $htaccess_path ) ) {
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			$current_content = @file_get_contents( $htaccess_path );
 
-		// Only upgrade the known legacy `deny from all` directive or recreate a missing file.
-		// Leave anything else (already correct, or custom rules) untouched.
-		if ( '' !== $current_content && FilesystemUtil::HTACCESS_DENY_ALL !== $current_content ) {
-			return;
+			// Only upgrade the known legacy `deny from all` directive. Leave anything else — an
+			// already-correct directive, custom rules, or a file we cannot even read — untouched,
+			// so we never clobber content we did not write.
+			if ( false === $current_content || FilesystemUtil::HTACCESS_DENY_ALL !== trim( $current_content ) ) {
+				return;
+			}
 		}
 
-		// Best effort: a failure here must never interrupt feed generation.
+		// Best effort: a failure here must never interrupt feed generation, but log it — otherwise
+		// the generated feed would silently remain unreachable (HTTP 403) behind the stale rule.
 		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-		@file_put_contents( $htaccess_path, FilesystemUtil::HTACCESS_ALLOW_FILE_ACCESS );
+		if ( false === @file_put_contents( $htaccess_path, FilesystemUtil::HTACCESS_ALLOW_FILE_ACCESS ) ) {
+			wc_get_logger()->warning(
+				'Could not update the product feed .htaccess to allow file access; generated feeds may remain inaccessible.',
+				array(
+					'source' => 'product-feed',
+					'path'   => $htaccess_path,
+				)
+			);
+		}
 	}
 }

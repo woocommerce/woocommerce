@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\ProductFeed\Storage;
 
 use Automattic\WooCommerce\Internal\ProductFeed\Storage\JsonFileFeed;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 
 // This file works directly with local files. That's fine.
 // phpcs:disable WordPress.WP.AlternativeFunctions
@@ -17,6 +18,8 @@ if ( ! function_exists( 'WP_Filesystem' ) ) {
  * JsonFileFeedTest class.
  */
 class JsonFileFeedTest extends \WC_Unit_Test_Case {
+	use LoggerSpyTrait;
+
 	/**
 	 * Clean up test fixtures.
 	 */
@@ -267,6 +270,26 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 			$custom_content,
 			file_get_contents( $directory . '/.htaccess' ),
 			'Custom .htaccess content must be preserved, not overwritten by the refresh.'
+		);
+	}
+
+	/**
+	 * @testdox Should log a warning when the feed directory .htaccess cannot be written.
+	 */
+	public function test_logs_warning_when_htaccess_cannot_be_written(): void {
+		// Occupy the .htaccess path with a directory so the write fails, surfacing the log path.
+		$directory = wp_upload_dir()['basedir'] . '/product-feeds';
+		wp_mkdir_p( $directory . '/.htaccess' );
+
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->start();
+		$feed->end();
+		$feed->get_file_url();
+
+		$this->assertLogged(
+			'warning',
+			'Could not update the product feed .htaccess',
+			array( 'source' => 'product-feed' )
 		);
 	}
 
