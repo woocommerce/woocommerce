@@ -59,31 +59,28 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return a WP_Error when _pos_staff_user_id references a missing user.
+	 * @testdox Should pass an order with an unknown _pos_staff_user_id through pre-insert (operator attribution is best-effort, not a hard gate).
 	 */
-	public function test_pre_insert_rejects_unknown_staff_user(): void {
+	public function test_pre_insert_passes_unknown_staff_user_through(): void {
 		$order = wc_create_order();
 		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, 99999999 );
 
 		$result = $this->sut->handle_pre_insert( $order, new WP_REST_Request(), true );
 
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_pos_invalid_attribution', $result->get_error_code() );
-		$this->assertSame( 400, $result->get_error_data()['status'] );
+		$this->assertSame( $order, $result );
 	}
 
 	/**
-	 * @testdox Should return a WP_Error when the staff user lacks POS access.
+	 * @testdox Should pass an order whose operator lacks POS access through pre-insert (no hard rollback on the operator id).
 	 */
-	public function test_pre_insert_rejects_staff_user_without_pos_access(): void {
+	public function test_pre_insert_passes_staff_user_without_pos_access_through(): void {
 		$customer = self::factory()->user->create( array( 'role' => 'customer' ) );
 		$order    = wc_create_order();
 		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $customer );
 
 		$result = $this->sut->handle_pre_insert( $order, new WP_REST_Request(), true );
 
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_pos_invalid_attribution', $result->get_error_code() );
+		$this->assertSame( $order, $result );
 
 		wp_delete_user( $customer );
 	}
@@ -262,6 +259,63 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 		$notes_after = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
 
 		$this->assertCount( count( $notes_before ), $notes_after, 'No new notes should be written.' );
+	}
+
+	/**
+	 * @testdox Should write the same attribution note when attribute_order() is called directly (the path-agnostic entry a Store API hook would use).
+	 */
+	public function test_attribute_order_writes_note_directly(): void {
+		$cashier = $this->make_pos_user(
+			Capabilities::POS_PRESET_CASHIER,
+			array(
+				'display_name' => 'Mike Cashier',
+				'user_login'   => 'mike',
+			)
+		);
+
+		$order = wc_create_order();
+		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $cashier );
+		$order->save();
+
+		$this->sut->attribute_order( $order, true );
+
+		$this->assert_order_note_contains( $order, 'POS: created by Mike Cashier (mike).' );
+
+		wp_delete_user( $cashier );
+	}
+
+	/**
+	 * @testdox Should skip the attribution note when the operator id references a missing user.
+	 */
+	public function test_attribute_order_skips_note_for_unknown_staff_user(): void {
+		$order = wc_create_order();
+		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, 99999999 );
+		$order->save();
+
+		$notes_before = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->sut->attribute_order( $order, true );
+		$notes_after = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+
+		$this->assertCount( count( $notes_before ), $notes_after, 'No note should be written for an unknown operator.' );
+	}
+
+	/**
+	 * @testdox Should skip the attribution note when the operator lacks POS access.
+	 */
+	public function test_attribute_order_skips_note_for_staff_user_without_pos_access(): void {
+		$customer = self::factory()->user->create( array( 'role' => 'customer' ) );
+
+		$order = wc_create_order();
+		$order->update_meta_data( OrderAttribution::META_KEY_STAFF_USER_ID, $customer );
+		$order->save();
+
+		$notes_before = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->sut->attribute_order( $order, true );
+		$notes_after = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+
+		$this->assertCount( count( $notes_before ), $notes_after, 'No note should be written when the operator lacks POS access.' );
+
+		wp_delete_user( $customer );
 	}
 
 	/**

@@ -28,9 +28,21 @@ use WP_REST_Request;
  * separate meta value — refunds require `issue_refunds` on the approver, and the
  * order endpoint does not accept overrides (since `process_sales` is universal).
  *
- * Validation runs in the pre-insert filter so bogus attribution or override data
- * rolls back the entire request (HTTP 400, no DB row). After successful persistence,
- * a single order note is written:
+ * Operator attribution (`_pos_staff_user_id`) is best-effort: it is written from
+ * attribute_order() after the order/refund is persisted, and an invalid or missing
+ * operator id is logged and skipped — never fatal, since a bad attribution id must
+ * not fail a customer's sale. attribute_order() is deliberately path-agnostic (it
+ * takes only the order + a creating flag), so the same logic can be invoked from any
+ * "order persisted" hook — the wc/v3 REST insert action today (via handle_post_insert),
+ * and a Store API checkout/completion hook once POS order creation moves there.
+ *
+ * The manager-override fields (`_pos_override_staff_user_id`) are different: they are
+ * validated up-front in the pre-insert filter, and a forged or unauthorized approver
+ * rolls back the entire request (HTTP 400, no DB row). Override is security-relevant —
+ * it records that a privileged user authorized an action the operator couldn't perform
+ * alone — so it must hard-fail rather than silently skip.
+ *
+ * After successful persistence a single order note is written:
  *
  *   - Without override: `POS: {action} by {display_name} ({login}).`
  *   - With override:    `POS override: {action} by {actor}, approved by {approver}.`
@@ -61,6 +73,10 @@ class OrderAttribution implements RegisterHooksInterface {
 	public function register(): void {
 		add_filter( 'woocommerce_rest_pre_insert_shop_order_object', array( $this, 'handle_pre_insert' ), 10, 3 );
 		add_filter( 'woocommerce_rest_pre_insert_shop_order_refund_object', array( $this, 'handle_pre_insert' ), 10, 3 );
+
+		// Note-writing is delegated to the path-agnostic attribute_order(). handle_post_insert()
+		// is the wc/v3 REST adapter; when POS order creation moves to the Store API, that path's
+		// checkout/completion hook can call attribute_order() directly with the same logic.
 		add_action( 'woocommerce_rest_insert_shop_order_object', array( $this, 'handle_post_insert' ), 10, 3 );
 		add_action( 'woocommerce_rest_insert_shop_order_refund_object', array( $this, 'handle_post_insert' ), 10, 3 );
 	}
@@ -68,8 +84,12 @@ class OrderAttribution implements RegisterHooksInterface {
 	/**
 	 * Handle the pre-insert filter for shop_order / shop_order_refund.
 	 *
-	 * Validates the POS attribution + override meta on the draft order. If any
-	 * required check fails, returns a WP_Error to abort the entire REST request.
+	 * Validates only the manager-override meta on the draft order: if
+	 * `_pos_override_staff_user_id` is present, the approver must exist, hold POS
+	 * access, hold the capability the override authorizes, and differ from the
+	 * operator — otherwise a WP_Error aborts the entire REST request (HTTP 400, no
+	 * DB row). Operator attribution (`_pos_staff_user_id`) is NOT gated here; it is
+	 * validated leniently at write time in attribute_order().
 	 *
 	 * @internal
 	 *
@@ -92,52 +112,45 @@ class OrderAttribution implements RegisterHooksInterface {
 			return $order_or_error;
 		}
 
-		$staff_user_id    = $this->read_int_meta( $order_or_error, self::META_KEY_STAFF_USER_ID );
 		$override_user_id = $this->read_int_meta( $order_or_error, self::META_KEY_OVERRIDE_STAFF_USER_ID );
-		$has_any_pos_meta = $staff_user_id > 0 || $override_user_id > 0;
 
-		if ( ! $has_any_pos_meta ) {
+		// Operator attribution (_pos_staff_user_id) is best-effort and validated leniently at
+		// write time in attribute_order(), so it is not gated here. Only the manager-override is
+		// security-relevant enough to roll the whole request back on invalid input.
+		if ( $override_user_id <= 0 ) {
 			return $order_or_error;
 		}
 
-		// Attribution is required whenever any POS meta is present.
-		$attribution_error = $this->validate_staff_user( $staff_user_id );
-		if ( is_wp_error( $attribution_error ) ) {
-			return $attribution_error;
+		// Plain orders do not accept overrides: `process_sales` is universal across POS roles,
+		// so there is no scenario in M1 where an order create/update needs a manager override.
+		if ( ! $order_or_error instanceof WC_Order_Refund ) {
+			return new WP_Error(
+				'woocommerce_pos_invalid_override',
+				__( 'POS override is not supported on order creation or updates.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
 		}
 
-		if ( $override_user_id > 0 ) {
-			// Plain orders do not accept overrides: `process_sales` is universal across POS roles,
-			// so there is no scenario in M1 where an order create/update needs a manager override.
-			if ( ! $order_or_error instanceof WC_Order_Refund ) {
-				return new WP_Error(
-					'woocommerce_pos_invalid_override',
-					__( 'POS override is not supported on order creation or updates.', 'woocommerce' ),
-					array( 'status' => 400 )
-				);
-			}
-
-			$override_error = $this->validate_override( $override_user_id, Capabilities::CAP_ISSUE_REFUNDS, $staff_user_id );
-			if ( is_wp_error( $override_error ) ) {
-				return $override_error;
-			}
+		$staff_user_id  = $this->read_int_meta( $order_or_error, self::META_KEY_STAFF_USER_ID );
+		$override_error = $this->validate_override( $override_user_id, Capabilities::CAP_ISSUE_REFUNDS, $staff_user_id );
+		if ( is_wp_error( $override_error ) ) {
+			return $override_error;
 		}
 
 		return $order_or_error;
 	}
 
 	/**
-	 * Handle the post-insert action for shop_order / shop_order_refund.
+	 * REST adapter: bridge the wc/v3 insert-action signature to attribute_order().
 	 *
-	 * Writes one order note + one log line per saved order/refund. When an override
-	 * is present, the note is the combined `POS override: ...` form; otherwise it's
-	 * the simple attribution form. Notes on refunds attach to the parent order
-	 * since refunds themselves don't expose add_order_note().
+	 * Hooked on woocommerce_rest_insert_shop_order_object / _refund_object. Keeping
+	 * the note-writing in the path-agnostic attribute_order() lets a future Store API
+	 * checkout/completion hook reuse the exact same logic.
 	 *
 	 * @internal
 	 *
 	 * @param WC_Abstract_Order $order    The freshly-saved order or refund.
-	 * @param WP_REST_Request   $request  The incoming request.
+	 * @param WP_REST_Request   $request  The incoming request (unused).
 	 * @param bool              $creating Whether this is a create (true) or update (false).
 	 *
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
@@ -149,16 +162,46 @@ class OrderAttribution implements RegisterHooksInterface {
 			return;
 		}
 
+		$this->attribute_order( $order, $creating );
+	}
+
+	/**
+	 * Write POS attribution for a saved order/refund, keyed entirely on the order's meta.
+	 *
+	 * Path-agnostic: callable from any "order persisted" hook — the wc/v3 REST insert
+	 * action today (via handle_post_insert), and a Store API checkout/completion hook
+	 * once POS order creation moves there — so both paths produce identical attribution.
+	 *
+	 * Operator attribution is best-effort: a missing operator id is a no-op, and an id
+	 * that references a non-existent user or one without POS access is logged and skipped
+	 * rather than fatal (a bad id must never fail a sale). The manager-override approver,
+	 * by contrast, is validated up-front in handle_pre_insert().
+	 *
+	 * Writes one order note + one log line per saved order/refund. When an override is
+	 * present, the note is the combined `POS override: ...` form; otherwise it's the
+	 * simple attribution form. Notes on refunds attach to the parent order since refunds
+	 * themselves don't expose add_order_note().
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param WC_Abstract_Order $order    The freshly-saved order or refund.
+	 * @param bool              $creating Whether this is a create (true) or update (false).
+	 */
+	public function attribute_order( WC_Abstract_Order $order, bool $creating ): void {
 		$staff_user_id = $this->read_int_meta( $order, self::META_KEY_STAFF_USER_ID );
 		if ( $staff_user_id <= 0 ) {
 			return;
 		}
 
 		$staff_user = get_userdata( $staff_user_id );
-		if ( ! $staff_user ) {
+
+		// Operator id is validated here (not in the pre-insert rollback path), so confirm
+		// both that the user exists and that they actually hold POS access before
+		// attributing — a forged or stale id must not produce a misleading note.
+		if ( ! $staff_user || ! Capabilities::has_pos_access( $staff_user_id ) ) {
 			wc_get_logger()->warning(
 				sprintf(
-					'POS attribution skipped: user %d not found at post-insert time (order %d).',
+					'POS attribution skipped: user %d is missing or lacks POS access at write time (order %d).',
 					$staff_user_id,
 					$order->get_id()
 				),
@@ -199,41 +242,6 @@ class OrderAttribution implements RegisterHooksInterface {
 			return 0;
 		}
 		return (int) $value;
-	}
-
-	/**
-	 * Validate the staff (operator) user id.
-	 *
-	 * @param int $staff_user_id The asserted staff user id.
-	 * @return true|WP_Error
-	 */
-	private function validate_staff_user( int $staff_user_id ) {
-		if ( $staff_user_id <= 0 ) {
-			return new WP_Error(
-				'woocommerce_pos_invalid_attribution',
-				__( 'POS attribution requires a positive _pos_staff_user_id.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$user = get_userdata( $staff_user_id );
-		if ( ! $user ) {
-			return new WP_Error(
-				'woocommerce_pos_invalid_attribution',
-				__( 'POS attribution references an unknown user.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		if ( ! Capabilities::has_pos_access( $staff_user_id ) ) {
-			return new WP_Error(
-				'woocommerce_pos_invalid_attribution',
-				__( 'POS attribution user does not have POS access.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		return true;
 	}
 
 	/**
