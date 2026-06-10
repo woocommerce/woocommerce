@@ -1223,6 +1223,66 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'refund_total_exceeds_remaining', $data['code'] );
 	}
 
+	/**
+	 * @testdox Partial amount preview returns 400 when refund_total is zero (treated as absent).
+	 */
+	public function test_preview_partial_amount_zero_refund_total_returns_400(): void {
+		$order   = $this->create_order_with_product( 20.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'refund_total' => 0,
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'missing_quantity_or_refund_total', $data['code'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview on a product returns 422 when refund_total exceeds remaining after prior partial refund.
+	 */
+	public function test_preview_partial_amount_product_exceeds_remaining_returns_422(): void {
+		$order   = $this->create_order_with_product( 50.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		// First partial refund: $30 of the $50 product.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 30.00,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 0,
+						'refund_total' => 30.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		// Try to refund $25, but only $20 remains.
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'refund_total' => 25.00,
+				),
+			)
+		);
+
+		$this->assertEquals( 422, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'refund_total_exceeds_remaining', $data['code'] );
+	}
+
 	// -- Helper methods --
 
 	/**

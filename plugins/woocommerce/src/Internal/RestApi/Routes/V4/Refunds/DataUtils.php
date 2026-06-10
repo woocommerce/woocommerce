@@ -710,7 +710,7 @@ class DataUtils {
 			}
 
 			$has_quantity     = isset( $line_item['quantity'] ) && is_int( $line_item['quantity'] ) && $line_item['quantity'] >= 1;
-			$has_refund_total = isset( $line_item['refund_total'] ) && is_numeric( $line_item['refund_total'] );
+			$has_refund_total = isset( $line_item['refund_total'] ) && is_numeric( $line_item['refund_total'] ) && (float) $line_item['refund_total'] > 0;
 
 			if ( ! $has_quantity && ! $has_refund_total ) {
 				return new WP_Error(
@@ -722,15 +722,7 @@ class DataUtils {
 
 			// Validate explicit refund_total when provided.
 			if ( $has_refund_total ) {
-				$refund_total = (float) $line_item['refund_total'];
-				if ( $refund_total <= 0 ) {
-					return new WP_Error(
-						'invalid_refund_total',
-						__( 'refund_total must be greater than zero.', 'woocommerce' ),
-						array( 'status' => WP_Http::BAD_REQUEST )
-					);
-				}
-
+				$refund_total        = (float) $line_item['refund_total'];
 				$item_total_with_tax = abs( (float) $item->get_total() + (float) $item->get_total_tax() );
 				if ( $refund_total > NumberUtil::round( $item_total_with_tax, wc_get_price_decimals() ) ) {
 					return new WP_Error(
@@ -744,30 +736,28 @@ class DataUtils {
 					);
 				}
 
-				// For fee and shipping, also cap against the remaining refundable amount for this
-				// line. compute_refunded_quantities_and_totals() returns tax-inclusive totals so
-				// the comparison is consistent.
-				if ( $item instanceof WC_Order_Item_Shipping || $item instanceof WC_Order_Item_Fee ) {
-					$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
-					$remaining_total = $item_total_with_tax - $refunded_total;
-					if ( $remaining_total <= 0 ) {
-						return new WP_Error(
-							'line_item_already_refunded',
-							__( 'This line item has already been fully refunded.', 'woocommerce' ),
-							array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
-						);
-					}
-					if ( $refund_total > NumberUtil::round( $remaining_total, wc_get_price_decimals() ) ) {
-						return new WP_Error(
-							'refund_total_exceeds_remaining',
-							sprintf(
-								/* translators: %s: remaining refundable amount */
-								__( 'refund_total cannot exceed the remaining refundable amount for this line item (%s).', 'woocommerce' ),
-								wc_format_decimal( $remaining_total, wc_get_price_decimals() )
-							),
-							array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
-						);
-					}
+				// Cap against the remaining refundable amount for this line.
+				// compute_refunded_quantities_and_totals() tracks tax-inclusive totals
+				// for all item types so the comparison is consistent.
+				$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
+				$remaining_total = $item_total_with_tax - $refunded_total;
+				if ( $remaining_total <= 0 ) {
+					return new WP_Error(
+						'line_item_already_refunded',
+						__( 'This line item has already been fully refunded.', 'woocommerce' ),
+						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+					);
+				}
+				if ( $refund_total > NumberUtil::round( $remaining_total, wc_get_price_decimals() ) ) {
+					return new WP_Error(
+						'refund_total_exceeds_remaining',
+						sprintf(
+							/* translators: %s: remaining refundable amount */
+							__( 'refund_total cannot exceed the remaining refundable amount for this line item (%s).', 'woocommerce' ),
+							wc_format_decimal( $remaining_total, wc_get_price_decimals() )
+						),
+						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+					);
 				}
 			}
 
@@ -854,8 +844,9 @@ class DataUtils {
 			 */
 			$refunded_line_items = $refund->get_items( 'line_item' );
 			foreach ( $refunded_line_items as $refunded_item ) {
-				$original_id          = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
-				$qtys[ $original_id ] = ( $qtys[ $original_id ] ?? 0 ) + $refunded_item->get_quantity();
+				$original_id            = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
+				$qtys[ $original_id ]   = ( $qtys[ $original_id ] ?? 0 ) + $refunded_item->get_quantity();
+				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + ( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ) * -1;
 			}
 			/**
 			 * Refunded fee items.

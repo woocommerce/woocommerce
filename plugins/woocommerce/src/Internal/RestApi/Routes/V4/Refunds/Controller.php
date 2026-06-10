@@ -209,7 +209,7 @@ class Controller extends AbstractController {
 										'minimum'     => 1,
 									),
 									'refund_total' => array(
-										'description' => __( 'Tax-inclusive amount to refund for this line item. Required when quantity is omitted.', 'woocommerce' ),
+										'description' => __( 'Tax-inclusive amount to refund for this line item. Must be greater than zero. Required when quantity is omitted.', 'woocommerce' ),
 										'type'        => array( 'number', 'null' ),
 										'minimum'     => 0,
 									),
