@@ -329,6 +329,60 @@ class AutoloaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A torn file that COMPILES but fails while linking — e.g. a class whose parent is not
+	 * written yet during a file-by-file upgrade — must also stay retryable. PHP records a
+	 * plain include's path in get_included_files() after compilation but BEFORE the link
+	 * error, so a guard that skips any already-included path would poison the completed file
+	 * for the rest of the request. This test fails against such a guard and passes when the
+	 * handler tracks only the files it has executed cleanly.
+	 *
+	 * @testdox the registered handler loads a link-failed class file once its dependency exists.
+	 */
+	public function test_registered_handler_recovers_after_a_link_failed_file_is_completed(): void {
+		$handler = Autoloader::register_woocommerce_psr4_fallback();
+		$this->assertInstanceOf( \Closure::class, $handler, 'Bootstrap must register a handler.' );
+
+		$suffix = 'ReproLink' . str_replace( '.', '', uniqid( '', true ) );
+		$dir    = dirname( WC_PLUGIN_FILE ) . '/src/' . $suffix;
+		$file   = $dir . '/Widget.php';
+		$class  = 'Automattic\\WooCommerce\\' . $suffix . '\\Widget';
+
+		try {
+			wp_mkdir_p( $dir );
+			// Syntactically valid, but extends a sibling class whose file is not written yet:
+			// the include compiles, then throws Error: Class "...Base" not found while linking.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture; WP_Filesystem adds no value here.
+			file_put_contents( $file, "<?php\nnamespace Automattic\\WooCommerce\\{$suffix};\nclass Widget extends Base {}\n" );
+			clearstatcache( true, $file );
+
+			$handler( $class );
+			$this->assertFalse( class_exists( $class, false ), 'Precondition: link-failed file must degrade to a miss.' );
+			$this->assertTrue(
+				in_array( realpath( $file ), get_included_files(), true ),
+				'Precondition: a plain include records the link-failed path, which a get_included_files() guard would skip on retry.'
+			);
+
+			// The upgrade finishes: the dependency lands and the class file is now self-contained.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture; WP_Filesystem adds no value here.
+			file_put_contents( $file, "<?php\nnamespace Automattic\\WooCommerce\\{$suffix};\nclass Widget {}\n" );
+			clearstatcache( true, $file );
+
+			$handler( $class );
+			$this->assertTrue(
+				class_exists( $class, false ),
+				'Handler must load the class once the dependency exists — a link-failed attempt must not poison the retry.'
+			);
+		} finally {
+			if ( file_exists( $file ) ) {
+				wp_delete_file( $file );
+			}
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture cleanup.
+			}
+		}
+	}
+
+	/**
 	 * Registration is idempotent: repeated calls return the same handler and never
 	 * stack duplicate autoloaders on the SPL stack.
 	 *

@@ -136,9 +136,12 @@ class Autoloader {
 	 * foreign/malformed `ClassLoader` shape is present. The handler likewise leaves a class
 	 * unresolved — rather than fataling — if a resolved file is torn/unparseable mid-upgrade,
 	 * so a defensive `class_exists()` probe during an upgrade gets `false` instead of an error.
-	 * The failed attempt stays retryable: once the upgrade finishes writing the file, a later
-	 * probe in the same request loads it (the handler uses a plain `include`, which — unlike
-	 * `require_once` — does not record a parse-failed path as already included).
+	 * The failed attempt stays retryable: the handler records only the files it has executed
+	 * cleanly, so once the upgrade finishes writing a file that previously failed to parse,
+	 * link, or run, a later probe in the same request re-attempts and loads it. It never
+	 * re-executes a path it already loaded (an uncatchable "Cannot redeclare class" fatal);
+	 * it cannot, however, guard the first execution of a file that declares a class already
+	 * loaded elsewhere under a non-matching PSR-4 path.
 	 *
 	 * @since 11.0.0
 	 *
@@ -170,35 +173,75 @@ class Autoloader {
 		}
 
 		$handler = static function ( string $class_name ) use ( $psr4_entries ) {
+			/*
+			 * Paths this handler has executed, so a repeated probe never re-runs a file:
+			 * - $loaded: includes that returned cleanly. Re-including one would redeclare its
+			 *   class — an UNCATCHABLE "Cannot redeclare class" fatal (e.g. a probe whose PSR-4
+			 *   file declares a different class name, then a second probe of the same path).
+			 * - $attempted: every path we have tried, success or failure. Used only to tell our
+			 *   own failed (and therefore retryable) attempt apart from a file some other loader
+			 *   already executed — see the get_included_files() check below.
+			 */
+			static $loaded    = array();
+			static $attempted = array();
+
 			$file = self::find_scoped_file( $class_name, $psr4_entries );
 			if ( null === $file ) {
 				return;
 			}
 
-			// Never re-execute a file that already loaded successfully: re-including a file
-			// whose class is already declared is an UNCATCHABLE "Cannot redeclare class"
-			// fatal (e.g. a repeated probe of a class whose PSR-4 file declares a different
-			// name). The engine's included-files table records successful inclusions only,
-			// so checking it skips exactly those.
 			$canonical = realpath( $file );
-			if ( false !== $canonical && in_array( $canonical, get_included_files(), true ) ) {
-				return;
+			if ( false !== $canonical ) {
+				// Already executed cleanly by this handler: re-including would redeclare.
+				if ( isset( $loaded[ $canonical ] ) ) {
+					return;
+				}
+				/*
+				 * Executed by another mechanism (the primary autoloader, a manual require) but
+				 * never attempted by us: re-including risks the same redeclare fatal, so skip.
+				 * A path WE attempted and that threw is deliberately excluded from this check so
+				 * it stays retryable once the upgrade finishes writing it.
+				 */
+				if ( ! isset( $attempted[ $canonical ] ) && in_array( $canonical, get_included_files(), true ) ) {
+					return;
+				}
+				$attempted[ $canonical ] = true;
 			}
 
 			try {
-				// Deliberately a plain `include`, NOT `require_once`: PHP records a path in
-				// the included-files table BEFORE compiling it for the *_once variants, so a
-				// torn file's caught ParseError would mark the path as included and every
-				// later attempt would no-op — the completed file could never load for the
-				// rest of the request, breaking the mid-request recovery guarantee (see
-				// find_scoped_file()). A plain include records the path only on success,
-				// keeping a failed attempt retryable; it also degrades a file deleted
-				// between findFile() and here to a warning, where require would fatal.
+				/*
+				 * Deliberately a plain `include`, NOT `require_once`: the *_once variants record
+				 * a path in the engine's included-files table BEFORE compiling it, so a torn
+				 * file's caught error would mark the path included and every later attempt would
+				 * no-op — the completed file could never load for the rest of the request. A
+				 * plain include lets us record success ourselves (in $loaded, below) only after
+				 * it returns, so a file that fails to parse, link (e.g. a parent not yet written
+				 * mid-upgrade), or run stays retryable. It also degrades a file deleted between
+				 * findFile() and here to a warning, where require would fatal.
+				 */
 				include $file;
+
+				if ( false !== $canonical ) {
+					$loaded[ $canonical ] = true;
+				}
 			} catch ( \Throwable $e ) {
-				// A torn/partially-written file mid-upgrade must not turn a class probe into a fatal:
-				// leave the class unresolved so e.g. class_exists() returns false and the request
-				// continues, instead of an uncatchable ParseError escaping the autoload handler.
+				/*
+				 * A torn/partially-written file mid-upgrade must not turn a class probe into a
+				 * fatal: leave the class unresolved so e.g. class_exists() returns false and the
+				 * request continues, instead of an uncatchable error escaping the autoload handler.
+				 * Surface it under WP_DEBUG so a genuine (non-upgrade) parse/link error in a
+				 * shipped src/ file is not an invisible miss.
+				 */
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+						sprintf(
+							'WooCommerce PSR-4 fallback could not load %1$s for %2$s: %3$s',
+							$file,
+							$class_name,
+							$e->getMessage()
+						)
+					);
+				}
 				return;
 			}
 		};
