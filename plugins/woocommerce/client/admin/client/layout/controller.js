@@ -25,6 +25,7 @@ import { useReports } from '../analytics/report/use-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { useFilterHook } from '~/utils/use-filter-hook';
 import { NoMatch } from './NoMatch';
+import { isFeatureEnabled } from '~/utils/features';
 
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
@@ -90,66 +91,68 @@ export const getPages = ( reports = [] ) => {
 		capability: 'manage_woocommerce',
 	} );
 
-	pages.push( {
-		container: Dashboard,
-		path: '/analytics/overview',
-		breadcrumbs: [
-			...initialBreadcrumbs,
-			[ '/analytics/overview', __( 'Analytics', 'woocommerce' ) ],
-			__( 'Overview', 'woocommerce' ),
-		],
-		wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
-		navArgs: {
-			id: 'woocommerce-analytics-overview',
-		},
-		capability: 'view_woocommerce_reports',
-	} );
-	pages.push( {
-		container: AnalyticsSettings,
-		path: '/analytics/settings',
-		breadcrumbs: [
-			...initialBreadcrumbs,
-			[ '/analytics/revenue', __( 'Analytics', 'woocommerce' ) ],
-			__( 'Settings', 'woocommerce' ),
-		],
-		wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
-		navArgs: {
-			id: 'woocommerce-analytics-settings',
-		},
-		capability: 'view_woocommerce_reports',
-	} );
-	pages.push( {
-		container: AnalyticsReport,
-		path: '/customers',
-		breadcrumbs: [
-			...initialBreadcrumbs,
-			__( 'Customers', 'woocommerce' ),
-		],
-		wpOpenMenu: 'toplevel_page_woocommerce',
-		navArgs: {
-			id: 'woocommerce-analytics-customers',
-		},
-		capability: 'view_woocommerce_reports',
-	} );
-	pages.push( {
-		container: AnalyticsReport,
-		path: '/analytics/:report',
-		breadcrumbs: ( { match } ) => {
-			const report = find( reports, {
-				report: match.params.report,
-			} );
-			if ( ! report ) {
-				return [];
-			}
-			return [
+	if ( isFeatureEnabled( 'analytics' ) ) {
+		pages.push( {
+			container: Dashboard,
+			path: '/analytics/overview',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				[ '/analytics/overview', __( 'Analytics', 'woocommerce' ) ],
+				__( 'Overview', 'woocommerce' ),
+			],
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
+			navArgs: {
+				id: 'woocommerce-analytics-overview',
+			},
+			capability: 'view_woocommerce_reports',
+		} );
+		pages.push( {
+			container: AnalyticsSettings,
+			path: '/analytics/settings',
+			breadcrumbs: [
 				...initialBreadcrumbs,
 				[ '/analytics/revenue', __( 'Analytics', 'woocommerce' ) ],
-				report.title,
-			];
-		},
-		wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
-		capability: 'view_woocommerce_reports',
-	} );
+				__( 'Settings', 'woocommerce' ),
+			],
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
+			navArgs: {
+				id: 'woocommerce-analytics-settings',
+			},
+			capability: 'view_woocommerce_reports',
+		} );
+		pages.push( {
+			container: AnalyticsReport,
+			path: '/customers',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				__( 'Customers', 'woocommerce' ),
+			],
+			wpOpenMenu: 'toplevel_page_woocommerce',
+			navArgs: {
+				id: 'woocommerce-analytics-customers',
+			},
+			capability: 'view_woocommerce_reports',
+		} );
+		pages.push( {
+			container: AnalyticsReport,
+			path: '/analytics/:report',
+			breadcrumbs: ( { match } ) => {
+				const report = find( reports, {
+					report: match.params.report,
+				} );
+				if ( ! report ) {
+					return [];
+				}
+				return [
+					...initialBreadcrumbs,
+					[ '/analytics/revenue', __( 'Analytics', 'woocommerce' ) ],
+					report.title,
+				];
+			},
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
+			capability: 'view_woocommerce_reports',
+		} );
+	}
 
 	pages.push( {
 		container: MarketingOverviewMultichannel,
