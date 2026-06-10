@@ -247,7 +247,7 @@ class SiteHealth {
 			'woocommerce_database_tables'              => array(
 				'label' => __( 'WooCommerce database tables', 'woocommerce' ),
 				'badge' => 'performance',
-				'check' => fn() => WC_Install::verify_base_tables( false ),
+				'check' => fn() => WC_Install::get_missing_base_tables(),
 				'good'  => array(
 					'label'       => __( 'WooCommerce database tables are present', 'woocommerce' ),
 					'description' => __( 'All required WooCommerce database tables exist.', 'woocommerce' ),
