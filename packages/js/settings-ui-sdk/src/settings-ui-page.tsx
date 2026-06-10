@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@wordpress/admin-ui';
-import { Button, Notice } from '@wordpress/components';
+import { Button, Modal, Notice } from '@wordpress/components';
 import {
 	Component,
 	createElement,
@@ -10,6 +10,7 @@ import {
 	useCallback,
 	useEffect,
 	useMemo,
+	useRef,
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -42,6 +43,10 @@ import type {
 type SaveNotice = {
 	status: 'success' | 'error';
 	message: string;
+};
+
+type PendingNavigation = {
+	href: string;
 };
 
 const getInitialValues = ( schema: SettingsUISchema ): SettingsValues => {
@@ -100,6 +105,92 @@ const clearLegacyFormPrompt = () => {
 	window.onbeforeunload = null;
 };
 
+const shouldPromptForNavigation = ( event: MouseEvent ) => {
+	if (
+		event.defaultPrevented ||
+		event.button !== 0 ||
+		event.metaKey ||
+		event.ctrlKey ||
+		event.shiftKey ||
+		event.altKey
+	) {
+		return false;
+	}
+
+	const target = event.target;
+
+	if ( ! ( target instanceof Element ) ) {
+		return false;
+	}
+
+	const link = target.closest( 'a[href]' );
+
+	if ( ! ( link instanceof HTMLAnchorElement ) ) {
+		return false;
+	}
+
+	if ( link.target && link.target !== '_self' ) {
+		return false;
+	}
+
+	return Boolean( link.href ) && link.href !== window.location.href;
+};
+
+const getNavigationHref = ( event: MouseEvent ) => {
+	const target = event.target;
+
+	if ( ! ( target instanceof Element ) ) {
+		return undefined;
+	}
+
+	const link = target.closest( 'a[href]' );
+
+	return link instanceof HTMLAnchorElement ? link.href : undefined;
+};
+
+const UnsavedChangesModal = ( {
+	isSaving,
+	onClose,
+	onDiscard,
+	onSave,
+}: {
+	isSaving: boolean;
+	onClose: () => void;
+	onDiscard: () => void;
+	onSave: () => void;
+} ) => {
+	return (
+		<Modal
+			className="wc-settings-ui__unsaved-changes-modal"
+			title={ __( 'You have unsaved changes', 'woocommerce' ) }
+			onRequestClose={ onClose }
+		>
+			<p>
+				{ __(
+					"If you leave now, your changes won't be saved.",
+					'woocommerce'
+				) }
+			</p>
+			<div className="wc-settings-ui__unsaved-changes-actions">
+				<Button variant="tertiary" onClick={ onDiscard }>
+					{ __( 'Discard', 'woocommerce' ) }
+				</Button>
+				<Button
+					variant="primary"
+					type="button"
+					name="save"
+					value={ __( 'Save', 'woocommerce' ) }
+					isBusy={ isSaving }
+					disabled={ isSaving }
+					onClick={ onSave }
+				>
+					{ __( 'Save', 'woocommerce' ) }
+				</Button>
+			</div>
+		</Modal>
+	);
+};
+
 const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 	const hasHeaderContent =
 		group.title || group.description || ( group.actions || [] ).length > 0;
@@ -109,17 +200,19 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 	}
 
 	return (
-		<div className="wc-settings-ui__group-header">
-			{ group.title ? <h2>{ group.title }</h2> : null }
-			{ group.description ? (
-				<div className="wc-settings-ui__group-description">
-					<RawHTML>
-						{ sanitizeSettingsHtml( group.description ) }
-					</RawHTML>
-				</div>
-			) : null }
+		<header className="wc-settings-ui__section-header">
+			<div className="wc-settings-ui__section-heading">
+				{ group.title ? <h2>{ group.title }</h2> : null }
+				{ group.description ? (
+					<div className="wc-settings-ui__section-description">
+						<RawHTML>
+							{ sanitizeSettingsHtml( group.description ) }
+						</RawHTML>
+					</div>
+				) : null }
+			</div>
 			{ group.actions && group.actions.length > 0 ? (
-				<div className="wc-settings-ui__group-actions">
+				<div className="wc-settings-ui__section-actions">
 					{ group.actions.map( ( action ) => (
 						<Button
 							key={ action.id }
@@ -133,7 +226,7 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 					) ) }
 				</div>
 			) : null }
-		</div>
+		</header>
 	);
 };
 
@@ -256,7 +349,7 @@ const ShellHeader = ( {
 	isDirty: boolean;
 	isSaving: boolean;
 	saveStrategy: SettingsUISaveStrategy;
-	onSave: () => void;
+	onSave: () => void | Promise< boolean >;
 	children: ReactNode;
 } ) => {
 	const shell = schema.shell || {};
@@ -294,22 +387,20 @@ const ShellHeader = ( {
 			</nav>
 		) : undefined;
 
+	const saveButtonLabel = __( 'Save', 'woocommerce' );
+
 	const actions = showSaveButton ? (
 		<Button
 			className="woocommerce-save-button"
 			variant="primary"
 			type={ saveButtonType }
 			name="save"
-			value={ __( 'Save changes', 'woocommerce' ) }
+			value={ saveButtonLabel }
 			disabled={ ! isDirty || isSaving }
 			isBusy={ isSaving }
-			onClick={
-				saveStrategy.adapter === 'form_post'
-					? clearLegacyFormPrompt
-					: onSave
-			}
+			onClick={ onSave }
 		>
-			{ __( 'Save changes', 'woocommerce' ) }
+			{ saveButtonLabel }
 		</Button>
 	) : undefined;
 
@@ -400,6 +491,9 @@ export const SettingsUIPage = ( {
 	);
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ saveNotice, setSaveNotice ] = useState< SaveNotice | null >( null );
+	const [ pendingNavigation, setPendingNavigation ] =
+		useState< PendingNavigation | null >( null );
+	const allowNavigationRef = useRef( false );
 	const context: SettingsFieldContext = useMemo(
 		() => ( {
 			page: page || schema.id,
@@ -423,6 +517,7 @@ export const SettingsUIPage = ( {
 		setInitialValues( nextValues );
 		setValuesState( nextValues );
 		setSaveNotice( null );
+		setPendingNavigation( null );
 	}, [ schema ] );
 
 	const setValue = useCallback(
@@ -434,6 +529,33 @@ export const SettingsUIPage = ( {
 		},
 		[]
 	);
+
+	const allowNavigation = useCallback( () => {
+		allowNavigationRef.current = true;
+		clearLegacyFormPrompt();
+	}, [] );
+
+	const submitSettingsForm = useCallback( () => {
+		allowNavigation();
+
+		const form = document.getElementById( 'mainform' );
+
+		if ( ! ( form instanceof HTMLFormElement ) ) {
+			return;
+		}
+
+		const saveButton = document.querySelector( '.woocommerce-save-button' );
+
+		if (
+			saveButton instanceof HTMLButtonElement &&
+			saveButton.form === form
+		) {
+			form.requestSubmit( saveButton );
+			return;
+		}
+
+		form.requestSubmit();
+	}, [ allowNavigation ] );
 
 	const setValues = useCallback(
 		( nextValues: Partial< SettingsValues > ) => {
@@ -456,7 +578,7 @@ export const SettingsUIPage = ( {
 
 	const handleCustomSave = useCallback( async () => {
 		if ( saveStrategy.adapter !== 'custom' ) {
-			return;
+			return false;
 		}
 
 		const handlerName =
@@ -469,7 +591,7 @@ export const SettingsUIPage = ( {
 				status: 'error',
 				message: __( 'Unable to save settings.', 'woocommerce' ),
 			} );
-			return;
+			return false;
 		}
 
 		setIsSaving( true );
@@ -493,12 +615,14 @@ export const SettingsUIPage = ( {
 					result?.notice ||
 					__( 'Settings saved successfully.', 'woocommerce' ),
 			} );
+			return true;
 		} catch ( saveError ) {
 			const message =
 				saveError instanceof Error && saveError.message
 					? saveError.message
 					: __( 'Unable to save settings.', 'woocommerce' );
 			setSaveNotice( { status: 'error', message } );
+			return false;
 		} finally {
 			setIsSaving( false );
 		}
@@ -510,6 +634,99 @@ export const SettingsUIPage = ( {
 		saveStrategy,
 		schema,
 		values,
+	] );
+
+	useEffect( () => {
+		if ( ! isDirty ) {
+			return;
+		}
+
+		const handleBeforeUnload = ( event: BeforeUnloadEvent ) => {
+			if ( allowNavigationRef.current ) {
+				return;
+			}
+
+			event.preventDefault();
+			event.returnValue = '';
+		};
+
+		window.addEventListener( 'beforeunload', handleBeforeUnload );
+
+		return () => {
+			window.removeEventListener( 'beforeunload', handleBeforeUnload );
+		};
+	}, [ isDirty ] );
+
+	useEffect( () => {
+		if ( ! isDirty ) {
+			return;
+		}
+
+		const handleNavigationClick = ( event: MouseEvent ) => {
+			const target = event.target;
+
+			if (
+				! ( target instanceof Element ) ||
+				! target.closest( '.wc-settings-ui-shell' ) ||
+				! shouldPromptForNavigation( event )
+			) {
+				return;
+			}
+
+			const href = getNavigationHref( event );
+
+			if ( ! href ) {
+				return;
+			}
+
+			event.preventDefault();
+			setPendingNavigation( { href } );
+		};
+
+		document.addEventListener( 'click', handleNavigationClick, true );
+
+		return () => {
+			document.removeEventListener(
+				'click',
+				handleNavigationClick,
+				true
+			);
+		};
+	}, [ isDirty ] );
+
+	const handleDiscardNavigation = useCallback( () => {
+		if ( ! pendingNavigation ) {
+			return;
+		}
+
+		allowNavigation();
+		window.location.assign( pendingNavigation.href );
+	}, [ allowNavigation, pendingNavigation ] );
+
+	const handleSavePendingNavigation = useCallback( async () => {
+		if ( ! pendingNavigation ) {
+			return;
+		}
+
+		if ( saveStrategy.adapter === 'form_post' ) {
+			submitSettingsForm();
+			return;
+		}
+
+		if ( saveStrategy.adapter === 'custom' ) {
+			const saved = await handleCustomSave();
+
+			if ( saved ) {
+				allowNavigation();
+				window.location.assign( pendingNavigation.href );
+			}
+		}
+	}, [
+		allowNavigation,
+		handleCustomSave,
+		pendingNavigation,
+		saveStrategy.adapter,
+		submitSettingsForm,
 	] );
 
 	const visibleGroups = useMemo(
@@ -555,8 +772,20 @@ export const SettingsUIPage = ( {
 			isDirty={ isDirty }
 			isSaving={ isSaving }
 			saveStrategy={ saveStrategy }
-			onSave={ handleCustomSave }
+			onSave={
+				saveStrategy.adapter === 'form_post'
+					? submitSettingsForm
+					: handleCustomSave
+			}
 		>
+			{ pendingNavigation ? (
+				<UnsavedChangesModal
+					isSaving={ isSaving }
+					onClose={ () => setPendingNavigation( null ) }
+					onDiscard={ handleDiscardNavigation }
+					onSave={ handleSavePendingNavigation }
+				/>
+			) : null }
 			{ saveNotice ? (
 				<Notice
 					className="wc-settings-ui-shell__notice"
@@ -569,38 +798,50 @@ export const SettingsUIPage = ( {
 			) : null }
 			<div className="wc-settings-ui">
 				{ visibleGroups.map( ( group ) => (
-					<section className="wc-settings-ui__group" key={ group.id }>
-						<GroupHeader group={ group } />
-						<div className="wc-settings-ui__group-panel">
-							{ group.fields.map( ( field ) => {
-								const FieldComponent =
-									resolveFieldComponent( field, context ) ||
-									NativeSettingsField;
-								const value = values[ field.id ];
+					<section
+						className="wc-settings-ui__section"
+						key={ group.id }
+					>
+						<div className="wc-settings-ui__section-card">
+							<GroupHeader group={ group } />
+							<div className="wc-settings-ui__section-fields">
+								{ group.fields.map( ( field ) => {
+									const FieldComponent =
+										resolveFieldComponent(
+											field,
+											context
+										) || NativeSettingsField;
+									const value = values[ field.id ];
 
-								return (
-									<div
-										className={ [
-											'wc-settings-ui__field',
-											getFieldTypeClassName( field.type ),
-										].join( ' ' ) }
-										key={ field.id }
-									>
-										<FieldComponent
-											field={ field }
-											value={ value }
-											context={ context }
-											values={ values }
-											initialValues={ initialValues }
-											setValue={ setValue }
-											setValues={ setValues }
-											onChange={ ( nextValue ) =>
-												setValue( field.id, nextValue )
-											}
-										/>
-									</div>
-								);
-							} ) }
+									return (
+										<div
+											className={ [
+												'wc-settings-ui__field',
+												getFieldTypeClassName(
+													field.type
+												),
+											].join( ' ' ) }
+											key={ field.id }
+										>
+											<FieldComponent
+												field={ field }
+												value={ value }
+												context={ context }
+												values={ values }
+												initialValues={ initialValues }
+												setValue={ setValue }
+												setValues={ setValues }
+												onChange={ ( nextValue ) =>
+													setValue(
+														field.id,
+														nextValue
+													)
+												}
+											/>
+										</div>
+									);
+								} ) }
+							</div>
 						</div>
 					</section>
 				) ) }

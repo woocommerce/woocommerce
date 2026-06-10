@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Use idempotent checkout address helpers in checkout e2e tests.

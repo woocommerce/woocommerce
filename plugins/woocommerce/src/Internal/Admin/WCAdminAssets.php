@@ -313,7 +313,6 @@ class WCAdminAssets {
 			'wc-store-data',
 			'wc-currency',
 			'wc-navigation',
-			'wc-block-templates',
 			'wc-experimental-products-app',
 			'wc-settings-ui-sdk',
 			'wc-remote-logging',
@@ -383,9 +382,6 @@ class WCAdminAssets {
 			),
 			array(
 				'handle' => 'wc-components',
-			),
-			array(
-				'handle' => 'wc-block-templates',
 			),
 			array(
 				'handle' => 'wc-experimental-products-app',
@@ -554,7 +550,6 @@ class WCAdminAssets {
 				'wc-date',
 				'wc-components',
 				'wc-tracks',
-				'wc-block-templates',
 			);
 			foreach ( $handles_for_injection as $handle ) {
 				$script = $wp_scripts->query( $handle, 'registered' );
