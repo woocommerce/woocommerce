@@ -196,11 +196,12 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	.wc-settings-ui {
 		box-sizing: border-box;
 		margin: 32px auto 48px;
-		max-width: 656px;
+		// WPDS surface-width/xl.
+		max-width: 720px;
 	}
 
 	.wc-settings-ui__section {
-		margin: 0 0 32px;
+		margin: 0 0 24px;
 	}
 
 	.wc-settings-ui__section-card {
@@ -257,7 +258,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	.wc-settings-ui__section-fields {
 		display: flex;
 		flex-direction: column;
-		gap: 24px;
+		gap: 16px;
 	}
 
 	.wc-settings-ui__field {
