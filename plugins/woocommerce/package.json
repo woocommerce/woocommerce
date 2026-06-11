@@ -946,6 +946,7 @@
 		"eslint-config-wpcalypso": "5.0.0",
 		"eslint-plugin-jest": "23.20.0",
 		"eslint-plugin-playwright": "1.6.0",
+		"handlebars": "^4.7.9",
 		"jest": "29.5.x",
 		"playwright-ctrf-json-reporter": "0.0.27",
 		"prettier": "npm:wp-prettier@^2.8.5",

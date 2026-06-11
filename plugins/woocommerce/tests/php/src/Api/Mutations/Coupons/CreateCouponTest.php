@@ -118,6 +118,37 @@ class CreateCouponTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox execute() persists fixed discount type enums when provided.
+	 *
+	 * @dataProvider fixed_discount_type_provider
+	 *
+	 * @param DiscountType $discount_type The discount type enum.
+	 * @param string       $expected      The expected stored discount type.
+	 */
+	public function test_execute_persists_fixed_discount_type_enums( DiscountType $discount_type, string $expected ): void {
+		$input                = new CreateCouponInput();
+		$input->code          = 'coupon-' . str_replace( '_', '-', $expected );
+		$input->discount_type = $discount_type;
+
+		$result = $this->sut->execute( $input );
+
+		$wc_coupon = new WC_Coupon( $result->id );
+		$this->assertSame( $expected, $wc_coupon->get_discount_type() );
+	}
+
+	/**
+	 * Data provider for fixed discount types.
+	 *
+	 * @return array<string, array{0: DiscountType, 1: string}>
+	 */
+	public function fixed_discount_type_provider(): array {
+		return array(
+			'fixed cart'    => array( DiscountType::FixedCart, 'fixed_cart' ),
+			'fixed product' => array( DiscountType::FixedProduct, 'fixed_product' ),
+		);
+	}
+
+	/**
 	 * @testdox execute() skips set_discount_type() when discount_type is null.
 	 */
 	public function test_execute_skips_discount_type_when_provided_null(): void {
