@@ -7543,23 +7543,6 @@ table.bar_chart {
 	}
 }
 
-@mixin blank-state-icon {
-	content: "";
-	display: block;
-	width: 32px;
-	height: 32px;
-	margin: 0 auto 12px;
-	background-color: $gray-400;
-	-webkit-mask-image: var(--wc-blank-state-icon);
-	mask-image: var(--wc-blank-state-icon);
-	-webkit-mask-position: center;
-	mask-position: center;
-	-webkit-mask-repeat: no-repeat;
-	mask-repeat: no-repeat;
-	-webkit-mask-size: contain;
-	mask-size: contain;
-}
-
 .woocommerce-BlankState {
 	max-width: 764px;
 	margin: auto;
@@ -7587,7 +7570,20 @@ table.bar_chart {
 .woocommerce-BlankState--webhooks,
 .woocommerce-BlankState--stock-notifications {
 	.woocommerce-BlankState-message::before {
-		@include blank-state-icon;
+		content: "";
+		display: block;
+		width: 32px;
+		height: 32px;
+		margin: 0 auto 12px;
+		background-color: $gray-400;
+		-webkit-mask-image: var(--wc-blank-state-icon);
+		mask-image: var(--wc-blank-state-icon);
+		-webkit-mask-position: center;
+		mask-position: center;
+		-webkit-mask-repeat: no-repeat;
+		mask-repeat: no-repeat;
+		-webkit-mask-size: contain;
+		mask-size: contain;
 	}
 }
 
