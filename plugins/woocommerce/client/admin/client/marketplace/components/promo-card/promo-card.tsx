@@ -92,11 +92,16 @@ const PromoCard = ( {
 			<Button
 				className="promo-cta"
 				href={ promotion.cta_link ?? '' }
+				variant="secondary"
 				onClick={ handleClick }
 			>
 				{ promotion.cta_label?.en_US ?? '' }
 			</Button>
-			<Button className="promo-cta-link" onClick={ handleDismiss }>
+			<Button
+				className="promo-cta-link"
+				variant="tertiary"
+				onClick={ handleDismiss }
+			>
 				{ __( 'Dismiss', 'woocommerce' ) }
 			</Button>
 		</div>
