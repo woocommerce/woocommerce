@@ -88,10 +88,11 @@
 }
 
 .promo-title {
-	color: $gray-900;
-	font-size: 14px;
-	font-weight: 600;
-	line-height: 20px;
+	color: #1e1e1e;
+	font-size: 16px;
+	font-style: normal;
+	font-weight: normal;
+	line-height: 24px;
 	margin: 0;
 }
 
@@ -137,9 +138,6 @@
 .woocommerce-marketing-coupons {
 	.promo-card {
 		margin-bottom: 24px;
-	}
-	.promo-title {
-		font-size: 16px;
 	}
 }
 
