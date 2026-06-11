@@ -65,6 +65,10 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 				'role'       => 'administrator',
 			)
 		);
+		if ( is_wp_error( self::$user_id ) ) {
+			self::fail( 'Could not create test admin user: ' . self::$user_id->get_error_message() );
+		}
+		self::$user_id = (int) self::$user_id;
 	}
 
 	/**
@@ -503,6 +507,10 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 				'role'       => 'customer',
 			)
 		);
+		if ( is_wp_error( $customer_id ) ) {
+			$this->fail( 'Could not create test customer: ' . $customer_id->get_error_message() );
+		}
+		$customer_id = (int) $customer_id;
 		wp_set_current_user( $customer_id );
 
 		$order = $this->create_order_with_product( 50.00, 1 );
@@ -676,28 +684,30 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 				$stub
 			);
 
-		$response = $this->do_preview_request(
-			$order->get_id(),
-			array(
+		try {
+			$response = $this->do_preview_request(
+				$order->get_id(),
 				array(
-					'line_item_id' => $item_id,
-					'quantity'     => 1,
-				),
-			)
-		);
-
-		$this->assertEquals( 500, $response->get_status() );
-		$data = $response->get_data();
-		$this->assertEquals( 'invalid_preview_request', $data['code'] );
-
-		// Restore the real DataUtils for subsequent tests in this run.
-		wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Controller::class )
-			->init(
-				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema::class ),
-				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema::class ),
-				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\CollectionQuery::class ),
-				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils::class )
+					array(
+						'line_item_id' => $item_id,
+						'quantity'     => 1,
+					),
+				)
 			);
+
+			$this->assertEquals( 500, $response->get_status() );
+			$data = $response->get_data();
+			$this->assertEquals( 'invalid_preview_request', $data['code'] );
+		} finally {
+			// Restore the real DataUtils for subsequent tests in this run.
+			wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Controller::class )
+				->init(
+					wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema::class ),
+					wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema::class ),
+					wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\CollectionQuery::class ),
+					wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils::class )
+				);
+		}
 	}
 
 	/**
