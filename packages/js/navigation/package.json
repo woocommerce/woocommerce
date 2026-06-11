@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/navigation",
-	"version": "8.2.0",
+	"version": "9.0.0",
 	"description": "WooCommerce navigation utilities.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -78,7 +78,8 @@
 		"react-router-dom": "~6.3.0"
 	},
 	"peerDependencies": {
-		"lodash": "^4.17.0"
+		"lodash": "^4.17.0",
+		"react": "18.3.x"
 	},
 	"publishConfig": {
 		"access": "public",
