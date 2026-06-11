@@ -100,9 +100,12 @@
 }
 
 .promo-text {
-	font-size: 14px;
-	line-height: 20px;
 	color: $gray-700;
+	font-size: 14px;
+	font-style: normal;
+	font-weight: normal;
+	line-height: 20px;
+	text-wrap: pretty;
 
 	p {
 		margin-top: 0;
