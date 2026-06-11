@@ -1908,7 +1908,7 @@ ul.wc_coupon_list_block {
 
 	h3,
 	h4 {
-		color: #1e1e1e;
+		color: $gray-900;
 		margin: 12px 0 0;
 	}
 
@@ -1995,7 +1995,7 @@ ul.wc_coupon_list_block {
 			label {
 				display: block;
 				margin-bottom: 4px;
-				color: #1e1e1e;
+				color: $gray-900;
 			}
 
 			input:not(.checkbox),
