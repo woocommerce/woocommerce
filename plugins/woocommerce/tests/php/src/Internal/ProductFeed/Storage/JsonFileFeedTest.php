@@ -274,10 +274,11 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should create the .htaccess when the feed directory exists without one.
+	 * @testdox Should leave the feed directory alone when it has no .htaccess.
 	 */
-	public function test_existing_feed_dir_without_htaccess_gets_one_created(): void {
+	public function test_existing_feed_dir_without_htaccess_is_left_alone(): void {
 		// Directory exists but its .htaccess is missing (e.g. it was removed) — the is_file() === false case.
+		// A missing file is not a blocked feed, so the refresh must not create one.
 		$directory = wp_upload_dir()['basedir'] . '/product-feeds';
 		wp_mkdir_p( $directory );
 		if ( file_exists( $directory . '/.htaccess' ) ) {
@@ -289,31 +290,51 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 		$feed->end();
 		$feed->get_file_url();
 
-		$this->assertSame(
-			'Options -Indexes',
-			trim( (string) file_get_contents( $directory . '/.htaccess' ) ),
-			'A missing .htaccess in an existing feed directory should be created with file access allowed.'
+		$this->assertFileDoesNotExist(
+			$directory . '/.htaccess',
+			'A missing .htaccess must be left alone, not created by the refresh.'
 		);
 	}
 
 	/**
-	 * @testdox Should log a warning when the feed directory .htaccess cannot be written.
+	 * @testdox Should log a warning when an existing legacy .htaccess cannot be overwritten.
 	 */
 	public function test_logs_warning_when_htaccess_cannot_be_written(): void {
-		// Occupy the .htaccess path with a directory so the write fails, surfacing the log path.
-		$directory = wp_upload_dir()['basedir'] . '/product-feeds';
-		wp_mkdir_p( $directory . '/.htaccess' );
+		// Redirect uploads to a container-local path: wp-env's bind-mounted uploads ignore chmod,
+		// so the read-only legacy file must live where file permissions are actually enforced.
+		$base     = get_temp_dir() . 'wc-feed-perms';
+		$feed_dir = $base . '/product-feeds';
+		$htaccess = $feed_dir . '/.htaccess';
+		mkdir( $feed_dir, 0755, true );
+		file_put_contents( $htaccess, 'deny from all' );
+		chmod( $htaccess, 0444 );
 
-		$feed = new JsonFileFeed( 'test-feed' );
-		$feed->start();
-		$feed->end();
-		$feed->get_file_url();
+		$filter = function ( $dir ) use ( $base ) {
+			$dir['basedir'] = $base;
+			$dir['baseurl'] = 'http://example.test/uploads';
+			$dir['error']   = false;
+			return $dir;
+		};
+		add_filter( 'upload_dir', $filter );
 
-		$this->assertLogged(
-			'warning',
-			'Could not update the product feed .htaccess',
-			array( 'source' => 'product-feed' )
-		);
+		try {
+			$feed = new JsonFileFeed( 'test-feed' );
+			$feed->start();
+			$feed->end();
+			$feed->get_file_url();
+
+			$this->assertLogged(
+				'warning',
+				'Could not update the product feed .htaccess',
+				array( 'source' => 'product-feed' )
+			);
+		} finally {
+			remove_filter( 'upload_dir', $filter );
+			chmod( $htaccess, 0644 );
+			global $wp_filesystem;
+			WP_Filesystem();
+			$wp_filesystem->rmdir( $base, true );
+		}
 	}
 
 	/**
