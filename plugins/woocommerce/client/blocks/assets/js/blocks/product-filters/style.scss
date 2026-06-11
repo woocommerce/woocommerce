@@ -111,47 +111,8 @@
 		}
 	}
 
-	&.is-filter-drawer-disabled,
-	&.is-filter-drawer-disabled.is-overlay-opened {
+	&.is-filter-drawer-disabled {
 		display: flex;
-
-		.wc-block-product-filters__overlay-header,
-		.wc-block-product-filters__overlay-footer,
-		.wc-block-product-filters__open-overlay {
-			display: none;
-		}
-
-		.wc-block-product-filters__overlay {
-			position: relative;
-			pointer-events: auto;
-			inset: 0;
-			background: inherit;
-			color: inherit;
-			transition: none;
-			flex-grow: 1;
-		}
-		.wc-block-product-filters__overlay-wrapper {
-			width: auto;
-			height: auto;
-			background: inherit;
-			color: inherit;
-		}
-
-		.wc-block-product-filters__overlay-dialog {
-			position: relative;
-			transform: none;
-			background: inherit;
-			color: inherit;
-		}
-
-		.wc-block-product-filters__content,
-		.wc-block-product-filters__overlay-content {
-			padding: 0;
-			overflow: visible;
-			flex-grow: 1;
-			background: inherit;
-			color: inherit;
-		}
 	}
 
 	@include breakpoint(">600px") {
