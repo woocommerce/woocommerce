@@ -117,4 +117,75 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			await expect( products ).toHaveCount( 2 );
 		} );
 	} );
+
+	test.describe( 'Multiple instances', () => {
+		test.beforeEach( async ( { page } ) => {
+			await page.addInitScript( () => {
+				// Mock the wc global variable.
+				if ( typeof window.wc === 'undefined' ) {
+					window.wc = {
+						wcSettings: {
+							getSetting() {
+								return true;
+							},
+						},
+					};
+				}
+			} );
+		} );
+
+		test( 'syncs active filters between Product Filters blocks', async ( {
+			page,
+			requestUtils,
+		} ) => {
+			const templateCompiler = await requestUtils.createTemplateFromFile(
+				'archive-product_multiple-product-filters'
+			);
+
+			await templateCompiler.compile( {
+				attributes: {
+					attributeId: 1,
+				},
+			} );
+
+			await page.goto( '/shop' );
+
+			const productFilters = page.locator(
+				'.wp-block-woocommerce-product-filters'
+			);
+			await expect( productFilters ).toHaveCount( 2 );
+
+			const activeFiltersBlock = productFilters.first();
+			const filterOptionsBlock = productFilters.nth( 1 );
+			const grayCheckbox = filterOptionsBlock.getByRole( 'checkbox', {
+				name: 'Gray',
+			} );
+			const grayActiveFilter = activeFiltersBlock.getByText(
+				'Color: Gray',
+				{ exact: true }
+			);
+
+			await expect( grayActiveFilter ).toBeHidden();
+
+			await grayCheckbox.click();
+			await page.waitForURL(
+				( url ) => url.searchParams.get( 'filter_color' ) === 'gray'
+			);
+
+			await expect( grayActiveFilter ).toBeVisible();
+			await expect( grayCheckbox ).toBeChecked();
+
+			await activeFiltersBlock
+				.getByRole( 'button', {
+					name: 'Remove filter: Color: Gray',
+				} )
+				.click();
+			await page.waitForURL(
+				( url ) => ! url.searchParams.has( 'filter_color' )
+			);
+
+			await expect( grayActiveFilter ).toBeHidden();
+			await expect( grayCheckbox ).not.toBeChecked();
+		} );
+	} );
 } );
