@@ -231,7 +231,7 @@ jobs:
             --message "Tagging version $RELEASE_TAG." \
             --no-auth-cache \
             --non-interactive \
-            --config-option=servers:global:http-timeout=1800
+            --config-option=servers:global:http-timeout=3600
 
           # Write success to summary.
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -266,7 +266,7 @@ jobs:
             --message "Tagging version $RELEASE_TAG." \
             --no-auth-cache \
             --non-interactive \
-            --config-option=servers:global:http-timeout=1800
+            --config-option=servers:global:http-timeout=3600
 
           # Write success to summary.
           echo "" >> $GITHUB_STEP_SUMMARY

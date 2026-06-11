@@ -11,7 +11,7 @@ import RecommendationsEligibilityWrapper from '../settings-recommendations/recom
 
 const ShippingRecommendationsLoader = lazy( () => {
 	return import(
-		/* webpackChunkName: "shipping-recommendations" */ './experimental-shipping-recommendations'
+		/* webpackChunkName: "shipping-recommendations" */ './shipping-recommendations'
 	);
 } );
 
