@@ -84,23 +84,23 @@ describe( 'Checkout Order Summary Coupon Form Block', () => {
 		);
 	} );
 
-	it( 'passes displayCouponForm as true by default', () => {
+	it( 'passes displayCouponForm as false by default', () => {
 		render( <Block /> );
 
 		expect( MockTotalsCoupon ).toHaveBeenCalledWith(
 			expect.objectContaining( {
-				displayCouponForm: true,
+				displayCouponForm: false,
 			} ),
 			expect.anything()
 		);
 	} );
 
-	it( 'passes displayCouponForm={false} when explicitly set', () => {
-		render( <Block displayCouponForm={ false } /> );
+	it( 'passes displayCouponForm={true} when explicitly set', () => {
+		render( <Block displayCouponForm={ true } /> );
 
 		expect( MockTotalsCoupon ).toHaveBeenCalledWith(
 			expect.objectContaining( {
-				displayCouponForm: false,
+				displayCouponForm: true,
 			} ),
 			expect.anything()
 		);

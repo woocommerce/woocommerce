@@ -54,6 +54,12 @@ export const TotalsCoupon = ( {
 	useEffect( () => {
 		setIsCouponFormVisible( displayCouponForm );
 	}, [ displayCouponForm ] );
+	// Skip auto-focus on the initial page-load mount when the form starts
+	// expanded; allow it on every subsequent user-triggered Panel open.
+	const skipFocusOnFirstMount = useRef( displayCouponForm );
+	useEffect( () => {
+		skipFocusOnFirstMount.current = false;
+	}, [] );
 	const textInputId = `wc-block-components-totals-coupon__input-${ instanceId }`;
 	const { validationErrorId } = useSelect(
 		( select ) => {
@@ -113,7 +119,7 @@ export const TotalsCoupon = ( {
 							onChange={ ( newCouponValue ) => {
 								setCouponValue( newCouponValue );
 							} }
-							focusOnMount={ ! displayCouponForm }
+							focusOnMount={ ! skipFocusOnFirstMount.current }
 							validateOnMount={ false }
 							showError={ false }
 							ref={ inputRef }

@@ -29,7 +29,7 @@ export const Edit = ( {
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<ToggleControl
 						label={ __(
-							'Show coupon form expanded',
+							'Expand coupon form by default',
 							'woocommerce'
 						) }
 						help={ __(

@@ -8,7 +8,7 @@ import { TotalsWrapper } from '@woocommerce/blocks-components';
 
 const Block = ( {
 	className = '',
-	displayCouponForm = true,
+	displayCouponForm = false,
 }: {
 	className?: string;
 	displayCouponForm?: boolean;

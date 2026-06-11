@@ -24,7 +24,7 @@
 		},
 		"displayCouponForm": {
 			"type": "boolean",
-			"default": true
+			"default": false
 		}
 	},
 	"parent": [

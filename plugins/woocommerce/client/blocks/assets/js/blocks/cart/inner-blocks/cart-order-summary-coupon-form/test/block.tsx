@@ -62,23 +62,23 @@ describe( 'Cart Order Summary Coupon Form Block', () => {
 		expect( screen.getByTestId( 'totals-wrapper' ) ).toBeInTheDocument();
 	} );
 
-	it( 'passes displayCouponForm as true by default', () => {
+	it( 'passes displayCouponForm as false by default', () => {
 		render( <Block className="" /> );
 
 		expect( MockTotalsCoupon ).toHaveBeenCalledWith(
 			expect.objectContaining( {
-				displayCouponForm: true,
+				displayCouponForm: false,
 			} ),
 			expect.anything()
 		);
 	} );
 
-	it( 'passes displayCouponForm={false} when explicitly set', () => {
-		render( <Block className="" displayCouponForm={ false } /> );
+	it( 'passes displayCouponForm={true} when explicitly set', () => {
+		render( <Block className="" displayCouponForm={ true } /> );
 
 		expect( MockTotalsCoupon ).toHaveBeenCalledWith(
 			expect.objectContaining( {
-				displayCouponForm: false,
+				displayCouponForm: true,
 			} ),
 			expect.anything()
 		);
