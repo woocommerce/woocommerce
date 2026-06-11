@@ -766,6 +766,91 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Re-importing without weight/dimension keys must preserve the existing values.
+	 *
+	 * The importer is shared across platforms; mappers that do not emit a field
+	 * (e.g. Shopify never maps length/width/height) must not clear merchant data
+	 * on a re-run. Regression test for the update path.
+	 */
+	public function test_update_preserves_weight_and_dimensions_when_keys_absent(): void {
+		$create_data = array(
+			'name'   => 'Dimension Product',
+			'sku'    => 'TEST-SKU-DIM-1',
+			'weight' => '2.5',
+			'length' => '10',
+			'width'  => '5',
+			'height' => '3',
+		);
+
+		$result1 = $this->importer->import_product( $create_data );
+		$this->assertEquals( 'created', $result1['action'] );
+		$product_id = $result1['product_id'];
+
+		// Re-import the same product without any weight/dimension keys.
+		$update_data = array(
+			'name' => 'Dimension Product Updated',
+			'sku'  => 'TEST-SKU-DIM-1',
+		);
+
+		$update_importer = new WooCommerceProductImporter();
+		$update_importer->configure( array( 'update_existing' => true ) );
+
+		$result2 = $update_importer->import_product( $update_data );
+		$this->assertEquals( 'updated', $result2['action'] );
+		$this->assertEquals( $product_id, $result2['product_id'] );
+
+		// Existing weight/dimensions must be preserved, not wiped.
+		$product = wc_get_product( $product_id );
+		$this->assertSame( '2.5', $product->get_weight() );
+		$this->assertSame( '10', $product->get_length() );
+		$this->assertSame( '5', $product->get_width() );
+		$this->assertSame( '3', $product->get_height() );
+	}
+
+	/**
+	 * Re-importing with explicitly empty weight/dimension keys must clear the values.
+	 *
+	 * When a mapper does emit the key (so the platform tracks the field), an empty
+	 * value should mirror the source and clear the existing value.
+	 */
+	public function test_update_clears_weight_and_dimensions_when_keys_present_empty(): void {
+		$create_data = array(
+			'name'   => 'Dimension Product Clear',
+			'sku'    => 'TEST-SKU-DIM-2',
+			'weight' => '2.5',
+			'length' => '10',
+			'width'  => '5',
+			'height' => '3',
+		);
+
+		$result1 = $this->importer->import_product( $create_data );
+		$this->assertEquals( 'created', $result1['action'] );
+		$product_id = $result1['product_id'];
+
+		// Re-import with the keys present but empty/null.
+		$update_data = array(
+			'name'   => 'Dimension Product Clear',
+			'sku'    => 'TEST-SKU-DIM-2',
+			'weight' => null,
+			'length' => '',
+			'width'  => '',
+			'height' => '',
+		);
+
+		$update_importer = new WooCommerceProductImporter();
+		$update_importer->configure( array( 'update_existing' => true ) );
+
+		$result2 = $update_importer->import_product( $update_data );
+		$this->assertEquals( 'updated', $result2['action'] );
+
+		$product = wc_get_product( $product_id );
+		$this->assertSame( '', $product->get_weight() );
+		$this->assertSame( '', $product->get_length() );
+		$this->assertSame( '', $product->get_width() );
+		$this->assertSame( '', $product->get_height() );
+	}
+
+	/**
 	 * Helper method to clean up test products.
 	 */
 	private function clean_up_products(): void {
