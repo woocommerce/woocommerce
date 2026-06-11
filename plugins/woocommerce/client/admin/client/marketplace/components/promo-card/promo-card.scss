@@ -50,10 +50,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: $small-gap;
-
-	.promo-text:last-child {
-		margin-bottom: 0;
-	}
 }
 
 .promo-image {
@@ -119,11 +115,6 @@
 .promo-cta,
 .promo-cta-link {
 	white-space: nowrap;
-}
-
-.promo-links .promo-cta {
-	height: 32px;
-	padding: 4px $small-gap;
 }
 
 .promo-cta-link.woocommerce-admin-dismiss-notification {
