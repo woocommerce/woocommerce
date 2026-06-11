@@ -144,7 +144,7 @@ class LaunchYourStoreTest extends \WC_Unit_Test_Case {
 			foreach ( $wp_filter['wp_footer']->callbacks as $callbacks ) {
 				foreach ( $callbacks as $callback ) {
 					if ( is_array( $callback['function'] ) && $callback['function'][0] instanceof LaunchYourStore && 'maybe_add_coming_soon_banner_on_frontend' === $callback['function'][1] ) {
-						$count++;
+						++$count;
 					}
 				}
 			}
