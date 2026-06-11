@@ -108,8 +108,11 @@ class WC_Autoloader {
 		'wc_queue'                                      => 'queue/class-wc-queue.php',
 		// Other classes in subdirectories not covered by the prefix rules.
 		'wc_blocks_utils'                               => 'blocks/class-wc-blocks-utils.php',
-		'wc_marketplace_updater'                        => 'admin/marketplace-suggestions/class-wc-marketplace-updater.php',
 		'wc_shop_customizer'                            => 'customizer/class-wc-shop-customizer.php',
+		// Note: WC_Marketplace_Updater is intentionally NOT mapped here. Its file calls
+		// WC_Marketplace_Updater::load() at include time, so it must only be loaded on admin-side
+		// requests via WooCommerce::includes(). Mapping it would let a frontend autoload pull in that
+		// admin-only boot work, undermining the request-type gating.
 	);
 
 	/**

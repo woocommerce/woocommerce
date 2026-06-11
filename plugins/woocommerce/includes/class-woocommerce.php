@@ -425,29 +425,13 @@ final class WooCommerce {
 
 		// Classes inheriting from RestApiControllerBase. Their register() method only adds them to the
 		// 'woocommerce_rest_api_get_rest_namespaces' filter, which the REST API server applies on
-		// 'rest_api_init'. A single shared filter callback that resolves them on demand avoids
-		// instantiating the controllers (and their dependencies) on requests that never initialize
-		// the REST API.
+		// 'rest_api_init'. A single shared filter callback resolves them on demand, which avoids
+		// instantiating the controllers (and their dependencies) on requests that never initialize the
+		// REST API. A named callback is used (rather than a closure) so it remains removable via
+		// remove_filter(). See register_internal_rest_api_controllers().
 		add_filter(
 			'woocommerce_rest_api_get_rest_namespaces',
-			static function ( $namespaces ) {
-				$rest_controller_classes = array(
-					Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class,
-					Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class,
-					Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class,
-					Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class,
-					Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController::class,
-					Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class,
-					Automattic\WooCommerce\Internal\Admin\Emails\EmailListingRestController::class,
-				);
-
-				$container = wc_get_container();
-				foreach ( $rest_controller_classes as $rest_controller_class ) {
-					$namespaces = $container->get( $rest_controller_class )->handle_woocommerce_rest_api_get_rest_namespaces( $namespaces );
-				}
-
-				return $namespaces;
-			}
+			array( $this, 'register_internal_rest_api_controllers' )
 		);
 
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
@@ -458,6 +442,36 @@ final class WooCommerce {
 
 		// Integration point between legacy reports and orders APIs (the reports caches invalidation focused).
 		\WC_Admin_Reports::register_orders_hook_handlers();
+	}
+
+	/**
+	 * Register the internal REST API controllers on the 'woocommerce_rest_api_get_rest_namespaces' filter.
+	 *
+	 * Each controller inherits from RestApiControllerBase and only needs to be instantiated when the REST
+	 * API server applies this filter on 'rest_api_init'. Resolving them here, on demand, avoids
+	 * instantiating the controllers (and their dependencies) on requests that never initialize the REST
+	 * API. This is registered as a named callback so it can still be removed with remove_filter().
+	 *
+	 * @param array $namespaces REST API namespaces and their controller classes.
+	 * @return array
+	 */
+	public function register_internal_rest_api_controllers( $namespaces ) {
+		$rest_controller_classes = array(
+			Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class,
+			Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class,
+			Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class,
+			Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class,
+			Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController::class,
+			Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class,
+			Automattic\WooCommerce\Internal\Admin\Emails\EmailListingRestController::class,
+		);
+
+		$container = wc_get_container();
+		foreach ( $rest_controller_classes as $rest_controller_class ) {
+			$namespaces = $container->get( $rest_controller_class )->handle_woocommerce_rest_api_get_rest_namespaces( $namespaces );
+		}
+
+		return $namespaces;
 	}
 
 	/**
