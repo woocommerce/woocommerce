@@ -553,7 +553,7 @@ class Controller extends AbstractController {
 	/**
 	 * Get the public schema for the preview endpoint.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 *
 	 * @return array
 	 */

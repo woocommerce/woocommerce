@@ -1232,7 +1232,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Partial amount preview returns 400 when refund_total is zero (treated as absent).
+	 * @testdox Partial amount preview returns 400 invalid_refund_total when refund_total is zero.
 	 */
 	public function test_preview_partial_amount_zero_refund_total_returns_400(): void {
 		$order   = $this->create_order_with_product( 20.00, 1 );
@@ -1250,7 +1250,60 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 400, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'missing_quantity_or_refund_total', $data['code'] );
+		$this->assertEquals( 'invalid_refund_total', $data['code'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview returns 400 invalid_refund_total when refund_total is zero even if quantity is provided.
+	 */
+	public function test_preview_zero_refund_total_with_quantity_returns_400(): void {
+		// Regression: a zero refund_total used to be treated as absent by
+		// validation (which then validated the quantity path) while
+		// build_refund_preview() used the explicit 0, producing a 200
+		// response with a $0.00 total. The combination must be rejected.
+		$order   = $this->create_order_with_product( 20.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 2,
+					'refund_total' => 0,
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'invalid_refund_total', $data['code'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview treats an explicit null refund_total as the quantity form.
+	 */
+	public function test_preview_null_refund_total_with_quantity_uses_quantity(): void {
+		// null means "use the quantity form" — mirrors the create endpoint,
+		// where null means "compute the total for me".
+		$order   = $this->create_order_with_product( 20.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 1,
+					'refund_total' => null,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( '20.00', $data['total'] );
+		$this->assertSame( 1, $data['breakdown']['products']['items'][0]['quantity'] );
 	}
 
 	/**

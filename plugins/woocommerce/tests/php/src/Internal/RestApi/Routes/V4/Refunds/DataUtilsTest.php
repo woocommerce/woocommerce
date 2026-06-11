@@ -1032,6 +1032,51 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return invalid_refund_total when refund_total is present but not a positive number.
+	 *
+	 * @dataProvider provider_invalid_refund_totals_for_validate
+	 *
+	 * @param array<string, mixed> $line_item_overrides Keys to merge into the test line item.
+	 */
+	public function test_validate_preview_line_items_invalid_refund_total( array $line_item_overrides ): void {
+		$order = $this->create_order_with_taxes( array(), 50.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$items = $order->get_items( 'line_item' );
+		$item  = reset( $items );
+
+		$line_item = array_merge( array( 'line_item_id' => $item->get_id() ), $line_item_overrides );
+
+		$result = $this->data_utils->validate_preview_line_items( array( $line_item ), $order );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'invalid_refund_total', $result->get_error_code() );
+	}
+
+	/**
+	 * @return array<string, array<array<string, mixed>>>
+	 */
+	public function provider_invalid_refund_totals_for_validate(): array {
+		return array(
+			'zero'                   => array( array( 'refund_total' => 0 ) ),
+			'zero with quantity'     => array(
+				array(
+					'quantity'     => 1,
+					'refund_total' => 0,
+				),
+			),
+			'negative'               => array( array( 'refund_total' => -5.00 ) ),
+			'negative with quantity' => array(
+				array(
+					'quantity'     => 1,
+					'refund_total' => -5.00,
+				),
+			),
+			'non-numeric string'     => array( array( 'refund_total' => 'abc' ) ),
+		);
+	}
+
+	/**
 	 * @testdox Should reject shipping/fee items with quantity other than 1.
 	 */
 	public function test_validate_preview_line_items_shipping_quantity_must_be_one(): void {

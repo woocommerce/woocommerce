@@ -511,9 +511,9 @@ class DataUtils {
 	 * method assumes inputs have been validated and throws on missing items.
 	 *
 	 * Each line item must have 'line_item_id' and at least one of 'quantity'
-	 * (positive int) or 'refund_total' (tax-inclusive float). When 'refund_total'
-	 * is present it is used directly; otherwise the total is computed from quantity
-	 * via {@see compute_line_item_refund_total()}.
+	 * (positive int) or 'refund_total' (positive tax-inclusive float). When
+	 * 'refund_total' is present and positive it is used directly; otherwise the
+	 * total is computed from quantity via {@see compute_line_item_refund_total()}.
 	 *
 	 * @param WC_Order $order      The order being previewed for refund.
 	 * @param array    $line_items Line items. Each: array{line_item_id: int, quantity?: int, refund_total?: float}.
@@ -560,7 +560,9 @@ class DataUtils {
 			 */
 			// When the caller provides an explicit refund_total (partial-amount form) use it
 			// directly. The quantity-based form computes the tax-inclusive total from unit price.
-			$refund_total_with_tax = isset( $line_item['refund_total'] )
+			// The positivity check mirrors validate_preview_line_items(), which rejects a
+			// present-but-non-positive refund_total before this method runs.
+			$refund_total_with_tax = isset( $line_item['refund_total'] ) && (float) $line_item['refund_total'] > 0
 				? (float) $line_item['refund_total']
 				: $this->compute_line_item_refund_total( $item, (int) $line_item['quantity'] );
 			$subtotal              = $refund_total_with_tax;
@@ -718,8 +720,22 @@ class DataUtils {
 				);
 			}
 
-			$has_quantity     = isset( $line_item['quantity'] ) && is_int( $line_item['quantity'] ) && $line_item['quantity'] >= 1;
-			$has_refund_total = isset( $line_item['refund_total'] ) && is_numeric( $line_item['refund_total'] ) && (float) $line_item['refund_total'] > 0;
+			// A present refund_total must be a positive number. Reject explicitly
+			// rather than treating a zero/invalid value as absent — otherwise a
+			// request like {quantity: 2, refund_total: 0} would validate via the
+			// quantity path while build_refund_preview() uses the explicit 0,
+			// producing a misleading $0.00 preview. A null refund_total means
+			// "use the quantity form" (isset() is false for null).
+			$has_refund_total = isset( $line_item['refund_total'] );
+			if ( $has_refund_total && ( ! is_numeric( $line_item['refund_total'] ) || (float) $line_item['refund_total'] <= 0 ) ) {
+				return new WP_Error(
+					'invalid_refund_total',
+					__( 'refund_total must be a number greater than zero.', 'woocommerce' ),
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
+			}
+
+			$has_quantity = isset( $line_item['quantity'] ) && is_int( $line_item['quantity'] ) && $line_item['quantity'] >= 1;
 
 			if ( ! $has_quantity && ! $has_refund_total ) {
 				return new WP_Error(
