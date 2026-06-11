@@ -316,20 +316,19 @@ class MiniCart extends AbstractBlock {
 		$cart = $this->get_cart_instance();
 
 		if ( $cart ) {
-			$classes_styles                   = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-			$icon_color                       = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-			$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
-			$styles                           = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
-			$icon                             = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
-			$product_count_visibility         = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
-			$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
-			$wrapper_styles                   = $classes_styles['styles'];
+			$classes_styles           = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+			$icon_color               = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
+			$product_count_color      = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
+			$styles                   = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
+			$icon                     = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
+			$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
+			$wrapper_classes          = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
+			$wrapper_styles           = $classes_styles['styles'];
 			// Pre-render the template part so nested blocks enqueue their assets before the overlay is printed in wp_footer.
 			$template_part_contents           = $this->get_template_part_contents( false );
 			$template_part_contents           = do_blocks( $this->process_template_contents( $template_part_contents ) );
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
 			$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
-			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
 			$badge_is_visible                 = ( 'always' === $product_count_visibility ) || ( 'never' !== $product_count_visibility && $cart_item_count > 0 );
 			$formatted_subtotal               = '';
 			$html                             = new \WP_HTML_Tag_Processor( wc_price( $cart->get_displayed_subtotal() ) );
