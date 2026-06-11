@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Inventory;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\Inventory\InventoryController;
+use Automattic\WooCommerce\Internal\Inventory\LocationStockAdminController;
 use Automattic\WooCommerce\Internal\Inventory\LocationStockInstaller;
 use Automattic\WooCommerce\Internal\Inventory\LocationStockService;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
@@ -20,6 +21,7 @@ use WC_REST_Unit_Test_Case;
  * Tests for POS location stock.
  *
  * @covers \Automattic\WooCommerce\Internal\Inventory\InventoryController
+ * @covers \Automattic\WooCommerce\Internal\Inventory\LocationStockAdminController
  * @covers \Automattic\WooCommerce\Internal\Inventory\LocationStockInstaller
  * @covers \Automattic\WooCommerce\Internal\Inventory\LocationStockRestApiHooks
  * @covers \Automattic\WooCommerce\Internal\Inventory\LocationStockService
@@ -39,6 +41,13 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	 * @var InventoryController
 	 */
 	private InventoryController $controller;
+
+	/**
+	 * Admin controller under test.
+	 *
+	 * @var LocationStockAdminController
+	 */
+	private LocationStockAdminController $admin_controller;
 
 	/**
 	 * Installer under test.
@@ -96,10 +105,11 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		update_option( InventoryController::FEATURE_OPTION, 'yes' );
 		update_option( 'woocommerce_manage_stock', 'yes' );
 
-		$this->service       = wc_get_container()->get( LocationStockService::class );
-		$this->controller    = wc_get_container()->get( InventoryController::class );
-		$this->installer     = wc_get_container()->get( LocationStockInstaller::class );
-		$this->database_util = wc_get_container()->get( DatabaseUtil::class );
+		$this->service          = wc_get_container()->get( LocationStockService::class );
+		$this->controller       = wc_get_container()->get( InventoryController::class );
+		$this->admin_controller = wc_get_container()->get( LocationStockAdminController::class );
+		$this->installer        = wc_get_container()->get( LocationStockInstaller::class );
+		$this->database_util    = wc_get_container()->get( DatabaseUtil::class );
 
 		$this->create_inventory_tables();
 		$this->empty_inventory_tables();
@@ -418,7 +428,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 				),
 			);
 
-			$this->controller->save_variation_location_fields( $variation, 0 );
+			$this->admin_controller->save_variation_location_fields( $variation, 0 );
 		} finally {
 			$_POST = $previous_post;
 		}
@@ -444,7 +454,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 				),
 			);
 
-			$this->controller->save_variation_location_fields( $variation, 0 );
+			$this->admin_controller->save_variation_location_fields( $variation, 0 );
 		} finally {
 			$_POST = $previous_post;
 		}
@@ -469,7 +479,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 				),
 			);
 
-			$this->controller->save_variation_location_fields( $variation, 0 );
+			$this->admin_controller->save_variation_location_fields( $variation, 0 );
 		} finally {
 			$_POST = $previous_post;
 		}
@@ -509,13 +519,13 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function order_created_via_provider(): array {
 		return array(
-			'block checkout'        => array( 'store-api' ),
-			'shortcode checkout'    => array( 'checkout' ),
-			'admin order'           => array( 'admin' ),
-			'generic REST'          => array( 'rest-api' ),
-			'REST integration'      => array( 'square' ),
-			'POS created_via'       => array( 'point-of-sale' ),
-			'POS REST created_via'  => array( 'pos-rest-api' ),
+			'block checkout'       => array( 'store-api' ),
+			'shortcode checkout'   => array( 'checkout' ),
+			'admin order'          => array( 'admin' ),
+			'generic REST'         => array( 'rest-api' ),
+			'REST integration'     => array( 'square' ),
+			'POS created_via'      => array( 'point-of-sale' ),
+			'POS REST created_via' => array( 'pos-rest-api' ),
 		);
 	}
 
@@ -1467,7 +1477,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$this->assertInstanceOf( \WP_Post::class, $variation_post );
 
 		ob_start();
-		$this->controller->render_variation_location_fields( $loop, array(), $variation_post );
+		$this->admin_controller->render_variation_location_fields( $loop, array(), $variation_post );
 
 		return (string) ob_get_clean();
 	}

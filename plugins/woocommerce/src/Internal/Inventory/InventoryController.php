@@ -7,7 +7,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Inventory;
 
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
@@ -53,6 +52,13 @@ class InventoryController {
 	private LocationStockService $location_stock_service;
 
 	/**
+	 * Admin product editor controller.
+	 *
+	 * @var LocationStockAdminController
+	 */
+	private LocationStockAdminController $admin_controller;
+
+	/**
 	 * Location stock installer.
 	 *
 	 * @var LocationStockInstaller
@@ -68,6 +74,8 @@ class InventoryController {
 
 	/**
 	 * Whether feature hooks have already been registered in this request.
+	 *
+	 * @var bool
 	 */
 	private bool $feature_hooks_registered = false;
 
@@ -81,11 +89,18 @@ class InventoryController {
 	/**
 	 * Initialize dependencies.
 	 *
+	 * @param FeaturesController           $features_controller Feature controller.
+	 * @param LocationStockService         $location_stock_service Location stock service.
+	 * @param LocationStockAdminController $admin_controller Admin product editor controller.
+	 * @param LocationStockInstaller       $location_stock_installer Location stock installer.
+	 * @param LocationStockRestApiHooks    $rest_api_hooks REST API hooks.
+	 *
 	 * @internal
 	 */
-	final public function init( FeaturesController $features_controller, LocationStockService $location_stock_service, LocationStockInstaller $location_stock_installer, LocationStockRestApiHooks $rest_api_hooks ): void {
+	final public function init( FeaturesController $features_controller, LocationStockService $location_stock_service, LocationStockAdminController $admin_controller, LocationStockInstaller $location_stock_installer, LocationStockRestApiHooks $rest_api_hooks ): void {
 		$this->features_controller      = $features_controller;
 		$this->location_stock_service   = $location_stock_service;
+		$this->admin_controller         = $admin_controller;
 		$this->location_stock_installer = $location_stock_installer;
 		$this->rest_api_hooks           = $rest_api_hooks;
 	}
@@ -116,10 +131,7 @@ class InventoryController {
 		$this->feature_hooks_registered = true;
 		$this->location_stock_installer->maybe_create_db_tables();
 
-		add_action( 'woocommerce_product_options_stock_fields', array( $this, 'render_simple_product_location_fields' ) );
-		add_action( 'woocommerce_admin_process_product_object', array( $this, 'save_simple_product_location_fields' ) );
-		add_action( 'woocommerce_variation_options_inventory', array( $this, 'render_variation_location_fields' ), 10, 3 );
-		add_action( 'woocommerce_admin_process_variation_object', array( $this, 'save_variation_location_fields' ), 10, 2 );
+		$this->admin_controller->register();
 		add_filter( 'woocommerce_can_reduce_order_stock', array( $this, 'allow_core_stock_adjustment_for_location_order' ), 10, 2 );
 		add_filter( 'woocommerce_can_restore_order_stock', array( $this, 'allow_core_stock_adjustment_for_location_order' ), 10, 2 );
 		add_filter( 'woocommerce_can_restock_refunded_items', array( $this, 'handle_location_refunded_items_restock' ), 10, 3 );
@@ -135,113 +147,6 @@ class InventoryController {
 		add_action( 'woocommerce_order_status_on-hold', array( $this, 'maybe_reduce_location_stock_levels' ) );
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'maybe_restore_location_stock_levels' ) );
 		add_action( 'woocommerce_order_status_pending', array( $this, 'maybe_restore_location_stock_levels' ) );
-	}
-
-	/**
-	 * Render the POS location stock field in the classic product editor.
-	 */
-	public function render_simple_product_location_fields(): void {
-		global $product_object;
-
-		if ( ! $this->can_manage_pos_location_stock() || ! $product_object instanceof \WC_Product ) {
-			return;
-		}
-
-		echo '<div class="options_group show_if_simple show_if_variable">';
-		echo '<p class="form-field"><strong>' . esc_html__( 'POS location stock', 'woocommerce' ) . '</strong></p>';
-		woocommerce_wp_text_input(
-			array(
-				'id'                => '_inventory_stock_pos',
-				'name'              => '_inventory_location_stock[' . LocationStockService::LOCATION_POS . ']',
-				'label'             => esc_html__( 'POS stock', 'woocommerce' ),
-				'value'             => wc_stock_amount( $this->location_stock_service->get_location_stock( $product_object, LocationStockService::LOCATION_POS ) ),
-				'type'              => 'number',
-				'custom_attributes' => array(
-					'step' => 'any',
-				),
-			)
-		);
-		echo '</div>';
-	}
-
-	/**
-	 * Save the POS location stock field without changing legacy _stock.
-	 *
-	 * @param \WC_Product $product Product object.
-	 */
-	public function save_simple_product_location_fields( \WC_Product $product ): void {
-		if ( ! $this->can_manage_pos_location_stock() ) {
-			return;
-		}
-
-		$location_stock_values = wc_clean( wp_unslash( $_POST['_inventory_location_stock'] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Product save nonce is verified before this hook fires.
-		if ( ! is_array( $location_stock_values ) || ! array_key_exists( LocationStockService::LOCATION_POS, $location_stock_values ) ) {
-			return;
-		}
-
-		$this->location_stock_service->set_location_stock(
-			$product,
-			LocationStockService::LOCATION_POS,
-			wc_stock_amount( $location_stock_values[ LocationStockService::LOCATION_POS ] )
-		);
-	}
-
-	/**
-	 * Render the POS location stock field for variation-managed stock.
-	 *
-	 * @param int      $loop           Position in the loop.
-	 * @param array    $variation_data Variation data.
-	 * @param \WP_Post $variation      Variation post object.
-	 */
-	public function render_variation_location_fields( int $loop, array $variation_data, \WP_Post $variation ): void {
-		if ( ! $this->can_manage_pos_location_stock() ) {
-			return;
-		}
-
-		$variation_product = wc_get_product( $variation->ID );
-		if ( ! $variation_product instanceof \WC_Product || ! $variation_product->is_type( ProductType::VARIATION ) ) {
-			return;
-		}
-
-		woocommerce_wp_text_input(
-			array(
-				'id'                => "variable_inventory_stock_pos{$loop}",
-				'name'              => 'variable_inventory_location_stock[' . LocationStockService::LOCATION_POS . "][{$loop}]",
-				'label'             => esc_html__( 'POS stock', 'woocommerce' ),
-				'value'             => $this->location_stock_service->get_location_stock_for_product_record( $variation_product, LocationStockService::LOCATION_POS ),
-				'type'              => 'number',
-				'custom_attributes' => array(
-					'step' => 'any',
-				),
-				'data_type'         => 'stock',
-				'desc_tip'          => true,
-				'description'       => esc_html__( 'Set POS stock for this variation. This does not change web stock.', 'woocommerce' ),
-				'wrapper_class'     => 'form-row form-row-full',
-			)
-		);
-	}
-
-	/**
-	 * Save the POS location stock field for variation-managed stock.
-	 *
-	 * @param \WC_Product $variation Variation product object.
-	 * @param int         $loop      Position in the loop.
-	 */
-	public function save_variation_location_fields( \WC_Product $variation, int $loop ): void {
-		if ( ! $this->can_manage_pos_location_stock() || ! $variation->is_type( ProductType::VARIATION ) || true !== $variation->get_manage_stock( 'edit' ) ) {
-			return;
-		}
-
-		$location_stock_values = wc_clean( wp_unslash( $_POST['variable_inventory_location_stock'][ LocationStockService::LOCATION_POS ] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Product save nonce is verified before this hook fires.
-		if ( ! is_array( $location_stock_values ) || ! array_key_exists( $loop, $location_stock_values ) ) {
-			return;
-		}
-
-		$this->location_stock_service->set_location_stock(
-			$variation,
-			LocationStockService::LOCATION_POS,
-			wc_stock_amount( $location_stock_values[ $loop ] )
-		);
 	}
 
 	/**
@@ -423,6 +328,8 @@ class InventoryController {
 	 * @param array $items    Posted order item data.
 	 */
 	public function snapshot_location_order_items_before_admin_save( $order_id, $items ): void {
+		unset( $items );
+
 		$order = wc_get_order( $order_id );
 		if ( ! $order instanceof \WC_Order || ! $this->get_configured_order_location_slug( $order ) ) {
 			return;
@@ -442,6 +349,8 @@ class InventoryController {
 	 * @param array $items    Posted order item data.
 	 */
 	public function clear_location_order_item_snapshots( $order_id, $items ): void {
+		unset( $items );
+
 		unset( $this->line_item_stock_adjustment_snapshots[ absint( $order_id ) ] );
 	}
 
@@ -452,6 +361,8 @@ class InventoryController {
 	 * @param array          $data REST order item data.
 	 */
 	public function snapshot_location_order_item_before_rest_save( $item, $data ): void {
+		unset( $data );
+
 		if ( ! $item instanceof \WC_Order_Item_Product || ! $item->get_id() ) {
 			return;
 		}
@@ -491,13 +402,6 @@ class InventoryController {
 	}
 
 	/**
-	 * Check whether POS location stock can be managed.
-	 */
-	private function can_manage_pos_location_stock(): bool {
-		return $this->feature_is_enabled() && $this->location_is_configured( LocationStockService::LOCATION_POS );
-	}
-
-	/**
 	 * Check whether a stock location has been configured.
 	 *
 	 * @param string $location_slug Location slug.
@@ -520,6 +424,15 @@ class InventoryController {
 			return null;
 		}
 
+		/**
+		 * Filter order item quantity.
+		 *
+		 * @since 4.5.0
+		 *
+		 * @param int|float              $quantity Quantity.
+		 * @param \WC_Order              $order    Order data.
+		 * @param \WC_Order_Item_Product $item     Order item data.
+		 */
 		$qty = wc_stock_amount( apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item ) );
 		if ( $qty <= 0 ) {
 			return null;
