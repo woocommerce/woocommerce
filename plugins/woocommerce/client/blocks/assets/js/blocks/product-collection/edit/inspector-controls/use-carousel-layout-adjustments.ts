@@ -35,10 +35,12 @@ const createGroupSpaceBetween = ( innerBlocks: BlockInstance[] ) =>
 		'core/group',
 		// Row variation of the group block
 		{
+			className: 'wc-product-collection-carousel-header',
 			layout: {
 				type: 'flex',
 				flexWrap: 'nowrap',
 				justifyContent: 'space-between',
+				verticalAlignment: 'center',
 			},
 		},
 		innerBlocks
@@ -101,6 +103,7 @@ const handleTransitionToCarouselLayout = (
 	// 2. Create and insert the next/previous buttons block
 	const nextPrevArrowsBlock = createBlock( nextPreviousButtonsBlockName, {
 		layout: { type: 'flex', flexWrap: 'nowrap' },
+		style: { spacing: { blockGap: '0' } },
 	} );
 
 	if ( headingBlock ) {

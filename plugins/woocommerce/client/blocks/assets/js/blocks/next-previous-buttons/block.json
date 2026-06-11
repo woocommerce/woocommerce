@@ -8,6 +8,11 @@
 	"keywords": [ "WooCommerce" ],
 	"usesContext": [ "iapi/provider" ],
 	"textdomain": "woocommerce",
+	"attributes": {
+		"style": {
+			"type": "object"
+		}
+	},
 	"supports": {
 		"interactivity": true,
 		"color": {
@@ -28,6 +33,7 @@
 		},
 		"shadow": true,
 		"spacing": {
+			"blockGap": true,
 			"margin": true,
 			"__experimentalSkipSerialization": true
 		},
