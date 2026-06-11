@@ -59,7 +59,7 @@ class LocationStockInstaller {
 	 */
 	final public function init( DatabaseUtil $database_util, FeaturesController $features_controller, LocationStockService $location_stock_service ): void {
 		$this->database_util          = $database_util;
-		$this->features_controller   = $features_controller;
+		$this->features_controller    = $features_controller;
 		$this->location_stock_service = $location_stock_service;
 	}
 

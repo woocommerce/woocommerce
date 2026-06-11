@@ -41,7 +41,7 @@ class LocationStockRestApiHooks {
 	 * @internal
 	 */
 	final public function init( FeaturesController $features_controller, LocationStockService $location_stock_service ): void {
-		$this->features_controller   = $features_controller;
+		$this->features_controller    = $features_controller;
 		$this->location_stock_service = $location_stock_service;
 	}
 

@@ -11,6 +11,7 @@ require_once __DIR__ . '/LocationStockTestCase.php';
 /**
  * Tests for POS location stock.
  *
+ * @covers \Automattic\WooCommerce\Internal\Inventory\InventoryController
  * @covers \Automattic\WooCommerce\Internal\Inventory\LocationStockService
  */
 class LocationStockServiceTest extends LocationStockTestCase {
