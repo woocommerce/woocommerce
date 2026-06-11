@@ -119,7 +119,10 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 	} );
 
 	test.describe( 'Multiple instances', () => {
-		test.beforeEach( async ( { page } ) => {
+		test( 'syncs active filters between Product Filters blocks', async ( {
+			page,
+			requestUtils,
+		} ) => {
 			await page.addInitScript( () => {
 				// Mock the wc global variable.
 				if ( typeof window.wc === 'undefined' ) {
@@ -132,12 +135,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 					};
 				}
 			} );
-		} );
 
-		test( 'syncs active filters between Product Filters blocks', async ( {
-			page,
-			requestUtils,
-		} ) => {
 			const templateCompiler = await requestUtils.createTemplateFromFile(
 				'archive-product_multiple-product-filters'
 			);
