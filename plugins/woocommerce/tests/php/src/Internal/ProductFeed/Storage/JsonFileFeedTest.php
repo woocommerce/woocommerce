@@ -302,7 +302,7 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	public function test_logs_warning_when_htaccess_cannot_be_written(): void {
 		// Redirect uploads to a container-local path: wp-env's bind-mounted uploads ignore chmod,
 		// so the read-only legacy file must live where file permissions are actually enforced.
-		$base     = get_temp_dir() . 'wc-feed-perms';
+		$base     = get_temp_dir() . uniqid( 'wc-feed-perms-', true );
 		$feed_dir = $base . '/product-feeds';
 		$htaccess = $feed_dir . '/.htaccess';
 		mkdir( $feed_dir, 0755, true );
