@@ -217,12 +217,20 @@ class Autoloader {
 				 * no-op — the completed file could never load for the rest of the request. A
 				 * plain include lets us record success ourselves (in $loaded, below) only after
 				 * it returns, so a file that fails to parse, link (e.g. a parent not yet written
-				 * mid-upgrade), or run stays retryable. It also degrades a file deleted between
-				 * findFile() and here to a warning, where require would fatal.
+				 * mid-upgrade), or run stays retryable. A file that vanishes between findFile()
+				 * and here degrades to a warning plus a FALSE return, where require would fatal —
+				 * no Throwable reaches the catch below, so the return value is the only signal
+				 * that nothing was compiled or executed.
 				 */
-				include $file;
+				$included = include $file;
 
-				if ( false !== $canonical ) {
+				// A false return means the include never OPENED the file (deleted/unreadable
+				// mid-upgrade): nothing ran, so re-including is safe and the path must stay
+				// retryable — recording it as loaded would skip the restored file for the
+				// rest of the request. A successful include of a src/ file never yields false
+				// (class files return 1; the odd config file returns an array), so false here
+				// always means the open failed.
+				if ( false !== $included && false !== $canonical ) {
 					$loaded[ $canonical ] = true;
 				}
 			} catch ( \Throwable $e ) {

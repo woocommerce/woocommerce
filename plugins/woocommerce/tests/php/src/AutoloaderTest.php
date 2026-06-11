@@ -434,6 +434,72 @@ class AutoloaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * An include that fails to OPEN — the resolved file vanished or turned unreadable
+	 * between findFile()/realpath() and the include, e.g. the upgrader replacing the old
+	 * plugin directory — emits a warning and returns false instead of throwing. No
+	 * Throwable reaches the handler's catch block in production, so only the include's
+	 * return value distinguishes this failure from a clean load; recording the path as
+	 * loaded would poison every retry after the upgrade restores the file. Reproduced
+	 * deterministically with a DIRECTORY at the class-file path: file_exists() (Composer's
+	 * findFile() predicate) and realpath() both accept it while the include's open fails.
+	 * The temporary error handler keeps the warning a warning, as in production — this
+	 * suite's convertWarningsToExceptions would otherwise turn it into a caught Throwable
+	 * and mask the false-return path under test.
+	 *
+	 * @testdox the registered handler retries a class file whose include failed to open.
+	 */
+	public function test_registered_handler_recovers_after_a_failed_open(): void {
+		$handler = Autoloader::register_woocommerce_psr4_fallback();
+		$this->assertInstanceOf( \Closure::class, $handler, 'Bootstrap must register a handler.' );
+
+		$suffix = 'ReproOpen' . str_replace( '.', '', uniqid( '', true ) );
+		$dir    = dirname( WC_PLUGIN_FILE ) . '/src/' . $suffix;
+		$file   = $dir . '/Widget.php';
+		$class  = 'Automattic\\WooCommerce\\' . $suffix . '\\Widget';
+
+		try {
+			// A directory where the class file belongs: the failed-open shape, minus the race.
+			wp_mkdir_p( $file );
+
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Keeps the include warning a warning, as in production; PHPUnit would convert it to an exception and mask the path under test.
+			set_error_handler(
+				static function () {
+					return true;
+				},
+				E_WARNING
+			);
+			try {
+				$handler( $class );
+			} finally {
+				restore_error_handler();
+			}
+			$this->assertFalse( class_exists( $class, false ), 'Precondition: a failed-open include must degrade to a miss.' );
+
+			// The upgrade completes: the path is now a regular, self-contained class file.
+			rmdir( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture; WP_Filesystem adds no value here.
+			file_put_contents( $file, "<?php\nnamespace Automattic\\WooCommerce\\{$suffix};\nclass Widget {}\n" );
+			clearstatcache( true, $file );
+
+			$handler( $class );
+			$this->assertTrue(
+				class_exists( $class, false ),
+				'Handler must load the class once the file is restored — a failed-open include must not be recorded as loaded.'
+			);
+		} finally {
+			if ( is_dir( $file ) ) {
+				rmdir( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture cleanup.
+			}
+			if ( file_exists( $file ) ) {
+				wp_delete_file( $file );
+			}
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture cleanup.
+			}
+		}
+	}
+
+	/**
 	 * Registration is idempotent: repeated calls return the same handler and never
 	 * stack duplicate autoloaders on the SPL stack.
 	 *
