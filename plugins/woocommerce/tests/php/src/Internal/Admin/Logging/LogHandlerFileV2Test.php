@@ -310,8 +310,11 @@ MESSAGE;
 		);
 
 		$paths = glob( Settings::get_log_directory() . '*.log' );
+		$this->assertCount( 1, $paths );
+
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$content = file_get_contents( reset( $paths ) );
+		$this->assertStringContainsString( ' CONTEXT: ', $content );
 
 		// The handler appends the context as JSON after " CONTEXT: ".
 		$json    = explode( ' CONTEXT: ', $content, 2 )[1];
