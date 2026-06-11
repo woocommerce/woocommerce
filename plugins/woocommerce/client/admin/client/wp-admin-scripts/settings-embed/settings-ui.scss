@@ -299,6 +299,32 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 	}
 
+	.wc-settings-ui-number-control {
+		position: relative;
+	}
+
+	.wc-settings-ui-number-control__input {
+		appearance: textfield;
+		box-sizing: border-box;
+		// Keep typed values clear of the spin buttons.
+		padding-right: 64px;
+		width: 100%;
+
+		&::-webkit-inner-spin-button,
+		&::-webkit-outer-spin-button {
+			appearance: none;
+			margin: 0;
+		}
+	}
+
+	.wc-settings-ui-number-control__spin-buttons {
+		display: flex;
+		position: absolute;
+		right: 6px;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
 	.wc-settings-ui__unsaved-changes-modal {
 		.components-modal__header {
 			min-height: 72px;

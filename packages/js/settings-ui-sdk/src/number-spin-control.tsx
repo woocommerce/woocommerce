@@ -1,0 +1,155 @@
+/**
+ * External dependencies
+ */
+import { BaseControl, Button } from '@wordpress/components';
+import { createElement } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import type { ReactNode } from 'react';
+
+export type NumberSpinControlProps = {
+	id: string;
+	label?: string;
+	help?: ReactNode;
+	value: string;
+	placeholder?: string;
+	disabled?: boolean;
+	onChange: ( next: string ) => void;
+	inputAttributes?: Record< string, string | number | boolean >;
+};
+
+const plusIcon = (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 24 24"
+		width="24"
+		height="24"
+		aria-hidden="true"
+		focusable="false"
+	>
+		<path d="M11 12.5V17.5H12.5V12.5H17.5V11H12.5V6H11V11H6V12.5H11Z" />
+	</svg>
+);
+
+const minusIcon = (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 24 24"
+		width="24"
+		height="24"
+		aria-hidden="true"
+		focusable="false"
+	>
+		<path d="M7 11.25h10v1.5H7z" />
+	</svg>
+);
+
+const toFiniteNumber = ( raw: unknown ): number | undefined => {
+	if ( typeof raw === 'number' && Number.isFinite( raw ) ) {
+		return raw;
+	}
+
+	if ( typeof raw === 'string' && raw.trim() !== '' ) {
+		const parsed = Number( raw );
+
+		if ( Number.isFinite( parsed ) ) {
+			return parsed;
+		}
+	}
+
+	return undefined;
+};
+
+const stepDecimals = ( step: number ) => {
+	const fraction = String( step ).split( '.' )[ 1 ];
+	return fraction ? fraction.length : 0;
+};
+
+/**
+ * A number input with explicit +/- spin buttons, per the settings designs.
+ *
+ * Composed from stable @wordpress/components APIs only; the native browser
+ * spinner is hidden via CSS and stepping is handled by the buttons, while
+ * typing and keyboard arrows keep the native input behavior.
+ */
+export const NumberSpinControl = ( {
+	id,
+	label,
+	help,
+	value,
+	placeholder,
+	disabled,
+	onChange,
+	inputAttributes,
+}: NumberSpinControlProps ) => {
+	const min = toFiniteNumber( inputAttributes?.min );
+	const max = toFiniteNumber( inputAttributes?.max );
+	const step = toFiniteNumber( inputAttributes?.step ) ?? 1;
+	const current = toFiniteNumber( value );
+
+	const stepBy = ( direction: 1 | -1 ) => {
+		let next = ( current ?? 0 ) + direction * step;
+
+		if ( typeof min !== 'undefined' ) {
+			next = Math.max( min, next );
+		}
+
+		if ( typeof max !== 'undefined' ) {
+			next = Math.min( max, next );
+		}
+
+		onChange( String( Number( next.toFixed( stepDecimals( step ) ) ) ) );
+	};
+
+	const incrementDisabled =
+		disabled ||
+		( typeof max !== 'undefined' &&
+			typeof current !== 'undefined' &&
+			current >= max );
+	const decrementDisabled =
+		disabled ||
+		( typeof min !== 'undefined' &&
+			typeof current !== 'undefined' &&
+			current <= min );
+
+	return (
+		<BaseControl
+			className="wc-settings-ui__control"
+			id={ id }
+			label={ label }
+			help={ help }
+			__nextHasNoMarginBottom
+		>
+			<div className="wc-settings-ui-number-control">
+				<input
+					className="components-text-control__input is-next-40px-default-size wc-settings-ui-number-control__input"
+					type="number"
+					id={ id }
+					value={ value }
+					placeholder={ placeholder }
+					disabled={ disabled }
+					aria-describedby={ help ? `${ id }__help` : undefined }
+					onChange={ ( event ) =>
+						onChange( event.currentTarget.value )
+					}
+					{ ...inputAttributes }
+				/>
+				<div className="wc-settings-ui-number-control__spin-buttons">
+					<Button
+						size="small"
+						icon={ plusIcon }
+						label={ __( 'Increment', 'woocommerce' ) }
+						disabled={ incrementDisabled }
+						onClick={ () => stepBy( 1 ) }
+					/>
+					<Button
+						size="small"
+						icon={ minusIcon }
+						label={ __( 'Decrement', 'woocommerce' ) }
+						disabled={ decrementDisabled }
+						onClick={ () => stepBy( -1 ) }
+					/>
+				</div>
+			</div>
+		</BaseControl>
+	);
+};
