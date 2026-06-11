@@ -234,6 +234,12 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 
 		return (
 			<tr
+				// Explicit role="row" is required because the responsive grid
+				// layout sets `display: grid` on this row (see style.scss),
+				// which strips the implicit table-row role and would otherwise
+				// orphan the rowheader cell below. On the desktop table layout
+				// this matches the implicit role, so it's a no-op there.
+				role="row"
 				data-cart-item-key={ lineItem.key }
 				className={ clsx(
 					'wc-block-cart-items__row',
@@ -271,7 +277,16 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 						</a>
 					) }
 				</td>
-				<td role="rowheader" className="wc-block-cart-item__product">
+				<td
+					role="rowheader"
+					// Name the rowheader after the product only. Without this,
+					// the accessible name is computed from the whole cell
+					// (prices, metadata, quantity selector, remove button),
+					// producing a verbose row-header announcement on every
+					// associated data cell.
+					aria-label={ name }
+					className="wc-block-cart-item__product"
+				>
 					<div className="wc-block-cart-item__wrap">
 						<ProductName
 							disabled={

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep cart line items announcing as proper table rows in the responsive grid and mini-cart layouts, and give the product row header a concise accessible name instead of the whole cell.
