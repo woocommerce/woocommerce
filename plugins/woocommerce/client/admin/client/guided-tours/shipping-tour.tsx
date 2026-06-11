@@ -70,7 +70,6 @@ const useShowShippingTour = () => {
 	return {
 		isLoading,
 		show:
-			window.wcAdminFeatures[ 'shipping-setting-tour' ] &&
 			! isLoading &&
 			hasCreatedDefaultShippingZones &&
 			! hasReviewedDefaultShippingOptions,
