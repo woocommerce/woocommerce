@@ -1116,7 +1116,10 @@ class WC_Checkout {
 		// We save the session early because if the payment gateway hangs
 		// the request will never finish, thus the session data will never be saved,
 		// and this can lead to duplicate orders if the user submits the order again.
-		WC()->session->save_data();
+		$save_session_data = array( WC()->session, 'save_data' );
+		if ( is_callable( $save_session_data ) ) {
+			$save_session_data();
+		}
 
 		// Process Payment.
 		$result = $available_gateways[ $payment_method ]->process_payment( $order_id );

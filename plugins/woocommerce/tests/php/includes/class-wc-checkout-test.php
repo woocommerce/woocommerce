@@ -1,18 +1,9 @@
 <?php
-
 declare( strict_types = 1 );
-
-/**
- * Unit tests for the WC_Cart_Test class.
- *
- * @package WooCommerce\Tests\Checkout.
- */
 
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
-/**
- * Class WC_Checkout
- */
+// phpcs:ignore Squiz.Commenting.ClassComment.Missing
 class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 	/**
