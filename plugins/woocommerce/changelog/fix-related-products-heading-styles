@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Normalize the Related products heading size and spacing on the single product page so it matches the upsells section's heading instead of being forced to the small font preset and a different margin.
