@@ -371,9 +371,7 @@
 			"dependencies": [
 				"@wordpress/router",
 				"@wordpress/edit-site",
-				"@wordpress/private-apis",
-				"@wordpress/dataviews",
-				"@wordpress/icons"
+				"@wordpress/private-apis"
 			],
 			"packages": [
 				"@woocommerce/admin-library"
@@ -383,7 +381,21 @@
 		{
 			"label": "Ignore all syncpack rules for experimental-products-app",
 			"dependencies": [
-				"**"
+				"@wordpress/api-fetch",
+				"@wordpress/base-styles",
+				"@wordpress/components",
+				"@wordpress/compose",
+				"@wordpress/core-data",
+				"@wordpress/data",
+				"@wordpress/dataviews",
+				"@wordpress/editor",
+				"@wordpress/element",
+				"@wordpress/notices",
+				"@wordpress/private-apis",
+				"@wordpress/router",
+				"@wordpress/theme",
+				"@woocommerce/settings",
+				"@types/lodash"
 			],
 			"packages": [
 				"@woocommerce/experimental-products-app"
@@ -476,15 +488,22 @@
 			"isIgnored": true
 		},
 		{
-			"label": "@wordpress/* dependencies that WooCommerce bundles instead of externalizing to WordPress",
+			"label": "@wordpress/* bundled runtime-dependencies",
 			"dependencyTypes": [
 				"prod",
 				"dev"
 			],
 			"dependencies": [
 				"@wordpress/admin-ui",
+				"@wordpress/dataviews",
+				"@wordpress/fields",
+				"@wordpress/grid",
 				"@wordpress/icons",
-				"@wordpress/interface"
+				"@wordpress/interface",
+				"@wordpress/style-runtime",
+				"@wordpress/ui",
+				"@wordpress/undo-manager",
+				"@wordpress/views"
 			],
 			"packages": [
 				"**"

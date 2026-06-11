@@ -10,7 +10,7 @@ import {
 } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { dispatch } from '@wordpress/data';
-import { backup, edit, trash } from '@wordpress/icons';
+import { backup, pencil, trash } from '@wordpress/icons';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
@@ -162,7 +162,7 @@ export const quickEditAction = ( {
 			: __( 'Quick edit', 'woocommerce' ),
 	isPrimary: true,
 	supportsBulk: true,
-	icon: edit,
+	icon: pencil,
 	isEligible( product ) {
 		return product.status !== 'trash';
 	},
