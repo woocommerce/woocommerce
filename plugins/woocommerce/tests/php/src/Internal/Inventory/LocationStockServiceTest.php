@@ -262,9 +262,9 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should update the parent modified date when parent-managed variation POS stock changes.
+	 * @testdox Should update parent and variation modified dates when parent-managed variation POS stock changes.
 	 */
-	public function test_parent_managed_variation_location_stock_updates_parent_modified_date(): void {
+	public function test_parent_managed_variation_location_stock_updates_parent_and_variation_modified_dates(): void {
 		$parent    = $this->create_parent_managed_variation_product();
 		$variation = wc_get_product( $parent->get_children()[0] );
 		$this->assertInstanceOf( WC_Product::class, $variation );
@@ -276,7 +276,25 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$this->service->decrease_location_stock( $variation, LocationStockService::LOCATION_POS, 1 );
 
 		$this->assert_product_modified_after( $parent->get_id(), $parent_modified_before );
-		$this->assertSame( $variation_modified_before, $this->get_product_modified_timestamp( $variation->get_id() ) );
+		$this->assert_product_modified_after( $variation->get_id(), $variation_modified_before );
+	}
+
+	/**
+	 * @testdox Should update parent-managed variation modified dates when parent POS stock changes.
+	 */
+	public function test_parent_location_stock_updates_parent_managed_variation_modified_dates(): void {
+		$parent    = $this->create_parent_managed_variation_product();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$this->assertInstanceOf( WC_Product::class, $variation );
+
+		$this->service->set_location_stock( $parent, LocationStockService::LOCATION_POS, 6 );
+		$parent_modified_before    = $this->set_product_modified_date_to_past( $parent );
+		$variation_modified_before = $this->set_product_modified_date_to_past( $variation );
+
+		$this->service->decrease_location_stock( $parent, LocationStockService::LOCATION_POS, 1 );
+
+		$this->assert_product_modified_after( $parent->get_id(), $parent_modified_before );
+		$this->assert_product_modified_after( $variation->get_id(), $variation_modified_before );
 	}
 
 	/**
@@ -328,6 +346,51 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$output = $this->get_rendered_variation_location_fields( $variation );
 
 		$this->assertSame( '', $output );
+	}
+
+	/**
+	 * @testdox Should render a variation POS stock field when stock is parent-managed.
+	 */
+	public function test_variation_location_stock_field_renders_for_parent_managed_stock(): void {
+		$parent    = $this->create_parent_managed_variation_product();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$this->assertInstanceOf( WC_Product::class, $variation );
+		$this->service->set_location_stock( $parent, LocationStockService::LOCATION_POS, 4 );
+
+		$output = $this->get_rendered_variation_location_fields( $variation );
+
+		$this->assertStringContainsString( 'name="variable_inventory_location_stock[pos][0]"', $output );
+		$this->assertStringContainsString( 'id="variable_inventory_stock_pos0"', $output );
+		$this->assertStringContainsString( 'value="0"', $output );
+		$this->assertStringNotContainsString( 'value="4"', $output );
+	}
+
+	/**
+	 * @testdox Should render the variation's own saved POS stock value before variation stock management is re-enabled.
+	 */
+	public function test_variation_location_stock_field_uses_variation_record_for_parent_managed_stock(): void {
+		$variation = $this->create_variation_with_own_stock();
+		$parent    = wc_get_product( $variation->get_parent_id() );
+		$this->assertInstanceOf( WC_Product::class, $parent );
+
+		$this->service->set_location_stock( $variation, LocationStockService::LOCATION_POS, 30 );
+
+		$parent->set_manage_stock( true );
+		$parent->save();
+		$variation->set_manage_stock( false );
+		$variation->save();
+
+		$this->service->set_location_stock( $parent, LocationStockService::LOCATION_POS, 4 );
+		$variation_id = $variation->get_id();
+		$this->clear_product_cache( $variation );
+		$variation = wc_get_product( $variation_id );
+		$this->assertInstanceOf( WC_Product::class, $variation );
+
+		$output = $this->get_rendered_variation_location_fields( $variation );
+
+		$this->assertEquals( 4, $this->service->get_location_stock( $variation, LocationStockService::LOCATION_POS ) );
+		$this->assertStringContainsString( 'value="30"', $output );
+		$this->assertStringNotContainsString( 'value="4"', $output );
 	}
 
 	/**
@@ -924,6 +987,26 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should update parent-managed variation modified dates when POS orders reduce stock.
+	 */
+	public function test_pos_order_reduction_updates_parent_managed_variation_modified_date(): void {
+		$parent    = $this->create_parent_managed_variation_product();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$this->assertInstanceOf( WC_Product::class, $variation );
+		$this->service->set_location_stock( $parent, LocationStockService::LOCATION_POS, 5 );
+		$order = $this->create_pos_order_for_product( $variation, 2 );
+
+		$parent_modified_before    = $this->set_product_modified_date_to_past( $parent );
+		$variation_modified_before = $this->set_product_modified_date_to_past( $variation );
+
+		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
+
+		$this->assertEquals( 3, $this->service->get_location_stock( $parent, LocationStockService::LOCATION_POS ) );
+		$this->assert_product_modified_after( $parent->get_id(), $parent_modified_before );
+		$this->assert_product_modified_after( $variation->get_id(), $variation_modified_before );
+	}
+
+	/**
 	 * @testdox Should restore POS stock when a POS order item quantity decreases.
 	 */
 	public function test_pos_order_item_quantity_decrease_adjusts_pos_stock_delta(): void {
@@ -974,6 +1057,20 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not expose location stock rows for products that do not manage stock.
+	 */
+	public function test_product_rest_response_exposes_empty_location_stock_for_unmanaged_stock(): void {
+		$product = $this->create_unmanaged_stock_product();
+
+		$request  = new \WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $response->get_data()['stock_status'] );
+		$this->assertSame( array(), $response->get_data()['location_stock'] );
+	}
+
+	/**
 	 * @testdox Should expose variation location_stock without replacing Core REST stock_quantity.
 	 */
 	public function test_variation_rest_response_exposes_location_stock_without_replacing_core_stock_quantity(): void {
@@ -1007,7 +1104,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$variation = $this->create_variation_with_own_stock();
 		$this->service->set_location_stock( $variation, LocationStockService::LOCATION_POS, 6 );
 
-		$row = $this->map_pos_catalog_variation( $variation, 'id,stock_quantity,stock_status' );
+		$row = $this->map_pos_catalog_variation( $variation, 'id,stock_quantity,stock_status,location_stock' );
 
 		$this->assertEquals( 11, $row['data']['stock_quantity'] );
 		$this->assertEquals( ProductStockStatus::IN_STOCK, $row['data']['stock_status'] );
@@ -1023,11 +1120,35 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$this->assertInstanceOf( WC_Product::class, $variation );
 		$this->service->set_location_stock( $parent, LocationStockService::LOCATION_POS, 4 );
 
-		$row = $this->map_pos_catalog_variation( $variation, 'id,stock_quantity,stock_status' );
+		$row = $this->map_pos_catalog_variation( $variation, 'id,stock_quantity,stock_status,location_stock' );
 
 		$this->assertEquals( 15, $row['data']['stock_quantity'] );
 		$this->assertEquals( ProductStockStatus::IN_STOCK, $row['data']['stock_status'] );
 		$this->assertEquals( 4, $row['data']['location_stock'][0]['quantity'] );
+	}
+
+	/**
+	 * @testdox Should respect requested fields for POS catalog location_stock.
+	 */
+	public function test_pos_catalog_does_not_include_location_stock_when_not_requested(): void {
+		$variation = $this->create_variation_with_own_stock();
+		$this->service->set_location_stock( $variation, LocationStockService::LOCATION_POS, 6 );
+
+		$row = $this->map_pos_catalog_variation( $variation, 'id,stock_quantity,stock_status' );
+
+		$this->assertArrayNotHasKey( 'location_stock', $row['data'] );
+	}
+
+	/**
+	 * @testdox Should expose empty POS catalog location_stock for unmanaged products.
+	 */
+	public function test_pos_catalog_exposes_empty_location_stock_for_unmanaged_stock(): void {
+		$product = $this->create_unmanaged_stock_product();
+
+		$row = $this->map_pos_catalog_product( $product, 'id,stock_status,location_stock' );
+
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $row['data']['stock_status'] );
+		$this->assertSame( array(), $row['data']['location_stock'] );
 	}
 
 	/**
@@ -1276,6 +1397,25 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Map a product through the POS catalog mapper.
+	 *
+	 * @param WC_Product $product Product.
+	 * @param string     $fields  Product fields.
+	 * @return array<string,mixed>
+	 */
+	private function map_pos_catalog_product( WC_Product $product, string $fields ): array {
+		$mapper = wc_get_container()->get( ProductMapper::class );
+		$this->assertInstanceOf( ProductMapper::class, $mapper );
+
+		try {
+			$mapper->set_fields( $fields );
+			return $mapper->map_product( $product );
+		} finally {
+			$mapper->set_fields( null );
+		}
+	}
+
+	/**
 	 * Clear product caches after directly backdating a test product.
 	 *
 	 * @param WC_Product $product Product object.
@@ -1330,6 +1470,19 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 			array(
 				'manage_stock'   => true,
 				'stock_quantity' => 15,
+			)
+		);
+	}
+
+	/**
+	 * Create a product that does not manage stock.
+	 */
+	private function create_unmanaged_stock_product(): WC_Product {
+		return WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock' => false,
+				'stock_status' => ProductStockStatus::IN_STOCK,
 			)
 		);
 	}

@@ -26,6 +26,20 @@ class LocationStockService {
 	public const LOCATION_POS = 'pos';
 
 	/**
+	 * Deferred modified-date update nesting level.
+	 *
+	 * @var int
+	 */
+	private $modified_date_update_deferral_level = 0;
+
+	/**
+	 * Product IDs queued for a deferred modified-date update.
+	 *
+	 * @var array<int,true>
+	 */
+	private $deferred_modified_date_product_ids = array();
+
+	/**
 	 * Get the inventory locations table name.
 	 */
 	public function get_locations_table_name(): string {
@@ -99,6 +113,25 @@ CREATE TABLE $product_inventory_table (
 	}
 
 	/**
+	 * Defer product modified-date updates until a group of stock writes completes.
+	 *
+	 * @param callable $callback Stock write callback.
+	 */
+	public function with_deferred_product_modified_date_updates( callable $callback ): void {
+		++$this->modified_date_update_deferral_level;
+
+		try {
+			$callback();
+		} finally {
+			--$this->modified_date_update_deferral_level;
+
+			if ( 0 === $this->modified_date_update_deferral_level ) {
+				$this->flush_deferred_product_modified_date_updates();
+			}
+		}
+	}
+
+	/**
 	 * Get an active location row by slug.
 	 *
 	 * @param string $slug Location slug.
@@ -163,15 +196,44 @@ CREATE TABLE $product_inventory_table (
 	 * @param string          $location_slug Location slug.
 	 */
 	public function get_location_stock( $product, string $location_slug ): float {
+		return $this->get_location_stock_for_inventory_key(
+			$this->get_product_inventory_key( $product ),
+			$location_slug
+		);
+	}
+
+	/**
+	 * Get product stock from its own inventory row, ignoring Core stock-owner resolution.
+	 *
+	 * Runtime stock movement should use get_location_stock() so parent-managed variations
+	 * follow Core's get_stock_managed_by_id() behavior. This method is for admin edit fields
+	 * that need to show the value stored directly on the product or variation being edited.
+	 *
+	 * @param \WC_Product|int $product       Product object or ID.
+	 * @param string          $location_slug Location slug.
+	 */
+	public function get_location_stock_for_product_record( $product, string $location_slug ): float {
+		return $this->get_location_stock_for_inventory_key(
+			$this->get_product_record_inventory_key( $product ),
+			$location_slug
+		);
+	}
+
+	/**
+	 * Get stock for an inventory key at a location.
+	 *
+	 * @param array{product_id:int,variation_id:int}|null $key           Product inventory key.
+	 * @param string                                      $location_slug Location slug.
+	 */
+	private function get_location_stock_for_inventory_key( ?array $key, string $location_slug ): float {
 		global $wpdb;
 
-		if ( ! $this->tables_exist() ) {
+		if ( ! $key || ! $this->tables_exist() ) {
 			return 0.0;
 		}
 
-		$key         = $this->get_product_inventory_key( $product );
 		$location_id = $this->get_location_id( $location_slug );
-		if ( ! $key || 0 === $location_id ) {
+		if ( 0 === $location_id ) {
 			return 0.0;
 		}
 
@@ -396,6 +458,36 @@ CREATE TABLE $product_inventory_table (
 	}
 
 	/**
+	 * Get product/variation key columns for the supplied product's own inventory row.
+	 *
+	 * @param \WC_Product|int $product Product object or ID.
+	 * @return array{product_id:int,variation_id:int}|null
+	 */
+	private function get_product_record_inventory_key( $product ): ?array {
+		$product = $product instanceof \WC_Product ? $product : wc_get_product( $product );
+		if ( ! $product instanceof \WC_Product || $product->get_id() <= 0 ) {
+			return null;
+		}
+
+		if ( $product->is_type( ProductType::VARIATION ) ) {
+			$parent_id = (int) $product->get_parent_id();
+			if ( $parent_id <= 0 ) {
+				return null;
+			}
+
+			return array(
+				'product_id'   => $parent_id,
+				'variation_id' => (int) $product->get_id(),
+			);
+		}
+
+		return array(
+			'product_id'   => (int) $product->get_id(),
+			'variation_id' => 0,
+		);
+	}
+
+	/**
 	 * Get the product object that owns stock for the supplied product.
 	 *
 	 * @param \WC_Product|int $product Product object or ID.
@@ -422,56 +514,162 @@ CREATE TABLE $product_inventory_table (
 			return;
 		}
 
+		$product_ids = $this->get_product_ids_to_touch_after_stock_update( $product );
+		if ( empty( $product_ids ) ) {
+			return;
+		}
+
+		if ( $this->modified_date_update_deferral_level > 0 ) {
+			foreach ( $product_ids as $product_id ) {
+				$this->deferred_modified_date_product_ids[ $product_id ] = true;
+			}
+			return;
+		}
+
+		$this->touch_product_modified_dates( $product_ids );
+	}
+
+	/**
+	 * Get product IDs whose catalog rows changed after a location stock write.
+	 *
+	 * @param \WC_Product|int $product Product object or ID.
+	 * @return array<int,int>
+	 */
+	private function get_product_ids_to_touch_after_stock_update( $product ): array {
+		$product = $product instanceof \WC_Product ? $product : wc_get_product( $product );
+		if ( ! $product instanceof \WC_Product ) {
+			return array();
+		}
+
 		$product_with_stock = $this->get_stock_managed_product( $product );
 		if ( ! $product_with_stock ) {
+			return array();
+		}
+
+		$product_ids = array( $product_with_stock->get_id() );
+		if ( $product->is_type( ProductType::VARIATION ) && $product->get_id() !== $product_with_stock->get_id() ) {
+			$product_ids[] = $product->get_id();
+		}
+
+		if ( $product_with_stock->is_type( ProductType::VARIABLE ) ) {
+			$product_ids = array_merge( $product_ids, $this->get_parent_managed_variation_ids( $product_with_stock ) );
+		}
+
+		return $this->normalize_product_ids( $product_ids );
+	}
+
+	/**
+	 * Get variation IDs that inherit stock from a parent product.
+	 *
+	 * @param \WC_Product $parent_product Parent product object.
+	 * @return array<int,int>
+	 */
+	private function get_parent_managed_variation_ids( \WC_Product $parent_product ): array {
+		$children = $this->normalize_product_ids( $parent_product->get_children() );
+		if ( empty( $children ) ) {
+			return array();
+		}
+
+		global $wpdb;
+
+		$children_sql = implode( ', ', array_map( 'absint', $children ) );
+
+		$variation_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $children_sql is an absint-normalized ID list.
+				"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value != %s AND post_id IN ($children_sql)",
+				'_manage_stock',
+				'yes'
+			)
+		);
+
+		return $this->normalize_product_ids( $variation_ids );
+	}
+
+	/**
+	 * Flush product modified-date updates queued during a deferred stock write group.
+	 */
+	private function flush_deferred_product_modified_date_updates(): void {
+		if ( empty( $this->deferred_modified_date_product_ids ) ) {
+			return;
+		}
+
+		$product_ids                              = array_keys( $this->deferred_modified_date_product_ids );
+		$this->deferred_modified_date_product_ids = array();
+
+		$this->touch_product_modified_dates( $product_ids );
+	}
+
+	/**
+	 * Update product modified dates.
+	 *
+	 * @param array<int,int> $product_ids Product IDs.
+	 */
+	private function touch_product_modified_dates( array $product_ids ): void {
+		$product_ids = $this->normalize_product_ids( $product_ids );
+		if ( empty( $product_ids ) ) {
 			return;
 		}
 
 		global $wpdb;
 
-		$product_id = $product_with_stock->get_id();
-		$wpdb->update(
-			$wpdb->posts,
-			array(
-				'post_modified'     => current_time( 'mysql' ),
-				'post_modified_gmt' => current_time( 'mysql', 1 ),
-			),
-			array(
-				'ID' => $product_id,
-			),
-			array( '%s', '%s' ),
-			array( '%d' )
+		$product_ids_sql = implode( ', ', array_map( 'absint', $product_ids ) );
+
+		$wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $product_ids_sql is an absint-normalized ID list.
+				"UPDATE {$wpdb->posts} SET post_modified = %s, post_modified_gmt = %s WHERE ID IN ($product_ids_sql)",
+				current_time( 'mysql' ),
+				current_time( 'mysql', 1 )
+			)
 		);
 
-		$this->clear_product_caches_after_modified_date_update( $product_with_stock );
+		$this->clear_product_caches_after_modified_date_update( $product_ids );
 	}
 
 	/**
-	 * Clear caches affected by directly touching a product modified date.
+	 * Clear caches affected by directly touching product modified dates.
 	 *
-	 * @param \WC_Product $product Product object.
+	 * @param array<int,int> $product_ids Product IDs.
 	 */
-	private function clear_product_caches_after_modified_date_update( \WC_Product $product ): void {
-		$product_id = $product->get_id();
-		$parent_id  = $product->get_parent_id( 'edit' );
+	private function clear_product_caches_after_modified_date_update( array $product_ids ): void {
+		$product_ids           = $this->normalize_product_ids( $product_ids );
+		$transient_product_ids = array();
 
-		clean_post_cache( $product_id );
-		wc_delete_product_transients( $product_id );
-		\WC_Cache_Helper::invalidate_cache_group( 'product_' . $product_id );
+		foreach ( $product_ids as $product_id ) {
+			$transient_product_ids[] = $product_id;
+			$parent_id               = wp_get_post_parent_id( $product_id );
 
-		if ( $parent_id ) {
-			wc_delete_product_transients( $parent_id );
-			\WC_Cache_Helper::invalidate_cache_group( 'product_' . $parent_id );
+			clean_post_cache( $product_id );
+			\WC_Cache_Helper::invalidate_cache_group( 'product_' . $product_id );
+
+			if ( $parent_id ) {
+				$transient_product_ids[] = $parent_id;
+				\WC_Cache_Helper::invalidate_cache_group( 'product_' . $parent_id );
+			}
+		}
+
+		$transient_product_ids = $this->normalize_product_ids( $transient_product_ids );
+		foreach ( $transient_product_ids as $product_id ) {
+			wc_delete_product_transients( $product_id );
 		}
 
 		if ( FeaturesUtil::feature_is_enabled( 'product_instance_caching' ) ) {
 			$product_cache = wc_get_container()->get( ProductCache::class );
-			$product_cache->remove( $product_id );
-
-			if ( $parent_id ) {
-				$product_cache->remove( $parent_id );
+			foreach ( $transient_product_ids as $product_id ) {
+				$product_cache->remove( $product_id );
 			}
 		}
+	}
+
+	/**
+	 * Normalize a list of product IDs.
+	 *
+	 * @param array<int|string,int|string> $product_ids Product IDs.
+	 * @return array<int,int>
+	 */
+	private function normalize_product_ids( array $product_ids ): array {
+		return array_values( array_unique( array_filter( array_map( 'absint', $product_ids ) ) ) );
 	}
 
 	/**

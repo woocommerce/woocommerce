@@ -164,7 +164,7 @@ class InventoryController {
 		add_action( 'woocommerce_rest_set_order_item', array( $this, 'snapshot_location_order_item_before_rest_save' ), 10, 2 );
 		add_filter( 'woocommerce_prevent_adjust_line_item_product_stock', array( $this, 'prevent_core_line_item_product_stock_adjustment' ), 10, 3 );
 		add_action( 'rest_api_init', array( $this, 'register_product_location_stock_rest_fields' ) );
-		add_filter( 'woocommerce_pos_catalog_map_product', array( $this, 'add_location_stock_to_pos_catalog_product' ), 10, 2 );
+		add_filter( 'woocommerce_pos_catalog_map_product', array( $this, 'add_location_stock_to_pos_catalog_product' ), 10, 3 );
 
 		if ( did_action( 'rest_api_init' ) ) {
 			$this->register_product_location_stock_rest_fields();
@@ -244,16 +244,12 @@ class InventoryController {
 			return;
 		}
 
-		$quantity = true === $variation_product->get_manage_stock( 'edit' )
-			? $this->location_stock_service->get_location_stock( $variation_product, LocationStockService::LOCATION_POS )
-			: 0;
-
 		woocommerce_wp_text_input(
 			array(
 				'id'                => "variable_inventory_stock_pos{$loop}",
 				'name'              => 'variable_inventory_location_stock[' . LocationStockService::LOCATION_POS . "][{$loop}]",
 				'label'             => esc_html__( 'POS stock', 'woocommerce' ),
-				'value'             => $quantity,
+				'value'             => $this->location_stock_service->get_location_stock_for_product_record( $variation_product, LocationStockService::LOCATION_POS ),
 				'type'              => 'number',
 				'custom_attributes' => array(
 					'step' => 'any',
@@ -352,21 +348,25 @@ class InventoryController {
 		}
 
 		$changes = array();
-		foreach ( $order->get_items() as $item ) {
-			if ( ! $item instanceof \WC_Order_Item_Product ) {
-				continue;
-			}
+		$this->location_stock_service->with_deferred_product_modified_date_updates(
+			function () use ( $order, $location_slug, &$changes ): void {
+				foreach ( $order->get_items() as $item ) {
+					if ( ! $item instanceof \WC_Order_Item_Product ) {
+						continue;
+					}
 
-			$change = $this->reduce_location_stock_for_order_item( $order, $item, $location_slug );
-			if ( is_wp_error( $change ) ) {
-				$order->add_order_note( $change->get_error_message(), 0, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
-				continue;
-			}
+					$change = $this->reduce_location_stock_for_order_item( $order, $item, $location_slug );
+					if ( is_wp_error( $change ) ) {
+						$order->add_order_note( $change->get_error_message(), 0, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
+						continue;
+					}
 
-			if ( $change ) {
-				$changes[] = $change;
+					if ( $change ) {
+						$changes[] = $change;
+					}
+				}
 			}
-		}
+		);
 
 		if ( empty( $changes ) ) {
 			return;
@@ -393,7 +393,12 @@ class InventoryController {
 			return;
 		}
 
-		$changes = $this->restore_location_stock_for_order_items( $order, $order->get_items(), $location_slug );
+		$changes = array();
+		$this->location_stock_service->with_deferred_product_modified_date_updates(
+			function () use ( $order, $location_slug, &$changes ): void {
+				$changes = $this->restore_location_stock_for_order_items( $order, $order->get_items(), $location_slug );
+			}
+		);
 		$this->clear_order_reduced_meta_if_done( $order );
 
 		if ( ! empty( $changes ) ) {
@@ -421,7 +426,12 @@ class InventoryController {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-			$changes = $this->restore_location_stock_for_order_items( $order, $order->get_items(), $location_slug, $refunded_line_items );
+			$changes = array();
+			$this->location_stock_service->with_deferred_product_modified_date_updates(
+				function () use ( $order, $location_slug, $refunded_line_items, &$changes ): void {
+					$changes = $this->restore_location_stock_for_order_items( $order, $order->get_items(), $location_slug, $refunded_line_items );
+				}
+			);
 			$this->clear_order_reduced_meta_if_done( $order );
 
 			if ( ! empty( $changes ) ) {
@@ -559,21 +569,24 @@ class InventoryController {
 	/**
 	 * Add POS location stock to POS catalog rows.
 	 *
-	 * @param array       $row     Mapped catalog product row.
-	 * @param \WC_Product $product Product object.
+	 * @param array            $row     Mapped catalog product row.
+	 * @param \WC_Product      $product Product object.
+	 * @param \WP_REST_Request $request REST request used to prepare the mapped data.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @return array
 	 */
-	public function add_location_stock_to_pos_catalog_product( array $row, \WC_Product $product ): array {
-		if ( ! $this->can_manage_pos_location_stock() || ! isset( $row['data'] ) || ! is_array( $row['data'] ) ) {
+	public function add_location_stock_to_pos_catalog_product( array $row, \WC_Product $product, \WP_REST_Request $request ): array {
+		if ( ! $this->can_manage_pos_location_stock() || ! isset( $row['data'] ) || ! is_array( $row['data'] ) || ! $this->catalog_request_includes_location_stock( $request ) ) {
+			return $row;
+		}
+
+		if ( ! empty( $row['data'][ self::LOCATION_STOCK_REST_FIELD ] ) ) {
 			return $row;
 		}
 
 		$location_stock = $this->get_product_location_stock_response_item( $product, LocationStockService::LOCATION_POS );
-		if ( empty( $location_stock ) ) {
-			return $row;
-		}
 
-		$row['data'][ self::LOCATION_STOCK_REST_FIELD ] = array( $location_stock );
+		$row['data'][ self::LOCATION_STOCK_REST_FIELD ] = empty( $location_stock ) ? array() : array( $location_stock );
 
 		return $row;
 	}
@@ -1109,6 +1122,10 @@ class InventoryController {
 	 * @return array<string,mixed>
 	 */
 	private function get_product_location_stock_response_item( \WC_Product $product, string $location_slug ): array {
+		if ( ! $product->managing_stock() ) {
+			return array();
+		}
+
 		$location = $this->location_stock_service->get_location( $location_slug );
 		if ( ! $location ) {
 			return array();
@@ -1131,6 +1148,28 @@ class InventoryController {
 	 */
 	private function get_location_stock_status( $quantity ): string {
 		return (float) wc_stock_amount( $quantity ) > 0.0 ? ProductStockStatus::IN_STOCK : ProductStockStatus::OUT_OF_STOCK;
+	}
+
+	/**
+	 * Determine whether a POS catalog request includes location_stock.
+	 *
+	 * @param \WP_REST_Request $request REST request used to prepare the mapped data.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 */
+	private function catalog_request_includes_location_stock( \WP_REST_Request $request ): bool {
+		$fields = $request->get_param( '_fields' );
+		if ( null === $fields || array() === $fields || '' === $fields ) {
+			return true;
+		}
+
+		foreach ( wp_parse_list( $fields ) as $field ) {
+			$field = trim( (string) $field );
+			if ( self::LOCATION_STOCK_REST_FIELD === $field || 0 === strpos( $field, self::LOCATION_STOCK_REST_FIELD . '.' ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
