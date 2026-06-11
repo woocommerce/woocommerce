@@ -2,9 +2,10 @@
 
 .promo-card {
 	background-color: #fff;
-	border: 1px solid $gray-200;
-	border-radius: 4px;
-	box-shadow: none;
+	border: none;
+	border-radius: calc(7px);
+	box-shadow: rgba(0, 0, 0, 0.1) 0 0 0 1px;
+	overflow: hidden;
 	padding: $large-gap;
 
 	&.has-background {
