@@ -131,8 +131,7 @@
 		"watch:build:project:esm": "node build.mjs --watch"
 	},
 	"peerDependencies": {
-		"@types/react": "18.3.x",
-		"@wordpress/data": "^10.0.2",
+		"@wordpress/data": "^10.19.0",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
 	},
