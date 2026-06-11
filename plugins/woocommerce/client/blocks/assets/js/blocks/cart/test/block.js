@@ -212,9 +212,7 @@ describe( 'Testing cart', () => {
 
 		await waitFor( () =>
 			expect(
-				document.querySelector(
-					'.wc-block-cart-item__total'
-				)
+				document.querySelector( '.wc-block-cart-item__total' )
 			).toHaveTextContent( '16€' )
 		);
 	} );
