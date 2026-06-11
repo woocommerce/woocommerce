@@ -259,6 +259,9 @@ MESSAGE;
 	/**
 	 * Data provider for test_handle_context_is_valid_json.
 	 *
+	 * Only values whose types survive a JSON round trip belong here: a zero-fraction
+	 * float like 1.0 encodes to 1 and decodes back as an integer, failing assertSame().
+	 *
 	 * @return array
 	 */
 	public function provide_context_values(): array {
