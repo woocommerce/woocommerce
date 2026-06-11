@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the PSR-4 upgrade fallback fataling when a foreign Composer ClassLoader's getPrefixesPsr4() returns a non-array; validate the map so it degrades to no fallback instead.

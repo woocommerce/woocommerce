@@ -160,14 +160,23 @@ class Autoloader {
 		// rebuilds a throwaway loader per miss from this captured map (for performance — the map
 		// is read once, not on every miss). Do NOT collapse this into a shared loader or a per-miss
 		// build() call: either reintroduces the negative-cache bug the fresh-per-miss design avoids.
-		// Wrapped so a foreign/malformed ClassLoader shape (an unexpected getPrefixesPsr4()) degrades
-		// to "no fallback" rather than fataling the bootstrap — matching build()'s own contract.
+		//
+		// A foreign/malformed ClassLoader shape must degrade to "no fallback" rather than fatal the
+		// bootstrap — matching build()'s own contract. The guard is twofold, because the map reaches
+		// find_scoped_file()'s `array $psr4_entries` parameter on every miss, outside the handler's
+		// own try/catch: the try/catch here handles a getPrefixesPsr4() that THROWS, and
+		// read_scoped_psr4_map() handles one that RETURNS a non-array (the method carries no
+		// return-type declaration, so an older/foreign loader can) — which would otherwise raise an
+		// uncatchable TypeError on the first autoload miss.
 		try {
 			$availability_probe = self::build_woocommerce_psr4_fallback();
 			if ( null === $availability_probe ) {
 				return null;
 			}
-			$psr4_entries = $availability_probe->getPrefixesPsr4();
+			$psr4_entries = self::read_scoped_psr4_map( $availability_probe );
+			if ( null === $psr4_entries ) {
+				return null;
+			}
 		} catch ( \Throwable $e ) {
 			return null;
 		}
@@ -259,6 +268,34 @@ class Autoloader {
 		$registered_handler = $handler;
 
 		return $handler;
+	}
+
+	/**
+	 * Read the scoped PSR-4 prefix map out of a built fallback loader, degrading to null on any
+	 * non-array shape.
+	 *
+	 * {@see ClassLoader::getPrefixesPsr4()} carries no return-type declaration, so an older or
+	 * foreign `Composer\Autoload\ClassLoader` — one another plugin or wp-cli loaded from a
+	 * different path, then reused by {@see self::build_woocommerce_psr4_fallback()} — may return a
+	 * non-array. The registered handler passes this map straight into {@see self::find_scoped_file()},
+	 * whose `array $psr4_entries` parameter would raise an uncatchable TypeError on the first
+	 * autoload miss, outside the handler's own try/catch. Validating here keeps the fallback's
+	 * degrade-don't-fatal contract whole, mirroring the is_array() guard build() already applies to
+	 * the file-sourced map.
+	 *
+	 * @internal Public only so {@see self::register_woocommerce_psr4_fallback()} and the unit tests
+	 *           can exercise it.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param ClassLoader $loader A loader returned by build_woocommerce_psr4_fallback().
+	 *
+	 * @return array<string, list<string>>|null The scoped PSR-4 map, or null on a non-array shape.
+	 */
+	public static function read_scoped_psr4_map( ClassLoader $loader ): ?array {
+		$psr4_entries = $loader->getPrefixesPsr4();
+
+		return is_array( $psr4_entries ) ? $psr4_entries : null;
 	}
 
 	/**

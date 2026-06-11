@@ -522,4 +522,53 @@ class AutoloaderTest extends \WC_Unit_Test_Case {
 			'The registered handler must be present on the SPL stack.'
 		);
 	}
+
+	/**
+	 * `ClassLoader::getPrefixesPsr4()` carries no return-type declaration, so an older or foreign
+	 * `Composer\Autoload\ClassLoader` reused from another path may return a non-array. The reader
+	 * must degrade that shape to null, because the map flows straight into find_scoped_file()'s
+	 * `array $psr4_entries` parameter on every autoload miss — outside the handler's try/catch — so
+	 * a non-array would raise an uncatchable TypeError and fatal the request.
+	 *
+	 * @testdox read_scoped_psr4_map() degrades to null on a foreign non-array shape.
+	 */
+	public function test_read_scoped_psr4_map_degrades_on_a_foreign_non_array_shape(): void {
+		// A foreign loader whose getPrefixesPsr4() returns a non-array (legal: the parent declares
+		// no return type). setPsr4() still works, so build() would treat it as a usable loader.
+		$foreign = new class() extends ClassLoader {
+			/**
+			 * Model a foreign/ancient loader that returns a non-array prefix map.
+			 *
+			 * @return string A deliberately non-array value.
+			 */
+			public function getPrefixesPsr4() {
+				return 'foreign-non-array-shape';
+			}
+		};
+
+		$this->assertNull(
+			Autoloader::read_scoped_psr4_map( $foreign ),
+			'A non-array getPrefixesPsr4() return must degrade to null, not flow into find_scoped_file().'
+		);
+	}
+
+	/**
+	 * A genuine loader returns its scoped PSR-4 map unchanged, so the handler keeps resolving
+	 * src classes normally.
+	 *
+	 * @testdox read_scoped_psr4_map() returns the array map from a genuine loader.
+	 */
+	public function test_read_scoped_psr4_map_returns_the_array_map_from_a_genuine_loader(): void {
+		$loader = new ClassLoader();
+		$loader->setPsr4( 'Automattic\\WooCommerce\\', array( dirname( WC_PLUGIN_FILE ) . '/src' ) );
+
+		$map = Autoloader::read_scoped_psr4_map( $loader );
+
+		$this->assertIsArray( $map, 'A genuine loader must yield an array map.' );
+		$this->assertArrayHasKey(
+			'Automattic\\WooCommerce\\',
+			$map,
+			'The scoped first-party prefix must be present in the returned map.'
+		);
+	}
 }
