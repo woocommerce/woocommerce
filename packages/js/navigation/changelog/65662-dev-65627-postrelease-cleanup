@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: dev
 
-Placeholder for AI to generate specific messages per affected package.
+Add react-dom to peerDependencies to follow the monorepo convention of declaring react and react-dom together.

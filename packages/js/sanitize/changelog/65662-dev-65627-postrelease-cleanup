@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Placeholder for AI to generate specific messages per affected package.
+Remove incorrect React peer dependencies; sanitize is a pure string sanitization utility with no React imports or JSX.
