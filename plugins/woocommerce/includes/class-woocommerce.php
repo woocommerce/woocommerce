@@ -368,13 +368,11 @@ final class WooCommerce {
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
 		$container->get( WebhookUtil::class );
-		$container->get( Marketplace::class );
 		$container->get( TimeUtil::class );
 		$container->get( ComingSoonAdminBarBadge::class );
 		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
 		$container->get( OrderCountCacheService::class );
-		$container->get( EmailImprovements::class );
 		$container->get( DeferredEmailQueue::class );
 		$container->get( AddressProviderController::class );
 		$container->get( AbilitiesRegistry::class );
@@ -397,13 +395,9 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionBlocksController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
 		$container->get( EmailLogger::class )->register();
-		$container->get( VisualAttributeTermAdmin::class )->register();
 		$container->get( Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Agentic\AgenticController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
@@ -411,14 +405,45 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
 
-		// Classes inheriting from RestApiControllerBase.
-		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Emails\EmailListingRestController::class )->register();
+		// Classes that only register admin-side hooks (admin screens, admin-ajax, settings pages,
+		// tracker snapshots). They are not resolved on regular frontend page loads, where none of
+		// their hooks can fire. REST and cron requests are included: settings are saved through the
+		// REST API and tracker data is collected from scheduled actions.
+		if ( $this->is_admin_side_request() ) {
+			$container->get( Marketplace::class );
+			$container->get( EmailImprovements::class );
+			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register();
+			$container->get( VisualAttributeTermAdmin::class )->register();
+		}
+
+		// Classes inheriting from RestApiControllerBase. Their register() method only adds them to the
+		// 'woocommerce_rest_api_get_rest_namespaces' filter, which the REST API server applies on
+		// 'rest_api_init'. A single shared filter callback that resolves them on demand avoids
+		// instantiating the controllers (and their dependencies) on requests that never initialize
+		// the REST API.
+		add_filter(
+			'woocommerce_rest_api_get_rest_namespaces',
+			static function ( $namespaces ) {
+				$rest_controller_classes = array(
+					Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class,
+					Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class,
+					Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class,
+					Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class,
+					Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController::class,
+					Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class,
+					Automattic\WooCommerce\Internal\Admin\Emails\EmailListingRestController::class,
+				);
+
+				$container = wc_get_container();
+				foreach ( $rest_controller_classes as $rest_controller_class ) {
+					$namespaces = $container->get( $rest_controller_class )->handle_woocommerce_rest_api_get_rest_namespaces( $namespaces );
+				}
+
+				return $namespaces;
+			}
+		);
 
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
@@ -645,6 +670,23 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Returns true for request types on which admin-side functionality may run: admin screens
+	 * (including admin-ajax), REST API, cron and WP-CLI. Returns false only for regular frontend
+	 * page loads, where purely admin-side hooks can never fire.
+	 *
+	 * REST requests are included because admin features are commonly driven through the REST API
+	 * (wc-admin), and cron because Action Scheduler/WP-Cron jobs registered by admin-side classes
+	 * must remain runnable when executed from cron.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return bool
+	 */
+	private function is_admin_side_request(): bool {
+		return $this->is_request( 'admin' ) || $this->is_rest_api_request() || defined( 'DOING_CRON' ) || ( defined( 'WP_CLI' ) && WP_CLI );
+	}
+
+	/**
 	 * What type of request is this?
 	 *
 	 * @param  string $type admin, ajax, cron or frontend.
@@ -677,140 +719,49 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-autoloader.php';
 
 		/**
-		 * Interfaces.
+		 * Interfaces, traits, abstract classes and data stores are loaded on demand by WC_Autoloader
+		 * (see its CLASS_MAP constant). They are intentionally not loaded eagerly here: referencing
+		 * any of these classes triggers the autoloader at any point after this method has run.
 		 */
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-abstract-order-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-coupon-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-customer-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-customer-download-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-customer-download-log-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-object-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-item-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-item-product-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-item-type-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-refund-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-payment-token-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-product-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-product-variable-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-shipping-zone-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-logger-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-webhooks-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-queue-interface.php';
-
-		/**
-		 * Core traits.
-		 */
-		include_once WC_ABSPATH . 'includes/traits/trait-wc-item-totals.php';
-
-		/**
-		 * Abstract classes.
-		 */
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-address-provider.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-object-query.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-product.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-order.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-settings-api.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-shipping-method.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-gateway.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-integration.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-log-handler.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-deprecated-hooks.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-session.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-privacy.php';
 
 		/**
 		 * Core classes.
+		 *
+		 * Only files that have side effects at include time (registering hooks, shortcodes, post
+		 * types...) or whose classes are instantiated unconditionally on every request are loaded
+		 * here. Plain class definitions (WC_Discounts, WC_Cart_Totals, data stores, queue, Tracks
+		 * and so on) are loaded on demand by WC_Autoloader.
 		 */
 		include_once WC_ABSPATH . 'includes/wc-core-functions.php';
-		include_once WC_ABSPATH . 'includes/class-wc-datetime.php';
 		include_once WC_ABSPATH . 'includes/class-wc-post-types.php';
 		include_once WC_ABSPATH . 'includes/class-wc-install.php';
-		include_once WC_ABSPATH . 'includes/class-wc-geolocation.php';
 		include_once WC_ABSPATH . 'includes/class-wc-download-handler.php';
 		include_once WC_ABSPATH . 'includes/class-wc-comments.php';
 		include_once WC_ABSPATH . 'includes/class-wc-post-data.php';
 		include_once WC_ABSPATH . 'includes/class-wc-ajax.php';
 		include_once WC_ABSPATH . 'includes/class-wc-emails.php';
-		include_once WC_ABSPATH . 'includes/class-wc-data-exception.php';
 		include_once WC_ABSPATH . 'includes/class-wc-query.php';
-		include_once WC_ABSPATH . 'includes/class-wc-meta-data.php';
 		include_once WC_ABSPATH . 'includes/class-wc-order-factory.php';
-		include_once WC_ABSPATH . 'includes/class-wc-order-query.php';
 		include_once WC_ABSPATH . 'includes/class-wc-product-factory.php';
-		include_once WC_ABSPATH . 'includes/class-wc-product-query.php';
-		include_once WC_ABSPATH . 'includes/class-wc-payment-tokens.php';
-		include_once WC_ABSPATH . 'includes/class-wc-shipping-zone.php';
-		include_once WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-cc.php';
-		include_once WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-echeck.php';
 		include_once WC_ABSPATH . 'includes/class-wc-countries.php';
 		include_once WC_ABSPATH . 'includes/class-wc-integrations.php';
 		include_once WC_ABSPATH . 'includes/class-wc-cache-helper.php';
 		include_once WC_ABSPATH . 'includes/class-wc-https.php';
 		include_once WC_ABSPATH . 'includes/class-wc-deprecated-action-hooks.php';
 		include_once WC_ABSPATH . 'includes/class-wc-deprecated-filter-hooks.php';
-		include_once WC_ABSPATH . 'includes/class-wc-background-emailer.php';
-		include_once WC_ABSPATH . 'includes/class-wc-discounts.php';
-		include_once WC_ABSPATH . 'includes/class-wc-cart-totals.php';
-		include_once WC_ABSPATH . 'includes/customizer/class-wc-shop-customizer.php';
 		include_once WC_ABSPATH . 'includes/class-wc-regenerate-images.php';
 		include_once WC_ABSPATH . 'includes/class-wc-privacy.php';
 		include_once WC_ABSPATH . 'includes/class-wc-structured-data.php';
 		include_once WC_ABSPATH . 'includes/class-wc-shortcodes.php';
-		include_once WC_ABSPATH . 'includes/class-wc-logger.php';
-		include_once WC_ABSPATH . 'includes/queue/class-wc-action-queue.php';
-		include_once WC_ABSPATH . 'includes/queue/class-wc-queue.php';
-		include_once WC_ABSPATH . 'includes/admin/marketplace-suggestions/class-wc-marketplace-updater.php';
-		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-marketplace-promotions.php';
-		include_once WC_ABSPATH . 'includes/blocks/class-wc-blocks-utils.php';
-
-		/**
-		 * Data stores - used to store and retrieve CRUD object data from the database.
-		 */
-		include_once WC_ABSPATH . 'includes/class-wc-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-data-store-wp.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-coupon-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-grouped-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-variable-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-variation-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/abstract-wc-order-item-type-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-coupon-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-fee-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-product-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-shipping-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-tax-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-payment-token-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store-session.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-customer-download-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-customer-download-log-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-shipping-zone-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/abstract-wc-order-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-refund-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-webhook-data-store.php';
 
 		/**
 		 * REST API.
+		 *
+		 * These two files register authentication filters and the wc-auth endpoint handlers at
+		 * include time, so they must be loaded eagerly on every request type.
 		 */
 		include_once WC_ABSPATH . 'includes/class-wc-rest-authentication.php';
-		include_once WC_ABSPATH . 'includes/class-wc-rest-exception.php';
 		include_once WC_ABSPATH . 'includes/class-wc-auth.php';
-		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
-
-		/**
-		 * Tracks.
-		 */
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
 
 		/**
 		 * WCCOM Site.
@@ -836,6 +787,16 @@ final class WooCommerce {
 			// Simulate loading plugin for the legacy reports.
 			// This will be removed after moving the legacy reports to a separate plugin.
 			include_once WC_ABSPATH . 'includes/admin/woocommerce-legacy-reports.php';
+			// Registers the admin_init hook that sets the Tracks identity cookie, which can only fire in admin.
+			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
+		}
+
+		// These files register admin screen hooks and Action Scheduler/WP-Cron job callbacks at include
+		// time. They are not needed on regular frontend page loads, but must be loaded for cron and REST
+		// requests so their scheduled job callbacks remain available when the jobs run.
+		if ( $this->is_admin_side_request() ) {
+			include_once WC_ABSPATH . 'includes/admin/marketplace-suggestions/class-wc-marketplace-updater.php';
+			include_once WC_ABSPATH . 'includes/admin/class-wc-admin-marketplace-promotions.php';
 		}
 
 		// We load frontend includes in the post editor, because they may be invoked via pre-loading of blocks.
