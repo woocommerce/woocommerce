@@ -686,7 +686,7 @@ class PageController {
 	 *
 	 * @return string
 	 */
-	private function format_line( string $line, int $line_number ): string {
+	protected function format_line( string $line, int $line_number ): string {
 		$classes = array( 'line' );
 
 		$line = esc_html( $line );
