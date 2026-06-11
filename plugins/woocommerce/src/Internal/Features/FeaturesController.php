@@ -451,11 +451,10 @@ class FeaturesController {
 					'Send a reminder email to shoppers who didn\'t finish checking out.',
 					'woocommerce'
 				),
-				// Skip compatibility checks like the other opt-in transactional-email features.
-				'skip_compatibility_checks'    => true,
+				'skip_compatibility_checks'    => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
-				'is_experimental'              => false,
+				'is_experimental'              => true,
 			),
 			'email_improvements'                 => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
@@ -625,7 +624,7 @@ class FeaturesController {
 					'Enable push notifications for the WooCommerce mobile apps to receive order notifications and store updates.',
 					'woocommerce'
 				),
-				'enabled_by_default'           => false,
+				'enabled_by_default'           => true,
 				'is_experimental'              => true,
 				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => false,
