@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix crash when opening the typography styles panel in the email editor for elements without typography styles defined.
