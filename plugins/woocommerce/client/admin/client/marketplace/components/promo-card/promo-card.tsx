@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
+import { Button, Card, CardBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
@@ -127,25 +127,27 @@ const PromoCard = ( {
 	}
 
 	return (
-		<div className={ classNames }>
-			{ promotion?.style === 'has-background' ? (
-				<>
-					<div className="promo-content-links">
-						{ content }
-						{ links }
-					</div>
-					{ getImage() }
-				</>
-			) : (
-				<>
-					<div className="promo-content-image">
-						{ content }
+		<Card className={ classNames }>
+			<CardBody className="promo-card__body" size="custom">
+				{ promotion?.style === 'has-background' ? (
+					<>
+						<div className="promo-content-links">
+							{ content }
+							{ links }
+						</div>
 						{ getImage() }
-					</div>
-					{ links }
-				</>
-			) }
-		</div>
+					</>
+				) : (
+					<>
+						<div className="promo-content-image">
+							{ content }
+							{ getImage() }
+						</div>
+						{ links }
+					</>
+				) }
+			</CardBody>
+		</Card>
 	);
 };
 
