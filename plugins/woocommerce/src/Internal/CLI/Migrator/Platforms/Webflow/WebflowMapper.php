@@ -44,6 +44,13 @@ class WebflowMapper implements PlatformMapperInterface {
 	private array $fields_to_process = array();
 
 	/**
+	 * Map of ISO currency code => minor-unit count, lazily built from core's locale-info.
+	 *
+	 * @var array<string,int>|null
+	 */
+	private ?array $currency_decimals = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param array $args Optional arguments. Recognized keys:
@@ -597,6 +604,10 @@ class WebflowMapper implements PlatformMapperInterface {
 	/**
 	 * Convert a Webflow money object `{ value: int (minor units), unit: "USD" }` into a decimal string.
 	 *
+	 * The number of minor units per major unit varies by currency (e.g. JPY has 0,
+	 * KWD has 3, most have 2), so the divisor is derived from the currency's
+	 * `num_decimals` rather than a hardcoded `/ 100`.
+	 *
 	 * @param mixed $money Webflow money object.
 	 * @return string|null
 	 */
@@ -608,7 +619,33 @@ class WebflowMapper implements PlatformMapperInterface {
 		if ( $minor < 0 ) {
 			return null;
 		}
-		return number_format( $minor / 100, 2, '.', '' );
+		$unit     = isset( $money->unit ) ? (string) $money->unit : 'USD';
+		$decimals = $this->get_currency_decimals( $unit );
+		return number_format( $minor / ( 10 ** $decimals ), $decimals, '.', '' );
+	}
+
+	/**
+	 * Get the number of decimal places (minor units) for an ISO currency code.
+	 *
+	 * Reads core's `i18n/locale-info.php` so the migrator stays in sync with
+	 * WooCommerce's own per-currency data. Falls back to 2 for unknown codes.
+	 *
+	 * @param string $currency ISO 4217 currency code.
+	 * @return int
+	 */
+	private function get_currency_decimals( string $currency ): int {
+		if ( null === $this->currency_decimals ) {
+			$this->currency_decimals = array();
+			$locale_info             = include WC()->plugin_path() . '/i18n/locale-info.php';
+			if ( is_array( $locale_info ) ) {
+				foreach ( $locale_info as $info ) {
+					if ( isset( $info['currency_code'], $info['num_decimals'] ) ) {
+						$this->currency_decimals[ $info['currency_code'] ] = (int) $info['num_decimals'];
+					}
+				}
+			}
+		}
+		return $this->currency_decimals[ strtoupper( $currency ) ] ?? 2;
 	}
 
 	/**
