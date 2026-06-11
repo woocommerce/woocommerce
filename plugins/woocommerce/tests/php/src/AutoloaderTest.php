@@ -329,6 +329,57 @@ class AutoloaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The redeclare guard must also skip a file the handler never touched but that some
+	 * OTHER mechanism (the primary autoloader, a manual require) already executed. This is
+	 * the get_included_files() branch of the guard: the handler's own $loaded/$attempted
+	 * sets know nothing about the file, so only that check stands between a re-probe and
+	 * an uncatchable "Cannot redeclare class" fatal. If the guard regresses, this test
+	 * fatals the PHPUnit process rather than failing an assertion.
+	 *
+	 * @testdox the registered handler never re-executes a file another mechanism already loaded.
+	 */
+	public function test_registered_handler_skips_a_file_another_mechanism_loaded(): void {
+		$handler = Autoloader::register_woocommerce_psr4_fallback();
+		$this->assertInstanceOf( \Closure::class, $handler, 'Bootstrap must register a handler.' );
+
+		$suffix = 'ReproForeign' . str_replace( '.', '', uniqid( '', true ) );
+		$dir    = dirname( WC_PLUGIN_FILE ) . '/src/' . $suffix;
+		$file   = $dir . '/Widget.php';
+		$class  = 'Automattic\\WooCommerce\\' . $suffix . '\\Widget';
+
+		try {
+			wp_mkdir_p( $dir );
+			// A rogue file: parses fine but declares a class that does not match its PSR-4 path,
+			// so a probe for Widget keeps resolving to it without ever declaring Widget.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture; WP_Filesystem adds no value here.
+			file_put_contents( $file, "<?php\nnamespace Automattic\\WooCommerce\\{$suffix};\nclass Mismatch {}\n" );
+			clearstatcache( true, $file );
+
+			// Another mechanism — not the handler — executes the file (declares Mismatch).
+			require $file;
+			$this->assertTrue(
+				in_array( realpath( $file ), get_included_files(), true ),
+				'Precondition: the file must be on record as executed outside the handler.'
+			);
+
+			// The probe resolves the same file; the guard must skip it instead of
+			// re-executing (which would be an uncatchable "Cannot redeclare class" fatal).
+			$handler( $class );
+			$this->assertFalse(
+				class_exists( $class, false ),
+				'A probe of a file another mechanism executed must degrade to a miss.'
+			);
+		} finally {
+			if ( file_exists( $file ) ) {
+				wp_delete_file( $file );
+			}
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture cleanup.
+			}
+		}
+	}
+
+	/**
 	 * A torn file that COMPILES but fails while linking — e.g. a class whose parent is not
 	 * written yet during a file-by-file upgrade — must also stay retryable. PHP records a
 	 * plain include's path in get_included_files() after compilation but BEFORE the link
