@@ -1,7 +1,6 @@
 module.exports = [
 	// wc-admin packages
 	'@woocommerce/admin-layout',
-	'@woocommerce/block-templates',
 	'@woocommerce/components',
 	'@woocommerce/csv-export',
 	'@woocommerce/currency',

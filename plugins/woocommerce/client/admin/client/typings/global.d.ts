@@ -60,11 +60,9 @@ declare global {
 			'product-custom-fields': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;
-			'products-catalog-api': boolean;
 			'settings-ui': boolean;
 			'wc-pay-promotion': boolean;
 			'launch-your-store': boolean;
-			'use-wp-horizon': boolean;
 			'rest-api-v4': boolean;
 			'order-detail-redesign': boolean;
 			'product-variations-classic-redesign': boolean;
