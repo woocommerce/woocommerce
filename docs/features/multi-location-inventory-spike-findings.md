@@ -57,11 +57,15 @@ Migration assessment: milestone 1 is plausibly a contained backend project. Swit
 
 - `plugins/woocommerce/src/Internal/Inventory/LocationStockService.php`
 - `plugins/woocommerce/src/Internal/Inventory/InventoryController.php`
+- `plugins/woocommerce/src/Internal/Inventory/LocationStockAdminController.php`
+- `plugins/woocommerce/src/Internal/Inventory/LocationStockInstaller.php`
 - `plugins/woocommerce/src/Internal/Inventory/LocationStockOrderController.php`
+- `plugins/woocommerce/src/Internal/Inventory/LocationStockRestApiHooks.php`
 - `plugins/woocommerce/includes/class-woocommerce.php`
 - `plugins/woocommerce/src/Internal/Features/FeaturesController.php`
 - `plugins/woocommerce/includes/class-wc-install.php` for uninstall table cleanup only
-- `plugins/woocommerce/tests/php/src/Internal/Inventory/LocationStockServiceTest.php`
+- `plugins/woocommerce/tests/php/src/Internal/Inventory/LocationStock*Test.php`
+- `plugins/woocommerce/tests/php/src/Internal/Inventory/LocationStockTestCase.php`
 
 Removed from this branch compared with the native aggregate spike:
 
@@ -75,8 +79,7 @@ Removed from this branch compared with the native aggregate spike:
 
 - Syntax lint passed for the changed PHP files after the POS-only pivot and after the review pass.
 - Existing focused tests have been rewritten to cover POS-only reduce, restore, refund restock, order edit deltas, REST rejection on insufficient or unknown POS stock locations, parent-managed variations, and product REST location stock exposure.
-- Targeted PHPUnit command attempted: `npm run test:php -- --filter LocationStockServiceTest`.
-- Targeted PHPUnit is currently blocked by local environment setup: the expected WordPress test library path under the macOS temp directory is missing, Docker/OrbStack is not reachable, and local `mysql`, `mysqladmin`, and `svn` binaries are not installed.
+- Focused PHPUnit command passed: `pnpm --filter=@woocommerce/plugin-woocommerce test:php:env -- --filter 'LocationStock(Installer|Service|AdminController|OrderController|RestApiHooks)Test'`.
 - Full PHPUnit suite has not been run.
 - No app-side POS stock display was built; the branch only exposes location stock on the existing product REST response.
 
