@@ -290,8 +290,11 @@ class DataUtils {
 			}
 
 			// Validate refund total is not greater than the item total (including tax).
+			// Round both sides to price decimals before comparing — the raw float sum
+			// (e.g. 29.97 + 2.66) can land a hair below the rounded refund_total and
+			// spuriously reject full-line refunds, including auto-computed totals.
 			$item_total_with_tax = $item->get_total() + $item->get_total_tax();
-			if ( isset( $line_item['refund_total'] ) && $item_total_with_tax < $line_item['refund_total'] ) {
+			if ( isset( $line_item['refund_total'] ) && NumberUtil::round( (float) $item_total_with_tax, wc_get_price_decimals() ) < NumberUtil::round( (float) $line_item['refund_total'], wc_get_price_decimals() ) ) {
 				return new WP_Error(
 					'invalid_refund_amount',
 					sprintf(
