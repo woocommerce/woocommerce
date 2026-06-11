@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Inventory;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\Inventory\InventoryController;
+use Automattic\WooCommerce\Internal\Inventory\LocationStockInstaller;
 use Automattic\WooCommerce\Internal\Inventory\LocationStockService;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\ProductMapper;
@@ -19,6 +20,8 @@ use WC_REST_Unit_Test_Case;
  * Tests for POS location stock.
  *
  * @covers \Automattic\WooCommerce\Internal\Inventory\InventoryController
+ * @covers \Automattic\WooCommerce\Internal\Inventory\LocationStockInstaller
+ * @covers \Automattic\WooCommerce\Internal\Inventory\LocationStockRestApiHooks
  * @covers \Automattic\WooCommerce\Internal\Inventory\LocationStockService
  */
 class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
@@ -36,6 +39,13 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	 * @var InventoryController
 	 */
 	private InventoryController $controller;
+
+	/**
+	 * Installer under test.
+	 *
+	 * @var LocationStockInstaller
+	 */
+	private LocationStockInstaller $installer;
 
 	/**
 	 * Database utility.
@@ -80,14 +90,15 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 
 		$this->previous_feature_option              = get_option( InventoryController::FEATURE_OPTION, null );
 		$this->previous_manage_stock_option         = get_option( 'woocommerce_manage_stock', null );
-		$this->previous_tables_created_option       = get_option( InventoryController::TABLES_CREATED_OPTION, null );
-		$this->previous_pos_location_created_option = get_option( InventoryController::POS_LOCATION_CREATED_OPTION, null );
+		$this->previous_tables_created_option       = get_option( LocationStockInstaller::TABLES_CREATED_OPTION, null );
+		$this->previous_pos_location_created_option = get_option( LocationStockInstaller::POS_LOCATION_CREATED_OPTION, null );
 
 		update_option( InventoryController::FEATURE_OPTION, 'yes' );
 		update_option( 'woocommerce_manage_stock', 'yes' );
 
 		$this->service       = wc_get_container()->get( LocationStockService::class );
 		$this->controller    = wc_get_container()->get( InventoryController::class );
+		$this->installer     = wc_get_container()->get( LocationStockInstaller::class );
 		$this->database_util = wc_get_container()->get( DatabaseUtil::class );
 
 		$this->create_inventory_tables();
@@ -118,8 +129,8 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->restore_option( InventoryController::FEATURE_OPTION, $this->previous_feature_option );
 		$this->restore_option( 'woocommerce_manage_stock', $this->previous_manage_stock_option );
-		$this->restore_option( InventoryController::TABLES_CREATED_OPTION, $this->previous_tables_created_option );
-		$this->restore_option( InventoryController::POS_LOCATION_CREATED_OPTION, $this->previous_pos_location_created_option );
+		$this->restore_option( LocationStockInstaller::TABLES_CREATED_OPTION, $this->previous_tables_created_option );
+		$this->restore_option( LocationStockInstaller::POS_LOCATION_CREATED_OPTION, $this->previous_pos_location_created_option );
 
 		parent::tearDown();
 	}
@@ -129,26 +140,26 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_tables_are_not_created_when_feature_is_disabled(): void {
 		update_option( InventoryController::FEATURE_OPTION, 'no' );
-		delete_option( InventoryController::TABLES_CREATED_OPTION );
+		delete_option( LocationStockInstaller::TABLES_CREATED_OPTION );
 		$this->drop_inventory_tables();
 
-		$this->controller->maybe_create_db_tables();
+		$this->installer->maybe_create_db_tables();
 
 		$this->assertFalse( $this->service->tables_exist(), 'Inventory tables should not exist when the feature is disabled.' );
-		$this->assertSame( 'no', get_option( InventoryController::TABLES_CREATED_OPTION, 'no' ) );
+		$this->assertSame( 'no', get_option( LocationStockInstaller::TABLES_CREATED_OPTION, 'no' ) );
 	}
 
 	/**
 	 * @testdox Should verify dbDelta results and configure the POS location when the feature is enabled.
 	 */
 	public function test_tables_are_created_and_verified_when_feature_is_enabled(): void {
-		delete_option( InventoryController::TABLES_CREATED_OPTION );
+		delete_option( LocationStockInstaller::TABLES_CREATED_OPTION );
 		$this->drop_inventory_tables();
 
-		$this->controller->maybe_create_db_tables();
+		$this->installer->maybe_create_db_tables();
 
 		$this->assertTrue( $this->service->tables_exist(), 'Inventory tables should exist after dbDelta runs.' );
-		$this->assertSame( 'yes', get_option( InventoryController::TABLES_CREATED_OPTION ) );
+		$this->assertSame( 'yes', get_option( LocationStockInstaller::TABLES_CREATED_OPTION ) );
 		$this->assertSame( 'POS', $this->service->get_location( LocationStockService::LOCATION_POS )['name'] );
 		$this->assertNull( $this->service->get_location( 'web' ), 'The POS-only milestone should not seed a web location row.' );
 	}
@@ -157,11 +168,11 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Should configure the POS location when the inventory tables already exist.
 	 */
 	public function test_existing_tables_configure_pos_location_when_feature_is_enabled(): void {
-		update_option( InventoryController::TABLES_CREATED_OPTION, 'yes' );
-		delete_option( InventoryController::POS_LOCATION_CREATED_OPTION );
+		update_option( LocationStockInstaller::TABLES_CREATED_OPTION, 'yes' );
+		delete_option( LocationStockInstaller::POS_LOCATION_CREATED_OPTION );
 		$this->remove_pos_location();
 
-		$this->controller->maybe_create_db_tables();
+		$this->installer->maybe_create_db_tables();
 
 		$this->assertSame( 'POS', $this->service->get_location( LocationStockService::LOCATION_POS )['name'] );
 	}
