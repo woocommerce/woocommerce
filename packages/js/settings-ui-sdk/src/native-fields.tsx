@@ -1,3 +1,4 @@
+/* eslint-disable @wordpress/no-unsafe-wp-apis -- NumberControl has no stable export; required for the design-spec custom spin controls. */
 /**
  * External dependencies
  */
@@ -7,6 +8,7 @@ import {
 	SelectControl,
 	TextControl,
 	TextareaControl,
+	__experimentalNumberControl as NumberControl,
 } from '@wordpress/components';
 import { createElement, RawHTML } from '@wordpress/element';
 
@@ -25,8 +27,7 @@ type TextInputType =
 	| 'time'
 	| 'email'
 	| 'url'
-	| 'tel'
-	| 'number';
+	| 'tel';
 
 const textInputTypes: TextInputType[] = [
 	'text',
@@ -37,7 +38,6 @@ const textInputTypes: TextInputType[] = [
 	'email',
 	'url',
 	'tel',
-	'number',
 ];
 
 const toStringValue = ( value: SettingsValue ) =>
@@ -149,6 +149,23 @@ export const NativeSettingsField = ( {
 					) ) }
 				</select>
 			</BaseControl>
+		);
+	}
+
+	if ( field.type === 'number' ) {
+		return (
+			<NumberControl
+				className="wc-settings-ui__control"
+				label={ field.label }
+				help={ getHelp( field.description ) }
+				value={ toStringValue( value ) }
+				placeholder={ field.placeholder }
+				disabled={ field.disabled }
+				onChange={ ( next ) => onChange( next ?? '' ) }
+				spinControls="custom"
+				__next40pxDefaultSize
+				{ ...field.customAttributes }
+			/>
 		);
 	}
 

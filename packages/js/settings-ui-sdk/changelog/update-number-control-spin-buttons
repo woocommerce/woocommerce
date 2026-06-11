@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Render number fields with NumberControl and custom +/- spin controls instead of a native number input.
