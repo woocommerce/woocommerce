@@ -976,4 +976,22 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 		$products_list_after = $this->version_generator->get_version( 'list_products', false );
 		$this->assertNotNull( $products_list_after, 'Products list version string should NOT be deleted when variation is deleted' );
 	}
+
+	/**
+	 * @testdox Invalidating a variation does not fatal and invalidates the parent when the object cache returns the cached parent ID as a string.
+	 */
+	public function test_string_cached_parent_id_is_normalized_and_parent_invalidated(): void {
+		$variation_id = 472;
+		$parent_id    = 462;
+
+		wp_cache_set( "wc_variation_parent_{$variation_id}", (string) $parent_id, 'woocommerce' );
+		$this->version_generator->generate_version( "product_{$parent_id}" );
+
+		$this->sut->handle_woocommerce_updated_product_attribute_summary( $variation_id );
+
+		$this->assertNull(
+			$this->version_generator->get_version( "product_{$parent_id}", false ),
+			'Parent should be invalidated, proving the string parent ID was cast to int'
+		);
+	}
 }

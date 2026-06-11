@@ -737,9 +737,12 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 					$caps[] = 'do_not_allow';
 				} elseif ( wc_current_user_has_role( 'shop_manager' ) ) {
 					// Shop managers can only edit customer info.
-					$userdata                    = get_userdata( $args[0] );
+					$userdata = get_userdata( $args[0] );
+					if ( ! $userdata instanceof WP_User ) {
+						break;
+					}
 					$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-					if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
+					if ( ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
 						$caps[] = 'do_not_allow';
 					}
 				}

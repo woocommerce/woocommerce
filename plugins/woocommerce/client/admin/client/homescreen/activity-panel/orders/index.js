@@ -31,6 +31,7 @@ import {
 	ActivityCardPlaceholder,
 } from '~/activity-panel/activity-card';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { isFeatureEnabled } from '~/utils/features';
 import './style.scss';
 
 function recordOrderEvent( eventName ) {
@@ -93,10 +94,12 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 			customers.find( ( c ) => c.user_id === customerId ) || {};
 		let customerUrl = null;
 		if ( customer && customer.id ) {
-			customerUrl = getNewPath( {}, '/analytics/customers', {
-				filter: 'single_customer',
-				customers: customer.id,
-			} );
+			customerUrl = isFeatureEnabled( 'analytics' )
+				? getNewPath( {}, '/analytics/customers', {
+						filter: 'single_customer',
+						customers: customer.id,
+				  } )
+				: getAdminLink( 'user-edit.php?user_id=' + customer.id );
 		}
 
 		const formattedString = sprintf(
@@ -302,7 +305,7 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 	} );
 
 	if ( isError ) {
-		if ( ! orderStatuses.length ) {
+		if ( ! orderStatuses.length && isFeatureEnabled( 'analytics' ) ) {
 			return (
 				<EmptyContent
 					title={ __(
