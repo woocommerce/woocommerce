@@ -149,9 +149,9 @@ class LocationStockRestApiHooksTest extends LocationStockTestCase {
 	}
 
 	/**
-	 * @testdox Should revert a REST order item quantity increase that would take POS stock below zero.
+	 * @testdox Should keep the edited quantity and add an error note when a REST order item increase exceeds available stock.
 	 */
-	public function test_pos_rest_order_item_increase_beyond_stock_is_reverted(): void {
+	public function test_pos_rest_order_item_increase_beyond_stock_keeps_edit_and_notes_error(): void {
 		$product = $this->create_managed_stock_product();
 		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 2 );
 
@@ -185,7 +185,8 @@ class LocationStockRestApiHooksTest extends LocationStockTestCase {
 		$items = $order->get_items();
 		$item  = reset( $items );
 
-		$this->assertEquals( 2, $item->get_quantity() );
+		// Like Core, the edit is not rolled back; POS stock stays at zero (never negative) and Core stock is untouched.
+		$this->assertEquals( 5, $item->get_quantity() );
 		$this->assertEquals( 0, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
 		$this->assertEquals( 15, wc_get_product( $product->get_id() )->get_stock_quantity() );
 		$this->assert_order_has_error_note( $order, 'Not enough stock at POS' );

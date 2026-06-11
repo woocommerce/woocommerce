@@ -219,9 +219,9 @@ class LocationStockOrderControllerTest extends LocationStockTestCase {
 	}
 
 	/**
-	 * @testdox Should revert a POS order item quantity increase when POS stock is unavailable.
+	 * @testdox Should keep the edited quantity and add an error note when a POS order item increase exceeds available stock.
 	 */
-	public function test_pos_order_item_quantity_increase_failure_reverts_quantity(): void {
+	public function test_pos_order_item_quantity_increase_failure_keeps_edit_and_notes_error(): void {
 		$product = $this->create_managed_stock_product();
 		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 2 );
 		$order = $this->create_pos_order_for_product( $product, 2 );
@@ -236,10 +236,13 @@ class LocationStockOrderControllerTest extends LocationStockTestCase {
 		$items = $order->get_items();
 		$item  = reset( $items );
 
+		// POS stock is never driven negative and Core stock is left untouched.
 		$this->assertEquals( 0, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
-		$this->assertEquals( 2, $item->get_quantity() );
-		$this->assertEquals( 20.0, (float) $item->get_total() );
-		$this->assertEquals( 20.0, (float) $item->get_subtotal() );
+		$this->assertEquals( 15, wc_get_product( $product->get_id() )->get_stock_quantity() );
+
+		// Like Core, the edit is not rolled back; the shortfall is surfaced via an order note.
+		$this->assertEquals( 3, $item->get_quantity() );
+		$this->assertEquals( 30.0, (float) $item->get_total() );
 		$this->assertEquals( 2, $item->get_meta( '_reduced_location_stock', true ) );
 		$this->assert_order_has_error_note( $order, 'Not enough stock at POS' );
 	}
