@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve the My Account login form layout by moving the Login and Register headings inside their form elements, styling them like an H3, placing the Remember me checkbox in its own row before the submit button, and trimming the leading padding on form rows.

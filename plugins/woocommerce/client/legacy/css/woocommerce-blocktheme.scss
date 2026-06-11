@@ -456,6 +456,19 @@ a.added_to_cart {
 	}
 }
 
+.woocommerce-form-login h2,
+.woocommerce-form-register h2 {
+	// Heading now sits as the first child of the form (see templates/myaccount/form-login.php).
+	// Remove the top margin so it sits flush with the top of the form.
+	margin-top: 0;
+	font-size: var(--wp--preset--font-size--large);
+}
+
+.woocommerce form.woocommerce-form-login .form-row,
+.woocommerce form.woocommerce-form-register .form-row {
+	padding-left: 0;
+}
+
 /**
 * My account - Login form
 */
