@@ -7,7 +7,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Inventory;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -39,11 +38,11 @@ class LocationStockInstaller {
 	private DatabaseUtil $database_util;
 
 	/**
-	 * Feature controller.
+	 * Feature and configuration gate.
 	 *
-	 * @var FeaturesController
+	 * @var LocationStockGate
 	 */
-	private FeaturesController $features_controller;
+	private LocationStockGate $gate;
 
 	/**
 	 * Location stock service.
@@ -57,9 +56,9 @@ class LocationStockInstaller {
 	 *
 	 * @internal
 	 */
-	final public function init( DatabaseUtil $database_util, FeaturesController $features_controller, LocationStockService $location_stock_service ): void {
+	final public function init( DatabaseUtil $database_util, LocationStockGate $gate, LocationStockService $location_stock_service ): void {
 		$this->database_util          = $database_util;
-		$this->features_controller    = $features_controller;
+		$this->gate                   = $gate;
 		$this->location_stock_service = $location_stock_service;
 	}
 
@@ -76,7 +75,7 @@ class LocationStockInstaller {
 	 * Create inventory tables when POS location stock is enabled.
 	 */
 	public function maybe_create_db_tables(): void {
-		if ( ! $this->feature_is_enabled() ) {
+		if ( ! $this->gate->feature_is_enabled() ) {
 			return;
 		}
 
@@ -98,13 +97,6 @@ class LocationStockInstaller {
 		update_option( self::TABLES_CREATED_OPTION, 'yes' );
 		delete_option( self::MISSING_TABLES_OPTION );
 		$this->ensure_pos_location();
-	}
-
-	/**
-	 * Check whether the POS location stock feature flag is enabled.
-	 */
-	private function feature_is_enabled(): bool {
-		return $this->features_controller->feature_is_enabled( InventoryController::FEATURE_ID );
 	}
 
 	/**

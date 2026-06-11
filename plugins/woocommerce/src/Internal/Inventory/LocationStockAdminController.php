@@ -8,7 +8,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Inventory;
 
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -20,11 +19,11 @@ defined( 'ABSPATH' ) || exit;
 class LocationStockAdminController {
 
 	/**
-	 * Feature controller.
+	 * Feature and configuration gate.
 	 *
-	 * @var FeaturesController
+	 * @var LocationStockGate
 	 */
-	private FeaturesController $features_controller;
+	private LocationStockGate $gate;
 
 	/**
 	 * Location stock service.
@@ -36,13 +35,13 @@ class LocationStockAdminController {
 	/**
 	 * Initialize dependencies.
 	 *
-	 * @param FeaturesController   $features_controller Feature controller.
+	 * @param LocationStockGate    $gate Feature and configuration gate.
 	 * @param LocationStockService $location_stock_service Location stock service.
 	 *
 	 * @internal
 	 */
-	final public function init( FeaturesController $features_controller, LocationStockService $location_stock_service ): void {
-		$this->features_controller    = $features_controller;
+	final public function init( LocationStockGate $gate, LocationStockService $location_stock_service ): void {
+		$this->gate                   = $gate;
 		$this->location_stock_service = $location_stock_service;
 	}
 
@@ -62,7 +61,7 @@ class LocationStockAdminController {
 	public function render_simple_product_location_fields(): void {
 		global $product_object;
 
-		if ( ! $this->can_manage_pos_location_stock() || ! $product_object instanceof \WC_Product ) {
+		if ( ! $this->gate->can_manage() || ! $product_object instanceof \WC_Product ) {
 			return;
 		}
 
@@ -89,7 +88,7 @@ class LocationStockAdminController {
 	 * @param \WC_Product $product Product object.
 	 */
 	public function save_simple_product_location_fields( \WC_Product $product ): void {
-		if ( ! $this->can_manage_pos_location_stock() ) {
+		if ( ! $this->gate->can_manage() ) {
 			return;
 		}
 
@@ -113,7 +112,7 @@ class LocationStockAdminController {
 	 * @param \WP_Post $variation      Variation post object.
 	 */
 	public function render_variation_location_fields( int $loop, array $variation_data, \WP_Post $variation ): void {
-		if ( ! $this->can_manage_pos_location_stock() ) {
+		if ( ! $this->gate->can_manage() ) {
 			return;
 		}
 
@@ -147,7 +146,7 @@ class LocationStockAdminController {
 	 * @param int         $loop      Position in the loop.
 	 */
 	public function save_variation_location_fields( \WC_Product $variation, int $loop ): void {
-		if ( ! $this->can_manage_pos_location_stock() || ! $variation->is_type( ProductType::VARIATION ) || true !== $variation->get_manage_stock( 'edit' ) ) {
+		if ( ! $this->gate->can_manage() || ! $variation->is_type( ProductType::VARIATION ) || true !== $variation->get_manage_stock( 'edit' ) ) {
 			return;
 		}
 
@@ -161,13 +160,5 @@ class LocationStockAdminController {
 			LocationStockService::LOCATION_POS,
 			wc_stock_amount( $location_stock_values[ $loop ] )
 		);
-	}
-
-	/**
-	 * Check whether POS location stock can be managed.
-	 */
-	private function can_manage_pos_location_stock(): bool {
-		return $this->features_controller->feature_is_enabled( InventoryController::FEATURE_ID )
-			&& $this->location_stock_service->is_known_location_slug( LocationStockService::LOCATION_POS );
 	}
 }

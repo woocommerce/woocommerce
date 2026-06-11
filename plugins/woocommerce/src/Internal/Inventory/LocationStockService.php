@@ -190,6 +190,30 @@ CREATE TABLE $product_inventory_table (
 	}
 
 	/**
+	 * Build an insufficient-stock error for a location.
+	 *
+	 * @param string    $location_slug Location slug.
+	 * @param string    $item_name     Name to display.
+	 * @param int|float $requested     Requested quantity.
+	 * @param int|float $available     Available quantity.
+	 * @param bool      $rest_error    Whether to build a REST-facing error (adds a 400 status).
+	 */
+	public function get_insufficient_stock_error( string $location_slug, string $item_name, $requested, $available, bool $rest_error = false ): \WP_Error {
+		return new \WP_Error(
+			$rest_error ? 'woocommerce_rest_location_stock_insufficient' : 'woocommerce_location_stock_insufficient',
+			sprintf(
+				/* translators: 1: location name 2: item name 3: requested quantity 4: available quantity */
+				__( 'Not enough stock at %1$s for %2$s. Requested %3$s, available %4$s.', 'woocommerce' ),
+				$this->get_location_name( $location_slug ),
+				$item_name,
+				wc_stock_amount( $requested ),
+				wc_stock_amount( $available )
+			),
+			$rest_error ? array( 'status' => 400 ) : array()
+		);
+	}
+
+	/**
 	 * Get product stock at a location.
 	 *
 	 * @param \WC_Product|int $product       Product object or ID.

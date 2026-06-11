@@ -8,7 +8,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Inventory;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,11 +21,11 @@ class LocationStockRestApiHooks {
 	private const LOCATION_STOCK_REST_FIELD = 'location_stock';
 
 	/**
-	 * Feature controller.
+	 * Feature and configuration gate.
 	 *
-	 * @var FeaturesController
+	 * @var LocationStockGate
 	 */
-	private FeaturesController $features_controller;
+	private LocationStockGate $gate;
 
 	/**
 	 * Location stock service.
@@ -40,8 +39,8 @@ class LocationStockRestApiHooks {
 	 *
 	 * @internal
 	 */
-	final public function init( FeaturesController $features_controller, LocationStockService $location_stock_service ): void {
-		$this->features_controller    = $features_controller;
+	final public function init( LocationStockGate $gate, LocationStockService $location_stock_service ): void {
+		$this->gate                   = $gate;
 		$this->location_stock_service = $location_stock_service;
 	}
 
@@ -68,7 +67,7 @@ class LocationStockRestApiHooks {
 	 * @return \WC_Order|\WP_Error
 	 */
 	public function prepare_rest_order_location_stock( $order, $request, $creating ) {
-		if ( ! $this->feature_is_enabled() ) {
+		if ( ! $this->gate->feature_is_enabled() ) {
 			return $order;
 		}
 
@@ -112,7 +111,7 @@ class LocationStockRestApiHooks {
 	 */
 	public function get_product_location_stock_rest_field( array $object ): array {
 		$product = wc_get_product( absint( $object['id'] ?? 0 ) );
-		if ( ! $this->feature_is_enabled() || ! $product instanceof \WC_Product ) {
+		if ( ! $this->gate->feature_is_enabled() || ! $product instanceof \WC_Product ) {
 			return array();
 		}
 
@@ -131,7 +130,7 @@ class LocationStockRestApiHooks {
 	 * @return array
 	 */
 	public function add_location_stock_to_pos_catalog_product( array $row, \WC_Product $product, \WP_REST_Request $request ): array {
-		if ( ! $this->can_manage_pos_location_stock() || ! isset( $row['data'] ) || ! is_array( $row['data'] ) || ! $this->catalog_request_includes_location_stock( $request ) ) {
+		if ( ! $this->gate->can_manage() || ! isset( $row['data'] ) || ! is_array( $row['data'] ) || ! $this->catalog_request_includes_location_stock( $request ) ) {
 			return $row;
 		}
 
@@ -144,29 +143,6 @@ class LocationStockRestApiHooks {
 		$row['data'][ self::LOCATION_STOCK_REST_FIELD ] = empty( $location_stock ) ? array() : array( $location_stock );
 
 		return $row;
-	}
-
-	/**
-	 * Check whether the POS location stock feature flag is enabled.
-	 */
-	private function feature_is_enabled(): bool {
-		return $this->features_controller->feature_is_enabled( InventoryController::FEATURE_ID );
-	}
-
-	/**
-	 * Check whether POS location stock can be managed.
-	 */
-	private function can_manage_pos_location_stock(): bool {
-		return $this->feature_is_enabled() && $this->location_is_configured( LocationStockService::LOCATION_POS );
-	}
-
-	/**
-	 * Check whether a stock location has been configured.
-	 *
-	 * @param string $location_slug Location slug.
-	 */
-	private function location_is_configured( string $location_slug ): bool {
-		return $this->location_stock_service->is_known_location_slug( $location_slug );
 	}
 
 	/**
@@ -183,7 +159,12 @@ class LocationStockRestApiHooks {
 			return $this->validate_rest_location_slug( $requested_location );
 		}
 
-		if ( $this->location_is_configured( LocationStockService::LOCATION_POS ) && $this->is_pos_created_via( $request->get_param( 'created_via' ) ?: $order->get_created_via() ) ) {
+		$created_via = $request->get_param( 'created_via' );
+		if ( empty( $created_via ) ) {
+			$created_via = $order->get_created_via();
+		}
+
+		if ( $this->gate->location_is_configured( LocationStockService::LOCATION_POS ) && $this->is_pos_created_via( $created_via ) ) {
 			return LocationStockService::LOCATION_POS;
 		}
 
@@ -198,7 +179,7 @@ class LocationStockRestApiHooks {
 	 */
 	private function validate_rest_location_slug( $location ) {
 		$location_slug = is_scalar( $location ) ? sanitize_title( wp_unslash( (string) $location ) ) : '';
-		if ( LocationStockService::LOCATION_POS === $location_slug && $this->location_is_configured( $location_slug ) ) {
+		if ( LocationStockService::LOCATION_POS === $location_slug && $this->gate->location_is_configured( $location_slug ) ) {
 			return LocationStockService::LOCATION_POS;
 		}
 
@@ -247,34 +228,11 @@ class LocationStockRestApiHooks {
 			$requested = wc_stock_amount( $item->get_quantity() );
 			$available = $this->location_stock_service->get_location_stock( $product, $location_slug );
 			if ( $requested > $available ) {
-				return $this->get_insufficient_location_stock_error( $location_slug, $product->get_name(), $requested, $available );
+				return $this->location_stock_service->get_insufficient_stock_error( $location_slug, $product->get_name(), $requested, $available, true );
 			}
 		}
 
 		return $order;
-	}
-
-	/**
-	 * Get an insufficient location stock REST error.
-	 *
-	 * @param string    $location_slug Location slug.
-	 * @param string    $item_name     Name to display.
-	 * @param int|float $requested     Requested quantity.
-	 * @param int|float $available     Available quantity.
-	 */
-	private function get_insufficient_location_stock_error( string $location_slug, string $item_name, $requested, $available ): \WP_Error {
-		return new \WP_Error(
-			'woocommerce_rest_location_stock_insufficient',
-			sprintf(
-				/* translators: 1: location name 2: item name 3: requested quantity 4: available quantity */
-				__( 'Not enough stock at %1$s for %2$s. Requested %3$s, available %4$s.', 'woocommerce' ),
-				$this->location_stock_service->get_location_name( $location_slug ),
-				$item_name,
-				wc_stock_amount( $requested ),
-				wc_stock_amount( $available )
-			),
-			array( 'status' => 400 )
-		);
 	}
 
 	/**

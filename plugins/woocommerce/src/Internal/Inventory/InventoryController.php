@@ -7,8 +7,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Inventory;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -31,11 +29,11 @@ class InventoryController {
 	public const ORDER_LOCATION_META = '_inventory_location';
 
 	/**
-	 * Feature controller.
+	 * Feature and configuration gate.
 	 *
-	 * @var FeaturesController
+	 * @var LocationStockGate
 	 */
-	private FeaturesController $features_controller;
+	private LocationStockGate $gate;
 
 	/**
 	 * Admin product editor controller.
@@ -75,7 +73,7 @@ class InventoryController {
 	/**
 	 * Initialize dependencies.
 	 *
-	 * @param FeaturesController           $features_controller Feature controller.
+	 * @param LocationStockGate            $gate Feature and configuration gate.
 	 * @param LocationStockAdminController $admin_controller Admin product editor controller.
 	 * @param LocationStockInstaller       $location_stock_installer Location stock installer.
 	 * @param LocationStockRestApiHooks    $rest_api_hooks REST API hooks.
@@ -83,8 +81,8 @@ class InventoryController {
 	 *
 	 * @internal
 	 */
-	final public function init( FeaturesController $features_controller, LocationStockAdminController $admin_controller, LocationStockInstaller $location_stock_installer, LocationStockRestApiHooks $rest_api_hooks, LocationStockOrderController $order_controller ): void {
-		$this->features_controller      = $features_controller;
+	final public function init( LocationStockGate $gate, LocationStockAdminController $admin_controller, LocationStockInstaller $location_stock_installer, LocationStockRestApiHooks $rest_api_hooks, LocationStockOrderController $order_controller ): void {
+		$this->gate                     = $gate;
 		$this->admin_controller         = $admin_controller;
 		$this->location_stock_installer = $location_stock_installer;
 		$this->rest_api_hooks           = $rest_api_hooks;
@@ -103,7 +101,7 @@ class InventoryController {
 	 * Check whether the POS location stock feature flag is enabled.
 	 */
 	public function feature_is_enabled(): bool {
-		return $this->features_controller->feature_is_enabled( self::FEATURE_ID );
+		return $this->gate->feature_is_enabled();
 	}
 
 	/**

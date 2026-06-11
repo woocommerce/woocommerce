@@ -7,7 +7,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Inventory;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
 defined( 'ABSPATH' ) || exit;
@@ -26,11 +25,11 @@ class LocationStockOrderController {
 	private const ITEM_LOCATION_STOCK_RESTOCKED_META = '_restock_refunded_location_items';
 
 	/**
-	 * Feature controller.
+	 * Feature and configuration gate.
 	 *
-	 * @var FeaturesController
+	 * @var LocationStockGate
 	 */
-	private FeaturesController $features_controller;
+	private LocationStockGate $gate;
 
 	/**
 	 * Location stock service.
@@ -49,13 +48,13 @@ class LocationStockOrderController {
 	/**
 	 * Initialize dependencies.
 	 *
-	 * @param FeaturesController   $features_controller Feature controller.
+	 * @param LocationStockGate    $gate Feature and configuration gate.
 	 * @param LocationStockService $location_stock_service Location stock service.
 	 *
 	 * @internal
 	 */
-	final public function init( FeaturesController $features_controller, LocationStockService $location_stock_service ): void {
-		$this->features_controller    = $features_controller;
+	final public function init( LocationStockGate $gate, LocationStockService $location_stock_service ): void {
+		$this->gate                   = $gate;
 		$this->location_stock_service = $location_stock_service;
 	}
 
@@ -310,7 +309,7 @@ class LocationStockOrderController {
 	 */
 	private function get_configured_order_location_slug( \WC_Order $order ): ?string {
 		$location_slug = $this->get_order_location_slug( $order );
-		if ( ! $this->feature_is_enabled() || null === $location_slug || ! $this->location_is_configured( $location_slug ) ) {
+		if ( ! $this->gate->feature_is_enabled() || null === $location_slug || ! $this->gate->location_is_configured( $location_slug ) ) {
 			return null;
 		}
 
@@ -329,22 +328,6 @@ class LocationStockOrderController {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Check whether the POS location stock feature flag is enabled.
-	 */
-	private function feature_is_enabled(): bool {
-		return $this->features_controller->feature_is_enabled( InventoryController::FEATURE_ID );
-	}
-
-	/**
-	 * Check whether a stock location has been configured.
-	 *
-	 * @param string $location_slug Location slug.
-	 */
-	private function location_is_configured( string $location_slug ): bool {
-		return $this->location_stock_service->is_known_location_slug( $location_slug );
 	}
 
 	/**
@@ -493,7 +476,7 @@ class LocationStockOrderController {
 		$qty       = wc_stock_amount( $qty );
 		$new_stock = $this->location_stock_service->decrease_location_stock( $product, $location_slug, $qty );
 		if ( null === $new_stock ) {
-			return $this->get_insufficient_location_stock_error(
+			return $this->location_stock_service->get_insufficient_stock_error(
 				$location_slug,
 				$product->get_name(),
 				$qty,
@@ -524,29 +507,6 @@ class LocationStockOrderController {
 			'product' => $product,
 			'from'    => $new_stock - $qty,
 			'to'      => $new_stock,
-		);
-	}
-
-	/**
-	 * Get an insufficient location stock error.
-	 *
-	 * @param string    $location_slug Location slug.
-	 * @param string    $item_name     Name to display.
-	 * @param int|float $requested     Requested quantity.
-	 * @param int|float $available     Available quantity.
-	 */
-	private function get_insufficient_location_stock_error( string $location_slug, string $item_name, $requested, $available ): \WP_Error {
-		return new \WP_Error(
-			'woocommerce_location_stock_insufficient',
-			sprintf(
-				/* translators: 1: location name 2: item name 3: requested quantity 4: available quantity */
-				__( 'Not enough stock at %1$s for %2$s. Requested %3$s, available %4$s.', 'woocommerce' ),
-				$this->location_stock_service->get_location_name( $location_slug ),
-				$item_name,
-				wc_stock_amount( $requested ),
-				wc_stock_amount( $available )
-			),
-			array()
 		);
 	}
 
