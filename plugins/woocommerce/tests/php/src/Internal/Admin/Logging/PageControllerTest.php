@@ -11,7 +11,7 @@ use WC_Unit_Test_Case;
  */
 class PageControllerTest extends WC_Unit_Test_Case {
 	/**
-	 * "System Under Test", a subclass of the class to be tested that exposes the line formatting method.
+	 * "System Under Test", an instance of the class to be tested.
 	 *
 	 * @var PageController
 	 */
@@ -32,20 +32,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut = new class() extends PageController {
-			/**
-			 * Expose the protected format_line method for testing.
-			 *
-			 * @param string $line        The unformatted log file line.
-			 * @param int    $line_number The line number.
-			 *
-			 * @return string
-			 */
-			public function format_line_for_testing( string $line, int $line_number ): string {
-				return $this->format_line( $line, $line_number );
-			}
-		};
-
+		$this->sut     = wc_get_container()->get( PageController::class );
 		$this->handler = new LogHandlerFileV2();
 	}
 
@@ -84,7 +71,23 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$line = file_get_contents( reset( $paths ) );
 
-		return $this->sut->format_line_for_testing( $line, 1 );
+		return $this->format_line( $line, 1 );
+	}
+
+	/**
+	 * Invoke the private format_line method on the SUT, since its only caller reads
+	 * query params through filter_input_array(), which is not settable from a test.
+	 *
+	 * @param string $line        The unformatted log file line.
+	 * @param int    $line_number The line number.
+	 *
+	 * @return string
+	 */
+	private function format_line( string $line, int $line_number ): string {
+		$method = new \ReflectionMethod( $this->sut, 'format_line' );
+		$method->setAccessible( true );
+
+		return $method->invoke( $this->sut, $line, $line_number );
 	}
 
 	/**
@@ -140,7 +143,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_format_line_malformed_context_renders_as_plain_line(): void {
 		$line      = gmdate( 'Y-m-d\TH:i:sP' ) . ' DEBUG Test log entry. CONTEXT: {"unclosed":';
-		$formatted = $this->sut->format_line_for_testing( $line, 1 );
+		$formatted = $this->format_line( $line, 1 );
 
 		$this->assertStringNotContainsString( 'has-context', $formatted );
 		$this->assertStringNotContainsString( '<details>', $formatted );
