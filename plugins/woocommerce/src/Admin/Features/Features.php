@@ -130,6 +130,14 @@ class Features {
 
 		$features = self::get_features();
 		foreach ( $features as $feature ) {
+			// LaunchYourStore is instantiated unconditionally from WooCommerce::init_hooks() so that
+			// its frontend hooks (the coming soon footer banner and the login dismissal reset) work
+			// without loading the feature system on frontend requests. Skip it here so its hooks
+			// aren't registered twice in admin contexts.
+			if ( 'launch-your-store' === $feature ) {
+				continue;
+			}
+
 			$feature_class = self::get_feature_class( $feature );
 
 			if ( $feature_class ) {
@@ -156,6 +164,7 @@ class Features {
 		$optional_feature_keys         = array_keys( self::$optional_features );
 		$optional_features_unavailable = array();
 
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		/**
 		 * Filter allowing WooCommerce Admin optional features to be disabled.
 		 *
@@ -164,6 +173,7 @@ class Features {
 		if ( apply_filters( 'woocommerce_admin_disabled', false ) ) {
 			return array_values( array_diff( $features, $optional_feature_keys ) );
 		}
+		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		foreach ( $optional_feature_keys as $optional_feature_key ) {
 			$feature_class = self::get_feature_class( $optional_feature_key );
@@ -337,9 +347,7 @@ class Features {
 			wp_doing_ajax() ||
 			wp_doing_cron() ||
 			( defined( 'WP_CLI' ) && WP_CLI ) ||
-			( WC()->is_rest_api_request() && ! WC()->is_store_api_request() ) ||
-			// Allow features to be loaded in frontend for admin users. This is needed for the use case such as the coming soon footer banner.
-			current_user_can( 'manage_woocommerce' )
+			( WC()->is_rest_api_request() && ! WC()->is_store_api_request() )
 		);
 
 		/**

@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
+use Automattic\WooCommerce\Admin\Features\LaunchYourStore;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonAdminBarBadge;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonCacheInvalidator;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
@@ -372,6 +373,10 @@ final class WooCommerce {
 		$container->get( ComingSoonAdminBarBadge::class );
 		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
+		// Resolved unconditionally (rather than through the wc-admin feature loader, which skips it)
+		// because its coming soon footer banner and login hooks must run on frontend requests, where
+		// the feature loader doesn't run. See Features::load_features().
+		$container->get( LaunchYourStore::class );
 		$container->get( OrderCountCacheService::class );
 		$container->get( DeferredEmailQueue::class );
 		$container->get( AddressProviderController::class );
