@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event';
 /**
  * Internal dependencies
  */
-import ShippingRecommendations from '../experimental-shipping-recommendations';
+import ShippingRecommendations from '../shipping-recommendations';
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
