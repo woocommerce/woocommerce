@@ -135,11 +135,11 @@ class WC_Autoloader {
 	/**
 	 * Take a class name and turn it into a file name.
 	 *
-	 * @param  string $class_name Class name.
+	 * @param  string $class Class name.
 	 * @return string
 	 */
-	private function get_file_name_from_class( $class_name ) {
-		return 'class-' . str_replace( '_', '-', $class_name ) . '.php';
+	private function get_file_name_from_class( $class ) {
+		return 'class-' . str_replace( '_', '-', $class ) . '.php';
 	}
 
 	/**
@@ -159,19 +159,19 @@ class WC_Autoloader {
 	/**
 	 * Auto-load WC classes on demand to reduce memory consumption.
 	 *
-	 * @param string $class_name Class name.
+	 * @param string $class Class name.
 	 */
-	public function autoload( $class_name ) {
-		$class_name = strtolower( $class_name );
+	public function autoload( $class ) {
+		$class = strtolower( $class );
 
 		// Check the explicit class map first: it covers classes whose file locations can't be derived
 		// from the prefix rules below, including the Abstract_WC_* classes that lack the WC_ prefix.
-		if ( isset( self::CLASS_MAP[ $class_name ] ) ) {
-			$this->load_file( $this->include_path . self::CLASS_MAP[ $class_name ] );
+		if ( isset( self::CLASS_MAP[ $class ] ) ) {
+			$this->load_file( $this->include_path . self::CLASS_MAP[ $class ] );
 			return;
 		}
 
-		if ( 0 !== strpos( $class_name, 'wc_' ) ) {
+		if ( 0 !== strpos( $class, 'wc_' ) ) {
 			return;
 		}
 
@@ -179,42 +179,42 @@ class WC_Autoloader {
 		// the includes/class-wc-api.php file after they upgrade, which causes a fatal error when executing
 		// "class_exists('WC_API')". This will prevent this error, while still making the class visible
 		// when it's provided by the WooCommerce Legacy REST API plugin.
-		if ( 'wc_api' === $class_name ) {
+		if ( 'wc_api' === $class ) {
 			return;
 		}
 
 		// If the class is already loaded from a merged package, prevent autoloader from loading it as well.
-		if ( \Automattic\WooCommerce\Packages::should_load_class( $class_name ) ) {
+		if ( \Automattic\WooCommerce\Packages::should_load_class( $class ) ) {
 			return;
 		}
 
-		$file = $this->get_file_name_from_class( $class_name );
+		$file = $this->get_file_name_from_class( $class );
 		$path = '';
 
-		if ( 0 === strpos( $class_name, 'wc_addons_gateway_' ) ) {
-			$path = $this->include_path . 'gateways/' . substr( str_replace( '_', '-', $class_name ), 18 ) . '/';
-		} elseif ( 0 === strpos( $class_name, 'wc_gateway_' ) ) {
-			$path = $this->include_path . 'gateways/' . substr( str_replace( '_', '-', $class_name ), 11 ) . '/';
-		} elseif ( 0 === strpos( $class_name, 'wc_shipping_' ) ) {
-			$path = $this->include_path . 'shipping/' . substr( str_replace( '_', '-', $class_name ), 12 ) . '/';
-		} elseif ( 0 === strpos( $class_name, 'wc_shortcode_' ) ) {
+		if ( 0 === strpos( $class, 'wc_addons_gateway_' ) ) {
+			$path = $this->include_path . 'gateways/' . substr( str_replace( '_', '-', $class ), 18 ) . '/';
+		} elseif ( 0 === strpos( $class, 'wc_gateway_' ) ) {
+			$path = $this->include_path . 'gateways/' . substr( str_replace( '_', '-', $class ), 11 ) . '/';
+		} elseif ( 0 === strpos( $class, 'wc_shipping_' ) ) {
+			$path = $this->include_path . 'shipping/' . substr( str_replace( '_', '-', $class ), 12 ) . '/';
+		} elseif ( 0 === strpos( $class, 'wc_shortcode_' ) ) {
 			$path = $this->include_path . 'shortcodes/';
-		} elseif ( 0 === strpos( $class_name, 'wc_meta_box' ) ) {
+		} elseif ( 0 === strpos( $class, 'wc_meta_box' ) ) {
 			$path = $this->include_path . 'admin/meta-boxes/';
-		} elseif ( 0 === strpos( $class_name, 'wc_admin' ) ) {
+		} elseif ( 0 === strpos( $class, 'wc_admin' ) ) {
 			$path = $this->include_path . 'admin/';
-		} elseif ( 0 === strpos( $class_name, 'wc_payment_token_' ) ) {
+		} elseif ( 0 === strpos( $class, 'wc_payment_token_' ) ) {
 			$path = $this->include_path . 'payment-tokens/';
-		} elseif ( 0 === strpos( $class_name, 'wc_log_handler_' ) ) {
+		} elseif ( 0 === strpos( $class, 'wc_log_handler_' ) ) {
 			$path = $this->include_path . 'log-handlers/';
-		} elseif ( 0 === strpos( $class_name, 'wc_integration' ) ) {
-			$path = $this->include_path . 'integrations/' . substr( str_replace( '_', '-', $class_name ), 15 ) . '/';
-		} elseif ( 0 === strpos( $class_name, 'wc_notes_' ) ) {
+		} elseif ( 0 === strpos( $class, 'wc_integration' ) ) {
+			$path = $this->include_path . 'integrations/' . substr( str_replace( '_', '-', $class ), 15 ) . '/';
+		} elseif ( 0 === strpos( $class, 'wc_notes_' ) ) {
 			$path = $this->include_path . 'admin/notes/';
-		} elseif ( 0 === strpos( $class_name, 'wc_rest_' ) ) {
+		} elseif ( 0 === strpos( $class, 'wc_rest_' ) ) {
 			// Handle REST API controllers in subdirectories.
 			// For V4 controllers, check if the feature is enabled first.
-			if ( false !== strpos( $class_name, '_v4_' ) ) {
+			if ( false !== strpos( $class, '_v4_' ) ) {
 				// Only load V4 controllers if the feature is enabled.
 				if ( Features::is_enabled( 'rest-api-v4' ) ) {
 					$rest_controller_paths = array(
