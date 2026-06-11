@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Register the LaunchYourStore hooks unconditionally instead of through the wc-admin feature loader, and stop loading admin feature classes on frontend requests for users with the manage_woocommerce capability.
