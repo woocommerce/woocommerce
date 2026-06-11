@@ -490,7 +490,10 @@ class WC_Checkout {
 			// Store the order as soon as it has been persisted so retries before payment processing reuse it.
 			if ( WC()->session ) {
 				WC()->session->set( 'order_awaiting_payment', $order_id );
-				WC()->session->save_data();
+				$save_session_data = array( WC()->session, 'save_data' );
+				if ( is_callable( $save_session_data ) ) {
+					$save_session_data();
+				}
 			}
 
 			/**

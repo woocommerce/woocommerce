@@ -59,6 +59,8 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		$this->assertEquals( strpos( $coupon_held_key[ $coupon->get_id() ], '_coupon_held_' ), 0 );
 		$this->assertEquals( $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ), 1 );
 
+		WC()->session->__unset( 'order_awaiting_payment' );
+
 		$order2_id = $checkout->create_order(
 			array(
 				'billing_email'  => 'a@c.com',
@@ -102,6 +104,8 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		$this->assertNotWPError( $order_id1 );
 		$this->assertEquals( $coupon_data_store->get_tentative_usage_count( $coupon1->get_id() ), 1 );
 		$this->assertEquals( $coupon_data_store->get_tentative_usage_count( $coupon2->get_id() ), 1 );
+
+		WC()->session->__unset( 'order_awaiting_payment' );
 
 		$order2_id = $checkout->create_order(
 			array(
