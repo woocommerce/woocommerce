@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Prevent performance issues by restricting product transient deletion to appropriate write contexts only
