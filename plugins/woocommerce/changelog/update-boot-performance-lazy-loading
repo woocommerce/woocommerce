@@ -1,4 +1,4 @@
 Significance: patch
 Type: performance
 
-Reduce boot-time work: load interfaces, abstracts, data stores and other side-effect-free classes in includes/ on demand via the WC_Autoloader class map, resolve internal REST API controllers lazily on the woocommerce_rest_api_get_rest_namespaces filter, and skip instantiating admin-screen-only classes on regular frontend page loads.
+Reduce boot-time work: load interfaces, abstracts, data stores and other side-effect-free classes in includes/ on demand via the WC_Autoloader class map, resolve internal REST API controllers lazily on the woocommerce_rest_api_get_rest_namespaces filter, skip instantiating admin-screen-only classes on regular frontend page loads, and stop loading wc-admin feature classes on the frontend for users with the manage_woocommerce capability (the LaunchYourStore coming soon banner hooks now register unconditionally instead).
