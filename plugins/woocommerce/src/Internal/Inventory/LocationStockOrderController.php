@@ -237,31 +237,23 @@ class LocationStockOrderController {
 	}
 
 	/**
-	 * Get a configured inventory location for an order.
+	 * Get the configured inventory location an order routes to, if any.
+	 *
+	 * Returns the location slug only when the order's stored location is a known,
+	 * configured location and the feature is enabled; otherwise null.
 	 *
 	 * @param \WC_Order $order Order object.
 	 */
 	private function get_configured_order_location_slug( \WC_Order $order ): ?string {
-		$location_slug = $this->get_order_location_slug( $order );
-		if ( ! $this->gate->feature_is_enabled() || null === $location_slug || ! $this->gate->location_is_configured( $location_slug ) ) {
+		$location_slug = sanitize_title( (string) $order->get_meta( InventoryController::ORDER_LOCATION_META, true ) );
+
+		if ( LocationStockService::LOCATION_POS !== $location_slug
+			|| ! $this->gate->feature_is_enabled()
+			|| ! $this->gate->location_is_configured( $location_slug ) ) {
 			return null;
 		}
 
 		return $location_slug;
-	}
-
-	/**
-	 * Get the inventory location for an order, if it routes to location stock.
-	 *
-	 * @param \WC_Order $order Order object.
-	 */
-	private function get_order_location_slug( \WC_Order $order ): ?string {
-		$explicit_location = sanitize_title( (string) $order->get_meta( InventoryController::ORDER_LOCATION_META, true ) );
-		if ( '' !== $explicit_location ) {
-			return LocationStockService::LOCATION_POS === $explicit_location ? LocationStockService::LOCATION_POS : null;
-		}
-
-		return null;
 	}
 
 	/**
