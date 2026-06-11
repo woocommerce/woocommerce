@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\Inventory\InventoryController;
 use Automattic\WooCommerce\Internal\Inventory\LocationStockAdminController;
 use Automattic\WooCommerce\Internal\Inventory\LocationStockInstaller;
+use Automattic\WooCommerce\Internal\Inventory\LocationStockOrderController;
 use Automattic\WooCommerce\Internal\Inventory\LocationStockService;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\ProductMapper;
@@ -23,6 +24,7 @@ use WC_REST_Unit_Test_Case;
  * @covers \Automattic\WooCommerce\Internal\Inventory\InventoryController
  * @covers \Automattic\WooCommerce\Internal\Inventory\LocationStockAdminController
  * @covers \Automattic\WooCommerce\Internal\Inventory\LocationStockInstaller
+ * @covers \Automattic\WooCommerce\Internal\Inventory\LocationStockOrderController
  * @covers \Automattic\WooCommerce\Internal\Inventory\LocationStockRestApiHooks
  * @covers \Automattic\WooCommerce\Internal\Inventory\LocationStockService
  */
@@ -48,6 +50,13 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 	 * @var LocationStockAdminController
 	 */
 	private LocationStockAdminController $admin_controller;
+
+	/**
+	 * Order controller under test.
+	 *
+	 * @var LocationStockOrderController
+	 */
+	private LocationStockOrderController $order_controller;
 
 	/**
 	 * Installer under test.
@@ -108,6 +117,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$this->service          = wc_get_container()->get( LocationStockService::class );
 		$this->controller       = wc_get_container()->get( InventoryController::class );
 		$this->admin_controller = wc_get_container()->get( LocationStockAdminController::class );
+		$this->order_controller = wc_get_container()->get( LocationStockOrderController::class );
 		$this->installer        = wc_get_container()->get( LocationStockInstaller::class );
 		$this->database_util    = wc_get_container()->get( DatabaseUtil::class );
 
@@ -543,7 +553,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 			array( '_inventory_location' => LocationStockService::LOCATION_POS )
 		);
 
-		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
+		$this->order_controller->maybe_reduce_location_stock_levels( $order->get_id() );
 
 		$order = wc_get_order( $order->get_id() );
 		$items = $order->get_items();
@@ -739,8 +749,8 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$first_order  = $this->create_pos_order_for_product( $product, 1 );
 		$second_order = $this->create_pos_order_for_product( $product, 1 );
 
-		$this->controller->maybe_reduce_location_stock_levels( $first_order->get_id() );
-		$this->controller->maybe_reduce_location_stock_levels( $second_order->get_id() );
+		$this->order_controller->maybe_reduce_location_stock_levels( $first_order->get_id() );
+		$this->order_controller->maybe_reduce_location_stock_levels( $second_order->get_id() );
 
 		$second_order = wc_get_order( $second_order->get_id() );
 		$items        = $second_order->get_items();
@@ -855,8 +865,8 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 5 );
 		$order = $this->create_pos_order_for_product( $product, 2 );
 
-		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
-		$this->controller->maybe_restore_location_stock_levels( $order->get_id() );
+		$this->order_controller->maybe_reduce_location_stock_levels( $order->get_id() );
+		$this->order_controller->maybe_restore_location_stock_levels( $order->get_id() );
 
 		$order = wc_get_order( $order->get_id() );
 		$items = $order->get_items();
@@ -875,7 +885,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 5 );
 		$order = $this->create_pos_order_for_product( $product, 2 );
 
-		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
+		$this->order_controller->maybe_reduce_location_stock_levels( $order->get_id() );
 
 		$order = wc_get_order( $order->get_id() );
 		$items = $order->get_items();
@@ -908,7 +918,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 5 );
 		$order = $this->create_pos_order_for_product( $product, 2 );
 
-		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
+		$this->order_controller->maybe_reduce_location_stock_levels( $order->get_id() );
 
 		$order = wc_get_order( $order->get_id() );
 		$items = $order->get_items();
@@ -923,7 +933,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
+		$this->order_controller->maybe_reduce_location_stock_levels( $order->get_id() );
 
 		$order = wc_get_order( $order->get_id() );
 		$items = $order->get_items();
@@ -943,7 +953,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 5 );
 		$order = $this->create_pos_order_for_product( $product, 2 );
 
-		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
+		$this->order_controller->maybe_reduce_location_stock_levels( $order->get_id() );
 		$item = $this->set_first_order_item_quantity( $order, 3 );
 
 		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
@@ -971,7 +981,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$order->save();
 		$this->set_first_order_item_totals( $order, '20.00', '20.00' );
 
-		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
+		$this->order_controller->maybe_reduce_location_stock_levels( $order->get_id() );
 		$this->save_first_order_item_with_admin_values( $order, 3, '30.00', '30.00' );
 
 		$order = wc_get_order( $order->get_id() );
@@ -1020,7 +1030,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$parent_modified_before    = $this->set_product_modified_date_to_past( $parent );
 		$variation_modified_before = $this->set_product_modified_date_to_past( $variation );
 
-		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
+		$this->order_controller->maybe_reduce_location_stock_levels( $order->get_id() );
 
 		$this->assertEquals( 3, $this->service->get_location_stock( $parent, LocationStockService::LOCATION_POS ) );
 		$this->assert_product_modified_after( $parent->get_id(), $parent_modified_before );
@@ -1035,7 +1045,7 @@ class LocationStockServiceTest extends WC_REST_Unit_Test_Case {
 		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 5 );
 		$order = $this->create_pos_order_for_product( $product, 3 );
 
-		$this->controller->maybe_reduce_location_stock_levels( $order->get_id() );
+		$this->order_controller->maybe_reduce_location_stock_levels( $order->get_id() );
 		$item = $this->set_first_order_item_quantity( $order, 1 );
 
 		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';

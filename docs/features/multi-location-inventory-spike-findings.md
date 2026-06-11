@@ -17,7 +17,7 @@ More-in-Core framing: this is a feature-gated primitive plus Merchant-controlled
 
 ## 1. Routing Key
 
-Resolved for the POS-only shape. REST order creation can pass explicit `inventory_location=pos` to use POS stock. An explicit `inventory_location=pos` is rejected with a 400 if the required `pos` location is unavailable, rather than silently consuming Core `_stock`. For older POS apps, `created_via: point-of-sale` and `pos-rest-api` still route to POS stock, but only when `wc_inventory_locations` contains the `pos` row. Existing orders can also be adjusted through the POS path when they already carry `_inventory_location=pos`. Everything else stays on Core `_stock`. `InventoryController` uses that decision to block Core stock adjustment only for POS-location-backed orders through `woocommerce_can_reduce_order_stock` and `woocommerce_can_restore_order_stock`, then runs dedicated location stock reduce/restore handlers that receive the resolved location slug.
+Resolved for the POS-only shape. REST order creation can pass explicit `inventory_location=pos` to use POS stock. An explicit `inventory_location=pos` is rejected with a 400 if the required `pos` location is unavailable, rather than silently consuming Core `_stock`. For older POS apps, `created_via: point-of-sale` and `pos-rest-api` still route to POS stock, but only when `wc_inventory_locations` contains the `pos` row. Existing orders can also be adjusted through the POS path when they already carry `_inventory_location=pos`. Everything else stays on Core `_stock`. `LocationStockOrderController` uses that decision to block Core stock adjustment only for POS-location-backed orders through `woocommerce_can_reduce_order_stock` and `woocommerce_can_restore_order_stock`, then runs dedicated location stock reduce/restore handlers that receive the resolved location slug.
 
 Evidence tests cover dbDelta verification plus POS row setup, explicit `inventory_location=pos` via actual `POST /wc/v3/orders`, the POS `created_via` compatibility fallback when the `pos` location exists, Core fallback for older POS REST requests when the `pos` location is absent, explicit rejection when `inventory_location=pos` is requested but unavailable, explicit `_inventory_location=pos` on an existing order, ignored generic `location=pos`, rejected unknown or non-POS inventory locations, and `store-api`, `checkout`, `admin`, `rest-api`, and `square` values staying on legacy `_stock`.
 
@@ -57,6 +57,7 @@ Migration assessment: milestone 1 is plausibly a contained backend project. Swit
 
 - `plugins/woocommerce/src/Internal/Inventory/LocationStockService.php`
 - `plugins/woocommerce/src/Internal/Inventory/InventoryController.php`
+- `plugins/woocommerce/src/Internal/Inventory/LocationStockOrderController.php`
 - `plugins/woocommerce/includes/class-woocommerce.php`
 - `plugins/woocommerce/src/Internal/Features/FeaturesController.php`
 - `plugins/woocommerce/includes/class-wc-install.php` for uninstall table cleanup only
