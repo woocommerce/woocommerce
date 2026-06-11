@@ -11,7 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Monorepo: bump pnpm version to 9.15.0. [#54189]
 -   Minor - Upgraded TypeScript in the monorepo to 5.7.2. [#53165]
 -   Patch - Bump php version in packages/js/*/composer.json. [#42020]
--   Patch - Comment: Fix comment typos across various files. [#50047]
+-   Patch - Fix comment typos across various files. [#50047]
 -   Patch - Bump wireit dependency version to latest. [#57299]
 -   Patch - CI: leverage composer packages cache in lint monorepo job. [#52054]
 -   Patch - Fix pnpm version to 9.1.3 to avoid dependency installation issues. [#50828]
