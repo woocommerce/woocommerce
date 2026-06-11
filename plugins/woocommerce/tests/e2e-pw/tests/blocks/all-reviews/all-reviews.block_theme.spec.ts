@@ -6,7 +6,7 @@ import { expect, test } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import { allReviews } from '../../test-data/data/data';
+import { allReviews } from '../../../test-data/blocks/data/data';
 
 const BLOCK_NAME = 'woocommerce/all-reviews';
 

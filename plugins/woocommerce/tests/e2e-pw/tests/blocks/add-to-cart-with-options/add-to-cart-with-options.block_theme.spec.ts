@@ -8,7 +8,7 @@ import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
  */
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
-import config from '../../../../../admin/config/core.json';
+import config from '../../../../../client/admin/config/core.json';
 
 const test = base.extend< {
 	pageObject: AddToCartWithOptionsPage;
