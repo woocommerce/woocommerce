@@ -111,8 +111,16 @@ class ProductFilters extends AbstractBlock {
 			'forcePageReload' => isset( $block->context['forcePageReload'] ) ? (bool) $block->context['forcePageReload'] : null,
 		);
 
+		$wrapper_classes = array( 'wc-block-product-filters' );
+		if (
+			isset( $attributes['showFilterDrawer'] ) &&
+			false === $attributes['showFilterDrawer']
+		) {
+			$wrapper_classes[] = 'is-filter-drawer-disabled';
+		}
+
 		$wrapper_attributes = array(
-			'class'                            => 'wc-block-product-filters',
+			'class'                            => implode( ' ', $wrapper_classes ),
 			'data-wp-interactive'              => $this->get_full_block_name(),
 			'data-wp-init--colors'             => 'callbacks.initColors',
 			'data-wp-watch--scrolling'         => 'callbacks.scrollLimit',
@@ -234,7 +242,14 @@ class ProductFilters extends AbstractBlock {
 	private function generate_navigation_id( $block ) {
 		return sprintf(
 			'wc-product-filters-%s',
-			md5( wp_json_encode( $block->parsed_block['innerBlocks'] ) )
+			md5(
+				wp_json_encode(
+					array(
+						'attrs'       => $block->parsed_block['attrs'] ?? array(),
+						'innerBlocks' => $block->parsed_block['innerBlocks'] ?? array(),
+					)
+				)
+			)
 		);
 	}
 

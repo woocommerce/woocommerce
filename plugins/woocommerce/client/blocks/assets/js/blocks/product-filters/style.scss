@@ -107,12 +107,51 @@
 		}
 	}
 
+	&.is-filter-drawer-disabled,
+	&.is-filter-drawer-disabled.is-overlay-opened {
+		display: flex;
+
+		.wc-block-product-filters__overlay-header,
+		.wc-block-product-filters__overlay-footer,
+		.wc-block-product-filters__open-overlay {
+			display: none;
+		}
+
+		.wc-block-product-filters__overlay {
+			position: relative;
+			pointer-events: auto;
+			inset: 0;
+			background: inherit;
+			color: inherit;
+			transition: none;
+			flex-grow: 1;
+		}
+		.wc-block-product-filters__overlay-wrapper {
+			width: auto;
+			height: auto;
+			background: inherit;
+			color: inherit;
+		}
+
+		.wc-block-product-filters__overlay-dialog {
+			position: relative;
+			transform: none;
+			background: inherit;
+			color: inherit;
+		}
+
+		.wc-block-product-filters__overlay-content {
+			padding: 0;
+			overflow: visible;
+			flex-grow: 1;
+			background: inherit;
+			color: inherit;
+		}
+	}
+
 	@include breakpoint(">600px") {
-		// If we add "Always show" option in the future, we can support that behavior
-		// by adding a class to the wrapper and refer it here, like this:
-		// &:not(.always-show) {
-		&,
-		&.is-overlay-opened {
+		&:not(.is-filter-drawer-disabled),
+		&:not(.is-filter-drawer-disabled).is-overlay-opened {
 			display: flex;
 
 			.wc-block-product-filters__overlay-header,
