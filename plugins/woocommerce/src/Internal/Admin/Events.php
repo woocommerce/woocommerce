@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use Automattic\WooCommerce\Internal\Admin\Notes\CustomizeStoreWithBlocks;
 use Automattic\WooCommerce\Internal\Admin\Notes\CustomizingProductCatalog;
@@ -145,9 +144,7 @@ class Events {
 			RemoteInboxNotificationsEngine::run();
 		}
 
-		if ( Features::is_enabled( 'core-profiler' ) ) {
-			( new MailchimpScheduler() )->run();
-		}
+		( new MailchimpScheduler() )->run();
 	}
 
 	/**

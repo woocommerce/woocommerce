@@ -172,15 +172,12 @@ class FeaturePlugin {
 		// Initialize API.
 		API\Init::instance();
 
-		if ( Features::is_enabled( 'onboarding' ) ) {
-			Onboarding::init();
-		}
+		Onboarding::init();
 
 		if ( FeaturesUtil::feature_is_enabled( 'analytics' ) ) {
 			// Initialize Reports syncing.
 			ReportsSync::init();
 			CategoryLookup::instance()->init();
-
 			// Initialize Reports exporter.
 			ReportExporter::init();
 		}
@@ -206,7 +203,6 @@ class FeaturePlugin {
 		Loader::get_instance();
 		WCAdminAssets::get_instance();
 	}
-
 
 	/**
 	 * Overwrites the allowed features array using a local `feature-config.php` file.

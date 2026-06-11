@@ -49,8 +49,6 @@ declare global {
 			};
 		};
 		wcAdminFeatures: {
-			'analytics-scheduled-import': boolean;
-			analytics: boolean;
 			coupons: boolean;
 			'product-data-views': boolean;
 			'experimental-blocks': boolean;
@@ -62,7 +60,6 @@ declare global {
 			'pattern-toolkit-full-composability': boolean;
 			printful: boolean;
 			'product-custom-fields': boolean;
-			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;
 			'settings-ui': boolean;
