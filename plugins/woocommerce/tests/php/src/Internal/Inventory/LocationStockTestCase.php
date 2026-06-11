@@ -176,7 +176,7 @@ abstract class LocationStockTestCase extends WC_REST_Unit_Test_Case {
 		global $wpdb;
 
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_inventory" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_inventory_locations" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_locations" );
 	}
 
 	/**
@@ -201,7 +201,7 @@ abstract class LocationStockTestCase extends WC_REST_Unit_Test_Case {
 		global $wpdb;
 
 		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wc_product_inventory" );
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wc_inventory_locations" );
+		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wc_locations" );
 	}
 
 	/**

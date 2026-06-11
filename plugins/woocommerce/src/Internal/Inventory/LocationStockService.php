@@ -40,12 +40,12 @@ class LocationStockService {
 	private $deferred_modified_date_product_ids = array();
 
 	/**
-	 * Get the inventory locations table name.
+	 * Get the locations table name.
 	 */
 	public function get_locations_table_name(): string {
 		global $wpdb;
 
-		return $wpdb->prefix . 'wc_inventory_locations';
+		return $wpdb->prefix . 'wc_locations';
 	}
 
 	/**
