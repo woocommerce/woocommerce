@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 -   Major - Replace MediaItem with native Attachment from @wordpress/media-utils throughout media-uploader and image-gallery components. [#64114]
 -   Major - Update @wordpress/* dependencies to WordPress 6.8 minimum. Remove @types/wordpress__media-utils and @types/wordpress__rich-text (native types at wp-6.8). [#64114]
--   Minor - Export MediaUploadProps and MediaUploadComponentType for typed MediaUpload component props (native types are Component<any>). [#64114]
+-   Minor - Export MediaUploadProps and MediaUploadComponentType for typed MediaUpload component props (native types are `Component<any>`). [#64114]
 -   Minor - Fix tax rate search in Analytics filters by using the correct `search` query parameter instead of `code` when calling the `/wc-analytics/taxes` endpoint. [#64754]
 -   Minor - Improve build time for components by using webpack filesystem cache. [#64082]
 -   Patch - Add __next40pxDefaultSize prop to SelectControl components to resolve deprecated size warning on WP 7.0+. [#63847]
