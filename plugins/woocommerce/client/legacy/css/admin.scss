@@ -3070,29 +3070,19 @@ ul.wc_coupon_list_block {
 			transform: translateY(-50%);
 		}
 
+		// Layout-only overrides on top of .components-button.is-tertiary.
+		// Color, hover, focus ring, padding, font, and radius all come from
+		// the design system; we only keep what the component doesn't supply.
 		.woocommerce-order-list-nav__button {
-			display: inline-flex;
-			align-items: center;
 			gap: 2px;
-			padding: 4px 8px;
-			border-radius: 2px; // --wpds-border-radius-xs
-			color: #1e1e1e; // --wpds-color-fg-content-neutral
-			font-size: 13px;
-			line-height: 1.4;
 			text-decoration: none;
 
-			&:hover {
-				background: rgba(0, 0, 0, 0.06);
-				color: #1e1e1e;
-			}
-
-			&:focus-visible {
-				outline: 2px solid;
-				outline-offset: 1px;
-			}
-
 			&[aria-disabled="true"] {
-				color: #757575; // --wpds-color-fg-content-neutral-weak
+				// .components-button.is-tertiary's disabled handling only
+				// fires on the real :disabled pseudo-class. The inactive
+				// nav variant renders as <span aria-disabled="true">, so we
+				// still need to mute color and lock interactions here.
+				color: var(--wpds-color-fg-interactive-neutral-disabled, #757575);
 				cursor: default;
 				pointer-events: none;
 			}

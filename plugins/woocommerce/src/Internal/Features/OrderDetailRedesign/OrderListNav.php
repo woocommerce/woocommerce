@@ -130,7 +130,7 @@ class OrderListNav {
 		$content = 'is-prev' === $variant
 			? $svg . '<span class="woocommerce-order-list-nav__label">' . esc_html( $text ) . '</span>'
 			: '<span class="woocommerce-order-list-nav__label">' . esc_html( $text ) . '</span>' . $svg;
-		$class   = 'woocommerce-order-list-nav__button ' . esc_attr( $variant );
+		$class   = 'components-button is-tertiary woocommerce-order-list-nav__button ' . esc_attr( $variant );
 
 		if ( null === $url ) {
 			?>
