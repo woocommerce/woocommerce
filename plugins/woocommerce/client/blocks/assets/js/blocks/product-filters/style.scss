@@ -155,8 +155,8 @@
 	}
 
 	@include breakpoint(">600px") {
-		&:not(.is-filter-drawer-disabled),
-		&:not(.is-filter-drawer-disabled).is-overlay-opened {
+		&,
+		&.is-overlay-opened {
 			display: flex;
 
 			.wc-block-product-filters__overlay-header,
