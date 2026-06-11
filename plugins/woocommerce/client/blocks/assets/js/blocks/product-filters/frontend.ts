@@ -15,10 +15,14 @@ import type {
 	ProductFiltersContext,
 } from './types';
 import { getClosestColor } from './utils/get-closest-color';
+import {
+	PRODUCT_FILTERS_STORE_LOCK,
+	PRODUCT_FILTERS_STORE_NAME,
+} from './constants';
 
 const { getContext, getElement, store, getServerContext, getConfig } = iAPI;
 
-const BLOCK_NAME = 'woocommerce/product-filters';
+const BLOCK_NAME = PRODUCT_FILTERS_STORE_NAME;
 
 type ValidFilterOptionItem = FilterOptionItem & {
 	type: string;
@@ -77,7 +81,6 @@ function unselectFilter( item: ValidFilterOptionItem ) {
 const productFiltersStore = {
 	state: {
 		get params() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
 			const params: Record< string, string > = {};
 
 			function addParam( key: string, value: string ) {
@@ -89,7 +92,7 @@ const productFiltersStore = {
 			const config = getConfig( BLOCK_NAME );
 			const taxonomyParamsMap = config?.taxonomyParamsMap || {};
 
-			activeFilters.forEach( ( filter ) => {
+			state.activeFilters.forEach( ( filter ) => {
 				// todo: refactor this to use params data from Automattic\WooCommerce\Internal\ProductFilters\Params.
 				const { type, value } = filter;
 
@@ -199,7 +202,7 @@ const productFiltersStore = {
 					? itemArg
 					: context.item;
 			if ( ! item || ! isValidFilterOptionItem( item ) ) return;
-			const isSelected = context.activeFilters.some(
+			const isSelected = state.activeFilters.some(
 				( f ) => f.type === item.type && f.value === item.value
 			);
 			if ( isSelected ) {
@@ -302,6 +305,15 @@ const productFiltersStore = {
 				document.body.style.overflow = 'auto';
 			}
 		},
+		syncActiveFiltersWithServer: () => {
+			if ( ! getServerContext ) return;
+			const context = getContext< ProductFiltersContext >();
+			const serverContext = getServerContext< ProductFiltersContext >();
+
+			context.activeFilters = Array.isArray( serverContext.activeFilters )
+				? serverContext.activeFilters.map( ( item ) => ( { ...item } ) )
+				: [];
+		},
 	},
 };
 
@@ -313,5 +325,6 @@ export type ProductFiltersStore = typeof productFiltersStore;
 
 const { state, actions } = store< ProductFiltersStore >(
 	BLOCK_NAME,
-	productFiltersStore
+	productFiltersStore,
+	{ lock: PRODUCT_FILTERS_STORE_LOCK }
 );
