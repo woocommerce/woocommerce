@@ -121,9 +121,17 @@
 	white-space: nowrap;
 }
 
-.promo-links .components-button {
+.promo-links .promo-cta {
 	height: 32px;
 	padding: 4px $small-gap;
+}
+
+.promo-cta-link.woocommerce-admin-dismiss-notification {
+	color: $gray-700;
+
+	&:hover {
+		box-shadow: inset 0 0 0 1px $gray-700;
+	}
 }
 
 // WooCommerce > Extensions

@@ -98,8 +98,7 @@ const PromoCard = ( {
 				{ promotion.cta_label?.en_US ?? '' }
 			</Button>
 			<Button
-				className="promo-cta-link"
-				variant="tertiary"
+				className="promo-cta-link woocommerce-admin-dismiss-notification"
 				onClick={ handleDismiss }
 			>
 				{ __( 'Dismiss', 'woocommerce' ) }
