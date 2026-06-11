@@ -4,35 +4,35 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [2.0.0](https://www.npmjs.com/package/@woocommerce/admin-layout/v/2.0.0) - 2026-06-11 
 
--   Major - Update @wordpress/* dependencies to WordPress 6.8 minimum.
--   Major - Updated declared dependencies to React 18 and WordPress 6.6.
--   Minor - Bump jest package dependency to 29.5.x.
--   Minor - Improve build time for admin-layout by using webpack filesystem cache.
--   Minor - Remove unused React imports.
--   Minor - Upgraded TypeScript in the monorepo to 5.7.2.
--   Patch - Fix woo header components types.
--   Patch - Bump wireit dependency version to latest.
--   Patch - CI: leverage composer packages cache in lint monorepo job.
--   Patch - Fix react-18-upgrade TODOs (@ts-expect-error) in WC Admin.
--   Patch - Fix the admin layout package installation example.
--   Patch - Fix WooFooterItem type.
--   Patch - Migrate from React RC types to direct React Props types with jscodeshift codemod.
--   Patch - Monorepo: build RAM usage optimization.
--   Patch - Monorepo: consolidate @wordpress/babel-preset-default, @wordpress/browserslist-config, glob packages versions.
--   Patch - Monorepo: consolidate packages licenses to `GPL-2.0-or-later`.
--   Patch - Monorepo: consolidate syncpack config around React 17/18 usage.
--   Patch - Monorepo: consolidate TypeScript config files and JS test directories naming.
--   Patch - Monorepo: drop the unused `concurrently` package from dependencies.
--   Patch - Monorepo: refresh DependencyExtractionWebpackPlugin for compatibility with filesystem cache, admin build cleanup.
--   Patch - Monorepo: refresh wireit dependencyOutputs configuration synchronization when installing dependencies.
--   Patch - Monorepo: watch startup time optimization.
--   Patch - Monorepo: Webpack deps review and consolidation and a bit of deps grooming.
--   Patch - Move the CommonJS build to prepack so day-to-day development only builds the ESM output.
--   Patch - Move TypeScript type-checking from the build to a new `lint:lang:types` script. Builds now emit types and JS without type-checking.
--   Patch - Replaced patched `@wordpress/data` types with opt-in internal package types.
--   Patch - Replaced wireit + tsc package build pipeline with a per-package esbuild script.
--   Patch - Update dependencies.
--   Patch - Update wireit to 0.14.10.
+-   Major - Update @wordpress/* dependencies to WordPress 6.8 minimum. [#64114]
+-   Major - Updated declared dependencies to React 18 and WordPress 6.6. [#53531]
+-   Minor - Bump jest package dependency to 29.5.x. [#60324]
+-   Minor - Improve build time for admin-layout by using webpack filesystem cache. [#64082]
+-   Minor - Remove unused React imports. [#55554]
+-   Minor - Upgraded TypeScript in the monorepo to 5.7.2. [#53165]
+-   Patch - Fix woo header components types. [#55822]
+-   Patch - Bump wireit dependency version to latest. [#57313]
+-   Patch - CI: leverage composer packages cache in lint monorepo job. [#52054]
+-   Patch - Fix react-18-upgrade TODOs (@ts-expect-error) in WC Admin. [#55478]
+-   Patch - Fix the admin layout package installation example. [#65500]
+-   Patch - Fix WooFooterItem type. [#54710]
+-   Patch - Migrate from React RC types to direct React Props types with jscodeshift codemod. [#56594]
+-   Patch - Monorepo: build RAM usage optimization. [#58781]
+-   Patch - Monorepo: consolidate @wordpress/babel-preset-default, @wordpress/browserslist-config, glob packages versions. [#56392]
+-   Patch - Monorepo: consolidate packages licenses to `GPL-2.0-or-later`. [#58941]
+-   Patch - Monorepo: consolidate syncpack config around React 17/18 usage. [#52022]
+-   Patch - Monorepo: consolidate TypeScript config files and JS test directories naming. [#52191]
+-   Patch - Monorepo: drop the unused `concurrently` package from dependencies. [#58765]
+-   Patch - Monorepo: refresh DependencyExtractionWebpackPlugin for compatibility with filesystem cache, admin build cleanup. [#64111]
+-   Patch - Monorepo: refresh wireit dependencyOutputs configuration synchronization when installing dependencies. [#55095]
+-   Patch - Monorepo: watch startup time optimization. [#59166]
+-   Patch - Monorepo: Webpack deps review and consolidation and a bit of deps grooming. [#56746]
+-   Patch - Move the CommonJS build to prepack so day-to-day development only builds the ESM output. [#64876]
+-   Patch - Move TypeScript type-checking from the build to a new `lint:lang:types` script. Builds now emit types and JS without type-checking. [#65168]
+-   Patch - Replaced patched `@wordpress/data` types with opt-in internal package types. [#63483]
+-   Patch - Replaced wireit + tsc package build pipeline with a per-package esbuild script. [#65210]
+-   Patch - Update dependencies. [#48645]
+-   Patch - Update wireit to 0.14.10. [#54996]
 
 ## [1.1.0](https://www.npmjs.com/package/@woocommerce/admin-layout/v/1.1.0) - 2024-04-12 
 

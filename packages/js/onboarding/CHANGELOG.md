@@ -13,7 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Fix the name of the Manawatu-Whanganui region. [#54231]
 -   Minor - Improve build time for onboarding by using webpack filesystem cache. [#64082]
 -   Minor - Improved the WooPaymentsMethodsLogos component to support provided breakpoints and number of methods shown for those. [#53900]
--   Minor - ISO Code update for Odisha state (India) https://en.wikipedia.org/wiki/ISO_3166-2:IN (23 November 2023). [#53341]
+-   Minor - ISO Code update for Odisha state (India) [ISO 3166-2:IN](https://en.wikipedia.org/wiki/ISO_3166-2:IN) (23 November 2023). [#53341]
 -   Minor - Monorepo: bump pnpm version to 9.15.0. [#54189]
 -   Minor - Remove unused React imports. [#55554]
 -   Minor - Replace Woopayments and WooPay logos with the new rebranded logos. [#54023]
