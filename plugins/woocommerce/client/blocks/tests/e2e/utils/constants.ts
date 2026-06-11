@@ -1,39 +1,5 @@
-/**
- * External dependencies
- */
-import path from 'path';
-
-export const BLOCK_THEME_WITH_TEMPLATES_SLUG = 'theme-with-woo-templates';
-export const BLOCK_THEME_WITH_TEMPLATES_NAME = 'Theme with Woo Templates';
-export const BLOCK_THEME_SLUG = 'twentytwentyfour';
-export const BLOCK_THEME_NAME = 'Twenty Twenty-Four';
-export const BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG = `${ BLOCK_THEME_SLUG }-child__block-notices-filter`;
-export const BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG = `${ BLOCK_THEME_SLUG }-child__block-notices-template`;
-export const BLOCK_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG = `${ BLOCK_THEME_SLUG }-child__classic-notices-template`;
-export const CLASSIC_THEME_SLUG = 'storefront';
-export const CLASSIC_THEME_NAME = 'Storefront';
-export const CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG = `${ CLASSIC_THEME_SLUG }-child__block-notices-filter`;
-export const CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG = `${ CLASSIC_THEME_SLUG }-child__block-notices-template`;
-export const CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG = `${ CLASSIC_THEME_SLUG }-child__classic-notices-template`;
-export const CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SLUG = `${ CLASSIC_THEME_SLUG }-child__with-block-template-part`;
-export const CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SUPPORT_SLUG = `${ CLASSIC_THEME_SLUG }-child__with-block-template-part-support`;
-export const BASE_URL =
-	'http://localhost:' + ( process.env.WP_ENV_TESTS_PORT || '8889' );
-
-export const WP_ARTIFACTS_PATH =
-	process.env.WP_ARTIFACTS_PATH ||
-	path.join( process.cwd(), 'tests/e2e/artifacts' );
-
-export const STORAGE_STATE_PATH =
-	process.env.STORAGE_STATE_PATH ||
-	path.join( WP_ARTIFACTS_PATH, 'storage-states/admin.json' );
-
-// User roles storage states
-export const adminFile = STORAGE_STATE_PATH;
-export const customerFile = path.join(
-	path.dirname( STORAGE_STATE_PATH ),
-	'customer.json'
-);
-export const guestFile = { cookies: [], origins: [] };
-
-export const DB_EXPORT_FILE = 'blocks_e2e.sql';
+// Compatibility shim: the real module moved to tests/e2e-pw/utils/blocks
+// during the QAO-185 e2e merge. The re-export keeps the old import path (used
+// by the blocks e2e utils barrel) working. Removed in QAO-407 (#6) with the
+// rest of this tree.
+export * from '../../../../../tests/e2e-pw/utils/blocks/constants';

@@ -12,6 +12,10 @@ import type {
 	ProductFilterPriceContext,
 	ProductFilterPriceStore,
 } from '../price-filter/frontend';
+import {
+	PRODUCT_FILTERS_STORE_LOCK,
+	PRODUCT_FILTERS_STORE_NAME,
+} from '../../constants';
 
 const { store, getContext, getElement, withScope, getServerContext } = iAPI;
 
@@ -73,4 +77,6 @@ const { state, actions } = store<
 	ProductFiltersStore &
 		ProductFilterPriceStore &
 		typeof productFilterPriceSliderStore
->( 'woocommerce/product-filters', productFilterPriceSliderStore );
+>( PRODUCT_FILTERS_STORE_NAME, productFilterPriceSliderStore, {
+	lock: PRODUCT_FILTERS_STORE_LOCK,
+} );
