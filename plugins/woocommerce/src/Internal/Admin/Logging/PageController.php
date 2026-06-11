@@ -725,7 +725,7 @@ class PageController {
 					// Decode for validation.
 					$context = json_decode( $maybe_json, false, 512, JSON_THROW_ON_ERROR );
 
-					// Re-encode to make it pretty.
+					// Re-encode to make it pretty. Keep the JSON flags in sync with LogHandlerFileV2::format_entry().
 					$context = wp_json_encode( $context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
 
 					$message_chunks[1] = sprintf(
