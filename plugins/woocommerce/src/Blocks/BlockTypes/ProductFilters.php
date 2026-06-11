@@ -142,6 +142,7 @@ class ProductFilters extends AbstractBlock {
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<?php if ( $show_filter_drawer ) : ?>
 				<button
+					type="button"
 					class="wc-block-product-filters__open-overlay"
 					data-wp-on--click="actions.openOverlay"
 				>
@@ -157,6 +158,7 @@ class ProductFilters extends AbstractBlock {
 						>
 							<header class="wc-block-product-filters__overlay-header">
 								<button
+									type="button"
 									class="wc-block-product-filters__close-overlay"
 									data-wp-on--click="actions.closeOverlay"
 								>
@@ -171,6 +173,7 @@ class ProductFilters extends AbstractBlock {
 								class="wc-block-product-filters__overlay-footer"
 							>
 								<button
+									type="button"
 									class="wc-block-product-filters__apply wp-element-button"
 									data-wp-interactive="<?php echo esc_attr( $this->get_full_block_name() ); ?>"
 									data-wp-on--click="actions.closeOverlay"
