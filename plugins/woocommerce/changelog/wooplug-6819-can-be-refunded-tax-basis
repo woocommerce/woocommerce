@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fixes a tax-basis mismatch in the v4 Orders API (experimental, behind the rest-api-v4 feature flag), so user-facing impact is limited.
-
-Fix can_be_refunded in v4 Orders API to compare fee and shipping refunded totals on a tax-inclusive basis, matching the helper's contract.
