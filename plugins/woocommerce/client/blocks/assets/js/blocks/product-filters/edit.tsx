@@ -115,15 +115,17 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 					</div>
 				) : (
 					<>
-						<button
-							className="wc-block-product-filters__open-overlay"
-							onClick={ () => setIsOpen( ! isOpen ) }
-						>
-							<Icon icon={ filterThreeLines } />
-							<span>
-								{ __( 'Filter products', 'woocommerce' ) }
-							</span>
-						</button>
+						{ showFilterDrawer && (
+							<button
+								className="wc-block-product-filters__open-overlay"
+								onClick={ () => setIsOpen( ! isOpen ) }
+							>
+								<Icon icon={ filterThreeLines } />
+								<span>
+									{ __( 'Filter products', 'woocommerce' ) }
+								</span>
+							</button>
+						) }
 
 						<div className="wc-block-product-filters__overlay">
 							<div className="wc-block-product-filters__overlay-wrapper">
