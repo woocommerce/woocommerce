@@ -243,7 +243,7 @@ diff -ruN a/type-overrides/@wordpress/core-data/index.d.ts b/type-overrides/@wor
  	import * as selectors from '@wordpress/core-data/build-types/selectors';
 +}
 +
-+declare module '@wordpress/data' {
++declare module '@wordpress/data/build-types/types' {
 +	interface StoreRegistry {
 +		'core': typeof import("@wordpress/core-data").store;
 +	}
