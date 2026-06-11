@@ -235,7 +235,7 @@ class RefundSchema extends AbstractSchema {
 							'validate_callback' => 'rest_validate_request_arg',
 						),
 						'refund_total' => array(
-							'description'       => __( 'Optional: Total refunded for this item (tax-inclusive). If omitted or set to null, the backend computes it from the order line item\'s unit price multiplied by quantity. An explicit 0 is treated as a zero refund for that line.', 'woocommerce' ),
+							'description'       => __( 'Total amount refunded for this item (including tax). If omitted or set to null, the backend computes it from the order line item\'s unit price multiplied by quantity. An explicit 0 is treated as a zero refund for this line item.', 'woocommerce' ),
 							'type'              => array( 'number', 'null' ),
 							'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
 							'validate_callback' => 'rest_validate_request_arg',
