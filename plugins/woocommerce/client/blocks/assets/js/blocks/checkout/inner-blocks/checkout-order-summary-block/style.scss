@@ -1,6 +1,6 @@
 .wp-block-woocommerce-checkout-order-summary-block {
 	border: 1px solid $universal-border-light;
-	border-radius: 5px;
+	border-radius: $universal-border-radius;
 	box-sizing: border-box;
 	@include font-small-locked;
 
@@ -39,7 +39,7 @@
 
 	.checkout-order-summary-block-fill {
 		border: 1px solid $universal-border-light;
-		border-radius: 5px;
+		border-radius: $universal-border-radius;
 
 		.wc-block-components-totals-wrapper:first-of-type {
 			border-top: 0;
