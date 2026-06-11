@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Make checkout address field helpers open collapsed address forms before filling fields.
