@@ -17,7 +17,7 @@ import defaults from './defaults';
 const { name } = metadata;
 export { metadata, name };
 
-const settings = {
+registerBlockType( name, {
 	icon: {
 		src: (
 			<Icon
@@ -27,10 +27,7 @@ const settings = {
 		),
 	},
 	edit,
-	// Save the props to post content.
 	save,
 	deprecated,
 	defaults,
-};
-
-registerBlockType( name, settings );
+} );

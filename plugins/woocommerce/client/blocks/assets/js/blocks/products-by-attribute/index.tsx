@@ -3,14 +3,13 @@
  */
 import { Icon, category } from '@wordpress/icons';
 import { registerBlockType } from '@wordpress/blocks';
-import { getSetting } from '@woocommerce/settings';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import './editor.scss';
+import { DeprecatedBlockWarning } from '../../editor-components/deprecated-block-warning';
 import metadata from './block.json';
-import { Edit } from './edit';
 
 registerBlockType( metadata, {
 	icon: {
@@ -23,23 +22,15 @@ registerBlockType( metadata, {
 	},
 	attributes: {
 		...metadata.attributes,
-		columns: {
-			type: 'number',
-			default: getSetting( 'defaultColumns', 3 ),
-		},
-		rows: {
-			type: 'number',
-			default: getSetting( 'defaultRows', 3 ),
-		},
-		stockStatus: {
-			type: 'array',
-			default: Object.keys( getSetting( 'stockStatusOptions', [] ) ),
-		},
 	},
 
-	edit: Edit,
+	edit: ( { attributes } ) => (
+		<DeprecatedBlockWarning
+			blockName={ metadata.name }
+			blockTitle={ __( 'Products by Attribute', 'woocommerce' ) }
+			attributes={ attributes }
+		/>
+	),
 
-	save: () => {
-		return null;
-	},
+	save: () => null,
 } );

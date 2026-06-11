@@ -1,17 +1,15 @@
 /**
  * External dependencies
  */
-import { createBlock, registerBlockType } from '@wordpress/blocks';
+import { registerBlockType } from '@wordpress/blocks';
 import { Icon, percent } from '@wordpress/icons';
+import { __ } from '@wordpress/i18n';
+
 /**
  * Internal dependencies
  */
-import Block from './block';
-import './editor.scss';
-import sharedAttributes, {
-	sharedAttributeBlockTypes,
-} from '../../utils/shared-attributes';
 import metadata from './block.json';
+import { DeprecatedBlockWarning } from '../../editor-components/deprecated-block-warning';
 
 registerBlockType( metadata, {
 	icon: {
@@ -22,33 +20,14 @@ registerBlockType( metadata, {
 			/>
 		),
 	},
-	attributes: {
-		...sharedAttributes,
-		...metadata.attributes,
-	},
-	transforms: {
-		from: [
-			{
-				type: 'block',
-				blocks: sharedAttributeBlockTypes.filter(
-					( value ) => value !== 'woocommerce/product-on-sale'
-				),
-				transform: ( attributes ) =>
-					createBlock( 'woocommerce/product-on-sale', attributes ),
-			},
-		],
-	},
 
-	/**
-	 * Renders and manages the block.
-	 *
-	 * @param {Object} props Props to pass to block.
-	 */
-	edit( props ) {
-		return <Block { ...props } />;
-	},
+	edit: ( { attributes } ) => (
+		<DeprecatedBlockWarning
+			blockName={ metadata.name }
+			blockTitle={ __( 'On Sale Products', 'woocommerce' ) }
+			attributes={ attributes }
+		/>
+	),
 
-	save() {
-		return null;
-	},
+	save: () => null,
 } );

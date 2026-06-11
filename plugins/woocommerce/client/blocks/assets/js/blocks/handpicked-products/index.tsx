@@ -2,15 +2,14 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { getSetting } from '@woocommerce/settings';
 import { Icon, stack } from '@wordpress/icons';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import './editor.scss';
 import metadata from './block.json';
-import { Edit } from './edit';
+import { DeprecatedBlockWarning } from '../../editor-components/deprecated-block-warning';
 
 registerBlockType( metadata, {
 	icon: {
@@ -21,17 +20,14 @@ registerBlockType( metadata, {
 			/>
 		),
 	},
-	attributes: {
-		...metadata.attributes,
-		columns: {
-			type: 'number',
-			default: getSetting( 'defaultColumns', 3 ),
-		},
-	},
 
-	edit: Edit,
+	edit: ( { attributes } ) => (
+		<DeprecatedBlockWarning
+			blockName={ metadata.name }
+			blockTitle={ __( 'Hand-picked Products', 'woocommerce' ) }
+			attributes={ attributes }
+		/>
+	),
 
-	save: () => {
-		return null;
-	},
+	save: () => null,
 } );
