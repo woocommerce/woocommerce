@@ -71,7 +71,9 @@ class WebflowMapper implements PlatformMapperInterface {
 		$field_data = $this->extract_field_data( $product );
 		$skus       = $this->extract_skus( $platform_data );
 
-		$properties  = $this->extract_sku_properties( $field_data );
+		$properties = $this->extract_sku_properties( $field_data );
+		// Needs properties AND more than one SKU. A single-SKU product is imported as simple,
+		// intentionally dropping its lone option (a one-value attribute adds no variation choice).
 		$is_variable = ! empty( $properties ) && count( $skus ) > 1;
 
 		$wc_data = $this->map_basic_fields( $product, $field_data, $is_variable );
