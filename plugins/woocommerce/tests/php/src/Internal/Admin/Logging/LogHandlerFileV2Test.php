@@ -192,13 +192,7 @@ MESSAGE;
 				'multibyte'   => '中文字',
 				'backslashes' => 'C:\MS-DOS\\',
 			),
-			$context_delineator . wp_json_encode(
-				array(
-					'multibyte'   => '中文字',
-					'backslashes' => 'C:\MS-DOS\\',
-				),
-				JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-			),
+			$context_delineator . '{"multibyte":"中文字","backslashes":"C:\\\\MS-DOS\\\\"}',
 		);
 		yield 'backtrace boolean only' => array(
 			array( 'backtrace' => true ),
