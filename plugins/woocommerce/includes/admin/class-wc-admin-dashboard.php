@@ -42,11 +42,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Init dashboard widgets.
 		 */
 		public function init() {
+			wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce Status', 'woocommerce' ), array( $this, 'status_widget' ), null, null, 'normal', 'high' );
+
 			// Reviews Widget.
 			if ( current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
-				wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), array( $this, 'recent_reviews' ) );
+				wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), array( $this, 'recent_reviews' ), null, null, 'normal', 'high' );
 			}
-			wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce Status', 'woocommerce' ), array( $this, 'status_widget' ) );
 
 			// Network Order Widget.
 			if ( is_multisite() && is_main_site() ) {
@@ -73,7 +74,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			$has_permission           = current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'publish_shop_orders' );
 			$task_completed_or_hidden = 'yes' === get_option( 'woocommerce_task_list_complete' ) || 'yes' === get_option( 'woocommerce_task_list_hidden' );
-			return $task_completed_or_hidden && $has_permission;
+			$store_launched           = 'yes' !== get_option( 'woocommerce_coming_soon' );
+			return ( $task_completed_or_hidden || $store_launched ) && $has_permission;
 		}
 
 		/**
@@ -150,8 +152,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			);
 
 			// Display loading placeholder.
-			echo '<div id="wc-status-widget-loading" class="wc-status-widget-loading">';
-			echo '<p>' . esc_html__( 'Loading status data...', 'woocommerce' ) . ' <span class="spinner is-active"></span></p>';
+			echo '<div id="wc-status-widget-loading" class="wc-dashboard-widget-loading wc-status-widget-loading" aria-busy="true">';
+			echo '<p><span class="spinner is-active"></span><span class="wc-dashboard-widget-loading__text">' . esc_html__( 'Loading status data...', 'woocommerce' ) . '</span></p>';
 			echo '</div>';
 			echo '<div id="wc-status-widget-content" style="display:none;"></div>';
 		}
@@ -493,8 +495,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			);
 
 			// Display loading placeholder.
-			echo '<div id="wc-recent-reviews-widget-loading" class="wc-recent-reviews-widget-loading">';
-			echo '<p>' . esc_html__( 'Loading reviews data...', 'woocommerce' ) . ' <span class="spinner is-active"></span></p>';
+			echo '<div id="wc-recent-reviews-widget-loading" class="wc-dashboard-widget-loading wc-recent-reviews-widget-loading" aria-busy="true">';
+			echo '<p><span class="spinner is-active"></span><span class="wc-dashboard-widget-loading__text">' . esc_html__( 'Loading reviews data...', 'woocommerce' ) . '</span></p>';
 			echo '</div>';
 			echo '<div id="wc-recent-reviews-widget-content" style="display:none;"></div>';
 		}

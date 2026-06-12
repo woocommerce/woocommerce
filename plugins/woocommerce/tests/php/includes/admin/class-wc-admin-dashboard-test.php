@@ -42,6 +42,7 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->admin_user );
+		update_option( 'woocommerce_coming_soon', 'yes' );
 		$this->sut = new WC_Admin_Dashboard();
 	}
 
@@ -53,6 +54,7 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_task_list_hidden' );
 		delete_option( 'woocommerce_task_list_hidden_lists' );
 		delete_option( 'woocommerce_task_list_complete' );
+		delete_option( 'woocommerce_coming_soon' );
 		remove_all_filters( 'pre_option_woocommerce_task_list_complete' );
 		remove_all_filters( 'pre_option_woocommerce_task_list_hidden' );
 
@@ -108,6 +110,70 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 			$this->invoke_should_display_widget( $this->sut ),
 			'Widget should not display when task list is neither complete nor hidden'
 		);
+	}
+
+	/**
+	 * @testdox Widget shows when store has launched and task list is incomplete.
+	 */
+	public function test_widget_shows_when_store_has_launched_and_task_list_incomplete(): void {
+		update_option( 'woocommerce_coming_soon', 'no' );
+		delete_option( 'woocommerce_task_list_completed_lists' );
+		delete_option( 'woocommerce_task_list_hidden_lists' );
+
+		$this->assertTrue(
+			$this->invoke_should_display_widget( $this->sut ),
+			'Widget should display when store has launched even if task list is incomplete'
+		);
+	}
+
+	/**
+	 * @testdox Status and reviews widgets are registered high in the normal dashboard column.
+	 */
+	public function test_init_registers_status_and_reviews_widgets_in_high_normal_context(): void {
+		global $wp_meta_boxes;
+
+		require_once ABSPATH . 'wp-admin/includes/dashboard.php';
+		set_current_screen( 'dashboard' );
+		$wp_meta_boxes['dashboard'] = array();
+
+		$this->sut->init();
+
+		$this->assertArrayHasKey( 'woocommerce_dashboard_status', $wp_meta_boxes['dashboard']['normal']['high'] );
+		$this->assertArrayHasKey( 'woocommerce_dashboard_recent_reviews', $wp_meta_boxes['dashboard']['normal']['high'] );
+
+		$widget_order  = array_keys( $wp_meta_boxes['dashboard']['normal']['high'] );
+		$status_index  = array_search( 'woocommerce_dashboard_status', $widget_order, true );
+		$reviews_index = array_search( 'woocommerce_dashboard_recent_reviews', $widget_order, true );
+
+		$this->assertNotFalse( $status_index );
+		$this->assertNotFalse( $reviews_index );
+		$this->assertLessThan( $reviews_index, $status_index );
+	}
+
+	/**
+	 * @testdox Status widget loading placeholder renders the spinner above the loading text.
+	 */
+	public function test_status_widget_loading_placeholder_renders_stacked_loader(): void {
+		ob_start();
+		$this->sut->status_widget();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'class="wc-dashboard-widget-loading wc-status-widget-loading"', $html );
+		$this->assertStringContainsString( 'aria-busy="true"', $html );
+		$this->assertMatchesRegularExpression( '/<p><span class="spinner is-active"><\/span><span class="wc-dashboard-widget-loading__text">Loading status data\.\.\.<\/span><\/p>/', $html );
+	}
+
+	/**
+	 * @testdox Recent reviews widget loading placeholder renders the spinner above the loading text.
+	 */
+	public function test_recent_reviews_widget_loading_placeholder_renders_stacked_loader(): void {
+		ob_start();
+		$this->sut->recent_reviews();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'class="wc-dashboard-widget-loading wc-recent-reviews-widget-loading"', $html );
+		$this->assertStringContainsString( 'aria-busy="true"', $html );
+		$this->assertMatchesRegularExpression( '/<p><span class="spinner is-active"><\/span><span class="wc-dashboard-widget-loading__text">Loading reviews data\.\.\.<\/span><\/p>/', $html );
 	}
 
 	/**

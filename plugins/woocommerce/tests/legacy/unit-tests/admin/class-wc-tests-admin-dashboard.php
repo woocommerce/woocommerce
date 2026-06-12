@@ -44,6 +44,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		( new WC_Admin_Dashboard() )->recent_reviews();
 		$this->expectOutputRegex( '/Loading reviews data.../' );
+		$this->expectOutputRegex( '/wc-dashboard-widget-loading/' );
 		$this->expectOutputRegex( '/wc-recent-reviews-widget-loading/' );
 		$this->expectOutputRegex( '/wc-recent-reviews-widget-content/' );
 	}
@@ -102,7 +103,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		( new WC_Admin_Dashboard() )->status_widget();
 		$this->expectOutputRegex( '/Loading status data.../' );
-		$this->expectOutputRegex( '/<div id="wc-status-widget-loading" class="wc-status-widget-loading">/' );
+		$this->expectOutputRegex( '/<div id="wc-status-widget-loading" class="wc-dashboard-widget-loading wc-status-widget-loading" aria-busy="true">/' );
 	}
 
 	/**
