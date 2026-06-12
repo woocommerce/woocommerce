@@ -390,6 +390,11 @@ class CheckoutSchema extends AbstractSchema {
 				$field_schema['enum'][] = true;
 			}
 
+			if ( 'textarea' === $field['type'] ) {
+				if ( ! empty( $field['attributes']['maxLength'] ) ) {
+					$field_schema['maxLength'] = (int) $field['attributes']['maxLength'];
+				}
+			}
 			$schema[ $key ] = $field_schema;
 		}
 		return $schema;

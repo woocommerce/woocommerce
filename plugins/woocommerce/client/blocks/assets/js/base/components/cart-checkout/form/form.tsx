@@ -31,6 +31,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import clsx from 'clsx';
 import fastDeepEqual from 'fast-deep-equal/es6';
+import { TextareaControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -409,6 +410,29 @@ const Form = <
 							errorMessage={
 								fieldProps.errorMessage || undefined
 							}
+						/>
+					);
+				}
+
+				if ( field.type === 'textarea' ) {
+					return (
+						<TextareaControl
+							key={ field.key }
+							{ ...fieldProps }
+							label={ fieldProps.label || '' }
+							value={
+								decodeEntities(
+									values[ field.key as keyof T ] as string
+								) ?? ''
+							}
+							onChange={ ( newValue: string ) =>
+								onChange( {
+									...values,
+									[ field.key ]: newValue,
+								} )
+							}
+							rows={ 4 }
+							className={ clsx( 'wc-block-components-textarea', `wc-block-components-textarea-${ field.key }`.replaceAll( '/', '-' ) ) }
 						/>
 					);
 				}

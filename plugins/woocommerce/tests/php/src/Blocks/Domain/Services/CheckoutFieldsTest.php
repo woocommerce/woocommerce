@@ -188,4 +188,46 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'plugin-namespace/gov-id', $fields );
 		$this->assertArrayNotHasKey( 'namespace/vat-number', $fields );
 	}
+
+	/**
+	 * Tests that a field with type 'textarea' can be successfully registered
+	 * using woocommerce_register_additional_checkout_field without errors.
+	 */
+	public function test_textarea_field_registers_successfully() {
+		woocommerce_register_additional_checkout_field( [
+			'id'       => 'test/textarea',
+			'label'    => 'Test textarea',
+			'location' => 'order',
+			'type'     => 'textarea',
+		] );
+		$fields = $this->controller->get_fields_for_location( 'order' );
+		$this->assertArrayHasKey( 'test/textarea', $fields );
+		$this->assertSame( 'textarea', $fields['test/textarea']['type'] );
+	}
+
+	/**
+	 * Tests that the default sanitization callback preserves newline characters for textarea fields
+	 */
+	public function test_textarea_sanitize_preserves_newlines() {
+		$field  = [ 'type' => 'textarea' ];
+		$value  = "line one\nline two";
+		$result = $this->controller->default_sanitize_callback( $value, $field );
+		$this->assertStringContainsString( "\n", $result );
+	}
+
+	/**
+	 * Tests that textarea-specific attributes (rows, maxLength) are accepted by the attribute allowlist.
+	 */
+	public function test_textarea_rows_attribute_allowed() {
+		woocommerce_register_additional_checkout_field( [
+			'id'         => 'test/textarea-attrs',
+			'label'      => 'Test',
+			'location'   => 'order',
+			'type'       => 'textarea',
+			'attributes' => [ 'rows' => '6', 'maxLength' => '200' ],
+		] );
+		$fields = $this->controller->get_fields_for_location( 'order' );
+		$this->assertArrayHasKey( 'test/textarea-attrs', $fields );
+		$this->assertSame( '6', $fields['test/textarea-attrs']['attributes']['rows'] );
+	}
 }

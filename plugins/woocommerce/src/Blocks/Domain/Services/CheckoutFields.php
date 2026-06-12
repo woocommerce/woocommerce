@@ -37,7 +37,7 @@ class CheckoutFields {
 	 *
 	 * @var array
 	 */
-	private $supported_field_types = [ 'text', 'select', 'checkbox' ];
+	private $supported_field_types = [ 'text', 'select', 'checkbox', 'textarea' ];
 
 	/**
 	 * Groups of fields to be saved.
@@ -157,7 +157,10 @@ class CheckoutFields {
 	 * @param array $field Field data.
 	 * @return mixed
 	 */
-	public function default_sanitize_callback( $value, $field ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	public function default_sanitize_callback( $value, $field ) {
+		if ( 'textarea' === ( $field['type'] ?? 'text' ) ) {
+			return sanitize_textarea_field( $value );
+		}
 		return $value;
 	}
 
@@ -609,6 +612,11 @@ class CheckoutFields {
 			'autocomplete',
 			'autocapitalize',
 			'title',
+			'rows',
+			'cols',
+			'minLength',
+			'placeholder',
+			'spellcheck',
 		];
 
 		$valid_attributes = array_filter(

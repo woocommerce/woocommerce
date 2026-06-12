@@ -325,6 +325,20 @@ class Additional_Checkout_Fields_Test_Helper {
 				),
 			)
 		);
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/gift-message',
+				'label'    => 'Gift message',
+				'location' => 'order',
+				'type'     => 'textarea',
+				'required' => false,
+				'attributes' => array(
+					'rows'      => '4',
+					'maxLength' => '500',
+				),
+			)
+		);
 	}
 }
 
