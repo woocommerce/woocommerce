@@ -148,10 +148,17 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 					),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
-						'context' => $this->get_context_param(
+						'context'    => $this->get_context_param(
 							array(
 								'default' => 'view',
 							)
+						),
+						'image_size' => array(
+							'description'       => __( 'Image size to return. Accepts any registered WordPress image size.', 'woocommerce' ),
+							'type'              => 'string',
+							'default'           => 'full',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
 						),
 					),
 				),
@@ -329,7 +336,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 			),
 			'shipping_class'        => $object->get_shipping_class(),
 			'shipping_class_id'     => $object->get_shipping_class_id(),
-			'image'                 => current( $this->get_images( $object ) ),
+			'image'                 => current( $this->get_images( $object, $request['image_size'] ?? 'full' ) ),
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
 			'meta_data'             => $object->get_meta_data(),
