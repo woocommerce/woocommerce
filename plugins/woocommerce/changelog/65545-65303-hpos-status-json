@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Adds JSON format for the `wp wc hpos status` command
