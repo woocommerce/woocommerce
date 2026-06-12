@@ -201,6 +201,31 @@
 	},
 	"styles": {
 		"blocks": {
+			"core/accordion-heading": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				},
+				"spacing": {
+					"padding": {
+						"top": "0",
+						"bottom": "0"
+					}
+				},
+				"typography": {
+					"fontSize":  "var(--wp--preset--font-size--medium)",
+					"fontWeight": "400"
+				}
+			},
+			"core/accordion-panel": {
+				"spacing": {
+					"margin": {
+						"top": "0"
+					},
+					"padding": {
+						"bottom": "var(--wp--preset--spacing--30)"
+					}
+				}
+			},
 			"core/button": {
 				"border": {
 					"radius": "0"
@@ -399,21 +424,6 @@
 				},
 				"spacing": {
 					"blockGap": "0"
-				}
-			},
-			"woocommerce/accordion-header": {
-				"color": {
-					"text": "var(--wp--preset--color--theme-2)"
-				},
-				"spacing": {
-					"padding": {
-						"top": "0.75rem",
-						"bottom": "0.75rem"
-					}
-				},
-				"typography": {
-					"fontSize":  "var(--wp--preset--font-size--medium)",
-					"fontWeight": "400"
 				}
 			},
 			"woocommerce/breadcrumbs": {
