@@ -123,7 +123,7 @@ test.describe( 'Shopper → Cart block', () => {
 		expect( hoodiePriceText ).toBe( '$50.00' );
 	} );
 
-	test( 'User can view empty cart message', async ( {
+	test( 'User can view empty cart message and can add products to cart', async ( {
 		frontendUtils,
 		page,
 	} ) => {
@@ -135,6 +135,16 @@ test.describe( 'Shopper → Cart block', () => {
 				name: 'Your cart is currently empty!',
 			} )
 		).toBeVisible();
+
+		// Add a product to cart.
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+		await addToCartButton.click();
+
+		await expect(
+			page.getByRole( 'spinbutton', { name: 'Quantity of' } )
+		).toHaveValue( '1' );
 	} );
 
 	test( 'User can remove a product from cart', async ( {
