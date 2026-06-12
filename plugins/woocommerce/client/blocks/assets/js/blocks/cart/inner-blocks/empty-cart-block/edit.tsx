@@ -15,7 +15,9 @@ import {
 	useForcedLayout,
 	getAllowedBlocks,
 } from '../../../cart-checkout-shared';
+import newArrivals from '../../../product-collection/collections/new-arrivals';
 import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../../../product-collection/constants';
+import { CoreCollectionNames } from '../../../product-collection/types';
 
 const browseStoreTemplate = SHOP_URL
 	? [
@@ -60,14 +62,21 @@ const defaultTemplate = [
 	[
 		'woocommerce/product-collection',
 		{
-			query: {
-				perPage: 4,
-				order: 'desc',
-				orderBy: 'date',
-				woocommerceStockStatus: [ 'instock' ],
-				isProductCollectionBlock: true,
+			...newArrivals.attributes,
+			displayLayout: {
+				...newArrivals.attributes.displayLayout,
+				columns: 4,
 			},
-			displayLayout: { type: 'flex', columns: 4 },
+			query: {
+				// Copy all properties from newArrivals.attributes.query except timeFrame
+				...( ( { timeFrame, ...rest } ) => rest )(
+					newArrivals.attributes.query
+				),
+				postType: 'product',
+				perPage: 4,
+				woocommerceStockStatus: [ 'instock' ],
+			},
+			collection: CoreCollectionNames.NEW_ARRIVALS,
 		},
 		[ INNER_BLOCKS_PRODUCT_TEMPLATE ],
 	],
