@@ -561,38 +561,34 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
  * Uses Action Scheduler to fire events at the exact sale start/end times,
  * rather than relying on the daily cron.
  *
+ * An action is not scheduled if an identical one (same hook, args, group and
+ * timestamp) is already pending, so concurrent processes saving the same
+ * product don't pile up duplicate actions.
+ *
  * @since 10.5.0
  * @param WC_Product $product Product object.
  * @return void
  */
 function wc_schedule_product_sale_events( WC_Product $product ): void {
 	$product_id = $product->get_id();
-	$date_from  = $product->get_date_on_sale_from( 'edit' );
-	$date_to    = $product->get_date_on_sale_to( 'edit' );
 
-	if ( $date_from ) {
-		$start_ts = $date_from->getTimestamp();
-		if ( $start_ts > time() ) {
-			as_schedule_single_action(
-				$start_ts,
-				'wc_product_start_scheduled_sale',
-				array( 'product_id' => $product_id ),
-				'woocommerce-sales'
-			);
+	$schedule = function ( ?WC_DateTime $date, string $hook ) use ( $product_id ): void {
+		if ( is_null( $date ) ) {
+			return;
 		}
-	}
 
-	if ( $date_to ) {
-		$end_ts = $date_to->getTimestamp();
-		if ( $end_ts > time() ) {
-			as_schedule_single_action(
-				$end_ts,
-				'wc_product_end_scheduled_sale',
-				array( 'product_id' => $product_id ),
-				'woocommerce-sales'
-			);
+		$timestamp = $date->getTimestamp();
+		$args      = array( 'product_id' => $product_id );
+
+		// An identical pending action means a concurrent process (parallel save, importer,
+		// daily cron) already scheduled it after the unschedule-all step ran.
+		if ( $timestamp > time() && as_next_scheduled_action( $hook, $args, 'woocommerce-sales' ) !== $timestamp ) {
+			as_schedule_single_action( $timestamp, $hook, $args, 'woocommerce-sales' );
 		}
-	}
+	};
+
+	$schedule( $product->get_date_on_sale_from( 'edit' ), 'wc_product_start_scheduled_sale' );
+	$schedule( $product->get_date_on_sale_to( 'edit' ), 'wc_product_end_scheduled_sale' );
 }
 
 /**

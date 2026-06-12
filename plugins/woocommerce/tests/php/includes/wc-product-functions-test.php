@@ -380,6 +380,83 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Identical pending sale events are not scheduled twice when scheduling runs concurrently.
+	 */
+	public function test_wc_schedule_product_sale_events_skips_identical_pending_actions() {
+		$future_start = time() + 3600;
+		$future_end   = time() + 86400;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', $future_end ) );
+		$product->save();
+
+		// Simulate a concurrent process that already passed the unschedule-all step
+		// by invoking the scheduling function directly, without unscheduling first.
+		wc_schedule_product_sale_events( wc_get_product( $product->get_id() ) );
+
+		$this->assertSame(
+			1,
+			$this->count_pending_sale_actions( 'wc_product_start_scheduled_sale', $product->get_id() ),
+			'Only one start sale action should be pending after concurrent scheduling'
+		);
+		$this->assertSame(
+			1,
+			$this->count_pending_sale_actions( 'wc_product_end_scheduled_sale', $product->get_id() ),
+			'Only one end sale action should be pending after concurrent scheduling'
+		);
+	}
+
+	/**
+	 * @testDox A sale event pending for a different time does not prevent scheduling at the new time.
+	 */
+	public function test_wc_schedule_product_sale_events_schedules_when_pending_action_has_different_timestamp() {
+		$future_start = time() + 3600;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start ) );
+		$product->save();
+
+		$product = wc_get_product( $product->get_id() );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start + 3600 ) );
+		wc_schedule_product_sale_events( $product );
+
+		$this->assertSame(
+			2,
+			$this->count_pending_sale_actions( 'wc_product_start_scheduled_sale', $product->get_id() ),
+			'A start sale action with a different timestamp should still be scheduled'
+		);
+	}
+
+	/**
+	 * Count pending Action Scheduler sale actions for a product.
+	 *
+	 * @param string $hook       Action hook name.
+	 * @param int    $product_id Product ID.
+	 * @return int
+	 */
+	private function count_pending_sale_actions( string $hook, int $product_id ): int {
+		$actions = as_get_scheduled_actions(
+			array(
+				'hook'     => $hook,
+				'args'     => array( 'product_id' => $product_id ),
+				'group'    => 'woocommerce-sales',
+				'status'   => \ActionScheduler_Store::STATUS_PENDING,
+				'per_page' => -1,
+			),
+			'ids'
+		);
+
+		return count( $actions );
+	}
+
+	/**
 	 * @testDox Action Scheduler events are scheduled when sale date meta is written directly via update_post_meta.
 	 */
 	public function test_wc_schedule_product_sale_events_on_direct_meta_write() {
