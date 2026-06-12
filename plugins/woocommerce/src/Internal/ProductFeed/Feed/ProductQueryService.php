@@ -90,6 +90,10 @@ class ProductQueryService implements ProductQueryInterface {
 	 * }
 	 */
 	public function query_products( array $args, int $page, int $limit ): array {
+		// Coerce pagination inputs to valid values so the loader never receives page<1 or limit<1.
+		$page  = max( 1, $page );
+		$limit = max( 1, $limit );
+
 		/**
 		 * Result is always stdClass when paginate=true.
 		 *

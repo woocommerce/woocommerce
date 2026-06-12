@@ -151,6 +151,22 @@ class POSIntegration implements IntegrationInterface {
 			$this
 		);
 
+		// Defensive: third-party filters could return non-array values. Fall back to the
+		// integration defaults so ProductQueryService never receives a malformed payload.
+		if ( ! is_array( $query_args ) ) {
+			wc_get_logger()->warning(
+				'Invalid query args returned from woocommerce_product_feed_args filter. Expected array.',
+				array( 'source' => 'product-feed-pos-integration' )
+			);
+			$query_args = array_merge(
+				array(
+					'status' => array( 'publish' ),
+					'return' => 'objects',
+				),
+				$this->get_product_feed_query_args()
+			);
+		}
+
 		return new ProductQueryService(
 			$this->get_product_mapper(),
 			$this->get_feed_validator(),

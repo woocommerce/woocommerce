@@ -35,9 +35,16 @@ interface ProductQueryInterface {
 	 * @param int   $page Page number (1-based).
 	 * @param int   $limit Products per page.
 	 * @return array {
-	 *     @type array $products        Array of mapped product data arrays.
-	 *     @type int   $total           Total matching products (before pagination).
-	 *     @type int   $max_num_pages   Total pages available.
+	 *     @type array $products        Mapped product data that passed validation
+	 *                                  (post-validation). Use count($products) for the
+	 *                                  number actually returned on this page.
+	 *     @type int   $total           Pre-validation total: count of products matched
+	 *                                  by the underlying query, before the validator
+	 *                                  filter. Use this for total catalog size and to
+	 *                                  compute pagination. May be greater than
+	 *                                  count($products) when invalid entries are dropped.
+	 *     @type int   $max_num_pages   Total pages available, based on the pre-validation
+	 *                                  $total and the requested $limit.
 	 * }
 	 */
 	public function query_products( array $args, int $page, int $limit ): array;

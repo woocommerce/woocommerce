@@ -16,14 +16,6 @@ use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductQueryService;
 class ProductQueryServiceTest extends \WC_Unit_Test_Case {
 
 	/**
-	 * Set up test fixtures.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-		remove_all_filters( 'woocommerce_product_feed_args' );
-	}
-
-	/**
 	 * Clean up test fixtures.
 	 */
 	public function tearDown(): void {
