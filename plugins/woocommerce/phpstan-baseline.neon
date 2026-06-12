@@ -8173,12 +8173,6 @@ parameters:
 			path: includes/admin/views/html-notice-custom.php
 
 		-
-			message: '#^Variable \$msg might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/admin/views/html-notice-wp-php-minimum-requirements.php
-
-		-
 			message: '#^Parameter \#1 \$value of function wc_format_localized_decimal expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
@@ -14371,12 +14365,6 @@ parameters:
 			path: includes/class-wc-regenerate-images.php
 
 		-
-			message: '#^Method WC_Regenerate_Images\:\:regenerating_notice\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
 			message: '#^Method WC_Regenerate_Images\:\:resize_and_return_image\(\) should return string but returns array\.$#'
 			identifier: return.type
 			count: 3
@@ -20529,12 +20517,6 @@ parameters:
 		-
 			message: '#^Action callback returns bool but should not return anything\.$#'
 			identifier: return.void
-			count: 1
-			path: includes/integrations/maxmind-geolocation/class-wc-integration-maxmind-geolocation.php
-
-		-
-			message: '#^Method WC_Integration_MaxMind_Geolocation\:\:add_missing_license_key_notice\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/integrations/maxmind-geolocation/class-wc-integration-maxmind-geolocation.php
 
