@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix customer address fields that are emptied during checkout being restored with the previously saved values on subsequent requests.
