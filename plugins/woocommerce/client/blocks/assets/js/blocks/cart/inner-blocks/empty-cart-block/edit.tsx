@@ -74,6 +74,7 @@ const defaultTemplate = [
 				order: 'desc',
 				orderBy: 'date',
 				woocommerceStockStatus: [ 'instock' ],
+				isProductCollectionBlock: true,
 			},
 			displayLayout: { type: 'flex', columns: 4 },
 		},
