@@ -20,7 +20,7 @@ import {
 } from '@woocommerce/blocks-checkout';
 import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
-import { isBoolean, objectHasProp, Currency } from '@woocommerce/types';
+import { isBoolean, Currency } from '@woocommerce/types';
 import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
 import { Icon, trash } from '@wordpress/icons';
 import { calculateSaleAmount } from '@woocommerce/base-utils';
@@ -251,13 +251,12 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 				ref={ ref }
 				tabIndex={ tabIndex }
 			>
-				{ /* If the image has no alt text, this link is unnecessary and can be hidden. */ }
-				<td
-					className="wc-block-cart-item__image"
-					aria-hidden={
-						! objectHasProp( firstImage, 'alt' ) || ! firstImage.alt
-					}
-				>
+				<td className="wc-block-cart-item__image">
+					{ /* The image carries an enforced alt (the product name via
+					     fallbackAlt below), so this cell stays in the
+					     accessibility tree. That keeps each row at three cells,
+					     matching the three column headers, so the Total cell is
+					     announced under "Total" and not the adjacent header. */ }
 					{ /* We don't need to make it focusable, because product name has the same link. */ }
 					{ isProductHiddenFromCatalog ? (
 						<ProductImage

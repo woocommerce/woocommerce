@@ -102,7 +102,14 @@ const CartLineItemsTable = ( {
 						scope="col"
 						className="wc-block-cart-items__header-product"
 					>
-						<span>{ __( 'Details', 'woocommerce' ) }</span>
+						{ /* Visually hidden but kept in the accessibility tree so
+						     the product/details column has a programmatic header.
+						     Each row's thumbnail cell is also exposed (see
+						     cart-line-item-row.tsx) so these three headers line up
+						     with the three body cells. */ }
+						<span className="screen-reader-text">
+							{ __( 'Details', 'woocommerce' ) }
+						</span>
 					</th>
 					<th
 						scope="col"

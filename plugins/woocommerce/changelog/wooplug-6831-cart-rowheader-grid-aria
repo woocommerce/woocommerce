@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Keep cart line items announcing as proper table rows in the responsive grid and mini-cart layouts, and give the product row header a concise accessible name instead of the whole cell.
+Improve cart table accessibility: announce cart line items as proper table rows in the responsive and mini-cart layouts, give the product row header a concise accessible name, and keep every cell aligned with its column header so screen readers announce the correct column.
