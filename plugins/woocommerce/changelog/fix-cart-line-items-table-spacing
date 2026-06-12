@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix: remove lateral padding from cart line items table and align header labels
