@@ -179,12 +179,24 @@ class DataUtils {
 	 * @return boolean|WP_Error
 	 */
 	public function validate_line_items( $line_items, WC_Order $order ) {
+		$seen_line_item_ids = array();
+
 		foreach ( $line_items as $line_item ) {
 			$line_item_id = $line_item['line_item_id'] ?? null;
 
 			if ( ! $line_item_id ) {
 				return new WP_Error( 'invalid_line_item', __( 'Line item ID is required.', 'woocommerce' ) );
 			}
+
+			// Reject duplicate entries: quantities and totals are validated per
+			// entry against the order, so duplicates of the same line item would
+			// each pass individually while their sum exceeds the line's
+			// refundable amount.
+			if ( isset( $seen_line_item_ids[ $line_item_id ] ) ) {
+				/* translators: %d: order line item ID */
+				return new WP_Error( 'duplicate_line_item', sprintf( __( 'Line item %d is included more than once. Each line item can only appear once per refund.', 'woocommerce' ), $line_item_id ) );
+			}
+			$seen_line_item_ids[ $line_item_id ] = true;
 
 			$item = $order->get_item( $line_item_id );
 
@@ -525,6 +537,8 @@ class DataUtils {
 
 		$refund_data = $this->compute_refunded_quantities_and_totals( $order );
 
+		$seen_line_item_ids = array();
+
 		foreach ( $line_items as $line_item ) {
 			$line_item_id = $line_item['line_item_id'] ?? null;
 			if ( ! $line_item_id ) {
@@ -534,6 +548,23 @@ class DataUtils {
 					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			}
+
+			// Reject duplicate entries: caps below are checked per entry against
+			// prior refunds only, so duplicates of the same line item would each
+			// pass individually while build_refund_preview() sums them all,
+			// inflating the preview totals.
+			if ( isset( $seen_line_item_ids[ $line_item_id ] ) ) {
+				return new WP_Error(
+					'duplicate_line_item',
+					sprintf(
+						/* translators: %d: order line item ID */
+						__( 'Line item %d is included more than once. Each line item can only appear once per refund.', 'woocommerce' ),
+						$line_item_id
+					),
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
+			}
+			$seen_line_item_ids[ $line_item_id ] = true;
 
 			$item = $order->get_item( $line_item_id );
 			if ( ! $item || $item->get_order_id() !== $order->get_id() ) {

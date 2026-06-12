@@ -469,6 +469,58 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test refund creation rejects duplicate line_item_id entries.
+	 *
+	 * Each duplicate entry passes the per-line caps on its own, but duplicates
+	 * are summed by calculate_refund_amount() while collapsed last-wins by
+	 * convert_line_items_to_internal_format(), so the refund amount and the
+	 * stored refund lines would disagree.
+	 */
+	public function test_refunds_create_with_duplicate_line_items_returns_400(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 2,
+					),
+				),
+			)
+		);
+
+		$line_items = $order->get_items();
+		$line_item  = reset( $line_items );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $line_item->get_id(),
+						'quantity'     => 1,
+						'refund_total' => 5.00,
+					),
+					array(
+						'line_item_id' => $line_item->get_id(),
+						'quantity'     => 1,
+						'refund_total' => 5.00,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertEquals( 'duplicate_line_item', $response_data['code'] );
+		$this->assertCount( 0, $order->get_refunds(), 'No refund should be created for duplicate line items' );
+
+		$product->delete( true );
+	}
+
+	/**
 	 * Test refund creation with automatic tax extraction (multiple non-compound rates).
 	 */
 	public function test_refunds_create_with_automatic_tax_extraction(): void {

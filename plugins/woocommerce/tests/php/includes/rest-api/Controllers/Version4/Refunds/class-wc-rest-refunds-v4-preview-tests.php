@@ -298,6 +298,36 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Preview with duplicate line_item_id entries returns 400 duplicate_line_item.
+	 *
+	 * Each duplicate entry passes the per-line caps on its own (quantity 1 of 2)
+	 * and the doubled sum stays under max_refundable, so without the duplicate
+	 * guard the preview would return 200 with inflated totals.
+	 */
+	public function test_preview_duplicate_line_items_returns_400(): void {
+		$order   = $this->create_order_with_product( 25.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 1,
+				),
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'duplicate_line_item', $data['code'] );
+	}
+
+	/**
 	 * @testdox P8: Preview with invalid line item ID returns line_item_not_found.
 	 */
 	public function test_preview_invalid_line_item(): void {

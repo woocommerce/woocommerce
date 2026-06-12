@@ -419,6 +419,100 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return error when preview line items contain duplicate line item IDs.
+	 */
+	public function test_validate_preview_line_items_rejects_duplicate_line_item_ids(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 25.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 50.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		// Each entry passes the per-line cap on its own (quantity 1 of 2).
+		$result = $this->data_utils->validate_preview_line_items(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'duplicate_line_item', $result->get_error_code() );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox Should return error when refund line items contain duplicate line item IDs.
+	 */
+	public function test_validate_line_items_rejects_duplicate_line_item_ids(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 25.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 50.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		// Each entry passes the per-line caps on its own (quantity 1 of 2, total 25 of 50).
+		$result = $this->data_utils->validate_line_items(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 25.00,
+				),
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 25.00,
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'duplicate_line_item', $result->get_error_code() );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
 	 * @testdox Should return error when order is not refundable.
 	 */
 	public function test_validate_preview_line_items_order_not_refundable(): void {
