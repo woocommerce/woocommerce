@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes 0 value attributes from being skipped when variation is added to cart directly
