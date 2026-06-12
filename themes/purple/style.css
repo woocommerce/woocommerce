@@ -37,3 +37,12 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
     padding-top: var(--wp--preset--spacing--60);
     padding-bottom: var(--wp--preset--spacing--70);
 }
+
+/* WOOPRD-1561: My Account address styles. */
+.woocommerce-account .addresses .title .edit {
+    float: none;
+}
+
+.woocommerce-account .addresses address {
+    font-style: normal;
+}
