@@ -55,6 +55,22 @@
   font-size: 12px;
 }
 
+/* Footer logo sizing — SVG renders crisp at any resolution */
+.footer__logo {
+  max-width: 160px;
+  height: auto;
+}
+
+/* Hide dark footer logo in light mode */
+html[data-theme='light'] .footer__logo--dark {
+  display: none;
+}
+
+/* Hide light footer logo in dark mode */
+html[data-theme='dark'] .footer__logo--light {
+  display: none;
+}
+
 
 .docusaurus-footer-for-automattic {
   padding-top: 10px;

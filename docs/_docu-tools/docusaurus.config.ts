@@ -123,6 +123,12 @@ const config: Config = {
 			],
 		},
 		footer: {
+			logo: {
+				alt: 'WooCommerce',
+				src: 'img/woo-dev-site-logo.svg',
+				srcDark: 'img/woo-dev-site-logo-dark.svg',
+				href: 'https://developer.woocommerce.com/',
+			},
 			links: [
 				{
 					title: 'COMMUNITY',
