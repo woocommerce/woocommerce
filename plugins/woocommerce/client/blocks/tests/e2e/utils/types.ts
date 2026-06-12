@@ -1,6 +1,5 @@
-export type BlockData< T = unknown > = {
-	name: string;
-	slug: string;
-	mainClass: string;
-	selectors: Record< 'editor' | 'frontend', Record< string, unknown > >;
-} & ( T extends undefined ? Record< string, never > : T );
+// Compatibility shim: the real module moved to tests/e2e-pw/utils/blocks
+// during the QAO-185 e2e merge. The re-export keeps the old import path (used
+// by the blocks e2e utils barrel) working. Removed in QAO-407 (#6) with the
+// rest of this tree.
+export * from '../../../../../tests/e2e-pw/utils/blocks/types';
