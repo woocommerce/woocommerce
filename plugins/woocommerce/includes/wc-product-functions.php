@@ -578,11 +578,30 @@ function wc_schedule_product_sale_events( WC_Product $product ): void {
 		}
 
 		$timestamp = $date->getTimestamp();
-		$args      = array( 'product_id' => $product_id );
+		if ( $timestamp <= time() ) {
+			return;
+		}
+
+		$args = array( 'product_id' => $product_id );
 
 		// An identical pending action means a concurrent process (parallel save, importer,
-		// daily cron) already scheduled it after the unschedule-all step ran.
-		if ( $timestamp > time() && as_next_scheduled_action( $hook, $args, 'woocommerce-sales' ) !== $timestamp ) {
+		// daily cron) already scheduled it after the unschedule-all step ran. The query
+		// filters by the exact timestamp: a pending action for a different time (e.g. left
+		// behind by a process that saw older sale dates) must not block scheduling.
+		$identical_pending = as_get_scheduled_actions(
+			array(
+				'hook'         => $hook,
+				'args'         => $args,
+				'group'        => 'woocommerce-sales',
+				'status'       => ActionScheduler_Store::STATUS_PENDING,
+				'date'         => gmdate( 'Y-m-d H:i:s', $timestamp ),
+				'date_compare' => '=',
+				'per_page'     => 1,
+			),
+			'ids'
+		);
+
+		if ( empty( $identical_pending ) ) {
 			as_schedule_single_action( $timestamp, $hook, $args, 'woocommerce-sales' );
 		}
 	};

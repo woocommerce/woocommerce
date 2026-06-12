@@ -411,6 +411,35 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox An identical pending sale event is not scheduled twice even when an earlier action is also pending.
+	 */
+	public function test_wc_schedule_product_sale_events_skips_identical_pending_action_behind_an_earlier_one() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+
+		$earlier_ts = time() + 3600;
+		$target_ts  = time() + 7200;
+
+		// Simulate a stale action left behind by a concurrent process that saw older sale dates.
+		as_schedule_single_action( $earlier_ts, 'wc_product_start_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' );
+
+		// Not saved on purpose: saving would trigger the unschedule-all step and remove the stale action.
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $target_ts ) );
+
+		wc_schedule_product_sale_events( $product );
+		wc_schedule_product_sale_events( $product );
+
+		$this->assertSame(
+			2,
+			$this->count_pending_sale_actions( 'wc_product_start_scheduled_sale', $product->get_id() ),
+			'The action at the new time should be scheduled exactly once alongside the stale earlier action'
+		);
+	}
+
+	/**
 	 * @testDox A sale event pending for a different time does not prevent scheduling at the new time.
 	 */
 	public function test_wc_schedule_product_sale_events_schedules_when_pending_action_has_different_timestamp() {
