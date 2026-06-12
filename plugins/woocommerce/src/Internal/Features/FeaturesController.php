@@ -304,7 +304,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			ProductMediaGallery::FEATURE_ID      => array(
-				'name'                         => __( 'Product gallery videos (Beta)', 'woocommerce' ),
+				'name'                         => __( 'Product gallery videos', 'woocommerce' ),
 				'description'                  => __( 'Enable videos in product galleries.', 'woocommerce' ),
 				'option_key'                   => ProductMediaGallery::ENABLE_OPTION_NAME,
 				'is_experimental'              => true,
