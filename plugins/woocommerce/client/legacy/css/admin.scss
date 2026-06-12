@@ -3084,7 +3084,7 @@ ul.wc_coupon_list_block {
 		// stranded full-width.
 		// NOTE: this intentionally diverges from the Order screen recipe, which spans an
 		// (effectively empty) `#post-body-content` across both columns. Coupons put real
-		// content there, so spanning would push the Coupon data panel below it look wrong.
+		// content there, so spanning would push the Coupon data panel below it, which looks wrong.
 		#post-body-content {
 			grid-column: 1;
 			grid-row: 1;
