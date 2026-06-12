@@ -6,6 +6,8 @@
  * @var WC_Product $product_object
  */
 
+use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\POSProductVisibilitySync;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -59,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?>
 		</div>
 	<?php endif; ?>
-	<?php $is_pos_supported = $product_object->is_type( array( 'simple', 'variable' ) ) && ! $product_object->is_downloadable(); ?>
+	<?php $is_pos_supported = wc_get_container()->get( POSProductVisibilitySync::class )->is_product_supported( $product_object ); ?>
 	<div class="options_group" id="pos_visibility_supported" <?php echo $is_pos_supported ? '' : 'style="display: none;"'; ?>>
 		<?php
 		$visible_in_pos = ! has_term( 'pos-hidden', 'pos_product_visibility', $product_object->get_id() );
