@@ -1056,8 +1056,19 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		);
 
 		if ( 'json' === ( $assoc_args['format'] ?? 'text' ) ) {
+			$encoded_status = wp_json_encode( $status );
+			if ( false === $encoded_status ) {
+				$error_message = sprintf(
+					/* translators: %s is the JSON encoding error message. */
+					__( 'Failed to encode HPOS status as JSON: %s', 'woocommerce' ),
+					json_last_error_msg()
+				);
+				fwrite( STDERR, $error_message . PHP_EOL ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- CLI error output.
+				exit( 1 );
+			}
+
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WP CLI JSON output.
-			echo wp_json_encode( $status ) . PHP_EOL;
+			echo $encoded_status . PHP_EOL;
 			return;
 		}
 
