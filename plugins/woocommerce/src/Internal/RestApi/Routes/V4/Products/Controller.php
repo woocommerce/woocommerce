@@ -277,10 +277,10 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 * Get the images for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product Product instance.
-	 * @param string                          $image_size Image size to use for the src. Default 'full'.
 	 * @return array
 	 */
-	protected function get_images( $product, $image_size = 'full' ) {
+	protected function get_images( $product ) {
+		$image_size     = $this->get_request_image_size();
 		$images         = array();
 		$attachment_ids = array();
 

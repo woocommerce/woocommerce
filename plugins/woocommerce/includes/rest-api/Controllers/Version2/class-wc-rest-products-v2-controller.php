@@ -58,6 +58,13 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	protected $hierarchical = true;
 
 	/**
+	 * The request being currently handled, set in prepare_object_for_response().
+	 *
+	 * @var WP_REST_Request<array<string, mixed>>|null
+	 */
+	protected $request = null;
+
+	/**
 	 * Initialize product actions.
 	 */
 	public function __construct() {
@@ -520,14 +527,27 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Get the image size requested via the image_size parameter of the current request.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return string WordPress registered image size. Defaults to 'full' if the request does not specify a valid size.
+	 */
+	protected function get_request_image_size() {
+		$image_size = $this->request['image_size'] ?? 'full';
+
+		return is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
+	}
+
+	/**
 	 * Get the images for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product Product instance.
-	 * @param string                          $image_size WordPress registered image size. Default 'full'.
 	 *
 	 * @return array
 	 */
-	protected function get_images( $product, $image_size = 'full' ) {
+	protected function get_images( $product ) {
+		$image_size     = $this->get_request_image_size();
 		$images         = array();
 		$attachment_ids = array();
 
@@ -1012,7 +1032,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					$base_data['tags'] = $this->get_taxonomy_terms( $product, 'tag' );
 					break;
 				case 'images':
-					$base_data['images'] = $this->get_images( $product, $request['image_size'] ?? 'full' );
+					$base_data['images'] = $this->get_images( $product );
 					break;
 				case 'attributes':
 					$base_data['attributes'] = $this->get_attributes( $product );
