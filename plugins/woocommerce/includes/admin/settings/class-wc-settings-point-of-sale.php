@@ -7,7 +7,6 @@
 
 declare(strict_types=1);
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
 
 defined( 'ABSPATH' ) || exit;
@@ -29,8 +28,6 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 		$this->label = __( 'Point of Sale', 'woocommerce' );
 
 		parent::__construct();
-
-		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
 	}
 
 	/**
