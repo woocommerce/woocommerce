@@ -15,6 +15,7 @@ import {
 	useForcedLayout,
 	getAllowedBlocks,
 } from '../../../cart-checkout-shared';
+import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../../../product-collection/constants';
 
 const browseStoreTemplate = SHOP_URL
 	? [
@@ -57,11 +58,17 @@ const defaultTemplate = [
 		},
 	],
 	[
-		'woocommerce/product-new',
+		'woocommerce/product-collection',
 		{
-			columns: 4,
-			rows: 1,
+			query: {
+				perPage: 4,
+				order: 'desc',
+				orderBy: 'date',
+				woocommerceStockStatus: [ 'instock' ],
+			},
+			displayLayout: { type: 'flex', columns: 4 },
 		},
+		[ INNER_BLOCKS_PRODUCT_TEMPLATE ],
 	],
 ].filter( Boolean ) as unknown as TemplateArray;
 
@@ -69,6 +76,10 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();
 	const { currentView } = useEditorContext();
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.EMPTY_CART );
+	// Product Collection is used for the New Arrivals block.
+	// We don't want to set a parent on the Product Collection block
+	// so we add it here manually.
+	allowedBlocks.push( 'woocommerce/product-collection' );
 
 	useForcedLayout( {
 		clientId,

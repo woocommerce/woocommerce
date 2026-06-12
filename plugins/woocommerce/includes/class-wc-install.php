@@ -3091,7 +3091,19 @@ EOT;
 <h2 class="wp-block-heading has-text-align-center">' . __( 'New in store', 'woocommerce' ) . '</h2>
 <!-- /wp:heading -->
 
-<!-- wp:woocommerce/product-new {"columns":4,"rows":1} /--></div>
+<!-- wp:woocommerce/product-collection {"queryId":1,"query":{"perPage":4,"postType":"product","order":"desc","orderBy":"date","woocommerceStockStatus":["instock"]},"tagName":"div","displayLayout":{"type":"flex","columns":4,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"queryContextIncludes":["collection"]} -->
+<div class="wp-block-woocommerce-product-collection"><!-- wp:woocommerce/product-template -->
+<!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
+<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
+<!-- /wp:woocommerce/product-image -->
+
+<!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+
+<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
+
+<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+<!-- /wp:woocommerce/product-template --></div>
+<!-- /wp:woocommerce/product-collection --></div>
 <!-- /wp:woocommerce/empty-cart-block --></div>
 <!-- /wp:woocommerce/cart -->';
 	}
