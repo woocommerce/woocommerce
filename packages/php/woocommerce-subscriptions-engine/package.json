@@ -1,0 +1,8 @@
+{
+	"name": "@woocommerce/woocommerce-subscriptions-engine-config",
+	"description": "Subscriptions engine for WooCommerce: plans, contracts, and renewal machinery as a reusable package.",
+	"scripts": {
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger"
+	},
+	"license": "GPL-2.0-or-later"
+}

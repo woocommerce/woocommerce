@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Scaffold the woocommerce-subscriptions-engine package: composer and monorepo config, docs, and changelogger wiring. No functional code yet.
