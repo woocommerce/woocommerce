@@ -176,6 +176,21 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Status widget order rows render labels before counts.
+	 */
+	public function test_status_widget_order_rows_render_labels_before_counts(): void {
+		$method = new ReflectionMethod( WC_Admin_Dashboard::class, 'status_widget_order_rows' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $this->sut );
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'Awaiting processing <strong>0 orders</strong>', $html );
+		$this->assertStringContainsString( 'On-hold <strong>0 orders</strong>', $html );
+	}
+
+	/**
 	 * @testdox Widget does not show without proper capabilities.
 	 */
 	public function test_widget_does_not_show_without_capabilities(): void {

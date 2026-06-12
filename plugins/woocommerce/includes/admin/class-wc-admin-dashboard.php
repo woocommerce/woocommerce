@@ -216,7 +216,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					<?php
 						printf(
 							/* translators: %s: net sales */
-							esc_html__( '%s net sales this month', 'woocommerce' ),
+							esc_html__( 'Net sales this month %s', 'woocommerce' ),
 							'<strong>' . wc_price( $report_data->net_sales ) . '</strong>'
 						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 					?>
@@ -236,7 +236,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					<?php
 						printf(
 							/* translators: 1: top seller product title 2: top seller quantity */
-							esc_html__( '%1$s top seller this month (sold %2$d)', 'woocommerce' ),
+							esc_html__( 'Top seller this month %1$s (sold %2$d)', 'woocommerce' ),
 							'<strong>' . get_the_title( $top_seller->product_id ) . '</strong>',
 							$top_seller->qty
 						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
@@ -286,7 +286,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				<?php
 					printf(
 						/* translators: %s: order count */
-						_n( '<strong>%s order</strong> awaiting processing', '<strong>%s orders</strong> awaiting processing', $processing_count, 'woocommerce' ),
+						_n( 'Awaiting processing <strong>%s order</strong>', 'Awaiting processing <strong>%s orders</strong>', $processing_count, 'woocommerce' ),
 						$processing_count
 					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 				?>
@@ -297,7 +297,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				<?php
 					printf(
 						/* translators: %s: order count */
-						_n( '<strong>%s order</strong> on-hold', '<strong>%s orders</strong> on-hold', $on_hold_count, 'woocommerce' ),
+						_n( 'On-hold <strong>%s order</strong>', 'On-hold <strong>%s orders</strong>', $on_hold_count, 'woocommerce' ),
 						$on_hold_count
 					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 				?>
@@ -391,7 +391,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				<?php
 					printf(
 						/* translators: %s: order count */
-						_n( '<strong>%s product</strong> low in stock', '<strong>%s products</strong> low in stock', $lowinstock_count, 'woocommerce' ),
+						_n( 'Low in stock <strong>%s product</strong>', 'Low in stock <strong>%s products</strong>', $lowinstock_count, 'woocommerce' ),
 						$lowinstock_count
 					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 				?>
@@ -402,7 +402,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				<?php
 					printf(
 						/* translators: %s: order count */
-						_n( '<strong>%s product</strong> out of stock', '<strong>%s products</strong> out of stock', $outofstock_count, 'woocommerce' ),
+						_n( 'Out of stock <strong>%s product</strong>', 'Out of stock <strong>%s products</strong>', $outofstock_count, 'woocommerce' ),
 						$outofstock_count
 					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 				?>
