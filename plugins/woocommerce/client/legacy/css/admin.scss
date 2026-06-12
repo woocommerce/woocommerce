@@ -8628,7 +8628,7 @@ table.bar_chart {
 	}
 
 	&.post-type-product #edit-slug-box {
-		padding: 0 !important;
+		padding: 0;
 	}
 
 	// Shipping zone name input: ID selector in the base rule outranks the form-table override above.
