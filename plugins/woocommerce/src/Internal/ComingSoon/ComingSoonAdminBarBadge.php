@@ -13,6 +13,23 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 class ComingSoonAdminBarBadge {
 
 	/**
+	 * Check if the site visibility badge is enabled.
+	 *
+	 * @return bool
+	 */
+	private function is_badge_enabled(): bool {
+		$option_value = get_option( 'woocommerce_site_visibility_badge', null );
+
+		// If the new option is set, use it.
+		if ( null !== $option_value ) {
+			return 'yes' === $option_value;
+		}
+
+		// Fallback to the legacy feature flag for sites that haven't migrated yet.
+		return FeaturesUtil::feature_is_enabled( 'site_visibility_badge' );
+	}
+
+	/**
 	 * Sets up the hooks.
 	 *
 	 * @internal
@@ -44,8 +61,7 @@ class ComingSoonAdminBarBadge {
 	 * @param WP_Admin_Bar $wp_admin_bar The WP_Admin_Bar instance.
 	 */
 	public function site_visibility_badge( $wp_admin_bar ) {
-		// Early exit if LYS feature is disabled.
-		if ( ! FeaturesUtil::feature_is_enabled( 'site_visibility_badge' ) ) {
+		if ( ! $this->is_badge_enabled() ) {
 			return;
 		}
 
@@ -82,8 +98,7 @@ class ComingSoonAdminBarBadge {
 	 * @internal
 	 */
 	public function output_css() {
-		// Early exit if LYS feature is disabled.
-		if ( ! FeaturesUtil::feature_is_enabled( 'site_visibility_badge' ) ) {
+		if ( ! $this->is_badge_enabled() ) {
 			return;
 		}
 
