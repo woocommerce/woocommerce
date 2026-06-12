@@ -40,6 +40,14 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 
 
 	/**
+	 * Clean up request globals after each test so request-classification state does not leak.
+	 */
+	public function tearDown(): void {
+		unset( $_GET['rest_route'] );
+		parent::tearDown();
+	}
+
+	/**
 	 * Restore the default URI.
 	 */
 	public static function tearDownAfterClass(): void {
@@ -69,5 +77,37 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		// Set the request uri to a rest api request.
 		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
 		$this->assertEquals( WC()->is_rest_api_request(), true );
+	}
+
+	/**
+	 * Test that REST requests routed via the `rest_route` query parameter (used with plain permalinks)
+	 * are detected, even though the wp-json prefix is absent from the request URI.
+	 */
+	public function test_rest_api_returns_true_for_rest_route_query_param() {
+		$_SERVER['REQUEST_URI'] = '/index.php';
+		$_GET['rest_route']     = '/wc/v3/products';
+		$this->assertTrue( WC()->is_rest_api_request() );
+	}
+
+	/**
+	 * Test that Store API requests routed via the `rest_route` query parameter are recognised as Store
+	 * API requests (and therefore as REST requests).
+	 */
+	public function test_store_api_request_detected_via_rest_route_query_param() {
+		$_SERVER['REQUEST_URI'] = '/index.php';
+		$_GET['rest_route']     = '/wc/store/v1/cart';
+		$this->assertTrue( WC()->is_store_api_request() );
+		$this->assertTrue( WC()->is_rest_api_request() );
+	}
+
+	/**
+	 * Test that a non-Store-API request routed via the `rest_route` query parameter is a REST request
+	 * but not a Store API request.
+	 */
+	public function test_non_store_rest_route_is_not_a_store_api_request() {
+		$_SERVER['REQUEST_URI'] = '/index.php';
+		$_GET['rest_route']     = '/wc/v3/products';
+		$this->assertFalse( WC()->is_store_api_request() );
+		$this->assertTrue( WC()->is_rest_api_request() );
 	}
 }

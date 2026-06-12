@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\Features;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\LaunchYourStore;
 use Automattic\WooCommerce\Internal\Admin\WCAdminUser;
 
@@ -134,9 +135,12 @@ class LaunchYourStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The feature loader skips launch-your-store so its hooks are not registered twice.
+	 * Counts how many wp_footer callbacks are bound to the coming soon banner method across any
+	 * LaunchYourStore instance.
+	 *
+	 * @return int
 	 */
-	public function test_feature_loader_does_not_duplicate_hook_registration(): void {
+	private function count_banner_footer_callbacks(): int {
 		global $wp_filter;
 
 		$count = 0;
@@ -150,6 +154,36 @@ class LaunchYourStoreTest extends \WC_Unit_Test_Case {
 			}
 		}
 
-		$this->assertSame( 1, $count, 'The banner callback should be registered exactly once' );
+		return $count;
+	}
+
+	/**
+	 * @testdox The feature loader skips launch-your-store so its hooks are not registered twice.
+	 */
+	public function test_feature_loader_does_not_duplicate_hook_registration(): void {
+		// LaunchYourStore is instantiated unconditionally from WooCommerce::init_hooks(), so the banner
+		// callback is already registered exactly once.
+		$this->assertSame( 1, $this->count_banner_footer_callbacks(), 'The banner callback should start registered exactly once' );
+
+		// Drive the wc-admin feature loader the way it runs in admin/REST contexts, but constrained to
+		// launch-your-store with unrelated features disabled so nothing else is instantiated. If the
+		// loader stopped skipping launch-your-store, it would create a second instance via
+		// `new LaunchYourStore()` and register the banner callback again.
+		$only_launch_your_store = static function () {
+			return array( 'launch-your-store' );
+		};
+		add_filter( 'woocommerce_admin_should_load_features', '__return_true' );
+		add_filter( 'woocommerce_admin_features', $only_launch_your_store );
+		update_option( 'woocommerce_feature_blueprint_enabled', 'no' );
+		update_option( 'woocommerce_feature_order-detail-redesign_enabled', 'no' );
+
+		Features::load_features();
+
+		delete_option( 'woocommerce_feature_order-detail-redesign_enabled' );
+		delete_option( 'woocommerce_feature_blueprint_enabled' );
+		remove_filter( 'woocommerce_admin_features', $only_launch_your_store );
+		remove_filter( 'woocommerce_admin_should_load_features', '__return_true' );
+
+		$this->assertSame( 1, $this->count_banner_footer_callbacks(), 'The feature loader must not register the banner callback a second time' );
 	}
 }

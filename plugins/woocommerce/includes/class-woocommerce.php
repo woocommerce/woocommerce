@@ -651,12 +651,17 @@ final class WooCommerce {
 	 * @return bool
 	 */
 	public function is_rest_api_request() {
-		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+		// With plain permalinks, REST requests are routed via the `rest_route` query parameter
+		// (e.g. /index.php?rest_route=/wc/v3/...) rather than the wp-json URL prefix, so the prefix is
+		// absent from REQUEST_URI. Detect that form too, otherwise such requests are misclassified.
+		$has_rest_route_param = ! empty( $_GET['rest_route'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( ! $has_rest_route_param && empty( $_SERVER['REQUEST_URI'] ) ) {
 			return false;
 		}
 
 		$rest_prefix         = trailingslashit( rest_get_url_prefix() );
-		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$is_rest_api_request = $has_rest_route_param || ( ! empty( $_SERVER['REQUEST_URI'] ) && false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		/**
 		 * Whether this is a REST API request.
@@ -672,10 +677,17 @@ final class WooCommerce {
 	 * @return bool
 	 */
 	public function is_store_api_request() {
+		// With plain permalinks, Store API requests are routed via the `rest_route` query parameter
+		// (e.g. /index.php?rest_route=/wc/store/...) rather than the wp-json URL prefix.
+		if ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			return 0 === strpos( wp_unslash( $_GET['rest_route'] ), '/wc/store/' );
+		}
+
 		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
 			return false;
 		}
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		return false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' );
 	}
 
@@ -690,19 +702,24 @@ final class WooCommerce {
 
 	/**
 	 * Returns true for request types on which admin-side functionality may run: admin screens
-	 * (including admin-ajax), REST API, cron and WP-CLI. Returns false only for regular frontend
-	 * page loads, where purely admin-side hooks can never fire.
+	 * (including admin-ajax), non-Store-API REST requests, cron and WP-CLI. Returns false for regular
+	 * frontend page loads and Store API requests, where purely admin-side hooks can never fire.
 	 *
 	 * REST requests are included because admin features are commonly driven through the REST API
 	 * (wc-admin), and cron because Action Scheduler/WP-Cron jobs registered by admin-side classes
-	 * must remain runnable when executed from cron.
+	 * must remain runnable when executed from cron. Store API requests are excluded: they are
+	 * frontend traffic (cart, checkout and other block-driven requests) that needs no admin-side boot
+	 * work. This mirrors the gating used by Features::should_load_features().
 	 *
 	 * @since 11.0.0
 	 *
 	 * @return bool
 	 */
 	private function is_admin_side_request(): bool {
-		return $this->is_request( 'admin' ) || $this->is_rest_api_request() || defined( 'DOING_CRON' ) || ( defined( 'WP_CLI' ) && WP_CLI );
+		return $this->is_request( 'admin' )
+			|| ( $this->is_rest_api_request() && ! $this->is_store_api_request() )
+			|| defined( 'DOING_CRON' )
+			|| ( defined( 'WP_CLI' ) && WP_CLI );
 	}
 
 	/**
