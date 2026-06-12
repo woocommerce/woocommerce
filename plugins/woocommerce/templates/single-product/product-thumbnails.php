@@ -12,7 +12,7 @@
  *
  * @see         https://woocommerce.com/document/template-structure/
  * @package     WooCommerce\Templates
- * @version     10.9.0
+ * @version     11.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -52,7 +52,8 @@ if ( count( $media_items ) > 1 ) {
 			/**
 			 * Filter product video thumbnail HTML string.
 			 *
-			 * @since 10.9.0
+			 * @since 11.0.0
+			 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 			 *
 			 * @param string $html          Product video thumbnail HTML string.
 			 * @param int    $attachment_id Video attachment ID.

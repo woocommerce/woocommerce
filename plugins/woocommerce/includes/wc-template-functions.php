@@ -1811,7 +1811,8 @@ if ( ! function_exists( 'wc_get_gallery_video_poster_id' ) ) {
 	/**
 	 * Get the poster attachment ID for a gallery video item.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @param array $media_item Product media gallery item.
 	 * @return int Poster attachment ID.
 	 */
@@ -1827,7 +1828,8 @@ if ( ! function_exists( 'wc_get_product_media_gallery_items' ) ) {
 	 * Composes the legacy featured image and product gallery image IDs with
 	 * positioned product gallery videos when the feature is enabled.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @param WC_Product $product Product object.
 	 * @return array[] Product media gallery items.
 	 */
@@ -1918,7 +1920,8 @@ if ( ! function_exists( 'wc_get_gallery_video_html' ) ) {
 	/**
 	 * Get HTML for a gallery video.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @param array $media_item  Product media gallery item.
 	 * @param bool  $main_video  Is this the main gallery item?.
 	 * @return string
