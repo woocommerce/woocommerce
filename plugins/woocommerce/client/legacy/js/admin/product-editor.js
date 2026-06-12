@@ -2,7 +2,6 @@
 jQuery( function ( $ ) {
 	$( function () {
 		var editorWrapper = $( '#postdivrich' );
-		var slugBox = document.getElementById( 'edit-slug-box' );
 
 		/**
 		 * In the Product Editor context, the footer needs to be hidden otherwise the computation of the postbox position is wrong.
@@ -17,22 +16,6 @@ jQuery( function ( $ ) {
 					woocommerce_admin_product_editor.i18n_description +
 					'</label></h2>'
 			);
-		}
-
-		if ( slugBox && ! slugBox.textContent.trim() ) {
-			slugBox.style.display = 'none';
-
-			var observer = new MutationObserver( function () {
-				if ( slugBox.textContent.trim() ) {
-					slugBox.style.removeProperty( 'display' );
-					observer.disconnect();
-				}
-			} );
-
-			observer.observe( slugBox, {
-				childList: true,
-				subtree: true,
-			} );
 		}
 	} );
 } );
