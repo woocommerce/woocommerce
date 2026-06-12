@@ -341,7 +341,7 @@ test.describe(
 			await page.reload();
 
 			// Verify import status bar is visible
-			await expect( page.getByText( 'Data status:' ) ).toBeVisible();
+			await expect( page.getByText( 'Data status' ) ).toBeVisible();
 			// Verify "Update now" button is visible
 			const updateButton = page.getByRole( 'button', {
 				name: 'Manually trigger analytics data import',
@@ -385,7 +385,7 @@ test.describe(
 			await page.reload();
 
 			// Verify import status bar wrapper is NOT rendered
-			await expect( page.getByText( 'Data status:' ) ).toBeHidden();
+			await expect( page.getByText( 'Data status' ) ).toBeHidden();
 		} );
 	}
 );
