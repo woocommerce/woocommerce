@@ -10,6 +10,9 @@
  * only hydrates regions present in the DOM when the page loads. This utility
  * hydrates such regions using the same private APIs that
  * `@wordpress/interactivity-router` uses for client-side navigation.
+ *
+ * This is a temporary solution until those blocks are fully migrated to the
+ * Interactivity API, in which case this utility will no longer be needed.
  */
 
 /**
