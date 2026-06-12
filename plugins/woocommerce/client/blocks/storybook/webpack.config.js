@@ -98,7 +98,8 @@ module.exports = ( { config: storybookConfig } ) => {
 		// pnpm resolves workspace packages to their real path, so `@woocommerce/*`
 		// source appears as `packages/js/<pkg>/src` (matched here) rather than the
 		// `node_modules/@woocommerce/<pkg>` symlink.
-		include: /[\/\\](?:packages[\/\\]js|node_modules[\/\\]@woocommerce)[\/\\][^\/\\]+[\/\\]src[\/\\]/,
+		include:
+			/[\/\\](?:packages[\/\\]js|node_modules[\/\\]@woocommerce)[\/\\][^\/\\]+[\/\\]src[\/\\]/,
 		loader: 'babel-loader',
 	} );
 
