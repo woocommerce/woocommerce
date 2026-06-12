@@ -72,7 +72,7 @@ if ( process.env.CI ) {
 		'html',
 		{
 			outputFolder: `${ TESTS_ROOT_PATH }/playwright-report`,
-			open: 'on-failure',
+			open: 'never',
 		},
 	] );
 }

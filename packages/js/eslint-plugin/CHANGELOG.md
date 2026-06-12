@@ -2,6 +2,22 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0](https://www.npmjs.com/package/@woocommerce/eslint-plugin/v/3.0.0) - 2026-06-10
+
+-   Major - Remove unused React imports from ESLint config; consuming projects may see new lint errors. [#55554]
+-   Minor - Bump jest package dependency to 29.5.x. [#60324]
+-   Minor - Fix typos in README.md files. [#48569]
+-   Minor - Monorepo: bump pnpm version to 9.15.0. [#54189]
+-   Minor - Upgraded TypeScript in the monorepo to 5.7.2. [#53165]
+-   Patch - Bump wireit dependency version to latest. [#57299]
+-   Patch - CI: leverage composer packages cache in lint monorepo job. [#52054]
+-   Patch - Fix pnpm version to 9.1.3 to avoid dependency installation issues. [#50828]
+-   Patch - Monorepo: consolidate @babel/* dependencies versions across the monorepo. [#56575]
+-   Patch - Monorepo: consolidate packages licenses to `GPL-2.0-or-later`. [#58941]
+-   Patch - Monorepo: consolidate syncpack config around React 17/18 usage. [#52022]
+-   Patch - Removed stray wireit devDependency. [#65210]
+-   Patch - Update wireit to 0.14.10. [#54996]
+
 ## [2.3.0](https://www.npmjs.com/package/@woocommerce/eslint-plugin/v/2.3.0) - 2024-06-11 
 
 -   Minor - Update deps and fix a bug where package rc files were not respected. [#36988]
