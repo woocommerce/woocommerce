@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Filter push notifications by per-user preferences so opted-out merchants don't receive disabled notification types on their devices.

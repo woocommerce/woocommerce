@@ -8,6 +8,7 @@
  * @since   3.0.0
  */
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
 
@@ -147,9 +148,10 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				'desc'   => __( 'This tool will delete expired download permissions and permissions with 0 remaining downloads.', 'woocommerce' ),
 			),
 			'regenerate_product_lookup_tables'     => array(
-				'name'   => __( 'Product lookup tables', 'woocommerce' ),
-				'button' => __( 'Regenerate', 'woocommerce' ),
-				'desc'   => __( 'This tool will regenerate product lookup table data. This process may take a while.', 'woocommerce' ),
+				'name'             => __( 'Product lookup tables', 'woocommerce' ),
+				'button'           => __( 'Regenerate', 'woocommerce' ),
+				'desc'             => __( 'This tool will regenerate product lookup table data. This process may take a while.', 'woocommerce' ),
+				'requires_refresh' => true,
 			),
 			'repair_coupons_lookup_table'          => array(
 				'name'   => __( 'Coupons lookup table', 'woocommerce' ),
@@ -212,9 +214,10 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				),
 			),
 			'regenerate_thumbnails'                => array(
-				'name'   => __( 'Regenerate shop thumbnails', 'woocommerce' ),
-				'button' => __( 'Regenerate', 'woocommerce' ),
-				'desc'   => __( 'This will regenerate all shop thumbnails to match your theme and/or image settings.', 'woocommerce' ),
+				'name'             => __( 'Regenerate shop thumbnails', 'woocommerce' ),
+				'button'           => __( 'Regenerate', 'woocommerce' ),
+				'desc'             => __( 'This will regenerate all shop thumbnails to match your theme and/or image settings.', 'woocommerce' ),
+				'requires_refresh' => true,
 			),
 			'db_update_routine'                    => array(
 				'name'   => __( 'Update database', 'woocommerce' ),
@@ -250,7 +253,76 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 			unset( $tools['clear_template_cache'] );
 		}
 
+		if ( wc_update_product_lookup_tables_is_running() ) {
+			$tools['regenerate_product_lookup_tables']['desc'] = __(
+				'Product lookup table regeneration is running in the background. Product display, sorting, and reports may not be accurate until this finishes.',
+				'woocommerce'
+			);
+			if ( Constants::is_true( 'DISABLE_WP_CRON' ) ) {
+				$tools['regenerate_product_lookup_tables']['desc'] .= ' ' . __(
+					'WP-Cron has been disabled, which may prevent this update from completing.',
+					'woocommerce'
+				);
+			}
+			$tools['regenerate_product_lookup_tables']['button']      = __( 'Regenerating in progress', 'woocommerce' );
+			$tools['regenerate_product_lookup_tables']['disabled']    = true;
+			$tools['regenerate_product_lookup_tables']['status_text'] = $this->get_regenerating_lookup_table_status_text();
+		}
+
+		if ( isset( $tools['regenerate_thumbnails'] ) && WC_Regenerate_Images::is_regeneration_in_progress() ) {
+			$tools['regenerate_thumbnails']['desc']        = __(
+				'Thumbnail regeneration is running in the background. Depending on the number of images in your store, this may take a while.',
+				'woocommerce'
+			);
+			$tools['regenerate_thumbnails']['button']      = __( 'Regenerating in progress', 'woocommerce' );
+			$tools['regenerate_thumbnails']['disabled']    = true;
+			$tools['regenerate_thumbnails']['status_text'] = $this->get_regenerating_thumbnails_status_text();
+		}
+
 		return apply_filters( 'woocommerce_debug_tools', $tools );
+	}
+
+	/**
+	 * Get the tools-page status text for product lookup table regeneration.
+	 *
+	 * @return string
+	 */
+	private function get_regenerating_lookup_table_status_text() {
+		$pending_actions_url = admin_url( 'admin.php?page=wc-status&tab=action-scheduler&s=wc_update_product_lookup_tables&status=pending' );
+		$cron_disabled       = Constants::is_true( 'DISABLE_WP_CRON' );
+		$progress_label      = $cron_disabled
+			? __( 'View queued updates', 'woocommerce' )
+			: __( 'View progress', 'woocommerce' );
+
+		return sprintf(
+			'<a href="%1$s">%2$s</a>',
+			esc_url( $pending_actions_url ),
+			esc_html( $progress_label )
+		);
+	}
+
+	/**
+	 * Get the tools-page status text for thumbnail regeneration.
+	 *
+	 * @return string
+	 */
+	private function get_regenerating_thumbnails_status_text() {
+		$cancel_url = wp_nonce_url(
+			add_query_arg(
+				'wc-hide-notice',
+				'regenerating_thumbnails',
+				admin_url( 'admin.php?page=wc-status&tab=tools' )
+			),
+			'woocommerce_hide_notices_nonce',
+			'_wc_notice_nonce'
+		);
+
+		return sprintf(
+			'<a class="button button-large" href="%1$s" aria-label="%2$s">%3$s</a>',
+			esc_url( $cancel_url ),
+			esc_attr__( 'Cancel thumbnail regeneration', 'woocommerce' ),
+			esc_html__( 'Cancel', 'woocommerce' )
+		);
 	}
 
 	/**
