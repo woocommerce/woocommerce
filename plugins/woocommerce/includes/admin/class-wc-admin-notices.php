@@ -35,6 +35,7 @@ class WC_Admin_Notices {
 		'template_files'                     => 'template_file_check_notice',
 		'legacy_shipping'                    => 'legacy_shipping_notice',
 		'no_shipping_methods'                => 'no_shipping_methods_notice',
+		'regenerating_thumbnails'            => 'regenerating_thumbnails_notice',
 		'regenerating_lookup_table'          => 'regenerating_lookup_table_notice',
 		'no_secure_connection'               => 'secure_connection_notice',
 		'maxmind_license_key'                => 'maxmind_missing_license_key_notice',
@@ -445,6 +446,17 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * Previously showed a notice while thumbnails regenerated in the background.
+	 *
+	 * Thumbnail regeneration progress is now shown beside the matching status tool.
+	 *
+	 * @return void
+	 */
+	public static function regenerating_thumbnails_notice() {
+		self::remove_notice( 'regenerating_thumbnails' );
+	}
+
+	/**
 	 * Previously showed a notice while product lookup tables regenerated.
 	 *
 	 * Product lookup table regeneration status is now shown beside the matching status tool.
@@ -459,7 +471,7 @@ class WC_Admin_Notices {
 	/**
 	 * Add notice about minimum PHP and WordPress requirement.
 	 *
-	 * @deprecated 10.9.0 WordPress and PHP minimum requirements notices are no longer shown.
+	 * @deprecated 11.0.0 WordPress and PHP minimum requirements notices are no longer shown.
 	 *
 	 * @since 3.6.5
 	 * @return void
