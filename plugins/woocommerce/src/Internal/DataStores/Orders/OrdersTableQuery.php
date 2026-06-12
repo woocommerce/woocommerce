@@ -32,20 +32,6 @@ class OrdersTableQuery {
 	public const REGEX_SHORTHAND_DATES = '/([^.<>]*)(>=|<=|>|<|\.\.\.)([^.<>]+)/';
 
 	/**
-	 * Maximum number of UNION branches (one per type/status pair) allowed when rewriting a multi-status query
-	 * ordered by creation date as a UNION of single-status queries. Queries needing more branches than this are
-	 * left untouched.
-	 */
-	private const STATUS_UNION_MAX_BRANCHES = 24;
-
-	/**
-	 * Maximum row depth (offset + row count) allowed when rewriting a multi-status query ordered by creation
-	 * date as a UNION of single-status queries. Each UNION branch must fetch up to this many rows, so deeply
-	 * paginated queries are left untouched.
-	 */
-	private const STATUS_UNION_MAX_ROWS = 10000;
-
-	/**
 	 * Names of all COT tables (orders, addresses, operational_data, meta) in the form 'table_id' => 'table name'.
 	 *
 	 * @var array
@@ -931,7 +917,7 @@ class OrdersTableQuery {
 			 * Filters the completed SQL query.
 			 *
 			 * Note: queries left unmodified by this filter may later be rewritten for performance (see
-			 * maybe_get_status_union_sql()), in which case the SQL received here is not the SQL that ends up
+			 * OrdersTableStatusUnionQuery), in which case the SQL received here is not the SQL that ends up
 			 * being executed. Returning a modified query from this filter disables any such rewrite.
 			 *
 			 * @since 7.9.0
@@ -949,8 +935,11 @@ class OrdersTableQuery {
 			// large stores. Rewriting it as a UNION of single-status queries lets each branch be fully served
 			// (filtering and ordering) by the type_status_date index. The rewrite is only attempted when no
 			// 'woocommerce_orders_table_query_sql' callback modified the query, so that code customizing the SQL
-			// always operates on (and gets) the regular query shape. See maybe_get_status_union_sql().
-			$status_union_sql = $this->maybe_get_status_union_sql( $fields, $join, $where, $groupby, $orderby, $limits );
+			// always operates on (and gets) the regular query shape. See OrdersTableStatusUnionQuery.
+			$status_union_sql = ( new OrdersTableStatusUnionQuery( $this ) )->get_sql(
+				compact( 'fields', 'join', 'where', 'groupby', 'orderby', 'limits' ),
+				$this->suppress_filters
+			);
 			if ( ! is_null( $status_union_sql ) ) {
 				$this->sql = $status_union_sql;
 			}
@@ -959,135 +948,6 @@ class OrdersTableQuery {
 		}
 
 		$this->build_count_query( $fields, $join, $where, $groupby );
-	}
-
-	/**
-	 * Rewrites a "multiple statuses, ordered by creation date" query (such as the default order admin list screen
-	 * query) as a UNION ALL of single-status queries, or returns NULL when the query doesn't have exactly that
-	 * shape after all filters have been applied.
-	 *
-	 * `status IN (...)` prevents the `type_status_date` index from providing a global `date_created_gmt` ordering,
-	 * so the optimizer must either sort all matching rows or walk the `date_created` index while filtering. On
-	 * large stores it may choose a plan that examines millions of rows to produce a single page of results,
-	 * depending on the optimizer heuristics available (e.g. the MySQL `prefer_ordering_index` switch). With one
-	 * branch per (type, status) pair, each branch is fully served — filtering and ordering — by the
-	 * `type_status_date` index regardless of optimizer behavior or status selectivity, and the outer query only
-	 * needs to merge a handful of pre-sorted candidate rows.
-	 *
-	 * The rewrite is skipped unless the clauses passed in are byte-identical to those generated purely by the
-	 * 'type' and 'status' query args, which guarantees that queries customized in any way (other query args,
-	 * search, meta queries, or modifications via the 'woocommerce_orders_table_query_clauses' filter) are never
-	 * altered. Queries modified via the 'woocommerce_orders_table_query_sql' filter are not rewritten either:
-	 * build_query() only calls this method when that filter returned the query unchanged.
-	 *
-	 * @param string $fields  Prepared SELECT clause.
-	 * @param string $join    Prepared JOIN clause.
-	 * @param string $where   Prepared WHERE clause.
-	 * @param string $groupby Prepared GROUP BY clause (including the GROUP BY keyword).
-	 * @param string $orderby Prepared ORDER BY clause (including the ORDER BY keyword).
-	 * @param string $limits  Prepared LIMIT clause.
-	 * @return string|null The rewritten SQL query, or NULL if the query is not eligible for the rewrite.
-	 */
-	private function maybe_get_status_union_sql( string $fields, string $join, string $where, string $groupby, string $orderby, string $limits ): ?string {
-		global $wpdb;
-
-		$orders_table = $this->tables['orders'];
-
-		if ( '' !== $join || '' !== $groupby || "{$orders_table}.id" !== $fields ) {
-			return null;
-		}
-
-		// Only an ORDER BY on date_created_gmt alone can be satisfied by the type_status_date index within each branch.
-		$direction = null;
-		foreach ( array( 'ASC', 'DESC' ) as $_direction ) {
-			if ( "ORDER BY {$orders_table}.date_created_gmt {$_direction}" === $orderby ) {
-				$direction = $_direction;
-			}
-		}
-
-		if ( is_null( $direction ) ) {
-			return null;
-		}
-
-		// Unlimited or deeply paginated queries gain nothing from the rewrite: each branch would have to fetch
-		// (offset + row count) rows.
-		if ( count( $this->limits ) !== 2 ) {
-			return null;
-		}
-
-		$offset    = (int) $this->limits[0];
-		$row_count = (int) $this->limits[1];
-
-		if ( $offset < 0 || $row_count <= 0 || ( $offset + $row_count ) > self::STATUS_UNION_MAX_ROWS || "LIMIT {$offset}, {$row_count}" !== $limits ) {
-			return null;
-		}
-
-		if ( ! $this->arg_isset( 'type' ) || ! $this->arg_isset( 'status' ) ) {
-			return null;
-		}
-
-		$types    = array_values( array_unique( (array) $this->args['type'] ) );
-		$statuses = array_values( array_unique( (array) $this->args['status'] ) );
-
-		foreach ( array_merge( $types, $statuses ) as $value ) {
-			if ( ! is_string( $value ) || '' === $value ) {
-				return null;
-			}
-		}
-
-		// A single status doesn't need the rewrite (the type_status_date index already provides the ordering).
-		if ( count( $statuses ) < 2 || ( count( $types ) * count( $statuses ) ) > self::STATUS_UNION_MAX_BRANCHES ) {
-			return null;
-		}
-
-		// Require the WHERE clause to be exactly the one the 'type' and 'status' args generate (same order as
-		// process_orders_table_query_args()). Any other contribution — other query args or filters — disqualifies
-		// the query.
-		$expected_where = '1=1';
-		foreach ( array( 'status', 'type' ) as $arg_key ) {
-			$clause          = $this->where( $orders_table, $arg_key, '=', $this->args[ $arg_key ], $this->mappings['orders'][ $arg_key ]['type'] );
-			$expected_where .= " AND ({$clause})";
-		}
-
-		if ( $where !== $expected_where ) {
-			return null;
-		}
-
-		if ( ! $this->suppress_filters ) {
-			/**
-			 * Filters whether a query for multiple order statuses ordered by creation date may be rewritten as a
-			 * UNION ALL of single-status queries for performance. The rewrite produces the same results and only
-			 * applies to queries generated purely from the 'type' and 'status' query args (no search, meta or
-			 * field filters), such as the default order admin list screen query.
-			 *
-			 * @param bool             $enabled Whether the rewrite is enabled. Default TRUE.
-			 * @param OrdersTableQuery $query   The OrdersTableQuery instance.
-			 *
-			 * @since 11.0.0
-			 */
-			if ( ! apply_filters( 'woocommerce_orders_table_query_status_union_optimization', true, $this ) ) {
-				return null;
-			}
-		}
-
-		// Each branch is wrapped in a derived table (instead of using parenthesized UNION members) so that the
-		// per-branch ORDER BY + LIMIT is honored across MySQL, MariaDB and SQLite.
-		$branch_rows = $offset + $row_count;
-		$branches    = array();
-
-		foreach ( $types as $type ) {
-			foreach ( $statuses as $status ) {
-				$branch = $wpdb->prepare(
-					"SELECT id, date_created_gmt FROM {$orders_table} WHERE type = %s AND status = %s ORDER BY date_created_gmt {$direction} LIMIT {$branch_rows}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$type,
-					$status
-				);
-
-				$branches[] = 'SELECT id, date_created_gmt FROM ( ' . $branch . ' ) wco_branch_' . count( $branches );
-			}
-		}
-
-		return 'SELECT id FROM ( ' . implode( ' UNION ALL ', $branches ) . " ) wco_candidates ORDER BY date_created_gmt {$direction} {$limits}";
 	}
 
 	/**

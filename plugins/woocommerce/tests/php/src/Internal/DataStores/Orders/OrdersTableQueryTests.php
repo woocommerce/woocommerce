@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
@@ -834,6 +835,21 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		return array( $ids, $captured_sql );
 	}
 
+
+	/**
+	 * Helper function to force-enable the status union rewrite, which by default is gated by store size.
+	 */
+	private function force_enable_status_union_rewrite(): void {
+		add_filter( 'woocommerce_orders_table_query_status_union_optimization', '__return_true' );
+	}
+
+	/**
+	 * Helper function to remove the force-enablement of the status union rewrite.
+	 */
+	private function reset_status_union_rewrite(): void {
+		remove_filter( 'woocommerce_orders_table_query_status_union_optimization', '__return_true' );
+	}
+
 	/**
 	 * @testdox Multi-status queries ordered by creation date are rewritten as a UNION of single-status queries and return the same results.
 	 */
@@ -846,7 +862,9 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 			'limit'   => 4,
 		);
 
+		$this->force_enable_status_union_rewrite();
 		list( $queried_ids, $sql ) = $this->get_orders_and_capture_sql( $args );
+		$this->reset_status_union_rewrite();
 
 		$this->assertStringContainsString( 'UNION ALL', $sql, 'Eligible multi-status queries should be rewritten as a UNION of single-status queries' );
 		$this->assertSame( array_slice( $ids, 0, 4 ), $queried_ids, 'The rewritten query should return the most recent orders across all statuses' );
@@ -865,7 +883,9 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	public function test_status_union_rewrite_applies_to_default_query(): void {
 		$ids = $this->create_orders_with_interleaved_statuses( 3 );
 
+		$this->force_enable_status_union_rewrite();
 		list( $queried_ids, $sql ) = $this->get_orders_and_capture_sql( array() );
+		$this->reset_status_union_rewrite();
 
 		$this->assertStringContainsString( 'UNION ALL', $sql, 'The default order query should be rewritten as a UNION of single-status queries' );
 		$this->assertSame( $ids, $queried_ids, 'The rewritten default query should return all orders, most recent first' );
@@ -876,6 +896,8 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_status_union_rewrite_pagination_and_sort_direction(): void {
 		$this->create_orders_with_interleaved_statuses( 9 );
+
+		$this->force_enable_status_union_rewrite();
 
 		foreach ( array( 'DESC', 'ASC' ) as $order ) {
 			foreach ( array( 1, 2, 3 ) as $page ) {
@@ -897,6 +919,8 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 				$this->assertSame( $unoptimized_ids, $queried_ids, "Page {$page} ({$order}) of the rewritten query should match the regular query" );
 			}
 		}
+
+		$this->reset_status_union_rewrite();
 	}
 
 	/**
@@ -904,6 +928,7 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_status_union_rewrite_skipped_for_ineligible_queries(): void {
 		$this->create_orders_with_interleaved_statuses( 3 );
+		$this->force_enable_status_union_rewrite();
 
 		$ineligible_args = array(
 			'a single status'    => array( 'status' => array( OrderStatus::PENDING ) ),
@@ -936,6 +961,8 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 
 			$this->assertStringNotContainsString( 'UNION ALL', $sql, "A query with {$description} should not be rewritten" );
 		}
+
+		$this->reset_status_union_rewrite();
 	}
 
 	/**
@@ -943,6 +970,7 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_status_union_rewrite_skipped_when_clauses_modified(): void {
 		$ids = $this->create_orders_with_interleaved_statuses( 3 );
+		$this->force_enable_status_union_rewrite();
 
 		$filter_callback = function ( $clauses ) {
 			$clauses['where'] .= ' AND 1=1';
@@ -960,6 +988,8 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		);
 		remove_filter( 'woocommerce_orders_table_query_clauses', $filter_callback );
 
+		$this->reset_status_union_rewrite();
+
 		$this->assertStringNotContainsString( 'UNION ALL', $sql, 'Queries modified via the clauses filter should not be rewritten' );
 		$this->assertSame( array( $ids[0], $ids[1] ), $queried_ids, 'The unmodified query should still return matching orders' );
 	}
@@ -969,6 +999,7 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_status_union_rewrite_skipped_when_sql_modified(): void {
 		$ids = $this->create_orders_with_interleaved_statuses( 3 );
+		$this->force_enable_status_union_rewrite();
 
 		$filter_callback = function ( $sql ) {
 			return $sql . ' -- modified';
@@ -985,8 +1016,60 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		);
 		remove_filter( 'woocommerce_orders_table_query_sql', $filter_callback );
 
+		$this->reset_status_union_rewrite();
+
 		$this->assertStringNotContainsString( 'UNION ALL', $sql, 'Queries modified via the SQL filter should not be rewritten' );
 		$this->assertStringEndsWith( '-- modified', $sql, 'The SQL modified by the filter should be the SQL that gets executed' );
 		$this->assertSame( array( $ids[0], $ids[1] ), $queried_ids, 'The filter-modified query should still return matching orders' );
+	}
+
+	/**
+	 * @testdox The status union rewrite is disabled by default on stores below the order count threshold.
+	 */
+	public function test_status_union_rewrite_disabled_by_default_on_small_stores(): void {
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		list( , $sql ) = $this->get_orders_and_capture_sql(
+			array(
+				'status'  => array( OrderStatus::PENDING, OrderStatus::PROCESSING, OrderStatus::COMPLETED ),
+				'orderby' => 'date',
+				'order'   => 'DESC',
+				'limit'   => 4,
+			)
+		);
+
+		$this->assertStringNotContainsString( 'UNION ALL', $sql, 'The rewrite should be disabled by default on stores below the order count threshold' );
+	}
+
+	/**
+	 * @testdox The status union rewrite is enabled by default once cached order counts reach the threshold.
+	 */
+	public function test_status_union_rewrite_enabled_by_default_on_large_stores(): void {
+		$ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$count_cache = new OrderCountCache();
+		$count_cache->set_multiple(
+			'shop_order',
+			array(
+				'wc-pending'    => 200000,
+				'wc-processing' => 200000,
+				'wc-completed'  => 200000,
+			)
+		);
+
+		list( $queried_ids, $sql ) = $this->get_orders_and_capture_sql(
+			array(
+				'type'    => 'shop_order',
+				'status'  => array( OrderStatus::PENDING, OrderStatus::PROCESSING, OrderStatus::COMPLETED ),
+				'orderby' => 'date',
+				'order'   => 'DESC',
+				'limit'   => 4,
+			)
+		);
+
+		$count_cache->flush( 'shop_order' );
+
+		$this->assertStringContainsString( 'UNION ALL', $sql, 'The rewrite should be enabled by default once cached order counts reach the threshold' );
+		$this->assertSame( $ids, $queried_ids, 'The rewritten query should return all orders, most recent first' );
 	}
 }
