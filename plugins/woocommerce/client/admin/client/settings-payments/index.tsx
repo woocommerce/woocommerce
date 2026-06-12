@@ -4,7 +4,7 @@
 import { Gridicon } from '@automattic/components';
 import { Button, Placeholder, SelectControl } from '@wordpress/components';
 import React from 'react';
-import {  lazy, Suspense, useEffect  } from '@wordpress/element';
+import { lazy, Suspense, useEffect } from '@wordpress/element';
 import {
 	unstable_HistoryRouter as HistoryRouter,
 	Route,

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useCallback, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	pluginsStore,
@@ -10,8 +10,7 @@ import {
 	PaymentsEntity,
 } from '@woocommerce/data';
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
-import React from 'react';
-import {  useState, useEffect  } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';

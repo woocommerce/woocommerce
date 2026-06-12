@@ -4,7 +4,7 @@
  * External dependencies
  */
 import React from 'react';
-import {  createElement  } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { Meta, Story } from '@storybook/react';
 /**
  * Internal dependencies

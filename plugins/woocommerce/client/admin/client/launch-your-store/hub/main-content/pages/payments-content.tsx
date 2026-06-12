@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import React from 'react';
-import {  useEffect, useRef, useState  } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { pluginsStore, paymentSettingsStore } from '@woocommerce/data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';

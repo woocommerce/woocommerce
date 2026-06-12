@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import React from 'react';
-import type { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';

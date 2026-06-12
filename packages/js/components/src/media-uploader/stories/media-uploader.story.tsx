@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 import { Notice } from '@wordpress/components';
-import { useState } from '@wordpress/element';
 import { cloudUpload } from '@wordpress/icons';
 import type { Attachment } from '@wordpress/media-utils';
 
