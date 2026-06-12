@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { speak } from '@wordpress/a11y';
 import { createElement } from '@wordpress/element';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -15,7 +16,16 @@ import type {
 	SettingsValue,
 } from '../types';
 
+jest.mock( '@wordpress/a11y', () => ( {
+	speak: jest.fn(),
+} ) );
+
+const previousActEnvironment = globalThis.IS_REACT_ACT_ENVIRONMENT;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
+afterAll( () => {
+	globalThis.IS_REACT_ACT_ENVIRONMENT = previousActEnvironment;
+} );
 
 const renderElement = ( element: JSX.Element ) => {
 	const container = document.createElement( 'div' );
@@ -71,6 +81,25 @@ describe( 'NativeSettingsField', () => {
 		} );
 	};
 
+	const getSpinButton = ( container: HTMLElement, ariaLabel: string ) => {
+		const button = container.querySelector(
+			`button[aria-label="${ ariaLabel }"]`
+		);
+
+		if ( ! ( button instanceof HTMLButtonElement ) ) {
+			throw new Error(
+				`Expected a spin button labelled "${ ariaLabel }".`
+			);
+		}
+
+		return button;
+	};
+
+	// Spin buttons stay perceivable when disabled (accessibleWhenDisabled),
+	// so the disabled state surfaces as aria-disabled, not [disabled].
+	const isSpinButtonDisabled = ( button: HTMLButtonElement ) =>
+		button.disabled || button.getAttribute( 'aria-disabled' ) === 'true';
+
 	describe( 'number fields', () => {
 		const numberField: SettingsUIField = {
 			id: 'wc_test_number',
@@ -90,14 +119,14 @@ describe( 'NativeSettingsField', () => {
 			expect( input?.getAttribute( 'step' ) ).toBe( '1' );
 
 			expect(
-				container.querySelector( '[aria-label="Increment"]' )
-			).not.toBeNull();
+				getSpinButton( container, 'Increment Low stock threshold' )
+			).toBeInstanceOf( HTMLButtonElement );
 			expect(
-				container.querySelector( '[aria-label="Decrement"]' )
-			).not.toBeNull();
+				getSpinButton( container, 'Decrement Low stock threshold' )
+			).toBeInstanceOf( HTMLButtonElement );
 		} );
 
-		it( 'calls onChange with the stepped value when a spin button is clicked', () => {
+		it( 'calls onChange with the stepped value and announces it when a spin button is clicked', () => {
 			const onChange = jest.fn();
 			const container = render(
 				<NativeSettingsField
@@ -106,12 +135,11 @@ describe( 'NativeSettingsField', () => {
 			);
 
 			clickButton(
-				container.querySelector(
-					'[aria-label="Increment"]'
-				) as HTMLButtonElement
+				getSpinButton( container, 'Increment Low stock threshold' )
 			);
 
 			expect( onChange ).toHaveBeenCalledWith( '6' );
+			expect( speak ).toHaveBeenCalledWith( '6' );
 		} );
 
 		it( 'disables the decrement button at the minimum value', () => {
@@ -120,19 +148,62 @@ describe( 'NativeSettingsField', () => {
 			);
 
 			expect(
-				(
-					container.querySelector(
-						'[aria-label="Decrement"]'
-					) as HTMLButtonElement
-				 ).disabled
+				isSpinButtonDisabled(
+					getSpinButton( container, 'Decrement Low stock threshold' )
+				)
 			).toBe( true );
 			expect(
-				(
-					container.querySelector(
-						'[aria-label="Increment"]'
-					) as HTMLButtonElement
-				 ).disabled
+				isSpinButtonDisabled(
+					getSpinButton( container, 'Increment Low stock threshold' )
+				)
 			).toBe( false );
+		} );
+
+		it( 'disables the increment button at the maximum value', () => {
+			const container = render(
+				<NativeSettingsField
+					{ ...makeProps(
+						{
+							...numberField,
+							customAttributes: { min: 0, max: 10, step: 1 },
+						},
+						'10'
+					) }
+				/>
+			);
+
+			expect(
+				isSpinButtonDisabled(
+					getSpinButton( container, 'Increment Low stock threshold' )
+				)
+			).toBe( true );
+			expect(
+				isSpinButtonDisabled(
+					getSpinButton( container, 'Decrement Low stock threshold' )
+				)
+			).toBe( false );
+		} );
+
+		it( 'falls back to a step of 1 when the schema provides a non-positive step', () => {
+			const onChange = jest.fn();
+			const container = render(
+				<NativeSettingsField
+					{ ...makeProps(
+						{
+							...numberField,
+							customAttributes: { min: 0, step: 0 },
+						},
+						'5',
+						onChange
+					) }
+				/>
+			);
+
+			clickButton(
+				getSpinButton( container, 'Increment Low stock threshold' )
+			);
+
+			expect( onChange ).toHaveBeenCalledWith( '6' );
 		} );
 
 		it( 'clamps stepping to the maximum and avoids float precision drift', () => {
@@ -151,9 +222,7 @@ describe( 'NativeSettingsField', () => {
 			);
 
 			clickButton(
-				container.querySelector(
-					'[aria-label="Increment"]'
-				) as HTMLButtonElement
+				getSpinButton( container, 'Increment Low stock threshold' )
 			);
 
 			expect( onChange ).toHaveBeenCalledWith( '0.3' );
@@ -175,9 +244,7 @@ describe( 'NativeSettingsField', () => {
 			);
 
 			clickButton(
-				container.querySelector(
-					'[aria-label="Increment"]'
-				) as HTMLButtonElement
+				getSpinButton( container, 'Increment Low stock threshold' )
 			);
 
 			expect( onChange ).toHaveBeenCalledWith( '2' );
@@ -203,7 +270,7 @@ describe( 'NativeSettingsField', () => {
 				container.querySelector( 'input[type="text"]' )
 			).not.toBeNull();
 			expect(
-				container.querySelector( '[aria-label="Increment"]' )
+				container.querySelector( '.wc-settings-ui__number-control' )
 			).toBeNull();
 		} );
 	} );

@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
+import { speak } from '@wordpress/a11y';
 import { BaseControl, Button } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import type { ReactNode } from 'react';
 
 export type NumberSpinControlProps = {
@@ -83,7 +84,11 @@ export const NumberSpinControl = ( {
 }: NumberSpinControlProps ) => {
 	const min = toFiniteNumber( inputAttributes?.min );
 	const max = toFiniteNumber( inputAttributes?.max );
-	const step = toFiniteNumber( inputAttributes?.step ) ?? 1;
+	const parsedStep = toFiniteNumber( inputAttributes?.step );
+	// A zero or negative step would make the buttons no-ops or invert them;
+	// fall back to 1 like the native number input does for an invalid step.
+	const step =
+		typeof parsedStep === 'number' && parsedStep > 0 ? parsedStep : 1;
 	const current = toFiniteNumber( value );
 
 	const stepBy = ( direction: 1 | -1 ) => {
@@ -97,7 +102,14 @@ export const NumberSpinControl = ( {
 			next = Math.min( max, next );
 		}
 
-		onChange( String( Number( next.toFixed( stepDecimals( step ) ) ) ) );
+		const nextValue = String(
+			Number( next.toFixed( stepDecimals( step ) ) )
+		);
+
+		onChange( nextValue );
+		// Focus stays on the spin button while the input updates, so the
+		// new value must be announced to assistive technology explicitly.
+		speak( nextValue );
 	};
 
 	const incrementDisabled =
@@ -111,6 +123,21 @@ export const NumberSpinControl = ( {
 			typeof current !== 'undefined' &&
 			current <= min );
 
+	const incrementLabel = label
+		? sprintf(
+				// translators: %s: the label of the number field being stepped.
+				__( 'Increment %s', 'woocommerce' ),
+				label
+		  )
+		: __( 'Increment', 'woocommerce' );
+	const decrementLabel = label
+		? sprintf(
+				// translators: %s: the label of the number field being stepped.
+				__( 'Decrement %s', 'woocommerce' ),
+				label
+		  )
+		: __( 'Decrement', 'woocommerce' );
+
 	return (
 		<BaseControl
 			className="wc-settings-ui__control"
@@ -119,9 +146,12 @@ export const NumberSpinControl = ( {
 			help={ help }
 			__nextHasNoMarginBottom
 		>
-			<div className="wc-settings-ui-number-control">
+			<div className="wc-settings-ui__number-control">
+				{ /* Schema-provided attributes are spread first so they can
+				     never override the controlled props below. */ }
 				<input
-					className="components-text-control__input is-next-40px-default-size wc-settings-ui-number-control__input"
+					{ ...inputAttributes }
+					className="wc-settings-ui__number-control-input"
 					type="number"
 					id={ id }
 					value={ value }
@@ -131,21 +161,22 @@ export const NumberSpinControl = ( {
 					onChange={ ( event ) =>
 						onChange( event.currentTarget.value )
 					}
-					{ ...inputAttributes }
 				/>
-				<div className="wc-settings-ui-number-control__spin-buttons">
+				<div className="wc-settings-ui__number-control-spin-buttons">
 					<Button
 						size="small"
 						icon={ plusIcon }
-						label={ __( 'Increment', 'woocommerce' ) }
+						label={ incrementLabel }
 						disabled={ incrementDisabled }
+						accessibleWhenDisabled
 						onClick={ () => stepBy( 1 ) }
 					/>
 					<Button
 						size="small"
 						icon={ minusIcon }
-						label={ __( 'Decrement', 'woocommerce' ) }
+						label={ decrementLabel }
 						disabled={ decrementDisabled }
+						accessibleWhenDisabled
 						onClick={ () => stepBy( -1 ) }
 					/>
 				</div>
