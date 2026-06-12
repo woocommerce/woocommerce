@@ -127,7 +127,7 @@ const PromoCard = ( {
 
 	return (
 		<Card className={ classNames }>
-			<CardBody className="promo-card__body" size="custom">
+			<CardBody className="promo-card__body">
 				{ promotion?.style === 'has-background' ? (
 					<>
 						<div className="promo-content-links">
