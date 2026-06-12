@@ -1039,6 +1039,11 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 *   - json
 	 * ---
 	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp wc hpos status
+	 *     wp wc hpos status --format=json
+	 *
 	 * @since 8.6.0
 	 *
 	 * @param array $args       Positional arguments passed to the command.
