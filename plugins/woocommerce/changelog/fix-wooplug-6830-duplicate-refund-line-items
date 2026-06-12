@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reject duplicate line_item_id entries in v4 refunds create and preview validation, which previously passed per-line caps individually and produced inflated preview totals that the create endpoint could not reproduce.
