@@ -51,6 +51,15 @@ class CLIRunnerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Clean up: reset container replacements so the LegacyDataHandler mock
+	 * registered in build_runner() does not leak into later tests in the run.
+	 */
+	public function tearDown(): void {
+		$this->reset_container_replacements();
+		parent::tearDown();
+	}
+
+	/**
 	 * Build a CLIRunner with mocked controller, synchronizer, and legacy handler.
 	 *
 	 * @param bool $hpos_enabled      Whether HPOS is enabled.

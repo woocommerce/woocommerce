@@ -1058,9 +1058,9 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		$status = array(
 			'hpos_enabled'               => $this->controller->custom_orders_table_usage_is_enabled(),
 			'compatibility_mode_enabled' => $this->synchronizer->data_sync_is_enabled(),
-			'unsynced_orders'            => $this->synchronizer->get_current_orders_pending_sync_count(),
+			'unsynced_orders'            => (int) $this->synchronizer->get_current_orders_pending_sync_count(),
 			'orders_subject_to_cleanup'  => ( $this->synchronizer->custom_orders_table_is_authoritative() && ! $this->synchronizer->data_sync_is_enabled() )
-				? $legacy_handler->count_orders_for_cleanup()
+				? (int) $legacy_handler->count_orders_for_cleanup()
 				: 0,
 		);
 
