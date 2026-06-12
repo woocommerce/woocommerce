@@ -90,9 +90,11 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce\_%';" );
 	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'widget\_woocommerce\_%';" );
 
-	// Delete usermeta. The POS preset key is matched explicitly because its leading
-	// underscore (`_woocommerce_pos_preset`) is outside the `woocommerce_%` pattern.
-	$wpdb->query( "DELETE FROM $wpdb->usermeta WHERE meta_key LIKE 'woocommerce\_%' OR meta_key = '_woocommerce_pos_preset';" );
+	// Delete usermeta.
+	$wpdb->query( "DELETE FROM $wpdb->usermeta WHERE meta_key LIKE 'woocommerce\_%';" );
+	// The POS preset key has a leading underscore, so it is outside the `woocommerce_%`
+	// pattern above and is removed explicitly.
+	$wpdb->query( "DELETE FROM $wpdb->usermeta WHERE meta_key = '_woocommerce_pos_preset';" );
 
 	// Delete our data from the post and post meta tables, and remove any additional tables we created.
 	$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation', 'shop_coupon', 'shop_order', 'shop_order_refund' );" );
