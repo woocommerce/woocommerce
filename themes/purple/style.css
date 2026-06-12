@@ -32,6 +32,10 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
     color: var(--wp--preset--color--theme-2);
 }
 
+.wp-block-woocommerce-product-gallery-is-layout-flex {
+    gap: var(--wp--preset--spacing--50);
+}
+
 /* https://github.com/woocommerce/woocommerce/issues/59391 */
 .woocommerce-account .entry-content > .woocommerce {
     padding-top: var(--wp--preset--spacing--60);
