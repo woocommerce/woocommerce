@@ -108,6 +108,10 @@ class MyCatalogController {
 
 Because the mapper is delivery-agnostic, the same implementation can also back a push feed for the same catalog shape later, by plugging it into an `IntegrationInterface`.
 
+## Scope and future direction
+
+The framework currently models two consumption patterns: push feeds (file assembly and delivery) and pull/live-query mapping. A third pattern exists in the WooCommerce ecosystem — batched API push with change-trigger hooks, as implemented by Google Listings & Ads (`WCProductAdapter` → `ProductSyncer` → `BatchProductHelper` → `SyncerHooks`). That model is the most mature product-export abstraction in the ecosystem and is a candidate blueprint for a future, richer export framework that push-feed, pull/query, and API-push integrations could all share. Migrating existing API-push integrations onto this framework is intentionally out of scope for now; `ProductShapeMapperInterface` is the shared mapping kernel any such evolution would build on.
+
 ## Backwards compatibility notes
 
 - `Feed\ProductMapperInterface` extends `Mapping\ProductShapeMapperInterface` without redeclaring methods. Existing implementations keep working unchanged and automatically satisfy the new interface.
