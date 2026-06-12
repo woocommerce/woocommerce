@@ -15,10 +15,7 @@ import type {
 	ProductFiltersContext,
 } from './types';
 import { getClosestColor } from './utils/get-closest-color';
-import {
-	PRODUCT_FILTERS_STORE_LOCK,
-	PRODUCT_FILTERS_STORE_NAME,
-} from './constants';
+import { PRODUCT_FILTERS_STORE_NAME } from './constants';
 
 const { getContext, getElement, store, getServerContext, getConfig } = iAPI;
 
@@ -325,6 +322,5 @@ export type ProductFiltersStore = typeof productFiltersStore;
 
 const { state, actions } = store< ProductFiltersStore >(
 	BLOCK_NAME,
-	productFiltersStore,
-	{ lock: PRODUCT_FILTERS_STORE_LOCK }
+	productFiltersStore
 );

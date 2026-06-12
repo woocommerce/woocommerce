@@ -1321,6 +1321,61 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $result['breakdown']['products']['items'] );
 		$this->assertArrayHasKey( 'name', $result['breakdown']['products']['items'][0] );
 		$this->assertArrayHasKey( 'product_id', $result['breakdown']['products']['items'][0] );
+		$this->assertArrayHasKey( 'subtotal', $result['breakdown']['products']['items'][0] );
+		$this->assertArrayHasKey( 'tax', $result['breakdown']['products']['items'][0] );
+		$this->assertArrayHasKey( 'total', $result['breakdown']['products']['items'][0] );
+		$this->assertEquals( '100.00', $result['breakdown']['products']['items'][0]['subtotal'] );
+		$this->assertEquals( '10.00', $result['breakdown']['products']['items'][0]['tax'] );
+		$this->assertEquals( '110.00', $result['breakdown']['products']['items'][0]['total'] );
+		$this->assertArrayHasKey( 'subtotal', $result['breakdown']['products'] );
+		$this->assertArrayHasKey( 'tax', $result['breakdown']['products'] );
+		$this->assertArrayHasKey( 'total', $result['breakdown']['products'] );
+		$this->assertEquals( '100.00', $result['breakdown']['products']['subtotal'] );
+		$this->assertEquals( '10.00', $result['breakdown']['products']['tax'] );
+		$this->assertEquals( '110.00', $result['breakdown']['products']['total'] );
+	}
+
+	/**
+	 * @testdox build_refund_preview should set product_id to the variation ID for variation line items.
+	 */
+	public function test_build_refund_preview_product_id_is_variation_id_for_variations(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_ids    = $variable_product->get_children();
+		$this->assertNotEmpty( $variation_ids, 'Variable product fixture should expose at least one variation.' );
+		$variation_id = (int) $variation_ids[0];
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product_id'   => $variable_product->get_id(),
+				'variation_id' => $variation_id,
+				'quantity'     => 1,
+				'subtotal'     => 10.00,
+				'total'        => 10.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->data_utils->build_refund_preview(
+			$order,
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		$product_item = $result['breakdown']['products']['items'][0];
+		$this->assertArrayHasKey( 'product_id', $product_item );
+		$this->assertArrayNotHasKey( 'variation_id', $product_item );
+		$this->assertSame( $variation_id, $product_item['product_id'] );
+
+		$variable_product->delete( true );
+		$order->delete( true );
 	}
 
 	/**
