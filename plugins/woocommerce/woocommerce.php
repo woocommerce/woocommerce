@@ -29,6 +29,14 @@ if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
 }
 \Automattic\WooCommerce\Packages::init();
 
+// Register a WooCommerce-scoped Composer PSR-4 autoloader on the SPL stack as a
+// low-priority (appended) fallback, consulted only after every other autoloader
+// — including the primary Jetpack autoloader — has missed. When a WordPress
+// in-place upgrade swaps WooCommerce's files mid-request, the Jetpack classmap
+// snapshot (captured at request start, never refreshed) cannot resolve a class
+// that is new in the upgraded version; this fallback resolves it from disk.
+\Automattic\WooCommerce\Autoloader::register_woocommerce_psr4_fallback();
+
 // Include the main WooCommerce class.
 if ( ! class_exists( 'WooCommerce', false ) ) {
 	include_once dirname( WC_PLUGIN_FILE ) . '/includes/class-woocommerce.php';

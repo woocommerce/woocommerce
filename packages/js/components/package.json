@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/components",
-	"version": "13.1.0",
+	"version": "14.0.0",
 	"description": "UI components for WooCommerce.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -132,7 +132,7 @@
 	"peerDependencies": {
 		"@types/react": "18.3.x",
 		"@types/react-dom": "18.3.x",
-		"@wordpress/data": "^10.0.2",
+		"@wordpress/data": "^10.19.0",
 		"lodash": "^4.17.0",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"

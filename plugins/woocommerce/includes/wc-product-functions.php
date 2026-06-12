@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -126,27 +127,13 @@ function wc_product_dimensions_enabled() {
  * @param int $post_id (default: 0) The product ID.
  */
 function wc_delete_product_transients( $post_id = 0 ) {
-	// Transient data to clear with a fixed name which may be stale after product updates.
-	$transients_to_clear = array(
-		'wc_products_onsale',
-		'wc_featured_products',
-		'wc_outofstock_count',
-		'wc_low_stock_count',
-	);
+	$container = wc_get_container();
 
-	foreach ( $transients_to_clear as $transient ) {
-		delete_transient( $transient );
+	if ( $container->get( ProductTransientsDeferrer::class )->maybe_defer_deletion( absint( $post_id ) ) ) {
+		return;
 	}
 
-	if ( $post_id > 0 ) {
-		// Transient names that include an ID - since they are dynamic they cannot be cleaned in bulk without the ID.
-		wc_get_container()->get( ProductUtil::class )->delete_product_specific_transients( $post_id );
-	}
-
-	// Kept for compatibility, WooCommerce core doesn't use product transient versions anymore.
-	WC_Cache_Helper::get_transient_version( 'product', true );
-
-	do_action( 'woocommerce_delete_product_transients', $post_id );
+	$container->get( ProductUtil::class )->delete_product_transients_for_products( array( $post_id ) );
 }
 
 /**
