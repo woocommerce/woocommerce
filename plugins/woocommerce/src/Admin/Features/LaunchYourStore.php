@@ -161,9 +161,8 @@ class LaunchYourStore {
 			return false;
 		}
 
-		$has_dismissed_banner = WCAdminUser::get_user_data_field( $current_user_id, self::BANNER_DISMISS_USER_META_KEY )
-				// Remove this check in WC 9.4.
-				|| get_user_meta( $current_user_id, 'woocommerce_' . self::BANNER_DISMISS_USER_META_KEY, true ) === 'yes';
+		$has_dismissed_banner = 'yes' === WCAdminUser::get_user_data_field( $current_user_id, self::BANNER_DISMISS_USER_META_KEY );
+
 		if ( $has_dismissed_banner ) {
 			return false;
 		}
