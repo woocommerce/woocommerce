@@ -42,7 +42,7 @@
 		"@wordpress/element": "catalog:wp-min",
 		"@wordpress/hooks": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
-		"@wordpress/icons": "catalog:wp-min",
+		"@wordpress/icons": "catalog:wp-bundled",
 		"@wordpress/plugins": "catalog:wp-min",
 		"prop-types": "^15.8.1"
 	},
