@@ -1,4 +1,4 @@
 Significance: major
-Type: update
+Type: performance
 
 Convert WooPayments onboarding payment method logos from inline JSX SVG components to static SVG assets, and remove the now-unused WCPayCard, WCPayAcceptedMethods, and individual icon exports.
