@@ -2,11 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { Button, ExternalLink } from '@wordpress/components';
 import { Pill } from '@woocommerce/components';
-import { pluginsStore } from '@woocommerce/data';
-import { getAdminLink } from '@woocommerce/settings';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -14,42 +13,71 @@ import { getAdminLink } from '@woocommerce/settings';
 import './woocommerce-shipping-item.scss';
 import WooIcon from './woo-icon.svg';
 
-const WoocommerceShippingItem = ( {
-	onSetupClick,
+const WOOCOMMERCE_SHIPPING_PLUGIN_SLUG = 'woocommerce-shipping';
+
+export type ShippingPartnerTrackingProps = {
+	context: 'settings';
+	country: string;
+	plugins: string;
+};
+
+const WooCommerceShippingItem = ( {
+	isPluginInstalled,
+	isPluginActive,
+	onInstallClick,
+	onActivateClick,
 	pluginsBeingSetup,
+	tracking,
 }: {
+	isPluginInstalled: boolean;
+	isPluginActive: boolean;
 	pluginsBeingSetup: Array< string >;
-	onSetupClick: ( slugs: string[] ) => PromiseLike< void >;
+	onInstallClick: ( slugs: string[] ) => PromiseLike< void >;
+	onActivateClick: ( slugs: string[] ) => PromiseLike< void >;
+	tracking?: ShippingPartnerTrackingProps;
 } ) => {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 
-	const isSiteConnectedToJetpack = useSelect(
-		( select ) => select( pluginsStore ).isJetpackConnected(),
-		[]
-	);
+	const handleClick = () => {
+		const trackingBase = {
+			...( tracking ?? {} ),
+			selected_plugin: WOOCOMMERCE_SHIPPING_PLUGIN_SLUG,
+		};
 
-	const handleSetupClick = () => {
-		onSetupClick( [ 'woocommerce-shipping' ] ).then( () => {
-			const actions = [];
-			if ( ! isSiteConnectedToJetpack ) {
-				actions.push( {
-					url: getAdminLink(
-						'admin.php?page=wc-settings&tab=shipping&section=woocommerce-shipping-settings'
-					),
-					label: __(
-						'Finish the setup by connecting your store to WordPress.com.',
-						'woocommerce'
-					),
+		recordEvent( 'shipping_partner_click', trackingBase );
+		recordEvent( 'settings_shipping_recommendation_setup_click', {
+			plugin: WOOCOMMERCE_SHIPPING_PLUGIN_SLUG,
+			action: isPluginInstalled ? 'activate' : 'install',
+		} );
+
+		const action = isPluginInstalled ? onActivateClick : onInstallClick;
+		const eventName = isPluginInstalled
+			? 'shipping_partner_activate'
+			: 'shipping_partner_install';
+
+		action( [ WOOCOMMERCE_SHIPPING_PLUGIN_SLUG ] ).then(
+			() => {
+				recordEvent( eventName, {
+					...trackingBase,
+					success: true,
+				} );
+				createSuccessNotice(
+					isPluginInstalled
+						? __( 'WooCommerce Shipping activated!', 'woocommerce' )
+						: __(
+								'WooCommerce Shipping is installed!',
+								'woocommerce'
+						  ),
+					{}
+				);
+			},
+			() => {
+				recordEvent( eventName, {
+					...trackingBase,
+					success: false,
 				} );
 			}
-
-			createSuccessNotice(
-				__( '🎉 WooCommerce Shipping is installed!', 'woocommerce' ),
-				{
-					actions,
-				}
-			);
-		} );
+		);
 	};
 
 	return (
@@ -58,7 +86,7 @@ const WoocommerceShippingItem = ( {
 				<img
 					className="woocommerce-shipping-plugin-item__logo"
 					src={ WooIcon }
-					alt=""
+					alt="WooCommerce Shipping Logo"
 				/>
 			</div>
 			<div className="woocommerce-list__item-text">
@@ -78,19 +106,34 @@ const WoocommerceShippingItem = ( {
 				</span>
 			</div>
 			<div className="woocommerce-list__item-after">
-				<Button
-					isSecondary
-					onClick={ handleSetupClick }
-					isBusy={ pluginsBeingSetup.includes(
-						'woocommerce-shipping'
-					) }
-					disabled={ pluginsBeingSetup.length > 0 }
-				>
-					{ __( 'Get started', 'woocommerce' ) }
-				</Button>
+				{ isPluginActive ? (
+					<Button
+						variant="secondary"
+						aria-disabled="true"
+						aria-label={ __(
+							'WooCommerce Shipping is already active',
+							'woocommerce'
+						) }
+					>
+						{ __( 'Active', 'woocommerce' ) }
+					</Button>
+				) : (
+					<Button
+						variant={ isPluginInstalled ? 'primary' : 'secondary' }
+						onClick={ handleClick }
+						isBusy={ pluginsBeingSetup.includes(
+							WOOCOMMERCE_SHIPPING_PLUGIN_SLUG
+						) }
+						disabled={ pluginsBeingSetup.length > 0 }
+					>
+						{ isPluginInstalled
+							? __( 'Activate', 'woocommerce' )
+							: __( 'Install', 'woocommerce' ) }
+					</Button>
+				) }
 			</div>
 		</div>
 	);
 };
 
-export default WoocommerceShippingItem;
+export default WooCommerceShippingItem;
