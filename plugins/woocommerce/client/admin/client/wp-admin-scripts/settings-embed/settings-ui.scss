@@ -141,6 +141,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	.wc-settings-ui-shell__tabs {
 		background: #fff;
+		box-sizing: border-box;
 		display: flex;
 		margin: 0 !important;
 		overflow-x: auto;
