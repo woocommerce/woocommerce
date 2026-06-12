@@ -3258,7 +3258,7 @@ EOT;
 
 <!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->
 
-<!-- wp:woocommerce/product-collection {"queryId":1,"query":{"perPage":4,"postType":"product","order":"desc","orderBy":"date","woocommerceStockStatus":["instock"],"isProductCollectionBlock":true},"tagName":"div","displayLayout":{"type":"flex","columns":4,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"queryContextIncludes":["collection"]} -->
+<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"orderBy":"date","order":"desc","perPage":4,"pages":1,"postType":"product","woocommerceStockStatus":["instock"]},"tagName":"div","displayLayout":{"type":"flex","columns":4,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/new-arrivals","hideControls":["order","filterable"],"queryContextIncludes":["collection"]} -->
 <div class="wp-block-woocommerce-product-collection"><!-- wp:woocommerce/product-template -->
 <!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
 <!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
