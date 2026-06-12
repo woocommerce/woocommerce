@@ -73,8 +73,9 @@ class MockWPCLI {
 	 * Mock debug method.
 	 *
 	 * @param string $message Debug message.
+	 * @param bool   $group   Debug group.
 	 */
-	public static function debug( $message ): void {
+	public static function debug( $message, $group = false ): void {
 		self::$last_debug_message = $message;
 	}
 
