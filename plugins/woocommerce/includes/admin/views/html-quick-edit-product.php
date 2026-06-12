@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 defined( 'ABSPATH' ) || exit;
 ?>
 
-<fieldset class="inline-edit-col-left">
+<fieldset class="inline-edit-col-left woocommerce-product-data-fields">
 	<div id="woocommerce-fields" class="inline-edit-col">
 
 		<h4><?php esc_html_e( 'Product data', 'woocommerce' ); ?></h4>
@@ -148,6 +148,74 @@ defined( 'ABSPATH' ) || exit;
 				</select>
 			</span>
 		</div>
+
+		<?php
+		$attribute_taxonomies = wc_get_attribute_taxonomies();
+		if ( ! empty( $attribute_taxonomies ) ) :
+			?>
+			<h4><?php esc_html_e( 'Attributes', 'woocommerce' ); ?></h4>
+			<div class="inline-edit-group product_attributes_fields">
+				<?php
+				foreach ( $attribute_taxonomies as $attribute_taxonomy ) :
+					$attribute_taxonomy_name = wc_attribute_taxonomy_name( $attribute_taxonomy->attribute_name );
+
+					if ( ! taxonomy_exists( $attribute_taxonomy_name ) ) {
+						continue;
+					}
+
+					$attribute_orderby = ! empty( $attribute_taxonomy->attribute_orderby ) ? $attribute_taxonomy->attribute_orderby : 'name';
+					$attribute_label   = wc_attribute_label( $attribute_taxonomy_name );
+					$placeholder       = sprintf(
+						/* translators: %s: Product attribute name. */
+						__( 'Select %s', 'woocommerce' ),
+						$attribute_label
+					);
+					?>
+					<label class="wc-product-attribute-field">
+						<span class="title"><?php echo esc_html( $attribute_label ); ?></span>
+						<span class="input-text-wrap">
+							<input type="hidden" class="wc-product-attribute-taxonomy" name="quick_edit_product_attribute_taxonomies[]" value="<?php echo esc_attr( $attribute_taxonomy_name ); ?>" disabled="disabled" />
+							<select
+								class="wc-product-attribute-values"
+								name="quick_edit_product_attributes[<?php echo esc_attr( $attribute_taxonomy_name ); ?>][]"
+								multiple="multiple"
+								disabled="disabled"
+								data-taxonomy="<?php echo esc_attr( $attribute_taxonomy_name ); ?>"
+								data-return_id="id"
+								data-orderby="<?php echo esc_attr( $attribute_orderby ); ?>"
+								data-minimum_input_length="0"
+								data-cache_results="true"
+								data-loading_without_search_term="true"
+								data-dropdown-css-class="wc-product-quick-edit-attribute-dropdown"
+								data-placeholder="<?php echo esc_attr( $placeholder ); ?>"
+								style="width:99%;"
+							></select>
+						</span>
+					</label>
+				<?php endforeach; ?>
+				<label class="wc-product-attribute-add-field">
+					<span class="title"><?php esc_html_e( 'Add attribute', 'woocommerce' ); ?></span>
+					<span class="input-text-wrap">
+						<select
+							class="wc-product-attribute-add"
+							data-placeholder="<?php esc_attr_e( 'Search attributes', 'woocommerce' ); ?>"
+							data-minimum_input_length="0"
+							data-loading_without_search_term="true"
+							data-dropdown-css-class="wc-product-quick-edit-attribute-dropdown"
+							style="width:99%;"
+						></select>
+						<span class="wc-product-attribute-add-message" hidden>
+							<?php
+							esc_html_e(
+								'All available attributes have been added.',
+								'woocommerce'
+							);
+							?>
+						</span>
+					</span>
+				</label>
+			</div>
+		<?php endif; ?>
 
 		<div class="inline-edit-group">
 			<label class="alignleft">

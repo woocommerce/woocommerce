@@ -513,10 +513,155 @@ class WC_Admin_Post_Types {
 		}
 
 		$product = $this->maybe_update_stock_status( $product, $stock_status );
+		$this->quick_edit_save_attributes( $product, $request_data );
 
 		$product->save();
 
 		do_action( 'woocommerce_product_quick_edit_save', $product );
+	}
+
+	/**
+	 * Save product attributes from Quick Edit.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @param array      $request_data Request data.
+	 */
+	private function quick_edit_save_attributes( $product, $request_data ): void {
+		if ( empty( $request_data['quick_edit_product_attribute_taxonomies'] ) || ! is_array( $request_data['quick_edit_product_attribute_taxonomies'] ) ) {
+			return;
+		}
+
+		$submitted_attributes = array();
+		if ( ! empty( $request_data['quick_edit_product_attributes'] ) && is_array( $request_data['quick_edit_product_attributes'] ) ) {
+			$submitted_attributes = $request_data['quick_edit_product_attributes'];
+		}
+
+		$attributes = $product->get_attributes( 'edit' );
+		$taxonomies = wp_unslash( $request_data['quick_edit_product_attribute_taxonomies'] );
+		if ( ! is_array( $taxonomies ) ) {
+			return;
+		}
+
+		$taxonomies = array_map( 'wc_clean', $taxonomies );
+
+		foreach ( $taxonomies as $taxonomy ) {
+			if ( ! is_string( $taxonomy ) || '' === $taxonomy || ! taxonomy_is_product_attribute( $taxonomy ) ) {
+				continue;
+			}
+
+			$attribute_key = sanitize_title( $taxonomy );
+			$term_ids      = array();
+
+			if ( isset( $submitted_attributes[ $taxonomy ] ) && is_array( $submitted_attributes[ $taxonomy ] ) ) {
+				$term_ids = wp_parse_id_list( wp_unslash( $submitted_attributes[ $taxonomy ] ) );
+			}
+
+			$is_existing_attribute = isset( $attributes[ $attribute_key ] ) && $attributes[ $attribute_key ] instanceof WC_Product_Attribute;
+
+			if ( $is_existing_attribute && $attributes[ $attribute_key ]->get_variation() && $product->is_type( 'variable' ) ) {
+				$term_ids = $this->get_quick_edit_variation_attribute_term_ids( $product, $taxonomy, $term_ids );
+			}
+
+			$set_terms = wp_set_object_terms( $product->get_id(), $term_ids, $taxonomy );
+			if ( is_wp_error( $set_terms ) ) {
+				continue;
+			}
+
+			if ( empty( $term_ids ) ) {
+				unset( $attributes[ $attribute_key ] );
+				continue;
+			}
+
+			$attribute = $is_existing_attribute ? $attributes[ $attribute_key ] : new WC_Product_Attribute();
+
+			$attribute->set_id( wc_attribute_taxonomy_id_by_name( $taxonomy ) );
+			$attribute->set_name( $taxonomy );
+			$attribute->set_options( $term_ids );
+
+			if ( ! $is_existing_attribute ) {
+				$attribute->set_position( count( $attributes ) );
+				$attribute->set_visible( true );
+				$attribute->set_variation( false );
+			}
+
+			$attributes[ $attribute_key ] = $attribute;
+		}
+
+		$product->set_attributes( $attributes );
+	}
+
+	/**
+	 * Preserve terms required by existing variations when saving a variation attribute from Quick Edit.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @param string     $taxonomy Attribute taxonomy.
+	 * @param array      $term_ids Submitted term IDs.
+	 * @return array Term IDs safe to save.
+	 */
+	private function get_quick_edit_variation_attribute_term_ids( $product, string $taxonomy, array $term_ids ): array {
+		global $wpdb;
+
+		$variation_ids = $product->get_children();
+		if ( empty( $variation_ids ) ) {
+			return wp_parse_id_list( $term_ids );
+		}
+
+		$variation_ids = wp_parse_id_list( $variation_ids );
+		$query_in      = '(' . implode( ',', array_fill( 0, count( $variation_ids ), '%d' ) ) . ')';
+		$query_args    = array_merge( array( wc_variation_attribute_name( $taxonomy ) ), $variation_ids );
+		$attributes    = $product->get_attributes( 'edit' );
+		$attribute_key = sanitize_title( $taxonomy );
+		$current_terms = isset( $attributes[ $attribute_key ] ) && $attributes[ $attribute_key ] instanceof WC_Product_Attribute ? $attributes[ $attribute_key ]->get_options() : $term_ids;
+
+		$variation_term_slugs = $wpdb->get_col(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT DISTINCT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN {$query_in}",
+				$query_args
+			)
+		);
+
+		if ( empty( $variation_term_slugs ) ) {
+			return wp_parse_id_list(
+				array_unique(
+					array_merge( $term_ids, $current_terms )
+				)
+			);
+		}
+
+		$has_wildcard_variation    = false;
+		$variation_term_slug_names = array();
+		foreach ( $variation_term_slugs as $variation_term_slug ) {
+			if ( null === $variation_term_slug || '' === $variation_term_slug ) {
+				$has_wildcard_variation = true;
+				continue;
+			}
+
+			$variation_term_slug_names[] = (string) $variation_term_slug;
+		}
+
+		if ( $has_wildcard_variation || empty( $variation_term_slug_names ) ) {
+			return wp_parse_id_list(
+				array_unique(
+					array_merge( $term_ids, $current_terms )
+				)
+			);
+		}
+
+		$variation_term_ids = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'slug'       => $variation_term_slug_names,
+				'hide_empty' => false,
+				'fields'     => 'ids',
+			)
+		);
+
+		if ( is_wp_error( $variation_term_ids ) ) {
+			return wp_parse_id_list( $term_ids );
+		}
+
+		return wp_parse_id_list( array_unique( array_merge( $term_ids, $variation_term_ids ) ) );
 	}
 
 	/**

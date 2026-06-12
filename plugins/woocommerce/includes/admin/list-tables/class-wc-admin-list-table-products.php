@@ -48,6 +48,20 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	private bool $use_cogs_lookup_column;
 
 	/**
+	 * Global attribute terms used by Quick Edit on the current Products list screen.
+	 *
+	 * @var array
+	 */
+	private array $quick_edit_attribute_terms = array();
+
+	/**
+	 * Whether Quick Edit attribute terms have been prefetched for the current list table.
+	 *
+	 * @var bool
+	 */
+	private bool $quick_edit_attribute_terms_prefetched = false;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -227,8 +241,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$cogs_value_html = $this->cogs_is_enabled ?
 				'<div class="cogs_value">' . esc_html( $this->object->get_cogs_value() ?? '0' ) . '</div>' :
 				'';
+		$attributes_data = $this->get_quick_edit_attributes_data();
+		$attributes_json = wp_json_encode( $attributes_data );
+		$attributes_json = false === $attributes_json ? '{}' : $attributes_json;
 
-		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- the COGS value is already escaped.
+		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Custom inline data is escaped below.
 		/* Custom inline data for woocommerce. */
 		echo '
 			<div class="hidden" id="woocommerce_inline_' . absint( $this->object->get_id() ) . '">
@@ -253,9 +270,176 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				<div class="tax_class">' . esc_html( $this->object->get_tax_class() ) . '</div>
 				<div class="backorders">' . esc_html( $this->object->get_backorders() ) . '</div>
 				<div class="low_stock_amount">' . esc_html( $this->object->get_low_stock_amount() ) . '</div>'
+				. '<div class="product_attributes" data-attributes="' . esc_attr( $attributes_json ) . '"></div>'
 				. $cogs_value_html .
 			'</div>';
 		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Get product attribute data used to populate the Quick Edit form.
+	 *
+	 * @return array
+	 */
+	private function get_quick_edit_attributes_data() {
+		$attributes_data   = array();
+		$attribute_options = array();
+
+		if ( ! $this->object instanceof WC_Product ) {
+			return $attributes_data;
+		}
+
+		$product = $this->object;
+
+		$this->prefetch_quick_edit_attribute_terms();
+
+		foreach ( $product->get_attributes( 'edit' ) as $attribute ) {
+			if ( ! $attribute->is_taxonomy() ) {
+				continue;
+			}
+
+			$taxonomy = $attribute->get_name();
+			$options  = wp_parse_id_list( $attribute->get_options() );
+			if ( empty( $options ) ) {
+				continue;
+			}
+
+			$attribute_options[ $taxonomy ] = $options;
+		}
+
+		if ( empty( $attribute_options ) ) {
+			return $attributes_data;
+		}
+
+		$this->cache_quick_edit_attribute_terms( $attribute_options );
+
+		foreach ( $attribute_options as $taxonomy => $options ) {
+			if ( empty( $this->quick_edit_attribute_terms[ $taxonomy ] ) ) {
+				continue;
+			}
+
+			$attributes_data[ $taxonomy ] = array(
+				'terms' => array(),
+			);
+
+			foreach ( $options as $term_id ) {
+				if ( empty( $this->quick_edit_attribute_terms[ $taxonomy ][ $term_id ] ) ) {
+					continue;
+				}
+
+				$term = $this->quick_edit_attribute_terms[ $taxonomy ][ $term_id ];
+
+				$attributes_data[ $taxonomy ]['terms'][] = array(
+					'id'   => $term->term_id,
+					'name' => $term->name,
+				);
+			}
+		}
+
+		return $attributes_data;
+	}
+
+	/**
+	 * Prefetch Quick Edit attribute terms for the current Products list.
+	 *
+	 * The name column renders hidden inline-edit data for each row. Without this cache,
+	 * rendering products with global attributes can run a separate term query per row.
+	 */
+	private function prefetch_quick_edit_attribute_terms(): void {
+		global $wp_query;
+
+		if ( $this->quick_edit_attribute_terms_prefetched ) {
+			return;
+		}
+
+		$this->quick_edit_attribute_terms_prefetched = true;
+
+		if ( empty( $wp_query->posts ) || ! is_array( $wp_query->posts ) ) {
+			return;
+		}
+
+		$attribute_options = array();
+
+		foreach ( $wp_query->posts as $post ) {
+			if ( ! $post instanceof WP_Post || 'product' !== $post->post_type ) {
+				continue;
+			}
+
+			$product = wc_get_product( $post->ID );
+			if ( ! $product instanceof WC_Product ) {
+				continue;
+			}
+
+			foreach ( $product->get_attributes( 'edit' ) as $attribute ) {
+				if ( ! $attribute->is_taxonomy() ) {
+					continue;
+				}
+
+				$options = wp_parse_id_list( $attribute->get_options() );
+				if ( empty( $options ) ) {
+					continue;
+				}
+
+				$taxonomy                       = $attribute->get_name();
+				$attribute_options[ $taxonomy ] = array_merge(
+					$attribute_options[ $taxonomy ] ?? array(),
+					$options
+				);
+			}
+		}
+
+		$this->cache_quick_edit_attribute_terms( $attribute_options );
+	}
+
+	/**
+	 * Cache Quick Edit attribute terms by taxonomy and term ID.
+	 *
+	 * @param array $attribute_options Product attribute term IDs grouped by taxonomy.
+	 */
+	private function cache_quick_edit_attribute_terms( $attribute_options ): void {
+		$missing_term_ids_by_taxonomy = array();
+		$missing_term_ids             = array();
+
+		foreach ( $attribute_options as $taxonomy => $options ) {
+			$options = wp_parse_id_list( $options );
+			if ( empty( $options ) ) {
+				continue;
+			}
+
+			if ( empty( $this->quick_edit_attribute_terms[ $taxonomy ] ) ) {
+				$this->quick_edit_attribute_terms[ $taxonomy ] = array();
+			}
+
+			foreach ( $options as $term_id ) {
+				if ( array_key_exists( $term_id, $this->quick_edit_attribute_terms[ $taxonomy ] ) ) {
+					continue;
+				}
+
+				$this->quick_edit_attribute_terms[ $taxonomy ][ $term_id ] = null;
+				$missing_term_ids_by_taxonomy[ $taxonomy ][]               = $term_id;
+				$missing_term_ids[]                                        = $term_id;
+			}
+		}
+
+		if ( empty( $missing_term_ids_by_taxonomy ) ) {
+			return;
+		}
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => array_keys( $missing_term_ids_by_taxonomy ),
+				'include'    => array_unique( $missing_term_ids ),
+				'hide_empty' => false,
+			)
+		);
+
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			return;
+		}
+
+		foreach ( $terms as $term ) {
+			$this->quick_edit_attribute_terms[ $term->taxonomy ][ $term->term_id ] = $term;
+		}
 	}
 
 	/**

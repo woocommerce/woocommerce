@@ -157,32 +157,33 @@ class ProductCollectionPage {
 		const placeholderSelector = this.editor.canvas.locator(
 			SELECTORS.collectionPlaceholder
 		);
+		const inserter = placeholderSelector.locator(
+			'.wc-blocks-product-collection__collections-grid, .wc-blocks-product-collection__collections-dropdown'
+		);
 
-		const chooseCollectionFromPlaceholder = async () => {
+		await inserter.waitFor( { state: 'visible' } );
+		await this.dismissBlockEditorCardPopover();
+
+		const inserterClass = await inserter.getAttribute( 'class' );
+		const isDropdown = inserterClass?.includes(
+			'wc-blocks-product-collection__collections-dropdown'
+		);
+
+		if ( ! isDropdown ) {
 			await placeholderSelector
 				.getByRole( 'button', { name: buttonName, exact: true } )
 				.click();
-		};
+			return;
+		}
 
-		const chooseCollectionFromDropdown = async () => {
-			await placeholderSelector
-				.getByRole( 'button', {
-					name: 'Choose collection',
-				} )
-				.click();
-
-			await this.admin.page
-				.locator(
-					'.wc-blocks-product-collection__collections-dropdown-content'
-				)
-				.getByRole( 'button', { name: buttonName, exact: true } )
-				.click();
-		};
-
-		await Promise.any( [
-			chooseCollectionFromPlaceholder(),
-			chooseCollectionFromDropdown(),
-		] );
+		await this.clickChooseCollectionButton( placeholderSelector );
+		await this.clickCollectionDropdownOption(
+			buttonName,
+			[ this.admin.page, this.editor.canvas ],
+			async () => {
+				await this.clickChooseCollectionButton( placeholderSelector );
+			}
+		);
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
@@ -202,18 +203,19 @@ class ProductCollectionPage {
 		const isDropdown = inserterClass?.includes(
 			'wc-blocks-product-collection__collections-dropdown'
 		);
+		await this.dismissBlockEditorCardPopover();
 
 		if ( isDropdown ) {
-			await this.editor.canvas
-				.getByRole( 'button', { name: 'Choose collection' } )
-				.click();
-
-			await this.editor.canvas
-				.locator(
-					'.wc-blocks-product-collection__collections-dropdown-content'
-				)
-				.getByRole( 'button', { name: buttonName, exact: true } )
-				.click();
+			await this.clickChooseCollectionButton( this.editor.canvas );
+			await this.clickCollectionDropdownOption(
+				buttonName,
+				[ this.editor.canvas, this.admin.page ],
+				async () => {
+					await this.clickChooseCollectionButton(
+						this.editor.canvas
+					);
+				}
+			);
 		} else {
 			await this.editor.canvas
 				.locator( SELECTORS.collectionPlaceholder )
@@ -778,6 +780,17 @@ class ProductCollectionPage {
 		return this.page.getByTestId( testId );
 	}
 
+	async dismissBlockEditorCardPopover() {
+		const blockCardPopover = this.page.locator(
+			'.components-popover__fallback-container .block-editor-block-card'
+		);
+
+		await this.page.keyboard.press( 'Escape' );
+		await blockCardPopover
+			.waitFor( { state: 'hidden', timeout: 3000 } )
+			.catch( () => undefined );
+	}
+
 	async getCollectionHeading() {
 		return this.page.getByRole( 'heading' );
 	}
@@ -800,6 +813,64 @@ class ProductCollectionPage {
 			.nth( 0 )
 			.click();
 		await singleProductBlock.getByText( 'Done' ).click();
+	}
+
+	private async clickChooseCollectionButton( container: Locator ) {
+		const chooseCollectionButton = container.getByRole( 'button', {
+			name: 'Choose collection',
+		} );
+
+		await chooseCollectionButton.scrollIntoViewIfNeeded();
+		await chooseCollectionButton
+			.click( { timeout: 5000 } )
+			.catch( async () => {
+				await this.dismissBlockEditorCardPopover();
+				await chooseCollectionButton.click( { force: true } );
+			} );
+	}
+
+	private async clickCollectionDropdownOption(
+		buttonName: string,
+		containers: Array< Page | FrameLocator >,
+		openDropdown: () => Promise< void >
+	) {
+		let lastError: unknown;
+
+		for ( let attempt = 0; attempt < 2; attempt++ ) {
+			if ( attempt > 0 ) {
+				await this.dismissBlockEditorCardPopover();
+				await openDropdown();
+			}
+
+			for ( const container of containers ) {
+				const option = container
+					.locator(
+						'.wc-blocks-product-collection__collections-dropdown-content'
+					)
+					.getByRole( 'button', {
+						name: buttonName,
+						exact: true,
+					} );
+
+				try {
+					await option.waitFor( {
+						state: 'visible',
+						timeout: 3000,
+					} );
+					await option.scrollIntoViewIfNeeded();
+					await option.click( { timeout: 5000 } ).catch( async () => {
+						await option.click( { force: true } );
+					} );
+					return;
+				} catch ( error ) {
+					lastError = error;
+				}
+			}
+		}
+
+		throw lastError instanceof Error
+			? lastError
+			: new Error( `Unable to choose collection "${ buttonName }".` );
 	}
 
 	async refreshLocators( currentUI: 'editor' | 'frontend' ) {

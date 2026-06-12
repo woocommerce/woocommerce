@@ -1,7 +1,10 @@
 /*global wc_enhanced_select_params */
 jQuery( function( $ ) {
+	var taxonomyTermSearchCache = {};
 
-	function getEnhancedSelectFormatString() {
+	function getEnhancedSelectFormatString( options ) {
+		options = options || {};
+
 		return {
 			'language': {
 				errorLoading: function() {
@@ -39,11 +42,63 @@ jQuery( function( $ ) {
 				noResults: function() {
 					return wc_enhanced_select_params.i18n_no_matches;
 				},
-				searching: function() {
+				searching: function( args ) {
+					if ( options.loadingWithoutSearchTerm && ( ! args || ! args.term ) ) {
+						return wc_enhanced_select_params.i18n_loading;
+					}
+
 					return wc_enhanced_select_params.i18n_searching;
 				}
 			}
 		};
+	}
+
+	function getMinimumInputLength( element, default_length ) {
+		var minimum_input_length = $( element ).data( 'minimum_input_length' );
+
+		return minimum_input_length !== null && minimum_input_length !== undefined ? minimum_input_length : default_length;
+	}
+
+	function isDataTrue( element, name ) {
+		var value = $( element ).data( name );
+
+		return value === true || value === 'true';
+	}
+
+	function getTaxonomyTermSearchCacheKey( data ) {
+		data = data || {};
+
+		return JSON.stringify( [
+			data.action || '',
+			data.taxonomy || '',
+			data.limit || '',
+			data.orderby || '',
+			data.order || '',
+			data.term || ''
+		] );
+	}
+
+	function cachedTaxonomyTermSearchTransport( params, success, failure ) {
+		var cache_key = getTaxonomyTermSearchCacheKey( params.data );
+
+		if ( Object.prototype.hasOwnProperty.call( taxonomyTermSearchCache, cache_key ) ) {
+			success( taxonomyTermSearchCache[ cache_key ] );
+
+			return {
+				abort: function() {}
+			};
+		}
+
+		var request = $.ajax( params );
+
+		request.then( function( data ) {
+			taxonomyTermSearchCache[ cache_key ] = data;
+			success( data );
+		} );
+
+		request.fail( failure );
+
+		return request;
 	}
 
 	try {
@@ -307,12 +362,14 @@ jQuery( function( $ ) {
 
 				// Ajax category search boxes
 				$( ':input.wc-taxonomy-term-search' ).filter( ':not(.enhanced)' ).each( function() {
-					var return_format = $( this ).data( 'return_id' ) ? 'id' : 'slug';
+					var return_format                = $( this ).data( 'return_id' ) ? 'id' : 'slug',
+						cache_results                = $( this ).data( 'cache_results' ) ? true : false,
+						loading_without_search_term = isDataTrue( this, 'loading_without_search_term' );
 
 					var select2_args = $.extend( {
 						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder       : $( this ).data( 'placeholder' ),
-						minimumInputLength: $( this ).data( 'minimum_input_length' ) !== null && $( this ).data( 'minimum_input_length' ) !== undefined ? $( this ).data( 'minimum_input_length' ) : '3',
+						minimumInputLength: getMinimumInputLength( this, '3' ),
 						escapeMarkup      : function( m ) {
 							return m;
 						},
@@ -346,17 +403,22 @@ jQuery( function( $ ) {
 							},
 							cache: true
 						}
-					}, getEnhancedSelectFormatString() );
+					}, getEnhancedSelectFormatString( { loadingWithoutSearchTerm: loading_without_search_term } ) );
+
+					if ( cache_results ) {
+						select2_args.ajax.transport = cachedTaxonomyTermSearchTransport;
+					}
 
 					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
 				});
 
 				$( ':input.wc-attribute-search' ).filter( ':not(.enhanced)' ).each( function() {
 					var select2Element = this;
+					var loading_without_search_term = isDataTrue( this, 'loading_without_search_term' );
 					var select2_args = $.extend( {
 						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder       : $( this ).data( 'placeholder' ),
-						minimumInputLength: $( this ).data( 'minimum_input_length' ) !== null && $( this ).data( 'minimum_input_length' ) !== undefined ? $( this ).data( 'minimum_input_length' ) : '3',
+						minimumInputLength: getMinimumInputLength( this, '3' ),
 						escapeMarkup      : function( m ) {
 							return m;
 						},
@@ -389,7 +451,7 @@ jQuery( function( $ ) {
 							},
 							cache: true
 						}
-					}, getEnhancedSelectFormatString() );
+					}, getEnhancedSelectFormatString( { loadingWithoutSearchTerm: loading_without_search_term } ) );
 
 					$( this ).selectWoo( select2_args ).addClass( 'enhanced' );
 				});
