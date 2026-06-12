@@ -94,7 +94,12 @@
 
 <!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"0","left":"0"}}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
 <div class="wp-block-group alignfull" style="padding-right:0;padding-left:0"><!-- wp:paragraph {"align":"left","style":{"typography":{"textTransform":"uppercase"}}} -->
-<p class="has-text-align-left" style="text-transform:uppercase"><?php esc_html_e('© 2025', 'purple');?></p>
+<p class="has-text-align-left" style="text-transform:uppercase"><?php
+printf(
+	esc_html__( '© %s', 'purple' ),
+	esc_html( wp_date( 'Y' ) )
+);
+?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"align":"left"} -->
