@@ -162,4 +162,94 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 		remove_action( 'woocommerce_product_published', $callback );
 		$product->delete( true );
 	}
+
+	/**
+	 * @testdox do_deferred_product_sync should sync each queued product once (even if queued multiple times) and empty the queue.
+	 */
+	public function test_do_deferred_product_sync_syncs_queued_products(): void {
+		global $wc_deferred_product_sync;
+
+		$wc_deferred_product_sync = array();
+		$product_1                = WC_Helper_Product::create_grouped_product();
+		$product_2                = WC_Helper_Product::create_grouped_product();
+
+		$synced_ids = array();
+		$callback   = function ( $product_id ) use ( &$synced_ids ) {
+			$synced_ids[] = $product_id;
+		};
+		add_action( 'woocommerce_update_product', $callback );
+
+		wc_deferred_product_sync( $product_1->get_id() );
+		wc_deferred_product_sync( $product_2->get_id() );
+		wc_deferred_product_sync( $product_1->get_id() );
+
+		WC_Post_Data::do_deferred_product_sync();
+
+		remove_action( 'woocommerce_update_product', $callback );
+
+		$this->assertSame( array( $product_1->get_id(), $product_2->get_id() ), $synced_ids, 'Each queued product should be synced exactly once' );
+		$this->assertEmpty( $wc_deferred_product_sync, 'The queue should be empty after the sync' );
+	}
+
+	/**
+	 * @testdox do_deferred_product_sync should also sync products that get deferred while another product is being synced.
+	 */
+	public function test_do_deferred_product_sync_processes_products_deferred_during_sync(): void {
+		global $wc_deferred_product_sync;
+
+		$wc_deferred_product_sync = array();
+		$product_1                = WC_Helper_Product::create_grouped_product();
+		$product_2                = WC_Helper_Product::create_grouped_product();
+
+		$synced_ids = array();
+		$callback   = function ( $product_id ) use ( &$synced_ids, $product_1, $product_2 ) {
+			$synced_ids[] = $product_id;
+			if ( $product_1->get_id() === $product_id ) {
+				wc_deferred_product_sync( $product_2->get_id() );
+			}
+		};
+		add_action( 'woocommerce_update_product', $callback );
+
+		wc_deferred_product_sync( $product_1->get_id() );
+
+		WC_Post_Data::do_deferred_product_sync();
+
+		remove_action( 'woocommerce_update_product', $callback );
+
+		$this->assertSame( array( $product_1->get_id(), $product_2->get_id() ), $synced_ids, 'Products deferred while syncing another product should be synced too' );
+		$this->assertEmpty( $wc_deferred_product_sync, 'The queue should be empty after the sync' );
+	}
+
+	/**
+	 * @testdox do_deferred_product_sync should terminate, syncing each product at most once, when synced products keep re-deferring each other.
+	 */
+	public function test_do_deferred_product_sync_terminates_on_mutual_re_deferral(): void {
+		global $wc_deferred_product_sync;
+
+		$wc_deferred_product_sync = array();
+		$product_1                = WC_Helper_Product::create_grouped_product();
+		$product_2                = WC_Helper_Product::create_grouped_product();
+
+		// Each product defers the other one when synced, as e.g. translation plugins do.
+		// With the old array_walk-based implementation this caused an infinite loop,
+		// hence the cap on the number of syncs: it makes the test fail instead of hanging.
+		$synced_ids = array();
+		$callback   = function ( $product_id ) use ( &$synced_ids, $product_1, $product_2 ) {
+			$synced_ids[] = $product_id;
+			if ( count( $synced_ids ) > 100 ) {
+				$this->fail( 'do_deferred_product_sync does not terminate when synced products keep re-deferring each other' );
+			}
+			wc_deferred_product_sync( $product_1->get_id() === $product_id ? $product_2->get_id() : $product_1->get_id() );
+		};
+		add_action( 'woocommerce_update_product', $callback );
+
+		wc_deferred_product_sync( $product_1->get_id() );
+
+		WC_Post_Data::do_deferred_product_sync();
+
+		remove_action( 'woocommerce_update_product', $callback );
+
+		$this->assertSame( array( $product_1->get_id(), $product_2->get_id() ), $synced_ids, 'Each product should be synced at most once per request' );
+		$this->assertEmpty( $wc_deferred_product_sync, 'The queue should be empty after the sync' );
+	}
 }

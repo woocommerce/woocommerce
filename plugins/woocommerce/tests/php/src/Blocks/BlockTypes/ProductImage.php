@@ -117,6 +117,41 @@ class ProductImage extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the ProductImage block renders a link by default.
+	 */
+	public function test_product_image_render_includes_product_link_by_default() {
+		$data = $this->create_product_with_image();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringContainsString( '<a href="' . $data['product']->get_permalink() . '"', $markup );
+		$this->assertStringContainsString( 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"', $markup );
+
+		// Clean up.
+		$data['product']->delete( true );
+		wp_delete_attachment( $data['image_id'], true );
+	}
+
+	/**
+	 * Test that the ProductImage block does not render a disabled link when product links are hidden.
+	 */
+	public function test_product_image_render_omits_anchor_when_product_link_is_hidden() {
+		$data = $this->create_product_with_image();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image {"showProductLink":false} /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringContainsString( 'data-testid="product-image"', $markup );
+		$this->assertStringNotContainsString( '<a ', $markup );
+		$this->assertStringNotContainsString( 'href="#"', $markup );
+		$this->assertStringNotContainsString( 'onclick="return false;"', $markup );
+		$this->assertStringNotContainsString( 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"', $markup );
+
+		// Clean up.
+		$data['product']->delete( true );
+		wp_delete_attachment( $data['image_id'], true );
+	}
+
+	/**
 	 * Test that the ProductImage block renders correctly for a variable product with variation images.
 	 * This is the main test case: if product is variable product and has some images attached to the variation
 	 * (but not in the main gallery) and the imageId of variation image is provided via context,
