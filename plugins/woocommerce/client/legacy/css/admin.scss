@@ -3045,11 +3045,100 @@ ul.wc_coupon_list_block {
 
 .woocommerce_page_wc-orders,
 .post-type-shop_order {
-	// Gated behind the `order-detail-redesign` feature flag (body class added by OrderDetailRedesign\Init).
+	// Apply the agreed team-wide 2-column grid sizing standard to the Order edit/new screens.
 	// `:has(#poststuff)` excludes the orders list screen (which doesn't render #poststuff).
-	&.woocommerce-feature-enabled-order-detail-redesign .wrap:has(#poststuff) {
-		max-width: 1200px;
+	// Total width is derived (not hardcoded) from the two column tokens plus the gap token:
+	// surface-width-xl (720) + padding-2xl (24) + surface-width-sm (320) = 1064px.
+	.wrap:has(#poststuff) {
+		// Cap .wrap to the derived grid width and center it on the page. This also
+		// keeps the "Edit order" / "Add order" page-title row aligned with the grid below.
+		max-width: calc(
+			var(--wpds-dimension-surface-width-xl, 720px)
+			+ var(--wpds-dimension-padding-2xl, 24px)
+			+ var(--wpds-dimension-surface-width-sm, 320px)
+		);
 		margin-inline: auto;
+
+		#post-body.columns-2 {
+			display: grid;
+			grid-template-columns:
+				minmax(0, var(--wpds-dimension-surface-width-xl, 720px))
+				var(--wpds-dimension-surface-width-sm, 320px);
+			gap: var(--wpds-dimension-padding-2xl, 24px);
+			float: none;
+			// WP core's edit.css sets `margin-right: 300px` on `#post-body.columns-2`
+			// to reserve space for the side-sortable floating in. Zero it out so the
+			// grid uses the full width of #poststuff.
+			margin: 0;
+		}
+
+		// `#post-body-content` is a small top area that's a sibling of the postbox
+		// containers. Span it across both columns so it doesn't hog column 1 and
+		// push the main metaboxes down to row 2.
+		#post-body-content {
+			grid-column: 1 / -1;
+		}
+
+		#postbox-container-1,
+		#postbox-container-2 {
+			float: none;
+			width: auto;
+			min-width: 0;
+			// WP core's edit.css sets `margin: 0 300px 0 0` on container-2 (and a
+			// negative margin-left on container-1) to reserve space for the old
+			// float-based sidebar. Zero them out so the grid controls width.
+			margin: 0;
+		}
+
+		// WP core's edit.css also pins `#side-sortables` to width: 280px (legacy
+		// float layout). Let it fill its 320px grid cell instead. Targeting
+		// `#post-body.columns-2 #side-sortables` matches WP core's selector specificity
+		// and the extra parent classes from the `.wrap:has(#poststuff)` chain put us over.
+		#post-body.columns-2 #side-sortables {
+			width: auto;
+		}
+
+		// WP puts `#postbox-container-1` (sidebar) before `#postbox-container-2`
+		// (main content) in the DOM, but its float layout visually places main on
+		// the left and sidebar on the right. Re-create that placement explicitly:
+		// main → 720px primary column, sidebar → 320px secondary, both at row 1.
+		// `grid-row: 1` is required because the default placement cursor advances
+		// past row 1 once container-1 lands in column 2, pushing container-2 to row 2.
+		#postbox-container-2 {
+			grid-column: 1;
+			grid-row: 1;
+		}
+
+		#postbox-container-1 {
+			grid-column: 2;
+			grid-row: 1;
+		}
+
+		// Stack to a single column on narrow viewports. Target is wrap < 960px
+		// (--wpds-dimension-surface-width-2xl). At expanded WP admin sidebar (~180px chrome),
+		// that maps to viewport ~1140px.
+		// TODO: switch to `@container (max-width: 960px)` once grunt-contrib-cssmin is
+		// upgraded (current clean-css 4.x strips @container rules).
+		@media (max-width: 1140px) {
+			#post-body.columns-2 {
+				grid-template-columns: 1fr;
+			}
+
+			// Stack with the SIDEBAR on top, primary below — opposite of the design
+			// system "primary above secondary" rule. Reason: the primary "Update" CTA
+			// currently lives in the Order actions metabox in the sidebar; flipping
+			// the stack would hide it under a long page of order content. Revisit
+			// once the CTA moves out of the sidebar (see GH #60962).
+			#postbox-container-1 {
+				grid-column: 1;
+				grid-row: 1;
+			}
+
+			#postbox-container-2 {
+				grid-column: 1;
+				grid-row: 2;
+			}
+		}
 	}
 
 	.tablenav .one-page .displaying-num {
