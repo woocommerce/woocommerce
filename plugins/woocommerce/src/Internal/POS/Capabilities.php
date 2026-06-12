@@ -184,7 +184,11 @@ class Capabilities {
 	}
 
 	/**
-	 * The `pos_*` capability bundle for a given preset.
+	 * Preset metadata: the `pos_*` cap bundle and display label for each preset.
+	 *
+	 * Single source of truth for capabilities_for_preset() and preset_label(), so
+	 * adding or renaming a preset is one edit here (plus the POSPreset constant)
+	 * rather than several parallel switches.
 	 *
 	 *     Capability           Cashier  Manager  Admin
 	 *     pos_process_sales      yes      yes     yes
@@ -197,12 +201,9 @@ class Capabilities {
 	 *     pos_manage_staff       no       no      yes
 	 *     pos_exit               no       no      yes
 	 *
-	 * @param string $preset One of the POSPreset constants.
-	 * @return array<string, true> Map of granted cap => true. Empty for unknown presets.
-	 *
-	 * @since 11.0.0
+	 * @return array<string, array{caps: array<string, true>, label: string}>
 	 */
-	public static function capabilities_for_preset( string $preset ): array {
+	private static function preset_definitions(): array {
 		$cashier_caps = array(
 			self::CAP_PROCESS_SALES => true,
 			self::CAP_VIEW_ORDERS   => true,
@@ -221,16 +222,34 @@ class Capabilities {
 			self::CAP_EXIT_POS      => true,
 		);
 
-		switch ( $preset ) {
-			case POSPreset::CASHIER:
-				return $cashier_caps;
-			case POSPreset::MANAGER:
-				return $manager_caps;
-			case POSPreset::ADMIN:
-				return $admin_caps;
-			default:
-				return array();
-		}
+		return array(
+			POSPreset::CASHIER => array(
+				'caps'  => $cashier_caps,
+				'label' => __( 'POS cashier', 'woocommerce' ),
+			),
+			POSPreset::MANAGER => array(
+				'caps'  => $manager_caps,
+				'label' => __( 'POS manager', 'woocommerce' ),
+			),
+			POSPreset::ADMIN   => array(
+				'caps'  => $admin_caps,
+				'label' => __( 'POS admin', 'woocommerce' ),
+			),
+		);
+	}
+
+	/**
+	 * The `pos_*` capability bundle for a given preset (see preset_definitions()).
+	 *
+	 * @param string $preset One of the POSPreset constants.
+	 * @return array<string, true> Map of granted cap => true. Empty for unknown presets.
+	 *
+	 * @since 11.0.0
+	 */
+	public static function capabilities_for_preset( string $preset ): array {
+		$definitions = self::preset_definitions();
+
+		return isset( $definitions[ $preset ] ) ? $definitions[ $preset ]['caps'] : array();
 	}
 
 	/**
@@ -294,15 +313,8 @@ class Capabilities {
 	 * @since 11.0.0
 	 */
 	public static function preset_label( string $preset ): string {
-		switch ( $preset ) {
-			case POSPreset::CASHIER:
-				return __( 'POS cashier', 'woocommerce' );
-			case POSPreset::MANAGER:
-				return __( 'POS manager', 'woocommerce' );
-			case POSPreset::ADMIN:
-				return __( 'POS admin', 'woocommerce' );
-			default:
-				return '';
-		}
+		$definitions = self::preset_definitions();
+
+		return isset( $definitions[ $preset ] ) ? $definitions[ $preset ]['label'] : '';
 	}
 }
