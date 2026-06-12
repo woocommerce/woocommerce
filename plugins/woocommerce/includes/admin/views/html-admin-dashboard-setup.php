@@ -8,8 +8,14 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+/**
+ * @var array{title:string, content:string, button_label:string, image_url:string, image_alt:string} $task_header Task header data.
+ * @var bool                                                                                         $task_is_in_progress Whether the task is in progress.
+ * @var string                                                                                       $task_in_progress_label Task in-progress label.
+ */
 ?>
-<div class="dashboard-widget-finish-setup" data-current-step="<?php echo esc_attr( $step_number - 1 ); ?>" data-total-steps="<?php echo esc_attr( $tasks_count ); ?>">
+<div class="dashboard-widget-finish-setup" data-current-step="<?php echo esc_attr( (string) ( $step_number - 1 ) ); ?>" data-total-steps="<?php echo esc_attr( (string) $tasks_count ); ?>">
 	<div class="description">
 		<div class="dashboard-widget-finish-setup__content">
 			<div class="dashboard-widget-finish-setup__meta">
