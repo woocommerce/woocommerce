@@ -1921,7 +1921,7 @@ ul.wc_coupon_list_block {
 	}
 
 	p {
-		color: #777;
+		color: $gray-900;
 	}
 
 	p.order_number {
@@ -2005,7 +2005,7 @@ ul.wc_coupon_list_block {
 			small {
 				display: block;
 				margin: 5px 0 0;
-				color: #999;
+				color: $gray-900;
 			}
 		}
 
@@ -2048,7 +2048,7 @@ ul.wc_coupon_list_block {
 		}
 
 		p.none_set {
-			color: #999;
+			color: $gray-900;
 		}
 
 		div.edit_address {
@@ -2291,7 +2291,7 @@ ul.wc_coupon_list_block {
 	}
 
 	h3 small {
-		color: #999;
+		color: $gray-900;
 	}
 
 	.amount {
@@ -2359,7 +2359,7 @@ ul.wc_coupon_list_block {
 				text-align: left;
 				padding: 1em;
 				font-weight: normal;
-				color: #999;
+				color: $gray-900;
 				background: #f8f8f8;
 				-webkit-touch-callout: none;
 				-webkit-user-select: none;
@@ -2470,7 +2470,7 @@ ul.wc_coupon_list_block {
 					display: block;
 					margin-top: 0.5em;
 					font-size: 0.92em !important;
-					color: #888;
+					color: $gray-700;
 				}
 			}
 
@@ -2501,7 +2501,7 @@ ul.wc_coupon_list_block {
 
 				label {
 					white-space: nowrap;
-					color: #999;
+					color: $gray-700;
 					font-size: 0.833em;
 
 					input {
@@ -2588,7 +2588,7 @@ ul.wc_coupon_list_block {
 				.wc-order-item-discount,
 				.wc-order-item-refund-fields {
 					font-size: 0.92em !important;
-					color: #888;
+					color: $gray-700;
 				}
 
 				.wc-order-item-taxes,
@@ -2641,7 +2641,7 @@ ul.wc_coupon_list_block {
 			table.display_meta {
 				margin: 0.5em 0 0;
 				font-size: 0.92em !important;
-				color: #888;
+				color: $gray-700;
 
 				tr {
 					th {
@@ -2870,7 +2870,7 @@ ul.wc_coupon_list_block {
 	}
 
 	h3 small {
-		color: #999;
+		color: $gray-900;
 	}
 }
 
