@@ -42,7 +42,6 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->admin_user );
-		update_option( 'woocommerce_coming_soon', 'yes' );
 		$this->sut = new WC_Admin_Dashboard();
 	}
 
@@ -54,7 +53,6 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_task_list_hidden' );
 		delete_option( 'woocommerce_task_list_hidden_lists' );
 		delete_option( 'woocommerce_task_list_complete' );
-		delete_option( 'woocommerce_coming_soon' );
 		remove_all_filters( 'pre_option_woocommerce_task_list_complete' );
 		remove_all_filters( 'pre_option_woocommerce_task_list_hidden' );
 
@@ -100,15 +98,16 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Widget does not show when neither complete nor hidden.
+	 * @testdox Widget shows when task list is incomplete and store is pre-launch.
 	 */
-	public function test_widget_does_not_show_when_neither_complete_nor_hidden(): void {
+	public function test_widget_shows_when_task_list_is_incomplete_and_store_is_pre_launch(): void {
 		delete_option( 'woocommerce_task_list_completed_lists' );
 		delete_option( 'woocommerce_task_list_hidden_lists' );
+		update_option( 'woocommerce_coming_soon', 'yes' );
 
-		$this->assertFalse(
+		$this->assertTrue(
 			$this->invoke_should_display_widget( $this->sut ),
-			'Widget should not display when task list is neither complete nor hidden'
+			'Widget should display even when the task list is incomplete and the store is pre-launch'
 		);
 	}
 

@@ -72,10 +72,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				return false;
 			}
 
-			$has_permission           = current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'publish_shop_orders' );
-			$task_completed_or_hidden = 'yes' === get_option( 'woocommerce_task_list_complete' ) || 'yes' === get_option( 'woocommerce_task_list_hidden' );
-			$store_launched           = 'yes' !== get_option( 'woocommerce_coming_soon' );
-			return ( $task_completed_or_hidden || $store_launched ) && $has_permission;
+			return current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'publish_shop_orders' );
 		}
 
 		/**
