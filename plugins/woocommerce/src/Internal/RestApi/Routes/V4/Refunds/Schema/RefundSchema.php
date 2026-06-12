@@ -19,6 +19,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderItemSch
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderFeeSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderTaxSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderShippingSchema;
+use WC_Order_Refund;
 use WP_REST_Request;
 
 /**
