@@ -3043,6 +3043,121 @@ ul.wc_coupon_list_block {
 	}
 }
 
+.post-type-shop_coupon {
+	// Apply the agreed team-wide 2-column grid sizing standard to the Coupon edit/new screens.
+	// Sibling retrofit to the Order screen standard (DSGWOO-1375); coupons are a classic-editor
+	// CPT, so the same metabox-grid recipe applies, scoped to the single `.post-type-shop_coupon`
+	// body class (no HPOS equivalent). `:has(#poststuff)` excludes the coupons list screen.
+	// Total width is derived (not hardcoded) from the two column tokens plus the gap token:
+	// surface-width-xl (720) + padding-2xl (24) + surface-width-sm (320) = 1064px.
+	.wrap:has(#poststuff) {
+		// Cap .wrap to the derived grid width and center it on the page. This also
+		// keeps the "Edit coupon" / "Add new coupon" page-title row aligned with the grid below.
+		max-width: calc(
+			var(--wpds-dimension-surface-width-xl, 720px)
+			+ var(--wpds-dimension-padding-2xl, 24px)
+			+ var(--wpds-dimension-surface-width-sm, 320px)
+		);
+		margin-inline: auto;
+
+		#post-body.columns-2 {
+			display: grid;
+			grid-template-columns:
+				minmax(0, var(--wpds-dimension-surface-width-xl, 720px))
+				var(--wpds-dimension-surface-width-sm, 320px);
+			gap: var(--wpds-dimension-padding-2xl, 24px);
+			// Top-align items so the spanned Publish box (below) doesn't stretch and
+			// so an uneven column doesn't open a gap between the stacked primary items.
+			align-items: start;
+			float: none;
+			// WP core's edit.css sets `margin-right: 300px` on `#post-body.columns-2`
+			// to reserve space for the side-sortable floating in. Zero it out so the
+			// grid uses the full width of #poststuff.
+			margin: 0;
+		}
+
+		// `#post-body-content` holds the coupon code field and the description textarea
+		// (rendered via `edit_form_after_title`); it's a sibling of the postbox containers.
+		// Place it at the TOP of the 720px primary column (row 1), with the Coupon data
+		// panel directly below it (row 2). This preserves the default screen's reading
+		// order (code → description → data) and keeps the description at 720px rather than
+		// stranded full-width.
+		// NOTE: this intentionally diverges from the Order screen recipe, which spans an
+		// (effectively empty) `#post-body-content` across both columns. Coupons put real
+		// content there, so spanning would push the Coupon data panel below it look wrong.
+		#post-body-content {
+			grid-column: 1;
+			grid-row: 1;
+		}
+
+		#postbox-container-1,
+		#postbox-container-2 {
+			float: none;
+			width: auto;
+			min-width: 0;
+			// WP core's edit.css sets `margin: 0 300px 0 0` on container-2 (and a
+			// negative margin-left on container-1) to reserve space for the old
+			// float-based sidebar. Zero them out so the grid controls width.
+			margin: 0;
+		}
+
+		// WP core's edit.css also pins `#side-sortables` to width: 280px (legacy
+		// float layout). Let it fill its 320px grid cell instead. Targeting
+		// `#post-body.columns-2 #side-sortables` matches WP core's selector specificity
+		// and the extra parent classes from the `.wrap:has(#poststuff)` chain put us over.
+		#post-body.columns-2 #side-sortables {
+			width: auto;
+		}
+
+		// Main "Coupon data" metabox: 720px primary column, directly below the
+		// code/description strip.
+		#postbox-container-2 {
+			grid-column: 1;
+			grid-row: 2;
+		}
+
+		// Sidebar "Publish" box: 320px secondary column. Span both rows so the Publish
+		// box height doesn't dictate row 1's height and open a gap between the
+		// description (row 1) and the Coupon data panel (row 2) in the primary column.
+		// `align-items: start` (on the grid above) keeps it top-aligned within the span.
+		#postbox-container-1 {
+			grid-column: 2;
+			grid-row: 1 / span 2;
+		}
+
+		// Stack to a single column on narrow viewports. Target is wrap < 960px
+		// (--wpds-dimension-surface-width-2xl). At expanded WP admin sidebar (~180px chrome),
+		// that maps to viewport ~1140px.
+		// TODO: switch to `@container (max-width: 960px)` once grunt-contrib-cssmin is
+		// upgraded (current clean-css 4.x strips @container rules).
+		@media (max-width: 1140px) {
+			#post-body.columns-2 {
+				grid-template-columns: 1fr;
+			}
+
+			// Single column. Stack with the SIDEBAR (Publish) on top, then the
+			// code/description, then the Coupon data panel — opposite of the design
+			// system "primary above secondary" rule. Reason: the primary "Publish"/"Update"
+			// CTA lives in the Publish metabox in the sidebar, so flipping the stack would
+			// hide it under the full coupon-data panel. Mirrors the Order screen decision.
+			#postbox-container-1 {
+				grid-column: 1;
+				grid-row: 1;
+			}
+
+			#post-body-content {
+				grid-column: 1;
+				grid-row: 2;
+			}
+
+			#postbox-container-2 {
+				grid-column: 1;
+				grid-row: 3;
+			}
+		}
+	}
+}
+
 .woocommerce_page_wc-orders,
 .post-type-shop_order {
 	// Gated behind the `order-detail-redesign` feature flag (body class added by OrderDetailRedesign\Init).
