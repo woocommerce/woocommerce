@@ -15,7 +15,7 @@ jQuery( function ( $ ) {
 			editorWrapper.prepend(
 				'<h2 class="postbox-header"><label>' +
 					woocommerce_admin_product_editor.i18n_description +
-				'</label></h2>'
+					'</label></h2>'
 			);
 		}
 
