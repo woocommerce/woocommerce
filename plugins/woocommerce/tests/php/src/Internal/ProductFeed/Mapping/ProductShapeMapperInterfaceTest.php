@@ -43,12 +43,12 @@ class ProductShapeMapperInterfaceTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The push-feed ProductMapperInterface should be a subtype of ProductShapeMapperInterface, so existing feed mappers are reusable by pull/query consumers.
+	 * @testdox The deprecated push-feed ProductMapperInterface should remain a subtype of ProductShapeMapperInterface, so existing feed mappers keep working during the deprecation window.
 	 */
 	public function test_feed_product_mapper_interface_is_a_product_shape_mapper(): void {
 		$this->assertTrue(
 			is_subclass_of( ProductMapperInterface::class, ProductShapeMapperInterface::class ),
-			'ProductMapperInterface should extend ProductShapeMapperInterface'
+			'The deprecated ProductMapperInterface should extend ProductShapeMapperInterface'
 		);
 	}
 

@@ -77,8 +77,9 @@ interface IntegrationInterface {
 	/**
 	 * Get the product mapper for the provider.
 	 *
-	 * Implementations may narrow the return type to ProductMapperInterface
-	 * (or a concrete mapper) thanks to return type covariance.
+	 * Implementations may narrow the return type to a concrete mapper class
+	 * (or, during its deprecation window, the deprecated ProductMapperInterface)
+	 * thanks to return type covariance.
 	 *
 	 * @since 11.0.0 Return type widened from ProductMapperInterface to ProductShapeMapperInterface.
 	 * @return ProductShapeMapperInterface The product mapper.

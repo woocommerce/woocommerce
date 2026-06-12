@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Extract a delivery-agnostic ProductShapeMapperInterface from the ProductFeed framework so pull/query catalog integrations can reuse product-shape mapping without depending on feed file delivery.
+Extract a delivery-agnostic ProductShapeMapperInterface from the ProductFeed framework so pull/query catalog integrations can reuse product-shape mapping without depending on feed file delivery. The push-feed-specific ProductMapperInterface is deprecated in its favor and keeps working during the transition window.

@@ -18,8 +18,9 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Mapping;
  * by pull/live-query integrations alike, without taking a dependency on file or
  * CSV delivery.
  *
- * Push-feed integrations should implement the ProductMapperInterface alias in the
- * Feed namespace, which extends this interface.
+ * This interface supersedes the Feed namespace's ProductMapperInterface, which
+ * extends it and is deprecated: all integrations, push-feed ones included, should
+ * implement this interface directly.
  *
  * @since 11.0.0
  */

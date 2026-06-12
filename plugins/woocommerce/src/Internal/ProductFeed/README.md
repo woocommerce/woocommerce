@@ -15,7 +15,7 @@ ProductFeed/
 ├── Mapping/
 │   └── ProductShapeMapperInterface.php  # Delivery-agnostic mapping contract
 ├── Feed/
-│   ├── ProductMapperInterface.php   # Push-feed alias of the mapping contract
+│   ├── ProductMapperInterface.php   # Deprecated alias of the mapping contract
 │   ├── FeedInterface.php            # Feed assembly (start / add_entry / end)
 │   ├── FeedValidatorInterface.php   # Per-entry validation for feeds
 │   ├── ProductWalker.php            # Batched iteration of the catalog into a feed
@@ -51,7 +51,7 @@ class MyCatalogMapper implements ProductShapeMapperInterface {
 The interface carries no delivery semantics. The returned array can be a feed row, a REST payload, a live query result, or anything else. This makes a mapper implementation reusable across delivery models:
 
 - **Pull/live-query consumers** (REST controllers that query products per request) type against `ProductShapeMapperInterface` directly and call `map_product()` on each result of their own query. They never touch `FeedInterface`, validators, or files.
-- **Push-feed integrations** implement `Feed\ProductMapperInterface`, which extends `ProductShapeMapperInterface` without adding methods. It exists as the push-feed-flavored name of the same contract, and is what `IntegrationInterface` consumers have historically implemented.
+- **Push-feed integrations** also implement `ProductShapeMapperInterface`; the framework's walker and feed machinery consume the mapper through this contract. The older `Feed\ProductMapperInterface` (which extends `ProductShapeMapperInterface` without adding methods) is deprecated: existing implementations keep working during the transition window, but new code should implement `ProductShapeMapperInterface` directly.
 
 ## Push-feed integrations
 
@@ -114,6 +114,6 @@ The framework currently models two consumption patterns: push feeds (file assemb
 
 ## Backwards compatibility notes
 
-- `Feed\ProductMapperInterface` extends `Mapping\ProductShapeMapperInterface` without redeclaring methods. Existing implementations keep working unchanged and automatically satisfy the new interface.
+- `Feed\ProductMapperInterface` is deprecated, not removed: it extends `Mapping\ProductShapeMapperInterface` without redeclaring methods, so existing implementations keep working unchanged and automatically satisfy the new interface. They should migrate to implementing `ProductShapeMapperInterface` directly before the deprecated interface is removed in a future release.
 - `IntegrationInterface::get_product_mapper()` declares `ProductShapeMapperInterface` as its return type. Implementations may keep narrowing it to `ProductMapperInterface` or a concrete mapper class (return type covariance).
 - These classes live under `Internal` and are not a public API; interfaces may evolve between minor versions.
