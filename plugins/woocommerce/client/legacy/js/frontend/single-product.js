@@ -468,14 +468,7 @@ jQuery( function( $ ) {
 					this.openPhotoswipe( e );
 				}
 			} );
-			this.$target.on( 'click', '.woocommerce-product-gallery__image a', function( e ) {
-				e.preventDefault();
-			});
-
-			// If flexslider is disabled, gallery images also need to trigger photoswipe on click.
-			if ( ! this.flexslider_enabled ) {
-				this.$target.on( 'click', '.woocommerce-product-gallery__image a', this.openPhotoswipe );
-			}
+			this.$target.on( 'click', '.woocommerce-product-gallery__image a', this.openPhotoswipe );
 		} else {
 			this.$target.on( 'click', '.woocommerce-product-gallery__image a', this.openPhotoswipe );
 		}
@@ -613,8 +606,10 @@ jQuery( function( $ ) {
 			items         = this.getGalleryItems(),
 			eventTarget   = $( e.target ),
 			currentTarget = e.currentTarget,
+			flexslider    = this.flexslider_enabled ? this.$target.data( 'flexslider' ) : false,
 			self          = this,
-			clicked;
+			clicked,
+			index;
 
 		if ( 0 < eventTarget.closest( '.woocommerce-product-gallery__trigger' ).length ) {
 			clicked = this.$target.find( '.flex-active-slide' );
@@ -622,8 +617,14 @@ jQuery( function( $ ) {
 			clicked = eventTarget.closest( '.woocommerce-product-gallery__image' );
 		}
 
+		index = $( clicked ).index();
+
+		if ( flexslider && 'number' === typeof flexslider.currentSlide ) {
+			index = flexslider.currentSlide;
+		}
+
 		var options = $.extend( {
-			index: $( clicked ).index(),
+			index: index,
 			addCaptionHTMLFn: function( item, captionEl ) {
 				if ( ! item.title ) {
 					captionEl.children[0].textContent = '';
