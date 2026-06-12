@@ -1,7 +1,5 @@
 export { SettingsUIErrorBoundary, SettingsUIPage } from './settings-ui-page';
 export { NativeSettingsField } from './native-fields';
-export { NumberSpinControl } from './number-spin-control';
-export type { NumberSpinControlProps } from './number-spin-control';
 export { HiddenInputs, getHiddenInputs } from './hidden-inputs';
 export {
 	registerSettingsExtension,
