@@ -646,8 +646,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		update_option( 'woocommerce_tax_based_on', 'base' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		
-		WC_Tax::_insert_tax_rate( array(
-			'tax_rate' => '20.0000',
+		$tax_rate_id = WC_Tax::_insert_tax_rate( array(
+			'tax_rate'      => '20.0000',
 			'tax_rate_name' => 'VAT',
 		) );
 
@@ -672,7 +672,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		// The UI calculates the line items to 179.26 (1p too high)
 		$line_item_qtys = array( $item_id => 10 );
 		$line_item_totals = array( $item_id => 149.38 );
-		$line_item_tax_totals = array( $item_id => array( 1 => 29.88 ) ); // 179.26 total
+		$line_item_tax_totals = array( $item_id => array( $tax_rate_id => 29.88 ) ); // 179.26 total
 
 		$_POST['order_id']             = $order->get_id();
 		$_POST['refund_amount']        = 179.26; // 1p higher than order total

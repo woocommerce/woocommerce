@@ -2405,11 +2405,17 @@ class WC_AJAX {
 			if ( $discrepancy > 0 && $discrepancy <= 0.05 ) {
 				$refund_amount = $max_refund;
 
-				// Shave the discrepancy off the first refunded line item's total 
+				// Shave the discrepancy off the refunded line items' totals 
 				// so wc_create_refund() balances the ledger exactly.
+				$remaining_discrepancy = $discrepancy;
 				foreach ( $line_item_totals as $item_id => $total ) {
-					if ( (float) $total > 0 ) {
-						$line_item_totals[ $item_id ] = wc_format_decimal( (float) $total - $discrepancy );
+					$float_total = (float) $total;
+					if ( $float_total > 0 && $remaining_discrepancy > 0 ) {
+						$shave_amount                 = min( $float_total, $remaining_discrepancy );
+						$line_item_totals[ $item_id ] = wc_format_decimal( $float_total - $shave_amount );
+						$remaining_discrepancy       -= $shave_amount;
+					}
+					if ( $remaining_discrepancy <= 0 ) {
 						break;
 					}
 				}
