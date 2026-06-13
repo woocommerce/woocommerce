@@ -676,10 +676,11 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		$_POST['order_id']             = $order->get_id();
 		$_POST['refund_amount']        = 179.26; // 1p higher than order total
+		$_POST['refunded_amount']      = 0;      // Bypass the strict type string vs int trap
 		$_POST['line_item_qtys']       = wp_json_encode( $line_item_qtys );
 		$_POST['line_item_totals']     = wp_json_encode( $line_item_totals );
 		$_POST['line_item_tax_totals'] = wp_json_encode( $line_item_tax_totals );
-		$_POST['security']             = wp_create_nonce( 'refund' );
+		$_POST['security']             = wp_create_nonce( 'order-item' );
 
 		// 5. Execute the AJAX request
 		$response = $this->do_ajax( 'woocommerce_refund_line_items' );
