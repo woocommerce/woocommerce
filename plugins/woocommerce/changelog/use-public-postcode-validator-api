@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Use the public postcode-validator API instead of reaching into the package's internal CJS regex map.
