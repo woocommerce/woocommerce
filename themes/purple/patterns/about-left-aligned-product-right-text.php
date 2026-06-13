@@ -1,8 +1,10 @@
 <?php
 /**
  * Title: Left-aligned product, text on the right
- * Slug: purple/left-aligned-product-text-on-the-right
- * Categories: About, Media, Text
+ * Slug: purple/left-aligned-product-right-text
+ * Categories: text, about, media
+ * Keywords: about, text, intro
+ * Description: A section with a product image and a large sized paragraph.
  */
 ?>
 <!-- wp:group {"metadata":{"categories":["text","about","media"],"name":"Left-aligned product, text on the right","description":"A section with a product image and a large sized paragraph."},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"},"blockGap":"0"},"dimensions":{"minHeight":""}},"layout":{"type":"constrained","justifyContent":"center"}} -->
