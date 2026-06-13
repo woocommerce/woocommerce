@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
@@ -149,6 +150,68 @@ describe( 'SettingsPaymentsCod', () => {
 			expect(
 				screen.getByRole( 'button', { name: 'Save changes' } )
 			).toBeDisabled();
+		} );
+	} );
+
+	it( 'supports keyboard navigation through the form fields', () => {
+		render( <SettingsPaymentsCod /> );
+
+		// Make a change first so the Save button is enabled (and tabbable).
+		fireEvent.change( screen.getByLabelText( 'Title' ), {
+			target: { value: 'Edited title' },
+		} );
+
+		userEvent.tab();
+		expect(
+			screen.getByLabelText( 'Enable cash on delivery payments' )
+		).toHaveFocus();
+		userEvent.tab();
+		expect( screen.getByLabelText( 'Title' ) ).toHaveFocus();
+		userEvent.tab();
+		expect( screen.getByLabelText( 'Description' ) ).toHaveFocus();
+		userEvent.tab();
+		expect( screen.getByLabelText( 'Instructions' ) ).toHaveFocus();
+		// The shipping methods tree select and the virtual orders checkbox
+		// sit between Instructions and Save; tab until Save receives focus.
+		const saveButton = screen.getByRole( 'button', {
+			name: 'Save changes',
+		} );
+		for (
+			let i = 0;
+			i < 6 && saveButton.ownerDocument.activeElement !== saveButton;
+			i++
+		) {
+			userEvent.tab();
+		}
+		expect( saveButton ).toHaveFocus();
+	} );
+
+	it( 'shows an error notice when saving fails', async () => {
+		const createErrorNotice = jest.fn();
+		updatePaymentGateway.mockRejectedValueOnce(
+			new Error( 'save failed' )
+		);
+		( useDispatch as jest.Mock ).mockReturnValue( {
+			createSuccessNotice: jest.fn(),
+			createErrorNotice,
+			updatePaymentGateway,
+			invalidateResolution: jest.fn(),
+			invalidateResolutionForStoreSelector: jest.fn(),
+		} );
+
+		render( <SettingsPaymentsCod /> );
+
+		fireEvent.change( screen.getByLabelText( 'Title' ), {
+			target: { value: 'Edited title' },
+		} );
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Save changes' } )
+		);
+
+		await waitFor( () => {
+			expect( createErrorNotice ).toHaveBeenCalledWith(
+				'Failed to update settings'
+			);
 		} );
 	} );
 } );
