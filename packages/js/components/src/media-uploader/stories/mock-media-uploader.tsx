@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 import { Modal } from '@wordpress/components';
-import { useState } from '@wordpress/element';
 
 export const MockMediaUpload = ( { onSelect, render } ) => {
 	const [ isOpen, setOpen ] = useState( false );
