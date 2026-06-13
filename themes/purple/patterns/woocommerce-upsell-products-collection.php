@@ -31,10 +31,6 @@
 <!-- /wp:group -->
 <!-- /wp:woocommerce/product-template --></div>
 <!-- /wp:group --></div>
-<!-- /wp:woocommerce/product-collection -->
-
-<!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignwide"></div>
-<!-- /wp:group --></div>
+<!-- /wp:woocommerce/product-collection --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
