@@ -97,3 +97,19 @@ if ( ! function_exists( 'purple_styles' ) ) :
 endif;
 
 add_action( 'wp_enqueue_scripts', 'purple_styles' );
+
+if ( ! function_exists( 'purple_remove_upsells' ) ) :
+	/**
+	 * Remove upsells from product description.
+	 *
+	 * @since purple 1.0
+	 *
+	 * @return void
+	 */
+	function purple_remove_upsells() {
+		remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_upsell_display', 15 );
+	}
+
+endif;
+
+add_action( 'init', 'purple_remove_upsells' );
