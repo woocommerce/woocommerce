@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\CustomerEmailVerification;
 
+use Automattic\WooCommerce\Internal\CustomerEmailVerification\Emails\CustomerVerifyEmail;
+
 /**
  * Boot class for the customer email verification subsystem.
  *
@@ -29,10 +31,25 @@ class CustomerEmailVerification {
 	 * @since 11.0.0
 	 */
 	public function init_hooks(): void {
+		add_filter( 'woocommerce_email_classes', array( $this, 'register_email_classes' ) );
+
 		$container = wc_get_container();
 		$container->get( VerificationController::class );
 		$container->get( LoginGate::class );
 		$container->get( OrderLinker::class );
 		$container->get( AccountCreationIntegration::class );
+	}
+
+	/**
+	 * Register the customer email verification email with WooCommerce.
+	 *
+	 * @internal
+	 *
+	 * @param array $emails Registered email classes.
+	 * @return array
+	 */
+	public function register_email_classes( array $emails ): array {
+		$emails['WC_Email_Customer_Verify_Email'] = new CustomerVerifyEmail();
+		return $emails;
 	}
 }

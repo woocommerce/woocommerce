@@ -1,33 +1,34 @@
 <?php
 declare( strict_types = 1 );
 
+namespace Automattic\WooCommerce\Tests\Internal\CustomerEmailVerification\Emails;
+
+use Automattic\WooCommerce\Internal\CustomerEmailVerification\Emails\CustomerVerifyEmail;
+use WC_Unit_Test_Case;
+
 /**
- * WC_Email_Customer_Verify_Email test.
+ * Tests for CustomerVerifyEmail.
  *
- * @covers WC_Email_Customer_Verify_Email
+ * @covers \Automattic\WooCommerce\Internal\CustomerEmailVerification\Emails\CustomerVerifyEmail
  */
-class WC_Email_Customer_Verify_Email_Test extends WC_Unit_Test_Case {
+class CustomerVerifyEmailTest extends WC_Unit_Test_Case {
 
 	/**
 	 * The System Under Test.
 	 *
-	 * @var WC_Email_Customer_Verify_Email
+	 * @var CustomerVerifyEmail
 	 */
 	private $sut;
 
 	/**
-	 * Load email classes and initialise the mailer before each test.
+	 * Initialise the mailer (loads the WC_Email base class) before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$bootstrap = WC_Unit_Tests_Bootstrap::instance();
-		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
-		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-verify-email.php';
-
 		WC()->mailer()->init();
 
-		$this->sut = new WC_Email_Customer_Verify_Email();
+		$this->sut = new CustomerVerifyEmail();
 	}
 
 	/**
@@ -65,6 +66,7 @@ class WC_Email_Customer_Verify_Email_Test extends WC_Unit_Test_Case {
 		$emails = WC()->mailer()->get_emails();
 
 		$this->assertArrayHasKey( 'WC_Email_Customer_Verify_Email', $emails );
+		$this->assertInstanceOf( CustomerVerifyEmail::class, $emails['WC_Email_Customer_Verify_Email'] );
 	}
 
 	/**

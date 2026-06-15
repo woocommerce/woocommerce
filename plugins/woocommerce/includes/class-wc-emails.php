@@ -296,7 +296,6 @@ class WC_Emails {
 			'WC_Email_Customer_Note'                 => __DIR__ . '/emails/class-wc-email-customer-note.php',
 			'WC_Email_Customer_Reset_Password'       => __DIR__ . '/emails/class-wc-email-customer-reset-password.php',
 			'WC_Email_Customer_New_Account'          => __DIR__ . '/emails/class-wc-email-customer-new-account.php',
-			'WC_Email_Customer_Verify_Email'         => __DIR__ . '/emails/class-wc-email-customer-verify-email.php',
 			'WC_Email_Admin_Payment_Gateway_Enabled' => __DIR__ . '/emails/class-wc-email-admin-payment-gateway-enabled.php',
 			'WC_Email_Customer_POS_Completed_Order'  => __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php',
 			'WC_Email_Customer_POS_Refunded_Order'   => __DIR__ . '/emails/class-wc-email-customer-pos-refunded-order.php',
@@ -670,14 +669,14 @@ class WC_Emails {
 
 				foreach ( $fields as $field ) {
 					if ( isset( $field['label'], $field['value'] ) && $field['value'] ) {
-						echo wp_kses_post( $field['label'] . ': ' . $field['value'] ) . "\n"; // phpcs:ignore Squiz.Commenting.PostStatementComment.Found
+						echo wp_kses_post( $field['label'] . ': ' . $field['value'] ) . "\n"; // WPCS: XSS ok.
 					}
 				}
 			} else {
 
 				foreach ( $fields as $field ) {
 					if ( isset( $field['label'], $field['value'] ) && $field['value'] ) {
-						echo '<p><strong>' . wp_kses_post( $field['label'] ) . ':</strong> ' . wp_kses_post( $field['value'] ) . '</p>'; // phpcs:ignore Squiz.Commenting.PostStatementComment.Found
+						echo '<p><strong>' . wp_kses_post( $field['label'] ) . ':</strong> ' . wp_kses_post( $field['value'] ) . '</p>'; // WPCS: XSS ok.
 					}
 				}
 			}
@@ -1035,7 +1034,7 @@ class WC_Emails {
 		/* translators: 1: product name 2: items in stock */
 			__( '%1$s is low in stock. There are %2$d left.', 'woocommerce' ),
 			html_entity_decode( wp_strip_all_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
-			html_entity_decode( wp_strip_all_tags( $product->get_stock_quantity() ), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 )
+			html_entity_decode( wp_strip_all_tags( $product->get_stock_quantity() ) )
 		);
 
 		$this->add_email_sender_filters();
