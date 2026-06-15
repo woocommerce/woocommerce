@@ -1,0 +1,83 @@
+{
+	"name": "@woocommerce/jest-wordpress-version-compat",
+	"version": "0.1.0",
+	"description": "Jest configuration helper for testing against WordPress package versions.",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^24.15.0"
+	},
+	"keywords": [
+		"wordpress",
+		"dependencies",
+		"compatibility",
+		"testing",
+		"jest"
+	],
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/jest-wordpress-version-compat/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git",
+		"directory": "packages/js/jest-wordpress-version-compat"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"main": "src/index.js",
+	"exports": {
+		".": "./src/index.js",
+		"./cache": "./src/cache.js",
+		"./jest": "./src/jest.js",
+		"./metadata": "./src/metadata.js"
+	},
+	"files": [
+		"src",
+		"README.md"
+	],
+	"scripts": {
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint src",
+		"test:js": "jest --config ./jest.config.json --passWithNoTests",
+		"update:php": "XDEBUG_MODE=off composer update --quiet"
+	},
+	"devDependencies": {
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"eslint": "^8.55.0",
+		"jest": "29.5.x",
+		"jest-cli": "29.5.x"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix",
+			"pnpm test:js"
+		]
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.js"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.json",
+						"src/**/*.js"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
+		}
+	}
+}

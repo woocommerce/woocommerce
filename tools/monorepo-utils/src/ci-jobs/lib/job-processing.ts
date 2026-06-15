@@ -12,6 +12,11 @@ import { ProjectFileChanges } from './file-changes';
 import { ProjectNode } from './project-graph';
 import { TestEnvVars, parseTestEnvConfig } from './test-environment';
 
+const DEFAULT_WORDPRESS_VERSION_COMPATIBILITY = {
+	wpVersion: 'latest',
+	gutenberg: true,
+};
+
 /**
  * A linting job.
  */
@@ -116,6 +121,40 @@ export function getShardedJobs(
 	}
 
 	return createdJobs;
+}
+
+function shouldCreateWordPressVersionCompatJobs(
+	jobConfig: TestJobConfig
+): boolean {
+	return jobConfig.testType === 'unit' && jobConfig.command === 'test:js';
+}
+
+function getWordPressVersionCompatJobs( job: TestJob ): TestJob[] {
+	const jobs = [ job ];
+
+	if ( DEFAULT_WORDPRESS_VERSION_COMPATIBILITY.wpVersion ) {
+		const jobCopy = JSON.parse( JSON.stringify( job ) );
+		jobCopy.name = `${ job.name } [WP packages ${ DEFAULT_WORDPRESS_VERSION_COMPATIBILITY.wpVersion }]`;
+		jobCopy.testEnv.envVars = {
+			...job.testEnv.envVars,
+			WP_VERSION: DEFAULT_WORDPRESS_VERSION_COMPATIBILITY.wpVersion,
+		};
+
+		jobs.push( jobCopy );
+	}
+
+	if ( DEFAULT_WORDPRESS_VERSION_COMPATIBILITY.gutenberg ) {
+		const jobCopy = JSON.parse( JSON.stringify( job ) );
+		jobCopy.name = `${ job.name } [Gutenberg packages]`;
+		jobCopy.testEnv.envVars = {
+			...job.testEnv.envVars,
+			WP_VERSION: 'gutenberg',
+		};
+
+		jobs.push( jobCopy );
+	}
+
+	return jobs;
 }
 
 /**
@@ -388,7 +427,13 @@ async function createJobsForProject(
 
 				jobConfig.jobCreated = true;
 
-				newJobs.test.push( ...getShardedJobs( created, jobConfig ) );
+				const shardedJobs = getShardedJobs( created, jobConfig );
+
+				newJobs.test.push(
+					...( shouldCreateWordPressVersionCompatJobs( jobConfig )
+						? shardedJobs.flatMap( getWordPressVersionCompatJobs )
+						: shardedJobs )
+				);
 				break;
 			}
 		}

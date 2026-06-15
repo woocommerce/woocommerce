@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add jest-wordpress-version-compat package for testing against WordPress package versions.

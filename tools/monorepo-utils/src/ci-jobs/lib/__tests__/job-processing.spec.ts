@@ -346,6 +346,68 @@ describe( 'Job Processing', () => {
 			} );
 		} );
 
+		it( 'should create WordPress package compatibility jobs for JavaScript unit tests', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType: 'unit',
+								shardingArguments: [],
+								events: [],
+								name: 'JavaScript',
+								changes: [ /test.js$/ ],
+								command: 'test:js',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 3 );
+			expect( jobs.test ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						name: 'JavaScript',
+						command: 'test:js',
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+					} ),
+					expect.objectContaining( {
+						name: 'JavaScript [WP packages latest]',
+						command: 'test:js',
+						testEnv: {
+							shouldCreate: false,
+							envVars: {
+								WP_VERSION: 'latest',
+							},
+						},
+					} ),
+					expect.objectContaining( {
+						name: 'JavaScript [Gutenberg packages]',
+						command: 'test:js',
+						testEnv: {
+							shouldCreate: false,
+							envVars: {
+								WP_VERSION: 'gutenberg',
+							},
+						},
+					} ),
+				] )
+			);
+		} );
+
 		it( 'should replace vars in test command', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(

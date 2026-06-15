@@ -39,14 +39,16 @@ const mapWpModules = [
 const wpModulesMapper = mapWpModules.reduce( ( acc, module ) => {
 	try {
 		// Excluding mappings for imports with suffixes like /build/index.js so that we can import the build/index.js file directly.
-		acc[ `^${ module }$` ] = require.resolve( module, { paths: [ process.cwd() ] } );
+		acc[ `^${ module }$` ] = require.resolve( module, {
+			paths: [ process.cwd() ],
+		} );
 	} catch ( error ) {
 		// If the module is not found, no need to add it to the mapper.
 	}
 	return acc;
 }, {} );
 
-module.exports = {
+const config = {
 	moduleNameMapper: {
 		tinymce: path.resolve( __dirname, 'src/mocks/tinymce' ),
 		'@woocommerce/settings': path.resolve(
@@ -82,10 +84,7 @@ module.exports = {
 		),
 		'\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
 			path.resolve( __dirname, 'src/mocks/static' ),
-		'\\.(scss|css)$': path.resolve(
-			__dirname,
-			'src/mocks/style-mock.js'
-		),
+		'\\.(scss|css)$': path.resolve( __dirname, 'src/mocks/style-mock.js' ),
 		// Force some modules to resolve with the CJS entry point, because Jest does not support package.json.exports.
 		'lib0/webcrypto': require.resolve( 'lib0/webcrypto' ), // use the CJS entry point so that it uses the node:crypto API as jsdom doesn't have a crypto API
 		uuid: require.resolve( 'uuid' ),
@@ -147,3 +146,27 @@ module.exports = {
 		'../../../node_modules/.cache/jest'
 	),
 };
+
+if ( process.env.WP_VERSION ) {
+	let withWordPressDependencyCompat;
+
+	try {
+		withWordPressDependencyCompat =
+			require( '@woocommerce/jest-wordpress-version-compat' ).withWordPressDependencyCompat;
+	} catch {
+		withWordPressDependencyCompat =
+			require( '../jest-wordpress-version-compat' ).withWordPressDependencyCompat;
+	}
+
+	module.exports = withWordPressDependencyCompat( config, {
+		cwd: process.cwd(),
+		wpVersion: process.env.WP_VERSION,
+	} );
+} else {
+	// eslint-disable-next-line no-console
+	console.warn(
+		'WP_VERSION is not set. This test run is using the installed @wordpress packages and may not rely on a validated WordPress package environment. Set WP_VERSION=latest, WP_VERSION=latest-1, or WP_VERSION=gutenberg to run WordPress package compatibility tests.'
+	);
+
+	module.exports = config;
+}
