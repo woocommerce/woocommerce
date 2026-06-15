@@ -12,6 +12,10 @@ Design + staging: `~/Work/a8c/ai-prompts/goals/woopayments-merge/`
 > WPCOM/Transact env, plus the **Stripe CLI** for raw account/event data. Never the
 > remote WPCOM sandbox.
 
+> **Start here for running the merge:** [`HARNESS.md`](HARNESS.md) — the implementor runbook
+> (env, gates, the one-command loop `verify.sh`, shadow-mode/cross-store activation, decision
+> rules, how to extend). This README is the per-tool reference.
+
 ---
 
 ## 1. The runtime arbiter (A0 keystone) — built
@@ -103,19 +107,21 @@ The harness is the **delta** on top of the already-wired env + existing test sui
 
 | Piece | Status | Notes |
 |---|---|---|
-| Manifest drift check | **built** (§2) | drift gate; PASS + fail-closed proven |
+| **Orchestrator** | **built** | `verify.sh` — one entry point; runs every gate, per-gate verdict + aggregate exit; self-check (A0) + cross-store (A1). 5/5 PASS on the unmodified plugin |
+| Manifest drift check | **built** (§2) | `bc-drift-gate.sh`; 6 categories incl. `tracks`; PASS + fail-closed proven |
 | Bucket-E surface dump | **built** | `dump-bucket-e-surface.{php,sh}` — per-order status/meta/notes/refunds; deterministic |
-| Parity differ | **built** | `parity-diff.sh` — self-check PASS on unmodified plugin (the A0 trust gate); fail-closed proven; env-noise excluded at data level |
-| Perf baseline + check gate | **built** | `perf-baseline.{php,sh}` + `perf-baseline.json` — §5.3 surfaces, query-count RULE-1 gate; capture + check PASS on reference |
-| Financial reconciliation | **built; e2e proven** | `financial-reconcile.sh` — reconciled a real £48 refund (WC 4800 === Stripe 4800 on the connected account); preflight fail-closed proven |
-| Tracks parity | **spec'd; runtime piece pending** | static name-level drift is live (the `tracks` drift-gate category, §2). The *prop-level* runtime check — capture `{name, props}` per surface on reference vs native, normalize out volatile values + the auto-envelope, assert zero diff — goes live at A1 shadow (no native emitters to diff against yet). Enforces `bc-manifest.md` §0.3/§3.6 |
+| Parity differ | **built** | `parity-diff.sh` — self-check PASS on unmodified plugin; fail-closed proven; env-noise excluded at data level |
+| Perf baseline + check gate | **built** | `perf-baseline.{php,sh}` + `perf-baseline.json` — §5.3 surfaces, query-count RULE-1 gate |
+| Financial reconciliation | **built; e2e proven** | `financial-reconcile.sh` — reconciled a real £48 refund (WC 4800 === Stripe 4800 on the connected account); fail-closed |
+| **Flow drivers** | **built** | `flow-drive.sh` — charge/refund/dispute/payout via Test Lab → structured order ids the gates consume |
+| **Tracks parity** | **built** | static: the `tracks` drift category. runtime: `tracks-capture.php` (server) + `tracks-normalize.py` + `tracks-parity.sh` (validated: PASS on masked volatile values; FAIL on type *or* enum-value drift) + the client spy in `HARNESS.md`. Enforces `bc-manifest.md` §0.3/§3.6 |
 
 The A0 harness gate — "reproduces the status quo on the *unmodified* plugin before any
-native code exists" — **is met**: the drift gate (incl. `tracks`), parity differ (zero self-diff),
-and perf baseline all agree with reality on the unmodified plugin; financial reconciliation is
-proven e2e on a real refund. The cross-store parity differs (Bucket-E **and** Tracks props) become
-load-bearing at **A1 shadow mode** (there is no native output to diff against until then); at A0
-they are validated in self-check mode and the static Tracks drift gate is live.
+native code exists" — **is met**: `verify.sh --self-check` is 5/5 green on the unmodified plugin
+(drift incl. `tracks`, flow-drive, Bucket-E parity, perf, financial reconciliation on a real refund).
+The **cross-store** parity differs (Bucket-E **and** Tracks props) and the client-side Tracks spy
+become load-bearing at **A1 shadow mode** (no native output to diff against until then); at A0 they
+are validated in self-check. See [`HARNESS.md`](HARNESS.md) for the full operating loop.
 
 ### Listeners (operator-run)
 
