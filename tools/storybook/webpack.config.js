@@ -8,6 +8,9 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
  * External dependencies
  */
 const wcAdminWebpackConfig = require( '../../plugins/woocommerce/client/admin/webpack.config.js' );
+const {
+	WebpackRTLPlugin,
+} = require( '@woocommerce/internal-build/style-build' );
 
 module.exports = ( storybookConfig ) => {
 	storybookConfig.module.rules = [
@@ -47,8 +50,20 @@ module.exports = ( storybookConfig ) => {
 		'node_modules',
 	];
 
+	// When USE_RTL_STYLE is set (the `storybook-rtl` script), swap the
+	// inherited RTL plugin for an in-place instance so the compiled CSS is
+	// rewritten to RTL rather than emitted as an unused `-rtl.css` sibling.
+	// This keeps RTL preview on the existing rtlcss toolchain now that the
+	// stylesheets are bundled from source instead of copied as pre-built files.
+	const useRtl = process.env.USE_RTL_STYLE === 'true';
+	const inheritedPlugins = wcAdminWebpackConfig.plugins.map( ( plugin ) =>
+		useRtl && plugin instanceof WebpackRTLPlugin
+			? new WebpackRTLPlugin( { inPlace: true } )
+			: plugin
+	);
+
 	storybookConfig.plugins.push(
-		...wcAdminWebpackConfig.plugins,
+		...inheritedPlugins,
 		new CopyWebpackPlugin( {
 			patterns: [
 				{
