@@ -72,15 +72,9 @@ function resolveWordPressPackageSpec( packageName, wpVersion ) {
 	) }`;
 }
 
-function getPackagesForWordPressVersion( wpVersion ) {
-	getWordPressVersionMetadata( wpVersion );
-	return {};
-}
-
 module.exports = {
 	BUNDLED_PACKAGES,
 	SUPPORTED_WORDPRESS_VERSION_TARGETS,
-	getPackagesForWordPressVersion,
 	getNpmDistTagForWordPressVersion,
 	getSupportedWordPressVersions,
 	getWordPressVersionMetadata,

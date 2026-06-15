@@ -5,7 +5,6 @@ const path = require( 'node:path' );
 const { spawnSync } = require( 'node:child_process' );
 
 const {
-	getPackagesForWordPressVersion,
 	getNpmDistTagForWordPressVersion,
 	isBundledPackage,
 	isWordPressPackage,
@@ -160,41 +159,20 @@ function getConfiguredPackages( packageJson ) {
 	return normalizePackageList( packageJson[ CONFIG_KEY ]?.packages );
 }
 
-function getConfiguredVersions( packageJson ) {
-	const configuredVersions = packageJson[ CONFIG_KEY ]?.versions;
-
-	if ( ! configuredVersions ) {
-		return [];
-	}
-
-	return Array.isArray( configuredVersions )
-		? configuredVersions.map( String )
-		: [ String( configuredVersions ) ];
-}
-
 function resolveRequestedPackages( {
 	wpVersion = getSelectedWordPressVersion(),
 	packages,
 	cwd = process.cwd(),
-	all = false,
 } = {} ) {
-	const metadataPackages = getPackagesForWordPressVersion( wpVersion );
-
-	if ( all && Object.keys( metadataPackages ).length > 0 ) {
-		return Object.keys( metadataPackages ).sort();
-	}
+	getNpmDistTagForWordPressVersion( wpVersion );
 
 	const packageJson = findProjectPackageJson( cwd );
-	const requestedPackages =
+
+	return (
 		normalizePackageList( packages ) ||
 		getConfiguredPackages( packageJson ) ||
-		getPackageJsonWordPressDependencies( packageJson );
-
-	if ( requestedPackages.length > 0 ) {
-		return requestedPackages;
-	}
-
-	return Object.keys( metadataPackages ).sort();
+		getPackageJsonWordPressDependencies( packageJson )
+	);
 }
 
 function ensureCachePackageJson( cacheDirectory, wpVersion ) {
@@ -363,17 +341,7 @@ function resolveNpmDistTag(
 		return distTag;
 	}
 
-	const wordpressDistTagMatch = distTag.match( /^wp-latest(?:-(\d+))?$/ );
-
-	if ( ! wordpressDistTagMatch ) {
-		throw new Error(
-			`Unsupported WordPress package dist-tag target "${ distTag }".`
-		);
-	}
-
-	const offset = wordpressDistTagMatch[ 1 ]
-		? parseInt( wordpressDistTagMatch[ 1 ], 10 )
-		: 0;
+	const offset = distTag === 'wp-latest-1' ? 1 : 0;
 
 	const cacheKey = [
 		cacheDirectory || process.cwd(),
@@ -608,7 +576,6 @@ function prepare( {
 	packages,
 	cwd = process.cwd(),
 	cacheRoot,
-	all = false,
 	offline = process.env.WP_JEST_DEPENDENCY_COMPAT_OFFLINE === '1',
 	logger = console,
 } = {} ) {
@@ -616,7 +583,6 @@ function prepare( {
 		wpVersion,
 		packages,
 		cwd,
-		all,
 	} );
 	const cacheDirectory = getCacheDirectory( { wpVersion, cacheRoot, cwd } );
 	const cachePackages = getPackagesRequiringCache( {
@@ -693,22 +659,12 @@ function clearCache( { wpVersion, cacheRoot, cwd = process.cwd() } = {} ) {
 	return directory;
 }
 
-function getConfiguredPrepareVersions( cwd = process.cwd() ) {
-	const packageJson = findProjectPackageJson( cwd );
-	const configuredVersions = getConfiguredVersions( packageJson );
-
-	return configuredVersions.length > 0
-		? configuredVersions
-		: [ getSelectedWordPressVersion() ];
-}
-
 module.exports = {
 	clearCache,
 	findProjectPackageJson,
 	findWorkspaceRoot,
 	getCacheDirectory,
 	getCachedPackagePath,
-	getConfiguredPrepareVersions,
 	getDefaultCacheRoot,
 	getInstalledPackagePath,
 	getInstalledPackageVersion,

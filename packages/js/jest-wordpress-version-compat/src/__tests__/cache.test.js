@@ -5,30 +5,41 @@ const os = require( 'node:os' );
 const path = require( 'node:path' );
 const { spawnSync } = require( 'node:child_process' );
 
+const GUTENBERG_PACKAGE_VERSION = '100.0.0';
+const OLDER_WORDPRESS_DIST_TAG = 'wp-100.0';
+const OLDER_WORDPRESS_PACKAGE_VERSION = '90.0.0';
+const PREVIOUS_WORDPRESS_DIST_TAG = 'wp-100.1';
+const PREVIOUS_WORDPRESS_PACKAGE_VERSION = '91.0.0';
+const LATEST_WORDPRESS_DIST_TAG = 'wp-101.0';
+const LATEST_WORDPRESS_PACKAGE_VERSION = '92.0.0';
+
 jest.mock( 'node:child_process', () => ( {
 	spawnSync: jest.fn( ( _command, args ) => {
 		if ( args[ 0 ] === 'view' && args[ 2 ] === 'dist-tags' ) {
 			return {
 				status: 0,
 				stdout: JSON.stringify( {
-					latest: '13.0.0',
-					'wp-6.8': '10.19.2',
-					'wp-6.9': '11.0.0',
-					'wp-7.0': '12.0.0',
+					latest: GUTENBERG_PACKAGE_VERSION,
+					[ OLDER_WORDPRESS_DIST_TAG ]:
+						OLDER_WORDPRESS_PACKAGE_VERSION,
+					[ PREVIOUS_WORDPRESS_DIST_TAG ]:
+						PREVIOUS_WORDPRESS_PACKAGE_VERSION,
+					[ LATEST_WORDPRESS_DIST_TAG ]:
+						LATEST_WORDPRESS_PACKAGE_VERSION,
 				} ),
 				stderr: '',
 			};
 		}
 
 		if ( args[ 0 ] === 'view' ) {
-			let version = '13.0.0';
+			let version = GUTENBERG_PACKAGE_VERSION;
 
-			if ( args[ 1 ].includes( 'wp-6.8' ) ) {
-				version = '10.19.2';
-			} else if ( args[ 1 ].includes( 'wp-6.9' ) ) {
-				version = '11.0.0';
-			} else if ( args[ 1 ].includes( 'wp-7.0' ) ) {
-				version = '12.0.0';
+			if ( args[ 1 ].includes( OLDER_WORDPRESS_DIST_TAG ) ) {
+				version = OLDER_WORDPRESS_PACKAGE_VERSION;
+			} else if ( args[ 1 ].includes( PREVIOUS_WORDPRESS_DIST_TAG ) ) {
+				version = PREVIOUS_WORDPRESS_PACKAGE_VERSION;
+			} else if ( args[ 1 ].includes( LATEST_WORDPRESS_DIST_TAG ) ) {
+				version = LATEST_WORDPRESS_PACKAGE_VERSION;
 			}
 
 			return {
@@ -171,7 +182,9 @@ describe( 'cache', () => {
 		);
 		expect( spawnSync ).not.toHaveBeenCalledWith(
 			'npm',
-			expect.arrayContaining( [ '@wordpress/icons@11.0.0' ] ),
+			expect.arrayContaining( [
+				`@wordpress/icons@${ PREVIOUS_WORDPRESS_PACKAGE_VERSION }`,
+			] ),
 			expect.anything()
 		);
 	} );
@@ -201,7 +214,7 @@ describe( 'cache', () => {
 				'install',
 				'--prefix',
 				getCacheDirectory( { cwd, cacheRoot, wpVersion: 'latest' } ),
-				'@wordpress/data@12.0.0',
+				`@wordpress/data@${ LATEST_WORDPRESS_PACKAGE_VERSION }`,
 			] ),
 			expect.objectContaining( {
 				encoding: 'utf8',
@@ -219,9 +232,9 @@ describe( 'cache', () => {
 			)
 		).toEqual( {
 			__distTags: {
-				'@wordpress/data': 'wp-7.0',
+				'@wordpress/data': LATEST_WORDPRESS_DIST_TAG,
 			},
-			'@wordpress/data': '12.0.0',
+			'@wordpress/data': LATEST_WORDPRESS_PACKAGE_VERSION,
 		} );
 	} );
 
@@ -233,7 +246,11 @@ describe( 'cache', () => {
 		} );
 		const cacheRoot = path.join( cwd, '.cache' );
 
-		createInstalledPackage( cwd, '@wordpress/data', '12.0.0' );
+		createInstalledPackage(
+			cwd,
+			'@wordpress/data',
+			LATEST_WORDPRESS_PACKAGE_VERSION
+		);
 
 		expect(
 			getPackagesRequiringCache( {
@@ -282,7 +299,7 @@ describe( 'cache', () => {
 			path.join( cacheDirectory, 'resolved-versions.json' ),
 			JSON.stringify(
 				{
-					'@wordpress/data': '11.0.0',
+					'@wordpress/data': PREVIOUS_WORDPRESS_PACKAGE_VERSION,
 				},
 				null,
 				2
@@ -293,7 +310,7 @@ describe( 'cache', () => {
 			toPackageSpec( '@wordpress/data', 'latest', {
 				cacheDirectory,
 			} )
-		).toBe( '@wordpress/data@12.0.0' );
+		).toBe( `@wordpress/data@${ LATEST_WORDPRESS_PACKAGE_VERSION }` );
 		expect(
 			JSON.parse(
 				fs.readFileSync(
@@ -303,9 +320,9 @@ describe( 'cache', () => {
 			)
 		).toEqual( {
 			__distTags: {
-				'@wordpress/data': 'wp-7.0',
+				'@wordpress/data': LATEST_WORDPRESS_DIST_TAG,
 			},
-			'@wordpress/data': '12.0.0',
+			'@wordpress/data': LATEST_WORDPRESS_PACKAGE_VERSION,
 		} );
 	} );
 
@@ -337,23 +354,48 @@ describe( 'cache', () => {
 
 	it( 'builds package specs from version metadata', () => {
 		expect( toPackageSpec( '@wordpress/data', 'latest' ) ).toBe(
-			'@wordpress/data@12.0.0'
+			`@wordpress/data@${ LATEST_WORDPRESS_PACKAGE_VERSION }`
 		);
 		expect( toPackageSpec( '@wordpress/data', 'latest-1' ) ).toBe(
-			'@wordpress/data@11.0.0'
+			`@wordpress/data@${ PREVIOUS_WORDPRESS_PACKAGE_VERSION }`
 		);
 		expect( toPackageSpec( '@wordpress/data', 'gutenberg' ) ).toBe(
-			'@wordpress/data@13.0.0'
+			`@wordpress/data@${ GUTENBERG_PACKAGE_VERSION }`
 		);
 		expect( toPackageSpec( '@wordpress/components', 'gutenberg' ) ).toBe(
-			'@wordpress/components@13.0.0'
+			`@wordpress/components@${ GUTENBERG_PACKAGE_VERSION }`
 		);
+	} );
+
+	it( 'rejects unsupported WordPress version targets', () => {
+		const cwd = createFixtureProject( {
+			dependencies: {
+				'@wordpress/data': 'catalog:wp-min',
+			},
+		} );
+
+		for ( const wpVersion of [
+			'explicit-version',
+			'wp-latest',
+			'wp-explicit-version',
+			'nightly',
+		] ) {
+			expect( () =>
+				resolveRequestedPackages( {
+					cwd,
+					wpVersion,
+				} )
+			).toThrow( /Unsupported WordPress version/ );
+			expect( () =>
+				toPackageSpec( '@wordpress/data', wpVersion )
+			).toThrow( /Unsupported WordPress version/ );
+		}
 	} );
 
 	it( 'resolves package versions from npm dist-tags', () => {
 		expect(
 			resolvePackageVersionFromNpm( '@wordpress/data', 'gutenberg' )
-		).toBe( '13.0.0' );
+		).toBe( GUTENBERG_PACKAGE_VERSION );
 		expect( spawnSync ).toHaveBeenCalledWith(
 			'npm',
 			[ 'view', '@wordpress/data@latest', 'version', '--json' ],
@@ -365,10 +407,10 @@ describe( 'cache', () => {
 
 	it( 'resolves latest from the highest WordPress npm dist-tag', () => {
 		expect( resolveNpmDistTag( '@wordpress/data', 'latest' ) ).toBe(
-			'wp-7.0'
+			LATEST_WORDPRESS_DIST_TAG
 		);
 		expect( resolveWordPressDistTagFromNpm( '@wordpress/data' ) ).toBe(
-			'wp-7.0'
+			LATEST_WORDPRESS_DIST_TAG
 		);
 		expect( spawnSync ).toHaveBeenCalledWith(
 			'npm',
@@ -381,34 +423,37 @@ describe( 'cache', () => {
 
 	it( 'resolves latest-1 from the previous WordPress npm dist-tag', () => {
 		expect( resolveNpmDistTag( '@wordpress/data', 'latest-1' ) ).toBe(
-			'wp-6.9'
+			PREVIOUS_WORDPRESS_DIST_TAG
 		);
 		expect( resolveWordPressDistTagFromNpm( '@wordpress/data', 1 ) ).toBe(
-			'wp-6.9'
+			PREVIOUS_WORDPRESS_DIST_TAG
 		);
 	} );
 
 	it( 'parses npm view version output', () => {
 		expect(
-			parseNpmViewVersion( '@wordpress/data@wp-6.8', '"10.19.2"' )
-		).toBe( '10.19.2' );
+			parseNpmViewVersion(
+				`@wordpress/data@${ OLDER_WORDPRESS_DIST_TAG }`,
+				`"${ OLDER_WORDPRESS_PACKAGE_VERSION }"`
+			)
+		).toBe( OLDER_WORDPRESS_PACKAGE_VERSION );
 		expect(
 			parseNpmViewVersion(
-				'@wordpress/data@wp-6.8',
-				'["10.19.1","10.19.2"]'
+				`@wordpress/data@${ OLDER_WORDPRESS_DIST_TAG }`,
+				`["${ PREVIOUS_WORDPRESS_PACKAGE_VERSION }","${ OLDER_WORDPRESS_PACKAGE_VERSION }"]`
 			)
-		).toBe( '10.19.2' );
+		).toBe( OLDER_WORDPRESS_PACKAGE_VERSION );
 	} );
 
 	it( 'parses npm view dist-tag output', () => {
 		expect(
 			parseNpmViewDistTags(
 				'@wordpress/data',
-				'{"latest":"13.0.0","wp-7.0":"12.0.0"}'
+				`{"latest":"${ GUTENBERG_PACKAGE_VERSION }","${ LATEST_WORDPRESS_DIST_TAG }":"${ LATEST_WORDPRESS_PACKAGE_VERSION }"}`
 			)
 		).toEqual( {
-			latest: '13.0.0',
-			'wp-7.0': '12.0.0',
+			latest: GUTENBERG_PACKAGE_VERSION,
+			[ LATEST_WORDPRESS_DIST_TAG ]: LATEST_WORDPRESS_PACKAGE_VERSION,
 		} );
 	} );
 } );

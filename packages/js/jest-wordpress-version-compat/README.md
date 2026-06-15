@@ -75,6 +75,29 @@ Add configuration to `package.json` when the package list should be shared by mu
 }
 ```
 
+## Conditional Test Logic
+
+Use the package root helpers when a test needs to adjust assertions for the active compatibility target:
+
+```javascript
+const {
+	getWordPressVersionTarget,
+	isWordPressVersionTarget,
+} = require( '@woocommerce/jest-wordpress-version-compat' );
+
+if ( isWordPressVersionTarget( 'gutenberg' ) ) {
+	// Gutenberg-specific assertion.
+}
+
+if ( isWordPressVersionTarget( [ 'latest', 'latest-1' ] ) ) {
+	// WordPress core package assertion.
+}
+
+const selectedTarget = getWordPressVersionTarget();
+```
+
+When `WP_VERSION` is not set, `getWordPressVersionTarget()` returns `undefined` and `isWordPressVersionTarget()` returns `false`. Unsupported values still throw, so conditional branches fail fast when a test run is misconfigured.
+
 ## WooCommerce Monorepo Usage
 
 WooCommerce packages should not wire this helper into individual Jest configs. The monorepo-level integration lives in `@woocommerce/internal-js-tests/jest-preset.js`, which is already used by most package-level Jest configs.
@@ -100,8 +123,8 @@ pnpm test:js:gutenberg
 
 CI expands JavaScript unit-test jobs into three variants:
 
--   The normal installed dependency set from `package.json`.
 -   `WP_VERSION=latest`.
+-   `WP_VERSION=latest-1`.
 -   `WP_VERSION=gutenberg`.
 
 The compatibility variants use the same package-level `test:js` command. Packages that do not use the shared Jest preset still run in those jobs, but their dependencies are not remapped until they compose this helper.
@@ -148,4 +171,4 @@ The package resolves version targets from npm metadata instead of keeping a hard
 -   `latest-1`, using npm metadata to find the previous `wp-*` WordPress dist-tag on each requested `@wordpress/*` package.
 -   `gutenberg`, using the npm `latest` dist-tag for the current Gutenberg package line.
 
-This means developers can run tests against the installed baseline, the current WordPress package set, and the Gutenberg package line without changing this package first. If npm has not published enough matching `wp-*` dist-tags for a requested package, the helper fails during cache preparation instead of falling back to a guessed version.
+This means developers can run tests against the current WordPress package set, the previous WordPress package set, and the Gutenberg package line without changing this package first. If npm has not published enough matching `wp-*` dist-tags for a requested package, the helper fails during cache preparation instead of falling back to a guessed version.

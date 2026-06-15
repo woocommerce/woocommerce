@@ -377,20 +377,22 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
-						name: 'JavaScript',
-						command: 'test:js',
-						testEnv: {
-							shouldCreate: false,
-							envVars: {},
-						},
-					} ),
-					expect.objectContaining( {
 						name: 'JavaScript [WP packages latest]',
 						command: 'test:js',
 						testEnv: {
 							shouldCreate: false,
 							envVars: {
 								WP_VERSION: 'latest',
+							},
+						},
+					} ),
+					expect.objectContaining( {
+						name: 'JavaScript [WP packages latest-1]',
+						command: 'test:js',
+						testEnv: {
+							shouldCreate: false,
+							envVars: {
+								WP_VERSION: 'latest-1',
 							},
 						},
 					} ),

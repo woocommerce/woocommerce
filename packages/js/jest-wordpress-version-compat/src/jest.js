@@ -13,13 +13,11 @@ function createJestModuleNameMapper( {
 	cwd = process.cwd(),
 	cacheRoot,
 	lazy = true,
-	all = false,
 } = {} ) {
 	const selectedPackages = resolveRequestedPackages( {
 		wpVersion,
 		packages,
 		cwd,
-		all,
 	} );
 
 	const preparedCache = lazy

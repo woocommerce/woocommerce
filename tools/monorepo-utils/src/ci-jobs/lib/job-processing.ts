@@ -12,10 +12,20 @@ import { ProjectFileChanges } from './file-changes';
 import { ProjectNode } from './project-graph';
 import { TestEnvVars, parseTestEnvConfig } from './test-environment';
 
-const DEFAULT_WORDPRESS_VERSION_COMPATIBILITY = {
-	wpVersion: 'latest',
-	gutenberg: true,
-};
+const WORDPRESS_VERSION_COMPATIBILITY_TARGETS = [
+	{
+		label: 'WP packages latest',
+		wpVersion: 'latest',
+	},
+	{
+		label: 'WP packages latest-1',
+		wpVersion: 'latest-1',
+	},
+	{
+		label: 'Gutenberg packages',
+		wpVersion: 'gutenberg',
+	},
+];
 
 /**
  * A linting job.
@@ -130,31 +140,18 @@ function shouldCreateWordPressVersionCompatJobs(
 }
 
 function getWordPressVersionCompatJobs( job: TestJob ): TestJob[] {
-	const jobs = [ job ];
+	return WORDPRESS_VERSION_COMPATIBILITY_TARGETS.map(
+		( { label, wpVersion } ) => {
+			const jobCopy = JSON.parse( JSON.stringify( job ) );
+			jobCopy.name = `${ job.name } [${ label }]`;
+			jobCopy.testEnv.envVars = {
+				...job.testEnv.envVars,
+				WP_VERSION: wpVersion,
+			};
 
-	if ( DEFAULT_WORDPRESS_VERSION_COMPATIBILITY.wpVersion ) {
-		const jobCopy = JSON.parse( JSON.stringify( job ) );
-		jobCopy.name = `${ job.name } [WP packages ${ DEFAULT_WORDPRESS_VERSION_COMPATIBILITY.wpVersion }]`;
-		jobCopy.testEnv.envVars = {
-			...job.testEnv.envVars,
-			WP_VERSION: DEFAULT_WORDPRESS_VERSION_COMPATIBILITY.wpVersion,
-		};
-
-		jobs.push( jobCopy );
-	}
-
-	if ( DEFAULT_WORDPRESS_VERSION_COMPATIBILITY.gutenberg ) {
-		const jobCopy = JSON.parse( JSON.stringify( job ) );
-		jobCopy.name = `${ job.name } [Gutenberg packages]`;
-		jobCopy.testEnv.envVars = {
-			...job.testEnv.envVars,
-			WP_VERSION: 'gutenberg',
-		};
-
-		jobs.push( jobCopy );
-	}
-
-	return jobs;
+			return jobCopy;
+		}
+	);
 }
 
 /**
