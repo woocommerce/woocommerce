@@ -171,6 +171,8 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * Tests the widget output when the next task is in progress.
+	 *
+	 * @testdox Widget output includes the in-progress label for the next task.
 	 */
 	public function test_widget_output_includes_in_progress_label() {
 		// phpcs:disable Squiz.Commenting

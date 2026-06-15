@@ -106,6 +106,11 @@ ul.woocommerce_stats {
 				line-height: 1.5;
 				color: $wp-admin-icon-gray;
 
+				&:hover,
+				&:focus {
+					background-color: $gray-100;
+				}
+
 				.wc_sparkline {
 					width: 4em;
 					height: 2em;
@@ -123,7 +128,7 @@ ul.woocommerce_stats {
 					line-height: 1.2em;
 					font-weight: normal;
 					display: block;
-					color: var(--wp-admin-theme-color, #3858e9);
+					color: $gray-900;
 				}
 
 				&::before {
