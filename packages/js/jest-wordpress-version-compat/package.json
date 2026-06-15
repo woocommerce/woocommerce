@@ -25,10 +25,7 @@
 	},
 	"main": "src/index.js",
 	"exports": {
-		".": "./src/index.js",
-		"./cache": "./src/cache.js",
-		"./jest": "./src/jest.js",
-		"./metadata": "./src/metadata.js"
+		".": "./src/index.js"
 	},
 	"files": [
 		"src",

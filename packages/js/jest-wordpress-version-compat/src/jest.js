@@ -3,12 +3,7 @@
 const fs = require( 'node:fs' );
 const path = require( 'node:path' );
 
-const {
-	getCachedPackagePath,
-	getSelectedWordPressVersion,
-	prepare,
-	resolveRequestedPackages,
-} = require( './cache' );
+const { prepare } = require( './cache' );
 
 const singletonPackages = [ 'react', 'react-dom' ];
 
@@ -33,80 +28,44 @@ function removeSingletonModuleNameMapperEntries( moduleNameMapper = {} ) {
 // JSX runtimes and hooks do not resolve to a second copy. Skip the mapping when
 // the cache does not contain React, otherwise non-React packages would point
 // subpath imports like react/jsx-runtime at files that were never installed.
-function createSingletonModuleNameMapper( {
-	wpVersion = getSelectedWordPressVersion(),
-	cacheRoot,
-	cwd = process.cwd(),
-} = {} ) {
+function getCachedPackagePath( packageName, cacheDirectory ) {
+	return path.join(
+		cacheDirectory,
+		'node_modules',
+		...packageName.split( '/' )
+	);
+}
+
+function createSingletonModuleNameMapper( { cacheDirectory } ) {
 	return singletonPackages.reduce( ( moduleNameMapper, packageName ) => {
-		const packagePath = getCachedPackagePath( packageName, {
-			wpVersion,
-			cacheRoot,
-			cwd,
-		} );
+		const packagePath = getCachedPackagePath( packageName, cacheDirectory );
 
 		if ( ! fs.existsSync( path.join( packagePath, 'package.json' ) ) ) {
 			return moduleNameMapper;
 		}
 
 		moduleNameMapper[ `^${ packageName }$` ] = packagePath;
-		moduleNameMapper[ `^${ packageName }/(.*?)(?:\\.js)?$` ] =
-			`${ packagePath }/$1.js`;
+		moduleNameMapper[
+			`^${ packageName }/(.*?)(?:\\.js)?$`
+		] = `${ packagePath }/$1.js`;
 
 		return moduleNameMapper;
 	}, {} );
 }
 
-function createJestModuleNameMapper( {
-	wpVersion = getSelectedWordPressVersion(),
-	packages,
-	cwd = process.cwd(),
-	cacheRoot,
-	lazy = true,
-} = {} ) {
-	const selectedPackages = resolveRequestedPackages( {
-		wpVersion,
-		packages,
-		cwd,
-	} );
-
-	const preparedCache = lazy
-		? prepare( {
-				wpVersion,
-				packages: selectedPackages,
-				cwd,
-				cacheRoot,
-		  } )
-		: undefined;
-
-	if ( preparedCache?.packagePaths ) {
-		return {
-			...Object.entries( preparedCache.packagePaths ).reduce(
-				( moduleNameMapper, [ packageName, packagePath ] ) => {
-					moduleNameMapper[ `^${ packageName }$` ] = packagePath;
-
-					return moduleNameMapper;
-				},
-				{}
-			),
-			...createSingletonModuleNameMapper( { wpVersion, cacheRoot, cwd } ),
-		};
-	}
+function createJestModuleNameMapper( options = {} ) {
+	const preparedCache = prepare( options );
 
 	return {
-		...selectedPackages.reduce( ( moduleNameMapper, packageName ) => {
-			moduleNameMapper[ `^${ packageName }$` ] = getCachedPackagePath(
-				packageName,
-				{
-					wpVersion,
-					cacheRoot,
-					cwd,
-				}
-			);
+		...Object.entries( preparedCache.packagePaths ).reduce(
+			( moduleNameMapper, [ packageName, packagePath ] ) => {
+				moduleNameMapper[ `^${ packageName }$` ] = packagePath;
 
-			return moduleNameMapper;
-		}, {} ),
-		...createSingletonModuleNameMapper( { wpVersion, cacheRoot, cwd } ),
+				return moduleNameMapper;
+			},
+			{}
+		),
+		...createSingletonModuleNameMapper( preparedCache ),
 	};
 }
 
@@ -123,6 +82,5 @@ function withWordPressDependencyCompat( jestConfig = {}, options = {} ) {
 }
 
 module.exports = {
-	createJestModuleNameMapper,
 	withWordPressDependencyCompat,
 };

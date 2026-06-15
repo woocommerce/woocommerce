@@ -132,8 +132,7 @@ function getPackageJsonWordPressDependencies( packageJson ) {
 			if (
 				isWordPressPackage( packageName ) &&
 				! isBundledPackage( packageName ) &&
-				normalizedVersionSpec.startsWith( 'catalog:wp-' ) &&
-				normalizedVersionSpec !== 'catalog:wp-bundled'
+				normalizedVersionSpec.startsWith( 'catalog:wp-' )
 			) {
 				packages.add( packageName );
 			}
@@ -621,7 +620,7 @@ function prepare( {
 		throw new Error(
 			`Missing cached @wordpress packages for WordPress ${ wpVersion }: ${ missingPackages.join(
 				', '
-			) }. Unset WP_JEST_DEPENDENCY_COMPAT_OFFLINE or call prepareWordPressPackages() before running tests.`
+			) }. Unset WP_JEST_DEPENDENCY_COMPAT_OFFLINE or run the compatibility test once with network access before using offline mode.`
 		);
 	}
 
@@ -653,36 +652,6 @@ function prepare( {
 	};
 }
 
-function clearCache( { wpVersion, cacheRoot, cwd = process.cwd() } = {} ) {
-	const directory = wpVersion
-		? getCacheDirectory( { wpVersion, cacheRoot, cwd } )
-		: cacheRoot || getDefaultCacheRoot( cwd );
-
-	fs.rmSync( directory, { recursive: true, force: true } );
-
-	return directory;
-}
-
 module.exports = {
-	clearCache,
-	findProjectPackageJson,
-	findWorkspaceRoot,
-	getCacheDirectory,
-	getCachedPackagePath,
-	getDefaultCacheRoot,
-	getInstalledPackagePath,
-	getInstalledPackageVersion,
-	getPackageJsonWordPressDependencies,
-	getPackagePaths,
-	getPackagesRequiringCache,
-	getSelectedWordPressVersion,
-	isPackageCached,
-	parseNpmViewDistTags,
-	parseNpmViewVersion,
 	prepare,
-	resolveWordPressDistTagFromNpm,
-	resolveNpmDistTag,
-	resolvePackageVersionFromNpm,
-	resolveRequestedPackages,
-	toPackageSpec,
 };

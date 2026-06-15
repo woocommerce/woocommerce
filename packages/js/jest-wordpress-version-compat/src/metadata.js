@@ -61,23 +61,9 @@ function getNpmDistTagForWordPressVersion( wpVersion ) {
 	return getWordPressVersionMetadata( wpVersion ).distTag;
 }
 
-function resolveWordPressPackageSpec( packageName, wpVersion ) {
-	if ( ! isWordPressPackage( packageName ) ) {
-		throw new Error( `"${ packageName }" is not an @wordpress package.` );
-	}
-
-	return `${ packageName }@${ getNpmDistTagForWordPressVersion(
-		wpVersion
-	) }`;
-}
-
 module.exports = {
-	BUNDLED_PACKAGES,
-	SUPPORTED_WORDPRESS_VERSION_TARGETS,
 	getNpmDistTagForWordPressVersion,
-	getSupportedWordPressVersions,
 	getWordPressVersionMetadata,
 	isBundledPackage,
 	isWordPressPackage,
-	resolveWordPressPackageSpec,
 };

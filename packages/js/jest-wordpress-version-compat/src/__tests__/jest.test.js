@@ -4,25 +4,27 @@ const fs = require( 'node:fs' );
 
 const cache = require( '../cache' );
 
-jest.mock( '../cache', () => {
-	const actual = jest.requireActual( '../cache' );
+jest.mock( '../cache', () => ( {
+	prepare: jest.fn(),
+} ) );
 
-	return {
-		...actual,
-		prepare: jest.fn(),
-	};
-} );
-
-const {
-	createJestModuleNameMapper,
-	withWordPressDependencyCompat,
-} = require( '../jest' );
 const packageRoot = require( '../index' );
-const { getWordPressVersionTarget, isWordPressVersionTarget } = packageRoot;
+const {
+	getWordPressVersionTarget,
+	isWordPressVersionTarget,
+	withWordPressDependencyCompat,
+} = packageRoot;
+
+function mockPreparedCache( packagePaths = {} ) {
+	cache.prepare.mockReturnValue( {
+		cacheDirectory: '/tmp/cache/latest',
+		packagePaths,
+	} );
+}
 
 describe( 'jest adapter', () => {
 	beforeEach( () => {
-		cache.prepare.mockClear();
+		cache.prepare.mockReset();
 		jest.spyOn( fs, 'existsSync' ).mockReturnValue( true );
 	} );
 
@@ -30,43 +32,11 @@ describe( 'jest adapter', () => {
 		fs.existsSync.mockRestore();
 	} );
 
-	it( 'creates moduleNameMapper entries for selected packages', () => {
-		const mapper = createJestModuleNameMapper( {
-			cacheRoot: '/tmp/cache',
-			lazy: false,
-			packages: [ '@wordpress/data' ],
-			wpVersion: 'latest',
-		} );
-
-		expect( mapper ).toEqual( {
-			'^@wordpress/data$':
-				'/tmp/cache/latest/node_modules/@wordpress/data',
-			'^react$': '/tmp/cache/latest/node_modules/react',
-			'^react/(.*?)(?:\\.js)?$':
-				'/tmp/cache/latest/node_modules/react/$1.js',
-			'^react-dom$': '/tmp/cache/latest/node_modules/react-dom',
-			'^react-dom/(.*?)(?:\\.js)?$':
-				'/tmp/cache/latest/node_modules/react-dom/$1.js',
-		} );
-		expect( cache.prepare ).not.toHaveBeenCalled();
-	} );
-
-	it( 'prepares packages lazily by default', () => {
-		createJestModuleNameMapper( {
-			cacheRoot: '/tmp/cache',
-			packages: [ '@wordpress/data' ],
-			wpVersion: 'latest',
-		} );
-
-		expect( cache.prepare ).toHaveBeenCalledWith(
-			expect.objectContaining( {
-				packages: [ '@wordpress/data' ],
-				wpVersion: 'latest',
-			} )
-		);
-	} );
-
 	it( 'merges generated mappings into Jest config', () => {
+		mockPreparedCache( {
+			'@wordpress/data': '/tmp/cache/latest/node_modules/@wordpress/data',
+		} );
+
 		const config = withWordPressDependencyCompat(
 			{
 				moduleNameMapper: {
@@ -75,7 +45,6 @@ describe( 'jest adapter', () => {
 			},
 			{
 				cacheRoot: '/tmp/cache',
-				lazy: false,
 				packages: [ '@wordpress/data' ],
 				wpVersion: 'latest',
 			}
@@ -92,9 +61,22 @@ describe( 'jest adapter', () => {
 			'^react-dom/(.*?)(?:\\.js)?$':
 				'/tmp/cache/latest/node_modules/react-dom/$1.js',
 		} );
+		expect( cache.prepare ).toHaveBeenCalledWith( {
+			cacheRoot: '/tmp/cache',
+			packages: [ '@wordpress/data' ],
+			wpVersion: 'latest',
+		} );
 	} );
 
 	it( 'keeps singleton dependencies mapped to the compatibility cache', () => {
+		cache.prepare.mockReturnValue( {
+			cacheDirectory: '/tmp/cache/gutenberg',
+			packagePaths: {
+				'@wordpress/element':
+					'/tmp/cache/gutenberg/node_modules/@wordpress/element',
+			},
+		} );
+
 		const config = withWordPressDependencyCompat(
 			{
 				moduleNameMapper: {
@@ -104,7 +86,6 @@ describe( 'jest adapter', () => {
 			},
 			{
 				cacheRoot: '/tmp/cache',
-				lazy: false,
 				packages: [ '@wordpress/element' ],
 				wpVersion: 'gutenberg',
 			}
@@ -123,16 +104,24 @@ describe( 'jest adapter', () => {
 	} );
 
 	it( 'maps singleton package subpath exports to JavaScript files', () => {
-		const mapper = createJestModuleNameMapper( {
-			cacheRoot: '/tmp/cache',
-			lazy: false,
-			packages: [ '@wordpress/element' ],
-			wpVersion: 'latest',
+		mockPreparedCache( {
+			'@wordpress/element':
+				'/tmp/cache/latest/node_modules/@wordpress/element',
 		} );
-		const reactSubpathPattern = Object.keys( mapper ).find( ( pattern ) =>
-			pattern.startsWith( '^react/' )
+
+		const config = withWordPressDependencyCompat(
+			{},
+			{
+				cacheRoot: '/tmp/cache',
+				packages: [ '@wordpress/element' ],
+				wpVersion: 'latest',
+			}
 		);
-		const reactSubpathReplacement = mapper[ reactSubpathPattern ];
+		const reactSubpathPattern = Object.keys( config.moduleNameMapper ).find(
+			( pattern ) => pattern.startsWith( '^react/' )
+		);
+		const reactSubpathReplacement =
+			config.moduleNameMapper[ reactSubpathPattern ];
 
 		expect(
 			'react/jsx-runtime'.replace(
@@ -150,15 +139,20 @@ describe( 'jest adapter', () => {
 
 	it( 'skips singleton mappings when singleton packages are not cached', () => {
 		fs.existsSync.mockReturnValue( false );
-
-		const mapper = createJestModuleNameMapper( {
-			cacheRoot: '/tmp/cache',
-			lazy: false,
-			packages: [ '@wordpress/data' ],
-			wpVersion: 'latest',
+		mockPreparedCache( {
+			'@wordpress/data': '/tmp/cache/latest/node_modules/@wordpress/data',
 		} );
 
-		expect( mapper ).toEqual( {
+		const config = withWordPressDependencyCompat(
+			{},
+			{
+				cacheRoot: '/tmp/cache',
+				packages: [ '@wordpress/data' ],
+				wpVersion: 'latest',
+			}
+		);
+
+		expect( config.moduleNameMapper ).toEqual( {
 			'^@wordpress/data$':
 				'/tmp/cache/latest/node_modules/@wordpress/data',
 		} );
