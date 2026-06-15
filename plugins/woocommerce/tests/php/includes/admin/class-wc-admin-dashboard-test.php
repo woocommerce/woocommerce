@@ -133,7 +133,7 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 
 		require_once ABSPATH . 'wp-admin/includes/dashboard.php';
 		set_current_screen( 'dashboard' );
-		$wp_meta_boxes['dashboard'] = array();
+		unset( $wp_meta_boxes['dashboard'] );
 
 		$this->sut->init();
 

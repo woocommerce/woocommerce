@@ -284,23 +284,27 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			<li class="processing-orders">
 			<a href="<?php echo esc_url( admin_url( 'edit.php?post_status=wc-processing&post_type=shop_order' ) ); ?>">
 				<?php
-					printf(
-						/* translators: %s: order count */
-						_n( 'Awaiting processing <strong>%s order</strong>', 'Awaiting processing <strong>%s orders</strong>', $processing_count, 'woocommerce' ),
-						$processing_count
-					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
-				?>
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: order count */
+							_n( 'Awaiting processing <strong>%s order</strong>', 'Awaiting processing <strong>%s orders</strong>', $processing_count, 'woocommerce' ),
+							$processing_count
+						)
+					);
+					?>
 				</a>
 			</li>
 			<li class="on-hold-orders">
 				<a href="<?php echo esc_url( admin_url( 'edit.php?post_status=wc-on-hold&post_type=shop_order' ) ); ?>">
 				<?php
-					printf(
-						/* translators: %s: order count */
-						_n( 'On-hold <strong>%s order</strong>', 'On-hold <strong>%s orders</strong>', $on_hold_count, 'woocommerce' ),
-						$on_hold_count
-					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
-				?>
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: order count */
+							_n( 'On-hold <strong>%s order</strong>', 'On-hold <strong>%s orders</strong>', $on_hold_count, 'woocommerce' ),
+							$on_hold_count
+						)
+					);
+					?>
 				</a>
 			</li>
 			<?php
@@ -389,23 +393,27 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			<li class="low-in-stock">
 				<a href="<?php echo esc_url( $lowstock_url ); ?>">
 				<?php
-					printf(
-						/* translators: %s: order count */
-						_n( 'Low in stock <strong>%s product</strong>', 'Low in stock <strong>%s products</strong>', $lowinstock_count, 'woocommerce' ),
-						$lowinstock_count
-					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
-				?>
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: order count */
+							_n( 'Low in stock <strong>%s product</strong>', 'Low in stock <strong>%s products</strong>', $lowinstock_count, 'woocommerce' ),
+							$lowinstock_count
+						)
+					);
+					?>
 				</a>
 			</li>
 			<li class="out-of-stock">
 				<a href="<?php echo esc_url( $outofstock_url ); ?>">
 				<?php
-					printf(
-						/* translators: %s: order count */
-						_n( 'Out of stock <strong>%s product</strong>', 'Out of stock <strong>%s products</strong>', $outofstock_count, 'woocommerce' ),
-						$outofstock_count
-					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
-				?>
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: order count */
+							_n( 'Out of stock <strong>%s product</strong>', 'Out of stock <strong>%s products</strong>', $outofstock_count, 'woocommerce' ),
+							$outofstock_count
+						)
+					);
+					?>
 				</a>
 			</li>
 			<?php
