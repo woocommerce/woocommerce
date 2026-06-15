@@ -157,9 +157,7 @@ plugins/woocommerce/client/blocks/src/block.tsx`;
 					'changelog/fix-123',
 					'tests/e2e-pw/tests/blocks/test.spec.ts',
 				],
-				'@woocommerce/block-library': [
-					'src/block.tsx',
-				],
+				'@woocommerce/block-library': [ 'src/block.tsx' ],
 			} );
 		}
 	} );
