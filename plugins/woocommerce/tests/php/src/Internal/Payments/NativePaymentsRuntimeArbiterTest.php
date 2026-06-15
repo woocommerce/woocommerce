@@ -120,6 +120,19 @@ class NativePaymentsRuntimeArbiterTest extends WC_Unit_Test_Case {
 		$this->fake_plugin( false, true );
 
 		$this->assertSame( NativePaymentsRuntimeArbiter::OWNER_PLUGIN, $this->sut->get_runtime_owner(), 'A network-activated plugin owns the runtime.' );
+		$this->assertTrue( $this->sut->is_plugin_runtime_active(), 'A network-activated plugin owns the runtime.' );
+		$this->assertFalse( $this->sut->should_native_register(), 'Native must not register while a network-activated plugin owns the runtime.' );
+	}
+
+	/**
+	 * @testdox A network-activated plugin wins even when native is enabled (the network-detection fence).
+	 */
+	public function test_network_active_plugin_wins_when_native_enabled(): void {
+		$this->fake_plugin( false, true );
+		$this->enable_native_runtime();
+
+		$this->assertSame( NativePaymentsRuntimeArbiter::OWNER_PLUGIN, $this->sut->get_runtime_owner(), 'Network-active detection must keep plugin-wins even when native is enabled.' );
+		$this->assertFalse( $this->sut->should_native_register(), 'Native must not register on a network-activated-plugin site.' );
 	}
 
 	/**
@@ -212,6 +225,23 @@ class NativePaymentsRuntimeArbiterTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( NativePaymentsRuntimeArbiter::OWNER_PLUGIN, $this->sut->get_runtime_owner(), 'Forcing plugin-wins overrides a yield (the conservative escape hatch).' );
+	}
+
+	/**
+	 * @testdox A forced plugin-wins value is dropped when the plugin is absent (falls through to native).
+	 */
+	public function test_forced_plugin_owner_is_dropped_when_plugin_absent(): void {
+		$this->fake_plugin();
+		$this->enable_native_runtime();
+		add_filter(
+			NativePaymentsRuntimeArbiter::FILTER_RUNTIME_OWNER,
+			function () {
+				return NativePaymentsRuntimeArbiter::OWNER_PLUGIN;
+			}
+		);
+
+		$this->assertSame( NativePaymentsRuntimeArbiter::OWNER_NATIVE, $this->sut->get_runtime_owner(), 'Forcing plugin-wins must be ignored when no plugin is present; native owns.' );
+		$this->assertTrue( $this->sut->should_native_register(), 'Native registers when forced plugin-wins is dropped and native is enabled.' );
 	}
 
 	/**

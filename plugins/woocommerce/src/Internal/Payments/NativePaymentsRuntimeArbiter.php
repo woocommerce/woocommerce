@@ -159,6 +159,8 @@ class NativePaymentsRuntimeArbiter {
 	/**
 	 * Get the payments runtime owner for the current site.
 	 *
+	 * @since 11.0.0
+	 *
 	 * @return string One of self::OWNER_PLUGIN, self::OWNER_NATIVE, self::OWNER_NONE.
 	 */
 	public function get_runtime_owner(): string {
@@ -198,6 +200,8 @@ class NativePaymentsRuntimeArbiter {
 	 *
 	 * This is the guard every native registration must consult before acting.
 	 *
+	 * @since 11.0.0
+	 *
 	 * @return bool True only when the native runtime owns this site.
 	 */
 	public function should_native_register(): bool {
@@ -206,6 +210,8 @@ class NativePaymentsRuntimeArbiter {
 
 	/**
 	 * Tell whether the WooPayments plugin owns the runtime for this site.
+	 *
+	 * @since 11.0.0
 	 *
 	 * @return bool True when the plugin owns this site's payments runtime.
 	 */
@@ -218,6 +224,8 @@ class NativePaymentsRuntimeArbiter {
 	 *
 	 * This is the feature-flag state, independent of ownership: native can be enabled
 	 * while the plugin still owns the runtime (in which case the plugin still wins).
+	 *
+	 * @since 11.0.0
 	 *
 	 * @return bool True when the native runtime is enabled.
 	 */
@@ -235,9 +243,12 @@ class NativePaymentsRuntimeArbiter {
 	/**
 	 * Tell whether the WooPayments plugin has yielded the runtime to native.
 	 *
+	 * Internal to the ownership decision; the plugin signals a yield through the
+	 * self::FILTER_PLUGIN_YIELDED filter, not by calling this method.
+	 *
 	 * @return bool True when the plugin has stood its runtime down in favor of native.
 	 */
-	public function plugin_has_yielded(): bool {
+	private function plugin_has_yielded(): bool {
 		/**
 		 * Filters whether the WooPayments plugin has yielded the runtime to native.
 		 *
