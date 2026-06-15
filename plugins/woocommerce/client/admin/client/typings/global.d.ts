@@ -54,8 +54,6 @@ declare global {
 			'experimental-blocks': boolean;
 			'minified-js': boolean;
 			navigation: boolean;
-			onboarding: boolean;
-			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
 			'pattern-toolkit-full-composability': boolean;
 			printful: boolean;
@@ -63,9 +61,7 @@ declare global {
 			'remote-free-extensions': boolean;
 			settings: boolean;
 			'settings-ui': boolean;
-			subscriptions: boolean;
 			'wc-pay-promotion': boolean;
-			'shipping-smart-defaults': boolean;
 			'launch-your-store': boolean;
 			'rest-api-v4': boolean;
 			'order-detail-redesign': boolean;

@@ -21,9 +21,4 @@ const possiblyImportProductTask = async () => {
 
 possiblyImportProductTask();
 
-if (
-	window.wcAdminFeatures &&
-	window.wcAdminFeatures[ 'shipping-smart-defaults' ]
-) {
-	import( './experimental-shipping-recommendation' );
-}
+import( './shipping-recommendation' );
