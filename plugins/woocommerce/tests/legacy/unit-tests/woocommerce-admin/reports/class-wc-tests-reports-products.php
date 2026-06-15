@@ -438,6 +438,59 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not throw DivisionByZeroError when syncing a monetary-only refund (qty 0) with float quantities.
+	 *
+	 * Reproduces WOOPLUG-6639. When a store uses decimal/float stock amounts (e.g. WCPOS),
+	 * a monetary-only partial refund creates a refund line item with qty 0. The refund's
+	 * get_item_count() then returns float 0.0, which the strict `0 === $order_items` guard
+	 * in OrderTraits::get_item_shipping_amount() does not catch, causing a Division by zero.
+	 */
+	public function test_sync_monetary_only_refund_with_float_quantities() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Simulate a decimal-quantity setup (e.g. WCPOS) where stock amounts are floats.
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_shipping_total( 10 );
+		$order->set_total( 35 );
+		$order->save();
+
+		// Monetary-only refund: refund an amount against the line item without refunding any quantity.
+		$refund = null;
+		foreach ( $order->get_items() as $item_id => $item ) {
+			$refund = wc_create_refund(
+				array(
+					'amount'     => 5,
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						$item_id => array(
+							'qty'          => 0,
+							'refund_total' => 5,
+						),
+					),
+				)
+			);
+			break;
+		}
+
+		$this->assertNotWPError( $refund, 'Refund creation should succeed' );
+
+		$data_store = new ProductsDataStore();
+		$result     = $data_store->sync_order_products( $refund->get_id() );
+
+		$this->assertTrue( $result, 'Syncing the refund should complete without a Division by zero error' );
+
+		remove_filter( 'woocommerce_stock_amount', 'floatval' );
+	}
+
+	/**
 	 * Tests that full refunds are reflected in product stats.
 	 *
 	 * The full refunds here are the ones that change the order status to refunded.

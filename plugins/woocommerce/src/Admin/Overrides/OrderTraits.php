@@ -34,7 +34,9 @@ trait OrderTraits {
 		// For example, if 2 items are refunded from an order with 4 items. The remaining 2 items should have the shipping fee of the refunded items distributed to them.
 		$order_items = null !== $order_items_count ? $order_items_count : $this->get_item_count();
 
-		if ( 0 === $order_items ) {
+		// Use a loose check so a float 0.0 item count (e.g. decimal-quantity stores) is also
+		// treated as zero, preventing a Division by zero error below.
+		if ( ! $order_items ) {
 			return 0;
 		}
 
@@ -65,7 +67,9 @@ trait OrderTraits {
 		// For example, if 2 items are refunded from an order with 4 items. The remaining 2 items should have the shipping tax of the refunded items distributed to them.
 		$order_items = null !== $order_items_count ? $order_items_count : $this->get_item_count();
 
-		if ( 0 === $order_items ) {
+		// Use a loose check so a float 0.0 item count (e.g. decimal-quantity stores) is also
+		// treated as zero, preventing a Division by zero error below.
+		if ( ! $order_items ) {
 			return 0;
 		}
 
