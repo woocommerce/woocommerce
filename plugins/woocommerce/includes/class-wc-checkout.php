@@ -11,6 +11,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -680,7 +681,10 @@ class WC_Checkout {
 	 * @param WC_Cart  $cart  Cart instance.
 	 */
 	public function create_order_tax_lines( &$order, $cart ) {
-		foreach ( array_keys( $cart->get_cart_contents_taxes() + $cart->get_shipping_taxes() + $cart->get_fee_taxes() ) as $tax_rate_id ) {
+		$tax_rate_ids     = array_keys( $cart->get_cart_contents_taxes() + $cart->get_shipping_taxes() + $cart->get_fee_taxes() );
+		$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( $tax_rate_ids );
+
+		foreach ( $tax_rate_ids as $tax_rate_id ) {
 			/**
 			 * Controls the zero rate tax ID.
 			 *
@@ -691,16 +695,17 @@ class WC_Checkout {
 			 * @param string $tax_rate_id The ID of the zero rate tax.
 			 */
 			if ( $tax_rate_id && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
-				$item = new WC_Order_Item_Tax();
+				$tax_rate_object_or_id = $tax_rate_objects[ $tax_rate_id ] ?? $tax_rate_id;
+				$item                  = new WC_Order_Item_Tax();
 				$item->set_props(
 					array(
 						'rate_id'            => $tax_rate_id,
 						'tax_total'          => $cart->get_tax_amount( $tax_rate_id ),
 						'shipping_tax_total' => $cart->get_shipping_tax_amount( $tax_rate_id ),
-						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_id ),
-						'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
-						'compound'           => WC_Tax::is_compound( $tax_rate_id ),
-						'rate_percent'       => WC_Tax::get_rate_percent_value( $tax_rate_id ),
+						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_object_or_id ),
+						'label'              => WC_Tax::get_rate_label( $tax_rate_object_or_id ),
+						'compound'           => WC_Tax::is_compound( $tax_rate_object_or_id ),
+						'rate_percent'       => WC_Tax::get_rate_percent_value( $tax_rate_object_or_id ),
 					)
 				);
 

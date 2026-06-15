@@ -746,18 +746,16 @@ class WC_Install {
 	}
 
 	/**
-	 * Check if all the base tables are present.
+	 * Get the names of any missing WooCommerce base tables.
 	 *
-	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
-	 * @param bool $execute       Whether to execute get_schema queries as well.
+	 * Unlike verify_base_tables(), this method has no side effects: it only inspects
+	 * the database and reports which required tables are missing.
 	 *
-	 * @return array List of queries.
+	 * @since 11.0.0
+	 *
+	 * @return string[] List of missing table names.
 	 */
-	public static function verify_base_tables( $modify_notice = true, $execute = false ) {
-		if ( $execute ) {
-			self::create_tables();
-		}
-
+	public static function get_missing_base_tables(): array {
 		$schema = self::get_schema();
 
 		$hpos_settings = filter_var_array(
@@ -776,14 +774,27 @@ class WC_Install {
 				->get_database_schema();
 		}
 
-		$missing_tables = wc_get_container()
+		return wc_get_container()
 			->get( DatabaseUtil::class )
 			->get_missing_tables( $schema );
+	}
+
+	/**
+	 * Check if all the base tables are present, updating the stored schema status accordingly.
+	 *
+	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
+	 * @param bool $execute       Whether to execute get_schema queries as well.
+	 *
+	 * @return string[] List of missing table names.
+	 */
+	public static function verify_base_tables( $modify_notice = true, $execute = false ) {
+		if ( $execute ) {
+			self::create_tables();
+		}
+
+		$missing_tables = self::get_missing_base_tables();
 
 		if ( 0 < count( $missing_tables ) ) {
-			if ( $modify_notice ) {
-				WC_Admin_Notices::add_notice( 'base_tables_missing' );
-			}
 			update_option( 'woocommerce_schema_missing_tables', $missing_tables );
 		} else {
 			if ( $modify_notice ) {
