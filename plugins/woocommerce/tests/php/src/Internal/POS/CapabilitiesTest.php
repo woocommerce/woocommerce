@@ -82,6 +82,42 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A multisite super admin has no implicit POS access until granted a cap.
+	 *
+	 * user_can() grants a super admin every capability on multisite, but POS access
+	 * is keyed on stored woocommerce_pos_* caps (WP_User::$allcaps), which omits the
+	 * runtime super-admin grant. A super admin therefore needs an explicit cap like
+	 * anyone else. Skips off multisite, where there is no super-admin concept.
+	 */
+	public function test_super_admin_has_no_implicit_access_on_multisite(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Super-admin access only applies on multisite.' );
+		}
+
+		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		grant_super_admin( $user_id );
+
+		$this->assertTrue(
+			user_can( $user_id, Capabilities::CAP_ISSUE_REFUNDS ),
+			'Sanity: a super admin passes user_can() for any cap.'
+		);
+		$this->assertFalse(
+			Capabilities::has_pos_access( $user_id ),
+			'A super admin must not implicitly count as POS staff.'
+		);
+
+		$user = get_userdata( $user_id );
+		$user->add_cap( Capabilities::CAP_ISSUE_REFUNDS );
+		$this->assertTrue(
+			Capabilities::has_pos_access( $user_id ),
+			'A super admin gains POS access once granted an explicit woocommerce_pos_* cap.'
+		);
+
+		revoke_super_admin( $user_id );
+		wp_delete_user( $user_id );
+	}
+
+	/**
 	 * @testdox has_pos_access is true once the user holds any single woocommerce_pos_* cap.
 	 *
 	 * Locks in the granular-caps semantics: a back-office refunds user holding
