@@ -736,6 +736,7 @@
 						"templates/**/*.html",
 						"tests/e2e-pw/bin/blocks/**",
 						"tests/e2e-pw/fixtures/blocks-setup.ts",
+						"tests/e2e-pw/playwright.config.ts",
 						"tests/e2e-pw/content-templates/blocks/**",
 						"tests/e2e-pw/test-data/blocks/**",
 						"tests/e2e-pw/test-plugins/blocks/**",
@@ -778,6 +779,7 @@
 						"templates/**/*.html",
 						"tests/e2e-pw/bin/blocks/**",
 						"tests/e2e-pw/fixtures/blocks-setup.ts",
+						"tests/e2e-pw/playwright.config.ts",
 						"tests/e2e-pw/content-templates/blocks/**",
 						"tests/e2e-pw/test-data/blocks/**",
 						"tests/e2e-pw/test-plugins/blocks/**",
@@ -821,6 +823,7 @@
 					"changes": [
 						"tests/e2e-pw/bin/blocks/**",
 						"tests/e2e-pw/fixtures/blocks-setup.ts",
+						"tests/e2e-pw/playwright.config.ts",
 						"tests/e2e-pw/content-templates/blocks/**",
 						"tests/e2e-pw/test-data/blocks/**",
 						"tests/e2e-pw/test-plugins/blocks/**",
@@ -866,6 +869,7 @@
 					"changes": [
 						"tests/e2e-pw/bin/blocks/**",
 						"tests/e2e-pw/fixtures/blocks-setup.ts",
+						"tests/e2e-pw/playwright.config.ts",
 						"tests/e2e-pw/content-templates/blocks/**",
 						"tests/e2e-pw/test-data/blocks/**",
 						"tests/e2e-pw/test-plugins/blocks/**",
