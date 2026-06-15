@@ -117,7 +117,7 @@ defined( 'ABSPATH' ) || exit;
 						'wrapper_class' => 'form-row',
 					)
 				);
-				
+
 				woocommerce_wp_text_input(
 					array(
 						'id'            => "variable_mpn{$loop}",

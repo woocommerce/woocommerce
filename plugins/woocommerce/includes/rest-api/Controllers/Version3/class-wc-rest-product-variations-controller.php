@@ -1308,8 +1308,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'description'       => __( 'Limit result set to product variations with specified MPN(s).', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
-      'validate_callback' => 'rest_validate_request_arg',
-    );
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 
 		$params['pos_products_only'] = array(
 			'description'       => __( 'Limit result set to variations visible in Point of Sale.', 'woocommerce' ),

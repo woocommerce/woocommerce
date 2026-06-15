@@ -417,7 +417,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			unset( $request['mpn'] );
 		}
-		
+
 		if ( ! empty( $request['global_unique_id'] ) ) {
 			$global_unique_ids  = array_map( 'trim', explode( ',', $request['global_unique_id'] ) );
 			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
@@ -874,7 +874,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		if ( isset( $request['global_unique_id'] ) ) {
 			$product->set_global_unique_id( wc_clean( $request['global_unique_id'] ) );
 		}
-		
+
 		// MPN.
 		if ( isset( $request['mpn'] ) ) {
 			$product->set_mpn( wc_clean( $request['mpn'] ) );
@@ -2013,7 +2013,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'sanitize_callback' => 'rest_sanitize_boolean',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		
+
 		$params['mpn'] = array(
 			'description'       => __( 'Limit result set to products with specific MPN(s). Use commas to separate.', 'woocommerce' ),
 			'type'              => 'string',
@@ -2128,7 +2128,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			if ( in_array( 'global_unique_id', $fields, true ) ) {
 				$data['global_unique_id'] = $product->get_global_unique_id( $context );
 			}
-			
+
 			if ( in_array( 'mpn', $fields, true ) ) {
 				$data['mpn'] = $product->get_mpn( $context );
 			}
