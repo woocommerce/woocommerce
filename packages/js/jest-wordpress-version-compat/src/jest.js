@@ -4,6 +4,7 @@ const fs = require( 'node:fs' );
 const path = require( 'node:path' );
 
 const { prepare } = require( './cache' );
+const { createCachedTransformConfig } = require( './jest-transform' );
 
 const singletonPackages = [ 'react', 'react-dom' ];
 
@@ -54,10 +55,8 @@ function createSingletonModuleNameMapper( { cacheDirectory } ) {
 }
 
 function createJestModuleNameMapper( options = {} ) {
-	const preparedCache = prepare( options );
-
 	return {
-		...Object.entries( preparedCache.packagePaths ).reduce(
+		...Object.entries( options.packagePaths ).reduce(
 			( moduleNameMapper, [ packageName, packagePath ] ) => {
 				moduleNameMapper[ `^${ packageName }$` ] = packagePath;
 
@@ -65,19 +64,28 @@ function createJestModuleNameMapper( options = {} ) {
 			},
 			{}
 		),
-		...createSingletonModuleNameMapper( preparedCache ),
+		...createSingletonModuleNameMapper( options ),
 	};
 }
 
 function withWordPressDependencyCompat( jestConfig = {}, options = {} ) {
+	const preparedCache = prepare( options );
+	const cachedTransformConfig = createCachedTransformConfig( {
+		cacheDirectory: preparedCache.cacheDirectory,
+		transform: jestConfig.transform,
+		transformIgnorePatterns: jestConfig.transformIgnorePatterns,
+		cwd: options.cwd,
+	} );
+
 	return {
 		...jestConfig,
 		moduleNameMapper: {
 			...removeSingletonModuleNameMapperEntries(
 				jestConfig.moduleNameMapper
 			),
-			...createJestModuleNameMapper( options ),
+			...createJestModuleNameMapper( preparedCache ),
 		},
+		...cachedTransformConfig,
 	};
 }
 

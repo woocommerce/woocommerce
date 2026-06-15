@@ -12,6 +12,28 @@ const PREVIOUS_WORDPRESS_DIST_TAG = 'wp-100.1';
 const PREVIOUS_WORDPRESS_PACKAGE_VERSION = '91.0.0';
 const LATEST_WORDPRESS_DIST_TAG = 'wp-101.0';
 const LATEST_WORDPRESS_PACKAGE_VERSION = '92.0.0';
+const mockPackageDependencies = {
+	'@wordpress/components': {
+		'@wordpress/compose': '^7.0.0',
+		'@wordpress/icons': '^10.0.0',
+		'@wordpress/private-apis': '^1.0.0',
+	},
+	'@wordpress/compose': {
+		'@wordpress/element': '^6.0.0',
+	},
+	'@wordpress/data': {
+		'@wordpress/icons': '^10.0.0',
+		'@wordpress/private-apis': '^1.0.0',
+	},
+};
+
+function mockGetPackageNameFromSpec( packageSpec ) {
+	const versionSeparatorIndex = packageSpec.indexOf( '@', 1 );
+
+	return versionSeparatorIndex === -1
+		? packageSpec
+		: packageSpec.slice( 0, versionSeparatorIndex );
+}
 
 jest.mock( 'node:child_process', () => ( {
 	spawnSync: jest.fn( ( _command, args ) => {
@@ -27,6 +49,18 @@ jest.mock( 'node:child_process', () => ( {
 					[ LATEST_WORDPRESS_DIST_TAG ]:
 						LATEST_WORDPRESS_PACKAGE_VERSION,
 				} ),
+				stderr: '',
+			};
+		}
+
+		if ( args[ 0 ] === 'view' && args[ 2 ] === 'dependencies' ) {
+			return {
+				status: 0,
+				stdout: JSON.stringify(
+					mockPackageDependencies[
+						mockGetPackageNameFromSpec( args[ 1 ] )
+					] || {}
+				),
 				stderr: '',
 			};
 		}
@@ -222,6 +256,16 @@ describe( 'cache', () => {
 				)
 			)
 		).toEqual( {
+			__dependencies: {
+				'@wordpress/data': {
+					version: LATEST_WORDPRESS_PACKAGE_VERSION,
+					dependencies: mockPackageDependencies[ '@wordpress/data' ],
+				},
+				'@wordpress/private-apis': {
+					version: LATEST_WORDPRESS_PACKAGE_VERSION,
+					dependencies: {},
+				},
+			},
 			__distTags: {
 				'@wordpress/data': LATEST_WORDPRESS_DIST_TAG,
 				'@wordpress/private-apis': LATEST_WORDPRESS_DIST_TAG,
@@ -231,7 +275,7 @@ describe( 'cache', () => {
 		} );
 	} );
 
-	it( 'installs private APIs for cached WordPress packages', () => {
+	it( 'installs transitive WordPress dependencies for cached WordPress packages', () => {
 		const cwd = createFixtureProject( {
 			dependencies: {
 				'@wordpress/components': 'catalog:wp-min',
@@ -249,19 +293,112 @@ describe( 'cache', () => {
 		expect( result.packages ).toEqual( [ '@wordpress/components' ] );
 		expect( result.cachePackages ).toEqual( [
 			'@wordpress/components',
+			'@wordpress/compose',
+			'@wordpress/element',
 			'@wordpress/private-apis',
 		] );
 		expect( result.installedPackages ).toEqual( [
 			'@wordpress/components',
+			'@wordpress/compose',
+			'@wordpress/element',
 			'@wordpress/private-apis',
 		] );
+		expect( result.packagePaths ).toEqual( {
+			'@wordpress/components': path.join(
+				cacheRoot,
+				'latest-1',
+				'node_modules',
+				'@wordpress',
+				'components'
+			),
+		} );
 		expect( spawnSync ).toHaveBeenCalledWith(
 			'npm',
 			expect.arrayContaining( [
 				'install',
 				`@wordpress/components@${ PREVIOUS_WORDPRESS_PACKAGE_VERSION }`,
+				`@wordpress/compose@${ PREVIOUS_WORDPRESS_PACKAGE_VERSION }`,
+				`@wordpress/element@${ PREVIOUS_WORDPRESS_PACKAGE_VERSION }`,
 				`@wordpress/private-apis@${ PREVIOUS_WORDPRESS_PACKAGE_VERSION }`,
 			] ),
+			expect.anything()
+		);
+	} );
+
+	it( 'reuses cached package dependencies for the same package version', () => {
+		const cwd = createFixtureProject( {
+			dependencies: {
+				'@wordpress/data': 'catalog:wp-min',
+			},
+		} );
+		const cacheRoot = path.join( cwd, '.cache' );
+		const cacheDirectory = path.join( cacheRoot, 'latest' );
+
+		createInstalledPackage(
+			cacheDirectory,
+			'@wordpress/data',
+			LATEST_WORDPRESS_PACKAGE_VERSION
+		);
+		createInstalledPackage(
+			cacheDirectory,
+			'@wordpress/private-apis',
+			LATEST_WORDPRESS_PACKAGE_VERSION
+		);
+
+		fs.mkdirSync( cacheDirectory, { recursive: true } );
+		fs.writeFileSync(
+			path.join( cacheDirectory, 'resolved-versions.json' ),
+			JSON.stringify(
+				{
+					__dependencies: {
+						'@wordpress/data': {
+							version: LATEST_WORDPRESS_PACKAGE_VERSION,
+							dependencies:
+								mockPackageDependencies[ '@wordpress/data' ],
+						},
+						'@wordpress/private-apis': {
+							version: LATEST_WORDPRESS_PACKAGE_VERSION,
+							dependencies: {},
+						},
+					},
+					__distTags: {
+						'@wordpress/data': LATEST_WORDPRESS_DIST_TAG,
+						'@wordpress/private-apis': LATEST_WORDPRESS_DIST_TAG,
+					},
+					'@wordpress/data': LATEST_WORDPRESS_PACKAGE_VERSION,
+					'@wordpress/private-apis':
+						LATEST_WORDPRESS_PACKAGE_VERSION,
+				},
+				null,
+				2
+			)
+		);
+
+		prepare( {
+			cwd,
+			cacheRoot,
+			wpVersion: 'latest',
+			logger: false,
+		} );
+
+		expect( spawnSync ).not.toHaveBeenCalledWith(
+			'npm',
+			[
+				'view',
+				`@wordpress/data@${ LATEST_WORDPRESS_PACKAGE_VERSION }`,
+				'dependencies',
+				'--json',
+			],
+			expect.anything()
+		);
+		expect( spawnSync ).not.toHaveBeenCalledWith(
+			'npm',
+			[
+				'view',
+				`@wordpress/private-apis@${ LATEST_WORDPRESS_PACKAGE_VERSION }`,
+				'dependencies',
+				'--json',
+			],
 			expect.anything()
 		);
 	} );
@@ -382,6 +519,16 @@ describe( 'cache', () => {
 				)
 			)
 		).toEqual( {
+			__dependencies: {
+				'@wordpress/data': {
+					version: LATEST_WORDPRESS_PACKAGE_VERSION,
+					dependencies: mockPackageDependencies[ '@wordpress/data' ],
+				},
+				'@wordpress/private-apis': {
+					version: LATEST_WORDPRESS_PACKAGE_VERSION,
+					dependencies: {},
+				},
+			},
 			__distTags: {
 				'@wordpress/data': LATEST_WORDPRESS_DIST_TAG,
 				'@wordpress/private-apis': LATEST_WORDPRESS_DIST_TAG,

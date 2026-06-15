@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require( 'node:fs' );
+const path = require( 'node:path' );
 
 const cache = require( '../cache' );
 
@@ -156,6 +157,56 @@ describe( 'jest adapter', () => {
 			'^@wordpress/data$':
 				'/tmp/cache/latest/node_modules/@wordpress/data',
 		} );
+	} );
+
+	it( 'mirrors transformed node modules into the compatibility cache', () => {
+		fs.existsSync.mockImplementation( ( filePath ) =>
+			filePath.endsWith( 'parsel-js/package.json' )
+		);
+		mockPreparedCache( {
+			'@wordpress/block-editor':
+				'/tmp/cache/latest-1/node_modules/@wordpress/block-editor',
+		} );
+
+		const config = withWordPressDependencyCompat(
+			{
+				transformIgnorePatterns: [
+					'node_modules/(?!(?:\\.pnpm|parsel-js)/)',
+				],
+				transform: {
+					'node_modules/parsel-js/.*\\.js$': 'babel-jest',
+					'src/.*\\.js$': 'babel-jest',
+				},
+			},
+			{
+				cacheRoot: '/tmp/cache',
+				packages: [ '@wordpress/block-editor' ],
+				wpVersion: 'latest-1',
+			}
+		);
+
+		expect( config.transformIgnorePatterns ).toEqual( [
+			'node_modules/(?!(?:\\.cache/jest-wordpress-version-compat/latest/node_modules/(?:parsel-js)|\\.pnpm|parsel-js)/)',
+		] );
+		expect( config.transform ).toMatchObject( {
+			'node_modules/parsel-js/.*\\.js$': 'babel-jest',
+			'src/.*\\.js$': 'babel-jest',
+		} );
+		expect( Object.keys( config.transform ).slice( 0, 2 ) ).toEqual( [
+			'node_modules/.cache/jest-wordpress-version-compat/latest/node_modules/parsel-js/.*\\.js$',
+			'node_modules/parsel-js/.*\\.js$',
+		] );
+		expect(
+			config.transform[
+				'node_modules/.cache/jest-wordpress-version-compat/latest/node_modules/parsel-js/.*\\.js$'
+			]
+		).toBe(
+			require.resolve( 'babel-jest', {
+				paths: [
+					path.resolve( __dirname, '../../../internal-js-tests' ),
+				],
+			} )
+		);
 	} );
 
 	it( 'keeps the package root export limited to public Jest helpers', () => {
