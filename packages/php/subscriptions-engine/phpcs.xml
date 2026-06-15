@@ -11,6 +11,35 @@
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 
+	<!-- Test method names are self-documenting; do not require per-method docblocks. -->
+	<rule ref="Squiz.Commenting.FunctionComment.Missing">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Commenting.DocComment.MissingShort">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<!--
+		The Core zone is WordPress-free by design (entities, value objects, the
+		state machine). WordPress-specific output-escaping rules do not apply
+		there: Core throws plain exceptions and never echoes, and pulling
+		esc_*() into Core would violate the zoning rule it exists to enforce.
+		Escaping is the integration layer's responsibility at the boundary.
+	-->
+	<rule ref="WordPress.Security.EscapeOutput">
+		<exclude-pattern>src/Core/*</exclude-pattern>
+	</rule>
+
+	<!--
+		The slow-meta-query heuristic targets wp_postmeta-style tables. The
+		engine's own contract-meta table merely shares the meta_key/meta_value
+		column names; it is always queried by indexed contract_id, so the
+		heuristic does not apply to the storage layer.
+	-->
+	<rule ref="WordPress.DB.SlowDBQuery">
+		<exclude-pattern>src/Integration/Storage/*</exclude-pattern>
+	</rule>
+
 	<!-- Exclude bootstrap from the SeparateFunctionsFromOO.Mixed rule -->
 	<rule ref="Universal.Files.SeparateFunctionsFromOO.Mixed">
 		<exclude-pattern>tests/unit/_bootstrap.php</exclude-pattern>

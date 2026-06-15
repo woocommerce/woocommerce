@@ -1,0 +1,27 @@
+{
+	"phpVersion": "8.1",
+	"plugins": [
+		"."
+	],
+	"config": {
+		"WP_DEBUG_LOG": true,
+		"WP_DEBUG_DISPLAY": true,
+		"ALTERNATE_WP_CRON": true
+	},
+	"mappings": {
+	},
+	"env": {
+		"development": {
+			"port": 8886
+		},
+		"tests": {
+			"port": 8086,
+			"plugins": [
+				"."
+			],
+			"themes": [],
+			"config": {
+			}
+		}
+	}
+}

@@ -1,0 +1,141 @@
+<?php
+/**
+ * Unit tests for the Plan entity (pure-Core behavior: validation + pricing).
+ *
+ * @package WooCommerce\Subscriptions\Engine
+ */
+
+declare( strict_types=1 );
+
+namespace WooCommerce\Subscriptions\Engine\Tests\Unit\Core\Entity;
+
+use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
+use WooCommerce\Subscriptions\Engine\Core\Entity\Plan;
+use WooCommerce\Subscriptions\Engine\Core\ValueObject\Billing_Policy;
+use WooCommerce\Subscriptions\Engine\Core\ValueObject\Pricing_Policy;
+
+/**
+ * @covers \WooCommerce\Subscriptions\Engine\Core\Entity\Plan
+ */
+class Plan_Test extends TestCase {
+
+	private function billing(): Billing_Policy {
+		return Billing_Policy::from_array(
+			array(
+				'period'   => 'month',
+				'interval' => 1,
+			)
+		);
+	}
+
+	public function test_create_defaults_category_and_owner(): void {
+		$plan = Plan::create(
+			5,
+			array(
+				'name'           => 'Monthly box',
+				'billing_policy' => $this->billing(),
+			)
+		);
+
+		$this->assertNull( $plan->get_id() );
+		$this->assertSame( 5, $plan->get_group_id() );
+		$this->assertSame( Plan::DEFAULT_CATEGORY, $plan->get_category() );
+		$this->assertNull( $plan->get_owner() );
+	}
+
+	public function test_calculate_price_delegates_to_pricing_policy(): void {
+		$plan = Plan::create(
+			1,
+			array(
+				'name'           => 'Discounted',
+				'billing_policy' => $this->billing(),
+				'pricing_policy' => Pricing_Policy::from_array(
+					array(
+						'policies' => array(
+							array(
+								'type'  => 'percentage',
+								'value' => 20,
+							),
+						),
+					)
+				),
+			)
+		);
+
+		$this->assertSame( 80.0, $plan->calculate_price( 100.0 ) );
+	}
+
+	public function test_calculate_price_without_pricing_policy_returns_base(): void {
+		$plan = Plan::create(
+			1,
+			array(
+				'name'           => 'Plain',
+				'billing_policy' => $this->billing(),
+			)
+		);
+
+		$this->assertSame( 42.0, $plan->calculate_price( 42.0 ) );
+	}
+
+	public function test_invalid_pricing_policy_type_is_rejected(): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		Plan::create(
+			1,
+			array(
+				'name'           => 'Bad',
+				'billing_policy' => $this->billing(),
+				'pricing_policy' => Pricing_Policy::from_array(
+					array(
+						'policies' => array(
+							array(
+								'type'  => 'mystery',
+								'value' => 1,
+							),
+						),
+					)
+				),
+			)
+		);
+	}
+
+	public function test_percentage_over_one_hundred_is_rejected(): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		Plan::create(
+			1,
+			array(
+				'name'           => 'Too much',
+				'billing_policy' => $this->billing(),
+				'pricing_policy' => Pricing_Policy::from_array(
+					array(
+						'policies' => array(
+							array(
+								'type'  => 'percentage',
+								'value' => 150,
+							),
+						),
+					)
+				),
+			)
+		);
+	}
+
+	public function test_to_storage_exposes_owner_and_decoded_policies(): void {
+		$plan = Plan::create(
+			3,
+			array(
+				'name'           => 'Owned',
+				'billing_policy' => $this->billing(),
+				'owner'          => 'lite',
+			)
+		);
+
+		$storage = $plan->to_storage();
+
+		$this->assertSame( 'lite', $storage['owner'] );
+		$this->assertSame( 3, $storage['group_id'] );
+		$this->assertIsArray( $storage['billing_policy'] );
+	}
+}
