@@ -156,7 +156,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			),
 			'shipping_class'        => $object->get_shipping_class(),
 			'shipping_class_id'     => $object->get_shipping_class_id(),
-			'image'                 => $this->get_image( $object, $context ),
+			'image'                 => $this->get_image( $object, $context, isset( $request['image_size'] ) ? $request['image_size'] : 'full' ),
 			'gallery_image_ids'     => $object instanceof WC_Product ? array_map( 'intval', $object->get_gallery_image_ids() ) : array(),
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
@@ -448,11 +448,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	/**
 	 * Get the image for a product variation.
 	 *
-	 * @param WC_Product_Variation $variation Variation data.
-	 * @param string               $context   Context of the request: 'view' or 'edit'.
+	 * @param WC_Product_Variation $variation  Variation data.
+	 * @param string               $context    Context of the request: 'view' or 'edit'.
+	 * @param string               $image_size Optional. WordPress registered image size to use for the image src. Default 'full'.
 	 * @return array
 	 */
-	protected function get_image( $variation, $context = 'view' ) {
+	protected function get_image( $variation, $context = 'view', $image_size = 'full' ) {
 		if ( ! $variation->get_image_id( $context ) ) {
 			return;
 		}
@@ -463,7 +464,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			return;
 		}
 
-		$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+		$attachment = wp_get_attachment_image_src( $attachment_id, $image_size );
 		if ( ! is_array( $attachment ) ) {
 			return;
 		}
@@ -1284,6 +1285,14 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'description'       => __( 'Limit result set to variations visible in Point of Sale.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['image_size'] = array(
+			'description'       => __( 'Use a specific registered image size for the returned variation image src. Falls back to the full size if the requested size is not registered.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'full',
+			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

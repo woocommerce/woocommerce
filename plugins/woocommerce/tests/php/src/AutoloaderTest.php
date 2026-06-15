@@ -180,6 +180,326 @@ class AutoloaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A torn/partially-written file resolved mid-upgrade must not fatal: the handler
+	 * leaves the class unresolved (so e.g. class_exists() returns false) rather than
+	 * letting the include's ParseError escape and kill the request.
+	 *
+	 * @testdox the registered handler degrades (does not fatal) on a torn class file.
+	 */
+	public function test_registered_handler_degrades_on_a_torn_class_file(): void {
+		$handler = Autoloader::register_woocommerce_psr4_fallback();
+		$this->assertInstanceOf( \Closure::class, $handler, 'Bootstrap must register a handler.' );
+
+		$suffix = 'ReproTorn' . str_replace( '.', '', uniqid( '', true ) );
+		$dir    = dirname( WC_PLUGIN_FILE ) . '/src/' . $suffix;
+		$file   = $dir . '/Widget.php';
+		$class  = 'Automattic\\WooCommerce\\' . $suffix . '\\Widget';
+
+		try {
+			wp_mkdir_p( $dir );
+			// A torn / partially-written file mid-upgrade: a syntax error (unclosed class body).
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture; WP_Filesystem adds no value here.
+			file_put_contents( $file, "<?php\nnamespace Automattic\\WooCommerce\\{$suffix};\nclass Widget {\n" );
+			clearstatcache( true, $file );
+
+			// The handler must not let the include's ParseError escape.
+			$threw = false;
+			try {
+				$handler( $class );
+			} catch ( \Throwable $e ) {
+				$threw = true;
+			}
+
+			$this->assertFalse(
+				$threw,
+				'Handler must not let a torn-file ParseError escape — it must degrade to a miss.'
+			);
+			$this->assertFalse(
+				class_exists( $class, false ),
+				'A torn class file must be left unresolved, not loaded or fataled.'
+			);
+		} finally {
+			if ( file_exists( $file ) ) {
+				wp_delete_file( $file );
+			}
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture cleanup.
+			}
+		}
+	}
+
+	/**
+	 * A torn file that degraded to a miss must stay retryable: once the upgrade finishes
+	 * writing the file, a later probe in the same request loads the class. With a
+	 * `require_once` in the handler this fails — PHP records the path as included BEFORE
+	 * compiling it, so the caught ParseError would poison every later attempt and the
+	 * completed file could never load for the rest of the request.
+	 *
+	 * @testdox the registered handler loads a torn class file once it is completed.
+	 */
+	public function test_registered_handler_recovers_after_a_torn_file_is_completed(): void {
+		$handler = Autoloader::register_woocommerce_psr4_fallback();
+		$this->assertInstanceOf( \Closure::class, $handler, 'Bootstrap must register a handler.' );
+
+		$suffix = 'ReproRetry' . str_replace( '.', '', uniqid( '', true ) );
+		$dir    = dirname( WC_PLUGIN_FILE ) . '/src/' . $suffix;
+		$file   = $dir . '/Widget.php';
+		$class  = 'Automattic\\WooCommerce\\' . $suffix . '\\Widget';
+
+		try {
+			wp_mkdir_p( $dir );
+			// A torn / partially-written file mid-upgrade: a syntax error (unclosed class body).
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture; WP_Filesystem adds no value here.
+			file_put_contents( $file, "<?php\nnamespace Automattic\\WooCommerce\\{$suffix};\nclass Widget {\n" );
+			clearstatcache( true, $file );
+
+			// First probe: degrades to a miss (covered by the torn-file test above).
+			$handler( $class );
+			$this->assertFalse( class_exists( $class, false ), 'Precondition: torn file must degrade to a miss.' );
+
+			// The upgrade finishes writing the file mid-request.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture; WP_Filesystem adds no value here.
+			file_put_contents( $file, "<?php\nnamespace Automattic\\WooCommerce\\{$suffix};\nclass Widget {}\n" );
+			clearstatcache( true, $file );
+
+			$handler( $class );
+			$this->assertTrue(
+				class_exists( $class, false ),
+				'Handler must load the class once the torn file is completed — the failed attempt must not poison the retry.'
+			);
+		} finally {
+			if ( file_exists( $file ) ) {
+				wp_delete_file( $file );
+			}
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture cleanup.
+			}
+		}
+	}
+
+	/**
+	 * The handler must never re-execute a file that already loaded successfully: a second
+	 * include of a file whose class is already declared is an UNCATCHABLE "Cannot redeclare
+	 * class" fatal. Reproduced here with a file whose declared class does not match the
+	 * probed name, so the first probe executes the file without resolving the class and a
+	 * second probe resolves the same, already-executed file. If the guard regresses, this
+	 * test fatals the PHPUnit process rather than failing an assertion.
+	 *
+	 * @testdox the registered handler never re-executes an already-included file.
+	 */
+	public function test_registered_handler_skips_an_already_included_file(): void {
+		$handler = Autoloader::register_woocommerce_psr4_fallback();
+		$this->assertInstanceOf( \Closure::class, $handler, 'Bootstrap must register a handler.' );
+
+		$suffix = 'ReproRogue' . str_replace( '.', '', uniqid( '', true ) );
+		$dir    = dirname( WC_PLUGIN_FILE ) . '/src/' . $suffix;
+		$file   = $dir . '/Widget.php';
+		$class  = 'Automattic\\WooCommerce\\' . $suffix . '\\Widget';
+
+		try {
+			wp_mkdir_p( $dir );
+			// A rogue file: parses fine but declares a class that does not match its PSR-4 path.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture; WP_Filesystem adds no value here.
+			file_put_contents( $file, "<?php\nnamespace Automattic\\WooCommerce\\{$suffix};\nclass Mismatch {}\n" );
+			clearstatcache( true, $file );
+
+			// First probe executes the file (declares Mismatch) without resolving Widget.
+			$handler( $class );
+			$this->assertFalse( class_exists( $class, false ), 'Precondition: the probed class must stay unresolved.' );
+			$this->assertTrue(
+				in_array( realpath( $file ), get_included_files(), true ),
+				'Precondition: the first probe must have executed the rogue file.'
+			);
+
+			// Second probe resolves the same file again; the guard must skip it instead of
+			// re-executing (which would be an uncatchable "Cannot redeclare class" fatal).
+			$handler( $class );
+			$this->assertFalse(
+				class_exists( $class, false ),
+				'A re-probe of an already-executed file must degrade to a miss.'
+			);
+		} finally {
+			if ( file_exists( $file ) ) {
+				wp_delete_file( $file );
+			}
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture cleanup.
+			}
+		}
+	}
+
+	/**
+	 * The redeclare guard must also skip a file the handler never touched but that some
+	 * OTHER mechanism (the primary autoloader, a manual require) already executed. This is
+	 * the get_included_files() branch of the guard: the handler's own $loaded/$attempted
+	 * sets know nothing about the file, so only that check stands between a re-probe and
+	 * an uncatchable "Cannot redeclare class" fatal. If the guard regresses, this test
+	 * fatals the PHPUnit process rather than failing an assertion.
+	 *
+	 * @testdox the registered handler never re-executes a file another mechanism already loaded.
+	 */
+	public function test_registered_handler_skips_a_file_another_mechanism_loaded(): void {
+		$handler = Autoloader::register_woocommerce_psr4_fallback();
+		$this->assertInstanceOf( \Closure::class, $handler, 'Bootstrap must register a handler.' );
+
+		$suffix = 'ReproForeign' . str_replace( '.', '', uniqid( '', true ) );
+		$dir    = dirname( WC_PLUGIN_FILE ) . '/src/' . $suffix;
+		$file   = $dir . '/Widget.php';
+		$class  = 'Automattic\\WooCommerce\\' . $suffix . '\\Widget';
+
+		try {
+			wp_mkdir_p( $dir );
+			// A rogue file: parses fine but declares a class that does not match its PSR-4 path,
+			// so a probe for Widget keeps resolving to it without ever declaring Widget.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture; WP_Filesystem adds no value here.
+			file_put_contents( $file, "<?php\nnamespace Automattic\\WooCommerce\\{$suffix};\nclass Mismatch {}\n" );
+			clearstatcache( true, $file );
+
+			// Another mechanism — not the handler — executes the file (declares Mismatch).
+			require $file;
+			$this->assertTrue(
+				in_array( realpath( $file ), get_included_files(), true ),
+				'Precondition: the file must be on record as executed outside the handler.'
+			);
+
+			// The probe resolves the same file; the guard must skip it instead of
+			// re-executing (which would be an uncatchable "Cannot redeclare class" fatal).
+			$handler( $class );
+			$this->assertFalse(
+				class_exists( $class, false ),
+				'A probe of a file another mechanism executed must degrade to a miss.'
+			);
+		} finally {
+			if ( file_exists( $file ) ) {
+				wp_delete_file( $file );
+			}
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture cleanup.
+			}
+		}
+	}
+
+	/**
+	 * A torn file that COMPILES but fails while linking — e.g. a class whose parent is not
+	 * written yet during a file-by-file upgrade — must also stay retryable. PHP records a
+	 * plain include's path in get_included_files() after compilation but BEFORE the link
+	 * error, so a guard that skips any already-included path would poison the completed file
+	 * for the rest of the request. This test fails against such a guard and passes when the
+	 * handler tracks only the files it has executed cleanly.
+	 *
+	 * @testdox the registered handler loads a link-failed class file once its dependency exists.
+	 */
+	public function test_registered_handler_recovers_after_a_link_failed_file_is_completed(): void {
+		$handler = Autoloader::register_woocommerce_psr4_fallback();
+		$this->assertInstanceOf( \Closure::class, $handler, 'Bootstrap must register a handler.' );
+
+		$suffix = 'ReproLink' . str_replace( '.', '', uniqid( '', true ) );
+		$dir    = dirname( WC_PLUGIN_FILE ) . '/src/' . $suffix;
+		$file   = $dir . '/Widget.php';
+		$class  = 'Automattic\\WooCommerce\\' . $suffix . '\\Widget';
+
+		try {
+			wp_mkdir_p( $dir );
+			// Syntactically valid, but extends a sibling class whose file is not written yet:
+			// the include compiles, then throws Error: Class "...Base" not found while linking.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture; WP_Filesystem adds no value here.
+			file_put_contents( $file, "<?php\nnamespace Automattic\\WooCommerce\\{$suffix};\nclass Widget extends Base {}\n" );
+			clearstatcache( true, $file );
+
+			$handler( $class );
+			$this->assertFalse( class_exists( $class, false ), 'Precondition: link-failed file must degrade to a miss.' );
+			$this->assertTrue(
+				in_array( realpath( $file ), get_included_files(), true ),
+				'Precondition: a plain include records the link-failed path, which a get_included_files() guard would skip on retry.'
+			);
+
+			// The upgrade finishes: the dependency lands and the class file is now self-contained.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture; WP_Filesystem adds no value here.
+			file_put_contents( $file, "<?php\nnamespace Automattic\\WooCommerce\\{$suffix};\nclass Widget {}\n" );
+			clearstatcache( true, $file );
+
+			$handler( $class );
+			$this->assertTrue(
+				class_exists( $class, false ),
+				'Handler must load the class once the dependency exists — a link-failed attempt must not poison the retry.'
+			);
+		} finally {
+			if ( file_exists( $file ) ) {
+				wp_delete_file( $file );
+			}
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture cleanup.
+			}
+		}
+	}
+
+	/**
+	 * An include that fails to OPEN — the resolved file vanished or turned unreadable
+	 * between findFile()/realpath() and the include, e.g. the upgrader replacing the old
+	 * plugin directory — emits a warning and returns false instead of throwing. No
+	 * Throwable reaches the handler's catch block in production, so only the include's
+	 * return value distinguishes this failure from a clean load; recording the path as
+	 * loaded would poison every retry after the upgrade restores the file. Reproduced
+	 * deterministically with a DIRECTORY at the class-file path: file_exists() (Composer's
+	 * findFile() predicate) and realpath() both accept it while the include's open fails.
+	 * The temporary error handler keeps the warning a warning, as in production — this
+	 * suite's convertWarningsToExceptions would otherwise turn it into a caught Throwable
+	 * and mask the false-return path under test.
+	 *
+	 * @testdox the registered handler retries a class file whose include failed to open.
+	 */
+	public function test_registered_handler_recovers_after_a_failed_open(): void {
+		$handler = Autoloader::register_woocommerce_psr4_fallback();
+		$this->assertInstanceOf( \Closure::class, $handler, 'Bootstrap must register a handler.' );
+
+		$suffix = 'ReproOpen' . str_replace( '.', '', uniqid( '', true ) );
+		$dir    = dirname( WC_PLUGIN_FILE ) . '/src/' . $suffix;
+		$file   = $dir . '/Widget.php';
+		$class  = 'Automattic\\WooCommerce\\' . $suffix . '\\Widget';
+
+		try {
+			// A directory where the class file belongs: the failed-open shape, minus the race.
+			wp_mkdir_p( $file );
+
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Keeps the include warning a warning, as in production; PHPUnit would convert it to an exception and mask the path under test.
+			set_error_handler(
+				static function () {
+					return true;
+				},
+				E_WARNING
+			);
+			try {
+				$handler( $class );
+			} finally {
+				restore_error_handler();
+			}
+			$this->assertFalse( class_exists( $class, false ), 'Precondition: a failed-open include must degrade to a miss.' );
+
+			// The upgrade completes: the path is now a regular, self-contained class file.
+			rmdir( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture; WP_Filesystem adds no value here.
+			file_put_contents( $file, "<?php\nnamespace Automattic\\WooCommerce\\{$suffix};\nclass Widget {}\n" );
+			clearstatcache( true, $file );
+
+			$handler( $class );
+			$this->assertTrue(
+				class_exists( $class, false ),
+				'Handler must load the class once the file is restored — a failed-open include must not be recorded as loaded.'
+			);
+		} finally {
+			if ( is_dir( $file ) ) {
+				rmdir( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture cleanup.
+			}
+			if ( file_exists( $file ) ) {
+				wp_delete_file( $file );
+			}
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture cleanup.
+			}
+		}
+	}
+
+	/**
 	 * Registration is idempotent: repeated calls return the same handler and never
 	 * stack duplicate autoloaders on the SPL stack.
 	 *

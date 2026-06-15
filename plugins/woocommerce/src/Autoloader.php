@@ -132,10 +132,20 @@ class Autoloader {
 	 *
 	 * Registration is idempotent: at most one handler is ever added per request.
 	 *
+	 * Degrades to null (nothing registered) if the Composer files are unavailable or a
+	 * foreign/malformed `ClassLoader` shape is present. The handler likewise leaves a class
+	 * unresolved — rather than fataling — if a resolved file is torn/unparseable mid-upgrade,
+	 * so a defensive `class_exists()` probe during an upgrade gets `false` instead of an error.
+	 * The failed attempt stays retryable: the handler records only the files it has executed
+	 * cleanly, so once the upgrade finishes writing a file that previously failed to parse,
+	 * link, or run, a later probe in the same request re-attempts and loads it. It never
+	 * re-executes a path it already loaded (an uncatchable "Cannot redeclare class" fatal);
+	 * it cannot, however, guard the first execution of a file that declares a class already
+	 * loaded elsewhere under a non-matching PSR-4 path.
+	 *
 	 * @since 11.0.0
 	 *
-	 * @return \Closure|null The registered autoloader, or null if the Composer files are
-	 *                       unavailable (nothing was registered).
+	 * @return \Closure|null The registered autoloader, or null if no fallback was registered.
 	 */
 	public static function register_woocommerce_psr4_fallback(): ?\Closure {
 		static $registered_handler = null;
@@ -150,16 +160,98 @@ class Autoloader {
 		// rebuilds a throwaway loader per miss from this captured map (for performance — the map
 		// is read once, not on every miss). Do NOT collapse this into a shared loader or a per-miss
 		// build() call: either reintroduces the negative-cache bug the fresh-per-miss design avoids.
-		$availability_probe = self::build_woocommerce_psr4_fallback();
-		if ( null === $availability_probe ) {
+		// Wrapped so a foreign/malformed ClassLoader shape (an unexpected getPrefixesPsr4()) degrades
+		// to "no fallback" rather than fataling the bootstrap — matching build()'s own contract.
+		try {
+			$availability_probe = self::build_woocommerce_psr4_fallback();
+			if ( null === $availability_probe ) {
+				return null;
+			}
+			$psr4_entries = $availability_probe->getPrefixesPsr4();
+		} catch ( \Throwable $e ) {
 			return null;
 		}
-		$psr4_entries = $availability_probe->getPrefixesPsr4();
 
 		$handler = static function ( string $class_name ) use ( $psr4_entries ) {
+			/*
+			 * Paths this handler has executed, so a repeated probe never re-runs a file:
+			 * - $loaded: includes that returned cleanly. Re-including one would redeclare its
+			 *   class — an UNCATCHABLE "Cannot redeclare class" fatal (e.g. a probe whose PSR-4
+			 *   file declares a different class name, then a second probe of the same path).
+			 * - $attempted: every path we have tried, success or failure. Used only to tell our
+			 *   own failed (and therefore retryable) attempt apart from a file some other loader
+			 *   already executed — see the get_included_files() check below.
+			 */
+			static $loaded    = array();
+			static $attempted = array();
+
 			$file = self::find_scoped_file( $class_name, $psr4_entries );
-			if ( null !== $file ) {
-				require_once $file;
+			if ( null === $file ) {
+				return;
+			}
+
+			$canonical = realpath( $file );
+			if ( false !== $canonical ) {
+				// Already executed cleanly by this handler: re-including would redeclare.
+				if ( isset( $loaded[ $canonical ] ) ) {
+					return;
+				}
+
+				/*
+				 * Executed by another mechanism (the primary autoloader, a manual require) but
+				 * never attempted by us: re-including risks the same redeclare fatal, so skip.
+				 * A path WE attempted and that threw is deliberately excluded from this check so
+				 * it stays retryable once the upgrade finishes writing it.
+				 */
+				if ( ! isset( $attempted[ $canonical ] ) && in_array( $canonical, get_included_files(), true ) ) {
+					return;
+				}
+				$attempted[ $canonical ] = true;
+			}
+
+			try {
+				/*
+				 * Deliberately a plain `include`, NOT `require_once`: the *_once variants record
+				 * a path in the engine's included-files table BEFORE compiling it, so a torn
+				 * file's caught error would mark the path included and every later attempt would
+				 * no-op — the completed file could never load for the rest of the request. A
+				 * plain include lets us record success ourselves (in $loaded, below) only after
+				 * it returns, so a file that fails to parse, link (e.g. a parent not yet written
+				 * mid-upgrade), or run stays retryable. A file that vanishes between findFile()
+				 * and here degrades to a warning plus a FALSE return, where require would fatal —
+				 * no Throwable reaches the catch below, so the return value is the only signal
+				 * that nothing was compiled or executed.
+				 */
+				$included = include $file;
+
+				// A false return means the include never OPENED the file (deleted/unreadable
+				// mid-upgrade): nothing ran, so re-including is safe and the path must stay
+				// retryable — recording it as loaded would skip the restored file for the
+				// rest of the request. A successful include of a src/ file never yields false
+				// (class files return 1; the odd config file returns an array), so false here
+				// always means the open failed.
+				if ( false !== $included && false !== $canonical ) {
+					$loaded[ $canonical ] = true;
+				}
+			} catch ( \Throwable $e ) {
+				/*
+				 * A torn/partially-written file mid-upgrade must not turn a class probe into a
+				 * fatal: leave the class unresolved so e.g. class_exists() returns false and the
+				 * request continues, instead of an uncatchable error escaping the autoload handler.
+				 * Surface it under WP_DEBUG so a genuine (non-upgrade) parse/link error in a
+				 * shipped src/ file is not an invisible miss.
+				 */
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+						sprintf(
+							'WooCommerce PSR-4 fallback could not load %1$s for %2$s: %3$s',
+							$file,
+							$class_name,
+							$e->getMessage()
+						)
+					);
+				}
+				return;
 			}
 		};
 

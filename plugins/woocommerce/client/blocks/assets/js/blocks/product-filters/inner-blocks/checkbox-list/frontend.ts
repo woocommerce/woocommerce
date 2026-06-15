@@ -15,10 +15,6 @@ import {
 	isVisualAttributeTermEmpty,
 } from '../../../../base/utils/visual-attribute-terms';
 import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
-import {
-	PRODUCT_FILTERS_STORE_LOCK,
-	PRODUCT_FILTERS_STORE_NAME,
-} from '../../constants';
 
 type CheckboxListItem = SelectableItem< {
 	visual?: VisualAttributeTerm;
@@ -48,11 +44,6 @@ type CheckboxListStore = {
 
 function getParentStore( storeNamespace?: string ) {
 	if ( ! storeNamespace ) return undefined;
-	if ( storeNamespace === PRODUCT_FILTERS_STORE_NAME ) {
-		return store<
-			SelectableItemsParentStore< { visual?: VisualAttributeTerm } >
-		>( storeNamespace, undefined, { lock: PRODUCT_FILTERS_STORE_LOCK } );
-	}
 	return store<
 		SelectableItemsParentStore< { visual?: VisualAttributeTerm } >
 	>( storeNamespace );
