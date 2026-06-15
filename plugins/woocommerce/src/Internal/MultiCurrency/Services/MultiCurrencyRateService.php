@@ -1,0 +1,103 @@
+<?php
+/**
+ * MultiCurrencyRateService class file.
+ */
+
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Internal\MultiCurrency\Services;
+
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistry;
+
+/**
+ * Resolves multi-currency exchange rates for the native runtime.
+ *
+ * @since 11.0.0
+ * @internal Transitional internal component for the native multi-currency runtime.
+ */
+class MultiCurrencyRateService {
+
+	/**
+	 * Rate provider registry.
+	 *
+	 * @var CurrencyRateProviderRegistry
+	 */
+	private CurrencyRateProviderRegistry $provider_registry;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param CurrencyRateProviderRegistry $provider_registry Rate provider registry.
+	 */
+	public function __construct( CurrencyRateProviderRegistry $provider_registry ) {
+		$this->provider_registry = $provider_registry;
+	}
+
+	/**
+	 * Get the exchange rate for a target currency.
+	 *
+	 * @param string $from_currency Source currency.
+	 * @param string $to_currency   Target currency.
+	 * @return float|null
+	 */
+	public function get_rate( string $from_currency, string $to_currency ): ?float {
+		$from_currency = strtolower( $from_currency );
+		$to_currency   = strtolower( $to_currency );
+		$rate_type     = get_option( 'wcpay_multi_currency_exchange_rate_' . $to_currency, 'automatic' );
+
+		if ( 'manual' === $rate_type ) {
+			return $this->get_manual_rate( $to_currency );
+		}
+
+		$provider = $this->provider_registry->get_available_provider();
+		if ( ! $provider ) {
+			return null;
+		}
+
+		$rates = $provider->get_currency_rates( $from_currency, array( $to_currency ) );
+		if ( isset( $rates['currencies'] ) && is_array( $rates['currencies'] ) ) {
+			$rates = $rates['currencies'];
+		}
+
+		return $this->extract_rate( $rates, $to_currency );
+	}
+
+	/**
+	 * Get a manual rate from preserved options.
+	 *
+	 * @param string $to_currency Target currency.
+	 * @return float|null
+	 */
+	private function get_manual_rate( string $to_currency ): ?float {
+		$rate = get_option( 'wcpay_multi_currency_manual_rate_' . $to_currency, null );
+
+		return $this->normalize_rate( $rate );
+	}
+
+	/**
+	 * Extract a target rate from a provider response.
+	 *
+	 * @param array<string,mixed> $rates       Provider rates.
+	 * @param string              $to_currency Target currency.
+	 * @return float|null
+	 */
+	private function extract_rate( array $rates, string $to_currency ): ?float {
+		$rate = $rates[ $to_currency ] ?? $rates[ strtoupper( $to_currency ) ] ?? null;
+
+		return $this->normalize_rate( $rate );
+	}
+
+	/**
+	 * Normalize a rate value.
+	 *
+	 * @param mixed $rate Rate value.
+	 * @return float|null
+	 */
+	private function normalize_rate( $rate ): ?float {
+		if ( ! is_numeric( $rate ) || 0 >= (float) $rate ) {
+			return null;
+		}
+
+		return (float) $rate;
+	}
+}
