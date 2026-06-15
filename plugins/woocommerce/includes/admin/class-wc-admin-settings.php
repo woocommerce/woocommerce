@@ -59,9 +59,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-accounts.php';
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-emails.php';
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-integrations.php';
-				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'launch-your-store' ) ) {
-					$settings[] = include_once __DIR__ . '/settings/class-wc-settings-site-visibility.php';
-				}
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-site-visibility.php';
 				if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
 					$settings[] = include_once __DIR__ . '/settings/class-wc-settings-point-of-sale.php';
 				}
