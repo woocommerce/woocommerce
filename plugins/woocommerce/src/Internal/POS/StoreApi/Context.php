@@ -36,8 +36,12 @@ class Context {
 
 	/**
 	 * REST URI prefix that identifies a POS Store API request.
+	 *
+	 * Matches the cart/checkout routes under `wc/internal/pos/` only — not the
+	 * public POS catalog feed at `wc/pos/v1/catalog`, which must not run the POS
+	 * checkout policy hooks.
 	 */
-	private const URI_PREFIX = 'wc/pos/';
+	private const URI_PREFIX = 'wc/internal/pos/';
 
 	/**
 	 * Whether the current request is a POS Store API request.
@@ -49,7 +53,7 @@ class Context {
 			return self::$test_override;
 		}
 
-		// Direct request: the route is in the URI path (/wp-json/wc/pos/...).
+		// Direct request: the route is in the URI path (/wp-json/wc/internal/pos/...).
 		if ( ! empty( $_SERVER['REQUEST_URI'] ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$request_uri = $_SERVER['REQUEST_URI'];

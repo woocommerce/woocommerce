@@ -10,11 +10,20 @@ namespace Automattic\WooCommerce\Internal\POS\StoreApi\Routes;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * Registers POS Store API REST routes.
  *
- * Routes live under the `wc/pos/v1` namespace, separate from `wc/store/v1`.
+ * Routes live under the `wc/internal/pos/v1` namespace, separate from both
+ * `wc/store/v1` and the public `wc/pos/v1` (used by the POS catalog feed). The
+ * `internal` segment is deliberate: the cart/checkout shape is still a spike and
+ * not a committed public contract, and keeping it out of `wc/store/v1` means no
+ * Store API middleware (rate limiting, the cart-token session swap, …) applies
+ * unless we add it explicitly. Registration is gated on the `point_of_sale`
+ * feature so the routes exist exactly when POS does — there is no separate
+ * enablement step for the mobile app.
+ *
  * Each POS route subclasses the corresponding Store API concrete route
  * (mirroring the agentic commerce pattern), so it reuses the Store API schema,
  * validation and response pipeline unchanged. The route subclasses are
@@ -36,7 +45,7 @@ class Controller implements RegisterHooksInterface {
 	/**
 	 * REST namespace for POS routes.
 	 */
-	public const REST_NAMESPACE = 'wc/pos/v1';
+	public const REST_NAMESPACE = 'wc/internal/pos/v1';
 
 	/**
 	 * POS route classes to register.
@@ -51,8 +60,16 @@ class Controller implements RegisterHooksInterface {
 
 	/**
 	 * Register hooks.
+	 *
+	 * Gated on the `point_of_sale` feature so the POS Store API routes are only
+	 * registered when POS is enabled. {@see self::register_routes()} stays
+	 * ungated so tests can register the routes directly without toggling the
+	 * feature.
 	 */
 	public function register(): void {
+		if ( ! FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
+			return;
+		}
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
 

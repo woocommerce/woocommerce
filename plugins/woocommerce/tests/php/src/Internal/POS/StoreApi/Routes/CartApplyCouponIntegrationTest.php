@@ -189,7 +189,7 @@ class CartApplyCouponIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
-	 * Dispatch POST /wc/pos/v1/cart/apply-coupon with the given code.
+	 * Dispatch POST /wc/internal/pos/v1/cart/apply-coupon with the given code.
 	 *
 	 * @param string $code  Coupon code.
 	 * @param array  $extra Extra request params (e.g. cart_token).

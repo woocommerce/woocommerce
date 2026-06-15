@@ -4,11 +4,11 @@
  *
  * Answers the load-bearing open question for the spike: do `ExtendSchema`
  * registrations made against the Store API (`wc/store/v1`) automatically apply
- * to responses produced under the separate POS namespace (`wc/pos/v1`)?
+ * to responses produced under the separate POS namespace (`wc/internal/pos/v1`)?
  *
  * If they do, the wrapper-delegation / subclassing approach holds: extensions
  * (Gift Cards, Subscriptions, Bookings, …) keep working through POS without any
- * POS-specific re-registration, and the `wc/pos/v1` namespace split is safe.
+ * POS-specific re-registration, and the `wc/internal/pos/v1` namespace split is safe.
  *
  * If they did NOT, the whole premise of routing POS through the Store API
  * pipeline would be undermined and the routes would need to live under the
@@ -126,7 +126,7 @@ class ExtendSchemaInheritanceIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox A cart-level ExtendSchema registration surfaces in a wc/pos/v1 add-item response.
+	 * @testdox A cart-level ExtendSchema registration surfaces in a wc/internal/pos/v1 add-item response.
 	 */
 	public function test_cart_level_extension_applies_to_pos_response(): void {
 		wp_set_current_user( $this->admin_id );
@@ -141,7 +141,7 @@ class ExtendSchemaInheritanceIntegrationTest extends ControllerTestCase {
 		$this->assertArrayHasKey(
 			self::PROBE_NAMESPACE,
 			$extensions,
-			'Extension data registered against the wc/store/v1 cart schema should appear under wc/pos/v1.'
+			'Extension data registered against the wc/store/v1 cart schema should appear under wc/internal/pos/v1.'
 		);
 		$this->assertSame(
 			self::CART_MARKER,
@@ -150,7 +150,7 @@ class ExtendSchemaInheritanceIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox A cart-item-level ExtendSchema registration surfaces on each item in a wc/pos/v1 response.
+	 * @testdox A cart-item-level ExtendSchema registration surfaces on each item in a wc/internal/pos/v1 response.
 	 */
 	public function test_cart_item_level_extension_applies_to_pos_response(): void {
 		wp_set_current_user( $this->admin_id );
@@ -168,7 +168,7 @@ class ExtendSchemaInheritanceIntegrationTest extends ControllerTestCase {
 		$this->assertArrayHasKey(
 			self::PROBE_NAMESPACE,
 			$item_extensions,
-			'cart-item ExtendSchema data should be inherited by wc/pos/v1 line items.'
+			'cart-item ExtendSchema data should be inherited by wc/internal/pos/v1 line items.'
 		);
 		$this->assertSame(
 			self::ITEM_MARKER,
@@ -263,7 +263,7 @@ class ExtendSchemaInheritanceIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
-	 * Dispatch POST /wc/pos/v1/cart/add-item.
+	 * Dispatch POST /wc/internal/pos/v1/cart/add-item.
 	 *
 	 * @param int $product_id Product ID to add.
 	 * @param int $quantity   Quantity to add.

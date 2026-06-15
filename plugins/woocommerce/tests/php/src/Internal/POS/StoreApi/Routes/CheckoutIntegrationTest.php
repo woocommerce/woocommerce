@@ -134,7 +134,7 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox The /checkout route is registered under wc/pos/v1.
+	 * @testdox The /checkout route is registered under wc/internal/pos/v1.
 	 */
 	public function test_checkout_route_is_registered(): void {
 		$routes = rest_get_server()->get_routes();

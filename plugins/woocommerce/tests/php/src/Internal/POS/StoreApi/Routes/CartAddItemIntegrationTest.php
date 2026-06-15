@@ -233,7 +233,7 @@ class CartAddItemIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
-	 * Dispatch POST /wc/pos/v1/cart/add-item with the given product id + quantity.
+	 * Dispatch POST /wc/internal/pos/v1/cart/add-item with the given product id + quantity.
 	 *
 	 * @param int   $product_id Product ID to add.
 	 * @param int   $quantity   Quantity to add.

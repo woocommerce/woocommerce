@@ -70,8 +70,16 @@ class ContextTest extends WC_Unit_Test_Case {
 	 * @testdox is_pos_request returns true when REQUEST_URI contains the POS prefix.
 	 */
 	public function test_returns_true_for_pos_uri(): void {
-		$_SERVER['REQUEST_URI'] = '/wp-json/wc/pos/v1/cart/add-item';
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/internal/pos/v1/cart/add-item';
 		$this->assertTrue( Context::is_pos_request() );
+	}
+
+	/**
+	 * @testdox is_pos_request returns false for the public POS catalog namespace (not the store-api routes).
+	 */
+	public function test_returns_false_for_pos_catalog_uri(): void {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/pos/v1/catalog/create';
+		$this->assertFalse( Context::is_pos_request(), 'The POS catalog feed must not be treated as a POS Store API request.' );
 	}
 
 	/**
@@ -87,8 +95,8 @@ class ContextTest extends WC_Unit_Test_Case {
 	 */
 	public function test_returns_true_for_pos_rest_route_get_parameter(): void {
 		// Tunneled requests don't carry the route in the URI path.
-		$_SERVER['REQUEST_URI'] = '/?rest_route=/wc/pos/v1/checkout';
-		$_GET['rest_route']     = '/wc/pos/v1/checkout';
+		$_SERVER['REQUEST_URI'] = '/?rest_route=/wc/internal/pos/v1/checkout';
+		$_GET['rest_route']     = '/wc/internal/pos/v1/checkout';
 		$this->assertTrue( Context::is_pos_request() );
 	}
 
@@ -109,7 +117,7 @@ class ContextTest extends WC_Unit_Test_Case {
 		Context::set_test_override( true );
 		$this->assertTrue( Context::is_pos_request() );
 
-		$_SERVER['REQUEST_URI'] = '/wp-json/wc/pos/v1/cart/add-item';
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/internal/pos/v1/cart/add-item';
 		Context::set_test_override( false );
 		$this->assertFalse( Context::is_pos_request() );
 	}
@@ -118,7 +126,7 @@ class ContextTest extends WC_Unit_Test_Case {
 	 * @testdox clearing override restores URI detection.
 	 */
 	public function test_clearing_override_restores_uri_detection(): void {
-		$_SERVER['REQUEST_URI'] = '/wp-json/wc/pos/v1/cart/add-item';
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/internal/pos/v1/cart/add-item';
 		Context::set_test_override( false );
 		$this->assertFalse( Context::is_pos_request() );
 
