@@ -35,6 +35,7 @@ const mapWpModules = [
 	'@wordpress/core-data',
 	'@wordpress/components',
 	'@wordpress/html-entities',
+	'@wordpress/notices',
 ];
 const wpModulesMapper = mapWpModules.reduce( ( acc, module ) => {
 	try {
