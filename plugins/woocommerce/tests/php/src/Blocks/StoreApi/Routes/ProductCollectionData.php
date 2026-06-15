@@ -633,6 +633,29 @@ class ProductCollectionData extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Non-existent taxonomies are skipped in calculate_taxonomy_counts.
+	 */
+	public function test_calculate_taxonomy_counts_skips_nonexistent_taxonomies() {
+		$category = wp_insert_term( 'Skip Test Category', 'product_cat' );
+		wp_set_post_terms( $this->products[0]->get_id(), array( $category['term_id'] ), 'product_cat' );
+
+		$baseline_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$baseline_request->set_param( 'calculate_taxonomy_counts', array( 'product_cat' ) );
+		$baseline = rest_get_server()->dispatch( $baseline_request )->get_data();
+
+		$with_junk_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$with_junk_request->set_param( 'calculate_taxonomy_counts', array( 'product_cat', 'does_not_exist_tax', 'another_missing_tax' ) );
+		$with_junk = rest_get_server()->dispatch( $with_junk_request )->get_data();
+
+		$this->assertNotEmpty( $baseline['taxonomy_counts'], 'Baseline taxonomy request should return counts.' );
+		$this->assertEquals(
+			$baseline['taxonomy_counts'],
+			$with_junk['taxonomy_counts'],
+			'Non-existent taxonomies must be skipped, not counted.'
+		);
+	}
+
+	/**
 	 * @testdox The count cap is filterable so large stores can raise it.
 	 */
 	public function test_counts_max_items_is_filterable() {

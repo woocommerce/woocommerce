@@ -204,8 +204,9 @@ class ProductCollectionData extends AbstractRoute {
 
 		if ( ! empty( $request['calculate_taxonomy_counts'] ) ) {
 			// Normalize to the canonical taxonomy name before deduping so textual variants
-			// (e.g. differing case or surrounding whitespace) collapse to a single query.
-			$taxonomies              = array_unique( array_filter( array_map( 'wc_sanitize_taxonomy_name', $request['calculate_taxonomy_counts'] ) ) );
+			// (e.g. differing case or surrounding whitespace) collapse to a single query, and keep
+			// only registered taxonomies so non-existent ones do not trigger wasted queries.
+			$taxonomies              = array_unique( array_filter( array_map( 'wc_sanitize_taxonomy_name', $request['calculate_taxonomy_counts'] ), 'taxonomy_exists' ) );
 			$data['taxonomy_counts'] = [];
 
 			if ( $taxonomies ) {
