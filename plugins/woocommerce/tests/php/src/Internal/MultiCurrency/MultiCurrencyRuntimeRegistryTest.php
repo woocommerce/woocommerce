@@ -61,6 +61,7 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'storefront',
 				'settings',
 				'rest',
+				'rest_request_overrides',
 				'user_settings',
 				'admin_notices',
 				'admin_notes',
@@ -148,6 +149,23 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 			$selected_currency_hooks
 		);
 		$this->assertSame( 11, $hook_groups['selected_currency']['actions'][0]['priority'] );
+	}
+
+	/**
+	 * @testdox Should preserve the WooPayments REST request override filter surface.
+	 */
+	public function test_rest_request_override_manifest_contains_preserved_filters(): void {
+		$hook_groups  = MultiCurrencyRuntimeRegistry::get_core_hook_groups();
+		$filter_hooks = array_column( $hook_groups['rest_request_overrides']['filters'], 'hook' );
+
+		$this->assertSame(
+			array(
+				'wcpay_multi_currency_override_selected_currency',
+				'wcpay_multi_currency_should_return_store_currency',
+				'wcpay_multi_currency_should_convert_product_price',
+			),
+			$filter_hooks
+		);
 	}
 
 	/**

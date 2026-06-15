@@ -115,6 +115,17 @@ class MultiCurrencyRequestContext {
 	}
 
 	/**
+	 * Tell whether non-Store REST request-local currency overrides should register.
+	 *
+	 * @return bool True when REST request override filters should register.
+	 *
+	 * @since 11.0.0
+	 */
+	public function should_register_rest_request_overrides(): bool {
+		return $this->is_wc_rest_api_request() && ! $this->is_store_api_request() && ! $this->is_store_batch_request();
+	}
+
+	/**
 	 * Tell whether WordPress is serving an admin request.
 	 *
 	 * @return bool True for admin requests.

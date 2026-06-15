@@ -92,6 +92,43 @@ class MultiCurrencyRequestContextTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should allow REST request overrides for non-Store REST context.
+	 */
+	public function test_allows_rest_request_overrides_for_non_store_rest_context(): void {
+		$sut = $this->create_context( false, false, true, false );
+
+		$this->assertTrue( $sut->should_register_rest_request_overrides(), 'Non-Store REST requests should register request-local currency overrides.' );
+	}
+
+	/**
+	 * @testdox Should block REST request overrides for Store API context.
+	 */
+	public function test_blocks_rest_request_overrides_for_store_api_context(): void {
+		$sut = $this->create_context( false, false, true, true );
+
+		$this->assertFalse( $sut->should_register_rest_request_overrides(), 'Store API requests should not register non-Store REST overrides.' );
+	}
+
+	/**
+	 * @testdox Should block REST request overrides for Store API batch context.
+	 */
+	public function test_blocks_rest_request_overrides_for_store_api_batch_context(): void {
+		$_REQUEST['rest_route'] = '/wc/store/v1/batch';
+		$sut                    = $this->create_context( false, false, true, false );
+
+		$this->assertFalse( $sut->should_register_rest_request_overrides(), 'Store API batch requests should not register non-Store REST overrides.' );
+	}
+
+	/**
+	 * @testdox Should block REST request overrides for non-REST context.
+	 */
+	public function test_blocks_rest_request_overrides_for_non_rest_context(): void {
+		$sut = $this->create_context();
+
+		$this->assertFalse( $sut->should_register_rest_request_overrides(), 'Non-REST requests should not register REST overrides.' );
+	}
+
+	/**
 	 * @testdox Should allow selected currency writers for Store API context.
 	 */
 	public function test_allows_selected_currency_writers_for_store_api_context(): void {

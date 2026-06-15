@@ -71,18 +71,19 @@ class MultiCurrencyRuntimeRegistry {
 	 */
 	public static function get_core_hook_groups(): array {
 		return array(
-			'frontend_prices'     => self::get_frontend_price_hook_group(),
-			'frontend_currencies' => self::get_frontend_currency_hook_group(),
-			'selected_currency'   => self::get_selected_currency_hook_group(),
-			'compatibility'       => MultiCurrencyCompatibilityProjectionService::get_hook_manifest(),
-			'async_prices'        => MultiCurrencyAsyncPriceProjectionService::get_hook_manifest( true, false, false, false, false ),
-			'storefront'          => MultiCurrencyStorefrontProjectionService::get_hook_manifest( 2, true ),
-			'settings'            => MultiCurrencySettingsProjectionService::get_hook_manifest(),
-			'rest'                => MultiCurrencyRestProjectionService::get_route_manifest( true ),
-			'user_settings'       => MultiCurrencyUserSettingsProjectionService::get_hook_manifest( 2 ),
-			'admin_notices'       => MultiCurrencyAdminNoticeProjectionService::get_hook_manifest(),
-			'admin_notes'         => MultiCurrencyAdminNoteProjectionService::get_hook_manifest( true ),
-			'tracking'            => self::get_tracking_hook_group(),
+			'frontend_prices'        => self::get_frontend_price_hook_group(),
+			'frontend_currencies'    => self::get_frontend_currency_hook_group(),
+			'selected_currency'      => self::get_selected_currency_hook_group(),
+			'compatibility'          => MultiCurrencyCompatibilityProjectionService::get_hook_manifest(),
+			'async_prices'           => MultiCurrencyAsyncPriceProjectionService::get_hook_manifest( true, false, false, false, false ),
+			'storefront'             => MultiCurrencyStorefrontProjectionService::get_hook_manifest( 2, true ),
+			'settings'               => MultiCurrencySettingsProjectionService::get_hook_manifest(),
+			'rest'                   => MultiCurrencyRestProjectionService::get_route_manifest( true ),
+			'rest_request_overrides' => self::get_rest_request_override_hook_group(),
+			'user_settings'          => MultiCurrencyUserSettingsProjectionService::get_hook_manifest( 2 ),
+			'admin_notices'          => MultiCurrencyAdminNoticeProjectionService::get_hook_manifest(),
+			'admin_notes'            => MultiCurrencyAdminNoteProjectionService::get_hook_manifest( true ),
+			'tracking'               => self::get_tracking_hook_group(),
 		);
 	}
 
@@ -174,6 +175,22 @@ class MultiCurrencyRuntimeRegistry {
 				self::hook_entry( 'woocommerce_edit_account_form', 'add_presentment_currency_switch', 10 ),
 				self::hook_entry( 'woocommerce_save_account_details', 'save_presentment_currency', 10 ),
 			),
+		);
+	}
+
+	/**
+	 * Get the preserved non-Store REST request override hook metadata.
+	 *
+	 * @return array{filters: array<int,array<string,mixed>>, actions: array<int,array<string,mixed>>}
+	 */
+	private static function get_rest_request_override_hook_group(): array {
+		return array(
+			'filters' => array(
+				self::hook_entry( 'wcpay_multi_currency_override_selected_currency', 'get_currency_from_query_param|get_store_currency_code', 10 ),
+				self::hook_entry( 'wcpay_multi_currency_should_return_store_currency', '__return_true', 10 ),
+				self::hook_entry( 'wcpay_multi_currency_should_convert_product_price', '__return_false', 10 ),
+			),
+			'actions' => array(),
 		);
 	}
 
