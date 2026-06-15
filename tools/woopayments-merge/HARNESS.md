@@ -18,20 +18,51 @@ Design context: `../../../ai-prompts/goals/woopayments-merge/` — `design-spec.
 
 ## 1. The substrate (already provided — do not rebuild)
 
+### 1a. Environment topology — READ THIS FIRST, do not conflate the checkouts
+
+There are **two WooCommerce-core checkouts on this machine, on purpose**, and a **third unrelated one**:
+
+| Checkout (path) | Role | Local env | Why |
+|---|---|---|---|
+| **`~/Work/a8c/woocommerce-develop`** | **pristine WC trunk** (unmodified) | **REFERENCE / oracle** — `http://localhost:8082` | the baseline you diff against — must stay unmodified |
+| **`~/Work/a8c/woocommerce-develop-2`** (THIS repo) | **our working clone** — where native payments is built | **TARGET** — `http://store8889.localhost:8889` | where all your changes go |
+| `~/Work/a8c/woocommerce-develop` again, separate env | unrelated day-to-day WC work | `http://localhost:8888` | **NOT this project — ignore it** |
+
+**Why two checkouts (critical mental model):** the reference must run *unmodified* WC + the
+*unmodified* WooPayments plugin to be a valid oracle. If the reference mounted *our* working clone,
+our native changes would appear in **both** the reference and the target — there'd be nothing clean
+to diff against. So the reference uses a **separate pristine `woocommerce-develop`** clone. Both
+checkouts **start aligned on the same WC trunk commit**; the *only* intended difference is our native
+work in `woocommerce-develop-2`. **Discipline:** keep the two WC bases aligned to the same trunk
+point over time (realign periodically) so the parity diff reflects *only* our changes.
+
+The **WooPayments plugin is unmodified** by this merge, so both envs mount the **same**
+`~/Work/a8c/woocommerce-payments` repo as the plugin — there is **no separate plugin clone** (the
+retired stand-down model needed one; the settled model does not). Plugin active-state is per-env
+(per-DB), so deactivating it on the target for cutover tests never touches the reference.
+
+### 1b. How to reach each piece
+
 | Piece | What | How you reach it |
 |---|---|---|
-| **Reference store** (the oracle) | current WooPayments behavior on `:8082` (`develop` plugin mounted from `../../../../woocommerce-payments`) | `WP="docker exec -i wcpay_wp_default wp --allow-root"` |
-| **Target store** | core (this repo) + the (unmodified) WooPayments plugin, on `:8889` | `WP="docker exec -i <cli-container> wp"` (the `…-cli-1` of the `:8889` wp-env stack) |
-| **Connected test account** | processes test payments; connected to the local Transact | already connected on both stores |
+| **Reference store** (oracle) | pristine `woocommerce-develop` WC + unmodified WooPayments plugin + connected account + Test Lab, on `:8082` | `WP="docker exec -i wcpay_wp_default wp --allow-root"` |
+| **Target store** | this repo's `woocommerce-develop-2` WC core + unmodified WooPayments plugin (active) + dev-tools + subscriptions, on `:8889` | `WP="docker exec -i $(docker ps --format '{{.Names}}' | grep -- '-cli-1' | grep -v tests) wp"` — currently `24860d14de30dc62f7b324ebef10b5fb-cli-1` (the hash is wp-env-instance-specific) |
+| **Connected test account** | processes test payments | **`:8082` connected ✓. `:8889` PENDING** (needs local-WPCOM/Transact onboarding — see §1c) |
 | **Event listener** | provider events → stores (operator-run) | reference routes to the **legacy Transact** (`~/Work/a8c/transact-platform-server`): `npm run stripe listen` |
 | **Stripe CLI** | raw provider source (charges/refunds/disputes/payouts) | `stripe charges retrieve … --stripe-account <connected_acct>`; needs a valid `stripe login` |
-| **Dev-tools Test Lab** | mints real orders/charges/refunds/disputes/payouts | `wp wcpay-dev test-lab <charges|refunds|disputes|payouts>` |
+| **Dev-tools Test Lab** | mints real orders/charges/refunds/disputes/payouts | `wp wcpay-dev test-lab <charges|refunds|disputes|payouts>` (account-dependent ops need the connected account) |
+| **Tracks sink** | captures **all** Tracks (client + server) the store posts, as NDJSON | wpcom-local sink at `~/.wpcom-local/logs/<checkout>/provider-sinks/tracks-events.ndjson` (CLI `wpcom-local tracks …` — see §1c) |
 | **Existing test suites** | what the harness extends, not replaces | WC core `tests/e2e-pw`, `playwright.performance.config.ts`, `tests/performance`, `tests/metrics`, `tests/php`; plugin `tests/e2e`, `tests/fixtures` |
 
-**Oracle discipline:** the reference store (`:8082`) must stay the *pristine, unmodified plugin* —
-never edit `../../../../woocommerce-payments`'s working tree. This merge makes **no plugin-side
-changes** (a site moves to native by core deactivating the plugin — `design-spec.md` §4.5a), so there
-is no plugin dev-clone to maintain; the parity oracle is simply the unmodified plugin as shipped.
+### 1c. Setup status of the TARGET env (`:8889`) — for the implementor
+
+- **WC core (`woocommerce-develop-2`) mapped + WooPayments plugin mounted & active** ✓ (arbiter returns `owner=plugin` while the plugin is active).
+- **Connected account: PENDING.** No Stripe/Transact account is connected on `:8889` yet, so native/plugin payment *processing* there is not exercisable until onboarding is done via the local WPCOM/Transact integration.
+- **Tracks → sink routing: PENDING/unverified** for `:8889` (the store must post to the local Tracks endpoint; the `wpcom-local` CLI is currently config-version-blocked, though the sink NDJSON is directly readable).
+- The `:8889` wp-env config lives in `plugins/woocommerce/.wp-env.override.json` (the source of truth for its plugin mappings); a clean `wp-env start` regenerates the Docker compose from it.
+
+**Oracle discipline:** never edit `~/Work/a8c/woocommerce-develop` or `~/Work/a8c/woocommerce-payments`
+working trees (the reference's WC + plugin). All your changes go in **`woocommerce-develop-2`** only.
 
 ---
 
