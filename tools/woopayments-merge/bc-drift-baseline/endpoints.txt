@@ -1,0 +1,63 @@
+includes/admin/class-wc-rest-payments-accounts-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-authorizations-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-capital-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-charges-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-connection-tokens-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-customer-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-deposits-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-dispute-readiness-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-disputes-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-documents-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-files-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-fraud-outcomes-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-onboarding-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-orders-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-payment-intents-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-pm-promotions-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-reader-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-refunds-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-settings-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-settings-option-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-terminal-locations-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-timeline-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-tos-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-transactions-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-vat-controller.php: register_rest_route(
+includes/admin/class-wc-rest-payments-webhook-controller.php: register_rest_route(
+includes/admin/class-wc-rest-woopay-session-controller.php: register_rest_route(
+includes/class-wc-payment-gateway-wcpay.php: add_action( 'wp_ajax_create_setup_intent', [ $this, 'create_setup_intent_ajax' ] );
+includes/class-wc-payment-gateway-wcpay.php: add_action( 'wp_ajax_nopriv_update_order_status', [ $this, 'update_order_status' ] );
+includes/class-wc-payment-gateway-wcpay.php: add_action( 'wp_ajax_update_order_status', [ $this, 'update_order_status' ] );
+includes/class-wc-payments-blocks-payment-method.php: class WC_Payments_Blocks_Payment_Method extends AbstractPaymentMethodType {
+includes/class-wc-payments-blocks-payment-method.php: use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
+includes/class-wc-payments-woopay-button-handler.php: add_action( 'wp_ajax_nopriv_woopay_express_checkout_button_show_error_notice', [ $this, 'show_error_notice' ] );
+includes/class-wc-payments-woopay-button-handler.php: add_action( 'wp_ajax_woopay_express_checkout_button_show_error_notice', [ $this, 'show_error_notice' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_check_bnpl_availability', [ __CLASS__, 'ajax_check_bnpl_availability' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_get_cart_total', [ __CLASS__, 'ajax_get_cart_total' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_get_woopay_minimum_session_data', [ WooPay_Session::class, 'ajax_get_woopay_minimum_session_data' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_get_woopay_session', [ WooPay_Session::class, 'ajax_get_woopay_session' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_get_woopay_signature', [ __CLASS__, 'ajax_get_woopay_signature' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_init_woopay', [ WooPay_Session::class, 'ajax_init_woopay' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_set_woopay_phone_number', [ WooPay_Session::class, 'ajax_set_woopay_phone_number' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_shopper_set_woopay_appearance', [ WooPay_Session::class, 'ajax_shopper_set_woopay_appearance' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_blocks_payment_method_type_registration', [ __CLASS__, 'register_checkout_gateway' ] );
+includes/class-wc-payments.php: add_action( 'wp_ajax_wcpay_admin_set_woopay_appearance', [ WooPay_Session::class, 'ajax_admin_set_woopay_appearance' ] );
+includes/class-woopay-tracker.php: add_action( 'wp_ajax_get_identity', [ $this, 'ajax_tracks_id' ] );
+includes/class-woopay-tracker.php: add_action( 'wp_ajax_nopriv_get_identity', [ $this, 'ajax_tracks_id' ] );
+includes/class-woopay-tracker.php: add_action( 'wp_ajax_nopriv_platform_tracks', [ $this, 'ajax_tracks' ] );
+includes/class-woopay-tracker.php: add_action( 'wp_ajax_platform_tracks', [ $this, 'ajax_tracks' ] );
+includes/compat/blocks/class-blocks-data-extractor.php: $checkout_schema = StoreApi::container()->get( ExtendSchema::class )->get_endpoint_schema( CheckoutSchema::IDENTIFIER );
+includes/compat/blocks/class-blocks-data-extractor.php: class_exists( 'Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema' ) &&
+includes/compat/blocks/class-blocks-data-extractor.php: use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
+includes/compat/subscriptions/trait-wc-payment-gateway-wcpay-subscriptions.php: add_action( 'wp_ajax_wcpay_get_user_payment_tokens', [ $this, 'ajax_get_user_payment_tokens' ] );
+includes/express-checkout/class-wc-payments-express-checkout-ajax-handler.php: if ( function_exists( 'woocommerce_store_api_register_update_callback' ) ) {
+includes/express-checkout/class-wc-payments-express-checkout-ajax-handler.php: woocommerce_store_api_register_update_callback(
+includes/express-checkout/class-wc-payments-express-checkout-button-display-handler.php: add_action( 'wc_ajax_wcpay_add_to_cart', [ $this->express_checkout_ajax_handler, 'ajax_add_to_cart' ] );
+includes/multi-currency/Compatibility/WooCommerceBookings.php: add_action( 'wp_ajax_nopriv_wc_bookings_calculate_costs', [ $this, 'add_wc_price_args_filter_for_ajax' ], 9 );
+includes/multi-currency/Compatibility/WooCommerceBookings.php: add_action( 'wp_ajax_wc_bookings_calculate_costs', [ $this, 'add_wc_price_args_filter_for_ajax' ], 9 );
+includes/multi-currency/RestController.php: register_rest_route(
+includes/reports/class-wc-rest-payments-reports-authorizations-controller.php: register_rest_route(
+includes/reports/class-wc-rest-payments-reports-balance-controller.php: register_rest_route(
+includes/reports/class-wc-rest-payments-reports-fees-controller.php: register_rest_route(
+includes/reports/class-wc-rest-payments-reports-transactions-controller.php: register_rest_route(
+includes/woopay/class-woopay-store-api-token.php: $extend_schema     = new \Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema( $formatters );

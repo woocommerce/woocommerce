@@ -1,0 +1,20 @@
+{
+    "has_wcpay": true,
+    "peak_mem_mb": 165.8,
+    "php_version": "8.1",
+    "surfaces": {
+        "available_gateways": {
+            "queries": 0,
+            "median_ms": 5.03
+        },
+        "all_gateways": {
+            "queries": 0,
+            "median_ms": 0
+        },
+        "wcpay_is_available": {
+            "queries": 0,
+            "median_ms": 0.36
+        }
+    },
+    "wc_version": "11.0.0-dev"
+}

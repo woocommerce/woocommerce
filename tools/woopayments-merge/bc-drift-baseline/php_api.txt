@@ -1,0 +1,307 @@
+includes/admin/class-wc-payments-admin-settings.php: 'section' => WC_Payment_Gateway_WCPay::GATEWAY_ID,
+includes/admin/class-wc-payments-admin.php: if ( $order && strpos( $order->get_payment_method(), WC_Payment_Gateway_WCPay::GATEWAY_ID ) !== false ) {
+includes/admin/class-wc-rest-payments-orders-controller.php: $order->set_payment_method( WC_Payment_Gateway_WCPay::GATEWAY_ID );
+includes/admin/class-wc-rest-payments-orders-controller.php: $subscription->set_payment_method( WC_Payment_Gateway_WCPay::GATEWAY_ID );
+includes/admin/tracks/tracks-loader.php: function record_tracker_events() {
+includes/class-database-cache.php: class Database_Cache implements MultiCurrencyCacheInterface {
+includes/class-wc-payment-gateway-wcpay.php: $customer_tokens = WC_Payment_Tokens::get_customer_tokens( $order->get_user_id(), self::GATEWAY_ID );
+includes/class-wc-payment-gateway-wcpay.php: $split_upe_gateway_prefix = self::GATEWAY_ID . '_';
+includes/class-wc-payment-gateway-wcpay.php: $this->id           = static::GATEWAY_ID;
+includes/class-wc-payment-gateway-wcpay.php: $this->id = self::GATEWAY_ID . '_' . $this->stripe_id;
+includes/class-wc-payment-gateway-wcpay.php: 'gateway_id' => $gateway_id ?? self::GATEWAY_ID,
+includes/class-wc-payment-gateway-wcpay.php: 'wc_payment_method' => self::GATEWAY_ID,
+includes/class-wc-payment-gateway-wcpay.php: : self::GATEWAY_ID . '_' . $effective_type;
+includes/class-wc-payment-gateway-wcpay.php: ? self::GATEWAY_ID
+includes/class-wc-payment-gateway-wcpay.php: const GATEWAY_ID = 'woocommerce_payments';
+includes/class-wc-payment-gateway-wcpay.php: if ( ! empty( $_POST[ 'wc-' . static::GATEWAY_ID . '-new-payment-method' ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+includes/class-wc-payment-gateway-wcpay.php: if ( $order->get_payment_method() !== self::GATEWAY_ID || empty( $this->order_service->get_payment_method_id_for_order( $order ) ) ) {
+includes/class-wc-payment-gateway-wcpay.php: if ( self::GATEWAY_ID !== $payment_method ) {
+includes/class-wc-payment-gateway-wcpay.php: if ( self::GATEWAY_ID === $this->id ) {
+includes/class-wc-payment-gateway-wcpay.php: if ( strpos( $theorder->get_payment_method(), self::GATEWAY_ID ) !== 0 ) {
+includes/class-wc-payment-token-wcpay-amazon-pay.php: const TYPE = 'wcpay_amazon_pay';
+includes/class-wc-payment-token-wcpay-amazon-pay.php: protected $type = self::TYPE;
+includes/class-wc-payment-token-wcpay-link.php: const TYPE = 'wcpay_link';
+includes/class-wc-payment-token-wcpay-link.php: protected $type = self::TYPE;
+includes/class-wc-payment-token-wcpay-sepa.php: const TYPE = 'wcpay_sepa';
+includes/class-wc-payment-token-wcpay-sepa.php: protected $type = self::TYPE;
+includes/class-wc-payments-account.php: class WC_Payments_Account implements MultiCurrencyAccountInterface {
+includes/class-wc-payments-blocks-payment-method.php: $this->name                 = WC_Payment_Gateway_WCPay::GATEWAY_ID;
+includes/class-wc-payments-checkout.php: $payment_fields['gatewayId']                = WC_Payment_Gateway_WCPay::GATEWAY_ID;
+includes/class-wc-payments-localization-service.php: class WC_Payments_Localization_Service implements MultiCurrencyLocalizationInterface {
+includes/class-wc-payments-onboarding-service.php: 'update_option_woocommerce_' . WC_Payment_Gateway_WCPay::GATEWAY_ID . '_settings',
+includes/class-wc-payments-order-service.php: const CHARGE_ID_META_KEY = '_charge_id';
+includes/class-wc-payments-order-service.php: const CHARGE_RISK_LEVEL_META_KEY = '_charge_risk_level';
+includes/class-wc-payments-order-service.php: const CUSTOMER_ID_META_KEY = '_stripe_customer_id';
+includes/class-wc-payments-order-service.php: const HAS_LIVE_SALE_OPTION = 'wcpay_has_live_sale';
+includes/class-wc-payments-order-service.php: const INTENTION_STATUS_META_KEY = '_intention_status';
+includes/class-wc-payments-order-service.php: const INTENT_ID_META_KEY = '_intent_id';
+includes/class-wc-payments-order-service.php: const IPP_CHANNEL_META_KEY = '_wcpay_ipp_channel';
+includes/class-wc-payments-order-service.php: const PAYMENT_METHOD_DETAILS_META_KEY = '_wcpay_payment_method_details';
+includes/class-wc-payments-order-service.php: const PAYMENT_METHOD_ID_META_KEY = '_payment_method_id';
+includes/class-wc-payments-order-service.php: const WCPAY_FRAUD_META_BOX_TYPE_META_KEY = '_wcpay_fraud_meta_box_type';
+includes/class-wc-payments-order-service.php: const WCPAY_FRAUD_OUTCOME_STATUS_META_KEY = '_wcpay_fraud_outcome_status';
+includes/class-wc-payments-order-service.php: const WCPAY_INTENT_CURRENCY_META_KEY = '_wcpay_intent_currency';
+includes/class-wc-payments-order-service.php: const WCPAY_MODE_META_KEY = '_wcpay_mode';
+includes/class-wc-payments-order-service.php: const WCPAY_MULTIBANCO_ENTITY_META_KEY = '_wcpay_multibanco_entity';
+includes/class-wc-payments-order-service.php: const WCPAY_MULTIBANCO_EXPIRY_META_KEY = '_wcpay_multibanco_expiry';
+includes/class-wc-payments-order-service.php: const WCPAY_MULTIBANCO_REFERENCE_META_KEY = '_wcpay_multibanco_reference';
+includes/class-wc-payments-order-service.php: const WCPAY_MULTIBANCO_URL_META_KEY = '_wcpay_multibanco_url';
+includes/class-wc-payments-order-service.php: const WCPAY_PAYMENT_TRANSACTION_ID_META_KEY = '_wcpay_payment_transaction_id';
+includes/class-wc-payments-order-service.php: const WCPAY_REFUND_ID_META_KEY = '_wcpay_refund_id';
+includes/class-wc-payments-order-service.php: const WCPAY_REFUND_STATUS_META_KEY = '_wcpay_refund_status';
+includes/class-wc-payments-order-service.php: const WCPAY_REFUND_TRANSACTION_ID_META_KEY = '_wcpay_refund_transaction_id';
+includes/class-wc-payments-order-service.php: const WCPAY_TRANSACTION_FEE_META_KEY = '_wcpay_transaction_fee';
+includes/class-wc-payments-order-success-page.php: $payment_method_type = str_replace( WC_Payment_Gateway_WCPay::GATEWAY_ID . '_', '', $payment_method );
+includes/class-wc-payments-order-success-page.php: 0 !== strpos( $order->get_payment_method(), WC_Payment_Gateway_WCPay::GATEWAY_ID )
+includes/class-wc-payments-payment-method-service.php: if ( WC_Payment_Gateway_WCPay::GATEWAY_ID !== $order->get_payment_method() ) {
+includes/class-wc-payments-settings-service.php: class WC_Payments_Settings_Service implements MultiCurrencySettingsInterface {
+includes/class-wc-payments-token-service.php: $gateway_id = WC_Payment_Gateway_WCPay::GATEWAY_ID . '_' . Payment_Method::AMAZON_PAY;
+includes/class-wc-payments-token-service.php: $gateway_id = WC_Payment_Gateway_WCPay::GATEWAY_ID . '_' . Payment_Method::SEPA;
+includes/class-wc-payments-token-service.php: $gateway_id = WC_Payment_Gateway_WCPay::GATEWAY_ID;
+includes/class-wc-payments-token-service.php: $token->set_gateway_id( WC_Payment_Gateway_WCPay::GATEWAY_ID );
+includes/class-wc-payments-token-service.php: Payment_Method::AMAZON_PAY => WC_Payment_Gateway_WCPay::GATEWAY_ID . '_' . Payment_Method::AMAZON_PAY,
+includes/class-wc-payments-token-service.php: Payment_Method::CARD       => WC_Payment_Gateway_WCPay::GATEWAY_ID,
+includes/class-wc-payments-token-service.php: Payment_Method::LINK       => WC_Payment_Gateway_WCPay::GATEWAY_ID,
+includes/class-wc-payments-token-service.php: Payment_Method::SEPA       => WC_Payment_Gateway_WCPay::GATEWAY_ID . '_' . Payment_Method::SEPA,
+includes/class-wc-payments.php: if ( ! $order instanceof WC_Order || WC_Payment_Gateway_WCPay::GATEWAY_ID !== $order->get_payment_method() ) {
+includes/class-wc-payments.php: public static function add_address_provider( $providers ) {
+includes/class-wc-payments.php: public static function add_ipp_emails( array $email_classes ): array {
+includes/class-wc-payments.php: public static function add_post_kyc_activation_email( array $email_classes ): array {
+includes/class-wc-payments.php: public static function add_user_data_fields( $user_data_fields ) {
+includes/class-wc-payments.php: public static function add_woo_admin_notes() {
+includes/class-wc-payments.php: public static function ajax_check_bnpl_availability() {
+includes/class-wc-payments.php: public static function ajax_get_cart_total() {
+includes/class-wc-payments.php: public static function ajax_get_woopay_signature() {
+includes/class-wc-payments.php: public static function create_api_client() {
+includes/class-wc-payments.php: public static function create_request( $class_name, $id = null ) {
+includes/class-wc-payments.php: public static function disable_express_checkout_in_block_editor() {
+includes/class-wc-payments.php: public static function display_admin_error( $message ) {
+includes/class-wc-payments.php: public static function display_admin_notice( $message, $classes ) {
+includes/class-wc-payments.php: public static function enqueue_assets_script() {
+includes/class-wc-payments.php: public static function enqueue_cart_scripts() {
+includes/class-wc-payments.php: public static function enqueue_dev_runtime_scripts() {
+includes/class-wc-payments.php: public static function enqueue_woopay_common_config_script() {
+includes/class-wc-payments.php: public static function filter_woocommerce_form_field_woopay_email( $field, $key, $args, $value ) {
+includes/class-wc-payments.php: public static function fit_card_brand_icon_for_printable_order_receipt( string $css, $order ): string {
+includes/class-wc-payments.php: public static function get_account_service() {
+includes/class-wc-payments.php: public static function get_action_scheduler_service() {
+includes/class-wc-payments.php: public static function get_customer_service(): WC_Payments_Customer_Service {
+includes/class-wc-payments.php: public static function get_customer_service_api(): WC_Payments_Customer_Service_API {
+includes/class-wc-payments.php: public static function get_database_cache(): Database_Cache {
+includes/class-wc-payments.php: public static function get_express_checkout_helper() {
+includes/class-wc-payments.php: public static function get_file_version( $file ): string {
+includes/class-wc-payments.php: public static function get_fraud_service() {
+includes/class-wc-payments.php: public static function get_gateway() {
+includes/class-wc-payments.php: public static function get_localization_service() {
+includes/class-wc-payments.php: public static function get_onboarding_experiment(): Onboarding_Experiment {
+includes/class-wc-payments.php: public static function get_order_service(): WC_Payments_Order_Service {
+includes/class-wc-payments.php: public static function get_payment_gateway_by_id( $payment_method_id ) {
+includes/class-wc-payments.php: public static function get_payment_gateway_map() {
+includes/class-wc-payments.php: public static function get_payment_method_by_id( $payment_method_id ) {
+includes/class-wc-payments.php: public static function get_payment_method_map() {
+includes/class-wc-payments.php: public static function get_payments_api_client() {
+includes/class-wc-payments.php: public static function get_plugin_headers() {
+includes/class-wc-payments.php: public static function get_session_service() {
+includes/class-wc-payments.php: public static function get_settings_service() {
+includes/class-wc-payments.php: public static function get_token_service(): WC_Payments_Token_Service {
+includes/class-wc-payments.php: public static function get_wc_payments_checkout() {
+includes/class-wc-payments.php: public static function get_woopayments_gateway_ids() {
+includes/class-wc-payments.php: public static function hide_gateways_on_settings_page() {
+includes/class-wc-payments.php: public static function init() {
+includes/class-wc-payments.php: public static function init_rest_api() {
+includes/class-wc-payments.php: public static function init_woopay() {
+includes/class-wc-payments.php: public static function install_actions() {
+includes/class-wc-payments.php: public static function is_network_saved_cards_enabled() {
+includes/class-wc-payments.php: public static function load_stripe_bnpl_site_messaging() {
+includes/class-wc-payments.php: public static function maybe_disable_wcpay_subscriptions_on_update() {
+includes/class-wc-payments.php: public static function maybe_display_express_checkout_buttons() {
+includes/class-wc-payments.php: public static function maybe_enqueue_woopay_common_config_script( $should_enqueue ) {
+includes/class-wc-payments.php: public static function maybe_init_woopay_direct_checkout() {
+includes/class-wc-payments.php: public static function maybe_register_woopay_hooks() {
+includes/class-wc-payments.php: public static function maybe_remove_stripe_billing_deprecation_note( $plugin ) {
+includes/class-wc-payments.php: public static function maybe_show_woopay_phone_number_error() {
+includes/class-wc-payments.php: public static function maybe_update_stripe_billing_deprecation_note() {
+includes/class-wc-payments.php: public static function mode() {
+includes/class-wc-payments.php: public static function order_woopayments_gateways( $ordering ) {
+includes/class-wc-payments.php: public static function possibly_add_note_source_where_clause( $where_clauses, $args ) {
+includes/class-wc-payments.php: public static function possibly_add_source_to_notes_query( $args, $request ) {
+includes/class-wc-payments.php: public static function register_checkout_gateway( $payment_method_registry ) {
+includes/class-wc-payments.php: public static function register_gateway( $gateways ) {
+includes/class-wc-payments.php: public static function register_script_with_dependencies( string $handler, string $script, array $dependencies = [] ) {
+includes/class-wc-payments.php: public static function remove_deprecated_notes() {
+includes/class-wc-payments.php: public static function remove_woo_admin_notes() {
+includes/class-wc-payments.php: public static function set_account_service( WC_Payments_Account $account ) {
+includes/class-wc-payments.php: public static function set_customer_service( WC_Payments_Customer_Service $customer_service_class ) {
+includes/class-wc-payments.php: public static function set_database_cache( Database_Cache $database_cache ) {
+includes/class-wc-payments.php: public static function set_express_checkout_helper( $express_checkout_helper ) {
+includes/class-wc-payments.php: public static function set_gateway( $gateway ) {
+includes/class-wc-payments.php: public static function set_onboarding_experiment( Onboarding_Experiment $onboarding_experiment ) {
+includes/class-wc-payments.php: public static function set_plugin_activation_timestamp() {
+includes/class-wc-payments.php: public static function set_token_service( WC_Payments_Token_Service $token_service ) {
+includes/class-wc-payments.php: public static function update_plugin_version() {
+includes/class-wc-payments.php: public static function validate_and_enqueue_woopay_common_config_script() {
+includes/class-wc-payments.php: public static function wcpay_show_old_woocommerce_for_hungary_sweden_and_czech_republic() {
+includes/class-wc-payments.php: public static function wcpay_show_old_woocommerce_for_norway_notice() {
+includes/class-wc-payments.php: public static function woopay_fields_before_billing_details() {
+includes/class-wc-payments.php: public static function woopay_tracker(): WooPay_Tracker {
+includes/compat/multi-currency/wc-payments-multi-currency.php: function WC_Payments_Multi_Currency() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
+includes/compat/multi-currency/wc-payments-multi-currency.php: function wcpay_multi_currency_deactivated() {
+includes/compat/multi-currency/wc-payments-multi-currency.php: function wcpay_multi_currency_onboarding_check() {
+includes/compat/subscriptions/trait-wc-payment-gateway-wcpay-subscriptions.php: $payment_method_type = str_replace( WC_Payment_Gateway_WCPay::GATEWAY_ID . '_', '', $payment_method_id );
+includes/compat/subscriptions/trait-wc-payment-gateway-wcpay-subscriptions.php: $token_gateway_id = WC_Payment_Gateway_WCPay::GATEWAY_ID; // Default to card.
+includes/compat/subscriptions/trait-wc-payment-gateway-wcpay-subscriptions.php: WC_Payment_Gateway_WCPay::GATEWAY_ID . '_' . AmazonPayDefinition::get_id(),
+includes/compat/subscriptions/trait-wc-payment-gateway-wcpay-subscriptions.php: WC_Payment_Gateway_WCPay::GATEWAY_ID, // Card gateway.
+includes/compat/subscriptions/trait-wc-payment-gateway-wcpay-subscriptions.php: if ( 0 !== strpos( $new_payment_method, WC_Payment_Gateway_WCPay::GATEWAY_ID ) ) {
+includes/compat/subscriptions/trait-wc-payment-gateway-wcpay-subscriptions.php: if ( 0 !== strpos( $old_payment_method, WC_Payment_Gateway_WCPay::GATEWAY_ID ) ) {
+includes/compat/subscriptions/trait-wc-payment-gateway-wcpay-subscriptions.php: if ( 0 !== strpos( $payment_method_id, WC_Payment_Gateway_WCPay::GATEWAY_ID ) ) {
+includes/compat/subscriptions/trait-wc-payment-gateway-wcpay-subscriptions.php: if ( WC_Payment_Gateway_WCPay::GATEWAY_ID !== $this->id ) {
+includes/compat/subscriptions/trait-wc-payment-gateway-wcpay-subscriptions.php: if ( WC_Payment_Gateway_WCPay::GATEWAY_ID !== $this->id || ! $this->is_reusable_wcpay_gateway( $token_gateway_id ) ) {
+includes/core/class-mode.php: $settings_option_name = 'woocommerce_' . WC_Payment_Gateway_WCPay::GATEWAY_ID . '_settings';
+includes/core/exceptions/server/request/class-extend-request-exception.php: class Extend_Request_Exception extends Base_Exception {
+includes/core/exceptions/server/request/class-immutable-parameter-exception.php: class Immutable_Parameter_Exception extends Base_Exception {
+includes/core/exceptions/server/request/class-invalid-request-parameter-exception.php: class Invalid_Request_Parameter_Exception extends Base_Exception {
+includes/core/exceptions/server/request/class-server-request-exception.php: class Server_Request_Exception extends Base_Exception {
+includes/core/exceptions/server/response/class-server-response-exception.php: class Server_Response_Exception extends Base_Exception {
+includes/exceptions/class-add-payment-method-exception.php: class Add_Payment_Method_Exception extends Base_Exception {
+includes/exceptions/class-amount-too-large-exception.php: class Amount_Too_Large_Exception extends API_Exception {
+includes/exceptions/class-amount-too-small-exception.php: class Amount_Too_Small_Exception extends API_Exception {
+includes/exceptions/class-api-exception.php: class API_Exception extends Base_Exception {
+includes/exceptions/class-api-merchant-exception.php: class API_Merchant_Exception extends API_Exception {
+includes/exceptions/class-base-exception.php: abstract class Base_Exception extends Exception {
+includes/exceptions/class-cannot-combine-currencies-exception.php: class Cannot_Combine_Currencies_Exception extends API_Exception {
+includes/exceptions/class-connection-exception.php: class Connection_Exception extends API_Exception {
+includes/exceptions/class-fraud-prevention-enabled-exception.php: class Fraud_Prevention_Enabled_Exception extends Process_Payment_Exception {
+includes/exceptions/class-fraud-ruleset-exception.php: class Fraud_Ruleset_Exception extends Exception {}
+includes/exceptions/class-intent-authentication-exception.php: class Intent_Authentication_Exception extends Base_Exception {
+includes/exceptions/class-invalid-address-exception.php: class Invalid_Address_Exception extends Exception {}
+includes/exceptions/class-invalid-payment-method-exception.php: class Invalid_Payment_Method_Exception extends Base_Exception {
+includes/exceptions/class-invalid-phone-number-exception.php: class Invalid_Phone_Number_Exception extends Process_Payment_Exception {
+includes/exceptions/class-invalid-price-exception.php: class Invalid_Price_Exception extends Exception {}
+includes/exceptions/class-invalid-webhook-data-exception.php: class Invalid_Webhook_Data_Exception extends Exception {
+includes/exceptions/class-order-id-mismatch-exception.php: class Order_ID_Mismatch_Exception extends Base_Exception {
+includes/exceptions/class-order-not-found-exception.php: class Order_Not_Found_Exception extends Base_Exception {}
+includes/exceptions/class-process-payment-exception.php: class Process_Payment_Exception extends Base_Exception {
+includes/exceptions/class-rate-limiter-enabled-exception.php: class Rate_Limiter_Enabled_Exception extends Process_Payment_Exception {
+includes/exceptions/class-rest-request-exception.php: class Rest_Request_Exception extends Exception {}
+includes/exceptions/class-subscription-mode-mismatch-exception.php: class Subscription_Mode_Mismatch_Exception extends Base_Exception {
+includes/fraud-prevention/wc-payments-fraud-risk-tools.php: function WC_Payments_Fraud_Risk_Tools() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
+includes/multi-currency/Exceptions/InvalidCurrencyException.php: class InvalidCurrencyException extends Exception {}
+includes/multi-currency/Exceptions/InvalidCurrencyRateException.php: class InvalidCurrencyRateException extends Exception {}
+includes/payment-methods/Configs/Definitions/AffirmDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/AffirmDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/AffirmDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/AffirmDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/AfterpayDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/AfterpayDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/AfterpayDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/AfterpayDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/AlipayDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/AlipayDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/AlipayDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/AlipayDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/AmazonPayDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/AmazonPayDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/AmazonPayDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/AmazonPayDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/ApplePayDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/ApplePayDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/ApplePayDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/BancontactDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/BancontactDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/BancontactDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/BancontactDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/BecsDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/BecsDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/BecsDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/BecsDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/CardDefinition.php: $details       = $payment_details[ self::get_id() ];
+includes/payment-methods/Configs/Definitions/CardDefinition.php: if ( ! isset( $payment_details[ self::get_id() ] ) ) {
+includes/payment-methods/Configs/Definitions/CardDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/CardDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/CardDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/CardDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/EpsDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/EpsDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/EpsDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/EpsDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/GiropayDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/GiropayDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/GiropayDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/GiropayDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/GooglePayDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/GooglePayDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/GooglePayDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/GrabPayDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/GrabPayDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/GrabPayDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/GrabPayDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/IdealDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/IdealDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/IdealDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/IdealDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/KlarnaDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/KlarnaDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/KlarnaDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/KlarnaDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/LinkDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/LinkDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/LinkDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/LinkDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/MultibancoDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/MultibancoDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/MultibancoDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/MultibancoDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/P24Definition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/P24Definition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/P24Definition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/P24Definition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/SepaDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/SepaDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/SepaDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/SepaDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/SofortDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/SofortDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/SofortDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/SofortDefinition.php: return self::get_id();
+includes/payment-methods/Configs/Definitions/WechatPayDefinition.php: public static function get_id(): string {
+includes/payment-methods/Configs/Definitions/WechatPayDefinition.php: public static function get_stripe_payment_method_type(): string {
+includes/payment-methods/Configs/Definitions/WechatPayDefinition.php: return PaymentMethodUtils::get_stripe_id( self::get_id() );
+includes/payment-methods/Configs/Definitions/WechatPayDefinition.php: return self::get_id();
+includes/subscriptions/class-wc-payments-invoice-service.php: $subscription->set_payment_method( WC_Payment_Gateway_WCPay::GATEWAY_ID );
+includes/subscriptions/class-wc-payments-invoice-service.php: WC_Payments::get_gateway()->update_failing_payment_method( $subscription, $order );
+includes/subscriptions/class-wc-payments-product-service.php: $is_current_environment = null === $test_mode || WC_Payments::mode()->is_test() === $test_mode;
+includes/subscriptions/class-wc-payments-product-service.php: $test_mode         = WC_Payments::mode()->is_test();
+includes/subscriptions/class-wc-payments-product-service.php: $test_mode = null === $test_mode ? WC_Payments::mode()->is_test() : $test_mode;
+includes/subscriptions/class-wc-payments-subscription-service.php: $current_mode      = WC_Payments::mode()->is_test() ? Order_Mode::TEST : Order_Mode::PRODUCTION;
+includes/subscriptions/class-wc-payments-subscription-service.php: $subscription_mode = $parent_order->get_meta( WC_Payments_Order_Service::WCPAY_MODE_META_KEY );
+includes/subscriptions/class-wc-payments-subscription-service.php: add_action( 'woocommerce_subscription_payment_method_updated_from_' . WC_Payment_Gateway_WCPay::GATEWAY_ID, [ $this, 'maybe_cancel_subscription' ], 10, 2 );
+includes/subscriptions/class-wc-payments-subscription-service.php: if ( (bool) $wcpay_subscription_id && WC_Payment_Gateway_WCPay::GATEWAY_ID !== $new_payment_method ) {
+includes/subscriptions/class-wc-payments-subscription-service.php: if ( WC_Payment_Gateway_WCPay::GATEWAY_ID !== $new_payment_method ) {
+includes/subscriptions/class-wc-payments-subscription-service.php: if ( WC_Payment_Gateway_WCPay::GATEWAY_ID !== $subscription->get_payment_method() ) {
+includes/subscriptions/class-wc-payments-subscription-service.php: return ! WC_Payments_Subscriptions::is_duplicate_site() && WC_Payment_Gateway_WCPay::GATEWAY_ID === $subscription->get_payment_method() && (bool) self::get_wcpay_subscription_id( $subscription );
+includes/subscriptions/class-wc-payments-subscriptions-admin-notices.php: WC_Payments::display_admin_notice( $message, 'notice-warning' );
+includes/subscriptions/class-wc-payments-subscriptions-admin-notices.php: return WC_Payments::get_file_version( WCPAY_PLUGIN_FILE );
+includes/subscriptions/class-wc-payments-subscriptions-empty-state-manager.php: 'connectUrl'    => WC_Payments_Account::get_connect_url( 'WC_SUBSCRIPTIONS_TABLE' ),
+includes/subscriptions/class-wc-payments-subscriptions-empty-state-manager.php: WC_Payments::get_file_version( 'dist/subscriptions-empty-state.css' ),
+includes/subscriptions/class-wc-payments-subscriptions-empty-state-manager.php: WC_Payments::register_script_with_dependencies( 'WCPAY_SUBSCRIPTIONS_EMPTY_STATE', 'dist/subscriptions-empty-state' );
+includes/subscriptions/class-wc-payments-subscriptions-event-handler.php: $order->set_payment_method( WC_Payment_Gateway_WCPay::GATEWAY_ID );
+includes/subscriptions/class-wc-payments-subscriptions-migrator.php: 'gateway_id' => WC_Payment_Gateway_WCPay::GATEWAY_ID,
+includes/subscriptions/class-wc-payments-subscriptions-migrator.php: 'limit'      => WC_Payment_Gateway_WCPay::USER_FORMATTED_TOKENS_LIMIT,
+includes/subscriptions/class-wc-payments-subscriptions-migrator.php: if ( $subscription->get_payment_method() !== WC_Payment_Gateway_WCPay::GATEWAY_ID ) {
+includes/subscriptions/class-wc-payments-subscriptions-migrator.php: if ( WC_Payment_Gateway_WCPay::GATEWAY_ID === $subscription->get_payment_method() && isset( $wcpay_subscription['current_period_end'] ) && absint( $wcpay_subscription['current_period_end'] ) > time() ) {
+includes/subscriptions/class-wc-payments-subscriptions-migrator.php: if ( WC_Payment_Gateway_WCPay::GATEWAY_ID === $subscription->get_payment_method() ) {
+includes/subscriptions/class-wc-payments-subscriptions-onboarding-handler.php: 'connectUrl'  => WC_Payments_Account::get_connect_url( 'WC_SUBSCRIPTIONS_PUBLISH_PRODUCT_' . $post->ID ),
+includes/subscriptions/class-wc-payments-subscriptions-onboarding-handler.php: WC_Payments::get_file_version( 'dist/subscription-product-onboarding-modal.css' ),
+includes/subscriptions/class-wc-payments-subscriptions-onboarding-handler.php: WC_Payments::register_script_with_dependencies( 'wcpay-subscription-product-onboarding-modal', 'dist/subscription-product-onboarding-modal' );
+includes/subscriptions/class-wc-payments-subscriptions-onboarding-handler.php: WC_Payments::register_script_with_dependencies( 'wcpay-subscription-product-onboarding-toast', 'dist/subscription-product-onboarding-toast' );
+includes/subscriptions/class-wc-payments-subscriptions-plugin-notice-manager.php: if ( WC_Payments::get_gateway()->is_subscriptions_plugin_active() ) {
+includes/wc-payment-api/class-wc-payments-api-client.php: class WC_Payments_API_Client implements MultiCurrencyApiClientInterface {
+src/wcpay-get-container.php: function wcpay_get_container() {
+woocommerce-payments.php: function wcpay_activated() {
+woocommerce-payments.php: function wcpay_check_old_jetpack_version() {
+woocommerce-payments.php: function wcpay_deactivated() {
+woocommerce-payments.php: function wcpay_get_jetpack_idc_custom_content(): array {
+woocommerce-payments.php: function wcpay_init() {
+woocommerce-payments.php: function wcpay_jetpack_init() {
+woocommerce-payments.php: function wcpay_show_old_jetpack_notice() {
+woocommerce-payments.php: function wcpay_tasks_init() {

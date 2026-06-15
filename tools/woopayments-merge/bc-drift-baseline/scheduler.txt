@@ -1,0 +1,161 @@
+includes/admin/class-wc-payments-admin-banner.php: 'payment_method' => 'woocommerce_payments',
+includes/admin/class-wc-payments-admin-banner.php: [ 'woocommerce_payments' ]
+includes/admin/class-wc-payments-admin-banner.php: add_action( 'woocommerce_payments_account_refreshed', [ $this, 'invalidate_post_kyc_activation_notice_cache' ] );
+includes/admin/class-wc-payments-admin-banner.php: if ( 'woocommerce_payments' === $order->get_payment_method()
+includes/admin/class-wc-payments-admin-settings.php: add_action( 'woocommerce_woocommerce_payments_admin_notices', [ $this, 'maybe_show_sandbox_account_notice' ] );
+includes/admin/class-wc-payments-admin-settings.php: add_action( 'woocommerce_woocommerce_payments_admin_notices', [ $this, 'maybe_show_test_account_notice' ] );
+includes/admin/class-wc-payments-admin-settings.php: add_action( 'woocommerce_woocommerce_payments_admin_notices', [ $this, 'maybe_show_test_mode_notice' ] );
+includes/admin/class-wc-payments-admin.php: add_action( 'woocommerce_admin_order_totals_after_total', [ $this, 'display_wcpay_transaction_fee' ] );
+includes/admin/class-wc-rest-payments-settings-controller.php: $stripe_billing_migrator->schedule_migrate_wcpay_subscriptions_action();
+includes/admin/class-wc-rest-payments-settings-controller.php: $updated_fields['deposit_schedule_interval'] = $this->wcpay_gateway->get_option( 'deposit_schedule_interval' );
+includes/admin/class-wc-rest-payments-settings-controller.php: 'deposit_schedule_interval'              => $this->wcpay_gateway->get_option( 'deposit_schedule_interval' ),
+includes/admin/class-wc-rest-payments-settings-controller.php: 'deposit_schedule_monthly_anchor'        => $this->wcpay_gateway->get_option( 'deposit_schedule_monthly_anchor' ),
+includes/admin/class-wc-rest-payments-settings-controller.php: 'deposit_schedule_weekly_anchor'         => $this->wcpay_gateway->get_option( 'deposit_schedule_weekly_anchor' ),
+includes/class-compatibility-service.php: WC_Payments::get_action_scheduler_service()->schedule_job( time() + 2 * MINUTE_IN_SECONDS, self::UPDATE_COMPATIBILITY_DATA );
+includes/class-compatibility-service.php: add_action( 'woocommerce_payments_account_refreshed', [ $this, 'update_compatibility_data' ] );
+includes/class-duplicates-detection-service.php: $special_keywords = [ 'woocommerce_payments', 'stripe' ];
+includes/class-duplicates-detection-service.php: } elseif ( 'woocommerce_payments' === $gateway->id && method_exists( $gateway, 'is_payment_request_enabled' ) && $gateway->is_payment_request_enabled() ) {
+includes/class-wc-payment-gateway-wcpay.php: $this->action_scheduler_service->schedule_job(
+includes/class-wc-payment-gateway-wcpay.php: const GATEWAY_ID = 'woocommerce_payments';
+includes/class-wc-payments-account.php: $this->action_scheduler_service->schedule_job( $reminder_time, $action_hook );
+includes/class-wc-payments-account.php: 'section' => 'woocommerce_payments',
+includes/class-wc-payments-account.php: add_action( 'updated_option', [ $this, 'possibly_update_wcpay_account_locale' ], 10, 3 );
+includes/class-wc-payments-account.php: add_action( 'woocommerce_payments_account_refreshed', [ $this, 'handle_instant_deposits_inbox_note' ] );
+includes/class-wc-payments-account.php: add_action( 'woocommerce_payments_account_refreshed', [ $this, 'handle_loan_approved_inbox_note' ] );
+includes/class-wc-payments-account.php: add_action( 'woocommerce_payments_account_refreshed', [ $this, 'maybe_record_kyc_completion_date' ] );
+includes/class-wc-payments-account.php: add_action( 'woocommerce_woocommerce_payments_updated', [ $this, 'clear_cache' ] );
+includes/class-wc-payments-account.php: add_action( 'woocommerce_woocommerce_payments_updated', [ $this, 'store_setup_sync' ] );
+includes/class-wc-payments-account.php: const INSTANT_DEPOSITS_REMINDER_ACTION                      = 'wcpay_instant_deposit_reminder';
+includes/class-wc-payments-account.php: const STORE_SETUP_SYNC_ACTION = 'wcpay_store_setup_sync';
+includes/class-wc-payments-account.php: const TRACKS_EVENT_ACCOUNT_CONNECT_FINISHED                 = 'wcpay_account_connect_finished';
+includes/class-wc-payments-account.php: const TRACKS_EVENT_ACCOUNT_CONNECT_START                    = 'wcpay_account_connect_start';
+includes/class-wc-payments-account.php: const TRACKS_EVENT_ACCOUNT_CONNECT_WPCOM_CONNECTION_FAILURE = 'wcpay_account_connect_wpcom_connection_failure';
+includes/class-wc-payments-account.php: const TRACKS_EVENT_ACCOUNT_CONNECT_WPCOM_CONNECTION_START   = 'wcpay_account_connect_wpcom_connection_start';
+includes/class-wc-payments-account.php: const TRACKS_EVENT_ACCOUNT_CONNECT_WPCOM_CONNECTION_SUCCESS = 'wcpay_account_connect_wpcom_connection_success';
+includes/class-wc-payments-account.php: const TRACKS_EVENT_ACCOUNT_REFERRAL                         = 'wcpay_account_referral';
+includes/class-wc-payments-account.php: const TRACKS_EVENT_KYC_REMINDER_MERCHANT_RETURNED           = 'wcpay_kyc_reminder_merchant_returned';
+includes/class-wc-payments-action-scheduler-service.php: '_wcpay_mode'         => $order_mode,
+includes/class-wc-payments-action-scheduler-service.php: *                          Defaults to 'woocommerce_payments'.
+includes/class-wc-payments-action-scheduler-service.php: * Used by schedule_job() to deduplicate deferred closures so that multiple
+includes/class-wc-payments-action-scheduler-service.php: add_action( 'wcpay_track_new_order', [ $this, 'track_new_order_action' ] );
+includes/class-wc-payments-action-scheduler-service.php: add_action( 'wcpay_track_update_order', [ $this, 'track_update_order_action' ] );
+includes/class-wc-payments-action-scheduler-service.php: as_schedule_recurring_action( time() + wp_rand( 10, 60 ), 6 * HOUR_IN_SECONDS, WC_Payments_Account::STORE_SETUP_SYNC_ACTION, [], self::GROUP_ID, true );
+includes/class-wc-payments-action-scheduler-service.php: as_schedule_single_action( $timestamp, $action, $args, $group );
+includes/class-wc-payments-action-scheduler-service.php: as_unschedule_action( $action, $args, $group );
+includes/class-wc-payments-action-scheduler-service.php: const GROUP_ID = 'woocommerce_payments';
+includes/class-wc-payments-action-scheduler-service.php: if ( ! function_exists( 'as_schedule_recurring_action' ) || ! function_exists( 'as_has_scheduled_action' ) ) {
+includes/class-wc-payments-action-scheduler-service.php: private function schedule_action_and_prevent_duplicates( int $timestamp, string $action, array $args = [], string $group = self::GROUP_ID ) {
+includes/class-wc-payments-action-scheduler-service.php: public function schedule_job( int $timestamp, string $hook, array $args = [], string $group = self::GROUP_ID ) {
+includes/class-wc-payments-action-scheduler-service.php: return as_has_scheduled_action( $hook, [], self::GROUP_ID );
+includes/class-wc-payments-address-provider.php: $this->id                  = 'woocommerce_payments';
+includes/class-wc-payments-apple-pay-registration.php: add_action( 'add_option_woocommerce_woocommerce_payments_apple_pay_settings', [ $this, 'verify_domain_on_new_settings' ], 10, 2 );
+includes/class-wc-payments-apple-pay-registration.php: add_action( 'update_option_woocommerce_woocommerce_payments_apple_pay_settings', [ $this, 'verify_domain_on_updated_settings' ], 10, 2 );
+includes/class-wc-payments-apple-pay-registration.php: add_action( 'update_option_woocommerce_woocommerce_payments_settings', [ $this, 'verify_domain_on_updated_main_gateway_settings' ], 10, 2 );
+includes/class-wc-payments-apple-pay-registration.php: add_action( 'woocommerce_woocommerce_payments_admin_notices', [ $this, 'display_error_notice' ] );
+includes/class-wc-payments-incentives-service.php: 'payment_method' => 'woocommerce_payments',
+includes/class-wc-payments-onboarding-service.php: const TRACKS_EVENT_ONBOARDING_RESET           = 'wcpay_onboarding_flow_reset';
+includes/class-wc-payments-onboarding-service.php: const TRACKS_EVENT_TEST_DRIVE_ACCOUNT_DISABLE = 'wcpay_onboarding_test_account_disable';
+includes/class-wc-payments-order-service.php: 'payment_method' => 'woocommerce_payments',
+includes/class-wc-payments-order-service.php: WC_Payments::get_action_scheduler_service()->schedule_job(
+includes/class-wc-payments-order-service.php: const WCPAY_PAYMENT_TRANSACTION_ID_META_KEY = '_wcpay_payment_transaction_id';
+includes/class-wc-payments-order-service.php: const WCPAY_REFUND_TRANSACTION_ID_META_KEY = '_wcpay_refund_transaction_id';
+includes/class-wc-payments-order-service.php: const WCPAY_TRANSACTION_FEE_META_KEY = '_wcpay_transaction_fee';
+includes/class-wc-payments-order-success-page.php: if ( stripos( $payment_method_id, 'woocommerce_payments' ) !== 0 ) {
+includes/class-wc-payments-post-kyc-activation-email-service.php: as_schedule_single_action( max( $send_at, $now + 60 ), self::SEND_HOOK, [ $stage ], 'woocommerce-payments' );
+includes/class-wc-payments-post-kyc-activation-email-service.php: const SCHEDULED_OPTION = 'wcpay_post_kyc_activation_emails_scheduled';
+includes/class-wc-payments-post-kyc-activation-email-service.php: const SEND_HOOK = 'wcpay_post_kyc_activation_email_send';
+includes/class-wc-payments-post-kyc-activation-email-service.php: if ( ! function_exists( 'as_schedule_single_action' ) ) {
+includes/class-wc-payments-utils.php: && 0 === strpos( $current_section, 'woocommerce_payments' )
+includes/class-wc-payments-webhook-reliability-service.php: $payload = $this->payments_api_client->get_failed_webhook_events();
+includes/class-wc-payments-webhook-reliability-service.php: $this->action_scheduler_service->schedule_job( time(), self::WEBHOOK_FETCH_EVENTS_ACTION );
+includes/class-wc-payments-webhook-reliability-service.php: $this->action_scheduler_service->schedule_job( time(), self::WEBHOOK_PROCESS_EVENT_ACTION, [ 'event_id' => $event_id ] );
+includes/class-wc-payments-webhook-reliability-service.php: add_action( 'woocommerce_payments_account_refreshed', [ $this, 'maybe_schedule_fetch_events' ] );
+includes/class-wc-payments-webhook-reliability-service.php: const CONTINUOUS_FETCH_FLAG_ACCOUNT_DATA = 'has_more_failed_events';
+includes/class-wc-payments-webhook-reliability-service.php: const WEBHOOK_FETCH_EVENTS_ACTION        = 'wcpay_webhook_fetch_events';
+includes/class-wc-payments-webhook-reliability-service.php: const WEBHOOK_PROCESS_EVENT_ACTION       = 'wcpay_webhook_process_event';
+includes/class-wc-payments-webhook-reliability-service.php: return 'wcpay_failed_event_' . md5( $event_id );
+includes/class-wc-payments-woopay-button-handler.php: if ( ! isset( $gateways['woocommerce_payments'] ) ) {
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_check_bnpl_availability', [ __CLASS__, 'ajax_check_bnpl_availability' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_get_cart_total', [ __CLASS__, 'ajax_get_cart_total' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_get_woopay_minimum_session_data', [ WooPay_Session::class, 'ajax_get_woopay_minimum_session_data' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_get_woopay_session', [ WooPay_Session::class, 'ajax_get_woopay_session' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_get_woopay_signature', [ __CLASS__, 'ajax_get_woopay_signature' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_init_woopay', [ WooPay_Session::class, 'ajax_init_woopay' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_set_woopay_phone_number', [ WooPay_Session::class, 'ajax_set_woopay_phone_number' ] );
+includes/class-wc-payments.php: add_action( 'wc_ajax_wcpay_shopper_set_woopay_appearance', [ WooPay_Session::class, 'ajax_shopper_set_woopay_appearance' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_onboarding_profile_data_updated', 'WC_Payments_Features::maybe_enable_wcpay_subscriptions_after_onboarding', 10, 2 );
+includes/class-wc-payments.php: add_action( 'woocommerce_payments_account_refreshed', [ WooPay_Order_Status_Sync::class, 'remove_webhook' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ 'WC_Payments_Styles_Cache', 'handle_theme_change' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ '\WCPay\Migrations\Delete_Active_WooPay_Webhook', 'maybe_delete' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ __CLASS__, 'maybe_disable_wcpay_subscriptions_on_update' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ __CLASS__, 'maybe_update_stripe_billing_deprecation_note' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ __CLASS__, 'set_plugin_activation_timestamp' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new Allowed_Payment_Request_Button_Types_Update( self::get_gateway() ), 'maybe_migrate' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new \WCPay\Migrations\Add_Amazon_Pay_To_Express_Checkout_Locations(), 'maybe_migrate' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new \WCPay\Migrations\Additional_Payment_Methods_Admin_Notes_Removal(), 'maybe_migrate' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new \WCPay\Migrations\Allowed_Payment_Request_Button_Sizes_Update( self::get_gateway() ), 'maybe_migrate' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new \WCPay\Migrations\Delete_Appearance_Transients(), 'maybe_migrate' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new \WCPay\Migrations\Erase_Bnpl_Announcement_Meta(), 'maybe_migrate' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new \WCPay\Migrations\Erase_Deprecated_Flags_And_Options(), 'maybe_migrate' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new \WCPay\Migrations\Gateway_Settings_Sync( self::get_gateway(), self::get_payment_gateway_map() ), 'maybe_sync' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new \WCPay\Migrations\Link_WooPay_Mutual_Exclusion_Handler( self::get_gateway() ), 'maybe_migrate' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new \WCPay\Migrations\Manual_Capture_Payment_Method_Settings_Update( self::get_gateway(), self::get_payment_gateway_map() ), 'maybe_migrate' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new \WCPay\Migrations\Migrate_Express_Checkout_Locations(), 'maybe_migrate' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new \WCPay\Migrations\Migrate_Payment_Request_To_Express_Checkout_Enabled(), 'maybe_migrate' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new \WCPay\Migrations\Payment_Method_Deprecation_Settings_Update( self::get_gateway(), self::get_payment_gateway_map(), GiropayDefinition::get_id(), '7.9.0' ), 'maybe_migrate' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new \WCPay\Migrations\Payment_Method_Deprecation_Settings_Update( self::get_gateway(), self::get_payment_gateway_map(), SofortDefinition::get_id(), '8.9.0' ), 'maybe_migrate' ] );
+includes/class-wc-payments.php: add_action( 'woocommerce_woocommerce_payments_updated', [ new \WCPay\Migrations\Update_Service_Data_From_Server( self::get_account_service() ), 'maybe_migrate' ] );
+includes/class-wc-payments.php: add_action( 'wp_ajax_wcpay_admin_set_woopay_appearance', [ WooPay_Session::class, 'ajax_admin_set_woopay_appearance' ] );
+includes/class-woopay-tracker.php: add_action( 'woocommerce_payments_save_user_in_woopay', [ $this, 'must_save_payment_method_to_platform' ] );
+includes/class-woopay-tracker.php: if ( ! $order || 'woocommerce_payments' !== $order->get_payment_method() ) {
+includes/class-woopay-tracker.php: if ( isset( $payment_gateway->id ) && strpos( $payment_gateway->id, 'woocommerce_payments' ) === 0 ) {
+includes/compat/multi-currency/class-wc-payments-currency-manager.php: add_action( 'update_option_woocommerce_woocommerce_payments_settings', [ $this, 'maybe_add_missing_currencies' ] );
+includes/compat/subscriptions/class-wc-payments-email-failed-renewal-authentication.php: add_action( 'woocommerce_woocommerce_payments_payment_requires_action', [ $this, 'trigger' ] );
+includes/compat/subscriptions/trait-wc-payment-gateway-wcpay-subscriptions.php: add_action( 'wp_ajax_wcpay_get_user_payment_tokens', [ $this, 'ajax_get_user_payment_tokens' ] );
+includes/core/server/class-request.php: WC_Payments_API_Client::WEBHOOK_FETCH_API          => 'webhook/failed_events',
+includes/emails/class-wc-payments-email-ipp-receipt.php: add_action( 'woocommerce_payments_email_ipp_receipt_compliance_details', [ $this, 'compliance_details' ], 10, 2 );
+includes/emails/class-wc-payments-email-ipp-receipt.php: add_action( 'woocommerce_payments_email_ipp_receipt_notification', [ $this, 'trigger' ], 10, 3 );
+includes/emails/class-wc-payments-email-ipp-receipt.php: add_action( 'woocommerce_payments_email_ipp_receipt_store_details', [ $this, 'store_details' ], 10, 2 );
+includes/express-checkout/class-wc-payments-express-checkout-button-display-handler.php: add_action( 'wc_ajax_wcpay_add_to_cart', [ $this->express_checkout_ajax_handler, 'ajax_add_to_cart' ] );
+includes/express-checkout/class-wc-payments-express-checkout-button-handler.php: add_action( 'wcpay_payment_fields_js_config', [ $this, 'payment_fields_js_config' ] );
+includes/express-checkout/class-wc-payments-express-checkout-button-handler.php: if ( 'woocommerce_payments' !== $id || ! is_admin() ) {
+includes/express-checkout/class-wc-payments-express-checkout-button-handler.php: if ( isset( $gateways['woocommerce_payments'] ) ) {
+includes/fraud-prevention/class-order-fraud-and-risk-meta-box.php: } elseif ( 'woocommerce_payments' !== $payment_method ) {
+includes/migrations/class-erase-deprecated-flags-and-options.php: delete_option( '_wcpay_feature_custom_deposit_schedules' );
+includes/migrations/class-wc-payments-remediate-canceled-auth-fees.php: as_schedule_single_action(
+includes/migrations/class-wc-payments-remediate-canceled-auth-fees.php: const ACTION_HOOK = 'wcpay_remediate_canceled_authorization_fees';
+includes/migrations/class-wc-payments-remediate-canceled-auth-fees.php: const CHECK_AFFECTED_ORDERS_HOOK = 'wcpay_check_affected_auth_fee_orders';
+includes/migrations/class-wc-payments-remediate-canceled-auth-fees.php: const DRY_RUN_ACTION_HOOK = 'wcpay_remediate_canceled_authorization_fees_dry_run';
+includes/migrations/class-wc-payments-remediate-canceled-auth-fees.php: if ( ! function_exists( 'as_schedule_single_action' ) ) {
+includes/migrations/class-wc-payments-remediate-canceled-auth-fees.php: if ( function_exists( 'as_schedule_single_action' ) ) {
+includes/multi-currency/Settings.php: add_action( 'woocommerce_admin_field_wcpay_multi_currency_settings_page', [ $this, 'wcpay_multi_currency_settings_page' ] );
+includes/multi-currency/SettingsOnboardCta.php: add_action( 'woocommerce_admin_field_wcpay_currencies_settings_onboarding_cta', [ $this, 'currencies_settings_onboarding_cta' ] );
+includes/notes/class-wc-payments-notes-canceled-auth-remediation.php: as_schedule_single_action(
+includes/notes/class-wc-payments-notes-canceled-auth-remediation.php: if ( ! function_exists( 'as_schedule_single_action' ) ) {
+includes/subscriptions/class-wc-payments-subscription-service.php: add_action( 'wcs_renewal_order_items', [ $this, 'check_wcpay_mode_for_subscription' ], 10, 3 );
+includes/subscriptions/class-wc-payments-subscription-service.php: add_action( 'woocommerce_admin_order_data_after_billing_address', [ $this, 'show_wcpay_subscription_id' ] );
+includes/subscriptions/class-wc-payments-subscription-service.php: add_action( 'woocommerce_payment_token_added_to_order', [ $this, 'update_wcpay_subscription_payment_method' ], 10, 3 );
+includes/subscriptions/class-wc-payments-subscription-service.php: add_action( 'woocommerce_payments_changed_subscription_payment_method', [ $this, 'maybe_attempt_payment_for_subscription' ], 10, 2 );
+includes/subscriptions/class-wc-payments-subscriptions-disabler.php: 'section'                     => 'woocommerce_payments',
+includes/subscriptions/class-wc-payments-subscriptions-disabler.php: if ( empty( $_GET['section'] ) || 'woocommerce_payments' !== $_GET['section'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+includes/subscriptions/class-wc-payments-subscriptions-event-handler.php: $subscription->add_order_note( sprintf( __( 'Next automatic payment scheduled for %s.', 'woocommerce-payments' ), get_date_from_gmt( gmdate( 'Y-m-d H:i:s', $wcpay_subscription['current_period_end'] ), wc_date_format() . ' ' . wc_time_format() ) ) );
+includes/subscriptions/class-wc-payments-subscriptions-migrator.php: 'callback'         => [ $this, 'schedule_migrate_wcpay_subscriptions_action' ],
+includes/subscriptions/class-wc-payments-subscriptions-migrator.php: add_action( $this->migrate_hook . '_retry', [ $this, 'migrate_wcpay_subscription' ], 10, 2 );
+includes/subscriptions/class-wc-payments-subscriptions-migrator.php: add_action( 'woocommerce_payment_token_added_to_order', [ WC_Payments_Subscriptions::get_subscription_service(), 'update_wcpay_subscription_payment_method' ], 10, 3 );
+includes/subscriptions/class-wc-payments-subscriptions-migrator.php: as_schedule_single_action(
+includes/subscriptions/class-wc-payments-subscriptions-migrator.php: as_schedule_single_action( gmdate( 'U' ) + 60, $this->migrate_hook, [ 'migrate_subscription' => $item ] );
+includes/subscriptions/class-wc-payments-subscriptions-migrator.php: public $scheduled_hook = 'wcpay_schedule_subscription_migrations';
+includes/subscriptions/class-wc-payments-subscriptions-migrator.php: public function schedule_migrate_wcpay_subscriptions_action() {
+includes/subscriptions/class-wc-payments-subscriptions-onboarding-handler.php: add_action( 'woocommerce_payments_account_refreshed', [ $this, 'account_data_refreshed' ] );
+includes/wc-payment-api/class-wc-payments-api-client.php: const WEBHOOK_FETCH_API            = 'webhook/failed_events';
+includes/wc-payment-api/class-wc-payments-api-client.php: public function get_failed_webhook_events() {
+includes/woopay-user/class-woopay-save-user.php: if ( ! isset( $gateways['woocommerce_payments'] ) ) {
+includes/woopay/class-woopay-order-status-sync.php: const WCPAY_WEBHOOK_WOOPAY_ORDER_STATUS_CHANGED = 'wcpay_webhook_platform_checkout_order_status_changed';
+includes/woopay/class-woopay-scheduler.php: add_action( 'woocommerce_woocommerce_payments_updated', [ $this, 'remove_legacy_schedule_action_name_on_update' ] );
+includes/woopay/class-woopay-scheduler.php: if ( ! wp_next_scheduled( 'validate_woopay_compatibility' ) ) {
+includes/woopay/class-woopay-scheduler.php: if ( wp_next_scheduled( 'validate_incompatible_extensions' ) ) {
+includes/woopay/class-woopay-scheduler.php: wp_clear_scheduled_hook( 'validate_incompatible_extensions' );
+includes/woopay/class-woopay-scheduler.php: wp_clear_scheduled_hook( 'validate_woopay_compatibility' );
+includes/woopay/class-woopay-scheduler.php: wp_schedule_event( time(), 'daily', 'validate_woopay_compatibility' );
+includes/woopay/class-woopay-session.php: wp_clear_scheduled_hook( 'woopay_restore_order_customer_id' );
+includes/woopay/class-woopay-session.php: wp_schedule_single_event( time() + 10 * MINUTE_IN_SECONDS, 'woopay_restore_order_customer_id', [ $order_id ] );
