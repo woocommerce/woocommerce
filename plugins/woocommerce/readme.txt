@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.9.0-beta.2 2026-XX-XX =
+= 10.9.0-beta.2 2026-06-15 =
 
 **WooCommerce**
 
@@ -242,6 +242,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Update Featured Product and Featured Category block previews in the inserter so they better match the frontend [#64206](https://github.com/woocommerce/woocommerce/pull/64206)
 * Fix - Validate product_query before using in WC_Product_Data_Store_CPT. [#64360](https://github.com/woocommerce/woocommerce/pull/64360)
 * Fix - Push notifications: cancel the safety-net Action Scheduler action on delivery by matching schedule and cancel on a single identity-keyed args shape, so stale actions no longer fire ~60s later (and the retry path can no longer produce duplicate pushes). [#65589](https://github.com/woocommerce/woocommerce/pull/65589)
+* Fix - Fix product filters not applying when Full Page Reload is enabled in the Product Collection block. [#65601](https://github.com/woocommerce/woocommerce/pull/65601)
 * Add - Add a "Save for later" link beneath each cart line item that saves the item to the saved-for-later shopper list and removes it from the cart on success. The link is only shown to logged-in users and is hidden in the mini-cart. [#65263](https://github.com/woocommerce/woocommerce/pull/65263)
 * Add - Add a configurable endpoint URL to the GraphQL settings section. [#64350](https://github.com/woocommerce/woocommerce/pull/64350)
 * Add - Add a configurable maximum query depth to the GraphQL settings section. [#64325](https://github.com/woocommerce/woocommerce/pull/64325)
@@ -313,6 +314,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update product filter color handling to use block and global styles. [#64586](https://github.com/woocommerce/woocommerce/pull/64586)
 * Update - Update the WooCommerce ability category description to cover extension abilities. [#64934](https://github.com/woocommerce/woocommerce/pull/64934)
 * Update - Enable the push notifications feature by default. [#65572](https://github.com/woocommerce/woocommerce/pull/65572)
+* Update - Add styles for the settings UI number spin control (hide the native spinner, position the +/- buttons). [#65729](https://github.com/woocommerce/woocommerce/pull/65729)
+* Update - Update settings UI layout to the agreed design values: 720px container width, 16px spacing between stacked fields, and 24px between cards. [#65729](https://github.com/woocommerce/woocommerce/pull/65729)
 * Dev - Add E2E tests for block email template update propagation. [#64817](https://github.com/woocommerce/woocommerce/pull/64817)
 * Dev - Add embedded product variation links to the WC REST API v4 products endpoint. [#64566](https://github.com/woocommerce/woocommerce/pull/64566)
 * Dev - Add extra flexibility to the authentication and authorization stages of the dual code+GraphQL API. [#64647](https://github.com/woocommerce/woocommerce/pull/64647)
