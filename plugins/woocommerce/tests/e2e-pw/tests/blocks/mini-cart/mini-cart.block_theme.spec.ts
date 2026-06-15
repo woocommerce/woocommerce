@@ -7,7 +7,7 @@ import { test, expect, BlockData, wpCLI } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
-import config from '../../../../../admin/config/core.json';
+import config from '../../../../../client/admin/config/core.json';
 
 const blockData: BlockData = {
 	name: 'Mini-Cart',

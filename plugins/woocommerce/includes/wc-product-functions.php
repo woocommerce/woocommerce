@@ -1914,10 +1914,6 @@ function wc_update_product_lookup_tables() {
 
 	$is_cli = Constants::is_true( 'WP_CLI' );
 
-	if ( ! $is_cli ) {
-		WC_Admin_Notices::add_notice( 'regenerating_lookup_table' );
-	}
-
 	// Note that the table is not yet generated.
 	update_option( 'woocommerce_product_lookup_table_is_generating', true );
 
