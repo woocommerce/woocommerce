@@ -35,9 +35,11 @@ describe( 'jest adapter', () => {
 			'^@wordpress/data$':
 				'/tmp/cache/latest/node_modules/@wordpress/data',
 			'^react$': '/tmp/cache/latest/node_modules/react',
-			'^react/(.*)$': '/tmp/cache/latest/node_modules/react/$1',
+			'^react/(.*?)(?:\\.js)?$':
+				'/tmp/cache/latest/node_modules/react/$1.js',
 			'^react-dom$': '/tmp/cache/latest/node_modules/react-dom',
-			'^react-dom/(.*)$': '/tmp/cache/latest/node_modules/react-dom/$1',
+			'^react-dom/(.*?)(?:\\.js)?$':
+				'/tmp/cache/latest/node_modules/react-dom/$1.js',
 		} );
 		expect( cache.prepare ).not.toHaveBeenCalled();
 	} );
@@ -77,9 +79,11 @@ describe( 'jest adapter', () => {
 			'^@wordpress/data$':
 				'/tmp/cache/latest/node_modules/@wordpress/data',
 			'^react$': '/tmp/cache/latest/node_modules/react',
-			'^react/(.*)$': '/tmp/cache/latest/node_modules/react/$1',
+			'^react/(.*?)(?:\\.js)?$':
+				'/tmp/cache/latest/node_modules/react/$1.js',
 			'^react-dom$': '/tmp/cache/latest/node_modules/react-dom',
-			'^react-dom/(.*)$': '/tmp/cache/latest/node_modules/react-dom/$1',
+			'^react-dom/(.*?)(?:\\.js)?$':
+				'/tmp/cache/latest/node_modules/react-dom/$1.js',
 		} );
 	} );
 
@@ -101,13 +105,40 @@ describe( 'jest adapter', () => {
 
 		expect( config.moduleNameMapper ).toEqual( {
 			'^react$': '/tmp/cache/gutenberg/node_modules/react',
-			'^react/(.*)$': '/tmp/cache/gutenberg/node_modules/react/$1',
+			'^react/(.*?)(?:\\.js)?$':
+				'/tmp/cache/gutenberg/node_modules/react/$1.js',
 			'^@wordpress/element$':
 				'/tmp/cache/gutenberg/node_modules/@wordpress/element',
 			'^react-dom$': '/tmp/cache/gutenberg/node_modules/react-dom',
-			'^react-dom/(.*)$':
-				'/tmp/cache/gutenberg/node_modules/react-dom/$1',
+			'^react-dom/(.*?)(?:\\.js)?$':
+				'/tmp/cache/gutenberg/node_modules/react-dom/$1.js',
 		} );
+	} );
+
+	it( 'maps singleton package subpath exports to JavaScript files', () => {
+		const mapper = createJestModuleNameMapper( {
+			cacheRoot: '/tmp/cache',
+			lazy: false,
+			packages: [ '@wordpress/element' ],
+			wpVersion: 'latest',
+		} );
+		const reactSubpathPattern = Object.keys( mapper ).find( ( pattern ) =>
+			pattern.startsWith( '^react/' )
+		);
+		const reactSubpathReplacement = mapper[ reactSubpathPattern ];
+
+		expect(
+			'react/jsx-runtime'.replace(
+				new RegExp( reactSubpathPattern ),
+				reactSubpathReplacement
+			)
+		).toBe( '/tmp/cache/latest/node_modules/react/jsx-runtime.js' );
+		expect(
+			'react/jsx-runtime.js'.replace(
+				new RegExp( reactSubpathPattern ),
+				reactSubpathReplacement
+			)
+		).toBe( '/tmp/cache/latest/node_modules/react/jsx-runtime.js' );
 	} );
 
 	it( 'keeps the package root export limited to public Jest helpers', () => {

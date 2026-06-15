@@ -9,6 +9,22 @@ const {
 
 const singletonPackages = [ 'react', 'react-dom' ];
 
+function isSingletonModuleNameMapperPattern( pattern ) {
+	return singletonPackages.some(
+		( packageName ) =>
+			pattern === `^${ packageName }$` ||
+			pattern.startsWith( `^${ packageName }/` )
+	);
+}
+
+function removeSingletonModuleNameMapperEntries( moduleNameMapper = {} ) {
+	return Object.fromEntries(
+		Object.entries( moduleNameMapper ).filter(
+			( [ pattern ] ) => ! isSingletonModuleNameMapperPattern( pattern )
+		)
+	);
+}
+
 function createSingletonModuleNameMapper( {
 	wpVersion = getSelectedWordPressVersion(),
 	cacheRoot,
@@ -22,7 +38,8 @@ function createSingletonModuleNameMapper( {
 		} );
 
 		moduleNameMapper[ `^${ packageName }$` ] = packagePath;
-		moduleNameMapper[ `^${ packageName }/(.*)$` ] = `${ packagePath }/$1`;
+		moduleNameMapper[ `^${ packageName }/(.*?)(?:\\.js)?$` ] =
+			`${ packagePath }/$1.js`;
 
 		return moduleNameMapper;
 	}, {} );
@@ -85,7 +102,9 @@ function withWordPressDependencyCompat( jestConfig = {}, options = {} ) {
 	return {
 		...jestConfig,
 		moduleNameMapper: {
-			...( jestConfig.moduleNameMapper || {} ),
+			...removeSingletonModuleNameMapperEntries(
+				jestConfig.moduleNameMapper
+			),
 			...createJestModuleNameMapper( options ),
 		},
 	};
