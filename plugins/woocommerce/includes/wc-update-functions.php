@@ -3279,12 +3279,22 @@ function wc_update_1090_add_mpn_to_product_lookup_table() {
 		)
 	);
 
+	// Check if the index already exists.
+	$index_exists = $wpdb->get_var(
+		$wpdb->prepare(
+			"SHOW INDEX FROM `{$table_name}` WHERE Key_name = %s",
+			'mpn'
+		)
+	);
+
 	if ( ! $column_exists ) {
 		// Add the MPN column.
 		$wpdb->query(
 			"ALTER TABLE {$table_name} ADD COLUMN `mpn` varchar(100) NOT NULL DEFAULT '' AFTER `global_unique_id`"
 		);
+	}
 
+	if ( ! $index_exists ) {
 		// Add an index for fast filtering.
 		$wpdb->query(
 			"ALTER TABLE {$table_name} ADD INDEX `mpn` (mpn(50))"

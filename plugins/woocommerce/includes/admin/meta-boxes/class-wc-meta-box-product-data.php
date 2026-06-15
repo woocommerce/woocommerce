@@ -563,7 +563,7 @@ class WC_Meta_Box_Product_Data {
 						'attributes'        => self::prepare_set_attributes( $parent->get_attributes(), 'attribute_', $i ),
 						'sku'               => isset( $_POST['variable_sku'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_sku'][ $i ] ) ) : '',
 						'global_unique_id'  => isset( $_POST['variable_global_unique_id'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_global_unique_id'][ $i ] ) ) : '',
-						'mpn'               => isset( $_POST['variable_mpn'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_mpn'][ $i ] ) ) : '',
+						'mpn'               => isset( $_POST['variable_mpn'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_mpn'][ $i ] ) ) : null,
 						'weight'            => isset( $_POST['variable_weight'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_weight'][ $i ] ) ) : '',
 						'length'            => isset( $_POST['variable_length'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_length'][ $i ] ) ) : '',
 						'width'             => isset( $_POST['variable_width'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_width'][ $i ] ) ) : '',
