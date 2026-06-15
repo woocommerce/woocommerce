@@ -5,7 +5,7 @@
 	"homepage": "https://woocommerce.com/",
 	"packageManager": "pnpm@10.33.0",
 	"engines": {
-		"node": "^24.15.0"
+		"node": "^24.16.0"
 	},
 	"private": true,
 	"repository": {

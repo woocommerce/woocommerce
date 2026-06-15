@@ -982,7 +982,7 @@
 		"wp-textdomain": "1.0.1"
 	},
 	"engines": {
-		"node": "^24.15.0"
+		"node": "^24.16.0"
 	},
 	"browserslist": [
 		"> 0.1%",

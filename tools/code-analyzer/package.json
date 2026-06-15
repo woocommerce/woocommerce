@@ -36,7 +36,7 @@
 		"typescript": "5.7.x"
 	},
 	"engines": {
-		"node": "^24.15.0"
+		"node": "^24.16.0"
 	},
 	"config": {
 		"ci": {

@@ -10,7 +10,7 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^24.15.0"
+		"node": "^24.16.0"
 	},
 	"devDependencies": {
 		"@tsconfig/node16": "^1.0.4",
