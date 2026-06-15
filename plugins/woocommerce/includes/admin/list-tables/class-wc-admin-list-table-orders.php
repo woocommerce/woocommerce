@@ -318,10 +318,15 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 			$product_object = is_callable( array( $item, 'get_product' ) ) ? $item->get_product() : null;
 			$row_class      = apply_filters( 'woocommerce_admin_html_order_preview_item_class', '', $item, $order );
-			$refund         = $refunds[ $item->get_product_id() ] ?? null;
 			$variation_id   = $item->get_variation_id();
-			$quantity       = 0 !== $variation_id ? $refund[ $variation_id ]['quantity'] : $refund['quantity'];
-			$total          = 0 !== $variation_id ? $refund[ $variation_id ]['total'] : $refund['total'];
+			
+			if ( $variation_id ) {
+				$refund = $refunds[ $item->get_product_id() ][ $variation_id ] ?? null;
+			} else {
+				$refund = $refunds[ $item->get_product_id() ] ?? null;
+			}
+			$quantity = $refund['quantity'] ?? 0;
+			$total    = $refund['total'] ?? 0;
 
 			$html .= '<tr class="wc-order-preview-table__item wc-order-preview-table__item--' . esc_attr( $item_id ) . ( $row_class ? ' ' . esc_attr( $row_class ) : '' ) . '">';
 
