@@ -732,7 +732,14 @@
 						"includes/**/*.php",
 						"src/Blocks/**/*.php",
 						"templates/**/*.php",
-						"templates/**/*.html"
+						"templates/**/*.html",
+						"client/blocks/tests/e2e/**",
+						"tests/e2e-pw/content-templates/blocks/**",
+						"tests/e2e-pw/test-data/blocks/**",
+						"tests/e2e-pw/test-plugins/blocks/**",
+						"tests/e2e-pw/tests/blocks/**",
+						"tests/e2e-pw/themes/blocks/**",
+						"tests/e2e-pw/utils/blocks/**"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/block-library"
@@ -766,7 +773,14 @@
 						"includes/**/*.php",
 						"src/Blocks/**/*.php",
 						"templates/**/*.php",
-						"templates/**/*.html"
+						"templates/**/*.html",
+						"client/blocks/tests/e2e/**",
+						"tests/e2e-pw/content-templates/blocks/**",
+						"tests/e2e-pw/test-data/blocks/**",
+						"tests/e2e-pw/test-plugins/blocks/**",
+						"tests/e2e-pw/tests/blocks/**",
+						"tests/e2e-pw/themes/blocks/**",
+						"tests/e2e-pw/utils/blocks/**"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/block-library"
@@ -802,7 +816,13 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"client/blocks/tests/e2e/**"
+						"client/blocks/tests/e2e/**",
+						"tests/e2e-pw/content-templates/blocks/**",
+						"tests/e2e-pw/test-data/blocks/**",
+						"tests/e2e-pw/test-plugins/blocks/**",
+						"tests/e2e-pw/tests/blocks/**",
+						"tests/e2e-pw/themes/blocks/**",
+						"tests/e2e-pw/utils/blocks/**"
 					],
 					"onlyForDependencies": [],
 					"testEnv": {
@@ -840,7 +860,13 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"client/blocks/tests/e2e/**"
+						"client/blocks/tests/e2e/**",
+						"tests/e2e-pw/content-templates/blocks/**",
+						"tests/e2e-pw/test-data/blocks/**",
+						"tests/e2e-pw/test-plugins/blocks/**",
+						"tests/e2e-pw/tests/blocks/**",
+						"tests/e2e-pw/themes/blocks/**",
+						"tests/e2e-pw/utils/blocks/**"
 					],
 					"onlyForDependencies": [],
 					"testEnv": {

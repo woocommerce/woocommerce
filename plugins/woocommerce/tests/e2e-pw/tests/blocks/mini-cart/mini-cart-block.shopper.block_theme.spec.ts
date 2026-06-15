@@ -10,10 +10,10 @@ import {
 	REGULAR_PRICED_PRODUCT_NAME,
 	SIMPLE_PHYSICAL_PRODUCT_NAME,
 } from '../checkout/constants';
-import { getTestTranslation } from '../../utils/get-test-translation';
-import { translations } from '../../test-data/data/data';
+import { getTestTranslation } from '../../../utils/blocks/get-test-translation';
+import { translations } from '../../../test-data/blocks/data/data';
 import ProductCollectionPage from '../product-collection/product-collection.page';
-import config from '../../../../../admin/config/core.json';
+import config from '../../../../../client/admin/config/core.json';
 
 const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 	productCollectionPage: async ( { page, admin, editor }, use ) => {

@@ -8,8 +8,8 @@ import { expect, test as base, wpCLI } from '@woocommerce/e2e-utils';
  */
 import { SIMPLE_PHYSICAL_PRODUCT_NAME } from '../checkout/constants';
 import { CheckoutPage } from '../checkout/checkout.page';
-import { translations } from '../../test-data/data/data';
-import { getTestTranslation } from '../../utils/get-test-translation';
+import { translations } from '../../../test-data/blocks/data/data';
+import { getTestTranslation } from '../../../utils/blocks/get-test-translation';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	checkoutPageObject: async ( { page }, use ) => {
