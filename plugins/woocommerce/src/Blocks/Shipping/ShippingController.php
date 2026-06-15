@@ -76,6 +76,7 @@ class ShippingController {
 		add_filter( 'woocommerce_local_pickup_methods', array( $this, 'register_local_pickup_method' ) );
 		add_filter( 'woocommerce_order_hide_shipping_address', array( $this, 'hide_shipping_address_for_local_pickup' ), 10 );
 		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'filter_taxable_address' ) );
+		add_filter( 'woocommerce_order_get_tax_location', array( $this, 'filter_order_tax_location' ), 10, 2 );
 		add_filter( 'woocommerce_shipping_settings', array( $this, 'remove_shipping_settings' ) );
 		add_filter( 'woocommerce_shipping_packages', array( $this, 'filter_shipping_packages' ) );
 		add_filter( 'pre_update_option_woocommerce_pickup_location_settings', array( $this, 'flush_cache' ) );
@@ -462,6 +463,61 @@ class ShippingController {
 		}
 
 		return $address;
+	}
+
+	/**
+	 * Filter the tax location for an order so local pickup orders are taxed at the chosen pickup location's address.
+	 *
+	 * An order's stored shipping/billing address is not the correct tax location for local pickup: the customer
+	 * collects from the store, so tax must be based on the pickup location. `WC_Abstract_Order::get_tax_location()`
+	 * already forces the shop base address for local pickup orders; this filter refines that to the specific pickup
+	 * location's address, which is captured on the shipping line item at purchase time.
+	 *
+	 * This is the order-side counterpart to {@see self::filter_taxable_address()}, which performs the equivalent
+	 * override for the cart via the customer's taxable address. Resolving the address from the order (rather than the
+	 * customer session) keeps the result correct for any order tax read, including admin recalculation, background
+	 * jobs, and multiple orders handled within a single request.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param array              $location Tax location with 'country', 'state', 'postcode' and 'city' keys.
+	 * @param \WC_Abstract_Order $order    Order the tax location is being resolved for.
+	 * @return array
+	 */
+	public function filter_order_tax_location( $location, $order ) {
+		if ( ! $order instanceof \WC_Abstract_Order ) {
+			return $location;
+		}
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		if ( true !== apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) ) {
+			return $location;
+		}
+
+		// Use the same canonical local pickup method list that WC_Abstract_Order::get_tax_location() uses to force
+		// the base address. Relying on the currently-registered methods (LocalPickupUtils::get_local_pickup_method_ids())
+		// would miss legacy or deregistered methods on existing orders, leaving them taxed at the store base instead.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Abstract_Order::get_tax_location().
+		$local_pickup_method_ids = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
+
+		foreach ( $order->get_shipping_methods() as $shipping_method ) {
+			if ( ! in_array( $shipping_method->get_method_id(), $local_pickup_method_ids, true ) ) {
+				continue;
+			}
+
+			$pickup_address = $shipping_method->get_meta( '_pickup_location_address' );
+
+			if ( is_array( $pickup_address ) && ! empty( $pickup_address['country'] ) ) {
+				return array(
+					'country'  => $pickup_address['country'],
+					'state'    => $pickup_address['state'] ?? '',
+					'postcode' => $pickup_address['postcode'] ?? '',
+					'city'     => $pickup_address['city'] ?? '',
+				);
+			}
+		}
+
+		return $location;
 	}
 
 	/**
