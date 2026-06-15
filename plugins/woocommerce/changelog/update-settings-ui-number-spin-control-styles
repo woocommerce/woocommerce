@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add styles for the settings UI number spin control (hide the native spinner, position the +/- buttons).

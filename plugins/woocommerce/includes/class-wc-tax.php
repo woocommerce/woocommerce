@@ -702,8 +702,8 @@ class WC_Tax {
 		global $wpdb;
 
 		if ( is_object( $key_or_rate ) ) {
-			$key      = $key_or_rate->tax_rate_id;
-			$compound = $key_or_rate->tax_rate_compound;
+			$key      = (int) $key_or_rate->tax_rate_id;
+			$compound = (bool) $key_or_rate->tax_rate_compound;
 		} else {
 			$key      = $key_or_rate;
 			$compound = (bool) $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_compound FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
@@ -722,7 +722,7 @@ class WC_Tax {
 		global $wpdb;
 
 		if ( is_object( $key_or_rate ) ) {
-			$key       = $key_or_rate->tax_rate_id;
+			$key       = (int) $key_or_rate->tax_rate_id;
 			$rate_name = $key_or_rate->tax_rate_name;
 		} else {
 			$key       = $key_or_rate;
@@ -744,7 +744,7 @@ class WC_Tax {
 	 */
 	public static function get_rate_percent( $key_or_rate ) {
 		$rate_percent_value = self::get_rate_percent_value( $key_or_rate );
-		$tax_rate_id        = is_object( $key_or_rate ) ? $key_or_rate->tax_rate_id : $key_or_rate;
+		$tax_rate_id        = is_object( $key_or_rate ) ? (int) $key_or_rate->tax_rate_id : $key_or_rate;
 		return apply_filters( 'woocommerce_rate_percent', $rate_percent_value . '%', $tax_rate_id );
 	}
 
@@ -778,7 +778,7 @@ class WC_Tax {
 		global $wpdb;
 
 		if ( is_object( $key_or_rate ) ) {
-			$key  = $key_or_rate->tax_rate_id;
+			$key  = (int) $key_or_rate->tax_rate_id;
 			$rate = $key_or_rate;
 		} else {
 			$key  = $key_or_rate;
