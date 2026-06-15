@@ -126,27 +126,48 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Status and reviews widgets are registered high in the normal dashboard column.
+	 * @testdox WooCommerce widgets are registered high in the normal dashboard column in their current order.
 	 */
-	public function test_init_registers_status_and_reviews_widgets_in_high_normal_context(): void {
+	public function test_init_registers_woocommerce_widgets_in_high_normal_context_in_current_order(): void {
 		global $wp_meta_boxes;
 
 		require_once ABSPATH . 'wp-admin/includes/dashboard.php';
 		set_current_screen( 'dashboard' );
 		unset( $wp_meta_boxes['dashboard'] );
 
+		add_meta_box(
+			'wc_admin_dashboard_setup',
+			'WooCommerce Setup',
+			'__return_empty_string',
+			'dashboard',
+			'normal',
+			'high'
+		);
 		$this->sut->init();
 
+		$this->assertArrayHasKey( 'wc_admin_dashboard_setup', $wp_meta_boxes['dashboard']['normal']['high'] );
 		$this->assertArrayHasKey( 'woocommerce_dashboard_status', $wp_meta_boxes['dashboard']['normal']['high'] );
 		$this->assertArrayHasKey( 'woocommerce_dashboard_recent_reviews', $wp_meta_boxes['dashboard']['normal']['high'] );
 
-		$widget_order  = array_keys( $wp_meta_boxes['dashboard']['normal']['high'] );
-		$status_index  = array_search( 'woocommerce_dashboard_status', $widget_order, true );
-		$reviews_index = array_search( 'woocommerce_dashboard_recent_reviews', $widget_order, true );
+		$widget_order = array_values(
+			array_intersect(
+				array_keys( $wp_meta_boxes['dashboard']['normal']['high'] ),
+				array(
+					'wc_admin_dashboard_setup',
+					'woocommerce_dashboard_status',
+					'woocommerce_dashboard_recent_reviews',
+				)
+			)
+		);
 
-		$this->assertNotFalse( $status_index );
-		$this->assertNotFalse( $reviews_index );
-		$this->assertLessThan( $reviews_index, $status_index );
+		$this->assertSame(
+			array(
+				'wc_admin_dashboard_setup',
+				'woocommerce_dashboard_status',
+				'woocommerce_dashboard_recent_reviews',
+			),
+			$widget_order
+		);
 	}
 
 	/**
