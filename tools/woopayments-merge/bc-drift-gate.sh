@@ -46,6 +46,7 @@ fi
 
 INC="$WCPAY_SRC/includes"
 SRC="$WCPAY_SRC/src"
+CLIENT="$WCPAY_SRC/client"
 ROOTFILE="$WCPAY_SRC/woocommerce-payments.php"
 SCAN="$INC $SRC"
 
@@ -118,7 +119,18 @@ probe_hooks_filters() {
 	} 2>/dev/null | grep -v "vendor/\|/tests/" | normalize
 }
 
-CATEGORIES="scheduler php_api persisted_data endpoints hooks_filters"
+# Tracks / telemetry emitters (bc-extraction/tracks-events.md) — the non-negotiable telemetry
+# contract (bc-manifest §0.3/§3.6). Static name-level drift only; prop-level drift is the runtime
+# parity harness's job. Captures PHP recorders + JS recorders + the server-side event-name constants.
+probe_tracks() {
+	{
+		grep -rHnE "Tracker::track[a-z_]*\(|record_tracks_event\(|wc_admin_record_tracks_event\(" "$INC" "$SRC" --include="*.php"
+		grep -rHn "const " "$INC/constants/class-track-events.php"
+		grep -rHnE "record(User)?Event\(|wcpayTracks|wcTracks\.recordEvent" "$CLIENT" --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx"
+	} 2>/dev/null | grep -vE "vendor|/tests/|__tests__|\.spec\." | normalize
+}
+
+CATEGORIES="scheduler php_api persisted_data endpoints hooks_filters tracks"
 
 echo "BC-manifest drift gate"
 echo "  source:   $WCPAY_SRC"

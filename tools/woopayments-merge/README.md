@@ -80,7 +80,13 @@ WCPAY_SRC=/path/to/woocommerce-payments tools/woopayments-merge/bc-drift-gate.sh
 
 Categories & captured baseline sizes (raw match-lines; higher than the corpus's deduped
 prose counts because each grep hit is one line): `scheduler` 161, `php_api` 307,
-`persisted_data` 755, `endpoints` 63, `hooks_filters` 91.
+`persisted_data` 755, `endpoints` 63, `hooks_filters` 91, `tracks` 159.
+
+The **`tracks`** category enforces the non-negotiable telemetry-continuity contract
+(`bc-manifest.md` §0.3/§3.6, `bc-extraction/tracks-events.md`): the roster of Tracks
+emitters (PHP recorders + JS `recordEvent` call sites + the `Track_Events` constants) must
+not silently change for surfaces that survive the merge. This is the *static, name-level*
+half; *prop-level* parity is the runtime Tracks-parity check (§3).
 
 **When the gate fails:** disposition each new/removed row in `bc-manifest.md`
 (PRESERVE / PRESERVE-AS-FACADE / REDESIGN-FREELY / EXTRACT / DROP / DROP-AFTER-MIGRATION),
@@ -101,14 +107,15 @@ The harness is the **delta** on top of the already-wired env + existing test sui
 | Bucket-E surface dump | **built** | `dump-bucket-e-surface.{php,sh}` — per-order status/meta/notes/refunds; deterministic |
 | Parity differ | **built** | `parity-diff.sh` — self-check PASS on unmodified plugin (the A0 trust gate); fail-closed proven; env-noise excluded at data level |
 | Perf baseline + check gate | **built** | `perf-baseline.{php,sh}` + `perf-baseline.json` — §5.3 surfaces, query-count RULE-1 gate; capture + check PASS on reference |
-| Financial reconciliation | **built; e2e blocked on env** | `financial-reconcile.sh` — preflight fail-closed proven; full run needs a valid host `stripe login` (host CLI key expired; container listener key is valid) |
+| Financial reconciliation | **built; e2e proven** | `financial-reconcile.sh` — reconciled a real £48 refund (WC 4800 === Stripe 4800 on the connected account); preflight fail-closed proven |
+| Tracks parity | **spec'd; runtime piece pending** | static name-level drift is live (the `tracks` drift-gate category, §2). The *prop-level* runtime check — capture `{name, props}` per surface on reference vs native, normalize out volatile values + the auto-envelope, assert zero diff — goes live at A1 shadow (no native emitters to diff against yet). Enforces `bc-manifest.md` §0.3/§3.6 |
 
 The A0 harness gate — "reproduces the status quo on the *unmodified* plugin before any
-native code exists" — **is met**: the drift gate, parity differ (zero self-diff), and perf
-baseline all agree with reality on the unmodified plugin; financial reconciliation's safety
-behavior (fail-closed) is proven, with full e2e gated on a host Stripe session refresh.
-The parity differ becomes load-bearing for cross-store diffs at **A1 shadow mode** (there is
-no native output to diff against until then); at A0 it is validated in self-check mode.
+native code exists" — **is met**: the drift gate (incl. `tracks`), parity differ (zero self-diff),
+and perf baseline all agree with reality on the unmodified plugin; financial reconciliation is
+proven e2e on a real refund. The cross-store parity differs (Bucket-E **and** Tracks props) become
+load-bearing at **A1 shadow mode** (there is no native output to diff against until then); at A0
+they are validated in self-check mode and the static Tracks drift gate is live.
 
 ### Listeners (operator-run)
 
