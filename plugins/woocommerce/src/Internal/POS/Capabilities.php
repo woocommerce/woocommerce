@@ -22,7 +22,7 @@ use WP_User;
  *
  * The preset layer maps each preset (see POSPreset) to a bundle of
  * `woocommerce_pos_*` caps and assigns or clears them per user via
- * set_pos_preset(). The assigned preset is recorded in `_woocommerce_pos_preset`
+ * set_pos_preset(). The assigned preset is recorded in `woocommerce_pos_preset`
  * user meta for the UI; the caps remain the authorization signal, so a stray
  * meta value alone grants nothing.
  *
@@ -75,7 +75,7 @@ class Capabilities {
 	 * is not the authorization signal: has_pos_access() reads the `woocommerce_pos_*` caps, not
 	 * this meta.
 	 */
-	public const POS_PRESET_META_KEY = '_woocommerce_pos_preset';
+	public const POS_PRESET_META_KEY = 'woocommerce_pos_preset';
 
 	/**
 	 * All known POS capability identifiers.
@@ -146,7 +146,7 @@ class Capabilities {
 	/**
 	 * Resolve the assigned POS preset for a user, or null if none is set.
 	 *
-	 * Returns the `_woocommerce_pos_preset` meta value only if it matches an
+	 * Returns the `woocommerce_pos_preset` meta value only if it matches an
 	 * assignable preset, so a stale or hand-edited value reads as "no preset".
 	 *
 	 * @param int $user_id Target user.
