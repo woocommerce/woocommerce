@@ -19,10 +19,11 @@
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
 		"watch:build:project:assets": "grunt watch",
-		"test:js": "wp-scripts test-unit-js --config jest.config.json"
+		"test:js": "wp-scripts test-unit-js --config jest.config.js"
 	},
 	"devDependencies": {
 		"@types/node": "^24.1.0",
+		"@woocommerce/jest-wordpress-version-compat": "workspace:*",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"@wordpress/scripts": "^30.23.0",
 		"autoprefixer": "9.8.6",

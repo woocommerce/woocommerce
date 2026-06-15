@@ -145,6 +145,7 @@
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/jest-wordpress-version-compat": "workspace:*",
 		"@wordpress/api-fetch": "catalog:wp-min",
 		"@wordpress/babel-preset-default": "next",
 		"@wordpress/base-styles": "catalog:wp-min",

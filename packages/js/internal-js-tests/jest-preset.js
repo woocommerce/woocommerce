@@ -148,26 +148,25 @@ const config = {
 	),
 };
 
-if ( process.env.WP_VERSION ) {
-	let withWordPressDependencyCompat;
+const missingWpVersionMessage =
+	'WP_VERSION is not set. This test run is using the installed @wordpress packages and may not rely on a validated WordPress package environment. Set WP_VERSION=latest, WP_VERSION=latest-1, or WP_VERSION=gutenberg to run WordPress package compatibility tests.';
 
-	try {
-		withWordPressDependencyCompat =
-			require( '@woocommerce/jest-wordpress-version-compat' ).withWordPressDependencyCompat;
-	} catch {
-		withWordPressDependencyCompat =
-			require( '../jest-wordpress-version-compat' ).withWordPressDependencyCompat;
-	}
+if ( process.env.WP_VERSION ) {
+	const {
+		withWordPressDependencyCompat,
+	} = require( '@woocommerce/jest-wordpress-version-compat' );
 
 	module.exports = withWordPressDependencyCompat( config, {
 		cwd: process.cwd(),
 		wpVersion: process.env.WP_VERSION,
 	} );
 } else {
+	if ( process.env.CI ) {
+		throw new Error( missingWpVersionMessage );
+	}
+
 	// eslint-disable-next-line no-console
-	console.warn(
-		'WP_VERSION is not set. This test run is using the installed @wordpress packages and may not rely on a validated WordPress package environment. Set WP_VERSION=latest, WP_VERSION=latest-1, or WP_VERSION=gutenberg to run WordPress package compatibility tests.'
-	);
+	console.warn( missingWpVersionMessage );
 
 	module.exports = config;
 }

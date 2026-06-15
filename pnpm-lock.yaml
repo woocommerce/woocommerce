@@ -3616,6 +3616,9 @@ importers:
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../../../../packages/js/internal-build
+      '@woocommerce/jest-wordpress-version-compat':
+        specifier: workspace:*
+        version: link:../../../../packages/js/jest-wordpress-version-compat
       '@wordpress/api-fetch':
         specifier: catalog:wp-min
         version: 7.33.1
@@ -3924,6 +3927,9 @@ importers:
       '@types/node':
         specifier: ^24.1.0
         version: 24.12.2
+      '@woocommerce/jest-wordpress-version-compat':
+        specifier: workspace:*
+        version: link:../../../../packages/js/jest-wordpress-version-compat
       '@wordpress/scripts':
         specifier: ^30.23.0
         version: 30.27.0(@playwright/test@1.59.1)(@swc/core@1.15.24)(@types/eslint@9.6.1)(@types/node@24.12.2)(@types/webpack@4.41.40)(babel-plugin-macros@3.1.0)(file-loader@6.2.0(webpack@5.97.1))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.14.0(stylelint@14.16.1))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(webpack-hot-middleware@2.26.1)
