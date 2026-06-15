@@ -33,26 +33,34 @@ function findInteractivityBlockAssets( dir = [] ) {
 
 				// For block.json's viewScriptModule, style, editorStyle, check if the file exists and warn
 				// if it doesn't, so we don't try enqueue non-existent assets.
-				if ( blockJson.viewScriptModule ) {
-					if (
-						! fs.existsSync( path.join( blockDir, 'frontend.ts' ) )
-					) {
-						// eslint-disable-next-line no-console
-						console.warn(
-							`viewScriptModule was declared in ${ blockJson.name } block.json but no frontend.ts file exists.`
-						);
-					}
+
+				// A viewScriptModule pointing at a name other than the block's own
+				// references a shared module built from another entry, so there's
+				// nothing local to check. Otherwise, the module is built from this
+				// block's own frontend.ts/frontend.js, which must exist.
+				if (
+					blockJson.viewScriptModule &&
+					blockJson.viewScriptModule === blockJson.name &&
+					! assets.some( ( f ) => f.includes( 'frontend' ) )
+				) {
+					// eslint-disable-next-line no-console
+					console.warn(
+						`viewScriptModule was declared in ${ blockJson.name } block.json but no frontend.ts/frontend.js file exists.`
+					);
 				}
 
-				if ( blockJson.style ) {
-					if (
-						! fs.existsSync( path.join( blockDir, 'style.scss' ) )
-					) {
-						// eslint-disable-next-line no-console
-						console.warn(
-							`style was declared in ${ blockJson.name } block.json but no style.scss file exists.`
-						);
-					}
+				// A `file:` style references a CSS file built elsewhere (e.g.
+				// compiled from a shared base component), so only warn when a
+				// local style.scss source is expected but missing.
+				if (
+					blockJson.style &&
+					! String( blockJson.style ).startsWith( 'file:' ) &&
+					! fs.existsSync( path.join( blockDir, 'style.scss' ) )
+				) {
+					// eslint-disable-next-line no-console
+					console.warn(
+						`style was declared in ${ blockJson.name } block.json but no style.scss file exists.`
+					);
 				}
 
 				if ( blockJson.editorStyle ) {
