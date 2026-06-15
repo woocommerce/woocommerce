@@ -55,6 +55,7 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 			array(
 				'frontend_prices',
 				'frontend_currencies',
+				'selected_currency',
 				'compatibility',
 				'async_prices',
 				'storefront',
@@ -128,6 +129,25 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 			),
 			$currency_hooks
 		);
+	}
+
+	/**
+	 * @testdox Should preserve the WooPayments selected currency hook surface.
+	 */
+	public function test_selected_currency_manifest_contains_preserved_hooks(): void {
+		$hook_groups             = MultiCurrencyRuntimeRegistry::get_core_hook_groups();
+		$selected_currency_hooks = array_column( $hook_groups['selected_currency']['actions'], 'hook' );
+
+		$this->assertSame(
+			array(
+				'init',
+				'woocommerce_created_customer',
+				'woocommerce_edit_account_form',
+				'woocommerce_save_account_details',
+			),
+			$selected_currency_hooks
+		);
+		$this->assertSame( 11, $hook_groups['selected_currency']['actions'][0]['priority'] );
 	}
 
 	/**

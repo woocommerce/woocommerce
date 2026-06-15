@@ -73,6 +73,7 @@ class MultiCurrencyRuntimeRegistry {
 		return array(
 			'frontend_prices'     => self::get_frontend_price_hook_group(),
 			'frontend_currencies' => self::get_frontend_currency_hook_group(),
+			'selected_currency'   => self::get_selected_currency_hook_group(),
 			'compatibility'       => MultiCurrencyCompatibilityProjectionService::get_hook_manifest(),
 			'async_prices'        => MultiCurrencyAsyncPriceProjectionService::get_hook_manifest( true, false, false, false, false ),
 			'storefront'          => MultiCurrencyStorefrontProjectionService::get_hook_manifest( 2, true ),
@@ -155,6 +156,23 @@ class MultiCurrencyRuntimeRegistry {
 			'actions' => array(
 				self::hook_entry( 'before_woocommerce_pay', 'init_order_currency_from_query_vars', 10 ),
 				self::hook_entry( 'woocommerce_account_view-order_endpoint', 'init_order_currency', 9 ),
+			),
+		);
+	}
+
+	/**
+	 * Get the preserved selected currency hook metadata.
+	 *
+	 * @return array{filters: array<int,array<string,mixed>>, actions: array<int,array<string,mixed>>}
+	 */
+	private static function get_selected_currency_hook_group(): array {
+		return array(
+			'filters' => array(),
+			'actions' => array(
+				self::hook_entry( 'init', 'update_selected_currency_by_url', 11 ),
+				self::hook_entry( 'woocommerce_created_customer', 'set_new_customer_currency_meta', 10 ),
+				self::hook_entry( 'woocommerce_edit_account_form', 'add_presentment_currency_switch', 10 ),
+				self::hook_entry( 'woocommerce_save_account_details', 'save_presentment_currency', 10 ),
 			),
 		);
 	}
