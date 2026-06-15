@@ -12,6 +12,10 @@ const {
 
 const CONFIG_KEY = 'wpDependencyCompat';
 const CACHE_DIRECTORY_NAME = 'jest-wordpress-version-compat';
+// @wordpress/private-apis must share the same WordPress version target as
+// cached packages that consume it; npm semver ranges can otherwise resolve a
+// newer private-apis version and break private API lock/unlock calls.
+const IMPLICIT_CACHE_PACKAGES = [ '@wordpress/private-apis' ];
 const latestWordPressDistTagCache = new Map();
 
 function findUp( fileName, startDirectory = process.cwd() ) {
@@ -75,13 +79,21 @@ function getCachedPackagePath( packageName, options = {} ) {
 	);
 }
 
-function isPackageCached( packageName, options = {} ) {
-	return fs.existsSync(
-		path.join(
-			getCachedPackagePath( packageName, options ),
-			'package.json'
-		)
-	);
+function getCachedPackageVersion( packageName, options = {} ) {
+	try {
+		return readJsonFile(
+			path.join(
+				getCachedPackagePath( packageName, options ),
+				'package.json'
+			)
+		).version;
+	} catch ( error ) {
+		return undefined;
+	}
+}
+
+function isPackageCachedAtVersion( packageName, version, options = {} ) {
+	return getCachedPackageVersion( packageName, options ) === version;
 }
 
 function readJsonFile( filePath ) {
@@ -501,6 +513,28 @@ function toPackageSpec( packageName, wpVersion, { cacheDirectory } = {} ) {
 	) }`;
 }
 
+function getCachedPackageMismatches( {
+	packages,
+	wpVersion,
+	cacheDirectory,
+	cacheRoot,
+	cwd = process.cwd(),
+} ) {
+	return packages.filter( ( packageName ) => {
+		const targetVersion = resolvePackageVersion(
+			packageName,
+			wpVersion,
+			cacheDirectory
+		);
+
+		return ! isPackageCachedAtVersion( packageName, targetVersion, {
+			wpVersion,
+			cacheRoot,
+			cwd,
+		} );
+	} );
+}
+
 function getPackagesRequiringCache( {
 	packages,
 	wpVersion,
@@ -588,16 +622,31 @@ function prepare( {
 		cwd,
 	} );
 	const cacheDirectory = getCacheDirectory( { wpVersion, cacheRoot, cwd } );
-	const cachePackages = getPackagesRequiringCache( {
+	const selectedCachePackages = getPackagesRequiringCache( {
 		packages: selectedPackages,
 		wpVersion,
 		cacheDirectory,
 		cwd,
 	} );
-	const missingPackages = cachePackages.filter(
-		( packageName ) =>
-			! isPackageCached( packageName, { wpVersion, cacheRoot, cwd } )
-	);
+	const cachePackages =
+		selectedCachePackages.length === 0
+			? []
+			: [
+					...new Set( [
+						...selectedCachePackages,
+						...IMPLICIT_CACHE_PACKAGES,
+					] ),
+			  ].sort();
+	const packagePathsPackages = [
+		...new Set( [ ...selectedPackages, ...cachePackages ] ),
+	].sort();
+	const missingPackages = getCachedPackageMismatches( {
+		packages: cachePackages,
+		wpVersion,
+		cacheDirectory,
+		cacheRoot,
+		cwd,
+	} );
 
 	if ( missingPackages.length === 0 ) {
 		return {
@@ -605,7 +654,7 @@ function prepare( {
 			cacheDirectory,
 			installedPackages: [],
 			packagePaths: getPackagePaths( {
-				packages: selectedPackages,
+				packages: packagePathsPackages,
 				cachePackages,
 				wpVersion,
 				cacheRoot,
@@ -618,7 +667,7 @@ function prepare( {
 
 	if ( offline ) {
 		throw new Error(
-			`Missing cached @wordpress packages for WordPress ${ wpVersion }: ${ missingPackages.join(
+			`Missing or stale cached @wordpress packages for WordPress ${ wpVersion }: ${ missingPackages.join(
 				', '
 			) }. Unset WP_JEST_DEPENDENCY_COMPAT_OFFLINE or run the compatibility test once with network access before using offline mode.`
 		);
@@ -641,7 +690,7 @@ function prepare( {
 		cacheDirectory,
 		installedPackages: missingPackages,
 		packagePaths: getPackagePaths( {
-			packages: selectedPackages,
+			packages: packagePathsPackages,
 			cachePackages,
 			wpVersion,
 			cacheRoot,

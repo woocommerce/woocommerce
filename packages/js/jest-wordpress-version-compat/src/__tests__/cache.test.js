@@ -158,7 +158,10 @@ describe( 'cache', () => {
 		} );
 
 		expect( result.packages ).toEqual( [ '@wordpress/data' ] );
-		expect( result.installedPackages ).toEqual( [ '@wordpress/data' ] );
+		expect( result.installedPackages ).toEqual( [
+			'@wordpress/data',
+			'@wordpress/private-apis',
+		] );
 		expect( spawnSync ).not.toHaveBeenCalledWith(
 			'npm',
 			expect.arrayContaining( [ 'view', '@wordpress/icons@latest' ] ),
@@ -188,7 +191,10 @@ describe( 'cache', () => {
 			logger: false,
 		} );
 
-		expect( result.installedPackages ).toEqual( [ '@wordpress/data' ] );
+		expect( result.installedPackages ).toEqual( [
+			'@wordpress/data',
+			'@wordpress/private-apis',
+		] );
 		expect(
 			fs.existsSync( path.join( result.cacheDirectory, 'package.json' ) )
 		).toBe( true );
@@ -199,6 +205,7 @@ describe( 'cache', () => {
 				'--prefix',
 				path.join( cacheRoot, 'latest' ),
 				`@wordpress/data@${ LATEST_WORDPRESS_PACKAGE_VERSION }`,
+				`@wordpress/private-apis@${ LATEST_WORDPRESS_PACKAGE_VERSION }`,
 			] ),
 			expect.objectContaining( {
 				encoding: 'utf8',
@@ -217,9 +224,88 @@ describe( 'cache', () => {
 		).toEqual( {
 			__distTags: {
 				'@wordpress/data': LATEST_WORDPRESS_DIST_TAG,
+				'@wordpress/private-apis': LATEST_WORDPRESS_DIST_TAG,
 			},
 			'@wordpress/data': LATEST_WORDPRESS_PACKAGE_VERSION,
+			'@wordpress/private-apis': LATEST_WORDPRESS_PACKAGE_VERSION,
 		} );
+	} );
+
+	it( 'installs private APIs for cached WordPress packages', () => {
+		const cwd = createFixtureProject( {
+			dependencies: {
+				'@wordpress/components': 'catalog:wp-min',
+			},
+		} );
+		const cacheRoot = path.join( cwd, '.cache' );
+
+		const result = prepare( {
+			cwd,
+			cacheRoot,
+			wpVersion: 'latest-1',
+			logger: false,
+		} );
+
+		expect( result.packages ).toEqual( [ '@wordpress/components' ] );
+		expect( result.cachePackages ).toEqual( [
+			'@wordpress/components',
+			'@wordpress/private-apis',
+		] );
+		expect( result.installedPackages ).toEqual( [
+			'@wordpress/components',
+			'@wordpress/private-apis',
+		] );
+		expect( spawnSync ).toHaveBeenCalledWith(
+			'npm',
+			expect.arrayContaining( [
+				'install',
+				`@wordpress/components@${ PREVIOUS_WORDPRESS_PACKAGE_VERSION }`,
+				`@wordpress/private-apis@${ PREVIOUS_WORDPRESS_PACKAGE_VERSION }`,
+			] ),
+			expect.anything()
+		);
+	} );
+
+	it( 'refreshes cached packages when the cached version is stale', () => {
+		const cwd = createFixtureProject( {
+			dependencies: {
+				'@wordpress/data': 'catalog:wp-min',
+			},
+		} );
+		const cacheRoot = path.join( cwd, '.cache' );
+		const cacheDirectory = path.join( cacheRoot, 'latest' );
+
+		createInstalledPackage(
+			cacheDirectory,
+			'@wordpress/data',
+			PREVIOUS_WORDPRESS_PACKAGE_VERSION
+		);
+		createInstalledPackage(
+			cacheDirectory,
+			'@wordpress/private-apis',
+			PREVIOUS_WORDPRESS_PACKAGE_VERSION
+		);
+
+		const result = prepare( {
+			cwd,
+			cacheRoot,
+			wpVersion: 'latest',
+			logger: false,
+		} );
+
+		expect( result.installedPackages ).toEqual( [
+			'@wordpress/data',
+			'@wordpress/private-apis',
+		] );
+		expect( spawnSync ).toHaveBeenCalledWith(
+			'npm',
+			expect.arrayContaining( [
+				'install',
+				`@wordpress/data@${ LATEST_WORDPRESS_PACKAGE_VERSION }`,
+				`@wordpress/private-apis@${ LATEST_WORDPRESS_PACKAGE_VERSION }`,
+			] ),
+			expect.anything()
+		);
 	} );
 
 	it( 'does not require a cache entry when the installed package matches the target version', () => {
@@ -298,8 +384,10 @@ describe( 'cache', () => {
 		).toEqual( {
 			__distTags: {
 				'@wordpress/data': LATEST_WORDPRESS_DIST_TAG,
+				'@wordpress/private-apis': LATEST_WORDPRESS_DIST_TAG,
 			},
 			'@wordpress/data': LATEST_WORDPRESS_PACKAGE_VERSION,
+			'@wordpress/private-apis': LATEST_WORDPRESS_PACKAGE_VERSION,
 		} );
 	} );
 
