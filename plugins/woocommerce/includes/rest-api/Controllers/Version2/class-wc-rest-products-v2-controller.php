@@ -58,13 +58,6 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	protected $hierarchical = true;
 
 	/**
-	 * The request being currently handled, set in prepare_object_for_response().
-	 *
-	 * @var WP_REST_Request<array<string, mixed>>|null
-	 */
-	protected $request = null;
-
-	/**
 	 * Initialize product actions.
 	 */
 	public function __construct() {
@@ -297,7 +290,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$context       = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		// @phpstan-ignore-next-line property.notFound (Deliberately dynamic to avoid adding inherited state that can fatal subclasses.)
 		$this->request = $request;
 
 		$data = $this->prepare_object_for_response_core( $object, $request, $context );
@@ -527,19 +521,6 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
-	 * Get the image size requested via the image_size parameter of the current request.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @return string WordPress registered image size. Defaults to 'full' if the request does not specify a valid size.
-	 */
-	protected function get_request_image_size() {
-		$image_size = $this->request['image_size'] ?? 'full';
-
-		return is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
-	}
-
-	/**
 	 * Get the images for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product Product instance.
@@ -547,7 +528,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	protected function get_images( $product ) {
-		$image_size     = $this->get_request_image_size();
+		$image_size = $this->request['image_size'] ?? 'full';
+		$image_size = is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
+
 		$images         = array();
 		$attachment_ids = array();
 

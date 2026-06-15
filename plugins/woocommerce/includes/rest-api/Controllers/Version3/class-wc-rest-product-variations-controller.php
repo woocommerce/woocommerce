@@ -112,6 +112,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
+		// @phpstan-ignore-next-line property.notFound (Deliberately dynamic to avoid adding inherited state that can fatal subclasses.)
 		$this->request = $request;
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -459,7 +460,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			return;
 		}
 
-		$image_size = $this->get_request_image_size();
+		$image_size = $this->request['image_size'] ?? 'full';
+		$image_size = is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
 
 		$attachment_id   = $variation->get_image_id();
 		$attachment_post = get_post( $attachment_id );
