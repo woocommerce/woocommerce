@@ -281,13 +281,12 @@ class Capabilities {
 			return false;
 		}
 
-		// Strip the user's directly-held woocommerce_pos_* caps so a preset change (or clear) starts
-		// clean. This class only grants them per-user via add_cap(), so $user->caps is the
-		// full set to clear here; role-granted caps are out of scope.
+		// Strip the user's directly-held woocommerce_pos_* caps so a preset change (or clear)
+		// starts clean. remove_cap() is a no-op for caps the user does not hold and strips a cap
+		// whether it was granted (true) or explicitly denied (false). This class only grants caps
+		// per-user via add_cap(), so role-granted caps are out of scope.
 		foreach ( self::all_pos_capabilities() as $cap ) {
-			if ( isset( $user->caps[ $cap ] ) ) {
-				$user->remove_cap( $cap );
-			}
+			$user->remove_cap( $cap );
 		}
 
 		if ( null === $preset ) {
