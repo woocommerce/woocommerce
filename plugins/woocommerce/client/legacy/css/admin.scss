@@ -8624,6 +8624,109 @@ table.bar_chart {
 		margin-right: 4px;
 	}
 
+	&.post-type-product #submitdiv {
+		--wc-product-publish-spacing-1: var(--wp-admin-grid-unit-05, 4px);
+		--wc-product-publish-spacing-2: var(--wp-admin-grid-unit-10, 8px);
+		--wc-product-publish-spacing-3: var(--wp-admin-grid-unit-15, 12px);
+		--wc-product-publish-spacing-4: var(--wp-admin-grid-unit-20, 16px);
+
+		.wc-product-publish-select {
+			box-sizing: border-box;
+			display: block;
+			margin: var(--wc-product-publish-spacing-2) 0 0;
+			width: 100%;
+		}
+
+		.wc-product-publish-current-value-hidden {
+			display: none;
+		}
+
+		.wc-product-publish-confirm-button.button-compact {
+			align-items: center;
+			display: inline-flex;
+			justify-content: center;
+			text-decoration: none;
+			vertical-align: middle;
+		}
+
+		.wc-product-publish-cancel-link {
+			line-height: 32px;
+		}
+
+		#post-status-select,
+		#post-visibility-select > p:last-child,
+		#timestampdiv > p,
+		#catalog-visibility-select > p:last-child {
+			align-items: center;
+			display: flex;
+			gap: var(--wc-product-publish-spacing-2);
+			margin: var(--wc-product-publish-spacing-2) 0 0;
+		}
+
+		#post-status-select {
+			flex-wrap: wrap;
+			margin-top: 0;
+		}
+
+		#post-status-select .wc-product-publish-select {
+			flex-basis: 100%;
+		}
+
+		.misc-pub-catalog-visibility::before {
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+			color: currentColor;
+			content: "\f312";
+			content: "\f312" / "";
+			display: inline-block;
+			font: normal 20px/1 dashicons;
+			margin-left: -1px;
+			padding-right: 3px;
+			speak: never;
+			vertical-align: top;
+		}
+
+		#post-visibility-select,
+		#catalog-visibility-select {
+			input[type="radio"],
+			label.selectit,
+			br {
+				display: none;
+			}
+		}
+
+		#post-visibility-select {
+			#password-span {
+				display: none;
+				margin-top: var(--wc-product-publish-spacing-4);
+			}
+
+			#password-span.wc-product-password-visible {
+				display: block;
+			}
+
+			#password-span label {
+				display: block;
+				margin-bottom: var(--wc-product-publish-spacing-1);
+			}
+
+			#post_password {
+				box-sizing: border-box;
+				display: block;
+				width: 100%;
+			}
+		}
+
+		#timestampdiv .timestamp-wrap {
+			margin-top: var(--wc-product-publish-spacing-2);
+		}
+
+		#catalog-visibility-select > p:first-of-type {
+			color: #646970;
+			margin: var(--wc-product-publish-spacing-1) 0 var(--wc-product-publish-spacing-2);
+		}
+	}
+
 	// Shipping zone name input: ID selector in the base rule outranks the form-table override above.
 	.wc-shipping-zone-settings #zone_name {
 		padding: 0 12px;

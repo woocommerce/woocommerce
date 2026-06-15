@@ -754,7 +754,7 @@ class WC_Admin_Post_Types {
 		$current_featured   = wc_bool_to_string( $product_object->get_featured() );
 		$visibility_options = wc_get_product_visibility_options();
 		?>
-		<div class="misc-pub-section" id="catalog-visibility">
+		<div class="misc-pub-section misc-pub-catalog-visibility" id="catalog-visibility">
 			<?php esc_html_e( 'Catalog visibility:', 'woocommerce' ); ?>
 			<strong id="catalog-visibility-display">
 				<?php
@@ -784,8 +784,8 @@ class WC_Admin_Post_Types {
 				echo '<br /><input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . esc_html__( 'This is a featured product', 'woocommerce' ) . '</label><br />';
 				?>
 				<p>
-					<a href="#catalog-visibility" class="save-post-visibility hide-if-no-js button"><?php esc_html_e( 'OK', 'woocommerce' ); ?></a>
-					<a href="#catalog-visibility" class="cancel-post-visibility hide-if-no-js"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
+					<a href="#catalog-visibility" class="save-post-visibility hide-if-no-js button button-compact"><?php esc_html_e( 'Confirm', 'woocommerce' ); ?></a>
+					<a href="#catalog-visibility" class="cancel-post-visibility hide-if-no-js button-link"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
 				</p>
 			</div>
 		</div>

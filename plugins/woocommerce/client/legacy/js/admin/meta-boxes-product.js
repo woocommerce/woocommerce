@@ -126,6 +126,315 @@ jQuery( function ( $ ) {
 			return false;
 		} );
 
+	const wc_product_publish_panel_dropdowns = {
+		init: function () {
+			this.init_action_buttons();
+			this.init_status();
+			this.init_post_visibility();
+			this.init_timestamp();
+			this.init_catalog_visibility();
+		},
+
+		init_action_buttons: function () {
+			const confirm_text =
+				$.trim( $( '#catalog-visibility-select .save-post-visibility' ).text() ) ||
+				'Confirm';
+
+			$(
+				[
+					'#post-status-select .save-post-status',
+					'#post-visibility-select .save-post-visibility',
+					'#timestampdiv .save-timestamp',
+					'#catalog-visibility-select .save-post-visibility',
+				].join( ', ' )
+			)
+				.addClass( 'button-compact wc-product-publish-confirm-button' )
+				.text( confirm_text );
+
+			$(
+				[
+					'#post-status-select .cancel-post-status',
+					'#post-visibility-select .cancel-post-visibility',
+					'#timestampdiv .cancel-timestamp',
+					'#catalog-visibility-select .cancel-post-visibility',
+				].join( ', ' )
+			)
+				.removeClass( 'button-cancel' )
+				.addClass( 'button-link wc-product-publish-cancel-link' );
+		},
+
+		update_current_value_visibility: function ( panel_selector, display_selector ) {
+			$( display_selector ).toggleClass(
+				'wc-product-publish-current-value-hidden',
+				$( panel_selector ).is( ':visible' )
+			);
+		},
+
+		hide_current_value: function ( display_selector ) {
+			$( display_selector ).addClass(
+				'wc-product-publish-current-value-hidden'
+			);
+		},
+
+		show_current_value: function ( display_selector ) {
+			$( display_selector ).removeClass(
+				'wc-product-publish-current-value-hidden'
+			);
+		},
+
+		init_status: function () {
+			$( '#post-status-select select#post_status' ).addClass(
+				'wc-product-publish-select'
+			);
+
+			const display_selector = '#post-status-display';
+
+			$( '#misc-publishing-actions' ).on(
+				'click',
+				'.edit-post-status',
+				() => this.hide_current_value( display_selector )
+			);
+
+			$( '#misc-publishing-actions' ).on(
+				'click',
+				'.save-post-status, .cancel-post-status',
+				() => this.show_current_value( display_selector )
+			);
+
+			this.show_current_value( display_selector );
+		},
+
+		init_post_visibility: function () {
+			const $panel = $( '#post-visibility-select' );
+
+			if ( ! $panel.length || $( '#wc-product-visibility-select' ).length ) {
+				return;
+			}
+
+			const $radios = $panel.find( 'input[type="radio"][name="visibility"]' );
+
+			if ( ! $radios.length ) {
+				return;
+			}
+
+			const $select = $( '<select />', {
+				id: 'wc-product-visibility-select',
+				class: 'wc-product-publish-select',
+			} );
+
+			$radios.each( function () {
+				const $radio = $( this );
+				const label = $.trim(
+					$( 'label[for="' + $radio.attr( 'id' ) + '"]' )
+						.clone()
+						.children()
+						.remove()
+						.end()
+						.text()
+				);
+
+				$select.append(
+					$( '<option />', {
+						value: $radio.val(),
+						text: label || $radio.val(),
+						selected: $radio.is( ':checked' ),
+					} )
+				);
+			} );
+
+			$panel.prepend( $select );
+
+			const sync_password_field = function () {
+				$( '#password-span' ).toggleClass(
+					'wc-product-password-visible',
+					'password' === $select.val()
+				);
+			};
+
+			const sync_select_from_radios = function () {
+				const $checked = $radios.filter( ':checked' );
+
+				if ( $checked.length ) {
+					$select.val( $checked.val() );
+				}
+
+				sync_password_field();
+			};
+
+			$select.on( 'change', function () {
+				const $radio = $( '#visibility-radio-' + $select.val() );
+
+				if ( $radio.length ) {
+					$radio.prop( 'checked', true ).trigger( 'change' );
+				}
+
+				sync_password_field();
+			} );
+
+			$( '#visibility' ).on(
+				'click',
+				'.edit-visibility, .save-post-visibility, .cancel-post-visibility',
+				function () {
+					window.setTimeout( sync_select_from_radios, 0 );
+				}
+			);
+
+			$( '#visibility' ).on(
+				'click',
+				'.edit-visibility',
+				() => this.hide_current_value( '#post-visibility-display' )
+			);
+
+			$( '#visibility' ).on(
+				'click',
+				'.save-post-visibility, .cancel-post-visibility',
+				() => this.show_current_value( '#post-visibility-display' )
+			);
+
+			this.show_current_value( '#post-visibility-display' );
+			sync_select_from_radios();
+		},
+
+		init_timestamp: function () {
+			const selected_value_selector = '#timestamp b';
+
+			const normalize_timestamp_label = function () {
+				const timestamp = document.getElementById( 'timestamp' );
+
+				if ( ! timestamp ) {
+					return;
+				}
+
+				const label_node = Array.prototype.find.call(
+					timestamp.childNodes,
+					function ( node ) {
+						return node.TEXT_NODE === node.nodeType;
+					}
+				);
+
+				if ( ! label_node || -1 !== label_node.nodeValue.indexOf( ':' ) ) {
+					return;
+				}
+
+				label_node.nodeValue = label_node.nodeValue.replace(
+					/(\S)\s*$/,
+					'$1: '
+				);
+			};
+
+			$( '#timestampdiv' )
+				.siblings( '.edit-timestamp' )
+				.on( 'click', () => {
+					normalize_timestamp_label();
+					this.hide_current_value( selected_value_selector );
+				} );
+
+			$( '#timestampdiv .save-timestamp, #timestampdiv .cancel-timestamp' ).on(
+				'click',
+				() => {
+					normalize_timestamp_label();
+					this.show_current_value( selected_value_selector );
+				}
+			);
+
+			normalize_timestamp_label();
+			this.show_current_value( selected_value_selector );
+		},
+
+		init_catalog_visibility: function () {
+			const $panel = $( '#catalog-visibility-select' );
+
+			if ( ! $panel.length || $( '#wc-product-catalog-visibility-select' ).length ) {
+				return;
+			}
+
+			const $radios = $panel.find(
+				'input[type="radio"][name="_visibility"]'
+			);
+
+			if ( ! $radios.length ) {
+				return;
+			}
+
+			const $select = $( '<select />', {
+				id: 'wc-product-catalog-visibility-select',
+				class: 'wc-product-publish-select',
+			} );
+
+			$radios.each( function () {
+				const $radio = $( this );
+
+				$select.append(
+					$( '<option />', {
+						value: $radio.val(),
+						text: $radio.attr( 'data-label' ) || $radio.val(),
+						selected: $radio.is( ':checked' ),
+					} )
+				);
+			} );
+
+			$panel.prepend( $select );
+
+			const $helper = $panel.children( 'p' ).first();
+
+			if ( $helper.length ) {
+				$select.after( $helper );
+			}
+
+			const sync_select_from_radios = function () {
+				const $checked = $radios.filter( ':checked' );
+
+				if ( $checked.length ) {
+					$select.val( $checked.val() );
+				}
+			};
+
+			$select.on( 'change', function () {
+				$radios
+					.filter( function () {
+						return $( this ).val() === $select.val();
+					} )
+					.prop( 'checked', true )
+					.trigger( 'change' );
+			} );
+
+			$( '#catalog-visibility' ).on(
+				'click',
+				'.edit-catalog-visibility, .save-post-visibility, .cancel-post-visibility',
+				function () {
+					window.setTimeout( sync_select_from_radios, 0 );
+				}
+			);
+
+			$( '#catalog-visibility' ).on(
+				'click',
+				'.edit-catalog-visibility',
+				() => this.hide_current_value( '#catalog-visibility-display' )
+			);
+
+			$( '#catalog-visibility' ).on(
+				'click',
+				'.save-post-visibility, .cancel-post-visibility',
+				() => this.show_current_value( '#catalog-visibility-display' )
+			);
+
+			$( '#catalog-visibility .edit-catalog-visibility' ).on( 'click', () =>
+				this.hide_current_value( '#catalog-visibility-display' )
+			);
+
+			$(
+				'#catalog-visibility .save-post-visibility, #catalog-visibility .cancel-post-visibility'
+			).on( 'click', () =>
+				this.show_current_value( '#catalog-visibility-display' )
+			);
+
+			this.show_current_value( '#catalog-visibility-display' );
+			sync_select_from_radios();
+		},
+	};
+
+	wc_product_publish_panel_dropdowns.init();
+
 	// Product type specific options.
 	$( 'select#product-type' )
 		.on( 'change', function () {
