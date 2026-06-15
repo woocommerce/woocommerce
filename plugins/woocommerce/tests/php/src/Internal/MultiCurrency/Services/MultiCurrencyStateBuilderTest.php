@@ -64,6 +64,8 @@ class MultiCurrencyStateBuilderTest extends WC_Unit_Test_Case {
 	 */
 	public function tear_down(): void {
 		$this->delete_options();
+		remove_all_filters( 'wcpay_multi_currency_override_selected_currency' );
+		remove_all_filters( 'wcpay_multi_currency_should_return_store_currency' );
 		update_option( 'woocommerce_currency', $this->original_currency );
 		wp_set_current_user( 0 );
 
@@ -178,6 +180,64 @@ class MultiCurrencyStateBuilderTest extends WC_Unit_Test_Case {
 		$state = $this->create_builder()->build();
 
 		$this->assertSame( 'GBP', $state->get_selected_currency()->get_code() );
+	}
+
+	/**
+	 * @testdox Should select compatibility override currency when enabled.
+	 */
+	public function test_selects_compatibility_override_currency_when_enabled(): void {
+		update_option( 'wcpay_multi_currency_enabled_currencies', array( 'GBP' ) );
+		update_option( 'wcpay_multi_currency_exchange_rate_gbp', 'manual' );
+		update_option( 'wcpay_multi_currency_manual_rate_gbp', '0.8' );
+		add_filter(
+			'wcpay_multi_currency_override_selected_currency',
+			static function () {
+				return 'GBP';
+			}
+		);
+
+		$state = $this->create_builder()->build();
+
+		$this->assertSame( 'GBP', $state->get_selected_currency()->get_code() );
+	}
+
+	/**
+	 * @testdox Should force store currency when compatibility filter requests it.
+	 */
+	public function test_forces_store_currency_when_compatibility_filter_requests_it(): void {
+		$user_id = self::factory()->user->create();
+		wp_set_current_user( $user_id );
+		update_user_meta( $user_id, 'wcpay_currency', 'GBP' );
+		update_option( 'wcpay_multi_currency_enabled_currencies', array( 'GBP' ) );
+		update_option( 'wcpay_multi_currency_exchange_rate_gbp', 'manual' );
+		update_option( 'wcpay_multi_currency_manual_rate_gbp', '0.8' );
+		add_filter( 'wcpay_multi_currency_should_return_store_currency', '__return_true' );
+
+		$state = $this->create_builder()->build();
+
+		$this->assertSame( 'USD', $state->get_selected_currency()->get_code() );
+	}
+
+	/**
+	 * @testdox Should fall back to default when compatibility override is not enabled.
+	 */
+	public function test_falls_back_to_default_when_compatibility_override_is_not_enabled(): void {
+		$user_id = self::factory()->user->create();
+		wp_set_current_user( $user_id );
+		update_user_meta( $user_id, 'wcpay_currency', 'GBP' );
+		update_option( 'wcpay_multi_currency_enabled_currencies', array( 'GBP' ) );
+		update_option( 'wcpay_multi_currency_exchange_rate_gbp', 'manual' );
+		update_option( 'wcpay_multi_currency_manual_rate_gbp', '0.8' );
+		add_filter(
+			'wcpay_multi_currency_override_selected_currency',
+			static function () {
+				return 'EUR';
+			}
+		);
+
+		$state = $this->create_builder()->build();
+
+		$this->assertSame( 'USD', $state->get_selected_currency()->get_code() );
 	}
 
 	/**
