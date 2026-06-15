@@ -2,6 +2,33 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [14.0.0](https://www.npmjs.com/package/@woocommerce/components/v/14.0.0) - 2026-06-11 
+
+-   Major - Replace MediaItem with native Attachment from @wordpress/media-utils throughout media-uploader and image-gallery components. [#64114]
+-   Major - Update @wordpress/* dependencies to WordPress 6.8 minimum. Remove @types/wordpress__media-utils and @types/wordpress__rich-text (native types at wp-6.8). [#64114]
+-   Minor - Export MediaUploadProps and MediaUploadComponentType for typed MediaUpload component props (native types are `Component<any>`). [#64114]
+-   Minor - Fix tax rate search in Analytics filters by using the correct `search` query parameter instead of `code` when calling the `/wc-analytics/taxes` endpoint. [#64754]
+-   Minor - Improve build time for components by using webpack filesystem cache. [#64082]
+-   Patch - Add __next40pxDefaultSize prop to SelectControl components to resolve deprecated size warning on WP 7.0+. [#63847]
+-   Patch - Drop the trailing colon on the Date range filter label to match WordPress 7.0 form-field labeling. [#64846]
+-   Patch - Fix Analytics tag popover being too narrow. [#65414]
+-   Patch - Fix date range input height increase on WP 7.0 by aligning with WordPress input styling. [#63844]
+-   Patch - Fix extra padding on analytics Card and CardBody components on WordPress 7.0 by setting size to "none". [#63809]
+-   Patch - Fix interval selector shifting downward on WP 7.0 by restoring margin-bottom. [#63843]
+-   Patch - Fix order status text wrapping vertically when Gutenberg plugin is active by adding white-space: nowrap to prevent inherited word-break styles from affecting grid min-content sizing. [#63882]
+-   Patch - Fix TypeScript error in EllipsisMenu onKeyDown handler by using native KeyboardEvent type. [#62841]
+-   Patch - Monorepo: address circular dependencies surfaced by SWC TDZ. [#64797]
+-   Patch - Monorepo: refresh DependencyExtractionWebpackPlugin for compatibility with filesystem cache, admin build cleanup. [#64111]
+-   Patch - Move the CommonJS build to prepack so day-to-day development only builds the ESM output. [#64876]
+-   Patch - Move TypeScript type-checking from the build to a new `lint:lang:types` script. Builds now emit types and JS without type-checking. [#65168]
+-   Patch - Prepare table component typings for React 19 compatibility. [#65401]
+-   Patch - Prevent page scroll when using arrow keys in EllipsisMenu component. [#62841]
+-   Patch - Render the stepper step description as a `<p>` so it picks up the global widow-prevention rule in the WooCommerce admin. [#64453]
+-   Patch - Replaced patched `@wordpress/data` types with opt-in internal package types. [#63483]
+-   Patch - Replaced wireit + tsc package build pipeline with a per-package esbuild script. [#65210]
+-   Patch - Update @wordpress/* peerDependencies from dist-tags to semver ranges for pnpm 10 compatibility. [#63964]
+-   Patch - Updates internal references to REST API documentation. [#64720]
+
 ## [13.1.0](https://www.npmjs.com/package/@woocommerce/components/v/13.1.0) - 2025-11-17 
 
 -   Minor - Make date handling within DateRange component more robust, for scenarious where a wrong moment date is used. [#61971]

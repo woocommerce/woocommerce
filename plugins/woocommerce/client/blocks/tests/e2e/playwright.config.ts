@@ -14,7 +14,8 @@ const config: PlaywrightTestConfig = {
 	globalSetup: fileURLToPath(
 		new URL( 'global-setup.ts', 'file:' + __filename ).href
 	),
-	testDir: './tests',
+	/* Specs moved to the Core e2e suite as part of the Blocks/Core e2e merge; the core `e2e` project ignores them via testIgnore. */
+	testDir: '../../../../tests/e2e-pw/tests/blocks',
 	retries: CI ? 1 : 0,
 	workers: 1,
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold

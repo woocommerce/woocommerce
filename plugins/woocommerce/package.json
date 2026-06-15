@@ -665,7 +665,14 @@
 						"includes/**/*.php",
 						"src/Blocks/**/*.php",
 						"templates/**/*.php",
-						"templates/**/*.html"
+						"templates/**/*.html",
+						"client/blocks/tests/e2e/**",
+						"tests/e2e-pw/content-templates/blocks/**",
+						"tests/e2e-pw/test-data/blocks/**",
+						"tests/e2e-pw/test-plugins/blocks/**",
+						"tests/e2e-pw/tests/blocks/**",
+						"tests/e2e-pw/themes/blocks/**",
+						"tests/e2e-pw/utils/blocks/**"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/block-library"
@@ -703,7 +710,13 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"client/blocks/tests/e2e/**"
+						"client/blocks/tests/e2e/**",
+						"tests/e2e-pw/content-templates/blocks/**",
+						"tests/e2e-pw/test-data/blocks/**",
+						"tests/e2e-pw/test-plugins/blocks/**",
+						"tests/e2e-pw/tests/blocks/**",
+						"tests/e2e-pw/themes/blocks/**",
+						"tests/e2e-pw/utils/blocks/**"
 					],
 					"onlyForDependencies": [],
 					"testEnv": {
@@ -741,7 +754,13 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"client/blocks/tests/e2e/**"
+						"client/blocks/tests/e2e/**",
+						"tests/e2e-pw/content-templates/blocks/**",
+						"tests/e2e-pw/test-data/blocks/**",
+						"tests/e2e-pw/test-plugins/blocks/**",
+						"tests/e2e-pw/tests/blocks/**",
+						"tests/e2e-pw/themes/blocks/**",
+						"tests/e2e-pw/utils/blocks/**"
 					],
 					"onlyForDependencies": [],
 					"testEnv": {
@@ -846,7 +865,8 @@
 		"eslint": "^8.55.0",
 		"eslint-config-wpcalypso": "5.0.0",
 		"eslint-plugin-jest": "23.20.0",
-		"eslint-plugin-playwright": "0.22.1",
+		"eslint-plugin-playwright": "1.6.0",
+		"handlebars": "^4.7.9",
 		"jest": "29.5.x",
 		"playwright-ctrf-json-reporter": "0.0.27",
 		"prettier": "npm:wp-prettier@^2.8.5",
