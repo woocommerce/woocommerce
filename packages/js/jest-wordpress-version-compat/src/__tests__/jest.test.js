@@ -1,5 +1,7 @@
 'use strict';
 
+const fs = require( 'node:fs' );
+
 const cache = require( '../cache' );
 
 jest.mock( '../cache', () => {
@@ -21,6 +23,11 @@ const { getWordPressVersionTarget, isWordPressVersionTarget } = packageRoot;
 describe( 'jest adapter', () => {
 	beforeEach( () => {
 		cache.prepare.mockClear();
+		jest.spyOn( fs, 'existsSync' ).mockReturnValue( true );
+	} );
+
+	afterEach( () => {
+		fs.existsSync.mockRestore();
 	} );
 
 	it( 'creates moduleNameMapper entries for selected packages', () => {
@@ -139,6 +146,22 @@ describe( 'jest adapter', () => {
 				reactSubpathReplacement
 			)
 		).toBe( '/tmp/cache/latest/node_modules/react/jsx-runtime.js' );
+	} );
+
+	it( 'skips singleton mappings when singleton packages are not cached', () => {
+		fs.existsSync.mockReturnValue( false );
+
+		const mapper = createJestModuleNameMapper( {
+			cacheRoot: '/tmp/cache',
+			lazy: false,
+			packages: [ '@wordpress/data' ],
+			wpVersion: 'latest',
+		} );
+
+		expect( mapper ).toEqual( {
+			'^@wordpress/data$':
+				'/tmp/cache/latest/node_modules/@wordpress/data',
+		} );
 	} );
 
 	it( 'keeps the package root export limited to public Jest helpers', () => {

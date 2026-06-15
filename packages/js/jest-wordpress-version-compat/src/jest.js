@@ -1,5 +1,8 @@
 'use strict';
 
+const fs = require( 'node:fs' );
+const path = require( 'node:path' );
+
 const {
 	getCachedPackagePath,
 	getSelectedWordPressVersion,
@@ -25,6 +28,11 @@ function removeSingletonModuleNameMapperEntries( moduleNameMapper = {} ) {
 	);
 }
 
+// WordPress packages can depend on React singletons. When a compatibility cache
+// installs React, keep React and React DOM imports pinned to that same cache so
+// JSX runtimes and hooks do not resolve to a second copy. Skip the mapping when
+// the cache does not contain React, otherwise non-React packages would point
+// subpath imports like react/jsx-runtime at files that were never installed.
 function createSingletonModuleNameMapper( {
 	wpVersion = getSelectedWordPressVersion(),
 	cacheRoot,
@@ -36,6 +44,10 @@ function createSingletonModuleNameMapper( {
 			cacheRoot,
 			cwd,
 		} );
+
+		if ( ! fs.existsSync( path.join( packagePath, 'package.json' ) ) ) {
+			return moduleNameMapper;
+		}
 
 		moduleNameMapper[ `^${ packageName }$` ] = packagePath;
 		moduleNameMapper[ `^${ packageName }/(.*?)(?:\\.js)?$` ] =
