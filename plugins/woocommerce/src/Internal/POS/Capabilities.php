@@ -40,17 +40,28 @@ class Capabilities {
 	 *
 	 * Real WP capabilities, granted per-user via add_cap() when POS access is
 	 * assigned. They surface in current_user_can() and the standard /wp/v2/users
-	 * response — no shadow permission store.
+	 * response — no shadow permission store. All share the `woocommerce_pos_`
+	 * prefix to stay isolated from core and third-party caps; what each one grants
+	 * is described inline below.
 	 */
-	public const CAP_PROCESS_SALES  = 'woocommerce_pos_process_sales';
-	public const CAP_VIEW_ORDERS    = 'woocommerce_pos_view_orders';
-	public const CAP_APPLY_COUPONS  = 'woocommerce_pos_apply_coupons';
+	// Ring up and complete a sale at checkout.
+	public const CAP_PROCESS_SALES = 'woocommerce_pos_process_sales';
+	// Look up and view existing orders.
+	public const CAP_VIEW_ORDERS = 'woocommerce_pos_view_orders';
+	// Apply an existing coupon to a cart.
+	public const CAP_APPLY_COUPONS = 'woocommerce_pos_apply_coupons';
+	// Create a new coupon during a sale.
 	public const CAP_CREATE_COUPONS = 'woocommerce_pos_create_coupons';
-	public const CAP_ISSUE_REFUNDS  = 'woocommerce_pos_issue_refunds';
-	public const CAP_VIEW_SETTINGS  = 'woocommerce_pos_view_settings';
-	public const CAP_EDIT_SETTINGS  = 'woocommerce_pos_edit_settings';
-	public const CAP_MANAGE_STAFF   = 'woocommerce_pos_manage_staff';
-	public const CAP_EXIT_POS       = 'woocommerce_pos_exit';
+	// Refund a paid order.
+	public const CAP_ISSUE_REFUNDS = 'woocommerce_pos_issue_refunds';
+	// View POS settings (read-only).
+	public const CAP_VIEW_SETTINGS = 'woocommerce_pos_view_settings';
+	// Change POS settings.
+	public const CAP_EDIT_SETTINGS = 'woocommerce_pos_edit_settings';
+	// Manage POS staff and their access.
+	public const CAP_MANAGE_STAFF = 'woocommerce_pos_manage_staff';
+	// Leave POS mode for the full admin.
+	public const CAP_EXIT_POS = 'woocommerce_pos_exit';
 
 	/**
 	 * All known POS capability identifiers.
