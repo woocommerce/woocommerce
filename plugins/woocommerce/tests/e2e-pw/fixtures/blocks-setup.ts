@@ -11,6 +11,7 @@ import {
 	customerFile,
 	BLOCK_THEME_SLUG,
 	DB_EXPORT_FILE,
+	// eslint-disable-next-line import/no-unresolved -- resolved via the @woocommerce/e2e-utils tsconfig alias.
 } from '@woocommerce/e2e-utils';
 
 /**

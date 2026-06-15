@@ -3,6 +3,10 @@
  */
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
+
+/**
+ * Internal dependencies
+ */
 import { adminFile as BLOCKS_ADMIN_STATE } from './utils/blocks/constants';
 
 // __dirname is not natively available in ESM, but Playwright's config loader shims it.
@@ -167,7 +171,10 @@ export default defineConfig( {
 			testDir: `${ TESTS_ROOT_PATH }/tests/blocks`,
 			dependencies: [ 'blocks setup' ],
 			fullyParallel: true,
-			use: { ...devices[ 'Desktop Chrome' ], storageState: BLOCKS_ADMIN_STATE },
+			use: {
+				...devices[ 'Desktop Chrome' ],
+				storageState: BLOCKS_ADMIN_STATE,
+			},
 		},
 		{
 			name: 'blocks-legacy-mini-cart',
@@ -180,7 +187,10 @@ export default defineConfig( {
 			],
 			dependencies: [ 'blocks setup' ],
 			fullyParallel: true,
-			use: { ...devices[ 'Desktop Chrome' ], storageState: BLOCKS_ADMIN_STATE },
+			use: {
+				...devices[ 'Desktop Chrome' ],
+				storageState: BLOCKS_ADMIN_STATE,
+			},
 		},
 	],
 } );
