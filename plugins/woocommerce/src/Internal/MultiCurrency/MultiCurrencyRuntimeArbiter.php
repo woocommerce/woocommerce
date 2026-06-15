@@ -8,6 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
  * Decides which multi-currency runtime owns the price/currency pipeline.
@@ -51,14 +52,23 @@ class MultiCurrencyRuntimeArbiter {
 	private NativePaymentsRuntimeArbiter $payments_arbiter;
 
 	/**
+	 * Legacy proxy for mockable global calls.
+	 *
+	 * @var LegacyProxy
+	 */
+	private LegacyProxy $legacy_proxy;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
 	 * @param NativePaymentsRuntimeArbiter $payments_arbiter Payments runtime owner arbiter.
+	 * @param LegacyProxy                  $legacy_proxy     Legacy proxy.
 	 */
-	final public function init( NativePaymentsRuntimeArbiter $payments_arbiter ): void {
+	final public function init( NativePaymentsRuntimeArbiter $payments_arbiter, LegacyProxy $legacy_proxy ): void {
 		$this->payments_arbiter = $payments_arbiter;
+		$this->legacy_proxy     = $legacy_proxy;
 	}
 
 	/**
@@ -69,7 +79,7 @@ class MultiCurrencyRuntimeArbiter {
 	public function get_runtime_owner(): string {
 		$payments_owner = $this->payments_arbiter->get_runtime_owner();
 
-		if ( NativePaymentsRuntimeArbiter::OWNER_PLUGIN === $payments_owner ) {
+		if ( NativePaymentsRuntimeArbiter::OWNER_PLUGIN === $payments_owner && $this->is_plugin_multi_currency_enabled() ) {
 			return self::OWNER_PLUGIN;
 		}
 
@@ -96,5 +106,17 @@ class MultiCurrencyRuntimeArbiter {
 	 */
 	public function should_plugin_register(): bool {
 		return self::OWNER_PLUGIN === $this->get_runtime_owner();
+	}
+
+	/**
+	 * Tell whether the standalone WooPayments plugin loads customer multi-currency.
+	 *
+	 * WooPayments defaults `_wcpay_feature_customer_multi_currency` to enabled and
+	 * returns before loading its multi-currency module when the option is `0`.
+	 *
+	 * @return bool True when the plugin multi-currency module should be active.
+	 */
+	private function is_plugin_multi_currency_enabled(): bool {
+		return '1' === (string) $this->legacy_proxy->call_function( 'get_option', '_wcpay_feature_customer_multi_currency', '1' );
 	}
 }

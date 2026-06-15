@@ -42,14 +42,18 @@ class MultiCurrencyRuntimeArbiterTest extends WC_Unit_Test_Case {
 	 * @param bool $in_list      Whether the plugin is in the per-site active-plugins list.
 	 * @param bool $network      Whether the plugin is in the network active-sitewide-plugins list.
 	 * @param bool $class_loaded Whether the WC_Payments bootstrap class is loaded.
+	 * @param bool $multi_currency_enabled Whether the WooPayments customer multi-currency feature is enabled.
 	 */
-	private function fake_plugin( bool $in_list = false, bool $network = false, bool $class_loaded = false ): void {
+	private function fake_plugin( bool $in_list = false, bool $network = false, bool $class_loaded = false, bool $multi_currency_enabled = true ): void {
 		$entry = NativePaymentsRuntimeArbiter::PLUGIN_FILE;
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_option'      => function ( $name, $default_value = false ) use ( $in_list, $entry ) {
+				'get_option'      => function ( $name, $default_value = false ) use ( $in_list, $entry, $multi_currency_enabled ) {
 					if ( 'active_plugins' === $name ) {
 						return $in_list ? array( $entry ) : array();
+					}
+					if ( '_wcpay_feature_customer_multi_currency' === $name ) {
+						return $multi_currency_enabled ? '1' : '0';
 					}
 					return get_option( $name, $default_value );
 				},
@@ -85,6 +89,17 @@ class MultiCurrencyRuntimeArbiterTest extends WC_Unit_Test_Case {
 		$this->assertSame( MultiCurrencyRuntimeArbiter::OWNER_PLUGIN, $this->sut->get_runtime_owner(), 'Plugin payments ownership should also own multi-currency.' );
 		$this->assertTrue( $this->sut->should_plugin_register(), 'Plugin multi-currency should remain responsible for price filters in plugin mode.' );
 		$this->assertFalse( $this->sut->should_core_register(), 'Core multi-currency must not register price filters in plugin mode.' );
+	}
+
+	/**
+	 * @testdox Should leave multi-currency unowned when the plugin disables customer multi-currency.
+	 */
+	public function test_plugin_payments_owner_with_disabled_customer_multi_currency_leaves_multi_currency_unowned(): void {
+		$this->fake_plugin( true, false, false, false );
+
+		$this->assertSame( MultiCurrencyRuntimeArbiter::OWNER_NONE, $this->sut->get_runtime_owner(), 'Plugin payments ownership alone should not imply plugin multi-currency ownership.' );
+		$this->assertFalse( $this->sut->should_plugin_register(), 'Plugin multi-currency should not register when the WooPayments feature is disabled.' );
+		$this->assertFalse( $this->sut->should_core_register(), 'Core multi-currency must not register while the plugin still owns payments.' );
 	}
 
 	/**
