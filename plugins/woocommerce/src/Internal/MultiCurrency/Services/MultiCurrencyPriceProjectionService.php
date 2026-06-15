@@ -77,6 +77,40 @@ class MultiCurrencyPriceProjectionService {
 	}
 
 	/**
+	 * Tell whether selected and default currencies differ.
+	 *
+	 * @return bool
+	 */
+	public function should_project_between_selected_and_default_currency(): bool {
+		$state = $this->state_builder->build();
+
+		return $state->get_default_currency()->get_code() !== $state->get_selected_currency()->get_code();
+	}
+
+	/**
+	 * Project a selected-currency price-filter value to default currency.
+	 *
+	 * @param mixed  $amount  Price-filter amount.
+	 * @param string $compare Price-filter comparison operator.
+	 * @return string
+	 */
+	public function get_price_filter_query_value( $amount, string $compare ): string {
+		$state            = $this->state_builder->build();
+		$converted_amount = $this->price_calculator->get_raw_conversion(
+			(float) $amount,
+			$state->get_default_currency()->get_code(),
+			$state->get_selected_currency()->get_code(),
+			$state->get_enabled_currencies()
+		);
+
+		$precision_epsilon = 0.000000001;
+
+		return '<=' === $compare
+			? (string) ceil( $converted_amount - $precision_epsilon )
+			: (string) floor( $converted_amount + $precision_epsilon );
+	}
+
+	/**
 	 * Project order meta candidates for a selected-currency order.
 	 *
 	 * @param string $order_currency Order currency code.

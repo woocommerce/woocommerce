@@ -37,6 +37,24 @@ class MultiCurrencyPriceProjectionServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should project selected-currency price-filter bounds to default currency.
+	 */
+	public function test_projects_price_filter_bounds_to_default_currency(): void {
+		$sut = $this->create_service( $this->create_state( 'GBP' ) );
+
+		$this->assertSame( '10', $sut->get_price_filter_query_value( 8.2, '>=' ) );
+		$this->assertSame( '11', $sut->get_price_filter_query_value( 8.21, '<=' ) );
+	}
+
+	/**
+	 * @testdox Should report whether selected and default currencies differ.
+	 */
+	public function test_reports_whether_selected_currency_differs_from_default(): void {
+		$this->assertTrue( $this->create_service( $this->create_state( 'GBP' ) )->should_project_between_selected_and_default_currency() );
+		$this->assertFalse( $this->create_service( $this->create_state( 'USD' ) )->should_project_between_selected_and_default_currency() );
+	}
+
+	/**
 	 * @testdox Should project order exchange-rate meta for non-default orders.
 	 */
 	public function test_projects_order_exchange_rate_meta_for_non_default_orders(): void {
