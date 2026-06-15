@@ -174,13 +174,19 @@ class SiteHealth {
 					'description' => __( 'The directory used for downloadable product files is not browsable from the web.', 'woocommerce' ),
 				),
 				'fail'  => array(
-					'status'      => fn( ?array $context ) => ! empty( $context['unverified'] ) ? 'recommended' : 'critical',
-					'label'       => fn( ?array $context ) => ! empty( $context['unverified'] )
-						? __( 'WooCommerce could not verify uploads directory protection', 'woocommerce' )
-						: __( 'WooCommerce uploads directory is browsable from the web', 'woocommerce' ),
-					'description' => fn( ?array $context ) => ! empty( $context['unverified'] )
-						? __( 'A loopback request to the WooCommerce uploads directory failed, so WooCommerce could not confirm whether directory browsing is disabled. Check your server configuration or try again later.', 'woocommerce' )
-						: __( 'Directory browsing can expose downloadable product files. Configure your web server to prevent directory indexing for the WooCommerce uploads directory.', 'woocommerce' ),
+					'status'      => function ( ?array $context ) {
+						return ! empty( $context['unverified'] ) ? 'recommended' : 'critical';
+					},
+					'label'       => function ( ?array $context ) {
+						return ! empty( $context['unverified'] )
+							? __( 'WooCommerce could not verify uploads directory protection', 'woocommerce' )
+							: __( 'WooCommerce uploads directory is browsable from the web', 'woocommerce' );
+					},
+					'description' => function ( ?array $context ) {
+						return ! empty( $context['unverified'] )
+							? __( 'A loopback request to the WooCommerce uploads directory failed, so WooCommerce could not confirm whether directory browsing is disabled. Check your server configuration or try again later.', 'woocommerce' )
+							: __( 'Directory browsing can expose downloadable product files. Configure your web server to prevent directory indexing for the WooCommerce uploads directory.', 'woocommerce' );
+					},
 					'actions'     => array(
 						array(
 							'url'     => 'https://woocommerce.com/document/digital-downloadable-product-handling/#protecting-your-uploads-directory',
