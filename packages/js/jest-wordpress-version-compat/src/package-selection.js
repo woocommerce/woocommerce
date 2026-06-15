@@ -39,26 +39,130 @@ function findProjectPackageJson( cwd = process.cwd() ) {
 	return packageFile ? readJsonFile( packageFile ) : {};
 }
 
-function getPackageJsonWordPressDependencies( packageJson ) {
-	const dependencySections = [
+function getPackageJsonDependencyEntries(
+	packageJson,
+	dependencySections = [
 		'dependencies',
 		'devDependencies',
 		'peerDependencies',
 		'optionalDependencies',
-	];
+	]
+) {
+	return dependencySections.flatMap( ( section ) =>
+		Object.entries( packageJson[ section ] || {} )
+	);
+}
+
+function getPackageJsonWordPressDependencies(
+	packageJson,
+	dependencySections
+) {
 	const packages = new Set();
 
-	for ( const section of dependencySections ) {
-		for ( const [ packageName, versionSpec ] of Object.entries(
-			packageJson[ section ] || {}
+	for ( const [ packageName, versionSpec ] of getPackageJsonDependencyEntries(
+		packageJson,
+		dependencySections
+	) ) {
+		if (
+			isWordPressPackage( packageName ) &&
+			! isBundledPackage( packageName ) &&
+			String( versionSpec ).startsWith( 'catalog:wp-' )
+		) {
+			packages.add( packageName );
+		}
+	}
+
+	return [ ...packages ].sort();
+}
+
+function getNodeModuleLookupPaths( cwd = process.cwd() ) {
+	const lookupPaths = [];
+	let currentDirectory = path.resolve( cwd );
+
+	while ( true ) {
+		lookupPaths.push( path.join( currentDirectory, 'node_modules' ) );
+
+		const parentDirectory = path.dirname( currentDirectory );
+
+		if ( parentDirectory === currentDirectory ) {
+			return lookupPaths;
+		}
+
+		currentDirectory = parentDirectory;
+	}
+}
+
+function resolvePackageJsonPath( packageName, cwd = process.cwd() ) {
+	for ( const nodeModulesPath of getNodeModuleLookupPaths( cwd ) ) {
+		const packageJsonPath = path.join(
+			nodeModulesPath,
+			...packageName.split( '/' ),
+			'package.json'
+		);
+
+		if ( fs.existsSync( packageJsonPath ) ) {
+			return fs.realpathSync( packageJsonPath );
+		}
+	}
+
+	return undefined;
+}
+
+function getWorkspaceDependencyNames( packageJson ) {
+	return getPackageJsonDependencyEntries( packageJson, [
+		'dependencies',
+		'peerDependencies',
+		'optionalDependencies',
+	] )
+		.filter( ( [ packageName, versionSpec ] ) =>
+			packageName.startsWith( '@woocommerce/' ) &&
+			String( versionSpec ).startsWith( 'workspace:' )
+		)
+		.map( ( [ packageName ] ) => packageName )
+		.sort();
+}
+
+function getWorkspaceWordPressDependencies( packageJson, cwd = process.cwd() ) {
+	const packages = new Set();
+	const checkedWorkspacePackages = new Set();
+	const packageQueue = getWorkspaceDependencyNames( packageJson ).map(
+		( packageName ) => ( { packageName, cwd } )
+	);
+
+	for ( let index = 0; index < packageQueue.length; index++ ) {
+		const { packageName, cwd: packageCwd } = packageQueue[ index ];
+
+		if ( checkedWorkspacePackages.has( packageName ) ) {
+			continue;
+		}
+
+		checkedWorkspacePackages.add( packageName );
+
+		const packageJsonPath = resolvePackageJsonPath(
+			packageName,
+			packageCwd
+		);
+
+		if ( ! packageJsonPath ) {
+			continue;
+		}
+
+		const workspacePackageJson = readJsonFile( packageJsonPath );
+
+		for ( const wordpressPackageName of getPackageJsonWordPressDependencies(
+			workspacePackageJson,
+			[ 'dependencies', 'peerDependencies', 'optionalDependencies' ]
 		) ) {
-			if (
-				isWordPressPackage( packageName ) &&
-				! isBundledPackage( packageName ) &&
-				String( versionSpec ).startsWith( 'catalog:wp-' )
-			) {
-				packages.add( packageName );
-			}
+			packages.add( wordpressPackageName );
+		}
+
+		for ( const dependencyName of getWorkspaceDependencyNames(
+			workspacePackageJson
+		) ) {
+			packageQueue.push( {
+				packageName: dependencyName,
+				cwd: path.dirname( packageJsonPath ),
+			} );
 		}
 	}
 
@@ -94,11 +198,19 @@ function resolveRequestedPackages( {
 	cwd = process.cwd(),
 } = {} ) {
 	getNpmDistTagForWordPressVersion( wpVersion );
+	const packageJson = findProjectPackageJson( cwd );
+	const configuredPackages = normalizePackageList( packages );
 
-	return (
-		normalizePackageList( packages ) ||
-		getPackageJsonWordPressDependencies( findProjectPackageJson( cwd ) )
-	);
+	if ( configuredPackages ) {
+		return configuredPackages;
+	}
+
+	return [
+		...new Set( [
+			...getPackageJsonWordPressDependencies( packageJson ),
+			...getWorkspaceWordPressDependencies( packageJson, cwd ),
+		] ),
+	].sort();
 }
 
 module.exports = {

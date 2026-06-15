@@ -183,7 +183,7 @@ function resolvePackageDependenciesFromNpm( packageName, version ) {
 	return dependencies;
 }
 
-function installPackages( packageSpecs, cacheDirectory ) {
+function installPackages( cacheDirectory ) {
 	const result = spawnSync(
 		'npm',
 		[
@@ -195,7 +195,6 @@ function installPackages( packageSpecs, cacheDirectory ) {
 			'--no-audit',
 			'--no-fund',
 			'--save-exact',
-			...packageSpecs,
 		],
 		{
 			encoding: 'utf8',
