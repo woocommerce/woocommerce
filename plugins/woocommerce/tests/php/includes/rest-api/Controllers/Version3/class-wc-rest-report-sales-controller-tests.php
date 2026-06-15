@@ -170,6 +170,7 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Pacific/Auckland is UTC+12 (or +13 in DST) — large enough that a local-time-of-02:00
 		// is the previous calendar day in UTC, surfacing any date()/gmdate() mismatch.
 		update_option( 'timezone_string', 'Pacific/Auckland' );
+		// phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- Need to change the PHP timezone to exercise local-vs-UTC date bucketing.
 		date_default_timezone_set( 'Pacific/Auckland' );
 
 		try {
@@ -207,6 +208,7 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'Refund must bucket by local time so it lines up with sales/orders in the same row.'
 			);
 		} finally {
+			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- Restore the original PHP timezone.
 			date_default_timezone_set( $previous_php_tz );
 			update_option( 'timezone_string', $previous_wp_tz );
 		}

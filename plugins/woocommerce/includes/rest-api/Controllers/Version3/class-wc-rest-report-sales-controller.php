@@ -52,8 +52,9 @@ class WC_REST_Report_Sales_Controller extends WC_REST_Report_Sales_V2_Controller
 		}
 
 		// `$this->report` is a WC_Report_Sales_By_Date (the v1 base annotates
-		// it as the abstract WC_Admin_Report). Cast locally so the call to
+		// it as the abstract WC_Admin_Report). Annotate locally so the call to
 		// the concrete `get_report_data()` typechecks.
+		/** @var WC_Report_Sales_By_Date $report */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$report      = $this->report;
 		$report_data = $report->get_report_data();
 		if ( ! empty( $report_data->refund_lines ) ) {
