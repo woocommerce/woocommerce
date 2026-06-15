@@ -37,17 +37,21 @@ const mapWpModules = [
 	'@wordpress/html-entities',
 	'@wordpress/notices',
 ];
-const wpModulesMapper = mapWpModules.reduce( ( acc, module ) => {
-	try {
-		// Excluding mappings for imports with suffixes like /build/index.js so that we can import the build/index.js file directly.
-		acc[ `^${ module }$` ] = require.resolve( module, {
-			paths: [ process.cwd() ],
-		} );
-	} catch ( error ) {
-		// If the module is not found, no need to add it to the mapper.
-	}
-	return acc;
-}, {} );
+// Compatibility runs need every mapped WordPress package and its singleton
+// dependencies to come from the selected compatibility cache.
+const wpModulesMapper = process.env.WP_VERSION
+	? {}
+	: mapWpModules.reduce( ( acc, module ) => {
+			try {
+				// Excluding mappings for imports with suffixes like /build/index.js so that we can import the build/index.js file directly.
+				acc[ `^${ module }$` ] = require.resolve( module, {
+					paths: [ process.cwd() ],
+				} );
+			} catch ( error ) {
+				// If the module is not found, no need to add it to the mapper.
+			}
+			return acc;
+	  }, {} );
 
 const config = {
 	moduleNameMapper: {

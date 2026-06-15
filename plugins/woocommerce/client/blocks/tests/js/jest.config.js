@@ -31,14 +31,18 @@ const singletonWpModules = [
 	'@wordpress/notices',
 ];
 
-const wpSingletonMapper = singletonWpModules.reduce( ( acc, mod ) => {
-	try {
-		acc[ `^${ mod }$` ] = require.resolve( mod );
-	} catch ( e ) {
-		// Not a direct dep — skip.
-	}
-	return acc;
-}, {} );
+// Compatibility runs need every mapped WordPress package and its singleton
+// dependencies to come from the selected compatibility cache.
+const wpSingletonMapper = process.env.WP_VERSION
+	? {}
+	: singletonWpModules.reduce( ( acc, mod ) => {
+			try {
+				acc[ `^${ mod }$` ] = require.resolve( mod );
+			} catch ( e ) {
+				// Not a direct dep — skip.
+			}
+			return acc;
+	  }, {} );
 
 const config = {
 	rootDir,
@@ -90,8 +94,12 @@ const config = {
 		'@woocommerce/test-utils/msw': 'tests/js/config/msw-setup.js',
 		'@woocommerce/entities': 'assets/js/entities',
 		'@woocommerce/stores/(.*)$': 'assets/js/base/stores/$1',
-		'^react$': '<rootDir>/node_modules/react',
-		'^react-dom$': '<rootDir>/node_modules/react-dom',
+		...( process.env.WP_VERSION
+			? {}
+			: {
+					'^react$': '<rootDir>/node_modules/react',
+					'^react-dom$': '<rootDir>/node_modules/react-dom',
+			  } ),
 		// Catch-all for monorepo @woocommerce/* packages: route bare and
 		// subpath imports through source so tests don't depend on built
 		// artifacts. Must come after all blocks-internal aliases above and

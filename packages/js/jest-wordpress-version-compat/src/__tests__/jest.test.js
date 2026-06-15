@@ -34,6 +34,10 @@ describe( 'jest adapter', () => {
 		expect( mapper ).toEqual( {
 			'^@wordpress/data$':
 				'/tmp/cache/latest/node_modules/@wordpress/data',
+			'^react$': '/tmp/cache/latest/node_modules/react',
+			'^react/(.*)$': '/tmp/cache/latest/node_modules/react/$1',
+			'^react-dom$': '/tmp/cache/latest/node_modules/react-dom',
+			'^react-dom/(.*)$': '/tmp/cache/latest/node_modules/react-dom/$1',
 		} );
 		expect( cache.prepare ).not.toHaveBeenCalled();
 	} );
@@ -72,6 +76,37 @@ describe( 'jest adapter', () => {
 			'^existing$': '/existing',
 			'^@wordpress/data$':
 				'/tmp/cache/latest/node_modules/@wordpress/data',
+			'^react$': '/tmp/cache/latest/node_modules/react',
+			'^react/(.*)$': '/tmp/cache/latest/node_modules/react/$1',
+			'^react-dom$': '/tmp/cache/latest/node_modules/react-dom',
+			'^react-dom/(.*)$': '/tmp/cache/latest/node_modules/react-dom/$1',
+		} );
+	} );
+
+	it( 'keeps singleton dependencies mapped to the compatibility cache', () => {
+		const config = withWordPressDependencyCompat(
+			{
+				moduleNameMapper: {
+					'^react$': '/installed/react',
+					'^react/(.*)$': '/installed/react/$1',
+				},
+			},
+			{
+				cacheRoot: '/tmp/cache',
+				lazy: false,
+				packages: [ '@wordpress/element' ],
+				wpVersion: 'gutenberg',
+			}
+		);
+
+		expect( config.moduleNameMapper ).toEqual( {
+			'^react$': '/tmp/cache/gutenberg/node_modules/react',
+			'^react/(.*)$': '/tmp/cache/gutenberg/node_modules/react/$1',
+			'^@wordpress/element$':
+				'/tmp/cache/gutenberg/node_modules/@wordpress/element',
+			'^react-dom$': '/tmp/cache/gutenberg/node_modules/react-dom',
+			'^react-dom/(.*)$':
+				'/tmp/cache/gutenberg/node_modules/react-dom/$1',
 		} );
 	} );
 
