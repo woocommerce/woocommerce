@@ -34,7 +34,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 			/**
 			 * Filter whether this cart item is visible in the mini-cart.
 			 *
-			 * @since 2.1.0
+			 * @since 1.6.0
 			 * @param bool   $visible       Whether the cart item is visible. Default true.
 			 * @param array  $cart_item     The cart item data.
 			 * @param string $cart_item_key The cart item key.
