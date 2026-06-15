@@ -12,11 +12,21 @@ use WP_Error;
 use WP_REST_Request;
 
 /**
- * Shared POS-specific overrides for routes that subclass Store API concrete
+ * Shared POS-specific behaviour for routes that subclass Store API concrete
  * route classes (e.g. `StoreApi\Routes\V1\CartAddItem`).
  *
+ * This trait holds only what the Store API base classes call back on the route
+ * instance itself: {@see self::requires_nonce()} and {@see self::has_cart_token()}
+ * are invoked inside `AbstractCartRoute::get_response()`, and
+ * {@see self::check_permission()} is wired up as the permission callback by
+ * {@see Controller}. The cross-cutting endpoint-shape changes (permission
+ * callback, the `cart_token` parameter, schema relaxations) live in the
+ * Controller's registration loop, so the route subclasses stay near-empty and
+ * there is a single place to reason about how POS diverges from the web Store
+ * API.
+ *
  * The routes can't share a base class (each extends a different Store API
- * parent), so a trait keeps the POS-specific surface in one file. Each consumer
+ * parent), so a trait keeps this shared surface in one file. Each consumer
  * declares a `REQUIRED_CAPABILITY` constant, resolved via `static::` in
  * {@see self::check_permission()}.
  *
@@ -88,36 +98,5 @@ trait PosRouteTrait {
 		$this->has_cart_token       = true;
 
 		return true;
-	}
-
-	/**
-	 * Apply POS overrides to the parent's {@see get_args()} return value: swap
-	 * the permission callback and add the `cart_token` URL parameter. Only the
-	 * int-indexed endpoint definitions are touched, not the string-keyed
-	 * metadata (`schema`, `allow_batch`).
-	 *
-	 * @param array  $endpoints              Result of `parent::get_args()`.
-	 * @param string $cart_token_description Per-route description for the `cart_token` URL parameter.
-	 * @return array
-	 */
-	protected function apply_pos_endpoint_overrides( array $endpoints, string $cart_token_description ): array {
-		foreach ( $endpoints as $key => &$endpoint ) {
-			if ( ! is_int( $key ) || ! is_array( $endpoint ) || ! isset( $endpoint['methods'] ) ) {
-				continue;
-			}
-			$endpoint['permission_callback'] = array( $this, 'check_permission' );
-			$endpoint['args']                = array_merge(
-				$endpoint['args'] ?? array(),
-				array(
-					'cart_token' => array(
-						'description' => $cart_token_description,
-						'type'        => 'string',
-						'context'     => array( 'view', 'edit' ),
-					),
-				)
-			);
-		}
-		unset( $endpoint );
-		return $endpoints;
 	}
 }

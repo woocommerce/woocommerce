@@ -14,7 +14,9 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\CartApplyCoupon as StoreApiCartApp
  *
  * Extends the Store API's concrete CartApplyCoupon so coupon validation
  * (usage limits, per-customer limits, product restrictions, etc.) runs
- * unchanged. POS-specific overrides come from {@see PosRouteTrait}.
+ * unchanged. The POS-specific endpoint-shape changes are applied by
+ * {@see Controller} at registration time; the request-time behaviour comes
+ * from {@see PosRouteTrait} and the POS policy hooks.
  *
  * @internal Just for internal use.
  *
@@ -28,16 +30,4 @@ class CartApplyCoupon extends StoreApiCartApplyCoupon {
 	 * Capability required for any POS request. Override per-route if needed.
 	 */
 	protected const REQUIRED_CAPABILITY = 'manage_woocommerce';
-
-	/**
-	 * Endpoint arguments.
-	 *
-	 * @return array
-	 */
-	public function get_args() {
-		return $this->apply_pos_endpoint_overrides(
-			parent::get_args(),
-			__( 'Cart session token returned by a prior POS Store API response. Pass it back here to apply a coupon to the cart you previously built.', 'woocommerce' )
-		);
-	}
 }

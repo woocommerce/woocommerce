@@ -17,7 +17,14 @@ use Automattic\WooCommerce\StoreApi\StoreApi;
  * Routes live under the `wc/pos/v1` namespace, separate from `wc/store/v1`.
  * Each POS route subclasses the corresponding Store API concrete route
  * (mirroring the agentic commerce pattern), so it reuses the Store API schema,
- * validation and response shape while overriding only what's POS-specific.
+ * validation and response pipeline unchanged. The route subclasses are
+ * deliberately near-empty: the POS-specific endpoint-shape changes are applied
+ * here in {@see self::apply_pos_endpoint_overrides()} at registration time, and
+ * the runtime behaviour changes live in the POS policy hooks. Keeping the
+ * divergence in those two places (and out of the route bodies) means there is
+ * one obvious spot to reason about how POS differs from the web Store API, and
+ * less surface to drift if the web routes are refactored.
+ *
  * Adding a route: write the subclass and add one entry to {@see ROUTE_CLASSES}.
  *
  * @internal Just for internal use.
@@ -66,8 +73,57 @@ class Controller implements RegisterHooksInterface {
 			register_rest_route(
 				self::REST_NAMESPACE,
 				$route->get_path(),
-				$route->get_args()
+				$this->apply_pos_endpoint_overrides( $route, $route->get_args() )
 			);
 		}
+	}
+
+	/**
+	 * Apply the POS-specific endpoint-shape changes to a route's arguments at
+	 * registration time, keeping every divergence from the web Store API in one
+	 * place rather than scattered across route subclasses.
+	 *
+	 * For each endpoint definition (the int-keyed entries; the string-keyed
+	 * `schema`/`allow_batch` metadata is left untouched) this:
+	 *
+	 * - swaps the permission callback for the route's capability check;
+	 * - adds the `cart_token` URL parameter so mobile clients can carry the cart
+	 *   session without a custom header;
+	 * - relaxes the schema-level `required` flag on billing/shipping address so
+	 *   POS can submit empty addresses at parse time (the deeper address
+	 *   validation is relaxed separately by the POS policy hooks). This is a
+	 *   no-op for routes without those args.
+	 *
+	 * @param object $route     The POS route instance (uses {@see PosRouteTrait}).
+	 * @param array  $endpoints Result of the route's `get_args()`.
+	 * @return array
+	 */
+	private function apply_pos_endpoint_overrides( object $route, array $endpoints ): array {
+		foreach ( $endpoints as $key => &$endpoint ) {
+			if ( ! is_int( $key ) || ! is_array( $endpoint ) || ! isset( $endpoint['methods'] ) ) {
+				continue;
+			}
+
+			$endpoint['permission_callback'] = array( $route, 'check_permission' );
+			$endpoint['args']                = array_merge(
+				$endpoint['args'] ?? array(),
+				array(
+					'cart_token' => array(
+						'description' => __( 'Cart session token returned by a prior POS Store API response. Pass it back on subsequent requests to keep the cart scoped to the same transaction.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+					),
+				)
+			);
+
+			foreach ( array( 'billing_address', 'shipping_address' ) as $address_arg ) {
+				if ( isset( $endpoint['args'][ $address_arg ] ) && is_array( $endpoint['args'][ $address_arg ] ) ) {
+					$endpoint['args'][ $address_arg ]['required'] = false;
+				}
+			}
+		}
+		unset( $endpoint );
+
+		return $endpoints;
 	}
 }
