@@ -229,5 +229,4 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'refunds', $bucket_schema['properties'], 'Per-period bucket should declare a refunds property.' );
 		$this->assertSame( 'string', $bucket_schema['properties']['refunds']['type'], 'refunds should be a string (decimal).' );
 	}
-
 }
