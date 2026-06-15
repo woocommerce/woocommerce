@@ -72,7 +72,7 @@ class Capabilities {
 	 * User meta key recording which preset was assigned to a user.
 	 *
 	 * The value is one of the POSPreset constants. It drives the admin UI, but it
-	 * is not the authorization signal: has_pos_access() reads the `pos_*` caps, not
+	 * is not the authorization signal: has_pos_access() reads the `woocommerce_pos_*` caps, not
 	 * this meta.
 	 */
 	public const POS_PRESET_META_KEY = '_woocommerce_pos_preset';
@@ -165,7 +165,7 @@ class Capabilities {
 	/**
 	 * WP_User_Query args selecting every user with POS access.
 	 *
-	 * Matches has_pos_access(): selects users holding any `pos_*` capability, via
+	 * Matches has_pos_access(): selects users holding any `woocommerce_pos_*` capability, via
 	 * WP_User_Query's capability__in. Use it to enumerate POS staff — e.g. the
 	 * GET /wc/pos/v1/staff endpoint and the wp-admin Staff list — which then refine
 	 * the candidates for their own needs (the staff endpoint also requires a PIN).
@@ -184,22 +184,22 @@ class Capabilities {
 	}
 
 	/**
-	 * Preset metadata: the `pos_*` cap bundle and display label for each preset.
+	 * Preset metadata: the `woocommerce_pos_*` cap bundle and display label for each preset.
 	 *
 	 * Single source of truth for capabilities_for_preset() and preset_label(), so
 	 * adding or renaming a preset is one edit here (plus the POSPreset constant)
 	 * rather than several parallel switches.
 	 *
-	 *     Capability           Cashier  Manager  Admin
-	 *     pos_process_sales      yes      yes     yes
-	 *     pos_view_orders        yes      yes     yes
-	 *     pos_apply_coupons      yes      yes     yes
-	 *     pos_create_coupons     no       yes     yes
-	 *     pos_issue_refunds      no       yes     yes
-	 *     pos_view_settings      no       yes     yes
-	 *     pos_edit_settings      no       no      yes
-	 *     pos_manage_staff       no       no      yes
-	 *     pos_exit               no       no      yes
+	 *     Capability                       Cashier  Manager  Admin
+	 *     woocommerce_pos_process_sales    yes      yes      yes
+	 *     woocommerce_pos_view_orders      yes      yes      yes
+	 *     woocommerce_pos_apply_coupons    yes      yes      yes
+	 *     woocommerce_pos_create_coupons   no       yes      yes
+	 *     woocommerce_pos_issue_refunds    no       yes      yes
+	 *     woocommerce_pos_view_settings    no       yes      yes
+	 *     woocommerce_pos_edit_settings    no       no       yes
+	 *     woocommerce_pos_manage_staff     no       no       yes
+	 *     woocommerce_pos_exit             no       no       yes
 	 *
 	 * @return array<string, array{caps: array<string, true>, label: string}>
 	 */
@@ -239,7 +239,7 @@ class Capabilities {
 	}
 
 	/**
-	 * The `pos_*` capability bundle for a given preset (see preset_definitions()).
+	 * The `woocommerce_pos_*` capability bundle for a given preset (see preset_definitions()).
 	 *
 	 * @param string $preset One of the POSPreset constants.
 	 * @return array<string, true> Map of granted cap => true. Empty for unknown presets.
@@ -257,10 +257,10 @@ class Capabilities {
 	 *
 	 * Touches only caps + meta, never WP roles: granting access to an existing user
 	 * leaves their role intact, and clearing it never leaves them roleless. Every
-	 * `pos_*` cap the user holds directly (via add_cap — the only way this class grants
+	 * `woocommerce_pos_*` cap the user holds directly (via add_cap — the only way this class grants
 	 * them) is stripped first, so a preset change (Manager to Cashier) drops the caps
 	 * the new preset omits, and a clear (null) removes them along with the preset meta.
-	 * Role-granted `pos_*` caps, if any, are out of scope: this class never adds caps
+	 * Role-granted `woocommerce_pos_*` caps, if any, are out of scope: this class never adds caps
 	 * to roles.
 	 *
 	 * @param int         $user_id Target user.
@@ -281,7 +281,7 @@ class Capabilities {
 			return false;
 		}
 
-		// Strip the user's directly-held pos_* caps so a preset change (or clear) starts
+		// Strip the user's directly-held woocommerce_pos_* caps so a preset change (or clear) starts
 		// clean. This class only grants them per-user via add_cap(), so $user->caps is the
 		// full set to clear here; role-granted caps are out of scope.
 		foreach ( self::all_pos_capabilities() as $cap ) {

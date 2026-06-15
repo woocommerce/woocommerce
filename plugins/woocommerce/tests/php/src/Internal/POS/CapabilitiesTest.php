@@ -245,7 +245,7 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox pos_staff_user_query_args selects POS cap-holders and excludes others.
 	 *
-	 * Verifies the query matches the access definition (any pos_* cap), not the
+	 * Verifies the query matches the access definition (any woocommerce_pos_* cap), not the
 	 * preset meta: a cap-holder is returned and a fresh administrator is not.
 	 */
 	public function test_pos_staff_user_query_args_selects_cap_holders(): void {
@@ -256,8 +256,8 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 		$results = ( new \WP_User_Query( Capabilities::pos_staff_user_query_args() ) )->get_results();
 		$ids     = wp_list_pluck( $results, 'ID' );
 
-		$this->assertContains( $staff, $ids, 'A user holding a pos_* cap should be selected.' );
-		$this->assertNotContains( $outsider, $ids, 'An administrator without any pos_* cap should not be selected.' );
+		$this->assertContains( $staff, $ids, 'A user holding a woocommerce_pos_* cap should be selected.' );
+		$this->assertNotContains( $outsider, $ids, 'An administrator without any woocommerce_pos_* cap should not be selected.' );
 
 		wp_delete_user( $staff );
 		wp_delete_user( $outsider );
@@ -290,7 +290,7 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox set_pos_preset grants the preset's pos_* caps as real WP capabilities.
+	 * @testdox set_pos_preset grants the preset's woocommerce_pos_* caps as real WP capabilities.
 	 */
 	public function test_set_pos_preset_grants_preset_caps(): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
@@ -320,7 +320,7 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Clearing a preset strips every pos_* cap and deletes the preset meta.
+	 * @testdox Clearing a preset strips every woocommerce_pos_* cap and deletes the preset meta.
 	 */
 	public function test_set_pos_preset_clear_strips_caps_and_meta(): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
@@ -340,7 +340,7 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	 * @testdox Clearing a preset leaves the user's non-POS capabilities untouched.
 	 *
 	 * The strip loop iterates only all_pos_capabilities(), so a directly-granted cap
-	 * outside the pos_* set must survive a clear — guarding against a regression to a
+	 * outside the woocommerce_pos_* set must survive a clear — guarding against a regression to a
 	 * blanket reset.
 	 */
 	public function test_set_pos_preset_clear_leaves_non_pos_caps_untouched(): void {
@@ -411,7 +411,7 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Preset meta without any pos_* cap does not grant POS access.
+	 * @testdox Preset meta without any woocommerce_pos_* cap does not grant POS access.
 	 *
 	 * The caps are the authorization signal, not the meta: a planted or partially
 	 * migrated preset meta value must not by itself confer access.
