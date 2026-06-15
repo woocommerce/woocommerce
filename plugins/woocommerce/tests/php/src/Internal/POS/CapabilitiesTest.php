@@ -15,16 +15,16 @@ use WC_Unit_Test_Case;
 class CapabilitiesTest extends WC_Unit_Test_Case {
 
 	/**
-	 * @testdox Every POS capability is pos_-prefixed, keeping it isolated from core caps.
+	 * @testdox Every POS capability is woocommerce_pos_-prefixed, keeping it isolated from core caps.
 	 */
-	public function test_all_caps_are_pos_prefixed(): void {
+	public function test_all_caps_are_woocommerce_pos_prefixed(): void {
 		foreach ( Capabilities::all_pos_capabilities() as $cap ) {
-			$this->assertStringStartsWith( 'pos_', $cap, "POS cap '{$cap}' must be pos_-prefixed." );
+			$this->assertStringStartsWith( 'woocommerce_pos_', $cap, "POS cap '{$cap}' must be woocommerce_pos_-prefixed." );
 		}
 	}
 
 	/**
-	 * @testdox all_pos_capabilities lists exactly the nine known pos_* caps.
+	 * @testdox all_pos_capabilities lists exactly the nine known woocommerce_pos_* caps.
 	 *
 	 * Asserts the full set (order-insensitive) so the test fails if any cap is
 	 * added, removed, or swapped — not just when the count changes.
@@ -66,7 +66,7 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox A fresh privileged WP role has no implicit POS access.
 	 *
-	 * POS access requires an explicitly granted pos_* cap; holding a privileged WP
+	 * POS access requires an explicitly granted woocommerce_pos_* cap; holding a privileged WP
 	 * role (administrator, shop_manager) grants none on its own.
 	 *
 	 * @dataProvider provider_privileged_roles
@@ -82,10 +82,10 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox has_pos_access is true once the user holds any single pos_* cap.
+	 * @testdox has_pos_access is true once the user holds any single woocommerce_pos_* cap.
 	 *
 	 * Locks in the granular-caps semantics: a back-office refunds user holding
-	 * only `pos_issue_refunds` (no baseline `pos_process_sales`) still counts as
+	 * only `woocommerce_pos_issue_refunds` (no baseline `woocommerce_pos_process_sales`) still counts as
 	 * POS staff.
 	 */
 	public function test_has_pos_access_true_with_a_single_cap(): void {
@@ -99,7 +99,7 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox has_pos_access is false when the user holds no pos_* caps.
+	 * @testdox has_pos_access is false when the user holds no woocommerce_pos_* caps.
 	 */
 	public function test_has_pos_access_false_without_caps(): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
@@ -121,7 +121,7 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	 * @testdox has_pos_access survives a role overwrite because access is cap-keyed.
 	 *
 	 * The wp-admin users.php "Change role to…" dropdown calls set_role(), which
-	 * replaces all roles. POS access must survive — individual pos_* caps added
+	 * replaces all roles. POS access must survive — individual woocommerce_pos_* caps added
 	 * via add_cap() are not cleared by set_role().
 	 */
 	public function test_has_pos_access_survives_set_role_overwrite(): void {
