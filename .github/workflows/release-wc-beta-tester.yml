@@ -15,7 +15,7 @@ jobs:
         permissions:
             contents: write
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo

@@ -15,7 +15,7 @@ jobs:
       matrix: ${{ steps.compute-branches.outputs.matrix }}
     steps:
       - name: Check out trunk
-        uses: actions/checkout@v4
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           ref: trunk
       - name: Compute WordPress versions
@@ -101,7 +101,7 @@ jobs:
       matrix: ${{ fromJSON(needs.preparation.outputs.matrix) }}
     steps:
       - name: Check out branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           ref: ${{ matrix.branch }}
       - name: Set up dev environment

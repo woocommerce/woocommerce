@@ -52,7 +52,7 @@ jobs:
       needs-markdown-validation:  ${{ steps.target-changes.outputs.needs-markdown-validation }}
       needs-syncpack-validation:  ${{ steps.target-changes.outputs.needs-syncpack-validation }}
     steps:
-      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: target-changes
         with:
           filters: |
@@ -79,16 +79,16 @@ jobs:
       test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
       report-jobs: ${{ steps.project-jobs.outputs.report-jobs }}
     steps:
-      - uses: 'actions/checkout@v4'
+      - uses: 'actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd' # v5.0.1
         name: 'Checkout'
         with:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
 
       - name: Setup - pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
 
       - name: Setup - spawn linting and testing jobs
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         id: 'project-jobs'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -131,7 +131,7 @@ jobs:
       matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.lint-jobs ) }}
     steps:
-      - uses: 'actions/checkout@v4'
+      - uses: 'actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd' # v5.0.1
         name: 'Checkout'
         with:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
@@ -160,7 +160,7 @@ jobs:
       matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.test-jobs ) }}
     steps:
-      - uses: 'actions/checkout@v4'
+      - uses: 'actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd' # v5.0.1
         name: 'Checkout'
         with:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
@@ -287,7 +287,7 @@ jobs:
     outputs:
       non_successful_jobs: ${{ steps.evaluation.outputs.non_successful_jobs }}
     steps:
-      - uses: 'actions/checkout@v4'
+      - uses: 'actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd' # v5.0.1
         name: 'Checkout'
         with:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
@@ -318,7 +318,7 @@ jobs:
     env:
       NON_SUCCESSFUL_JOBS: ${{ needs.evaluate-project-jobs.outputs.non_successful_jobs }}
     steps:
-      - uses: 'actions/checkout@v4'
+      - uses: 'actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd' # v5.0.1
         name: 'Checkout'
         with:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
@@ -328,7 +328,7 @@ jobs:
               .github/workflows
 
       - name: 'Setup PNPM'
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
 
       - name: 'Send messages for failed jobs'
         env:
@@ -415,7 +415,7 @@ jobs:
 
       - name: 'Add a link to test report in summary'
         if: ${{ strategy.job-index == 0 }} # only add the link once
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const BASE_REPORT_URL = 'https://woocommerce.github.io/woocommerce-test-reports/#/';
@@ -452,10 +452,10 @@ jobs:
       contents: read
 
     steps:
-      - uses: 'actions/checkout@v4'
+      - uses: 'actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd' # v5.0.1
           
       - name: 'Setup - node'
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version-file: .nvmrc
 
@@ -489,7 +489,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: 'actions/checkout@v4'
+      - uses: 'actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd' # v5.0.1
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
 
@@ -522,9 +522,9 @@ jobs:
       contents: read
 
     steps:
-      - uses: 'actions/checkout@v4'
+      - uses: 'actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd' # v5.0.1
 
-      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: target-changes
         with:
           list-files: shell
@@ -536,12 +536,12 @@ jobs:
               - 'docs/**/*.md'
 
       - name: 'Setup - node'
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version-file: .nvmrc
 
       - name: 'Setup - pnpm'
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
 
       - name: 'Validate - lint md-files'
         if: ${{ steps.target-changes.outputs.needs-markdown-linting }}
