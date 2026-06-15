@@ -44,10 +44,10 @@ module.exports = {
 			},
 		},
 		/*
-		 * Blocks e2e subtree (migrated from client/blocks/tests/e2e during the
+		 * Blocks e2e subtree (migrated into the core e2e suite during the
 		 * QAO-185 merge). These files use the blocks alias universe, so they get
 		 * the type-aware parser pointed at tsconfig.blocks.json and the blocks
-		 * lint rules that previously lived in client/blocks/tests/e2e/.eslintrc.js.
+		 * lint rules that previously applied to the blocks e2e tree.
 		 */
 		{
 			files: [ 'tests/blocks/**', 'utils/blocks/**' ],
