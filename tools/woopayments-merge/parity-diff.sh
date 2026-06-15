@@ -57,8 +57,19 @@ dump() {
 
 if [ -n "$SELF_WP" ]; then
 	LEFT_LABEL="run-1"; RIGHT_LABEL="run-2"
+	# Self-check proves the differ is deterministic on a SETTLED surface. A freshly-driven order can
+	# still be settling (async webhooks updating status/notes), a moving target — so dump until two
+	# consecutive dumps match (bounded), then compare those. A genuinely non-deterministic differ
+	# never stabilizes and the final unequal pair is reported as FAIL.
 	left="$(dump "$SELF_WP")"
 	right="$(dump "$SELF_WP")"
+	tries=0
+	while [ "$left" != "$right" ] && [ "$tries" -lt 8 ]; do
+		sleep 1
+		left="$right"
+		right="$(dump "$SELF_WP")"
+		tries=$((tries + 1))
+	done
 else
 	if [ -z "$REF_WP" ] || [ -z "$TARGET_WP" ]; then
 		echo "Cross-store mode needs both --ref and --target." >&2
