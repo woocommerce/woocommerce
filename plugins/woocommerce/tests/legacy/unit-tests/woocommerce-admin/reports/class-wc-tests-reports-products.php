@@ -451,43 +451,48 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		// Simulate a decimal-quantity setup (e.g. WCPOS) where stock amounts are floats.
 		add_filter( 'woocommerce_stock_amount', 'floatval' );
 
-		$product = new WC_Product_Simple();
-		$product->set_name( 'Test Product' );
-		$product->set_regular_price( 25 );
-		$product->save();
+		// Use try/finally so the global filter is always detached, even if an assertion fails
+		// or sync_order_products() throws (the regression this test guards against), to avoid
+		// leaking the float coercion into later tests.
+		try {
+			$product = new WC_Product_Simple();
+			$product->set_name( 'Test Product' );
+			$product->set_regular_price( 25 );
+			$product->save();
 
-		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( OrderStatus::COMPLETED );
-		$order->set_shipping_total( 10 );
-		$order->set_total( 35 );
-		$order->save();
+			$order = WC_Helper_Order::create_order( 1, $product );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->set_shipping_total( 10 );
+			$order->set_total( 35 );
+			$order->save();
 
-		// Monetary-only refund: refund an amount against the line item without refunding any quantity.
-		$refund = null;
-		foreach ( $order->get_items() as $item_id => $item ) {
-			$refund = wc_create_refund(
-				array(
-					'amount'     => 5,
-					'order_id'   => $order->get_id(),
-					'line_items' => array(
-						$item_id => array(
-							'qty'          => 0,
-							'refund_total' => 5,
+			// Monetary-only refund: refund an amount against the line item without refunding any quantity.
+			$refund = null;
+			foreach ( $order->get_items() as $item_id => $item ) {
+				$refund = wc_create_refund(
+					array(
+						'amount'     => 5,
+						'order_id'   => $order->get_id(),
+						'line_items' => array(
+							$item_id => array(
+								'qty'          => 0,
+								'refund_total' => 5,
+							),
 						),
-					),
-				)
-			);
-			break;
+					)
+				);
+				break;
+			}
+
+			$this->assertNotWPError( $refund, 'Refund creation should succeed' );
+
+			$data_store = new ProductsDataStore();
+			$result     = $data_store->sync_order_products( $refund->get_id() );
+
+			$this->assertTrue( $result, 'Syncing the refund should complete without a Division by zero error' );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
 		}
-
-		$this->assertNotWPError( $refund, 'Refund creation should succeed' );
-
-		$data_store = new ProductsDataStore();
-		$result     = $data_store->sync_order_products( $refund->get_id() );
-
-		$this->assertTrue( $result, 'Syncing the refund should complete without a Division by zero error' );
-
-		remove_filter( 'woocommerce_stock_amount', 'floatval' );
 	}
 
 	/**
