@@ -64,8 +64,18 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  * Resolved as a single instance by the runtime DI container (auto-wired; the container
  * caches one instance), so all consumers share the same arbiter.
  *
+ * Lifecycle — TRANSITIONAL, not permanent core API. This exists to make the standalone
+ * WooPayments plugin and the core-native runtime coexist safely while both can be present on a
+ * site (it must run in production, which is why it lives in core rather than in dev tooling). Its
+ * plugin-detection notably defends against OLD plugin versions that predate the stand-down
+ * handshake and so never yield on their own. Once the standalone plugin is fully sunset
+ * (post-cutover cleanup), the plugin-detection path is dead: collapse this to a plain
+ * "is native payments enabled" runtime gate, or remove it. It is shipped DORMANT at the keystone
+ * stage (no consumers yet); it becomes live when the boot wires it and native registrations
+ * consult should_native_register() — it should not merge to trunk as a caller-less class.
+ *
  * @since 11.0.0
- * @internal This is part of the internal native-payments platform and is not a public API.
+ * @internal Transitional internal component (not a public API); slated to simplify/remove once the standalone plugin is sunset.
  */
 class NativePaymentsRuntimeArbiter {
 
