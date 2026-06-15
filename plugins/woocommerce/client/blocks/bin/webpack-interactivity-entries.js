@@ -51,10 +51,16 @@ function findInteractivityBlockAssets( dir = [] ) {
 
 				// A `file:` style references a CSS file built elsewhere (e.g.
 				// compiled from a shared base component), so only warn when a
-				// local style.scss source is expected but missing.
+				// local style.scss source is expected but missing. `style` may
+				// be a single reference or an array of them.
+				const styleRefs = Array.isArray( blockJson.style )
+					? blockJson.style
+					: [ blockJson.style ];
 				if (
 					blockJson.style &&
-					! String( blockJson.style ).startsWith( 'file:' ) &&
+					! styleRefs.some( ( ref ) =>
+						String( ref ).startsWith( 'file:' )
+					) &&
 					! fs.existsSync( path.join( blockDir, 'style.scss' ) )
 				) {
 					// eslint-disable-next-line no-console
