@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Use the customer's first name (billing first name, falling back to WordPress first name, then username) in the greeting of the new account and reset password emails.

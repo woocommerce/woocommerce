@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Update destructive action link color on Shipping Zone, Shipping Class, Shipping Method, and Shipping Provider list tables to match WordPress 7.0's updated destructive red.

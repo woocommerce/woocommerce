@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Stabilize Blocks E2E site editor saves when the save panel opens with multiple dirty entities.
