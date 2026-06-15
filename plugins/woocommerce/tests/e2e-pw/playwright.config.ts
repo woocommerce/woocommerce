@@ -20,6 +20,13 @@ if ( ! process.env.BASE_URL ) {
 	);
 }
 
+// The blocks setup project uses @wordpress/e2e-test-utils-playwright, which derives
+// the REST API root from WP_BASE_URL (its default is port 8889). Align it with the
+// suite's base URL so REST setup targets the same WordPress instance.
+if ( ! process.env.WP_BASE_URL ) {
+	process.env.WP_BASE_URL = process.env.BASE_URL;
+}
+
 const { BASE_URL, CI, E2E_MAX_FAILURES, REPEAT_EACH } = process.env;
 
 export const TESTS_ROOT_PATH = __dirname;
