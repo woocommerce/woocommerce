@@ -51418,12 +51418,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Parameter \#1 \$content of function do_blocks expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
