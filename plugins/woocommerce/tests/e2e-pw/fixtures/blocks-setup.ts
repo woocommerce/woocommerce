@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { chromium, request } from '@playwright/test';
+import { test as setup, chromium, request } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 import {
 	adminFile,
@@ -16,8 +16,8 @@ import {
 /**
  * Internal dependencies
  */
-import { customer, admin } from './test-data/data/data';
-import { BASE_URL } from './utils/constants';
+import { customer, admin } from '../test-data/blocks/data/data';
+import { BASE_URL } from '../utils/blocks/constants';
 
 const prepareAttributes = async () => {
 	const browser = await chromium.launch();
@@ -60,7 +60,7 @@ const prepareAttributes = async () => {
 	await wpCLI( cronTask );
 };
 
-async function globalSetup() {
+setup( 'blocks setup', async () => {
 	console.log( 'Running global setup:' );
 	console.time( '└ Total time' );
 
@@ -110,6 +110,4 @@ async function globalSetup() {
 
 	await requestContext.dispose();
 	console.timeEnd( '└ Total time' );
-}
-
-export default globalSetup;
+} );
