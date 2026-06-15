@@ -124,6 +124,7 @@ class CheckoutSessions extends AbstractCartRoute {
 	 * @see \Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute::is_cookie_authenticated()
 	 *
 	 * @param \WP_REST_Request $request Request object.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @return bool False, Jetpack blog token auth used instead.
 	 */
 	protected function is_cookie_authenticated( \WP_REST_Request $request ) {

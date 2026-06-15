@@ -66,6 +66,7 @@ trait PosRouteTrait {
 	 * @see \Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute::is_cookie_authenticated()
 	 *
 	 * @param WP_REST_Request $request Request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return bool
 	 */
 	protected function is_cookie_authenticated( WP_REST_Request $request ) {
@@ -81,6 +82,7 @@ trait PosRouteTrait {
 	 * `checkout_session_id` pattern used by agentic commerce.
 	 *
 	 * @param WP_REST_Request $request Request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return bool
 	 */
 	protected function has_cart_token( WP_REST_Request $request ) {

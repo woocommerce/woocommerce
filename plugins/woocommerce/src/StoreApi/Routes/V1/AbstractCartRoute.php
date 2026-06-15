@@ -240,6 +240,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @since 10.9.0
 	 *
 	 * @param \WP_REST_Request $request Request object.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
 	 * @return bool
 	 */
