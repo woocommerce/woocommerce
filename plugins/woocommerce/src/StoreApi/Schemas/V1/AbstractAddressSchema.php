@@ -127,16 +127,16 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			function ( $carry, $key ) use ( $address, $validation_util, $schema ) {
 				switch ( $key ) {
 					case 'country':
-						$carry[ $key ] = wc_strtoupper( sanitize_text_field( wp_unslash( $address[ $key ] ) ) );
+						$carry[ $key ] = wc_strtoupper( sanitize_text_field( $address[ $key ] ) );
 						break;
 					case 'state':
-						$carry[ $key ] = $validation_util->format_state( sanitize_text_field( wp_unslash( $address[ $key ] ) ), $address['country'] );
+						$carry[ $key ] = $validation_util->format_state( sanitize_text_field( $address[ $key ] ), $address['country'] );
 						break;
 					case 'postcode':
-						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
+						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( $address['postcode'] ), $address['country'] ) : '';
 						break;
 					default:
-						$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $schema[ $key ], $key );
+						$carry[ $key ] = rest_sanitize_value_from_schema( $address[ $key ], $schema[ $key ], $key );
 						break;
 				}
 				if ( $this->additional_fields_controller->is_field( $key ) ) {
