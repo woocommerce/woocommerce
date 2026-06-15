@@ -174,16 +174,16 @@ jobs:
               } ) => ( {
                 projectName,
                 projectPath,
-                name: `${ jobConfig.name } [${ label }] - ${ projectName } [unit]`,
+                name: `${ jobConfig.name }${
+                  label ? ` [${ label }]` : ''
+                } - ${ projectName } [unit]`,
                 command: jobConfig.command,
                 testType: 'unit',
                 optional: jobConfig.optional || false,
                 shardNumber: 0,
                 testEnv: {
                   shouldCreate: false,
-                  envVars: {
-                    WP_VERSION: wpVersion,
-                  },
+                  envVars: wpVersion ? { WP_VERSION: wpVersion } : {},
                 },
                 report: {
                   resultsBlobName: '',
@@ -220,8 +220,13 @@ jobs:
                           events.includes( 'pull_request' ) )
                       );
                     } )
-                    .flatMap( ( jobConfig ) =>
-                      wpCompatibilityTargets.map( ( [ label, wpVersion ] ) =>
+                    .flatMap( ( jobConfig ) => {
+                      const targets =
+                        jobConfig.command === 'test:js'
+                          ? wpCompatibilityTargets
+                          : [ [ '', '' ] ];
+
+                      return targets.map( ( [ label, wpVersion ] ) =>
                         createUnitJob( {
                           projectName,
                           projectPath,
@@ -229,8 +234,8 @@ jobs:
                           label,
                           wpVersion,
                         } )
-                      )
-                    );
+                      );
+                    } );
                 } )
                 .flat();
 
