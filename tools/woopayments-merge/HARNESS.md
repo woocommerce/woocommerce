@@ -58,18 +58,31 @@ itself is trustworthy. (Validated: 5/5 gates PASS on the unmodified plugin.)
 
 ---
 
-## 3. The gates (what each proves, how to run alone)
+## 3. The gates — and EXACTLY what each does / does not cover
 
-| Gate | Proves | Tool |
+> **Read this honestly. A green gate means only what its "covers" column says — never more.** The
+> harness is a change-detection + determinism substrate for a *bounded* surface, not a comprehensive
+> merge verifier. Full per-tool capability ledger: `../../../ai-prompts/goals/woopayments-merge/follow-up/harness-capability-audit.md`.
+
+### Automated-deterministic gates (trust within the bound)
+
+| Gate | Covers (deterministic) | Does NOT cover |
 |---|---|---|
-| **BC + Tracks drift** | the BC surface (hooks, endpoints, persisted data, scheduler, php-api, **tracks**) hasn't changed unnoticed vs the captured baseline | `bc-drift-gate.sh` (`--update` to re-baseline after dispositioning) |
-| **Bucket-E parity** | the persisted payment surface (order status, every meta key, notes, refunds) is **byte-identical** — the executable form of RULE 0 | `parity-diff.sh --self-check WP <ids>` / `--ref … --target … <ids>` |
-| **Perf (RULE 1)** | no per-surface **query-count** regression vs the reference baseline | `perf-baseline.sh capture` (reference) / `check` (target) |
-| **Financial reconciliation** | WC-side money records match the **provider's raw source** (Stripe CLI on the connected account); fail-closed | `financial-reconcile.sh <ids>` |
-| **Tracks parity** | every surviving surface's Tracks events keep the **same name + props contract** (no telemetry cutoff/drift) | static: the `tracks` drift category; runtime: `tracks-parity.sh` + `tracks-capture.php` + the client spy (§5) |
+| **BC + Tracks drift** (`bc-drift-gate.sh`) | grep-matched BC surface didn't change vs baseline | dynamic/variable hook & event names, var-built meta keys, indirect registrations; it's drift on the *reference*, not proof native reproduces it |
+| **Bucket-E parity** (`parity-diff.sh`) | byte-identical **status / pattern-matched meta / notes / refunds / total / txn_id** for the **orders you dump** | meta keys outside the pattern; customer/token/subscription/session/option state; **final state only, not the transition sequence**; only sampled orders |
+| **Financial reconciliation** (`financial-reconcile.sh`) | WC total-refunded === Stripe `amount_refunded` for given charges; fail-closed | **refunds only** — not charge amount, captures/auths, disputes, payouts, fees, multi-currency |
+| **Tracks parity — server-side** (`tracks-parity.sh` + `tracks-capture.php`) | the ~33 **PHP** Tracks emitters' name + normalized props | the ~156 **client-side JS** emitters (the majority) — see runbooks |
+| **Perf probe** (`perf-baseline.sh`) — *narrow* | query-count on **3 gateway-resolution surfaces** | checkout render, admin pages, `process_payment`, cold cache, **bundle size (RULE 3)** — this is a weak signal, NOT RULE-1 verification |
 
-Each gate is **fail-closed**: it refuses to emit PASS unless it positively verified the property
-(e.g. the money oracle exits 3 rather than PASS when it can't read the provider).
+Each is **fail-closed** (refuses PASS unless it positively verified the property).
+
+### Runbooks (JUDGED by the implementor — NOT automated; do not fake a PASS)
+
+For these, run the playbook against the local env (WP-CLI / browser) and record a judged verdict + evidence:
+
+- **Browser checkout matrix** — classic/Blocks/express/WooPay, **3DS/SCA**, saved-method, redirect. Extend `tests/e2e-pw` + WooPayments `tests/e2e`; judge the result. (`flow-drive.sh` only exercises *server-side* `process_payment` — it does **not** cover the browser/Stripe.js flows.)
+- **Client-side Tracks** — the JS emitters via the `window.wcTracks.recordEvent` spy (§5; spec'd, **not yet built/validated**).
+- **Admin screens** render/behavior/network vs reference; **bundle size**; **broad perf** (`tests/performance`); **disputes/payouts/captures/fees** financial matrix; **subscription renewals / token meta / multi-currency** state.
 
 ---
 

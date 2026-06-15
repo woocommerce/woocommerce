@@ -104,5 +104,7 @@ echo
 echo "Summary: ${#PASS[@]} passed, ${#FAILED[@]} failed, ${#BLOCKED[@]} blocked."
 if [ "${#FAILED[@]}" -ne 0 ]; then echo "RESULT: FAIL (regressions present)."; exit 1; fi
 if [ "${#BLOCKED[@]}" -ne 0 ]; then echo "RESULT: INCOMPLETE (preconditions unmet — not a regression)."; exit 3; fi
-echo "RESULT: PASS — the harness agrees with reality across every gate."
+echo "RESULT: PASS — the deterministic gates pass on the captured surfaces (Tier A/B)."
+echo "  NOTE: this is NOT full merge verification. Browser checkout (incl. 3DS/SCA), client-side"
+echo "  Tracks, broad perf, and bundle size are RUNBOOK/JUDGMENT, not gated here — see HARNESS.md."
 exit 0
