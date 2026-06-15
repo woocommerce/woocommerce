@@ -12,7 +12,6 @@
 # Flags:
 #   --with-tracks    also run the Tracks-parity gate (installs the capture drop-in + enables
 #                    tracking on the store(s), then restores). Off by default since it mutates state.
-#   --keep-orders    don't note the driven fixture orders as disposable.
 #
 # Exit: 0 only if every gate PASSED. Any FAIL or BLOCKED → non-zero (so a CI loop stops).
 # PRECONDITIONS (see HARNESS.md): connected test account, event listener running, valid host
@@ -31,7 +30,6 @@ while [ "$#" -gt 0 ]; do
 		--ref) MODE="cross"; REF_WP="$2"; shift 2 ;;
 		--target) TARGET_WP="$2"; shift 2 ;;
 		--with-tracks) WITH_TRACKS=1; shift ;;
-		--keep-orders) shift ;;
 		*) echo "Unknown arg: $1" >&2; exit 2 ;;
 	esac
 done
