@@ -37,8 +37,8 @@ Three properties already protect that, plus one action to take:
 - *Or:* let it ride the branch and delete it as the **first action of stage A6**:
   `git rm -r tools/woopayments-merge && git commit -m "Remove WooPayments-merge transition harness"`.
 
-The plugin-side reverse-gated stand-down is NOT here — it lives in a dedicated `woocommerce-payments`
-clone (the plugin repo), never in WC core.
+The WooPayments plugin is **unmodified** by this merge — there is no plugin-side code here or in the
+plugin repo. A site moves to native by **deactivating** the plugin (see §1).
 
 ---
 
@@ -58,31 +58,26 @@ the plugin defines that bootstrap class late (`wcpay_init()` at `plugins_loaded:
 an explicit require, not the autoloader).
 
 Dormant by default: `OWNER_NATIVE` requires the `woocommerce_native_payments_enabled`
-flag (off in A0) **and** the plugin to be absent (or to have yielded).
+flag (off in A0) **and** the plugin to be inactive. While the plugin is active, native is
+dormant — **plugin-wins is the only state on any site with the plugin active**, regardless
+of native's flag.
 
-### Reverse-gated plugin stand-down handshake (cross-repo)
+### How a site moves to native (the cutover, A5 — `design-spec.md` §4.5a)
 
-The arbiter exposes the seam; the **WooPayments plugin** must consult it (a coordinated
-reverse-gated release in the `woocommerce-payments` repo, not this repo):
+The plugin is unmodified; a site moves to native by **deactivating** the plugin, and core owns
+that UX (modeled on core's own merged-package handling, `src/Packages.php`):
 
-| Filter | Owner | Meaning |
-|---|---|---|
-| `woocommerce_native_payments_enabled` | core (feature flag) | native runtime enabled for this site |
-| `woocommerce_native_payments_plugin_yielded` | **the plugin** | plugin is present but has stood its runtime down → native may take over |
-| `woocommerce_native_payments_runtime_owner` | ops/escape hatch | **conservative only**: `none` = global kill switch; `plugin` = force plugin-wins (when present). Cannot promote native over a present, non-yielded plugin. |
+- **Soft phase:** core detects the active plugin (`is_plugin_runtime_active()`) and shows an
+  admin-wide notice — *"WooPayments is now part of WooCommerce core — disable the WooPayments
+  extension to continue processing payments with WooPayments"* — with a one-click **Disable
+  WooPayments** button (`deactivate_plugins()` → reload → reassurance notice).
+- **Mandatory phase (gated on `WC_VERSION >= X`):** core auto-deactivates the plugin on the
+  update/activate request + an activation guard blocking re-activation.
+- **Money-safety:** the one-request deactivation overlap is plugin-owned (arbiter → `OWNER_PLUGIN`),
+  so native stays dormant that request and takes over from the next — no dual submit.
 
-**The handover contract (must be atomic in the plugin release):** when the plugin
-decides native should own, it returns `true` for `..._plugin_yielded` **and** skips
-booting its own runtime, in lockstep. The arbiter only lets native take over a still-
-present plugin when that yield signal is set — so a stray/third-party filter cannot
-induce a dual-runtime state. The dangerous direction (force-native) is fenced; only the
-plugin's own yield opens it.
-
-A5 (cutover) hardens the yield into a verified, option-backed handshake written by the
-plugin's stand-down routine, plus the webhook/AS drain-or-rebind continuity gate
-(§4.5 #4) — the arbiter provides the ownership signal that gate guards. Until the
-reverse-gated release ships and saturates, **plugin-wins** is the only state on any
-site that has the plugin active.
+The arbiter is the per-request safety; the notice/auto-deactivation component (A5) is the merchant-
+facing migration. Both are transitional — removed once the plugin is sunset.
 
 ---
 
@@ -154,20 +149,19 @@ Provider events reach the stores via a listener the operator runs. The reference
 `npm run stripe listen`. (A store routed to wpcom-local would use `transact listen`.) Never
 the remote WPCOM sandbox; the Stripe CLI is the only allowed raw-source reader.
 
-## 4. Reverse-gated plugin stand-down — built (dev copy in a clone)
+## 4. Cutover — how a site moves to native (A5, core-side, not yet built)
 
-The plugin side of the handshake lives in a **dedicated clone** (`~/Work/a8c/woocommerce-payments-standdown`,
-branch `feat/native-standdown`), wired into this repo's `:8889` env via the wp-env override
-(`plugins/woocommerce/.wp-env.override.json` maps `woocommerce-payments` → the clone). The
-reference env (`:8082`) stays on the pristine `../woocommerce-payments` as the parity oracle.
+There is **no plugin-side code** — the WooPayments plugin is unmodified. A site moves to native by
+**deactivating** the plugin, and core owns that UX (modeled on core's merged-package handling,
+`src/Packages.php`; full spec in `design-spec.md` §4.5a):
 
-- `includes/class-wc-payments-native-standdown.php` — `WC_Payments_Native_Standdown`:
-  `should_stand_down()` = core-native present **AND** native enabled **AND** rollout gate open
-  (fail-closed on all three); `yield_to_native()` (atomic with skip-boot); `record_saturation()`.
-- Gates in `wcpay_init` (atomic yield + skip-boot + saturation), `wcpay_init_subscriptions_core`,
-  `wcpay_tasks_init`. Jetpack init left ungated (connection is shared infra).
-- Validated: plugin logic `tests/unit/test-native-standdown-logic.php` → 12/12; core handshake
-  proven live in `:8889` (native-on + yielded → owner=native; forced-native-without-yield fenced).
+- **Soft phase:** core detects the active plugin (the arbiter's `is_plugin_runtime_active()`) and
+  shows an admin-wide notice with a one-click **Disable WooPayments** button → `deactivate_plugins()`
+  → reload → reassurance notice.
+- **Mandatory phase (gated on `WC_VERSION >= X`):** core auto-deactivates the plugin on the
+  update/activate request + an activation guard against re-activation.
+- **Money-safety:** the one-request deactivation overlap is plugin-owned (arbiter → `OWNER_PLUGIN`);
+  native takes over from the next request.
 
-To complete the single-boot integration proof: `pnpm wc:env` (re-provision `:8889` onto the
-clone), then enable native + open the rollout gate and confirm the plugin skips its boot.
+This component is built at **A5 (cutover)**; the arbiter (§1) is the per-request safety it relies on.
+Both are transitional — removed once the plugin is sunset.

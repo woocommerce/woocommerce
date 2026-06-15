@@ -21,16 +21,17 @@ Design context: `../../../ai-prompts/goals/woopayments-merge/` — `design-spec.
 | Piece | What | How you reach it |
 |---|---|---|
 | **Reference store** (the oracle) | current WooPayments behavior on `:8082` (`develop` plugin mounted from `../../../../woocommerce-payments`) | `WP="docker exec -i wcpay_wp_default wp --allow-root"` |
-| **Target store** | core (this repo) + the plugin clone, on `:8889` | `WP="docker exec -i <cli-container> wp"` (the `…-cli-1` of the `:8889` wp-env stack) |
+| **Target store** | core (this repo) + the (unmodified) WooPayments plugin, on `:8889` | `WP="docker exec -i <cli-container> wp"` (the `…-cli-1` of the `:8889` wp-env stack) |
 | **Connected test account** | processes test payments; connected to the local Transact | already connected on both stores |
 | **Event listener** | provider events → stores (operator-run) | reference routes to the **legacy Transact** (`~/Work/a8c/transact-platform-server`): `npm run stripe listen` |
 | **Stripe CLI** | raw provider source (charges/refunds/disputes/payouts) | `stripe charges retrieve … --stripe-account <connected_acct>`; needs a valid `stripe login` |
 | **Dev-tools Test Lab** | mints real orders/charges/refunds/disputes/payouts | `wp wcpay-dev test-lab <charges|refunds|disputes|payouts>` |
 | **Existing test suites** | what the harness extends, not replaces | WC core `tests/e2e-pw`, `playwright.performance.config.ts`, `tests/performance`, `tests/metrics`, `tests/php`; plugin `tests/e2e`, `tests/fixtures` |
 
-**Oracle discipline:** the reference store (`:8082`) must stay the *pristine, unmodified plugin*.
-Never edit `../../../../woocommerce-payments`'s working tree. Develop plugin-side changes (e.g. the
-reverse-gated stand-down) in a **dedicated clone** wired into the target env via wp-env override.
+**Oracle discipline:** the reference store (`:8082`) must stay the *pristine, unmodified plugin* —
+never edit `../../../../woocommerce-payments`'s working tree. This merge makes **no plugin-side
+changes** (a site moves to native by core deactivating the plugin — `design-spec.md` §4.5a), so there
+is no plugin dev-clone to maintain; the parity oracle is simply the unmodified plugin as shipped.
 
 ---
 
