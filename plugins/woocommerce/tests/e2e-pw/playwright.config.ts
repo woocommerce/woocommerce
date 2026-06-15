@@ -141,7 +141,7 @@ export default defineConfig( {
 				'**/api-tests/**',
 				/* Exclude PayPal tests, as they don't run well in parallel - see https://github.com/woocommerce/woocommerce/pull/63068. */
 				'**/tests/paypal/**',
-				/* Blocks specs are run by the Blocks e2e suite - see client/blocks/tests/e2e/playwright.config.ts. */
+				/* Blocks specs are run by the blocks-chromium and blocks-legacy-mini-cart projects below. */
 				'**/tests/blocks/**',
 			],
 			dependencies: [ 'site setup' ],
