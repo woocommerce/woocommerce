@@ -11,6 +11,11 @@ import sys
 
 ID_RE = re.compile(r'^(ch|pi|py|re|in|cus|pm|seti|po|dp|sub|prod|price|txn|wcpay)_[A-Za-z0-9]+$')
 TS_RE = re.compile(r'^\d{4}-\d{2}-\d{2}[T ]')
+# Volatile values that legitimately differ across installs/releases and so are NOT part of the
+# contract — mask the value, keep the prop's presence/key/type. (Confirmed against real sink data:
+# store_id is a UUID, wc_version is a dotted version; both differ between the reference and target.)
+UUID_RE = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', re.I)
+VER_RE = re.compile(r'^\d+\.\d+(\.\d+)*([.-][0-9A-Za-z.]+)?$')
 # Auto-injected Tracks envelope (client/Jetpack/identity) — not part of WCPay's contract.
 ENVELOPE = {
     'blog_id', 'blog_tz', 'user_lang', 'device_type', 'anonid', 'url', 'referrer',
@@ -26,8 +31,12 @@ def mask(v):
     if isinstance(v, str):
         if ID_RE.match(v):
             return 'str:<id>'
+        if UUID_RE.match(v):
+            return 'str:<uuid>'
         if TS_RE.match(v):
             return 'str:<ts>'
+        if VER_RE.match(v):
+            return 'str:<ver>'
         if re.fullmatch(r'\d+', v):
             return 'str:<n>'
         return 'str:%s' % v  # stable enum string — kept (drift is caught)
