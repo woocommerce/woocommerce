@@ -15,7 +15,9 @@ TS_RE = re.compile(r'^\d{4}-\d{2}-\d{2}[T ]')
 # contract — mask the value, keep the prop's presence/key/type. (Confirmed against real sink data:
 # store_id is a UUID, wc_version is a dotted version; both differ between the reference and target.)
 UUID_RE = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', re.I)
-VER_RE = re.compile(r'^\d+\.\d+(\.\d+)*([.-][0-9A-Za-z.]+)?$')
+DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+DEC_RE = re.compile(r'^\d+\.\d{1,4}$')  # monetary/decimal amount (e.g. order_total 75.00)
+VER_RE = re.compile(r'^\d+\.\d+(\.\d+)+([.-][0-9A-Za-z.]+)?$')  # 3+ part dotted version
 # Auto-injected Tracks envelope (client/Jetpack/identity) — not part of WCPay's contract.
 ENVELOPE = {
     'blog_id', 'blog_tz', 'user_lang', 'device_type', 'anonid', 'url', 'referrer',
@@ -33,10 +35,12 @@ def mask(v):
             return 'str:<id>'
         if UUID_RE.match(v):
             return 'str:<uuid>'
-        if TS_RE.match(v):
+        if TS_RE.match(v) or DATE_RE.match(v):
             return 'str:<ts>'
         if VER_RE.match(v):
             return 'str:<ver>'
+        if DEC_RE.match(v):
+            return 'str:<num>'
         if re.fullmatch(r'\d+', v):
             return 'str:<n>'
         return 'str:%s' % v  # stable enum string — kept (drift is caught)
@@ -48,6 +52,13 @@ def mask(v):
 
 
 def main():
+    # The wpcom-local sink is shared by every store in the checkout, so filter to one store's
+    # events via --store <woocommerce_store_id> (the per-install UUID on every client+server event).
+    store = None
+    if '--store' in sys.argv:
+        store = sys.argv[sys.argv.index('--store') + 1]
+    # Synthetic sources injected by the sink tooling itself — not real store telemetry, so excluded.
+    synthetic = {'mock', 'helper_smoke', 'codex', 'smoke'}
     lines = set()
     for raw in sys.stdin:
         raw = raw.strip()
@@ -57,8 +68,14 @@ def main():
             rec = json.loads(raw)
         except Exception:
             continue
-        name = re.sub(r'^wcadmin_', '', str(rec.get('event', '')))
-        props = rec.get('props', {}) or {}
+        if str(rec.get('source', '')) in synthetic:
+            continue
+        # Accept both the wpcom-local sink shape ({event_name, properties}) and the
+        # legacy capture shape ({event, props}).
+        name = re.sub(r'^wcadmin_', '', str(rec.get('event_name') or rec.get('event') or ''))
+        props = rec.get('properties') or rec.get('props') or {}
+        if store is not None and str(props.get('store_id', '')) != store:
+            continue
         keys = []
         for k in sorted(props.keys()):
             if k.startswith('_') or k in ENVELOPE:

@@ -102,7 +102,7 @@ itself is trustworthy. (Validated: 5/5 gates PASS on the unmodified plugin.)
 | **BC + Tracks drift** (`bc-drift-gate.sh`) | grep-matched BC surface didn't change vs baseline | dynamic/variable hook & event names, var-built meta keys, indirect registrations; it's drift on the *reference*, not proof native reproduces it |
 | **Bucket-E parity** (`parity-diff.sh`) | byte-identical **status / pattern-matched meta / notes / refunds / total / txn_id** for the **orders you dump** | meta keys outside the pattern; customer/token/subscription/session/option state; **final state only, not the transition sequence**; only sampled orders |
 | **Financial reconciliation** (`financial-reconcile.sh`) | WC total-refunded === Stripe `amount_refunded` for given charges; fail-closed | **refunds only** — not charge amount, captures/auths, disputes, payouts, fees, multi-currency |
-| **Tracks parity — server-side** (`tracks-parity.sh` + `tracks-capture.php`) | the ~33 **PHP** Tracks emitters' name + normalized props | the ~156 **client-side JS** emitters (the majority) — see runbooks |
+| **Tracks parity** (`tracks-parity.sh`, via the wpcom-local sink) | name + normalized props for **both client (`browser_tkq`) and server (`server_pixel`)** Tracks the store posts, attributed by `store_id` | only events a *driven flow actually fires* (drive the surface); cross-store needs store-config alignment (§5) |
 | **Perf probe** (`perf-baseline.sh`) — *narrow* | query-count on **3 gateway-resolution surfaces** | checkout render, admin pages, `process_payment`, cold cache, **bundle size (RULE 3)** — this is a weak signal, NOT RULE-1 verification |
 
 Each is **fail-closed** (refuses PASS unless it positively verified the property).
@@ -112,8 +112,9 @@ Each is **fail-closed** (refuses PASS unless it positively verified the property
 For these, run the playbook against the local env (WP-CLI / browser) and record a judged verdict + evidence:
 
 - **Browser checkout matrix** — classic/Blocks/express/WooPay, **3DS/SCA**, saved-method, redirect. Extend `tests/e2e-pw` + WooPayments `tests/e2e`; judge the result. (`flow-drive.sh` only exercises *server-side* `process_payment` — it does **not** cover the browser/Stripe.js flows.)
-- **Client-side Tracks** — the JS emitters via the `window.wcTracks.recordEvent` spy (§5; spec'd, **not yet built/validated**).
 - **Admin screens** render/behavior/network vs reference; **bundle size**; **broad perf** (`tests/performance`); **disputes/payouts/captures/fees** financial matrix; **subscription renewals / token meta / multi-currency** state.
+
+(Client-side Tracks are **no longer a runbook** — they're captured deterministically at the wpcom-local sink alongside server-side, §5. The remaining Tracks caveat is just that you must *drive the surface* that fires them, and align store config for cross-store.)
 
 ---
 
@@ -153,45 +154,48 @@ native output yet. From **A1 (shadow mode)** onward they become **cross-store**:
 2. Capture the surface on each: Bucket-E via `dump-bucket-e-surface.sh`; Tracks via the capture below.
 3. Diff: **zero diff on the preserve surface** is the gate. Any diff is a RULE-0 regression.
 
-### Tracks runtime parity recipe (both stores)
+### Tracks runtime parity recipe (capture at the wpcom-local sink)
 
+Tracks are captured at the **wpcom-local sink** — the local endpoint every store posts to (via the
+`wpcom-local-helper` bridge), capturing **both** client (`source: browser_tkq`) and server
+(`source: server_pixel`) events. This is the actual pipeline destination, so it's complete — no
+per-emitter spy needed. **Prereqs (validated in place):** the helper is active on both stores, WC
+usage tracking is on (`woocommerce_allow_tracking=yes` — `WC_Tracks` early-returns otherwise), and
+the wpcom-local sink is enabled (`wpcom-local tracks status`).
+
+The sink is **shared by all stores** in the checkout, so discriminate by **`store_id`** (each
+install's `woocommerce_store_id` UUID rides on every event). Get each: `wp option get woocommerce_store_id`.
+
+**Same-store parity (the rigorous A4 gate — recommended):** native-off vs native-on on `:8889` — same
+store, same config, so the *only* variable is native-vs-plugin (no store-config confound):
 ```sh
-# one-time per store: install the capture drop-in + enable tracking
-docker cp tools/woopayments-merge/tracks-capture.php <container>:/var/www/html/wp-content/mu-plugins/
-WP eval 'update_option("woocommerce_allow_tracking","yes");'   # WC_Tracks early-returns otherwise
-
-# per comparison:
-WP="$REF" tracks-parity.sh reset ; <drive flow on ref> ; WP="$REF" tracks-parity.sh normalize > ref.txt
-WP="$TGT" tracks-parity.sh reset ; <drive flow on tgt> ; WP="$TGT" tracks-parity.sh normalize > tgt.txt
-tracks-parity.sh diff ref.txt tgt.txt      # PASS = same name+props contract; exit 1 on drift
+tracks-parity.sh reset            # wpcom-local tracks clear
+# ...drive flow with native OFF (plugin emits)...   then capture, then repeat with native ON
+tracks-parity.sh normalize --store "$STORE_8889" > plugin.txt   # (after the native-off run)
+tracks-parity.sh normalize --store "$STORE_8889" > native.txt   # (after the native-on run; reset between)
+tracks-parity.sh diff plugin.txt native.txt
 ```
 
-The normalizer (`tracks-normalize.py`) freezes name + prop keys/types + **stable enum string values**
-and the custom envelope props WCPay adds, while **masking volatile values** (ids/timestamps/numbers)
-and dropping the auto-injected envelope — exactly the §0.3 boundary. (Validated: PASS when only volatile
-values differ; FAIL on a type change *or* an enum-value change.)
-
-`tracks-capture.php` is the **server-side** half (the WC_Tracks path). The **client-side** majority
-(admin React + shopper) is captured by spying the JS sink inside the e2e flow drivers — add to a
-Playwright `addInitScript`:
-
-```js
-await page.addInitScript(() => {
-  window.__wcpayTracks = [];
-  const sink = (name, props) => window.__wcpayTracks.push({ event: name, props: props || {} });
-  const hook = () => {
-    const t = window.wcTracks || (window.wc && window.wc.tracks);
-    if (t && t.recordEvent && !t.__spied) {
-      const orig = t.recordEvent.bind(t);
-      t.recordEvent = (n, p) => { sink(n, p); return orig(n, p); };
-      t.__spied = true;
-    }
-  };
-  hook(); new MutationObserver(hook).observe(document.documentElement, { childList: true, subtree: true });
-});
-// after the flow: const events = await page.evaluate(() => window.__wcpayTracks);
-// pipe `events` (as JSONL) through tracks-normalize.py and diff reference vs target.
+**Cross-store parity (reference vs target):** captures both from the shared sink, separated by store_id:
+```sh
+tracks-parity.sh reset
+<drive same flow on :8082 AND :8889>
+tracks-parity.sh normalize --store "$STORE_8082" > ref.txt
+tracks-parity.sh normalize --store "$STORE_8889" > tgt.txt
+tracks-parity.sh diff ref.txt tgt.txt
 ```
+**⚠ Cross-store has store-CONFIG confounds.** Validated: a clean charge on each store matched on every
+prop *except* `coming_soon` (`no` on :8082 vs `site` on :8889) — a CORE-added, store-config prop, not a
+WooPayments/native difference; aligning it (`wp option update woocommerce_coming_soon no`) → **zero
+drift**. So for cross-store you must **align store config** (coming-soon mode, feature flags, products)
+between the two envs — the same "keep them aligned" discipline as the WC trunk base. Same-store parity
+avoids this entirely; prefer it for the rigorous gate.
+
+The normalizer (`tracks-normalize.py`) freezes event name + prop keys/types + **stable enum string
+values** + WCPay's deliberate custom props, while **masking volatile values** (ids, UUIDs, versions,
+dates, decimals/amounts, numbers) and dropping the auto-injected envelope; it excludes synthetic sink
+sources (`mock`/`helper_smoke`). (Validated against real sink data: PASS when only volatile/config
+values differ; FAIL on a prop type change *or* a real enum-value change.)
 
 ---
 

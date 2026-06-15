@@ -133,7 +133,7 @@ The harness is the **delta** on top of the already-wired env + existing test sui
 | Perf baseline + check gate | **built** | `perf-baseline.{php,sh}` + `perf-baseline.json` — §5.3 surfaces, query-count RULE-1 gate |
 | Financial reconciliation | **built; e2e proven** | `financial-reconcile.sh` — reconciled a real £48 refund (WC 4800 === Stripe 4800 on the connected account); fail-closed |
 | **Flow drivers** | **built** | `flow-drive.sh` — charge/refund/dispute/payout via Test Lab → structured order ids the gates consume |
-| **Tracks parity** | **built** | static: the `tracks` drift category. runtime: `tracks-capture.php` (server) + `tracks-normalize.py` + `tracks-parity.sh` (validated: PASS on masked volatile values; FAIL on type *or* enum-value drift) + the client spy in `HARNESS.md`. Enforces `bc-manifest.md` §0.3/§3.6 |
+| **Tracks parity** | **built** | static: the `tracks` drift category. runtime: `tracks-parity.sh` + `tracks-normalize.py` capture at the **wpcom-local sink** (both client `browser_tkq` + server `server_pixel`, attributed by `store_id`). Validated live: discrimination by store_id; cross-store PASS once store config is aligned (the sole confound was `coming_soon`); masks volatile/config values, FAILs on type/enum drift. Enforces `bc-manifest.md` §0.3/§3.6 |
 
 The A0 harness gate — "reproduces the status quo on the *unmodified* plugin before any
 native code exists" — **is met**: `verify.sh --self-check` is 5/5 green on the unmodified plugin
