@@ -454,6 +454,82 @@ class ProductCollectionData extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Attribute taxonomies are normalized before dedup so case and whitespace variants collapse to one entry.
+	 */
+	public function test_calculate_attribute_counts_normalizes_taxonomy_before_dedup() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_variable_product(
+			array(),
+			array(
+				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+			)
+		);
+		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
+
+		$single_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$single_request->set_param(
+			'calculate_attribute_counts',
+			array(
+				array(
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'or',
+				),
+			)
+		);
+		$single = rest_get_server()->dispatch( $single_request )->get_data();
+
+		$variants_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$variants_request->set_param(
+			'calculate_attribute_counts',
+			array(
+				array(
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'or',
+				),
+				array(
+					'taxonomy'   => ' pa_size ',
+					'query_type' => 'or',
+				),
+				array(
+					'taxonomy'   => 'PA_SIZE',
+					'query_type' => 'or',
+				),
+			)
+		);
+		$variants = rest_get_server()->dispatch( $variants_request )->get_data();
+
+		$this->assertNotEmpty( $single['attribute_counts'], 'Baseline single-taxonomy request should return counts.' );
+		$this->assertEquals(
+			$single['attribute_counts'],
+			$variants['attribute_counts'],
+			'Case and whitespace variants of the same taxonomy must be counted once, not duplicated.'
+		);
+	}
+
+	/**
+	 * @testdox Taxonomies are normalized before dedup so case and whitespace variants collapse to one entry.
+	 */
+	public function test_calculate_taxonomy_counts_normalizes_taxonomy_before_dedup() {
+		$category = wp_insert_term( 'Normalized Category', 'product_cat' );
+		wp_set_post_terms( $this->products[0]->get_id(), array( $category['term_id'] ), 'product_cat' );
+
+		$single_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$single_request->set_param( 'calculate_taxonomy_counts', array( 'product_cat' ) );
+		$single = rest_get_server()->dispatch( $single_request )->get_data();
+
+		$variants_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$variants_request->set_param( 'calculate_taxonomy_counts', array( 'product_cat', ' product_cat ', 'PRODUCT_CAT' ) );
+		$variants = rest_get_server()->dispatch( $variants_request )->get_data();
+
+		$this->assertNotEmpty( $single['taxonomy_counts'], 'Baseline single-taxonomy request should return counts.' );
+		$this->assertEquals(
+			$single['taxonomy_counts'],
+			$variants['taxonomy_counts'],
+			'Case and whitespace variants of the same taxonomy must be counted once, not duplicated.'
+		);
+	}
+
+	/**
 	 * @testdox The count cap is filterable so large stores can raise it.
 	 */
 	public function test_counts_max_items_is_filterable() {

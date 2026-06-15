@@ -115,12 +115,22 @@ class ProductCollectionData extends AbstractRoute {
 			$taxonomy__and_queries = [];
 
 			foreach ( $request['calculate_attribute_counts'] as $attributes_to_count ) {
-				if ( ! empty( $attributes_to_count['taxonomy'] ) ) {
-					if ( empty( $attributes_to_count['query_type'] ) || 'or' === $attributes_to_count['query_type'] ) {
-						$taxonomy__or_queries[] = $attributes_to_count['taxonomy'];
-					} else {
-						$taxonomy__and_queries[] = $attributes_to_count['taxonomy'];
-					}
+				if ( empty( $attributes_to_count['taxonomy'] ) ) {
+					continue;
+				}
+
+				// Normalize to the canonical taxonomy name before deduping so textual variants
+				// (e.g. differing case or surrounding whitespace) collapse to a single query.
+				$taxonomy = wc_sanitize_taxonomy_name( $attributes_to_count['taxonomy'] );
+
+				if ( '' === $taxonomy ) {
+					continue;
+				}
+
+				if ( empty( $attributes_to_count['query_type'] ) || 'or' === $attributes_to_count['query_type'] ) {
+					$taxonomy__or_queries[] = $taxonomy;
+				} else {
+					$taxonomy__and_queries[] = $taxonomy;
 				}
 			}
 
@@ -142,7 +152,8 @@ class ProductCollectionData extends AbstractRoute {
 						$filter_attributes = array_filter(
 							$filter_attributes,
 							function ( $query ) use ( $taxonomy ) {
-								return $query['attribute'] !== $taxonomy;
+								// $taxonomy is already sanitized, so sanitize the active attribute too for a like-for-like comparison.
+								return wc_sanitize_taxonomy_name( $query['attribute'] ) !== $taxonomy;
 							}
 						);
 					}
@@ -185,7 +196,9 @@ class ProductCollectionData extends AbstractRoute {
 		}
 
 		if ( ! empty( $request['calculate_taxonomy_counts'] ) ) {
-			$taxonomies              = array_unique( $request['calculate_taxonomy_counts'] );
+			// Normalize to the canonical taxonomy name before deduping so textual variants
+			// (e.g. differing case or surrounding whitespace) collapse to a single query.
+			$taxonomies              = array_unique( array_filter( array_map( 'wc_sanitize_taxonomy_name', $request['calculate_taxonomy_counts'] ) ) );
 			$data['taxonomy_counts'] = [];
 
 			if ( $taxonomies ) {
