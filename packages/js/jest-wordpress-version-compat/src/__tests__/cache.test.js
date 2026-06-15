@@ -311,6 +311,27 @@ describe( 'cache', () => {
 				'@wordpress',
 				'components'
 			),
+			'@wordpress/compose': path.join(
+				cacheRoot,
+				'latest-1',
+				'node_modules',
+				'@wordpress',
+				'compose'
+			),
+			'@wordpress/element': path.join(
+				cacheRoot,
+				'latest-1',
+				'node_modules',
+				'@wordpress',
+				'element'
+			),
+			'@wordpress/private-apis': path.join(
+				cacheRoot,
+				'latest-1',
+				'node_modules',
+				'@wordpress',
+				'private-apis'
+			),
 		} );
 		expect( spawnSync ).toHaveBeenCalledWith(
 			'npm',
@@ -445,7 +466,7 @@ describe( 'cache', () => {
 		);
 	} );
 
-	it( 'does not require a cache entry when the installed package matches the target version', () => {
+	it( 'uses the compatibility cache when the installed package matches the target version', () => {
 		const cwd = createFixtureProject( {
 			dependencies: {
 				'@wordpress/data': 'catalog:wp-min',
@@ -466,19 +487,37 @@ describe( 'cache', () => {
 			logger: false,
 		} );
 
-		expect( result.cachePackages ).toEqual( [] );
-		expect( result.installedPackages ).toEqual( [] );
+		expect( result.cachePackages ).toEqual( [
+			'@wordpress/data',
+			'@wordpress/private-apis',
+		] );
+		expect( result.installedPackages ).toEqual( [
+			'@wordpress/data',
+			'@wordpress/private-apis',
+		] );
 		expect( result.packagePaths ).toEqual( {
 			'@wordpress/data': path.join(
-				fs.realpathSync( cwd ),
+				cacheRoot,
+				'latest',
 				'node_modules',
 				'@wordpress',
 				'data'
 			),
+			'@wordpress/private-apis': path.join(
+				cacheRoot,
+				'latest',
+				'node_modules',
+				'@wordpress',
+				'private-apis'
+			),
 		} );
-		expect( spawnSync ).not.toHaveBeenCalledWith(
+		expect( spawnSync ).toHaveBeenCalledWith(
 			'npm',
-			expect.arrayContaining( [ 'install' ] ),
+			expect.arrayContaining( [
+				'install',
+				`@wordpress/data@${ LATEST_WORDPRESS_PACKAGE_VERSION }`,
+				`@wordpress/private-apis@${ LATEST_WORDPRESS_PACKAGE_VERSION }`,
+			] ),
 			expect.anything()
 		);
 	} );

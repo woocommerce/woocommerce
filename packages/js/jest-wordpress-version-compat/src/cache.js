@@ -2,15 +2,19 @@
 
 const fs = require( 'node:fs' );
 const path = require( 'node:path' );
-const { spawnSync } = require( 'node:child_process' );
 
+const { getNpmDistTagForWordPressVersion } = require( './metadata' );
 const {
-	getNpmDistTagForWordPressVersion,
-	isBundledPackage,
-	isWordPressPackage,
-} = require( './metadata' );
+	installPackages,
+	resolvePackageDependenciesFromNpm,
+	resolvePackageVersionFromNpm,
+	resolveWordPressDistTagFromNpm,
+} = require( './npm' );
+const {
+	getWordPressDependencyNames,
+	resolveRequestedPackages,
+} = require( './package-selection' );
 
-const CONFIG_KEY = 'wpDependencyCompat';
 const CACHE_DIRECTORY_NAME = 'jest-wordpress-version-compat';
 const latestWordPressDistTagCache = new Map();
 
@@ -67,130 +71,29 @@ function getCacheDirectory( {
 	return path.join( cacheRoot || getDefaultCacheRoot( cwd ), wpVersion );
 }
 
-function getCachedPackagePath( packageName, options = {} ) {
+function getCachedPackagePath( packageName, cacheDirectory ) {
 	return path.join(
-		getCacheDirectory( options ),
+		cacheDirectory,
 		'node_modules',
 		...packageName.split( '/' )
 	);
-}
-
-function getCachedPackageVersion( packageName, options = {} ) {
-	try {
-		return readJsonFile(
-			path.join(
-				getCachedPackagePath( packageName, options ),
-				'package.json'
-			)
-		).version;
-	} catch ( error ) {
-		return undefined;
-	}
-}
-
-function isPackageCachedAtVersion( packageName, version, options = {} ) {
-	return getCachedPackageVersion( packageName, options ) === version;
 }
 
 function readJsonFile( filePath ) {
 	return JSON.parse( fs.readFileSync( filePath, 'utf8' ) );
 }
 
-function getInstalledPackageJsonPath( packageName, cwd = process.cwd() ) {
-	return require.resolve( `${ packageName }/package.json`, {
-		paths: [ cwd ],
-	} );
-}
-
-function getInstalledPackageVersion( packageName, cwd = process.cwd() ) {
+function getCachedPackageVersion( packageName, cacheDirectory ) {
 	try {
-		const packageJsonPath = getInstalledPackageJsonPath( packageName, cwd );
-
-		return readJsonFile( packageJsonPath ).version;
+		return readJsonFile(
+			path.join(
+				getCachedPackagePath( packageName, cacheDirectory ),
+				'package.json'
+			)
+		).version;
 	} catch ( error ) {
 		return undefined;
 	}
-}
-
-function getInstalledPackagePath( packageName, cwd = process.cwd() ) {
-	return path.dirname( getInstalledPackageJsonPath( packageName, cwd ) );
-}
-
-function findProjectPackageJson( cwd = process.cwd() ) {
-	const packageFile = findUp( 'package.json', cwd );
-
-	return packageFile ? readJsonFile( packageFile ) : {};
-}
-
-function getPackageJsonWordPressDependencies( packageJson ) {
-	const dependencySections = [
-		'dependencies',
-		'devDependencies',
-		'peerDependencies',
-		'optionalDependencies',
-	];
-	const packages = new Set();
-
-	for ( const section of dependencySections ) {
-		for ( const [ packageName, versionSpec ] of Object.entries(
-			packageJson[ section ] || {}
-		) ) {
-			const normalizedVersionSpec = String( versionSpec );
-
-			if (
-				isWordPressPackage( packageName ) &&
-				! isBundledPackage( packageName ) &&
-				normalizedVersionSpec.startsWith( 'catalog:wp-' )
-			) {
-				packages.add( packageName );
-			}
-		}
-	}
-
-	return [ ...packages ].sort();
-}
-
-function getWordPressDependencyNames( dependencies = {} ) {
-	return Object.keys( dependencies )
-		.filter( isWordPressPackage )
-		.filter( ( packageName ) => ! isBundledPackage( packageName ) )
-		.sort();
-}
-
-function normalizePackageList( packages ) {
-	if ( ! packages ) {
-		return undefined;
-	}
-
-	const packageList = Array.isArray( packages ) ? packages : [ packages ];
-
-	return packageList
-		.flatMap( ( packageName ) => String( packageName ).split( ',' ) )
-		.map( ( packageName ) => packageName.trim() )
-		.filter( Boolean )
-		.filter( isWordPressPackage )
-		.filter( ( packageName ) => ! isBundledPackage( packageName ) )
-		.sort();
-}
-
-function getConfiguredPackages( packageJson ) {
-	return normalizePackageList( packageJson[ CONFIG_KEY ]?.packages );
-}
-
-function resolveRequestedPackages( {
-	wpVersion = getSelectedWordPressVersion(),
-	packages,
-	cwd = process.cwd(),
-} = {} ) {
-	getNpmDistTagForWordPressVersion( wpVersion );
-
-	const packageJson = findProjectPackageJson( cwd );
-
-	return (
-		normalizePackageList( packages ) ||
-		getConfiguredPackages( packageJson ) ||
-		getPackageJsonWordPressDependencies( packageJson )
-	);
 }
 
 function ensureCachePackageJson( cacheDirectory, wpVersion ) {
@@ -240,402 +143,140 @@ function writeResolvedVersions( cacheDirectory, resolvedVersions ) {
 	);
 }
 
-function getCachedPackageDependencies( packageName, version, cacheDirectory ) {
-	const cachedDependencies =
-		readResolvedVersions( cacheDirectory ).__dependencies?.[ packageName ];
-
-	if ( cachedDependencies?.version !== version ) {
-		return undefined;
-	}
-
-	if (
-		! cachedDependencies.dependencies ||
-		typeof cachedDependencies.dependencies !== 'object'
-	) {
-		return undefined;
-	}
-
-	return cachedDependencies.dependencies;
+function createCacheContext( wpVersion, cacheDirectory ) {
+	return {
+		cacheDirectory,
+		hasResolvedVersionChanges: false,
+		resolvedVersions: readResolvedVersions( cacheDirectory ),
+		wpVersion,
+	};
 }
 
-function writeCachedPackageDependencies(
-	packageName,
-	version,
-	dependencies,
-	cacheDirectory
-) {
-	const resolvedVersions = readResolvedVersions( cacheDirectory );
+function setResolvedVersionValue( context, key, value ) {
+	context.resolvedVersions[ key ] = value;
+	context.hasResolvedVersionChanges = true;
+}
 
-	writeResolvedVersions( cacheDirectory, {
-		...resolvedVersions,
-		__dependencies: {
-			...( resolvedVersions.__dependencies || {} ),
-			[ packageName ]: {
-				version,
-				dependencies,
-			},
+function setResolvedDistTag( context, packageName, distTag ) {
+	context.resolvedVersions.__distTags = {
+		...( context.resolvedVersions.__distTags || {} ),
+		[ packageName ]: distTag,
+	};
+	context.hasResolvedVersionChanges = true;
+}
+
+function setResolvedDependencies( context, packageName, version, dependencies ) {
+	context.resolvedVersions.__dependencies = {
+		...( context.resolvedVersions.__dependencies || {} ),
+		[ packageName ]: {
+			version,
+			dependencies,
 		},
-	} );
+	};
+	context.hasResolvedVersionChanges = true;
 }
 
-function parseNpmViewVersion( packageSpec, stdout ) {
-	const trimmedOutput = stdout.trim();
-
-	if ( ! trimmedOutput ) {
-		throw new Error(
-			`npm returned an empty version for ${ packageSpec }.`
-		);
+function flushResolvedVersions( context ) {
+	if ( ! context.hasResolvedVersionChanges ) {
+		return;
 	}
 
-	try {
-		const parsedOutput = JSON.parse( trimmedOutput );
-
-		if ( Array.isArray( parsedOutput ) ) {
-			return parsedOutput[ parsedOutput.length - 1 ];
-		}
-
-		return parsedOutput;
-	} catch ( error ) {
-		return trimmedOutput;
-	}
+	writeResolvedVersions( context.cacheDirectory, context.resolvedVersions );
+	context.hasResolvedVersionChanges = false;
 }
 
-function parseNpmViewDistTags( packageName, stdout ) {
-	const trimmedOutput = stdout.trim();
-
-	if ( ! trimmedOutput ) {
-		throw new Error( `npm returned empty dist-tags for ${ packageName }.` );
-	}
-
-	const parsedOutput = JSON.parse( trimmedOutput );
-
-	if ( ! parsedOutput || typeof parsedOutput !== 'object' ) {
-		throw new Error(
-			`npm returned invalid dist-tags for ${ packageName }.`
-		);
-	}
-
-	return parsedOutput;
-}
-
-function compareWordPressDistTags( first, second ) {
-	const firstVersion = first.replace( /^wp-/, '' ).split( '.' ).map( Number );
-	const secondVersion = second
-		.replace( /^wp-/, '' )
-		.split( '.' )
-		.map( Number );
-	const length = Math.max( firstVersion.length, secondVersion.length );
-
-	for ( let index = 0; index < length; index++ ) {
-		const firstPart = firstVersion[ index ] || 0;
-		const secondPart = secondVersion[ index ] || 0;
-
-		if ( firstPart !== secondPart ) {
-			return firstPart - secondPart;
-		}
-	}
-
-	return 0;
-}
-
-function resolveWordPressDistTagFromNpm( packageName, offset = 0 ) {
-	const result = spawnSync(
-		'npm',
-		[ 'view', packageName, 'dist-tags', '--json' ],
-		{
-			encoding: 'utf8',
-			stdio: 'pipe',
-		}
+function resolveNpmDistTag( packageName, context ) {
+	const requestedDistTag = getNpmDistTagForWordPressVersion(
+		context.wpVersion
 	);
 
-	if ( result.status !== 0 ) {
-		throw new Error(
-			[
-				`Failed to resolve ${ packageName } dist-tags from npm.`,
-				result.stdout,
-				result.stderr,
-			]
-				.filter( Boolean )
-				.join( '\n' )
-		);
+	if ( requestedDistTag === 'latest' ) {
+		return requestedDistTag;
 	}
-
-	const distTags = parseNpmViewDistTags( packageName, result.stdout );
-	const wordpressDistTags = Object.keys( distTags ).filter( ( distTag ) =>
-		/^wp-\d+\.\d+$/.test( distTag )
-	);
-
-	if ( wordpressDistTags.length === 0 ) {
-		throw new Error(
-			`npm did not return WordPress dist-tags for ${ packageName }.`
-		);
-	}
-
-	const sortedWordPressDistTags = wordpressDistTags.sort(
-		compareWordPressDistTags
-	);
-	const distTag = sortedWordPressDistTags.at( -1 - offset );
-
-	if ( ! distTag ) {
-		throw new Error(
-			`npm did not return enough WordPress dist-tags for ${ packageName }.`
-		);
-	}
-
-	return distTag;
-}
-
-function resolveNpmDistTag(
-	packageName,
-	wpVersion,
-	cacheDirectory,
-	{ preferCache = true } = {}
-) {
-	const distTag = getNpmDistTagForWordPressVersion( wpVersion );
-
-	if ( distTag === 'latest' ) {
-		return distTag;
-	}
-
-	const offset = distTag === 'wp-latest-1' ? 1 : 0;
 
 	const cacheKey = [
-		cacheDirectory || process.cwd(),
+		context.cacheDirectory,
 		packageName,
-		distTag,
+		requestedDistTag,
 	].join( ':' );
 
-	if ( preferCache && latestWordPressDistTagCache.has( cacheKey ) ) {
+	if ( latestWordPressDistTagCache.has( cacheKey ) ) {
 		return latestWordPressDistTagCache.get( cacheKey );
 	}
 
-	if ( cacheDirectory ) {
-		const resolvedVersions = readResolvedVersions( cacheDirectory );
-		const cachedDistTag = resolvedVersions.__distTags?.[ packageName ];
+	const offset = requestedDistTag === 'wp-latest-1' ? 1 : 0;
+	const resolvedDistTag = resolveWordPressDistTagFromNpm(
+		packageName,
+		offset
+	);
 
-		if ( preferCache && cachedDistTag ) {
-			latestWordPressDistTagCache.set( cacheKey, cachedDistTag );
-			return cachedDistTag;
-		}
+	latestWordPressDistTagCache.set( cacheKey, resolvedDistTag );
 
-		const latestDistTag = resolveWordPressDistTagFromNpm(
-			packageName,
-			offset
-		);
-		latestWordPressDistTagCache.set( cacheKey, latestDistTag );
+	return resolvedDistTag;
+}
 
-		writeResolvedVersions( cacheDirectory, {
-			...resolvedVersions,
-			__distTags: {
-				...( resolvedVersions.__distTags || {} ),
-				[ packageName ]: latestDistTag,
-			},
-		} );
+function resolvePackageVersion( packageName, context ) {
+	const requestedDistTag = getNpmDistTagForWordPressVersion(
+		context.wpVersion
+	);
+	const isDynamicWordPressTarget = requestedDistTag.startsWith( 'wp-latest' );
+	const distTag = resolveNpmDistTag( packageName, context );
+	const cachedDistTag = context.resolvedVersions.__distTags?.[ packageName ];
+	const cachedVersion = context.resolvedVersions[ packageName ];
 
-		return latestDistTag;
+	if (
+		cachedVersion &&
+		( ! isDynamicWordPressTarget || cachedDistTag === distTag )
+	) {
+		return cachedVersion;
 	}
 
-	const latestDistTag = resolveWordPressDistTagFromNpm( packageName, offset );
-	latestWordPressDistTagCache.set( cacheKey, latestDistTag );
-
-	return latestDistTag;
-}
-
-function resolveWordPressPackageSpec(
-	packageName,
-	wpVersion,
-	cacheDirectory,
-	distTag
-) {
-	return `${ packageName }@${
-		distTag || resolveNpmDistTag( packageName, wpVersion, cacheDirectory )
-	}`;
-}
-
-function resolvePackageVersionFromNpm(
-	packageName,
-	wpVersion,
-	cacheDirectory,
-	distTag
-) {
-	const packageSpec = resolveWordPressPackageSpec(
+	const packageVersion = resolvePackageVersionFromNpm(
 		packageName,
-		wpVersion,
-		cacheDirectory,
+		context.wpVersion,
 		distTag
 	);
-	const result = spawnSync(
-		'npm',
-		[ 'view', packageSpec, 'version', '--json' ],
-		{
-			encoding: 'utf8',
-			stdio: 'pipe',
-		}
-	);
 
-	if ( result.status !== 0 ) {
-		throw new Error(
-			[
-				`Failed to resolve ${ packageSpec } from npm.`,
-				result.stdout,
-				result.stderr,
-			]
-				.filter( Boolean )
-				.join( '\n' )
-		);
+	if ( isDynamicWordPressTarget ) {
+		setResolvedDistTag( context, packageName, distTag );
 	}
 
-	return parseNpmViewVersion( packageSpec, result.stdout );
+	setResolvedVersionValue( context, packageName, packageVersion );
+
+	return packageVersion;
 }
 
-function resolvePackageDependencies(
-	packageName,
-	version,
-	{ cacheDirectory } = {}
-) {
-	if ( cacheDirectory ) {
-		const cachedDependencies = getCachedPackageDependencies(
-			packageName,
-			version,
-			cacheDirectory
-		);
+function resolvePackageDependencies( packageName, version, context ) {
+	const cachedDependencies =
+		context.resolvedVersions.__dependencies?.[ packageName ];
 
-		if ( cachedDependencies ) {
-			return cachedDependencies;
-		}
+	if (
+		cachedDependencies?.version === version &&
+		cachedDependencies.dependencies &&
+		typeof cachedDependencies.dependencies === 'object'
+	) {
+		return cachedDependencies.dependencies;
 	}
 
-	const packageSpec = `${ packageName }@${ version }`;
-	const result = spawnSync(
-		'npm',
-		[ 'view', packageSpec, 'dependencies', '--json' ],
-		{
-			encoding: 'utf8',
-			stdio: 'pipe',
-		}
+	const dependencies = resolvePackageDependenciesFromNpm(
+		packageName,
+		version
 	);
 
-	if ( result.status !== 0 ) {
-		throw new Error(
-			[
-				`Failed to resolve ${ packageSpec } dependencies from npm.`,
-				result.stdout,
-				result.stderr,
-			]
-				.filter( Boolean )
-				.join( '\n' )
-		);
-	}
-
-	const trimmedOutput = result.stdout.trim();
-
-	if ( ! trimmedOutput ) {
-		return {};
-	}
-
-	const dependencies = JSON.parse( trimmedOutput );
-
-	if ( ! dependencies || typeof dependencies !== 'object' ) {
-		return {};
-	}
-
-	if ( cacheDirectory ) {
-		writeCachedPackageDependencies(
-			packageName,
-			version,
-			dependencies,
-			cacheDirectory
-		);
-	}
+	setResolvedDependencies( context, packageName, version, dependencies );
 
 	return dependencies;
 }
 
-function resolvePackageVersion( packageName, wpVersion, cacheDirectory ) {
-	if ( cacheDirectory ) {
-		const cachedResolvedVersions = readResolvedVersions( cacheDirectory );
-		const cachedDistTag =
-			cachedResolvedVersions.__distTags?.[ packageName ];
-		const distTag = resolveNpmDistTag(
-			packageName,
-			wpVersion,
-			cacheDirectory,
-			{
-				preferCache: false,
-			}
-		);
-		const resolvedVersions = readResolvedVersions( cacheDirectory );
-		const cachedVersion = resolvedVersions[ packageName ];
-		const isDynamicWordPressTarget =
-			getNpmDistTagForWordPressVersion( wpVersion ).startsWith(
-				'wp-latest'
-			);
-
-		if (
-			cachedVersion &&
-			( ! isDynamicWordPressTarget || cachedDistTag === distTag )
-		) {
-			return cachedVersion;
-		}
-
-		const packageVersion = resolvePackageVersionFromNpm(
-			packageName,
-			wpVersion,
-			cacheDirectory,
-			distTag
-		);
-		const latestResolvedVersions = readResolvedVersions( cacheDirectory );
-
-		writeResolvedVersions( cacheDirectory, {
-			...latestResolvedVersions,
-			...( isDynamicWordPressTarget
-				? {
-						__distTags: {
-							...( latestResolvedVersions.__distTags || {} ),
-							[ packageName ]: distTag,
-						},
-				  }
-				: {} ),
-			[ packageName ]: packageVersion,
-		} );
-
-		return packageVersion;
-	}
-
-	return resolvePackageVersionFromNpm(
-		packageName,
-		wpVersion,
-		cacheDirectory
-	);
-}
-
-function toPackageSpec( packageName, wpVersion, { cacheDirectory } = {} ) {
-	return `${ packageName }@${ resolvePackageVersion(
-		packageName,
-		wpVersion,
-		cacheDirectory
-	) }`;
-}
-
-function resolveWordPressPackageDependencyClosure( {
-	packages,
-	wpVersion,
-	cacheDirectory,
-} ) {
+function resolveWordPressPackageDependencyClosure( packages, context ) {
 	const resolvedPackages = new Set( packages );
 	const packageQueue = [ ...packages ];
 
 	for ( let index = 0; index < packageQueue.length; index++ ) {
 		const packageName = packageQueue[ index ];
-		const packageVersion = resolvePackageVersion(
-			packageName,
-			wpVersion,
-			cacheDirectory
-		);
+		const packageVersion = resolvePackageVersion( packageName, context );
 		const dependencyNames = getWordPressDependencyNames(
-			resolvePackageDependencies( packageName, packageVersion, {
-				cacheDirectory,
-			} )
+			resolvePackageDependencies( packageName, packageVersion, context )
 		);
 
 		for ( const dependencyName of dependencyNames ) {
@@ -651,99 +292,50 @@ function resolveWordPressPackageDependencyClosure( {
 	return [ ...resolvedPackages ].sort();
 }
 
-function getCachedPackageMismatches( {
-	packages,
-	wpVersion,
-	cacheDirectory,
-	cacheRoot,
-	cwd = process.cwd(),
-} ) {
+function getCachedPackageMismatches( packages, context ) {
 	return packages.filter( ( packageName ) => {
-		const targetVersion = resolvePackageVersion(
-			packageName,
-			wpVersion,
-			cacheDirectory
-		);
+		const targetVersion = resolvePackageVersion( packageName, context );
 
-		return ! isPackageCachedAtVersion( packageName, targetVersion, {
-			wpVersion,
-			cacheRoot,
-			cwd,
-		} );
+		return (
+			getCachedPackageVersion( packageName, context.cacheDirectory ) !==
+			targetVersion
+		);
 	} );
 }
 
-function getPackagesRequiringCache( {
-	packages,
-	wpVersion,
-	cacheDirectory,
-	cwd = process.cwd(),
-} ) {
-	return packages.filter( ( packageName ) => {
-		const installedVersion = getInstalledPackageVersion( packageName, cwd );
-		const targetVersion = resolvePackageVersion(
-			packageName,
-			wpVersion,
-			cacheDirectory
-		);
-
-		return installedVersion !== targetVersion;
-	} );
+function toPackageSpec( packageName, context ) {
+	return `${ packageName }@${ resolvePackageVersion(
+		packageName,
+		context
+	) }`;
 }
 
-function getPackagePaths( {
-	packages,
-	cachePackages,
-	wpVersion,
-	cacheRoot,
-	cwd = process.cwd(),
-} ) {
-	const cachePackageSet = new Set( cachePackages );
-
+function getPackagePaths( packages, cacheDirectory ) {
 	return packages.reduce( ( packagePaths, packageName ) => {
-		packagePaths[ packageName ] = cachePackageSet.has( packageName )
-			? getCachedPackagePath( packageName, {
-					wpVersion,
-					cacheRoot,
-					cwd,
-			  } )
-			: getInstalledPackagePath( packageName, cwd );
+		packagePaths[ packageName ] = getCachedPackagePath(
+			packageName,
+			cacheDirectory
+		);
 
 		return packagePaths;
 	}, {} );
 }
 
-function installPackages( packageSpecs, cacheDirectory ) {
-	const result = spawnSync(
-		'npm',
-		[
-			'install',
-			'--prefix',
-			cacheDirectory,
-			'--package-lock=false',
-			'--ignore-scripts',
-			'--no-audit',
-			'--no-fund',
-			'--save-exact',
-			...packageSpecs,
-		],
-		{
-			encoding: 'utf8',
-			stdio: 'pipe',
-		}
-	);
-
-	if ( result.status !== 0 ) {
-		throw new Error(
-			[
-				'Failed to install cached @wordpress packages.',
-				result.stdout,
-				result.stderr,
-			]
-				.filter( Boolean )
-				.join( '\n' )
-		);
-	}
+function createPrepareResult( {
+	cacheDirectory,
+	cachePackages,
+	installedPackages = [],
+	selectedPackages,
+	wpVersion,
+} ) {
+	return {
+		cachePackages,
+		cacheDirectory,
+		installedPackages,
+		packagePaths: getPackagePaths( cachePackages, cacheDirectory ),
+		packages: selectedPackages,
+		wpVersion,
+	};
 }
 
 function prepare( {
@@ -760,43 +352,25 @@ function prepare( {
 		cwd,
 	} );
 	const cacheDirectory = getCacheDirectory( { wpVersion, cacheRoot, cwd } );
-	const selectedCachePackages = getPackagesRequiringCache( {
-		packages: selectedPackages,
-		wpVersion,
-		cacheDirectory,
-		cwd,
-	} );
-	const cachePackages =
-		selectedCachePackages.length === 0
-			? []
-			: resolveWordPressPackageDependencyClosure( {
-					packages: selectedCachePackages,
-					wpVersion,
-					cacheDirectory,
-			  } );
-	const missingPackages = getCachedPackageMismatches( {
-		packages: cachePackages,
-		wpVersion,
-		cacheDirectory,
-		cacheRoot,
-		cwd,
-	} );
+	const context = createCacheContext( wpVersion, cacheDirectory );
+	const cachePackages = resolveWordPressPackageDependencyClosure(
+		selectedPackages,
+		context
+	);
+	const missingPackages = getCachedPackageMismatches(
+		cachePackages,
+		context
+	);
+
+	flushResolvedVersions( context );
 
 	if ( missingPackages.length === 0 ) {
-		return {
-			cachePackages,
+		return createPrepareResult( {
 			cacheDirectory,
-			installedPackages: [],
-			packagePaths: getPackagePaths( {
-				packages: selectedPackages,
-				cachePackages,
-				wpVersion,
-				cacheRoot,
-				cwd,
-			} ),
-			packages: selectedPackages,
+			cachePackages,
+			selectedPackages,
 			wpVersion,
-		};
+		} );
 	}
 
 	if ( offline ) {
@@ -810,7 +384,7 @@ function prepare( {
 	ensureCachePackageJson( cacheDirectory, wpVersion );
 
 	const packageSpecs = missingPackages.map( ( packageName ) =>
-		toPackageSpec( packageName, wpVersion, { cacheDirectory } )
+		toPackageSpec( packageName, context )
 	);
 
 	logger.info?.(
@@ -819,20 +393,13 @@ function prepare( {
 
 	installPackages( packageSpecs, cacheDirectory );
 
-	return {
-		cachePackages,
+	return createPrepareResult( {
 		cacheDirectory,
+		cachePackages,
 		installedPackages: missingPackages,
-		packagePaths: getPackagePaths( {
-			packages: selectedPackages,
-			cachePackages,
-			wpVersion,
-			cacheRoot,
-			cwd,
-		} ),
-		packages: selectedPackages,
+		selectedPackages,
 		wpVersion,
-	};
+	} );
 }
 
 module.exports = {

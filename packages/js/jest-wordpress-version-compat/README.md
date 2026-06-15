@@ -2,7 +2,7 @@
 
 Jest configuration helper for testing code against the `@wordpress/*` package versions associated with a WordPress target.
 
-The helper prepares a local dependency cache only when Jest needs it. Projects keep their normal installed dependencies, while compatibility runs remap selected `@wordpress/*` packages to the cache for the active `WP_VERSION`.
+The helper prepares a local dependency cache for compatibility runs. Projects keep their normal installed dependencies, while compatibility runs remap selected `@wordpress/*` packages to the cache for the active `WP_VERSION`.
 
 ## Usage
 
@@ -52,16 +52,6 @@ module.exports = withWordPressDependencyCompat(
 		wpVersion: process.env.WP_VERSION || 'latest',
 	}
 );
-```
-
-Shared package lists can live in `package.json`:
-
-```json
-{
-	"wpDependencyCompat": {
-		"packages": [ "@wordpress/data", "@wordpress/components" ]
-	}
-}
 ```
 
 ## Conditional Test Logic
