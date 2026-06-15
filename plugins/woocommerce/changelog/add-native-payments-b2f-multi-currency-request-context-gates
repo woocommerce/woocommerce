@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Gate native payments multi-currency hooks by request context.

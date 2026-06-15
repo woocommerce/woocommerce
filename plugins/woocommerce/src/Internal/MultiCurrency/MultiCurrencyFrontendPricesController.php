@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocaliza
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceCalculator;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRateService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
@@ -43,6 +44,13 @@ class MultiCurrencyFrontendPricesController implements RegisterHooksInterface {
 	private ?MultiCurrencyPriceProjectionService $price_projection_service = null;
 
 	/**
+	 * Request context.
+	 *
+	 * @var MultiCurrencyRequestContext|null
+	 */
+	private ?MultiCurrencyRequestContext $request_context = null;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
@@ -65,10 +73,21 @@ class MultiCurrencyFrontendPricesController implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Set the request context.
+	 *
+	 * @internal Used by tests and future explicit bootstrap definitions.
+	 *
+	 * @param MultiCurrencyRequestContext $request_context Request context.
+	 */
+	public function set_request_context( MultiCurrencyRequestContext $request_context ): void {
+		$this->request_context = $request_context;
+	}
+
+	/**
 	 * Register frontend price hooks.
 	 */
 	public function register() {
-		if ( ! $this->arbiter->should_core_register() ) {
+		if ( ! $this->arbiter->should_core_register() || ! $this->get_request_context()->should_register_frontend_hooks() ) {
 			return;
 		}
 
@@ -345,6 +364,19 @@ class MultiCurrencyFrontendPricesController implements RegisterHooksInterface {
 		}
 
 		return $this->price_projection_service;
+	}
+
+	/**
+	 * Get the request context.
+	 *
+	 * @return MultiCurrencyRequestContext
+	 */
+	private function get_request_context(): MultiCurrencyRequestContext {
+		if ( null === $this->request_context ) {
+			$this->request_context = new MultiCurrencyRequestContext();
+		}
+
+		return $this->request_context;
 	}
 
 	/**

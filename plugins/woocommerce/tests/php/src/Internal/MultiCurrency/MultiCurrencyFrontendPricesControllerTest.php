@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyFrontendPricesController;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceProjectionService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -101,6 +102,23 @@ class MultiCurrencyFrontendPricesControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 99, has_filter( 'woocommerce_new_order', array( $sut, 'add_order_meta' ) ) );
 		$this->assertSame( 10, has_filter( 'rest_post_dispatch', array( $sut, 'maybe_modify_price_ranges_rest_response' ) ) );
 		$this->assertSame( 10, has_filter( 'query_loop_block_query_vars', array( $sut, 'maybe_modify_price_ranges_query_var' ) ) );
+	}
+
+	/**
+	 * @testdox Should not register frontend price hooks in blocked request context.
+	 */
+	public function test_does_not_register_frontend_price_hooks_in_blocked_request_context(): void {
+		$sut = $this->create_controller(
+			MultiCurrencyRuntimeArbiter::OWNER_CORE,
+			true,
+			$this->create_request_context( false )
+		);
+
+		$sut->register();
+
+		$this->assertFalse( has_filter( 'woocommerce_product_get_price', array( $sut, 'get_product_price_string' ) ) );
+		$this->assertFalse( has_filter( 'woocommerce_coupon_get_amount', array( $sut, 'get_coupon_amount' ) ) );
+		$this->assertFalse( has_filter( 'rest_post_dispatch', array( $sut, 'maybe_modify_price_ranges_rest_response' ) ) );
 	}
 
 	/**
@@ -232,14 +250,22 @@ class MultiCurrencyFrontendPricesControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Create a frontend prices controller with a static runtime owner.
 	 *
-	 * @param string $owner                  Runtime owner.
-	 * @param bool   $should_project_queries Whether query price filters should project.
+	 * @param string                           $owner                  Runtime owner.
+	 * @param bool                             $should_project_queries Whether query price filters should project.
+	 * @param MultiCurrencyRequestContext|null $request_context Request context.
 	 * @return MultiCurrencyFrontendPricesController
 	 */
-	private function create_controller( string $owner, bool $should_project_queries = true ): MultiCurrencyFrontendPricesController {
+	private function create_controller(
+		string $owner,
+		bool $should_project_queries = true,
+		?MultiCurrencyRequestContext $request_context = null
+	): MultiCurrencyFrontendPricesController {
 		$controller = new MultiCurrencyFrontendPricesController();
 		$controller->init( $this->create_arbiter( $owner ) );
 		$controller->set_price_projection_service( $this->create_projection_service( $should_project_queries ) );
+		if ( null !== $request_context && method_exists( $controller, 'set_request_context' ) ) {
+			$controller->set_request_context( $request_context );
+		}
 
 		return $controller;
 	}
@@ -365,6 +391,41 @@ class MultiCurrencyFrontendPricesControllerTest extends WC_Unit_Test_Case {
 			 */
 			public function get_price_filter_query_value( $amount, string $compare ): string {
 				return '<=' === $compare ? 'ceil-' . (string) $amount : 'floor-' . (string) $amount;
+			}
+		};
+	}
+
+	/**
+	 * Create a request context test double.
+	 *
+	 * @param bool $should_register_frontend_hooks Whether frontend hooks should register.
+	 * @return MultiCurrencyRequestContext
+	 */
+	private function create_request_context( bool $should_register_frontend_hooks ): MultiCurrencyRequestContext {
+		return new class( $should_register_frontend_hooks ) extends MultiCurrencyRequestContext {
+			/**
+			 * Whether frontend hooks should register.
+			 *
+			 * @var bool
+			 */
+			private bool $should_register_frontend_hooks;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param bool $should_register_frontend_hooks Whether frontend hooks should register.
+			 */
+			public function __construct( bool $should_register_frontend_hooks ) {
+				$this->should_register_frontend_hooks = $should_register_frontend_hooks;
+			}
+
+			/**
+			 * Tell whether frontend hooks should register.
+			 *
+			 * @return bool
+			 */
+			public function should_register_frontend_hooks(): bool {
+				return $this->should_register_frontend_hooks;
 			}
 		};
 	}

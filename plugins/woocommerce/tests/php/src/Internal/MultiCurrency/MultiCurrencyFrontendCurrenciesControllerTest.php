@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyFrontendCurrenciesController;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontendProjectionService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
 use WC_Unit_Test_Case;
 
 /**
@@ -94,6 +95,27 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should register only always-on currency hooks in blocked request context.
+	 */
+	public function test_registers_only_always_on_currency_hooks_in_blocked_request_context(): void {
+		$sut = $this->create_controller(
+			MultiCurrencyRuntimeArbiter::OWNER_CORE,
+			$this->create_request_context( false )
+		);
+
+		$sut->register();
+
+		$this->assertFalse( has_filter( 'woocommerce_currency', array( $sut, 'get_woocommerce_currency' ) ) );
+		$this->assertFalse( has_filter( 'wc_get_price_decimals', array( $sut, 'get_price_decimals' ) ) );
+		$this->assertFalse( has_filter( 'woocommerce_order_get_total', array( $sut, 'maybe_init_order_currency_from_order_total_prop' ) ) );
+		$this->assertFalse( has_action( 'before_woocommerce_pay', array( $sut, 'init_order_currency_from_query_vars' ) ) );
+		$this->assertSame( 10, has_filter( 'woocommerce_thankyou_order_id', array( $sut, 'init_order_currency' ) ) );
+		$this->assertSame( 9, has_action( 'woocommerce_account_view-order_endpoint', array( $sut, 'init_order_currency' ) ) );
+		$this->assertSame( 900, has_filter( 'woocommerce_cart_hash', array( $sut, 'add_currency_to_cart_hash' ) ) );
+		$this->assertSame( 900, has_filter( 'woocommerce_shipping_method_add_rate_args', array( $sut, 'fix_price_decimals_for_shipping_rates' ) ) );
+	}
+
+	/**
 	 * @testdox Should delegate frontend formatting callbacks to the projection service.
 	 */
 	public function test_delegates_frontend_formatting_callbacks_to_projection_service(): void {
@@ -129,13 +151,20 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Create a frontend currencies controller with a static runtime owner.
 	 *
-	 * @param string $owner Runtime owner.
+	 * @param string                           $owner           Runtime owner.
+	 * @param MultiCurrencyRequestContext|null $request_context Request context.
 	 * @return MultiCurrencyFrontendCurrenciesController
 	 */
-	private function create_controller( string $owner ): MultiCurrencyFrontendCurrenciesController {
+	private function create_controller(
+		string $owner,
+		?MultiCurrencyRequestContext $request_context = null
+	): MultiCurrencyFrontendCurrenciesController {
 		$controller = new MultiCurrencyFrontendCurrenciesController();
 		$controller->init( $this->create_arbiter( $owner ) );
 		$controller->set_frontend_projection_service( $this->create_projection_service() );
+		if ( null !== $request_context && method_exists( $controller, 'set_request_context' ) ) {
+			$controller->set_request_context( $request_context );
+		}
 
 		return $controller;
 	}
@@ -269,6 +298,41 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 			 */
 			public function add_currency_to_cart_hash( string $hash ): string {
 				return $hash . '-GBP';
+			}
+		};
+	}
+
+	/**
+	 * Create a request context test double.
+	 *
+	 * @param bool $should_register_frontend_hooks Whether frontend hooks should register.
+	 * @return MultiCurrencyRequestContext
+	 */
+	private function create_request_context( bool $should_register_frontend_hooks ): MultiCurrencyRequestContext {
+		return new class( $should_register_frontend_hooks ) extends MultiCurrencyRequestContext {
+			/**
+			 * Whether frontend hooks should register.
+			 *
+			 * @var bool
+			 */
+			private bool $should_register_frontend_hooks;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param bool $should_register_frontend_hooks Whether frontend hooks should register.
+			 */
+			public function __construct( bool $should_register_frontend_hooks ) {
+				$this->should_register_frontend_hooks = $should_register_frontend_hooks;
+			}
+
+			/**
+			 * Tell whether frontend hooks should register.
+			 *
+			 * @return bool
+			 */
+			public function should_register_frontend_hooks(): bool {
+				return $this->should_register_frontend_hooks;
 			}
 		};
 	}

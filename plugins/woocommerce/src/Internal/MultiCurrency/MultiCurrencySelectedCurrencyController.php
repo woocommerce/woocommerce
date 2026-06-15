@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProvider
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDatabaseCache;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRateService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySelectedCurrencyPersistenceService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyUserSettingsProjectionService;
@@ -39,6 +40,13 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 	private ?MultiCurrencySelectedCurrencyPersistenceService $persistence_service = null;
 
 	/**
+	 * Request context.
+	 *
+	 * @var MultiCurrencyRequestContext|null
+	 */
+	private ?MultiCurrencyRequestContext $request_context = null;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
@@ -61,6 +69,17 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 	}
 
 	/**
+	 * Set the request context.
+	 *
+	 * @internal Used by tests and future explicit bootstrap definitions.
+	 *
+	 * @param MultiCurrencyRequestContext $request_context Request context.
+	 */
+	public function set_request_context( MultiCurrencyRequestContext $request_context ): void {
+		$this->request_context = $request_context;
+	}
+
+	/**
 	 * Register selected-currency hooks.
 	 */
 	public function register() {
@@ -68,8 +87,11 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 			return;
 		}
 
-		$this->add_action_once( 'init', array( $this, 'handle_init' ), 11 );
-		$this->add_action_once( 'woocommerce_created_customer', array( $this, 'handle_woocommerce_created_customer' ) );
+		if ( $this->get_request_context()->should_register_selected_currency_entry_hooks() ) {
+			$this->add_action_once( 'init', array( $this, 'handle_init' ), 11 );
+			$this->add_action_once( 'woocommerce_created_customer', array( $this, 'handle_woocommerce_created_customer' ) );
+		}
+
 		$this->add_action_once( 'woocommerce_edit_account_form', array( $this, 'handle_woocommerce_edit_account_form' ) );
 		$this->add_action_once( 'woocommerce_save_account_details', array( $this, 'handle_woocommerce_save_account_details' ) );
 	}
@@ -155,6 +177,19 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 		}
 
 		return $this->persistence_service;
+	}
+
+	/**
+	 * Get the request context.
+	 *
+	 * @return MultiCurrencyRequestContext
+	 */
+	private function get_request_context(): MultiCurrencyRequestContext {
+		if ( null === $this->request_context ) {
+			$this->request_context = new MultiCurrencyRequestContext();
+		}
+
+		return $this->request_context;
 	}
 
 	/**

@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontend
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyGeolocationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRateService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
@@ -39,6 +40,13 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	private ?MultiCurrencyFrontendProjectionService $frontend_projection_service = null;
 
 	/**
+	 * Request context.
+	 *
+	 * @var MultiCurrencyRequestContext|null
+	 */
+	private ?MultiCurrencyRequestContext $request_context = null;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
@@ -61,6 +69,17 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	}
 
 	/**
+	 * Set the request context.
+	 *
+	 * @internal Used by tests and future explicit bootstrap definitions.
+	 *
+	 * @param MultiCurrencyRequestContext $request_context Request context.
+	 */
+	public function set_request_context( MultiCurrencyRequestContext $request_context ): void {
+		$this->request_context = $request_context;
+	}
+
+	/**
 	 * Register frontend currency hooks.
 	 */
 	public function register() {
@@ -68,20 +87,23 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 			return;
 		}
 
-		$this->add_filter_once( 'woocommerce_currency', array( $this, 'get_woocommerce_currency' ), 900 );
-		$this->add_filter_once( 'wc_get_price_decimals', array( $this, 'get_price_decimals' ), 900 );
-		$this->add_filter_once( 'wc_get_price_decimal_separator', array( $this, 'get_price_decimal_separator' ), 900 );
-		$this->add_filter_once( 'wc_get_price_thousand_separator', array( $this, 'get_price_thousand_separator' ), 900 );
-		$this->add_filter_once( 'woocommerce_price_format', array( $this, 'get_woocommerce_price_format' ), 900 );
-		$this->add_filter_once( 'option_woocommerce_currency_pos', array( $this, 'get_woocommerce_currency_pos' ), 900 );
-		$this->add_filter_once( 'woocommerce_cart_hash', array( $this, 'add_currency_to_cart_hash' ), 900 );
-		$this->add_filter_once( 'woocommerce_order_get_total', array( $this, 'maybe_init_order_currency_from_order_total_prop' ), 900, 2 );
-		$this->add_filter_once( 'woocommerce_get_formatted_order_total', array( $this, 'maybe_clear_order_currency_after_formatted_order_total' ), 900, 4 );
-		$this->add_filter_once( 'woocommerce_shipping_method_add_rate_args', array( $this, 'fix_price_decimals_for_shipping_rates' ), 900, 2 );
-		$this->add_filter_once( 'woocommerce_thankyou_order_id', array( $this, 'init_order_currency' ) );
+		if ( $this->get_request_context()->should_register_frontend_hooks() ) {
+			$this->add_filter_once( 'woocommerce_currency', array( $this, 'get_woocommerce_currency' ), 900 );
+			$this->add_filter_once( 'wc_get_price_decimals', array( $this, 'get_price_decimals' ), 900 );
+			$this->add_filter_once( 'wc_get_price_decimal_separator', array( $this, 'get_price_decimal_separator' ), 900 );
+			$this->add_filter_once( 'wc_get_price_thousand_separator', array( $this, 'get_price_thousand_separator' ), 900 );
+			$this->add_filter_once( 'woocommerce_price_format', array( $this, 'get_woocommerce_price_format' ), 900 );
+			$this->add_filter_once( 'option_woocommerce_currency_pos', array( $this, 'get_woocommerce_currency_pos' ), 900 );
+			$this->add_filter_once( 'woocommerce_order_get_total', array( $this, 'maybe_init_order_currency_from_order_total_prop' ), 900, 2 );
+			$this->add_filter_once( 'woocommerce_get_formatted_order_total', array( $this, 'maybe_clear_order_currency_after_formatted_order_total' ), 900, 4 );
 
-		$this->add_action_once( 'before_woocommerce_pay', array( $this, 'init_order_currency_from_query_vars' ) );
+			$this->add_action_once( 'before_woocommerce_pay', array( $this, 'init_order_currency_from_query_vars' ) );
+		}
+
+		$this->add_filter_once( 'woocommerce_thankyou_order_id', array( $this, 'init_order_currency' ) );
 		$this->add_action_once( 'woocommerce_account_view-order_endpoint', array( $this, 'init_order_currency' ), 9 );
+		$this->add_filter_once( 'woocommerce_cart_hash', array( $this, 'add_currency_to_cart_hash' ), 900 );
+		$this->add_filter_once( 'woocommerce_shipping_method_add_rate_args', array( $this, 'fix_price_decimals_for_shipping_rates' ), 900, 2 );
 	}
 
 	/**
@@ -234,6 +256,19 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 		}
 
 		return $this->frontend_projection_service;
+	}
+
+	/**
+	 * Get the request context.
+	 *
+	 * @return MultiCurrencyRequestContext
+	 */
+	private function get_request_context(): MultiCurrencyRequestContext {
+		if ( null === $this->request_context ) {
+			$this->request_context = new MultiCurrencyRequestContext();
+		}
+
+		return $this->request_context;
 	}
 
 	/**

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySelectedCurrencyController;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySelectedCurrencyPersistenceService;
 use WC_Unit_Test_Case;
 
@@ -68,6 +69,42 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should register only account hooks in blocked request context.
+	 */
+	public function test_registers_only_account_hooks_in_blocked_request_context(): void {
+		$service = $this->create_persistence_service();
+		$sut     = $this->create_controller(
+			MultiCurrencyRuntimeArbiter::OWNER_CORE,
+			$service,
+			$this->create_request_context( false )
+		);
+
+		$sut->register();
+
+		$this->assertFalse( has_action( 'init', array( $sut, 'handle_init' ) ) );
+		$this->assertFalse( has_action( 'woocommerce_created_customer', array( $sut, 'handle_woocommerce_created_customer' ) ) );
+		$this->assertSame( 10, has_action( 'woocommerce_edit_account_form', array( $sut, 'handle_woocommerce_edit_account_form' ) ) );
+		$this->assertSame( 10, has_action( 'woocommerce_save_account_details', array( $sut, 'handle_woocommerce_save_account_details' ) ) );
+	}
+
+	/**
+	 * @testdox Should register writer hooks in Store API request context.
+	 */
+	public function test_registers_writer_hooks_for_store_api_context(): void {
+		$service = $this->create_persistence_service();
+		$sut     = $this->create_controller(
+			MultiCurrencyRuntimeArbiter::OWNER_CORE,
+			$service,
+			$this->create_request_context( true )
+		);
+
+		$sut->register();
+
+		$this->assertSame( 11, has_action( 'init', array( $sut, 'handle_init' ) ) );
+		$this->assertSame( 10, has_action( 'woocommerce_created_customer', array( $sut, 'handle_woocommerce_created_customer' ) ) );
+	}
+
+	/**
 	 * @testdox Should update currency from URL parameter.
 	 */
 	public function test_updates_currency_from_url_parameter(): void {
@@ -111,14 +148,22 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Create a selected currency controller with a static runtime owner.
 	 *
-	 * @param string $owner   Runtime owner.
-	 * @param object $service Persistence service test double.
+	 * @param string                           $owner           Runtime owner.
+	 * @param object                           $service         Persistence service test double.
+	 * @param MultiCurrencyRequestContext|null $request_context Request context.
 	 * @return MultiCurrencySelectedCurrencyController
 	 */
-	private function create_controller( string $owner, object $service ): MultiCurrencySelectedCurrencyController {
+	private function create_controller(
+		string $owner,
+		object $service,
+		?MultiCurrencyRequestContext $request_context = null
+	): MultiCurrencySelectedCurrencyController {
 		$controller = new MultiCurrencySelectedCurrencyController();
 		$controller->init( $this->create_arbiter( $owner ) );
 		$controller->set_persistence_service( $service );
+		if ( null !== $request_context && method_exists( $controller, 'set_request_context' ) ) {
+			$controller->set_request_context( $request_context );
+		}
 
 		return $controller;
 	}
@@ -283,6 +328,41 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 			 */
 			public function get_selected_currency_code(): string {
 				return $this->selected_code;
+			}
+		};
+	}
+
+	/**
+	 * Create a request context test double.
+	 *
+	 * @param bool $should_register_entry_hooks Whether selected-currency entry hooks should register.
+	 * @return MultiCurrencyRequestContext
+	 */
+	private function create_request_context( bool $should_register_entry_hooks ): MultiCurrencyRequestContext {
+		return new class( $should_register_entry_hooks ) extends MultiCurrencyRequestContext {
+			/**
+			 * Whether selected-currency entry hooks should register.
+			 *
+			 * @var bool
+			 */
+			private bool $should_register_entry_hooks;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param bool $should_register_entry_hooks Whether selected-currency entry hooks should register.
+			 */
+			public function __construct( bool $should_register_entry_hooks ) {
+				$this->should_register_entry_hooks = $should_register_entry_hooks;
+			}
+
+			/**
+			 * Tell whether selected-currency entry hooks should register.
+			 *
+			 * @return bool
+			 */
+			public function should_register_selected_currency_entry_hooks(): bool {
+				return $this->should_register_entry_hooks;
 			}
 		};
 	}
