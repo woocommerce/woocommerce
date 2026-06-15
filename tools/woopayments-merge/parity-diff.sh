@@ -73,6 +73,10 @@ if [ -z "$left" ]; then
 	echo "FAIL: $LEFT_LABEL produced no surface output (store unreachable or no orders)." >&2
 	exit 2
 fi
+if [ -z "$right" ]; then
+	echo "FAIL: $RIGHT_LABEL produced no surface output (store unreachable or no orders) — not a parity regression, an infra failure." >&2
+	exit 2
+fi
 
 d="$(diff <(printf '%s\n' "$left") <(printf '%s\n' "$right"))"
 if [ -n "$d" ]; then

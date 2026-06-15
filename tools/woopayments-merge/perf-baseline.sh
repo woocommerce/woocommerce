@@ -47,10 +47,13 @@ case "$MODE" in
 			exit 2
 		fi
 		# Compare query counts per surface; fail if any target surface exceeds the baseline.
-		# Uses node if available (JSON math); falls back to a python3 comparator.
-		printf '%s\n' "$out" > "$SELF_DIR/.perf-current.json"
+		# Write the current capture to a temp file outside the tracked tree (never the repo dir).
+		mkdir -p "${TMPDIR:-/tmp}"
+		current_json="$(mktemp "${TMPDIR:-/tmp}/perf-current.XXXXXX.json")"
+		trap 'rm -f "$current_json"' EXIT
+		printf '%s\n' "$out" > "$current_json"
 		if command -v python3 >/dev/null 2>&1; then
-			python3 - "$BASELINE" "$SELF_DIR/.perf-current.json" <<'PY'
+			python3 - "$BASELINE" "$current_json" <<'PY'
 import json, sys
 base = json.load(open(sys.argv[1]))
 cur  = json.load(open(sys.argv[2]))
@@ -66,14 +69,12 @@ for name, b in base.get("surfaces", {}).items():
 sys.exit(1 if fail else 0)
 PY
 			rc=$?
-			rm -f "$SELF_DIR/.perf-current.json"
 			[ "$rc" -ne 0 ] && { echo "FAIL: per-surface query-count regression (RULE 1)."; exit 1; }
 			echo "PASS: no per-surface query-count regression vs baseline."
 		else
 			echo "python3 not available; emitting current vs baseline for manual review:"
 			echo "--- baseline ---"; cat "$BASELINE"
 			echo "--- current ---";  printf '%s\n' "$out"
-			rm -f "$SELF_DIR/.perf-current.json"
 		fi
 		;;
 	*)

@@ -77,6 +77,13 @@ PHP
 		echo "  order $order_id: no charge id on WC side — skipping (not a provider-charged order)."
 		continue
 	fi
+	# Defensive: a charge id is always [A-Za-z0-9_]; reject anything else before it reaches the CLI
+	# (blocks a stray meta value being interpreted as a flag/argument). Fail-closed: can't verify => fail.
+	if ! printf '%s' "$charge_id" | grep -qE '^[A-Za-z0-9_]+$'; then
+		echo "  order $order_id: charge id has unexpected characters — refusing to query the provider. RECONCILE FAIL."
+		fail=1
+		continue
+	fi
 
 	# Stripe side: amount_refunded (in minor units) + currency for that charge, from raw source
 	# (read from the connected account where WooPayments charges live).
@@ -89,22 +96,27 @@ PHP
 	s_refunded_minor="$(printf '%s' "$stripe_charge" | sed -n 's/.*"amount_refunded": *\([0-9]*\).*/\1/p' | head -1)"
 	s_currency="$(printf '%s' "$stripe_charge" | sed -n 's/.*"currency": *"\([a-z]*\)".*/\1/p' | head -1)"
 
-	# WC side total refunded (sum of refund amounts), compared to Stripe minor units.
-	wc_refunded="$($WP eval-file - "$order_id" <<'PHP' 2>/dev/null
+	# WC side total refunded (sum of refund amounts) in minor units + the WC currency, as "minor currency".
+	wc_line="$($WP eval-file - "$order_id" <<'PHP' 2>/dev/null
 <?php
 $order = wc_get_order( (int) $args[0] );
 $sum = 0.0;
 foreach ( $order->get_refunds() as $r ) { $sum += (float) $r->get_amount(); }
 $currency = strtolower( $order->get_currency() );
-$minor = (int) round( $sum * ( in_array( $currency, array( 'jpy', 'krw' ), true ) ? 1 : 100 ) );
-WP_CLI::line( $minor );
+// Stripe zero-decimal currencies are already in their base unit (no *100). Three-decimal
+// currencies (bhd/jod/kwd/omr/tnd) are charged specially by Stripe and not handled here.
+$zero_decimal = array( 'bif', 'clp', 'djf', 'gnf', 'jpy', 'kmf', 'krw', 'mga', 'pyg', 'rwf', 'ugx', 'vnd', 'vuv', 'xaf', 'xof', 'xpf' );
+$minor = (int) round( $sum * ( in_array( $currency, $zero_decimal, true ) ? 1 : 100 ) );
+WP_CLI::line( $minor . ' ' . $currency );
 PHP
 )"
+	wc_refunded="${wc_line%% *}"
+	wc_currency="${wc_line##* }"
 
-	if [ "${wc_refunded:-0}" = "${s_refunded_minor:-0}" ]; then
-		echo "  order $order_id (charge $charge_id): refunded ${wc_refunded:-0} ${s_currency:-?} — WC matches provider. ok"
+	if [ "${wc_refunded:-0}" = "${s_refunded_minor:-0}" ] && [ "${wc_currency:-?}" = "${s_currency:-??}" ]; then
+		echo "  order $order_id (charge $charge_id): refunded ${wc_refunded:-0} ${wc_currency:-?} — WC matches provider. ok"
 	else
-		echo "  order $order_id (charge $charge_id): MISMATCH — WC=${wc_refunded:-0} provider=${s_refunded_minor:-0} (${s_currency:-?}). RECONCILE FAIL"
+		echo "  order $order_id (charge $charge_id): MISMATCH — WC=${wc_refunded:-0} ${wc_currency:-?} provider=${s_refunded_minor:-0} ${s_currency:-??}. RECONCILE FAIL"
 		fail=1
 	fi
 done
