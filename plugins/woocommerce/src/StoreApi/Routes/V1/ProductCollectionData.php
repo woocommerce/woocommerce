@@ -123,7 +123,14 @@ class ProductCollectionData extends AbstractRoute {
 				// (e.g. differing case or surrounding whitespace) collapse to a single query.
 				$taxonomy = wc_sanitize_taxonomy_name( $attributes_to_count['taxonomy'] );
 
-				if ( '' === $taxonomy ) {
+				// Resolve numeric attribute IDs (e.g. "3") to their taxonomy name (e.g. "pa_color").
+				if ( is_numeric( $taxonomy ) ) {
+					$taxonomy = wc_attribute_taxonomy_name_by_id( (int) $taxonomy );
+				}
+
+				// Skip anything that is not a registered product attribute taxonomy so non-existent
+				// or non-attribute taxonomies do not trigger wasted full-collection queries.
+				if ( ! taxonomy_is_product_attribute( $taxonomy ) ) {
 					continue;
 				}
 

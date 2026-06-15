@@ -507,6 +507,109 @@ class ProductCollectionData extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Non-attribute and non-existent taxonomies are skipped in calculate_attribute_counts.
+	 */
+	public function test_calculate_attribute_counts_skips_invalid_taxonomies() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_variable_product(
+			array(),
+			array(
+				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+			)
+		);
+		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
+
+		$baseline_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$baseline_request->set_param(
+			'calculate_attribute_counts',
+			array(
+				array(
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'or',
+				),
+			)
+		);
+		$baseline = rest_get_server()->dispatch( $baseline_request )->get_data();
+
+		$with_junk_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$with_junk_request->set_param(
+			'calculate_attribute_counts',
+			array(
+				array(
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'or',
+				),
+				array(
+					// Exists as a taxonomy but is not a product attribute.
+					'taxonomy'   => 'product_cat',
+					'query_type' => 'or',
+				),
+				array(
+					// Not a registered taxonomy at all.
+					'taxonomy'   => 'pa_does_not_exist',
+					'query_type' => 'or',
+				),
+			)
+		);
+		$with_junk = rest_get_server()->dispatch( $with_junk_request )->get_data();
+
+		$this->assertNotEmpty( $baseline['attribute_counts'], 'Baseline attribute request should return counts.' );
+		$this->assertEquals(
+			$baseline['attribute_counts'],
+			$with_junk['attribute_counts'],
+			'Non-attribute and non-existent taxonomies must be skipped, not counted.'
+		);
+	}
+
+	/**
+	 * @testdox A numeric attribute ID resolves to the same counts as its taxonomy name.
+	 */
+	public function test_calculate_attribute_counts_accepts_numeric_attribute_id() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_variable_product(
+			array(),
+			array(
+				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+			)
+		);
+		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
+
+		$attribute_id = wc_attribute_taxonomy_id_by_name( 'pa_size' );
+		$this->assertNotEmpty( $attribute_id, 'Test attribute should resolve to an ID.' );
+
+		$by_name_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$by_name_request->set_param(
+			'calculate_attribute_counts',
+			array(
+				array(
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'or',
+				),
+			)
+		);
+		$by_name = rest_get_server()->dispatch( $by_name_request )->get_data();
+
+		$by_id_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$by_id_request->set_param(
+			'calculate_attribute_counts',
+			array(
+				array(
+					'taxonomy'   => (string) $attribute_id,
+					'query_type' => 'or',
+				),
+			)
+		);
+		$by_id = rest_get_server()->dispatch( $by_id_request )->get_data();
+
+		$this->assertNotEmpty( $by_name['attribute_counts'], 'Baseline name-based request should return counts.' );
+		$this->assertEquals(
+			$by_name['attribute_counts'],
+			$by_id['attribute_counts'],
+			'A numeric attribute ID must resolve to the same counts as its taxonomy name.'
+		);
+	}
+
+	/**
 	 * @testdox Taxonomies are normalized before dedup so case and whitespace variants collapse to one entry.
 	 */
 	public function test_calculate_taxonomy_counts_normalizes_taxonomy_before_dedup() {
