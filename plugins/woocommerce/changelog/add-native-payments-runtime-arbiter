@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add NativePaymentsRuntimeArbiter, the internal mutual-exclusion authority that guarantees exactly one payments runtime (the WooPayments plugin or core-native) owns a site. Dormant by default: native registers nothing while the plugin is active.
