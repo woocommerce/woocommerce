@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Don't show color swatches in the editor if they are disabled
+
+
