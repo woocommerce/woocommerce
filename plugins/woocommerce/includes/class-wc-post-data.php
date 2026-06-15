@@ -1067,8 +1067,8 @@ class WC_Post_Data {
 				...$query_args
 			)
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$invalidator = wc_get_container()->get( ProductVersionStringInvalidator::class );
 		foreach ( $variation_ids as $variation_id ) {
 			wp_cache_delete( $variation_id, 'post_meta' );
