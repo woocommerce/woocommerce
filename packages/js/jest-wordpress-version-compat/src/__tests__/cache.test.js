@@ -107,11 +107,13 @@ describe( 'cache', () => {
 		const cwd = createFixtureProject( {
 			dependencies: {
 				'@wordpress/data': 'catalog:wp-min',
-				'@wordpress/icons': 'catalog:wp-min',
+				'@wordpress/icons': 'catalog:wp-bundled',
+				'@wordpress/global-styles-engine': '^1.3.0',
 				'@woocommerce/data': 'workspace:*',
 			},
 			devDependencies: {
 				'@wordpress/components': 'catalog:wp-min',
+				'@wordpress/browserslist-config': 'next',
 			},
 		} );
 
@@ -161,7 +163,7 @@ describe( 'cache', () => {
 		const cwd = createFixtureProject( {
 			dependencies: {
 				'@wordpress/data': 'catalog:wp-min',
-				'@wordpress/icons': 'catalog:wp-min',
+				'@wordpress/icons': 'catalog:wp-bundled',
 			},
 		} );
 		const cacheRoot = path.join( cwd, '.cache' );

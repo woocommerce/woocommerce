@@ -124,12 +124,16 @@ function getPackageJsonWordPressDependencies( packageJson ) {
 	const packages = new Set();
 
 	for ( const section of dependencySections ) {
-		for ( const packageName of Object.keys(
+		for ( const [ packageName, versionSpec ] of Object.entries(
 			packageJson[ section ] || {}
 		) ) {
+			const normalizedVersionSpec = String( versionSpec );
+
 			if (
 				isWordPressPackage( packageName ) &&
-				! isBundledPackage( packageName )
+				! isBundledPackage( packageName ) &&
+				normalizedVersionSpec.startsWith( 'catalog:wp-' ) &&
+				normalizedVersionSpec !== 'catalog:wp-bundled'
 			) {
 				packages.add( packageName );
 			}

@@ -9,7 +9,6 @@ const SUPPORTED_WORDPRESS_VERSION_TARGETS = [
 const BUNDLED_PACKAGES = [
 	'@wordpress/admin-ui',
 	'@wordpress/dataviews',
-	'@wordpress/dataviews/wp',
 	'@wordpress/fields',
 	'@wordpress/grid',
 	'@wordpress/icons',
