@@ -37,15 +37,15 @@ function findInteractivityBlockAssets( dir = [] ) {
 				// A viewScriptModule pointing at a name other than the block's own
 				// references a shared module built from another entry, so there's
 				// nothing local to check. Otherwise, the module is built from this
-				// block's own frontend.ts/frontend.js, which must exist.
+				// block's own frontend.ts, which must exist.
 				if (
 					blockJson.viewScriptModule &&
 					blockJson.viewScriptModule === blockJson.name &&
-					! assets.some( ( f ) => f.includes( 'frontend' ) )
+					! fs.existsSync( path.join( blockDir, 'frontend.ts' ) )
 				) {
 					// eslint-disable-next-line no-console
 					console.warn(
-						`viewScriptModule was declared in ${ blockJson.name } block.json but no frontend.ts/frontend.js file exists.`
+						`viewScriptModule was declared in ${ blockJson.name } block.json but no frontend.ts file exists.`
 					);
 				}
 
