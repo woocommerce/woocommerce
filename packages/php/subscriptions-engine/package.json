@@ -1,0 +1,12 @@
+{
+	"name": "@woocommerce/subscriptions-engine",
+	"description": "Subscriptions engine for WooCommerce.",
+	"scripts": {
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:php": "composer run-script phpcbf",
+		"lint:lang:php": "composer run-script phpcs"
+	},
+	"license": "GPL-2.0-or-later"
+}
