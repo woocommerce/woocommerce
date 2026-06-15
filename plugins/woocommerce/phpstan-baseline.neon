@@ -51504,7 +51504,7 @@ parameters:
 		-
 			message: '#^Ternary operator condition is always true\.$#'
 			identifier: ternary.alwaysTrue
-			count: 2
+			count: 1
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
