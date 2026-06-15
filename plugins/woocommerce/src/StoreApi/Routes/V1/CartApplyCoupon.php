@@ -5,6 +5,9 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 
 /**
  * CartApplyCoupon class.
+ *
+ * Subclassed by POS ({@see \Automattic\WooCommerce\Internal\POS\StoreApi\Routes\CartApplyCoupon},
+ * `wc/internal/pos/v1`); behavioural changes here are inherited by that client.
  */
 class CartApplyCoupon extends AbstractCartRoute {
 	/**

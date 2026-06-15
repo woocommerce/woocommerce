@@ -17,6 +17,18 @@ use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 
 /**
  * Abstract Cart Route
+ *
+ * Heads up: this base class and its concrete cart/checkout routes are subclassed
+ * by other first-party clients that reuse the cart and checkout pipeline almost
+ * unchanged — POS (`wc/internal/pos/v1`, see
+ * {@see \Automattic\WooCommerce\Internal\POS\StoreApi\Routes}) and agentic
+ * commerce (`wc/agentic/v1`, see
+ * {@see \Automattic\WooCommerce\StoreApi\Routes\V1\Agentic}). Behavioural
+ * changes here — new required fields, validation rules, nonce/session handling,
+ * etc. — are inherited by those clients, where they may not be appropriate (an
+ * in-person POS sale, for example, has no shipping contact). Where a behaviour
+ * should be opt-out, prefer adding a seam or filter (e.g.
+ * {@see self::is_cookie_authenticated()}) over hard-coding it.
  */
 abstract class AbstractCartRoute extends AbstractRoute {
 	use DraftOrderTrait;

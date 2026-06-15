@@ -11,6 +11,11 @@ use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
 
 /**
  * Checkout class.
+ *
+ * Subclassed by POS ({@see \Automattic\WooCommerce\Internal\POS\StoreApi\Routes\Checkout},
+ * `wc/internal/pos/v1`), which reuses this checkout pipeline; behavioural
+ * changes here are inherited by that client, where they may not be appropriate.
+ * Prefer a seam or filter for anything POS should be able to opt out of.
  */
 class Checkout extends AbstractCartRoute {
 	use DraftOrderTrait;
