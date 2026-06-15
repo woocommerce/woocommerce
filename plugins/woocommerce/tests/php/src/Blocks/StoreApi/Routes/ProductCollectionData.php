@@ -656,25 +656,6 @@ class ProductCollectionData extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox The count cap is filterable so large stores can raise it.
-	 */
-	public function test_counts_max_items_is_filterable() {
-		$callback = static function () {
-			return 100;
-		};
-		add_filter( 'woocommerce_store_api_collection_data_counts_max_items', $callback );
-
-		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
-		$controller = $routes->get( 'product-collection-data' );
-		$params     = $controller->get_collection_params();
-
-		remove_filter( 'woocommerce_store_api_collection_data_counts_max_items', $callback );
-
-		$this->assertSame( 100, $params['calculate_attribute_counts']['maxItems'], 'Filter should raise the attribute-counts cap.' );
-		$this->assertSame( 100, $params['calculate_taxonomy_counts']['maxItems'], 'Filter should raise the taxonomy-counts cap.' );
-	}
-
-	/**
 	 * @testdox Attribute counts are computed through the cached filter-data path.
 	 */
 	public function test_calculate_attribute_counts_uses_filter_data_cache() {

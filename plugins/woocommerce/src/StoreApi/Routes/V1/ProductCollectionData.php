@@ -266,7 +266,7 @@ class ProductCollectionData extends AbstractRoute {
 				],
 			],
 			'default'     => [],
-			'maxItems'    => $this->get_counts_max_items(),
+			'maxItems'    => self::COUNTS_MAX_ITEMS,
 		];
 
 		$params['calculate_rating_counts'] = [
@@ -283,36 +283,9 @@ class ProductCollectionData extends AbstractRoute {
 				'description' => __( 'Taxonomy name.', 'woocommerce' ),
 			],
 			'default'     => [],
-			'maxItems'    => $this->get_counts_max_items(),
+			'maxItems'    => self::COUNTS_MAX_ITEMS,
 		];
 
 		return $params;
-	}
-
-	/**
-	 * Get the maximum number of entries accepted in the `calculate_attribute_counts` and
-	 * `calculate_taxonomy_counts` parameters.
-	 *
-	 * Each entry triggers a separate full-collection aggregate query, so this caps the per-request
-	 * query fan-out. Stores with many attributes/taxonomies can raise it via the filter below.
-	 *
-	 * @return int
-	 */
-	protected function get_counts_max_items() {
-		/**
-		 * Filters the maximum number of entries accepted in the `calculate_attribute_counts` and
-		 * `calculate_taxonomy_counts` parameters of the products/collection-data endpoint.
-		 *
-		 * Each entry results in a full-collection aggregate query, so this value bounds the amount
-		 * of work a single request can request. Requests exceeding it are rejected during schema
-		 * validation with an HTTP 400 response.
-		 *
-		 * @param int $max_items Maximum number of count entries per request. Default 25.
-		 *
-		 * @since 10.9.0
-		 */
-		$max_items = apply_filters( 'woocommerce_store_api_collection_data_counts_max_items', self::COUNTS_MAX_ITEMS );
-
-		return max( 1, (int) $max_items );
 	}
 }
