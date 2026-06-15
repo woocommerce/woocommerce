@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelec
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
  * Tests for the AddToCartWithOptions block type
@@ -516,5 +517,65 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$this->assertStringContainsString( 'wc-block-components-quantity-selector', $result, 'The quantity wrapper should receive the stepper wrapper class.' );
 		$this->assertStringContainsString( 'wc-block-components-quantity-selector__input', $result, 'The input should receive the stepper input class.' );
 		$this->assertStringContainsString( 'custom_name', $result, 'The original input name value should be preserved.' );
+	}
+
+	/**
+	 * Tests that the Add to Wishlist Button is injected as the last child only
+	 * when the `showAddToWishlist` attribute is enabled and the `product_wishlist`
+	 * feature flag is on.
+	 *
+	 * A lightweight stub stands in for the real `add-to-wishlist-button` block so
+	 * the test isolates the ATCWO injection/gating logic (the button's own
+	 * rendering is covered by AddToWishlistButtonTests).
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\AddToCartWithOptions::render
+	 */
+	public function test_add_to_wishlist_button_injection() {
+		$marker   = 'wc-block-add-to-wishlist-button-stub';
+		$registry = \WP_Block_Type_Registry::get_instance();
+		$features = wc_get_container()->get( FeaturesController::class );
+		$original = $features->feature_is_enabled( 'product_wishlist' );
+
+		if ( $registry->is_registered( 'woocommerce/add-to-wishlist-button' ) ) {
+			$registry->unregister( 'woocommerce/add-to-wishlist-button' );
+		}
+		register_block_type(
+			'woocommerce/add-to-wishlist-button',
+			array(
+				'render_callback' => function () use ( $marker ) {
+					return '<div class="' . $marker . '"></div>';
+				},
+			)
+		);
+
+		try {
+			global $product;
+			$product = new \WC_Product_Simple();
+			$product->set_regular_price( 10 );
+			$product_id = $product->save();
+
+			// Attribute on + feature on: the button is injected as the last child.
+			$features->change_feature_enable( 'product_wishlist', true );
+			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options {"showAddToWishlist":true} /--><!-- /wp:woocommerce/single-product -->' );
+
+			$this->assertStringContainsString( $marker, $markup, 'The Add to Wishlist Button is injected when the attribute and the feature flag are both on.' );
+			$this->assertGreaterThan(
+				strpos( $markup, 'wp-block-woocommerce-product-button' ),
+				strpos( $markup, $marker ),
+				'The Add to Wishlist Button is injected after the product button (as the last child).'
+			);
+
+			// Attribute off + feature on: the button is not injected.
+			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+			$this->assertStringNotContainsString( $marker, $markup, 'The Add to Wishlist Button is not injected when the attribute is off.' );
+
+			// Attribute on + feature off: the button is not injected.
+			$features->change_feature_enable( 'product_wishlist', false );
+			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options {"showAddToWishlist":true} /--><!-- /wp:woocommerce/single-product -->' );
+			$this->assertStringNotContainsString( $marker, $markup, 'The Add to Wishlist Button is not injected when the feature flag is off, even if the attribute is on.' );
+		} finally {
+			$registry->unregister( 'woocommerce/add-to-wishlist-button' );
+			$features->change_feature_enable( 'product_wishlist', $original );
+		}
 	}
 }

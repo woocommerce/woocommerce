@@ -2,12 +2,15 @@
  * External dependencies
  */
 import { useEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { BlockEditProps } from '@wordpress/blocks';
+import { PanelBody, ToggleControl } from '@wordpress/components';
 import {
 	BlockControls,
 	InspectorControls,
 	useBlockProps,
 } from '@wordpress/block-editor';
+import { getSetting } from '@woocommerce/settings';
 import { useProduct } from '@woocommerce/entities';
 
 /**
@@ -24,6 +27,12 @@ import type { Attributes } from '../types';
 const AddToCartOptionsEdit = (
 	props: BlockEditProps< Attributes > & { context?: { postId?: number } }
 ) => {
+	const { attributes, setAttributes } = props;
+	const { showAddToWishlist } = attributes;
+	const isWishlistFeatureEnabled = getSetting< boolean >(
+		'wishlistFeatureEnabled',
+		false
+	);
 	const { product } = useProduct( props.context?.postId );
 	const blockProps = useBlockProps( {
 		className: 'wc-block-add-to-cart-with-options',
@@ -54,6 +63,22 @@ const AddToCartOptionsEdit = (
 			<InspectorControls>
 				<UpgradeProductImageGallery />
 				<DowngradeNotice blockClientId={ props?.clientId } />
+				{ isWishlistFeatureEnabled && (
+					<PanelBody title={ __( 'Wishlist', 'woocommerce' ) }>
+						<ToggleControl
+							__nextHasNoMarginBottom
+							label={ __( 'Add to wishlist', 'woocommerce' ) }
+							help={ __(
+								'Show an “Add to wishlist” button as the last item in the add to cart area.',
+								'woocommerce'
+							) }
+							checked={ !! showAddToWishlist }
+							onChange={ ( value ) =>
+								setAttributes( { showAddToWishlist: value } )
+							}
+						/>
+					</PanelBody>
+				) }
 			</InspectorControls>
 			<BlockControls>
 				<ToolbarProductTypeGroup />
@@ -61,6 +86,9 @@ const AddToCartOptionsEdit = (
 			{ isCoreProductType ? (
 				<AddToCartWithOptionsEditTemplatePart
 					productType={ productType }
+					showAddToWishlist={
+						isWishlistFeatureEnabled && !! showAddToWishlist
+					}
 				/>
 			) : (
 				<div { ...blockProps }>
