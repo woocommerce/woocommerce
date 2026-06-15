@@ -9,8 +9,7 @@ import { getNewPath } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { LYSPaymentsSteps } from '~/settings-payments/onboarding/providers/woopayments/steps';
-import { OnboardingProvider } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
+import { LYSPaymentsSteps, OnboardingProvider } from '~/woopayments/onboarding';
 import { isWooPayments } from '~/settings-payments/utils';
 import { wooPaymentsExtensionSlug } from '~/settings-payments/constants';
 

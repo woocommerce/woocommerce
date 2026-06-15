@@ -4,7 +4,6 @@
 const { get } = require( 'lodash' );
 const path = require( 'path' );
 const fs = require( 'fs' );
-const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
 const webpack = require( 'webpack' );
@@ -18,6 +17,7 @@ const {
 	webpackConfig: styleConfig,
 } = require( '@woocommerce/internal-build/style-build' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
+const { requestToExternal, requestToHandle } = require( './webpack-externals' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
@@ -271,69 +271,8 @@ const jsConfig = {
 		// We reuse this Webpack setup for Storybook, where we need to disable dependency extraction.
 		! process.env.STORYBOOK &&
 			new WooCommerceDependencyExtractionWebpackPlugin( {
-				requestToExternal( request ) {
-					switch ( request ) {
-						case 'moment-timezone':
-							// Use WordPress core's window.moment (which includes moment-timezone)
-							// instead of bundling a stripped copy.
-							return 'moment';
-						case 'react/jsx-runtime':
-						case 'react/jsx-dev-runtime':
-							// @wordpress/dependency-extraction-webpack-plugin version bump related, which added 'react-jsx-runtime' dependency.
-							// See https://github.com/WordPress/gutenberg/pull/61692 for more details about the dependency in general.
-							// For backward compatibility reasons we need to skip requesting to external here.
-							return null;
-						case 'react-dom/client':
-							// React 18 split createRoot/hydrateRoot into
-							// react-dom/client. WordPress's wp-react-dom UMD
-							// aggregates both entrypoints onto the same
-							// window.ReactDOM global. DEWP's default mapper
-							// doesn't know about the subpath yet
-							// (https://github.com/WordPress/gutenberg/pull/77326),
-							// so map it here.
-							return 'ReactDOM';
-						case '@wordpress/global-styles-engine':
-							// @wordpress/global-styles-engine is not a standard WordPress package available globally,
-							// so we need to bundle it instead of treating it as an external.
-							return null;
-					}
-
-					if ( request.startsWith( '@wordpress/dataviews' ) ) {
-						return null;
-					}
-
-					if ( request.startsWith( '@wordpress/theme' ) ) {
-						return null;
-					}
-
-					if ( request.startsWith( '@wordpress/ui' ) ) {
-						return null;
-					}
-
-					// Skip requesting to external if the import path is from the build or build-module directory for WordPress packages.
-					// This is required for @wordpress/edit-site to work and also can reduce the bundle size when we don't need to load the entire WordPress package.
-					if (
-						request.match( /^@wordpress\/.*\/build(?:-module)?/ )
-					) {
-						return null;
-					}
-
-					// Skip requesting to external if the import path is from the build or build-module directory for WooCommerce packages.
-					// This can reduce the bundle size when we don't need to load the entire WooCommerce package.
-					if (
-						request.match( /^@woocommerce\/.*\/build(?:-module)?/ )
-					) {
-						return null;
-					}
-				},
-				requestToHandle( request ) {
-					if ( request === 'moment-timezone' ) {
-						return 'moment';
-					}
-					if ( request === 'react-dom/client' ) {
-						return 'react-dom';
-					}
-				},
+				requestToExternal,
+				requestToHandle,
 			} ),
 		process.env.ANALYZE && new BundleAnalyzerPlugin(),
 		// We only want to generate unminified files in the development phase.

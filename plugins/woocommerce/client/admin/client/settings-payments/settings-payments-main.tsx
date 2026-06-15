@@ -39,7 +39,7 @@ import {
 	recordPaymentsOnboardingEvent,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
-import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
+import WooPaymentsModal from '~/woopayments/onboarding';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
 

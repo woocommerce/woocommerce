@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add native WooPayments admin seams and externalize DataViews from admin bundles.

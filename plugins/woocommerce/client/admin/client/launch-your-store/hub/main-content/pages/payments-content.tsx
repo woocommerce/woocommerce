@@ -13,8 +13,10 @@ import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
 /**
  * Internal dependencies
  */
-import WooPaymentsOnboarding from '~/settings-payments/onboarding/providers/woopayments/components/onboarding';
-import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
+import {
+	WooPaymentsOnboarding,
+	useOnboardingContext,
+} from '~/woopayments/onboarding';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 import { createNoticesFromResponse } from '~/lib/notices';
 import './payments-content.scss';

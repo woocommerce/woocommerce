@@ -13,7 +13,7 @@ import type { SidebarComponentProps } from '../xstate';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 import { wooPaymentsOnboardingSessionEntryLYS } from '~/settings-payments/constants';
 import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';
-import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
+import { useOnboardingContext } from '~/woopayments/onboarding';
 
 export const PaymentsMobileHeader = ( props: SidebarComponentProps ) => {
 	const { wooPaymentsRecentlyActivated } = useSetUpPaymentsContext();

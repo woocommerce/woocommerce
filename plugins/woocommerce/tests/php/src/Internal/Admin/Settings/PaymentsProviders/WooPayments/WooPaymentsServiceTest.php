@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOnboardingAdapter;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
@@ -234,6 +235,81 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		} catch ( ApiException $e ) {
 			$this->assertSame( 'woocommerce_woopayments_onboarding_extension_not_active', $e->getErrorCode() );
 		}
+	}
+
+	/**
+	 * Test get onboarding details uses the onboarding adapter runtime availability.
+	 */
+	public function test_get_onboarding_details_uses_onboarding_adapter_runtime_availability(): void {
+		$location = 'US';
+		$gateway  = new FakePaymentGateway( WooPaymentsService::GATEWAY_ID );
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'class_exists' => function ( $class_to_check ) {
+					if ( '\WC_Payments' === $class_to_check ) {
+						return false;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		$onboarding_adapter = $this->getMockBuilder( WooPaymentsOnboardingAdapter::class )
+			->disableOriginalConstructor()
+			->onlyMethods(
+				array(
+					'is_onboarding_runtime_available',
+					'get_payment_gateway',
+					'has_account',
+					'has_valid_account',
+					'has_working_account',
+					'has_test_account',
+					'has_sandbox_account',
+					'has_live_account',
+					'get_overview_page_url',
+				)
+			)
+			->getMock();
+		$onboarding_adapter
+			->method( 'is_onboarding_runtime_available' )
+			->willReturn( true );
+		$onboarding_adapter
+			->method( 'get_payment_gateway' )
+			->willReturn( $gateway );
+		$onboarding_adapter
+			->method( 'has_account' )
+			->willReturn( false );
+		$onboarding_adapter
+			->method( 'has_valid_account' )
+			->willReturn( false );
+		$onboarding_adapter
+			->method( 'has_working_account' )
+			->willReturn( false );
+		$onboarding_adapter
+			->method( 'has_test_account' )
+			->willReturn( false );
+		$onboarding_adapter
+			->method( 'has_sandbox_account' )
+			->willReturn( false );
+		$onboarding_adapter
+			->method( 'has_live_account' )
+			->willReturn( false );
+		$onboarding_adapter
+			->method( 'get_overview_page_url' )
+			->willReturn( 'https://example.com/native-overview' );
+
+		$this->sut = new WooPaymentsService();
+		$this->sut->init( $this->mock_providers, $this->mockable_proxy, $onboarding_adapter );
+
+		$result = $this->sut->get_onboarding_details( $location, '/some/path' );
+
+		$this->assertIsArray( $result );
+		$this->assertSame(
+			'https://example.com/native-overview',
+			$result['context']['urls']['overview_page']
+		);
 	}
 
 	/**
