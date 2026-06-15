@@ -21,4 +21,4 @@ const possiblyImportProductTask = async () => {
 
 possiblyImportProductTask();
 
-import( './experimental-shipping-recommendation' );
+import( './shipping-recommendation' );

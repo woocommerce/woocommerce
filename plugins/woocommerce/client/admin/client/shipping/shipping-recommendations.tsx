@@ -14,7 +14,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { getCountryCode } from '~/dashboard/utils';
-import WooCommerceShippingItem from './experimental-woocommerce-shipping-item';
+import WooCommerceShippingItem from './woocommerce-shipping-item';
 import ShipStationItem from './shipstation-item';
 import PacklinkItem from './packlink-item';
 import {
