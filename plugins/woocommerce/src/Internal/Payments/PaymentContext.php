@@ -70,6 +70,67 @@ class PaymentContext {
 	}
 
 	/**
+	 * Create a checkout payment context.
+	 *
+	 * @param WC_Order            $order             Order being charged.
+	 * @param string              $gateway_id        Gateway ID.
+	 * @param string              $payment_method_id Payment method ID.
+	 * @param array<string,mixed> $payment_data      Generic payment-operation data.
+	 * @param array<string,mixed> $provider_data     Provider-scoped data.
+	 * @return self
+	 */
+	public static function for_checkout( WC_Order $order, string $gateway_id, string $payment_method_id = '', array $payment_data = array(), array $provider_data = array() ): self {
+		return new self( $order, $gateway_id, $payment_method_id, $payment_data, $provider_data );
+	}
+
+	/**
+	 * Create a refund payment context.
+	 *
+	 * @param WC_Order            $order         Order being refunded.
+	 * @param string              $gateway_id    Gateway ID.
+	 * @param float               $amount        Refund amount.
+	 * @param string              $reason        Refund reason.
+	 * @param array<string,mixed> $provider_data Provider-scoped data.
+	 * @return self
+	 */
+	public static function for_refund( WC_Order $order, string $gateway_id, float $amount, string $reason = '', array $provider_data = array() ): self {
+		return new self(
+			$order,
+			$gateway_id,
+			'',
+			array(
+				'amount' => $amount,
+				'reason' => $reason,
+			),
+			$provider_data
+		);
+	}
+
+	/**
+	 * Create a capture payment context.
+	 *
+	 * @param WC_Order            $order         Order being captured.
+	 * @param string              $gateway_id    Gateway ID.
+	 * @param array<string,mixed> $provider_data Provider-scoped data.
+	 * @return self
+	 */
+	public static function for_capture( WC_Order $order, string $gateway_id, array $provider_data = array() ): self {
+		return new self( $order, $gateway_id, '', array(), $provider_data );
+	}
+
+	/**
+	 * Create a cancel payment context.
+	 *
+	 * @param WC_Order            $order         Order whose authorization is being canceled.
+	 * @param string              $gateway_id    Gateway ID.
+	 * @param array<string,mixed> $provider_data Provider-scoped data.
+	 * @return self
+	 */
+	public static function for_cancel( WC_Order $order, string $gateway_id, array $provider_data = array() ): self {
+		return new self( $order, $gateway_id, '', array(), $provider_data );
+	}
+
+	/**
 	 * Get the order.
 	 *
 	 * @return WC_Order

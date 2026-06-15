@@ -37,17 +37,43 @@ class WooPaymentsProviderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A1 provider does not publish money-moving operations before real callers exist.
+	 * @testdox A3 provider publishes money-moving operations once native processing exists.
 	 */
-	public function test_provider_does_not_publish_money_moving_operations_before_real_callers_exist(): void {
+	public function test_provider_publishes_money_moving_operations_for_native_processing(): void {
 		foreach (
 			array(
 				'charge',
 				'capture',
 				'cancel',
+				'refund',
 			) as $method
 		) {
-			$this->assertFalse( method_exists( $this->sut, $method ), "{$method} must not be exposed before native processing has real callers." );
+			$this->assertTrue( method_exists( $this->sut, $method ), "{$method} must be exposed through ProviderContract for A3." );
+		}
+	}
+
+	/**
+	 * @testdox Provider capabilities should expose the WooPayments native processing surface.
+	 */
+	public function test_provider_capabilities_expose_native_processing_surface(): void {
+		$manifest = $this->sut->get_capability_manifest();
+
+		foreach (
+			array(
+				CapabilityManifest::CAPABILITY_CARDS,
+				CapabilityManifest::CAPABILITY_SAVED_TOKENS,
+				CapabilityManifest::CAPABILITY_MANDATES,
+				CapabilityManifest::CAPABILITY_ASYNC_REDIRECT,
+				CapabilityManifest::CAPABILITY_REFUNDS,
+				CapabilityManifest::CAPABILITY_PARTIAL_REFUNDS,
+				CapabilityManifest::CAPABILITY_MANUAL_CAPTURE,
+				CapabilityManifest::CAPABILITY_EXPRESS_CHECKOUT,
+				CapabilityManifest::CAPABILITY_HOSTED_SESSION,
+				CapabilityManifest::CAPABILITY_SUBSCRIPTIONS,
+				CapabilityManifest::CAPABILITY_IN_PERSON,
+			) as $capability
+		) {
+			$this->assertTrue( $manifest->supports( $capability ), "{$capability} should be declared for WooPayments native processing." );
 		}
 	}
 }

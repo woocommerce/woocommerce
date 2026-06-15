@@ -44,6 +44,7 @@ class PaymentOutcomeTest extends WC_Unit_Test_Case {
 		$this->assertTrue( ( new PaymentOutcome( PaymentOutcome::STATUS_AUTHORIZED ) )->is_successful() );
 		$this->assertTrue( ( new PaymentOutcome( PaymentOutcome::STATUS_NO_EXTERNAL_PAYMENT ) )->is_successful() );
 		$this->assertFalse( ( new PaymentOutcome( PaymentOutcome::STATUS_FAILED ) )->is_successful() );
+		$this->assertFalse( ( new PaymentOutcome( PaymentOutcome::STATUS_CANCELED ) )->is_successful() );
 	}
 
 	/**

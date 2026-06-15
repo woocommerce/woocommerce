@@ -60,6 +60,13 @@ class PaymentOutcome {
 	const STATUS_FAILED = 'failed';
 
 	/**
+	 * Payment authorization was canceled.
+	 *
+	 * @var string
+	 */
+	const STATUS_CANCELED = 'canceled';
+
+	/**
 	 * No external payment was needed.
 	 *
 	 * @var string
@@ -145,6 +152,7 @@ class PaymentOutcome {
 			self::STATUS_REQUIRES_REDIRECT,
 			self::STATUS_REQUIRES_CUSTOMER_ACTION,
 			self::STATUS_FAILED,
+			self::STATUS_CANCELED,
 			self::STATUS_NO_EXTERNAL_PAYMENT,
 		);
 	}

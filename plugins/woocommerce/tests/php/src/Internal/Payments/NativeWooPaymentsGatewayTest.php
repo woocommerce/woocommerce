@@ -1,0 +1,134 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Payments;
+
+use Automattic\WooCommerce\Internal\Payments\NativeWooPaymentsGateway;
+use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
+use Automattic\WooCommerce\Internal\Payments\PaymentContext;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
+use WC_Order;
+use WC_Unit_Test_Case;
+
+/**
+ * Tests for the NativeWooPaymentsGateway class.
+ */
+class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
+
+	/**
+	 * @testdox Should preserve the WooPayments gateway identity and settings option key.
+	 */
+	public function test_preserves_gateway_identity(): void {
+		$gateway = wc_get_container()->get( NativeWooPaymentsGateway::class );
+
+		$this->assertSame( OrderPaymentStore::GATEWAY_ID, $gateway->id );
+		$this->assertSame( 'woocommerce_woocommerce_payments_settings', $gateway->get_option_key() );
+		$this->assertContains( 'refunds', $gateway->supports );
+		$this->assertNotContains( 'add_payment_method', $gateway->supports );
+	}
+
+	/**
+	 * @testdox Should process payments through the native processing service.
+	 */
+	public function test_process_payment_delegates_to_processing_service(): void {
+		$order   = $this->create_order();
+		$service = new RecordingPaymentProcessingService();
+		$gateway = new NativeWooPaymentsGateway();
+		$gateway->init( $service, new WooPaymentsProvider() );
+
+		$result = $gateway->process_payment( $order->get_id() );
+
+		$this->assertSame( 'success', $result['result'] );
+		$this->assertInstanceOf( PaymentContext::class, $service->last_checkout_context );
+		$this->assertSame( $order->get_id(), $service->last_checkout_context->get_order_id() );
+		$this->assertSame( OrderPaymentStore::GATEWAY_ID, $service->last_checkout_context->get_gateway_id() );
+	}
+
+	/**
+	 * @testdox Should process refunds through the native processing service.
+	 */
+	public function test_process_refund_delegates_to_processing_service(): void {
+		$order = $this->create_order();
+		$order->update_meta_data( '_charge_id', 'ch_test' );
+		$order->save();
+
+		$service = new RecordingPaymentProcessingService();
+		$gateway = new NativeWooPaymentsGateway();
+		$gateway->init( $service, new WooPaymentsProvider() );
+
+		$result = $gateway->process_refund( $order->get_id(), 4.25, 'Adjustment' );
+
+		$this->assertTrue( $result );
+		$this->assertInstanceOf( PaymentContext::class, $service->last_refund_context );
+		$this->assertSame(
+			array(
+				'amount' => 4.25,
+				'reason' => 'Adjustment',
+			),
+			$service->last_refund_context->get_payment_data()
+		);
+	}
+
+	/**
+	 * @testdox Should only allow refunds for orders with a WooPayments charge.
+	 */
+	public function test_can_refund_order_requires_charge_id(): void {
+		$order   = $this->create_order();
+		$gateway = new NativeWooPaymentsGateway();
+
+		$this->assertFalse( $gateway->can_refund_order( $order ) );
+
+		$order->update_meta_data( '_charge_id', 'ch_test' );
+		$order->save();
+
+		$this->assertTrue( $gateway->can_refund_order( wc_get_order( $order->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox Should fail refunds that do not have a WooPayments charge.
+	 */
+	public function test_process_refund_fails_without_charge_id(): void {
+		$order   = $this->create_order();
+		$service = new RecordingPaymentProcessingService();
+		$gateway = new NativeWooPaymentsGateway();
+		$gateway->init( $service, new WooPaymentsProvider() );
+
+		$result = $gateway->process_refund( $order->get_id(), 4.25, 'Adjustment' );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'native_payment_refund_missing_charge', $result->get_error_code() );
+		$this->assertNull( $service->last_refund_context );
+	}
+
+	/**
+	 * @testdox Should resolve native dependencies when WooCommerce instantiates the gateway directly.
+	 */
+	public function test_process_payment_resolves_dependencies_without_explicit_init(): void {
+		$order   = $this->create_order();
+		$gateway = new NativeWooPaymentsGateway();
+
+		$result = $gateway->process_payment( $order->get_id() );
+
+		$this->assertSame(
+			array(
+				'result'         => 'fail',
+				'redirect'       => '',
+				'payment_method' => '',
+			),
+			$result
+		);
+	}
+
+	/**
+	 * Create an order for gateway tests.
+	 *
+	 * @return WC_Order
+	 */
+	private function create_order(): WC_Order {
+		$order = wc_create_order();
+		$order->set_total( '12.00' );
+		$order->save();
+
+		return $order;
+	}
+}

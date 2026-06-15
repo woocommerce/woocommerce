@@ -48,35 +48,46 @@ class OrderPaymentLifecycleService {
 		$locked_by_service = false;
 
 		if ( null !== $payment_reference ) {
-			if ( $this->order_payment_store->is_order_payment_locked( $order, $payment_reference ) ) {
+			if ( ! $this->order_payment_store->claim_order_payment_lock( $order, $payment_reference ) ) {
 				return;
 			}
 
-			$this->order_payment_store->lock_order_payment( $order, $payment_reference );
 			$locked_by_service = true;
 		}
 
 		try {
-			$this->apply_meta_changes( $order, $event );
-
-			$note            = $event->get_note();
-			$should_add_note = null !== $note && '' !== $note && ! $this->has_note_marker( $order, $event, $note );
-			if ( $should_add_note ) {
-				$order->update_meta_data( $this->get_note_marker_key( $event, $note ), 'yes' );
-			}
-
-			$status_transition_saved_order = $this->apply_status_transition( $order, $event );
-			if ( ! $status_transition_saved_order ) {
-				$order->save();
-			}
-
-			if ( $should_add_note ) {
-				$order->add_order_note( $note );
-			}
+			$this->apply_unlocked( $order, $event );
 		} finally {
 			if ( $locked_by_service ) {
 				$this->order_payment_store->unlock_order_payment( $order );
 			}
+		}
+	}
+
+	/**
+	 * Apply a payment lifecycle event while the caller already owns the order payment lock.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param WC_Order              $order Order object.
+	 * @param PaymentLifecycleEvent $event Lifecycle event.
+	 */
+	public function apply_unlocked( WC_Order $order, PaymentLifecycleEvent $event ): void {
+		$this->apply_meta_changes( $order, $event );
+
+		$note            = $event->get_note();
+		$should_add_note = null !== $note && '' !== $note && ! $this->has_note_marker( $order, $event, $note );
+		if ( $should_add_note ) {
+			$order->update_meta_data( $this->get_note_marker_key( $event, $note ), 'yes' );
+		}
+
+		$status_transition_saved_order = $this->apply_status_transition( $order, $event );
+		if ( ! $status_transition_saved_order ) {
+			$order->save();
+		}
+
+		if ( $should_add_note ) {
+			$order->add_order_note( $note );
 		}
 	}
 

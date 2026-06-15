@@ -10,8 +10,7 @@ namespace Automattic\WooCommerce\Internal\Payments;
 /**
  * Internal metadata contract implemented by native payments providers.
  *
- * A1 intentionally exposes provider identity and capability metadata only. Money-moving operation
- * contracts are introduced with the A2/A3 call sites that need them.
+ * A3 introduces money-moving operation contracts used by the native processing service.
  *
  * @since 11.0.0
  * @internal Transitional internal component for the native payments runtime.
@@ -31,4 +30,40 @@ interface ProviderContract {
 	 * @return CapabilityManifest
 	 */
 	public function get_capability_manifest(): CapabilityManifest;
+
+	/**
+	 * Charge an order through the provider.
+	 *
+	 * @param PaymentContext $context         Payment context.
+	 * @param string         $idempotency_key Deterministic idempotency key.
+	 * @return PaymentOutcome
+	 */
+	public function charge( PaymentContext $context, string $idempotency_key ): PaymentOutcome;
+
+	/**
+	 * Capture a previously authorized payment through the provider.
+	 *
+	 * @param PaymentContext $context         Payment context.
+	 * @param string         $idempotency_key Deterministic idempotency key.
+	 * @return PaymentOutcome
+	 */
+	public function capture( PaymentContext $context, string $idempotency_key ): PaymentOutcome;
+
+	/**
+	 * Cancel a previously authorized payment through the provider.
+	 *
+	 * @param PaymentContext $context         Payment context.
+	 * @param string         $idempotency_key Deterministic idempotency key.
+	 * @return PaymentOutcome
+	 */
+	public function cancel( PaymentContext $context, string $idempotency_key ): PaymentOutcome;
+
+	/**
+	 * Refund a payment through the provider.
+	 *
+	 * @param PaymentContext $context         Payment context.
+	 * @param string         $idempotency_key Deterministic idempotency key.
+	 * @return PaymentOutcome
+	 */
+	public function refund( PaymentContext $context, string $idempotency_key ): PaymentOutcome;
 }

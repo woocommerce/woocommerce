@@ -250,6 +250,34 @@ class OrderPaymentLifecycleServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Locked orders are not mutated or unlocked while another operation is active.
+	 */
+	public function test_locked_order_is_not_mutated_or_unlocked_for_active_operation(): void {
+		$order = $this->create_woopayments_order();
+		$this->assertTrue( $this->order_payment_store->claim_order_payment_lock( $order, 'native_charge_operation' ) );
+
+		$this->sut->apply(
+			$order,
+			new PaymentLifecycleEvent(
+				PaymentLifecycleEvent::STATUS_COMPLETED,
+				'pi_webhook',
+				array( '_intent_id' => 'pi_webhook' ),
+				array(),
+				'Payment complete.'
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'pending', $order->get_status() );
+		$this->assertSame( '', $order->get_meta( '_intent_id', true ) );
+		$this->assertSame( 0, $this->countOrderNotesMatching( $order, 'Payment complete.' ) );
+		$this->assertTrue( $this->order_payment_store->is_order_payment_locked( $order, 'native_charge_operation' ) );
+		$this->order_payment_store->unlock_order_payment( $order );
+	}
+
+	/**
 	 * Create a WooPayments order for lifecycle tests.
 	 *
 	 * @return WC_Order

@@ -147,6 +147,55 @@ class OrderPaymentStore {
 	}
 
 	/**
+	 * Atomically claim the order payment lock for a money-moving operation.
+	 *
+	 * Unlike WooPayments-compatible reference checks, native processing uses this as an order-wide
+	 * claim: any active lock value blocks checkout, refund, capture, and cancel from starting.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param WC_Order    $order             Order being locked.
+	 * @param string|null $payment_reference Payment reference being processed.
+	 * @return bool True when the lock was claimed.
+	 */
+	public function claim_order_payment_lock( WC_Order $order, ?string $payment_reference = null ): bool {
+		$lock_key = $this->get_order_payment_lock_key( $order );
+		$value    = empty( $payment_reference ) ? self::LOCK_SENTINEL : $payment_reference;
+
+		if ( false !== get_transient( $lock_key ) ) {
+			return false;
+		}
+
+		if (
+			( function_exists( 'wp_using_ext_object_cache' ) && wp_using_ext_object_cache() )
+			|| ( function_exists( 'wp_installing' ) && wp_installing() )
+		) {
+			return wp_cache_add( $lock_key, $value, 'transient', self::LOCK_TTL_SECONDS );
+		}
+
+		$timeout_option = '_transient_timeout_' . $lock_key;
+		$value_option   = '_transient_' . $lock_key;
+		$expiration     = time() + self::LOCK_TTL_SECONDS;
+
+		$timeout_added = add_option( $timeout_option, $expiration, '', false );
+		$value_added   = add_option( $value_option, $value, '', false );
+
+		if ( ! $value_added ) {
+			if ( $timeout_added ) {
+				delete_option( $timeout_option );
+			}
+
+			return false;
+		}
+
+		if ( ! $timeout_added ) {
+			update_option( $timeout_option, $expiration, false );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Lock an order for payment processing.
 	 *
 	 * @since 11.0.0

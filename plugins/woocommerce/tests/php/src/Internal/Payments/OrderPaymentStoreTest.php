@@ -173,4 +173,26 @@ class OrderPaymentStoreTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $this->sut->is_order_payment_locked( $order, 'pi_123' ) );
 	}
+
+	/**
+	 * @testdox Native money-operation claims should block any active order payment lock.
+	 */
+	public function test_claim_order_payment_lock_blocks_any_active_lock(): void {
+		$order = wc_create_order();
+
+		$this->assertTrue( $this->sut->claim_order_payment_lock( $order, 'native_charge_key' ) );
+		$this->assertFalse( $this->sut->claim_order_payment_lock( $order, 'native_refund_key' ) );
+		$this->assertTrue( $this->sut->is_order_payment_locked( $order, 'native_charge_key' ) );
+		$this->assertFalse( $this->sut->is_order_payment_locked( $order, 'native_refund_key' ) );
+
+		$this->sut->unlock_order_payment( $order );
+
+		$this->sut->lock_order_payment( $order, 'pi_legacy' );
+		$this->assertFalse( $this->sut->is_order_payment_locked( $order, 'native_charge_key' ) );
+		$this->assertFalse( $this->sut->claim_order_payment_lock( $order, 'native_charge_key' ) );
+
+		$this->sut->unlock_order_payment( $order );
+		$this->assertTrue( $this->sut->claim_order_payment_lock( $order, 'native_charge_key' ) );
+		$this->sut->unlock_order_payment( $order );
+	}
 }
