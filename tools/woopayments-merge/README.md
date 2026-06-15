@@ -18,6 +18,30 @@ Design + staging: `~/Work/a8c/ai-prompts/goals/woopayments-merge/`
 
 ---
 
+## Lifecycle — keeping this OUT of WooCommerce core
+
+This harness is **transition-only** and must not land in WooCommerce trunk when the merge PRs merge.
+Three properties already protect that, plus one action to take:
+
+- **It never ships to users.** It lives at repo-root `tools/`, **outside `plugins/woocommerce/`**, so it
+  is never in the built/released plugin zip (built from `plugins/woocommerce/` only) — true even now.
+- **It is fully self-contained.** Everything is in this one directory; no shipped code, CI, or build
+  config references it. `git rm -r tools/woopayments-merge` removes it with zero impact on core.
+- **Its commits are separable.** Every harness commit touches only this directory; the shipped A0
+  product (the `NativePaymentsRuntimeArbiter` + its test + changelog, under `plugins/woocommerce/`) is
+  in separate commits.
+
+**Action — pick one so it never reaches trunk:**
+- *Recommended:* don't include this directory in the core-code PR(s) — ship only the product commits
+  (keep the harness on a parallel tooling branch, or strip it before the final merge).
+- *Or:* let it ride the branch and delete it as the **first action of stage A6**:
+  `git rm -r tools/woopayments-merge && git commit -m "Remove WooPayments-merge transition harness"`.
+
+The plugin-side reverse-gated stand-down is NOT here — it lives in a dedicated `woocommerce-payments`
+clone (the plugin repo), never in WC core.
+
+---
+
 ## 1. The runtime arbiter (A0 keystone) — built
 
 `plugins/woocommerce/src/Internal/Payments/NativePaymentsRuntimeArbiter.php`
