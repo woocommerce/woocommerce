@@ -11,6 +11,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -470,6 +471,23 @@ class WC_Checkout {
 			// Save the order.
 			$order_id = $order->save();
 
+			// Defense-in-depth: if the cart still has items but the persisted order has none,
+			// the save silently dropped every line item (e.g. a $wpdb->insert() returning false
+			// in save_items()). Re-read the order from the data store so we check DB state, not
+			// the in-memory copy that save_items() populated. Bail out so the caller can retry
+			// rather than completing a paid-but-empty order.
+			//
+			// This is intentionally narrow: it catches the catastrophic "no items at all" case,
+			// not partial item loss where some inserts succeed and some fail. Wider parity checks
+			// would need to reconcile quantities across products, bundles, fees, shipping, etc.,
+			// which is out of scope for the silent-failure guard.
+			if ( WC()->cart->get_cart_contents_count() > 0 ) {
+				$persisted_order = wc_get_order( $order_id );
+				if ( ! $persisted_order || 0 === count( $persisted_order->get_items() ) ) {
+					throw new Exception( __( 'Order items could not be saved. Please try again.', 'woocommerce' ) );
+				}
+			}
+
 			/**
 			 * Action hook fired after an order is created used to add custom meta to the order.
 			 *
@@ -559,8 +577,6 @@ class WC_Checkout {
 						'tax_class'    => $product->get_tax_class(),
 						'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
 						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
-						// Order model compositions: set the product instance.
-						'product'      => $product,
 					)
 				);
 			}
@@ -665,7 +681,10 @@ class WC_Checkout {
 	 * @param WC_Cart  $cart  Cart instance.
 	 */
 	public function create_order_tax_lines( &$order, $cart ) {
-		foreach ( array_keys( $cart->get_cart_contents_taxes() + $cart->get_shipping_taxes() + $cart->get_fee_taxes() ) as $tax_rate_id ) {
+		$tax_rate_ids     = array_keys( $cart->get_cart_contents_taxes() + $cart->get_shipping_taxes() + $cart->get_fee_taxes() );
+		$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( $tax_rate_ids );
+
+		foreach ( $tax_rate_ids as $tax_rate_id ) {
 			/**
 			 * Controls the zero rate tax ID.
 			 *
@@ -676,16 +695,17 @@ class WC_Checkout {
 			 * @param string $tax_rate_id The ID of the zero rate tax.
 			 */
 			if ( $tax_rate_id && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
-				$item = new WC_Order_Item_Tax();
+				$tax_rate_object_or_id = $tax_rate_objects[ $tax_rate_id ] ?? $tax_rate_id;
+				$item                  = new WC_Order_Item_Tax();
 				$item->set_props(
 					array(
 						'rate_id'            => $tax_rate_id,
 						'tax_total'          => $cart->get_tax_amount( $tax_rate_id ),
 						'shipping_tax_total' => $cart->get_shipping_tax_amount( $tax_rate_id ),
-						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_id ),
-						'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
-						'compound'           => WC_Tax::is_compound( $tax_rate_id ),
-						'rate_percent'       => WC_Tax::get_rate_percent_value( $tax_rate_id ),
+						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_object_or_id ),
+						'label'              => WC_Tax::get_rate_label( $tax_rate_object_or_id ),
+						'compound'           => WC_Tax::is_compound( $tax_rate_object_or_id ),
+						'rate_percent'       => WC_Tax::get_rate_percent_value( $tax_rate_object_or_id ),
 					)
 				);
 

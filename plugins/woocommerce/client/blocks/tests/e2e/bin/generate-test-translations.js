@@ -8,8 +8,11 @@ const { translations } = require( '../test-data/data/data.ts' );
 const { getTestTranslation } = require( '../utils/get-test-translation.js' );
 
 const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
-const BUILD_DIR = path.resolve( __dirname, '../../../build/' );
-const TESTS_DIR = path.resolve( __dirname, '../tests/' );
+const BUILD_DIR = path.resolve( ROOT_DIR, 'assets/client/blocks/' );
+const TESTS_DIR = path.resolve(
+	__dirname,
+	'../../../../../tests/e2e-pw/tests/blocks'
+);
 const LANGUAGES_DIR = path.join( ROOT_DIR, 'i18n/languages/' );
 
 ensureDirSync( LANGUAGES_DIR );
@@ -60,9 +63,12 @@ builtJsFiles.forEach( ( filePath ) => {
 	if ( stringsInFile.length === 0 ) {
 		return;
 	}
-	const relativeFilePath = filePath
-		.substring( filePath.indexOf( 'build/' ) )
-		.replace( 'build', 'assets/client/blocks' );
+	// Match WordPress's script handle path: assets are enqueued from
+	// `plugins/woocommerce/assets/client/blocks/...` and WP hashes that
+	// path (minus the plugin prefix) to find translation JSON files.
+	const relativeFilePath = filePath.substring(
+		filePath.indexOf( 'assets/client/blocks/' )
+	);
 	const data = {
 		locale_data: {
 			messages: {

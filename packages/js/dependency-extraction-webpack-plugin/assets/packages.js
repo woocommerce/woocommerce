@@ -1,7 +1,6 @@
 module.exports = [
 	// wc-admin packages
 	'@woocommerce/admin-layout',
-	'@woocommerce/block-templates',
 	'@woocommerce/components',
 	'@woocommerce/csv-export',
 	'@woocommerce/currency',
@@ -18,7 +17,6 @@ module.exports = [
 	'@woocommerce/navigation',
 	'@woocommerce/notices',
 	'@woocommerce/number',
-	'@woocommerce/product-editor',
 	'@woocommerce/tracks',
 	'@woocommerce/remote-logging',
 	'@woocommerce/sanitize',

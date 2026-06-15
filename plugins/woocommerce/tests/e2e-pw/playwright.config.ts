@@ -58,7 +58,6 @@ const reporter = [
 ];
 
 if ( process.env.CI ) {
-	reporter.push( [ 'buildkite-test-collector/playwright/reporter' ] );
 	reporter.push( [ `${ TESTS_ROOT_PATH }/reporters/skipped-tests.ts` ] );
 	reporter.push( [
 		'junit',
@@ -73,7 +72,7 @@ if ( process.env.CI ) {
 		'html',
 		{
 			outputFolder: `${ TESTS_ROOT_PATH }/playwright-report`,
-			open: 'on-failure',
+			open: 'never',
 		},
 	] );
 }
@@ -136,6 +135,8 @@ export default defineConfig( {
 				'**/api-tests/**',
 				/* Exclude PayPal tests, as they don't run well in parallel - see https://github.com/woocommerce/woocommerce/pull/63068. */
 				'**/tests/paypal/**',
+				/* Blocks specs are run by the Blocks e2e suite - see client/blocks/tests/e2e/playwright.config.ts. */
+				'**/tests/blocks/**',
 			],
 			dependencies: [ 'site setup' ],
 		},
@@ -147,6 +148,7 @@ export default defineConfig( {
 		{
 			name: 'legacy-mini-cart',
 			testMatch: [ '**/tests/cart/**', '**/tests/checkout/**' ],
+			testIgnore: [ '**/tests/blocks/**' ],
 			dependencies: [ 'site setup' ],
 		},
 		{

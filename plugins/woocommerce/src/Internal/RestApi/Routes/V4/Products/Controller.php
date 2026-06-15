@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use WC_REST_Products_V2_Controller;
@@ -276,9 +277,10 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 * Get the images for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product Product instance.
+	 * @param string                          $image_size Image size to use for the src. Default 'full'.
 	 * @return array
 	 */
-	protected function get_images( $product ) {
+	protected function get_images( $product, $image_size = 'full' ) {
 		$images         = array();
 		$attachment_ids = array();
 
@@ -302,7 +304,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 				continue;
 			}
 
-			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+			$attachment = wp_get_attachment_image_src( $attachment_id, $image_size );
 
 			if ( ! is_array( $attachment ) ) {
 				continue;
@@ -318,8 +320,8 @@ class Controller extends WC_REST_Products_V2_Controller {
 				'src'               => current( $attachment ),
 				'name'              => get_the_title( $attachment_id ),
 				'alt'               => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
-				'srcset'            => (string) wp_get_attachment_image_srcset( $attachment_id, 'full' ),
-				'sizes'             => (string) wp_get_attachment_image_sizes( $attachment_id, 'full' ),
+				'srcset'            => (string) wp_get_attachment_image_srcset( $attachment_id, $image_size ),
+				'sizes'             => (string) wp_get_attachment_image_sizes( $attachment_id, $image_size ),
 				'thumbnail'         => current( $thumbnail ),
 			);
 		}
@@ -707,6 +709,12 @@ class Controller extends WC_REST_Products_V2_Controller {
 			remove_filter( 'posts_where', array( $this, 'exclude_product_statuses' ) );
 
 			$this->exclude_status = array();
+		}
+
+		// Batch-prime image attachment caches for the whole collection, rather than once per
+		// product when get_images() runs during serialization.
+		if ( ! empty( $result['objects'] ) ) {
+			wc_get_container()->get( ProductUtil::class )->prime_image_caches( $result['objects'] );
 		}
 
 		return $result;
