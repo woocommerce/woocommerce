@@ -205,6 +205,10 @@ ul.woocommerce_stats {
 
 #woocommerce_dashboard_recent_reviews {
 
+	#wc-recent-reviews-widget-content > p {
+		margin-bottom: 0;
+	}
+
 	ul {
 		margin: 0;
 	}
