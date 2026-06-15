@@ -252,4 +252,23 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( array( $product_1->get_id(), $product_2->get_id() ), $synced_ids, 'Each product should be synced at most once per request' );
 		$this->assertEmpty( $wc_deferred_product_sync, 'The queue should be empty after the sync' );
 	}
+
+	/**
+	 * @testdox Should delete variation attribute meta when the parent variation attribute is removed.
+	 */
+	public function test_product_attributes_updated_deletes_stale_variation_attribute_meta(): void {
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[2];
+
+		$this->assertSame( 'red', get_post_meta( $variation_id, 'attribute_pa_colour', true ), 'Variation should start with colour attribute meta' );
+		$this->assertSame( 'huge', get_post_meta( $variation_id, 'attribute_pa_size', true ), 'Variation should start with size attribute meta' );
+
+		$attributes = $product->get_attributes();
+		unset( $attributes['pa_colour'] );
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		$this->assertFalse( metadata_exists( 'post', $variation_id, 'attribute_pa_colour' ), 'Removed parent variation attribute meta should be deleted from child variations' );
+		$this->assertSame( 'huge', get_post_meta( $variation_id, 'attribute_pa_size', true ), 'Remaining parent variation attribute meta should be preserved' );
+	}
 }
