@@ -319,15 +319,134 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		} finally {
 			WC()->cart->empty_cart();
 			WC()->session->__unset( 'order_awaiting_payment' );
+			WC()->session->__unset( 'checkout_pending_order_id' );
 		}
 
 		$this->assertIsInt( $first_order_id );
 		$this->assertSame( $first_order_id, $second_order_id, 'Repeated order creation for the same cart should resume the pending order.' );
+		$this->assertEmpty( WC()->session->get( 'order_awaiting_payment' ), 'create_order() should not mark an order as awaiting payment before payment processing starts.' );
 
 		$order = wc_get_order( $first_order_id );
 		$this->assertInstanceOf( WC_Order::class, $order );
 		$this->assertSame( 1, count( $order->get_items() ) );
 		$this->assertSame( 'pending', $order->get_status() );
+	}
+
+	/**
+	 * @testdox create_order does not reuse or mutate a pending order for a different billing email.
+	 */
+	public function test_create_order_does_not_reuse_pending_order_for_different_billing_email() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+
+		$first_data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'first-customer@example.com',
+		);
+		$second_data = array_merge(
+			$first_data,
+			array(
+				'billing_email' => 'second-customer@example.com',
+			)
+		);
+
+		try {
+			$first_order_id  = $this->sut->create_order( $first_data );
+			$second_order_id = $this->sut->create_order( $second_data );
+		} finally {
+			WC()->cart->empty_cart();
+			WC()->session->__unset( 'order_awaiting_payment' );
+			WC()->session->__unset( 'checkout_pending_order_id' );
+		}
+
+		$this->assertIsInt( $first_order_id );
+		$this->assertIsInt( $second_order_id );
+		$this->assertNotSame( $first_order_id, $second_order_id, 'A pending order should not be reused for a different billing email.' );
+
+		$first_order = wc_get_order( $first_order_id );
+		$this->assertInstanceOf( WC_Order::class, $first_order );
+		$this->assertSame( 'first-customer@example.com', $first_order->get_billing_email(), 'A second checkout identity should not mutate the first order.' );
+	}
+
+	/**
+	 * @testdox create_order does not reuse or mutate a pending order for a different customer ID.
+	 */
+	public function test_create_order_does_not_reuse_pending_order_for_different_customer_id() {
+		$product     = WC_Helper_Product::create_simple_product();
+		$customer_id = 111;
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+
+		$get_customer_id = function () use ( &$customer_id ) {
+			return $customer_id;
+		};
+		add_filter( 'woocommerce_checkout_customer_id', $get_customer_id );
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'same-email@example.com',
+		);
+
+		try {
+			$first_order_id = $this->sut->create_order( $data );
+			$customer_id    = 222;
+			$second_order_id = $this->sut->create_order( $data );
+		} finally {
+			remove_filter( 'woocommerce_checkout_customer_id', $get_customer_id );
+			WC()->cart->empty_cart();
+			WC()->session->__unset( 'order_awaiting_payment' );
+			WC()->session->__unset( 'checkout_pending_order_id' );
+		}
+
+		$this->assertIsInt( $first_order_id );
+		$this->assertIsInt( $second_order_id );
+		$this->assertNotSame( $first_order_id, $second_order_id, 'A pending order should not be reused for a different customer ID.' );
+
+		$first_order = wc_get_order( $first_order_id );
+		$this->assertInstanceOf( WC_Order::class, $first_order );
+		$this->assertSame( 111, $first_order->get_customer_id(), 'A second checkout customer should not mutate the first order.' );
+	}
+
+	/**
+	 * @testdox create_order does not double-reserve coupon usage when reusing a pending order for the same cart.
+	 */
+	public function test_create_order_reuses_pending_order_without_double_reserving_coupon_usage() {
+		$product = WC_Helper_Product::create_simple_product();
+		$coupon  = new WC_Coupon();
+		$coupon->set_code( 'same-cart-retry-coupon' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 1 );
+		$coupon->set_usage_limit( 2 );
+		$coupon->save();
+
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'coupon-customer@example.com',
+		);
+
+		try {
+			$first_order_id  = $this->sut->create_order( $data );
+			$second_order_id = $this->sut->create_order( $data );
+		} finally {
+			WC()->cart->empty_cart();
+			WC()->session->__unset( 'order_awaiting_payment' );
+			WC()->session->__unset( 'checkout_pending_order_id' );
+		}
+
+		$this->assertSame( $first_order_id, $second_order_id, 'Same-cart retries should reuse the pending order.' );
+		$this->assertSame(
+			1,
+			$coupon->get_data_store()->get_tentative_usages_for_user( $coupon->get_id(), array( 'coupon-customer@example.com' ) ),
+			'Reusing a pending order should not create a second coupon hold.'
+		);
 	}
 
 	/**
@@ -355,6 +474,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		} finally {
 			WC()->cart->empty_cart();
 			WC()->session->__unset( 'order_awaiting_payment' );
+			WC()->session->__unset( 'checkout_pending_order_id' );
 		}
 
 		$this->assertIsInt( $first_order_id );
@@ -390,6 +510,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		} finally {
 			WC()->cart->empty_cart();
 			WC()->session->__unset( 'order_awaiting_payment' );
+			WC()->session->__unset( 'checkout_pending_order_id' );
 		}
 
 		$this->assertIsInt( $first_order_id );
@@ -421,6 +542,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		} finally {
 			WC()->cart->empty_cart();
 			WC()->session->__unset( 'order_awaiting_payment' );
+			WC()->session->__unset( 'checkout_pending_order_id' );
 		}
 
 		$this->assertIsInt( $first_order_id );

@@ -387,10 +387,13 @@ class WC_Checkout {
 		}
 
 		try {
-			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
+			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) ) ?: absint( WC()->session->get( 'checkout_pending_order_id' ) );
 			$cart_hash          = WC()->cart->get_cart_hash();
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+			$customer_id        = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
 			$order              = $order_id ? wc_get_order( $order_id ) : null;
+			$resuming_order     = false;
+			$resuming_failed_order = false;
 
 			/**
 			 * If there is an order pending payment, we can resume it here so
@@ -398,7 +401,16 @@ class WC_Checkout {
 			 * different items or cost, create a new order. We use a hash to
 			 * detect changes which is based on cart items + order total.
 			 */
-			if ( $order && $order->has_cart_hash( $cart_hash ) && $order->has_status( array( OrderStatus::PENDING, OrderStatus::FAILED ) ) ) {
+			if (
+				$order &&
+				$order->has_cart_hash( $cart_hash ) &&
+				$order->has_status( array( OrderStatus::PENDING, OrderStatus::FAILED ) ) &&
+				absint( $order->get_customer_id() ) === absint( $customer_id ) &&
+				( empty( $data['billing_email'] ) || wc_strtolower( $order->get_billing_email() ) === wc_strtolower( $data['billing_email'] ) )
+			) {
+				$resuming_order        = true;
+				$resuming_failed_order = $order->has_status( OrderStatus::FAILED );
+
 				/**
 				 * Indicates that we are resuming checkout for an existing order (which is pending payment, and which
 				 * has not changed since it was added to the current shopping session).
@@ -408,9 +420,6 @@ class WC_Checkout {
 				 * @param int $order_id The ID of the order being resumed.
 				 */
 				do_action( 'woocommerce_resume_order', $order_id );
-
-				// Remove all items - we will re-add them later.
-				$order->remove_order_items();
 			} else {
 				$order = new WC_Order();
 			}
@@ -436,7 +445,7 @@ class WC_Checkout {
 				}
 			}
 
-			if ( isset( $data['billing_email'] ) ) {
+			if ( isset( $data['billing_email'] ) && ( ! $resuming_order || $resuming_failed_order ) ) {
 				$order->hold_applied_coupons( $data['billing_email'] );
 			}
 
@@ -447,16 +456,18 @@ class WC_Checkout {
 			 *
 			 * @since 3.0.0 or earlier
 			 */
-			$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) );
+			$order->set_customer_id( $customer_id );
 			$order->set_currency( get_woocommerce_currency() );
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->set_customer_user_agent( wc_get_user_agent() );
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
 			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ] : $data['payment_method'] );
-			$this->set_data_from_cart( $order );
+			if ( ! $resuming_order ) {
+				$this->set_data_from_cart( $order );
+			}
 
-			if ( $order->has_cogs() && $this->cogs_is_enabled() ) {
+			if ( ! $resuming_order && $order->has_cogs() && $this->cogs_is_enabled() ) {
 				$order->calculate_cogs_total_value();
 			}
 
@@ -487,9 +498,9 @@ class WC_Checkout {
 				}
 			}
 
-			// Store the order as soon as it has been persisted so retries before payment processing reuse it.
+			// Store the checkout-created order separately from payment-attempt state so retries before payment processing reuse it.
 			if ( WC()->session ) {
-				WC()->session->set( 'order_awaiting_payment', $order_id );
+				WC()->session->set( 'checkout_pending_order_id', $order_id );
 				$save_session_data = array( WC()->session, 'save_data' );
 				if ( is_callable( $save_session_data ) ) {
 					$save_session_data();
