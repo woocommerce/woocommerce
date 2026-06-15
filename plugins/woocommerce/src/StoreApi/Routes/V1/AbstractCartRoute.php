@@ -215,6 +215,28 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	}
 
 	/**
+	 * Whether this route authenticates the request via the WordPress auth cookie.
+	 *
+	 * The Store API nonce exists to protect cookie-authenticated requests against
+	 * CSRF. Routes that authenticate by other means — a Jetpack blog token, an
+	 * application password, a POS capability check, etc. — are not a CSRF target,
+	 * so they can opt out of the nonce requirement by returning false here. This
+	 * is the intended extension point for that: override this single method rather
+	 * than re-implementing {@see self::requires_nonce()} and duplicating the
+	 * cart-token / update-request logic.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @return bool
+	 */
+	protected function is_cookie_authenticated( \WP_REST_Request $request ) {
+		unset( $request );
+		return true;
+	}
+
+	/**
 	 * Checks if a nonce is required for the route.
 	 *
 	 * @param \WP_REST_Request $request Request.
@@ -222,6 +244,9 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return bool
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
+		if ( ! $this->is_cookie_authenticated( $request ) ) {
+			return false;
+		}
 		return $this->is_update_request( $request ) && ! $this->has_cart_token( $request );
 	}
 

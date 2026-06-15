@@ -58,15 +58,17 @@ trait PosRouteTrait {
 	}
 
 	/**
-	 * POS requests are not cookie-authenticated, so CSRF isn't a vector and
-	 * the Store API nonce check is moot. Mirrors how agentic commerce opts
-	 * out of the same check in
-	 * {@see \Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\CheckoutSessions::requires_nonce}.
+	 * POS requests are authenticated by the route's capability check, not the
+	 * WordPress auth cookie, so they are not a CSRF target and opt out of the
+	 * Store API nonce requirement through the base-class seam. Agentic commerce
+	 * opts out the same way for its Jetpack-token-authenticated routes.
+	 *
+	 * @see \Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute::is_cookie_authenticated()
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return bool
 	 */
-	protected function requires_nonce( WP_REST_Request $request ) {
+	protected function is_cookie_authenticated( WP_REST_Request $request ) {
 		unset( $request );
 		return false;
 	}

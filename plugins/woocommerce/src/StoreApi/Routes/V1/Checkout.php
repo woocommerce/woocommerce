@@ -60,10 +60,17 @@ class Checkout extends AbstractCartRoute {
 	/**
 	 * Checks if a nonce is required for the route.
 	 *
+	 * Unlike other cart routes, checkout requires a nonce for read requests too,
+	 * but still honours the {@see AbstractCartRoute::is_cookie_authenticated()}
+	 * seam so non-cookie-authenticated callers (e.g. POS) can opt out.
+	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return bool
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
+		if ( ! $this->is_cookie_authenticated( $request ) ) {
+			return false;
+		}
 		return ! $this->has_cart_token( $request );
 	}
 
