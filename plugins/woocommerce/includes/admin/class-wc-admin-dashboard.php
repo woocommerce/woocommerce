@@ -135,6 +135,10 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 			$version = Constants::get_constant( 'WC_VERSION' );
 
+			if ( ! wp_script_is( 'wc-flot', 'registered' ) ) {
+				wp_register_script( 'wc-flot', WC()->plugin_url() . '/assets/js/jquery-flot/jquery.flot' . $suffix . '.js', array( 'jquery' ), $version, true );
+			}
+
 			wp_enqueue_script( 'wc-status-widget', WC()->plugin_url() . '/assets/js/admin/wc-status-widget' . $suffix . '.js', array( 'jquery', 'wc-flot' ), $version, true );
 			wp_enqueue_script( 'wc-status-widget-async', WC()->plugin_url() . '/assets/js/admin/wc-status-widget-async' . $suffix . '.js', array( 'jquery' ), $version, true );
 

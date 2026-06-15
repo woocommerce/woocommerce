@@ -174,10 +174,13 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	 * @testdox Status widget loading placeholder renders the spinner above the loading text.
 	 */
 	public function test_status_widget_loading_placeholder_renders_stacked_loader(): void {
+		wp_deregister_script( 'wc-flot' );
+
 		ob_start();
 		$this->sut->status_widget();
 		$html = ob_get_clean();
 
+		$this->assertTrue( wp_script_is( 'wc-flot', 'registered' ) );
 		$this->assertStringContainsString( 'class="wc-dashboard-widget-loading wc-status-widget-loading"', $html );
 		$this->assertStringContainsString( 'aria-busy="true"', $html );
 		$this->assertMatchesRegularExpression( '/<p><span class="spinner is-active"><\/span><span class="wc-dashboard-widget-loading__text">Loading status data\.\.\.<\/span><\/p>/', $html );
