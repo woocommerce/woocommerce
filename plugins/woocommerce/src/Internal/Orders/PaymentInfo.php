@@ -3,7 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Orders;
 
-use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPaymentMethodDetailsService;
 use WC_Abstract_Order;
 
 /**
@@ -108,33 +108,14 @@ class PaymentInfo {
 		}
 
 		if ( ! $payment_details ) {
-			if ( ! class_exists( \WC_Payments::class ) ) {
-				return array();
-			}
-
 			$payment_method_id = $order->get_meta( '_payment_method_id' );
 			if ( ! $payment_method_id ) {
 				return array();
 			}
 
-			try {
-				$payment_details = \WC_Payments::get_payments_api_client()->get_payment_method( $payment_method_id );
-			} catch ( \Throwable $ex ) {
-				$order_id = $order->get_id();
-				$message  = $ex->getMessage();
-				wc_get_logger()->error(
-					sprintf(
-						'%s - retrieving info for payment method %s for order %s: %s',
-						StringUtil::class_name_without_namespace( static::class ),
-						$payment_method_id,
-						$order_id,
-						$message
-					),
-					array(
-						'source' => 'payment-info',
-					)
-				);
-
+			$payment_method_details_service = wc_get_container()->get( WooPaymentsPaymentMethodDetailsService::class );
+			$payment_details                = $payment_method_details_service->get_payment_method_details( (string) $payment_method_id );
+			if ( empty( $payment_details ) ) {
 				return array();
 			}
 

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add native payments lifecycle event ingestion, WooPayments-compatible webhook reliability queue handling, and a namespaced payment method details service.
