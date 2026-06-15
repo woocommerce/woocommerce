@@ -84,6 +84,17 @@ class Capabilities {
 	 * (each preset's caps granted as a bundle) and a future granular model
 	 * (individual `woocommerce_pos_*` caps assigned without a baseline cap).
 	 *
+	 * Reads the resolved capability map (WP_User::$allcaps) directly rather than
+	 * looping over user_can(). user_can() re-runs map_meta_cap() and fires the
+	 * user_has_cap filter on every call, so the loop would dispatch that machinery
+	 * once per POS cap; an $allcaps lookup is a plain array check per cap.
+	 *
+	 * Reading $allcaps also scopes access to caps the user actually holds: unlike
+	 * user_can(), it does not honor the multisite super-admin grant, which
+	 * has_cap() applies as a runtime gate rather than storing in $allcaps. A super
+	 * admin therefore does not implicitly count as POS staff — they need an
+	 * explicit `woocommerce_pos_*` cap like anyone else.
+	 *
 	 * @param int $user_id Target user.
 	 * @return bool
 	 *
@@ -93,8 +104,14 @@ class Capabilities {
 		if ( $user_id <= 0 ) {
 			return false;
 		}
+
+		$user = get_userdata( $user_id );
+		if ( ! $user ) {
+			return false;
+		}
+
 		foreach ( self::all_pos_capabilities() as $cap ) {
-			if ( user_can( $user_id, $cap ) ) {
+			if ( ! empty( $user->allcaps[ $cap ] ) ) {
 				return true;
 			}
 		}
