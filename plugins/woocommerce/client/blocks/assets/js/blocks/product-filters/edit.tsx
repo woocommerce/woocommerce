@@ -78,13 +78,78 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 		},
 	} );
 
+	let filtersContent: JSX.Element;
+
+	if ( isPreview ) {
+		filtersContent = (
+			<div className="wc-block-product-filters__overlay-content">
+				<InnerBlocks templateLock={ false } template={ TEMPLATE } />
+			</div>
+		);
+	} else if ( showFilterDrawer ) {
+		filtersContent = (
+			<>
+				<button
+					className="wc-block-product-filters__open-overlay"
+					onClick={ () => setIsOpen( ! isOpen ) }
+				>
+					<Icon icon={ filterThreeLines } />
+					<span>{ __( 'Filter products', 'woocommerce' ) }</span>
+				</button>
+
+				<div className="wc-block-product-filters__overlay">
+					<div className="wc-block-product-filters__overlay-wrapper">
+						<div
+							className="wc-block-product-filters__overlay-dialog"
+							role="dialog"
+						>
+							<header className="wc-block-product-filters__overlay-header">
+								<button
+									className="wc-block-product-filters__close-overlay"
+									onClick={ () => setIsOpen( ! isOpen ) }
+								>
+									<span>
+										{ __( 'Close', 'woocommerce' ) }
+									</span>
+									<Icon icon={ close } />
+								</button>
+							</header>
+							<div className="wc-block-product-filters__overlay-content">
+								<InnerBlocks
+									templateLock={ false }
+									template={ TEMPLATE }
+								/>
+							</div>
+							<footer className="wc-block-product-filters__overlay-footer">
+								<button
+									className="wc-block-product-filters__apply wp-block-button__link wp-element-button"
+									onClick={ () => setIsOpen( ! isOpen ) }
+								>
+									<span>
+										{ __( 'Apply', 'woocommerce' ) }
+									</span>
+								</button>
+							</footer>
+						</div>
+					</div>
+				</div>
+			</>
+		);
+	} else {
+		filtersContent = (
+			<div className="wc-block-product-filters__content">
+				<InnerBlocks templateLock={ false } template={ TEMPLATE } />
+			</div>
+		);
+	}
+
 	return (
 		<>
 			<InspectorControls>
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<ToggleControl
 						label={ __(
-							'Show filter button on small screens',
+							'Use drawer on small screens',
 							'woocommerce'
 						) }
 						help={
@@ -105,71 +170,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<div { ...blockProps }>
-				{ isPreview ? (
-					<div className="wc-block-product-filters__overlay-content">
-						<InnerBlocks
-							templateLock={ false }
-							template={ TEMPLATE }
-						/>
-					</div>
-				) : (
-					<>
-						{ showFilterDrawer && (
-							<button
-								className="wc-block-product-filters__open-overlay"
-								onClick={ () => setIsOpen( ! isOpen ) }
-							>
-								<Icon icon={ filterThreeLines } />
-								<span>
-									{ __( 'Filter products', 'woocommerce' ) }
-								</span>
-							</button>
-						) }
-
-						<div className="wc-block-product-filters__overlay">
-							<div className="wc-block-product-filters__overlay-wrapper">
-								<div
-									className="wc-block-product-filters__overlay-dialog"
-									role="dialog"
-								>
-									<header className="wc-block-product-filters__overlay-header">
-										<button
-											className="wc-block-product-filters__close-overlay"
-											onClick={ () =>
-												setIsOpen( ! isOpen )
-											}
-										>
-											<span>
-												{ __( 'Close', 'woocommerce' ) }
-											</span>
-											<Icon icon={ close } />
-										</button>
-									</header>
-									<div className="wc-block-product-filters__overlay-content">
-										<InnerBlocks
-											templateLock={ false }
-											template={ TEMPLATE }
-										/>
-									</div>
-									<footer className="wc-block-product-filters__overlay-footer">
-										<button
-											className="wc-block-product-filters__apply wp-block-button__link wp-element-button"
-											onClick={ () =>
-												setIsOpen( ! isOpen )
-											}
-										>
-											<span>
-												{ __( 'Apply', 'woocommerce' ) }
-											</span>
-										</button>
-									</footer>
-								</div>
-							</div>
-						</div>
-					</>
-				) }
-			</div>
+			<div { ...blockProps }>{ filtersContent }</div>
 		</>
 	);
 };
