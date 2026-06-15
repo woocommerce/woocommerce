@@ -28,6 +28,8 @@ class ImplicitVerificationTest extends WC_Unit_Test_Case {
 		// Suppress auth-cookie and reset-password-cookie header calls that fail in
 		// the PHPUnit environment because output has already been sent.
 		add_filter( 'send_auth_cookies', '__return_false' );
+
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Test-only: swallow "headers already sent" notices from cookie sends during CLI test runs.
 		set_error_handler(
 			function ( int $errno, string $errstr ): bool {
 				// Allow "headers already sent" warnings through as a no-op so that

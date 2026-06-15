@@ -5,9 +5,7 @@
  * @package WooCommerce\Emails
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Email_Customer_Verify_Email', false ) ) :
 

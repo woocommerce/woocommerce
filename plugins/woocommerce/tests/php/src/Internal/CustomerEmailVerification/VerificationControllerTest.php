@@ -84,7 +84,8 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 		add_action(
 			'woocommerce_customer_verify_email_notification',
 			function ( $uid, $url ) use ( &$captured_url ) {
-				unset( $uid ); // Avoid parameter not used PHPCS errors.
+				// The $uid arg is unused but required by the two-argument hook signature.
+				unset( $uid );
 				$captured_url = $url;
 			},
 			10,

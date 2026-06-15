@@ -36,4 +36,5 @@ if ( $additional_content ) {
 	echo "\n\n----------------------------------------\n\n";
 }
 
+// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core filter documented in WC_Emails; mirrors the other plain email templates.
 echo wp_kses_post( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );
