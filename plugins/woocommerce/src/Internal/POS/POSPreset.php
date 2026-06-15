@@ -8,7 +8,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Enum-style class for the assignable POS staff presets.
  *
- * Presets are UI-curated bundles of `pos_*` capabilities (Cashier / Manager /
+ * Presets are UI-curated bundles of `woocommerce_pos_*` capabilities (Cashier / Manager /
  * Admin); see Capabilities::capabilities_for_preset(). Kept under the POS
  * namespace rather than the shared `Enums` namespace because presets are a
  * UI-level grouping that may change as the granular-caps model matures, not a
