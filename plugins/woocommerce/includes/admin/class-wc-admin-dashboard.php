@@ -291,7 +291,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 							$processing_count
 						)
 					);
-					?>
+				?>
 				</a>
 			</li>
 			<li class="on-hold-orders">
@@ -304,7 +304,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 							$on_hold_count
 						)
 					);
-					?>
+				?>
 				</a>
 			</li>
 			<?php
@@ -400,7 +400,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 							$lowinstock_count
 						)
 					);
-					?>
+				?>
 				</a>
 			</li>
 			<li class="out-of-stock">
@@ -413,7 +413,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 							$outofstock_count
 						)
 					);
-					?>
+				?>
 				</a>
 			</li>
 			<?php
