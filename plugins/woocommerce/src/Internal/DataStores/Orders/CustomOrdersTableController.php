@@ -745,7 +745,7 @@ class CustomOrdersTableController {
 						__( 'Stop sync', 'woocommerce' )
 					);
 				}
-			} elseif ( $sync_is_pending ) {
+			} elseif ( ( $sync_enabled || ! $this->data_synchronizer->custom_orders_table_is_authoritative() ) && $sync_is_pending ) {
 				$sync_now_url = wp_nonce_url(
 					add_query_arg(
 						array(

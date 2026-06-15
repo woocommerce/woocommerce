@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix incorrect "orders are out of sync" warning shown on WooCommerce > Settings > Advanced > Features for sites that have always used HPOS and never enabled compatibility mode.
