@@ -22,30 +22,30 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 	private const SUBSCRIPTION_TYPES = array( 'renewal', 'resubscribe', 'switch' );
 
 	private const PRODUCT_PRICE_CALCULATION_CALLS = array(
-		'WC_Cart_Totals::calculate_item_totals',
-		'WC_Cart::get_product_subtotal',
+		'WC_Cart_Totals->calculate_item_totals',
+		'WC_Cart->get_product_subtotal',
 		'wc_get_price_excluding_tax',
 		'wc_get_price_including_tax',
 	);
 
 	private const RENEWAL_SETUP_CALLS = array(
-		'WCS_Cart_Renewal::setup_cart',
+		'WCS_Cart_Renewal->setup_cart',
 	);
 
 	private const EARLY_RENEWAL_SETUP_CALLS = array(
-		'WCS_Cart_Early_Renewal::setup_cart',
+		'WCS_Cart_Early_Renewal->setup_cart',
 	);
 
 	private const RECURRING_ITEM_DATA_CALLS = array(
-		'WC_Payments_Subscription_Service::get_recurring_item_data_for_subscription',
+		'WC_Payments_Subscription_Service->get_recurring_item_data_for_subscription',
 	);
 
 	private const PRODUCT_GET_PRICE_CALLS = array(
-		'WC_Product::get_price',
+		'WC_Product->get_price',
 	);
 
 	private const APPLY_COUPON_CALLS = array(
-		'WC_Discounts::apply_coupon',
+		'WC_Discounts->apply_coupon',
 	);
 
 	/**
@@ -86,6 +86,28 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 	 * Register Subscriptions compatibility hooks.
 	 */
 	public function register() {
+		if (
+			! $this->arbiter->should_core_register()
+			|| $this->is_admin_request()
+			|| $this->is_cron_request()
+		) {
+			return;
+		}
+
+		if ( $this->is_subscriptions_runtime_available() || $this->have_plugins_loaded() ) {
+			$this->register_subscription_filters();
+			return;
+		}
+
+		$this->add_action_once( 'plugins_loaded', array( $this, 'register_subscription_filters' ), 20 );
+	}
+
+	/**
+	 * Register Subscriptions compatibility filters after supported runtimes have loaded.
+	 *
+	 * @internal
+	 */
+	public function register_subscription_filters(): void {
 		if (
 			! $this->arbiter->should_core_register()
 			|| $this->is_admin_request()
@@ -238,6 +260,15 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 	}
 
 	/**
+	 * Tell whether WordPress has finished loading active plugins.
+	 *
+	 * @return bool
+	 */
+	protected function have_plugins_loaded(): bool {
+		return 0 < did_action( 'plugins_loaded' );
+	}
+
+	/**
 	 * Get a subscription cart item for a specific Subscriptions cart type.
 	 *
 	 * @param string $type Subscription cart type.
@@ -343,7 +374,7 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 			}
 
 			$call_string = isset( $call['class'] )
-				? (string) $call['class'] . '::' . (string) $call['function']
+				? (string) $call['class'] . (string) ( $call['type'] ?? '::' ) . (string) $call['function']
 				: (string) $call['function'];
 
 			if ( isset( $expected_lookup[ $call_string ] ) ) {
@@ -465,6 +496,20 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 	private function add_filter_once( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		if ( false === has_filter( $hook, $callback ) ) {
 			add_filter( $hook, $callback, $priority, $accepted_args );
+		}
+	}
+
+	/**
+	 * Register an action only once for this controller instance.
+	 *
+	 * @param string   $hook          Hook name.
+	 * @param callable $callback      Hook callback.
+	 * @param int      $priority      Hook priority.
+	 * @param int      $accepted_args Accepted argument count.
+	 */
+	private function add_action_once( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
+		if ( false === has_action( $hook, $callback ) ) {
+			add_action( $hook, $callback, $priority, $accepted_args );
 		}
 	}
 }

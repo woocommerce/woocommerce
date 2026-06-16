@@ -27,11 +27,22 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 	);
 
 	/**
+	 * Controllers that scheduled deferred plugin-loaded registration.
+	 *
+	 * @var MultiCurrencySubscriptionsCompatibilityController[]
+	 */
+	private array $deferred_controllers = array();
+
+	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
 		foreach ( $this->hooks as $hook ) {
 			remove_all_filters( $hook );
+		}
+
+		foreach ( $this->deferred_controllers as $controller ) {
+			remove_action( 'plugins_loaded', array( $controller, 'register_subscription_filters' ), 20 );
 		}
 
 		parent::tearDown();
@@ -87,6 +98,25 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 
 		$this->assert_subscription_hooks_not_registered( $admin );
 		$this->assert_subscription_hooks_not_registered( $cron );
+	}
+
+	/**
+	 * @testdox Should defer registration until subscriptions runtime loads.
+	 */
+	public function test_defers_registration_until_subscriptions_runtime_loads(): void {
+		$sut = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, false );
+		$sut->set_plugins_loaded( false );
+		$this->deferred_controllers[] = $sut;
+
+		$sut->register();
+
+		$this->assertFalse( has_filter( 'wcpay_multi_currency_should_convert_product_price', array( $sut, 'should_convert_product_price' ) ) );
+		$this->assertSame( 20, has_action( 'plugins_loaded', array( $sut, 'register_subscription_filters' ) ) );
+
+		$sut->set_subscriptions_available( true );
+		$sut->register_subscription_filters();
+
+		$this->assertSame( 50, has_filter( 'wcpay_multi_currency_should_convert_product_price', array( $sut, 'should_convert_product_price' ) ) );
 	}
 
 	/**
@@ -153,24 +183,24 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 
 		$renewal = $this->create_controller();
 		$renewal->set_subscription_cart_item( 'renewal', $this->create_subscription( 'EUR' ) );
-		$renewal->set_backtrace_calls( array( 'WC_Cart_Totals::calculate_item_totals' ) );
+		$renewal->set_backtrace_calls( array( 'WC_Cart_Totals->calculate_item_totals' ) );
 
 		$this->assertFalse( $renewal->should_convert_product_price( true, $product ) );
 
 		$renewal_setup = $this->create_controller();
 		$renewal_setup->set_subscription_cart_item( 'renewal', $this->create_subscription( 'EUR' ) );
-		$renewal_setup->set_backtrace_calls( array( 'WCS_Cart_Renewal::setup_cart', 'WC_Cart_Totals::calculate_item_totals' ) );
+		$renewal_setup->set_backtrace_calls( array( 'WCS_Cart_Renewal->setup_cart', 'WC_Cart_Totals->calculate_item_totals' ) );
 
 		$this->assertTrue( $renewal_setup->should_convert_product_price( true, $product ) );
 
 		$resubscribe = $this->create_controller();
 		$resubscribe->set_subscription_cart_item( 'resubscribe', $this->create_subscription( 'GBP' ) );
-		$resubscribe->set_backtrace_calls( array( 'WC_Cart::get_product_subtotal' ) );
+		$resubscribe->set_backtrace_calls( array( 'WC_Cart->get_product_subtotal' ) );
 
 		$this->assertFalse( $resubscribe->should_convert_product_price( true, $product ) );
 
 		$recurring_item = $this->create_controller();
-		$recurring_item->set_backtrace_calls( array( 'WC_Payments_Subscription_Service::get_recurring_item_data_for_subscription', 'WC_Product::get_price' ) );
+		$recurring_item->set_backtrace_calls( array( 'WC_Payments_Subscription_Service->get_recurring_item_data_for_subscription', 'WC_Product->get_price' ) );
 
 		$this->assertFalse( $recurring_item->should_convert_product_price( true, $product ) );
 	}
@@ -187,16 +217,47 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 
 		$renewal = $this->create_controller();
 		$renewal->set_subscription_cart_item( 'renewal', $this->create_subscription( 'EUR' ) );
-		$renewal->set_backtrace_calls( array( 'WC_Discounts::apply_coupon' ) );
+		$renewal->set_backtrace_calls( array( 'WC_Discounts->apply_coupon' ) );
 
 		$this->assertFalse( $renewal->should_convert_coupon_amount( true, $this->create_coupon( 'renewal_fee' ) ) );
 		$this->assertTrue( $renewal->should_convert_coupon_amount( true, $this->create_coupon( 'fixed_cart' ) ) );
 
 		$early_renewal = $this->create_controller();
 		$early_renewal->set_subscription_cart_item( 'renewal', $this->create_subscription( 'EUR' ) );
-		$early_renewal->set_backtrace_calls( array( 'WCS_Cart_Early_Renewal::setup_cart', 'WC_Discounts::apply_coupon' ) );
+		$early_renewal->set_backtrace_calls( array( 'WCS_Cart_Early_Renewal->setup_cart', 'WC_Discounts->apply_coupon' ) );
 
 		$this->assertTrue( $early_renewal->should_convert_coupon_amount( true, $this->create_coupon( 'renewal_fee' ) ) );
+	}
+
+	/**
+	 * @testdox Should match instance method calls in the real backtrace.
+	 */
+	public function test_matches_instance_method_calls_in_real_backtrace(): void {
+		$sut = new class() extends MultiCurrencySubscriptionsCompatibilityController {
+			/**
+			 * Tell whether an expected call is present in the real backtrace.
+			 *
+			 * @param string $expected_call Expected call string.
+			 * @return bool
+			 */
+			public function matches_current_backtrace( string $expected_call ): bool {
+				return $this->is_call_in_backtrace( array( $expected_call ) );
+			}
+		};
+
+		$fixture = new class() {
+			/**
+			 * Call the controller from an instance method.
+			 *
+			 * @param object $controller Controller exposing matches_current_backtrace().
+			 * @return bool
+			 */
+			public function matches_instance_method_call( object $controller ): bool {
+				return $controller->matches_current_backtrace( self::class . '->matches_instance_method_call' );
+			}
+		};
+
+		$this->assertTrue( $fixture->matches_instance_method_call( $sut ) );
 	}
 
 	/**
@@ -277,6 +338,13 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 			private bool $is_cron;
 
 			/**
+			 * Whether WordPress has finished loading plugins.
+			 *
+			 * @var bool
+			 */
+			private bool $plugins_loaded = true;
+
+			/**
 			 * Subscription cart items keyed by type.
 			 *
 			 * @var array<string,array<string,mixed>>
@@ -308,6 +376,24 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 				$this->subscriptions_available = $subscriptions_available;
 				$this->is_admin                = $is_admin;
 				$this->is_cron                 = $is_cron;
+			}
+
+			/**
+			 * Set whether Subscriptions runtime is available.
+			 *
+			 * @param bool $subscriptions_available Whether Subscriptions runtime is available.
+			 */
+			public function set_subscriptions_available( bool $subscriptions_available ): void {
+				$this->subscriptions_available = $subscriptions_available;
+			}
+
+			/**
+			 * Set whether plugins_loaded has fired.
+			 *
+			 * @param bool $plugins_loaded Whether plugins_loaded has fired.
+			 */
+			public function set_plugins_loaded( bool $plugins_loaded ): void {
+				$this->plugins_loaded = $plugins_loaded;
 			}
 
 			/**
@@ -366,6 +452,15 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 			 */
 			protected function is_subscriptions_runtime_available(): bool {
 				return $this->subscriptions_available;
+			}
+
+			/**
+			 * Tell whether WordPress has finished loading plugins.
+			 *
+			 * @return bool
+			 */
+			protected function have_plugins_loaded(): bool {
+				return $this->plugins_loaded;
 			}
 
 			/**
