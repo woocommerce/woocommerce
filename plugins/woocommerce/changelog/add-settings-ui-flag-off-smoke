@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Add a smoke test for the settings UI feature flag off state.

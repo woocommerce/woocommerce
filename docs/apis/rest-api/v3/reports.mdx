@@ -309,7 +309,7 @@ woocommerce.get("reports/sales", query).parsed_response
 		"total_items": 6,
 		"total_tax": "0.00",
 		"total_shipping": "10.00",
-		"total_refunds": 0,
+		"total_refunds": "10.00",
 		"total_discount": "0.00",
 		"totals_grouped_by": "day",
 		"totals": {
@@ -320,6 +320,7 @@ woocommerce.get("reports/sales", query).parsed_response
 				"tax": "0.00",
 				"shipping": "10.00",
 				"discount": "0.00",
+				"refunds": "10.00",
 				"customers": 0
 			},
 			"2016-05-04": {
@@ -329,6 +330,7 @@ woocommerce.get("reports/sales", query).parsed_response
 				"tax": "0.00",
 				"shipping": "0.00",
 				"discount": "0.00",
+				"refunds": "0.00",
 				"customers": 0
 			}
 		},
@@ -346,6 +348,10 @@ woocommerce.get("reports/sales", query).parsed_response
 
   </TabItem>
 </Tabs>
+
+:::note Per-period `refunds` vs `total_refunds`
+Per-period `refunds` and the top-level `total_refunds` come from different queries and will not always agree. Per-period `refunds` sum each refund record by its own date inside the report range. `total_refunds` instead counts the parent order's full total for any refunded-status order that has *any* refund record falling in the range. When an order's refunds straddle the range boundary (e.g. a partial refund last month and another this month on the same order that ultimately becomes refunded), the two values can diverge. For per-day net sales, prefer `sales - refunds` per bucket.
+:::
 
 #### Sales report properties
 

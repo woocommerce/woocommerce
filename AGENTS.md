@@ -153,13 +153,15 @@ For detailed test commands, see `woocommerce-dev-cycle` skill.
 
 ## Interactivity API Stores
 
-All WooCommerce Interactivity API stores are **private by design**:
+Most WooCommerce Interactivity API stores are **private by design**. Exception: the `woocommerce/product-filters` store is public for Product Filters inner-block extensibility.
 
-- Stores use `lock: true` indicating they are not intended for extension
+For private stores:
+
+- Not intended for third-party extension
 - Removing or changing store state/selectors is **not a breaking change**
 - No backwards compatibility is required for store internals
-- If a store needs to be extensible in the future, it will be split into private (internal) and public (API) stores
-- General stores (namespace `woocommerce`) may become public eventually, but currently all are locked
+- If another store needs to be extensible in the future, it will be split into private (internal) and public (API) stores
+- General stores (namespace `woocommerce`) may become public eventually, but currently remain private
 
 Reference: [WordPress Interactivity API - Private Stores](https://developer.wordpress.org/block-editor/reference-guides/interactivity-api/api-reference#private-stores)
 
