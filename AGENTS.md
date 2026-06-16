@@ -161,7 +161,7 @@ Do not add `default` values to block attributes in `block.json`.
 
 - Default attribute values can be indistinguishable from missing attributes when parsed, especially when the default value is not serialized into saved block markup.
 - Defaults can create subtle conflicts with `theme.json`, block supports, editor controls, deprecations, and migrations.
-- During implementation or review, flag any newly inserted `default` in `block.json` and remove it before merging.
+- During implementation or review, flag any newly inserted `default` in `block.json`.
 
 ## Interactivity API Stores
 
