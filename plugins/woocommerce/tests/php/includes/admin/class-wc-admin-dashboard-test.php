@@ -222,6 +222,30 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Recent reviews widget uses the enabled default when the reviews setting has not been saved.
+	 */
+	public function test_init_registers_recent_reviews_widget_when_reviews_setting_is_missing(): void {
+		global $wp_meta_boxes;
+
+		require_once ABSPATH . 'wp-admin/includes/dashboard.php';
+		set_current_screen( 'dashboard' );
+		delete_option( 'woocommerce_enable_reviews' );
+		$had_comments_support = post_type_supports( 'product', 'comments' );
+		add_post_type_support( 'product', 'comments' );
+		unset( $wp_meta_boxes['dashboard'] );
+
+		try {
+			$this->sut->init();
+
+			$this->assertArrayHasKey( 'woocommerce_dashboard_recent_reviews', $wp_meta_boxes['dashboard']['normal']['high'] );
+		} finally {
+			if ( ! $had_comments_support ) {
+				remove_post_type_support( 'product', 'comments' );
+			}
+		}
+	}
+
+	/**
 	 * @testdox Status widget loading placeholder renders the spinner above the loading text.
 	 */
 	public function test_status_widget_loading_placeholder_renders_stacked_loader(): void {
