@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { type BlockConfiguration } from '@wordpress/blocks';
 import { heading } from '@wordpress/icons';
 
 /**
@@ -9,16 +8,14 @@ import { heading } from '@wordpress/icons';
  */
 import initBlock from '../utils/init-block';
 import metadata from './block.json';
-import edit, { type CategoryTitleAttributes } from './edit';
+import edit from './edit';
 
 const { name } = metadata;
 
 export { metadata, name };
 
-export const settings: Partial<
-	BlockConfiguration< CategoryTitleAttributes >
-> = {
-	edit: edit as unknown as BlockConfiguration< CategoryTitleAttributes >[ 'edit' ],
+export const settings = {
+	edit: edit,
 	icon: heading,
 	save: () => null,
 };
