@@ -1,0 +1,39 @@
+.wcpay-price-skeleton {
+	background: rgba( 0, 0, 0, 0.05 );
+	border: none;
+	border-radius: 2px;
+	display: inline-block;
+	height: 1em;
+	min-width: 60px;
+	overflow: hidden;
+	position: relative;
+
+	&::after {
+		animation: wcpay-skeleton-shimmer 1.25s infinite;
+		background: linear-gradient(
+			90deg,
+			transparent 0%,
+			rgba( 0, 0, 0, 0.05 ) 50%,
+			transparent 100%
+		);
+		content: '';
+		inset: 0;
+		position: absolute;
+		transform: translateX( -100% );
+
+		@media ( prefers-reduced-motion: reduce ) {
+			animation: none;
+		}
+	}
+}
+
+@keyframes wcpay-skeleton-shimmer {
+	100% {
+		transform: translateX( 100% );
+	}
+}
+
+.wcpay-price-error {
+	color: #999;
+	font-style: italic;
+}
