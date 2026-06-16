@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Filter native multi-currency automatic rates by account-supported currencies.
