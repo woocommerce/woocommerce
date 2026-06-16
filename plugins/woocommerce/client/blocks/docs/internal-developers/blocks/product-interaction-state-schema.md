@@ -59,10 +59,7 @@ type WooCommerceStoreState = {
 
 	products: Record< number, ProductResponseItem >;
 	productVariations: Record< number, ProductResponseItem >;
-	productInteractions: Record<
-		number,
-		Omit< ProductInteraction, 'quantityToAdd' >
-	>;
+	productInteractions: Record< number, ProductInteraction >;
 
 	mainProductInContext: ProductResponseItem | null;
 	productVariationInContext: ProductResponseItem | null;
@@ -105,7 +102,6 @@ type ProductInteraction = {
 	productId: number;
 	selectedAttributes: SelectedAttribute[];
 	quantities: Record< number, number >;
-	quantityToAdd: number;
 	validationErrors: ProductInteractionError[];
 	extensions?: Record< string, unknown >;
 };
@@ -117,14 +113,6 @@ type ProductInteractionError = {
 };
 ```
 
-`quantityToAdd` is added by the `productInteractionInContext` getter. It is derived from `productInteractionInContext.quantities[ productInContext.id ]` and is not stored in `productInteractions`.
-
-This gives consumers a stable binding target:
-
-```html
-<input data-wp-bind--value="state.productInteractionInContext.quantityToAdd" />
-```
-
 Notes:
 
 -   `productId` is the main product for the current context and is used to find `productInteractionInContext`.
@@ -132,7 +120,6 @@ Notes:
 -   `productVariationInContext` derives from `productId + selectedAttributes`.
 -   `productInContext` remains product data: `productVariationInContext ?? mainProductInContext`.
 -   `quantities` is storage keyed by purchasable product id: simple product id, selected variation id, or grouped child product id.
--   `quantityToAdd` is the consumer-facing quantity for the current `productInContext`.
 -   `extensions` is reserved for future add-ons/bundles/composite payloads; not a public API yet.
 
 ## Selected attribute shape
@@ -211,7 +198,7 @@ Actions operate on the current `woocommerce` context.
 -   Should `productVariationInContext` keep supporting explicit `variationId` context as an override?
 
 <details>
-<summary>Product type examples</summary>
+<summary>Examples and edge cases</summary>
 
 ### Simple product
 
@@ -239,6 +226,69 @@ state.productInteractions[ 100 ] = {
 	quantities: { 101: 2 },
 	validationErrors: [],
 };
+```
+
+### Quantity block
+
+Quantity UI should derive local getters from `productInteractionInContext`, `productInContext`, and `cartItemInContext`. The global store should not add quantity-specific convenience getters unless they are needed by multiple consumers.
+
+```typescript
+type QuantityBlockStore = {
+	state: {
+		quantity: number | undefined;
+		maxQuantity: number | undefined;
+	};
+	actions: {
+		setQuantity: ( quantity: number ) => void;
+	};
+};
+
+const { state: wooState, actions: wooActions } = store< WooCommerceStore >(
+	'woocommerce',
+	{},
+	{ lock: universalLock }
+);
+
+store< QuantityBlockStore >( 'woocommerce/product-quantity', {
+	state: {
+		get quantity(): number | undefined {
+			const product = wooState.productInContext;
+			const interaction = wooState.productInteractionInContext;
+
+			return product
+				? interaction?.quantities[ product.id ] ??
+						product.add_to_cart.minimum
+				: undefined;
+		},
+
+		get maxQuantity(): number | undefined {
+			const product = wooState.productInContext;
+			const cartItem = wooState.cartItemInContext;
+
+			return product
+				? Math.max(
+						0,
+						product.add_to_cart.maximum -
+							( cartItem?.quantity ?? 0 )
+				  )
+				: undefined;
+		},
+	},
+	actions: {
+		setQuantity( quantity: number ): void {
+			const product = wooState.productInContext;
+
+			if ( ! product ) {
+				return;
+			}
+
+			wooActions.setProductInteractionQuantity( {
+				id: product.id,
+				quantity,
+			} );
+		},
+	},
+} );
 ```
 
 ### Add to Wishlist for variable product
