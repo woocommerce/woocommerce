@@ -93,16 +93,25 @@ class WooPaymentsEventIngestor {
 	private LegacyProxy $legacy_proxy;
 
 	/**
+	 * WooPayments legacy runtime.
+	 *
+	 * @var WooPaymentsLegacyRuntime
+	 */
+	private WooPaymentsLegacyRuntime $legacy_runtime;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
 	 * @param OrderPaymentLifecycleService $lifecycle_service Order lifecycle service.
 	 * @param LegacyProxy                  $legacy_proxy      Legacy proxy.
+	 * @param WooPaymentsLegacyRuntime     $legacy_runtime    WooPayments legacy runtime.
 	 */
-	final public function init( OrderPaymentLifecycleService $lifecycle_service, LegacyProxy $legacy_proxy ): void {
+	final public function init( OrderPaymentLifecycleService $lifecycle_service, LegacyProxy $legacy_proxy, WooPaymentsLegacyRuntime $legacy_runtime ): void {
 		$this->lifecycle_service = $lifecycle_service;
 		$this->legacy_proxy      = $legacy_proxy;
+		$this->legacy_runtime    = $legacy_runtime;
 	}
 
 	/**
@@ -536,7 +545,7 @@ class WooPaymentsEventIngestor {
 		try {
 			$this->legacy_proxy->call_function( 'do_action', $hook, $event_type, $event );
 		} catch ( Throwable $exception ) {
-			$logger = $this->legacy_proxy->call_function( 'wc_get_logger' );
+			$logger = $this->legacy_runtime->get_logger();
 			if ( is_object( $logger ) && is_callable( array( $logger, 'error' ) ) ) {
 				$logger->error(
 					$exception->getMessage(),

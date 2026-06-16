@@ -4,7 +4,10 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
+use Automattic\WooCommerce\Internal\Payments\OrderPaymentLifecycleService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsEventIngestor;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use InvalidArgumentException;
 use RuntimeException;
 use WC_Order;
@@ -260,6 +263,71 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 				array( 'after', 'customer.created', 'evt_123' ),
 			),
 			$hook_calls
+		);
+	}
+
+	/**
+	 * @testdox Delivery hook errors are logged through the WooPayments runtime logger seam.
+	 */
+	public function test_delivery_hook_errors_are_logged_through_runtime_logger(): void {
+		$logger = new class() {
+			/**
+			 * Logged messages.
+			 *
+			 * @var string[]
+			 */
+			public array $messages = array();
+
+			/**
+			 * Record an error message.
+			 *
+			 * @param string              $message Error message.
+			 * @param array<string,mixed> $context Error context.
+			 */
+			public function error( string $message, array $context = array() ): void {
+				$this->messages[] = $message . ':' . ( $context['source'] ?? '' );
+			}
+		};
+
+		$legacy_proxy = new class() extends LegacyProxy {
+			/**
+			 * Call a user function.
+			 *
+			 * @param string $function_name Function name.
+			 * @param mixed  ...$parameters Function parameters.
+			 * @return mixed
+			 */
+			public function call_function( $function_name, ...$parameters ) {
+				if ( 'do_action' === $function_name ) {
+					throw new RuntimeException( 'Delivery hook failed.' );
+				}
+
+				if ( 'wc_get_logger' === $function_name ) {
+					throw new RuntimeException( 'Direct logger lookup should not be used.' );
+				}
+
+				return parent::call_function( $function_name, ...$parameters );
+			}
+		};
+
+		$runtime = new WooPaymentsLegacyRuntime();
+		$runtime->init( new LegacyRuntimeProxy( true, null, null, null, $logger ) );
+
+		$sut = new WooPaymentsEventIngestor();
+		$sut->init(
+			wc_get_container()->get( OrderPaymentLifecycleService::class ),
+			$legacy_proxy,
+			$runtime
+		);
+
+		$sut->process( $this->create_payment_intent_event( 'customer.created', $this->create_woopayments_order() ) );
+
+		$this->assertSame(
+			array(
+				'Delivery hook failed.:native-payments-webhook',
+				'Delivery hook failed.:native-payments-webhook',
+			),
+			$logger->messages
 		);
 	}
 

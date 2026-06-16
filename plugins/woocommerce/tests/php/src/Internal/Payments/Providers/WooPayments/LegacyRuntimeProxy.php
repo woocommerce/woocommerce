@@ -46,20 +46,38 @@ class LegacyRuntimeProxy extends LegacyProxy {
 	private ?object $logger;
 
 	/**
+	 * Account connect URL.
+	 *
+	 * @var string|null
+	 */
+	private ?string $account_connect_url;
+
+	/**
+	 * Account overview URL.
+	 *
+	 * @var string|null
+	 */
+	private ?string $account_overview_url;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param bool        $loaded     Whether the WooPayments runtime is loaded.
 	 * @param object|null $gateway    Gateway service.
 	 * @param object|null $account    Account service.
 	 * @param object|null $api_client API client.
-	 * @param object|null $logger     Logger.
+	 * @param object|null $logger               Logger.
+	 * @param string|null $account_connect_url  Account connect URL.
+	 * @param string|null $account_overview_url Account overview URL.
 	 */
-	public function __construct( bool $loaded, ?object $gateway = null, ?object $account = null, ?object $api_client = null, ?object $logger = null ) {
-		$this->loaded     = $loaded;
-		$this->gateway    = $gateway;
-		$this->account    = $account;
-		$this->api_client = $api_client;
-		$this->logger     = $logger;
+	public function __construct( bool $loaded, ?object $gateway = null, ?object $account = null, ?object $api_client = null, ?object $logger = null, ?string $account_connect_url = null, ?string $account_overview_url = null ) {
+		$this->loaded               = $loaded;
+		$this->gateway              = $gateway;
+		$this->account              = $account;
+		$this->api_client           = $api_client;
+		$this->logger               = $logger;
+		$this->account_connect_url  = $account_connect_url;
+		$this->account_overview_url = $account_overview_url;
 	}
 
 	/**
@@ -78,6 +96,14 @@ class LegacyRuntimeProxy extends LegacyProxy {
 			return $this->logger;
 		}
 
+		if ( 'is_callable' === $function_name && '\WC_Payments_Account::get_connect_url' === ( $parameters[0] ?? null ) ) {
+			return null !== $this->account_connect_url;
+		}
+
+		if ( 'is_callable' === $function_name && '\WC_Payments_Account::get_overview_page_url' === ( $parameters[0] ?? null ) ) {
+			return null !== $this->account_overview_url;
+		}
+
 		return parent::call_function( $function_name, ...$parameters );
 	}
 
@@ -90,6 +116,14 @@ class LegacyRuntimeProxy extends LegacyProxy {
 	 * @return mixed
 	 */
 	public function call_static( $class_name, $method_name, ...$parameters ) {
+		if ( 'WC_Payments_Account' === ltrim( $class_name, '\\' ) && 'get_connect_url' === $method_name ) {
+			return $this->account_connect_url;
+		}
+
+		if ( 'WC_Payments_Account' === ltrim( $class_name, '\\' ) && 'get_overview_page_url' === $method_name ) {
+			return $this->account_overview_url;
+		}
+
 		if ( 'WC_Payments' !== $class_name ) {
 			return parent::call_static( $class_name, $method_name, ...$parameters );
 		}

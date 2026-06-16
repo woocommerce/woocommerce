@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGate
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Payments\NativeWooPaymentsGateway;
-use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Throwable;
 use WC_Payment_Gateway;
 
@@ -26,11 +25,11 @@ defined( 'ABSPATH' ) || exit;
 class WooPaymentsOnboardingAdapter {
 
 	/**
-	 * Legacy proxy.
+	 * WooPayments legacy runtime.
 	 *
-	 * @var LegacyProxy
+	 * @var WooPaymentsLegacyRuntime
 	 */
-	private LegacyProxy $proxy;
+	private WooPaymentsLegacyRuntime $legacy_runtime;
 
 	/**
 	 * WooPayments provider.
@@ -44,12 +43,12 @@ class WooPaymentsOnboardingAdapter {
 	 *
 	 * @internal
 	 *
-	 * @param LegacyProxy         $proxy    Legacy proxy.
-	 * @param WooPaymentsProvider $provider WooPayments provider.
+	 * @param WooPaymentsLegacyRuntime $legacy_runtime WooPayments legacy runtime.
+	 * @param WooPaymentsProvider      $provider       WooPayments provider.
 	 */
-	final public function init( LegacyProxy $proxy, WooPaymentsProvider $provider ): void {
-		$this->proxy    = $proxy;
-		$this->provider = $provider;
+	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsProvider $provider ): void {
+		$this->legacy_runtime = $legacy_runtime;
+		$this->provider       = $provider;
 	}
 
 	/**
@@ -58,7 +57,7 @@ class WooPaymentsOnboardingAdapter {
 	 * @return bool
 	 */
 	public function is_extension_active(): bool {
-		return (bool) $this->get_proxy()->call_function( 'class_exists', '\WC_Payments' );
+		return $this->get_legacy_runtime()->is_loaded();
 	}
 
 	/**
@@ -91,7 +90,7 @@ class WooPaymentsOnboardingAdapter {
 	 */
 	public function get_payment_gateway(): WC_Payment_Gateway {
 		if ( $this->is_extension_active() ) {
-			$gateway = $this->get_proxy()->call_static( '\WC_Payments', 'get_gateway' );
+			$gateway = $this->get_legacy_runtime()->get_gateway();
 
 			if ( $gateway instanceof WC_Payment_Gateway ) {
 				return $gateway;
@@ -216,11 +215,9 @@ class WooPaymentsOnboardingAdapter {
 	 * @return string
 	 */
 	public function get_onboarding_kyc_fallback_url( PaymentGateway $provider ): string {
-		if (
-			$this->is_extension_active() &&
-			$this->get_proxy()->call_function( 'is_callable', '\WC_Payments_Account::get_connect_url' )
-		) {
-			return (string) $this->get_proxy()->call_static( '\WC_Payments_Account', 'get_connect_url', WooPaymentsService::FROM_NOX_IN_CONTEXT );
+		$connect_url = $this->get_legacy_runtime()->get_account_connect_url( WooPaymentsService::FROM_NOX_IN_CONTEXT );
+		if ( null !== $connect_url ) {
+			return $connect_url;
 		}
 
 		return $provider->get_onboarding_url(
@@ -238,15 +235,13 @@ class WooPaymentsOnboardingAdapter {
 	 * @return string
 	 */
 	public function get_overview_page_url(): string {
-		if (
-			$this->is_extension_active() &&
-			$this->get_proxy()->call_function( 'is_callable', '\WC_Payments_Account::get_overview_page_url' )
-		) {
+		$overview_url = $this->get_legacy_runtime()->get_account_overview_page_url();
+		if ( null !== $overview_url ) {
 			return add_query_arg(
 				array(
 					'from' => WooPaymentsService::FROM_NOX_IN_CONTEXT,
 				),
-				$this->get_proxy()->call_static( '\WC_Payments_Account', 'get_overview_page_url' )
+				$overview_url
 			);
 		}
 
@@ -266,17 +261,7 @@ class WooPaymentsOnboardingAdapter {
 	 * @return object|null
 	 */
 	private function get_account_service(): ?object {
-		if ( ! $this->is_extension_active() ) {
-			return null;
-		}
-
-		try {
-			$account_service = $this->get_proxy()->call_static( '\WC_Payments', 'get_account_service' );
-
-			return is_object( $account_service ) ? $account_service : null;
-		} catch ( Throwable $e ) {
-			return null;
-		}
+		return $this->get_legacy_runtime()->get_account_service();
 	}
 
 	/**
@@ -297,16 +282,16 @@ class WooPaymentsOnboardingAdapter {
 	}
 
 	/**
-	 * Get the legacy proxy.
+	 * Get the WooPayments legacy runtime.
 	 *
-	 * @return LegacyProxy
+	 * @return WooPaymentsLegacyRuntime
 	 */
-	private function get_proxy(): LegacyProxy {
-		if ( ! isset( $this->proxy ) ) {
-			$this->proxy = wc_get_container()->get( LegacyProxy::class );
+	private function get_legacy_runtime(): WooPaymentsLegacyRuntime {
+		if ( ! isset( $this->legacy_runtime ) ) {
+			$this->legacy_runtime = wc_get_container()->get( WooPaymentsLegacyRuntime::class );
 		}
 
-		return $this->proxy;
+		return $this->legacy_runtime;
 	}
 
 	/**

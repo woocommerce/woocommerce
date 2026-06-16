@@ -91,6 +91,25 @@ class WooPaymentsLegacyRuntime {
 	}
 
 	/**
+	 * Get the WooPayments account connect URL.
+	 *
+	 * @param string $source Source context.
+	 * @return string|null
+	 */
+	public function get_account_connect_url( string $source ): ?string {
+		return $this->get_account_static_url( 'get_connect_url', $source );
+	}
+
+	/**
+	 * Get the WooPayments account overview page URL.
+	 *
+	 * @return string|null
+	 */
+	public function get_account_overview_page_url(): ?string {
+		return $this->get_account_static_url( 'get_overview_page_url' );
+	}
+
+	/**
 	 * Get a WooPayments service through the legacy runtime.
 	 *
 	 * @param string $method_name WC_Payments static accessor.
@@ -108,5 +127,30 @@ class WooPaymentsLegacyRuntime {
 		}
 
 		return is_object( $service ) ? $service : null;
+	}
+
+	/**
+	 * Get a WooPayments account URL through the legacy account static helper.
+	 *
+	 * @param string $method_name WC_Payments_Account static URL accessor.
+	 * @param mixed  ...$args     Method arguments.
+	 * @return string|null
+	 */
+	private function get_account_static_url( string $method_name, ...$args ): ?string {
+		if ( ! $this->is_loaded() ) {
+			return null;
+		}
+
+		try {
+			if ( ! $this->legacy_proxy->call_function( 'is_callable', "\\WC_Payments_Account::{$method_name}" ) ) {
+				return null;
+			}
+
+			$url = $this->legacy_proxy->call_static( 'WC_Payments_Account', $method_name, ...$args );
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+
+		return is_scalar( $url ) ? (string) $url : null;
 	}
 }

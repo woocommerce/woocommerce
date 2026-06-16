@@ -8,6 +8,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOnboardingAdapter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -84,19 +86,22 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 
 		$this->legacy_proxy->register_static_mocks(
 			array(
-				'\WC_Payments'         => array(
+				'WC_Payments'         => array(
 					'get_gateway'         => fn() => $this->gateway,
 					'get_account_service' => fn() => $this->account_service,
 				),
-				'\WC_Payments_Account' => array(
+				'WC_Payments_Account' => array(
 					'get_connect_url'       => fn() => 'https://example.com/kyc',
 					'get_overview_page_url' => fn() => 'https://example.com/overview',
 				),
 			)
 		);
 
+		$legacy_runtime = new WooPaymentsLegacyRuntime();
+		$legacy_runtime->init( $this->legacy_proxy );
+
 		$this->adapter = new WooPaymentsOnboardingAdapter();
-		$this->adapter->init( $this->legacy_proxy, $this->provider );
+		$this->adapter->init( $legacy_runtime, $this->provider );
 	}
 
 	/**
@@ -114,7 +119,7 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 	public function test_runtime_available_when_legacy_extension_is_active(): void {
 		$this->legacy_proxy->register_function_mocks(
 			array(
-				'class_exists' => fn( $class_to_check ) => '\WC_Payments' === $class_to_check,
+				'class_exists' => fn( $class_to_check ) => 'WC_Payments' === ltrim( (string) $class_to_check, '\\' ),
 			)
 		);
 		$this->provider->method( 'can_process_payments' )->willReturn( false );
@@ -158,7 +163,7 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 	public function test_legacy_account_state_is_normalized(): void {
 		$this->legacy_proxy->register_function_mocks(
 			array(
-				'class_exists' => fn( $class_to_check ) => '\WC_Payments' === $class_to_check,
+				'class_exists' => fn( $class_to_check ) => 'WC_Payments' === ltrim( (string) $class_to_check, '\\' ),
 			)
 		);
 		$this->provider->method( 'can_process_payments' )->willReturn( false );
@@ -181,5 +186,48 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 		self::assertTrue( $this->adapter->has_test_account( $this->payment_gateway_provider ) );
 		self::assertFalse( $this->adapter->has_sandbox_account( $this->payment_gateway_provider ) );
 		self::assertFalse( $this->adapter->has_live_account( $this->payment_gateway_provider ) );
+	}
+
+	/**
+	 * @testdox Legacy runtime seam supplies extension, gateway, account, and URL data.
+	 */
+	public function test_legacy_runtime_seam_supplies_extension_gateway_account_and_url_data(): void {
+		$runtime = new WooPaymentsLegacyRuntime();
+		$runtime->init(
+			new LegacyRuntimeProxy(
+				true,
+				$this->gateway,
+				$this->account_service,
+				null,
+				null,
+				'https://example.com/runtime-connect',
+				'https://example.com/runtime-overview'
+			)
+		);
+
+		$adapter = new WooPaymentsOnboardingAdapter();
+		$adapter->init( $runtime, $this->provider );
+
+		$this->provider->method( 'can_process_payments' )->willReturn( false );
+		$this->account_service
+			->method( 'is_stripe_account_valid' )
+			->willReturn( true );
+		$this->account_service
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'paymentsEnabled' => true,
+					'testDrive'       => false,
+					'isLive'          => true,
+				)
+			);
+
+		self::assertTrue( $adapter->is_extension_active() );
+		self::assertSame( $this->gateway, $adapter->get_payment_gateway() );
+		self::assertTrue( $adapter->has_valid_account( $this->payment_gateway_provider ) );
+		self::assertTrue( $adapter->has_working_account( $this->payment_gateway_provider ) );
+		self::assertTrue( $adapter->has_live_account( $this->payment_gateway_provider ) );
+		self::assertSame( 'https://example.com/runtime-connect', $adapter->get_onboarding_kyc_fallback_url( $this->payment_gateway_provider ) );
+		self::assertSame( 'https://example.com/runtime-overview?from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT, $adapter->get_overview_page_url() );
 	}
 }
