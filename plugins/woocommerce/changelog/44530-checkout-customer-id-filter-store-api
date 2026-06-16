@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add `woocommerce_checkout_customer_id` filter to block-based checkout (Store API) for parity with classic checkout. Allows third-party plugins to override the customer ID assigned to an order during block checkout — enabling concierge/B2B ordering flows that run on the classic checkout today.

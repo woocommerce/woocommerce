@@ -982,6 +982,24 @@ class Checkout extends AbstractCartRoute {
 	private function process_customer( \WP_REST_Request $request ) {
 		$order = $this->get_order_or_throw();
 
+		/**
+		 * Filters the customer ID at block-based checkout processing time.
+		 *
+		 * Provides parity with the `woocommerce_checkout_customer_id` filter used in
+		 * WC_Checkout::process_customer() for the classic checkout. Fires once, at
+		 * checkout submission, after the cart has been committed to a draft order.
+		 *
+		 * Common use cases: concierge/operator ordering (a logged-in shop manager
+		 * assigns the order to a different customer account) and multi-customer B2B
+		 * flows. Note — if a new customer account is created during this request, the
+		 * newly-created account ID takes precedence over this filter's return value.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param int $customer_id The current user's ID (0 for guests).
+		 */
+		$order->set_customer_id( absint( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) ) );
+
 		if ( $this->should_create_customer_account( $request ) ) {
 			$customer_id = wc_create_new_customer(
 				$request['billing_address']['email'],
