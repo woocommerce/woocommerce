@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve native multi-currency store-currency handling for WooCommerce UPS rates.
