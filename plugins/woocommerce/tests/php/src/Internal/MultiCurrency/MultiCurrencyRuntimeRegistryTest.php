@@ -142,6 +142,7 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'init',
+				'init',
 				'woocommerce_created_customer',
 				'woocommerce_edit_account_form',
 				'woocommerce_save_account_details',
@@ -149,6 +150,7 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 			$selected_currency_hooks
 		);
 		$this->assertSame( 11, $hook_groups['selected_currency']['actions'][0]['priority'] );
+		$this->assertSame( 12, $hook_groups['selected_currency']['actions'][1]['priority'] );
 	}
 
 	/**

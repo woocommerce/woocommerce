@@ -95,6 +95,38 @@ class MultiCurrencySelectedCurrencyPersistenceServiceTest extends WC_Unit_Test_C
 	}
 
 	/**
+	 * @testdox Should detect stored logged-in user currency.
+	 */
+	public function test_detects_stored_logged_in_user_currency(): void {
+		$user_id = self::factory()->user->create();
+		wp_set_current_user( $user_id );
+		update_user_meta( $user_id, 'wcpay_currency', 'GBP' );
+		$sut = $this->create_service( 'USD' );
+
+		$this->assertTrue( $sut->has_stored_currency_code() );
+	}
+
+	/**
+	 * @testdox Should detect stored guest session currency.
+	 */
+	public function test_detects_stored_guest_session_currency(): void {
+		WC()->session = $this->create_session( 'GBP' );
+		$sut          = $this->create_service( 'USD' );
+
+		$this->assertTrue( $sut->has_stored_currency_code() );
+	}
+
+	/**
+	 * @testdox Should report no stored currency when user and session are empty.
+	 */
+	public function test_reports_no_stored_currency_when_user_and_session_are_empty(): void {
+		WC()->session = $this->create_session();
+		$sut          = $this->create_service( 'USD' );
+
+		$this->assertFalse( $sut->has_stored_currency_code() );
+	}
+
+	/**
 	 * @testdox Should copy guest session currency to new customer meta.
 	 */
 	public function test_copies_guest_session_currency_to_new_customer_meta(): void {

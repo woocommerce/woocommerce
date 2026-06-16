@@ -8,7 +8,10 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistry;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDatabaseCache;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontendProjectionService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyGeolocationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRateService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
@@ -24,6 +27,11 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
  * @internal Transitional internal component for the native multi-currency runtime.
  */
 class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface {
+
+	private const OPTION_PREFIX             = 'wcpay_multi_currency';
+	private const RENDERING_MODE_CACHE      = 'cache';
+	private const CACHE_FEATURE_FLAG_OPTION = '_wcpay_feature_mc_cache_optimized';
+	private const DISABLE_SWITCHING_FILTER  = 'wcpay_multi_currency_should_disable_currency_switching';
 
 	/**
 	 * Runtime owner arbiter.
@@ -45,6 +53,13 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 	 * @var MultiCurrencyRequestContext|null
 	 */
 	private ?MultiCurrencyRequestContext $request_context = null;
+
+	/**
+	 * Geolocation service.
+	 *
+	 * @var MultiCurrencyGeolocationService|null
+	 */
+	private ?MultiCurrencyGeolocationService $geolocation_service = null;
 
 	/**
 	 * Initialize the class instance.
@@ -80,6 +95,17 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 	}
 
 	/**
+	 * Set the geolocation service.
+	 *
+	 * @internal Used by tests and future explicit bootstrap definitions.
+	 *
+	 * @param MultiCurrencyGeolocationService $geolocation_service Geolocation service.
+	 */
+	public function set_geolocation_service( MultiCurrencyGeolocationService $geolocation_service ): void {
+		$this->geolocation_service = $geolocation_service;
+	}
+
+	/**
 	 * Register selected-currency hooks.
 	 */
 	public function register() {
@@ -89,6 +115,7 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 
 		if ( $this->get_request_context()->should_register_selected_currency_entry_hooks() ) {
 			$this->add_action_once( 'init', array( $this, 'handle_init' ), 11 );
+			$this->add_action_once( 'init', array( $this, 'handle_geolocation_init' ), 12 );
 			$this->add_action_once( 'woocommerce_created_customer', array( $this, 'handle_woocommerce_created_customer' ) );
 		}
 
@@ -113,6 +140,29 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 
 		$this->get_persistence_service()->update_selected_currency( strtoupper( trim( (string) $currency_code ) ) );
 		$this->clear_url_price_params();
+	}
+
+	/**
+	 * Handle automatic selected-currency changes from geolocation.
+	 *
+	 * @internal
+	 */
+	public function handle_geolocation_init(): void {
+		if (
+			! $this->is_using_auto_currency_switching()
+			|| $this->should_disable_currency_switching()
+			|| $this->should_use_async_rendering()
+			|| $this->get_persistence_service()->has_stored_currency_code()
+		) {
+			return;
+		}
+
+		$currency_code = $this->get_geolocation_service()->get_currency_by_customer_location();
+		if ( ! is_string( $currency_code ) || '' === trim( $currency_code ) ) {
+			return;
+		}
+
+		$this->get_persistence_service()->update_selected_currency( strtoupper( trim( $currency_code ) ), false );
 	}
 
 	/**
@@ -200,6 +250,20 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 	}
 
 	/**
+	 * Get the geolocation service.
+	 *
+	 * @return MultiCurrencyGeolocationService
+	 */
+	private function get_geolocation_service(): MultiCurrencyGeolocationService {
+		if ( null === $this->geolocation_service ) {
+			$localization_service      = new MultiCurrencyLocalizationService();
+			$this->geolocation_service = new MultiCurrencyGeolocationService( $localization_service );
+		}
+
+		return $this->geolocation_service;
+	}
+
+	/**
 	 * Get the request context.
 	 *
 	 * @return MultiCurrencyRequestContext
@@ -210,6 +274,71 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 		}
 
 		return $this->request_context;
+	}
+
+	/**
+	 * Tell whether automatic currency switching is enabled.
+	 *
+	 * @return bool
+	 */
+	private function is_using_auto_currency_switching(): bool {
+		return 'yes' === get_option( self::OPTION_PREFIX . '_enable_auto_currency', 'no' );
+	}
+
+	/**
+	 * Tell whether compatibility rules disable switching.
+	 *
+	 * @return bool
+	 */
+	private function should_disable_currency_switching(): bool {
+		$query_args = array();
+		if ( isset( $_GET['pay_for_order'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$query_args['pay_for_order'] = wc_clean( wp_unslash( $_GET['pay_for_order'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+
+		/**
+		 * Filters whether native multi-currency switching should be disabled.
+		 *
+		 * @param bool $should_disable Whether switching should be disabled.
+		 *
+		 * @since 11.0.0
+		 */
+		$external_filter_disabled = (bool) apply_filters( self::DISABLE_SWITCHING_FILTER, false );
+
+		return MultiCurrencyCompatibilityProjectionService::should_disable_currency_switching( $query_args, false, $external_filter_disabled );
+	}
+
+	/**
+	 * Tell whether async rendering should handle geolocation switching client-side.
+	 *
+	 * @return bool
+	 */
+	private function should_use_async_rendering(): bool {
+		return $this->is_cache_optimized_mode()
+			&& ! $this->has_active_session()
+			&& ! $this->get_request_context()->is_store_api_request();
+	}
+
+	/**
+	 * Tell whether cache-optimized mode is active.
+	 *
+	 * @return bool
+	 */
+	private function is_cache_optimized_mode(): bool {
+		return '1' === get_option( self::CACHE_FEATURE_FLAG_OPTION, '0' )
+			&& self::RENDERING_MODE_CACHE === get_option( self::OPTION_PREFIX . '_rendering_mode', MultiCurrencyFrontendProjectionService::RENDERING_MODE_SPEED );
+	}
+
+	/**
+	 * Tell whether a cookie-backed WooCommerce session exists.
+	 *
+	 * @return bool
+	 */
+	private function has_active_session(): bool {
+		return function_exists( 'WC' )
+			&& is_object( WC()->session )
+			&& method_exists( WC()->session, 'has_session' )
+			&& WC()->session->has_session();
 	}
 
 	/**

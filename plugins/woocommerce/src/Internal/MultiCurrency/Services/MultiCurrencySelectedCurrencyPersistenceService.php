@@ -133,6 +133,30 @@ class MultiCurrencySelectedCurrencyPersistenceService {
 	}
 
 	/**
+	 * Tell whether the current customer has a stored selected currency.
+	 *
+	 * @return bool True when user meta or the active session stores a currency.
+	 *
+	 * @since 11.0.0
+	 */
+	public function has_stored_currency_code(): bool {
+		$user_id = get_current_user_id();
+		if ( $user_id ) {
+			$currency_code = get_user_meta( $user_id, self::CURRENCY_STORAGE_KEY, true );
+
+			return is_string( $currency_code ) && '' !== $currency_code;
+		}
+
+		if ( function_exists( 'WC' ) && WC()->session && method_exists( WC()->session, 'get' ) ) {
+			$currency_code = WC()->session->get( self::CURRENCY_STORAGE_KEY );
+
+			return is_string( $currency_code ) && '' !== $currency_code;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Recalculate cart totals.
 	 *
 	 * @internal

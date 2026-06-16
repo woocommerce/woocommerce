@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySelectedCurrencyController;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyGeolocationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySelectedCurrencyPersistenceService;
 use WC_Unit_Test_Case;
@@ -27,6 +28,22 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 	);
 
 	/**
+	 * Original WooCommerce session.
+	 *
+	 * @var mixed
+	 */
+	private $original_session;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->original_session = WC()->session;
+	}
+
+	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
@@ -39,8 +56,13 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 			$_GET['min_price'],
 			$_GET['max_price'],
 			$_GET['rest_route'],
+			$_GET['pay_for_order'],
 			$_POST['wcpay_selected_currency']
 		);
+		delete_option( 'wcpay_multi_currency_enable_auto_currency' );
+		delete_option( 'wcpay_multi_currency_rendering_mode' );
+		delete_option( '_wcpay_feature_mc_cache_optimized' );
+		WC()->session = $this->original_session;
 
 		parent::tearDown();
 	}
@@ -69,6 +91,7 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 		$sut->register();
 
 		$this->assertSame( 11, has_action( 'init', array( $sut, 'handle_init' ) ) );
+		$this->assertSame( 12, has_action( 'init', array( $sut, 'handle_geolocation_init' ) ) );
 		$this->assertSame( 10, has_action( 'woocommerce_created_customer', array( $sut, 'handle_woocommerce_created_customer' ) ) );
 		$this->assertSame( 10, has_action( 'woocommerce_edit_account_form', array( $sut, 'handle_woocommerce_edit_account_form' ) ) );
 		$this->assertSame( 10, has_action( 'woocommerce_save_account_details', array( $sut, 'handle_woocommerce_save_account_details' ) ) );
@@ -88,6 +111,7 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 		$sut->register();
 
 		$this->assertFalse( has_action( 'init', array( $sut, 'handle_init' ) ) );
+		$this->assertFalse( has_action( 'init', array( $sut, 'handle_geolocation_init' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_created_customer', array( $sut, 'handle_woocommerce_created_customer' ) ) );
 		$this->assertSame( 10, has_action( 'woocommerce_edit_account_form', array( $sut, 'handle_woocommerce_edit_account_form' ) ) );
 		$this->assertSame( 10, has_action( 'woocommerce_save_account_details', array( $sut, 'handle_woocommerce_save_account_details' ) ) );
@@ -107,6 +131,7 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 		$sut->register();
 
 		$this->assertSame( 11, has_action( 'init', array( $sut, 'handle_init' ) ) );
+		$this->assertSame( 12, has_action( 'init', array( $sut, 'handle_geolocation_init' ) ) );
 		$this->assertSame( 10, has_action( 'woocommerce_created_customer', array( $sut, 'handle_woocommerce_created_customer' ) ) );
 	}
 
@@ -121,6 +146,106 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 		$sut->handle_init();
 
 		$this->assertSame( array( 'GBP' ), $service->updated_currencies );
+	}
+
+	/**
+	 * @testdox Should update currency from geolocation when automatic switching is enabled.
+	 */
+	public function test_updates_currency_from_geolocation_when_auto_currency_is_enabled(): void {
+		update_option( 'wcpay_multi_currency_enable_auto_currency', 'yes' );
+		$service = $this->create_persistence_service();
+		$sut     = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, $service );
+		$sut->set_geolocation_service( $this->create_geolocation_service( 'CAD' ) );
+
+		$sut->handle_geolocation_init();
+
+		$this->assertSame( array( 'CAD' ), $service->updated_currencies );
+		$this->assertSame( array( false ), $service->persist_flags );
+	}
+
+	/**
+	 * @testdox Should not update geolocation currency when automatic switching is disabled.
+	 */
+	public function test_does_not_update_geolocation_currency_when_auto_currency_is_disabled(): void {
+		$service = $this->create_persistence_service();
+		$sut     = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, $service );
+		$sut->set_geolocation_service( $this->create_geolocation_service( 'CAD' ) );
+
+		$sut->handle_geolocation_init();
+
+		$this->assertSame( array(), $service->updated_currencies );
+	}
+
+	/**
+	 * @testdox Should not update geolocation currency when switching is disabled.
+	 */
+	public function test_does_not_update_geolocation_currency_when_switching_is_disabled(): void {
+		update_option( 'wcpay_multi_currency_enable_auto_currency', 'yes' );
+		$service               = $this->create_persistence_service();
+		$sut                   = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, $service );
+		$_GET['pay_for_order'] = '1';
+		$sut->set_geolocation_service( $this->create_geolocation_service( 'CAD' ) );
+
+		$sut->handle_geolocation_init();
+
+		$this->assertSame( array(), $service->updated_currencies );
+	}
+
+	/**
+	 * @testdox Should not overwrite stored currency with geolocation currency.
+	 */
+	public function test_does_not_overwrite_stored_currency_with_geolocation_currency(): void {
+		update_option( 'wcpay_multi_currency_enable_auto_currency', 'yes' );
+		$service = $this->create_persistence_service( true, 'GBP', true );
+		$sut     = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, $service );
+		$sut->set_geolocation_service( $this->create_geolocation_service( 'CAD' ) );
+
+		$sut->handle_geolocation_init();
+
+		$this->assertSame( array(), $service->updated_currencies );
+	}
+
+	/**
+	 * @testdox Should skip geolocation persistence in cache mode without an active session.
+	 */
+	public function test_skips_geolocation_persistence_in_cache_mode_without_active_session(): void {
+		update_option( 'wcpay_multi_currency_enable_auto_currency', 'yes' );
+		update_option( 'wcpay_multi_currency_rendering_mode', 'cache' );
+		update_option( '_wcpay_feature_mc_cache_optimized', '1' );
+		WC()->session = $this->create_session( false );
+		$service      = $this->create_persistence_service();
+		$sut          = $this->create_controller(
+			MultiCurrencyRuntimeArbiter::OWNER_CORE,
+			$service,
+			$this->create_request_context( true, false )
+		);
+		$sut->set_geolocation_service( $this->create_geolocation_service( 'CAD' ) );
+
+		$sut->handle_geolocation_init();
+
+		$this->assertSame( array(), $service->updated_currencies );
+	}
+
+	/**
+	 * @testdox Should persist geolocation currency in cache mode for Store API requests.
+	 */
+	public function test_persists_geolocation_currency_in_cache_mode_for_store_api_requests(): void {
+		update_option( 'wcpay_multi_currency_enable_auto_currency', 'yes' );
+		update_option( 'wcpay_multi_currency_rendering_mode', 'cache' );
+		update_option( '_wcpay_feature_mc_cache_optimized', '1' );
+		WC()->session = $this->create_session( false );
+		$service      = $this->create_persistence_service();
+		$sut          = $this->create_controller(
+			MultiCurrencyRuntimeArbiter::OWNER_CORE,
+			$service,
+			$this->create_request_context( true, true )
+		);
+		$sut->set_geolocation_service( $this->create_geolocation_service( 'CAD' ) );
+
+		$sut->handle_geolocation_init();
+
+		$this->assertSame( array( 'CAD' ), $service->updated_currencies );
+		$this->assertSame( array( false ), $service->persist_flags );
 	}
 
 	/**
@@ -328,21 +453,32 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Create a persistence service test double.
 	 *
-	 * @param bool   $has_additional_currencies Whether multiple currencies are enabled.
-	 * @param string $selected_code             Selected currency code.
-	 * @return MultiCurrencySelectedCurrencyPersistenceService&object{updated_currencies: string[], new_customer_ids: int[]}
+	 * @param bool     $has_additional_currencies Whether multiple currencies are enabled.
+	 * @param string   $selected_code             Selected currency code.
+	 * @param bool     $has_stored_currency       Whether a stored currency exists.
+	 * @param string[] $enabled_currency_codes    Enabled currency codes.
+	 * @return MultiCurrencySelectedCurrencyPersistenceService&object{updated_currencies: string[], persist_flags: bool[], new_customer_ids: int[]}
 	 */
 	private function create_persistence_service(
 		bool $has_additional_currencies = true,
-		string $selected_code = 'USD'
+		string $selected_code = 'USD',
+		bool $has_stored_currency = false,
+		array $enabled_currency_codes = array( 'USD', 'GBP', 'JPY', 'EUR', 'CAD' )
 	): MultiCurrencySelectedCurrencyPersistenceService {
-		return new class( $has_additional_currencies, $selected_code ) extends MultiCurrencySelectedCurrencyPersistenceService {
+		return new class( $has_additional_currencies, $selected_code, $has_stored_currency, $enabled_currency_codes ) extends MultiCurrencySelectedCurrencyPersistenceService {
 			/**
 			 * Updated currencies.
 			 *
 			 * @var string[]
 			 */
 			public array $updated_currencies = array();
+
+			/**
+			 * Persist-change flags.
+			 *
+			 * @var bool[]
+			 */
+			public array $persist_flags = array();
 
 			/**
 			 * New customer IDs.
@@ -366,14 +502,37 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 			private string $selected_code;
 
 			/**
+			 * Whether a stored currency exists.
+			 *
+			 * @var bool
+			 */
+			private bool $has_stored_currency;
+
+			/**
+			 * Enabled currency lookup.
+			 *
+			 * @var array<string,bool>
+			 */
+			private array $enabled_currency_lookup;
+
+			/**
 			 * Constructor.
 			 *
-			 * @param bool   $has_additional_currencies Whether multiple currencies are enabled.
-			 * @param string $selected_code             Selected currency code.
+			 * @param bool     $has_additional_currencies Whether multiple currencies are enabled.
+			 * @param string   $selected_code             Selected currency code.
+			 * @param bool     $has_stored_currency       Whether a stored currency exists.
+			 * @param string[] $enabled_currency_codes   Enabled currency codes.
 			 */
-			public function __construct( bool $has_additional_currencies, string $selected_code ) {
+			public function __construct(
+				bool $has_additional_currencies,
+				string $selected_code,
+				bool $has_stored_currency,
+				array $enabled_currency_codes
+			) {
 				$this->has_additional_currencies = $has_additional_currencies;
 				$this->selected_code             = $selected_code;
+				$this->has_stored_currency       = $has_stored_currency;
+				$this->enabled_currency_lookup   = array_fill_keys( array_map( 'strtoupper', $enabled_currency_codes ), true );
 			}
 
 			/**
@@ -384,9 +543,14 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 			 * @return bool
 			 */
 			public function update_selected_currency( string $currency_code, bool $persist_change = true ): bool {
-				unset( $persist_change );
+				$currency_code = strtoupper( trim( $currency_code ) );
 
-				$this->updated_currencies[] = strtoupper( trim( $currency_code ) );
+				if ( ! isset( $this->enabled_currency_lookup[ $currency_code ] ) ) {
+					return false;
+				}
+
+				$this->updated_currencies[] = $currency_code;
+				$this->persist_flags[]      = $persist_change;
 
 				return true;
 			}
@@ -442,6 +606,85 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 			public function get_selected_currency_code(): string {
 				return $this->selected_code;
 			}
+
+			/**
+			 * Tell whether a stored selected currency exists.
+			 *
+			 * @return bool
+			 */
+			public function has_stored_currency_code(): bool {
+				return $this->has_stored_currency;
+			}
+		};
+	}
+
+	/**
+	 * Create a deterministic geolocation service.
+	 *
+	 * @param string|null $currency_code Currency code to return.
+	 * @return MultiCurrencyGeolocationService
+	 */
+	private function create_geolocation_service( ?string $currency_code ): MultiCurrencyGeolocationService {
+		return new class( $currency_code ) extends MultiCurrencyGeolocationService {
+			/**
+			 * Currency code to return.
+			 *
+			 * @var string|null
+			 */
+			private ?string $currency_code;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param string|null $currency_code Currency code to return.
+			 */
+			public function __construct( ?string $currency_code ) {
+				$this->currency_code = $currency_code;
+			}
+
+			/**
+			 * Get the customer's currency based on location.
+			 *
+			 * @return string|null
+			 */
+			public function get_currency_by_customer_location(): ?string {
+				return $this->currency_code;
+			}
+		};
+	}
+
+	/**
+	 * Create a session test double.
+	 *
+	 * @param bool $has_session Whether an active session exists.
+	 * @return object
+	 */
+	private function create_session( bool $has_session ): object {
+		return new class( $has_session ) {
+			/**
+			 * Whether an active session exists.
+			 *
+			 * @var bool
+			 */
+			private bool $has_session;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param bool $has_session Whether an active session exists.
+			 */
+			public function __construct( bool $has_session ) {
+				$this->has_session = $has_session;
+			}
+
+			/**
+			 * Tell whether a cookie-backed session exists.
+			 *
+			 * @return bool
+			 */
+			public function has_session(): bool {
+				return $this->has_session;
+			}
 		};
 	}
 
@@ -449,10 +692,11 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 	 * Create a request context test double.
 	 *
 	 * @param bool $should_register_entry_hooks Whether selected-currency entry hooks should register.
+	 * @param bool $is_store_api_request        Whether this is a Store API request.
 	 * @return MultiCurrencyRequestContext
 	 */
-	private function create_request_context( bool $should_register_entry_hooks ): MultiCurrencyRequestContext {
-		return new class( $should_register_entry_hooks ) extends MultiCurrencyRequestContext {
+	private function create_request_context( bool $should_register_entry_hooks, bool $is_store_api_request = false ): MultiCurrencyRequestContext {
+		return new class( $should_register_entry_hooks, $is_store_api_request ) extends MultiCurrencyRequestContext {
 			/**
 			 * Whether selected-currency entry hooks should register.
 			 *
@@ -461,12 +705,21 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 			private bool $should_register_entry_hooks;
 
 			/**
+			 * Whether this is a Store API request.
+			 *
+			 * @var bool
+			 */
+			private bool $is_store_api_request;
+
+			/**
 			 * Constructor.
 			 *
 			 * @param bool $should_register_entry_hooks Whether selected-currency entry hooks should register.
+			 * @param bool $is_store_api_request        Whether this is a Store API request.
 			 */
-			public function __construct( bool $should_register_entry_hooks ) {
+			public function __construct( bool $should_register_entry_hooks, bool $is_store_api_request ) {
 				$this->should_register_entry_hooks = $should_register_entry_hooks;
+				$this->is_store_api_request        = $is_store_api_request;
 			}
 
 			/**
@@ -476,6 +729,15 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 			 */
 			public function should_register_selected_currency_entry_hooks(): bool {
 				return $this->should_register_entry_hooks;
+			}
+
+			/**
+			 * Tell whether this is a Store API request.
+			 *
+			 * @return bool
+			 */
+			public function is_store_api_request(): bool {
+				return $this->is_store_api_request;
 			}
 		};
 	}
