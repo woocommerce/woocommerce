@@ -149,7 +149,21 @@ class MultiCurrencyRequestContext {
 	 * @return bool True for WooCommerce REST requests.
 	 */
 	protected function is_wc_rest_api_request(): bool {
-		return function_exists( 'WC' ) && method_exists( WC(), 'is_rest_api_request' ) && WC()->is_rest_api_request();
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+
+		$rest_prefix         = trailingslashit( rest_get_url_prefix() );
+		$is_rest_api_request = false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		/**
+		 * Filters whether this is a WooCommerce REST API request.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param bool $is_rest_api_request Whether this is a WooCommerce REST API request.
+		 */
+		return (bool) apply_filters( 'woocommerce_is_rest_api_request', $is_rest_api_request );
 	}
 
 	/**
@@ -158,10 +172,6 @@ class MultiCurrencyRequestContext {
 	 * @return bool|null Store API result, or null when unavailable.
 	 */
 	protected function get_wc_store_api_request(): ?bool {
-		if ( function_exists( 'WC' ) && method_exists( WC(), 'is_store_api_request' ) ) {
-			return WC()->is_store_api_request();
-		}
-
 		return null;
 	}
 }

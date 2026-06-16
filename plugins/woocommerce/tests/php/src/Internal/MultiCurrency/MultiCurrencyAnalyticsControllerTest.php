@@ -86,6 +86,60 @@ class MultiCurrencyAnalyticsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not resolve the WooCommerce singleton while registering analytics hooks.
+	 */
+	public function test_register_does_not_resolve_woocommerce_singleton_for_rest_detection(): void {
+		$reflection = new \ReflectionClass( \WooCommerce::class );
+		$instance   = $reflection->getProperty( '_instance' );
+		$instance->setAccessible( true );
+		$previous_instance = $instance->getValue();
+		$previous_uri      = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve the test request URI for restoration.
+		$sentinel          = new class() extends \WooCommerce {
+			/**
+			 * Whether is_rest_api_request was called.
+			 *
+			 * @var bool
+			 */
+			public bool $is_rest_api_request_called = false;
+
+			/**
+			 * Constructor intentionally avoids booting WooCommerce.
+			 */
+			public function __construct() {}
+
+			/**
+			 * Record accidental WooCommerce singleton access.
+			 *
+			 * @return bool
+			 */
+			public function is_rest_api_request() {
+				$this->is_rest_api_request_called = true;
+
+				return true;
+			}
+		};
+
+		$instance->setValue( $sentinel );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Simulate a REST request URI.
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc-analytics/reports/orders';
+
+		try {
+			$sut = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, false );
+			$sut->register();
+		} finally {
+			$instance->setValue( $previous_instance );
+
+			if ( null === $previous_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $previous_uri;
+			}
+		}
+
+		$this->assertFalse( $sentinel->is_rest_api_request_called, 'Analytics registration must not call WC() while WooCommerce is still constructing.' );
+	}
+
+	/**
 	 * @testdox Should register SQL hooks only for REST requests with multi-currency orders.
 	 */
 	public function test_registers_sql_hooks_only_for_rest_requests_with_multi_currency_orders(): void {
@@ -209,17 +263,20 @@ class MultiCurrencyAnalyticsControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Create an analytics controller.
 	 *
-	 * @param string $owner Runtime owner.
+	 * @param string $owner                     Runtime owner.
+	 * @param bool   $set_rest_request_resolver Whether to set the default REST request resolver.
 	 * @return MultiCurrencyAnalyticsController
 	 */
-	private function create_controller( string $owner ): MultiCurrencyAnalyticsController {
+	private function create_controller( string $owner, bool $set_rest_request_resolver = true ): MultiCurrencyAnalyticsController {
 		$controller = new MultiCurrencyAnalyticsController();
 		$controller->init(
 			$this->create_arbiter( $owner ),
 			wc_get_container()->get( MultiCurrencyRuntimeServiceFactory::class )
 		);
 		$controller->set_dev_mode_resolver( static fn(): bool => false );
-		$controller->set_rest_request_resolver( static fn(): bool => false );
+		if ( $set_rest_request_resolver ) {
+			$controller->set_rest_request_resolver( static fn(): bool => false );
+		}
 		$controller->set_multi_currency_orders_resolver( static fn(): bool => false );
 		$controller->set_hpos_resolver( static fn(): bool => false );
 		$controller->set_default_currency_resolver( static fn(): string => 'USD' );

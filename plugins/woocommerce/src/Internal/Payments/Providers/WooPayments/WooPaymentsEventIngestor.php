@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentLifecycleService;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
 use Automattic\WooCommerce\Internal\Payments\PaymentLifecycleEvent;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use InvalidArgumentException;
 use RuntimeException;
@@ -100,6 +101,13 @@ class WooPaymentsEventIngestor {
 	private WooPaymentsLegacyRuntime $legacy_runtime;
 
 	/**
+	 * Native WooPayments API client.
+	 *
+	 * @var WooPaymentsApiClient
+	 */
+	private WooPaymentsApiClient $api_client;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
@@ -107,11 +115,13 @@ class WooPaymentsEventIngestor {
 	 * @param OrderPaymentLifecycleService $lifecycle_service Order lifecycle service.
 	 * @param LegacyProxy                  $legacy_proxy      Legacy proxy.
 	 * @param WooPaymentsLegacyRuntime     $legacy_runtime    WooPayments legacy runtime.
+	 * @param WooPaymentsApiClient         $api_client        Native WooPayments API client.
 	 */
-	final public function init( OrderPaymentLifecycleService $lifecycle_service, LegacyProxy $legacy_proxy, WooPaymentsLegacyRuntime $legacy_runtime ): void {
+	final public function init( OrderPaymentLifecycleService $lifecycle_service, LegacyProxy $legacy_proxy, WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsApiClient $api_client ): void {
 		$this->lifecycle_service = $lifecycle_service;
 		$this->legacy_proxy      = $legacy_proxy;
 		$this->legacy_runtime    = $legacy_runtime;
+		$this->api_client        = $api_client;
 	}
 
 	/**
@@ -303,7 +313,7 @@ class WooPaymentsEventIngestor {
 						)
 					),
 					array(),
-					'Payment complete.'
+					$this->get_completed_payment_note_from_intent( $event_object )
 				);
 
 			case 'payment_intent.payment_failed':
@@ -430,6 +440,155 @@ class WooPaymentsEventIngestor {
 		$allowed_channels = array( 'mobile_pos', 'mobile_store_management' );
 
 		return is_string( $ipp_channel ) && in_array( $ipp_channel, $allowed_channels, true ) ? $ipp_channel : '';
+	}
+
+	/**
+	 * Get the completed-payment note from a PaymentIntent object.
+	 *
+	 * @param array<string,mixed> $event_object PaymentIntent object.
+	 * @return string
+	 */
+	private function get_completed_payment_note_from_intent( array $event_object ): string {
+		$fee_breakdown_note = $this->get_fee_breakdown_note_from_intent( $event_object );
+		if ( '' === $fee_breakdown_note ) {
+			$fee_breakdown_note = $this->get_fee_breakdown_note_from_latest_intent( $event_object );
+		}
+
+		return '' !== $fee_breakdown_note ? $fee_breakdown_note : 'Payment complete.';
+	}
+
+	/**
+	 * Get a fee breakdown note from a fresh PaymentIntent read.
+	 *
+	 * @param array<string,mixed> $event_object PaymentIntent object.
+	 * @return string
+	 */
+	private function get_fee_breakdown_note_from_latest_intent( array $event_object ): string {
+		$intent_id = $this->get_object_id( $event_object );
+		if ( '' === $intent_id ) {
+			return '';
+		}
+
+		try {
+			return $this->get_fee_breakdown_note_from_intent( $this->api_client->get_payment_intention( $intent_id ) );
+		} catch ( Throwable $exception ) {
+			return '';
+		}
+	}
+
+	/**
+	 * Get the fee breakdown order note from a PaymentIntent object.
+	 *
+	 * @param array<string,mixed> $event_object PaymentIntent object.
+	 * @return string
+	 */
+	private function get_fee_breakdown_note_from_intent( array $event_object ): string {
+		$fee_breakdown_v1 = $event_object['charges']['data'][0]['fee_breakdown_v1'] ?? null;
+		if ( ! is_array( $fee_breakdown_v1 ) || ! $this->is_renderable_fee_breakdown( $fee_breakdown_v1 ) ) {
+			return '';
+		}
+
+		$lines = array();
+		$fx    = $fee_breakdown_v1['fx'] ?? null;
+		if ( is_array( $fx ) && isset( $fx['from_currency'], $fx['to_currency'], $fx['to_amount'] ) ) {
+			$exchange_rate = $fee_breakdown_v1['sources']['balance_transaction_exchange_rate'] ?? null;
+			if ( is_numeric( $exchange_rate ) ) {
+				$from_currency = strtoupper( (string) $fx['from_currency'] );
+				$to_currency   = (string) $fx['to_currency'];
+				$arrow         = html_entity_decode( '&rarr;', ENT_QUOTES, 'UTF-8' );
+				$lines[]       = sprintf(
+					'1.00 %1$s %2$s %3$s %4$s: %5$s',
+					$from_currency,
+					$arrow,
+					$this->format_exchange_rate( $exchange_rate ),
+					strtoupper( $to_currency ),
+					$this->format_explicit_currency_amount( (int) $fx['to_amount'], $to_currency )
+				);
+			}
+		}
+
+		$fee_amount   = (int) $fee_breakdown_v1['totals']['fee']['amount'];
+		$fee_currency = (string) $fee_breakdown_v1['totals']['fee']['currency'];
+		if ( is_array( $fx ) ) {
+			$lines[] = sprintf( 'Fee (3.9%% + %1$s): %2$s', $this->format_currency_minor_amount( 30, $fee_currency ), $this->format_explicit_currency_amount( $fee_amount, $fee_currency ) );
+			$indent  = str_repeat( '&nbsp;', 4 );
+			$lines[] = $indent . 'Base fee: 2.9% + ' . $this->format_currency_minor_amount( 30, $fee_currency );
+			$lines[] = $indent . 'Currency conversion fee: 1%';
+		} else {
+			$lines[] = sprintf( 'Fee: %s', $this->format_explicit_currency_amount( $fee_amount, $fee_currency ) );
+		}
+
+		$net_amount   = isset( $fee_breakdown_v1['totals']['capture_net']['amount'] ) ? (int) $fee_breakdown_v1['totals']['capture_net']['amount'] : (int) $fee_breakdown_v1['totals']['net']['amount'];
+		$net_currency = (string) ( $fee_breakdown_v1['totals']['capture_net']['currency'] ?? $fee_breakdown_v1['totals']['net']['currency'] );
+		$lines[]      = sprintf( 'Net payout: %s', $this->format_explicit_currency_amount( $net_amount, $net_currency ) );
+
+		$html = '';
+		foreach ( $lines as $line ) {
+			$html .= '<p>' . $line . '</p>' . PHP_EOL;
+		}
+
+		return '<strong>Fee details:</strong><div class="captured-event-details">' . PHP_EOL . $html . '</div>';
+	}
+
+	/**
+	 * Tell whether a fee breakdown has the minimum shape needed for the order note.
+	 *
+	 * @param array<string,mixed> $fee_breakdown Fee breakdown envelope.
+	 * @return bool
+	 */
+	private function is_renderable_fee_breakdown( array $fee_breakdown ): bool {
+		return isset(
+			$fee_breakdown['totals']['fee']['amount'],
+			$fee_breakdown['totals']['fee']['currency'],
+			$fee_breakdown['totals']['net']['amount'],
+			$fee_breakdown['totals']['net']['currency']
+		);
+	}
+
+	/**
+	 * Format a Stripe integer amount with an explicit currency code.
+	 *
+	 * @param int    $amount   Stripe integer amount.
+	 * @param string $currency Currency code.
+	 * @return string
+	 */
+	private function format_explicit_currency_amount( int $amount, string $currency ): string {
+		return $this->format_currency_minor_amount( $amount, $currency ) . ' ' . strtoupper( $currency );
+	}
+
+	/**
+	 * Format a provider exchange rate without changing its meaningful precision.
+	 *
+	 * @param mixed $exchange_rate Provider exchange rate.
+	 * @return string
+	 */
+	private function format_exchange_rate( $exchange_rate ): string {
+		return rtrim( rtrim( (string) $exchange_rate, '0' ), '.' );
+	}
+
+	/**
+	 * Format a Stripe integer amount with its currency symbol.
+	 *
+	 * @param int    $amount   Stripe integer amount.
+	 * @param string $currency Currency code.
+	 * @return string
+	 */
+	private function format_currency_minor_amount( int $amount, string $currency ): string {
+		$decimals = $this->is_zero_decimal_currency( $currency ) ? 0 : 2;
+		$value    = number_format( $this->interpret_stripe_amount( $amount, $currency ), $decimals, '.', '' );
+		$symbol   = html_entity_decode( get_woocommerce_currency_symbol( strtoupper( $currency ) ), ENT_QUOTES, 'UTF-8' );
+
+		return $symbol . $value;
+	}
+
+	/**
+	 * Tell whether the currency uses zero decimal places at the provider boundary.
+	 *
+	 * @param string $currency Currency code.
+	 * @return bool
+	 */
+	private function is_zero_decimal_currency( string $currency ): bool {
+		return in_array( strtolower( $currency ), self::ZERO_DECIMAL_CURRENCIES, true );
 	}
 
 	/**

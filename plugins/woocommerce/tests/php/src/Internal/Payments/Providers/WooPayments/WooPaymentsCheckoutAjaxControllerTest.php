@@ -26,9 +26,36 @@ class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
+		remove_all_actions( 'wp_ajax_update_order_status' );
+		remove_all_actions( 'wp_ajax_nopriv_update_order_status' );
+		remove_all_actions( 'wp_ajax_create_setup_intent' );
 		remove_all_filters( 'woocommerce_native_woopayments_is_recurring_payment' );
+		remove_all_filters( 'woocommerce_native_woopayments_related_subscriptions_for_order' );
 		wp_set_current_user( 0 );
 		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Should register AJAX callbacks even when transport readiness is still deferred.
+	 */
+	public function test_registers_callbacks_when_transport_is_unavailable_at_boot(): void {
+		$api_client = new class() extends WooPaymentsApiClient {
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return false;
+			}
+		};
+		$sut        = $this->create_controller( $api_client );
+
+		$sut->register();
+
+		$this->assertSame( 10, has_action( 'wp_ajax_update_order_status', array( $sut, 'handle_update_order_status' ) ) );
+		$this->assertSame( 10, has_action( 'wp_ajax_nopriv_update_order_status', array( $sut, 'handle_update_order_status' ) ) );
+		$this->assertSame( 10, has_action( 'wp_ajax_create_setup_intent', array( $sut, 'handle_create_setup_intent' ) ) );
 	}
 
 	/**
@@ -85,13 +112,15 @@ class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'seti_native', $order->get_meta( '_intent_id', true ) );
 		$this->assertSame( 'pm_native', $order->get_meta( '_payment_method_id', true ) );
 		$this->assertSame( 'cus_native', $order->get_meta( '_stripe_customer_id', true ) );
+		$this->assert_order_has_no_note_containing( $order, 'A payment of' );
+		$this->assert_order_has_no_note_containing( $order, 'A test payment of' );
 	}
 
 	/**
 	 * @testdox Order-status callback should use the Core-owned account service for lifecycle mode metadata.
 	 */
 	public function test_update_order_status_uses_account_service_mode_for_lifecycle_meta(): void {
-		$order = $this->create_woopayments_order( '10.00' );
+		$order = $this->create_woopayments_order( '50.00' );
 		$order->update_meta_data( '_intent_id', 'pi_native' );
 		$order->save();
 
@@ -120,8 +149,32 @@ class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 					'id'             => 'pi_native',
 					'status'         => 'succeeded',
 					'currency'       => 'usd',
+					'amount'         => 5000,
 					'customer'       => 'cus_native',
 					'payment_method' => 'pm_native',
+					'charges'        => array(
+						'total_count' => 1,
+						'data'        => array(
+							array(
+								'id'                     => 'ch_native',
+								'payment_method'         => 'pm_native',
+								'payment_method_details' => array(
+									'type' => 'card',
+									'card' => array(
+										'brand'   => 'visa',
+										'funding' => 'credit',
+										'last4'   => '4242',
+										'network' => 'visa',
+									),
+								),
+								'balance_transaction'    => array( 'id' => 'txn_native' ),
+								'outcome'                => array( 'risk_level' => 'normal' ),
+								'amount'                 => 5000,
+								'currency'               => 'usd',
+								'application_fee_amount' => 218,
+							),
+						),
+					),
 				);
 			}
 		};
@@ -139,6 +192,17 @@ class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( WC_Order::class, $order );
 		$this->assertSame( 200, $response['status_code'] );
 		$this->assertSame( 'test', $order->get_meta( '_wcpay_mode', true ) );
+		$this->assertSame( '2.18', $order->get_meta( '_wcpay_transaction_fee', true ) );
+		$this->assertSame( '47.82', $order->get_meta( '_wcpay_net', true ) );
+		$this->assertSame( 'allow', $order->get_meta( '_wcpay_fraud_outcome_status', true ) );
+		$this->assertSame( 'allow', $order->get_meta( '_wcpay_fraud_meta_box_type', true ) );
+		$this->assertSame( 'Visa credit card', $order->get_payment_method_title() );
+		$this->assertSame( '4242', $order->get_meta( 'last4', true ) );
+		$this->assertSame( 'visa', $order->get_meta( '_card_brand', true ) );
+		$this->assertStringContainsString( '"last4":"4242"', (string) $order->get_meta( '_wcpay_payment_method_details', true ) );
+		$this->assert_order_has_note_containing( $order, 'A test payment of' );
+		$this->assert_order_has_note_containing( $order, 'was processed using WooPayments in <strong>test mode</strong>' );
+		$this->assert_order_has_note_containing( $order, 'pi_native' );
 	}
 
 	/**
@@ -331,6 +395,101 @@ class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( WC_Payment_Token_CC::class, $token );
 		$this->assertSame( 'pm_native', $token->get_token() );
 		$this->assertContains( $token->get_id(), $order->get_payment_tokens() );
+	}
+
+	/**
+	 * @testdox Order-status callback should copy saved token details to related subscriptions.
+	 */
+	public function test_update_order_status_copies_saved_card_token_to_related_subscriptions(): void {
+		$user_id      = $this->factory()->user->create();
+		$order        = $this->create_woopayments_order( '10.00' );
+		$subscription = $this->create_woopayments_order( '10.00' );
+		wp_set_current_user( $user_id );
+
+		$order->set_customer_id( $user_id );
+		$order->update_meta_data( '_intent_id', 'pi_native' );
+		$order->save();
+		$subscription->set_customer_id( $user_id );
+		$subscription->save();
+
+		$api_client    = new class() extends WooPaymentsApiClient {
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Retrieve a PaymentIntent.
+			 *
+			 * @param string $intent_id PaymentIntent ID.
+			 * @return array<string,mixed>
+			 */
+			public function get_payment_intention( string $intent_id ): array {
+				if ( 'pi_native' !== $intent_id ) {
+					throw new \RuntimeException( 'Unexpected payment intent ID.' );
+				}
+
+				return array(
+					'id'             => 'pi_native',
+					'status'         => 'succeeded',
+					'currency'       => 'usd',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_native',
+				);
+			}
+		};
+		$token_service = $this->create_token_service(
+			array(
+				'pm_native' => array(
+					'id'   => 'pm_native',
+					'type' => 'card',
+					'card' => array(
+						'brand'     => 'visa',
+						'last4'     => '4242',
+						'exp_month' => 12,
+						'exp_year'  => 2030,
+					),
+				),
+			)
+		);
+		$sut           = $this->create_controller( $api_client, null, $token_service );
+
+		add_filter( 'woocommerce_native_woopayments_is_recurring_payment', '__return_true' );
+		add_filter(
+			'woocommerce_native_woopayments_related_subscriptions_for_order',
+			static function ( array $subscriptions, WC_Order $filtered_order ) use ( $order, $subscription ): array {
+				return $order->get_id() === $filtered_order->get_id() ? array( $subscription ) : $subscriptions;
+			},
+			10,
+			2
+		);
+
+		$response = $sut->get_update_order_status_response(
+			array(
+				'_ajax_nonce'                => wp_create_nonce( 'wcpay_update_order_status_nonce' ),
+				'order_id'                   => $order->get_id(),
+				'intent_id'                  => 'pi_native',
+				'should_save_payment_method' => 'true',
+			)
+		);
+		$order    = wc_get_order( $order->get_id() );
+		$tokens   = array_values( WC_Payment_Tokens::get_customer_tokens( $user_id, OrderPaymentStore::GATEWAY_ID ) );
+		$token    = $tokens[0] ?? null;
+
+		$subscription = wc_get_order( $subscription->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertInstanceOf( WC_Order::class, $subscription );
+		$this->assertSame( 200, $response['status_code'] );
+		$this->assertInstanceOf( WC_Payment_Token_CC::class, $token );
+		$this->assertContains( $token->get_id(), $order->get_payment_tokens(), 'Saved cards should be linked to the parent order.' );
+		$this->assertContains( $token->get_id(), $subscription->get_payment_tokens(), 'Saved cards should be linked to related subscriptions.' );
+		$this->assertSame( 'pm_native', $subscription->get_meta( '_payment_method_id', true ) );
+		$this->assertSame( 'cus_native', $subscription->get_meta( '_stripe_customer_id', true ) );
 	}
 
 	/**
@@ -576,6 +735,53 @@ class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 		$sut->init( $details_service );
 
 		return $sut;
+	}
+
+	/**
+	 * Assert that an order has a note containing the expected content.
+	 *
+	 * @param WC_Order $order    Order object.
+	 * @param string   $expected Expected note content.
+	 */
+	private function assert_order_has_note_containing( WC_Order $order, string $expected ): void {
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'type'     => 'any',
+			)
+		);
+
+		foreach ( $notes as $note ) {
+			if ( false !== strpos( (string) $note->content, $expected ) ) {
+				$this->addToAssertionCount( 1 );
+				return;
+			}
+		}
+
+		$this->fail( "Missing order note containing: {$expected}" );
+	}
+
+	/**
+	 * Assert that an order has no note containing the expected content.
+	 *
+	 * @param WC_Order $order    Order object.
+	 * @param string   $expected Expected note content.
+	 */
+	private function assert_order_has_no_note_containing( WC_Order $order, string $expected ): void {
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'type'     => 'any',
+			)
+		);
+
+		foreach ( $notes as $note ) {
+			if ( false !== strpos( (string) $note->content, $expected ) ) {
+				$this->fail( "Unexpected order note containing: {$expected}" );
+			}
+		}
+
+		$this->addToAssertionCount( 1 );
 	}
 
 	/**

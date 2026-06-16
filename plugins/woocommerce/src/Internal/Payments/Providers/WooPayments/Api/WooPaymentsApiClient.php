@@ -165,7 +165,7 @@ class WooPaymentsApiClient {
 			throw new WooPaymentsApiException( __( 'A WooPayments charge requires exactly one payment credential.', 'woocommerce' ), 'wcpay_invalid_payment_credential', 400 );
 		}
 
-		$request_data['confirm']         = true;
+		$request_data['confirm']         = 'true';
 		$request_data['capture_method']  = $request_data['capture_method'] ?? 'automatic';
 		$request_data['idempotency_key'] = $idempotency_key;
 
@@ -189,7 +189,7 @@ class WooPaymentsApiClient {
 			throw new WooPaymentsApiException( __( 'A WooPayments setup intent requires exactly one payment credential.', 'woocommerce' ), 'wcpay_invalid_payment_credential', 400 );
 		}
 
-		$request_data['confirm']              = true;
+		$request_data['confirm']              = 'true';
 		$request_data['payment_method_types'] = $request_data['payment_method_types'] ?? array( 'card' );
 		$request_data['idempotency_key']      = $idempotency_key;
 
@@ -205,7 +205,7 @@ class WooPaymentsApiClient {
 	 * @throws WooPaymentsApiException When the request fails.
 	 */
 	public function create_setup_intention( array $request_data, string $idempotency_key = '' ): array {
-		$request_data['confirm']              = false;
+		$request_data['confirm']              = 'false';
 		$request_data['payment_method_types'] = $request_data['payment_method_types'] ?? array( 'card' );
 
 		if ( '' !== $idempotency_key ) {
@@ -233,6 +233,16 @@ class WooPaymentsApiClient {
 	 */
 	public function get_setup_intention( string $setup_intent_id ): array {
 		return $this->request( array(), 'setup_intents/' . rawurlencode( $setup_intent_id ), 'GET' );
+	}
+
+	/**
+	 * Retrieve a WooPayments payment method.
+	 *
+	 * @param string $payment_method_id Payment method ID.
+	 * @return array<string,mixed>
+	 */
+	public function get_payment_method( string $payment_method_id ): array {
+		return $this->request( array(), 'payment_methods/' . rawurlencode( $payment_method_id ), 'GET' );
 	}
 
 	/**
@@ -286,17 +296,24 @@ class WooPaymentsApiClient {
 		 * @param array<string,string> $headers Request headers.
 		 */
 		$headers = apply_filters( 'wcpay_api_request_headers', $headers );
-		$body    = wp_json_encode( $params );
+		$site_id = $this->http_client->get_blog_id();
+		$path    = sprintf( '/sites/%d/wcpay/%s', (int) $site_id, $api );
+		$body    = null;
 
-		if ( false === $body ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
-			throw new WooPaymentsApiException( __( 'Unable to encode the WooPayments request body.', 'woocommerce' ), 'wcpay_client_unable_to_encode_json' );
+		if ( 'GET' === $method ) {
+			$path .= '?' . http_build_query( $params );
+		} else {
+			$body = wp_json_encode( $params );
+
+			if ( false === $body ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
+				throw new WooPaymentsApiException( __( 'Unable to encode the WooPayments request body.', 'woocommerce' ), 'wcpay_client_unable_to_encode_json' );
+			}
 		}
 
-		$site_id  = $this->http_client->get_blog_id();
 		$response = $this->http_client->request(
 			$method,
-			sprintf( '/sites/%d/wcpay/%s', (int) $site_id, $api ),
+			$path,
 			$headers,
 			$body,
 			self::REQUEST_TIMEOUT_SECONDS

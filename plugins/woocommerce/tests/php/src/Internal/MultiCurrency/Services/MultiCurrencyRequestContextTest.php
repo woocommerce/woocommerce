@@ -139,6 +139,52 @@ class MultiCurrencyRequestContextTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should detect Store API requests without resolving the WooCommerce singleton.
+	 */
+	public function test_detects_store_api_requests_without_resolving_woocommerce_singleton(): void {
+		$sentinel = $this->install_woocommerce_singleton_sentinel();
+
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/store/v1/cart';
+
+		try {
+			$sut = new MultiCurrencyRequestContext();
+
+			$this->assertTrue( $sut->is_store_api_request(), 'Store API requests should be detected from the request URI.' );
+		} finally {
+			$this->restore_woocommerce_singleton_sentinel( $sentinel );
+		}
+
+		$this->assertFalse( $sentinel->is_store_api_request_called, 'Request context must not call WC() while WooCommerce is still constructing.' );
+	}
+
+	/**
+	 * @testdox Should detect WooCommerce REST requests without resolving the WooCommerce singleton.
+	 */
+	public function test_detects_rest_requests_without_resolving_woocommerce_singleton(): void {
+		$sentinel = $this->install_woocommerce_singleton_sentinel();
+		$sut      = new class() extends MultiCurrencyRequestContext {
+			/**
+			 * Expose REST request detection for testing.
+			 *
+			 * @return bool
+			 */
+			public function is_wc_rest_api_request_for_test(): bool {
+				return $this->is_wc_rest_api_request();
+			}
+		};
+
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
+
+		try {
+			$this->assertTrue( $sut->is_wc_rest_api_request_for_test(), 'WooCommerce REST requests should be detected from the request URI.' );
+		} finally {
+			$this->restore_woocommerce_singleton_sentinel( $sentinel );
+		}
+
+		$this->assertFalse( $sentinel->is_rest_api_request_called, 'Request context must not call WC() while WooCommerce is still constructing.' );
+	}
+
+	/**
 	 * @testdox Should detect Store API batch routes.
 	 */
 	public function test_detects_store_api_batch_routes(): void {
@@ -243,5 +289,83 @@ class MultiCurrencyRequestContextTest extends WC_Unit_Test_Case {
 				return $this->is_store_api;
 			}
 		};
+	}
+
+	/**
+	 * Install a WooCommerce singleton sentinel.
+	 *
+	 * @return object
+	 */
+	private function install_woocommerce_singleton_sentinel(): object {
+		$reflection = new \ReflectionClass( \WooCommerce::class );
+		$instance   = $reflection->getProperty( '_instance' );
+		$instance->setAccessible( true );
+
+		$sentinel                    = new class() extends \WooCommerce {
+			/**
+			 * Previous WooCommerce singleton instance.
+			 *
+			 * @var mixed
+			 */
+			public $previous_instance;
+
+			/**
+			 * Whether is_rest_api_request was called.
+			 *
+			 * @var bool
+			 */
+			public bool $is_rest_api_request_called = false;
+
+			/**
+			 * Whether is_store_api_request was called.
+			 *
+			 * @var bool
+			 */
+			public bool $is_store_api_request_called = false;
+
+			/**
+			 * Constructor intentionally avoids booting WooCommerce.
+			 */
+			public function __construct() {}
+
+			/**
+			 * Record accidental WooCommerce singleton access.
+			 *
+			 * @return bool
+			 */
+			public function is_rest_api_request() {
+				$this->is_rest_api_request_called = true;
+
+				return true;
+			}
+
+			/**
+			 * Record accidental WooCommerce singleton access.
+			 *
+			 * @return bool
+			 */
+			public function is_store_api_request() {
+				$this->is_store_api_request_called = true;
+
+				return true;
+			}
+		};
+		$sentinel->previous_instance = $instance->getValue();
+
+		$instance->setValue( $sentinel );
+
+		return $sentinel;
+	}
+
+	/**
+	 * Restore the WooCommerce singleton after a sentinel test.
+	 *
+	 * @param object $sentinel WooCommerce singleton sentinel.
+	 */
+	private function restore_woocommerce_singleton_sentinel( object $sentinel ): void {
+		$reflection = new \ReflectionClass( \WooCommerce::class );
+		$instance   = $reflection->getProperty( '_instance' );
+		$instance->setAccessible( true );
+		$instance->setValue( $sentinel->previous_instance );
 	}
 }

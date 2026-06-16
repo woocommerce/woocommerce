@@ -161,6 +161,46 @@ class WooPaymentsTokenService {
 	}
 
 	/**
+	 * Copy a saved payment token and provider metadata to subscriptions related to an initial order.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param WC_Order         $order             Parent order.
+	 * @param WC_Payment_Token $token             Saved payment token.
+	 * @param string           $payment_method_id Provider payment method ID.
+	 * @param string           $customer_id       WooPayments customer ID.
+	 */
+	public function sync_related_subscriptions_payment_token( WC_Order $order, WC_Payment_Token $token, string $payment_method_id, string $customer_id ): void {
+		if ( 0 >= $token->get_id() ) {
+			return;
+		}
+
+		$provider_payment_method_id = '' !== $payment_method_id ? $payment_method_id : (string) $token->get_token();
+		$provider_customer_id       = '' !== $customer_id ? $customer_id : (string) $order->get_meta( '_stripe_customer_id', true );
+
+		foreach ( $this->get_related_subscriptions_for_order( $order ) as $subscription ) {
+			if ( ! $subscription instanceof WC_Order || $order->get_payment_method() !== $subscription->get_payment_method() ) {
+				continue;
+			}
+
+			$subscription_token_ids = array_map( 'absint', $subscription->get_payment_tokens() );
+			if ( ! in_array( $token->get_id(), $subscription_token_ids, true ) ) {
+				$subscription->add_payment_token( $token );
+			}
+
+			if ( '' !== $provider_payment_method_id ) {
+				$subscription->update_meta_data( '_payment_method_id', $provider_payment_method_id );
+			}
+
+			if ( '' !== $provider_customer_id ) {
+				$subscription->update_meta_data( '_stripe_customer_id', $provider_customer_id );
+			}
+
+			$subscription->save();
+		}
+	}
+
+	/**
 	 * Get an existing card token for a provider payment method ID.
 	 *
 	 * @param string $payment_method_id Provider payment method ID.
@@ -176,6 +216,33 @@ class WooPaymentsTokenService {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get subscriptions related to an initial order.
+	 *
+	 * @param WC_Order $order Parent order.
+	 * @return array<int,mixed>
+	 */
+	private function get_related_subscriptions_for_order( WC_Order $order ): array {
+		$subscriptions = array();
+		if ( function_exists( 'wcs_get_subscriptions_for_order' ) ) {
+			$subscriptions = wcs_get_subscriptions_for_order( $order->get_id() );
+		}
+
+		$subscriptions = is_array( $subscriptions ) ? $subscriptions : array();
+
+		/**
+		 * Filters native WooPayments subscriptions related to an initial order.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param array<int,mixed> $subscriptions Related subscriptions.
+		 * @param WC_Order         $order         Parent order.
+		 */
+		$subscriptions = apply_filters( 'woocommerce_native_woopayments_related_subscriptions_for_order', $subscriptions, $order );
+
+		return is_array( $subscriptions ) ? $subscriptions : array();
 	}
 
 	/**

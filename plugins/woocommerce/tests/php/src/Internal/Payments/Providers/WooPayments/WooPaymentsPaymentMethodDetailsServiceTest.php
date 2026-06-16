@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPaymentMethodDetailsService;
 use RuntimeException;
 use WC_Unit_Test_Case;
@@ -58,6 +60,59 @@ class WooPaymentsPaymentMethodDetailsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( array(), $this->sut->get_payment_method_details( 'pm_123' ) );
+	}
+
+	/**
+	 * @testdox Missing plugin runtime falls back to the native API client.
+	 */
+	public function test_falls_back_to_native_api_client_when_plugin_runtime_is_absent(): void {
+		$details = array(
+			'id'   => 'pm_native',
+			'type' => 'card',
+			'card' => array(
+				'brand'     => 'visa',
+				'last4'     => '4242',
+				'exp_month' => 12,
+				'exp_year'  => 2030,
+			),
+		);
+
+		$legacy_runtime = new WooPaymentsLegacyRuntime();
+		$legacy_runtime->init( new LegacyRuntimeProxy( false ) );
+
+		$sut = new WooPaymentsPaymentMethodDetailsService();
+		$sut->init(
+			$legacy_runtime,
+			new class( $details ) extends WooPaymentsApiClient {
+				/**
+				 * Details to return.
+				 *
+				 * @var array<string,mixed>
+				 */
+				private array $details;
+
+				/**
+				 * Constructor.
+				 *
+				 * @param array<string,mixed> $details Details to return.
+				 */
+				public function __construct( array $details ) {
+					$this->details = $details;
+				}
+
+				/**
+				 * Get a payment method.
+				 *
+				 * @param string $payment_method_id Payment method ID.
+				 * @return array<string,mixed>
+				 */
+				public function get_payment_method( string $payment_method_id ): array {
+					return $this->details + array( 'requested_id' => $payment_method_id );
+				}
+			}
+		);
+
+		$this->assertSame( $details + array( 'requested_id' => 'pm_123' ), $sut->get_payment_method_details( 'pm_123' ) );
 	}
 
 	/**

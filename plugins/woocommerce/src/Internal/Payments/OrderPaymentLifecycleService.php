@@ -76,10 +76,12 @@ class OrderPaymentLifecycleService {
 		$this->apply_meta_changes( $order, $event );
 
 		$note            = $event->get_note();
-		$should_add_note = null !== $note && '' !== $note && ! $this->has_note_marker( $order, $event, $note );
+		$should_add_note = null !== $note && '' !== $note && ! $this->should_skip_lifecycle_note( $order, $event, $note ) && ! $this->has_note_marker( $order, $event, $note );
 		if ( $should_add_note ) {
 			$order->update_meta_data( $this->get_note_marker_key( $event, $note ), 'yes' );
 		}
+
+		$order->save_meta_data();
 
 		$status_transition_saved_order = $this->apply_status_transition( $order, $event );
 		if ( ! $status_transition_saved_order ) {
@@ -117,8 +119,7 @@ class OrderPaymentLifecycleService {
 	private function apply_status_transition( WC_Order $order, PaymentLifecycleEvent $event ): bool {
 		switch ( $event->get_status() ) {
 			case PaymentLifecycleEvent::STATUS_COMPLETED:
-				$order->payment_complete( (string) $event->get_payment_reference() );
-				return true;
+				return (bool) $order->payment_complete( (string) $event->get_payment_reference() );
 
 			case PaymentLifecycleEvent::STATUS_AUTHORIZED:
 				$order->update_status( 'on-hold' );
@@ -150,6 +151,51 @@ class OrderPaymentLifecycleService {
 	 */
 	private function has_note_marker( WC_Order $order, PaymentLifecycleEvent $event, string $note ): bool {
 		return 'yes' === $order->get_meta( $this->get_note_marker_key( $event, $note ), true );
+	}
+
+	/**
+	 * Tell whether a lifecycle note should be skipped for an already-applied event.
+	 *
+	 * @param WC_Order              $order Order object.
+	 * @param PaymentLifecycleEvent $event Lifecycle event.
+	 * @param string                $note  Note content.
+	 * @return bool
+	 */
+	private function should_skip_lifecycle_note( WC_Order $order, PaymentLifecycleEvent $event, string $note ): bool {
+		$payment_reference = (string) $event->get_payment_reference();
+
+		if ( 0 === strpos( $note, '<strong>Fee details:</strong>' ) && $this->has_fee_details_note( $order ) ) {
+			return true;
+		}
+
+		return PaymentLifecycleEvent::STATUS_COMPLETED === $event->get_status()
+			&& 'Payment complete.' === $note
+			&& '' !== $payment_reference
+			&& $payment_reference === (string) $order->get_transaction_id()
+			&& $order->has_status( array( 'processing', 'completed' ) );
+	}
+
+	/**
+	 * Tell whether the order already has a fee-details order note.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	private function has_fee_details_note( WC_Order $order ): bool {
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'type'     => 'any',
+			)
+		);
+
+		foreach ( $notes as $note ) {
+			if ( 0 === strpos( (string) $note->content, '<strong>Fee details:</strong>' ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

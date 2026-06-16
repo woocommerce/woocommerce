@@ -70,6 +70,39 @@ class OrderPaymentLifecycleServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Completed events update paid orders without adding duplicate generic completion notes.
+	 */
+	public function test_completed_event_updates_paid_order_without_generic_completion_note(): void {
+		$order = $this->create_woopayments_order();
+		$order->set_transaction_id( 'pi_123' );
+		$order->set_status( 'processing' );
+		$order->save();
+		$this->assertSame( 'processing', $order->get_status() );
+
+		$this->sut->apply_unlocked(
+			$order,
+			new PaymentLifecycleEvent(
+				PaymentLifecycleEvent::STATUS_COMPLETED,
+				'pi_123',
+				array(
+					'_intent_id'             => 'pi_123',
+					'_wcpay_transaction_fee' => '1.23',
+				),
+				array(),
+				'Payment complete.'
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'processing', $order->get_status() );
+		$this->assertSame( 'pi_123', $order->get_meta( '_intent_id', true ) );
+		$this->assertSame( '1.23', $order->get_meta( '_wcpay_transaction_fee', true ) );
+		$this->assertSame( 0, $this->countOrderNotesMatching( $order, 'Payment complete.' ) );
+	}
+
+	/**
 	 * @testdox Authorized events move the order on hold.
 	 */
 	public function test_authorized_event_moves_order_on_hold(): void {

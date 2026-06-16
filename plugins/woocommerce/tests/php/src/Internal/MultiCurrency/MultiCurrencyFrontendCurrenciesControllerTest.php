@@ -137,6 +137,46 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the original store currency during currency projection re-entry.
+	 */
+	public function test_currency_projection_is_reentry_safe(): void {
+		update_option( 'woocommerce_currency', 'USD' );
+		$sut     = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
+		$service = new class() extends MultiCurrencyFrontendProjectionService {
+			/**
+			 * Number of projection calls.
+			 *
+			 * @var int
+			 */
+			public int $calls = 0;
+
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {}
+
+			/**
+			 * Project the WooCommerce currency code.
+			 *
+			 * @param string|null $order_currency Optional order currency override.
+			 * @return string
+			 */
+			public function get_woocommerce_currency( ?string $order_currency = null ): string {
+				unset( $order_currency );
+
+				++$this->calls;
+
+				return 1 === $this->calls ? get_woocommerce_currency() : 'GBP';
+			}
+		};
+		$sut->set_frontend_projection_service( $service );
+		$sut->register();
+
+		$this->assertSame( 'USD', get_woocommerce_currency() );
+		$this->assertSame( 1, $service->calls, 'The frontend currency controller should not re-enter projection while resolving the store currency.' );
+	}
+
+	/**
 	 * @testdox Should leave deferred order-context callbacks as safe pass-throughs.
 	 */
 	public function test_deferred_order_context_callbacks_are_safe_pass_throughs(): void {

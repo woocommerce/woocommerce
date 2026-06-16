@@ -72,6 +72,13 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	private ?string $order_currency = null;
 
 	/**
+	 * Whether the WooCommerce currency filter is currently being projected.
+	 *
+	 * @var bool
+	 */
+	private bool $is_projecting_woocommerce_currency = false;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
@@ -157,9 +164,17 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 * @return string
 	 */
 	public function get_woocommerce_currency( $currency = null ): string {
-		unset( $currency );
+		if ( $this->is_projecting_woocommerce_currency ) {
+			return is_scalar( $currency ) && '' !== (string) $currency ? (string) $currency : (string) get_option( 'woocommerce_currency' );
+		}
 
-		return $this->get_frontend_projection_service()->get_woocommerce_currency( $this->order_currency );
+		$this->is_projecting_woocommerce_currency = true;
+
+		try {
+			return $this->get_frontend_projection_service()->get_woocommerce_currency( $this->order_currency );
+		} finally {
+			$this->is_projecting_woocommerce_currency = false;
+		}
 	}
 
 	/**

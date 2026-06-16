@@ -48,7 +48,7 @@ class NativePaymentsGatewayRegistry implements RegisterHooksInterface {
 	 * Register gateway hooks.
 	 */
 	public function register() {
-		if ( ! $this->arbiter->should_native_register() || ! $this->provider->can_process_payments() ) {
+		if ( ! $this->arbiter->should_native_register() ) {
 			return;
 		}
 
@@ -64,6 +64,10 @@ class NativePaymentsGatewayRegistry implements RegisterHooksInterface {
 	 * @return array<int|string,mixed>
 	 */
 	public function register_gateway( array $gateways ): array {
+		if ( ! $this->arbiter->should_native_register() || ! $this->provider->can_process_payments() ) {
+			return $gateways;
+		}
+
 		if ( in_array( NativeWooPaymentsGateway::class, $gateways, true ) ) {
 			return $gateways;
 		}

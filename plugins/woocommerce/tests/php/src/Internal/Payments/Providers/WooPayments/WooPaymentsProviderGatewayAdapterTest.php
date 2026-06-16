@@ -29,6 +29,7 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_native_woopayments_is_recurring_payment' );
+		remove_all_filters( 'woocommerce_native_woopayments_related_subscriptions_for_order' );
 		parent::tearDown();
 	}
 
@@ -144,7 +145,7 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	 * @testdox Charge should prefer the native positive-amount transport before the legacy gateway bridge.
 	 */
 	public function test_charge_prefers_native_positive_amount_transport_when_available(): void {
-		$order            = $this->create_woopayments_order();
+		$order            = $this->create_woopayments_order( '50.00' );
 		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
 		$api_client       = new class() extends WooPaymentsApiClient {
 			/**
@@ -155,7 +156,7 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 			 * @return array<string,mixed>
 			 */
 			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
-				if ( 1000 !== $request_data['amount']
+				if ( 5000 !== $request_data['amount']
 					|| 'USD' !== $request_data['currency']
 					|| 'cus_native' !== $request_data['customer']
 					|| 'pm_request' !== $request_data['payment_method']
@@ -180,12 +181,75 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 								'payment_method_details' => array(
 									'type' => 'card',
 									'card' => array(
-										'brand' => 'visa',
-										'last4' => '4242',
+										'brand'   => 'visa',
+										'funding' => 'credit',
+										'last4'   => '4242',
+										'network' => 'visa',
 									),
 								),
 								'balance_transaction'    => array( 'id' => 'txn_native' ),
 								'outcome'                => array( 'risk_level' => 'normal' ),
+								'amount'                 => 5000,
+								'currency'               => 'usd',
+								'application_fee_amount' => 218,
+							),
+						),
+					),
+				);
+			}
+
+			/**
+			 * Retrieve a payment intention.
+			 *
+			 * @param string $intent_id PaymentIntent ID.
+			 * @return array<string,mixed>
+			 */
+			public function get_payment_intention( string $intent_id ): array {
+				if ( 'pi_native' !== $intent_id ) {
+					throw new \RuntimeException( 'Unexpected native intent read.' );
+				}
+
+				return array(
+					'id'      => 'pi_native',
+					'status'  => 'succeeded',
+					'charges' => array(
+						'total_count' => 1,
+						'data'        => array(
+							array(
+								'id'               => 'ch_native',
+								'fee_breakdown_v1' => array(
+									'totals'  => array(
+										'fee'         => array(
+											'amount'   => 293,
+											'currency' => 'usd',
+										),
+										'tax'         => array(
+											'amount'   => 0,
+											'currency' => 'usd',
+										),
+										'net'         => array(
+											'amount'   => 6422,
+											'currency' => 'usd',
+										),
+										'capture_net' => array(
+											'amount'   => 6422,
+											'currency' => 'usd',
+										),
+										'gross'       => array(
+											'amount'   => 6715,
+											'currency' => 'usd',
+										),
+									),
+									'fx'      => array(
+										'from_currency' => 'gbp',
+										'to_currency'   => 'usd',
+										'from_amount'   => 5000,
+										'to_amount'     => 6715,
+									),
+									'sources' => array(
+										'balance_transaction_exchange_rate' => 1.3428,
+									),
+								),
 							),
 						),
 					),
@@ -211,7 +275,7 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 			->with( $this->isInstanceOf( WC_Order::class ) )
 			->willReturn( 'cus_native' );
 
-		$sut     = $this->create_adapter( $gateway, $api_client, $customer_service );
+		$sut     = $this->create_adapter( $gateway, $api_client, $customer_service, null, $this->create_account_service( true ) );
 		$outcome = $sut->charge( PaymentContext::for_checkout( $order, OrderPaymentStore::GATEWAY_ID, 'pm_request' ), 'key_charge' );
 		$order   = wc_get_order( $order->get_id() );
 
@@ -223,7 +287,26 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$this->assertSame( 0, $gateway->processed_order_id );
 		$this->assertSame( '4242', $order->get_meta( 'last4', true ) );
 		$this->assertSame( 'visa', $order->get_meta( '_card_brand', true ) );
-		$this->assertSame( 'Credit / Debit Cards', $order->get_payment_method_title() );
+		$this->assertSame( 'Visa credit card', $order->get_payment_method_title() );
+		$this->assertArrayHasKey( 'note', $outcome->get_data() );
+		$this->assertStringContainsString( 'A test payment of', $outcome->get_data()['note'] );
+		$this->assertStringContainsString( 'USD was processed using WooPayments', $outcome->get_data()['note'] );
+		$this->assertStringContainsString( 'was processed using WooPayments in <strong>test mode</strong>', $outcome->get_data()['note'] );
+		$this->assertStringContainsString( 'pi_native', $outcome->get_data()['note'] );
+		$this->assertSame( '2.18', $outcome->get_data()['meta']['_wcpay_transaction_fee'] );
+		$this->assertSame( '47.82', $outcome->get_data()['meta']['_wcpay_net'] );
+		$this->assertSame( 'allow', $outcome->get_data()['meta']['_wcpay_fraud_outcome_status'] );
+		$this->assertSame( 'allow', $outcome->get_data()['meta']['_wcpay_fraud_meta_box_type'] );
+		$this->assertOrderHasNote(
+			$order,
+			'<strong>Fee details:</strong><div class="captured-event-details">' . PHP_EOL
+				. '<p>1.00 GBP → 1.3428 USD: $67.15 USD</p>' . PHP_EOL
+			. '<p>Fee (3.9% + $0.30): $2.93 USD</p>' . PHP_EOL
+			. '<p>&nbsp;&nbsp;&nbsp;&nbsp;Base fee: 2.9% + $0.30</p>' . PHP_EOL
+			. '<p>&nbsp;&nbsp;&nbsp;&nbsp;Currency conversion fee: 1%</p>' . PHP_EOL
+			. '<p>Net payout: $64.22 USD</p>' . PHP_EOL
+			. '</div>'
+		);
 	}
 
 	/**
@@ -668,8 +751,10 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 								'payment_method_details' => array(
 									'type' => 'card',
 									'card' => array(
-										'brand' => 'visa',
-										'last4' => '4242',
+										'brand'   => 'visa',
+										'funding' => 'credit',
+										'last4'   => '4242',
+										'network' => 'visa',
 									),
 								),
 							),
@@ -697,7 +782,7 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$this->assertSame( '4242', $order->get_meta( 'last4', true ) );
 		$this->assertSame( 'visa', $order->get_meta( '_card_brand', true ) );
 		$this->assertNotSame( '', $order->get_meta( '_wcpay_payment_method_details', true ) );
-		$this->assertSame( 'Credit / Debit Cards', $order->get_payment_method_title() );
+		$this->assertSame( 'Visa credit card', $order->get_payment_method_title() );
 		$this->assertSame( 0, $gateway->processed_order_id );
 	}
 
@@ -763,6 +848,99 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$this->assertSame( 0, $gateway->processed_order_id );
 		$this->assertSame( 'seti_native', $order->get_transaction_id() );
 		$this->assertSame( 'pm_native', $order->get_meta( '_payment_method_id', true ) );
+	}
+
+	/**
+	 * @testdox Zero-total recurring charges should copy the saved token and provider metadata to related subscriptions.
+	 */
+	public function test_zero_total_recurring_charge_copies_saved_token_to_related_subscriptions(): void {
+		$user_id          = $this->factory()->user->create();
+		$order            = $this->create_woopayments_order( '0.00' );
+		$subscription     = $this->create_woopayments_order( '10.00' );
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a setup intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_setup_intention( array $request_data, string $idempotency_key ): array {
+				unset( $request_data, $idempotency_key );
+
+				return array(
+					'id'             => 'seti_native',
+					'status'         => 'succeeded',
+					'client_secret'  => 'seti_native_secret_abc',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_native',
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+		$token_service    = $this->create_token_service(
+			array(
+				'pm_native' => array(
+					'id'   => 'pm_native',
+					'type' => 'card',
+					'card' => array(
+						'brand'     => 'visa',
+						'last4'     => '4242',
+						'exp_month' => 12,
+						'exp_year'  => 2030,
+					),
+				),
+			)
+		);
+
+		$order->set_customer_id( $user_id );
+		$order->save();
+		$subscription->set_customer_id( $user_id );
+		$subscription->save();
+
+		add_filter( 'woocommerce_native_woopayments_is_recurring_payment', '__return_true' );
+		add_filter(
+			'woocommerce_native_woopayments_related_subscriptions_for_order',
+			static function ( array $subscriptions, WC_Order $filtered_order ) use ( $order, $subscription ): array {
+				return $order->get_id() === $filtered_order->get_id() ? array( $subscription ) : $subscriptions;
+			},
+			10,
+			2
+		);
+
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_native' );
+
+		$sut     = $this->create_adapter( $gateway, $api_client, $customer_service, $token_service );
+		$outcome = $sut->charge( PaymentContext::for_checkout( $order, OrderPaymentStore::GATEWAY_ID, 'pm_zero' ), 'key_setup' );
+		$order   = wc_get_order( $order->get_id() );
+		$tokens  = \WC_Payment_Tokens::get_customer_tokens( $user_id, OrderPaymentStore::GATEWAY_ID );
+		$token   = reset( $tokens );
+
+		$subscription = wc_get_order( $subscription->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertInstanceOf( WC_Order::class, $subscription );
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertInstanceOf( WC_Payment_Token_CC::class, $token );
+		$this->assertContains( $token->get_id(), $order->get_payment_tokens(), 'Saved cards should be linked to the parent order.' );
+		$this->assertContains( $token->get_id(), $subscription->get_payment_tokens(), 'Saved cards should be linked to related subscriptions.' );
+		$this->assertSame( 'pm_native', $subscription->get_meta( '_payment_method_id', true ) );
+		$this->assertSame( 'cus_native', $subscription->get_meta( '_stripe_customer_id', true ) );
 	}
 
 	/**
@@ -1069,6 +1247,30 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$token->save();
 
 		return $token;
+	}
+
+	/**
+	 * Assert that an order has a note with the expected exact content.
+	 *
+	 * @param WC_Order $order    Order object.
+	 * @param string   $expected Expected note content.
+	 */
+	private function assertOrderHasNote( WC_Order $order, string $expected ): void {
+		$count = 0;
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'type'     => 'any',
+			)
+		);
+
+		foreach ( $notes as $note ) {
+			if ( $expected === $note->content ) {
+				++$count;
+			}
+		}
+
+		$this->assertGreaterThan( 0, $count, "Missing order note: {$expected}" );
 	}
 
 	/**

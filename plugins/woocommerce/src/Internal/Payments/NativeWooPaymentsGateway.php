@@ -23,6 +23,16 @@ use WP_Error;
 class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 
 	/**
+	 * Untranslated gateway title.
+	 */
+	private const METHOD_TITLE = 'WooPayments';
+
+	/**
+	 * Untranslated gateway description.
+	 */
+	private const METHOD_DESCRIPTION = 'Accept payments with WooPayments.';
+
+	/**
 	 * Payment processing service.
 	 *
 	 * @var PaymentProcessingService
@@ -48,16 +58,32 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	 */
 	public function __construct() {
 		$this->id                 = OrderPaymentStore::GATEWAY_ID;
+		$this->method_title       = self::METHOD_TITLE;
+		$this->method_description = self::METHOD_DESCRIPTION;
+			$this->has_fields     = true;
+			$this->supports       = array(
+				'products',
+				'refunds',
+				PaymentGatewayFeature::TOKENIZATION,
+			);
+
+			$this->init_settings();
+
+			if ( did_action( 'init' ) ) {
+				$this->handle_init();
+			} else {
+				add_action( 'init', array( $this, 'handle_init' ) );
+			}
+	}
+
+	/**
+	 * Handle the init hook.
+	 *
+	 * @internal
+	 */
+	public function handle_init(): void {
 		$this->method_title       = __( 'WooPayments', 'woocommerce' );
 		$this->method_description = __( 'Accept payments with WooPayments.', 'woocommerce' );
-		$this->has_fields         = true;
-		$this->supports           = array(
-			'products',
-			'refunds',
-			PaymentGatewayFeature::TOKENIZATION,
-		);
-
-		$this->init_settings();
 	}
 
 	/**

@@ -16,6 +16,16 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPr
 final class WooPayments extends AbstractPaymentMethodType {
 
 	/**
+	 * Stripe.js script handle.
+	 */
+	private const STRIPE_SCRIPT_HANDLE = 'stripe';
+
+	/**
+	 * Stripe.js script URL.
+	 */
+	private const STRIPE_SCRIPT_URL = 'https://js.stripe.com/v3/';
+
+	/**
 	 * Payment method name defined by payment methods extending this class.
 	 *
 	 * @var string
@@ -76,9 +86,12 @@ final class WooPayments extends AbstractPaymentMethodType {
 	 * @return string[]
 	 */
 	public function get_payment_method_script_handles() {
+		$this->register_stripe_script();
+
 		$this->asset_api->register_script(
 			'wc-payment-method-woopayments',
-			'assets/client/blocks/wc-payment-method-woopayments.js'
+			'assets/client/blocks/wc-payment-method-woopayments.js',
+			array( self::STRIPE_SCRIPT_HANDLE )
 		);
 
 		return array( 'wc-payment-method-woopayments' );
@@ -91,5 +104,17 @@ final class WooPayments extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_data() {
 		return $this->checkout_bridge->get_blocks_payment_method_data();
+	}
+
+	/**
+	 * Register Stripe.js for the Blocks payment element.
+	 */
+	private function register_stripe_script(): void {
+		if ( wp_script_is( self::STRIPE_SCRIPT_HANDLE, 'registered' ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_script( self::STRIPE_SCRIPT_HANDLE, self::STRIPE_SCRIPT_URL, array(), null, true );
 	}
 }

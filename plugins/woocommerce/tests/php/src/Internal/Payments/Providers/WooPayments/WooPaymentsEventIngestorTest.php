@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentLifecycleService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsEventIngestor;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -65,6 +66,209 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 		$this->assertSame( '1.23', $order->get_meta( '_wcpay_transaction_fee', true ) );
 		$this->assertSame( '11.11', $order->get_meta( '_wcpay_net', true ) );
 		$this->assertSame( 'mobile_pos', $order->get_meta( '_wcpay_ipp_channel', true ) );
+	}
+
+	/**
+	 * @testdox payment_intent.succeeded does not add a generic completion note to an already paid order.
+	 */
+	public function test_payment_intent_succeeded_does_not_add_generic_completion_note_to_paid_order(): void {
+		$order = $this->create_woopayments_order();
+		$order->set_payment_method_title( 'Visa credit card' );
+		$order->set_transaction_id( 'pi_123' );
+		$order->set_status( 'processing' );
+		$order->update_meta_data( '_intent_id', 'pi_123' );
+		$order->update_meta_data( '_intention_status', 'succeeded' );
+		$order->save();
+		$order->add_order_note( 'A test payment of $10.00 USD was processed using WooPayments in <strong>test mode</strong> (<a>pi_123</a>). No real funds were collected.' );
+
+		$this->sut->process( $this->create_payment_intent_event( 'payment_intent.succeeded', $order ) );
+
+		$order_id = $order->get_id();
+		$order    = wc_get_order( $order->get_id() );
+		$notes    = array_map(
+			static fn( $note ): string => (string) $note->content,
+			wc_get_order_notes( array( 'order_id' => $order_id ) )
+		);
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'pi_123', $order->get_meta( '_intent_id', true ) );
+		$this->assertSame( '1.23', $order->get_meta( '_wcpay_transaction_fee', true ) );
+		$this->assertNotContains( 'Payment complete.', $notes );
+	}
+
+	/**
+	 * @testdox payment_intent.succeeded adds fee-breakdown details from the native charge envelope.
+	 */
+	public function test_payment_intent_succeeded_adds_fee_breakdown_details_note(): void {
+		$order = $this->create_woopayments_order();
+		$order->set_transaction_id( 'pi_123' );
+		$order->set_status( 'processing' );
+		$order->update_meta_data( '_intent_id', 'pi_123' );
+		$order->save();
+
+		$this->sut->process(
+			$this->create_payment_intent_event(
+				'payment_intent.succeeded',
+				$order,
+				array(
+					'amount'  => 5000,
+					'charges' => array(
+						'data' => array(
+							array(
+								'id'                     => 'ch_123',
+								'payment_method'         => 'pm_123',
+								'application_fee_amount' => 218,
+								'payment_method_details' => array(
+									'card' => array(
+										'mandate' => 'mandate_123',
+									),
+								),
+								'fee_breakdown_v1'       => array(
+									'totals'  => array(
+										'fee'         => array(
+											'amount'   => 293,
+											'currency' => 'usd',
+										),
+										'tax'         => array(
+											'amount'   => 0,
+											'currency' => 'usd',
+										),
+										'net'         => array(
+											'amount'   => 6422,
+											'currency' => 'usd',
+										),
+										'capture_net' => array(
+											'amount'   => 6422,
+											'currency' => 'usd',
+										),
+										'gross'       => array(
+											'amount'   => 6715,
+											'currency' => 'usd',
+										),
+									),
+									'fx'      => array(
+										'from_currency' => 'gbp',
+										'to_currency'   => 'usd',
+										'from_amount'   => 5000,
+										'to_amount'     => 6715,
+									),
+									'sources' => array(
+										'balance_transaction_exchange_rate' => 1.3428,
+									),
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertOrderHasNote(
+			$order,
+			'<strong>Fee details:</strong><div class="captured-event-details">' . PHP_EOL
+			. '<p>1.00 GBP → 1.3428 USD: $67.15 USD</p>' . PHP_EOL
+			. '<p>Fee (3.9% + $0.30): $2.93 USD</p>' . PHP_EOL
+			. '<p>&nbsp;&nbsp;&nbsp;&nbsp;Base fee: 2.9% + $0.30</p>' . PHP_EOL
+			. '<p>&nbsp;&nbsp;&nbsp;&nbsp;Currency conversion fee: 1%</p>' . PHP_EOL
+			. '<p>Net payout: $64.22 USD</p>' . PHP_EOL
+			. '</div>'
+		);
+	}
+
+	/**
+	 * @testdox payment_intent.succeeded fetches fee-breakdown details when the webhook envelope is stale.
+	 */
+	public function test_payment_intent_succeeded_fetches_fee_breakdown_details_when_webhook_envelope_is_stale(): void {
+		$order = $this->create_woopayments_order();
+		$order->set_payment_method_title( 'Visa credit card' );
+		$order->set_transaction_id( 'pi_123' );
+		$order->set_status( 'processing' );
+		$order->update_meta_data( '_intent_id', 'pi_123' );
+		$order->update_meta_data( '_intention_status', 'succeeded' );
+		$order->save();
+
+		$api_client = new class() extends WooPaymentsApiClient {
+			/**
+			 * Requested intent IDs.
+			 *
+			 * @var string[]
+			 */
+			public array $requested_intents = array();
+
+			/**
+			 * Retrieve a WooPayments PaymentIntent.
+			 *
+			 * @param string $intent_id Intent ID.
+			 * @return array<string,mixed>
+			 */
+			public function get_payment_intention( string $intent_id ): array {
+				$this->requested_intents[] = $intent_id;
+
+				return array(
+					'id'      => $intent_id,
+					'charges' => array(
+						'data' => array(
+							array(
+								'id'               => 'ch_123',
+								'fee_breakdown_v1' => array(
+									'totals'  => array(
+										'fee'         => array(
+											'amount'   => 293,
+											'currency' => 'usd',
+										),
+										'net'         => array(
+											'amount'   => 6421,
+											'currency' => 'usd',
+										),
+										'capture_net' => array(
+											'amount'   => 6421,
+											'currency' => 'usd',
+										),
+									),
+									'fx'      => array(
+										'from_currency' => 'gbp',
+										'to_currency'   => 'usd',
+										'from_amount'   => 5000,
+										'to_amount'     => 6714,
+									),
+									'sources' => array(
+										'balance_transaction_exchange_rate' => 1.34274,
+									),
+								),
+							),
+						),
+					),
+				);
+			}
+		};
+
+		$sut = new WooPaymentsEventIngestor();
+		$sut->init(
+			wc_get_container()->get( OrderPaymentLifecycleService::class ),
+			new LegacyProxy(),
+			new WooPaymentsLegacyRuntime(),
+			$api_client
+		);
+
+		$sut->process( $this->create_payment_intent_event( 'payment_intent.succeeded', $order ) );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( array( 'pi_123' ), $api_client->requested_intents );
+		$this->assertOrderHasNote(
+			$order,
+			'<strong>Fee details:</strong><div class="captured-event-details">' . PHP_EOL
+			. '<p>1.00 GBP → 1.34274 USD: $67.14 USD</p>' . PHP_EOL
+			. '<p>Fee (3.9% + $0.30): $2.93 USD</p>' . PHP_EOL
+			. '<p>&nbsp;&nbsp;&nbsp;&nbsp;Base fee: 2.9% + $0.30</p>' . PHP_EOL
+			. '<p>&nbsp;&nbsp;&nbsp;&nbsp;Currency conversion fee: 1%</p>' . PHP_EOL
+			. '<p>Net payout: $64.21 USD</p>' . PHP_EOL
+			. '</div>'
+		);
 	}
 
 	/**
@@ -317,7 +521,18 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 		$sut->init(
 			wc_get_container()->get( OrderPaymentLifecycleService::class ),
 			$legacy_proxy,
-			$runtime
+			$runtime,
+			new class() extends WooPaymentsApiClient {
+				/**
+				 * Retrieve a WooPayments PaymentIntent.
+				 *
+				 * @param string $intent_id Intent ID.
+				 * @return array<string,mixed>
+				 */
+				public function get_payment_intention( string $intent_id ): array {
+					return array();
+				}
+			}
 		);
 
 		$sut->process( $this->create_payment_intent_event( 'customer.created', $this->create_woopayments_order() ) );
@@ -406,6 +621,30 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 		$order->save();
 
 		return $order;
+	}
+
+	/**
+	 * Assert that an order has a note with the expected exact content.
+	 *
+	 * @param WC_Order $order    Order object.
+	 * @param string   $expected Expected note content.
+	 */
+	private function assertOrderHasNote( WC_Order $order, string $expected ): void {
+		$count = 0;
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'type'     => 'any',
+			)
+		);
+
+		foreach ( $notes as $note ) {
+			if ( $expected === $note->content ) {
+				++$count;
+			}
+		}
+
+		$this->assertGreaterThan( 0, $count, "Missing order note: {$expected}" );
 	}
 
 	/**

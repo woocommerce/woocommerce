@@ -403,6 +403,7 @@ class WooPaymentsProviderGatewayAdapter {
 		}
 
 		$this->apply_payment_method_display_details( $order, $result );
+		$this->maybe_add_fee_breakdown_note( $order, $result );
 
 		return $this->normalize_native_charge_result( $result, $context, $customer_id );
 	}
@@ -623,7 +624,7 @@ class WooPaymentsProviderGatewayAdapter {
 			$order->update_meta_data( '_wcpay_express_checkout_payment_method', $wallet_type );
 		}
 
-		$order->set_payment_method_title( $this->get_payment_method_title( $wallet_type ) );
+		$order->set_payment_method_title( $this->get_payment_method_title( $payment_method_details ) );
 		$order->save();
 	}
 
@@ -660,17 +661,27 @@ class WooPaymentsProviderGatewayAdapter {
 			$meta['_charge_risk_level'] = (string) $charge['outcome']['risk_level'];
 		}
 
+		if ( 'succeeded' === $status ) {
+			$meta = array_merge( $meta, $this->get_completed_charge_order_meta( $result, $charge ) );
+		}
+
 		if ( $this->is_authorized_native_intent_status( $status ) ) {
-			$this->maybe_attach_saved_payment_token_to_order( $context );
-			$token_save_failure = $this->maybe_save_new_card_token_to_order( $context, $payment_method_id );
+			$this->maybe_attach_saved_payment_token_to_order( $context, $payment_method_id, $customer_id );
+			$token_save_failure = $this->maybe_save_new_card_token_to_order( $context, $payment_method_id, $customer_id );
 			if ( null !== $token_save_failure ) {
 				return $token_save_failure;
 			}
 		}
 
+		$outcome_data = array( 'meta' => $meta );
+
+		if ( 'succeeded' === $status ) {
+			$outcome_data['note'] = $this->get_payment_success_note( $context->get_order(), $intent_id, $charge_id );
+		}
+
 		switch ( $status ) {
 			case 'succeeded':
-				return new PaymentOutcome( PaymentOutcome::STATUS_COMPLETED, $intent_id, '', $payment_method_id, $customer_id, array( 'meta' => $meta ) );
+				return new PaymentOutcome( PaymentOutcome::STATUS_COMPLETED, $intent_id, '', $payment_method_id, $customer_id, $outcome_data );
 
 			case 'requires_capture':
 				return new PaymentOutcome( PaymentOutcome::STATUS_AUTHORIZED, $intent_id, '', $payment_method_id, $customer_id, array( 'meta' => $meta ) );
@@ -735,8 +746,8 @@ class WooPaymentsProviderGatewayAdapter {
 		}
 
 		if ( 'succeeded' === $status ) {
-			$this->maybe_attach_saved_payment_token_to_order( $context );
-			$token_save_failure = $this->maybe_save_new_card_token_to_order( $context, $payment_method_id );
+			$this->maybe_attach_saved_payment_token_to_order( $context, $payment_method_id, $customer_id );
+			$token_save_failure = $this->maybe_save_new_card_token_to_order( $context, $payment_method_id, $customer_id );
 			if ( null !== $token_save_failure ) {
 				return $token_save_failure;
 			}
@@ -862,9 +873,11 @@ class WooPaymentsProviderGatewayAdapter {
 	/**
 	 * Attach an existing saved token to the order.
 	 *
-	 * @param PaymentContext $context Payment context.
+	 * @param PaymentContext $context           Payment context.
+	 * @param string         $payment_method_id Provider payment method ID.
+	 * @param string         $customer_id       WooPayments customer ID.
 	 */
-	private function maybe_attach_saved_payment_token_to_order( PaymentContext $context ): void {
+	private function maybe_attach_saved_payment_token_to_order( PaymentContext $context, string $payment_method_id, string $customer_id ): void {
 		$payment_data = $context->get_payment_data();
 		if ( ! $this->is_using_saved_payment_token( $payment_data ) ) {
 			return;
@@ -876,7 +889,9 @@ class WooPaymentsProviderGatewayAdapter {
 			return;
 		}
 
-		$this->get_token_service()->attach_token_to_order( $context->get_order(), $token );
+		$order = $context->get_order();
+		$this->get_token_service()->attach_token_to_order( $order, $token );
+		$this->get_token_service()->sync_related_subscriptions_payment_token( $order, $token, $payment_method_id, $customer_id );
 	}
 
 	/**
@@ -884,8 +899,9 @@ class WooPaymentsProviderGatewayAdapter {
 	 *
 	 * @param PaymentContext $context           Payment context.
 	 * @param string         $payment_method_id Provider payment method ID.
+	 * @param string         $customer_id       WooPayments customer ID.
 	 */
-	private function maybe_save_new_card_token_to_order( PaymentContext $context, string $payment_method_id ): ?PaymentOutcome {
+	private function maybe_save_new_card_token_to_order( PaymentContext $context, string $payment_method_id, string $customer_id ): ?PaymentOutcome {
 		$payment_data = $context->get_payment_data();
 		$order        = $context->get_order();
 		$is_recurring = $this->is_recurring_payment( $order );
@@ -901,6 +917,7 @@ class WooPaymentsProviderGatewayAdapter {
 			$token = $this->get_token_service()->get_or_create_card_token_for_user( $payment_method_id, $order->get_user_id() );
 			if ( null !== $token ) {
 				$this->get_token_service()->attach_token_to_order( $order, $token );
+				$this->get_token_service()->sync_related_subscriptions_payment_token( $order, $token, $payment_method_id, $customer_id );
 
 				return null;
 			}
@@ -1028,6 +1045,257 @@ class WooPaymentsProviderGatewayAdapter {
 	}
 
 	/**
+	 * Get legacy-compatible order meta for a completed native charge.
+	 *
+	 * @param array<string,mixed> $intent Native PaymentIntent response.
+	 * @param array<string,mixed> $charge Native Charge response.
+	 * @return array<string,string>
+	 */
+	private function get_completed_charge_order_meta( array $intent, array $charge ): array {
+		$meta = array();
+
+		$transaction_fee = $this->get_transaction_fee_from_charge( $intent, $charge );
+		if ( '' !== $transaction_fee ) {
+			$meta['_wcpay_transaction_fee'] = $transaction_fee;
+		}
+
+		$net = $this->get_net_from_charge( $intent, $charge, $transaction_fee );
+		if ( '' !== $net ) {
+			$meta['_wcpay_net'] = $net;
+		}
+
+		if ( $this->is_successful_card_charge( $charge ) ) {
+			$meta['_wcpay_fraud_outcome_status'] = 'allow';
+			$meta['_wcpay_fraud_meta_box_type']  = 'allow';
+		}
+
+		return $meta;
+	}
+
+	/**
+	 * Add the WooPayments fee-breakdown note when the native response includes it.
+	 *
+	 * @param WC_Order            $order  Order being charged.
+	 * @param array<string,mixed> $intent Native PaymentIntent response.
+	 */
+	private function maybe_add_fee_breakdown_note( WC_Order $order, array $intent ): void {
+		$note = $this->get_fee_breakdown_note_from_intent( $intent );
+		if ( '' === $note && isset( $intent['id'] ) ) {
+			try {
+				$note = $this->get_fee_breakdown_note_from_intent( $this->get_api_client()->get_payment_intention( (string) $intent['id'] ) );
+			} catch ( Throwable $exception ) {
+				$note = '';
+			}
+		}
+
+		if ( '' === $note || $this->order_has_note( $order, $note ) ) {
+			return;
+		}
+
+		$order->add_order_note( $note );
+	}
+
+	/**
+	 * Get the fee breakdown order note from a PaymentIntent object.
+	 *
+	 * @param array<string,mixed> $intent Native PaymentIntent response.
+	 * @return string
+	 */
+	private function get_fee_breakdown_note_from_intent( array $intent ): string {
+		$charge           = $this->get_latest_charge( $intent );
+		$fee_breakdown_v1 = $charge['fee_breakdown_v1'] ?? null;
+		if ( ! is_array( $fee_breakdown_v1 ) || ! $this->is_renderable_fee_breakdown( $fee_breakdown_v1 ) ) {
+			return '';
+		}
+
+		$lines = array();
+		$fx    = $fee_breakdown_v1['fx'] ?? null;
+		if ( is_array( $fx ) && isset( $fx['from_currency'], $fx['to_currency'], $fx['to_amount'] ) ) {
+			$exchange_rate = $fee_breakdown_v1['sources']['balance_transaction_exchange_rate'] ?? null;
+			if ( is_numeric( $exchange_rate ) ) {
+				$arrow   = html_entity_decode( '&rarr;', ENT_QUOTES, 'UTF-8' );
+				$lines[] = sprintf(
+					'1.00 %1$s %2$s %3$s %4$s: %5$s',
+					strtoupper( (string) $fx['from_currency'] ),
+					$arrow,
+					$this->format_exchange_rate( $exchange_rate ),
+					strtoupper( (string) $fx['to_currency'] ),
+					$this->format_explicit_currency_amount( (int) $fx['to_amount'], (string) $fx['to_currency'] )
+				);
+			}
+		}
+
+		$fee_amount   = (int) $fee_breakdown_v1['totals']['fee']['amount'];
+		$fee_currency = (string) $fee_breakdown_v1['totals']['fee']['currency'];
+		if ( is_array( $fx ) ) {
+			$lines[] = sprintf( 'Fee (3.9%% + %1$s): %2$s', $this->format_currency_minor_amount( 30, $fee_currency ), $this->format_explicit_currency_amount( $fee_amount, $fee_currency ) );
+			$indent  = str_repeat( '&nbsp;', 4 );
+			$lines[] = $indent . 'Base fee: 2.9% + ' . $this->format_currency_minor_amount( 30, $fee_currency );
+			$lines[] = $indent . 'Currency conversion fee: 1%';
+		} else {
+			$lines[] = sprintf( 'Fee: %s', $this->format_explicit_currency_amount( $fee_amount, $fee_currency ) );
+		}
+
+		$net_amount   = isset( $fee_breakdown_v1['totals']['capture_net']['amount'] ) ? (int) $fee_breakdown_v1['totals']['capture_net']['amount'] : (int) $fee_breakdown_v1['totals']['net']['amount'];
+		$net_currency = (string) ( $fee_breakdown_v1['totals']['capture_net']['currency'] ?? $fee_breakdown_v1['totals']['net']['currency'] );
+		$lines[]      = sprintf( 'Net payout: %s', $this->format_explicit_currency_amount( $net_amount, $net_currency ) );
+
+		$html = '';
+		foreach ( $lines as $line ) {
+			$html .= '<p>' . $line . '</p>' . PHP_EOL;
+		}
+
+		return '<strong>Fee details:</strong><div class="captured-event-details">' . PHP_EOL . $html . '</div>';
+	}
+
+	/**
+	 * Tell whether a fee breakdown has the minimum shape needed for the order note.
+	 *
+	 * @param array<string,mixed> $fee_breakdown Fee breakdown envelope.
+	 * @return bool
+	 */
+	private function is_renderable_fee_breakdown( array $fee_breakdown ): bool {
+		return isset(
+			$fee_breakdown['totals']['fee']['amount'],
+			$fee_breakdown['totals']['fee']['currency'],
+			$fee_breakdown['totals']['net']['amount'],
+			$fee_breakdown['totals']['net']['currency']
+		);
+	}
+
+	/**
+	 * Format a Stripe integer amount with an explicit currency code.
+	 *
+	 * @param int    $amount   Stripe integer amount.
+	 * @param string $currency Currency code.
+	 * @return string
+	 */
+	private function format_explicit_currency_amount( int $amount, string $currency ): string {
+		return $this->format_currency_minor_amount( $amount, $currency ) . ' ' . strtoupper( $currency );
+	}
+
+	/**
+	 * Format a provider exchange rate without changing its meaningful precision.
+	 *
+	 * @param mixed $exchange_rate Provider exchange rate.
+	 * @return string
+	 */
+	private function format_exchange_rate( $exchange_rate ): string {
+		return rtrim( rtrim( (string) $exchange_rate, '0' ), '.' );
+	}
+
+	/**
+	 * Format a Stripe integer amount with its currency symbol.
+	 *
+	 * @param int    $amount   Stripe integer amount.
+	 * @param string $currency Currency code.
+	 * @return string
+	 */
+	private function format_currency_minor_amount( int $amount, string $currency ): string {
+		$decimals = $this->is_zero_decimal_currency( $currency ) ? 0 : 2;
+		$value    = number_format( $this->interpret_stripe_amount( $amount, $currency ), $decimals, '.', '' );
+		$symbol   = html_entity_decode( get_woocommerce_currency_symbol( strtoupper( $currency ) ), ENT_QUOTES, 'UTF-8' );
+
+		return $symbol . $value;
+	}
+
+	/**
+	 * Tell whether an order already has an exact order note.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param string   $note  Note content.
+	 * @return bool
+	 */
+	private function order_has_note( WC_Order $order, string $note ): bool {
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'type'     => 'any',
+			)
+		);
+
+		foreach ( $notes as $order_note ) {
+			if ( $note === $order_note->content ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the merchant transaction fee from a native charge.
+	 *
+	 * @param array<string,mixed> $intent Native PaymentIntent response.
+	 * @param array<string,mixed> $charge Native Charge response.
+	 * @return string
+	 */
+	private function get_transaction_fee_from_charge( array $intent, array $charge ): string {
+		$application_fee_amount = $charge['application_fee_amount'] ?? null;
+		$currency               = isset( $charge['currency'] ) ? (string) $charge['currency'] : (string) ( $intent['currency'] ?? '' );
+		if ( null !== $application_fee_amount && '' !== $currency ) {
+			return (string) $this->interpret_stripe_amount( (int) $application_fee_amount, $currency );
+		}
+
+		$fee_breakdown_v1 = $charge['fee_breakdown_v1'] ?? null;
+		if ( is_array( $fee_breakdown_v1 ) && isset( $fee_breakdown_v1['totals']['fee']['amount'], $fee_breakdown_v1['totals']['fee']['currency'] ) ) {
+			return (string) $this->interpret_stripe_amount( (int) $fee_breakdown_v1['totals']['fee']['amount'], (string) $fee_breakdown_v1['totals']['fee']['currency'] );
+		}
+
+		return '';
+	}
+
+	/**
+	 * Get the merchant net amount from a native charge.
+	 *
+	 * @param array<string,mixed> $intent          Native PaymentIntent response.
+	 * @param array<string,mixed> $charge          Native Charge response.
+	 * @param string              $transaction_fee Transaction fee.
+	 * @return string
+	 */
+	private function get_net_from_charge( array $intent, array $charge, string $transaction_fee ): string {
+		$application_fee_amount = $charge['application_fee_amount'] ?? null;
+		$charge_amount          = $charge['amount'] ?? $intent['amount'] ?? null;
+		$currency               = isset( $charge['currency'] ) ? (string) $charge['currency'] : (string) ( $intent['currency'] ?? '' );
+		if ( null !== $application_fee_amount && '' !== $transaction_fee && null !== $charge_amount && '' !== $currency ) {
+			return (string) ( $this->interpret_stripe_amount( (int) $charge_amount, $currency ) - (float) $transaction_fee );
+		}
+
+		$fee_breakdown_v1 = $charge['fee_breakdown_v1'] ?? null;
+		if ( is_array( $fee_breakdown_v1 ) && isset( $fee_breakdown_v1['totals']['net']['amount'], $fee_breakdown_v1['totals']['net']['currency'] ) ) {
+			return (string) $this->interpret_stripe_amount( (int) $fee_breakdown_v1['totals']['net']['amount'], (string) $fee_breakdown_v1['totals']['net']['currency'] );
+		}
+
+		return '';
+	}
+
+	/**
+	 * Tell whether a native charge represents an allowed card payment.
+	 *
+	 * @param array<string,mixed> $charge Native Charge response.
+	 * @return bool
+	 */
+	private function is_successful_card_charge( array $charge ): bool {
+		$payment_method_details = $charge['payment_method_details'] ?? null;
+
+		return is_array( $payment_method_details )
+			&& isset( $payment_method_details['type'] )
+			&& 'card' === (string) $payment_method_details['type']
+			&& isset( $charge['outcome']['risk_level'] );
+	}
+
+	/**
+	 * Interpret a Stripe integer amount for a currency.
+	 *
+	 * @param int    $amount   Stripe integer amount.
+	 * @param string $currency Currency code.
+	 * @return float
+	 */
+	private function interpret_stripe_amount( int $amount, string $currency ): float {
+		return $this->is_zero_decimal_currency( $currency ) ? (float) $amount : (float) $amount / 100;
+	}
+
+	/**
 	 * Build the legacy-compatible frontend confirmation hash.
 	 *
 	 * @param WC_Order $order              Order being charged.
@@ -1047,12 +1315,14 @@ class WooPaymentsProviderGatewayAdapter {
 	}
 
 	/**
-	 * Get the human-readable payment method title for a wallet type.
+	 * Get the human-readable payment method title.
 	 *
-	 * @param string|null $wallet_type Express wallet type.
+	 * @param array<string,mixed> $payment_method_details Payment method details from the charge.
 	 * @return string
 	 */
-	private function get_payment_method_title( ?string $wallet_type ): string {
+	private function get_payment_method_title( array $payment_method_details ): string {
+		$wallet_type = $payment_method_details['card']['wallet']['type'] ?? null;
+
 		switch ( $wallet_type ) {
 			case 'link':
 				return __( 'Link', 'woocommerce' );
@@ -1064,7 +1334,133 @@ class WooPaymentsProviderGatewayAdapter {
 				return __( 'Google Pay', 'woocommerce' );
 		}
 
+		if ( 'card' === ( $payment_method_details['type'] ?? '' ) && isset( $payment_method_details['card'] ) && is_array( $payment_method_details['card'] ) ) {
+			return $this->get_card_payment_method_title( $payment_method_details['card'] );
+		}
+
 		return __( 'Credit / Debit Cards', 'woocommerce' );
+	}
+
+	/**
+	 * Get the human-readable card payment method title from charge details.
+	 *
+	 * @param array<string,mixed> $card_details Card details from the charge.
+	 * @return string
+	 */
+	private function get_card_payment_method_title( array $card_details ): string {
+		$funding_types = array(
+			'credit'  => __( 'credit', 'woocommerce' ),
+			'debit'   => __( 'debit', 'woocommerce' ),
+			'prepaid' => __( 'prepaid', 'woocommerce' ),
+			'unknown' => __( 'unknown', 'woocommerce' ),
+		);
+
+		$networks     = isset( $card_details['networks'] ) && is_array( $card_details['networks'] ) ? $card_details['networks'] : array();
+		$available    = isset( $networks['available'] ) && is_array( $networks['available'] ) ? $networks['available'] : array();
+		$card_network = $card_details['display_brand'] ?? $card_details['network'] ?? $networks['preferred'] ?? $available[0] ?? 'card';
+		$card_network = str_replace( '_', ' ', (string) $card_network );
+		$funding      = isset( $card_details['funding'] ) && isset( $funding_types[ (string) $card_details['funding'] ] )
+			? $funding_types[ (string) $card_details['funding'] ]
+			: $funding_types['unknown'];
+
+		return sprintf(
+			/* translators: %1$s: card brand, %2$s: card funding type. */
+			__( '%1$s %2$s card', 'woocommerce' ),
+			ucwords( $card_network ),
+			$funding
+		);
+	}
+
+	/**
+	 * Get a WooPayments-compatible payment success order note.
+	 *
+	 * @param WC_Order $order     Order object.
+	 * @param string   $intent_id Payment intent ID.
+	 * @param string   $charge_id Charge ID.
+	 * @return string
+	 */
+	private function get_payment_success_note( WC_Order $order, string $intent_id, string $charge_id ): string {
+		$formatted_amount = wc_price( (float) $order->get_total(), array( 'currency' => $order->get_currency() ) ) . ' ' . $order->get_currency();
+		$transaction_id   = '' !== $intent_id ? $intent_id : $charge_id;
+		$transaction_url  = $this->get_transaction_url( $intent_id, $charge_id );
+
+		if ( 'test' === $this->get_account_service()->get_mode() ) {
+			return sprintf(
+				$this->get_interpolated_note_text(
+					/* translators: %1$s: charged amount, %2$s: WooPayments, %3$s: transaction ID. */
+					__( 'A test payment of %1$s was processed using %2$s in <strong>test mode</strong> (<a>%3$s</a>). No real funds were collected.', 'woocommerce' ),
+					array(
+						'strong' => '<strong>',
+						'a'      => '' !== $transaction_url ? '<a href="' . $transaction_url . '" target="_blank" rel="noopener noreferrer">' : '<code>',
+					)
+				),
+				$formatted_amount,
+				'WooPayments',
+				$transaction_id
+			);
+		}
+
+		return sprintf(
+			$this->get_interpolated_note_text(
+				/* translators: %1$s: charged amount, %2$s: WooPayments, %3$s: transaction ID, %4$s: transaction URL. */
+				__( 'A payment of %1$s was <strong>successfully charged</strong> using %2$s (<a>%3$s</a>).', 'woocommerce' ),
+				array(
+					'strong' => '<strong>',
+					'a'      => '' !== $transaction_url ? '<a href="%4$s" target="_blank" rel="noopener noreferrer">' : '<code>',
+				)
+			),
+			$formatted_amount,
+			'WooPayments',
+			$transaction_id,
+			$transaction_url
+		);
+	}
+
+	/**
+	 * Replace simple interpolation tags with stored note HTML.
+	 *
+	 * @param string               $text        Note text.
+	 * @param array<string,string> $element_map Element replacements.
+	 * @return string
+	 */
+	private function get_interpolated_note_text( string $text, array $element_map ): string {
+		foreach ( $element_map as $tag => $opening_tag ) {
+			$closing_tag = '</' . $tag . '>';
+			if ( preg_match( '/^<(\w+)/', $opening_tag, $matches ) ) {
+				$closing_tag = '</' . $matches[1] . '>';
+			}
+
+			$text = str_replace( '<' . $tag . '>', $opening_tag, $text );
+			$text = str_replace( '</' . $tag . '>', $closing_tag, $text );
+		}
+
+		return $text;
+	}
+
+	/**
+	 * Get the WooPayments transaction details URL.
+	 *
+	 * @param string $intent_id Payment intent ID.
+	 * @param string $charge_id Charge ID.
+	 * @return string
+	 */
+	private function get_transaction_url( string $intent_id, string $charge_id ): string {
+		if ( '' === $intent_id && '' === $charge_id ) {
+			return '';
+		}
+
+		if ( false !== strpos( $intent_id, 'seti_' ) ) {
+			return '';
+		}
+
+		return add_query_arg(
+			array(
+				'page' => 'wc-admin',
+				'path' => rawurlencode( '/payments/transactions/details' ),
+				'id'   => '' !== $intent_id ? $intent_id : $charge_id,
+			),
+			admin_url( 'admin.php' )
+		);
 	}
 
 	/**

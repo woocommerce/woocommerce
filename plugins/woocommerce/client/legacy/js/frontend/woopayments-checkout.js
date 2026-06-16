@@ -7,6 +7,7 @@
 	var stripe = null;
 	var elements = null;
 	var paymentElement = null;
+	var paymentElementContainer = null;
 	var isSubmittingWithPaymentMethod = false;
 
 	function isSelectedGateway() {
@@ -66,6 +67,22 @@
 		ensureHiddenField( form, 'wcpay-fingerprint', fingerprint || '' );
 	}
 
+	function getStripeElementsOptions() {
+		var amount = Number( config.cartTotal || 0 );
+		var options = {
+			mode: amount > 0 && isFinite( amount ) ? 'payment' : 'setup',
+			currency: ( config.currency || 'usd' ).toLowerCase(),
+			paymentMethodCreation: 'manual',
+			paymentMethodTypes: [ 'card' ],
+		};
+
+		if ( 'payment' === options.mode ) {
+			options.amount = amount;
+		}
+
+		return options;
+	}
+
 	function initializeStripeElement() {
 		var container = document.getElementById( 'wcpay-core-payment-element' );
 		if (
@@ -78,6 +95,13 @@
 		}
 
 		if ( paymentElement ) {
+			if ( paymentElementContainer !== container ) {
+				if ( paymentElement.unmount ) {
+					paymentElement.unmount();
+				}
+				paymentElement.mount( container );
+				paymentElementContainer = container;
+			}
 			return;
 		}
 
@@ -85,14 +109,10 @@
 			locale: config.locale || 'auto',
 			stripeAccount: config.accountId || undefined,
 		} );
-		elements = stripe.elements( {
-			mode: 'payment',
-			amount: config.cartTotal || 0,
-			currency: ( config.currency || 'usd' ).toLowerCase(),
-			paymentMethodTypes: [ 'card' ],
-		} );
+		elements = stripe.elements( getStripeElementsOptions() );
 		paymentElement = elements.create( 'payment' );
 		paymentElement.mount( container );
+		paymentElementContainer = container;
 	}
 
 	function createPaymentMethodAndSubmit() {
@@ -201,13 +221,9 @@
 					clientSecret: confirmation.clientSecret,
 				} );
 			}
-		} else if ( stripe.confirmPayment ) {
-			confirmationPromise = stripe.confirmPayment( {
+		} else if ( stripe.handleNextAction ) {
+			confirmationPromise = stripe.handleNextAction( {
 				clientSecret: confirmation.clientSecret,
-				confirmParams: {
-					return_url: window.location.href.split( '#' )[ 0 ],
-				},
-				redirect: 'if_required',
 			} );
 		}
 

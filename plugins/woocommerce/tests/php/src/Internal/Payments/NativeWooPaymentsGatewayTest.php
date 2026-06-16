@@ -24,10 +24,87 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 		$gateway = wc_get_container()->get( NativeWooPaymentsGateway::class );
 
 		$this->assertSame( OrderPaymentStore::GATEWAY_ID, $gateway->id );
-		$this->assertSame( 'woocommerce_woocommerce_payments_settings', $gateway->get_option_key() );
-		$this->assertContains( 'refunds', $gateway->supports );
-		$this->assertContains( PaymentGatewayFeature::TOKENIZATION, $gateway->supports );
-		$this->assertNotContains( PaymentGatewayFeature::ADD_PAYMENT_METHOD, $gateway->supports );
+			$this->assertSame( 'woocommerce_woocommerce_payments_settings', $gateway->get_option_key() );
+			$this->assertContains( 'refunds', $gateway->supports );
+			$this->assertContains( PaymentGatewayFeature::TOKENIZATION, $gateway->supports );
+			$this->assertNotContains( 'subscriptions', $gateway->supports );
+			$this->assertNotContains( 'subscription_payment_method_change', $gateway->supports );
+			$this->assertNotContains( 'subscription_payment_method_change_admin', $gateway->supports );
+			$this->assertNotContains( 'subscription_payment_method_change_customer', $gateway->supports );
+			$this->assertNotContains( PaymentGatewayFeature::ADD_PAYMENT_METHOD, $gateway->supports );
+	}
+
+	/**
+	 * @testdox Should not translate gateway labels during construction before init.
+	 */
+	public function test_constructor_does_not_translate_gateway_labels_before_init(): void {
+		global $wp_actions;
+
+		$had_init_action_count = is_array( $wp_actions ) && array_key_exists( 'init', $wp_actions );
+		$previous_init_count   = $had_init_action_count ? $wp_actions['init'] : null;
+		$translated            = array();
+		$filter                = static function ( $translation, $text, $domain ) use ( &$translated ) {
+			if ( 'woocommerce' === $domain ) {
+				$translated[] = $text;
+			}
+
+			return $translation;
+		};
+
+		unset( $wp_actions['init'] );
+		add_filter( 'gettext', $filter, 10, 3 );
+
+		try {
+			new NativeWooPaymentsGateway();
+		} finally {
+			remove_filter( 'gettext', $filter, 10 );
+
+			if ( $had_init_action_count ) {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate pre-init construction for the WP 6.7 textdomain guard.
+				$wp_actions['init'] = $previous_init_count;
+			} else {
+				unset( $wp_actions['init'] );
+			}
+		}
+
+		$this->assertSame( array(), $translated, 'Native gateway construction must not call translation APIs before init.' );
+	}
+
+	/**
+	 * @testdox Should translate gateway labels from the init hook.
+	 */
+	public function test_translates_gateway_labels_from_init_hook(): void {
+		global $wp_actions;
+
+		$had_init_action_count = is_array( $wp_actions ) && array_key_exists( 'init', $wp_actions );
+		$previous_init_count   = $had_init_action_count ? $wp_actions['init'] : null;
+		$filter                = static function ( $translation, $text, $domain ) {
+			return 'woocommerce' === $domain ? 'Translated: ' . $text : $translation;
+		};
+
+		unset( $wp_actions['init'] );
+		add_filter( 'gettext', $filter, 10, 3 );
+
+		try {
+			$gateway = new NativeWooPaymentsGateway();
+
+			$this->assertSame( 'WooPayments', $gateway->method_title );
+			$this->assertSame( 'Accept payments with WooPayments.', $gateway->method_description );
+
+			$gateway->handle_init();
+
+			$this->assertSame( 'Translated: WooPayments', $gateway->method_title );
+			$this->assertSame( 'Translated: Accept payments with WooPayments.', $gateway->method_description );
+		} finally {
+			remove_filter( 'gettext', $filter, 10 );
+
+			if ( $had_init_action_count ) {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate pre-init construction for the WP 6.7 textdomain guard.
+				$wp_actions['init'] = $previous_init_count;
+			} else {
+				unset( $wp_actions['init'] );
+			}
+		}
 	}
 
 	/**

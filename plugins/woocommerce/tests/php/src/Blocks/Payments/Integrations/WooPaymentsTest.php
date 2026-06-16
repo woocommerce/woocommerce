@@ -64,6 +64,8 @@ class WooPaymentsTest extends WP_UnitTestCase {
 	 * @testdox Should register a core-owned Blocks asset handle for WooPayments.
 	 */
 	public function test_get_payment_method_script_handles_registers_core_owned_woopayments_blocks_script(): void {
+		wp_deregister_script( 'stripe' );
+
 		$asset_api = $this->getMockBuilder( AssetApi::class )
 			->disableOriginalConstructor()
 			->onlyMethods( array( 'register_script' ) )
@@ -71,7 +73,11 @@ class WooPaymentsTest extends WP_UnitTestCase {
 		$asset_api
 			->expects( $this->once() )
 			->method( 'register_script' )
-			->with( 'wc-payment-method-woopayments', 'assets/client/blocks/wc-payment-method-woopayments.js' );
+			->with(
+				'wc-payment-method-woopayments',
+				'assets/client/blocks/wc-payment-method-woopayments.js',
+				array( 'stripe' )
+			);
 
 		$bridge = $this->getMockBuilder( WooPaymentsCheckoutBridge::class )
 			->disableOriginalConstructor()
@@ -87,6 +93,8 @@ class WooPaymentsTest extends WP_UnitTestCase {
 		$integration = new WooPayments( $asset_api, $bridge, $provider );
 
 		$this->assertSame( array( 'wc-payment-method-woopayments' ), $integration->get_payment_method_script_handles() );
+		$this->assertTrue( wp_script_is( 'stripe', 'registered' ) );
+		$this->assertSame( 'https://js.stripe.com/v3/', wp_scripts()->registered['stripe']->src );
 	}
 
 	/**

@@ -121,15 +121,85 @@ const createStripe = () => {
 	} );
 };
 
+const getStripeElementsOptions = () => {
+	const amount = Number( settings.cartTotal || 0 );
+	const options = {
+		mode: amount > 0 && Number.isFinite( amount ) ? 'payment' : 'setup',
+		currency: ( settings.currency || 'usd' ).toLowerCase(),
+		paymentMethodCreation: 'manual',
+		paymentMethodTypes: [ 'card' ],
+	};
+
+	if ( options.mode === 'payment' ) {
+		options.amount = amount;
+	}
+
+	return options;
+};
+
+const getStripePaymentElementOptions = () => ( {
+	fields: {
+		billingDetails: {
+			name: 'never',
+			email: 'never',
+			phone: 'never',
+			address: {
+				country: 'never',
+				line1: 'never',
+				line2: 'never',
+				city: 'never',
+				state: 'never',
+				postalCode: 'never',
+			},
+		},
+	},
+	wallets: {
+		applePay: 'never',
+		googlePay: 'never',
+		link: 'never',
+	},
+} );
+
+const getFieldValue = ( selector ) => {
+	const field = document.querySelector( selector );
+	return field ? field.value : '';
+};
+
+const getBillingDetails = () => {
+	const firstName = getFieldValue( '#billing-first_name' );
+	const lastName = getFieldValue( '#billing-last_name' );
+	const name = `${ firstName || '' } ${ lastName || '' }`.trim();
+
+	return {
+		name,
+		email: getFieldValue( '#email' ),
+		phone: getFieldValue( '#billing-phone' ),
+		address: {
+			city: getFieldValue( '#billing-city' ),
+			country: getFieldValue( '#billing-country' ),
+			line1: getFieldValue( '#billing-address_1' ),
+			line2: getFieldValue( '#billing-address_2' ),
+			postal_code: getFieldValue( '#billing-postcode' )?.trim(),
+			state: getFieldValue( '#billing-state' ),
+		},
+	};
+};
+
 const WooPaymentsContent = ( {
 	eventRegistration,
 	emitResponse,
 	shouldSavePayment,
 } ) => {
+	const { onPaymentSetup, onCheckoutSuccess } = eventRegistration || {};
 	const elementContainer = useRef( null );
 	const stripe = useRef( null );
 	const elements = useRef( null );
 	const paymentElement = useRef( null );
+	const emitResponseRef = useRef( emitResponse );
+	const shouldSavePaymentRef = useRef( shouldSavePayment );
+
+	emitResponseRef.current = emitResponse;
+	shouldSavePaymentRef.current = shouldSavePayment;
 
 	useEffect( () => {
 		if (
@@ -145,22 +215,22 @@ const WooPaymentsContent = ( {
 			return;
 		}
 
-		elements.current = stripe.current.elements( {
-			mode: 'payment',
-			amount: settings.cartTotal || 0,
-			currency: ( settings.currency || 'usd' ).toLowerCase(),
-			paymentMethodTypes: [ 'card' ],
-		} );
-		paymentElement.current = elements.current.create( 'payment' );
+		elements.current = stripe.current.elements(
+			getStripeElementsOptions()
+		);
+		paymentElement.current = elements.current.create(
+			'payment',
+			getStripePaymentElementOptions()
+		);
 		paymentElement.current.mount( elementContainer.current );
 	}, [] );
 
 	useEffect( () => {
-		if ( ! eventRegistration?.onPaymentSetup ) {
+		if ( ! onPaymentSetup ) {
 			return undefined;
 		}
 
-		const unsubscribe = eventRegistration.onPaymentSetup( async () => {
+		const unsubscribe = onPaymentSetup( async () => {
 			const paymentMethodData = {
 				'wcpay-payment-method': '',
 				'wcpay-payment-method-error-code': '',
@@ -169,8 +239,31 @@ const WooPaymentsContent = ( {
 			};
 
 			if ( stripe.current && elements.current ) {
+				if ( typeof elements.current.submit === 'function' ) {
+					const submitResult = await elements.current.submit();
+					if ( submitResult?.error ) {
+						paymentMethodData[ 'wcpay-payment-method-error-code' ] =
+							submitResult.error.code || '';
+						paymentMethodData[
+							'wcpay-payment-method-error-message'
+						] = submitResult.error.message || '';
+
+						return getErrorResponse(
+							emitResponseRef.current,
+							submitResult.error.message ||
+								__(
+									'There was a problem validating your payment details.',
+									'woocommerce'
+								)
+						);
+					}
+				}
+
 				const result = await stripe.current.createPaymentMethod( {
 					elements: elements.current,
+					params: {
+						billing_details: getBillingDetails(),
+					},
 				} );
 
 				if ( result.error ) {
@@ -180,7 +273,7 @@ const WooPaymentsContent = ( {
 						result.error.message || '';
 
 					return getErrorResponse(
-						emitResponse,
+						emitResponseRef.current,
 						result.error.message ||
 							__(
 								'There was a problem validating your payment details.',
@@ -197,85 +290,83 @@ const WooPaymentsContent = ( {
 				}
 			}
 
-			return getSuccessResponse( emitResponse, paymentMethodData );
+			return getSuccessResponse(
+				emitResponseRef.current,
+				paymentMethodData
+			);
 		} );
 
 		return typeof unsubscribe === 'function' ? unsubscribe : undefined;
-	}, [ emitResponse, eventRegistration ] );
+	}, [ onPaymentSetup ] );
 
 	useEffect( () => {
-		if ( ! eventRegistration?.onCheckoutSuccess ) {
+		if ( ! onCheckoutSuccess ) {
 			return undefined;
 		}
 
-		const unsubscribe = eventRegistration.onCheckoutSuccess(
-			async ( response ) => {
-				const confirmation = parseConfirmationRedirect( response );
-				if ( ! confirmation ) {
-					return getSuccessResponse( emitResponse, {} );
-				}
-
-				stripe.current = stripe.current || createStripe();
-
-				if ( ! stripe.current ) {
-					return getSuccessResponse( emitResponse, {} );
-				}
-
-				let result;
-
-				if ( confirmation.type === 'si' ) {
-					result = confirmation.confirmationToken
-						? await stripe.current.confirmSetup( {
-								clientSecret: confirmation.clientSecret,
-								confirmParams: {
-									confirmation_token:
-										confirmation.confirmationToken,
-								},
-								redirect: 'if_required',
-						  } )
-						: await stripe.current.handleNextAction( {
-								clientSecret: confirmation.clientSecret,
-						  } );
-				} else {
-					result = await stripe.current.confirmPayment( {
-						clientSecret: confirmation.clientSecret,
-						confirmParams: {
-							return_url: window.location.href.split( '#' )[ 0 ],
-						},
-						redirect: 'if_required',
-					} );
-				}
-
-				if ( result.error ) {
-					return getErrorResponse(
-						emitResponse,
-						result.error.message ||
-							__(
-								'There was a problem confirming your payment.',
-								'woocommerce'
-							)
-					);
-				}
-
-				const intentId =
-					result.paymentIntent?.id ||
-					result.setupIntent?.id ||
-					result.error?.payment_intent?.id ||
-					result.error?.setup_intent?.id ||
-					confirmation.intentId;
-
-				const redirectUrl = await updateOrderStatusAfterConfirmation(
-					confirmation,
-					intentId,
-					Boolean( shouldSavePayment )
-				);
-
-				return getSuccessResponse( emitResponse, {}, redirectUrl );
+		const unsubscribe = onCheckoutSuccess( async ( response ) => {
+			const currentEmitResponse = emitResponseRef.current;
+			const confirmation = parseConfirmationRedirect( response );
+			if ( ! confirmation ) {
+				return getSuccessResponse( currentEmitResponse, {} );
 			}
-		);
+
+			stripe.current = stripe.current || createStripe();
+
+			if ( ! stripe.current ) {
+				return getSuccessResponse( currentEmitResponse, {} );
+			}
+
+			let result;
+
+			if ( confirmation.type === 'si' ) {
+				result = confirmation.confirmationToken
+					? await stripe.current.confirmSetup( {
+							clientSecret: confirmation.clientSecret,
+							confirmParams: {
+								confirmation_token:
+									confirmation.confirmationToken,
+							},
+							redirect: 'if_required',
+					  } )
+					: await stripe.current.handleNextAction( {
+							clientSecret: confirmation.clientSecret,
+					  } );
+			} else {
+				result = await stripe.current.handleNextAction( {
+					clientSecret: confirmation.clientSecret,
+				} );
+			}
+
+			if ( result.error ) {
+				return getErrorResponse(
+					currentEmitResponse,
+					result.error.message ||
+						__(
+							'There was a problem confirming your payment.',
+							'woocommerce'
+						)
+				);
+			}
+
+			const intentId =
+				result.paymentIntent?.id ||
+				result.setupIntent?.id ||
+				result.error?.payment_intent?.id ||
+				result.error?.setup_intent?.id ||
+				confirmation.intentId;
+
+			const redirectUrl = await updateOrderStatusAfterConfirmation(
+				confirmation,
+				intentId,
+				Boolean( shouldSavePaymentRef.current )
+			);
+
+			return getSuccessResponse( currentEmitResponse, {}, redirectUrl );
+		} );
 
 		return typeof unsubscribe === 'function' ? unsubscribe : undefined;
-	}, [ emitResponse, eventRegistration, shouldSavePayment ] );
+	}, [ onCheckoutSuccess ] );
 
 	return (
 		<div
