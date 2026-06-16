@@ -40,6 +40,8 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
+		wc_clear_notices();
+		unset( $GLOBALS['wp']->query_vars['orders'] );
 		parent::tearDown();
 	}
 
@@ -83,24 +85,61 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $this->sut->should_show_prompt(), 'Unverified customers with nothing to link should not see the prompt' );
 	}
 
+	// -------------------------------------------------------------------------
+	// maybe_add_orders_notice()
+	// -------------------------------------------------------------------------
+
 	/**
-	 * @testdox should_show_prompt returns false while a verification email was just sent.
+	 * @testdox The orders notice carries a confirm call to action when no link was sent recently.
 	 */
-	public function test_should_show_prompt_returns_false_when_recently_sent(): void {
-		$email   = 'recent-send@example.com';
-		$user_id = wc_create_new_customer( $email, 'recentsenduser', 'pw' );
+	public function test_orders_notice_shows_cta_when_not_recently_sent(): void {
+		global $wp;
+		$email   = 'cta-prompt@example.com';
+		$user_id = wc_create_new_customer( $email, 'ctapromptuser', 'pw' );
 		wp_set_current_user( $user_id );
 
-		// A linkable guest order exists, so only the recent-send suppression should hide the prompt.
 		$order = \WC_Helper_Order::create_order( 0 );
 		$order->set_billing_email( $email );
 		$order->set_customer_id( 0 );
 		$order->save();
 
-		// Simulate a verification email having just been sent.
+		$wp->query_vars['orders'] = '';
+		wc_clear_notices();
+
+		$this->sut->maybe_add_orders_notice();
+
+		$notices = wc_get_notices( 'notice' );
+		$this->assertNotEmpty( $notices );
+		$this->assertStringContainsString( 'Confirm your email address', $notices[0]['notice'] );
+		$this->assertStringContainsString( 'button wc-forward', $notices[0]['notice'], 'A prompt with no recent send should carry the confirm button.' );
+	}
+
+	/**
+	 * @testdox Right after a send, the orders notice drops the call to action and says a link was emailed.
+	 */
+	public function test_orders_notice_shows_check_inbox_without_cta_when_recently_sent(): void {
+		global $wp;
+		$email   = 'inbox-prompt@example.com';
+		$user_id = wc_create_new_customer( $email, 'inboxpromptuser', 'pw' );
+		wp_set_current_user( $user_id );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( $email );
+		$order->set_customer_id( 0 );
+		$order->save();
+
+		// A confirmation link was just sent.
 		$this->service->create_verification_key( $user_id );
 
-		$this->assertFalse( $this->sut->should_show_prompt(), 'Prompt should be hidden while a freshly-sent verification link is still valid' );
+		$wp->query_vars['orders'] = '';
+		wc_clear_notices();
+
+		$this->sut->maybe_add_orders_notice();
+
+		$notices = wc_get_notices( 'notice' );
+		$this->assertNotEmpty( $notices );
+		$this->assertStringContainsString( 'We emailed you a link to confirm your email', $notices[0]['notice'] );
+		$this->assertStringNotContainsString( 'button wc-forward', $notices[0]['notice'], 'The recently-sent notice must not carry a resend button.' );
 	}
 
 	/**

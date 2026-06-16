@@ -93,8 +93,9 @@ class VerificationController {
 	/**
 	 * Handle a request to send (or resend) the verification email, triggered by the My Account prompt.
 	 *
-	 * Verifies the nonce and user, applies a rate-limit, then dispatches the email. Redirects back
-	 * to the orders section with a success or rate-limit notice added.
+	 * Verifies the nonce, applies a rate-limit (does not re-send within the window), dispatches the
+	 * email, and redirects to the orders section. The orders notice points the customer to their
+	 * inbox, so no extra confirmation notice is added here.
 	 *
 	 * @since 11.0.0
 	 */
@@ -113,24 +114,11 @@ class VerificationController {
 			exit;
 		}
 
+		// Only send a fresh link if the last one is outside the rate-limit window; otherwise the
+		// existing link still stands. Either way the orders notice points the customer to their inbox.
 		$seconds_since = $this->service->seconds_since_last_key( $user_id );
-		if ( null !== $seconds_since && $seconds_since < self::SEND_RATE_LIMIT ) {
-			wc_add_notice( __( 'A confirmation link was just sent — please check your inbox.', 'woocommerce' ) );
-			wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
-			exit;
-		}
-
-		$this->send_verification_email( $user_id );
-
-		$user = get_user_by( 'id', $user_id );
-		if ( $user ) {
-			wc_add_notice(
-				sprintf(
-					/* translators: %s: customer email address */
-					__( "We've emailed a confirmation link to %s.", 'woocommerce' ),
-					$user->user_email
-				)
-			);
+		if ( null === $seconds_since || $seconds_since >= self::SEND_RATE_LIMIT ) {
+			$this->send_verification_email( $user_id );
 		}
 
 		wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
@@ -138,12 +126,12 @@ class VerificationController {
 	}
 
 	/**
-	 * Return whether the email-verification prompt should be shown to the current visitor.
+	 * Return whether the email-confirmation notice should be shown on the current page.
 	 *
-	 * True only for a logged-in customer who is not yet verified, has at least one guest order
-	 * that could be linked (existence only; no details exposed), and has not just been sent a
-	 * verification email — so the prompt does not sit alongside the "we've emailed you a link"
-	 * notice.
+	 * True only for a logged-in customer who is not yet confirmed, does not have a temporary
+	 * password (those confirm via their set-password link), and has at least one guest order that
+	 * could be linked (existence only; no details exposed). Whether the notice carries a call to
+	 * action or a "check your inbox" message is decided in {@see self::maybe_add_orders_notice()}.
 	 *
 	 * @since 11.0.0
 	 *
@@ -157,13 +145,6 @@ class VerificationController {
 		}
 
 		if ( $this->service->is_verified( $user_id ) ) {
-			return false;
-		}
-
-		// Don't prompt again while a freshly-sent verification link is still within the
-		// rate-limit window — the "we've emailed you a link" / "just sent" notice covers it.
-		$seconds_since = $this->service->seconds_since_last_key( $user_id );
-		if ( null !== $seconds_since && $seconds_since < self::SEND_RATE_LIMIT ) {
 			return false;
 		}
 
@@ -188,6 +169,14 @@ class VerificationController {
 	 */
 	public function maybe_add_orders_notice(): void {
 		if ( ! is_wc_endpoint_url( 'orders' ) || ! $this->should_show_prompt() ) {
+			return;
+		}
+
+		// Within the rate-limit window a confirmation link was sent recently: point the customer to
+		// their inbox without a resend call to action.
+		$seconds_since = $this->service->seconds_since_last_key( get_current_user_id() );
+		if ( null !== $seconds_since && $seconds_since < self::SEND_RATE_LIMIT ) {
+			wc_add_notice( __( 'Confirm your email address to view past orders. We emailed you a link to confirm your email.', 'woocommerce' ), 'notice' );
 			return;
 		}
 
