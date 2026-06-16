@@ -31,7 +31,6 @@
 	"types": "build-types/index.d.ts",
 	"react-native": "src/index",
 	"files": [
-		"build",
 		"build-module",
 		"build-style",
 		"build-types"
