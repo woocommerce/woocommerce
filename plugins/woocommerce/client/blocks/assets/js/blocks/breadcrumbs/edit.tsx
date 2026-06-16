@@ -23,6 +23,17 @@ const Edit = ( { attributes }: BlockEditProps< Attributes > ) => {
 
 	const themeFontSize = useBreadcrumbsThemeFontSize();
 
+	// Remove the default 'has-small-font-size' class when the block has a
+	// custom font size defined in theme.json.
+	// This is needed because block.json defines a default font size, which is
+	// considered an anti-pattern since styles should be defined by themes and
+	// plugins instead.
+	// As a result, font sizes defined in theme.json will take priority over a
+	// `small` font size selected in the editor. When selecting other font
+	// sizes, the editor font size will take priority over the theme.json font
+	// size as expected.
+	// That's a trade-off we are making until we can migrate this block to a new
+	// version or to the WP core Breadcrumbs block.
 	if (
 		attributes.fontSize === 'small' &&
 		themeFontSize &&
