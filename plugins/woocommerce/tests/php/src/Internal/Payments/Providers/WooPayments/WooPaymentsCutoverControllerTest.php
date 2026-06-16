@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCutoverController;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Unit_Test_Case;
 
 /**
@@ -22,6 +24,20 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	 * @var WooPaymentsCutoverController
 	 */
 	private WooPaymentsCutoverController $sut;
+
+	/**
+	 * Native WooPayments provider mock.
+	 *
+	 * @var WooPaymentsProvider&\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private WooPaymentsProvider $provider;
+
+	/**
+	 * Whether the native provider can process payments.
+	 *
+	 * @var bool
+	 */
+	private bool $native_provider_ready = false;
 
 	/**
 	 * Whether the WooPayments plugin should appear active.
@@ -56,7 +72,21 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = wc_get_container()->get( WooPaymentsCutoverController::class );
+
+		$this->provider = $this->getMockBuilder( WooPaymentsProvider::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'can_process_payments' ) )
+			->getMock();
+		$this->provider
+			->method( 'can_process_payments' )
+			->willReturnCallback( fn() => $this->native_provider_ready );
+
+		$this->sut = new WooPaymentsCutoverController();
+		$this->sut->init(
+			wc_get_container()->get( NativePaymentsRuntimeArbiter::class ),
+			wc_get_container()->get( LegacyProxy::class ),
+			$this->provider
+		);
 	}
 
 	/**
@@ -163,6 +193,18 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Mandatory activation guard remains default-off when native preflight is ready.
+	 */
+	public function test_mandatory_activation_guard_remains_default_off_when_preflight_is_ready(): void {
+		$this->fake_wp_die_handler();
+		$this->enable_ready_cutover();
+
+		$this->sut->guard_woopayments_activation( NativePaymentsRuntimeArbiter::PLUGIN_FILE );
+
+		$this->assertTrue( true, 'Mandatory cutover must still require an explicit rollout filter.' );
+	}
+
+	/**
 	 * @testdox Mandatory activation guard ignores other plugins.
 	 */
 	public function test_mandatory_activation_guard_ignores_other_plugins(): void {
@@ -193,11 +235,36 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Transport readiness filter can still block cutover when the native provider is ready.
+	 */
+	public function test_transport_filter_can_block_provider_backed_preflight(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		$this->enable_ready_cutover();
+		add_filter( WooPaymentsCutoverController::FILTER_NATIVE_TRANSPORT_READY, '__return_false' );
+
+		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+		$this->assertContains( 'native_transport_unavailable', $this->sut->get_preflight_failures() );
+	}
+
+	/**
+	 * @testdox Transport readiness filter can still force cutover readiness for controlled rollouts.
+	 */
+	public function test_transport_filter_can_force_preflight_when_provider_is_not_ready(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		add_filter( NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED, '__return_true' );
+		add_filter( WooPaymentsCutoverController::FILTER_NATIVE_TRANSPORT_READY, '__return_true' );
+
+		$this->assertTrue( $this->sut->should_show_soft_cutover_notice() );
+	}
+
+	/**
 	 * Make the native cutover preflight ready.
 	 */
 	private function enable_ready_cutover(): void {
 		add_filter( NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED, '__return_true' );
-		add_filter( WooPaymentsCutoverController::FILTER_NATIVE_TRANSPORT_READY, '__return_true' );
+		$this->native_provider_ready = true;
 	}
 
 	/**

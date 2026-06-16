@@ -114,16 +114,25 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	private LegacyProxy $legacy_proxy;
 
 	/**
+	 * Native WooPayments provider.
+	 *
+	 * @var WooPaymentsProvider
+	 */
+	private WooPaymentsProvider $provider;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
 	 * @param NativePaymentsRuntimeArbiter $arbiter      Runtime owner arbiter.
 	 * @param LegacyProxy                  $legacy_proxy Legacy proxy.
+	 * @param WooPaymentsProvider          $provider     Native WooPayments provider.
 	 */
-	final public function init( NativePaymentsRuntimeArbiter $arbiter, LegacyProxy $legacy_proxy ): void {
+	final public function init( NativePaymentsRuntimeArbiter $arbiter, LegacyProxy $legacy_proxy, WooPaymentsProvider $provider ): void {
 		$this->arbiter      = $arbiter;
 		$this->legacy_proxy = $legacy_proxy;
+		$this->provider     = $provider;
 	}
 
 	/**
@@ -270,7 +279,7 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 		 *
 		 * @since 11.0.0
 		 */
-		if ( ! (bool) apply_filters( self::FILTER_NATIVE_TRANSPORT_READY, false ) ) {
+		if ( ! (bool) apply_filters( self::FILTER_NATIVE_TRANSPORT_READY, $this->is_native_transport_ready() ) ) {
 			$failures[] = 'native_transport_unavailable';
 		}
 
@@ -309,6 +318,19 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	 */
 	private function is_cutover_ready(): bool {
 		return array() === $this->get_preflight_failures();
+	}
+
+	/**
+	 * Tell whether native WooPayments can process after plugin deactivation.
+	 *
+	 * @return bool
+	 */
+	private function is_native_transport_ready(): bool {
+		try {
+			return $this->provider->can_process_payments();
+		} catch ( \Throwable $e ) {
+			return false;
+		}
 	}
 
 	/**
