@@ -8,8 +8,10 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Payments;
 
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
+use Throwable;
 use WC_Order;
 use WC_Payment_Gateway_CC;
 use WP_Error;
@@ -52,6 +54,16 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	);
 
 	/**
+	 * Recommended payment methods cache key.
+	 */
+	private const RECOMMENDED_PAYMENT_METHODS_CACHE_KEY = 'woocommerce_woocommerce_payments_recommended_payment_methods';
+
+	/**
+	 * Recommended payment methods cache TTL.
+	 */
+	private const RECOMMENDED_PAYMENT_METHODS_CACHE_TTL = DAY_IN_SECONDS;
+
+	/**
 	 * Payment processing service.
 	 *
 	 * @var PaymentProcessingService
@@ -71,6 +83,13 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	 * @var WooPaymentsCheckoutBridge
 	 */
 	private WooPaymentsCheckoutBridge $checkout_bridge;
+
+	/**
+	 * Native WooPayments API client.
+	 *
+	 * @var WooPaymentsApiClient
+	 */
+	private WooPaymentsApiClient $api_client;
 
 	/**
 	 * Constructor.
@@ -115,13 +134,18 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	 * @param PaymentProcessingService       $processing_service Payment processing service.
 	 * @param WooPaymentsProvider            $provider           WooPayments provider.
 	 * @param WooPaymentsCheckoutBridge|null $checkout_bridge    Optional checkout bridge.
+	 * @param WooPaymentsApiClient|null      $api_client         Optional API client.
 	 */
-	final public function init( PaymentProcessingService $processing_service, WooPaymentsProvider $provider, ?WooPaymentsCheckoutBridge $checkout_bridge = null ): void {
+	final public function init( PaymentProcessingService $processing_service, WooPaymentsProvider $provider, ?WooPaymentsCheckoutBridge $checkout_bridge = null, ?WooPaymentsApiClient $api_client = null ): void {
 		$this->processing_service = $processing_service;
 		$this->provider           = $provider;
 
 		if ( null !== $checkout_bridge ) {
 			$this->checkout_bridge = $checkout_bridge;
+		}
+
+		if ( null !== $api_client ) {
+			$this->api_client = $api_client;
 		}
 	}
 
@@ -238,6 +262,110 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	}
 
 	/**
+	 * Get the recommended payment methods list for onboarding.
+	 *
+	 * @param string $country_code Optional. Business location country code.
+	 * @return array<int,array<string,mixed>>
+	 */
+	public function get_recommended_payment_methods( string $country_code = '' ): array {
+		$country_code = strtoupper( trim( $country_code ) );
+		if ( '' === $country_code ) {
+			return array();
+		}
+
+		$locale = get_user_locale();
+		$cached = $this->get_cached_recommended_payment_methods( $country_code, $locale );
+		if ( null !== $cached ) {
+			return $cached;
+		}
+
+		try {
+			$recommended_pms = $this->get_api_client()->get_recommended_payment_methods( $country_code, $locale );
+		} catch ( Throwable $exception ) {
+			return array();
+		}
+
+		$recommended_pms = $this->normalize_recommended_payment_methods( $recommended_pms );
+		if ( ! empty( $recommended_pms ) ) {
+			$this->set_cached_recommended_payment_methods( $country_code, $locale, $recommended_pms );
+		}
+
+		return $recommended_pms;
+	}
+
+	/**
+	 * Normalize recommended payment methods for the settings provider pipeline.
+	 *
+	 * @param array $recommended_pms Raw recommended payment methods.
+	 * @return array<int,array<string,mixed>>
+	 */
+	private function normalize_recommended_payment_methods( array $recommended_pms ): array {
+		$recommended_pms = array_values(
+			array_filter(
+				$recommended_pms,
+				static function ( $payment_method ): bool {
+					return is_array( $payment_method ) && isset( $payment_method['id'], $payment_method['title'] );
+				}
+			)
+		);
+
+		return array_map(
+			static function ( array $payment_method, int $index ): array {
+				if ( ! isset( $payment_method['enabled'] ) ) {
+					$payment_method['enabled'] = ! isset( $payment_method['type'] ) || 'available' !== $payment_method['type'];
+				}
+
+				$payment_method['priority'] = isset( $payment_method['priority'] ) ? (int) $payment_method['priority'] : $index;
+
+				return $payment_method;
+			},
+			$recommended_pms,
+			array_keys( $recommended_pms )
+		);
+	}
+
+	/**
+	 * Get cached recommended payment methods for a country and locale.
+	 *
+	 * @param string $country_code Business location country code.
+	 * @param string $locale       User locale.
+	 * @return array<int,array<string,mixed>>|null
+	 */
+	private function get_cached_recommended_payment_methods( string $country_code, string $locale ): ?array {
+		$cached = get_transient( self::RECOMMENDED_PAYMENT_METHODS_CACHE_KEY );
+		if ( ! is_array( $cached ) ||
+			( $cached['country_code'] ?? '' ) !== $country_code ||
+			( $cached['__locale'] ?? '' ) !== $locale ||
+			! isset( $cached['payment_methods'] ) ||
+			! is_array( $cached['payment_methods'] ) ) {
+
+			return null;
+		}
+
+		return $cached['payment_methods'];
+	}
+
+	/**
+	 * Cache recommended payment methods for a country and locale.
+	 *
+	 * @param string $country_code    Business location country code.
+	 * @param string $locale          User locale.
+	 * @param array  $payment_methods Recommended payment methods.
+	 * @return void
+	 */
+	private function set_cached_recommended_payment_methods( string $country_code, string $locale, array $payment_methods ): void {
+		set_transient(
+			self::RECOMMENDED_PAYMENT_METHODS_CACHE_KEY,
+			array(
+				'payment_methods' => $payment_methods,
+				'__locale'        => $locale,
+				'country_code'    => $country_code,
+			),
+			self::RECOMMENDED_PAYMENT_METHODS_CACHE_TTL
+		);
+	}
+
+	/**
 	 * Get the payment processing service.
 	 *
 	 * @return PaymentProcessingService
@@ -274,6 +402,19 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 		}
 
 		return $this->checkout_bridge;
+	}
+
+	/**
+	 * Get the native WooPayments API client.
+	 *
+	 * @return WooPaymentsApiClient
+	 */
+	private function get_api_client(): WooPaymentsApiClient {
+		if ( ! isset( $this->api_client ) ) {
+			$this->api_client = wc_get_container()->get( WooPaymentsApiClient::class );
+		}
+
+		return $this->api_client;
 	}
 
 	/**

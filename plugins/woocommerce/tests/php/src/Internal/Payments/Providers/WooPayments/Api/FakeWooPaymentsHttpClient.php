@@ -67,6 +67,13 @@ class FakeWooPaymentsHttpClient extends WooPaymentsHttpClient {
 	public int $last_timeout = 0;
 
 	/**
+	 * Whether the last request used the connection-owner user token.
+	 *
+	 * @var bool
+	 */
+	public bool $last_use_user_token = false;
+
+	/**
 	 * Tell whether the client is connected.
 	 *
 	 * @return bool
@@ -91,15 +98,17 @@ class FakeWooPaymentsHttpClient extends WooPaymentsHttpClient {
 	 * @param string      $path    WPCOM path.
 	 * @param string[]    $headers Request headers.
 	 * @param string|null $body    Request body.
-	 * @param int         $timeout Request timeout.
+	 * @param int         $timeout        Request timeout.
+	 * @param bool        $use_user_token Whether to sign with the connection-owner user token.
 	 * @return mixed
 	 */
-	public function request( string $method, string $path, array $headers = array(), ?string $body = null, int $timeout = 70 ) {
-		$this->last_method  = $method;
-		$this->last_path    = $path;
-		$this->last_headers = $headers;
-		$this->last_body    = $body;
-		$this->last_timeout = $timeout;
+	public function request( string $method, string $path, array $headers = array(), ?string $body = null, int $timeout = 70, bool $use_user_token = false ) {
+		$this->last_method         = $method;
+		$this->last_path           = $path;
+		$this->last_headers        = $headers;
+		$this->last_body           = $body;
+		$this->last_timeout        = $timeout;
+		$this->last_use_user_token = $use_user_token;
 
 		return $this->response;
 	}

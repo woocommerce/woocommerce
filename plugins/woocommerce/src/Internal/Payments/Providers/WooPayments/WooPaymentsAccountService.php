@@ -66,6 +66,72 @@ class WooPaymentsAccountService {
 	}
 
 	/**
+	 * Clear the preserved WooPayments account cache.
+	 *
+	 * This mirrors the plugin behavior after account creation/finalization so the next account read can refresh the
+	 * provider state instead of continuing to use stale cached readiness.
+	 *
+	 * @return void
+	 */
+	public function clear_cache(): void {
+		try {
+			$this->legacy_proxy->call_function( 'delete_option', self::ACCOUNT_OPTION );
+			$this->legacy_proxy->call_function( 'wp_cache_delete', self::ACCOUNT_OPTION, 'options' );
+		} catch ( \Throwable $e ) {
+			return;
+		}
+	}
+
+	/**
+	 * Persist normalized WooPayments account cache data.
+	 *
+	 * @param array<string,mixed> $account_data Account data.
+	 * @return void
+	 */
+	public function cache_account_data( array $account_data ): void {
+		try {
+			$this->legacy_proxy->call_function(
+				'update_option',
+				self::ACCOUNT_OPTION,
+				array(
+					'data'               => $account_data,
+					'fetched'            => $this->legacy_proxy->call_function( 'time' ),
+					'errored'            => false,
+					'consecutive_errors' => 0,
+				)
+			);
+			$this->legacy_proxy->call_function( 'wp_cache_delete', self::ACCOUNT_OPTION, 'options' );
+		} catch ( \Throwable $e ) {
+			return;
+		}
+	}
+
+	/**
+	 * Immediately overwrite the preserved account cache with a connected-but-no-account payload.
+	 *
+	 * This avoids reading a stale account while the platform finishes deleting it.
+	 *
+	 * @return void
+	 */
+	public function overwrite_cache_with_no_account(): void {
+		try {
+			$this->legacy_proxy->call_function(
+				'update_option',
+				self::ACCOUNT_OPTION,
+				array(
+					'data'               => array(),
+					'fetched'            => $this->legacy_proxy->call_function( 'time' ),
+					'errored'            => false,
+					'consecutive_errors' => 0,
+				)
+			);
+			$this->legacy_proxy->call_function( 'wp_cache_delete', self::ACCOUNT_OPTION, 'options' );
+		} catch ( \Throwable $e ) {
+			return;
+		}
+	}
+
+	/**
 	 * Get the connected WooPayments account ID.
 	 *
 	 * @return string

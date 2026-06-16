@@ -52,14 +52,16 @@ class WooPaymentsHttpClient implements WooPaymentsHttpClientInterface {
 	/**
 	 * Send a WPCOM request.
 	 *
-	 * @param string      $method  HTTP method.
-	 * @param string      $path    Site-scoped WPCOM path.
-	 * @param string[]    $headers Request headers.
-	 * @param string|null $body    Encoded request body.
-	 * @param int         $timeout Request timeout.
+	 * @param string      $method         HTTP method.
+	 * @param string      $path           WPCOM API path.
+	 * @param string[]    $headers        Request headers.
+	 * @param string|null $body           Encoded request body.
+	 * @param int         $timeout        Request timeout.
+	 * @param bool        $use_user_token Whether to sign with the connection-owner user token.
 	 * @return array|WP_Error
 	 */
-	public function request( string $method, string $path, array $headers = array(), ?string $body = null, int $timeout = 70 ) {
+	public function request( string $method, string $path, array $headers = array(), ?string $body = null, int $timeout = 70, bool $use_user_token = false ) {
+		$manager = JetpackConnection::get_manager();
 		$site_id = $this->get_blog_id();
 		if ( ! $this->is_connected() ) {
 			return new WP_Error( 'wcpay_wpcom_not_connected', __( 'Site is not connected to WordPress.com.', 'woocommerce' ) );
@@ -69,7 +71,7 @@ class WooPaymentsHttpClient implements WooPaymentsHttpClientInterface {
 			return new WP_Error( 'wcpay_blog_id_unavailable', __( 'The WooPayments site ID is unavailable.', 'woocommerce' ) );
 		}
 
-		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
+		$request_args            = Jetpack_Connection_Client::validate_args_for_wpcom_json_api_request(
 			$path,
 			'2',
 			array(
@@ -77,9 +79,20 @@ class WooPaymentsHttpClient implements WooPaymentsHttpClientInterface {
 				'method'  => $method,
 				'timeout' => $timeout,
 			),
-			$body,
 			'wpcom'
 		);
+		$request_args['blog_id'] = $site_id;
+
+		if ( $use_user_token ) {
+			$connection_owner_id = $manager->get_connection_owner_id();
+			if ( ! $connection_owner_id ) {
+				return new WP_Error( 'wcpay_connection_owner_unavailable', __( 'The WooPayments connection owner is unavailable.', 'woocommerce' ) );
+			}
+
+			$request_args['user_id'] = $connection_owner_id;
+		}
+
+		$response = Jetpack_Connection_Client::remote_request( $request_args, $body );
 
 		return is_array( $response ) || $response instanceof WP_Error
 			? $response

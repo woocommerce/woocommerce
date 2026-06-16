@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\Payments\NativeWooPaymentsGateway;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
 use Automattic\WooCommerce\Internal\Payments\PaymentContext;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use WC_Order;
@@ -253,6 +254,89 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 		$output = (string) ob_get_clean();
 
 		$this->assertStringContainsString( 'wcpay-core-checkout-form', $output );
+	}
+
+	/**
+	 * @testdox Should expose recommended payment methods for the settings provider list.
+	 */
+	public function test_get_recommended_payment_methods_delegates_to_native_api_client(): void {
+		delete_transient( 'woocommerce_woocommerce_payments_recommended_payment_methods' );
+
+		$api_client = $this->getMockBuilder( WooPaymentsApiClient::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_recommended_payment_methods' ) )
+			->getMock();
+		$api_client
+			->expects( $this->once() )
+			->method( 'get_recommended_payment_methods' )
+			->with( 'GB', 'en_US' )
+			->willReturn(
+				array(
+					array(
+						'id'    => 'card',
+						'title' => 'Cards',
+					),
+					array(
+						'id'       => 'link',
+						'title'    => 'Link',
+						'type'     => 'available',
+						'priority' => '7',
+					),
+					array(
+						'title' => 'Invalid recommendation',
+					),
+				)
+			);
+
+		$gateway = new NativeWooPaymentsGateway();
+		$gateway->init( new RecordingPaymentProcessingService(), new WooPaymentsProvider(), null, $api_client );
+
+		$result = $gateway->get_recommended_payment_methods( 'GB' );
+
+		$this->assertCount( 2, $result );
+		$this->assertSame( 'card', $result[0]['id'] );
+		$this->assertTrue( $result[0]['enabled'] );
+		$this->assertSame( 0, $result[0]['priority'] );
+		$this->assertSame( 'link', $result[1]['id'] );
+		$this->assertFalse( $result[1]['enabled'] );
+		$this->assertSame( 7, $result[1]['priority'] );
+
+		delete_transient( 'woocommerce_woocommerce_payments_recommended_payment_methods' );
+	}
+
+	/**
+	 * @testdox Should cache recommended payment methods by country and locale.
+	 */
+	public function test_get_recommended_payment_methods_uses_cached_country_locale_data(): void {
+		delete_transient( 'woocommerce_woocommerce_payments_recommended_payment_methods' );
+
+		$api_client = $this->getMockBuilder( WooPaymentsApiClient::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_recommended_payment_methods' ) )
+			->getMock();
+		$api_client
+			->expects( $this->once() )
+			->method( 'get_recommended_payment_methods' )
+			->with( 'GB', 'en_US' )
+			->willReturn(
+				array(
+					array(
+						'id'    => 'card',
+						'title' => 'Cards',
+					),
+				)
+			);
+
+		$gateway = new NativeWooPaymentsGateway();
+		$gateway->init( new RecordingPaymentProcessingService(), new WooPaymentsProvider(), null, $api_client );
+
+		$first_result  = $gateway->get_recommended_payment_methods( 'GB' );
+		$second_result = $gateway->get_recommended_payment_methods( 'GB' );
+
+		$this->assertSame( $first_result, $second_result );
+		$this->assertSame( 'card', $second_result[0]['id'] );
+
+		delete_transient( 'woocommerce_woocommerce_payments_recommended_payment_methods' );
 	}
 
 	/**

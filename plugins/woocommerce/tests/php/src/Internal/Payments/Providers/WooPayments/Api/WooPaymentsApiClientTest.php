@@ -316,6 +316,350 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should retrieve recommended payment methods through the public recommendations endpoint.
+	 */
+	public function test_get_recommended_payment_methods_reads_public_recommendations_endpoint(): void {
+		$captured_url  = '';
+		$captured_args = array();
+		$filter        = static function ( $preempt, array $parsed_args, string $url ) use ( &$captured_url, &$captured_args ) {
+			$captured_url  = $url;
+			$captured_args = $parsed_args;
+
+			return array(
+				'response' => array( 'code' => 200 ),
+				'headers'  => array( 'content-type' => 'application/json' ),
+				'body'     => wp_json_encode(
+					array(
+						array(
+							'id'    => 'card',
+							'title' => 'Cards',
+						),
+					)
+				),
+			);
+		};
+
+		add_filter( 'pre_http_request', $filter, 10, 3 );
+
+		try {
+			$sut    = new WooPaymentsApiClient();
+			$result = $sut->get_recommended_payment_methods( 'GB', 'en_US' );
+		} finally {
+			remove_filter( 'pre_http_request', $filter, 10 );
+		}
+
+		$this->assertSame( 'card', $result[0]['id'] );
+		$this->assertStringStartsWith( 'https://public-api.wordpress.com/wpcom/v2/wcpay/payment_methods/recommended?', $captured_url );
+		$this->assertStringContainsString( 'country_code=GB', $captured_url );
+		$this->assertStringContainsString( 'locale=en_US', $captured_url );
+		$this->assertStringStartsWith( 'WooCommerce Payments/', $captured_args['user-agent'] );
+		$this->assertSame( 70, $captured_args['timeout'] );
+		$this->assertTrue( $captured_args['sslverify'] );
+	}
+
+	/**
+	 * @testdox Should build recommendation URLs from the Jetpack WPCOM JSON API base.
+	 */
+	public function test_get_recommended_payment_methods_uses_jetpack_wpcom_api_base(): void {
+		$captured_url = '';
+		$base_filter  = static function ( $constant_value, string $constant_name ) {
+			return 'JETPACK__WPCOM_JSON_API_BASE' === $constant_name ? 'http://wpcom.localhost:30001' : $constant_value;
+		};
+		$http_filter  = static function ( $preempt, array $parsed_args, string $url ) use ( &$captured_url ) {
+			unset( $parsed_args );
+			$captured_url = $url;
+
+			return array(
+				'response' => array( 'code' => 200 ),
+				'headers'  => array( 'content-type' => 'application/json' ),
+				'body'     => '[]',
+			);
+		};
+
+		add_filter( 'jetpack_constant_default_value', $base_filter, 10, 2 );
+		add_filter( 'pre_http_request', $http_filter, 10, 3 );
+
+		try {
+			$sut = new WooPaymentsApiClient();
+			$sut->get_recommended_payment_methods( 'GB', 'en_US' );
+		} finally {
+			remove_filter( 'pre_http_request', $http_filter, 10 );
+			remove_filter( 'jetpack_constant_default_value', $base_filter, 10 );
+		}
+
+		$this->assertStringStartsWith( 'http://wpcom.localhost:30001/wpcom/v2/wcpay/payment_methods/recommended?', $captured_url );
+	}
+
+	/**
+	 * @testdox Should retrieve onboarding field data through the native transport onboarding endpoint.
+	 */
+	public function test_get_onboarding_fields_data_reads_onboarding_fields_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'business_types' => array(
+						array(
+							'key'  => 'individual',
+							'name' => 'Individual',
+						),
+					),
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$result = $sut->get_onboarding_fields_data( 'en_US' );
+
+		$this->assertSame( 'individual', $result['business_types'][0]['key'] );
+		$this->assertSame( '/wcpay/onboarding/fields_data?test_mode=1&locale=en_US', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+		$this->assertNull( $http_client->last_body );
+		$this->assertTrue( $http_client->last_use_user_token );
+	}
+
+	/**
+	 * @testdox Should initialize onboarding through the native onboarding endpoint.
+	 */
+	public function test_initialize_onboarding_posts_account_payload(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'url'   => 'https://connect.example.test',
+					'state' => 'state_test',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$result = $sut->initialize_onboarding(
+			false,
+			array( 'site_locale' => 'en_US' ),
+			array( 'email' => 'merchant@example.com' ),
+			array( 'business_type' => 'individual' ),
+			array( 'wcpay-promo-test' ),
+			'ref_test'
+		);
+
+		$body = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( 'state_test', $result['state'] );
+		$this->assertSame( '/sites/123/wcpay/onboarding/init', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $body );
+		$this->assertFalse( $body['create_live_account'] );
+		$this->assertSame( 'en_US', $body['site_data']['site_locale'] );
+		$this->assertSame( 'merchant@example.com', $body['user_data']['email'] );
+		$this->assertSame( 'individual', $body['account_data']['business_type'] );
+		$this->assertSame( array( 'wcpay-promo-test' ), $body['actioned_notes'] );
+		$this->assertSame( 'ref_test', $body['referral_code'] );
+		$this->assertTrue( $body['test_mode'] );
+		$this->assertTrue( $http_client->last_use_user_token );
+	}
+
+	/**
+	 * @testdox Should preserve the existing onboarding payload filter for native onboarding.
+	 */
+	public function test_initialize_onboarding_applies_onboarding_data_args_filter(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'url' => false ) ),
+		);
+		$filter                = static function ( array $args ): array {
+			$args['compatibility_data']                   = array( 'woocommerce' => '11.0.0' );
+			$args['account_data']['woocommerce_store_id'] = 'store_123';
+			return $args;
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+		add_filter( 'wc_payments_get_onboarding_data_args', $filter );
+
+		try {
+			$sut->initialize_onboarding(
+				false,
+				array( 'site_locale' => 'en_US' ),
+				array( 'email' => 'merchant@example.com' ),
+				array( 'business_type' => 'individual' ),
+				array(),
+				'ref_test'
+			);
+		} finally {
+			remove_filter( 'wc_payments_get_onboarding_data_args', $filter );
+		}
+
+		$body = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertIsArray( $body );
+		$this->assertSame( array( 'woocommerce' => '11.0.0' ), $body['compatibility_data'] );
+		$this->assertSame( 'store_123', $body['account_data']['woocommerce_store_id'] );
+		$this->assertSame( 'ref_test', $body['referral_code'] );
+	}
+
+	/**
+	 * @testdox Should initialize embedded KYC through the native onboarding endpoint.
+	 */
+	public function test_initialize_onboarding_embedded_kyc_posts_account_payload(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'client_secret'   => 'secret_test',
+					'publishable_key' => 'pk_test',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$result = $sut->initialize_onboarding_embedded_kyc(
+			true,
+			array( 'site_locale' => 'en_US' ),
+			array( 'email' => 'merchant@example.com' ),
+			array( 'business_type' => 'individual' ),
+			array( 'wcpay-promo-test' )
+		);
+
+		$body = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( 'secret_test', $result['client_secret'] );
+		$this->assertSame( '/sites/123/wcpay/onboarding/embedded', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $body );
+		$this->assertTrue( $body['create_live_account'] );
+		$this->assertSame( 'en_US', $body['site_data']['site_locale'] );
+		$this->assertSame( 'merchant@example.com', $body['user_data']['email'] );
+		$this->assertSame( 'individual', $body['account_data']['business_type'] );
+		$this->assertSame( array( 'wcpay-promo-test' ), $body['actioned_notes'] );
+		$this->assertTrue( $body['test_mode'] );
+		$this->assertTrue( $http_client->last_use_user_token );
+	}
+
+	/**
+	 * @testdox Should preserve the existing onboarding payload filter for embedded KYC.
+	 */
+	public function test_initialize_onboarding_embedded_kyc_applies_onboarding_data_args_filter(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'client_secret' => 'secret_test' ) ),
+		);
+		$filter                = static function ( array $args ): array {
+			$args['compatibility_data']                   = array( 'woocommerce' => '11.0.0' );
+			$args['account_data']['woocommerce_store_id'] = 'store_123';
+			return $args;
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+		add_filter( 'wc_payments_get_onboarding_data_args', $filter );
+
+		try {
+			$sut->initialize_onboarding_embedded_kyc(
+				true,
+				array( 'site_locale' => 'en_US' ),
+				array( 'email' => 'merchant@example.com' ),
+				array( 'business_type' => 'individual' ),
+				array()
+			);
+		} finally {
+			remove_filter( 'wc_payments_get_onboarding_data_args', $filter );
+		}
+
+		$body = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertIsArray( $body );
+		$this->assertSame( array( 'woocommerce' => '11.0.0' ), $body['compatibility_data'] );
+		$this->assertSame( 'store_123', $body['account_data']['woocommerce_store_id'] );
+	}
+
+	/**
+	 * @testdox Should finalize embedded KYC through the native onboarding endpoint.
+	 */
+	public function test_finalize_onboarding_embedded_kyc_posts_locale_source_and_notes(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'success' => true,
+					'mode'    => 'live',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->finalize_onboarding_embedded_kyc( 'en_US', 'wcadmin-settings-page', array( 'wcpay-promo-test' ) );
+
+		$body = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertTrue( $result['success'] );
+		$this->assertSame( '/sites/123/wcpay/onboarding/embedded/finalize', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $body );
+		$this->assertSame( 'en_US', $body['locale'] );
+		$this->assertSame( 'wcadmin-settings-page', $body['source'] );
+		$this->assertSame( array( 'wcpay-promo-test' ), $body['actioned_notes'] );
+		$this->assertFalse( $body['test_mode'] );
+		$this->assertTrue( $http_client->last_use_user_token );
+	}
+
+	/**
+	 * @testdox Should delete the connected account through the native accounts endpoint.
+	 */
+	public function test_delete_account_posts_to_accounts_delete_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'result' => 'success',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->delete_account( true );
+
+		$body = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( 'success', $result['result'] );
+		$this->assertSame( '/sites/123/wcpay/accounts/delete', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $body );
+		$this->assertTrue( $body['test_mode'] );
+		$this->assertTrue( $http_client->last_use_user_token );
+	}
+
+	/**
 	 * Create a WooPayments account service mock.
 	 *
 	 * @param bool $test_mode Whether WooPayments should run in test mode.

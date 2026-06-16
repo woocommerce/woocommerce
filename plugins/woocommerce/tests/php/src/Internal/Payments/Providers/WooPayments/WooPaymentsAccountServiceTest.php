@@ -173,6 +173,52 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should clear the preserved account cache so the next account read can refresh from the provider.
+	 */
+	public function test_clear_cache_deletes_preserved_account_cache(): void {
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => array(
+					'account_id' => 'acct_123',
+				),
+			)
+		);
+
+		$sut = $this->create_service();
+		$sut->clear_cache();
+
+		$this->assertFalse( get_option( 'wcpay_account_data' ) );
+		$this->assertSame( '', $sut->get_account_id() );
+	}
+
+	/**
+	 * @testdox Should immediately overwrite the preserved account cache with a connected-no-account payload.
+	 */
+	public function test_overwrite_cache_with_no_account_updates_preserved_account_cache(): void {
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => array(
+					'account_id'        => 'acct_123',
+					'payments_enabled'  => true,
+					'details_submitted' => true,
+				),
+			)
+		);
+
+		$sut = $this->create_service();
+		$sut->overwrite_cache_with_no_account();
+
+		$cached = get_option( 'wcpay_account_data' );
+
+		$this->assertIsArray( $cached );
+		$this->assertSame( array(), $cached['data'] );
+		$this->assertSame( '', $sut->get_account_id() );
+		$this->assertFalse( $sut->can_process_payments() );
+	}
+
+	/**
 	 * @testdox Should let onboarding test mode and the legacy test-mode filter override persisted gateway settings.
 	 */
 	public function test_mode_follows_onboarding_option_and_test_mode_filter(): void {

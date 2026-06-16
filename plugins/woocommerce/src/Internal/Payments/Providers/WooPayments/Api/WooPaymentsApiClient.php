@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api;
 
+use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use WP_Error;
 
@@ -22,6 +23,26 @@ class WooPaymentsApiClient {
 	 * Request timeout.
 	 */
 	private const REQUEST_TIMEOUT_SECONDS = 70;
+
+	/**
+	 * WooPayments onboarding API path.
+	 */
+	private const ONBOARDING_API = 'onboarding';
+
+	/**
+	 * WooPayments accounts API path.
+	 */
+	private const ACCOUNTS_API = 'accounts';
+
+	/**
+	 * WooPayments API root.
+	 */
+	private const ENDPOINT_REST_BASE = 'wcpay';
+
+	/**
+	 * WooPayments recommended payment methods API path.
+	 */
+	private const RECOMMENDED_PAYMENT_METHODS = 'payment_methods/recommended';
 
 	/**
 	 * HTTP client.
@@ -246,15 +267,231 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Retrieve recommended payment methods for onboarding.
+	 *
+	 * This route is intentionally not sent through the signed provider request path because recommendations are used
+	 * before onboarding has connected a store/account.
+	 *
+	 * @param string $country_code Business location country code.
+	 * @param string $locale       User locale.
+	 * @return array<int,array<string,mixed>>
+	 * @throws WooPaymentsApiException When the public request fails.
+	 */
+	public function get_recommended_payment_methods( string $country_code, string $locale = '' ): array {
+		$request_args = Jetpack_Connection_Client::validate_args_for_wpcom_json_api_request(
+			self::ENDPOINT_REST_BASE . '/' . self::RECOMMENDED_PAYMENT_METHODS,
+			'2',
+			array(),
+			'wpcom'
+		);
+		$url          = add_query_arg(
+			array(
+				'country_code' => $country_code,
+				'locale'       => $locale,
+			),
+			$request_args['url']
+		);
+
+		/**
+		 * Filters WooPayments public API request headers.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param array<string,string> $headers Request headers.
+		 */
+		$headers = apply_filters(
+			'wcpay_api_request_headers',
+			array(
+				'Content-type' => 'application/json; charset=utf-8',
+			)
+		);
+
+		$response = wp_remote_get(
+			$url,
+			array(
+				'headers'    => $headers,
+				'user-agent' => $this->get_user_agent(),
+				'timeout'    => self::REQUEST_TIMEOUT_SECONDS,
+				'sslverify'  => true,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
+			throw new WooPaymentsApiException(
+				sprintf(
+					/* translators: %1$s: original error message. */
+					__( 'Http request failed. Reason: %1$s', 'woocommerce' ),
+					$response->get_error_message()
+				),
+				'wcpay_http_request_failed',
+				500
+			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
+		if ( 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+			return array();
+		}
+
+		$decoded_body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+		return is_array( $decoded_body ) ? $decoded_body : array();
+	}
+
+	/**
+	 * Retrieve onboarding field data.
+	 *
+	 * @param string $locale User locale.
+	 * @return array<string,mixed>
+	 */
+	public function get_onboarding_fields_data( string $locale = '' ): array {
+		return $this->request(
+			array(
+				'locale' => $locale,
+			),
+			self::ONBOARDING_API . '/fields_data',
+			'GET',
+			false,
+			true
+		);
+	}
+
+	/**
+	 * Initialize the non-embedded onboarding flow.
+	 *
+	 * @param bool                $live_account   Whether to create a live account.
+	 * @param array<string,mixed> $site_data      Site payload.
+	 * @param array<string,mixed> $user_data      User payload.
+	 * @param array<string,mixed> $account_data   Account payload.
+	 * @param string[]            $actioned_notes Actioned note names.
+	 * @param string|null         $referral_code  Referral code.
+	 * @return array<string,mixed>
+	 */
+	public function initialize_onboarding( bool $live_account, array $site_data = array(), array $user_data = array(), array $account_data = array(), array $actioned_notes = array(), ?string $referral_code = null ): array {
+		$request_args                  = $this->get_filtered_onboarding_request_args(
+			array(
+				'site_data'           => $site_data,
+				'user_data'           => $user_data,
+				'account_data'        => $account_data,
+				'actioned_notes'      => $actioned_notes,
+				'create_live_account' => $live_account,
+			)
+		);
+		$request_args['referral_code'] = $referral_code;
+
+		return $this->request(
+			$request_args,
+			self::ONBOARDING_API . '/init',
+			'POST',
+			true,
+			true
+		);
+	}
+
+	/**
+	 * Initialize the embedded KYC onboarding flow.
+	 *
+	 * @param bool                $live_account   Whether to create a live account.
+	 * @param array<string,mixed> $site_data      Site payload.
+	 * @param array<string,mixed> $user_data      User payload.
+	 * @param array<string,mixed> $account_data   Account payload.
+	 * @param string[]            $actioned_notes Actioned note names.
+	 * @param string|null         $referral_code  Referral code.
+	 * @return array<string,mixed>
+	 */
+	public function initialize_onboarding_embedded_kyc( bool $live_account, array $site_data = array(), array $user_data = array(), array $account_data = array(), array $actioned_notes = array(), ?string $referral_code = null ): array {
+		$request_args                  = $this->get_filtered_onboarding_request_args(
+			array(
+				'site_data'           => $site_data,
+				'user_data'           => $user_data,
+				'account_data'        => $account_data,
+				'actioned_notes'      => $actioned_notes,
+				'create_live_account' => $live_account,
+			)
+		);
+		$request_args['referral_code'] = $referral_code;
+
+		return $this->request(
+			$request_args,
+			self::ONBOARDING_API . '/embedded',
+			'POST',
+			true,
+			true
+		);
+	}
+
+	/**
+	 * Finalize the embedded KYC onboarding flow.
+	 *
+	 * @param string   $locale         User locale.
+	 * @param string   $source         Onboarding source.
+	 * @param string[] $actioned_notes Actioned note names.
+	 * @return array<string,mixed>
+	 */
+	public function finalize_onboarding_embedded_kyc( string $locale, string $source, array $actioned_notes = array() ): array {
+		return $this->request(
+			array(
+				'locale'         => $locale,
+				'source'         => $source,
+				'actioned_notes' => $actioned_notes,
+			),
+			self::ONBOARDING_API . '/embedded/finalize',
+			'POST',
+			true,
+			true
+		);
+	}
+
+	/**
+	 * Delete the connected WooPayments account.
+	 *
+	 * @param bool $test_mode Whether to delete a test-mode account.
+	 * @return array<string,mixed>
+	 */
+	public function delete_account( bool $test_mode = false ): array {
+		return $this->request(
+			array(
+				'test_mode' => $test_mode,
+			),
+			self::ACCOUNTS_API . '/delete',
+			'POST',
+			true,
+			true
+		);
+	}
+
+	/**
+	 * Apply WooPayments onboarding payload filters preserved from the plugin path.
+	 *
+	 * @param array<string,mixed> $request_args Onboarding request payload.
+	 * @return array<string,mixed>
+	 */
+	private function get_filtered_onboarding_request_args( array $request_args ): array {
+		/**
+		 * Filters WooPayments onboarding request args.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param array<string,mixed> $request_args Onboarding request payload.
+		 */
+		$filtered_args = apply_filters( 'wc_payments_get_onboarding_data_args', $request_args );
+
+		return is_array( $filtered_args ) ? $filtered_args : $request_args;
+	}
+
+	/**
 	 * Send a request through the provider transport.
 	 *
-	 * @param array<string,mixed> $params Request params.
-	 * @param string              $api    API path.
-	 * @param string              $method HTTP method.
+	 * @param array<string,mixed> $params         Request params.
+	 * @param string              $api            API path.
+	 * @param string              $method         HTTP method.
+	 * @param bool                $is_site_scoped Whether to include the WPCOM site ID in the API path.
+	 * @param bool                $use_user_token Whether to sign with the connection-owner user token.
 	 * @return array<string,mixed>
 	 * @throws WooPaymentsApiException When the request fails.
 	 */
-	private function request( array $params, string $api, string $method ): array {
+	private function request( array $params, string $api, string $method, bool $is_site_scoped = true, bool $use_user_token = false ): array {
 		if ( ! $this->is_available() ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
 			throw new WooPaymentsApiException( __( 'Site is not connected to WordPress.com.', 'woocommerce' ), 'wcpay_wpcom_not_connected', 409 );
@@ -297,7 +534,9 @@ class WooPaymentsApiClient {
 		 */
 		$headers = apply_filters( 'wcpay_api_request_headers', $headers );
 		$site_id = $this->http_client->get_blog_id();
-		$path    = sprintf( '/sites/%d/wcpay/%s', (int) $site_id, $api );
+		$path    = $is_site_scoped
+			? sprintf( '/sites/%d/wcpay/%s', (int) $site_id, $api )
+			: sprintf( '/wcpay/%s', $api );
 		$body    = null;
 
 		if ( 'GET' === $method ) {
@@ -316,7 +555,8 @@ class WooPaymentsApiClient {
 			$path,
 			$headers,
 			$body,
-			self::REQUEST_TIMEOUT_SECONDS
+			self::REQUEST_TIMEOUT_SECONDS,
+			$use_user_token
 		);
 
 		if ( $response instanceof WP_Error ) {
@@ -381,8 +621,9 @@ class WooPaymentsApiClient {
 	 * @return string
 	 */
 	private function get_user_agent(): string {
-		$version = defined( 'WC_VERSION' ) ? WC_VERSION : 'unknown';
+		$version = defined( 'WC_VERSION' ) ? preg_replace( '/-dev$/', '', WC_VERSION ) : 'unknown';
+		$version = is_string( $version ) ? $version : 'unknown';
 
-		return 'WooPaymentsNative/woocommerce/' . $version;
+		return 'WooCommerce Payments/' . $version;
 	}
 }
