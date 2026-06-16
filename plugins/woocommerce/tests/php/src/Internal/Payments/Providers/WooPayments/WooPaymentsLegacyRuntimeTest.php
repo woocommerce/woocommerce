@@ -284,6 +284,52 @@ class WooPaymentsLegacyRuntimeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should compare WooPayments extension version when the version constant is available.
+	 */
+	public function test_compares_extension_version_when_constant_is_available(): void {
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', '10.0.0' );
+
+		try {
+			$sut = new WooPaymentsLegacyRuntime();
+			$sut->init( new LegacyRuntimeProxy( true ) );
+
+			$this->assertTrue( $sut->is_extension_version_less_than( '10.1.0' ) );
+			$this->assertFalse( $sut->is_extension_version_less_than( '10.0.0' ) );
+			$this->assertFalse( $sut->is_extension_version_less_than( '9.9.0' ) );
+		} finally {
+			Constants::clear_constants();
+		}
+	}
+
+	/**
+	 * @testdox Should return null when the WooPayments extension version is unavailable.
+	 */
+	public function test_returns_null_when_extension_version_is_unavailable(): void {
+		Constants::clear_constants();
+
+		$sut = new WooPaymentsLegacyRuntime();
+		$sut->init( new LegacyRuntimeProxy( true ) );
+
+		$this->assertNull( $sut->is_extension_version_less_than( '10.0.0' ) );
+	}
+
+	/**
+	 * @testdox Should return null when the WooPayments extension version is not scalar.
+	 */
+	public function test_returns_null_when_extension_version_is_not_scalar(): void {
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', array( 'version' => '10.0.0' ) );
+
+		try {
+			$sut = new WooPaymentsLegacyRuntime();
+			$sut->init( new LegacyRuntimeProxy( true ) );
+
+			$this->assertNull( $sut->is_extension_version_less_than( '10.0.0' ) );
+		} finally {
+			Constants::clear_constants();
+		}
+	}
+
+	/**
 	 * @testdox Should report onboarded WooPayments account data when details are submitted.
 	 */
 	public function test_reports_onboarded_account_data_when_details_are_submitted(): void {

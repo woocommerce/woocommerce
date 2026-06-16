@@ -35,6 +35,12 @@ class WooPaymentsLegacyAdminRuntimeBoundaryTest extends WC_Unit_Test_Case {
 				"class_exists( '\\WC_Payments' )",
 				'@return \\WC_Payments|null',
 			),
+			'src/Internal/Admin/Settings/PaymentsProviders/WooPayments.php' => array(
+				'WCPAY_VERSION_NUMBER',
+			),
+			'src/Internal/Admin/Settings/PaymentsProviders/WooPayments/WooPaymentsService.php' => array(
+				'WCPAY_VERSION_NUMBER',
+			),
 		);
 
 		foreach ( $assertions as $relative_path => $forbidden_strings ) {

@@ -270,6 +270,25 @@ class WooPaymentsLegacyRuntime {
 	}
 
 	/**
+	 * Tell whether the installed WooPayments extension version is less than a minimum version.
+	 *
+	 * @param string $minimum_version Minimum required version.
+	 * @return bool|null
+	 */
+	public function is_extension_version_less_than( string $minimum_version ): ?bool {
+		if ( ! Constants::is_defined( 'WCPAY_VERSION_NUMBER' ) ) {
+			return null;
+		}
+
+		$version = Constants::get_constant( 'WCPAY_VERSION_NUMBER' );
+		if ( ! is_scalar( $version ) ) {
+			return null;
+		}
+
+		return version_compare( (string) $version, $minimum_version, '<' );
+	}
+
+	/**
 	 * Hide WooPayments gateways from the WooCommerce settings page.
 	 *
 	 * @return bool

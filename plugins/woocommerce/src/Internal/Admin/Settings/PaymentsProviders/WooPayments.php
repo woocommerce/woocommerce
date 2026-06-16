@@ -4,7 +4,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 
 use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
-use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
@@ -95,8 +94,11 @@ class WooPayments extends PaymentGateway {
 
 		// If the WooPayments installed version is less than minimum required version,
 		// we can't use the in-context onboarding flows.
-		if ( Constants::is_defined( 'WCPAY_VERSION_NUMBER' ) &&
-			version_compare( Constants::get_constant( 'WCPAY_VERSION_NUMBER' ), WooPaymentsService::EXTENSION_MINIMUM_VERSION, '<' ) ) {
+		$legacy_runtime                         = $this->get_legacy_runtime();
+		$extension_version_is_less_than_minimum = null !== $legacy_runtime ?
+			$legacy_runtime->is_extension_version_less_than( WooPaymentsService::EXTENSION_MINIMUM_VERSION ) :
+			null;
+		if ( true === $extension_version_is_less_than_minimum ) {
 
 			return $details;
 		}
