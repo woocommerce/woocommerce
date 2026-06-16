@@ -405,21 +405,47 @@ class ProductCollectionData extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Requesting the same attribute taxonomy with both "or" and "and" query types is not duplicated.
+	 * @testdox The same attribute requested with both "or" and "and" query types is counted separately for each type.
 	 */
-	public function test_calculate_attribute_counts_deduplicates_across_query_types() {
+	public function test_calculate_attribute_counts_keeps_query_types_separate() {
 		$fixtures = new FixtureData();
-		$product  = $fixtures->get_variable_product(
+
+		// Two products with different sizes so that an active filter makes the "or" and "and" counts diverge.
+		$large_product = $fixtures->get_variable_product(
 			array(),
 			array(
 				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
 			)
 		);
-		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
+		$fixtures->get_taxonomy_and_term( $large_product, 'pa_size', 'large', 'large' );
 
-		$single_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
-		$single_request->set_param(
-			'calculate_attribute_counts',
+		$small_product = $fixtures->get_variable_product(
+			array(),
+			array(
+				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+			)
+		);
+		$fixtures->get_taxonomy_and_term( $small_product, 'pa_size', 'small', 'small' );
+
+		// Shopper has selected "large". "or" counts ignore that selection (faceted what-if counts) while
+		// "and" counts respect it, so the two query types must produce different counts for pa_size.
+		$active_filter = array(
+			array(
+				'attribute' => 'pa_size',
+				'operator'  => 'in',
+				'slug'      => array( 'large' ),
+			),
+		);
+
+		$get_counts = function ( array $entries ) use ( $active_filter ) {
+			$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+			$request->set_param( 'attributes', $active_filter );
+			$request->set_param( 'calculate_attribute_counts', $entries );
+
+			return rest_get_server()->dispatch( $request )->get_data()['attribute_counts'];
+		};
+
+		$or_only  = $get_counts(
 			array(
 				array(
 					'taxonomy'   => 'pa_size',
@@ -427,11 +453,15 @@ class ProductCollectionData extends ControllerTestCase {
 				),
 			)
 		);
-		$single = rest_get_server()->dispatch( $single_request )->get_data();
-
-		$both_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
-		$both_request->set_param(
-			'calculate_attribute_counts',
+		$and_only = $get_counts(
+			array(
+				array(
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'and',
+				),
+			)
+		);
+		$both     = $get_counts(
 			array(
 				array(
 					'taxonomy'   => 'pa_size',
@@ -443,13 +473,18 @@ class ProductCollectionData extends ControllerTestCase {
 				),
 			)
 		);
-		$both = rest_get_server()->dispatch( $both_request )->get_data();
 
-		$this->assertNotEmpty( $single['attribute_counts'], 'Baseline single-taxonomy request should return counts.' );
-		$this->assertEquals(
-			$single['attribute_counts'],
-			$both['attribute_counts'],
-			'A taxonomy requested with both query types must be counted once, not duplicated.'
+		$this->assertNotEmpty( $or_only, 'The "or" request should return counts.' );
+		$this->assertNotEmpty( $and_only, 'The "and" request should return counts.' );
+		$this->assertNotEquals(
+			$or_only,
+			$and_only,
+			'For the same taxonomy, "or" and "and" must produce different counts when it is an active filter.'
+		);
+		$this->assertCount(
+			count( $or_only ) + count( $and_only ),
+			$both,
+			'Requesting both query types must keep both result sets, not collapse them into one.'
 		);
 	}
 
