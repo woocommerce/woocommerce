@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDatabase
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontendProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyGeolocationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyOrderContextService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRateService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
@@ -45,6 +46,13 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 * @var MultiCurrencyRequestContext|null
 	 */
 	private ?MultiCurrencyRequestContext $request_context = null;
+
+	/**
+	 * Order context service.
+	 *
+	 * @var MultiCurrencyOrderContextService|null
+	 */
+	private ?MultiCurrencyOrderContextService $order_context_service = null;
 
 	/**
 	 * Order currency override for order-context formatting.
@@ -84,6 +92,17 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 */
 	public function set_request_context( MultiCurrencyRequestContext $request_context ): void {
 		$this->request_context = $request_context;
+	}
+
+	/**
+	 * Set the order context service.
+	 *
+	 * @internal Used by tests and future explicit bootstrap definitions.
+	 *
+	 * @param MultiCurrencyOrderContextService $order_context_service Order context service.
+	 */
+	public function set_order_context_service( MultiCurrencyOrderContextService $order_context_service ): void {
+		$this->order_context_service = $order_context_service;
 	}
 
 	/**
@@ -211,7 +230,9 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 * @return mixed
 	 */
 	public function maybe_init_order_currency_from_order_total_prop( $total, $order ) {
-		unset( $order );
+		if ( $this->get_order_context_service()->should_use_order_currency() ) {
+			$this->init_order_currency( $order );
+		}
 
 		return $total;
 	}
@@ -228,7 +249,9 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	public function maybe_clear_order_currency_after_formatted_order_total( $formatted_total, $order, $tax_display, $display_refunded ) {
 		unset( $order, $tax_display, $display_refunded );
 
-		$this->order_currency = null;
+		if ( null !== $this->order_currency && $this->get_order_context_service()->should_use_order_currency() ) {
+			$this->order_currency = null;
+		}
 
 		return $formatted_total;
 	}
@@ -317,6 +340,19 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 		}
 
 		return $this->request_context;
+	}
+
+	/**
+	 * Get the order context service.
+	 *
+	 * @return MultiCurrencyOrderContextService
+	 */
+	private function get_order_context_service(): MultiCurrencyOrderContextService {
+		if ( null === $this->order_context_service ) {
+			$this->order_context_service = new MultiCurrencyOrderContextService();
+		}
+
+		return $this->order_context_service;
 	}
 
 	/**

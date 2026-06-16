@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyFrontendCurrenciesController;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontendProjectionService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyOrderContextService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
 use WC_Unit_Test_Case;
 
@@ -166,13 +167,74 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 		$order = wc_create_order();
 		$order->set_currency( 'JPY' );
 		$order->save();
-		$sut = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
+		$sut = $this->create_controller(
+			MultiCurrencyRuntimeArbiter::OWNER_CORE,
+			null,
+			$this->create_order_context_service( true )
+		);
 
 		$sut->init_order_currency( $order );
 		$this->assertSame( '$42.00', $sut->maybe_clear_order_currency_after_formatted_order_total( '$42.00', $order, '', false ) );
 
 		$this->assertNull( $sut->get_order_currency() );
 		$this->assertSame( 'GBP', $sut->get_woocommerce_currency( 'USD' ) );
+	}
+
+	/**
+	 * @testdox Should initialize order currency from order total in matching order context.
+	 */
+	public function test_initializes_order_currency_from_order_total_in_matching_order_context(): void {
+		$order = wc_create_order();
+		$order->set_currency( 'JPY' );
+		$order->save();
+		$sut = $this->create_controller(
+			MultiCurrencyRuntimeArbiter::OWNER_CORE,
+			null,
+			$this->create_order_context_service( true )
+		);
+
+		$this->assertSame( 42.0, $sut->maybe_init_order_currency_from_order_total_prop( 42.0, $order ) );
+
+		$this->assertSame( 'JPY', $sut->get_order_currency() );
+		$this->assertSame( 'JPY', $sut->get_woocommerce_currency( 'USD' ) );
+	}
+
+	/**
+	 * @testdox Should not initialize order currency from order total outside order context.
+	 */
+	public function test_does_not_initialize_order_currency_from_order_total_outside_order_context(): void {
+		$order = wc_create_order();
+		$order->set_currency( 'JPY' );
+		$order->save();
+		$sut = $this->create_controller(
+			MultiCurrencyRuntimeArbiter::OWNER_CORE,
+			null,
+			$this->create_order_context_service( false )
+		);
+
+		$this->assertSame( 42.0, $sut->maybe_init_order_currency_from_order_total_prop( 42.0, $order ) );
+
+		$this->assertNull( $sut->get_order_currency() );
+		$this->assertSame( 'GBP', $sut->get_woocommerce_currency( 'USD' ) );
+	}
+
+	/**
+	 * @testdox Should keep order currency after formatted order total outside order context.
+	 */
+	public function test_keeps_order_currency_after_formatted_order_total_outside_order_context(): void {
+		$order = wc_create_order();
+		$order->set_currency( 'JPY' );
+		$order->save();
+		$sut = $this->create_controller(
+			MultiCurrencyRuntimeArbiter::OWNER_CORE,
+			null,
+			$this->create_order_context_service( false )
+		);
+
+		$sut->init_order_currency( $order );
+		$this->assertSame( '$42.00', $sut->maybe_clear_order_currency_after_formatted_order_total( '$42.00', $order, '', false ) );
+
+		$this->assertSame( 'JPY', $sut->get_order_currency() );
 	}
 
 	/**
@@ -283,19 +345,24 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Create a frontend currencies controller with a static runtime owner.
 	 *
-	 * @param string                           $owner           Runtime owner.
-	 * @param MultiCurrencyRequestContext|null $request_context Request context.
+	 * @param string                                $owner                 Runtime owner.
+	 * @param MultiCurrencyRequestContext|null      $request_context       Request context.
+	 * @param MultiCurrencyOrderContextService|null $order_context_service Order context service.
 	 * @return MultiCurrencyFrontendCurrenciesController
 	 */
 	private function create_controller(
 		string $owner,
-		?MultiCurrencyRequestContext $request_context = null
+		?MultiCurrencyRequestContext $request_context = null,
+		?MultiCurrencyOrderContextService $order_context_service = null
 	): MultiCurrencyFrontendCurrenciesController {
 		$controller = new MultiCurrencyFrontendCurrenciesController();
 		$controller->init( $this->create_arbiter( $owner ) );
 		$controller->set_frontend_projection_service( $this->create_projection_service() );
 		if ( null !== $request_context && method_exists( $controller, 'set_request_context' ) ) {
 			$controller->set_request_context( $request_context );
+		}
+		if ( null !== $order_context_service && method_exists( $controller, 'set_order_context_service' ) ) {
+			$controller->set_order_context_service( $order_context_service );
 		}
 
 		return $controller;
@@ -320,6 +387,41 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 		} finally {
 			$wp->query_vars = $previous_query_vars;
 		}
+	}
+
+	/**
+	 * Create a deterministic order context service.
+	 *
+	 * @param bool $should_use_order_currency Whether order currency should be used.
+	 * @return MultiCurrencyOrderContextService
+	 */
+	private function create_order_context_service( bool $should_use_order_currency ): MultiCurrencyOrderContextService {
+		return new class( $should_use_order_currency ) extends MultiCurrencyOrderContextService {
+			/**
+			 * Whether order currency should be used.
+			 *
+			 * @var bool
+			 */
+			private bool $should_use_order_currency;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param bool $should_use_order_currency Whether order currency should be used.
+			 */
+			public function __construct( bool $should_use_order_currency ) {
+				$this->should_use_order_currency = $should_use_order_currency;
+			}
+
+			/**
+			 * Tell whether order currency should be used.
+			 *
+			 * @return bool
+			 */
+			public function should_use_order_currency(): bool {
+				return $this->should_use_order_currency;
+			}
+		};
 	}
 
 	/**
