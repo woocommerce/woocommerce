@@ -12,7 +12,6 @@ use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
-use Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
 use Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
 use Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
 use Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
@@ -189,7 +188,6 @@ class FeaturePlugin {
 		new WooSubscriptionsNotes();
 		new OrderMilestones();
 		new TrackingOptIn();
-		new WooCommercePayments();
 		new InstallJPAndWCSPlugins();
 		new SellingOnlineCourses();
 		new MagentoMigration();

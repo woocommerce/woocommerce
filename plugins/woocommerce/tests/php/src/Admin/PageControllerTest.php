@@ -97,7 +97,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		wp_delete_user( $this->customer_user_id );
 
 		// Reset global state.
-		unset( $_GET['page'], $_GET['task'], $_GET['connection-return'] );
+		unset( $_GET['page'], $_GET['task'], $_GET['connection-return'], $_GET['action'] );
 
 		// Restore screen backup.
 		if ( $this->current_screen_backup ) {
@@ -192,6 +192,26 @@ class PageControllerTest extends WC_Unit_Test_Case {
 			admin_url( 'admin.php?page=wc-settings&tab=checkout&from=WCADMIN_PAYMENT_TASK' ),
 			$redirect_url,
 			'Redirect URL should match expected settings page URL.'
+		);
+	}
+
+	/**
+	 * Test redirect happens for legacy action=setup-woocommerce-payments request.
+	 */
+	public function test_redirect_for_legacy_setup_woocommerce_payments_action(): void {
+		wp_set_current_user( $this->admin_user_id );
+
+		$_GET['page']   = 'wc-admin';
+		$_GET['action'] = 'setup-woocommerce-payments';
+
+		$this->trigger_redirect_check();
+
+		$redirect_url = $this->get_redirect_attempt();
+		$this->assertNotEmpty( $redirect_url, 'A redirect should occur for the legacy setup-woocommerce-payments action.' );
+		$this->assertEquals(
+			admin_url( 'admin.php?page=wc-settings&tab=checkout&from=WCADMIN_PAYMENT_TASK' ),
+			$redirect_url,
+			'Redirect URL should match expected settings page URL for the legacy setup-woocommerce-payments action.'
 		);
 	}
 

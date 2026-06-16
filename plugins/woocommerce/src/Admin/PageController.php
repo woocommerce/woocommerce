@@ -612,10 +612,11 @@ class PageController {
 	}
 
 	/**
-	 * Redirect payment tasks to the settings page.
+	 * Redirect payment tasks and legacy WooPayments entry points to the settings page.
 	 *
-	 * Redirects both 'payments' and 'woocommerce-payments' tasks to the Payments settings page,
-	 * when it is safe to do so in terms of backwards compatibility.
+	 * Redirects the current payments task, the deprecated WooPayments task alias, and the
+	 * deprecated `setup-woocommerce-payments` action to the Payments settings page when it is safe
+	 * to do so in terms of backwards compatibility.
 	 */
 	public function maybe_redirect_payment_tasks_to_settings() {
 		// Bail if we are not in the WP admin or not on a WC admin page.
@@ -623,14 +624,24 @@ class PageController {
 			return;
 		}
 
-		// Bail if we are not requesting a page for a WooCommerce task.
-		// phpcs:ignore WordPress.Security.NonceVerification
-		if ( empty( $_GET['task'] ) ) {
+		// Only sufficiently capable users should be redirected.
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
-		// Only sufficiently capable users should be redirected.
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		$redirect_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&from=WCADMIN_PAYMENT_TASK' );
+
+		// Redirect legacy inbox note actions that used to boot the removed WooPayments task surface.
+		// phpcs:ignore WordPress.Security.NonceVerification
+		$action = ! empty( $_GET['action'] ) ? wc_clean( wp_unslash( $_GET['action'] ) ) : '';
+		if ( 'setup-woocommerce-payments' === $action ) {
+			wp_safe_redirect( $redirect_url );
+			exit;
+		}
+
+		// Bail if we are not requesting a page for a WooCommerce task.
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( empty( $_GET['task'] ) ) {
 			return;
 		}
 
@@ -643,9 +654,7 @@ class PageController {
 			return;
 		}
 
-		$redirect_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&from=WCADMIN_PAYMENT_TASK' );
-
-		// The WooPayments task is always redirected to the settings page.
+		// The deprecated WooPayments task alias is always redirected to the settings page.
 		if ( 'woocommerce-payments' === $task_id ) {
 			wp_safe_redirect( $redirect_url );
 			exit;
