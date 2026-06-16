@@ -63,6 +63,7 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'pre_orders_compatibility',
 				'ups_compatibility',
 				'fedex_compatibility',
+				'points_rewards_compatibility',
 				'subscriptions_compatibility',
 				'async_prices',
 				'storefront',
@@ -322,6 +323,23 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 			$filter_hooks
 		);
 		$this->assertSame( array(), $hook_groups['fedex_compatibility']['actions'] );
+	}
+
+	/**
+	 * @testdox Should preserve the WooPayments Points and Rewards compatibility hook surface.
+	 */
+	public function test_points_rewards_compatibility_manifest_contains_preserved_hooks(): void {
+		$hook_groups  = MultiCurrencyRuntimeRegistry::get_core_hook_groups();
+		$filter_hooks = array_column( $hook_groups['points_rewards_compatibility']['filters'], 'hook' );
+
+		$this->assertSame(
+			array(
+				'option_wc_points_rewards_earn_points_ratio',
+				'option_wc_points_rewards_redeem_points_ratio',
+			),
+			$filter_hooks
+		);
+		$this->assertSame( array(), $hook_groups['points_rewards_compatibility']['actions'] );
 	}
 
 	/**
