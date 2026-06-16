@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\MultiCurrency;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyProjectionServiceFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRuntimeServiceFactory;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
@@ -39,6 +40,13 @@ class MultiCurrencyFrontendPricesController implements RegisterHooksInterface {
 	private MultiCurrencyProjectionServiceFactory $projection_service_factory;
 
 	/**
+	 * Runtime service factory.
+	 *
+	 * @var MultiCurrencyRuntimeServiceFactory
+	 */
+	private MultiCurrencyRuntimeServiceFactory $runtime_service_factory;
+
+	/**
 	 * Price projection service.
 	 *
 	 * @var MultiCurrencyPriceProjectionService|null
@@ -59,10 +67,16 @@ class MultiCurrencyFrontendPricesController implements RegisterHooksInterface {
 	 *
 	 * @param MultiCurrencyRuntimeArbiter           $arbiter                    Runtime owner arbiter.
 	 * @param MultiCurrencyProjectionServiceFactory $projection_service_factory Projection service factory.
+	 * @param MultiCurrencyRuntimeServiceFactory    $runtime_service_factory    Runtime service factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyProjectionServiceFactory $projection_service_factory ): void {
+	final public function init(
+		MultiCurrencyRuntimeArbiter $arbiter,
+		MultiCurrencyProjectionServiceFactory $projection_service_factory,
+		MultiCurrencyRuntimeServiceFactory $runtime_service_factory
+	): void {
 		$this->arbiter                    = $arbiter;
 		$this->projection_service_factory = $projection_service_factory;
+		$this->runtime_service_factory    = $runtime_service_factory;
 	}
 
 	/**
@@ -394,7 +408,7 @@ class MultiCurrencyFrontendPricesController implements RegisterHooksInterface {
 	 */
 	private function get_request_context(): MultiCurrencyRequestContext {
 		if ( null === $this->request_context ) {
-			$this->request_context = new MultiCurrencyRequestContext();
+			$this->request_context = $this->runtime_service_factory->create_request_context();
 		}
 
 		return $this->request_context;

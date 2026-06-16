@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontend
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyOrderContextService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyProjectionServiceFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRuntimeServiceFactory;
 use WC_Unit_Test_Case;
 
 /**
@@ -418,7 +419,8 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 		$controller = new MultiCurrencyFrontendCurrenciesController();
 		$controller->init(
 			$this->create_arbiter( $owner ),
-			wc_get_container()->get( MultiCurrencyProjectionServiceFactory::class )
+			wc_get_container()->get( MultiCurrencyProjectionServiceFactory::class ),
+			wc_get_container()->get( MultiCurrencyRuntimeServiceFactory::class )
 		);
 		$controller->set_frontend_projection_service( $this->create_projection_service() );
 		if ( null !== $request_context && method_exists( $controller, 'set_request_context' ) ) {

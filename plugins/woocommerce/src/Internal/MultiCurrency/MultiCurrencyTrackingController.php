@@ -7,7 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRuntimeServiceFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyTrackingOrderCountProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyTrackingProjectionService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
@@ -52,23 +52,23 @@ class MultiCurrencyTrackingController implements RegisterHooksInterface {
 	private $hpos_enabled_resolver = null;
 
 	/**
-	 * State builder factory.
+	 * Runtime service factory.
 	 *
-	 * @var MultiCurrencyStateBuilderFactory
+	 * @var MultiCurrencyRuntimeServiceFactory
 	 */
-	private MultiCurrencyStateBuilderFactory $state_builder_factory;
+	private MultiCurrencyRuntimeServiceFactory $runtime_service_factory;
 
 	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter      $arbiter               Runtime owner arbiter.
-	 * @param MultiCurrencyStateBuilderFactory $state_builder_factory State builder factory.
+	 * @param MultiCurrencyRuntimeArbiter        $arbiter                 Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeServiceFactory $runtime_service_factory Runtime service factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyStateBuilderFactory $state_builder_factory ): void {
-		$this->arbiter               = $arbiter;
-		$this->state_builder_factory = $state_builder_factory;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyRuntimeServiceFactory $runtime_service_factory ): void {
+		$this->arbiter                 = $arbiter;
+		$this->runtime_service_factory = $runtime_service_factory;
 	}
 
 	/**
@@ -141,9 +141,7 @@ class MultiCurrencyTrackingController implements RegisterHooksInterface {
 	 */
 	private function get_tracking_projection_service(): MultiCurrencyTrackingProjectionService {
 		if ( null === $this->tracking_projection_service ) {
-			$this->tracking_projection_service = new MultiCurrencyTrackingProjectionService(
-				$this->state_builder_factory->create()
-			);
+			$this->tracking_projection_service = $this->runtime_service_factory->create_tracking_projection_service();
 		}
 
 		return $this->tracking_projection_service;
@@ -156,7 +154,7 @@ class MultiCurrencyTrackingController implements RegisterHooksInterface {
 	 */
 	private function get_order_count_projection_service(): MultiCurrencyTrackingOrderCountProjectionService {
 		if ( null === $this->order_count_projection_service ) {
-			$this->order_count_projection_service = new MultiCurrencyTrackingOrderCountProjectionService();
+			$this->order_count_projection_service = $this->runtime_service_factory->create_tracking_order_count_projection_service();
 		}
 
 		return $this->order_count_projection_service;

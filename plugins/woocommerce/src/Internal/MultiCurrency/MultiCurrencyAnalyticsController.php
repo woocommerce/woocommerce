@@ -9,8 +9,7 @@ namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyAnalyticsProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyAnalyticsSqlProjectionService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRuntimeServiceFactory;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -39,11 +38,11 @@ class MultiCurrencyAnalyticsController implements RegisterHooksInterface {
 	private MultiCurrencyRuntimeArbiter $arbiter;
 
 	/**
-	 * State builder factory.
+	 * Runtime service factory.
 	 *
-	 * @var MultiCurrencyStateBuilderFactory
+	 * @var MultiCurrencyRuntimeServiceFactory
 	 */
-	private MultiCurrencyStateBuilderFactory $state_builder_factory;
+	private MultiCurrencyRuntimeServiceFactory $runtime_service_factory;
 
 	/**
 	 * Analytics projection service.
@@ -106,12 +105,12 @@ class MultiCurrencyAnalyticsController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter      $arbiter               Runtime owner arbiter.
-	 * @param MultiCurrencyStateBuilderFactory $state_builder_factory State builder factory.
+	 * @param MultiCurrencyRuntimeArbiter        $arbiter                 Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeServiceFactory $runtime_service_factory Runtime service factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyStateBuilderFactory $state_builder_factory ): void {
-		$this->arbiter               = $arbiter;
-		$this->state_builder_factory = $state_builder_factory;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyRuntimeServiceFactory $runtime_service_factory ): void {
+		$this->arbiter                 = $arbiter;
+		$this->runtime_service_factory = $runtime_service_factory;
 	}
 
 	/**
@@ -360,7 +359,7 @@ class MultiCurrencyAnalyticsController implements RegisterHooksInterface {
 	 */
 	private function get_analytics_projection_service(): MultiCurrencyAnalyticsProjectionService {
 		if ( null === $this->analytics_projection_service ) {
-			$this->analytics_projection_service = new MultiCurrencyAnalyticsProjectionService( $this->create_state_builder() );
+			$this->analytics_projection_service = $this->runtime_service_factory->create_analytics_projection_service();
 		}
 
 		return $this->analytics_projection_service;
@@ -373,19 +372,10 @@ class MultiCurrencyAnalyticsController implements RegisterHooksInterface {
 	 */
 	private function get_sql_projection_service(): MultiCurrencyAnalyticsSqlProjectionService {
 		if ( null === $this->sql_projection_service ) {
-			$this->sql_projection_service = new MultiCurrencyAnalyticsSqlProjectionService();
+			$this->sql_projection_service = $this->runtime_service_factory->create_analytics_sql_projection_service();
 		}
 
 		return $this->sql_projection_service;
-	}
-
-	/**
-	 * Create a default state builder.
-	 *
-	 * @return MultiCurrencyStateBuilder
-	 */
-	private function create_state_builder(): MultiCurrencyStateBuilder {
-		return $this->state_builder_factory->create();
 	}
 
 	/**

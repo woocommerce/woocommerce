@@ -10,8 +10,8 @@ use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyAnalytic
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDatabaseCache;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRateService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRuntimeServiceFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use WC_Unit_Test_Case;
 
 /**
@@ -216,7 +216,7 @@ class MultiCurrencyAnalyticsControllerTest extends WC_Unit_Test_Case {
 		$controller = new MultiCurrencyAnalyticsController();
 		$controller->init(
 			$this->create_arbiter( $owner ),
-			wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )
+			wc_get_container()->get( MultiCurrencyRuntimeServiceFactory::class )
 		);
 		$controller->set_dev_mode_resolver( static fn(): bool => false );
 		$controller->set_rest_request_resolver( static fn(): bool => false );

@@ -7,7 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRuntimeServiceFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySwitcherProjectionService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
@@ -36,11 +36,11 @@ class MultiCurrencySwitcherBlockController implements RegisterHooksInterface {
 	private MultiCurrencyCompatibilityController $compatibility_controller;
 
 	/**
-	 * State builder factory.
+	 * Runtime service factory.
 	 *
-	 * @var MultiCurrencyStateBuilderFactory
+	 * @var MultiCurrencyRuntimeServiceFactory
 	 */
-	private MultiCurrencyStateBuilderFactory $state_builder_factory;
+	private MultiCurrencyRuntimeServiceFactory $runtime_service_factory;
 
 	/**
 	 * Switcher projection service.
@@ -56,16 +56,16 @@ class MultiCurrencySwitcherBlockController implements RegisterHooksInterface {
 	 *
 	 * @param MultiCurrencyRuntimeArbiter          $arbiter                  Runtime owner arbiter.
 	 * @param MultiCurrencyCompatibilityController $compatibility_controller Compatibility controller.
-	 * @param MultiCurrencyStateBuilderFactory     $state_builder_factory    State builder factory.
+	 * @param MultiCurrencyRuntimeServiceFactory   $runtime_service_factory  Runtime service factory.
 	 */
 	final public function init(
 		MultiCurrencyRuntimeArbiter $arbiter,
 		MultiCurrencyCompatibilityController $compatibility_controller,
-		MultiCurrencyStateBuilderFactory $state_builder_factory
+		MultiCurrencyRuntimeServiceFactory $runtime_service_factory
 	): void {
 		$this->arbiter                  = $arbiter;
 		$this->compatibility_controller = $compatibility_controller;
-		$this->state_builder_factory    = $state_builder_factory;
+		$this->runtime_service_factory  = $runtime_service_factory;
 	}
 
 	/**
@@ -189,9 +189,7 @@ class MultiCurrencySwitcherBlockController implements RegisterHooksInterface {
 	 */
 	private function get_switcher_projection_service(): MultiCurrencySwitcherProjectionService {
 		if ( null === $this->switcher_projection_service ) {
-			$this->switcher_projection_service = new MultiCurrencySwitcherProjectionService(
-				$this->state_builder_factory->create()
-			);
+			$this->switcher_projection_service = $this->runtime_service_factory->create_switcher_projection_service();
 		}
 
 		return $this->switcher_projection_service;

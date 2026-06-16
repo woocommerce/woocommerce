@@ -8,6 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRuntimeServiceFactory;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
@@ -37,14 +38,23 @@ class MultiCurrencyRestRequestOverrideController implements RegisterHooksInterfa
 	private ?MultiCurrencyRequestContext $request_context = null;
 
 	/**
+	 * Runtime service factory.
+	 *
+	 * @var MultiCurrencyRuntimeServiceFactory
+	 */
+	private MultiCurrencyRuntimeServiceFactory $runtime_service_factory;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter $arbiter Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeArbiter        $arbiter                 Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeServiceFactory $runtime_service_factory Runtime service factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter ): void {
-		$this->arbiter = $arbiter;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyRuntimeServiceFactory $runtime_service_factory ): void {
+		$this->arbiter                 = $arbiter;
+		$this->runtime_service_factory = $runtime_service_factory;
 	}
 
 	/**
@@ -117,7 +127,7 @@ class MultiCurrencyRestRequestOverrideController implements RegisterHooksInterfa
 	 */
 	private function get_request_context(): MultiCurrencyRequestContext {
 		if ( null === $this->request_context ) {
-			$this->request_context = new MultiCurrencyRequestContext();
+			$this->request_context = $this->runtime_service_factory->create_request_context();
 		}
 
 		return $this->request_context;

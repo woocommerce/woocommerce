@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontend
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyOrderContextService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyProjectionServiceFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRuntimeServiceFactory;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
@@ -34,6 +35,13 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 * @var MultiCurrencyProjectionServiceFactory
 	 */
 	private MultiCurrencyProjectionServiceFactory $projection_service_factory;
+
+	/**
+	 * Runtime service factory.
+	 *
+	 * @var MultiCurrencyRuntimeServiceFactory
+	 */
+	private MultiCurrencyRuntimeServiceFactory $runtime_service_factory;
 
 	/**
 	 * Frontend projection service.
@@ -70,10 +78,16 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 *
 	 * @param MultiCurrencyRuntimeArbiter           $arbiter                    Runtime owner arbiter.
 	 * @param MultiCurrencyProjectionServiceFactory $projection_service_factory Projection service factory.
+	 * @param MultiCurrencyRuntimeServiceFactory    $runtime_service_factory    Runtime service factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyProjectionServiceFactory $projection_service_factory ): void {
+	final public function init(
+		MultiCurrencyRuntimeArbiter $arbiter,
+		MultiCurrencyProjectionServiceFactory $projection_service_factory,
+		MultiCurrencyRuntimeServiceFactory $runtime_service_factory
+	): void {
 		$this->arbiter                    = $arbiter;
 		$this->projection_service_factory = $projection_service_factory;
+		$this->runtime_service_factory    = $runtime_service_factory;
 	}
 
 	/**
@@ -386,7 +400,7 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 */
 	private function get_request_context(): MultiCurrencyRequestContext {
 		if ( null === $this->request_context ) {
-			$this->request_context = new MultiCurrencyRequestContext();
+			$this->request_context = $this->runtime_service_factory->create_request_context();
 		}
 
 		return $this->request_context;
@@ -399,7 +413,7 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 */
 	private function get_order_context_service(): MultiCurrencyOrderContextService {
 		if ( null === $this->order_context_service ) {
-			$this->order_context_service = new MultiCurrencyOrderContextService();
+			$this->order_context_service = $this->runtime_service_factory->create_order_context_service();
 		}
 
 		return $this->order_context_service;

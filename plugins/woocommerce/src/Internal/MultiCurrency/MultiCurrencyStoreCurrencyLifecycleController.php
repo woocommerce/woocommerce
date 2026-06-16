@@ -7,8 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDatabaseCache;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRuntimeServiceFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStoreCurrencyLifecycleService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
@@ -28,11 +27,11 @@ class MultiCurrencyStoreCurrencyLifecycleController implements RegisterHooksInte
 	private MultiCurrencyRuntimeArbiter $arbiter;
 
 	/**
-	 * State builder factory.
+	 * Runtime service factory.
 	 *
-	 * @var MultiCurrencyStateBuilderFactory
+	 * @var MultiCurrencyRuntimeServiceFactory
 	 */
-	private MultiCurrencyStateBuilderFactory $state_builder_factory;
+	private MultiCurrencyRuntimeServiceFactory $runtime_service_factory;
 
 	/**
 	 * Store-currency lifecycle service.
@@ -46,12 +45,12 @@ class MultiCurrencyStoreCurrencyLifecycleController implements RegisterHooksInte
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter      $arbiter               Runtime owner arbiter.
-	 * @param MultiCurrencyStateBuilderFactory $state_builder_factory State builder factory.
+	 * @param MultiCurrencyRuntimeArbiter        $arbiter                 Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeServiceFactory $runtime_service_factory Runtime service factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyStateBuilderFactory $state_builder_factory ): void {
-		$this->arbiter               = $arbiter;
-		$this->state_builder_factory = $state_builder_factory;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyRuntimeServiceFactory $runtime_service_factory ): void {
+		$this->arbiter                 = $arbiter;
+		$this->runtime_service_factory = $runtime_service_factory;
 	}
 
 	/**
@@ -92,11 +91,7 @@ class MultiCurrencyStoreCurrencyLifecycleController implements RegisterHooksInte
 	 */
 	private function get_lifecycle_service(): MultiCurrencyStoreCurrencyLifecycleService {
 		if ( null === $this->lifecycle_service ) {
-			$cache                   = new MultiCurrencyDatabaseCache();
-			$this->lifecycle_service = new MultiCurrencyStoreCurrencyLifecycleService(
-				$cache,
-				$this->state_builder_factory->create( null, $cache )
-			);
+			$this->lifecycle_service = $this->runtime_service_factory->create_store_currency_lifecycle_service();
 		}
 
 		return $this->lifecycle_service;

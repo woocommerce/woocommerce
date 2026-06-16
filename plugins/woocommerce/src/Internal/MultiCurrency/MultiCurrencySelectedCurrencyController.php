@@ -10,10 +10,9 @@ namespace Automattic\WooCommerce\Internal\MultiCurrency;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontendProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyGeolocationService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRuntimeServiceFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySelectedCurrencyPersistenceService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyUserSettingsProjectionService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
@@ -62,23 +61,23 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 	private ?MultiCurrencyGeolocationService $geolocation_service = null;
 
 	/**
-	 * State builder factory.
+	 * Runtime service factory.
 	 *
-	 * @var MultiCurrencyStateBuilderFactory
+	 * @var MultiCurrencyRuntimeServiceFactory
 	 */
-	private MultiCurrencyStateBuilderFactory $state_builder_factory;
+	private MultiCurrencyRuntimeServiceFactory $runtime_service_factory;
 
 	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter      $arbiter               Runtime owner arbiter.
-	 * @param MultiCurrencyStateBuilderFactory $state_builder_factory State builder factory.
+	 * @param MultiCurrencyRuntimeArbiter        $arbiter                 Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeServiceFactory $runtime_service_factory Runtime service factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyStateBuilderFactory $state_builder_factory ): void {
-		$this->arbiter               = $arbiter;
-		$this->state_builder_factory = $state_builder_factory;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyRuntimeServiceFactory $runtime_service_factory ): void {
+		$this->arbiter                 = $arbiter;
+		$this->runtime_service_factory = $runtime_service_factory;
 	}
 
 	/**
@@ -310,9 +309,7 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 	 */
 	private function get_persistence_service(): MultiCurrencySelectedCurrencyPersistenceService {
 		if ( null === $this->persistence_service ) {
-			$this->persistence_service = new MultiCurrencySelectedCurrencyPersistenceService(
-				$this->state_builder_factory->create()
-			);
+			$this->persistence_service = $this->runtime_service_factory->create_selected_currency_persistence_service();
 		}
 
 		return $this->persistence_service;
@@ -325,8 +322,7 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 	 */
 	private function get_geolocation_service(): MultiCurrencyGeolocationService {
 		if ( null === $this->geolocation_service ) {
-			$localization_service      = new MultiCurrencyLocalizationService();
-			$this->geolocation_service = new MultiCurrencyGeolocationService( $localization_service );
+			$this->geolocation_service = $this->runtime_service_factory->create_geolocation_service();
 		}
 
 		return $this->geolocation_service;
@@ -339,7 +335,7 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 	 */
 	private function get_request_context(): MultiCurrencyRequestContext {
 		if ( null === $this->request_context ) {
-			$this->request_context = new MultiCurrencyRequestContext();
+			$this->request_context = $this->runtime_service_factory->create_request_context();
 		}
 
 		return $this->request_context;

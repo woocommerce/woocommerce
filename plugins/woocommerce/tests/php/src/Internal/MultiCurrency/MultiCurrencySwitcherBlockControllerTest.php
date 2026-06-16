@@ -6,8 +6,8 @@ namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyCompatibilityController;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySwitcherBlockController;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRuntimeServiceFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySwitcherProjectionService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use WC_Unit_Test_Case;
 use WP_Block_Type_Registry;
 
@@ -201,7 +201,7 @@ class MultiCurrencySwitcherBlockControllerTest extends WC_Unit_Test_Case {
 		$controller->init(
 			$this->create_arbiter( $owner ),
 			$this->create_compatibility_controller( $switching_disabled ),
-			wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )
+			wc_get_container()->get( MultiCurrencyRuntimeServiceFactory::class )
 		);
 		$controller->set_switcher_projection_service( $projection ?? $this->create_projection_service() );
 

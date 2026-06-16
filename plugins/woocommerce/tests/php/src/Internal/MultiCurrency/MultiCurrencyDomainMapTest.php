@@ -192,6 +192,51 @@ class MultiCurrencyDomainMapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should centralize runtime service graph construction in the factory.
+	 */
+	public function test_runtime_service_construction_is_centralized_in_factory(): void {
+		$source_files           = array(
+			'src/Internal/MultiCurrency/MultiCurrencyFrontendPricesController.php',
+			'src/Internal/MultiCurrency/MultiCurrencySelectedCurrencyController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyFrontendCurrenciesController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyAsyncPriceRendererController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyRestRequestOverrideController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyAnalyticsController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyTrackingController.php',
+			'src/Internal/MultiCurrency/MultiCurrencySwitcherBlockController.php',
+			'src/Internal/MultiCurrency/MultiCurrencySwitcherWidgetController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyStorefrontIntegrationController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyStoreCurrencyLifecycleController.php',
+		);
+		$forbidden_constructors = array(
+			'new MultiCurrencyRequestContext(',
+			'new MultiCurrencyOrderContextService(',
+			'new MultiCurrencySelectedCurrencyPersistenceService(',
+			'new MultiCurrencyGeolocationService(',
+			'new MultiCurrencySwitcherProjectionService(',
+			'new MultiCurrencyAnalyticsProjectionService(',
+			'new MultiCurrencyAnalyticsSqlProjectionService(',
+			'new MultiCurrencyTrackingProjectionService(',
+			'new MultiCurrencyTrackingOrderCountProjectionService(',
+			'new MultiCurrencyStoreCurrencyLifecycleService(',
+			'new MultiCurrencyDatabaseCache(',
+		);
+
+		foreach ( $source_files as $source_file ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for domain-boundary regression coverage.
+			$source = (string) file_get_contents( WC()->plugin_path() . '/' . $source_file );
+
+			foreach ( $forbidden_constructors as $forbidden_constructor ) {
+				$this->assertStringNotContainsString(
+					$forbidden_constructor,
+					$source,
+					"{$source_file} should delegate {$forbidden_constructor} construction to the runtime service factory."
+				);
+			}
+		}
+	}
+
+	/**
 	 * @testdox Should record the plugin compatibility integrations that B1 must preserve.
 	 */
 	public function test_records_compatibility_integrations(): void {
