@@ -453,6 +453,129 @@ class PaymentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should key native WooPayments provider state snapshots by the WooPayments extension slug.
+	 */
+	public function test_provider_state_snapshots_use_suggestion_plugin_slug_for_native_woopayments(): void {
+		delete_option( Payments::PAYMENTS_PROVIDER_STATE_SNAPSHOTS_KEY );
+		$this->mock_woopayments_suggestion_lookup();
+
+		$gateways = array(
+			new FakePaymentGateway(
+				'woocommerce_payments',
+				array(
+					'plugin_slug' => 'woocommerce',
+					'plugin_file' => 'woocommerce/woocommerce.php',
+				)
+			),
+			new FakePaymentGateway( WC_Gateway_Paypal::ID, array( 'plugin_slug' => 'woocommerce' ) ),
+		);
+		$this->mock_providers
+			->expects( $this->atLeastOnce() )
+			->method( 'get_payment_gateways' )
+			->willReturn( $gateways );
+		$this->mock_providers
+			->expects( $this->any() )
+			->method( 'get_extension_suggestions' )
+			->willReturn( array() );
+		$this->mock_providers
+			->expects( $this->any() )
+			->method( 'get_order_map' )
+			->willReturn(
+				array(
+					'woocommerce_payments' => 0,
+					WC_Gateway_Paypal::ID  => 1,
+				)
+			);
+		$this->mock_providers
+			->expects( $this->any() )
+			->method( 'enhance_order_map' )
+			->willReturnArgument( 0 );
+
+		$this->sut->get_payment_providers( 'US' );
+
+		$snapshots = get_option( Payments::PAYMENTS_PROVIDER_STATE_SNAPSHOTS_KEY );
+		delete_option( Payments::PAYMENTS_PROVIDER_STATE_SNAPSHOTS_KEY );
+
+		$this->assertIsArray( $snapshots );
+		$this->assertArrayHasKey( 'woocommerce-payments', $snapshots );
+		$this->assertTrue( $snapshots['woocommerce-payments']['extension_active'] );
+	}
+
+	/**
+	 * @testdox Should not read suggestion metadata from unrelated Core providers when stale snapshots use the Core slug.
+	 */
+	public function test_provider_state_tracking_ignores_core_provider_slug_collision_for_stale_native_snapshot(): void {
+		update_option(
+			Payments::PAYMENTS_PROVIDER_STATE_SNAPSHOTS_KEY,
+			array(
+				'woocommerce' => array(
+					'extension_active'  => true,
+					'account_connected' => true,
+					'account_test_mode' => true,
+					'needs_setup'       => false,
+					'test_mode'         => true,
+				),
+			),
+			false
+		);
+		$this->mock_woopayments_suggestion_lookup();
+
+		$gateways = array(
+			new FakePaymentGateway( WC_Gateway_Paypal::ID, array( 'plugin_slug' => 'woocommerce' ) ),
+			new FakePaymentGateway(
+				'woocommerce_payments',
+				array(
+					'plugin_slug' => 'woocommerce-payments',
+					'plugin_file' => 'woocommerce-payments/woocommerce-payments',
+				)
+			),
+		);
+		$this->mock_providers
+			->expects( $this->atLeastOnce() )
+			->method( 'get_payment_gateways' )
+			->willReturn( $gateways );
+		$this->mock_providers
+			->expects( $this->any() )
+			->method( 'get_extension_suggestions' )
+			->willReturn( array() );
+		$this->mock_providers
+			->expects( $this->any() )
+			->method( 'get_order_map' )
+			->willReturn(
+				array(
+					WC_Gateway_Paypal::ID  => 0,
+					'woocommerce_payments' => 1,
+				)
+			);
+		$this->mock_providers
+			->expects( $this->any() )
+			->method( 'enhance_order_map' )
+			->willReturnArgument( 0 );
+
+		$captured_warning = null;
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Captures the specific regression warning so the test fails before production logs it.
+		set_error_handler(
+			function ( int $errno, string $errstr ) use ( &$captured_warning ): bool {
+				if ( E_WARNING === $errno && str_contains( $errstr, 'Undefined array key "_suggestion_id"' ) ) {
+					$captured_warning = $errstr;
+					return true;
+				}
+
+				return false;
+			}
+		);
+
+		try {
+			$this->sut->get_payment_providers( 'US' );
+		} finally {
+			restore_error_handler();
+			delete_option( Payments::PAYMENTS_PROVIDER_STATE_SNAPSHOTS_KEY );
+		}
+
+		$this->assertNull( $captured_warning, 'Provider state tracking should not read `_suggestion_id` from unrelated Core providers.' );
+	}
+
+	/**
 	 * Test getting the payments settings country.
 	 */
 	public function test_get_country() {
@@ -715,5 +838,41 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->assertGreaterThan( $gateway1_index, $stripe_index, 'stripe should be after gateway1' );
 		// Stripe should be the last non-offline-PM provider.
 		$this->assertSame( count( $provider_ids ) - 1, $stripe_index, 'stripe should be the last provider' );
+	}
+
+	/**
+	 * Mock WooPayments suggestion lookups used when enriching gateway details.
+	 */
+	private function mock_woopayments_suggestion_lookup(): void {
+		$suggestion = array(
+			'id'          => ExtensionSuggestions::WOOPAYMENTS,
+			'_priority'   => 10,
+			'_type'       => ExtensionSuggestions::TYPE_PSP,
+			'title'       => 'Accept payments with Woo',
+			'description' => 'Credit/debit cards, Apple Pay, Google Pay, and more.',
+			'plugin'      => array(
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'woocommerce-payments',
+			),
+			'icon'        => 'http://example.com/woopayments-icon.svg',
+			'links'       => array(),
+			'tags'        => array( ExtensionSuggestions::TAG_MADE_IN_WOO, ExtensionSuggestions::TAG_PREFERRED ),
+		);
+
+		$this->mock_extension_suggestions
+			->method( 'get_by_plugin_slug' )
+			->willReturnCallback(
+				function ( string $slug ) use ( $suggestion ): ?array {
+					return 'woocommerce-payments' === $slug ? $suggestion : null;
+				}
+			);
+
+		$this->mock_extension_suggestions
+			->method( 'get_by_id' )
+			->willReturnCallback(
+				function ( string $id ) use ( $suggestion ): ?array {
+					return ExtensionSuggestions::WOOPAYMENTS === $id ? $suggestion : null;
+				}
+			);
 	}
 }
