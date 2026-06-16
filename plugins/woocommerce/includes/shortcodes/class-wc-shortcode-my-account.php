@@ -94,9 +94,9 @@ class WC_Shortcode_My_Account {
 			$resend_url = wp_nonce_url( add_query_arg( 'wc-resend-set-password', '1', wc_get_page_permalink( 'myaccount' ) ), 'wc-resend-set-password' );
 			wc_add_notice(
 				sprintf(
-					/* translators: %1$s and %2$s are opening and closing anchor tags for the resend link. */
-					__( 'Your account is using a temporary password. We emailed you a link to change your password. %1$sResend link%2$s.', 'woocommerce' ),
-					'<a href="' . esc_url( $resend_url ) . '">',
+					/* translators: %1$s and %2$s are opening and closing anchor tags for the resend-link button. */
+					__( 'Your account is using a temporary password. We emailed you a link to change your password. %1$sResend link%2$s', 'woocommerce' ),
+					'<a href="' . esc_url( $resend_url ) . '" class="button wc-forward">',
 					'</a>'
 				),
 				'notice'
