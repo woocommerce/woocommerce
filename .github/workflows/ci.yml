@@ -39,6 +39,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   FORCE_COLOR: 1
 
 jobs:
@@ -510,6 +511,11 @@ jobs:
                 filter="$filter --filter $package"
             done
             echo "Populated filter: $filter"
+
+            if [ -z "$filter" ]; then
+                echo "No touched packages use changelogger; nothing to validate."
+                exit 0
+            fi
 
             pnpm --parallel --workspace-concurrency=10 --stream $filter changelog validate
 

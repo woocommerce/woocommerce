@@ -112,6 +112,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
+		// @phpstan-ignore-next-line property.notFound (Deliberately dynamic to avoid adding inherited state that can fatal subclasses.)
+		$this->request = $request;
+
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = array(
 			'id'                    => $object->get_id(),
@@ -156,7 +159,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			),
 			'shipping_class'        => $object->get_shipping_class(),
 			'shipping_class_id'     => $object->get_shipping_class_id(),
-			'image'                 => $this->get_image( $object, $context, isset( $request['image_size'] ) ? $request['image_size'] : 'full' ),
+			'image'                 => $this->get_image( $object, $context ),
 			'gallery_image_ids'     => $object instanceof WC_Product ? array_map( 'intval', $object->get_gallery_image_ids() ) : array(),
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
@@ -448,15 +451,17 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	/**
 	 * Get the image for a product variation.
 	 *
-	 * @param WC_Product_Variation $variation  Variation data.
-	 * @param string               $context    Context of the request: 'view' or 'edit'.
-	 * @param string               $image_size Optional. WordPress registered image size to use for the image src. Default 'full'.
+	 * @param WC_Product_Variation $variation Variation data.
+	 * @param string               $context   Context of the request: 'view' or 'edit'.
 	 * @return array
 	 */
-	protected function get_image( $variation, $context = 'view', $image_size = 'full' ) {
+	protected function get_image( $variation, $context = 'view' ) {
 		if ( ! $variation->get_image_id( $context ) ) {
 			return;
 		}
+
+		$image_size = $this->request['image_size'] ?? 'full';
+		$image_size = is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
 
 		$attachment_id   = $variation->get_image_id();
 		$attachment_post = get_post( $attachment_id );
