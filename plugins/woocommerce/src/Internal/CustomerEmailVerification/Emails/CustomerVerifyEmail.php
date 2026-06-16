@@ -92,7 +92,7 @@ class CustomerVerifyEmail extends WC_Email {
 		if ( $user_id && $verify_url ) {
 			$this->object            = new WP_User( $user_id );
 			$this->verify_url        = $verify_url;
-			$this->recipient         = stripslashes( $this->object->user_email );
+			$this->recipient         = wp_unslash( $this->object->user_email );
 			$customer                = new WC_Customer( $user_id );
 			$first_name              = ! empty( $customer->get_billing_first_name() ) ? $customer->get_billing_first_name() : $this->object->first_name;
 			$this->user_display_name = ! empty( $first_name ) ? $first_name : $this->object->user_login;
