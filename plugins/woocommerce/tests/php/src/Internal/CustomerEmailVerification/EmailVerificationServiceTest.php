@@ -100,4 +100,43 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $this->sut->is_verified( $user_id ), 'User should not be verified after clearing' );
 	}
+
+	/**
+	 * @testdox A verified status self-invalidates when the account email changes.
+	 */
+	public function test_is_verified_false_after_email_change(): void {
+		$user_id = wc_create_new_customer( 'before-change@example.com', 'changeuser', 'pw' );
+
+		$this->sut->mark_verified( $user_id );
+		$this->assertTrue( $this->sut->is_verified( $user_id ), 'User should be verified for their current email' );
+
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'after-change@example.com',
+			)
+		);
+		clean_user_cache( $user_id );
+
+		$this->assertFalse( $this->sut->is_verified( $user_id ), 'Changing the account email must invalidate verification' );
+	}
+
+	/**
+	 * @testdox A verified status is preserved across non-email profile changes.
+	 */
+	public function test_is_verified_preserved_after_non_email_change(): void {
+		$user_id = wc_create_new_customer( 'keep-verified@example.com', 'keepuser', 'pw' );
+
+		$this->sut->mark_verified( $user_id );
+
+		wp_update_user(
+			array(
+				'ID'           => $user_id,
+				'display_name' => 'Renamed Customer',
+			)
+		);
+		clean_user_cache( $user_id );
+
+		$this->assertTrue( $this->sut->is_verified( $user_id ), 'Non-email profile changes must not invalidate verification' );
+	}
 }

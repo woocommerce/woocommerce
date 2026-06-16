@@ -18,8 +18,8 @@ use Automattic\WooCommerce\Internal\Utilities\Users;
 class EmailVerificationService {
 
 	/**
-	 * User meta key that stores the email-verified timestamp.
-	 * A truthy (non-empty) value means the customer is verified.
+	 * User meta key that stores the verified email address (lower-cased).
+	 * The customer is considered verified only while this matches their current account email.
 	 */
 	private const VERIFIED_META = '_wc_email_verified';
 
@@ -29,23 +29,35 @@ class EmailVerificationService {
 	private const KEY_META = '_wc_email_verification_key';
 
 	/**
-	 * Return whether the given user has verified their email address.
+	 * Return whether the given user has verified their current account email address.
+	 *
+	 * A user is verified only while the stored verified email matches their current
+	 * account email, so changing the account email automatically invalidates the
+	 * status — no change event needs to be observed.
 	 *
 	 * @since 11.0.0
 	 *
 	 * @param int $user_id WordPress user ID.
-	 * @return bool True when the verification meta is non-empty.
+	 * @return bool True when the stored verified email matches the user's current email.
 	 */
 	public function is_verified( int $user_id ): bool {
-		return (bool) Users::get_site_user_meta( $user_id, self::VERIFIED_META );
+		$verified_email = (string) Users::get_site_user_meta( $user_id, self::VERIFIED_META );
+
+		if ( '' === $verified_email ) {
+			return false;
+		}
+
+		$user = get_user_by( 'id', $user_id );
+
+		return $user instanceof \WP_User && 0 === strcasecmp( $verified_email, $user->user_email );
 	}
 
 	/**
-	 * Mark the given user as having verified their email address.
+	 * Mark the given user as having verified their current account email address.
 	 *
-	 * Sets the verified-timestamp meta, clears the pending verification key, and
+	 * Stores the verified email address, clears the pending verification key, and
 	 * fires the {@see 'woocommerce_customer_email_verified'} action. No-ops if the
-	 * user is already verified.
+	 * user is already verified for their current email.
 	 *
 	 * @since 11.0.0
 	 *
@@ -57,7 +69,14 @@ class EmailVerificationService {
 			return;
 		}
 
-		Users::update_site_user_meta( $user_id, self::VERIFIED_META, time() );
+		$user = get_user_by( 'id', $user_id );
+
+		if ( ! $user instanceof \WP_User ) {
+			return;
+		}
+
+		// Store the verified email (lower-cased) so the status self-invalidates if the account email later changes.
+		Users::update_site_user_meta( $user_id, self::VERIFIED_META, strtolower( $user->user_email ) );
 		Users::delete_site_user_meta( $user_id, self::KEY_META );
 
 		/**
@@ -150,20 +169,6 @@ class EmailVerificationService {
 		list( $timestamp ) = explode( ':', $stored, 2 );
 
 		return time() - (int) $timestamp;
-	}
-
-	/**
-	 * Return whether the store currently requires email verification.
-	 *
-	 * Reads the {@see 'woocommerce_require_email_verification'} option. This method
-	 * is intentionally read-only; writing the option is handled elsewhere.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @return bool True when the option is set to 'yes'.
-	 */
-	public function should_require_verification(): bool {
-		return 'yes' === get_option( 'woocommerce_require_email_verification', 'no' );
 	}
 
 	/**
