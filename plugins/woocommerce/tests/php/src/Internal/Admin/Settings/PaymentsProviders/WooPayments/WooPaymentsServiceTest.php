@@ -9,8 +9,11 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
-use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOnboardingAdapter;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
+use Automattic\WooCommerce\Internal\Payments\NativeWooPaymentsGateway;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOnboardingAdapter;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
@@ -133,7 +136,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				},
 				'class_exists' => function ( $class_to_check ) {
 					// By default, the WooPayments extension is mocked as active.
-					if ( '\WC_Payments' === $class_to_check ) {
+					if ( $this->is_woopayments_class( $class_to_check ) ) {
 						return true;
 					}
 
@@ -151,7 +154,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		$this->mockable_proxy->register_static_mocks(
 			array(
-				'\WC_Payments'         => array(
+				'WC_Payments'         => array(
 					'get_gateway'         => function () {
 						return new FakePaymentGateway();
 					},
@@ -159,7 +162,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						return $this->mock_account_service;
 					},
 				),
-				'\WC_Payments_Account' => array(
+				'WC_Payments_Account' => array(
 					'get_connect_url'       => function () {
 						return 'https://example.com/kyc_fallback';
 					},
@@ -167,12 +170,12 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						return 'https://example.com/overview_page?from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT;
 					},
 				),
-				'\WC_Payments_Utils'   => array(
+				'\WC_Payments_Utils'  => array(
 					'supported_countries' => function () {
 						return $this->get_woopayments_supported_countries();
 					},
 				),
-				Utils::class           => array(
+				Utils::class          => array(
 					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 					'wc_payments_settings_url'           => function ( ?string $path = null, array $query = array() ) {
 						unset( $path, $query );
@@ -204,7 +207,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		$this->sut = new WooPaymentsService();
-		$this->sut->init( $this->mock_providers, $this->mockable_proxy );
+		$this->sut->init(
+			$this->mock_providers,
+			$this->mockable_proxy,
+			$this->create_onboarding_adapter()
+		);
 	}
 
 	/**
@@ -218,7 +225,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'class_exists' => function ( $class_to_check ) {
-					if ( '\WC_Payments' === $class_to_check ) {
+					if ( $this->is_woopayments_class( $class_to_check ) ) {
 						return false;
 					}
 
@@ -247,7 +254,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'class_exists' => function ( $class_to_check ) {
-					if ( '\WC_Payments' === $class_to_check ) {
+					if ( $this->is_woopayments_class( $class_to_check ) ) {
 						return false;
 					}
 
@@ -268,6 +275,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_test_account',
 					'has_sandbox_account',
 					'has_live_account',
+					'get_onboarding_kyc_fallback_url',
 					'get_overview_page_url',
 				)
 			)
@@ -297,6 +305,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->method( 'has_live_account' )
 			->willReturn( false );
 		$onboarding_adapter
+			->method( 'get_onboarding_kyc_fallback_url' )
+			->willReturn( 'https://example.com/native-kyc' );
+		$onboarding_adapter
 			->method( 'get_overview_page_url' )
 			->willReturn( 'https://example.com/native-overview' );
 
@@ -309,6 +320,53 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			'https://example.com/native-overview',
 			$result['context']['urls']['overview_page']
+		);
+	}
+
+	/**
+	 * Create an onboarding adapter wired to this test's mockable legacy proxy.
+	 *
+	 * @return WooPaymentsOnboardingAdapter
+	 */
+	private function create_onboarding_adapter(): WooPaymentsOnboardingAdapter {
+		$legacy_runtime = new WooPaymentsLegacyRuntime();
+		$legacy_runtime->init( $this->mockable_proxy );
+
+		$provider = $this->getMockBuilder( WooPaymentsProvider::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'can_process_payments' ) )
+			->getMock();
+		$provider
+			->method( 'can_process_payments' )
+			->willReturn( false );
+
+		$adapter = new WooPaymentsOnboardingAdapter();
+		$adapter->init( $legacy_runtime, $provider, new NativeWooPaymentsGateway() );
+
+		return $adapter;
+	}
+
+	/**
+	 * Tell whether a class check targets the WooPayments extension class.
+	 *
+	 * @param mixed $class_to_check Class name passed to class_exists().
+	 * @return bool
+	 */
+	private function is_woopayments_class( $class_to_check ): bool {
+		return 'WC_Payments' === ltrim( (string) $class_to_check, '\\' );
+	}
+
+	/**
+	 * @testdox Should receive the onboarding adapter through dependency injection.
+	 */
+	public function test_onboarding_adapter_access_is_injected(): void {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for admin-service boundary regression coverage.
+		$source = (string) file_get_contents( WC()->plugin_path() . '/src/Internal/Admin/Settings/PaymentsProviders/WooPayments/WooPaymentsService.php' );
+
+		$this->assertDoesNotMatchRegularExpression(
+			'/wc_get_container\(\)\s*->get\(\s*WooPaymentsOnboardingAdapter::class\s*\)/',
+			$source,
+			'WooPaymentsService should receive the onboarding adapter through init injection.'
 		);
 	}
 
@@ -1041,7 +1099,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		$this->mockable_proxy->register_static_mocks(
 			array(
-				Utils::class           => array(
+				Utils::class          => array(
 					'wc_payments_settings_url'           => function ( ?string $path = null, array $query = array() ) use ( $wpcom_connection_return_url ) {
 						if ( WooPaymentsService::ONBOARDING_PATH_BASE === $path && ! empty( $query['wpcom_connection_return'] ) ) {
 							return $wpcom_connection_return_url;
@@ -1073,7 +1131,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
 					},
 				),
-				'\WC_Payments_Account' => array(
+				'WC_Payments_Account' => array(
 					'get_connect_url' => function () use ( $kyc_fallback_url ) {
 						return $kyc_fallback_url;
 					},
@@ -5554,7 +5612,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'class_exists' => function ( $class_to_check ) {
-					if ( '\WC_Payments' === $class_to_check ) {
+					if ( $this->is_woopayments_class( $class_to_check ) ) {
 						return false;
 					}
 
@@ -5827,7 +5885,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'class_exists' => function ( $class_to_check ) {
-					if ( '\WC_Payments' === $class_to_check ) {
+					if ( $this->is_woopayments_class( $class_to_check ) ) {
 						return false;
 					}
 
@@ -6165,7 +6223,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'class_exists' => function ( $class_to_check ) {
-					if ( '\WC_Payments' === $class_to_check ) {
+					if ( $this->is_woopayments_class( $class_to_check ) ) {
 						return false;
 					}
 
@@ -6458,7 +6516,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'class_exists' => function ( $class_to_check ) {
-					if ( '\WC_Payments' === $class_to_check ) {
+					if ( $this->is_woopayments_class( $class_to_check ) ) {
 						return false;
 					}
 
@@ -6797,7 +6855,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'class_exists' => function ( $class_to_check ) {
-					if ( '\WC_Payments' === $class_to_check ) {
+					if ( $this->is_woopayments_class( $class_to_check ) ) {
 						return false;
 					}
 
@@ -7121,7 +7179,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'class_exists' => function ( $class_to_check ) {
-					if ( '\WC_Payments' === $class_to_check ) {
+					if ( $this->is_woopayments_class( $class_to_check ) ) {
 						return false;
 					}
 
@@ -8180,7 +8238,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'class_exists' => function ( $class_to_check ) {
-					if ( '\WC_Payments' === $class_to_check ) {
+					if ( $this->is_woopayments_class( $class_to_check ) ) {
 						return false;
 					}
 
@@ -8560,7 +8618,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'class_exists' => function ( $class_to_check ) {
-					if ( '\WC_Payments' === $class_to_check ) {
+					if ( $this->is_woopayments_class( $class_to_check ) ) {
 						return false;
 					}
 
@@ -9011,7 +9069,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'class_exists' => function ( $class_to_check ) {
-					if ( '\WC_Payments' === $class_to_check ) {
+					if ( $this->is_woopayments_class( $class_to_check ) ) {
 						return false;
 					}
 

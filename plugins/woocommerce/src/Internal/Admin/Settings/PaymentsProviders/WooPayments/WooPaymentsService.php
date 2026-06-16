@@ -126,20 +126,20 @@ class WooPaymentsService {
 	/**
 	 * The WooPayments onboarding adapter.
 	 *
-	 * @var WooPaymentsOnboardingAdapter|null
+	 * @var WooPaymentsOnboardingAdapter
 	 */
-	private ?WooPaymentsOnboardingAdapter $onboarding_adapter = null;
+	private WooPaymentsOnboardingAdapter $onboarding_adapter;
 
 	/**
 	 * Initialize the class instance.
 	 *
-	 * @param PaymentsProviders                 $payment_providers  The PaymentsProviders instance.
-	 * @param LegacyProxy                       $proxy              The LegacyProxy instance.
-	 * @param WooPaymentsOnboardingAdapter|null $onboarding_adapter Optional WooPayments onboarding adapter.
+	 * @param PaymentsProviders            $payment_providers  The PaymentsProviders instance.
+	 * @param LegacyProxy                  $proxy              The LegacyProxy instance.
+	 * @param WooPaymentsOnboardingAdapter $onboarding_adapter The WooPayments onboarding adapter.
 	 *
 	 * @internal
 	 */
-	final public function init( PaymentsProviders $payment_providers, LegacyProxy $proxy, ?WooPaymentsOnboardingAdapter $onboarding_adapter = null ): void {
+	final public function init( PaymentsProviders $payment_providers, LegacyProxy $proxy, WooPaymentsOnboardingAdapter $onboarding_adapter ): void {
 		$this->payments_providers = $payment_providers;
 		$this->proxy              = $proxy;
 		$this->onboarding_adapter = $onboarding_adapter;
@@ -1072,7 +1072,8 @@ class WooPaymentsService {
 		if ( ! empty( $configured_payment_methods ) && is_array( $configured_payment_methods ) ) {
 			foreach ( $configured_payment_methods as $pm_id => $enabled ) {
 				if ( ! is_string( $pm_id ) || ! is_bool( $enabled ) ) {
-					continue; // Skip invalid entries.
+					// Skip invalid entries.
+					continue;
 				}
 
 				if ( $enabled ) {
@@ -2643,10 +2644,6 @@ class WooPaymentsService {
 	 * @return WooPaymentsOnboardingAdapter
 	 */
 	private function get_onboarding_adapter(): WooPaymentsOnboardingAdapter {
-		if ( ! isset( $this->onboarding_adapter ) ) {
-			$this->onboarding_adapter = wc_get_container()->get( WooPaymentsOnboardingAdapter::class );
-		}
-
 		return $this->onboarding_adapter;
 	}
 

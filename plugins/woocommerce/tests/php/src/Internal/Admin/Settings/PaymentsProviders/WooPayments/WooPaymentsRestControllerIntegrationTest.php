@@ -203,7 +203,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		$this->mockable_proxy->register_static_mocks(
 			array(
-				'\WC_Payments'         => array(
+				'WC_Payments'         => array(
 					'get_gateway'         => function () {
 						return $this->mock_gateway;
 					},
@@ -211,7 +211,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 						return $this->mock_account_service;
 					},
 				),
-				'\WC_Payments_Account' => array(
+				'WC_Payments_Account' => array(
 					'get_connect_url'       => function () {
 						return 'https://example.com/kyc_fallback';
 					},
@@ -219,12 +219,12 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 						return 'https://example.com/overview_page?from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT;
 					},
 				),
-				'\WC_Payments_Utils'   => array(
+				'\WC_Payments_Utils'  => array(
 					'supported_countries' => function () {
 						return $this->get_woopayments_supported_countries();
 					},
 				),
-				Utils::class           => array(
+				Utils::class          => array(
 					'get_wpcom_connection_authorization' => function ( string $return_url ) {
 						unset( $return_url ); // Avoid parameter not used PHPCS errors.
 						return array(
@@ -256,7 +256,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 				},
 				'class_exists' => function ( $class_to_check ) {
 					// By default, the WooPayments extension is mocked as active.
-					if ( '\WC_Payments' === $class_to_check ) {
+					if ( 'WC_Payments' === ltrim( (string) $class_to_check, '\\' ) ) {
 						return true;
 					}
 

@@ -59,6 +59,13 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 	private FakePaymentGateway $gateway;
 
 	/**
+	 * Native gateway test double.
+	 *
+	 * @var NativeWooPaymentsGateway
+	 */
+	private NativeWooPaymentsGateway $native_gateway;
+
+	/**
 	 * Account service mock.
 	 *
 	 * @var object|\PHPUnit\Framework\MockObject\MockObject
@@ -81,6 +88,7 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 
 		$this->payment_gateway_provider = new PaymentGateway( $this->legacy_proxy );
 		$this->gateway                  = new FakePaymentGateway( 'woocommerce_payments' );
+		$this->native_gateway           = new NativeWooPaymentsGateway();
 		$this->account_service          = $this->getMockBuilder( \stdClass::class )
 			->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data' ) )
 			->getMock();
@@ -102,7 +110,7 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 		$legacy_runtime->init( $this->legacy_proxy );
 
 		$this->adapter = new WooPaymentsOnboardingAdapter();
-		$this->adapter->init( $legacy_runtime, $this->provider, new NativeWooPaymentsGateway() );
+		$this->adapter->init( $legacy_runtime, $this->provider, $this->native_gateway );
 	}
 
 	/**
@@ -140,6 +148,51 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 		$this->provider->method( 'can_process_payments' )->willReturn( true );
 
 		self::assertTrue( $this->adapter->is_onboarding_runtime_available() );
+	}
+
+	/**
+	 * @testdox The injected native gateway is returned when native processing is available without the plugin.
+	 */
+	public function test_native_gateway_is_returned_when_native_provider_can_process_without_plugin(): void {
+		$this->legacy_proxy->register_function_mocks(
+			array(
+				'class_exists' => fn() => false,
+			)
+		);
+		$this->provider->method( 'can_process_payments' )->willReturn( true );
+
+		self::assertSame( $this->native_gateway, $this->adapter->get_payment_gateway() );
+	}
+
+	/**
+	 * @testdox Native gateway is not returned when native processing is unavailable.
+	 */
+	public function test_native_gateway_is_not_returned_when_native_provider_cannot_process(): void {
+		$this->legacy_proxy->register_function_mocks(
+			array(
+				'class_exists' => fn() => false,
+			)
+		);
+		$this->provider->method( 'can_process_payments' )->willReturn( false );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'WooPayments gateway is not available.' );
+
+		$this->adapter->get_payment_gateway();
+	}
+
+	/**
+	 * @testdox Legacy gateway wins when both legacy and native runtimes are available.
+	 */
+	public function test_legacy_gateway_wins_when_both_legacy_and_native_are_available(): void {
+		$this->legacy_proxy->register_function_mocks(
+			array(
+				'class_exists' => fn( $class_to_check ) => 'WC_Payments' === ltrim( (string) $class_to_check, '\\' ),
+			)
+		);
+		$this->provider->method( 'can_process_payments' )->willReturn( true );
+
+		self::assertSame( $this->gateway, $this->adapter->get_payment_gateway() );
 	}
 
 	/**

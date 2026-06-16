@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\CapabilityManifest;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProviderGatewayAdapter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use WC_Unit_Test_Case;
 
@@ -75,6 +76,41 @@ class WooPaymentsProviderTest extends WC_Unit_Test_Case {
 		) {
 			$this->assertTrue( $manifest->supports( $capability ), "{$capability} should be declared for WooPayments native processing." );
 		}
+	}
+
+	/**
+	 * @testdox Provider availability delegates to the injected gateway adapter.
+	 *
+	 * @dataProvider provider_gateway_availability
+	 *
+	 * @param bool $available Gateway adapter availability.
+	 */
+	public function test_can_process_payments_delegates_to_injected_gateway_adapter( bool $available ): void {
+		$gateway_adapter = $this->getMockBuilder( WooPaymentsProviderGatewayAdapter::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_available' ) )
+			->getMock();
+		$gateway_adapter
+			->expects( $this->once() )
+			->method( 'is_available' )
+			->willReturn( $available );
+
+		$provider = new WooPaymentsProvider();
+		$provider->init( $gateway_adapter );
+
+		$this->assertSame( $available, $provider->can_process_payments() );
+	}
+
+	/**
+	 * Data provider for provider gateway availability.
+	 *
+	 * @return array<string,array{bool}>
+	 */
+	public function provider_gateway_availability(): array {
+		return array(
+			'available'   => array( true ),
+			'unavailable' => array( false ),
+		);
 	}
 
 	/**
