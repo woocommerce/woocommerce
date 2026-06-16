@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MultiCurrency\Providers;
 
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsCurrencyRateProviderRegistrar;
+
 /**
  * Creates native multi-currency automatic-rate provider registries.
  *

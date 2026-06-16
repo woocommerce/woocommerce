@@ -1,9 +1,9 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency\Providers;
+namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments\MultiCurrency;
 
-use Automattic\WooCommerce\Internal\MultiCurrency\Providers\WooPaymentsLegacyAccountAdapter;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsLegacyAccountAdapter;
 use WC_Unit_Test_Case;
 
 /**

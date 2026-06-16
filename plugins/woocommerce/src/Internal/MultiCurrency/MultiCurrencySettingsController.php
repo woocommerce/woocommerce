@@ -9,8 +9,8 @@ namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\MultiCurrencyAccountInterface;
-use Automattic\WooCommerce\Internal\MultiCurrency\Providers\WooPaymentsLegacyAccountAdapter;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySettingsProjectionService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsLegacyAccountAdapter;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**

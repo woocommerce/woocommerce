@@ -5,7 +5,10 @@
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Internal\MultiCurrency\Providers;
+namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency;
+
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistrarInterface;
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistry;
 
 /**
  * Registers the WooPayments-backed automatic FX rate provider.

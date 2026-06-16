@@ -36,6 +36,26 @@ class MultiCurrencyDomainMapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep WooPayments rate source implementation in the payments provider namespace.
+	 */
+	public function test_woopayments_rate_source_implementation_lives_in_payments_provider_namespace(): void {
+		$this->assertTrue( class_exists( 'Automattic\\WooCommerce\\Internal\\Payments\\Providers\\WooPayments\\MultiCurrency\\WooPaymentsCurrencyRateProvider' ) );
+		$this->assertTrue( class_exists( 'Automattic\\WooCommerce\\Internal\\Payments\\Providers\\WooPayments\\MultiCurrency\\WooPaymentsCurrencyRateProviderRegistrar' ) );
+		$this->assertTrue( class_exists( 'Automattic\\WooCommerce\\Internal\\Payments\\Providers\\WooPayments\\MultiCurrency\\WooPaymentsLegacyAccountAdapter' ) );
+		$this->assertTrue( class_exists( 'Automattic\\WooCommerce\\Internal\\Payments\\Providers\\WooPayments\\MultiCurrency\\WooPaymentsLegacyApiClientAdapter' ) );
+	}
+
+	/**
+	 * @testdox Should not keep WooPayments rate source implementation in the generic multi-currency namespace.
+	 */
+	public function test_woopayments_rate_source_implementation_is_not_in_generic_multi_currency_namespace(): void {
+		$this->assertFalse( class_exists( 'Automattic\\WooCommerce\\Internal\\MultiCurrency\\Providers\\WooPaymentsCurrencyRateProvider' ) );
+		$this->assertFalse( class_exists( 'Automattic\\WooCommerce\\Internal\\MultiCurrency\\Providers\\WooPaymentsCurrencyRateProviderRegistrar' ) );
+		$this->assertFalse( class_exists( 'Automattic\\WooCommerce\\Internal\\MultiCurrency\\Providers\\WooPaymentsLegacyAccountAdapter' ) );
+		$this->assertFalse( class_exists( 'Automattic\\WooCommerce\\Internal\\MultiCurrency\\Providers\\WooPaymentsLegacyApiClientAdapter' ) );
+	}
+
+	/**
 	 * @testdox Should record hard-preserved multi-currency order meta keys.
 	 */
 	public function test_records_preserved_order_meta_keys(): void {

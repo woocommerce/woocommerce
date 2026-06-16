@@ -5,7 +5,7 @@
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Internal\MultiCurrency\Providers;
+namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\CurrencyRateProvider;
 use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\MultiCurrencyAccountInterface;

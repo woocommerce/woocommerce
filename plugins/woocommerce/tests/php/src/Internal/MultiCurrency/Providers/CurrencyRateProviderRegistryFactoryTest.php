@@ -7,10 +7,10 @@ use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\CurrencyRateProvide
 use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistry;
 use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistryFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistrarInterface;
-use Automattic\WooCommerce\Internal\MultiCurrency\Providers\WooPaymentsCurrencyRateProvider;
-use Automattic\WooCommerce\Internal\MultiCurrency\Providers\WooPaymentsCurrencyRateProviderRegistrar;
-use Automattic\WooCommerce\Internal\MultiCurrency\Providers\WooPaymentsLegacyAccountAdapter;
-use Automattic\WooCommerce\Internal\MultiCurrency\Providers\WooPaymentsLegacyApiClientAdapter;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsCurrencyRateProvider;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsCurrencyRateProviderRegistrar;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsLegacyAccountAdapter;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsLegacyApiClientAdapter;
 use WC_Unit_Test_Case;
 
 /**

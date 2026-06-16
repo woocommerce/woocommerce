@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySettingsController;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySettingsPage;
-use Automattic\WooCommerce\Internal\MultiCurrency\Providers\WooPaymentsLegacyAccountAdapter;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsLegacyAccountAdapter;
 use WC_Unit_Test_Case;
 
 /**
