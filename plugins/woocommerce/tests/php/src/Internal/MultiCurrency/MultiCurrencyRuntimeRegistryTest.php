@@ -59,6 +59,7 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'selected_currency',
 				'analytics',
 				'compatibility',
+				'bookings_compatibility',
 				'subscriptions_compatibility',
 				'async_prices',
 				'storefront',
@@ -242,6 +243,39 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'option_woocommerce_subscriptions_multiple_purchase',
 			),
 			$filter_hooks
+		);
+	}
+
+	/**
+	 * @testdox Should preserve the WooPayments Bookings compatibility hook surface.
+	 */
+	public function test_bookings_compatibility_manifest_contains_preserved_hooks(): void {
+		$hook_groups  = MultiCurrencyRuntimeRegistry::get_core_hook_groups();
+		$filter_hooks = array_column( $hook_groups['bookings_compatibility']['filters'], 'hook' );
+		$action_hooks = array_column( $hook_groups['bookings_compatibility']['actions'], 'hook' );
+
+		$this->assertSame(
+			array(
+				'woocommerce_bookings_calculated_booking_cost',
+				'woocommerce_product_get_block_cost',
+				'woocommerce_product_get_cost',
+				'woocommerce_product_get_display_cost',
+				'woocommerce_product_booking_person_type_get_block_cost',
+				'woocommerce_product_booking_person_type_get_cost',
+				'woocommerce_product_get_resource_base_costs',
+				'woocommerce_product_get_resource_block_costs',
+				'wcpay_multi_currency_should_convert_product_price',
+				'woocommerce_bookings_process_cost_rules_cost',
+				'woocommerce_bookings_process_cost_rules_base_cost',
+			),
+			$filter_hooks
+		);
+		$this->assertSame(
+			array(
+				'wp_ajax_wc_bookings_calculate_costs',
+				'wp_ajax_nopriv_wc_bookings_calculate_costs',
+			),
+			$action_hooks
 		);
 	}
 

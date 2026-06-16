@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\MultiCurrency;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyAdminNoteProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyAdminNoticeProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyAsyncPriceProjectionService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyBookingsCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRestProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySettingsProjectionService;
@@ -78,6 +79,7 @@ class MultiCurrencyRuntimeRegistry {
 			'selected_currency'           => self::get_selected_currency_hook_group(),
 			'analytics'                   => self::get_analytics_hook_group(),
 			'compatibility'               => MultiCurrencyCompatibilityProjectionService::get_hook_manifest(),
+			'bookings_compatibility'      => MultiCurrencyBookingsCompatibilityProjectionService::get_hook_manifest(),
 			'subscriptions_compatibility' => MultiCurrencySubscriptionsCompatibilityProjectionService::get_hook_manifest(),
 			'async_prices'                => MultiCurrencyAsyncPriceProjectionService::get_hook_manifest( true, false, false, false, false ),
 			'storefront'                  => MultiCurrencyStorefrontProjectionService::get_hook_manifest( 2, true ),
