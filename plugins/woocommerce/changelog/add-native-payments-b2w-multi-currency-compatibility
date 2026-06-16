@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Add native multi-currency compatibility hooks.
