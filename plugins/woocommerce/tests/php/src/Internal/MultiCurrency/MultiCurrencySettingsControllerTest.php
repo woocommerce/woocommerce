@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySettingsController;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySettingsPage;
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\WooPaymentsLegacyAccountAdapter;
 use WC_Unit_Test_Case;
 
 /**
@@ -21,6 +22,7 @@ class MultiCurrencySettingsControllerTest extends WC_Unit_Test_Case {
 	private array $hooks = array(
 		'woocommerce_get_settings_pages',
 		'wcpay_settings',
+		'wcpay_js_settings',
 		'admin_print_scripts',
 		'woocommerce_admin_field_wcpay_multi_currency_settings_page',
 		'woocommerce_admin_field_wcpay_currencies_settings_onboarding_cta',
@@ -50,6 +52,7 @@ class MultiCurrencySettingsControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( has_filter( 'woocommerce_get_settings_pages', array( $sut, 'handle_woocommerce_get_settings_pages' ) ) );
 		$this->assertFalse( has_filter( 'wcpay_settings', array( $sut, 'add_multi_currency_settings_config' ) ) );
+		$this->assertFalse( has_filter( 'wcpay_js_settings', array( $sut, 'add_multi_currency_settings_config' ) ) );
 		$this->assertFalse( has_action( 'admin_print_scripts', array( $sut, 'handle_admin_print_scripts' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_admin_field_wcpay_multi_currency_settings_page', array( $sut, 'render_settings_container' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_admin_field_wcpay_currencies_settings_onboarding_cta', array( $sut, 'render_onboarding_cta' ) ) );
@@ -66,7 +69,8 @@ class MultiCurrencySettingsControllerTest extends WC_Unit_Test_Case {
 		$sut->register();
 
 		$this->assertSame( 10, has_filter( 'woocommerce_get_settings_pages', array( $sut, 'handle_woocommerce_get_settings_pages' ) ) );
-		$this->assertSame( 10, has_filter( 'wcpay_settings', array( $sut, 'add_multi_currency_settings_config' ) ) );
+		$this->assertFalse( has_filter( 'wcpay_settings', array( $sut, 'add_multi_currency_settings_config' ) ) );
+		$this->assertSame( 10, has_filter( 'wcpay_js_settings', array( $sut, 'add_multi_currency_settings_config' ) ) );
 		$this->assertSame( 10, has_action( 'admin_print_scripts', array( $sut, 'handle_admin_print_scripts' ) ) );
 		$this->assertSame( 10, has_action( 'woocommerce_admin_field_wcpay_multi_currency_settings_page', array( $sut, 'render_settings_container' ) ) );
 		$this->assertSame( 10, has_action( 'woocommerce_admin_field_wcpay_currencies_settings_onboarding_cta', array( $sut, 'render_onboarding_cta' ) ) );
@@ -100,6 +104,47 @@ class MultiCurrencySettingsControllerTest extends WC_Unit_Test_Case {
 			$settings_page->get_settings()
 		);
 		$this->assertTrue( $GLOBALS['hide_save_button'] );
+	}
+
+	/**
+	 * @testdox Should register connected settings page from production account adapter.
+	 */
+	public function test_registers_connected_settings_page_from_account_adapter(): void {
+		$sut = new MultiCurrencySettingsController();
+		$sut->init(
+			$this->create_arbiter( MultiCurrencyRuntimeArbiter::OWNER_CORE ),
+			$this->create_account_adapter( true, 'https://example.test/onboarding' )
+		);
+
+		$settings_pages = $sut->handle_woocommerce_get_settings_pages( array() );
+		$settings_page  = $settings_pages[0];
+
+		$this->assertInstanceOf( MultiCurrencySettingsPage::class, $settings_page );
+		$this->assertSame(
+			array(
+				array(
+					'type' => 'wcpay_multi_currency_settings_page',
+				),
+			),
+			$settings_page->get_settings()
+		);
+	}
+
+	/**
+	 * @testdox Should render onboarding CTA from production account adapter.
+	 */
+	public function test_renders_onboarding_cta_from_account_adapter(): void {
+		$sut = new MultiCurrencySettingsController();
+		$sut->init(
+			$this->create_arbiter( MultiCurrencyRuntimeArbiter::OWNER_CORE ),
+			$this->create_account_adapter( false, 'https://example.test/account-onboarding' )
+		);
+
+		ob_start();
+		$sut->render_onboarding_cta();
+		$markup = ob_get_clean();
+
+		$this->assertStringContainsString( 'href="https://example.test/account-onboarding"', $markup );
 	}
 
 	/**
@@ -263,13 +308,11 @@ class MultiCurrencySettingsControllerTest extends WC_Unit_Test_Case {
 		$sut->handle_admin_enqueue_scripts();
 
 		$this->assertCount( 1, $registered_assets );
-		$this->assertSame( 'WCPAY_MULTI_CURRENCY_SETTINGS', $registered_assets[0]['script']['handle'] );
-		$this->assertSame( 'dist/multi-currency', $registered_assets[0]['script']['path'] );
-		$this->assertSame( 'WCPAY_MULTI_CURRENCY_SETTINGS', $registered_assets[0]['style']['handle'] );
+		$this->assertSame( 'multi-currency-settings', $registered_assets[0]['script']['entry'] );
+		$this->assertSame( 'wc-admin-multi-currency-settings', $registered_assets[0]['script']['handle'] );
 		$this->assertSame(
 			array(
-				'WCPAY_MULTI_CURRENCY_SETTINGS',
-				'WCPAY_MULTI_CURRENCY_SETTINGS',
+				'wc-admin-multi-currency-settings',
 			),
 			$enqueued_assets
 		);
@@ -313,7 +356,13 @@ class MultiCurrencySettingsControllerTest extends WC_Unit_Test_Case {
 	 */
 	private function create_controller( string $owner, array $options = array() ): MultiCurrencySettingsController {
 		$controller = new MultiCurrencySettingsController();
-		$controller->init( $this->create_arbiter( $owner ) );
+		$controller->init(
+			$this->create_arbiter( $owner ),
+			$this->create_account_adapter(
+				(bool) ( $options['provider_connected'] ?? true ),
+				(string) ( $options['onboarding_url'] ?? 'https://example.test/onboarding' )
+			)
+		);
 
 		$controller->set_provider_connected_resolver(
 			static fn(): bool => (bool) ( $options['provider_connected'] ?? true )
@@ -350,6 +399,62 @@ class MultiCurrencySettingsControllerTest extends WC_Unit_Test_Case {
 		);
 
 		return $controller;
+	}
+
+	/**
+	 * Create a static account adapter.
+	 *
+	 * @param bool   $connected      Whether the provider account is connected.
+	 * @param string $onboarding_url Provider onboarding URL.
+	 * @return WooPaymentsLegacyAccountAdapter
+	 */
+	private function create_account_adapter( bool $connected, string $onboarding_url ): WooPaymentsLegacyAccountAdapter {
+		return new class( $connected, $onboarding_url ) extends WooPaymentsLegacyAccountAdapter {
+
+			/**
+			 * Whether the provider account is connected.
+			 *
+			 * @var bool
+			 */
+			private bool $connected;
+
+			/**
+			 * Provider onboarding URL.
+			 *
+			 * @var string
+			 */
+			private string $onboarding_url;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param bool   $connected      Whether the provider account is connected.
+			 * @param string $onboarding_url Provider onboarding URL.
+			 */
+			public function __construct( bool $connected, string $onboarding_url ) {
+				$this->connected      = $connected;
+				$this->onboarding_url = $onboarding_url;
+			}
+
+			/**
+			 * Tell whether the rate provider account is connected.
+			 *
+			 * @param bool $on_error Value to return on provider errors.
+			 * @return bool
+			 */
+			public function is_provider_connected( bool $on_error = false ): bool {
+				return $this->connected;
+			}
+
+			/**
+			 * Get the provider onboarding URL.
+			 *
+			 * @return string
+			 */
+			public function get_provider_onboarding_page_url(): string {
+				return $this->onboarding_url;
+			}
+		};
 	}
 
 	/**

@@ -15,18 +15,16 @@ namespace Automattic\WooCommerce\Internal\MultiCurrency\Services;
  */
 class MultiCurrencySettingsProjectionService {
 
-	private const SETTINGS_TAB            = 'wcpay_multi_currency';
-	private const SETTINGS_SCREEN_BASE    = 'woocommerce_page_wc-settings';
-	private const SETTINGS_FIELD_TYPE     = 'wcpay_multi_currency_settings_page';
-	private const ONBOARDING_FIELD_TYPE   = 'wcpay_currencies_settings_onboarding_cta';
-	private const SETTINGS_CONTAINER_ID   = 'wcpay_multi_currency_settings_container';
-	private const ONBOARDING_CTA_ID       = 'wcpay_enabled_currencies_onboarding_cta';
-	private const ENABLED_CURRENCIES_ID   = 'wcpay_multi_currency_enabled_currencies';
-	private const ADMIN_ASSET_HANDLE      = 'WCPAY_MULTI_CURRENCY_SETTINGS';
-	private const ADMIN_SCRIPT_PATH       = 'dist/multi-currency';
-	private const ADMIN_STYLE_PATH        = 'dist/multi-currency.css';
-	private const LEARN_MORE_URL          = 'https://woocommerce.com/document/woopayments/currencies/multi-currency-setup/';
-	private const ADMIN_SCRIPT_DEPENDENCY = 'WCPAY_ADMIN_SETTINGS';
+	private const SETTINGS_TAB          = 'wcpay_multi_currency';
+	private const SETTINGS_SCREEN_BASE  = 'woocommerce_page_wc-settings';
+	private const SETTINGS_FIELD_TYPE   = 'wcpay_multi_currency_settings_page';
+	private const ONBOARDING_FIELD_TYPE = 'wcpay_currencies_settings_onboarding_cta';
+	private const SETTINGS_CONTAINER_ID = 'wcpay_multi_currency_settings_container';
+	private const ONBOARDING_CTA_ID     = 'wcpay_enabled_currencies_onboarding_cta';
+	private const ENABLED_CURRENCIES_ID = 'wcpay_multi_currency_enabled_currencies';
+	private const ADMIN_SCRIPT_ENTRY    = 'multi-currency-settings';
+	private const ADMIN_ASSET_HANDLE    = 'wc-admin-multi-currency-settings';
+	private const LEARN_MORE_URL        = 'https://woocommerce.com/document/woopayments/currencies/multi-currency-setup/';
 
 	/**
 	 * Project the multi-currency settings page manifest.
@@ -180,26 +178,15 @@ class MultiCurrencySettingsProjectionService {
 	/**
 	 * Project admin asset registration metadata.
 	 *
-	 * @param string $style_url     Stylesheet URL.
-	 * @param string $style_version Stylesheet version.
 	 * @return array<string,mixed>
 	 *
 	 * @since 11.0.0
 	 */
-	public static function get_admin_asset_manifest( string $style_url = '', string $style_version = '' ): array {
+	public static function get_admin_asset_manifest(): array {
 		return array(
 			'script' => array(
-				'handle'       => self::ADMIN_ASSET_HANDLE,
-				'path'         => self::ADMIN_SCRIPT_PATH,
-				'dependencies' => array( self::ADMIN_SCRIPT_DEPENDENCY, 'wp-components' ),
-			),
-			'style'  => array(
-				'handle'       => self::ADMIN_ASSET_HANDLE,
-				'path'         => self::ADMIN_STYLE_PATH,
-				'url'          => $style_url,
-				'dependencies' => array( 'wc-components', self::ADMIN_SCRIPT_DEPENDENCY ),
-				'version'      => $style_version,
-				'media'        => 'all',
+				'entry'  => self::ADMIN_SCRIPT_ENTRY,
+				'handle' => self::ADMIN_ASSET_HANDLE,
 			),
 		);
 	}

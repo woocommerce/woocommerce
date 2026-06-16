@@ -7,6 +7,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\MultiCurrencyAccountInterface;
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\WooPaymentsLegacyAccountAdapter;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySettingsProjectionService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
@@ -24,6 +27,13 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 	 * @var MultiCurrencyRuntimeArbiter
 	 */
 	private MultiCurrencyRuntimeArbiter $arbiter;
+
+	/**
+	 * Provider account boundary.
+	 *
+	 * @var MultiCurrencyAccountInterface
+	 */
+	private MultiCurrencyAccountInterface $account;
 
 	/**
 	 * Provider connection resolver.
@@ -93,10 +103,12 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter $arbiter Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeArbiter     $arbiter Runtime owner arbiter.
+	 * @param WooPaymentsLegacyAccountAdapter $account Provider account boundary.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter ): void {
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, WooPaymentsLegacyAccountAdapter $account ): void {
 		$this->arbiter = $arbiter;
+		$this->account = $account;
 	}
 
 	/**
@@ -207,7 +219,7 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 		}
 
 		$this->add_filter_once( 'woocommerce_get_settings_pages', array( $this, 'handle_woocommerce_get_settings_pages' ) );
-		$this->add_filter_once( 'wcpay_settings', array( $this, 'add_multi_currency_settings_config' ) );
+		$this->add_filter_once( 'wcpay_js_settings', array( $this, 'add_multi_currency_settings_config' ) );
 		$this->add_action_once( 'admin_print_scripts', array( $this, 'handle_admin_print_scripts' ) );
 		$this->add_action_once( 'woocommerce_admin_field_wcpay_multi_currency_settings_page', array( $this, 'render_settings_container' ) );
 		$this->add_action_once( 'woocommerce_admin_field_wcpay_currencies_settings_onboarding_cta', array( $this, 'render_onboarding_cta' ) );
@@ -295,10 +307,7 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 		$this->register_admin_assets( $manifest );
 
 		$script = is_array( $manifest['script'] ?? null ) ? $manifest['script'] : array();
-		$style  = is_array( $manifest['style'] ?? null ) ? $manifest['style'] : array();
-
 		$this->enqueue_admin_asset( (string) ( $script['handle'] ?? '' ) );
-		$this->enqueue_admin_asset( (string) ( $style['handle'] ?? '' ) );
 	}
 
 	/**
@@ -321,7 +330,11 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 			return (bool) call_user_func( $this->provider_connected_resolver );
 		}
 
-		return false;
+		try {
+			return $this->account->is_provider_connected();
+		} catch ( \Throwable $e ) {
+			return false;
+		}
 	}
 
 	/**
@@ -332,6 +345,15 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 	private function get_onboarding_url(): string {
 		if ( null !== $this->onboarding_url_resolver ) {
 			return (string) call_user_func( $this->onboarding_url_resolver );
+		}
+
+		try {
+			$onboarding_url = $this->account->get_provider_onboarding_page_url();
+			if ( '' !== $onboarding_url ) {
+				return $onboarding_url;
+			}
+		} catch ( \Throwable $e ) {
+			return admin_url( 'admin.php?page=wc-admin&path=/payments/onboarding' );
 		}
 
 		return admin_url( 'admin.php?page=wc-admin&path=/payments/onboarding' );
@@ -429,7 +451,11 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 			return (bool) call_user_func( $this->asset_available_resolver );
 		}
 
-		return file_exists( WC()->plugin_path() . '/dist/multi-currency.js' );
+		$manifest = MultiCurrencySettingsProjectionService::get_admin_asset_manifest();
+		$script   = is_array( $manifest['script'] ?? null ) ? $manifest['script'] : array();
+		$entry    = (string) ( $script['entry'] ?? '' );
+
+		return '' !== $entry && file_exists( WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $entry . '.asset.php' );
 	}
 
 	/**
@@ -444,23 +470,12 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 		}
 
 		$script = is_array( $manifest['script'] ?? null ) ? $manifest['script'] : array();
-		$style  = is_array( $manifest['style'] ?? null ) ? $manifest['style'] : array();
+		$entry  = (string) ( $script['entry'] ?? '' );
+		if ( '' === $entry ) {
+			return;
+		}
 
-		wp_register_script(
-			(string) ( $script['handle'] ?? '' ),
-			WC()->plugin_url() . '/' . (string) ( $script['path'] ?? '' ) . '.js',
-			is_array( $script['dependencies'] ?? null ) ? $script['dependencies'] : array(),
-			WC_VERSION,
-			true
-		);
-
-		wp_register_style(
-			(string) ( $style['handle'] ?? '' ),
-			WC()->plugin_url() . '/' . (string) ( $style['path'] ?? '' ),
-			is_array( $style['dependencies'] ?? null ) ? $style['dependencies'] : array(),
-			(string) ( $style['version'] ?? WC_VERSION ),
-			(string) ( $style['media'] ?? 'all' )
-		);
+		WCAdminAssets::register_script( 'wp-admin-scripts', $entry, true );
 	}
 
 	/**
@@ -478,8 +493,7 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 			return;
 		}
 
-		wp_enqueue_script( $handle );
-		wp_enqueue_style( $handle );
+		// WCAdminAssets::register_script() enqueues production assets directly.
 	}
 
 	/**

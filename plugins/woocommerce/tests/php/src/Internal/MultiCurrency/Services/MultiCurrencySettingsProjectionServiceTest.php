@@ -166,27 +166,15 @@ class MultiCurrencySettingsProjectionServiceTest extends WC_Unit_Test_Case {
 	 * @testdox Should project admin assets and JS config flag.
 	 */
 	public function test_projects_admin_assets_and_js_config_flag(): void {
-		$asset_manifest = MultiCurrencySettingsProjectionService::get_admin_asset_manifest(
-			'https://example.test/wp-content/plugins/woocommerce/dist/multi-currency.css',
-			'1.2.3'
-		);
+		$asset_manifest = MultiCurrencySettingsProjectionService::get_admin_asset_manifest();
 
 		$this->assertTrue( MultiCurrencySettingsProjectionService::should_enqueue_admin_assets( 'wcpay_multi_currency' ) );
 		$this->assertFalse( MultiCurrencySettingsProjectionService::should_enqueue_admin_assets( 'checkout' ) );
 		$this->assertSame(
 			array(
 				'script' => array(
-					'handle'       => 'WCPAY_MULTI_CURRENCY_SETTINGS',
-					'path'         => 'dist/multi-currency',
-					'dependencies' => array( 'WCPAY_ADMIN_SETTINGS', 'wp-components' ),
-				),
-				'style'  => array(
-					'handle'       => 'WCPAY_MULTI_CURRENCY_SETTINGS',
-					'path'         => 'dist/multi-currency.css',
-					'url'          => 'https://example.test/wp-content/plugins/woocommerce/dist/multi-currency.css',
-					'dependencies' => array( 'wc-components', 'WCPAY_ADMIN_SETTINGS' ),
-					'version'      => '1.2.3',
-					'media'        => 'all',
+					'entry'  => 'multi-currency-settings',
+					'handle' => 'wc-admin-multi-currency-settings',
 				),
 			),
 			$asset_manifest
