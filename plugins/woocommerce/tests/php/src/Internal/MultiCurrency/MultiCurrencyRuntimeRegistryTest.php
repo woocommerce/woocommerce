@@ -56,6 +56,7 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'frontend_prices',
 				'frontend_currencies',
 				'selected_currency',
+				'analytics',
 				'compatibility',
 				'async_prices',
 				'storefront',
@@ -129,6 +130,31 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'woocommerce_account_view-order_endpoint',
 			),
 			$currency_hooks
+		);
+	}
+
+	/**
+	 * @testdox Should preserve the WooPayments analytics hook surface.
+	 */
+	public function test_analytics_manifest_contains_preserved_hooks(): void {
+		$hook_groups     = MultiCurrencyRuntimeRegistry::get_core_hook_groups();
+		$analytics_hooks = array_column( $hook_groups['analytics']['filters'], 'hook' );
+
+		$this->assertSame(
+			array(
+				'woocommerce_analytics_report_should_use_cache',
+				'woocommerce_analytics_update_order_stats_data',
+				'woocommerce_analytics_orders_query_args',
+				'woocommerce_analytics_orders_stats_query_args',
+				'woocommerce_analytics_clauses_select',
+				'woocommerce_analytics_clauses_join',
+				'woocommerce_analytics_clauses_where_orders_subquery',
+				'woocommerce_analytics_clauses_where_orders_stats_total',
+				'woocommerce_analytics_clauses_where_orders_stats_interval',
+				'woocommerce_analytics_clauses_select_orders_subquery',
+				'woocommerce_analytics_clauses_select_orders_stats_total',
+			),
+			$analytics_hooks
 		);
 	}
 

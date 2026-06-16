@@ -74,6 +74,7 @@ class MultiCurrencyRuntimeRegistry {
 			'frontend_prices'        => self::get_frontend_price_hook_group(),
 			'frontend_currencies'    => self::get_frontend_currency_hook_group(),
 			'selected_currency'      => self::get_selected_currency_hook_group(),
+			'analytics'              => self::get_analytics_hook_group(),
 			'compatibility'          => MultiCurrencyCompatibilityProjectionService::get_hook_manifest(),
 			'async_prices'           => MultiCurrencyAsyncPriceProjectionService::get_hook_manifest( true, false, false, false, false ),
 			'storefront'             => MultiCurrencyStorefrontProjectionService::get_hook_manifest( 2, true ),
@@ -158,6 +159,30 @@ class MultiCurrencyRuntimeRegistry {
 				self::hook_entry( 'before_woocommerce_pay', 'init_order_currency_from_query_vars', 10 ),
 				self::hook_entry( 'woocommerce_account_view-order_endpoint', 'init_order_currency', 9 ),
 			),
+		);
+	}
+
+	/**
+	 * Get the preserved analytics hook metadata.
+	 *
+	 * @return array{filters: array<int,array<string,mixed>>, actions: array<int,array<string,mixed>>}
+	 */
+	private static function get_analytics_hook_group(): array {
+		return array(
+			'filters' => array(
+				self::hook_entry( 'woocommerce_analytics_report_should_use_cache', 'disable_report_caching', 10 ),
+				self::hook_entry( 'woocommerce_analytics_update_order_stats_data', 'update_order_stats_data', 99999, 2 ),
+				self::hook_entry( 'woocommerce_analytics_orders_query_args', 'apply_customer_currency_args', 10 ),
+				self::hook_entry( 'woocommerce_analytics_orders_stats_query_args', 'apply_customer_currency_args', 10 ),
+				self::hook_entry( 'woocommerce_analytics_clauses_select', 'filter_select_clauses', 20, 2 ),
+				self::hook_entry( 'woocommerce_analytics_clauses_join', 'filter_join_clauses', 20, 2 ),
+				self::hook_entry( 'woocommerce_analytics_clauses_where_orders_subquery', 'filter_where_clauses', 10 ),
+				self::hook_entry( 'woocommerce_analytics_clauses_where_orders_stats_total', 'filter_where_clauses', 10 ),
+				self::hook_entry( 'woocommerce_analytics_clauses_where_orders_stats_interval', 'filter_where_clauses', 10 ),
+				self::hook_entry( 'woocommerce_analytics_clauses_select_orders_subquery', 'filter_select_orders_clauses', 10 ),
+				self::hook_entry( 'woocommerce_analytics_clauses_select_orders_stats_total', 'filter_select_orders_clauses', 10 ),
+			),
+			'actions' => array(),
 		);
 	}
 
