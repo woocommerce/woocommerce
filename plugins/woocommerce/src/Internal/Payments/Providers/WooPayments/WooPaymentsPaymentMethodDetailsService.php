@@ -7,7 +7,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments;
 
-use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Throwable;
 
 /**
@@ -19,21 +18,21 @@ use Throwable;
 class WooPaymentsPaymentMethodDetailsService {
 
 	/**
-	 * Legacy proxy.
+	 * WooPayments legacy runtime.
 	 *
-	 * @var LegacyProxy
+	 * @var WooPaymentsLegacyRuntime
 	 */
-	private LegacyProxy $legacy_proxy;
+	private WooPaymentsLegacyRuntime $legacy_runtime;
 
 	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param LegacyProxy $legacy_proxy Legacy proxy.
+	 * @param WooPaymentsLegacyRuntime $legacy_runtime WooPayments legacy runtime.
 	 */
-	final public function init( LegacyProxy $legacy_proxy ): void {
-		$this->legacy_proxy = $legacy_proxy;
+	final public function init( WooPaymentsLegacyRuntime $legacy_runtime ): void {
+		$this->legacy_runtime = $legacy_runtime;
 	}
 
 	/**
@@ -49,12 +48,8 @@ class WooPaymentsPaymentMethodDetailsService {
 			return array();
 		}
 
-		if ( ! $this->legacy_proxy->call_function( 'class_exists', 'WC_Payments' ) ) {
-			return array();
-		}
-
 		try {
-			$api_client = $this->legacy_proxy->call_static( 'WC_Payments', 'get_payments_api_client' );
+			$api_client = $this->legacy_runtime->get_payments_api_client();
 			if ( ! is_object( $api_client ) || ! is_callable( array( $api_client, 'get_payment_method' ) ) ) {
 				return array();
 			}
@@ -75,7 +70,7 @@ class WooPaymentsPaymentMethodDetailsService {
 	 * @param Throwable $exception         Exception.
 	 */
 	private function log_fetch_error( string $payment_method_id, Throwable $exception ): void {
-		$logger = $this->legacy_proxy->call_function( 'wc_get_logger' );
+		$logger = $this->legacy_runtime->get_logger();
 		if ( ! is_object( $logger ) || ! is_callable( array( $logger, 'error' ) ) ) {
 			return;
 		}

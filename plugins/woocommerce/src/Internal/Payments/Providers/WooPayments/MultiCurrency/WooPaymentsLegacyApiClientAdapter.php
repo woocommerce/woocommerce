@@ -8,7 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\MultiCurrencyApiClientInterface;
-use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 
 /**
  * Adapts the local WooPayments API client to the native multi-currency boundary.
@@ -19,21 +19,21 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 class WooPaymentsLegacyApiClientAdapter implements MultiCurrencyApiClientInterface {
 
 	/**
-	 * Legacy proxy.
+	 * WooPayments legacy runtime.
 	 *
-	 * @var LegacyProxy
+	 * @var WooPaymentsLegacyRuntime
 	 */
-	private LegacyProxy $legacy_proxy;
+	private WooPaymentsLegacyRuntime $legacy_runtime;
 
 	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param LegacyProxy $legacy_proxy Legacy proxy.
+	 * @param WooPaymentsLegacyRuntime $legacy_runtime WooPayments legacy runtime.
 	 */
-	final public function init( LegacyProxy $legacy_proxy ): void {
-		$this->legacy_proxy = $legacy_proxy;
+	final public function init( WooPaymentsLegacyRuntime $legacy_runtime ): void {
+		$this->legacy_runtime = $legacy_runtime;
 	}
 
 	/**
@@ -82,16 +82,6 @@ class WooPaymentsLegacyApiClientAdapter implements MultiCurrencyApiClientInterfa
 	 * @return object|null
 	 */
 	private function get_legacy_api_client(): ?object {
-		if ( ! $this->legacy_proxy->call_function( 'class_exists', 'WC_Payments' ) ) {
-			return null;
-		}
-
-		try {
-			$api_client = $this->legacy_proxy->call_static( 'WC_Payments', 'get_payments_api_client' );
-		} catch ( \Throwable $e ) {
-			return null;
-		}
-
-		return is_object( $api_client ) ? $api_client : null;
+		return $this->legacy_runtime->get_payments_api_client();
 	}
 }

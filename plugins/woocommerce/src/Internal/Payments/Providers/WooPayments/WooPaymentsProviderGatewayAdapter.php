@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\PaymentContext;
 use Automattic\WooCommerce\Internal\Payments\PaymentOutcome;
-use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Order;
 use WP_Error;
 
@@ -22,21 +21,21 @@ use WP_Error;
 class WooPaymentsProviderGatewayAdapter {
 
 	/**
-	 * Legacy proxy.
+	 * WooPayments legacy runtime.
 	 *
-	 * @var LegacyProxy
+	 * @var WooPaymentsLegacyRuntime
 	 */
-	private LegacyProxy $legacy_proxy;
+	private WooPaymentsLegacyRuntime $legacy_runtime;
 
 	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param LegacyProxy $legacy_proxy Legacy proxy.
+	 * @param WooPaymentsLegacyRuntime $legacy_runtime WooPayments legacy runtime.
 	 */
-	final public function init( LegacyProxy $legacy_proxy ): void {
-		$this->legacy_proxy = $legacy_proxy;
+	final public function init( WooPaymentsLegacyRuntime $legacy_runtime ): void {
+		$this->legacy_runtime = $legacy_runtime;
 	}
 
 	/**
@@ -220,13 +219,7 @@ class WooPaymentsProviderGatewayAdapter {
 	 * @return object|null
 	 */
 	private function get_legacy_gateway(): ?object {
-		if ( ! $this->legacy_proxy->call_function( 'class_exists', 'WC_Payments' ) ) {
-			return null;
-		}
-
-		$gateway = $this->legacy_proxy->call_static( 'WC_Payments', 'get_gateway' );
-
-		return is_object( $gateway ) ? $gateway : null;
+		return $this->legacy_runtime->get_gateway();
 	}
 
 	/**

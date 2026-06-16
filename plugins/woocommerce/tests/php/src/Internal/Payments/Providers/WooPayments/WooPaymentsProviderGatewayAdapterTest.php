@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
 use Automattic\WooCommerce\Internal\Payments\PaymentContext;
 use Automattic\WooCommerce\Internal\Payments\PaymentOutcome;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProviderGatewayAdapter;
 use WC_Order;
 use WC_Unit_Test_Case;
@@ -228,8 +229,11 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	 * @return WooPaymentsProviderGatewayAdapter
 	 */
 	private function create_adapter( ?RecordingLegacyGateway $gateway ): WooPaymentsProviderGatewayAdapter {
+		$legacy_runtime = new WooPaymentsLegacyRuntime();
+		$legacy_runtime->init( new LegacyProxyWithGateway( $gateway ) );
+
 		$sut = new WooPaymentsProviderGatewayAdapter();
-		$sut->init( new LegacyProxyWithGateway( $gateway ) );
+		$sut->init( $legacy_runtime );
 
 		return $sut;
 	}
