@@ -512,6 +512,11 @@ jobs:
             done
             echo "Populated filter: $filter"
 
+            if [ -z "$filter" ]; then
+                echo "No touched packages use changelogger; nothing to validate."
+                exit 0
+            fi
+
             pnpm --parallel --workspace-concurrency=10 --stream $filter changelog validate
 
   validate-markdown:

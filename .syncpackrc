@@ -467,6 +467,16 @@
 			"pinVersion": "next"
 		},
 		{
+			"label": "@wordpress/build uses the dedicated WordPress tooling catalog",
+			"dependencies": [
+				"@wordpress/build"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "catalog:wp-tooling"
+		},
+		{
 			"dependencies": [
 				"@wordpress/global-styles-engine"
 			],
