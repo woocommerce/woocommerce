@@ -47,6 +47,13 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	private ?MultiCurrencyRequestContext $request_context = null;
 
 	/**
+	 * Order currency override for order-context formatting.
+	 *
+	 * @var string|null
+	 */
+	private ?string $order_currency = null;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
@@ -115,7 +122,7 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	public function get_woocommerce_currency( $currency = null ): string {
 		unset( $currency );
 
-		return $this->get_frontend_projection_service()->get_woocommerce_currency();
+		return $this->get_frontend_projection_service()->get_woocommerce_currency( $this->order_currency );
 	}
 
 	/**
@@ -125,7 +132,7 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 * @return int
 	 */
 	public function get_price_decimals( $decimals ): int {
-		return $this->get_frontend_projection_service()->get_price_decimals( absint( $decimals ) );
+		return $this->get_frontend_projection_service()->get_price_decimals( absint( $decimals ), $this->order_currency );
 	}
 
 	/**
@@ -135,7 +142,7 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 * @return string
 	 */
 	public function get_price_decimal_separator( $separator ): string {
-		return $this->get_frontend_projection_service()->get_price_decimal_separator( (string) $separator );
+		return $this->get_frontend_projection_service()->get_price_decimal_separator( (string) $separator, $this->order_currency );
 	}
 
 	/**
@@ -145,7 +152,7 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 * @return string
 	 */
 	public function get_price_thousand_separator( $separator ): string {
-		return $this->get_frontend_projection_service()->get_price_thousand_separator( (string) $separator );
+		return $this->get_frontend_projection_service()->get_price_thousand_separator( (string) $separator, $this->order_currency );
 	}
 
 	/**
@@ -155,7 +162,7 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 * @return string
 	 */
 	public function get_woocommerce_price_format( $format ): string {
-		return $this->get_frontend_projection_service()->get_woocommerce_price_format( (string) $format );
+		return $this->get_frontend_projection_service()->get_woocommerce_price_format( (string) $format, $this->order_currency );
 	}
 
 	/**
@@ -165,7 +172,7 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 * @return string
 	 */
 	public function get_woocommerce_currency_pos( $position ): string {
-		return $this->get_frontend_projection_service()->get_woocommerce_currency_pos( (string) $position );
+		return $this->get_frontend_projection_service()->get_woocommerce_currency_pos( (string) $position, $this->order_currency );
 	}
 
 	/**
@@ -197,7 +204,7 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	}
 
 	/**
-	 * Preserve formatted order total until native order-context currency handling is added.
+	 * Clear order-context currency after formatted order totals.
 	 *
 	 * @param mixed $formatted_total  Formatted total.
 	 * @param mixed $order            Order object.
@@ -208,17 +215,39 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	public function maybe_clear_order_currency_after_formatted_order_total( $formatted_total, $order, $tax_display, $display_refunded ) {
 		unset( $order, $tax_display, $display_refunded );
 
+		$this->order_currency = null;
+
 		return $formatted_total;
 	}
 
 	/**
-	 * Preserve order ID until native order-context currency handling is added.
+	 * Initialize order-context currency from an order object or ID.
 	 *
-	 * @param mixed $order_id Order ID.
+	 * @param mixed $order_id Order object or ID.
 	 * @return mixed
 	 */
 	public function init_order_currency( $order_id ) {
+		if ( null !== $this->order_currency ) {
+			return $order_id;
+		}
+
+		$order = $order_id instanceof \WC_Order ? $order_id : wc_get_order( $order_id );
+		if ( $order ) {
+			$this->order_currency = $order->get_currency();
+
+			return $order->get_id();
+		}
+
 		return $order_id;
+	}
+
+	/**
+	 * Get the current order-context currency.
+	 *
+	 * @return string|null
+	 */
+	public function get_order_currency(): ?string {
+		return $this->order_currency;
 	}
 
 	/**

@@ -123,7 +123,7 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 		$sut->register();
 
 		$this->assertSame( 'GBP', $sut->get_woocommerce_currency( 'USD' ) );
-		$this->assertSame( 0, $sut->get_price_decimals( 2 ) );
+		$this->assertSame( 2, $sut->get_price_decimals( 2 ) );
 		$this->assertSame( ',', $sut->get_price_decimal_separator( '.' ) );
 		$this->assertSame( '.', $sut->get_price_thousand_separator( ',' ) );
 		$this->assertSame( '%2$s&nbsp;%1$s', $sut->get_woocommerce_price_format( '%1$s%2$s' ) );
@@ -142,6 +142,37 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 42.0, $sut->maybe_init_order_currency_from_order_total_prop( 42.0, null ) );
 		$this->assertSame( '$42.00', $sut->maybe_clear_order_currency_after_formatted_order_total( '$42.00', null, '', false ) );
 		$this->assertNull( $sut->init_order_currency_from_query_vars(), 'Pay-for-order action callback should not return a value.' );
+	}
+
+	/**
+	 * @testdox Should initialize order currency from order ID for formatting.
+	 */
+	public function test_initializes_order_currency_from_order_id_for_formatting(): void {
+		$order = wc_create_order();
+		$order->set_currency( 'JPY' );
+		$order->save();
+		$sut = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
+
+		$this->assertSame( $order->get_id(), $sut->init_order_currency( $order->get_id() ) );
+		$this->assertSame( 'JPY', $sut->get_order_currency() );
+		$this->assertSame( 'JPY', $sut->get_woocommerce_currency( 'USD' ) );
+		$this->assertSame( 0, $sut->get_price_decimals( 2 ) );
+	}
+
+	/**
+	 * @testdox Should clear order currency after formatted order total.
+	 */
+	public function test_clears_order_currency_after_formatted_order_total(): void {
+		$order = wc_create_order();
+		$order->set_currency( 'JPY' );
+		$order->save();
+		$sut = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
+
+		$sut->init_order_currency( $order );
+		$this->assertSame( '$42.00', $sut->maybe_clear_order_currency_after_formatted_order_total( '$42.00', $order, '', false ) );
+
+		$this->assertNull( $sut->get_order_currency() );
+		$this->assertSame( 'GBP', $sut->get_woocommerce_currency( 'USD' ) );
 	}
 
 	/**
@@ -244,7 +275,7 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 			 * @return string
 			 */
 			public function get_woocommerce_currency( ?string $order_currency = null ): string {
-				return 'GBP';
+				return $order_currency ?? 'GBP';
 			}
 
 			/**
@@ -255,7 +286,7 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 			 * @return int
 			 */
 			public function get_price_decimals( int $decimals, ?string $order_currency = null ): int {
-				return 0;
+				return 'JPY' === $order_currency ? 0 : 2;
 			}
 
 			/**
