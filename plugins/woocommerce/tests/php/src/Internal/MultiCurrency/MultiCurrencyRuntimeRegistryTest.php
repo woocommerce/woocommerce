@@ -62,6 +62,7 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'bookings_compatibility',
 				'pre_orders_compatibility',
 				'ups_compatibility',
+				'fedex_compatibility',
 				'subscriptions_compatibility',
 				'async_prices',
 				'storefront',
@@ -304,6 +305,23 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 			$filter_hooks
 		);
 		$this->assertSame( array(), $hook_groups['ups_compatibility']['actions'] );
+	}
+
+	/**
+	 * @testdox Should preserve the WooPayments FedEx compatibility hook surface.
+	 */
+	public function test_fedex_compatibility_manifest_contains_preserved_hooks(): void {
+		$hook_groups  = MultiCurrencyRuntimeRegistry::get_core_hook_groups();
+		$filter_hooks = array_column( $hook_groups['fedex_compatibility']['filters'], 'hook' );
+
+		$this->assertSame(
+			array(
+				'wcpay_multi_currency_should_convert_product_price',
+				'wcpay_multi_currency_should_return_store_currency',
+			),
+			$filter_hooks
+		);
+		$this->assertSame( array(), $hook_groups['fedex_compatibility']['actions'] );
 	}
 
 	/**

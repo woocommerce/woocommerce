@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyAdminNot
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyAsyncPriceProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyBookingsCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyCompatibilityProjectionService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFedExCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPreOrdersCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRestProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySettingsProjectionService;
@@ -84,6 +85,7 @@ class MultiCurrencyRuntimeRegistry {
 			'bookings_compatibility'      => MultiCurrencyBookingsCompatibilityProjectionService::get_hook_manifest(),
 			'pre_orders_compatibility'    => MultiCurrencyPreOrdersCompatibilityProjectionService::get_hook_manifest(),
 			'ups_compatibility'           => MultiCurrencyUpsCompatibilityProjectionService::get_hook_manifest(),
+			'fedex_compatibility'         => MultiCurrencyFedExCompatibilityProjectionService::get_hook_manifest(),
 			'subscriptions_compatibility' => MultiCurrencySubscriptionsCompatibilityProjectionService::get_hook_manifest(),
 			'async_prices'                => MultiCurrencyAsyncPriceProjectionService::get_hook_manifest( true, false, false, false, false ),
 			'storefront'                  => MultiCurrencyStorefrontProjectionService::get_hook_manifest( 2, true ),
