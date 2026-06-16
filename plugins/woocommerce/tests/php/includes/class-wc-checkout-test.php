@@ -18,6 +18,15 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Value of woocommerce_manage_stock captured in setUp so tearDown can
+	 * restore it instead of deleting (delete_option resolves to WC defaults
+	 * rather than the actual pre-test state, which leaks into other tests).
+	 *
+	 * @var string|false
+	 */
+	private $prev_manage_stock;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -33,6 +42,8 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 
+		$this->prev_manage_stock = get_option( 'woocommerce_manage_stock', false );
+
 		WC()->cart->empty_cart();
 
 		add_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
@@ -44,7 +55,16 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 		delete_option( 'woocommerce_calc_taxes' );
-		delete_option( 'woocommerce_manage_stock' );
+		// Restore rather than delete so we don't leave the option absent when
+		// it had a real value before this test ran.
+		if ( false === $this->prev_manage_stock ) {
+			delete_option( 'woocommerce_manage_stock' );
+		} else {
+			update_option( 'woocommerce_manage_stock', $this->prev_manage_stock );
+		}
+		// Clear the session key set during resume-order tests so it doesn't
+		// bleed into tests that follow in the same PHP process.
+		WC()->session->set( 'order_awaiting_payment', null );
 	}
 
 	/**

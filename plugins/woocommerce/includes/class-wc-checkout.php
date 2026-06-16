@@ -436,6 +436,7 @@ class WC_Checkout {
 				// @since 11.0.0
 				if ( $order->get_data_store()->get_stock_reduced( $order_id ) ) {
 					wc_increase_stock_levels( $order );
+					// Object form (not int) intentional — see block comment above.
 					$order->get_data_store()->set_stock_reduced( $order, false );
 				}
 
