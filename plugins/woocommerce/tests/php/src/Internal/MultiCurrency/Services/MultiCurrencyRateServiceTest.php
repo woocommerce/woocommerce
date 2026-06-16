@@ -152,6 +152,29 @@ class MultiCurrencyRateServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return normalized supported currency codes from provider.
+	 */
+	public function test_returns_normalized_supported_currency_codes_from_provider(): void {
+		$registry = new CurrencyRateProviderRegistry();
+		$registry->register( $this->create_provider( true, array(), array( 'gbp', 'EUR', 'bad-code' ) ) );
+		$service = new MultiCurrencyRateService( $registry );
+
+		$this->assertSame( array( 'GBP', 'EUR' ), $service->get_supported_currency_codes() );
+	}
+
+	/**
+	 * @testdox Should return all WooCommerce currency codes when provider support is empty.
+	 */
+	public function test_returns_all_woocommerce_currency_codes_when_provider_support_is_empty(): void {
+		$registry = new CurrencyRateProviderRegistry();
+		$registry->register( $this->create_provider( true, array(), array() ) );
+		$service = new MultiCurrencyRateService( $registry );
+
+		$this->assertContains( 'USD', $service->get_supported_currency_codes() );
+		$this->assertContains( 'GBP', $service->get_supported_currency_codes() );
+	}
+
+	/**
 	 * @testdox Should return null for automatic rates when no provider is available.
 	 */
 	public function test_returns_null_for_automatic_rate_without_provider(): void {
@@ -176,12 +199,13 @@ class MultiCurrencyRateServiceTest extends WC_Unit_Test_Case {
 	/**
 	 * Create a fake provider.
 	 *
-	 * @param bool                $available Whether the provider is available.
-	 * @param array<string,mixed> $rates     Rates to return.
+	 * @param bool                $available            Whether the provider is available.
+	 * @param array<string,mixed> $rates                Rates to return.
+	 * @param string[]            $supported_currencies Supported currency codes.
 	 * @return CurrencyRateProvider
 	 */
-	private function create_provider( bool $available, array $rates ): CurrencyRateProvider {
-		return new class( $available, $rates ) implements CurrencyRateProvider {
+	private function create_provider( bool $available, array $rates, array $supported_currencies = array() ): CurrencyRateProvider {
+		return new class( $available, $rates, $supported_currencies ) implements CurrencyRateProvider {
 			/**
 			 * Whether the provider is available.
 			 *
@@ -197,14 +221,23 @@ class MultiCurrencyRateServiceTest extends WC_Unit_Test_Case {
 			private array $rates;
 
 			/**
+			 * Supported currency codes.
+			 *
+			 * @var string[]
+			 */
+			private array $supported_currencies;
+
+			/**
 			 * Constructor.
 			 *
-			 * @param bool                $available Whether the provider is available.
-			 * @param array<string,mixed> $rates     Rates to return.
+			 * @param bool                $available            Whether the provider is available.
+			 * @param array<string,mixed> $rates                Rates to return.
+			 * @param string[]            $supported_currencies Supported currency codes.
 			 */
-			public function __construct( bool $available, array $rates ) {
-				$this->available = $available;
-				$this->rates     = $rates;
+			public function __construct( bool $available, array $rates, array $supported_currencies ) {
+				$this->available            = $available;
+				$this->rates                = $rates;
+				$this->supported_currencies = $supported_currencies;
 			}
 
 			/**
@@ -223,6 +256,15 @@ class MultiCurrencyRateServiceTest extends WC_Unit_Test_Case {
 			 */
 			public function is_available(): bool {
 				return $this->available;
+			}
+
+			/**
+			 * Get supported currencies.
+			 *
+			 * @return string[]
+			 */
+			public function get_supported_currencies(): array {
+				return $this->supported_currencies;
 			}
 
 			/**

@@ -67,6 +67,28 @@ class WooPaymentsCurrencyRateProvider implements CurrencyRateProvider {
 	}
 
 	/**
+	 * Get supported customer currencies.
+	 *
+	 * @return string[]
+	 */
+	public function get_supported_currencies(): array {
+		$wc_currencies        = array_keys( get_woocommerce_currencies() );
+		$account              = $this->account->get_cached_account_data();
+		$supported_currencies = $this->account->get_account_customer_supported_currencies();
+
+		if ( $account && ! empty( $supported_currencies ) ) {
+			return array_values(
+				array_intersect(
+					array_values( array_unique( array_map( 'strtoupper', $supported_currencies ) ) ),
+					$wc_currencies
+				)
+			);
+		}
+
+		return $wc_currencies;
+	}
+
+	/**
 	 * Get currency rates.
 	 *
 	 * @param string        $currency_from Currency to convert from.

@@ -129,6 +129,30 @@ class MultiCurrencyStateBuilderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should filter automatic currencies by provider-supported currencies.
+	 */
+	public function test_filters_automatic_currencies_by_provider_supported_currencies(): void {
+		$registry = new CurrencyRateProviderRegistry();
+		$registry->register(
+			$this->create_available_rate_provider(
+				array(
+					'gbp' => 0.82,
+					'eur' => 0.91,
+				),
+				array( 'GBP' )
+			)
+		);
+		update_option( 'wcpay_multi_currency_enabled_currencies', array( 'GBP', 'EUR' ) );
+		update_option( 'wcpay_multi_currency_exchange_rate_gbp', 'automatic' );
+		update_option( 'wcpay_multi_currency_exchange_rate_eur', 'automatic' );
+
+		$state = $this->create_builder( $registry )->build();
+
+		$this->assertSame( array( 'USD', 'GBP' ), array_keys( $state->get_enabled_currencies() ) );
+		$this->assertSame( 0.82, $state->get_enabled_currencies()['GBP']->get_rate() );
+	}
+
+	/**
 	 * @testdox Should skip automatic currencies when no provider rate is available.
 	 */
 	public function test_skips_automatic_currency_without_provider_rate(): void {
@@ -294,12 +318,39 @@ class MultiCurrencyStateBuilderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a rate provider whose automatic rate should be ignored.
+	 * Create an available rate provider.
 	 *
+	 * @param array<string,mixed> $rates                Rates to return.
+	 * @param string[]            $supported_currencies Supported currency codes.
 	 * @return CurrencyRateProvider
 	 */
-	private function create_available_rate_provider(): CurrencyRateProvider {
-		return new class() implements CurrencyRateProvider {
+	private function create_available_rate_provider( array $rates = array( 'gbp' => 0.82 ), array $supported_currencies = array() ): CurrencyRateProvider {
+		return new class( $rates, $supported_currencies ) implements CurrencyRateProvider {
+			/**
+			 * Rates to return.
+			 *
+			 * @var array<string,mixed>
+			 */
+			private array $rates;
+
+			/**
+			 * Supported currency codes.
+			 *
+			 * @var string[]
+			 */
+			private array $supported_currencies;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param array<string,mixed> $rates                Rates to return.
+			 * @param string[]            $supported_currencies Supported currency codes.
+			 */
+			public function __construct( array $rates, array $supported_currencies ) {
+				$this->rates                = $rates;
+				$this->supported_currencies = $supported_currencies;
+			}
+
 			/**
 			 * Get the provider identifier.
 			 *
@@ -319,6 +370,15 @@ class MultiCurrencyStateBuilderTest extends WC_Unit_Test_Case {
 			}
 
 			/**
+			 * Get supported currencies.
+			 *
+			 * @return string[]
+			 */
+			public function get_supported_currencies(): array {
+				return $this->supported_currencies;
+			}
+
+			/**
 			 * Get provider rates.
 			 *
 			 * @param string        $currency_from Currency to convert from.
@@ -328,7 +388,7 @@ class MultiCurrencyStateBuilderTest extends WC_Unit_Test_Case {
 			public function get_currency_rates( string $currency_from, ?array $currencies_to = null ): array {
 				unset( $currency_from, $currencies_to );
 
-				return array( 'gbp' => 0.82 );
+				return $this->rates;
 			}
 		};
 	}

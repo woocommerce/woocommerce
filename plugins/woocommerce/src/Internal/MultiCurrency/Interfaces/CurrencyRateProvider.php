@@ -34,6 +34,15 @@ interface CurrencyRateProvider {
 	public function is_available(): bool;
 
 	/**
+	 * Get supported customer currencies.
+	 *
+	 * An empty array means all WooCommerce currencies are supported.
+	 *
+	 * @return string[]
+	 */
+	public function get_supported_currencies(): array;
+
+	/**
 	 * Get currency rates.
 	 *
 	 * @param string        $currency_from Currency to convert from.

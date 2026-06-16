@@ -74,14 +74,46 @@ class WooPaymentsCurrencyRateProviderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return account-supported customer currencies.
+	 */
+	public function test_returns_account_supported_customer_currencies(): void {
+		$provider = new WooPaymentsCurrencyRateProvider(
+			$this->create_account(
+				true,
+				false,
+				array( 'gbp', 'EUR', 'bad-code' ),
+				array( 'customer_currencies' => array( 'supported' => array( 'gbp', 'EUR' ) ) )
+			),
+			$this->create_api_client( true )
+		);
+
+		$this->assertSame( array( 'GBP', 'EUR' ), $provider->get_supported_currencies() );
+	}
+
+	/**
+	 * @testdox Should return all WooCommerce currencies without account-supported customer currencies.
+	 */
+	public function test_returns_all_woocommerce_currencies_without_account_supported_customer_currencies(): void {
+		$provider = new WooPaymentsCurrencyRateProvider(
+			$this->create_account( true, false, array(), array() ),
+			$this->create_api_client( true )
+		);
+
+		$this->assertContains( 'USD', $provider->get_supported_currencies() );
+		$this->assertContains( 'GBP', $provider->get_supported_currencies() );
+	}
+
+	/**
 	 * Create a fake account implementation.
 	 *
-	 * @param bool $connected Whether the account is connected.
-	 * @param bool $rejected  Whether the account is rejected.
+	 * @param bool                $connected            Whether the account is connected.
+	 * @param bool                $rejected             Whether the account is rejected.
+	 * @param string[]            $supported_currencies Supported customer currencies.
+	 * @param array<string,mixed> $account_data         Cached account data.
 	 * @return MultiCurrencyAccountInterface
 	 */
-	private function create_account( bool $connected, bool $rejected ): MultiCurrencyAccountInterface {
-		return new class( $connected, $rejected ) implements MultiCurrencyAccountInterface {
+	private function create_account( bool $connected, bool $rejected, array $supported_currencies = array(), array $account_data = array() ): MultiCurrencyAccountInterface {
+		return new class( $connected, $rejected, $supported_currencies, $account_data ) implements MultiCurrencyAccountInterface {
 			/**
 			 * Whether the account is connected.
 			 *
@@ -97,14 +129,32 @@ class WooPaymentsCurrencyRateProviderTest extends WC_Unit_Test_Case {
 			private bool $rejected;
 
 			/**
+			 * Supported customer currencies.
+			 *
+			 * @var string[]
+			 */
+			private array $supported_currencies;
+
+			/**
+			 * Cached account data.
+			 *
+			 * @var array<string,mixed>
+			 */
+			private array $account_data;
+
+			/**
 			 * Constructor.
 			 *
-			 * @param bool $connected Whether the account is connected.
-			 * @param bool $rejected  Whether the account is rejected.
+			 * @param bool                $connected            Whether the account is connected.
+			 * @param bool                $rejected             Whether the account is rejected.
+			 * @param string[]            $supported_currencies Supported customer currencies.
+			 * @param array<string,mixed> $account_data         Cached account data.
 			 */
-			public function __construct( bool $connected, bool $rejected ) {
-				$this->connected = $connected;
-				$this->rejected  = $rejected;
+			public function __construct( bool $connected, bool $rejected, array $supported_currencies, array $account_data ) {
+				$this->connected            = $connected;
+				$this->rejected             = $rejected;
+				$this->supported_currencies = $supported_currencies;
+				$this->account_data         = $account_data;
 			}
 
 			/**
@@ -133,7 +183,9 @@ class WooPaymentsCurrencyRateProviderTest extends WC_Unit_Test_Case {
 			 * @return array<string,mixed>|bool
 			 */
 			public function get_cached_account_data( bool $force_refresh = false ) {
-				return array();
+				unset( $force_refresh );
+
+				return $this->account_data;
 			}
 
 			/**
@@ -142,7 +194,7 @@ class WooPaymentsCurrencyRateProviderTest extends WC_Unit_Test_Case {
 			 * @return string[]
 			 */
 			public function get_account_customer_supported_currencies(): array {
-				return array();
+				return $this->supported_currencies;
 			}
 
 			/**

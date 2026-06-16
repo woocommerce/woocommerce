@@ -105,6 +105,33 @@ class MultiCurrencyRateService {
 	}
 
 	/**
+	 * Get provider-supported WooCommerce currency codes.
+	 *
+	 * @return string[]
+	 *
+	 * @since 11.0.0
+	 */
+	public function get_supported_currency_codes(): array {
+		$provider = $this->provider_registry->get_available_provider();
+		if ( ! $provider ) {
+			return array();
+		}
+
+		$wc_currencies        = array_keys( get_woocommerce_currencies() );
+		$supported_currencies = $provider->get_supported_currencies();
+		if ( empty( $supported_currencies ) ) {
+			return $wc_currencies;
+		}
+
+		return array_values(
+			array_intersect(
+				array_values( array_unique( array_map( 'strtoupper', $supported_currencies ) ) ),
+				$wc_currencies
+			)
+		);
+	}
+
+	/**
 	 * Get a manual rate from preserved options.
 	 *
 	 * @param string $to_currency Target currency.

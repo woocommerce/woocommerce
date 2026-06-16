@@ -159,13 +159,20 @@ class MultiCurrencyStateBuilder {
 			return array();
 		}
 
-		$last_updated = isset( $cache_data['updated'] ) && is_numeric( $cache_data['updated'] )
+		$last_updated          = isset( $cache_data['updated'] ) && is_numeric( $cache_data['updated'] )
 			? (int) $cache_data['updated']
 			: null;
-		$currencies   = array();
+		$currencies            = array();
+		$supported_code_lookup = $this->rate_service->has_available_provider()
+			? array_fill_keys( $this->rate_service->get_supported_currency_codes(), true )
+			: null;
 
 		foreach ( $cache_data['currencies'] as $currency_code => $rate ) {
 			$currency_code = strtoupper( (string) $currency_code );
+
+			if ( null !== $supported_code_lookup && ! isset( $supported_code_lookup[ $currency_code ] ) ) {
+				continue;
+			}
 
 			if ( $default_code === $currency_code || ! $this->is_valid_currency_code( $currency_code ) || ! is_numeric( $rate ) || 0 >= (float) $rate ) {
 				continue;

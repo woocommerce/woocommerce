@@ -118,6 +118,15 @@ class CurrencyRateProviderRegistryTest extends WC_Unit_Test_Case {
 			}
 
 			/**
+			 * Get supported currencies.
+			 *
+			 * @return string[]
+			 */
+			public function get_supported_currencies(): array {
+				return array();
+			}
+
+			/**
 			 * Get currency rates.
 			 *
 			 * @param string        $currency_from Currency to convert from.
