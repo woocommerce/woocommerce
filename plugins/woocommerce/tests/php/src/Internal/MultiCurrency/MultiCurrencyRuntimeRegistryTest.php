@@ -66,6 +66,7 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'fedex_compatibility',
 				'points_rewards_compatibility',
 				'name_your_price_compatibility',
+				'product_addons_compatibility',
 				'subscriptions_compatibility',
 				'async_prices',
 				'storefront',
@@ -386,6 +387,29 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 			array( 'woocommerce_add_cart_item_data' ),
 			array_column( $hook_groups['name_your_price_compatibility']['actions'], 'hook' )
 		);
+	}
+
+	/**
+	 * @testdox Should preserve the WooPayments Product Add-ons compatibility hook surface.
+	 */
+	public function test_product_addons_compatibility_manifest_contains_preserved_hooks(): void {
+		$hook_groups = MultiCurrencyRuntimeRegistry::get_core_hook_groups();
+
+		$this->assertSame(
+			array(
+				'woocommerce_product_addons_option_price_raw',
+				'woocommerce_product_addons_price_raw',
+				'woocommerce_product_addons_params',
+				'woocommerce_product_addons_get_item_data',
+				'woocommerce_product_addons_update_product_price',
+				'woocommerce_product_addons_order_line_item_meta',
+				'wcpay_multi_currency_should_convert_product_price',
+				'woocommerce_product_addons_ajax_get_product_price_including_tax',
+				'woocommerce_product_addons_ajax_get_product_price_excluding_tax',
+			),
+			array_column( $hook_groups['product_addons_compatibility']['filters'], 'hook' )
+		);
+		$this->assertSame( array(), $hook_groups['product_addons_compatibility']['actions'] );
 	}
 
 	/**
