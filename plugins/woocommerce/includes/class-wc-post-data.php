@@ -1008,7 +1008,6 @@ class WC_Post_Data {
 	/**
 	 * Deletes child variation attribute meta that no longer maps to a parent variation attribute.
 	 *
-	 * @since 11.0.0
 	 * @param WC_Product $product The variable product whose attributes were updated.
 	 *
 	 * @return void
@@ -1038,12 +1037,12 @@ class WC_Post_Data {
 		}
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-		$variation_ids = $wpdb->get_col(
+		$stale_rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT DISTINCT pm.post_id
-				FROM {$wpdb->postmeta} pm
-				INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-				WHERE p.post_parent = %d
+				"SELECT pm.post_id, pm.meta_key
+					FROM {$wpdb->postmeta} pm
+					INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+					WHERE p.post_parent = %d
 				AND p.post_type = %s
 				AND pm.meta_key LIKE %s
 				{$not_in_sql}",
@@ -1051,27 +1050,20 @@ class WC_Post_Data {
 			)
 		);
 
-		if ( empty( $variation_ids ) ) {
+		if ( empty( $stale_rows ) ) {
 			return;
 		}
 
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE pm
-				FROM {$wpdb->postmeta} pm
-				INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-				WHERE p.post_parent = %d
-				AND p.post_type = %s
-				AND pm.meta_key LIKE %s
-				{$not_in_sql}",
-				...$query_args
-			)
-		);
-
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$variation_ids = array();
+		foreach ( $stale_rows as $row ) {
+			$variation_id                   = (int) $row->post_id;
+			$variation_ids[ $variation_id ] = $variation_id;
+			delete_post_meta( $variation_id, $row->meta_key );
+		}
+
 		$invalidator = wc_get_container()->get( ProductVersionStringInvalidator::class );
 		foreach ( $variation_ids as $variation_id ) {
-			wp_cache_delete( $variation_id, 'post_meta' );
 			clean_post_cache( $variation_id );
 			$invalidator->invalidate( $variation_id );
 		}
