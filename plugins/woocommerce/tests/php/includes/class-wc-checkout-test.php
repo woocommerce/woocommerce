@@ -44,6 +44,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 		delete_option( 'woocommerce_calc_taxes' );
+		delete_option( 'woocommerce_manage_stock' );
 	}
 
 	/**
@@ -344,5 +345,94 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $result, 'create_order() should return a WP_Error when line items were not persisted.' );
 		$this->assertSame( 'checkout-error', $result->get_error_code(), 'Error code should come from the checkout try/catch path.' );
 		$this->assertStringContainsString( 'Order items could not be saved', $result->get_error_message(), 'Error message should surface the defense-in-depth guard message.' );
+	}
+
+	/**
+	 * @testdox Resuming a failed order restores stock and resets _order_stock_reduced.
+	 *
+	 * Regression for #36702: when remove_order_items() is called during order resumption,
+	 * the item-level _reduced_stock metadata is destroyed along with the items. Without
+	 * an explicit restore-then-reset, the order-level _order_stock_reduced flag stays 'yes'.
+	 * On cancellation, wc_increase_stock_levels() skips items with no _reduced_stock meta
+	 * so stock is never restored. On admin order update, wc_adjust_line_item_product_stock()
+	 * reads _reduced_stock=0 on the fresh items and double-reduces stock.
+	 *
+	 * This test drives the full lifecycle: real stock reduction via an on-hold transition,
+	 * then a failed transition (no stock change), then a cart-hash-matched resume that must
+	 * restore stock before removing items and reset the flag to false.
+	 */
+	public function test_resuming_failed_order_restores_stock_and_resets_flag() {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product(
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'customer@example.com',
+		);
+
+		// First checkout creates the order (pending via BACS).
+		$order_id = $this->sut->create_order( $data );
+		$this->assertIsInt( $order_id );
+
+		$order = wc_get_order( $order_id );
+
+		// Transition to on-hold: fires wc_maybe_reduce_stock_levels, which calls
+		// wc_reduce_stock_levels() (sets _reduced_stock on items) and sets the
+		// _order_stock_reduced flag to true.
+		$order->update_status( 'on-hold' );
+
+		// Confirm stock was actually reduced and the flag is set.
+		$this->assertSame(
+			9,
+			wc_get_product( $product->get_id() )->get_stock_quantity(),
+			'Stock must be reduced to 9 after the on-hold transition.'
+		);
+		$this->assertTrue(
+			wc_get_order( $order_id )->get_data_store()->get_stock_reduced( $order_id ),
+			'_order_stock_reduced must be true after stock is reduced.'
+		);
+
+		// Simulate payment failure: on-hold → failed. No stock hook fires for 'failed'.
+		$order->update_status( 'failed' );
+
+		$this->assertSame(
+			9,
+			wc_get_product( $product->get_id() )->get_stock_quantity(),
+			'Stock must still be 9 after the failed transition.'
+		);
+
+		// Second checkout attempt: same cart, same cart hash → create_order() resumes
+		// the existing failed order instead of creating a new one.
+		WC()->session->set( 'order_awaiting_payment', $order_id );
+
+		$order_id_2 = $this->sut->create_order( $data );
+		$this->assertIsInt( $order_id_2 );
+		$this->assertSame( $order_id, $order_id_2, 'create_order() should resume the existing failed order.' );
+
+		// The fix must have restored stock before wiping items.
+		$this->assertSame(
+			10,
+			wc_get_product( $product->get_id() )->get_stock_quantity(),
+			'Stock must be restored to 10 after resume.'
+		);
+
+		// The flag must be reset so the next reduction cycle (e.g. payment success)
+		// is not blocked by wc_maybe_reduce_stock_levels's early-return guard.
+		$this->assertFalse(
+			wc_get_order( $order_id )->get_data_store()->get_stock_reduced( $order_id ),
+			'_order_stock_reduced must be reset to false after resume.'
+		);
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
 	}
 }

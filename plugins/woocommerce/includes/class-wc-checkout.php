@@ -421,6 +421,24 @@ class WC_Checkout {
 				 */
 				do_action( 'woocommerce_resume_order', $order_id );
 
+				// If stock was already reduced for this order, restore it before removing
+				// the items. The item-level `_reduced_stock` metadata lives on the order
+				// item rows and is deleted along with them; losing it breaks both the
+				// cancel-restore path (wc_increase_stock_levels reads it to know how much
+				// to restore) and the admin-update path (wc_adjust_line_item_product_stock
+				// uses it to avoid a double-reduction). Restoring now means the resumed
+				// order's stock lifecycle starts clean.
+				//
+				// Pass $order (object) not $order_id (int) so set_stock_reduced updates
+				// both post-meta and the in-memory WC_Order property; the order is saved
+				// later in this method and would otherwise overwrite the flag back to true.
+				//
+				// @since 11.0.0
+				if ( $order->get_data_store()->get_stock_reduced( $order_id ) ) {
+					wc_increase_stock_levels( $order );
+					$order->get_data_store()->set_stock_reduced( $order, false );
+				}
+
 				// Remove all items - we will re-add them later.
 				$order->remove_order_items();
 			} else {
