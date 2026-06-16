@@ -923,7 +923,7 @@ class LookupDataStore {
 		}
 
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
-		$temp = unserialize( $temp );
+		$temp = unserialize( $temp, array( 'allowed_classes' => false ) );
 		if ( false === $temp ) {
 			throw new \WC_Data_Exception( 0, 'The product attributes metadata row is not properly serialized' );
 		}

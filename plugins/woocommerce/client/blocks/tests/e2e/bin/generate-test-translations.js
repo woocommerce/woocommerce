@@ -9,7 +9,10 @@ const { getTestTranslation } = require( '../utils/get-test-translation.js' );
 
 const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
 const BUILD_DIR = path.resolve( ROOT_DIR, 'assets/client/blocks/' );
-const TESTS_DIR = path.resolve( __dirname, '../tests/' );
+const TESTS_DIR = path.resolve(
+	__dirname,
+	'../../../../../tests/e2e-pw/tests/blocks'
+);
 const LANGUAGES_DIR = path.join( ROOT_DIR, 'i18n/languages/' );
 
 ensureDirSync( LANGUAGES_DIR );

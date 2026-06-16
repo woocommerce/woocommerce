@@ -13,8 +13,9 @@ const config: PlaywrightTestConfig = {
 	projects: [
 		{
 			name: 'chromium',
-			testDir: '.',
-			testMatch: '*.perf.ts',
+			// testDir is inherited from the base config, which points at the
+			// migrated specs under tests/e2e-pw/tests/blocks.
+			testMatch: '**/*.perf.ts',
 		},
 	],
 };
