@@ -156,35 +156,6 @@
 	display: none;
 }
 
-.woocommerce-payments__usage-modal {
-	.components-modal__header {
-		height: auto;
-		padding: 24px 24px 0 24px;
-
-		.components-modal__header-heading {
-			font-size: 24px;
-			line-height: 32px;
-			margin: 0 0 24px 0;
-		}
-	}
-
-	.woocommerce-payments__usage-modal-message {
-		padding: $gap 0;
-		font-size: 16px;
-		line-height: 24px;
-	}
-
-	.woocommerce-payments__usage-footer {
-		display: flex;
-		justify-content: flex-end;
-		padding: $gap 0;
-
-		button {
-			margin-left: $gap;
-		}
-	}
-}
-
 .components-modal__frame.woocommerce-cart-modal {
 	width: 600px;
 	max-width: 100%;
