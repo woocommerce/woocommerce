@@ -9,6 +9,7 @@ import { useShippingData, useStoreCart } from '@woocommerce/base-context/hooks';
  * Internal dependencies
  */
 import CheckoutPickupOptionsBlock from '../block';
+import { getPickupOptionsTitle } from '../frontend';
 import {
 	generateShippingPackage,
 	generateShippingRate,
@@ -52,6 +53,26 @@ jest.mock( '@woocommerce/settings', () => {
 ( useStoreCart as jest.Mock ).mockImplementation( () =>
 	jest.requireActual( '@woocommerce/base-context/hooks' ).useStoreCart()
 );
+
+describe( 'getPickupOptionsTitle', () => {
+	it( 'uses the singular default title when there is one pickup location', () => {
+		expect( getPickupOptionsTitle( 'Pickup locations', 1 ) ).toBe(
+			'Pickup location'
+		);
+	} );
+
+	it( 'keeps the plural default title when there are multiple pickup locations', () => {
+		expect( getPickupOptionsTitle( 'Pickup locations', 2 ) ).toBe(
+			'Pickup locations'
+		);
+	} );
+
+	it( 'keeps custom titles unchanged', () => {
+		expect( getPickupOptionsTitle( 'Collect from store', 1 ) ).toBe(
+			'Collect from store'
+		);
+	} );
+} );
 
 const testPackageData = generateShippingPackage( {
 	packageId: 0,

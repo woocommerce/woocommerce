@@ -8,12 +8,31 @@ import { useSelect } from '@wordpress/data';
 import { checkoutStore as checkoutStoreDescriptor } from '@woocommerce/block-data';
 import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
 import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
+import { useShippingData } from '@woocommerce/base-context/hooks';
+import { isPackageRateCollectable } from '@woocommerce/base-utils';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
 import attributes from './attributes';
+
+const DEFAULT_PICKUP_OPTIONS_TITLE = __( 'Pickup locations', 'woocommerce' );
+
+export const getPickupOptionsTitle = (
+	title: string,
+	pickupLocationsCount: number
+) => {
+	if (
+		title === DEFAULT_PICKUP_OPTIONS_TITLE &&
+		pickupLocationsCount === 1
+	) {
+		return __( 'Pickup location', 'woocommerce' );
+	}
+
+	return title;
+};
 
 const FrontendBlock = ( {
 	title,
@@ -38,6 +57,10 @@ const FrontendBlock = ( {
 	);
 
 	const { showFormStepNumbers } = useCheckoutBlockContext();
+	const { shippingRates } = useShippingData();
+	const pickupLocationsCount = (
+		shippingRates[ 0 ]?.shipping_rates || []
+	).filter( isPackageRateCollectable ).length;
 
 	if ( ! prefersCollection || ! LOCAL_PICKUP_ENABLED ) {
 		return null;
@@ -48,7 +71,7 @@ const FrontendBlock = ( {
 			id="pickup-options"
 			disabled={ checkoutIsProcessing }
 			className={ clsx( 'wc-block-checkout__pickup-options', className ) }
-			title={ title }
+			title={ getPickupOptionsTitle( title, pickupLocationsCount ) }
 			description={ description }
 			showStepNumber={ showFormStepNumbers }
 		>
