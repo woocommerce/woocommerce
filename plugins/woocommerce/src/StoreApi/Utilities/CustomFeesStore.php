@@ -102,25 +102,6 @@ final class CustomFeesStore {
 	}
 
 	/**
-	 * Remove a stored fee by id.
-	 *
-	 * @param string $id Fee id.
-	 * @return bool True if a fee was removed, false if no fee had that id.
-	 */
-	public function remove( string $id ): bool {
-		$fees = $this->get_all();
-
-		if ( ! array_key_exists( $id, $fees ) ) {
-			return false;
-		}
-
-		unset( $fees[ $id ] );
-		$this->save( $fees );
-
-		return true;
-	}
-
-	/**
 	 * Re-apply every stored fee to a cart. Intended as the
 	 * `woocommerce_cart_calculate_fees` callback so the fees survive the
 	 * per-request fee reset.

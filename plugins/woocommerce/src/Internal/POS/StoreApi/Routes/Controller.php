@@ -56,7 +56,6 @@ class Controller implements RegisterHooksInterface {
 		CartAddItem::class,
 		CartApplyCoupon::class,
 		CartAddFee::class,
-		CartRemoveFee::class,
 		Checkout::class,
 	);
 

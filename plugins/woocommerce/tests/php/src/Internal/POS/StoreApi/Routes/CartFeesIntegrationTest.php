@@ -2,8 +2,8 @@
 /**
  * POS custom-fee integration tests.
  *
- * Exercises cart/add-fee and cart/remove-fee end-to-end against the real REST
- * server, the real Store API cart pipeline, and the session-backed fee store.
+ * Exercises cart/add-fee end-to-end against the real REST server, the real
+ * Store API cart pipeline, and the session-backed fee store.
  * The persistence test is the important one: it proves a fee added in one
  * request survives into a later request via the session, which is the whole
  * reason the fee store + woocommerce_cart_calculate_fees re-apply exist.
@@ -27,7 +27,6 @@ use WC_Product_Simple;
 
 /**
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\Routes\CartAddFee
- * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\Routes\CartRemoveFee
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomFeesPolicy
  * @covers \Automattic\WooCommerce\StoreApi\Utilities\CustomFeesStore
  */
@@ -106,12 +105,11 @@ class CartFeesIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox The POS cart/add-fee and cart/remove-fee routes are present in the REST server's index.
+	 * @testdox The POS cart/add-fee route is present in the REST server's index.
 	 */
 	public function test_routes_are_registered(): void {
 		$routes = rest_get_server()->get_routes();
 		$this->assertArrayHasKey( '/' . Controller::REST_NAMESPACE . '/cart/add-fee', $routes );
-		$this->assertArrayHasKey( '/' . Controller::REST_NAMESPACE . '/cart/remove-fee', $routes );
 	}
 
 	/**
@@ -176,39 +174,6 @@ class CartFeesIntegrationTest extends ControllerTestCase {
 		$response = $this->add_fee( 'Gift wrap', 5, array( 'cart_token' => $cart_token ) );
 
 		$this->assertCount( 1, $response->get_data()['fees'] ?? array(), 'An identical fee must not be duplicated.' );
-	}
-
-	/**
-	 * @testdox A fee can be removed by the id returned in the cart response.
-	 */
-	public function test_admin_can_remove_fee(): void {
-		wp_set_current_user( $this->admin_id );
-
-		$cart_token = $this->build_cart_with_one_item();
-		wp_set_current_user( $this->admin_id );
-		$add  = $this->add_fee( 'Gift wrap', 5, array( 'cart_token' => $cart_token ) );
-		$fees = $add->get_data()['fees'];
-		// The cart fee schema exposes the fee identifier as `key` (mapped from the WC fee id).
-		$id = $fees[0]['key'];
-
-		wp_set_current_user( $this->admin_id );
-		$remove = $this->remove_fee( $id, array( 'cart_token' => $cart_token ) );
-
-		$this->assertSame( 200, $remove->get_status(), 'remove-fee failed: ' . wp_json_encode( $remove->get_data() ) );
-		$this->assertCount( 0, $remove->get_data()['fees'] ?? array() );
-	}
-
-	/**
-	 * @testdox Removing an unknown fee id returns 409.
-	 */
-	public function test_removing_unknown_fee_returns_409(): void {
-		wp_set_current_user( $this->admin_id );
-
-		$cart_token = $this->build_cart_with_one_item();
-		wp_set_current_user( $this->admin_id );
-		$response = $this->remove_fee( 'custom-fee-nope', array( 'cart_token' => $cart_token ) );
-
-		$this->assertSame( 409, $response->get_status() );
 	}
 
 	/**
@@ -293,21 +258,6 @@ class CartFeesIntegrationTest extends ControllerTestCase {
 				),
 				$extra
 			)
-		);
-		return rest_get_server()->dispatch( $request );
-	}
-
-	/**
-	 * Dispatch POST /cart/remove-fee.
-	 *
-	 * @param string $id    Fee id to remove.
-	 * @param array  $extra Extra request params (e.g. cart_token).
-	 * @return \WP_REST_Response
-	 */
-	private function remove_fee( string $id, array $extra = array() ): \WP_REST_Response {
-		$request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/cart/remove-fee' );
-		$request->set_body_params(
-			array_merge( array( 'id' => $id ), $extra )
 		);
 		return rest_get_server()->dispatch( $request );
 	}

@@ -75,24 +75,6 @@ class CustomFeesStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox remove deletes a stored fee and reports success.
-	 */
-	public function test_remove_deletes_fee(): void {
-		$spec = $this->sut->add( 'Gift wrap', 5.0 );
-
-		$this->assertTrue( $this->sut->remove( $spec['id'] ) );
-		$this->assertFalse( $this->sut->has( $spec['id'] ) );
-		$this->assertCount( 0, $this->sut->get_all() );
-	}
-
-	/**
-	 * @testdox remove returns false for an unknown id.
-	 */
-	public function test_remove_unknown_id_returns_false(): void {
-		$this->assertFalse( $this->sut->remove( 'custom-fee-does-not-exist' ) );
-	}
-
-	/**
 	 * @testdox apply_to_cart re-applies every stored fee to the cart.
 	 */
 	public function test_apply_to_cart_reapplies_stored_fees(): void {
