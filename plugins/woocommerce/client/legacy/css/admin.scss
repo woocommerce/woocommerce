@@ -2134,6 +2134,12 @@ ul.wc_coupon_list_block {
 	}
 }
 
+// Let the "more actions" menu float out over the panel below instead of being
+// clipped: the postbox is overflow: hidden by default, which traps the popover.
+#poststuff #woocommerce-order-actions {
+	overflow: visible;
+}
+
 .order_actions {
 	margin: 0;
 	padding: 0;
@@ -2151,67 +2157,93 @@ ul.wc_coupon_list_block {
 			border-top: 0;
 		}
 
-		// Save row: primary Update/Create button stacked above the destructive
-		// trash link, kept beneath the action dropdown to preserve legacy DOM order.
+		// Save row: primary Update/Create button on the left, with tertiary
+		// actions tucked behind a kebab "more actions" menu on the right. Keeping
+		// the destructive trash action out of the primary surface (and a deliberate
+		// two-step away) follows the unified admin header pattern and removes the
+		// large red target that previously sat right beside the save button.
 		&.wc-order-save-action {
 			display: flex;
-			flex-direction: column;
+			flex-direction: row;
+			align-items: stretch;
 			gap: 8px;
 
 			button.save_order {
-				width: 100%;
-				// Reset the legacy 1px button margin so the full-width button doesn't overflow.
+				flex: 1;
+				// Reset the legacy 1px button margin so the row doesn't overflow.
+				margin: 0;
+			}
+		}
+
+		.wc-order-actions-menu {
+			position: relative;
+			flex-shrink: 0;
+
+			// Square icon button sized to match the WP 7.0 button height.
+			&__toggle {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 40px;
+				min-height: 40px;
+				padding: 0;
 				margin: 0;
 			}
 
-			#delete-action {
-				// Extra gap above the destructive action so an accidental click
-				// near the save button is less likely.
-				margin-top: 8px;
+			&__icon {
+				width: 24px;
+				height: 24px;
+				fill: $gray-900; // Neutral "more" affordance, not the button's blue.
+			}
 
-				// The div always renders but holds only whitespace when the user
-				// lacks `delete_post`, so `:empty` never matches — detect actual
-				// content with `:has()` and hide the empty wrapper instead.
-				&:not(:has(*)) {
-					display: none;
+			// Floating popover anchored below the toggle, styled like a Gutenberg
+			// dropdown: white surface, hairline border, and a lift shadow so it
+			// reads as floating over the panel rather than part of it.
+			&__list {
+				position: absolute;
+				right: 0;
+				top: calc(100% + 4px);
+				z-index: 10;
+				min-width: 200px;
+				margin: 0;
+				padding: 4px;
+				list-style: none;
+				background: #fff;
+				border: 1px solid $gray-200;
+				border-radius: 4px;
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+				li {
+					padding: 0;
+					margin: 0;
+					border: 0;
+					line-height: normal;
 				}
 			}
 
-			// Trash link styled as a WP 7.0 destructive secondary button: red text
-			// and inset stroke, error-tint wash on hover. Values are hardcoded WPDS
-			// tokens (noted inline) — the --wpds-* vars aren't loaded in wp-admin yet.
-			#delete-action a.submitdelete {
+			// Menu items render as neutral rows like a standard dropdown — the rule
+			// targets the role, so the built-in trash action and anything an
+			// extension adds look consistent regardless of source. (Overrides the
+			// red WP core gives `.submitdelete`, since the kebab already provides
+			// the friction that the red used to signal.)
+			a[role="menuitem"] {
 				display: block;
-				width: 100%;
-				box-sizing: border-box;
-				padding: 0 12px;
-				min-height: 40px;
-				line-height: 38px; // min-height minus 2 × 1px box-shadow inset.
-				border: 0;
+				padding: 8px 12px;
 				border-radius: 2px;
-				background: transparent;
-				box-shadow: inset 0 0 0 1px #cc1818; // stroke-interactive-error.
-				color: #cc1818; // fg-interactive-error.
-				text-align: center;
+				color: $gray-900;
 				text-decoration: none;
-				transition: box-shadow 0.1s linear, background-color 0.1s linear;
+				white-space: nowrap;
+				cursor: pointer;
 
 				&:hover,
-				&:active {
-					color: #cc1818;
-					background: #f6e6e3; // bg-interactive-error-weak-active.
-					box-shadow: inset 0 0 0 1px #9d0000; // stroke-interactive-error-active.
+				&:focus {
+					background: $gray-100;
+					color: $gray-900;
 				}
 
 				&:focus {
-					color: #cc1818;
-					// Inner stroke + outer ring with a white gap, matching
-					// Gutenberg's two-ring destructive focus pattern.
-					box-shadow:
-						inset 0 0 0 1px #9d0000,
-						0 0 0 1.5px #fff,
-						0 0 0 3px #cc1818;
-					outline: 2px solid transparent; // a11y for high-contrast.
+					outline: none;
+					box-shadow: inset 0 0 0 1.5px var(--wp-admin-theme-color, #2271b1);
 				}
 			}
 		}
