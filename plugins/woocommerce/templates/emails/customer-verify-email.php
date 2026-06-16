@@ -33,7 +33,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 echo wp_kses_post(
 	sprintf(
 		/* translators: %s: the customer's email address. */
-		__( 'Confirm that %s is your email address and we will link any past orders placed with it to your account.', 'woocommerce' ),
+		__( "Once you've confirmed that %s is your email address, we'll link any past orders to your verified account.", 'woocommerce' ),
 		'<strong>' . esc_html( $user_email ) . '</strong>'
 	)
 );
@@ -44,7 +44,7 @@ $wc_verify_button_bg   = get_option( 'woocommerce_email_base_color', '#7f54b3' )
 $wc_verify_button_text = wc_hex_is_light( $wc_verify_button_bg ) ? '#000000' : '#ffffff';
 ?>
 <p style="margin: 24px 0;">
-	<a href="<?php echo esc_url( $verify_url ); ?>" style="display:inline-block;padding:16px 32px;background-color:<?php echo esc_attr( $wc_verify_button_bg ); ?>;color:<?php echo esc_attr( $wc_verify_button_text ); ?>;border-radius:4px;font-weight:bold;font-size:15px;text-decoration:none;"><?php esc_html_e( 'Verify email address', 'woocommerce' ); ?></a>
+	<a href="<?php echo esc_url( $verify_url ); ?>" style="display:inline-block;padding:16px 32px;background-color:<?php echo esc_attr( $wc_verify_button_bg ); ?>;color:<?php echo esc_attr( $wc_verify_button_text ); ?>;border-radius:4px;font-weight:bold;font-size:15px;text-decoration:none;"><?php esc_html_e( 'Confirm email address', 'woocommerce' ); ?></a>
 </p>
 
 <?php

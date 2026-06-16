@@ -76,7 +76,7 @@ class CustomerVerifyEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_additional_content() {
-		return __( "If you didn't request this email, you can safely ignore it.", 'woocommerce' );
+		return __( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' );
 	}
 
 	/**
