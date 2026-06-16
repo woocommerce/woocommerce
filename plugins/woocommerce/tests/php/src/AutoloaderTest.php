@@ -571,4 +571,57 @@ class AutoloaderTest extends \WC_Unit_Test_Case {
 			'The scoped first-party prefix must be present in the returned map.'
 		);
 	}
+
+	/**
+	 * `ClassLoader::findFile()` also carries no return-type declaration, so the same older or foreign
+	 * `Composer\Autoload\ClassLoader` reused from another path may return a non-string. The reader
+	 * must degrade that shape to null, because find_scoped_file() declares a `: ?string` return and
+	 * the value reaches it on every autoload miss — outside the handler's try/catch — so a non-string
+	 * would raise an uncatchable TypeError and fatal the request.
+	 *
+	 * @testdox read_scoped_file_path() degrades to null on a foreign non-string shape.
+	 */
+	public function test_read_scoped_file_path_degrades_on_a_foreign_non_string_shape(): void {
+		// A foreign loader whose findFile() returns a non-array, non-string value (legal: the parent
+		// declares no return type).
+		$foreign = new class() extends ClassLoader {
+			/**
+			 * Model a foreign/ancient loader that returns a non-string from findFile().
+			 *
+			 * @param string $class_name The probed class name (ignored).
+			 *
+			 * @return array<int, string> A deliberately non-string value.
+			 */
+			public function findFile( $class_name ) {
+				// Avoid parameter not used PHPCS errors.
+				unset( $class_name );
+				return array( 'foreign-non-string-shape' );
+			}
+		};
+
+		$this->assertNull(
+			Autoloader::read_scoped_file_path( $foreign, 'Automattic\\WooCommerce\\Enums\\DefaultCustomerAddress' ),
+			'A non-string findFile() return must degrade to null, not flow into find_scoped_file()\'s ?string return.'
+		);
+	}
+
+	/**
+	 * A genuine loader still resolves a real src class to its file path, so normal resolution is
+	 * unaffected.
+	 *
+	 * @testdox read_scoped_file_path() returns the resolved path from a genuine loader.
+	 */
+	public function test_read_scoped_file_path_returns_the_path_from_a_genuine_loader(): void {
+		$loader = new ClassLoader();
+		$loader->setPsr4( 'Automattic\\WooCommerce\\', array( dirname( WC_PLUGIN_FILE ) . '/src' ) );
+
+		$path = Autoloader::read_scoped_file_path( $loader, 'Automattic\\WooCommerce\\Enums\\DefaultCustomerAddress' );
+
+		$this->assertIsString( $path, 'A genuine loader must resolve a real src class to a string path.' );
+		$this->assertStringContainsString(
+			'DefaultCustomerAddress',
+			$path,
+			'The resolved path must point at the probed class file.'
+		);
+	}
 }

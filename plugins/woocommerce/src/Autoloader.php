@@ -299,6 +299,34 @@ class Autoloader {
 	}
 
 	/**
+	 * Read a resolved file path out of a fallback loader's findFile(), degrading to null on any
+	 * non-string shape.
+	 *
+	 * The sibling of {@see self::read_scoped_psr4_map()}: {@see ClassLoader::findFile()} carries no
+	 * return-type declaration either, so the same older or foreign `Composer\Autoload\ClassLoader`
+	 * reused by {@see self::build_woocommerce_psr4_fallback()} may return a non-string. The caller,
+	 * {@see self::find_scoped_file()}, declares a `: ?string` return, so a non-string result would
+	 * raise an uncatchable TypeError at that return statement — which, on an autoload miss, runs
+	 * outside the registered handler's own try/catch, exactly the shape this fallback guards against
+	 * for getPrefixesPsr4(). Composer's own miss sentinel is `false`, which is not a string and so
+	 * degrades to null here, unchanged. Validating keeps the degrade-don't-fatal contract whole.
+	 *
+	 * @internal Public only so {@see self::find_scoped_file()} and the unit tests can exercise it.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param ClassLoader $loader     A loader built from the scoped PSR-4 map.
+	 * @param string      $class_name Fully-qualified class name to resolve.
+	 *
+	 * @return string|null The resolved absolute file path, or null on a miss or non-string shape.
+	 */
+	public static function read_scoped_file_path( ClassLoader $loader, string $class_name ): ?string {
+		$file = $loader->findFile( $class_name );
+
+		return is_string( $file ) ? $file : null;
+	}
+
+	/**
 	 * Resolve a WooCommerce `src/` class to a file via a throwaway PSR-4 `ClassLoader`.
 	 *
 	 * A new loader per call is deliberate (and is the property the fallback exists for): Composer's
@@ -325,13 +353,14 @@ class Autoloader {
 			foreach ( $psr4_entries as $namespace => $paths ) {
 				$loader->setPsr4( $namespace, $paths );
 			}
-			$file = $loader->findFile( $class_name );
+
+			// read_scoped_file_path() guards findFile()'s untyped return: a non-string would
+			// otherwise TypeError against this method's `: ?string`, outside the handler's try/catch.
+			return self::read_scoped_file_path( $loader, $class_name );
 		} catch ( \Throwable $e ) {
 			// Foreign/malformed ClassLoader — miss rather than fatal the autoload path.
 			return null;
 		}
-
-		return false !== $file ? $file : null;
 	}
 
 	/**
