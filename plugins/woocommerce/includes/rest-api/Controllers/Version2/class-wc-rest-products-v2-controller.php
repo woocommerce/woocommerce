@@ -290,7 +290,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$context       = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		// @phpstan-ignore-next-line property.notFound (Deliberately dynamic to avoid adding inherited state that can fatal subclasses.)
 		$this->request = $request;
 
 		$data = $this->prepare_object_for_response_core( $object, $request, $context );
@@ -523,11 +524,13 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * Get the images for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product Product instance.
-	 * @param string                          $image_size WordPress registered image size. Default 'full'.
 	 *
 	 * @return array
 	 */
-	protected function get_images( $product, $image_size = 'full' ) {
+	protected function get_images( $product ) {
+		$image_size = $this->request['image_size'] ?? 'full';
+		$image_size = is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
+
 		$images         = array();
 		$attachment_ids = array();
 
@@ -1012,7 +1015,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					$base_data['tags'] = $this->get_taxonomy_terms( $product, 'tag' );
 					break;
 				case 'images':
-					$base_data['images'] = $this->get_images( $product, $request['image_size'] ?? 'full' );
+					$base_data['images'] = $this->get_images( $product );
 					break;
 				case 'attributes':
 					$base_data['attributes'] = $this->get_attributes( $product );
