@@ -171,13 +171,16 @@ class Autoloader {
 		try {
 			$availability_probe = self::build_woocommerce_psr4_fallback();
 			if ( null === $availability_probe ) {
+				self::log_fallback_declined( 'the Composer files are unavailable or a foreign ClassLoader shape was rejected by build()' );
 				return null;
 			}
 			$psr4_entries = self::read_scoped_psr4_map( $availability_probe );
 			if ( null === $psr4_entries ) {
+				self::log_fallback_declined( 'getPrefixesPsr4() returned a non-array shape' );
 				return null;
 			}
 		} catch ( \Throwable $e ) {
+			self::log_fallback_declined( 'building the availability probe threw: ' . $e->getMessage() );
 			return null;
 		}
 
@@ -268,6 +271,27 @@ class Autoloader {
 		$registered_handler = $handler;
 
 		return $handler;
+	}
+
+	/**
+	 * Log, under WP_DEBUG only, why the PSR-4 fallback declined to register.
+	 *
+	 * When the fallback bails to "no fallback", the downstream "class not found" fatal an operator
+	 * eventually sees during an in-place upgrade carries no breadcrumb back to this decision — yet
+	 * that breadcrumb is the most useful signal in the system, since the fallback exists precisely
+	 * to prevent that fatal. Mirrors the WP_DEBUG error_log the registered handler already emits for
+	 * a caught autoload error.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param string $reason Human-readable reason the fallback was not registered.
+	 */
+	private static function log_fallback_declined( string $reason ): void {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				'WooCommerce PSR-4 fallback not registered: ' . $reason
+			);
+		}
 	}
 
 	/**
