@@ -19,6 +19,26 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 class WooPaymentsLegacyRuntime {
 
 	/**
+	 * Default WooPayments admin onboarding source context.
+	 */
+	public const ADMIN_ONBOARDING_FROM_DEFAULT = 'WCADMIN_PAYMENT_SETTINGS';
+
+	/**
+	 * Default WooPayments admin onboarding source slug.
+	 */
+	public const ADMIN_ONBOARDING_SOURCE_DEFAULT = 'wcadmin-settings-page';
+
+	/**
+	 * WooPayments admin onboarding source context constant.
+	 */
+	private const ADMIN_ONBOARDING_FROM_CONSTANT = 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS';
+
+	/**
+	 * WooPayments admin onboarding source slug constant.
+	 */
+	private const ADMIN_ONBOARDING_SOURCE_CONSTANT = 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE';
+
+	/**
 	 * Legacy proxy.
 	 *
 	 * @var LegacyProxy
@@ -220,6 +240,18 @@ class WooPaymentsLegacyRuntime {
 	}
 
 	/**
+	 * Get the WooPayments admin onboarding context.
+	 *
+	 * @return array{from:string,source:string}
+	 */
+	public function get_admin_onboarding_context(): array {
+		return array(
+			'from'   => $this->get_constant_value( self::ADMIN_ONBOARDING_FROM_CONSTANT, self::ADMIN_ONBOARDING_FROM_DEFAULT ),
+			'source' => $this->get_constant_value( self::ADMIN_ONBOARDING_SOURCE_CONSTANT, self::ADMIN_ONBOARDING_SOURCE_DEFAULT ),
+		);
+	}
+
+	/**
 	 * Reset the WooPayments onboarding test-mode option when the legacy constant is available.
 	 *
 	 * @return void
@@ -319,6 +351,23 @@ class WooPaymentsLegacyRuntime {
 		}
 
 		return is_scalar( $url ) ? (string) $url : null;
+	}
+
+	/**
+	 * Get a scalar constant value with fallback.
+	 *
+	 * @param string $constant_name Constant name.
+	 * @param string $fallback      Fallback value.
+	 * @return string
+	 */
+	private function get_constant_value( string $constant_name, string $fallback ): string {
+		if ( ! Constants::is_defined( $constant_name ) ) {
+			return $fallback;
+		}
+
+		$value = Constants::get_constant( $constant_name );
+
+		return is_scalar( $value ) ? (string) $value : $fallback;
 	}
 
 	/**

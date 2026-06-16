@@ -426,11 +426,17 @@ class WooPayments extends PaymentGateway {
 			$connect_url = parent::get_onboarding_url( $payment_gateway, $return_url );
 		}
 
+		$admin_onboarding_context = null !== $legacy_runtime ? $legacy_runtime->get_admin_onboarding_context() : array(
+			'from'   => WooPaymentsLegacyRuntime::ADMIN_ONBOARDING_FROM_DEFAULT,
+			'source' => WooPaymentsLegacyRuntime::ADMIN_ONBOARDING_SOURCE_DEFAULT,
+		);
+
 		// Default URL params to set, regardless if they exist.
-		$params = array(
-			'from'                      => Constants::is_defined( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) ? (string) Constants::get_constant( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) : 'WCADMIN_PAYMENT_SETTINGS',
-			'source'                    => Constants::is_defined( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) ? (string) Constants::get_constant( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) : 'wcadmin-settings-page',
-			'redirect_to_settings_page' => 'true',
+		$params = array_merge(
+			$admin_onboarding_context,
+			array(
+				'redirect_to_settings_page' => 'true',
+			)
 		);
 
 		// First, sanity check to handle existing accounts.

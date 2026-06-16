@@ -156,14 +156,16 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 						'priority' => 30,
 						'enabled'  => false,
 						'title'    => 'Title',
-						'category' => 'unknown', // This should be ignored and replaced with the default category (primary).
+						// This should be ignored and replaced with the default category (primary).
+						'category' => 'unknown',
 					),
 					array(
 						'id'          => 'card',
 						'order'       => 20,
 						'enabled'     => true,
 						'required'    => true,
-						'title'       => '<b>Credit/debit card (required)</b>', // All tags should be stripped.
+						// All tags should be stripped.
+						'title'       => '<b>Credit/debit card (required)</b>',
 						// Paragraphs and line breaks should be stripped.
 						'description' => '<p><strong>Accepts</strong> <b>all major</b></br><em>credit</em> and <a href="#" target="_blank">debit cards</a>.</p>',
 						'icon'        => 'https://example.com/card-icon.png',
@@ -285,7 +287,8 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 			$this->assertFalse( $recommended_pms[0]['enabled'] );
 			$this->assertFalse( $recommended_pms[0]['required'] );
 			$this->assertSame( 'WooPay', $recommended_pms[0]['title'] );
-			$this->assertSame( '', $recommended_pms[0]['icon'] ); // Invalid URL removed.
+			$this->assertSame( '', $recommended_pms[0]['icon'] );
+			// Invalid URL removed.
 			$this->assertSame( PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY, $recommended_pms[0]['category'] );
 
 			// Check second payment method (card) - required, HTML tags stripped but content preserved.
@@ -302,7 +305,8 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 			$this->assertSame( 'basic2', $recommended_pms[2]['id'] );
 			$this->assertSame( 2, $recommended_pms[2]['_order'] );
 			$this->assertFalse( $recommended_pms[2]['enabled'] );
-			$this->assertSame( PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY, $recommended_pms[2]['category'] ); // 'unknown' normalized to primary.
+			// 'unknown' normalized to primary.
+			$this->assertSame( PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY, $recommended_pms[2]['category'] );
 
 			// Check fourth payment method (basic) - no order, placed last, secondary category.
 			$this->assertSame( 'basic', $recommended_pms[3]['id'] );
@@ -328,6 +332,8 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'WC_Payments_Account::get_connect_url', $source, 'WooPayments provider should read account URLs through WooPaymentsLegacyRuntime.' );
 		$this->assertStringNotContainsString( 'wcpay_get_container', $source, 'WooPayments provider should read account status through WooPaymentsLegacyRuntime.' );
 		$this->assertStringNotContainsString( 'WC_Payments_Utils::supported_countries', $source, 'WooPayments provider should read supported countries through WooPaymentsLegacyRuntime.' );
+		$this->assertStringNotContainsString( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS', $source, 'WooPayments provider should read admin onboarding context through WooPaymentsLegacyRuntime.' );
+		$this->assertStringNotContainsString( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE', $source, 'WooPayments provider should read admin onboarding context through WooPaymentsLegacyRuntime.' );
 	}
 
 	/**
@@ -520,7 +526,8 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		$fake_gateway = new FakePaymentGateway(
 			'woocommerce_payments',
 			array(
-				'onboarding_supported' => null, // Ensure gateway doesn't provide info.
+				// Ensure gateway doesn't provide info.
+				'onboarding_supported' => null,
 			)
 		);
 
@@ -718,7 +725,8 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 					'get_plugin_data' => function ( $plugin_file ) {
 						if ( 'woocommerce-payments/woocommerce-payments.php' === $plugin_file ) {
 							return array(
-								'Version' => '10.0.0', // Compatible version >= 9.3.0.
+								// Compatible version >= 9.3.0.
+								'Version' => '10.0.0',
 							);
 						}
 						return false;
@@ -768,7 +776,8 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 					'get_plugin_data' => function ( $plugin_file ) {
 						if ( 'woocommerce-payments/woocommerce-payments.php' === $plugin_file ) {
 							return array(
-								'Version' => '3.0.0', // Below minimum.
+								// Below minimum.
+								'Version' => '3.0.0',
 							);
 						}
 						return false;
@@ -1211,6 +1220,32 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		// Should NOT include test_drive params for connected accounts.
 		$this->assertStringNotContainsString( 'test_drive=true', $onboarding_url );
 		$this->assertStringNotContainsString( 'auto_start_test_drive_onboarding=true', $onboarding_url );
+	}
+
+	/**
+	 * Test get_onboarding_url uses WooPayments runtime admin onboarding context.
+	 */
+	public function test_get_onboarding_url_uses_runtime_admin_onboarding_context() {
+		Constants::set_constant( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS', 'RUNTIME_FROM' );
+		Constants::set_constant( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE', 'runtime-source' );
+
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'enabled'           => true,
+				'account_connected' => true,
+			)
+		);
+
+		try {
+			$onboarding_url = $this->sut->get_onboarding_url( $fake_gateway );
+
+			$this->assertStringContainsString( 'from=RUNTIME_FROM', $onboarding_url );
+			$this->assertStringContainsString( 'source=runtime-source', $onboarding_url );
+			$this->assertStringContainsString( 'redirect_to_settings_page=true', $onboarding_url );
+		} finally {
+			Constants::clear_constants();
+		}
 	}
 
 	/**

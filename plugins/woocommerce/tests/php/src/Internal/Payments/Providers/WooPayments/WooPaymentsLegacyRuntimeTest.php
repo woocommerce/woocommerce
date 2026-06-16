@@ -172,6 +172,47 @@ class WooPaymentsLegacyRuntimeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return admin onboarding context values from WooPayments constants when available.
+	 */
+	public function test_returns_admin_onboarding_context_values_from_woopayments_constants(): void {
+		Constants::set_constant( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS', 'RUNTIME_FROM' );
+		Constants::set_constant( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE', 'runtime-source' );
+
+		try {
+			$sut = new WooPaymentsLegacyRuntime();
+			$sut->init( new LegacyRuntimeProxy( true ) );
+
+			$this->assertSame(
+				array(
+					'from'   => 'RUNTIME_FROM',
+					'source' => 'runtime-source',
+				),
+				$sut->get_admin_onboarding_context()
+			);
+		} finally {
+			Constants::clear_constants();
+		}
+	}
+
+	/**
+	 * @testdox Should return Core admin onboarding context fallbacks when WooPayments constants are unavailable.
+	 */
+	public function test_returns_admin_onboarding_context_fallback_values(): void {
+		Constants::clear_constants();
+
+		$sut = new WooPaymentsLegacyRuntime();
+		$sut->init( new LegacyRuntimeProxy( true ) );
+
+		$this->assertSame(
+			array(
+				'from'   => 'WCADMIN_PAYMENT_SETTINGS',
+				'source' => 'wcadmin-settings-page',
+			),
+			$sut->get_admin_onboarding_context()
+		);
+	}
+
+	/**
 	 * @testdox Should report onboarded WooPayments account data when details are submitted.
 	 */
 	public function test_reports_onboarded_account_data_when_details_are_submitted(): void {
