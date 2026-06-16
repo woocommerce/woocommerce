@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyFrontendCurrenciesController;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontendProjectionService;
@@ -34,6 +35,7 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 		'woocommerce_shipping_method_add_rate_args',
 		'before_woocommerce_pay',
 		'woocommerce_account_view-order_endpoint',
+		'woocommerce_order_class',
 	);
 
 	/**
@@ -158,6 +160,63 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'JPY', $sut->get_order_currency() );
 		$this->assertSame( 'JPY', $sut->get_woocommerce_currency( 'USD' ) );
 		$this->assertSame( 0, $sut->get_price_decimals( 2 ) );
+	}
+
+	/**
+	 * @testdox Should fall back to selected currency when order lookup fails.
+	 */
+	public function test_initializes_order_currency_to_selected_currency_when_order_lookup_fails(): void {
+		$missing_order_id = PHP_INT_MAX;
+		$sut              = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
+
+		$this->assertSame( $missing_order_id, $sut->init_order_currency( $missing_order_id ) );
+
+		$this->assertSame( 'GBP', $sut->get_order_currency() );
+		$this->assertSame( 'GBP', $sut->get_woocommerce_currency( 'USD' ) );
+	}
+
+	/**
+	 * @testdox Should remove frontend currency filters while resolving order IDs.
+	 */
+	public function test_removes_frontend_currency_filters_while_resolving_order_ids(): void {
+		$order = wc_create_order();
+		$order->set_currency( 'JPY' );
+		$order->save();
+		wc_get_container()->get( OrderCache::class )->remove( $order->get_id() );
+
+		$sut = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
+		$sut->register();
+
+		$observed_filters = null;
+		add_filter(
+			'woocommerce_order_class',
+			function ( $class_name ) use ( $sut, &$observed_filters ) {
+				$observed_filters = array(
+					'wc_get_price_decimals'           => has_filter( 'wc_get_price_decimals', array( $sut, 'get_price_decimals' ) ),
+					'wc_get_price_decimal_separator'  => has_filter( 'wc_get_price_decimal_separator', array( $sut, 'get_price_decimal_separator' ) ),
+					'wc_get_price_thousand_separator' => has_filter( 'wc_get_price_thousand_separator', array( $sut, 'get_price_thousand_separator' ) ),
+					'woocommerce_price_format'        => has_filter( 'woocommerce_price_format', array( $sut, 'get_woocommerce_price_format' ) ),
+				);
+
+				return $class_name;
+			}
+		);
+
+		$this->assertSame( $order->get_id(), $sut->init_order_currency( $order->get_id() ) );
+
+		$this->assertSame(
+			array(
+				'wc_get_price_decimals'           => false,
+				'wc_get_price_decimal_separator'  => false,
+				'wc_get_price_thousand_separator' => false,
+				'woocommerce_price_format'        => false,
+			),
+			$observed_filters
+		);
+		$this->assertSame( 900, has_filter( 'wc_get_price_decimals', array( $sut, 'get_price_decimals' ) ) );
+		$this->assertSame( 900, has_filter( 'wc_get_price_decimal_separator', array( $sut, 'get_price_decimal_separator' ) ) );
+		$this->assertSame( 900, has_filter( 'wc_get_price_thousand_separator', array( $sut, 'get_price_thousand_separator' ) ) );
+		$this->assertSame( 900, has_filter( 'woocommerce_price_format', array( $sut, 'get_woocommerce_price_format' ) ) );
 	}
 
 	/**

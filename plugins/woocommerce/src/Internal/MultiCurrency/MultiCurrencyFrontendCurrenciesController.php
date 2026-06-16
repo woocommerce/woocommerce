@@ -267,12 +267,20 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 			return $order_id;
 		}
 
-		$order = $order_id instanceof \WC_Order ? $order_id : wc_get_order( $order_id );
+		$removed_filters = $this->remove_frontend_currency_format_filters();
+		try {
+			$order = $order_id instanceof \WC_Order ? $order_id : wc_get_order( $order_id );
+		} finally {
+			$this->restore_frontend_currency_format_filters( $removed_filters );
+		}
+
 		if ( $order ) {
 			$this->order_currency = $order->get_currency();
 
 			return $order->get_id();
 		}
+
+		$this->order_currency = $this->get_frontend_projection_service()->get_woocommerce_currency();
 
 		return $order_id;
 	}
@@ -327,6 +335,55 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 		}
 
 		return $this->frontend_projection_service;
+	}
+
+	/**
+	 * Remove frontend currency format filters during order lookup.
+	 *
+	 * @return array<string,int|false> Removed filter priorities keyed by hook.
+	 */
+	private function remove_frontend_currency_format_filters(): array {
+		$removed_filters = array();
+
+		foreach ( $this->get_frontend_currency_format_filters() as $hook => $callback ) {
+			$priority                 = has_filter( $hook, $callback );
+			$removed_filters[ $hook ] = $priority;
+
+			if ( false !== $priority ) {
+				remove_filter( $hook, $callback, $priority );
+			}
+		}
+
+		return $removed_filters;
+	}
+
+	/**
+	 * Restore frontend currency format filters removed during order lookup.
+	 *
+	 * @param array<string,int|false> $removed_filters Removed filter priorities keyed by hook.
+	 */
+	private function restore_frontend_currency_format_filters( array $removed_filters ): void {
+		foreach ( $this->get_frontend_currency_format_filters() as $hook => $callback ) {
+			$priority = $removed_filters[ $hook ] ?? false;
+
+			if ( false !== $priority ) {
+				add_filter( $hook, $callback, $priority );
+			}
+		}
+	}
+
+	/**
+	 * Get frontend currency format callbacks.
+	 *
+	 * @return array<string,callable>
+	 */
+	private function get_frontend_currency_format_filters(): array {
+		return array(
+			'woocommerce_price_format'        => array( $this, 'get_woocommerce_price_format' ),
+			'wc_get_price_thousand_separator' => array( $this, 'get_price_thousand_separator' ),
+			'wc_get_price_decimal_separator'  => array( $this, 'get_price_decimal_separator' ),
+			'wc_get_price_decimals'           => array( $this, 'get_price_decimals' ),
+		);
 	}
 
 	/**

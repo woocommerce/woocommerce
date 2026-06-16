@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Match WooPayments order currency initialization in native multi-currency.
