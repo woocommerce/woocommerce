@@ -54,6 +54,7 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 		$this->supports           = array(
 			'products',
 			'refunds',
+			PaymentGatewayFeature::TOKENIZATION,
 		);
 
 		$this->init_settings();
@@ -78,11 +79,11 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	}
 
 	/**
-	 * Render WooPayments payment fields.
+	 * Render the native WooPayments payment form.
 	 *
 	 * @return void
 	 */
-	public function payment_fields() {
+	public function form() {
 		$this->get_checkout_bridge()->render_payment_fields();
 	}
 

@@ -63,7 +63,11 @@ const parseConfirmationRedirect = ( value ) => {
 	}, null );
 };
 
-const updateOrderStatusAfterConfirmation = async ( confirmation, intentId ) => {
+const updateOrderStatusAfterConfirmation = async (
+	confirmation,
+	intentId,
+	shouldSavePaymentMethod = false
+) => {
 	if (
 		! settings.ajaxUrl ||
 		! confirmation?.orderId ||
@@ -79,7 +83,10 @@ const updateOrderStatusAfterConfirmation = async ( confirmation, intentId ) => {
 	body.append( 'order_id', confirmation.orderId );
 	body.append( '_ajax_nonce', confirmation.nonce );
 	body.append( 'intent_id', intentId );
-	body.append( 'should_save_payment_method', 'false' );
+	body.append(
+		'should_save_payment_method',
+		shouldSavePaymentMethod ? 'true' : 'false'
+	);
 	body.append( 'is_changing_payment', 'false' );
 
 	const response = await window.fetch( settings.ajaxUrl, {
@@ -114,7 +121,11 @@ const createStripe = () => {
 	} );
 };
 
-const WooPaymentsContent = ( { eventRegistration, emitResponse } ) => {
+const WooPaymentsContent = ( {
+	eventRegistration,
+	emitResponse,
+	shouldSavePayment,
+} ) => {
 	const elementContainer = useRef( null );
 	const stripe = useRef( null );
 	const elements = useRef( null );
@@ -255,7 +266,8 @@ const WooPaymentsContent = ( { eventRegistration, emitResponse } ) => {
 
 				const redirectUrl = await updateOrderStatusAfterConfirmation(
 					confirmation,
-					intentId
+					intentId,
+					Boolean( shouldSavePayment )
 				);
 
 				return getSuccessResponse( emitResponse, {}, redirectUrl );
@@ -263,7 +275,7 @@ const WooPaymentsContent = ( { eventRegistration, emitResponse } ) => {
 		);
 
 		return typeof unsubscribe === 'function' ? unsubscribe : undefined;
-	}, [ emitResponse, eventRegistration ] );
+	}, [ emitResponse, eventRegistration, shouldSavePayment ] );
 
 	return (
 		<div
@@ -289,6 +301,8 @@ export const getWooPaymentsPaymentMethod = () => ( {
 	ariaLabel: label,
 	supports: {
 		features: settings?.supports ?? [],
+		showSavedCards: true,
+		showSaveOption: true,
 	},
 } );
 

@@ -368,6 +368,45 @@ class PaymentProcessingServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should call setup-capable providers for zero-total checkout when a saved payment token is present.
+	 */
+	public function test_process_checkout_calls_setup_capable_provider_for_zero_total_checkout_with_saved_token(): void {
+		$order    = $this->create_woopayments_order( '0.00' );
+		$provider = new RecordingProvider(
+			new PaymentOutcome(
+				PaymentOutcome::STATUS_COMPLETED,
+				'seti_saved',
+				'',
+				'pm_saved',
+				'cus_saved',
+				array(
+					'meta' => array(
+						'_intention_status' => 'succeeded',
+					),
+				)
+			),
+			array( CapabilityManifest::CAPABILITY_ZERO_AMOUNT_SETUP )
+		);
+
+		$result = $this->sut->process_checkout(
+			PaymentContext::for_checkout(
+				$order,
+				OrderPaymentStore::GATEWAY_ID,
+				'',
+				array( 'payment_token' => '123' )
+			),
+			$provider
+		);
+		$order  = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'success', $result['result'] );
+		$this->assertSame( 1, $provider->charge_calls );
+		$this->assertSame( 'seti_saved', $order->get_meta( '_intent_id', true ) );
+		$this->assertSame( 'pm_saved', $order->get_meta( '_payment_method_id', true ) );
+	}
+
+	/**
 	 * Create a WooPayments order for processing tests.
 	 *
 	 * @param string $total Order total.

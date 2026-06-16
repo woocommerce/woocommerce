@@ -81,6 +81,18 @@ describe( 'wc-payment-method-woopayments', () => {
 		} );
 	} );
 
+	it( 'enables WooCommerce saved-payment controls', () => {
+		const registration = registerWooPayments();
+
+		expect( registration.supports ).toEqual(
+			expect.objectContaining( {
+				features: [ 'products' ],
+				showSavedCards: true,
+				showSaveOption: true,
+			} )
+		);
+	} );
+
 	it( 'returns a payment notice when Stripe element validation fails', async () => {
 		const createPaymentMethod = jest.fn().mockResolvedValue( {
 			error: {
@@ -181,6 +193,7 @@ describe( 'wc-payment-method-woopayments', () => {
 					onCheckoutSuccess,
 				},
 				emitResponse,
+				shouldSavePayment: true,
 			} )
 		);
 
@@ -212,6 +225,9 @@ describe( 'wc-payment-method-woopayments', () => {
 		expect( requestBody.get( 'order_id' ) ).toBe( '123' );
 		expect( requestBody.get( '_ajax_nonce' ) ).toBe( 'nonce_123' );
 		expect( requestBody.get( 'intent_id' ) ).toBe( 'pi_123' );
+		expect( requestBody.get( 'should_save_payment_method' ) ).toBe(
+			'true'
+		);
 	} );
 
 	it( 'confirms full #wcpay-confirm-si redirects with confirmation tokens', async () => {
@@ -291,6 +307,9 @@ describe( 'wc-payment-method-woopayments', () => {
 		expect( requestBody.get( 'order_id' ) ).toBe( '123' );
 		expect( requestBody.get( '_ajax_nonce' ) ).toBe( 'nonce_123' );
 		expect( requestBody.get( 'intent_id' ) ).toBe( 'seti_123' );
+		expect( requestBody.get( 'should_save_payment_method' ) ).toBe(
+			'false'
+		);
 	} );
 
 	it( 'handles SetupIntent next actions when no confirmation token is present', async () => {

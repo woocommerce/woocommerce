@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Payments;
 
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\Payments\NativeWooPaymentsGateway;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
 use Automattic\WooCommerce\Internal\Payments\PaymentContext;
@@ -25,7 +26,8 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 		$this->assertSame( OrderPaymentStore::GATEWAY_ID, $gateway->id );
 		$this->assertSame( 'woocommerce_woocommerce_payments_settings', $gateway->get_option_key() );
 		$this->assertContains( 'refunds', $gateway->supports );
-		$this->assertNotContains( 'add_payment_method', $gateway->supports );
+		$this->assertContains( PaymentGatewayFeature::TOKENIZATION, $gateway->supports );
+		$this->assertNotContains( PaymentGatewayFeature::ADD_PAYMENT_METHOD, $gateway->supports );
 	}
 
 	/**
@@ -124,6 +126,8 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 	 * @testdox Should delegate payment fields rendering to the checkout bridge.
 	 */
 	public function test_payment_fields_delegate_to_checkout_bridge(): void {
+		add_filter( 'woocommerce_is_checkout', '__return_true' );
+
 		$service = new RecordingPaymentProcessingService();
 		$bridge  = $this->getMockBuilder( WooPaymentsCheckoutBridge::class )
 			->disableOriginalConstructor()
@@ -142,10 +146,16 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 		$gateway->init( $service, new WooPaymentsProvider(), $bridge );
 
 		ob_start();
-		$gateway->payment_fields();
-		$output = (string) ob_get_clean();
+		try {
+			$gateway->payment_fields();
+			$output = (string) ob_get_clean();
+		} finally {
+			remove_filter( 'woocommerce_is_checkout', '__return_true' );
+		}
 
 		$this->assertStringContainsString( 'wcpay-bridge-marker', $output );
+		$this->assertStringContainsString( 'wc-woocommerce_payments-new-payment-method', $output );
+		$this->assertStringContainsString( 'wc-woocommerce_payments-payment-token-new', $output );
 	}
 
 	/**

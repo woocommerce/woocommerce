@@ -200,8 +200,24 @@ class PaymentProcessingService {
 	 * @return bool
 	 */
 	private function should_call_provider_for_zero_total_checkout( PaymentContext $context, ProviderContract $provider ): bool {
-		return '' !== $context->get_payment_method_id()
-			&& $provider->get_capability_manifest()->supports( CapabilityManifest::CAPABILITY_ZERO_AMOUNT_SETUP );
+		if ( ! $provider->get_capability_manifest()->supports( CapabilityManifest::CAPABILITY_ZERO_AMOUNT_SETUP ) ) {
+			return false;
+		}
+
+		return '' !== $context->get_payment_method_id() || $this->has_saved_payment_token( $context );
+	}
+
+	/**
+	 * Tell whether checkout context carries an existing saved payment token.
+	 *
+	 * @param PaymentContext $context Payment context.
+	 * @return bool
+	 */
+	private function has_saved_payment_token( PaymentContext $context ): bool {
+		$payment_data  = $context->get_payment_data();
+		$payment_token = isset( $payment_data['payment_token'] ) ? (string) $payment_data['payment_token'] : '';
+
+		return '' !== $payment_token && 'new' !== $payment_token;
 	}
 
 	/**

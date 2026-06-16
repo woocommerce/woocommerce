@@ -56,6 +56,13 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 	private OrderPaymentLifecycleService $lifecycle_service;
 
 	/**
+	 * WooPayments token service.
+	 *
+	 * @var WooPaymentsTokenService
+	 */
+	private WooPaymentsTokenService $token_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
@@ -64,17 +71,20 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 	 * @param WooPaymentsApiClient         $api_client        Native WooPayments API client.
 	 * @param WooPaymentsCustomerService   $customer_service  WooPayments customer service.
 	 * @param OrderPaymentLifecycleService $lifecycle_service Order lifecycle service.
+	 * @param WooPaymentsTokenService      $token_service     WooPayments token service.
 	 */
 	final public function init(
 		NativePaymentsRuntimeArbiter $arbiter,
 		WooPaymentsApiClient $api_client,
 		WooPaymentsCustomerService $customer_service,
-		OrderPaymentLifecycleService $lifecycle_service
+		OrderPaymentLifecycleService $lifecycle_service,
+		WooPaymentsTokenService $token_service
 	): void {
 		$this->arbiter           = $arbiter;
 		$this->api_client        = $api_client;
 		$this->customer_service  = $customer_service;
 		$this->lifecycle_service = $lifecycle_service;
+		$this->token_service     = $token_service;
 	}
 
 	/**
@@ -154,11 +164,19 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 			$intent = 0.0 >= (float) $order->get_total()
 				? $this->api_client->get_setup_intention( $intent_id )
 				: $this->api_client->get_payment_intention( $intent_id );
+			$status = isset( $intent['status'] ) ? (string) $intent['status'] : '';
+
+			if ( $this->is_authorized_intent_status( $status ) ) {
+				$token_save_error = $this->maybe_save_payment_method_for_order( $order, $intent, $request );
+				if ( null !== $token_save_error ) {
+					return $token_save_error;
+				}
+			}
 
 			$event = $this->build_lifecycle_event_from_intent( $intent, $order );
 			$this->lifecycle_service->apply( $order, $event );
 
-			if ( ! $this->is_authorized_intent_status( isset( $intent['status'] ) ? (string) $intent['status'] : '' ) ) {
+			if ( ! $this->is_authorized_intent_status( $status ) ) {
 				return $this->error_response( __( "We're not able to process this payment. Please try again later.", 'woocommerce' ), 409 );
 			}
 
@@ -334,6 +352,122 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 	 */
 	private function is_authorized_intent_status( string $status ): bool {
 		return in_array( $status, array( 'succeeded', 'requires_capture', 'processing' ), true );
+	}
+
+	/**
+	 * Persist a requested payment method as a WooCommerce token before completing the order.
+	 *
+	 * @param WC_Order            $order   Order being updated.
+	 * @param array<string,mixed> $intent  Native intent response.
+	 * @param array<string,mixed> $request Request data.
+	 * @return array<string,mixed>|null Error response when token saving must block checkout.
+	 */
+	private function maybe_save_payment_method_for_order( WC_Order $order, array $intent, array $request ): ?array {
+		$is_recurring     = $this->is_recurring_payment( $order );
+		$should_save_card = $is_recurring || $this->should_save_payment_method( $request );
+		if ( ! $should_save_card ) {
+			return null;
+		}
+
+		$payment_method_id = $this->get_result_payment_method_id( $intent );
+		$user_id           = $this->get_token_user_id( $order );
+		if ( '' === $payment_method_id || 0 >= $user_id ) {
+			return $is_recurring ? $this->recurring_token_save_error_response() : null;
+		}
+
+		try {
+			$token = $this->token_service->get_or_create_card_token_for_user( $payment_method_id, $user_id );
+			if ( $token instanceof \WC_Payment_Token ) {
+				$this->token_service->attach_token_to_order( $order, $token );
+
+				return null;
+			}
+		} catch ( Throwable $exception ) {
+			$this->log_token_save_error( $payment_method_id, $exception );
+
+			return $is_recurring ? $this->recurring_token_save_error_response() : null;
+		}
+
+		return $is_recurring ? $this->recurring_token_save_error_response() : null;
+	}
+
+	/**
+	 * Tell whether the customer requested payment-method saving.
+	 *
+	 * @param array<string,mixed> $request Request data.
+	 * @return bool
+	 */
+	private function should_save_payment_method( array $request ): bool {
+		return 'true' === strtolower( $this->get_request_string( $request, 'should_save_payment_method' ) );
+	}
+
+	/**
+	 * Tell whether this payment must be saved for a recurring order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	private function is_recurring_payment( WC_Order $order ): bool {
+		$is_recurring = false;
+		if ( function_exists( 'wcs_order_contains_subscription' ) ) {
+			$is_recurring = (bool) wcs_order_contains_subscription( $order->get_id() );
+		}
+
+		if ( ! $is_recurring && function_exists( 'wcs_order_contains_renewal' ) ) {
+			$is_recurring = (bool) wcs_order_contains_renewal( $order->get_id() );
+		}
+
+		/**
+		 * Filters whether a native WooPayments callback requires saved-token persistence.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param bool     $is_recurring Whether the order requires saved-token persistence.
+		 * @param WC_Order $order        Order object.
+		 */
+		return (bool) apply_filters( 'woocommerce_native_woopayments_is_recurring_payment', $is_recurring, $order );
+	}
+
+	/**
+	 * Get the user ID that should own a saved payment token.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return int
+	 */
+	private function get_token_user_id( WC_Order $order ): int {
+		$user_id = $order->get_user_id();
+
+		return 0 < $user_id ? $user_id : get_current_user_id();
+	}
+
+	/**
+	 * Log a token-save error.
+	 *
+	 * @param string    $payment_method_id Provider payment method ID.
+	 * @param Throwable $exception         Exception thrown while saving the token.
+	 */
+	private function log_token_save_error( string $payment_method_id, Throwable $exception ): void {
+		if ( ! function_exists( 'wc_get_logger' ) ) {
+			return;
+		}
+
+		wc_get_logger()->error(
+			sprintf(
+				'Failed to save native WooPayments payment method %1$s: %2$s',
+				$payment_method_id,
+				$exception->getMessage()
+			),
+			array( 'source' => 'payment-info' )
+		);
+	}
+
+	/**
+	 * Build the recurring token-save error response.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function recurring_token_save_error_response(): array {
+		return $this->error_response( __( 'Unable to save payment method for subscription. Please try again or use a different payment method.', 'woocommerce' ), 409 );
 	}
 
 	/**

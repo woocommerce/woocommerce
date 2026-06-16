@@ -10,8 +10,11 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymen
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCustomerService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPaymentMethodDetailsService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProviderGatewayAdapter;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsTokenService;
 use WC_Order;
+use WC_Payment_Token_CC;
 use WC_Unit_Test_Case;
 use WP_Error;
 
@@ -19,6 +22,14 @@ use WP_Error;
  * Tests for the WooPaymentsProviderGatewayAdapter class.
  */
 class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		remove_all_filters( 'woocommerce_native_woopayments_is_recurring_payment' );
+		parent::tearDown();
+	}
 
 	/**
 	 * @testdox Charge should normalize legacy confirmation redirects to customer-action outcomes.
@@ -292,6 +303,270 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
 		$this->assertSame( 'cus_recreated', $outcome->get_customer_id() );
+		$this->assertSame( 0, $gateway->processed_order_id );
+	}
+
+	/**
+	 * @testdox Charge should resolve saved WooCommerce token IDs before native transport.
+	 */
+	public function test_charge_resolves_saved_payment_token_before_native_transport(): void {
+		$user_id          = $this->factory()->user->create();
+		$order            = $this->create_woopayments_order();
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$saved_token      = $this->create_card_token( $user_id, 'pm_saved' );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Last request data.
+			 *
+			 * @var array<string,mixed>
+			 */
+			public array $last_request_data = array();
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				if ( 'pm_saved' !== $request_data['payment_method'] || 'key_charge' !== $idempotency_key ) {
+					throw new \RuntimeException( 'Saved token was not resolved before the native charge request.' );
+				}
+
+				return array(
+					'id'             => 'pi_saved',
+					'status'         => 'succeeded',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_saved',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 0,
+						'data'        => array(),
+					),
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+
+		$order->set_customer_id( $user_id );
+		$order->save();
+
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_native' );
+
+		$sut     = $this->create_adapter( $gateway, $api_client, $customer_service );
+		$outcome = $sut->charge(
+			PaymentContext::for_checkout(
+				$order,
+				OrderPaymentStore::GATEWAY_ID,
+				'',
+				array( 'payment_token' => (string) $saved_token->get_id() )
+			),
+			'key_charge'
+		);
+		$order   = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertSame( 'pm_saved', $outcome->get_payment_method_id() );
+		$this->assertContains( $saved_token->get_id(), $order->get_payment_tokens(), 'Existing saved tokens should be linked to the paid order.' );
+	}
+
+	/**
+	 * @testdox Charge should save and attach requested card tokens before returning a successful native outcome.
+	 */
+	public function test_charge_saves_and_attaches_requested_card_token(): void {
+		$user_id          = $this->factory()->user->create();
+		$order            = $this->create_woopayments_order();
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Last request data.
+			 *
+			 * @var array<string,mixed>
+			 */
+			public array $last_request_data = array();
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				unset( $idempotency_key );
+				$this->last_request_data = $request_data;
+
+				return array(
+					'id'             => 'pi_native',
+					'status'         => 'succeeded',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_native',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 0,
+						'data'        => array(),
+					),
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+		$token_service    = $this->create_token_service(
+			array(
+				'pm_native' => array(
+					'id'   => 'pm_native',
+					'type' => 'card',
+					'card' => array(
+						'brand'     => 'visa',
+						'last4'     => '4242',
+						'exp_month' => 12,
+						'exp_year'  => 2030,
+					),
+				),
+			)
+		);
+
+		$order->set_customer_id( $user_id );
+		$order->save();
+
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_native' );
+
+		$sut     = $this->create_adapter( $gateway, $api_client, $customer_service, $token_service );
+		$outcome = $sut->charge(
+			PaymentContext::for_checkout(
+				$order,
+				OrderPaymentStore::GATEWAY_ID,
+				'pm_request',
+				array( 'save_payment_method' => true )
+			),
+			'key_charge'
+		);
+		$order   = wc_get_order( $order->get_id() );
+		$tokens  = \WC_Payment_Tokens::get_customer_tokens( $user_id, OrderPaymentStore::GATEWAY_ID );
+		$token   = reset( $tokens );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertSame( 'off_session', $api_client->last_request_data['setup_future_usage'] );
+		$this->assertInstanceOf( WC_Payment_Token_CC::class, $token );
+		$this->assertSame( 'pm_native', $token->get_token() );
+		$this->assertContains( $token->get_id(), $order->get_payment_tokens(), 'Saved cards should be linked to the paid order.' );
+	}
+
+	/**
+	 * @testdox Charge should fail recurring orders when immediate native token saving fails.
+	 */
+	public function test_charge_fails_recurring_order_when_token_save_fails(): void {
+		$user_id          = $this->factory()->user->create();
+		$order            = $this->create_woopayments_order();
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				unset( $idempotency_key );
+				$this->last_request_data = $request_data;
+
+				return array(
+					'id'             => 'pi_native',
+					'status'         => 'succeeded',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_native',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 0,
+						'data'        => array(),
+					),
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+		$token_service    = new class() extends WooPaymentsTokenService {
+			// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn -- This test double must fail token saving.
+			/**
+			 * Fail token creation.
+			 *
+			 * @param string $payment_method_id Provider payment method ID.
+			 * @param int    $user_id           User ID.
+			 * @return WC_Payment_Token_CC|null
+			 */
+			public function get_or_create_card_token_for_user( string $payment_method_id, int $user_id ): ?WC_Payment_Token_CC {
+				unset( $payment_method_id, $user_id );
+
+				throw new \RuntimeException( 'Token save failed.' );
+			}
+			// phpcs:enable Squiz.Commenting.FunctionComment.InvalidNoReturn
+		};
+
+		$order->set_customer_id( $user_id );
+		$order->save();
+
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_native' );
+
+		add_filter( 'woocommerce_native_woopayments_is_recurring_payment', '__return_true' );
+
+		$sut     = $this->create_adapter( $gateway, $api_client, $customer_service, $token_service );
+		$outcome = $sut->charge(
+			PaymentContext::for_checkout(
+				$order,
+				OrderPaymentStore::GATEWAY_ID,
+				'pm_request',
+				array( 'save_payment_method' => false )
+			),
+			'key_charge'
+		);
+
+		$this->assertSame( PaymentOutcome::STATUS_FAILED, $outcome->get_status() );
+		$this->assertSame( 'off_session', $api_client->last_request_data['setup_future_usage'] );
+		$this->assertSame( 'wcpay_recurring_token_save_failed', $outcome->get_data()['error_code'] );
 		$this->assertSame( 0, $gateway->processed_order_id );
 	}
 
@@ -633,9 +908,10 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	 * @param RecordingLegacyGateway|null     $gateway Legacy gateway.
 	 * @param WooPaymentsApiClient|null       $api_client Native API client.
 	 * @param WooPaymentsCustomerService|null $customer_service WooPayments customer service.
+	 * @param WooPaymentsTokenService|null    $token_service WooPayments token service.
 	 * @return WooPaymentsProviderGatewayAdapter
 	 */
-	private function create_adapter( ?RecordingLegacyGateway $gateway, ?WooPaymentsApiClient $api_client = null, ?WooPaymentsCustomerService $customer_service = null ): WooPaymentsProviderGatewayAdapter {
+	private function create_adapter( ?RecordingLegacyGateway $gateway, ?WooPaymentsApiClient $api_client = null, ?WooPaymentsCustomerService $customer_service = null, ?WooPaymentsTokenService $token_service = null ): WooPaymentsProviderGatewayAdapter {
 		$legacy_runtime = new WooPaymentsLegacyRuntime();
 		$legacy_runtime->init( new LegacyProxyWithGateway( $gateway ) );
 		$api_client = $api_client ?? $this->getMockBuilder( WooPaymentsApiClient::class )
@@ -648,11 +924,74 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$customer_service = $customer_service ?? $this->getMockBuilder( WooPaymentsCustomerService::class )
 			->disableOriginalConstructor()
 			->getMock();
+		$token_service    = $token_service ?? $this->create_token_service();
 
 		$sut = new WooPaymentsProviderGatewayAdapter();
-		$sut->init( $legacy_runtime, $api_client, $customer_service );
+		$sut->init( $legacy_runtime, $api_client, $customer_service, $token_service );
 
 		return $sut;
+	}
+
+	/**
+	 * Create a token service with fake payment method details.
+	 *
+	 * @param array<string,array<string,mixed>> $payment_method_details Payment method details keyed by ID.
+	 * @return WooPaymentsTokenService
+	 */
+	private function create_token_service( array $payment_method_details = array() ): WooPaymentsTokenService {
+		$details_service = new class( $payment_method_details ) extends WooPaymentsPaymentMethodDetailsService {
+			/**
+			 * Payment method details keyed by ID.
+			 *
+			 * @var array<string,array<string,mixed>>
+			 */
+			private array $payment_method_details;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param array<string,array<string,mixed>> $payment_method_details Payment method details keyed by ID.
+			 */
+			public function __construct( array $payment_method_details ) {
+				$this->payment_method_details = $payment_method_details;
+			}
+
+			/**
+			 * Get payment method details.
+			 *
+			 * @param string $payment_method_id Payment method ID.
+			 * @return array<string,mixed>
+			 */
+			public function get_payment_method_details( string $payment_method_id ): array {
+				return $this->payment_method_details[ $payment_method_id ] ?? array();
+			}
+		};
+
+		$token_service = new WooPaymentsTokenService();
+		$token_service->init( $details_service );
+
+		return $token_service;
+	}
+
+	/**
+	 * Create a persisted WooPayments card token.
+	 *
+	 * @param int    $user_id           User ID.
+	 * @param string $payment_method_id Provider payment method ID.
+	 * @return WC_Payment_Token_CC
+	 */
+	private function create_card_token( int $user_id, string $payment_method_id ): WC_Payment_Token_CC {
+		$token = new WC_Payment_Token_CC();
+		$token->set_gateway_id( OrderPaymentStore::GATEWAY_ID );
+		$token->set_user_id( $user_id );
+		$token->set_token( $payment_method_id );
+		$token->set_card_type( 'visa' );
+		$token->set_last4( '4242' );
+		$token->set_expiry_month( '12' );
+		$token->set_expiry_year( '2030' );
+		$token->save();
+
+		return $token;
 	}
 
 	/**
