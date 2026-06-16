@@ -110,29 +110,50 @@ const TaxRecommendationItem = ( {
 	};
 
 	const handleClick = () => {
+		const trackingBase = {
+			context: 'settings',
+			selected_plugin: pluginSlug,
+		};
+
+		recordEvent( 'tax_partner_click', trackingBase );
 		recordEvent( 'settings_tax_recommendation_setup_click', {
 			plugin: pluginSlug,
 			action: isPluginInstalled ? 'activate' : 'install',
 		} );
 
 		const action = isPluginInstalled ? onActivateClick : onInstallClick;
+		const eventName = isPluginInstalled
+			? 'tax_partner_activate'
+			: 'tax_partner_install';
 
-		action( [ pluginSlug ] ).then( () => {
-			createSuccessNotice(
-				isPluginInstalled
-					? sprintf(
-							/* translators: %s: extension name. */
-							__( '%s activated!', 'woocommerce' ),
-							title
-					  )
-					: sprintf(
-							/* translators: %s: extension name. */
-							__( '%s is installed!', 'woocommerce' ),
-							title
-					  ),
-				{}
-			);
-		} );
+		action( [ pluginSlug ] ).then(
+			() => {
+				recordEvent( eventName, {
+					...trackingBase,
+					success: true,
+				} );
+				createSuccessNotice(
+					isPluginInstalled
+						? sprintf(
+								/* translators: %s: extension name. */
+								__( '%s activated!', 'woocommerce' ),
+								title
+						  )
+						: sprintf(
+								/* translators: %s: extension name. */
+								__( '%s is installed!', 'woocommerce' ),
+								title
+						  ),
+					{}
+				);
+			},
+			() => {
+				recordEvent( eventName, {
+					...trackingBase,
+					success: false,
+				} );
+			}
+		);
 	};
 
 	return (
