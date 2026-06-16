@@ -55,6 +55,7 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_task_list_complete' );
 		remove_all_filters( 'pre_option_woocommerce_task_list_complete' );
 		remove_all_filters( 'pre_option_woocommerce_task_list_hidden' );
+		delete_option( 'woocommerce_enable_reviews' );
 
 		parent::tearDown();
 	}
@@ -133,6 +134,7 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 
 		require_once ABSPATH . 'wp-admin/includes/dashboard.php';
 		set_current_screen( 'dashboard' );
+		update_option( 'woocommerce_enable_reviews', 'yes' );
 		unset( $wp_meta_boxes['dashboard'] );
 
 		add_meta_box(
@@ -168,6 +170,55 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 			),
 			$widget_order
 		);
+	}
+
+	/**
+	 * @testdox Recent reviews widget is not registered when product reviews are disabled.
+	 */
+	public function test_init_does_not_register_recent_reviews_widget_when_reviews_are_disabled(): void {
+		global $wp_meta_boxes;
+
+		require_once ABSPATH . 'wp-admin/includes/dashboard.php';
+		set_current_screen( 'dashboard' );
+		update_option( 'woocommerce_enable_reviews', 'no' );
+		$had_comments_support = post_type_supports( 'product', 'comments' );
+		add_post_type_support( 'product', 'comments' );
+		unset( $wp_meta_boxes['dashboard'] );
+
+		try {
+			$this->sut->init();
+
+			$this->assertArrayHasKey( 'woocommerce_dashboard_status', $wp_meta_boxes['dashboard']['normal']['high'] );
+			$this->assertArrayNotHasKey( 'woocommerce_dashboard_recent_reviews', $wp_meta_boxes['dashboard']['normal']['high'] );
+		} finally {
+			if ( ! $had_comments_support ) {
+				remove_post_type_support( 'product', 'comments' );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Recent reviews widget is registered when product reviews are enabled.
+	 */
+	public function test_init_registers_recent_reviews_widget_when_reviews_are_enabled(): void {
+		global $wp_meta_boxes;
+
+		require_once ABSPATH . 'wp-admin/includes/dashboard.php';
+		set_current_screen( 'dashboard' );
+		update_option( 'woocommerce_enable_reviews', 'yes' );
+		$had_comments_support = post_type_supports( 'product', 'comments' );
+		add_post_type_support( 'product', 'comments' );
+		unset( $wp_meta_boxes['dashboard'] );
+
+		try {
+			$this->sut->init();
+
+			$this->assertArrayHasKey( 'woocommerce_dashboard_recent_reviews', $wp_meta_boxes['dashboard']['normal']['high'] );
+		} finally {
+			if ( ! $had_comments_support ) {
+				remove_post_type_support( 'product', 'comments' );
+			}
+		}
 	}
 
 	/**

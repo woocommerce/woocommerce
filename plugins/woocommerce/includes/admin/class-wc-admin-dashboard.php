@@ -45,7 +45,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce Status', 'woocommerce' ), array( $this, 'status_widget' ), null, null, 'normal', 'high' );
 
 			// Reviews Widget.
-			if ( current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
+			if ( wc_reviews_enabled() && current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
 				wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), array( $this, 'recent_reviews' ), null, null, 'normal', 'high' );
 			}
 
