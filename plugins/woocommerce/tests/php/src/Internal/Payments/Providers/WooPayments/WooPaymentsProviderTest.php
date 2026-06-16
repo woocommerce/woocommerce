@@ -76,4 +76,18 @@ class WooPaymentsProviderTest extends WC_Unit_Test_Case {
 			$this->assertTrue( $manifest->supports( $capability ), "{$capability} should be declared for WooPayments native processing." );
 		}
 	}
+
+	/**
+	 * @testdox Provider should receive the gateway adapter through dependency injection.
+	 */
+	public function test_provider_gateway_adapter_access_is_injected(): void {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for provider-boundary regression coverage.
+		$source = (string) file_get_contents( WC()->plugin_path() . '/src/Internal/Payments/Providers/WooPayments/WooPaymentsProvider.php' );
+
+		$this->assertDoesNotMatchRegularExpression(
+			'/wc_get_container\(\)\s*->get\(\s*WooPaymentsProviderGatewayAdapter::class\s*\)/',
+			$source,
+			'WooPaymentsProvider should receive the gateway adapter through init injection.'
+		);
+	}
 }

@@ -132,10 +132,6 @@ class WooPaymentsProvider implements ProviderContract {
 	 * @return WooPaymentsProviderGatewayAdapter
 	 */
 	private function get_gateway_adapter(): WooPaymentsProviderGatewayAdapter {
-		if ( ! isset( $this->gateway_adapter ) ) {
-			$this->gateway_adapter = wc_get_container()->get( WooPaymentsProviderGatewayAdapter::class );
-		}
-
 		return $this->gateway_adapter;
 	}
 }

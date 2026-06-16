@@ -39,16 +39,25 @@ class WooPaymentsOnboardingAdapter {
 	private WooPaymentsProvider $provider;
 
 	/**
+	 * Native WooPayments gateway.
+	 *
+	 * @var NativeWooPaymentsGateway
+	 */
+	private NativeWooPaymentsGateway $native_gateway;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
 	 * @param WooPaymentsLegacyRuntime $legacy_runtime WooPayments legacy runtime.
 	 * @param WooPaymentsProvider      $provider       WooPayments provider.
+	 * @param NativeWooPaymentsGateway $native_gateway Native WooPayments gateway.
 	 */
-	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsProvider $provider ): void {
+	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsProvider $provider, NativeWooPaymentsGateway $native_gateway ): void {
 		$this->legacy_runtime = $legacy_runtime;
 		$this->provider       = $provider;
+		$this->native_gateway = $native_gateway;
 	}
 
 	/**
@@ -98,11 +107,7 @@ class WooPaymentsOnboardingAdapter {
 		}
 
 		if ( $this->is_native_provider_available() ) {
-			$gateway = wc_get_container()->get( NativeWooPaymentsGateway::class );
-
-			if ( $gateway instanceof WC_Payment_Gateway ) {
-				return $gateway;
-			}
+			return $this->native_gateway;
 		}
 
 		throw new \RuntimeException( 'WooPayments gateway is not available.' );
@@ -287,10 +292,6 @@ class WooPaymentsOnboardingAdapter {
 	 * @return WooPaymentsLegacyRuntime
 	 */
 	private function get_legacy_runtime(): WooPaymentsLegacyRuntime {
-		if ( ! isset( $this->legacy_runtime ) ) {
-			$this->legacy_runtime = wc_get_container()->get( WooPaymentsLegacyRuntime::class );
-		}
-
 		return $this->legacy_runtime;
 	}
 
@@ -300,10 +301,6 @@ class WooPaymentsOnboardingAdapter {
 	 * @return WooPaymentsProvider
 	 */
 	private function get_provider(): WooPaymentsProvider {
-		if ( ! isset( $this->provider ) ) {
-			$this->provider = wc_get_container()->get( WooPaymentsProvider::class );
-		}
-
 		return $this->provider;
 	}
 }

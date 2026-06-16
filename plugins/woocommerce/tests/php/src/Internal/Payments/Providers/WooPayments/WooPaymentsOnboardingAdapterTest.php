@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
+use Automattic\WooCommerce\Internal\Payments\NativeWooPaymentsGateway;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOnboardingAdapter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
@@ -101,7 +102,7 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 		$legacy_runtime->init( $this->legacy_proxy );
 
 		$this->adapter = new WooPaymentsOnboardingAdapter();
-		$this->adapter->init( $legacy_runtime, $this->provider );
+		$this->adapter->init( $legacy_runtime, $this->provider, new NativeWooPaymentsGateway() );
 	}
 
 	/**
@@ -206,7 +207,7 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 		);
 
 		$adapter = new WooPaymentsOnboardingAdapter();
-		$adapter->init( $runtime, $this->provider );
+		$adapter->init( $runtime, $this->provider, new NativeWooPaymentsGateway() );
 
 		$this->provider->method( 'can_process_payments' )->willReturn( false );
 		$this->account_service
@@ -229,5 +230,21 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 		self::assertTrue( $adapter->has_live_account( $this->payment_gateway_provider ) );
 		self::assertSame( 'https://example.com/runtime-connect', $adapter->get_onboarding_kyc_fallback_url( $this->payment_gateway_provider ) );
 		self::assertSame( 'https://example.com/runtime-overview?from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT, $adapter->get_overview_page_url() );
+	}
+
+	/**
+	 * @testdox Onboarding adapter should receive runtime collaborators through dependency injection.
+	 */
+	public function test_onboarding_runtime_collaborators_are_injected(): void {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for provider-boundary regression coverage.
+		$source = (string) file_get_contents( WC()->plugin_path() . '/src/Internal/Payments/Providers/WooPayments/WooPaymentsOnboardingAdapter.php' );
+
+		foreach ( array( 'NativeWooPaymentsGateway', 'WooPaymentsLegacyRuntime', 'WooPaymentsProvider' ) as $dependency ) {
+			$this->assertDoesNotMatchRegularExpression(
+				'/wc_get_container\(\)\s*->get\(\s*' . $dependency . '::class\s*\)/',
+				$source,
+				"{$dependency} should be supplied through init injection."
+			);
+		}
 	}
 }
