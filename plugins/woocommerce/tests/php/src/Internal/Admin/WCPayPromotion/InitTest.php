@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\DefaultPromotions;
 use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotion;
 use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\WCPayPromotionDataSourcePoller;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use WC_Unit_Test_Case;
 
 /**
@@ -49,8 +50,37 @@ class InitTest extends WC_Unit_Test_Case {
 		WCPayPromotion::delete_specs_transient();
 		remove_all_filters( 'transient_woocommerce_admin_' . WCPayPromotionDataSourcePoller::ID . '_specs' );
 		update_option( 'woocommerce_default_country', 'US' );
+		$this->reset_container_replacements();
+		wc_get_container()->reset_all_resolved();
 
 		parent::tearDown();
+	}
+
+	/**
+	 * Test that the WooPayments active check uses WooPaymentsLegacyRuntime.
+	 */
+	public function test_can_show_promotion_uses_woopayments_legacy_runtime() {
+		$legacy_runtime = $this->getMockBuilder( WooPaymentsLegacyRuntime::class )
+			->onlyMethods( array( 'is_loaded' ) )
+			->getMock();
+		$legacy_runtime
+			->expects( $this->once() )
+			->method( 'is_loaded' )
+			->willReturn( true );
+		wc_get_container()->replace( WooPaymentsLegacyRuntime::class, $legacy_runtime );
+		wc_get_container()->reset_all_resolved();
+
+		$this->assertFalse( WCPayPromotion::can_show_promotion() );
+	}
+
+	/**
+	 * Test that WooPayments runtime access is centralized.
+	 */
+	public function test_woopayments_runtime_access_is_centralized() {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Read a local source file for a boundary assertion.
+		$source = (string) file_get_contents( WC()->plugin_path() . '/src/Internal/Admin/WCPayPromotion/Init.php' );
+
+		$this->assertStringNotContainsString( "class_exists( '\\WC_Payments' )", $source, 'WCPay promotion should ask WooPaymentsLegacyRuntime whether WooPayments is loaded.' );
 	}
 
 	/**

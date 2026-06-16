@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestionIncentives;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -30,6 +31,13 @@ class WcPayWelcomePage {
 	private PaymentsExtensionSuggestionIncentives $suggestion_incentives;
 
 	/**
+	 * WooPayments legacy runtime.
+	 *
+	 * @var WooPaymentsLegacyRuntime
+	 */
+	private WooPaymentsLegacyRuntime $legacy_runtime;
+
+	/**
 	 * Class instance.
 	 *
 	 * @var ?WcPayWelcomePage
@@ -49,9 +57,13 @@ class WcPayWelcomePage {
 
 	/**
 	 * WCPayWelcomePage constructor.
+	 *
+	 * @param PaymentsExtensionSuggestionIncentives|null $suggestion_incentives Suggestion incentives provider.
+	 * @param WooPaymentsLegacyRuntime|null              $legacy_runtime        WooPayments legacy runtime.
 	 */
-	public function __construct() {
-		$this->suggestion_incentives = wc_get_container()->get( PaymentsExtensionSuggestionIncentives::class );
+	public function __construct( ?PaymentsExtensionSuggestionIncentives $suggestion_incentives = null, ?WooPaymentsLegacyRuntime $legacy_runtime = null ) {
+		$this->suggestion_incentives = $suggestion_incentives ?? wc_get_container()->get( PaymentsExtensionSuggestionIncentives::class );
+		$this->legacy_runtime        = $legacy_runtime ?? wc_get_container()->get( WooPaymentsLegacyRuntime::class );
 	}
 
 	/**
@@ -120,7 +132,7 @@ class WcPayWelcomePage {
 	 * @return boolean
 	 */
 	private function is_wcpay_active(): bool {
-		return class_exists( '\WC_Payments' );
+		return $this->legacy_runtime->is_loaded();
 	}
 
 	/**

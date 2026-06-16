@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 
 /**
  * WooCommerce_Payments
@@ -134,11 +135,24 @@ class WooCommercePayments {
 	 * Check if the WooCommerce Payments plugin is active or installed.
 	 */
 	protected static function is_installed() {
-		if ( defined( 'WC_Payments' ) ) {
+		if ( self::is_woopayments_loaded() ) {
 			return true;
 		}
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 		return 0 === validate_plugin( self::PLUGIN_FILE );
+	}
+
+	/**
+	 * Check if the WooPayments runtime is loaded.
+	 *
+	 * @return boolean
+	 */
+	private static function is_woopayments_loaded(): bool {
+		try {
+			return wc_get_container()->get( WooPaymentsLegacyRuntime::class )->is_loaded();
+		} catch ( \Throwable $e ) {
+			return false;
+		}
 	}
 
 	/**

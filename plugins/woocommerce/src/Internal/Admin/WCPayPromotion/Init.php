@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -40,7 +41,7 @@ class Init extends RemoteSpecsEngine {
 	 */
 	public static function can_show_promotion() {
 		// Don't show if WooPayments is enabled.
-		if ( class_exists( '\WC_Payments' ) ) {
+		if ( self::is_woopayments_loaded() ) {
 			return false;
 		}
 
@@ -187,5 +188,18 @@ class Init extends RemoteSpecsEngine {
 	public static function load_payment_method_promotions() {
 		WCAdminAssets::register_style( 'payment-method-promotions', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'payment-method-promotions', true );
+	}
+
+	/**
+	 * Check if the WooPayments runtime is loaded.
+	 *
+	 * @return boolean
+	 */
+	private static function is_woopayments_loaded(): bool {
+		try {
+			return wc_get_container()->get( WooPaymentsLegacyRuntime::class )->is_loaded();
+		} catch ( \Throwable $e ) {
+			return false;
+		}
 	}
 }
