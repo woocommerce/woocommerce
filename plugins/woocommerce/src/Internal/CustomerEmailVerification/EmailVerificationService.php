@@ -136,19 +136,40 @@ class EmailVerificationService {
 	 * @return bool True when the key is valid and has not expired.
 	 */
 	public function check_verification_key( int $user_id, string $key ): bool {
-		$stored = (string) Users::get_site_user_meta( $user_id, self::KEY_META );
+		$parsed = $this->parse_stored_key( $user_id );
 
-		if ( ! str_contains( $stored, ':' ) ) {
+		if ( null === $parsed ) {
 			return false;
 		}
 
-		list( $timestamp, $hash ) = explode( ':', $stored, 2 );
+		list( $timestamp, $hash ) = $parsed;
 
-		if ( time() - (int) $timestamp > $this->get_expiration() ) {
+		if ( time() - $timestamp > $this->get_expiration() ) {
 			return false;
 		}
 
 		return wp_verify_fast_hash( $key, $hash );
+	}
+
+	/**
+	 * Parse the stored verification token into its timestamp and hash parts.
+	 *
+	 * The token is persisted as "{timestamp}:{wp_fast_hash}"; this is the single place
+	 * that knows that format.
+	 *
+	 * @param int $user_id WordPress user ID.
+	 * @return array{0: int, 1: string}|null The [timestamp, hash] pair, or null when no token is stored.
+	 */
+	private function parse_stored_key( int $user_id ): ?array {
+		$stored = (string) Users::get_site_user_meta( $user_id, self::KEY_META );
+
+		if ( ! str_contains( $stored, ':' ) ) {
+			return null;
+		}
+
+		list( $timestamp, $hash ) = explode( ':', $stored, 2 );
+
+		return array( (int) $timestamp, $hash );
 	}
 
 	/**
@@ -160,15 +181,13 @@ class EmailVerificationService {
 	 * @return int|null Seconds since the last key was created, or null when no key is stored.
 	 */
 	public function seconds_since_last_key( int $user_id ): ?int {
-		$stored = (string) Users::get_site_user_meta( $user_id, self::KEY_META );
+		$parsed = $this->parse_stored_key( $user_id );
 
-		if ( ! str_contains( $stored, ':' ) ) {
+		if ( null === $parsed ) {
 			return null;
 		}
 
-		list( $timestamp ) = explode( ':', $stored, 2 );
-
-		return time() - (int) $timestamp;
+		return time() - $parsed[0];
 	}
 
 	/**

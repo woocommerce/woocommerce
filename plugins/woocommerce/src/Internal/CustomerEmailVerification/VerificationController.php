@@ -226,7 +226,7 @@ class VerificationController {
 	 * @param int $user_id User ID.
 	 * @return string The verification URL.
 	 */
-	public function build_verification_url( int $user_id ): string {
+	private function build_verification_url( int $user_id ): string {
 		$key = $this->service->create_verification_key( $user_id );
 		return add_query_arg(
 			array(

@@ -39,18 +39,10 @@ class OrderLinker {
 	 * @param int $user_id The verified user's ID.
 	 */
 	public function link_past_orders( int $user_id ): void {
-		$user = get_user_by( 'id', $user_id );
-		if ( ! $user ) {
+		$matching = $this->get_matching_order_ids( $user_id, self::ASYNC_THRESHOLD + 1 );
+		if ( null === $matching ) {
 			return;
 		}
-
-		$matching = (array) wc_get_orders(
-			array(
-				'limit'    => self::ASYNC_THRESHOLD + 1,
-				'customer' => array( array( 0, $user->user_email ) ),
-				'return'   => 'ids',
-			)
-		);
 
 		if ( count( $matching ) > self::ASYNC_THRESHOLD ) {
 			WC()->queue()->add( self::ASYNC_HOOK, array( 'user_id' => $user_id ), 'woocommerce-email-verification' );
@@ -58,6 +50,30 @@ class OrderLinker {
 		}
 
 		$this->run_link( $user_id );
+	}
+
+	/**
+	 * Return the IDs of guest orders whose billing email matches the user's account email.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param int $user_id The user ID to match guest orders for.
+	 * @param int $limit   Maximum number of order IDs to return.
+	 * @return int[]|null Matching guest order IDs, or null when the user does not exist.
+	 */
+	private function get_matching_order_ids( int $user_id, int $limit ): ?array {
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			return null;
+		}
+
+		return (array) wc_get_orders(
+			array(
+				'limit'    => $limit,
+				'customer' => array( array( 0, $user->user_email ) ),
+				'return'   => 'ids',
+			)
+		);
 	}
 
 	/**
@@ -83,19 +99,6 @@ class OrderLinker {
 	 * @return bool
 	 */
 	public function has_linkable_orders( int $user_id ): bool {
-		$user = get_user_by( 'id', $user_id );
-		if ( ! $user ) {
-			return false;
-		}
-
-		$matching = (array) wc_get_orders(
-			array(
-				'limit'    => 1,
-				'customer' => array( array( 0, $user->user_email ) ),
-				'return'   => 'ids',
-			)
-		);
-
-		return ! empty( $matching );
+		return ! empty( $this->get_matching_order_ids( $user_id, 1 ) );
 	}
 }
