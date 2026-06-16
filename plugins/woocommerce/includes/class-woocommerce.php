@@ -409,6 +409,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyCompatibilityController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyBookingsCompatibilityController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyPreOrdersCompatibilityController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyUpsCompatibilityController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySubscriptionsCompatibilityController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySwitcherWidgetController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySwitcherBlockController::class )->register();

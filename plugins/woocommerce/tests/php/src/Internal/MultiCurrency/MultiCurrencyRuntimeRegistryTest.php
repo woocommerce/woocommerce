@@ -61,6 +61,7 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'compatibility',
 				'bookings_compatibility',
 				'pre_orders_compatibility',
+				'ups_compatibility',
 				'subscriptions_compatibility',
 				'async_prices',
 				'storefront',
@@ -289,6 +290,20 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'wc_pre_orders_fee' ), $filter_hooks );
 		$this->assertSame( array(), $hook_groups['pre_orders_compatibility']['actions'] );
+	}
+
+	/**
+	 * @testdox Should preserve the WooPayments UPS compatibility hook surface.
+	 */
+	public function test_ups_compatibility_manifest_contains_preserved_hooks(): void {
+		$hook_groups  = MultiCurrencyRuntimeRegistry::get_core_hook_groups();
+		$filter_hooks = array_column( $hook_groups['ups_compatibility']['filters'], 'hook' );
+
+		$this->assertSame(
+			array( 'wcpay_multi_currency_should_return_store_currency' ),
+			$filter_hooks
+		);
+		$this->assertSame( array(), $hook_groups['ups_compatibility']['actions'] );
 	}
 
 	/**

@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySettings
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStorefrontProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySubscriptionsCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyTrackingProjectionService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyUpsCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyUserSettingsProjectionService;
 
 /**
@@ -82,6 +83,7 @@ class MultiCurrencyRuntimeRegistry {
 			'compatibility'               => MultiCurrencyCompatibilityProjectionService::get_hook_manifest(),
 			'bookings_compatibility'      => MultiCurrencyBookingsCompatibilityProjectionService::get_hook_manifest(),
 			'pre_orders_compatibility'    => MultiCurrencyPreOrdersCompatibilityProjectionService::get_hook_manifest(),
+			'ups_compatibility'           => MultiCurrencyUpsCompatibilityProjectionService::get_hook_manifest(),
 			'subscriptions_compatibility' => MultiCurrencySubscriptionsCompatibilityProjectionService::get_hook_manifest(),
 			'async_prices'                => MultiCurrencyAsyncPriceProjectionService::get_hook_manifest( true, false, false, false, false ),
 			'storefront'                  => MultiCurrencyStorefrontProjectionService::get_hook_manifest( 2, true ),
