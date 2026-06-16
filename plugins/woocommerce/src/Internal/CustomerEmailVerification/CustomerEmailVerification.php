@@ -35,9 +35,7 @@ class CustomerEmailVerification {
 
 		$container = wc_get_container();
 		$container->get( VerificationController::class );
-		$container->get( LoginGate::class );
 		$container->get( OrderLinker::class );
-		$container->get( AccountCreationIntegration::class );
 		$container->get( VerificationEventListener::class );
 	}
 

@@ -3,9 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\CustomerEmailVerification;
 
-use Automattic\WooCommerce\Internal\CustomerEmailVerification\AccountCreationIntegration;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
-use Automattic\WooCommerce\Internal\CustomerEmailVerification\LoginGate;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\OrderLinker;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\VerificationController;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\VerificationEventListener;
@@ -42,21 +40,9 @@ class CustomerEmailVerificationTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertInstanceOf(
-			LoginGate::class,
-			$container->get( LoginGate::class ),
-			'LoginGate must be resolvable from the DI container.'
-		);
-
-		$this->assertInstanceOf(
 			OrderLinker::class,
 			$container->get( OrderLinker::class ),
 			'OrderLinker must be resolvable from the DI container.'
-		);
-
-		$this->assertInstanceOf(
-			AccountCreationIntegration::class,
-			$container->get( AccountCreationIntegration::class ),
-			'AccountCreationIntegration must be resolvable from the DI container.'
 		);
 
 		$this->assertInstanceOf(
