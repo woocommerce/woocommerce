@@ -199,6 +199,15 @@ class MultiCurrencyFrontendProjectionServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should project store currency decimals for shipping calculations.
+	 */
+	public function test_projects_store_currency_decimals_for_shipping_calculations(): void {
+		$sut = $this->create_service( $this->create_state( 'JPY' ) );
+
+		$this->assertSame( 2, $sut->get_store_currency_decimals() );
+	}
+
+	/**
 	 * @testdox Should return single currency settings for available currency.
 	 */
 	public function test_returns_single_currency_settings_for_available_currency(): void {

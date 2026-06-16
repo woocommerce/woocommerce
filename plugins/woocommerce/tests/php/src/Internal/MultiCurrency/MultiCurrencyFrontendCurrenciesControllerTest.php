@@ -141,11 +141,23 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 123, $sut->init_order_currency( 123 ) );
 		$this->assertSame( 42.0, $sut->maybe_init_order_currency_from_order_total_prop( 42.0, null ) );
 		$this->assertSame( '$42.00', $sut->maybe_clear_order_currency_after_formatted_order_total( '$42.00', null, '', false ) );
+		$this->assertNull( $sut->init_order_currency_from_query_vars(), 'Pay-for-order action callback should not return a value.' );
+	}
+
+	/**
+	 * @testdox Should set store currency decimals for shipping rate args.
+	 */
+	public function test_sets_store_currency_decimals_for_shipping_rate_args(): void {
+		$sut = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
+		$sut->register();
+
 		$this->assertSame(
-			array( 'cost' => '10.00' ),
+			array(
+				'cost'           => '10.00',
+				'price_decimals' => 2,
+			),
 			$sut->fix_price_decimals_for_shipping_rates( array( 'cost' => '10.00' ), null )
 		);
-		$this->assertNull( $sut->init_order_currency_from_query_vars(), 'Pay-for-order action callback should not return a value.' );
 	}
 
 	/**
@@ -288,6 +300,15 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 			 */
 			public function get_woocommerce_currency_pos( string $position, ?string $order_currency = null ): string {
 				return 'right_space';
+			}
+
+			/**
+			 * Project the store/default currency decimal count.
+			 *
+			 * @return int
+			 */
+			public function get_store_currency_decimals(): int {
+				return 2;
 			}
 
 			/**

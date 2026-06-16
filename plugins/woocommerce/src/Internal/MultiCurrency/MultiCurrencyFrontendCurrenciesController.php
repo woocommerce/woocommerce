@@ -231,6 +231,12 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	public function fix_price_decimals_for_shipping_rates( $args, $method ) {
 		unset( $method );
 
+		if ( ! is_array( $args ) ) {
+			return $args;
+		}
+
+		$args['price_decimals'] = $this->get_frontend_projection_service()->get_store_currency_decimals();
+
 		return $args;
 	}
 

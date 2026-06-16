@@ -195,6 +195,17 @@ class MultiCurrencyFrontendProjectionService {
 	}
 
 	/**
+	 * Project the store/default currency decimal count.
+	 *
+	 * @return int
+	 */
+	public function get_store_currency_decimals(): int {
+		$default_code = $this->state_builder->build()->get_default_currency()->get_code();
+
+		return absint( $this->localization_service->get_currency_format( $default_code )['num_decimals'] );
+	}
+
+	/**
 	 * Project stored settings for a single currency.
 	 *
 	 * @param string $currency_code Currency code.
