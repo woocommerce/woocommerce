@@ -22,6 +22,7 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 	 */
 	private array $hooks = array(
 		'init',
+		'wp_footer',
 		'woocommerce_created_customer',
 		'woocommerce_edit_account_form',
 		'woocommerce_save_account_details',
@@ -246,6 +247,89 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'CAD' ), $service->updated_currencies );
 		$this->assertSame( array( false ), $service->persist_flags );
+	}
+
+	/**
+	 * @testdox Should register geolocation notice when automatic switching passes guards.
+	 */
+	public function test_registers_geolocation_notice_when_auto_currency_passes_guards(): void {
+		update_option( 'wcpay_multi_currency_enable_auto_currency', 'yes' );
+		$service = $this->create_persistence_service();
+		$sut     = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, $service );
+		$sut->set_geolocation_service( $this->create_geolocation_service( 'CAD', 'CA' ) );
+
+		$sut->handle_geolocation_init();
+		$sut->handle_geolocation_init();
+
+		$this->assertSame( 10, has_action( 'wp_footer', array( $sut, 'handle_wp_footer' ) ) );
+	}
+
+	/**
+	 * @testdox Should not register geolocation notice when switching is disabled.
+	 */
+	public function test_does_not_register_geolocation_notice_when_switching_is_disabled(): void {
+		update_option( 'wcpay_multi_currency_enable_auto_currency', 'yes' );
+		$service               = $this->create_persistence_service();
+		$sut                   = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, $service );
+		$_GET['pay_for_order'] = '1';
+		$sut->set_geolocation_service( $this->create_geolocation_service( 'CAD', 'CA' ) );
+
+		$sut->handle_geolocation_init();
+
+		$this->assertFalse( has_action( 'wp_footer', array( $sut, 'handle_wp_footer' ) ) );
+	}
+
+	/**
+	 * @testdox Should render geolocation currency update notice.
+	 */
+	public function test_renders_geolocation_currency_update_notice(): void {
+		$service = $this->create_persistence_service( true, 'CAD' );
+		$sut     = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, $service );
+		$sut->set_geolocation_service( $this->create_geolocation_service( 'CAD', 'CA' ) );
+
+		ob_start();
+		$sut->handle_wp_footer();
+		$markup = (string) ob_get_clean();
+
+		$store_currency = get_woocommerce_currency();
+		$currencies     = get_woocommerce_currencies();
+
+		$this->assertStringContainsString( 'woocommerce-store-notice demo_store', $markup );
+		$this->assertStringContainsString( 'visiting from Canada', $markup );
+		$this->assertStringContainsString( '?currency=' . $store_currency, $markup );
+		$this->assertStringContainsString( 'Use ' . $currencies[ $store_currency ] . ' instead.', $markup );
+		$this->assertStringContainsString( 'woocommerce-store-notice__dismiss-link', $markup );
+	}
+
+	/**
+	 * @testdox Should not render geolocation notice for the store default currency.
+	 */
+	public function test_does_not_render_geolocation_notice_for_store_default_currency(): void {
+		$store_currency = get_woocommerce_currency();
+		$service        = $this->create_persistence_service( true, $store_currency );
+		$sut            = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, $service );
+		$sut->set_geolocation_service( $this->create_geolocation_service( $store_currency, 'US' ) );
+
+		ob_start();
+		$sut->handle_wp_footer();
+		$markup = (string) ob_get_clean();
+
+		$this->assertSame( '', $markup );
+	}
+
+	/**
+	 * @testdox Should not render geolocation notice for another selected currency.
+	 */
+	public function test_does_not_render_geolocation_notice_for_other_selected_currency(): void {
+		$service = $this->create_persistence_service( true, 'CAD' );
+		$sut     = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, $service );
+		$sut->set_geolocation_service( $this->create_geolocation_service( 'EUR', 'FR' ) );
+
+		ob_start();
+		$sut->handle_wp_footer();
+		$markup = (string) ob_get_clean();
+
+		$this->assertSame( '', $markup );
 	}
 
 	/**
@@ -622,10 +706,11 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 	 * Create a deterministic geolocation service.
 	 *
 	 * @param string|null $currency_code Currency code to return.
+	 * @param string      $country_code  Country code to return.
 	 * @return MultiCurrencyGeolocationService
 	 */
-	private function create_geolocation_service( ?string $currency_code ): MultiCurrencyGeolocationService {
-		return new class( $currency_code ) extends MultiCurrencyGeolocationService {
+	private function create_geolocation_service( ?string $currency_code, string $country_code = 'CA' ): MultiCurrencyGeolocationService {
+		return new class( $currency_code, $country_code ) extends MultiCurrencyGeolocationService {
 			/**
 			 * Currency code to return.
 			 *
@@ -634,12 +719,21 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 			private ?string $currency_code;
 
 			/**
+			 * Country code to return.
+			 *
+			 * @var string
+			 */
+			private string $country_code;
+
+			/**
 			 * Constructor.
 			 *
 			 * @param string|null $currency_code Currency code to return.
+			 * @param string      $country_code  Country code to return.
 			 */
-			public function __construct( ?string $currency_code ) {
+			public function __construct( ?string $currency_code, string $country_code ) {
 				$this->currency_code = $currency_code;
+				$this->country_code  = $country_code;
 			}
 
 			/**
@@ -649,6 +743,15 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 			 */
 			public function get_currency_by_customer_location(): ?string {
 				return $this->currency_code;
+			}
+
+			/**
+			 * Get the customer's country based on location.
+			 *
+			 * @return string
+			 */
+			public function get_country_by_customer_location(): string {
+				return $this->country_code;
 			}
 		};
 	}

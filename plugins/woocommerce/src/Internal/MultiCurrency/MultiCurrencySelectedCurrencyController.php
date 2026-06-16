@@ -33,6 +33,9 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 	private const CACHE_FEATURE_FLAG_OPTION = '_wcpay_feature_mc_cache_optimized';
 	private const DISABLE_SWITCHING_FILTER  = 'wcpay_multi_currency_should_disable_currency_switching';
 
+	private const FILTER_OVERRIDE_NOTICE_COUNTRY       = 'wcpay_multi_currency_override_notice_country';
+	private const FILTER_OVERRIDE_NOTICE_CURRENCY_NAME = 'wcpay_multi_currency_override_notice_currency_name';
+
 	/**
 	 * Runtime owner arbiter.
 	 *
@@ -152,8 +155,13 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 			! $this->is_using_auto_currency_switching()
 			|| $this->should_disable_currency_switching()
 			|| $this->should_use_async_rendering()
-			|| $this->get_persistence_service()->has_stored_currency_code()
 		) {
+			return;
+		}
+
+		$this->add_action_once( 'wp_footer', array( $this, 'handle_wp_footer' ) );
+
+		if ( $this->get_persistence_service()->has_stored_currency_code() ) {
 			return;
 		}
 
@@ -163,6 +171,66 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 		}
 
 		$this->get_persistence_service()->update_selected_currency( strtoupper( trim( $currency_code ) ), false );
+	}
+
+	/**
+	 * Render the geolocation currency update notice.
+	 *
+	 * @internal
+	 */
+	public function handle_wp_footer(): void {
+		$current_currency_code    = strtoupper( $this->get_persistence_service()->get_selected_currency_code() );
+		$store_currency_code      = strtoupper( get_woocommerce_currency() );
+		$geolocated_currency_code = $this->get_geolocation_service()->get_currency_by_customer_location();
+
+		if (
+			$store_currency_code === $current_currency_code
+			|| ! is_string( $geolocated_currency_code )
+			|| strtoupper( $geolocated_currency_code ) !== $current_currency_code
+		) {
+			return;
+		}
+
+		$country_code          = $this->get_geolocation_service()->get_country_by_customer_location();
+		$countries             = function_exists( 'WC' ) && is_object( WC()->countries ) && method_exists( WC()->countries, 'get_countries' )
+			? WC()->countries->get_countries()
+			: array();
+		$currencies            = get_woocommerce_currencies();
+		$country_name          = $countries[ $country_code ] ?? $country_code;
+		$current_currency_name = $currencies[ $current_currency_code ] ?? $current_currency_code;
+		$store_currency_name   = $currencies[ $store_currency_code ] ?? $store_currency_code;
+
+		/**
+		 * Filters the country name displayed in the native multi-currency geolocation notice.
+		 *
+		 * @param string $country_name Country name.
+		 *
+		 * @since 11.0.0
+		 */
+		$country_name = apply_filters( self::FILTER_OVERRIDE_NOTICE_COUNTRY, $country_name );
+
+		/**
+		 * Filters the currency name displayed in the native multi-currency geolocation notice.
+		 *
+		 * @param string $current_currency_name Current currency name.
+		 *
+		 * @since 11.0.0
+		 */
+		$current_currency_name = apply_filters( self::FILTER_OVERRIDE_NOTICE_CURRENCY_NAME, $current_currency_name );
+
+		$message = sprintf(
+			/* translators: %1$s: User country. %2$s: Selected currency name. %3$s: Store currency name. %4$s: Link to switch currency. */
+			__( 'We noticed you\'re visiting from %1$s. We\'ve updated our prices to %2$s for your shopping convenience. <a href="%4$s">Use %3$s instead.</a>', 'woocommerce' ),
+			esc_html( (string) $country_name ),
+			esc_html( (string) $current_currency_name ),
+			esc_html( $store_currency_name ),
+			esc_url( '?currency=' . $store_currency_code )
+		);
+		$notice_id = md5( $message );
+
+		echo '<p class="woocommerce-store-notice demo_store" data-notice-id="' . esc_attr( $notice_id . 2 ) . '" style="display:none;">';
+		echo wp_kses_post( $message );
+		echo ' <a href="#" class="woocommerce-store-notice__dismiss-link">' . esc_html__( 'Dismiss', 'woocommerce' ) . '</a></p>';
 	}
 
 	/**

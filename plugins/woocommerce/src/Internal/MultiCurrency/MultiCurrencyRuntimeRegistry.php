@@ -172,6 +172,7 @@ class MultiCurrencyRuntimeRegistry {
 			'actions' => array(
 				self::hook_entry( 'init', 'update_selected_currency_by_url', 11 ),
 				self::hook_entry( 'init', 'update_selected_currency_by_geolocation', 12 ),
+				self::hook_entry( 'wp_footer', 'display_geolocation_currency_update_notice', 10 ),
 				self::hook_entry( 'woocommerce_created_customer', 'set_new_customer_currency_meta', 10 ),
 				self::hook_entry( 'woocommerce_edit_account_form', 'add_presentment_currency_switch', 10 ),
 				self::hook_entry( 'woocommerce_save_account_details', 'save_presentment_currency', 10 ),
