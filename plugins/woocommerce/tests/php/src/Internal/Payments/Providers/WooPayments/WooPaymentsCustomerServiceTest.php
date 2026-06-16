@@ -4,8 +4,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCustomerService;
-use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use WC_Order;
 use WC_Unit_Test_Case;
 
@@ -84,38 +84,15 @@ class WooPaymentsCustomerServiceTest extends WC_Unit_Test_Case {
 	 * @return WooPaymentsCustomerService
 	 */
 	private function create_sut( bool $test_mode, WooPaymentsApiClient $api_client ): WooPaymentsCustomerService {
-		$mode = new class( $test_mode ) {
-			/**
-			 * Whether test mode is enabled.
-			 *
-			 * @var bool
-			 */
-			private bool $test_mode;
+		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_test_mode_enabled' ) )
+			->getMock();
 
-			/**
-			 * Constructor.
-			 *
-			 * @param bool $test_mode Whether test mode is enabled.
-			 */
-			public function __construct( bool $test_mode ) {
-				$this->test_mode = $test_mode;
-			}
-
-			/**
-			 * Tell whether the runtime is in test mode.
-			 *
-			 * @return bool
-			 */
-			public function is_test(): bool {
-				return $this->test_mode;
-			}
-		};
-
-		$runtime = new WooPaymentsLegacyRuntime();
-		$runtime->init( new LegacyRuntimeProxy( true, null, null, null, null, null, null, $mode ) );
+		$account_service->method( 'is_test_mode_enabled' )->willReturn( $test_mode );
 
 		$sut = new WooPaymentsCustomerService();
-		$sut->init( $api_client, $runtime );
+		$sut->init( $api_client, $account_service );
 
 		return $sut;
 	}

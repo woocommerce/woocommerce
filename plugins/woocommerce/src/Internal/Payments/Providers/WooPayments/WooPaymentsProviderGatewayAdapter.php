@@ -52,6 +52,13 @@ class WooPaymentsProviderGatewayAdapter {
 	private WooPaymentsTokenService $token_service;
 
 	/**
+	 * WooPayments account service.
+	 *
+	 * @var WooPaymentsAccountService
+	 */
+	private WooPaymentsAccountService $account_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
@@ -60,12 +67,14 @@ class WooPaymentsProviderGatewayAdapter {
 	 * @param WooPaymentsApiClient       $api_client      Native WooPayments API client.
 	 * @param WooPaymentsCustomerService $customer_service WooPayments customer service.
 	 * @param WooPaymentsTokenService    $token_service    WooPayments token service.
+	 * @param WooPaymentsAccountService  $account_service  WooPayments account service.
 	 */
-	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsApiClient $api_client, WooPaymentsCustomerService $customer_service, WooPaymentsTokenService $token_service ): void {
+	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsApiClient $api_client, WooPaymentsCustomerService $customer_service, WooPaymentsTokenService $token_service, WooPaymentsAccountService $account_service ): void {
 		$this->legacy_runtime   = $legacy_runtime;
 		$this->api_client       = $api_client;
 		$this->customer_service = $customer_service;
 		$this->token_service    = $token_service;
+		$this->account_service  = $account_service;
 	}
 
 	/**
@@ -344,6 +353,15 @@ class WooPaymentsProviderGatewayAdapter {
 	 */
 	private function get_token_service(): WooPaymentsTokenService {
 		return $this->token_service;
+	}
+
+	/**
+	 * Get the WooPayments account service.
+	 *
+	 * @return WooPaymentsAccountService
+	 */
+	private function get_account_service(): WooPaymentsAccountService {
+		return $this->account_service;
 	}
 
 	/**
@@ -627,7 +645,7 @@ class WooPaymentsProviderGatewayAdapter {
 		$customer_id       = isset( $result['customer'] ) ? (string) $result['customer'] : $fallback_customer_id;
 		$meta              = array(
 			'_wcpay_intent_currency' => isset( $result['currency'] ) ? (string) $result['currency'] : (string) $context->get_order()->get_currency(),
-			'_wcpay_mode'            => $this->is_test_mode_enabled() ? 'test' : 'live',
+			'_wcpay_mode'            => $this->get_account_service()->get_mode(),
 		);
 
 		if ( '' !== $charge_id ) {
@@ -709,7 +727,7 @@ class WooPaymentsProviderGatewayAdapter {
 		$confirmation_token = $this->is_confirmation_token( $payment_credential ) ? $payment_credential : '';
 		$meta               = array(
 			'_wcpay_intent_currency' => (string) $context->get_order()->get_currency(),
-			'_wcpay_mode'            => $this->is_test_mode_enabled() ? 'test' : 'live',
+			'_wcpay_mode'            => $this->get_account_service()->get_mode(),
 		);
 
 		if ( '' === $payment_method_id && ! $this->is_confirmation_token( $payment_credential ) ) {
@@ -1047,20 +1065,6 @@ class WooPaymentsProviderGatewayAdapter {
 		}
 
 		return __( 'Credit / Debit Cards', 'woocommerce' );
-	}
-
-	/**
-	 * Tell whether the current WooPayments runtime is in test mode.
-	 *
-	 * @return bool
-	 */
-	private function is_test_mode_enabled(): bool {
-		$test_mode = $this->legacy_runtime->is_test_mode();
-		if ( null !== $test_mode ) {
-			return $test_mode;
-		}
-
-		return 'yes' === get_option( 'wcpay_test_mode', 'no' );
 	}
 
 	/**

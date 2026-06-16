@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\Payments\CapabilityManifest;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
 use Automattic\WooCommerce\Internal\Payments\PaymentContext;
 use Automattic\WooCommerce\Internal\Payments\PaymentOutcome;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\ProviderContract;
 
 /**
@@ -31,14 +32,32 @@ class WooPaymentsProvider implements ProviderContract {
 	private WooPaymentsProviderGatewayAdapter $gateway_adapter;
 
 	/**
+	 * Native WooPayments API client.
+	 *
+	 * @var WooPaymentsApiClient
+	 */
+	private WooPaymentsApiClient $api_client;
+
+	/**
+	 * WooPayments account service.
+	 *
+	 * @var WooPaymentsAccountService
+	 */
+	private WooPaymentsAccountService $account_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
 	 * @param WooPaymentsProviderGatewayAdapter $gateway_adapter WooPayments gateway adapter.
+	 * @param WooPaymentsApiClient              $api_client      Native WooPayments API client.
+	 * @param WooPaymentsAccountService         $account_service WooPayments account service.
 	 */
-	final public function init( WooPaymentsProviderGatewayAdapter $gateway_adapter ): void {
+	final public function init( WooPaymentsProviderGatewayAdapter $gateway_adapter, WooPaymentsApiClient $api_client, WooPaymentsAccountService $account_service ): void {
 		$this->gateway_adapter = $gateway_adapter;
+		$this->api_client      = $api_client;
+		$this->account_service = $account_service;
 	}
 
 	/**
@@ -80,7 +99,7 @@ class WooPaymentsProvider implements ProviderContract {
 	 * @return bool
 	 */
 	public function can_process_payments(): bool {
-		return $this->get_gateway_adapter()->is_available();
+		return $this->api_client->is_available() && $this->account_service->can_process_payments();
 	}
 
 	/**

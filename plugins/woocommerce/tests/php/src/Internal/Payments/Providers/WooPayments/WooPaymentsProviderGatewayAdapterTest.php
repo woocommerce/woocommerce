@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Payments\PaymentContext;
 use Automattic\WooCommerce\Internal\Payments\PaymentOutcome;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCustomerService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPaymentMethodDetailsService;
@@ -223,6 +224,62 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$this->assertSame( '4242', $order->get_meta( 'last4', true ) );
 		$this->assertSame( 'visa', $order->get_meta( '_card_brand', true ) );
 		$this->assertSame( 'Credit / Debit Cards', $order->get_payment_method_title() );
+	}
+
+	/**
+	 * @testdox Charge should use the Core-owned account service for native outcome mode metadata.
+	 */
+	public function test_charge_uses_account_service_mode_for_native_outcome_meta(): void {
+		$order            = $this->create_woopayments_order();
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				unset( $request_data, $idempotency_key );
+
+				return array(
+					'id'             => 'pi_native',
+					'status'         => 'succeeded',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_native',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 0,
+						'data'        => array(),
+					),
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+		$account_service  = $this->create_account_service( true );
+
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_native' );
+
+		$sut     = $this->create_adapter( $gateway, $api_client, $customer_service, null, $account_service );
+		$outcome = $sut->charge( PaymentContext::for_checkout( $order, OrderPaymentStore::GATEWAY_ID, 'pm_request' ), 'key_charge' );
+
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertSame( 'test', $outcome->get_data()['meta']['_wcpay_mode'] );
 	}
 
 	/**
@@ -909,9 +966,10 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	 * @param WooPaymentsApiClient|null       $api_client Native API client.
 	 * @param WooPaymentsCustomerService|null $customer_service WooPayments customer service.
 	 * @param WooPaymentsTokenService|null    $token_service WooPayments token service.
+	 * @param WooPaymentsAccountService|null  $account_service WooPayments account service.
 	 * @return WooPaymentsProviderGatewayAdapter
 	 */
-	private function create_adapter( ?RecordingLegacyGateway $gateway, ?WooPaymentsApiClient $api_client = null, ?WooPaymentsCustomerService $customer_service = null, ?WooPaymentsTokenService $token_service = null ): WooPaymentsProviderGatewayAdapter {
+	private function create_adapter( ?RecordingLegacyGateway $gateway, ?WooPaymentsApiClient $api_client = null, ?WooPaymentsCustomerService $customer_service = null, ?WooPaymentsTokenService $token_service = null, ?WooPaymentsAccountService $account_service = null ): WooPaymentsProviderGatewayAdapter {
 		$legacy_runtime = new WooPaymentsLegacyRuntime();
 		$legacy_runtime->init( new LegacyProxyWithGateway( $gateway ) );
 		$api_client = $api_client ?? $this->getMockBuilder( WooPaymentsApiClient::class )
@@ -925,11 +983,30 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 			->disableOriginalConstructor()
 			->getMock();
 		$token_service    = $token_service ?? $this->create_token_service();
+		$account_service  = $account_service ?? $this->create_account_service( false );
 
 		$sut = new WooPaymentsProviderGatewayAdapter();
-		$sut->init( $legacy_runtime, $api_client, $customer_service, $token_service );
+		$sut->init( $legacy_runtime, $api_client, $customer_service, $token_service, $account_service );
 
 		return $sut;
+	}
+
+	/**
+	 * Create a WooPayments account service mock.
+	 *
+	 * @param bool $test_mode Whether WooPayments should run in test mode.
+	 * @return WooPaymentsAccountService
+	 */
+	private function create_account_service( bool $test_mode ): WooPaymentsAccountService {
+		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_test_mode_enabled', 'get_mode' ) )
+			->getMock();
+
+		$account_service->method( 'is_test_mode_enabled' )->willReturn( $test_mode );
+		$account_service->method( 'get_mode' )->willReturn( $test_mode ? 'test' : 'live' );
+
+		return $account_service;
 	}
 
 	/**

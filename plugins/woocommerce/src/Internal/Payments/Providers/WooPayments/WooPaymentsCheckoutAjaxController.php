@@ -63,6 +63,13 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 	private WooPaymentsTokenService $token_service;
 
 	/**
+	 * WooPayments account service.
+	 *
+	 * @var WooPaymentsAccountService
+	 */
+	private WooPaymentsAccountService $account_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
@@ -72,19 +79,22 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 	 * @param WooPaymentsCustomerService   $customer_service  WooPayments customer service.
 	 * @param OrderPaymentLifecycleService $lifecycle_service Order lifecycle service.
 	 * @param WooPaymentsTokenService      $token_service     WooPayments token service.
+	 * @param WooPaymentsAccountService    $account_service   WooPayments account service.
 	 */
 	final public function init(
 		NativePaymentsRuntimeArbiter $arbiter,
 		WooPaymentsApiClient $api_client,
 		WooPaymentsCustomerService $customer_service,
 		OrderPaymentLifecycleService $lifecycle_service,
-		WooPaymentsTokenService $token_service
+		WooPaymentsTokenService $token_service,
+		WooPaymentsAccountService $account_service
 	): void {
 		$this->arbiter           = $arbiter;
 		$this->api_client        = $api_client;
 		$this->customer_service  = $customer_service;
 		$this->lifecycle_service = $lifecycle_service;
 		$this->token_service     = $token_service;
+		$this->account_service   = $account_service;
 	}
 
 	/**
@@ -286,7 +296,7 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 			'_intent_id'             => $intent_id,
 			'_intention_status'      => $status,
 			'_wcpay_intent_currency' => isset( $intent['currency'] ) ? (string) $intent['currency'] : (string) $order->get_currency(),
-			'_wcpay_mode'            => 'yes' === get_option( 'wcpay_test_mode', 'no' ) ? 'test' : 'live',
+			'_wcpay_mode'            => $this->account_service->get_mode(),
 		);
 
 		$payment_method_id = $this->get_result_payment_method_id( $intent );

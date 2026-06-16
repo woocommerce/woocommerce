@@ -36,14 +36,23 @@ class WooPaymentsCheckoutBridge {
 	private WooPaymentsLegacyRuntime $legacy_runtime;
 
 	/**
+	 * WooPayments account service.
+	 *
+	 * @var WooPaymentsAccountService
+	 */
+	private WooPaymentsAccountService $account_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsLegacyRuntime $legacy_runtime WooPayments legacy runtime.
+	 * @param WooPaymentsLegacyRuntime  $legacy_runtime  WooPayments legacy runtime.
+	 * @param WooPaymentsAccountService $account_service WooPayments account service.
 	 */
-	final public function init( WooPaymentsLegacyRuntime $legacy_runtime ): void {
-		$this->legacy_runtime = $legacy_runtime;
+	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsAccountService $account_service ): void {
+		$this->legacy_runtime  = $legacy_runtime;
+		$this->account_service = $account_service;
 	}
 
 	/**
@@ -52,7 +61,7 @@ class WooPaymentsCheckoutBridge {
 	 * @return bool
 	 */
 	public function should_expose_checkout_surface(): bool {
-		return '' !== (string) $this->get_legacy_runtime()->get_gateway_publishable_key();
+		return $this->get_account_service()->can_process_payments();
 	}
 
 	/**
@@ -62,8 +71,8 @@ class WooPaymentsCheckoutBridge {
 	 */
 	public function get_payment_fields_js_config(): array {
 		$config = array(
-			'publishableKey'                => (string) $this->get_legacy_runtime()->get_gateway_publishable_key(),
-			'accountId'                     => (string) $this->get_legacy_runtime()->get_gateway_account_id(),
+			'publishableKey'                => $this->get_account_service()->get_publishable_key(),
+			'accountId'                     => $this->get_account_service()->get_account_id(),
 			'locale'                        => $this->get_stripe_locale(),
 			'gatewayId'                     => OrderPaymentStore::GATEWAY_ID,
 			'ajaxUrl'                       => admin_url( 'admin-ajax.php' ),
@@ -185,6 +194,19 @@ class WooPaymentsCheckoutBridge {
 		}
 
 		return $this->legacy_runtime;
+	}
+
+	/**
+	 * Get the WooPayments account service.
+	 *
+	 * @return WooPaymentsAccountService
+	 */
+	private function get_account_service(): WooPaymentsAccountService {
+		if ( ! isset( $this->account_service ) ) {
+			$this->account_service = wc_get_container()->get( WooPaymentsAccountService::class );
+		}
+
+		return $this->account_service;
 	}
 
 	/**

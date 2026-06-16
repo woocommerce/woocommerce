@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments\A
 
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use WC_Unit_Test_Case;
 
 /**
@@ -30,7 +31,7 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 			return $params;
 		};
 
-		$sut->init( $http_client );
+		$sut->init( $http_client, $this->create_account_service( false ) );
 		add_filter( 'wcpay_api_request_params', $filter, 10, 3 );
 
 		try {
@@ -45,6 +46,31 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'idem_test', $http_client->last_headers['Idempotency-Key'] );
 		$this->assertStringNotContainsString( 'idempotency_key', (string) $http_client->last_body );
 		$this->assertStringContainsString( '"filtered":"yes"', (string) $http_client->last_body );
+	}
+
+	/**
+	 * @testdox Should source test mode from the Core-owned account service.
+	 */
+	public function test_request_sources_test_mode_from_account_service(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'id' => 'cus_test' ) ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$sut->create_customer(
+			array(
+				'name'  => 'Ada Lovelace',
+				'email' => 'ada@example.com',
+			)
+		);
+
+		$this->assertStringContainsString( '"test_mode":true', (string) $http_client->last_body );
 	}
 
 	/**
@@ -67,7 +93,7 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		);
 
 		$sut = new WooPaymentsApiClient();
-		$sut->init( $http_client );
+		$sut->init( $http_client, $this->create_account_service( false ) );
 
 		try {
 			$sut->refund_charge( 'ch_test', 250, 'requested_by_customer', 'native_transport', 'idem_test' );
@@ -91,7 +117,7 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		);
 
 		$sut = new WooPaymentsApiClient();
-		$sut->init( $http_client );
+		$sut->init( $http_client, $this->create_account_service( false ) );
 
 		$customer_id = $sut->create_customer(
 			array(
@@ -119,7 +145,7 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		);
 
 		$sut = new WooPaymentsApiClient();
-		$sut->init( $http_client );
+		$sut->init( $http_client, $this->create_account_service( false ) );
 
 		$sut->update_customer(
 			'cus_test',
@@ -155,7 +181,7 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		);
 
 		$sut = new WooPaymentsApiClient();
-		$sut->init( $http_client );
+		$sut->init( $http_client, $this->create_account_service( false ) );
 
 		$result = $sut->create_and_confirm_payment_intention(
 			array(
@@ -197,7 +223,7 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		);
 
 		$sut = new WooPaymentsApiClient();
-		$sut->init( $http_client );
+		$sut->init( $http_client, $this->create_account_service( false ) );
 
 		$result = $sut->create_and_confirm_setup_intention(
 			array(
@@ -214,5 +240,22 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'idem_setup', $http_client->last_headers['Idempotency-Key'] );
 		$this->assertStringContainsString( '"confirm":true', (string) $http_client->last_body );
 		$this->assertStringContainsString( '"payment_method":"pm_test"', (string) $http_client->last_body );
+	}
+
+	/**
+	 * Create a WooPayments account service mock.
+	 *
+	 * @param bool $test_mode Whether WooPayments should run in test mode.
+	 * @return WooPaymentsAccountService
+	 */
+	private function create_account_service( bool $test_mode ): WooPaymentsAccountService {
+		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_test_mode_enabled' ) )
+			->getMock();
+
+		$account_service->method( 'is_test_mode_enabled' )->willReturn( $test_mode );
+
+		return $account_service;
 	}
 }

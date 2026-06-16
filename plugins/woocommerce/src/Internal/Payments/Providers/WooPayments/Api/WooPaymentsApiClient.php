@@ -7,7 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api;
 
-use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use WP_Error;
 
 /**
@@ -31,23 +31,23 @@ class WooPaymentsApiClient {
 	private WooPaymentsHttpClient $http_client;
 
 	/**
-	 * Legacy runtime.
+	 * WooPayments account service.
 	 *
-	 * @var WooPaymentsLegacyRuntime|null
+	 * @var WooPaymentsAccountService
 	 */
-	private ?WooPaymentsLegacyRuntime $legacy_runtime = null;
+	private WooPaymentsAccountService $account_service;
 
 	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsHttpClient         $http_client    Native WPCOM transport.
-	 * @param WooPaymentsLegacyRuntime|null $legacy_runtime Legacy runtime for test-mode reads.
+	 * @param WooPaymentsHttpClient     $http_client     Native WPCOM transport.
+	 * @param WooPaymentsAccountService $account_service WooPayments account service.
 	 */
-	final public function init( WooPaymentsHttpClient $http_client, ?WooPaymentsLegacyRuntime $legacy_runtime = null ): void {
-		$this->http_client    = $http_client;
-		$this->legacy_runtime = $legacy_runtime;
+	final public function init( WooPaymentsHttpClient $http_client, WooPaymentsAccountService $account_service ): void {
+		$this->http_client     = $http_client;
+		$this->account_service = $account_service;
 	}
 
 	/**
@@ -253,7 +253,7 @@ class WooPaymentsApiClient {
 		$params = wp_parse_args(
 			$params,
 			array(
-				'test_mode' => $this->is_test_mode_enabled(),
+				'test_mode' => $this->account_service->is_test_mode_enabled(),
 			)
 		);
 
@@ -356,22 +356,6 @@ class WooPaymentsApiClient {
 			$response_code
 		);
 		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
-	}
-
-	/**
-	 * Get the current WooPayments test-mode setting.
-	 *
-	 * @return bool
-	 */
-	private function is_test_mode_enabled(): bool {
-		if ( isset( $this->legacy_runtime ) ) {
-			$legacy_test_mode = $this->legacy_runtime->is_test_mode();
-			if ( null !== $legacy_test_mode ) {
-				return $legacy_test_mode;
-			}
-		}
-
-		return 'yes' === get_option( 'wcpay_test_mode', 'no' );
 	}
 
 	/**

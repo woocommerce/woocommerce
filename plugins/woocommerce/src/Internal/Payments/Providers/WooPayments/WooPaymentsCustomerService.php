@@ -47,23 +47,23 @@ class WooPaymentsCustomerService {
 	private WooPaymentsApiClient $api_client;
 
 	/**
-	 * Legacy runtime.
+	 * WooPayments account service.
 	 *
-	 * @var WooPaymentsLegacyRuntime
+	 * @var WooPaymentsAccountService
 	 */
-	private WooPaymentsLegacyRuntime $legacy_runtime;
+	private WooPaymentsAccountService $account_service;
 
 	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsApiClient     $api_client     Native API client.
-	 * @param WooPaymentsLegacyRuntime $legacy_runtime WooPayments legacy runtime.
+	 * @param WooPaymentsApiClient      $api_client      Native API client.
+	 * @param WooPaymentsAccountService $account_service WooPayments account service.
 	 */
-	final public function init( WooPaymentsApiClient $api_client, WooPaymentsLegacyRuntime $legacy_runtime ): void {
-		$this->api_client     = $api_client;
-		$this->legacy_runtime = $legacy_runtime;
+	final public function init( WooPaymentsApiClient $api_client, WooPaymentsAccountService $account_service ): void {
+		$this->api_client      = $api_client;
+		$this->account_service = $account_service;
 	}
 
 	/**
@@ -273,21 +273,7 @@ class WooPaymentsCustomerService {
 	 * @return string
 	 */
 	private function get_customer_id_option(): string {
-		return $this->is_test_mode_enabled() ? self::TEST_CUSTOMER_ID_OPTION : self::LIVE_CUSTOMER_ID_OPTION;
-	}
-
-	/**
-	 * Tell whether the current WooPayments runtime is in test mode.
-	 *
-	 * @return bool
-	 */
-	private function is_test_mode_enabled(): bool {
-		$test_mode = $this->legacy_runtime->is_test_mode();
-		if ( null !== $test_mode ) {
-			return $test_mode;
-		}
-
-		return 'yes' === get_option( 'wcpay_test_mode', 'no' );
+		return $this->account_service->is_test_mode_enabled() ? self::TEST_CUSTOMER_ID_OPTION : self::LIVE_CUSTOMER_ID_OPTION;
 	}
 
 	/**

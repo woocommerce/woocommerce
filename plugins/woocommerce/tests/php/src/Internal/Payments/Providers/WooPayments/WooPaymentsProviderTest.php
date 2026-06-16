@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\CapabilityManifest;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProviderGatewayAdapter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use WC_Unit_Test_Case;
@@ -79,37 +81,62 @@ class WooPaymentsProviderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Provider availability delegates to the injected gateway adapter.
+	 * @testdox Provider availability requires native transport and account readiness.
 	 *
-	 * @dataProvider provider_gateway_availability
+	 * @dataProvider provider_native_readiness
 	 *
-	 * @param bool $available Gateway adapter availability.
+	 * @param bool $transport_available Whether native transport is available.
+	 * @param bool $account_ready       Whether the account can process payments.
+	 * @param bool $expected            Expected readiness.
 	 */
-	public function test_can_process_payments_delegates_to_injected_gateway_adapter( bool $available ): void {
+	public function test_can_process_payments_requires_native_transport_and_account_readiness( bool $transport_available, bool $account_ready, bool $expected ): void {
 		$gateway_adapter = $this->getMockBuilder( WooPaymentsProviderGatewayAdapter::class )
 			->disableOriginalConstructor()
 			->onlyMethods( array( 'is_available' ) )
 			->getMock();
 		$gateway_adapter
+			->expects( $this->never() )
+			->method( 'is_available' );
+		$api_client = $this->getMockBuilder( WooPaymentsApiClient::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_available' ) )
+			->getMock();
+		$api_client
 			->expects( $this->once() )
 			->method( 'is_available' )
-			->willReturn( $available );
+			->willReturn( $transport_available );
+		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'can_process_payments' ) )
+			->getMock();
+
+		if ( $transport_available ) {
+			$account_service
+				->expects( $this->once() )
+				->method( 'can_process_payments' )
+				->willReturn( $account_ready );
+		} else {
+			$account_service
+				->expects( $this->never() )
+				->method( 'can_process_payments' );
+		}
 
 		$provider = new WooPaymentsProvider();
-		$provider->init( $gateway_adapter );
+		$provider->init( $gateway_adapter, $api_client, $account_service );
 
-		$this->assertSame( $available, $provider->can_process_payments() );
+		$this->assertSame( $expected, $provider->can_process_payments() );
 	}
 
 	/**
-	 * Data provider for provider gateway availability.
+	 * Data provider for native provider readiness.
 	 *
-	 * @return array<string,array{bool}>
+	 * @return array<string,array{bool,bool,bool}>
 	 */
-	public function provider_gateway_availability(): array {
+	public function provider_native_readiness(): array {
 		return array(
-			'available'   => array( true ),
-			'unavailable' => array( false ),
+			'transport and account ready' => array( true, true, true ),
+			'transport unavailable'       => array( false, true, false ),
+			'account unavailable'         => array( true, false, false ),
 		);
 	}
 
@@ -124,6 +151,11 @@ class WooPaymentsProviderTest extends WC_Unit_Test_Case {
 			'/wc_get_container\(\)\s*->get\(\s*WooPaymentsProviderGatewayAdapter::class\s*\)/',
 			$source,
 			'WooPaymentsProvider should receive the gateway adapter through init injection.'
+		);
+		$this->assertStringNotContainsString(
+			'get_gateway_adapter()->is_available()',
+			$source,
+			'WooPaymentsProvider readiness should use native transport and account readiness, not legacy gateway adapter availability.'
 		);
 	}
 }

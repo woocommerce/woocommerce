@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentLifecycleService;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutAjaxController;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCustomerService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPaymentMethodDetailsService;
@@ -84,6 +85,60 @@ class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'seti_native', $order->get_meta( '_intent_id', true ) );
 		$this->assertSame( 'pm_native', $order->get_meta( '_payment_method_id', true ) );
 		$this->assertSame( 'cus_native', $order->get_meta( '_stripe_customer_id', true ) );
+	}
+
+	/**
+	 * @testdox Order-status callback should use the Core-owned account service for lifecycle mode metadata.
+	 */
+	public function test_update_order_status_uses_account_service_mode_for_lifecycle_meta(): void {
+		$order = $this->create_woopayments_order( '10.00' );
+		$order->update_meta_data( '_intent_id', 'pi_native' );
+		$order->save();
+
+		$api_client = new class() extends WooPaymentsApiClient {
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Retrieve a PaymentIntent.
+			 *
+			 * @param string $intent_id PaymentIntent ID.
+			 * @return array<string,mixed>
+			 */
+			public function get_payment_intention( string $intent_id ): array {
+				if ( 'pi_native' !== $intent_id ) {
+					throw new \RuntimeException( 'Unexpected payment intent ID.' );
+				}
+
+				return array(
+					'id'             => 'pi_native',
+					'status'         => 'succeeded',
+					'currency'       => 'usd',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_native',
+				);
+			}
+		};
+		$sut        = $this->create_controller( $api_client, null, null, $this->create_account_service( true ) );
+
+		$response = $sut->get_update_order_status_response(
+			array(
+				'_ajax_nonce' => wp_create_nonce( 'wcpay_update_order_status_nonce' ),
+				'order_id'    => $order->get_id(),
+				'intent_id'   => 'pi_native',
+			)
+		);
+		$order    = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 200, $response['status_code'] );
+		$this->assertSame( 'test', $order->get_meta( '_wcpay_mode', true ) );
 	}
 
 	/**
@@ -432,9 +487,10 @@ class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 	 * @param WooPaymentsApiClient            $api_client       API client.
 	 * @param WooPaymentsCustomerService|null $customer_service Customer service.
 	 * @param WooPaymentsTokenService|null    $token_service    Token service.
+	 * @param WooPaymentsAccountService|null  $account_service  Account service.
 	 * @return WooPaymentsCheckoutAjaxController
 	 */
-	private function create_controller( WooPaymentsApiClient $api_client, ?WooPaymentsCustomerService $customer_service = null, ?WooPaymentsTokenService $token_service = null ): WooPaymentsCheckoutAjaxController {
+	private function create_controller( WooPaymentsApiClient $api_client, ?WooPaymentsCustomerService $customer_service = null, ?WooPaymentsTokenService $token_service = null, ?WooPaymentsAccountService $account_service = null ): WooPaymentsCheckoutAjaxController {
 		$arbiter = $this->createMock( NativePaymentsRuntimeArbiter::class );
 		$arbiter->method( 'should_native_register' )->willReturn( true );
 
@@ -446,16 +502,39 @@ class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 			$token_service = $this->create_token_service();
 		}
 
+		if ( null === $account_service ) {
+			$account_service = $this->create_account_service( false );
+		}
+
 		$sut = new WooPaymentsCheckoutAjaxController();
 		$sut->init(
 			$arbiter,
 			$api_client,
 			$customer_service,
 			wc_get_container()->get( OrderPaymentLifecycleService::class ),
-			$token_service
+			$token_service,
+			$account_service
 		);
 
 		return $sut;
+	}
+
+	/**
+	 * Create a WooPayments account service mock.
+	 *
+	 * @param bool $test_mode Whether WooPayments should run in test mode.
+	 * @return WooPaymentsAccountService
+	 */
+	private function create_account_service( bool $test_mode ): WooPaymentsAccountService {
+		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_mode', 'is_test_mode_enabled' ) )
+			->getMock();
+
+		$account_service->method( 'get_mode' )->willReturn( $test_mode ? 'test' : 'live' );
+		$account_service->method( 'is_test_mode_enabled' )->willReturn( $test_mode );
+
+		return $account_service;
 	}
 
 	/**

@@ -1,0 +1,249 @@
+<?php
+/**
+ * WooPaymentsAccountService class file.
+ */
+
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments;
+
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+
+/**
+ * Reads Core-owned WooPayments account readiness from preserved persisted data.
+ *
+ * @since 11.0.0
+ * @internal Transitional internal component for the native payments runtime.
+ */
+class WooPaymentsAccountService {
+
+	private const ACCOUNT_OPTION = 'wcpay_account_data';
+
+	private const SETTINGS_OPTION = 'woocommerce_woocommerce_payments_settings';
+
+	private const ONBOARDING_TEST_MODE_OPTION = 'wcpay_onboarding_test_mode';
+
+	private const DEV_MODE_ENVIRONMENTS = array(
+		'development',
+		'staging',
+	);
+
+	/**
+	 * Legacy proxy.
+	 *
+	 * @var LegacyProxy
+	 */
+	private LegacyProxy $legacy_proxy;
+
+	/**
+	 * Initialize the class instance.
+	 *
+	 * @internal
+	 *
+	 * @param LegacyProxy $legacy_proxy Legacy proxy.
+	 */
+	final public function init( LegacyProxy $legacy_proxy ): void {
+		$this->legacy_proxy = $legacy_proxy;
+	}
+
+	/**
+	 * Get normalized WooPayments account cache data.
+	 *
+	 * @return array<string,mixed>
+	 */
+	public function get_cached_account_data(): array {
+		try {
+			$account_data = $this->legacy_proxy->call_function( 'get_option', self::ACCOUNT_OPTION, array() );
+		} catch ( \Throwable $e ) {
+			return array();
+		}
+
+		if ( ! is_array( $account_data ) || empty( $account_data['data'] ) || ! is_array( $account_data['data'] ) ) {
+			return array();
+		}
+
+		return $account_data['data'];
+	}
+
+	/**
+	 * Get the connected WooPayments account ID.
+	 *
+	 * @return string
+	 */
+	public function get_account_id(): string {
+		$account_data = $this->get_cached_account_data();
+
+		return isset( $account_data['account_id'] ) && is_scalar( $account_data['account_id'] )
+			? (string) $account_data['account_id']
+			: '';
+	}
+
+	/**
+	 * Get the mode-specific publishable key.
+	 *
+	 * @return string
+	 */
+	public function get_publishable_key(): string {
+		$key_name        = $this->is_test_mode_enabled() ? 'test_publishable_key' : 'live_publishable_key';
+		$account_data    = $this->get_cached_account_data();
+		$publishable_key = $account_data[ $key_name ] ?? '';
+
+		return is_scalar( $publishable_key ) ? (string) $publishable_key : '';
+	}
+
+	/**
+	 * Tell whether WooPayments native processing has enough account data to act.
+	 *
+	 * @return bool
+	 */
+	public function can_process_payments(): bool {
+		$account_data = $this->get_cached_account_data();
+
+		return '' !== $this->get_account_id()
+			&& '' !== $this->get_publishable_key()
+			&& $this->is_truthy( $account_data['payments_enabled'] ?? false )
+			&& $this->is_truthy( $account_data['details_submitted'] ?? false );
+	}
+
+	/**
+	 * Tell whether WooPayments is in test mode.
+	 *
+	 * @return bool
+	 */
+	public function is_test_mode_enabled(): bool {
+		$test_mode_onboarding = $this->is_test_mode_onboarding_enabled();
+		if ( $test_mode_onboarding ) {
+			$test_mode = true;
+		} else {
+			$settings  = $this->get_gateway_settings();
+			$test_mode = 'yes' === ( $settings['test_mode'] ?? 'no' );
+		}
+
+		/**
+		 * Allows WooPayments to process payments in test mode.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param bool $test_mode Whether WooPayments should process payments in test mode.
+		 */
+		return (bool) apply_filters( 'wcpay_test_mode', $test_mode );
+	}
+
+	/**
+	 * Get the current WooPayments mode slug.
+	 *
+	 * @return string
+	 */
+	public function get_mode(): string {
+		return $this->is_test_mode_enabled() ? 'test' : 'live';
+	}
+
+	/**
+	 * Tell whether WooPayments is in test-mode onboarding.
+	 *
+	 * @return bool
+	 */
+	private function is_test_mode_onboarding_enabled(): bool {
+		$test_mode_onboarding = $this->is_dev_mode_enabled() || $this->is_onboarding_test_mode_enabled();
+
+		/**
+		 * Allows WooPayments to use test mode onboarding.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param bool $test_mode_onboarding Whether WooPayments should use test mode onboarding.
+		 */
+		return (bool) apply_filters( 'wcpay_test_mode_onboarding', $test_mode_onboarding );
+	}
+
+	/**
+	 * Tell whether WooPayments development mode is enabled.
+	 *
+	 * @return bool
+	 */
+	private function is_dev_mode_enabled(): bool {
+		$dev_mode = $this->is_wcpay_dev_mode_defined()
+			|| $this->is_wp_environment_dev_mode()
+			|| $this->is_wp_development_mode_enabled();
+
+		/**
+		 * Allows WooPayments to enter dev mode.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param bool $dev_mode Whether WooPayments should enter dev mode.
+		 */
+		return (bool) apply_filters( 'wcpay_dev_mode', $dev_mode );
+	}
+
+	/**
+	 * Tell whether WooPayments dev mode constant is defined.
+	 *
+	 * @return bool
+	 */
+	private function is_wcpay_dev_mode_defined(): bool {
+		return defined( 'WCPAY_DEV_MODE' ) && WCPAY_DEV_MODE;
+	}
+
+	/**
+	 * Tell whether the current WordPress environment implies WooPayments dev mode.
+	 *
+	 * @return bool
+	 */
+	private function is_wp_environment_dev_mode(): bool {
+		if ( ! function_exists( 'wp_get_environment_type' ) ) {
+			return false;
+		}
+
+		return in_array( wp_get_environment_type(), self::DEV_MODE_ENVIRONMENTS, true );
+	}
+
+	/**
+	 * Tell whether WordPress development mode implies WooPayments dev mode.
+	 *
+	 * @return bool
+	 */
+	private function is_wp_development_mode_enabled(): bool {
+		return function_exists( 'wp_get_development_mode' ) && '' !== wp_get_development_mode();
+	}
+
+	/**
+	 * Get persisted gateway settings.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function get_gateway_settings(): array {
+		try {
+			$settings = $this->legacy_proxy->call_function( 'get_option', self::SETTINGS_OPTION, array() );
+		} catch ( \Throwable $e ) {
+			return array();
+		}
+
+		return is_array( $settings ) ? $settings : array();
+	}
+
+	/**
+	 * Tell whether onboarding test mode is enabled.
+	 *
+	 * @return bool
+	 */
+	private function is_onboarding_test_mode_enabled(): bool {
+		try {
+			$value = $this->legacy_proxy->call_function( 'get_option', self::ONBOARDING_TEST_MODE_OPTION, 'no' );
+		} catch ( \Throwable $e ) {
+			return false;
+		}
+
+		return in_array( $value, array( 'yes', '1' ), true );
+	}
+
+	/**
+	 * Normalize persisted booleans.
+	 *
+	 * @param mixed $value Raw boolean-like value.
+	 * @return bool
+	 */
+	private function is_truthy( $value ): bool {
+		return filter_var( $value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) ?? false;
+	}
+}
