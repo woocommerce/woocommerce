@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add an opt-in "Add to wishlist" toggle to the Add to Cart + Options block that renders the Add to Wishlist Button as the last child. The toggle only appears while the wishlist feature flag is enabled.
+Render the Add to Wishlist Button inside the Add to Cart + Options block as the last child when the (experimental) wishlist feature is enabled, without modifying the shipped template parts.
