@@ -90,32 +90,29 @@ class POSRequestContextTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Default valid staff credential headers.
+	 * Default staff-id header (the POC credential; no PIN check yet).
 	 *
-	 * @param int    $staff_id Staff user id.
-	 * @param string $pin      Staff PIN.
+	 * @param int $staff_id Staff user id.
 	 * @return array<string, string>
 	 */
-	private function credential_headers( int $staff_id = 42, string $pin = '1234' ): array {
+	private function credential_headers( int $staff_id = 42 ): array {
 		return array(
 			'HTTP_X_WC_POS_STAFF_ID' => (string) $staff_id,
-			'HTTP_X_WC_POS_PIN'      => $pin,
 		);
 	}
 
 	/**
-	 * @testdox A structural /wc/pos/v1/* request with staff credentials is POS-originated (read, no intent).
+	 * @testdox A structural /wc/pos/v1/* request naming a staff member is POS-originated (read, no intent).
 	 */
 	public function test_structural_read_is_pos_request(): void {
 		$this->arrange_request( '/wc/pos/v1/whoami', 'GET', $this->credential_headers() );
 
 		$sut = $this->make_sut();
 
-		$this->assertTrue( $sut->is_pos_request(), 'Structural POS route with credentials should be POS-originated' );
+		$this->assertTrue( $sut->is_pos_request(), 'Structural POS route naming a staff member should be POS-originated' );
 		$this->assertSame( POSRequestContext::TIER_STRUCTURAL, $sut->tier() );
 		$this->assertSame( 42, $sut->get_staff_id() );
 		$this->assertNull( $sut->get_intent(), 'A read route should resolve no write intent' );
-		$this->assertSame( '1234', $sut->get_pin() );
 	}
 
 	/**
@@ -196,15 +193,6 @@ class POSRequestContextTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A request missing the PIN header is not POS-originated.
-	 */
-	public function test_missing_pin_header_is_not_pos(): void {
-		$this->arrange_request( '/wc/pos/v1/whoami', 'GET', array( 'HTTP_X_WC_POS_STAFF_ID' => '42' ) );
-
-		$this->assertFalse( $this->make_sut()->is_pos_request() );
-	}
-
-	/**
 	 * @testdox Detection is off when the point_of_sale_staff flag is disabled.
 	 */
 	public function test_disabled_flag_is_not_pos(): void {
@@ -217,14 +205,7 @@ class POSRequestContextTest extends WC_Unit_Test_Case {
 	 * @testdox A non-numeric staff-id header resolves to no staff and is not POS-originated.
 	 */
 	public function test_invalid_staff_id_is_not_pos(): void {
-		$this->arrange_request(
-			'/wc/pos/v1/whoami',
-			'GET',
-			array(
-				'HTTP_X_WC_POS_STAFF_ID' => 'abc',
-				'HTTP_X_WC_POS_PIN'      => '1234',
-			)
-		);
+		$this->arrange_request( '/wc/pos/v1/whoami', 'GET', array( 'HTTP_X_WC_POS_STAFF_ID' => 'abc' ) );
 
 		$this->assertFalse( $this->make_sut()->is_pos_request() );
 	}
@@ -248,5 +229,21 @@ class POSRequestContextTest extends WC_Unit_Test_Case {
 		// stale false (this is the bug that 403'd the live swap).
 		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/pos/v1/whoami';
 		$this->assertTrue( $sut->is_pos_request(), 'Once the route exists the same instance must re-evaluate to true' );
+	}
+
+	/**
+	 * @testdox get_initiator_id reads the X-WC-POS-Initiator-Id header.
+	 */
+	public function test_get_initiator_id_reads_header(): void {
+		$_SERVER['HTTP_X_WC_POS_INITIATOR_ID'] = '7';
+
+		$this->assertSame( 7, $this->make_sut()->get_initiator_id() );
+	}
+
+	/**
+	 * @testdox get_initiator_id is 0 when the header is absent.
+	 */
+	public function test_get_initiator_id_absent_is_zero(): void {
+		$this->assertSame( 0, $this->make_sut()->get_initiator_id() );
 	}
 }

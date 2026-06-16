@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Tests\Internal\POS;
 use Automattic\WooCommerce\Internal\POS\Auth\POSRequestContext;
 use Automattic\WooCommerce\Internal\POS\Capabilities;
 use Automattic\WooCommerce\Internal\POS\CouponAttribution;
-use Automattic\WooCommerce\Internal\POS\OrderAttribution;
 use Automattic\WooCommerce\Internal\POS\POSPreset;
 use WC_Coupon;
 use WC_Logger_Interface;
@@ -66,14 +65,16 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Build the SUT with a POS-request flag.
+	 * Build the SUT with the POS-request flag and the initiator the header would carry.
 	 *
-	 * @param bool $is_pos Whether the request is POS-originated.
+	 * @param bool $is_pos       Whether the request is POS-originated.
+	 * @param int  $initiator_id The initiator id the X-WC-POS-Initiator-Id header carries (0 = none).
 	 * @return CouponAttribution
 	 */
-	private function make_sut( bool $is_pos = true ): CouponAttribution {
+	private function make_sut( bool $is_pos = true, int $initiator_id = 0 ): CouponAttribution {
 		$ctx = $this->createMock( POSRequestContext::class );
 		$ctx->method( 'is_pos_request' )->willReturn( $is_pos );
+		$ctx->method( 'get_initiator_id' )->willReturn( $initiator_id );
 
 		$sut = new CouponAttribution();
 		$sut->init( $ctx );
@@ -81,17 +82,13 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a coupon carrying the given initiator meta.
+	 * Create a saved coupon (the initiator rides the header now, not coupon meta).
 	 *
-	 * @param int|null $initiator_id Initiator id, or null for none.
 	 * @return WC_Coupon
 	 */
-	private function make_coupon( ?int $initiator_id ): WC_Coupon {
+	private function make_coupon(): WC_Coupon {
 		$coupon = new WC_Coupon();
 		$coupon->set_code( 'pos-' . wp_rand( 1000, 9999 ) );
-		if ( null !== $initiator_id ) {
-			$coupon->update_meta_data( OrderAttribution::META_KEY_INITIATOR_USER_ID, $initiator_id );
-		}
 		$coupon->save();
 		return $coupon;
 	}
@@ -100,16 +97,16 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Logs an info line when a valid initiator is present.
 	 */
 	public function test_logs_info_for_valid_initiator(): void {
-		$this->make_sut()->handle_post_insert( $this->make_coupon( $this->initiator_id ), null, true );
+		$this->make_sut( true, $this->initiator_id )->handle_post_insert( $this->make_coupon(), null, true );
 
 		$this->assertCount( 1, $this->fake_logger->info_calls, 'A valid initiator should produce one info log line' );
 	}
 
 	/**
-	 * @testdox Logs nothing when there is no initiator meta.
+	 * @testdox Logs nothing when there is no initiator header.
 	 */
 	public function test_no_log_without_initiator(): void {
-		$this->make_sut()->handle_post_insert( $this->make_coupon( null ), null, true );
+		$this->make_sut( true, 0 )->handle_post_insert( $this->make_coupon(), null, true );
 
 		$this->assertCount( 0, $this->fake_logger->info_calls );
 		$this->assertCount( 0, $this->fake_logger->warning_calls );
@@ -119,7 +116,7 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Logs nothing when the request is not POS-originated.
 	 */
 	public function test_no_log_when_not_pos_request(): void {
-		$this->make_sut( false )->handle_post_insert( $this->make_coupon( $this->initiator_id ), null, true );
+		$this->make_sut( false, $this->initiator_id )->handle_post_insert( $this->make_coupon(), null, true );
 
 		$this->assertCount( 0, $this->fake_logger->info_calls );
 	}
@@ -130,7 +127,7 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	public function test_warns_for_initiator_without_pos_access(): void {
 		$stranger = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 
-		$this->make_sut()->handle_post_insert( $this->make_coupon( $stranger ), null, true );
+		$this->make_sut( true, $stranger )->handle_post_insert( $this->make_coupon(), null, true );
 
 		$this->assertCount( 1, $this->fake_logger->warning_calls, 'A non-POS initiator should produce one warning' );
 		$this->assertCount( 0, $this->fake_logger->info_calls );

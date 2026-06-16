@@ -22,9 +22,11 @@ use WP_User;
  *
  * The one identity the swap cannot represent is the *initiator* of a manager-authorized action:
  * when a cashier initiates a refund their manager approves, the manager is the swapped actor and
- * the cashier is the initiator. The client sends the initiator as `_woocommerce_pos_initiator_user_id`
- * order meta; this class validates it (best-effort, log-and-skip) and writes a single combined note
- * capturing both. Plain writes (actor == initiator) need nothing extra.
+ * the cashier is the initiator. The client sends the initiator as the `X-WC-POS-Initiator-Id`
+ * request header (so the whole auth/attribution context rides in headers, not the body); this class
+ * validates it (best-effort, log-and-skip), records it on the object as
+ * `_woocommerce_pos_initiator_user_id` meta, and writes a single combined note capturing both.
+ * Plain writes (actor == initiator, no header) need nothing extra.
  *
  * Clean break: this is a new contract. The pre-v3 `_pos_staff_user_id` / `_pos_override_*` shapes
  * are not read or supported — the feature is behind an off-by-default dev flag with no production
@@ -120,6 +122,11 @@ class OrderAttribution implements RegisterHooksInterface {
 			return;
 		}
 
+		// The wire carried the initiator as a header; record it on the object server-side so it
+		// stays queryable (the swap already makes the actor the current user / note author).
+		$order->update_meta_data( self::META_KEY_INITIATOR_USER_ID, (string) $initiator->ID );
+		$order->save_meta_data();
+
 		$is_refund   = $order instanceof WC_Order_Refund;
 		$note_target = $is_refund ? wc_get_order( $order->get_parent_id() ) : $order;
 		if ( ! $note_target instanceof WC_Order ) {
@@ -154,7 +161,7 @@ class OrderAttribution implements RegisterHooksInterface {
 	 * @return WP_User|null
 	 */
 	private function resolve_initiator( WC_Abstract_Order $order, int $actor_id ): ?WP_User {
-		$initiator_id = $this->read_int_meta( $order, self::META_KEY_INITIATOR_USER_ID );
+		$initiator_id = $this->request_context->get_initiator_id();
 		if ( $initiator_id <= 0 || $initiator_id === $actor_id ) {
 			return null;
 		}
@@ -206,20 +213,5 @@ class OrderAttribution implements RegisterHooksInterface {
 		}
 
 		return sprintf( $template, $actor_label, $initiator_label );
-	}
-
-	/**
-	 * Read an integer scalar from order meta. Returns 0 if absent or invalid.
-	 *
-	 * @param WC_Abstract_Order $order The order.
-	 * @param string            $key   The meta key.
-	 * @return int
-	 */
-	private function read_int_meta( WC_Abstract_Order $order, string $key ): int {
-		$value = $order->get_meta( $key, true );
-		if ( '' === $value || null === $value || ! is_numeric( $value ) ) {
-			return 0;
-		}
-		return (int) $value;
 	}
 }

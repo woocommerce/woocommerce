@@ -16,8 +16,9 @@ use WP_User;
  * The coupon analogue of {@see OrderAttribution}: under the v3 server-side-auth model the acting
  * staff member is the effective `current_user`, so they are recorded as the actor for free. The one
  * fact the swap cannot carry is the *initiator* of a manager-authorized coupon creation, which the
- * client sends as `_woocommerce_pos_initiator_user_id` coupon meta. Coupons have no order-note
- * timeline, so audit lands in the WC log (the meta itself persists for a future wp-admin UI).
+ * client sends as the `X-WC-POS-Initiator-Id` header. This class records it on the coupon as
+ * `_woocommerce_pos_initiator_user_id` meta. Coupons have no order-note timeline, so audit lands in
+ * the WC log (the meta persists for a future wp-admin UI).
  *
  * Clean break: the pre-v3 `_pos_staff_user_id` / `_pos_override_*` shapes are not read or supported.
  *
@@ -83,7 +84,7 @@ class CouponAttribution implements RegisterHooksInterface {
 			return;
 		}
 
-		$initiator_id = $this->read_int_meta( $coupon, OrderAttribution::META_KEY_INITIATOR_USER_ID );
+		$initiator_id = $this->request_context->get_initiator_id();
 		if ( $initiator_id <= 0 || $initiator_id === $actor_id ) {
 			return;
 		}
@@ -106,6 +107,10 @@ class CouponAttribution implements RegisterHooksInterface {
 			return;
 		}
 
+		// The wire carried the initiator as a header; record it on the coupon server-side too.
+		$coupon->update_meta_data( OrderAttribution::META_KEY_INITIATOR_USER_ID, (string) $initiator->ID );
+		$coupon->save_meta_data();
+
 		wc_get_logger()->info(
 			sprintf(
 				'POS coupon %1$d by user %2$s (ID %3$d), initiated by user %4$s (ID %5$d).',
@@ -117,20 +122,5 @@ class CouponAttribution implements RegisterHooksInterface {
 			),
 			array( 'source' => self::LOG_SOURCE )
 		);
-	}
-
-	/**
-	 * Read an integer scalar from coupon meta. Returns 0 if absent or invalid.
-	 *
-	 * @param WC_Coupon $coupon The coupon.
-	 * @param string    $key    The meta key.
-	 * @return int
-	 */
-	private function read_int_meta( WC_Coupon $coupon, string $key ): int {
-		$value = $coupon->get_meta( $key, true );
-		if ( '' === $value || null === $value || ! is_numeric( $value ) ) {
-			return 0;
-		}
-		return (int) $value;
 	}
 }

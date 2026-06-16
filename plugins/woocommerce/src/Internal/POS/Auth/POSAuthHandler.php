@@ -6,27 +6,32 @@ namespace Automattic\WooCommerce\Internal\POS\Auth;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\POS\Capabilities;
-use Automattic\WooCommerce\Internal\POS\Service\POSPinService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WP_Error;
 
 /**
- * Swaps the effective current user to the PIN-authenticated POS staff member for POS-originated
- * requests, implementing the "authenticate high, at determine_current_user" model.
+ * Swaps the effective current user to the named POS staff member for POS-originated requests,
+ * implementing the "authenticate high, at determine_current_user" model.
  *
  * The device authenticates first (Jetpack tunnel / Application Password) and resolves to a
- * shop-manager/admin user. For a POS-originated request (see POSRequestContext) carrying valid
- * staff PIN credentials, this handler then switches the effective user to the staff member, so
- * downstream WP/Woo logic — capability checks, order/refund authorship, logs — naturally sees the
- * staff member as the actor.
+ * shop-manager/admin user. For a POS-originated request (see POSRequestContext) naming a staff
+ * member, this handler switches the effective user to that staff member, so downstream WP/Woo
+ * logic — capability checks, order/refund authorship, logs — naturally sees the staff member as
+ * the actor.
  *
- * Swap-target rule: the swap targets the PIN-presenting staff member, and only if they genuinely
- * hold the `woocommerce_pos_*` capability the operation requires. That staff member is the
- * authorizing actor — for a normal sale the operator (cashier), and for a manager-approved override
- * refund the approving manager, who taps their own PIN. A cap-less initiator (e.g. the cashier on
- * an override refund) is never the swap target; they are recorded separately as attribution
- * metadata at insert time. If no presented staff holds the required cap, no swap happens and the
- * request continues as the device admin.
+ * POC credential note: the named staff id is currently TRUSTED as asserted (gated only by the
+ * device-admin auth) — there is no per-request staff credential check. Authenticating the staff
+ * (verify a PIN once at login/override, then carry a short-lived token on the request) is the
+ * deferred v3.1 follow-up. Until then the swap + capability bridge are a plumbing demonstration,
+ * not an enforcement boundary against a malicious till operator.
+ *
+ * Swap-target rule: the swap targets the named staff member, and only if they genuinely hold the
+ * `woocommerce_pos_*` capability the operation requires. That staff member is the authorizing actor
+ * — for a normal sale the operator (cashier), and for a manager-approved override refund the
+ * approving manager. A cap-less initiator (e.g. the cashier on an override refund) is never the
+ * swap target; they are recorded separately as attribution metadata at insert time. If the named
+ * staff does not hold the required cap, no swap happens and the request continues as the device
+ * admin.
  *
  * Hooks (both required):
  *  - `determine_current_user` @ 100 — primary. Runs after core Application Password (20) and WC
@@ -47,13 +52,6 @@ class POSAuthHandler implements RegisterHooksInterface {
 	 * @var POSRequestContext
 	 */
 	private POSRequestContext $request_context;
-
-	/**
-	 * PIN verification service.
-	 *
-	 * @var POSPinService
-	 */
-	private POSPinService $pin_service;
 
 	/**
 	 * The device admin user id captured before the swap (0 if no swap happened).
@@ -82,11 +80,9 @@ class POSAuthHandler implements RegisterHooksInterface {
 	 * @internal
 	 *
 	 * @param POSRequestContext $request_context The request-shape detector.
-	 * @param POSPinService     $pin_service     The PIN verification service.
 	 */
-	final public function init( POSRequestContext $request_context, POSPinService $pin_service ): void {
+	final public function init( POSRequestContext $request_context ): void {
 		$this->request_context = $request_context;
-		$this->pin_service     = $pin_service;
 	}
 
 	/**
@@ -175,11 +171,9 @@ class POSAuthHandler implements RegisterHooksInterface {
 			return 0;
 		}
 
-		// Identity is proven here, not asserted: the PIN must verify for the presented staff id.
-		if ( ! $this->pin_service->verify_pin_for_user( $staff_id, $this->request_context->get_pin() ) ) {
-			return 0;
-		}
-
+		// POC: the staff id is trusted as asserted (gated by the device-admin auth above). There is
+		// no per-request staff credential check yet — authenticating the staff (verify a PIN once at
+		// login/override, then carry a short-lived token here) is the deferred v3.1 follow-up.
 		if ( ! Capabilities::has_pos_access( $staff_id ) ) {
 			return 0;
 		}

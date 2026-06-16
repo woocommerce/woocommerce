@@ -11,6 +11,9 @@ use WC_Unit_Test_Case;
 
 /**
  * Tests for OrderAttribution — initiator recording on POS order/refund writes.
+ *
+ * The initiator now rides the X-WC-POS-Initiator-Id header (exposed via POSRequestContext), so the
+ * tests feed it through the mocked context rather than via order meta.
  */
 class OrderAttributionTest extends WC_Unit_Test_Case {
 
@@ -52,14 +55,16 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Build the SUT with a POS-request flag.
+	 * Build the SUT with the POS-request flag and the initiator the header would carry.
 	 *
-	 * @param bool $is_pos Whether the request is POS-originated.
+	 * @param bool $is_pos       Whether the request is POS-originated.
+	 * @param int  $initiator_id The initiator id the X-WC-POS-Initiator-Id header carries (0 = none).
 	 * @return OrderAttribution
 	 */
-	private function make_sut( bool $is_pos = true ): OrderAttribution {
+	private function make_sut( bool $is_pos = true, int $initiator_id = 0 ): OrderAttribution {
 		$ctx = $this->createMock( POSRequestContext::class );
 		$ctx->method( 'is_pos_request' )->willReturn( $is_pos );
+		$ctx->method( 'get_initiator_id' )->willReturn( $initiator_id );
 
 		$sut = new OrderAttribution();
 		$sut->init( $ctx );
@@ -84,28 +89,34 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Writes one combined note naming the actor and the initiator.
+	 * @testdox Writes one combined note and records the initiator meta.
 	 */
 	public function test_writes_combined_initiator_note(): void {
 		$order = wc_create_order();
-		$order->update_meta_data( OrderAttribution::META_KEY_INITIATOR_USER_ID, $this->initiator_id );
 		$order->save();
 
-		$this->make_sut()->handle_post_insert( $order, null, true );
+		$this->make_sut( true, $this->initiator_id )->handle_post_insert( $order, null, true );
 
 		$notes = $this->pos_notes( $order->get_id() );
 		$this->assertCount( 1, $notes, 'Exactly one POS attribution note should be written' );
 		$this->assertStringContainsString( 'initiated by', $notes[0] );
+
+		$saved = wc_get_order( $order->get_id() );
+		$this->assertSame(
+			(string) $this->initiator_id,
+			(string) $saved->get_meta( OrderAttribution::META_KEY_INITIATOR_USER_ID ),
+			'The initiator should be persisted on the order'
+		);
 	}
 
 	/**
-	 * @testdox Writes no note when there is no initiator meta (plain write).
+	 * @testdox Writes no note when there is no initiator header (plain write).
 	 */
 	public function test_no_note_without_initiator(): void {
 		$order = wc_create_order();
 		$order->save();
 
-		$this->make_sut()->handle_post_insert( $order, null, true );
+		$this->make_sut( true, 0 )->handle_post_insert( $order, null, true );
 
 		$this->assertCount( 0, $this->pos_notes( $order->get_id() ), 'A plain POS write needs no initiator note' );
 	}
@@ -115,10 +126,9 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 */
 	public function test_no_note_when_not_pos_request(): void {
 		$order = wc_create_order();
-		$order->update_meta_data( OrderAttribution::META_KEY_INITIATOR_USER_ID, $this->initiator_id );
 		$order->save();
 
-		$this->make_sut( false )->handle_post_insert( $order, null, true );
+		$this->make_sut( false, $this->initiator_id )->handle_post_insert( $order, null, true );
 
 		$this->assertCount( 0, $this->pos_notes( $order->get_id() ) );
 	}
@@ -128,10 +138,9 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	 */
 	public function test_no_note_when_initiator_is_actor(): void {
 		$order = wc_create_order();
-		$order->update_meta_data( OrderAttribution::META_KEY_INITIATOR_USER_ID, $this->actor_id );
 		$order->save();
 
-		$this->make_sut()->handle_post_insert( $order, null, true );
+		$this->make_sut( true, $this->actor_id )->handle_post_insert( $order, null, true );
 
 		$this->assertCount( 0, $this->pos_notes( $order->get_id() ), 'No separate initiator means no extra note' );
 	}
@@ -142,10 +151,9 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	public function test_skips_initiator_without_pos_access(): void {
 		$stranger = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 		$order    = wc_create_order();
-		$order->update_meta_data( OrderAttribution::META_KEY_INITIATOR_USER_ID, $stranger );
 		$order->save();
 
-		$this->make_sut()->handle_post_insert( $order, null, true );
+		$this->make_sut( true, $stranger )->handle_post_insert( $order, null, true );
 
 		$this->assertCount( 0, $this->pos_notes( $order->get_id() ), 'A non-POS initiator id is skipped, not noted' );
 	}
@@ -165,10 +173,8 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertNotWPError( $refund );
-		$refund->update_meta_data( OrderAttribution::META_KEY_INITIATOR_USER_ID, $this->initiator_id );
-		$refund->save();
 
-		$this->make_sut()->handle_post_insert( $refund, null, true );
+		$this->make_sut( true, $this->initiator_id )->handle_post_insert( $refund, null, true );
 
 		$notes = $this->pos_notes( $order->get_id() );
 		$this->assertCount( 1, $notes, 'The refund initiator note should land on the parent order' );

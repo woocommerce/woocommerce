@@ -27,16 +27,17 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
  *    the real URL.
  *  - Tier 2 (header bridge, interim): an allowlisted `/wc/v3/{orders,refunds,coupons}` write
  *    plus the `X-WC-POS-Request: 1` header — a crutch for routes not yet migrated to the POS
- *    namespace. The header is spoofable, but it only scopes WHEN the credential is checked; it is
- *    not the gate (POSAuthHandler still requires a real device-admin credential and a verified PIN).
+ *    namespace. The header is spoofable, but it only scopes WHEN the swap runs; it is not the gate
+ *    (POSAuthHandler still requires the pre-swap user to be the device admin).
  *
- * Identity credential (both tiers): the `X-WC-POS-Staff-Id` + `X-WC-POS-Pin` headers. This class
- * only records that they are PRESENT and exposes them; POSAuthHandler verifies the PIN server-side.
+ * Identity credential (both tiers): the `X-WC-POS-Staff-Id` header names the staff member to act
+ * as. For this POC the swap TRUSTS that id (gated only by the device-admin auth) — there is NO
+ * per-request staff credential check yet, so the swap is not an enforcement boundary on its own.
+ * Authenticating the staff (verify a PIN once at login/override, then carry a short-lived token on
+ * writes) is the deferred follow-up; see POSAuthHandler.
  *
  * Header-naming note: `X-WC-POS-*` are POC-local conventions, not a WooCommerce standard (the lone
- * core precedent is the boolean hint `X-WC-From-Product-Editor`). The production credential should
- * be a short-lived signed token; plaintext-PIN headers are an explicit POC shortcut. The PIN value
- * returned by get_pin() must never be logged.
+ * core precedent is the boolean hint `X-WC-From-Product-Editor`).
  *
  * @since 11.0.0
  * @internal
@@ -46,9 +47,9 @@ class POSRequestContext {
 	private const PARENT_FLAG  = 'point_of_sale';
 	private const FEATURE_FLAG = 'point_of_sale_staff';
 
-	private const HEADER_POS_REQUEST = 'HTTP_X_WC_POS_REQUEST';
-	private const HEADER_STAFF_ID    = 'HTTP_X_WC_POS_STAFF_ID';
-	private const HEADER_PIN         = 'HTTP_X_WC_POS_PIN';
+	private const HEADER_POS_REQUEST  = 'HTTP_X_WC_POS_REQUEST';
+	private const HEADER_STAFF_ID     = 'HTTP_X_WC_POS_STAFF_ID';
+	private const HEADER_INITIATOR_ID = 'HTTP_X_WC_POS_INITIATOR_ID';
 
 	public const TIER_STRUCTURAL = 'structural';
 	public const TIER_HEADER     = 'header';
@@ -88,7 +89,8 @@ class POSRequestContext {
 	private ?string $intent = null;
 
 	/**
-	 * Staff user id asserted by the request header (unverified until POSAuthHandler checks the PIN).
+	 * Staff user id asserted by the request header (device-asserted; no per-request credential check
+	 * in this POC).
 	 *
 	 * @var int
 	 */
@@ -106,11 +108,11 @@ class POSRequestContext {
 	}
 
 	/**
-	 * Whether the current request is shaped like a POS-originated request carrying staff
-	 * credentials. Memoized for the request.
+	 * Whether the current request is shaped like a POS-originated request naming a staff member.
+	 * Memoized for the request.
 	 *
 	 * This is necessary-but-not-sufficient for a swap: POSAuthHandler additionally requires the
-	 * pre-swap user to be the device admin and the PIN to verify.
+	 * pre-swap user to be the device admin and the named staff to hold the operation's cap.
 	 *
 	 * @return bool
 	 */
@@ -132,7 +134,8 @@ class POSRequestContext {
 	/**
 	 * The staff user id asserted by the request header (0 when absent/invalid).
 	 *
-	 * Unverified: the identity is only trusted once POSAuthHandler verifies the PIN against it.
+	 * Device-asserted: this POC trusts the id without a per-request staff credential check. A token
+	 * check is the deferred follow-up.
 	 *
 	 * @return int
 	 */
@@ -155,17 +158,18 @@ class POSRequestContext {
 	}
 
 	/**
-	 * The plaintext PIN supplied by the request header.
+	 * The initiator staff user id from the `X-WC-POS-Initiator-Id` header (0 when absent).
 	 *
-	 * MUST NOT be logged. Returned only for server-side verification by POSAuthHandler.
+	 * The initiator is the staff member who initiated an action a different staff member authorized
+	 * — e.g. the cashier on a manager-approved override refund. It is attribution context, not an
+	 * auth credential, so it is read on demand and never gates detection or the swap.
 	 *
-	 * @return string Empty string when absent.
+	 * @return int
 	 */
-	public function get_pin(): string {
-		if ( empty( $_SERVER[ self::HEADER_PIN ] ) ) {
-			return '';
-		}
-		return sanitize_text_field( wp_unslash( $_SERVER[ self::HEADER_PIN ] ) );
+	public function get_initiator_id(): int {
+		return isset( $_SERVER[ self::HEADER_INITIATOR_ID ] )
+			? absint( wp_unslash( $_SERVER[ self::HEADER_INITIATOR_ID ] ) )
+			: 0;
 	}
 
 	/**
@@ -237,15 +241,12 @@ class POSRequestContext {
 			return false;
 		}
 
-		// The staff credential headers must be present. Identity is not trusted until the PIN is
-		// verified server-side by POSAuthHandler; here we only require they exist.
+		// The staff-id header must name a staff member to act as. This POC trusts the id (gated by
+		// the device-admin auth); a per-request staff credential check is the deferred follow-up.
 		$staff_id = isset( $_SERVER[ self::HEADER_STAFF_ID ] )
 			? absint( wp_unslash( $_SERVER[ self::HEADER_STAFF_ID ] ) )
 			: 0;
 		if ( $staff_id <= 0 ) {
-			return false;
-		}
-		if ( empty( $_SERVER[ self::HEADER_PIN ] ) ) {
 			return false;
 		}
 
