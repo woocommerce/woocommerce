@@ -2204,7 +2204,10 @@ ul.wc_coupon_list_block {
 				right: 0;
 				top: calc(100% + 4px);
 				z-index: 10;
-				min-width: 200px;
+				// Hug the content (items are white-space: nowrap) instead of
+				// stretching to a fixed width, with a small floor to stay tidy.
+				width: max-content;
+				min-width: 120px;
 				margin: 0;
 				padding: 4px;
 				list-style: none;
