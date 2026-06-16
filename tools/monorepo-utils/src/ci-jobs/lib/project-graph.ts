@@ -12,7 +12,7 @@ import { PackageJSON, loadPackage } from './package-file';
 
 const PNPM_COMMAND_OPTIONS = {
 	encoding: 'utf-8',
-	maxBuffer: 50 * 1024 * 1024,
+	maxBuffer: 5 * 1024 * 1024,
 } as const;
 
 /**
