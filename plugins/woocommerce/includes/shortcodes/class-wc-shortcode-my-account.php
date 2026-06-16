@@ -90,16 +90,16 @@ class WC_Shortcode_My_Account {
 			wc_add_notice( sprintf( __( 'Are you sure you want to log out? <a href="%s">Confirm and log out</a>', 'woocommerce' ), wc_logout_url() ) );
 		}
 
-		if ( get_user_option( 'default_password_nag' ) && ( wc_is_current_account_menu_item( 'dashboard' ) || wc_is_current_account_menu_item( 'edit-account' ) ) ) {
+		if ( get_user_option( 'default_password_nag' ) && ( wc_is_current_account_menu_item( 'dashboard' ) || wc_is_current_account_menu_item( 'edit-account' ) || wc_is_current_account_menu_item( 'orders' ) ) ) {
+			$resend_url = wp_nonce_url( add_query_arg( 'wc-resend-set-password', '1', wc_get_page_permalink( 'myaccount' ) ), 'wc-resend-set-password' );
 			wc_add_notice(
 				sprintf(
-					// translators: %s: site name.
-					__( 'Your account with %s is using a temporary password. We emailed you a link to change your password.', 'woocommerce' ),
-					esc_html( wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) )
+					/* translators: %1$s and %2$s are opening and closing anchor tags for the resend link. */
+					__( 'Your account is using a temporary password. We emailed you a link to change your password. %1$sResend link%2$s.', 'woocommerce' ),
+					'<a href="' . esc_url( $resend_url ) . '">',
+					'</a>'
 				),
-				'notice',
-				array(),
-				true
+				'notice'
 			);
 		}
 	}
@@ -233,14 +233,16 @@ class WC_Shortcode_My_Account {
 		/**
 		 * After sending the reset link, don't show the form again.
 		 */
-		if ( ! empty( $_GET['reset-link-sent'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! empty( $_GET['reset-link-sent'] ) ) {
+			// WPCS: input var ok, CSRF ok.
 			wc_get_template( 'myaccount/lost-password-confirmation.php' );
 			return;
 
 			/**
 			 * Process reset key / login from email confirmation link
 			 */
-		} elseif ( ! empty( $_GET['show-reset-form'] ) ) { // WPCS: input var ok, CSRF ok.
+		} elseif ( ! empty( $_GET['show-reset-form'] ) ) {
+			// WPCS: input var ok, CSRF ok.
 			if ( isset( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ) && 0 < strpos( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ], ':' ) ) {  // @codingStandardsIgnoreLine
 				list( $rp_id, $rp_key ) = array_map( 'wc_clean', explode( ':', wp_unslash( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ), 2 ) ); // @codingStandardsIgnoreLine
 				$userdata               = get_userdata( absint( $rp_id ) );
@@ -279,7 +281,8 @@ class WC_Shortcode_My_Account {
 	 * @return bool True: when finish. False: on error
 	 */
 	public static function retrieve_password() {
-		$login = isset( $_POST['user_login'] ) ? sanitize_user( wp_unslash( $_POST['user_login'] ) ) : ''; // WPCS: input var ok, CSRF ok.
+		$login = isset( $_POST['user_login'] ) ? sanitize_user( wp_unslash( $_POST['user_login'] ) ) : '';
+		// WPCS: input var ok, CSRF ok.
 
 		if ( empty( $login ) ) {
 
@@ -337,7 +340,8 @@ class WC_Shortcode_My_Account {
 		$key = get_password_reset_key( $user_data );
 
 		// Send email notification.
-		WC()->mailer(); // Load email classes.
+		WC()->mailer();
+		// Load email classes.
 		do_action( 'woocommerce_reset_password_notification', $user_login, $key );
 
 		return true;
@@ -379,6 +383,11 @@ class WC_Shortcode_My_Account {
 		wp_set_password( $new_pass, $user->ID );
 		update_user_meta( $user->ID, 'default_password_nag', false );
 
+		// Completing a password reset proves the customer controls their inbox — mark verified.
+		wc_get_container()
+			->get( \Automattic\WooCommerce\Internal\CustomerEmailVerification\EmailVerificationService::class )
+			->mark_verified( $user->ID );
+
 		/**
 		 * Fires after the user's password has been reset via WooCommerce.
 		 *
@@ -405,7 +414,8 @@ class WC_Shortcode_My_Account {
 	 */
 	public static function set_reset_password_cookie( $value = '' ) {
 		$rp_cookie = 'wp-resetpass-' . COOKIEHASH;
-		$rp_path   = isset( $_SERVER['REQUEST_URI'] ) ? current( explode( '?', wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) : ''; // WPCS: input var ok, sanitization ok.
+		$rp_path   = isset( $_SERVER['REQUEST_URI'] ) ? current( explode( '?', wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) : '';
+		// WPCS: input var ok, sanitization ok.
 
 		if ( $value ) {
 			setcookie( $rp_cookie, $value, 0, $rp_path, COOKIE_DOMAIN, is_ssl(), true );

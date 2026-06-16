@@ -104,6 +104,25 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox should_show_prompt returns false for an account using a temporary password.
+	 */
+	public function test_should_show_prompt_returns_false_with_temporary_password(): void {
+		$email   = 'temp-pass@example.com';
+		$user_id = wc_create_new_customer( $email, 'temppassuser', 'pw' );
+		wp_set_current_user( $user_id );
+
+		// A linkable guest order exists, so only the temporary-password suppression should hide the prompt.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( $email );
+		$order->set_customer_id( 0 );
+		$order->save();
+
+		update_user_option( $user_id, 'default_password_nag', true, true );
+
+		$this->assertFalse( $this->sut->should_show_prompt(), 'Prompt should be hidden when the temporary-password notice covers verification' );
+	}
+
+	/**
 	 * @testdox should_show_prompt returns false for a logged-in customer whose email is verified.
 	 */
 	public function test_should_show_prompt_returns_false_for_verified_customer(): void {

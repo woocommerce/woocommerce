@@ -167,6 +167,12 @@ class VerificationController {
 			return false;
 		}
 
+		// A temporary-password account already has a set-password link (which also verifies on use),
+		// surfaced by the temporary-password notice — don't show a second prompt alongside it.
+		if ( get_user_option( 'default_password_nag', $user_id ) ) {
+			return false;
+		}
+
 		return $this->order_linker->has_linkable_orders( $user_id );
 	}
 
