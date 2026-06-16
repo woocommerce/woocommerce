@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCutoverController;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
@@ -101,6 +102,7 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 		remove_all_filters( WooPaymentsCutoverController::FILTER_MANDATORY_CUTOVER_ENABLED );
 		remove_all_filters( WooPaymentsCutoverController::FILTER_PREFLIGHT_FAILURES );
 		remove_all_filters( 'wp_die_handler' );
+		Constants::clear_single_constant( 'WC_ALLOW_MERGED_FEATURE_PLUGINS' );
 		$this->reset_legacy_proxy_mocks();
 
 		parent::tearDown();
@@ -202,6 +204,41 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 		$this->sut->guard_woopayments_activation( NativePaymentsRuntimeArbiter::PLUGIN_FILE );
 
 		$this->assertTrue( true, 'Mandatory cutover must still require an explicit rollout filter.' );
+	}
+
+	/**
+	 * @testdox Mandatory auto-deactivation does not require current user cutover capabilities.
+	 */
+	public function test_mandatory_auto_deactivation_does_not_require_current_user_cutover_capabilities(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( false );
+		$this->enable_ready_cutover();
+		add_filter( WooPaymentsCutoverController::FILTER_MANDATORY_CUTOVER_ENABLED, '__return_true' );
+
+		$this->sut->handle_admin_init();
+
+		$this->assertCount( 1, $this->deactivate_plugin_calls, 'Mandatory cutover should deactivate the plugin when native preflight is ready.' );
+		$this->assertSame(
+			array( NativePaymentsRuntimeArbiter::PLUGIN_FILE, false, false ),
+			$this->deactivate_plugin_calls[0],
+			'Mandatory cutover should deactivate the per-site WooPayments plugin when native preflight is ready.'
+		);
+		$this->assertFalse( $this->plugin_active, 'Mandatory cutover should remove the plugin active signal.' );
+	}
+
+	/**
+	 * @testdox Mandatory auto-deactivation allows merged feature plugins when developer bypass is enabled.
+	 */
+	public function test_mandatory_auto_deactivation_allows_merged_feature_plugins_when_bypass_enabled(): void {
+		$this->fake_plugin_active();
+		$this->enable_ready_cutover();
+		add_filter( WooPaymentsCutoverController::FILTER_MANDATORY_CUTOVER_ENABLED, '__return_true' );
+		Constants::set_constant( 'WC_ALLOW_MERGED_FEATURE_PLUGINS', true );
+
+		$this->sut->handle_admin_init();
+
+		$this->assertSame( array(), $this->deactivate_plugin_calls, 'Developer bypass should preserve an active standalone plugin for parallel testing.' );
+		$this->assertTrue( $this->plugin_active, 'Developer bypass should leave WooPayments active.' );
 	}
 
 	/**

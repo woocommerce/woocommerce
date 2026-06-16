@@ -219,6 +219,15 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 			return false;
 		}
 
+		return $this->deactivate_woopayments_plugin();
+	}
+
+	/**
+	 * Deactivate the standalone WooPayments plugin.
+	 *
+	 * @return bool True when the plugin no longer owns the runtime.
+	 */
+	private function deactivate_woopayments_plugin(): bool {
 		if ( ! function_exists( 'deactivate_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
@@ -299,11 +308,20 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	 * Auto-deactivate WooPayments when mandatory cutover is enabled and safe.
 	 */
 	private function maybe_auto_deactivate_plugin(): void {
-		if ( ! $this->is_mandatory_cutover_enabled() || ! $this->arbiter->is_plugin_runtime_active() ) {
+		if (
+			! $this->is_mandatory_cutover_enabled() ||
+			! $this->arbiter->is_plugin_runtime_active() ||
+			Constants::is_true( 'WC_ALLOW_MERGED_FEATURE_PLUGINS' )
+		) {
 			return;
 		}
 
-		if ( $this->disable_woopayments_plugin() ) {
+		if ( ! $this->is_cutover_ready() ) {
+			add_action( 'admin_notices', array( $this, 'output_blocked_notice' ) );
+			return;
+		}
+
+		if ( $this->deactivate_woopayments_plugin() ) {
 			add_action( 'admin_notices', array( $this, 'output_success_notice' ) );
 			return;
 		}
