@@ -3,8 +3,14 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency\Providers;
 
+use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\CurrencyRateProvider;
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistry;
 use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistryFactory;
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistrarInterface;
 use Automattic\WooCommerce\Internal\MultiCurrency\Providers\WooPaymentsCurrencyRateProvider;
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\WooPaymentsCurrencyRateProviderRegistrar;
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\WooPaymentsLegacyAccountAdapter;
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\WooPaymentsLegacyApiClientAdapter;
 use WC_Unit_Test_Case;
 
 /**
@@ -34,6 +40,32 @@ class CurrencyRateProviderRegistryFactoryTest extends WC_Unit_Test_Case {
 		$this->assertNotSame( $first, $second );
 		$this->assertInstanceOf( WooPaymentsCurrencyRateProvider::class, $first->get_provider( WooPaymentsCurrencyRateProvider::PROVIDER_ID ) );
 		$this->assertNull( $first->get_available_provider() );
+	}
+
+	/**
+	 * @testdox Should create an empty registry when no provider registrars are configured.
+	 */
+	public function test_creates_empty_registry_when_provider_registrars_are_empty(): void {
+		$sut = $this->create_factory_with_default_registrar();
+		$sut->set_provider_registrars( array() );
+
+		$registry = $sut->create();
+
+		$this->assertSame( array(), $registry->get_providers() );
+		$this->assertNull( $registry->get_available_provider() );
+	}
+
+	/**
+	 * @testdox Should register providers from configured registrars.
+	 */
+	public function test_registers_providers_from_configured_registrars(): void {
+		$sut = $this->create_factory_with_default_registrar();
+		$sut->set_provider_registrars( array( $this->create_fake_provider_registrar() ) );
+
+		$registry = $sut->create();
+
+		$this->assertArrayHasKey( 'fake-provider', $registry->get_providers() );
+		$this->assertTrue( $registry->get_provider( 'fake-provider' )->is_available() );
 	}
 
 	/**
@@ -162,6 +194,81 @@ class CurrencyRateProviderRegistryFactoryTest extends WC_Unit_Test_Case {
 				unset( $currency_from, $currencies_to );
 
 				return array( 'gbp' => 0.82 );
+			}
+		};
+	}
+
+	/**
+	 * Create a standalone factory with the default WooPayments registrar.
+	 *
+	 * @return CurrencyRateProviderRegistryFactory
+	 */
+	private function create_factory_with_default_registrar(): CurrencyRateProviderRegistryFactory {
+		$registrar = new WooPaymentsCurrencyRateProviderRegistrar();
+		$registrar->init( new WooPaymentsLegacyAccountAdapter(), new WooPaymentsLegacyApiClientAdapter() );
+
+		$sut = new CurrencyRateProviderRegistryFactory();
+		$sut->init( $registrar );
+
+		return $sut;
+	}
+
+	/**
+	 * Create a fake provider registrar.
+	 *
+	 * @return CurrencyRateProviderRegistrarInterface
+	 */
+	private function create_fake_provider_registrar(): CurrencyRateProviderRegistrarInterface {
+		return new class() implements CurrencyRateProviderRegistrarInterface {
+			/**
+			 * Register fake providers.
+			 *
+			 * @param CurrencyRateProviderRegistry $registry Rate provider registry.
+			 */
+			public function register( CurrencyRateProviderRegistry $registry ): void {
+				$registry->register(
+					new class() implements CurrencyRateProvider {
+						/**
+						 * Get the provider identifier.
+						 *
+						 * @return string
+						 */
+						public function get_id(): string {
+							return 'fake-provider';
+						}
+
+						/**
+						 * Tell whether the provider is available.
+						 *
+						 * @return bool
+						 */
+						public function is_available(): bool {
+							return true;
+						}
+
+						/**
+						 * Get supported currencies.
+						 *
+						 * @return string[]
+						 */
+						public function get_supported_currencies(): array {
+							return array( 'EUR' );
+						}
+
+						/**
+						 * Get currency rates.
+						 *
+						 * @param string        $currency_from Source currency.
+						 * @param string[]|null $currencies_to Target currencies.
+						 * @return array<string,mixed>
+						 */
+						public function get_currency_rates( string $currency_from, ?array $currencies_to = null ): array {
+							unset( $currency_from, $currencies_to );
+
+							return array( 'eur' => 1.2 );
+						}
+					}
+				);
 			}
 		};
 	}

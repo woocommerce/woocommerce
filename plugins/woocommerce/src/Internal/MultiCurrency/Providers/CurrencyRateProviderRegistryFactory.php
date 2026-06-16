@@ -16,30 +16,32 @@ namespace Automattic\WooCommerce\Internal\MultiCurrency\Providers;
 class CurrencyRateProviderRegistryFactory {
 
 	/**
-	 * WooPayments account adapter.
+	 * Rate provider registrars.
 	 *
-	 * @var WooPaymentsLegacyAccountAdapter
+	 * @var CurrencyRateProviderRegistrarInterface[]
 	 */
-	private WooPaymentsLegacyAccountAdapter $account_adapter;
-
-	/**
-	 * WooPayments API client adapter.
-	 *
-	 * @var WooPaymentsLegacyApiClientAdapter
-	 */
-	private WooPaymentsLegacyApiClientAdapter $api_client_adapter;
+	private array $provider_registrars = array();
 
 	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsLegacyAccountAdapter   $account_adapter    WooPayments account adapter.
-	 * @param WooPaymentsLegacyApiClientAdapter $api_client_adapter WooPayments API client adapter.
+	 * @param WooPaymentsCurrencyRateProviderRegistrar $woo_payments_provider_registrar WooPayments provider registrar.
 	 */
-	final public function init( WooPaymentsLegacyAccountAdapter $account_adapter, WooPaymentsLegacyApiClientAdapter $api_client_adapter ): void {
-		$this->account_adapter    = $account_adapter;
-		$this->api_client_adapter = $api_client_adapter;
+	final public function init( WooPaymentsCurrencyRateProviderRegistrar $woo_payments_provider_registrar ): void {
+		$this->provider_registrars = array( $woo_payments_provider_registrar );
+	}
+
+	/**
+	 * Set explicit rate-provider registrars.
+	 *
+	 * @internal Used by tests and future explicit provider bootstrap.
+	 *
+	 * @param CurrencyRateProviderRegistrarInterface[] $provider_registrars Provider registrars.
+	 */
+	public function set_provider_registrars( array $provider_registrars ): void {
+		$this->provider_registrars = array_values( $provider_registrars );
 	}
 
 	/**
@@ -49,7 +51,10 @@ class CurrencyRateProviderRegistryFactory {
 	 */
 	public function create(): CurrencyRateProviderRegistry {
 		$registry = new CurrencyRateProviderRegistry();
-		$registry->register( new WooPaymentsCurrencyRateProvider( $this->account_adapter, $this->api_client_adapter ) );
+
+		foreach ( $this->provider_registrars as $provider_registrar ) {
+			$provider_registrar->register( $registry );
+		}
 
 		return $registry;
 	}
