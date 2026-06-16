@@ -379,11 +379,6 @@ class WC_Shortcode_My_Account {
 		wp_set_password( $new_pass, $user->ID );
 		update_user_meta( $user->ID, 'default_password_nag', false );
 
-		// Completing a password reset proves the customer controls their inbox — mark verified.
-		wc_get_container()
-			->get( \Automattic\WooCommerce\Internal\CustomerEmailVerification\EmailVerificationService::class )
-			->mark_verified( $user->ID );
-
 		/**
 		 * Fires after the user's password has been reset via WooCommerce.
 		 *

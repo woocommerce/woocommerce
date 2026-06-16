@@ -38,6 +38,7 @@ class CustomerEmailVerification {
 		$container->get( LoginGate::class );
 		$container->get( OrderLinker::class );
 		$container->get( AccountCreationIntegration::class );
+		$container->get( VerificationEventListener::class );
 	}
 
 	/**

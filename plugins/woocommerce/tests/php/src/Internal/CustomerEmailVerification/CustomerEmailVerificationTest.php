@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerif
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\LoginGate;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\OrderLinker;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\VerificationController;
+use Automattic\WooCommerce\Internal\CustomerEmailVerification\VerificationEventListener;
 use WC_Unit_Test_Case;
 
 /**
@@ -56,6 +57,12 @@ class CustomerEmailVerificationTest extends WC_Unit_Test_Case {
 			AccountCreationIntegration::class,
 			$container->get( AccountCreationIntegration::class ),
 			'AccountCreationIntegration must be resolvable from the DI container.'
+		);
+
+		$this->assertInstanceOf(
+			VerificationEventListener::class,
+			$container->get( VerificationEventListener::class ),
+			'VerificationEventListener must be resolvable from the DI container.'
 		);
 	}
 }
