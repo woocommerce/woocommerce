@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\POS\StoreApi;
 
 use WC_Order;
 use WC_Order_Item_Product;
+use WC_Product;
 
 /**
  * Cart-driven view of what POS needs to capture before checkout can succeed.
@@ -33,6 +34,8 @@ final class PosCheckoutRequirements {
 	private $order;
 
 	/**
+	 * Constructor.
+	 *
 	 * @param WC_Order $order Order whose line items are inspected.
 	 */
 	public function __construct( WC_Order $order ) {
@@ -64,7 +67,7 @@ final class PosCheckoutRequirements {
 				continue;
 			}
 			$product = $item->get_product();
-			if ( $product && $product->is_downloadable() ) {
+			if ( $product instanceof WC_Product && $product->is_downloadable() ) {
 				return true;
 			}
 		}

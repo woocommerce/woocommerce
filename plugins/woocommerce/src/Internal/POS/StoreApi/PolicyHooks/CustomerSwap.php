@@ -47,7 +47,7 @@ class CustomerSwap implements RegisterHooksInterface {
 		if ( ! Context::is_pos_request() ) {
 			return;
 		}
-		add_filter( 'rest_dispatch_request', array( $this, 'swap_customer' ), self::PRIORITY, 2 );
+		add_filter( 'rest_dispatch_request', array( $this, 'swap_customer' ), self::PRIORITY, 1 );
 	}
 
 	/**

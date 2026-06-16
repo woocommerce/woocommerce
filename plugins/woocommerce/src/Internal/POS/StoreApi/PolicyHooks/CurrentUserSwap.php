@@ -44,7 +44,7 @@ class CurrentUserSwap implements RegisterHooksInterface {
 		if ( ! Context::is_pos_request() ) {
 			return;
 		}
-		add_filter( 'rest_dispatch_request', array( $this, 'swap_to_guest' ), 10, 2 );
+		add_filter( 'rest_dispatch_request', array( $this, 'swap_to_guest' ), 10, 1 );
 	}
 
 	/**
