@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Container;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Affirm;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AfterpayClearpay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Airwallex;
@@ -33,8 +34,10 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Visa;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Vivacom;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WC_Payment_Gateway;
@@ -214,16 +217,39 @@ class PaymentsProviders {
 	private LegacyProxy $proxy;
 
 	/**
+	 * The dependency injection container.
+	 *
+	 * @var Container|null
+	 */
+	private ?Container $container = null;
+
+	/**
+	 * The WooPayments legacy runtime.
+	 *
+	 * @var WooPaymentsLegacyRuntime|null
+	 */
+	private ?WooPaymentsLegacyRuntime $woo_payments_legacy_runtime = null;
+
+	/**
 	 * Initialize the class instance.
 	 *
-	 * @param ExtensionSuggestions $payment_extension_suggestions The payment extension suggestions service.
-	 * @param LegacyProxy          $proxy                         The LegacyProxy instance.
+	 * @param ExtensionSuggestions     $payment_extension_suggestions The payment extension suggestions service.
+	 * @param LegacyProxy              $proxy                         The LegacyProxy instance.
+	 * @param Container                $container                     Optional. The dependency injection container.
+	 * @param WooPaymentsLegacyRuntime $woo_payments_legacy_runtime Optional. The WooPayments legacy runtime.
 	 *
 	 * @internal
 	 */
-	final public function init( ExtensionSuggestions $payment_extension_suggestions, LegacyProxy $proxy ): void {
-		$this->extension_suggestions = $payment_extension_suggestions;
-		$this->proxy                 = $proxy;
+	final public function init(
+		ExtensionSuggestions $payment_extension_suggestions,
+		LegacyProxy $proxy,
+		?Container $container = null,
+		?WooPaymentsLegacyRuntime $woo_payments_legacy_runtime = null
+	): void {
+		$this->extension_suggestions       = $payment_extension_suggestions;
+		$this->proxy                       = $proxy;
+		$this->container                   = $container;
+		$this->woo_payments_legacy_runtime = $woo_payments_legacy_runtime;
 	}
 
 	/**
@@ -410,7 +436,7 @@ class PaymentsProviders {
 			return $this->instances['generic'];
 		}
 
-		$this->instances[ $gateway_id ] = new $provider_class( $this->proxy );
+		$this->instances[ $gateway_id ] = $this->configure_payment_gateway_provider_instance( new $provider_class( $this->proxy ) );
 
 		return $this->instances[ $gateway_id ];
 	}
@@ -460,9 +486,48 @@ class PaymentsProviders {
 			return $this->instances['generic'];
 		}
 
-		$this->instances[ $pes_id ] = new $provider_class( $this->proxy );
+		$this->instances[ $pes_id ] = $this->configure_payment_gateway_provider_instance( new $provider_class( $this->proxy ) );
 
 		return $this->instances[ $pes_id ];
+	}
+
+	/**
+	 * Configure provider instances that need explicit runtime collaborators.
+	 *
+	 * @param PaymentGateway $provider The payment gateway provider instance.
+	 * @return PaymentGateway
+	 */
+	private function configure_payment_gateway_provider_instance( PaymentGateway $provider ): PaymentGateway {
+		if ( ! $provider instanceof WooPayments ||
+			null === $this->container ||
+			null === $this->woo_payments_legacy_runtime ) {
+			return $provider;
+		}
+
+		$container                   = $this->container;
+		$woo_payments_legacy_runtime = $this->woo_payments_legacy_runtime;
+
+		$provider->set_admin_runtime_collaborators(
+			$woo_payments_legacy_runtime,
+			function () use ( $container ): WooPaymentsRestController {
+				$rest_controller = $container->get( WooPaymentsRestController::class );
+				if ( ! $rest_controller instanceof WooPaymentsRestController ) {
+					throw new \RuntimeException( 'WooPayments REST controller is not available.' );
+				}
+
+				return $rest_controller;
+			},
+			function () use ( $container ): WooPaymentsService {
+				$service = $container->get( WooPaymentsService::class );
+				if ( ! $service instanceof WooPaymentsService ) {
+					throw new \RuntimeException( 'WooPayments service is not available.' );
+				}
+
+				return $service;
+			}
+		);
+
+		return $provider;
 	}
 
 	/**

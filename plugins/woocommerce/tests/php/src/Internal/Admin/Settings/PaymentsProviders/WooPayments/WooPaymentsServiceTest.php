@@ -210,7 +210,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->sut->init(
 			$this->mock_providers,
 			$this->mockable_proxy,
-			$this->create_onboarding_adapter()
+			$this->create_onboarding_adapter(),
+			$this->create_legacy_runtime()
 		);
 	}
 
@@ -312,7 +313,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->willReturn( 'https://example.com/native-overview' );
 
 		$this->sut = new WooPaymentsService();
-		$this->sut->init( $this->mock_providers, $this->mockable_proxy, $onboarding_adapter );
+		$this->sut->init( $this->mock_providers, $this->mockable_proxy, $onboarding_adapter, $this->create_legacy_runtime() );
 
 		$result = $this->sut->get_onboarding_details( $location, '/some/path' );
 
@@ -329,9 +330,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @return WooPaymentsOnboardingAdapter
 	 */
 	private function create_onboarding_adapter(): WooPaymentsOnboardingAdapter {
-		$legacy_runtime = new WooPaymentsLegacyRuntime();
-		$legacy_runtime->init( $this->mockable_proxy );
-
 		$provider = $this->getMockBuilder( WooPaymentsProvider::class )
 			->disableOriginalConstructor()
 			->onlyMethods( array( 'can_process_payments' ) )
@@ -341,9 +339,21 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->willReturn( false );
 
 		$adapter = new WooPaymentsOnboardingAdapter();
-		$adapter->init( $legacy_runtime, $provider, new NativeWooPaymentsGateway() );
+		$adapter->init( $this->create_legacy_runtime(), $provider, new NativeWooPaymentsGateway() );
 
 		return $adapter;
+	}
+
+	/**
+	 * Create a WooPayments legacy runtime wired to this test's mockable proxy.
+	 *
+	 * @return WooPaymentsLegacyRuntime
+	 */
+	private function create_legacy_runtime(): WooPaymentsLegacyRuntime {
+		$legacy_runtime = new WooPaymentsLegacyRuntime();
+		$legacy_runtime->init( $this->mockable_proxy );
+
+		return $legacy_runtime;
 	}
 
 	/**
@@ -368,6 +378,18 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$source,
 			'WooPaymentsService should receive the onboarding adapter through init injection.'
 		);
+	}
+
+	/**
+	 * @testdox Should centralize legacy WooPayments runtime access.
+	 */
+	public function test_legacy_runtime_access_is_centralized(): void {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for admin-service boundary regression coverage.
+		$source = (string) file_get_contents( WC()->plugin_path() . '/src/Internal/Admin/Settings/PaymentsProviders/WooPayments/WooPaymentsService.php' );
+
+		$this->assertStringNotContainsString( "class_exists( 'WC_Payments_Onboarding_Service' )", $source, 'WooPaymentsService should reset onboarding mode through WooPaymentsLegacyRuntime.' );
+		$this->assertStringNotContainsString( "class_exists( '\\WC_Payments_Utils' )", $source, 'WooPaymentsService should read supported countries through WooPaymentsLegacyRuntime.' );
+		$this->assertStringNotContainsString( '\\WC_Payments_Utils::supported_countries', $source, 'WooPaymentsService should not call WooPayments utility statics directly.' );
 	}
 
 	/**

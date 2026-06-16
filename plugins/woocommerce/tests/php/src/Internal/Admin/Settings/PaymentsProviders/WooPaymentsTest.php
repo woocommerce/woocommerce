@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGate
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
@@ -75,7 +76,30 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		// Finally, set up the mockable proxy.
 		$this->setup_legacy_proxy_mocks();
 
-		$this->sut = new WooPayments( $this->mockable_proxy );
+		$this->sut      = new WooPayments( $this->mockable_proxy );
+		$legacy_runtime = new WooPaymentsLegacyRuntime();
+		$legacy_runtime->init( $this->mockable_proxy );
+
+		$container = wc_get_container();
+		$this->sut->set_admin_runtime_collaborators(
+			$legacy_runtime,
+			static function () use ( $container ): WooPaymentsRestController {
+				$rest_controller = $container->get( WooPaymentsRestController::class );
+				if ( ! $rest_controller instanceof WooPaymentsRestController ) {
+					throw new \RuntimeException( 'WooPayments REST controller is not available.' );
+				}
+
+				return $rest_controller;
+			},
+			static function () use ( $container ): WooPaymentsService {
+				$service = $container->get( WooPaymentsService::class );
+				if ( ! $service instanceof WooPaymentsService ) {
+					throw new \RuntimeException( 'WooPayments service is not available.' );
+				}
+
+				return $service;
+			}
+		);
 	}
 
 	/**
@@ -290,6 +314,20 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 			Constants::clear_constants();
 			$container->reset_replacement( WooPaymentsRestController::class );
 		}
+	}
+
+	/**
+	 * @testdox Should receive admin runtime access through explicit collaborators.
+	 */
+	public function test_admin_runtime_access_is_injected(): void {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for admin provider boundary regression coverage.
+		$source = (string) file_get_contents( WC()->plugin_path() . '/src/Internal/Admin/Settings/PaymentsProviders/WooPayments.php' );
+
+		$this->assertStringNotContainsString( 'wc_get_container()->get', $source, 'WooPayments provider should receive admin service and REST access through explicit resolvers.' );
+		$this->assertStringNotContainsString( 'WC_Payments::mode', $source, 'WooPayments provider should read mode state through WooPaymentsLegacyRuntime.' );
+		$this->assertStringNotContainsString( 'WC_Payments_Account::get_connect_url', $source, 'WooPayments provider should read account URLs through WooPaymentsLegacyRuntime.' );
+		$this->assertStringNotContainsString( 'wcpay_get_container', $source, 'WooPayments provider should read account status through WooPaymentsLegacyRuntime.' );
+		$this->assertStringNotContainsString( 'WC_Payments_Utils::supported_countries', $source, 'WooPayments provider should read supported countries through WooPaymentsLegacyRuntime.' );
 	}
 
 	/**

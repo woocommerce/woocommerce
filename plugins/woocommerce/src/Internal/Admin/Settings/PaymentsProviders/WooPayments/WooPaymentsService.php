@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiArgumentExcepti
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOnboardingAdapter;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
@@ -131,18 +132,27 @@ class WooPaymentsService {
 	private WooPaymentsOnboardingAdapter $onboarding_adapter;
 
 	/**
+	 * The WooPayments legacy runtime.
+	 *
+	 * @var WooPaymentsLegacyRuntime
+	 */
+	private WooPaymentsLegacyRuntime $legacy_runtime;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @param PaymentsProviders            $payment_providers  The PaymentsProviders instance.
 	 * @param LegacyProxy                  $proxy              The LegacyProxy instance.
 	 * @param WooPaymentsOnboardingAdapter $onboarding_adapter The WooPayments onboarding adapter.
+	 * @param WooPaymentsLegacyRuntime     $legacy_runtime     The WooPayments legacy runtime.
 	 *
 	 * @internal
 	 */
-	final public function init( PaymentsProviders $payment_providers, LegacyProxy $proxy, WooPaymentsOnboardingAdapter $onboarding_adapter ): void {
+	final public function init( PaymentsProviders $payment_providers, LegacyProxy $proxy, WooPaymentsOnboardingAdapter $onboarding_adapter, WooPaymentsLegacyRuntime $legacy_runtime ): void {
 		$this->payments_providers = $payment_providers;
 		$this->proxy              = $proxy;
 		$this->onboarding_adapter = $onboarding_adapter;
+		$this->legacy_runtime     = $legacy_runtime;
 
 		$this->wpcom_connection_manager = $this->proxy->get_instance_of( WPCOM_Connection_Manager::class, 'woocommerce' );
 		$this->provider                 = $this->payments_providers->get_payment_gateway_provider_instance( self::GATEWAY_ID );
@@ -1455,9 +1465,7 @@ class WooPaymentsService {
 		$this->proxy->call_function( 'delete_option', self::NOX_PROFILE_OPTION_KEY );
 
 		// Make sure the onboarding mode is reset.
-		if ( class_exists( 'WC_Payments_Onboarding_Service' ) && defined( 'WC_Payments_Onboarding_Service::TEST_MODE_OPTION' ) ) {
-			$this->proxy->call_function( 'update_option', Constants::get_constant( 'WC_Payments_Onboarding_Service::TEST_MODE_OPTION' ), 'no' );
-		}
+		$this->legacy_runtime->reset_onboarding_test_mode_option();
 
 		if ( is_wp_error( $response ) ) {
 			throw new ApiException(
@@ -1565,9 +1573,7 @@ class WooPaymentsService {
 		$this->clear_onboarding_lock();
 
 		// Make sure the onboarding mode is reset.
-		if ( class_exists( 'WC_Payments_Onboarding_Service' ) && defined( 'WC_Payments_Onboarding_Service::TEST_MODE_OPTION' ) ) {
-			$this->proxy->call_function( 'update_option', Constants::get_constant( 'WC_Payments_Onboarding_Service::TEST_MODE_OPTION' ), 'no' );
-		}
+		$this->legacy_runtime->reset_onboarding_test_mode_option();
 
 		// Track the failure to disable the test account.
 		if ( is_wp_error( $response ) || ! is_array( $response ) || empty( $response['success'] ) ) {
@@ -2608,11 +2614,10 @@ class WooPaymentsService {
 		$fields = $response['data'];
 
 		// If there is no available_countries entry, add it.
-		if ( ! isset( $fields['available_countries'] ) &&
-			class_exists( '\WC_Payments_Utils' ) &&
-			$this->proxy->call_function( 'is_callable', '\WC_Payments_Utils::supported_countries' ) ) {
+		$supported_countries = $this->legacy_runtime->get_supported_countries();
+		if ( ! isset( $fields['available_countries'] ) && null !== $supported_countries ) {
 
-			$fields['available_countries'] = $this->proxy->call_static( '\WC_Payments_Utils', 'supported_countries' );
+			$fields['available_countries'] = $supported_countries;
 		}
 
 		$fields['location'] = $location;

@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -96,7 +97,11 @@ class WooPaymentsLegacyRuntime {
 	 * @param string $source Source context.
 	 * @return string|null
 	 */
-	public function get_account_connect_url( string $source ): ?string {
+	public function get_account_connect_url( string $source = '' ): ?string {
+		if ( '' === $source ) {
+			return $this->get_account_static_url( 'get_connect_url' );
+		}
+
 		return $this->get_account_static_url( 'get_connect_url', $source );
 	}
 
@@ -107,6 +112,108 @@ class WooPaymentsLegacyRuntime {
 	 */
 	public function get_account_overview_page_url(): ?string {
 		return $this->get_account_static_url( 'get_overview_page_url' );
+	}
+
+	/**
+	 * Tell whether WooPayments is in test mode.
+	 *
+	 * @return bool|null
+	 */
+	public function is_test_mode(): ?bool {
+		return $this->call_mode_boolean_method( 'is_test' );
+	}
+
+	/**
+	 * Tell whether WooPayments is in development mode.
+	 *
+	 * @return bool|null
+	 */
+	public function is_dev_mode(): ?bool {
+		return $this->call_mode_boolean_method( 'is_dev' );
+	}
+
+	/**
+	 * Tell whether WooPayments is in test-mode onboarding.
+	 *
+	 * @return bool|null
+	 */
+	public function is_test_mode_onboarding(): ?bool {
+		return $this->call_mode_boolean_method( 'is_test_mode_onboarding' );
+	}
+
+	/**
+	 * Get WooPayments account status data.
+	 *
+	 * @return array|null
+	 */
+	public function get_account_status_data(): ?array {
+		$account_service = $this->get_account_service();
+		if ( ! is_object( $account_service ) ) {
+			return null;
+		}
+
+		try {
+			$account_status_data_reader = array( $account_service, 'get_account_status_data' );
+			if ( ! $this->legacy_proxy->call_function( 'method_exists', $account_service, 'get_account_status_data' ) ||
+				! $this->legacy_proxy->call_function( 'is_callable', $account_status_data_reader ) ||
+				! is_callable( $account_status_data_reader ) ) {
+				return null;
+			}
+
+			$account_status_data = $account_status_data_reader();
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+
+		return is_array( $account_status_data ) ? $account_status_data : null;
+	}
+
+	/**
+	 * Get WooPayments supported countries.
+	 *
+	 * @return array|null
+	 */
+	public function get_supported_countries(): ?array {
+		foreach ( array( 'WC_Payments_Utils', '\WC_Payments_Utils' ) as $class_name ) {
+			try {
+				if ( ! $this->legacy_proxy->call_function( 'class_exists', $class_name ) ||
+					! $this->legacy_proxy->call_function( 'is_callable', "{$class_name}::supported_countries" ) ) {
+					continue;
+				}
+
+				$supported_countries = $this->legacy_proxy->call_static( $class_name, 'supported_countries' );
+			} catch ( \Throwable $e ) {
+				continue;
+			}
+
+			if ( is_array( $supported_countries ) ) {
+				return $supported_countries;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Reset the WooPayments onboarding test-mode option when the legacy constant is available.
+	 *
+	 * @return void
+	 */
+	public function reset_onboarding_test_mode_option(): void {
+		try {
+			if ( ! $this->legacy_proxy->call_function( 'class_exists', 'WC_Payments_Onboarding_Service' ) ||
+				! Constants::is_defined( 'WC_Payments_Onboarding_Service::TEST_MODE_OPTION' ) ) {
+				return;
+			}
+
+			$this->legacy_proxy->call_function(
+				'update_option',
+				Constants::get_constant( 'WC_Payments_Onboarding_Service::TEST_MODE_OPTION' ),
+				'no'
+			);
+		} catch ( \Throwable $e ) {
+			return;
+		}
 	}
 
 	/**
@@ -130,6 +237,39 @@ class WooPaymentsLegacyRuntime {
 	}
 
 	/**
+	 * Get the WooPayments mode service.
+	 *
+	 * @return object|null
+	 */
+	private function get_mode_service(): ?object {
+		return $this->get_wc_payments_service( 'mode' );
+	}
+
+	/**
+	 * Call a boolean method on the WooPayments mode service.
+	 *
+	 * @param string $method_name Mode service method name.
+	 * @return bool|null
+	 */
+	private function call_mode_boolean_method( string $method_name ): ?bool {
+		$mode_service = $this->get_mode_service();
+		if ( ! is_object( $mode_service ) ) {
+			return null;
+		}
+
+		try {
+			if ( ! $this->legacy_proxy->call_function( 'method_exists', $mode_service, $method_name ) ||
+				! $this->legacy_proxy->call_function( 'is_callable', array( $mode_service, $method_name ) ) ) {
+				return null;
+			}
+
+			return (bool) $mode_service->{$method_name}();
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+	}
+
+	/**
 	 * Get a WooPayments account URL through the legacy account static helper.
 	 *
 	 * @param string $method_name WC_Payments_Account static URL accessor.
@@ -142,7 +282,9 @@ class WooPaymentsLegacyRuntime {
 		}
 
 		try {
-			if ( ! $this->legacy_proxy->call_function( 'is_callable', "\\WC_Payments_Account::{$method_name}" ) ) {
+			$is_callable = $this->legacy_proxy->call_function( 'is_callable', "WC_Payments_Account::{$method_name}" ) ||
+				$this->legacy_proxy->call_function( 'is_callable', "\\WC_Payments_Account::{$method_name}" );
+			if ( ! $is_callable ) {
 				return null;
 			}
 

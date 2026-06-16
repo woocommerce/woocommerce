@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Throwable;
 use WC_Abstract_Order;
 use WC_Payment_Gateway;
@@ -29,6 +30,40 @@ defined( 'ABSPATH' ) || exit;
 class WooPayments extends PaymentGateway {
 
 	const PREFIX = 'woocommerce_admin_settings_payments__woopayments__';
+
+	/**
+	 * The WooPayments legacy runtime.
+	 *
+	 * @var WooPaymentsLegacyRuntime|null
+	 */
+	private ?WooPaymentsLegacyRuntime $legacy_runtime = null;
+
+	/**
+	 * The lazy WooPayments REST controller resolver.
+	 *
+	 * @var callable|null
+	 */
+	private $rest_controller_resolver = null;
+
+	/**
+	 * The lazy WooPayments service resolver.
+	 *
+	 * @var callable|null
+	 */
+	private $service_resolver = null;
+
+	/**
+	 * Set the admin runtime collaborators.
+	 *
+	 * @param WooPaymentsLegacyRuntime $legacy_runtime          The WooPayments legacy runtime.
+	 * @param callable                 $rest_controller_resolver The lazy WooPayments REST controller resolver.
+	 * @param callable                 $service_resolver         The lazy WooPayments service resolver.
+	 */
+	public function set_admin_runtime_collaborators( WooPaymentsLegacyRuntime $legacy_runtime, callable $rest_controller_resolver, callable $service_resolver ): void {
+		$this->legacy_runtime           = $legacy_runtime;
+		$this->rest_controller_resolver = $rest_controller_resolver;
+		$this->service_resolver         = $service_resolver;
+	}
 
 	/**
 	 * Extract the payment gateway provider details from the object.
@@ -75,13 +110,9 @@ class WooPayments extends PaymentGateway {
 			'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding', array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ) ),
 		);
 
+		$rest_controller = null;
 		try {
-			/**
-			 * The WooPayments REST controller instance.
-			 *
-			 * @var WooPaymentsRestController $rest_controller
-			 */
-			$rest_controller = wc_get_container()->get( WooPaymentsRestController::class );
+			$rest_controller = $this->get_rest_controller();
 
 			// Add disable test account URL to onboarding links, if the current account is a test or sandbox account.
 			if ( $has_test_account || $has_sandbox_account ) {
@@ -109,18 +140,11 @@ class WooPayments extends PaymentGateway {
 		// Override the onboarding state with the entries provided by the WooPayments service.
 		if ( ! empty( $country_code ) ) {
 			try {
-				/**
-				 * The WooPayments service instance.
-				 *
-				 * @var WooPaymentsService $service
-				 */
-				$service = wc_get_container()->get( WooPaymentsService::class );
-
-				// Ensure we have a valid rest_controller from the earlier try block.
-				if ( ! isset( $rest_controller ) ) {
-					throw new \RuntimeException( 'WooPayments REST controller not available' );
+				if ( ! $rest_controller instanceof WooPaymentsRestController ) {
+					$rest_controller = $this->get_rest_controller();
 				}
 
+				$service            = $this->get_service();
 				$onboarding_details = $service->get_onboarding_details( $country_code, $rest_controller->get_rest_url_path( 'onboarding' ) );
 				// Merge the onboarding state with the one provided by the service.
 				if ( ! empty( $onboarding_details['state'] ) && is_array( $onboarding_details['state'] ) ) {
@@ -218,12 +242,7 @@ class WooPayments extends PaymentGateway {
 		// This is because WooPayments onboarding preloading focuses on hydrating the WPCOM connection.
 		if ( ! $extension_suggestion['onboarding']['state']['wpcom_has_working_connection'] ) {
 			try {
-				/**
-				 * The WooPayments REST controller instance.
-				 *
-				 * @var WooPaymentsRestController $rest_controller
-				 */
-				$rest_controller = wc_get_container()->get( WooPaymentsRestController::class );
+				$rest_controller = $this->get_rest_controller();
 
 				// Add the onboarding preload URL.
 				$extension_suggestion['onboarding']['_links']['preload'] = array(
@@ -277,15 +296,10 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments' ) &&
-			$this->proxy->call_function( 'is_callable', 'WC_Payments::mode' ) ) {
-
-			$woopayments_mode = $this->proxy->call_static( 'WC_Payments', 'mode' );
-			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_test' ) &&
-				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_test' ) ) ) {
-
-				return $woopayments_mode->is_test();
-			}
+		$legacy_runtime = $this->get_legacy_runtime();
+		$is_test_mode   = null !== $legacy_runtime ? $legacy_runtime->is_test_mode() : null;
+		if ( null !== $is_test_mode ) {
+			return $is_test_mode;
 		}
 
 		return parent::is_in_test_mode( $payment_gateway );
@@ -302,15 +316,10 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the payment gateway is in dev mode, false otherwise.
 	 */
 	public function is_in_dev_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments' ) &&
-			$this->proxy->call_function( 'is_callable', 'WC_Payments::mode' ) ) {
-
-			$woopayments_mode = $this->proxy->call_static( 'WC_Payments', 'mode' );
-			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_dev' ) &&
-				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_dev' ) ) ) {
-
-				return $woopayments_mode->is_dev();
-			}
+		$legacy_runtime = $this->get_legacy_runtime();
+		$is_dev_mode    = null !== $legacy_runtime ? $legacy_runtime->is_dev_mode() : null;
+		if ( null !== $is_dev_mode ) {
+			return $is_dev_mode;
 		}
 
 		return parent::is_in_dev_mode( $payment_gateway );
@@ -390,15 +399,10 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments' ) &&
-			$this->proxy->call_function( 'is_callable', 'WC_Payments::mode' ) ) {
-
-			$woopayments_mode = $this->proxy->call_static( 'WC_Payments', 'mode' );
-			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_test_mode_onboarding' ) &&
-				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_test_mode_onboarding' ) ) ) {
-
-				return $woopayments_mode->is_test_mode_onboarding();
-			}
+		$legacy_runtime          = $this->get_legacy_runtime();
+		$is_test_mode_onboarding = null !== $legacy_runtime ? $legacy_runtime->is_test_mode_onboarding() : null;
+		if ( null !== $is_test_mode_onboarding ) {
+			return $is_test_mode_onboarding;
 		}
 
 		return parent::is_in_test_mode_onboarding( $payment_gateway );
@@ -416,11 +420,9 @@ class WooPayments extends PaymentGateway {
 	 * @return string The onboarding URL for the payment gateway.
 	 */
 	public function get_onboarding_url( WC_Payment_Gateway $payment_gateway, string $return_url = '' ): string {
-		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments_Account' ) &&
-			$this->proxy->call_function( 'is_callable', 'WC_Payments_Account::get_connect_url' ) ) {
-
-			$connect_url = $this->proxy->call_static( 'WC_Payments_Account', 'get_connect_url' );
-		} else {
+		$legacy_runtime = $this->get_legacy_runtime();
+		$connect_url    = null !== $legacy_runtime ? $legacy_runtime->get_account_connect_url() : null;
+		if ( null === $connect_url ) {
 			$connect_url = parent::get_onboarding_url( $payment_gateway, $return_url );
 		}
 
@@ -576,22 +578,9 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the account is a test account, false otherwise.
 	 */
 	private function has_test_account(): bool {
-		if ( $this->proxy->call_function( 'function_exists', 'wcpay_get_container' ) &&
-			$this->proxy->call_function( 'class_exists', 'WC_Payments_Account' ) ) {
-
-			$woopayments_container = $this->proxy->call_function( 'wcpay_get_container' );
-			$account_service       = $woopayments_container->get( 'WC_Payments_Account' );
-			if ( ! empty( $account_service ) &&
-				$this->proxy->call_function( 'method_exists', $account_service, 'get_account_status_data' ) &&
-				$this->proxy->call_function( 'is_callable', array( $account_service, 'get_account_status_data' ) ) ) {
-
-				$account_status = $account_service->get_account_status_data();
-
-				return ! empty( $account_status['testDrive'] );
-			}
-		}
-
-		return false;
+		$legacy_runtime = $this->get_legacy_runtime();
+		$account_status = null !== $legacy_runtime ? $legacy_runtime->get_account_status_data() : null;
+		return is_array( $account_status ) && ! empty( $account_status['testDrive'] );
 	}
 
 	/**
@@ -605,22 +594,9 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the account is a sandbox account, false otherwise.
 	 */
 	private function has_sandbox_account(): bool {
-		if ( $this->proxy->call_function( 'function_exists', 'wcpay_get_container' ) &&
-			$this->proxy->call_function( 'class_exists', 'WC_Payments_Account' ) ) {
-
-			$woopayments_container = $this->proxy->call_function( 'wcpay_get_container' );
-			$account_service       = $woopayments_container->get( 'WC_Payments_Account' );
-			if ( ! empty( $account_service ) &&
-				$this->proxy->call_function( 'method_exists', $account_service, 'get_account_status_data' ) &&
-				$this->proxy->call_function( 'is_callable', array( $account_service, 'get_account_status_data' ) ) ) {
-
-				$account_status = $account_service->get_account_status_data();
-
-				return empty( $account_status['isLive'] ) && empty( $account_status['testDrive'] );
-			}
-		}
-
-		return false;
+		$legacy_runtime = $this->get_legacy_runtime();
+		$account_status = null !== $legacy_runtime ? $legacy_runtime->get_account_status_data() : null;
+		return is_array( $account_status ) && empty( $account_status['isLive'] ) && empty( $account_status['testDrive'] );
 	}
 
 	/**
@@ -632,13 +608,10 @@ class WooPayments extends PaymentGateway {
 	 */
 	private function get_supported_country_codes(): ?array {
 		try {
-			if ( $this->proxy->call_function( 'class_exists', 'WC_Payments_Utils' ) &&
-				$this->proxy->call_function( 'is_callable', 'WC_Payments_Utils::supported_countries' ) ) {
-
-				$supported_country_codes = $this->proxy->call_static( 'WC_Payments_Utils', 'supported_countries' );
-				if ( is_array( $supported_country_codes ) ) {
-					return array_unique( array_map( 'strtoupper', array_keys( $supported_country_codes ) ) );
-				}
+			$legacy_runtime      = $this->get_legacy_runtime();
+			$supported_countries = null !== $legacy_runtime ? $legacy_runtime->get_supported_countries() : null;
+			if ( is_array( $supported_countries ) ) {
+				return array_unique( array_map( 'strtoupper', array_keys( $supported_countries ) ) );
 			}
 		} catch ( Throwable $e ) {
 			// This is not a critical error, so we just ignore it.
@@ -652,6 +625,53 @@ class WooPayments extends PaymentGateway {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get the configured WooPayments REST controller.
+	 *
+	 * @return WooPaymentsRestController
+	 * @throws \RuntimeException When the configured resolver is invalid.
+	 */
+	private function get_rest_controller(): WooPaymentsRestController {
+		if ( ! is_callable( $this->rest_controller_resolver ) ) {
+			throw new \RuntimeException( 'WooPayments REST controller resolver is not configured.' );
+		}
+
+		$rest_controller = call_user_func( $this->rest_controller_resolver );
+		if ( ! $rest_controller instanceof WooPaymentsRestController ) {
+			throw new \RuntimeException( 'WooPayments REST controller resolver returned an invalid value.' );
+		}
+
+		return $rest_controller;
+	}
+
+	/**
+	 * Get the configured WooPayments service.
+	 *
+	 * @return WooPaymentsService
+	 * @throws \RuntimeException When the configured resolver is invalid.
+	 */
+	private function get_service(): WooPaymentsService {
+		if ( ! is_callable( $this->service_resolver ) ) {
+			throw new \RuntimeException( 'WooPayments service resolver is not configured.' );
+		}
+
+		$service = call_user_func( $this->service_resolver );
+		if ( ! $service instanceof WooPaymentsService ) {
+			throw new \RuntimeException( 'WooPayments service resolver returned an invalid value.' );
+		}
+
+		return $service;
+	}
+
+	/**
+	 * Get the WooPayments legacy runtime.
+	 *
+	 * @return WooPaymentsLegacyRuntime|null
+	 */
+	private function get_legacy_runtime(): ?WooPaymentsLegacyRuntime {
+		return $this->legacy_runtime;
 	}
 
 	/**

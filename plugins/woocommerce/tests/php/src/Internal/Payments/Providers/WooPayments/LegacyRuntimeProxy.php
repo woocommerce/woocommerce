@@ -60,17 +60,40 @@ class LegacyRuntimeProxy extends LegacyProxy {
 	private ?string $account_overview_url;
 
 	/**
+	 * WooPayments mode service.
+	 *
+	 * @var object|null
+	 */
+	private ?object $mode;
+
+	/**
+	 * Supported countries.
+	 *
+	 * @var array<string,mixed>|null
+	 */
+	private ?array $supported_countries;
+
+	/**
+	 * Updated options.
+	 *
+	 * @var array<string,mixed>
+	 */
+	private array $updated_options = array();
+
+	/**
 	 * Constructor.
 	 *
-	 * @param bool        $loaded     Whether the WooPayments runtime is loaded.
-	 * @param object|null $gateway    Gateway service.
-	 * @param object|null $account    Account service.
-	 * @param object|null $api_client API client.
-	 * @param object|null $logger               Logger.
-	 * @param string|null $account_connect_url  Account connect URL.
-	 * @param string|null $account_overview_url Account overview URL.
+	 * @param bool                     $loaded     Whether the WooPayments runtime is loaded.
+	 * @param object|null              $gateway    Gateway service.
+	 * @param object|null              $account    Account service.
+	 * @param object|null              $api_client API client.
+	 * @param object|null              $logger               Logger.
+	 * @param string|null              $account_connect_url  Account connect URL.
+	 * @param string|null              $account_overview_url Account overview URL.
+	 * @param object|null              $mode                 WooPayments mode service.
+	 * @param array<string,mixed>|null $supported_countries  Supported countries.
 	 */
-	public function __construct( bool $loaded, ?object $gateway = null, ?object $account = null, ?object $api_client = null, ?object $logger = null, ?string $account_connect_url = null, ?string $account_overview_url = null ) {
+	public function __construct( bool $loaded, ?object $gateway = null, ?object $account = null, ?object $api_client = null, ?object $logger = null, ?string $account_connect_url = null, ?string $account_overview_url = null, ?object $mode = null, ?array $supported_countries = null ) {
 		$this->loaded               = $loaded;
 		$this->gateway              = $gateway;
 		$this->account              = $account;
@@ -78,6 +101,8 @@ class LegacyRuntimeProxy extends LegacyProxy {
 		$this->logger               = $logger;
 		$this->account_connect_url  = $account_connect_url;
 		$this->account_overview_url = $account_overview_url;
+		$this->mode                 = $mode;
+		$this->supported_countries  = $supported_countries;
 	}
 
 	/**
@@ -92,6 +117,14 @@ class LegacyRuntimeProxy extends LegacyProxy {
 			return $this->loaded;
 		}
 
+		if ( 'class_exists' === $function_name && 'WC_Payments_Onboarding_Service' === ( $parameters[0] ?? null ) ) {
+			return true;
+		}
+
+		if ( 'class_exists' === $function_name && 'WC_Payments_Utils' === ltrim( (string) ( $parameters[0] ?? '' ), '\\' ) ) {
+			return null !== $this->supported_countries;
+		}
+
 		if ( 'wc_get_logger' === $function_name ) {
 			return $this->logger;
 		}
@@ -102,6 +135,16 @@ class LegacyRuntimeProxy extends LegacyProxy {
 
 		if ( 'is_callable' === $function_name && '\WC_Payments_Account::get_overview_page_url' === ( $parameters[0] ?? null ) ) {
 			return null !== $this->account_overview_url;
+		}
+
+		if ( 'is_callable' === $function_name && in_array( $parameters[0] ?? null, array( 'WC_Payments_Utils::supported_countries', '\WC_Payments_Utils::supported_countries' ), true ) ) {
+			return null !== $this->supported_countries;
+		}
+
+		if ( 'update_option' === $function_name ) {
+			$this->updated_options[ (string) ( $parameters[0] ?? '' ) ] = $parameters[1] ?? null;
+
+			return true;
 		}
 
 		return parent::call_function( $function_name, ...$parameters );
@@ -124,6 +167,10 @@ class LegacyRuntimeProxy extends LegacyProxy {
 			return $this->account_overview_url;
 		}
 
+		if ( 'WC_Payments_Utils' === ltrim( $class_name, '\\' ) && 'supported_countries' === $method_name ) {
+			return $this->supported_countries;
+		}
+
 		if ( 'WC_Payments' !== $class_name ) {
 			return parent::call_static( $class_name, $method_name, ...$parameters );
 		}
@@ -140,6 +187,19 @@ class LegacyRuntimeProxy extends LegacyProxy {
 			return $this->api_client;
 		}
 
+		if ( 'mode' === $method_name ) {
+			return $this->mode;
+		}
+
 		return parent::call_static( $class_name, $method_name, ...$parameters );
+	}
+
+	/**
+	 * Get updated options.
+	 *
+	 * @return array<string,mixed>
+	 */
+	public function get_updated_options(): array {
+		return $this->updated_options;
 	}
 }
