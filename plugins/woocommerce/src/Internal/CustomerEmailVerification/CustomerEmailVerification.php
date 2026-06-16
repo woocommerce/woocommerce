@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\CustomerEmailVerification;
 
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\Emails\CustomerVerifyEmail;
+use Automattic\WooCommerce\Internal\CustomerEmailVerification\Emails\NewAccountEmailVerificationLink;
 
 /**
  * Boot class for the customer email verification subsystem.
@@ -37,6 +38,7 @@ class CustomerEmailVerification {
 		$container->get( VerificationController::class );
 		$container->get( OrderLinker::class );
 		$container->get( VerificationEventListener::class );
+		$container->get( NewAccountEmailVerificationLink::class )->register();
 	}
 
 	/**
