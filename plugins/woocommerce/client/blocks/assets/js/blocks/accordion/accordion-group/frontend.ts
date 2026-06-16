@@ -3,16 +3,23 @@
  */
 import { store, getContext } from '@wordpress/interactivity';
 
+type AccordionContext = {
+	isOpen: string[];
+	id: string;
+	autoclose: boolean;
+	openByDefault: boolean;
+};
+
 const { state } = store( 'woocommerce/accordion', {
 	state: {
-		get isOpen() {
-			const { isOpen, id } = getContext();
+		get isOpen(): boolean {
+			const { isOpen, id } = getContext< AccordionContext >();
 			return isOpen.includes( id );
 		},
 	},
 	actions: {
 		toggle: () => {
-			const context = getContext();
+			const context = getContext< AccordionContext >();
 			const { id, autoclose } = context;
 
 			if ( autoclose ) {
@@ -28,7 +35,7 @@ const { state } = store( 'woocommerce/accordion', {
 	},
 	callbacks: {
 		initIsOpen: () => {
-			const context = getContext();
+			const context = getContext< AccordionContext >();
 			const { id, openByDefault } = context;
 			if ( openByDefault ) {
 				context.isOpen.push( id );

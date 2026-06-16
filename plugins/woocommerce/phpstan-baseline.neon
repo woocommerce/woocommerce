@@ -26989,12 +26989,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
 
 		-
-			message: '#^Access to an undefined property WC_REST_Products_V2_Controller\:\:\$request\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
 			message: '#^Call to an undefined method WC_Data\:\:get_children\(\)\.$#'
 			identifier: method.notFound
 			count: 4
@@ -50656,12 +50650,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AttributeFilter.php
 
 		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Breadcrumbs\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/Breadcrumbs.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Cart\:\:enqueue_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -57378,12 +57366,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$fp of function fgets expects resource, resource\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Logging/PageController.php
-
-		-
-			message: '#^Parameter \#1 \$str of function stripslashes expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Logging/PageController.php
