@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Centralize WooPayments provider runtime discovery for onboarding and webhook logging.
