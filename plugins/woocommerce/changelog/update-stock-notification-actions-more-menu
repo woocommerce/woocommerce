@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Align the customer stock notification edit and create screens with the redesigned order actions sidebar, moving the delete action into a "more actions" menu.
