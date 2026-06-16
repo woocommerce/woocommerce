@@ -55,6 +55,8 @@ class Controller implements RegisterHooksInterface {
 	private const ROUTE_CLASSES = array(
 		CartAddItem::class,
 		CartApplyCoupon::class,
+		CartAddFee::class,
+		CartRemoveFee::class,
 		Checkout::class,
 	);
 

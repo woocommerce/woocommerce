@@ -411,6 +411,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutAddressPolicy::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CartPersistencePolicy::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutEmailPolicy::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomFeesPolicy::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CurrentUserSwap::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerSwap::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\DefaultPaymentMethodPolicy::class )->register();
