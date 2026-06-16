@@ -110,17 +110,22 @@ class MultiCurrencyStateBuilderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not call providers when building automatic currencies.
+	 * @testdox Should refresh automatic currencies from the available provider.
 	 */
-	public function test_does_not_call_provider_for_automatic_currency_snapshots(): void {
+	public function test_refreshes_automatic_currencies_from_available_provider(): void {
 		$registry = new CurrencyRateProviderRegistry();
 		$registry->register( $this->create_available_rate_provider() );
 		update_option( 'wcpay_multi_currency_enabled_currencies', array( 'GBP' ) );
 		update_option( 'wcpay_multi_currency_exchange_rate_gbp', 'automatic' );
 
-		$state = $this->create_builder( $registry )->build();
+		$state  = $this->create_builder( $registry )->build();
+		$cached = get_option( MultiCurrencyCacheInterface::CURRENCIES_KEY );
 
-		$this->assertSame( array( 'USD' ), array_keys( $state->get_enabled_currencies() ) );
+		$this->assertSame( array( 'USD', 'GBP' ), array_keys( $state->get_enabled_currencies() ) );
+		$this->assertSame( 0.82, $state->get_enabled_currencies()['GBP']->get_rate() );
+		$this->assertIsArray( $cached );
+		$this->assertSame( array( 'gbp' => 0.82 ), $cached['data']['currencies'] );
+		$this->assertIsInt( $cached['data']['updated'] );
 	}
 
 	/**

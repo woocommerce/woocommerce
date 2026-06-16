@@ -34,6 +34,17 @@ class MultiCurrencyRateService {
 	}
 
 	/**
+	 * Tell whether an automatic-rate provider is available.
+	 *
+	 * @return bool
+	 *
+	 * @since 11.0.0
+	 */
+	public function has_available_provider(): bool {
+		return null !== $this->provider_registry->get_available_provider();
+	}
+
+	/**
 	 * Get the exchange rate for a target currency.
 	 *
 	 * @param string $from_currency Source currency.
@@ -63,6 +74,37 @@ class MultiCurrencyRateService {
 	}
 
 	/**
+	 * Get automatic rates from the available provider.
+	 *
+	 * @param string        $from_currency Source currency.
+	 * @param string[]|null $currencies_to Target currencies, or null for all supported.
+	 * @return array<string,float>|null
+	 *
+	 * @since 11.0.0
+	 */
+	public function get_rates( string $from_currency, ?array $currencies_to = null ): ?array {
+		$provider = $this->provider_registry->get_available_provider();
+		if ( ! $provider ) {
+			return null;
+		}
+
+		try {
+			$rates = $provider->get_currency_rates(
+				strtolower( $from_currency ),
+				null === $currencies_to ? null : array_map( 'strtolower', $currencies_to )
+			);
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+
+		if ( isset( $rates['currencies'] ) && is_array( $rates['currencies'] ) ) {
+			$rates = $rates['currencies'];
+		}
+
+		return $this->normalize_rates( $rates );
+	}
+
+	/**
 	 * Get a manual rate from preserved options.
 	 *
 	 * @param string $to_currency Target currency.
@@ -85,6 +127,27 @@ class MultiCurrencyRateService {
 		$rate = $rates[ $to_currency ] ?? $rates[ strtoupper( $to_currency ) ] ?? null;
 
 		return $this->normalize_rate( $rate );
+	}
+
+	/**
+	 * Normalize provider rates.
+	 *
+	 * @param array<string,mixed> $rates Provider rates.
+	 * @return array<string,float>
+	 */
+	private function normalize_rates( array $rates ): array {
+		$normalized_rates = array();
+
+		foreach ( $rates as $currency_code => $rate ) {
+			$normalized_rate = $this->normalize_rate( $rate );
+			if ( null === $normalized_rate ) {
+				continue;
+			}
+
+			$normalized_rates[ strtolower( (string) $currency_code ) ] = $normalized_rate;
+		}
+
+		return $normalized_rates;
 	}
 
 	/**

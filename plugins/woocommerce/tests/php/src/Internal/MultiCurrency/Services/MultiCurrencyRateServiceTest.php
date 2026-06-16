@@ -110,6 +110,48 @@ class MultiCurrencyRateServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should resolve bulk automatic rates from the available provider.
+	 */
+	public function test_resolves_bulk_automatic_rates_from_available_provider(): void {
+		$registry = new CurrencyRateProviderRegistry();
+		$registry->register(
+			$this->create_provider(
+				true,
+				array(
+					'currencies' => array(
+						'eur' => '1.2',
+						'GBP' => 0.82,
+						'bad' => 'not-a-rate',
+						'jpy' => 0,
+					),
+				)
+			)
+		);
+		$service = new MultiCurrencyRateService( $registry );
+
+		$this->assertTrue( $service->has_available_provider() );
+		$this->assertSame(
+			array(
+				'eur' => 1.2,
+				'gbp' => 0.82,
+			),
+			$service->get_rates( 'USD' )
+		);
+	}
+
+	/**
+	 * @testdox Should return null for bulk rates without an available provider.
+	 */
+	public function test_returns_null_for_bulk_rates_without_available_provider(): void {
+		$registry = new CurrencyRateProviderRegistry();
+		$registry->register( $this->create_provider( false, array( 'eur' => 1.2 ) ) );
+		$service = new MultiCurrencyRateService( $registry );
+
+		$this->assertFalse( $service->has_available_provider() );
+		$this->assertNull( $service->get_rates( 'USD' ) );
+	}
+
+	/**
 	 * @testdox Should return null for automatic rates when no provider is available.
 	 */
 	public function test_returns_null_for_automatic_rate_without_provider(): void {

@@ -154,7 +154,7 @@ class MultiCurrencyStateBuilder {
 	 * @return array<string,MultiCurrencyCurrency>
 	 */
 	private function get_cached_currency_rates( string $default_code ): array {
-		$cache_data = $this->cache->get( MultiCurrencyCacheInterface::CURRENCIES_KEY, true );
+		$cache_data = $this->get_cached_currency_data( $default_code );
 		if ( ! is_array( $cache_data ) || ! isset( $cache_data['currencies'] ) || ! is_array( $cache_data['currencies'] ) ) {
 			return array();
 		}
@@ -190,6 +190,40 @@ class MultiCurrencyStateBuilder {
 		}
 
 		return $sorted;
+	}
+
+	/**
+	 * Get cached automatic currency data, refreshing it when a provider is available.
+	 *
+	 * @param string $default_code Default currency code.
+	 * @return array<string,mixed>|null
+	 */
+	private function get_cached_currency_data( string $default_code ): ?array {
+		if ( ! $this->rate_service->has_available_provider() ) {
+			$cache_data = $this->cache->get( MultiCurrencyCacheInterface::CURRENCIES_KEY, true );
+
+			return is_array( $cache_data ) ? $cache_data : null;
+		}
+
+		$cache_data = $this->cache->get_or_add(
+			MultiCurrencyCacheInterface::CURRENCIES_KEY,
+			function () use ( $default_code ) {
+				$rates = $this->rate_service->get_rates( $default_code );
+				if ( null === $rates ) {
+					return null;
+				}
+
+				return array(
+					'currencies' => $rates,
+					'updated'    => time(),
+				);
+			},
+			static function ( $data ) {
+				return is_array( $data ) && isset( $data['currencies'], $data['updated'] ) && is_array( $data['currencies'] );
+			}
+		);
+
+		return is_array( $cache_data ) ? $cache_data : null;
 	}
 
 	/**
