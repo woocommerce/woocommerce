@@ -107,7 +107,10 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 	 */
 	public function test_frontend_price_manifest_contains_preserved_hooks_once(): void {
 		$hook_groups = MultiCurrencyRuntimeRegistry::get_core_hook_groups();
-		$price_hooks = array_column( $hook_groups['frontend_prices']['filters'], 'hook' );
+		$price_hooks = array_merge(
+			array_column( $hook_groups['frontend_prices']['filters'], 'hook' ),
+			array_column( $hook_groups['frontend_prices']['actions'], 'hook' )
+		);
 
 		$this->assertSame(
 			array(
@@ -128,7 +131,18 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'rest_post_dispatch',
 				'query_loop_block_query_vars',
 			),
-			$price_hooks
+			array_column( $hook_groups['frontend_prices']['filters'], 'hook' )
+		);
+		$this->assertSame(
+			array(
+				array(
+					'hook'          => 'woocommerce_order_refunded',
+					'callback'      => 'add_refund_meta',
+					'priority'      => 99,
+					'accepted_args' => 2,
+				),
+			),
+			$hook_groups['frontend_prices']['actions']
 		);
 		$this->assertSame( $price_hooks, array_values( array_unique( $price_hooks ) ), 'The frontend price manifest must not declare duplicate price hooks.' );
 	}

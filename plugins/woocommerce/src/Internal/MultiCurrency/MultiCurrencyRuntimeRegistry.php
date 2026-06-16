@@ -164,7 +164,9 @@ class MultiCurrencyRuntimeRegistry {
 				self::hook_entry( 'rest_post_dispatch', 'maybe_modify_price_ranges_rest_response', 10, 3 ),
 				self::hook_entry( 'query_loop_block_query_vars', 'maybe_modify_price_ranges_query_var', 10, 3 ),
 			),
-			'actions' => array(),
+			'actions' => array(
+				self::hook_entry( 'woocommerce_order_refunded', 'add_refund_meta', 99, 2 ),
+			),
 		);
 	}
 
