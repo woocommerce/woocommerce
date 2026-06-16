@@ -90,15 +90,18 @@ class WC_Shortcode_My_Account {
 			wc_add_notice( sprintf( __( 'Are you sure you want to log out? <a href="%s">Confirm and log out</a>', 'woocommerce' ), wc_logout_url() ) );
 		}
 
-		if ( get_user_option( 'default_password_nag' ) && ( wc_is_current_account_menu_item( 'dashboard' ) || wc_is_current_account_menu_item( 'edit-account' ) || wc_is_current_account_menu_item( 'orders' ) ) ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$password_link_just_sent = ! empty( $_GET['password-link-sent'] );
+
+		if ( ! $password_link_just_sent && get_user_option( 'default_password_nag' ) && ( wc_is_current_account_menu_item( 'dashboard' ) || wc_is_current_account_menu_item( 'edit-account' ) || wc_is_current_account_menu_item( 'orders' ) ) ) {
 			$resend_url = wp_nonce_url( add_query_arg( 'wc-resend-set-password', '1', wc_get_page_permalink( 'myaccount' ) ), 'wc-resend-set-password' );
 			wc_add_notice(
 				sprintf(
 					/* translators: %1$s and %2$s are opening and closing anchor tags for the resend-link button. */
-					__( 'Your account is using a temporary password. We emailed you a link to change your password. %1$sResend link%2$s', 'woocommerce' ),
+					__( '%1$sResend link%2$s', 'woocommerce' ),
 					'<a href="' . esc_url( $resend_url ) . '" class="button wc-forward">',
 					'</a>'
-				),
+				) . ' ' . __( 'Your account is using a temporary password. We emailed you a link to change your password.', 'woocommerce' ),
 				'notice'
 			);
 		}

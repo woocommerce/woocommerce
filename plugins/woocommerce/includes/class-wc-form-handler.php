@@ -99,8 +99,9 @@ class WC_Form_Handler {
 			return;
 		}
 
-		$user = wp_get_current_user();
-		$key  = get_password_reset_key( $user );
+		$user     = wp_get_current_user();
+		$key      = get_password_reset_key( $user );
+		$redirect = wc_get_page_permalink( 'myaccount' );
 
 		if ( is_wp_error( $key ) ) {
 			wc_add_notice( __( 'Sorry, we were unable to resend the link. Please try again.', 'woocommerce' ), 'error' );
@@ -108,9 +109,11 @@ class WC_Form_Handler {
 			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Re-fires woocommerce_reset_password_notification, documented in WC_Shortcode_My_Account::retrieve_password().
 			do_action( 'woocommerce_reset_password_notification', $user->user_login, $key );
 			wc_add_notice( __( 'We have emailed you a new link to change your password.', 'woocommerce' ) );
+			// Flag so the temporary-password notice is hidden on the redirect target — the confirmation above covers it.
+			$redirect = add_query_arg( 'password-link-sent', 'true', $redirect );
 		}
 
-		wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
+		wp_safe_redirect( $redirect );
 		exit;
 	}
 
