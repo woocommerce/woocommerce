@@ -30,6 +30,31 @@ jest.mock( '../store-settings', () => ( {
 	StoreLevelSettings: () => <div>Store settings component</div>,
 } ) );
 
+jest.mock( '../currency-settings-modal', () => ( {
+	CurrencySettingsModal: ( {
+		currency,
+		onClose,
+		onSaved,
+	}: {
+		currency: StoreCurrenciesResponse[ 'default' ];
+		onClose: () => void;
+		onSaved: ( currencyCode: string, manualRate: number | null ) => void;
+	} ) => (
+		<div>
+			<div>Currency settings modal for { currency.code }</div>
+			<button
+				type="button"
+				onClick={ () => {
+					onSaved( currency.code, 0.95 );
+					onClose();
+				} }
+			>
+				Save { currency.code } manual rate
+			</button>
+		</div>
+	),
+} ) );
+
 const mockApiFetch = apiFetch as jest.MockedFunction< typeof apiFetch >;
 
 const currenciesResponse: StoreCurrenciesResponse = {
@@ -150,6 +175,45 @@ describe( 'MultiCurrencySettingsApp', () => {
 				} )
 			).toHaveFocus()
 		);
+	} );
+
+	it( 'opens the currency settings modal for a non-default currency', async () => {
+		render( <MultiCurrencySettingsApp /> );
+
+		fireEvent.click(
+			await screen.findByRole( 'button', {
+				name: 'Manage Euro settings',
+			} )
+		);
+
+		expect(
+			screen.getByText( 'Currency settings modal for EUR' )
+		).toBeInTheDocument();
+	} );
+
+	it( 'updates the displayed exchange rate after saving manual currency settings', async () => {
+		render( <MultiCurrencySettingsApp /> );
+
+		fireEvent.click(
+			await screen.findByRole( 'button', {
+				name: 'Manage Euro settings',
+			} )
+		);
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Save EUR manual rate' } )
+		);
+
+		expect( screen.getByText( '0.95' ) ).toBeInTheDocument();
+		expect(
+			screen.queryByText( 'Currency settings modal for EUR' )
+		).not.toBeInTheDocument();
+		await waitFor( () => {
+			expect(
+				screen.getByRole( 'button', {
+					name: 'Manage Euro settings',
+				} )
+			).toHaveFocus();
+		} );
 	} );
 
 	it( 'keeps modal save focus visible while updating currencies', async () => {

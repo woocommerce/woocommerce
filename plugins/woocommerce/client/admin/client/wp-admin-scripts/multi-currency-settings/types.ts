@@ -39,3 +39,19 @@ export interface StoreSettingsState {
 	isCacheOptimizedFeatureEnabled: boolean;
 	siteTheme: string;
 }
+
+export type ExchangeRateType = 'automatic' | 'manual';
+
+export interface CurrencySettingsResponse {
+	exchange_rate_type: ExchangeRateType;
+	manual_rate: number | string | null;
+	price_rounding: number | string | null;
+	price_charm: number | string | null;
+}
+
+export interface CurrencySettingsState {
+	exchangeRateType: ExchangeRateType;
+	manualRate: string;
+	priceRounding: string;
+	priceCharm: string;
+}

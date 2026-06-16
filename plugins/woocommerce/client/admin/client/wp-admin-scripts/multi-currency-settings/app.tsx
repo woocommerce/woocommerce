@@ -18,6 +18,7 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import type { MultiCurrencyCurrency, StoreCurrenciesResponse } from './types';
 import { StoreLevelSettings } from './store-settings';
+import { CurrencySettingsModal } from './currency-settings-modal';
 
 const REST_BASE = '/wc/v3/payments/multi-currency';
 
@@ -47,6 +48,24 @@ const formatExchangeRate = ( currency: MultiCurrencyCurrency ): string => {
 	} );
 };
 
+const updateCurrencyRecordRate = (
+	currencies: Record< string, MultiCurrencyCurrency >,
+	code: string,
+	rate: number
+): Record< string, MultiCurrencyCurrency > => {
+	if ( ! currencies[ code ] ) {
+		return currencies;
+	}
+
+	return {
+		...currencies,
+		[ code ]: {
+			...currencies[ code ],
+			rate,
+		},
+	};
+};
+
 export function MultiCurrencySettingsApp() {
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
@@ -55,12 +74,17 @@ export function MultiCurrencySettingsApp() {
 	const [ isLoading, setIsLoading ] = useState( true );
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
+	const [ managedCurrencyCode, setManagedCurrencyCode ] = useState<
+		string | null
+	>( null );
 	const [ selectedCodes, setSelectedCodes ] = useState< string[] >( [] );
 	const [ search, setSearch ] = useState( '' );
 	const manageCurrenciesButtonRef = useRef< HTMLButtonElement | null >(
 		null
 	);
+	const manageCurrencyButtonRef = useRef< HTMLButtonElement | null >( null );
 	const shouldRestoreManagementFocusRef = useRef( false );
+	const shouldRestoreManagedCurrencyFocusRef = useRef( false );
 
 	useEffect( () => {
 		let isMounted = true;
@@ -104,6 +128,10 @@ export function MultiCurrencySettingsApp() {
 		[ currencies ]
 	);
 	const defaultCode = currencies?.default.code ?? '';
+	const managedCurrency =
+		managedCurrencyCode && currencies?.enabled[ managedCurrencyCode ]
+			? currencies.enabled[ managedCurrencyCode ]
+			: null;
 
 	useEffect( () => {
 		if (
@@ -117,6 +145,18 @@ export function MultiCurrencySettingsApp() {
 		shouldRestoreManagementFocusRef.current = false;
 		manageCurrenciesButtonRef.current?.focus();
 	}, [ isModalOpen, isSaving, currencies ] );
+
+	useEffect( () => {
+		if (
+			managedCurrencyCode ||
+			! shouldRestoreManagedCurrencyFocusRef.current
+		) {
+			return;
+		}
+
+		shouldRestoreManagedCurrencyFocusRef.current = false;
+		manageCurrencyButtonRef.current?.focus();
+	}, [ managedCurrencyCode ] );
 
 	const filteredAvailableCurrencies = useMemo( () => {
 		const query = search.trim().toLowerCase();
@@ -194,6 +234,40 @@ export function MultiCurrencySettingsApp() {
 		} );
 	};
 
+	const closeCurrencySettingsModal = () => {
+		shouldRestoreManagedCurrencyFocusRef.current = true;
+		setManagedCurrencyCode( null );
+	};
+
+	const updateManagedCurrencyRate = (
+		code: string,
+		manualRate: number | null
+	) => {
+		if ( manualRate === null ) {
+			return;
+		}
+
+		setCurrencies( ( currentCurrencies ) => {
+			if ( ! currentCurrencies ) {
+				return currentCurrencies;
+			}
+
+			return {
+				...currentCurrencies,
+				available: updateCurrencyRecordRate(
+					currentCurrencies.available,
+					code,
+					manualRate
+				),
+				enabled: updateCurrencyRecordRate(
+					currentCurrencies.enabled,
+					code,
+					manualRate
+				),
+			};
+		} );
+	};
+
 	if ( isLoading ) {
 		return (
 			<p aria-live="polite">
@@ -257,41 +331,78 @@ export function MultiCurrencySettingsApp() {
 										) }
 									</span>
 								) : (
-									<Button
-										variant="link"
-										disabled={ isSaving }
-										accessibleWhenDisabled
-										aria-label={ sprintf(
-											/* translators: %s: Currency name. */
-											__(
-												'Remove %s as an enabled currency',
-												'woocommerce'
-											),
-											currency.name
-										) }
-										onClick={ () =>
-											saveEnabledCurrencies(
-												enabledCurrencies
-													.map(
-														( enabledCurrency ) =>
-															enabledCurrency.code
-													)
-													.filter(
-														( code ) =>
-															code !==
-															currency.code
-													)
-											)
-										}
-									>
-										{ __( 'Remove', 'woocommerce' ) }
-									</Button>
+									<>
+										<Button
+											variant="link"
+											disabled={ isSaving }
+											accessibleWhenDisabled
+											aria-label={ sprintf(
+												/* translators: %s: Currency name. */
+												__(
+													'Manage %s settings',
+													'woocommerce'
+												),
+												currency.name
+											) }
+											onClick={ (
+												event: React.MouseEvent< HTMLButtonElement >
+											) => {
+												manageCurrencyButtonRef.current =
+													event.currentTarget;
+												setManagedCurrencyCode(
+													currency.code
+												);
+											} }
+										>
+											{ __( 'Manage', 'woocommerce' ) }
+										</Button>{ ' ' }
+										<Button
+											variant="link"
+											disabled={ isSaving }
+											accessibleWhenDisabled
+											aria-label={ sprintf(
+												/* translators: %s: Currency name. */
+												__(
+													'Remove %s as an enabled currency',
+													'woocommerce'
+												),
+												currency.name
+											) }
+											onClick={ () =>
+												saveEnabledCurrencies(
+													enabledCurrencies
+														.map(
+															(
+																enabledCurrency
+															) =>
+																enabledCurrency.code
+														)
+														.filter(
+															( code ) =>
+																code !==
+																currency.code
+														)
+												)
+											}
+										>
+											{ __( 'Remove', 'woocommerce' ) }
+										</Button>
+									</>
 								) }
 							</td>
 						</tr>
 					) ) }
 				</tbody>
 			</table>
+
+			{ managedCurrency && currencies && (
+				<CurrencySettingsModal
+					currency={ managedCurrency }
+					defaultCurrency={ currencies.default }
+					onClose={ closeCurrencySettingsModal }
+					onSaved={ updateManagedCurrencyRate }
+				/>
+			) }
 
 			{ isModalOpen && (
 				<Modal
