@@ -8,8 +8,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks;
 
 use Automattic\WooCommerce\Internal\POS\StoreApi\Context;
-use Automattic\WooCommerce\Internal\POS\StoreApi\PosCheckoutRequirements;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
+use Automattic\WooCommerce\StoreApi\Utilities\CheckoutRequirements;
 use WC_Order;
 
 /**
@@ -17,8 +17,8 @@ use WC_Order;
  * POS requests.
  *
  * The typical in-store cash sale has no email to capture, but some cart
- * contents need one (a downloadable must be delivered somewhere).
- * {@see PosCheckoutRequirements} decides per-cart; when no email is needed the
+ * contents need one (a downloadable must be delivered somewhere). The shared
+ * {@see CheckoutRequirements} decides per-cart; when no email is needed the
  * order proceeds with an empty `billing_email`, otherwise the standard
  * validation runs unchanged. Uses the `woocommerce_store_api_require_billing_email`
  * filter added in {@see \Automattic\WooCommerce\StoreApi\Utilities\OrderController::validate_email}.
@@ -51,6 +51,6 @@ class CheckoutEmailPolicy implements RegisterHooksInterface {
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
 	public function require_when_cart_needs_email( bool $required, WC_Order $order ): bool {
-		return $required && PosCheckoutRequirements::for_order( $order )->requires_email();
+		return $required && CheckoutRequirements::for_order( $order )->requires_email();
 	}
 }

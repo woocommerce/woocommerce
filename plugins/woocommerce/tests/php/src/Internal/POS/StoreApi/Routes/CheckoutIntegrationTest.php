@@ -550,7 +550,7 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
-	 * End-to-end regression for downloadable products on POS. PosCheckoutRequirements
+	 * End-to-end regression for downloadable products on POS. CheckoutRequirements
 	 * marks downloadables as email-requiring; this verifies the supplied email
 	 * actually flows through CustomerSwap onto the order, and that the standard WC
 	 * download-permission grant fires once the order transitions to processing.
