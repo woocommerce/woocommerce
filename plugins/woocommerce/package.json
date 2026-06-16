@@ -748,7 +748,10 @@
 						"@woocommerce/block-library"
 					],
 					"testEnv": {
-						"start": "env:start:blocks"
+						"start": "env:start:blocks",
+						"config": {
+							"phpVersion": "7.4"
+						}
 					},
 					"events": [
 						"pull_request",
@@ -791,7 +794,10 @@
 						"@woocommerce/block-library"
 					],
 					"testEnv": {
-						"start": "env:start:blocks"
+						"start": "env:start:blocks",
+						"config": {
+							"phpVersion": "7.4"
+						}
 					},
 					"events": [
 						"pull_request",
@@ -835,6 +841,7 @@
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
+							"phpVersion": "7.4",
 							"wpVersion": "prerelease"
 						}
 					},
@@ -881,6 +888,7 @@
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
+							"phpVersion": "7.4",
 							"wpVersion": "latest-1"
 						}
 					},
