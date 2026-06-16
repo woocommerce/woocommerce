@@ -547,6 +547,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$order->set_billing_country( 'US' );
 		$order->set_total( 128.00 );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$this->created_orders[] = $order->get_id();
@@ -695,6 +696,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order->set_billing_country( 'US' );
 		$order->set_billing_state( 'CA' );
 		$order->set_total( 115.50 );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$this->created_orders[] = $order->get_id();
@@ -834,6 +836,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$order->set_billing_country( 'US' );
 		$order->set_total( 64.00 );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$this->created_orders[] = $order->get_id();
@@ -950,6 +953,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$order->set_billing_country( 'US' );
 		$order->set_total( 110.00 );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$this->created_orders[] = $order->get_id();
@@ -973,13 +977,14 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$request->set_body_params( $refund_data );
 		$response = $this->server->dispatch( $request );
 
-		// Should return 400 Bad Request.
-		$this->assertEquals( 400, $response->get_status(), 'Refund should fail with 400 status' );
+		// A refund_total exceeding the line total is a well-formed but unprocessable
+		// request, so it returns 422 with the same code the preview endpoint uses.
+		$this->assertEquals( 422, $response->get_status() );
 
 		$response_data = $response->get_data();
 		$this->assertArrayHasKey( 'code', $response_data );
-		$this->assertEquals( 'invalid_refund_amount', $response_data['code'] );
-		$this->assertStringContainsString( 'cannot be greater than the remaining refundable amount including tax', $response_data['message'] );
+		$this->assertEquals( 'refund_total_exceeds_line', $response_data['code'] );
+		$this->assertStringContainsString( 'cannot exceed the line item total including tax', $response_data['message'] );
 
 		// Clean up product.
 		$product->delete( true );
@@ -1073,6 +1078,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$order->set_billing_country( 'US' );
 		$order->set_total( 110.00 );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$this->created_orders[] = $order->get_id();
@@ -1270,6 +1276,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order->set_billing_state( 'CA' );
 		$order->set_total( 55.26 );
 		// 50.00 + 0.50 + 1.63 + 3.13.
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$this->created_orders[] = $order->get_id();
@@ -1458,6 +1465,185 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( -2.25, (float) $refund_taxes['total'][ $tax_rate_state ], 'State tax should be half of $4.50.' );
 
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Refund creation on a non-refundable order returns 422 order_not_refundable, matching the preview endpoint.
+	 */
+	public function test_refunds_create_order_not_refundable_returns_422(): void {
+		$order = $this->create_test_order();
+		$order->set_status( OrderStatus::CANCELLED );
+		$order->save();
+
+		$items = $order->get_items( 'line_item' );
+		$item  = reset( $items );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 422, $response->get_status() );
+		$this->assertEquals( 'order_not_refundable', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Refund creation on an already-fully-refunded line returns 422 line_item_already_refunded with a clear message.
+	 *
+	 * Uses a two-line order so fully refunding one line leaves the order itself
+	 * refundable — otherwise a full order refund flips the order to the refunded
+	 * status and the order-level guard fires first.
+	 */
+	public function test_refunds_create_fully_refunded_line_returns_422(): void {
+		$product_a = WC_Helper_Product::create_simple_product();
+		$product_a->set_price( 10.00 );
+		$product_a->save();
+		$product_b = WC_Helper_Product::create_simple_product();
+		$product_b->set_price( 20.00 );
+		$product_b->save();
+
+		$order  = wc_create_order();
+		$item_a = new WC_Order_Item_Product();
+		$item_a->set_props(
+			array(
+				'product'  => $product_a,
+				'quantity' => 1,
+				'subtotal' => 10.00,
+				'total'    => 10.00,
+			)
+		);
+		$item_a->save();
+		$order->add_item( $item_a );
+
+		$item_b = new WC_Order_Item_Product();
+		$item_b->set_props(
+			array(
+				'product'  => $product_b,
+				'quantity' => 1,
+				'subtotal' => 20.00,
+				'total'    => 20.00,
+			)
+		);
+		$item_b->save();
+		$order->add_item( $item_b );
+
+		$order->set_total( 30.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		$first = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$first->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_a->get_id(),
+						'refund_total' => 10.00,
+					),
+				),
+			)
+		);
+		$first_response = $this->server->dispatch( $first );
+		$this->assertEquals( 201, $first_response->get_status(), 'First full-line refund should succeed.' );
+		$this->created_refunds[] = $first_response->get_data()['id'];
+
+		$second = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$second->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_a->get_id(),
+						'refund_total' => 5.00,
+					),
+				),
+			)
+		);
+		$second_response = $this->server->dispatch( $second );
+
+		$this->assertEquals( 422, $second_response->get_status() );
+		$this->assertEquals( 'line_item_already_refunded', $second_response->get_data()['code'] );
+		$this->assertStringContainsString( 'already been fully refunded', $second_response->get_data()['message'] );
+
+		$product_a->delete( true );
+		$product_b->delete( true );
+	}
+
+	/**
+	 * @testdox Refund creation rejects a zero refund_total in a mixed request and stores no refund, matching preview.
+	 */
+	public function test_refunds_create_zero_refund_total_in_mixed_request_returns_error(): void {
+		$product_a = WC_Helper_Product::create_simple_product();
+		$product_a->set_price( 10.00 );
+		$product_a->save();
+		$product_b = WC_Helper_Product::create_simple_product();
+		$product_b->set_price( 20.00 );
+		$product_b->save();
+
+		$order  = wc_create_order();
+		$item_a = new WC_Order_Item_Product();
+		$item_a->set_props(
+			array(
+				'product'  => $product_a,
+				'quantity' => 1,
+				'subtotal' => 10.00,
+				'total'    => 10.00,
+			)
+		);
+		$item_a->save();
+		$order->add_item( $item_a );
+
+		$item_b = new WC_Order_Item_Product();
+		$item_b->set_props(
+			array(
+				'product'  => $product_b,
+				'quantity' => 1,
+				'subtotal' => 20.00,
+				'total'    => 20.00,
+			)
+		);
+		$item_b->save();
+		$order->add_item( $item_b );
+
+		$order->set_total( 30.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_a->get_id(),
+						'refund_total' => 0,
+					),
+					array(
+						'line_item_id' => $item_b->get_id(),
+						'refund_total' => 10.00,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'invalid_refund_total', $response->get_data()['code'] );
+		$this->assertCount( 0, $order->get_refunds(), 'No refund should be stored when any line is rejected.' );
+
+		$product_a->delete( true );
+		$product_b->delete( true );
 	}
 
 	/**
@@ -2377,9 +2563,9 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Step 2: the per-line remaining-amount cap gates subsequent refunds.
 		// Remaining refundable on the line = 100 - 30 = 70. A simplified-form request
 		// for the full 2 units would compute 100 (2 * $50), which exceeds the remaining
-		// 70, so validate_line_items rejects it with invalid_refund_amount — the same
-		// cap (and code) the preview endpoint applies, before the request ever reaches
-		// wc_create_refund.
+		// 70, so validate_line_items rejects it with refund_total_exceeds_remaining — the
+		// same code (and 422 status) the preview endpoint applies, before the request
+		// ever reaches wc_create_refund.
 		$request2 = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
 		$request2->set_body_params(
 			array(
@@ -2394,8 +2580,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 		$response2 = $this->server->dispatch( $request2 );
 
-		$this->assertEquals( 400, $response2->get_status(), 'Follow-up refund exceeding remaining dollars must be rejected.' );
-		$this->assertEquals( 'invalid_refund_amount', $response2->get_data()['code'] );
+		$this->assertEquals( 422, $response2->get_status(), 'Follow-up refund exceeding remaining dollars must be rejected.' );
+		$this->assertEquals( 'refund_total_exceeds_remaining', $response2->get_data()['code'] );
 
 		// Step 3: a follow-up that fits within remaining ($40 of $70) must succeed.
 		// Guards against a regression where the first refund silently consumed

@@ -164,6 +164,16 @@ class DataUtils {
 	 * @return boolean|WP_Error
 	 */
 	public function validate_line_items( $line_items, WC_Order $order ) {
+		// Reject non-refundable order statuses up front, mirroring the preview path
+		// so create and preview agree on which orders accept refunds.
+		if ( ! in_array( $order->get_status(), self::REFUNDABLE_STATUSES, true ) ) {
+			return new WP_Error(
+				'order_not_refundable',
+				__( 'This order cannot be refunded.', 'woocommerce' ),
+				array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+			);
+		}
+
 		// Precompute refunded quantities/totals once so the over-refund check
 		// below caps against remaining refundable quantity, not the original.
 		$refund_data = $this->compute_refunded_quantities_and_totals( $order );
@@ -287,17 +297,56 @@ class DataUtils {
 					);
 				}
 
-				$item_total_with_tax = abs( $signed_line_total );
-				$refunded_total      = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
-				$remaining_total     = $item_total_with_tax - $refunded_total;
-				if ( $remaining_total <= 0 || abs( (float) $line_item['refund_total'] ) > NumberUtil::round( $remaining_total, $price_decimals ) ) {
+				// Reject a refund_total that rounds to zero. A zero line refund is a
+				// no-op that would otherwise be stored as an empty qty:0 refund line,
+				// and it is what the preview path already rejects — keep create and
+				// preview consistent for the same input.
+				if ( 0.0 === (float) NumberUtil::round( (float) $line_item['refund_total'], $price_decimals ) ) {
 					return new WP_Error(
-						'invalid_refund_amount',
+						'invalid_refund_total',
+						__( 'refund_total must be a number greater than zero.', 'woocommerce' ),
+						array( 'status' => WP_Http::BAD_REQUEST )
+					);
+				}
+
+				$item_total_with_tax = abs( $signed_line_total );
+				$abs_refund_total    = abs( (float) $line_item['refund_total'] );
+
+				// Mirror the preview path's three distinct over-refund errors (same
+				// codes, messages, and 422 status) so create and preview reject the
+				// same input identically. An over-refund is a well-formed but
+				// unprocessable request, so 422 — not 400 — is the correct status,
+				// matching the order-level cap the controller already returns.
+				if ( $abs_refund_total > NumberUtil::round( $item_total_with_tax, $price_decimals ) ) {
+					return new WP_Error(
+						'refund_total_exceeds_line',
 						sprintf(
-							/* translators: %s: remaining refundable amount including tax */
-							__( 'Refund total cannot be greater than the remaining refundable amount including tax (%s).', 'woocommerce' ),
+							/* translators: %s: line item total including tax */
+							__( 'refund_total cannot exceed the line item total including tax (%s).', 'woocommerce' ),
+							wc_format_decimal( $item_total_with_tax, $price_decimals )
+						),
+						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+					);
+				}
+
+				$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
+				$remaining_total = $item_total_with_tax - $refunded_total;
+				if ( $remaining_total <= 0 ) {
+					return new WP_Error(
+						'line_item_already_refunded',
+						__( 'This line item has already been fully refunded.', 'woocommerce' ),
+						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+					);
+				}
+				if ( $abs_refund_total > NumberUtil::round( $remaining_total, $price_decimals ) ) {
+					return new WP_Error(
+						'refund_total_exceeds_remaining',
+						sprintf(
+							/* translators: %s: remaining refundable amount */
+							__( 'refund_total cannot exceed the remaining refundable amount for this line item (%s).', 'woocommerce' ),
 							wc_format_decimal( $remaining_total, $price_decimals )
-						)
+						),
+						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 					);
 				}
 			}
@@ -326,13 +375,19 @@ class DataUtils {
 							);
 						}
 
-						if ( $item_taxes['total'][ $tax_id ] < $tax_refund_total ) {
+						// Cap against the remaining tax for this bucket, subtracting any
+						// tax already refunded for this tax id on prior refunds — not the
+						// original line tax. Otherwise sequential refunds could each pass
+						// this check and over-refund a single tax bucket.
+						$already_refunded_tax = (float) ( $refund_data['tax_totals'][ $line_item_id ][ $tax_id ] ?? 0.0 );
+						$remaining_tax        = (float) $item_taxes['total'][ $tax_id ] - $already_refunded_tax;
+						if ( $remaining_tax < (float) $tax_refund_total ) {
 							return new WP_Error(
 								'invalid_refund_amount',
 								sprintf(
-								/* translators: %s: tax total */
-									__( 'Refund tax total cannot be greater than the line item tax total (%s).', 'woocommerce' ),
-									$item_taxes['total'][ $tax_id ]
+								/* translators: %s: remaining refundable tax total */
+									__( 'Refund tax total cannot be greater than the remaining refundable tax for this line item (%s).', 'woocommerce' ),
+									wc_format_decimal( $remaining_tax, wc_get_price_decimals() )
 								)
 							);
 						}
@@ -934,11 +989,22 @@ class DataUtils {
 	 * tax-inclusive so they can be compared directly against {@see compute_line_item_refund_total()}.
 	 *
 	 * @param WC_Order $order Order instance.
-	 * @return array{qtys: array<int, int>, totals: array<int, float>}
+	 * @return array{qtys: array<int, int>, totals: array<int, float>, tax_totals: array<int, array<int, float>>}
 	 */
 	public function compute_refunded_quantities_and_totals( WC_Order $order ): array {
-		$qtys   = array();
-		$totals = array();
+		$qtys       = array();
+		$totals     = array();
+		$tax_totals = array();
+
+		// Accumulate the already-refunded tax per original item, keyed by tax rate
+		// id, as a positive amount. Refund line items store taxes as negatives, so
+		// flip the sign. Lets the per-tax-id cap subtract prior refunds.
+		$add_refunded_taxes = function ( $refunded_item, int $original_id ) use ( &$tax_totals ) {
+			$taxes = $refunded_item->get_taxes();
+			foreach ( (array) ( $taxes['total'] ?? array() ) as $tax_id => $amount ) {
+				$tax_totals[ $original_id ][ $tax_id ] = ( $tax_totals[ $original_id ][ $tax_id ] ?? 0.0 ) + abs( (float) $amount );
+			}
+		};
 
 		foreach ( $order->get_refunds() as $refund ) {
 			/**
@@ -951,6 +1017,7 @@ class DataUtils {
 				$original_id            = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
 				$qtys[ $original_id ]   = ( $qtys[ $original_id ] ?? 0 ) + $refunded_item->get_quantity();
 				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + ( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ) * -1;
+				$add_refunded_taxes( $refunded_item, $original_id );
 			}
 			/**
 			 * Refunded fee items.
@@ -961,6 +1028,7 @@ class DataUtils {
 			foreach ( $refunded_fees as $refunded_item ) {
 				$original_id            = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
 				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + ( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ) * -1;
+				$add_refunded_taxes( $refunded_item, $original_id );
 			}
 			/**
 			 * Refunded shipping items.
@@ -971,12 +1039,14 @@ class DataUtils {
 			foreach ( $refunded_shipping as $refunded_item ) {
 				$original_id            = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
 				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + ( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ) * -1;
+				$add_refunded_taxes( $refunded_item, $original_id );
 			}
 		}
 
 		return array(
-			'qtys'   => $qtys,
-			'totals' => $totals,
+			'qtys'       => $qtys,
+			'totals'     => $totals,
+			'tax_totals' => $tax_totals,
 		);
 	}
 }

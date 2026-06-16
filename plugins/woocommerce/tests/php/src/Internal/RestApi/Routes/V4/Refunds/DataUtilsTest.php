@@ -506,6 +506,150 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox validate_line_items rejects an order whose status is not refundable, mirroring the preview path.
+	 *
+	 * @dataProvider provider_non_refundable_statuses
+	 *
+	 * @param string $status Non-refundable order status.
+	 */
+	public function test_validate_line_items_order_not_refundable( string $status ): void {
+		$order = $this->create_order_with_taxes( array(), 50.00 );
+		$order->set_status( $status );
+		$order->save();
+
+		$items = $order->get_items( 'line_item' );
+		$item  = reset( $items );
+
+		$result = $this->data_utils->validate_line_items(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'order_not_refundable', $result->get_error_code() );
+	}
+
+	/**
+	 * @return array<string, array<int, string>>
+	 */
+	public function provider_non_refundable_statuses(): array {
+		return array(
+			'cancelled' => array( OrderStatus::CANCELLED ),
+			'pending'   => array( OrderStatus::PENDING ),
+			'failed'    => array( OrderStatus::FAILED ),
+			'refunded'  => array( OrderStatus::REFUNDED ),
+		);
+	}
+
+	/**
+	 * @testdox validate_line_items rejects an explicit refund_total of zero, matching the preview path.
+	 *
+	 * @dataProvider provider_zero_refund_totals
+	 *
+	 * @param mixed $refund_total The zero-equivalent refund_total to test.
+	 */
+	public function test_validate_line_items_rejects_zero_refund_total( $refund_total ): void {
+		$order = $this->create_order_with_taxes( array(), 50.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$items = $order->get_items( 'line_item' );
+		$item  = reset( $items );
+
+		$result = $this->data_utils->validate_line_items(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => $refund_total,
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'invalid_refund_total', $result->get_error_code() );
+	}
+
+	/**
+	 * @return array<string, array<int, mixed>>
+	 */
+	public function provider_zero_refund_totals(): array {
+		return array(
+			'int zero'       => array( 0 ),
+			'float zero'     => array( 0.0 ),
+			'rounds to zero' => array( 0.001 ),
+		);
+	}
+
+	/**
+	 * @testdox validate_line_items caps explicit refund_tax against the remaining per-tax-id amount, not the original line tax.
+	 */
+	public function test_validate_line_items_refund_tax_capped_against_remaining_per_tax_id(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// $100 net + $10 tax (rate VAT) = $110 line total.
+		$order = $this->create_order_with_taxes( array( $tax_rate_id ), 100.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$items   = $order->get_items( 'line_item' );
+		$item    = reset( $items );
+		$item_id = $item->get_id();
+
+		// Prior refund consumes $8 of the $10 tax bucket, leaving $2 remaining.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 88.00,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 0,
+						'refund_total' => 80.00,
+						'refund_tax'   => array( $tax_rate_id => 8.00 ),
+					),
+				),
+			)
+		);
+
+		// A second refund claiming $5 of the same tax bucket exceeds the $2 remaining.
+		$result = $this->data_utils->validate_line_items(
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'refund_total' => 5.00,
+					'refund_tax'   => array(
+						array(
+							'id'           => $tax_rate_id,
+							'refund_total' => 5.00,
+						),
+					),
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result, 'Refund tax exceeding the remaining bucket must be rejected.' );
+		$this->assertEquals( 'invalid_refund_amount', $result->get_error_code() );
+	}
+
+	/**
 	 * @testdox Should return 0.0 for product line item with zero original quantity.
 	 */
 	public function test_compute_line_item_refund_total_zero_original_quantity(): void {
@@ -1811,6 +1955,7 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		);
 		$item->save();
 		$order->add_item( $item );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$result = $this->data_utils->validate_line_items(

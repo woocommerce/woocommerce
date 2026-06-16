@@ -400,7 +400,12 @@ class Controller extends AbstractController {
 			$validation_error = $this->data_utils->validate_line_items( $line_items, $order );
 
 			if ( is_wp_error( $validation_error ) ) {
-				return $this->get_route_error_response( $validation_error->get_error_code(), $validation_error->get_error_message() );
+				// Preserve any status carried on the WP_Error so create and preview
+				// return the same HTTP code for the same invalid input (e.g. 422 for
+				// over-refund / non-refundable order). Falls back to 400 otherwise.
+				$error_data = $validation_error->get_error_data();
+				$status     = is_array( $error_data ) && isset( $error_data['status'] ) ? (int) $error_data['status'] : WP_Http::BAD_REQUEST;
+				return $this->get_route_error_response_from_object( $validation_error, $status );
 			}
 
 			// Convert line items to internal format. Note: refund_total is tax-inclusive
