@@ -67,6 +67,24 @@ class MultiCurrencySubscriptionsCompatibilityProjectionService {
 					'accepted_args' => 2,
 				),
 				array(
+					'hook'          => 'woocommerce_subscriptions_product_price',
+					'callback'      => 'get_subscription_product_price',
+					'priority'      => 50,
+					'accepted_args' => 2,
+				),
+				array(
+					'hook'          => 'woocommerce_product_get__subscription_sign_up_fee',
+					'callback'      => 'get_subscription_product_signup_fee',
+					'priority'      => 50,
+					'accepted_args' => 2,
+				),
+				array(
+					'hook'          => 'woocommerce_product_variation_get__subscription_sign_up_fee',
+					'callback'      => 'get_subscription_product_signup_fee',
+					'priority'      => 50,
+					'accepted_args' => 2,
+				),
+				array(
 					'hook'          => 'option_woocommerce_subscriptions_multiple_purchase',
 					'callback'      => 'maybe_disable_mixed_cart',
 					'priority'      => 50,
@@ -173,6 +191,51 @@ class MultiCurrencySubscriptionsCompatibilityProjectionService {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Project whether a direct subscription product price should be converted.
+	 *
+	 * @param mixed $price                        Subscription product price.
+	 * @param bool  $should_convert_product_price Product conversion decision after Subscriptions guards.
+	 * @return bool
+	 *
+	 * @since 11.0.0
+	 */
+	public static function should_convert_subscription_product_price( $price, bool $should_convert_product_price ): bool {
+		return (bool) $price && $should_convert_product_price;
+	}
+
+	/**
+	 * Project whether a subscription sign-up fee should be converted.
+	 *
+	 * @param mixed $price                               Subscription sign-up fee.
+	 * @param bool  $is_switch_product                   Whether the product matches the active switch cart item.
+	 * @param bool  $is_subscription_price_setup_context Whether Subscriptions is setting prices for calculation.
+	 * @param bool  $is_switch_proration_context         Whether switch proration totals are being calculated.
+	 * @param bool  $has_changed_signup_fee_meta         Whether sign-up fee meta was already mutated.
+	 * @return bool
+	 *
+	 * @since 11.0.0
+	 */
+	public static function should_convert_subscription_signup_fee(
+		$price,
+		bool $is_switch_product,
+		bool $is_subscription_price_setup_context,
+		bool $is_switch_proration_context,
+		bool $has_changed_signup_fee_meta
+	): bool {
+		if ( ! $price ) {
+			return false;
+		}
+
+		if ( ! $is_switch_product ) {
+			return true;
+		}
+
+		return ! $is_subscription_price_setup_context
+			&& ! $is_switch_proration_context
+			&& ! $has_changed_signup_fee_meta;
 	}
 
 	/**

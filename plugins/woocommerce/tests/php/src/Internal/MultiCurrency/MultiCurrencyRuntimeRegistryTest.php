@@ -233,6 +233,9 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'wcpay_multi_currency_should_disable_currency_switching',
 				'wcpay_multi_currency_should_convert_product_price',
 				'wcpay_multi_currency_should_convert_coupon_amount',
+				'woocommerce_subscriptions_product_price',
+				'woocommerce_product_get__subscription_sign_up_fee',
+				'woocommerce_product_variation_get__subscription_sign_up_fee',
 				'option_woocommerce_subscriptions_multiple_purchase',
 			),
 			$filter_hooks

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySubscriptionsCompatibilityController;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceProjectionService;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Unit_Test_Case;
 
@@ -23,6 +24,9 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 		'wcpay_multi_currency_should_disable_currency_switching',
 		'wcpay_multi_currency_should_convert_product_price',
 		'wcpay_multi_currency_should_convert_coupon_amount',
+		'woocommerce_subscriptions_product_price',
+		'woocommerce_product_get__subscription_sign_up_fee',
+		'woocommerce_product_variation_get__subscription_sign_up_fee',
 		'option_woocommerce_subscriptions_multiple_purchase',
 	);
 
@@ -61,6 +65,9 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 		$this->assertSame( 50, has_filter( 'wcpay_multi_currency_should_disable_currency_switching', array( $sut, 'should_disable_currency_switching' ) ) );
 		$this->assertSame( 50, has_filter( 'wcpay_multi_currency_should_convert_product_price', array( $sut, 'should_convert_product_price' ) ) );
 		$this->assertSame( 50, has_filter( 'wcpay_multi_currency_should_convert_coupon_amount', array( $sut, 'should_convert_coupon_amount' ) ) );
+		$this->assertSame( 50, has_filter( 'woocommerce_subscriptions_product_price', array( $sut, 'get_subscription_product_price' ) ) );
+		$this->assertSame( 50, has_filter( 'woocommerce_product_get__subscription_sign_up_fee', array( $sut, 'get_subscription_product_signup_fee' ) ) );
+		$this->assertSame( 50, has_filter( 'woocommerce_product_variation_get__subscription_sign_up_fee', array( $sut, 'get_subscription_product_signup_fee' ) ) );
 		$this->assertSame( 50, has_filter( 'option_woocommerce_subscriptions_multiple_purchase', array( $sut, 'maybe_disable_mixed_cart' ) ) );
 	}
 
@@ -206,6 +213,89 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 	}
 
 	/**
+	 * @testdox Should convert direct subscription product prices through the native projection service.
+	 */
+	public function test_converts_direct_subscription_product_prices_through_native_projection_service(): void {
+		$product = $this->create_product( 10 );
+		$sut     = $this->create_controller();
+
+		$this->assertSame( 20.0, $sut->get_subscription_product_price( '10.00', $product ) );
+		$this->assertSame( 0, $sut->get_subscription_product_price( 0, $product ) );
+
+		$renewal = $this->create_controller();
+		$renewal->set_subscription_cart_item( 'renewal', $this->create_subscription( 'EUR' ) );
+		$renewal->set_backtrace_calls( array( 'WC_Cart_Totals->calculate_item_totals' ) );
+
+		$this->assertSame( '10.00', $renewal->get_subscription_product_price( '10.00', $product ) );
+	}
+
+	/**
+	 * @testdox Should convert subscription sign-up fees through the native projection service.
+	 */
+	public function test_converts_subscription_signup_fees_through_native_projection_service(): void {
+		$product = $this->create_product( 10 );
+		$sut     = $this->create_controller();
+
+		$this->assertSame( 20.0, $sut->get_subscription_product_signup_fee( '10.00', $product ) );
+		$this->assertSame( 0, $sut->get_subscription_product_signup_fee( 0, $product ) );
+	}
+
+	/**
+	 * @testdox Should preserve switch subscription sign-up fees during price setup.
+	 */
+	public function test_preserves_switch_subscription_signup_fees_during_price_setup(): void {
+		$product = $this->create_product( 10 );
+		$sut     = $this->create_controller();
+		$sut->set_switch_cart_item( 10, 0, 'switch-item' );
+		$sut->set_backtrace_calls( array( 'WC_Subscriptions_Cart::set_subscription_prices_for_calculation' ) );
+
+		$this->assertSame( '10.00', $sut->get_subscription_product_signup_fee( '10.00', $product ) );
+	}
+
+	/**
+	 * @testdox Should preserve repeated switch sign-up fees during proration total calculation.
+	 */
+	public function test_preserves_repeated_switch_signup_fees_during_proration_total_calculation(): void {
+		$product = $this->create_product( 10 );
+		$sut     = $this->create_controller();
+		$sut->set_switch_cart_item( 10, 0, 'switch-item' );
+
+		$this->assertSame( 20.0, $sut->get_subscription_product_signup_fee( '10.00', $product ) );
+
+		$sut->set_backtrace_calls( array( 'WC_Subscriptions_Product::get_sign_up_fee', 'WC_Cart->calculate_totals' ) );
+
+		$this->assertSame( '10.00', $sut->get_subscription_product_signup_fee( '10.00', $product ) );
+	}
+
+	/**
+	 * @testdox Should convert repeated switch sign-up fees while apportioning switch totals.
+	 */
+	public function test_converts_repeated_switch_signup_fees_while_apportioning_switch_totals(): void {
+		$product = $this->create_product( 10 );
+		$sut     = $this->create_controller();
+		$sut->set_switch_cart_item( 10, 0, 'switch-item' );
+
+		$this->assertSame( 20.0, $sut->get_subscription_product_signup_fee( '10.00', $product ) );
+
+		$sut->set_backtrace_calls( array( 'WC_Subscriptions_Product::get_sign_up_fee', 'WC_Cart->calculate_totals', 'WCS_Switch_Totals_Calculator->apportion_sign_up_fees' ) );
+
+		$this->assertSame( 20.0, $sut->get_subscription_product_signup_fee( '10.00', $product ) );
+	}
+
+	/**
+	 * @testdox Should preserve repeated switch sign-up fees after product meta has already changed.
+	 */
+	public function test_preserves_repeated_switch_signup_fees_after_product_meta_has_already_changed(): void {
+		$product = $this->create_product( 10, true );
+		$sut     = $this->create_controller();
+		$sut->set_switch_cart_item( 10, 0, 'switch-item' );
+
+		$this->assertSame( 20.0, $sut->get_subscription_product_signup_fee( '10.00', $product ) );
+
+		$this->assertSame( '10.00', $sut->get_subscription_product_signup_fee( '10.00', $product ) );
+	}
+
+	/**
 	 * @testdox Should apply subscription coupon conversion decisions.
 	 */
 	public function test_applies_subscription_coupon_conversion_decisions(): void {
@@ -297,6 +387,9 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 		$this->assertFalse( has_filter( 'wcpay_multi_currency_should_disable_currency_switching', array( $sut, 'should_disable_currency_switching' ) ) );
 		$this->assertFalse( has_filter( 'wcpay_multi_currency_should_convert_product_price', array( $sut, 'should_convert_product_price' ) ) );
 		$this->assertFalse( has_filter( 'wcpay_multi_currency_should_convert_coupon_amount', array( $sut, 'should_convert_coupon_amount' ) ) );
+		$this->assertFalse( has_filter( 'woocommerce_subscriptions_product_price', array( $sut, 'get_subscription_product_price' ) ) );
+		$this->assertFalse( has_filter( 'woocommerce_product_get__subscription_sign_up_fee', array( $sut, 'get_subscription_product_signup_fee' ) ) );
+		$this->assertFalse( has_filter( 'woocommerce_product_variation_get__subscription_sign_up_fee', array( $sut, 'get_subscription_product_signup_fee' ) ) );
 		$this->assertFalse( has_filter( 'option_woocommerce_subscriptions_multiple_purchase', array( $sut, 'maybe_disable_mixed_cart' ) ) );
 	}
 
@@ -410,6 +503,23 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 			}
 
 			/**
+			 * Set a deterministic subscription switch cart item.
+			 *
+			 * @param int    $product_id   Product ID.
+			 * @param int    $variation_id Variation ID.
+			 * @param string $key          Cart item key.
+			 */
+			public function set_switch_cart_item( int $product_id, int $variation_id, string $key ): void {
+				$this->cart_items['switch'] = array(
+					'subscription_switch' => array( 'subscription_id' => 'switch-subscription' ),
+					'product_id'          => $product_id,
+					'variation_id'        => $variation_id,
+					'key'                 => $key,
+					'subscription_object' => (object) array(),
+				);
+			}
+
+			/**
 			 * Set a deterministic switch request subscription.
 			 *
 			 * @param object $subscription Subscription object.
@@ -513,8 +623,36 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 		};
 
 		$controller->init( $this->create_arbiter( $owner ), new LegacyProxy() );
+		$controller->set_price_projection_service( $this->create_price_projection_service() );
 
 		return $controller;
+	}
+
+	/**
+	 * Create a deterministic price projection service.
+	 *
+	 * @return MultiCurrencyPriceProjectionService
+	 */
+	private function create_price_projection_service(): MultiCurrencyPriceProjectionService {
+		return new class() extends MultiCurrencyPriceProjectionService {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {}
+
+			/**
+			 * Project a converted price for the selected currency.
+			 *
+			 * @param mixed  $price Price.
+			 * @param string $type  Price type.
+			 * @return float
+			 */
+			public function get_price( $price, string $type ): float {
+				unset( $type );
+
+				return (float) $price * 2;
+			}
+		};
 	}
 
 	/**
@@ -627,6 +765,96 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 			 */
 			public function get_discount_type(): string {
 				return $this->discount_type;
+			}
+		};
+	}
+
+	/**
+	 * Create a fake subscription product.
+	 *
+	 * @param int  $product_id                 Product ID.
+	 * @param bool $has_changed_signup_fee_meta Whether the sign-up fee meta has changes.
+	 * @return object
+	 */
+	private function create_product( int $product_id, bool $has_changed_signup_fee_meta = false ): object {
+		return new class( $product_id, $has_changed_signup_fee_meta ) {
+			/**
+			 * Product ID.
+			 *
+			 * @var int
+			 */
+			private int $product_id;
+
+			/**
+			 * Whether the sign-up fee meta has changes.
+			 *
+			 * @var bool
+			 */
+			private bool $has_changed_signup_fee_meta;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param int  $product_id                 Product ID.
+			 * @param bool $has_changed_signup_fee_meta Whether the sign-up fee meta has changes.
+			 */
+			public function __construct( int $product_id, bool $has_changed_signup_fee_meta ) {
+				$this->product_id                  = $product_id;
+				$this->has_changed_signup_fee_meta = $has_changed_signup_fee_meta;
+			}
+
+			/**
+			 * Get product ID.
+			 *
+			 * @return int
+			 */
+			public function get_id(): int {
+				return $this->product_id;
+			}
+
+			/**
+			 * Get product meta data.
+			 *
+			 * @return object[]
+			 */
+			public function get_meta_data(): array {
+				return array(
+					new class( $this->has_changed_signup_fee_meta ) {
+						/**
+						 * Whether the meta has changes.
+						 *
+						 * @var bool
+						 */
+						private bool $has_changes;
+
+						/**
+						 * Constructor.
+						 *
+						 * @param bool $has_changes Whether the meta has changes.
+						 */
+						public function __construct( bool $has_changes ) {
+							$this->has_changes = $has_changes;
+						}
+
+						/**
+						 * Get meta data payload.
+						 *
+						 * @return array<string,string>
+						 */
+						public function get_data(): array {
+							return array( 'key' => '_subscription_sign_up_fee' );
+						}
+
+						/**
+						 * Get meta changes.
+						 *
+						 * @return array<string,string>
+						 */
+						public function get_changes(): array {
+							return $this->has_changes ? array( 'value' => '12.00' ) : array();
+						}
+					},
+				);
 			}
 		};
 	}

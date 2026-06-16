@@ -7,7 +7,11 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceCalculator;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySubscriptionsCompatibilityProjectionService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
@@ -48,6 +52,22 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 		'WC_Discounts->apply_coupon',
 	);
 
+	private const SUBSCRIPTION_PRICE_SETUP_CALLS = array(
+		'WC_Subscriptions_Cart::set_subscription_prices_for_calculation',
+	);
+
+	private const SUBSCRIPTION_PRODUCT_SIGNUP_FEE_CALLS = array(
+		'WC_Subscriptions_Product::get_sign_up_fee',
+	);
+
+	private const CART_CALCULATE_TOTALS_CALLS = array(
+		'WC_Cart->calculate_totals',
+	);
+
+	private const SWITCH_APPORTION_SIGNUP_FEE_CALLS = array(
+		'WCS_Switch_Totals_Calculator->apportion_sign_up_fees',
+	);
+
 	/**
 	 * Runtime owner arbiter.
 	 *
@@ -61,6 +81,20 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 	 * @var LegacyProxy
 	 */
 	private LegacyProxy $legacy_proxy;
+
+	/**
+	 * Price projection service.
+	 *
+	 * @var MultiCurrencyPriceProjectionService|null
+	 */
+	private ?MultiCurrencyPriceProjectionService $price_projection_service = null;
+
+	/**
+	 * Previously observed subscription switch cart item key.
+	 *
+	 * @var string
+	 */
+	private string $switch_cart_item = '';
 
 	/**
 	 * Whether selected-currency override lookups are already running.
@@ -80,6 +114,17 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 	final public function init( MultiCurrencyRuntimeArbiter $arbiter, LegacyProxy $legacy_proxy ): void {
 		$this->arbiter      = $arbiter;
 		$this->legacy_proxy = $legacy_proxy;
+	}
+
+	/**
+	 * Set the price projection service.
+	 *
+	 * @internal Used by tests and future explicit bootstrap definitions.
+	 *
+	 * @param MultiCurrencyPriceProjectionService $price_projection_service Price projection service.
+	 */
+	public function set_price_projection_service( MultiCurrencyPriceProjectionService $price_projection_service ): void {
+		$this->price_projection_service = $price_projection_service;
 	}
 
 	/**
@@ -217,6 +262,72 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 			$this->is_call_in_backtrace( self::EARLY_RENEWAL_SETUP_CALLS ),
 			$this->is_call_in_backtrace( self::APPLY_COUPON_CALLS )
 		);
+	}
+
+	/**
+	 * Convert direct Subscriptions product prices when Subscriptions guards allow it.
+	 *
+	 * @param mixed $price   Subscription product price.
+	 * @param mixed $product Product object.
+	 * @return mixed
+	 */
+	public function get_subscription_product_price( $price, $product ) {
+		if (
+			! MultiCurrencySubscriptionsCompatibilityProjectionService::should_convert_subscription_product_price(
+				$price,
+				$this->should_convert_product_price( true, $product )
+			)
+		) {
+			return $price;
+		}
+
+		return $this->get_price_projection_service()->get_price( $price, 'product' );
+	}
+
+	/**
+	 * Convert subscription sign-up fees when switch/proration guards allow it.
+	 *
+	 * @param mixed $price   Subscription sign-up fee.
+	 * @param mixed $product Product object.
+	 * @return mixed
+	 */
+	public function get_subscription_product_signup_fee( $price, $product ) {
+		$is_switch_product                   = false;
+		$is_subscription_price_setup_context = false;
+		$is_switch_proration_context         = false;
+		$has_changed_signup_fee_meta         = false;
+
+		$cart_item = $this->get_subscription_type_from_cart( 'switch' );
+		if ( null !== $cart_item ) {
+			$product_id                = $this->get_product_id( $product );
+			$switch_product_id         = $this->get_switch_cart_item_product_id( $cart_item );
+			$previous_switch_cart_item = $this->switch_cart_item;
+			$current_switch_cart_item  = $this->get_switch_cart_item_key( $cart_item );
+
+			$this->switch_cart_item = $current_switch_cart_item;
+
+			$is_switch_product = $product_id === $switch_product_id;
+
+			if ( $is_switch_product ) {
+				$is_subscription_price_setup_context = $this->is_call_in_backtrace( self::SUBSCRIPTION_PRICE_SETUP_CALLS );
+				$is_switch_proration_context         = $this->is_subscription_switch_proration_context( $current_switch_cart_item, $previous_switch_cart_item );
+				$has_changed_signup_fee_meta         = $this->has_changed_subscription_signup_fee_meta( $product, $current_switch_cart_item, $previous_switch_cart_item );
+			}
+		}
+
+		if (
+			! MultiCurrencySubscriptionsCompatibilityProjectionService::should_convert_subscription_signup_fee(
+				$price,
+				$is_switch_product,
+				$is_subscription_price_setup_context,
+				$is_switch_proration_context,
+				$has_changed_signup_fee_meta
+			)
+		) {
+			return $price;
+		}
+
+		return $this->get_price_projection_service()->get_price( $price, 'product' );
 	}
 
 	/**
@@ -396,6 +507,66 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 	}
 
 	/**
+	 * Tell whether switch proration totals are reading a repeated sign-up fee.
+	 *
+	 * @param string $current_switch_cart_item  Current switch cart item key.
+	 * @param string $previous_switch_cart_item Previously observed switch cart item key.
+	 * @return bool
+	 */
+	private function is_subscription_switch_proration_context( string $current_switch_cart_item, string $previous_switch_cart_item ): bool {
+		return '' !== $current_switch_cart_item
+			&& $current_switch_cart_item === $previous_switch_cart_item
+			&& $this->is_call_in_backtrace( self::SUBSCRIPTION_PRODUCT_SIGNUP_FEE_CALLS )
+			&& $this->is_call_in_backtrace( self::CART_CALCULATE_TOTALS_CALLS )
+			&& ! $this->is_call_in_backtrace( self::SWITCH_APPORTION_SIGNUP_FEE_CALLS );
+	}
+
+	/**
+	 * Tell whether a repeated switch sign-up fee was already written to product meta.
+	 *
+	 * @param mixed  $product                   Product object.
+	 * @param string $current_switch_cart_item  Current switch cart item key.
+	 * @param string $previous_switch_cart_item Previously observed switch cart item key.
+	 * @return bool
+	 */
+	private function has_changed_subscription_signup_fee_meta( $product, string $current_switch_cart_item, string $previous_switch_cart_item ): bool {
+		if (
+			'' === $current_switch_cart_item ||
+			$current_switch_cart_item !== $previous_switch_cart_item ||
+			! is_object( $product ) ||
+			! is_callable( array( $product, 'get_meta_data' ) )
+		) {
+			return false;
+		}
+
+		$meta_data = call_user_func( array( $product, 'get_meta_data' ) );
+		if ( ! is_iterable( $meta_data ) ) {
+			return false;
+		}
+
+		foreach ( $meta_data as $meta ) {
+			if (
+				! is_object( $meta ) ||
+				! is_callable( array( $meta, 'get_data' ) ) ||
+				! is_callable( array( $meta, 'get_changes' ) )
+			) {
+				continue;
+			}
+
+			$data = call_user_func( array( $meta, 'get_data' ) );
+			if ( ! is_array( $data ) || '_subscription_sign_up_fee' !== ( $data['key'] ?? null ) ) {
+				continue;
+			}
+
+			if ( ! empty( call_user_func( array( $meta, 'get_changes' ) ) ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Tell whether any subscription cart item is present.
 	 *
 	 * @return bool
@@ -483,6 +654,60 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 		$discount_type = call_user_func( array( $coupon, 'get_discount_type' ) );
 
 		return is_scalar( $discount_type ) ? (string) $discount_type : '';
+	}
+
+	/**
+	 * Get the product ID from a product-like object.
+	 *
+	 * @param mixed $product Product object.
+	 * @return int
+	 */
+	private function get_product_id( $product ): int {
+		if ( ! is_object( $product ) || ! is_callable( array( $product, 'get_id' ) ) ) {
+			return 0;
+		}
+
+		return absint( call_user_func( array( $product, 'get_id' ) ) );
+	}
+
+	/**
+	 * Get the product or variation ID from a switch cart item.
+	 *
+	 * @param array<string,mixed> $cart_item Switch cart item.
+	 * @return int
+	 */
+	private function get_switch_cart_item_product_id( array $cart_item ): int {
+		$variation_id = absint( $cart_item['variation_id'] ?? 0 );
+
+		return 0 < $variation_id ? $variation_id : absint( $cart_item['product_id'] ?? 0 );
+	}
+
+	/**
+	 * Get the switch cart item key.
+	 *
+	 * @param array<string,mixed> $cart_item Switch cart item.
+	 * @return string
+	 */
+	private function get_switch_cart_item_key( array $cart_item ): string {
+		return is_scalar( $cart_item['key'] ?? null ) ? (string) $cart_item['key'] : '';
+	}
+
+	/**
+	 * Get the price projection service.
+	 *
+	 * @return MultiCurrencyPriceProjectionService
+	 */
+	private function get_price_projection_service(): MultiCurrencyPriceProjectionService {
+		if ( null === $this->price_projection_service ) {
+			$localization_service = new MultiCurrencyLocalizationService();
+
+			$this->price_projection_service = new MultiCurrencyPriceProjectionService(
+				wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create( $localization_service ),
+				new MultiCurrencyPriceCalculator( $localization_service )
+			);
+		}
+
+		return $this->price_projection_service;
 	}
 
 	/**
