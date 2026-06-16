@@ -140,9 +140,10 @@ class VerificationController {
 	/**
 	 * Return whether the email-verification prompt should be shown to the current visitor.
 	 *
-	 * True only for a logged-in customer who is not yet verified AND who has at least one
-	 * guest order that could be linked — there's no point prompting someone with nothing to
-	 * gain. Only existence is checked; no order details are exposed.
+	 * True only for a logged-in customer who is not yet verified, has at least one guest order
+	 * that could be linked (existence only; no details exposed), and has not just been sent a
+	 * verification email — so the prompt does not sit alongside the "we've emailed you a link"
+	 * notice.
 	 *
 	 * @since 11.0.0
 	 *
@@ -156,6 +157,13 @@ class VerificationController {
 		}
 
 		if ( $this->service->is_verified( $user_id ) ) {
+			return false;
+		}
+
+		// Don't prompt again while a freshly-sent verification link is still within the
+		// rate-limit window — the "we've emailed you a link" / "just sent" notice covers it.
+		$seconds_since = $this->service->seconds_since_last_key( $user_id );
+		if ( null !== $seconds_since && $seconds_since < self::SEND_RATE_LIMIT ) {
 			return false;
 		}
 

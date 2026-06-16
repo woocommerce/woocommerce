@@ -84,6 +84,26 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox should_show_prompt returns false while a verification email was just sent.
+	 */
+	public function test_should_show_prompt_returns_false_when_recently_sent(): void {
+		$email   = 'recent-send@example.com';
+		$user_id = wc_create_new_customer( $email, 'recentsenduser', 'pw' );
+		wp_set_current_user( $user_id );
+
+		// A linkable guest order exists, so only the recent-send suppression should hide the prompt.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( $email );
+		$order->set_customer_id( 0 );
+		$order->save();
+
+		// Simulate a verification email having just been sent.
+		$this->service->create_verification_key( $user_id );
+
+		$this->assertFalse( $this->sut->should_show_prompt(), 'Prompt should be hidden while a freshly-sent verification link is still valid' );
+	}
+
+	/**
 	 * @testdox should_show_prompt returns false for a logged-in customer whose email is verified.
 	 */
 	public function test_should_show_prompt_returns_false_for_verified_customer(): void {
