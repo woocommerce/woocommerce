@@ -5,23 +5,23 @@ namespace Automattic\WooCommerce\Tests\Internal\Blocks;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
-use Automattic\WooCommerce\Internal\Blocks\BlockLibraryBlockTypeRegistry;
+use Automattic\WooCommerce\Internal\Blocks\BlockLibraryRegistry;
 use WC_Unit_Test_Case;
 use WP_Block;
 use WP_Block_Type;
 use WP_Block_Type_Registry;
 
 /**
- * Tests for the BlockLibraryBlockTypeRegistry class.
+ * Tests for the BlockLibraryRegistry class.
  */
-class BlockLibraryBlockTypeRegistryTest extends WC_Unit_Test_Case {
+class BlockLibraryRegistryTest extends WC_Unit_Test_Case {
 
 	/**
 	 * The System Under Test.
 	 *
-	 * @var BlockLibraryBlockTypeRegistry
+	 * @var BlockLibraryRegistry
 	 */
-	private BlockLibraryBlockTypeRegistry $sut;
+	private BlockLibraryRegistry $sut;
 
 	/**
 	 * Blocks package.
@@ -37,7 +37,9 @@ class BlockLibraryBlockTypeRegistryTest extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		$this->package = BlocksPackage::container()->get( Package::class );
-		$this->sut     = new BlockLibraryBlockTypeRegistry( $this->package );
+		$this->sut     = new BlockLibraryRegistry( $this->package );
+		wp_deregister_script( 'wc-block-library' );
+		wp_deregister_script( 'wp-icons' );
 	}
 
 	/**
@@ -46,18 +48,76 @@ class BlockLibraryBlockTypeRegistryTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->unregister_block_type( 'woocommerce/category-title' );
 		wp_dequeue_script( 'wc-block-library' );
+		wp_deregister_script( 'wc-block-library' );
+		wp_deregister_script( 'wp-icons' );
 
 		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Should register the block-library script from the generated registry.
+	 */
+	public function test_registers_block_library_script_from_generated_registry(): void {
+		$this->sut->init();
+		do_action_ref_array( 'wp_default_scripts', array( wp_scripts() ) );
+
+		$this->assertTrue( wp_script_is( 'wc-block-library', 'registered' ), 'Block library script should be registered.' );
+	}
+
+	/**
+	 * @testdox Should load dependencies and version from the generated asset file.
+	 */
+	public function test_loads_dependencies_and_version_from_generated_asset_file(): void {
+		$this->sut->init();
+		do_action_ref_array( 'wp_default_scripts', array( wp_scripts() ) );
+
+		$script = wp_scripts()->query( 'wc-block-library', 'registered' );
+		$asset  = require $this->package->get_path( 'assets/client/blocks/scripts/block-library/index.min.asset.php' );
+
+		$this->assertSame( $asset['dependencies'], $script->deps, 'Block library script dependencies should match generated asset data.' );
+		$this->assertSame( $asset['version'], $script->ver, 'Block library script version should match generated asset data.' );
+	}
+
+	/**
+	 * @testdox Should not register a WordPress Icons fallback.
+	 */
+	public function test_does_not_register_wordpress_icons_fallback(): void {
+		$this->sut->init();
+		do_action_ref_array( 'wp_default_scripts', array( wp_scripts() ) );
+
+		$this->assertFalse( wp_script_is( 'wp-icons', 'registered' ), 'WordPress Icons fallback should not be registered.' );
+	}
+
+	/**
+	 * @testdox Should use the generated block-library script URL.
+	 */
+	public function test_uses_generated_block_library_script_url(): void {
+		$this->sut->init();
+		do_action_ref_array( 'wp_default_scripts', array( wp_scripts() ) );
+
+		$script = wp_scripts()->query( 'wc-block-library', 'registered' );
+
+		$this->assertStringContainsString(
+			'assets/client/blocks/scripts/block-library/index.min.js',
+			$script->src,
+			'Block library script should use the generated script URL.'
+		);
+	}
+
+	/**
+	 * @testdox Should discover migrated block names from generated block-library render files.
+	 */
+	public function test_discovers_migrated_block_names_from_generated_block_library_render_files(): void {
+		$this->assertContains( 'category-title', $this->sut->get_block_names() );
 	}
 
 	/**
 	 * @testdox Should remove migrated block types from the legacy block type list.
 	 */
 	public function test_removes_migrated_block_types_from_legacy_block_type_list(): void {
-		$this->assertSame(
-			array( 'Cart', 'Checkout' ),
-			$this->sut->remove_migrated_block_types( array( 'Cart', 'CategoryTitle', 'Checkout' ) )
-		);
+		$block_types = $this->sut->remove_migrated_block_types( array( 'Cart', 'CategoryTitle', 'Checkout' ) );
+
+		$this->assertSame( array( 'Cart', 'Checkout' ), $block_types );
 	}
 
 	/**

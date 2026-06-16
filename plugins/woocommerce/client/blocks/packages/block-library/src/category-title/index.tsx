@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { type BlockConfiguration } from '@wordpress/blocks';
+import { heading } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -9,7 +10,6 @@ import { type BlockConfiguration } from '@wordpress/blocks';
 import initBlock from '../utils/init-block';
 import metadata from './block.json';
 import edit, { type CategoryTitleAttributes } from './edit';
-import { heading } from '@wordpress/icons';
 
 const { name } = metadata;
 
@@ -23,4 +23,4 @@ export const settings: Partial<
 	save: () => null,
 };
 
-export const init = () => initBlock( { name, metadata, settings } );
+initBlock( { metadata, settings } );

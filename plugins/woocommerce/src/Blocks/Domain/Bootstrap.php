@@ -36,8 +36,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\TemplateOptions;
-use Automattic\WooCommerce\Internal\Blocks\BlockLibraryBlockTypeRegistry;
-use Automattic\WooCommerce\Internal\Blocks\BlockLibraryScriptRegistry;
+use Automattic\WooCommerce\Internal\Blocks\BlockLibraryRegistry;
 
 
 /**
@@ -135,8 +134,7 @@ class Bootstrap {
 		$this->container->get( CheckoutLink::class )->init();
 		$this->container->get( AssetDataRegistry::class );
 		$this->container->get( AssetsController::class );
-		$this->container->get( BlockLibraryScriptRegistry::class )->init();
-		$this->container->get( BlockLibraryBlockTypeRegistry::class )->init();
+		$this->container->get( BlockLibraryRegistry::class )->init();
 		$this->container->get( DependencyDetection::class );
 
 		// Load assets in admin and on the frontend.
@@ -224,15 +222,9 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			BlockLibraryScriptRegistry::class,
+			BlockLibraryRegistry::class,
 			function ( Container $container ) {
-				return new BlockLibraryScriptRegistry( $container->get( Package::class ) );
-			}
-		);
-		$this->container->register(
-			BlockLibraryBlockTypeRegistry::class,
-			function ( Container $container ) {
-				return new BlockLibraryBlockTypeRegistry( $container->get( Package::class ) );
+				return new BlockLibraryRegistry( $container->get( Package::class ) );
 			}
 		);
 		$this->container->register(

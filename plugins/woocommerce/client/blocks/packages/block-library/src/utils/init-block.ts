@@ -4,8 +4,7 @@
 import { registerBlockType, type BlockConfiguration } from '@wordpress/blocks';
 
 type BlockDefinition< TAttributes extends object = object > = {
-	name: string;
-	metadata: Record< string, unknown >;
+	metadata: Record< string, unknown > & { name: string };
 	settings: Partial< BlockConfiguration< TAttributes > >;
 };
 
@@ -18,9 +17,9 @@ type BlockDefinition< TAttributes extends object = object > = {
 export default function initBlock< TAttributes extends object = object >(
 	block: BlockDefinition< TAttributes >
 ) {
-	const { metadata, name, settings } = block;
+	const { metadata, settings } = block;
 	return registerBlockType(
-		{ name, ...metadata } as unknown as BlockConfiguration< TAttributes >,
+		metadata as unknown as BlockConfiguration< TAttributes >,
 		settings
 	);
 }
