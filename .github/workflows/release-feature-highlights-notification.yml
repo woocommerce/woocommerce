@@ -4,6 +4,9 @@ on:
     - cron: '0 9 * * *' # Every day at 9 AM UTC
   workflow_dispatch:
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   check-feature-freeze:
     runs-on: ubuntu-latest

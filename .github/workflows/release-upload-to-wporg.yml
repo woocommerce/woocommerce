@@ -17,6 +17,9 @@ permissions: {}
 concurrency:
   group: release-wporg-svn
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   get-and-validate-release-asset:
     name: Get intended release details
@@ -218,8 +221,8 @@ jobs:
           cp -a ../release/woocommerce/. trunk
 
           # SVN add/delete new or removed files as needed.
-          svn status | grep '^?' | awk '{print $2}' | xargs -r svn add
-          svn status | grep '^!' | awk '{print $2}' | xargs -r svn delete
+          svn status | grep '^?' | awk '{print $2"@"}' | xargs -r svn add
+          svn status | grep '^!' | awk '{print $2"@"}' | xargs -r svn delete
 
           # Copy trunk to tag.
           svn copy trunk "tags/$RELEASE_TAG"
@@ -231,7 +234,7 @@ jobs:
             --message "Tagging version $RELEASE_TAG." \
             --no-auth-cache \
             --non-interactive \
-            --config-option=servers:global:http-timeout=1800
+            --config-option=servers:global:http-timeout=3600
 
           # Write success to summary.
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -266,7 +269,7 @@ jobs:
             --message "Tagging version $RELEASE_TAG." \
             --no-auth-cache \
             --non-interactive \
-            --config-option=servers:global:http-timeout=1800
+            --config-option=servers:global:http-timeout=3600
 
           # Write success to summary.
           echo "" >> $GITHUB_STEP_SUMMARY
