@@ -70,4 +70,50 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
 		$this->assertEquals( WC()->is_rest_api_request(), true );
 	}
+
+	/**
+	 * Restore the request globals after each test.
+	 */
+	public function tearDown(): void {
+		unset( $_GET['rest_route'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Should return false when the request is not a Store API request.
+	 */
+	public function test_is_store_api_request_returns_false_for_non_store_request(): void {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc-admin/options';
+
+		$this->assertFalse( WC()->is_store_api_request(), 'A non-Store API WooCommerce REST request should not be detected as Store API.' );
+	}
+
+	/**
+	 * @testdox Should detect a Store API request that uses pretty permalinks.
+	 */
+	public function test_is_store_api_request_returns_true_for_pretty_permalinks(): void {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/store/v1/cart';
+
+		$this->assertTrue( WC()->is_store_api_request(), 'A /wp-json/wc/store/ path should be detected as Store API.' );
+	}
+
+	/**
+	 * @testdox Should detect a Store API request that uses plain permalinks (?rest_route=).
+	 */
+	public function test_is_store_api_request_returns_true_for_plain_permalinks(): void {
+		$_SERVER['REQUEST_URI'] = '/index.php?rest_route=/wc/store/v1/cart';
+		$_GET['rest_route']     = '/wc/store/v1/cart';
+
+		$this->assertTrue( WC()->is_store_api_request(), 'A ?rest_route=/wc/store/ request should be detected as Store API.' );
+	}
+
+	/**
+	 * @testdox Should not detect a non-Store API plain-permalink request as Store API.
+	 */
+	public function test_is_store_api_request_returns_false_for_plain_permalinks_non_store(): void {
+		$_SERVER['REQUEST_URI'] = '/index.php?rest_route=/wc-admin/options';
+		$_GET['rest_route']     = '/wc-admin/options';
+
+		$this->assertFalse( WC()->is_store_api_request(), 'A non-Store API ?rest_route= request should not be detected as Store API.' );
+	}
 }
