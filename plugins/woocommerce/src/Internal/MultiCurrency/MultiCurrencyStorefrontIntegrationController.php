@@ -7,12 +7,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
-use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistry;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyCompatibilityProjectionService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDatabaseCache;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRateService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStorefrontProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySwitcherProjectionService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
@@ -199,11 +196,7 @@ class MultiCurrencyStorefrontIntegrationController implements RegisterHooksInter
 	 */
 	private function get_state_builder(): MultiCurrencyStateBuilder {
 		if ( null === $this->state_builder ) {
-			$this->state_builder = new MultiCurrencyStateBuilder(
-				new MultiCurrencyLocalizationService(),
-				new MultiCurrencyRateService( new CurrencyRateProviderRegistry() ),
-				new MultiCurrencyDatabaseCache()
-			);
+			$this->state_builder = wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create();
 		}
 
 		return $this->state_builder;

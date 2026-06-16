@@ -9,14 +9,12 @@ namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\Exceptions\InvalidCurrencyException;
 use Automattic\WooCommerce\Internal\MultiCurrency\Exceptions\InvalidCurrencyRateException;
-use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistry;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDatabaseCache;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontendProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyGeolocationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRateService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRestProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WP_Error;
 use WP_REST_Controller;
@@ -433,11 +431,7 @@ class MultiCurrencyRestController extends WP_REST_Controller implements Register
 	 */
 	private function get_state_builder(): MultiCurrencyStateBuilder {
 		if ( null === $this->state_builder ) {
-			$this->state_builder = new MultiCurrencyStateBuilder(
-				new MultiCurrencyLocalizationService(),
-				new MultiCurrencyRateService( new CurrencyRateProviderRegistry() ),
-				new MultiCurrencyDatabaseCache()
-			);
+			$this->state_builder = wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create();
 		}
 
 		return $this->state_builder;

@@ -7,15 +7,12 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
-use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistry;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDatabaseCache;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontendProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyGeolocationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyOrderContextService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRateService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
@@ -321,14 +318,9 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	private function get_frontend_projection_service(): MultiCurrencyFrontendProjectionService {
 		if ( null === $this->frontend_projection_service ) {
 			$localization_service = new MultiCurrencyLocalizationService();
-			$state_builder        = new MultiCurrencyStateBuilder(
-				$localization_service,
-				new MultiCurrencyRateService( new CurrencyRateProviderRegistry() ),
-				new MultiCurrencyDatabaseCache()
-			);
 
 			$this->frontend_projection_service = new MultiCurrencyFrontendProjectionService(
-				$state_builder,
+				wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create( $localization_service ),
 				$localization_service,
 				new MultiCurrencyGeolocationService( $localization_service )
 			);

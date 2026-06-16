@@ -7,11 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
-use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistry;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDatabaseCache;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRateService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyTrackingOrderCountProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyTrackingProjectionService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
@@ -136,13 +132,8 @@ class MultiCurrencyTrackingController implements RegisterHooksInterface {
 	 */
 	private function get_tracking_projection_service(): MultiCurrencyTrackingProjectionService {
 		if ( null === $this->tracking_projection_service ) {
-			$localization_service              = new MultiCurrencyLocalizationService();
 			$this->tracking_projection_service = new MultiCurrencyTrackingProjectionService(
-				new MultiCurrencyStateBuilder(
-					$localization_service,
-					new MultiCurrencyRateService( new CurrencyRateProviderRegistry() ),
-					new MultiCurrencyDatabaseCache()
-				)
+				wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create()
 			);
 		}
 

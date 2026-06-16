@@ -7,16 +7,13 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
-use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistry;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyCompatibilityProjectionService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDatabaseCache;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontendProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyGeolocationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRateService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySelectedCurrencyPersistenceService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyUserSettingsProjectionService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
@@ -304,13 +301,8 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 	 */
 	private function get_persistence_service(): MultiCurrencySelectedCurrencyPersistenceService {
 		if ( null === $this->persistence_service ) {
-			$localization_service      = new MultiCurrencyLocalizationService();
 			$this->persistence_service = new MultiCurrencySelectedCurrencyPersistenceService(
-				new MultiCurrencyStateBuilder(
-					$localization_service,
-					new MultiCurrencyRateService( new CurrencyRateProviderRegistry() ),
-					new MultiCurrencyDatabaseCache()
-				)
+				wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create()
 			);
 		}
 

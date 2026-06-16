@@ -7,11 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
-use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistry;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDatabaseCache;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRateService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStoreCurrencyLifecycleService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
@@ -89,11 +86,7 @@ class MultiCurrencyStoreCurrencyLifecycleController implements RegisterHooksInte
 			$cache                   = new MultiCurrencyDatabaseCache();
 			$this->lifecycle_service = new MultiCurrencyStoreCurrencyLifecycleService(
 				$cache,
-				new MultiCurrencyStateBuilder(
-					new MultiCurrencyLocalizationService(),
-					new MultiCurrencyRateService( new CurrencyRateProviderRegistry() ),
-					$cache
-				)
+				wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create( null, $cache )
 			);
 		}
 

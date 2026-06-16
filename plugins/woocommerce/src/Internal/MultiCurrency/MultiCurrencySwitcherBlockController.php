@@ -7,11 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
-use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistry;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDatabaseCache;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRateService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySwitcherProjectionService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
@@ -183,14 +179,9 @@ class MultiCurrencySwitcherBlockController implements RegisterHooksInterface {
 	 */
 	private function get_switcher_projection_service(): MultiCurrencySwitcherProjectionService {
 		if ( null === $this->switcher_projection_service ) {
-			$localization_service = new MultiCurrencyLocalizationService();
-			$state_builder        = new MultiCurrencyStateBuilder(
-				$localization_service,
-				new MultiCurrencyRateService( new CurrencyRateProviderRegistry() ),
-				new MultiCurrencyDatabaseCache()
+			$this->switcher_projection_service = new MultiCurrencySwitcherProjectionService(
+				wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create()
 			);
-
-			$this->switcher_projection_service = new MultiCurrencySwitcherProjectionService( $state_builder );
 		}
 
 		return $this->switcher_projection_service;
