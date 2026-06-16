@@ -2175,6 +2175,24 @@ ul.wc_coupon_list_block {
 			}
 		}
 
+		// The customer stock-notification edit/create screens reuse this
+		// submitbox markup but keep the legacy save row (#delete-action +
+		// .save_order, no kebab). Restore its original side-by-side layout so
+		// this order-edit redesign doesn't regress those screens. The
+		// :has(#delete-action) guard keeps this off the order screen and off
+		// any extension-injected `<li class="wide">` panels. Migrating those
+		// templates to the new design is tracked as a follow-up.
+		&.wide:has(#delete-action) {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 8px;
+
+			.save_order {
+				margin: 0;
+			}
+		}
+
 		.wc-order-actions-menu {
 			position: relative;
 			flex-shrink: 0;
