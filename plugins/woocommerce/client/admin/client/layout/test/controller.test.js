@@ -6,7 +6,7 @@ import * as navigation from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { updateLinkHref } from '../controller';
+import { getPages, updateLinkHref } from '../controller';
 
 jest.mock( '@woocommerce/navigation', () => {
 	const actual = jest.requireActual( '@woocommerce/navigation' );
@@ -138,5 +138,27 @@ describe( 'updateLinkHref', () => {
 		item.onclick( event );
 		expect( navigation.getHistory ).toHaveBeenCalledTimes( 1 );
 		expect( event.preventDefault ).toHaveBeenCalledTimes( 1 );
+	} );
+} );
+
+describe( 'getPages', () => {
+	const originalFeatures = window.wcAdminFeatures;
+
+	afterEach( () => {
+		window.wcAdminFeatures = originalFeatures;
+	} );
+
+	it( 'should not register the deprecated WooPayments welcome page route', () => {
+		window.wcAdminFeatures = {
+			'wc-pay-welcome-page': true,
+		};
+
+		const pages = getPages();
+
+		expect( pages ).not.toContainEqual(
+			expect.objectContaining( {
+				path: '/wc-pay-welcome-page',
+			} )
+		);
 	} );
 } );

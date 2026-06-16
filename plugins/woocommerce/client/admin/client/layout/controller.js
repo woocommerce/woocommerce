@@ -53,12 +53,6 @@ const CoreProfiler = lazy( () =>
 	import( /* webpackChunkName: "core-profiler" */ '../core-profiler' )
 );
 
-const WCPaymentsWelcomePage = lazy( () =>
-	import(
-		/* webpackChunkName: "wcpay-payment-welcome-page" */ '../payments-welcome'
-	)
-);
-
 const CustomizeStore = lazy( () =>
 	import( /* webpackChunkName: "customize-store" */ '../customize-store' )
 );
@@ -252,22 +246,6 @@ export const getPages = ( reports = [] ) => {
 				showStoreAlerts: false,
 				showPluginArea: false,
 			},
-			capability: 'manage_woocommerce',
-		} );
-	}
-
-	if ( window.wcAdminFeatures[ 'wc-pay-welcome-page' ] ) {
-		pages.push( {
-			container: WCPaymentsWelcomePage,
-			path: '/wc-pay-welcome-page',
-			breadcrumbs: [
-				[ '/wc-pay-welcome-page', __( 'WooPayments', 'woocommerce' ) ],
-				__( 'WooPayments', 'woocommerce' ),
-			],
-			navArgs: {
-				id: 'woocommerce-wc-pay-welcome-page',
-			},
-			wpOpenMenu: 'toplevel_page_woocommerce-wc-pay-welcome-page',
 			capability: 'manage_woocommerce',
 		} );
 	}

@@ -47032,12 +47032,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/WooCommercePayments.php
 
 		-
-			message: '#^Cannot call method has_incentive\(\) on Automattic\\WooCommerce\\Internal\\Admin\\WcPayWelcomePage\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/WooCommercePayments.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WooCommercePayments\:\:get_gateway\(\) has invalid return type WC_Payments\.$#'
 			identifier: class.notFound
 			count: 1
@@ -57953,42 +57947,6 @@ parameters:
 			path: src/Internal/Admin/Notes/OrderMilestones.php
 
 		-
-			message: '#^Cannot call method has_incentive\(\) on Automattic\\WooCommerce\\Internal\\Admin\\WcPayWelcomePage\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsMoreInfoNeeded\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsMoreInfoNeeded\:\:is_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Cannot call method has_incentive\(\) on Automattic\\WooCommerce\\Internal\\Admin\\WcPayWelcomePage\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsRemindMeLater\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsRemindMeLater\:\:is_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PerformanceOnMobile\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
 			identifier: return.empty
 			count: 4
@@ -61053,18 +61011,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/Admin/WCPayPromotion/WCPaymentGatewayPreInstallWCPayPromotion.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\WcPayWelcomePage\:\:get_active_payments_task_slug\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: src/Internal/Admin/WcPayWelcomePage.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\WcPayWelcomePage\:\:is_payments_task_complete\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: src/Internal/Admin/WcPayWelcomePage.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\AssignDefaultCategory\:\:init\(\) has no return type specified\.$#'

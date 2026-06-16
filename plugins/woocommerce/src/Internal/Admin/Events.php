@@ -26,8 +26,6 @@ use Automattic\WooCommerce\Internal\Admin\Notes\NewSalesRecord;
 use Automattic\WooCommerce\Internal\Admin\Notes\OnboardingPayments;
 use Automattic\WooCommerce\Internal\Admin\Notes\OnlineClothingStore;
 use Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
-use Automattic\WooCommerce\Internal\Admin\Notes\PaymentsMoreInfoNeeded;
-use Automattic\WooCommerce\Internal\Admin\Notes\PaymentsRemindMeLater;
 use Automattic\WooCommerce\Internal\Admin\Notes\PerformanceOnMobile;
 use Automattic\WooCommerce\Internal\Admin\Notes\PersonalizeStore;
 use Automattic\WooCommerce\Internal\Admin\Notes\RealTimeOrderAlerts;
@@ -82,8 +80,6 @@ class Events {
 		NewSalesRecord::class,
 		OnboardingPayments::class,
 		OnlineClothingStore::class,
-		PaymentsMoreInfoNeeded::class,
-		PaymentsRemindMeLater::class,
 		PerformanceOnMobile::class,
 		PersonalizeStore::class,
 		RealTimeOrderAlerts::class,
@@ -137,7 +133,6 @@ class Events {
 	 */
 	public function do_wc_admin_daily() {
 		$this->possibly_add_notes();
-		$this->possibly_delete_notes();
 		$this->possibly_update_notes();
 		$this->possibly_refresh_data_source_pollers();
 
@@ -194,14 +189,6 @@ class Events {
 				$note_class::possibly_add_note();
 			}
 		}
-	}
-
-	/**
-	 * Deletes notes that should be deleted.
-	 */
-	protected function possibly_delete_notes() {
-		PaymentsRemindMeLater::delete_if_not_applicable();
-		PaymentsMoreInfoNeeded::delete_if_not_applicable();
 	}
 
 	/**
