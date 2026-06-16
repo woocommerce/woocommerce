@@ -91,6 +91,7 @@ class CartAddFee extends AbstractCartRoute {
 	 *
 	 * @throws RouteException On error.
 	 * @param \WP_REST_Request $request Request object.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {

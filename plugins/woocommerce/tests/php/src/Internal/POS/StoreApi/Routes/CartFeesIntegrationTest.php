@@ -188,7 +188,8 @@ class CartFeesIntegrationTest extends ControllerTestCase {
 		wp_set_current_user( $this->admin_id );
 		$add  = $this->add_fee( 'Gift wrap', 5, array( 'cart_token' => $cart_token ) );
 		$fees = $add->get_data()['fees'];
-		$id   = $fees[0]['id'];
+		// The cart fee schema exposes the fee identifier as `key` (mapped from the WC fee id).
+		$id = $fees[0]['key'];
 
 		wp_set_current_user( $this->admin_id );
 		$remove = $this->remove_fee( $id, array( 'cart_token' => $cart_token ) );
