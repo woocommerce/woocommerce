@@ -10,8 +10,7 @@ namespace Automattic\WooCommerce\Internal\MultiCurrency;
 use Automattic\WooCommerce\Internal\MultiCurrency\Exceptions\InvalidCurrencyException;
 use Automattic\WooCommerce\Internal\MultiCurrency\Exceptions\InvalidCurrencyRateException;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontendProjectionService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyGeolocationService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyProjectionServiceFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRestProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
@@ -444,13 +443,9 @@ class MultiCurrencyRestController extends WP_REST_Controller implements Register
 	 */
 	private function get_frontend_projection_service(): MultiCurrencyFrontendProjectionService {
 		if ( null === $this->frontend_projection_service ) {
-			$localization_service = new MultiCurrencyLocalizationService();
-
-			$this->frontend_projection_service = new MultiCurrencyFrontendProjectionService(
-				$this->get_state_builder(),
-				$localization_service,
-				new MultiCurrencyGeolocationService( $localization_service )
-			);
+			$this->frontend_projection_service = wc_get_container()
+				->get( MultiCurrencyProjectionServiceFactory::class )
+				->create_frontend_projection_service( null, $this->get_state_builder() );
 		}
 
 		return $this->frontend_projection_service;

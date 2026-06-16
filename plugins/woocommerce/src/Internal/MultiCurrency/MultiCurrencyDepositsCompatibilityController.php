@@ -8,10 +8,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDepositsCompatibilityProjectionService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceCalculator;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceProjectionService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyProjectionServiceFactory;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
@@ -289,12 +287,9 @@ class MultiCurrencyDepositsCompatibilityController implements RegisterHooksInter
 	 */
 	private function get_price_projection_service(): MultiCurrencyPriceProjectionService {
 		if ( null === $this->price_projection_service ) {
-			$localization_service = new MultiCurrencyLocalizationService();
-
-			$this->price_projection_service = new MultiCurrencyPriceProjectionService(
-				wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create( $localization_service ),
-				new MultiCurrencyPriceCalculator( $localization_service )
-			);
+			$this->price_projection_service = wc_get_container()
+				->get( MultiCurrencyProjectionServiceFactory::class )
+				->create_price_projection_service();
 		}
 
 		return $this->price_projection_service;

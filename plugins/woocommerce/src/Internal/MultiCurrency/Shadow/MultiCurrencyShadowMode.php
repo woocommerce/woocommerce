@@ -9,9 +9,8 @@ namespace Automattic\WooCommerce\Internal\MultiCurrency\Shadow;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\MultiCurrencyLocalizationInterface;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceCalculator;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceProjectionService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyProjectionServiceFactory;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Abstract_Order;
@@ -294,12 +293,9 @@ class MultiCurrencyShadowMode implements RegisterHooksInterface {
 	 */
 	private function get_projection_service(): MultiCurrencyPriceProjectionService {
 		if ( null === $this->projection_service ) {
-			$localization_service = $this->create_read_only_localization_service();
-
-			$this->projection_service = new MultiCurrencyPriceProjectionService(
-				wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create( $localization_service ),
-				new MultiCurrencyPriceCalculator( $localization_service )
-			);
+			$this->projection_service = wc_get_container()
+				->get( MultiCurrencyProjectionServiceFactory::class )
+				->create_price_projection_service( $this->create_read_only_localization_service() );
 		}
 
 		return $this->projection_service;

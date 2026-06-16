@@ -10,10 +10,8 @@ namespace Automattic\WooCommerce\Internal\MultiCurrency;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyAsyncPriceProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontendProjectionService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyGeolocationService;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyProjectionServiceFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
-use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
@@ -291,13 +289,9 @@ class MultiCurrencyAsyncPriceRendererController implements RegisterHooksInterfac
 	 */
 	private function get_frontend_projection_service(): MultiCurrencyFrontendProjectionService {
 		if ( null === $this->frontend_projection_service ) {
-			$localization_service = new MultiCurrencyLocalizationService();
-
-			$this->frontend_projection_service = new MultiCurrencyFrontendProjectionService(
-				wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create( $localization_service ),
-				$localization_service,
-				new MultiCurrencyGeolocationService( $localization_service )
-			);
+			$this->frontend_projection_service = wc_get_container()
+				->get( MultiCurrencyProjectionServiceFactory::class )
+				->create_frontend_projection_service();
 		}
 
 		return $this->frontend_projection_service;

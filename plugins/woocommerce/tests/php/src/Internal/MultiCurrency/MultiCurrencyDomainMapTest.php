@@ -103,6 +103,34 @@ class MultiCurrencyDomainMapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should centralize projection service graph construction in the factory.
+	 */
+	public function test_projection_service_construction_is_centralized_in_factory(): void {
+		$source_files = array(
+			'src/Internal/MultiCurrency/MultiCurrencyFrontendPricesController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyFrontendCurrenciesController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyAsyncPriceRendererController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyRestController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyBookingsCompatibilityController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyDepositsCompatibilityController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyProductAddOnsCompatibilityController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyNameYourPriceCompatibilityController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyPreOrdersCompatibilityController.php',
+			'src/Internal/MultiCurrency/MultiCurrencySubscriptionsCompatibilityController.php',
+			'src/Internal/MultiCurrency/Shadow/MultiCurrencyShadowMode.php',
+		);
+
+		foreach ( $source_files as $source_file ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for domain-boundary regression coverage.
+			$source = (string) file_get_contents( WC()->plugin_path() . '/' . $source_file );
+
+			$this->assertStringNotContainsString( 'new MultiCurrencyPriceProjectionService(', $source, "{$source_file} should delegate price projection construction to the factory." );
+			$this->assertStringNotContainsString( 'new MultiCurrencyFrontendProjectionService(', $source, "{$source_file} should delegate frontend projection construction to the factory." );
+			$this->assertStringNotContainsString( 'new MultiCurrencyPriceCalculator(', $source, "{$source_file} should delegate price calculator construction to the factory." );
+		}
+	}
+
+	/**
 	 * @testdox Should record the plugin compatibility integrations that B1 must preserve.
 	 */
 	public function test_records_compatibility_integrations(): void {
