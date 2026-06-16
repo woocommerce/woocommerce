@@ -25,7 +25,7 @@ use WP_User_Query;
  */
 class POSPinService {
 
-	public const PIN_META_KEY = '_woocommerce_pos_pin';
+	public const PIN_META_KEY = 'woocommerce_pos_pin';
 	public const ALGO         = 'pbkdf2-sha256';
 	public const ITERATIONS   = 10000;
 	public const SALT_BYTES   = 16;

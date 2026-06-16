@@ -207,7 +207,7 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should ignore PINs on users who do not have POS access.
 	 *
-	 * A non-POS user with a stale `_woocommerce_pos_pin` meta entry (e.g. left over
+	 * A non-POS user with a stale `woocommerce_pos_pin` meta entry (e.g. left over
 	 * from v1 or a manual edit) must not block a real POS staff member from using
 	 * the same plaintext PIN. Uniqueness is scoped to users with the POS preset
 	 * meta set — non-POS users are invisible to the uniqueness scan.
