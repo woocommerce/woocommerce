@@ -160,7 +160,7 @@
 		"@wordpress/block-editor": "catalog:wp-min",
 		"@wordpress/block-library": "catalog:wp-min",
 		"@wordpress/blocks": "catalog:wp-min",
-		"@wordpress/build": "catalog:wp-min",
+		"@wordpress/build": "catalog:wp-tooling",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/components": "catalog:wp-min",
 		"@wordpress/core-data": "catalog:wp-min",

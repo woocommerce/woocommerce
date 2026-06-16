@@ -62,7 +62,7 @@ catalogs:
         '@wordpress/icons': 11.0.1
         '@wordpress/interface': 9.18.5
 
-    wp-tools:
+    wp-tooling:
         '@wordpress/build': 0.16.1
 
 
