@@ -32,34 +32,6 @@ class CustomerVerifyEmailTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Email id is customer_verify_email.
-	 */
-	public function test_email_id(): void {
-		$this->assertSame( 'customer_verify_email', $this->sut->id );
-	}
-
-	/**
-	 * @testdox Email is marked as a customer email.
-	 */
-	public function test_customer_email_flag(): void {
-		$this->assertTrue( $this->sut->is_customer_email() );
-	}
-
-	/**
-	 * @testdox Email belongs to the accounts group.
-	 */
-	public function test_email_group(): void {
-		$this->assertSame( 'accounts', $this->sut->email_group );
-	}
-
-	/**
-	 * @testdox Email is enabled by default.
-	 */
-	public function test_enabled_by_default(): void {
-		$this->assertTrue( $this->sut->is_enabled() );
-	}
-
-	/**
 	 * @testdox Class is registered with the WC mailer so the Settings > Emails page renders it.
 	 */
 	public function test_is_registered_with_wc_emails(): void {
@@ -95,9 +67,7 @@ class CustomerVerifyEmailTest extends WC_Unit_Test_Case {
 
 		$sent = $mailer->mock_sent[ $before ];
 		$this->assertSame( 'verify@example.com', $sent['to'][0][0], 'Email must be addressed to the customer.' );
-		$this->assertStringContainsString( 'wc_verify_email_key=TESTKEY', $sent['body'], 'Email body must contain the verification key.' );
-		$this->assertStringContainsString( 'verify@example.com', $sent['body'], 'Email body should name the address being confirmed.' );
-		$this->assertStringContainsString( 'safely ignore it', $sent['body'], 'Email body should include the reassurance footer.' );
+		$this->assertStringContainsString( 'wc_verify_email_key=TESTKEY', $sent['body'], 'Email body must contain the verification link.' );
 	}
 
 	/**

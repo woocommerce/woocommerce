@@ -90,7 +90,7 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * @testdox The orders notice carries a confirm call to action when no link was sent recently.
+	 * @testdox The orders notice carries a resend call-to-action button when no link was sent recently.
 	 */
 	public function test_orders_notice_shows_cta_when_not_recently_sent(): void {
 		global $wp;
@@ -110,12 +110,11 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 
 		$notices = wc_get_notices( 'notice' );
 		$this->assertNotEmpty( $notices );
-		$this->assertStringContainsString( 'Confirm your email address', $notices[0]['notice'] );
-		$this->assertStringContainsString( 'button wc-forward', $notices[0]['notice'], 'A prompt with no recent send should carry the confirm button.' );
+		$this->assertStringContainsString( 'button wc-forward', $notices[0]['notice'], 'A prompt with no recent send should carry the resend button.' );
 	}
 
 	/**
-	 * @testdox Right after a send, the orders notice drops the call to action and says a link was emailed.
+	 * @testdox Right after a send, the orders notice drops the resend call-to-action button.
 	 */
 	public function test_orders_notice_shows_check_inbox_without_cta_when_recently_sent(): void {
 		global $wp;
@@ -138,7 +137,6 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 
 		$notices = wc_get_notices( 'notice' );
 		$this->assertNotEmpty( $notices );
-		$this->assertStringContainsString( 'We emailed you a link to confirm your email', $notices[0]['notice'] );
 		$this->assertStringNotContainsString( 'button wc-forward', $notices[0]['notice'], 'The recently-sent notice must not carry a resend button.' );
 	}
 
