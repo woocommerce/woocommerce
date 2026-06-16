@@ -56,6 +56,18 @@ class MultiCurrencyDomainMapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep generic settings controller account wiring provider-neutral.
+	 */
+	public function test_settings_controller_account_wiring_is_provider_neutral(): void {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for domain-boundary regression coverage.
+		$source = (string) file_get_contents( WC()->plugin_path() . '/src/Internal/MultiCurrency/MultiCurrencySettingsController.php' );
+
+		$this->assertStringContainsString( 'MultiCurrencyProviderAccountResolver', $source, 'Settings controller should use the provider-neutral account resolver.' );
+		$this->assertStringNotContainsString( 'WooPaymentsLegacyAccountAdapter', $source, 'Settings controller should not type-hint the WooPayments account adapter.' );
+		$this->assertStringNotContainsString( 'Internal\\Payments\\Providers\\WooPayments', $source, 'Settings controller should not import WooPayments provider implementation details.' );
+	}
+
+	/**
 	 * @testdox Should record hard-preserved multi-currency order meta keys.
 	 */
 	public function test_records_preserved_order_meta_keys(): void {

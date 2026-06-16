@@ -8,9 +8,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
-use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\MultiCurrencyAccountInterface;
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\MultiCurrencyProviderAccountResolver;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySettingsProjectionService;
-use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsLegacyAccountAdapter;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
@@ -29,11 +28,11 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 	private MultiCurrencyRuntimeArbiter $arbiter;
 
 	/**
-	 * Provider account boundary.
+	 * Provider account resolver.
 	 *
-	 * @var MultiCurrencyAccountInterface
+	 * @var MultiCurrencyProviderAccountResolver
 	 */
-	private MultiCurrencyAccountInterface $account;
+	private MultiCurrencyProviderAccountResolver $account_resolver;
 
 	/**
 	 * Provider connection resolver.
@@ -103,12 +102,12 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter     $arbiter Runtime owner arbiter.
-	 * @param WooPaymentsLegacyAccountAdapter $account Provider account boundary.
+	 * @param MultiCurrencyRuntimeArbiter          $arbiter          Runtime owner arbiter.
+	 * @param MultiCurrencyProviderAccountResolver $account_resolver Provider account resolver.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter, WooPaymentsLegacyAccountAdapter $account ): void {
-		$this->arbiter = $arbiter;
-		$this->account = $account;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyProviderAccountResolver $account_resolver ): void {
+		$this->arbiter          = $arbiter;
+		$this->account_resolver = $account_resolver;
 	}
 
 	/**
@@ -331,7 +330,7 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 		}
 
 		try {
-			return $this->account->is_provider_connected();
+			return $this->account_resolver->is_provider_connected();
 		} catch ( \Throwable $e ) {
 			return false;
 		}
@@ -348,7 +347,7 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 		}
 
 		try {
-			$onboarding_url = $this->account->get_provider_onboarding_page_url();
+			$onboarding_url = $this->account_resolver->get_provider_onboarding_page_url();
 			if ( '' !== $onboarding_url ) {
 				return $onboarding_url;
 			}

@@ -6,7 +6,8 @@ namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySettingsController;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySettingsPage;
-use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsLegacyAccountAdapter;
+use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\MultiCurrencyAccountInterface;
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\MultiCurrencyProviderAccountResolver;
 use WC_Unit_Test_Case;
 
 /**
@@ -107,13 +108,13 @@ class MultiCurrencySettingsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should register connected settings page from production account adapter.
+	 * @testdox Should register connected settings page from provider account resolver.
 	 */
-	public function test_registers_connected_settings_page_from_account_adapter(): void {
+	public function test_registers_connected_settings_page_from_provider_account_resolver(): void {
 		$sut = new MultiCurrencySettingsController();
 		$sut->init(
 			$this->create_arbiter( MultiCurrencyRuntimeArbiter::OWNER_CORE ),
-			$this->create_account_adapter( true, 'https://example.test/onboarding' )
+			$this->create_account_resolver( true, 'https://example.test/onboarding' )
 		);
 
 		$settings_pages = $sut->handle_woocommerce_get_settings_pages( array() );
@@ -131,13 +132,13 @@ class MultiCurrencySettingsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should render onboarding CTA from production account adapter.
+	 * @testdox Should render onboarding CTA from provider account resolver.
 	 */
-	public function test_renders_onboarding_cta_from_account_adapter(): void {
+	public function test_renders_onboarding_cta_from_provider_account_resolver(): void {
 		$sut = new MultiCurrencySettingsController();
 		$sut->init(
 			$this->create_arbiter( MultiCurrencyRuntimeArbiter::OWNER_CORE ),
-			$this->create_account_adapter( false, 'https://example.test/account-onboarding' )
+			$this->create_account_resolver( false, 'https://example.test/account-onboarding' )
 		);
 
 		ob_start();
@@ -358,7 +359,7 @@ class MultiCurrencySettingsControllerTest extends WC_Unit_Test_Case {
 		$controller = new MultiCurrencySettingsController();
 		$controller->init(
 			$this->create_arbiter( $owner ),
-			$this->create_account_adapter(
+			$this->create_account_resolver(
 				(bool) ( $options['provider_connected'] ?? true ),
 				(string) ( $options['onboarding_url'] ?? 'https://example.test/onboarding' )
 			)
@@ -402,14 +403,28 @@ class MultiCurrencySettingsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a static account adapter.
+	 * Create a static account resolver.
 	 *
 	 * @param bool   $connected      Whether the provider account is connected.
 	 * @param string $onboarding_url Provider onboarding URL.
-	 * @return WooPaymentsLegacyAccountAdapter
+	 * @return MultiCurrencyProviderAccountResolver
 	 */
-	private function create_account_adapter( bool $connected, string $onboarding_url ): WooPaymentsLegacyAccountAdapter {
-		return new class( $connected, $onboarding_url ) extends WooPaymentsLegacyAccountAdapter {
+	private function create_account_resolver( bool $connected, string $onboarding_url ): MultiCurrencyProviderAccountResolver {
+		$account_resolver = new MultiCurrencyProviderAccountResolver();
+		$account_resolver->set_account( $this->create_account( $connected, $onboarding_url ) );
+
+		return $account_resolver;
+	}
+
+	/**
+	 * Create a static account boundary.
+	 *
+	 * @param bool   $connected      Whether the provider account is connected.
+	 * @param string $onboarding_url Provider onboarding URL.
+	 * @return MultiCurrencyAccountInterface
+	 */
+	private function create_account( bool $connected, string $onboarding_url ): MultiCurrencyAccountInterface {
+		return new class( $connected, $onboarding_url ) implements MultiCurrencyAccountInterface {
 
 			/**
 			 * Whether the provider account is connected.
@@ -444,6 +459,43 @@ class MultiCurrencySettingsControllerTest extends WC_Unit_Test_Case {
 			 */
 			public function is_provider_connected( bool $on_error = false ): bool {
 				return $this->connected;
+			}
+
+			/**
+			 * Tell whether the connected account is rejected.
+			 *
+			 * @return bool
+			 */
+			public function is_account_rejected(): bool {
+				return false;
+			}
+
+			/**
+			 * Get cached provider account data.
+			 *
+			 * @param bool $force_refresh Whether to force-refresh provider data.
+			 * @return array<string,mixed>|bool
+			 */
+			public function get_cached_account_data( bool $force_refresh = false ) {
+				return false;
+			}
+
+			/**
+			 * Get account-supported customer currencies.
+			 *
+			 * @return string[]
+			 */
+			public function get_account_customer_supported_currencies(): array {
+				return array();
+			}
+
+			/**
+			 * Get provider-supported countries.
+			 *
+			 * @return string[]
+			 */
+			public function get_supported_countries(): array {
+				return array();
 			}
 
 			/**
