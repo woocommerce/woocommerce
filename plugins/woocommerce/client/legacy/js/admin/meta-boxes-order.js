@@ -9,7 +9,8 @@ jQuery( function ( $ ) {
 	/**
 	 * Order actions "more actions" menu.
 	 *
-	 * Dependency-free disclosure menu for the order-actions box. The kebab toggle
+	 * Dependency-free menu button (ARIA menu-button pattern) for the order-actions
+		 * box. The kebab toggle
 	 * opens a popover of tertiary actions (currently the destructive trash link)
 	 * so the trash action is no longer a large target beside the save button.
 	 * Handlers are delegated from the document so the menu keeps working after a
@@ -33,16 +34,17 @@ jQuery( function ( $ ) {
 			return 'true' === toggle.getAttribute( 'aria-expanded' );
 		}
 
-		function open( toggle ) {
+		function open( toggle, focusLast ) {
 			var menu = getMenu( toggle );
 			if ( ! menu ) {
 				return;
 			}
 			toggle.setAttribute( 'aria-expanded', 'true' );
 			menu.hidden = false;
-			var first = getItems( menu )[ 0 ];
-			if ( first ) {
-				first.focus();
+			var items  = getItems( menu );
+			var target = focusLast ? items[ items.length - 1 ] : items[ 0 ];
+			if ( target ) {
+				target.focus();
 			}
 		}
 
@@ -94,7 +96,8 @@ jQuery( function ( $ ) {
 			if ( toggle ) {
 				if ( 'ArrowDown' === e.key || 'ArrowUp' === e.key ) {
 					e.preventDefault();
-					open( toggle );
+					// APG menu button: Down opens onto the first item, Up onto the last.
+					open( toggle, 'ArrowUp' === e.key );
 				}
 				return;
 			}
@@ -129,12 +132,27 @@ jQuery( function ( $ ) {
 					e.preventDefault();
 					items[ items.length - 1 ].focus();
 					break;
-				case 'Tab':
-					// Let focus leave naturally, but close the menu behind it.
-					close( parentToggle, false );
-					break;
 				default:
 					break;
+			}
+		} );
+
+		// Close when focus leaves the menu entirely (e.g. tabbing out). Closing on
+		// focusout — after the browser has already moved focus — avoids hiding the
+		// focused element synchronously, which can drop focus to the <body> in some
+		// browsers. Mirrors Gutenberg's Dropdown closeIfFocusOutside.
+		document.addEventListener( 'focusout', function ( e ) {
+			var wrapper = e.target.closest( '.wc-order-actions-menu' );
+			if ( ! wrapper ) {
+				return;
+			}
+			var next = e.relatedTarget;
+			if ( next && wrapper.contains( next ) ) {
+				return; // Focus moved within this menu — keep it open.
+			}
+			var toggle = wrapper.querySelector( TOGGLE );
+			if ( toggle && isOpen( toggle ) ) {
+				close( toggle, false ); // Focus already left; don't steal it back.
 			}
 		} );
 	}() );

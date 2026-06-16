@@ -2206,12 +2206,23 @@ ul.wc_coupon_list_block {
 				min-height: 40px;
 				padding: 0;
 				margin: 0;
+				// Neutral resting colour so the icon (currentColor) reads as a gray
+				// "more" affordance rather than the secondary button's blue. Matches
+				// the @wordpress/components icon-button convention.
+				color: $gray-900;
 			}
 
 			&__icon {
 				width: 24px;
 				height: 24px;
-				fill: $gray-900; // Neutral "more" affordance, not the button's blue.
+				// Inherit the button colour (Gutenberg keeps the SVG fill-less and
+				// drives it via currentColor); map to the system colour in forced
+				// colours so the kebab stays visible in high-contrast modes.
+				fill: currentColor;
+
+				@media (forced-colors: active) {
+					fill: CanvasText;
+				}
 			}
 
 			// Floating popover anchored below the toggle, styled like a Gutenberg
@@ -2263,8 +2274,12 @@ ul.wc_coupon_list_block {
 				}
 
 				&:focus {
-					outline: none;
 					box-shadow: inset 0 0 0 1.5px var(--wp-admin-theme-color, #2271b1);
+					// Transparent outline so forced-colors / Windows High Contrast
+					// paints a focus ring (box-shadow is ignored there). Mirrors
+					// Gutenberg's button-style focus.
+					outline: 2px solid transparent;
+					outline-offset: -2px;
 				}
 			}
 		}
