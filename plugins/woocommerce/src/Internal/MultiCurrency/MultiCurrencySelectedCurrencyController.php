@@ -112,6 +112,7 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 		}
 
 		$this->get_persistence_service()->update_selected_currency( strtoupper( trim( (string) $currency_code ) ) );
+		$this->clear_url_price_params();
 	}
 
 	/**
@@ -123,6 +124,25 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 	 */
 	public function handle_woocommerce_created_customer( $customer_id ): void {
 		$this->get_persistence_service()->set_new_customer_currency_meta( absint( $customer_id ) );
+	}
+
+	/**
+	 * Clear stale URL price filters after a browser currency switch.
+	 */
+	private function clear_url_price_params(): void {
+		if (
+			( function_exists( 'WC' ) && WC()->is_rest_api_request() )
+			|| ! empty( $_GET['rest_route'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		) {
+			return;
+		}
+
+		if ( isset( $_GET['min_price'] ) || isset( $_GET['max_price'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$url = remove_query_arg( array( 'min_price', 'max_price' ) );
+
+			wp_safe_redirect( $url );
+			exit;
+		}
 	}
 
 	/**

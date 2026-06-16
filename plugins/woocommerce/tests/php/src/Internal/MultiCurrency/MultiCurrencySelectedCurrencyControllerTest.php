@@ -34,7 +34,13 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 			remove_all_filters( $hook );
 		}
 
-		unset( $_GET['currency'], $_POST['wcpay_selected_currency'] );
+		unset(
+			$_GET['currency'],
+			$_GET['min_price'],
+			$_GET['max_price'],
+			$_GET['rest_route'],
+			$_POST['wcpay_selected_currency']
+		);
 
 		parent::tearDown();
 	}
@@ -115,6 +121,113 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 		$sut->handle_init();
 
 		$this->assertSame( array( 'GBP' ), $service->updated_currencies );
+	}
+
+	/**
+	 * @testdox Should redirect browser currency switches to strip stale price filters.
+	 */
+	public function test_redirects_browser_currency_switch_to_strip_stale_price_filters(): void {
+		$service                = $this->create_persistence_service();
+		$sut                    = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, $service );
+		$_GET['currency']       = 'eur';
+		$_GET['min_price']      = '10';
+		$_GET['max_price']      = '50';
+		$original_request_uri   = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$_SERVER['REQUEST_URI'] = '/shop/?currency=EUR&min_price=10&max_price=50';
+		$captured_url           = null;
+
+		add_filter(
+			'wp_redirect',
+			static function ( $location ) use ( &$captured_url ) {
+				$captured_url = $location;
+				throw new \Exception( 'redirect captured' );
+			}
+		);
+
+		try {
+			$sut->handle_init();
+			$this->fail( 'Expected handle_init() to redirect on a browser currency switch with stale price filters.' );
+		} catch ( \Exception $e ) {
+			$this->assertSame( 'redirect captured', $e->getMessage(), 'Unexpected exception thrown.' );
+			$this->assertSame( array( 'EUR' ), $service->updated_currencies );
+			$this->assertIsString( $captured_url, 'Expected a redirect URL to be captured.' );
+			$this->assertStringNotContainsString( 'min_price', $captured_url, 'min_price should have been stripped.' );
+			$this->assertStringNotContainsString( 'max_price', $captured_url, 'max_price should have been stripped.' );
+		} finally {
+			remove_all_filters( 'wp_redirect' );
+			if ( null === $original_request_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $original_request_uri;
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should not redirect Store API currency switches with price filters.
+	 */
+	public function test_does_not_redirect_store_api_currency_switch_with_price_filters(): void {
+		$service                = $this->create_persistence_service();
+		$sut                    = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, $service );
+		$_GET['currency']       = 'eur';
+		$_GET['min_price']      = '10';
+		$_GET['max_price']      = '50';
+		$original_request_uri   = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/store/v1/products?currency=EUR&min_price=10&max_price=50';
+
+		add_filter(
+			'wp_redirect',
+			static function () {
+				throw new \Exception( 'Unexpected redirect during REST request.' );
+			}
+		);
+
+		try {
+			$sut->handle_init();
+
+			$this->assertSame( array( 'EUR' ), $service->updated_currencies );
+		} finally {
+			remove_all_filters( 'wp_redirect' );
+			if ( null === $original_request_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $original_request_uri;
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should not redirect rest_route currency switches with price filters.
+	 */
+	public function test_does_not_redirect_rest_route_currency_switch_with_price_filters(): void {
+		$service                = $this->create_persistence_service();
+		$sut                    = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, $service );
+		$_GET['currency']       = 'eur';
+		$_GET['min_price']      = '10';
+		$_GET['max_price']      = '50';
+		$_GET['rest_route']     = '/wc/store/v1/products';
+		$original_request_uri   = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$_SERVER['REQUEST_URI'] = '/?rest_route=/wc/store/v1/products&currency=EUR&min_price=10&max_price=50';
+
+		add_filter(
+			'wp_redirect',
+			static function () {
+				throw new \Exception( 'Unexpected redirect during rest_route request.' );
+			}
+		);
+
+		try {
+			$sut->handle_init();
+
+			$this->assertSame( array( 'EUR' ), $service->updated_currencies );
+		} finally {
+			remove_all_filters( 'wp_redirect' );
+			if ( null === $original_request_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $original_request_uri;
+			}
+		}
 	}
 
 	/**

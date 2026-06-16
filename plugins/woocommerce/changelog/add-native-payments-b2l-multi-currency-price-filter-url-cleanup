@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Clear stale multi-currency price filters after URL currency switches.
