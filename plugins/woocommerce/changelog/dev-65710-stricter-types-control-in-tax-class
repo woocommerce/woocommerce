@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Harden types handling in WC_Tax class get-methods.

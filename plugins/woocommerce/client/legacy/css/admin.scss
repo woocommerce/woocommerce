@@ -1257,11 +1257,16 @@ table.wc_status_table {
 		&.run-tool {
 			text-align: right;
 
+			.run-tool-actions {
+				align-items: center;
+				display: inline-flex;
+				white-space: nowrap;
+			}
+
 			.run-tool-status {
-				font-size: 90%;
-				margin-right: 0.5em;
 				display: inline-block;
-				opacity: 80%;
+				margin-left: 0.5em;
+				vertical-align: middle;
 
 				.dashicons.spin {
 					animation: rotation 2s infinite linear;
@@ -3764,6 +3769,7 @@ table.wp-list-table {
 
 	.row-actions span.id {
 		padding-top: 8px;
+		color: $secondarytext;
 	}
 
 	td.column-thumb img {
@@ -6561,7 +6567,7 @@ img.help_tip {
 			}
 
 			a.delete {
-				color: red;
+				color: var(--wc-destructive, #cc1818);
 				font-weight: normal;
 				line-height: 26px;
 				text-decoration: none;
@@ -6691,7 +6697,7 @@ img.help_tip {
 			}
 		}
 		.placeholder {
-			opacity: 0.4;
+			color: $gray-700;
 		}
 	}
 }

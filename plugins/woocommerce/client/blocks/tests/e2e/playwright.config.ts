@@ -14,7 +14,8 @@ const config: PlaywrightTestConfig = {
 	globalSetup: fileURLToPath(
 		new URL( 'global-setup.ts', 'file:' + __filename ).href
 	),
-	testDir: './tests',
+	/* Specs moved to the Core e2e suite as part of the Blocks/Core e2e merge; the core `e2e` project ignores them via testIgnore. */
+	testDir: '../../../../tests/e2e-pw/tests/blocks',
 	retries: CI ? 1 : 0,
 	workers: 1,
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
@@ -75,10 +76,10 @@ const config: PlaywrightTestConfig = {
 		{
 			name: 'legacy-mini-cart',
 			testMatch: [
-				'**/tests/mini-cart/**/*.spec.ts',
-				'**/tests/add-to-cart-with-options/**/*.spec.ts',
-				'**/tests/product-button/**/*.spec.ts',
-				'**/tests/product-collection/**/*.spec.ts',
+				'**/blocks/mini-cart/**/*.spec.ts',
+				'**/blocks/add-to-cart-with-options/**/*.spec.ts',
+				'**/blocks/product-button/**/*.spec.ts',
+				'**/blocks/product-collection/**/*.spec.ts',
 			],
 			fullyParallel: true,
 			use: { ...devices[ 'Desktop Chrome' ] },

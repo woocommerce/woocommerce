@@ -112,6 +112,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
+		// @phpstan-ignore-next-line property.notFound (Deliberately dynamic to avoid adding inherited state that can fatal subclasses.)
+		$this->request = $request;
+
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = array(
 			'id'                    => $object->get_id(),
@@ -457,13 +460,16 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			return;
 		}
 
+		$image_size = $this->request['image_size'] ?? 'full';
+		$image_size = is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
+
 		$attachment_id   = $variation->get_image_id();
 		$attachment_post = get_post( $attachment_id );
 		if ( is_null( $attachment_post ) ) {
 			return;
 		}
 
-		$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+		$attachment = wp_get_attachment_image_src( $attachment_id, $image_size );
 		if ( ! is_array( $attachment ) ) {
 			return;
 		}
@@ -1284,6 +1290,14 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'description'       => __( 'Limit result set to variations visible in Point of Sale.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['image_size'] = array(
+			'description'       => __( 'Use a specific registered image size for the returned variation image src. Falls back to the full size if the requested size is not registered.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'full',
+			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
