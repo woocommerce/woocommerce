@@ -29,6 +29,13 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	private MultiCurrencyRuntimeArbiter $arbiter;
 
 	/**
+	 * Projection service factory.
+	 *
+	 * @var MultiCurrencyProjectionServiceFactory
+	 */
+	private MultiCurrencyProjectionServiceFactory $projection_service_factory;
+
+	/**
 	 * Frontend projection service.
 	 *
 	 * @var MultiCurrencyFrontendProjectionService|null
@@ -61,10 +68,12 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter $arbiter Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeArbiter           $arbiter                    Runtime owner arbiter.
+	 * @param MultiCurrencyProjectionServiceFactory $projection_service_factory Projection service factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter ): void {
-		$this->arbiter = $arbiter;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyProjectionServiceFactory $projection_service_factory ): void {
+		$this->arbiter                    = $arbiter;
+		$this->projection_service_factory = $projection_service_factory;
 	}
 
 	/**
@@ -315,9 +324,7 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	 */
 	private function get_frontend_projection_service(): MultiCurrencyFrontendProjectionService {
 		if ( null === $this->frontend_projection_service ) {
-			$this->frontend_projection_service = wc_get_container()
-				->get( MultiCurrencyProjectionServiceFactory::class )
-				->create_frontend_projection_service();
+			$this->frontend_projection_service = $this->projection_service_factory->create_frontend_projection_service();
 		}
 
 		return $this->frontend_projection_service;

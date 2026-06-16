@@ -41,6 +41,13 @@ class MultiCurrencyBookingsCompatibilityController implements RegisterHooksInter
 	private MultiCurrencyRuntimeArbiter $arbiter;
 
 	/**
+	 * Projection service factory.
+	 *
+	 * @var MultiCurrencyProjectionServiceFactory
+	 */
+	private MultiCurrencyProjectionServiceFactory $projection_service_factory;
+
+	/**
 	 * Price projection service.
 	 *
 	 * @var MultiCurrencyPriceProjectionService|null
@@ -59,10 +66,12 @@ class MultiCurrencyBookingsCompatibilityController implements RegisterHooksInter
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter $arbiter Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeArbiter           $arbiter                    Runtime owner arbiter.
+	 * @param MultiCurrencyProjectionServiceFactory $projection_service_factory Projection service factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter ): void {
-		$this->arbiter = $arbiter;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyProjectionServiceFactory $projection_service_factory ): void {
+		$this->arbiter                    = $arbiter;
+		$this->projection_service_factory = $projection_service_factory;
 	}
 
 	/**
@@ -314,9 +323,7 @@ class MultiCurrencyBookingsCompatibilityController implements RegisterHooksInter
 	 */
 	private function get_price_projection_service(): MultiCurrencyPriceProjectionService {
 		if ( null === $this->price_projection_service ) {
-			$this->price_projection_service = wc_get_container()
-				->get( MultiCurrencyProjectionServiceFactory::class )
-				->create_price_projection_service();
+			$this->price_projection_service = $this->projection_service_factory->create_price_projection_service();
 		}
 
 		return $this->price_projection_service;
@@ -329,9 +336,7 @@ class MultiCurrencyBookingsCompatibilityController implements RegisterHooksInter
 	 */
 	private function get_frontend_projection_service(): MultiCurrencyFrontendProjectionService {
 		if ( null === $this->frontend_projection_service ) {
-			$this->frontend_projection_service = wc_get_container()
-				->get( MultiCurrencyProjectionServiceFactory::class )
-				->create_frontend_projection_service();
+			$this->frontend_projection_service = $this->projection_service_factory->create_frontend_projection_service();
 		}
 
 		return $this->frontend_projection_service;

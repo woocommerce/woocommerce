@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyFrontendPricesController;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceProjectionService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyProjectionServiceFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
@@ -328,7 +329,10 @@ class MultiCurrencyFrontendPricesControllerTest extends WC_Unit_Test_Case {
 		?MultiCurrencyRequestContext $request_context = null
 	): MultiCurrencyFrontendPricesController {
 		$controller = new MultiCurrencyFrontendPricesController();
-		$controller->init( $this->create_arbiter( $owner ) );
+		$controller->init(
+			$this->create_arbiter( $owner ),
+			wc_get_container()->get( MultiCurrencyProjectionServiceFactory::class )
+		);
 		$controller->set_price_projection_service( $this->create_projection_service( $should_project_queries ) );
 		if ( null !== $request_context && method_exists( $controller, 'set_request_context' ) ) {
 			$controller->set_request_context( $request_context );

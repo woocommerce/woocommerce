@@ -70,6 +70,13 @@ class MultiCurrencyShadowMode implements RegisterHooksInterface {
 	private MultiCurrencyRuntimeArbiter $arbiter;
 
 	/**
+	 * Projection service factory.
+	 *
+	 * @var MultiCurrencyProjectionServiceFactory
+	 */
+	private MultiCurrencyProjectionServiceFactory $projection_service_factory;
+
+	/**
 	 * Native price/meta projection service.
 	 *
 	 * @var MultiCurrencyPriceProjectionService|null
@@ -95,14 +102,16 @@ class MultiCurrencyShadowMode implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter $arbiter      Runtime owner arbiter.
-	 * @param MultiCurrencySurfaceDiffer  $differ       Multi-currency surface differ.
-	 * @param LegacyProxy                 $legacy_proxy Legacy proxy.
+	 * @param MultiCurrencyRuntimeArbiter           $arbiter                    Runtime owner arbiter.
+	 * @param MultiCurrencySurfaceDiffer            $differ                     Multi-currency surface differ.
+	 * @param LegacyProxy                           $legacy_proxy               Legacy proxy.
+	 * @param MultiCurrencyProjectionServiceFactory $projection_service_factory Projection service factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencySurfaceDiffer $differ, LegacyProxy $legacy_proxy ): void {
-		$this->arbiter      = $arbiter;
-		$this->differ       = $differ;
-		$this->legacy_proxy = $legacy_proxy;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencySurfaceDiffer $differ, LegacyProxy $legacy_proxy, MultiCurrencyProjectionServiceFactory $projection_service_factory ): void {
+		$this->arbiter                    = $arbiter;
+		$this->differ                     = $differ;
+		$this->legacy_proxy               = $legacy_proxy;
+		$this->projection_service_factory = $projection_service_factory;
 	}
 
 	/**
@@ -293,9 +302,7 @@ class MultiCurrencyShadowMode implements RegisterHooksInterface {
 	 */
 	private function get_projection_service(): MultiCurrencyPriceProjectionService {
 		if ( null === $this->projection_service ) {
-			$this->projection_service = wc_get_container()
-				->get( MultiCurrencyProjectionServiceFactory::class )
-				->create_price_projection_service( $this->create_read_only_localization_service() );
+			$this->projection_service = $this->projection_service_factory->create_price_projection_service( $this->create_read_only_localization_service() );
 		}
 
 		return $this->projection_service;

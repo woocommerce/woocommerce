@@ -63,18 +63,27 @@ class MultiCurrencyRestController extends WP_REST_Controller implements Register
 	private ?MultiCurrencyFrontendProjectionService $frontend_projection_service = null;
 
 	/**
+	 * Projection service factory.
+	 *
+	 * @var MultiCurrencyProjectionServiceFactory
+	 */
+	private MultiCurrencyProjectionServiceFactory $projection_service_factory;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter      $arbiter               Runtime owner arbiter.
-	 * @param MultiCurrencyStateBuilderFactory $state_builder_factory State builder factory.
+	 * @param MultiCurrencyRuntimeArbiter           $arbiter                    Runtime owner arbiter.
+	 * @param MultiCurrencyStateBuilderFactory      $state_builder_factory      State builder factory.
+	 * @param MultiCurrencyProjectionServiceFactory $projection_service_factory Projection service factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyStateBuilderFactory $state_builder_factory ): void {
-		$this->arbiter               = $arbiter;
-		$this->state_builder_factory = $state_builder_factory;
-		$this->namespace             = self::REST_NAMESPACE;
-		$this->rest_base             = self::REST_BASE;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyStateBuilderFactory $state_builder_factory, MultiCurrencyProjectionServiceFactory $projection_service_factory ): void {
+		$this->arbiter                    = $arbiter;
+		$this->state_builder_factory      = $state_builder_factory;
+		$this->projection_service_factory = $projection_service_factory;
+		$this->namespace                  = self::REST_NAMESPACE;
+		$this->rest_base                  = self::REST_BASE;
 	}
 
 	/**
@@ -452,9 +461,7 @@ class MultiCurrencyRestController extends WP_REST_Controller implements Register
 	 */
 	private function get_frontend_projection_service(): MultiCurrencyFrontendProjectionService {
 		if ( null === $this->frontend_projection_service ) {
-			$this->frontend_projection_service = wc_get_container()
-				->get( MultiCurrencyProjectionServiceFactory::class )
-				->create_frontend_projection_service( null, $this->get_state_builder() );
+			$this->frontend_projection_service = $this->projection_service_factory->create_frontend_projection_service( null, $this->get_state_builder() );
 		}
 
 		return $this->frontend_projection_service;

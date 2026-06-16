@@ -162,6 +162,36 @@ class MultiCurrencyDomainMapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should inject projection service factory access into controllers.
+	 */
+	public function test_projection_service_factory_access_is_injected_into_controllers(): void {
+		$source_files = array(
+			'src/Internal/MultiCurrency/MultiCurrencyFrontendPricesController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyFrontendCurrenciesController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyAsyncPriceRendererController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyRestController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyBookingsCompatibilityController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyDepositsCompatibilityController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyProductAddOnsCompatibilityController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyNameYourPriceCompatibilityController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyPreOrdersCompatibilityController.php',
+			'src/Internal/MultiCurrency/MultiCurrencySubscriptionsCompatibilityController.php',
+			'src/Internal/MultiCurrency/Shadow/MultiCurrencyShadowMode.php',
+		);
+
+		foreach ( $source_files as $source_file ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for domain-boundary regression coverage.
+			$source = (string) file_get_contents( WC()->plugin_path() . '/' . $source_file );
+
+			$this->assertDoesNotMatchRegularExpression(
+				'/wc_get_container\(\)\s*->get\(\s*MultiCurrencyProjectionServiceFactory::class\s*\)/',
+				$source,
+				"{$source_file} should receive the projection service factory through init injection."
+			);
+		}
+	}
+
+	/**
 	 * @testdox Should record the plugin compatibility integrations that B1 must preserve.
 	 */
 	public function test_records_compatibility_integrations(): void {
