@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Suggestions;
 
 use Automattic\WooCommerce\Internal\Admin\Suggestions\Incentives\Incentive;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\Incentives\WooPayments;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -29,6 +30,24 @@ class PaymentsExtensionSuggestionIncentives {
 	 * @var Incentive[]
 	 */
 	private array $instances = array();
+
+	/**
+	 * WooPayments legacy runtime.
+	 *
+	 * @var WooPaymentsLegacyRuntime|null
+	 */
+	private ?WooPaymentsLegacyRuntime $woopayments_runtime = null;
+
+	/**
+	 * Initialize the class instance.
+	 *
+	 * @internal
+	 *
+	 * @param WooPaymentsLegacyRuntime $woopayments_runtime WooPayments legacy runtime.
+	 */
+	final public function init( WooPaymentsLegacyRuntime $woopayments_runtime ): void {
+		$this->woopayments_runtime = $woopayments_runtime;
+	}
 
 	/**
 	 * Get the first found incentive details for a specific payment extension suggestion.
@@ -178,8 +197,12 @@ class PaymentsExtensionSuggestionIncentives {
 		}
 
 		// Create an instance of the incentives provider class.
-		$provider_class                    = $this->suggestion_incentives_class_map[ $suggestion_id ];
-		$this->instances[ $suggestion_id ] = new $provider_class( $suggestion_id );
+		$provider_class = $this->suggestion_incentives_class_map[ $suggestion_id ];
+		if ( WooPayments::class === $provider_class && null !== $this->woopayments_runtime ) {
+			$this->instances[ $suggestion_id ] = new $provider_class( $suggestion_id, $this->woopayments_runtime );
+		} else {
+			$this->instances[ $suggestion_id ] = new $provider_class( $suggestion_id );
+		}
 
 		return $this->instances[ $suggestion_id ];
 	}

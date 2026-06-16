@@ -3,7 +3,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Suggestions;
 
+use Automattic\WooCommerce\Internal\Admin\Suggestions\Incentives\WooPayments as WooPaymentsIncentive;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestionIncentives;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Tests\Internal\Admin\Suggestions\Mocks\FakeIncentive;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_Unit_Test_Case;
@@ -565,5 +568,24 @@ class PaymentsExtensionSuggestionIncentivesTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertTrue( $incentive_provider );
+	}
+
+	/**
+	 * @testdox Should pass WooPayments legacy runtime to manually constructed WooPayments incentive providers.
+	 */
+	public function test_injects_woopayments_runtime_into_woopayments_incentive_provider(): void {
+		$legacy_runtime = new WooPaymentsLegacyRuntime();
+		$sut            = new PaymentsExtensionSuggestionIncentives();
+
+		$sut->init( $legacy_runtime );
+
+		$provider = $sut->get_incentive_instance( PaymentsExtensionSuggestions::WOOPAYMENTS );
+
+		$this->assertInstanceOf( WooPaymentsIncentive::class, $provider );
+
+		$runtime_property = new \ReflectionProperty( $provider, 'legacy_runtime' );
+		$runtime_property->setAccessible( true );
+
+		$this->assertSame( $legacy_runtime, $runtime_property->getValue( $provider ) );
 	}
 }

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Throwable;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
@@ -30,6 +31,13 @@ class PaymentsController {
 	private Payments $payments;
 
 	/**
+	 * WooPayments legacy runtime.
+	 *
+	 * @var WooPaymentsLegacyRuntime
+	 */
+	private WooPaymentsLegacyRuntime $woopayments_runtime;
+
+	/**
 	 * Register hooks.
 	 */
 	public function register() {
@@ -44,12 +52,14 @@ class PaymentsController {
 	/**
 	 * Initialize the class instance.
 	 *
-	 * @param Payments $payments The payments service.
+	 * @param Payments                 $payments The payments service.
+	 * @param WooPaymentsLegacyRuntime $woopayments_runtime WooPayments legacy runtime.
 	 *
 	 * @internal
 	 */
-	final public function init( Payments $payments ): void {
-		$this->payments = $payments;
+	final public function init( Payments $payments, WooPaymentsLegacyRuntime $woopayments_runtime ): void {
+		$this->payments            = $payments;
+		$this->woopayments_runtime = $woopayments_runtime;
 	}
 
 	/**
@@ -353,24 +363,10 @@ class PaymentsController {
 	 * @return boolean
 	 */
 	private function is_woopayments_account_onboarded(): bool {
-		// Sanity check: the WooPayments extension must be active.
-		if ( ! class_exists( '\WC_Payments' ) ) {
+		if ( ! $this->woopayments_runtime->is_loaded() ) {
 			return false;
 		}
 
-		$account_data = get_option( 'wcpay_account_data', array() );
-
-		// The account ID must be present.
-		if ( empty( $account_data['data']['account_id'] ) ) {
-			return false;
-		}
-
-		// We consider the store to have an onboarded WooPayments account if account data in the WooPayments account cache
-		// contains a details_submitted = true entry. This implies that WooPayments is also connected.
-		if ( empty( $account_data['data']['details_submitted'] ) ) {
-			return false;
-		}
-
-		return filter_var( $account_data['data']['details_submitted'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) ?? false;
+		return $this->woopayments_runtime->is_account_onboarded_from_cache();
 	}
 }

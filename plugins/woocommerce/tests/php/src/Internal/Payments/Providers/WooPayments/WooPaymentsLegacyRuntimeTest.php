@@ -156,6 +156,53 @@ class WooPaymentsLegacyRuntimeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report cached WooPayments account data when an account ID exists.
+	 */
+	public function test_reports_cached_account_data_when_account_id_exists(): void {
+		$sut = $this->create_runtime_with_account_data(
+			array(
+				'data' => array(
+					'account_id' => 'acct_123',
+				),
+			)
+		);
+
+		$this->assertTrue( $sut->has_cached_account_data() );
+		$this->assertFalse( $sut->is_account_onboarded_from_cache() );
+	}
+
+	/**
+	 * @testdox Should report onboarded WooPayments account data when details are submitted.
+	 */
+	public function test_reports_onboarded_account_data_when_details_are_submitted(): void {
+		foreach ( array( true, 'true', 'yes', '1', 1 ) as $details_submitted ) {
+			$sut = $this->create_runtime_with_account_data(
+				array(
+					'data' => array(
+						'account_id'        => 'acct_123',
+						'details_submitted' => $details_submitted,
+					),
+				)
+			);
+
+			$this->assertTrue( $sut->has_cached_account_data() );
+			$this->assertTrue( $sut->is_account_onboarded_from_cache() );
+		}
+	}
+
+	/**
+	 * @testdox Should ignore invalid WooPayments account cache payloads.
+	 */
+	public function test_ignores_invalid_account_cache_payloads(): void {
+		foreach ( array( false, 'invalid', array(), array( 'data' => 'invalid' ), array( 'data' => array() ) ) as $account_data ) {
+			$sut = $this->create_runtime_with_account_data( $account_data );
+
+			$this->assertFalse( $sut->has_cached_account_data() );
+			$this->assertFalse( $sut->is_account_onboarded_from_cache() );
+		}
+	}
+
+	/**
 	 * @testdox Should reset WooPayments onboarding test mode option when available.
 	 */
 	public function test_resets_onboarding_test_mode_option_when_available(): void {
@@ -208,5 +255,21 @@ class WooPaymentsLegacyRuntimeTest extends WC_Unit_Test_Case {
 		$this->assertNull( $sut->is_test_mode_onboarding() );
 		$this->assertNull( $sut->get_account_status_data() );
 		$this->assertNull( $sut->get_supported_countries() );
+	}
+
+	/**
+	 * Create a runtime with injected WooPayments account data.
+	 *
+	 * @param mixed $account_data Account data payload.
+	 * @return WooPaymentsLegacyRuntime
+	 */
+	private function create_runtime_with_account_data( $account_data ): WooPaymentsLegacyRuntime {
+		$proxy = new LegacyRuntimeProxy( true );
+		$proxy->set_account_data( $account_data );
+
+		$sut = new WooPaymentsLegacyRuntime();
+		$sut->init( $proxy );
+
+		return $sut;
 	}
 }

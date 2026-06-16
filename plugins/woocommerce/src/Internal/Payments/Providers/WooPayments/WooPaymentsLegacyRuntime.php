@@ -169,6 +169,31 @@ class WooPaymentsLegacyRuntime {
 	}
 
 	/**
+	 * Tell whether the WooPayments account cache contains account data.
+	 *
+	 * @return bool
+	 */
+	public function has_cached_account_data(): bool {
+		$account_data = $this->get_cached_account_data();
+
+		return ! empty( $account_data['account_id'] );
+	}
+
+	/**
+	 * Tell whether the WooPayments account cache contains an onboarded account.
+	 *
+	 * @return bool
+	 */
+	public function is_account_onboarded_from_cache(): bool {
+		$account_data = $this->get_cached_account_data();
+		if ( empty( $account_data['account_id'] ) || empty( $account_data['details_submitted'] ) ) {
+			return false;
+		}
+
+		return filter_var( $account_data['details_submitted'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) ?? false;
+	}
+
+	/**
 	 * Get WooPayments supported countries.
 	 *
 	 * @return array|null
@@ -294,5 +319,24 @@ class WooPaymentsLegacyRuntime {
 		}
 
 		return is_scalar( $url ) ? (string) $url : null;
+	}
+
+	/**
+	 * Get the normalized WooPayments account cache data.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function get_cached_account_data(): array {
+		try {
+			$account_data = $this->legacy_proxy->call_function( 'get_option', 'wcpay_account_data', array() );
+		} catch ( \Throwable $e ) {
+			return array();
+		}
+
+		if ( ! is_array( $account_data ) || empty( $account_data['data'] ) || ! is_array( $account_data['data'] ) ) {
+			return array();
+		}
+
+		return $account_data['data'];
 	}
 }

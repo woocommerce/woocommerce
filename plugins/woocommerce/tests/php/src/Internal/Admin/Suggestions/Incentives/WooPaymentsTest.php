@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Suggestions\Incentives;
 
 use Automattic\WooCommerce\Internal\Admin\Suggestions\Incentives\Incentive;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\Incentives\WooPayments;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
+use PHPUnit\Framework\MockObject\MockObject;
 use WC_Unit_Test_Case;
 
 /**
@@ -19,6 +21,13 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 	 * @var WooPayments
 	 */
 	protected $sut;
+
+	/**
+	 * WooPayments legacy runtime mock.
+	 *
+	 * @var WooPaymentsLegacyRuntime|MockObject
+	 */
+	protected $legacy_runtime;
 
 	/**
 	 * The incentive's suggestion ID.
@@ -59,10 +68,10 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 		$this->suggestion_id = 'suggestion1';
 
-		$this->sut = $this->getMockBuilder( WooPayments::class )
-			->setConstructorArgs( array( $this->suggestion_id ) )
-			->onlyMethods( array( 'is_extension_active' ) )
+		$this->legacy_runtime = $this->getMockBuilder( WooPaymentsLegacyRuntime::class )
+			->onlyMethods( array( 'is_loaded', 'has_cached_account_data' ) )
 			->getMock();
+		$this->sut            = new WooPayments( $this->suggestion_id, $this->legacy_runtime );
 
 		// Mock the response from the API.
 		$this->response_mock_ref = function ( $preempt, $parsed_args, $url ) {
@@ -209,9 +218,12 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_is_visible_skips_extension_active_check() {
 		// Arrange.
-		$this->sut
+		$this->legacy_runtime
 			->expects( $this->never() )
-			->method( 'is_extension_active' );
+			->method( 'is_loaded' );
+		$this->legacy_runtime
+			->expects( $this->never() )
+			->method( 'has_cached_account_data' );
 
 		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		$filter_callback = fn( $caps ) => array( 'manage_woocommerce' => true );
@@ -234,10 +246,14 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_is_visible_with_extension_active_and_no_account_data() {
 		// Arrange.
-		$this->sut
+		$this->legacy_runtime
 			->expects( $this->once() )
-			->method( 'is_extension_active' )
+			->method( 'is_loaded' )
 			->willReturn( true );
+		$this->legacy_runtime
+			->expects( $this->once() )
+			->method( 'has_cached_account_data' )
+			->willReturn( false );
 
 		add_filter( 'pre_http_request', $this->response_mock_ref, 10, 3 );
 
@@ -253,22 +269,32 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_is_visible_with_extension_active_and_has_account_data() {
 		// Arrange.
-		$this->sut
+		$this->legacy_runtime
 			->expects( $this->once() )
-			->method( 'is_extension_active' )
+			->method( 'is_loaded' )
+			->willReturn( true );
+		$this->legacy_runtime
+			->expects( $this->once() )
+			->method( 'has_cached_account_data' )
 			->willReturn( true );
 
 		add_filter( 'pre_http_request', $this->response_mock_ref, 10, 3 );
-
-		update_option( 'wcpay_account_data', array( 'data' => array( 'account_id' => '123' ) ) );
 
 		// Act.
 		$result = $this->sut->is_visible( 'incentive1', 'US' );
 
 		// Assert.
 		$this->assertFalse( $result );
+	}
 
-		// Clean up.
-		delete_option( 'wcpay_account_data' );
+	/**
+	 * @testdox Should read WooPayments runtime state through WooPaymentsLegacyRuntime.
+	 */
+	public function test_runtime_access_is_centralized(): void {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Read a local source file for a boundary assertion.
+		$source = (string) file_get_contents( WC()->plugin_path() . '/src/Internal/Admin/Suggestions/Incentives/WooPayments.php' );
+
+		$this->assertStringNotContainsString( "class_exists( '\\WC_Payments' )", $source, 'WooPayments incentives should ask WooPaymentsLegacyRuntime whether WooPayments is loaded.' );
+		$this->assertStringNotContainsString( "'wcpay_account_data'", $source, 'WooPayments incentives should read WooPayments account cache through WooPaymentsLegacyRuntime.' );
 	}
 }

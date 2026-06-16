@@ -81,6 +81,13 @@ class LegacyRuntimeProxy extends LegacyProxy {
 	private array $updated_options = array();
 
 	/**
+	 * WooPayments account data option payload.
+	 *
+	 * @var mixed
+	 */
+	private $account_data = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param bool                     $loaded     Whether the WooPayments runtime is loaded.
@@ -147,6 +154,10 @@ class LegacyRuntimeProxy extends LegacyProxy {
 			return true;
 		}
 
+		if ( 'get_option' === $function_name && 'wcpay_account_data' === ( $parameters[0] ?? null ) ) {
+			return null === $this->account_data ? ( $parameters[1] ?? null ) : $this->account_data;
+		}
+
 		return parent::call_function( $function_name, ...$parameters );
 	}
 
@@ -201,5 +212,14 @@ class LegacyRuntimeProxy extends LegacyProxy {
 	 */
 	public function get_updated_options(): array {
 		return $this->updated_options;
+	}
+
+	/**
+	 * Set the WooPayments account data option payload.
+	 *
+	 * @param mixed $account_data Account data payload.
+	 */
+	public function set_account_data( $account_data ): void {
+		$this->account_data = $account_data;
 	}
 }
