@@ -997,6 +997,7 @@ class Checkout extends AbstractCartRoute {
 		 * @since 11.0.0
 		 *
 		 * @param int $customer_id The current user's ID (0 for guests).
+		 * @return int The customer ID to assign to the order.
 		 */
 		$order->set_customer_id( absint( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) ) );
 
