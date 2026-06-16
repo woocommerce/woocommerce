@@ -59,7 +59,10 @@ type WooCommerceStoreState = {
 
 	products: Record< number, ProductResponseItem >;
 	productVariations: Record< number, ProductResponseItem >;
-	productInteractions: Record< number, ProductInteraction >;
+	productInteractions: Record<
+		number,
+		Omit< ProductInteraction, 'quantityToAdd' >
+	>;
 
 	mainProductInContext: ProductResponseItem | null;
 	productVariationInContext: ProductResponseItem | null;
@@ -102,6 +105,7 @@ type ProductInteraction = {
 	productId: number;
 	selectedAttributes: SelectedAttribute[];
 	quantities: Record< number, number >;
+	quantityToAdd: number;
 	validationErrors: ProductInteractionError[];
 	extensions?: Record< string, unknown >;
 };
@@ -113,13 +117,22 @@ type ProductInteractionError = {
 };
 ```
 
+`quantityToAdd` is added by the `productInteractionInContext` getter. It is derived from `productInteractionInContext.quantities[ productInContext.id ]` and is not stored in `productInteractions`.
+
+This gives consumers a stable binding target:
+
+```html
+<input data-wp-bind--value="state.productInteractionInContext.quantityToAdd" />
+```
+
 Notes:
 
 -   `productId` is the main product for the current context and is used to find `productInteractionInContext`.
 -   `selectedAttributes` belongs to the main/parent product in the current context and replaces the current Add to Cart + Options local selected attributes context.
 -   `productVariationInContext` derives from `productId + selectedAttributes`.
 -   `productInContext` remains product data: `productVariationInContext ?? mainProductInContext`.
--   `quantities` belongs to the current `ProductInteraction`; it is keyed by the purchasable product id: simple product id, selected variation id, or grouped child product id.
+-   `quantities` is storage keyed by purchasable product id: simple product id, selected variation id, or grouped child product id.
+-   `quantityToAdd` is the consumer-facing quantity for the current `productInContext`.
 -   `extensions` is reserved for future add-ons/bundles/composite payloads; not a public API yet.
 
 ## Selected attribute shape
