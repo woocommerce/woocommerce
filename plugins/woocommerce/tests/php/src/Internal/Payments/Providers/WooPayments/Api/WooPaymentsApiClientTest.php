@@ -177,4 +177,42 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '"payment_method_types":["card"]', (string) $http_client->last_body );
 		$this->assertStringNotContainsString( 'idempotency_key', (string) $http_client->last_body );
 	}
+
+	/**
+	 * @testdox Should create and confirm native WooPayments SetupIntents through the setup_intents endpoint.
+	 */
+	public function test_create_and_confirm_setup_intention_posts_to_setup_intents_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'id'            => 'seti_test',
+					'status'        => 'succeeded',
+					'client_secret' => 'seti_test_secret_abc',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client );
+
+		$result = $sut->create_and_confirm_setup_intention(
+			array(
+				'customer'       => 'cus_test',
+				'metadata'       => array( 'order_id' => '123' ),
+				'payment_method' => 'pm_test',
+			),
+			'idem_setup'
+		);
+
+		$this->assertSame( 'seti_test', $result['id'] );
+		$this->assertSame( '/sites/123/wcpay/setup_intents', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertSame( 'idem_setup', $http_client->last_headers['Idempotency-Key'] );
+		$this->assertStringContainsString( '"confirm":true', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"payment_method":"pm_test"', (string) $http_client->last_body );
+	}
 }

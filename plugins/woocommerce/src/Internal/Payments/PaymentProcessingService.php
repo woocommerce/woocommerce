@@ -93,7 +93,7 @@ class PaymentProcessingService {
 		}
 
 		try {
-			$outcome = 0.0 >= $amount
+			$outcome = 0.0 >= $amount && ! $this->should_call_provider_for_zero_total_checkout( $context, $provider )
 				? new PaymentOutcome( PaymentOutcome::STATUS_NO_EXTERNAL_PAYMENT )
 				: $this->charge_provider( $context, $provider, $idempotency_key );
 
@@ -190,6 +190,18 @@ class PaymentProcessingService {
 		} catch ( Throwable $exception ) {
 			return $this->exception_policy->to_failed_outcome( $exception );
 		}
+	}
+
+	/**
+	 * Tell whether a zero-total checkout still needs a provider-owned setup operation.
+	 *
+	 * @param PaymentContext   $context  Payment context.
+	 * @param ProviderContract $provider Provider.
+	 * @return bool
+	 */
+	private function should_call_provider_for_zero_total_checkout( PaymentContext $context, ProviderContract $provider ): bool {
+		return '' !== $context->get_payment_method_id()
+			&& $provider->get_capability_manifest()->supports( CapabilityManifest::CAPABILITY_ZERO_AMOUNT_SETUP );
 	}
 
 	/**

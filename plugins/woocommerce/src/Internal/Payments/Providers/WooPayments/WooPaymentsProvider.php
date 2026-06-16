@@ -69,6 +69,7 @@ class WooPaymentsProvider implements ProviderContract {
 				CapabilityManifest::CAPABILITY_HOSTED_SESSION,
 				CapabilityManifest::CAPABILITY_SUBSCRIPTIONS,
 				CapabilityManifest::CAPABILITY_IN_PERSON,
+				CapabilityManifest::CAPABILITY_ZERO_AMOUNT_SETUP,
 			)
 		);
 	}

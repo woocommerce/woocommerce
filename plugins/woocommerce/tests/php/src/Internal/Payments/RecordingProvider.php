@@ -22,6 +22,13 @@ class RecordingProvider implements ProviderContract {
 	private PaymentOutcome $outcome;
 
 	/**
+	 * Supported capabilities.
+	 *
+	 * @var string[]
+	 */
+	private array $capabilities;
+
+	/**
 	 * Number of charge calls.
 	 *
 	 * @var int
@@ -59,10 +66,12 @@ class RecordingProvider implements ProviderContract {
 	/**
 	 * Constructor.
 	 *
-	 * @param PaymentOutcome $outcome Outcome returned by operations.
+	 * @param PaymentOutcome $outcome      Outcome returned by operations.
+	 * @param string[]       $capabilities Supported capabilities.
 	 */
-	public function __construct( PaymentOutcome $outcome ) {
-		$this->outcome = $outcome;
+	public function __construct( PaymentOutcome $outcome, array $capabilities = array() ) {
+		$this->outcome      = $outcome;
+		$this->capabilities = $capabilities;
 	}
 
 	/**
@@ -80,7 +89,7 @@ class RecordingProvider implements ProviderContract {
 	 * @return CapabilityManifest
 	 */
 	public function get_capability_manifest(): CapabilityManifest {
-		return CapabilityManifest::from_array( array() );
+		return CapabilityManifest::from_array( $this->capabilities );
 	}
 
 	/**

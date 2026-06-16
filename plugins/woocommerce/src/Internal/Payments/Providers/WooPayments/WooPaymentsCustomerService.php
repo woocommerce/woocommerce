@@ -103,6 +103,24 @@ class WooPaymentsCustomerService {
 	}
 
 	/**
+	 * Get or create the WooPayments customer ID associated with a WordPress user.
+	 *
+	 * @param int $user_id WordPress user ID.
+	 * @return string
+	 */
+	public function get_or_create_customer_id_for_user( int $user_id ): string {
+		$customer_id = $this->get_customer_id_by_user_id( $user_id );
+		if ( null !== $customer_id ) {
+			return $customer_id;
+		}
+
+		$customer_id = $this->api_client->create_customer( $this->map_customer_data_for_user( $user_id ) );
+		$this->persist_customer_id( $user_id, $customer_id );
+
+		return $customer_id;
+	}
+
+	/**
 	 * Map WooCommerce order data to the WooPayments customer payload.
 	 *
 	 * @param WC_Order $order Order being charged.
@@ -149,6 +167,36 @@ class WooPaymentsCustomerService {
 		}
 
 		return $customer_data;
+	}
+
+	/**
+	 * Map WordPress customer data to the WooPayments customer payload.
+	 *
+	 * @param int $user_id WordPress user ID.
+	 * @return array<string,mixed>
+	 */
+	private function map_customer_data_for_user( int $user_id ): array {
+		$customer = new WC_Customer( $user_id );
+		$user     = get_user_by( 'id', $user_id );
+		$name     = trim( $customer->get_first_name() . ' ' . $customer->get_last_name() );
+
+		/* translators: 1: customer full name, 2: WordPress username. */
+		$description = sprintf( __( 'Name: %1$s, Username: %2$s', 'woocommerce' ), $name, $customer->get_username() );
+
+		return array(
+			'name'        => $name,
+			'description' => $description,
+			'email'       => $user ? $user->user_email : $customer->get_email(),
+			'phone'       => $customer->get_billing_phone(),
+			'address'     => array(
+				'line1'       => $customer->get_billing_address_1(),
+				'line2'       => $customer->get_billing_address_2(),
+				'postal_code' => $customer->get_billing_postcode(),
+				'city'        => $customer->get_billing_city(),
+				'state'       => $customer->get_billing_state(),
+				'country'     => $customer->get_billing_country(),
+			),
+		);
 	}
 
 	/**

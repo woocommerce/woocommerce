@@ -173,6 +173,69 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Create and confirm a WooPayments SetupIntent.
+	 *
+	 * @param array<string,mixed> $request_data    SetupIntent payload.
+	 * @param string              $idempotency_key Deterministic idempotency key.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request shape is invalid.
+	 */
+	public function create_and_confirm_setup_intention( array $request_data, string $idempotency_key ): array {
+		$has_payment_method     = isset( $request_data['payment_method'] ) && '' !== trim( (string) $request_data['payment_method'] );
+		$has_confirmation_token = isset( $request_data['confirmation_token'] ) && '' !== trim( (string) $request_data['confirmation_token'] );
+
+		if ( $has_payment_method === $has_confirmation_token ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
+			throw new WooPaymentsApiException( __( 'A WooPayments setup intent requires exactly one payment credential.', 'woocommerce' ), 'wcpay_invalid_payment_credential', 400 );
+		}
+
+		$request_data['confirm']              = true;
+		$request_data['payment_method_types'] = $request_data['payment_method_types'] ?? array( 'card' );
+		$request_data['idempotency_key']      = $idempotency_key;
+
+		return $this->request( $request_data, 'setup_intents', 'POST' );
+	}
+
+	/**
+	 * Create an unconfirmed WooPayments SetupIntent.
+	 *
+	 * @param array<string,mixed> $request_data    SetupIntent payload.
+	 * @param string              $idempotency_key Optional idempotency key.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function create_setup_intention( array $request_data, string $idempotency_key = '' ): array {
+		$request_data['confirm']              = false;
+		$request_data['payment_method_types'] = $request_data['payment_method_types'] ?? array( 'card' );
+
+		if ( '' !== $idempotency_key ) {
+			$request_data['idempotency_key'] = $idempotency_key;
+		}
+
+		return $this->request( $request_data, 'setup_intents', 'POST' );
+	}
+
+	/**
+	 * Retrieve a WooPayments PaymentIntent.
+	 *
+	 * @param string $intent_id Intent ID.
+	 * @return array<string,mixed>
+	 */
+	public function get_payment_intention( string $intent_id ): array {
+		return $this->request( array(), 'intentions/' . rawurlencode( $intent_id ), 'GET' );
+	}
+
+	/**
+	 * Retrieve a WooPayments SetupIntent.
+	 *
+	 * @param string $setup_intent_id SetupIntent ID.
+	 * @return array<string,mixed>
+	 */
+	public function get_setup_intention( string $setup_intent_id ): array {
+		return $this->request( array(), 'setup_intents/' . rawurlencode( $setup_intent_id ), 'GET' );
+	}
+
+	/**
 	 * Send a request through the provider transport.
 	 *
 	 * @param array<string,mixed> $params Request params.

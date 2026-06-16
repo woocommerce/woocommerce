@@ -370,6 +370,70 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Charge should prefer native SetupIntent transport for zero-total card checkout.
+	 */
+	public function test_charge_prefers_native_setup_intent_for_zero_total_checkout(): void {
+		$order            = $this->create_woopayments_order( '0.00' );
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a setup intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_setup_intention( array $request_data, string $idempotency_key ): array {
+				if ( 'cus_native' !== $request_data['customer']
+					|| 'pm_zero' !== $request_data['payment_method']
+					|| array( 'card' ) !== $request_data['payment_method_types']
+					|| 'key_setup' !== $idempotency_key ) {
+					throw new \RuntimeException( 'Unexpected native setup intent request payload.' );
+				}
+
+				return array(
+					'id'             => 'seti_native',
+					'status'         => 'succeeded',
+					'client_secret'  => 'seti_native_secret_abc',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_native',
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->with( $this->isInstanceOf( WC_Order::class ) )
+			->willReturn( 'cus_native' );
+
+		$sut     = $this->create_adapter( $gateway, $api_client, $customer_service );
+		$outcome = $sut->charge( PaymentContext::for_checkout( $order, OrderPaymentStore::GATEWAY_ID, 'pm_zero' ), 'key_setup' );
+		$order   = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertSame( 'seti_native', $outcome->get_provider_payment_id() );
+		$this->assertSame( 'pm_native', $outcome->get_payment_method_id() );
+		$this->assertSame( 'cus_native', $outcome->get_customer_id() );
+		$this->assertSame( 0, $gateway->processed_order_id );
+		$this->assertSame( 'seti_native', $order->get_transaction_id() );
+		$this->assertSame( 'pm_native', $order->get_meta( '_payment_method_id', true ) );
+	}
+
+	/**
 	 * @testdox Refund should normalize legacy success and errors.
 	 */
 	public function test_refund_normalizes_legacy_success_and_errors(): void {
@@ -594,12 +658,13 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	/**
 	 * Create a WooPayments order for adapter tests.
 	 *
+	 * @param string $total Order total.
 	 * @return WC_Order
 	 */
-	private function create_woopayments_order(): WC_Order {
+	private function create_woopayments_order( string $total = '10.00' ): WC_Order {
 		$order = wc_create_order();
 		$order->set_payment_method( OrderPaymentStore::GATEWAY_ID );
-		$order->set_total( '10.00' );
+		$order->set_total( $total );
 		$order->save();
 
 		return $order;

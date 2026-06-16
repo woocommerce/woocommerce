@@ -22,12 +22,17 @@ jest.mock( '@woocommerce/settings', () => ( {
 		accountId: 'acct_123',
 		currency: 'USD',
 		isCoreNativeCheckoutAvailable: true,
+		usesLegacyOrderStatusBridge: false,
+		ajaxUrl: 'https://example.test/wp-admin/admin-ajax.php',
 	} ) ),
 } ) );
+
+const originalFetch = window.fetch;
 
 describe( 'wc-payment-method-woopayments', () => {
 	afterEach( () => {
 		delete window.Stripe;
+		window.fetch = originalFetch;
 	} );
 
 	it( 'submits wcpay-payment-method metadata for a new card method', async () => {
@@ -131,8 +136,13 @@ describe( 'wc-payment-method-woopayments', () => {
 		} );
 	} );
 
-	it( 'confirms #wcpay-confirm-pi redirects through Stripe.js before returning success', async () => {
+	it( 'confirms full #wcpay-confirm-pi redirects through Stripe.js and updates the order status', async () => {
 		const confirmPayment = jest.fn().mockResolvedValue( {} );
+		window.fetch = jest.fn().mockResolvedValue( {
+			json: jest.fn().mockResolvedValue( {
+				return_url: 'https://example.test/checkout/order-received/123/',
+			} ),
+		} );
 		window.Stripe = jest.fn( () => ( {
 			elements: jest.fn( () => ( {
 				create: jest.fn( () => ( {
@@ -148,7 +158,7 @@ describe( 'wc-payment-method-woopayments', () => {
 		const onCheckoutSuccess = jest.fn( ( callback ) => {
 			checkoutSuccessResult = callback( {
 				redirectUrl:
-					'https://example.test/checkout/order-received/#wcpay-confirm-pi:pi_123_secret_abc',
+					'https://example.test/checkout/order-received/#wcpay-confirm-pi:123:pi_123_secret_abc:nonce_123',
 			} );
 		} );
 		const emitResponse = {
@@ -180,6 +190,7 @@ describe( 'wc-payment-method-woopayments', () => {
 
 		await expect( checkoutSuccessResult ).resolves.toEqual( {
 			type: 'success',
+			redirectUrl: 'https://example.test/checkout/order-received/123/',
 			meta: {
 				paymentMethodData: {},
 			},
@@ -190,5 +201,168 @@ describe( 'wc-payment-method-woopayments', () => {
 				redirect: 'if_required',
 			} )
 		);
+		expect( window.fetch ).toHaveBeenCalledWith(
+			'https://example.test/wp-admin/admin-ajax.php',
+			expect.objectContaining( {
+				method: 'POST',
+			} )
+		);
+		const requestBody = window.fetch.mock.calls[ 0 ][ 1 ].body;
+		expect( requestBody.get( 'action' ) ).toBe( 'update_order_status' );
+		expect( requestBody.get( 'order_id' ) ).toBe( '123' );
+		expect( requestBody.get( '_ajax_nonce' ) ).toBe( 'nonce_123' );
+		expect( requestBody.get( 'intent_id' ) ).toBe( 'pi_123' );
+	} );
+
+	it( 'confirms full #wcpay-confirm-si redirects with confirmation tokens', async () => {
+		const confirmSetup = jest.fn().mockResolvedValue( {
+			setupIntent: {
+				id: 'seti_123',
+			},
+		} );
+		window.fetch = jest.fn().mockResolvedValue( {
+			json: jest.fn().mockResolvedValue( {
+				return_url: 'https://example.test/checkout/order-received/123/',
+			} ),
+		} );
+		window.Stripe = jest.fn( () => ( {
+			elements: jest.fn( () => ( {
+				create: jest.fn( () => ( {
+					mount: jest.fn(),
+				} ) ),
+			} ) ),
+			createPaymentMethod: jest.fn().mockResolvedValue( {} ),
+			confirmSetup,
+		} ) );
+
+		const registration = registerWooPayments();
+		let checkoutSuccessResult;
+		const onCheckoutSuccess = jest.fn( ( callback ) => {
+			checkoutSuccessResult = callback( {
+				redirectUrl:
+					'https://example.test/checkout/order-received/#wcpay-confirm-si:123:seti_123_secret_abc:nonce_123:ctoken_123',
+			} );
+		} );
+		const emitResponse = {
+			responseTypes: {
+				SUCCESS: 'success',
+				ERROR: 'error',
+			},
+			noticeContexts: {
+				PAYMENTS: 'payments',
+			},
+		};
+
+		const content = registration.content;
+
+		render(
+			createElement( content.type, {
+				...content.props,
+				eventRegistration: {
+					onPaymentSetup: jest.fn(),
+					onCheckoutSuccess,
+				},
+				emitResponse,
+			} )
+		);
+
+		await waitFor( () => {
+			expect( onCheckoutSuccess ).toHaveBeenCalled();
+		} );
+
+		await expect( checkoutSuccessResult ).resolves.toEqual( {
+			type: 'success',
+			redirectUrl: 'https://example.test/checkout/order-received/123/',
+			meta: {
+				paymentMethodData: {},
+			},
+		} );
+		expect( confirmSetup ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				clientSecret: 'seti_123_secret_abc',
+				confirmParams: {
+					confirmation_token: 'ctoken_123',
+				},
+				redirect: 'if_required',
+			} )
+		);
+		const requestBody = window.fetch.mock.calls[ 0 ][ 1 ].body;
+		expect( requestBody.get( 'action' ) ).toBe( 'update_order_status' );
+		expect( requestBody.get( 'order_id' ) ).toBe( '123' );
+		expect( requestBody.get( '_ajax_nonce' ) ).toBe( 'nonce_123' );
+		expect( requestBody.get( 'intent_id' ) ).toBe( 'seti_123' );
+	} );
+
+	it( 'handles SetupIntent next actions when no confirmation token is present', async () => {
+		const handleNextAction = jest.fn().mockResolvedValue( {
+			setupIntent: {
+				id: 'seti_123',
+			},
+		} );
+		window.fetch = jest.fn().mockResolvedValue( {
+			json: jest.fn().mockResolvedValue( {
+				return_url: 'https://example.test/checkout/order-received/123/',
+			} ),
+		} );
+		window.Stripe = jest.fn( () => ( {
+			elements: jest.fn( () => ( {
+				create: jest.fn( () => ( {
+					mount: jest.fn(),
+				} ) ),
+			} ) ),
+			createPaymentMethod: jest.fn().mockResolvedValue( {} ),
+			handleNextAction,
+		} ) );
+
+		const registration = registerWooPayments();
+		let checkoutSuccessResult;
+		const onCheckoutSuccess = jest.fn( ( callback ) => {
+			checkoutSuccessResult = callback( {
+				redirectUrl:
+					'https://example.test/checkout/order-received/#wcpay-confirm-si:123:seti_123_secret_abc:nonce_123',
+			} );
+		} );
+		const emitResponse = {
+			responseTypes: {
+				SUCCESS: 'success',
+				ERROR: 'error',
+			},
+			noticeContexts: {
+				PAYMENTS: 'payments',
+			},
+		};
+
+		const content = registration.content;
+
+		render(
+			createElement( content.type, {
+				...content.props,
+				eventRegistration: {
+					onPaymentSetup: jest.fn(),
+					onCheckoutSuccess,
+				},
+				emitResponse,
+			} )
+		);
+
+		await waitFor( () => {
+			expect( onCheckoutSuccess ).toHaveBeenCalled();
+		} );
+
+		await expect( checkoutSuccessResult ).resolves.toEqual( {
+			type: 'success',
+			redirectUrl: 'https://example.test/checkout/order-received/123/',
+			meta: {
+				paymentMethodData: {},
+			},
+		} );
+		expect( handleNextAction ).toHaveBeenCalledWith( {
+			clientSecret: 'seti_123_secret_abc',
+		} );
+		const requestBody = window.fetch.mock.calls[ 0 ][ 1 ].body;
+		expect( requestBody.get( 'action' ) ).toBe( 'update_order_status' );
+		expect( requestBody.get( 'order_id' ) ).toBe( '123' );
+		expect( requestBody.get( '_ajax_nonce' ) ).toBe( 'nonce_123' );
+		expect( requestBody.get( 'intent_id' ) ).toBe( 'seti_123' );
 	} );
 } );

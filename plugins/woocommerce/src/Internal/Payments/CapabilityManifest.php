@@ -15,22 +15,23 @@ namespace Automattic\WooCommerce\Internal\Payments;
  */
 class CapabilityManifest {
 
-	const CAPABILITY_CARDS            = 'cards';
-	const CAPABILITY_SAVED_TOKENS     = 'saved_tokens';
-	const CAPABILITY_OFF_SESSION      = 'off_session';
-	const CAPABILITY_MANDATES         = 'mandates';
-	const CAPABILITY_ASYNC_REDIRECT   = 'async_redirect';
-	const CAPABILITY_REFUNDS          = 'refunds';
-	const CAPABILITY_PARTIAL_REFUNDS  = 'partial_refunds';
-	const CAPABILITY_DISPUTES         = 'disputes';
-	const CAPABILITY_MANUAL_CAPTURE   = 'manual_capture';
-	const CAPABILITY_SUBSCRIPTIONS    = 'subscriptions';
-	const CAPABILITY_EXPRESS_CHECKOUT = 'express_checkout';
-	const CAPABILITY_HOSTED_KYC       = 'hosted_kyc';
-	const CAPABILITY_HOSTED_SESSION   = 'hosted_session';
-	const CAPABILITY_REPORTING        = 'reporting';
-	const CAPABILITY_MULTI_CURRENCY   = 'multi_currency';
-	const CAPABILITY_IN_PERSON        = 'in_person';
+	const CAPABILITY_CARDS             = 'cards';
+	const CAPABILITY_SAVED_TOKENS      = 'saved_tokens';
+	const CAPABILITY_OFF_SESSION       = 'off_session';
+	const CAPABILITY_MANDATES          = 'mandates';
+	const CAPABILITY_ASYNC_REDIRECT    = 'async_redirect';
+	const CAPABILITY_REFUNDS           = 'refunds';
+	const CAPABILITY_PARTIAL_REFUNDS   = 'partial_refunds';
+	const CAPABILITY_DISPUTES          = 'disputes';
+	const CAPABILITY_MANUAL_CAPTURE    = 'manual_capture';
+	const CAPABILITY_SUBSCRIPTIONS     = 'subscriptions';
+	const CAPABILITY_EXPRESS_CHECKOUT  = 'express_checkout';
+	const CAPABILITY_HOSTED_KYC        = 'hosted_kyc';
+	const CAPABILITY_HOSTED_SESSION    = 'hosted_session';
+	const CAPABILITY_REPORTING         = 'reporting';
+	const CAPABILITY_MULTI_CURRENCY    = 'multi_currency';
+	const CAPABILITY_IN_PERSON         = 'in_person';
+	const CAPABILITY_ZERO_AMOUNT_SETUP = 'zero_amount_setup';
 
 	/**
 	 * Capability support map.
@@ -100,6 +101,7 @@ class CapabilityManifest {
 			self::CAPABILITY_REPORTING,
 			self::CAPABILITY_MULTI_CURRENCY,
 			self::CAPABILITY_IN_PERSON,
+			self::CAPABILITY_ZERO_AMOUNT_SETUP,
 		);
 	}
 

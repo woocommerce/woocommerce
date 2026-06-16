@@ -1,5 +1,5 @@
 /* global jQuery, wcpay_core_checkout_config */
-( function( $, window, document ) {
+( function ( $, window, document ) {
 	'use strict';
 
 	var config = window.wcpay_core_checkout_config || {};
@@ -12,12 +12,16 @@
 	function isSelectedGateway() {
 		return (
 			$( 'input[name="payment_method"]:checked' ).val() === gatewayId ||
-			$( 'input[name="payment_method"]' ).filter( '[value="' + gatewayId + '"]' ).length === 1
+			$( 'input[name="payment_method"]' ).filter(
+				'[value="' + gatewayId + '"]'
+			).length === 1
 		);
 	}
 
 	function setError( message ) {
-		var errorElement = document.getElementById( 'wcpay-core-payment-errors' );
+		var errorElement = document.getElementById(
+			'wcpay-core-payment-errors'
+		);
 		if ( ! errorElement ) {
 			return;
 		}
@@ -39,17 +43,37 @@
 	}
 
 	function appendPaymentFields( form, paymentMethod, error ) {
-		var fingerprint = paymentMethod && paymentMethod.card ? paymentMethod.card.fingerprint : '';
+		var fingerprint =
+			paymentMethod && paymentMethod.card
+				? paymentMethod.card.fingerprint
+				: '';
 
-		ensureHiddenField( form, 'wcpay-payment-method', paymentMethod && paymentMethod.id ? paymentMethod.id : '' );
-		ensureHiddenField( form, 'wcpay-payment-method-error-code', error && error.code ? error.code : '' );
-		ensureHiddenField( form, 'wcpay-payment-method-error-message', error && error.message ? error.message : '' );
+		ensureHiddenField(
+			form,
+			'wcpay-payment-method',
+			paymentMethod && paymentMethod.id ? paymentMethod.id : ''
+		);
+		ensureHiddenField(
+			form,
+			'wcpay-payment-method-error-code',
+			error && error.code ? error.code : ''
+		);
+		ensureHiddenField(
+			form,
+			'wcpay-payment-method-error-message',
+			error && error.message ? error.message : ''
+		);
 		ensureHiddenField( form, 'wcpay-fingerprint', fingerprint || '' );
 	}
 
 	function initializeStripeElement() {
 		var container = document.getElementById( 'wcpay-core-payment-element' );
-		if ( ! container || ! config.isCoreNativeCheckoutAvailable || ! config.publishableKey || ! window.Stripe ) {
+		if (
+			! container ||
+			! config.isCoreNativeCheckoutAvailable ||
+			! config.publishableKey ||
+			! window.Stripe
+		) {
 			return;
 		}
 
@@ -83,11 +107,13 @@
 			.createPaymentMethod( {
 				elements: elements,
 			} )
-			.then( function( result ) {
+			.then( function ( result ) {
 				if ( result.error ) {
 					appendPaymentFields( form, null, result.error );
 					setError( result.error.message );
-					$( document.body ).trigger( 'checkout_error', [ result.error.message ] );
+					$( document.body ).trigger( 'checkout_error', [
+						result.error.message,
+					] );
 					return;
 				}
 
@@ -100,61 +126,142 @@
 		return false;
 	}
 
-	function updateOrderStatusAfterConfirmation( intentId ) {
-		if ( ! config.usesLegacyOrderStatusBridge || ! config.updateOrderStatusNonce || ! config.ajaxUrl || ! intentId ) {
+	function parseConfirmationHash( hash ) {
+		var match = ( hash || '' ).match(
+			/^#wcpay-confirm-(pi|si):([^:]+):([^:]+):([^:]+)(?::(.+))?$/
+		);
+		var clientSecret;
+
+		if ( ! match ) {
+			return null;
+		}
+
+		clientSecret = decodeURIComponent( match[ 3 ] );
+
+		return {
+			type: match[ 1 ],
+			orderId: decodeURIComponent( match[ 2 ] ),
+			clientSecret: clientSecret,
+			nonce: decodeURIComponent( match[ 4 ] ),
+			confirmationToken: match[ 5 ]
+				? decodeURIComponent( match[ 5 ] )
+				: '',
+			intentId: clientSecret.split( '_secret_' )[ 0 ],
+		};
+	}
+
+	function updateOrderStatusAfterConfirmation( confirmation, intentId ) {
+		if (
+			! config.ajaxUrl ||
+			! confirmation ||
+			! confirmation.orderId ||
+			! confirmation.nonce ||
+			! intentId
+		) {
 			return $.Deferred().resolve().promise();
 		}
 
 		return $.post( config.ajaxUrl, {
-			action: 'wcpay_update_order_status',
-			_ajax_nonce: config.updateOrderStatusNonce,
+			action: 'update_order_status',
+			order_id: confirmation.orderId,
+			_ajax_nonce: confirmation.nonce,
 			intent_id: intentId,
+			should_save_payment_method: 'false',
+			is_changing_payment: 'false',
 		} );
 	}
 
 	function confirmRedirectIfPresent() {
-		var hash = window.location.hash || '';
-		var prefix = '#wcpay-confirm-pi:';
-		var clientSecret;
+		var confirmation = parseConfirmationHash( window.location.hash || '' );
 		var intentId;
+		var confirmationPromise;
 
-		if ( hash.indexOf( prefix ) !== 0 || ! config.publishableKey || ! window.Stripe ) {
+		if ( ! confirmation || ! config.publishableKey || ! window.Stripe ) {
 			return;
 		}
 
-		clientSecret = decodeURIComponent( hash.substring( prefix.length ) );
-		intentId = clientSecret.split( '_secret_' )[ 0 ];
-		stripe = stripe || window.Stripe( config.publishableKey, {
-			locale: config.locale || 'auto',
-			stripeAccount: config.accountId || undefined,
-		} );
+		stripe =
+			stripe ||
+			window.Stripe( config.publishableKey, {
+				locale: config.locale || 'auto',
+				stripeAccount: config.accountId || undefined,
+			} );
 
-		stripe
-			.confirmPayment( {
-				clientSecret: clientSecret,
+		if ( confirmation.type === 'si' ) {
+			if ( confirmation.confirmationToken && stripe.confirmSetup ) {
+				confirmationPromise = stripe.confirmSetup( {
+					clientSecret: confirmation.clientSecret,
+					confirmParams: {
+						confirmation_token: confirmation.confirmationToken,
+					},
+					redirect: 'if_required',
+				} );
+			} else if ( stripe.handleNextAction ) {
+				confirmationPromise = stripe.handleNextAction( {
+					clientSecret: confirmation.clientSecret,
+				} );
+			}
+		} else if ( stripe.confirmPayment ) {
+			confirmationPromise = stripe.confirmPayment( {
+				clientSecret: confirmation.clientSecret,
 				confirmParams: {
 					return_url: window.location.href.split( '#' )[ 0 ],
 				},
 				redirect: 'if_required',
-			} )
-			.then( function( result ) {
-				if ( result.error ) {
-					setError( result.error.message );
-					return;
-				}
-
-				updateOrderStatusAfterConfirmation( intentId );
 			} );
+		}
+
+		if ( ! confirmationPromise ) {
+			return;
+		}
+
+		confirmationPromise.then( function ( result ) {
+			if ( result.error ) {
+				setError( result.error.message );
+				return;
+			}
+
+			intentId =
+				( result.paymentIntent && result.paymentIntent.id ) ||
+				( result.setupIntent && result.setupIntent.id ) ||
+				confirmation.intentId;
+
+			updateOrderStatusAfterConfirmation( confirmation, intentId )
+				.done( function ( response ) {
+					var resultResponse =
+						typeof response === 'string'
+							? JSON.parse( response )
+							: response;
+
+					if ( resultResponse.error && resultResponse.error.message ) {
+						setError( resultResponse.error.message );
+						return;
+					}
+
+					if ( resultResponse.return_url ) {
+						window.location.href = resultResponse.return_url;
+					}
+				} )
+				.fail( function () {
+					setError( config.confirmationErrorMessage || '' );
+				} );
+		} );
 	}
 
-	$( function() {
+	$( function () {
 		initializeStripeElement();
 		confirmRedirectIfPresent();
 	} );
 
+	$( window ).on( 'hashchange', function () {
+		if ( ( window.location.hash || '' ).indexOf( '#wcpay-confirm-' ) === 0 ) {
+			confirmRedirectIfPresent();
+		}
+	} );
+
 	$( document.body ).on( 'updated_checkout', initializeStripeElement );
 
-	$( document.body ).on( 'checkout_place_order_' + gatewayId, function() {
+	$( document.body ).on( 'checkout_place_order_' + gatewayId, function () {
 		if ( ! isSelectedGateway() ) {
 			return true;
 		}

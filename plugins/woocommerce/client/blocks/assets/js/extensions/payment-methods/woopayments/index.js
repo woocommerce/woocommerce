@@ -12,8 +12,13 @@ const settings = getPaymentMethodData( PAYMENT_METHOD_NAME, {} );
 const defaultLabel = __( 'WooPayments', 'woocommerce' );
 const label = decodeEntities( settings?.title || '' ) || defaultLabel;
 
-const getSuccessResponse = ( emitResponse, paymentMethodData ) => ( {
+const getSuccessResponse = (
+	emitResponse,
+	paymentMethodData,
+	redirectUrl = ''
+) => ( {
 	type: emitResponse.responseTypes.SUCCESS,
+	...( redirectUrl ? { redirectUrl } : {} ),
 	meta: {
 		paymentMethodData,
 	},
@@ -25,25 +30,44 @@ const getErrorResponse = ( emitResponse, message ) => ( {
 	messageContext: emitResponse.noticeContexts.PAYMENTS,
 } );
 
-const getConfirmationRedirect = ( value ) => {
-	if ( typeof value === 'string' && value.includes( '#wcpay-confirm-pi:' ) ) {
-		return value;
+const parseConfirmationRedirect = ( value ) => {
+	if ( typeof value === 'string' ) {
+		const match = value.match(
+			/#wcpay-confirm-(pi|si):([^:]+):([^:]+):([^:]+)(?::(.+))?$/
+		);
+
+		if ( ! match ) {
+			return null;
+		}
+
+		const clientSecret = decodeURIComponent( match[ 3 ] );
+
+		return {
+			type: match[ 1 ],
+			orderId: decodeURIComponent( match[ 2 ] ),
+			clientSecret,
+			nonce: decodeURIComponent( match[ 4 ] ),
+			confirmationToken: match[ 5 ]
+				? decodeURIComponent( match[ 5 ] )
+				: '',
+			intentId: clientSecret.split( '_secret_' )[ 0 ],
+		};
 	}
 
 	if ( ! value || typeof value !== 'object' ) {
-		return '';
+		return null;
 	}
 
-	return Object.values( value ).reduce( ( redirect, child ) => {
-		return redirect || getConfirmationRedirect( child );
-	}, '' );
+	return Object.values( value ).reduce( ( confirmation, child ) => {
+		return confirmation || parseConfirmationRedirect( child );
+	}, null );
 };
 
-const updateOrderStatusAfterConfirmation = async ( intentId ) => {
+const updateOrderStatusAfterConfirmation = async ( confirmation, intentId ) => {
 	if (
-		! settings.usesLegacyOrderStatusBridge ||
-		! settings.updateOrderStatusNonce ||
 		! settings.ajaxUrl ||
+		! confirmation?.orderId ||
+		! confirmation?.nonce ||
 		! intentId ||
 		! window.fetch
 	) {
@@ -51,11 +75,14 @@ const updateOrderStatusAfterConfirmation = async ( intentId ) => {
 	}
 
 	const body = new window.URLSearchParams();
-	body.append( 'action', 'wcpay_update_order_status' );
-	body.append( '_ajax_nonce', settings.updateOrderStatusNonce );
+	body.append( 'action', 'update_order_status' );
+	body.append( 'order_id', confirmation.orderId );
+	body.append( '_ajax_nonce', confirmation.nonce );
 	body.append( 'intent_id', intentId );
+	body.append( 'should_save_payment_method', 'false' );
+	body.append( 'is_changing_payment', 'false' );
 
-	await window.fetch( settings.ajaxUrl, {
+	const response = await window.fetch( settings.ajaxUrl, {
 		method: 'POST',
 		credentials: 'same-origin',
 		headers: {
@@ -63,6 +90,17 @@ const updateOrderStatusAfterConfirmation = async ( intentId ) => {
 		},
 		body,
 	} );
+
+	if ( ! response || typeof response.json !== 'function' ) {
+		return;
+	}
+
+	const result = await response.json();
+	if ( result?.error?.message ) {
+		throw new Error( result.error.message );
+	}
+
+	return result?.return_url || '';
 };
 
 const createStripe = () => {
@@ -161,31 +199,41 @@ const WooPaymentsContent = ( { eventRegistration, emitResponse } ) => {
 
 		const unsubscribe = eventRegistration.onCheckoutSuccess(
 			async ( response ) => {
-				const redirect = getConfirmationRedirect( response );
-				const prefix = '#wcpay-confirm-pi:';
-				if ( ! redirect || ! redirect.includes( prefix ) ) {
+				const confirmation = parseConfirmationRedirect( response );
+				if ( ! confirmation ) {
 					return getSuccessResponse( emitResponse, {} );
 				}
 
-				const clientSecret = decodeURIComponent(
-					redirect.substring(
-						redirect.indexOf( prefix ) + prefix.length
-					)
-				);
-				const intentId = clientSecret.split( '_secret_' )[ 0 ];
 				stripe.current = stripe.current || createStripe();
 
 				if ( ! stripe.current ) {
 					return getSuccessResponse( emitResponse, {} );
 				}
 
-				const result = await stripe.current.confirmPayment( {
-					clientSecret,
-					confirmParams: {
-						return_url: window.location.href.split( '#' )[ 0 ],
-					},
-					redirect: 'if_required',
-				} );
+				let result;
+
+				if ( confirmation.type === 'si' ) {
+					result = confirmation.confirmationToken
+						? await stripe.current.confirmSetup( {
+								clientSecret: confirmation.clientSecret,
+								confirmParams: {
+									confirmation_token:
+										confirmation.confirmationToken,
+								},
+								redirect: 'if_required',
+						  } )
+						: await stripe.current.handleNextAction( {
+								clientSecret: confirmation.clientSecret,
+						  } );
+				} else {
+					result = await stripe.current.confirmPayment( {
+						clientSecret: confirmation.clientSecret,
+						confirmParams: {
+							return_url: window.location.href.split( '#' )[ 0 ],
+						},
+						redirect: 'if_required',
+					} );
+				}
 
 				if ( result.error ) {
 					return getErrorResponse(
@@ -198,9 +246,19 @@ const WooPaymentsContent = ( { eventRegistration, emitResponse } ) => {
 					);
 				}
 
-				await updateOrderStatusAfterConfirmation( intentId );
+				const intentId =
+					result.paymentIntent?.id ||
+					result.setupIntent?.id ||
+					result.error?.payment_intent?.id ||
+					result.error?.setup_intent?.id ||
+					confirmation.intentId;
 
-				return getSuccessResponse( emitResponse, {} );
+				const redirectUrl = await updateOrderStatusAfterConfirmation(
+					confirmation,
+					intentId
+				);
+
+				return getSuccessResponse( emitResponse, {}, redirectUrl );
 			}
 		);
 

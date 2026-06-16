@@ -87,9 +87,11 @@ class WooPaymentsProviderGatewayAdapter {
 	 */
 	public function charge( PaymentContext $context, string $idempotency_key ): PaymentOutcome {
 		$order = $context->get_order();
-		if ( 0.0 < (float) $order->get_total() && $this->get_api_client()->is_available() ) {
+		if ( $this->get_api_client()->is_available() ) {
 			try {
-				return $this->charge_via_native_transport( $context, $idempotency_key );
+				return 0.0 < (float) $order->get_total()
+					? $this->charge_via_native_transport( $context, $idempotency_key )
+					: $this->setup_intent_via_native_transport( $context, $idempotency_key );
 			} catch ( WooPaymentsApiException $exception ) {
 				return $this->failed_transport_outcome( 'charge', $exception );
 			}
@@ -369,6 +371,51 @@ class WooPaymentsProviderGatewayAdapter {
 	}
 
 	/**
+	 * Create or confirm a zero-amount setup intent through the native WooPayments transport.
+	 *
+	 * @param PaymentContext $context         Payment context.
+	 * @param string         $idempotency_key Deterministic idempotency key.
+	 * @return PaymentOutcome
+	 * @throws WooPaymentsApiException When the provider request fails.
+	 */
+	private function setup_intent_via_native_transport( PaymentContext $context, string $idempotency_key ): PaymentOutcome {
+		$order              = $context->get_order();
+		$payment_credential = $this->get_payment_credential( $context );
+
+		if ( '' === $payment_credential ) {
+			return new PaymentOutcome(
+				PaymentOutcome::STATUS_FAILED,
+				'',
+				'',
+				'',
+				'',
+				array( 'error_code' => 'wcpay_missing_payment_credential' )
+			);
+		}
+
+		$customer_id  = $this->get_customer_service()->get_or_create_customer_id_for_order( $order );
+		$request_data = $this->build_native_setup_intent_request_data( $context, $payment_credential, $customer_id );
+
+		try {
+			$result = $this->is_confirmation_token( $payment_credential )
+				? $this->get_api_client()->create_setup_intention( $request_data, $idempotency_key )
+				: $this->get_api_client()->create_and_confirm_setup_intention( $request_data, $idempotency_key );
+		} catch ( WooPaymentsApiException $exception ) {
+			if ( ! $this->is_missing_customer_exception( $exception ) ) {
+				throw $exception;
+			}
+
+			$customer_id              = $this->get_customer_service()->recreate_customer_for_order( $order );
+			$request_data['customer'] = $customer_id;
+			$result                   = $this->is_confirmation_token( $payment_credential )
+				? $this->get_api_client()->create_setup_intention( $request_data, $idempotency_key )
+				: $this->get_api_client()->create_and_confirm_setup_intention( $request_data, $idempotency_key );
+		}
+
+		return $this->normalize_native_setup_intent_result( $result, $context, $customer_id );
+	}
+
+	/**
 	 * Build the native WooPayments charge request payload.
 	 *
 	 * @param PaymentContext $context            Payment context.
@@ -409,6 +456,28 @@ class WooPaymentsProviderGatewayAdapter {
 					'billing_details' => $billing_details,
 				);
 			}
+		}
+
+		return $request_data;
+	}
+
+	/**
+	 * Build the native WooPayments setup-intent request payload.
+	 *
+	 * @param PaymentContext $context            Payment context.
+	 * @param string         $payment_credential Payment method or confirmation token.
+	 * @param string         $customer_id        Customer ID.
+	 * @return array<string,mixed>
+	 */
+	private function build_native_setup_intent_request_data( PaymentContext $context, string $payment_credential, string $customer_id ): array {
+		$request_data = array(
+			'customer'             => $customer_id,
+			'metadata'             => $this->build_order_metadata( $context->get_order() ),
+			'payment_method_types' => array( 'card' ),
+		);
+
+		if ( ! $this->is_confirmation_token( $payment_credential ) ) {
+			$request_data['payment_method'] = $payment_credential;
 		}
 
 		return $request_data;
@@ -596,6 +665,119 @@ class WooPaymentsProviderGatewayAdapter {
 	}
 
 	/**
+	 * Normalize a native SetupIntent response to a neutral payment outcome.
+	 *
+	 * @param array<string,mixed> $result              Native SetupIntent response.
+	 * @param PaymentContext      $context             Payment context.
+	 * @param string              $fallback_customer_id Customer ID used in the request.
+	 * @return PaymentOutcome
+	 */
+	private function normalize_native_setup_intent_result( array $result, PaymentContext $context, string $fallback_customer_id ): PaymentOutcome {
+		$status             = isset( $result['status'] ) ? (string) $result['status'] : '';
+		$setup_intent_id    = isset( $result['id'] ) ? (string) $result['id'] : '';
+		$client_secret      = isset( $result['client_secret'] ) ? (string) $result['client_secret'] : '';
+		$payment_method_id  = $this->get_result_payment_method_id( $result );
+		$customer_id        = isset( $result['customer'] ) ? (string) $result['customer'] : $fallback_customer_id;
+		$payment_credential = $this->get_payment_credential( $context );
+		$confirmation_token = $this->is_confirmation_token( $payment_credential ) ? $payment_credential : '';
+		$meta               = array(
+			'_wcpay_intent_currency' => (string) $context->get_order()->get_currency(),
+			'_wcpay_mode'            => $this->is_test_mode_enabled() ? 'test' : 'live',
+		);
+
+		if ( '' === $payment_method_id && ! $this->is_confirmation_token( $payment_credential ) ) {
+			$payment_method_id = $payment_credential;
+		}
+
+		$this->persist_setup_intent_details( $context->get_order(), $setup_intent_id, $payment_method_id, $customer_id, $meta );
+
+		switch ( $status ) {
+			case 'succeeded':
+				return new PaymentOutcome( PaymentOutcome::STATUS_COMPLETED, $setup_intent_id, '', $payment_method_id, $customer_id, array( 'meta' => $meta ) );
+
+			case 'requires_action':
+			case 'requires_confirmation':
+				return new PaymentOutcome(
+					PaymentOutcome::STATUS_REQUIRES_CUSTOMER_ACTION,
+					$setup_intent_id,
+					$this->build_confirmation_redirect( $context->get_order(), $client_secret, 'si', $confirmation_token ),
+					$payment_method_id,
+					$customer_id,
+					array( 'meta' => $meta )
+				);
+
+			case 'processing':
+				return new PaymentOutcome( PaymentOutcome::STATUS_PENDING_ASYNC, $setup_intent_id, '', $payment_method_id, $customer_id, array( 'meta' => $meta ) );
+
+			case 'canceled':
+				return new PaymentOutcome( PaymentOutcome::STATUS_CANCELED, $setup_intent_id, '', $payment_method_id, $customer_id, array( 'meta' => $meta ) );
+		}
+
+		$error = is_array( $result['last_setup_error'] ?? null ) ? $result['last_setup_error'] : array();
+
+		return new PaymentOutcome(
+			PaymentOutcome::STATUS_FAILED,
+			$setup_intent_id,
+			'',
+			$payment_method_id,
+			$customer_id,
+			array(
+				'meta'          => $meta,
+				'error_code'    => isset( $error['code'] ) ? (string) $error['code'] : 'wcpay_native_setup_intent_failed',
+				'error_message' => isset( $error['message'] ) ? (string) $error['message'] : '',
+			)
+		);
+	}
+
+	/**
+	 * Get a payment method ID from a provider intent response.
+	 *
+	 * @param array<string,mixed> $result Intent response.
+	 * @return string
+	 */
+	private function get_result_payment_method_id( array $result ): string {
+		if ( isset( $result['payment_method'] ) && is_string( $result['payment_method'] ) ) {
+			return $result['payment_method'];
+		}
+
+		if ( isset( $result['payment_method'] ) && is_array( $result['payment_method'] ) && isset( $result['payment_method']['id'] ) ) {
+			return (string) $result['payment_method']['id'];
+		}
+
+		return '';
+	}
+
+	/**
+	 * Persist setup-intent details needed by the post-authentication AJAX callback.
+	 *
+	 * @param WC_Order             $order             Order being charged.
+	 * @param string               $setup_intent_id   SetupIntent ID.
+	 * @param string               $payment_method_id Payment method ID.
+	 * @param string               $customer_id       Customer ID.
+	 * @param array<string,string> $meta              SetupIntent meta.
+	 */
+	private function persist_setup_intent_details( WC_Order $order, string $setup_intent_id, string $payment_method_id, string $customer_id, array $meta ): void {
+		if ( '' !== $setup_intent_id ) {
+			$order->set_transaction_id( $setup_intent_id );
+			$order->update_meta_data( '_intent_id', $setup_intent_id );
+		}
+
+		if ( '' !== $payment_method_id ) {
+			$order->update_meta_data( '_payment_method_id', $payment_method_id );
+		}
+
+		if ( '' !== $customer_id ) {
+			$order->update_meta_data( '_stripe_customer_id', $customer_id );
+		}
+
+		foreach ( $meta as $key => $value ) {
+			$order->update_meta_data( $key, $value );
+		}
+
+		$order->save();
+	}
+
+	/**
 	 * Get the submitted payment method or saved payment token.
 	 *
 	 * @param PaymentContext $context Payment context.
@@ -645,12 +827,20 @@ class WooPaymentsProviderGatewayAdapter {
 	/**
 	 * Build the legacy-compatible frontend confirmation hash.
 	 *
-	 * @param WC_Order $order         Order being charged.
-	 * @param string   $client_secret Intent client secret.
+	 * @param WC_Order $order              Order being charged.
+	 * @param string   $client_secret      Intent client secret.
+	 * @param string   $intent_type        Intent type.
+	 * @param string   $confirmation_token Confirmation token.
 	 * @return string
 	 */
-	private function build_confirmation_redirect( WC_Order $order, string $client_secret ): string {
-		return '#wcpay-confirm-pi:' . $order->get_id() . ':' . $client_secret . ':' . wp_create_nonce( 'wcpay_update_order_status_nonce' );
+	private function build_confirmation_redirect( WC_Order $order, string $client_secret, string $intent_type = 'pi', string $confirmation_token = '' ): string {
+		$redirect = '#wcpay-confirm-' . $intent_type . ':' . $order->get_id() . ':' . $client_secret . ':' . wp_create_nonce( 'wcpay_update_order_status_nonce' );
+
+		if ( '' !== $confirmation_token ) {
+			$redirect .= ':' . $confirmation_token;
+		}
+
+		return $redirect;
 	}
 
 	/**

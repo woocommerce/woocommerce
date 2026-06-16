@@ -61,8 +61,6 @@ class WooPaymentsCheckoutBridge {
 	 * @return array<string,mixed>
 	 */
 	public function get_payment_fields_js_config(): array {
-		$can_use_legacy_callbacks = $this->get_legacy_runtime()->can_handle_checkout_bridge_callbacks();
-
 		$config = array(
 			'publishableKey'                => (string) $this->get_legacy_runtime()->get_gateway_publishable_key(),
 			'accountId'                     => (string) $this->get_legacy_runtime()->get_gateway_account_id(),
@@ -75,14 +73,17 @@ class WooPaymentsCheckoutBridge {
 			'currency'                      => get_woocommerce_currency(),
 			'cartTotal'                     => $this->get_cart_total(),
 			'customerData'                  => $this->get_legacy_runtime()->get_gateway_prepared_customer_data(),
-			'usesLegacySetupIntentBridge'   => $can_use_legacy_callbacks,
-			'usesLegacyOrderStatusBridge'   => $can_use_legacy_callbacks,
+			'usesLegacySetupIntentBridge'   => false,
+			'usesLegacyOrderStatusBridge'   => false,
+			'usesNativeSetupIntentBridge'   => true,
+			'usesNativeOrderStatusBridge'   => true,
 			'isCheckout'                    => function_exists( 'is_checkout' ) && is_checkout(),
 			'isCoreNativeCheckoutBridge'    => true,
 			'isCoreNativeCheckoutAvailable' => $this->should_expose_checkout_surface(),
+			'confirmationErrorMessage'      => __( 'There was a problem confirming your payment.', 'woocommerce' ),
 		);
 
-		if ( $can_use_legacy_callbacks ) {
+		if ( $this->should_expose_checkout_surface() ) {
 			$config['createSetupIntentNonce'] = wp_create_nonce( 'wcpay_create_setup_intent_nonce' );
 			$config['updateOrderStatusNonce'] = wp_create_nonce( 'wcpay_update_order_status_nonce' );
 		}

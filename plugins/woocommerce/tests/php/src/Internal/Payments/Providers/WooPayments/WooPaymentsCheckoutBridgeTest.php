@@ -58,6 +58,10 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'cartTotal', $config );
 		$this->assertArrayHasKey( 'createSetupIntentNonce', $config );
 		$this->assertArrayHasKey( 'updateOrderStatusNonce', $config );
+		$this->assertFalse( $config['usesLegacySetupIntentBridge'] );
+		$this->assertFalse( $config['usesLegacyOrderStatusBridge'] );
+		$this->assertTrue( $config['usesNativeSetupIntentBridge'] );
+		$this->assertTrue( $config['usesNativeOrderStatusBridge'] );
 	}
 
 	/**
@@ -96,9 +100,9 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should only expose legacy bridge nonces when the legacy runtime can serve the callbacks.
+	 * @testdox Should expose native bridge nonces independently from the removed legacy callback bridge.
 	 */
-	public function test_get_payment_fields_js_config_exposes_legacy_bridge_nonces_only_when_runtime_is_loaded(): void {
+	public function test_get_payment_fields_js_config_exposes_native_bridge_nonces_when_checkout_surface_is_available(): void {
 		$legacy_runtime = $this->createMock( WooPaymentsLegacyRuntime::class );
 		$legacy_runtime->method( 'get_gateway_publishable_key' )->willReturn( 'pk_test_123' );
 		$legacy_runtime->method( 'get_gateway_account_id' )->willReturn( 'acct_123' );
@@ -110,9 +114,11 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 
 		$config = $bridge->get_payment_fields_js_config();
 
-		$this->assertArrayNotHasKey( 'createSetupIntentNonce', $config );
-		$this->assertArrayNotHasKey( 'updateOrderStatusNonce', $config );
+		$this->assertArrayHasKey( 'createSetupIntentNonce', $config );
+		$this->assertArrayHasKey( 'updateOrderStatusNonce', $config );
 		$this->assertFalse( $config['usesLegacySetupIntentBridge'] );
 		$this->assertFalse( $config['usesLegacyOrderStatusBridge'] );
+		$this->assertTrue( $config['usesNativeSetupIntentBridge'] );
+		$this->assertTrue( $config['usesNativeOrderStatusBridge'] );
 	}
 }

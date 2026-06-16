@@ -337,6 +337,37 @@ class PaymentProcessingServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should call setup-capable providers for zero-total checkout when a payment credential is present.
+	 */
+	public function test_process_checkout_calls_setup_capable_provider_for_zero_total_checkout_with_credential(): void {
+		$order    = $this->create_woopayments_order( '0.00' );
+		$provider = new RecordingProvider(
+			new PaymentOutcome(
+				PaymentOutcome::STATUS_COMPLETED,
+				'seti_zero',
+				'',
+				'pm_zero',
+				'cus_zero',
+				array(
+					'meta' => array(
+						'_intention_status' => 'succeeded',
+					),
+				)
+			),
+			array( CapabilityManifest::CAPABILITY_ZERO_AMOUNT_SETUP )
+		);
+
+		$result = $this->sut->process_checkout( PaymentContext::for_checkout( $order, OrderPaymentStore::GATEWAY_ID, 'pm_zero' ), $provider );
+		$order  = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'success', $result['result'] );
+		$this->assertSame( 1, $provider->charge_calls );
+		$this->assertSame( 'seti_zero', $order->get_meta( '_intent_id', true ) );
+		$this->assertSame( 'pm_zero', $order->get_meta( '_payment_method_id', true ) );
+	}
+
+	/**
 	 * Create a WooPayments order for processing tests.
 	 *
 	 * @param string $total Order total.
