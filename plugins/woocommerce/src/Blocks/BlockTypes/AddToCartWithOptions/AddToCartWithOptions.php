@@ -111,9 +111,9 @@ class AddToCartWithOptions extends AbstractBlock {
 	/**
 	 * Whether the wishlist feature is enabled.
 	 *
-	 * Gates both the editor toggle and the render-time injection of the
-	 * Add to Wishlist Button block, so the block is never inserted while
-	 * its (experimental, feature-flagged) block type is unregistered.
+	 * Gates the render-time injection of the Add to Wishlist Button block (and
+	 * its editor preview), so the button only appears while the (experimental,
+	 * feature-flagged) wishlist feature is on.
 	 *
 	 * @return bool True if the wishlist feature flag is enabled, false otherwise.
 	 */
@@ -526,13 +526,12 @@ class AddToCartWithOptions extends AbstractBlock {
 				$hooks_after = ob_get_clean();
 			}
 
-			// Opt-in Add to Wishlist Button: when the merchant has enabled the
-			// toggle on this block, inject the button as the last child of the
-			// template part so it renders inside the form's iAPI scope. This is
-			// gated by the feature flag too, so a stale attribute never inserts
-			// an unregistered block. The markup lives in the merchant's own
-			// template customization, never in the shipped template parts.
-			if ( ! empty( $attributes['showAddToWishlist'] ) && $this->is_wishlist_enabled() ) {
+			// Add to Wishlist Button: when the wishlist feature is enabled,
+			// inject the button as the last child of the template part so it
+			// renders inside the form's iAPI scope (where it can read the
+			// selected variation/attributes). The markup is injected at render
+			// time only, never persisted to the shipped template parts.
+			if ( $this->is_wishlist_enabled() ) {
 				$template_part_contents .= "\n<!-- wp:woocommerce/add-to-wishlist-button /-->";
 			}
 

@@ -7,10 +7,6 @@
 		"isDescendantOfAddToCartWithOptions": {
 			"type": "boolean",
 			"default": true
-		},
-		"showAddToWishlist": {
-			"type": "boolean",
-			"default": false
 		}
 	},
 	"usesContext": [ "postId" ],

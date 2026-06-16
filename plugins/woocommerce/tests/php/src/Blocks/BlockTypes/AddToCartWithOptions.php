@@ -521,8 +521,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 	/**
 	 * Tests that the Add to Wishlist Button is injected as the last child only
-	 * when the `showAddToWishlist` attribute is enabled and the `product_wishlist`
-	 * feature flag is on.
+	 * when the `product_wishlist` feature flag is enabled.
 	 *
 	 * A lightweight stub stands in for the real `add-to-wishlist-button` block so
 	 * the test isolates the ATCWO injection/gating logic (the button's own
@@ -553,26 +552,23 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			$product = new \WC_Product_Simple();
 			$product->set_regular_price( 10 );
 			$product_id = $product->save();
+			$block      = '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->';
 
-			// Attribute on + feature on: the button is injected as the last child.
+			// Feature on: the button is injected as the last child.
 			$features->change_feature_enable( 'product_wishlist', true );
-			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options {"showAddToWishlist":true} /--><!-- /wp:woocommerce/single-product -->' );
+			$markup = do_blocks( $block );
 
-			$this->assertStringContainsString( $marker, $markup, 'The Add to Wishlist Button is injected when the attribute and the feature flag are both on.' );
+			$this->assertStringContainsString( $marker, $markup, 'The Add to Wishlist Button is injected when the wishlist feature is enabled.' );
 			$this->assertGreaterThan(
 				strpos( $markup, 'wp-block-woocommerce-product-button' ),
 				strpos( $markup, $marker ),
 				'The Add to Wishlist Button is injected after the product button (as the last child).'
 			);
 
-			// Attribute off + feature on: the button is not injected.
-			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
-			$this->assertStringNotContainsString( $marker, $markup, 'The Add to Wishlist Button is not injected when the attribute is off.' );
-
-			// Attribute on + feature off: the button is not injected.
+			// Feature off: the button is not injected.
 			$features->change_feature_enable( 'product_wishlist', false );
-			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options {"showAddToWishlist":true} /--><!-- /wp:woocommerce/single-product -->' );
-			$this->assertStringNotContainsString( $marker, $markup, 'The Add to Wishlist Button is not injected when the feature flag is off, even if the attribute is on.' );
+			$markup = do_blocks( $block );
+			$this->assertStringNotContainsString( $marker, $markup, 'The Add to Wishlist Button is not injected when the wishlist feature is disabled.' );
 		} finally {
 			$registry->unregister( 'woocommerce/add-to-wishlist-button' );
 			$features->change_feature_enable( 'product_wishlist', $original );
