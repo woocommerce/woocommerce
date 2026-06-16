@@ -59,6 +59,7 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'selected_currency',
 				'analytics',
 				'compatibility',
+				'subscriptions_compatibility',
 				'async_prices',
 				'storefront',
 				'settings',
@@ -214,6 +215,25 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'wcpay_multi_currency_override_selected_currency',
 				'wcpay_multi_currency_should_return_store_currency',
 				'wcpay_multi_currency_should_convert_product_price',
+			),
+			$filter_hooks
+		);
+	}
+
+	/**
+	 * @testdox Should preserve the WooPayments subscriptions compatibility filter surface.
+	 */
+	public function test_subscriptions_compatibility_manifest_contains_preserved_filters(): void {
+		$hook_groups  = MultiCurrencyRuntimeRegistry::get_core_hook_groups();
+		$filter_hooks = array_column( $hook_groups['subscriptions_compatibility']['filters'], 'hook' );
+
+		$this->assertSame(
+			array(
+				'wcpay_multi_currency_override_selected_currency',
+				'wcpay_multi_currency_should_disable_currency_switching',
+				'wcpay_multi_currency_should_convert_product_price',
+				'wcpay_multi_currency_should_convert_coupon_amount',
+				'option_woocommerce_subscriptions_multiple_purchase',
 			),
 			$filter_hooks
 		);
