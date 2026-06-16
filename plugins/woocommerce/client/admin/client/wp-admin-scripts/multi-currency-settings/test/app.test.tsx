@@ -26,6 +26,10 @@ jest.mock( '@wordpress/data', () => {
 	};
 } );
 
+jest.mock( '../store-settings', () => ( {
+	StoreLevelSettings: () => <div>Store settings component</div>,
+} ) );
+
 const mockApiFetch = apiFetch as jest.MockedFunction< typeof apiFetch >;
 
 const currenciesResponse: StoreCurrenciesResponse = {

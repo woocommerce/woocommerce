@@ -17,6 +17,7 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { MultiCurrencyCurrency, StoreCurrenciesResponse } from './types';
+import { StoreLevelSettings } from './store-settings';
 
 const REST_BASE = '/wc/v3/payments/multi-currency';
 
@@ -215,7 +216,10 @@ export function MultiCurrencySettingsApp() {
 
 	return (
 		<div className="woocommerce-multi-currency-settings">
+			<StoreLevelSettings />
+
 			<div className="woocommerce-multi-currency-settings__actions">
+				<h2>{ __( 'Enabled currencies', 'woocommerce' ) }</h2>
 				<Button
 					ref={ manageCurrenciesButtonRef }
 					variant="secondary"
