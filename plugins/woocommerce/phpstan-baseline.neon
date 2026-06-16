@@ -26989,12 +26989,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
 
 		-
-			message: '#^Access to an undefined property WC_REST_Products_V2_Controller\:\:\$request\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
 			message: '#^Call to an undefined method WC_Data\:\:get_children\(\)\.$#'
 			identifier: method.notFound
 			count: 4

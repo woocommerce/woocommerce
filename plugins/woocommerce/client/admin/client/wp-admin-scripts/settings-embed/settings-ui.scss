@@ -141,6 +141,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	.wc-settings-ui-shell__tabs {
 		background: #fff;
+		box-sizing: border-box;
 		display: flex;
 		margin: 0 !important;
 		overflow-x: auto;
@@ -391,7 +392,10 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			padding-right: 24px;
 		}
 
-		.wc-settings-ui-shell {
+		// Match the base `.wc-settings-ui-shell.admin-ui-page` specificity so
+		// this breakpoint's full-bleed margin actually overrides the -48px
+		// base value instead of losing the cascade.
+		.wc-settings-ui-shell.admin-ui-page {
 			margin-left: -24px;
 			margin-right: -24px;
 		}
@@ -399,12 +403,6 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		.wc-settings-ui-shell .admin-ui-page__header {
 			padding-left: 24px;
 			padding-right: 24px;
-		}
-
-		.wc-settings-ui-shell__navigation {
-			margin-left: -24px;
-			margin-right: -24px;
-			width: calc(100% + 48px);
 		}
 
 		.wc-settings-ui-shell__tabs {
