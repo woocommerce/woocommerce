@@ -131,6 +131,37 @@ class MultiCurrencyDomainMapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should inject state builder factory access into controllers.
+	 */
+	public function test_state_builder_factory_access_is_injected_into_controllers(): void {
+		$source_files = array(
+			'src/Internal/MultiCurrency/MultiCurrencyAnalyticsController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyPointsRewardsCompatibilityController.php',
+			'src/Internal/MultiCurrency/MultiCurrencySubscriptionsCompatibilityController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyNameYourPriceCompatibilityController.php',
+			'src/Internal/MultiCurrency/MultiCurrencySwitcherBlockController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyStorefrontIntegrationController.php',
+			'src/Internal/MultiCurrency/MultiCurrencySelectedCurrencyController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyStoreCurrencyLifecycleController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyRestController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyCompatibilityController.php',
+			'src/Internal/MultiCurrency/MultiCurrencyTrackingController.php',
+			'src/Internal/MultiCurrency/MultiCurrencySwitcherWidgetController.php',
+		);
+
+		foreach ( $source_files as $source_file ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for domain-boundary regression coverage.
+			$source = (string) file_get_contents( WC()->plugin_path() . '/' . $source_file );
+
+			$this->assertDoesNotMatchRegularExpression(
+				'/wc_get_container\(\)\s*->get\(\s*MultiCurrencyStateBuilderFactory::class\s*\)/',
+				$source,
+				"{$source_file} should receive the state builder factory through init injection."
+			);
+		}
+	}
+
+	/**
 	 * @testdox Should record the plugin compatibility integrations that B1 must preserve.
 	 */
 	public function test_records_compatibility_integrations(): void {

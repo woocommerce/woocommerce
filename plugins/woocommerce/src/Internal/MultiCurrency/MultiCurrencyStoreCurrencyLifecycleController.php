@@ -28,6 +28,13 @@ class MultiCurrencyStoreCurrencyLifecycleController implements RegisterHooksInte
 	private MultiCurrencyRuntimeArbiter $arbiter;
 
 	/**
+	 * State builder factory.
+	 *
+	 * @var MultiCurrencyStateBuilderFactory
+	 */
+	private MultiCurrencyStateBuilderFactory $state_builder_factory;
+
+	/**
 	 * Store-currency lifecycle service.
 	 *
 	 * @var MultiCurrencyStoreCurrencyLifecycleService|null
@@ -39,10 +46,12 @@ class MultiCurrencyStoreCurrencyLifecycleController implements RegisterHooksInte
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter $arbiter Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeArbiter      $arbiter               Runtime owner arbiter.
+	 * @param MultiCurrencyStateBuilderFactory $state_builder_factory State builder factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter ): void {
-		$this->arbiter = $arbiter;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyStateBuilderFactory $state_builder_factory ): void {
+		$this->arbiter               = $arbiter;
+		$this->state_builder_factory = $state_builder_factory;
 	}
 
 	/**
@@ -86,7 +95,7 @@ class MultiCurrencyStoreCurrencyLifecycleController implements RegisterHooksInte
 			$cache                   = new MultiCurrencyDatabaseCache();
 			$this->lifecycle_service = new MultiCurrencyStoreCurrencyLifecycleService(
 				$cache,
-				wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create( null, $cache )
+				$this->state_builder_factory->create( null, $cache )
 			);
 		}
 

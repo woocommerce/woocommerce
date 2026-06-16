@@ -47,14 +47,23 @@ class MultiCurrencyNameYourPriceCompatibilityController implements RegisterHooks
 	private ?MultiCurrencyStateBuilder $state_builder = null;
 
 	/**
+	 * State builder factory.
+	 *
+	 * @var MultiCurrencyStateBuilderFactory
+	 */
+	private MultiCurrencyStateBuilderFactory $state_builder_factory;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter $arbiter Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeArbiter      $arbiter               Runtime owner arbiter.
+	 * @param MultiCurrencyStateBuilderFactory $state_builder_factory State builder factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter ): void {
-		$this->arbiter = $arbiter;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyStateBuilderFactory $state_builder_factory ): void {
+		$this->arbiter               = $arbiter;
+		$this->state_builder_factory = $state_builder_factory;
 	}
 
 	/**
@@ -406,9 +415,7 @@ class MultiCurrencyNameYourPriceCompatibilityController implements RegisterHooks
 	 */
 	private function get_state_builder(): MultiCurrencyStateBuilder {
 		if ( null === $this->state_builder ) {
-			$this->state_builder = wc_get_container()
-				->get( MultiCurrencyStateBuilderFactory::class )
-				->create( new MultiCurrencyLocalizationService() );
+			$this->state_builder = $this->state_builder_factory->create( new MultiCurrencyLocalizationService() );
 		}
 
 		return $this->state_builder;

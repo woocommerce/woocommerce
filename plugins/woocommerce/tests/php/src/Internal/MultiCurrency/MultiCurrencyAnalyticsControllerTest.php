@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDatabase
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRateService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use WC_Unit_Test_Case;
 
 /**
@@ -213,7 +214,10 @@ class MultiCurrencyAnalyticsControllerTest extends WC_Unit_Test_Case {
 	 */
 	private function create_controller( string $owner ): MultiCurrencyAnalyticsController {
 		$controller = new MultiCurrencyAnalyticsController();
-		$controller->init( $this->create_arbiter( $owner ) );
+		$controller->init(
+			$this->create_arbiter( $owner ),
+			wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )
+		);
 		$controller->set_dev_mode_resolver( static fn(): bool => false );
 		$controller->set_rest_request_resolver( static fn(): bool => false );
 		$controller->set_multi_currency_orders_resolver( static fn(): bool => false );

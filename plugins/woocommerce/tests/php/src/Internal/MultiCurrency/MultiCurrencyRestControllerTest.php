@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyState;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFrontendProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use WC_Unit_Test_Case;
 use WP_Error;
 use WP_REST_Request;
@@ -289,7 +290,10 @@ class MultiCurrencyRestControllerTest extends WC_Unit_Test_Case {
 		bool $cache_optimized_mode = true
 	): MultiCurrencyRestController {
 		$controller = new MultiCurrencyRestController();
-		$controller->init( $this->create_arbiter( $owner ) );
+		$controller->init(
+			$this->create_arbiter( $owner ),
+			wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )
+		);
 		$controller->set_state_builder( $state_builder ?? $this->create_state_builder() );
 		$controller->set_frontend_projection_service( $this->create_frontend_projection_service( $cache_optimized_mode ) );
 

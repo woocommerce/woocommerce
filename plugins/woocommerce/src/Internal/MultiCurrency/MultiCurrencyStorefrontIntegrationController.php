@@ -40,6 +40,13 @@ class MultiCurrencyStorefrontIntegrationController implements RegisterHooksInter
 	private ?MultiCurrencyStateBuilder $state_builder = null;
 
 	/**
+	 * State builder factory.
+	 *
+	 * @var MultiCurrencyStateBuilderFactory
+	 */
+	private MultiCurrencyStateBuilderFactory $state_builder_factory;
+
+	/**
 	 * Switcher projection service.
 	 *
 	 * @var MultiCurrencySwitcherProjectionService|null
@@ -58,10 +65,12 @@ class MultiCurrencyStorefrontIntegrationController implements RegisterHooksInter
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter $arbiter Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeArbiter      $arbiter               Runtime owner arbiter.
+	 * @param MultiCurrencyStateBuilderFactory $state_builder_factory State builder factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter ): void {
-		$this->arbiter = $arbiter;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyStateBuilderFactory $state_builder_factory ): void {
+		$this->arbiter               = $arbiter;
+		$this->state_builder_factory = $state_builder_factory;
 	}
 
 	/**
@@ -196,7 +205,7 @@ class MultiCurrencyStorefrontIntegrationController implements RegisterHooksInter
 	 */
 	private function get_state_builder(): MultiCurrencyStateBuilder {
 		if ( null === $this->state_builder ) {
-			$this->state_builder = wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create();
+			$this->state_builder = $this->state_builder_factory->create();
 		}
 
 		return $this->state_builder;

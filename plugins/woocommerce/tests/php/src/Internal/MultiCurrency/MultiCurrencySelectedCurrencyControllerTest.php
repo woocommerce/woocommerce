@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySelectedCurrencyC
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyGeolocationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRequestContext;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySelectedCurrencyPersistenceService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use WC_Unit_Test_Case;
 
 /**
@@ -481,7 +482,10 @@ class MultiCurrencySelectedCurrencyControllerTest extends WC_Unit_Test_Case {
 		?MultiCurrencyRequestContext $request_context = null
 	): MultiCurrencySelectedCurrencyController {
 		$controller = new MultiCurrencySelectedCurrencyController();
-		$controller->init( $this->create_arbiter( $owner ) );
+		$controller->init(
+			$this->create_arbiter( $owner ),
+			wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )
+		);
 		$controller->set_persistence_service( $service );
 		if ( null !== $request_context && method_exists( $controller, 'set_request_context' ) ) {
 			$controller->set_request_context( $request_context );

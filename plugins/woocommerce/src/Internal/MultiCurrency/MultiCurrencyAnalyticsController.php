@@ -39,6 +39,13 @@ class MultiCurrencyAnalyticsController implements RegisterHooksInterface {
 	private MultiCurrencyRuntimeArbiter $arbiter;
 
 	/**
+	 * State builder factory.
+	 *
+	 * @var MultiCurrencyStateBuilderFactory
+	 */
+	private MultiCurrencyStateBuilderFactory $state_builder_factory;
+
+	/**
 	 * Analytics projection service.
 	 *
 	 * @var MultiCurrencyAnalyticsProjectionService|null
@@ -99,10 +106,12 @@ class MultiCurrencyAnalyticsController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter $arbiter Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeArbiter      $arbiter               Runtime owner arbiter.
+	 * @param MultiCurrencyStateBuilderFactory $state_builder_factory State builder factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter ): void {
-		$this->arbiter = $arbiter;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyStateBuilderFactory $state_builder_factory ): void {
+		$this->arbiter               = $arbiter;
+		$this->state_builder_factory = $state_builder_factory;
 	}
 
 	/**
@@ -376,7 +385,7 @@ class MultiCurrencyAnalyticsController implements RegisterHooksInterface {
 	 * @return MultiCurrencyStateBuilder
 	 */
 	private function create_state_builder(): MultiCurrencyStateBuilder {
-		return wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create();
+		return $this->state_builder_factory->create();
 	}
 
 	/**

@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyPointsRewardsComp
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyState;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use WC_Unit_Test_Case;
 
 /**
@@ -252,7 +253,10 @@ class MultiCurrencyPointsRewardsCompatibilityControllerTest extends WC_Unit_Test
 			}
 		};
 
-		$controller->init( $this->create_arbiter( $owner ) );
+		$controller->init(
+			$this->create_arbiter( $owner ),
+			wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )
+		);
 		$controller->set_state_builder( $this->create_state_builder( $this->create_state() ) );
 
 		return $controller;

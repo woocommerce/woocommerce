@@ -49,6 +49,13 @@ class MultiCurrencyRestController extends WP_REST_Controller implements Register
 	private ?MultiCurrencyStateBuilder $state_builder = null;
 
 	/**
+	 * State builder factory.
+	 *
+	 * @var MultiCurrencyStateBuilderFactory
+	 */
+	private MultiCurrencyStateBuilderFactory $state_builder_factory;
+
+	/**
 	 * Frontend projection service.
 	 *
 	 * @var MultiCurrencyFrontendProjectionService|null
@@ -60,12 +67,14 @@ class MultiCurrencyRestController extends WP_REST_Controller implements Register
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter $arbiter Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeArbiter      $arbiter               Runtime owner arbiter.
+	 * @param MultiCurrencyStateBuilderFactory $state_builder_factory State builder factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter ): void {
-		$this->arbiter   = $arbiter;
-		$this->namespace = self::REST_NAMESPACE;
-		$this->rest_base = self::REST_BASE;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyStateBuilderFactory $state_builder_factory ): void {
+		$this->arbiter               = $arbiter;
+		$this->state_builder_factory = $state_builder_factory;
+		$this->namespace             = self::REST_NAMESPACE;
+		$this->rest_base             = self::REST_BASE;
 	}
 
 	/**
@@ -430,7 +439,7 @@ class MultiCurrencyRestController extends WP_REST_Controller implements Register
 	 */
 	private function get_state_builder(): MultiCurrencyStateBuilder {
 		if ( null === $this->state_builder ) {
-			$this->state_builder = wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create();
+			$this->state_builder = $this->state_builder_factory->create();
 		}
 
 		return $this->state_builder;

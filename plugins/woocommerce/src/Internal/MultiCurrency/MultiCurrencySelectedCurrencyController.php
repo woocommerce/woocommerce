@@ -62,14 +62,23 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 	private ?MultiCurrencyGeolocationService $geolocation_service = null;
 
 	/**
+	 * State builder factory.
+	 *
+	 * @var MultiCurrencyStateBuilderFactory
+	 */
+	private MultiCurrencyStateBuilderFactory $state_builder_factory;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter $arbiter Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeArbiter      $arbiter               Runtime owner arbiter.
+	 * @param MultiCurrencyStateBuilderFactory $state_builder_factory State builder factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter ): void {
-		$this->arbiter = $arbiter;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyStateBuilderFactory $state_builder_factory ): void {
+		$this->arbiter               = $arbiter;
+		$this->state_builder_factory = $state_builder_factory;
 	}
 
 	/**
@@ -302,7 +311,7 @@ class MultiCurrencySelectedCurrencyController implements RegisterHooksInterface 
 	private function get_persistence_service(): MultiCurrencySelectedCurrencyPersistenceService {
 		if ( null === $this->persistence_service ) {
 			$this->persistence_service = new MultiCurrencySelectedCurrencyPersistenceService(
-				wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create()
+				$this->state_builder_factory->create()
 			);
 		}
 

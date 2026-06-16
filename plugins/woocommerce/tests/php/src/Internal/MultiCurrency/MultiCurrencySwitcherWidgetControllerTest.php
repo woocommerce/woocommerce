@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySwitcherWidget;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySwitcherWidgetController;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySwitcherProjectionService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use WC_Unit_Test_Case;
 
 /**
@@ -180,7 +181,11 @@ class MultiCurrencySwitcherWidgetControllerTest extends WC_Unit_Test_Case {
 		?MultiCurrencySwitcherProjectionService $projection = null
 	): MultiCurrencySwitcherWidgetController {
 		$controller = new MultiCurrencySwitcherWidgetController();
-		$controller->init( $this->create_arbiter( $owner ), $this->create_compatibility_controller() );
+		$controller->init(
+			$this->create_arbiter( $owner ),
+			$this->create_compatibility_controller(),
+			wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )
+		);
 		$controller->set_switcher_projection_service( $projection ?? $this->create_projection_service() );
 
 		return $controller;

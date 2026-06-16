@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyCurrency;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyState;
 use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\MultiCurrencyLocalizationInterface;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySubscriptionsCompatibilityController;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceProjectionService;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -693,7 +694,11 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 			}
 		};
 
-		$controller->init( $this->create_arbiter( $owner ), new LegacyProxy() );
+		$controller->init(
+			$this->create_arbiter( $owner ),
+			new LegacyProxy(),
+			wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )
+		);
 		$controller->set_price_projection_service( $this->create_price_projection_service() );
 		$controller->set_state_builder( $this->create_state_builder( $has_additional_currencies_enabled ) );
 

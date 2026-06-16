@@ -52,14 +52,23 @@ class MultiCurrencyTrackingController implements RegisterHooksInterface {
 	private $hpos_enabled_resolver = null;
 
 	/**
+	 * State builder factory.
+	 *
+	 * @var MultiCurrencyStateBuilderFactory
+	 */
+	private MultiCurrencyStateBuilderFactory $state_builder_factory;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter $arbiter Runtime owner arbiter.
+	 * @param MultiCurrencyRuntimeArbiter      $arbiter               Runtime owner arbiter.
+	 * @param MultiCurrencyStateBuilderFactory $state_builder_factory State builder factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter ): void {
-		$this->arbiter = $arbiter;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyStateBuilderFactory $state_builder_factory ): void {
+		$this->arbiter               = $arbiter;
+		$this->state_builder_factory = $state_builder_factory;
 	}
 
 	/**
@@ -133,7 +142,7 @@ class MultiCurrencyTrackingController implements RegisterHooksInterface {
 	private function get_tracking_projection_service(): MultiCurrencyTrackingProjectionService {
 		if ( null === $this->tracking_projection_service ) {
 			$this->tracking_projection_service = new MultiCurrencyTrackingProjectionService(
-				wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create()
+				$this->state_builder_factory->create()
 			);
 		}
 

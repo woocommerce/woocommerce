@@ -36,6 +36,13 @@ class MultiCurrencySwitcherBlockController implements RegisterHooksInterface {
 	private MultiCurrencyCompatibilityController $compatibility_controller;
 
 	/**
+	 * State builder factory.
+	 *
+	 * @var MultiCurrencyStateBuilderFactory
+	 */
+	private MultiCurrencyStateBuilderFactory $state_builder_factory;
+
+	/**
 	 * Switcher projection service.
 	 *
 	 * @var MultiCurrencySwitcherProjectionService|null
@@ -49,13 +56,16 @@ class MultiCurrencySwitcherBlockController implements RegisterHooksInterface {
 	 *
 	 * @param MultiCurrencyRuntimeArbiter          $arbiter                  Runtime owner arbiter.
 	 * @param MultiCurrencyCompatibilityController $compatibility_controller Compatibility controller.
+	 * @param MultiCurrencyStateBuilderFactory     $state_builder_factory    State builder factory.
 	 */
 	final public function init(
 		MultiCurrencyRuntimeArbiter $arbiter,
-		MultiCurrencyCompatibilityController $compatibility_controller
+		MultiCurrencyCompatibilityController $compatibility_controller,
+		MultiCurrencyStateBuilderFactory $state_builder_factory
 	): void {
 		$this->arbiter                  = $arbiter;
 		$this->compatibility_controller = $compatibility_controller;
+		$this->state_builder_factory    = $state_builder_factory;
 	}
 
 	/**
@@ -180,7 +190,7 @@ class MultiCurrencySwitcherBlockController implements RegisterHooksInterface {
 	private function get_switcher_projection_service(): MultiCurrencySwitcherProjectionService {
 		if ( null === $this->switcher_projection_service ) {
 			$this->switcher_projection_service = new MultiCurrencySwitcherProjectionService(
-				wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create()
+				$this->state_builder_factory->create()
 			);
 		}
 

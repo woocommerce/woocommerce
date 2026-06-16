@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyTrackingController;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyTrackingOrderCountProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyTrackingProjectionService;
 use WC_Unit_Test_Case;
@@ -129,7 +130,10 @@ class MultiCurrencyTrackingControllerTest extends WC_Unit_Test_Case {
 		?callable $storage_resolver = null
 	): MultiCurrencyTrackingController {
 		$controller = new MultiCurrencyTrackingController();
-		$controller->init( $this->create_arbiter( $owner ) );
+		$controller->init(
+			$this->create_arbiter( $owner ),
+			wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )
+		);
 
 		if ( null !== $projection_service ) {
 			$controller->set_tracking_projection_service( $projection_service );

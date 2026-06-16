@@ -127,16 +127,25 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 	private bool $running_override_selected_currency_filters = false;
 
 	/**
+	 * State builder factory.
+	 *
+	 * @var MultiCurrencyStateBuilderFactory
+	 */
+	private MultiCurrencyStateBuilderFactory $state_builder_factory;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter $arbiter      Runtime owner arbiter.
-	 * @param LegacyProxy                 $legacy_proxy Legacy proxy.
+	 * @param MultiCurrencyRuntimeArbiter      $arbiter               Runtime owner arbiter.
+	 * @param LegacyProxy                      $legacy_proxy          Legacy proxy.
+	 * @param MultiCurrencyStateBuilderFactory $state_builder_factory State builder factory.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter, LegacyProxy $legacy_proxy ): void {
-		$this->arbiter      = $arbiter;
-		$this->legacy_proxy = $legacy_proxy;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, LegacyProxy $legacy_proxy, MultiCurrencyStateBuilderFactory $state_builder_factory ): void {
+		$this->arbiter               = $arbiter;
+		$this->legacy_proxy          = $legacy_proxy;
+		$this->state_builder_factory = $state_builder_factory;
 	}
 
 	/**
@@ -810,7 +819,7 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 	 */
 	private function get_state_builder(): MultiCurrencyStateBuilder {
 		if ( null === $this->state_builder ) {
-			$this->state_builder = wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create();
+			$this->state_builder = $this->state_builder_factory->create();
 		}
 
 		return $this->state_builder;
