@@ -63,10 +63,10 @@ class UserProfileField {
 
 		wp_nonce_field( self::NONCE_ACTION . '_' . $user->ID, self::NONCE_ACTION . '_nonce' );
 		?>
-		<h2><?php esc_html_e( 'Email verification', 'woocommerce' ); ?></h2>
+		<h2><?php esc_html_e( 'Email confirmation', 'woocommerce' ); ?></h2>
 		<table class="form-table" role="presentation">
 			<tr>
-				<th scope="row"><?php esc_html_e( 'Email address verified', 'woocommerce' ); ?></th>
+				<th scope="row"><?php esc_html_e( 'Email address confirmed', 'woocommerce' ); ?></th>
 				<td>
 					<label for="<?php echo esc_attr( self::FIELD ); ?>">
 						<input type="checkbox" name="<?php echo esc_attr( self::FIELD ); ?>" id="<?php echo esc_attr( self::FIELD ); ?>" value="1" <?php checked( $this->service->is_verified( $user->ID ) ); ?> />

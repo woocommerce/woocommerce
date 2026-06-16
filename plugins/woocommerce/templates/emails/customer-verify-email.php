@@ -33,7 +33,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 echo wp_kses_post(
 	sprintf(
 		/* translators: %s: the customer's email address. */
-		__( "Once you've confirmed that %s is your email address, we'll link any past orders to your verified account.", 'woocommerce' ),
+		__( "Once you've confirmed that %s is your email address, we'll link any past orders to your confirmed account.", 'woocommerce' ),
 		'<strong>' . esc_html( $user_email ) . '</strong>'
 	)
 );

@@ -81,9 +81,9 @@ class VerificationController {
 			if ( get_current_user_id() !== $user_id ) {
 				wc_set_customer_auth_cookie( $user_id );
 			}
-			wc_add_notice( __( 'Your email address has been verified.', 'woocommerce' ) );
+			wc_add_notice( __( 'Your email address has been confirmed.', 'woocommerce' ) );
 		} else {
-			wc_add_notice( __( 'This verification link is invalid or has expired. Please request a new one.', 'woocommerce' ), 'error' );
+			wc_add_notice( __( 'This confirmation link is invalid or has expired. Please request a new one.', 'woocommerce' ), 'error' );
 		}
 
 		wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
@@ -115,7 +115,7 @@ class VerificationController {
 
 		$seconds_since = $this->service->seconds_since_last_key( $user_id );
 		if ( null !== $seconds_since && $seconds_since < self::SEND_RATE_LIMIT ) {
-			wc_add_notice( __( 'A verification link was just sent — please check your inbox.', 'woocommerce' ) );
+			wc_add_notice( __( 'A confirmation link was just sent — please check your inbox.', 'woocommerce' ) );
 			wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
 			exit;
 		}
@@ -127,7 +127,7 @@ class VerificationController {
 			wc_add_notice(
 				sprintf(
 					/* translators: %s: customer email address */
-					__( "We've emailed a verification link to %s.", 'woocommerce' ),
+					__( "We've emailed a confirmation link to %s.", 'woocommerce' ),
 					$user->user_email
 				)
 			);
@@ -198,9 +198,9 @@ class VerificationController {
 
 		$notice = sprintf(
 			'%1$s <a href="%2$s" class="button wc-forward">%3$s</a>',
-			esc_html__( 'Verify your email address to view past orders.', 'woocommerce' ),
+			esc_html__( 'Confirm your email address to view past orders.', 'woocommerce' ),
 			esc_url( $send_url ),
-			esc_html__( 'Verify your email address', 'woocommerce' )
+			esc_html__( 'Confirm your email address', 'woocommerce' )
 		);
 
 		wc_add_notice( $notice, 'notice' );

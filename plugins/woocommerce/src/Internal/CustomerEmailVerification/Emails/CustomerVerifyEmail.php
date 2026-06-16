@@ -39,7 +39,7 @@ class CustomerVerifyEmail extends WC_Email {
 	public function __construct() {
 		$this->id             = 'customer_verify_email';
 		$this->customer_email = true;
-		$this->title          = __( 'Verify email address', 'woocommerce' );
+		$this->title          = __( 'Confirm email address', 'woocommerce' );
 		$this->description    = __( 'Sent to customers with a link to confirm they own their account email address.', 'woocommerce' );
 		$this->template_html  = 'emails/customer-verify-email.php';
 		$this->template_plain = 'emails/plain/customer-verify-email.php';
@@ -58,7 +58,7 @@ class CustomerVerifyEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_subject() {
-		return __( 'Verify your email address for {site_title}', 'woocommerce' );
+		return __( 'Confirm your email address for {site_title}', 'woocommerce' );
 	}
 
 	/**

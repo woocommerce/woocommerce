@@ -25,7 +25,7 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_display_name ) ) . "\n\n";
 echo sprintf(
 	/* translators: %s: the customer's email address. */
-	esc_html__( "Once you've confirmed that %s is your email address, we'll link any past orders to your verified account. Visit the link below to confirm:", 'woocommerce' ),
+	esc_html__( "Once you've confirmed that %s is your email address, we'll link any past orders to your confirmed account. Visit the link below to confirm:", 'woocommerce' ),
 	esc_html( $user_email )
 ) . "\n\n";
 echo esc_url( $verify_url ) . "\n\n";
