@@ -44,7 +44,8 @@ class VerificationController {
 	 */
 	public function __construct() {
 		add_action( 'template_redirect', array( $this, 'maybe_process_request' ) );
-		add_action( 'woocommerce_account_dashboard', array( $this, 'maybe_render_prompt' ) );
+		// Priority 1 so the notice is queued before woocommerce_output_all_notices() prints it (priority 5).
+		add_action( 'woocommerce_account_content', array( $this, 'maybe_add_orders_notice' ), 1 );
 	}
 
 	/**
@@ -93,7 +94,7 @@ class VerificationController {
 	 * Handle a request to send (or resend) the verification email, triggered by the My Account prompt.
 	 *
 	 * Verifies the nonce and user, applies a rate-limit, then dispatches the email. Redirects back
-	 * to My Account with a success or rate-limit notice added.
+	 * to the orders section with a success or rate-limit notice added.
 	 *
 	 * @since 11.0.0
 	 */
@@ -108,14 +109,14 @@ class VerificationController {
 
 		if ( ! wp_verify_nonce( $nonce, self::SEND_NONCE_ACTION ) ) {
 			wc_add_notice( __( 'Invalid request. Please try again.', 'woocommerce' ), 'error' );
-			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
+			wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
 			exit;
 		}
 
 		$seconds_since = $this->service->seconds_since_last_key( $user_id );
 		if ( null !== $seconds_since && $seconds_since < self::SEND_RATE_LIMIT ) {
 			wc_add_notice( __( 'A verification link was just sent — please check your inbox.', 'woocommerce' ) );
-			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
+			wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
 			exit;
 		}
 
@@ -132,7 +133,7 @@ class VerificationController {
 			);
 		}
 
-		wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
+		wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
 		exit;
 	}
 
@@ -162,30 +163,33 @@ class VerificationController {
 	}
 
 	/**
-	 * Render the email-verification prompt on the My Account dashboard for unverified customers.
+	 * Add the email-verification prompt as a standard notice on the My Account "Orders" section.
 	 *
-	 * Hooked to {@see 'woocommerce_account_dashboard'}.
+	 * Hooked to {@see 'woocommerce_account_content'} at priority 1, so the notice is queued before
+	 * woocommerce_output_all_notices() prints it (priority 5). Only shown on the orders endpoint,
+	 * and only when there are guest orders worth verifying for.
 	 *
+	 * @internal
 	 * @since 11.0.0
 	 */
-	public function maybe_render_prompt(): void {
-		if ( ! $this->should_show_prompt() ) {
+	public function maybe_add_orders_notice(): void {
+		if ( ! is_wc_endpoint_url( 'orders' ) || ! $this->should_show_prompt() ) {
 			return;
 		}
 
 		$send_url = wp_nonce_url(
-			add_query_arg( self::SEND_PARAM, '1', wc_get_page_permalink( 'myaccount' ) ),
+			add_query_arg( self::SEND_PARAM, '1', wc_get_account_endpoint_url( 'orders' ) ),
 			self::SEND_NONCE_ACTION
 		);
 
-		?>
-		<div class="woocommerce-info woocommerce-verify-email">
-			<p><?php esc_html_e( 'Verify your email address to view past orders.', 'woocommerce' ); ?></p>
-			<a href="<?php echo esc_url( $send_url ); ?>" class="button woocommerce-button">
-				<?php esc_html_e( 'Verify your email address', 'woocommerce' ); ?>
-			</a>
-		</div>
-		<?php
+		$notice = sprintf(
+			'%1$s <a href="%2$s" class="button wc-forward">%3$s</a>',
+			esc_html__( 'Verify your email address to view past orders.', 'woocommerce' ),
+			esc_url( $send_url ),
+			esc_html__( 'Verify your email address', 'woocommerce' )
+		);
+
+		wc_add_notice( $notice, 'notice' );
 	}
 
 	/**
