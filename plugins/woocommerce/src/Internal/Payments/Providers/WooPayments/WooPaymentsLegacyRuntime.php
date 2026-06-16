@@ -162,6 +162,24 @@ class WooPaymentsLegacyRuntime {
 	}
 
 	/**
+	 * Tell whether the WooPayments gateway is connected.
+	 *
+	 * @return bool|null
+	 */
+	public function is_gateway_connected(): ?bool {
+		return $this->call_gateway_boolean_method( 'is_connected' );
+	}
+
+	/**
+	 * Tell whether the WooPayments account is partially onboarded.
+	 *
+	 * @return bool|null
+	 */
+	public function is_gateway_partially_onboarded(): ?bool {
+		return $this->call_gateway_boolean_method( 'is_account_partially_onboarded' );
+	}
+
+	/**
 	 * Get WooPayments account status data.
 	 *
 	 * @return array|null
@@ -252,6 +270,31 @@ class WooPaymentsLegacyRuntime {
 	}
 
 	/**
+	 * Hide WooPayments gateways from the WooCommerce settings page.
+	 *
+	 * @return bool
+	 */
+	public function hide_gateways_on_settings_page(): bool {
+		if ( ! $this->is_loaded() ) {
+			return false;
+		}
+
+		try {
+			$is_callable = $this->legacy_proxy->call_function( 'is_callable', 'WC_Payments::hide_gateways_on_settings_page' ) ||
+				$this->legacy_proxy->call_function( 'is_callable', '\WC_Payments::hide_gateways_on_settings_page' );
+			if ( ! $is_callable ) {
+				return false;
+			}
+
+			$this->legacy_proxy->call_static( 'WC_Payments', 'hide_gateways_on_settings_page' );
+		} catch ( \Throwable $e ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Reset the WooPayments onboarding test-mode option when the legacy constant is available.
 	 *
 	 * @return void
@@ -321,6 +364,30 @@ class WooPaymentsLegacyRuntime {
 			}
 
 			return (bool) $mode_service->{$method_name}();
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+	}
+
+	/**
+	 * Call a boolean method on the WooPayments gateway.
+	 *
+	 * @param string $method_name Gateway method name.
+	 * @return bool|null
+	 */
+	private function call_gateway_boolean_method( string $method_name ): ?bool {
+		$gateway = $this->get_gateway();
+		if ( ! is_object( $gateway ) ) {
+			return null;
+		}
+
+		try {
+			if ( ! $this->legacy_proxy->call_function( 'method_exists', $gateway, $method_name ) ||
+				! $this->legacy_proxy->call_function( 'is_callable', array( $gateway, $method_name ) ) ) {
+				return null;
+			}
+
+			return (bool) $gateway->{$method_name}();
 		} catch ( \Throwable $e ) {
 			return null;
 		}

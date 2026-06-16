@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPaymentsS
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
@@ -175,7 +176,9 @@ class Payments extends Task {
 	 * @return bool
 	 */
 	private function is_woopayments_active(): bool {
-		return class_exists( '\WC_Payments' );
+		$legacy_runtime = $this->get_woopayments_legacy_runtime();
+
+		return null !== $legacy_runtime && $legacy_runtime->is_loaded();
 	}
 
 	/**
@@ -290,8 +293,10 @@ class Payments extends Task {
 	 * @return bool Whether the country is supported by WooPayments.
 	 */
 	private function is_woopayments_supported_country( string $country_code ): bool {
-		if ( class_exists( '\WC_Payments_Utils' ) && is_callable( array( '\WC_Payments_Utils', 'supported_countries' ) ) ) {
-			$supported_countries = array_keys( \WC_Payments_Utils::supported_countries() );
+		$legacy_runtime      = $this->get_woopayments_legacy_runtime();
+		$supported_countries = null !== $legacy_runtime ? $legacy_runtime->get_supported_countries() : null;
+		if ( is_array( $supported_countries ) ) {
+			$supported_countries = array_keys( $supported_countries );
 			return in_array( $country_code, $supported_countries, true );
 		}
 
@@ -478,5 +483,20 @@ class Payments extends Task {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get the WooPayments legacy runtime.
+	 *
+	 * @return WooPaymentsLegacyRuntime|null
+	 */
+	private function get_woopayments_legacy_runtime(): ?WooPaymentsLegacyRuntime {
+		try {
+			$legacy_runtime = wc_get_container()->get( WooPaymentsLegacyRuntime::class );
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+
+		return $legacy_runtime instanceof WooPaymentsLegacyRuntime ? $legacy_runtime : null;
 	}
 }

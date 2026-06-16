@@ -105,6 +105,77 @@ class WooPaymentsLegacyRuntimeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return WooPayments gateway state flags when available.
+	 */
+	public function test_returns_gateway_state_helpers_when_available(): void {
+		$gateway = new class() {
+			/**
+			 * Tell whether the gateway is connected.
+			 *
+			 * @return bool
+			 */
+			public function is_connected(): bool {
+				return true;
+			}
+
+			/**
+			 * Tell whether the account is partially onboarded.
+			 *
+			 * @return bool
+			 */
+			public function is_account_partially_onboarded(): bool {
+				return false;
+			}
+		};
+		$sut     = new WooPaymentsLegacyRuntime();
+		$sut->init( new LegacyRuntimeProxy( true, $gateway ) );
+
+		$this->assertTrue( $sut->is_gateway_connected() );
+		$this->assertFalse( $sut->is_gateway_partially_onboarded() );
+	}
+
+	/**
+	 * @testdox Should fail closed when WooPayments gateway state helpers are unavailable.
+	 */
+	public function test_gateway_state_helpers_fail_closed_when_unavailable(): void {
+		$gateway_without_methods = (object) array( 'id' => 'woocommerce_payments' );
+		$absent_runtime          = new WooPaymentsLegacyRuntime();
+		$missing_methods_runtime = new WooPaymentsLegacyRuntime();
+
+		$absent_runtime->init( new LegacyRuntimeProxy( false ) );
+		$missing_methods_runtime->init( new LegacyRuntimeProxy( true, $gateway_without_methods ) );
+
+		$this->assertNull( $absent_runtime->is_gateway_connected() );
+		$this->assertNull( $absent_runtime->is_gateway_partially_onboarded() );
+		$this->assertNull( $missing_methods_runtime->is_gateway_connected() );
+		$this->assertNull( $missing_methods_runtime->is_gateway_partially_onboarded() );
+	}
+
+	/**
+	 * @testdox Should hide WooPayments gateways on the settings page through the legacy runtime.
+	 */
+	public function test_hides_gateways_on_settings_page_through_runtime(): void {
+		$proxy = new LegacyRuntimeProxy( true );
+		$sut   = new WooPaymentsLegacyRuntime();
+		$sut->init( $proxy );
+
+		$this->assertTrue( $sut->hide_gateways_on_settings_page() );
+		$this->assertSame( 1, $proxy->get_hide_gateways_on_settings_page_calls() );
+	}
+
+	/**
+	 * @testdox Should not hide WooPayments gateways when the legacy runtime is absent.
+	 */
+	public function test_does_not_hide_gateways_on_settings_page_when_runtime_is_absent(): void {
+		$proxy = new LegacyRuntimeProxy( false );
+		$sut   = new WooPaymentsLegacyRuntime();
+		$sut->init( $proxy );
+
+		$this->assertFalse( $sut->hide_gateways_on_settings_page() );
+		$this->assertSame( 0, $proxy->get_hide_gateways_on_settings_page_calls() );
+	}
+
+	/**
 	 * @testdox Should return account status data and supported countries when available.
 	 */
 	public function test_returns_account_status_data_and_supported_countries_when_available(): void {

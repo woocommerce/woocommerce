@@ -81,6 +81,13 @@ class LegacyRuntimeProxy extends LegacyProxy {
 	private array $updated_options = array();
 
 	/**
+	 * Number of WooPayments settings-page gateway hide calls.
+	 *
+	 * @var int
+	 */
+	private int $hide_gateways_on_settings_page_calls = 0;
+
+	/**
 	 * WooPayments account data option payload.
 	 *
 	 * @var mixed
@@ -148,6 +155,10 @@ class LegacyRuntimeProxy extends LegacyProxy {
 			return null !== $this->supported_countries;
 		}
 
+		if ( 'is_callable' === $function_name && in_array( $parameters[0] ?? null, array( 'WC_Payments::hide_gateways_on_settings_page', '\WC_Payments::hide_gateways_on_settings_page' ), true ) ) {
+			return $this->loaded;
+		}
+
 		if ( 'update_option' === $function_name ) {
 			$this->updated_options[ (string) ( $parameters[0] ?? '' ) ] = $parameters[1] ?? null;
 
@@ -202,6 +213,12 @@ class LegacyRuntimeProxy extends LegacyProxy {
 			return $this->mode;
 		}
 
+		if ( 'hide_gateways_on_settings_page' === $method_name ) {
+			++$this->hide_gateways_on_settings_page_calls;
+
+			return null;
+		}
+
 		return parent::call_static( $class_name, $method_name, ...$parameters );
 	}
 
@@ -212,6 +229,15 @@ class LegacyRuntimeProxy extends LegacyProxy {
 	 */
 	public function get_updated_options(): array {
 		return $this->updated_options;
+	}
+
+	/**
+	 * Get the number of WooPayments settings-page gateway hide calls.
+	 *
+	 * @return int
+	 */
+	public function get_hide_gateways_on_settings_page_calls(): int {
+		return $this->hide_gateways_on_settings_page_calls;
 	}
 
 	/**

@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
 use Automattic\WooCommerce\Blueprint\Steps\Step;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 
 /**
  * ExportWCPaymentGateways class
@@ -62,9 +63,25 @@ class ExportWCPaymentGateways implements StepExporter {
 	 * @return void
 	 */
 	protected function maybe_hide_wcpay_gateways() {
-		if ( class_exists( 'WC_Payments' ) ) {
-			\WC_Payments::hide_gateways_on_settings_page();
+		$legacy_runtime = $this->get_woopayments_legacy_runtime();
+		if ( null !== $legacy_runtime ) {
+			$legacy_runtime->hide_gateways_on_settings_page();
 		}
+	}
+
+	/**
+	 * Get the WooPayments legacy runtime.
+	 *
+	 * @return WooPaymentsLegacyRuntime|null
+	 */
+	private function get_woopayments_legacy_runtime(): ?WooPaymentsLegacyRuntime {
+		try {
+			$legacy_runtime = wc_get_container()->get( WooPaymentsLegacyRuntime::class );
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+
+		return $legacy_runtime instanceof WooPaymentsLegacyRuntime ? $legacy_runtime : null;
 	}
 
 	/**

@@ -5,9 +5,12 @@
  * Handles requests to install and activate dependent plugins.
  */
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 
 defined( 'ABSPATH' ) || exit;
@@ -634,7 +637,8 @@ class Plugins extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|array Connect URL.
 	 */
 	public function connect_wcpay() {
-		if ( ! class_exists( 'WC_Payments' ) ) {
+		$legacy_runtime = $this->get_woopayments_legacy_runtime();
+		if ( null === $legacy_runtime || ! $legacy_runtime->is_loaded() ) {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooPayments plugin.', 'woocommerce' ), 500 );
 		}
 
@@ -649,6 +653,21 @@ class Plugins extends \WC_REST_Data_Controller {
 				admin_url( 'admin.php' )
 			),
 		);
+	}
+
+	/**
+	 * Get the WooPayments legacy runtime.
+	 *
+	 * @return WooPaymentsLegacyRuntime|null
+	 */
+	private function get_woopayments_legacy_runtime(): ?WooPaymentsLegacyRuntime {
+		try {
+			$legacy_runtime = wc_get_container()->get( WooPaymentsLegacyRuntime::class );
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+
+		return $legacy_runtime instanceof WooPaymentsLegacyRuntime ? $legacy_runtime : null;
 	}
 
 	/**

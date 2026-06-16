@@ -1,4 +1,5 @@
 <?php
+declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
@@ -8,6 +9,7 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as Suggestions;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 use Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
@@ -159,7 +161,9 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public static function is_wcpay_active() {
-		return class_exists( '\WC_Payments' );
+		$legacy_runtime = self::get_woopayments_legacy_runtime();
+
+		return null !== $legacy_runtime && $legacy_runtime->is_loaded();
 	}
 
 	/**
@@ -172,12 +176,9 @@ class WooCommercePayments extends Task {
 			return false;
 		}
 
-		$wc_payments_gateway = self::get_gateway();
-		if ( $wc_payments_gateway && method_exists( $wc_payments_gateway, 'is_connected' ) ) {
-			return $wc_payments_gateway->is_connected();
-		}
+		$legacy_runtime = self::get_woopayments_legacy_runtime();
 
-		return false;
+		return null !== $legacy_runtime ? $legacy_runtime->is_gateway_connected() ?? false : false;
 	}
 
 	/**
@@ -191,12 +192,9 @@ class WooCommercePayments extends Task {
 			return false;
 		}
 
-		$wc_payments_gateway = self::get_gateway();
-		if ( $wc_payments_gateway && method_exists( $wc_payments_gateway, 'is_account_partially_onboarded' ) ) {
-			return $wc_payments_gateway->is_account_partially_onboarded();
-		}
+		$legacy_runtime = self::get_woopayments_legacy_runtime();
 
-		return false;
+		return null !== $legacy_runtime ? $legacy_runtime->is_gateway_partially_onboarded() ?? false : false;
 	}
 
 	/**
@@ -233,19 +231,6 @@ class WooCommercePayments extends Task {
 	 */
 	public static function is_supported() {
 		return ! empty( self::get_suggestion() );
-	}
-
-	/**
-	 * Get the WooPayments gateway.
-	 *
-	 * @return \WC_Payments|null
-	 */
-	private static function get_gateway() {
-		$payment_gateways = WC()->payment_gateways()->payment_gateways();
-		if ( isset( $payment_gateways['woocommerce_payments'] ) ) {
-			return $payment_gateways['woocommerce_payments'];
-		}
-		return null;
 	}
 
 	/**
@@ -310,5 +295,20 @@ class WooCommercePayments extends Task {
 
 		// Fall back to the WooPayments task page URL.
 		return add_query_arg( 'task', $this->get_id(), admin_url( 'admin.php?page=wc-admin' ) );
+	}
+
+	/**
+	 * Get the WooPayments legacy runtime.
+	 *
+	 * @return WooPaymentsLegacyRuntime|null
+	 */
+	private static function get_woopayments_legacy_runtime(): ?WooPaymentsLegacyRuntime {
+		try {
+			$legacy_runtime = wc_get_container()->get( WooPaymentsLegacyRuntime::class );
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+
+		return $legacy_runtime instanceof WooPaymentsLegacyRuntime ? $legacy_runtime : null;
 	}
 }
