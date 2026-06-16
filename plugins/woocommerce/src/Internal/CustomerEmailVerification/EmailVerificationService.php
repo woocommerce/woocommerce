@@ -133,6 +133,26 @@ class EmailVerificationService {
 	}
 
 	/**
+	 * Return the number of seconds elapsed since the last verification key was issued, or null if no key exists.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param int $user_id WordPress user ID.
+	 * @return int|null Seconds since the last key was created, or null when no key is stored.
+	 */
+	public function seconds_since_last_key( int $user_id ): ?int {
+		$stored = (string) Users::get_site_user_meta( $user_id, self::KEY_META );
+
+		if ( ! str_contains( $stored, ':' ) ) {
+			return null;
+		}
+
+		list( $timestamp ) = explode( ':', $stored, 2 );
+
+		return time() - (int) $timestamp;
+	}
+
+	/**
 	 * Return whether the store currently requires email verification.
 	 *
 	 * Reads the {@see 'woocommerce_require_email_verification'} option. This method
