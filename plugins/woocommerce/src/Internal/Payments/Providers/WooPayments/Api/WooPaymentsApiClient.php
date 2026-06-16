@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLe
 use WP_Error;
 
 /**
- * Minimal native WooPayments API client for non-checkout money operations.
+ * Minimal native WooPayments API client for provider-owned WooPayments operations.
  *
  * @since 11.0.0
  * @internal Transitional internal component for the native payments runtime.
@@ -117,6 +117,59 @@ class WooPaymentsApiClient {
 	 */
 	public function cancel_intention( string $intent_id ): array {
 		return $this->request( array(), 'intentions/' . $intent_id . '/cancel', 'POST' );
+	}
+
+	/**
+	 * Create a WooPayments customer.
+	 *
+	 * @param array<string,mixed> $customer_data Customer payload.
+	 * @return string
+	 */
+	public function create_customer( array $customer_data ): string {
+		$result = $this->request( $customer_data, 'customers', 'POST' );
+
+		return isset( $result['id'] ) ? (string) $result['id'] : '';
+	}
+
+	/**
+	 * Update a WooPayments customer.
+	 *
+	 * @param string              $customer_id   Customer ID.
+	 * @param array<string,mixed> $customer_data Customer update payload.
+	 * @return void
+	 * @throws WooPaymentsApiException When the customer ID is missing.
+	 */
+	public function update_customer( string $customer_id, array $customer_data = array() ): void {
+		if ( '' === trim( $customer_id ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
+			throw new WooPaymentsApiException( __( 'Customer ID is required.', 'woocommerce' ), 'wcpay_mandatory_customer_id_missing', 400 );
+		}
+
+		$this->request( $customer_data, 'customers/' . $customer_id, 'POST' );
+	}
+
+	/**
+	 * Create and confirm a positive-amount WooPayments PaymentIntent.
+	 *
+	 * @param array<string,mixed> $request_data     Intent payload.
+	 * @param string              $idempotency_key  Deterministic idempotency key.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request shape is invalid.
+	 */
+	public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+		$has_payment_method     = isset( $request_data['payment_method'] ) && '' !== trim( (string) $request_data['payment_method'] );
+		$has_confirmation_token = isset( $request_data['confirmation_token'] ) && '' !== trim( (string) $request_data['confirmation_token'] );
+
+		if ( $has_payment_method === $has_confirmation_token ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
+			throw new WooPaymentsApiException( __( 'A WooPayments charge requires exactly one payment credential.', 'woocommerce' ), 'wcpay_invalid_payment_credential', 400 );
+		}
+
+		$request_data['confirm']         = true;
+		$request_data['capture_method']  = $request_data['capture_method'] ?? 'automatic';
+		$request_data['idempotency_key'] = $idempotency_key;
+
+		return $this->request( $request_data, 'intentions', 'POST' );
 	}
 
 	/**

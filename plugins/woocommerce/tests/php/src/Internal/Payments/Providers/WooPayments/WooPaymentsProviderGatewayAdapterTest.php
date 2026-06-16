@@ -7,6 +7,8 @@ use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
 use Automattic\WooCommerce\Internal\Payments\PaymentContext;
 use Automattic\WooCommerce\Internal\Payments\PaymentOutcome;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCustomerService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProviderGatewayAdapter;
 use WC_Order;
@@ -124,6 +126,247 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( PaymentOutcome::STATUS_FAILED, $outcome->get_status() );
 		$this->assertSame( 'legacy_process_payment_failed', $outcome->get_data()['error_code'] );
+	}
+
+	/**
+	 * @testdox Charge should prefer the native positive-amount transport before the legacy gateway bridge.
+	 */
+	public function test_charge_prefers_native_positive_amount_transport_when_available(): void {
+		$order            = $this->create_woopayments_order();
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				if ( 1000 !== $request_data['amount']
+					|| 'USD' !== $request_data['currency']
+					|| 'cus_native' !== $request_data['customer']
+					|| 'pm_request' !== $request_data['payment_method']
+					|| array( 'card' ) !== $request_data['payment_method_types']
+					|| 'key_charge' !== $idempotency_key ) {
+					throw new \RuntimeException( 'Unexpected native charge request payload.' );
+				}
+
+				return array(
+					'id'             => 'pi_native',
+					'status'         => 'succeeded',
+					'client_secret'  => 'secret_native',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_native',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 1,
+						'data'        => array(
+							array(
+								'id'                     => 'ch_native',
+								'payment_method'         => 'pm_native',
+								'payment_method_details' => array(
+									'type' => 'card',
+									'card' => array(
+										'brand' => 'visa',
+										'last4' => '4242',
+									),
+								),
+								'balance_transaction'    => array( 'id' => 'txn_native' ),
+								'outcome'                => array( 'risk_level' => 'normal' ),
+							),
+						),
+					),
+				);
+			}
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->with( $this->isInstanceOf( WC_Order::class ) )
+			->willReturn( 'cus_native' );
+
+		$sut     = $this->create_adapter( $gateway, $api_client, $customer_service );
+		$outcome = $sut->charge( PaymentContext::for_checkout( $order, OrderPaymentStore::GATEWAY_ID, 'pm_request' ), 'key_charge' );
+		$order   = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertSame( 'pi_native', $outcome->get_provider_payment_id() );
+		$this->assertSame( 'pm_native', $outcome->get_payment_method_id() );
+		$this->assertSame( 'cus_native', $outcome->get_customer_id() );
+		$this->assertSame( 0, $gateway->processed_order_id );
+		$this->assertSame( '4242', $order->get_meta( 'last4', true ) );
+		$this->assertSame( 'visa', $order->get_meta( '_card_brand', true ) );
+		$this->assertSame( 'Credit / Debit Cards', $order->get_payment_method_title() );
+	}
+
+	/**
+	 * @testdox Charge should recreate and retry when the native transport reports a missing customer.
+	 */
+	public function test_charge_retries_after_missing_customer_by_recreating_customer(): void {
+		$order            = $this->create_woopayments_order();
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Number of attempts.
+			 *
+			 * @var int
+			 */
+			private int $attempt = 0;
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				unset( $idempotency_key );
+				++$this->attempt;
+
+				if ( 1 === $this->attempt ) {
+					if ( 'cus_missing' !== $request_data['customer'] ) {
+						throw new \RuntimeException( 'First attempt must use the original customer.' );
+					}
+
+					throw new WooPaymentsApiException( 'No such customer: customer', 'resource_missing', 404 );
+				}
+
+				if ( 'cus_recreated' !== $request_data['customer'] ) {
+					throw new \RuntimeException( 'Second attempt must use the recreated customer.' );
+				}
+
+				return array(
+					'id'             => 'pi_retry',
+					'status'         => 'succeeded',
+					'client_secret'  => 'secret_retry',
+					'customer'       => 'cus_recreated',
+					'payment_method' => 'pm_retry',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 0,
+						'data'        => array(),
+					),
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order', 'recreate_customer_for_order' ) )
+			->getMock();
+
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_missing' );
+		$customer_service->expects( $this->once() )
+			->method( 'recreate_customer_for_order' )
+			->with( $this->isInstanceOf( WC_Order::class ) )
+			->willReturn( 'cus_recreated' );
+
+		$sut     = $this->create_adapter( $gateway, $api_client, $customer_service );
+		$outcome = $sut->charge( PaymentContext::for_checkout( $order, OrderPaymentStore::GATEWAY_ID, 'pm_request' ), 'key_charge' );
+
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertSame( 'cus_recreated', $outcome->get_customer_id() );
+		$this->assertSame( 0, $gateway->processed_order_id );
+	}
+
+	/**
+	 * @testdox Charge should set card display meta before returning a customer-action outcome.
+	 */
+	public function test_charge_sets_card_display_meta_before_returning_requires_action(): void {
+		$order            = $this->create_woopayments_order();
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				unset( $request_data, $idempotency_key );
+
+				return array(
+					'id'             => 'pi_action',
+					'status'         => 'requires_action',
+					'client_secret'  => 'secret_action',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_native',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 1,
+						'data'        => array(
+							array(
+								'id'                     => 'ch_native',
+								'payment_method_details' => array(
+									'type' => 'card',
+									'card' => array(
+										'brand' => 'visa',
+										'last4' => '4242',
+									),
+								),
+							),
+						),
+					),
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_native' );
+
+		$sut     = $this->create_adapter( $gateway, $api_client, $customer_service );
+		$outcome = $sut->charge( PaymentContext::for_checkout( $order, OrderPaymentStore::GATEWAY_ID, 'pm_request' ), 'key_charge' );
+		$order   = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( PaymentOutcome::STATUS_REQUIRES_CUSTOMER_ACTION, $outcome->get_status() );
+		$this->assertStringStartsWith( '#wcpay-confirm-pi:' . $order->get_id() . ':secret_action:', $outcome->get_redirect_url() );
+		$this->assertSame( '4242', $order->get_meta( 'last4', true ) );
+		$this->assertSame( 'visa', $order->get_meta( '_card_brand', true ) );
+		$this->assertNotSame( '', $order->get_meta( '_wcpay_payment_method_details', true ) );
+		$this->assertSame( 'Credit / Debit Cards', $order->get_payment_method_title() );
+		$this->assertSame( 0, $gateway->processed_order_id );
 	}
 
 	/**
@@ -323,21 +566,27 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	/**
 	 * Create adapter with a fake legacy gateway.
 	 *
-	 * @param RecordingLegacyGateway|null $gateway Legacy gateway.
-	 * @param WooPaymentsApiClient|null   $api_client Native API client.
+	 * @param RecordingLegacyGateway|null     $gateway Legacy gateway.
+	 * @param WooPaymentsApiClient|null       $api_client Native API client.
+	 * @param WooPaymentsCustomerService|null $customer_service WooPayments customer service.
 	 * @return WooPaymentsProviderGatewayAdapter
 	 */
-	private function create_adapter( ?RecordingLegacyGateway $gateway, ?WooPaymentsApiClient $api_client = null ): WooPaymentsProviderGatewayAdapter {
+	private function create_adapter( ?RecordingLegacyGateway $gateway, ?WooPaymentsApiClient $api_client = null, ?WooPaymentsCustomerService $customer_service = null ): WooPaymentsProviderGatewayAdapter {
 		$legacy_runtime = new WooPaymentsLegacyRuntime();
 		$legacy_runtime->init( new LegacyProxyWithGateway( $gateway ) );
 		$api_client = $api_client ?? $this->getMockBuilder( WooPaymentsApiClient::class )
 			->disableOriginalConstructor()
 			->onlyMethods( array( 'is_available' ) )
 			->getMock();
-		$api_client->method( 'is_available' )->willReturn( false );
+		if ( $api_client instanceof \PHPUnit\Framework\MockObject\MockObject ) {
+			$api_client->method( 'is_available' )->willReturn( false );
+		}
+		$customer_service = $customer_service ?? $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->getMock();
 
 		$sut = new WooPaymentsProviderGatewayAdapter();
-		$sut->init( $legacy_runtime, $api_client );
+		$sut->init( $legacy_runtime, $api_client, $customer_service );
 
 		return $sut;
 	}

@@ -77,4 +77,104 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 			$this->assertStringContainsString( 'Card declined', $exception->getMessage() );
 		}
 	}
+
+	/**
+	 * @testdox Should create a customer through the native transport customers endpoint.
+	 */
+	public function test_create_customer_posts_to_customers_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'id' => 'cus_test' ) ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client );
+
+		$customer_id = $sut->create_customer(
+			array(
+				'name'  => 'Ada Lovelace',
+				'email' => 'ada@example.com',
+			)
+		);
+
+		$this->assertSame( 'cus_test', $customer_id );
+		$this->assertSame( '/sites/123/wcpay/customers', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertStringContainsString( '"name":"Ada Lovelace"', (string) $http_client->last_body );
+	}
+
+	/**
+	 * @testdox Should update an existing customer through the native transport customer resource endpoint.
+	 */
+	public function test_update_customer_posts_to_customer_resource(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array() ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client );
+
+		$sut->update_customer(
+			'cus_test',
+			array(
+				'email' => 'ada@example.com',
+			)
+		);
+
+		$this->assertSame( '/sites/123/wcpay/customers/cus_test', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertStringContainsString( '"email":"ada@example.com"', (string) $http_client->last_body );
+	}
+
+	/**
+	 * @testdox Should create and confirm native WooPayments PaymentIntents with one payment credential and lifted idempotency.
+	 */
+	public function test_create_and_confirm_payment_intention_lifts_idempotency_and_preserves_request_shape(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'id'      => 'pi_test',
+					'status'  => 'succeeded',
+					'charges' => array(
+						'total_count' => 0,
+						'data'        => array(),
+					),
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client );
+
+		$result = $sut->create_and_confirm_payment_intention(
+			array(
+				'amount'               => 1000,
+				'currency'             => 'usd',
+				'customer'             => 'cus_test',
+				'metadata'             => array( 'order_id' => '123' ),
+				'payment_method'       => 'pm_test',
+				'payment_method_types' => array( 'card' ),
+			),
+			'idem_charge'
+		);
+
+		$this->assertSame( 'pi_test', $result['id'] );
+		$this->assertSame( '/sites/123/wcpay/intentions', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertSame( 'idem_charge', $http_client->last_headers['Idempotency-Key'] );
+		$this->assertStringContainsString( '"payment_method":"pm_test"', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"payment_method_types":["card"]', (string) $http_client->last_body );
+		$this->assertStringNotContainsString( 'idempotency_key', (string) $http_client->last_body );
+	}
 }

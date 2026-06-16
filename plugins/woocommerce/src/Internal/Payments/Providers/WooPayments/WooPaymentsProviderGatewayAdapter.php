@@ -37,16 +37,25 @@ class WooPaymentsProviderGatewayAdapter {
 	private WooPaymentsApiClient $api_client;
 
 	/**
+	 * WooPayments customer service.
+	 *
+	 * @var WooPaymentsCustomerService
+	 */
+	private WooPaymentsCustomerService $customer_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsLegacyRuntime $legacy_runtime WooPayments legacy runtime.
-	 * @param WooPaymentsApiClient     $api_client     Native WooPayments API client.
+	 * @param WooPaymentsLegacyRuntime   $legacy_runtime  WooPayments legacy runtime.
+	 * @param WooPaymentsApiClient       $api_client      Native WooPayments API client.
+	 * @param WooPaymentsCustomerService $customer_service WooPayments customer service.
 	 */
-	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsApiClient $api_client ): void {
-		$this->legacy_runtime = $legacy_runtime;
-		$this->api_client     = $api_client;
+	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsApiClient $api_client, WooPaymentsCustomerService $customer_service ): void {
+		$this->legacy_runtime   = $legacy_runtime;
+		$this->api_client       = $api_client;
+		$this->customer_service = $customer_service;
 	}
 
 	/**
@@ -77,6 +86,15 @@ class WooPaymentsProviderGatewayAdapter {
 	 * @return PaymentOutcome
 	 */
 	public function charge( PaymentContext $context, string $idempotency_key ): PaymentOutcome {
+		$order = $context->get_order();
+		if ( 0.0 < (float) $order->get_total() && $this->get_api_client()->is_available() ) {
+			try {
+				return $this->charge_via_native_transport( $context, $idempotency_key );
+			} catch ( WooPaymentsApiException $exception ) {
+				return $this->failed_transport_outcome( 'charge', $exception );
+			}
+		}
+
 		$gateway = $this->get_legacy_gateway();
 		if ( ! is_object( $gateway ) || ! is_callable( array( $gateway, 'process_payment' ) ) ) {
 			return $this->unavailable_outcome( 'charge' );
@@ -296,6 +314,378 @@ class WooPaymentsProviderGatewayAdapter {
 	 */
 	private function get_api_client(): WooPaymentsApiClient {
 		return $this->api_client;
+	}
+
+	/**
+	 * Get the WooPayments customer service.
+	 *
+	 * @return WooPaymentsCustomerService
+	 */
+	private function get_customer_service(): WooPaymentsCustomerService {
+		return $this->customer_service;
+	}
+
+	/**
+	 * Charge an order through the native WooPayments transport.
+	 *
+	 * @param PaymentContext $context         Payment context.
+	 * @param string         $idempotency_key Deterministic idempotency key.
+	 * @return PaymentOutcome
+	 * @throws WooPaymentsApiException When the provider request fails.
+	 */
+	private function charge_via_native_transport( PaymentContext $context, string $idempotency_key ): PaymentOutcome {
+		$order              = $context->get_order();
+		$payment_credential = $this->get_payment_credential( $context );
+
+		if ( '' === $payment_credential ) {
+			return new PaymentOutcome(
+				PaymentOutcome::STATUS_FAILED,
+				'',
+				'',
+				'',
+				'',
+				array( 'error_code' => 'wcpay_missing_payment_credential' )
+			);
+		}
+
+		$customer_id  = $this->get_customer_service()->get_or_create_customer_id_for_order( $order );
+		$request_data = $this->build_native_charge_request_data( $context, $payment_credential, $customer_id );
+
+		try {
+			$result = $this->get_api_client()->create_and_confirm_payment_intention( $request_data, $idempotency_key );
+		} catch ( WooPaymentsApiException $exception ) {
+			if ( ! $this->is_missing_customer_exception( $exception ) ) {
+				throw $exception;
+			}
+
+			$customer_id              = $this->get_customer_service()->recreate_customer_for_order( $order );
+			$request_data['customer'] = $customer_id;
+			$result                   = $this->get_api_client()->create_and_confirm_payment_intention( $request_data, $idempotency_key );
+		}
+
+		$this->apply_payment_method_display_details( $order, $result );
+
+		return $this->normalize_native_charge_result( $result, $context, $customer_id );
+	}
+
+	/**
+	 * Build the native WooPayments charge request payload.
+	 *
+	 * @param PaymentContext $context            Payment context.
+	 * @param string         $payment_credential Payment method or confirmation token.
+	 * @param string         $customer_id        Customer ID.
+	 * @return array<string,mixed>
+	 */
+	private function build_native_charge_request_data( PaymentContext $context, string $payment_credential, string $customer_id ): array {
+		$order         = $context->get_order();
+		$payment_data  = $context->get_payment_data();
+		$provider_data = $context->get_provider_data();
+		$request_data  = array(
+			'amount'               => $this->prepare_amount( (float) $order->get_total(), (string) $order->get_currency() ),
+			'currency'             => (string) $order->get_currency(),
+			'customer'             => $customer_id,
+			'metadata'             => $this->build_order_metadata( $order ),
+			'payment_method_types' => array( 'card' ),
+		);
+
+		if ( $this->is_confirmation_token( $payment_credential ) ) {
+			$request_data['confirmation_token'] = $payment_credential;
+		} else {
+			$request_data['payment_method'] = $payment_credential;
+		}
+
+		if ( ! empty( $provider_data['cvc_confirmation'] ) ) {
+			$request_data['cvc_confirmation'] = (string) $provider_data['cvc_confirmation'];
+		}
+
+		if ( ! empty( $payment_data['save_payment_method'] ) ) {
+			$request_data['setup_future_usage'] = 'off_session';
+		}
+
+		if ( ! empty( $payment_data['payment_token'] ) && ! preg_match( '/^(card_|src_)/', $payment_credential ) ) {
+			$billing_details = $this->get_billing_data_from_order( $order );
+			if ( ! empty( $billing_details ) ) {
+				$request_data['payment_method_update_data'] = array(
+					'billing_details' => $billing_details,
+				);
+			}
+		}
+
+		return $request_data;
+	}
+
+	/**
+	 * Build the WooPayments metadata payload for an order.
+	 *
+	 * @param WC_Order $order Order being charged.
+	 * @return array<string,mixed>
+	 */
+	private function build_order_metadata( WC_Order $order ): array {
+		$metadata = array(
+			'customer_name'        => trim( sanitize_text_field( $order->get_billing_first_name() ) . ' ' . sanitize_text_field( $order->get_billing_last_name() ) ),
+			'customer_email'       => sanitize_email( $order->get_billing_email() ),
+			'site_url'             => esc_url( get_site_url() ),
+			'order_id'             => $order->get_id(),
+			'order_number'         => $order->get_order_number(),
+			'order_key'            => $order->get_order_key(),
+			'payment_type'         => 'single',
+			'checkout_type'        => $order->get_created_via(),
+			'client_version'       => defined( 'WC_VERSION' ) ? WC_VERSION : '',
+			'subscription_payment' => 'no',
+		);
+
+		/**
+		 * Filters the WooPayments metadata created from an order.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param array<string,mixed> $metadata Metadata being sent to WooPayments.
+		 * @param WC_Order            $order    Order object.
+		 * @param string              $payment_type Payment type slug.
+		 */
+		$metadata = apply_filters( 'wcpay_metadata_from_order', $metadata, $order, 'single' );
+
+		return is_array( $metadata ) ? $metadata : array();
+	}
+
+	/**
+	 * Build the billing-details payload for payment method updates.
+	 *
+	 * @param WC_Order $order Order being charged.
+	 * @return array<string,mixed>
+	 */
+	private function get_billing_data_from_order( WC_Order $order ): array {
+		$billing_details = array(
+			'address' => array_filter(
+				array(
+					'city'        => $order->get_billing_city(),
+					'country'     => $order->get_billing_country(),
+					'line1'       => $order->get_billing_address_1(),
+					'line2'       => $order->get_billing_address_2(),
+					'postal_code' => $order->get_billing_postcode(),
+					'state'       => $order->get_billing_state(),
+				),
+				static fn( string $value ): bool => '' !== $value
+			),
+		);
+
+		if ( '' !== trim( $order->get_formatted_billing_full_name() ) ) {
+			$billing_details['name'] = trim( $order->get_formatted_billing_full_name() );
+		}
+
+		if ( '' !== $order->get_billing_email() ) {
+			$billing_details['email'] = $order->get_billing_email();
+		}
+
+		if ( '' !== $order->get_billing_phone() ) {
+			$billing_details['phone'] = $order->get_billing_phone();
+		}
+
+		if ( empty( $billing_details['address'] ) ) {
+			unset( $billing_details['address'] );
+		}
+
+		return $billing_details;
+	}
+
+	/**
+	 * Apply payment-method details to the order before completion or customer action.
+	 *
+	 * @param WC_Order            $order  Order being charged.
+	 * @param array<string,mixed> $result Native PaymentIntent response.
+	 */
+	private function apply_payment_method_display_details( WC_Order $order, array $result ): void {
+		$charge                 = $this->get_latest_charge( $result );
+		$payment_method_details = is_array( $charge['payment_method_details'] ?? null ) ? $charge['payment_method_details'] : array();
+		$wallet_type            = $payment_method_details['card']['wallet']['type'] ?? null;
+
+		if ( ! empty( $payment_method_details ) ) {
+			$encoded_payment_method_details = wp_json_encode( $payment_method_details );
+			if ( false !== $encoded_payment_method_details ) {
+				$order->update_meta_data( '_wcpay_payment_method_details', $encoded_payment_method_details );
+			}
+		}
+
+		if ( 'link' !== $wallet_type && isset( $payment_method_details['card']['last4'] ) ) {
+			$order->update_meta_data( 'last4', (string) $payment_method_details['card']['last4'] );
+			if ( isset( $payment_method_details['card']['brand'] ) ) {
+				$order->update_meta_data( '_card_brand', (string) $payment_method_details['card']['brand'] );
+			}
+		}
+
+		if ( is_string( $wallet_type ) && '' !== $wallet_type ) {
+			$order->update_meta_data( '_wcpay_express_checkout_payment_method', $wallet_type );
+		}
+
+		$order->set_payment_method_title( $this->get_payment_method_title( $wallet_type ) );
+		$order->save();
+	}
+
+	/**
+	 * Normalize a native PaymentIntent response to a neutral payment outcome.
+	 *
+	 * @param array<string,mixed> $result              Native PaymentIntent response.
+	 * @param PaymentContext      $context             Payment context.
+	 * @param string              $fallback_customer_id Customer ID used in the request.
+	 * @return PaymentOutcome
+	 */
+	private function normalize_native_charge_result( array $result, PaymentContext $context, string $fallback_customer_id ): PaymentOutcome {
+		$status            = isset( $result['status'] ) ? (string) $result['status'] : '';
+		$intent_id         = isset( $result['id'] ) ? (string) $result['id'] : '';
+		$client_secret     = isset( $result['client_secret'] ) ? (string) $result['client_secret'] : '';
+		$charge            = $this->get_latest_charge( $result );
+		$charge_id         = isset( $charge['id'] ) ? (string) $charge['id'] : '';
+		$payment_method_id = isset( $result['payment_method'] ) ? (string) $result['payment_method'] : ( isset( $charge['payment_method'] ) ? (string) $charge['payment_method'] : $this->get_payment_credential( $context ) );
+		$customer_id       = isset( $result['customer'] ) ? (string) $result['customer'] : $fallback_customer_id;
+		$meta              = array(
+			'_wcpay_intent_currency' => isset( $result['currency'] ) ? (string) $result['currency'] : (string) $context->get_order()->get_currency(),
+			'_wcpay_mode'            => $this->is_test_mode_enabled() ? 'test' : 'live',
+		);
+
+		if ( '' !== $charge_id ) {
+			$meta['_charge_id'] = $charge_id;
+		}
+
+		if ( isset( $charge['balance_transaction']['id'] ) ) {
+			$meta['_wcpay_payment_transaction_id'] = (string) $charge['balance_transaction']['id'];
+		}
+
+		if ( isset( $charge['outcome']['risk_level'] ) ) {
+			$meta['_charge_risk_level'] = (string) $charge['outcome']['risk_level'];
+		}
+
+		switch ( $status ) {
+			case 'succeeded':
+				return new PaymentOutcome( PaymentOutcome::STATUS_COMPLETED, $intent_id, '', $payment_method_id, $customer_id, array( 'meta' => $meta ) );
+
+			case 'requires_capture':
+				return new PaymentOutcome( PaymentOutcome::STATUS_AUTHORIZED, $intent_id, '', $payment_method_id, $customer_id, array( 'meta' => $meta ) );
+
+			case 'processing':
+				return new PaymentOutcome( PaymentOutcome::STATUS_PENDING_ASYNC, $intent_id, '', $payment_method_id, $customer_id, array( 'meta' => $meta ) );
+
+			case 'requires_action':
+			case 'requires_confirmation':
+				return new PaymentOutcome(
+					PaymentOutcome::STATUS_REQUIRES_CUSTOMER_ACTION,
+					$intent_id,
+					$this->build_confirmation_redirect( $context->get_order(), $client_secret ),
+					$payment_method_id,
+					$customer_id,
+					array( 'meta' => $meta )
+				);
+
+			case 'canceled':
+				return new PaymentOutcome( PaymentOutcome::STATUS_CANCELED, $intent_id, '', $payment_method_id, $customer_id, array( 'meta' => $meta ) );
+		}
+
+		$error = is_array( $result['last_payment_error'] ?? null ) ? $result['last_payment_error'] : array();
+
+		return new PaymentOutcome(
+			PaymentOutcome::STATUS_FAILED,
+			$intent_id,
+			'',
+			$payment_method_id,
+			$customer_id,
+			array(
+				'meta'          => $meta,
+				'error_code'    => isset( $error['code'] ) ? (string) $error['code'] : 'wcpay_native_charge_failed',
+				'error_message' => isset( $error['message'] ) ? (string) $error['message'] : '',
+			)
+		);
+	}
+
+	/**
+	 * Get the submitted payment method or saved payment token.
+	 *
+	 * @param PaymentContext $context Payment context.
+	 * @return string
+	 */
+	private function get_payment_credential( PaymentContext $context ): string {
+		$payment_data  = $context->get_payment_data();
+		$payment_token = isset( $payment_data['payment_token'] ) ? (string) $payment_data['payment_token'] : '';
+
+		return '' !== $payment_token ? $payment_token : $context->get_payment_method_id();
+	}
+
+	/**
+	 * Tell whether a credential is a Stripe confirmation token.
+	 *
+	 * @param string $payment_credential Credential value.
+	 * @return bool
+	 */
+	private function is_confirmation_token( string $payment_credential ): bool {
+		return 0 === strpos( $payment_credential, 'ctoken_' );
+	}
+
+	/**
+	 * Tell whether a transport exception represents a missing customer.
+	 *
+	 * @param WooPaymentsApiException $exception Native transport exception.
+	 * @return bool
+	 */
+	private function is_missing_customer_exception( WooPaymentsApiException $exception ): bool {
+		return 'resource_missing' === $exception->get_error_code()
+			&& false !== strpos( strtolower( $exception->getMessage() ), 'customer' );
+	}
+
+	/**
+	 * Get the latest charge array from a PaymentIntent response.
+	 *
+	 * @param array<string,mixed> $result Native PaymentIntent response.
+	 * @return array<string,mixed>
+	 */
+	private function get_latest_charge( array $result ): array {
+		$charges = isset( $result['charges']['data'] ) && is_array( $result['charges']['data'] ) ? $result['charges']['data'] : array();
+		$charge  = empty( $charges ) ? array() : end( $charges );
+
+		return is_array( $charge ) ? $charge : array();
+	}
+
+	/**
+	 * Build the legacy-compatible frontend confirmation hash.
+	 *
+	 * @param WC_Order $order         Order being charged.
+	 * @param string   $client_secret Intent client secret.
+	 * @return string
+	 */
+	private function build_confirmation_redirect( WC_Order $order, string $client_secret ): string {
+		return '#wcpay-confirm-pi:' . $order->get_id() . ':' . $client_secret . ':' . wp_create_nonce( 'wcpay_update_order_status_nonce' );
+	}
+
+	/**
+	 * Get the human-readable payment method title for a wallet type.
+	 *
+	 * @param string|null $wallet_type Express wallet type.
+	 * @return string
+	 */
+	private function get_payment_method_title( ?string $wallet_type ): string {
+		switch ( $wallet_type ) {
+			case 'link':
+				return __( 'Link', 'woocommerce' );
+
+			case 'apple_pay':
+				return __( 'Apple Pay', 'woocommerce' );
+
+			case 'google_pay':
+				return __( 'Google Pay', 'woocommerce' );
+		}
+
+		return __( 'Credit / Debit Cards', 'woocommerce' );
+	}
+
+	/**
+	 * Tell whether the current WooPayments runtime is in test mode.
+	 *
+	 * @return bool
+	 */
+	private function is_test_mode_enabled(): bool {
+		$test_mode = $this->legacy_runtime->is_test_mode();
+		if ( null !== $test_mode ) {
+			return $test_mode;
+		}
+
+		return 'yes' === get_option( 'wcpay_test_mode', 'no' );
 	}
 
 	/**
