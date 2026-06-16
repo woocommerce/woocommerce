@@ -1,0 +1,152 @@
+<?php
+/**
+ * BlockRegistrationContext class.
+ */
+
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Blocks\Domain;
+
+/**
+ * Decides whether WooCommerce block types and patterns should be registered for the current request.
+ *
+ * Runs during bootstrap on `plugins_loaded`, before the main query is parsed, so it inspects only $_SERVER,
+ * $_GET and constants set before wp-load — not query-dependent helpers such as is_favicon()/is_robots().
+ *
+ * @since 11.0.0
+ */
+class BlockRegistrationContext {
+
+	/**
+	 * Whether block types and patterns should be registered for the current request.
+	 *
+	 * Blacklist of known non-rendering contexts: an unrecognised request keeps registering (the previous
+	 * behaviour), so a missed case costs a little performance but never a rendering regression. Front-end,
+	 * admin and wp/v2 (block/site editor) requests therefore keep registering.
+	 *
+	 * @return bool True unless the request is a known non-rendering context.
+	 */
+	public function should_register(): bool {
+		// Store API renders no blocks.
+		if ( wc()->is_store_api_request() ) {
+			return false;
+		}
+
+		// Cron produces no output.
+		if ( wp_doing_cron() ) {
+			return false;
+		}
+
+		// AJAX (admin-ajax and wc-ajax) renders no blocks. wc-ajax's constants are set too late to use here, so
+		// detect it from the request; ! empty() matches WC_AJAX::set_wc_ajax_argument_in_query().
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the endpoint only, no state change.
+		if ( wp_doing_ajax() || ! empty( $_GET['wc-ajax'] ) ) {
+			return false;
+		}
+
+		// XML-RPC renders no blocks; its constant is set before wp-load, so it is reliable here.
+		if ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
+			return false;
+		}
+
+		// Favicon, robots.txt and XML sitemaps render no blocks.
+		if ( $this->is_non_rendering_path_request() ) {
+			return false;
+		}
+
+		// WooCommerce REST namespaces render no blocks (Store API handled above). wp/v2 is left registering for
+		// the block and site editors.
+		if ( $this->is_woocommerce_rest_request() ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether the request targets a WordPress endpoint that renders no block content: the favicon, robots.txt or
+	 * core XML sitemaps. The URI path is inspected directly because is_favicon()/is_robots() are unavailable this
+	 * early. WP core serves these in wp-includes/template-loader.php and the WP_Sitemaps class.
+	 *
+	 * @return bool
+	 */
+	private function is_non_rendering_path_request(): bool {
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$path = wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH );
+		if ( ! is_string( $path ) ) {
+			return false;
+		}
+
+		// Favicon, e.g. /favicon.ico (also matches subdirectory installs).
+		if ( '/favicon.ico' === substr( $path, -12 ) ) {
+			return true;
+		}
+
+		// robots.txt.
+		if ( '/robots.txt' === substr( $path, -11 ) ) {
+			return true;
+		}
+
+		// Core XML sitemaps, e.g. /wp-sitemap.xml or /wp-sitemap.xsl. The suffix check avoids matching a page
+		// slug that merely contains "wp-sitemap".
+		if ( false !== strpos( $path, 'wp-sitemap' ) && ( '.xml' === substr( $path, -4 ) || '.xsl' === substr( $path, -4 ) ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Whether the request targets a WooCommerce-owned REST namespace other than the Store API, in either pretty
+	 * (/wp-json/<namespace>) or plain (?rest_route=/<namespace>) permalink form.
+	 *
+	 * @return bool
+	 */
+	private function is_woocommerce_rest_request(): bool {
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+
+		// WooCommerce-owned namespaces that render no blocks; mirrors wc_rest_should_load_namespace() (add new
+		// versions here too). Store API (wc/store) is handled above; the trailing slash prevents matching a
+		// longer, unrelated namespace.
+		$namespaces = array(
+			'wc/v1/',
+			'wc/v2/',
+			'wc/v3/',
+			'wc/v4/',
+			'wc/private/',
+			'wc-admin/',
+			'wc-analytics/',
+			'wc-telemetry/',
+		);
+
+		$rest_prefix = trailingslashit( rest_get_url_prefix() );
+
+		// Pretty permalinks: /wp-json/<namespace>...
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] );
+		foreach ( $namespaces as $namespace ) {
+			if ( false !== strpos( $request_uri, $rest_prefix . $namespace ) ) {
+				return true;
+			}
+		}
+
+		// Plain permalinks: ?rest_route=/<namespace>...
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the route only, no state change.
+		if ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the route only, no state change.
+			$rest_route = rawurldecode( sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ) );
+			foreach ( $namespaces as $namespace ) {
+				if ( 0 === strpos( $rest_route, '/' . $namespace ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+}

@@ -145,10 +145,11 @@ class Bootstrap {
 
 		// Load assets unless this is a request specifically for the store API.
 		if ( ! $is_store_api_request ) {
-			// Template related functionality. These won't be loaded for store API requests, but may be loaded for
-			// regular rest requests to maintain compatibility with the store editor.
-			$this->container->get( BlockPatterns::class );
-			$this->container->get( BlockTypesController::class );
+			// Skip block/pattern registration on non-rendering requests. See BlockRegistrationContext.
+			if ( ( new BlockRegistrationContext() )->should_register() ) {
+				$this->container->get( BlockPatterns::class );
+				$this->container->get( BlockTypesController::class );
+			}
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( Notices::class )->init();
 
