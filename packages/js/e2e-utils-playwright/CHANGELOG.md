@@ -2,6 +2,17 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0](https://www.npmjs.com/package/@woocommerce/e2e-utils-playwright/v/0.5.0) - 2026-06-11 
+
+-   Minor - Enable the Interactivity API-powered Mini Cart by default. [#60823]
+-   Minor - Bump jest package dependency to 29.5.x. [#60324]
+-   Minor - Converted the package source code to TypeScript. [#63102]
+-   Patch - Make checkout address field helpers open collapsed address forms before filling fields. [#65548]
+-   Patch - Move the CommonJS build to prepack so day-to-day development only builds the ESM output. [#64876]
+-   Patch - Move TypeScript type-checking from the build to a new `lint:lang:types` script. Builds now emit types and JS without type-checking. [#65168]
+-   Patch - Replaced wireit + tsc package build pipeline with a per-package esbuild script. [#65210]
+-   Patch - Wait for the Gutenberg editor canvas iframe before falling back to the page context in Playwright tests. [#65532]
+
 ## [0.4.0](https://www.npmjs.com/package/@woocommerce/e2e-utils-playwright/v/0.4.0) - 2025-07-08 
 
 -   Minor - Added api-client module [#59409]

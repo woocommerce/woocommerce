@@ -54,6 +54,7 @@ export type ProductFiltersContext = {
 export type BlockAttributes = {
 	productId?: string;
 	isPreview: boolean;
+	showFilterDrawer?: boolean;
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;

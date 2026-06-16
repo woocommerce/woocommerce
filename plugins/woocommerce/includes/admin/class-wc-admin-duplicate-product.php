@@ -310,6 +310,10 @@ class WC_Admin_Duplicate_Product {
 	/**
 	 * Generates a unique sku for a given product.
 	 *
+	 * Appends a numeric suffix to the original SKU. For example, if the original SKU
+	 * is "SKU-123", the duplicate will get "SKU-123-1". This preserves hyphens in the
+	 * original SKU rather than treating them as suffix delimiters.
+	 *
 	 * @param WC_Product $product The product to generate a sku for.
 	 * @return void
 	 * @since 10.5.0
@@ -319,16 +323,30 @@ class WC_Admin_Duplicate_Product {
 	private function generate_unique_sku( $product ) {
 		global $wpdb;
 
-		// We want to remove the suffix from the sku so that we can find the maximum suffix using this root sku.
-		// This will allow us to find the next-highest suffix that is unique. While this does not support gap
-		// filling, this shouldn't matter for our use-case.
-		$root_sku = preg_replace( '/-[0-9]+$/', '', $product->get_sku() );
+		$original_sku = $product->get_sku();
 
-		// If the parent product has no SKU, don't do anything.
-		if ( ! $root_sku ) {
+		// If the product has no SKU, don't do anything.
+		if ( '' === $original_sku ) {
 			return;
 		}
 
+		// If the source SKU is not used by any saved product, use it as-is.
+		// This preserves backward compatibility with the REST API duplicate endpoint,
+		// which lets callers set a custom SKU on the duplicate and expects that SKU
+		// to be applied directly when it is unique.
+		$source_sku_in_use = (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->wc_product_meta_lookup} WHERE sku = %s",
+				$original_sku
+			)
+		);
+
+		if ( ! $source_sku_in_use ) {
+			$product->set_sku( $original_sku );
+			return;
+		}
+
+		// Query existing SKUs that match the pattern: original SKU + hyphen + number.
 		$existing_skus = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT lookup.sku
@@ -336,33 +354,46 @@ class WC_Admin_Duplicate_Product {
 					INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
 					WHERE posts.post_type IN ( 'product', 'product_variation' )
 					AND lookup.sku LIKE %s",
-				$wpdb->esc_like( $root_sku ) . '%'
+				$wpdb->esc_like( $original_sku ) . '-%'
 			)
 		);
 
-		// The sku is already unique!
-		if ( empty( $existing_skus ) ) {
-			$product->set_sku( $root_sku );
-			return;
-		}
-
-		// Find the maximum suffix so we can ensure uniqueness.
+		// Find the maximum suffix.
 		$max_suffix = 0;
+		// +1 for the hyphen separator between original SKU and suffix.
+		$prefix_len = strlen( $original_sku ) + 1;
 		foreach ( $existing_skus as $existing_sku ) {
-			// Pull a numerical suffix off the sku after the last hyphen.
-			$suffix = intval( substr( $existing_sku, strrpos( $existing_sku, '-', -1 ) + 1 ) );
-			if ( $suffix > $max_suffix ) {
-				$max_suffix = $suffix;
+			// Check if the SKU starts with our base and has a numeric suffix.
+			if ( stripos( $existing_sku, $original_sku . '-' ) === 0 ) {
+				$suffix_str = substr( $existing_sku, $prefix_len );
+				// Only consider pure numeric suffixes.
+				if ( is_numeric( $suffix_str ) ) {
+					$suffix = intval( $suffix_str );
+					if ( $suffix > $max_suffix ) {
+						$max_suffix = $suffix;
+					}
+				}
 			}
 		}
 
-		// We set a limit of SKUs to try in order to avoid infinite loops.
-		$limit      = $max_suffix + 100;
+		// Set the new SKU with the next available suffix.
+		$new_sku    = $original_sku . '-' . ( $max_suffix + 1 );
 		$product_id = $product->get_id();
 
-		while ( $max_suffix < $limit ) {
-			$new_sku = $root_sku . '-' . ( $max_suffix + 1 );
+		/**
+		 * Gives plugins an opportunity to verify SKU uniqueness themselves. Filter added to keep backwards
+		 * compatibility with `wc_product_has_unique_sku()`.
+		 * See: https://github.com/woocommerce/woocommerce/pull/62628
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param bool|null $has_unique_sku Set to a boolean value to short-circuit the default SKU check.
+		 * @param int       $product_id     The ID of the current product.
+		 * @param string    $sku            The SKU to check for uniqueness.
+		 */
+		$pre_has_unique_sku = apply_filters( 'wc_product_pre_has_unique_sku', true, $product_id, $new_sku );
 
+		if ( $pre_has_unique_sku ) {
 			/**
 			 * Gives plugins an opportunity to verify SKU uniqueness themselves. Filter added to keep backwards
 			 * compatibility with `wc_product_has_unique_sku()`.
@@ -370,33 +401,20 @@ class WC_Admin_Duplicate_Product {
 			 *
 			 * @since 10.5.0
 			 *
-			 * @param bool|null $has_unique_sku Set to a boolean value to short-circuit the default SKU check.
-			 * @param int $product_id The ID of the current product.
-			 * @param string $sku The SKU to check for uniqueness.
+			 * @param bool|null $sku_found Set to a boolean value to short-circuit the default SKU check.
+			 * @param int       $product_id The ID of the current product.
+			 * @param string    $sku       The SKU to check for uniqueness.
 			 */
-			$pre_has_unique_sku = apply_filters( 'wc_product_pre_has_unique_sku', true, $product_id, $new_sku );
+			$sku_found = apply_filters( 'wc_product_has_unique_sku', false, $product_id, $new_sku );
 
-			if ( $pre_has_unique_sku ) {
-				/**
-				 * Gives plugins an opportunity to verify SKU uniqueness themselves. Filter added to keep backwards
-				 * compatibility with `wc_product_has_unique_sku()`.
-				 * See: https://github.com/woocommerce/woocommerce/pull/62628
-				 *
-				 * @since 10.5.0
-				 *
-				 * @param bool|null $sku_found Set to a boolean value to short-circuit the default SKU check.
-				 * @param int $product_id The ID of the current product.
-				 * @param string $sku The SKU to check for uniqueness.
-				 */
-				$sku_found = apply_filters( 'wc_product_has_unique_sku', false, $product_id, $new_sku );
-
-				if ( ! $sku_found ) {
-					$product->set_sku( $new_sku );
-					return;
-				}
+			if ( ! $sku_found ) {
+				$product->set_sku( $new_sku );
+				return;
 			}
-			++$max_suffix;
 		}
+
+		// Fallback: use the standard unique SKU generator which loops until it finds a unique value.
+		$product->set_sku( wc_product_generate_unique_sku( $product_id, $original_sku, $max_suffix + 1 ) );
 	}
 }
 
