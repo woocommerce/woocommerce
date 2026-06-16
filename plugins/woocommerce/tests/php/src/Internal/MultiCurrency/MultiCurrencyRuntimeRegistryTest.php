@@ -65,6 +65,7 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'ups_compatibility',
 				'fedex_compatibility',
 				'points_rewards_compatibility',
+				'name_your_price_compatibility',
 				'subscriptions_compatibility',
 				'async_prices',
 				'storefront',
@@ -361,6 +362,30 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 			$filter_hooks
 		);
 		$this->assertSame( array(), $hook_groups['points_rewards_compatibility']['actions'] );
+	}
+
+	/**
+	 * @testdox Should preserve the WooPayments Name Your Price compatibility hook surface.
+	 */
+	public function test_name_your_price_compatibility_manifest_contains_preserved_hooks(): void {
+		$hook_groups = MultiCurrencyRuntimeRegistry::get_core_hook_groups();
+
+		$this->assertSame(
+			array(
+				'wc_nyp_raw_minimum_price',
+				'wc_nyp_raw_maximum_price',
+				'wc_nyp_raw_suggested_price',
+				'woocommerce_get_cart_item_from_session',
+				'wcpay_multi_currency_should_convert_product_price',
+				'wc_nyp_edit_in_cart_args',
+				'wc_nyp_get_initial_price',
+			),
+			array_column( $hook_groups['name_your_price_compatibility']['filters'], 'hook' )
+		);
+		$this->assertSame(
+			array( 'woocommerce_add_cart_item_data' ),
+			array_column( $hook_groups['name_your_price_compatibility']['actions'], 'hook' )
+		);
 	}
 
 	/**

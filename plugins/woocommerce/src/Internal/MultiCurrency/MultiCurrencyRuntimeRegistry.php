@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyBookings
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyDepositsCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyFedExCompatibilityProjectionService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyNameYourPriceCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPointsRewardsCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPreOrdersCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyRestProjectionService;
@@ -78,28 +79,29 @@ class MultiCurrencyRuntimeRegistry {
 	 */
 	public static function get_core_hook_groups(): array {
 		return array(
-			'frontend_prices'              => self::get_frontend_price_hook_group(),
-			'frontend_currencies'          => self::get_frontend_currency_hook_group(),
-			'store_currency_lifecycle'     => self::get_store_currency_lifecycle_hook_group(),
-			'selected_currency'            => self::get_selected_currency_hook_group(),
-			'analytics'                    => self::get_analytics_hook_group(),
-			'compatibility'                => MultiCurrencyCompatibilityProjectionService::get_hook_manifest(),
-			'bookings_compatibility'       => MultiCurrencyBookingsCompatibilityProjectionService::get_hook_manifest(),
-			'deposits_compatibility'       => MultiCurrencyDepositsCompatibilityProjectionService::get_hook_manifest(),
-			'pre_orders_compatibility'     => MultiCurrencyPreOrdersCompatibilityProjectionService::get_hook_manifest(),
-			'ups_compatibility'            => MultiCurrencyUpsCompatibilityProjectionService::get_hook_manifest(),
-			'fedex_compatibility'          => MultiCurrencyFedExCompatibilityProjectionService::get_hook_manifest(),
-			'points_rewards_compatibility' => MultiCurrencyPointsRewardsCompatibilityProjectionService::get_hook_manifest(),
-			'subscriptions_compatibility'  => MultiCurrencySubscriptionsCompatibilityProjectionService::get_hook_manifest(),
-			'async_prices'                 => MultiCurrencyAsyncPriceProjectionService::get_hook_manifest( true, false, false, false, false ),
-			'storefront'                   => MultiCurrencyStorefrontProjectionService::get_hook_manifest( 2, true ),
-			'settings'                     => MultiCurrencySettingsProjectionService::get_hook_manifest(),
-			'rest'                         => MultiCurrencyRestProjectionService::get_route_manifest( true ),
-			'rest_request_overrides'       => self::get_rest_request_override_hook_group(),
-			'user_settings'                => MultiCurrencyUserSettingsProjectionService::get_hook_manifest( 2 ),
-			'admin_notices'                => MultiCurrencyAdminNoticeProjectionService::get_hook_manifest(),
-			'admin_notes'                  => MultiCurrencyAdminNoteProjectionService::get_hook_manifest( true ),
-			'tracking'                     => self::get_tracking_hook_group(),
+			'frontend_prices'               => self::get_frontend_price_hook_group(),
+			'frontend_currencies'           => self::get_frontend_currency_hook_group(),
+			'store_currency_lifecycle'      => self::get_store_currency_lifecycle_hook_group(),
+			'selected_currency'             => self::get_selected_currency_hook_group(),
+			'analytics'                     => self::get_analytics_hook_group(),
+			'compatibility'                 => MultiCurrencyCompatibilityProjectionService::get_hook_manifest(),
+			'bookings_compatibility'        => MultiCurrencyBookingsCompatibilityProjectionService::get_hook_manifest(),
+			'deposits_compatibility'        => MultiCurrencyDepositsCompatibilityProjectionService::get_hook_manifest(),
+			'pre_orders_compatibility'      => MultiCurrencyPreOrdersCompatibilityProjectionService::get_hook_manifest(),
+			'ups_compatibility'             => MultiCurrencyUpsCompatibilityProjectionService::get_hook_manifest(),
+			'fedex_compatibility'           => MultiCurrencyFedExCompatibilityProjectionService::get_hook_manifest(),
+			'points_rewards_compatibility'  => MultiCurrencyPointsRewardsCompatibilityProjectionService::get_hook_manifest(),
+			'name_your_price_compatibility' => MultiCurrencyNameYourPriceCompatibilityProjectionService::get_hook_manifest(),
+			'subscriptions_compatibility'   => MultiCurrencySubscriptionsCompatibilityProjectionService::get_hook_manifest(),
+			'async_prices'                  => MultiCurrencyAsyncPriceProjectionService::get_hook_manifest( true, false, false, false, false ),
+			'storefront'                    => MultiCurrencyStorefrontProjectionService::get_hook_manifest( 2, true ),
+			'settings'                      => MultiCurrencySettingsProjectionService::get_hook_manifest(),
+			'rest'                          => MultiCurrencyRestProjectionService::get_route_manifest( true ),
+			'rest_request_overrides'        => self::get_rest_request_override_hook_group(),
+			'user_settings'                 => MultiCurrencyUserSettingsProjectionService::get_hook_manifest( 2 ),
+			'admin_notices'                 => MultiCurrencyAdminNoticeProjectionService::get_hook_manifest(),
+			'admin_notes'                   => MultiCurrencyAdminNoteProjectionService::get_hook_manifest( true ),
+			'tracking'                      => self::get_tracking_hook_group(),
 		);
 	}
 
