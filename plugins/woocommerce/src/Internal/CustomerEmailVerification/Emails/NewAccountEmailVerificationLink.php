@@ -89,10 +89,15 @@ class NewAccountEmailVerificationLink {
 
 		$verify_url = $this->controller->build_verification_url( $email_object->ID );
 
+		// Use a bare URL (not an <a> tag): additional_content is shared between the HTML
+		// and plain-text email bodies, and the plain-text template runs it through
+		// wp_strip_all_tags() — which would drop an anchor and lose the link entirely.
+		// esc_url_raw (not esc_url) avoids HTML-encoding the ampersands here; the email
+		// templates escape on output. This mirrors WooCommerce's own set-password link.
 		$verify_paragraph = sprintf(
 			/* translators: %s: one-time email-verification URL */
-			__( 'To verify your email address, <a href="%s">click here</a>.', 'woocommerce' ),
-			esc_url( $verify_url )
+			__( 'To verify your email address, visit: %s', 'woocommerce' ),
+			esc_url_raw( $verify_url )
 		);
 
 		if ( '' !== $content ) {
