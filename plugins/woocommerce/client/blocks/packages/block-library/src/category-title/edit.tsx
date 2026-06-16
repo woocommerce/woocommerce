@@ -2,11 +2,11 @@
  * External dependencies
  */
 import clsx from 'clsx';
+import { usePreviewMode } from '@woocommerce/base-hooks/use-preview-mode';
 import { store as coreStore, useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { createElement, forwardRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import type { WP_REST_API_Category } from 'wp-types';
 import {
 	AlignmentControl,
 	BlockControls,
@@ -24,11 +24,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
-
-/**
- * Internal dependencies
- */
-import { usePreviewMode } from '@woocommerce/base-hooks/use-preview-mode';
 
 export type CategoryTitleAttributes = {
 	isLink: boolean;
@@ -55,28 +50,6 @@ const DEFAULT_ATTRIBUTES = {
 
 const PREVIEW_CATEGORY_TITLE = __( 'Hoodies', 'woocommerce' );
 
-type CoreDataSelector = {
-	canUser: (
-		action: string,
-		resource: {
-			kind: string;
-			name: string;
-			id: number;
-		}
-	) => boolean | undefined;
-	getEntityRecord: < T >(
-		kind: string,
-		name: string,
-		id: number
-	) => T | undefined;
-};
-
-type HeadingLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-
-const PlainTextWithTagName = PlainText as unknown as React.ComponentType<
-	Record< string, unknown >
->;
-
 const ContainerElement = forwardRef<
 	HTMLElement,
 	React.HTMLAttributes< HTMLElement > & {
@@ -98,9 +71,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	const userCanEdit = useSelect(
 		( select ) => {
 			if ( ! termId ) return false;
-			const coreDataSelector = select(
-				coreStore
-			) as unknown as CoreDataSelector;
+			const coreDataSelector = select( coreStore );
 
 			return Boolean(
 				coreDataSelector.canUser( 'update', {
@@ -143,15 +114,10 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	const link = useSelect(
 		( select ) => {
 			if ( ! termId ) return undefined;
-			const coreDataSelector = select(
-				coreStore
-			) as unknown as CoreDataSelector;
-			const record =
-				coreDataSelector.getEntityRecord< WP_REST_API_Category >(
-					'taxonomy',
-					termTaxonomy || 'product_cat',
-					termId
-				);
+			const coreDataSelector = select( coreStore );
+			const record = coreDataSelector.getEntityRecord< {
+				link: string;
+			} >( 'taxonomy', termTaxonomy || 'product_cat', termId );
 
 			return record?.link;
 		},
@@ -170,7 +136,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	if ( termId ) {
 		titleElement = userCanEdit ? (
-			<PlainTextWithTagName
+			<PlainText
 				tagName={ TagName }
 				placeholder={ __( 'No title', 'woocommerce' ) }
 				value={ displayRawTitle }
@@ -192,7 +158,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	if ( isLink && termId ) {
 		titleElement = userCanEdit ? (
 			<ContainerElement tagName={ TagName } { ...blockProps }>
-				<PlainTextWithTagName
+				<PlainText
 					tagName="a"
 					href={ link }
 					target={ linkTarget }
@@ -226,8 +192,8 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		<>
 			<BlockControls group="block">
 				<HeadingLevelDropdown
-					value={ level as HeadingLevel }
-					onChange={ ( newLevel?: HeadingLevel ) =>
+					value={ level as HeadingLevelDropdown.HeadingLevel }
+					onChange={ ( newLevel ) =>
 						setAttributes( { level: newLevel ?? 2 } )
 					}
 				/>

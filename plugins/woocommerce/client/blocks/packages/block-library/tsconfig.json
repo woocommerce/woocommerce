@@ -1,6 +1,6 @@
 {
 	"extends": "../../tsconfig.base.json",
-	"include": [ "./src/**/*" ],
+	"include": [ "./src/**/*", "typings" ],
 	"compilerOptions": {
 		"composite": false,
 		"emitDeclarationOnly": false,

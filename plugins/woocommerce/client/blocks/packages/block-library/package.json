@@ -16,6 +16,10 @@
 	},
 	"wpScript": true,
 	"dependencies": {
-		"@wordpress/icons": "13.3.0"
+		"@wordpress/icons": "wp-bundled"
+	},
+	"devDependencies": {
+		"@wordpress/data": "wp-min",
+		"@wordpress/core-data": "wp-min"
 	}
 }
