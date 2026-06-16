@@ -41,6 +41,17 @@ class LocationStockServiceTest extends LocationStockTestCase {
 	}
 
 	/**
+	 * @testdox Should treat missing location stock meta as zero for managed products.
+	 */
+	public function test_missing_location_stock_meta_is_zero_for_managed_products(): void {
+		$product = $this->create_managed_stock_product();
+
+		$this->assertEquals( 0, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
+		$this->assertNull( $this->service->decrease_location_stock( $product, LocationStockService::LOCATION_POS, 1 ) );
+		$this->assertEquals( 15, wc_get_product( $product->get_id() )->get_stock_quantity() );
+	}
+
+	/**
 	 * @testdox Should not decrease POS stock below zero.
 	 */
 	public function test_decrease_pos_location_stock_does_not_go_negative(): void {
@@ -170,5 +181,53 @@ class LocationStockServiceTest extends LocationStockTestCase {
 
 		$this->assertEquals( 6, $this->service->get_location_stock( $variation, LocationStockService::LOCATION_POS ) );
 		$this->assertEquals( 6, $this->service->get_location_stock( $parent, LocationStockService::LOCATION_POS ) );
+	}
+
+	/**
+	 * @testdox Should normalize configured locations and cap them at five.
+	 */
+	public function test_configured_locations_are_normalized_and_capped(): void {
+		$this->configure_pos_locations(
+			array(
+				array(
+					'slug'      => 'Register 1',
+					'name'      => 'Main till',
+					'address_1' => '1 Shop Street',
+					'city'      => 'Cardiff',
+					'country'   => 'GB',
+				),
+				array(
+					'slug' => 'register-2',
+					'name' => 'Register 2',
+				),
+				array(
+					'slug' => 'register-3',
+					'name' => 'Register 3',
+				),
+				array(
+					'slug' => 'register-4',
+					'name' => 'Register 4',
+				),
+				array(
+					'slug' => 'register-5',
+					'name' => 'Register 5',
+				),
+				array(
+					'slug' => 'register-6',
+					'name' => 'Register 6',
+				),
+			)
+		);
+
+		$locations = $this->service->get_locations();
+
+		$this->assertCount( 5, $locations );
+		$this->assertArrayHasKey( 'register-1', $locations );
+		$this->assertArrayNotHasKey( 'register-6', $locations );
+		$this->assertSame( 'Main till', $locations['register-1']['name'] );
+		$this->assertSame( '1 Shop Street', $locations['register-1']['address_1'] );
+		$this->assertSame( '', $locations['register-1']['address_2'] );
+		$this->assertSame( 'Cardiff', $locations['register-1']['city'] );
+		$this->assertSame( 'GB', $locations['register-1']['country'] );
 	}
 }

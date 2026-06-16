@@ -113,7 +113,7 @@ class InventoryController {
 		}
 
 		$this->feature_hooks_registered = true;
-		$this->location_stock_installer->maybe_create_db_tables();
+		$this->location_stock_installer->maybe_initialize_locations();
 
 		$this->admin_controller->register();
 		$this->rest_api_hooks->register();

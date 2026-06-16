@@ -62,11 +62,15 @@ class LocationStockGate {
 	}
 
 	/**
-	 * Check whether POS location stock can be managed for a location.
+	 * Check whether POS location stock can be managed.
 	 *
-	 * @param string $location_slug Location slug.
+	 * @param string $location_slug Optional location slug.
 	 */
-	public function can_manage( string $location_slug = LocationStockService::LOCATION_POS ): bool {
-		return $this->feature_is_enabled() && $this->location_is_configured( $location_slug );
+	public function can_manage( string $location_slug = '' ): bool {
+		if ( ! $this->feature_is_enabled() ) {
+			return false;
+		}
+
+		return '' === $location_slug ? $this->location_stock_service->has_locations() : $this->location_is_configured( $location_slug );
 	}
 }

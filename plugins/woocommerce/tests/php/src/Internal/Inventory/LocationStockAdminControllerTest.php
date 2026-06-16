@@ -17,6 +17,84 @@ require_once __DIR__ . '/LocationStockTestCase.php';
 class LocationStockAdminControllerTest extends LocationStockTestCase {
 
 	/**
+	 * @testdox Should render one simple product POS stock field for each configured location.
+	 */
+	public function test_simple_location_stock_fields_render_for_each_configured_location(): void {
+		global $product_object;
+
+		$product = $this->create_managed_stock_product();
+		$this->configure_pos_locations(
+			array(
+				array(
+					'slug' => LocationStockService::LOCATION_POS,
+					'name' => 'Front counter',
+				),
+				array(
+					'slug' => 'side-counter',
+					'name' => 'Side counter',
+				),
+			)
+		);
+		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 6 );
+		$this->service->set_location_stock( $product, 'side-counter', 3 );
+
+		$previous_product_object = $product_object ?? null;
+		$product_object          = $product;
+
+		try {
+			ob_start();
+			$this->admin_controller->render_simple_product_location_fields();
+			$output = (string) ob_get_clean();
+		} finally {
+			$product_object = $previous_product_object;
+		}
+
+		$this->assertStringContainsString( 'name="_inventory_location_stock[pos]"', $output );
+		$this->assertStringContainsString( 'id="_inventory_stock_pos"', $output );
+		$this->assertStringContainsString( 'Front counter stock', $output );
+		$this->assertStringContainsString( 'value="6"', $output );
+		$this->assertStringContainsString( 'name="_inventory_location_stock[side-counter]"', $output );
+		$this->assertStringContainsString( 'id="_inventory_stock_side-counter"', $output );
+		$this->assertStringContainsString( 'Side counter stock', $output );
+		$this->assertStringContainsString( 'value="3"', $output );
+	}
+
+	/**
+	 * @testdox Should save simple product POS stock for each configured location.
+	 */
+	public function test_save_simple_location_stock_fields_updates_each_configured_location(): void {
+		$product = $this->create_managed_stock_product();
+		$this->configure_pos_locations(
+			array(
+				array(
+					'slug' => LocationStockService::LOCATION_POS,
+					'name' => 'Front counter',
+				),
+				array(
+					'slug' => 'side-counter',
+					'name' => 'Side counter',
+				),
+			)
+		);
+		$previous_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test fixture snapshots posted form data.
+
+		try {
+			$_POST['_inventory_location_stock'] = array(
+				LocationStockService::LOCATION_POS => '8',
+				'side-counter'                     => '2',
+			);
+
+			$this->admin_controller->save_simple_product_location_fields( $product );
+		} finally {
+			$_POST = $previous_post;
+		}
+
+		$this->assertEquals( 8, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
+		$this->assertEquals( 2, $this->service->get_location_stock( $product, 'side-counter' ) );
+		$this->assertEquals( 15, wc_get_product( $product->get_id() )->get_stock_quantity() );
+	}
+
+	/**
 	 * @testdox Should render a POS stock field for variation-managed stock.
 	 */
 	public function test_variation_location_stock_field_renders_for_variation_managed_stock(): void {
@@ -28,6 +106,38 @@ class LocationStockAdminControllerTest extends LocationStockTestCase {
 		$this->assertStringContainsString( 'name="variable_inventory_location_stock[pos][0]"', $output );
 		$this->assertStringContainsString( 'id="variable_inventory_stock_pos0"', $output );
 		$this->assertStringContainsString( 'value="6"', $output );
+	}
+
+	/**
+	 * @testdox Should render one variation POS stock field for each configured location.
+	 */
+	public function test_variation_location_stock_fields_render_for_each_configured_location(): void {
+		$variation = $this->create_variation_with_own_stock();
+		$this->configure_pos_locations(
+			array(
+				array(
+					'slug' => LocationStockService::LOCATION_POS,
+					'name' => 'Front counter',
+				),
+				array(
+					'slug' => 'side-counter',
+					'name' => 'Side counter',
+				),
+			)
+		);
+		$this->service->set_location_stock( $variation, LocationStockService::LOCATION_POS, 6 );
+		$this->service->set_location_stock( $variation, 'side-counter', 3 );
+
+		$output = $this->get_rendered_variation_location_fields( $variation );
+
+		$this->assertStringContainsString( 'name="variable_inventory_location_stock[pos][0]"', $output );
+		$this->assertStringContainsString( 'id="variable_inventory_stock_pos0"', $output );
+		$this->assertStringContainsString( 'Front counter stock', $output );
+		$this->assertStringContainsString( 'value="6"', $output );
+		$this->assertStringContainsString( 'name="variable_inventory_location_stock[side-counter][0]"', $output );
+		$this->assertStringContainsString( 'id="variable_inventory_stock_side-counter0"', $output );
+		$this->assertStringContainsString( 'Side counter stock', $output );
+		$this->assertStringContainsString( 'value="3"', $output );
 	}
 
 	/**

@@ -219,27 +219,29 @@ class LocationStockRestApiHooksTest extends LocationStockTestCase {
 	}
 
 	/**
-	 * @testdox Should not accept known non-POS locations as REST order routes.
+	 * @testdox Should route explicit REST inventory locations to configured POS locations.
 	 */
-	public function test_rest_order_rejects_known_non_pos_inventory_location(): void {
-		global $wpdb;
-
+	public function test_rest_order_routes_configured_inventory_location(): void {
 		$product = $this->create_managed_stock_product();
-		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 5 );
-		$wpdb->insert(
-			$this->service->get_locations_table_name(),
+		$this->configure_pos_locations(
 			array(
-				'slug'           => 'warehouse',
-				'name'           => 'Warehouse',
-				'created_at_gmt' => gmdate( 'Y-m-d H:i:s' ),
-			),
-			array( '%s', '%s', '%s' )
+				array(
+					'slug' => LocationStockService::LOCATION_POS,
+					'name' => 'Front counter',
+				),
+				array(
+					'slug' => 'side-counter',
+					'name' => 'Side counter',
+				),
+			)
 		);
+		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 5 );
+		$this->service->set_location_stock( $product, 'side-counter', 4 );
 
 		$response = $this->create_rest_order(
 			array(
 				'created_via'        => 'point-of-sale',
-				'inventory_location' => 'warehouse',
+				'inventory_location' => 'side-counter',
 				'line_items'         => array(
 					array(
 						'product_id' => $product->get_id(),
@@ -249,10 +251,11 @@ class LocationStockRestApiHooksTest extends LocationStockTestCase {
 			)
 		);
 
-		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'woocommerce_rest_invalid_inventory_location', $response->get_data()['code'] );
+		$this->assertEquals( 201, $response->get_status() );
 		$this->assertEquals( 5, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
+		$this->assertEquals( 2, $this->service->get_location_stock( $product, 'side-counter' ) );
 		$this->assertEquals( 15, wc_get_product( $product->get_id() )->get_stock_quantity() );
+		$this->assert_order_used_location_stock( wc_get_order( $response->get_data()['id'] ), 'side-counter', 2 );
 	}
 
 	/**
@@ -292,7 +295,20 @@ class LocationStockRestApiHooksTest extends LocationStockTestCase {
 	 */
 	public function test_product_rest_response_exposes_location_stock(): void {
 		$product = $this->create_managed_stock_product();
+		$this->configure_pos_locations(
+			array(
+				array(
+					'slug' => LocationStockService::LOCATION_POS,
+					'name' => 'Front counter',
+				),
+				array(
+					'slug' => 'side-counter',
+					'name' => 'Side counter',
+				),
+			)
+		);
 		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 7 );
+		$this->service->set_location_stock( $product, 'side-counter', 0 );
 
 		$request  = new \WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() );
 		$response = $this->server->dispatch( $request );
@@ -303,9 +319,15 @@ class LocationStockRestApiHooksTest extends LocationStockTestCase {
 			array(
 				array(
 					'slug'         => LocationStockService::LOCATION_POS,
-					'name'         => 'POS',
+					'name'         => 'Front counter',
 					'quantity'     => 7,
 					'stock_status' => ProductStockStatus::IN_STOCK,
+				),
+				array(
+					'slug'         => 'side-counter',
+					'name'         => 'Side counter',
+					'quantity'     => 0,
+					'stock_status' => ProductStockStatus::OUT_OF_STOCK,
 				),
 			),
 			$response->get_data()['location_stock']

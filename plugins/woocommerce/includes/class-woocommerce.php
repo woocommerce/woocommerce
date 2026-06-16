@@ -571,8 +571,6 @@ final class WooCommerce {
 			'wc_product_meta_lookup' => 'wc_product_meta_lookup',
 			'wc_tax_rate_classes'    => 'wc_tax_rate_classes',
 			'wc_reserved_stock'      => 'wc_reserved_stock',
-			'wc_locations'           => 'wc_locations',
-			'wc_product_inventory'   => 'wc_product_inventory',
 		);
 
 		foreach ( $tables as $name => $table ) {

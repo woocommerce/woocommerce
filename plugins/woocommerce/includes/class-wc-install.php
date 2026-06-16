@@ -2113,8 +2113,6 @@ $stock_notifications_table_schema;
 			"{$wpdb->prefix}woocommerce_tax_rate_locations",
 			"{$wpdb->prefix}woocommerce_tax_rates",
 			"{$wpdb->prefix}wc_reserved_stock",
-			"{$wpdb->prefix}wc_locations",
-			"{$wpdb->prefix}wc_product_inventory",
 			"{$wpdb->prefix}wc_rate_limits",
 			"{$wpdb->prefix}wc_product_attributes_lookup",
 			"{$wpdb->prefix}wc_stock_notifications",

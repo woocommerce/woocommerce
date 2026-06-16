@@ -115,9 +115,7 @@ class LocationStockRestApiHooks {
 			return array();
 		}
 
-		$location_stock = $this->get_product_location_stock_response_item( $product, LocationStockService::LOCATION_POS );
-
-		return empty( $location_stock ) ? array() : array( $location_stock );
+		return $this->get_product_location_stock_response_items( $product );
 	}
 
 	/**
@@ -138,9 +136,7 @@ class LocationStockRestApiHooks {
 			return $row;
 		}
 
-		$location_stock = $this->get_product_location_stock_response_item( $product, LocationStockService::LOCATION_POS );
-
-		$row['data'][ self::LOCATION_STOCK_REST_FIELD ] = empty( $location_stock ) ? array() : array( $location_stock );
+		$row['data'][ self::LOCATION_STOCK_REST_FIELD ] = $this->get_product_location_stock_response_items( $product );
 
 		return $row;
 	}
@@ -179,8 +175,8 @@ class LocationStockRestApiHooks {
 	 */
 	private function validate_rest_location_slug( $location ) {
 		$location_slug = is_scalar( $location ) ? sanitize_title( wp_unslash( (string) $location ) ) : '';
-		if ( LocationStockService::LOCATION_POS === $location_slug && $this->gate->location_is_configured( $location_slug ) ) {
-			return LocationStockService::LOCATION_POS;
+		if ( $this->gate->location_is_configured( $location_slug ) ) {
+			return $location_slug;
 		}
 
 		return new \WP_Error(
@@ -236,29 +232,28 @@ class LocationStockRestApiHooks {
 	}
 
 	/**
-	 * Get one location stock REST response item for a product.
+	 * Get location stock REST response items for a product.
 	 *
 	 * @param \WC_Product $product Product object.
-	 * @return array<string,mixed>
+	 * @return array<int,array<string,mixed>>
 	 */
-	private function get_product_location_stock_response_item( \WC_Product $product, string $location_slug ): array {
+	private function get_product_location_stock_response_items( \WC_Product $product ): array {
 		if ( ! $product->managing_stock() ) {
 			return array();
 		}
 
-		$location = $this->location_stock_service->get_location( $location_slug );
-		if ( ! $location ) {
-			return array();
+		$location_stock = array();
+		foreach ( $this->location_stock_service->get_locations() as $location ) {
+			$quantity         = $this->location_stock_service->get_location_stock( $product, $location['slug'] );
+			$location_stock[] = array(
+				'slug'         => $location['slug'],
+				'name'         => $location['name'],
+				'quantity'     => $quantity,
+				'stock_status' => $this->get_location_stock_status( $quantity ),
+			);
 		}
 
-		$quantity = $this->location_stock_service->get_location_stock( $product, $location_slug );
-
-		return array(
-			'slug'         => $location['slug'],
-			'name'         => $location['name'],
-			'quantity'     => $quantity,
-			'stock_status' => $this->get_location_stock_status( $quantity ),
-		);
+		return $location_stock;
 	}
 
 	/**

@@ -14,16 +14,28 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Internal data access for POS location stock.
+ * Internal data access for option-backed POS locations and product-meta stock.
  *
  * @internal
  */
 class LocationStockService {
 
 	/**
-	 * POS inventory location slug.
+	 * Default POS inventory location slug.
 	 */
 	public const LOCATION_POS = 'pos';
+
+	/**
+	 * Option key used to store configured POS locations.
+	 */
+	public const LOCATIONS_OPTION = 'woocommerce_pos_location_stock_locations';
+
+	/**
+	 * Maximum number of POS locations supported by this spike.
+	 */
+	public const MAX_POS_LOCATIONS = 5;
+
+	private const LOCATION_STOCK_META_PREFIX = '_woocommerce_pos_location_stock_';
 
 	/**
 	 * Deferred modified-date update nesting level.
@@ -40,76 +52,20 @@ class LocationStockService {
 	private $deferred_modified_date_product_ids = array();
 
 	/**
-	 * Get the locations table name.
-	 */
-	public function get_locations_table_name(): string {
-		global $wpdb;
-
-		return $wpdb->prefix . 'wc_locations';
-	}
-
-	/**
-	 * Get the product inventory table name.
-	 */
-	public function get_product_inventory_table_name(): string {
-		global $wpdb;
-
-		return $wpdb->prefix . 'wc_product_inventory';
-	}
-
-	/**
-	 * Get the database schema.
-	 */
-	public function get_database_schema(): string {
-		global $wpdb;
-
-		$collate                 = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
-		$locations_table         = $this->get_locations_table_name();
-		$product_inventory_table = $this->get_product_inventory_table_name();
-
-		return "
-CREATE TABLE $locations_table (
-	id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-	slug varchar(100) NOT NULL,
-	name varchar(255) NOT NULL,
-	created_at_gmt datetime NOT NULL,
-	deleted_at_gmt datetime NULL DEFAULT NULL,
-	PRIMARY KEY  (id),
-	UNIQUE KEY slug (slug)
-) $collate;
-CREATE TABLE $product_inventory_table (
-	id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-	product_id bigint(20) unsigned NOT NULL,
-	variation_id bigint(20) unsigned NOT NULL DEFAULT 0,
-	location_id bigint(20) unsigned NOT NULL,
-	quantity decimal(19,6) NOT NULL DEFAULT 0,
-	PRIMARY KEY  (id),
-	UNIQUE KEY product_variation_location (product_id, variation_id, location_id),
-	KEY location_product (location_id, product_id, variation_id)
-) $collate;
-		";
-	}
-
-	/**
-	 * Determine whether both inventory tables exist.
-	 */
-	public function tables_exist(): bool {
-		global $wpdb;
-
-		$locations_table         = $this->get_locations_table_name();
-		$product_inventory_table = $this->get_product_inventory_table_name();
-
-		$locations_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $locations_table ) );
-		$inventory_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $product_inventory_table ) );
-
-		return $locations_table === $locations_exists && $product_inventory_table === $inventory_exists;
-	}
-
-	/**
-	 * Ensure the POS location row exists.
+	 * Ensure the default POS location option exists.
 	 */
 	public function ensure_pos_location(): void {
-		$this->ensure_location( self::LOCATION_POS, 'POS' );
+		$locations = $this->get_locations();
+		if ( isset( $locations[ self::LOCATION_POS ] ) ) {
+			return;
+		}
+
+		$this->set_locations(
+			array_merge(
+				array( $this->get_default_pos_location() ),
+				array_values( $locations )
+			)
+		);
 	}
 
 	/**
@@ -132,50 +88,90 @@ CREATE TABLE $product_inventory_table (
 	}
 
 	/**
-	 * Get an active location row by slug.
+	 * Get all configured POS locations, keyed by slug.
 	 *
-	 * @param string $slug Location slug.
-	 * @return array{id:int,slug:string,name:string}|null
+	 * @return array<string,array{slug:string,name:string,address_1:string,address_2:string,city:string,state:string,postcode:string,country:string}>
 	 */
-	public function get_location( string $slug ): ?array {
-		global $wpdb;
-
-		if ( ! $this->tables_exist() ) {
-			return null;
+	public function get_locations(): array {
+		$locations = get_option( self::LOCATIONS_OPTION, array() );
+		if ( ! is_array( $locations ) ) {
+			return array();
 		}
 
-		$slug = $this->normalize_location_slug( $slug );
-		if ( '' === $slug ) {
-			return null;
+		$normalized = array();
+		foreach ( $locations as $location ) {
+			if ( ! is_array( $location ) ) {
+				continue;
+			}
+
+			$location = $this->normalize_location( $location );
+			if ( '' === $location['slug'] || isset( $normalized[ $location['slug'] ] ) ) {
+				continue;
+			}
+
+			$normalized[ $location['slug'] ] = $location;
+			if ( count( $normalized ) >= self::MAX_POS_LOCATIONS ) {
+				break;
+			}
 		}
 
-		$location = $wpdb->get_row(
-			$wpdb->prepare(
-				'SELECT id, slug, name FROM %i WHERE slug = %s AND deleted_at_gmt IS NULL',
-				$this->get_locations_table_name(),
-				$slug
-			),
-			ARRAY_A
-		);
-
-		if ( ! is_array( $location ) ) {
-			return null;
-		}
-
-		return array(
-			'id'   => (int) $location['id'],
-			'slug' => (string) $location['slug'],
-			'name' => (string) $location['name'],
-		);
+		return $normalized;
 	}
 
 	/**
-	 * Check whether a slug maps to an active inventory location.
+	 * Replace configured POS locations.
+	 *
+	 * @param array<int,array<string,mixed>> $locations Location data.
+	 */
+	public function set_locations( array $locations ): void {
+		$normalized = array();
+
+		foreach ( $locations as $location ) {
+			if ( ! is_array( $location ) ) {
+				continue;
+			}
+
+			$location = $this->normalize_location( $location );
+			if ( '' === $location['slug'] || isset( $normalized[ $location['slug'] ] ) ) {
+				continue;
+			}
+
+			$normalized[ $location['slug'] ] = $location;
+			if ( count( $normalized ) >= self::MAX_POS_LOCATIONS ) {
+				break;
+			}
+		}
+
+		update_option( self::LOCATIONS_OPTION, array_values( $normalized ), false );
+	}
+
+	/**
+	 * Get an active configured location by slug.
+	 *
+	 * @param string $slug Location slug.
+	 * @return array{slug:string,name:string,address_1:string,address_2:string,city:string,state:string,postcode:string,country:string}|null
+	 */
+	public function get_location( string $slug ): ?array {
+		$locations = $this->get_locations();
+		$slug      = $this->normalize_location_slug( $slug );
+
+		return $locations[ $slug ] ?? null;
+	}
+
+	/**
+	 * Check whether a slug maps to a configured POS location.
 	 *
 	 * @param string $slug Location slug.
 	 */
 	public function is_known_location_slug( string $slug ): bool {
 		return null !== $this->get_location( $slug );
+	}
+
+	/**
+	 * Check whether at least one POS location has been configured.
+	 */
+	public function has_locations(): bool {
+		return ! empty( $this->get_locations() );
 	}
 
 	/**
@@ -216,18 +212,20 @@ CREATE TABLE $product_inventory_table (
 	/**
 	 * Get product stock at a location.
 	 *
+	 * Missing product meta intentionally means zero stock for configured locations.
+	 *
 	 * @param \WC_Product|int $product       Product object or ID.
 	 * @param string          $location_slug Location slug.
 	 */
 	public function get_location_stock( $product, string $location_slug ): float {
-		return $this->get_location_stock_for_inventory_key(
-			$this->get_product_inventory_key( $product ),
+		return $this->get_location_stock_for_product_id(
+			$this->get_stock_managed_product_id( $product ),
 			$location_slug
 		);
 	}
 
 	/**
-	 * Get product stock from its own inventory row, ignoring Core stock-owner resolution.
+	 * Get product stock from its own meta row, ignoring Core stock-owner resolution.
 	 *
 	 * Runtime stock movement should use get_location_stock() so parent-managed variations
 	 * follow Core's get_stock_managed_by_id() behavior. This method is for admin edit fields
@@ -237,40 +235,9 @@ CREATE TABLE $product_inventory_table (
 	 * @param string          $location_slug Location slug.
 	 */
 	public function get_location_stock_for_product_record( $product, string $location_slug ): float {
-		return $this->get_location_stock_for_inventory_key(
-			$this->get_product_record_inventory_key( $product ),
+		return $this->get_location_stock_for_product_id(
+			$this->get_product_record_id( $product ),
 			$location_slug
-		);
-	}
-
-	/**
-	 * Get stock for an inventory key at a location.
-	 *
-	 * @param array{product_id:int,variation_id:int}|null $key           Product inventory key.
-	 * @param string                                      $location_slug Location slug.
-	 */
-	private function get_location_stock_for_inventory_key( ?array $key, string $location_slug ): float {
-		global $wpdb;
-
-		if ( ! $key || ! $this->tables_exist() ) {
-			return 0.0;
-		}
-
-		$location_id = $this->get_location_id( $location_slug );
-		if ( 0 === $location_id ) {
-			return 0.0;
-		}
-
-		return wc_stock_amount(
-			$wpdb->get_var(
-				$wpdb->prepare(
-					'SELECT quantity FROM %i WHERE product_id = %d AND variation_id = %d AND location_id = %d',
-					$this->get_product_inventory_table_name(),
-					$key['product_id'],
-					$key['variation_id'],
-					$location_id
-				)
-			)
 		);
 	}
 
@@ -282,31 +249,13 @@ CREATE TABLE $product_inventory_table (
 	 * @param int|float       $quantity      Quantity.
 	 */
 	public function set_location_stock( $product, string $location_slug, $quantity ): float {
-		global $wpdb;
-
-		$quantity = max( 0, wc_stock_amount( $quantity ) );
-		if ( ! $this->tables_exist() ) {
+		$quantity   = max( 0, wc_stock_amount( $quantity ) );
+		$product_id = $this->get_stock_managed_product_id( $product );
+		if ( 0 === $product_id ) {
 			return $quantity;
 		}
 
-		$key = $this->get_product_inventory_key( $product );
-		if ( ! $key ) {
-			return $quantity;
-		}
-
-		$updated = $wpdb->query(
-			$wpdb->prepare(
-				"INSERT INTO %i ( product_id, variation_id, location_id, quantity )
-				VALUES ( %d, %d, %d, %f )
-				ON DUPLICATE KEY UPDATE quantity = VALUES( quantity )",
-				$this->get_product_inventory_table_name(),
-				$key['product_id'],
-				$key['variation_id'],
-				$this->get_required_location_id( $location_slug ),
-				$quantity
-			)
-		);
-
+		$updated = update_post_meta( $product_id, $this->get_required_location_stock_meta_key( $location_slug ), (string) $quantity );
 		$this->touch_product_modified_date_after_stock_update( $product, $updated );
 
 		return $quantity;
@@ -320,30 +269,19 @@ CREATE TABLE $product_inventory_table (
 	 * @param int|float       $quantity      Quantity.
 	 */
 	public function increase_location_stock( $product, string $location_slug, $quantity ): float {
-		global $wpdb;
-
 		$quantity = wc_stock_amount( $quantity );
-		if ( (float) $quantity <= 0.0 || ! $this->tables_exist() ) {
+		if ( (float) $quantity <= 0.0 ) {
 			return $this->get_location_stock( $product, $location_slug );
 		}
 
-		$key = $this->get_product_inventory_key( $product );
-		if ( ! $key ) {
+		$product_id = $this->get_stock_managed_product_id( $product );
+		if ( 0 === $product_id ) {
 			return $this->get_location_stock( $product, $location_slug );
 		}
 
-		$updated = $wpdb->query(
-			$wpdb->prepare(
-				"INSERT INTO %i ( product_id, variation_id, location_id, quantity )
-				VALUES ( %d, %d, %d, %f )
-				ON DUPLICATE KEY UPDATE quantity = quantity + VALUES( quantity )",
-				$this->get_product_inventory_table_name(),
-				$key['product_id'],
-				$key['variation_id'],
-				$this->get_required_location_id( $location_slug ),
-				$quantity
-			)
-		);
+		$stock_meta_key = $this->get_required_location_stock_meta_key( $location_slug );
+		$new_stock      = $this->get_location_stock_for_product_id( $product_id, $location_slug ) + $quantity;
+		$updated        = update_post_meta( $product_id, $stock_meta_key, (string) wc_stock_amount( $new_stock ) );
 
 		$this->touch_product_modified_date_after_stock_update( $product, $updated );
 
@@ -366,29 +304,24 @@ CREATE TABLE $product_inventory_table (
 			return $this->get_location_stock( $product, $location_slug );
 		}
 
-		if ( ! $this->tables_exist() ) {
+		$product_id = $this->get_stock_managed_product_id( $product );
+		if ( 0 === $product_id ) {
 			return null;
 		}
 
-		$key         = $this->get_product_inventory_key( $product );
-		$location_id = $this->get_location_id( $location_slug );
-		if ( ! $key || 0 === $location_id ) {
-			return null;
-		}
-
-		$updated = $wpdb->query(
+		$stock_meta_key = $this->get_required_location_stock_meta_key( $location_slug );
+		$updated        = $wpdb->query(
 			$wpdb->prepare(
-				"UPDATE %i
-				SET quantity = quantity - %f
-				WHERE product_id = %d
-				AND variation_id = %d
-				AND location_id = %d
-				AND quantity >= %f",
-				$this->get_product_inventory_table_name(),
+				"UPDATE {$wpdb->postmeta}
+				SET meta_value = CAST( meta_value AS DECIMAL(19,6) ) - %f
+				WHERE post_id = %d
+				AND meta_key = %s
+				AND CAST( meta_value AS DECIMAL(19,6) ) >= %f
+				ORDER BY meta_id ASC
+				LIMIT 1",
 				$quantity,
-				$key['product_id'],
-				$key['variation_id'],
-				$location_id,
+				$product_id,
+				$stock_meta_key,
 				$quantity
 			)
 		);
@@ -403,112 +336,63 @@ CREATE TABLE $product_inventory_table (
 	}
 
 	/**
-	 * Ensure one location row exists.
+	 * Get stock for a product ID at a configured location.
 	 *
-	 * @param string $slug Location slug.
-	 * @param string $name Location display name.
+	 * @param int    $product_id     Product ID.
+	 * @param string $location_slug  Location slug.
 	 */
-	private function ensure_location( string $slug, string $name ): void {
-		global $wpdb;
-
-		if ( ! $this->tables_exist() ) {
-			return;
+	private function get_location_stock_for_product_id( int $product_id, string $location_slug ): float {
+		if ( $product_id <= 0 || ! $this->is_known_location_slug( $location_slug ) ) {
+			return 0.0;
 		}
 
-		$slug = $this->normalize_location_slug( $slug );
-
-		$wpdb->query(
-			$wpdb->prepare(
-				"INSERT INTO %i ( slug, name, created_at_gmt, deleted_at_gmt )
-				VALUES ( %s, %s, %s, NULL )
-				ON DUPLICATE KEY UPDATE name = VALUES( name ), deleted_at_gmt = NULL",
-				$this->get_locations_table_name(),
-				$slug,
-				$name,
-				gmdate( 'Y-m-d H:i:s' )
-			)
-		);
+		return wc_stock_amount( get_post_meta( $product_id, $this->get_location_stock_meta_key( $location_slug ), true ) );
 	}
 
 	/**
-	 * Get a location ID by slug.
+	 * Get the meta key for a location's product stock.
 	 *
-	 * @param string $slug Location slug.
+	 * @param string $location_slug Location slug.
 	 */
-	private function get_location_id( string $slug ): int {
-		$location = $this->get_location( $slug );
-
-		return $location ? $location['id'] : 0;
+	private function get_location_stock_meta_key( string $location_slug ): string {
+		return self::LOCATION_STOCK_META_PREFIX . $this->normalize_location_slug( $location_slug );
 	}
 
 	/**
-	 * Get an active location ID or fail for invalid writes.
+	 * Get a location stock meta key or fail for invalid writes.
 	 *
-	 * @param string $slug Location slug.
+	 * @param string $location_slug Location slug.
 	 * @throws \InvalidArgumentException When the location does not exist.
 	 */
-	private function get_required_location_id( string $slug ): int {
-		$location_id = $this->get_location_id( $slug );
-		if ( $location_id > 0 ) {
-			return $location_id;
+	private function get_required_location_stock_meta_key( string $location_slug ): string {
+		$location_slug = $this->normalize_location_slug( $location_slug );
+		if ( $this->is_known_location_slug( $location_slug ) ) {
+			return $this->get_location_stock_meta_key( $location_slug );
 		}
 
-		throw new \InvalidArgumentException( sprintf( 'Unknown inventory location: %s.', $slug ) );
+		throw new \InvalidArgumentException( sprintf( 'Unknown inventory location: %s.', esc_html( $location_slug ) ) );
 	}
 
 	/**
-	 * Get product/variation key columns for inventory rows.
+	 * Get the product ID that owns stock for the supplied product.
 	 *
 	 * @param \WC_Product|int $product Product object or ID.
-	 * @return array{product_id:int,variation_id:int}|null
 	 */
-	private function get_product_inventory_key( $product ): ?array {
+	private function get_stock_managed_product_id( $product ): int {
 		$product_with_stock = $this->get_stock_managed_product( $product );
-		if ( ! $product_with_stock ) {
-			return null;
-		}
 
-		if ( $product_with_stock->is_type( ProductType::VARIATION ) ) {
-			return array(
-				'product_id'   => (int) $product_with_stock->get_parent_id(),
-				'variation_id' => (int) $product_with_stock->get_id(),
-			);
-		}
-
-		return array(
-			'product_id'   => (int) $product_with_stock->get_id(),
-			'variation_id' => 0,
-		);
+		return $product_with_stock ? (int) $product_with_stock->get_id() : 0;
 	}
 
 	/**
-	 * Get product/variation key columns for the supplied product's own inventory row.
+	 * Get the supplied product's own record ID.
 	 *
 	 * @param \WC_Product|int $product Product object or ID.
-	 * @return array{product_id:int,variation_id:int}|null
 	 */
-	private function get_product_record_inventory_key( $product ): ?array {
+	private function get_product_record_id( $product ): int {
 		$product = $product instanceof \WC_Product ? $product : wc_get_product( $product );
-		if ( ! $product instanceof \WC_Product || $product->get_id() <= 0 ) {
-			return null;
-		}
 
-		if ( $product->is_type( ProductType::VARIATION ) ) {
-			$parent_id = (int) $product->get_parent_id();
-			if ( $parent_id <= 0 ) {
-				return null;
-			}
-
-			return array(
-				'product_id'   => $parent_id,
-				'variation_id' => (int) $product->get_id(),
-			);
-		}
-
-		return array(
-			'product_id'   => (int) $product->get_id(),
-			'variation_id' => 0,
-		);
+		return $product instanceof \WC_Product ? (int) $product->get_id() : 0;
 	}
 
 	/**
@@ -528,13 +412,65 @@ CREATE TABLE $product_inventory_table (
 	}
 
 	/**
+	 * Get the default POS location seeded by the spike.
+	 *
+	 * @return array{slug:string,name:string,address_1:string,address_2:string,city:string,state:string,postcode:string,country:string}
+	 */
+	private function get_default_pos_location(): array {
+		$country_state = explode( ':', (string) get_option( 'woocommerce_default_country', '' ), 2 );
+
+		return array(
+			'slug'      => self::LOCATION_POS,
+			'name'      => __( 'POS', 'woocommerce' ),
+			'address_1' => (string) get_option( 'woocommerce_store_address', '' ),
+			'address_2' => (string) get_option( 'woocommerce_store_address_2', '' ),
+			'city'      => (string) get_option( 'woocommerce_store_city', '' ),
+			'state'     => (string) ( $country_state[1] ?? '' ),
+			'postcode'  => (string) get_option( 'woocommerce_store_postcode', '' ),
+			'country'   => (string) ( $country_state[0] ?? '' ),
+		);
+	}
+
+	/**
+	 * Normalize one location config item.
+	 *
+	 * @param array<string,mixed> $location Location data.
+	 * @return array{slug:string,name:string,address_1:string,address_2:string,city:string,state:string,postcode:string,country:string}
+	 */
+	private function normalize_location( array $location ): array {
+		$slug = $this->normalize_location_slug( $this->get_scalar_location_value( $location, 'slug' ) );
+		$name = (string) wc_clean( $this->get_scalar_location_value( $location, 'name' ) );
+
+		return array(
+			'slug'      => $slug,
+			'name'      => '' === $name ? $slug : $name,
+			'address_1' => (string) wc_clean( $this->get_scalar_location_value( $location, 'address_1' ) ),
+			'address_2' => (string) wc_clean( $this->get_scalar_location_value( $location, 'address_2' ) ),
+			'city'      => (string) wc_clean( $this->get_scalar_location_value( $location, 'city' ) ),
+			'state'     => (string) wc_clean( $this->get_scalar_location_value( $location, 'state' ) ),
+			'postcode'  => (string) wc_clean( $this->get_scalar_location_value( $location, 'postcode' ) ),
+			'country'   => (string) wc_clean( $this->get_scalar_location_value( $location, 'country' ) ),
+		);
+	}
+
+	/**
+	 * Get a scalar location option value.
+	 *
+	 * @param array<string,mixed> $location Location data.
+	 * @param string              $field    Field name.
+	 */
+	private function get_scalar_location_value( array $location, string $field ): string {
+		return is_scalar( $location[ $field ] ?? null ) ? (string) $location[ $field ] : '';
+	}
+
+	/**
 	 * Update product modified dates after a successful location stock write.
 	 *
 	 * @param \WC_Product|int $product      Product object or ID.
 	 * @param int|bool        $rows_updated Rows updated by the stock query.
 	 */
 	private function touch_product_modified_date_after_stock_update( $product, $rows_updated ): void {
-		if ( ! is_int( $rows_updated ) || $rows_updated < 1 ) {
+		if ( ( ! is_int( $rows_updated ) && ! is_bool( $rows_updated ) ) || ! $rows_updated ) {
 			return;
 		}
 

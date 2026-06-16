@@ -65,20 +65,31 @@ class LocationStockAdminController {
 			return;
 		}
 
+		$locations = $this->location_stock_service->get_locations();
+		if ( empty( $locations ) ) {
+			return;
+		}
+
 		echo '<div class="options_group show_if_simple show_if_variable">';
 		echo '<p class="form-field"><strong>' . esc_html__( 'POS location stock', 'woocommerce' ) . '</strong></p>';
-		woocommerce_wp_text_input(
-			array(
-				'id'                => '_inventory_stock_pos',
-				'name'              => '_inventory_location_stock[' . LocationStockService::LOCATION_POS . ']',
-				'label'             => esc_html__( 'POS stock', 'woocommerce' ),
-				'value'             => wc_stock_amount( $this->location_stock_service->get_location_stock( $product_object, LocationStockService::LOCATION_POS ) ),
-				'type'              => 'number',
-				'custom_attributes' => array(
-					'step' => 'any',
-				),
-			)
-		);
+		foreach ( $locations as $location ) {
+			woocommerce_wp_text_input(
+				array(
+					'id'                => '_inventory_stock_' . $location['slug'],
+					'name'              => '_inventory_location_stock[' . $location['slug'] . ']',
+					'label'             => sprintf(
+						/* translators: %s: POS location name. */
+						__( '%s stock', 'woocommerce' ),
+						$location['name']
+					),
+					'value'             => wc_stock_amount( $this->location_stock_service->get_location_stock( $product_object, $location['slug'] ) ),
+					'type'              => 'number',
+					'custom_attributes' => array(
+						'step' => 'any',
+					),
+				)
+			);
+		}
 		echo '</div>';
 	}
 
@@ -93,15 +104,21 @@ class LocationStockAdminController {
 		}
 
 		$location_stock_values = wc_clean( wp_unslash( $_POST['_inventory_location_stock'] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Product save nonce is verified before this hook fires.
-		if ( ! is_array( $location_stock_values ) || ! array_key_exists( LocationStockService::LOCATION_POS, $location_stock_values ) ) {
+		if ( ! is_array( $location_stock_values ) ) {
 			return;
 		}
 
-		$this->location_stock_service->set_location_stock(
-			$product,
-			LocationStockService::LOCATION_POS,
-			wc_stock_amount( $location_stock_values[ LocationStockService::LOCATION_POS ] )
-		);
+		foreach ( $this->location_stock_service->get_locations() as $location ) {
+			if ( ! array_key_exists( $location['slug'], $location_stock_values ) ) {
+				continue;
+			}
+
+			$this->location_stock_service->set_location_stock(
+				$product,
+				$location['slug'],
+				wc_stock_amount( $location_stock_values[ $location['slug'] ] )
+			);
+		}
 	}
 
 	/**
@@ -116,27 +133,38 @@ class LocationStockAdminController {
 			return;
 		}
 
+		$locations = $this->location_stock_service->get_locations();
+		if ( empty( $locations ) ) {
+			return;
+		}
+
 		$variation_product = wc_get_product( $variation->ID );
 		if ( ! $variation_product instanceof \WC_Product || ! $variation_product->is_type( ProductType::VARIATION ) ) {
 			return;
 		}
 
-		woocommerce_wp_text_input(
-			array(
-				'id'                => "variable_inventory_stock_pos{$loop}",
-				'name'              => 'variable_inventory_location_stock[' . LocationStockService::LOCATION_POS . "][{$loop}]",
-				'label'             => esc_html__( 'POS stock', 'woocommerce' ),
-				'value'             => $this->location_stock_service->get_location_stock_for_product_record( $variation_product, LocationStockService::LOCATION_POS ),
-				'type'              => 'number',
-				'custom_attributes' => array(
-					'step' => 'any',
-				),
-				'data_type'         => 'stock',
-				'desc_tip'          => true,
-				'description'       => esc_html__( 'Set POS stock for this variation. This does not change web stock.', 'woocommerce' ),
-				'wrapper_class'     => 'form-row form-row-full',
-			)
-		);
+		foreach ( $locations as $location ) {
+			woocommerce_wp_text_input(
+				array(
+					'id'                => 'variable_inventory_stock_' . $location['slug'] . $loop,
+					'name'              => 'variable_inventory_location_stock[' . $location['slug'] . "][{$loop}]",
+					'label'             => sprintf(
+						/* translators: %s: POS location name. */
+						__( '%s stock', 'woocommerce' ),
+						$location['name']
+					),
+					'value'             => $this->location_stock_service->get_location_stock_for_product_record( $variation_product, $location['slug'] ),
+					'type'              => 'number',
+					'custom_attributes' => array(
+						'step' => 'any',
+					),
+					'data_type'         => 'stock',
+					'desc_tip'          => true,
+					'description'       => esc_html__( 'Set POS stock for this variation. This does not change web stock.', 'woocommerce' ),
+					'wrapper_class'     => 'form-row form-row-full',
+				)
+			);
+		}
 	}
 
 	/**
@@ -150,15 +178,21 @@ class LocationStockAdminController {
 			return;
 		}
 
-		$location_stock_values = wc_clean( wp_unslash( $_POST['variable_inventory_location_stock'][ LocationStockService::LOCATION_POS ] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Product save nonce is verified before this hook fires.
-		if ( ! is_array( $location_stock_values ) || ! array_key_exists( $loop, $location_stock_values ) ) {
+		$location_stock_values = wc_clean( wp_unslash( $_POST['variable_inventory_location_stock'] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Product save nonce is verified before this hook fires.
+		if ( ! is_array( $location_stock_values ) ) {
 			return;
 		}
 
-		$this->location_stock_service->set_location_stock(
-			$variation,
-			LocationStockService::LOCATION_POS,
-			wc_stock_amount( $location_stock_values[ $loop ] )
-		);
+		foreach ( $this->location_stock_service->get_locations() as $location ) {
+			if ( ! isset( $location_stock_values[ $location['slug'] ] ) || ! is_array( $location_stock_values[ $location['slug'] ] ) || ! array_key_exists( $loop, $location_stock_values[ $location['slug'] ] ) ) {
+				continue;
+			}
+
+			$this->location_stock_service->set_location_stock(
+				$variation,
+				$location['slug'],
+				wc_stock_amount( $location_stock_values[ $location['slug'] ][ $loop ] )
+			);
+		}
 	}
 }

@@ -247,8 +247,7 @@ class LocationStockOrderController {
 	private function get_configured_order_location_slug( \WC_Order $order ): ?string {
 		$location_slug = sanitize_title( (string) $order->get_meta( InventoryController::ORDER_LOCATION_META, true ) );
 
-		if ( LocationStockService::LOCATION_POS !== $location_slug
-			|| ! $this->gate->feature_is_enabled()
+		if ( ! $this->gate->feature_is_enabled()
 			|| ! $this->gate->location_is_configured( $location_slug ) ) {
 			return null;
 		}

@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Internal\Inventory\LocationStockOrderController;
 use Automattic\WooCommerce\Internal\Inventory\LocationStockService;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\ProductMapper;
-use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use WC_Helper_Product;
 use WC_Order;
 use WC_Order_Item_Product;
@@ -59,13 +58,6 @@ abstract class LocationStockTestCase extends WC_REST_Unit_Test_Case {
 	protected LocationStockInstaller $installer;
 
 	/**
-	 * Database utility.
-	 *
-	 * @var DatabaseUtil
-	 */
-	protected DatabaseUtil $database_util;
-
-	/**
 	 * Original feature option value.
 	 *
 	 * @var mixed
@@ -80,11 +72,11 @@ abstract class LocationStockTestCase extends WC_REST_Unit_Test_Case {
 	protected $previous_manage_stock_option;
 
 	/**
-	 * Original table latch option value.
+	 * Original locations option value.
 	 *
 	 * @var mixed
 	 */
-	protected $previous_tables_created_option;
+	protected $previous_locations_option;
 
 	/**
 	 * Original POS location latch option value.
@@ -101,22 +93,27 @@ abstract class LocationStockTestCase extends WC_REST_Unit_Test_Case {
 
 		$this->previous_feature_option              = get_option( InventoryController::FEATURE_OPTION, null );
 		$this->previous_manage_stock_option         = get_option( 'woocommerce_manage_stock', null );
-		$this->previous_tables_created_option       = get_option( LocationStockInstaller::TABLES_CREATED_OPTION, null );
+		$this->previous_locations_option            = get_option( LocationStockService::LOCATIONS_OPTION, null );
 		$this->previous_pos_location_created_option = get_option( LocationStockInstaller::POS_LOCATION_CREATED_OPTION, null );
 
 		update_option( InventoryController::FEATURE_OPTION, 'yes' );
 		update_option( 'woocommerce_manage_stock', 'yes' );
+		delete_option( LocationStockInstaller::POS_LOCATION_CREATED_OPTION );
 
 		$this->service          = wc_get_container()->get( LocationStockService::class );
 		$this->controller       = wc_get_container()->get( InventoryController::class );
 		$this->admin_controller = wc_get_container()->get( LocationStockAdminController::class );
 		$this->order_controller = wc_get_container()->get( LocationStockOrderController::class );
 		$this->installer        = wc_get_container()->get( LocationStockInstaller::class );
-		$this->database_util    = wc_get_container()->get( DatabaseUtil::class );
 
-		$this->create_inventory_tables();
-		$this->empty_inventory_tables();
-		$this->service->ensure_pos_location();
+		$this->configure_pos_locations(
+			array(
+				array(
+					'slug' => LocationStockService::LOCATION_POS,
+					'name' => 'POS',
+				),
+			)
+		);
 
 		// The controller is a shared singleton whose feature-hooks latch survives the
 		// whole run, while WP_UnitTestCase restores $wp_filter between tests. Reset the
@@ -142,7 +139,7 @@ abstract class LocationStockTestCase extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->restore_option( InventoryController::FEATURE_OPTION, $this->previous_feature_option );
 		$this->restore_option( 'woocommerce_manage_stock', $this->previous_manage_stock_option );
-		$this->restore_option( LocationStockInstaller::TABLES_CREATED_OPTION, $this->previous_tables_created_option );
+		$this->restore_option( LocationStockService::LOCATIONS_OPTION, $this->previous_locations_option );
 		$this->restore_option( LocationStockInstaller::POS_LOCATION_CREATED_OPTION, $this->previous_pos_location_created_option );
 
 		parent::tearDown();
@@ -163,45 +160,22 @@ abstract class LocationStockTestCase extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Create the inventory tables.
-	 */
-	protected function create_inventory_tables(): void {
-		$this->database_util->dbdelta( $this->service->get_database_schema() );
-	}
-
-	/**
-	 * Empty the inventory tables.
-	 */
-	protected function empty_inventory_tables(): void {
-		global $wpdb;
-
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_inventory" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_locations" );
-	}
-
-	/**
 	 * Remove the configured POS location.
 	 */
 	protected function remove_pos_location(): void {
-		global $wpdb;
+		$locations = $this->service->get_locations();
+		unset( $locations[ LocationStockService::LOCATION_POS ] );
 
-		$wpdb->delete(
-			$this->service->get_locations_table_name(),
-			array(
-				'slug' => LocationStockService::LOCATION_POS,
-			),
-			array( '%s' )
-		);
+		$this->configure_pos_locations( array_values( $locations ) );
 	}
 
 	/**
-	 * Drop the inventory tables.
+	 * Configure POS locations for a test.
+	 *
+	 * @param array<int,array<string,mixed>> $locations Location data.
 	 */
-	protected function drop_inventory_tables(): void {
-		global $wpdb;
-
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wc_product_inventory" );
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wc_locations" );
+	protected function configure_pos_locations( array $locations ): void {
+		$this->service->set_locations( $locations );
 	}
 
 	/**
@@ -254,10 +228,21 @@ abstract class LocationStockTestCase extends WC_REST_Unit_Test_Case {
 	 * @param int      $reduced_qty     Reduced item quantity.
 	 */
 	protected function assert_order_used_pos_stock( WC_Order $order, int $reduced_qty ): void {
+		$this->assert_order_used_location_stock( $order, LocationStockService::LOCATION_POS, $reduced_qty );
+	}
+
+	/**
+	 * Assert that an order used location stock.
+	 *
+	 * @param WC_Order $order         Order object.
+	 * @param string   $location_slug Location slug.
+	 * @param int      $reduced_qty   Reduced item quantity.
+	 */
+	protected function assert_order_used_location_stock( WC_Order $order, string $location_slug, int $reduced_qty ): void {
 		$items = $order->get_items();
 		$item  = reset( $items );
 
-		$this->assertEquals( LocationStockService::LOCATION_POS, $order->get_meta( '_inventory_location', true ) );
+		$this->assertEquals( $location_slug, $order->get_meta( '_inventory_location', true ) );
 		$this->assertEquals( $reduced_qty, $item->get_meta( '_reduced_location_stock', true ) );
 		$this->assertEmpty( $item->get_meta( '_reduced_stock', true ) );
 	}
@@ -481,11 +466,22 @@ abstract class LocationStockTestCase extends WC_REST_Unit_Test_Case {
 	 * @param int        $quantity Quantity.
 	 */
 	protected function create_pos_order_for_product( WC_Product $product, int $quantity ): WC_Order {
+		return $this->create_location_order_for_product( $product, $quantity, LocationStockService::LOCATION_POS );
+	}
+
+	/**
+	 * Create a location-backed order containing one product.
+	 *
+	 * @param WC_Product $product       Product object.
+	 * @param int        $quantity      Quantity.
+	 * @param string     $location_slug Location slug.
+	 */
+	protected function create_location_order_for_product( WC_Product $product, int $quantity, string $location_slug ): WC_Order {
 		return $this->create_order_for_product(
 			$product,
 			$quantity,
 			'point-of-sale',
-			array( '_inventory_location' => LocationStockService::LOCATION_POS )
+			array( '_inventory_location' => $location_slug )
 		);
 	}
 

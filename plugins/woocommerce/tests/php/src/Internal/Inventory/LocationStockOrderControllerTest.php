@@ -82,6 +82,38 @@ class LocationStockOrderControllerTest extends LocationStockTestCase {
 		$this->assertEmpty( $item->get_meta( '_reduced_stock', true ) );
 	}
 
+	/**
+	 * @testdox Should route existing orders with configured POS location meta to that location's stock.
+	 */
+	public function test_existing_order_configured_inventory_location_meta_routes_to_that_location_stock(): void {
+		$product = $this->create_managed_stock_product();
+		$this->configure_pos_locations(
+			array(
+				array(
+					'slug' => LocationStockService::LOCATION_POS,
+					'name' => 'Front counter',
+				),
+				array(
+					'slug' => 'side-counter',
+					'name' => 'Side counter',
+				),
+			)
+		);
+		$this->service->set_location_stock( $product, LocationStockService::LOCATION_POS, 5 );
+		$this->service->set_location_stock( $product, 'side-counter', 4 );
+
+		$order = $this->create_location_order_for_product( $product, 2, 'side-counter' );
+
+		$this->order_controller->maybe_reduce_location_stock_levels( $order->get_id() );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertEquals( 5, $this->service->get_location_stock( $product, LocationStockService::LOCATION_POS ) );
+		$this->assertEquals( 2, $this->service->get_location_stock( $product, 'side-counter' ) );
+		$this->assertEquals( 15, wc_get_product( $product->get_id() )->get_stock_quantity() );
+		$this->assert_order_used_location_stock( $order, 'side-counter', 2 );
+	}
+
 
 	/**
 	 * @testdox Should add an error note when stock is no longer available at reduction time.

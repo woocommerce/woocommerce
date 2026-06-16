@@ -7,35 +7,19 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Inventory;
 
-use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Creates POS location stock tables and required setup rows.
+ * Ensures option-backed POS locations are initialized.
  *
  * @internal
  */
 class LocationStockInstaller {
 
 	/**
-	 * Option key used to latch schema creation.
-	 */
-	public const TABLES_CREATED_OPTION = 'woocommerce_pos_location_stock_db_tables_created';
-
-	/**
-	 * Option key used to latch POS location creation.
+	 * Option key used to latch default POS location setup.
 	 */
 	public const POS_LOCATION_CREATED_OPTION = 'woocommerce_pos_location_stock_pos_location_created';
-
-	private const MISSING_TABLES_OPTION = 'woocommerce_pos_location_stock_schema_missing_tables';
-
-	/**
-	 * Database utilities.
-	 *
-	 * @var DatabaseUtil
-	 */
-	private DatabaseUtil $database_util;
 
 	/**
 	 * Feature and configuration gate.
@@ -56,8 +40,7 @@ class LocationStockInstaller {
 	 *
 	 * @internal
 	 */
-	final public function init( DatabaseUtil $database_util, LocationStockGate $gate, LocationStockService $location_stock_service ): void {
-		$this->database_util          = $database_util;
+	final public function init( LocationStockGate $gate, LocationStockService $location_stock_service ): void {
 		$this->gate                   = $gate;
 		$this->location_stock_service = $location_stock_service;
 	}
@@ -66,54 +49,23 @@ class LocationStockInstaller {
 	 * Register installer hooks.
 	 */
 	public function register(): void {
-		add_action( 'woocommerce_installed', array( $this, 'maybe_create_db_tables' ) );
-		add_action( 'woocommerce_updated', array( $this, 'maybe_create_db_tables' ) );
-		add_action( 'init', array( $this, 'maybe_create_db_tables' ), 5 );
+		add_action( 'woocommerce_installed', array( $this, 'maybe_initialize_locations' ) );
+		add_action( 'woocommerce_updated', array( $this, 'maybe_initialize_locations' ) );
+		add_action( 'init', array( $this, 'maybe_initialize_locations' ), 5 );
 	}
 
 	/**
-	 * Create inventory tables when POS location stock is enabled.
+	 * Initialize the default POS location when POS location stock is enabled.
 	 */
-	public function maybe_create_db_tables(): void {
+	public function maybe_initialize_locations(): void {
 		if ( ! $this->gate->feature_is_enabled() ) {
 			return;
 		}
 
-		if ( 'yes' === get_option( self::TABLES_CREATED_OPTION, 'no' ) && $this->location_stock_service->tables_exist() ) {
-			$this->maybe_ensure_pos_location();
+		if ( 'yes' === get_option( self::POS_LOCATION_CREATED_OPTION, 'no' ) && $this->location_stock_service->has_locations() ) {
 			return;
 		}
 
-		$schema = $this->location_stock_service->get_database_schema();
-		$this->database_util->dbdelta( $schema );
-
-		$missing_tables = $this->database_util->get_missing_tables( $schema );
-		if ( ! empty( $missing_tables ) ) {
-			update_option( self::TABLES_CREATED_OPTION, 'no' );
-			update_option( self::MISSING_TABLES_OPTION, $missing_tables );
-			return;
-		}
-
-		update_option( self::TABLES_CREATED_OPTION, 'yes' );
-		delete_option( self::MISSING_TABLES_OPTION );
-		$this->ensure_pos_location();
-	}
-
-	/**
-	 * Ensure the POS row once after table creation or upgrade.
-	 */
-	private function maybe_ensure_pos_location(): void {
-		if ( 'yes' === get_option( self::POS_LOCATION_CREATED_OPTION, 'no' ) ) {
-			return;
-		}
-
-		$this->ensure_pos_location();
-	}
-
-	/**
-	 * Ensure the POS row and latch the setup.
-	 */
-	private function ensure_pos_location(): void {
 		$this->location_stock_service->ensure_pos_location();
 		update_option( self::POS_LOCATION_CREATED_OPTION, 'yes' );
 	}
