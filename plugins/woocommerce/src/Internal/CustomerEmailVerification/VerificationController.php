@@ -33,6 +33,13 @@ class VerificationController {
 	private $service;
 
 	/**
+	 * Order linker, used to detect whether there are guest orders worth verifying for.
+	 *
+	 * @var OrderLinker
+	 */
+	private $order_linker;
+
+	/**
 	 * Constructor. Registers hooks.
 	 */
 	public function __construct() {
@@ -44,10 +51,12 @@ class VerificationController {
 	 * Inject dependencies.
 	 *
 	 * @internal
-	 * @param EmailVerificationService $service Verification service.
+	 * @param EmailVerificationService $service      Verification service.
+	 * @param OrderLinker              $order_linker Order linker.
 	 */
-	final public function init( EmailVerificationService $service ): void {
-		$this->service = $service;
+	final public function init( EmailVerificationService $service, OrderLinker $order_linker ): void {
+		$this->service      = $service;
+		$this->order_linker = $order_linker;
 	}
 
 	/**
@@ -130,7 +139,9 @@ class VerificationController {
 	/**
 	 * Return whether the email-verification prompt should be shown to the current visitor.
 	 *
-	 * Returns true only for logged-in customers whose email address is not yet verified.
+	 * True only for a logged-in customer who is not yet verified AND who has at least one
+	 * guest order that could be linked — there's no point prompting someone with nothing to
+	 * gain. Only existence is checked; no order details are exposed.
 	 *
 	 * @since 11.0.0
 	 *
@@ -143,7 +154,11 @@ class VerificationController {
 			return false;
 		}
 
-		return ! $this->service->is_verified( $user_id );
+		if ( $this->service->is_verified( $user_id ) ) {
+			return false;
+		}
+
+		return $this->order_linker->has_linkable_orders( $user_id );
 	}
 
 	/**
@@ -165,7 +180,7 @@ class VerificationController {
 
 		?>
 		<div class="woocommerce-info woocommerce-verify-email">
-			<p><?php esc_html_e( 'Confirm your email address to access past orders placed with it.', 'woocommerce' ); ?></p>
+			<p><?php esc_html_e( 'Verify your email address to view past orders.', 'woocommerce' ); ?></p>
 			<a href="<?php echo esc_url( $send_url ); ?>" class="button woocommerce-button">
 				<?php esc_html_e( 'Verify your email address', 'woocommerce' ); ?>
 			</a>

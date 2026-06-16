@@ -64,4 +64,35 @@ class OrderLinkerTest extends WC_Unit_Test_Case {
 		$unlinked_order = wc_get_order( $order_id );
 		$this->assertSame( 0, $unlinked_order->get_customer_id(), 'Orders with a different billing email should remain unlinked' );
 	}
+
+	/**
+	 * @testdox has_linkable_orders is true when a matching guest order exists, false otherwise.
+	 */
+	public function test_has_linkable_orders_detects_matching_guest_orders(): void {
+		$email   = 'has-linkable@example.com';
+		$user_id = wc_create_new_customer( $email, 'haslinkableuser', 'pw' );
+
+		$this->assertFalse( $this->sut->has_linkable_orders( $user_id ), 'No guest orders yet — should be false' );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( $email );
+		$order->set_customer_id( 0 );
+		$order->save();
+
+		$this->assertTrue( $this->sut->has_linkable_orders( $user_id ), 'A matching guest order exists — should be true' );
+	}
+
+	/**
+	 * @testdox has_linkable_orders is false when guest orders exist only for a different email.
+	 */
+	public function test_has_linkable_orders_ignores_other_emails(): void {
+		$user_id = wc_create_new_customer( 'no-linkable@example.com', 'nolinkableuser', 'pw' );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( 'someone-else@example.com' );
+		$order->set_customer_id( 0 );
+		$order->save();
+
+		$this->assertFalse( $this->sut->has_linkable_orders( $user_id ), 'Guest orders for a different email should not count' );
+	}
 }

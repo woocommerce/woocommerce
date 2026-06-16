@@ -70,4 +70,32 @@ class OrderLinker {
 	public function run_link( int $user_id ): void {
 		wc_update_new_customer_past_orders( $user_id );
 	}
+
+	/**
+	 * Whether the user has at least one guest order that could be linked on verification.
+	 *
+	 * Deliberately checks existence only (a single row, no details) so it is cheap to call
+	 * on page load and discloses nothing beyond "there is something to link".
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param int $user_id The user ID to check.
+	 * @return bool
+	 */
+	public function has_linkable_orders( int $user_id ): bool {
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			return false;
+		}
+
+		$matching = (array) wc_get_orders(
+			array(
+				'limit'    => 1,
+				'customer' => array( array( 0, $user->user_email ) ),
+				'return'   => 'ids',
+			)
+		);
+
+		return ! empty( $matching );
+	}
 }

@@ -57,13 +57,30 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_show_prompt returns true for a logged-in customer whose email is unverified.
+	 * @testdox should_show_prompt returns true for an unverified customer with linkable guest orders.
 	 */
 	public function test_should_show_prompt_returns_true_for_logged_in_unverified_customer(): void {
-		$user_id = wc_create_new_customer( 'prompt-unverified@example.com', 'promptunverified', 'pw' );
+		$email   = 'prompt-unverified@example.com';
+		$user_id = wc_create_new_customer( $email, 'promptunverified', 'pw' );
 		wp_set_current_user( $user_id );
 
-		$this->assertTrue( $this->sut->should_show_prompt(), 'Unverified customers should see the prompt' );
+		// A linkable guest order must exist for the prompt to appear.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( $email );
+		$order->set_customer_id( 0 );
+		$order->save();
+
+		$this->assertTrue( $this->sut->should_show_prompt(), 'Unverified customers with linkable guest orders should see the prompt' );
+	}
+
+	/**
+	 * @testdox should_show_prompt returns false for an unverified customer with no linkable guest orders.
+	 */
+	public function test_should_show_prompt_returns_false_without_linkable_orders(): void {
+		$user_id = wc_create_new_customer( 'prompt-no-orders@example.com', 'promptnoorders', 'pw' );
+		wp_set_current_user( $user_id );
+
+		$this->assertFalse( $this->sut->should_show_prompt(), 'Unverified customers with nothing to link should not see the prompt' );
 	}
 
 	/**
