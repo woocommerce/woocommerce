@@ -213,6 +213,33 @@ class POSPinService {
 	}
 
 	/**
+	 * Verify a plaintext PIN against the record stored for a specific user.
+	 *
+	 * Convenience wrapper over verify_pin(): loads the user's stored PIN record and
+	 * checks the candidate against it. Used by the server-side POS staff auth path
+	 * to confirm the operator behind a POS-originated request before swapping the
+	 * effective user. Returns false when the user has no PIN set.
+	 *
+	 * @param int    $user_id The target user ID.
+	 * @param string $pin     The plaintext PIN to verify.
+	 * @return bool           True if the PIN matches the user's stored record.
+	 *
+	 * @since 11.0.0
+	 */
+	public function verify_pin_for_user( int $user_id, string $pin ): bool {
+		if ( $user_id <= 0 ) {
+			return false;
+		}
+
+		$record = get_user_meta( $user_id, self::PIN_META_KEY, true );
+		if ( ! is_array( $record ) ) {
+			return false;
+		}
+
+		return $this->verify_pin( $pin, $record );
+	}
+
+	/**
 	 * Validate the PIN string against the expected wire format.
 	 *
 	 * @param string $pin The PIN to validate.

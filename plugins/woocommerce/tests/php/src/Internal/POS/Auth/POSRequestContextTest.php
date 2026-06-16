@@ -1,0 +1,252 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\POS\Auth;
+
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\POS\Auth\POSRequestContext;
+use WC_Unit_Test_Case;
+
+/**
+ * Tests for POSRequestContext — the POS-originated request detector.
+ */
+class POSRequestContextTest extends WC_Unit_Test_Case {
+
+	/**
+	 * Saved $_SERVER keys to restore in tearDown.
+	 *
+	 * @var array<string, mixed>
+	 */
+	private array $server_backup = array();
+
+	/**
+	 * Saved rest_route query var.
+	 *
+	 * @var mixed
+	 */
+	private $rest_route_backup;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		if ( ! defined( 'REST_REQUEST' ) ) {
+			define( 'REST_REQUEST', true );
+		}
+
+		$this->server_backup     = $_SERVER;
+		$this->rest_route_backup = $GLOBALS['wp']->query_vars['rest_route'] ?? null;
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		$_SERVER = $this->server_backup;
+		if ( null === $this->rest_route_backup ) {
+			unset( $GLOBALS['wp']->query_vars['rest_route'] );
+		} else {
+			$GLOBALS['wp']->query_vars['rest_route'] = $this->rest_route_backup;
+		}
+		parent::tearDown();
+	}
+
+	/**
+	 * Build a SUT with the feature flags stubbed.
+	 *
+	 * @param bool $pos_enabled   Whether the parent point_of_sale flag is on.
+	 * @param bool $staff_enabled Whether the point_of_sale_staff flag is on.
+	 * @return POSRequestContext
+	 */
+	private function make_sut( bool $pos_enabled = true, bool $staff_enabled = true ): POSRequestContext {
+		$features = $this->createMock( FeaturesController::class );
+		$features->method( 'feature_is_enabled' )->willReturnMap(
+			array(
+				array( 'point_of_sale', $pos_enabled ),
+				array( 'point_of_sale_staff', $staff_enabled ),
+			)
+		);
+
+		$sut = new POSRequestContext();
+		$sut->init( $features );
+		return $sut;
+	}
+
+	/**
+	 * Arrange the current request: route, method, and POS headers.
+	 *
+	 * @param string                $route   REST route (e.g. /wc/pos/v1/whoami).
+	 * @param string                $method  HTTP method.
+	 * @param array<string, string> $headers Map of HTTP_* server keys to values.
+	 */
+	private function arrange_request( string $route, string $method = 'GET', array $headers = array() ): void {
+		$GLOBALS['wp']->query_vars['rest_route'] = $route;
+		$_SERVER['REQUEST_METHOD']               = $method;
+		foreach ( $headers as $key => $value ) {
+			$_SERVER[ $key ] = $value;
+		}
+	}
+
+	/**
+	 * Default valid staff credential headers.
+	 *
+	 * @param int    $staff_id Staff user id.
+	 * @param string $pin      Staff PIN.
+	 * @return array<string, string>
+	 */
+	private function credential_headers( int $staff_id = 42, string $pin = '1234' ): array {
+		return array(
+			'HTTP_X_WC_POS_STAFF_ID' => (string) $staff_id,
+			'HTTP_X_WC_POS_PIN'      => $pin,
+		);
+	}
+
+	/**
+	 * @testdox A structural /wc/pos/v1/* request with staff credentials is POS-originated (read, no intent).
+	 */
+	public function test_structural_read_is_pos_request(): void {
+		$this->arrange_request( '/wc/pos/v1/whoami', 'GET', $this->credential_headers() );
+
+		$sut = $this->make_sut();
+
+		$this->assertTrue( $sut->is_pos_request(), 'Structural POS route with credentials should be POS-originated' );
+		$this->assertSame( POSRequestContext::TIER_STRUCTURAL, $sut->tier() );
+		$this->assertSame( 42, $sut->get_staff_id() );
+		$this->assertNull( $sut->get_intent(), 'A read route should resolve no write intent' );
+		$this->assertSame( '1234', $sut->get_pin() );
+	}
+
+	/**
+	 * @testdox A structural POST /wc/pos/v1/orders resolves the order.create intent.
+	 */
+	public function test_structural_order_create_intent(): void {
+		$this->arrange_request( '/wc/pos/v1/orders', 'POST', $this->credential_headers() );
+
+		$sut = $this->make_sut();
+
+		$this->assertTrue( $sut->is_pos_request() );
+		$this->assertSame( POSRequestContext::INTENT_ORDER_CREATE, $sut->get_intent() );
+	}
+
+	/**
+	 * @testdox A POST /wc/v3/orders with the POS header is POS-originated via the header tier.
+	 */
+	public function test_header_tier_order_create(): void {
+		$headers = $this->credential_headers() + array( 'HTTP_X_WC_POS_REQUEST' => '1' );
+		$this->arrange_request( '/wc/v3/orders', 'POST', $headers );
+
+		$sut = $this->make_sut();
+
+		$this->assertTrue( $sut->is_pos_request() );
+		$this->assertSame( POSRequestContext::TIER_HEADER, $sut->tier() );
+		$this->assertSame( POSRequestContext::INTENT_ORDER_CREATE, $sut->get_intent() );
+	}
+
+	/**
+	 * @testdox A wc/v3 refund route resolves the refund.create intent.
+	 */
+	public function test_header_tier_refund_create(): void {
+		$headers = $this->credential_headers() + array( 'HTTP_X_WC_POS_REQUEST' => '1' );
+		$this->arrange_request( '/wc/v3/orders/123/refunds', 'POST', $headers );
+
+		$sut = $this->make_sut();
+
+		$this->assertTrue( $sut->is_pos_request() );
+		$this->assertSame( POSRequestContext::INTENT_REFUND_CREATE, $sut->get_intent() );
+	}
+
+	/**
+	 * @testdox A wc/v3 write without the POS header is not POS-originated.
+	 */
+	public function test_header_tier_requires_marker_header(): void {
+		$this->arrange_request( '/wc/v3/orders', 'POST', $this->credential_headers() );
+
+		$this->assertFalse( $this->make_sut()->is_pos_request(), 'Missing X-WC-POS-Request must not match the header tier' );
+	}
+
+	/**
+	 * @testdox A non-allowlisted wc/v3 route is never POS-originated even with the POS header.
+	 */
+	public function test_non_allowlisted_v3_route_is_not_pos(): void {
+		$headers = $this->credential_headers() + array( 'HTTP_X_WC_POS_REQUEST' => '1' );
+		$this->arrange_request( '/wc/v3/products', 'POST', $headers );
+
+		$this->assertFalse( $this->make_sut()->is_pos_request(), 'Products endpoint is not an attributable POS write' );
+	}
+
+	/**
+	 * @testdox A Store API route is never POS-originated.
+	 */
+	public function test_store_api_route_is_never_pos(): void {
+		$headers = $this->credential_headers() + array( 'HTTP_X_WC_POS_REQUEST' => '1' );
+		$this->arrange_request( '/wc/store/v1/checkout', 'POST', $headers );
+
+		$this->assertFalse( $this->make_sut()->is_pos_request(), 'Storefront/guest traffic must never be treated as POS' );
+	}
+
+	/**
+	 * @testdox A request missing the staff-id header is not POS-originated.
+	 */
+	public function test_missing_staff_id_header_is_not_pos(): void {
+		$this->arrange_request( '/wc/pos/v1/whoami', 'GET', array( 'HTTP_X_WC_POS_PIN' => '1234' ) );
+
+		$this->assertFalse( $this->make_sut()->is_pos_request() );
+	}
+
+	/**
+	 * @testdox A request missing the PIN header is not POS-originated.
+	 */
+	public function test_missing_pin_header_is_not_pos(): void {
+		$this->arrange_request( '/wc/pos/v1/whoami', 'GET', array( 'HTTP_X_WC_POS_STAFF_ID' => '42' ) );
+
+		$this->assertFalse( $this->make_sut()->is_pos_request() );
+	}
+
+	/**
+	 * @testdox Detection is off when the point_of_sale_staff flag is disabled.
+	 */
+	public function test_disabled_flag_is_not_pos(): void {
+		$this->arrange_request( '/wc/pos/v1/whoami', 'GET', $this->credential_headers() );
+
+		$this->assertFalse( $this->make_sut( true, false )->is_pos_request(), 'Sub-flag off must disable detection' );
+	}
+
+	/**
+	 * @testdox A non-numeric staff-id header resolves to no staff and is not POS-originated.
+	 */
+	public function test_invalid_staff_id_is_not_pos(): void {
+		$this->arrange_request(
+			'/wc/pos/v1/whoami',
+			'GET',
+			array(
+				'HTTP_X_WC_POS_STAFF_ID' => 'abc',
+				'HTTP_X_WC_POS_PIN'      => '1234',
+			)
+		);
+
+		$this->assertFalse( $this->make_sut()->is_pos_request() );
+	}
+
+	/**
+	 * @testdox A negative computed before the route is parsed is not memoized.
+	 */
+	public function test_pre_route_negative_is_not_memoized(): void {
+		// Simulate an early wp_get_current_user() (before REST dispatch parsed the route): the
+		// credentials are present but no route is resolvable yet.
+		unset( $GLOBALS['wp']->query_vars['rest_route'] );
+		$_SERVER['REQUEST_METHOD'] = 'GET';
+		foreach ( $this->credential_headers() as $key => $value ) {
+			$_SERVER[ $key ] = $value;
+		}
+
+		$sut = $this->make_sut();
+		$this->assertFalse( $sut->is_pos_request(), 'With no route yet, detection must report a transient false' );
+
+		// REST dispatch now sets the route; the same instance must re-evaluate, not return the
+		// stale false (this is the bug that 403'd the live swap).
+		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/pos/v1/whoami';
+		$this->assertTrue( $sut->is_pos_request(), 'Once the route exists the same instance must re-evaluate to true' );
+	}
+}

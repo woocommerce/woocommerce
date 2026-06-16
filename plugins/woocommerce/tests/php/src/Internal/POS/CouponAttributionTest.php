@@ -3,198 +3,245 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\POS;
 
+use Automattic\WooCommerce\Internal\POS\Auth\POSRequestContext;
 use Automattic\WooCommerce\Internal\POS\Capabilities;
 use Automattic\WooCommerce\Internal\POS\CouponAttribution;
 use Automattic\WooCommerce\Internal\POS\OrderAttribution;
+use Automattic\WooCommerce\Internal\POS\POSPreset;
 use WC_Coupon;
+use WC_Logger_Interface;
 use WC_Unit_Test_Case;
-use WP_REST_Request;
 
 /**
- * Tests for the CouponAttribution lifecycle hooks.
- *
- * Hooks are exercised directly (rather than through the full REST stack) to keep the
- * test focused on validation behavior. The attribution meta keys are reused from
- * {@see OrderAttribution} to keep the mobile wire shape uniform across resources.
+ * Tests for CouponAttribution — initiator recording (log-only) on POS coupon writes.
  */
 class CouponAttributionTest extends WC_Unit_Test_Case {
 
 	/**
-	 * The System Under Test.
+	 * Acting staff member (current user) id.
 	 *
-	 * @var CouponAttribution
+	 * @var int
 	 */
-	private $sut;
+	private int $actor_id;
+
+	/**
+	 * Initiator staff member id.
+	 *
+	 * @var int
+	 */
+	private int $initiator_id;
+
+	/**
+	 * Fake logger capturing info/warning calls.
+	 *
+	 * @var object
+	 */
+	private $fake_logger;
 
 	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = new CouponAttribution();
+
+		$this->actor_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		Capabilities::set_pos_preset( $this->actor_id, POSPreset::MANAGER );
+
+		$this->initiator_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		Capabilities::set_pos_preset( $this->initiator_id, POSPreset::CASHIER );
+
+		wp_set_current_user( $this->actor_id );
+
+		$this->fake_logger = $this->create_fake_logger();
+		add_filter( 'woocommerce_logging_class', fn() => $this->fake_logger );
 	}
 
 	/**
-	 * Create a user with the given POS preset.
-	 *
-	 * @param string $pos_preset One of Capabilities::POS_PRESET_* constants.
-	 * @param array  $user_args Optional overrides for the user factory.
-	 * @return int              The created user ID.
+	 * Tear down test fixtures.
 	 */
-	private function make_pos_user( string $pos_preset, array $user_args = array() ): int {
-		$user_id = self::factory()->user->create( array_merge( array( 'role' => 'subscriber' ), $user_args ) );
-		Capabilities::set_pos_preset( $user_id, $pos_preset );
-		return $user_id;
+	public function tearDown(): void {
+		remove_all_filters( 'woocommerce_logging_class' );
+		wp_set_current_user( 0 );
+		parent::tearDown();
 	}
 
 	/**
-	 * Build a draft coupon with the given POS meta applied.
+	 * Build the SUT with a POS-request flag.
 	 *
-	 * @param array $meta Map of meta key → value.
+	 * @param bool $is_pos Whether the request is POS-originated.
+	 * @return CouponAttribution
+	 */
+	private function make_sut( bool $is_pos = true ): CouponAttribution {
+		$ctx = $this->createMock( POSRequestContext::class );
+		$ctx->method( 'is_pos_request' )->willReturn( $is_pos );
+
+		$sut = new CouponAttribution();
+		$sut->init( $ctx );
+		return $sut;
+	}
+
+	/**
+	 * Create a coupon carrying the given initiator meta.
+	 *
+	 * @param int|null $initiator_id Initiator id, or null for none.
 	 * @return WC_Coupon
 	 */
-	private function make_coupon_with_meta( array $meta ): WC_Coupon {
+	private function make_coupon( ?int $initiator_id ): WC_Coupon {
 		$coupon = new WC_Coupon();
-		$coupon->set_code( 'test-' . uniqid() );
-		foreach ( $meta as $key => $value ) {
-			$coupon->update_meta_data( $key, $value );
+		$coupon->set_code( 'pos-' . wp_rand( 1000, 9999 ) );
+		if ( null !== $initiator_id ) {
+			$coupon->update_meta_data( OrderAttribution::META_KEY_INITIATOR_USER_ID, $initiator_id );
 		}
+		$coupon->save();
 		return $coupon;
 	}
 
 	/**
-	 * @testdox Should pass coupons without any POS meta through unchanged.
+	 * @testdox Logs an info line when a valid initiator is present.
 	 */
-	public function test_pre_insert_passes_coupons_without_pos_meta(): void {
-		$coupon = $this->make_coupon_with_meta( array() );
-		$result = $this->sut->handle_pre_insert( $coupon, new WP_REST_Request(), true );
+	public function test_logs_info_for_valid_initiator(): void {
+		$this->make_sut()->handle_post_insert( $this->make_coupon( $this->initiator_id ), null, true );
 
-		$this->assertSame( $coupon, $result );
+		$this->assertCount( 1, $this->fake_logger->info_calls, 'A valid initiator should produce one info log line' );
 	}
 
 	/**
-	 * @testdox Should return a WP_Error when _pos_staff_user_id references a missing user.
+	 * @testdox Logs nothing when there is no initiator meta.
 	 */
-	public function test_pre_insert_rejects_unknown_staff_user(): void {
-		$coupon = $this->make_coupon_with_meta(
-			array( OrderAttribution::META_KEY_STAFF_USER_ID => 99999999 )
-		);
+	public function test_no_log_without_initiator(): void {
+		$this->make_sut()->handle_post_insert( $this->make_coupon( null ), null, true );
 
-		$result = $this->sut->handle_pre_insert( $coupon, new WP_REST_Request(), true );
-
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_pos_invalid_attribution', $result->get_error_code() );
-		$this->assertSame( 400, $result->get_error_data()['status'] );
+		$this->assertCount( 0, $this->fake_logger->info_calls );
+		$this->assertCount( 0, $this->fake_logger->warning_calls );
 	}
 
 	/**
-	 * @testdox Should return a WP_Error when the staff user lacks POS access.
+	 * @testdox Logs nothing when the request is not POS-originated.
 	 */
-	public function test_pre_insert_rejects_staff_user_without_pos_access(): void {
-		$customer = self::factory()->user->create( array( 'role' => 'customer' ) );
-		$coupon   = $this->make_coupon_with_meta(
-			array( OrderAttribution::META_KEY_STAFF_USER_ID => $customer )
-		);
+	public function test_no_log_when_not_pos_request(): void {
+		$this->make_sut( false )->handle_post_insert( $this->make_coupon( $this->initiator_id ), null, true );
 
-		$result = $this->sut->handle_pre_insert( $coupon, new WP_REST_Request(), true );
-
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_pos_invalid_attribution', $result->get_error_code() );
-
-		wp_delete_user( $customer );
+		$this->assertCount( 0, $this->fake_logger->info_calls );
 	}
 
 	/**
-	 * @testdox Should accept a coupon with valid attribution and no override.
+	 * @testdox Logs a warning when the initiator lacks POS access.
 	 */
-	public function test_pre_insert_accepts_valid_attribution(): void {
-		$manager = $this->make_pos_user( Capabilities::POS_PRESET_MANAGER );
-		$coupon  = $this->make_coupon_with_meta(
-			array( OrderAttribution::META_KEY_STAFF_USER_ID => $manager )
-		);
+	public function test_warns_for_initiator_without_pos_access(): void {
+		$stranger = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 
-		$result = $this->sut->handle_pre_insert( $coupon, new WP_REST_Request(), true );
+		$this->make_sut()->handle_post_insert( $this->make_coupon( $stranger ), null, true );
 
-		$this->assertSame( $coupon, $result );
-
-		wp_delete_user( $manager );
+		$this->assertCount( 1, $this->fake_logger->warning_calls, 'A non-POS initiator should produce one warning' );
+		$this->assertCount( 0, $this->fake_logger->info_calls );
 	}
 
 	/**
-	 * @testdox Should reject a self-override on a coupon.
+	 * Build a fake logger that records info/warning calls.
+	 *
+	 * @return object
 	 */
-	public function test_pre_insert_rejects_self_override(): void {
-		$manager = $this->make_pos_user( Capabilities::POS_PRESET_MANAGER );
-		$coupon  = $this->make_coupon_with_meta(
-			array(
-				OrderAttribution::META_KEY_STAFF_USER_ID => $manager,
-				OrderAttribution::META_KEY_OVERRIDE_STAFF_USER_ID => $manager,
-			)
-		);
+	private function create_fake_logger() {
+		return new class() implements WC_Logger_Interface {
+			/**
+			 * Captured info() calls.
+			 *
+			 * @var array<int, array{0:string,1:array}>
+			 */
+			public array $info_calls = array();
 
-		$result = $this->sut->handle_pre_insert( $coupon, new WP_REST_Request(), true );
+			/**
+			 * Captured warning() calls.
+			 *
+			 * @var array<int, array{0:string,1:array}>
+			 */
+			public array $warning_calls = array();
 
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_pos_self_override', $result->get_error_code() );
+			/**
+			 * {@inheritDoc}
+			 *
+			 * @param string $message Message.
+			 * @param array  $context Context.
+			 */
+			public function info( $message, $context = array() ) {
+				$this->info_calls[] = array( $message, $context );
+			}
 
-		wp_delete_user( $manager );
-	}
+			/**
+			 * {@inheritDoc}
+			 *
+			 * @param string $message Message.
+			 * @param array  $context Context.
+			 */
+			public function warning( $message, $context = array() ) {
+				$this->warning_calls[] = array( $message, $context );
+			}
 
-	/**
-	 * @testdox Should reject coupon override when approver lacks create_coupons.
-	 */
-	public function test_pre_insert_rejects_forbidden_approver(): void {
-		$cashier         = $this->make_pos_user( Capabilities::POS_PRESET_CASHIER );
-		$another_cashier = $this->make_pos_user( Capabilities::POS_PRESET_CASHIER );
+			/**
+			 * {@inheritDoc}
+			 *
+			 * @param string $level   Level.
+			 * @param string $message Message.
+			 * @param array  $context Context.
+			 */
+			public function log( $level, $message, $context = array() ) {}
 
-		$coupon = $this->make_coupon_with_meta(
-			array(
-				OrderAttribution::META_KEY_STAFF_USER_ID => $cashier,
-				OrderAttribution::META_KEY_OVERRIDE_STAFF_USER_ID => $another_cashier,
-			)
-		);
+			/**
+			 * {@inheritDoc}
+			 *
+			 * @param string $handle  Handle.
+			 * @param string $message Message.
+			 * @param string $level   Level.
+			 */
+			public function add( $handle, $message, $level = 'notice' ) {}
 
-		$result = $this->sut->handle_pre_insert( $coupon, new WP_REST_Request(), true );
+			/**
+			 * {@inheritDoc}
+			 *
+			 * @param string $message Message.
+			 * @param array  $context Context.
+			 */
+			public function debug( $message, $context = array() ) {}
 
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_pos_override_forbidden', $result->get_error_code() );
+			/**
+			 * {@inheritDoc}
+			 *
+			 * @param string $message Message.
+			 * @param array  $context Context.
+			 */
+			public function notice( $message, $context = array() ) {}
 
-		wp_delete_user( $cashier );
-		wp_delete_user( $another_cashier );
-	}
+			/**
+			 * {@inheritDoc}
+			 *
+			 * @param string $message Message.
+			 * @param array  $context Context.
+			 */
+			public function error( $message, $context = array() ) {}
 
-	/**
-	 * @testdox Should accept a valid coupon override (approver holds create_coupons).
-	 */
-	public function test_pre_insert_accepts_valid_override(): void {
-		$cashier = $this->make_pos_user( Capabilities::POS_PRESET_CASHIER );
-		$manager = $this->make_pos_user( Capabilities::POS_PRESET_MANAGER );
+			/**
+			 * {@inheritDoc}
+			 *
+			 * @param string $message Message.
+			 * @param array  $context Context.
+			 */
+			public function critical( $message, $context = array() ) {}
 
-		$coupon = $this->make_coupon_with_meta(
-			array(
-				OrderAttribution::META_KEY_STAFF_USER_ID => $cashier,
-				OrderAttribution::META_KEY_OVERRIDE_STAFF_USER_ID => $manager,
-			)
-		);
+			/**
+			 * {@inheritDoc}
+			 *
+			 * @param string $message Message.
+			 * @param array  $context Context.
+			 */
+			public function alert( $message, $context = array() ) {}
 
-		$result = $this->sut->handle_pre_insert( $coupon, new WP_REST_Request(), true );
-
-		$this->assertSame( $coupon, $result );
-
-		wp_delete_user( $cashier );
-		wp_delete_user( $manager );
-	}
-
-	/**
-	 * @testdox Should be a no-op at post-insert when no attribution meta is present.
-	 */
-	public function test_post_insert_noop_without_attribution(): void {
-		$coupon = $this->make_coupon_with_meta( array() );
-		$coupon->save();
-
-		// No exception, no fatal — coupons have no order-note timeline to assert against.
-		$this->sut->handle_post_insert( $coupon, new WP_REST_Request(), true );
-
-		$this->assertTrue( true );
+			/**
+			 * {@inheritDoc}
+			 *
+			 * @param string $message Message.
+			 * @param array  $context Context.
+			 */
+			public function emergency( $message, $context = array() ) {}
+		};
 	}
 }

@@ -242,4 +242,39 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 		// from the uniqueness scan so their own existing hash does not falsely collide.
 		$this->assertTrue( $this->sut->set_pin( $this->user_id, '1234' ) );
 	}
+
+	/**
+	 * @testdox verify_pin_for_user returns true for the user's correct PIN.
+	 */
+	public function test_verify_pin_for_user_accepts_correct_pin(): void {
+		$this->sut->set_pin( $this->user_id, '1234' );
+
+		$this->assertTrue( $this->sut->verify_pin_for_user( $this->user_id, '1234' ) );
+	}
+
+	/**
+	 * @testdox verify_pin_for_user returns false for a wrong PIN.
+	 */
+	public function test_verify_pin_for_user_rejects_wrong_pin(): void {
+		$this->sut->set_pin( $this->user_id, '1234' );
+
+		$this->assertFalse( $this->sut->verify_pin_for_user( $this->user_id, '9999' ) );
+	}
+
+	/**
+	 * @testdox verify_pin_for_user returns false when the user has no PIN set.
+	 */
+	public function test_verify_pin_for_user_rejects_user_without_pin(): void {
+		$without_pin            = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$this->extra_user_ids[] = $without_pin;
+
+		$this->assertFalse( $this->sut->verify_pin_for_user( $without_pin, '1234' ) );
+	}
+
+	/**
+	 * @testdox verify_pin_for_user returns false for a non-positive user id.
+	 */
+	public function test_verify_pin_for_user_rejects_invalid_user_id(): void {
+		$this->assertFalse( $this->sut->verify_pin_for_user( 0, '1234' ) );
+	}
 }

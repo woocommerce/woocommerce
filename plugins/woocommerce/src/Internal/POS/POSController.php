@@ -7,9 +7,12 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\POS\Admin\UserFormIntegration;
+use Automattic\WooCommerce\Internal\POS\Auth\POSAuthHandler;
+use Automattic\WooCommerce\Internal\POS\Auth\POSCapBridge;
 use Automattic\WooCommerce\Internal\POS\CouponAttribution;
 use Automattic\WooCommerce\Internal\POS\OrderAttribution;
 use Automattic\WooCommerce\Internal\POS\RestApi\POSStaffController;
+use Automattic\WooCommerce\Internal\POS\RestApi\POSWhoamiController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
@@ -17,8 +20,8 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
  *
  * Short-circuits on either the parent `point_of_sale` feature being off or the
  * dev-only `point_of_sale_staff` sub-flag being off. When both are on, wires up
- * the staff REST endpoint and the order-attribution lifecycle hooks via the DI
- * container.
+ * the server-side staff auth (current-user swap + capability bridge), the staff
+ * REST endpoint, and the initiator-attribution hooks via the DI container.
  *
  * @since 11.0.0
  * @internal
@@ -64,6 +67,27 @@ class POSController implements RegisterHooksInterface {
 	private UserFormIntegration $user_form_integration;
 
 	/**
+	 * Server-side POS staff auth handler (current-user swap).
+	 *
+	 * @var POSAuthHandler
+	 */
+	private POSAuthHandler $auth_handler;
+
+	/**
+	 * POS-scoped capability bridge.
+	 *
+	 * @var POSCapBridge
+	 */
+	private POSCapBridge $cap_bridge;
+
+	/**
+	 * POC-only whoami debug REST controller.
+	 *
+	 * @var POSWhoamiController
+	 */
+	private POSWhoamiController $whoami_controller;
+
+	/**
 	 * Initialize dependencies via the DI container.
 	 *
 	 * @internal
@@ -73,19 +97,28 @@ class POSController implements RegisterHooksInterface {
 	 * @param OrderAttribution    $order_attribution     The order attribution lifecycle handler.
 	 * @param CouponAttribution   $coupon_attribution    The coupon attribution lifecycle handler.
 	 * @param UserFormIntegration $user_form_integration The Add New User form integration.
+	 * @param POSAuthHandler      $auth_handler          The server-side staff auth handler.
+	 * @param POSCapBridge        $cap_bridge            The POS-scoped capability bridge.
+	 * @param POSWhoamiController $whoami_controller     The POC-only whoami debug controller.
 	 */
 	final public function init(
 		FeaturesController $features_controller,
 		POSStaffController $staff_controller,
 		OrderAttribution $order_attribution,
 		CouponAttribution $coupon_attribution,
-		UserFormIntegration $user_form_integration
+		UserFormIntegration $user_form_integration,
+		POSAuthHandler $auth_handler,
+		POSCapBridge $cap_bridge,
+		POSWhoamiController $whoami_controller
 	): void {
 		$this->features_controller   = $features_controller;
 		$this->staff_controller      = $staff_controller;
 		$this->order_attribution     = $order_attribution;
 		$this->coupon_attribution    = $coupon_attribution;
 		$this->user_form_integration = $user_form_integration;
+		$this->auth_handler          = $auth_handler;
+		$this->cap_bridge            = $cap_bridge;
+		$this->whoami_controller     = $whoami_controller;
 	}
 
 	/**
@@ -149,7 +182,13 @@ class POSController implements RegisterHooksInterface {
 			return;
 		}
 
+		// Server-side staff auth must register first: the current-user swap hooks onto
+		// determine_current_user, and the capability bridge onto user_has_cap.
+		$this->auth_handler->register();
+		$this->cap_bridge->register();
+
 		$this->staff_controller->register();
+		$this->whoami_controller->register();
 		$this->order_attribution->register();
 		$this->coupon_attribution->register();
 		$this->user_form_integration->register();
