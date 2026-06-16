@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Build WooCommerce e2e CI assets once and share them across local e2e matrix jobs.
+Build a WooCommerce plugin artifact once and share it across local e2e matrix jobs.
