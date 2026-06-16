@@ -46,7 +46,9 @@ export const registerSettingsUIScreens = () => {
 			document.querySelector< HTMLElement >( '[data-wc-settings-ui="1"]' )
 		) {
 			// eslint-disable-next-line no-console
-			console.warn( '[WooCommerce settings UI] The wc-settings-ui script is missing.' );
+			console.warn(
+				'[WooCommerce settings UI] The wc-settings-ui script is missing.'
+			);
 		}
 		return;
 	}

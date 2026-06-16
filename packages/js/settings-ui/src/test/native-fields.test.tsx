@@ -228,6 +228,28 @@ describe( 'NativeSettingsField', () => {
 			expect( onChange ).toHaveBeenCalledWith( '0.3' );
 		} );
 
+		it( 'preserves current value precision when it exceeds step precision', () => {
+			const onChange = jest.fn();
+			const container = render(
+				<NativeSettingsField
+					{ ...makeProps(
+						{
+							...numberField,
+							customAttributes: { min: 0, step: 0.1 },
+						},
+						'0.05',
+						onChange
+					) }
+				/>
+			);
+
+			clickButton(
+				getSpinButton( container, 'Increment Low stock threshold' )
+			);
+
+			expect( onChange ).toHaveBeenCalledWith( '0.15' );
+		} );
+
 		it( 'steps onto the minimum from an empty value', () => {
 			const onChange = jest.fn();
 			const container = render(
