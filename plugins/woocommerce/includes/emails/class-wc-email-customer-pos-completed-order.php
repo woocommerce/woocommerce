@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
+use Automattic\WooCommerce\Internal\Inventory\LocationStockService;
 use Automattic\WooCommerce\Internal\Orders\PointOfSaleOrderUtil;
 use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -473,9 +474,25 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @return string
 		 */
 		private function get_pos_store_address() {
+			$location_address = $this->get_pos_location_store_address();
+			if ( '' !== $location_address ) {
+				return $this->format_string( $location_address );
+			}
+
 			return $this->format_string(
 				get_option( 'woocommerce_pos_store_address', PointOfSaleDefaultSettings::get_default_store_address() )
 			);
+		}
+
+		/**
+		 * Get the configured address for the order's POS location.
+		 */
+		private function get_pos_location_store_address(): string {
+			if ( ! $this->object instanceof WC_Order ) {
+				return '';
+			}
+
+			return wc_get_container()->get( LocationStockService::class )->get_order_location_address( $this->object );
 		}
 
 		/**

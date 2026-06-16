@@ -13,7 +13,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.5.0
+ * @version 10.9.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -22,6 +22,7 @@ defined( 'ABSPATH' ) || exit;
 // phpcs:disable Squiz.PHP.EmbeddedPhp.ContentAfterEnd -- removed to prevent empty new lines.
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Inventory\LocationStockService;
 use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
 
 if ( 'customer_invoice' === $email->id ) :
@@ -145,37 +146,49 @@ if ( isset( $order ) && ! in_array( $email->id, $emails_without_order_details, t
 }
 
 if ( 'customer_pos_completed_order' === $email->id || 'customer_pos_refunded_order' === $email->id ) :
-	if ( ! empty( get_option( 'woocommerce_pos_store_email', PointOfSaleDefaultSettings::get_default_store_email() ) )
-		|| ! empty( get_option( 'woocommerce_pos_store_phone' ) )
-		|| ! empty( get_option( 'woocommerce_pos_store_address', PointOfSaleDefaultSettings::get_default_store_address() ) ) ) :
+	$pos_store_name    = get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() );
+	$pos_store_email   = get_option( 'woocommerce_pos_store_email', PointOfSaleDefaultSettings::get_default_store_email() );
+	$pos_store_phone   = get_option( 'woocommerce_pos_store_phone' );
+	$pos_store_address = get_option( 'woocommerce_pos_store_address', PointOfSaleDefaultSettings::get_default_store_address() );
+
+	if ( isset( $order ) && $order instanceof WC_Order ) {
+		$location_address = wc_get_container()->get( LocationStockService::class )->get_order_location_address( $order );
+		if ( '' !== $location_address ) {
+			$pos_store_address = $location_address;
+		}
+	}
+
+	if ( ! empty( $pos_store_email )
+		|| ! empty( $pos_store_phone )
+		|| ! empty( $pos_store_address ) ) :
 		?>
 		<!-- wp:group -->
 		<div class="wp-block-group">
-			<?php if ( ! empty( get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() ) ) ) : ?>
+			<?php if ( ! empty( $pos_store_name ) ) : ?>
 			<!-- wp:heading {"level":3} -->
-			<h3 class="wp-block-heading"><?php echo esc_html( get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() ) ); ?></h3>
+			<h3 class="wp-block-heading"><?php echo esc_html( $pos_store_name ); ?></h3>
 			<!-- /wp:heading -->
 			<?php else : ?>
 			<!-- wp:heading {"level":3} -->
-			<h3 class="wp-block-heading"><?php echo esc_html__( 'Store Information', 'woocommerce' ); ?></h3>
+			<h3 class="wp-block-heading"><?php echo esc_html__( 'Store information', 'woocommerce' ); ?></h3>
 			<!-- /wp:heading -->
 			<?php endif; ?>
 
-			<?php if ( ! empty( get_option( 'woocommerce_pos_store_email', PointOfSaleDefaultSettings::get_default_store_email() ) ) ) : ?>
+			<?php if ( ! empty( $pos_store_email ) ) : ?>
 			<!-- wp:paragraph -->
-			<p><?php echo esc_html( get_option( 'woocommerce_pos_store_email', PointOfSaleDefaultSettings::get_default_store_email() ) ); ?></p>
+			<p><?php echo esc_html( $pos_store_email ); ?></p>
 			<!-- /wp:paragraph -->
 			<?php endif; ?>
 
-			<?php if ( ! empty( get_option( 'woocommerce_pos_store_phone' ) ) ) : ?>
+			<?php if ( ! empty( $pos_store_phone ) ) : ?>
 			<!-- wp:paragraph -->
-			<p><?php echo esc_html( get_option( 'woocommerce_pos_store_phone' ) ); ?></p>
+			<p><?php echo esc_html( $pos_store_phone ); ?></p>
 			<!-- /wp:paragraph -->
 			<?php endif; ?>
 
-			<?php if ( ! empty( get_option( 'woocommerce_pos_store_address', PointOfSaleDefaultSettings::get_default_store_address() ) ) ) : ?>
+			<?php if ( ! empty( $pos_store_address ) ) : ?>
 			<!-- wp:paragraph -->
-			<p><?php echo esc_html( get_option( 'woocommerce_pos_store_address', PointOfSaleDefaultSettings::get_default_store_address() ) ); ?></p>
+			<p><?php echo esc_html( $pos_store_address ); ?></p>
 			<!-- /wp:paragraph -->
 			<?php endif; ?>
 		</div>

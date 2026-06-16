@@ -124,6 +124,16 @@ class LocationStockService {
 	 * @param array<int,array<string,mixed>> $locations Location data.
 	 */
 	public function set_locations( array $locations ): void {
+		update_option( self::LOCATIONS_OPTION, $this->normalize_locations( $locations ), false );
+	}
+
+	/**
+	 * Normalize configured POS locations.
+	 *
+	 * @param array<int,array<string,mixed>> $locations Location data.
+	 * @return array<int,array{slug:string,name:string,address_1:string,address_2:string,city:string,state:string,postcode:string,country:string}>
+	 */
+	public function normalize_locations( array $locations ): array {
 		$normalized = array();
 
 		foreach ( $locations as $location ) {
@@ -142,7 +152,7 @@ class LocationStockService {
 			}
 		}
 
-		update_option( self::LOCATIONS_OPTION, array_values( $normalized ), false );
+		return array_values( $normalized );
 	}
 
 	/**
@@ -183,6 +193,67 @@ class LocationStockService {
 		$location = $this->get_location( $slug );
 
 		return $location ? $location['name'] : $slug;
+	}
+
+	/**
+	 * Get the formatted address for an order's saved inventory location.
+	 *
+	 * @param \WC_Order $order Order object.
+	 */
+	public function get_order_location_address( \WC_Order $order ): string {
+		$location_slug = sanitize_title( (string) $order->get_meta( InventoryController::ORDER_LOCATION_META, true ) );
+		if ( '' === $location_slug ) {
+			return '';
+		}
+
+		return $this->get_location_address( $location_slug );
+	}
+
+	/**
+	 * Get a newline-separated address for a configured location.
+	 *
+	 * @param string $slug Location slug.
+	 */
+	public function get_location_address( string $slug ): string {
+		$location = $this->get_location( $slug );
+		if ( ! $location ) {
+			return '';
+		}
+
+		$country = $location['country'];
+		$state   = $location['state'];
+		if ( function_exists( 'WC' ) && WC()->countries ) {
+			$country = WC()->countries->countries[ $location['country'] ] ?? $country;
+			$states  = WC()->countries->get_states( $location['country'] );
+			if ( is_array( $states ) ) {
+				$state = $states[ $location['state'] ] ?? $state;
+			}
+		}
+
+		$city_region_postcode = implode(
+			', ',
+			array_filter(
+				array(
+					$location['city'],
+					$state,
+					$location['postcode'],
+				),
+				'strlen'
+			)
+		);
+
+		return implode(
+			"\n",
+			array_filter(
+				array(
+					$location['address_1'],
+					$location['address_2'],
+					$city_region_postcode,
+					$country,
+				),
+				'strlen'
+			)
+		);
 	}
 
 	/**
@@ -438,8 +509,11 @@ class LocationStockService {
 	 * @return array{slug:string,name:string,address_1:string,address_2:string,city:string,state:string,postcode:string,country:string}
 	 */
 	private function normalize_location( array $location ): array {
-		$slug = $this->normalize_location_slug( $this->get_scalar_location_value( $location, 'slug' ) );
 		$name = (string) wc_clean( $this->get_scalar_location_value( $location, 'name' ) );
+		$slug = $this->normalize_location_slug( $this->get_scalar_location_value( $location, 'slug' ) );
+		if ( '' === $slug && '' !== $name ) {
+			$slug = $this->normalize_location_slug( $name );
+		}
 
 		return array(
 			'slug'      => $slug,

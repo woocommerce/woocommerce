@@ -197,8 +197,8 @@ class LocationStockServiceTest extends LocationStockTestCase {
 					'country'   => 'GB',
 				),
 				array(
-					'slug' => 'register-2',
-					'name' => 'Register 2',
+					'slug' => '',
+					'name' => 'Mobile counter',
 				),
 				array(
 					'slug' => 'register-3',
@@ -223,11 +223,40 @@ class LocationStockServiceTest extends LocationStockTestCase {
 
 		$this->assertCount( 5, $locations );
 		$this->assertArrayHasKey( 'register-1', $locations );
+		$this->assertArrayHasKey( 'mobile-counter', $locations );
 		$this->assertArrayNotHasKey( 'register-6', $locations );
 		$this->assertSame( 'Main till', $locations['register-1']['name'] );
+		$this->assertSame( 'Mobile counter', $locations['mobile-counter']['name'] );
 		$this->assertSame( '1 Shop Street', $locations['register-1']['address_1'] );
 		$this->assertSame( '', $locations['register-1']['address_2'] );
 		$this->assertSame( 'Cardiff', $locations['register-1']['city'] );
 		$this->assertSame( 'GB', $locations['register-1']['country'] );
+	}
+
+	/**
+	 * @testdox Should format an order's configured POS location address.
+	 */
+	public function test_order_location_address_uses_order_location_meta(): void {
+		$this->configure_pos_locations(
+			array(
+				array(
+					'slug'      => 'register-2',
+					'name'      => 'Register 2',
+					'address_1' => '1 Shop Street',
+					'address_2' => 'Unit 2',
+					'city'      => 'Cardiff',
+					'state'     => 'South Glamorgan',
+					'postcode'  => 'CF10 1AA',
+					'country'   => 'Testland',
+				),
+			)
+		);
+
+		$order = $this->create_location_order_for_product( $this->create_managed_stock_product(), 1, 'register-2' );
+
+		$this->assertSame(
+			"1 Shop Street\nUnit 2\nCardiff, South Glamorgan, CF10 1AA\nTestland",
+			$this->service->get_order_location_address( $order )
+		);
 	}
 }
