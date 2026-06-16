@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\MultiCurrency;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyLocalizationService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceCalculator;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceProjectionService;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencySubscriptionsCompatibilityProjectionService;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
@@ -68,6 +69,15 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 		'WCS_Switch_Totals_Calculator->apportion_sign_up_fees',
 	);
 
+	private const MY_ACCOUNT_SUBSCRIPTIONS_TEMPLATE_CALLS = array(
+		'WCS_Template_Loader::get_my_subscriptions',
+		'WCS_Template_Loader::get_my_subscriptions ',
+	);
+
+	private const FORMATTED_SUBSCRIPTION_TOTAL_CALLS = array(
+		'WC_Subscription->get_formatted_order_total',
+	);
+
 	/**
 	 * Runtime owner arbiter.
 	 *
@@ -90,11 +100,25 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 	private ?MultiCurrencyPriceProjectionService $price_projection_service = null;
 
 	/**
+	 * State builder.
+	 *
+	 * @var MultiCurrencyStateBuilder|null
+	 */
+	private ?MultiCurrencyStateBuilder $state_builder = null;
+
+	/**
 	 * Previously observed subscription switch cart item key.
 	 *
 	 * @var string
 	 */
 	private string $switch_cart_item = '';
+
+	/**
+	 * Current My Account subscription being formatted.
+	 *
+	 * @var object|null
+	 */
+	private ?object $current_my_account_subscription = null;
 
 	/**
 	 * Whether selected-currency override lookups are already running.
@@ -125,6 +149,17 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 	 */
 	public function set_price_projection_service( MultiCurrencyPriceProjectionService $price_projection_service ): void {
 		$this->price_projection_service = $price_projection_service;
+	}
+
+	/**
+	 * Set the state builder.
+	 *
+	 * @internal Used by tests and future explicit bootstrap definitions.
+	 *
+	 * @param MultiCurrencyStateBuilder $state_builder State builder.
+	 */
+	public function set_state_builder( MultiCurrencyStateBuilder $state_builder ): void {
+		$this->state_builder = $state_builder;
 	}
 
 	/**
@@ -186,6 +221,11 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 	public function override_selected_currency( $selected_currency ) {
 		if ( $selected_currency || $this->running_override_selected_currency_filters ) {
 			return $selected_currency;
+		}
+
+		$currency_code = $this->get_subscription_currency( $this->current_my_account_subscription );
+		if ( null !== $currency_code ) {
+			return $currency_code;
 		}
 
 		foreach ( self::SUBSCRIPTION_TYPES as $type ) {
@@ -328,6 +368,63 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 		}
 
 		return $this->get_price_projection_service()->get_price( $price, 'product' );
+	}
+
+	/**
+	 * Track the current My Account subscription while Subscriptions formats totals.
+	 *
+	 * @param array<mixed> $subscription_details Subscription price string details.
+	 * @param mixed        $subscription         Subscription object.
+	 * @return array<mixed>
+	 */
+	public function maybe_set_current_my_account_subscription( $subscription_details, $subscription ): array {
+		if (
+			MultiCurrencySubscriptionsCompatibilityProjectionService::should_set_current_my_account_subscription(
+				$this->is_call_in_backtrace( self::MY_ACCOUNT_SUBSCRIPTIONS_TEMPLATE_CALLS ),
+				$this->is_call_in_backtrace( self::FORMATTED_SUBSCRIPTION_TOTAL_CALLS )
+			)
+			&& null !== $this->get_subscription_currency( is_object( $subscription ) ? $subscription : null )
+		) {
+			$this->current_my_account_subscription = $subscription;
+		}
+
+		return $subscription_details;
+	}
+
+	/**
+	 * Clear the current My Account subscription after the formatted total is done.
+	 *
+	 * @param mixed $formatted    Formatted subscription total.
+	 * @param mixed $subscription Subscription object.
+	 * @return string
+	 */
+	public function maybe_clear_current_my_account_subscription( $formatted, $subscription ): string {
+		unset( $subscription );
+
+		if ( null !== $this->get_subscription_currency( $this->current_my_account_subscription ) ) {
+			$this->current_my_account_subscription = null;
+		}
+
+		return (string) $formatted;
+	}
+
+	/**
+	 * Append explicit currency code to My Account subscription totals when needed.
+	 *
+	 * @param mixed $html_price Price HTML.
+	 * @return string
+	 */
+	public function maybe_get_explicit_format_for_subscription_total( $html_price ): string {
+		$currency_code = $this->get_subscription_currency( $this->current_my_account_subscription );
+		if ( null === $currency_code ) {
+			return (string) $html_price;
+		}
+
+		return MultiCurrencySubscriptionsCompatibilityProjectionService::get_explicit_subscription_total_price_html(
+			(string) $html_price,
+			$currency_code,
+			$this->get_state_builder()->build()->has_additional_currencies_enabled()
+		);
 	}
 
 	/**
@@ -708,6 +805,19 @@ class MultiCurrencySubscriptionsCompatibilityController implements RegisterHooks
 		}
 
 		return $this->price_projection_service;
+	}
+
+	/**
+	 * Get the state builder.
+	 *
+	 * @return MultiCurrencyStateBuilder
+	 */
+	private function get_state_builder(): MultiCurrencyStateBuilder {
+		if ( null === $this->state_builder ) {
+			$this->state_builder = wc_get_container()->get( MultiCurrencyStateBuilderFactory::class )->create();
+		}
+
+		return $this->state_builder;
 	}
 
 	/**

@@ -236,6 +236,9 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'woocommerce_subscriptions_product_price',
 				'woocommerce_product_get__subscription_sign_up_fee',
 				'woocommerce_product_variation_get__subscription_sign_up_fee',
+				'woocommerce_subscription_price_string_details',
+				'woocommerce_get_formatted_subscription_total',
+				'wc_price',
 				'option_woocommerce_subscriptions_multiple_purchase',
 			),
 			$filter_hooks

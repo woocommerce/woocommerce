@@ -4,6 +4,10 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
+use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyCurrency;
+use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyState;
+use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\MultiCurrencyLocalizationInterface;
+use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilder;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencySubscriptionsCompatibilityController;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyPriceProjectionService;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -27,6 +31,9 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 		'woocommerce_subscriptions_product_price',
 		'woocommerce_product_get__subscription_sign_up_fee',
 		'woocommerce_product_variation_get__subscription_sign_up_fee',
+		'woocommerce_subscription_price_string_details',
+		'woocommerce_get_formatted_subscription_total',
+		'wc_price',
 		'option_woocommerce_subscriptions_multiple_purchase',
 	);
 
@@ -68,6 +75,9 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 		$this->assertSame( 50, has_filter( 'woocommerce_subscriptions_product_price', array( $sut, 'get_subscription_product_price' ) ) );
 		$this->assertSame( 50, has_filter( 'woocommerce_product_get__subscription_sign_up_fee', array( $sut, 'get_subscription_product_signup_fee' ) ) );
 		$this->assertSame( 50, has_filter( 'woocommerce_product_variation_get__subscription_sign_up_fee', array( $sut, 'get_subscription_product_signup_fee' ) ) );
+		$this->assertSame( 50, has_filter( 'woocommerce_subscription_price_string_details', array( $sut, 'maybe_set_current_my_account_subscription' ) ) );
+		$this->assertSame( 50, has_filter( 'woocommerce_get_formatted_subscription_total', array( $sut, 'maybe_clear_current_my_account_subscription' ) ) );
+		$this->assertSame( 50, has_filter( 'wc_price', array( $sut, 'maybe_get_explicit_format_for_subscription_total' ) ) );
 		$this->assertSame( 50, has_filter( 'option_woocommerce_subscriptions_multiple_purchase', array( $sut, 'maybe_disable_mixed_cart' ) ) );
 	}
 
@@ -157,6 +167,62 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 		$sut->set_subscription_cart_item( 'renewal', $this->create_subscription( 'EUR' ) );
 
 		$this->assertSame( 'GBP', $sut->override_selected_currency( 'GBP' ) );
+	}
+
+	/**
+	 * @testdox Should override selected currency while a My Account subscription total is formatting.
+	 */
+	public function test_overrides_selected_currency_while_my_account_subscription_total_is_formatting(): void {
+		$sut          = $this->create_controller();
+		$subscription = $this->create_subscription( 'EUR' );
+		$details      = array( 'price' => 'placeholder' );
+		$sut->set_backtrace_calls( array( 'WC_Subscription->get_formatted_order_total' ) );
+
+		$this->assertSame( $details, $sut->maybe_set_current_my_account_subscription( $details, $subscription ) );
+		$this->assertSame( 'EUR', $sut->override_selected_currency( false ) );
+		$this->assertSame( '<span>$10.00</span> EUR', $sut->maybe_get_explicit_format_for_subscription_total( '<span>$10.00</span>' ) );
+		$this->assertSame( '<span>$10.00</span> EUR', $sut->maybe_clear_current_my_account_subscription( '<span>$10.00</span> EUR', $subscription ) );
+		$this->assertFalse( $sut->override_selected_currency( false ) );
+	}
+
+	/**
+	 * @testdox Should not set current My Account subscription outside subscription total formatting.
+	 */
+	public function test_does_not_set_current_my_account_subscription_outside_total_formatting(): void {
+		$sut          = $this->create_controller();
+		$subscription = $this->create_subscription( 'EUR' );
+		$details      = array( 'price' => 'placeholder' );
+
+		$this->assertSame( $details, $sut->maybe_set_current_my_account_subscription( $details, $subscription ) );
+		$this->assertFalse( $sut->override_selected_currency( false ) );
+		$this->assertSame( '<span>$10.00</span>', $sut->maybe_get_explicit_format_for_subscription_total( '<span>$10.00</span>' ) );
+	}
+
+	/**
+	 * @testdox Should preserve explicit currency formatting when no code is needed.
+	 */
+	public function test_preserves_explicit_currency_formatting_when_no_code_is_needed(): void {
+		$sut          = $this->create_controller();
+		$subscription = $this->create_subscription( 'EUR' );
+		$sut->set_backtrace_calls( array( 'WCS_Template_Loader::get_my_subscriptions' ) );
+
+		$sut->maybe_set_current_my_account_subscription( array(), $subscription );
+
+		$this->assertSame( '<span>$10.00 EUR</span>', $sut->maybe_get_explicit_format_for_subscription_total( '<span>$10.00 EUR</span>' ) );
+		$this->assertSame( 'GBP', $sut->override_selected_currency( 'GBP' ) );
+	}
+
+	/**
+	 * @testdox Should skip explicit subscription total formatting when additional currencies are disabled.
+	 */
+	public function test_skips_explicit_subscription_total_formatting_when_additional_currencies_are_disabled(): void {
+		$sut          = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, true, false, false, false );
+		$subscription = $this->create_subscription( 'EUR' );
+		$sut->set_backtrace_calls( array( 'WC_Subscription->get_formatted_order_total' ) );
+
+		$sut->maybe_set_current_my_account_subscription( array(), $subscription );
+
+		$this->assertSame( '<span>$10.00</span>', $sut->maybe_get_explicit_format_for_subscription_total( '<span>$10.00</span>' ) );
 	}
 
 	/**
@@ -390,6 +456,9 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 		$this->assertFalse( has_filter( 'woocommerce_subscriptions_product_price', array( $sut, 'get_subscription_product_price' ) ) );
 		$this->assertFalse( has_filter( 'woocommerce_product_get__subscription_sign_up_fee', array( $sut, 'get_subscription_product_signup_fee' ) ) );
 		$this->assertFalse( has_filter( 'woocommerce_product_variation_get__subscription_sign_up_fee', array( $sut, 'get_subscription_product_signup_fee' ) ) );
+		$this->assertFalse( has_filter( 'woocommerce_subscription_price_string_details', array( $sut, 'maybe_set_current_my_account_subscription' ) ) );
+		$this->assertFalse( has_filter( 'woocommerce_get_formatted_subscription_total', array( $sut, 'maybe_clear_current_my_account_subscription' ) ) );
+		$this->assertFalse( has_filter( 'wc_price', array( $sut, 'maybe_get_explicit_format_for_subscription_total' ) ) );
 		$this->assertFalse( has_filter( 'option_woocommerce_subscriptions_multiple_purchase', array( $sut, 'maybe_disable_mixed_cart' ) ) );
 	}
 
@@ -400,13 +469,15 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 	 * @param bool   $subscriptions_available Whether Subscriptions runtime is available.
 	 * @param bool   $is_admin                Whether this is an admin request.
 	 * @param bool   $is_cron                 Whether this is a cron request.
+	 * @param bool   $has_additional_currencies_enabled Whether additional currencies are enabled.
 	 * @return MultiCurrencySubscriptionsCompatibilityController
 	 */
 	private function create_controller(
 		string $owner = MultiCurrencyRuntimeArbiter::OWNER_CORE,
 		bool $subscriptions_available = true,
 		bool $is_admin = false,
-		bool $is_cron = false
+		bool $is_cron = false,
+		bool $has_additional_currencies_enabled = true
 	): MultiCurrencySubscriptionsCompatibilityController {
 		$controller = new class( $subscriptions_available, $is_admin, $is_cron ) extends MultiCurrencySubscriptionsCompatibilityController {
 			/**
@@ -624,8 +695,60 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 
 		$controller->init( $this->create_arbiter( $owner ), new LegacyProxy() );
 		$controller->set_price_projection_service( $this->create_price_projection_service() );
+		$controller->set_state_builder( $this->create_state_builder( $has_additional_currencies_enabled ) );
 
 		return $controller;
+	}
+
+	/**
+	 * Create a deterministic state builder.
+	 *
+	 * @param bool $has_additional_currencies_enabled Whether additional currencies are enabled.
+	 * @return MultiCurrencyStateBuilder
+	 */
+	private function create_state_builder( bool $has_additional_currencies_enabled ): MultiCurrencyStateBuilder {
+		return new class( $has_additional_currencies_enabled, $this->create_localization() ) extends MultiCurrencyStateBuilder {
+			/**
+			 * Whether additional currencies are enabled.
+			 *
+			 * @var bool
+			 */
+			private bool $has_additional_currencies_enabled;
+
+			/**
+			 * Localization service.
+			 *
+			 * @var MultiCurrencyLocalizationInterface
+			 */
+			private MultiCurrencyLocalizationInterface $localization_service;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param bool                               $has_additional_currencies_enabled Whether additional currencies are enabled.
+			 * @param MultiCurrencyLocalizationInterface $localization_service              Localization service.
+			 */
+			public function __construct( bool $has_additional_currencies_enabled, MultiCurrencyLocalizationInterface $localization_service ) {
+				$this->has_additional_currencies_enabled = $has_additional_currencies_enabled;
+				$this->localization_service              = $localization_service;
+			}
+
+			/**
+			 * Build a deterministic multi-currency state.
+			 *
+			 * @return MultiCurrencyState
+			 */
+			public function build(): MultiCurrencyState {
+				$default = new MultiCurrencyCurrency( $this->localization_service, 'USD', 1.0, true );
+				$enabled = array( 'USD' => $default );
+
+				if ( $this->has_additional_currencies_enabled ) {
+					$enabled['EUR'] = new MultiCurrencyCurrency( $this->localization_service, 'EUR', 0.9 );
+				}
+
+				return new MultiCurrencyState( $enabled, $enabled, $default, $default );
+			}
+		};
 	}
 
 	/**
@@ -651,6 +774,44 @@ class MultiCurrencySubscriptionsCompatibilityControllerTest extends WC_Unit_Test
 				unset( $type );
 
 				return (float) $price * 2;
+			}
+		};
+	}
+
+	/**
+	 * Create a localization test double.
+	 *
+	 * @return MultiCurrencyLocalizationInterface
+	 */
+	private function create_localization(): MultiCurrencyLocalizationInterface {
+		return new class() implements MultiCurrencyLocalizationInterface {
+			/**
+			 * Get a currency format.
+			 *
+			 * @param string $currency_code Currency code.
+			 * @return array<string,mixed>
+			 */
+			public function get_currency_format( $currency_code ): array {
+				unset( $currency_code );
+
+				return array(
+					'currency_pos' => 'left',
+					'thousand_sep' => ',',
+					'decimal_sep'  => '.',
+					'num_decimals' => 2,
+				);
+			}
+
+			/**
+			 * Get locale data for a country.
+			 *
+			 * @param string $country Country code.
+			 * @return array<string,mixed>
+			 */
+			public function get_country_locale_data( $country ): array {
+				unset( $country );
+
+				return array();
 			}
 		};
 	}

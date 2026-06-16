@@ -62,6 +62,24 @@ class MultiCurrencySubscriptionsCompatibilityProjectionServiceTest extends WC_Un
 						'accepted_args' => 2,
 					),
 					array(
+						'hook'          => 'woocommerce_subscription_price_string_details',
+						'callback'      => 'maybe_set_current_my_account_subscription',
+						'priority'      => 50,
+						'accepted_args' => 2,
+					),
+					array(
+						'hook'          => 'woocommerce_get_formatted_subscription_total',
+						'callback'      => 'maybe_clear_current_my_account_subscription',
+						'priority'      => 50,
+						'accepted_args' => 2,
+					),
+					array(
+						'hook'          => 'wc_price',
+						'callback'      => 'maybe_get_explicit_format_for_subscription_total',
+						'priority'      => 50,
+						'accepted_args' => 1,
+					),
+					array(
 						'hook'          => 'option_woocommerce_subscriptions_multiple_purchase',
 						'callback'      => 'maybe_disable_mixed_cart',
 						'priority'      => 50,
@@ -144,6 +162,37 @@ class MultiCurrencySubscriptionsCompatibilityProjectionServiceTest extends WC_Un
 				$is_switch_proration_context,
 				$has_changed_signup_fee_meta
 			)
+		);
+	}
+
+	/**
+	 * @testdox Should set current My Account subscription only while subscription totals are formatting.
+	 */
+	public function test_sets_current_my_account_subscription_only_while_subscription_totals_are_formatting(): void {
+		$this->assertTrue( MultiCurrencySubscriptionsCompatibilityProjectionService::should_set_current_my_account_subscription( true, false ) );
+		$this->assertTrue( MultiCurrencySubscriptionsCompatibilityProjectionService::should_set_current_my_account_subscription( false, true ) );
+		$this->assertFalse( MultiCurrencySubscriptionsCompatibilityProjectionService::should_set_current_my_account_subscription( false, false ) );
+	}
+
+	/**
+	 * @testdox Should append explicit subscription total currency code only when needed.
+	 */
+	public function test_appends_explicit_subscription_total_currency_code_only_when_needed(): void {
+		$this->assertSame(
+			'<span>$10.00</span> EUR',
+			MultiCurrencySubscriptionsCompatibilityProjectionService::get_explicit_subscription_total_price_html( '<span>$10.00</span>', 'EUR', true )
+		);
+		$this->assertSame(
+			'<span>$10.00 EUR</span>',
+			MultiCurrencySubscriptionsCompatibilityProjectionService::get_explicit_subscription_total_price_html( '<span>$10.00 EUR</span>', 'EUR', true )
+		);
+		$this->assertSame(
+			'<span>$10.00</span>',
+			MultiCurrencySubscriptionsCompatibilityProjectionService::get_explicit_subscription_total_price_html( '<span>$10.00</span>', 'EUR', false )
+		);
+		$this->assertSame(
+			'<span>$10.00</span>',
+			MultiCurrencySubscriptionsCompatibilityProjectionService::get_explicit_subscription_total_price_html( '<span>$10.00</span>', '', true )
 		);
 	}
 

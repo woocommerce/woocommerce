@@ -85,6 +85,24 @@ class MultiCurrencySubscriptionsCompatibilityProjectionService {
 					'accepted_args' => 2,
 				),
 				array(
+					'hook'          => 'woocommerce_subscription_price_string_details',
+					'callback'      => 'maybe_set_current_my_account_subscription',
+					'priority'      => 50,
+					'accepted_args' => 2,
+				),
+				array(
+					'hook'          => 'woocommerce_get_formatted_subscription_total',
+					'callback'      => 'maybe_clear_current_my_account_subscription',
+					'priority'      => 50,
+					'accepted_args' => 2,
+				),
+				array(
+					'hook'          => 'wc_price',
+					'callback'      => 'maybe_get_explicit_format_for_subscription_total',
+					'priority'      => 50,
+					'accepted_args' => 1,
+				),
+				array(
 					'hook'          => 'option_woocommerce_subscriptions_multiple_purchase',
 					'callback'      => 'maybe_disable_mixed_cart',
 					'priority'      => 50,
@@ -236,6 +254,49 @@ class MultiCurrencySubscriptionsCompatibilityProjectionService {
 		return ! $is_subscription_price_setup_context
 			&& ! $is_switch_proration_context
 			&& ! $has_changed_signup_fee_meta;
+	}
+
+	/**
+	 * Project whether the current subscription should be tracked while totals format.
+	 *
+	 * @param bool $is_my_subscriptions_template_context Whether the My Account subscriptions template is rendering.
+	 * @param bool $is_formatted_order_total_context     Whether a subscription formatted total is being calculated.
+	 * @return bool
+	 *
+	 * @since 11.0.0
+	 */
+	public static function should_set_current_my_account_subscription(
+		bool $is_my_subscriptions_template_context,
+		bool $is_formatted_order_total_context
+	): bool {
+		return $is_my_subscriptions_template_context || $is_formatted_order_total_context;
+	}
+
+	/**
+	 * Project explicit subscription total price HTML.
+	 *
+	 * @param string      $html_price                         Price HTML.
+	 * @param string|null $currency_code                      Currency code.
+	 * @param bool        $has_additional_currencies_enabled Whether additional currencies are enabled.
+	 * @return string
+	 *
+	 * @since 11.0.0
+	 */
+	public static function get_explicit_subscription_total_price_html(
+		string $html_price,
+		?string $currency_code,
+		bool $has_additional_currencies_enabled
+	): string {
+		if ( ! $has_additional_currencies_enabled || null === $currency_code || '' === trim( $currency_code ) ) {
+			return $html_price;
+		}
+
+		$currency_code  = strtoupper( trim( $currency_code ) );
+		$price_to_check = html_entity_decode( wp_strip_all_tags( $html_price ), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 );
+
+		return false === strpos( $price_to_check, $currency_code )
+			? $html_price . ' ' . $currency_code
+			: $html_price;
 	}
 
 	/**
