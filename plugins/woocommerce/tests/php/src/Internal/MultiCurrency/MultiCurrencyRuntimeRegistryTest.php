@@ -60,6 +60,7 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'analytics',
 				'compatibility',
 				'bookings_compatibility',
+				'deposits_compatibility',
 				'pre_orders_compatibility',
 				'ups_compatibility',
 				'fedex_compatibility',
@@ -280,6 +281,26 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 				'wp_ajax_nopriv_wc_bookings_calculate_costs',
 			),
 			$action_hooks
+		);
+	}
+
+	/**
+	 * @testdox Should preserve the WooPayments Deposits compatibility hook surface.
+	 */
+	public function test_deposits_compatibility_manifest_contains_preserved_hooks(): void {
+		$hook_groups = MultiCurrencyRuntimeRegistry::get_core_hook_groups();
+
+		$this->assertSame(
+			array(
+				'woocommerce_get_cart_contents',
+				'woocommerce_product_get__wc_deposit_amount',
+				'wcpay_multi_currency_should_convert_product_price',
+			),
+			array_column( $hook_groups['deposits_compatibility']['filters'], 'hook' )
+		);
+		$this->assertSame(
+			array( 'woocommerce_deposits_create_order' ),
+			array_column( $hook_groups['deposits_compatibility']['actions'], 'hook' )
 		);
 	}
 
