@@ -155,6 +155,8 @@ For detailed test commands, see `woocommerce-dev-cycle` skill.
 
 ### `block.json` Attribute Defaults
 
+Never include styling options such as `fontSize`, `borderColor`, `textColor`... as block attributes. They should only be listed under `supports`.
+
 Do not add `default` values to block attributes in `block.json`.
 
 - Default attribute values can be indistinguishable from missing attributes when parsed, especially when the default value is not serialized into saved block markup.
