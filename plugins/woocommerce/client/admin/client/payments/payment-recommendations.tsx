@@ -26,10 +26,6 @@ import { getPluginSlug } from '~/utils';
 import { isWcPaySupported } from './utils';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 
-const WcPayPromotionGateway = document.querySelector(
-	'[data-gateway_id="pre_install_woocommerce_payments_promotion"]'
-);
-
 const PaymentRecommendations = () => {
 	const [ installingPlugin, setInstallingPlugin ] = useState< string | null >(
 		null
@@ -44,7 +40,6 @@ const PaymentRecommendations = () => {
 		installedPaymentGateway,
 		installedPaymentGateways,
 		paymentGatewaySuggestions,
-		isResolving,
 	} = useSelect(
 		( select ) => {
 			const installingGatewayId =
@@ -70,15 +65,11 @@ const PaymentRecommendations = () => {
 						},
 						{}
 					),
-				isResolving: select( onboardingStore ).isResolving(
-					'getPaymentGatewaySuggestions',
-					[]
-				),
 				paymentGatewaySuggestions:
 					select( onboardingStore ).getPaymentGatewaySuggestions(),
 			};
 		},
-		[ isInstalled ]
+		[ installingPlugin, isInstalled ]
 	);
 
 	const triggeredPageViewRef = useRef( false );
@@ -89,11 +80,7 @@ const PaymentRecommendations = () => {
 		! isDismissed;
 
 	useEffect( () => {
-		if (
-			( shouldShowRecommendations ||
-				( WcPayPromotionGateway && ! isResolving ) ) &&
-			! triggeredPageViewRef.current
-		) {
+		if ( shouldShowRecommendations && ! triggeredPageViewRef.current ) {
 			triggeredPageViewRef.current = true;
 			const eventProps = ( paymentGatewaySuggestions || [] ).reduce(
 				( props: { [ key: string ]: boolean }, plugin: Plugin ) => {
@@ -106,16 +93,14 @@ const PaymentRecommendations = () => {
 					}
 					return props;
 				},
-				{
-					woocommerce_payments_displayed: !! WcPayPromotionGateway,
-				}
+				{}
 			);
 			recordEvent(
 				'settings_payments_recommendations_pageview',
 				eventProps
 			);
 		}
-	}, [ shouldShowRecommendations, WcPayPromotionGateway, isResolving ] );
+	}, [ shouldShowRecommendations, paymentGatewaySuggestions ] );
 
 	useEffect( () => {
 		if ( ! installedPaymentGateway ) {
@@ -165,9 +150,7 @@ const PaymentRecommendations = () => {
 		.filter( ( plugin: Plugin ) => {
 			return (
 				! installedPaymentGateways[ plugin.id ] &&
-				plugin.plugins?.length &&
-				( ! window.wcAdminFeatures[ 'wc-pay-promotion' ] ||
-					! plugin.id.startsWith( 'woocommerce_payments' ) )
+				plugin.plugins?.length
 			);
 		} )
 		.map( ( plugin: Plugin ) => {

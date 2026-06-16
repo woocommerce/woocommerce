@@ -141,6 +141,67 @@ class WooPaymentsLegacyAdminRuntimeBoundaryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Deprecated WooPayments promotion surfaces should be removed from core.
+	 */
+	public function test_deprecated_woopayments_promotion_surface_is_removed(): void {
+		$removed_files = array(
+			'src/Internal/Admin/WCPayPromotion/Init.php',
+			'src/Internal/Admin/WCPayPromotion/WCPaymentGatewayPreInstallWCPayPromotion.php',
+			'src/Internal/Admin/WCPayPromotion/WCPayPromotionDataSourcePoller.php',
+			'src/Internal/Admin/WCPayPromotion/DefaultPromotions.php',
+			'client/admin/client/wp-admin-scripts/payment-method-promotions/index.tsx',
+			'client/admin/client/wp-admin-scripts/payment-method-promotions/payment-promotion-row.tsx',
+			'client/admin/client/wp-admin-scripts/payment-method-promotions/payment-promotion-row.scss',
+		);
+
+		foreach ( $removed_files as $removed_file ) {
+			$this->assertFileDoesNotExist( WC()->plugin_path() . '/' . $removed_file, "{$removed_file} should be removed with the deprecated WooPayments promotion surface." );
+		}
+
+		$forbidden_php_strings = array(
+			'Internal\\Admin\\WCPayPromotion\\Init',
+			'Admin\\Features\\WcPayPromotion\\Init',
+			'pre_install_woocommerce_payments_promotion',
+			'payment-method-promotions',
+		);
+		$production_php_files  = array_merge(
+			$this->get_php_source_files( WC()->plugin_path() . '/src' ),
+			$this->get_php_source_files( WC()->plugin_path() . '/includes' )
+		);
+
+		foreach ( $production_php_files as $source_file ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading local source for removal assertion.
+			$source = (string) file_get_contents( $source_file );
+
+			foreach ( $forbidden_php_strings as $forbidden_string ) {
+				$this->assertStringNotContainsString( $forbidden_string, $source, "{$source_file} should not retain deprecated WooPayments promotion symbol {$forbidden_string}." );
+			}
+		}
+
+		$forbidden_client_strings = array(
+			'wc-pay-promotion',
+			'pre_install_woocommerce_payments_promotion',
+			'woocommerce_payments_displayed',
+		);
+		$production_client_files  = array_merge(
+			$this->get_source_files( WC()->plugin_path() . '/client/admin/client/payments', array( 'js', 'jsx', 'ts', 'tsx' ) ),
+			$this->get_source_files( WC()->plugin_path() . '/client/admin/client/wp-admin-scripts', array( 'js', 'jsx', 'ts', 'tsx' ) ),
+			$this->get_source_files( WC()->plugin_path() . '/client/admin/client/typings', array( 'ts', 'tsx' ) ),
+			$this->get_source_files( WC()->plugin_path() . '/client/admin/config', array( 'json' ) ),
+			$this->get_source_files( WC()->plugin_path() . '/includes/react-admin', array( 'php' ) )
+		);
+
+		foreach ( $production_client_files as $source_file ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading local source for removal assertion.
+			$source = (string) file_get_contents( $source_file );
+
+			foreach ( $forbidden_client_strings as $forbidden_string ) {
+				$this->assertStringNotContainsString( $forbidden_string, $source, "{$source_file} should not retain deprecated WooPayments promotion client symbol {$forbidden_string}." );
+			}
+		}
+	}
+
+	/**
 	 * Get PHP source files under a directory.
 	 *
 	 * @param string $directory Directory path.

@@ -32,7 +32,6 @@
 		"store-alerts": true,
 		"transient-notices": true,
 		"woo-mobile-welcome": true,
-		"wc-pay-promotion": true,
 		"launch-your-store": true,
 		"rest-api-v4": false,
 		"order-detail-redesign": false,

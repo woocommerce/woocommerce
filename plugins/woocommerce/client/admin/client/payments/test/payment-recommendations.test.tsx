@@ -76,6 +76,10 @@ declare global {
 }
 
 describe( 'Payment recommendations', () => {
+	beforeEach( () => {
+		window.wcAdminFeatures = {};
+	} );
+
 	it( 'should render nothing with no paymentGatewaySuggestions and country not defined', () => {
 		( useSelect as jest.Mock ).mockReturnValue( {
 			installedPaymentGateways: {},
@@ -131,12 +135,11 @@ describe( 'Payment recommendations', () => {
 			'settings_payments_recommendations_pageview',
 			{
 				test_displayed: true,
-				woocommerce_payments_displayed: false,
 			}
 		);
 	} );
 
-	it( 'should set woocommerce-payments-displayed prop to true if pre install wc pay promotion gateway is displayed', () => {
+	it( 'should ignore the removed pre-install WooPayments promotion row when recording pageview props', () => {
 		( isWCPaySupported as jest.Mock ).mockReturnValue( true );
 		( useSelect as jest.Mock ).mockReturnValue( {
 			installedPaymentGateways: {},
@@ -156,7 +159,6 @@ describe( 'Payment recommendations', () => {
 			'settings_payments_recommendations_pageview',
 			{
 				test_displayed: true,
-				woocommerce_payments_displayed: false,
 			}
 		);
 	} );

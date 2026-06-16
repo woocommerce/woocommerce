@@ -14,13 +14,6 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLe
  */
 class ExportWCPaymentGateways implements StepExporter {
 	/**
-	 * Payment gateway IDs to exclude from export
-	 *
-	 * @var array|string[] Payment gateway IDs to exclude from export
-	 */
-	protected array $exclude_ids = array( 'pre_install_woocommerce_payments_promotion' );
-
-	/**
 	 * Export the step
 	 *
 	 * @return Step
@@ -29,10 +22,6 @@ class ExportWCPaymentGateways implements StepExporter {
 		$options = array();
 		$this->maybe_hide_wcpay_gateways();
 		foreach ( $this->get_wc_payment_gateways() as $id => $payment_gateway ) {
-			if ( in_array( $id, $this->exclude_ids, true ) ) {
-				continue;
-			}
-
 			$options[ 'woocommerce_' . $id . '_settings' ] = $payment_gateway->settings;
 		}
 
