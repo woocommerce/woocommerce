@@ -57,10 +57,11 @@ class CouponAttribution implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Record the initiator for a saved POS coupon, if one is present.
+	 * Record POS staff attribution for a saved coupon.
 	 *
-	 * No-op unless the request is POS-originated and the coupon carries an initiator distinct from
-	 * the acting staff member (the current user). Log-only — coupons have no order-note timeline.
+	 * No-op unless the request is POS-originated and the effective current user is a POS staff
+	 * member. Records the actor (and the initiator when an override header is present) as coupon meta
+	 * and a WC log line — coupons have no order-note timeline.
 	 *
 	 * @internal
 	 *
@@ -80,13 +81,56 @@ class CouponAttribution implements RegisterHooksInterface {
 		}
 
 		$actor_id = get_current_user_id();
-		if ( $actor_id <= 0 ) {
+		if ( $actor_id <= 0 || ! Capabilities::has_pos_access( $actor_id ) ) {
 			return;
 		}
 
+		$actor = get_userdata( $actor_id );
+		if ( ! $actor instanceof WP_User ) {
+			return;
+		}
+
+		$initiator = $this->resolve_initiator( $coupon, $actor_id );
+
+		$coupon->update_meta_data( OrderAttribution::META_KEY_ACTOR_USER_ID, (string) $actor_id );
+		if ( $initiator instanceof WP_User ) {
+			$coupon->update_meta_data( OrderAttribution::META_KEY_INITIATOR_USER_ID, (string) $initiator->ID );
+		}
+		$coupon->save_meta_data();
+
+		$message = $initiator instanceof WP_User
+			? sprintf(
+				'POS coupon %1$d by user %2$s (ID %3$d), initiated by user %4$s (ID %5$d).',
+				$coupon->get_id(),
+				$actor->user_login,
+				$actor->ID,
+				$initiator->user_login,
+				$initiator->ID
+			)
+			: sprintf(
+				'POS coupon %1$d by user %2$s (ID %3$d).',
+				$coupon->get_id(),
+				$actor->user_login,
+				$actor->ID
+			);
+
+		wc_get_logger()->info( $message, array( 'source' => self::LOG_SOURCE ) );
+	}
+
+	/**
+	 * Resolve the initiator user from the request header, or null when there is none to record.
+	 *
+	 * Best-effort: a missing initiator (or one equal to the actor) is ignored; an id referencing a
+	 * non-existent user or one without POS access is logged and skipped rather than fatal.
+	 *
+	 * @param WC_Coupon $coupon   The saved coupon (for the log line).
+	 * @param int       $actor_id The acting staff member (current user).
+	 * @return WP_User|null
+	 */
+	private function resolve_initiator( WC_Coupon $coupon, int $actor_id ): ?WP_User {
 		$initiator_id = $this->request_context->get_initiator_id();
 		if ( $initiator_id <= 0 || $initiator_id === $actor_id ) {
-			return;
+			return null;
 		}
 
 		$initiator = get_userdata( $initiator_id );
@@ -99,28 +143,9 @@ class CouponAttribution implements RegisterHooksInterface {
 				),
 				array( 'source' => self::LOG_SOURCE )
 			);
-			return;
+			return null;
 		}
 
-		$actor = get_userdata( $actor_id );
-		if ( ! $actor instanceof WP_User ) {
-			return;
-		}
-
-		// The wire carried the initiator as a header; record it on the coupon server-side too.
-		$coupon->update_meta_data( OrderAttribution::META_KEY_INITIATOR_USER_ID, (string) $initiator->ID );
-		$coupon->save_meta_data();
-
-		wc_get_logger()->info(
-			sprintf(
-				'POS coupon %1$d by user %2$s (ID %3$d), initiated by user %4$s (ID %5$d).',
-				$coupon->get_id(),
-				$actor->user_login,
-				$actor->ID,
-				$initiator->user_login,
-				$initiator->ID
-			),
-			array( 'source' => self::LOG_SOURCE )
-		);
+		return $initiator;
 	}
 }

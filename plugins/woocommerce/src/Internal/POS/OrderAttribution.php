@@ -15,18 +15,17 @@ use WP_User;
 /**
  * Records the POS initiator on attributable order/refund writes.
  *
- * Under the v3 server-side-auth model the acting staff member is the effective `current_user`
- * (swapped in by POSAuthHandler), so WordPress/Woo records them as the actor for free —
- * `refunded_by`, note authorship, and logs all reflect the staff member. There is therefore no
- * separate operator-attribution meta or note to write.
+ * The swap (POSAuthHandler) makes the staff member the effective `current_user`, which is correct
+ * for live signals — `refunded_by`, note authorship, capability checks. But Core does not durably
+ * expose *who created an order* (HPOS has no author column; the legacy post_author is a fragile
+ * placeholder, empty for orders not created through the swap), so this class records the actor
+ * explicitly on every POS-originated write: `_woocommerce_pos_actor_user_id` meta + an order note.
  *
- * The one identity the swap cannot represent is the *initiator* of a manager-authorized action:
- * when a cashier initiates a refund their manager approves, the manager is the swapped actor and
- * the cashier is the initiator. The client sends the initiator as the `X-WC-POS-Initiator-Id`
+ * On a manager-authorized override the swap cannot represent the *initiator* — the cashier who
+ * initiated an action the manager approved. The client sends it as the `X-WC-POS-Initiator-Id`
  * request header (so the whole auth/attribution context rides in headers, not the body); this class
- * validates it (best-effort, log-and-skip), records it on the object as
- * `_woocommerce_pos_initiator_user_id` meta, and writes a single combined note capturing both.
- * Plain writes (actor == initiator, no header) need nothing extra.
+ * validates it (best-effort, log-and-skip), records it as `_woocommerce_pos_initiator_user_id` meta,
+ * and names both in the note. Plain writes carry only the actor.
  *
  * Clean break: this is a new contract. The pre-v3 `_pos_staff_user_id` / `_pos_override_*` shapes
  * are not read or supported — the feature is behind an off-by-default dev flag with no production
@@ -40,6 +39,7 @@ use WP_User;
  */
 class OrderAttribution implements RegisterHooksInterface {
 
+	public const META_KEY_ACTOR_USER_ID     = '_woocommerce_pos_actor_user_id';
 	public const META_KEY_INITIATOR_USER_ID = '_woocommerce_pos_initiator_user_id';
 	public const LOG_SOURCE                 = 'woocommerce-pos';
 
@@ -91,11 +91,12 @@ class OrderAttribution implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Record the initiator for a saved POS order/refund, if one is present.
+	 * Record POS staff attribution for a saved order/refund.
 	 *
-	 * No-op unless the request is POS-originated and the order carries an initiator distinct from
-	 * the acting staff member (the current user). Writes one combined order note. Refund notes
-	 * attach to the parent order, since refunds don't expose add_order_note().
+	 * No-op unless the request is POS-originated and the effective current user is a POS staff
+	 * member (i.e. the swap landed). Records the actor on every such write and the initiator when an
+	 * override header is present, as meta + one order note. Refund notes attach to the parent order,
+	 * since refunds don't expose add_order_note().
 	 *
 	 * @since 11.0.0
 	 *
@@ -108,12 +109,7 @@ class OrderAttribution implements RegisterHooksInterface {
 		}
 
 		$actor_id = get_current_user_id();
-		if ( $actor_id <= 0 ) {
-			return;
-		}
-
-		$initiator = $this->resolve_initiator( $order, $actor_id );
-		if ( ! $initiator instanceof WP_User ) {
+		if ( $actor_id <= 0 || ! Capabilities::has_pos_access( $actor_id ) ) {
 			return;
 		}
 
@@ -122,21 +118,24 @@ class OrderAttribution implements RegisterHooksInterface {
 			return;
 		}
 
-		// The wire carried the initiator as a header; record it on the object server-side so it
-		// stays queryable (the swap already makes the actor the current user / note author).
-		$order->update_meta_data( self::META_KEY_INITIATOR_USER_ID, (string) $initiator->ID );
+		$initiator = $this->resolve_initiator( $order, $actor_id );
+
+		// Core does not durably record the creating user (HPOS has no author column), so record the
+		// staff actor — and the initiator, when present — on the object ourselves.
+		$order->update_meta_data( self::META_KEY_ACTOR_USER_ID, (string) $actor_id );
+		if ( $initiator instanceof WP_User ) {
+			$order->update_meta_data( self::META_KEY_INITIATOR_USER_ID, (string) $initiator->ID );
+		}
 		$order->save_meta_data();
 
 		$is_refund   = $order instanceof WC_Order_Refund;
 		$note_target = $is_refund ? wc_get_order( $order->get_parent_id() ) : $order;
-		if ( ! $note_target instanceof WC_Order ) {
-			return;
+		if ( $note_target instanceof WC_Order ) {
+			$note_target->add_order_note( $this->build_note( $actor, $initiator, $creating, $is_refund ), 0, false );
 		}
 
-		$note_target->add_order_note( $this->build_initiator_note( $actor, $initiator, $creating, $is_refund ), 0, false );
-
-		wc_get_logger()->info(
-			sprintf(
+		$message = $initiator instanceof WP_User
+			? sprintf(
 				'POS %1$s %2$d by user %3$s (ID %4$d), initiated by user %5$s (ID %6$d).',
 				$is_refund ? 'refund' : 'order',
 				$order->get_id(),
@@ -144,9 +143,16 @@ class OrderAttribution implements RegisterHooksInterface {
 				$actor->ID,
 				$initiator->user_login,
 				$initiator->ID
-			),
-			array( 'source' => self::LOG_SOURCE )
-		);
+			)
+			: sprintf(
+				'POS %1$s %2$d by user %3$s (ID %4$d).',
+				$is_refund ? 'refund' : 'order',
+				$order->get_id(),
+				$actor->user_login,
+				$actor->ID
+			);
+
+		wc_get_logger()->info( $message, array( 'source' => self::LOG_SOURCE ) );
 	}
 
 	/**
@@ -183,35 +189,54 @@ class OrderAttribution implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Build the localized combined note naming the actor and the initiator.
+	 * Build the localized attribution note naming the actor, and the initiator when present.
 	 *
 	 * Each variant is its own full sentence so translators get an intact string rather than having
 	 * to splice a verb into a template.
 	 *
-	 * @param WP_User $actor     The acting staff member (current user).
-	 * @param WP_User $initiator The initiator recorded on the order.
-	 * @param bool    $creating  Whether this was a create (vs update).
-	 * @param bool    $is_refund Whether the object being attributed is a refund.
+	 * @param WP_User      $actor     The acting staff member (current user).
+	 * @param WP_User|null $initiator The override initiator, or null for a plain write.
+	 * @param bool         $creating  Whether this was a create (vs update).
+	 * @param bool         $is_refund Whether the object being attributed is a refund.
 	 * @return string
 	 */
-	private function build_initiator_note( WP_User $actor, WP_User $initiator, bool $creating, bool $is_refund ): string {
-		$actor_label     = sprintf( '%s (%s)', $actor->display_name, $actor->user_login );
-		$initiator_label = sprintf( '%s (%s)', $initiator->display_name, $initiator->user_login );
+	private function build_note( WP_User $actor, ?WP_User $initiator, bool $creating, bool $is_refund ): string {
+		$actor_label = sprintf( '%s (%s)', $actor->display_name, $actor->user_login );
+
+		if ( $initiator instanceof WP_User ) {
+			$initiator_label = sprintf( '%s (%s)', $initiator->display_name, $initiator->user_login );
+
+			if ( $is_refund ) {
+				$template = $creating
+					/* translators: 1: actor display name + login, 2: initiator display name + login. */
+					? __( 'POS: refunded by %1$s, initiated by %2$s.', 'woocommerce' )
+					/* translators: 1: actor display name + login, 2: initiator display name + login. */
+					: __( 'POS: refund updated by %1$s, initiated by %2$s.', 'woocommerce' );
+			} else {
+				$template = $creating
+					/* translators: 1: actor display name + login, 2: initiator display name + login. */
+					? __( 'POS: created by %1$s, initiated by %2$s.', 'woocommerce' )
+					/* translators: 1: actor display name + login, 2: initiator display name + login. */
+					: __( 'POS: updated by %1$s, initiated by %2$s.', 'woocommerce' );
+			}
+
+			return sprintf( $template, $actor_label, $initiator_label );
+		}
 
 		if ( $is_refund ) {
 			$template = $creating
-				/* translators: 1: actor display name + login, 2: initiator display name + login. */
-				? __( 'POS: refunded by %1$s, initiated by %2$s.', 'woocommerce' )
-				/* translators: 1: actor display name + login, 2: initiator display name + login. */
-				: __( 'POS: refund updated by %1$s, initiated by %2$s.', 'woocommerce' );
+				/* translators: %s: actor display name + login. */
+				? __( 'POS: refunded by %s.', 'woocommerce' )
+				/* translators: %s: actor display name + login. */
+				: __( 'POS: refund updated by %s.', 'woocommerce' );
 		} else {
 			$template = $creating
-				/* translators: 1: actor display name + login, 2: initiator display name + login. */
-				? __( 'POS: created by %1$s, initiated by %2$s.', 'woocommerce' )
-				/* translators: 1: actor display name + login, 2: initiator display name + login. */
-				: __( 'POS: updated by %1$s, initiated by %2$s.', 'woocommerce' );
+				/* translators: %s: actor display name + login. */
+				? __( 'POS: created by %s.', 'woocommerce' )
+				/* translators: %s: actor display name + login. */
+				: __( 'POS: updated by %s.', 'woocommerce' );
 		}
 
-		return sprintf( $template, $actor_label, $initiator_label );
+		return sprintf( $template, $actor_label );
 	}
 }

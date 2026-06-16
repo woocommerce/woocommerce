@@ -10,10 +10,10 @@ use Automattic\WooCommerce\Internal\POS\POSPreset;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for OrderAttribution — initiator recording on POS order/refund writes.
+ * Tests for OrderAttribution — staff attribution on POS order/refund writes.
  *
- * The initiator now rides the X-WC-POS-Initiator-Id header (exposed via POSRequestContext), so the
- * tests feed it through the mocked context rather than via order meta.
+ * The actor is the effective current user (the swapped staff); the optional initiator rides the
+ * X-WC-POS-Initiator-Id header, fed here through the mocked context.
  */
 class OrderAttributionTest extends WC_Unit_Test_Case {
 
@@ -89,77 +89,101 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Writes one combined note and records the initiator meta.
+	 * @testdox Records the actor (meta + note) on a plain POS write.
 	 */
-	public function test_writes_combined_initiator_note(): void {
+	public function test_records_actor_on_plain_write(): void {
+		$order = wc_create_order();
+		$order->save();
+
+		$this->make_sut( true, 0 )->handle_post_insert( $order, null, true );
+
+		$notes = $this->pos_notes( $order->get_id() );
+		$this->assertCount( 1, $notes, 'A POS write should record one actor note' );
+		$this->assertStringContainsString( 'created by', $notes[0] );
+		$this->assertStringNotContainsString( 'initiated by', $notes[0] );
+
+		$saved = wc_get_order( $order->get_id() );
+		$this->assertSame( (string) $this->actor_id, (string) $saved->get_meta( OrderAttribution::META_KEY_ACTOR_USER_ID ) );
+		$this->assertSame( '', (string) $saved->get_meta( OrderAttribution::META_KEY_INITIATOR_USER_ID ) );
+	}
+
+	/**
+	 * @testdox Records both the actor and the initiator when the header is present.
+	 */
+	public function test_records_actor_and_initiator(): void {
 		$order = wc_create_order();
 		$order->save();
 
 		$this->make_sut( true, $this->initiator_id )->handle_post_insert( $order, null, true );
 
 		$notes = $this->pos_notes( $order->get_id() );
-		$this->assertCount( 1, $notes, 'Exactly one POS attribution note should be written' );
+		$this->assertCount( 1, $notes );
 		$this->assertStringContainsString( 'initiated by', $notes[0] );
 
 		$saved = wc_get_order( $order->get_id() );
-		$this->assertSame(
-			(string) $this->initiator_id,
-			(string) $saved->get_meta( OrderAttribution::META_KEY_INITIATOR_USER_ID ),
-			'The initiator should be persisted on the order'
-		);
+		$this->assertSame( (string) $this->actor_id, (string) $saved->get_meta( OrderAttribution::META_KEY_ACTOR_USER_ID ) );
+		$this->assertSame( (string) $this->initiator_id, (string) $saved->get_meta( OrderAttribution::META_KEY_INITIATOR_USER_ID ) );
 	}
 
 	/**
-	 * @testdox Writes no note when there is no initiator header (plain write).
+	 * @testdox Records nothing when the request is not POS-originated.
 	 */
-	public function test_no_note_without_initiator(): void {
-		$order = wc_create_order();
-		$order->save();
-
-		$this->make_sut( true, 0 )->handle_post_insert( $order, null, true );
-
-		$this->assertCount( 0, $this->pos_notes( $order->get_id() ), 'A plain POS write needs no initiator note' );
-	}
-
-	/**
-	 * @testdox Writes no note when the request is not POS-originated.
-	 */
-	public function test_no_note_when_not_pos_request(): void {
+	public function test_no_attribution_when_not_pos_request(): void {
 		$order = wc_create_order();
 		$order->save();
 
 		$this->make_sut( false, $this->initiator_id )->handle_post_insert( $order, null, true );
 
 		$this->assertCount( 0, $this->pos_notes( $order->get_id() ) );
+		$this->assertSame( '', (string) wc_get_order( $order->get_id() )->get_meta( OrderAttribution::META_KEY_ACTOR_USER_ID ) );
 	}
 
 	/**
-	 * @testdox Writes no note when the initiator equals the actor.
+	 * @testdox Records nothing when the effective user is not POS staff (swap did not land).
 	 */
-	public function test_no_note_when_initiator_is_actor(): void {
+	public function test_no_attribution_when_actor_lacks_pos_access(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$order = wc_create_order();
+		$order->save();
+
+		$this->make_sut( true, 0 )->handle_post_insert( $order, null, true );
+
+		$this->assertCount( 0, $this->pos_notes( $order->get_id() ), 'A non-staff current user is not attributed' );
+	}
+
+	/**
+	 * @testdox Ignores an initiator equal to the actor (still records the actor).
+	 */
+	public function test_initiator_equal_to_actor_is_ignored(): void {
 		$order = wc_create_order();
 		$order->save();
 
 		$this->make_sut( true, $this->actor_id )->handle_post_insert( $order, null, true );
 
-		$this->assertCount( 0, $this->pos_notes( $order->get_id() ), 'No separate initiator means no extra note' );
+		$notes = $this->pos_notes( $order->get_id() );
+		$this->assertCount( 1, $notes );
+		$this->assertStringNotContainsString( 'initiated by', $notes[0] );
+		$this->assertSame( '', (string) wc_get_order( $order->get_id() )->get_meta( OrderAttribution::META_KEY_INITIATOR_USER_ID ) );
 	}
 
 	/**
-	 * @testdox Skips (does not note) an initiator without POS access.
+	 * @testdox Skips an initiator without POS access but still records the actor.
 	 */
-	public function test_skips_initiator_without_pos_access(): void {
+	public function test_skips_invalid_initiator_but_records_actor(): void {
 		$stranger = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 		$order    = wc_create_order();
 		$order->save();
 
 		$this->make_sut( true, $stranger )->handle_post_insert( $order, null, true );
 
-		$this->assertCount( 0, $this->pos_notes( $order->get_id() ), 'A non-POS initiator id is skipped, not noted' );
+		$notes = $this->pos_notes( $order->get_id() );
+		$this->assertCount( 1, $notes );
+		$this->assertStringNotContainsString( 'initiated by', $notes[0] );
+		$this->assertSame( (string) $this->actor_id, (string) wc_get_order( $order->get_id() )->get_meta( OrderAttribution::META_KEY_ACTOR_USER_ID ) );
 	}
 
 	/**
-	 * @testdox Attaches the refund initiator note to the parent order.
+	 * @testdox Attaches the refund attribution note to the parent order.
 	 */
 	public function test_refund_note_attaches_to_parent_order(): void {
 		$order = wc_create_order();
@@ -177,7 +201,8 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 		$this->make_sut( true, $this->initiator_id )->handle_post_insert( $refund, null, true );
 
 		$notes = $this->pos_notes( $order->get_id() );
-		$this->assertCount( 1, $notes, 'The refund initiator note should land on the parent order' );
+		$this->assertCount( 1, $notes, 'The refund note should land on the parent order' );
 		$this->assertStringContainsString( 'refunded by', $notes[0] );
+		$this->assertStringContainsString( 'initiated by', $notes[0] );
 	}
 }

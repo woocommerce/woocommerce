@@ -94,21 +94,22 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Logs an info line when a valid initiator is present.
+	 * @testdox Logs the actor (one info line) on a plain POS coupon write.
 	 */
-	public function test_logs_info_for_valid_initiator(): void {
-		$this->make_sut( true, $this->initiator_id )->handle_post_insert( $this->make_coupon(), null, true );
+	public function test_logs_actor_without_initiator(): void {
+		$this->make_sut( true, 0 )->handle_post_insert( $this->make_coupon(), null, true );
 
-		$this->assertCount( 1, $this->fake_logger->info_calls, 'A valid initiator should produce one info log line' );
+		$this->assertCount( 1, $this->fake_logger->info_calls, 'A POS coupon write should log the actor' );
+		$this->assertCount( 0, $this->fake_logger->warning_calls );
 	}
 
 	/**
-	 * @testdox Logs nothing when there is no initiator header.
+	 * @testdox Logs the actor and initiator when the initiator header is present.
 	 */
-	public function test_no_log_without_initiator(): void {
-		$this->make_sut( true, 0 )->handle_post_insert( $this->make_coupon(), null, true );
+	public function test_logs_actor_and_initiator(): void {
+		$this->make_sut( true, $this->initiator_id )->handle_post_insert( $this->make_coupon(), null, true );
 
-		$this->assertCount( 0, $this->fake_logger->info_calls );
+		$this->assertCount( 1, $this->fake_logger->info_calls );
 		$this->assertCount( 0, $this->fake_logger->warning_calls );
 	}
 
@@ -122,15 +123,26 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Logs a warning when the initiator lacks POS access.
+	 * @testdox Logs nothing when the effective user is not POS staff.
 	 */
-	public function test_warns_for_initiator_without_pos_access(): void {
+	public function test_no_log_when_actor_lacks_pos_access(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$this->make_sut( true, 0 )->handle_post_insert( $this->make_coupon(), null, true );
+
+		$this->assertCount( 0, $this->fake_logger->info_calls );
+	}
+
+	/**
+	 * @testdox Warns on an initiator without POS access but still logs the actor.
+	 */
+	public function test_warns_for_invalid_initiator_but_logs_actor(): void {
 		$stranger = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 
 		$this->make_sut( true, $stranger )->handle_post_insert( $this->make_coupon(), null, true );
 
 		$this->assertCount( 1, $this->fake_logger->warning_calls, 'A non-POS initiator should produce one warning' );
-		$this->assertCount( 0, $this->fake_logger->info_calls );
+		$this->assertCount( 1, $this->fake_logger->info_calls, 'The actor is still logged' );
 	}
 
 	/**
