@@ -43,7 +43,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 								<button class="button wc-reload" disabled="disabled"><span><?php esc_html_e( 'Apply', 'woocommerce' ); ?></span></button>
 							</li>
 
-							<li class="wide">
+							<li class="wide wc-order-save-action">
 								<button type="submit" class="button save_order button-primary" name="save" value="<?php esc_attr_e( 'Create', 'woocommerce' ); ?>"><?php esc_html_e( 'Create', 'woocommerce' ); ?></button>
 							</li>
 
