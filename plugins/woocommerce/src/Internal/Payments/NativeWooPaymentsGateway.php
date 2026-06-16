@@ -8,6 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Payments;
 
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use WC_Order;
 use WC_Payment_Gateway_CC;
@@ -36,6 +37,13 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	private WooPaymentsProvider $provider;
 
 	/**
+	 * WooPayments checkout bridge.
+	 *
+	 * @var WooPaymentsCheckoutBridge
+	 */
+	private WooPaymentsCheckoutBridge $checkout_bridge;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -56,12 +64,26 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	 *
 	 * @internal
 	 *
-	 * @param PaymentProcessingService $processing_service Payment processing service.
-	 * @param WooPaymentsProvider      $provider           WooPayments provider.
+	 * @param PaymentProcessingService       $processing_service Payment processing service.
+	 * @param WooPaymentsProvider            $provider           WooPayments provider.
+	 * @param WooPaymentsCheckoutBridge|null $checkout_bridge    Optional checkout bridge.
 	 */
-	final public function init( PaymentProcessingService $processing_service, WooPaymentsProvider $provider ): void {
+	final public function init( PaymentProcessingService $processing_service, WooPaymentsProvider $provider, ?WooPaymentsCheckoutBridge $checkout_bridge = null ): void {
 		$this->processing_service = $processing_service;
 		$this->provider           = $provider;
+
+		if ( null !== $checkout_bridge ) {
+			$this->checkout_bridge = $checkout_bridge;
+		}
+	}
+
+	/**
+	 * Render WooPayments payment fields.
+	 *
+	 * @return void
+	 */
+	public function payment_fields() {
+		$this->get_checkout_bridge()->render_payment_fields();
 	}
 
 	/**
@@ -153,6 +175,19 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 		}
 
 		return $this->provider;
+	}
+
+	/**
+	 * Get the WooPayments checkout bridge.
+	 *
+	 * @return WooPaymentsCheckoutBridge
+	 */
+	private function get_checkout_bridge(): WooPaymentsCheckoutBridge {
+		if ( ! isset( $this->checkout_bridge ) ) {
+			$this->checkout_bridge = wc_get_container()->get( WooPaymentsCheckoutBridge::class );
+		}
+
+		return $this->checkout_bridge;
 	}
 
 	/**

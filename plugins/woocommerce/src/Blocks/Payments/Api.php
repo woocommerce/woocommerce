@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\BankTransfer;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\CashOnDelivery;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\WooPayments;
 
 /**
  *  The Api class provides an interface to payment method registration.
@@ -114,6 +115,9 @@ class Api {
 		);
 		$payment_method_registry->register(
 			Package::container()->get( CashOnDelivery::class )
+		);
+		$payment_method_registry->register(
+			Package::container()->get( WooPayments::class )
 		);
 	}
 

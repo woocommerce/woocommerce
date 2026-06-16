@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments;
 use Automattic\WooCommerce\Internal\Payments\NativeWooPaymentsGateway;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
 use Automattic\WooCommerce\Internal\Payments\PaymentContext;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use WC_Order;
 use WC_Unit_Test_Case;
@@ -117,6 +118,47 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 			),
 			$result
 		);
+	}
+
+	/**
+	 * @testdox Should delegate payment fields rendering to the checkout bridge.
+	 */
+	public function test_payment_fields_delegate_to_checkout_bridge(): void {
+		$service = new RecordingPaymentProcessingService();
+		$bridge  = $this->getMockBuilder( WooPaymentsCheckoutBridge::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'render_payment_fields' ) )
+			->getMock();
+		$bridge
+			->expects( $this->once() )
+			->method( 'render_payment_fields' )
+			->willReturnCallback(
+				static function (): void {
+					echo '<div id="wcpay-bridge-marker"></div>';
+				}
+			);
+
+		$gateway = new NativeWooPaymentsGateway();
+		$gateway->init( $service, new WooPaymentsProvider(), $bridge );
+
+		ob_start();
+		$gateway->payment_fields();
+		$output = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'wcpay-bridge-marker', $output );
+	}
+
+	/**
+	 * @testdox Should resolve checkout bridge dependencies when payment fields are rendered directly.
+	 */
+	public function test_payment_fields_resolve_dependencies_without_explicit_init(): void {
+		$gateway = new NativeWooPaymentsGateway();
+
+		ob_start();
+		$gateway->payment_fields();
+		$output = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'wcpay-core-checkout-form', $output );
 	}
 
 	/**

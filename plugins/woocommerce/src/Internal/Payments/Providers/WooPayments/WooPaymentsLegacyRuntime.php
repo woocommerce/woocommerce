@@ -79,6 +79,15 @@ class WooPaymentsLegacyRuntime {
 	}
 
 	/**
+	 * Get the WooPayments checkout service.
+	 *
+	 * @return object|null
+	 */
+	public function get_checkout_service(): ?object {
+		return $this->get_wc_payments_service( 'get_wc_payments_checkout' );
+	}
+
+	/**
 	 * Get the WooPayments account service.
 	 *
 	 * @return object|null
@@ -94,6 +103,15 @@ class WooPaymentsLegacyRuntime {
 	 */
 	public function get_payments_api_client(): ?object {
 		return $this->get_wc_payments_service( 'get_payments_api_client' );
+	}
+
+	/**
+	 * Get the WooPayments customer service.
+	 *
+	 * @return object|null
+	 */
+	public function get_customer_service(): ?object {
+		return $this->get_wc_payments_service( 'get_customer_service' );
 	}
 
 	/**
@@ -132,6 +150,88 @@ class WooPaymentsLegacyRuntime {
 	 */
 	public function get_account_overview_page_url(): ?string {
 		return $this->get_account_static_url( 'get_overview_page_url' );
+	}
+
+	/**
+	 * Get the WooPayments gateway publishable key.
+	 *
+	 * @return string|null
+	 */
+	public function get_gateway_publishable_key(): ?string {
+		$account_service = $this->get_account_service();
+		if ( ! is_object( $account_service ) ) {
+			return null;
+		}
+
+		return $this->call_object_scalar_method(
+			$account_service,
+			'get_publishable_key',
+			(bool) $this->is_test_mode()
+		);
+	}
+
+	/**
+	 * Get the WooPayments gateway connected account ID.
+	 *
+	 * @return string|null
+	 */
+	public function get_gateway_account_id(): ?string {
+		$account_service = $this->get_account_service();
+		if ( is_object( $account_service ) ) {
+			$account_id = $this->call_object_scalar_method( $account_service, 'get_stripe_account_id' );
+			if ( null !== $account_id && '' !== $account_id ) {
+				return $account_id;
+			}
+		}
+
+		$account_data = $this->get_cached_account_data();
+
+		return isset( $account_data['account_id'] ) && is_scalar( $account_data['account_id'] )
+			? (string) $account_data['account_id']
+			: null;
+	}
+
+	/**
+	 * Get WooPayments UPE-enabled payment method IDs from the active gateway.
+	 *
+	 * @return string[]
+	 */
+	public function get_gateway_upe_enabled_payment_method_ids(): array {
+		$gateway = $this->get_gateway();
+		if ( ! is_object( $gateway ) ) {
+			return array();
+		}
+
+		$payment_method_ids = $this->call_object_array_method( $gateway, 'get_upe_enabled_payment_method_ids' );
+
+		return $this->normalize_string_array( $payment_method_ids ?? array() );
+	}
+
+	/**
+	 * Get checkout customer data prepared by the WooPayments runtime.
+	 *
+	 * @return array<string,mixed>
+	 */
+	public function get_gateway_prepared_customer_data(): array {
+		$customer_service = $this->get_customer_service();
+		if ( ! is_object( $customer_service ) ) {
+			return array();
+		}
+
+		$customer_data = $this->call_object_array_method( $customer_service, 'get_prepared_customer_data' );
+
+		return is_array( $customer_data ) ? $customer_data : array();
+	}
+
+	/**
+	 * Tell whether WooPayments can serve the checkout bridge callbacks Core has not ported yet.
+	 *
+	 * @return bool
+	 */
+	public function can_handle_checkout_bridge_callbacks(): bool {
+		return $this->is_loaded()
+			&& is_object( $this->get_gateway() )
+			&& is_object( $this->get_checkout_service() );
 	}
 
 	/**
@@ -413,6 +513,52 @@ class WooPaymentsLegacyRuntime {
 	}
 
 	/**
+	 * Call an object method expected to return a scalar value.
+	 *
+	 * @param object $target      Object instance.
+	 * @param string $method_name Method name.
+	 * @param mixed  ...$args     Method arguments.
+	 * @return string|null
+	 */
+	private function call_object_scalar_method( object $target, string $method_name, ...$args ): ?string {
+		try {
+			if ( ! $this->legacy_proxy->call_function( 'method_exists', $target, $method_name ) ||
+				! $this->legacy_proxy->call_function( 'is_callable', array( $target, $method_name ) ) ) {
+				return null;
+			}
+
+			$value = $target->{$method_name}( ...$args );
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+
+		return is_scalar( $value ) ? (string) $value : null;
+	}
+
+	/**
+	 * Call an object method expected to return an array.
+	 *
+	 * @param object $target      Object instance.
+	 * @param string $method_name Method name.
+	 * @param mixed  ...$args     Method arguments.
+	 * @return array|null
+	 */
+	private function call_object_array_method( object $target, string $method_name, ...$args ): ?array {
+		try {
+			if ( ! $this->legacy_proxy->call_function( 'method_exists', $target, $method_name ) ||
+				! $this->legacy_proxy->call_function( 'is_callable', array( $target, $method_name ) ) ) {
+				return null;
+			}
+
+			$value = $target->{$method_name}( ...$args );
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+
+		return is_array( $value ) ? $value : null;
+	}
+
+	/**
 	 * Get a WooPayments account URL through the legacy account static helper.
 	 *
 	 * @param string $method_name WC_Payments_Account static URL accessor.
@@ -473,5 +619,27 @@ class WooPaymentsLegacyRuntime {
 		}
 
 		return $account_data['data'];
+	}
+
+	/**
+	 * Normalize a mixed array to string values.
+	 *
+	 * @param array<mixed> $values Raw values.
+	 * @return string[]
+	 */
+	private function normalize_string_array( array $values ): array {
+		$normalized = array();
+		foreach ( $values as $value ) {
+			if ( ! is_scalar( $value ) ) {
+				continue;
+			}
+
+			$value = (string) $value;
+			if ( '' !== $value ) {
+				$normalized[] = $value;
+			}
+		}
+
+		return array_values( array_unique( $normalized ) );
 	}
 }

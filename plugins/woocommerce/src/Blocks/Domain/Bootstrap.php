@@ -28,12 +28,15 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\BankTransfer;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\CashOnDelivery;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\WooPayments;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Registry\Container;
 use Automattic\WooCommerce\Blocks\Templates\ClassicTemplatesCompatibility;
 use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\TemplateOptions;
 
@@ -489,6 +492,17 @@ class Bootstrap {
 			function ( Container $container ) {
 				$asset_api = $container->get( AssetApi::class );
 				return new CashOnDelivery( $asset_api );
+			}
+		);
+		$this->container->register(
+			WooPayments::class,
+			function ( Container $container ) {
+				$asset_api         = $container->get( AssetApi::class );
+				$core_container    = wc_get_container();
+				$checkout_bridge   = $core_container->get( WooPaymentsCheckoutBridge::class );
+				$payments_provider = $core_container->get( WooPaymentsProvider::class );
+
+				return new WooPayments( $asset_api, $checkout_bridge, $payments_provider );
 			}
 		);
 	}

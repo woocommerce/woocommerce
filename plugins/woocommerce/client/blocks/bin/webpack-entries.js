@@ -375,6 +375,8 @@ const entries = {
 			'./assets/js/extensions/payment-methods/cheque/index.js',
 		'wc-payment-method-paypal':
 			'./assets/js/extensions/payment-methods/paypal/index.js',
+		'wc-payment-method-woopayments':
+			'./assets/js/extensions/payment-methods/woopayments/index.js',
 		'wc-payment-method-bacs':
 			'./assets/js/extensions/payment-methods/bacs/index.js',
 		'wc-payment-method-cod':
