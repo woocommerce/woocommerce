@@ -55,6 +55,7 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 			array(
 				'frontend_prices',
 				'frontend_currencies',
+				'store_currency_lifecycle',
 				'selected_currency',
 				'analytics',
 				'compatibility',
@@ -70,6 +71,26 @@ class MultiCurrencyRuntimeRegistryTest extends WC_Unit_Test_Case {
 			),
 			array_keys( $manifest['hook_groups'] )
 		);
+	}
+
+	/**
+	 * @testdox Should preserve the WooPayments store currency lifecycle hook surface.
+	 */
+	public function test_store_currency_lifecycle_manifest_contains_preserved_hook(): void {
+		$hook_groups = MultiCurrencyRuntimeRegistry::get_core_hook_groups();
+
+		$this->assertSame(
+			array(
+				array(
+					'hook'          => 'init',
+					'callback'      => 'sync_store_currency',
+					'priority'      => 10,
+					'accepted_args' => 1,
+				),
+			),
+			$hook_groups['store_currency_lifecycle']['actions']
+		);
+		$this->assertSame( array(), $hook_groups['store_currency_lifecycle']['filters'] );
 	}
 
 	/**
