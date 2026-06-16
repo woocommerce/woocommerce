@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Use native payments multi-currency order query vars for formatting.

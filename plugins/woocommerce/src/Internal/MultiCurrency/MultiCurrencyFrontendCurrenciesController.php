@@ -186,9 +186,22 @@ class MultiCurrencyFrontendCurrenciesController implements RegisterHooksInterfac
 	}
 
 	/**
-	 * Placeholder for pay-for-order query-var currency initialization.
+	 * Initialize order-context currency from WooCommerce order query vars.
 	 */
-	public function init_order_currency_from_query_vars(): void {}
+	public function init_order_currency_from_query_vars(): void {
+		global $wp;
+
+		if ( ! $wp instanceof \WP ) {
+			return;
+		}
+
+		foreach ( array( 'order-pay', 'order-received', 'view-order' ) as $query_var ) {
+			if ( ! empty( $wp->query_vars[ $query_var ] ) ) {
+				$this->init_order_currency( $wp->query_vars[ $query_var ] );
+				return;
+			}
+		}
+	}
 
 	/**
 	 * Preserve order total until native order-context currency handling is added.

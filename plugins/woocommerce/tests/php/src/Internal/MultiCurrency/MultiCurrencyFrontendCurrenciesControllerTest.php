@@ -132,9 +132,9 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep order-context hooks as pass-throughs until later B2 slices own them.
+	 * @testdox Should leave deferred order-context callbacks as safe pass-throughs.
 	 */
-	public function test_order_context_callbacks_are_safe_pass_throughs(): void {
+	public function test_deferred_order_context_callbacks_are_safe_pass_throughs(): void {
 		$sut = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
 		$sut->register();
 
@@ -176,6 +176,95 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should initialize order currency from order query vars.
+	 *
+	 * @dataProvider order_query_var_provider
+	 *
+	 * @param string $query_var Query var name.
+	 */
+	public function test_initializes_order_currency_from_order_query_vars( string $query_var ): void {
+		$order = wc_create_order();
+		$order->set_currency( 'JPY' );
+		$order->save();
+		$sut = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
+
+		$this->with_query_vars(
+			array( $query_var => $order->get_id() ),
+			function () use ( $sut, $order ): void {
+				$sut->init_order_currency_from_query_vars();
+
+				$this->assertSame( 'JPY', $sut->get_order_currency() );
+				$this->assertSame( 'JPY', $sut->get_woocommerce_currency( 'USD' ) );
+				$this->assertSame( 0, $sut->get_price_decimals( 2 ) );
+				$this->assertSame( $order->get_id(), $sut->init_order_currency( $order->get_id() ) );
+			}
+		);
+	}
+
+	/**
+	 * Data provider for supported order query vars.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function order_query_var_provider(): array {
+		return array(
+			'order-pay'      => array( 'order-pay' ),
+			'order-received' => array( 'order-received' ),
+			'view-order'     => array( 'view-order' ),
+		);
+	}
+
+	/**
+	 * @testdox Should prefer order-pay before other order query vars.
+	 */
+	public function test_prefers_order_pay_before_other_order_query_vars(): void {
+		$order_pay = wc_create_order();
+		$order_pay->set_currency( 'JPY' );
+		$order_pay->save();
+		$order_received = wc_create_order();
+		$order_received->set_currency( 'EUR' );
+		$order_received->save();
+		$view_order = wc_create_order();
+		$view_order->set_currency( 'AUD' );
+		$view_order->save();
+		$sut = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
+
+		$this->with_query_vars(
+			array(
+				'order-pay'      => $order_pay->get_id(),
+				'order-received' => $order_received->get_id(),
+				'view-order'     => $view_order->get_id(),
+			),
+			function () use ( $sut ): void {
+				$sut->init_order_currency_from_query_vars();
+
+				$this->assertSame( 'JPY', $sut->get_order_currency() );
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should ignore empty order query vars.
+	 */
+	public function test_ignores_empty_order_query_vars(): void {
+		$sut = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
+
+		$this->with_query_vars(
+			array(
+				'order-pay'      => '',
+				'order-received' => 0,
+				'view-order'     => false,
+			),
+			function () use ( $sut ): void {
+				$sut->init_order_currency_from_query_vars();
+
+				$this->assertNull( $sut->get_order_currency() );
+				$this->assertSame( 'GBP', $sut->get_woocommerce_currency( 'USD' ) );
+			}
+		);
+	}
+
+	/**
 	 * @testdox Should set store currency decimals for shipping rate args.
 	 */
 	public function test_sets_store_currency_decimals_for_shipping_rate_args(): void {
@@ -210,6 +299,27 @@ class MultiCurrencyFrontendCurrenciesControllerTest extends WC_Unit_Test_Case {
 		}
 
 		return $controller;
+	}
+
+	/**
+	 * Run a callback with temporary WordPress query vars.
+	 *
+	 * @param array<string, mixed> $query_vars Query vars.
+	 * @param callable             $callback   Callback to run.
+	 */
+	private function with_query_vars( array $query_vars, callable $callback ): void {
+		global $wp;
+
+		$this->assertInstanceOf( \WP::class, $wp );
+
+		$previous_query_vars = $wp->query_vars;
+		$wp->query_vars      = $query_vars;
+
+		try {
+			$callback();
+		} finally {
+			$wp->query_vars = $previous_query_vars;
+		}
 	}
 
 	/**
