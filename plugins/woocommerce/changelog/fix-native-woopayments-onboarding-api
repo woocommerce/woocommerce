@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Restore native WooPayments onboarding API wiring for Settings Payments.
