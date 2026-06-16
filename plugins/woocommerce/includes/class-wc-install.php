@@ -10,6 +10,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
+use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
@@ -374,6 +375,7 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_analytics_scheduled_import' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_product_instance_caching_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'woocommerce_update_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
@@ -1309,6 +1311,21 @@ class WC_Install {
 	}
 
 	/**
+	 * Enable product object caching by default for new shops.
+	 *
+	 * Only newly installed stores get the feature enabled here; existing installs keep the
+	 * opt-in default so their behavior is unchanged on upgrade.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return void
+	 */
+	public static function enable_product_instance_caching_for_newly_installed(): void {
+		$feature_controller = wc_get_container()->get( FeaturesController::class );
+		$feature_controller->change_feature_enable( ProductCacheController::FEATURE_NAME, true );
+	}
+
+	/**
 	 * Enable email improvements by default for existing shops if conditions are met.
 	 *
 	 * @since 9.9.0
@@ -1734,7 +1751,10 @@ class WC_Install {
 
 		// Stock Notifications Table Schema.
 		$stock_notifications_table_schema = wc_get_container()->get( StockNotificationsDataStore::class )->get_database_schema();
-		$order_stats_table_schema         = self::get_order_stats_table_schema( $collate );
+
+		// Email Unsubscribes table — generic across email types; each row pairs an email hash with an email-kind identifier.
+		$email_unsubscribes_table_schema = wc_get_container()->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class )->get_database_schema();
+		$order_stats_table_schema        = self::get_order_stats_table_schema( $collate );
 
 		$mysql_version = wc_get_server_database_version()['number'];
 		if ( version_compare( $mysql_version, '5.6', '>=' ) ) {
@@ -2078,6 +2098,7 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 ) $collate;
 $hpos_table_schema;
 $stock_notifications_table_schema;
+$email_unsubscribes_table_schema;
 		";
 
 		return $tables;
@@ -2117,6 +2138,7 @@ $stock_notifications_table_schema;
 			"{$wpdb->prefix}wc_product_attributes_lookup",
 			"{$wpdb->prefix}wc_stock_notifications",
 			"{$wpdb->prefix}wc_stock_notificationmeta",
+			"{$wpdb->prefix}wc_email_unsubscribes",
 
 			// WCA Tables.
 			"{$wpdb->prefix}wc_order_stats",
@@ -3002,7 +3024,7 @@ EOT;
 <div class="wp-block-woocommerce-cart-line-items-block"></div>
 <!-- /wp:woocommerce/cart-line-items-block -->
 
-<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"perPage":3,"pages":1,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/cross-sells","hideControls":["filterable"],"queryContextIncludes":["collection"],"__privatePreviewState":{"isPreview":true,"previewMessage":"Actual products will vary depending on the page being viewed."}} -->
+<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"perPage":3,"pages":1,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/cross-sells","hideControls":["filterable"],"queryContextIncludes":["collection"]} -->
 <div class="wp-block-woocommerce-product-collection"><!-- wp:heading {"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} -->
 <h2 class="wp-block-heading has-text-align-left" style="margin-bottom:1rem">' . __( 'You may be interested in&hellip;', 'woocommerce' ) . '</h2>
 

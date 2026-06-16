@@ -15,6 +15,7 @@ import QueryString, { parse } from 'qs';
  */
 import { PaymentRecommendations } from '../payments';
 import { ShippingRecommendations } from '../shipping';
+import { AbandonedCartRecoveryRecommendations } from '../abandoned-cart-recovery';
 import { EmbeddedBodyProps } from './embedded-body-props';
 import './style.scss';
 
@@ -29,6 +30,7 @@ function isWPPage(
 const EMBEDDED_BODY_COMPONENT_LIST: React.ElementType[] = [
 	PaymentRecommendations,
 	ShippingRecommendations,
+	AbandonedCartRecoveryRecommendations,
 ];
 
 /**

@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use WC_REST_Products_V2_Controller;
@@ -289,6 +290,11 @@ class Controller extends WC_REST_Products_V2_Controller {
 
 		// Add gallery images.
 		$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
+
+		if ( ! empty( $attachment_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $attachment_ids );
+		}
 
 		// Build image data.
 		foreach ( $attachment_ids as $attachment_id ) {
@@ -702,6 +708,12 @@ class Controller extends WC_REST_Products_V2_Controller {
 			remove_filter( 'posts_where', array( $this, 'exclude_product_statuses' ) );
 
 			$this->exclude_status = array();
+		}
+
+		// Batch-prime image attachment caches for the whole collection, rather than once per
+		// product when get_images() runs during serialization.
+		if ( ! empty( $result['objects'] ) ) {
+			wc_get_container()->get( ProductUtil::class )->prime_image_caches( $result['objects'] );
 		}
 
 		return $result;

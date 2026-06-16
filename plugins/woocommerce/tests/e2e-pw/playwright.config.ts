@@ -58,7 +58,6 @@ const reporter = [
 ];
 
 if ( process.env.CI ) {
-	reporter.push( [ 'buildkite-test-collector/playwright/reporter' ] );
 	reporter.push( [ `${ TESTS_ROOT_PATH }/reporters/skipped-tests.ts` ] );
 	reporter.push( [
 		'junit',
