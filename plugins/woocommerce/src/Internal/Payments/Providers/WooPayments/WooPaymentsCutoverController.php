@@ -171,6 +171,7 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	 * @internal
 	 */
 	public function output_admin_notices(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reads post-redirect status only; no state change is performed here.
 		$status = isset( $_GET[ self::QUERY_STATUS ] ) ? sanitize_key( wp_unslash( $_GET[ self::QUERY_STATUS ] ) ) : '';
 		if ( self::STATUS_DISABLED === $status ) {
 			$this->output_success_notice();
@@ -262,6 +263,13 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 			$failures[] = 'native_runtime_disabled';
 		}
 
+		/**
+		 * Filters whether the native WooPayments transport is ready for cutover.
+		 *
+		 * @param bool $is_ready Whether the native transport can process WooPayments requests.
+		 *
+		 * @since 11.0.0
+		 */
 		if ( ! (bool) apply_filters( self::FILTER_NATIVE_TRANSPORT_READY, false ) ) {
 			$failures[] = 'native_transport_unavailable';
 		}

@@ -213,25 +213,25 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_option'          => function ( $name, $default_value = false ) use ( $entry ) {
+				'get_option'         => function ( $name, $default_value = false ) use ( $entry ) {
 					if ( 'active_plugins' === $name ) {
 						return $this->plugin_active ? array( $entry ) : array();
 					}
 					return get_option( $name, $default_value );
 				},
-				'get_site_option'     => function ( $name, $default_value = false ) use ( $entry ) {
+				'get_site_option'    => function ( $name, $default_value = false ) use ( $entry ) {
 					if ( 'active_sitewide_plugins' === $name ) {
 						return $this->plugin_network_active ? array( $entry => 1234567890 ) : array();
 					}
 					return get_site_option( $name, $default_value );
 				},
-				'class_exists'        => function ( $class_name, $autoload = true ) {
+				'class_exists'       => function ( $class_name, $autoload = true ) {
 					if ( 'WC_Payments' === ltrim( (string) $class_name, '\\' ) ) {
 						return $this->plugin_active || $this->plugin_network_active;
 					}
 					return class_exists( $class_name, $autoload );
 				},
-				'deactivate_plugins'  => function ( $plugin, $silent = false, $network_wide = null ) {
+				'deactivate_plugins' => function ( $plugin, $silent = false, $network_wide = null ) {
 					$network_wide                    = (bool) $network_wide;
 					$this->deactivate_plugin_calls[] = array( (string) $plugin, (bool) $silent, $network_wide );
 
@@ -241,7 +241,7 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 						$this->plugin_active = false;
 					}
 				},
-				'current_user_can'    => fn( $capability ) => in_array( $capability, array( 'manage_woocommerce', 'activate_plugins', 'manage_network_plugins' ), true )
+				'current_user_can'   => fn( $capability ) => in_array( $capability, array( 'manage_woocommerce', 'activate_plugins', 'manage_network_plugins' ), true )
 					? $this->current_user_can_cutover
 					: current_user_can( $capability ),
 			)
@@ -265,14 +265,9 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 			'wp_die_handler',
 			static function () {
 				return static function ( $message = '' ): void {
-					throw new WooPaymentsCutoverBlockedException( wp_strip_all_tags( (string) $message ) );
+					throw new WooPaymentsCutoverBlockedException( esc_html( wp_strip_all_tags( (string) $message ) ) );
 				};
 			}
 		);
 	}
 }
-
-/**
- * Test exception for wp_die assertions.
- */
-class WooPaymentsCutoverBlockedException extends \RuntimeException {}
