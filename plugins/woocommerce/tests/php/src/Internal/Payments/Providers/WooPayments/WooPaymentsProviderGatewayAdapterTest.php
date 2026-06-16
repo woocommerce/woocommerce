@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
 use Automattic\WooCommerce\Internal\Payments\PaymentContext;
 use Automattic\WooCommerce\Internal\Payments\PaymentOutcome;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProviderGatewayAdapter;
 use WC_Order;
@@ -147,6 +148,35 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Refund should prefer the native transport before the legacy gateway bridge.
+	 */
+	public function test_refund_prefers_native_transport_when_available(): void {
+		$order      = $this->create_woopayments_order();
+		$gateway    = new RecordingLegacyGateway( array( 'result' => 'success' ), true );
+		$api_client = $this->getMockBuilder( WooPaymentsApiClient::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_available', 'refund_charge' ) )
+			->getMock();
+
+		$order->update_meta_data( '_charge_id', 'ch_native' );
+		$order->save();
+
+		$api_client->expects( $this->once() )
+			->method( 'is_available' )
+			->willReturn( true );
+		$api_client->expects( $this->once() )
+			->method( 'refund_charge' )
+			->with( 'ch_native', 350, 'Adjustment', $this->isType( 'string' ), 'key_refund' )
+			->willReturn( array( 'id' => 're_native' ) );
+
+		$sut     = $this->create_adapter( $gateway, $api_client );
+		$outcome = $sut->refund( PaymentContext::for_refund( $order, OrderPaymentStore::GATEWAY_ID, 3.50, 'Adjustment' ), 'key_refund' );
+
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertNull( $gateway->refund_amount );
+	}
+
+	/**
 	 * @testdox Capture should normalize legacy capture statuses.
 	 */
 	public function test_capture_normalizes_legacy_capture_statuses(): void {
@@ -166,6 +196,40 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
 		$this->assertSame( 'pi_captured', $outcome->get_provider_payment_id() );
 		$this->assertSame( 'key_capture', $gateway->last_idempotency_key );
+	}
+
+	/**
+	 * @testdox Capture should prefer the native transport before the legacy gateway bridge.
+	 */
+	public function test_capture_prefers_native_transport_when_available(): void {
+		$order      = $this->create_woopayments_order();
+		$gateway    = new RecordingLegacyGateway( array( 'result' => 'success' ), true );
+		$api_client = $this->getMockBuilder( WooPaymentsApiClient::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_available', 'capture_intention' ) )
+			->getMock();
+
+		$order->set_transaction_id( 'pi_capture' );
+		$order->save();
+
+		$api_client->expects( $this->once() )
+			->method( 'is_available' )
+			->willReturn( true );
+		$api_client->expects( $this->once() )
+			->method( 'capture_intention' )
+			->with( 'pi_capture', 1000, array() )
+			->willReturn(
+				array(
+					'id'     => 'pi_capture',
+					'status' => 'succeeded',
+				)
+			);
+
+		$sut     = $this->create_adapter( $gateway, $api_client );
+		$outcome = $sut->capture( PaymentContext::for_capture( $order, OrderPaymentStore::GATEWAY_ID ), 'key_capture' );
+
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertSame( '', $gateway->last_idempotency_key );
 	}
 
 	/**
@@ -189,6 +253,40 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$this->assertSame( PaymentOutcome::STATUS_CANCELED, $outcome->get_status() );
 		$this->assertSame( 'pi_canceled', $outcome->get_provider_payment_id() );
 		$this->assertSame( 'key_cancel', $gateway->last_idempotency_key );
+	}
+
+	/**
+	 * @testdox Cancel should prefer the native transport before the legacy gateway bridge.
+	 */
+	public function test_cancel_prefers_native_transport_when_available(): void {
+		$order      = $this->create_woopayments_order();
+		$gateway    = new RecordingLegacyGateway( array( 'result' => 'success' ), true );
+		$api_client = $this->getMockBuilder( WooPaymentsApiClient::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_available', 'cancel_intention' ) )
+			->getMock();
+
+		$order->set_transaction_id( 'pi_cancel' );
+		$order->save();
+
+		$api_client->expects( $this->once() )
+			->method( 'is_available' )
+			->willReturn( true );
+		$api_client->expects( $this->once() )
+			->method( 'cancel_intention' )
+			->with( 'pi_cancel' )
+			->willReturn(
+				array(
+					'id'     => 'pi_cancel',
+					'status' => 'canceled',
+				)
+			);
+
+		$sut     = $this->create_adapter( $gateway, $api_client );
+		$outcome = $sut->cancel( PaymentContext::for_cancel( $order, OrderPaymentStore::GATEWAY_ID ), 'key_cancel' );
+
+		$this->assertSame( PaymentOutcome::STATUS_CANCELED, $outcome->get_status() );
+		$this->assertSame( '', $gateway->last_idempotency_key );
 	}
 
 	/**
@@ -226,14 +324,20 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	 * Create adapter with a fake legacy gateway.
 	 *
 	 * @param RecordingLegacyGateway|null $gateway Legacy gateway.
+	 * @param WooPaymentsApiClient|null   $api_client Native API client.
 	 * @return WooPaymentsProviderGatewayAdapter
 	 */
-	private function create_adapter( ?RecordingLegacyGateway $gateway ): WooPaymentsProviderGatewayAdapter {
+	private function create_adapter( ?RecordingLegacyGateway $gateway, ?WooPaymentsApiClient $api_client = null ): WooPaymentsProviderGatewayAdapter {
 		$legacy_runtime = new WooPaymentsLegacyRuntime();
 		$legacy_runtime->init( new LegacyProxyWithGateway( $gateway ) );
+		$api_client = $api_client ?? $this->getMockBuilder( WooPaymentsApiClient::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_available' ) )
+			->getMock();
+		$api_client->method( 'is_available' )->willReturn( false );
 
 		$sut = new WooPaymentsProviderGatewayAdapter();
-		$sut->init( $legacy_runtime );
+		$sut->init( $legacy_runtime, $api_client );
 
 		return $sut;
 	}
