@@ -105,6 +105,7 @@ class MultiCurrencyFrontendPricesController implements RegisterHooksInterface {
 		$this->add_filter_once( 'woocommerce_coupon_get_minimum_amount', array( $this, 'get_coupon_min_max_amount' ), 99 );
 		$this->add_filter_once( 'woocommerce_coupon_get_maximum_amount', array( $this, 'get_coupon_min_max_amount' ), 99 );
 		$this->add_filter_once( 'woocommerce_new_order', array( $this, 'add_order_meta' ), 99, 2 );
+		$this->add_action_once( 'woocommerce_order_refunded', array( $this, 'add_refund_meta' ), 99, 2 );
 		$this->add_filter_once( 'rest_post_dispatch', array( $this, 'maybe_modify_price_ranges_rest_response' ), 10, 3 );
 		$this->add_filter_once( 'query_loop_block_query_vars', array( $this, 'maybe_modify_price_ranges_query_var' ), 10, 3 );
 	}
@@ -279,6 +280,32 @@ class MultiCurrencyFrontendPricesController implements RegisterHooksInterface {
 		}
 
 		$order->save_meta_data();
+	}
+
+	/**
+	 * Persist projected multi-currency refund meta.
+	 *
+	 * @param mixed $order_id  Order ID.
+	 * @param mixed $refund_id Refund ID.
+	 */
+	public function add_refund_meta( $order_id, $refund_id ): void {
+		$order  = wc_get_order( absint( $order_id ) );
+		$refund = wc_get_order( absint( $refund_id ) );
+
+		if ( ! $order instanceof \WC_Order || ! $refund instanceof \WC_Order_Refund ) {
+			return;
+		}
+
+		$meta_candidates = $this->get_price_projection_service()->get_refund_meta_candidates( $order );
+		if ( empty( $meta_candidates ) ) {
+			return;
+		}
+
+		foreach ( $meta_candidates as $meta_key => $meta_value ) {
+			$refund->update_meta_data( $meta_key, (string) $meta_value );
+		}
+
+		$refund->save_meta_data();
 	}
 
 	/**
@@ -482,6 +509,20 @@ class MultiCurrencyFrontendPricesController implements RegisterHooksInterface {
 	private function add_filter_once( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		if ( false === has_filter( $hook, $callback ) ) {
 			add_filter( $hook, $callback, $priority, $accepted_args );
+		}
+	}
+
+	/**
+	 * Register an action only once for this controller instance.
+	 *
+	 * @param string   $hook          Hook name.
+	 * @param callable $callback      Hook callback.
+	 * @param int      $priority      Hook priority.
+	 * @param int      $accepted_args Accepted argument count.
+	 */
+	private function add_action_once( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
+		if ( false === has_action( $hook, $callback ) ) {
+			add_action( $hook, $callback, $priority, $accepted_args );
 		}
 	}
 }

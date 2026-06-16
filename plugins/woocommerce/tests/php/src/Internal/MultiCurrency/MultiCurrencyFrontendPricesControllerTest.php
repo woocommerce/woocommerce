@@ -36,6 +36,7 @@ class MultiCurrencyFrontendPricesControllerTest extends WC_Unit_Test_Case {
 		'woocommerce_coupon_get_minimum_amount',
 		'woocommerce_coupon_get_maximum_amount',
 		'woocommerce_new_order',
+		'woocommerce_order_refunded',
 		'rest_post_dispatch',
 		'query_loop_block_query_vars',
 		'wcpay_multi_currency_should_convert_product_price',
@@ -63,6 +64,7 @@ class MultiCurrencyFrontendPricesControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( has_filter( 'woocommerce_product_get_price', array( $sut, 'get_product_price_string' ) ) );
 		$this->assertFalse( has_filter( 'woocommerce_coupon_get_amount', array( $sut, 'get_coupon_amount' ) ) );
+		$this->assertFalse( has_action( 'woocommerce_order_refunded', array( $sut, 'add_refund_meta' ) ) );
 	}
 
 	/**
@@ -75,6 +77,7 @@ class MultiCurrencyFrontendPricesControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( has_filter( 'woocommerce_product_get_price', array( $sut, 'get_product_price_string' ) ) );
 		$this->assertFalse( has_filter( 'woocommerce_coupon_get_amount', array( $sut, 'get_coupon_amount' ) ) );
+		$this->assertFalse( has_action( 'woocommerce_order_refunded', array( $sut, 'add_refund_meta' ) ) );
 	}
 
 	/**
@@ -100,6 +103,7 @@ class MultiCurrencyFrontendPricesControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 99, has_filter( 'woocommerce_coupon_get_minimum_amount', array( $sut, 'get_coupon_min_max_amount' ) ) );
 		$this->assertSame( 99, has_filter( 'woocommerce_coupon_get_maximum_amount', array( $sut, 'get_coupon_min_max_amount' ) ) );
 		$this->assertSame( 99, has_filter( 'woocommerce_new_order', array( $sut, 'add_order_meta' ) ) );
+		$this->assertSame( 99, has_action( 'woocommerce_order_refunded', array( $sut, 'add_refund_meta' ) ) );
 		$this->assertSame( 10, has_filter( 'rest_post_dispatch', array( $sut, 'maybe_modify_price_ranges_rest_response' ) ) );
 		$this->assertSame( 10, has_filter( 'query_loop_block_query_vars', array( $sut, 'maybe_modify_price_ranges_query_var' ) ) );
 	}
@@ -118,6 +122,7 @@ class MultiCurrencyFrontendPricesControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( has_filter( 'woocommerce_product_get_price', array( $sut, 'get_product_price_string' ) ) );
 		$this->assertFalse( has_filter( 'woocommerce_coupon_get_amount', array( $sut, 'get_coupon_amount' ) ) );
+		$this->assertFalse( has_action( 'woocommerce_order_refunded', array( $sut, 'add_refund_meta' ) ) );
 		$this->assertFalse( has_filter( 'rest_post_dispatch', array( $sut, 'maybe_modify_price_ranges_rest_response' ) ) );
 	}
 
@@ -204,6 +209,68 @@ class MultiCurrencyFrontendPricesControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( '10.00', $converted_methods[1]->min_amount );
 		$this->assertSame( '0.82', $order->get_meta( '_wcpay_multi_currency_order_exchange_rate', true ) );
 		$this->assertSame( 'USD', $order->get_meta( '_wcpay_multi_currency_order_default_currency', true ) );
+	}
+
+	/**
+	 * @testdox Should persist projected multi-currency refund meta.
+	 */
+	public function test_persists_projected_refund_meta(): void {
+		$sut   = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
+		$order = wc_create_order();
+		$order->set_currency( 'GBP' );
+		$order->set_total( 100 );
+		$order->save();
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+				'reason'   => 'Multi-currency refund meta test',
+			)
+		);
+
+		$this->assertInstanceOf( \WC_Order_Refund::class, $refund );
+
+		$sut->add_refund_meta( $order->get_id(), $refund->get_id() );
+
+		$refund = wc_get_order( $refund->get_id() );
+
+		$this->assertInstanceOf( \WC_Order_Refund::class, $refund );
+		$this->assertSame( '0.82', $refund->get_meta( '_wcpay_multi_currency_order_exchange_rate', true ) );
+		$this->assertSame( 'USD', $refund->get_meta( '_wcpay_multi_currency_order_default_currency', true ) );
+		$this->assertSame( '1.25', $refund->get_meta( '_wcpay_multi_currency_stripe_exchange_rate', true ) );
+	}
+
+	/**
+	 * @testdox Should skip refund meta when no projected candidates exist.
+	 */
+	public function test_skips_refund_meta_when_no_projected_candidates_exist(): void {
+		$sut   = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
+		$order = wc_create_order();
+		$order->set_currency( 'USD' );
+		$order->set_total( 100 );
+		$order->save();
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+				'reason'   => 'Default currency refund meta test',
+			)
+		);
+
+		$this->assertInstanceOf( \WC_Order_Refund::class, $refund );
+
+		$sut->add_refund_meta( $order->get_id(), $refund->get_id() );
+		$sut->add_refund_meta( 0, $refund->get_id() );
+		$sut->add_refund_meta( $order->get_id(), 0 );
+
+		$refund = wc_get_order( $refund->get_id() );
+
+		$this->assertInstanceOf( \WC_Order_Refund::class, $refund );
+		$this->assertSame( '', $refund->get_meta( '_wcpay_multi_currency_order_exchange_rate', true ) );
+		$this->assertSame( '', $refund->get_meta( '_wcpay_multi_currency_order_default_currency', true ) );
+		$this->assertSame( '', $refund->get_meta( '_wcpay_multi_currency_stripe_exchange_rate', true ) );
 	}
 
 	/**
@@ -370,6 +437,24 @@ class MultiCurrencyFrontendPricesControllerTest extends WC_Unit_Test_Case {
 				return array(
 					'_wcpay_multi_currency_order_exchange_rate'    => 0.82,
 					'_wcpay_multi_currency_order_default_currency' => 'USD',
+				);
+			}
+
+			/**
+			 * Project refund meta candidates for a selected-currency order.
+			 *
+			 * @param \WC_Order $order Order.
+			 * @return array<string,float|string>
+			 */
+			public function get_refund_meta_candidates( \WC_Order $order ): array {
+				if ( 'GBP' !== strtoupper( $order->get_currency() ) ) {
+					return array();
+				}
+
+				return array(
+					'_wcpay_multi_currency_order_exchange_rate'    => 0.82,
+					'_wcpay_multi_currency_order_default_currency' => 'USD',
+					'_wcpay_multi_currency_stripe_exchange_rate'   => 1.25,
 				);
 			}
 
