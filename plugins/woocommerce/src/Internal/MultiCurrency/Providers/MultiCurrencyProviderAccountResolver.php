@@ -8,7 +8,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\MultiCurrency\Providers;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\MultiCurrencyAccountInterface;
-use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsLegacyAccountAdapter;
 
 /**
  * Resolves the active native multi-currency provider account boundary.
@@ -24,17 +23,6 @@ class MultiCurrencyProviderAccountResolver {
 	 * @var MultiCurrencyAccountInterface|null
 	 */
 	private ?MultiCurrencyAccountInterface $account = null;
-
-	/**
-	 * Initialize the class instance.
-	 *
-	 * @internal
-	 *
-	 * @param WooPaymentsLegacyAccountAdapter $woo_payments_account_adapter WooPayments account adapter.
-	 */
-	final public function init( WooPaymentsLegacyAccountAdapter $woo_payments_account_adapter ): void {
-		$this->account = $woo_payments_account_adapter;
-	}
 
 	/**
 	 * Set the active account boundary.

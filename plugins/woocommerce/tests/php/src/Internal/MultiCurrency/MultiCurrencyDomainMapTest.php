@@ -68,6 +68,38 @@ class MultiCurrencyDomainMapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep generic account resolver wiring provider-neutral.
+	 */
+	public function test_provider_account_resolver_wiring_is_provider_neutral(): void {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for domain-boundary regression coverage.
+		$source = (string) file_get_contents( WC()->plugin_path() . '/src/Internal/MultiCurrency/Providers/MultiCurrencyProviderAccountResolver.php' );
+
+		$this->assertStringContainsString( 'MultiCurrencyAccountInterface', $source, 'Generic resolver should expose only the provider-neutral account boundary.' );
+		$this->assertStringNotContainsString( 'WooPaymentsLegacyAccountAdapter', $source, 'Generic resolver should not type-hint the WooPayments account adapter.' );
+		$this->assertStringNotContainsString( 'Internal\\Payments\\Providers\\WooPayments', $source, 'Generic resolver should not import WooPayments provider implementation details.' );
+	}
+
+	/**
+	 * @testdox Should explicitly bootstrap WooPayments account boundaries before multi-currency settings.
+	 */
+	public function test_woopayments_account_bootstrap_registers_before_multi_currency_settings(): void {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for domain-boundary regression coverage.
+		$source = (string) file_get_contents( WC()->plugin_path() . '/includes/class-woocommerce.php' );
+
+		$bootstrap_position = strpos( $source, 'WooPaymentsMultiCurrencyProviderBootstrap::class' );
+		$settings_position  = strpos( $source, 'MultiCurrencySettingsController::class' );
+
+		$this->assertNotFalse( $bootstrap_position, 'WooPayments account bootstrap should be explicitly registered.' );
+		$this->assertNotFalse( $settings_position, 'Multi-currency settings controller should still be registered.' );
+
+		if ( false === $bootstrap_position || false === $settings_position ) {
+			return;
+		}
+
+		$this->assertLessThan( $settings_position, $bootstrap_position, 'WooPayments account bootstrap should run before settings consumes the resolver.' );
+	}
+
+	/**
 	 * @testdox Should record hard-preserved multi-currency order meta keys.
 	 */
 	public function test_records_preserved_order_meta_keys(): void {
