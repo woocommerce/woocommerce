@@ -5,13 +5,10 @@ const {
 
 describe( 'admin webpack externals', () => {
 	it.each( [ '@wordpress/dataviews', '@wordpress/dataviews/wp' ] )(
-		'externalizes %s to the WordPress DataViews script',
+		'bundles %s because WordPress Core does not register wp-dataviews in supported environments',
 		( request ) => {
-			expect( requestToExternal( request ) ).toEqual( [
-				'wp',
-				'dataviews',
-			] );
-			expect( requestToHandle( request ) ).toBe( 'wp-dataviews' );
+			expect( requestToExternal( request ) ).toBeNull();
+			expect( requestToHandle( request ) ).toBeUndefined();
 		}
 	);
 } );

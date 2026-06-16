@@ -61,6 +61,7 @@ class WooPaymentsLegacyAdminRuntimeBoundaryTest extends WC_Unit_Test_Case {
 			'src/Internal/Admin/WcPayWelcomePage.php',
 			'src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php',
 			'src/Internal/Admin/Notes/PaymentsRemindMeLater.php',
+			'assets/client/admin/chunks/wcpay-payment-welcome-page.js',
 		);
 
 		foreach ( $removed_files as $removed_file ) {
@@ -152,6 +153,12 @@ class WooPaymentsLegacyAdminRuntimeBoundaryTest extends WC_Unit_Test_Case {
 			'client/admin/client/wp-admin-scripts/payment-method-promotions/index.tsx',
 			'client/admin/client/wp-admin-scripts/payment-method-promotions/payment-promotion-row.tsx',
 			'client/admin/client/wp-admin-scripts/payment-method-promotions/payment-promotion-row.scss',
+			'assets/client/admin/wp-admin-scripts/payment-method-promotions.asset.php',
+			'assets/client/admin/wp-admin-scripts/payment-method-promotions.js',
+			'assets/client/admin/wp-admin-scripts/payment-method-promotions.js.LICENSE.txt',
+			'assets/client/admin/payment-method-promotions/style.asset.php',
+			'assets/client/admin/payment-method-promotions/style.css',
+			'assets/client/admin/payment-method-promotions/style-rtl.css',
 		);
 
 		foreach ( $removed_files as $removed_file ) {
@@ -198,6 +205,31 @@ class WooPaymentsLegacyAdminRuntimeBoundaryTest extends WC_Unit_Test_Case {
 			foreach ( $forbidden_client_strings as $forbidden_string ) {
 				$this->assertStringNotContainsString( $forbidden_string, $source, "{$source_file} should not retain deprecated WooPayments promotion client symbol {$forbidden_string}." );
 			}
+		}
+	}
+
+	/**
+	 * @testdox Active WooPayments settings assets should use core-owned WooPayments names.
+	 */
+	public function test_active_woopayments_settings_assets_use_core_owned_names(): void {
+		$old_generated_chunk = 'assets/client/admin/chunks/settings-payments-woocommerce-payments.js';
+		$this->assertFileDoesNotExist( WC()->plugin_path() . '/' . $old_generated_chunk, "{$old_generated_chunk} should be replaced by the core-owned WooPayments settings chunk name." );
+
+		$old_name_source_files = array(
+			'client/admin/client/settings-payments/index.tsx',
+			'client/admin/client/settings-payments/settings-payments-woopayments.tsx',
+			'client/admin/client/settings-payments/settings-payments-woopayments.scss',
+		);
+
+		foreach ( $old_name_source_files as $source_file ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading local source for boundary assertion.
+			$source = (string) file_get_contents( WC()->plugin_path() . '/' . $source_file );
+
+			$this->assertStringNotContainsString(
+				'settings-payments-woocommerce-payments',
+				$source,
+				"{$source_file} should use the core-owned WooPayments settings asset name."
+			);
 		}
 	}
 

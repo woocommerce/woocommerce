@@ -115,6 +115,64 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should expose live, test-drive, and sandbox account state from the preserved account cache.
+	 */
+	public function test_exposes_account_type_state_from_account_cache(): void {
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => array(
+					'account_id'        => 'acct_123',
+					'is_live'           => false,
+					'is_test_drive'     => true,
+					'payments_enabled'  => true,
+					'details_submitted' => true,
+				),
+			)
+		);
+
+		$sut = $this->create_service();
+
+		$this->assertTrue( $sut->has_account() );
+		$this->assertTrue( $sut->has_test_account() );
+		$this->assertFalse( $sut->has_sandbox_account() );
+		$this->assertFalse( $sut->has_live_account() );
+		$this->assertTrue( $sut->has_working_account() );
+
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => array(
+					'account_id'        => 'acct_123',
+					'is_live'           => false,
+					'is_test_drive'     => false,
+					'payments_enabled'  => true,
+					'details_submitted' => true,
+				),
+			)
+		);
+
+		$this->assertTrue( $sut->has_sandbox_account() );
+		$this->assertFalse( $sut->has_test_account() );
+		$this->assertFalse( $sut->has_live_account() );
+
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => array(
+					'account_id'    => 'acct_123',
+					'is_live'       => true,
+					'is_test_drive' => false,
+				),
+			)
+		);
+
+		$this->assertTrue( $sut->has_live_account() );
+		$this->assertFalse( $sut->has_test_account() );
+		$this->assertFalse( $sut->has_sandbox_account() );
+	}
+
+	/**
 	 * @testdox Should let onboarding test mode and the legacy test-mode filter override persisted gateway settings.
 	 */
 	public function test_mode_follows_onboarding_option_and_test_mode_filter(): void {

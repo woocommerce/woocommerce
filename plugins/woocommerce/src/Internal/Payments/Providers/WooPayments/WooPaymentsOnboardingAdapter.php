@@ -46,18 +46,27 @@ class WooPaymentsOnboardingAdapter {
 	private NativeWooPaymentsGateway $native_gateway;
 
 	/**
+	 * Native WooPayments account service.
+	 *
+	 * @var WooPaymentsAccountService
+	 */
+	private WooPaymentsAccountService $account_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsLegacyRuntime $legacy_runtime WooPayments legacy runtime.
-	 * @param WooPaymentsProvider      $provider       WooPayments provider.
-	 * @param NativeWooPaymentsGateway $native_gateway Native WooPayments gateway.
+	 * @param WooPaymentsLegacyRuntime  $legacy_runtime  WooPayments legacy runtime.
+	 * @param WooPaymentsProvider       $provider        WooPayments provider.
+	 * @param NativeWooPaymentsGateway  $native_gateway  Native WooPayments gateway.
+	 * @param WooPaymentsAccountService $account_service Native WooPayments account service.
 	 */
-	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsProvider $provider, NativeWooPaymentsGateway $native_gateway ): void {
-		$this->legacy_runtime = $legacy_runtime;
-		$this->provider       = $provider;
-		$this->native_gateway = $native_gateway;
+	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsProvider $provider, NativeWooPaymentsGateway $native_gateway, WooPaymentsAccountService $account_service ): void {
+		$this->legacy_runtime  = $legacy_runtime;
+		$this->provider        = $provider;
+		$this->native_gateway  = $native_gateway;
+		$this->account_service = $account_service;
 	}
 
 	/**
@@ -124,6 +133,10 @@ class WooPaymentsOnboardingAdapter {
 			return false;
 		}
 
+		if ( ! $this->is_extension_active() ) {
+			return $this->get_native_account_service()->has_account();
+		}
+
 		try {
 			return $provider->is_account_connected( $this->get_payment_gateway() );
 		} catch ( Throwable $e ) {
@@ -138,8 +151,12 @@ class WooPaymentsOnboardingAdapter {
 	 * @return bool
 	 */
 	public function has_valid_account( PaymentGateway $provider ): bool {
-		if ( ! $this->has_account( $provider ) || ! $this->is_extension_active() ) {
+		if ( ! $this->has_account( $provider ) ) {
 			return false;
+		}
+
+		if ( ! $this->is_extension_active() ) {
+			return $this->get_native_account_service()->can_process_payments();
 		}
 
 		$account_service = $this->get_account_service();
@@ -160,6 +177,10 @@ class WooPaymentsOnboardingAdapter {
 			return false;
 		}
 
+		if ( ! $this->is_extension_active() ) {
+			return $this->get_native_account_service()->has_working_account();
+		}
+
 		$account_status = $this->get_account_status_data();
 
 		return ! empty( $account_status['paymentsEnabled'] );
@@ -174,6 +195,10 @@ class WooPaymentsOnboardingAdapter {
 	public function has_test_account( PaymentGateway $provider ): bool {
 		if ( ! $this->has_account( $provider ) ) {
 			return false;
+		}
+
+		if ( ! $this->is_extension_active() ) {
+			return $this->get_native_account_service()->has_test_account();
 		}
 
 		$account_status = $this->get_account_status_data();
@@ -192,6 +217,10 @@ class WooPaymentsOnboardingAdapter {
 			return false;
 		}
 
+		if ( ! $this->is_extension_active() ) {
+			return $this->get_native_account_service()->has_sandbox_account();
+		}
+
 		$account_status = $this->get_account_status_data();
 
 		return empty( $account_status['isLive'] ) && empty( $account_status['testDrive'] );
@@ -206,6 +235,10 @@ class WooPaymentsOnboardingAdapter {
 	public function has_live_account( PaymentGateway $provider ): bool {
 		if ( ! $this->has_account( $provider ) ) {
 			return false;
+		}
+
+		if ( ! $this->is_extension_active() ) {
+			return $this->get_native_account_service()->has_live_account();
 		}
 
 		$account_status = $this->get_account_status_data();
@@ -293,6 +326,15 @@ class WooPaymentsOnboardingAdapter {
 	 */
 	private function get_legacy_runtime(): WooPaymentsLegacyRuntime {
 		return $this->legacy_runtime;
+	}
+
+	/**
+	 * Get the native WooPayments account service.
+	 *
+	 * @return WooPaymentsAccountService
+	 */
+	private function get_native_account_service(): WooPaymentsAccountService {
+		return $this->account_service;
 	}
 
 	/**

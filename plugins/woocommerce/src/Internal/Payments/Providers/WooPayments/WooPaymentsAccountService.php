@@ -106,6 +106,62 @@ class WooPaymentsAccountService {
 	}
 
 	/**
+	 * Tell whether WooPayments has an account cache entry.
+	 *
+	 * @return bool
+	 */
+	public function has_account(): bool {
+		return '' !== $this->get_account_id();
+	}
+
+	/**
+	 * Tell whether the cached account can currently receive payments.
+	 *
+	 * @return bool
+	 */
+	public function has_working_account(): bool {
+		$account_data = $this->get_cached_account_data();
+
+		return $this->has_account() && $this->is_truthy( $account_data['payments_enabled'] ?? false );
+	}
+
+	/**
+	 * Tell whether the cached account is a test-drive account.
+	 *
+	 * @return bool
+	 */
+	public function has_test_account(): bool {
+		$account_data = $this->get_cached_account_data();
+
+		return $this->has_account() && $this->is_truthy( $account_data['is_test_drive'] ?? false );
+	}
+
+	/**
+	 * Tell whether the cached account is a sandbox account.
+	 *
+	 * @return bool
+	 */
+	public function has_sandbox_account(): bool {
+		$account_data = $this->get_cached_account_data();
+
+		return $this->has_account()
+			&& array_key_exists( 'is_live', $account_data )
+			&& ! $this->is_truthy( $account_data['is_live'] )
+			&& ! $this->has_test_account();
+	}
+
+	/**
+	 * Tell whether the cached account is a live account.
+	 *
+	 * @return bool
+	 */
+	public function has_live_account(): bool {
+		$account_data = $this->get_cached_account_data();
+
+		return $this->has_account() && $this->is_truthy( $account_data['is_live'] ?? false );
+	}
+
+	/**
 	 * Tell whether WooPayments is in test mode.
 	 *
 	 * @return bool

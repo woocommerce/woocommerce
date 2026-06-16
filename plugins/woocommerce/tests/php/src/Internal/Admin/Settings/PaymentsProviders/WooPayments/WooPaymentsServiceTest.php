@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGate
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Payments\NativeWooPaymentsGateway;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOnboardingAdapter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
@@ -338,8 +339,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->method( 'can_process_payments' )
 			->willReturn( false );
 
-		$adapter = new WooPaymentsOnboardingAdapter();
-		$adapter->init( $this->create_legacy_runtime(), $provider, new NativeWooPaymentsGateway() );
+		$adapter         = new WooPaymentsOnboardingAdapter();
+		$account_service = new WooPaymentsAccountService();
+		$account_service->init( $this->mockable_proxy );
+		$adapter->init( $this->create_legacy_runtime(), $provider, new NativeWooPaymentsGateway(), $account_service );
 
 		return $adapter;
 	}

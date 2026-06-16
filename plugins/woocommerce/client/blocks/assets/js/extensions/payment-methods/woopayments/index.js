@@ -9,8 +9,87 @@ import { useEffect, useRef } from '@wordpress/element';
 
 const PAYMENT_METHOD_NAME = 'woocommerce_payments';
 const settings = getPaymentMethodData( PAYMENT_METHOD_NAME, {} );
-const defaultLabel = __( 'WooPayments', 'woocommerce' );
-const label = decodeEntities( settings?.title || '' ) || defaultLabel;
+const cardConfig = settings?.paymentMethodsConfig?.card || {};
+const defaultLabel = __( 'Card', 'woocommerce' );
+const label =
+	decodeEntities( cardConfig?.title || cardConfig?.label || settings?.title || '' ) ||
+	defaultLabel;
+const isTestMode = Boolean( settings?.testMode );
+const testingInstructions =
+	cardConfig?.testingInstructions ||
+	settings?.testingInstructions ||
+	'';
+const cardBrandIcons = Array.isArray( cardConfig?.cardBrandIcons )
+	? cardConfig.cardBrandIcons
+	: [];
+const testModeBadgeLabel = __( 'Test Mode', 'woocommerce' );
+const ariaLabel = isTestMode ? `${ label } ${ testModeBadgeLabel }` : label;
+const testModeBadgeStyle = {
+	backgroundColor: '#fff2d7',
+	borderRadius: '4px',
+	color: '#4d3716',
+	display: 'inline-block',
+	fontSize: '12px',
+	fontWeight: 400,
+	lineHeight: '16px',
+	marginLeft: '8px',
+	padding: '4px 6px',
+};
+
+const TestModeBadge = () => {
+	if ( ! isTestMode ) {
+		return null;
+	}
+
+	return (
+		<span className="test-mode badge" style={ testModeBadgeStyle }>
+			{ testModeBadgeLabel }
+		</span>
+	);
+};
+
+const CardBrandIcons = () => {
+	if ( ! cardBrandIcons.length ) {
+		return null;
+	}
+
+	const visibleIcons = cardBrandIcons.slice( 0, 4 );
+	const additionalIconCount = cardBrandIcons.length - visibleIcons.length;
+
+	return (
+		<span
+			className="wcpay-core-card-brand-icons"
+			style={ {
+				display: 'inline-flex',
+				gap: '4px',
+				marginLeft: '8px',
+				verticalAlign: 'middle',
+			} }
+		>
+			{ visibleIcons.map( ( icon ) => (
+				<img
+					key={ icon.id || icon.src }
+					src={ icon.src }
+					alt={ icon.alt || icon.id || '' }
+					width="38"
+					height="24"
+				/>
+			) ) }
+			{ additionalIconCount > 0 ? (
+				<span className="payment-methods--logos-count">
+					{ `+ ${ additionalIconCount }` }
+				</span>
+			) : null }
+		</span>
+	);
+};
+
+const PaymentMethodIcon = () => (
+	<>
+		<TestModeBadge />
+		<CardBrandIcons />
+	</>
+);
 
 const getSuccessResponse = (
 	emitResponse,
@@ -202,6 +281,31 @@ const WooPaymentsContent = ( {
 	shouldSavePaymentRef.current = shouldSavePayment;
 
 	useEffect( () => {
+		const copyTestNumber = ( event ) => {
+			if ( ! ( event.target instanceof window.Element ) ) {
+				return;
+			}
+
+			const button = event.target.closest(
+				'.js-woopayments-copy-test-number'
+			);
+			const testNumber = button?.textContent?.trim();
+
+			if ( ! button || ! testNumber || ! window.navigator?.clipboard ) {
+				return;
+			}
+
+			window.navigator.clipboard.writeText( testNumber );
+		};
+
+		document.addEventListener( 'click', copyTestNumber );
+
+		return () => {
+			document.removeEventListener( 'click', copyTestNumber );
+		};
+	}, [] );
+
+	useEffect( () => {
 		if (
 			paymentElement.current ||
 			! elementContainer.current ||
@@ -369,18 +473,28 @@ const WooPaymentsContent = ( {
 	}, [ onCheckoutSuccess ] );
 
 	return (
-		<div
-			id="wcpay-core-blocks-payment-element"
-			className="wcpay-core-blocks-payment-element"
-			ref={ elementContainer }
-			aria-live="polite"
-		/>
+		<>
+			{ isTestMode && testingInstructions ? (
+				<p
+					className="wcpay-core-test-mode-instructions"
+					dangerouslySetInnerHTML={ {
+						__html: testingInstructions,
+					} }
+				/>
+			) : null }
+			<div
+				id="wcpay-core-blocks-payment-element"
+				className="wcpay-core-blocks-payment-element"
+				ref={ elementContainer }
+				aria-live="polite"
+			/>
+		</>
 	);
 };
 
 const Label = ( props ) => {
 	const { PaymentMethodLabel } = props.components;
-	return <PaymentMethodLabel text={ label } />;
+	return <PaymentMethodLabel text={ label } icon={ <PaymentMethodIcon /> } />;
 };
 
 export const getWooPaymentsPaymentMethod = () => ( {
@@ -389,7 +503,7 @@ export const getWooPaymentsPaymentMethod = () => ( {
 	content: <WooPaymentsContent />,
 	edit: <WooPaymentsContent />,
 	canMakePayment: () => Boolean( settings.isCoreNativeCheckoutAvailable ),
-	ariaLabel: label,
+	ariaLabel,
 	supports: {
 		features: settings?.supports ?? [],
 		showSavedCards: true,

@@ -24,14 +24,19 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 		$gateway = wc_get_container()->get( NativeWooPaymentsGateway::class );
 
 		$this->assertSame( OrderPaymentStore::GATEWAY_ID, $gateway->id );
-			$this->assertSame( 'woocommerce_woocommerce_payments_settings', $gateway->get_option_key() );
-			$this->assertContains( 'refunds', $gateway->supports );
-			$this->assertContains( PaymentGatewayFeature::TOKENIZATION, $gateway->supports );
-			$this->assertNotContains( 'subscriptions', $gateway->supports );
-			$this->assertNotContains( 'subscription_payment_method_change', $gateway->supports );
-			$this->assertNotContains( 'subscription_payment_method_change_admin', $gateway->supports );
-			$this->assertNotContains( 'subscription_payment_method_change_customer', $gateway->supports );
-			$this->assertNotContains( PaymentGatewayFeature::ADD_PAYMENT_METHOD, $gateway->supports );
+		$this->assertSame( 'woocommerce_woocommerce_payments_settings', $gateway->get_option_key() );
+		$this->assertSame( 'Card', $gateway->title );
+		$this->assertStringContainsString( '/assets/images/payment-methods/visa.svg', $gateway->get_icon() );
+		$this->assertStringContainsString( 'alt="Visa"', $gateway->get_icon() );
+		$this->assertStringContainsString( '/assets/images/payment-methods/mastercard.svg', $gateway->get_icon() );
+		$this->assertStringContainsString( '+ 3', $gateway->get_icon() );
+		$this->assertContains( 'refunds', $gateway->supports );
+		$this->assertContains( PaymentGatewayFeature::TOKENIZATION, $gateway->supports );
+		$this->assertNotContains( 'subscriptions', $gateway->supports );
+		$this->assertNotContains( 'subscription_payment_method_change', $gateway->supports );
+		$this->assertNotContains( 'subscription_payment_method_change_admin', $gateway->supports );
+		$this->assertNotContains( 'subscription_payment_method_change_customer', $gateway->supports );
+		$this->assertNotContains( PaymentGatewayFeature::ADD_PAYMENT_METHOD, $gateway->supports );
 	}
 
 	/**
@@ -88,11 +93,13 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 		try {
 			$gateway = new NativeWooPaymentsGateway();
 
+			$this->assertSame( 'Card', $gateway->title );
 			$this->assertSame( 'WooPayments', $gateway->method_title );
 			$this->assertSame( 'Accept payments with WooPayments.', $gateway->method_description );
 
 			$gateway->handle_init();
 
+			$this->assertSame( 'Translated: Card', $gateway->title );
 			$this->assertSame( 'Translated: WooPayments', $gateway->method_title );
 			$this->assertSame( 'Translated: Accept payments with WooPayments.', $gateway->method_description );
 		} finally {

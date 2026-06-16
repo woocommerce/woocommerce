@@ -31,6 +31,24 @@
 		errorElement.hidden = ! message;
 	}
 
+	function copyTestNumber( event ) {
+		var button;
+		var testNumber;
+
+		if ( ! ( event.target instanceof window.Element ) ) {
+			return;
+		}
+
+		button = event.target.closest( '.js-woopayments-copy-test-number' );
+		testNumber = button && button.textContent ? button.textContent.trim() : '';
+
+		if ( ! button || ! testNumber || ! window.navigator.clipboard ) {
+			return;
+		}
+
+		window.navigator.clipboard.writeText( testNumber );
+	}
+
 	function ensureHiddenField( form, name, value ) {
 		var field = form.find( 'input[name="' + name + '"]' );
 		if ( ! field.length ) {
@@ -267,6 +285,7 @@
 	$( function () {
 		initializeStripeElement();
 		confirmRedirectIfPresent();
+		document.addEventListener( 'click', copyTestNumber );
 	} );
 
 	$( window ).on( 'hashchange', function () {

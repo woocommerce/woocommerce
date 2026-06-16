@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOnboardingAdapter;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
@@ -1163,6 +1164,140 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertFalse( $is_test_mode_onboarding );
+	}
+
+	/**
+	 * @testdox Should treat sandbox WooPayments accounts as test-mode onboarding accounts.
+	 */
+	public function test_is_in_test_mode_onboarding_when_sandbox_account_exists(): void {
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array() );
+
+		$this->mock_woopayments_mode
+			->method( 'is_test_mode_onboarding' )
+			->willReturn( false );
+		$this->mock_woopayments_account_service
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'testDrive' => false,
+					'isLive'    => false,
+				)
+			);
+
+		$is_test_mode_onboarding = $this->sut->is_in_test_mode_onboarding( $fake_gateway );
+
+		$this->assertTrue( $is_test_mode_onboarding );
+	}
+
+	/**
+	 * @testdox Should use native onboarding adapter account state for test-mode onboarding.
+	 */
+	public function test_is_in_test_mode_onboarding_uses_native_onboarding_adapter_account_state(): void {
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array() );
+		$adapter      = $this->getMockBuilder( WooPaymentsOnboardingAdapter::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'has_test_account', 'has_sandbox_account' ) )
+			->getMock();
+
+		$this->mock_woopayments_mode
+			->method( 'is_test_mode_onboarding' )
+			->willReturn( false );
+		$adapter
+			->expects( $this->once() )
+			->method( 'has_test_account' )
+			->with( $this->sut )
+			->willReturn( true );
+		$adapter
+			->expects( $this->never() )
+			->method( 'has_sandbox_account' );
+
+		$legacy_runtime = new WooPaymentsLegacyRuntime();
+		$legacy_runtime->init( $this->mockable_proxy );
+		$container = wc_get_container();
+		$this->sut->set_admin_runtime_collaborators(
+			$legacy_runtime,
+			static function () use ( $container ): WooPaymentsRestController {
+				$rest_controller = $container->get( WooPaymentsRestController::class );
+				if ( ! $rest_controller instanceof WooPaymentsRestController ) {
+					throw new \RuntimeException( 'WooPayments REST controller is not available.' );
+				}
+
+				return $rest_controller;
+			},
+			static function () use ( $container ): WooPaymentsService {
+				$service = $container->get( WooPaymentsService::class );
+				if ( ! $service instanceof WooPaymentsService ) {
+					throw new \RuntimeException( 'WooPayments service is not available.' );
+				}
+
+				return $service;
+			},
+			$adapter
+		);
+
+		$is_test_mode_onboarding = $this->sut->is_in_test_mode_onboarding( $fake_gateway );
+
+		$this->assertTrue( $is_test_mode_onboarding );
+	}
+
+	/**
+	 * @testdox Should include test-account onboarding state for sandbox WooPayments accounts.
+	 */
+	public function test_get_details_marks_sandbox_account_as_test_mode_onboarding(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'enabled'           => true,
+				'account_connected' => true,
+				'needs_setup'       => false,
+				'plugin_slug'       => 'woocommerce',
+				'plugin_file'       => 'woocommerce/woocommerce.php',
+			)
+		);
+
+		$this->mock_woopayments_mode
+			->method( 'is_test' )
+			->willReturn( true );
+		$this->mock_woopayments_mode
+			->method( 'is_test_mode_onboarding' )
+			->willReturn( false );
+		$this->mock_woopayments_mode
+			->method( 'is_dev' )
+			->willReturn( false );
+		$this->mock_woopayments_account_service
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'status'           => 'complete',
+					'testDrive'        => false,
+					'isLive'           => false,
+					'paymentsEnabled'  => true,
+					'detailsSubmitted' => true,
+				)
+			);
+		$this->mock_wpcom_connection();
+
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
+
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+		$container->replace( WooPaymentsRestController::class, $this->mock_rest_controller );
+
+		try {
+			$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'US' );
+
+			$this->assertTrue( $gateway_details['state']['test_mode'] );
+			$this->assertTrue( $gateway_details['onboarding']['state']['test_mode'] );
+			$this->assertFalse( $gateway_details['onboarding']['state']['test_drive_account'] );
+			$this->assertArrayHasKey( 'disable_test_account', $gateway_details['onboarding']['_links'] );
+		} finally {
+			Constants::clear_constants();
+			$container->reset_replacement( WooPaymentsRestController::class );
+		}
 	}
 
 	/**

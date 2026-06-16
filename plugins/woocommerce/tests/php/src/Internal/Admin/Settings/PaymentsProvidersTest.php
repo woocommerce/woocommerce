@@ -965,6 +965,61 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should enrich native WooPayments gateways with WooPayments suggestion details while keeping the core plugin owner.
+	 */
+	public function test_get_payment_gateway_details_enriches_native_woopayments_from_suggestion(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'enabled'            => true,
+				'title'              => 'WooPayments',
+				'method_title'       => 'WooPayments',
+				'description'        => 'Accept payments with WooPayments.',
+				'method_description' => 'Accept payments with WooPayments.',
+				'plugin_slug'        => 'woocommerce',
+				'plugin_file'        => 'woocommerce/woocommerce.php',
+			),
+		);
+
+		$suggestion = array(
+			'id'          => ExtensionSuggestions::WOOPAYMENTS,
+			'_priority'   => 10,
+			'_type'       => ExtensionSuggestions::TYPE_PSP,
+			'title'       => 'Accept payments with Woo',
+			'description' => 'Credit/debit cards, Apple Pay, Google Pay, and more.',
+			'plugin'      => array(
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'woocommerce-payments',
+			),
+			'icon'        => 'http://example.com/woopayments-icon.svg',
+			'links'       => array(
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+					'url'   => 'https://woocommerce.com/document/woopayments/',
+				),
+			),
+			'tags'        => array( ExtensionSuggestions::TAG_MADE_IN_WOO, ExtensionSuggestions::TAG_PREFERRED ),
+		);
+
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_by_plugin_slug' )
+			->with( 'woocommerce-payments', 'US', Payments::SUGGESTIONS_CONTEXT )
+			->willReturn( $suggestion );
+
+		$gateway_details = $this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
+
+		$this->assertSame( ExtensionSuggestions::WOOPAYMENTS, $gateway_details['_suggestion_id'] );
+		$this->assertSame( 'Accept payments with Woo', $gateway_details['title'] );
+		$this->assertSame( 'Credit/debit cards, Apple Pay, Google Pay, and more.', $gateway_details['description'] );
+		$this->assertSame( 'http://example.com/woopayments-icon.svg', $gateway_details['icon'] );
+		$this->assertSame( array( ExtensionSuggestions::TAG_MADE_IN_WOO, ExtensionSuggestions::TAG_PREFERRED ), $gateway_details['tags'] );
+		$this->assertSame( 'woocommerce', $gateway_details['plugin']['slug'] );
+		$this->assertSame( 'woocommerce/woocommerce', $gateway_details['plugin']['file'] );
+		$this->assertSame( PaymentsProviders::EXTENSION_ACTIVE, $gateway_details['plugin']['status'] );
+	}
+
+	/**
 	 * Test that get_payment_gateway_details does not override gateway details with those from the suggestion
 	 * when they exist.
 	 */
@@ -1395,6 +1450,80 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertIsList( $other_suggestion['tags'] );
 		// The category should be PSP.
 		$this->assertSame( PaymentsProviders::CATEGORY_PSP, $other_suggestion['category'] );
+	}
+
+	/**
+	 * @testdox Should not return the WooPayments suggestion when the native WooPayments gateway is registered.
+	 */
+	public function test_get_extension_suggestions_skips_woopayments_when_native_gateway_is_registered(): void {
+		$this->mock_payment_gateways(
+			array(
+				'woocommerce_payments' => array(
+					'enabled'            => true,
+					'method_title'       => 'WooPayments',
+					'method_description' => 'Accept payments with WooPayments.',
+					'plugin_slug'        => 'woocommerce',
+					'plugin_file'        => 'woocommerce/woocommerce.php',
+				),
+			)
+		);
+
+		$location         = 'US';
+		$base_suggestions = array(
+			array(
+				'id'          => ExtensionSuggestions::WOOPAYMENTS,
+				'_priority'   => 10,
+				'_type'       => ExtensionSuggestions::TYPE_PSP,
+				'title'       => 'Accept payments with Woo',
+				'description' => 'Credit/debit cards, Apple Pay, Google Pay, and more.',
+				'plugin'      => array(
+					'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+					'slug'  => 'woocommerce-payments',
+				),
+				'icon'        => 'http://example.com/woopayments-icon.svg',
+				'links'       => array(),
+				'tags'        => array( ExtensionSuggestions::TAG_PREFERRED ),
+			),
+			array(
+				'id'          => 'alternate-psp',
+				'_priority'   => 20,
+				'_type'       => ExtensionSuggestions::TYPE_PSP,
+				'title'       => 'Alternate PSP',
+				'description' => 'Accept payments with another provider.',
+				'plugin'      => array(
+					'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+					'slug'  => 'alternate-psp',
+				),
+				'icon'        => 'http://example.com/alternate-psp.svg',
+				'links'       => array(),
+				'tags'        => array( ExtensionSuggestions::TAG_PREFERRED ),
+			),
+			array(
+				'id'          => 'alternate-bnpl',
+				'_priority'   => 30,
+				'_type'       => ExtensionSuggestions::TYPE_BNPL,
+				'title'       => 'Alternate BNPL',
+				'description' => 'Offer buy now, pay later.',
+				'plugin'      => array(
+					'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+					'slug'  => 'alternate-bnpl',
+				),
+				'icon'        => 'http://example.com/alternate-bnpl.svg',
+				'links'       => array(),
+				'tags'        => array(),
+			),
+		);
+
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_country_extensions' )
+			->with( $location )
+			->willReturn( $base_suggestions );
+
+		$suggestions = $this->sut->get_extension_suggestions( $location );
+
+		$this->assertSame( array( 'alternate-psp' ), array_column( $suggestions['preferred'], 'id' ) );
+		$this->assertSame( array(), array_column( $suggestions['other'], 'id' ), 'WooPayments should count as active so BNPL suggestions stay suppressed.' );
 	}
 
 	/**

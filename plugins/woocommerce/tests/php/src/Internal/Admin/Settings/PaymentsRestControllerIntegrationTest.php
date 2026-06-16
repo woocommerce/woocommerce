@@ -965,7 +965,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'completed', $provider['onboarding']['state'], 'Provider (gateway) `onboarding[state][completed]` entry is missing' );
 		$this->assertFalse( $provider['onboarding']['state']['completed'] );
 		$this->assertArrayHasKey( 'test_mode', $provider['onboarding']['state'], 'Provider (gateway) `onboarding[state][test_mode]` entry is missing' );
-		$this->assertFalse( $provider['onboarding']['state']['test_mode'] );
+		$this->assertTrue( $provider['onboarding']['state']['test_mode'] );
 		$this->assertArrayHasKey( 'steps', $provider['onboarding'], 'Provider (gateway) `onboarding[steps]` entry is missing' );
 		$this->assertIsArray( $provider['onboarding']['steps'], 'Provider (gateway) `onboarding[steps]` entry is not an array' );
 		$this->assertArrayHasKey( 'context', $provider['onboarding'], 'Provider (gateway) `onboarding[context]` entry is missing' );
@@ -1818,7 +1818,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		$this->mockable_proxy->register_static_mocks(
 			array(
-				'\WC_Payments'         => array(
+				'WC_Payments'         => array(
 					'get_gateway'         => function () {
 						return $this->mock_woopayments_gateway;
 					},
@@ -1826,7 +1826,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 						return $this->mock_woopayments_account_service;
 					},
 				),
-				'\WC_Payments_Account' => array(
+				'WC_Payments_Account' => array(
 					'get_connect_url'       => function () {
 						return 'https://example.com/kyc_fallback';
 					},
@@ -1834,12 +1834,12 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 						return 'https://example.com/overview_page?from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT;
 					},
 				),
-				'\WC_Payments_Utils'   => array(
+				'WC_Payments_Utils'   => array(
 					'supported_countries' => function () {
 						return $this->get_woopayments_supported_countries();
 					},
 				),
-				PluginsHelper::class   => array(
+				PluginsHelper::class  => array(
 					'is_plugin_installed'       => function ( $plugin_path_or_slug ) use ( $active_plugin_paths, $active_plugin_slugs ) {
 						if ( in_array( $plugin_path_or_slug, $active_plugin_paths, true ) ) {
 							return true;
@@ -1886,7 +1886,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'class_exists' => function ( $class_to_check ) use ( $woopayments ) {
-					if ( '\WC_Payments' === $class_to_check ) {
+					if ( in_array( $class_to_check, array( 'WC_Payments', '\WC_Payments' ), true ) ) {
 						return $woopayments;
 					}
 

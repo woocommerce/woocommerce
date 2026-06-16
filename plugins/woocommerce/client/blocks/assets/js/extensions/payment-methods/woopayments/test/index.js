@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -23,6 +23,46 @@ jest.mock( '@woocommerce/settings', () => ( {
 		cartTotal: 0,
 		currency: 'USD',
 		isCoreNativeCheckoutAvailable: true,
+		testMode: true,
+		paymentMethodsConfig: {
+			card: {
+				title: 'Card',
+				cardBrandIcons: [
+					{
+						id: 'visa',
+						alt: 'Visa',
+						src: 'https://example.test/visa.svg',
+					},
+					{
+						id: 'mastercard',
+						alt: 'Mastercard',
+						src: 'https://example.test/mastercard.svg',
+					},
+					{
+						id: 'amex',
+						alt: 'American Express',
+						src: 'https://example.test/amex.svg',
+					},
+					{
+						id: 'discover',
+						alt: 'Discover',
+						src: 'https://example.test/discover.svg',
+					},
+					{
+						id: 'jcb',
+						alt: 'JCB',
+						src: 'https://example.test/jcb.svg',
+					},
+					{
+						id: 'unionpay',
+						alt: 'Union Pay',
+						src: 'https://example.test/unionpay.svg',
+					},
+				],
+				testingInstructions:
+					'Use test card <button type="button" class="js-woopayments-copy-test-number" aria-label="Click to copy the test number to clipboard" title="Copy to clipboard"><i></i><span>4242 4242 4242 4242</span></button> or refer to our <a href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/testing/#test-cards" target="_blank">testing guide</a>.',
+			},
+		},
 		usesLegacyOrderStatusBridge: false,
 		ajaxUrl: 'https://example.test/wp-admin/admin-ajax.php',
 	} ) ),
@@ -33,6 +73,7 @@ const originalFetch = window.fetch;
 describe( 'wc-payment-method-woopayments', () => {
 	afterEach( () => {
 		delete window.Stripe;
+		delete window.navigator.clipboard;
 		window.fetch = originalFetch;
 		document.body.innerHTML = '';
 		jest.clearAllMocks();
@@ -94,6 +135,106 @@ describe( 'wc-payment-method-woopayments', () => {
 				showSaveOption: true,
 			} )
 		);
+	} );
+
+	it( 'shows the test mode badge in the payment method label', () => {
+		const registration = registerWooPayments();
+		const LabelComponent = registration.label.type;
+		const PaymentMethodLabel = ( { text, icon } ) => (
+			<span>
+				{ text }
+				{ icon }
+			</span>
+		);
+
+		render(
+			createElement( LabelComponent, {
+				components: {
+					PaymentMethodLabel,
+				},
+			} )
+		);
+
+		expect( screen.getByText( 'Card' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Test Mode' ) ).toBeInTheDocument();
+		expect( screen.getByAltText( 'Visa' ) ).toHaveAttribute(
+			'src',
+			'https://example.test/visa.svg'
+		);
+		expect( screen.getByAltText( 'Mastercard' ) ).toHaveAttribute(
+			'src',
+			'https://example.test/mastercard.svg'
+		);
+		expect( screen.getByText( '+ 2' ) ).toBeInTheDocument();
+		expect( registration.ariaLabel ).toContain( 'Test Mode' );
+	} );
+
+	it( 'renders test card instructions while the account is in test mode', () => {
+		const registration = registerWooPayments();
+		const content = registration.content;
+
+		render(
+			createElement( content.type, {
+				...content.props,
+				eventRegistration: {
+					onPaymentSetup: jest.fn(),
+					onCheckoutSuccess: jest.fn(),
+				},
+				emitResponse: {
+					responseTypes: {
+						SUCCESS: 'success',
+						ERROR: 'error',
+					},
+					noticeContexts: {
+						PAYMENTS: 'payments',
+					},
+				},
+			} )
+		);
+
+		expect( screen.getByText( /Use test card/ ) ).toBeInTheDocument();
+		expect( screen.getByText( '4242 4242 4242 4242' ) ).toBeInTheDocument();
+		expect( screen.getByText( /testing guide/ ) ).toBeInTheDocument();
+	} );
+
+	it( 'copies the test card number from the checkout instructions', () => {
+		const writeText = jest.fn();
+		Object.defineProperty( window.navigator, 'clipboard', {
+			value: {
+				writeText,
+			},
+			configurable: true,
+		} );
+
+		const registration = registerWooPayments();
+		const content = registration.content;
+
+		render(
+			createElement( content.type, {
+				...content.props,
+				eventRegistration: {
+					onPaymentSetup: jest.fn(),
+					onCheckoutSuccess: jest.fn(),
+				},
+				emitResponse: {
+					responseTypes: {
+						SUCCESS: 'success',
+						ERROR: 'error',
+					},
+					noticeContexts: {
+						PAYMENTS: 'payments',
+					},
+				},
+			} )
+		);
+
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Click to copy the test number to clipboard',
+			} )
+		);
+
+		expect( writeText ).toHaveBeenCalledWith( '4242 4242 4242 4242' );
 	} );
 
 	it( 'submits Stripe Elements before creating a payment method', async () => {

@@ -38,6 +38,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOnboardingAdapter;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WC_Payment_Gateway;
@@ -94,6 +95,8 @@ class PaymentsProviders {
 	public const LINK_TYPE_ABOUT   = 'about';
 	public const LINK_TYPE_TERMS   = 'terms';
 	public const LINK_TYPE_PRICING = 'pricing';
+
+	private const WOOPAYMENTS_EXTENSION_PLUGIN_SLUG = 'woocommerce-payments';
 
 	/**
 	 * The map of gateway IDs to their respective provider classes.
@@ -524,7 +527,8 @@ class PaymentsProviders {
 				}
 
 				return $service;
-			}
+			},
+			$container->get( WooPaymentsOnboardingAdapter::class )
 		);
 
 		return $provider;
@@ -739,6 +743,14 @@ class PaymentsProviders {
 		$active_extensions = array();
 
 		foreach ( $extensions as $extension ) {
+			if (
+				ExtensionSuggestions::WOOPAYMENTS === ( $extension['id'] ?? null ) &&
+				$this->has_registered_payment_gateway( WooPaymentsService::GATEWAY_ID )
+			) {
+				$active_extensions[] = ExtensionSuggestions::WOOPAYMENTS;
+				continue;
+			}
+
 			$extension = $this->enhance_extension_suggestion( $extension );
 
 			if ( self::EXTENSION_ACTIVE === $extension['plugin']['status'] ) {
@@ -1132,7 +1144,12 @@ class PaymentsProviders {
 		// Get the payment gateways to suggestions map.
 		// There will be null entries for payment gateways where we couldn't find a suggestion.
 		$payment_gateways_to_suggestions_map = array_map(
-			fn( $gateway ) => $this->extension_suggestions->get_by_plugin_slug( Utils::normalize_plugin_slug( $this->get_payment_gateway_plugin_slug( $gateway ) ) ),
+			fn( $gateway ) => $this->extension_suggestions->get_by_plugin_slug(
+				$this->get_suggestion_plugin_slug_for_gateway(
+					$gateway,
+					Utils::normalize_plugin_slug( $this->get_payment_gateway_plugin_slug( $gateway ) )
+				)
+			),
 			$payment_gateways
 		);
 
@@ -1373,10 +1390,11 @@ class PaymentsProviders {
 		// The payment gateway plugin might use a non-standard directory name.
 		// Try to normalize it to the common slug to avoid false negatives when matching.
 		$normalized_plugin_slug = Utils::normalize_plugin_slug( $plugin_slug );
+		$suggestion_plugin_slug = $this->get_suggestion_plugin_slug_for_gateway( $payment_gateway, $normalized_plugin_slug );
 
 		// If we have a matching suggestion, hoist details from there.
 		// The suggestions only know about the normalized (aka official) plugin slug.
-		$suggestion = $this->get_extension_suggestion_by_plugin_slug( $normalized_plugin_slug, $country_code );
+		$suggestion = $this->get_extension_suggestion_by_plugin_slug( $suggestion_plugin_slug, $country_code );
 		if ( ! is_null( $suggestion ) ) {
 			// The title, description, icon, and image from the suggestion take precedence over the ones from the gateway.
 			// This is temporary until we update the partner extensions.
@@ -1488,6 +1506,40 @@ class PaymentsProviders {
 		);
 
 		return ! empty( $enabled_gateways );
+	}
+
+	/**
+	 * Check if a gateway ID is registered in the raw WooCommerce gateways list.
+	 *
+	 * @param string $gateway_id The payment gateway ID.
+	 * @return bool
+	 */
+	private function has_registered_payment_gateway( string $gateway_id ): bool {
+		foreach ( $this->get_payment_gateways( false ) as $gateway ) {
+			if ( $gateway instanceof WC_Payment_Gateway && $gateway_id === $gateway->id ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the suggestion plugin slug that corresponds to a gateway.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway        The payment gateway object.
+	 * @param string             $normalized_plugin_slug The normalized gateway plugin slug.
+	 * @return string
+	 */
+	private function get_suggestion_plugin_slug_for_gateway( WC_Payment_Gateway $payment_gateway, string $normalized_plugin_slug ): string {
+		if (
+			WooPaymentsService::GATEWAY_ID === $payment_gateway->id &&
+			'woocommerce' === $normalized_plugin_slug
+		) {
+			return self::WOOPAYMENTS_EXTENSION_PLUGIN_SLUG;
+		}
+
+		return $normalized_plugin_slug;
 	}
 
 	/**

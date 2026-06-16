@@ -28,9 +28,28 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	private const METHOD_TITLE = 'WooPayments';
 
 	/**
+	 * Untranslated shopper-facing card title.
+	 */
+	private const CHECKOUT_TITLE = 'Card';
+
+	/**
 	 * Untranslated gateway description.
 	 */
 	private const METHOD_DESCRIPTION = 'Accept payments with WooPayments.';
+
+	/**
+	 * Shopper-facing card brand icons.
+	 *
+	 * @var array<string,string>
+	 */
+	private const CARD_BRAND_ICONS = array(
+		'visa'       => 'Visa',
+		'mastercard' => 'Mastercard',
+		'amex'       => 'American Express',
+		'discover'   => 'Discover',
+		'jcb'        => 'JCB',
+		'unionpay'   => 'Union Pay',
+	);
 
 	/**
 	 * Payment processing service.
@@ -58,22 +77,23 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	 */
 	public function __construct() {
 		$this->id                 = OrderPaymentStore::GATEWAY_ID;
+		$this->title              = self::CHECKOUT_TITLE;
 		$this->method_title       = self::METHOD_TITLE;
 		$this->method_description = self::METHOD_DESCRIPTION;
-			$this->has_fields     = true;
-			$this->supports       = array(
-				'products',
-				'refunds',
-				PaymentGatewayFeature::TOKENIZATION,
-			);
+		$this->has_fields         = true;
+		$this->supports           = array(
+			'products',
+			'refunds',
+			PaymentGatewayFeature::TOKENIZATION,
+		);
 
-			$this->init_settings();
+		$this->init_settings();
 
-			if ( did_action( 'init' ) ) {
-				$this->handle_init();
-			} else {
-				add_action( 'init', array( $this, 'handle_init' ) );
-			}
+		if ( did_action( 'init' ) ) {
+			$this->handle_init();
+		} else {
+			add_action( 'init', array( $this, 'handle_init' ) );
+		}
 	}
 
 	/**
@@ -82,6 +102,7 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	 * @internal
 	 */
 	public function handle_init(): void {
+		$this->title              = __( 'Card', 'woocommerce' );
 		$this->method_title       = __( 'WooPayments', 'woocommerce' );
 		$this->method_description = __( 'Accept payments with WooPayments.', 'woocommerce' );
 	}
@@ -111,6 +132,44 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	 */
 	public function form() {
 		$this->get_checkout_bridge()->render_payment_fields();
+	}
+
+	/**
+	 * Return the shopper-facing card brand icons.
+	 *
+	 * @return string
+	 */
+	public function get_icon() {
+		$icons                 = array();
+		$brands                = array_slice( self::CARD_BRAND_ICONS, 0, 3, true );
+		$additional_icon_count = count( self::CARD_BRAND_ICONS ) - count( $brands );
+
+		foreach ( $brands as $brand => $label ) {
+			$icons[] = sprintf(
+				'<img src="%1$s" alt="%2$s" width="38" height="24" />',
+				esc_url( \WC_HTTPS::force_https_url( WC()->plugin_url() . '/assets/images/payment-methods/' . $brand . '.svg' ) ),
+				esc_attr( $label )
+			);
+		}
+
+		if ( $additional_icon_count > 0 ) {
+			$icons[] = sprintf(
+				'<span class="payment-methods--logos-count">+ %d</span>',
+				$additional_icon_count
+			);
+		}
+
+		$icon = '<span class="wcpay-core-card-brand-icons payment-methods--logos">' . implode( '', $icons ) . '</span>';
+
+		/**
+		 * Filter the gateway icon.
+		 *
+		 * @since 1.5.8
+		 * @param string $icon Gateway icon.
+		 * @param string $id Gateway ID.
+		 * @return string
+		 */
+		return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
 	}
 
 	/**

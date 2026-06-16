@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Payments\NativeWooPaymentsGateway;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOnboardingAdapter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
@@ -73,6 +74,13 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 	private $account_service;
 
 	/**
+	 * Native WooPayments account service.
+	 *
+	 * @var WooPaymentsAccountService
+	 */
+	private WooPaymentsAccountService $native_account_service;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -92,6 +100,8 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 		$this->account_service          = $this->getMockBuilder( \stdClass::class )
 			->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data' ) )
 			->getMock();
+		$this->native_account_service   = new WooPaymentsAccountService();
+		$this->native_account_service->init( $this->legacy_proxy );
 
 		$this->legacy_proxy->register_static_mocks(
 			array(
@@ -110,13 +120,16 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 		$legacy_runtime->init( $this->legacy_proxy );
 
 		$this->adapter = new WooPaymentsOnboardingAdapter();
-		$this->adapter->init( $legacy_runtime, $this->provider, $this->native_gateway );
+		$this->adapter->init( $legacy_runtime, $this->provider, $this->native_gateway, $this->native_account_service );
 	}
 
 	/**
 	 * Reset proxy mocks after each test.
 	 */
 	public function tearDown(): void {
+		delete_option( 'wcpay_account_data' );
+		delete_option( 'woocommerce_woocommerce_payments_settings' );
+		delete_option( 'wcpay_onboarding_test_mode' );
 		$this->legacy_proxy->reset();
 
 		parent::tearDown();
@@ -243,6 +256,39 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Native account state is normalized from the preserved account cache.
+	 */
+	public function test_native_account_state_is_normalized_from_account_cache(): void {
+		$this->legacy_proxy->register_function_mocks(
+			array(
+				'class_exists' => fn() => false,
+			)
+		);
+		$this->provider->method( 'can_process_payments' )->willReturn( true );
+		update_option( 'woocommerce_woocommerce_payments_settings', array( 'test_mode' => 'yes' ) );
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => array(
+					'account_id'           => 'acct_123',
+					'test_publishable_key' => 'pk_test_123',
+					'is_live'              => false,
+					'is_test_drive'        => true,
+					'payments_enabled'     => true,
+					'details_submitted'    => true,
+				),
+			)
+		);
+
+		self::assertTrue( $this->adapter->has_account( $this->payment_gateway_provider ) );
+		self::assertTrue( $this->adapter->has_valid_account( $this->payment_gateway_provider ) );
+		self::assertTrue( $this->adapter->has_working_account( $this->payment_gateway_provider ) );
+		self::assertTrue( $this->adapter->has_test_account( $this->payment_gateway_provider ) );
+		self::assertFalse( $this->adapter->has_sandbox_account( $this->payment_gateway_provider ) );
+		self::assertFalse( $this->adapter->has_live_account( $this->payment_gateway_provider ) );
+	}
+
+	/**
 	 * @testdox Legacy runtime seam supplies extension, gateway, account, and URL data.
 	 */
 	public function test_legacy_runtime_seam_supplies_extension_gateway_account_and_url_data(): void {
@@ -260,7 +306,7 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 		);
 
 		$adapter = new WooPaymentsOnboardingAdapter();
-		$adapter->init( $runtime, $this->provider, new NativeWooPaymentsGateway() );
+		$adapter->init( $runtime, $this->provider, new NativeWooPaymentsGateway(), $this->native_account_service );
 
 		$this->provider->method( 'can_process_payments' )->willReturn( false );
 		$this->account_service
@@ -292,7 +338,7 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for provider-boundary regression coverage.
 		$source = (string) file_get_contents( WC()->plugin_path() . '/src/Internal/Payments/Providers/WooPayments/WooPaymentsOnboardingAdapter.php' );
 
-		foreach ( array( 'NativeWooPaymentsGateway', 'WooPaymentsLegacyRuntime', 'WooPaymentsProvider' ) as $dependency ) {
+		foreach ( array( 'NativeWooPaymentsGateway', 'WooPaymentsAccountService', 'WooPaymentsLegacyRuntime', 'WooPaymentsProvider' ) as $dependency ) {
 			$this->assertDoesNotMatchRegularExpression(
 				'/wc_get_container\(\)\s*->get\(\s*' . $dependency . '::class\s*\)/',
 				$source,

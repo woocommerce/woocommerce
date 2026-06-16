@@ -17,7 +17,9 @@ const requestToExternal = ( request ) => {
 			return 'ReactDOM';
 		case '@wordpress/dataviews':
 		case '@wordpress/dataviews/wp':
-			return [ 'wp', 'dataviews' ];
+			// Supported WordPress versions do not consistently register the
+			// wp-dataviews script handle, so bundle DataViews with admin assets.
+			return null;
 		case '@wordpress/global-styles-engine':
 			// @wordpress/global-styles-engine is not a standard WordPress package available globally,
 			// so we need to bundle it instead of treating it as an external.
@@ -58,7 +60,7 @@ const requestToHandle = ( request ) => {
 		request === '@wordpress/dataviews' ||
 		request === '@wordpress/dataviews/wp'
 	) {
-		return 'wp-dataviews';
+		return undefined;
 	}
 };
 

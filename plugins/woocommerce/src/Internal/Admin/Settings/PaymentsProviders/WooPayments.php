@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOnboardingAdapter;
 use Throwable;
 use WC_Abstract_Order;
 use WC_Payment_Gateway;
@@ -38,6 +39,13 @@ class WooPayments extends PaymentGateway {
 	private ?WooPaymentsLegacyRuntime $legacy_runtime = null;
 
 	/**
+	 * The WooPayments onboarding adapter.
+	 *
+	 * @var WooPaymentsOnboardingAdapter|null
+	 */
+	private ?WooPaymentsOnboardingAdapter $onboarding_adapter = null;
+
+	/**
 	 * The lazy WooPayments REST controller resolver.
 	 *
 	 * @var callable|null
@@ -54,14 +62,16 @@ class WooPayments extends PaymentGateway {
 	/**
 	 * Set the admin runtime collaborators.
 	 *
-	 * @param WooPaymentsLegacyRuntime $legacy_runtime          The WooPayments legacy runtime.
-	 * @param callable                 $rest_controller_resolver The lazy WooPayments REST controller resolver.
-	 * @param callable                 $service_resolver         The lazy WooPayments service resolver.
+	 * @param WooPaymentsLegacyRuntime          $legacy_runtime           The WooPayments legacy runtime.
+	 * @param callable                          $rest_controller_resolver The lazy WooPayments REST controller resolver.
+	 * @param callable                          $service_resolver         The lazy WooPayments service resolver.
+	 * @param WooPaymentsOnboardingAdapter|null $onboarding_adapter       Optional WooPayments onboarding adapter.
 	 */
-	public function set_admin_runtime_collaborators( WooPaymentsLegacyRuntime $legacy_runtime, callable $rest_controller_resolver, callable $service_resolver ): void {
+	public function set_admin_runtime_collaborators( WooPaymentsLegacyRuntime $legacy_runtime, callable $rest_controller_resolver, callable $service_resolver, ?WooPaymentsOnboardingAdapter $onboarding_adapter = null ): void {
 		$this->legacy_runtime           = $legacy_runtime;
 		$this->rest_controller_resolver = $rest_controller_resolver;
 		$this->service_resolver         = $service_resolver;
+		$this->onboarding_adapter       = $onboarding_adapter;
 	}
 
 	/**
@@ -403,8 +413,16 @@ class WooPayments extends PaymentGateway {
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
 		$legacy_runtime          = $this->get_legacy_runtime();
 		$is_test_mode_onboarding = null !== $legacy_runtime ? $legacy_runtime->is_test_mode_onboarding() : null;
-		if ( null !== $is_test_mode_onboarding ) {
-			return $is_test_mode_onboarding;
+		if ( true === $is_test_mode_onboarding ) {
+			return true;
+		}
+
+		if ( $this->has_test_account() || $this->has_sandbox_account() ) {
+			return true;
+		}
+
+		if ( false === $is_test_mode_onboarding ) {
+			return false;
 		}
 
 		return parent::is_in_test_mode_onboarding( $payment_gateway );
@@ -586,6 +604,10 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the account is a test account, false otherwise.
 	 */
 	private function has_test_account(): bool {
+		if ( null !== $this->onboarding_adapter && $this->onboarding_adapter->has_test_account( $this ) ) {
+			return true;
+		}
+
 		$legacy_runtime = $this->get_legacy_runtime();
 		$account_status = null !== $legacy_runtime ? $legacy_runtime->get_account_status_data() : null;
 		return is_array( $account_status ) && ! empty( $account_status['testDrive'] );
@@ -602,6 +624,10 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the account is a sandbox account, false otherwise.
 	 */
 	private function has_sandbox_account(): bool {
+		if ( null !== $this->onboarding_adapter && $this->onboarding_adapter->has_sandbox_account( $this ) ) {
+			return true;
+		}
+
 		$legacy_runtime = $this->get_legacy_runtime();
 		$account_status = null !== $legacy_runtime ? $legacy_runtime->get_account_status_data() : null;
 		return is_array( $account_status ) && empty( $account_status['isLive'] ) && empty( $account_status['testDrive'] );

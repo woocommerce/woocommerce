@@ -47,7 +47,7 @@ const SettingsPaymentsOfflineChunk = lazy(
 const SettingsPaymentsWooPaymentsChunk = lazy(
 	() =>
 		import(
-			/* webpackChunkName: "settings-payments-woocommerce-payments" */ './settings-payments-woopayments'
+			/* webpackChunkName: "settings-payments-woopayments" */ './settings-payments-woopayments'
 		)
 );
 

@@ -51,8 +51,18 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'pk_test_123', $config['publishableKey'] );
 		$this->assertSame( 'acct_123', $config['accountId'] );
 		$this->assertSame( 'woocommerce_payments', $config['gatewayId'] );
+		$this->assertTrue( $config['testMode'] );
 		$this->assertSame( 'yes', $config['filtered'] );
 		$this->assertArrayHasKey( 'paymentMethodsConfig', $config );
+		$this->assertSame( 'Card', $config['paymentMethodsConfig']['card']['title'] );
+		$this->assertSame( 'Card', $config['paymentMethodsConfig']['card']['label'] );
+		$this->assertSame( 'visa', $config['paymentMethodsConfig']['card']['cardBrandIcons'][0]['id'] );
+		$this->assertSame( 'Visa', $config['paymentMethodsConfig']['card']['cardBrandIcons'][0]['alt'] );
+		$this->assertStringContainsString( '/assets/images/payment-methods/visa.svg', $config['paymentMethodsConfig']['card']['cardBrandIcons'][0]['src'] );
+		$this->assertStringContainsString( '4000 0064 2000 0001', $config['paymentMethodsConfig']['card']['testingInstructions'] );
+		$this->assertStringContainsString( 'js-woopayments-copy-test-number', $config['paymentMethodsConfig']['card']['testingInstructions'] );
+		$this->assertStringContainsString( 'Click to copy the test number to clipboard', $config['paymentMethodsConfig']['card']['testingInstructions'] );
+		$this->assertStringContainsString( 'testing guide', $config['paymentMethodsConfig']['card']['testingInstructions'] );
 		$this->assertArrayHasKey( 'enabledBillingFields', $config );
 		$this->assertArrayHasKey( 'currency', $config );
 		$this->assertArrayHasKey( 'cartTotal', $config );
@@ -89,6 +99,9 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$output = (string) ob_get_clean();
 
 		$this->assertStringContainsString( 'wcpay-core-checkout-form', $output );
+		$this->assertStringContainsString( 'wcpay-core-test-mode-instructions', $output );
+		$this->assertStringContainsString( '4000 0064 2000 0001', $output );
+		$this->assertStringContainsString( 'js-woopayments-copy-test-number', $output );
 		$this->assertStringContainsString( 'data-wcpay-config', $output );
 		$this->assertStringContainsString( 'filtered', $output );
 		$this->assertTrue( wp_script_is( 'wc-woopayments-checkout', 'enqueued' ) );
@@ -181,7 +194,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 	private function create_account_service_for_bridge( bool $can_process_payments ) {
 		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
 			->disableOriginalConstructor()
-			->onlyMethods( array( 'get_publishable_key', 'get_account_id', 'can_process_payments' ) )
+			->onlyMethods( array( 'get_publishable_key', 'get_account_id', 'get_cached_account_data', 'can_process_payments', 'is_test_mode_enabled' ) )
 			->getMock();
 
 		$account_service
@@ -191,8 +204,18 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 			->method( 'get_account_id' )
 			->willReturn( 'acct_123' );
 		$account_service
+			->method( 'get_cached_account_data' )
+			->willReturn(
+				array(
+					'country' => 'RO',
+				)
+			);
+		$account_service
 			->method( 'can_process_payments' )
 			->willReturn( $can_process_payments );
+		$account_service
+			->method( 'is_test_mode_enabled' )
+			->willReturn( true );
 
 		return $account_service;
 	}

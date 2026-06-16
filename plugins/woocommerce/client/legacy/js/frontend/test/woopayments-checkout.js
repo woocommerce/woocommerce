@@ -114,6 +114,7 @@ describe( 'WooPayments checkout', () => {
 		delete window.$;
 		delete window.wcpay_core_checkout_config;
 		delete window.Stripe;
+		delete window.navigator.clipboard;
 		document.body.innerHTML = '';
 		window.location.hash = '';
 	} );
@@ -192,5 +193,26 @@ describe( 'WooPayments checkout', () => {
 		expect( mountPaymentElement ).toHaveBeenCalledWith(
 			replacementContainer
 		);
+	} );
+
+	test( 'copies the test card number from checkout instructions', () => {
+		const writeText = jest.fn();
+		Object.defineProperty( window.navigator, 'clipboard', {
+			value: {
+				writeText,
+			},
+			configurable: true,
+		} );
+		document.body.innerHTML +=
+			'<button type="button" class="js-woopayments-copy-test-number">' +
+			'<i></i><span>4242 4242 4242 4242</span></button>';
+
+		require( '../woopayments-checkout' );
+
+		document
+			.querySelector( '.js-woopayments-copy-test-number' )
+			.click();
+
+		expect( writeText ).toHaveBeenCalledWith( '4242 4242 4242 4242' );
 	} );
 } );
