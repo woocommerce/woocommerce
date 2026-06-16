@@ -42,7 +42,9 @@ class AdminManager {
 		$suffix    = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version   = Constants::get_constant( 'WC_VERSION' );
 
-		wp_register_script( 'wc-admin-customer-stock-notifications', WC()->plugin_url() . '/assets/js/admin/wc-customer-stock-notifications' . $suffix . '.js', array( 'jquery' ), $version, true );
+		// The notification edit/create screens reuse the order-actions "more actions" kebab markup,
+		// so they depend on its shared controller (registered by WC_Admin_Assets) to drive the menu.
+		wp_register_script( 'wc-admin-customer-stock-notifications', WC()->plugin_url() . '/assets/js/admin/wc-customer-stock-notifications' . $suffix . '.js', array( 'jquery', 'wc-order-actions-menu' ), $version, true );
 
 		$params = array(
 			'i18n_wc_delete_notification_warning'       => __( 'Delete this notification permanently?', 'woocommerce' ),

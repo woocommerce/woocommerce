@@ -57,12 +57,19 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 								<button class="button wc-reload"><span><?php esc_html_e( 'Apply', 'woocommerce' ); ?></span></button>
 							</li>
 
-							<li class="wide">
-								<div id="delete-action">
-									<a class="submitdelete deletion" href="<?php echo esc_url( wp_nonce_url( admin_url( sprintf( NotificationsPage::PAGE_URL . '&notification_action=delete&notification_id=%d', $notification->get_id() ) ), 'delete_customer_stock_notification' ) ); ?>"><?php esc_html_e( 'Delete permanently', 'woocommerce' ); ?></a>
-								</div>
-
+							<li class="wide wc-order-save-action">
 								<button type="submit" class="button save_order button-primary" name="save" value="<?php esc_attr_e( 'Update', 'woocommerce' ); ?>"><?php esc_html_e( 'Update', 'woocommerce' ); ?></button>
+
+								<div class="wc-order-actions-menu">
+									<button type="button" class="button wc-order-actions-menu__toggle" aria-haspopup="menu" aria-expanded="false" aria-controls="wc-stock-notification-actions-menu" aria-label="<?php esc_attr_e( 'More notification actions', 'woocommerce' ); ?>">
+										<svg class="wc-order-actions-menu__icon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M13 19h-2v-2h2v2zm0-6h-2v-2h2v2zm0-6h-2V5h2v2z" /></svg>
+									</button>
+									<ul id="wc-stock-notification-actions-menu" class="wc-order-actions-menu__list" role="menu" aria-label="<?php esc_attr_e( 'More notification actions', 'woocommerce' ); ?>" hidden>
+										<li role="none">
+											<a class="submitdelete deletion" role="menuitem" tabindex="-1" href="<?php echo esc_url( wp_nonce_url( admin_url( sprintf( NotificationsPage::PAGE_URL . '&notification_action=delete&notification_id=%d', $notification->get_id() ) ), 'delete_customer_stock_notification' ) ); ?>"><?php esc_html_e( 'Delete permanently', 'woocommerce' ); ?></a>
+										</li>
+									</ul>
+								</div>
 							</li>
 
 						</ul>

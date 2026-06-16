@@ -231,6 +231,16 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'version'      => $version,
 				),
 				array(
+					// Dependency-free controller for the "more actions" kebab menu, shared by the
+					// order-edit and customer stock-notification screens (both reuse the same markup).
+					'handle'  => 'wc-order-actions-menu',
+					'path'    => $plugin_url . '/assets/js/admin/order-actions-menu' . $suffix . '.js',
+					'version' => $version,
+					'args'    => array(
+						'in_footer' => true,
+					),
+				),
+				array(
 					'legacy_handle' => 'qrcode',
 					'handle'        => 'wc-qrcode',
 					'path'          => $plugin_url . '/assets/js/jquery-qrcode/jquery.qrcode' . $suffix . '.js',
@@ -595,7 +605,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( $this->is_order_meta_box_screen( $screen_id ) ) {
 				$default_location = wc_get_customer_default_location();
 
-				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard', 'wp-a11y' ), $version );
+				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard', 'wp-a11y', 'wc-order-actions-menu' ), $version );
 				wp_localize_script(
 					'wc-admin-order-meta-boxes',
 					'woocommerce_admin_meta_boxes_order',
