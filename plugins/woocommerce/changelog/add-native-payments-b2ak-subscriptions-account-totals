@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add native multi-currency formatting for WooCommerce Subscriptions My Account totals.
