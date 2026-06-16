@@ -96,6 +96,8 @@ class CustomerVerifyEmailTest extends WC_Unit_Test_Case {
 		$sent = $mailer->mock_sent[ $before ];
 		$this->assertSame( 'verify@example.com', $sent['to'][0][0], 'Email must be addressed to the customer.' );
 		$this->assertStringContainsString( 'wc_verify_email_key=TESTKEY', $sent['body'], 'Email body must contain the verification key.' );
+		$this->assertStringContainsString( 'verify@example.com', $sent['body'], 'Email body should name the address being confirmed.' );
+		$this->assertStringContainsString( 'safely ignore it', $sent['body'], 'Email body should include the reassurance footer.' );
 	}
 
 	/**

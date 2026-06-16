@@ -76,7 +76,7 @@ class CustomerVerifyEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_additional_content() {
-		return __( 'Thanks for reading.', 'woocommerce' );
+		return __( "If you didn't request this email, you can safely ignore it.", 'woocommerce' );
 	}
 
 	/**
@@ -115,6 +115,7 @@ class CustomerVerifyEmail extends WC_Email {
 				'email_heading'      => $this->get_heading(),
 				'additional_content' => $this->get_additional_content(),
 				'user_display_name'  => $this->user_display_name,
+				'user_email'         => $this->object instanceof WP_User ? $this->object->user_email : '',
 				'verify_url'         => $this->verify_url,
 				'blogname'           => $this->get_blogname(),
 				'sent_to_admin'      => false,
@@ -136,6 +137,7 @@ class CustomerVerifyEmail extends WC_Email {
 				'email_heading'      => $this->get_heading(),
 				'additional_content' => $this->get_additional_content(),
 				'user_display_name'  => $this->user_display_name,
+				'user_email'         => $this->object instanceof WP_User ? $this->object->user_email : '',
 				'verify_url'         => $this->verify_url,
 				'blogname'           => $this->get_blogname(),
 				'sent_to_admin'      => false,
