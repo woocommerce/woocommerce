@@ -132,9 +132,11 @@ $this->asset_data_registry->add('reviewRatingsEnabled', wc_review_ratings_enable
 // Available in JS as window.wcSettings.reviewRatingsEnabled
 ```
 
-### Interactivity API Stores (LOCKED)
+### Interactivity API Stores
 
-All WooCommerce Interactivity API stores use `lock: true`. They are **private by design**:
+Most WooCommerce Interactivity API stores are private by design. Exception: the `woocommerce/product-filters` store is public for Product Filters inner-block extensibility.
+
+For private stores:
 
 - Not intended for third-party extension
 - Removing/changing store state is NOT a breaking change
