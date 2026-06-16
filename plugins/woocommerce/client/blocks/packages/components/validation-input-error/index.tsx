@@ -3,7 +3,7 @@
  */
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
-import { Icon, warning } from '@wordpress/icons';
+import { Icon, cautionFilled } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -44,7 +44,7 @@ export const ValidationInputError = ( {
 	return (
 		<div className="wc-block-components-validation-error" role="alert">
 			<p id={ validationErrorId }>
-				<Icon icon={ warning } />
+				<Icon icon={ cautionFilled } />
 				<span>{ errorMessage }</span>
 			</p>
 		</div>
