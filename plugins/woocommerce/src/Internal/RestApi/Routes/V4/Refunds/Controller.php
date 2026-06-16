@@ -209,9 +209,13 @@ class Controller extends AbstractController {
 										'minimum'     => 1,
 									),
 									'refund_total' => array(
+										// No `minimum` here on purpose: validate_preview_line_items() owns
+										// the "must be greater than zero" rule and returns the actionable
+										// `invalid_refund_total` code for both 0 and negative values. A
+										// schema `minimum: 0` would contradict that (it allows 0) and a
+										// generic `rest_invalid_param` is less useful to clients.
 										'description' => __( 'Tax-inclusive amount to refund for this line item. Must be greater than zero. Required when quantity is omitted.', 'woocommerce' ),
 										'type'        => array( 'number', 'null' ),
-										'minimum'     => 0,
 									),
 								),
 							),
@@ -426,6 +430,24 @@ class Controller extends AbstractController {
 				);
 			}
 
+			// Over-refunding line items is allowed (goodwill), but the amount can never
+			// exceed the order's remaining refundable amount. Reject up-front with a clear
+			// 422 rather than relying on wc_create_refund's generic failure, mirroring the
+			// preview endpoint's preview_exceeds_max_refundable guard.
+			$remaining_refundable = (float) $order->get_remaining_refund_amount();
+			if ( NumberUtil::round( (float) $refund_amount, wc_get_price_decimals() ) > NumberUtil::round( $remaining_refundable, wc_get_price_decimals() ) ) {
+				return $this->get_route_error_response(
+					'refund_exceeds_remaining',
+					sprintf(
+						/* translators: %1$s: requested refund amount, %2$s: remaining refundable amount */
+						__( 'Refund amount (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
+						wc_format_decimal( $refund_amount, wc_get_price_decimals() ),
+						wc_format_decimal( $remaining_refundable, wc_get_price_decimals() )
+					),
+					WP_Http::UNPROCESSABLE_ENTITY
+				);
+			}
+
 			$refund = wc_create_refund(
 				array(
 					'order_id'       => $order->get_id(),
@@ -491,7 +513,12 @@ class Controller extends AbstractController {
 			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
-		$validation_error = $this->data_utils->validate_preview_line_items( $request['line_items'], $order );
+		// Round caller-supplied refund_total values once, up front, so validation and
+		// the computed preview use the same precision the create flow stores. Reused
+		// for both validate and build below.
+		$line_items = $this->data_utils->normalize_refund_totals( $request['line_items'] );
+
+		$validation_error = $this->data_utils->validate_preview_line_items( $line_items, $order );
 
 		if ( is_wp_error( $validation_error ) ) {
 			$error_data = $validation_error->get_error_data();
@@ -500,7 +527,7 @@ class Controller extends AbstractController {
 		}
 
 		try {
-			$preview = $this->data_utils->build_refund_preview( $order, $request['line_items'] );
+			$preview = $this->data_utils->build_refund_preview( $order, $line_items );
 		} catch ( \InvalidArgumentException $e ) {
 			// validate_preview_line_items above should have caught any bad input.
 			// If build_refund_preview still throws InvalidArgumentException, treat

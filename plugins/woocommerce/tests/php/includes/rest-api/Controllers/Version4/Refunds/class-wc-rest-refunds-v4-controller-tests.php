@@ -979,10 +979,43 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response_data = $response->get_data();
 		$this->assertArrayHasKey( 'code', $response_data );
 		$this->assertEquals( 'invalid_refund_amount', $response_data['code'] );
-		$this->assertStringContainsString( 'cannot be greater than the line item total including tax', $response_data['message'] );
+		$this->assertStringContainsString( 'cannot be greater than the remaining refundable amount including tax', $response_data['message'] );
 
 		// Clean up product.
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Refund creation rejects a request that lists the same line item more than once.
+	 */
+	public function test_refunds_create_duplicate_line_item_returns_error(): void {
+		$order   = $this->create_test_order();
+		$items   = $order->get_items( 'line_item' );
+		$item    = reset( $items );
+		$item_id = $item->get_id();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_id,
+						'refund_total' => 5.00,
+					),
+					array(
+						'line_item_id' => $item_id,
+						'refund_total' => 5.00,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'invalid_line_item', $data['code'] );
+		$this->assertStringContainsString( 'only once', $data['message'] );
 	}
 
 	/**
@@ -1320,6 +1353,168 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Clean up product.
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox A partial refund on a line with multiple tax IDs distributes tax per ID by stored share.
+	 *
+	 * Full-refund tests exercise the proportional split only at ratio 1.0 (the identity).
+	 * This refunds exactly half a $55 line ($50 net + $0.50 county + $4.50 state) so the
+	 * per-ID distribution and the subtotal-as-remainder math actually run with a non-trivial
+	 * ratio, and asserts each stored per-tax-ID amount.
+	 */
+	public function test_refunds_create_partial_multi_tax_id_distributes_per_id(): void {
+		$tax_rate_county = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate'          => '1.0000',
+				'tax_rate_name'     => 'County',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+		$tax_rate_state  = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate'          => '9.0000',
+				'tax_rate_name'     => 'State',
+				'tax_rate_priority' => '2',
+				'tax_rate_order'    => '2',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array(
+					$tax_rate_county => '0.50',
+					$tax_rate_state  => '4.50',
+				),
+				'subtotal' => array(
+					$tax_rate_county => '0.50',
+					$tax_rate_state  => '4.50',
+				),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$tax_totals_by_rate = array(
+			$tax_rate_county => 0.50,
+			$tax_rate_state  => 4.50,
+		);
+		foreach ( $tax_totals_by_rate as $rate_id => $tax_total ) {
+			$tax_item = new WC_Order_Item_Tax();
+			$tax_item->set_rate( $rate_id );
+			$tax_item->set_tax_total( $tax_total );
+			$tax_item->save();
+			$order->add_item( $tax_item );
+		}
+
+		$order->set_billing_country( 'US' );
+		$order->set_total( 55.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		// Refund half the tax-inclusive line: $27.50 → $25.00 net, $0.25 county, $2.25 state.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'refund_total' => 27.50,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+		$this->created_refunds[] = $response->get_data()['id'];
+
+		$refund           = wc_get_order( $response->get_data()['id'] );
+		$refund_items     = $refund->get_items( 'line_item' );
+		$refund_line_item = reset( $refund_items );
+		$refund_taxes     = $refund_line_item->get_taxes();
+
+		$this->assertEquals( -25.00, (float) $refund_line_item->get_total(), 'Net subtotal should be half of $50.' );
+		$this->assertEquals( -0.25, (float) $refund_taxes['total'][ $tax_rate_county ], 'County tax should be half of $0.50.' );
+		$this->assertEquals( -2.25, (float) $refund_taxes['total'][ $tax_rate_state ], 'State tax should be half of $4.50.' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Refund creation rejects a negative refund_total on a positive line item.
+	 */
+	public function test_refunds_create_wrong_sign_refund_total_returns_error(): void {
+		$order = $this->create_test_order();
+		$items = $order->get_items( 'line_item' );
+		$item  = reset( $items );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'refund_total' => -5.00,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'invalid_refund_amount', $data['code'] );
+		$this->assertStringContainsString( 'wrong sign', $data['message'] );
+	}
+
+	/**
+	 * @testdox Refund creation rejects an amount exceeding the order's remaining refundable amount.
+	 */
+	public function test_refunds_create_amount_exceeds_order_remaining_returns_422(): void {
+		// $10 order. A goodwill over-refund of the line is allowed, but the amount
+		// cannot exceed what remains refundable on the order.
+		$order = $this->create_test_order();
+		$items = $order->get_items( 'line_item' );
+		$item  = reset( $items );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 15.00,
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'refund_total' => 10.00,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 422, $response->get_status() );
+		$this->assertEquals( 'refund_exceeds_remaining', $response->get_data()['code'] );
 	}
 
 	/**
@@ -2179,10 +2374,12 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 0, $refund_item->get_quantity(), 'qty=0 expected for legacy-no-quantity path.' );
 		$this->assertEquals( -30.00, (float) $refund_item->get_total(), 'Refund line item total should be -30.00.' );
 
-		// Step 2: dollar accounting still gates subsequent refunds.
-		// Remaining refundable = 100 - 30 = 70. A simplified-form request for the
-		// full remaining 2 units would compute 100 (2 * $50), which exceeds 70,
-		// so wc_create_refund must reject it.
+		// Step 2: the per-line remaining-amount cap gates subsequent refunds.
+		// Remaining refundable on the line = 100 - 30 = 70. A simplified-form request
+		// for the full 2 units would compute 100 (2 * $50), which exceeds the remaining
+		// 70, so validate_line_items rejects it with invalid_refund_amount — the same
+		// cap (and code) the preview endpoint applies, before the request ever reaches
+		// wc_create_refund.
 		$request2 = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
 		$request2->set_body_params(
 			array(
@@ -2198,7 +2395,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response2 = $this->server->dispatch( $request2 );
 
 		$this->assertEquals( 400, $response2->get_status(), 'Follow-up refund exceeding remaining dollars must be rejected.' );
-		$this->assertEquals( 'cannot_create_refund', $response2->get_data()['code'] );
+		$this->assertEquals( 'invalid_refund_amount', $response2->get_data()['code'] );
 
 		// Step 3: a follow-up that fits within remaining ($40 of $70) must succeed.
 		// Guards against a regression where the first refund silently consumed

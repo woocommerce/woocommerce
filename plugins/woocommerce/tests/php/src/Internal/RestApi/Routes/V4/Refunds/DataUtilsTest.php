@@ -1645,7 +1645,9 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 			$order
 		);
 
-		$this->assertSame( 0, $result[0]['refund_total'], 'Explicit zero must not be replaced by the auto-computed value' );
+		// normalize_refund_totals() rounds every explicit value to a float, so an
+		// explicit 0 is preserved as 0.0 (not replaced by the auto-computed $10).
+		$this->assertSame( 0.0, $result[0]['refund_total'], 'Explicit zero must not be replaced by the auto-computed value' );
 
 		$product->delete( true );
 		$order->delete( true );
@@ -2013,6 +2015,98 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$this->assertSame( $variation_id, $product_item['product_id'] );
 
 		$variable_product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox normalize_refund_totals rounds a numeric refund_total to currency precision (and coerces ints to float).
+	 * @dataProvider provider_normalize_refund_totals_numeric
+	 *
+	 * @param int|float $input    Provided refund_total.
+	 * @param float     $expected Rounded float result.
+	 */
+	public function test_normalize_refund_totals_rounds_numeric( $input, float $expected ): void {
+		$result = $this->data_utils->normalize_refund_totals( array( array( 'refund_total' => $input ) ) );
+
+		$this->assertSame( $expected, $result[0]['refund_total'] );
+	}
+
+	/**
+	 * @return array<string, array{0: int|float, 1: float}>
+	 */
+	public function provider_normalize_refund_totals_numeric(): array {
+		return array(
+			'integer coerced to float' => array( 30, 30.0 ),
+			'rounds to two decimals'   => array( 30.999, 31.0 ),
+			'explicit zero'            => array( 0, 0.0 ),
+		);
+	}
+
+	/**
+	 * @testdox normalize_refund_totals leaves null, non-numeric, and missing refund_total untouched.
+	 */
+	public function test_normalize_refund_totals_leaves_non_numeric_untouched(): void {
+		$result = $this->data_utils->normalize_refund_totals(
+			array(
+				array( 'refund_total' => null ),
+				array( 'refund_total' => 'abc' ),
+				array( 'line_item_id' => 7 ),
+			)
+		);
+
+		$this->assertNull( $result[0]['refund_total'], 'null means "auto-compute" and must be preserved.' );
+		$this->assertSame( 'abc', $result[1]['refund_total'], 'Non-numeric values are left for downstream validation.' );
+		$this->assertArrayNotHasKey( 'refund_total', $result[2], 'A missing key stays missing.' );
+	}
+
+	/**
+	 * @testdox build_refund_preview falls back to zero tax when a line's stored total and tax nearly cancel.
+	 *
+	 * A line with total 100 and stored tax -99.99 has a near-zero inclusive total; splitting by
+	 * the stored ratio would explode the tax. The sanity clamp must fall back to all-net.
+	 */
+	public function test_build_refund_preview_clamps_degenerate_stored_ratio(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( 1 => -99.99 ),
+				'subtotal' => array( 1 => -99.99 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 0.01 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$preview = $this->data_utils->build_refund_preview(
+			$order,
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			)
+		);
+
+		$item_data = $preview['breakdown']['products']['items'][0];
+		$this->assertEquals( '0.00', $item_data['tax'], 'Degenerate ratio must clamp tax to zero rather than explode.' );
+		$this->assertEquals( '0.01', $item_data['subtotal'] );
+
+		$product->delete( true );
 		$order->delete( true );
 	}
 

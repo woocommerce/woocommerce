@@ -9,14 +9,12 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use WC_Order;
 use WC_Order_Item_Fee;
 use WC_Order_Item_Product;
 use WC_Order_Item_Shipping;
-use WC_Tax;
 use WP_Error;
 use WP_Http;
 
@@ -72,52 +70,21 @@ class DataUtils {
 				continue;
 			}
 
-			// If no explicit refund_tax provided, extract tax from refund_total
-			// using WC_Tax. Skip when refund_total is also missing — there's
-			// nothing to extract tax from.
+			// If no explicit refund_tax provided, extract tax from the tax-inclusive
+			// refund_total. Skip when refund_total is also missing — there's nothing
+			// to extract tax from. The split is by the line's own stored total/tax
+			// ratio via split_inclusive_by_stored_ratio(), the same method the preview
+			// uses, so the stored refund matches what build_refund_preview() showed.
 			if ( ! isset( $line_item['refund_tax'] ) && isset( $line_item['refund_total'] ) ) {
 				$original_item = $order->get_item( $line_item['line_item_id'] );
-				if ( $original_item ) {
-					$original_taxes = $original_item->get_taxes();
-					// Keep any non-zero stored tax (positive or negative). Negative-tax
-					// discount fees (e.g. a -$10 fee with -$1 stored tax) must retain
-					// their tax breakdown so the create side matches the preview side
-					// in build_refund_preview() — filtering on `> 0` previously dropped
-					// them and emitted refund_total=$line_total / refund_tax=[].
-					$tax_totals = array_filter(
-						$original_taxes['total'] ?? array(),
-						function ( $amount ) {
-							return is_numeric( $amount ) && 0.0 !== (float) $amount;
-						}
-					);
-					$tax_ids    = array_keys( $tax_totals );
+				if ( $original_item instanceof WC_Order_Item_Product || $original_item instanceof WC_Order_Item_Shipping || $original_item instanceof WC_Order_Item_Fee ) {
+					$split = $this->split_inclusive_by_stored_ratio( (float) $line_item['refund_total'], $original_item, wc_get_price_decimals() );
 
-					if ( ! empty( $tax_ids ) ) {
-						$tax_rates = $this->build_tax_rates_array( $order, $tax_ids );
-
-						// Always assume refund_total includes tax - extract it using WC_Tax.
-						$calculated_taxes = WC_Tax::calc_inclusive_tax(
-							(float) $line_item['refund_total'],
-							$tax_rates
-						);
-
-						// Round extracted taxes to display precision to match how original taxes were stored.
-						// This prevents rounding errors where internal precision (6DP) differs from storage precision (2DP).
-						$price_decimals   = wc_get_price_decimals();
-						$calculated_taxes = array_map(
-							function ( $tax ) use ( $price_decimals ) {
-								return NumberUtil::round( $tax, $price_decimals );
-							},
-							$calculated_taxes
-						);
-
-						$line_item['refund_tax'] = $this->convert_proportional_taxes_to_schema_format(
-							$calculated_taxes
-						);
-
-						// Subtract extracted tax from refund_total to get the amount excluding tax.
-						$total_tax                 = array_sum( $calculated_taxes );
-						$line_item['refund_total'] = NumberUtil::round( $line_item['refund_total'] - $total_tax, $price_decimals );
+					// Leave a tax-free line untouched: refund_total stays the full
+					// (tax-exclusive == tax-inclusive) amount and no refund_tax is set.
+					if ( ! empty( $split['taxes'] ) ) {
+						$line_item['refund_tax']   = $this->convert_proportional_taxes_to_schema_format( $split['taxes'] );
+						$line_item['refund_total'] = $split['subtotal'];
 					}
 				}
 			}
@@ -201,12 +168,21 @@ class DataUtils {
 		// below caps against remaining refundable quantity, not the original.
 		$refund_data = $this->compute_refunded_quantities_and_totals( $order );
 
+		$seen_ids = array();
 		foreach ( $line_items as $line_item ) {
 			$line_item_id = $line_item['line_item_id'] ?? null;
 
 			if ( ! $line_item_id ) {
 				return new WP_Error( 'invalid_line_item', __( 'Line item ID is required.', 'woocommerce' ) );
 			}
+
+			// Reject duplicate line items: each is validated against the same remaining
+			// snapshot, so repeating an ID would let the per-line cap pass twice for the
+			// same line. Callers must combine a line into a single entry.
+			if ( isset( $seen_ids[ $line_item_id ] ) ) {
+				return new WP_Error( 'invalid_line_item', __( 'Each line item may appear only once per request.', 'woocommerce' ) );
+			}
+			$seen_ids[ $line_item_id ] = true;
 
 			$item = $order->get_item( $line_item_id );
 
@@ -289,17 +265,41 @@ class DataUtils {
 				return new WP_Error( 'invalid_line_item', sprintf( __( 'Line item quantity cannot be greater than the item quantity (%s).', 'woocommerce' ), $item->get_quantity() ) );
 			}
 
-			// Validate refund total is not greater than the item total (including tax).
-			$item_total_with_tax = $item->get_total() + $item->get_total_tax();
-			if ( isset( $line_item['refund_total'] ) && $item_total_with_tax < $line_item['refund_total'] ) {
-				return new WP_Error(
-					'invalid_refund_amount',
-					sprintf(
-						/* translators: %s: item total with tax */
-						__( 'Refund total cannot be greater than the line item total including tax (%s).', 'woocommerce' ),
-						$item_total_with_tax
-					)
-				);
+			// Validate refund total against the remaining refundable amount for this
+			// line (including tax), subtracting any prior partial refunds. Rounds both
+			// sides to currency precision and uses abs() so the cap matches
+			// validate_preview_line_items() exactly — a previewed amount that is
+			// accepted (or rejected) there behaves the same way here.
+			if ( isset( $line_item['refund_total'] ) ) {
+				$price_decimals    = wc_get_price_decimals();
+				$signed_line_total = (float) $item->get_total() + (float) $item->get_total_tax();
+
+				// Reject a refund_total whose sign is opposite the line: you cannot refund
+				// a positive amount from a discount line, or a negative amount from a normal
+				// line. Without this, abs() in the cap below would let a wrong-sign value
+				// pass and be stored (e.g. a negative refund_total on a positive line in a
+				// mixed-line request whose total stays positive). An explicit 0 is allowed
+				// (a zero refund for the line), matching the existing create contract.
+				if ( (float) $line_item['refund_total'] * $signed_line_total < 0 ) {
+					return new WP_Error(
+						'invalid_refund_amount',
+						__( 'Refund total has the wrong sign for this line item.', 'woocommerce' )
+					);
+				}
+
+				$item_total_with_tax = abs( $signed_line_total );
+				$refunded_total      = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
+				$remaining_total     = $item_total_with_tax - $refunded_total;
+				if ( $remaining_total <= 0 || abs( (float) $line_item['refund_total'] ) > NumberUtil::round( $remaining_total, $price_decimals ) ) {
+					return new WP_Error(
+						'invalid_refund_amount',
+						sprintf(
+							/* translators: %s: remaining refundable amount including tax */
+							__( 'Refund total cannot be greater than the remaining refundable amount including tax (%s).', 'woocommerce' ),
+							wc_format_decimal( $remaining_total, $price_decimals )
+						)
+					);
+				}
 			}
 
 			if ( isset( $line_item['refund_tax'] ) ) {
@@ -364,32 +364,99 @@ class DataUtils {
 	}
 
 	/**
-	 * Build tax rate array from order tax items for use with WC_Tax calculations.
+	 * Split a tax-inclusive amount into net subtotal and per-tax-ID tax amounts using
+	 * the line item's own stored total/tax ratio.
 	 *
-	 * @param WC_Order $order The order.
-	 * @param array    $tax_ids Array of tax rate IDs that apply to an item.
-	 * @return array Tax rates array formatted for WC_Tax::calc_*_tax() methods.
+	 * Splitting by the line's actual stored proportion — rather than re-deriving tax
+	 * from the order tax item's rate percent — returns exactly what was charged. It
+	 * stays correct when the stored tax is not an exact rate% of net (manually edited
+	 * tax, or a rate that changed after the order) and when a taxed line's rate
+	 * resolves to zero. Preview ({@see build_refund_preview()}) and create
+	 * ({@see convert_line_items_to_internal_format()}) share this method so a previewed
+	 * split always matches the split stored on the created refund.
+	 *
+	 * Per-ID amounts are rounded and the subtotal is derived as amount - sum(tax), so
+	 * the invariant subtotal + total_tax == amount holds exactly at $dp precision.
+	 *
+	 * @param float                                                          $amount Tax-inclusive amount to split. Rounded to $dp before splitting.
+	 * @param WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item   Order item supplying the stored total/tax ratio.
+	 * @param int                                                            $dp     Price decimal places.
+	 * @return array{subtotal: float, total_tax: float, taxes: array<int, float>} Net subtotal, summed tax, and per-tax-ID amounts.
 	 *
 	 * @since 10.9.0
 	 */
-	protected function build_tax_rates_array( WC_Order $order, array $tax_ids ): array {
-		$tax_rates = array();
-		$tax_items = $order->get_items( OrderItemType::TAX );
+	protected function split_inclusive_by_stored_ratio( float $amount, $item, int $dp ): array {
+		$amount       = NumberUtil::round( $amount, $dp );
+		$stored_total = (float) $item->get_total();
 
-		foreach ( $tax_ids as $tax_id ) {
-			foreach ( $tax_items as $tax_item ) {
-				if ( $tax_item->get_rate_id() === (int) $tax_id ) {
-					$tax_rates[ $tax_id ] = array(
-						'rate'     => $tax_item->get_rate_percent(),
-						'label'    => $tax_item->get_label(),
-						'compound' => $tax_item->is_compound() ? 'yes' : 'no',
-					);
-					break;
-				}
+		// Keep only non-zero numeric stored taxes (positive or negative). A negative-tax
+		// discount fee must retain its breakdown; a zero entry contributes nothing.
+		$stored_taxes = array_filter(
+			$item->get_taxes()['total'] ?? array(),
+			function ( $t ) {
+				return is_numeric( $t ) && 0.0 !== (float) $t;
 			}
+		);
+
+		$stored_tax_total = array_sum( array_map( 'floatval', $stored_taxes ) );
+		$stored_with_tax  = $stored_total + $stored_tax_total;
+
+		// Fallback used whenever the stored data can't yield a sane proportional split:
+		// treat the whole amount as net (no tax) and log for observability.
+		$unsplittable = function ( string $reason ) use ( $amount, $item ) {
+			wc_get_logger()->warning(
+				sprintf(
+					'Refund tax split: cannot split tax for item %d on order %d (%s).',
+					(int) $item->get_id(),
+					(int) $item->get_order_id(),
+					$reason
+				),
+				array( 'source' => 'wc-v4-refunds' )
+			);
+			return array(
+				'subtotal'  => $amount,
+				'total_tax' => 0.0,
+				'taxes'     => array(),
+			);
+		};
+
+		// No tax on the line: the whole amount is net (not an error, no log).
+		if ( empty( $stored_taxes ) ) {
+			return array(
+				'subtotal'  => $amount,
+				'total_tax' => 0.0,
+				'taxes'     => array(),
+			);
 		}
 
-		return $tax_rates;
+		// A zero-value line (stored total nets to zero while a tax was charged) can't be
+		// split proportionally — avoid division by zero.
+		if ( 0.0 === (float) $stored_with_tax ) {
+			return $unsplittable( 'stored total incl. tax is zero' );
+		}
+
+		// Scale each stored tax by the share of the line being refunded.
+		$taxes = array();
+		foreach ( $stored_taxes as $tax_id => $stored_tax ) {
+			$taxes[ (int) $tax_id ] = NumberUtil::round( $amount * ( (float) $stored_tax / $stored_with_tax ), $dp );
+		}
+		$total_tax = NumberUtil::round( array_sum( $taxes ), $dp );
+
+		// Sanity clamp: the tax portion of a tax-inclusive amount can never exceed the
+		// amount itself. A larger value means the stored total/tax nearly cancel (e.g. a
+		// near-zero inclusive total from manually edited data), which would explode the
+		// ratio. Fall back rather than emit a nonsensical negative subtotal.
+		if ( abs( $total_tax ) > abs( $amount ) ) {
+			return $unsplittable( 'stored total and tax nearly cancel' );
+		}
+
+		$subtotal = NumberUtil::round( $amount - $total_tax, $dp );
+
+		return array(
+			'subtotal'  => $subtotal,
+			'total_tax' => $total_tax,
+			'taxes'     => $taxes,
+		);
 	}
 
 	/**
@@ -434,6 +501,30 @@ class DataUtils {
 	}
 
 	/**
+	 * Round every caller-supplied refund_total to currency precision.
+	 *
+	 * Applied at the entry of both the preview and create flows so a value the client
+	 * sends is validated, summed, split, and stored at the same precision. A previewed
+	 * amount therefore always matches the created refund to the cent. A missing or null
+	 * refund_total (the auto-compute form) is left untouched — those are computed later
+	 * and already rounded by {@see compute_line_item_refund_total()}.
+	 *
+	 * @param array $line_items Line items in schema format.
+	 * @return array Line items with numeric refund_total values rounded to wc_get_price_decimals().
+	 *
+	 * @since 10.9.0
+	 */
+	public function normalize_refund_totals( array $line_items ): array {
+		$price_decimals = wc_get_price_decimals();
+		foreach ( $line_items as $key => $line_item ) {
+			if ( isset( $line_item['refund_total'] ) && is_numeric( $line_item['refund_total'] ) ) {
+				$line_items[ $key ]['refund_total'] = NumberUtil::round( (float) $line_item['refund_total'], $price_decimals );
+			}
+		}
+		return $line_items;
+	}
+
+	/**
 	 * Fill in refund_total for any line item that omits it, computing the value from
 	 * the order item's unit price × quantity via compute_line_item_refund_total().
 	 *
@@ -458,6 +549,11 @@ class DataUtils {
 	 * @since 10.9.0
 	 */
 	public function fill_missing_refund_totals( array $line_items, WC_Order $order ): array {
+		// Round caller-supplied amounts up front so explicit values are stored at the
+		// same precision the preview validated and showed. Computed values below are
+		// already rounded by compute_line_item_refund_total().
+		$line_items = $this->normalize_refund_totals( $line_items );
+
 		foreach ( $line_items as $key => $line_item ) {
 			// Treat a missing key and an explicit `null` value the same — both mean
 			// "compute it for me". An explicit `0` is treated as a zero refund for
@@ -563,47 +659,14 @@ class DataUtils {
 			// The positivity check mirrors validate_preview_line_items(), which rejects a
 			// present-but-non-positive refund_total before this method runs.
 			$refund_total_with_tax = isset( $line_item['refund_total'] ) && (float) $line_item['refund_total'] > 0
-				? (float) $line_item['refund_total']
+				? NumberUtil::round( (float) $line_item['refund_total'], $price_decimals )
 				: $this->compute_line_item_refund_total( $item, (int) $line_item['quantity'] );
-			$subtotal              = $refund_total_with_tax;
-			$tax                   = 0.0;
 
-			$original_taxes = $item->get_taxes();
-			// Keep any non-zero stored tax (positive or negative). Negative-tax
-			// discount fees (e.g. a -$10 fee with -$1 stored tax) must retain
-			// their tax breakdown — filtering on `> 0` previously dropped them
-			// and emitted subtotal=$line_total / tax=0 instead of the correct
-			// signed split.
-			$tax_totals = array_filter(
-				$original_taxes['total'] ?? array(),
-				function ( $amount ) {
-					return is_numeric( $amount ) && 0.0 !== (float) $amount;
-				}
-			);
-
-			if ( ! empty( $original_taxes['total'] ?? array() ) && empty( $tax_totals ) ) {
-				wc_get_logger()->warning(
-					sprintf(
-						'Refund preview: tax totals filtered to empty for item %d on order %d (non-numeric or zero values).',
-						(int) $line_item['line_item_id'],
-						$order->get_id()
-					),
-					array( 'source' => 'wc-v4-refunds' )
-				);
-			}
-
-			if ( ! empty( $tax_totals ) ) {
-				$tax_rates        = $this->build_tax_rates_array( $order, array_keys( $tax_totals ) );
-				$calculated_taxes = WC_Tax::calc_inclusive_tax( $refund_total_with_tax, $tax_rates );
-				$calculated_taxes = array_map(
-					function ( $t ) use ( $price_decimals ) {
-						return NumberUtil::round( $t, $price_decimals );
-					},
-					$calculated_taxes
-				);
-				$tax              = NumberUtil::round( array_sum( $calculated_taxes ), $price_decimals );
-				$subtotal         = NumberUtil::round( $refund_total_with_tax - $tax, $price_decimals );
-			}
+			// Split by the line's own stored total/tax ratio so the preview reflects what
+			// was actually charged and matches the split create stores (both call this).
+			$split    = $this->split_inclusive_by_stored_ratio( $refund_total_with_tax, $item, $price_decimals );
+			$subtotal = $split['subtotal'];
+			$tax      = $split['total_tax'];
 
 			$item_data = array(
 				'id'       => $line_item['line_item_id'],
@@ -693,6 +756,7 @@ class DataUtils {
 
 		$refund_data = $this->compute_refunded_quantities_and_totals( $order );
 
+		$seen_ids = array();
 		foreach ( $line_items as $line_item ) {
 			$line_item_id = $line_item['line_item_id'] ?? null;
 			if ( ! $line_item_id ) {
@@ -703,12 +767,27 @@ class DataUtils {
 				);
 			}
 
+			// Reject duplicate line items: each is validated against the same remaining
+			// snapshot, so repeating an ID would let the per-line cap pass twice for the
+			// same line and double-count it in the preview breakdown.
+			if ( isset( $seen_ids[ $line_item_id ] ) ) {
+				return new WP_Error(
+					'duplicate_line_item',
+					__( 'Each line item may appear only once per request.', 'woocommerce' ),
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
+			}
+			$seen_ids[ $line_item_id ] = true;
+
+			// A bad line_item_id reference (not on the order, or an unsupported type) is a
+			// malformed request, returned as 400 to match the create endpoint's handling
+			// of the same conditions.
 			$item = $order->get_item( $line_item_id );
 			if ( ! $item || $item->get_order_id() !== $order->get_id() ) {
 				return new WP_Error(
 					'line_item_not_found',
 					__( 'Line item not found.', 'woocommerce' ),
-					array( 'status' => WP_Http::NOT_FOUND )
+					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			}
 
@@ -716,7 +795,7 @@ class DataUtils {
 				return new WP_Error(
 					'unsupported_item_type',
 					__( 'Line item is not a product, fee, or shipping line.', 'woocommerce' ),
-					array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			}
 
