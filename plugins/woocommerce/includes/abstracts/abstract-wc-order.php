@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Enums\TaxBasedOn;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\Customers\SearchService as CustomersSearchService;
 use Automattic\WooCommerce\Internal\Orders\PaymentInfo;
+use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
@@ -2070,17 +2071,27 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
+		$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( array_keys( $cart_taxes + $shipping_taxes ) );
+
 		foreach ( $existing_taxes as $tax ) {
+			$tax_rate_id = $tax->get_rate_id();
 			// Remove taxes which no longer exist for cart/shipping.
-			if ( ( ! array_key_exists( $tax->get_rate_id(), $cart_taxes ) && ! array_key_exists( $tax->get_rate_id(), $shipping_taxes ) ) || in_array( $tax->get_rate_id(), $saved_rate_ids, true ) ) {
+			if ( ( ! array_key_exists( $tax_rate_id, $cart_taxes ) && ! array_key_exists( $tax_rate_id, $shipping_taxes ) ) || in_array( $tax_rate_id, $saved_rate_ids, true ) ) {
 				$this->remove_item( $tax->get_id() );
 				continue;
 			}
-			$saved_rate_ids[] = $tax->get_rate_id();
-			$tax->set_rate( $tax->get_rate_id() );
-			$tax->set_tax_total( isset( $cart_taxes[ $tax->get_rate_id() ] ) ? $cart_taxes[ $tax->get_rate_id() ] : 0 );
-			$tax->set_label( WC_Tax::get_rate_label( $tax->get_rate_id() ) );
-			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax->get_rate_id() ] ) ? $shipping_taxes[ $tax->get_rate_id() ] : 0 );
+
+			$tax_rate_object_or_id = $tax_rate_objects[ $tax_rate_id ] ?? $tax_rate_id;
+
+			$tax->set_rate_id( $tax_rate_id );
+			$tax->set_rate_code( WC_Tax::get_rate_code( $tax_rate_object_or_id ) );
+			$tax->set_label( WC_Tax::get_rate_label( $tax_rate_object_or_id ) );
+			$tax->set_compound( WC_Tax::is_compound( $tax_rate_object_or_id ) );
+			$tax->set_rate_percent( WC_Tax::get_rate_percent_value( $tax_rate_object_or_id ) );
+			$tax->set_tax_total( $cart_taxes[ $tax_rate_id ] ?? 0 );
+			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
+
+			$saved_rate_ids[] = $tax_rate_id;
 			$tax->save();
 		}
 
@@ -2088,10 +2099,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// New taxes.
 		foreach ( $new_rate_ids as $tax_rate_id ) {
+			$tax_rate_object_or_id = $tax_rate_objects[ $tax_rate_id ] ?? $tax_rate_id;
+
 			$item = new WC_Order_Item_Tax();
-			$item->set_rate( $tax_rate_id );
-			$item->set_tax_total( isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] : 0 );
+			$item->set_rate_id( $tax_rate_id );
+			$item->set_rate_code( WC_Tax::get_rate_code( $tax_rate_object_or_id ) );
+			$item->set_label( WC_Tax::get_rate_label( $tax_rate_object_or_id ) );
+			$item->set_compound( WC_Tax::is_compound( $tax_rate_object_or_id ) );
+			$item->set_rate_percent( WC_Tax::get_rate_percent_value( $tax_rate_object_or_id ) );
+			$item->set_tax_total( $cart_taxes[ $tax_rate_id ] ?? 0 );
 			$item->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
+
 			$this->add_item( $item );
 		}
 

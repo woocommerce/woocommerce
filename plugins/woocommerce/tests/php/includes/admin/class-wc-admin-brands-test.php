@@ -113,4 +113,42 @@ class WC_Admin_Brands_Test extends WC_Unit_Test_Case {
 			$output
 		);
 	}
+
+	/**
+	 * @testdox save_coupon_brands() persists posted coupon brand restrictions.
+	 */
+	public function test_save_coupon_brands_persists_posted_coupon_brand_restrictions(): void {
+		WC_Brands::init_taxonomy();
+
+		$included_brand_id = $this->factory()->term->create(
+			array(
+				'taxonomy' => 'product_brand',
+				'name'     => 'Included brand',
+			)
+		);
+		$excluded_brand_id = $this->factory()->term->create(
+			array(
+				'taxonomy' => 'product_brand',
+				'name'     => 'Excluded brand',
+			)
+		);
+		$coupon            = WC_Helper_Coupon::create_coupon( 'brand-restrictions' );
+		$brands_admin      = new WC_Brands_Admin();
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserves test fixture state.
+		$previous_post = $_POST;
+		$_POST         = array(
+			'product_brands'         => array( (string) $included_brand_id ),
+			'exclude_product_brands' => array( (string) $excluded_brand_id ),
+		);
+
+		try {
+			$brands_admin->save_coupon_brands( $coupon->get_id() );
+		} finally {
+			$_POST = $previous_post;
+		}
+
+		$this->assertSame( array( $included_brand_id ), get_post_meta( $coupon->get_id(), 'product_brands', true ), 'Expected included brand restrictions to persist.' );
+		$this->assertSame( array( $excluded_brand_id ), get_post_meta( $coupon->get_id(), 'exclude_product_brands', true ), 'Expected excluded brand restrictions to persist.' );
+	}
 }

@@ -3,9 +3,7 @@
 		"product-data-views": false,
 		"experimental-blocks": true,
 		"minified-js": true,
-		"products-catalog-api": true,
 		"settings-ui": false,
-		"use-wp-horizon": false,
 		"rest-api-v4": false,
 		"order-detail-redesign": false,
 		"product-variations-classic-redesign": false

@@ -1,11 +1,11 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
-use WC_Tax;
 
 /**
  * CartSchema class.
@@ -416,14 +416,15 @@ class CartSchema extends AbstractSchema {
 			return $tax_lines;
 		}
 
-		$cart_tax_totals = $cart->get_tax_totals();
-		$decimals        = wc_get_price_decimals();
+		$cart_tax_totals  = $cart->get_tax_totals();
+		$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( array_column( $cart_tax_totals, 'tax_rate_id' ) );
+		$decimals         = wc_get_price_decimals();
 
 		foreach ( $cart_tax_totals as $cart_tax_total ) {
 			$tax_lines[] = array(
 				'name'  => $cart_tax_total->label,
 				'price' => $this->prepare_money_response( $cart_tax_total->amount, $decimals ),
-				'rate'  => WC_Tax::get_rate_percent( $cart_tax_total->tax_rate_id ),
+				'rate'  => \WC_Tax::get_rate_percent( $tax_rate_objects[ $cart_tax_total->tax_rate_id ] ?? $cart_tax_total->tax_rate_id ),
 			);
 		}
 

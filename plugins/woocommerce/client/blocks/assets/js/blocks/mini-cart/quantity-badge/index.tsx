@@ -7,7 +7,6 @@ import { Icon } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import './style.scss';
 import { IconType, ColorItem, productCountVisibilityType } from '.././types';
 
 interface Props {

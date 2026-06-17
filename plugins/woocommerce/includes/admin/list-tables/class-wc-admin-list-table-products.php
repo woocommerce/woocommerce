@@ -86,14 +86,14 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render blank state.
 	 */
 	protected function render_blank_state() {
-		echo '<div class="woocommerce-BlankState">';
+		echo '<div class="woocommerce-BlankState woocommerce-BlankState--products">';
 
 		echo '<h2 class="woocommerce-BlankState-message">' . esc_html__( 'Ready to start selling something awesome?', 'woocommerce' ) . '</h2>';
 
 		echo '<div class="woocommerce-BlankState-buttons">';
 
-		echo '<a class="woocommerce-BlankState-cta button-primary button" href="' . esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ) . '">' . esc_html__( 'Create Product', 'woocommerce' ) . '</a>';
-		echo '<a class="woocommerce-BlankState-cta button" href="' . esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) . '">' . esc_html__( 'Start Import', 'woocommerce' ) . '</a>';
+		echo '<a class="woocommerce-BlankState-cta button button-secondary" href="' . esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ) . '">' . esc_html__( 'Create Product', 'woocommerce' ) . '</a>';
+		echo '<a class="woocommerce-BlankState-cta button button-secondary" href="' . esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) . '">' . esc_html__( 'Start Import', 'woocommerce' ) . '</a>';
 
 		echo '</div>';
 
