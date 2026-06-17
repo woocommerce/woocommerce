@@ -45,7 +45,7 @@
 		"env:stop": "npx wp-env stop",
 		"env:destroy": "npx wp-env destroy",
 		"test:unit": "phpunit",
-		"test:integration": "npx wp-env run tests-cli --env-cwd=wp-content/plugins/subscriptions-engine ./vendor/bin/phpunit --configuration phpunit-integration.xml.dist",
+		"test:integration": "npx wp-env run tests-cli --env-cwd=wp-content/plugins/woocommerce-subscriptions-engine ./vendor/bin/phpunit --configuration phpunit-integration.xml.dist",
 		"phpcs": "phpcs -s -p",
 		"phpcbf": "phpcbf -p"
 	},
