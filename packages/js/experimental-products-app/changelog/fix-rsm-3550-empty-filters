@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ignore empty product list filters until a value is selected.

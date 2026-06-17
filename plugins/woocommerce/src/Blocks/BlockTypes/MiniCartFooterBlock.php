@@ -75,7 +75,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 				<span class="wc-block-components-totals-item__label">
 					<?php echo esc_html( $subtotal_label ); ?>
 				</span>
-				<span data-wp-text="woocommerce/mini-cart::state.formattedSubtotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value">
+				<span data-wp-text="woocommerce/mini-cart::state.formattedSubtotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value notranslate">
 				</span>
 				<div class="wc-block-components-totals-item__description">
 					<?php echo esc_html( $other_costs_label ); ?>

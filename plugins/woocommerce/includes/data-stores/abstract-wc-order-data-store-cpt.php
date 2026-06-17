@@ -705,7 +705,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$cache_keys_mapping = array();
 		foreach ( $order_ids as $order_id ) {
-			$cache_keys_mapping[ $order_id ] = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order_id;
+			$cache_keys_mapping[ $order_id ] = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $order_id;
 		}
 
 		$non_cached_ids = array();
@@ -738,16 +738,15 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			)
 		);
 
-		$order_refunds = array();
+		$order_refund_ids = array_fill_keys( $non_cached_ids, array() );
 		foreach ( $refunds as $refund ) {
-			if ( $refund instanceof \WC_Order_Refund ) {
-				$order_refunds[ $refund->get_parent_id() ][] = $refund;
+			if ( $refund instanceof \WC_Order_Refund && isset( $order_refund_ids[ $refund->get_parent_id() ] ) ) {
+				$order_refund_ids[ $refund->get_parent_id() ][] = $refund->get_id();
 			}
 		}
 
 		foreach ( $non_cached_ids as $order_id ) {
-			$cached_refunds = isset( $order_refunds[ $order_id ] ) ? $order_refunds[ $order_id ] : array();
-			wp_cache_set( $cache_keys_mapping[ $order_id ], $cached_refunds, 'orders' );
+			wp_cache_set( $cache_keys_mapping[ $order_id ], $order_refund_ids[ $order_id ], 'orders' );
 		}
 	}
 
@@ -1173,6 +1172,117 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		}
 		foreach ( $non_cached_ids as $order_id ) {
 			wp_cache_set( $tax_keys[ $order_id ], $tax_by_order[ $order_id ] ?? 0.0, 'orders' );
+		}
+	}
+
+	/**
+	 * Temporarily neutralizes the WC_Emails transactional dispatch listeners
+	 * (send_transactional_email and queue_transactional_email) so that restoring an order
+	 * from the trash does not re-notify the customer about an order they were already
+	 * emailed about.
+	 *
+	 * The listeners are left in their original WP_Hook slots: the action, priority,
+	 * accepted-args count and position are all kept, and only the callback function is
+	 * wrapped to suppress dispatches for the restored order. This preserves the relative
+	 * ordering of every other listener on those actions, so third-party integrations are
+	 * unaffected. Pass the returned snapshot to {@see restore_transactional_email_dispatch()}
+	 * to undo this.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param int $restored_order_id The ID of the order being restored.
+	 * @return list<array{0: string, 1: int, 2: string, 3: callable}> Snapshot of neutralized listeners.
+	 */
+	protected function suspend_transactional_email_dispatch( int $restored_order_id ): array {
+		global $wp_filter;
+
+		$suspended           = array();
+		$dispatch_method_set = array( 'send_transactional_email', 'queue_transactional_email' );
+
+		foreach ( $wp_filter as $action => $hook ) {
+			if ( ! is_string( $action ) || ! $hook instanceof WP_Hook ) {
+				continue;
+			}
+			foreach ( $hook->callbacks as $priority => $callbacks ) {
+				foreach ( $callbacks as $key => $cb ) {
+					$function = $cb['function'] ?? null;
+					if ( ! is_array( $function ) || ! isset( $function[0], $function[1] ) ) {
+						continue;
+					}
+					if ( ! is_callable( $function ) ) {
+						continue;
+					}
+					$class  = is_object( $function[0] ) ? get_class( $function[0] ) : $function[0];
+					$method = $function[1];
+					if ( ! is_string( $class ) || ! is_string( $method ) ) {
+						continue;
+					}
+					if ( 'WC_Emails' !== $class || ! in_array( $method, $dispatch_method_set, true ) ) {
+						continue;
+					}
+					$suspended[]                                      = array( $action, (int) $priority, (string) $key, $function );
+					$hook->callbacks[ $priority ][ $key ]['function'] = function ( ...$args ) use ( $action, $function, $restored_order_id ) {
+						if ( $this->should_suppress_transactional_email_dispatch( $action, $restored_order_id, $args ) ) {
+							return null;
+						}
+
+						return call_user_func_array( $function, $args );
+					};
+				}
+			}
+		}
+
+		return $suspended;
+	}
+
+	/**
+	 * Checks whether a transactional email dispatch belongs to the restored order.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param string $action            The action being dispatched.
+	 * @param int    $restored_order_id The ID of the order being restored.
+	 * @param array  $args              The runtime action arguments.
+	 * @return bool
+	 */
+	private function should_suppress_transactional_email_dispatch( string $action, int $restored_order_id, array $args ): bool {
+		if ( 0 !== strpos( $action, 'woocommerce_order_status_' ) ) {
+			return false;
+		}
+
+		$order = $args[1] ?? null;
+		if ( $order instanceof WC_Order ) {
+			return $restored_order_id === $order->get_id();
+		}
+
+		$order_id = $args[0] ?? null;
+		return is_numeric( $order_id ) && $restored_order_id === (int) $order_id;
+	}
+
+	/**
+	 * Restores the transactional email dispatch listeners previously neutralized by
+	 * {@see suspend_transactional_email_dispatch()} to their original callbacks.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param list<array{0: string, 1: int, 2: string, 3: callable}> $suspended Snapshot returned by suspend_transactional_email_dispatch().
+	 *
+	 * @return void
+	 */
+	protected function restore_transactional_email_dispatch( array $suspended ): void {
+		global $wp_filter;
+
+		foreach ( $suspended as $entry ) {
+			list( $action, $priority, $key, $function ) = $entry;
+			if ( ! isset( $wp_filter[ $action ] ) || ! $wp_filter[ $action ] instanceof WP_Hook ) {
+				continue;
+			}
+			// Only restore the slot if it still exists; if it was removed during the
+			// suspended window we must not resurrect it.
+			if ( ! isset( $wp_filter[ $action ]->callbacks[ $priority ][ $key ] ) ) {
+				continue;
+			}
+			$wp_filter[ $action ]->callbacks[ $priority ][ $key ]['function'] = $function;
 		}
 	}
 }

@@ -50,12 +50,14 @@ class OrderController {
 
 		add_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ) );
 
-		$order = new \WC_Order();
-		$order->set_status( 'checkout-draft' );
-		$order->set_created_via( 'store-api' );
-		$this->update_order_from_cart( $order );
-
-		remove_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ) );
+		try {
+			$order = new \WC_Order();
+			$order->set_status( 'checkout-draft' );
+			$order->set_created_via( 'store-api' );
+			$this->update_order_from_cart( $order );
+		} finally {
+			remove_filter( 'woocommerce_default_order_status', array( $this, 'default_order_status' ) );
+		}
 
 		return $order;
 	}
@@ -67,41 +69,10 @@ class OrderController {
 	 * @param boolean   $update_totals Whether to update totals or not.
 	 */
 	public function update_order_from_cart( \WC_Order $order, $update_totals = true ) {
-		/**
-		 * This filter ensures that local pickup locations are still used for order taxes by forcing the address used to
-		 * calculate tax for an order to match the current address of the customer.
-		 *
-		 * -    The method `$customer->get_taxable_address()` runs the filter `woocommerce_customer_taxable_address`.
-		 * -    While we have a session, our `ShippingController::filter_taxable_address` function uses this hook to set
-		 *      the customer address to the pickup location address if local pickup is the chosen method.
-		 *
-		 * Without this code in place, `$customer->get_taxable_address()` is not used when order taxes are calculated,
-		 * resulting in the wrong taxes being applied with local pickup.
-		 *
-		 * The alternative would be to instead use `woocommerce_order_get_tax_location` to return the pickup location
-		 * address directly, however since we have the customer filter in place we don't need to duplicate effort.
-		 *
-		 * @see \WC_Abstract_Order::get_tax_location()
-		 */
-		add_filter(
-			'woocommerce_order_get_tax_location',
-			function ( $location ) {
-
-				if ( ! is_null( wc()->customer ) ) {
-
-					$taxable_address = wc()->customer->get_taxable_address();
-
-					$location = array(
-						'country'  => $taxable_address[0],
-						'state'    => $taxable_address[1],
-						'postcode' => $taxable_address[2],
-						'city'     => $taxable_address[3],
-					);
-				}
-
-				return $location;
-			}
-		);
+		// Tax location for local pickup orders is handled by ShippingController::filter_order_tax_location(), which
+		// hooks woocommerce_order_get_tax_location once and derives the pickup location address from the order's own
+		// shipping line item. This avoids registering a per-call (and unremovable) closure on every sync.
+		// See \WC_Abstract_Order::get_tax_location().
 
 		// Ensure cart is current.
 		if ( $update_totals ) {

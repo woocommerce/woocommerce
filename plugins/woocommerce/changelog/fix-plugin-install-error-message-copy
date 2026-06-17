@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Replace developer-facing "Plugin API call failed" error with merchant-friendly copy that explains the issue and suggests next steps.

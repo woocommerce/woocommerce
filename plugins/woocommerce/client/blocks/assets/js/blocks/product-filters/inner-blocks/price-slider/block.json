@@ -49,7 +49,7 @@
 		}
 	},
 	"ancestor": [ "woocommerce/product-filter-price" ],
-	"usesContext": [ "filterData" ],
+	"usesContext": [ "woocommerce/rangeInput" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json",

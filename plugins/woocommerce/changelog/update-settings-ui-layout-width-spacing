@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update settings UI layout to the agreed design values: 720px container width, 16px spacing between stacked fields, and 24px between cards.

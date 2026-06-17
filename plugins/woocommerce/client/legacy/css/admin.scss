@@ -626,7 +626,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 				}
 
 				p {
-					color: #2c3338;
+					color: $gray-900;
 					font-size: 14px;
 					line-height: 20px;
 					margin: 14px 64px 0 0;
@@ -679,7 +679,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 				}
 
 				.price-suffix {
-					color: #646970; // Gray 50
+					color: $gray-700;
 				}
 
 				.product-reviews-block {
@@ -708,7 +708,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 					}
 
 					.product-reviews-count {
-						color: #646970; // Gray 50
+						color: $gray-700;
 						font-size: 12px;
 						font-family: sans-serif;
 						line-height: 24px;
@@ -992,12 +992,30 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 		padding-bottom: 2em;
 	}
 
+	label:not(:first-child) {
+		display: block;
+		margin-top: 1.5em;
+	}
+
 	input[type="text"] {
 		display: block;
 		font-size: 13px;
 		line-height: 16px;
 		margin: 6px 0;
 		padding: 12px;
+		width: 100%;
+	}
+
+	.wc-admin-visual-attribute-type {
+		margin: 1.5em 0 1em;
+
+		label {
+			margin-top: 0;
+		}
+	}
+
+	.wc-admin-visual-attribute-color-picker-trigger,
+	.wc-admin-visual-attribute-image-picker-trigger {
 		width: 100%;
 	}
 }
@@ -1239,11 +1257,16 @@ table.wc_status_table {
 		&.run-tool {
 			text-align: right;
 
+			.run-tool-actions {
+				align-items: center;
+				display: inline-flex;
+				white-space: nowrap;
+			}
+
 			.run-tool-status {
-				font-size: 90%;
-				margin-right: 0.5em;
 				display: inline-block;
-				opacity: 80%;
+				margin-left: 0.5em;
+				vertical-align: middle;
 
 				.dashicons.spin {
 					animation: rotation 2s infinite linear;
@@ -1313,6 +1336,24 @@ table.wc_status_table--tools {
 		font-size: 12px;
 		line-height: 20px;
 		outline: 0;
+	}
+}
+
+@media screen and (max-width: 500px) {
+	body.woocommerce_page_wc-status {
+		.updated.woocommerce-message.inline {
+			p.submit {
+				a,
+				button {
+					display: block;
+					width: 100%;
+					margin-bottom: 0.5em;
+					margin-left: 0;
+					text-align: center;
+					box-sizing: border-box;
+				}
+			}
+		}
 	}
 }
 
@@ -2216,6 +2257,19 @@ ul.wc_coupon_list_block {
 		}
 	}
 
+	// Stack the coupons/totals columns full width once the admin sidebar hides.
+	@media screen and (max-width: 782px) {
+		.wc-used-coupons,
+		.wc-order-totals {
+			float: none;
+			width: 100%;
+		}
+
+		.wc-used-coupons {
+			margin-bottom: 12px;
+		}
+	}
+
 	.refund-actions {
 		margin-top: 5px;
 		padding-top: 12px;
@@ -2864,10 +2918,6 @@ ul.wc_coupon_list_block {
 	margin: 0;
 	padding: 0;
 
-	ul.order_notes li {
-		padding: 0 10px;
-	}
-
 	button {
 		margin: 1px;
 		vertical-align: top;
@@ -3000,6 +3050,13 @@ ul.wc_coupon_list_block {
 
 .woocommerce_page_wc-orders,
 .post-type-shop_order {
+	// Gated behind the `order-detail-redesign` feature flag (body class added by OrderDetailRedesign\Init).
+	// `:has(#poststuff)` excludes the orders list screen (which doesn't render #poststuff).
+	&.woocommerce-feature-enabled-order-detail-redesign .wrap:has(#poststuff) {
+		max-width: 1200px;
+		margin-inline: auto;
+	}
+
 	.tablenav .one-page .displaying-num {
 		display: none;
 	}
@@ -3521,13 +3578,18 @@ ul.wc_coupon_list_block {
 
 /* Order notes */
 ul.order_notes {
-	padding: 2px 0 0;
+	list-style: none;
+	padding: 16px 12px;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 
 	li {
 		.note_content {
-			padding: 10px;
-			background: #efefef;
-			position: relative;
+			background: #fff;
+			border: 1px solid $gray-200;
+			border-radius: 4px;
 
 			p {
 				margin: 0;
@@ -3536,67 +3598,96 @@ ul.order_notes {
 			}
 		}
 
+		.note_header {
+			margin: 0;
+			padding: 6px 12px;
+			// Mirrors @wordpress/components Notice is-warning variant
+			// (bg #fef8ee, accent #f0b849). Supplementary cue — info is
+			// also in the label text itself.
+			background: #fef8ee;
+			border-bottom: 1px solid $gray-200;
+			border-top-left-radius: 3px;
+			border-top-right-radius: 3px;
+			font-size: 11px;
+			font-weight: 600;
+		}
+
+		.note_body {
+			padding: 8px 12px;
+		}
+
 		p.meta {
-			padding: 10px;
-			color: #999;
+			padding: 4px 0 0;
+			color: $subtext;
 			margin: 0;
 			font-size: 11px;
 
 			.exact-date {
-				border-bottom: 1px dotted #999;
+				border-bottom: 0;
+				text-decoration: none;
 			}
 		}
 
 		a.delete_note {
 			color: $red;
-		}
-
-		.note_content::after {
-			content: "";
-			display: block;
-			position: absolute;
-			bottom: -10px;
-			left: 20px;
-			width: 0;
-			height: 0;
-			border-width: 10px 10px 0 0;
-			border-style: solid;
-			border-color: #efefef transparent;
+			margin-left: 4px;
 		}
 	}
 
-	li.system-note {
-		.note_content {
-			background: #d7cad2;
-		}
-
-		.note_content::after {
-			border-color: #d7cad2 transparent;
-		}
+	li.no-items {
+		color: $subtext;
+		padding: 16px 0;
+		text-align: center;
 	}
 
-	li.customer-note {
-		.note_content {
-			background: #a7cedc;
-		}
-
-		.note_content::after {
-			border-color: #a7cedc transparent;
-		}
+	li.system-note .note_content {
+		// Auto-generated notes (status changes, webhooks, etc.) are
+		// visually de-emphasised so manual notes scan more easily.
+		background: $gray-100;
 	}
 }
 
 .add_note {
-	border-top: 1px solid #ddd;
-	padding: 10px 10px 0;
+	border-bottom: 1px solid $gray-200;
+	padding: 16px 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 
-	h4 {
-		margin-top: 5px !important;
+	> p {
+		margin: 0;
+	}
+
+	label {
+		display: block;
+		margin-bottom: 4px;
 	}
 
 	#add_order_note {
 		width: 100%;
-		height: 50px;
+		height: 60px;
+	}
+
+	.order_note_visibility {
+		select {
+			width: 100%;
+			max-width: 100%;
+		}
+
+		.add_note_email_settings {
+			margin: 6px 0 0;
+			font-size: 12px;
+			color: $subtext;
+
+			a {
+				color: inherit;
+			}
+		}
+	}
+
+	.add_note_actions button.add_note {
+		width: 100%;
+		text-align: center;
 	}
 }
 
@@ -3678,6 +3769,7 @@ table.wp-list-table {
 
 	.row-actions span.id {
 		padding-top: 8px;
+		color: $secondarytext;
 	}
 
 	td.column-thumb img {
@@ -4746,7 +4838,7 @@ table.wc-shipping-classes {
 
 		a.wc-shipping-zone-actions,
 		a.wc-shipping-zone-actions:hover {
-			color: var(--wc-red);
+			color: var(--wc-destructive, #cc1818);
 		}
 	}
 
@@ -5781,6 +5873,14 @@ img.help_tip {
 				line-height: 20px !important;
 				border-bottom: 1px solid #eee;
 
+				// The rule above suppresses the global box-shadow focus ring; reinstate a
+				// visible focus indicator via outline. Negative offset keeps the outline
+				// inside the parent .panel-wrap, which uses overflow: hidden.
+				&:focus {
+					outline: 2px solid #2271b1;
+					outline-offset: -2px;
+				}
+
 				span {
 					margin-left: 0.618em;
 					margin-right: 0.618em;
@@ -6467,7 +6567,7 @@ img.help_tip {
 			}
 
 			a.delete {
-				color: red;
+				color: var(--wc-destructive, #cc1818);
 				font-weight: normal;
 				line-height: 26px;
 				text-decoration: none;
@@ -6597,7 +6697,7 @@ img.help_tip {
 			}
 		}
 		.placeholder {
-			opacity: 0.4;
+			color: $gray-700;
 		}
 	}
 }
@@ -7449,84 +7549,72 @@ table.bar_chart {
 	}
 }
 
-.woocommerce_page_wc-orders,
-.post-type-shop_order {
-	.woocommerce-BlankState-message::before {
-		@include icon("\e01d");
-	}
-}
-
-.post-type-shop_coupon .woocommerce-BlankState-message::before {
-	@include icon("\e600");
-}
-
-.post-type-product .woocommerce-BlankState-message::before {
-	@include icon("\e006");
-}
-
-.woocommerce-BlankState--api .woocommerce-BlankState-message::before {
-	@include icon("\e01c");
-}
-
-.woocommerce-BlankState--webhooks .woocommerce-BlankState-message::before {
-	@include icon("\e01b");
-}
-
 .woocommerce-BlankState {
-	text-align: center;
-	padding: 5em 0 0;
-
-	.woocommerce-BlankState-message {
-		color: #aaa;
-		margin: 0 auto 1.5em;
-		line-height: 1.5em;
-		font-size: 1.2em;
-		max-width: 500px;
-
-		&::before {
-			color: #ddd;
-			text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.2),
-				0 1px 0 rgba(255, 255, 255, 0.8);
-			font-size: 8em;
-			display: block;
-			position: relative !important;
-			top: auto;
-			left: auto;
-			line-height: 1em;
-			margin: 0 0 0.1875em;
-		}
-	}
-
-	.woocommerce-BlankState-cta {
-		font-size: 1.2em;
-		padding: 0.75em 1.5em;
-		margin: 0 0.25em;
-		height: auto;
-		display: inline-block !important;
-	}
-}
-
-.woocommerce-customer-stock-notifications .woocommerce-BlankState,
-.woocommerce_page_wc-orders .woocommerce-BlankState,
-.post-type-product .woocommerce-BlankState,
-.post-type-shop_order .woocommerce-BlankState {
 	max-width: 764px;
-	text-align: center;
 	margin: auto;
+	text-align: center;
+	padding: $grid-unit-60 0;
 
 	.woocommerce-BlankState-message {
-		color: #444;
-		font-size: 1.5em;
-		margin: 0 auto 1em;
-	}
-
-	.woocommerce-BlankState-message::before {
-		font-size: 120px;
+		color: $gray-900;
+		margin: 0 auto 12px;
+		line-height: 1.4;
+		font-size: 13px;
+		font-weight: 400;
+		max-width: 500px;
 	}
 
 	.woocommerce-BlankState-buttons {
-		margin-bottom: 4em;
+		margin-bottom: 32px;
 	}
+}
+
+.woocommerce-BlankState--orders,
+.woocommerce-BlankState--products,
+.woocommerce-BlankState--coupons,
+.woocommerce-BlankState--api,
+.woocommerce-BlankState--webhooks,
+.woocommerce-BlankState--stock-notifications {
+	.woocommerce-BlankState-message::before {
+		content: "";
+		display: block;
+		width: 32px;
+		height: 32px;
+		margin: 0 auto 12px;
+		background-color: $gray-400;
+		-webkit-mask-image: var(--wc-blank-state-icon);
+		mask-image: var(--wc-blank-state-icon);
+		-webkit-mask-position: center;
+		mask-position: center;
+		-webkit-mask-repeat: no-repeat;
+		mask-repeat: no-repeat;
+		-webkit-mask-size: contain;
+		mask-size: contain;
+	}
+}
+
+.woocommerce-BlankState--orders {
+	--wc-blank-state-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M16.83 6.342l.602.3.625-.25.443-.176v12.569l-.443-.178-.625-.25-.603.301-1.444.723-2.41-.804-.475-.158-.474.158-2.41.803-1.445-.722-.603-.3-.625.25-.443.177V6.215l.443.178.625.25.603-.301 1.444-.722 2.41.803.475.158.474-.158 2.41-.803 1.445.722zM20 4l-1.5.6-1 .4-2-1-3 1-3-1-2 1-1-.4L5 4v17l1.5-.6 1-.4 2 1 3-1 3 1 2-1 1 .4 1.5.6V4zm-3.5 6.25v-1.5h-8v1.5h8zm0 3v-1.5h-8v1.5h8zm-8 3v-1.5h8v1.5h-8z'%2F%3E%3C%2Fsvg%3E");
+}
+
+.woocommerce-BlankState--products {
+	--wc-blank-state-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M5 5.5h14a.5.5 0 01.5.5v1.5a.5.5 0 01-.5.5H5a.5.5 0 01-.5-.5V6a.5.5 0 01.5-.5zM4 9.232A2 2 0 013 7.5V6a2 2 0 012-2h14a2 2 0 012 2v1.5a2 2 0 01-1 1.732V18a2 2 0 01-2 2H6a2 2 0 01-2-2V9.232zm1.5.268V18a.5.5 0 00.5.5h12a.5.5 0 00.5-.5V9.5h-13z'%2F%3E%3C%2Fsvg%3E");
+}
+
+.woocommerce-BlankState--coupons {
+	--wc-blank-state-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4.75 4a.75.75 0 0 0-.75.75v7.826c0 .2.08.39.22.53l6.72 6.716a2.313 2.313 0 0 0 3.276-.001l5.61-5.611-.531-.53.532.528a2.315 2.315 0 0 0 0-3.264L13.104 4.22a.75.75 0 0 0-.53-.22H4.75ZM19 12.576a.815.815 0 0 1-.236.574l-5.61 5.611a.814.814 0 0 1-1.153 0L5.5 12.264V5.5h6.763l6.5 6.502a.816.816 0 0 1 .237.574ZM8.75 9.75a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z'%2F%3E%3C%2Fsvg%3E");
+}
+
+.woocommerce-BlankState--api {
+	--wc-blank-state-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M9 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM9 16a4.002 4.002 0 003.8-2.75H15V16h2.5v-2.75H19v-2.5h-6.2A4.002 4.002 0 005 12a4 4 0 004 4z'%2F%3E%3C%2Fsvg%3E");
+}
+
+.woocommerce-BlankState--webhooks {
+	--wc-blank-state-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 17.389H8.444A5.194 5.194 0 1 1 8.444 7H10v1.5H8.444a3.694 3.694 0 0 0 0 7.389H10v1.5ZM14 7h1.556a5.194 5.194 0 0 1 0 10.39H14v-1.5h1.556a3.694 3.694 0 0 0 0-7.39H14V7Zm-4.5 6h5v-1.5h-5V13Z'%2F%3E%3C%2Fsvg%3E");
+}
+
+.woocommerce-BlankState--stock-notifications {
+	--wc-blank-state-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M17 11.5c0 1.353.17 2.368.976 3 .266.209.602.376 1.024.5v1H5v-1c.422-.124.757-.291 1.024-.5.806-.632.976-1.647.976-3V9c0-2.8 2.2-5 5-5s5 2.2 5 5v2.5ZM15.5 9v2.5c0 .93.066 1.98.515 2.897l.053.103H7.932a4.018 4.018 0 0 0 .053-.103c.449-.917.515-1.967.515-2.897V9c0-1.972 1.528-3.5 3.5-3.5s3.5 1.528 3.5 3.5Zm-5.492 9.008c0-.176.023-.346.065-.508h3.854A1.996 1.996 0 0 1 12 20c-1.1 0-1.992-.892-1.992-1.992Z'%2F%3E%3C%2Fsvg%3E");
 }
 
 .post-type-product {
@@ -9118,7 +9206,7 @@ table.bar_chart {
 				a:visited,
 				a:hover,
 				a:active {
-					color: #2c3338;
+					color: $gray-900;
 					padding: 10px 16px !important;
 				}
 			}
@@ -9283,6 +9371,15 @@ body.woocommerce_page_wc-settings {
 		padding-bottom: 0px;
 	}
 
+	// Floating header on Settings sits directly above the tab nav with no
+	// content between — treat both strips as one continuous title region
+	// by dropping the header's bottom border. The tab strip keeps its own
+	// bottom border (separating tabs from content); we just colour it to
+	// match the rest of the chrome.
+	.woocommerce-layout__header {
+		border-bottom: 0;
+	}
+
 	p.submit {
 		margin-bottom: 0;
 	}
@@ -9304,12 +9401,15 @@ body.woocommerce_page_wc-settings {
 		}
 	}
 
-	.woocommerce-layout__header-heading {
-		padding: 0 0 0 30px;
-		font-weight: 600;
-		font-size: 16px;
-		color: #070707;
-	}
+	// Heading typography (font-size, font-weight, colour) AND left
+	// padding now all live in the shared
+	// `client/admin/client/header/style.scss` rule (15px / 500 /
+	// $gray-900 / $gutter-large — aligned to Gutenberg's WPDS tokens
+	// and the unified admin header direction in
+	// WordPress/gutenberg#76709). Dropped the entire Settings-specific
+	// override (font-size 16px, font-weight 600, color #070707, padding
+	// 30px) so Settings renders identically to Home and every other
+	// floating-header page on every axis.
 
 	#wpbody .woocommerce-layout,
 	.woocommerce-layout__notice-list-hide + .wrap {
@@ -9355,7 +9455,15 @@ body.woocommerce_page_wc-settings {
 		display: flex;
 		flex-wrap: wrap;
 		list-style: none;
-		padding-left: 30px;
+		// 24px to match the floating-header title's `$gap-large` (from
+		// @wordpress/base-styles) so the "Settings" h1 above and the
+		// "General / Products / ..." tab labels below line up on the
+		// same left edge. Also matches the future-state design and
+		// `$grid-unit-30` / `--wp-admin-grid-unit-30` in the admin
+		// tokens proposal at https://core.trac.wordpress.org/ticket/65085.
+		// Legacy admin.scss can't import the shared SCSS variables file
+		// directly, hence the literal.
+		padding-left: 24px;
 		padding-right: 24px;
 		gap: 24px;
 
@@ -9378,7 +9486,13 @@ body.woocommerce_page_wc-settings {
 			border: 0;
 			background: none;
 			font-weight: 500;
-			font-size: 14px;
+			// 13px to match WP's `$default-font-size` (from
+			// @wordpress/base-styles) and Gutenberg's
+			// `--wpds-typography-font-size-md` (13px). Reads as quieter
+			// chrome below the 15px floating-header h1, restoring the
+			// chrome → tabs → content hierarchy the previous 14px size
+			// was already aiming at.
+			font-size: 13px;
 			line-height: 20px;
 			color: #505050;
 			padding: 0 0 10px 0;
@@ -9389,8 +9503,13 @@ body.woocommerce_page_wc-settings {
 			}
 		}
 		margin: 0;
-		background: #FFF;
-		border-bottom: 1px solid #EBEBEB;
+		// Tab strip inherits the wp-admin body bg so it reads as one
+		// continuous title region with the floating header above. Bottom
+		// border colour matches the rest of the wp-admin chrome borders
+		// ($wp-admin-border in packages/js/internal-build/styles); kept as
+		// a literal here because legacy admin.scss doesn't import the
+		// shared variables file.
+		border-bottom: 1px solid #dcdcde;
 
 		.nav-tab-active, .nav-tab-active:focus, .nav-tab-active:focus:active, .nav-tab-active:hover {
 			border-bottom: 2px solid var(--wp-admin-theme-color, #3858e9);
@@ -9604,12 +9723,83 @@ body.woocommerce-settings-payments-section_legacy {
 }
 
 .wc-admin-color-swatch {
+	background-color: #fff;
 	display: inline-block;
 	vertical-align: middle;
-	vertical-align: center;
 	border: 1px solid #7e8993;
+	border-radius: 50%;
+	margin-right: 0.5em;
+	height: 1em;
+	width: 1em;
+	position: relative;
+	top: -1px;
+
+	&.is-empty::before {
+		content: '';
+		border-radius: 50%;
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background: linear-gradient(to bottom right, transparent 47%, #7e8993 47%, #7e8993 53%, transparent 53%);
+	}
+}
+
+.wc-admin-visual-attribute-type fieldset {
+	display: flex;
+	gap: 1.5em;
+}
+
+.wc-admin-visual-attribute-color-picker-trigger,
+.wc-admin-visual-attribute-image-picker-trigger {
+	width: 95%;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0 12px;
+	min-height: 40px;
+	background: #fff;
+	border: 1px solid #949494;
 	border-radius: 2px;
-	margin-right: 6px;
-	width: 12px;
-	height: 12px;
+	text-align: left;
+	font-size: 13px;
+	line-height: 1.4;
+	cursor: pointer;
+
+	+ .wc-admin-visual-attribute-color-picker-clear,
+	+ .wc-admin-visual-attribute-image-picker-clear {
+		display: block;
+		margin: 2px 0 5px;
+	}
+
+	.wc-admin-color-swatch {
+		margin-right: 0;
+	}
+
+	.wc-admin-image-swatch {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1em;
+		min-width: 24px;
+		height: 1em;
+		min-height: 24px;
+		flex-shrink: 0;
+		border: 1px solid #c3c4c7;
+		border-radius: 2px;
+		overflow: hidden;
+		background: #f0f0f1;
+
+		&.is-empty {
+			background: #f0f0f1;
+		}
+
+		img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
 }

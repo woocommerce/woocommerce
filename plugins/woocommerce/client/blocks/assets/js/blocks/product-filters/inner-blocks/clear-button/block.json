@@ -8,7 +8,7 @@
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"ancestor": [ "woocommerce/product-filter-active" ],
-	"usesContext": [ "filterData" ],
+	"usesContext": [ "woocommerce/removableItems" ],
 	"supports": {
 		"interactivity": true,
 		"inserter": true

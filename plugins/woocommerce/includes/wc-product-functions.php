@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -126,27 +127,13 @@ function wc_product_dimensions_enabled() {
  * @param int $post_id (default: 0) The product ID.
  */
 function wc_delete_product_transients( $post_id = 0 ) {
-	// Transient data to clear with a fixed name which may be stale after product updates.
-	$transients_to_clear = array(
-		'wc_products_onsale',
-		'wc_featured_products',
-		'wc_outofstock_count',
-		'wc_low_stock_count',
-	);
+	$container = wc_get_container();
 
-	foreach ( $transients_to_clear as $transient ) {
-		delete_transient( $transient );
+	if ( $container->get( ProductTransientsDeferrer::class )->maybe_defer_deletion( absint( $post_id ) ) ) {
+		return;
 	}
 
-	if ( $post_id > 0 ) {
-		// Transient names that include an ID - since they are dynamic they cannot be cleaned in bulk without the ID.
-		wc_get_container()->get( ProductUtil::class )->delete_product_specific_transients( $post_id );
-	}
-
-	// Kept for compatibility, WooCommerce core doesn't use product transient versions anymore.
-	WC_Cache_Helper::get_transient_version( 'product', true );
-
-	do_action( 'woocommerce_delete_product_transients', $post_id );
+	$container->get( ProductUtil::class )->delete_product_transients_for_products( array( $post_id ) );
 }
 
 /**
@@ -574,38 +561,53 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
  * Uses Action Scheduler to fire events at the exact sale start/end times,
  * rather than relying on the daily cron.
  *
+ * An action is not scheduled if an identical one (same hook, args, group and
+ * timestamp) is already pending, so concurrent processes saving the same
+ * product don't pile up duplicate actions.
+ *
  * @since 10.5.0
  * @param WC_Product $product Product object.
  * @return void
  */
 function wc_schedule_product_sale_events( WC_Product $product ): void {
 	$product_id = $product->get_id();
-	$date_from  = $product->get_date_on_sale_from( 'edit' );
-	$date_to    = $product->get_date_on_sale_to( 'edit' );
 
-	if ( $date_from ) {
-		$start_ts = $date_from->getTimestamp();
-		if ( $start_ts > time() ) {
-			as_schedule_single_action(
-				$start_ts,
-				'wc_product_start_scheduled_sale',
-				array( 'product_id' => $product_id ),
-				'woocommerce-sales'
-			);
+	$schedule = function ( ?WC_DateTime $date, string $hook ) use ( $product_id ): void {
+		if ( is_null( $date ) ) {
+			return;
 		}
-	}
 
-	if ( $date_to ) {
-		$end_ts = $date_to->getTimestamp();
-		if ( $end_ts > time() ) {
-			as_schedule_single_action(
-				$end_ts,
-				'wc_product_end_scheduled_sale',
-				array( 'product_id' => $product_id ),
-				'woocommerce-sales'
-			);
+		$timestamp = $date->getTimestamp();
+		if ( $timestamp <= time() ) {
+			return;
 		}
-	}
+
+		$args = array( 'product_id' => $product_id );
+
+		// An identical pending action means a concurrent process (parallel save, importer,
+		// daily cron) already scheduled it after the unschedule-all step ran. The query
+		// filters by the exact timestamp: a pending action for a different time (e.g. left
+		// behind by a process that saw older sale dates) must not block scheduling.
+		$identical_pending = as_get_scheduled_actions(
+			array(
+				'hook'         => $hook,
+				'args'         => $args,
+				'group'        => 'woocommerce-sales',
+				'status'       => ActionScheduler_Store::STATUS_PENDING,
+				'date'         => gmdate( 'Y-m-d H:i:s', $timestamp ),
+				'date_compare' => '=',
+				'per_page'     => 1,
+			),
+			'ids'
+		);
+
+		if ( empty( $identical_pending ) ) {
+			as_schedule_single_action( $timestamp, $hook, $args, 'woocommerce-sales' );
+		}
+	};
+
+	$schedule( $product->get_date_on_sale_from( 'edit' ), 'wc_product_start_scheduled_sale' );
+	$schedule( $product->get_date_on_sale_to( 'edit' ), 'wc_product_end_scheduled_sale' );
 }
 
 /**
@@ -1926,10 +1928,6 @@ function wc_update_product_lookup_tables() {
 	global $wpdb;
 
 	$is_cli = Constants::is_true( 'WP_CLI' );
-
-	if ( ! $is_cli ) {
-		WC_Admin_Notices::add_notice( 'regenerating_lookup_table' );
-	}
 
 	// Note that the table is not yet generated.
 	update_option( 'woocommerce_product_lookup_table_is_generating', true );
