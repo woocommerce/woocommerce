@@ -10,10 +10,7 @@ import {
 	REGULAR_PRICED_PRODUCT_NAME,
 	SIMPLE_PHYSICAL_PRODUCT_NAME,
 } from '../checkout/constants';
-import { getTestTranslation } from '../../../utils/blocks/get-test-translation';
-import { translations } from '../../../test-data/blocks/data/data';
 import ProductCollectionPage from '../product-collection/product-collection.page';
-import config from '../../../../../client/admin/config/core.json';
 
 const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 	productCollectionPage: async ( { page, admin, editor }, use ) => {
@@ -27,66 +24,62 @@ const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 } );
 
 test.describe( 'Shopper → Notices', () => {
-	// This test only applies to the iAPI mini cart which supports SSR.
-	// The legacy React mini cart is entirely client-side rendered.
-	if ( config.features[ 'experimental-iapi-mini-cart' ] ) {
-		test( 'Shopper sees SSR error notice in mini cart when product goes out of stock', async ( {
-			page,
-			browser,
-			frontendUtils,
-		} ) => {
-			const productName = 'Limited Stock Product';
+	test( 'Shopper sees SSR error notice in mini cart when product goes out of stock', async ( {
+		page,
+		browser,
+		frontendUtils,
+	} ) => {
+		const productName = 'Limited Stock Product';
 
-			// Create a product with only 1 in stock.
-			const result = await wpCLI(
-				`wc product create --name="${ productName }" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin --porcelain`
+		// Create a product with only 1 in stock.
+		const result = await wpCLI(
+			`wc product create --name="${ productName }" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin --porcelain`
+		);
+		// Extract just the numeric ID from output (npm adds prefix lines to stdout).
+		const productId = result.stdout.match( /^\d+$/m )?.[ 0 ];
+		if ( ! productId ) {
+			throw new Error(
+				`Failed to extract product ID from wpCLI output: ${ result.stdout }`
 			);
-			// Extract just the numeric ID from output (npm adds prefix lines to stdout).
-			const productId = result.stdout.match( /^\d+$/m )?.[ 0 ];
-			if ( ! productId ) {
-				throw new Error(
-					`Failed to extract product ID from wpCLI output: ${ result.stdout }`
-				);
-			}
+		}
 
-			await frontendUtils.emptyCart();
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( productName );
+		await frontendUtils.emptyCart();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( productName );
 
-			// Set product to out of stock while it's in cart.
-			await wpCLI(
-				`wc product update ${ productId } --stock_quantity=0 --in_stock=false --user=admin`
-			);
+		// Set product to out of stock while it's in cart.
+		await wpCLI(
+			`wc product update ${ productId } --stock_quantity=0 --in_stock=false --user=admin`
+		);
 
-			// Get the current URL to revisit with JS disabled.
-			const currentUrl = page.url();
+		// Get the current URL to revisit with JS disabled.
+		const currentUrl = page.url();
 
-			// Create a new context with JavaScript disabled to verify SSR output.
-			const noJsContext = await browser.newContext( {
-				javaScriptEnabled: false,
-			} );
-
-			try {
-				const noJsPage = await noJsContext.newPage();
-
-				// Copy cookies to maintain cart session.
-				const cookies = await page.context().cookies();
-				await noJsContext.addCookies( cookies );
-
-				await noJsPage.goto( currentUrl );
-
-				// Verify error notice banner is rendered in SSR output (not client-side JS).
-				// Note: The notice text content contains HTML and is rendered client-side via
-				// data-wp-init callback, so we only verify the banner structure exists in SSR.
-				const miniCartNotice = noJsPage.locator(
-					'.wp-block-woocommerce-filled-mini-cart-contents-block .wc-block-components-notice-banner'
-				);
-				await expect( miniCartNotice ).toBeVisible();
-			} finally {
-				await noJsContext.close();
-			}
+		// Create a new context with JavaScript disabled to verify SSR output.
+		const noJsContext = await browser.newContext( {
+			javaScriptEnabled: false,
 		} );
-	}
+
+		try {
+			const noJsPage = await noJsContext.newPage();
+
+			// Copy cookies to maintain cart session.
+			const cookies = await page.context().cookies();
+			await noJsContext.addCookies( cookies );
+
+			await noJsPage.goto( currentUrl );
+
+			// Verify error notice banner is rendered in SSR output (not client-side JS).
+			// Note: The notice text content contains HTML and is rendered client-side via
+			// data-wp-init callback, so we only verify the banner structure exists in SSR.
+			const miniCartNotice = noJsPage.locator(
+				'.wp-block-woocommerce-filled-mini-cart-contents-block .wc-block-components-notice-banner'
+			);
+			await expect( miniCartNotice ).toBeVisible();
+		} finally {
+			await noJsContext.close();
+		}
+	} );
 
 	test( 'Shopper can add item to cart, and will not see a notice in the mini cart', async ( {
 		page,
@@ -168,60 +161,6 @@ test.describe( 'Shopper → Notices', () => {
 	} );
 } );
 
-// Skip the rest of the translation tests if the iAPI mini cart is  enabled.
-if ( ! config.features[ 'experimental-iapi-mini-cart' ] ) {
-	test.describe( 'Shopper → Translations', () => {
-		test.beforeEach( async () => {
-			await wpCLI( `site switch-language ${ translations.locale }` );
-		} );
-
-		test( 'User can see translation in empty Mini-Cart', async ( {
-			page,
-			frontendUtils,
-			miniCartUtils,
-		} ) => {
-			await frontendUtils.emptyCart();
-			await frontendUtils.goToShop();
-			await miniCartUtils.openMiniCart();
-
-			await expect(
-				page.getByRole( 'link', {
-					name: getTestTranslation( 'Start shopping' ),
-				} )
-			).toBeVisible();
-		} );
-
-		test( 'User can see translation in filled Mini-Cart', async ( {
-			page,
-			frontendUtils,
-			miniCartUtils,
-		} ) => {
-			await frontendUtils.emptyCart();
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-			await miniCartUtils.openMiniCart();
-
-			await expect(
-				page.getByRole( 'heading', {
-					name: getTestTranslation( 'Your cart' ),
-				} )
-			).toBeVisible();
-
-			await expect(
-				page.getByRole( 'link', {
-					name: getTestTranslation( 'View my cart' ),
-				} )
-			).toBeVisible();
-
-			await expect(
-				page.getByRole( 'link', {
-					name: getTestTranslation( 'Go to checkout' ),
-				} )
-			).toBeVisible();
-		} );
-	} );
-}
-
 test.describe( 'Shopper → Tax', () => {
 	test.beforeEach( async () => {
 		await wpCLI( 'option set woocommerce_prices_include_tax no' );
@@ -239,11 +178,7 @@ test.describe( 'Shopper → Tax', () => {
 
 		const miniCartLocator = page
 			.getByTestId( 'mini-cart' )
-			.getByLabel(
-				config.features[ 'experimental-iapi-mini-cart' ]
-					? 'Number of items in the cart: 1'
-					: '1 item in cart'
-			);
+			.getByLabel( 'Number of items in the cart: 1' );
 
 		await expect( miniCartLocator ).toContainText( '(incl. tax)' );
 
