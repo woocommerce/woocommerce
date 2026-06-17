@@ -198,28 +198,27 @@ class CheckoutOrder extends AbstractCartRoute {
 	 */
 	private function update_billing_address( \WP_REST_Request $request ) {
 		$customer = wc()->customer;
+
+		// Billing address is a required field.
 		$billing  = $request['billing_address'];
-		$shipping = $request['shipping_address'];
+
+		// If shipping address (optional field) was not provided, set it to the given billing address (required field).
+		$shipping = $request['shipping_address'] ?? $billing;
 
 		$this->order->set_billing_address( $billing );
 		$this->order->set_shipping_address( $shipping );
 		$this->order_controller->validate_existing_order_before_update( $this->order );
 
-		// Billing address is a required field.
+		// Update customer object with validated order addresses.
 		foreach ( $billing as $key => $value ) {
 			if ( is_callable( [ $customer, "set_billing_$key" ] ) ) {
 				$customer->{"set_billing_$key"}( $value );
 			}
 		}
 
-		// If shipping address (optional field) was not provided, set it to the given billing address (required field).
-		$shipping_address_values = $shipping ?? $billing;
-
-		foreach ( $shipping_address_values as $key => $value ) {
+		foreach ( $shipping as $key => $value ) {
 			if ( is_callable( [ $customer, "set_shipping_$key" ] ) ) {
 				$customer->{"set_shipping_$key"}( $value );
-			} elseif ( 'phone' === $key ) {
-				$customer->update_meta_data( 'shipping_phone', $value );
 			}
 		}
 
@@ -234,7 +233,6 @@ class CheckoutOrder extends AbstractCartRoute {
 		do_action( 'woocommerce_store_api_checkout_update_customer_from_request', $customer, $request );
 
 		$customer->save();
-
 		$this->order->save();
 		$this->order->calculate_totals();
 	}
