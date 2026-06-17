@@ -559,6 +559,9 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			$markup = do_blocks( $block );
 
 			$this->assertStringContainsString( $marker, $markup, 'The Add to Wishlist Button is injected when the wishlist feature is enabled.' );
+			// Confirm the product button is present first, so both strpos() calls
+			// below return integers and the position comparison is meaningful.
+			$this->assertStringContainsString( 'wp-block-woocommerce-product-button', $markup, 'The product button is rendered.' );
 			$this->assertGreaterThan(
 				strpos( $markup, 'wp-block-woocommerce-product-button' ),
 				strpos( $markup, $marker ),
