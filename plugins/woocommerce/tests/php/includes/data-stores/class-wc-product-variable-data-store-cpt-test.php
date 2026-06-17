@@ -541,6 +541,49 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The woocommerce_variable_product_taxes_influence_price filter can override the default decision.
+	 *
+	 * @testWith [true,  true,  true,  true,  true]
+	 *           [true,  true,  true,  false, false]
+	 *           [false, true,  false, true,  true]
+	 *           [true,  false, false, true,  true]
+	 *           [false, false, false, true,  true]
+	 *           [true,  false, false, false, false]
+	 *
+	 * @param bool $taxable_product  Product is taxable or not.
+	 * @param bool $tax_has_rates    Product tax has defined rates or not.
+	 * @param bool $expected_default Value the filter callback should receive as the default decision.
+	 * @param bool $filter_returns   Value the filter callback will return.
+	 * @param bool $expected         Expected return value from taxes_influence_price.
+	 */
+	public function test_taxes_influence_price_filter_overrides_default( bool $taxable_product, bool $tax_has_rates, bool $expected_default, bool $filter_returns, bool $expected ) {
+		add_filter( 'wc_tax_enabled', '__return_true' );
+		add_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
+		add_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
+
+		$received_default = null;
+		$received_product = null;
+		$filter_callback  = function ( $default_value, $product ) use ( $filter_returns, &$received_default, &$received_product ) {
+			$received_default = $default_value;
+			$received_product = $product;
+			return $filter_returns;
+		};
+		add_filter( 'woocommerce_variable_product_taxes_influence_price', $filter_callback, 10, 2 );
+
+		$product             = WC_Helper_Product::create_variation_product();
+		$extended_data_store = $this->get_data_store_with_public_taxes_influence_price();
+
+		$this->assertSame( $expected, $extended_data_store->taxes_influence_price( $product ) );
+		$this->assertSame( $expected_default, $received_default, 'Filter callback should receive the default decision.' );
+		$this->assertSame( $product->get_id(), $received_product->get_id(), 'Filter callback should receive the product being evaluated.' );
+
+		remove_filter( 'woocommerce_variable_product_taxes_influence_price', $filter_callback, 10 );
+		remove_filter( 'wc_tax_enabled', '__return_true' );
+		remove_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
+		remove_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
+	}
+
+	/**
 	 * @testdox read_prices does separate caching for prices for display and not for display when they are different.
 	 *
 	 * @testWith [true]
