@@ -76,7 +76,7 @@ class WooPaymentsTest extends WP_UnitTestCase {
 			->with(
 				'wc-payment-method-woopayments',
 				'assets/client/blocks/wc-payment-method-woopayments.js',
-				array( 'stripe' )
+				array( 'stripe', 'wc-blocks-checkout' )
 			);
 
 		$bridge = $this->getMockBuilder( WooPaymentsCheckoutBridge::class )

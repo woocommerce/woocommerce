@@ -9,11 +9,15 @@ namespace Automattic\WooCommerce\Internal\Payments;
 
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsTokenService;
 use Throwable;
 use WC_Order;
+use WC_Payment_Token;
 use WC_Payment_Gateway_CC;
+use WC_Payment_Tokens;
 use WP_Error;
 
 /**
@@ -64,6 +68,16 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	private const RECOMMENDED_PAYMENT_METHODS_CACHE_TTL = DAY_IN_SECONDS;
 
 	/**
+	 * WooPayments subscriptions feature flag option.
+	 */
+	private const WCPAY_SUBSCRIPTIONS_FLAG_NAME = '_wcpay_feature_subscriptions';
+
+	/**
+	 * Stripe Billing feature flag option.
+	 */
+	private const STRIPE_BILLING_FLAG_NAME = '_wcpay_feature_stripe_billing';
+
+	/**
 	 * Payment processing service.
 	 *
 	 * @var PaymentProcessingService
@@ -92,6 +106,20 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	private WooPaymentsApiClient $api_client;
 
 	/**
+	 * Native WooPayments account service.
+	 *
+	 * @var WooPaymentsAccountService
+	 */
+	private WooPaymentsAccountService $account_service;
+
+	/**
+	 * WooPayments token service.
+	 *
+	 * @var WooPaymentsTokenService
+	 */
+	private WooPaymentsTokenService $token_service;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -103,10 +131,10 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 		$this->supports           = array(
 			'products',
 			'refunds',
-			PaymentGatewayFeature::TOKENIZATION,
 		);
 
 		$this->init_settings();
+		$this->init_supported_features();
 
 		if ( did_action( 'init' ) ) {
 			$this->handle_init();
@@ -135,8 +163,10 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	 * @param WooPaymentsProvider            $provider           WooPayments provider.
 	 * @param WooPaymentsCheckoutBridge|null $checkout_bridge    Optional checkout bridge.
 	 * @param WooPaymentsApiClient|null      $api_client         Optional API client.
+	 * @param WooPaymentsAccountService|null $account_service    Optional account service.
+	 * @param WooPaymentsTokenService|null   $token_service      Optional token service.
 	 */
-	final public function init( PaymentProcessingService $processing_service, WooPaymentsProvider $provider, ?WooPaymentsCheckoutBridge $checkout_bridge = null, ?WooPaymentsApiClient $api_client = null ): void {
+	final public function init( PaymentProcessingService $processing_service, WooPaymentsProvider $provider, ?WooPaymentsCheckoutBridge $checkout_bridge = null, ?WooPaymentsApiClient $api_client = null, ?WooPaymentsAccountService $account_service = null, ?WooPaymentsTokenService $token_service = null ): void {
 		$this->processing_service = $processing_service;
 		$this->provider           = $provider;
 
@@ -147,6 +177,14 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 		if ( null !== $api_client ) {
 			$this->api_client = $api_client;
 		}
+
+		if ( null !== $account_service ) {
+			$this->account_service = $account_service;
+		}
+
+		if ( null !== $token_service ) {
+			$this->token_service = $token_service;
+		}
 	}
 
 	/**
@@ -156,6 +194,183 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	 */
 	public function form() {
 		$this->get_checkout_bridge()->render_payment_fields();
+	}
+
+	/**
+	 * Add a WooPayments payment method from the My Account payment-method form.
+	 *
+	 * @return array<string,string>
+	 */
+	public function add_payment_method() {
+		try {
+			$setup_intent_id = $this->sanitize_post_string( 'wcpay-setup-intent' );
+
+			if ( '' === $setup_intent_id ) {
+				return $this->add_payment_method_error( __( 'A WooPayments payment method was not provided.', 'woocommerce' ) );
+			}
+
+			$user_id = get_current_user_id();
+			if ( 0 >= $user_id ) {
+				return $this->add_payment_method_error( __( "We're not able to add this payment method. Please log in and try again.", 'woocommerce' ) );
+			}
+
+			$setup_intent = $this->get_api_client()->get_setup_intention( $setup_intent_id );
+			$status       = isset( $setup_intent['status'] ) ? (string) $setup_intent['status'] : '';
+			if ( 'succeeded' !== $status ) {
+				return $this->add_payment_method_error( __( 'Failed to add the provided payment method. Please try again later.', 'woocommerce' ) );
+			}
+
+			$payment_method_id = $this->get_setup_intent_payment_method_id( $setup_intent );
+			if ( '' === $payment_method_id ) {
+				return $this->add_payment_method_error( __( "We're not able to add this payment method. Please try again later.", 'woocommerce' ) );
+			}
+
+			$token = $this->get_token_service()->get_or_create_card_token_for_user( $payment_method_id, $user_id );
+			if ( ! $token instanceof WC_Payment_Token ) {
+				return $this->add_payment_method_error( __( "We're not able to add this payment method. Please try again later.", 'woocommerce' ) );
+			}
+
+			return array(
+				'result'   => 'success',
+				/**
+				 * Filters the redirect URL after adding a WooPayments payment method.
+				 *
+				 * @since 11.0.0
+				 * @param string $url Redirect URL.
+				 */
+				'redirect' => apply_filters( 'wcpay_get_add_payment_method_redirect_url', wc_get_endpoint_url( 'payment-methods' ) ),
+			);
+		} catch ( Throwable $exception ) {
+			wc_get_logger()->error(
+				'Error when adding native WooPayments payment method: ' . $exception->getMessage(),
+				array( 'source' => 'wcpay-add-payment-method' )
+			);
+
+			return $this->add_payment_method_error( __( "We're not able to add this payment method. Please try again later.", 'woocommerce' ) );
+		}
+	}
+
+	/**
+	 * Process a scheduled subscription renewal payment.
+	 *
+	 * @param float    $amount        Renewal amount.
+	 * @param WC_Order $renewal_order Renewal order.
+	 * @return void
+	 */
+	public function scheduled_subscription_payment( $amount, $renewal_order ): void {
+		unset( $amount );
+
+		if ( ! $renewal_order instanceof WC_Order ) {
+			return;
+		}
+
+		$token = $this->get_payment_token_from_order( $renewal_order );
+		if ( ! $token instanceof WC_Payment_Token ) {
+			$renewal_order->add_order_note( __( 'Subscription renewal failed: No saved payment method found.', 'woocommerce' ) );
+			$renewal_order->update_status( 'failed' );
+			return;
+		}
+
+		$this->get_processing_service()->process_checkout(
+			PaymentContext::for_checkout(
+				$renewal_order,
+				$this->id,
+				'',
+				array(
+					'payment_token'       => (string) $token->get_id(),
+					'save_payment_method' => false,
+				),
+				array( 'scheduled_subscription_payment' => true )
+			),
+			$this->get_provider()
+		);
+	}
+
+	/**
+	 * Copy the successful renewal token to the failing subscription.
+	 *
+	 * @param WC_Order $subscription  Subscription order.
+	 * @param WC_Order $renewal_order Renewal order.
+	 * @return void
+	 */
+	public function update_failing_payment_method( $subscription, $renewal_order ): void {
+		if ( ! $subscription instanceof WC_Order || ! $renewal_order instanceof WC_Order ) {
+			return;
+		}
+
+		$token = $this->get_payment_token_from_order( $renewal_order );
+		if ( ! $token instanceof WC_Payment_Token ) {
+			$renewal_order->add_order_note( __( 'Unable to update subscription payment method: No valid payment token or method found.', 'woocommerce' ) );
+			return;
+		}
+
+		$subscription_token_ids = array_map( 'absint', $subscription->get_payment_tokens() );
+		if ( ! in_array( $token->get_id(), $subscription_token_ids, true ) ) {
+			$subscription->add_payment_token( $token );
+			$subscription->save();
+		}
+	}
+
+	/**
+	 * Tell whether saved payment methods are enabled.
+	 *
+	 * @return bool
+	 */
+	public function is_saved_cards_enabled(): bool {
+		return 'yes' === $this->get_option( 'saved_cards' );
+	}
+
+	/**
+	 * Tell whether subscriptions support is available.
+	 *
+	 * @return bool
+	 */
+	public function is_subscriptions_enabled(): bool {
+		if ( $this->is_subscriptions_plugin_active() ) {
+			return version_compare( (string) $this->get_subscriptions_plugin_version(), '2.2.0', '>=' );
+		}
+
+		return class_exists( 'WC_Subscriptions_Core_Plugin' );
+	}
+
+	/**
+	 * Tell whether WooCommerce Subscriptions is active.
+	 *
+	 * @return bool
+	 */
+	public function is_subscriptions_plugin_active(): bool {
+		return class_exists( 'WC_Subscriptions' );
+	}
+
+	/**
+	 * Get the active WooCommerce Subscriptions version.
+	 *
+	 * @return string|null
+	 */
+	public function get_subscriptions_plugin_version(): ?string {
+		if ( ! class_exists( 'WC_Subscriptions' ) || ! isset( \WC_Subscriptions::$version ) ) {
+			return null;
+		}
+
+		return (string) \WC_Subscriptions::$version;
+	}
+
+	/**
+	 * Tell whether WooPayments is in test mode.
+	 *
+	 * @return bool
+	 */
+	public function is_test_mode(): bool {
+		return $this->get_account_service()->is_test_mode_enabled();
+	}
+
+	/**
+	 * Tell whether WooPayments is in development mode.
+	 *
+	 * @return bool
+	 */
+	public function is_dev_mode(): bool {
+		return $this->get_account_service()->is_dev_mode_enabled();
 	}
 
 	/**
@@ -415,6 +630,175 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 		}
 
 		return $this->api_client;
+	}
+
+	/**
+	 * Get the native WooPayments account service.
+	 *
+	 * @return WooPaymentsAccountService
+	 */
+	private function get_account_service(): WooPaymentsAccountService {
+		if ( ! isset( $this->account_service ) ) {
+			$this->account_service = wc_get_container()->get( WooPaymentsAccountService::class );
+		}
+
+		return $this->account_service;
+	}
+
+	/**
+	 * Get the native WooPayments token service.
+	 *
+	 * @return WooPaymentsTokenService
+	 */
+	private function get_token_service(): WooPaymentsTokenService {
+		if ( ! isset( $this->token_service ) ) {
+			$this->token_service = wc_get_container()->get( WooPaymentsTokenService::class );
+		}
+
+		return $this->token_service;
+	}
+
+	/**
+	 * Initialize the WooPayments support list.
+	 *
+	 * @return void
+	 */
+	private function init_supported_features(): void {
+		if ( $this->is_subscriptions_enabled() ) {
+			$this->supports = array_merge(
+				$this->supports,
+				array(
+					'multiple_subscriptions',
+					'subscription_cancellation',
+					'subscription_payment_method_change_admin',
+					'subscription_payment_method_change_customer',
+					'subscription_payment_method_change',
+					'subscription_reactivation',
+					'subscription_suspension',
+					'subscriptions',
+				)
+			);
+
+			$this->supports = array_merge(
+				$this->supports,
+				$this->should_use_stripe_billing()
+					? array( 'gateway_scheduled_payments' )
+					: array( 'subscription_amount_changes', 'subscription_date_changes' )
+			);
+		}
+
+		if ( $this->is_saved_cards_enabled() ) {
+			$this->supports[] = PaymentGatewayFeature::TOKENIZATION;
+			$this->supports[] = PaymentGatewayFeature::ADD_PAYMENT_METHOD;
+		}
+
+		$this->supports = array_values( array_unique( $this->supports ) );
+		$this->register_subscription_handlers();
+	}
+
+	/**
+	 * Register gateway-specific subscription handlers.
+	 *
+	 * @return void
+	 */
+	private function register_subscription_handlers(): void {
+		if ( ! $this->is_subscriptions_enabled() ) {
+			return;
+		}
+
+		$scheduled_hook = 'woocommerce_scheduled_subscription_payment_' . $this->id;
+		$failing_hook   = 'woocommerce_subscription_failing_payment_method_updated_' . $this->id;
+
+		if ( false === has_action( $scheduled_hook, array( $this, 'scheduled_subscription_payment' ) ) ) {
+			add_action( $scheduled_hook, array( $this, 'scheduled_subscription_payment' ), 10, 2 );
+		}
+
+		if ( false === has_action( $failing_hook, array( $this, 'update_failing_payment_method' ) ) ) {
+			add_action( $failing_hook, array( $this, 'update_failing_payment_method' ), 10, 2 );
+		}
+	}
+
+	/**
+	 * Get the saved payment token from an order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return WC_Payment_Token|null
+	 */
+	private function get_payment_token_from_order( WC_Order $order ): ?WC_Payment_Token {
+		$token_ids = array_map( 'absint', $order->get_payment_tokens() );
+		foreach ( $token_ids as $token_id ) {
+			$token = WC_Payment_Tokens::get( $token_id );
+			if ( $token instanceof WC_Payment_Token && $this->id === $token->get_gateway_id() ) {
+				return $token;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Build an add-payment-method error response and customer notice.
+	 *
+	 * @param string $message Error message.
+	 * @return array<string,string>
+	 */
+	private function add_payment_method_error( string $message ): array {
+		wc_add_notice( $message, 'error', array( 'icon' => 'error' ) );
+
+		return array( 'result' => 'error' );
+	}
+
+	/**
+	 * Get the payment method ID from a SetupIntent response.
+	 *
+	 * @param array<string,mixed> $setup_intent SetupIntent response.
+	 * @return string
+	 */
+	private function get_setup_intent_payment_method_id( array $setup_intent ): string {
+		if ( isset( $setup_intent['payment_method'] ) && is_string( $setup_intent['payment_method'] ) ) {
+			return $setup_intent['payment_method'];
+		}
+
+		if ( isset( $setup_intent['payment_method'] ) && is_array( $setup_intent['payment_method'] ) && isset( $setup_intent['payment_method']['id'] ) ) {
+			return (string) $setup_intent['payment_method']['id'];
+		}
+
+		return '';
+	}
+
+	/**
+	 * Tell whether Stripe Billing should be used for subscriptions.
+	 *
+	 * @return bool
+	 */
+	protected function should_use_stripe_billing(): bool {
+		if ( $this->is_wcpay_subscriptions_enabled() && ! class_exists( 'WC_Subscriptions' ) ) {
+			return true;
+		}
+
+		if ( $this->is_stripe_billing_enabled() && class_exists( 'WC_Subscriptions' ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Tell whether legacy WooPayments Subscriptions is enabled.
+	 *
+	 * @return bool
+	 */
+	private function is_wcpay_subscriptions_enabled(): bool {
+		return '1' === get_option( self::WCPAY_SUBSCRIPTIONS_FLAG_NAME, '0' );
+	}
+
+	/**
+	 * Tell whether Stripe Billing is enabled.
+	 *
+	 * @return bool
+	 */
+	private function is_stripe_billing_enabled(): bool {
+		return '1' === get_option( self::STRIPE_BILLING_FLAG_NAME, '0' );
 	}
 
 	/**

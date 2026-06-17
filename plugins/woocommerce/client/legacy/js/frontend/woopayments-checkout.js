@@ -9,6 +9,7 @@
 	var paymentElement = null;
 	var paymentElementContainer = null;
 	var isSubmittingWithPaymentMethod = false;
+	var isSubmittingWithSetupIntent = false;
 
 	function isSelectedGateway() {
 		return (
@@ -61,6 +62,18 @@
 		field.val( value || '' );
 	}
 
+	function ensureFormHiddenField( formElement, name, value ) {
+		var field = formElement.querySelector( 'input[name="' + name + '"]' );
+		if ( ! field ) {
+			field = document.createElement( 'input' );
+			field.type = 'hidden';
+			field.name = name;
+			formElement.appendChild( field );
+		}
+
+		field.value = value || '';
+	}
+
 	function appendPaymentFields( form, paymentMethod, error ) {
 		var fingerprint =
 			paymentMethod && paymentMethod.card
@@ -85,10 +98,77 @@
 		ensureHiddenField( form, 'wcpay-fingerprint', fingerprint || '' );
 	}
 
+	function getSetupIntentData( response ) {
+		if ( response && response.data ) {
+			return response.data;
+		}
+
+		return response || {};
+	}
+
+	function confirmSetupIntentIfNeeded( setupIntent ) {
+		if ( setupIntent && setupIntent.status === 'succeeded' ) {
+			return Promise.resolve( setupIntent );
+		}
+
+		if (
+			! setupIntent ||
+			! setupIntent.client_secret ||
+			! stripe ||
+			! stripe.confirmSetup
+		) {
+			return Promise.reject(
+				new Error( config.confirmationErrorMessage || '' )
+			);
+		}
+
+		return stripe
+			.confirmSetup( {
+				clientSecret: setupIntent.client_secret,
+				redirect: 'if_required',
+			} )
+			.then( function ( result ) {
+				if ( result.error ) {
+					return Promise.reject( result.error );
+				}
+
+				return result.setupIntent || setupIntent;
+			} );
+	}
+
+	function createSetupIntent( paymentMethodId ) {
+		return new Promise( function ( resolve, reject ) {
+			$.post( config.ajaxUrl, {
+				action: 'create_setup_intent',
+				'wcpay-payment-method': paymentMethodId,
+				_ajax_nonce: config.createSetupIntentNonce || '',
+			} )
+				.done( function ( response ) {
+					var setupIntent = getSetupIntentData( response );
+					if ( response && response.success === false ) {
+						reject( setupIntent.error || setupIntent );
+						return;
+					}
+
+					confirmSetupIntentIfNeeded( setupIntent )
+						.then( resolve )
+						.catch( reject );
+				} )
+				.fail( function () {
+					reject( new Error( config.confirmationErrorMessage || '' ) );
+				} );
+		} );
+	}
+
 	function getStripeElementsOptions() {
 		var amount = Number( config.cartTotal || 0 );
+		var isAddPaymentMethodForm =
+			!! document.getElementById( 'add_payment_method' );
 		var options = {
-			mode: amount > 0 && isFinite( amount ) ? 'payment' : 'setup',
+			mode:
+				! isAddPaymentMethodForm && amount > 0 && isFinite( amount )
+					? 'payment'
+					: 'setup',
 			currency: ( config.currency || 'usd' ).toLowerCase(),
 			paymentMethodCreation: 'manual',
 			paymentMethodTypes: [ 'card' ],
@@ -99,6 +179,28 @@
 		}
 
 		return options;
+	}
+
+	function submitElements() {
+		if ( ! elements || ! elements.submit ) {
+			return Promise.resolve( {} );
+		}
+
+		return elements.submit().then( function ( result ) {
+			if ( result && result.error ) {
+				return Promise.reject( result.error );
+			}
+
+			return result || {};
+		} );
+	}
+
+	function createPaymentMethod() {
+		return submitElements().then( function () {
+			return stripe.createPaymentMethod( {
+				elements: elements,
+			} );
+		} );
 	}
 
 	function initializeStripeElement() {
@@ -141,10 +243,7 @@
 			return true;
 		}
 
-		stripe
-			.createPaymentMethod( {
-				elements: elements,
-			} )
+		createPaymentMethod()
 			.then( function ( result ) {
 				if ( result.error ) {
 					appendPaymentFields( form, null, result.error );
@@ -159,9 +258,75 @@
 				setError( '' );
 				isSubmittingWithPaymentMethod = true;
 				form.trigger( 'submit' );
+			} )
+			.catch( function ( error ) {
+				appendPaymentFields( form, null, error );
+				setError( error && error.message ? error.message : '' );
+				$( document.body ).trigger( 'checkout_error', [
+					error && error.message ? error.message : '',
+				] );
 			} );
 
 		return false;
+	}
+
+	function submitAddPaymentMethodForm( formElement ) {
+		isSubmittingWithSetupIntent = true;
+		formElement.submit();
+	}
+
+	function createSetupIntentAndSubmit( formElement ) {
+		if ( ! stripe || ! elements ) {
+			return true;
+		}
+
+		createPaymentMethod()
+			.then( function ( result ) {
+				if ( result.error ) {
+					setError( result.error.message );
+					return Promise.reject( result.error );
+				}
+
+				return createSetupIntent( result.paymentMethod.id );
+			} )
+			.then( function ( setupIntent ) {
+				if ( ! setupIntent || ! setupIntent.id ) {
+					setError( config.confirmationErrorMessage || '' );
+					return;
+				}
+
+				ensureFormHiddenField(
+					formElement,
+					'wcpay-setup-intent',
+					setupIntent.id
+				);
+				setError( '' );
+				submitAddPaymentMethodForm( formElement );
+			} )
+			.catch( function ( error ) {
+				setError( error && error.message ? error.message : '' );
+			} );
+
+		return false;
+	}
+
+	function handleAddPaymentMethodSubmit( event ) {
+		var formElement = event.target;
+		var selectedGateway = formElement.querySelector(
+			'input[name="payment_method"]:checked'
+		);
+
+		if ( ! selectedGateway || selectedGateway.value !== gatewayId ) {
+			return true;
+		}
+
+		if ( isSubmittingWithSetupIntent ) {
+			isSubmittingWithSetupIntent = false;
+			return true;
+		}
+
+		event.preventDefault();
+		return createSetupIntentAndSubmit( formElement );
 	}
 
 	function parseConfirmationHash( hash ) {
@@ -286,6 +451,11 @@
 		initializeStripeElement();
 		confirmRedirectIfPresent();
 		document.addEventListener( 'click', copyTestNumber );
+		if ( document.getElementById( 'add_payment_method' ) ) {
+			document
+				.getElementById( 'add_payment_method' )
+				.addEventListener( 'submit', handleAddPaymentMethodSubmit );
+		}
 	} );
 
 	$( window ).on( 'hashchange', function () {

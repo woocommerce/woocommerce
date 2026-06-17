@@ -26,6 +26,11 @@ final class WooPayments extends AbstractPaymentMethodType {
 	private const STRIPE_SCRIPT_URL = 'https://js.stripe.com/v3/';
 
 	/**
+	 * Checkout Blocks script handle.
+	 */
+	private const CHECKOUT_BLOCKS_SCRIPT_HANDLE = 'wc-blocks-checkout';
+
+	/**
 	 * Payment method name defined by payment methods extending this class.
 	 *
 	 * @var string
@@ -91,7 +96,7 @@ final class WooPayments extends AbstractPaymentMethodType {
 		$this->asset_api->register_script(
 			'wc-payment-method-woopayments',
 			'assets/client/blocks/wc-payment-method-woopayments.js',
-			array( self::STRIPE_SCRIPT_HANDLE )
+			array( self::STRIPE_SCRIPT_HANDLE, self::CHECKOUT_BLOCKS_SCRIPT_HANDLE )
 		);
 
 		return array( 'wc-payment-method-woopayments' );

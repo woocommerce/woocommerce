@@ -70,6 +70,11 @@ class WooPaymentsApiClient {
 	private const TRACKING_API = 'tracking';
 
 	/**
+	 * WooPayments failed webhook events API path.
+	 */
+	private const WEBHOOK_FETCH_API = 'webhook/failed_events';
+
+	/**
 	 * HTTP client.
 	 *
 	 * @var WooPaymentsHttpClient
@@ -370,6 +375,15 @@ class WooPaymentsApiClient {
 			self::TRACKING_API . '/order',
 			'POST'
 		);
+	}
+
+	/**
+	 * Retrieve failed webhook events for replay.
+	 *
+	 * @return array<string,mixed>
+	 */
+	public function get_failed_webhook_events(): array {
+		return $this->request( array(), self::WEBHOOK_FETCH_API, 'POST' );
 	}
 
 	/**

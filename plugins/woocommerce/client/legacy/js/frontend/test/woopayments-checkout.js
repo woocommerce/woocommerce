@@ -4,10 +4,16 @@
 
 describe( 'WooPayments checkout', () => {
 	let bodyEventHandlers;
+	let elementsMock;
 	let mountPaymentElement;
 	let stripeMock;
 	let stripeElementsOptions;
+	let submitElements;
 	let unmountPaymentElement;
+
+	async function flushPromises() {
+		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+	}
 
 	function createJQueryMock() {
 		const defaultResult = {
@@ -15,8 +21,18 @@ describe( 'WooPayments checkout', () => {
 			filter: jest.fn( () => defaultResult ),
 			find: jest.fn( () => defaultResult ),
 			on: jest.fn( () => defaultResult ),
+			appendTo: jest.fn( () => defaultResult ),
 			trigger: jest.fn( () => defaultResult ),
 			val: jest.fn(),
+		};
+		const selectedGatewayResult = {
+			length: 1,
+			find: jest.fn( () => defaultResult ),
+			on: jest.fn( () => selectedGatewayResult ),
+			appendTo: jest.fn( () => selectedGatewayResult ),
+			filter: jest.fn( () => selectedGatewayResult ),
+			trigger: jest.fn( () => selectedGatewayResult ),
+			val: jest.fn( () => 'woocommerce_payments' ),
 		};
 		const bodyResult = {
 			length: 1,
@@ -36,6 +52,13 @@ describe( 'WooPayments checkout', () => {
 				return bodyResult;
 			}
 
+			if (
+				typeof selectorOrCallback === 'string' &&
+				selectorOrCallback.indexOf( 'input[name="payment_method"]' ) !== -1
+			) {
+				return selectedGatewayResult;
+			}
+
 			return defaultResult;
 		} );
 		jQueryMock.post = jest.fn( () => ( {
@@ -53,6 +76,7 @@ describe( 'WooPayments checkout', () => {
 	beforeEach( () => {
 		jest.resetModules();
 		bodyEventHandlers = {};
+		submitElements = jest.fn( () => Promise.resolve( {} ) );
 		mountPaymentElement = jest.fn();
 		stripeElementsOptions = null;
 		unmountPaymentElement = jest.fn();
@@ -80,14 +104,20 @@ describe( 'WooPayments checkout', () => {
 		stripeMock = {
 			elements: jest.fn( ( options ) => {
 				stripeElementsOptions = options;
-				return {
-					submit: jest.fn( () => Promise.resolve( {} ) ),
+				elementsMock = {
+					submit: submitElements,
 					create: jest.fn( () => ( {
 						mount: mountPaymentElement,
 						unmount: unmountPaymentElement,
 					} ) ),
 				};
+				return elementsMock;
 			} ),
+			createPaymentMethod: jest.fn( () =>
+				Promise.resolve( {
+					paymentMethod: { id: 'pm_native' },
+				} )
+			),
 			confirmPayment: jest.fn( () =>
 				Promise.resolve( {
 					paymentIntent: { id: 'pi_native' },
@@ -145,13 +175,30 @@ describe( 'WooPayments checkout', () => {
 		expect( stripeElementsOptions ).not.toHaveProperty( 'amount' );
 	} );
 
+	test( 'uses setup mode on the add-payment-method form', () => {
+		document.body.innerHTML =
+			'<form id="add_payment_method">' +
+			'<input type="radio" name="payment_method" value="woocommerce_payments" checked />' +
+			'<div id="wcpay-core-payment-element"></div>' +
+			'</form>';
+
+		require( '../woopayments-checkout' );
+
+		expect( stripeElementsOptions ).toMatchObject( {
+			currency: 'gbp',
+			mode: 'setup',
+			paymentMethodCreation: 'manual',
+			paymentMethodTypes: [ 'card' ],
+		} );
+		expect( stripeElementsOptions ).not.toHaveProperty( 'amount' );
+	} );
+
 	test( 'handles PaymentIntent confirmation hashes through next actions', async () => {
 		window.location.hash = '#wcpay-confirm-pi:123:pi_native_secret_abc:nonce';
 
 		require( '../woopayments-checkout' );
 
-		await Promise.resolve();
-		await Promise.resolve();
+		await flushPromises();
 
 		expect( stripeMock.handleNextAction ).toHaveBeenCalledWith( {
 			clientSecret: 'pi_native_secret_abc',
@@ -165,6 +212,24 @@ describe( 'WooPayments checkout', () => {
 				_ajax_nonce: 'nonce',
 				intent_id: 'pi_native',
 			} )
+		);
+	} );
+
+	test( 'submits Stripe Elements before creating a checkout payment method', async () => {
+		require( '../woopayments-checkout' );
+
+		expect(
+			bodyEventHandlers.checkout_place_order_woocommerce_payments()
+		).toBe( false );
+
+		await flushPromises();
+
+		expect( submitElements ).toHaveBeenCalled();
+		expect( stripeMock.createPaymentMethod ).toHaveBeenCalledWith( {
+			elements: elementsMock,
+		} );
+		expect( submitElements.mock.invocationCallOrder[ 0 ] ).toBeLessThan(
+			stripeMock.createPaymentMethod.mock.invocationCallOrder[ 0 ]
 		);
 	} );
 
@@ -214,5 +279,96 @@ describe( 'WooPayments checkout', () => {
 			.click();
 
 		expect( writeText ).toHaveBeenCalledWith( '4242 4242 4242 4242' );
+	} );
+
+	test( 'adds a setup intent field before submitting the add-payment-method form', async () => {
+		const addPaymentMethodForm = document.createElement( 'form' );
+		addPaymentMethodForm.id = 'add_payment_method';
+		addPaymentMethodForm.submit = jest.fn();
+		addPaymentMethodForm.innerHTML =
+			'<input type="radio" name="payment_method" value="woocommerce_payments" checked />' +
+			'<div id="wcpay-core-payment-element"></div>';
+		document.body.innerHTML = '';
+		document.body.appendChild( addPaymentMethodForm );
+		window.wcpay_core_checkout_config.cartTotal = '0';
+		window.wcpay_core_checkout_config.createSetupIntentNonce =
+			'setup_nonce';
+		global.jQuery.post.mockReturnValueOnce( {
+			done: jest.fn( ( callback ) => {
+				callback( {
+					success: true,
+					data: {
+						id: 'seti_native',
+						status: 'succeeded',
+					},
+				} );
+				return {
+					fail: jest.fn(),
+				};
+			} ),
+		} );
+
+		require( '../woopayments-checkout' );
+
+		addPaymentMethodForm.dispatchEvent(
+			new window.Event( 'submit', { bubbles: true, cancelable: true } )
+		);
+
+		await flushPromises();
+
+		const setupIntentField = addPaymentMethodForm.querySelector(
+			'input[name="wcpay-setup-intent"]'
+		);
+
+		expect( global.jQuery.post ).toHaveBeenCalledWith(
+			'https://example.test/admin-ajax.php',
+			expect.objectContaining( {
+				action: 'create_setup_intent',
+				_ajax_nonce: 'setup_nonce',
+				'wcpay-payment-method': expect.any( String ),
+			} )
+		);
+		expect( submitElements ).toHaveBeenCalled();
+		expect( submitElements.mock.invocationCallOrder[ 0 ] ).toBeLessThan(
+			stripeMock.createPaymentMethod.mock.invocationCallOrder[ 0 ]
+		);
+		expect( stripeMock.confirmSetup ).not.toHaveBeenCalled();
+		expect( setupIntentField ).not.toBeNull();
+		expect( setupIntentField.value ).toBe( 'seti_native' );
+		expect( addPaymentMethodForm.submit ).toHaveBeenCalled();
+	} );
+
+	test( 'preserves add-payment-method payment method errors', async () => {
+		const addPaymentMethodForm = document.createElement( 'form' );
+		addPaymentMethodForm.id = 'add_payment_method';
+		addPaymentMethodForm.submit = jest.fn();
+		addPaymentMethodForm.innerHTML =
+			'<input type="radio" name="payment_method" value="woocommerce_payments" checked />' +
+			'<div id="wcpay-core-payment-element"></div>' +
+			'<div id="wcpay-core-payment-errors" hidden></div>';
+		document.body.innerHTML = '';
+		document.body.appendChild( addPaymentMethodForm );
+		window.wcpay_core_checkout_config.cartTotal = '0';
+		window.wcpay_core_checkout_config.confirmationErrorMessage =
+			'Unable to add payment method.';
+		stripeMock.createPaymentMethod.mockResolvedValueOnce( {
+			error: {
+				message: 'Your card number is incomplete.',
+			},
+		} );
+
+		require( '../woopayments-checkout' );
+
+		addPaymentMethodForm.dispatchEvent(
+			new window.Event( 'submit', { bubbles: true, cancelable: true } )
+		);
+
+		await flushPromises();
+
+		expect(
+			document.getElementById( 'wcpay-core-payment-errors' ).textContent
+		).toBe( 'Your card number is incomplete.' );
+		expect( global.jQuery.post ).not.toHaveBeenCalled();
+		expect( addPaymentMethodForm.submit ).not.toHaveBeenCalled();
 	} );
 } );

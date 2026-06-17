@@ -283,7 +283,7 @@ class WooPaymentsAccountService {
 	 *
 	 * @return bool
 	 */
-	private function is_dev_mode_enabled(): bool {
+	public function is_dev_mode_enabled(): bool {
 		$dev_mode = $this->is_wcpay_dev_mode_defined()
 			|| $this->is_wp_environment_dev_mode()
 			|| $this->is_wp_development_mode_enabled();

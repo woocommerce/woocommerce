@@ -830,6 +830,42 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fetch failed webhook events through the native WooPayments endpoint.
+	 */
+	public function test_get_failed_webhook_events_posts_to_failed_events_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'data'     => array(
+						array(
+							'id'   => 'evt_failed_1',
+							'type' => 'payment_intent.succeeded',
+						),
+					),
+					'has_more' => true,
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$result = $sut->get_failed_webhook_events();
+		$body   = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( '/sites/123/wcpay/webhook/failed_events', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $body );
+		$this->assertTrue( $body['test_mode'] );
+		$this->assertSame( 'evt_failed_1', $result['data'][0]['id'] );
+		$this->assertTrue( $result['has_more'] );
+	}
+
+	/**
 	 * Create a WooPayments account service mock.
 	 *
 	 * @param bool      $test_mode            Whether WooPayments should run in test mode.
