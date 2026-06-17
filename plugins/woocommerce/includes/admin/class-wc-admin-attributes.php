@@ -170,7 +170,7 @@ class WC_Admin_Attributes {
 	 * This counter closes that feedback gap before submission.
 	 */
 	private static function slug_byte_counter_script(): void {
-		$max_bytes = 32 - strlen( 'pa_' );
+		$max_bytes = wc_get_attribute_slug_max_byte_length();
 		/* translators: 1: current byte count, 2: maximum allowed bytes. */
 		$template = wp_json_encode( __( '%1$d / %2$d bytes', 'woocommerce' ), JSON_HEX_TAG | JSON_HEX_AMP );
 		if ( false === $template ) {
@@ -210,6 +210,7 @@ class WC_Admin_Attributes {
 					if ( bytes > maxBytes ) {
 						counter.style.color = '#d63638';
 					} else if ( bytes >= maxBytes - 3 ) {
+						// Within one multibyte character (up to 3 bytes) of the limit.
 						counter.style.color = '#996800';
 					} else {
 						counter.style.color = '';

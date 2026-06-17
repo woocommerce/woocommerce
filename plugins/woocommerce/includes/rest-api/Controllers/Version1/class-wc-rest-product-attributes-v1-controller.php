@@ -604,19 +604,19 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	protected function validate_attribute_slug( $slug, $new_data = true ) {
-		// WordPress's register_taxonomy() rejects taxonomy names longer than 32 bytes
-		// (see wp-includes/taxonomy.php), and WooCommerce prefixes attribute slugs with
-		// 'pa_'. Multibyte characters (Cyrillic, Chinese, etc.) consume 2-4 bytes each.
-		$prefixed_slug_byte_length = strlen( 'pa_' . $slug );
-		if ( $prefixed_slug_byte_length > 32 ) {
+		// Validate slug length against the byte budget left by WordPress's 32-byte taxonomy
+		// name limit once the 'pa_' prefix is accounted for (see wc_get_attribute_slug_max_byte_length()).
+		$slug_byte_length = strlen( $slug );
+		$max_byte_length  = wc_get_attribute_slug_max_byte_length();
+		if ( $slug_byte_length > $max_byte_length ) {
 			return new WP_Error(
 				'woocommerce_rest_invalid_product_attribute_slug_too_long',
 				/* translators: %s: slug being validated */
 				sprintf( __( 'Slug "%s" is too long. Please use a shorter slug.', 'woocommerce' ), $slug ),
 				array(
 					'status'                 => 400,
-					'slug_byte_length'       => $prefixed_slug_byte_length - strlen( 'pa_' ),
-					'slug_byte_length_limit' => 32 - strlen( 'pa_' ),
+					'slug_byte_length'       => $slug_byte_length,
+					'slug_byte_length_limit' => $max_byte_length,
 				)
 			);
 		} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
