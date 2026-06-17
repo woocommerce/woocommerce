@@ -1235,17 +1235,19 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$order->save();
 
 		$this->expectException( \InvalidArgumentException::class );
-		$this->data_utils->build_refund_preview(
-			$order,
-			array(
+		try {
+			$this->data_utils->build_refund_preview(
+				$order,
 				array(
-					'line_item_id' => 999999,
-					'quantity'     => 1,
-				),
-			)
-		);
-
-		$order->delete( true );
+					array(
+						'line_item_id' => 999999,
+						'quantity'     => 1,
+					),
+				)
+			);
+		} finally {
+			$order->delete( true );
+		}
 	}
 
 	/**
@@ -2170,6 +2172,65 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		return array(
 			'missing' => array( null ),
 			'zero'    => array( 0 ),
+		);
+	}
+
+	/**
+	 * @testdox validate_line_items rejects a negative or non-integer quantity supplied alongside refund_total.
+	 *
+	 * A missing or zero quantity is the accepted dollars-only form, but a negative or
+	 * fractional quantity would be stored verbatim on the refund line, so it is rejected
+	 * — matching the integer/range checks the preview path performs.
+	 *
+	 * @dataProvider provider_invalid_loose_quantities
+	 *
+	 * @param mixed $quantity The quantity value to test.
+	 */
+	public function test_validate_line_items_rejects_invalid_quantity_with_explicit_refund_total( $quantity ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 20.00,
+				'total'    => 20.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 20.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$result = $this->data_utils->validate_line_items(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 10.00,
+					'quantity'     => $quantity,
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result, 'A negative or non-integer quantity must be rejected.' );
+		$this->assertEquals( 'invalid_quantity', $result->get_error_code() );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @return array<string, array<int, mixed>>
+	 */
+	public function provider_invalid_loose_quantities(): array {
+		return array(
+			'negative'   => array( -1 ),
+			'fractional' => array( 1.5 ),
 		);
 	}
 

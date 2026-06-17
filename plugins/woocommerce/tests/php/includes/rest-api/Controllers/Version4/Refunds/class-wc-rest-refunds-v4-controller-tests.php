@@ -81,6 +81,11 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 
+		// Reset tax-calculation options to their defaults. Several tests toggle these and
+		// not all restore them individually; resetting here keeps the suite order-independent.
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
 		parent::tearDown();
 		$this->disable_rest_api_v4_feature();
 	}

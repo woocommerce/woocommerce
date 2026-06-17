@@ -272,6 +272,19 @@ class DataUtils {
 				);
 			}
 
+			// When refund_total is provided, a supplied quantity is informational, but it must
+			// still be a non-negative integer so it round-trips cleanly onto the refund line —
+			// a negative or fractional value would be stored verbatim as the line qty. 0 (or an
+			// omitted quantity) means "dollars only". This mirrors the integer/range checks the
+			// preview path applies before branching on item type.
+			if ( ! $refund_total_missing && isset( $line_item['quantity'] ) && ( ! is_int( $line_item['quantity'] ) || $line_item['quantity'] < 0 ) ) {
+				return new WP_Error(
+					'invalid_quantity',
+					__( 'Line item quantity must be a non-negative integer.', 'woocommerce' ),
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
+			}
+
 			// Auto-compute requires a non-zero source quantity to derive the unit
 			// price from. If the client omitted refund_total (or sent null) and the
 			// source product has zero quantity, surface a clear error rather than
@@ -328,8 +341,8 @@ class DataUtils {
 				// a positive amount from a discount line, or a negative amount from a normal
 				// line. Without this, abs() in the cap below would let a wrong-sign value
 				// pass and be stored (e.g. a negative refund_total on a positive line in a
-				// mixed-line request whose total stays positive). An explicit 0 is allowed
-				// (a zero refund for the line), matching the existing create contract.
+				// mixed-line request whose total stays positive). Values that round to 0 are
+				// rejected by the next check, so create and preview stay aligned.
 				if ( (float) $line_item['refund_total'] * $signed_line_total < 0 ) {
 					return new WP_Error(
 						'invalid_refund_total',

@@ -1151,7 +1151,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Partial amount preview returns 400 when refund_total exceeds line item total.
+	 * @testdox Partial amount preview returns 422 when refund_total exceeds line item total.
 	 */
 	public function test_preview_partial_amount_exceeds_line_total_returns_422(): void {
 		$order   = $this->create_order_with_product( 20.00, 1 );
