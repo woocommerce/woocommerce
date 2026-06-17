@@ -137,7 +137,9 @@ jQuery( function ( $ ) {
 
 		init_action_buttons: function () {
 			const confirm_text =
-				$.trim( $( '#catalog-visibility-select .save-post-visibility' ).text() ) ||
+				$( '#catalog-visibility-select .save-post-visibility' )
+					.text()
+					.trim() ||
 				'Confirm';
 
 			$(
@@ -176,14 +178,14 @@ jQuery( function ( $ ) {
 		},
 
 		get_publish_field_label: function ( container_selector ) {
-			return $.trim(
-				$( container_selector )
-					.clone()
-					.children()
-					.remove()
-					.end()
-					.text()
-			).replace( /:$/, '' );
+			return $( container_selector )
+				.clone()
+				.children()
+				.remove()
+				.end()
+				.text()
+				.trim()
+				.replace( /:$/, '' );
 		},
 
 		init_status: function () {
@@ -232,14 +234,13 @@ jQuery( function ( $ ) {
 
 			$radios.each( function () {
 				const $radio = $( this );
-				const label = $.trim(
-					$( 'label[for="' + $radio.attr( 'id' ) + '"]' )
-						.clone()
-						.children()
-						.remove()
-						.end()
-						.text()
-				);
+				const label = $( 'label[for="' + $radio.attr( 'id' ) + '"]' )
+					.clone()
+					.children()
+					.remove()
+					.end()
+					.text()
+					.trim();
 
 				$select.append(
 					$( '<option />', {
