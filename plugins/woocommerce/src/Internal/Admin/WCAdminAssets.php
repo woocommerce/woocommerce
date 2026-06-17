@@ -314,7 +314,7 @@ class WCAdminAssets {
 			'wc-currency',
 			'wc-navigation',
 			'wc-experimental-products-app',
-			'wc-settings-ui-sdk',
+			'wc-settings-ui',
 			'wc-remote-logging',
 			'wc-sanitize',
 		);
@@ -333,7 +333,7 @@ class WCAdminAssets {
 			'wc-experimental-products-app',
 			'wc-experimental',
 			'wc-navigation',
-			'wc-settings-ui-sdk',
+			'wc-settings-ui',
 			WC_ADMIN_APP,
 		);
 
@@ -456,7 +456,7 @@ class WCAdminAssets {
 		 * @var mixed[] $extension_handles
 		 */
 		$dependencies = array_merge(
-			array( 'wc-settings-ui-sdk' ),
+			array( 'wc-settings-ui' ),
 			array_filter(
 				$extension_handles,
 				static function ( $script_handle ): bool {
