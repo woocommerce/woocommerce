@@ -34,30 +34,6 @@ class OrderLinker {
 	}
 
 	/**
-	 * Return the IDs of guest orders whose billing email matches the user's account email.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @param int $user_id The user ID to match guest orders for.
-	 * @param int $limit   Maximum number of order IDs to return.
-	 * @return int[]|null Matching guest order IDs, or null when the user does not exist.
-	 */
-	private function get_matching_order_ids( int $user_id, int $limit ): ?array {
-		$user = get_user_by( 'id', $user_id );
-		if ( ! $user ) {
-			return null;
-		}
-
-		return (array) wc_get_orders(
-			array(
-				'limit'    => $limit,
-				'customer' => array( array( 0, $user->user_email ) ),
-				'return'   => 'ids',
-			)
-		);
-	}
-
-	/**
 	 * Whether the user has at least one guest order that could be linked on verification.
 	 *
 	 * Deliberately checks existence only (a single row, no details) so it is cheap to call
@@ -69,6 +45,16 @@ class OrderLinker {
 	 * @return bool
 	 */
 	public function has_linkable_orders( int $user_id ): bool {
-		return ! empty( $this->get_matching_order_ids( $user_id, 1 ) );
+		$user = get_user_by( 'id', $user_id );
+
+		return $user && ! empty(
+			wc_get_orders(
+				array(
+					'limit'    => 1,
+					'customer' => array( array( 0, $user->user_email ) ),
+					'return'   => 'ids',
+				)
+			)
+		);
 	}
 }
