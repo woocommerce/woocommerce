@@ -131,9 +131,7 @@ const serialRunSpecs = [
 	'**/tests/email-editor/**/*.spec.ts',
 	'**/tests/onboarding/**/*.spec.ts',
 	'**/tests/order/**/*.spec.ts',
-	'**/tests/product/product-grouped.spec.ts',
 	'**/tests/product/product-import-csv.spec.ts',
-	'**/tests/product/product-tags-attributes.spec.ts',
 	'**/tests/settings/**/*.spec.ts',
 	'**/tests/shipping/**/*.spec.ts',
 	'**/tests/shop/shop-title-after-deletion.spec.ts',
@@ -157,7 +155,6 @@ export default defineConfig( {
 	testDir: `${ TESTS_ROOT_PATH }/tests`,
 	retries: CI ? 1 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
-	workers: 1, // 1 by default to avoid issues with parallel tests, but can be overridden with the `--workers` CLI option
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	reporter,
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
@@ -186,34 +183,37 @@ export default defineConfig( {
 			name: 'core-serial',
 			testMatch: serialRunSpecs,
 			dependencies: [ 'site setup' ],
+			workers: 1,
 		},
 		{
 			name: 'core-parallel',
 			testIgnore: [ ...serialRunSpecs, ...nonCoreSpecs ],
 			dependencies: [ 'site setup' ],
-			fullyParallel: true,
 		},
 		{
 			name: 'api',
 			testMatch: '**/api-tests/**',
 			dependencies: [ 'site setup' ],
+			workers: 4,
 		},
 		{
 			name: 'legacy-mini-cart',
 			testMatch: [ '**/tests/cart/**', '**/tests/checkout/**' ],
 			testIgnore: [ '**/tests/blocks/**' ],
 			dependencies: [ 'site setup' ],
+			workers: 1,
 		},
 		{
 			name: 'paypal-standard',
 			testMatch: [ '**/tests/paypal/**' ],
 			dependencies: [ 'site setup' ],
+			workers: 1,
 		},
 		{
 			name: 'blocks-chromium',
 			testDir: `${ TESTS_ROOT_PATH }/tests/blocks`,
 			dependencies: [ 'blocks setup' ],
-			fullyParallel: true,
+			workers: 1,
 			use: {
 				...devices[ 'Desktop Chrome' ],
 				storageState: BLOCKS_ADMIN_STATE,
@@ -229,7 +229,7 @@ export default defineConfig( {
 				'**/product-collection/**/*.spec.ts',
 			],
 			dependencies: [ 'blocks setup' ],
-			fullyParallel: true,
+			workers: 1,
 			use: {
 				...devices[ 'Desktop Chrome' ],
 				storageState: BLOCKS_ADMIN_STATE,
