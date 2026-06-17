@@ -418,20 +418,10 @@ jQuery( function ( $ ) {
 				() => this.show_current_value( '#catalog-visibility-display' )
 			);
 
-			$( '#catalog-visibility .edit-catalog-visibility' ).on( 'click', () =>
-				this.hide_current_value( '#catalog-visibility-display' )
-			);
-
-			$(
-				'#catalog-visibility .save-post-visibility, #catalog-visibility .cancel-post-visibility'
-			).on( 'click', () =>
-				this.show_current_value( '#catalog-visibility-display' )
-			);
-
 			this.show_current_value( '#catalog-visibility-display' );
 			sync_select_from_radios();
 		},
-	};
+
 
 	wc_product_publish_panel_dropdowns.init();
 
