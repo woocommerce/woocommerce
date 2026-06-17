@@ -16,24 +16,24 @@ import {
 import { tags, test, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { fillPageTitle } from '../../utils/editor';
+import { getFakeProduct, getFakeTag, getFakeAttribute } from '../../utils/data';
 
 const pageTitle = 'Product Showcase';
-const singleProductPrice1 = '5.00';
-const singleProductPrice2 = '10.00';
-const singleProductPrice3 = '15.00';
 
-const productTagName1 = 'product tag 1';
-const productTagName2 = 'product tag 2';
-const productTagName3 = 'product tag 3';
+const productTagName1 = getFakeTag().name;
+const productTagName2 = getFakeTag().name;
+const productTagName3 = getFakeTag().name;
 
-const productAttributeName = 'color';
-const productAttributeTerm = 'red';
-
-const simpleProductName = 'Single Product With Tags';
+// Both the attribute and its term must be unique: the attribute creates a
+// global `pa_*` taxonomy and the term a global term within it, so a fixed name
+// would collide across parallel workers.
+const productAttributeName = getFakeAttribute().name;
+const productAttributeTerm = getFakeAttribute().name;
 
 let product1Id: number,
 	product2Id: number,
 	product3Id: number,
+	product1Slug: string,
 	productTag1Id: number,
 	productTag2Id: number,
 	productTag3Id: number,
@@ -44,6 +44,10 @@ test.describe(
 	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
+
+		const product1 = getFakeProduct();
+		const product2 = getFakeProduct();
+		const product3 = getFakeProduct();
 
 		test.beforeAll( async ( { restApi } ) => {
 			// add product tags
@@ -90,9 +94,7 @@ test.describe(
 			// add products
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
-					name: simpleProductName + ' 1',
-					type: 'simple',
-					regular_price: singleProductPrice1,
+					...product1,
 					tags: [
 						{ id: productTag1Id },
 						{
@@ -112,12 +114,11 @@ test.describe(
 				} )
 				.then( ( response ) => {
 					product1Id = response.data.id;
+					product1Slug = response.data.slug;
 				} );
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
-					name: simpleProductName + ' 2',
-					type: 'simple',
-					regular_price: singleProductPrice2,
+					...product2,
 					tags: [
 						{ id: productTag1Id },
 						{
@@ -137,9 +138,7 @@ test.describe(
 				} );
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
-					name: simpleProductName + ' 3',
-					type: 'simple',
-					regular_price: singleProductPrice3,
+					...product3,
 					tags: [ { id: productTag1Id } ],
 					attributes: [
 						{
@@ -215,7 +214,7 @@ test.describe(
 			page,
 		} ) => {
 			await page.goto( 'shop/?orderby=date' );
-			await page.locator( `text=${ simpleProductName } 1` ).click();
+			await page.locator( `text=${ product1.name }` ).click();
 			await page.getByRole( 'link', { name: productTagName1 } ).click();
 			await expect(
 				page.getByRole( 'heading', { name: productTagName1 } )
@@ -257,8 +256,7 @@ test.describe(
 
 			await expect( attributeLookupCheckbox ).toBeChecked();
 
-			const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
-			await page.goto( `product/${ slug }` );
+			await page.goto( `product/${ product1Slug }` );
 			await page
 				.locator(
 					'.woocommerce-product-attributes-item__value > p > a',

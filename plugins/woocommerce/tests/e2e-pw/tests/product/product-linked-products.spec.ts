@@ -9,6 +9,7 @@ import type { Page } from '@playwright/test';
  */
 import { test as baseTest, expect, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { getFakeProduct } from '../../utils/data';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
@@ -18,11 +19,7 @@ const test = baseTest.extend( {
 
 		for ( const key of Object.values( keys ) ) {
 			await restApi
-				.post( `${ WC_API_PATH }/products`, {
-					name: `${ key } ${ Date.now() }`,
-					type: 'simple',
-					regular_price: '12.99',
-				} )
+				.post( `${ WC_API_PATH }/products`, getFakeProduct() )
 				.then( ( response ) => {
 					products[ key ] = response.data;
 				} );

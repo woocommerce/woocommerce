@@ -8,49 +8,39 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  */
 import { test, expect, tags } from '../../fixtures/fixtures';
 import { checkCartContent } from '../../utils/cart';
-
-const productPrice = '18.16';
-const simpleProductName = 'Simple single product';
-const groupedProductName = 'Grouped single product';
+import { getFakeProduct } from '../../utils/data';
 
 let simpleProductId: number, simpleProduct2Id: number, groupedProductId: number;
+let groupedProductSlug: string;
 
 test.describe(
 	'Grouped Product Page',
 	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
 	() => {
-		const slug = groupedProductName.replace( / /gi, '-' ).toLowerCase();
-		const simpleProduct1 = simpleProductName + ' 1';
-		const simpleProduct2 = simpleProductName + ' 2';
+		const simpleProduct1 = getFakeProduct();
+		const simpleProduct2 = getFakeProduct();
+		const groupedProduct = getFakeProduct( { type: 'grouped' } );
 
 		test.beforeAll( async ( { restApi } ) => {
 			// add products
 			await restApi
-				.post( `${ WC_API_PATH }/products`, {
-					name: simpleProduct1,
-					type: 'simple',
-					regular_price: productPrice,
-				} )
+				.post( `${ WC_API_PATH }/products`, simpleProduct1 )
 				.then( ( response ) => {
 					simpleProductId = response.data.id;
 				} );
 			await restApi
-				.post( `${ WC_API_PATH }/products`, {
-					name: simpleProduct2,
-					type: 'simple',
-					regular_price: productPrice,
-				} )
+				.post( `${ WC_API_PATH }/products`, simpleProduct2 )
 				.then( ( response ) => {
 					simpleProduct2Id = response.data.id;
 				} );
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
-					name: groupedProductName,
-					type: 'grouped',
+					...groupedProduct,
 					grouped_products: [ simpleProductId, simpleProduct2Id ],
 				} )
 				.then( ( response ) => {
 					groupedProductId = response.data.id;
+					groupedProductSlug = response.data.slug;
 				} );
 		} );
 
@@ -83,7 +73,7 @@ test.describe(
 		test( 'should be able to add grouped products to the cart', async ( {
 			page,
 		} ) => {
-			await page.goto( `product/${ slug }` );
+			await page.goto( `product/${ groupedProductSlug }` );
 
 			await page
 				.getByRole( 'button', { name: 'Add to cart', exact: true } )
@@ -102,7 +92,7 @@ test.describe(
 			await expect(
 				page.getByText(
 					new RegExp(
-						`${ simpleProduct1 }.*and.*${ simpleProduct2 }.*have been added to your cart`
+						`${ simpleProduct1.name }.*and.*${ simpleProduct2.name }.*have been added to your cart`
 					)
 				)
 			).toBeVisible();
@@ -114,15 +104,15 @@ test.describe(
 				[
 					{
 						data: {
-							name: simpleProduct1,
-							price: productPrice,
+							name: simpleProduct1.name,
+							price: simpleProduct1.regular_price,
 						},
 						qty: 5,
 					},
 					{
 						data: {
-							name: simpleProduct2,
-							price: productPrice,
+							name: simpleProduct2.name,
+							price: simpleProduct2.regular_price,
 						},
 						qty: 5,
 					},
@@ -134,7 +124,7 @@ test.describe(
 		test( 'should be able to remove grouped products from the cart', async ( {
 			page,
 		} ) => {
-			await page.goto( `product/${ slug }` );
+			await page.goto( `product/${ groupedProductSlug }` );
 			await page.locator( 'div.quantity input.qty >> nth=0' ).fill( '1' );
 			await page.locator( 'div.quantity input.qty >> nth=1' ).fill( '1' );
 			await page
@@ -144,7 +134,7 @@ test.describe(
 			await expect(
 				page.getByText(
 					new RegExp(
-						`${ simpleProduct1 }.*and.*${ simpleProduct2 }.*have been added to your cart`
+						`${ simpleProduct1.name }.*and.*${ simpleProduct2.name }.*have been added to your cart`
 					)
 				)
 			).toBeVisible();

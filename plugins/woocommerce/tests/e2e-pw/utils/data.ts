@@ -69,3 +69,26 @@ export function getFakeCategory( options = { extraRandomTerm: false } ) {
 		}`.trim(),
 	};
 }
+
+// A unique taxonomy term name. Kept short so the generated `pa_*` attribute
+// taxonomy slug stays within WordPress' length limit, and suffixed with random
+// characters so parallel workers never share the same global term.
+function getFakeTermName() {
+	return `${ faker.commerce.productMaterial() } ${ faker.string.alphanumeric(
+		5
+	) }`;
+}
+
+// A unique product tag name, so parallel workers don't share global terms.
+export function getFakeTag() {
+	return {
+		name: getFakeTermName(),
+	};
+}
+
+// A unique product attribute (or attribute term) name.
+export function getFakeAttribute() {
+	return {
+		name: getFakeTermName(),
+	};
+}
