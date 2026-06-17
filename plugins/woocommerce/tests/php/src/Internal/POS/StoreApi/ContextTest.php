@@ -75,6 +75,22 @@ class ContextTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox is_pos_request returns false for a POS URI when the point_of_sale feature is disabled.
+	 */
+	public function test_returns_false_when_feature_disabled(): void {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/internal/pos/v1/cart/add-item';
+		update_option( 'woocommerce_feature_point_of_sale_enabled', 'no' );
+		try {
+			$this->assertFalse(
+				Context::is_pos_request(),
+				'With point_of_sale off there are no POS routes, so a POS URI must not be treated as a POS request.'
+			);
+		} finally {
+			delete_option( 'woocommerce_feature_point_of_sale_enabled' );
+		}
+	}
+
+	/**
 	 * @testdox is_pos_request returns false for the public POS catalog namespace (not the store-api routes).
 	 */
 	public function test_returns_false_for_pos_catalog_uri(): void {

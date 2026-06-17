@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\POS\StoreApi;
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 /**
  * Request-scoped detection of POS Store API requests.
  *
@@ -20,6 +22,12 @@ namespace Automattic\WooCommerce\Internal\POS\StoreApi;
  * every POS policy hook. Consulted by the POS session handler and policy hooks;
  * detection is cheap and idempotent. A test override lets PHPUnit simulate POS
  * context without a full REST request.
+ *
+ * Detection also requires the `point_of_sale` feature to be enabled: when it is
+ * off no POS routes are registered (see {@see Routes\Controller}), so a request
+ * to a POS URI cannot be a real POS request and the policy hooks must stay out
+ * of the way. Gating here keeps the session handler swap and every policy hook
+ * consistent with route registration from a single place.
  *
  * @internal Just for internal use.
  *
@@ -51,6 +59,13 @@ class Context {
 	public static function is_pos_request(): bool {
 		if ( null !== self::$test_override ) {
 			return self::$test_override;
+		}
+
+		// No POS routes exist when the feature is off, so nothing should be
+		// treated as a POS request. Checked after the test override so unit
+		// tests can force POS context without toggling the feature.
+		if ( ! FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
+			return false;
 		}
 
 		// Direct request: the route is in the URI path (/wp-json/wc/internal/pos/...).
