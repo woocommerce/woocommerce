@@ -176,10 +176,17 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
-						'context' => $this->get_context_param(
+						'context'    => $this->get_context_param(
 							array(
 								'default' => 'view',
 							)
+						),
+						'image_size' => array(
+							'description'       => __( 'Image size to return. Accepts any registered WordPress image size.', 'woocommerce' ),
+							'type'              => 'string',
+							'default'           => 'full',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
 						),
 					),
 				),
@@ -283,7 +290,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$context       = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		// @phpstan-ignore-next-line property.notFound (Deliberately dynamic to avoid adding inherited state that can fatal subclasses.)
 		$this->request = $request;
 
 		$data = $this->prepare_object_for_response_core( $object, $request, $context );
@@ -520,6 +528,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	protected function get_images( $product ) {
+		$image_size = $this->request['image_size'] ?? 'full';
+		$image_size = is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
+
 		$images         = array();
 		$attachment_ids = array();
 
@@ -543,7 +554,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				continue;
 			}
 
-			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+			$attachment = wp_get_attachment_image_src( $attachment_id, $image_size );
 			if ( ! is_array( $attachment ) ) {
 				continue;
 			}
@@ -2574,6 +2585,13 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				'type' => 'string',
 			),
 			'sanitize_callback' => 'wp_parse_list',
+		);
+		$params['image_size']   = array(
+			'description'       => __( 'Image size to return. Accepts any registered WordPress image size.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'full',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;

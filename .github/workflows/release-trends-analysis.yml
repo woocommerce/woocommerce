@@ -6,6 +6,9 @@ on:
         description: 'Milestone (in X.Y.Z format)'
         required: true
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   analyze-trends-cfes:
     runs-on: ubuntu-latest
