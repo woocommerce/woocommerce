@@ -497,7 +497,7 @@ export const SettingsUIPage = ( {
 	const context: SettingsFieldContext = useMemo(
 		() => ( {
 			page: page || schema.id,
-			section: section || schema.section,
+			section: typeof section === 'undefined' ? schema.section : section,
 		} ),
 		[ page, schema.id, schema.section, section ]
 	);

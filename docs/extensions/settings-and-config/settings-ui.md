@@ -192,6 +192,8 @@ registerSettingsExtension( {
 } );
 ```
 
+Omit `scope.section` for a page-wide registration. Use `section: ''` for the default section only, or pass a section id such as `section: 'payments'` for one named section.
+
 See [Registering settings UI components](./registering-settings-ui-components.md) for the full component contract.
 
 ## Load extension scripts before mount

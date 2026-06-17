@@ -58,6 +58,9 @@ const isValidRegistration = (
 	} );
 };
 
+const hasSectionScope = ( scope: SettingsExtensionRegistration[ 'scope' ] ) =>
+	typeof scope.section !== 'undefined';
+
 const scopeMatches = (
 	registration: SettingsExtensionRegistration,
 	context: SettingsFieldContext
@@ -66,14 +69,17 @@ const scopeMatches = (
 		return false;
 	}
 
-	return (
-		! registration.scope.section ||
-		registration.scope.section === context.section
-	);
+	if ( ! hasSectionScope( registration.scope ) ) {
+		return true;
+	}
+
+	return ( registration.scope.section ?? '' ) === ( context.section ?? '' );
 };
 
 const getScopeKey = ( scope: SettingsExtensionRegistration[ 'scope' ] ) =>
-	`${ scope.page }::${ scope.section || 'default' }`;
+	`${ scope.page }::${
+		hasSectionScope( scope ) ? scope.section || 'default' : '*'
+	}`;
 
 const hasDuplicateScopeAndKeys = (
 	registration: SettingsExtensionRegistration,

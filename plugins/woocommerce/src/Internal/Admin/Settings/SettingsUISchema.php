@@ -115,12 +115,17 @@ class SettingsUISchema {
 			}
 		);
 
+		foreach ( $groups as $group_id => $group ) {
+			unset( $group['order'] );
+			$groups[ $group_id ] = $group;
+		}
+
 		$decoded_title = html_entity_decode( $title, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 );
 
 		return array(
 			'id'      => $page_id,
 			'title'   => $decoded_title,
-			'section' => '' === $section ? self::DEFAULT_GROUP_ID : $section,
+			'section' => $section,
 			'save'    => array(
 				'adapter' => $default_save_adapter,
 			),
