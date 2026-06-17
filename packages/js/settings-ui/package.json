@@ -1,5 +1,5 @@
 {
-	"name": "@woocommerce/settings-ui-sdk",
+	"name": "@woocommerce/settings-ui",
 	"version": "0.1.0",
 	"description": "React utilities for rendering extensible WooCommerce settings pages.",
 	"author": "Automattic",
@@ -9,7 +9,7 @@
 		"woocommerce",
 		"settings"
 	],
-	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/settings-ui-sdk/README.md",
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/settings-ui/README.md",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"

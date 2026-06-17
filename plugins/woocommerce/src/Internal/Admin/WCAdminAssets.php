@@ -329,8 +329,12 @@ class WCAdminAssets {
 			'wc-navigation',
 			'wc-block-templates',
 			'wc-experimental-products-app',
+<<<<<<< HEAD
 			'wc-product-editor',
 			'wc-settings-ui-sdk',
+=======
+			'wc-settings-ui',
+>>>>>>> c8a99b03ef (Rename @woocommerce/settings-ui-sdk to @woocommerce/settings-ui (#65719))
 			'wc-remote-logging',
 			'wc-sanitize',
 		);
@@ -349,8 +353,12 @@ class WCAdminAssets {
 			'wc-experimental-products-app',
 			'wc-experimental',
 			'wc-navigation',
+<<<<<<< HEAD
 			'wc-product-editor',
 			'wc-settings-ui-sdk',
+=======
+			'wc-settings-ui',
+>>>>>>> c8a99b03ef (Rename @woocommerce/settings-ui-sdk to @woocommerce/settings-ui (#65719))
 			WC_ADMIN_APP,
 		);
 
@@ -479,7 +487,7 @@ class WCAdminAssets {
 		 * @var mixed[] $extension_handles
 		 */
 		$dependencies = array_merge(
-			array( 'wc-settings-ui-sdk' ),
+			array( 'wc-settings-ui' ),
 			array_filter(
 				$extension_handles,
 				static function ( $script_handle ): bool {

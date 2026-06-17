@@ -65,7 +65,7 @@
 		"@woocommerce/email-editor": "workspace:*",
 		"@woocommerce/experimental": "workspace:*",
 		"@woocommerce/explat": "workspace:*",
-		"@woocommerce/settings-ui-sdk": "workspace:*",
+		"@woocommerce/settings-ui": "workspace:*",
 		"@woocommerce/navigation": "workspace:*",
 		"@woocommerce/number": "workspace:*",
 		"@woocommerce/onboarding": "workspace:*",

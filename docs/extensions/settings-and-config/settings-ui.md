@@ -1,18 +1,18 @@
 ---
-post_title: Settings UI SDK
-sidebar_label: Settings UI SDK
+post_title: Settings UI
+sidebar_label: Settings UI
 sidebar_position: 5
 ---
 
-# Settings UI SDK
+# Settings UI
 
-The settings UI SDK is an opt-in path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow.
+The settings UI is an opt-in path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow.
 
 It is designed for extension authors who want to migrate incrementally. PHP still owns page registration, settings schema, permissions, script dependencies, and persistence. React owns field rendering and client-side interaction.
 
 ## Status
 
--   The SDK is behind the `settings-ui` feature flag.
+-   The settings UI is behind the `settings-ui` feature flag.
 -   With the flag disabled, settings pages keep the legacy PHP renderer.
 -   With the flag enabled, a settings page still has to opt in explicitly.
 -   Saves use the existing WooCommerce settings form POST flow by default.
@@ -104,7 +104,7 @@ array(
 Then register that component from JavaScript:
 
 ```ts
-import { registerSettingsExtension } from '@woocommerce/settings-ui-sdk';
+import { registerSettingsExtension } from '@woocommerce/settings-ui';
 import { PaymentMethodPicker } from './payment-method-picker';
 
 registerSettingsExtension( {
@@ -134,11 +134,11 @@ final class My_Plugin_Settings_UI_Page extends LegacySettingsPageAdapter {
 }
 ```
 
-The settings embed script depends on the SDK and these handles only for the opted-in page. Other settings pages do not load the SDK.
+The settings embed script depends on the settings UI package and these handles only for the opted-in page. Other settings pages do not load it.
 
 ## Save adapters
 
-The SDK supports two save adapters:
+The settings UI supports two save adapters:
 
 | Adapter     | Behavior                                                             |
 | ----------- | -------------------------------------------------------------------- |
@@ -187,7 +187,7 @@ Descriptions are sanitized with `wp_kses_post()`. Actions are structured data wi
 
 ## Reference migration in WooCommerce core
 
-The Products settings page is the Core reference migration. With `settings-ui` enabled, the Products tab renders through the settings UI SDK. With the flag disabled, it renders through the existing legacy settings UI.
+The Products settings page is the Core reference migration. With `settings-ui` enabled, the Products tab renders through the settings UI. With the flag disabled, it renders through the existing legacy settings UI.
 
 Use this page to verify the native migration path before testing a plugin-specific page such as WooPayments.
 
@@ -203,10 +203,10 @@ Use this page to verify the native migration path before testing a plugin-specif
 
 ## Diagnostics
 
-In development, the SDK logs warnings for common integration issues:
+In development, the settings UI logs warnings for common integration issues:
 
 -   The settings payload is missing.
--   The SDK script is missing for a settings UI mount.
+-   The `wc-settings-ui` script is missing for a settings UI mount.
 -   A field declares a component that is not registered.
 -   A field type is unsupported.
 -   A field declares an unknown save adapter.
