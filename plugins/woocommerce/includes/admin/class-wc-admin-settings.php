@@ -418,7 +418,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									echo implode( ' ', $custom_attributes );
 									// WPCS: XSS ok.
 									?>
-									/>&lrm;
+									/>&lrm; 
 									<?php
 									echo $description;
 									// WPCS: XSS ok.
@@ -520,7 +520,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 										<?php
 									}
 									?>
-								</select>
+								</select> 
 								<?php
 								echo $description;
 								// WPCS: XSS ok.
@@ -661,12 +661,12 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									echo implode( ' ', $custom_attributes );
 									// WPCS: XSS ok.
 									?>
-								/>
+								/> 
 								<?php
 								echo $description;
 								// WPCS: XSS ok.
 								?>
-							</label>
+							</label> 
 							<?php
 							echo $tooltip_html;
 							// WPCS: XSS ok.
@@ -713,19 +713,19 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						</th>
 							<td class="forminp image_width_settings">
 
-								<input name="<?php echo esc_attr( $value['field_name'] ); ?>[width]"
+								<input name="<?php echo esc_attr( $value['field_name'] ); ?>[width]" 
 								<?php
 								echo $disabled_attr;
 								// WPCS: XSS ok.
 								?>
-								id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo esc_attr( $width ); ?>" /> &times; <input name="<?php echo esc_attr( $value['id'] ); ?>[height]"
+								id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo esc_attr( $width ); ?>" /> &times; <input name="<?php echo esc_attr( $value['id'] ); ?>[height]" 
 						<?php
 						echo $disabled_attr;
 						// WPCS: XSS ok.
 						?>
 id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="<?php echo esc_attr( $height ); ?>" />px
 
-								<label><input name="<?php echo esc_attr( $value['field_name'] ); ?>[crop]"
+								<label><input name="<?php echo esc_attr( $value['field_name'] ); ?>[crop]" 
 								<?php
 								echo $disabled_attr;
 								// WPCS: XSS ok.
@@ -844,7 +844,7 @@ id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="
 							</th>
 							<td class="forminp"><select name="<?php echo esc_attr( $value['field_name'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php esc_attr_e( 'Choose a country / region&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>" class="wc-enhanced-select">
 								<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
-							</select>
+							</select> 
 							<?php
 							echo $description;
 							// WPCS: XSS ok.
@@ -892,7 +892,7 @@ id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="
 										}
 									}
 									?>
-								</select>
+								</select> 
 								<?php
 								echo ( $description ) ? $description : '';
 								// WPCS: XSS ok.
@@ -944,7 +944,7 @@ id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="
 										echo '<option value="' . esc_attr( $value ) . '"' . selected( $option_value['unit'], $value, false ) . '>' . esc_html( $label ) . '</option>';
 									}
 									?>
-								</select>
+								</select> 
 								<?php
 								echo ( $description ) ? $description : '';
 								// WPCS: XSS ok.

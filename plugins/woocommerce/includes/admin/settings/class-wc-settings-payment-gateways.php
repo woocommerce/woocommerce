@@ -56,6 +56,10 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		// It is too risky to hook into `admin_notices` with a low priority because the callbacks might be cached.
 		add_action( 'in_admin_header', array( $this, 'suppress_admin_notices' ), PHP_INT_MAX );
 
+		// Do not show any store alerts (WC admin notes with type: 'error,update' and status: 'unactioned')
+		// on the WooCommerce Payments settings page and Reactified sections.
+		add_filter( 'woocommerce_admin_features', array( $this, 'suppress_store_alerts' ), PHP_INT_MAX );
+
 		parent::__construct();
 	}
 
@@ -424,6 +428,29 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Suppress the store-alerts WCAdmin feature on the WooCommerce Payments settings page and Reactified sections.
+	 *
+	 * @param mixed $features The WCAdmin features list.
+	 *
+	 * @return mixed The modified features list.
+	 */
+	public function suppress_store_alerts( $features ) {
+		global $current_tab, $current_section;
+
+		$feature_name = 'store-alerts';
+
+		if ( is_array( $features ) &&
+			in_array( $feature_name, $features, true ) &&
+			self::TAB_NAME === $current_tab &&
+			$this->should_render_react_section( $current_section ) ) {
+
+			unset( $features[ array_search( $feature_name, $features, true ) ] );
+		}
+
+		return $features;
 	}
 }
 
