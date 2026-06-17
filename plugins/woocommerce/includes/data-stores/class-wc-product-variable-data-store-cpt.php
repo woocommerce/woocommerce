@@ -569,21 +569,33 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	protected function taxes_influence_price( $product ): bool {
 		if ( ! $product->is_taxable() ) {
-			return false;
+			$taxes_influence_price = false;
+		} elseif ( empty( WC_Tax::get_rates( $product->get_tax_class() ) ) ) {
+			$taxes_influence_price = false;
+		} else {
+			// Taxes influence the price regardless of VAT exempt status. Even when a
+			// customer is VAT exempt, the displayed prices differ from non-exempt
+			// prices, so they need separate cache entries and the opposite_price_hash
+			// optimization should not apply. Returning false here was causing cached
+			// non-exempt prices to be served to VAT exempt customers.
+			$taxes_influence_price = true;
 		}
 
-		if ( empty( WC_Tax::get_rates( $product->get_tax_class() ) ) ) {
-			return false;
-		}
-
-		// Taxes influence the price regardless of VAT exempt status. Even when a
-		// customer is VAT exempt, the displayed prices differ from non-exempt
-		// prices, so they need separate cache entries and the opposite_price_hash
-		// optimization should not apply. Returning false here was causing cached
-		// non-exempt prices to be served to VAT exempt customers.
-		// See: https://github.com/woocommerce/woocommerce/issues/63716
-
-		return true;
+		/**
+		 * Filters whether taxes influence the displayed price of a variable product.
+		 *
+		 * Return `true` from this filter to force separate cache entries for the two
+		 * variants. This is needed when an extension produces displayed prices that
+		 * differ from raw prices independently of the standard tax calculation, for
+		 * example when computing per-country prices for locations that have no
+		 * configured tax rates.
+		 *
+		 * @param bool       $taxes_influence_price Default decision based on product taxability and configured tax rates.
+		 * @param WC_Product $product               The variable product being evaluated.
+		 *
+		 * @since 10.9.0
+		 */
+		return (bool) apply_filters( 'woocommerce_variable_product_taxes_influence_price', $taxes_influence_price, $product );
 	}
 
 	/**

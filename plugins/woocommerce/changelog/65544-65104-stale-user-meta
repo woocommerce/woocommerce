@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fixes checkout flow to not save shipping_method in customer meta

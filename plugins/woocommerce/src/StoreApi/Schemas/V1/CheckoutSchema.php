@@ -428,7 +428,7 @@ class CheckoutSchema extends AbstractSchema {
 						return $carry;
 					}
 					$field_schema   = $properties[ $key ];
-					$rest_sanitized = rest_sanitize_value_from_schema( wp_unslash( $fields[ $key ] ), $field_schema, $key );
+					$rest_sanitized = rest_sanitize_value_from_schema( $fields[ $key ], $field_schema, $key );
 					$rest_sanitized = $this->additional_fields_controller->sanitize_field( $key, $rest_sanitized );
 					$carry[ $key ]  = $rest_sanitized;
 					return $carry;
