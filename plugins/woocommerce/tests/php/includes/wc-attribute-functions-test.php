@@ -358,4 +358,35 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			array( 'ĂnîC°Dę', 'anicde' ),
 		);
 	}
+
+	/**
+	 * Test wc_get_attribute_slug_character_estimate().
+	 */
+	public function test_wc_get_attribute_slug_character_estimate() {
+		$max = wc_get_attribute_slug_max_byte_length();
+
+		// Latin / single-byte locales get the full byte budget as characters.
+		$this->assertSame( $max, wc_get_attribute_slug_character_estimate( 'en_US' ) );
+		$this->assertSame( $max, wc_get_attribute_slug_character_estimate( 'pt_BR' ) );
+
+		// Cyrillic, Greek, and Hebrew are two bytes per character.
+		$this->assertSame( intdiv( $max, 2 ), wc_get_attribute_slug_character_estimate( 'ru_RU' ) );
+		$this->assertSame( intdiv( $max, 2 ), wc_get_attribute_slug_character_estimate( 'el' ) );
+		$this->assertSame( intdiv( $max, 2 ), wc_get_attribute_slug_character_estimate( 'he_IL' ) );
+
+		// CJK, Thai, and Devanagari are three bytes per character.
+		$this->assertSame( intdiv( $max, 3 ), wc_get_attribute_slug_character_estimate( 'zh_CN' ) );
+		$this->assertSame( intdiv( $max, 3 ), wc_get_attribute_slug_character_estimate( 'ja' ) );
+		$this->assertSame( intdiv( $max, 3 ), wc_get_attribute_slug_character_estimate( 'th' ) );
+		$this->assertSame( intdiv( $max, 3 ), wc_get_attribute_slug_character_estimate( 'hi_IN' ) );
+
+		// Unknown locales fall back to the single-byte (Latin) assumption.
+		$this->assertSame( $max, wc_get_attribute_slug_character_estimate( 'xx_YY' ) );
+
+		// An empty locale defers to the site locale.
+		$this->assertSame(
+			wc_get_attribute_slug_character_estimate( get_locale() ),
+			wc_get_attribute_slug_character_estimate()
+		);
+	}
 }

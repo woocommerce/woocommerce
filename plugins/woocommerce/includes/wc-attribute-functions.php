@@ -161,6 +161,50 @@ function wc_get_attribute_slug_max_byte_length() {
 }
 
 /**
+ * Estimate how many characters fit in a product attribute slug for a given locale.
+ *
+ * The slug limit is enforced in bytes (see wc_get_attribute_slug_max_byte_length()),
+ * but users think in characters. UTF-8 encodes a character in 1-4 bytes depending on
+ * its script, so the character budget depends on the language. This maps the locale to
+ * the typical byte width of its script and divides the byte budget by it, yielding a
+ * rough, user-friendly maximum.
+ *
+ * This is a heuristic: a site's locale predicts the script its users most likely type,
+ * not the actual slug they enter (a Greek-language store may still use Latin slugs),
+ * so callers should present the result as an approximation and keep the byte limit
+ * authoritative.
+ *
+ * @since 11.0.0
+ * @param string $locale Locale to inspect, e.g. 'pt_BR'. Defaults to the site locale.
+ * @return int Approximate maximum number of characters, never less than 1.
+ */
+function wc_get_attribute_slug_character_estimate( $locale = '' ) {
+	if ( '' === $locale ) {
+		$locale = get_locale();
+	}
+
+	// Reduce the locale to its language subtag, e.g. 'pt_BR' or 'zh-Hans' -> 'pt' / 'zh'.
+	$language = strtolower( (string) strtok( (string) $locale, '_-' ) );
+
+	// Space-padded lists of language subtags grouped by the typical UTF-8 byte width of
+	// their script. Three bytes: CJK, Thai, Georgian, and common Brahmic (Indic) scripts.
+	// Two bytes: Cyrillic, Greek, Hebrew, Arabic, Armenian, and related. Everything else
+	// (Latin and unknown) is treated as single-byte. The padding makes each match whole-word.
+	$three_byte = ' zh ja ko th ka hi bn ta te mr gu kn ml pa or si km lo my ';
+	$two_byte   = ' ru uk bg sr be mk kk ky tg mn el he ar fa ur ps hy ';
+
+	if ( false !== strpos( $three_byte, " {$language} " ) ) {
+		$byte_width = 3;
+	} elseif ( false !== strpos( $two_byte, " {$language} " ) ) {
+		$byte_width = 2;
+	} else {
+		$byte_width = 1;
+	}
+
+	return max( 1, intdiv( wc_get_attribute_slug_max_byte_length(), $byte_width ) );
+}
+
+/**
  * Get the attribute name used when storing values in post meta.
  *
  * @since 2.6.0
