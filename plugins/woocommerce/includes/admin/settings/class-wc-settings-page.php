@@ -123,7 +123,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		}
 
 		/**
-		 * Add a body class for settings pages rendered through the settings UI SDK.
+		 * Add a body class for settings pages rendered through the settings UI.
 		 *
 		 * @since 10.9.0
 		 *
