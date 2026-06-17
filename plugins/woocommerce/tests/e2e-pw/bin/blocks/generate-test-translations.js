@@ -4,15 +4,14 @@ const { ensureDirSync, writeJsonSync } = require( 'fs-extra' );
 const crypto = require( 'crypto' );
 const path = require( 'path' );
 const glob = require( 'glob' );
-const { translations } = require( '../test-data/data/data.ts' );
-const { getTestTranslation } = require( '../utils/get-test-translation.js' );
+const { translations } = require( '../../test-data/blocks/data/data.ts' );
+const {
+	getTestTranslation,
+} = require( '../../utils/blocks/get-test-translation.js' );
 
-const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
+const ROOT_DIR = path.resolve( __dirname, '../../../../' );
 const BUILD_DIR = path.resolve( ROOT_DIR, 'assets/client/blocks/' );
-const TESTS_DIR = path.resolve(
-	__dirname,
-	'../../../../../tests/e2e-pw/tests/blocks'
-);
+const TESTS_DIR = path.resolve( __dirname, '../../tests/blocks' );
 const LANGUAGES_DIR = path.join( ROOT_DIR, 'i18n/languages/' );
 
 ensureDirSync( LANGUAGES_DIR );
