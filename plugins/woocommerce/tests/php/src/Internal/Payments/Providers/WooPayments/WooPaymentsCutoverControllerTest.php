@@ -98,6 +98,8 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 
 		remove_all_filters( NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED );
 		remove_all_filters( WooPaymentsCutoverController::FILTER_NATIVE_TRANSPORT_READY );
+		remove_all_filters( WooPaymentsCutoverController::FILTER_NATIVE_ADMIN_SURFACES_READY );
+		remove_all_filters( WooPaymentsCutoverController::FILTER_PROVIDER_EVENT_TYPES_PENDING_CUTOVER );
 		remove_all_filters( WooPaymentsCutoverController::FILTER_SOFT_CUTOVER_ENABLED );
 		remove_all_filters( WooPaymentsCutoverController::FILTER_MANDATORY_CUTOVER_ENABLED );
 		remove_all_filters( WooPaymentsCutoverController::FILTER_PREFLIGHT_FAILURES );
@@ -285,12 +287,42 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cutover preflight blocks while native admin surfaces are unavailable.
+	 */
+	public function test_preflight_blocks_when_native_admin_surfaces_are_unavailable(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		add_filter( NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED, '__return_true' );
+		add_filter( WooPaymentsCutoverController::FILTER_PROVIDER_EVENT_TYPES_PENDING_CUTOVER, '__return_empty_array' );
+		$this->native_provider_ready = true;
+
+		$this->assertContains( 'native_admin_surfaces_unavailable', $this->sut->get_preflight_failures() );
+		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+	}
+
+	/**
+	 * @testdox Cutover preflight blocks while provider event types remain undispositioned.
+	 */
+	public function test_preflight_blocks_when_provider_events_are_undispositioned(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		add_filter( NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED, '__return_true' );
+		add_filter( WooPaymentsCutoverController::FILTER_NATIVE_ADMIN_SURFACES_READY, '__return_true' );
+		$this->native_provider_ready = true;
+
+		$this->assertContains( 'provider_events_undispositioned', $this->sut->get_preflight_failures() );
+		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+	}
+
+	/**
 	 * @testdox Transport readiness filter can still force cutover readiness for controlled rollouts.
 	 */
 	public function test_transport_filter_can_force_preflight_when_provider_is_not_ready(): void {
 		$this->fake_plugin_active();
 		$this->fake_current_user_caps( true );
 		add_filter( NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED, '__return_true' );
+		add_filter( WooPaymentsCutoverController::FILTER_NATIVE_ADMIN_SURFACES_READY, '__return_true' );
+		add_filter( WooPaymentsCutoverController::FILTER_PROVIDER_EVENT_TYPES_PENDING_CUTOVER, '__return_empty_array' );
 		add_filter( WooPaymentsCutoverController::FILTER_NATIVE_TRANSPORT_READY, '__return_true' );
 
 		$this->assertTrue( $this->sut->should_show_soft_cutover_notice() );
@@ -301,6 +333,8 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	 */
 	private function enable_ready_cutover(): void {
 		add_filter( NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED, '__return_true' );
+		add_filter( WooPaymentsCutoverController::FILTER_NATIVE_ADMIN_SURFACES_READY, '__return_true' );
+		add_filter( WooPaymentsCutoverController::FILTER_PROVIDER_EVENT_TYPES_PENDING_CUTOVER, '__return_empty_array' );
 		$this->native_provider_ready = true;
 	}
 

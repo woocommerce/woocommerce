@@ -51,6 +51,20 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	public const FILTER_NATIVE_TRANSPORT_READY = 'woocommerce_woopayments_native_transport_ready';
 
 	/**
+	 * Filter that reports whether native WooPayments merchant admin surfaces are ready after deactivation.
+	 *
+	 * @var string
+	 */
+	public const FILTER_NATIVE_ADMIN_SURFACES_READY = 'woocommerce_woopayments_native_admin_surfaces_ready';
+
+	/**
+	 * Filter that reports provider event types still pending native cutover disposition.
+	 *
+	 * @var string
+	 */
+	public const FILTER_PROVIDER_EVENT_TYPES_PENDING_CUTOVER = 'woocommerce_woopayments_native_cutover_pending_event_types';
+
+	/**
 	 * Filter for cutover preflight failures.
 	 *
 	 * @var string
@@ -293,6 +307,21 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 		}
 
 		/**
+		 * Filters whether native WooPayments merchant admin surfaces are ready after deactivation.
+		 *
+		 * @param bool $is_ready Whether native merchant admin surfaces are ready.
+		 *
+		 * @since 11.0.0
+		 */
+		if ( ! (bool) apply_filters( self::FILTER_NATIVE_ADMIN_SURFACES_READY, false ) ) {
+			$failures[] = 'native_admin_surfaces_unavailable';
+		}
+
+		if ( array() !== $this->get_pending_provider_event_types() ) {
+			$failures[] = 'provider_events_undispositioned';
+		}
+
+		/**
 		 * Filters WooPayments native cutover preflight failures.
 		 *
 		 * @param array<int,string> $failures Failure codes.
@@ -349,6 +378,35 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 		} catch ( \Throwable $e ) {
 			return false;
 		}
+	}
+
+	/**
+	 * Get provider event types that still need native cutover disposition.
+	 *
+	 * @return array<int,string> Event type identifiers.
+	 */
+	private function get_pending_provider_event_types(): array {
+		/**
+		 * Filters provider event types that still need native cutover disposition.
+		 *
+		 * @param array<int,string> $event_types Event types that still block cutover.
+		 *
+		 * @since 11.0.0
+		 */
+		$event_types = apply_filters( self::FILTER_PROVIDER_EVENT_TYPES_PENDING_CUTOVER, WooPaymentsEventIngestor::KNOWN_UNHANDLED_EVENT_TYPES );
+
+		if ( ! is_array( $event_types ) ) {
+			return array( 'provider_events_filter_invalid' );
+		}
+
+		return array_values(
+			array_unique(
+				array_filter(
+					array_map( 'strval', $event_types ),
+					static fn( string $event_type ): bool => '' !== $event_type
+				)
+			)
+		);
 	}
 
 	/**
