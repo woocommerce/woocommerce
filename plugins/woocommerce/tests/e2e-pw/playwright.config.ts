@@ -131,7 +131,6 @@ const serialRunSpecs = [
 	'**/tests/email-editor/**/*.spec.ts',
 	'**/tests/onboarding/**/*.spec.ts',
 	'**/tests/order/**/*.spec.ts',
-	'**/tests/product/**/*.spec.ts',
 	'**/tests/settings/**/*.spec.ts',
 	'**/tests/shipping/**/*.spec.ts',
 	'**/tests/shop/**/*.spec.ts',
