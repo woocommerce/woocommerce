@@ -97,7 +97,7 @@ pnpm --filter='@woocommerce/admin-library' test:js
 pnpm --filter='@woocommerce/block-library' test:js
 ```
 
-See the [unit tests README](plugins/woocommerce/tests/README.md), [E2E tests README](plugins/woocommerce/tests/e2e-pw/README.md), and [performance tests README](plugins/woocommerce/tests/performance/README.md) for full details.
+See the [unit tests README](plugins/woocommerce/tests/README.md), [E2E tests README](plugins/woocommerce/tests/e2e/README.md), and [performance tests README](plugins/woocommerce/tests/performance/README.md) for full details.
 
 ## Linting and static analysis
 

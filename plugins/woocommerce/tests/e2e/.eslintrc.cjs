@@ -16,7 +16,7 @@ module.exports = {
 		'jest/valid-title': 'off',
 		'testing-library/await-async-utils': 'off',
 		/*
-		 * The e2e-pw tests use dependencies from the parent woocommerce package
+		 * The e2e tests use dependencies from the parent woocommerce package
 		 * (this directory has no package.json of its own). Resolve packageDir from
 		 * __dirname so the check is independent of ESLint's working directory: VS
 		 * Code / root-level ESLint can run from the monorepo root, and relative

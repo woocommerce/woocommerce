@@ -10,9 +10,9 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { test, expect, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-const filePath = path.resolve( 'tests/e2e-pw/test-data/sample_products.csv' );
+const filePath = path.resolve( 'tests/e2e/test-data/sample_products.csv' );
 const filePathOverride = path.resolve(
-	'tests/e2e-pw/test-data/sample_products_override.csv'
+	'tests/e2e/test-data/sample_products_override.csv'
 );
 
 const productIds: number[] = [];

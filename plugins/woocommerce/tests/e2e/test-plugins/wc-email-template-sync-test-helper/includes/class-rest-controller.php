@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  * Helper REST endpoints exposed under /wc-email-test-helper/v1/ for Playwright E2E tests.
  *
  * Health endpoint is open; every other route requires manage_options. The plugin's location
- * under tests/e2e-pw/test-plugins/ — only mounted via .wp-env.json for the test environment —
+ * under tests/e2e/test-plugins/ — only mounted via .wp-env.json for the test environment —
  * provides the second layer of defense.
  */
 class REST_Controller {

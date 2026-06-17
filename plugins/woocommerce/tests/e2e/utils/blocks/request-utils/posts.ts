@@ -17,7 +17,7 @@ export interface PostCompiler {
 
 /**
  * Creates a post from a Handlebars template file located in the
- * tests/e2e-pw/content-templates/blocks directory.
+ * tests/e2e/content-templates/blocks directory.
  */
 export async function createPostFromFile( this: RequestUtils, name: string ) {
 	const filePrefix = 'post';

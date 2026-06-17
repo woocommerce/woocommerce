@@ -53,7 +53,7 @@ Other ways of running tests (make sure you are in the `plugins/woocommerce` fold
 - `pnpm test:e2e --headed` (headed -- displaying browser window and test interactions)
 - `pnpm test:e2e --debug` (runs tests in debug mode)
 - `pnpm test:e2e page-loads.spec.ts` (runs a single test file - `page-loads.spec.ts` in this case)
-- `pnpm test:e2e ./tests/e2e-pw/tests/merchant` (runs all tests that are found in the `merchant` folder)
+- `pnpm test:e2e ./tests/e2e/tests/merchant` (runs all tests that are found in the `merchant` folder)
 - `pnpm test:e2e --ui` (open tests in [Playwright UI mode](https://playwright.dev/docs/test-ui-mode)).
 
 To see all the Playwright options, make sure you are in the `plugins/woocommerce` folder and
@@ -83,7 +83,7 @@ The test site URL and the credentials can be set via environment variables. If n
 as configured in the `test-data/data.js` file.
 
 If you'd like to overwrite the default values to run against a different environment (external host for
-example), you can create a `.env` file in `tests/e2e-pw/`:
+example), you can create a `.env` file in `tests/e2e/`:
 
 ```bash
 BASE_URL='https://www.example.com'
@@ -98,7 +98,7 @@ CUSTOMER_PASSWORD='customer.password'
 > file you should read further on how to create an alternative env, or you should run the tests using the raw Playwright 
 > command: `pnpm playwright ...`
 
-There are some pre-defined environments set in the `tests/e2e-pw/envs` path.
+There are some pre-defined environments set in the `tests/e2e/envs` path.
 Each folder represents an environment, and contains a setup script, a `playwright.config.js` file and optionally an
 encrypted `.env` file.
 Running the tests with one of these environments will first decrypt the `.env.enc` file if it exists, execute the setup 
@@ -132,8 +132,8 @@ E2E_ENV_KEY='your-key' pnpm test:e2e:with-env default-pressable
 
 If you need to create a new pre-defined environment, you can follow these steps:
 
-- create a new folder in the `tests/e2e-pw/envs` directory with the name of the environment.
-  Example: `tests/e2e-pw/envs/my-new-env`
+- create a new folder in the `tests/e2e/envs` directory with the name of the environment.
+  Example: `tests/e2e/envs/my-new-env`
 - create an `env-setup.sh` file in the new folder. This file should contain any setup steps for the environment. This
   will run before any test execution.
 - create a `playwright.config.ts` file in the new folder. This file should contain the configuration for the
@@ -143,9 +143,9 @@ If you need to create a new pre-defined environment, you can follow these steps:
 > [!NOTE]
 > If you previously created a custom environment with a `playwright.config.js` file, it will still work — the test runner falls back to `.js` when no `.ts` config is found. However, new environments should use `.ts`.
 
-- if you need to store an encrypted `.env` file, first create the `.env` file in the `tests/e2e-pw` folder, then
-  run `E2E_ENV_KEY='your-key' ./tests/e2e-pw/bin/dotenv.sh -e my-new-env`. This script command will encrypt the `.env`
-  file into `tests/e2e-pw/envs/my-new-env/.env.enc`.
+- if you need to store an encrypted `.env` file, first create the `.env` file in the `tests/e2e` folder, then
+  run `E2E_ENV_KEY='your-key' ./tests/e2e/bin/dotenv.sh -e my-new-env`. This script command will encrypt the `.env`
+  file into `tests/e2e/envs/my-new-env/.env.enc`.
 
 > [!TIP]
 > Creating an environment directory starting with `_local` will make it ignored by git, so you can store your local environment configurations without worrying about accidentally committing them.
@@ -170,7 +170,7 @@ read: [Playwright Best Practices](https://playwright.dev/docs/best-practices).
 
 ## Test helper plugins
 
-Some E2E suites need fixture mechanisms that can't be expressed cleanly with REST or WP-CLI alone — for example, filter-driven content overrides, server-side event mirroring, or synchronous triggers for normally-scheduled jobs. These ship as small PHP plugins under `tests/e2e-pw/test-plugins/`, mounted via `.wp-env.json`'s `plugins` array.
+Some E2E suites need fixture mechanisms that can't be expressed cleanly with REST or WP-CLI alone — for example, filter-driven content overrides, server-side event mirroring, or synchronous triggers for normally-scheduled jobs. These ship as small PHP plugins under `tests/e2e/test-plugins/`, mounted via `.wp-env.json`'s `plugins` array.
 
 ### `wc-email-template-sync-test-helper`
 
@@ -217,7 +217,7 @@ use the following commands:
 
 ```bash
 cd plugins/woocommerce
-pnpm exec playwright show-report tests/e2e-pw/test-results/playwright-report
+pnpm exec playwright show-report tests/e2e/test-results/playwright-report
 ```
 
 For more details about the Playwright HTML report, see
@@ -235,13 +235,13 @@ Use the `allure generate` command to generate an HTML report from the `allure-re
 the test run. Then, use the `allure open` command to open it on your browser. For example, assuming that:
 
 - You're at the root of the WooCommerce monorepo
-- You want to generate the `allure-report` folder in `plugins/woocommerce/tests/e2e-pw/test-results`
+- You want to generate the `allure-report` folder in `plugins/woocommerce/tests/e2e/test-results`
 
 Then you would need to use the following commands:
 
 ```bash
-pnpm exec allure generate --clean plugins/woocommerce/tests/e2e-pw/test-results/allure-results --output plugins/woocommerce/tests/e2e-pw/test-results/allure-report
-pnpm exec allure open plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+pnpm exec allure generate --clean plugins/woocommerce/tests/e2e/test-results/allure-results --output plugins/woocommerce/tests/e2e/test-results/allure-report
+pnpm exec allure open plugins/woocommerce/tests/e2e/test-results/allure-report
 ```
 
 A browser window should open the Allure report.

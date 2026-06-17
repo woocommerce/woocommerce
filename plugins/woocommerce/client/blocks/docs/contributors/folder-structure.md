@@ -170,9 +170,6 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 ├── templates/emails
 │ Email templates of the WooCommerce Blocks plugin.
 │
-├── tests/e2e
-│ Set of end-to-end tests.
-│
 ├── tests/js
 │ Configuration for Jest.
 │

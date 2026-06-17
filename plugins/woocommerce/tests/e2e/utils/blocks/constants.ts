@@ -23,7 +23,7 @@ export const BASE_URL =
 
 export const WP_ARTIFACTS_PATH =
 	process.env.WP_ARTIFACTS_PATH ||
-	path.join( process.cwd(), 'tests/e2e-pw/.state' );
+	path.join( process.cwd(), 'tests/e2e/.state' );
 
 export const STORAGE_STATE_PATH =
 	process.env.STORAGE_STATE_PATH ||
