@@ -210,11 +210,13 @@ class Controller extends AbstractController {
 									),
 									'refund_total' => array(
 										// No `minimum` here on purpose: validate_preview_line_items() owns
-										// the "must be greater than zero" rule and returns the actionable
-										// `invalid_refund_total` code for both 0 and negative values. A
-										// schema `minimum: 0` would contradict that (it allows 0) and a
-										// generic `rest_invalid_param` is less useful to clients.
-										'description' => __( 'Tax-inclusive amount to refund for this line item. Must be greater than zero. Required when quantity is omitted.', 'woocommerce' ),
+										// the sign rule and returns the actionable `invalid_refund_total`
+										// code. A refund_total must be non-zero and match the line's sign —
+										// negative is valid for a discount/credit line, positive for a normal
+										// line; zero and wrong-sign values are rejected. A schema `minimum`
+										// would wrongly forbid the negative form, and a generic
+										// `rest_invalid_param` is less useful to clients.
+										'description' => __( 'Tax-inclusive amount to refund for this line item. Must be non-zero and match the line\'s sign (negative for discount or credit lines, positive otherwise). Required when quantity is omitted.', 'woocommerce' ),
 										'type'        => array( 'number', 'null' ),
 									),
 								),
