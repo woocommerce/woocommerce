@@ -366,7 +366,8 @@
 				"@wordpress/icons"
 			],
 			"packages": [
-				"@woocommerce/admin-library"
+				"@woocommerce/admin-library",
+				"@woocommerce/settings-ui-sdk"
 			],
 			"isIgnored": true
 		},

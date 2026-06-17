@@ -21,7 +21,7 @@ jest.mock( '@wordpress/admin-ui', () => ( {
  */
 import { SettingsUIPage } from '../settings-ui-page';
 import { __resetRegistry, registerSettingsExtension } from '../registry';
-import type { SettingsUISchema } from '../types';
+import type { SettingsFieldComponentProps, SettingsUISchema } from '../types';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -102,6 +102,65 @@ describe( 'settings HTML rendering', () => {
 		expect( container.textContent ).toContain( 'Test field' );
 		expect( container.textContent ).toContain(
 			'Shown as field description.'
+		);
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'renders registered field components through the settings data form', () => {
+		const CustomField = ( {
+			value,
+			onChange,
+		}: SettingsFieldComponentProps ) => (
+			<button type="button" onClick={ () => onChange( 'changed' ) }>
+				{ value }
+			</button>
+		);
+
+		registerSettingsExtension( {
+			scope: { page: 'test-page', section: 'default' },
+			components: {
+				customField: CustomField,
+			},
+		} );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'none' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							component: 'customField',
+							value: 'initial',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+		const button = container.querySelector( 'button' );
+
+		expect( button?.textContent ).toBe( 'initial' );
+
+		act( () => {
+			button?.dispatchEvent(
+				new MouseEvent( 'click', { bubbles: true } )
+			);
+		} );
+
+		expect( container.querySelector( 'button' )?.textContent ).toBe(
+			'changed'
 		);
 
 		act( () => root.unmount() );
@@ -322,6 +381,8 @@ describe( 'settings HTML rendering', () => {
 				);
 			}
 		} );
+
+		await act( async () => {} );
 
 		act( () => {
 			link?.dispatchEvent(

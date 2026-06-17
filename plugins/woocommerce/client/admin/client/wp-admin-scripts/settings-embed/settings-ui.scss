@@ -262,6 +262,15 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		gap: 16px;
 	}
 
+	.wc-settings-ui__section-fields > .components-v-stack,
+	.wc-settings-ui__section-fields .dataforms-layouts-regular__field {
+		width: 100%;
+	}
+
+	.wc-settings-ui__section-fields .dataforms-layouts-regular__field {
+		margin: 0;
+	}
+
 	.wc-settings-ui__field {
 		margin: 0;
 		width: 100%;

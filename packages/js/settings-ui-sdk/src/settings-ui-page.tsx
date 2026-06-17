@@ -22,9 +22,8 @@ import type { ErrorInfo, ReactNode } from 'react';
 import { HiddenInputs } from './hidden-inputs';
 import { error, warn } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
-import { NativeSettingsField } from './native-fields';
+import { SettingsDataForm } from './dataform';
 import {
-	resolveFieldComponent,
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
 	resolveRegionComponent,
@@ -89,9 +88,6 @@ const getChangedValues = (
 
 	return changedValues;
 };
-
-const getFieldTypeClassName = ( type: string ) =>
-	`wc-settings-ui__field--${ type.replace( /[^a-z0-9_-]/gi, '-' ) }`;
 
 const getActionVariant = ( variant?: string ) =>
 	( [ 'primary', 'secondary', 'tertiary', 'link' ].includes( variant || '' )
@@ -805,42 +801,14 @@ export const SettingsUIPage = ( {
 						<div className="wc-settings-ui__section-card">
 							<GroupHeader group={ group } />
 							<div className="wc-settings-ui__section-fields">
-								{ group.fields.map( ( field ) => {
-									const FieldComponent =
-										resolveFieldComponent(
-											field,
-											context
-										) || NativeSettingsField;
-									const value = values[ field.id ];
-
-									return (
-										<div
-											className={ [
-												'wc-settings-ui__field',
-												getFieldTypeClassName(
-													field.type
-												),
-											].join( ' ' ) }
-											key={ field.id }
-										>
-											<FieldComponent
-												field={ field }
-												value={ value }
-												context={ context }
-												values={ values }
-												initialValues={ initialValues }
-												setValue={ setValue }
-												setValues={ setValues }
-												onChange={ ( nextValue ) =>
-													setValue(
-														field.id,
-														nextValue
-													)
-												}
-											/>
-										</div>
-									);
-								} ) }
+								<SettingsDataForm
+									fields={ group.fields }
+									values={ values }
+									initialValues={ initialValues }
+									context={ context }
+									setValue={ setValue }
+									setValues={ setValues }
+								/>
 							</div>
 						</div>
 					</section>

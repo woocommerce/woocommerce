@@ -2381,6 +2381,9 @@ importers:
       '@wordpress/components':
         specifier: catalog:wp-min
         version: 29.5.4(@emotion/is-prop-valid@1.4.0)(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/dataviews':
+        specifier: ^4.17.0
+        version: 4.22.0(@emotion/is-prop-valid@1.4.0)(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/element':
         specifier: catalog:wp-min
         version: 6.19.1

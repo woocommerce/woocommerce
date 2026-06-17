@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Render Settings UI fields through DataForm while preserving the existing settings page design.
