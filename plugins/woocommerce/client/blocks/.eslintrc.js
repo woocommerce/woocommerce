@@ -120,8 +120,6 @@ const coreModules = [
 	'@woocommerce/base-context',
 	'@woocommerce/base-components',
 	'@woocommerce/base-components/cart-checkout',
-	'@woocommerce/base-hooks',
-	'@woocommerce/base-hooks/use-preview-mode',
 	'@woocommerce/block-data',
 	'@woocommerce/blocks-checkout',
 	'@woocommerce/blocks-checkout-events',
@@ -130,8 +128,6 @@ const coreModules = [
 	'@woocommerce/block-settings',
 	'@woocommerce/email-editor',
 	'@woocommerce/price-format',
-	'@woocommerce/resource-previews',
-	'@woocommerce/resource-previews/categories',
 	'@woocommerce/settings',
 	'@woocommerce/shared-context',
 	'@woocommerce/shared-hocs',
@@ -345,12 +341,6 @@ module.exports = {
 			files: [ '**/frontend.ts' ],
 			rules: {
 				'@typescript-eslint/no-use-before-define': 'off',
-			},
-		},
-		{
-			files: [ 'packages/block-library/**/*.{js,ts,tsx}' ],
-			rules: {
-				'import/no-extraneous-dependencies': 'off',
 			},
 		},
 		{

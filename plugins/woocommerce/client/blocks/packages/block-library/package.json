@@ -19,6 +19,7 @@
 		"@wordpress/icons": "wp-bundled"
 	},
 	"devDependencies": {
+		"clsx": "2.1.1",
 		"@wordpress/data": "wp-min",
 		"@wordpress/core-data": "wp-min"
 	}

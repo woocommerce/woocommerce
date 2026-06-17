@@ -2,22 +2,21 @@
  * External dependencies
  */
 import { heading } from '@wordpress/icons';
+import { BlockConfiguration, registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import initBlock from '../utils/init-block';
 import metadata from './block.json';
-import edit from './edit';
-
-const { name } = metadata;
-
-export { metadata, name };
+import edit, { CategoryTitleAttributes } from './edit';
 
 export const settings = {
-	edit: edit,
+	edit,
 	icon: heading,
 	save: () => null,
 };
 
-initBlock( { metadata, settings } );
+registerBlockType(
+	metadata as BlockConfiguration< CategoryTitleAttributes >,
+	settings
+);

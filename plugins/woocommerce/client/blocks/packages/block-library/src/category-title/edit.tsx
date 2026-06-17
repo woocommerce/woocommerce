@@ -15,7 +15,6 @@ import {
 	PlainText,
 	HeadingLevelDropdown,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	ToggleControl,
 	TextControl,
