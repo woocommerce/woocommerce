@@ -39,7 +39,6 @@ const entries = {
 	...scriptModuleEntries,
 	...styleEntries,
 	...editorStyleEntries,
-	'woocommerce/mini-cart': './assets/js/blocks/mini-cart/frontend.ts',
 	// Product elements frontend module. Share by several blocks.
 	'woocommerce/product-elements':
 		'./assets/js/atomic/blocks/product-elements/frontend.ts',

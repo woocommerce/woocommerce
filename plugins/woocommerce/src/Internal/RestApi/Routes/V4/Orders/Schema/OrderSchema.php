@@ -710,7 +710,7 @@ class OrderSchema extends AbstractSchema {
 				$item_data = $this->order_shipping_schema->get_item_response( $shipping_line, $request );
 				$refunded  = $refund_data['totals'][ $shipping_line->get_id() ] ?? 0.0;
 
-				$item_data['can_be_refunded'] = ( (float) $shipping_line->get_total() - $refunded ) > 0;
+				$item_data['can_be_refunded'] = ( (float) $shipping_line->get_total() + (float) $shipping_line->get_total_tax() - $refunded ) > 0;
 
 				$data['shipping_lines'][] = $item_data;
 			}
@@ -736,7 +736,7 @@ class OrderSchema extends AbstractSchema {
 				$item_data = $this->order_fee_schema->get_item_response( $fee_line, $request );
 				$refunded  = $refund_data['totals'][ $fee_line->get_id() ] ?? 0.0;
 
-				$item_data['can_be_refunded'] = ( (float) $fee_line->get_total() - $refunded ) > 0;
+				$item_data['can_be_refunded'] = ( (float) $fee_line->get_total() + (float) $fee_line->get_total_tax() - $refunded ) > 0;
 
 				$data['fee_lines'][] = $item_data;
 			}

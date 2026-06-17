@@ -116,6 +116,7 @@ class ProductFilters extends AbstractBlock {
 			'data-wp-interactive'              => $this->get_full_block_name(),
 			'data-wp-init--colors'             => 'callbacks.initColors',
 			'data-wp-watch--scrolling'         => 'callbacks.scrollLimit',
+			'data-wp-watch--active-filters'    => 'callbacks.syncActiveFiltersWithServer',
 			'data-wp-on--keyup'                => 'actions.closeOverlayOnEscape',
 			'data-wp-context'                  => (string) wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			'data-wp-class--is-overlay-opened' => 'context.isOverlayOpened',

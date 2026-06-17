@@ -53,10 +53,14 @@ declare global {
 			'experimental-blocks': boolean;
 			'minified-js': boolean;
 			navigation: boolean;
+			'payment-gateway-suggestions': boolean;
+			printful: boolean;
+			'product-custom-fields': boolean;
+			'remote-free-extensions': boolean;
 			settings: boolean;
-			'products-catalog-api': boolean;
 			'settings-ui': boolean;
-			'use-wp-horizon': boolean;
+			'wc-pay-promotion': boolean;
+			'launch-your-store': boolean;
 			'rest-api-v4': boolean;
 			'order-detail-redesign': boolean;
 			'product-variations-classic-redesign': boolean;

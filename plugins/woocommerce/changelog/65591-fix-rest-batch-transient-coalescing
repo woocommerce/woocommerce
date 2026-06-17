@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Coalesce repeated product transient deletion during REST variation batch writes.
