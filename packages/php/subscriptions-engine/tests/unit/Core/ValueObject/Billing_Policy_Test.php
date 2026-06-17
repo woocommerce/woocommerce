@@ -2,21 +2,21 @@
 /**
  * Unit tests for Billing_Policy.
  *
- * @package WooCommerce\Subscriptions\Engine
+ * @package Automattic\WooCommerce\SubscriptionsEngine
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Tests\Unit\Core\ValueObject;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\ValueObject;
 
 use DateTimeImmutable;
 use DateTimeZone;
 use DomainException;
 use PHPUnit\Framework\TestCase;
-use WooCommerce\Subscriptions\Engine\Core\ValueObject\Billing_Policy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Billing_Policy;
 
 /**
- * @covers \WooCommerce\Subscriptions\Engine\Core\ValueObject\Billing_Policy
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Billing_Policy
  */
 class Billing_Policy_Test extends TestCase {
 

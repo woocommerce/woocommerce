@@ -6,12 +6,12 @@
  * baseline schema once up front so per-test transaction rollback (provided by
  * WP_UnitTestCase) keeps each test isolated without re-running DDL.
  *
- * @package WooCommerce\Subscriptions\Engine
+ * @package Automattic\WooCommerce\SubscriptionsEngine
  */
 
 declare( strict_types=1 );
 
-use WooCommerce\Subscriptions\Engine\Integration\Storage\Schema_Installer;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Schema_Installer;
 
 // phpcs:disable Universal.Files.SeparateFunctionsFromOO.Mixed -- Bootstrap file mixes a class and procedural setup.
 

@@ -2,24 +2,24 @@
 /**
  * Integration tests for Plan_Repository (and Plan_Group_Repository).
  *
- * @package WooCommerce\Subscriptions\Engine
+ * @package Automattic\WooCommerce\SubscriptionsEngine
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Tests\Integration\Integration\Storage;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
 
 use Engine_Integration_Test_Case;
-use WooCommerce\Subscriptions\Engine\Core\Entity\Plan;
-use WooCommerce\Subscriptions\Engine\Core\Entity\Plan_Group;
-use WooCommerce\Subscriptions\Engine\Core\ValueObject\Billing_Policy;
-use WooCommerce\Subscriptions\Engine\Core\ValueObject\Pricing_Policy;
-use WooCommerce\Subscriptions\Engine\Integration\Storage\Plan_Group_Repository;
-use WooCommerce\Subscriptions\Engine\Integration\Storage\Plan_Repository;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan_Group;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Billing_Policy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Pricing_Policy;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Plan_Group_Repository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Plan_Repository;
 
 /**
- * @covers \WooCommerce\Subscriptions\Engine\Integration\Storage\Plan_Repository
- * @covers \WooCommerce\Subscriptions\Engine\Integration\Storage\Plan_Group_Repository
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Plan_Repository
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Plan_Group_Repository
  */
 class Plan_Repository_Test extends Engine_Integration_Test_Case {
 

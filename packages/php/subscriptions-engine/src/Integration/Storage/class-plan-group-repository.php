@@ -4,14 +4,14 @@
  *
  * The engine's tables are private API; consumers reach plan groups through the public surface.
  *
- * @package WooCommerce\Subscriptions\Engine\Integration\Storage
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Integration\Storage;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage;
 
-use WooCommerce\Subscriptions\Engine\Core\Entity\Plan_Group;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan_Group;
 
 defined( 'ABSPATH' ) || exit;
 

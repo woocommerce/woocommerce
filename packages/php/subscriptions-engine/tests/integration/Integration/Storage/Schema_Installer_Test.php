@@ -2,18 +2,18 @@
 /**
  * Integration tests for Schema_Installer.
  *
- * @package WooCommerce\Subscriptions\Engine
+ * @package Automattic\WooCommerce\SubscriptionsEngine
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Tests\Integration\Integration\Storage;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
 
 use Engine_Integration_Test_Case;
-use WooCommerce\Subscriptions\Engine\Integration\Storage\Schema_Installer;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Schema_Installer;
 
 /**
- * @covers \WooCommerce\Subscriptions\Engine\Integration\Storage\Schema_Installer
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Schema_Installer
  */
 class Schema_Installer_Test extends Engine_Integration_Test_Case {
 

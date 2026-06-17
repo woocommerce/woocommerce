@@ -17,12 +17,12 @@
  *
  * Lives in the WordPress-free Core zone.
  *
- * @package WooCommerce\Subscriptions\Engine\Core\ValueObject
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Core\ValueObject;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 
 defined( 'ABSPATH' ) || exit;
 

@@ -2,18 +2,18 @@
 /**
  * Unit tests for the Contract_Status state machine.
  *
- * @package WooCommerce\Subscriptions\Engine
+ * @package Automattic\WooCommerce\SubscriptionsEngine
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Tests\Unit\Core\Entity;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\Entity;
 
 use PHPUnit\Framework\TestCase;
-use WooCommerce\Subscriptions\Engine\Core\Entity\Contract_Status;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract_Status;
 
 /**
- * @covers \WooCommerce\Subscriptions\Engine\Core\Entity\Contract_Status
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract_Status
  */
 class Contract_Status_Test extends TestCase {
 

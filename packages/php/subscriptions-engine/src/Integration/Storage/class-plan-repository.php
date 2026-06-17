@@ -2,14 +2,14 @@
 /**
  * Plan_Repository - persistence for {@see Plan} entities.
  *
- * @package WooCommerce\Subscriptions\Engine\Integration\Storage
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Integration\Storage;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage;
 
-use WooCommerce\Subscriptions\Engine\Core\Entity\Plan;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 
 defined( 'ABSPATH' ) || exit;
 

@@ -2,14 +2,14 @@
 /**
  * Main package class for the WooCommerce Subscriptions Engine.
  *
- * @package WooCommerce\Subscriptions\Engine
+ * @package Automattic\WooCommerce\SubscriptionsEngine
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine;
+namespace Automattic\WooCommerce\SubscriptionsEngine;
 
-use WooCommerce\Subscriptions\Engine\Integration\Bootstrap;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Bootstrap;
 
 defined( 'ABSPATH' ) || exit;
 

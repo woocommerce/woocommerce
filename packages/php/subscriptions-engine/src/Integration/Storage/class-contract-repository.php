@@ -6,14 +6,14 @@
  * contract tables (contract row, items, addresses, meta), hydrating the Core
  * entity from clean arrays.
  *
- * @package WooCommerce\Subscriptions\Engine\Integration\Storage
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Integration\Storage;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage;
 
-use WooCommerce\Subscriptions\Engine\Core\Entity\Contract;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 
 defined( 'ABSPATH' ) || exit;
 

@@ -2,20 +2,20 @@
 /**
  * Integration tests for Contract_Repository.
  *
- * @package WooCommerce\Subscriptions\Engine
+ * @package Automattic\WooCommerce\SubscriptionsEngine
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Tests\Integration\Integration\Storage;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
 
 use Engine_Integration_Test_Case;
-use WooCommerce\Subscriptions\Engine\Core\Entity\Contract;
-use WooCommerce\Subscriptions\Engine\Core\Entity\Contract_Status;
-use WooCommerce\Subscriptions\Engine\Integration\Storage\Contract_Repository;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract_Status;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Contract_Repository;
 
 /**
- * @covers \WooCommerce\Subscriptions\Engine\Integration\Storage\Contract_Repository
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Contract_Repository
  */
 class Contract_Repository_Test extends Engine_Integration_Test_Case {
 
@@ -126,8 +126,8 @@ class Contract_Repository_Test extends Engine_Integration_Test_Case {
 		$this->assertTrue( $repo->delete( $id ) );
 		$this->assertNull( $repo->find( $id ) );
 
-		$items_table = \WooCommerce\Subscriptions\Engine\Integration\Storage\Schema_Installer::get_table_name(
-			\WooCommerce\Subscriptions\Engine\Integration\Storage\Schema_Installer::TABLE_CONTRACT_ITEMS
+		$items_table = \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Schema_Installer::get_table_name(
+			\Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Schema_Installer::TABLE_CONTRACT_ITEMS
 		);
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$items_table} WHERE contract_id = %d", $id ) );

@@ -6,12 +6,12 @@
  * unique at the storage layer and is the deduplication key consumers use to
  * make group creation idempotent. `app_id` scopes a group to a solution family.
  *
- * @package WooCommerce\Subscriptions\Engine\Core\Entity
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Core\Entity;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
 defined( 'ABSPATH' ) || exit;
 

@@ -5,12 +5,12 @@
  * Owns the set of valid statuses and the allowed transitions between them.
  * Status transitions are validated here and applied by the {@see Contract} entity.
  *
- * @package WooCommerce\Subscriptions\Engine\Core\Entity
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Core\Entity;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
 defined( 'ABSPATH' ) || exit;
 

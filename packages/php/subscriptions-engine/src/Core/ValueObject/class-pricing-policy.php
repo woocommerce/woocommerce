@@ -20,12 +20,12 @@
  * genuinely untaxed. The two are not interchangeable - round-trip preserves
  * whichever was supplied.
  *
- * @package WooCommerce\Subscriptions\Engine\Core\ValueObject
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Core\ValueObject;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 
 defined( 'ABSPATH' ) || exit;
 

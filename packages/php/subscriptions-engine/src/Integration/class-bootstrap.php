@@ -7,14 +7,14 @@
  * version-gated install check on boot: cheap in the common case (a single
  * option read) and self-healing if the tables are missing or behind.
  *
- * @package WooCommerce\Subscriptions\Engine\Integration
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Integration
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Integration;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Integration;
 
-use WooCommerce\Subscriptions\Engine\Integration\Storage\Schema_Installer;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Schema_Installer;
 
 defined( 'ABSPATH' ) || exit;
 

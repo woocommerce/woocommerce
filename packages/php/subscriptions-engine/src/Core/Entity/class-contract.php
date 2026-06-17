@@ -8,15 +8,15 @@
  * (`Y-m-d H:i:s`). The payment instrument is exposed as an {@see Instrument_Ref}
  * rather than a live payment token.
  *
- * @package WooCommerce\Subscriptions\Engine\Core\Entity
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Core\Entity;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
 use DomainException;
-use WooCommerce\Subscriptions\Engine\Core\ValueObject\Instrument_Ref;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Instrument_Ref;
 
 defined( 'ABSPATH' ) || exit;
 

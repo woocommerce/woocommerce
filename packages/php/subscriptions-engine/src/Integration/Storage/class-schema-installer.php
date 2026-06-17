@@ -15,12 +15,12 @@
  * through {@see self::maybe_install()} (a version-gated check on boot), not a
  * plugin activation hook.
  *
- * @package WooCommerce\Subscriptions\Engine\Integration\Storage
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Integration\Storage;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage;
 
 defined( 'ABSPATH' ) || exit;
 

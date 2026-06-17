@@ -14,12 +14,12 @@
  * Trial is a native field: the first cycle's billing date is delayed by the
  * trial at contract creation rather than modelled as a discount.
  *
- * @package WooCommerce\Subscriptions\Engine\Core\ValueObject
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Core\ValueObject;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 
 use DateTimeImmutable;
 use DateTimeZone;

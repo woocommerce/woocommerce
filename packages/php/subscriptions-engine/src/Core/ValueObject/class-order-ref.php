@@ -5,12 +5,12 @@
  * The Core zone never loads a live order object; it holds a reference and
  * commands effects through the Orders host binding in the integration layer.
  *
- * @package WooCommerce\Subscriptions\Engine\Core\ValueObject
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject
  */
 
 declare( strict_types=1 );
 
-namespace WooCommerce\Subscriptions\Engine\Core\ValueObject;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 
 defined( 'ABSPATH' ) || exit;
 

@@ -8,7 +8,7 @@
  * Composer autoloader. If a Core class ever reaches for a WP/Woo symbol, these
  * tests fatal - which is the executable form of the zoning rule.
  *
- * @package WooCommerce\Subscriptions\Engine
+ * @package Automattic\WooCommerce\SubscriptionsEngine
  */
 
 declare( strict_types=1 );

@@ -2,11 +2,11 @@
 /**
  * This file is part of the WooCommerce Subscriptions Engine package.
  *
- * @package WooCommerce\Subscriptions\Engine
+ * @package Automattic\WooCommerce\SubscriptionsEngine
  */
 
 /**
- * Plugin Name: Subscriptions Engine
+ * Plugin Name: WooCommerce Subscriptions Engine
  * Plugin URI: https://woocommerce.com/
  * Description: An empty subscriptions-engine definition file to set up the wp-env test environment.
  * Version: 0.0.1
@@ -22,6 +22,6 @@ if ( file_exists( $autoload_entry_point ) ) {
 }
 // When the package is distributed as part of WooCommerce core, it will provide autoloading of necessary dependencies.
 
-if ( class_exists( \WooCommerce\Subscriptions\Engine\Package::class ) ) {
-	\WooCommerce\Subscriptions\Engine\Package::init();
+if ( class_exists( \Automattic\WooCommerce\SubscriptionsEngine\Package::class ) ) {
+	\Automattic\WooCommerce\SubscriptionsEngine\Package::init();
 }
