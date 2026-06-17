@@ -1,10 +1,11 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
-use WC_Tax;
 
 /**
  * CartSchema class.
@@ -343,29 +344,18 @@ class CartSchema extends AbstractSchema {
 		// Get visible cross sells products.
 		$cross_sells    = array();
 		$cross_sell_ids = $cart->get_cross_sells();
-		$image_ids      = array();
 		if ( ! empty( $cross_sell_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $cross_sell_ids );
 			$cross_sells = array_values( array_filter( array_map( 'wc_get_product', $cross_sell_ids ), 'wc_products_array_filter_visible' ) );
 			/** @var \WC_Product[] $cross_sells */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
-			// Identify which images need priming.
-			$ids         = array_map( static fn( $product ) => array( (int) $product->get_image_id(), ...$product->get_gallery_image_ids() ), $cross_sells );
-			$image_ids[] = array_values( array_filter( array_merge( ...$ids ) ) );
 		}
 
 		$cart_all_items  = $cart->get_cart();
 		$cart_line_items = array_values( array_filter( $cart_all_items, static fn( $item ) => ( $item['data'] ?? null ) instanceof \WC_Product ) );
-		if ( ! empty( $cart_line_items ) ) {
-			// Identify which images need priming.
-			$ids         = array_map( static fn( $item ) => array( (int) $item['data']->get_image_id(), ...$item['data']->get_gallery_image_ids() ), $cart_line_items );
-			$image_ids[] = array_values( array_filter( array_merge( ...array_values( $ids ) ) ) );
-		}
 
-		if ( ! empty( $image_ids ) ) {
-			// Prime caches to reduce future queries.
-			_prime_post_caches( array_unique( array_merge( ...$image_ids ) ) );
-		}
+		// Batch-prime image attachment caches for cross-sells and cart line items in one query.
+		wc_get_container()->get( ProductUtil::class )->prime_image_caches( array_merge( $cross_sells, array_column( $cart_line_items, 'data' ) ) );
 
 		return [
 			'items'                   => $this->get_item_responses_from_schema( $this->item_schema, $cart_all_items ),
@@ -426,14 +416,15 @@ class CartSchema extends AbstractSchema {
 			return $tax_lines;
 		}
 
-		$cart_tax_totals = $cart->get_tax_totals();
-		$decimals        = wc_get_price_decimals();
+		$cart_tax_totals  = $cart->get_tax_totals();
+		$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( array_column( $cart_tax_totals, 'tax_rate_id' ) );
+		$decimals         = wc_get_price_decimals();
 
 		foreach ( $cart_tax_totals as $cart_tax_total ) {
 			$tax_lines[] = array(
 				'name'  => $cart_tax_total->label,
 				'price' => $this->prepare_money_response( $cart_tax_total->amount, $decimals ),
-				'rate'  => WC_Tax::get_rate_percent( $cart_tax_total->tax_rate_id ),
+				'rate'  => \WC_Tax::get_rate_percent( $tax_rate_objects[ $cart_tax_total->tax_rate_id ] ?? $cart_tax_total->tax_rate_id ),
 			);
 		}
 

@@ -1244,8 +1244,21 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			return false;
 		}
 
-		$order->set_status( get_post_field( 'post_status', $order->get_id() ) );
-		return (bool) $order->save();
+		// Restoring the order triggers a status transition (from 'trash' back to its previous
+		// status). WC_Emails dispatches customer notifications on those transitions, so suppress
+		// email dispatch for this order while we restore to avoid re-notifying the customer
+		// about an order they were already emailed about. The status transition actions
+		// themselves still fire, so any 3rd-party code hooked into them keeps working.
+		$suspended_email_dispatch = $this->suspend_transactional_email_dispatch( $order->get_id() );
+
+		try {
+			$order->set_status( get_post_field( 'post_status', $order->get_id() ) );
+			$saved = (bool) $order->save();
+		} finally {
+			$this->restore_transactional_email_dispatch( $suspended_email_dispatch );
+		}
+
+		return $saved;
 	}
 
 	/**

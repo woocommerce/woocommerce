@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Blocks\Utils\Utils;
 
 /**
  * AssetsController class.
@@ -47,29 +47,6 @@ final class AssetsController {
 		add_action( 'admin_enqueue_scripts', array( $this, 'update_block_settings_dependencies' ), 100 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_wc_entities' ), 100 );
 		add_filter( 'js_do_concat', array( $this, 'skip_boost_minification_for_cart_checkout' ), 10, 2 );
-
-		if ( Features::is_enabled( 'experimental-iapi-runtime' ) ) {
-			// Run after the WordPress iAPI runtime has been registered by setting a lower priority.
-			add_filter( 'wp_default_scripts', array( $this, 'reregister_core_iapi_runtime' ), 20 );
-		}
-	}
-
-	/**
-	 * Re-registers the iAPI runtime registered by WordPress Core/Gutenberg, allowing WooCommerce to register its own version of the iAPI runtime.
-	 */
-	public function reregister_core_iapi_runtime() {
-		$interactivity_api_asset_data = $this->api->get_asset_data(
-			$this->api->get_block_asset_build_path( 'interactivity-api-assets', 'php' )
-		);
-
-		foreach ( $interactivity_api_asset_data as $handle => $data ) {
-			$handle_without_js = str_replace( '.js', '', $handle );
-			if ( '@wordpress/interactivity' === $handle_without_js || '@wordpress/interactivity-router' === $handle_without_js ) {
-				wp_deregister_script_module( $handle_without_js );
-			}
-
-			wp_register_script_module( $handle_without_js, plugins_url( $this->api->get_block_asset_build_path( $handle_without_js ), dirname( __DIR__ ) ), $data['dependencies'], $data['version'] );
-		}
 	}
 
 	/**
@@ -352,7 +329,12 @@ final class AssetsController {
 
 		$src = array();
 		foreach ( $found_dependencies as $handle => $unused ) {
-			$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, $this->get_absolute_url( $wp_scripts->registered[ $handle ]->src ) ) );
+			$script_src = $wp_scripts->registered[ $handle ]->src;
+			if ( ! is_string( $script_src ) ) {
+				// Skip srcless dependencies (e.g. meta-packages), which have no URL to hint.
+				continue;
+			}
+			$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, Utils::get_absolute_script_url( $script_src ) ) );
 		}
 		return $src;
 	}
@@ -379,20 +361,6 @@ final class AssetsController {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Returns an absolute url to relative links for WordPress core scripts.
-	 *
-	 * @param string $src Original src that can be relative.
-	 * @return string Correct full path string.
-	 */
-	private function get_absolute_url( $src ) {
-		$wp_scripts = wp_scripts();
-		if ( ! preg_match( '|^(https?:)?//|', $src ) && ! ( $wp_scripts->content_url && 0 === strpos( $src, $wp_scripts->content_url ) ) ) {
-			$src = $wp_scripts->base_url . $src;
-		}
-		return $src;
 	}
 
 	/**

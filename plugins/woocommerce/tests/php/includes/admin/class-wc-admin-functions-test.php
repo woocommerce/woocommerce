@@ -535,4 +535,50 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order_item = new WC_Order_Item_Product( $order_item_id );
 		$this->assertEquals( 4, $order_item->get_meta( '_reduced_stock', true ), 'Reduced stock meta should be updated to new quantity' );
 	}
+
+	/**
+	 * @testdox wc_save_order_items() should skip reserved meta keys while still saving valid custom meta.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/62328
+	 */
+	public function test_wc_save_order_items_skips_reserved_meta_keys() {
+		$order               = WC_Helper_Order::create_order();
+		$order_item          = current( $order->get_items() );
+		$item_id             = $order_item->get_id();
+		$original_product_id = $order_item->get_product_id();
+
+		// new-0 = internal key, new-1 = hidden key, new-2 = valid custom meta.
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		$items = array(
+			'order_item_id'        => array( $item_id ),
+			'order_item_name'      => array( $item_id => $order_item->get_name() ),
+			'order_item_qty'       => array( $item_id => $order_item->get_quantity() ),
+			'order_item_tax_class' => array( $item_id => $order_item->get_tax_class() ),
+			'line_total'           => array( $item_id => $order_item->get_total() ),
+			'line_subtotal'        => array( $item_id => $order_item->get_subtotal() ),
+			'meta_key'             => array(
+				$item_id => array(
+					'new-0' => '_product_id',
+					'new-1' => '_reduced_stock',
+					'new-2' => 'custom_meta',
+				),
+			),
+			'meta_value'           => array(
+				$item_id => array(
+					'new-0' => '99999',
+					'new-1' => '5',
+					'new-2' => 'hello world',
+				),
+			),
+		);
+		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+
+		wc_save_order_items( $order->get_id(), $items );
+
+		$saved_item = new WC_Order_Item_Product( $item_id );
+
+		$this->assertEquals( 'hello world', $saved_item->get_meta( 'custom_meta', true ), 'Valid custom meta should still be saved' );
+		$this->assertEquals( $original_product_id, $saved_item->get_product_id(), 'Reserved internal key should not overwrite core item data' );
+		$this->assertFalse( $saved_item->meta_exists( '_reduced_stock' ), 'Reserved hidden key should not be stored as item meta' );
+	}
 }
