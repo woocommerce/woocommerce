@@ -49558,26 +49558,8 @@ parameters:
 			path: src/Admin/WCAdminHelper.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\WCAdminHelper\:\:get_normalized_url_path\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/WCAdminHelper.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\WCAdminHelper\:\:get_url_from_wp\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/WCAdminHelper.php
-
-		-
-			message: '#^Parameter \#1 \$string of function strlen expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/WCAdminHelper.php
-
-		-
-			message: '#^Static method Automattic\\WooCommerce\\Admin\\WCAdminHelper\:\:get_normalized_url_path\(\) is unused\.$#'
-			identifier: method.unused
 			count: 1
 			path: src/Admin/WCAdminHelper.php
 
@@ -49812,12 +49794,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:update_block_style_dependencies\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/AssetsController.php
-
-		-
-			message: '#^Parameter \#1 \$src of method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:get_absolute_url\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/AssetsController.php
 
