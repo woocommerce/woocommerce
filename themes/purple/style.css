@@ -70,7 +70,7 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
  * This lives in style.css (rather than theme.json's css field)
  * because that field strips @media queries during sanitization. */
 @media (min-width: 600px) {
-    .wp-block-navigation .wp-block-navigation__submenu-container {
+    .wp-block-navigation:not(.has-background) .wp-block-navigation__submenu-container {
         background-color: var(--wp--preset--color--theme-1) !important;
         border: none !important;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
