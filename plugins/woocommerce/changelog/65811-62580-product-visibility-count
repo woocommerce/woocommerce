@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide empty Store API terms and preserve zero counts
