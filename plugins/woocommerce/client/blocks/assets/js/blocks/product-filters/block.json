@@ -15,7 +15,6 @@
 			"enableContrastChecker": false,
 			"button": true
 		},
-		"multiple": false,
 		"inserter": true,
 		"interactivity": true,
 		"typography": {
@@ -35,11 +34,15 @@
 		}
 	},
 	"textdomain": "woocommerce",
-	"usesContext": [ "postId", "query", "queryId" ],
+	"usesContext": [ "postId", "query", "queryId", "forcePageReload" ],
 	"attributes": {
 		"isPreview": {
 			"type": "boolean",
 			"default": false
+		},
+		"showFilterDrawer": {
+			"type": "boolean",
+			"default": true
 		}
 	},
 	"example": {

@@ -5,6 +5,7 @@ import { __, _n } from '@wordpress/i18n';
 import { Fragment, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { Tooltip } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 import { Date, Link, Pill } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import { getAdminLink } from '@woocommerce/settings';
@@ -108,9 +109,8 @@ function CustomersReportTable( {
 	};
 
 	const getCountryName = ( code ) => {
-		return typeof countries[ code ] !== 'undefined'
-			? countries[ code ]
-			: null;
+		const country = countries.find( ( c ) => c.code === code );
+		return country ? decodeEntities( country.name ) : null;
 	};
 
 	const getRowsContent = ( customers ) => {
