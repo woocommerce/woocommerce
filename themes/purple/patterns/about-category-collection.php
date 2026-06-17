@@ -2,7 +2,7 @@
 /**
  * Title: Collection of categories with images	
  * Slug: purple/about-category-collection
- * Categories: columns, purple
+ * Categories: purple
  * Keywords: about, text, image, media
  * Description: A section with a collection of categories with images.
  */

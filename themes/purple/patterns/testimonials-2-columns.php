@@ -2,7 +2,7 @@
 /**
  * Title: Testimonials in two columns
  * Slug: purple/testimonials-2-columns
- * Categories: testimonials, columns, purple
+ * Categories: testimonials, purple
  * Keywords: testimonials, text, media
  * Description: A section with a heading and a 2 column testimonial grid.
  */

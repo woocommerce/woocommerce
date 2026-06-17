@@ -2,7 +2,7 @@
 /**
  * Title: Categories on three columns
  * Slug: purple/categories-on-three-columns
- * Categories: woo-commerce, columns, purple
+ * Categories: woo-commerce, purple
  * Keywords: text, media, columns	
  * Description: A section with three columns of categories with images.
  */

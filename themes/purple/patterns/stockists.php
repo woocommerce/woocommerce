@@ -2,7 +2,7 @@
 /**
  * Title: Stockists
  * Slug: purple/stockists
- * Categories: columns
+ * Categories: purple
  * Keywords: stockists, locations, columns
  * Description: A column layout to display stockists.
  * Block Types: core/columns

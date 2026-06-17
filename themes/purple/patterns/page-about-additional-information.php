@@ -2,7 +2,7 @@
 /**
  * Title: About page with additional information
  * Slug: purple/page-about-additional-information
- * Categories: columns
+ * Categories: purple
  * Keywords: starter
  * Block Types: core/post-content
  * Post Types: page, wp_template

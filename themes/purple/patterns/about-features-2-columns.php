@@ -2,7 +2,7 @@
 /**
  * Title: Heading, image and list of features
  * Slug: purple/about-features-2-columns
- * Categories: columns, purple
+ * Categories: purple
  * Keywords: about, text, image, media
  * Description: A section with a heading, paragraph, a list of features with icons and an image.
  */

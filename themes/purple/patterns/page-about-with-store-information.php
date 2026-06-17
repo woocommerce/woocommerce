@@ -2,7 +2,7 @@
 /**
  * Title: About page with store information
  * Slug: purple/page-about-with-store-information
- * Categories: columns
+ * Categories: purple
  * Keywords: starter
  * Block Types: core/post-content
  * Post Types: page, wp_template

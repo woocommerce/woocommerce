@@ -2,7 +2,7 @@
 /**
  * Title: Two columns highlights sections
  * Slug: purple/two-columns-highlights-sections
- * Categories: columns, purple
+ * Categories: purple
  * Keywords: about, columns, media, featured
  * Description: A section with 2 columns of highlights
  */

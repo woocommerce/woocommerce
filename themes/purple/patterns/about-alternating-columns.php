@@ -2,7 +2,7 @@
 /**
  * Title: About section with alternating columns
  * Slug: purple/about-alternating-columns
- * Categories: about, columns, purple
+ * Categories: about, purple
  * Keywords: about, text, image, media
  * Description: A section with alternating columns of text and an image.
  */

@@ -2,7 +2,7 @@
 /**
  * Title: Subscribe to newsletter section
  * Slug: purple/subscribe-to-newsletter
- * Categories: columns, purple
+ * Categories: purple
  * Keywords: text, call-to-action, columns
  * Description: A section with a heading and a newsletter subscription form.
  */

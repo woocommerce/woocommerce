@@ -2,7 +2,7 @@
 /**
  * Title: About 2 columns with heading
  * Slug: purple/about-2-columns-with-heading
- * Categories: about, columns, purple
+ * Categories: about, purple
  * Keywords: about, text, image, media
  * Description: A section with two columns of text, heading and an image.
  */
