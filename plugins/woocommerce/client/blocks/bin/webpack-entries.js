@@ -343,6 +343,8 @@ const entries = {
 			'./assets/js/extensions/payment-methods/woopayments/style.scss',
 		'wc-payment-method-woopayments-woopay':
 			'./assets/js/extensions/payment-methods/woopayments/woopay/style.scss',
+		'wc-payment-method-woopayments-express-checkout':
+			'./assets/js/extensions/payment-methods/woopayments/express-checkout/style.scss',
 
 		...blockStylingEntries,
 	},
@@ -383,6 +385,8 @@ const entries = {
 			'./assets/js/extensions/payment-methods/woopayments/index.js',
 		'wc-payment-method-woopayments-woopay':
 			'./assets/js/extensions/payment-methods/woopayments/woopay/index.js',
+		'wc-payment-method-woopayments-express-checkout':
+			'./assets/js/extensions/payment-methods/woopayments/express-checkout/index.js',
 		'wc-payment-method-bacs':
 			'./assets/js/extensions/payment-methods/bacs/index.js',
 		'wc-payment-method-cod':

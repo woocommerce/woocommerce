@@ -686,9 +686,37 @@ class WooPaymentsWooPaySessionController implements RegisterHooksInterface {
 	 * @return bool
 	 */
 	private function is_supported_frontend_surface(): bool {
+		if ( $this->is_block_cart_or_checkout_surface() ) {
+			return false;
+		}
+
 		return ( function_exists( 'is_checkout' ) && is_checkout() ) ||
 			( function_exists( 'is_cart' ) && is_cart() ) ||
 			( function_exists( 'is_product' ) && is_product() );
+	}
+
+	/**
+	 * Tell whether the current request renders a Blocks cart or checkout page.
+	 *
+	 * @return bool
+	 */
+	private function is_block_cart_or_checkout_surface(): bool {
+		$post_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
+		$post    = $post_id ? get_post( $post_id ) : null;
+
+		if ( ! $post instanceof \WP_Post ) {
+			$post = get_queried_object();
+		}
+
+		if ( ! $post instanceof \WP_Post ) {
+			$post = get_post();
+		}
+
+		if ( ! $post instanceof \WP_Post ) {
+			return false;
+		}
+
+		return has_block( 'woocommerce/cart', $post ) || has_block( 'woocommerce/checkout', $post );
 	}
 
 	/**

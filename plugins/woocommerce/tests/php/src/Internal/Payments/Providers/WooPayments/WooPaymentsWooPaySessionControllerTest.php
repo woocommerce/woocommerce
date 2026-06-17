@@ -52,6 +52,7 @@ class WooPaymentsWooPaySessionControllerTest extends WC_REST_Unit_Test_Case {
 		wp_dequeue_style( 'wc-woopayments-woopay' );
 		wp_deregister_script( 'wc-woopayments-woopay' );
 		wp_deregister_style( 'wc-woopayments-woopay' );
+		wp_reset_postdata();
 		$_POST    = array();
 		$_REQUEST = array();
 		parent::tearDown();
@@ -144,6 +145,30 @@ class WooPaymentsWooPaySessionControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertIsString( $localized_data );
 		$this->assertStringContainsString( '"shouldShowWooPayButton":""', $localized_data );
 		$this->assertStringContainsString( '"PRE_CHECK_SAVE_MY_INFO":"1"', $localized_data );
+	}
+
+	/**
+	 * @testdox Should not enqueue classic WooPay assets on checkout block pages.
+	 */
+	public function test_enqueue_frontend_assets_skips_checkout_block_pages(): void {
+		$this->sut = $this->create_controller( true, true );
+		$page_id   = self::factory()->post->create(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_content' => '<!-- wp:woocommerce/checkout --><div class="wp-block-woocommerce-checkout"></div><!-- /wp:woocommerce/checkout -->',
+			)
+		);
+
+		global $post;
+		$post = get_post( $page_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		setup_postdata( $post );
+		add_filter( 'woocommerce_is_checkout', '__return_true' );
+
+		$this->sut->enqueue_frontend_assets();
+
+		$this->assertFalse( wp_script_is( 'wc-woopayments-woopay', 'enqueued' ) );
+		$this->assertFalse( wp_style_is( 'wc-woopayments-woopay', 'enqueued' ) );
 	}
 
 	/**

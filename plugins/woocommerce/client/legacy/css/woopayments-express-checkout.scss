@@ -1,0 +1,46 @@
+.wcpay-express-checkout-wrapper {
+	width: 100%;
+	clear: both;
+	display: flex;
+	flex-direction: column;
+	list-style: none;
+
+	#wcpay-express-checkout-element iframe {
+		max-width: unset;
+	}
+
+	#wcpay-express-checkout-element {
+		min-height: 0;
+		margin: 0;
+		opacity: 0;
+		transition: opacity 0.2s ease-in-out;
+
+		&.is-ready {
+			min-height: 40px;
+			opacity: 1;
+
+			&:not(:first-child) {
+				margin-top: 12px;
+			}
+		}
+	}
+
+	.woocommerce-cart & {
+		margin-bottom: 0;
+	}
+
+	.woocommerce-checkout & {
+
+		#wcpay-express-checkout-element.is-ready:first-child {
+			margin-top: 4px;
+		}
+	}
+
+	.wc-proceed-to-checkout &,
+	.wp-block-add-to-cart-form &,
+	.wp-block-add-to-cart-with-options &,
+	.woocommerce .type-product & {
+		margin-top: 1em;
+		margin-bottom: 1em;
+	}
+}
