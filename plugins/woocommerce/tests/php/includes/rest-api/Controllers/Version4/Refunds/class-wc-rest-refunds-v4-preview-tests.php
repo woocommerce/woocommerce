@@ -1776,6 +1776,94 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '40.00', $create_response->get_data()['amount'], 'Create amount must match the preview total.' );
 	}
 
+	/**
+	 * @testdox Preview rejects a refund whose aggregate total is negative, matching create.
+	 */
+	public function test_preview_negative_only_total_rejected_matches_create(): void {
+		$order   = $this->create_order_with_product( 50.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Discount',
+				'total' => -10.00,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+		$order->set_total( 40.00 );
+		$order->save();
+
+		// A refund of only the negative discount line nets -$5.
+		$line_items = array(
+			array(
+				'line_item_id' => $fee->get_id(),
+				'refund_total' => -5.00,
+			),
+		);
+
+		$preview_response = $this->do_preview_request( $order->get_id(), $line_items );
+		$this->assertNotEquals( 200, $preview_response->get_status(), 'Preview must not accept a non-positive aggregate total.' );
+		$this->assertEquals( 'invalid_refund_amount', $preview_response->get_data()['code'] );
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$create_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => $line_items,
+			)
+		);
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertEquals( 'invalid_refund_amount', $create_response->get_data()['code'], 'Create rejects the same input.' );
+	}
+
+	/**
+	 * @testdox Preview rejects a refund whose aggregate total nets to zero, matching create.
+	 */
+	public function test_preview_zero_net_total_rejected_matches_create(): void {
+		// $20 product less a $10 discount: order stays refundable ($10), but the refund nets $0.
+		$order   = $this->create_order_with_product( 20.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Discount',
+				'total' => -10.00,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+		$order->set_total( 10.00 );
+		$order->save();
+
+		$line_items = array(
+			array(
+				'line_item_id' => $item_id,
+				'refund_total' => 10.00,
+			),
+			array(
+				'line_item_id' => $fee->get_id(),
+				'refund_total' => -10.00,
+			),
+		);
+
+		$preview_response = $this->do_preview_request( $order->get_id(), $line_items );
+		$this->assertNotEquals( 200, $preview_response->get_status(), 'Preview must not accept a zero aggregate total.' );
+		$this->assertEquals( 'invalid_refund_amount', $preview_response->get_data()['code'] );
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$create_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => $line_items,
+			)
+		);
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertEquals( 'invalid_refund_amount', $create_response->get_data()['code'], 'Create rejects the same input.' );
+	}
+
 	// -- Helper methods --
 
 	/**

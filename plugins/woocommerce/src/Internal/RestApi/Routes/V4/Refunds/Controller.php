@@ -561,6 +561,17 @@ class Controller extends AbstractController {
 			);
 		}
 
+		// Reject a non-positive aggregate total up front, mirroring create_item()'s
+		// `0 > $refund_amount || ! $refund_amount` guard. A refund of only a negative
+		// discount line, or a product plus discount that nets to zero, would otherwise
+		// preview successfully and then fail at create with 'invalid_refund_amount'.
+		if ( (float) $preview['total'] <= 0 ) {
+			return $this->get_route_error_response(
+				'invalid_refund_amount',
+				__( 'Refund total must be greater than zero.', 'woocommerce' )
+			);
+		}
+
 		// Final guard: even when per-line validation passes, the aggregate
 		// preview total can still exceed the order's remaining refundable
 		// amount (e.g. an amount-only partial refund applied previously).
