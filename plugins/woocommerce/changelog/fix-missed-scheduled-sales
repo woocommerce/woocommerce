@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Scheduled sales now start and end at the time the product editor promises. The daily safety-net cron is realigned to midnight on installs where it was stuck at an arbitrary time, and products that already had future sale dates get their exact-time Action Scheduler events scheduled on upgrade.
