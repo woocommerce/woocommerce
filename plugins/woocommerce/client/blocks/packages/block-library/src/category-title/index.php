@@ -74,10 +74,6 @@ function render_block_woocommerce_category_title( $attributes, $content, $block 
  * @since 11.0.0
  */
 function register_block_woocommerce_category_title(): void {
-	if ( WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/category-title' ) ) {
-		return;
-	}
-
 	register_block_type_from_metadata(
 		__DIR__,
 		array(
