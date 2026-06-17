@@ -19,6 +19,20 @@ class RecordingWooPaySessionService extends WooPaymentsWooPaySessionService {
 	public bool $woopay_enabled = true;
 
 	/**
+	 * Whether the WooPay button should be shown.
+	 *
+	 * @var bool
+	 */
+	public bool $should_show_woopay_button = true;
+
+	/**
+	 * Whether WooPay save-user assets should be loaded.
+	 *
+	 * @var bool
+	 */
+	public bool $should_load_woopay_save_user_assets = true;
+
+	/**
 	 * Last session email.
 	 *
 	 * @var string
@@ -53,6 +67,61 @@ class RecordingWooPaySessionService extends WooPaymentsWooPaySessionService {
 	 */
 	public function is_woopay_enabled(): bool {
 		return $this->woopay_enabled;
+	}
+
+	/**
+	 * Tell whether the WooPay button should be shown.
+	 *
+	 * @param string $context Express checkout context.
+	 * @return bool
+	 */
+	public function should_show_woopay_button( string $context = 'checkout' ): bool {
+		unset( $context );
+
+		return $this->should_show_woopay_button;
+	}
+
+	/**
+	 * Tell whether WooPay save-user assets should load.
+	 *
+	 * @param string $context Express checkout context.
+	 * @return bool
+	 */
+	public function should_load_woopay_save_user_assets( string $context = 'checkout' ): bool {
+		unset( $context );
+
+		return $this->should_load_woopay_save_user_assets;
+	}
+
+	/**
+	 * Get WooPay frontend config.
+	 *
+	 * @param string $context Express checkout context.
+	 * @return array<string,mixed>
+	 */
+	public function get_woopay_frontend_config( string $context = 'checkout' ): array {
+		return array(
+			'isWooPayEnabled'        => $this->woopay_enabled,
+			'shouldShowWooPayButton' => $this->should_show_woopay_button,
+			'forceNetworkSavedCards' => true,
+			'woopayButton'           => array(
+				'type'    => 'default',
+				'theme'   => 'dark',
+				'height'  => '48',
+				'radius'  => '',
+				'size'    => 'medium',
+				'context' => $context,
+			),
+		);
+	}
+
+	/**
+	 * Get WooPay save-user checkout data.
+	 *
+	 * @return array<string,bool>
+	 */
+	public function get_save_user_checkout_data(): array {
+		return array( 'PRE_CHECK_SAVE_MY_INFO' => true );
 	}
 
 	/**

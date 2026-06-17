@@ -339,6 +339,10 @@ const entries = {
 		// Blocks
 		'product-image-gallery':
 			'./assets/js/atomic/blocks/product-elements/product-image-gallery/index.ts',
+		'wc-payment-method-woopayments':
+			'./assets/js/extensions/payment-methods/woopayments/style.scss',
+		'wc-payment-method-woopayments-woopay':
+			'./assets/js/extensions/payment-methods/woopayments/woopay/style.scss',
 
 		...blockStylingEntries,
 	},
@@ -377,6 +381,8 @@ const entries = {
 			'./assets/js/extensions/payment-methods/paypal/index.js',
 		'wc-payment-method-woopayments':
 			'./assets/js/extensions/payment-methods/woopayments/index.js',
+		'wc-payment-method-woopayments-woopay':
+			'./assets/js/extensions/payment-methods/woopayments/woopay/index.js',
 		'wc-payment-method-bacs':
 			'./assets/js/extensions/payment-methods/bacs/index.js',
 		'wc-payment-method-cod':

@@ -383,6 +383,28 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 		$brands                = array_slice( self::CARD_BRAND_ICONS, 0, 3, true );
 		$additional_icon_count = count( self::CARD_BRAND_ICONS ) - count( $brands );
 
+		if ( $this->is_test_mode() ) {
+			$badge_style = implode(
+				'',
+				array(
+					'background-color:#fff2d7;',
+					'border-radius:4px;',
+					'color:#4d3716;',
+					'display:inline-block;',
+					'font-size:12px;',
+					'font-weight:400;',
+					'line-height:16px;',
+					'margin-left:8px;',
+					'padding:4px 6px;',
+				)
+			);
+			$icons[]     = sprintf(
+				'<span class="test-mode badge" style="%1$s">%2$s</span>',
+				esc_attr( $badge_style ),
+				esc_html__( 'Test Mode', 'woocommerce' )
+			);
+		}
+
 		foreach ( $brands as $brand => $label ) {
 			$icons[] = sprintf(
 				'<img src="%1$s" alt="%2$s" width="38" height="24" />',

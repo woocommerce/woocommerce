@@ -29,8 +29,6 @@ class WooPaymentsWooPaySessionService {
 
 	private const APPEARANCE_OPTION = 'wcpay_woopay_checkout_appearance';
 
-	private const APPEARANCE_VERSION_OPTION = 'wcpay_styles_cache_version';
-
 	/**
 	 * WooPayments account service.
 	 *
@@ -39,14 +37,23 @@ class WooPaymentsWooPaySessionService {
 	private WooPaymentsAccountService $account_service;
 
 	/**
+	 * Shared frontend styles service.
+	 *
+	 * @var WooPaymentsFrontendStylesService
+	 */
+	private WooPaymentsFrontendStylesService $frontend_styles_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsAccountService $account_service WooPayments account service.
+	 * @param WooPaymentsAccountService        $account_service         WooPayments account service.
+	 * @param WooPaymentsFrontendStylesService $frontend_styles_service Shared frontend styles service.
 	 */
-	final public function init( WooPaymentsAccountService $account_service ): void {
-		$this->account_service = $account_service;
+	final public function init( WooPaymentsAccountService $account_service, WooPaymentsFrontendStylesService $frontend_styles_service ): void {
+		$this->account_service         = $account_service;
+		$this->frontend_styles_service = $frontend_styles_service;
 	}
 
 	/**
@@ -55,21 +62,8 @@ class WooPaymentsWooPaySessionService {
 	 * @return bool
 	 */
 	public function is_woopay_enabled(): bool {
-		if (
-			'yes' === $this->get_account_service()->get_gateway_setting( 'platform_checkout', 'no' ) ||
-			'yes' === $this->get_account_service()->get_gateway_setting( 'woopay', 'no' )
-		) {
-			return true;
-		}
-
-		foreach ( array( 'express_checkout_product_methods', 'express_checkout_cart_methods', 'express_checkout_checkout_methods' ) as $setting_key ) {
-			$methods = $this->get_account_service()->get_gateway_setting( $setting_key, array() );
-			if ( is_array( $methods ) && in_array( 'woopay', $methods, true ) ) {
-				return true;
-			}
-		}
-
-		return false;
+		return 'yes' === $this->get_account_service()->get_gateway_setting( 'platform_checkout', 'no' ) &&
+			$this->is_woopay_account_eligible();
 	}
 
 	/**
@@ -385,6 +379,187 @@ class WooPaymentsWooPaySessionService {
 	}
 
 	/**
+	 * Get WooPay frontend config used by classic and block checkout surfaces.
+	 *
+	 * @param string $context Express checkout context.
+	 * @return array<string,mixed>
+	 */
+	public function get_woopay_frontend_config( string $context = 'checkout' ): array {
+		$is_woopay_enabled        = $this->is_woopay_enabled();
+		$is_country_available     = $this->is_woopay_country_available();
+		$is_global_theme_enabled  = $this->is_woopay_global_theme_support_enabled();
+		$should_show_woopay       = $this->should_show_woopay_button( $context );
+		$woopay_appearance        = $is_global_theme_enabled ? $this->get_woopay_appearance() : null;
+		$woopay_font_rules        = $is_global_theme_enabled ? $this->get_woopay_font_rules() : array();
+		$woopay_session_email     = $this->get_current_shopper_email();
+		$woopay_minimum_session   = $is_woopay_enabled ? $this->get_encrypted_minimum_session_data() : array();
+		$woopay_express_available = $is_woopay_enabled && $this->is_woopay_express_checkout_enabled_at( $context );
+
+		return array(
+			'isWooPayEnabled'                   => $is_woopay_enabled,
+			'isWoopayExpressCheckoutEnabled'    => $woopay_express_available,
+			'isWoopayFirstPartyAuthEnabled'     => false,
+			'isWooPayEmailInputEnabled'         => $is_woopay_enabled,
+			'isWooPayDirectCheckoutEnabled'     => $this->is_truthy_gateway_setting( 'is_woopay_direct_checkout_enabled' ),
+			'isWooPayGlobalThemeSupportEnabled' => $is_global_theme_enabled,
+			'forceNetworkSavedCards'            => $this->is_truthy_gateway_setting( 'force_network_saved_cards' ) || $this->should_use_stripe_platform_on_checkout_page( $context ),
+			'platformTrackerNonce'              => wp_create_nonce( 'platform_tracks_nonce' ),
+			'woopayHost'                        => $this->get_woopay_url(),
+			'wcpayVersionNumber'                => defined( 'WC_VERSION' ) ? WC_VERSION : '',
+			'woopayMerchantId'                  => $this->get_woopay_merchant_id(),
+			'initWooPayNonce'                   => wp_create_nonce( 'wcpay_init_woopay_nonce' ),
+			'woopaySessionNonce'                => wp_create_nonce( 'woopay_session_nonce' ),
+			'woopaySignatureNonce'              => wp_create_nonce( 'woopay_signature_nonce' ),
+			'woopayMinimumSessionData'          => $woopay_minimum_session,
+			'woopayButton'                      => $this->get_woopay_button_settings( $context ),
+			'woopayButtonNonce'                 => wp_create_nonce( 'woopay_button_nonce' ),
+			'addToCartNonce'                    => wp_create_nonce( 'wcpay-add-to-cart' ),
+			'shouldShowWooPayButton'            => $should_show_woopay,
+			'woopaySessionEmail'                => $woopay_session_email,
+			'woopayIsCountryAvailable'          => $is_country_available,
+			'woopayAppearance'                  => $woopay_appearance,
+			'woopayFontRules'                   => $woopay_font_rules,
+			'woopayButtonLabels'                => array(
+				'default' => __( 'WooPay', 'woocommerce' ),
+				'buy'     => sprintf(
+					/* translators: %s: WooPay. */
+					__( 'Buy with %s', 'woocommerce' ),
+					'WooPay'
+				),
+				'donate'  => sprintf(
+					/* translators: %s: WooPay. */
+					__( 'Donate with %s', 'woocommerce' ),
+					'WooPay'
+				),
+				'book'    => sprintf(
+					/* translators: %s: WooPay. */
+					__( 'Book with %s', 'woocommerce' ),
+					'WooPay'
+				),
+			),
+			'woopaySaveUserLabel'               => __( 'Securely save my information for 1-click checkout', 'woocommerce' ),
+			'woopayPhoneLabel'                  => __( 'Mobile phone number', 'woocommerce' ),
+		);
+	}
+
+	/**
+	 * Get express checkout params for WooPay.
+	 *
+	 * @param string $context Express checkout context.
+	 * @return array<string,mixed>
+	 */
+	public function get_express_checkout_params( string $context = 'checkout' ): array {
+		$currency = strtolower( get_woocommerce_currency() );
+		$country  = $this->get_store_base_country();
+
+		return array(
+			'nonce'              => array(
+				'payment_request'  => wp_create_nonce( 'wcpay-payment-request' ),
+				'shipping'         => wp_create_nonce( 'wcpay-shipping' ),
+				'update_shipping'  => wp_create_nonce( 'wcpay-update-shipping' ),
+				'checkout'         => wp_create_nonce( 'wcpay-checkout' ),
+				'platform_tracker' => wp_create_nonce( 'platform_tracks_nonce' ),
+			),
+			'checkout'           => array(
+				'currency_code'              => $currency,
+				'currency_decimals'          => function_exists( 'wc_get_price_decimals' ) ? wc_get_price_decimals() : 2,
+				'stripe_minor_unit'          => 10 ** ( function_exists( 'wc_get_price_decimals' ) ? wc_get_price_decimals() : 2 ),
+				'country_code'               => $country,
+				'needs_shipping'             => function_exists( 'WC' ) && WC() && WC()->cart ? WC()->cart->needs_shipping() : false,
+				'needs_payer_phone'          => 'required' === get_option( 'woocommerce_checkout_phone_field', 'required' ),
+				'allowed_shipping_countries' => function_exists( 'WC' ) && WC() && WC()->countries ? array_keys( WC()->countries->get_shipping_countries() ?? array() ) : array(),
+				'display_prices_with_tax'    => 'incl' === get_option( 'woocommerce_tax_display_cart' ),
+			),
+			'has_subscription'   => class_exists( '\WC_Subscriptions_Cart' ) && is_callable( array( '\WC_Subscriptions_Cart', 'cart_contains_subscription' ) ) && \WC_Subscriptions_Cart::cart_contains_subscription(),
+			'is_manual_capture'  => $this->is_truthy_gateway_setting( 'manual_capture' ),
+			'button'             => $this->get_woopay_button_settings( $context ),
+			'login_confirmation' => false,
+			'button_context'     => $this->normalize_button_context( $context ),
+			'has_block'          => has_block( 'woocommerce/cart' ) || has_block( 'woocommerce/checkout' ),
+			'product'            => array(),
+			'store_name'         => get_bloginfo( 'name' ),
+			'enabled_methods'    => $this->is_woopay_express_checkout_enabled_at( $context ) ? array( 'woopay' ) : array(),
+			'stripe'             => array(
+				'publishableKey' => $this->get_account_service()->get_publishable_key(),
+				'accountId'      => $this->get_account_service()->get_account_id(),
+				'locale'         => $this->get_stripe_locale(),
+			),
+			'flags'              => array(
+				'isEceUsingConfirmationTokens' => false,
+			),
+		);
+	}
+
+	/**
+	 * Get WooPay save-user checkout data.
+	 *
+	 * @return array<string,bool>
+	 */
+	public function get_save_user_checkout_data(): array {
+		$account_data = $this->get_account_service()->get_cached_account_data();
+
+		return array(
+			'PRE_CHECK_SAVE_MY_INFO' => ! empty( $account_data['pre_check_save_my_info'] ),
+		);
+	}
+
+	/**
+	 * Tell whether the WooPay button should be shown in the current context.
+	 *
+	 * @param string $context Express checkout context.
+	 * @return bool
+	 */
+	public function should_show_woopay_button( string $context = 'checkout' ): bool {
+		return $this->is_woopay_enabled() &&
+			$this->is_woopay_country_available() &&
+			$this->is_woopay_express_checkout_enabled_at( $context );
+	}
+
+	/**
+	 * Tell whether WooPay save-user assets should load for the current context.
+	 *
+	 * @param string $context Express checkout context.
+	 * @return bool
+	 */
+	public function should_load_woopay_save_user_assets( string $context = 'checkout' ): bool {
+		return 'checkout' === $this->normalize_button_context( $context ) &&
+			$this->is_woopay_enabled() &&
+			$this->is_woopay_country_available() &&
+			( $this->is_truthy_gateway_setting( 'force_network_saved_cards' ) || $this->should_use_stripe_platform_on_checkout_page( $context ) );
+	}
+
+	/**
+	 * Add WooPay save-user session data to order metadata.
+	 *
+	 * @param array<string,mixed> $metadata Metadata.
+	 * @param \WC_Order           $order    Order object.
+	 * @return array<string,mixed>
+	 */
+	public function maybe_add_woopay_user_metadata( array $metadata, \WC_Order $order ): array {
+		$should_save_woopay_user = $this->get_woopay_save_user_flag();
+		$woopay_phone            = $this->get_woopay_phone();
+
+		if ( ! $should_save_woopay_user || '' === $woopay_phone ) {
+			return $metadata;
+		}
+
+		$metadata['platform_checkout_primary_first_name']   = wc_clean( $order->get_billing_first_name() );
+		$metadata['platform_checkout_primary_last_name']    = wc_clean( $order->get_billing_last_name() );
+		$metadata['platform_checkout_primary_phone']        = wc_clean( $order->get_billing_phone() );
+		$metadata['platform_checkout_primary_company']      = wc_clean( $order->get_billing_company() );
+		$metadata['platform_checkout_secondary_first_name'] = wc_clean( $order->get_shipping_first_name() );
+		$metadata['platform_checkout_secondary_last_name']  = wc_clean( $order->get_shipping_last_name() );
+		$metadata['platform_checkout_secondary_phone']      = wc_clean( $order->get_shipping_phone() );
+		$metadata['platform_checkout_secondary_company']    = wc_clean( $order->get_shipping_company() );
+		$metadata['platform_checkout_phone']                = $woopay_phone;
+		$metadata['platform_checkout_source_url']           = $this->get_woopay_source_url();
+		$metadata['platform_checkout_is_blocks']            = $this->get_woopay_is_blocks();
+		$metadata['platform_checkout_viewport']             = $this->get_woopay_viewport();
+
+		return $metadata;
+	}
+
+	/**
 	 * Save WooPay appearance data.
 	 *
 	 * @param array<string,mixed>             $appearance Appearance data.
@@ -540,6 +715,312 @@ class WooPaymentsWooPaySessionService {
 		}
 
 		return $sanitized;
+	}
+
+	/**
+	 * Tell whether WooPay is available for the connected account country.
+	 *
+	 * @return bool
+	 */
+	private function is_woopay_country_available(): bool {
+		return 'US' === $this->get_account_country();
+	}
+
+	/**
+	 * Tell whether the connected account is eligible for WooPay.
+	 *
+	 * @return bool
+	 */
+	private function is_woopay_account_eligible(): bool {
+		$account_data = $this->get_account_service()->get_cached_account_data();
+
+		return ! empty( $account_data['platform_checkout_eligible'] );
+	}
+
+	/**
+	 * Tell whether WooPay express checkout is enabled for a context.
+	 *
+	 * @param string $context Express checkout context.
+	 * @return bool
+	 */
+	private function is_woopay_express_checkout_enabled_at( string $context ): bool {
+		if ( ! $this->is_woopay_enabled() ) {
+			return false;
+		}
+
+		$setting_key = 'express_checkout_' . $this->normalize_button_context( $context ) . '_methods';
+		$methods     = $this->get_account_service()->get_gateway_setting( $setting_key, array() );
+
+		if ( is_array( $methods ) ) {
+			return in_array( 'woopay', $methods, true );
+		}
+
+		return 'yes' === $this->get_account_service()->get_gateway_setting( 'platform_checkout', 'no' );
+	}
+
+	/**
+	 * Tell whether WooPay global theme support is enabled.
+	 *
+	 * @return bool
+	 */
+	private function is_woopay_global_theme_support_enabled(): bool {
+		$account_data = $this->get_account_service()->get_cached_account_data();
+
+		return ! empty( $account_data['platform_global_theme_support_enabled'] ) &&
+			$this->is_truthy_gateway_setting( 'is_woopay_global_theme_support_enabled' );
+	}
+
+	/**
+	 * Tell whether checkout should use the Stripe platform account for WooPay.
+	 *
+	 * @param string $context Express checkout context.
+	 * @return bool
+	 */
+	private function should_use_stripe_platform_on_checkout_page( string $context ): bool {
+		if (
+			'checkout' !== $this->normalize_button_context( $context ) ||
+			! $this->is_woopay_enabled() ||
+			! $this->is_woopay_country_available() ||
+			( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-pay' ) )
+		) {
+			return false;
+		}
+
+		return function_exists( 'WC' ) &&
+			WC() &&
+			WC()->cart instanceof \WC_Cart &&
+			! WC()->cart->is_empty() &&
+			WC()->cart->needs_payment();
+	}
+
+	/**
+	 * Get WooPay button settings.
+	 *
+	 * @param string $context Express checkout context.
+	 * @return array<string,string>
+	 */
+	private function get_woopay_button_settings( string $context ): array {
+		return array(
+			'type'    => $this->get_string_gateway_setting( 'payment_request_button_type', 'default' ),
+			'theme'   => $this->get_string_gateway_setting( 'payment_request_button_theme', 'dark' ),
+			'height'  => $this->get_woopay_button_height(),
+			'radius'  => $this->get_string_gateway_setting_allow_empty( 'payment_request_button_border_radius', '' ),
+			'size'    => $this->get_string_gateway_setting( 'payment_request_button_size', 'default' ),
+			'context' => $this->normalize_button_context( $context ),
+		);
+	}
+
+	/**
+	 * Get the WooPay button height from the express checkout size setting.
+	 *
+	 * @return string
+	 */
+	private function get_woopay_button_height(): string {
+		$size = $this->get_string_gateway_setting( 'payment_request_button_size', 'medium' );
+
+		if ( 'medium' === $size ) {
+			return '48';
+		}
+
+		if ( 'large' === $size ) {
+			return '55';
+		}
+
+		return '40';
+	}
+
+	/**
+	 * Normalize an express checkout context.
+	 *
+	 * @param string $context Context.
+	 * @return string
+	 */
+	private function normalize_button_context( string $context ): string {
+		$context = sanitize_key( $context );
+
+		return in_array( $context, array( 'product', 'cart', 'checkout' ), true ) ? $context : 'checkout';
+	}
+
+	/**
+	 * Get a string gateway setting.
+	 *
+	 * @param string $key      Setting key.
+	 * @param string $fallback Fallback value.
+	 * @return string
+	 */
+	private function get_string_gateway_setting( string $key, string $fallback ): string {
+		$value = $this->get_account_service()->get_gateway_setting( $key, $fallback );
+
+		return is_scalar( $value ) && '' !== (string) $value ? sanitize_text_field( (string) $value ) : $fallback;
+	}
+
+	/**
+	 * Get a string gateway setting while preserving empty string values.
+	 *
+	 * @param string $key      Setting key.
+	 * @param string $fallback Fallback value.
+	 * @return string
+	 */
+	private function get_string_gateway_setting_allow_empty( string $key, string $fallback ): string {
+		$value = $this->get_account_service()->get_gateway_setting( $key, $fallback );
+
+		return is_scalar( $value ) ? sanitize_text_field( (string) $value ) : $fallback;
+	}
+
+	/**
+	 * Tell whether a gateway setting is truthy.
+	 *
+	 * @param string $key Setting key.
+	 * @return bool
+	 */
+	private function is_truthy_gateway_setting( string $key ): bool {
+		$value = $this->get_account_service()->get_gateway_setting( $key, 'no' );
+
+		return true === $value || 'yes' === $value || '1' === $value || 1 === $value;
+	}
+
+	/**
+	 * Get the connected account country.
+	 *
+	 * @return string
+	 */
+	private function get_account_country(): string {
+		$account_data = $this->get_account_service()->get_cached_account_data();
+		$country      = isset( $account_data['country'] ) && is_scalar( $account_data['country'] )
+			? strtoupper( (string) $account_data['country'] )
+			: '';
+
+		if ( false !== strpos( $country, ':' ) ) {
+			$base_country = strtok( $country, ':' );
+			$country      = is_string( $base_country ) ? $base_country : '';
+		}
+
+		return '' !== $country ? $country : $this->get_store_base_country();
+	}
+
+	/**
+	 * Get the store base country.
+	 *
+	 * @return string
+	 */
+	private function get_store_base_country(): string {
+		$country = (string) get_option( 'woocommerce_default_country', 'US' );
+		if ( function_exists( 'WC' ) && WC() && WC()->countries ) {
+			$country = (string) WC()->countries->get_base_country();
+		}
+
+		if ( false !== strpos( $country, ':' ) ) {
+			$base_country = strtok( $country, ':' );
+			$country      = is_string( $base_country ) ? $base_country : '';
+		}
+
+		$country = strtoupper( $country );
+
+		return '' !== $country ? $country : 'US';
+	}
+
+	/**
+	 * Get the current shopper email when available.
+	 *
+	 * @return string
+	 */
+	private function get_current_shopper_email(): string {
+		$user = wp_get_current_user();
+
+		return $user instanceof \WP_User && is_email( $user->user_email ) ? sanitize_email( $user->user_email ) : '';
+	}
+
+	/**
+	 * Get a Stripe-compatible locale.
+	 *
+	 * @return string
+	 */
+	private function get_stripe_locale(): string {
+		$locale = function_exists( 'determine_locale' ) ? determine_locale() : get_locale();
+		$locale = strtolower( str_replace( '_', '-', (string) $locale ) );
+
+		return '' !== $locale ? $locale : 'auto';
+	}
+
+	/**
+	 * Tell whether the shopper opted to save their details in WooPay.
+	 *
+	 * @return bool
+	 */
+	private function get_woopay_save_user_flag(): bool {
+		$value = $this->get_posted_or_session_value( 'save_user_in_woopay', false );
+
+		return filter_var( $value, FILTER_VALIDATE_BOOLEAN );
+	}
+
+	/**
+	 * Get WooPay shopper phone.
+	 *
+	 * @return string
+	 */
+	private function get_woopay_phone(): string {
+		$phone_field = $this->get_posted_or_session_value( 'woopay_user_phone_field', array() );
+		if ( is_array( $phone_field ) && is_scalar( $phone_field['full'] ?? null ) ) {
+			return sanitize_text_field( (string) $phone_field['full'] );
+		}
+
+		$phone = $this->get_posted_or_session_value( 'phone_number', '' );
+
+		return is_scalar( $phone ) ? sanitize_text_field( (string) $phone ) : '';
+	}
+
+	/**
+	 * Get WooPay source URL.
+	 *
+	 * @return string
+	 */
+	private function get_woopay_source_url(): string {
+		$value = $this->get_posted_or_session_value( 'woopay_source_url', '' );
+
+		return is_scalar( $value ) ? esc_url_raw( (string) $value ) : '';
+	}
+
+	/**
+	 * Tell whether the WooPay save-user request came from Blocks checkout.
+	 *
+	 * @return bool
+	 */
+	private function get_woopay_is_blocks(): bool {
+		$value = $this->get_posted_or_session_value( 'woopay_is_blocks', false );
+
+		return filter_var( $value, FILTER_VALIDATE_BOOLEAN );
+	}
+
+	/**
+	 * Get WooPay checkout viewport.
+	 *
+	 * @return string
+	 */
+	private function get_woopay_viewport(): string {
+		$value = $this->get_posted_or_session_value( 'woopay_viewport', '' );
+
+		return is_scalar( $value ) ? sanitize_text_field( (string) $value ) : '';
+	}
+
+	/**
+	 * Get a posted value or fall back to WooPay session data.
+	 *
+	 * @param string $key     Value key.
+	 * @param mixed  $fallback Fallback value.
+	 * @return mixed
+	 */
+	private function get_posted_or_session_value( string $key, $fallback ) {
+		$post_data = wp_unslash( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( is_array( $post_data ) && array_key_exists( $key, $post_data ) ) {
+			return $post_data[ $key ];
+		}
+
+		$session_data = $this->get_woopay_session_data();
+		if ( is_array( $session_data ) && array_key_exists( $key, $session_data ) ) {
+			return $session_data[ $key ];
+		}
+
+		return $fallback;
 	}
 
 	/**
@@ -822,11 +1303,17 @@ class WooPaymentsWooPaySessionService {
 	 * @return array<string,mixed>|null
 	 */
 	private function get_request_array( array $request, string $key ): ?array {
-		if ( ! isset( $request[ $key ] ) || ! is_array( $request[ $key ] ) ) {
+		if ( ! isset( $request[ $key ] ) ) {
 			return null;
 		}
 
-		return $this->sanitize_array_recursive( $request[ $key ] );
+		$value = $request[ $key ];
+		if ( is_string( $value ) ) {
+			$decoded = json_decode( $value, true );
+			$value   = is_array( $decoded ) ? $decoded : null;
+		}
+
+		return is_array( $value ) ? $this->sanitize_array_recursive( $value ) : null;
 	}
 
 	/**
@@ -898,16 +1385,7 @@ class WooPaymentsWooPaySessionService {
 	 * @return string
 	 */
 	private function get_appearance_version(): string {
-		$version = get_option( self::APPEARANCE_VERSION_OPTION );
-
-		if ( is_scalar( $version ) && '' !== (string) $version ) {
-			return sanitize_text_field( (string) $version );
-		}
-
-		$version = md5( (string) wp_get_theme()->get_stylesheet() . '|' . ( defined( 'WC_VERSION' ) ? WC_VERSION : '' ) );
-		update_option( self::APPEARANCE_VERSION_OPTION, $version, true );
-
-		return $version;
+		return $this->get_frontend_styles_service()->get_styles_cache_version();
 	}
 
 	/**
@@ -918,6 +1396,19 @@ class WooPaymentsWooPaySessionService {
 	 */
 	private function has_current_appearance_version( array $stored ): bool {
 		return isset( $stored['version'] ) && is_scalar( $stored['version'] ) && (string) $stored['version'] === $this->get_appearance_version();
+	}
+
+	/**
+	 * Get the shared frontend styles service.
+	 *
+	 * @return WooPaymentsFrontendStylesService
+	 */
+	private function get_frontend_styles_service(): WooPaymentsFrontendStylesService {
+		if ( ! isset( $this->frontend_styles_service ) ) {
+			$this->frontend_styles_service = wc_get_container()->get( WooPaymentsFrontendStylesService::class );
+		}
+
+		return $this->frontend_styles_service;
 	}
 
 	/**

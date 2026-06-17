@@ -37,6 +37,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsWooPaySessionService;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\TemplateOptions;
 
@@ -501,8 +502,9 @@ class Bootstrap {
 				$core_container    = wc_get_container();
 				$checkout_bridge   = $core_container->get( WooPaymentsCheckoutBridge::class );
 				$payments_provider = $core_container->get( WooPaymentsProvider::class );
+				$woopay_service    = $core_container->get( WooPaymentsWooPaySessionService::class );
 
-				return new WooPayments( $asset_api, $checkout_bridge, $payments_provider );
+				return new WooPayments( $asset_api, $checkout_bridge, $payments_provider, $woopay_service );
 			}
 		);
 	}

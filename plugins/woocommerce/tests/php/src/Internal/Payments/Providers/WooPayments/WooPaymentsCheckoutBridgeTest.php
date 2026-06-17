@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsFrontendStylesService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsWooPaySessionService;
 use WC_Unit_Test_Case;
@@ -37,7 +38,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( true );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ) );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge() );
 
 		add_filter(
 			'wcpay_payment_fields_js_config',
@@ -57,6 +58,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'paymentMethodsConfig', $config );
 		$this->assertSame( 'Card', $config['paymentMethodsConfig']['card']['title'] );
 		$this->assertSame( 'Card', $config['paymentMethodsConfig']['card']['label'] );
+		$this->assertFalse( $config['paymentMethodsConfig']['card']['forceNetworkSavedCards'] );
 		$this->assertSame( 'visa', $config['paymentMethodsConfig']['card']['cardBrandIcons'][0]['id'] );
 		$this->assertSame( 'Visa', $config['paymentMethodsConfig']['card']['cardBrandIcons'][0]['alt'] );
 		$this->assertStringContainsString( '/assets/images/payment-methods/visa.svg', $config['paymentMethodsConfig']['card']['cardBrandIcons'][0]['src'] );
@@ -67,6 +69,8 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'enabledBillingFields', $config );
 		$this->assertArrayHasKey( 'currency', $config );
 		$this->assertArrayHasKey( 'cartTotal', $config );
+		$this->assertFalse( $config['cartContainsSubscription'] );
+		$this->assertSame( 'styles-v1', $config['stylesCacheVersion'] );
 		$this->assertSame( defined( 'WC_VERSION' ) ? WC_VERSION : '', $config['wcpayVersionNumber'] );
 		$this->assertArrayHasKey( 'createSetupIntentNonce', $config );
 		$this->assertArrayHasKey( 'updateOrderStatusNonce', $config );
@@ -77,10 +81,64 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'woopaySessionNonce', $config );
 		$this->assertArrayHasKey( 'woopaySignatureNonce', $config );
 		$this->assertSame( array( 'encrypted' => 'minimum' ), $config['woopayMinimumSessionData'] );
+		$this->assertTrue( $config['isWooPayEnabled'] );
+		$this->assertTrue( $config['isWoopayExpressCheckoutEnabled'] );
+		$this->assertTrue( $config['isWooPayEmailInputEnabled'] );
+		$this->assertFalse( $config['isWooPayDirectCheckoutEnabled'] );
+		$this->assertFalse( $config['isWooPayGlobalThemeSupportEnabled'] );
+		$this->assertFalse( $config['forceNetworkSavedCards'] );
+		$this->assertArrayHasKey( 'platformTrackerNonce', $config );
+		$this->assertSame(
+			array(
+				'type'    => 'default',
+				'theme'   => 'dark',
+				'height'  => '48',
+				'radius'  => '4',
+				'size'    => 'default',
+				'context' => 'checkout',
+			),
+			$config['woopayButton']
+		);
+		$this->assertArrayHasKey( 'woopayButtonNonce', $config );
+		$this->assertArrayHasKey( 'addToCartNonce', $config );
+		$this->assertTrue( $config['shouldShowWooPayButton'] );
+		$this->assertSame( 'shopper@example.com', $config['woopaySessionEmail'] );
+		$this->assertTrue( $config['woopayIsCountryAvailable'] );
+		$this->assertNull( $config['woopayAppearance'] );
+		$this->assertSame( array(), $config['woopayFontRules'] );
+		$this->assertSame( 'Securely save my information for 1-click checkout', $config['woopaySaveUserLabel'] );
+		$this->assertSame( 'Mobile phone number', $config['woopayPhoneLabel'] );
 		$this->assertFalse( $config['usesLegacySetupIntentBridge'] );
 		$this->assertFalse( $config['usesLegacyOrderStatusBridge'] );
 		$this->assertTrue( $config['usesNativeSetupIntentBridge'] );
 		$this->assertTrue( $config['usesNativeOrderStatusBridge'] );
+	}
+
+	/**
+	 * @testdox Should expose card platform checkout config independently from WooPay frontend config.
+	 */
+	public function test_card_platform_checkout_config_is_independent_from_woopay_frontend_config(): void {
+		$legacy_runtime  = $this->create_legacy_runtime_for_bridge();
+		$account_service = $this->create_account_service_for_bridge(
+			true,
+			array(
+				'country'                    => 'US',
+				'platform_checkout_eligible' => true,
+			),
+			array(
+				'force_network_saved_cards' => 'yes',
+			)
+		);
+		$legacy_runtime->method( 'get_gateway_prepared_customer_data' )->willReturn( array() );
+		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( true );
+
+		$bridge = new WooPaymentsCheckoutBridge();
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( false ), $this->create_frontend_styles_service_for_bridge() );
+
+		$config = $bridge->get_payment_fields_js_config();
+
+		$this->assertTrue( $config['forceNetworkSavedCards'] );
+		$this->assertTrue( $config['paymentMethodsConfig']['card']['forceNetworkSavedCards'] );
 	}
 
 	/**
@@ -93,7 +151,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( true );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ) );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge() );
 
 		add_filter(
 			'wcpay_payment_fields_js_config',
@@ -121,6 +179,24 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should include WooPay save-user data in Blocks payment method data.
+	 */
+	public function test_get_blocks_payment_method_data_includes_woopay_save_user_data(): void {
+		$legacy_runtime  = $this->create_legacy_runtime_for_bridge();
+		$account_service = $this->create_account_service_for_bridge( true );
+		$legacy_runtime->method( 'get_gateway_prepared_customer_data' )->willReturn( array() );
+		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( true );
+
+		$bridge = new WooPaymentsCheckoutBridge();
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge() );
+
+		$data = $bridge->get_blocks_payment_method_data();
+
+		$this->assertTrue( $data['isWooPayEnabled'] );
+		$this->assertTrue( $data['PRE_CHECK_SAVE_MY_INFO'] );
+	}
+
+	/**
 	 * @testdox Should expose native bridge nonces independently from the removed legacy callback bridge.
 	 */
 	public function test_get_payment_fields_js_config_exposes_native_bridge_nonces_when_checkout_surface_is_available(): void {
@@ -130,7 +206,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( false );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ) );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge() );
 
 		$config = $bridge->get_payment_fields_js_config();
 
@@ -151,7 +227,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'get_gateway_prepared_customer_data' )->willReturn( array() );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ) );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge() );
 
 		$config = $bridge->get_payment_fields_js_config();
 
@@ -176,7 +252,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'get_gateway_prepared_customer_data' )->willReturn( array() );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( false ) );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( false ), $this->create_frontend_styles_service_for_bridge() );
 
 		$config = $bridge->get_payment_fields_js_config();
 
@@ -186,6 +262,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'woopaySessionNonce', $config );
 		$this->assertArrayNotHasKey( 'woopaySignatureNonce', $config );
 		$this->assertArrayNotHasKey( 'woopayMinimumSessionData', $config );
+		$this->assertFalse( $config['isWooPayEnabled'] );
 	}
 
 	/**
@@ -223,13 +300,15 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 	/**
 	 * Create an account service mock for checkout bridge tests.
 	 *
-	 * @param bool $can_process_payments Whether the account can process payments.
+	 * @param bool  $can_process_payments Whether the account can process payments.
+	 * @param array $account_data         Account cache data.
+	 * @param array $gateway_settings     Gateway settings.
 	 * @return WooPaymentsAccountService|\PHPUnit\Framework\MockObject\MockObject
 	 */
-	private function create_account_service_for_bridge( bool $can_process_payments ) {
+	private function create_account_service_for_bridge( bool $can_process_payments, array $account_data = array( 'country' => 'RO' ), array $gateway_settings = array() ) {
 		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
 			->disableOriginalConstructor()
-			->onlyMethods( array( 'get_publishable_key', 'get_account_id', 'get_cached_account_data', 'can_process_payments', 'is_test_mode_enabled' ) )
+			->onlyMethods( array( 'get_publishable_key', 'get_account_id', 'get_cached_account_data', 'get_gateway_setting', 'can_process_payments', 'is_test_mode_enabled' ) )
 			->getMock();
 
 		$account_service
@@ -240,10 +319,13 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 			->willReturn( 'acct_123' );
 		$account_service
 			->method( 'get_cached_account_data' )
-			->willReturn(
-				array(
-					'country' => 'RO',
-				)
+			->willReturn( $account_data );
+		$account_service
+			->method( 'get_gateway_setting' )
+			->willReturnCallback(
+				static function ( string $key, $fallback = null ) use ( $gateway_settings ) {
+					return array_key_exists( $key, $gateway_settings ) ? $gateway_settings[ $key ] : $fallback;
+				}
 			);
 		$account_service
 			->method( 'can_process_payments' )
@@ -264,13 +346,61 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 	private function create_woopay_session_service_for_bridge( bool $enabled ) {
 		$service = $this->getMockBuilder( WooPaymentsWooPaySessionService::class )
 			->disableOriginalConstructor()
-			->onlyMethods( array( 'is_woopay_enabled', 'get_woopay_url', 'get_woopay_merchant_id', 'get_encrypted_minimum_session_data' ) )
+			->onlyMethods( array( 'is_woopay_enabled', 'get_woopay_frontend_config', 'get_save_user_checkout_data' ) )
 			->getMock();
 
 		$service->method( 'is_woopay_enabled' )->willReturn( $enabled );
-		$service->method( 'get_woopay_url' )->willReturn( 'https://pay.woo.com' );
-		$service->method( 'get_woopay_merchant_id' )->willReturn( '12345' );
-		$service->method( 'get_encrypted_minimum_session_data' )->willReturn( array( 'encrypted' => 'minimum' ) );
+		$service->method( 'get_woopay_frontend_config' )->willReturn(
+			array(
+				'isWooPayEnabled'                   => true,
+				'isWoopayExpressCheckoutEnabled'    => true,
+				'isWooPayEmailInputEnabled'         => true,
+				'isWooPayDirectCheckoutEnabled'     => false,
+				'isWooPayGlobalThemeSupportEnabled' => false,
+				'forceNetworkSavedCards'            => false,
+				'platformTrackerNonce'              => 'platform-tracks-nonce',
+				'woopayHost'                        => 'https://pay.woo.com',
+				'wcpayVersionNumber'                => defined( 'WC_VERSION' ) ? WC_VERSION : '',
+				'woopayMerchantId'                  => '12345',
+				'initWooPayNonce'                   => 'init-woopay-nonce',
+				'woopaySessionNonce'                => 'woopay-session-nonce',
+				'woopaySignatureNonce'              => 'woopay-signature-nonce',
+				'woopayMinimumSessionData'          => array( 'encrypted' => 'minimum' ),
+				'woopayButton'                      => array(
+					'type'    => 'default',
+					'theme'   => 'dark',
+					'height'  => '48',
+					'radius'  => '4',
+					'size'    => 'default',
+					'context' => 'checkout',
+				),
+				'woopayButtonNonce'                 => 'woopay-button-nonce',
+				'addToCartNonce'                    => 'add-to-cart-nonce',
+				'shouldShowWooPayButton'            => true,
+				'woopaySessionEmail'                => 'shopper@example.com',
+				'woopayIsCountryAvailable'          => true,
+				'woopayAppearance'                  => null,
+				'woopayFontRules'                   => array(),
+				'woopaySaveUserLabel'               => 'Securely save my information for 1-click checkout',
+				'woopayPhoneLabel'                  => 'Mobile phone number',
+			)
+		);
+		$service->method( 'get_save_user_checkout_data' )->willReturn( array( 'PRE_CHECK_SAVE_MY_INFO' => true ) );
+
+		return $service;
+	}
+
+	/**
+	 * Create a frontend styles service mock for checkout bridge tests.
+	 *
+	 * @return WooPaymentsFrontendStylesService|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private function create_frontend_styles_service_for_bridge() {
+		$service = $this->getMockBuilder( WooPaymentsFrontendStylesService::class )
+			->onlyMethods( array( 'get_styles_cache_version' ) )
+			->getMock();
+
+		$service->method( 'get_styles_cache_version' )->willReturn( 'styles-v1' );
 
 		return $service;
 	}

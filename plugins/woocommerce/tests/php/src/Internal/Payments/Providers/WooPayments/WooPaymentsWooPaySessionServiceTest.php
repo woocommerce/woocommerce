@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsFrontendStylesService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsWooPaySessionService;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
@@ -51,6 +52,7 @@ class WooPaymentsWooPaySessionServiceTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'rest_pre_dispatch' );
 		remove_all_filters( 'woocommerce_store_api_disable_nonce_check' );
+		wp_set_current_user( 0 );
 		parent::tearDown();
 	}
 
@@ -65,9 +67,9 @@ class WooPaymentsWooPaySessionServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should treat WooPay as enabled from native express-checkout method settings.
+	 * @testdox Should require platform checkout to treat WooPay as enabled.
 	 */
-	public function test_woopay_is_enabled_from_native_express_checkout_method_settings(): void {
+	public function test_woopay_requires_platform_checkout_to_be_enabled(): void {
 		$sut = $this->create_service(
 			array(
 				'platform_checkout'                 => 'no',
@@ -77,18 +79,49 @@ class WooPaymentsWooPaySessionServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertTrue( $sut->is_woopay_enabled() );
+		$this->assertFalse( $sut->is_woopay_enabled() );
 
 		$sut = $this->create_service(
 			array(
-				'platform_checkout'                 => 'no',
+				'platform_checkout'                 => 'yes',
 				'express_checkout_product_methods'  => array( 'payment_request' ),
 				'express_checkout_cart_methods'     => array(),
 				'express_checkout_checkout_methods' => array(),
 			)
 		);
 
+		$this->assertTrue( $sut->is_woopay_enabled() );
+
+		$sut = $this->create_service(
+			array(
+				'platform_checkout' => 'yes',
+			),
+			array(
+				'platform_checkout_eligible' => false,
+			)
+		);
+
 		$this->assertFalse( $sut->is_woopay_enabled() );
+		$this->assertFalse( $sut->get_woopay_frontend_config( 'checkout' )['isWooPayEnabled'] );
+	}
+
+	/**
+	 * @testdox Should not show the checkout WooPay button unless the checkout express method is enabled.
+	 */
+	public function test_woopay_checkout_button_requires_checkout_express_method(): void {
+		$sut = $this->create_service(
+			array(
+				'platform_checkout'                 => 'yes',
+				'express_checkout_product_methods'  => array( 'payment_request' ),
+				'express_checkout_cart_methods'     => array(),
+				'express_checkout_checkout_methods' => array(),
+			)
+		);
+
+		$config = $sut->get_woopay_frontend_config( 'checkout' );
+
+		$this->assertTrue( $config['isWooPayEnabled'] );
+		$this->assertFalse( $config['shouldShowWooPayButton'] );
 	}
 
 	/**
@@ -265,6 +298,149 @@ class WooPaymentsWooPaySessionServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should build the preserved WooPay checkout frontend config.
+	 */
+	public function test_builds_woopay_checkout_frontend_config(): void {
+		add_filter( 'woocommerce_native_woopayments_woopay_blog_id', static fn() => '12345' );
+
+		$sut = $this->create_service();
+		$sut->save_woopay_appearance(
+			array( 'theme' => 'stripe' ),
+			array(
+				array( 'cssSrc' => 'https://fonts.googleapis.com/css2?family=Inter' ),
+			)
+		);
+
+		$config = $sut->get_woopay_frontend_config( 'checkout' );
+
+		$this->assertTrue( $config['isWooPayEnabled'] );
+		$this->assertTrue( $config['isWoopayExpressCheckoutEnabled'] );
+		$this->assertTrue( $config['isWooPayEmailInputEnabled'] );
+		$this->assertFalse( $config['isWooPayDirectCheckoutEnabled'] );
+		$this->assertFalse( $config['isWooPayGlobalThemeSupportEnabled'] );
+		$this->assertFalse( $config['forceNetworkSavedCards'] );
+		$this->assertSame( 'https://pay.woo.com', $config['woopayHost'] );
+		$this->assertSame( '12345', $config['woopayMerchantId'] );
+		$this->assertSame( 'checkout', $config['woopayButton']['context'] );
+		$this->assertSame( 'default', $config['woopayButton']['type'] );
+		$this->assertSame( 'dark', $config['woopayButton']['theme'] );
+		$this->assertSame( '48', $config['woopayButton']['height'] );
+		$this->assertSame( '', $config['woopayButton']['radius'] );
+		$this->assertArrayHasKey( 'woopayButtonNonce', $config );
+		$this->assertArrayHasKey( 'addToCartNonce', $config );
+		$this->assertTrue( $config['shouldShowWooPayButton'] );
+		$this->assertTrue( $config['woopayIsCountryAvailable'] );
+		$this->assertNull( $config['woopayAppearance'] );
+		$this->assertSame( array(), $config['woopayFontRules'] );
+		$this->assertSame( 'Securely save my information for 1-click checkout', $config['woopaySaveUserLabel'] );
+		$this->assertSame( 'Mobile phone number', $config['woopayPhoneLabel'] );
+		$this->assertArrayHasKey( 'platformTrackerNonce', $config );
+	}
+
+	/**
+	 * @testdox Should match the extension WooPay button style settings.
+	 */
+	public function test_uses_extension_woopay_button_style_settings(): void {
+		$sut = $this->create_service(
+			array(
+				'payment_request_button_size'          => 'medium',
+				'payment_request_button_height'        => '44',
+				'payment_request_button_border_radius' => '',
+				'payment_request_button_radius'        => '9',
+			)
+		);
+
+		$config = $sut->get_woopay_frontend_config( 'checkout' );
+
+		$this->assertSame( '48', $config['woopayButton']['height'] );
+		$this->assertSame( '', $config['woopayButton']['radius'] );
+	}
+
+	/**
+	 * @testdox Should build WooPay express checkout params with Core-owned account data.
+	 */
+	public function test_builds_woopay_express_checkout_params(): void {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_currency', 'USD' );
+
+		$sut    = $this->create_service();
+		$params = $sut->get_express_checkout_params( 'checkout' );
+
+		$this->assertSame( 'pk_test_123', $params['stripe']['publishableKey'] );
+		$this->assertSame( 'acct_123', $params['stripe']['accountId'] );
+		$this->assertSame( 'checkout', $params['button_context'] );
+		$this->assertSame( array( 'woopay' ), $params['enabled_methods'] );
+		$this->assertSame( get_bloginfo( 'name' ), $params['store_name'] );
+		$this->assertSame( 'usd', $params['checkout']['currency_code'] );
+		$this->assertSame( 'US', $params['checkout']['country_code'] );
+		$this->assertSame( 'default', $params['button']['type'] );
+		$this->assertArrayHasKey( 'isEceUsingConfirmationTokens', $params['flags'] );
+	}
+
+	/**
+	 * @testdox Should build WooPay save-user checkout data from the account cache.
+	 */
+	public function test_builds_woopay_save_user_checkout_data(): void {
+		$sut = $this->create_service(
+			array(),
+			array(
+				'country'                    => 'US',
+				'pre_check_save_my_info'     => true,
+				'platform_checkout_eligible' => true,
+			)
+		);
+
+		$this->assertSame( array( 'PRE_CHECK_SAVE_MY_INFO' => true ), $sut->get_save_user_checkout_data() );
+	}
+
+	/**
+	 * @testdox Should add WooPay save-user session data to order metadata.
+	 */
+	public function test_adds_woopay_session_data_to_order_metadata(): void {
+		$this->original_session = WC()->session;
+		WC()->session           = $this->create_session();
+		WC()->session->set(
+			'woopay-user-data',
+			array(
+				'save_user_in_woopay'     => true,
+				'woopay_source_url'       => 'https://example.test/checkout',
+				'woopay_is_blocks'        => true,
+				'woopay_viewport'         => 'desktop',
+				'woopay_user_phone_field' => array(
+					'full' => '+15555550123',
+				),
+			)
+		);
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_billing_first_name( 'Ada' );
+		$order->set_billing_last_name( 'Lovelace' );
+		$order->set_billing_phone( '+15555550000' );
+		$order->set_billing_company( 'Analytical Engines' );
+		$order->set_shipping_first_name( 'Grace' );
+		$order->set_shipping_last_name( 'Hopper' );
+		$order->set_shipping_phone( '+15555550001' );
+		$order->set_shipping_company( 'Compilers Inc' );
+
+		$sut      = $this->create_service();
+		$metadata = $sut->maybe_add_woopay_user_metadata( array( 'existing' => 'kept' ), $order );
+
+		$this->assertSame( 'kept', $metadata['existing'] );
+		$this->assertSame( 'Ada', $metadata['platform_checkout_primary_first_name'] );
+		$this->assertSame( 'Lovelace', $metadata['platform_checkout_primary_last_name'] );
+		$this->assertSame( '+15555550000', $metadata['platform_checkout_primary_phone'] );
+		$this->assertSame( 'Analytical Engines', $metadata['platform_checkout_primary_company'] );
+		$this->assertSame( 'Grace', $metadata['platform_checkout_secondary_first_name'] );
+		$this->assertSame( 'Hopper', $metadata['platform_checkout_secondary_last_name'] );
+		$this->assertSame( '+15555550001', $metadata['platform_checkout_secondary_phone'] );
+		$this->assertSame( 'Compilers Inc', $metadata['platform_checkout_secondary_company'] );
+		$this->assertSame( '+15555550123', $metadata['platform_checkout_phone'] );
+		$this->assertSame( 'https://example.test/checkout', $metadata['platform_checkout_source_url'] );
+		$this->assertTrue( $metadata['platform_checkout_is_blocks'] );
+		$this->assertSame( 'desktop', $metadata['platform_checkout_viewport'] );
+	}
+
+	/**
 	 * @testdox Should store WooPay checkout appearance in the preserved option shape.
 	 */
 	public function test_stores_appearance_in_preserved_option_shape(): void {
@@ -386,11 +562,27 @@ class WooPaymentsWooPaySessionServiceTest extends WC_Unit_Test_Case {
 			3
 		);
 
+		$appearance = $this->get_valid_appearance();
+		$font_rules = array(
+			array(
+				'cssSrc' => 'https://fonts.wp.com/font.css',
+				'family' => 'Inter',
+			),
+		);
+
+		$expected_font_rules = array(
+			array(
+				'cssSrc' => 'https://fonts.wp.com/font.css',
+			),
+		);
+
 		$sut    = $this->create_service();
 		$result = $sut->init_woopay_session(
 			array(
 				'email'        => 'shopper@example.com',
 				'user_session' => 'qwerty123',
+				'appearance'   => wp_json_encode( $appearance ),
+				'font_rules'   => wp_json_encode( $font_rules ),
 			)
 		);
 
@@ -405,6 +597,8 @@ class WooPaymentsWooPaySessionServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'acct_123', $captured_request['body']['store_data']['account_id'] );
 		$this->assertTrue( $captured_request['body']['store_data']['test_mode'] );
 		$this->assertSame( 'qwerty123', $captured_request['body']['user_session'] );
+		$this->assertSame( $appearance, $captured_request['body']['appearance'] );
+		$this->assertSame( $expected_font_rules, $captured_request['body']['font_rules'] );
 		$this->assertArrayHasKey( 'session_nonce', $captured_request['body'] );
 		$this->assertArrayHasKey( 'store_api_token', $captured_request['body'] );
 	}
@@ -412,31 +606,50 @@ class WooPaymentsWooPaySessionServiceTest extends WC_Unit_Test_Case {
 	/**
 	 * Create the System Under Test.
 	 *
-	 * @param array<string,mixed> $settings Gateway settings.
+	 * @param array<string,mixed> $settings     Gateway settings.
+	 * @param array<string,mixed> $account_data Account data.
 	 * @return WooPaymentsWooPaySessionService
 	 */
-	private function create_service( array $settings = array() ): WooPaymentsWooPaySessionService {
-		$settings = array_merge(
+	private function create_service( array $settings = array(), array $account_data = array() ): WooPaymentsWooPaySessionService {
+		$settings     = array_merge(
 			array(
-				'platform_checkout' => 'yes',
-				'manual_capture'    => 'no',
+				'platform_checkout'                    => 'yes',
+				'manual_capture'                       => 'no',
+				'payment_request_button_type'          => 'default',
+				'payment_request_button_theme'         => 'dark',
+				'payment_request_button_size'          => 'medium',
+				'payment_request_button_height'        => '44',
+				'payment_request_button_border_radius' => '',
+				'express_checkout_product_methods'     => array( 'woopay' ),
+				'express_checkout_cart_methods'        => array( 'woopay' ),
+				'express_checkout_checkout_methods'    => array( 'woopay' ),
 			),
 			$settings
+		);
+		$account_data = array_merge(
+			array(
+				'country'                    => 'US',
+				'pre_check_save_my_info'     => false,
+				'platform_checkout_eligible' => true,
+			),
+			$account_data
 		);
 
 		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
 			->disableOriginalConstructor()
-			->onlyMethods( array( 'get_account_id', 'is_test_mode_enabled', 'get_gateway_setting' ) )
+			->onlyMethods( array( 'get_account_id', 'get_publishable_key', 'get_cached_account_data', 'is_test_mode_enabled', 'get_gateway_setting' ) )
 			->getMock();
 
 		$account_service->method( 'get_account_id' )->willReturn( 'acct_123' );
+		$account_service->method( 'get_publishable_key' )->willReturn( 'pk_test_123' );
+		$account_service->method( 'get_cached_account_data' )->willReturn( $account_data );
 		$account_service->method( 'is_test_mode_enabled' )->willReturn( true );
 		$account_service->method( 'get_gateway_setting' )->willReturnCallback(
 			static fn( string $key, $fallback = null ) => array_key_exists( $key, $settings ) ? $settings[ $key ] : $fallback
 		);
 
 		$sut = new WooPaymentsWooPaySessionService();
-		$sut->init( $account_service );
+		$sut->init( $account_service, new WooPaymentsFrontendStylesService() );
 
 		return $sut;
 	}

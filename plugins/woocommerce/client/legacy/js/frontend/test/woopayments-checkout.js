@@ -54,7 +54,8 @@ describe( 'WooPayments checkout', () => {
 
 			if (
 				typeof selectorOrCallback === 'string' &&
-				selectorOrCallback.indexOf( 'input[name="payment_method"]' ) !== -1
+				selectorOrCallback.indexOf( 'input[name="payment_method"]' ) !==
+					-1
 			) {
 				return selectedGatewayResult;
 			}
@@ -100,6 +101,9 @@ describe( 'WooPayments checkout', () => {
 			isCoreNativeCheckoutAvailable: true,
 			locale: 'en-US',
 			publishableKey: 'pk_test',
+			woopayPhoneLabel: 'Mobile phone number',
+			woopaySaveUserLabel:
+				'Securely save my information for 1-click checkout',
 		};
 		stripeMock = {
 			elements: jest.fn( ( options ) => {
@@ -194,7 +198,8 @@ describe( 'WooPayments checkout', () => {
 	} );
 
 	test( 'handles PaymentIntent confirmation hashes through next actions', async () => {
-		window.location.hash = '#wcpay-confirm-pi:123:pi_native_secret_abc:nonce';
+		window.location.hash =
+			'#wcpay-confirm-pi:123:pi_native_secret_abc:nonce';
 
 		require( '../woopayments-checkout' );
 
@@ -274,11 +279,26 @@ describe( 'WooPayments checkout', () => {
 
 		require( '../woopayments-checkout' );
 
-		document
-			.querySelector( '.js-woopayments-copy-test-number' )
-			.click();
+		document.querySelector( '.js-woopayments-copy-test-number' ).click();
 
 		expect( writeText ).toHaveBeenCalledWith( '4242 4242 4242 4242' );
+	} );
+
+	test( 'does not render WooPay express markup from the card checkout bundle', () => {
+		document.body.innerHTML =
+			'<form class="checkout">' +
+			'<input id="billing_email" value="shopper@example.com" />' +
+			'<input type="radio" name="payment_method" value="woocommerce_payments" checked />' +
+			'<div id="wcpay-core-payment-element"></div>' +
+			'<div id="wcpay-woopay-button"><div class="woopay-express-button is-placeholder"></div></div>' +
+			'</form>';
+
+		require( '../woopayments-checkout' );
+
+		expect( document.querySelector( '#wcpay-woopay-button button' ) ).toBeNull();
+		expect(
+			document.querySelector( '.woopay-express-button.is-placeholder' )
+		).not.toBeNull();
 	} );
 
 	test( 'adds a setup intent field before submitting the add-payment-method form', async () => {

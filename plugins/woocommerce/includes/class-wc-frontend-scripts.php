@@ -276,6 +276,11 @@ class WC_Frontend_Scripts {
 				'deps'    => array( 'jquery', 'wc-checkout', 'stripe' ),
 				'version' => $version,
 			),
+			'wc-woopayments-woopay'        => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/woopayments-woopay' . $suffix . '.js' ),
+				'deps'    => array( 'jquery' ),
+				'version' => $version,
+			),
 			'wc-country-select'            => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/country-select' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
@@ -454,6 +459,12 @@ class WC_Frontend_Scripts {
 			),
 			'woocommerce_prettyPhoto_css' => array( // deprecated.
 				'src'     => self::get_asset_url( 'assets/css/prettyPhoto.css' ),
+				'deps'    => array(),
+				'version' => $version,
+				'has_rtl' => true,
+			),
+			'wc-woopayments-woopay'       => array(
+				'src'     => self::get_asset_url( 'assets/css/woopayments-woopay.css' ),
 				'deps'    => array(),
 				'version' => $version,
 				'has_rtl' => true,

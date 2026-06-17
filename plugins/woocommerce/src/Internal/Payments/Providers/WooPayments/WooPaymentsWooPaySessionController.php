@@ -26,6 +26,10 @@ class WooPaymentsWooPaySessionController implements RegisterHooksInterface {
 
 	private const NAMESPACE = 'payments/woopay';
 
+	private const CLASSIC_WOOPAY_SCRIPT_HANDLE = 'wc-woopayments-woopay';
+
+	private const CLASSIC_WOOPAY_STYLE_HANDLE = 'wc-woopayments-woopay';
+
 	/**
 	 * Runtime owner arbiter.
 	 *
@@ -39,6 +43,13 @@ class WooPaymentsWooPaySessionController implements RegisterHooksInterface {
 	 * @var WooPaymentsWooPaySessionService
 	 */
 	private WooPaymentsWooPaySessionService $session_service;
+
+	/**
+	 * Whether WooPay express checkout buttons have already rendered in this request.
+	 *
+	 * @var bool
+	 */
+	private bool $has_rendered_express_checkout_buttons = false;
 
 	/**
 	 * Initialize the class instance.
@@ -69,6 +80,16 @@ class WooPaymentsWooPaySessionController implements RegisterHooksInterface {
 			if ( false === has_action( $hook, $callback ) ) {
 				add_action( $hook, $callback );
 			}
+		}
+
+		foreach ( $this->get_frontend_hooks() as $hook => $callback ) {
+			if ( false === has_action( $hook, $callback ) ) {
+				add_action( $hook, $callback );
+			}
+		}
+
+		if ( false === has_filter( 'wcpay_metadata_from_order', array( $this, 'maybe_add_woopay_user_metadata' ) ) ) {
+			add_filter( 'wcpay_metadata_from_order', array( $this, 'maybe_add_woopay_user_metadata' ), 10, 2 );
 		}
 	}
 
@@ -225,6 +246,209 @@ class WooPaymentsWooPaySessionController implements RegisterHooksInterface {
 		}
 
 		wp_send_json_success( $this->get_shopper_appearance_response( $request ) );
+	}
+
+	/**
+	 * Enqueue Core-owned WooPay frontend assets on supported shopper surfaces.
+	 */
+	public function enqueue_frontend_assets(): void {
+		if ( ! $this->is_supported_frontend_surface() ) {
+			return;
+		}
+
+		$context = $this->get_current_button_context();
+		if (
+			! $this->session_service->should_show_woopay_button( $context ) &&
+			! $this->session_service->should_load_woopay_save_user_assets( $context )
+		) {
+			return;
+		}
+
+		$this->register_classic_woopay_assets();
+		wp_localize_script( self::CLASSIC_WOOPAY_SCRIPT_HANDLE, 'wcpay_core_woopay_config', $this->get_classic_woopay_config( $context ) );
+		wp_enqueue_style( self::CLASSIC_WOOPAY_STYLE_HANDLE );
+		wp_enqueue_script( self::CLASSIC_WOOPAY_SCRIPT_HANDLE );
+	}
+
+	/**
+	 * Display the WooPay express checkout placeholder.
+	 */
+	public function display_express_checkout_buttons(): void {
+		if ( $this->has_rendered_express_checkout_buttons || ! $this->is_supported_frontend_surface() ) {
+			return;
+		}
+
+		$context = $this->get_current_button_context();
+		if ( ! $this->session_service->should_show_woopay_button( $context ) ) {
+			return;
+		}
+
+		$config   = $this->session_service->get_woopay_frontend_config( $context );
+		$settings = is_array( $config['woopayButton'] ?? null ) ? $config['woopayButton'] : array();
+		$type     = isset( $settings['type'] ) && is_scalar( $settings['type'] ) ? (string) $settings['type'] : 'default';
+		$theme    = isset( $settings['theme'] ) && is_scalar( $settings['theme'] ) ? (string) $settings['theme'] : 'dark';
+		$height   = isset( $settings['height'] ) && is_scalar( $settings['height'] ) ? (string) $settings['height'] : '48';
+		$radius   = isset( $settings['radius'] ) && is_scalar( $settings['radius'] ) ? (string) $settings['radius'] : '4';
+
+		$this->has_rendered_express_checkout_buttons = true;
+
+		echo '<div class="wcpay-express-checkout-wrapper">';
+		echo '<div id="wcpay-woopay-button" data-product_page="' . esc_attr( 'product' === $context ? '1' : '0' ) . '">';
+		echo '<div class="woopay-express-button is-placeholder" aria-label="' . esc_attr__( 'WooPay', 'woocommerce' ) . '" data-type="' . esc_attr( $type ) . '" data-theme="' . esc_attr( $theme ) . '" data-size="' . esc_attr( (string) ( $settings['size'] ?? 'default' ) ) . '" style="height: ' . esc_attr( $height ) . 'px; border-radius: ' . esc_attr( $radius ) . 'px"></div>';
+		echo '</div>';
+		echo '<p id="wcpay-express-checkout-button-separator">&mdash; ' . esc_html__( 'OR', 'woocommerce' ) . ' &mdash;</p>';
+		echo '</div>';
+	}
+
+	/**
+	 * Handle WooPay product add-to-cart AJAX.
+	 */
+	public function handle_add_to_cart(): void {
+		check_ajax_referer( 'wcpay-add-to-cart', 'security' );
+
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
+
+		if ( function_exists( 'WC' ) && WC() ) {
+			WC()->shipping()->reset_shipping();
+		}
+
+		$request    = wp_unslash( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$product_id = isset( $request['product_id'] ) ? absint( $request['product_id'] ) : 0;
+		$product    = wc_get_product( $product_id );
+
+		if ( ! $product ) {
+			wp_send_json(
+				array(
+					'error' => array(
+						'code'    => 'invalid_product_id',
+						'message' => __( 'Invalid product ID.', 'woocommerce' ),
+					),
+				),
+				404
+			);
+		}
+
+		$quantity = isset( $request['quantity'] ) ? (int) wc_stock_amount( $request['quantity'] ) : 1;
+		$quantity = max( 1, $quantity );
+
+		/**
+		 * Filters whether WooCommerce should add the WooPay product to the cart.
+		 *
+		 * @param bool $passed     Whether validation passed.
+		 * @param int  $product_id Product ID.
+		 * @param int  $quantity   Quantity.
+		 *
+		 * @since 11.0.0
+		 */
+		if ( ! apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity ) ) {
+			wp_send_json(
+				array(
+					'error'  => true,
+					'submit' => true,
+				),
+				400
+			);
+		}
+
+		if ( function_exists( 'WC' ) && WC() && WC()->cart ) {
+			WC()->cart->empty_cart();
+			$variation_id = isset( $request['variation_id'] ) ? absint( $request['variation_id'] ) : 0;
+			$attributes   = $this->get_add_to_cart_attributes( $request );
+			$added        = WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $attributes );
+			if ( ! $added ) {
+				wp_send_json(
+					array(
+						'error' => array(
+							'code'    => 'add_to_cart_failed',
+							'message' => __( 'Unable to add this product to the cart.', 'woocommerce' ),
+						),
+					),
+					400
+				);
+			}
+
+			WC()->cart->calculate_totals();
+		}
+
+		wp_send_json(
+			array(
+				'result' => 'success',
+				'cart'   => array(
+					'items_count' => function_exists( 'WC' ) && WC() && WC()->cart ? WC()->cart->get_cart_contents_count() : 0,
+					'total'       => function_exists( 'WC' ) && WC() && WC()->cart ? WC()->cart->get_total( '' ) : '',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Get product variation attributes from a WooPay add-to-cart request.
+	 *
+	 * @param array<string,mixed> $request Unsigned add-to-cart request data.
+	 * @return array<string,mixed>
+	 */
+	private function get_add_to_cart_attributes( array $request ): array {
+		$attributes = array();
+		if ( isset( $request['attributes'] ) && is_array( $request['attributes'] ) ) {
+			$clean_attributes = wc_clean( $request['attributes'] );
+			$attributes       = is_array( $clean_attributes ) ? $clean_attributes : array();
+		}
+
+		foreach ( $request as $key => $value ) {
+			if ( 0 !== strpos( (string) $key, 'attribute_' ) || is_array( $value ) ) {
+				continue;
+			}
+
+			$attributes[ sanitize_key( $key ) ] = wc_clean( $value );
+		}
+
+		return $attributes;
+	}
+
+	/**
+	 * Handle WooPay frontend error notices.
+	 */
+	public function handle_show_error_notice(): void {
+		$is_nonce_valid = check_ajax_referer( 'woopay_button_nonce', false, false );
+
+		if ( ! $is_nonce_valid ) {
+			wp_send_json_error(
+				__( 'You aren’t authorized to do that.', 'woocommerce' ),
+				403
+			);
+		}
+
+		$request = wp_unslash( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$message = isset( $request['message'] ) && is_scalar( $request['message'] )
+			? sanitize_text_field( (string) $request['message'] )
+			: __( 'There was a problem processing the payment.', 'woocommerce' );
+
+		wc_add_notice( $message, 'error' );
+		wp_send_json_success(
+			array(
+				'notice' => wc_print_notices( true ),
+			)
+		);
+	}
+
+	/**
+	 * Clear WooPay session data when WooCommerce completes payment.
+	 */
+	public function handle_woocommerce_payment_complete(): void {
+		$this->session_service->clear_woopay_session_data();
+	}
+
+	/**
+	 * Add WooPay save-user session data to order metadata.
+	 *
+	 * @param array<string,mixed> $metadata Metadata.
+	 * @param \WC_Order           $order    Order object.
+	 * @return array<string,mixed>
+	 */
+	public function maybe_add_woopay_user_metadata( array $metadata, \WC_Order $order ): array {
+		return $this->session_service->maybe_add_woopay_user_metadata( $metadata, $order );
 	}
 
 	/**
@@ -391,6 +615,96 @@ class WooPaymentsWooPaySessionController implements RegisterHooksInterface {
 			'wc_ajax_wcpay_get_woopay_minimum_session_data' => array( $this, 'handle_get_woopay_minimum_session_data' ),
 			'wp_ajax_wcpay_admin_set_woopay_appearance'   => array( $this, 'handle_set_admin_woopay_appearance' ),
 			'wc_ajax_wcpay_shopper_set_woopay_appearance' => array( $this, 'handle_set_shopper_woopay_appearance' ),
+			'wc_ajax_wcpay_add_to_cart'                   => array( $this, 'handle_add_to_cart' ),
+			'wp_ajax_woopay_express_checkout_button_show_error_notice' => array( $this, 'handle_show_error_notice' ),
+			'wp_ajax_nopriv_woopay_express_checkout_button_show_error_notice' => array( $this, 'handle_show_error_notice' ),
 		);
+	}
+
+	/**
+	 * Get WooPay frontend hooks and callbacks.
+	 *
+	 * @return array<string,callable>
+	 */
+	private function get_frontend_hooks(): array {
+		return array(
+			'wp_enqueue_scripts'                           => array( $this, 'enqueue_frontend_assets' ),
+			'woocommerce_checkout_before_customer_details' => array( $this, 'display_express_checkout_buttons' ),
+			'woocommerce_proceed_to_checkout'              => array( $this, 'display_express_checkout_buttons' ),
+			'woocommerce_after_add_to_cart_form'           => array( $this, 'display_express_checkout_buttons' ),
+			'woocommerce_pay_order_before_payment'         => array( $this, 'display_express_checkout_buttons' ),
+			'woocommerce_payment_complete'                 => array( $this, 'handle_woocommerce_payment_complete' ),
+		);
+	}
+
+	/**
+	 * Register classic WooPay assets when WooCommerce has not registered them yet.
+	 */
+	private function register_classic_woopay_assets(): void {
+		if ( ! wp_script_is( self::CLASSIC_WOOPAY_SCRIPT_HANDLE, 'registered' ) ) {
+			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+			wp_register_script(
+				self::CLASSIC_WOOPAY_SCRIPT_HANDLE,
+				WC()->plugin_url() . '/assets/js/frontend/woopayments-woopay' . $suffix . '.js',
+				array( 'jquery' ),
+				WC_VERSION,
+				true
+			);
+		}
+
+		if ( ! wp_style_is( self::CLASSIC_WOOPAY_STYLE_HANDLE, 'registered' ) ) {
+			wp_register_style(
+				self::CLASSIC_WOOPAY_STYLE_HANDLE,
+				WC()->plugin_url() . '/assets/css/woopayments-woopay.css',
+				array(),
+				WC_VERSION
+			);
+			wp_style_add_data( self::CLASSIC_WOOPAY_STYLE_HANDLE, 'rtl', 'replace' );
+		}
+	}
+
+	/**
+	 * Get localized classic WooPay config.
+	 *
+	 * @param string $context WooPay button context.
+	 * @return array<string,mixed>
+	 */
+	private function get_classic_woopay_config( string $context ): array {
+		return array_merge(
+			array(
+				'wcAjaxUrl'                => \WC_AJAX::get_endpoint( '%%endpoint%%' ),
+				'confirmationErrorMessage' => __( 'There was a problem processing the payment. Please try again.', 'woocommerce' ),
+			),
+			$this->session_service->get_woopay_frontend_config( $context ),
+			$this->session_service->get_save_user_checkout_data()
+		);
+	}
+
+	/**
+	 * Tell whether the current request is a supported shopper frontend surface.
+	 *
+	 * @return bool
+	 */
+	private function is_supported_frontend_surface(): bool {
+		return ( function_exists( 'is_checkout' ) && is_checkout() ) ||
+			( function_exists( 'is_cart' ) && is_cart() ) ||
+			( function_exists( 'is_product' ) && is_product() );
+	}
+
+	/**
+	 * Get the current WooPay button context.
+	 *
+	 * @return string
+	 */
+	private function get_current_button_context(): string {
+		if ( function_exists( 'is_product' ) && is_product() ) {
+			return 'product';
+		}
+
+		if ( function_exists( 'is_cart' ) && is_cart() ) {
+			return 'cart';
+		}
+
+		return 'checkout';
 	}
 }

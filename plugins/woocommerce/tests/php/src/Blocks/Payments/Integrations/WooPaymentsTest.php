@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\WooPayments;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsWooPaySessionService;
 use WP_UnitTestCase;
 
 /**
@@ -32,7 +33,7 @@ class WooPaymentsTest extends WP_UnitTestCase {
 			->getMock();
 		$provider->method( 'can_process_payments' )->willReturn( true );
 
-		$integration = new WooPayments( $asset_api, $bridge, $provider );
+		$integration = new WooPayments( $asset_api, $bridge, $provider, $this->create_woopay_session_service() );
 
 		$this->assertFalse( $integration->is_active() );
 	}
@@ -55,7 +56,7 @@ class WooPaymentsTest extends WP_UnitTestCase {
 			->getMock();
 		$provider->method( 'can_process_payments' )->willReturn( false );
 
-		$integration = new WooPayments( $asset_api, $bridge, $provider );
+		$integration = new WooPayments( $asset_api, $bridge, $provider, $this->create_woopay_session_service() );
 
 		$this->assertFalse( $integration->is_active() );
 	}
@@ -68,7 +69,7 @@ class WooPaymentsTest extends WP_UnitTestCase {
 
 		$asset_api = $this->getMockBuilder( AssetApi::class )
 			->disableOriginalConstructor()
-			->onlyMethods( array( 'register_script' ) )
+			->onlyMethods( array( 'register_script', 'register_style' ) )
 			->getMock();
 		$asset_api
 			->expects( $this->once() )
@@ -77,6 +78,16 @@ class WooPaymentsTest extends WP_UnitTestCase {
 				'wc-payment-method-woopayments',
 				'assets/client/blocks/wc-payment-method-woopayments.js',
 				array( 'stripe', 'wc-blocks-checkout' )
+			);
+		$asset_api
+			->expects( $this->once() )
+			->method( 'register_style' )
+			->with(
+				'wc-payment-method-woopayments',
+				'assets/client/blocks/wc-payment-method-woopayments.css',
+				array(),
+				'all',
+				true
 			);
 
 		$bridge = $this->getMockBuilder( WooPaymentsCheckoutBridge::class )
@@ -90,11 +101,76 @@ class WooPaymentsTest extends WP_UnitTestCase {
 			->getMock();
 		$provider->method( 'can_process_payments' )->willReturn( true );
 
-		$integration = new WooPayments( $asset_api, $bridge, $provider );
+		$integration = new WooPayments( $asset_api, $bridge, $provider, $this->create_woopay_session_service() );
 
 		$this->assertSame( array( 'wc-payment-method-woopayments' ), $integration->get_payment_method_script_handles() );
 		$this->assertTrue( wp_script_is( 'stripe', 'registered' ) );
 		$this->assertSame( 'https://js.stripe.com/v3/', wp_scripts()->registered['stripe']->src );
+	}
+
+	/**
+	 * @testdox Should register WooPay Blocks assets only when the WooPay button is available.
+	 */
+	public function test_get_payment_method_script_handles_registers_woopay_assets_only_when_button_is_available(): void {
+		wp_deregister_script( 'stripe' );
+
+		$asset_api = $this->getMockBuilder( AssetApi::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'register_script', 'register_style' ) )
+			->getMock();
+		$asset_api
+			->expects( $this->exactly( 2 ) )
+			->method( 'register_script' )
+			->withConsecutive(
+				array(
+					'wc-payment-method-woopayments',
+					'assets/client/blocks/wc-payment-method-woopayments.js',
+					array( 'stripe', 'wc-blocks-checkout' ),
+				),
+				array(
+					'wc-payment-method-woopayments-woopay',
+					'assets/client/blocks/wc-payment-method-woopayments-woopay.js',
+					array( 'wc-blocks-checkout' ),
+				)
+			);
+		$asset_api
+			->expects( $this->exactly( 2 ) )
+			->method( 'register_style' )
+			->withConsecutive(
+				array(
+					'wc-payment-method-woopayments',
+					'assets/client/blocks/wc-payment-method-woopayments.css',
+					array(),
+					'all',
+					true,
+				),
+				array(
+					'wc-payment-method-woopayments-woopay',
+					'assets/client/blocks/wc-payment-method-woopayments-woopay.css',
+					array(),
+					'all',
+					true,
+				)
+			);
+
+		$bridge = $this->getMockBuilder( WooPaymentsCheckoutBridge::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'should_expose_checkout_surface' ) )
+			->getMock();
+		$bridge->method( 'should_expose_checkout_surface' )->willReturn( true );
+		$provider = $this->getMockBuilder( WooPaymentsProvider::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'can_process_payments' ) )
+			->getMock();
+		$provider->method( 'can_process_payments' )->willReturn( true );
+		$woopay_session_service = $this->create_woopay_session_service( true );
+
+		$integration = new WooPayments( $asset_api, $bridge, $provider, $woopay_session_service );
+
+		$this->assertSame(
+			array( 'wc-payment-method-woopayments', 'wc-payment-method-woopayments-woopay' ),
+			$integration->get_payment_method_script_handles()
+		);
 	}
 
 	/**
@@ -123,8 +199,24 @@ class WooPaymentsTest extends WP_UnitTestCase {
 			->getMock();
 		$provider->method( 'can_process_payments' )->willReturn( true );
 
-		$integration = new WooPayments( $asset_api, $bridge, $provider );
+		$integration = new WooPayments( $asset_api, $bridge, $provider, $this->create_woopay_session_service() );
 
 		$this->assertSame( array( 'title' => 'WooPayments' ), $integration->get_payment_method_data() );
+	}
+
+	/**
+	 * Create a WooPay session service mock.
+	 *
+	 * @param bool $should_show_button Whether the WooPay button should be available.
+	 * @return WooPaymentsWooPaySessionService
+	 */
+	private function create_woopay_session_service( bool $should_show_button = false ): WooPaymentsWooPaySessionService {
+		$service = $this->getMockBuilder( WooPaymentsWooPaySessionService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'should_show_woopay_button' ) )
+			->getMock();
+		$service->method( 'should_show_woopay_button' )->willReturn( $should_show_button );
+
+		return $service;
 	}
 }

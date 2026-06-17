@@ -3,14 +3,20 @@
  */
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createElement } from '@wordpress/element';
+import { registerExpressPaymentMethod } from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
  */
 import registerWooPayments from '../index';
+import {
+	normalizeAppearanceForStripe,
+	normalizeAppearanceValueForStripe,
+} from '../upe-styles';
 
 jest.mock( '@woocommerce/blocks-registry', () => ( {
 	registerPaymentMethod: jest.fn(),
+	registerExpressPaymentMethod: jest.fn(),
 } ) );
 
 jest.mock( '@woocommerce/settings', () => ( {
@@ -21,12 +27,42 @@ jest.mock( '@woocommerce/settings', () => ( {
 		publishableKey: 'pk_test_123',
 		accountId: 'acct_123',
 		cartTotal: 0,
+		stylesCacheVersion: 'styles-v1',
 		currency: 'USD',
+		forceNetworkSavedCards: true,
+		initWooPayNonce: 'init-nonce',
 		isCoreNativeCheckoutAvailable: true,
+		isWooPayEnabled: true,
+		shouldShowWooPayButton: true,
 		testMode: true,
+		wcAjaxUrl: '/?wc-ajax=%%endpoint%%',
+		woopayButton: {
+			type: 'default',
+			theme: 'dark',
+			height: '48',
+			radius: '4',
+			size: 'default',
+			context: 'checkout',
+		},
+		woopayAppearance: {
+			theme: 'stripe',
+			labels: 'floating',
+		},
+		woopayFontRules: [
+			{
+				cssSrc: 'https://fonts.wp.com/font.css',
+				family: 'Inter',
+			},
+		],
+		woopayUserSession: 'qwerty123',
+		woopaySessionNonce: 'session-nonce',
+		woopayPhoneLabel: 'WooPay phone number',
+		woopaySaveUserLabel: 'Save to WooPay',
+		PRE_CHECK_SAVE_MY_INFO: true,
 		paymentMethodsConfig: {
 			card: {
 				title: 'Card',
+				isReusable: true,
 				cardBrandIcons: [
 					{
 						id: 'visa',
@@ -76,6 +112,7 @@ describe( 'wc-payment-method-woopayments', () => {
 		delete window.navigator.clipboard;
 		window.fetch = originalFetch;
 		document.body.innerHTML = '';
+		window.localStorage.clear();
 		jest.clearAllMocks();
 	} );
 
@@ -141,7 +178,7 @@ describe( 'wc-payment-method-woopayments', () => {
 		const registration = registerWooPayments();
 		const LabelComponent = registration.label.type;
 		const PaymentMethodLabel = ( { text, icon } ) => (
-			<span>
+			<span className="wc-block-components-payment-method-label wc-block-components-payment-method-label--with-icon">
 				{ text }
 				{ icon }
 			</span>
@@ -166,7 +203,67 @@ describe( 'wc-payment-method-woopayments', () => {
 			'https://example.test/mastercard.svg'
 		);
 		expect( screen.getByText( '+ 2' ) ).toBeInTheDocument();
+		expect(
+			document.querySelector( '.payment-methods--logos' )
+		).toBeInTheDocument();
+		expect(
+			document.querySelector( '.wcpay-core-card-brand-icons' )
+		).not.toBeInTheDocument();
 		expect( registration.ariaLabel ).toContain( 'Test Mode' );
+	} );
+
+	it( 'renders the WooPay save-my-info section after the Blocks payment step', async () => {
+		document.body.innerHTML = `
+			<div class="wc-block-checkout">
+				<div class="wp-block-woocommerce-checkout-payment-block"></div>
+			</div>
+			<input id="billing-phone" value="5551234567" />
+		`;
+
+		const registration = registerWooPayments();
+		const content = registration.content;
+
+		render(
+			createElement( content.type, {
+				...content.props,
+				eventRegistration: {
+					onPaymentSetup: jest.fn(),
+					onCheckoutSuccess: jest.fn(),
+				},
+				emitResponse: {
+					responseTypes: {
+						SUCCESS: 'success',
+						ERROR: 'error',
+					},
+					noticeContexts: {
+						PAYMENTS: 'payments',
+					},
+				},
+			} )
+		);
+
+		await waitFor( () => {
+			expect(
+				screen.getByRole( 'heading', { name: 'Save my info' } )
+			).toBeInTheDocument();
+		} );
+
+		expect(
+			document.querySelector( '#remember-me' )?.previousElementSibling
+		).toHaveClass( 'wp-block-woocommerce-checkout-payment-block' );
+		expect(
+			screen.getByRole( 'checkbox', {
+				name: 'Save to WooPay',
+			} )
+		).toBeChecked();
+		expect(
+			document.querySelector( 'input[name="woopay_viewport"]' )
+		).toBeInTheDocument();
+		expect(
+			document.querySelector(
+				'input[name="woopay_user_phone_field[full]"]'
+			)
+		).toHaveValue( '5551234567' );
 	} );
 
 	it( 'renders test card instructions while the account is in test mode', () => {
@@ -235,6 +332,12 @@ describe( 'wc-payment-method-woopayments', () => {
 		);
 
 		expect( writeText ).toHaveBeenCalledWith( '4242 4242 4242 4242' );
+	} );
+
+	it( 'does not register WooPay express from the card payment method bundle', () => {
+		registerWooPayments();
+
+		expect( registerExpressPaymentMethod ).not.toHaveBeenCalled();
 	} );
 
 	it( 'submits Stripe Elements before creating a payment method', async () => {
@@ -381,6 +484,7 @@ describe( 'wc-payment-method-woopayments', () => {
 		expect( elements ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				currency: 'usd',
+				loader: 'never',
 				mode: 'setup',
 				paymentMethodCreation: 'manual',
 				paymentMethodTypes: [ 'card' ],
@@ -409,6 +513,212 @@ describe( 'wc-payment-method-woopayments', () => {
 					applePay: 'never',
 					googlePay: 'never',
 					link: 'never',
+				},
+				terms: {
+					card: 'never',
+				},
+			} )
+		);
+	} );
+
+	it( 'initializes the card PaymentElement without a connected Stripe account when network saved cards are forced', async () => {
+		const elements = jest.fn( () => ( {
+			create: jest.fn( () => ( {
+				mount: jest.fn(),
+			} ) ),
+		} ) );
+		window.Stripe = jest.fn( () => ( {
+			elements,
+			createPaymentMethod: jest.fn().mockResolvedValue( {} ),
+		} ) );
+		const registration = registerWooPayments();
+		const content = registration.content;
+
+		render(
+			createElement( content.type, {
+				...content.props,
+				eventRegistration: {
+					onPaymentSetup: jest.fn(),
+					onCheckoutSuccess: jest.fn(),
+				},
+				emitResponse: {
+					responseTypes: {
+						SUCCESS: 'success',
+						ERROR: 'error',
+					},
+					noticeContexts: {
+						PAYMENTS: 'payments',
+					},
+				},
+			} )
+		);
+
+		await waitFor( () => {
+			expect( window.Stripe ).toHaveBeenCalled();
+		} );
+
+		expect( window.Stripe ).toHaveBeenCalledWith( 'pk_test_123', {
+			locale: 'auto',
+		} );
+		expect( window.Stripe.mock.calls[ 0 ][ 1 ] ).not.toHaveProperty(
+			'stripeAccount'
+		);
+	} );
+
+	it( 'initializes Stripe Elements with cached Blocks checkout appearance and font rules', async () => {
+		const appearance = {
+			theme: 'stripe',
+			labels: 'floating',
+			rules: {
+				'.Input': {
+					fontSize: '16px',
+				},
+			},
+		};
+		const create = jest.fn( () => ( {
+			mount: jest.fn(),
+		} ) );
+		const elements = jest.fn( () => ( {
+			create,
+		} ) );
+		const originalStyleSheets = document.styleSheets;
+		Object.defineProperty( document, 'styleSheets', {
+			configurable: true,
+			value: [
+				{
+					href: 'https://fonts.wp.com/inter.css',
+				},
+				{
+					href: 'https://example.test/theme.css',
+				},
+			],
+		} );
+		window.localStorage.setItem(
+			'wcpay_appearance_blocks_checkout',
+			JSON.stringify( {
+				version: 'styles-v1',
+				appearance,
+			} )
+		);
+		window.Stripe = jest.fn( () => ( {
+			elements,
+			createPaymentMethod: jest.fn().mockResolvedValue( {} ),
+		} ) );
+		const registration = registerWooPayments();
+		const content = registration.content;
+
+		render(
+			createElement( content.type, {
+				...content.props,
+				eventRegistration: {
+					onPaymentSetup: jest.fn(),
+					onCheckoutSuccess: jest.fn(),
+				},
+				emitResponse: {
+					responseTypes: {
+						SUCCESS: 'success',
+						ERROR: 'error',
+					},
+					noticeContexts: {
+						PAYMENTS: 'payments',
+					},
+				},
+			} )
+		);
+
+		await waitFor( () => {
+			expect( elements ).toHaveBeenCalled();
+		} );
+
+		expect( elements ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				appearance,
+				fonts: [
+					{
+						cssSrc: 'https://fonts.wp.com/inter.css',
+					},
+				],
+				loader: 'never',
+			} )
+		);
+
+		Object.defineProperty( document, 'styleSheets', {
+			configurable: true,
+			value: originalStyleSheets,
+		} );
+	} );
+
+	it( 'normalizes modern computed CSS colors before passing them to Stripe Elements', () => {
+		expect(
+			normalizeAppearanceValueForStripe(
+				'1px solid color(srgb 0.168627 0.176471 0.184314 / 0.8)'
+			)
+		).toBe( '1px solid rgb(85, 87, 89)' );
+		expect(
+			normalizeAppearanceValueForStripe(
+				'rgb(43 45 47 / 0.8) 0px 1px 2px'
+			)
+		).toBe( 'rgb(85, 87, 89) 0px 1px 2px' );
+		expect(
+			normalizeAppearanceForStripe( {
+				rules: {
+					'.Input': {
+						borderColor:
+							'color(srgb 0.168627 0.176471 0.184314 / 0.8)',
+					},
+				},
+			} )
+		).toEqual( {
+			rules: {
+				'.Input': {
+					borderColor: 'rgb(85, 87, 89)',
+				},
+			},
+		} );
+	} );
+
+	it( 'shows reusable card terms when the shopper saves the payment method', async () => {
+		const create = jest.fn( () => ( {
+			mount: jest.fn(),
+		} ) );
+		window.Stripe = jest.fn( () => ( {
+			elements: jest.fn( () => ( {
+				create,
+			} ) ),
+			createPaymentMethod: jest.fn().mockResolvedValue( {} ),
+		} ) );
+		const registration = registerWooPayments();
+		const content = registration.content;
+
+		render(
+			createElement( content.type, {
+				...content.props,
+				eventRegistration: {
+					onPaymentSetup: jest.fn(),
+					onCheckoutSuccess: jest.fn(),
+				},
+				emitResponse: {
+					responseTypes: {
+						SUCCESS: 'success',
+						ERROR: 'error',
+					},
+					noticeContexts: {
+						PAYMENTS: 'payments',
+					},
+				},
+				shouldSavePayment: true,
+			} )
+		);
+
+		await waitFor( () => {
+			expect( create ).toHaveBeenCalled();
+		} );
+
+		expect( create ).toHaveBeenCalledWith(
+			'payment',
+			expect.objectContaining( {
+				terms: {
+					card: 'always',
 				},
 			} )
 		);
@@ -590,6 +900,13 @@ describe( 'wc-payment-method-woopayments', () => {
 		} );
 		expect( handleNextAction ).toHaveBeenCalledWith( {
 			clientSecret: 'pi_123_secret_abc',
+		} );
+		expect( window.Stripe ).toHaveBeenNthCalledWith( 1, 'pk_test_123', {
+			locale: 'auto',
+		} );
+		expect( window.Stripe ).toHaveBeenNthCalledWith( 2, 'pk_test_123', {
+			locale: 'auto',
+			stripeAccount: 'acct_123',
 		} );
 		expect( window.fetch ).toHaveBeenCalledWith(
 			'https://example.test/wp-admin/admin-ajax.php',

@@ -130,18 +130,27 @@ class WooPaymentsCheckoutBridge {
 	private WooPaymentsWooPaySessionService $woopay_session_service;
 
 	/**
+	 * Shared frontend styles service.
+	 *
+	 * @var WooPaymentsFrontendStylesService
+	 */
+	private WooPaymentsFrontendStylesService $frontend_styles_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsLegacyRuntime        $legacy_runtime         WooPayments legacy runtime.
-	 * @param WooPaymentsAccountService       $account_service        WooPayments account service.
-	 * @param WooPaymentsWooPaySessionService $woopay_session_service WooPay session service.
+	 * @param WooPaymentsLegacyRuntime         $legacy_runtime         WooPayments legacy runtime.
+	 * @param WooPaymentsAccountService        $account_service        WooPayments account service.
+	 * @param WooPaymentsWooPaySessionService  $woopay_session_service WooPay session service.
+	 * @param WooPaymentsFrontendStylesService $frontend_styles_service Shared frontend styles service.
 	 */
-	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsAccountService $account_service, WooPaymentsWooPaySessionService $woopay_session_service ): void {
-		$this->legacy_runtime         = $legacy_runtime;
-		$this->account_service        = $account_service;
-		$this->woopay_session_service = $woopay_session_service;
+	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsAccountService $account_service, WooPaymentsWooPaySessionService $woopay_session_service, WooPaymentsFrontendStylesService $frontend_styles_service ): void {
+		$this->legacy_runtime          = $legacy_runtime;
+		$this->account_service         = $account_service;
+		$this->woopay_session_service  = $woopay_session_service;
+		$this->frontend_styles_service = $frontend_styles_service;
 	}
 
 	/**
@@ -159,7 +168,8 @@ class WooPaymentsCheckoutBridge {
 	 * @return array<string,mixed>
 	 */
 	public function get_payment_fields_js_config(): array {
-		$config = array(
+		$force_network_saved_cards = $this->should_force_network_saved_cards();
+		$config                    = array(
 			'publishableKey'                => $this->get_account_service()->get_publishable_key(),
 			'accountId'                     => $this->get_account_service()->get_account_id(),
 			'locale'                        => $this->get_stripe_locale(),
@@ -171,6 +181,9 @@ class WooPaymentsCheckoutBridge {
 			'enabledBillingFields'          => $this->get_enabled_billing_fields(),
 			'currency'                      => get_woocommerce_currency(),
 			'cartTotal'                     => $this->get_cart_total(),
+			'cartContainsSubscription'      => $this->cart_contains_subscription(),
+			'stylesCacheVersion'            => $this->get_frontend_styles_service()->get_styles_cache_version(),
+			'forceNetworkSavedCards'        => $force_network_saved_cards,
 			'customerData'                  => $this->get_legacy_runtime()->get_gateway_prepared_customer_data(),
 			'usesLegacySetupIntentBridge'   => false,
 			'usesLegacyOrderStatusBridge'   => false,
@@ -179,6 +192,7 @@ class WooPaymentsCheckoutBridge {
 			'isCheckout'                    => function_exists( 'is_checkout' ) && is_checkout(),
 			'isCoreNativeCheckoutBridge'    => true,
 			'isCoreNativeCheckoutAvailable' => $this->should_expose_checkout_surface(),
+			'isWooPayEnabled'               => false,
 			'confirmationErrorMessage'      => __( 'There was a problem confirming your payment.', 'woocommerce' ),
 		);
 
@@ -187,13 +201,11 @@ class WooPaymentsCheckoutBridge {
 			$config['updateOrderStatusNonce'] = wp_create_nonce( 'wcpay_update_order_status_nonce' );
 
 			if ( $this->get_woopay_session_service()->is_woopay_enabled() ) {
-				$config['woopayHost']               = $this->get_woopay_session_service()->get_woopay_url();
-				$config['wcpayVersionNumber']       = defined( 'WC_VERSION' ) ? WC_VERSION : '';
-				$config['woopayMerchantId']         = $this->get_woopay_session_service()->get_woopay_merchant_id();
-				$config['initWooPayNonce']          = wp_create_nonce( 'wcpay_init_woopay_nonce' );
-				$config['woopaySessionNonce']       = wp_create_nonce( 'woopay_session_nonce' );
-				$config['woopaySignatureNonce']     = wp_create_nonce( 'woopay_signature_nonce' );
-				$config['woopayMinimumSessionData'] = $this->get_woopay_session_service()->get_encrypted_minimum_session_data();
+				$config                           = array_merge(
+					$config,
+					$this->get_woopay_session_service()->get_woopay_frontend_config( 'checkout' )
+				);
+				$config['forceNetworkSavedCards'] = $force_network_saved_cards;
 			}
 		}
 
@@ -257,8 +269,16 @@ class WooPaymentsCheckoutBridge {
 	 * @return array<string,mixed>
 	 */
 	public function get_blocks_payment_method_data(): array {
+		$data = $this->get_payment_fields_js_config();
+		if ( ! empty( $data['isWooPayEnabled'] ) ) {
+			$data = array_merge(
+				$data,
+				$this->get_woopay_session_service()->get_save_user_checkout_data()
+			);
+		}
+
 		return array_merge(
-			$this->get_payment_fields_js_config(),
+			$data,
 			array(
 				'title'       => __( 'Card', 'woocommerce' ),
 				'description' => __( 'Pay securely using WooPayments.', 'woocommerce' ),
@@ -345,13 +365,17 @@ class WooPaymentsCheckoutBridge {
 
 		return array(
 			'card' => array(
-				'id'                  => 'card',
-				'title'               => __( 'Card', 'woocommerce' ),
-				'label'               => __( 'Card', 'woocommerce' ),
-				'cardBrandIcons'      => $this->get_card_brand_icons(),
-				'showSaveOption'      => true,
-				'supports'            => array( 'products' ),
-				'testingInstructions' => $this->get_card_testing_instructions(),
+				'id'                     => 'card',
+				'title'                  => __( 'Card', 'woocommerce' ),
+				'label'                  => __( 'Card', 'woocommerce' ),
+				'isReusable'             => true,
+				'isBnpl'                 => false,
+				'isExpressCheckout'      => false,
+				'forceNetworkSavedCards' => $this->should_force_network_saved_cards(),
+				'cardBrandIcons'         => $this->get_card_brand_icons(),
+				'showSaveOption'         => true,
+				'supports'               => array( 'products' ),
+				'testingInstructions'    => $this->get_card_testing_instructions(),
 			),
 		);
 	}
@@ -426,6 +450,62 @@ class WooPaymentsCheckoutBridge {
 	}
 
 	/**
+	 * Tell whether card checkout should use Stripe platform behavior for saved payment details.
+	 *
+	 * @return bool
+	 */
+	private function should_force_network_saved_cards(): bool {
+		return $this->is_truthy_gateway_setting( 'force_network_saved_cards' ) || $this->should_use_stripe_platform_for_card_checkout();
+	}
+
+	/**
+	 * Tell whether card checkout should initialize Stripe through the platform account.
+	 *
+	 * @return bool
+	 */
+	private function should_use_stripe_platform_for_card_checkout(): bool {
+		$account_data = $this->get_account_service()->get_cached_account_data();
+		if ( empty( $account_data['platform_checkout_eligible'] ) || 'yes' !== $this->get_string_gateway_setting( 'platform_checkout', 'no' ) ) {
+			return false;
+		}
+
+		if ( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-pay' ) ) {
+			return false;
+		}
+
+		return function_exists( 'WC' ) &&
+			WC() &&
+			WC()->cart instanceof \WC_Cart &&
+			! WC()->cart->is_empty() &&
+			WC()->cart->needs_payment();
+	}
+
+	/**
+	 * Get a string WooPayments gateway setting.
+	 *
+	 * @param string $key Setting key.
+	 * @param string $fallback Fallback value.
+	 * @return string
+	 */
+	private function get_string_gateway_setting( string $key, string $fallback ): string {
+		$value = $this->get_account_service()->get_gateway_setting( $key, $fallback );
+
+		return is_scalar( $value ) && '' !== (string) $value ? sanitize_text_field( (string) $value ) : $fallback;
+	}
+
+	/**
+	 * Tell whether a WooPayments gateway setting is truthy.
+	 *
+	 * @param string $key Setting key.
+	 * @return bool
+	 */
+	private function is_truthy_gateway_setting( string $key ): bool {
+		$value = $this->get_account_service()->get_gateway_setting( $key, 'no' );
+
+		return true === $value || 'yes' === $value || '1' === $value || 1 === $value;
+	}
+
+	/**
 	 * Get the country-specific test card number.
 	 *
 	 * @param string $country Country code.
@@ -479,6 +559,17 @@ class WooPaymentsCheckoutBridge {
 	}
 
 	/**
+	 * Tell whether the current cart contains a subscription.
+	 *
+	 * @return bool
+	 */
+	private function cart_contains_subscription(): bool {
+		return class_exists( '\WC_Subscriptions_Cart' ) &&
+			is_callable( array( '\WC_Subscriptions_Cart', 'cart_contains_subscription' ) ) &&
+			\WC_Subscriptions_Cart::cart_contains_subscription();
+	}
+
+	/**
 	 * Get a Stripe-compatible locale.
 	 *
 	 * @return string
@@ -488,5 +579,18 @@ class WooPaymentsCheckoutBridge {
 		$locale = strtolower( str_replace( '_', '-', (string) $locale ) );
 
 		return '' !== $locale ? $locale : 'auto';
+	}
+
+	/**
+	 * Get the shared frontend styles service.
+	 *
+	 * @return WooPaymentsFrontendStylesService
+	 */
+	private function get_frontend_styles_service(): WooPaymentsFrontendStylesService {
+		if ( ! isset( $this->frontend_styles_service ) ) {
+			$this->frontend_styles_service = wc_get_container()->get( WooPaymentsFrontendStylesService::class );
+		}
+
+		return $this->frontend_styles_service;
 	}
 }

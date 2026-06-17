@@ -464,7 +464,9 @@
 		}
 	} );
 
-	$( document.body ).on( 'updated_checkout', initializeStripeElement );
+	$( document.body ).on( 'updated_checkout', function () {
+		initializeStripeElement();
+	} );
 
 	$( document.body ).on( 'checkout_place_order_' + gatewayId, function () {
 		if ( ! isSelectedGateway() ) {

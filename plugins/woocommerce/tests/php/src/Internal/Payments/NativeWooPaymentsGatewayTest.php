@@ -58,6 +58,39 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should show the checkout test-mode badge when test mode is enabled.
+	 */
+	public function test_gateway_icon_shows_test_mode_badge_when_test_mode_is_enabled(): void {
+		$this->with_gateway_settings(
+			array( 'test_mode' => 'yes' ),
+			function (): void {
+				$gateway = new NativeWooPaymentsGateway();
+
+				$this->assertStringContainsString( '/assets/images/payment-methods/visa.svg', $gateway->get_icon() );
+				$this->assertStringContainsString( 'test-mode badge', $gateway->get_icon() );
+				$this->assertStringContainsString( 'background-color:#fff2d7', $gateway->get_icon() );
+				$this->assertStringContainsString( 'Test Mode', $gateway->get_icon() );
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should hide the checkout test-mode badge when test mode is disabled.
+	 */
+	public function test_gateway_icon_hides_test_mode_badge_when_test_mode_is_disabled(): void {
+		$this->with_gateway_settings(
+			array( 'test_mode' => 'no' ),
+			function (): void {
+				$gateway = new NativeWooPaymentsGateway();
+
+				$this->assertStringContainsString( '/assets/images/payment-methods/visa.svg', $gateway->get_icon() );
+				$this->assertStringNotContainsString( 'test-mode badge', $gateway->get_icon() );
+				$this->assertStringNotContainsString( 'Test Mode', $gateway->get_icon() );
+			}
+		);
+	}
+
+	/**
 	 * @testdox Should expose saved-card support only when saved cards are enabled.
 	 */
 	public function test_saved_card_support_tracks_saved_cards_setting(): void {

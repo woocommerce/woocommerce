@@ -1,0 +1,119 @@
+#wcpay-woopay-button,
+.wcpay-core-woopay-express {
+	container-name: woopay-button;
+	container-type: inline-size;
+}
+
+.woopay-express-button {
+	align-items: center;
+	background: #fff;
+	border: 0;
+	border-radius: 4px;
+	box-sizing: border-box;
+	color: #000;
+	display: flex;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+	font-size: 18px;
+	font-weight: 500;
+	height: 40px;
+	justify-content: center;
+	letter-spacing: 0.8px;
+	line-height: 1;
+	list-style-type: none;
+	min-height: auto;
+	overflow: hidden;
+	position: relative;
+	text-decoration: none;
+	text-transform: none;
+	white-space: nowrap;
+	width: 100%;
+
+	.button-content {
+		align-items: center;
+		display: flex;
+		justify-content: center;
+		max-width: 100%;
+		padding: 0 12px;
+		transform: scale(0.9);
+	}
+
+	svg {
+		display: inline-block;
+		flex: 0 0 auto;
+		width: 99px;
+	}
+
+	&[data-type="buy"],
+	&[data-type="book"],
+	&[data-type="donate"] {
+		min-width: 150px;
+
+		svg {
+			margin-left: 5px;
+		}
+	}
+
+	&[data-theme="dark"] {
+		background: #873eff;
+		border-color: #873eff;
+		color: #fff;
+	}
+
+	&[data-theme="light-outline"] {
+		border: 1px solid #000;
+	}
+
+	&[data-size="medium"] {
+		height: 48px;
+
+		.button-content {
+			transform: scale(1);
+		}
+	}
+
+	&[data-size="large"] {
+		height: 55px;
+
+		.button-content {
+			transform: scale(1.1);
+		}
+	}
+
+	&:disabled,
+	&[aria-disabled="true"],
+	&.is-placeholder {
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
+
+	&:not(:disabled):not(.is-placeholder):hover {
+		cursor: pointer;
+	}
+
+	&[data-theme="dark"]:not(:disabled):not(.is-placeholder):hover {
+		background: #9a5bff;
+		border-color: #9a5bff;
+	}
+
+	&[data-theme="dark"]:not(:disabled):not(.is-placeholder):focus-visible {
+		box-shadow: none;
+		outline: 2px solid #4b1d99;
+		outline-offset: 2px;
+	}
+
+	&[data-theme="light-outline"]:not(:disabled):not(.is-placeholder):hover {
+		background: #e0e0e0;
+	}
+
+	&[data-theme="light-outline"]:not(:disabled):not(.is-placeholder):focus-visible {
+		box-shadow: inset 0 0 0 2px #000;
+		outline: none;
+	}
+}
+
+@media (forced-colors: active) {
+
+	.woopay-express-button:focus-visible {
+		outline: 2px solid ButtonText;
+	}
+}
