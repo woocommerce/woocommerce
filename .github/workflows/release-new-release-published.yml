@@ -7,6 +7,9 @@ on:
         required: true
         type: string
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   # Jobs to run after a pre-release is published (triggered by the "prereleased" GH event).
   generate-release-commits-and-contributors:

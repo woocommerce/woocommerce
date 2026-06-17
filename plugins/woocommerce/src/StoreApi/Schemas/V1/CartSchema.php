@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\StoreApi\SchemaController;
@@ -370,7 +371,7 @@ class CartSchema extends AbstractSchema {
 			'has_calculated_shipping' => $cart->has_calculated_shipping(),
 			'shipping_rates'          => $this->get_item_responses_from_schema( $this->shipping_rate_schema, $shipping_packages ),
 			'items_count'             => $cart->get_cart_contents_count(),
-			'items_weight'            => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),
+			'items_weight'            => wc_get_weight( $cart->get_cart_contents_weight(), WeightUnit::GRAM ),
 			'cross_sells'             => $this->get_item_responses_from_schema( $this->cross_sells_item_schema, $cross_sells ),
 			'errors'                  => $cart_errors,
 			'payment_methods'         => array_values( wp_list_pluck( WC()->payment_gateways->get_available_payment_gateways(), 'id' ) ),
