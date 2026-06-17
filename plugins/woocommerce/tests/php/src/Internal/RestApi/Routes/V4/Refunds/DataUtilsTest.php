@@ -1572,6 +1572,258 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Preview validates a supplied quantity even when refund_total is also present (matches create).
+	 *
+	 * Regression guard: preview previously skipped quantity validation whenever a
+	 * refund_total was supplied, so { quantity: 2, refund_total: 1 } on a 1-unit
+	 * line previewed successfully but failed at create.
+	 */
+	public function test_validate_preview_line_items_quantity_with_refund_total_still_validated(): void {
+		// 1-unit, no-tax product line.
+		$order = $this->create_order_with_taxes( array(), 50.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$items = $order->get_items( 'line_item' );
+		$item  = reset( $items );
+
+		$result = $this->data_utils->validate_preview_line_items(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 2,
+					'refund_total' => 1.00,
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'quantity_exceeds_refundable', $result->get_error_code() );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox Preview caps a product quantity refund against the remaining line amount, not just units (matches create).
+	 *
+	 * Regression guard: an amount-only prior refund leaves all units "available" by
+	 * count, so the units-only check passed, but create auto-fills refund_total and
+	 * rejects the over-refund. Preview must reject it too.
+	 */
+	public function test_validate_preview_line_items_product_quantity_respects_prior_amount_refund(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 200.00,
+				'total'    => 200.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 200.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		// Prior amount-only refund of $150 on the line (no units consumed: qty 0),
+		// leaving $50 of line amount but both units still uncounted.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 150.00,
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => 0,
+						'refund_total' => 150.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$result = $this->data_utils->validate_preview_line_items(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 2,
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'quantity_exceeds_refundable', $result->get_error_code() );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox Preview accepts an explicit negative refund_total on a discount-fee line (matches create).
+	 */
+	public function test_validate_preview_line_items_negative_fee_explicit_refund_total_passes(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Discount',
+				'total' => -10.00,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+
+		$order->set_total( 40.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$result = $this->data_utils->validate_preview_line_items(
+			array(
+				array(
+					'line_item_id' => $fee->get_id(),
+					'refund_total' => -5.00,
+				),
+			),
+			$order
+		);
+
+		$this->assertTrue( $result, 'A negative refund_total on a negative line should be accepted.' );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox Preview rejects a positive refund_total against a negative discount-fee line (matches create).
+	 */
+	public function test_validate_preview_line_items_positive_refund_total_on_negative_line_rejected(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Discount',
+				'total' => -10.00,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+
+		$order->set_total( 40.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$result = $this->data_utils->validate_preview_line_items(
+			array(
+				array(
+					'line_item_id' => $fee->get_id(),
+					'refund_total' => 5.00,
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'invalid_refund_total', $result->get_error_code() );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox build_refund_preview honors an explicit negative refund_total on a discount-fee line.
+	 */
+	public function test_build_refund_preview_explicit_negative_refund_total(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		$order = wc_create_order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Loyalty discount',
+				'total' => -10.00,
+			)
+		);
+		$fee->set_taxes( array( 'total' => array( $tax_rate_id => -1.00 ) ) );
+		$fee->save();
+		$order->add_item( $fee );
+
+		$tax_item = new \WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( -1.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+		$order->save();
+
+		$result = $this->data_utils->build_refund_preview(
+			$order,
+			array(
+				array(
+					'line_item_id' => $fee->get_id(),
+					'refund_total' => -5.00,
+				),
+			)
+		);
+
+		// The explicit -$5 is used directly, not recomputed from a (missing) quantity.
+		$this->assertSame( '-5.00', $result['breakdown']['fees']['total'] );
+		$item_data = $result['breakdown']['fees']['items'][0];
+		$this->assertEqualsWithDelta(
+			-5.00,
+			(float) $item_data['subtotal'] + (float) $item_data['tax'],
+			0.0001,
+			'Subtotal + tax must reconstitute the requested negative amount.'
+		);
+
+		$order->delete( true );
+	}
+
+	/**
 	 * @testdox validate_line_items rejects missing or non-positive quantity with a clear invalid_line_item error.
 	 *
 	 * @dataProvider provider_invalid_quantities_for_validate_line_items

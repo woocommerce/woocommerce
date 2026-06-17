@@ -748,9 +748,11 @@ class DataUtils {
 			 */
 			// When the caller provides an explicit refund_total (partial-amount form) use it
 			// directly. The quantity-based form computes the tax-inclusive total from unit price.
-			// The positivity check mirrors validate_preview_line_items(), which rejects a
-			// present-but-non-positive refund_total before this method runs.
-			$refund_total_with_tax = isset( $line_item['refund_total'] ) && (float) $line_item['refund_total'] > 0
+			// A non-zero check (not > 0) mirrors validate_preview_line_items(), which accepts a
+			// negative refund_total for a negative discount line and rejects a present-but-zero
+			// one before this method runs — so a signed value is honoured rather than falling
+			// through to the (possibly absent) quantity.
+			$refund_total_with_tax = isset( $line_item['refund_total'] ) && is_numeric( $line_item['refund_total'] ) && 0.0 !== (float) $line_item['refund_total']
 				? NumberUtil::round( (float) $line_item['refund_total'], $price_decimals )
 				: $this->compute_line_item_refund_total( $item, (int) $line_item['quantity'] );
 
@@ -891,14 +893,12 @@ class DataUtils {
 				);
 			}
 
-			// A present refund_total must be a positive number. Reject explicitly
-			// rather than treating a zero/invalid value as absent — otherwise a
-			// request like {quantity: 2, refund_total: 0} would validate via the
-			// quantity path while build_refund_preview() uses the explicit 0,
-			// producing a misleading $0.00 preview. A null refund_total means
-			// "use the quantity form" (isset() is false for null).
+			// A present refund_total may be negative (a discount/credit line) but must be a
+			// non-zero number with the same sign as the line — validated below, mirroring
+			// validate_line_items() so create and preview accept and reject the same input.
+			// A null refund_total means "use the quantity form" (isset() is false for null).
 			$has_refund_total = isset( $line_item['refund_total'] );
-			if ( $has_refund_total && ( ! is_numeric( $line_item['refund_total'] ) || (float) $line_item['refund_total'] <= 0 ) ) {
+			if ( $has_refund_total && ! is_numeric( $line_item['refund_total'] ) ) {
 				return new WP_Error(
 					'invalid_refund_total',
 					__( 'refund_total must be a number greater than zero.', 'woocommerce' ),
@@ -916,17 +916,43 @@ class DataUtils {
 				);
 			}
 
-			// Validate explicit refund_total when provided.
+			$price_decimals    = wc_get_price_decimals();
+			$signed_line_total = (float) $item->get_total() + (float) $item->get_total_tax();
+
+			// Validate an explicit refund_total. Mirrors validate_line_items() exactly (sign,
+			// zero, and the three over-refund caps) so a previewed amount that is accepted or
+			// rejected here behaves identically at create.
 			if ( $has_refund_total ) {
-				$refund_total        = (float) $line_item['refund_total'];
-				$item_total_with_tax = abs( (float) $item->get_total() + (float) $item->get_total_tax() );
-				if ( $refund_total > NumberUtil::round( $item_total_with_tax, wc_get_price_decimals() ) ) {
+				$refund_total = (float) $line_item['refund_total'];
+
+				// Reject a refund_total whose sign is opposite the line: you cannot refund a
+				// positive amount from a discount line, or a negative amount from a normal line.
+				if ( $refund_total * $signed_line_total < 0 ) {
+					return new WP_Error(
+						'invalid_refund_total',
+						__( 'Refund total has the wrong sign for this line item.', 'woocommerce' ),
+						array( 'status' => WP_Http::BAD_REQUEST )
+					);
+				}
+
+				// Reject a refund_total that rounds to zero — a no-op the create path also rejects.
+				if ( 0.0 === (float) NumberUtil::round( $refund_total, $price_decimals ) ) {
+					return new WP_Error(
+						'invalid_refund_total',
+						__( 'refund_total must be a number greater than zero.', 'woocommerce' ),
+						array( 'status' => WP_Http::BAD_REQUEST )
+					);
+				}
+
+				$item_total_with_tax = abs( $signed_line_total );
+				$abs_refund_total    = abs( $refund_total );
+				if ( $abs_refund_total > NumberUtil::round( $item_total_with_tax, $price_decimals ) ) {
 					return new WP_Error(
 						'refund_total_exceeds_line',
 						sprintf(
 							/* translators: %s: line item total including tax */
 							__( 'refund_total cannot exceed the line item total including tax (%s).', 'woocommerce' ),
-							wc_format_decimal( $item_total_with_tax, wc_get_price_decimals() )
+							wc_format_decimal( $item_total_with_tax, $price_decimals )
 						),
 						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 					);
@@ -944,21 +970,23 @@ class DataUtils {
 						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 					);
 				}
-				if ( $refund_total > NumberUtil::round( $remaining_total, wc_get_price_decimals() ) ) {
+				if ( $abs_refund_total > NumberUtil::round( $remaining_total, $price_decimals ) ) {
 					return new WP_Error(
 						'refund_total_exceeds_remaining',
 						sprintf(
 							/* translators: %s: remaining refundable amount */
 							__( 'refund_total cannot exceed the remaining refundable amount for this line item (%s).', 'woocommerce' ),
-							wc_format_decimal( $remaining_total, wc_get_price_decimals() )
+							wc_format_decimal( $remaining_total, $price_decimals )
 						),
 						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 					);
 				}
 			}
 
-			// Quantity-based validation — only when refund_total is absent.
-			if ( $has_quantity && ! $has_refund_total ) {
+			// Validate a supplied quantity whenever present — even alongside refund_total —
+			// matching validate_line_items(). Skipping this when refund_total was given let a
+			// preview accept a quantity the create path then rejects.
+			if ( $has_quantity ) {
 				$quantity = $line_item['quantity'];
 
 				if ( $item instanceof WC_Order_Item_Product ) {
@@ -974,43 +1002,43 @@ class DataUtils {
 							array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 						);
 					}
+				} elseif ( 1 !== $quantity ) {
+					// Shipping and fee lines carry a single refundable unit.
+					return new WP_Error(
+						'invalid_quantity',
+						__( 'Shipping and fee line items must be refunded with quantity of 1.', 'woocommerce' ),
+						array( 'status' => WP_Http::BAD_REQUEST )
+					);
+				}
+			}
+
+			// Amount-from-quantity cap: when the amount is derived from quantity (no explicit
+			// refund_total), cap the computed tax-inclusive amount against the remaining line
+			// amount for every item type. Mirrors create, which auto-fills refund_total from
+			// quantity and then applies the same cap — so a product with prior amount-only
+			// refunds (units still uncounted) can no longer preview an over-refund.
+			if ( $has_quantity && ! $has_refund_total ) {
+				$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
+				$remaining_total = abs( $signed_line_total ) - $refunded_total;
+				if ( $remaining_total <= 0 ) {
+					return new WP_Error(
+						'quantity_exceeds_refundable',
+						__( 'This line item has already been fully refunded.', 'woocommerce' ),
+						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+					);
 				}
 
-				if ( $item instanceof WC_Order_Item_Shipping || $item instanceof WC_Order_Item_Fee ) {
-					if ( 1 !== $quantity ) {
-						return new WP_Error(
-							'invalid_quantity',
-							__( 'Shipping and fee line items must be refunded with quantity of 1.', 'woocommerce' ),
-							array( 'status' => WP_Http::BAD_REQUEST )
-						);
-					}
-
-					// Compare on a tax-inclusive basis: compute_line_item_refund_total() (and
-					// therefore $requested_total below) already includes tax, and
-					// compute_refunded_quantities_and_totals() also returns tax-inclusive
-					// fee/shipping totals.
-					$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
-					$remaining_total = abs( (float) $item->get_total() + (float) $item->get_total_tax() ) - $refunded_total;
-					if ( $remaining_total <= 0 ) {
-						return new WP_Error(
-							'quantity_exceeds_refundable',
-							__( 'This line item has already been fully refunded.', 'woocommerce' ),
-							array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
-						);
-					}
-
-					$requested_total = abs( $this->compute_line_item_refund_total( $item, $quantity ) );
-					if ( $requested_total > NumberUtil::round( $remaining_total, wc_get_price_decimals() ) ) {
-						return new WP_Error(
-							'quantity_exceeds_refundable',
-							sprintf(
-								/* translators: %s: remaining refundable amount */
-								__( 'Requested refund exceeds the remaining refundable amount for this line item (%s).', 'woocommerce' ),
-								wc_format_decimal( $remaining_total, wc_get_price_decimals() )
-							),
-							array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
-						);
-					}
+				$requested_total = abs( $this->compute_line_item_refund_total( $item, $line_item['quantity'] ) );
+				if ( $requested_total > NumberUtil::round( $remaining_total, $price_decimals ) ) {
+					return new WP_Error(
+						'quantity_exceeds_refundable',
+						sprintf(
+							/* translators: %s: remaining refundable amount */
+							__( 'Requested refund exceeds the remaining refundable amount for this line item (%s).', 'woocommerce' ),
+							wc_format_decimal( $remaining_total, $price_decimals )
+						),
+						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+					);
 				}
 			}
 		}

@@ -1654,6 +1654,128 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * @testdox Preview rejects a quantity exceeding refundable units even when refund_total is supplied, matching create.
+	 */
+	public function test_preview_quantity_with_refund_total_exceeding_units_matches_create(): void {
+		$order   = $this->create_order_with_product( 10.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$line_items = array(
+			array(
+				'line_item_id' => $item_id,
+				'quantity'     => 2,
+				'refund_total' => 1.00,
+			),
+		);
+
+		$preview_response = $this->do_preview_request( $order->get_id(), $line_items );
+		$this->assertEquals( 422, $preview_response->get_status(), 'Preview must reject a quantity over the refundable units.' );
+		$this->assertEquals( 'quantity_exceeds_refundable', $preview_response->get_data()['code'] );
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$create_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => $line_items,
+			)
+		);
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertEquals( 422, $create_response->get_status(), 'Create rejects the same input, so preview must not return 200.' );
+		$this->assertEquals( 'quantity_exceeds_refundable', $create_response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Preview rejects a product quantity refund that exceeds the remaining line amount after a prior amount-only refund, matching create.
+	 */
+	public function test_preview_product_quantity_after_amount_refund_matches_create(): void {
+		$order   = $this->create_order_with_product( 100.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		// Prior amount-only refund of $150 on the line (no units consumed: qty 0).
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 150.00,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 0,
+						'refund_total' => 150.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$line_items = array(
+			array(
+				'line_item_id' => $item_id,
+				'quantity'     => 2,
+			),
+		);
+
+		// Preview must not return 200 while create rejects the same auto-filled $200 over-refund.
+		$preview_response = $this->do_preview_request( $order->get_id(), $line_items );
+		$this->assertEquals( 422, $preview_response->get_status() );
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$create_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => $line_items,
+			)
+		);
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertEquals( 422, $create_response->get_status() );
+	}
+
+	/**
+	 * @testdox Preview accepts a mixed refund with a negative discount-fee line, matching create.
+	 */
+	public function test_preview_partial_amount_negative_fee_matches_create(): void {
+		$order   = $this->create_order_with_product( 50.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Discount',
+				'total' => -10.00,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+		$order->set_total( 40.00 );
+		$order->save();
+
+		// Refund the full product line and the full discount: net $40, the order total.
+		$line_items = array(
+			array(
+				'line_item_id' => $item_id,
+				'refund_total' => 50.00,
+			),
+			array(
+				'line_item_id' => $fee->get_id(),
+				'refund_total' => -10.00,
+			),
+		);
+
+		$preview_response = $this->do_preview_request( $order->get_id(), $line_items );
+		$this->assertEquals( 200, $preview_response->get_status(), 'Preview must accept the negative discount-fee line.' );
+		$this->assertEquals( '40.00', $preview_response->get_data()['total'] );
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$create_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => $line_items,
+			)
+		);
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertEquals( 201, $create_response->get_status(), 'Create accepts the same mixed request.' );
+		$this->assertEquals( '40.00', $create_response->get_data()['amount'], 'Create amount must match the preview total.' );
+	}
+
 	// -- Helper methods --
 
 	/**
