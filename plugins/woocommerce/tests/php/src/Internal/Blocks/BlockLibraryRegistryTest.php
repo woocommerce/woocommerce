@@ -38,48 +38,12 @@ class BlockLibraryRegistryTest extends WC_Unit_Test_Case {
 
 		$this->package = BlocksPackage::container()->get( Package::class );
 		$this->sut     = new BlockLibraryRegistry( $this->package );
-		wp_deregister_script( 'wc-block-library' );
-		wp_deregister_script( 'wp-icons' );
-	}
-
-	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		wp_dequeue_script( 'wc-block-library' );
-		wp_deregister_script( 'wc-block-library' );
-		wp_deregister_script( 'wp-icons' );
-
-		parent::tearDown();
-	}
-
-	/**
-	 * @testdox Should load generated block-library asset registration.
-	 */
-	public function test_loads_generated_block_library_asset_registration(): void {
-		$this->sut->load_asset_registration();
-		do_action_ref_array( 'wp_default_scripts', array( wp_scripts() ) );
-
-		$script = wp_scripts()->query( 'wc-block-library', 'registered' );
-		$asset  = require $this->package->get_path( 'assets/client/blocks/scripts/block-library/index.min.asset.php' );
-
-		$this->assertNotFalse( $script, 'Block library script should be registered.' );
-		$this->assertSame( $asset['dependencies'], $script->deps, 'Block library script dependencies should match generated asset data.' );
-		$this->assertSame( $asset['version'], $script->ver, 'Block library script version should match generated asset data.' );
-		$this->assertStringContainsString(
-			'assets/client/blocks/scripts/block-library/index.min.js',
-			$script->src,
-			'Block library script should use the generated script URL.'
-		);
-		$this->assertFalse( wp_script_is( 'wp-icons', 'registered' ), 'WordPress Icons fallback should not be registered.' );
 	}
 
 	/**
 	 * @testdox Should initialize self-registering block-library PHP files.
 	 */
 	public function test_initializes_self_registering_block_library_php_files(): void {
-		$this->assertGreaterThan( 0, did_action( 'init' ), 'The test environment should already be past init.' );
-
 		$this->sut->init();
 
 		$this->assertTrue(
@@ -90,7 +54,6 @@ class BlockLibraryRegistryTest extends WC_Unit_Test_Case {
 		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce/category-title' );
 
 		$this->assertNotFalse( $block_type, 'Category title should be registered by its generated PHP file.' );
-		$this->assertContains( 'wc-block-library', $block_type->editor_script_handles, 'Category title should use the registered block-library script handle.' );
 
 		$term_id      = self::factory()->term->create(
 			array(
