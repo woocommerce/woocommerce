@@ -138,7 +138,17 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 
 		foreach ( $objects as $object ) {
 			$data     = $this->prepare_item_for_response( $object, $request );
-			$return[] = $this->prepare_response_for_collection( $data );
+			$response = $this->prepare_response_for_collection( $data );
+
+			if (
+				(bool) $request['hide_empty']
+				&& isset( $response['count'] )
+				&& 0 === (int) $response['count']
+			) {
+				continue;
+			}
+
+			$return[] = $response;
 		}
 
 		$response = rest_ensure_response( $return );

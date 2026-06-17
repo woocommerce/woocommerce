@@ -83,7 +83,7 @@ class ProductBrandSchema extends TermSchema {
 		$response = parent::get_item_response( $term );
 		$count    = get_term_meta( $term->term_id, 'product_count_product_brand', true );
 
-		if ( $count ) {
+		if ( '' !== $count ) {
 			$response['count'] = (int) $count;
 		}
 
