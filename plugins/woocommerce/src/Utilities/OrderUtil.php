@@ -68,6 +68,21 @@ final class OrderUtil {
 	}
 
 	/**
+	 * Checks whether the real-time data sync between the posts and orders tables is enabled.
+	 *
+	 * Unlike is_custom_order_tables_in_sync(), this only reflects whether the sync setting is enabled (a cheap
+	 * option read) and does not run a query to check whether the tables are currently fully synchronized. Use
+	 * this when you only need to know if sync is turned on, not whether every order is currently in sync.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return bool True if data sync is enabled, false otherwise.
+	 */
+	public static function custom_orders_table_data_sync_is_enabled(): bool {
+		return wc_get_container()->get( COTMigrationUtil::class )->custom_orders_table_data_sync_is_enabled();
+	}
+
+	/**
 	 * Gets value of a meta key from WC_Data object if passed, otherwise from the post object.
 	 * This helper function support backward compatibility for meta box functions, when moving from posts based store to custom tables.
 	 *

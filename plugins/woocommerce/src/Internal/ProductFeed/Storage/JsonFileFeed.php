@@ -311,18 +311,19 @@ class JsonFileFeed implements FeedInterface {
 	}
 
 	/**
-	 * Ensures an existing feed directory allows file access while preventing directory listing.
+	 * Upgrades a legacy `deny from all` .htaccess in an existing feed directory to allow file access.
 	 *
-	 * Installs created before file access was enabled have a `deny from all` .htaccess in this
-	 * directory, which blocks feed downloads. This replaces only that known legacy directive (or
-	 * recreates a missing file); any other content — the already-correct directive, or custom rules
-	 * a site or host may have added — is left untouched.
+	 * Installs created before file access was enabled have a `deny from all` .htaccess here, which
+	 * blocks feed downloads. This upgrades only that known legacy directive, in place. Anything else
+	 * — an already-correct directive, custom rules a site or host added, a file we cannot read, or a
+	 * missing file — is left untouched. (The directory's initial .htaccess is written when the
+	 * directory is first created, by `mkdir_p_not_indexable()`.)
 	 *
 	 * Native file functions are used here (like the feed writes elsewhere in this class) rather
 	 * than WP_Filesystem: the directory is local, and routing through a possibly FTP/SSH-backed
 	 * filesystem could fail to initialize and leave the old `deny from all` in place even though
-	 * the feed file itself was written natively. Failures are ignored so this can never interrupt
-	 * feed generation.
+	 * the feed file itself was written natively. A failure is ignored (and logged) so it can never
+	 * interrupt feed generation.
 	 *
 	 * @param string $directory_path The feed directory path (trailing-slashed).
 	 * @return void
@@ -330,17 +331,33 @@ class JsonFileFeed implements FeedInterface {
 	private function ensure_feed_dir_file_access( string $directory_path ): void {
 		$htaccess_path = $directory_path . '.htaccess';
 
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-		$current_content = is_file( $htaccess_path ) ? trim( (string) @file_get_contents( $htaccess_path ) ) : '';
-
-		// Only upgrade the known legacy `deny from all` directive or recreate a missing file.
-		// Leave anything else (already correct, or custom rules) untouched.
-		if ( '' !== $current_content && FilesystemUtil::HTACCESS_DENY_ALL !== $current_content ) {
+		// Only act on an existing file. A missing .htaccess does not block downloads, so there is
+		// nothing to fix — and we should not create a file the directory did not already have.
+		if ( ! is_file( $htaccess_path ) ) {
 			return;
 		}
 
-		// Best effort: a failure here must never interrupt feed generation.
 		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-		@file_put_contents( $htaccess_path, FilesystemUtil::HTACCESS_ALLOW_FILE_ACCESS );
+		$current_content = @file_get_contents( $htaccess_path );
+
+		// Upgrade only the known legacy `deny from all` directive. Leave anything else — already
+		// correct, custom rules, or a file we cannot read — untouched, never clobbering content
+		// we did not write.
+		if ( false === $current_content || FilesystemUtil::HTACCESS_DENY_ALL !== trim( $current_content ) ) {
+			return;
+		}
+
+		// Best effort: a failure must never interrupt feed generation, but log it — otherwise the
+		// feed would silently stay 403 behind the stale rule.
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		if ( false === @file_put_contents( $htaccess_path, FilesystemUtil::HTACCESS_ALLOW_FILE_ACCESS ) ) {
+			wc_get_logger()->warning(
+				'Could not update the product feed .htaccess to allow file access; generated feeds may remain inaccessible.',
+				array(
+					'source' => 'product-feed',
+					'path'   => $htaccess_path,
+				)
+			);
+		}
 	}
 }

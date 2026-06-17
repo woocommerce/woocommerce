@@ -297,11 +297,9 @@ class WC_Emails {
 			'WC_Email_Customer_Reset_Password'       => __DIR__ . '/emails/class-wc-email-customer-reset-password.php',
 			'WC_Email_Customer_New_Account'          => __DIR__ . '/emails/class-wc-email-customer-new-account.php',
 			'WC_Email_Admin_Payment_Gateway_Enabled' => __DIR__ . '/emails/class-wc-email-admin-payment-gateway-enabled.php',
+			'WC_Email_Customer_POS_Completed_Order'  => __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php',
+			'WC_Email_Customer_POS_Refunded_Order'   => __DIR__ . '/emails/class-wc-email-customer-pos-refunded-order.php',
 		);
-		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
-			$emails['WC_Email_Customer_POS_Completed_Order'] = __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php';
-			$emails['WC_Email_Customer_POS_Refunded_Order']  = __DIR__ . '/emails/class-wc-email-customer-pos-refunded-order.php';
-		}
 		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
 			$emails['WC_Email_Customer_Fulfillment_Created'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-created.php';
 			$emails['WC_Email_Customer_Fulfillment_Updated'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-updated.php';

@@ -87,7 +87,7 @@ class WC_Analytics_Tracking {
 			return true;
 		}
 
-		// Skip cookie-less contexts that cannot persist a stable visitor id; fresh random ids fragment sessions.
+		// Skip events that arrive without a stable visitor id (e.g. no tk_ai cookie); see get_visitor_id().
 		if ( empty( self::get_visitor_id() ) ) {
 			return true;
 		}
@@ -458,9 +458,14 @@ class WC_Analytics_Tracking {
 	}
 
 	/**
-	 * Get the visitor id from the cookie or IP address (if proxy tracking is enabled).
+	 * Get the existing stable visitor id: the `tk_ai` cookie, or an IP-based hash when
+	 * proxy tracking is enabled. Returns null otherwise so the caller skips the event.
 	 *
-	 * @return string|null
+	 * We never mint a new id here: attributing an event to a brand-new id creates a
+	 * throwaway one-event "visitor" (mostly cookie-less crawlers) that inflates session
+	 * counts. Real browsers already have a `tk_ai` cookie by the time an event fires.
+	 *
+	 * @return string|null Stable visitor id, or null when none is available.
 	 */
 	private static function get_visitor_id() {
 		// Return cached result if available.
@@ -468,57 +473,27 @@ class WC_Analytics_Tracking {
 			return self::$cached_visitor_id;
 		}
 
-		// Prefer tk_ai cookie if present.
+		// Prefer the tk_ai cookie if present.
 		if ( ! empty( $_COOKIE['tk_ai'] ) ) {
 			self::$cached_visitor_id = sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) );
 			return self::$cached_visitor_id;
 		}
 
-		// Cron and WP-CLI have no client IP or UA, so even proxy-tracking would collapse all background activity into one phantom user.
+		// Cron and WP-CLI have no real visitor; never attribute background activity to one.
 		if ( ( defined( 'DOING_CRON' ) && DOING_CRON )
 			|| ( defined( 'WP_CLI' ) && WP_CLI )
 		) {
 			return null;
 		}
 
-		// Proxy tracking provides a stable id from daily_salt + domain + ip + user_agent, even in REST/XMLRPC contexts.
+		// Proxy tracking provides a stable id from daily_salt + domain + ip + user_agent.
 		if ( Features::is_proxy_tracking_enabled() ) {
 			self::$cached_visitor_id = self::get_ip_based_visitor_id();
 			return self::$cached_visitor_id;
 		}
 
-		// Only mint a new id when we can persist it in a cookie; otherwise it would be a single-use throwaway that fragments sessions.
-		if ( headers_sent()
-			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-			|| ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
-		) {
-			return null;
-		}
-
-		// Base64-encoding 18 random bytes produces a 24-character anon id.
-		$binary = '';
-		for ( $i = 0; $i < 18; ++$i ) {
-			$binary .= chr( wp_rand( 0, 255 ) );
-		}
-
-		$new_visitor_id = base64_encode( $binary ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-
-		// httponly=false is intentional: _wca and client-side analytics need to read the same value the server wrote.
-		setcookie(
-			'tk_ai',
-			$new_visitor_id,
-			array(
-				'expires'  => time() + ( 365 * 24 * 60 * 60 ), // 1 year
-				'path'     => '/',
-				'domain'   => COOKIE_DOMAIN,
-				'secure'   => is_ssl(),
-				'httponly' => false,
-				'samesite' => 'Strict',
-			)
-		);
-
-		self::$cached_visitor_id = $new_visitor_id;
-		return self::$cached_visitor_id;
+		// No stable id arrived with the request. Do not mint one (see method doc).
+		return null;
 	}
 
 	/**
