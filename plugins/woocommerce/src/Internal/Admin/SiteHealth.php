@@ -542,14 +542,14 @@ class SiteHealth {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			set_transient( $cache_key, 'unverified', DAY_IN_SECONDS );
+			set_transient( $cache_key, 'unverified', HOUR_IN_SECONDS );
 			return array( 'unverified' => true );
 		}
 
 		$response_code = intval( wp_remote_retrieve_response_code( $response ) );
 
 		if ( 0 === $response_code ) {
-			set_transient( $cache_key, 'unverified', DAY_IN_SECONDS );
+			set_transient( $cache_key, 'unverified', HOUR_IN_SECONDS );
 			return array( 'unverified' => true );
 		}
 
