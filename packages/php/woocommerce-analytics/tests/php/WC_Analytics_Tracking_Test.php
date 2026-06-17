@@ -102,13 +102,13 @@ class WC_Analytics_Tracking_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Must run BEFORE any test defines REST_REQUEST. In a plain front-end context
-	 * (not REST/XMLRPC/cron/CLI) with no `tk_ai` cookie, get_visitor_id() must NOT
-	 * return a freshly-minted id. Minting-and-attributing here is the Nov 2025
-	 * regression that produced one-event "visitors" — overwhelmingly UA-spoofing
-	 * crawler traffic that never persists the cookie — inflating Tracks session counts.
-	 * The id is still persisted in a cookie for the next request, but the current
-	 * call returns null so the event is skipped.
+	 * With no `tk_ai` cookie and proxy tracking off, get_visitor_id() must return null
+	 * instead of minting a fresh id. Minting-and-attributing here was the Nov 2025
+	 * regression that produced one-event "visitors" — overwhelmingly UA-spoofing crawler
+	 * traffic that never persists a cookie — inflating Tracks session counts.
+	 *
+	 * Order-independent: the cookie-less path no longer branches on REST_REQUEST, and the
+	 * method no longer sets a cookie server-side (real browsers get `tk_ai` client-side).
 	 */
 	public function test_get_visitor_id_returns_null_for_non_rest_request_without_cookie(): void {
 		$reflection = new \ReflectionClass( WC_Analytics_Tracking::class );
@@ -123,8 +123,8 @@ class WC_Analytics_Tracking_Test extends BaseTestCase {
 
 	/**
 	 * Companion behavioral assertion: record_event() emits/queues no pixel for a
-	 * cookie-less, non-REST request — the crawler path that inflated session counts.
-	 * Must run before REST_REQUEST leaks so the non-REST branch is actually exercised.
+	 * cookie-less request — the crawler path that inflated session counts. Order-independent
+	 * (the skip no longer depends on REST_REQUEST).
 	 */
 	public function test_record_event_skips_non_rest_request_without_cookie(): void {
 		$captured = array();
