@@ -289,6 +289,75 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_content_directory_relative_path() derives the path from WP_CONTENT_DIR when it lives under ABSPATH.
+	 * @dataProvider provider_content_dir_under_abspath
+	 *
+	 * @param string $abspath        The ABSPATH value to use.
+	 * @param string $wp_content_dir The WP_CONTENT_DIR value to use.
+	 * @param string $expected       The expected root-relative content path.
+	 */
+	public function test_get_content_directory_relative_path_under_abspath( string $abspath, string $wp_content_dir, string $expected ): void {
+		Constants::set_constant( 'ABSPATH', $abspath );
+		Constants::set_constant( 'WP_CONTENT_DIR', $wp_content_dir );
+
+		$this->assertSame( $expected, FilesystemUtil::get_content_directory_relative_path() );
+	}
+
+	/**
+	 * Data provider for content directories located under ABSPATH.
+	 *
+	 * @return array<array<string>>
+	 */
+	public function provider_content_dir_under_abspath(): array {
+		return array(
+			// Default layout.
+			array( '/var/www/html/', '/var/www/html/wp-content', '/wp-content' ),
+			// Renamed content directory.
+			array( '/var/www/html/', '/var/www/html/custom-content', '/custom-content' ),
+			// Nested content directory.
+			array( '/var/www/html/', '/var/www/html/wp/content', '/wp/content' ),
+			// WordPress in a subdirectory.
+			array( '/var/www/html/wp/', '/var/www/html/wp/wp-content', '/wp-content' ),
+		);
+	}
+
+	/**
+	 * @testdox get_content_directory_relative_path() falls back to the content URL path when WP_CONTENT_DIR is not under ABSPATH.
+	 * @dataProvider provider_content_dir_outside_abspath
+	 *
+	 * @param string $abspath        The ABSPATH value to use.
+	 * @param string $wp_content_dir The WP_CONTENT_DIR value to use.
+	 */
+	public function test_get_content_directory_relative_path_falls_back_to_content_url( string $abspath, string $wp_content_dir ): void {
+		Constants::set_constant( 'ABSPATH', $abspath );
+		Constants::set_constant( 'WP_CONTENT_DIR', $wp_content_dir );
+
+		// When the content directory is not under ABSPATH the path must come from the content URL,
+		// never from a bogus ABSPATH-relative substring of WP_CONTENT_DIR.
+		$expected = wp_parse_url( content_url(), PHP_URL_PATH );
+
+		$this->assertSame( $expected, FilesystemUtil::get_content_directory_relative_path() );
+	}
+
+	/**
+	 * Data provider for content directories that are not located under ABSPATH.
+	 *
+	 * @return array<array<string>>
+	 */
+	public function provider_content_dir_outside_abspath(): array {
+		return array(
+			// Bedrock-style sibling directory.
+			array( '/var/www/html/wp/', '/var/www/html/app' ),
+			// Sibling sharing a name prefix (must not false-match ABSPATH).
+			array( '/var/www/html/', '/var/www/htmlx/wp-content' ),
+			// Unrelated absolute path.
+			array( '/var/www/html/', '/totally/different/app' ),
+			// Empty ABSPATH.
+			array( '', '/var/www/html/wp-content' ),
+		);
+	}
+
+	/**
 	 * @testdox 'mkdir_p_not_indexable' writes the expected .htaccess based on the allow_file_access flag.
 	 *
 	 * @testWith [false, "deny from all"]
