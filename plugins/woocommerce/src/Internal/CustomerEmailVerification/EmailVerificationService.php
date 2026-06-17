@@ -110,7 +110,7 @@ class EmailVerificationService {
 	 *
 	 * The plaintext key is returned for inclusion in the verification email link.
 	 * The stored value is a "{timestamp}:{wp_fast_hash}" pair so the plaintext is
-	 * never persisted and the token expires after {@see 'woocommerce_email_verification_expiration'}.
+	 * never persisted and the token expires after DAY_IN_SECONDS.
 	 *
 	 * @since 11.0.0
 	 *
@@ -144,7 +144,7 @@ class EmailVerificationService {
 
 		list( $timestamp, $hash ) = $parsed;
 
-		if ( time() - $timestamp > $this->get_expiration() ) {
+		if ( time() - $timestamp > DAY_IN_SECONDS ) {
 			return false;
 		}
 
@@ -188,23 +188,5 @@ class EmailVerificationService {
 		}
 
 		return time() - $parsed[0];
-	}
-
-	/**
-	 * Return the number of seconds a verification token remains valid.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @return int Expiration period in seconds.
-	 */
-	public function get_expiration(): int {
-		/**
-		 * Filters the number of seconds a customer email-verification token remains valid.
-		 *
-		 * @param int $expiration Expiration period in seconds. Default is DAY_IN_SECONDS (86400).
-		 *
-		 * @since 11.0.0
-		 */
-		return (int) apply_filters( 'woocommerce_email_verification_expiration', DAY_IN_SECONDS );
 	}
 }

@@ -216,28 +216,6 @@ class VerificationController {
 	}
 
 	/**
-	 * Build the one-time email-verification URL for the given user.
-	 *
-	 * Creates a fresh verification key via the service and returns the full URL
-	 * containing both the key and the user ID as query parameters.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @param int $user_id User ID.
-	 * @return string The verification URL.
-	 */
-	private function build_verification_url( int $user_id ): string {
-		$key = $this->service->create_verification_key( $user_id );
-		return add_query_arg(
-			array(
-				'wc_verify_email_key'  => $key,
-				'wc_verify_email_user' => $user_id,
-			),
-			wc_get_page_permalink( 'myaccount' )
-		);
-	}
-
-	/**
 	 * Send (or resend) a verification email to a user.
 	 *
 	 * @since 11.0.0
@@ -249,7 +227,14 @@ class VerificationController {
 		if ( ! $user ) {
 			return;
 		}
-		$verify_url = $this->build_verification_url( $user_id );
+		$key        = $this->service->create_verification_key( $user_id );
+		$verify_url = add_query_arg(
+			array(
+				'wc_verify_email_key'  => $key,
+				'wc_verify_email_user' => $user_id,
+			),
+			wc_get_page_permalink( 'myaccount' )
+		);
 
 		WC()->mailer();
 
