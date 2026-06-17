@@ -65,6 +65,13 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	public const FILTER_PROVIDER_EVENT_TYPES_PENDING_CUTOVER = 'woocommerce_woopayments_native_cutover_pending_event_types';
 
 	/**
+	 * Filter that reports operational queue hooks still pending native cutover disposition.
+	 *
+	 * @var string
+	 */
+	public const FILTER_OPERATIONAL_QUEUE_HOOKS_PENDING_CUTOVER = 'woocommerce_woopayments_native_cutover_pending_operational_queue_hooks';
+
+	/**
 	 * Filter for cutover preflight failures.
 	 *
 	 * @var string
@@ -98,6 +105,16 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	 * @var string
 	 */
 	public const QUERY_STATUS = 'wc_woopayments_cutover_status';
+
+	/**
+	 * Legacy operational queue hooks that still need native cutover disposition.
+	 *
+	 * @var string[]
+	 */
+	private const DEFAULT_PENDING_OPERATIONAL_QUEUE_HOOKS = array(
+		'wcpay_instant_deposit_reminder',
+		'wcpay_post_kyc_activation_email_send',
+	);
 
 	/**
 	 * Status value for a successful plugin disable.
@@ -321,6 +338,10 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 			$failures[] = 'provider_events_undispositioned';
 		}
 
+		if ( array() !== $this->get_pending_operational_queue_hooks() ) {
+			$failures[] = 'operational_queue_hooks_undispositioned';
+		}
+
 		/**
 		 * Filters WooPayments native cutover preflight failures.
 		 *
@@ -404,6 +425,35 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 				array_filter(
 					array_map( 'strval', $event_types ),
 					static fn( string $event_type ): bool => '' !== $event_type
+				)
+			)
+		);
+	}
+
+	/**
+	 * Get operational queue hooks that still need native cutover disposition.
+	 *
+	 * @return array<int,string> Operational queue hook names.
+	 */
+	private function get_pending_operational_queue_hooks(): array {
+		/**
+		 * Filters operational queue hooks that still need native cutover disposition.
+		 *
+		 * @param array<int,string> $hook_names Operational queue hooks that still block cutover.
+		 *
+		 * @since 11.0.0
+		 */
+		$hook_names = apply_filters( self::FILTER_OPERATIONAL_QUEUE_HOOKS_PENDING_CUTOVER, self::DEFAULT_PENDING_OPERATIONAL_QUEUE_HOOKS );
+
+		if ( ! is_array( $hook_names ) ) {
+			return array( 'operational_queue_hooks_filter_invalid' );
+		}
+
+		return array_values(
+			array_unique(
+				array_filter(
+					array_map( 'strval', $hook_names ),
+					static fn( string $hook_name ): bool => '' !== $hook_name
 				)
 			)
 		);
