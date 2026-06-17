@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Block WooPayments native cutover while operational queue hooks remain pending.
