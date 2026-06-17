@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Internal\ProductAttributes\ReservedAttributeNames;
 use Automattic\WooCommerce\Internal\Traits\RestApiCache;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
@@ -1241,6 +1242,18 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					$attribute_object->set_variation( ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0 );
 					$attributes[] = $attribute_object;
 				}
+			}
+			$blocked_attribute_names = ReservedAttributeNames::get_blocked_reserved_names( $attributes, $product );
+			if ( ! empty( $blocked_attribute_names ) ) {
+				return new WP_Error(
+					'woocommerce_rest_product_attribute_name_reserved',
+					sprintf(
+						/* translators: %s: comma-separated list of attribute names. */
+						__( 'The following attribute names are not allowed because they are reserved terms: %s. Please change them.', 'woocommerce' ),
+						implode( ', ', $blocked_attribute_names )
+					),
+					array( 'status' => 400 )
+				);
 			}
 			$product->set_attributes( $attributes );
 		}

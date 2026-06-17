@@ -11,6 +11,7 @@
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\ProductAttributes\ReservedAttributeNames;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\POSProductVisibilitySync;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -337,7 +338,27 @@ class WC_Meta_Box_Product_Data {
 		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : ProductType::SIMPLE );
 		$product      = new $classname( $post_id );
 		$attributes   = self::prepare_attributes();
-		$stock        = null;
+
+		$blocked_attribute_names = ReservedAttributeNames::get_blocked_reserved_names( $attributes, $product instanceof WC_Product ? $product : null );
+		if ( ! empty( $blocked_attribute_names ) ) {
+			$attributes = array_values(
+				array_filter(
+					$attributes,
+					function ( $attribute ) use ( $blocked_attribute_names ) {
+						return ! in_array( $attribute->get_name(), $blocked_attribute_names, true );
+					}
+				)
+			);
+			WC_Admin_Meta_Boxes::add_error(
+				sprintf(
+					/* translators: %s: comma-separated list of attribute names. */
+					__( 'The product was saved, but the following attributes use reserved names and were not saved: %s. To use them, add them again with a different name.', 'woocommerce' ),
+					implode( ', ', $blocked_attribute_names )
+				)
+			);
+		}
+
+		$stock = null;
 
 		// Handle stock changes.
 		if ( isset( $_POST['_stock'] ) ) {

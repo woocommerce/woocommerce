@@ -2132,4 +2132,64 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $product->get_id() ) );
 	}
+
+	/**
+	 * @testdox Creating a product with a custom attribute using a reserved structural key name is rejected.
+	 */
+	public function test_create_product_blocks_reserved_custom_attribute_name() {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params(
+			array(
+				'name'       => 'Reserved Attribute Product',
+				'type'       => 'variable',
+				'attributes' => array(
+					array(
+						'name'      => 'Variation',
+						'options'   => array( 'One', 'Two' ),
+						'visible'   => true,
+						'variation' => true,
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status(), 'Creating a product with a reserved custom attribute name should be rejected.' );
+		$this->assertEquals( 'woocommerce_rest_product_attribute_name_reserved', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Updating a product that already has a reserved custom attribute name is allowed (grandfathered).
+	 */
+	public function test_update_product_grandfathers_existing_reserved_custom_attribute_name() {
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Variation' );
+		$attribute->set_options( array( 'One', 'Two' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_body_params(
+			array(
+				'attributes' => array(
+					array(
+						'name'      => 'Variation',
+						'options'   => array( 'One', 'Two', 'Three' ),
+						'visible'   => true,
+						'variation' => true,
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status(), 'Updating a product that already has the reserved attribute should be allowed.' );
+
+		$product->delete( true );
+	}
 }

@@ -607,6 +607,77 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should reject a custom attribute that uses a reserved structural key name when saving attributes via AJAX.
+	 */
+	public function test_save_attributes_blocks_reserved_custom_attribute_name(): void {
+		$this->_setRole( 'administrator' );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'AJAX reserved attribute' );
+		$product->save();
+
+		$_POST['security']     = wp_create_nonce( 'save-attributes' );
+		$_POST['post_id']      = $product->get_id();
+		$_POST['product_type'] = 'variable';
+		$_POST['data']         = http_build_query(
+			array(
+				'attribute_names'      => array( 'variation' ),
+				'attribute_values'     => array( 'One | Two' ),
+				'attribute_position'   => array( '0' ),
+				'attribute_visibility' => array( 1 ),
+				'attribute_variation'  => array( 1 ),
+			)
+		);
+
+		$response = $this->do_ajax( 'woocommerce_save_attributes' );
+
+		$this->assertArrayHasKey( 'error', $response, 'Saving a reserved custom attribute name via AJAX should return a top-level error the classic editor can display.' );
+		$this->assertStringContainsString( 'reserved', strtolower( $response['error'] ), 'The error should mention the reserved term.' );
+		$this->assertArrayNotHasKey( 'variation', wc_get_product( $product->get_id() )->get_attributes( 'edit' ), 'The reserved attribute should not be saved.' );
+
+		unset( $_POST['security'], $_POST['post_id'], $_POST['product_type'], $_POST['data'] );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should allow saving via AJAX a reserved attribute name that the product already has (grandfathered).
+	 */
+	public function test_save_attributes_grandfathers_existing_reserved_name(): void {
+		$this->_setRole( 'administrator' );
+
+		$product   = new WC_Product_Variable();
+		$product->set_name( 'AJAX grandfathered attribute' );
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'variation' );
+		$attribute->set_options( array( 'One', 'Two' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$_POST['security']     = wp_create_nonce( 'save-attributes' );
+		$_POST['post_id']      = $product->get_id();
+		$_POST['product_type'] = 'variable';
+		$_POST['data']         = http_build_query(
+			array(
+				'attribute_names'      => array( 'variation' ),
+				'attribute_values'     => array( 'One | Two | Three' ),
+				'attribute_position'   => array( '0' ),
+				'attribute_visibility' => array( 1 ),
+				'attribute_variation'  => array( 1 ),
+			)
+		);
+
+		$response = $this->do_ajax( 'woocommerce_save_attributes' );
+
+		$this->assertTrue( $response['success'], 'Saving a reserved name already on the product should be allowed.' );
+		$this->assertArrayHasKey( 'variation', wc_get_product( $product->get_id() )->get_attributes( 'edit' ), 'The grandfathered attribute should be retained.' );
+
+		unset( $_POST['security'], $_POST['post_id'], $_POST['product_type'], $_POST['data'] );
+		$product->delete( true );
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.

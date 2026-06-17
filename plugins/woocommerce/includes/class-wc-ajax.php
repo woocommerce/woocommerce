@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\ProductAttributes\ReservedAttributeNames;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
@@ -848,7 +849,8 @@ class WC_AJAX {
 
 			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
-			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+			// The classic editor's "Save attributes" handler reads the error from the top level of the response.
+			wp_send_json( array( 'error' => $e->getMessage() ) );
 		}
 
 		// wp_send_json_success must be outside the try block not to break phpunit tests.
@@ -877,7 +879,8 @@ class WC_AJAX {
 			wp_die();
 
 		} catch ( Exception $e ) {
-			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+			// The classic editor's add-attributes-and-variations handler reads the error from the top level of the response.
+			wp_send_json( array( 'error' => $e->getMessage() ) );
 		}
 	}
 	/**
@@ -896,6 +899,13 @@ class WC_AJAX {
 		$product_type = ! empty( $_POST['product_type'] ) ? wc_clean( wp_unslash( $_POST['product_type'] ) ) : ProductType::SIMPLE;
 		$classname    = WC_Product_Factory::get_product_classname( $product_id, $product_type );
 		$product      = new $classname( $product_id );
+
+		$blocked_attribute_names = ReservedAttributeNames::get_blocked_reserved_names( $attributes, $product instanceof WC_Product ? $product : null );
+		if ( ! empty( $blocked_attribute_names ) ) {
+			/* translators: %s: comma-separated list of attribute names. */
+			throw new Exception( esc_html( sprintf( __( 'The following attribute names are not allowed because they are reserved terms: %s. Please change them.', 'woocommerce' ), implode( ', ', $blocked_attribute_names ) ) ) );
+		}
+
 		$product->set_attributes( $attributes );
 		$product->save();
 		return $product;

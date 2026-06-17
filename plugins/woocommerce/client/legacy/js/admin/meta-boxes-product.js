@@ -1128,6 +1128,7 @@ jQuery( function ( $ ) {
 				if ( response.error ) {
 					// Error.
 					window.alert( response.error );
+					$( '.product_attributes' ).unblock();
 				} else if ( response.data ) {
 					// Success.
 					$( '.product_attributes' ).html( response.data.html );
