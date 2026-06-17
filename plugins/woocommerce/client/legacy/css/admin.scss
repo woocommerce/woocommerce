@@ -8653,7 +8653,6 @@ table.bar_chart {
 			line-height: 32px;
 		}
 
-		#post-status-select,
 		#post-visibility-select > p:last-child,
 		#timestampdiv > p,
 		#catalog-visibility-select > p:last-child {
@@ -8664,8 +8663,19 @@ table.bar_chart {
 		}
 
 		#post-status-select {
+			align-items: center;
+			display: flex;
 			flex-wrap: wrap;
+			gap: var(--wc-product-publish-spacing-2);
 			margin-top: 0;
+		}
+
+		@at-root body.js.post-type-product #submitdiv #post-status-select.hide-if-js {
+			display: none;
+		}
+
+		@at-root body.js.post-type-product #submitdiv #post-status-select[style*="display: block"] {
+			display: flex !important;
 		}
 
 		#post-status-select .wc-product-publish-select {
@@ -8698,11 +8708,11 @@ table.bar_chart {
 		#post-visibility-select {
 			#password-span {
 				display: none;
-				margin-top: var(--wc-product-publish-spacing-4);
+				margin-top: var(--wc-product-publish-spacing-2);
 			}
 
 			#password-span.wc-product-password-visible {
-				display: block;
+				display: block !important;
 			}
 
 			#password-span label {
