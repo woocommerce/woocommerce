@@ -615,6 +615,7 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 
 		$result = $sut->initialize_onboarding(
 			false,
+			'https://example.test/return',
 			array( 'site_locale' => 'en_US' ),
 			array( 'email' => 'merchant@example.com' ),
 			array( 'business_type' => 'individual' ),
@@ -628,6 +629,7 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertSame( '/sites/123/wcpay/onboarding/init', $http_client->last_path );
 		$this->assertSame( 'POST', $http_client->last_method );
 		$this->assertIsArray( $body );
+		$this->assertSame( 'https://example.test/return', $body['return_url'] );
 		$this->assertFalse( $body['create_live_account'] );
 		$this->assertSame( 'en_US', $body['site_data']['site_locale'] );
 		$this->assertSame( 'merchant@example.com', $body['user_data']['email'] );
@@ -662,6 +664,7 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		try {
 			$sut->initialize_onboarding(
 				false,
+				'https://example.test/return',
 				array( 'site_locale' => 'en_US' ),
 				array( 'email' => 'merchant@example.com' ),
 				array( 'business_type' => 'individual' ),
@@ -675,6 +678,7 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$body = json_decode( (string) $http_client->last_body, true );
 
 		$this->assertIsArray( $body );
+		$this->assertSame( 'https://example.test/return', $body['return_url'] );
 		$this->assertSame( array( 'woocommerce' => '11.0.0' ), $body['compatibility_data'] );
 		$this->assertSame( 'store_123', $body['account_data']['woocommerce_store_id'] );
 		$this->assertSame( 'ref_test', $body['referral_code'] );
@@ -827,6 +831,41 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $body );
 		$this->assertTrue( $body['test_mode'] );
 		$this->assertTrue( $http_client->last_use_user_token );
+	}
+
+	/**
+	 * @testdox Should fetch account data through the native accounts endpoint with the WooCommerce store ID.
+	 */
+	public function test_get_account_fetches_accounts_endpoint_with_store_id(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'account_id'           => 'acct_native_123',
+					'test_publishable_key' => 'pk_test_native',
+					'is_live'              => false,
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false, true ) );
+
+		$result = $sut->get_account( 'store_123' );
+
+		$query = array();
+		parse_str( (string) wp_parse_url( $http_client->last_path, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( 'acct_native_123', $result['account_id'] );
+		$this->assertSame( '/sites/123/wcpay/accounts', strtok( $http_client->last_path, '?' ) );
+		$this->assertSame( 'GET', $http_client->last_method );
+		$this->assertSame( 'store_123', $query['woocommerce_store_id'] );
+		$this->assertSame( '1', $query['test_mode'] );
+		$this->assertFalse( $http_client->last_use_user_token );
+		$this->assertNull( $http_client->last_body );
 	}
 
 	/**

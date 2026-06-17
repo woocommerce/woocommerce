@@ -103,6 +103,17 @@ class WooPaymentsProvider implements ProviderContract {
 	}
 
 	/**
+	 * Tell whether WooPayments can perform native onboarding/admin account operations.
+	 *
+	 * Unlike money-moving readiness, onboarding availability must not require an already-connected account.
+	 *
+	 * @return bool
+	 */
+	public function can_manage_onboarding(): bool {
+		return $this->api_client->is_available();
+	}
+
+	/**
 	 * Charge an order through WooPayments.
 	 *
 	 * @param PaymentContext $context         Payment context.

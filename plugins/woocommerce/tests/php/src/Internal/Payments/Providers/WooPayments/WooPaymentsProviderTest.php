@@ -128,6 +128,43 @@ class WooPaymentsProviderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Provider onboarding availability requires native transport, not account readiness.
+	 *
+	 * @dataProvider boolean_provider
+	 *
+	 * @param bool $transport_available Whether native transport is available.
+	 */
+	public function test_can_manage_onboarding_requires_native_transport_only( bool $transport_available ): void {
+		$gateway_adapter = $this->getMockBuilder( WooPaymentsProviderGatewayAdapter::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_available' ) )
+			->getMock();
+		$gateway_adapter
+			->expects( $this->never() )
+			->method( 'is_available' );
+		$api_client = $this->getMockBuilder( WooPaymentsApiClient::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_available' ) )
+			->getMock();
+		$api_client
+			->expects( $this->once() )
+			->method( 'is_available' )
+			->willReturn( $transport_available );
+		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'can_process_payments' ) )
+			->getMock();
+		$account_service
+			->expects( $this->never() )
+			->method( 'can_process_payments' );
+
+		$provider = new WooPaymentsProvider();
+		$provider->init( $gateway_adapter, $api_client, $account_service );
+
+		$this->assertSame( $transport_available, $provider->can_manage_onboarding() );
+	}
+
+	/**
 	 * Data provider for native provider readiness.
 	 *
 	 * @return array<string,array{bool,bool,bool}>
@@ -137,6 +174,18 @@ class WooPaymentsProviderTest extends WC_Unit_Test_Case {
 			'transport and account ready' => array( true, true, true ),
 			'transport unavailable'       => array( false, true, false ),
 			'account unavailable'         => array( true, false, false ),
+		);
+	}
+
+	/**
+	 * Data provider for boolean inputs.
+	 *
+	 * @return array<string,array{bool}>
+	 */
+	public function boolean_provider(): array {
+		return array(
+			'true'  => array( true ),
+			'false' => array( false ),
 		);
 	}
 

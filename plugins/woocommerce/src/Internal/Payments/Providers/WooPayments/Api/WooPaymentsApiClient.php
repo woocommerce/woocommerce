@@ -710,6 +710,7 @@ class WooPaymentsApiClient {
 	 * Initialize the non-embedded onboarding flow.
 	 *
 	 * @param bool                $live_account   Whether to create a live account.
+	 * @param string              $return_url     URL to redirect to at the end of the flow.
 	 * @param array<string,mixed> $site_data      Site payload.
 	 * @param array<string,mixed> $user_data      User payload.
 	 * @param array<string,mixed> $account_data   Account payload.
@@ -717,9 +718,10 @@ class WooPaymentsApiClient {
 	 * @param string|null         $referral_code  Referral code.
 	 * @return array<string,mixed>
 	 */
-	public function initialize_onboarding( bool $live_account, array $site_data = array(), array $user_data = array(), array $account_data = array(), array $actioned_notes = array(), ?string $referral_code = null ): array {
+	public function initialize_onboarding( bool $live_account, string $return_url, array $site_data = array(), array $user_data = array(), array $account_data = array(), array $actioned_notes = array(), ?string $referral_code = null ): array {
 		$request_args                  = $this->get_filtered_onboarding_request_args(
 			array(
+				'return_url'          => $return_url,
 				'site_data'           => $site_data,
 				'user_data'           => $user_data,
 				'account_data'        => $account_data,
@@ -807,6 +809,28 @@ class WooPaymentsApiClient {
 			'POST',
 			true,
 			true
+		);
+	}
+
+	/**
+	 * Retrieve the connected WooPayments account.
+	 *
+	 * @param string $woocommerce_store_id WooCommerce store ID.
+	 * @return array<string,mixed>
+	 */
+	public function get_account( string $woocommerce_store_id = '' ): array {
+		$params = array(
+			'test_mode' => $this->account_service->is_test_mode_onboarding_enabled(),
+		);
+
+		if ( '' !== $woocommerce_store_id ) {
+			$params['woocommerce_store_id'] = $woocommerce_store_id;
+		}
+
+		return $this->request(
+			$params,
+			self::ACCOUNTS_API,
+			'GET'
 		);
 	}
 

@@ -132,6 +132,16 @@ class WooPaymentsCustomerServiceTest extends WC_Unit_Test_Case {
 
 				return (string) array_shift( $this->customer_ids );
 			}
+
+			/**
+			 * Update a customer.
+			 *
+			 * @param string              $customer_id Customer ID.
+			 * @param array<string,mixed> $customer_data Customer data.
+			 */
+			public function update_customer( string $customer_id, array $customer_data = array() ): void {
+				unset( $customer_id, $customer_data );
+			}
 		};
 	}
 

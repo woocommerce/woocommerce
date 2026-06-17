@@ -2680,6 +2680,7 @@ class WooPaymentsService {
 
 		$response = $this->get_native_api_client()->initialize_onboarding(
 			false,
+			$this->get_native_onboarding_return_url(),
 			$this->get_native_onboarding_site_data(),
 			$this->array_filter_recursive( $this->get_native_onboarding_user_data() ),
 			$this->array_filter_recursive( $account_data ),
@@ -2819,6 +2820,18 @@ class WooPaymentsService {
 		return array(
 			'site_username' => wp_get_current_user()->user_login,
 			'site_locale'   => get_locale(),
+		);
+	}
+
+	/**
+	 * Get the return URL for native non-embedded onboarding requests.
+	 *
+	 * @return string
+	 */
+	private function get_native_onboarding_return_url(): string {
+		return $this->proxy->call_function(
+			'admin_url',
+			'admin.php?page=wc-admin&path=/payments/overview'
 		);
 	}
 

@@ -226,19 +226,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function test_get_onboarding_details_throws_when_extension_not_active(): void {
 		$location = 'US';
 
-		// Arrange.
-		// Mock the extension as not active.
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				'class_exists' => function ( $class_to_check ) {
-					if ( $this->is_woopayments_class( $class_to_check ) ) {
-						return false;
-					}
-
-					return true;
-				},
-			)
-		);
+		$this->mock_woopayments_runtime_unavailable();
 
 		// Act.
 		try {
@@ -888,6 +876,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			 * Capture a native onboarding init request and return a completed test-drive account.
 			 *
 			 * @param bool        $live_account   Whether the account is live.
+			 * @param string      $return_url     Return URL for the onboarding flow.
 			 * @param array       $site_data      Site data.
 			 * @param array       $user_data      User data.
 			 * @param array       $account_data   Account data.
@@ -895,9 +884,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			 * @param string|null $referral_code  Referral code.
 			 * @return array
 			 */
-			public function initialize_onboarding( bool $live_account, array $site_data = array(), array $user_data = array(), array $account_data = array(), array $actioned_notes = array(), ?string $referral_code = null ): array {
+			public function initialize_onboarding( bool $live_account, string $return_url, array $site_data = array(), array $user_data = array(), array $account_data = array(), array $actioned_notes = array(), ?string $referral_code = null ): array {
 				$this->captured_call = array(
 					'live_account'   => $live_account,
+					'return_url'     => $return_url,
 					'site_data'      => $site_data,
 					'user_data'      => $user_data,
 					'account_data'   => $account_data,
@@ -988,6 +978,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $result['success'] );
 		$this->assertFalse( $captured_call['live_account'] );
+		$this->assertStringContainsString( 'admin.php?page=wc-admin&path=/payments/overview', $captured_call['return_url'] );
 		$this->assertSame( 'card_payments', array_key_first( $captured_call['account_data']['capabilities'] ) );
 		$this->assertIsArray( $cached );
 		$this->assertSame( 'acct_native_test', $cached['data']['account_id'] );
@@ -1121,16 +1112,20 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	/**
 	 * Create an onboarding adapter wired to this test's mockable legacy proxy.
 	 *
+	 * @param bool $native_onboarding_available Whether native onboarding is available.
 	 * @return WooPaymentsOnboardingAdapter
 	 */
-	private function create_onboarding_adapter(): WooPaymentsOnboardingAdapter {
+	private function create_onboarding_adapter( bool $native_onboarding_available = true ): WooPaymentsOnboardingAdapter {
 		$provider = $this->getMockBuilder( WooPaymentsProvider::class )
 			->disableOriginalConstructor()
-			->onlyMethods( array( 'can_process_payments' ) )
+			->onlyMethods( array( 'can_process_payments', 'can_manage_onboarding' ) )
 			->getMock();
 		$provider
 			->method( 'can_process_payments' )
 			->willReturn( false );
+		$provider
+			->method( 'can_manage_onboarding' )
+			->willReturn( $native_onboarding_available );
 
 		$adapter         = new WooPaymentsOnboardingAdapter();
 		$account_service = new WooPaymentsAccountService();
@@ -1138,6 +1133,33 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$adapter->init( $this->create_legacy_runtime(), $provider, new NativeWooPaymentsGateway(), $account_service );
 
 		return $adapter;
+	}
+
+	/**
+	 * Mock both WooPayments runtime paths as unavailable.
+	 */
+	private function mock_woopayments_runtime_unavailable(): void {
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'class_exists' => function ( $class_to_check ) {
+					if ( $this->is_woopayments_class( $class_to_check ) ) {
+						return false;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		$this->sut = new WooPaymentsService();
+		$this->sut->init(
+			$this->mock_providers,
+			$this->mockable_proxy,
+			$this->create_onboarding_adapter( false ),
+			$this->create_legacy_runtime(),
+			$this->create_unavailable_api_client(),
+			$this->create_native_account_service()
+		);
 	}
 
 	/**
@@ -6471,19 +6493,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function test_mark_onboarding_step_started_throws_when_extension_not_active() {
 		$location = 'US';
 
-		// Arrange.
-		// Mock the extension as not active.
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				'class_exists' => function ( $class_to_check ) {
-					if ( $this->is_woopayments_class( $class_to_check ) ) {
-						return false;
-					}
-
-					return true;
-				},
-			)
-		);
+		$this->mock_woopayments_runtime_unavailable();
 
 		try {
 			$this->sut->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
@@ -6744,19 +6754,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function test_mark_onboarding_step_completed_throws_when_extension_not_active() {
 		$location = 'US';
 
-		// Arrange.
-		// Mock the extension as not active.
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				'class_exists' => function ( $class_to_check ) {
-					if ( $this->is_woopayments_class( $class_to_check ) ) {
-						return false;
-					}
-
-					return true;
-				},
-			)
-		);
+		$this->mock_woopayments_runtime_unavailable();
 
 		try {
 			$this->sut->mark_onboarding_step_completed( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
@@ -7082,19 +7080,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function test_clean_onboarding_step_progress_throws_when_extension_not_active() {
 		$location = 'US';
 
-		// Arrange.
-		// Mock the extension as not active.
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				'class_exists' => function ( $class_to_check ) {
-					if ( $this->is_woopayments_class( $class_to_check ) ) {
-						return false;
-					}
-
-					return true;
-				},
-			)
-		);
+		$this->mock_woopayments_runtime_unavailable();
 
 		try {
 			$this->sut->clean_onboarding_step_progress( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
@@ -7375,19 +7361,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function test_onboarding_step_save_throws_when_extension_not_active() {
 		$location = 'US';
 
-		// Arrange.
-		// Mock the extension as not active.
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				'class_exists' => function ( $class_to_check ) {
-					if ( $this->is_woopayments_class( $class_to_check ) ) {
-						return false;
-					}
-
-					return true;
-				},
-			)
-		);
+		$this->mock_woopayments_runtime_unavailable();
 
 		try {
 			$this->sut->onboarding_step_save( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, $location, array() );
@@ -7714,19 +7688,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function test_onboarding_step_check_throws_when_extension_not_active() {
 		$location = 'US';
 
-		// Arrange.
-		// Mock the extension as not active.
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				'class_exists' => function ( $class_to_check ) {
-					if ( $this->is_woopayments_class( $class_to_check ) ) {
-						return false;
-					}
-
-					return true;
-				},
-			)
-		);
+		$this->mock_woopayments_runtime_unavailable();
 
 		try {
 			$this->sut->onboarding_step_check( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
@@ -8038,19 +8000,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function test_onboarding_test_account_init_throws_when_extension_not_active() {
 		$location = 'US';
 
-		// Arrange.
-		// Mock the extension as not active.
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				'class_exists' => function ( $class_to_check ) {
-					if ( $this->is_woopayments_class( $class_to_check ) ) {
-						return false;
-					}
-
-					return true;
-				},
-			)
-		);
+		$this->mock_woopayments_runtime_unavailable();
 
 		try {
 			$this->sut->onboarding_test_account_init( $location );
@@ -9097,19 +9047,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function test_get_onboarding_kyc_session_throws_when_extension_not_active() {
 		$location = 'US';
 
-		// Arrange.
-		// Mock the extension as not active.
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				'class_exists' => function ( $class_to_check ) {
-					if ( $this->is_woopayments_class( $class_to_check ) ) {
-						return false;
-					}
-
-					return true;
-				},
-			)
-		);
+		$this->mock_woopayments_runtime_unavailable();
 
 		try {
 			$this->sut->get_onboarding_kyc_session( $location );
@@ -9477,19 +9415,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function test_finish_onboarding_kyc_session_throws_when_extension_not_active() {
 		$location = 'US';
 
-		// Arrange.
-		// Mock the extension as not active.
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				'class_exists' => function ( $class_to_check ) {
-					if ( $this->is_woopayments_class( $class_to_check ) ) {
-						return false;
-					}
-
-					return true;
-				},
-			)
-		);
+		$this->mock_woopayments_runtime_unavailable();
 
 		try {
 			$this->sut->finish_onboarding_kyc_session( $location );
@@ -9929,18 +9855,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function test_reset_onboarding_throws_when_extension_not_active() {
 		// Arrange.
 		$location = 'US';
-		// Mock the extension as not active.
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				'class_exists' => function ( $class_to_check ) {
-					if ( $this->is_woopayments_class( $class_to_check ) ) {
-						return false;
-					}
-
-					return true;
-				},
-			)
-		);
+		$this->mock_woopayments_runtime_unavailable();
 
 		try {
 			$this->sut->reset_onboarding( $location );

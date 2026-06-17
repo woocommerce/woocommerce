@@ -489,7 +489,7 @@ class WooPaymentsProviderGatewayAdapter {
 		$provider_data = $context->get_provider_data();
 		$request_data  = array(
 			'amount'               => $this->prepare_amount( (float) $order->get_total(), (string) $order->get_currency() ),
-			'currency'             => (string) $order->get_currency(),
+			'currency'             => strtolower( (string) $order->get_currency() ),
 			'customer'             => $customer_id,
 			'metadata'             => $this->build_order_metadata( $order ),
 			'payment_method_types' => array( 'card' ),
@@ -1046,12 +1046,29 @@ class WooPaymentsProviderGatewayAdapter {
 			$meta['_wcpay_net'] = $net;
 		}
 
-		if ( $this->is_successful_card_charge( $charge ) ) {
-			$meta['_wcpay_fraud_outcome_status'] = 'allow';
-			$meta['_wcpay_fraud_meta_box_type']  = 'allow';
-		}
+		$meta = array_merge( $meta, $this->get_fraud_outcome_order_meta( $intent ) );
 
 		return $meta;
+	}
+
+	/**
+	 * Get WooPayments fraud-outcome order meta from provider metadata.
+	 *
+	 * @param array<string,mixed> $intent Native PaymentIntent response.
+	 * @return array<string,string>
+	 */
+	private function get_fraud_outcome_order_meta( array $intent ): array {
+		$metadata      = isset( $intent['metadata'] ) && is_array( $intent['metadata'] ) ? $intent['metadata'] : array();
+		$fraud_outcome = isset( $metadata['fraud_outcome'] ) ? (string) $metadata['fraud_outcome'] : '';
+
+		if ( ! in_array( $fraud_outcome, array( 'allow', 'block', 'review' ), true ) ) {
+			return array();
+		}
+
+		return array(
+			'_wcpay_fraud_outcome_status' => $fraud_outcome,
+			'_wcpay_fraud_meta_box_type'  => 'allow',
+		);
 	}
 
 	/**
@@ -1062,19 +1079,49 @@ class WooPaymentsProviderGatewayAdapter {
 	 */
 	private function maybe_add_fee_breakdown_note( WC_Order $order, array $intent ): void {
 		$order_data_service = $this->get_order_data_service();
-		if ( $order_data_service->add_fee_breakdown_note_from_intent( $order, $intent, false ) ) {
-			return;
+
+		if ( isset( $intent['id'] ) && ! $order_data_service->intent_has_fee_breakdown_rate( $intent, false ) ) {
+			if ( $this->add_fee_breakdown_note_from_timeline( $order, (string) $intent['id'] ) ) {
+				return;
+			}
+
+			try {
+				$latest_intent = $this->get_api_client()->get_payment_intention( (string) $intent['id'] );
+				if ( $order_data_service->add_fee_breakdown_note_from_intent( $order, $latest_intent, false ) ) {
+					return;
+				}
+			} catch ( Throwable $exception ) {
+				unset( $exception );
+				// Fall back to the original response below.
+			}
 		}
 
-		if ( '' !== $order_data_service->get_fee_breakdown_note_from_intent( $intent, false ) || ! isset( $intent['id'] ) ) {
-			return;
-		}
+		$order_data_service->add_fee_breakdown_note_from_intent( $order, $intent, false );
+	}
 
+	/**
+	 * Add a fee-breakdown note from the captured timeline event.
+	 *
+	 * @param WC_Order $order     Order being charged.
+	 * @param string   $intent_id Provider intent ID.
+	 * @return bool True when a note was added.
+	 */
+	private function add_fee_breakdown_note_from_timeline( WC_Order $order, string $intent_id ): bool {
 		try {
-			$order_data_service->add_fee_breakdown_note_from_intent( $order, $this->get_api_client()->get_payment_intention( (string) $intent['id'] ), false );
+			$timeline = $this->get_api_client()->get_timeline( $intent_id );
 		} catch ( Throwable $exception ) {
-			return;
+			return false;
 		}
+
+		$events = isset( $timeline['data'] ) && is_array( $timeline['data'] ) ? $timeline['data'] : array();
+
+		foreach ( $events as $event ) {
+			if ( is_array( $event ) && $this->get_order_data_service()->add_fee_breakdown_note_from_timeline_event( $order, $event ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1085,15 +1132,15 @@ class WooPaymentsProviderGatewayAdapter {
 	 * @return string
 	 */
 	private function get_transaction_fee_from_charge( array $intent, array $charge ): string {
+		$fee_breakdown_v1 = $charge['fee_breakdown_v1'] ?? null;
+		if ( is_array( $fee_breakdown_v1 ) && isset( $fee_breakdown_v1['totals']['fee']['amount'], $fee_breakdown_v1['totals']['fee']['currency'] ) ) {
+			return (string) $this->interpret_stripe_amount( (int) $fee_breakdown_v1['totals']['fee']['amount'], (string) $fee_breakdown_v1['totals']['fee']['currency'] );
+		}
+
 		$application_fee_amount = $charge['application_fee_amount'] ?? null;
 		$currency               = isset( $charge['currency'] ) ? (string) $charge['currency'] : (string) ( $intent['currency'] ?? '' );
 		if ( null !== $application_fee_amount && '' !== $currency ) {
 			return (string) $this->interpret_stripe_amount( (int) $application_fee_amount, $currency );
-		}
-
-		$fee_breakdown_v1 = $charge['fee_breakdown_v1'] ?? null;
-		if ( is_array( $fee_breakdown_v1 ) && isset( $fee_breakdown_v1['totals']['fee']['amount'], $fee_breakdown_v1['totals']['fee']['currency'] ) ) {
-			return (string) $this->interpret_stripe_amount( (int) $fee_breakdown_v1['totals']['fee']['amount'], (string) $fee_breakdown_v1['totals']['fee']['currency'] );
 		}
 
 		return '';
@@ -1108,6 +1155,11 @@ class WooPaymentsProviderGatewayAdapter {
 	 * @return string
 	 */
 	private function get_net_from_charge( array $intent, array $charge, string $transaction_fee ): string {
+		$fee_breakdown_v1 = $charge['fee_breakdown_v1'] ?? null;
+		if ( is_array( $fee_breakdown_v1 ) && isset( $fee_breakdown_v1['totals']['net']['amount'], $fee_breakdown_v1['totals']['net']['currency'] ) ) {
+			return (string) $this->interpret_stripe_amount( (int) $fee_breakdown_v1['totals']['net']['amount'], (string) $fee_breakdown_v1['totals']['net']['currency'] );
+		}
+
 		$application_fee_amount = $charge['application_fee_amount'] ?? null;
 		$charge_amount          = $charge['amount'] ?? $intent['amount'] ?? null;
 		$currency               = isset( $charge['currency'] ) ? (string) $charge['currency'] : (string) ( $intent['currency'] ?? '' );
@@ -1115,27 +1167,7 @@ class WooPaymentsProviderGatewayAdapter {
 			return (string) ( $this->interpret_stripe_amount( (int) $charge_amount, $currency ) - (float) $transaction_fee );
 		}
 
-		$fee_breakdown_v1 = $charge['fee_breakdown_v1'] ?? null;
-		if ( is_array( $fee_breakdown_v1 ) && isset( $fee_breakdown_v1['totals']['net']['amount'], $fee_breakdown_v1['totals']['net']['currency'] ) ) {
-			return (string) $this->interpret_stripe_amount( (int) $fee_breakdown_v1['totals']['net']['amount'], (string) $fee_breakdown_v1['totals']['net']['currency'] );
-		}
-
 		return '';
-	}
-
-	/**
-	 * Tell whether a native charge represents an allowed card payment.
-	 *
-	 * @param array<string,mixed> $charge Native Charge response.
-	 * @return bool
-	 */
-	private function is_successful_card_charge( array $charge ): bool {
-		$payment_method_details = $charge['payment_method_details'] ?? null;
-
-		return is_array( $payment_method_details )
-			&& isset( $payment_method_details['type'] )
-			&& 'card' === (string) $payment_method_details['type']
-			&& isset( $charge['outcome']['risk_level'] );
 	}
 
 	/**

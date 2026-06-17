@@ -744,12 +744,29 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 			$meta['_wcpay_net'] = $net;
 		}
 
-		if ( $this->is_successful_card_charge( $charge ) ) {
-			$meta['_wcpay_fraud_outcome_status'] = 'allow';
-			$meta['_wcpay_fraud_meta_box_type']  = 'allow';
-		}
+		$meta = array_merge( $meta, $this->get_fraud_outcome_order_meta( $intent ) );
 
 		return $meta;
+	}
+
+	/**
+	 * Get WooPayments fraud-outcome order meta from provider metadata.
+	 *
+	 * @param array<string,mixed> $intent Native intent response.
+	 * @return array<string,string>
+	 */
+	private function get_fraud_outcome_order_meta( array $intent ): array {
+		$metadata      = isset( $intent['metadata'] ) && is_array( $intent['metadata'] ) ? $intent['metadata'] : array();
+		$fraud_outcome = isset( $metadata['fraud_outcome'] ) ? (string) $metadata['fraud_outcome'] : '';
+
+		if ( ! in_array( $fraud_outcome, array( 'allow', 'block', 'review' ), true ) ) {
+			return array();
+		}
+
+		return array(
+			'_wcpay_fraud_outcome_status' => $fraud_outcome,
+			'_wcpay_fraud_meta_box_type'  => 'allow',
+		);
 	}
 
 	/**
@@ -760,15 +777,15 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 	 * @return string
 	 */
 	private function get_transaction_fee_from_charge( array $intent, array $charge ): string {
+		$fee_breakdown_v1 = $charge['fee_breakdown_v1'] ?? null;
+		if ( is_array( $fee_breakdown_v1 ) && isset( $fee_breakdown_v1['totals']['fee']['amount'], $fee_breakdown_v1['totals']['fee']['currency'] ) ) {
+			return (string) $this->interpret_stripe_amount( (int) $fee_breakdown_v1['totals']['fee']['amount'], (string) $fee_breakdown_v1['totals']['fee']['currency'] );
+		}
+
 		$application_fee_amount = $charge['application_fee_amount'] ?? null;
 		$currency               = isset( $charge['currency'] ) ? (string) $charge['currency'] : (string) ( $intent['currency'] ?? '' );
 		if ( null !== $application_fee_amount && '' !== $currency ) {
 			return (string) $this->interpret_stripe_amount( (int) $application_fee_amount, $currency );
-		}
-
-		$fee_breakdown_v1 = $charge['fee_breakdown_v1'] ?? null;
-		if ( is_array( $fee_breakdown_v1 ) && isset( $fee_breakdown_v1['totals']['fee']['amount'], $fee_breakdown_v1['totals']['fee']['currency'] ) ) {
-			return (string) $this->interpret_stripe_amount( (int) $fee_breakdown_v1['totals']['fee']['amount'], (string) $fee_breakdown_v1['totals']['fee']['currency'] );
 		}
 
 		return '';
@@ -783,6 +800,11 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 	 * @return string
 	 */
 	private function get_net_from_charge( array $intent, array $charge, string $transaction_fee ): string {
+		$fee_breakdown_v1 = $charge['fee_breakdown_v1'] ?? null;
+		if ( is_array( $fee_breakdown_v1 ) && isset( $fee_breakdown_v1['totals']['net']['amount'], $fee_breakdown_v1['totals']['net']['currency'] ) ) {
+			return (string) $this->interpret_stripe_amount( (int) $fee_breakdown_v1['totals']['net']['amount'], (string) $fee_breakdown_v1['totals']['net']['currency'] );
+		}
+
 		$application_fee_amount = $charge['application_fee_amount'] ?? null;
 		$charge_amount          = $charge['amount'] ?? $intent['amount'] ?? null;
 		$currency               = isset( $charge['currency'] ) ? (string) $charge['currency'] : (string) ( $intent['currency'] ?? '' );
@@ -790,27 +812,7 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 			return (string) ( $this->interpret_stripe_amount( (int) $charge_amount, $currency ) - (float) $transaction_fee );
 		}
 
-		$fee_breakdown_v1 = $charge['fee_breakdown_v1'] ?? null;
-		if ( is_array( $fee_breakdown_v1 ) && isset( $fee_breakdown_v1['totals']['net']['amount'], $fee_breakdown_v1['totals']['net']['currency'] ) ) {
-			return (string) $this->interpret_stripe_amount( (int) $fee_breakdown_v1['totals']['net']['amount'], (string) $fee_breakdown_v1['totals']['net']['currency'] );
-		}
-
 		return '';
-	}
-
-	/**
-	 * Tell whether a native charge represents an allowed card payment.
-	 *
-	 * @param array<string,mixed> $charge Native Charge response.
-	 * @return bool
-	 */
-	private function is_successful_card_charge( array $charge ): bool {
-		$payment_method_details = $charge['payment_method_details'] ?? null;
-
-		return is_array( $payment_method_details )
-			&& isset( $payment_method_details['type'] )
-			&& 'card' === (string) $payment_method_details['type']
-			&& isset( $charge['outcome']['risk_level'] );
 	}
 
 	/**

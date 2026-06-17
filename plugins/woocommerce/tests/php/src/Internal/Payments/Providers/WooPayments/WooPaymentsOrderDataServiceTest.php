@@ -112,6 +112,19 @@ class WooPaymentsOrderDataServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Fee-breakdown notes render a non-FX captured-event fee rate when provided by the platform.
+	 */
+	public function test_get_fee_breakdown_note_from_timeline_event_renders_non_fx_rate(): void {
+		$this->assertSame(
+			'<strong>Fee details:</strong><div class="captured-event-details">' . PHP_EOL
+			. '<p>Fee (2.9% + $0.30): $1.75 USD</p>' . PHP_EOL
+			. '<p>Net payout: $48.25 USD</p>' . PHP_EOL
+			. '</div>',
+			$this->sut->get_fee_breakdown_note_from_timeline_event( $this->get_non_fx_captured_timeline_event() )
+		);
+	}
+
+	/**
 	 * @testdox Fee-breakdown notes are not duplicated on the same order.
 	 */
 	public function test_add_fee_breakdown_note_from_timeline_event_does_not_duplicate_notes(): void {
@@ -155,6 +168,51 @@ class WooPaymentsOrderDataServiceTest extends WC_Unit_Test_Case {
 		return array_merge(
 			array( 'type' => 'captured' ),
 			$this->get_charge_with_fee_breakdown()
+		);
+	}
+
+	/**
+	 * Get a non-FX captured timeline event with a fee rate.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function get_non_fx_captured_timeline_event(): array {
+		return array(
+			'type'             => 'captured',
+			'fee_breakdown_v1' => array(
+				'rows'   => array(
+					array(
+						'key'      => 'base',
+						'kind'     => 'fee',
+						'amount'   => 175,
+						'currency' => 'usd',
+						'rate'     => array(
+							'percentage'     => 0.029,
+							'fixed'          => 30,
+							'fixed_currency' => 'usd',
+						),
+					),
+				),
+				'totals' => array(
+					'fee'         => array(
+						'amount'   => 175,
+						'currency' => 'usd',
+						'rate'     => array(
+							'percentage'     => 0.029,
+							'fixed'          => 30,
+							'fixed_currency' => 'usd',
+						),
+					),
+					'net'         => array(
+						'amount'   => 4825,
+						'currency' => 'usd',
+					),
+					'capture_net' => array(
+						'amount'   => 4825,
+						'currency' => 'usd',
+					),
+				),
+			),
 		);
 	}
 

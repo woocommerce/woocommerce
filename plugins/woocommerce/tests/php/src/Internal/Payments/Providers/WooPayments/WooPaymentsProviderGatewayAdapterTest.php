@@ -157,7 +157,7 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 			 */
 			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
 				if ( 5000 !== $request_data['amount']
-					|| 'USD' !== $request_data['currency']
+					|| 'usd' !== $request_data['currency']
 					|| 'cus_native' !== $request_data['customer']
 					|| 'pm_request' !== $request_data['payment_method']
 					|| array( 'card' ) !== $request_data['payment_method_types']
@@ -192,6 +192,18 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 								'amount'                 => 5000,
 								'currency'               => 'usd',
 								'application_fee_amount' => 218,
+								'fee_breakdown_v1'       => array(
+									'totals' => array(
+										'fee' => array(
+											'amount'   => 175,
+											'currency' => 'usd',
+										),
+										'net' => array(
+											'amount'   => 4825,
+											'currency' => 'usd',
+										),
+									),
+								),
 							),
 						),
 					),
@@ -257,6 +269,64 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 			}
 
 			/**
+			 * Retrieve a payment timeline.
+			 *
+			 * @param string $intent_id PaymentIntent ID.
+			 * @return array<string,mixed>
+			 */
+			public function get_timeline( string $intent_id ): array {
+				if ( 'pi_native' !== $intent_id ) {
+					throw new \RuntimeException( 'Unexpected native timeline read.' );
+				}
+
+				return array(
+					'data' => array(
+						array(
+							'type'             => 'captured',
+							'fee_breakdown_v1' => array(
+								'rows'   => array(
+									array(
+										'key'      => 'base',
+										'kind'     => 'fee',
+										'amount'   => 175,
+										'currency' => 'usd',
+										'rate'     => array(
+											'percentage' => 0.029,
+											'fixed'      => 30,
+											'fixed_currency' => 'usd',
+										),
+									),
+								),
+								'totals' => array(
+									'fee'         => array(
+										'amount'   => 175,
+										'currency' => 'usd',
+										'rate'     => array(
+											'percentage' => 0.029,
+											'fixed'      => 30,
+											'fixed_currency' => 'usd',
+										),
+									),
+									'tax'         => array(
+										'amount'   => 0,
+										'currency' => 'usd',
+									),
+									'net'         => array(
+										'amount'   => 4825,
+										'currency' => 'usd',
+									),
+									'capture_net' => array(
+										'amount'   => 4825,
+										'currency' => 'usd',
+									),
+								),
+							),
+						),
+					),
+				);
+			}
+
+			/**
 			 * Tell whether the transport is available.
 			 *
 			 * @return bool
@@ -293,18 +363,15 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'USD was processed using WooPayments', $outcome->get_data()['note'] );
 		$this->assertStringContainsString( 'was processed using WooPayments in <strong>test mode</strong>', $outcome->get_data()['note'] );
 		$this->assertStringContainsString( 'pi_native', $outcome->get_data()['note'] );
-		$this->assertSame( '2.18', $outcome->get_data()['meta']['_wcpay_transaction_fee'] );
-		$this->assertSame( '47.82', $outcome->get_data()['meta']['_wcpay_net'] );
-		$this->assertSame( 'allow', $outcome->get_data()['meta']['_wcpay_fraud_outcome_status'] );
-		$this->assertSame( 'allow', $outcome->get_data()['meta']['_wcpay_fraud_meta_box_type'] );
+		$this->assertSame( '1.75', $outcome->get_data()['meta']['_wcpay_transaction_fee'] );
+		$this->assertSame( '48.25', $outcome->get_data()['meta']['_wcpay_net'] );
+		$this->assertArrayNotHasKey( '_wcpay_fraud_outcome_status', $outcome->get_data()['meta'] );
+		$this->assertArrayNotHasKey( '_wcpay_fraud_meta_box_type', $outcome->get_data()['meta'] );
 		$this->assertOrderHasNote(
 			$order,
 			'<strong>Fee details:</strong><div class="captured-event-details">' . PHP_EOL
-				. '<p>1.00 GBP → 1.3428 USD: $67.15 USD</p>' . PHP_EOL
-			. '<p>Fee (3.9% + $0.30): $2.93 USD</p>' . PHP_EOL
-			. '<p>&nbsp;&nbsp;&nbsp;&nbsp;Base fee: 2.9% + $0.30</p>' . PHP_EOL
-			. '<p>&nbsp;&nbsp;&nbsp;&nbsp;Currency conversion fee: 1%</p>' . PHP_EOL
-			. '<p>Net payout: $64.22 USD</p>' . PHP_EOL
+			. '<p>Fee (2.9% + $0.30): $1.75 USD</p>' . PHP_EOL
+			. '<p>Net payout: $48.25 USD</p>' . PHP_EOL
 			. '</div>'
 		);
 	}

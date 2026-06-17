@@ -97,6 +97,22 @@ class WooPaymentsOrderDataService {
 	}
 
 	/**
+	 * Tell whether a PaymentIntent fee-breakdown envelope includes a renderable fee rate.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param array<string,mixed> $intent           Native PaymentIntent response.
+	 * @param bool                $use_first_charge Whether to use the first charge in the list.
+	 * @return bool
+	 */
+	public function intent_has_fee_breakdown_rate( array $intent, bool $use_first_charge = true ): bool {
+		$charge           = $this->get_charge( $intent, $use_first_charge );
+		$fee_breakdown_v1 = $charge['fee_breakdown_v1'] ?? null;
+
+		return is_array( $fee_breakdown_v1 ) && $this->fee_breakdown_has_rate( $fee_breakdown_v1 );
+	}
+
+	/**
 	 * Get the fee breakdown order note from a captured timeline event.
 	 *
 	 * @since 11.0.0
@@ -202,11 +218,18 @@ class WooPaymentsOrderDataService {
 
 		$fee_amount   = (int) $fee_breakdown_v1['totals']['fee']['amount'];
 		$fee_currency = (string) $fee_breakdown_v1['totals']['fee']['currency'];
+		$fee_rate     = $this->format_fee_rate_text( $fee_breakdown_v1['totals']['fee']['rate'] ?? null, $fee_currency );
 		if ( is_array( $fx ) ) {
-			$lines[] = sprintf( 'Fee (3.9%% + %1$s): %2$s', $this->format_currency_minor_amount( 30, $fee_currency ), $this->format_explicit_currency_amount( $fee_amount, $fee_currency ) );
+			$lines[] = sprintf(
+				'Fee (%1$s): %2$s',
+				'' !== $fee_rate ? $fee_rate : '3.9% + ' . $this->format_currency_minor_amount( 30, $fee_currency ),
+				$this->format_explicit_currency_amount( $fee_amount, $fee_currency )
+			);
 			$indent  = str_repeat( '&nbsp;', 4 );
 			$lines[] = $indent . 'Base fee: 2.9% + ' . $this->format_currency_minor_amount( 30, $fee_currency );
 			$lines[] = $indent . 'Currency conversion fee: 1%';
+		} elseif ( '' !== $fee_rate ) {
+			$lines[] = sprintf( 'Fee (%1$s): %2$s', $fee_rate, $this->format_explicit_currency_amount( $fee_amount, $fee_currency ) );
 		} else {
 			$lines[] = sprintf( 'Fee: %s', $this->format_explicit_currency_amount( $fee_amount, $fee_currency ) );
 		}
@@ -250,6 +273,54 @@ class WooPaymentsOrderDataService {
 			$fee_breakdown['totals']['net']['amount'],
 			$fee_breakdown['totals']['net']['currency']
 		);
+	}
+
+	/**
+	 * Tell whether a fee breakdown has a fee rate worth rendering.
+	 *
+	 * @param array<string,mixed> $fee_breakdown Fee breakdown envelope.
+	 * @return bool
+	 */
+	private function fee_breakdown_has_rate( array $fee_breakdown ): bool {
+		return '' !== $this->format_fee_rate_text( $fee_breakdown['totals']['fee']['rate'] ?? null, (string) ( $fee_breakdown['totals']['fee']['currency'] ?? '' ) );
+	}
+
+	/**
+	 * Format a provider fee rate for an order note.
+	 *
+	 * @param mixed  $rate     Provider fee rate data.
+	 * @param string $currency Fallback currency code.
+	 * @return string
+	 */
+	private function format_fee_rate_text( $rate, string $currency ): string {
+		if ( ! is_array( $rate ) ) {
+			return '';
+		}
+
+		$parts       = array();
+		$percentage  = isset( $rate['percentage'] ) && is_numeric( $rate['percentage'] ) ? (float) $rate['percentage'] : 0.0;
+		$fixed_minor = isset( $rate['fixed'] ) && is_numeric( $rate['fixed'] ) ? (int) $rate['fixed'] : 0;
+		$fixed_curr  = isset( $rate['fixed_currency'] ) ? (string) $rate['fixed_currency'] : $currency;
+
+		if ( 0.0 !== $percentage ) {
+			$parts[] = $this->format_percentage_rate( $percentage ) . '%';
+		}
+
+		if ( 0 !== $fixed_minor && '' !== $fixed_curr ) {
+			$parts[] = $this->format_currency_minor_amount( $fixed_minor, $fixed_curr );
+		}
+
+		return implode( ' + ', $parts );
+	}
+
+	/**
+	 * Format a decimal fee rate as a percentage without insignificant zeroes.
+	 *
+	 * @param float $rate Decimal fee rate.
+	 * @return string
+	 */
+	private function format_percentage_rate( float $rate ): string {
+		return rtrim( rtrim( number_format( $rate * 100, 2, '.', '' ), '0' ), '.' );
 	}
 
 	/**

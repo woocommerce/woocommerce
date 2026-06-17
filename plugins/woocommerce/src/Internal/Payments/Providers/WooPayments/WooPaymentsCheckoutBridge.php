@@ -123,16 +123,25 @@ class WooPaymentsCheckoutBridge {
 	private WooPaymentsAccountService $account_service;
 
 	/**
+	 * WooPay session service.
+	 *
+	 * @var WooPaymentsWooPaySessionService
+	 */
+	private WooPaymentsWooPaySessionService $woopay_session_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsLegacyRuntime  $legacy_runtime  WooPayments legacy runtime.
-	 * @param WooPaymentsAccountService $account_service WooPayments account service.
+	 * @param WooPaymentsLegacyRuntime        $legacy_runtime         WooPayments legacy runtime.
+	 * @param WooPaymentsAccountService       $account_service        WooPayments account service.
+	 * @param WooPaymentsWooPaySessionService $woopay_session_service WooPay session service.
 	 */
-	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsAccountService $account_service ): void {
-		$this->legacy_runtime  = $legacy_runtime;
-		$this->account_service = $account_service;
+	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsAccountService $account_service, WooPaymentsWooPaySessionService $woopay_session_service ): void {
+		$this->legacy_runtime         = $legacy_runtime;
+		$this->account_service        = $account_service;
+		$this->woopay_session_service = $woopay_session_service;
 	}
 
 	/**
@@ -176,6 +185,16 @@ class WooPaymentsCheckoutBridge {
 		if ( $this->should_expose_checkout_surface() ) {
 			$config['createSetupIntentNonce'] = wp_create_nonce( 'wcpay_create_setup_intent_nonce' );
 			$config['updateOrderStatusNonce'] = wp_create_nonce( 'wcpay_update_order_status_nonce' );
+
+			if ( $this->get_woopay_session_service()->is_woopay_enabled() ) {
+				$config['woopayHost']               = $this->get_woopay_session_service()->get_woopay_url();
+				$config['wcpayVersionNumber']       = defined( 'WC_VERSION' ) ? WC_VERSION : '';
+				$config['woopayMerchantId']         = $this->get_woopay_session_service()->get_woopay_merchant_id();
+				$config['initWooPayNonce']          = wp_create_nonce( 'wcpay_init_woopay_nonce' );
+				$config['woopaySessionNonce']       = wp_create_nonce( 'woopay_session_nonce' );
+				$config['woopaySignatureNonce']     = wp_create_nonce( 'woopay_signature_nonce' );
+				$config['woopayMinimumSessionData'] = $this->get_woopay_session_service()->get_encrypted_minimum_session_data();
+			}
 		}
 
 		/**
@@ -298,6 +317,19 @@ class WooPaymentsCheckoutBridge {
 		}
 
 		return $this->account_service;
+	}
+
+	/**
+	 * Get the WooPay session service.
+	 *
+	 * @return WooPaymentsWooPaySessionService
+	 */
+	private function get_woopay_session_service(): WooPaymentsWooPaySessionService {
+		if ( ! isset( $this->woopay_session_service ) ) {
+			$this->woopay_session_service = wc_get_container()->get( WooPaymentsWooPaySessionService::class );
+		}
+
+		return $this->woopay_session_service;
 	}
 
 	/**

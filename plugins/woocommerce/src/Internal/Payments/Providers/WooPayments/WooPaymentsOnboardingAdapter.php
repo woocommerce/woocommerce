@@ -97,7 +97,20 @@ class WooPaymentsOnboardingAdapter {
 	 * @return bool
 	 */
 	public function is_onboarding_runtime_available(): bool {
-		return $this->is_extension_active() || $this->is_native_provider_available();
+		return $this->is_extension_active() || $this->is_native_onboarding_available();
+	}
+
+	/**
+	 * Tell whether the native WooPayments provider can manage onboarding/admin account operations.
+	 *
+	 * @return bool
+	 */
+	public function is_native_onboarding_available(): bool {
+		try {
+			return $this->get_provider()->can_manage_onboarding();
+		} catch ( Throwable $e ) {
+			return false;
+		}
 	}
 
 	/**

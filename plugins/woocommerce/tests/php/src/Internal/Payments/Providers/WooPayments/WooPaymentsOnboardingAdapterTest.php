@@ -91,7 +91,7 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 
 		$this->provider = $this->getMockBuilder( WooPaymentsProvider::class )
 			->disableOriginalConstructor()
-			->onlyMethods( array( 'can_process_payments' ) )
+			->onlyMethods( array( 'can_process_payments', 'can_manage_onboarding' ) )
 			->getMock();
 
 		$this->payment_gateway_provider = new PaymentGateway( $this->legacy_proxy );
@@ -158,7 +158,23 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 				'class_exists' => fn() => false,
 			)
 		);
+		$this->provider->method( 'can_manage_onboarding' )->willReturn( true );
 		$this->provider->method( 'can_process_payments' )->willReturn( true );
+
+		self::assertTrue( $this->adapter->is_onboarding_runtime_available() );
+	}
+
+	/**
+	 * @testdox Native onboarding runtime is available with transport even before the account can process payments.
+	 */
+	public function test_runtime_available_when_native_transport_exists_before_account_can_process(): void {
+		$this->legacy_proxy->register_function_mocks(
+			array(
+				'class_exists' => fn() => false,
+			)
+		);
+		$this->provider->method( 'can_manage_onboarding' )->willReturn( true );
+		$this->provider->method( 'can_process_payments' )->willReturn( false );
 
 		self::assertTrue( $this->adapter->is_onboarding_runtime_available() );
 	}
@@ -265,7 +281,9 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->provider->method( 'can_process_payments' )->willReturn( true );
+		$this->provider->method( 'can_manage_onboarding' )->willReturn( true );
 		update_option( 'woocommerce_woocommerce_payments_settings', array( 'test_mode' => 'yes' ) );
+		update_option( 'wcpay_onboarding_test_mode', 'yes' );
 		update_option(
 			'wcpay_account_data',
 			array(

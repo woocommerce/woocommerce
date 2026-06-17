@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsWooPaySessionService;
 use WC_Unit_Test_Case;
 
 /**
@@ -36,7 +37,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( true );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ) );
 
 		add_filter(
 			'wcpay_payment_fields_js_config',
@@ -66,8 +67,16 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'enabledBillingFields', $config );
 		$this->assertArrayHasKey( 'currency', $config );
 		$this->assertArrayHasKey( 'cartTotal', $config );
+		$this->assertSame( defined( 'WC_VERSION' ) ? WC_VERSION : '', $config['wcpayVersionNumber'] );
 		$this->assertArrayHasKey( 'createSetupIntentNonce', $config );
 		$this->assertArrayHasKey( 'updateOrderStatusNonce', $config );
+		$this->assertSame( 'https://pay.woo.com', $config['woopayHost'] );
+		$this->assertSame( '12345', $config['woopayMerchantId'] );
+		$this->assertArrayHasKey( 'initWooPayNonce', $config );
+		$this->assertArrayNotHasKey( 'woopayInitNonce', $config );
+		$this->assertArrayHasKey( 'woopaySessionNonce', $config );
+		$this->assertArrayHasKey( 'woopaySignatureNonce', $config );
+		$this->assertSame( array( 'encrypted' => 'minimum' ), $config['woopayMinimumSessionData'] );
 		$this->assertFalse( $config['usesLegacySetupIntentBridge'] );
 		$this->assertFalse( $config['usesLegacyOrderStatusBridge'] );
 		$this->assertTrue( $config['usesNativeSetupIntentBridge'] );
@@ -84,7 +93,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( true );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ) );
 
 		add_filter(
 			'wcpay_payment_fields_js_config',
@@ -121,7 +130,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( false );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ) );
 
 		$config = $bridge->get_payment_fields_js_config();
 
@@ -142,7 +151,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'get_gateway_prepared_customer_data' )->willReturn( array() );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ) );
 
 		$config = $bridge->get_payment_fields_js_config();
 
@@ -151,6 +160,32 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $config['isCoreNativeCheckoutAvailable'] );
 		$this->assertArrayNotHasKey( 'createSetupIntentNonce', $config );
 		$this->assertArrayNotHasKey( 'updateOrderStatusNonce', $config );
+		$this->assertArrayNotHasKey( 'initWooPayNonce', $config );
+		$this->assertArrayNotHasKey( 'woopaySessionNonce', $config );
+		$this->assertArrayNotHasKey( 'woopaySignatureNonce', $config );
+		$this->assertArrayNotHasKey( 'woopayMerchantId', $config );
+		$this->assertArrayNotHasKey( 'woopayMinimumSessionData', $config );
+	}
+
+	/**
+	 * @testdox Should omit encrypted WooPay payloads when WooPay is disabled.
+	 */
+	public function test_get_payment_fields_js_config_omits_encrypted_woopay_payload_when_woopay_is_disabled(): void {
+		$legacy_runtime  = $this->create_legacy_runtime_for_bridge();
+		$account_service = $this->create_account_service_for_bridge( true );
+		$legacy_runtime->method( 'get_gateway_prepared_customer_data' )->willReturn( array() );
+
+		$bridge = new WooPaymentsCheckoutBridge();
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( false ) );
+
+		$config = $bridge->get_payment_fields_js_config();
+
+		$this->assertArrayHasKey( 'createSetupIntentNonce', $config );
+		$this->assertArrayHasKey( 'updateOrderStatusNonce', $config );
+		$this->assertArrayNotHasKey( 'initWooPayNonce', $config );
+		$this->assertArrayNotHasKey( 'woopaySessionNonce', $config );
+		$this->assertArrayNotHasKey( 'woopaySignatureNonce', $config );
+		$this->assertArrayNotHasKey( 'woopayMinimumSessionData', $config );
 	}
 
 	/**
@@ -218,5 +253,25 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 			->willReturn( true );
 
 		return $account_service;
+	}
+
+	/**
+	 * Create a WooPay session service mock for checkout bridge tests.
+	 *
+	 * @param bool $enabled Whether WooPay is enabled.
+	 * @return WooPaymentsWooPaySessionService|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private function create_woopay_session_service_for_bridge( bool $enabled ) {
+		$service = $this->getMockBuilder( WooPaymentsWooPaySessionService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_woopay_enabled', 'get_woopay_url', 'get_woopay_merchant_id', 'get_encrypted_minimum_session_data' ) )
+			->getMock();
+
+		$service->method( 'is_woopay_enabled' )->willReturn( $enabled );
+		$service->method( 'get_woopay_url' )->willReturn( 'https://pay.woo.com' );
+		$service->method( 'get_woopay_merchant_id' )->willReturn( '12345' );
+		$service->method( 'get_encrypted_minimum_session_data' )->willReturn( array( 'encrypted' => 'minimum' ) );
+
+		return $service;
 	}
 }
