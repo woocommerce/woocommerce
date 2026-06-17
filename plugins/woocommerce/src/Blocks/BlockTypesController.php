@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypes\Cart;
 use Automattic\WooCommerce\Blocks\BlockTypes\Checkout;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCartContents;
+use Automattic\WooCommerce\Internal\Blocks\BlockLibraryRegistry;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 
 /**
@@ -110,7 +111,6 @@ final class BlockTypesController {
 	 * Register blocks, hooking up assets and render functions as needed.
 	 */
 	public function register_blocks() {
-		$this->register_block_metadata();
 		$block_types = $this->get_block_types();
 
 		$woo_blocks_wp_build_registered = array(
@@ -130,23 +130,16 @@ final class BlockTypesController {
 	/**
 	 * Register block metadata collections for WooCommerce blocks.
 	 *
-	 * This method handles the registration of block metadata by using WordPress's block metadata
-	 * collection registration system. It includes a temporary workaround for WordPress 6.7's
-	 * strict path validation that might fail for sites using symlinked plugins.
-	 *
-	 * If the registration fails due to path validation, blocks will fall back to regular
-	 * registration without affecting functionality.
+	 * @deprecated 11.0.0 Use BlockLibraryRegistry::register_block_metadata_collection() instead.
 	 */
 	public function register_block_metadata() {
-		$meta_file_path = WC_ABSPATH . 'assets/client/blocks/blocks-json.php';
-		if ( function_exists( 'wp_register_block_metadata_collection' ) && file_exists( $meta_file_path ) ) {
-			add_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'bypass_block_metadata_doing_it_wrong' ), 10, 4 );
-			wp_register_block_metadata_collection(
-				WC_ABSPATH . 'assets/client/blocks/',
-				$meta_file_path
-			);
-			remove_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'bypass_block_metadata_doing_it_wrong' ), 10 );
-		}
+		wc_deprecated_function(
+			__METHOD__,
+			'11.0.0',
+			BlockLibraryRegistry::class . '::register_block_metadata_collection'
+		);
+
+		Package::container()->get( BlockLibraryRegistry::class )->register_block_metadata_collection();
 	}
 
 	/**
