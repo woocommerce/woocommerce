@@ -9,6 +9,7 @@ import { registerExpressPaymentMethod } from '@woocommerce/blocks-registry';
  * Internal dependencies
  */
 import registerWooPayments from '../index';
+import { recordWooPaymentsUserEvent } from '../tracks';
 import {
 	normalizeAppearanceForStripe,
 	normalizeAppearanceValueForStripe,
@@ -35,6 +36,8 @@ jest.mock( '@woocommerce/settings', () => ( {
 		isWooPayEnabled: true,
 		shouldShowWooPayButton: true,
 		testMode: true,
+		platformTrackerNonce: 'tracks-nonce',
+		isShopperTrackingEnabled: true,
 		wcAjaxUrl: '/?wc-ajax=%%endpoint%%',
 		woopayButton: {
 			type: 'default',
@@ -163,6 +166,74 @@ describe( 'wc-payment-method-woopayments', () => {
 		} );
 	} );
 
+	it( 'records a WooPayments place-order event when Blocks payment setup runs', async () => {
+		window.fetch = jest.fn().mockResolvedValue( {
+			json: jest.fn().mockResolvedValue( { success: true } ),
+		} );
+		const registration = registerWooPayments();
+		let setupResult;
+		const onPaymentSetup = jest.fn( ( callback ) => {
+			setupResult = callback();
+		} );
+		const content = registration.content;
+
+		render(
+			createElement( content.type, {
+				...content.props,
+				eventRegistration: {
+					onPaymentSetup,
+					onCheckoutSuccess: jest.fn(),
+				},
+				emitResponse: {
+					responseTypes: {
+						SUCCESS: 'success',
+						ERROR: 'error',
+					},
+					noticeContexts: {
+						PAYMENTS: 'payments',
+					},
+				},
+			} )
+		);
+
+		await waitFor( () => {
+			expect( onPaymentSetup ).toHaveBeenCalled();
+		} );
+		await setupResult;
+
+		const trackingRequest = window.fetch.mock.calls.find(
+			( [ url, options ] ) =>
+				url === 'https://example.test/wp-admin/admin-ajax.php' &&
+				options.body.get( 'action' ) === 'platform_tracks'
+		);
+
+		expect( trackingRequest ).toBeDefined();
+		expect( trackingRequest[ 1 ].body.get( 'tracksNonce' ) ).toBe(
+			'tracks-nonce'
+		);
+		expect( trackingRequest[ 1 ].body.get( 'tracksEventName' ) ).toBe(
+			'checkout_place_order_button_click'
+		);
+		expect(
+			JSON.parse( trackingRequest[ 1 ].body.get( 'tracksEventProp' ) )
+		).toEqual( {} );
+	} );
+
+	it( 'does not record tracking events when shopper tracking is disabled', () => {
+		window.fetch = jest.fn();
+
+		recordWooPaymentsUserEvent(
+			{
+				ajaxUrl: 'https://example.test/wp-admin/admin-ajax.php',
+				platformTrackerNonce: 'tracks-nonce',
+				isShopperTrackingEnabled: false,
+			},
+			'checkout_place_order_button_click'
+		);
+
+		expect( window.fetch ).not.toHaveBeenCalled();
+	} );
+
 	it( 'enables WooCommerce saved-payment controls', () => {
 		const registration = registerWooPayments();
 
@@ -269,6 +340,81 @@ describe( 'wc-payment-method-woopayments', () => {
 				'input[name="woopay_user_phone_field[full]"]'
 			)
 		).toHaveValue( '5551234567' );
+	} );
+
+	it( 'records WooPay save-info offer and checkbox events', async () => {
+		window.fetch = jest.fn().mockResolvedValue( {
+			json: jest.fn().mockResolvedValue( { success: true } ),
+		} );
+		document.body.innerHTML = `
+			<div class="wc-block-checkout">
+				<div class="wp-block-woocommerce-checkout-payment-block"></div>
+			</div>
+			<input id="billing-phone" value="5551234567" />
+		`;
+
+		const registration = registerWooPayments();
+		const content = registration.content;
+
+		render(
+			createElement( content.type, {
+				...content.props,
+				eventRegistration: {
+					onPaymentSetup: jest.fn(),
+					onCheckoutSuccess: jest.fn(),
+				},
+				emitResponse: {
+					responseTypes: {
+						SUCCESS: 'success',
+						ERROR: 'error',
+					},
+					noticeContexts: {
+						PAYMENTS: 'payments',
+					},
+				},
+			} )
+		);
+
+		await waitFor( () => {
+			expect(
+				screen.getByRole( 'checkbox', { name: 'Save to WooPay' } )
+			).toBeChecked();
+		} );
+
+		fireEvent.click(
+			screen.getByRole( 'checkbox', { name: 'Save to WooPay' } )
+		);
+
+		await waitFor( () => {
+			const events = window.fetch.mock.calls
+				.filter(
+					( [ url, options ] ) =>
+						url ===
+							'https://example.test/wp-admin/admin-ajax.php' &&
+						options.body.get( 'action' ) === 'platform_tracks'
+				)
+				.map( ( [ , options ] ) => ( {
+					name: options.body.get( 'tracksEventName' ),
+					props: JSON.parse( options.body.get( 'tracksEventProp' ) ),
+				} ) );
+
+			expect( events ).toEqual(
+				expect.arrayContaining( [
+					{
+						name: 'checkout_woopay_save_my_info_offered',
+						props: {},
+					},
+					{
+						name: 'checkout_save_my_info_click',
+						props: { status: 'checked' },
+					},
+					{
+						name: 'checkout_save_my_info_click',
+						props: { status: 'unchecked' },
+					},
+				] )
+			);
+		} );
 	} );
 
 	it( 'renders test card instructions while the account is in test mode', () => {

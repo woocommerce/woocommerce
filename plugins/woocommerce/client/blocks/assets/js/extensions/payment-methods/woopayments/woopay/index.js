@@ -4,6 +4,12 @@
 import { registerExpressPaymentMethod } from '@woocommerce/blocks-registry';
 import { getPaymentMethodData } from '@woocommerce/settings';
 import { __, sprintf } from '@wordpress/i18n';
+import { useEffect } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import { recordWooPaymentsUserEvent } from '../tracks';
 
 const PAYMENT_METHOD_NAME = 'woocommerce_payments';
 const settings = getPaymentMethodData( PAYMENT_METHOD_NAME, {} );
@@ -201,8 +207,19 @@ const WooPayButtonContent = ( { buttonSettings } ) => {
 const WooPayExpressContent = () => {
 	const buttonSettings = settings.woopayButton || {};
 	const buttonType = buttonSettings.type || 'default';
+	const eventSource = buttonSettings.context || 'checkout';
+
+	useEffect( () => {
+		recordWooPaymentsUserEvent( settings, 'woopay_button_load', {
+			source: eventSource,
+		} );
+	}, [ eventSource ] );
 
 	const initWooPay = async () => {
+		recordWooPaymentsUserEvent( settings, 'woopay_button_click', {
+			source: eventSource,
+		} );
+
 		if ( ! settings.woopayUserSession ) {
 			const sessionData = await getWooPayMinimumSessionData();
 			const redirectUrl =

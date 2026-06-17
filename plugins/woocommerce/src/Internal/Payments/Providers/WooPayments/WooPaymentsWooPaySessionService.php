@@ -44,16 +44,25 @@ class WooPaymentsWooPaySessionService {
 	private WooPaymentsFrontendStylesService $frontend_styles_service;
 
 	/**
+	 * Frontend tracking controller.
+	 *
+	 * @var WooPaymentsFrontendTrackingController
+	 */
+	private WooPaymentsFrontendTrackingController $frontend_tracking_controller;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsAccountService        $account_service         WooPayments account service.
-	 * @param WooPaymentsFrontendStylesService $frontend_styles_service Shared frontend styles service.
+	 * @param WooPaymentsAccountService             $account_service              WooPayments account service.
+	 * @param WooPaymentsFrontendStylesService      $frontend_styles_service      Shared frontend styles service.
+	 * @param WooPaymentsFrontendTrackingController $frontend_tracking_controller Frontend tracking controller.
 	 */
-	final public function init( WooPaymentsAccountService $account_service, WooPaymentsFrontendStylesService $frontend_styles_service ): void {
-		$this->account_service         = $account_service;
-		$this->frontend_styles_service = $frontend_styles_service;
+	final public function init( WooPaymentsAccountService $account_service, WooPaymentsFrontendStylesService $frontend_styles_service, WooPaymentsFrontendTrackingController $frontend_tracking_controller ): void {
+		$this->account_service              = $account_service;
+		$this->frontend_styles_service      = $frontend_styles_service;
+		$this->frontend_tracking_controller = $frontend_tracking_controller;
 	}
 
 	/**
@@ -403,7 +412,10 @@ class WooPaymentsWooPaySessionService {
 			'isWooPayDirectCheckoutEnabled'     => $this->is_truthy_gateway_setting( 'is_woopay_direct_checkout_enabled' ),
 			'isWooPayGlobalThemeSupportEnabled' => $is_global_theme_enabled,
 			'forceNetworkSavedCards'            => $this->is_truthy_gateway_setting( 'force_network_saved_cards' ) || $this->should_use_stripe_platform_on_checkout_page( $context ),
+			'ajaxUrl'                           => admin_url( 'admin-ajax.php' ),
 			'platformTrackerNonce'              => wp_create_nonce( 'platform_tracks_nonce' ),
+			'isShopperTrackingEnabled'          => $this->get_frontend_tracking_controller()->is_shopper_tracking_enabled(),
+			'is_shopper_tracking_enabled'       => $this->get_frontend_tracking_controller()->is_shopper_tracking_enabled(),
 			'woopayHost'                        => $this->get_woopay_url(),
 			'wcpayVersionNumber'                => defined( 'WC_VERSION' ) ? WC_VERSION : '',
 			'woopayMerchantId'                  => $this->get_woopay_merchant_id(),
@@ -1531,5 +1543,18 @@ class WooPaymentsWooPaySessionService {
 		}
 
 		return $this->account_service;
+	}
+
+	/**
+	 * Get the frontend tracking controller.
+	 *
+	 * @return WooPaymentsFrontendTrackingController
+	 */
+	private function get_frontend_tracking_controller(): WooPaymentsFrontendTrackingController {
+		if ( ! isset( $this->frontend_tracking_controller ) ) {
+			$this->frontend_tracking_controller = wc_get_container()->get( WooPaymentsFrontendTrackingController::class );
+		}
+
+		return $this->frontend_tracking_controller;
 	}
 }

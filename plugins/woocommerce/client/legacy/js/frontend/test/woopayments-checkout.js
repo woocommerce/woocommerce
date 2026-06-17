@@ -10,9 +10,23 @@ describe( 'WooPayments checkout', () => {
 	let stripeElementsOptions;
 	let submitElements;
 	let unmountPaymentElement;
+	const originalFetch = window.fetch;
 
 	async function flushPromises() {
 		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+	}
+
+	function getTrackingEvents() {
+		return window.fetch.mock.calls
+			.filter(
+				( [ url, options ] ) =>
+					url === 'https://example.test/admin-ajax.php' &&
+					options.body.get( 'action' ) === 'platform_tracks'
+			)
+			.map( ( [ , options ] ) => ( {
+				name: options.body.get( 'tracksEventName' ),
+				props: JSON.parse( options.body.get( 'tracksEventProp' ) ),
+			} ) );
 	}
 
 	function createJQueryMock() {
@@ -85,6 +99,7 @@ describe( 'WooPayments checkout', () => {
 			'<form class="checkout">' +
 			'<input type="radio" name="payment_method" value="woocommerce_payments" checked />' +
 			'<div id="wcpay-core-payment-element"></div>' +
+			'<button id="place_order" type="button">Place order</button>' +
 			'</form>';
 
 		const jQueryMock = createJQueryMock();
@@ -99,12 +114,17 @@ describe( 'WooPayments checkout', () => {
 			currency: 'GBP',
 			gatewayId: 'woocommerce_payments',
 			isCoreNativeCheckoutAvailable: true,
+			isShopperTrackingEnabled: true,
 			locale: 'en-US',
+			platformTrackerNonce: 'tracks-nonce',
 			publishableKey: 'pk_test',
 			woopayPhoneLabel: 'Mobile phone number',
 			woopaySaveUserLabel:
 				'Securely save my information for 1-click checkout',
 		};
+		window.fetch = jest.fn().mockResolvedValue( {
+			json: jest.fn().mockResolvedValue( { success: true } ),
+		} );
 		stripeMock = {
 			elements: jest.fn( ( options ) => {
 				stripeElementsOptions = options;
@@ -149,8 +169,20 @@ describe( 'WooPayments checkout', () => {
 		delete window.wcpay_core_checkout_config;
 		delete window.Stripe;
 		delete window.navigator.clipboard;
+		window.fetch = originalFetch;
 		document.body.innerHTML = '';
 		window.location.hash = '';
+	} );
+
+	test( 'does not record place-order tracking when shopper tracking is disabled', () => {
+		window.wcpay_core_checkout_config.isShopperTrackingEnabled = false;
+		require( '../woopayments-checkout' );
+
+		document.getElementById( 'place_order' ).dispatchEvent(
+			new window.MouseEvent( 'click', { bubbles: true, cancelable: true } )
+		);
+
+		expect( getTrackingEvents() ).toEqual( [] );
 	} );
 
 	test( 'passes the checkout total to Stripe Elements as a number', () => {
@@ -235,6 +267,23 @@ describe( 'WooPayments checkout', () => {
 		} );
 		expect( submitElements.mock.invocationCallOrder[ 0 ] ).toBeLessThan(
 			stripeMock.createPaymentMethod.mock.invocationCallOrder[ 0 ]
+		);
+	} );
+
+	test( 'records a place-order event when the shopper clicks the classic checkout button', () => {
+		require( '../woopayments-checkout' );
+
+		document.getElementById( 'place_order' ).dispatchEvent(
+			new window.MouseEvent( 'click', { bubbles: true, cancelable: true } )
+		);
+
+		expect( getTrackingEvents() ).toEqual(
+			expect.arrayContaining( [
+				{
+					name: 'checkout_place_order_button_click',
+					props: {},
+				},
+			] )
 		);
 	} );
 

@@ -50,6 +50,48 @@
 		window.navigator.clipboard.writeText( testNumber );
 	}
 
+	function recordUserEvent( eventName, eventProperties ) {
+		var ajaxUrl = config.ajaxUrl || config.ajax_url;
+		var nonce = config.platformTrackerNonce || config.platform_tracker_nonce;
+		var body;
+
+		if (
+			! eventName ||
+			config.isShopperTrackingEnabled === false ||
+			config.is_shopper_tracking_enabled === false ||
+			! ajaxUrl ||
+			! nonce ||
+			! window.fetch ||
+			! window.FormData
+		) {
+			return;
+		}
+
+		body = new window.FormData();
+		body.append( 'tracksNonce', nonce );
+		body.append( 'action', 'platform_tracks' );
+		body.append( 'tracksEventName', eventName );
+		body.append( 'tracksEventProp', JSON.stringify( eventProperties || {} ) );
+
+		window.fetch( ajaxUrl, {
+			method: 'POST',
+			credentials: 'same-origin',
+			body: body,
+		} ).catch( function () {} );
+	}
+
+	function recordPlaceOrderButtonClick( event ) {
+		if (
+			! ( event.target instanceof window.Element ) ||
+			! event.target.closest( '#place_order' ) ||
+			! isSelectedGateway()
+		) {
+			return;
+		}
+
+		recordUserEvent( 'checkout_place_order_button_click' );
+	}
+
 	function ensureHiddenField( form, name, value ) {
 		var field = form.find( 'input[name="' + name + '"]' );
 		if ( ! field.length ) {
@@ -451,6 +493,7 @@
 		initializeStripeElement();
 		confirmRedirectIfPresent();
 		document.addEventListener( 'click', copyTestNumber );
+		document.addEventListener( 'click', recordPlaceOrderButtonClick );
 		if ( document.getElementById( 'add_payment_method' ) ) {
 			document
 				.getElementById( 'add_payment_method' )

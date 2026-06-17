@@ -22,6 +22,9 @@ jest.mock( '@woocommerce/settings', () => ( {
 		isCoreNativeCheckoutAvailable: true,
 		isWooPayEnabled: true,
 		shouldShowWooPayButton: true,
+		platformTrackerNonce: 'tracks-nonce',
+		isShopperTrackingEnabled: true,
+		ajaxUrl: 'https://example.test/wp-admin/admin-ajax.php',
 		wcAjaxUrl: '/?wc-ajax=%%endpoint%%',
 		woopayButton: {
 			type: 'default',
@@ -95,16 +98,22 @@ describe( 'wc-payment-method-woopayments-woopay', () => {
 		fireEvent.click( button );
 
 		await waitFor( () => {
-			expect( window.fetch ).toHaveBeenCalled();
+			expect(
+				window.fetch.mock.calls.some(
+					( [ url ] ) => url === '/?wc-ajax=wcpay_init_woopay'
+				)
+			).toBe( true );
 		} );
 
-		expect( window.fetch ).toHaveBeenCalledWith(
-			'/?wc-ajax=wcpay_init_woopay',
+		const initRequest = window.fetch.mock.calls.find(
+			( [ url ] ) => url === '/?wc-ajax=wcpay_init_woopay'
+		);
+		expect( initRequest[ 1 ] ).toEqual(
 			expect.objectContaining( {
 				method: 'POST',
 			} )
 		);
-		const requestBody = window.fetch.mock.calls[ 0 ][ 1 ].body;
+		const requestBody = initRequest[ 1 ].body;
 		expect( requestBody.get( '_wpnonce' ) ).toBe( 'init-nonce' );
 		expect( requestBody.get( 'email' ) ).toBe( 'shopper@example.com' );
 		expect( requestBody.get( 'user_session' ) ).toBe( 'qwerty123' );
@@ -118,6 +127,62 @@ describe( 'wc-payment-method-woopayments-woopay', () => {
 				family: 'Inter',
 			},
 		] );
+	} );
+
+	it( 'records WooPay express load and click events', async () => {
+		window.fetch = jest.fn().mockResolvedValue( {
+			json: jest.fn().mockResolvedValue( {
+				result: 'success',
+				url: 'https://pay.woo.test/session',
+			} ),
+		} );
+
+		registerWooPay();
+		const expressRegistration =
+			registerExpressPaymentMethod.mock.calls[ 0 ][ 0 ];
+
+		render( createElement( expressRegistration.content.type ) );
+
+		await waitFor( () => {
+			expect(
+				window.fetch.mock.calls.some(
+					( [ url, options ] ) =>
+						url ===
+							'https://example.test/wp-admin/admin-ajax.php' &&
+						options.body.get( 'tracksEventName' ) ===
+							'woopay_button_load'
+				)
+			).toBe( true );
+		} );
+
+		fireEvent.click( screen.getByRole( 'button', { name: 'WooPay' } ) );
+
+		await waitFor( () => {
+			const events = window.fetch.mock.calls
+				.filter(
+					( [ url, options ] ) =>
+						url ===
+							'https://example.test/wp-admin/admin-ajax.php' &&
+						options.body.get( 'action' ) === 'platform_tracks'
+				)
+				.map( ( [ , options ] ) => ( {
+					name: options.body.get( 'tracksEventName' ),
+					props: JSON.parse( options.body.get( 'tracksEventProp' ) ),
+				} ) );
+
+			expect( events ).toEqual(
+				expect.arrayContaining( [
+					{
+						name: 'woopay_button_load',
+						props: { source: 'checkout' },
+					},
+					{
+						name: 'woopay_button_click',
+						props: { source: 'checkout' },
+					},
+				] )
+			);
+		} );
 	} );
 
 	it( 'does not render card save-user controls in the express button surface', () => {
@@ -138,6 +203,10 @@ describe( 'wc-payment-method-woopayments-woopay', () => {
 		expect(
 			document.querySelector( '.wcpay-core-woopay-save-user' )
 		).toBeNull();
-		expect( window.fetch ).not.toHaveBeenCalled();
+		expect(
+			window.fetch.mock.calls.some(
+				( [ url ] ) => url === '/?wc-ajax=wcpay_init_woopay'
+			)
+		).toBe( false );
 	} );
 } );

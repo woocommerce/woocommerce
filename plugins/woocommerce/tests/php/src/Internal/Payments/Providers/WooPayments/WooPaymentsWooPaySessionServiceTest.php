@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsFrontendStylesService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsFrontendTrackingController;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsWooPaySessionService;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
@@ -335,6 +336,9 @@ class WooPaymentsWooPaySessionServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Securely save my information for 1-click checkout', $config['woopaySaveUserLabel'] );
 		$this->assertSame( 'Mobile phone number', $config['woopayPhoneLabel'] );
 		$this->assertArrayHasKey( 'platformTrackerNonce', $config );
+		$this->assertSame( admin_url( 'admin-ajax.php' ), $config['ajaxUrl'] );
+		$this->assertArrayHasKey( 'isShopperTrackingEnabled', $config );
+		$this->assertArrayHasKey( 'is_shopper_tracking_enabled', $config );
 	}
 
 	/**
@@ -648,8 +652,14 @@ class WooPaymentsWooPaySessionServiceTest extends WC_Unit_Test_Case {
 			static fn( string $key, $fallback = null ) => array_key_exists( $key, $settings ) ? $settings[ $key ] : $fallback
 		);
 
+		$tracking_controller = $this->getMockBuilder( WooPaymentsFrontendTrackingController::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_shopper_tracking_enabled' ) )
+			->getMock();
+		$tracking_controller->method( 'is_shopper_tracking_enabled' )->willReturn( true );
+
 		$sut = new WooPaymentsWooPaySessionService();
-		$sut->init( $account_service, new WooPaymentsFrontendStylesService() );
+		$sut->init( $account_service, new WooPaymentsFrontendStylesService(), $tracking_controller );
 
 		return $sut;
 	}

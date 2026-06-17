@@ -156,20 +156,29 @@ class WooPaymentsCheckoutBridge {
 	private WooPaymentsFrontendStylesService $frontend_styles_service;
 
 	/**
+	 * Frontend tracking controller.
+	 *
+	 * @var WooPaymentsFrontendTrackingController
+	 */
+	private WooPaymentsFrontendTrackingController $frontend_tracking_controller;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsLegacyRuntime         $legacy_runtime         WooPayments legacy runtime.
-	 * @param WooPaymentsAccountService        $account_service        WooPayments account service.
-	 * @param WooPaymentsWooPaySessionService  $woopay_session_service WooPay session service.
-	 * @param WooPaymentsFrontendStylesService $frontend_styles_service Shared frontend styles service.
+	 * @param WooPaymentsLegacyRuntime              $legacy_runtime               WooPayments legacy runtime.
+	 * @param WooPaymentsAccountService             $account_service              WooPayments account service.
+	 * @param WooPaymentsWooPaySessionService       $woopay_session_service       WooPay session service.
+	 * @param WooPaymentsFrontendStylesService      $frontend_styles_service      Shared frontend styles service.
+	 * @param WooPaymentsFrontendTrackingController $frontend_tracking_controller Frontend tracking controller.
 	 */
-	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsAccountService $account_service, WooPaymentsWooPaySessionService $woopay_session_service, WooPaymentsFrontendStylesService $frontend_styles_service ): void {
-		$this->legacy_runtime          = $legacy_runtime;
-		$this->account_service         = $account_service;
-		$this->woopay_session_service  = $woopay_session_service;
-		$this->frontend_styles_service = $frontend_styles_service;
+	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsAccountService $account_service, WooPaymentsWooPaySessionService $woopay_session_service, WooPaymentsFrontendStylesService $frontend_styles_service, WooPaymentsFrontendTrackingController $frontend_tracking_controller ): void {
+		$this->legacy_runtime               = $legacy_runtime;
+		$this->account_service              = $account_service;
+		$this->woopay_session_service       = $woopay_session_service;
+		$this->frontend_styles_service      = $frontend_styles_service;
+		$this->frontend_tracking_controller = $frontend_tracking_controller;
 	}
 
 	/**
@@ -212,6 +221,7 @@ class WooPaymentsCheckoutBridge {
 			'isCoreNativeCheckoutBridge'    => true,
 			'isCoreNativeCheckoutAvailable' => $this->should_expose_checkout_surface(),
 			'isWooPayEnabled'               => false,
+			'isShopperTrackingEnabled'      => $this->get_frontend_tracking_controller()->is_shopper_tracking_enabled(),
 			'confirmationErrorMessage'      => __( 'There was a problem confirming your payment.', 'woocommerce' ),
 		);
 
@@ -611,5 +621,18 @@ class WooPaymentsCheckoutBridge {
 		}
 
 		return $this->frontend_styles_service;
+	}
+
+	/**
+	 * Get the frontend tracking controller.
+	 *
+	 * @return WooPaymentsFrontendTrackingController
+	 */
+	private function get_frontend_tracking_controller(): WooPaymentsFrontendTrackingController {
+		if ( ! isset( $this->frontend_tracking_controller ) ) {
+			$this->frontend_tracking_controller = wc_get_container()->get( WooPaymentsFrontendTrackingController::class );
+		}
+
+		return $this->frontend_tracking_controller;
 	}
 }

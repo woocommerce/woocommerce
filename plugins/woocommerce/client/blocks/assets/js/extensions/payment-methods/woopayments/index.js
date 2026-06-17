@@ -14,6 +14,7 @@ import {
 	getBlocksCheckoutAppearance,
 	getFontRulesFromPage,
 } from './upe-styles';
+import { recordWooPaymentsUserEvent } from './tracks';
 
 const PAYMENT_METHOD_NAME = 'woocommerce_payments';
 const settings = getPaymentMethodData( PAYMENT_METHOD_NAME, {} );
@@ -376,8 +377,11 @@ const persistWooPaySaveUser = async ( isSavingUser, phone ) => {
 };
 
 const WooPaySaveUserSection = () => {
-	const [ isSavingUser, setIsSavingUser ] = useState(
+	const initialIsSavingUser = useRef(
 		Boolean( settings.PRE_CHECK_SAVE_MY_INFO )
+	);
+	const [ isSavingUser, setIsSavingUser ] = useState(
+		initialIsSavingUser.current
 	);
 	const [ phone, setPhone ] = useState( getWooPayInitialPhone );
 	const saveUserLabel =
@@ -389,11 +393,28 @@ const WooPaySaveUserSection = () => {
 	const phoneLabel =
 		settings.woopayPhoneLabel || __( 'Mobile phone number', 'woocommerce' );
 
+	useEffect( () => {
+		recordWooPaymentsUserEvent(
+			settings,
+			'checkout_woopay_save_my_info_offered'
+		);
+		if ( initialIsSavingUser.current ) {
+			recordWooPaymentsUserEvent(
+				settings,
+				'checkout_save_my_info_click',
+				{ status: 'checked' }
+			);
+		}
+	}, [] );
+
 	const updateSaveUser = ( checked, nextPhone = phone ) => {
 		setIsSavingUser( checked );
 		if ( ! checked ) {
 			setPhone( '' );
 		}
+		recordWooPaymentsUserEvent( settings, 'checkout_save_my_info_click', {
+			status: checked ? 'checked' : 'unchecked',
+		} );
 		persistWooPaySaveUser( checked, checked ? nextPhone : '' );
 	};
 
@@ -606,6 +627,11 @@ const WooPaymentsContent = ( {
 		}
 
 		const unsubscribe = onPaymentSetup( async () => {
+			recordWooPaymentsUserEvent(
+				settings,
+				'checkout_place_order_button_click'
+			);
+
 			const paymentMethodData = {
 				'wcpay-payment-method': '',
 				'wcpay-payment-method-error-code': '',

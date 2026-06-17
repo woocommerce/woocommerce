@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsFrontendStylesService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsFrontendTrackingController;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsWooPaySessionService;
 use WC_Unit_Test_Case;
@@ -38,7 +39,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( true );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge() );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge(), $this->create_frontend_tracking_controller_for_bridge() );
 
 		add_filter(
 			'wcpay_payment_fields_js_config',
@@ -108,6 +109,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $config['woopayFontRules'] );
 		$this->assertSame( 'Securely save my information for 1-click checkout', $config['woopaySaveUserLabel'] );
 		$this->assertSame( 'Mobile phone number', $config['woopayPhoneLabel'] );
+		$this->assertArrayHasKey( 'isShopperTrackingEnabled', $config );
 		$this->assertFalse( $config['usesLegacySetupIntentBridge'] );
 		$this->assertFalse( $config['usesLegacyOrderStatusBridge'] );
 		$this->assertTrue( $config['usesNativeSetupIntentBridge'] );
@@ -133,7 +135,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( true );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( false ), $this->create_frontend_styles_service_for_bridge() );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( false ), $this->create_frontend_styles_service_for_bridge(), $this->create_frontend_tracking_controller_for_bridge() );
 
 		$config = $bridge->get_payment_fields_js_config();
 
@@ -151,7 +153,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( true );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge() );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge(), $this->create_frontend_tracking_controller_for_bridge() );
 
 		add_filter(
 			'wcpay_payment_fields_js_config',
@@ -188,7 +190,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( true );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge() );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge(), $this->create_frontend_tracking_controller_for_bridge() );
 
 		$data = $bridge->get_blocks_payment_method_data();
 
@@ -208,7 +210,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( false );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge() );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge(), $this->create_frontend_tracking_controller_for_bridge() );
 
 		$config = $bridge->get_payment_fields_js_config();
 
@@ -229,7 +231,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'get_gateway_prepared_customer_data' )->willReturn( array() );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge() );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge(), $this->create_frontend_tracking_controller_for_bridge() );
 
 		$config = $bridge->get_payment_fields_js_config();
 
@@ -254,7 +256,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$legacy_runtime->method( 'get_gateway_prepared_customer_data' )->willReturn( array() );
 
 		$bridge = new WooPaymentsCheckoutBridge();
-		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( false ), $this->create_frontend_styles_service_for_bridge() );
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( false ), $this->create_frontend_styles_service_for_bridge(), $this->create_frontend_tracking_controller_for_bridge() );
 
 		$config = $bridge->get_payment_fields_js_config();
 
@@ -405,5 +407,21 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$service->method( 'get_styles_cache_version' )->willReturn( 'styles-v1' );
 
 		return $service;
+	}
+
+	/**
+	 * Create a frontend tracking controller mock for checkout bridge tests.
+	 *
+	 * @return WooPaymentsFrontendTrackingController|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private function create_frontend_tracking_controller_for_bridge() {
+		$controller = $this->getMockBuilder( WooPaymentsFrontendTrackingController::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_shopper_tracking_enabled' ) )
+			->getMock();
+
+		$controller->method( 'is_shopper_tracking_enabled' )->willReturn( true );
+
+		return $controller;
 	}
 }
