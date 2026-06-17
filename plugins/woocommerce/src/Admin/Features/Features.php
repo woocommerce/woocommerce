@@ -165,26 +165,26 @@ class Features {
 			return;
 		}
 
-		foreach (
-			array(
-				\Automattic\WooCommerce\Internal\Admin\ActivityPanels::class,
-				\Automattic\WooCommerce\Internal\Admin\Analytics::class,
-				\Automattic\WooCommerce\Internal\Admin\Coupons::class,
-				\Automattic\WooCommerce\Internal\Admin\CustomerEffortScoreTracks::class,
-				\Automattic\WooCommerce\Internal\Admin\Homescreen::class,
-				\Automattic\WooCommerce\Internal\Admin\Marketing::class,
-				\Automattic\WooCommerce\Internal\Admin\MobileAppBanner::class,
-				\Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init::class,
-				\Automattic\WooCommerce\Internal\Admin\RemoteInboxNotifications::class,
-				\Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init::class,
-				\Automattic\WooCommerce\Internal\Admin\ShippingLabelBanner::class,
-				\Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init::class,
-				\Automattic\WooCommerce\Admin\Features\TransientNotices::class,
-				\Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init::class,
-				\Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage::class,
-				\Automattic\WooCommerce\Admin\Features\LaunchYourStore::class,
-			) as $feature_class
-		) {
+		$always_loaded_feature_classes = array(
+			\Automattic\WooCommerce\Internal\Admin\ActivityPanels::class,
+			\Automattic\WooCommerce\Internal\Admin\Analytics::class,
+			\Automattic\WooCommerce\Internal\Admin\Coupons::class,
+			\Automattic\WooCommerce\Internal\Admin\CustomerEffortScoreTracks::class,
+			\Automattic\WooCommerce\Internal\Admin\Homescreen::class,
+			\Automattic\WooCommerce\Internal\Admin\Marketing::class,
+			\Automattic\WooCommerce\Internal\Admin\MobileAppBanner::class,
+			\Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init::class,
+			\Automattic\WooCommerce\Internal\Admin\RemoteInboxNotifications::class,
+			\Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init::class,
+			\Automattic\WooCommerce\Internal\Admin\ShippingLabelBanner::class,
+			\Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init::class,
+			\Automattic\WooCommerce\Admin\Features\TransientNotices::class,
+			\Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init::class,
+			\Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage::class,
+			\Automattic\WooCommerce\Admin\Features\LaunchYourStore::class,
+		);
+
+		foreach ( $always_loaded_feature_classes as $feature_class ) {
 			new $feature_class();
 		}
 
@@ -192,9 +192,17 @@ class Features {
 		foreach ( $features as $feature ) {
 			$feature_class = self::get_feature_class( $feature );
 
-			if ( $feature_class ) {
-				new $feature_class();
+			if ( ! $feature_class ) {
+				continue;
 			}
+
+			foreach ( $always_loaded_feature_classes as $loaded_feature_class ) {
+				if ( is_a( $feature_class, $loaded_feature_class, true ) ) {
+					continue 2;
+				}
+			}
+
+			new $feature_class();
 		}
 
 		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
