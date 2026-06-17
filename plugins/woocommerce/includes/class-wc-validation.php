@@ -27,14 +27,12 @@ class WC_Validation {
 	 * Validates a phone number using a regular expression.
 	 *
 	 * @param  string $phone Phone number to validate.
+	 * @param string $country Country to validate the phone for.
 	 * @return bool
 	 */
-	public static function is_phone( $phone ) {
-		if ( 0 < strlen( trim( preg_replace( '/[\s\#0-9_\-\+\/\(\)\.]/', '', $phone ) ) ) ) {
-			return false;
-		}
-
-		return true;
+	public static function is_phone( $phone, $country = null ) {
+		$valid = 0 === strlen( trim( preg_replace( '/[\s\#0-9_\-\+\/\(\)\.]/', '', $phone ) ) );
+		return apply_filters( 'woocommerce_validate_phone', $valid, $phone, $country );
 	}
 
 	/**
