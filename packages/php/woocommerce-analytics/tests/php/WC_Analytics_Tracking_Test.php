@@ -102,6 +102,53 @@ class WC_Analytics_Tracking_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Must run BEFORE any test defines REST_REQUEST. In a plain front-end context
+	 * (not REST/XMLRPC/cron/CLI) with no `tk_ai` cookie, get_visitor_id() must NOT
+	 * return a freshly-minted id. Minting-and-attributing here is the Nov 2025
+	 * regression that produced one-event "visitors" — overwhelmingly UA-spoofing
+	 * crawler traffic that never persists the cookie — inflating Tracks session counts.
+	 * The id is still persisted in a cookie for the next request, but the current
+	 * call returns null so the event is skipped.
+	 */
+	public function test_get_visitor_id_returns_null_for_non_rest_request_without_cookie(): void {
+		$reflection = new \ReflectionClass( WC_Analytics_Tracking::class );
+		$method     = $reflection->getMethod( 'get_visitor_id' );
+		$method->setAccessible( true );
+
+		$this->assertNull(
+			$method->invoke( null ),
+			'A freshly-minted id must not be returned for cookie-less non-REST requests.'
+		);
+	}
+
+	/**
+	 * Companion behavioral assertion: record_event() emits/queues no pixel for a
+	 * cookie-less, non-REST request — the crawler path that inflated session counts.
+	 * Must run before REST_REQUEST leaks so the non-REST branch is actually exercised.
+	 */
+	public function test_record_event_skips_non_rest_request_without_cookie(): void {
+		$captured = array();
+		$filter   = function ( $pre, $args, $url ) use ( &$captured ) {
+			if ( false !== strpos( $url, 'pixel.wp.com' ) ) {
+				$captured[] = $url;
+			}
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => '',
+			);
+		};
+		add_filter( 'pre_http_request', $filter, 10, 3 );
+
+		$result = WC_Analytics_Tracking::record_event( 'add_to_cart' );
+
+		remove_filter( 'pre_http_request', $filter, 10 );
+
+		$this->assertTrue( $result, 'record_event should return true (skipped) for cookie-less non-REST contexts.' );
+		$this->assertCount( 0, $captured, 'No pixel.wp.com request should fire when no tk_ai cookie is present in a non-REST context.' );
+		$this->assertSame( array(), $this->get_pixel_batch_queue(), 'No pixel should be queued when no tk_ai cookie is present in a non-REST context.' );
+	}
+
+	/**
 	 * record_event() should short-circuit (no pixel emitted) when called from
 	 * a REST request that has no `tk_ai` cookie. Generating a one-shot id
 	 * here would fragment Nosara/Tracks sessions across cookie-less
