@@ -624,4 +624,22 @@ class AutoloaderTest extends \WC_Unit_Test_Case {
 			'The resolved path must point at the probed class file.'
 		);
 	}
+
+	/**
+	 * Composer's findFile() returns the literal `false` on a miss — the most common non-string
+	 * return, since every class miss flows through it. read_scoped_file_path() must promote that
+	 * `false` to null (is_string() excludes it), because that promotion is exactly what stops a
+	 * TypeError at find_scoped_file()'s `?string` return on the most-travelled path.
+	 *
+	 * @testdox read_scoped_file_path() promotes findFile()'s false miss to null.
+	 */
+	public function test_read_scoped_file_path_promotes_a_false_miss_to_null(): void {
+		$loader = new ClassLoader();
+		$loader->setPsr4( 'Automattic\\WooCommerce\\', array( dirname( WC_PLUGIN_FILE ) . '/src' ) );
+
+		$this->assertNull(
+			Autoloader::read_scoped_file_path( $loader, 'Automattic\\WooCommerce\\Nope\\DoesNotExistXYZ' ),
+			'A findFile() miss (false) must promote to null, not surface as a non-string.'
+		);
+	}
 }
