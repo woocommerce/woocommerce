@@ -114,6 +114,40 @@ export const setupProjects = [
 	},
 ];
 
+/**
+ * Spec folders that must run serially in `core-serial` (they mutate global
+ * state or share fixtures). Every other folder under `tests/` runs in
+ * `core-parallel` by default, except the other-project folders in `nonCoreSpecs`.
+ */
+const serialRunSpecs = [
+	'**/tests/analytics/**/*.spec.ts',
+	'**/tests/brands/**/*.spec.ts',
+	'**/tests/cart/**/*.spec.ts',
+	'**/tests/checkout/**/*.spec.ts',
+	'**/tests/coupons/**/*.spec.ts',
+	'**/tests/customer/**/*.spec.ts',
+	'**/tests/editor/**/*.spec.ts',
+	'**/tests/email/**/*.spec.ts',
+	'**/tests/email-editor/**/*.spec.ts',
+	'**/tests/onboarding/**/*.spec.ts',
+	'**/tests/order/**/*.spec.ts',
+	'**/tests/product/**/*.spec.ts',
+	'**/tests/settings/**/*.spec.ts',
+	'**/tests/shipping/**/*.spec.ts',
+	'**/tests/shop/**/*.spec.ts',
+];
+
+/**
+ * Spec folders owned by other Playwright projects — excluded from both core projects.
+ * PayPal tests don't run well in parallel (https://github.com/woocommerce/woocommerce/pull/63068);
+ * blocks specs need the `blocks setup` project and its storage state.
+ */
+const nonCoreSpecs = [
+	'**/api-tests/**',
+	'**/tests/paypal/**',
+	'**/tests/blocks/**',
+];
+
 export default defineConfig( {
 	timeout: 120 * 1000,
 	expect: { timeout: CI ? 20 * 1000 : 10 * 1000 },
@@ -121,7 +155,7 @@ export default defineConfig( {
 	testDir: `${ TESTS_ROOT_PATH }/tests`,
 	retries: CI ? 1 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
-	// workers: 1,
+	workers: 1, // 1 by default to avoid issues with parallel tests, but can be overridden with the `--workers` CLI option
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	reporter,
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
@@ -147,35 +181,13 @@ export default defineConfig( {
 	projects: [
 		...setupProjects,
 		{
-			name: 'e2e',
-			testIgnore: [
-				'**/api-tests/**',
-				/* Exclude PayPal tests, as they don't run well in parallel - see https://github.com/woocommerce/woocommerce/pull/63068. */
-				'**/tests/paypal/**',
-				/* Blocks specs are run by the blocks-chromium and blocks-legacy-mini-cart projects below. */
-				'**/tests/blocks/**',
-				/* Parallel-safe specs are run by the e2e-parallel-safe project below. */
-				'**/tests/analytics/analytics-access.spec.ts',
-				'**/tests/basic/basic.spec.ts',
-				'**/tests/basic/dashboard-access.spec.ts',
-				'**/tests/js-file-monitor/monitor-js-file-number.spec.ts',
-				'**/tests/marketing/overview.spec.ts',
-				'**/tests/my-account/my-account.spec.ts',
-				'**/tests/user/lost-password.spec.ts',
-			],
+			name: 'core-serial',
+			testMatch: serialRunSpecs,
 			dependencies: [ 'site setup' ],
 		},
 		{
-			name: 'e2e-parallel-safe',
-			testMatch: [
-				'**/tests/analytics/analytics-access.spec.ts',
-				'**/tests/basic/basic.spec.ts',
-				'**/tests/basic/dashboard-access.spec.ts',
-				'**/tests/js-file-monitor/monitor-js-file-number.spec.ts',
-				'**/tests/marketing/overview.spec.ts',
-				'**/tests/my-account/my-account.spec.ts',
-				'**/tests/user/lost-password.spec.ts',
-			],
+			name: 'core-parallel',
+			testIgnore: [ ...serialRunSpecs, ...nonCoreSpecs ],
 			dependencies: [ 'site setup' ],
 			fullyParallel: true,
 		},
