@@ -41,7 +41,7 @@ class Schema_Installer_Test extends Engine_Integration_Test_Case {
 	public function test_each_baseline_table_exists( string $logical ): void {
 		global $wpdb;
 
-		$table = Schema_Installer::table( $logical );
+		$table = Schema_Installer::get_table_name( $logical );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
@@ -63,13 +63,13 @@ class Schema_Installer_Test extends Engine_Integration_Test_Case {
 
 	public function test_unknown_table_identifier_throws(): void {
 		$this->expectException( \InvalidArgumentException::class );
-		Schema_Installer::table( 'not_a_table' );
+		Schema_Installer::get_table_name( 'not_a_table' );
 	}
 
 	public function test_plans_table_has_owner_column(): void {
 		global $wpdb;
 
-		$table = Schema_Installer::table( Schema_Installer::TABLE_PLANS );
+		$table = Schema_Installer::get_table_name( Schema_Installer::TABLE_PLANS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$column = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'owner' ) );
@@ -80,7 +80,7 @@ class Schema_Installer_Test extends Engine_Integration_Test_Case {
 	public function test_contracts_table_has_owner_column(): void {
 		global $wpdb;
 
-		$table = Schema_Installer::table( Schema_Installer::TABLE_CONTRACTS );
+		$table = Schema_Installer::get_table_name( Schema_Installer::TABLE_CONTRACTS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$column = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'owner' ) );

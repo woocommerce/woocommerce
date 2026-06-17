@@ -126,7 +126,7 @@ class Contract_Repository_Test extends Engine_Integration_Test_Case {
 		$this->assertTrue( $repo->delete( $id ) );
 		$this->assertNull( $repo->find( $id ) );
 
-		$items_table = \WooCommerce\Subscriptions\Engine\Integration\Storage\Schema_Installer::table(
+		$items_table = \WooCommerce\Subscriptions\Engine\Integration\Storage\Schema_Installer::get_table_name(
 			\WooCommerce\Subscriptions\Engine\Integration\Storage\Schema_Installer::TABLE_CONTRACT_ITEMS
 		);
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
