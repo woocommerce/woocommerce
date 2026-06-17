@@ -1,3 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Migrate the offline payment method settings forms (direct bank transfer, check, cash on delivery) from hand-rolled field rendering to the DataForm component from the dataviews library. No user-facing changes.
+
+Migrate offline payment settings forms to DataForm.
