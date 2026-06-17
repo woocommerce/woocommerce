@@ -80,7 +80,7 @@ final class Contract_Status {
 	private static function transitions(): array {
 		return array(
 			self::ACTIVE               => array( self::ON_HOLD, self::PENDING_CANCELLATION, self::CANCELLED, self::EXPIRED ),
-			self::ON_HOLD              => array( self::ACTIVE, self::PENDING_CANCELLATION, self::CANCELLED, self::EXPIRED ),
+			self::ON_HOLD              => array( self::ACTIVE, self::PENDING_CANCELLATION, self::CANCELLED ),
 			self::PENDING_CANCELLATION => array( self::ACTIVE, self::CANCELLED ),
 			self::CANCELLED            => array(),
 			self::EXPIRED              => array(),
