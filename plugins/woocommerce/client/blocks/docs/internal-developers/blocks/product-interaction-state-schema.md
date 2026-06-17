@@ -152,9 +152,11 @@ main product id + productInteractionInContext.selectedAttributes → productVari
 
 This keeps selected attributes in shared store state while keeping `productInContext` read-oriented product data.
 
-## Actions
+## Global mutation actions
 
-The store only needs actions for mutating `productInteractionInContext`. Cart submission can keep using existing cart actions after reading product and interaction state.
+The `woocommerce` store needs actions for mutating shared product interaction state. Local block stores can still expose UI-specific actions and getters; those local actions should call these global mutation actions instead of writing to `productInteractions` directly.
+
+Cart submission can keep using existing cart actions after reading product and interaction state.
 
 Proposed minimum write surface:
 
