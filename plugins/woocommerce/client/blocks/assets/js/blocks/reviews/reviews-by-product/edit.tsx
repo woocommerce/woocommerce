@@ -3,16 +3,19 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import {
-	Button,
-	PanelBody,
-	Placeholder,
-	withSpokenMessages,
-} from '@wordpress/components';
 import { SearchListItem } from '@woocommerce/editor-components/search-list-control';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import { commentContent, Icon } from '@wordpress/icons';
 import { decodeEntities } from '@wordpress/html-entities';
+import {
+	Button,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+	Placeholder,
+	withSpokenMessages,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -73,29 +76,106 @@ const ReviewsByProductEditor = ( {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody
-					title={ __( 'Product', 'woocommerce' ) }
-					initialOpen={ false }
+				<ToolsPanel
+					label={ __( 'Product', 'woocommerce' ) }
+					resetAll={ () => setAttributes( { productId: 0 } ) }
 				>
-					<ProductControl
-						selected={ attributes.productId || 0 }
-						onChange={ ( value = [] ) => {
-							const id = value[ 0 ] ? value[ 0 ].id : 0;
-							setAttributes( { productId: id } );
-						} }
-						renderItem={ renderProductControlItem }
-						isCompact={ true }
-					/>
-				</PanelBody>
-				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
-					{ getSharedReviewContentControls(
-						attributes,
-						setAttributes
-					) }
-				</PanelBody>
-				<PanelBody title={ __( 'List Settings', 'woocommerce' ) }>
-					{ getSharedReviewListControls( attributes, setAttributes ) }
-				</PanelBody>
+					<ToolsPanelItem
+						hasValue={ () => !! attributes.productId }
+						label={ __( 'Product', 'woocommerce' ) }
+						onDeselect={ () => setAttributes( { productId: 0 } ) }
+						isShownByDefault
+					>
+						<ProductControl
+							selected={ attributes.productId || 0 }
+							onChange={ ( value = [] ) => {
+								const id = value[ 0 ] ? value[ 0 ].id : 0;
+								setAttributes( { productId: id } );
+							} }
+							renderItem={ renderProductControlItem }
+							isCompact={ true }
+						/>
+					</ToolsPanelItem>
+				</ToolsPanel>
+				<ToolsPanel
+					label={ __( 'Content', 'woocommerce' ) }
+					resetAll={ () =>
+						setAttributes( {
+							showReviewRating: true,
+							showReviewerName: true,
+							showReviewImage: true,
+							showReviewDate: true,
+							showReviewContent: true,
+							imageType: 'reviewer',
+						} )
+					}
+				>
+					<ToolsPanelItem
+						hasValue={ () =>
+							! attributes.showReviewRating ||
+							! attributes.showReviewerName ||
+							! attributes.showReviewImage ||
+							! attributes.showReviewDate ||
+							! attributes.showReviewContent ||
+							attributes.imageType !== 'reviewer'
+						}
+						label={ __( 'Review options', 'woocommerce' ) }
+						onDeselect={ () =>
+							setAttributes( {
+								showReviewRating: true,
+								showReviewerName: true,
+								showReviewImage: true,
+								showReviewDate: true,
+								showReviewContent: true,
+								imageType: 'reviewer',
+							} )
+						}
+						isShownByDefault
+					>
+						{ getSharedReviewContentControls(
+							attributes,
+							setAttributes
+						) }
+					</ToolsPanelItem>
+				</ToolsPanel>
+				<ToolsPanel
+					label={ __( 'List Settings', 'woocommerce' ) }
+					resetAll={ () =>
+						setAttributes( {
+							showOrderby: true,
+							orderby: 'most-recent',
+							reviewsOnPageLoad: 10,
+							showLoadMore: true,
+							reviewsOnLoadMore: 10,
+						} )
+					}
+				>
+					<ToolsPanelItem
+						hasValue={ () =>
+							! attributes.showOrderby ||
+							attributes.orderby !== 'most-recent' ||
+							attributes.reviewsOnPageLoad !== 10 ||
+							! attributes.showLoadMore ||
+							attributes.reviewsOnLoadMore !== 10
+						}
+						label={ __( 'List settings', 'woocommerce' ) }
+						onDeselect={ () =>
+							setAttributes( {
+								showOrderby: true,
+								orderby: 'most-recent',
+								reviewsOnPageLoad: 10,
+								showLoadMore: true,
+								reviewsOnLoadMore: 10,
+							} )
+						}
+						isShownByDefault
+					>
+						{ getSharedReviewListControls(
+							attributes,
+							setAttributes
+						) }
+					</ToolsPanelItem>
+				</ToolsPanel>
 			</InspectorControls>
 		);
 	};
