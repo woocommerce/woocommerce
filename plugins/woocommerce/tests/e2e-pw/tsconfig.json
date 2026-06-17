@@ -7,7 +7,7 @@
 		"baseUrl": ".",
 		"paths": {
 			"@woocommerce/e2e-utils": [
-				"../../client/blocks/tests/e2e/utils"
+				"./utils/blocks"
 			]
 		},
 		"esModuleInterop": true,

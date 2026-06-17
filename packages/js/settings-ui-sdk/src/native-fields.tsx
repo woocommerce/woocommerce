@@ -15,6 +15,7 @@ import { createElement, RawHTML } from '@wordpress/element';
  */
 import { warn } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
+import { NumberSpinControl } from './number-spin-control';
 import type { SettingsFieldComponentProps, SettingsValue } from './types';
 
 type TextInputType =
@@ -25,8 +26,7 @@ type TextInputType =
 	| 'time'
 	| 'email'
 	| 'url'
-	| 'tel'
-	| 'number';
+	| 'tel';
 
 const textInputTypes: TextInputType[] = [
 	'text',
@@ -37,7 +37,6 @@ const textInputTypes: TextInputType[] = [
 	'email',
 	'url',
 	'tel',
-	'number',
 ];
 
 const toStringValue = ( value: SettingsValue ) =>
@@ -149,6 +148,21 @@ export const NativeSettingsField = ( {
 					) ) }
 				</select>
 			</BaseControl>
+		);
+	}
+
+	if ( field.type === 'number' ) {
+		return (
+			<NumberSpinControl
+				id={ field.id }
+				label={ field.label }
+				help={ getHelp( field.description ) }
+				value={ toStringValue( value ) }
+				placeholder={ field.placeholder }
+				disabled={ field.disabled }
+				onChange={ onChange }
+				inputAttributes={ field.customAttributes }
+			/>
 		);
 	}
 
