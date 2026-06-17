@@ -153,6 +153,37 @@ For detailed test commands, see `woocommerce-dev-cycle` skill.
 
 ## Block Development
 
+### New Block-Library Blocks
+
+New blocks that are built by the block-library `wp-build` package should live under:
+
+```text
+plugins/woocommerce/client/blocks/packages/block-library/src/
+├── index.tsx
+└── <block-name>/
+    ├── block.json
+    ├── index.tsx
+    ├── edit.tsx
+    ├── index.php
+    └── test/
+```
+
+Use `plugins/woocommerce/client/blocks/packages/block-library/src/<block-name>/` as the block's source of truth. The build copies this package output to `plugins/woocommerce/assets/client/blocks/<block-name>/` and includes the block metadata in `plugins/woocommerce/assets/client/blocks/blocks-json.php`.
+
+Server-rendered blocks in this package should register themselves from their block folder PHP file:
+
+- Put the render callback and `register_block_type_from_metadata( __DIR__, ... )` call in `<block-name>/index.php`.
+- Do not rely on `"render": "file:./index.php"` in `block.json` for blocks using this PHP self-registration pattern.
+- `Automattic\WooCommerce\Internal\Blocks\BlockLibraryRegistry` loads generated block-library PHP files and registers the generated metadata collection with `wp_register_block_metadata_collection()`.
+- Do not add new block-library package blocks to `BlockTypesController` block classes. That controller is for the legacy PHP block type class registration path.
+
+Keep tests close to the block when they only exercise that block:
+
+- JavaScript/TypeScript block unit tests can live in `<block-name>/test/`, for example `<block-name>/test/block.ts`.
+- PHP unit tests for block-specific server rendering can also live in `<block-name>/test/` when the relevant PHPUnit runner discovers that path. If the current runner only covers `plugins/woocommerce/tests/php`, add or mirror integration coverage there.
+
+Existing blocks may still live under `plugins/woocommerce/client/blocks/assets/js/blocks/` while they are migrated. Follow the local folder pattern for existing blocks, but prefer the `packages/block-library/src/` structure for new wp-build block-library work.
+
 ### `block.json` Attribute Defaults
 
 Never include styling options such as `fontSize`, `borderColor`, `textColor`... as block attributes. They should only be listed under `supports`.
