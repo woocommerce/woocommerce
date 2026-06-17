@@ -76,7 +76,7 @@ class CustomerVerifyEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_additional_content() {
-		return __( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' );
+		return __( 'Thanks for reading.', 'woocommerce' );
 	}
 
 	/**
@@ -143,6 +143,25 @@ class CustomerVerifyEmail extends WC_Email {
 				'sent_to_admin'      => false,
 				'plain_text'         => true,
 				'email'              => $this,
+			)
+		);
+	}
+
+	/**
+	 * Get the content rendered into the block email editor's WooCommerce content placeholder.
+	 *
+	 * @return string
+	 */
+	public function get_block_editor_email_template_content() {
+		return wc_get_template_html(
+			$this->template_block_content,
+			array(
+				'user_display_name' => $this->user_display_name,
+				'user_email'        => $this->object instanceof WP_User ? $this->object->user_email : '',
+				'verify_url'        => $this->verify_url,
+				'sent_to_admin'     => false,
+				'plain_text'        => false,
+				'email'             => $this,
 			)
 		);
 	}

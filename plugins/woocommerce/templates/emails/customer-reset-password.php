@@ -12,48 +12,62 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.9.0
+ * @version 11.0.0
+ *
+ * @var string    $email_heading      Email heading.
+ * @var string    $additional_content Additional content below the body.
+ * @var string    $user_display_name  Customer's display name.
+ * @var string    $blogname           Site name.
+ * @var bool      $sent_to_admin      Whether sent to admin.
+ * @var bool      $plain_text         Whether plain-text variant.
+ * @var \WC_Email $email              Email object.
+ * @var string    $reset_key          Reset key.
+ * @var string    $user_id            User ID.
+ * @var string    $user_login         User login.
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 
-?>
-
-<?php do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
+/**
+ * Fires to output the email header.
+ *
+ * @hooked WC_Emails::email_header()
+ *
+ * @since 3.7.0
+ */
+do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <?php echo $email_improvements_enabled ? '<div class="email-introduction">' : ''; ?>
-<?php /* translators: %s: Customer first name, or username if name is not available */ ?>
+
+<?php /* translators: %s: Customer first name, or username if name is not available. */ ?>
 <p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_display_name ) ); ?></p>
-<?php /* translators: %s: Store name */ ?>
-<p><?php printf( esc_html__( 'Someone has requested a new password for the following account on %s:', 'woocommerce' ), esc_html( $blogname ) ); ?></p>
-<?php if ( $email_improvements_enabled ) : ?>
-	<div class="hr hr-top"></div>
-	<?php /* translators: %s: Username */ ?>
-	<p><?php echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), esc_html( $user_login ) ), array( 'b' => array() ) ); ?></p>
-	<div class="hr hr-bottom"></div>
-	<p><?php esc_html_e( 'If you didn’t make this request, just ignore this email. If you’d like to proceed, reset your password via the link below:', 'woocommerce' ); ?></p>
-<?php else : ?>
-	<?php /* translators: %s: Customer username */ ?>
-	<p><?php printf( esc_html__( 'Username: %s', 'woocommerce' ), esc_html( $user_login ) ); ?></p>
-	<p><?php esc_html_e( 'If you didn\'t make this request, just ignore this email. If you\'d like to proceed:', 'woocommerce' ); ?></p>
-<?php endif; ?>
+<p><?php esc_html_e( 'We received a request to update your password. To reset your password, click the link below:', 'woocommerce' ); ?></p>
+
+<?php
+$reset_url = add_query_arg(
+	array(
+		'key'   => $reset_key,
+		'id'    => $user_id,
+		'login' => rawurlencode( $user_login ),
+	),
+	wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) )
+);
+wc_get_template(
+	'emails/email-button.php',
+	array(
+		'url'   => $reset_url,
+		'label' => __( 'Reset password', 'woocommerce' ),
+	)
+);
+?>
 <p>
-	<a class="link" href="<?php echo esc_url( add_query_arg( array( 'key' => $reset_key, 'id' => $user_id, 'login' => rawurlencode( $user_login ) ), wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) ) ) ); ?>"><?php // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound ?>
-		<?php
-		if ( $email_improvements_enabled ) {
-			esc_html_e( 'Reset your password', 'woocommerce' );
-		} else {
-			esc_html_e( 'Click here to reset your password', 'woocommerce' );
-		}
-		?>
-	</a>
+	<?php esc_html_e( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' ); ?>
 </p>
+
 <?php echo $email_improvements_enabled ? '</div>' : ''; ?>
 
 <?php
@@ -66,4 +80,11 @@ if ( $additional_content ) {
 	echo $email_improvements_enabled ? '</td></tr></table>' : '';
 }
 
+/**
+ * Fires to output the email footer.
+ *
+ * @hooked WC_Emails::email_footer()
+ *
+ * @since 3.7.0
+ */
 do_action( 'woocommerce_email_footer', $email );

@@ -227,14 +227,7 @@ class VerificationController {
 		if ( ! $user ) {
 			return;
 		}
-		$key        = $this->service->create_verification_key( $user_id );
-		$verify_url = add_query_arg(
-			array(
-				'wc_verify_email_key'  => $key,
-				'wc_verify_email_user' => $user_id,
-			),
-			wc_get_page_permalink( 'myaccount' )
-		);
+		$verify_url = $this->service->build_verification_url( $user_id );
 
 		WC()->mailer();
 

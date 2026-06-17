@@ -98,7 +98,7 @@ class WC_Shortcode_My_Account {
 			wc_add_notice(
 				sprintf(
 					/* translators: %1$s and %2$s are opening and closing anchor tags for the resend-link button. */
-					__( '%1$sResend link%2$s', 'woocommerce' ),
+					__( '%1$sResend%2$s', 'woocommerce' ),
 					'<a href="' . esc_url( $resend_url ) . '" class="button wc-forward">',
 					'</a>'
 				) . ' ' . __( 'Your account is using a temporary password. We emailed you a link to change your password.', 'woocommerce' ),

@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer Reset Password email (initial block version)
+ * Customer verify email address email (initial block version)
  *
  * This template can be overridden by editing it in the WooCommerce email editor.
  *
@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2 class="wp-block-heading"> <?php echo esc_html__( 'Reset your password', 'woocommerce' ); ?> </h2>
+<h2 class="wp-block-heading"> <?php echo esc_html__( 'Confirm your email address', 'woocommerce' ); ?> </h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
@@ -36,7 +36,7 @@ defined( 'ABSPATH' ) || exit;
 
 <!-- wp:paragraph -->
 <p><?php
-	echo esc_html__( 'We received a request to update your password. To reset your password, click the link below:', 'woocommerce' );
+	echo esc_html__( 'Confirm your email address to link your past orders to your account. Click the link below:', 'woocommerce' );
 ?></p>
 <!-- /wp:paragraph -->
 
@@ -47,4 +47,3 @@ defined( 'ABSPATH' ) || exit;
 <!-- wp:paragraph {"align":"center"} -->
 <p class="has-text-align-center"> <?php echo esc_html__( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->
-

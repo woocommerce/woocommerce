@@ -12,14 +12,21 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 10.9.0
+ * @version 11.0.0
+ *
+ * @var string    $email_heading      Email heading.
+ * @var string    $additional_content Additional content below the body.
+ * @var string    $user_display_name  Customer's display name.
+ * @var string    $blogname           Site name.
+ * @var bool      $sent_to_admin      Whether sent to admin.
+ * @var bool      $plain_text         Whether plain-text variant.
+ * @var \WC_Email $email              Email object.
+ * @var string    $reset_key          Reset key.
+ * @var string    $user_id            User ID.
+ * @var string    $user_login         User login.
  */
 
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
-
 defined( 'ABSPATH' ) || exit;
-
-$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n";
 echo esc_html( wp_strip_all_tags( $email_heading ) );
@@ -27,22 +34,15 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 /* translators: %s: Customer first name, or username if name is not available */
 echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_display_name ) ) . "\n\n";
-/* translators: %s: Store name */
-echo sprintf( esc_html__( 'Someone has requested a new password for the following account on %s:', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
-if ( $email_improvements_enabled ) {
-	echo "----------------------------------------\n\n";
-}
-/* translators: %s: Customer username */
-echo sprintf( esc_html__( 'Username: %s', 'woocommerce' ), esc_html( $user_login ) ) . "\n\n";
-if ( $email_improvements_enabled ) {
-	echo "----------------------------------------\n\n";
-	echo esc_html__( 'If you didn’t make this request, just ignore this email. If you’d like to proceed, reset your password via the link below:', 'woocommerce' ) . "\n\n";
-} else {
-	echo esc_html__( 'If you didn\'t make this request, just ignore this email. If you\'d like to proceed:', 'woocommerce' ) . "\n\n";
-}
-echo esc_url( add_query_arg( array( 'key' => $reset_key, 'id' => $user_id, 'login' => rawurlencode( $user_login ) ), wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) ) ) ) . "\n\n"; // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+echo esc_html__( 'We received a request to update your password. To reset your password, click the link below:', 'woocommerce' );
 
 echo "\n\n----------------------------------------\n\n";
+
+echo esc_url( add_query_arg( array( 'key' => $reset_key, 'id' => $user_id, 'login' => rawurlencode( $user_login ) ), wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) ) ) ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+
+echo "\n\n----------------------------------------\n\n";
+
+echo esc_html__( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' ) . "\n\n";
 
 /**
  * Show user-defined additional content - this is set in each email's settings.
@@ -52,4 +52,10 @@ if ( $additional_content ) {
 	echo "\n\n----------------------------------------\n\n";
 }
 
+/**
+ * Filter the email footer text.
+ *
+ * @param string $footer_text The footer text.
+ * @since 2.3.0
+ */
 echo wp_kses_post( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );

@@ -13,6 +13,16 @@
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
  * @version 11.0.0
+ *
+ * @var string    $email_heading      Email heading.
+ * @var string    $additional_content Additional content below the body.
+ * @var string    $user_display_name  Customer's display name.
+ * @var string    $user_email         Email address being confirmed.
+ * @var string    $verify_url         One-time verification URL.
+ * @var string    $blogname           Site name.
+ * @var bool      $sent_to_admin      Whether sent to admin.
+ * @var bool      $plain_text         Whether plain-text variant.
+ * @var \WC_Email $email              Email object.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -25,12 +35,15 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_display_name ) ) . "\n\n";
 echo sprintf(
 	/* translators: %s: the customer's email address. */
-	esc_html__( "Once you've confirmed that %s is your email address, we'll link any past orders to your confirmed account. Visit the link below to confirm:", 'woocommerce' ),
+	esc_html__( "Once you've confirmed that %s is your email address, we'll link any past orders to your account.", 'woocommerce' ),
 	esc_html( $user_email )
 ) . "\n\n";
-echo esc_url( $verify_url ) . "\n\n";
+
+echo esc_url( $verify_url ?? wc_get_page_permalink( 'myaccount' ) );
 
 echo "\n\n----------------------------------------\n\n";
+
+echo esc_html__( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' ) . "\n\n";
 
 /**
  * Show user-defined additional content - this is set in each email's settings.
@@ -40,5 +53,10 @@ if ( $additional_content ) {
 	echo "\n\n----------------------------------------\n\n";
 }
 
-// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core filter documented in WC_Emails; mirrors the other plain email templates.
+/**
+ * Filter the email footer text.
+ *
+ * @param string $footer_text The footer text.
+ * @since 2.3.0
+ */
 echo wp_kses_post( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );

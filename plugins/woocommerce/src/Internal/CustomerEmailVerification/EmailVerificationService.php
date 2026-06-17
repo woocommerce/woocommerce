@@ -124,6 +124,28 @@ class EmailVerificationService {
 	}
 
 	/**
+	 * Build a one-time email-verification URL for the given user.
+	 *
+	 * Mints a fresh verification key and returns the My Account URL carrying that key and the
+	 * user ID as query args, ready to drop into an email. The matching reader is
+	 * {@see VerificationController::maybe_process_request()}.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param int $user_id WordPress user ID.
+	 * @return string The verification URL.
+	 */
+	public function build_verification_url( int $user_id ): string {
+		return add_query_arg(
+			array(
+				'wc_verify_email_key'  => $this->create_verification_key( $user_id ),
+				'wc_verify_email_user' => $user_id,
+			),
+			wc_get_page_permalink( 'myaccount' )
+		);
+	}
+
+	/**
 	 * Validate a plaintext verification key against the stored hash for the given user.
 	 *
 	 * Returns false if no token is stored, if the token has expired, or if the key
