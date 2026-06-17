@@ -16,7 +16,7 @@ done
 
 # Build and copy block-library package metadata/scripts so PHP tests can register
 # blocks that are produced by @wordpress/build without requiring a full Blocks build.
-pnpm --silent --filter=@woocommerce/block-library build:project:block-library >/dev/null
+pnpm --filter=@woocommerce/block-library build:project:block-library
 
 # Set target directory
 TARGET_DIR="plugins/woocommerce/assets/client/blocks"
