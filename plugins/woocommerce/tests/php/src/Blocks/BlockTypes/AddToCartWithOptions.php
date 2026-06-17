@@ -222,6 +222,26 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that grouped product child rows scope descendants to the child product context.
+	 */
+	public function test_grouped_product_children_are_wrapped_in_products_context(): void {
+		$simple_product = new \WC_Product_Simple();
+		$simple_product->set_regular_price( 10 );
+		$simple_product->set_sku( 'child-sku' );
+		$simple_product_id = $simple_product->save();
+
+		$grouped_product = new \WC_Product_Grouped();
+		$grouped_product->set_children( array( $simple_product_id ) );
+		$grouped_product_id = $grouped_product->save();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $grouped_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringContainsString( 'data-wp-interactive="woocommerce/products"', $markup, 'Grouped child rows should initialize the products store for descendant bindings.' );
+		$this->assertStringContainsString( 'woocommerce/products::', $markup, 'Grouped child rows should set a products-store local context.' );
+		$this->assertStringContainsString( 'productId', $markup, 'Grouped child rows should scope descendant bindings to a concrete child product ID.' );
+	}
+
+	/**
 	 * Tests that the quantity selector block is not visible for sold individually products and manage stock products with stock quantity <= 1.
 	 */
 	public function test_stepper_not_visible_for_sold_individually_products_and_manage_stock() {
