@@ -296,7 +296,9 @@ class WooPaymentsWooPaySessionController implements RegisterHooksInterface {
 		echo '<div id="wcpay-woopay-button" data-product_page="' . esc_attr( 'product' === $context ? '1' : '0' ) . '">';
 		echo '<div class="woopay-express-button is-placeholder" aria-label="' . esc_attr__( 'WooPay', 'woocommerce' ) . '" data-type="' . esc_attr( $type ) . '" data-theme="' . esc_attr( $theme ) . '" data-size="' . esc_attr( (string) ( $settings['size'] ?? 'default' ) ) . '" style="height: ' . esc_attr( $height ) . 'px; border-radius: ' . esc_attr( $radius ) . 'px"></div>';
 		echo '</div>';
-		echo '<p id="wcpay-express-checkout-button-separator">&mdash; ' . esc_html__( 'OR', 'woocommerce' ) . ' &mdash;</p>';
+		if ( 'checkout' === $context ) {
+			echo '<p id="wcpay-express-checkout-button-separator">&mdash; ' . esc_html__( 'OR', 'woocommerce' ) . ' &mdash;</p>';
+		}
 		echo '</div>';
 	}
 

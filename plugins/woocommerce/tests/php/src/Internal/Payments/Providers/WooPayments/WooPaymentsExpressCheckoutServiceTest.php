@@ -23,8 +23,11 @@ class WooPaymentsExpressCheckoutServiceTest extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_tax_based_on' );
 		delete_option( 'woocommerce_calc_taxes' );
 		unset( $_GET['pay_for_order'], $_GET['key'] );
-		remove_all_filters( 'woocommerce_native_woopayments_express_checkout_enabled_methods' );
+			remove_all_filters( 'woocommerce_native_woopayments_express_checkout_enabled_methods' );
+			remove_all_filters( 'wcpay_payment_request_supported_types' );
+			remove_all_filters( 'woocommerce_is_product' );
 		$this->set_order_pay_query_var( 0 );
+		wp_reset_postdata();
 		parent::tearDown();
 	}
 
@@ -45,6 +48,16 @@ class WooPaymentsExpressCheckoutServiceTest extends WC_Unit_Test_Case {
 	 * @testdox Should honor context-specific payment-request express checkout settings.
 	 */
 	public function test_payment_request_is_context_specific(): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '12.34',
+				'virtual'       => true,
+				'price'         => '12.34',
+			)
+		);
+		$this->set_current_product( $product );
+
 		$sut = $this->create_service(
 			array(
 				'express_checkout_product_methods'  => array( 'payment_request' ),
@@ -56,6 +69,116 @@ class WooPaymentsExpressCheckoutServiceTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $sut->should_show_payment_request_button( 'product' ) );
 		$this->assertFalse( $sut->should_show_payment_request_button( 'cart' ) );
 		$this->assertFalse( $sut->should_show_payment_request_button( 'checkout' ) );
+	}
+
+	/**
+	 * @testdox Should build reference-shaped product page express checkout params.
+	 */
+	public function test_builds_product_page_express_checkout_params(): void {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_currency', 'USD' );
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'          => 'Express Widget',
+				'regular_price' => '12.34',
+				'virtual'       => true,
+				'price'         => '12.34',
+			)
+		);
+		$this->set_current_product( $product );
+
+		$params  = $this->create_service()->get_express_checkout_params( 'product' );
+		$product = $params['product'];
+
+		$this->assertSame( 'product', $params['button_context'] );
+		$this->assertSame( 'simple', $product['product_type'] );
+		$this->assertSame( 'usd', $product['currency'] );
+		$this->assertSame( 'US', $product['country_code'] );
+		$this->assertFalse( $product['needs_shipping'] );
+		$this->assertSame(
+			array(
+				array(
+					'label'  => 'Express Widget',
+					'amount' => 1234,
+				),
+			),
+			$product['displayItems']
+		);
+		$this->assertSame( 1234, $product['total']['amount'] );
+	}
+
+	/**
+	 * @testdox Should build product page express checkout params for product_page shortcode pages.
+	 */
+	public function test_builds_product_page_shortcode_express_checkout_params(): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'          => 'Shortcode Widget',
+				'regular_price' => '7.89',
+				'virtual'       => true,
+				'price'         => '7.89',
+			)
+		);
+		$page_id = self::factory()->post->create(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_content' => '[product_page id="' . $product->get_id() . '"]',
+			)
+		);
+		$this->go_to( get_permalink( $page_id ) );
+		unset( $GLOBALS['product'] );
+
+		$params = $this->create_service()->get_express_checkout_params( 'product' );
+
+		$this->assertTrue( $this->create_service()->should_show_payment_request_button( 'product' ) );
+		$this->assertSame( 'Shortcode Widget', $params['product']['displayItems'][0]['label'] );
+		$this->assertSame( 789, $params['product']['total']['amount'] );
+	}
+
+	/**
+	 * @testdox Should fail closed for product-page express checkout when the product has no payable amount.
+	 */
+	public function test_payment_request_fails_closed_for_zero_amount_product(): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'virtual'       => true,
+				'price'         => '0',
+				'regular_price' => '0',
+			)
+		);
+		$this->set_current_product( $product );
+
+		$this->assertFalse( $this->create_service()->should_show_payment_request_button( 'product' ) );
+	}
+
+	/**
+	 * @testdox Should preserve the public WooPayments supported product types filter contract.
+	 */
+	public function test_product_support_preserves_public_supported_types_filter_contract(): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'virtual'       => true,
+				'price'         => '12.34',
+				'regular_price' => '12.34',
+			)
+		);
+		$this->set_current_product( $product );
+
+		$this->assertTrue( $this->create_service()->should_show_payment_request_button( 'product' ) );
+
+		add_filter(
+			'wcpay_payment_request_supported_types',
+			static function (): array {
+				return array();
+			}
+		);
+
+		$this->assertFalse( $this->create_service()->should_show_payment_request_button( 'product' ) );
 	}
 
 	/**
@@ -169,6 +292,25 @@ class WooPaymentsExpressCheckoutServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( 'payment_request', 'amazon_pay' ), $sut->get_enabled_methods_for_context( 'checkout' ) );
 		$this->assertSame( array( 'card', 'amazon_pay' ), $sut->get_express_checkout_params( 'checkout' )['payment_method_types'] );
 		$this->assertSame( array( 'payment_request', 'amazon_pay' ), $sut->get_express_checkout_params( 'checkout' )['enabled_methods'] );
+	}
+
+	/**
+	 * @testdox Should not require Amazon Pay in UPE card method settings when express checkout enables it.
+	 */
+	public function test_amazon_pay_eligibility_uses_express_checkout_settings_not_upe_card_settings(): void {
+		$sut = $this->create_service(
+			array(
+				'express_checkout_checkout_methods' => array( 'payment_request', 'amazon_pay' ),
+				'upe_enabled_payment_method_ids'    => array( 'card' ),
+			),
+			true,
+			array(
+				'ece_confirmation_tokens_disabled' => false,
+			)
+		);
+
+		$this->assertSame( array( 'card', 'amazon_pay' ), $sut->get_allowed_payment_method_types_for_context( 'checkout' ) );
+		$this->assertSame( array( 'payment_request', 'amazon_pay' ), $sut->get_enabled_methods_for_context( 'checkout' ) );
 	}
 
 	/**
@@ -439,5 +581,20 @@ class WooPaymentsExpressCheckoutServiceTest extends WC_Unit_Test_Case {
 		}
 
 		unset( $wp->query_vars['order-pay'] );
+	}
+
+	/**
+	 * Set the current queried product.
+	 *
+	 * @param \WC_Product $product Product object.
+	 */
+	private function set_current_product( \WC_Product $product ): void {
+		global $post;
+
+		$post               = get_post( $product->get_id() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$GLOBALS['product'] = $product;
+		$this->go_to( get_permalink( $product->get_id() ) );
+		setup_postdata( $post );
+		add_filter( 'woocommerce_is_product', '__return_true' );
 	}
 }

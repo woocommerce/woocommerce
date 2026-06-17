@@ -43,6 +43,7 @@ class WooPaymentsWooPaySessionControllerTest extends WC_REST_Unit_Test_Case {
 		wc_clear_notices();
 		remove_all_filters( 'wcpay_woopay_is_signed_with_blog_token' );
 		remove_all_filters( 'woocommerce_is_checkout' );
+		remove_all_filters( 'woocommerce_is_product' );
 		remove_all_filters( 'wp_die_ajax_handler' );
 		remove_all_filters( 'wp_doing_ajax' );
 		if ( function_exists( 'WC' ) && WC() && WC()->cart ) {
@@ -169,6 +170,36 @@ class WooPaymentsWooPaySessionControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertFalse( wp_script_is( 'wc-woopayments-woopay', 'enqueued' ) );
 		$this->assertFalse( wp_style_is( 'wc-woopayments-woopay', 'enqueued' ) );
+	}
+
+	/**
+	 * @testdox Should render the WooPay separator on checkout.
+	 */
+	public function test_display_express_checkout_buttons_renders_separator_on_checkout(): void {
+		$this->sut = $this->create_controller( true, true );
+		add_filter( 'woocommerce_is_checkout', '__return_true' );
+
+		ob_start();
+		$this->sut->display_express_checkout_buttons();
+		$output = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'id="wcpay-woopay-button"', $output );
+		$this->assertStringContainsString( 'wcpay-express-checkout-button-separator', $output );
+	}
+
+	/**
+	 * @testdox Should not render the WooPay separator on product pages.
+	 */
+	public function test_display_express_checkout_buttons_omits_separator_on_product_page(): void {
+		$this->sut = $this->create_controller( true, true );
+		$this->set_current_product();
+
+		ob_start();
+		$this->sut->display_express_checkout_buttons();
+		$output = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'id="wcpay-woopay-button"', $output );
+		$this->assertStringNotContainsString( 'wcpay-express-checkout-button-separator', $output );
 	}
 
 	/**
@@ -499,6 +530,15 @@ class WooPaymentsWooPaySessionControllerTest extends WC_REST_Unit_Test_Case {
 			'woocommerce_pay_order_before_payment'         => 'display_express_checkout_buttons',
 			'woocommerce_payment_complete'                 => 'handle_woocommerce_payment_complete',
 		);
+	}
+
+	/**
+	 * Set the current request to a product page.
+	 */
+	private function set_current_product(): void {
+		$product = \WC_Helper_Product::create_simple_product( true );
+		$this->go_to( get_permalink( $product->get_id() ) );
+		$GLOBALS['product'] = $product;
 	}
 
 	/**

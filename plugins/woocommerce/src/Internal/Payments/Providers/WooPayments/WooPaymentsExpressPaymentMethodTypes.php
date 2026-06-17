@@ -268,14 +268,8 @@ class WooPaymentsExpressPaymentMethodTypes {
 	 */
 	private static function is_amazon_pay_enabled_for_account( WooPaymentsAccountService $account_service, array $account_data ): bool {
 		$available = $account_service->get_gateway_setting( 'upe_available_payment_methods', array() );
-		$enabled   = $account_service->get_gateway_setting( 'upe_enabled_payment_method_ids', array() );
 
 		$available = is_array( $available ) ? self::normalize_express_method_ids( $available ) : array();
-		$enabled   = is_array( $enabled ) ? self::normalize_express_method_ids( $enabled ) : array();
-
-		if ( ! in_array( self::EXPRESS_METHOD_AMAZON_PAY, $enabled, true ) ) {
-			return false;
-		}
 
 		if ( ! empty( $available ) && ! in_array( self::EXPRESS_METHOD_AMAZON_PAY, $available, true ) ) {
 			return false;

@@ -59,6 +59,10 @@ class WooPaymentsExpressCheckoutService {
 			return false;
 		}
 
+		if ( 'product' === $context && ! $this->is_product_supported() ) {
+			return false;
+		}
+
 		return ! empty( $this->get_allowed_payment_method_types_for_context( $context, $this->get_context_currency( $context ) ) );
 	}
 
@@ -99,7 +103,7 @@ class WooPaymentsExpressCheckoutService {
 			'login_confirmation'   => false,
 			'button_context'       => $context,
 			'has_block'            => has_block( 'woocommerce/cart' ) || has_block( 'woocommerce/checkout' ),
-			'product'              => array(),
+			'product'              => 'product' === $context ? $this->get_product_data() : array(),
 			'store_name'           => get_bloginfo( 'name' ),
 			'enabled_methods'      => $this->get_enabled_methods_for_context( $context, $context_currency ),
 			'payment_method_types' => $this->get_allowed_payment_method_types_for_context( $context, $context_currency ),
@@ -298,6 +302,341 @@ class WooPaymentsExpressCheckoutService {
 		}
 
 		return current_user_can( 'pay_for_order', $order->get_id() );
+	}
+
+	/**
+	 * Tell whether the current product page can show ECE.
+	 *
+	 * @return bool
+	 */
+	private function is_product_supported(): bool {
+		$product = $this->get_product_for_product_page();
+		if ( ! $product instanceof \WC_Product ) {
+			return false;
+		}
+
+		$supported_types = array(
+			'simple',
+			'variable',
+			'variation',
+			'subscription',
+			'variable-subscription',
+			'subscription_variation',
+			'booking',
+			'bundle',
+			'composite',
+			'mix-and-match',
+		);
+
+		/**
+		 * Filters WooPayments product types that can render product-page express checkout.
+		 *
+		 * @param array<int,string> $supported_types Product type IDs.
+		 *
+		 * @since 11.0.0
+		 */
+		$supported_types = apply_filters( 'wcpay_payment_request_supported_types', $supported_types );
+
+		/**
+		 * Filters native WooPayments product types that can render product-page express checkout.
+		 *
+		 * @param array<int,string>                 $supported_types Product type IDs.
+		 * @param \WC_Product                       $product         Product object.
+		 * @param WooPaymentsExpressCheckoutService $service         Native express checkout service.
+		 *
+		 * @since 11.0.0
+		 */
+		$supported_types = apply_filters( 'woocommerce_native_woopayments_express_checkout_product_types', $supported_types, $product, $this );
+		if ( ! is_array( $supported_types ) || ! in_array( $product->get_type(), $supported_types, true ) ) {
+			return false;
+		}
+
+		$supported = ! $this->is_reference_blocked_product( $product ) && $this->get_product_price( $product ) > 0;
+
+		/**
+		 * Filters whether a product can show WooPayments product-page express checkout.
+		 *
+		 * @param bool        $supported Whether the product is supported.
+		 * @param \WC_Product $product   Product object.
+		 *
+		 * @since 11.0.0
+		 */
+		$supported = (bool) apply_filters( 'wcpay_payment_request_is_product_supported', $supported, $product );
+
+		/**
+		 * Filters whether a product can show native WooPayments product-page express checkout.
+		 *
+		 * @param bool                              $supported Whether the product is supported.
+		 * @param \WC_Product                       $product   Product object.
+		 * @param WooPaymentsExpressCheckoutService $service   Native express checkout service.
+		 *
+		 * @since 11.0.0
+		 */
+		return (bool) apply_filters( 'woocommerce_native_woopayments_express_checkout_is_product_supported', $supported, $product, $this );
+	}
+
+	/**
+	 * Get reference-shaped product data for product-page ECE.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function get_product_data(): array {
+		$product = $this->get_product_for_product_page();
+		if ( ! $product instanceof \WC_Product ) {
+			return array();
+		}
+
+		$currency  = get_woocommerce_currency();
+		$price     = $this->get_product_price( $product );
+		$total_tax = 0.0;
+		$items     = array(
+			array(
+				'label'  => $product->get_name(),
+				'amount' => $this->prepare_amount( $price ),
+			),
+		);
+
+		foreach ( $this->get_taxes_like_cart( $product, $price ) as $tax ) {
+			$tax        = (float) $tax;
+			$total_tax += $tax;
+			$items[]    = array(
+				'label'   => __( 'Tax', 'woocommerce' ),
+				'amount'  => $this->prepare_amount( $tax ),
+				'pending' => 0.0 === $tax,
+			);
+		}
+
+		/**
+		 * Filters WooPayments product-page express checkout total label.
+		 *
+		 * @param string $label Total label.
+		 *
+		 * @since 11.0.0
+		 */
+		$total_label = apply_filters( 'wcpay_payment_request_total_label', get_bloginfo( 'name' ) );
+
+		$data = array(
+			'displayItems'   => $items,
+			'total'          => array(
+				'label'   => $total_label,
+				'amount'  => $this->prepare_amount( $price + $total_tax ),
+				'pending' => true,
+			),
+			'needs_shipping' => $this->product_needs_shipping( $product ),
+			'currency'       => strtolower( $currency ),
+			'country_code'   => $this->get_store_base_country(),
+			'product_type'   => $product->get_type(),
+		);
+
+		if ( $data['needs_shipping'] ) {
+			$data['shippingOptions'] = array(
+				'id'     => 'pending',
+				'label'  => __( 'Pending', 'woocommerce' ),
+				'detail' => '',
+				'amount' => 0,
+			);
+		}
+
+		/**
+		 * Filters WooPayments product-page express checkout product data.
+		 *
+		 * @param array<string,mixed> $data    Product data.
+		 * @param \WC_Product        $product Product object.
+		 *
+		 * @since 11.0.0
+		 */
+		$data = apply_filters( 'wcpay_payment_request_product_data', $data, $product );
+
+		/**
+		 * Filters native WooPayments product-page express checkout product data.
+		 *
+		 * @param array<string,mixed>                $data    Product data.
+		 * @param \WC_Product                       $product Product object.
+		 * @param WooPaymentsExpressCheckoutService $service Native express checkout service.
+		 *
+		 * @since 11.0.0
+		 */
+		$filtered_data = apply_filters( 'woocommerce_native_woopayments_express_checkout_product_data', $data, $product, $this );
+
+		return is_array( $filtered_data ) ? $filtered_data : $data;
+	}
+
+	/**
+	 * Tell whether the product hits a reference WooPayments product-page ECE fail-closed guardrail.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return bool
+	 */
+	private function is_reference_blocked_product( \WC_Product $product ): bool {
+		if ( class_exists( '\WC_Pre_Orders_Product' ) && \WC_Pre_Orders_Product::product_is_charged_upon_release( $product ) ) {
+			return true;
+		}
+
+		if ( class_exists( '\WC_Composite_Products' ) && $product->is_type( 'composite' ) ) {
+			return true;
+		}
+
+		if ( class_exists( '\WC_Mix_and_Match' ) && $product->is_type( 'mix-and-match' ) ) {
+			return true;
+		}
+
+		if (
+			class_exists( '\WC_Subscriptions_Product' ) &&
+			\WC_Subscriptions_Product::is_subscription( $product ) &&
+			\WC_Subscriptions_Product::get_trial_length( $product ) > 0 &&
+			0.0 >= (float) \WC_Subscriptions_Product::get_sign_up_fee( $product )
+		) {
+			return true;
+		}
+
+		if ( class_exists( '\WC_Product_Addons_Helper' ) ) {
+			$product_addons = \WC_Product_Addons_Helper::get_product_addons( $product->get_id() );
+			foreach ( $product_addons as $addon ) {
+				if ( is_array( $addon ) && 'file_upload' === ( $addon['type'] ?? '' ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the current product-page product.
+	 *
+	 * @return \WC_Product|null
+	 */
+	private function get_product_for_product_page(): ?\WC_Product {
+		$current_product = $GLOBALS['product'] ?? null;
+		if ( $current_product instanceof \WC_Product ) {
+			return $current_product;
+		}
+
+		$shortcode_product = $this->get_product_from_product_page_shortcode();
+		if ( $shortcode_product instanceof \WC_Product ) {
+			return $shortcode_product;
+		}
+
+		$post_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
+		if ( $post_id <= 0 ) {
+			$post_id = get_the_ID();
+		}
+
+		$queried_product = $post_id ? wc_get_product( $post_id ) : null;
+
+		return $queried_product instanceof \WC_Product ? $queried_product : null;
+	}
+
+	/**
+	 * Get the product from a product_page shortcode in the current post.
+	 *
+	 * @return \WC_Product|null
+	 */
+	private function get_product_from_product_page_shortcode(): ?\WC_Product {
+		$post = get_post();
+		if ( ! $post instanceof \WP_Post || ! has_shortcode( $post->post_content, 'product_page' ) ) {
+			return null;
+		}
+
+		if ( ! preg_match_all( '/' . get_shortcode_regex( array( 'product_page' ) ) . '/', $post->post_content, $matches, PREG_SET_ORDER ) ) {
+			return null;
+		}
+
+		foreach ( $matches as $shortcode ) {
+			if ( 'product_page' !== $shortcode[2] ) {
+				continue;
+			}
+
+			$atts = shortcode_parse_atts( $shortcode[3] );
+			if ( ! is_array( $atts ) ) {
+				continue;
+			}
+
+			$product_id = isset( $atts['id'] ) ? absint( $atts['id'] ) : 0;
+			if ( ! $product_id && isset( $atts['sku'] ) && is_scalar( $atts['sku'] ) ) {
+				$sku        = wc_clean( wp_unslash( (string) $atts['sku'] ) );
+				$sku        = is_scalar( $sku ) ? (string) $sku : '';
+				$product_id = '' !== $sku ? wc_get_product_id_by_sku( $sku ) : 0;
+			}
+
+			$product = $product_id ? wc_get_product( $product_id ) : null;
+			if ( $product instanceof \WC_Product ) {
+				return $product;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the product display price for ECE product data.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return float
+	 */
+	private function get_product_price( \WC_Product $product ): float {
+		$price = $product->get_price();
+		if ( '' === $price ) {
+			return 0.0;
+		}
+
+		return (float) ( $this->cart_prices_include_tax() ? wc_get_price_including_tax(
+			$product,
+			array(
+				'qty'   => 1,
+				'price' => (float) $price,
+			)
+		) : wc_get_price_excluding_tax(
+			$product,
+			array(
+				'qty'   => 1,
+				'price' => (float) $price,
+			)
+		) );
+	}
+
+	/**
+	 * Tell whether product prices are displayed as tax-inclusive in cart-like contexts.
+	 *
+	 * @return bool
+	 */
+	private function cart_prices_include_tax(): bool {
+		return ! wc_tax_enabled() || 'incl' === get_option( 'woocommerce_tax_display_cart' );
+	}
+
+	/**
+	 * Calculate product taxes like cart totals for product-page ECE display.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @param float       $price   Display price.
+	 * @return array<int|float>
+	 */
+	private function get_taxes_like_cart( \WC_Product $product, float $price ): array {
+		if ( ! wc_tax_enabled() || $this->cart_prices_include_tax() ) {
+			return array();
+		}
+
+		return \WC_Tax::calc_tax( $price, \WC_Tax::get_rates( $product->get_tax_class() ), false );
+	}
+
+	/**
+	 * Convert a decimal WooCommerce amount to a Stripe minor-unit amount.
+	 *
+	 * @param float $amount Decimal amount.
+	 * @return int
+	 */
+	private function prepare_amount( float $amount ): int {
+		return (int) round( $amount * ( 10 ** wc_get_price_decimals() ) );
+	}
+
+	/**
+	 * Tell whether product-page ECE should ask Stripe for shipping.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return bool
+	 */
+	private function product_needs_shipping( \WC_Product $product ): bool {
+		return wc_shipping_enabled() && 0 !== wc_get_shipping_method_count( true ) && $product->needs_shipping();
 	}
 
 	/**

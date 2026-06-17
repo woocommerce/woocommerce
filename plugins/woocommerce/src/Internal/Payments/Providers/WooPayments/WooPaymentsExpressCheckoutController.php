@@ -95,6 +95,9 @@ class WooPaymentsExpressCheckoutController implements RegisterHooksInterface {
 		$this->register_classic_express_checkout_assets();
 		wp_localize_script( self::CLASSIC_EXPRESS_CHECKOUT_SCRIPT_HANDLE, 'wcpayExpressCheckoutParams', $this->express_checkout_service->get_express_checkout_params( $context ) );
 		wp_enqueue_style( self::CLASSIC_EXPRESS_CHECKOUT_STYLE_HANDLE );
+		if ( 'product' === $context ) {
+			wp_enqueue_script( 'wp-hooks' );
+		}
 		wp_enqueue_script( self::CLASSIC_EXPRESS_CHECKOUT_SCRIPT_HANDLE );
 	}
 
@@ -115,7 +118,9 @@ class WooPaymentsExpressCheckoutController implements RegisterHooksInterface {
 
 		echo '<div class="wcpay-express-checkout-wrapper">';
 		echo '<div id="wcpay-express-checkout-element"></div>';
-		echo '<p id="wcpay-express-checkout-button-separator">&mdash; ' . esc_html__( 'OR', 'woocommerce' ) . ' &mdash;</p>';
+		if ( 'checkout' === $context ) {
+			echo '<p id="wcpay-express-checkout-button-separator">&mdash; ' . esc_html__( 'OR', 'woocommerce' ) . ' &mdash;</p>';
+		}
 		echo '</div>';
 	}
 
@@ -156,6 +161,7 @@ class WooPaymentsExpressCheckoutController implements RegisterHooksInterface {
 	private function get_frontend_hooks(): array {
 		return array(
 			'wp_enqueue_scripts'                           => array( $this, 'enqueue_frontend_assets' ),
+			'woocommerce_after_add_to_cart_form'           => array( $this, 'display_express_checkout_buttons' ),
 			'woocommerce_checkout_before_customer_details' => array( $this, 'display_express_checkout_buttons' ),
 			'woocommerce_proceed_to_checkout'              => array( $this, 'display_express_checkout_buttons' ),
 			'woocommerce_pay_order_before_payment'         => array( $this, 'display_express_checkout_buttons' ),
@@ -217,6 +223,7 @@ class WooPaymentsExpressCheckoutController implements RegisterHooksInterface {
 		}
 
 		return $this->is_checkout_surface() ||
+			$this->is_product_surface() ||
 			( function_exists( 'is_cart' ) && is_cart() );
 	}
 
@@ -250,6 +257,30 @@ class WooPaymentsExpressCheckoutController implements RegisterHooksInterface {
 		}
 
 		return has_shortcode( $post->post_content, 'woocommerce_checkout' );
+	}
+
+	/**
+	 * Tell whether the current request is a product page or product shortcode content page.
+	 *
+	 * @return bool
+	 */
+	private function is_product_surface(): bool {
+		if ( function_exists( 'is_product' ) && is_product() ) {
+			return true;
+		}
+
+		$post_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
+		$post    = $post_id ? get_post( $post_id ) : null;
+
+		if ( ! $post instanceof \WP_Post ) {
+			$post = get_queried_object();
+		}
+
+		if ( ! $post instanceof \WP_Post ) {
+			$post = get_post();
+		}
+
+		return $post instanceof \WP_Post && has_shortcode( $post->post_content, 'product_page' );
 	}
 
 	/**
@@ -288,6 +319,10 @@ class WooPaymentsExpressCheckoutController implements RegisterHooksInterface {
 
 		if ( function_exists( 'is_cart' ) && is_cart() ) {
 			return 'cart';
+		}
+
+		if ( $this->is_product_surface() ) {
+			return 'product';
 		}
 
 		return 'checkout';

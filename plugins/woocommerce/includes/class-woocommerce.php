@@ -430,8 +430,9 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Payments\NativePaymentsGatewayRegistry::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutAjaxController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsExpressCheckoutController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsTokenizedCartSessionController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsWooPaySessionController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsExpressCheckoutController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsFrontendTrackingController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsWebhookRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsMobileRestController::class )->register();
