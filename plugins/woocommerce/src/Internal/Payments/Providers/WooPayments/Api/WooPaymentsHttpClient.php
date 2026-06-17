@@ -58,9 +58,10 @@ class WooPaymentsHttpClient implements WooPaymentsHttpClientInterface {
 	 * @param string|null $body           Encoded request body.
 	 * @param int         $timeout        Request timeout.
 	 * @param bool        $use_user_token Whether to sign with the connection-owner user token.
+	 * @param bool        $blocking       Whether the request should block for the response.
 	 * @return array|WP_Error
 	 */
-	public function request( string $method, string $path, array $headers = array(), ?string $body = null, int $timeout = 70, bool $use_user_token = false ) {
+	public function request( string $method, string $path, array $headers = array(), ?string $body = null, int $timeout = 70, bool $use_user_token = false, bool $blocking = true ) {
 		$manager = JetpackConnection::get_manager();
 		$site_id = $this->get_blog_id();
 		if ( ! $this->is_connected() ) {
@@ -71,7 +72,7 @@ class WooPaymentsHttpClient implements WooPaymentsHttpClientInterface {
 			return new WP_Error( 'wcpay_blog_id_unavailable', __( 'The WooPayments site ID is unavailable.', 'woocommerce' ) );
 		}
 
-		$request_args            = Jetpack_Connection_Client::validate_args_for_wpcom_json_api_request(
+		$request_args             = Jetpack_Connection_Client::validate_args_for_wpcom_json_api_request(
 			$path,
 			'2',
 			array(
@@ -81,7 +82,8 @@ class WooPaymentsHttpClient implements WooPaymentsHttpClientInterface {
 			),
 			'wpcom'
 		);
-		$request_args['blog_id'] = $site_id;
+		$request_args['blocking'] = $blocking;
+		$request_args['blog_id']  = $site_id;
 
 		if ( $use_user_token ) {
 			$connection_owner_id = $manager->get_connection_owner_id();
@@ -92,7 +94,20 @@ class WooPaymentsHttpClient implements WooPaymentsHttpClientInterface {
 			$request_args['user_id'] = $connection_owner_id;
 		}
 
-		$response = Jetpack_Connection_Client::remote_request( $request_args, $body );
+		$apply_blocking_arg = static function ( array $args, string $url ) use ( $request_args, $blocking ): array {
+			if ( isset( $request_args['url'] ) && 0 === strpos( $url, (string) $request_args['url'] ) ) {
+				$args['blocking'] = $blocking;
+			}
+
+			return $args;
+		};
+
+		add_filter( 'http_request_args', $apply_blocking_arg, 10, 2 );
+		try {
+			$response = Jetpack_Connection_Client::remote_request( $request_args, $body );
+		} finally {
+			remove_filter( 'http_request_args', $apply_blocking_arg, 10 );
+		}
 
 		return is_array( $response ) || $response instanceof WP_Error
 			? $response

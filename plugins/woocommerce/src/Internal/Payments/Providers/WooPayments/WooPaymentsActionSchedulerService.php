@@ -28,14 +28,15 @@ class WooPaymentsActionSchedulerService {
 	 * @since 11.0.0
 	 *
 	 * @param string              $hook Hook name.
-	 * @param array<string,mixed> $args Action args.
+	 * @param array<string,mixed> $args      Action args.
+	 * @param int|null            $timestamp Scheduled timestamp. Defaults to now.
 	 */
-	public function schedule_job( string $hook, array $args = array() ): void {
+	public function schedule_job( string $hook, array $args = array(), ?int $timestamp = null ): void {
 		if ( $this->has_pending_action( $hook, $args ) ) {
 			return;
 		}
 
-		as_schedule_single_action( time(), $hook, $args, self::GROUP_ID );
+		as_schedule_single_action( $timestamp ?? time(), $hook, $args, self::GROUP_ID );
 	}
 
 	/**

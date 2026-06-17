@@ -38,7 +38,8 @@ interface WooPaymentsHttpClientInterface {
 	 * @param string|null $body           Encoded request body.
 	 * @param int         $timeout        Request timeout.
 	 * @param bool        $use_user_token Whether to sign with the connection-owner user token.
+	 * @param bool        $blocking       Whether the request should block for the response.
 	 * @return mixed
 	 */
-	public function request( string $method, string $path, array $headers = array(), ?string $body = null, int $timeout = 70, bool $use_user_token = false );
+	public function request( string $method, string $path, array $headers = array(), ?string $body = null, int $timeout = 70, bool $use_user_token = false, bool $blocking = true );
 }

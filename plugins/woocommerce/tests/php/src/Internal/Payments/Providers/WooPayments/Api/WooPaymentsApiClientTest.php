@@ -355,6 +355,137 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should update payment method billing details through the native transport.
+	 */
+	public function test_update_payment_method_posts_billing_details(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'id' => 'pm_test' ) ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$result = $sut->update_payment_method(
+			'pm_test',
+			array(
+				'billing_details' => array(
+					'email' => 'ada@example.com',
+				),
+			)
+		);
+
+		$body = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( 'pm_test', $result['id'] );
+		$this->assertSame( '/sites/123/wcpay/payment_methods/pm_test', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $body );
+		$this->assertSame( 'ada@example.com', $body['billing_details']['email'] );
+		$this->assertTrue( $body['test_mode'] );
+	}
+
+	/**
+	 * @testdox Should retrieve timeline events through the native transport.
+	 */
+	public function test_get_timeline_reads_timeline_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'data' => array(
+						array(
+							'type' => 'captured',
+						),
+					),
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->get_timeline( 'pi_test' );
+
+		$this->assertSame( 'captured', $result['data'][0]['type'] );
+		$this->assertSame( '/sites/123/wcpay/timeline/pi_test?test_mode=0', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+		$this->assertNull( $http_client->last_body );
+	}
+
+	/**
+	 * @testdox Should send store setup snapshots through the native transport.
+	 */
+	public function test_send_store_setup_posts_snapshot(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'result' => 'ok' ) ),
+		);
+
+		$account_service = $this->create_account_service( false, true );
+		$sut             = new WooPaymentsApiClient();
+		$sut->init( $http_client, $account_service );
+
+		$result = $sut->send_store_setup(
+			array(
+				'gateway' => array(
+					'enabled' => true,
+				),
+			)
+		);
+
+		$body = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( array(), $result );
+		$this->assertSame( '/sites/123/wcpay/accounts/store_setup', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertFalse( $http_client->last_blocking );
+		$this->assertIsArray( $body );
+		$this->assertTrue( $body['snapshot']['gateway']['enabled'] );
+		$this->assertTrue( $body['test_mode'] );
+	}
+
+	/**
+	 * @testdox Should update compatibility data through the native transport.
+	 */
+	public function test_update_compatibility_data_posts_compatibility_payload(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'result' => 'ok' ) ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->update_compatibility_data(
+			array(
+				'woocommerce_version' => '11.0.0',
+			)
+		);
+
+		$body = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( 'ok', $result['result'] );
+		$this->assertSame( '/sites/123/wcpay/compatibility', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $body );
+		$this->assertSame( '11.0.0', $body['compatibility_data']['woocommerce_version'] );
+		$this->assertFalse( $body['test_mode'] );
+	}
+
+	/**
 	 * @testdox Should retrieve recommended payment methods through the public recommendations endpoint.
 	 */
 	public function test_get_recommended_payment_methods_reads_public_recommendations_endpoint(): void {
@@ -701,16 +832,18 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 	/**
 	 * Create a WooPayments account service mock.
 	 *
-	 * @param bool $test_mode Whether WooPayments should run in test mode.
+	 * @param bool      $test_mode            Whether WooPayments should run in test mode.
+	 * @param bool|null $test_mode_onboarding Whether WooPayments should use test-mode onboarding.
 	 * @return WooPaymentsAccountService
 	 */
-	private function create_account_service( bool $test_mode ): WooPaymentsAccountService {
+	private function create_account_service( bool $test_mode, ?bool $test_mode_onboarding = null ): WooPaymentsAccountService {
 		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
 			->disableOriginalConstructor()
-			->onlyMethods( array( 'is_test_mode_enabled' ) )
+			->onlyMethods( array( 'is_test_mode_enabled', 'is_test_mode_onboarding_enabled' ) )
 			->getMock();
 
 		$account_service->method( 'is_test_mode_enabled' )->willReturn( $test_mode );
+		$account_service->method( 'is_test_mode_onboarding_enabled' )->willReturn( $test_mode_onboarding ?? $test_mode );
 
 		return $account_service;
 	}

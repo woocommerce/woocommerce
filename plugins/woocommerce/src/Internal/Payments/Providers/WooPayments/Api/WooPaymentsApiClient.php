@@ -45,6 +45,26 @@ class WooPaymentsApiClient {
 	private const RECOMMENDED_PAYMENT_METHODS = 'payment_methods/recommended';
 
 	/**
+	 * WooPayments payment methods API path.
+	 */
+	private const PAYMENT_METHODS_API = 'payment_methods';
+
+	/**
+	 * WooPayments timeline API path.
+	 */
+	private const TIMELINE_API = 'timeline';
+
+	/**
+	 * WooPayments store setup API path.
+	 */
+	private const STORE_SETUP_API = 'accounts/store_setup';
+
+	/**
+	 * WooPayments compatibility API path.
+	 */
+	private const COMPATIBILITY_API = 'compatibility';
+
+	/**
 	 * WooPayments tracking API path.
 	 */
 	private const TRACKING_API = 'tracking';
@@ -268,7 +288,70 @@ class WooPaymentsApiClient {
 	 * @return array<string,mixed>
 	 */
 	public function get_payment_method( string $payment_method_id ): array {
-		return $this->request( array(), 'payment_methods/' . rawurlencode( $payment_method_id ), 'GET' );
+		return $this->request( array(), self::PAYMENT_METHODS_API . '/' . rawurlencode( $payment_method_id ), 'GET' );
+	}
+
+	/**
+	 * Update a WooPayments payment method.
+	 *
+	 * @param string              $payment_method_id   Payment method ID.
+	 * @param array<string,mixed> $payment_method_data Payment method update payload.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function update_payment_method( string $payment_method_id, array $payment_method_data = array() ): array {
+		$this->validate_route_resource_id( $payment_method_id );
+
+		return $this->request( $payment_method_data, self::PAYMENT_METHODS_API . '/' . $payment_method_id, 'POST' );
+	}
+
+	/**
+	 * Retrieve the WooPayments timeline for an intent or order identifier.
+	 *
+	 * @param string $id Payment intent ID or order ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function get_timeline( string $id ): array {
+		$this->validate_route_resource_id( $id );
+
+		return $this->request( array(), self::TIMELINE_API . '/' . $id, 'GET' );
+	}
+
+	/**
+	 * Send the current store setup snapshot.
+	 *
+	 * @param array<string,mixed> $store_setup Store setup snapshot.
+	 * @return array<string,mixed>
+	 */
+	public function send_store_setup( array $store_setup ): array {
+		return $this->request(
+			array(
+				'snapshot'  => $store_setup,
+				'test_mode' => $this->account_service->is_test_mode_onboarding_enabled(),
+			),
+			self::STORE_SETUP_API,
+			'POST',
+			true,
+			false,
+			false
+		);
+	}
+
+	/**
+	 * Send WooPayments compatibility data.
+	 *
+	 * @param array<string,mixed> $compatibility_data Compatibility payload.
+	 * @return array<string,mixed>
+	 */
+	public function update_compatibility_data( array $compatibility_data ): array {
+		return $this->request(
+			array(
+				'compatibility_data' => $compatibility_data,
+			),
+			self::COMPATIBILITY_API,
+			'POST'
+		);
 	}
 
 	/**
@@ -504,6 +587,19 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Validate a WooPayments route resource ID before path interpolation.
+	 *
+	 * @param string $id Resource ID.
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	private function validate_route_resource_id( string $id ): void {
+		if ( ! preg_match( '/^\w+$/', $id ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
+			throw new WooPaymentsApiException( __( 'Route param validation failed.', 'woocommerce' ), 'wcpay_route_validation_failure', 400 );
+		}
+	}
+
+	/**
 	 * Send a request through the provider transport.
 	 *
 	 * @param array<string,mixed> $params         Request params.
@@ -511,10 +607,11 @@ class WooPaymentsApiClient {
 	 * @param string              $method         HTTP method.
 	 * @param bool                $is_site_scoped Whether to include the WPCOM site ID in the API path.
 	 * @param bool                $use_user_token Whether to sign with the connection-owner user token.
+	 * @param bool                $blocking       Whether to block for the transport response.
 	 * @return array<string,mixed>
 	 * @throws WooPaymentsApiException When the request fails.
 	 */
-	private function request( array $params, string $api, string $method, bool $is_site_scoped = true, bool $use_user_token = false ): array {
+	private function request( array $params, string $api, string $method, bool $is_site_scoped = true, bool $use_user_token = false, bool $blocking = true ): array {
 		if ( ! $this->is_available() ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
 			throw new WooPaymentsApiException( __( 'Site is not connected to WordPress.com.', 'woocommerce' ), 'wcpay_wpcom_not_connected', 409 );
@@ -579,8 +676,13 @@ class WooPaymentsApiClient {
 			$headers,
 			$body,
 			self::REQUEST_TIMEOUT_SECONDS,
-			$use_user_token
+			$use_user_token,
+			$blocking
 		);
+
+		if ( ! $blocking ) {
+			return array();
+		}
 
 		if ( $response instanceof WP_Error ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Provider error is transported as structured application data, not rendered HTML.

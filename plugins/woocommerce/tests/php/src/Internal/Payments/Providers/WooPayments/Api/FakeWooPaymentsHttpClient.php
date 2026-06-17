@@ -74,6 +74,13 @@ class FakeWooPaymentsHttpClient extends WooPaymentsHttpClient {
 	public bool $last_use_user_token = false;
 
 	/**
+	 * Whether the last request blocked for the response.
+	 *
+	 * @var bool
+	 */
+	public bool $last_blocking = true;
+
+	/**
 	 * Tell whether the client is connected.
 	 *
 	 * @return bool
@@ -100,15 +107,17 @@ class FakeWooPaymentsHttpClient extends WooPaymentsHttpClient {
 	 * @param string|null $body    Request body.
 	 * @param int         $timeout        Request timeout.
 	 * @param bool        $use_user_token Whether to sign with the connection-owner user token.
+	 * @param bool        $blocking       Whether the request should block for the response.
 	 * @return mixed
 	 */
-	public function request( string $method, string $path, array $headers = array(), ?string $body = null, int $timeout = 70, bool $use_user_token = false ) {
+	public function request( string $method, string $path, array $headers = array(), ?string $body = null, int $timeout = 70, bool $use_user_token = false, bool $blocking = true ) {
 		$this->last_method         = $method;
 		$this->last_path           = $path;
 		$this->last_headers        = $headers;
 		$this->last_body           = $body;
 		$this->last_timeout        = $timeout;
 		$this->last_use_user_token = $use_user_token;
+		$this->last_blocking       = $blocking;
 
 		return $this->response;
 	}

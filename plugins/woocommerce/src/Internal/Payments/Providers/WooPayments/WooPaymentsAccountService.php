@@ -265,7 +265,7 @@ class WooPaymentsAccountService {
 	 *
 	 * @return bool
 	 */
-	private function is_test_mode_onboarding_enabled(): bool {
+	public function is_test_mode_onboarding_enabled(): bool {
 		$test_mode_onboarding = $this->is_dev_mode_enabled() || $this->is_onboarding_test_mode_enabled();
 
 		/**

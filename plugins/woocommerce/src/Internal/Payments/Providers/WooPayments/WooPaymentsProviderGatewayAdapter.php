@@ -59,22 +59,31 @@ class WooPaymentsProviderGatewayAdapter {
 	private WooPaymentsAccountService $account_service;
 
 	/**
+	 * WooPayments order data service.
+	 *
+	 * @var WooPaymentsOrderDataService|null
+	 */
+	private ?WooPaymentsOrderDataService $order_data_service = null;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsLegacyRuntime   $legacy_runtime  WooPayments legacy runtime.
-	 * @param WooPaymentsApiClient       $api_client      Native WooPayments API client.
-	 * @param WooPaymentsCustomerService $customer_service WooPayments customer service.
-	 * @param WooPaymentsTokenService    $token_service    WooPayments token service.
-	 * @param WooPaymentsAccountService  $account_service  WooPayments account service.
+	 * @param WooPaymentsLegacyRuntime         $legacy_runtime    WooPayments legacy runtime.
+	 * @param WooPaymentsApiClient             $api_client        Native WooPayments API client.
+	 * @param WooPaymentsCustomerService       $customer_service  WooPayments customer service.
+	 * @param WooPaymentsTokenService          $token_service     WooPayments token service.
+	 * @param WooPaymentsAccountService        $account_service   WooPayments account service.
+	 * @param WooPaymentsOrderDataService|null $order_data_service WooPayments order data service.
 	 */
-	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsApiClient $api_client, WooPaymentsCustomerService $customer_service, WooPaymentsTokenService $token_service, WooPaymentsAccountService $account_service ): void {
-		$this->legacy_runtime   = $legacy_runtime;
-		$this->api_client       = $api_client;
-		$this->customer_service = $customer_service;
-		$this->token_service    = $token_service;
-		$this->account_service  = $account_service;
+	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsApiClient $api_client, WooPaymentsCustomerService $customer_service, WooPaymentsTokenService $token_service, WooPaymentsAccountService $account_service, ?WooPaymentsOrderDataService $order_data_service = null ): void {
+		$this->legacy_runtime     = $legacy_runtime;
+		$this->api_client         = $api_client;
+		$this->customer_service   = $customer_service;
+		$this->token_service      = $token_service;
+		$this->account_service    = $account_service;
+		$this->order_data_service = $order_data_service;
 	}
 
 	/**
@@ -365,6 +374,19 @@ class WooPaymentsProviderGatewayAdapter {
 	}
 
 	/**
+	 * Get the WooPayments order data service.
+	 *
+	 * @return WooPaymentsOrderDataService
+	 */
+	private function get_order_data_service(): WooPaymentsOrderDataService {
+		if ( null === $this->order_data_service ) {
+			$this->order_data_service = wc_get_container()->get( WooPaymentsOrderDataService::class );
+		}
+
+		return $this->order_data_service;
+	}
+
+	/**
 	 * Charge an order through the native WooPayments transport.
 	 *
 	 * @param PaymentContext $context         Payment context.
@@ -488,7 +510,7 @@ class WooPaymentsProviderGatewayAdapter {
 		}
 
 		if ( $this->is_using_saved_payment_token( $payment_data ) && ! preg_match( '/^(card_|src_)/', $payment_credential ) ) {
-			$billing_details = $this->get_billing_data_from_order( $order );
+			$billing_details = $this->get_order_data_service()->get_billing_data_from_order( $order );
 			if ( ! empty( $billing_details ) ) {
 				$request_data['payment_method_update_data'] = array(
 					'billing_details' => $billing_details,
@@ -553,46 +575,6 @@ class WooPaymentsProviderGatewayAdapter {
 		$metadata = apply_filters( 'wcpay_metadata_from_order', $metadata, $order, 'single' );
 
 		return is_array( $metadata ) ? $metadata : array();
-	}
-
-	/**
-	 * Build the billing-details payload for payment method updates.
-	 *
-	 * @param WC_Order $order Order being charged.
-	 * @return array<string,mixed>
-	 */
-	private function get_billing_data_from_order( WC_Order $order ): array {
-		$billing_details = array(
-			'address' => array_filter(
-				array(
-					'city'        => $order->get_billing_city(),
-					'country'     => $order->get_billing_country(),
-					'line1'       => $order->get_billing_address_1(),
-					'line2'       => $order->get_billing_address_2(),
-					'postal_code' => $order->get_billing_postcode(),
-					'state'       => $order->get_billing_state(),
-				),
-				static fn( string $value ): bool => '' !== $value
-			),
-		);
-
-		if ( '' !== trim( $order->get_formatted_billing_full_name() ) ) {
-			$billing_details['name'] = trim( $order->get_formatted_billing_full_name() );
-		}
-
-		if ( '' !== $order->get_billing_email() ) {
-			$billing_details['email'] = $order->get_billing_email();
-		}
-
-		if ( '' !== $order->get_billing_phone() ) {
-			$billing_details['phone'] = $order->get_billing_phone();
-		}
-
-		if ( empty( $billing_details['address'] ) ) {
-			unset( $billing_details['address'] );
-		}
-
-		return $billing_details;
 	}
 
 	/**
@@ -1079,148 +1061,20 @@ class WooPaymentsProviderGatewayAdapter {
 	 * @param array<string,mixed> $intent Native PaymentIntent response.
 	 */
 	private function maybe_add_fee_breakdown_note( WC_Order $order, array $intent ): void {
-		$note = $this->get_fee_breakdown_note_from_intent( $intent );
-		if ( '' === $note && isset( $intent['id'] ) ) {
-			try {
-				$note = $this->get_fee_breakdown_note_from_intent( $this->get_api_client()->get_payment_intention( (string) $intent['id'] ) );
-			} catch ( Throwable $exception ) {
-				$note = '';
-			}
-		}
-
-		if ( '' === $note || $this->order_has_note( $order, $note ) ) {
+		$order_data_service = $this->get_order_data_service();
+		if ( $order_data_service->add_fee_breakdown_note_from_intent( $order, $intent, false ) ) {
 			return;
 		}
 
-		$order->add_order_note( $note );
-	}
-
-	/**
-	 * Get the fee breakdown order note from a PaymentIntent object.
-	 *
-	 * @param array<string,mixed> $intent Native PaymentIntent response.
-	 * @return string
-	 */
-	private function get_fee_breakdown_note_from_intent( array $intent ): string {
-		$charge           = $this->get_latest_charge( $intent );
-		$fee_breakdown_v1 = $charge['fee_breakdown_v1'] ?? null;
-		if ( ! is_array( $fee_breakdown_v1 ) || ! $this->is_renderable_fee_breakdown( $fee_breakdown_v1 ) ) {
-			return '';
+		if ( '' !== $order_data_service->get_fee_breakdown_note_from_intent( $intent, false ) || ! isset( $intent['id'] ) ) {
+			return;
 		}
 
-		$lines = array();
-		$fx    = $fee_breakdown_v1['fx'] ?? null;
-		if ( is_array( $fx ) && isset( $fx['from_currency'], $fx['to_currency'], $fx['to_amount'] ) ) {
-			$exchange_rate = $fee_breakdown_v1['sources']['balance_transaction_exchange_rate'] ?? null;
-			if ( is_numeric( $exchange_rate ) ) {
-				$arrow   = html_entity_decode( '&rarr;', ENT_QUOTES, 'UTF-8' );
-				$lines[] = sprintf(
-					'1.00 %1$s %2$s %3$s %4$s: %5$s',
-					strtoupper( (string) $fx['from_currency'] ),
-					$arrow,
-					$this->format_exchange_rate( $exchange_rate ),
-					strtoupper( (string) $fx['to_currency'] ),
-					$this->format_explicit_currency_amount( (int) $fx['to_amount'], (string) $fx['to_currency'] )
-				);
-			}
+		try {
+			$order_data_service->add_fee_breakdown_note_from_intent( $order, $this->get_api_client()->get_payment_intention( (string) $intent['id'] ), false );
+		} catch ( Throwable $exception ) {
+			return;
 		}
-
-		$fee_amount   = (int) $fee_breakdown_v1['totals']['fee']['amount'];
-		$fee_currency = (string) $fee_breakdown_v1['totals']['fee']['currency'];
-		if ( is_array( $fx ) ) {
-			$lines[] = sprintf( 'Fee (3.9%% + %1$s): %2$s', $this->format_currency_minor_amount( 30, $fee_currency ), $this->format_explicit_currency_amount( $fee_amount, $fee_currency ) );
-			$indent  = str_repeat( '&nbsp;', 4 );
-			$lines[] = $indent . 'Base fee: 2.9% + ' . $this->format_currency_minor_amount( 30, $fee_currency );
-			$lines[] = $indent . 'Currency conversion fee: 1%';
-		} else {
-			$lines[] = sprintf( 'Fee: %s', $this->format_explicit_currency_amount( $fee_amount, $fee_currency ) );
-		}
-
-		$net_amount   = isset( $fee_breakdown_v1['totals']['capture_net']['amount'] ) ? (int) $fee_breakdown_v1['totals']['capture_net']['amount'] : (int) $fee_breakdown_v1['totals']['net']['amount'];
-		$net_currency = (string) ( $fee_breakdown_v1['totals']['capture_net']['currency'] ?? $fee_breakdown_v1['totals']['net']['currency'] );
-		$lines[]      = sprintf( 'Net payout: %s', $this->format_explicit_currency_amount( $net_amount, $net_currency ) );
-
-		$html = '';
-		foreach ( $lines as $line ) {
-			$html .= '<p>' . $line . '</p>' . PHP_EOL;
-		}
-
-		return '<strong>Fee details:</strong><div class="captured-event-details">' . PHP_EOL . $html . '</div>';
-	}
-
-	/**
-	 * Tell whether a fee breakdown has the minimum shape needed for the order note.
-	 *
-	 * @param array<string,mixed> $fee_breakdown Fee breakdown envelope.
-	 * @return bool
-	 */
-	private function is_renderable_fee_breakdown( array $fee_breakdown ): bool {
-		return isset(
-			$fee_breakdown['totals']['fee']['amount'],
-			$fee_breakdown['totals']['fee']['currency'],
-			$fee_breakdown['totals']['net']['amount'],
-			$fee_breakdown['totals']['net']['currency']
-		);
-	}
-
-	/**
-	 * Format a Stripe integer amount with an explicit currency code.
-	 *
-	 * @param int    $amount   Stripe integer amount.
-	 * @param string $currency Currency code.
-	 * @return string
-	 */
-	private function format_explicit_currency_amount( int $amount, string $currency ): string {
-		return $this->format_currency_minor_amount( $amount, $currency ) . ' ' . strtoupper( $currency );
-	}
-
-	/**
-	 * Format a provider exchange rate without changing its meaningful precision.
-	 *
-	 * @param mixed $exchange_rate Provider exchange rate.
-	 * @return string
-	 */
-	private function format_exchange_rate( $exchange_rate ): string {
-		return rtrim( rtrim( (string) $exchange_rate, '0' ), '.' );
-	}
-
-	/**
-	 * Format a Stripe integer amount with its currency symbol.
-	 *
-	 * @param int    $amount   Stripe integer amount.
-	 * @param string $currency Currency code.
-	 * @return string
-	 */
-	private function format_currency_minor_amount( int $amount, string $currency ): string {
-		$decimals = $this->is_zero_decimal_currency( $currency ) ? 0 : 2;
-		$value    = number_format( $this->interpret_stripe_amount( $amount, $currency ), $decimals, '.', '' );
-		$symbol   = html_entity_decode( get_woocommerce_currency_symbol( strtoupper( $currency ) ), ENT_QUOTES, 'UTF-8' );
-
-		return $symbol . $value;
-	}
-
-	/**
-	 * Tell whether an order already has an exact order note.
-	 *
-	 * @param WC_Order $order Order object.
-	 * @param string   $note  Note content.
-	 * @return bool
-	 */
-	private function order_has_note( WC_Order $order, string $note ): bool {
-		$notes = wc_get_order_notes(
-			array(
-				'order_id' => $order->get_id(),
-				'type'     => 'any',
-			)
-		);
-
-		foreach ( $notes as $order_note ) {
-			if ( $note === $order_note->content ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**
