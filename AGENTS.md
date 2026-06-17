@@ -58,6 +58,10 @@ plugins/woocommerce/
 - `plugins/woocommerce/src/` - Modern PHP with dependency injection, PSR-4 autoloading
 - `plugins/woocommerce/includes/` - Legacy WordPress patterns, modify only when necessary
 
+**JavaScript:**
+
+- When possible, prefer vanilla JavaScript/TypeScript over jQuery for new or modified frontend code. Keep existing jQuery when a rewrite is out of scope.
+
 **Namespace:**
 
 - Root namespace: `Automattic\WooCommerce`
