@@ -91,7 +91,7 @@ Use the current `woocommerce` context to know which product the block is operati
 </div>
 ```
 
-`productInteractions` stores interaction state keyed by the current context's `productId`.
+`productInteractions` stores interaction state keyed by the current context's `productId`. This is intentional: if the same product appears multiple times on a page, those instances share selected attributes, quantities, and validation state.
 
 `productInteractionInContext` resolves `state.productInteractions[ context.productId ]`, not `state.productInteractions[ productInContext.id ]`. This matters for variable products: `productInContext` may be the selected variation, while the interaction still belongs to the parent product context.
 
@@ -195,8 +195,6 @@ Actions operate on the current `woocommerce` context.
 
 -   Final name for `productInteractionInContext`.
 -   Exact selected attribute shape.
--   Are we comfortable keying `productInteractions` by product id, so repeated UI for the same product shares interaction state?
--   Should duplicated product cards with the same product share interaction state or remain independent?
 -   Should `productVariationInContext` keep supporting explicit `variationId` context as an override?
 
 <details>
