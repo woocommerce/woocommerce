@@ -464,6 +464,64 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox The 11.0.0 backfill schedules the per-product sale events for a product with future sale dates that has none.
+	 */
+	public function test_scheduled_sales_events_backfill_schedules_missing_events() {
+		// Sale starts in 1 hour and ends in 24 hours.
+		$future_start = time() + 3600;
+		$future_end   = time() + 86400;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', $future_end ) );
+		$product->save();
+
+		// Simulate a product saved before per-product events existed: sale-date meta is present,
+		// but no Action Scheduler events are scheduled.
+		as_unschedule_all_actions( 'wc_product_start_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' );
+		as_unschedule_all_actions( 'wc_product_end_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' );
+		$this->assertSame( 0, $this->count_pending_sale_actions( 'wc_product_end_scheduled_sale', $product->get_id() ), 'Precondition: no events scheduled' );
+
+		$needs_another_batch = \Automattic\WooCommerce\Internal\DataMigrations\ScheduledSalesEventsBackfill::run();
+
+		$this->assertFalse( $needs_another_batch, 'A single batch should complete the backfill for one product' );
+		$this->assertSame(
+			1,
+			$this->count_pending_sale_actions( 'wc_product_start_scheduled_sale', $product->get_id() ),
+			'The start event should be scheduled by the backfill'
+		);
+		$this->assertSame(
+			1,
+			$this->count_pending_sale_actions( 'wc_product_end_scheduled_sale', $product->get_id() ),
+			'The end event should be scheduled by the backfill'
+		);
+	}
+
+	/**
+	 * @testDox The 11.0.0 backfill does not schedule events for products whose sale dates are in the past.
+	 */
+	public function test_scheduled_sales_events_backfill_skips_past_sale_dates() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+
+		// A sale that already ended: the end date is in the past, so no future event is due.
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 3600 );
+
+		\Automattic\WooCommerce\Internal\DataMigrations\ScheduledSalesEventsBackfill::run();
+
+		$this->assertSame(
+			0,
+			$this->count_pending_sale_actions( 'wc_product_end_scheduled_sale', $product->get_id() ),
+			'No end event should be scheduled for a sale whose end date is in the past'
+		);
+	}
+
+	/**
 	 * Count pending Action Scheduler sale actions for a product.
 	 *
 	 * @param string $hook       Action hook name.

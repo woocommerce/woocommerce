@@ -335,6 +335,9 @@ class WC_Install {
 		'10.9.0'   => array(
 			'wc_update_1090_remove_task_list_reminder_bar_hidden_option',
 		),
+		'11.0.0'   => array(
+			'wc_update_1100_schedule_existing_product_sale_events',
+		),
 	);
 
 	/**

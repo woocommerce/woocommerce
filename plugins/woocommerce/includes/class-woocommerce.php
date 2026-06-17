@@ -1687,7 +1687,17 @@ final class WooCommerce {
 			$scheduled_sales_time = strtotime( '00:00 tomorrow' );
 		}
 
-		as_schedule_recurring_action( $scheduled_sales_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', true );
+		// Reschedule if the next run isn't midnight. Installs that scheduled this action before
+		// the midnight run time was introduced keep their original (arbitrary) time of day,
+		// because the unique flag makes as_schedule_recurring_action() a no-op while a pending
+		// action exists. That leaves sales starting/ending at a random time instead of the
+		// 00:00:00/23:59:59 the product editor promises. Mirrors the woocommerce_cleanup_sessions
+		// handling below.
+		$next_scheduled_sales_time = as_next_scheduled_action( 'woocommerce_scheduled_sales', array(), 'woocommerce' );
+		if ( $next_scheduled_sales_time !== $scheduled_sales_time ) {
+			as_unschedule_all_actions( 'woocommerce_scheduled_sales', array(), 'woocommerce' );
+			as_schedule_recurring_action( $scheduled_sales_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', true );
+		}
 
 		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 

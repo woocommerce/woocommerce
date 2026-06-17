@@ -27,6 +27,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\DataMigrations\ScheduledSalesEventsBackfill;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
@@ -3543,4 +3544,17 @@ function wc_update_1080_backfill_email_template_sync_meta(): bool {
  */
 function wc_update_1090_remove_task_list_reminder_bar_hidden_option() {
 	delete_option( 'woocommerce_task_list_reminder_bar_hidden' );
+}
+
+/**
+ * Schedule the per-product Action Scheduler sale events for products that already had
+ * future sale dates before those events were introduced, so their sales start/end at the
+ * exact scheduled time rather than whenever the daily safety-net cron next runs.
+ *
+ * @since 11.0.0
+ *
+ * @return bool True if the backfill needs to run again for the next batch, false when complete.
+ */
+function wc_update_1100_schedule_existing_product_sale_events(): bool {
+	return ScheduledSalesEventsBackfill::run();
 }

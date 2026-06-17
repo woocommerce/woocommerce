@@ -126,6 +126,76 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox The scheduled sales action is rescheduled to midnight when it was previously set to run at another time of day.
+	 */
+	public function test_scheduled_sales_is_rescheduled_to_midnight() {
+		// Simulate a legacy install where the recurring action is stuck at an arbitrary time of day.
+		$arbitrary_time = strtotime( 'tomorrow 09:15' );
+		as_schedule_recurring_action( $arbitrary_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', true );
+		$this->assertSame(
+			$arbitrary_time,
+			as_next_scheduled_action( 'woocommerce_scheduled_sales', array(), 'woocommerce' ),
+			'Precondition: the action should start at the arbitrary legacy time'
+		);
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'action_scheduler_ensure_recurring_actions' );
+
+		$this->assertSame(
+			$this->expected_midnight_timestamp(),
+			as_next_scheduled_action( 'woocommerce_scheduled_sales', array(), 'woocommerce' ),
+			'The action should be rescheduled to midnight'
+		);
+	}
+
+	/**
+	 * @testDox The scheduled sales action is left untouched when it already runs at midnight.
+	 */
+	public function test_scheduled_sales_is_not_rescheduled_when_already_at_midnight() {
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'action_scheduler_ensure_recurring_actions' );
+		$first_run = as_next_scheduled_action( 'woocommerce_scheduled_sales', array(), 'woocommerce' );
+
+		// A second ensure pass must not reschedule or duplicate the action.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'action_scheduler_ensure_recurring_actions' );
+
+		$this->assertSame(
+			$first_run,
+			as_next_scheduled_action( 'woocommerce_scheduled_sales', array(), 'woocommerce' ),
+			'The action should keep its midnight run time across ensure passes'
+		);
+		$pending = as_get_scheduled_actions(
+			array(
+				'hook'     => 'woocommerce_scheduled_sales',
+				'group'    => 'woocommerce',
+				'status'   => \ActionScheduler_Store::STATUS_PENDING,
+				'per_page' => -1,
+			),
+			'ids'
+		);
+		$this->assertCount( 1, $pending, 'Only a single scheduled sales action should be pending' );
+	}
+
+	/**
+	 * Compute the timestamp of the next midnight in the site timezone, matching the value
+	 * used by WC()->register_recurring_actions().
+	 *
+	 * @return int
+	 */
+	private function expected_midnight_timestamp(): int {
+		$gmt_offset   = get_option( 'gmt_offset' );
+		$offset_hours = ( $gmt_offset > 0 ? '-' : '+' ) . absint( $gmt_offset ) . ' hours';
+
+		$midnight = strtotime( '00:00 tomorrow ' . $offset_hours );
+		if ( false === $midnight ) {
+			$midnight = strtotime( '00:00 tomorrow' );
+		}
+
+		return $midnight;
+	}
+
+	/**
 	 * Helper method to clear all scheduled actions.
 	 */
 	private function clear_scheduled_actions() {
