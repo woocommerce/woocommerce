@@ -38,16 +38,25 @@ class WooPaymentsWebhookRestController implements RegisterHooksInterface {
 	private WooPaymentsEventIngestor $event_ingestor;
 
 	/**
+	 * WooPayments legacy runtime.
+	 *
+	 * @var WooPaymentsLegacyRuntime
+	 */
+	private WooPaymentsLegacyRuntime $legacy_runtime;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
 	 * @param NativePaymentsRuntimeArbiter $arbiter        Runtime owner arbiter.
 	 * @param WooPaymentsEventIngestor     $event_ingestor Event ingestor.
+	 * @param WooPaymentsLegacyRuntime     $legacy_runtime WooPayments legacy runtime.
 	 */
-	final public function init( NativePaymentsRuntimeArbiter $arbiter, WooPaymentsEventIngestor $event_ingestor ): void {
+	final public function init( NativePaymentsRuntimeArbiter $arbiter, WooPaymentsEventIngestor $event_ingestor, WooPaymentsLegacyRuntime $legacy_runtime ): void {
 		$this->arbiter        = $arbiter;
 		$this->event_ingestor = $event_ingestor;
+		$this->legacy_runtime = $legacy_runtime;
 	}
 
 	/**
@@ -97,9 +106,34 @@ class WooPaymentsWebhookRestController implements RegisterHooksInterface {
 			$this->event_ingestor->process( is_array( $payload ) ? $payload : array() );
 			return new WP_REST_Response( array( 'result' => 'success' ), 200 );
 		} catch ( InvalidArgumentException $exception ) {
+			$this->log_webhook_exception( $exception );
 			return new WP_REST_Response( array( 'result' => 'bad_request' ), 400 );
 		} catch ( Throwable $exception ) {
+			$this->log_webhook_exception( $exception );
 			return new WP_REST_Response( array( 'result' => 'error' ), 500 );
+		}
+	}
+
+	/**
+	 * Log a webhook processing exception.
+	 *
+	 * @param Throwable $exception Webhook processing exception.
+	 */
+	private function log_webhook_exception( Throwable $exception ): void {
+		$logger = $this->legacy_runtime->get_logger();
+		if ( ! is_object( $logger ) || ! is_callable( array( $logger, 'error' ) ) ) {
+			return;
+		}
+
+		try {
+			$logger->error(
+				$exception->getMessage(),
+				array(
+					'source' => 'native-payments-webhook',
+				)
+			);
+		} catch ( Throwable $logger_exception ) {
+			unset( $logger_exception );
 		}
 	}
 }

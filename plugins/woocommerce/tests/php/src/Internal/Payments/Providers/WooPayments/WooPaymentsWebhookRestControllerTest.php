@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsEventIngestor;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsWebhookRestController;
 use InvalidArgumentException;
 use RuntimeException;
@@ -110,6 +111,7 @@ class WooPaymentsWebhookRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Bad webhook payloads return the WooPayments bad_request envelope.
 	 */
 	public function test_bad_payload_returns_bad_request_envelope(): void {
+		$logger     = $this->create_recording_logger();
 		$controller = $this->create_controller_with_ingestor(
 			new class() extends WooPaymentsEventIngestor {
 				/**
@@ -120,19 +122,24 @@ class WooPaymentsWebhookRestControllerTest extends WC_REST_Unit_Test_Case {
 				public function process( array $event ): void {
 					throw new InvalidArgumentException( 'bad payload' );
 				}
-			}
+			},
+			$logger
 		);
 
 		$response = $controller->handle_webhook( $this->create_post_request( array( 'type' => 'bad' ) ) );
 
 		$this->assertSame( 400, $response->get_status() );
 		$this->assertSame( array( 'result' => 'bad_request' ), $response->get_data() );
+		$this->assertCount( 1, $logger->entries );
+		$this->assertSame( 'native-payments-webhook', $logger->entries[0]['context']['source'] );
+		$this->assertStringContainsString( 'bad payload', $logger->entries[0]['message'] );
 	}
 
 	/**
 	 * @testdox Processing exceptions return the WooPayments error envelope.
 	 */
 	public function test_processing_exception_returns_error_envelope(): void {
+		$logger     = $this->create_recording_logger();
 		$controller = $this->create_controller_with_ingestor(
 			new class() extends WooPaymentsEventIngestor {
 				/**
@@ -142,6 +149,46 @@ class WooPaymentsWebhookRestControllerTest extends WC_REST_Unit_Test_Case {
 				 */
 				public function process( array $event ): void {
 					throw new RuntimeException( 'server failed' );
+				}
+			},
+			$logger
+		);
+
+		$response = $controller->handle_webhook( $this->create_post_request( array( 'type' => 'bad' ) ) );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( array( 'result' => 'error' ), $response->get_data() );
+		$this->assertCount( 1, $logger->entries );
+		$this->assertSame( 'native-payments-webhook', $logger->entries[0]['context']['source'] );
+		$this->assertStringContainsString( 'server failed', $logger->entries[0]['message'] );
+	}
+
+	/**
+	 * @testdox Logger failures do not replace the webhook error envelope.
+	 */
+	public function test_logger_failures_do_not_replace_webhook_error_envelope(): void {
+		$controller = $this->create_controller_with_ingestor(
+			new class() extends WooPaymentsEventIngestor {
+				/**
+				 * Process a payload.
+				 *
+				 * @param array<string,mixed> $event Event payload.
+				 */
+				public function process( array $event ): void {
+					throw new RuntimeException( 'server failed' );
+				}
+			},
+			new class() {
+				/**
+				 * Record an error log entry.
+				 *
+				 * @param string              $message Log message.
+				 * @param array<string,mixed> $context Log context.
+				 */
+				public function error( string $message, array $context = array() ): void {
+					unset( $message, $context );
+
+					throw new RuntimeException( 'logger failed' );
 				}
 			}
 		);
@@ -194,13 +241,46 @@ class WooPaymentsWebhookRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Create a controller with a supplied ingestor.
 	 *
 	 * @param WooPaymentsEventIngestor $ingestor Ingestor test double.
+	 * @param object|null              $logger   Optional logger test double.
 	 * @return WooPaymentsWebhookRestController
 	 */
-	private function create_controller_with_ingestor( WooPaymentsEventIngestor $ingestor ): WooPaymentsWebhookRestController {
+	private function create_controller_with_ingestor( WooPaymentsEventIngestor $ingestor, ?object $logger = null ): WooPaymentsWebhookRestController {
+		$runtime = new WooPaymentsLegacyRuntime();
+		$runtime->init( new LegacyRuntimeProxy( true, null, null, null, $logger ) );
+
 		$controller = new WooPaymentsWebhookRestController();
-		$controller->init( wc_get_container()->get( NativePaymentsRuntimeArbiter::class ), $ingestor );
+		$controller->init( wc_get_container()->get( NativePaymentsRuntimeArbiter::class ), $ingestor, $runtime );
 
 		return $controller;
+	}
+
+	/**
+	 * Create a recording logger test double.
+	 *
+	 * @return object
+	 */
+	private function create_recording_logger(): object {
+		return new class() {
+			/**
+			 * Logged entries.
+			 *
+			 * @var array<int,array{message:string,context:array<string,mixed>}>
+			 */
+			public array $entries = array();
+
+			/**
+			 * Record an error log entry.
+			 *
+			 * @param string              $message Log message.
+			 * @param array<string,mixed> $context Log context.
+			 */
+			public function error( string $message, array $context = array() ): void {
+				$this->entries[] = array(
+					'message' => $message,
+					'context' => $context,
+				);
+			}
+		};
 	}
 
 	/**
