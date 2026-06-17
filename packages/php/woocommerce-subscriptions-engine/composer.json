@@ -1,5 +1,5 @@
 {
-	"name": "woocommerce/subscriptions-engine",
+	"name": "automattic/woocommerce-subscriptions-engine",
 	"description": "Subscriptions engine for WooCommerce.",
 	"type": "wordpress-plugin",
 	"license": "GPL-2.0-or-later",
