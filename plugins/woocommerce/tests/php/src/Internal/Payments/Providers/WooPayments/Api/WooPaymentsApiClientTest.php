@@ -316,6 +316,45 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should track order payloads through the native transport tracking endpoint.
+	 */
+	public function test_track_order_posts_to_tracking_order_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'result' => 'success',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$result = $sut->track_order(
+			array(
+				'id'                 => 42,
+				'_payment_method_id' => 'pm_test',
+			),
+			true
+		);
+
+		$body = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( 'success', $result['result'] );
+		$this->assertSame( '/sites/123/wcpay/tracking/order', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $body );
+		$this->assertSame( 42, $body['order_data']['id'] );
+		$this->assertSame( 'pm_test', $body['order_data']['_payment_method_id'] );
+		$this->assertTrue( $body['update'] );
+		$this->assertTrue( $body['test_mode'] );
+	}
+
+	/**
 	 * @testdox Should retrieve recommended payment methods through the public recommendations endpoint.
 	 */
 	public function test_get_recommended_payment_methods_reads_public_recommendations_endpoint(): void {

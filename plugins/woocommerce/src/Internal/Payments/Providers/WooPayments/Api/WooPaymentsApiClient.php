@@ -45,6 +45,11 @@ class WooPaymentsApiClient {
 	private const RECOMMENDED_PAYMENT_METHODS = 'payment_methods/recommended';
 
 	/**
+	 * WooPayments tracking API path.
+	 */
+	private const TRACKING_API = 'tracking';
+
+	/**
 	 * HTTP client.
 	 *
 	 * @var WooPaymentsHttpClient
@@ -264,6 +269,24 @@ class WooPaymentsApiClient {
 	 */
 	public function get_payment_method( string $payment_method_id ): array {
 		return $this->request( array(), 'payment_methods/' . rawurlencode( $payment_method_id ), 'GET' );
+	}
+
+	/**
+	 * Track a WooPayments order creation or update event.
+	 *
+	 * @param array<string,mixed> $order_data Order payload.
+	 * @param bool                $update     Whether this is an update event.
+	 * @return array<string,mixed>
+	 */
+	public function track_order( array $order_data, bool $update = false ): array {
+		return $this->request(
+			array(
+				'order_data' => $order_data,
+				'update'     => $update,
+			),
+			self::TRACKING_API . '/order',
+			'POST'
+		);
 	}
 
 	/**
