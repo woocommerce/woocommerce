@@ -149,6 +149,29 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		}
 
 		/**
+		 * Log a developer-facing notice when settings UI rendering falls back to the legacy renderer.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param SettingsUIPageInterface $settings_ui_page Settings UI page adapter.
+		 * @param string                  $section_id Section id.
+		 * @param string                  $reason Fallback reason.
+		 */
+		private function log_settings_ui_fallback( SettingsUIPageInterface $settings_ui_page, string $section_id, string $reason ): void {
+			wc_doing_it_wrong(
+				'WC_Settings_Page::output',
+				sprintf(
+					/* translators: 1: settings page id, 2: settings section id, 3: fallback reason. */
+					__( 'Settings UI rendering for page "%1$s" section "%2$s" fell back to the legacy settings renderer. Reason: %3$s', 'woocommerce' ),
+					$settings_ui_page->get_page_id(),
+					'' === $section_id ? 'default' : $section_id,
+					$reason
+				),
+				'10.9.0'
+			);
+		}
+
+		/**
 		 * Creates the React mount point for settings slot.
 		 */
 		public function add_settings_slot() {
@@ -313,41 +336,68 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$page_id          = $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page->get_page_id() : '';
 			$schema_failed    = ! empty( $GLOBALS['wc_settings_ui_schema_failed'][ $page_id ][ $section_key ] );
 
-			if ( Features::is_enabled( 'settings-ui' ) && $settings_ui_page instanceof SettingsUIPageInterface && ! $schema_failed ) {
-				$render_settings_ui = true;
-
-				try {
-					$script_handles = $settings_ui_page->get_script_handles( $current_section );
-				} catch ( \Throwable $e ) {
-					$script_handles     = array();
-					$render_settings_ui = false;
-
-					if ( $e instanceof \Exception ) {
-						wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
-					}
-				}
-
-				if ( $render_settings_ui ) {
-					/**
-					 * Extension-provided handles may violate the interface contract.
-					 *
-					 * @var mixed[] $script_handles
-					 */
-					foreach ( $script_handles as $script_handle ) {
-						if ( is_string( $script_handle ) && '' !== $script_handle ) {
-							wp_enqueue_script( $script_handle );
-						}
-					}
-
-					$GLOBALS['hide_save_button'] = true;
-
-					printf(
-						'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
-						esc_attr( 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $current_section ? 'default' : $current_section ) ),
-						esc_attr( $settings_ui_page->get_page_id() ),
-						esc_attr( $current_section )
+			if ( Features::is_enabled( 'settings-ui' ) && $settings_ui_page instanceof SettingsUIPageInterface ) {
+				if ( $schema_failed ) {
+					$this->log_settings_ui_fallback(
+						$settings_ui_page,
+						$current_section,
+						__( 'Settings UI schema generation failed.', 'woocommerce' )
 					);
-					return;
+				} else {
+					$render_settings_ui = true;
+
+					try {
+						$script_handles = $settings_ui_page->get_script_handles( $current_section );
+					} catch ( \Throwable $e ) {
+						$script_handles     = array();
+						$render_settings_ui = false;
+						$reason             = __( 'Settings UI script handles could not be resolved.', 'woocommerce' );
+
+						wc_get_logger()->debug(
+							sprintf(
+								'Settings UI script handles could not be resolved for page "%1$s" section "%2$s": %3$s: %4$s',
+								$settings_ui_page->get_page_id(),
+								'' === $current_section ? 'default' : $current_section,
+								get_class( $e ),
+								$e->getMessage()
+							),
+							array( 'source' => 'settings-ui' )
+						);
+
+						if ( $e instanceof \Exception ) {
+							$reason = sprintf(
+								/* translators: %s: exception message. */
+								__( 'Settings UI script handles could not be resolved: %s', 'woocommerce' ),
+								$e->getMessage()
+							);
+							wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
+						}
+
+						$this->log_settings_ui_fallback( $settings_ui_page, $current_section, $reason );
+					}
+
+					if ( $render_settings_ui ) {
+						/**
+						 * Extension-provided handles may violate the interface contract.
+						 *
+						 * @var mixed[] $script_handles
+						 */
+						foreach ( $script_handles as $script_handle ) {
+							if ( is_string( $script_handle ) && '' !== $script_handle ) {
+								wp_enqueue_script( $script_handle );
+							}
+						}
+
+						$GLOBALS['hide_save_button'] = true;
+
+						printf(
+							'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
+							esc_attr( 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $current_section ? 'default' : $current_section ) ),
+							esc_attr( $settings_ui_page->get_page_id() ),
+							esc_attr( $current_section )
+						);
+						return;
+					}
 				}
 			}
 

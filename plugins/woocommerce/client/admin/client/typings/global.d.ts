@@ -119,7 +119,6 @@ declare global {
 			'minified-js': boolean;
 			navigation: boolean;
 			settings: boolean;
-			'products-catalog-api': boolean;
 			'settings-ui': boolean;
 			'use-wp-horizon': boolean;
 			'rest-api-v4': boolean;

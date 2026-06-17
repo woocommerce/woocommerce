@@ -13,6 +13,9 @@ on:
         required: true
         description: 'The release version (in X.Y or X.Y.Z-beta.N formats) to generate the release summary for.'
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   extract-versions:
     name: Extract release current and previous versions
