@@ -20,7 +20,11 @@ class WooPaymentsExpressCheckoutServiceTest extends WC_Unit_Test_Case {
 		wc_empty_cart();
 		delete_option( 'woocommerce_default_country' );
 		delete_option( 'woocommerce_currency' );
+		delete_option( 'woocommerce_tax_based_on' );
+		delete_option( 'woocommerce_calc_taxes' );
+		unset( $_GET['pay_for_order'], $_GET['key'] );
 		remove_all_filters( 'woocommerce_native_woopayments_express_checkout_enabled_methods' );
+		$this->set_order_pay_query_var( 0 );
 		parent::tearDown();
 	}
 
@@ -147,6 +151,212 @@ class WooPaymentsExpressCheckoutServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should expose server-authoritative Stripe payment method types for enabled express methods.
+	 */
+	public function test_allowed_payment_method_types_include_eligible_amazon_pay(): void {
+		$sut = $this->create_service(
+			array(
+				'express_checkout_checkout_methods' => array( 'payment_request', 'amazon_pay' ),
+				'upe_enabled_payment_method_ids'    => array( 'card', 'amazon_pay' ),
+			),
+			true,
+			array(
+				'ece_confirmation_tokens_disabled' => false,
+			)
+		);
+
+		$this->assertSame( array( 'card', 'amazon_pay' ), $sut->get_allowed_payment_method_types_for_context( 'checkout' ) );
+		$this->assertSame( array( 'payment_request', 'amazon_pay' ), $sut->get_enabled_methods_for_context( 'checkout' ) );
+		$this->assertSame( array( 'card', 'amazon_pay' ), $sut->get_express_checkout_params( 'checkout' )['payment_method_types'] );
+		$this->assertSame( array( 'payment_request', 'amazon_pay' ), $sut->get_express_checkout_params( 'checkout' )['enabled_methods'] );
+	}
+
+	/**
+	 * @testdox Should fail closed when Amazon Pay is configured but not available on the connected account.
+	 */
+	public function test_allowed_payment_method_types_exclude_unavailable_amazon_pay(): void {
+		$sut = $this->create_service(
+			array(
+				'express_checkout_checkout_methods' => array( 'payment_request', 'amazon_pay' ),
+				'upe_available_payment_methods'     => array( 'card' ),
+				'upe_enabled_payment_method_ids'    => array( 'card', 'amazon_pay' ),
+			),
+			true,
+			array(
+				'ece_confirmation_tokens_disabled' => false,
+			)
+		);
+
+		$this->assertSame( array( 'card' ), $sut->get_allowed_payment_method_types_for_context( 'checkout' ) );
+		$this->assertSame( array( 'payment_request' ), $sut->get_enabled_methods_for_context( 'checkout' ) );
+		$this->assertSame( array( 'payment_request' ), $sut->get_express_checkout_params( 'checkout' )['enabled_methods'] );
+	}
+
+	/**
+	 * @testdox Should fail closed when account data disables ECE confirmation tokens.
+	 */
+	public function test_allowed_payment_method_types_exclude_amazon_pay_when_confirmation_tokens_are_disabled(): void {
+		$sut = $this->create_service(
+			array(
+				'express_checkout_checkout_methods' => array( 'payment_request', 'amazon_pay' ),
+				'upe_available_payment_methods'     => array( 'card', 'amazon_pay' ),
+				'upe_enabled_payment_method_ids'    => array( 'card', 'amazon_pay' ),
+			),
+			true,
+			array(
+				'ece_confirmation_tokens_disabled' => true,
+			)
+		);
+
+		$this->assertSame( array( 'card' ), $sut->get_allowed_payment_method_types_for_context( 'checkout' ) );
+	}
+
+	/**
+	 * @testdox Should block Amazon Pay when taxes are based on billing address.
+	 */
+	public function test_allowed_payment_method_types_exclude_amazon_pay_for_billing_address_taxes(): void {
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$sut = $this->create_service(
+			array(
+				'express_checkout_checkout_methods' => array( 'payment_request', 'amazon_pay' ),
+				'upe_available_payment_methods'     => array( 'card', 'amazon_pay' ),
+				'upe_enabled_payment_method_ids'    => array( 'card', 'amazon_pay' ),
+			),
+			true,
+			array(
+				'ece_confirmation_tokens_disabled' => false,
+			)
+		);
+
+		$this->assertSame( array( 'card' ), $sut->get_allowed_payment_method_types_for_context( 'checkout' ) );
+	}
+
+	/**
+	 * @testdox Should allow Amazon Pay with billing-address tax settings when taxes are disabled.
+	 */
+	public function test_allowed_payment_method_types_include_amazon_pay_for_billing_address_when_taxes_disabled(): void {
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		$sut = $this->create_service(
+			array(
+				'express_checkout_checkout_methods' => array( 'payment_request', 'amazon_pay' ),
+				'upe_available_payment_methods'     => array( 'card', 'amazon_pay' ),
+				'upe_enabled_payment_method_ids'    => array( 'card', 'amazon_pay' ),
+			),
+			true,
+			array(
+				'ece_confirmation_tokens_disabled' => false,
+			)
+		);
+
+		$this->assertSame( array( 'card', 'amazon_pay' ), $sut->get_allowed_payment_method_types_for_context( 'checkout' ) );
+	}
+
+	/**
+	 * @testdox Should validate pay-for-order express method types against the order currency.
+	 */
+	public function test_pay_for_order_payment_method_types_use_order_currency(): void {
+		update_option( 'woocommerce_currency', 'USD' );
+
+		$order = wc_create_order();
+		$order->set_total( '24.00' );
+		$order->set_currency( 'EUR' );
+		$order->set_billing_email( 'shopper@example.test' );
+		$order->save();
+		$_GET['pay_for_order'] = 'true';
+		$_GET['key']           = $order->get_order_key();
+		$this->set_order_pay_query_var( $order->get_id() );
+
+		$params = $this->create_service(
+			array(
+				'express_checkout_checkout_methods' => array( 'payment_request', 'amazon_pay' ),
+				'upe_available_payment_methods'     => array( 'card', 'amazon_pay' ),
+				'upe_enabled_payment_method_ids'    => array( 'card', 'amazon_pay' ),
+			),
+			true,
+			array(
+				'ece_confirmation_tokens_disabled' => false,
+			)
+		)->get_express_checkout_params( 'pay_for_order' );
+
+		$this->assertSame( 'eur', $params['checkout']['currency_code'] );
+		$this->assertSame( array( 'payment_request' ), $params['enabled_methods'] );
+		$this->assertSame( array( 'card' ), $params['payment_method_types'] );
+	}
+
+	/**
+	 * @testdox Should keep Amazon Pay available for pay-for-order when billing-address taxes are enabled.
+	 */
+	public function test_pay_for_order_allows_amazon_pay_with_billing_address_taxes(): void {
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$order = wc_create_order();
+		$order->set_total( '24.00' );
+		$order->set_currency( 'USD' );
+		$order->set_billing_email( 'shopper@example.test' );
+		$order->save();
+		$_GET['pay_for_order'] = 'true';
+		$_GET['key']           = $order->get_order_key();
+		$this->set_order_pay_query_var( $order->get_id() );
+
+		$params = $this->create_service(
+			array(
+				'express_checkout_checkout_methods' => array( 'payment_request', 'amazon_pay' ),
+				'upe_available_payment_methods'     => array( 'card', 'amazon_pay' ),
+				'upe_enabled_payment_method_ids'    => array( 'card', 'amazon_pay' ),
+			),
+			true,
+			array(
+				'ece_confirmation_tokens_disabled' => false,
+			)
+		)->get_express_checkout_params( 'pay_for_order' );
+
+		$this->assertSame( array( 'payment_request', 'amazon_pay' ), $params['enabled_methods'] );
+		$this->assertSame( array( 'card', 'amazon_pay' ), $params['payment_method_types'] );
+	}
+
+	/**
+	 * @testdox Should build pay-for-order express checkout params from the current order.
+	 */
+	public function test_builds_pay_for_order_express_checkout_params(): void {
+		$order = wc_create_order();
+		$order->set_total( '24.00' );
+		$order->set_billing_email( 'shopper@example.test' );
+		$order->save();
+		$_GET['pay_for_order'] = 'true';
+		$_GET['key']           = $order->get_order_key();
+		$this->set_order_pay_query_var( $order->get_id() );
+
+		$params = $this->create_service()->get_express_checkout_params( 'pay_for_order' );
+
+		$this->assertSame( 'pay_for_order', $params['button_context'] );
+		$this->assertSame( $order->get_id(), $params['order_id'] );
+		$this->assertSame( 'true', $params['pay_for_order'] );
+		$this->assertSame( $order->get_order_key(), $params['key'] );
+		$this->assertSame( 'shopper@example.test', $params['billing_email'] );
+		$this->assertSame( array( 'payment_request' ), $params['enabled_methods'] );
+		$this->assertSame( array( 'card' ), $params['payment_method_types'] );
+	}
+
+	/**
+	 * @testdox Should fail closed for pay-for-order when billing email is missing.
+	 */
+	public function test_payment_request_fails_closed_for_pay_for_order_without_billing_email(): void {
+		$order = wc_create_order();
+		$order->set_total( '24.00' );
+		$order->save();
+		$_GET['pay_for_order'] = 'true';
+		$_GET['key']           = $order->get_order_key();
+		$this->set_order_pay_query_var( $order->get_id() );
+
+		$this->assertFalse( $this->create_service()->should_show_payment_request_button( 'pay_for_order' ) );
+	}
+
+	/**
 	 * Create the System Under Test.
 	 *
 	 * @param array<string,mixed> $settings             Gateway settings.
@@ -170,7 +380,18 @@ class WooPaymentsExpressCheckoutServiceTest extends WC_Unit_Test_Case {
 		$settings         = $merge_defaults ? array_merge( $default_settings, $settings ) : $settings;
 		$account_data     = array_merge(
 			array(
-				'country' => 'US',
+				'country'          => 'US',
+				'payments_enabled' => true,
+				'capabilities'     => array(
+					'amazon_pay_payments' => 'active',
+				),
+				'fees'             => array(
+					'amazon_pay' => array(
+						'base' => array(
+							'currency' => 'usd',
+						),
+					),
+				),
 			),
 			$account_data
 		);
@@ -198,5 +419,25 @@ class WooPaymentsExpressCheckoutServiceTest extends WC_Unit_Test_Case {
 		$sut->init( $account_service, $provider );
 
 		return $sut;
+	}
+
+	/**
+	 * Set the current order-pay query var.
+	 *
+	 * @param int $order_id Order ID.
+	 */
+	private function set_order_pay_query_var( int $order_id ): void {
+		global $wp;
+
+		if ( ! is_object( $wp ) ) {
+			$wp = new \WP(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		if ( $order_id > 0 ) {
+			$wp->query_vars['order-pay'] = $order_id;
+			return;
+		}
+
+		unset( $wp->query_vars['order-pay'] );
 	}
 }

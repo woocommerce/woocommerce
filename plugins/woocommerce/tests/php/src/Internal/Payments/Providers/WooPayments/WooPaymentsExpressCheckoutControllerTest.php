@@ -33,6 +33,7 @@ class WooPaymentsExpressCheckoutControllerTest extends WC_Unit_Test_Case {
 
 		remove_all_filters( 'woocommerce_is_checkout' );
 		remove_all_filters( 'woocommerce_is_cart' );
+		$this->set_order_pay_query_var( 0 );
 		wp_dequeue_script( 'wc-woopayments-express-checkout' );
 		wp_dequeue_style( 'wc-woopayments-express-checkout' );
 		wp_deregister_script( 'wc-woopayments-express-checkout' );
@@ -127,6 +128,25 @@ class WooPaymentsExpressCheckoutControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should enqueue express checkout assets with pay-for-order context on order-pay pages.
+	 */
+	public function test_enqueue_frontend_assets_loads_on_order_pay_page(): void {
+		$service   = new RecordingExpressCheckoutService();
+		$this->sut = $this->create_controller( true, true, $service );
+		$this->set_order_pay_query_var( 123 );
+		add_filter( 'woocommerce_is_checkout', '__return_true' );
+
+		$this->sut->enqueue_frontend_assets();
+
+		$this->assertTrue( wp_script_is( 'wc-woopayments-express-checkout', 'enqueued' ) );
+		$this->assertTrue( wp_style_is( 'wc-woopayments-express-checkout', 'enqueued' ) );
+		$this->assertSame( array( 'pay_for_order' ), $service->contexts );
+		$localized_data = wp_scripts()->get_data( 'wc-woopayments-express-checkout', 'data' );
+		$this->assertIsString( $localized_data );
+		$this->assertStringContainsString( '"button_context":"pay_for_order"', $localized_data );
+	}
+
+	/**
 	 * @testdox Should not enqueue classic ECE assets on checkout block pages.
 	 */
 	public function test_enqueue_frontend_assets_skips_checkout_block_pages(): void {
@@ -164,6 +184,23 @@ class WooPaymentsExpressCheckoutControllerTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'wcpay-express-checkout-wrapper', $output );
 		$this->assertStringContainsString( 'id="wcpay-express-checkout-element"', $output );
 		$this->assertStringContainsString( 'wcpay-express-checkout-button-separator', $output );
+	}
+
+	/**
+	 * @testdox Should render the ECE container with pay-for-order context on order-pay pages.
+	 */
+	public function test_display_express_checkout_buttons_renders_on_order_pay_page(): void {
+		$service   = new RecordingExpressCheckoutService();
+		$this->sut = $this->create_controller( true, true, $service );
+		$this->set_order_pay_query_var( 123 );
+		add_filter( 'woocommerce_is_checkout', '__return_true' );
+
+		ob_start();
+		$this->sut->display_express_checkout_buttons();
+		$output = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'wcpay-express-checkout-wrapper', $output );
+		$this->assertSame( array( 'pay_for_order' ), $service->contexts );
 	}
 
 	/**
@@ -233,6 +270,27 @@ class WooPaymentsExpressCheckoutControllerTest extends WC_Unit_Test_Case {
 			'wp_enqueue_scripts'                           => 'enqueue_frontend_assets',
 			'woocommerce_checkout_before_customer_details' => 'display_express_checkout_buttons',
 			'woocommerce_proceed_to_checkout'              => 'display_express_checkout_buttons',
+			'woocommerce_pay_order_before_payment'         => 'display_express_checkout_buttons',
 		);
+	}
+
+	/**
+	 * Set the current order-pay query var.
+	 *
+	 * @param int $order_id Order ID.
+	 */
+	private function set_order_pay_query_var( int $order_id ): void {
+		global $wp;
+
+		if ( ! is_object( $wp ) ) {
+			$wp = new \WP(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		if ( $order_id > 0 ) {
+			$wp->query_vars['order-pay'] = $order_id;
+			return;
+		}
+
+		unset( $wp->query_vars['order-pay'] );
 	}
 }

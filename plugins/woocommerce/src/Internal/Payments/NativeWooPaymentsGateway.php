@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsExpressPaymentMethodTypes;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPlatformPaymentMethodContext;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsTokenService;
@@ -969,6 +970,8 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 
 		return array_merge(
 			WooPaymentsPlatformPaymentMethodContext::provider_data_from_checkout_value( $this->sanitize_post_string( WooPaymentsPlatformPaymentMethodContext::CHECKOUT_FIELD ) ),
+			WooPaymentsExpressPaymentMethodTypes::provider_data_from_checkout_value( $this->sanitize_post_string( WooPaymentsExpressPaymentMethodTypes::CHECKOUT_FIELD ) ),
+			WooPaymentsExpressPaymentMethodTypes::provider_context_from_checkout_value( $this->sanitize_post_string( WooPaymentsExpressPaymentMethodTypes::CONTEXT_FIELD ) ),
 			array(
 				'cvc_confirmation'          => $this->sanitize_post_string( $cvc_key ),
 				'fingerprint'               => $this->sanitize_post_string( 'wcpay-fingerprint' ),

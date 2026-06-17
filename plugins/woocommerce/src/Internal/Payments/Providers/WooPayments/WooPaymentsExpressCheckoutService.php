@@ -15,8 +15,6 @@ namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments;
  */
 class WooPaymentsExpressCheckoutService {
 
-	private const PAYMENT_REQUEST_METHOD = 'payment_request';
-
 	/**
 	 * WooPayments account service.
 	 *
@@ -51,8 +49,17 @@ class WooPaymentsExpressCheckoutService {
 	 * @return bool
 	 */
 	public function should_show_payment_request_button( string $context = 'checkout' ): bool {
-		return $this->provider->can_process_payments()
-			&& in_array( self::PAYMENT_REQUEST_METHOD, $this->get_enabled_methods_for_context( $context ), true );
+		$context = $this->normalize_button_context( $context );
+
+		if ( ! $this->provider->can_process_payments() ) {
+			return false;
+		}
+
+		if ( 'pay_for_order' === $context && ! $this->is_pay_for_order_supported() ) {
+			return false;
+		}
+
+		return ! empty( $this->get_allowed_payment_method_types_for_context( $context, $this->get_context_currency( $context ) ) );
 	}
 
 	/**
@@ -62,19 +69,21 @@ class WooPaymentsExpressCheckoutService {
 	 * @return array<string,mixed>
 	 */
 	public function get_express_checkout_params( string $context = 'checkout' ): array {
-		$currency = strtolower( get_woocommerce_currency() );
-		$decimals = function_exists( 'wc_get_price_decimals' ) ? wc_get_price_decimals() : 2;
+		$context          = $this->normalize_button_context( $context );
+		$context_currency = $this->get_context_currency( $context );
+		$currency         = strtolower( '' === $context_currency ? get_woocommerce_currency() : $context_currency );
+		$decimals         = function_exists( 'wc_get_price_decimals' ) ? wc_get_price_decimals() : 2;
 
-		return array(
-			'ajax_url'           => admin_url( 'admin-ajax.php' ),
-			'wc_ajax_url'        => \WC_AJAX::get_endpoint( '%%endpoint%%' ),
-			'nonce'              => array(
+		$params = array(
+			'ajax_url'             => admin_url( 'admin-ajax.php' ),
+			'wc_ajax_url'          => \WC_AJAX::get_endpoint( '%%endpoint%%' ),
+			'nonce'                => array(
 				'platform_tracker'             => wp_create_nonce( 'platform_tracks_nonce' ),
 				'tokenized_cart_nonce'         => wp_create_nonce( 'woopayments_tokenized_cart_nonce' ),
 				'tokenized_cart_session_nonce' => wp_create_nonce( 'woopayments_tokenized_cart_session_nonce' ),
 				'store_api_nonce'              => wp_create_nonce( 'wc_store_api' ),
 			),
-			'checkout'           => array(
+			'checkout'             => array(
 				'currency_code'              => $currency,
 				'currency_decimals'          => $decimals,
 				'stripe_minor_unit'          => 10 ** $decimals,
@@ -84,33 +93,37 @@ class WooPaymentsExpressCheckoutService {
 				'allowed_shipping_countries' => function_exists( 'WC' ) && WC() && WC()->countries ? array_keys( WC()->countries->get_shipping_countries() ?? array() ) : array(),
 				'display_prices_with_tax'    => 'incl' === get_option( 'woocommerce_tax_display_cart' ),
 			),
-			'has_subscription'   => class_exists( '\WC_Subscriptions_Cart' ) && is_callable( array( '\WC_Subscriptions_Cart', 'cart_contains_subscription' ) ) && \WC_Subscriptions_Cart::cart_contains_subscription(),
-			'is_manual_capture'  => $this->is_truthy_gateway_setting( 'manual_capture' ),
-			'button'             => $this->get_button_settings( $context ),
-			'login_confirmation' => false,
-			'button_context'     => $this->normalize_button_context( $context ),
-			'has_block'          => has_block( 'woocommerce/cart' ) || has_block( 'woocommerce/checkout' ),
-			'product'            => array(),
-			'store_name'         => get_bloginfo( 'name' ),
-			'enabled_methods'    => $this->get_enabled_methods_for_context( $context ),
-			'stripe'             => array(
+			'has_subscription'     => class_exists( '\WC_Subscriptions_Cart' ) && is_callable( array( '\WC_Subscriptions_Cart', 'cart_contains_subscription' ) ) && \WC_Subscriptions_Cart::cart_contains_subscription(),
+			'is_manual_capture'    => $this->is_truthy_gateway_setting( 'manual_capture' ),
+			'button'               => $this->get_button_settings( $context ),
+			'login_confirmation'   => false,
+			'button_context'       => $context,
+			'has_block'            => has_block( 'woocommerce/cart' ) || has_block( 'woocommerce/checkout' ),
+			'product'              => array(),
+			'store_name'           => get_bloginfo( 'name' ),
+			'enabled_methods'      => $this->get_enabled_methods_for_context( $context, $context_currency ),
+			'payment_method_types' => $this->get_allowed_payment_method_types_for_context( $context, $context_currency ),
+			'stripe'               => array(
 				'publishableKey' => $this->account_service->get_publishable_key(),
 				'accountId'      => $this->account_service->get_account_id(),
 				'locale'         => $this->get_stripe_locale(),
 			),
-			'flags'              => array(
+			'flags'                => array(
 				'isEceUsingConfirmationTokens' => true,
 			),
 		);
+
+		return 'pay_for_order' === $context ? array_merge( $params, $this->get_pay_for_order_params() ) : $params;
 	}
 
 	/**
 	 * Get enabled express checkout platform methods for a context.
 	 *
 	 * @param string $context Express checkout context.
+	 * @param string $currency Optional order/cart currency.
 	 * @return array<int,string>
 	 */
-	public function get_enabled_methods_for_context( string $context = 'checkout' ): array {
+	public function get_enabled_methods_for_context( string $context = 'checkout', string $currency = '' ): array {
 		$context = $this->normalize_button_context( $context );
 		$methods = $this->get_configured_methods_for_context( $context );
 
@@ -124,8 +137,42 @@ class WooPaymentsExpressCheckoutService {
 		 * @since 11.0.0
 		 */
 		$filtered_methods = apply_filters( 'woocommerce_native_woopayments_express_checkout_enabled_methods', $methods, $context, $this );
+		$filtered_methods = is_array( $filtered_methods ) ? $this->normalize_method_list( $filtered_methods ) : $methods;
 
-		return is_array( $filtered_methods ) ? $this->normalize_method_list( $filtered_methods ) : $methods;
+		return array_values(
+			array_filter(
+				$filtered_methods,
+				function ( string $method ) use ( $context, $currency ): bool {
+					if ( WooPaymentsExpressPaymentMethodTypes::EXPRESS_METHOD_AMAZON_PAY !== $method ) {
+						return true;
+					}
+
+					return in_array(
+						WooPaymentsExpressPaymentMethodTypes::STRIPE_TYPE_AMAZON_PAY,
+						WooPaymentsExpressPaymentMethodTypes::get_allowed_payment_method_types_for_methods( $this->account_service, array( $method ), $context, $currency ),
+						true
+					);
+				}
+			)
+		);
+	}
+
+	/**
+	 * Get server-allowed Stripe payment method types for a context.
+	 *
+	 * @param string $context Express checkout context.
+	 * @param string $currency Optional order/cart currency.
+	 * @return array<int,string>
+	 */
+	public function get_allowed_payment_method_types_for_context( string $context = 'checkout', string $currency = '' ): array {
+		$context = $this->normalize_button_context( $context );
+
+		return WooPaymentsExpressPaymentMethodTypes::get_allowed_payment_method_types_for_methods(
+			$this->account_service,
+			$this->get_enabled_methods_for_context( $context, $currency ),
+			$context,
+			$currency
+		);
 	}
 
 	/**
@@ -134,7 +181,7 @@ class WooPaymentsExpressCheckoutService {
 	 * @return bool
 	 */
 	private function is_payment_request_enabled(): bool {
-		return $this->is_truthy_gateway_setting( self::PAYMENT_REQUEST_METHOD );
+		return $this->is_truthy_gateway_setting( WooPaymentsExpressPaymentMethodTypes::EXPRESS_METHOD_PAYMENT_REQUEST );
 	}
 
 	/**
@@ -144,14 +191,15 @@ class WooPaymentsExpressCheckoutService {
 	 * @return array<int,string>
 	 */
 	private function get_configured_methods_for_context( string $context ): array {
-		$setting_key = 'express_checkout_' . $context . '_methods';
-		$methods     = $this->account_service->get_gateway_setting( $setting_key, null );
+		$setting_context = 'pay_for_order' === $context ? 'checkout' : $context;
+		$setting_key     = 'express_checkout_' . $setting_context . '_methods';
+		$methods         = $this->account_service->get_gateway_setting( $setting_key, null );
 
 		if ( is_array( $methods ) ) {
 			return $this->normalize_method_list( $methods );
 		}
 
-		return $this->is_payment_request_enabled() ? array( self::PAYMENT_REQUEST_METHOD ) : array();
+		return $this->is_payment_request_enabled() ? array( WooPaymentsExpressPaymentMethodTypes::EXPRESS_METHOD_PAYMENT_REQUEST ) : array();
 	}
 
 	/**
@@ -226,7 +274,122 @@ class WooPaymentsExpressCheckoutService {
 	private function normalize_button_context( string $context ): string {
 		$context = sanitize_key( $context );
 
-		return in_array( $context, array( 'product', 'cart', 'checkout' ), true ) ? $context : 'checkout';
+		return in_array( $context, array( 'product', 'cart', 'checkout', 'pay_for_order' ), true ) ? $context : 'checkout';
+	}
+
+	/**
+	 * Tell whether the current order-pay surface can show ECE.
+	 *
+	 * @return bool
+	 */
+	private function is_pay_for_order_supported(): bool {
+		$order = $this->get_pay_for_order_order();
+		if ( ! $order instanceof \WC_Order || ! $order->needs_payment() ) {
+			return false;
+		}
+
+		if ( '' === $order->get_billing_email() ) {
+			return false;
+		}
+
+		$key = $this->get_pay_for_order_key();
+		if ( '' === $key || ! hash_equals( $order->get_order_key(), $key ) ) {
+			return false;
+		}
+
+		return current_user_can( 'pay_for_order', $order->get_id() );
+	}
+
+	/**
+	 * Get the currency that should drive context-specific Stripe Elements eligibility.
+	 *
+	 * @param string $context Express checkout context.
+	 * @return string
+	 */
+	private function get_context_currency( string $context ): string {
+		if ( 'pay_for_order' !== $context ) {
+			return '';
+		}
+
+		$order = $this->get_pay_for_order_order();
+
+		return $order instanceof \WC_Order ? (string) $order->get_currency() : '';
+	}
+
+	/**
+	 * Get pay-for-order params for the frontend.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function get_pay_for_order_params(): array {
+		$order = $this->get_pay_for_order_order();
+		if ( ! $order instanceof \WC_Order ) {
+			return array();
+		}
+
+		return array(
+			'order_id'      => $order->get_id(),
+			'pay_for_order' => $this->get_pay_for_order_flag(),
+			'key'           => $this->get_pay_for_order_key(),
+			'billing_email' => $order->get_billing_email(),
+		);
+	}
+
+	/**
+	 * Get the current order-pay order.
+	 *
+	 * @return \WC_Order|null
+	 */
+	private function get_pay_for_order_order(): ?\WC_Order {
+		$order_id = $this->get_pay_for_order_id();
+		if ( $order_id <= 0 ) {
+			return null;
+		}
+
+		$order = wc_get_order( $order_id );
+
+		return $order instanceof \WC_Order ? $order : null;
+	}
+
+	/**
+	 * Get the current order-pay order ID.
+	 *
+	 * @return int
+	 */
+	private function get_pay_for_order_id(): int {
+		global $wp;
+
+		if ( is_object( $wp ) && isset( $wp->query_vars['order-pay'] ) ) {
+			return absint( $wp->query_vars['order-pay'] );
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Get the current order-pay key.
+	 *
+	 * @return string
+	 */
+	private function get_pay_for_order_key(): string {
+		if ( ! isset( $_GET['key'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return '';
+		}
+
+		return sanitize_text_field( wp_unslash( $_GET['key'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
+	 * Get the current pay-for-order flag value.
+	 *
+	 * @return string
+	 */
+	private function get_pay_for_order_flag(): string {
+		if ( ! isset( $_GET['pay_for_order'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return '';
+		}
+
+		return sanitize_text_field( wp_unslash( $_GET['pay_for_order'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**

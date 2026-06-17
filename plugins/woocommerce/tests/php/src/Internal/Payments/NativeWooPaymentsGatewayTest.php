@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\Payments\PaymentContext;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsExpressPaymentMethodTypes;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsTokenService;
 use WC_Order;
@@ -31,6 +32,8 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 		unset( $_POST['wcpay-setup-intent'] );
 		unset( $_POST['wcpay-payment-method'] );
 		unset( $_POST['wcpay-is-platform-payment-method'] );
+		unset( $_POST['wcpay-express-payment-method-types'] );
+		unset( $_POST['wcpay-express-checkout-context'] );
 		wp_set_current_user( 0 );
 		parent::tearDown();
 	}
@@ -468,6 +471,29 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( PaymentContext::class, $service->last_checkout_context );
 		$this->assertSame( 'pm_platform', $service->last_checkout_context->get_payment_method_id() );
+		$this->assertTrue( $service->last_checkout_context->get_provider_data()['is_platform_payment_method'] );
+	}
+
+	/**
+	 * @testdox Should pass submitted express checkout payment method types through provider data.
+	 */
+	public function test_process_payment_passes_express_payment_method_types_to_provider_data(): void {
+		$order   = $this->create_order();
+		$service = new RecordingPaymentProcessingService();
+		$gateway = new NativeWooPaymentsGateway();
+		$gateway->init( $service, new WooPaymentsProvider() );
+
+		$_POST['wcpay-confirmation-token']           = 'ctoken_express';
+		$_POST['wcpay-express-payment-method-types'] = wp_json_encode( array( 'card', 'amazon_pay', 'unknown_method', array( 'nested' ) ) );
+		$_POST['wcpay-express-checkout-context']     = 'pay_for_order';
+		$_POST['wcpay-is-platform-payment-method']   = 'true';
+
+		$gateway->process_payment( $order->get_id() );
+
+		$this->assertInstanceOf( PaymentContext::class, $service->last_checkout_context );
+		$this->assertSame( 'ctoken_express', $service->last_checkout_context->get_payment_method_id() );
+		$this->assertSame( array( 'card', 'amazon_pay' ), $service->last_checkout_context->get_provider_data()[ WooPaymentsExpressPaymentMethodTypes::PROVIDER_DATA_KEY ] );
+		$this->assertSame( 'pay_for_order', $service->last_checkout_context->get_provider_data()[ WooPaymentsExpressPaymentMethodTypes::PROVIDER_CONTEXT_KEY ] );
 		$this->assertTrue( $service->last_checkout_context->get_provider_data()['is_platform_payment_method'] );
 	}
 

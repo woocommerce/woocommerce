@@ -158,6 +158,7 @@ class WooPaymentsExpressCheckoutController implements RegisterHooksInterface {
 			'wp_enqueue_scripts'                           => array( $this, 'enqueue_frontend_assets' ),
 			'woocommerce_checkout_before_customer_details' => array( $this, 'display_express_checkout_buttons' ),
 			'woocommerce_proceed_to_checkout'              => array( $this, 'display_express_checkout_buttons' ),
+			'woocommerce_pay_order_before_payment'         => array( $this, 'display_express_checkout_buttons' ),
 		);
 	}
 
@@ -207,6 +208,10 @@ class WooPaymentsExpressCheckoutController implements RegisterHooksInterface {
 	 * @return bool
 	 */
 	private function is_supported_frontend_surface(): bool {
+		if ( $this->is_pay_for_order_surface() ) {
+			return true;
+		}
+
 		if ( $this->is_block_cart_or_checkout_surface() ) {
 			return false;
 		}
@@ -277,10 +282,25 @@ class WooPaymentsExpressCheckoutController implements RegisterHooksInterface {
 	 * @return string
 	 */
 	private function get_current_button_context(): string {
+		if ( $this->is_pay_for_order_surface() ) {
+			return 'pay_for_order';
+		}
+
 		if ( function_exists( 'is_cart' ) && is_cart() ) {
 			return 'cart';
 		}
 
 		return 'checkout';
+	}
+
+	/**
+	 * Tell whether the current request renders the classic order-pay surface.
+	 *
+	 * @return bool
+	 */
+	private function is_pay_for_order_surface(): bool {
+		global $wp;
+
+		return is_object( $wp ) && ! empty( $wp->query_vars['order-pay'] );
 	}
 }

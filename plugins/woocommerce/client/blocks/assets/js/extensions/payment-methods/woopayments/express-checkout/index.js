@@ -22,14 +22,21 @@ const METHOD_CONFIG = {
 	applePay: {
 		name: `${ EXPRESS_CHECKOUT_PAYMENT_METHOD_NAME }_applePay`,
 		title: __( 'WooPayments - Apple Pay', 'woocommerce' ),
+		enabledMethod: 'payment_request',
 		loadEvent: 'applepay_button_load',
 		clickEvent: 'applepay_button_click',
 	},
 	googlePay: {
 		name: `${ EXPRESS_CHECKOUT_PAYMENT_METHOD_NAME }_googlePay`,
 		title: __( 'WooPayments - Google Pay', 'woocommerce' ),
+		enabledMethod: 'payment_request',
 		loadEvent: 'gpay_button_load',
 		clickEvent: 'gpay_button_click',
+	},
+	amazonPay: {
+		name: `${ EXPRESS_CHECKOUT_PAYMENT_METHOD_NAME }_amazonPay`,
+		title: __( 'WooPayments - Amazon Pay', 'woocommerce' ),
+		enabledMethod: 'amazon_pay',
 	},
 };
 
@@ -90,12 +97,23 @@ const getExpressButtonOptions = ( method ) => ( {
 	paymentMethods: {
 		applePay: method === 'applePay' ? 'always' : 'never',
 		googlePay: method === 'googlePay' ? 'always' : 'never',
+		amazonPay: method === 'amazonPay' ? 'auto' : 'never',
 		link: 'never',
 		paypal: 'never',
-		amazonPay: 'never',
 		klarna: 'never',
 	},
 } );
+
+const getPaymentMethodTypes = () => {
+	const paymentMethodTypes = Array.isArray( params?.payment_method_types )
+		? params.payment_method_types
+		: [ 'card' ];
+	const filteredTypes = paymentMethodTypes.filter( ( type ) =>
+		[ 'card', 'amazon_pay' ].includes( type )
+	);
+
+	return filteredTypes.length ? filteredTypes : [ 'card' ];
+};
 
 const getStoreApiHeaders = ( includeSessionNonce = false ) => {
 	const nonce = params?.nonce || {};
@@ -158,7 +176,7 @@ const getStripeElementsOptions = ( billing ) => {
 		mode: amount > 0 ? 'payment' : 'setup',
 		loader: 'never',
 		currency: getCartCurrency( billing ),
-		paymentMethodTypes: [ 'card' ],
+		paymentMethodTypes: getPaymentMethodTypes(),
 	};
 
 	if ( options.mode === 'payment' ) {
@@ -173,7 +191,7 @@ const getAvailabilityElementsOptions = ( cart ) => {
 	const options = {
 		mode: amount > 0 ? 'payment' : 'setup',
 		currency: getCartTotalsCurrency( cart ),
-		paymentMethodTypes: [ 'card' ],
+		paymentMethodTypes: getPaymentMethodTypes(),
 	};
 
 	if ( options.mode === 'payment' ) {
@@ -226,6 +244,7 @@ const checkAvailablePaymentMethods = ( cart ) => {
 		options.mode,
 		options.amount || 0,
 		options.currency,
+		getPaymentMethodTypes().join( ',' ),
 		params?.is_manual_capture ? 'manual' : 'automatic',
 		params?.has_subscription ? 'subscription' : 'standard',
 	].join( ':' );
@@ -261,9 +280,11 @@ const checkAvailablePaymentMethods = ( cart ) => {
 				paymentMethods: {
 					applePay: 'always',
 					googlePay: 'always',
+					amazonPay: getPaymentMethodTypes().includes( 'amazon_pay' )
+						? 'auto'
+						: 'never',
 					link: 'never',
 					paypal: 'never',
-					amazonPay: 'never',
 					klarna: 'never',
 				},
 			} );
@@ -346,6 +367,14 @@ const getPaymentData = ( confirmationTokenId ) => [
 		key: 'wcpay-is-platform-payment-method',
 		value: 'true',
 	},
+	{
+		key: 'wcpay-express-payment-method-types',
+		value: JSON.stringify( getPaymentMethodTypes() ),
+	},
+	{
+		key: 'wcpay-express-checkout-context',
+		value: params.button_context || 'checkout',
+	},
 ];
 
 const redirectToOrder = ( response ) => {
@@ -395,7 +424,7 @@ const ExpressCheckoutContent = ( {
 		);
 
 		expressElementRef.current.on( 'ready', ( event ) => {
-			if ( event?.availablePaymentMethods ) {
+			if ( event?.availablePaymentMethods && methodConfig.loadEvent ) {
 				recordWooPaymentsUserEvent(
 					{
 						...settings,
@@ -410,15 +439,17 @@ const ExpressCheckoutContent = ( {
 
 		expressElementRef.current.on( 'click', ( event ) => {
 			onClick?.();
-			recordWooPaymentsUserEvent(
-				{
-					...settings,
-					ajaxUrl: params.ajax_url,
-					platformTrackerNonce: params?.nonce?.platform_tracker,
-				},
-				methodConfig.clickEvent,
-				{ source: params.button_context || 'checkout' }
-			);
+			if ( methodConfig.clickEvent ) {
+				recordWooPaymentsUserEvent(
+					{
+						...settings,
+						ajaxUrl: params.ajax_url,
+						platformTrackerNonce: params?.nonce?.platform_tracker,
+					},
+					methodConfig.clickEvent,
+					{ source: params.button_context || 'checkout' }
+				);
+			}
 
 			event.resolve( {
 				business: {
@@ -529,7 +560,7 @@ const getExpressPaymentMethod = ( method ) => {
 		canMakePayment: ( { cart } ) => {
 			if (
 				! Array.isArray( params.enabled_methods ) ||
-				! params.enabled_methods.includes( 'payment_request' )
+				! params.enabled_methods.includes( methodConfig.enabledMethod )
 			) {
 				return false;
 			}
@@ -544,12 +575,23 @@ const getExpressPaymentMethod = ( method ) => {
 };
 
 const registerWooPaymentsExpressCheckout = () => {
+	availabilityCache.clear();
+	availabilityStripe = null;
+
 	if (
 		Array.isArray( params.enabled_methods ) &&
 		params.enabled_methods.includes( 'payment_request' )
 	) {
 		registerExpressPaymentMethod( getExpressPaymentMethod( 'applePay' ) );
 		registerExpressPaymentMethod( getExpressPaymentMethod( 'googlePay' ) );
+	}
+
+	if (
+		Array.isArray( params.enabled_methods ) &&
+		params.enabled_methods.includes( 'amazon_pay' ) &&
+		getPaymentMethodTypes().includes( 'amazon_pay' )
+	) {
+		registerExpressPaymentMethod( getExpressPaymentMethod( 'amazonPay' ) );
 	}
 };
 

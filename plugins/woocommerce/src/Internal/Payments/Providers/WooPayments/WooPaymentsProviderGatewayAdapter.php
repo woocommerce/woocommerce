@@ -496,7 +496,7 @@ class WooPaymentsProviderGatewayAdapter {
 			'currency'             => strtolower( (string) $order->get_currency() ),
 			'customer'             => $customer_id,
 			'metadata'             => $this->build_order_metadata( $order, $payment_type, $subscription_payment ),
-			'payment_method_types' => array( 'card' ),
+			'payment_method_types' => $this->get_payment_method_types_for_request( $provider_data, (string) $order->get_currency() ),
 		);
 
 		if ( $this->is_confirmation_token( $payment_credential ) ) {
@@ -547,7 +547,7 @@ class WooPaymentsProviderGatewayAdapter {
 		$request_data         = array(
 			'customer'             => $customer_id,
 			'metadata'             => $this->build_order_metadata( $context->get_order(), $payment_type, $subscription_payment ),
-			'payment_method_types' => array( 'card' ),
+			'payment_method_types' => $this->get_payment_method_types_for_request( $context->get_provider_data(), (string) $context->get_order()->get_currency() ),
 		);
 
 		if ( ! $this->is_confirmation_token( $payment_credential ) ) {
@@ -555,6 +555,24 @@ class WooPaymentsProviderGatewayAdapter {
 		}
 
 		return WooPaymentsPlatformPaymentMethodContext::from_provider_data( $context->get_provider_data() )->apply_to_request_data( $request_data );
+	}
+
+	/**
+	 * Get Stripe payment method types for a native WCPay request.
+	 *
+	 * @param array<string,mixed> $provider_data WooPayments provider data.
+	 * @param string              $currency      Order currency.
+	 * @return array<int,string>
+	 */
+	private function get_payment_method_types_for_request( array $provider_data, string $currency ): array {
+		$submitted_types = $provider_data[ WooPaymentsExpressPaymentMethodTypes::PROVIDER_DATA_KEY ] ?? array();
+		$context         = isset( $provider_data[ WooPaymentsExpressPaymentMethodTypes::PROVIDER_CONTEXT_KEY ] ) && is_scalar( $provider_data[ WooPaymentsExpressPaymentMethodTypes::PROVIDER_CONTEXT_KEY ] )
+			? (string) $provider_data[ WooPaymentsExpressPaymentMethodTypes::PROVIDER_CONTEXT_KEY ]
+			: 'checkout';
+		$allowed_types   = WooPaymentsExpressPaymentMethodTypes::get_allowed_payment_method_types_for_account( $this->get_account_service(), $context, $currency );
+		$validated_types = WooPaymentsExpressPaymentMethodTypes::validate_submitted_payment_method_types( $submitted_types, $allowed_types );
+
+		return empty( $validated_types ) ? array( WooPaymentsExpressPaymentMethodTypes::STRIPE_TYPE_CARD ) : $validated_types;
 	}
 
 	/**

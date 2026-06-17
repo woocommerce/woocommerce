@@ -51,6 +51,7 @@ const baseExpressCheckoutParams = {
 	flags: {
 		isEceUsingConfirmationTokens: true,
 	},
+	payment_method_types: [ 'card' ],
 };
 
 const billing = {
@@ -104,6 +105,7 @@ describe( 'wc-payment-method-woopayments-express-checkout', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 		baseExpressCheckoutParams.enabled_methods = [ 'payment_request' ];
+		baseExpressCheckoutParams.payment_method_types = [ 'card' ];
 		apiFetch.mockResolvedValue( {
 			payment_result: {
 				payment_status: 'success',
@@ -174,6 +176,45 @@ describe( 'wc-payment-method-woopayments-express-checkout', () => {
 				} ),
 			} )
 		);
+	} );
+
+	it( 'registers Amazon Pay as a separate express method when server config enables it', () => {
+		baseExpressCheckoutParams.enabled_methods = [
+			'payment_request',
+			'amazon_pay',
+		];
+		baseExpressCheckoutParams.payment_method_types = [
+			'card',
+			'amazon_pay',
+		];
+
+		registerExpressCheckout();
+
+		expect( registerExpressPaymentMethod ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				name: 'woocommerce_payments_express_checkout_amazonPay',
+				gatewayId: 'woocommerce_payments',
+				paymentMethodId: 'woocommerce_payments_express_checkout',
+			} )
+		);
+		expect( registerExpressPaymentMethod ).toHaveBeenCalledTimes( 3 );
+	} );
+
+	it( 'does not register Amazon Pay when Stripe method types exclude it', () => {
+		baseExpressCheckoutParams.enabled_methods = [
+			'payment_request',
+			'amazon_pay',
+		];
+		baseExpressCheckoutParams.payment_method_types = [ 'card' ];
+
+		registerExpressCheckout();
+
+		expect( registerExpressPaymentMethod ).not.toHaveBeenCalledWith(
+			expect.objectContaining( {
+				name: 'woocommerce_payments_express_checkout_amazonPay',
+			} )
+		);
+		expect( registerExpressPaymentMethod ).toHaveBeenCalledTimes( 2 );
 	} );
 
 	it( 'mounts Stripe ECE with method-specific button options', async () => {
@@ -295,6 +336,48 @@ describe( 'wc-payment-method-woopayments-express-checkout', () => {
 		).resolves.toBe( false );
 	} );
 
+	it( 'probes Stripe Amazon Pay availability before exposing the Blocks Amazon method', async () => {
+		baseExpressCheckoutParams.enabled_methods = [
+			'payment_request',
+			'amazon_pay',
+		];
+		baseExpressCheckoutParams.payment_method_types = [
+			'card',
+			'amazon_pay',
+		];
+		registerExpressCheckout();
+		const amazonPayRegistration =
+			registerExpressPaymentMethod.mock.calls.find(
+				( [ registration ] ) =>
+					registration.name ===
+					'woocommerce_payments_express_checkout_amazonPay'
+			)[ 0 ];
+
+		availablePaymentMethods = {
+			amazonPay: true,
+		};
+
+		await expect(
+			amazonPayRegistration.canMakePayment( { cart: blocksCart } )
+		).resolves.toBe( true );
+
+		expect( stripe.elements ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				paymentMethodTypes: [ 'card', 'amazon_pay' ],
+			} )
+		);
+		expect( elements.create ).toHaveBeenCalledWith(
+			'expressCheckout',
+			expect.objectContaining( {
+				paymentMethods: expect.objectContaining( {
+					applePay: 'always',
+					googlePay: 'always',
+					amazonPay: 'auto',
+				} ),
+			} )
+		);
+	} );
+
 	it( 'places the Blocks order with a confirmation token through Store API', async () => {
 		registerExpressCheckout();
 		const googlePayRegistration =
@@ -349,12 +432,76 @@ describe( 'wc-payment-method-woopayments-express-checkout', () => {
 							key: 'wcpay-is-platform-payment-method',
 							value: 'true',
 						},
+						{
+							key: 'wcpay-express-payment-method-types',
+							value: JSON.stringify( [ 'card' ] ),
+						},
+						{
+							key: 'wcpay-express-checkout-context',
+							value: 'checkout',
+						},
 					] ),
 				} ),
 			} )
 		);
 		expect( checkoutRequest.headers ).not.toHaveProperty(
 			'X-WooPayments-Tokenized-Cart-Session-Nonce'
+		);
+	} );
+
+	it( 'places the Blocks Amazon Pay order with express payment method types', async () => {
+		baseExpressCheckoutParams.enabled_methods = [
+			'payment_request',
+			'amazon_pay',
+		];
+		baseExpressCheckoutParams.payment_method_types = [
+			'card',
+			'amazon_pay',
+		];
+		registerExpressCheckout();
+		const amazonPayRegistration =
+			registerExpressPaymentMethod.mock.calls.find(
+				( [ registration ] ) =>
+					registration.name ===
+					'woocommerce_payments_express_checkout_amazonPay'
+			)[ 0 ];
+
+		render(
+			createElement( amazonPayRegistration.content.type, {
+				...amazonPayRegistration.content.props,
+				billing,
+				onClick: jest.fn(),
+				onClose: jest.fn(),
+				setExpressPaymentError: jest.fn(),
+			} )
+		);
+
+		await waitFor( () => {
+			expect( expressHandlers.confirm ).toBeDefined();
+		} );
+
+		await act( async () => {
+			await expressHandlers.confirm( {
+				billingDetails: {
+					email: 'shopper@example.test',
+					name: 'Ada Lovelace',
+				},
+			} );
+		} );
+
+		const checkoutRequest = apiFetch.mock.calls[ 0 ][ 0 ];
+
+		expect( checkoutRequest.data.payment_data ).toEqual(
+			expect.arrayContaining( [
+				{
+					key: 'wcpay-express-payment-method-types',
+					value: JSON.stringify( [ 'card', 'amazon_pay' ] ),
+				},
+				{
+					key: 'wcpay-express-checkout-context',
+					value: 'checkout',
+				},
+			] )
 		);
 	} );
 } );

@@ -75,6 +75,7 @@ describe( 'WooPayments express checkout', () => {
 			flags: {
 				isEceUsingConfirmationTokens: true,
 			},
+			payment_method_types: [ 'card' ],
 		};
 	}
 
@@ -106,6 +107,17 @@ describe( 'WooPayments express checkout', () => {
 				country: 'US',
 			},
 		};
+	}
+
+	function getOrderPayResponse() {
+		var cartResponse = getCartResponse();
+
+		return Object.assign( {}, cartResponse, {
+			needs_shipping: false,
+			billing_address: Object.assign( {}, cartResponse.billing_address, {
+				email: 'order@example.test',
+			} ),
+		} );
 	}
 
 	beforeEach( () => {
@@ -217,6 +229,90 @@ describe( 'WooPayments express checkout', () => {
 		);
 	} );
 
+	test( 'mounts Stripe ECE with Amazon Pay when server config enables it', async () => {
+		window.wcpayExpressCheckoutParams.enabled_methods = [
+			'payment_request',
+			'amazon_pay',
+		];
+		window.wcpayExpressCheckoutParams.payment_method_types = [
+			'card',
+			'amazon_pay',
+		];
+
+		require( '../woopayments-express-checkout' );
+
+		await bodyEventHandlers.updated_checkout();
+		await flushPromises();
+
+		expect( stripe.elements ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				paymentMethodTypes: [ 'card', 'amazon_pay' ],
+			} )
+		);
+		expect( elements.create ).toHaveBeenCalledWith(
+			'expressCheckout',
+			expect.objectContaining( {
+				paymentMethods: expect.objectContaining( {
+					applePay: 'always',
+					googlePay: 'always',
+					amazonPay: 'auto',
+				} ),
+			} )
+		);
+	} );
+
+	test( 'mounts Stripe ECE when only Amazon Pay is enabled', async () => {
+		window.wcpayExpressCheckoutParams.enabled_methods = [ 'amazon_pay' ];
+		window.wcpayExpressCheckoutParams.payment_method_types = [
+			'amazon_pay',
+		];
+
+		require( '../woopayments-express-checkout' );
+
+		await bodyEventHandlers.updated_checkout();
+		await flushPromises();
+
+		expect( stripe.elements ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				paymentMethodTypes: [ 'amazon_pay' ],
+			} )
+		);
+		expect( elements.create ).toHaveBeenCalledWith(
+			'expressCheckout',
+			expect.objectContaining( {
+				paymentMethods: expect.objectContaining( {
+					applePay: 'never',
+					googlePay: 'never',
+					amazonPay: 'auto',
+				} ),
+			} )
+		);
+	} );
+
+	test( 'does not mount Amazon Pay when Stripe method types exclude it', async () => {
+		window.wcpayExpressCheckoutParams.enabled_methods = [
+			'payment_request',
+			'amazon_pay',
+		];
+		window.wcpayExpressCheckoutParams.payment_method_types = [ 'card' ];
+
+		require( '../woopayments-express-checkout' );
+
+		await bodyEventHandlers.updated_checkout();
+		await flushPromises();
+
+		expect( elements.create ).toHaveBeenCalledWith(
+			'expressCheckout',
+			expect.objectContaining( {
+				paymentMethods: expect.objectContaining( {
+					applePay: 'always',
+					googlePay: 'always',
+					amazonPay: 'never',
+				} ),
+			} )
+		);
+	} );
+
 	test( 'places the classic checkout order with a confirmation token', async () => {
 		window.wp.apiFetch
 			.mockResolvedValueOnce( getCartResponse() )
@@ -259,6 +355,136 @@ describe( 'WooPayments express checkout', () => {
 						{
 							key: 'wcpay-is-platform-payment-method',
 							value: 'true',
+						},
+						{
+							key: 'wcpay-express-payment-method-types',
+							value: JSON.stringify( [ 'card' ] ),
+						},
+						{
+							key: 'wcpay-express-checkout-context',
+							value: 'checkout',
+						},
+					] ),
+				} ),
+			} )
+		);
+	} );
+
+	test( 'places the classic Amazon Pay checkout order with express payment method types', async () => {
+		window.wcpayExpressCheckoutParams.enabled_methods = [
+			'payment_request',
+			'amazon_pay',
+		];
+		window.wcpayExpressCheckoutParams.payment_method_types = [
+			'card',
+			'amazon_pay',
+		];
+		window.wp.apiFetch
+			.mockResolvedValueOnce( getCartResponse() )
+			.mockResolvedValueOnce( {
+				payment_result: {
+					payment_status: 'success',
+				},
+			} );
+		require( '../woopayments-express-checkout' );
+
+		await bodyEventHandlers.updated_checkout();
+		await flushPromises();
+
+		await expressHandlers.confirm( {
+			billingDetails: {
+				email: 'shopper@example.test',
+				name: 'Ada Lovelace',
+			},
+		} );
+
+		expect( window.wp.apiFetch ).toHaveBeenLastCalledWith(
+			expect.objectContaining( {
+				data: expect.objectContaining( {
+					payment_data: expect.arrayContaining( [
+						{
+							key: 'wcpay-express-payment-method-types',
+							value: JSON.stringify( [ 'card', 'amazon_pay' ] ),
+						},
+						{
+							key: 'wcpay-express-checkout-context',
+							value: 'checkout',
+						},
+					] ),
+				} ),
+			} )
+		);
+	} );
+
+	test( 'places the classic pay-for-order payment through the Store API order endpoint', async () => {
+		const resolveClick = jest.fn();
+		window.wcpayExpressCheckoutParams.button_context = 'pay_for_order';
+		window.wcpayExpressCheckoutParams.has_block = true;
+		window.wcpayExpressCheckoutParams.order_id = 123;
+		window.wcpayExpressCheckoutParams.pay_for_order = 'true';
+		window.wcpayExpressCheckoutParams.key = 'wc_order_key_123';
+		window.wcpayExpressCheckoutParams.billing_email = 'order@example.test';
+		window.wp.apiFetch
+			.mockResolvedValueOnce( getOrderPayResponse() )
+			.mockResolvedValueOnce( {
+				payment_result: {
+					payment_status: 'success',
+				},
+			} );
+		require( '../woopayments-express-checkout' );
+
+		await flushPromises();
+
+		expect( window.wp.apiFetch ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				method: 'GET',
+				path: expect.stringContaining( '/wc/store/v1/order/123' ),
+			} )
+		);
+		expect( window.wp.apiFetch.mock.calls[ 0 ][ 0 ].path ).toContain(
+			'key=wc_order_key_123'
+		);
+		expect( window.wp.apiFetch.mock.calls[ 0 ][ 0 ].path ).toContain(
+			'billing_email=order%40example.test'
+		);
+
+		expressHandlers.click( { resolve: resolveClick } );
+		expect( resolveClick ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				shippingAddressRequired: false,
+			} )
+		);
+
+		await expressHandlers.confirm( {
+			billingDetails: {
+				email: 'changed@example.test',
+				name: 'Changed Shopper',
+			},
+		} );
+
+		expect( window.wp.apiFetch ).toHaveBeenLastCalledWith(
+			expect.objectContaining( {
+				method: 'POST',
+				path: '/wc/store/v1/checkout/123',
+				data: expect.objectContaining( {
+					key: 'wc_order_key_123',
+					billing_email: 'order@example.test',
+					billing_address: expect.objectContaining( {
+						email: 'order@example.test',
+					} ),
+					payment_method: 'woocommerce_payments',
+					payment_data: expect.arrayContaining( [
+						{
+							key: 'wcpay-confirmation-token',
+							value: 'ctoken_123',
+						},
+						{
+							key: 'wcpay-express-payment-method-types',
+							value: JSON.stringify( [ 'card' ] ),
+						},
+						{
+							key: 'wcpay-express-checkout-context',
+							value: 'pay_for_order',
 						},
 					] ),
 				} ),

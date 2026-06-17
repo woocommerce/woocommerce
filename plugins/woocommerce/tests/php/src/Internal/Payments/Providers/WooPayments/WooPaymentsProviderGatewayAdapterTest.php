@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymen
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCustomerService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsExpressPaymentMethodTypes;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPaymentMethodDetailsService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProviderGatewayAdapter;
@@ -31,6 +32,8 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_native_woopayments_is_recurring_payment' );
 		remove_all_filters( 'woocommerce_native_woopayments_related_subscriptions_for_order' );
 		remove_all_filters( 'wcpay_metadata_from_order' );
+		delete_option( 'woocommerce_tax_based_on' );
+		delete_option( 'woocommerce_calc_taxes' );
 		parent::tearDown();
 	}
 
@@ -586,6 +589,455 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
 		$this->assertSame( 'cus_recreated', $outcome->get_customer_id() );
 		$this->assertSame( 0, $gateway->processed_order_id );
+	}
+
+	/**
+	 * @testdox Charge should preserve server-allowed express checkout payment method types.
+	 */
+	public function test_charge_preserves_allowed_express_payment_method_types(): void {
+		$order            = $this->create_woopayments_order( '50.00' );
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Last request data.
+			 *
+			 * @var array<string,mixed>
+			 */
+			public array $last_request_data = array();
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				unset( $idempotency_key );
+				$this->last_request_data = $request_data;
+
+				return $this->successful_charge_response();
+			}
+
+			/**
+			 * Create a successful charge response.
+			 *
+			 * @return array<string,mixed>
+			 */
+			private function successful_charge_response(): array {
+				return array(
+					'id'             => 'pi_express',
+					'status'         => 'succeeded',
+					'client_secret'  => 'secret_express',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_express',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 1,
+						'data'        => array(
+							array(
+								'id'                     => 'ch_express',
+								'payment_method'         => 'pm_express',
+								'payment_method_details' => array(
+									'type' => 'card',
+									'card' => array(
+										'brand'   => 'visa',
+										'funding' => 'credit',
+										'last4'   => '4242',
+										'network' => 'visa',
+									),
+								),
+							),
+						),
+					),
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_native' );
+		$account_service = $this->create_account_service(
+			false,
+			array(
+				'express_checkout_checkout_methods' => array( 'payment_request', 'amazon_pay' ),
+				'upe_available_payment_methods'     => array( 'card', 'amazon_pay' ),
+				'upe_enabled_payment_method_ids'    => array( 'card', 'amazon_pay' ),
+			),
+			array(
+				'ece_confirmation_tokens_disabled' => false,
+			)
+		);
+
+		$sut = $this->create_adapter( $gateway, $api_client, $customer_service, null, $account_service );
+		$sut->charge(
+			PaymentContext::for_checkout(
+				$order,
+				OrderPaymentStore::GATEWAY_ID,
+				'ctoken_express',
+				array(),
+				array( 'express_payment_method_types' => array( 'card', 'amazon_pay', 'unknown_method' ) )
+			),
+			'key_charge'
+		);
+
+		$this->assertSame( array( 'card', 'amazon_pay' ), $api_client->last_request_data['payment_method_types'] );
+		$this->assertSame( 'ctoken_express', $api_client->last_request_data['confirmation_token'] );
+		$this->assertArrayNotHasKey( 'payment_method', $api_client->last_request_data );
+	}
+
+	/**
+	 * @testdox Charge should fail closed when submitted express checkout method types are not server-allowed.
+	 */
+	public function test_charge_rejects_unallowed_express_payment_method_types(): void {
+		$order            = $this->create_woopayments_order( '50.00' );
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Last request data.
+			 *
+			 * @var array<string,mixed>
+			 */
+			public array $last_request_data = array();
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				unset( $idempotency_key );
+				$this->last_request_data = $request_data;
+
+				return array(
+					'id'             => 'pi_card',
+					'status'         => 'succeeded',
+					'client_secret'  => 'secret_card',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_card',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 0,
+						'data'        => array(),
+					),
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_native' );
+		$account_service = $this->create_account_service(
+			false,
+			array(
+				'express_checkout_checkout_methods' => array( 'payment_request', 'amazon_pay' ),
+				'upe_available_payment_methods'     => array( 'card' ),
+				'upe_enabled_payment_method_ids'    => array( 'card', 'amazon_pay' ),
+			),
+			array(
+				'ece_confirmation_tokens_disabled' => false,
+			)
+		);
+
+		$sut = $this->create_adapter( $gateway, $api_client, $customer_service, null, $account_service );
+		$sut->charge(
+			PaymentContext::for_checkout(
+				$order,
+				OrderPaymentStore::GATEWAY_ID,
+				'ctoken_express',
+				array(),
+				array( 'express_payment_method_types' => array( 'card', 'amazon_pay' ) )
+			),
+			'key_charge'
+		);
+
+		$this->assertSame( array( 'card' ), $api_client->last_request_data['payment_method_types'] );
+	}
+
+	/**
+	 * @testdox Charge should validate express checkout method types against the order currency.
+	 */
+	public function test_charge_validates_express_payment_method_types_against_order_currency(): void {
+		$order = $this->create_woopayments_order( '50.00' );
+		$order->set_currency( 'EUR' );
+		$order->save();
+
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Last request data.
+			 *
+			 * @var array<string,mixed>
+			 */
+			public array $last_request_data = array();
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				unset( $idempotency_key );
+				$this->last_request_data = $request_data;
+
+				return array(
+					'id'             => 'pi_currency',
+					'status'         => 'succeeded',
+					'client_secret'  => 'secret_currency',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_currency',
+					'currency'       => 'eur',
+					'charges'        => array(
+						'total_count' => 0,
+						'data'        => array(),
+					),
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_native' );
+		$account_service = $this->create_account_service(
+			false,
+			array(
+				'express_checkout_checkout_methods' => array( 'payment_request', 'amazon_pay' ),
+				'upe_available_payment_methods'     => array( 'card', 'amazon_pay' ),
+				'upe_enabled_payment_method_ids'    => array( 'card', 'amazon_pay' ),
+			),
+			array(
+				'country'                          => 'US',
+				'ece_confirmation_tokens_disabled' => false,
+			)
+		);
+
+		$sut = $this->create_adapter( $gateway, $api_client, $customer_service, null, $account_service );
+		$sut->charge(
+			PaymentContext::for_checkout(
+				$order,
+				OrderPaymentStore::GATEWAY_ID,
+				'ctoken_express',
+				array(),
+				array( 'express_payment_method_types' => array( 'card', 'amazon_pay' ) )
+			),
+			'key_charge'
+		);
+
+		$this->assertSame( array( 'card' ), $api_client->last_request_data['payment_method_types'] );
+	}
+
+	/**
+	 * @testdox Charge should validate express checkout method types against checkout-context settings.
+	 */
+	public function test_charge_validates_express_payment_method_types_against_checkout_context_settings(): void {
+		$order            = $this->create_woopayments_order( '50.00' );
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Last request data.
+			 *
+			 * @var array<string,mixed>
+			 */
+			public array $last_request_data = array();
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				unset( $idempotency_key );
+				$this->last_request_data = $request_data;
+
+				return array(
+					'id'             => 'pi_checkout_context',
+					'status'         => 'succeeded',
+					'client_secret'  => 'secret_checkout_context',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_checkout_context',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 0,
+						'data'        => array(),
+					),
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_native' );
+		$account_service = $this->create_account_service(
+			false,
+			array(
+				'express_checkout_cart_methods'     => array( 'payment_request', 'amazon_pay' ),
+				'express_checkout_checkout_methods' => array( 'payment_request' ),
+				'upe_available_payment_methods'     => array( 'card', 'amazon_pay' ),
+				'upe_enabled_payment_method_ids'    => array( 'card', 'amazon_pay' ),
+			),
+			array(
+				'ece_confirmation_tokens_disabled' => false,
+			)
+		);
+
+		$sut = $this->create_adapter( $gateway, $api_client, $customer_service, null, $account_service );
+		$sut->charge(
+			PaymentContext::for_checkout(
+				$order,
+				OrderPaymentStore::GATEWAY_ID,
+				'ctoken_express',
+				array(),
+				array(
+					WooPaymentsExpressPaymentMethodTypes::PROVIDER_DATA_KEY    => array( 'card', 'amazon_pay' ),
+					WooPaymentsExpressPaymentMethodTypes::PROVIDER_CONTEXT_KEY => 'checkout',
+				)
+			),
+			'key_charge'
+		);
+
+		$this->assertSame( array( 'card' ), $api_client->last_request_data['payment_method_types'] );
+	}
+
+	/**
+	 * @testdox Charge should preserve pay-for-order context while validating express checkout method types.
+	 */
+	public function test_charge_preserves_pay_for_order_context_for_express_payment_method_types(): void {
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$order            = $this->create_woopayments_order( '50.00' );
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Last request data.
+			 *
+			 * @var array<string,mixed>
+			 */
+			public array $last_request_data = array();
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				unset( $idempotency_key );
+				$this->last_request_data = $request_data;
+
+				return array(
+					'id'             => 'pi_order_pay_context',
+					'status'         => 'succeeded',
+					'client_secret'  => 'secret_order_pay_context',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_order_pay_context',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 0,
+						'data'        => array(),
+					),
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_native' );
+		$account_service = $this->create_account_service(
+			false,
+			array(
+				'express_checkout_checkout_methods' => array( 'payment_request', 'amazon_pay' ),
+				'upe_available_payment_methods'     => array( 'card', 'amazon_pay' ),
+				'upe_enabled_payment_method_ids'    => array( 'card', 'amazon_pay' ),
+			),
+			array(
+				'ece_confirmation_tokens_disabled' => false,
+			)
+		);
+
+		$sut = $this->create_adapter( $gateway, $api_client, $customer_service, null, $account_service );
+		$sut->charge(
+			PaymentContext::for_checkout(
+				$order,
+				OrderPaymentStore::GATEWAY_ID,
+				'ctoken_express',
+				array(),
+				array(
+					WooPaymentsExpressPaymentMethodTypes::PROVIDER_DATA_KEY    => array( 'card', 'amazon_pay' ),
+					WooPaymentsExpressPaymentMethodTypes::PROVIDER_CONTEXT_KEY => 'pay_for_order',
+				)
+			),
+			'key_charge'
+		);
+
+		$this->assertSame( array( 'card', 'amazon_pay' ), $api_client->last_request_data['payment_method_types'] );
 	}
 
 	/**
@@ -1543,17 +1995,41 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	/**
 	 * Create a WooPayments account service mock.
 	 *
-	 * @param bool $test_mode Whether WooPayments should run in test mode.
+	 * @param bool                $test_mode    Whether WooPayments should run in test mode.
+	 * @param array<string,mixed> $settings     Gateway settings.
+	 * @param array<string,mixed> $account_data Cached account data.
 	 * @return WooPaymentsAccountService
 	 */
-	private function create_account_service( bool $test_mode ): WooPaymentsAccountService {
+	private function create_account_service( bool $test_mode, array $settings = array(), array $account_data = array() ): WooPaymentsAccountService {
 		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
 			->disableOriginalConstructor()
-			->onlyMethods( array( 'is_test_mode_enabled', 'get_mode' ) )
+			->onlyMethods( array( 'is_test_mode_enabled', 'get_mode', 'get_gateway_setting', 'get_cached_account_data' ) )
 			->getMock();
 
 		$account_service->method( 'is_test_mode_enabled' )->willReturn( $test_mode );
 		$account_service->method( 'get_mode' )->willReturn( $test_mode ? 'test' : 'live' );
+		$account_service->method( 'get_gateway_setting' )->willReturnCallback(
+			static fn( string $key, $fallback = null ) => array_key_exists( $key, $settings ) ? $settings[ $key ] : $fallback
+		);
+		$account_service->method( 'get_cached_account_data' )->willReturn(
+			array_merge(
+				array(
+					'country'          => 'US',
+					'payments_enabled' => true,
+					'capabilities'     => array(
+						'amazon_pay_payments' => 'active',
+					),
+					'fees'             => array(
+						'amazon_pay' => array(
+							'base' => array(
+								'currency' => 'usd',
+							),
+						),
+					),
+				),
+				$account_data
+			)
+		);
 
 		return $account_service;
 	}

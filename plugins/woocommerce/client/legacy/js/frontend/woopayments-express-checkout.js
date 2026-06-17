@@ -15,6 +15,10 @@
 		return config.button_context || ( config.button && config.button.context ) || 'checkout';
 	}
 
+	function isPayForOrder() {
+		return getButtonContext() === 'pay_for_order' && config.order_id;
+	}
+
 	function isBlockSurface() {
 		return config.has_block && getButtonContext() !== 'pay_for_order';
 	}
@@ -26,7 +30,27 @@
 		);
 	}
 
-	function getStoreApiHeaders( includeSessionNonce ) {
+	function isAmazonPayEnabled() {
+		return (
+			Array.isArray( config.enabled_methods ) &&
+			config.enabled_methods.indexOf( 'amazon_pay' ) !== -1 &&
+			getPaymentMethodTypes().indexOf( 'amazon_pay' ) !== -1
+		);
+	}
+
+	function getPaymentMethodTypes() {
+		var paymentMethodTypes = Array.isArray( config.payment_method_types )
+			? config.payment_method_types
+			: [ 'card' ];
+
+		paymentMethodTypes = paymentMethodTypes.filter( function ( type ) {
+			return [ 'card', 'amazon_pay' ].indexOf( type ) !== -1;
+		} );
+
+		return paymentMethodTypes.length ? paymentMethodTypes : [ 'card' ];
+	}
+
+	function getStoreApiHeaders( includeSessionNonce, includeTokenizedCartNonce ) {
 		var nonce = config.nonce || {};
 		var headers = {};
 
@@ -34,7 +58,7 @@
 			headers.Nonce = nonce.store_api_nonce;
 		}
 
-		if ( nonce.tokenized_cart_nonce ) {
+		if ( includeTokenizedCartNonce !== false && nonce.tokenized_cart_nonce ) {
 			headers[ 'X-WooPayments-Tokenized-Cart-Nonce' ] =
 				nonce.tokenized_cart_nonce;
 		}
@@ -47,6 +71,23 @@
 		return headers;
 	}
 
+	function addQueryArgs( path, args ) {
+		var query = Object.keys( args )
+			.filter( function ( key ) {
+				return args[ key ] !== undefined && args[ key ] !== null && args[ key ] !== '';
+			} )
+			.map( function ( key ) {
+				return (
+					encodeURIComponent( key ) +
+					'=' +
+					encodeURIComponent( args[ key ] )
+				);
+			} )
+			.join( '&' );
+
+		return query ? path + '?' + query : path;
+	}
+
 	function requestCart( options ) {
 		var apiFetch = getApiFetch();
 		var includeSessionNonce = getButtonContext() === 'product';
@@ -55,7 +96,21 @@
 			Object.assign( {}, options, {
 				headers: Object.assign(
 					{},
-					getStoreApiHeaders( includeSessionNonce ),
+					getStoreApiHeaders( includeSessionNonce, true ),
+					options.headers || {}
+				),
+			} )
+		);
+	}
+
+	function requestOrder( options ) {
+		var apiFetch = getApiFetch();
+
+		return apiFetch(
+			Object.assign( {}, options, {
+				headers: Object.assign(
+					{},
+					getStoreApiHeaders( false, false ),
 					options.headers || {}
 				),
 			} )
@@ -63,6 +118,16 @@
 	}
 
 	function getCart() {
+		if ( isPayForOrder() ) {
+			return requestOrder( {
+				method: 'GET',
+				path: addQueryArgs( '/wc/store/v1/order/' + config.order_id, {
+					key: config.key,
+					billing_email: config.billing_email,
+				} ),
+			} );
+		}
+
 		return requestCart( {
 			method: 'GET',
 			path: '/wc/store/v1/cart',
@@ -149,7 +214,7 @@
 				googlePay: isPaymentRequestEnabled() ? 'always' : 'never',
 				link: 'never',
 				paypal: 'never',
-				amazonPay: 'never',
+				amazonPay: isAmazonPayEnabled() ? 'auto' : 'never',
 				klarna: 'never',
 			},
 		};
@@ -162,7 +227,7 @@
 			amount: amount,
 			currency: getCurrency( cartData ),
 			loader: 'never',
-			paymentMethodTypes: [ 'card' ],
+			paymentMethodTypes: getPaymentMethodTypes(),
 		};
 
 		if ( config.is_manual_capture ) {
@@ -328,10 +393,35 @@
 				key: 'wcpay-is-platform-payment-method',
 				value: 'true',
 			},
+			{
+				key: 'wcpay-express-payment-method-types',
+				value: JSON.stringify( getPaymentMethodTypes() ),
+			},
+			{
+				key: 'wcpay-express-checkout-context',
+				value: getButtonContext(),
+			},
 		];
 	}
 
 	function placeOrder( confirmationTokenId, event ) {
+		if ( isPayForOrder() ) {
+			return requestOrder( {
+				method: 'POST',
+				path: '/wc/store/v1/checkout/' + config.order_id,
+				data: {
+					key: config.key,
+					billing_email: config.billing_email,
+					payment_method: 'woocommerce_payments',
+					billing_address:
+						cachedCartData && cachedCartData.billing_address,
+					shipping_address:
+						cachedCartData && cachedCartData.shipping_address,
+					payment_data: getPaymentData( confirmationTokenId ),
+				},
+			} );
+		}
+
 		return requestCart( {
 			method: 'POST',
 			path: '/wc/store/v1/checkout',
@@ -370,11 +460,13 @@
 			phoneNumberRequired: Boolean(
 				config.checkout && config.checkout.needs_payer_phone
 			),
-			shippingAddressRequired: Boolean(
-				cachedCartData
-					? cachedCartData.needs_shipping
-					: config.checkout && config.checkout.needs_shipping
-			),
+			shippingAddressRequired: isPayForOrder()
+				? false
+				: Boolean(
+						cachedCartData
+							? cachedCartData.needs_shipping
+							: config.checkout && config.checkout.needs_shipping
+				  ),
 			allowedShippingCountries:
 				( config.checkout &&
 					config.checkout.allowed_shipping_countries ) ||
@@ -388,7 +480,7 @@
 
 		if (
 			isBlockSurface() ||
-			! isPaymentRequestEnabled() ||
+			! ( isPaymentRequestEnabled() || isAmazonPayEnabled() ) ||
 			! getApiFetch() ||
 			! document.getElementById( 'wcpay-express-checkout-element' )
 		) {
