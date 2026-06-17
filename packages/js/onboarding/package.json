@@ -24,16 +24,13 @@
 		".": {
 			"wc-source": "./src/index.ts",
 			"types": "./build-types/index.d.ts",
-			"import": "./build-module/index.js",
-			"require": "./build/index.js"
+			"import": "./build-module/index.js"
 		}
 	},
-	"main": "build/index.js",
 	"module": "build-module/index.js",
 	"types": "build-types/index.d.ts",
 	"react-native": "src/index",
 	"files": [
-		"build",
 		"build-module",
 		"build-style",
 		"build-types"
@@ -44,7 +41,6 @@
 		"build:project:bundle": "NODE_ENV=production webpack",
 		"build:project:esm": "node build.mjs",
 		"build:publish:project": "pnpm --stream '/^build:publish:project:.*$/'",
-		"build:publish:project:cjs": "node build.mjs --commonjs",
 		"build:publish:project:types": "tsc --build --emitDeclarationOnly",
 		"build:publish:project:runtime": "pnpm build:project",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
@@ -110,8 +106,7 @@
 		"exports": {
 			".": {
 				"types": "./build-types/index.d.ts",
-				"import": "./build-module/index.js",
-				"require": "./build/index.js"
+				"import": "./build-module/index.js"
 			}
 		}
 	},

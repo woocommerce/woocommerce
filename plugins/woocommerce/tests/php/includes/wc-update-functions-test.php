@@ -323,4 +323,19 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'yes', get_option( 'woocommerce_analytics_scheduled_import' ) );
 		$this->assertFalse( get_option( 'woocommerce_analytics_immediate_import' ) );
 	}
+
+	/**
+	 * @testdox Migration sets the point_of_sale feature flag option to yes regardless of the previous value.
+	 */
+	public function test_wc_update_1100_enable_point_of_sale_feature(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		update_option( 'woocommerce_feature_point_of_sale_enabled', 'no' );
+		wc_update_1100_enable_point_of_sale_feature();
+		$this->assertSame( 'yes', get_option( 'woocommerce_feature_point_of_sale_enabled' ) );
+
+		delete_option( 'woocommerce_feature_point_of_sale_enabled' );
+		wc_update_1100_enable_point_of_sale_feature();
+		$this->assertSame( 'yes', get_option( 'woocommerce_feature_point_of_sale_enabled' ) );
+	}
 }

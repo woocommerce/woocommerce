@@ -111,7 +111,7 @@ baz/project-d/baz.js`;
 		jest.mocked( execSync ).mockImplementation( ( command ) => {
 			if ( command === 'git diff --name-only origin/trunk' ) {
 				return `plugins/woocommerce/changelog/fix-123
-plugins/woocommerce/client/blocks/tests/e2e/test.spec.ts
+plugins/woocommerce/tests/e2e-pw/tests/blocks/test.spec.ts
 plugins/woocommerce/client/blocks/src/block.tsx`;
 			}
 
@@ -128,7 +128,7 @@ plugins/woocommerce/client/blocks/src/block.tsx`;
 							type: JobType.Test,
 							testType: 'e2e',
 							name: 'Blocks e2e tests',
-							changes: [ /^client\/blocks\/tests\/e2e\/.*/ ],
+							changes: [ /^tests\/e2e-pw\/tests\/blocks\/.*/ ],
 							command: 'test:e2e:blocks',
 							events: [ 'pull_request' ],
 							shardingArguments: [],
@@ -155,12 +155,9 @@ plugins/woocommerce/client/blocks/src/block.tsx`;
 			expect( fileChanges ).toMatchObject( {
 				'@woocommerce/plugin-woocommerce': [
 					'changelog/fix-123',
-					'client/blocks/tests/e2e/test.spec.ts',
+					'tests/e2e-pw/tests/blocks/test.spec.ts',
 				],
-				'@woocommerce/block-library': [
-					'tests/e2e/test.spec.ts',
-					'src/block.tsx',
-				],
+				'@woocommerce/block-library': [ 'src/block.tsx' ],
 			} );
 		}
 	} );
@@ -185,7 +182,7 @@ plugins/woocommerce/client/blocks/assets/style.scss`;
 							type: JobType.Test,
 							testType: 'e2e',
 							name: 'Blocks e2e tests',
-							changes: [ /^client\/blocks\/tests\/e2e\/.*/ ],
+							changes: [ /^tests\/e2e-pw\/tests\/blocks\/.*/ ],
 							command: 'test:e2e:blocks',
 							events: [ 'pull_request' ],
 							shardingArguments: [],
@@ -222,7 +219,7 @@ plugins/woocommerce/client/blocks/assets/style.scss`;
 	it( 'should handle multiple CI config patterns from different jobs', () => {
 		jest.mocked( execSync ).mockImplementation( ( command ) => {
 			if ( command === 'git diff --name-only origin/trunk' ) {
-				return `plugins/woocommerce/client/blocks/tests/e2e/test.spec.ts
+				return `plugins/woocommerce/tests/e2e-pw/tests/blocks/test.spec.ts
 plugins/woocommerce/client/blocks/tests/unit/test.spec.ts
 plugins/woocommerce/client/blocks/src/block.tsx`;
 			}
@@ -240,7 +237,7 @@ plugins/woocommerce/client/blocks/src/block.tsx`;
 							type: JobType.Test,
 							testType: 'e2e',
 							name: 'Blocks e2e tests',
-							changes: [ /^client\/blocks\/tests\/e2e\/.*/ ],
+							changes: [ /^tests\/e2e-pw\/tests\/blocks\/.*/ ],
 							command: 'test:e2e:blocks',
 							events: [ 'pull_request' ],
 							shardingArguments: [],
@@ -273,11 +270,10 @@ plugins/woocommerce/client/blocks/src/block.tsx`;
 		if ( fileChanges !== true ) {
 			expect( fileChanges ).toMatchObject( {
 				'@woocommerce/plugin-woocommerce': [
-					'client/blocks/tests/e2e/test.spec.ts',
+					'tests/e2e-pw/tests/blocks/test.spec.ts',
 					'client/blocks/tests/unit/test.spec.ts',
 				],
 				'@woocommerce/block-library': [
-					'tests/e2e/test.spec.ts',
 					'tests/unit/test.spec.ts',
 					'src/block.tsx',
 				],
