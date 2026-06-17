@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Preserve native WooPay session routes, AJAX actions, and checkout config.
