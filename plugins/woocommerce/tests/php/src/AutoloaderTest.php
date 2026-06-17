@@ -9,6 +9,16 @@ use Composer\Autoload\ClassLoader;
 /**
  * Tests for the WooCommerce-scoped Composer PSR-4 fallback autoloader.
  *
+ * Coverage boundary: register_woocommerce_psr4_fallback()'s decline-to-null path (a foreign-shaped
+ * probe loader) is pinned only at the helper level — see read_scoped_psr4_map() and
+ * read_scoped_file_path() below. It is not driven end-to-end through register_() because that would
+ * need two production testing seams on a bootstrap surface: register_() binds
+ * build_woocommerce_psr4_fallback() with early static binding (self::, so a subclass override won't
+ * dispatch) and memoizes its handler in a function-static that the woocommerce.php bootstrap already
+ * populates before any test runs (and PHP cannot reset a function-static). The helper tests guard
+ * the same null-returning logic; if the null-check wiring in register_() is ever refactored, add
+ * those seams to cover the contract end-to-end.
+ *
  * @package Automattic\WooCommerce\Tests
  */
 class AutoloaderTest extends \WC_Unit_Test_Case {
