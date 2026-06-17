@@ -2863,12 +2863,6 @@ parameters:
 			path: includes/admin/class-wc-admin-settings.php
 
 		-
-			message: '#^Method WC_Admin_Settings\:\:reset_settings_pages_on_feature_change\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-wc-admin-settings.php
-
-		-
 			message: '#^Method WC_Admin_Settings\:\:save\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -26989,12 +26983,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
 
 		-
-			message: '#^Access to an undefined property WC_REST_Products_V2_Controller\:\:\$request\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
 			message: '#^Call to an undefined method WC_Data\:\:get_children\(\)\.$#'
 			identifier: method.notFound
 			count: 4
@@ -50654,12 +50642,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AttributeFilter.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Breadcrumbs\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/Breadcrumbs.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Cart\:\:enqueue_assets\(\) has no return type specified\.$#'
