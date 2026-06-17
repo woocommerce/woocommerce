@@ -9,6 +9,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { test as baseTest, expect, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { checkCartContent } from '../../utils/cart';
+import { getFakeCategory } from '../../utils/data';
 
 const productData = {
 	virtual: {
@@ -62,10 +63,13 @@ const test = baseTest.extend( {
 	category: async ( { restApi }, use ) => {
 		let category = {};
 
+		// Use a random term so parallel workers don't collide on the same
+		// `Date.now()` category name (which fails with a 400 term_exists).
 		await restApi
-			.post( `${ WC_API_PATH }/products/categories`, {
-				name: `cat_${ Date.now() }`,
-			} )
+			.post(
+				`${ WC_API_PATH }/products/categories`,
+				getFakeCategory( { extraRandomTerm: true } )
+			)
 			.then( ( response ) => {
 				category = response.data;
 			} );
@@ -329,8 +333,11 @@ for ( const productType of Object.keys( productData ) ) {
 				await page.context().clearCookies();
 				await page.reload();
 
+				// Use an exact match so the related-products block buttons
+				// ("Add to cart: <name>") that may show products created by
+				// parallel workers don't collide with the single product's button.
 				await page
-					.getByRole( 'button', { name: 'Add to cart' } )
+					.getByRole( 'button', { name: 'Add to cart', exact: true } )
 					.click();
 				await page.getByRole( 'link', { name: 'View cart' } ).click();
 
