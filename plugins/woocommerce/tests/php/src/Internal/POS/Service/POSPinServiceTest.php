@@ -212,6 +212,23 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject a record whose decoded salt or hash length is wrong.
+	 */
+	public function test_verify_pin_rejects_wrong_length_salt_or_hash(): void {
+		$this->sut->set_pin( $this->user_id, '4321' );
+		$record = $this->sut->get_public_pin_record( $this->user_id );
+
+		// Valid base64, but the decoded salt/hash are the wrong size for the declared format.
+		$short_salt         = $record;
+		$short_salt['salt'] = base64_encode( random_bytes( POSPinService::SALT_BYTES - 1 ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+		$this->assertFalse( $this->sut->verify_pin( '4321', $short_salt ), 'Wrong salt length must be rejected.' );
+
+		$short_hash         = $record;
+		$short_hash['hash'] = base64_encode( random_bytes( POSPinService::HASH_BYTES - 1 ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+		$this->assertFalse( $this->sut->verify_pin( '4321', $short_hash ), 'Wrong hash length must be rejected.' );
+	}
+
+	/**
 	 * @testdox Should return null from get_public_pin_record when no PIN is set.
 	 */
 	public function test_get_public_pin_record_returns_null_when_unset(): void {
