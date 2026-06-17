@@ -448,12 +448,15 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 	public function test_sync_monetary_only_refund_with_float_quantities() {
 		WC_Helper_Reports::reset_stats_dbs();
 
-		// Simulate a decimal-quantity setup (e.g. WCPOS) where stock amounts are floats.
+		// Simulate a decimal-quantity setup (e.g. WCPOS), which swaps WooCommerce's default
+		// intval coercion for floatval so that stock amounts become floats. Removing intval first
+		// makes the float coercion deterministic rather than relying on same-priority filter order.
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
 		add_filter( 'woocommerce_stock_amount', 'floatval' );
 
-		// Use try/finally so the global filter is always detached, even if an assertion fails
-		// or sync_order_products() throws (the regression this test guards against), to avoid
-		// leaking the float coercion into later tests.
+		// Use try/finally so the filters are always restored to WooCommerce's default, even if an
+		// assertion fails or sync_order_products() throws (the regression this test guards against),
+		// to avoid leaking the float coercion into later tests.
 		try {
 			$product = new WC_Product_Simple();
 			$product->set_name( 'Test Product' );
@@ -492,6 +495,8 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 			$this->assertTrue( $result, 'Syncing the refund should complete without a Division by zero error' );
 		} finally {
 			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			// Restore WooCommerce's default coercion for later tests.
+			add_filter( 'woocommerce_stock_amount', 'intval' );
 		}
 	}
 

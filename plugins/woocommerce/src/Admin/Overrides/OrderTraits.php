@@ -19,7 +19,7 @@ trait OrderTraits {
 	 * Calculate shipping amount for line item/product as a total shipping amount ratio based on quantity.
 	 *
 	 * @param WC_Order_Item $item              Line item from order.
-	 * @param int           $order_items_count (optional) The number of order items in an order. This could be the remaining items left to refund.
+	 * @param int|float     $order_items_count (optional) The number of order items in an order. This could be the remaining items left to refund.
 	 * @param float         $shipping_amount   (optional) The shipping fee amount in an order. This could be the remaining shipping amount left to refund.
 	 *
 	 * @return float|int
@@ -57,7 +57,7 @@ trait OrderTraits {
 	 * @todo If WC is currently not tax enabled, but it was before (or vice versa), would this work correctly?
 	 *
 	 * @param WC_Order_Item $item Line item from order.
-	 * @param int           $order_items_count   (optional) The number of order items in an order. This could be the remaining items left to refund.
+	 * @param int|float     $order_items_count   (optional) The number of order items in an order. This could be the remaining items left to refund.
 	 * @param float         $shipping_tax_amount (optional) The shipping tax amount in an order. This could be the remaining shipping tax amount left to refund.
 	 *
 	 * @return float|int
