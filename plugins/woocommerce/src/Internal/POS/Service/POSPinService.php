@@ -34,11 +34,6 @@ class POSPinService {
 	public const PIN_LENGTH     = 4;
 
 	/**
-	 * Seconds to wait for the PIN-write lock before proceeding without it (best-effort).
-	 */
-	private const PIN_LOCK_TIMEOUT = 5;
-
-	/**
 	 * Set or replace a user's POS PIN.
 	 *
 	 * PINs are the sole operator identifier on the POS device (the merchant taps a
@@ -52,9 +47,14 @@ class POSPinService {
 	 * be invisible to it and become a latent collision the moment that user is later
 	 * granted POS caps — this method rejects that case rather than create the record.
 	 *
-	 * The uniqueness scan and the write are serialized under a MySQL named lock so two
-	 * concurrent calls can't both pass the collision check and persist the same PIN
-	 * (see {@see set_pin_locked()}).
+	 * The uniqueness check is best-effort: it is a read-then-write, so two near-simultaneous
+	 * calls for different users could both pass before either writes and end up sharing a PIN.
+	 * A PIN is stored as a per-record salted hash, so it cannot be guarded by a unique DB index
+	 * the way core enforces SKUs ({@see WC_Product_Data_Store_CPT::obtain_lock_on_sku_for_concurrent_requests()}),
+	 * and WordPress offers no portable atomic "reserve value" primitive — mirroring the same
+	 * documented trade-off in {@see \Automattic\WooCommerce\Api\Mutations\Products\CreateProduct}.
+	 * If strict uniqueness is ever required, the caller should enforce it at a higher layer
+	 * (e.g. a mutex around the REST handler) rather than assume this service guarantees it.
 	 *
 	 * @param int    $user_id The target user ID.
 	 * @param string $pin     The plaintext 4-digit PIN. Must match the PIN_LENGTH constant.
@@ -80,37 +80,6 @@ class POSPinService {
 			);
 		}
 
-		global $wpdb;
-
-		// Serialize the uniqueness scan + write. Without this, two concurrent set_pin() calls for
-		// different users could both pass is_pin_used_by_other_user() before either writes, persisting
-		// the same PIN twice — the exact collision the scan exists to prevent. A PIN is a salted hash,
-		// so it can't be guarded with a unique DB index the way core does for SKUs
-		// (WC_Product_Data_Store_CPT::obtain_lock_on_sku_for_concurrent_requests); a MySQL named lock is
-		// the cross-process primitive available without a persistent object cache. The lock name is
-		// prefixed per-site so installs sharing a MySQL server don't contend. Acquisition is
-		// best-effort: if the lock can't be taken (timeout/unsupported), we proceed rather than block a
-		// legitimate change, accepting the same narrow race we would have had without it.
-		$lock_name = $wpdb->prefix . 'wc_pos_pin_write';
-		$got_lock  = 1 === (int) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $lock_name, self::PIN_LOCK_TIMEOUT ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-
-		try {
-			return $this->set_pin_locked( $user_id, $pin );
-		} finally {
-			if ( $got_lock ) {
-				$wpdb->query( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			}
-		}
-	}
-
-	/**
-	 * The uniqueness scan and write half of set_pin(), run inside the named lock.
-	 *
-	 * @param int    $user_id The target user ID. Assumed POS-access and format checks already passed.
-	 * @param string $pin     The plaintext 4-digit PIN.
-	 * @return true|WP_Error  True on success, WP_Error when the PIN is already in use.
-	 */
-	private function set_pin_locked( int $user_id, string $pin ) {
 		if ( $this->is_pin_used_by_other_user( $pin, $user_id ) ) {
 			return new WP_Error(
 				'woocommerce_pos_pin_in_use',
