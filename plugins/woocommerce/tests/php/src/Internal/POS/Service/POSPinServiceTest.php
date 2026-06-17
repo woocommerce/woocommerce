@@ -108,6 +108,23 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject set_pin for a user without POS access.
+	 *
+	 * Uniqueness is scoped to POS-access users, so a PIN stored on a non-POS user would be a
+	 * latent collision once they gain POS caps. set_pin must refuse to create that record.
+	 */
+	public function test_set_pin_rejects_user_without_pos_access(): void {
+		$non_pos_user           = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$this->extra_user_ids[] = $non_pos_user;
+
+		$result = $this->sut->set_pin( $non_pos_user, '1234' );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_pos_no_pos_access', $result->get_error_code() );
+		$this->assertFalse( $this->sut->has_pin( $non_pos_user ) );
+	}
+
+	/**
 	 * @testdox Should produce a unique salt per set_pin call.
 	 */
 	public function test_set_pin_generates_unique_salt_each_call(): void {
@@ -226,8 +243,8 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	 *
 	 * A non-POS user with a stale `woocommerce_pos_pin` meta entry (e.g. left over
 	 * from v1 or a manual edit) must not block a real POS staff member from using
-	 * the same plaintext PIN. Uniqueness is scoped to users with the POS preset
-	 * meta set — non-POS users are invisible to the uniqueness scan.
+	 * the same plaintext PIN. Uniqueness is scoped to users with POS access — holders
+	 * of any `woocommerce_pos_*` capability — so non-POS users are invisible to the scan.
 	 */
 	public function test_set_pin_ignores_non_pos_staff_users_with_stale_pin_meta(): void {
 		$non_pos_user           = self::factory()->user->create( array( 'role' => 'subscriber' ) );

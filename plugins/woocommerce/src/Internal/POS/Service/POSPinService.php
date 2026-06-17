@@ -42,10 +42,15 @@ class POSPinService {
 	 * keying in 1234. To prevent that, this method PBKDF2-verifies the candidate
 	 * against every other stored PIN record and rejects on first match.
 	 *
+	 * The target must already have POS access (hold a `woocommerce_pos_*` capability).
+	 * The uniqueness scan only covers POS staff, so a PIN stored on a non-POS user would
+	 * be invisible to it and become a latent collision the moment that user is later
+	 * granted POS caps — this method rejects that case rather than create the record.
+	 *
 	 * @param int    $user_id The target user ID.
 	 * @param string $pin     The plaintext 4-digit PIN. Must match the PIN_LENGTH constant.
-	 * @return true|WP_Error  True on success, WP_Error on invalid PIN format or
-	 *                        when the PIN is already in use by another user.
+	 * @return true|WP_Error  True on success, WP_Error when the user lacks POS access, the
+	 *                        PIN format is invalid, or the PIN is already in use by another user.
 	 *
 	 * @since 11.0.0
 	 */
@@ -55,6 +60,14 @@ class POSPinService {
 				'woocommerce_pos_invalid_pin_format',
 				__( 'PIN must be exactly 4 digits.', 'woocommerce' ),
 				array( 'status' => 422 )
+			);
+		}
+
+		if ( ! Capabilities::has_pos_access( $user_id ) ) {
+			return new WP_Error(
+				'woocommerce_pos_no_pos_access',
+				__( 'A POS PIN can only be set for a staff member with POS access.', 'woocommerce' ),
+				array( 'status' => 400 )
 			);
 		}
 
