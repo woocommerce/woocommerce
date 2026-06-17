@@ -187,26 +187,26 @@ function wc_get_weight( $weight, $to_unit, $from_unit = '' ) {
 	// Unify all units to kg first.
 	if ( $from_unit !== $to_unit ) {
 		switch ( $from_unit ) {
-			case WeightUnit::GRAMS:
+			case WeightUnit::GRAM:
 				$weight *= 0.001;
 				break;
-			case WeightUnit::POUNDS:
+			case WeightUnit::POUND:
 				$weight *= 0.453592;
 				break;
-			case WeightUnit::OUNCES:
+			case WeightUnit::OUNCE:
 				$weight *= 0.0283495;
 				break;
 		}
 
 		// Output desired unit.
 		switch ( $to_unit ) {
-			case WeightUnit::GRAMS:
+			case WeightUnit::GRAM:
 				$weight *= 1000;
 				break;
-			case WeightUnit::POUNDS:
+			case WeightUnit::POUND:
 				$weight *= 2.20462;
 				break;
-			case WeightUnit::OUNCES:
+			case WeightUnit::OUNCE:
 				$weight *= 35.274;
 				break;
 		}

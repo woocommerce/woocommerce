@@ -8,34 +8,34 @@ namespace Automattic\WooCommerce\Enums;
  * Enum class for the possible values of the `woocommerce_weight_unit` option,
  * which determines the weight unit used throughout the store.
  *
- * @since 10.8.0
+ * @since 11.0.0
  */
 final class WeightUnit {
 	/**
-	 * Kilograms.
+	 * Kilogram.
 	 *
 	 * @var string
 	 */
-	public const KILOGRAMS = 'kg';
+	public const KILOGRAM = 'kg';
 
 	/**
-	 * Grams.
+	 * Gram.
 	 *
 	 * @var string
 	 */
-	public const GRAMS = 'g';
+	public const GRAM = 'g';
 
 	/**
-	 * Pounds.
+	 * Pound.
 	 *
 	 * @var string
 	 */
-	public const POUNDS = 'lbs';
+	public const POUND = 'lbs';
 
 	/**
-	 * Ounces.
+	 * Ounce.
 	 *
 	 * @var string
 	 */
-	public const OUNCES = 'oz';
+	public const OUNCE = 'oz';
 }

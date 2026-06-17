@@ -244,7 +244,7 @@ class Controller extends AbstractController {
 				 *
 				 * @param array $weight_units Array of weight unit strings.
 				 */
-				$valid_units = apply_filters( 'woocommerce_weight_units', array( WeightUnit::KILOGRAMS, WeightUnit::GRAMS, WeightUnit::POUNDS, WeightUnit::OUNCES ) );
+				$valid_units = apply_filters( 'woocommerce_weight_units', array( WeightUnit::KILOGRAM, WeightUnit::GRAM, WeightUnit::POUND, WeightUnit::OUNCE ) );
 				if ( ! in_array( $value, $valid_units, true ) ) {
 					return new WP_Error(
 						'rest_invalid_param',
