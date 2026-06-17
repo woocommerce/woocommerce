@@ -10,6 +10,8 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPayments;
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils as SettingsUtils;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 
@@ -243,12 +245,12 @@ class Plugins extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|array Plugin Status
 	 */
 	public function install_plugins( $request ) {
-		$plugins = explode( ',', $request['plugins'] );
-		$source  = ! empty( $request['source'] ) ? $request['source'] : null;
-
-		if ( empty( $request['plugins'] ) || ! is_array( $plugins ) ) {
+		if ( empty( $request['plugins'] ) || ! is_string( $request['plugins'] ) ) {
 			return new \WP_Error( 'woocommerce_rest_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
 		}
+
+		$plugins = explode( ',', $request['plugins'] );
+		$source  = ! empty( $request['source'] ) ? $request['source'] : null;
 
 		if ( isset( $request['async'] ) && $request['async'] ) {
 			$job_id = PluginsHelper::schedule_install_plugins( $plugins );
@@ -358,11 +360,11 @@ class Plugins extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|array Plugin Status
 	 */
 	public function activate_plugins( $request ) {
-		$plugins = explode( ',', $request['plugins'] );
-
-		if ( empty( $request['plugins'] ) || ! is_array( $plugins ) ) {
+		if ( empty( $request['plugins'] ) || ! is_string( $request['plugins'] ) ) {
 			return new \WP_Error( 'woocommerce_rest_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
 		}
+
+		$plugins = explode( ',', $request['plugins'] );
 
 		if ( isset( $request['async'] ) && $request['async'] ) {
 			$job_id = PluginsHelper::schedule_activate_plugins( $plugins );
@@ -639,7 +641,14 @@ class Plugins extends \WC_REST_Data_Controller {
 	public function connect_wcpay() {
 		$legacy_runtime = $this->get_woopayments_legacy_runtime();
 		if ( null === $legacy_runtime || ! $legacy_runtime->is_loaded() ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooPayments plugin.', 'woocommerce' ), 500 );
+			return array(
+				'connectUrl' => SettingsUtils::wc_payments_settings_url(
+					'/woopayments/onboarding',
+					array(
+						'from' => SettingsPayments::FROM_PAYMENTS_TASK,
+					)
+				),
+			);
 		}
 
 		// Use a WooPayments connect link to let the WooPayments plugin handle the connection flow.

@@ -1,7 +1,11 @@
 /**
  * Internal dependencies
  */
-import { getSplitGateways, getIsWCPayOrOtherCategoryDoneSetup } from '../utils';
+import {
+	getSplitGateways,
+	getIsWCPayOrOtherCategoryDoneSetup,
+	getIsGatewayWCPay,
+} from '../utils';
 
 const wcpay = {
 	id: 'woocommerce_payments:something',
@@ -136,6 +140,41 @@ describe( 'getSplitGateways()', () => {
 			);
 			expect( mainList ).toEqual( [ stripe, klarna ] );
 		} );
+	} );
+} );
+
+describe( 'getIsGatewayWCPay()', () => {
+	it( 'identifies WooPayments suggestions by id without plugin metadata', () => {
+		expect(
+			getIsGatewayWCPay( {
+				id: 'woocommerce_payments',
+				plugins: [],
+			} )
+		).toEqual( true );
+		expect(
+			getIsGatewayWCPay( {
+				id: 'woocommerce_payments:with-in-person-payments',
+			} )
+		).toEqual( true );
+		expect(
+			getIsGatewayWCPay( {
+				id: 'woocommerce_payments:without-in-person-payments',
+			} )
+		).toEqual( true );
+		expect(
+			getIsGatewayWCPay( {
+				id: 'woocommerce_payments:bnpl',
+			} )
+		).toEqual( true );
+	} );
+
+	it( 'keeps non-WooPayments plugin-backed gateways out of WooPayments handling', () => {
+		expect(
+			getIsGatewayWCPay( {
+				id: 'stripe',
+				plugins: [ 'woocommerce-gateway-stripe' ],
+			} )
+		).toEqual( false );
 	} );
 } );
 

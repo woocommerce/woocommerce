@@ -58,7 +58,7 @@ class Init extends RemoteSpecsEngine {
 			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs_to_save ), 3 * HOUR_IN_SECONDS );
 		}
 
-		return $specs_to_return;
+		return self::normalize_native_woopayments_suggestions( $specs_to_return );
 	}
 
 	/**
@@ -83,7 +83,45 @@ class Init extends RemoteSpecsEngine {
 		 */
 		$specs   = apply_filters( 'woocommerce_admin_payment_gateway_suggestion_specs', $specs );
 		$results = EvaluateSuggestion::evaluate_specs( $specs );
-		return $results['suggestions'];
+		return self::normalize_native_woopayments_suggestions( $results['suggestions'] );
+	}
+
+	/**
+	 * Remove legacy WooPayments plugin install metadata from suggestions.
+	 *
+	 * WooPayments is a Core-owned native provider. Remote suggestions may still carry
+	 * the historical WooPayments plugin slug, but Core surfaces should not advertise
+	 * native WooPayments setup as a plugin install.
+	 *
+	 * @param array $suggestions Payment gateway suggestions.
+	 * @return array Normalized suggestions.
+	 */
+	private static function normalize_native_woopayments_suggestions( array $suggestions ): array {
+		foreach ( $suggestions as $suggestion ) {
+			if ( ! is_object( $suggestion ) || empty( $suggestion->id ) ) {
+				continue;
+			}
+
+			$id = explode( ':', (string) $suggestion->id )[0];
+			if ( ! in_array( $id, array( 'woocommerce_payments', 'woocommerce-payments' ), true ) || empty( $suggestion->plugins ) || ! is_array( $suggestion->plugins ) ) {
+				continue;
+			}
+
+			$suggestion->plugins = array_values(
+				array_filter(
+					$suggestion->plugins,
+					static function ( $plugin ) {
+						return 'woocommerce-payments' !== $plugin;
+					}
+				)
+			);
+
+			if ( empty( $suggestion->plugins ) ) {
+				unset( $suggestion->plugins );
+			}
+		}
+
+		return $suggestions;
 	}
 
 	/**

@@ -39,7 +39,11 @@ export const SetUpPaymentsProvider: React.FC< {
 	// Get the WooPayments provider to access the real plugin slug.
 	// This is important for test/beta versions that may be installed under a different slug.
 	// We wait for the fetch to complete before exposing state to prevent slug instability.
-	const { wooPaymentsPluginSlug, isSlugResolved } = useSelect(
+	const {
+		wooPaymentsPluginSlug,
+		isSlugResolved,
+		hasNativeWooPaymentsProvider,
+	} = useSelect(
 		( select ) => {
 			const store = select( paymentSettingsStore );
 			const isFetching = store.isFetching();
@@ -58,10 +62,18 @@ export const SetUpPaymentsProvider: React.FC< {
 			const hasLoadedProviders =
 				! isFetching && Array.isArray( providers );
 			const resolvedSlug = wooPaymentsProvider?.plugin?.slug;
+			const hasNativeProvider =
+				!! wooPaymentsProvider &&
+				( wooPaymentsProvider?.plugin?.slug === 'woocommerce' ||
+					wooPaymentsProvider?.onboarding?.type ===
+						'native_in_context' ||
+					!! wooPaymentsProvider?.onboarding?._links?.onboard
+						?.href );
 
 			return {
 				wooPaymentsPluginSlug: resolvedSlug ?? wooPaymentsExtensionSlug,
 				isSlugResolved: hasLoadedProviders,
+				hasNativeWooPaymentsProvider: hasNativeProvider,
 			};
 		},
 		// Empty deps array - the selector subscribes to store state internally.
@@ -70,7 +82,7 @@ export const SetUpPaymentsProvider: React.FC< {
 	);
 
 	// Check if WooPayments is active by looking for the plugin in the active plugins list.
-	const isWooPaymentsActive = useSelect(
+	const isWooPaymentsPluginActive = useSelect(
 		( select ) => {
 			const activePlugins = select( pluginsStore ).getActivePlugins();
 			// Defensively check that activePlugins is an array before calling .includes().
@@ -81,7 +93,7 @@ export const SetUpPaymentsProvider: React.FC< {
 		[ wooPaymentsPluginSlug ]
 	);
 
-	const isWooPaymentsInstalled = useSelect(
+	const isWooPaymentsPluginInstalled = useSelect(
 		( select ) => {
 			const installedPlugins =
 				select( pluginsStore ).getInstalledPlugins();
@@ -92,6 +104,11 @@ export const SetUpPaymentsProvider: React.FC< {
 		},
 		[ wooPaymentsPluginSlug ]
 	);
+
+	const isWooPaymentsActive =
+		hasNativeWooPaymentsProvider || isWooPaymentsPluginActive;
+	const isWooPaymentsInstalled =
+		hasNativeWooPaymentsProvider || isWooPaymentsPluginInstalled;
 
 	// State to track if WooPayments was recently enabled
 	const [ wooPaymentsRecentlyActivated, setWooPaymentsRecentlyActivated ] =

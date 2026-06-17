@@ -1,55 +1,24 @@
-/**
- * External dependencies
- */
-import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
-import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
+const WCPAY_NATIVE_ONBOARDING_PATH =
+	'admin.php?page=wc-settings&tab=checkout&path=/woopayments/onboarding';
 
-/**
- * Internal dependencies
- */
-import { createNoticesFromResponse } from '~/lib/notices';
+export function getWcpayNativeOnboardingUrl(
+	from = 'WCADMIN_PAYMENT_TASK'
+) {
+	return `${ WCPAY_NATIVE_ONBOARDING_PATH }&from=${ encodeURIComponent(
+		from
+	) }`;
+}
 
-export function connectWcpay( createNotice, onCatch ) {
-	const errorMessage = __(
-		'There was an error connecting to WooPayments. Please try again or connect later in store settings.',
-		'woocommerce'
-	);
-	apiFetch( {
-		path: WC_ADMIN_NAMESPACE + '/plugins/connect-wcpay',
-		method: 'POST',
-	} )
-		.then( ( response ) => {
-			window.location = response.connectUrl;
-		} )
-		.catch( () => {
-			createNotice( 'error', errorMessage );
-			if ( typeof onCatch === 'function' ) {
-				onCatch();
-			}
-		} );
+export function connectWcpay() {
+	window.location.href = getWcpayNativeOnboardingUrl();
 }
 
 export function installActivateAndConnectWcpay(
-	reject,
-	createNotice,
-	installAndActivatePlugins
+	_reject,
+	_createNotice,
+	_installAndActivatePlugins
 ) {
-	installAndActivatePlugins( [ 'woocommerce-payments' ] )
-		.then( () => {
-			recordEvent( 'woocommerce_payments_install', {
-				context: 'tasklist',
-			} );
-
-			connectWcpay( createNotice, () => {
-				reject();
-			} );
-		} )
-		.catch( ( error ) => {
-			createNoticesFromResponse( error );
-			reject();
-		} );
+	connectWcpay();
 }
 
 export function isWCPaySupported( countryCode ) {

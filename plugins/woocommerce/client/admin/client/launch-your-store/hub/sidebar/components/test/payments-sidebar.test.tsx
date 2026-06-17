@@ -373,6 +373,9 @@ describe( 'PaymentsSidebar', () => {
 			// First should be Install step (completed)
 			expect( sidebarItems[ 0 ] ).toHaveClass( 'install-woopayments' );
 			expect( sidebarItems[ 0 ] ).toHaveClass( 'is-complete' );
+			expect( sidebarItems[ 0 ] ).toHaveTextContent(
+				/Set up.*WooPayments/i
+			);
 
 			// Other steps should be present
 			expect( sidebarItems[ 1 ] ).toHaveTextContent(

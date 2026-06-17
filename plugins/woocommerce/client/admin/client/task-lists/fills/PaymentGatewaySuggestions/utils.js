@@ -6,9 +6,16 @@ import { getPluginSlug } from '~/utils';
 export const comparePaymentGatewaysByPriority = ( a, b ) =>
 	a.recommendation_priority - b.recommendation_priority;
 
-export const getIsGatewayWCPay = ( gateway ) =>
-	gateway.plugins?.length === 1 &&
-	gateway.plugins[ 0 ] === 'woocommerce-payments';
+export const getIsGatewayWCPay = ( gateway ) => {
+	const id = getPluginSlug( gateway.id || '' );
+
+	return (
+		id === 'woocommerce_payments' ||
+		id === 'woocommerce-payments' ||
+		( gateway.plugins?.length === 1 &&
+			gateway.plugins[ 0 ] === 'woocommerce-payments' )
+	);
+};
 
 export const getIsGatewayOtherCategory = ( gateway, countryCode ) =>
 	gateway.category_other &&

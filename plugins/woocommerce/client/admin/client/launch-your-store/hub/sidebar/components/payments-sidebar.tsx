@@ -156,7 +156,10 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 			disabled={ true }
 			showChevron={ false }
 		>
-			{ payments_task?.additionalData?.wooPaymentsIsInstalled
+			{ isWooPaymentsActive
+				? /* translators: %s: WooPayments */
+				  sprintf( __( 'Set up %s', 'woocommerce' ), 'WooPayments' )
+				: payments_task?.additionalData?.wooPaymentsIsInstalled
 				? /* translators: %s: WooPayments */
 				  sprintf( __( 'Enable %s', 'woocommerce' ), 'WooPayments' )
 				: /* translators: %s: WooPayments */

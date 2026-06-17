@@ -167,6 +167,25 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the native WooPayments onboarding URL when the legacy runtime is unavailable.
+	 */
+	public function test_connect_wcpay_returns_native_onboarding_url_without_legacy_runtime() {
+		wp_set_current_user( $this->user );
+
+		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/connect-wcpay' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'connectUrl', $data );
+		$this->assertStringContainsString( 'page=wc-settings', $data['connectUrl'] );
+		$this->assertStringContainsString( 'tab=checkout', $data['connectUrl'] );
+		$this->assertStringContainsString( 'path=/woopayments/onboarding', $data['connectUrl'] );
+		$this->assertStringContainsString( 'from=WCADMIN_PAYMENT_TASK', $data['connectUrl'] );
+		$this->assertStringNotContainsString( 'wcpay-connect=1', $data['connectUrl'] );
+	}
+
+	/**
 	 * @return string locale
 	 */
 	public function set_france_locale() {
