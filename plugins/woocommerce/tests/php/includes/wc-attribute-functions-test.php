@@ -129,6 +129,10 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			'wc_create_attribute should return a numeric id on success.'
 		);
 
+		// This 29-byte ASCII slug exercises the exact upper boundary (pa_ + 29 = 32 bytes).
+		// The multibyte cases below can't land on 29 bytes exactly — Cyrillic is 2 bytes/char
+		// (so 28 or 30) and these CJK characters are 3 bytes/char (27 or 30) — so they cover
+		// the closest reachable values just under and just over the limit.
 		$ids[] = wc_create_attribute( array( 'name' => str_repeat( 'n', 29 ) ) );
 		$this->assertIsInt(
 			end( $ids ),

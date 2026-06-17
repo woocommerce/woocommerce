@@ -58,7 +58,12 @@ class WC_Tests_Attributes_Functions extends WC_Unit_Test_Case {
 		$err = wc_create_attribute( array( 'name' => 'This is a big name for a product attribute!' ) );
 		$this->assertEquals( 'invalid_product_attribute_slug_too_long', $err->get_error_code() );
 
-		// Multibyte boundary: 14-char Cyrillic slug = 28 bytes; with 'pa_' prefix = 31 bytes (under WP's 32-byte taxonomy limit).
+		// Multibyte boundary cases. The slug byte budget is 29 (pa_ + 29 = 32). A pure
+		// Cyrillic/CJK slug can't measure exactly 29 bytes — Cyrillic is 2 bytes/char and
+		// these CJK characters are 3 bytes/char — so these cover the closest reachable values
+		// on either side (the exact 29-byte boundary is covered by the ASCII case in the
+		// modern tests/php/includes/wc-attribute-functions-test.php suite).
+		// 14-char Cyrillic slug = 28 bytes; with 'pa_' prefix = 31 bytes (under WP's 32-byte taxonomy limit).
 		$cyrillic_ok = wc_create_attribute(
 			array(
 				'slug' => 'абвгдежзиклмно',
