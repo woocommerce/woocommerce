@@ -147,6 +147,58 @@ class EmailPreviewRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the preview send path uses the WC_Email instance resolved by
+	 * EmailPreview (rather than a generic WC_Emails instance), so the email
+	 * type, recipient, headers and attachments flow through to the
+	 * woocommerce_email_sent hook — which is what EmailLogger and any
+	 * third-party listeners depend on.
+	 */
+	public function test_send_preview_uses_resolved_email_instance() {
+		$captured = array();
+		$capture  = function ( $success, $email_id, $email ) use ( &$captured ) {
+			$captured[] = array(
+				'success'   => $success,
+				'email_id'  => $email_id,
+				'class'     => get_class( $email ),
+				'recipient' => $email->get_recipient(),
+			);
+		};
+		add_action( 'woocommerce_email_sent', $capture, 10, 3 );
+
+		try {
+			$request  = $this->get_email_preview_request( EmailPreview::DEFAULT_EMAIL_TYPE, self::EMAIL );
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 200, $response->get_status() );
+			$this->assertNotEmpty( $captured, 'woocommerce_email_sent should fire for the preview send path.' );
+
+			$last = end( $captured );
+			$this->assertSame( EmailPreview::DEFAULT_EMAIL_TYPE, $last['class'], 'Send path should use the resolved WC_Email subclass, not a generic WC_Emails instance.' );
+			$this->assertNotEmpty( $last['email_id'], 'Email id should be set so listeners can identify the email type.' );
+			$this->assertSame( self::EMAIL, $last['recipient'], 'Recipient should be set on the resolved instance before send.' );
+		} finally {
+			remove_action( 'woocommerce_email_sent', $capture, 10 );
+		}
+	}
+
+	/**
+	 * Test that the preview send path does not mutate the recipient on the
+	 * EmailPreview singleton. The controller clones before assigning, so a
+	 * subsequent read of get_email()->get_recipient() must not return the
+	 * test address — under long-lived runtimes this would otherwise leak the
+	 * previous tester's address into a later send for a different customer.
+	 */
+	public function test_send_preview_does_not_persist_recipient_on_cached_email() {
+		$email_preview = wc_get_container()->get( EmailPreview::class );
+
+		$request  = $this->get_email_preview_request( EmailPreview::DEFAULT_EMAIL_TYPE, self::EMAIL );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNotSame( self::EMAIL, $email_preview->get_email()->get_recipient(), 'Recipient must not persist on the cached EmailPreview instance after a preview send.' );
+	}
+
+	/**
 	 * Helper method to simulate a failed email sending.
 	 *
 	 * @return callable

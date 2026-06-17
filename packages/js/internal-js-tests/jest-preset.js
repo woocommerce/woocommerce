@@ -31,6 +31,7 @@ const transformModules = {
  */
 const mapWpModules = [
 	'@wordpress/private-apis',
+	'@wordpress/data',
 	'@wordpress/core-data',
 	'@wordpress/components',
 	'@wordpress/html-entities',
@@ -47,24 +48,43 @@ const wpModulesMapper = mapWpModules.reduce( ( acc, module ) => {
 
 module.exports = {
 	moduleNameMapper: {
-		tinymce: path.resolve( __dirname, 'build/mocks/tinymce' ),
+		tinymce: path.resolve( __dirname, 'src/mocks/tinymce' ),
 		'@woocommerce/settings': path.resolve(
 			__dirname,
-			'build/mocks/woocommerce-settings'
+			'src/mocks/woocommerce-settings'
 		),
 		'@woocommerce/tracks': path.resolve(
 			__dirname,
-			'build/mocks/woocommerce-tracks'
+			'src/mocks/woocommerce-tracks'
 		),
+		// Route all monorepo @woocommerce/* imports through source so tests
+		// don't depend on sibling packages having been built. internal-js-tests
+		// is a special case — its main is build/util/index.js so the source
+		// entry is src/util, not src/index. Subpaths that explicitly point
+		// at a build directory (src/, build/, build-module/, build-types/)
+		// are stripped of that segment so they resolve under src/. Bare
+		// subpaths get prefixed with src/. Order matters: targeted overrides
+		// first, then most specific to least.
+		'^@woocommerce/internal-js-tests$': path.resolve(
+			__dirname,
+			'src/util'
+		),
+		'^@woocommerce/([^/]+)/(?:src|build|build-module|build-types)/(.+)$':
+			path.resolve( __dirname, '../$1/src/$2' ),
+		'^@woocommerce/([^/]+)/(.+)$': path.resolve(
+			__dirname,
+			'../$1/src/$2'
+		),
+		'^@woocommerce/([^/]+)$': path.resolve( __dirname, '../$1/src' ),
 		'~/(.*)': path.resolve(
 			__dirname,
 			'../../../plugins/woocommerce/client/admin/client/$1'
 		),
 		'\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
-			path.resolve( __dirname, 'build/mocks/static' ),
+			path.resolve( __dirname, 'src/mocks/static' ),
 		'\\.(scss|css)$': path.resolve(
 			__dirname,
-			'build/mocks/style-mock.js'
+			'src/mocks/style-mock.js'
 		),
 		// Force some modules to resolve with the CJS entry point, because Jest does not support package.json.exports.
 		'lib0/webcrypto': require.resolve( 'lib0/webcrypto' ), // use the CJS entry point so that it uses the node:crypto API as jsdom doesn't have a crypto API
@@ -74,11 +94,11 @@ module.exports = {
 	},
 	restoreMocks: true,
 	setupFiles: [
-		path.resolve( __dirname, 'build/setup-window-globals.js' ),
-		path.resolve( __dirname, 'build/setup-globals.js' ),
+		path.resolve( __dirname, 'src/setup-window-globals.js' ),
+		path.resolve( __dirname, 'src/setup-globals.js' ),
 	],
 	setupFilesAfterEnv: [
-		path.resolve( __dirname, 'build/setup-react-testing-library.js' ),
+		path.resolve( __dirname, 'src/setup-react-testing-library.js' ),
 	],
 	testMatch: [
 		'**/__tests__/**/*.[jt]s?(x)',
@@ -93,7 +113,6 @@ module.exports = {
 		'node_modules/(?!(?:\\.pnpm|' +
 			Object.keys( transformModules ).join( '|' ) +
 			')/)',
-		__dirname,
 	],
 	// The values for the transformed modules contain an object with the transforms to apply.
 	transform: Object.entries( transformModules ).reduce(
@@ -106,7 +125,18 @@ module.exports = {
 			return acc;
 		},
 		{
-			'(?:src|client|assets/js)/.*\\.[jt]sx?$': 'ts-jest',
+			'(?:src|client|assets/js)/.*\\.[jt]sx?$': [
+				'ts-jest',
+				{
+					// Dedicated jest tsconfig flips jsx to the automatic
+					// runtime and emits CJS for jest's runtime. Sidesteps
+					// per-package include/exclude/rootDir restrictions that
+					// block ts-jest from compiling cross-package source
+					// files (resolved via the @woocommerce/* moduleNameMapper).
+					tsconfig: path.resolve( __dirname, 'tsconfig-jest.json' ),
+					diagnostics: false,
+				},
+			],
 		}
 	),
 	testEnvironment: 'jest-environment-jsdom',

@@ -6,14 +6,12 @@
  * @version 2.5.0
  */
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\Orders\COTRedirectionController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
 use Automattic\WooCommerce\Internal\Admin\Logging\PageController as LoggingPageController;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileListTable, SearchListTable };
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -40,7 +38,6 @@ class WC_Admin_Menus {
 		// Add menus.
 		add_action( 'admin_menu', array( $this, 'menu_highlight' ) );
 		add_action( 'admin_menu', array( $this, 'menu_order_count' ) );
-		add_action( 'admin_menu', array( $this, 'maybe_add_new_product_management_experience' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'orders_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
@@ -375,11 +372,7 @@ class WC_Admin_Menus {
 	 * @return void
 	 */
 	public function settings_page() {
-		if ( Features::is_enabled( 'settings' ) ) {
-			echo '<div id="wc-settings-page"/>';
-		} else {
-			WC_Admin_Settings::output();
-		}
+		WC_Admin_Settings::output();
 	}
 
 	/**
@@ -524,24 +517,6 @@ class WC_Admin_Menus {
 				'href'   => wc_get_page_permalink( 'shop' ),
 			)
 		);
-	}
-
-	/**
-	 * Maybe add new management product experience.
-	 *
-	 * @return void
-	 */
-	public function maybe_add_new_product_management_experience() {
-		if ( FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			global $submenu;
-			if ( isset( $submenu['edit.php?post_type=product'][10] ) ) {
-				// Disable phpcs since we need to override submenu classes.
-				// Note that `phpcs:ignore WordPress.Variables.GlobalVariables.OverrideProhibited` does not work to disable this check.
-				// phpcs:disable
-				$submenu['edit.php?post_type=product'][10][2] = 'admin.php?page=wc-admin&path=/add-product';
-				// phps:enableWordPress.Variables.GlobalVariables.OverrideProhibited
-			}
-		}
 	}
 
 	/**

@@ -20,7 +20,7 @@ Create a concise, reviewer-friendly draft PR from the current branch.
 
 ### 1. Preflight and Analyze
 
-Verify from dynamic context: not on trunk (ask which branch if so), commits exist ahead of trunk (stop if none), no uncommitted changes (ask user to commit/stash if dirty).
+Verify from dynamic context: not on trunk (stop if so), commits exist ahead of trunk (stop if none), no uncommitted changes (stop if dirty).
 
 **Base branch**: use `release/*` if the branch was created from one, otherwise `trunk`.
 
@@ -30,19 +30,17 @@ From the dynamic context above (read full diffs only if the stat summary is ambi
 - **Significance**: Patch (most common), Minor (new features), Major (breaking — rare)
 - **Bug fix?** Look for issue refs in commits/branch name (e.g., `#12345`, `fix/issue-12345`)
 - **UI changes?** Changes in `client/`, `templates/`, CSS/SCSS, JSX/TSX
-- **Plugin-affecting?** Code shipped to users = yes. CI/CD, workflows, tooling, docs = no. This drives changelog, milestone, and PR body complexity — non-plugin PRs use a simplified body (see Step 3).
+- **Plugin-affecting?** Code shipped to users = yes. CI/CD, workflows, tooling, docs = no. This drives the Milestone, Changelog, and Release Communication decisions in Step 3.
 
-### 2. Gather Context from User
+### 2. Gather Context
 
-Extract issue/PR refs from commits and branch name. Ask the user (combine into one prompt):
+Extract issue/PR refs from commits and branch name:
 
-- If no issue ref: "Is there a GitHub issue?" (Linear is internal — only reference GitHub issues in PRs)
-- If bug fix, no origin PR found: "Which PR introduced this bug?"
-- If motivation unclear from code: "What's the context?"
+- **Issue ref**: use what's in commits/branch if present; otherwise omit `Closes #` (Linear refs are internal — only reference GitHub issues in PRs).
+- **Bug-fix origin PR**: if a bug fix and no PR ref is in the diff/commits, search history (`git log -S` on touched lines) to find the introducing PR; omit `Bug introduced in PR #XXXX.` if not found.
+- **Motivation**: infer from diff and commit messages. Use the strongest summary you can; don't block on missing context.
 
 ### 3. Generate PR Title + Body
-
-Use the PR template from the dynamic context above.
 
 **Title** (under 70 chars, verb-first — the repo convention):
 
@@ -50,34 +48,21 @@ Use the PR template from the dynamic context above.
 - Optional area prefix: `[Email Editor] Fix double margin-top in flex layout`
 - No `fix:`/`feat:` prefixes. No Linear ticket refs — Linear is internal, PRs are public.
 
-**Body** — depends on whether the change is plugin-affecting:
+**Body** — fill in `.github/PULL_REQUEST_TEMPLATE.md` (loaded in dynamic context above) section by section, in order. The template's HTML comments describe what each section is for — follow them as the per-section instructions. Repo-specific rules that the template doesn't carry, layered on top:
 
-#### Non-plugin changes (CI/CD, tooling, docs, `.ai/skills/`, workflows)
+- **Changes proposed**: 2-3 sentences. Lead with WHY, then WHAT. No filler ("This PR addresses..."). Drop the `Closes # .` line if you don't have a GitHub issue ref. Drop the `Bug introduced in PR # .` line if not a bug fix or origin PR unknown.
+- **Milestone**: tick the auto-assign box only for plugin-affecting changes. The section itself stays — the template marks it do-not-remove.
+- **Changelog entry**:
+    - Plugin-affecting, no changelog files in the diff → tick `Automatically create` with Significance, Type, and a user-facing Message.
+    - Plugin-affecting with changelog files already in the diff → tick `does not require` with the Comment "Created manually."
+    - Not plugin-affecting → tick `does not require` with a Comment explaining why (e.g., "Internal tooling, not shipped to merchants").
+- **Release Communication**: tick `Feature Highlight` for user-visible features merchants will notice, or `Developer Advisory` for changes affecting extension/theme developers (hook signatures, deprecations, REST API field changes). Otherwise leave both unchecked.
 
-Use a simplified body with only these sections:
+After filling, keep the template's HTML comments (`<!-- -->`) — they support PR automation and GitHub tests. Remove only unfilled placeholder lines that are actual visible placeholders (e.g., `Closes # .`, `Bug introduced in PR # .`).
 
-- **Submission Review Guidelines**: Keep as-is from template.
-- **Changes proposed**: 2-3 sentences. Lead with WHY, then WHAT.
+### 4. Preview
 
-Skip Screenshots, Testing instructions, Testing done, Milestone, and Changelog sections entirely.
-
-#### Plugin-affecting changes
-
-Use the full template:
-
-- **Submission Review Guidelines**: Keep as-is from template.
-- **Changes proposed**: 2-3 sentences. Lead with WHY, then WHAT. No filler ("This PR addresses..."). Include `Closes #1234.` if applicable. For bugs: `Bug introduced in PR #XXXX.` (omit this line entirely if not a bug fix).
-- **Screenshots**: Remove section if no UI changes. For UI changes, use Chrome DevTools MCP to capture screenshots if available; otherwise remind user to add them before marking ready.
-- **Testing instructions**: Concrete numbered steps with expected outcomes. Ask user to verify before finalizing. Each step must be actionable — don't reference links that won't exist yet.
-- **Testing done**: Ask user what testing they've performed.
-- **Milestone**: Check auto-assign `[x]` if plugin-affecting.
-- **Changelog**: If changelogs already in diff → "does not require" (created manually). Otherwise → "Automatically create" `[x]` with Significance, Type, and a user-facing Message.
-
-Strip all HTML comments (`<!-- -->`) and unfilled placeholder lines (e.g., `Closes # .`, `Bug introduced in PR # .`) from output.
-
-### 4. Preview and Confirm
-
-Show the user the generated title and body. Apply any corrections before proceeding.
+State the generated title and body before executing.
 
 ### 5. Push and Create
 
@@ -95,5 +80,5 @@ Output the PR URL. If UI changes need screenshots, remind the user.
 
 - No Co-Authored-By lines or self-attribution
 - Never commit code — pushing is fine
-- Preserve the PR template section headings exactly (for plugin-affecting PRs)
+- Preserve the PR template section headings and HTML comments exactly
 - Changelog checkboxes must match CI automation format

@@ -1000,9 +1000,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$this->assertFalse( $object->payment_complete() );
 		$object->save();
-		// Set created_via to indicate legitimate checkout session.
-		$object->set_created_via( 'checkout' );
-		$object->save();
 		$this->assertTrue( $object->payment_complete( '12345' ) );
 		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
 		$this->assertEquals( '12345', $object->get_transaction_id() );
@@ -1016,8 +1013,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_payment_complete_error() {
 		$object = new WC_Order();
-		$object->save();
-		$object->set_created_via( 'checkout' );
 		$object->save();
 
 		add_action( 'woocommerce_payment_complete', array( $this, 'throwAnException' ) );
@@ -1036,228 +1031,47 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: payment_complete blocks orders without checkout evidence
-	 *
-	 * @testdox payment_complete blocks order when no created_via or cart_hash and fires payment_complete_blocked
-	 * @since 10.8.0
-	 */
-	public function test_payment_complete_blocks_orders_without_checkout_evidence() {
-		$object = new WC_Order();
-		$object->save();
-		// No created_via or cart_hash. Payment should be blocked.
-		$object->set_status( OrderStatus::PENDING );
-		$object->save();
-
-		$blocked_action_fired = false;
-		$blocked_action_args  = array();
-		$blocked_callback     = function ( $order_id, $created_via, $cart_hash ) use ( &$blocked_action_fired, &$blocked_action_args ) {
-			$blocked_action_fired = true;
-			$blocked_action_args  = array( $order_id, $created_via, $cart_hash );
-		};
-		add_action( 'woocommerce_payment_complete_blocked', $blocked_callback, 10, 3 );
-
-		$this->assertFalse( $object->payment_complete( '12345' ) );
-		$this->assertEquals( OrderStatus::PENDING, $object->get_status() );
-
-		$this->assertTrue( $blocked_action_fired );
-		$this->assertEquals( $object->get_id(), $blocked_action_args[0] );
-		$this->assertEquals( '', $blocked_action_args[1] );
-		$this->assertEquals( '', $blocked_action_args[2] );
-
-		remove_action( 'woocommerce_payment_complete_blocked', $blocked_callback, 10 );
-
-		// Confirm blocked-payment order note exists.
-		$notes        = wc_get_order_notes(
-			array(
-				'order_id' => $object->get_id(),
-			)
-		);
-		$blocked_note = null;
-		foreach ( $notes as $note ) {
-			if ( strpos( $note->content, 'Payment completion blocked' ) !== false ) {
-				$blocked_note = $note;
-				break;
-			}
-		}
-		$this->assertNotNull( $blocked_note );
-	}
-
-	/**
-	 * Test: payment_complete does not fire woocommerce_pre_payment_complete when blocked
-	 *
-	 * @testdox pre_payment_complete does not fire when payment is blocked for lack of checkout evidence
-	 * @since 10.8.0
-	 */
-	public function test_payment_complete_does_not_fire_pre_payment_complete_when_blocked() {
-		$object = new WC_Order();
-		$object->set_status( OrderStatus::PENDING );
-		$object->save();
-
-		$pre_payment_complete_fired = false;
-		$callback                   = function () use ( &$pre_payment_complete_fired ) {
-			$pre_payment_complete_fired = true;
-		};
-		add_action( 'woocommerce_pre_payment_complete', $callback, 10, 0 );
-
-		$object->payment_complete( '12345' );
-
-		$this->assertFalse( $pre_payment_complete_fired );
-
-		remove_action( 'woocommerce_pre_payment_complete', $callback, 10 );
-	}
-
-	/**
-	 * Test: payment_complete allows orders with created_via checkout
-	 *
-	 * @testdox payment_complete allows order with created_via checkout
-	 * @since 10.8.0
-	 */
-	public function test_payment_complete_allows_orders_with_created_via_checkout() {
-		$object = new WC_Order();
-		$object->set_created_via( 'checkout' );
-		$object->set_status( OrderStatus::PENDING );
-		$object->save();
-
-		$this->assertTrue( $object->payment_complete( '12345' ) );
-		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
-	}
-
-	/**
-	 * Test: payment_complete allows orders with created_via store-api
-	 *
-	 * @testdox payment_complete allows order with created_via store-api
-	 * @since 10.8.0
-	 */
-	public function test_payment_complete_allows_orders_with_created_via_store_api() {
-		$object = new WC_Order();
-		$object->set_created_via( 'store-api' );
-		$object->set_status( OrderStatus::PENDING );
-		$object->save();
-
-		$this->assertTrue( $object->payment_complete( '12345' ) );
-		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
-	}
-
-	/**
-	 * Test: payment_complete allows orders with created_via rest-api
-	 *
-	 * @testdox payment_complete allows order with created_via rest-api
-	 * @since 10.8.0
-	 */
-	public function test_payment_complete_allows_orders_with_created_via_rest_api() {
-		$object = new WC_Order();
-		$object->set_created_via( 'rest-api' );
-		$object->set_status( OrderStatus::PENDING );
-		$object->save();
-
-		$this->assertTrue( $object->payment_complete( '12345' ) );
-		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
-	}
-
-	/**
-	 * Test: payment_complete allows orders with created_via admin
-	 *
-	 * @testdox payment_complete allows order with created_via admin
-	 * @since 10.8.0
-	 */
-	public function test_payment_complete_allows_orders_with_created_via_admin() {
-		$object = new WC_Order();
-		$object->set_created_via( 'admin' );
-		$object->set_status( OrderStatus::PENDING );
-		$object->save();
-
-		$this->assertTrue( $object->payment_complete( '12345' ) );
-		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
-	}
-
-	/**
-	 * Test: payment_complete allows orders with created_via pos-rest-api
-	 *
-	 * @testdox payment_complete allows order with created_via pos-rest-api
-	 * @since 10.8.0
-	 */
-	public function test_payment_complete_allows_orders_with_created_via_pos_rest_api() {
-		$object = new WC_Order();
-		$object->set_created_via( 'pos-rest-api' );
-		$object->set_status( OrderStatus::PENDING );
-		$object->save();
-
-		$this->assertTrue( $object->payment_complete( '12345' ) );
-		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
-	}
-
-	/**
-	 * Test: payment_complete allows orders with cart_hash
-	 *
-	 * @testdox payment_complete allows order with cart_hash
-	 * @since 10.8.0
-	 */
-	public function test_payment_complete_allows_orders_with_cart_hash() {
-		$object = new WC_Order();
-		$object->set_cart_hash( 'test-cart-hash-123' );
-		$object->set_status( OrderStatus::PENDING );
-		$object->save();
-
-		$this->assertTrue( $object->payment_complete( '12345' ) );
-		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
-	}
-
-	/**
-	 * Test: payment_complete allows bypass via filter
-	 *
-	 * @testdox payment_complete allows bypass via woocommerce_allow_payment_complete_without_checkout_evidence
-	 * @since 10.8.0
-	 */
-	public function test_payment_complete_allows_bypass_via_filter() {
-		$object = new WC_Order();
-		$object->set_status( OrderStatus::PENDING );
-		$object->save();
-
-		// Allow this order via bypass filter.
-		$bypass_callback = function ( $allow, $order ) use ( $object ) {
-			return $order->get_id() === $object->get_id();
-		};
-		add_filter( 'woocommerce_allow_payment_complete_without_checkout_evidence', $bypass_callback, 10, 2 );
-
-		$this->assertTrue( $object->payment_complete( '12345' ) );
-		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
-
-		remove_filter( 'woocommerce_allow_payment_complete_without_checkout_evidence', $bypass_callback, 10 );
-	}
-
-	/**
-	 * Test: payment_complete allows custom created_via values via filter
-	 *
-	 * @testdox payment_complete allows custom created_via via woocommerce_payment_complete_allowed_created_via_values
-	 * @since 10.8.0
-	 */
-	public function test_payment_complete_allows_custom_created_via_via_filter() {
-		$object = new WC_Order();
-		$object->set_created_via( 'custom-integration' );
-		$object->set_status( OrderStatus::PENDING );
-		$object->save();
-
-		// Allow custom created_via via filter.
-		$created_via_callback = function ( $allowed_values ) {
-			$allowed_values[] = 'custom-integration';
-			return $allowed_values;
-		};
-		add_filter( 'woocommerce_payment_complete_allowed_created_via_values', $created_via_callback, 10, 1 );
-
-		$this->assertTrue( $object->payment_complete( '12345' ) );
-		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
-
-		remove_filter( 'woocommerce_payment_complete_allowed_created_via_values', $created_via_callback, 10 );
-	}
-
-	/**
 	 * Test: get_formatted_order_total
 	 */
 	public function test_get_formatted_order_total() {
 		$object = new WC_Order();
 		$object->set_total( 100 );
 		$object->set_currency( 'USD' );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>100.00</bdi></span>', $object->get_formatted_order_total() );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>100.00</bdi></span>', $object->get_formatted_order_total() );
+	}
+
+	/**
+	 * Test: get_formatted_order_total with refunded amount does not throw TypeError on PHP 8.3.
+	 */
+	public function test_get_formatted_order_total_with_refund() {
+		$object = new WC_Order();
+		$object->set_total( 100 );
+		$object->set_currency( 'USD' );
+		$id = $object->save();
+
+		wc_create_refund(
+			array(
+				'order_id'   => $id,
+				'amount'     => '25',
+				'line_items' => array(),
+			)
+		);
+
+		// Reload the order so it picks up the refund.
+		$order = wc_get_order( $id );
+
+		// Force a non-numeric total via filter to confirm the (float) cast prevents a TypeError on
+		// PHP 8.x. Without the cast, `non-numeric-string − float` is a fatal TypeError.
+		$non_numeric_filter = fn() => 'not-a-number';
+		add_filter( 'woocommerce_order_get_total', $non_numeric_filter );
+
+		// Should not throw a TypeError when the filter returns a non-numeric string.
+		$formatted_total = $order->get_formatted_order_total();
+
+		remove_filter( 'woocommerce_order_get_total', $non_numeric_filter );
+
+		$this->assertStringContainsString( '<del', $formatted_total );
+		$this->assertStringContainsString( '<ins', $formatted_total );
 	}
 
 	/**
@@ -2360,5 +2174,296 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		}
 
 		$this->assertEquals( 20.50, $order->get_total_fees() );
+	}
+
+	/**
+	 * @testdox calculate_taxes() respects woocommerce_adjust_non_base_location_prices
+	 *          for manual backend orders.
+	 */
+	public function test_calculate_taxes_fixed_end_price_non_base_country(): void {
+		$context = $this->create_manual_order_tax_context();
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		$order = $this->create_manual_order_for_tax_context( $context, '24' );
+
+		try {
+			$order->calculate_totals();
+
+			$this->assertEquals( 24.00, round( (float) $order->get_total(), 2 ) );
+			$this->assertEquals( 0.00, round( (float) $order->get_discount_total(), 2 ) );
+
+			$item = $this->get_first_order_item( $order );
+			$this->assertEquals(
+				1.98,
+				round( (float) $item->get_subtotal_tax(), 2 ),
+				'Line subtotal tax must be 24/1.09*0.09 from the customer NL rate.'
+			);
+		} finally {
+			$this->cleanup_manual_order_tax_context( $context, $order );
+		}
+	}
+
+	/**
+	 * @testdox calculate_taxes() without the filter still adjusts price for non-base
+	 *          country (default WooCommerce behaviour must be preserved).
+	 */
+	public function test_calculate_taxes_adjusts_price_without_filter(): void {
+		$context = $this->create_manual_order_tax_context();
+		$order   = $this->create_manual_order_for_tax_context( $context );
+
+		try {
+			$order->calculate_totals();
+
+			$this->assertGreaterThan( 24.00, (float) $order->get_total() );
+			$this->assertEquals(
+				24.68,
+				round( (float) $order->get_total(), 2 ),
+				'Without the filter, NL total should be ~24.68.'
+			);
+		} finally {
+			$this->cleanup_manual_order_tax_context( $context, $order );
+		}
+	}
+
+	/**
+	 * @testdox calculate_taxes() with adjust_non_base_location_prices false is a
+	 *          no-op for prices-exclusive-of-tax stores.
+	 */
+	public function test_calculate_taxes_fixed_price_filter_noop_for_excl_tax_store(): void {
+		$context = $this->create_manual_order_tax_context( 'no' );
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		$order = $this->create_manual_order_for_tax_context( $context );
+
+		try {
+			$order->calculate_totals();
+
+			$this->assertEquals(
+				26.16,
+				round( (float) $order->get_total(), 2 ),
+				'For excl-tax stores the filter must be a no-op; NL 9% applies on top of 24.'
+			);
+		} finally {
+			$this->cleanup_manual_order_tax_context( $context, $order );
+		}
+	}
+
+	/**
+	 * @testdox calculate_totals() is idempotent, calling it twice produces
+	 *          the same result when adjust_non_base_location_prices is false.
+	 */
+	public function test_calculate_taxes_fixed_price_idempotent(): void {
+		$context = $this->create_manual_order_tax_context();
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		$order = $this->create_manual_order_for_tax_context( $context, '24' );
+
+		try {
+			$order->calculate_totals();
+			$total_first = $order->get_total();
+
+			$order->calculate_totals();
+			$total_second = $order->get_total();
+
+			$this->assertEquals(
+				round( (float) $total_first, 2 ),
+				round( (float) $total_second, 2 ),
+				'Calling calculate_totals() twice must produce the same total.'
+			);
+			$this->assertEquals( 24.00, round( (float) $total_second, 2 ) );
+		} finally {
+			$this->cleanup_manual_order_tax_context( $context, $order );
+		}
+	}
+
+	/**
+	 * @testdox calculate_totals() keeps positive fees tax-exclusive in fixed end-price mode.
+	 */
+	public function test_calculate_taxes_fixed_price_positive_fee_remains_tax_exclusive(): void {
+		$context = $this->create_manual_order_tax_context();
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		$order = $this->create_manual_order_for_tax_context( $context, '24' );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'       => 'Handling',
+				'tax_status' => ProductTaxStatus::TAXABLE,
+				'tax_class'  => $context['tax_class_slug'],
+				'total'      => 10,
+			)
+		);
+		$order->add_item( $fee );
+
+		try {
+			$order->calculate_totals();
+
+			$this->assertEquals( 34.90, round( (float) $order->get_total(), 2 ) );
+			$this->assertEquals( 0.90, round( (float) $fee->get_total_tax(), 2 ) );
+		} finally {
+			$this->cleanup_manual_order_tax_context( $context, $order );
+		}
+	}
+
+	/**
+	 * @testdox calculate_totals() extracts tax from negative fees in fixed end-price mode.
+	 */
+	public function test_calculate_taxes_fixed_price_negative_fee_uses_inclusive_tax(): void {
+		$context = $this->create_manual_order_tax_context();
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		$order = $this->create_manual_order_for_tax_context( $context, '24' );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'       => 'Manual discount',
+				'tax_status' => ProductTaxStatus::TAXABLE,
+				'tax_class'  => $context['tax_class_slug'],
+				'total'      => -10,
+			)
+		);
+		$order->add_item( $fee );
+
+		try {
+			$order->calculate_totals();
+
+			$this->assertEquals( -0.83, round( (float) $fee->get_total_tax(), 2 ) );
+			$this->assertEquals( 1.15, round( (float) $order->get_cart_tax(), 2 ) );
+			$this->assertEquals( 13.17, round( (float) $order->get_total(), 2 ) );
+		} finally {
+			$this->cleanup_manual_order_tax_context( $context, $order );
+		}
+	}
+
+	/**
+	 * Creates tax rates and a product for manual order tax tests.
+	 *
+	 * @param string $prices_include_tax Whether prices include tax.
+	 * @return array<string,mixed>
+	 */
+	private function create_manual_order_tax_context( string $prices_include_tax = 'yes' ): array {
+		$tax_class_slug    = 'books-vat';
+		$tax_class_created = false;
+
+		$context = array(
+			'original_prices_include_tax' => get_option( 'woocommerce_prices_include_tax' ),
+			'original_calc_taxes'         => get_option( 'woocommerce_calc_taxes' ),
+			'original_tax_based_on'       => get_option( 'woocommerce_tax_based_on' ),
+			'original_base_country'       => get_option( 'woocommerce_default_country' ),
+			'tax_class_slug'              => $tax_class_slug,
+		);
+
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		update_option( 'woocommerce_default_country', 'BE' );
+
+		if ( ! in_array( $tax_class_slug, WC_Tax::get_tax_class_slugs(), true ) ) {
+			WC_Tax::create_tax_class( 'Books VAT', $tax_class_slug );
+			$tax_class_created = true;
+		}
+
+		$context['tax_class_created'] = $tax_class_created;
+		$context['be_rate_id']        = $this->insert_manual_order_tax_rate( 'BE', '6.0000', 'Belgium VAT', $tax_class_slug );
+		$context['nl_rate_id']        = $this->insert_manual_order_tax_rate( 'NL', '9.0000', 'Netherlands VAT', $tax_class_slug );
+
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( '24' );
+		$product->set_regular_price( '24' );
+		$product->set_tax_status( ProductTaxStatus::TAXABLE );
+		$product->set_tax_class( $tax_class_slug );
+		$product->save();
+
+		$context['product'] = $product;
+
+		return $context;
+	}
+
+	/**
+	 * Inserts a tax rate for manual order tax tests.
+	 *
+	 * @param string $country Tax rate country.
+	 * @param string $rate Tax rate percentage.
+	 * @param string $name Tax rate name.
+	 * @param string $tax_class_slug Tax class slug.
+	 * @return int
+	 */
+	private function insert_manual_order_tax_rate( string $country, string $rate, string $name, string $tax_class_slug ): int {
+		return WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => $country,
+				'tax_rate_state'    => '',
+				'tax_rate'          => $rate,
+				'tax_rate_name'     => $name,
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => $tax_class_slug,
+			)
+		);
+	}
+
+	/**
+	 * Creates a manual order for the tax context.
+	 *
+	 * @param array<string,mixed> $context Tax test context.
+	 * @param string|null         $line_total Optional line total override.
+	 * @return WC_Order
+	 */
+	private function create_manual_order_for_tax_context( array $context, ?string $line_total = null ): WC_Order {
+		$order = wc_create_order();
+		$order->set_billing_country( 'NL' );
+		$order->set_shipping_country( 'NL' );
+		$item_id = $order->add_product( $context['product'], 1 );
+
+		if ( null !== $line_total ) {
+			$item = $order->get_item( $item_id );
+			$item->set_subtotal( $line_total );
+			$item->set_total( $line_total );
+			$item->save();
+		}
+
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Cleans up manual order tax test data.
+	 *
+	 * @param array<string,mixed> $context Tax test context.
+	 * @param WC_Order|null       $order Order to delete.
+	 */
+	private function cleanup_manual_order_tax_context( array $context, ?WC_Order $order = null ): void {
+		remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		WC_Tax::_delete_tax_rate( $context['be_rate_id'] );
+		WC_Tax::_delete_tax_rate( $context['nl_rate_id'] );
+
+		if ( $context['tax_class_created'] ) {
+			WC_Tax::delete_tax_class_by( 'slug', $context['tax_class_slug'] );
+		}
+
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+		WC_Helper_Product::delete_product( $context['product']->get_id() );
+
+		if ( $order ) {
+			$order->delete( true );
+		}
+
+		update_option( 'woocommerce_prices_include_tax', $context['original_prices_include_tax'] );
+		update_option( 'woocommerce_calc_taxes', $context['original_calc_taxes'] );
+		update_option( 'woocommerce_tax_based_on', $context['original_tax_based_on'] );
+		update_option( 'woocommerce_default_country', $context['original_base_country'] );
+	}
+
+	/**
+	 * Gets the first item from an order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return WC_Order_Item
+	 */
+	private function get_first_order_item( WC_Order $order ): WC_Order_Item {
+		$items = $order->get_items();
+		return reset( $items );
 	}
 }

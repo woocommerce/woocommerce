@@ -1,4 +1,4 @@
-.wc-block-product-filter-chips fieldset {
+:where(.wc-block-product-filter-chips__fieldset) {
 	display: contents;
 }
 
@@ -10,7 +10,7 @@
 
 .wc-block-product-filter-chips__item {
 	border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
-	padding: 0.25em 0.75em;
+	padding: 0.4em 0.75em;
 	appearance: none;
 	background: transparent;
 	border-radius: 2px;
@@ -22,14 +22,6 @@
 	&:focus {
 		outline: 1px solid currentColor;
 		outline-offset: 1px;
-	}
-
-	&:hover {
-		background-color: color-mix(
-			in srgb,
-			var(--wp--preset--color--contrast) 10%,
-			transparent
-		);
 	}
 
 	.has-chip-text-color & {
@@ -44,6 +36,18 @@
 }
 
 .wc-block-product-filter-chips__item[aria-checked="true"] {
+	background: var(
+		--wc-product-filter-chips-selected-background,
+		var(--wc-product-filter-chips-text, CanvasText)
+	);
+	color: var(
+		--wc-product-filter-chips-selected-text,
+		var(--wc-product-filter-chips-background, Canvas)
+	);
+	border-color: var(
+		--wc-product-filter-chips-selected-border,
+		var(--wc-product-filter-chips-text, CanvasText)
+	);
 
 	.has-selected-chip-text-color & {
 		color: var(--wc-product-filter-chips-selected-text);
@@ -56,10 +60,24 @@
 	}
 }
 
+.wc-block-product-filter-chips__item:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+
+	&:hover {
+		background: transparent;
+	}
+
+	:where(.wc-block-product-filter-chips__label) {
+		text-decoration: line-through;
+	}
+}
+
 :where(.wc-block-product-filter-chips__label) {
 	display: inline-flex;
 	align-items: center;
 	gap: $gap-smallest;
+	vertical-align: bottom;
 }
 
 .wc-block-product-filter-chips__text {
@@ -67,15 +85,103 @@
 }
 
 .wc-block-product-filter-chips__count {
-	display: contents;
 	white-space: nowrap;
 }
 
 .wc-block-product-filter-chips__show-more {
-	text-decoration: underline;
 	appearance: none;
-	font-family: inherit;
 	background: transparent;
-	border: none;
+	border: 0;
 	padding: 0;
+	font: inherit;
+	font-size: 0.875em;
+	color: inherit;
+	text-decoration: underline;
+	cursor: pointer;
+
+	&:hover,
+	&:focus {
+		text-decoration: none;
+	}
+}
+
+// Swatch style — color circles only, no text labels.
+.is-style-swatch {
+	.wc-block-product-filter-chips__items {
+		gap: $gap-small;
+	}
+
+	.wc-block-product-filter-chips__item {
+		background: transparent;
+		padding: 2px;
+		border-radius: 50%;
+		border: 1px solid transparent;
+		outline: none;
+		color: inherit;
+
+		&:hover {
+			border-color: color-mix(in srgb, currentColor 40%, transparent);
+		}
+
+		&:focus-visible {
+			border-color: color-mix(in srgb, currentColor 60%, transparent);
+		}
+
+		&[aria-checked="true"] {
+			border-color: var(
+				--wc-product-filter-chips-selected-border,
+				var(--wc-product-filter-chips-text, CanvasText)
+			);
+		}
+	}
+
+	.wc-block-product-filter-chips__label {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	:where(.wc-block-product-filter-chips__swatch) {
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+		display: inline-block;
+		width: 1.8em;
+		height: 1.8em;
+		border-radius: 50%;
+		border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+		flex-shrink: 0;
+	}
+
+	:where(.wc-block-product-filter-chips__swatch--no-color) {
+		display: inline-block;
+		background: linear-gradient(
+			to top left,
+			transparent calc(50% - 0.5px),
+			color-mix(in srgb, currentColor 20%, transparent)
+				calc(50% - 0.5px),
+			color-mix(in srgb, currentColor 20%, transparent)
+				calc(50% + 0.5px),
+			transparent calc(50% + 0.5px)
+		);
+	}
+
+	&.has-chip-border-color :where(.wc-block-product-filter-chips__item:not([aria-checked="true"]) .wc-block-product-filter-chips__swatch) {
+		border-color: var(--wc-product-filter-chips-border);
+	}
+	&.has-selected-chip-border-color :where(.wc-block-product-filter-chips__item[aria-checked="true"] .wc-block-product-filter-chips__swatch) {
+		border-color: transparent;
+	}
+
+	.wc-block-product-filter-chips__text,
+	.wc-block-product-filter-chips__count {
+		display: block;
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
 }

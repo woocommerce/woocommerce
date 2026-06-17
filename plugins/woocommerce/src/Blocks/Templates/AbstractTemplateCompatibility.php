@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+
 /**
  * AbstractTemplateCompatibility class.
  *
@@ -24,49 +26,60 @@ abstract class AbstractTemplateCompatibility {
 		$this->set_hook_data();
 
 		add_filter(
-			'render_block_data',
-			function ( $parsed_block, $source_block, $parent_block ) {
-				/**
-				* Filter to disable the compatibility layer for the blockified templates.
-				*
-				* This hook allows to disable the compatibility layer for the blockified templates.
-				*
-				* @since 7.6.0
-				* @param boolean.
-				*/
-				$is_disabled_compatility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
+			'template_include',
+			function ( $template ) {
+				$this->set_compatibility_layer_flag();
 
-				if ( $is_disabled_compatility_layer ) {
-					return $parsed_block;
-				}
+				add_filter(
+					'render_block_data',
+					function ( $parsed_block, $source_block, $parent_block ) {
+						/**
+						* Filter to disable the compatibility layer for the blockified templates.
+						*
+						* This hook allows to disable the compatibility layer for the blockified templates.
+						*
+						* @since 7.6.0
+						* @param bool $is_disabled_compatibility_layer Whether the compatibility layer should be disabled.
+						*/
+						$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
 
-				return $this->update_render_block_data( $parsed_block, $source_block, $parent_block );
+						if ( $is_disabled_compatibility_layer ) {
+							return $parsed_block;
+						}
+
+						return $this->update_render_block_data( $parsed_block, $source_block, $parent_block );
+					},
+					10,
+					3
+				);
+
+				add_filter(
+					'render_block',
+					function ( $block_content, $block ) {
+						/**
+						* Filter to disable the compatibility layer for the blockified templates.
+						*
+						* This hook allows to disable the compatibility layer for the blockified.
+						*
+						* @since 7.6.0
+						* @param bool $is_disabled_compatibility_layer Whether the compatibility layer should be disabled.
+						*/
+						$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
+
+						if ( $is_disabled_compatibility_layer ) {
+							return $block_content;
+						}
+
+						return $this->inject_hooks( $block_content, $block );
+					},
+					10,
+					2
+				);
+
+				return $template;
 			},
 			10,
-			3
-		);
-
-		add_filter(
-			'render_block',
-			function ( $block_content, $block ) {
-				/**
-				* Filter to disable the compatibility layer for the blockified templates.
-				*
-				* This hook allows to disable the compatibility layer for the blockified.
-				*
-				* @since 7.6.0
-				* @param boolean.
-				*/
-				$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
-
-				if ( $is_disabled_compatibility_layer ) {
-					return $block_content;
-				}
-
-				return $this->inject_hooks( $block_content, $block );
-			},
-			10,
-			2
+			1
 		);
 	}
 
@@ -194,5 +207,51 @@ abstract class AbstractTemplateCompatibility {
 			}
 		}
 		return ob_get_clean();
+	}
+
+	/**
+	 * Check if the current template has a legacy template block.
+	 *
+	 * @return bool True if the current template has a legacy template block, false otherwise.
+	 *
+	 * @internal
+	 */
+	public function current_template_has_legacy_template_block() {
+		global $_wp_current_template_id;
+
+		if ( empty( $_wp_current_template_id ) ) {
+			return false;
+		}
+
+		$current_template = get_block_template( $_wp_current_template_id, 'wp_template' );
+
+		if ( isset( $current_template ) && BlockTemplateUtils::template_has_legacy_template_block( $current_template ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if the current template has a legacy template block and disable the compatibility layer if it does.
+	 *
+	 * @return void
+	 *
+	 * @internal
+	 */
+	public function set_compatibility_layer_flag() {
+		$current_template_has_legacy_template_block = $this->current_template_has_legacy_template_block();
+
+		/**
+		 * Filter to determine whether the compatibility layer should be disabled.
+		 *
+		 * @since 11.0.0
+		 * @param bool $should_disable_compatibility_layer Whether the compatibility layer should be disabled.
+		 */
+		$should_disable_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', $current_template_has_legacy_template_block );
+
+		if ( $should_disable_compatibility_layer ) {
+			add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
+		}
 	}
 }

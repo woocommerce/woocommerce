@@ -8,6 +8,7 @@ import {
 	Button,
 	ComboboxControl,
 	Spinner,
+	SelectControl,
 } from '@wordpress/components';
 import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
 import type { CSSProperties } from 'react';
@@ -18,7 +19,12 @@ import { dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import type { BlockEditProps } from './types';
+import type { BlockEditProps, CouponCodeAttributes } from './types';
+import { GeneralSettings } from './components/general-settings';
+import { UsageLimits } from './components/usage-limits';
+import { UsageRestrictions } from './components/usage-restrictions';
+
+const COUPON_CODE_PLACEHOLDER = 'XXXX-XXXXXX-XXXX';
 
 interface Coupon {
 	id: number;
@@ -33,21 +39,15 @@ const DEFAULT_COUPON_STATUSES = [
 	'publish',
 ] as const;
 
-/**
- * Edit component for the Coupon Code block.
- *
- * @param {BlockEditProps} props - Block properties.
- * @return {JSX.Element} The edit component.
- */
-export default function Edit( props: BlockEditProps ): JSX.Element {
-	const { attributes, setAttributes } = props;
-	const couponCode = attributes.couponCode as string;
+function ExistingCouponSettings( {
+	attributes,
+	setAttributes,
+}: {
+	attributes: CouponCodeAttributes;
+	setAttributes: ( attrs: Partial< CouponCodeAttributes > ) => void;
+} ): JSX.Element {
+	const couponCode = attributes.couponCode;
 
-	const {
-		className: blockClassName = '',
-		style: blockStyle,
-		...wrapperProps
-	} = useBlockProps();
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ coupons, setCoupons ] = useState< Coupon[] >( [] );
 	const [ isLoading, setIsLoading ] = useState( false );
@@ -56,19 +56,10 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 	);
 	const abortControllerRef = useRef< AbortController | null >( null );
 
-	// Handler for creating a new coupon - uses a filter so integrators can customize behavior
 	const handleCreateCoupon = () => {
-		// Get the handler from the filter (integrations provide the default handler)
-		// Integrators can customize this filter for SPA routing, custom workflows, etc.
-		// Filter: woocommerce_email_editor_create_coupon_handler
-		// @since 10.5.0
-		// @param {() => void} handler - Function called when user clicks "Create new coupon"
-		// @return {() => void} Modified handler function. The returned function should open the coupon creation UI.
 		const createCouponHandler = applyFilters(
 			'woocommerce_email_editor_create_coupon_handler',
 			() => {
-				// This is the ultimate fallback if no integration provides a handler
-				// May not work correctly in subdirectory installations
 				window.open(
 					'/wp-admin/post-new.php?post_type=shop_coupon',
 					'_blank'
@@ -81,14 +72,11 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 		}
 	};
 
-	// Debounced coupon search function
 	const searchCoupons = useCallback( ( search: string ) => {
-		// Cancel any pending request
 		if ( abortControllerRef.current ) {
 			abortControllerRef.current.abort();
 		}
 
-		// Don't search if search term is too short
 		if ( search.length < 2 ) {
 			setCoupons( [] );
 			setIsLoading( false );
@@ -118,7 +106,6 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 				if ( error instanceof Error && error.name === 'AbortError' ) {
 					return;
 				}
-				// Check if it's a permissions error
 				if ( error.code === 'rest_forbidden' || error.status === 403 ) {
 					dispatch( 'core/notices' ).createErrorNotice(
 						__(
@@ -135,19 +122,15 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 			} );
 	}, [] );
 
-	// Handle search value changes with debouncing
 	useEffect( () => {
-		// Clear any existing timer
 		if ( debounceTimerRef.current ) {
 			clearTimeout( debounceTimerRef.current );
 		}
 
-		// Set new timer for debounced search
 		debounceTimerRef.current = setTimeout( () => {
 			searchCoupons( searchValue );
 		}, 300 );
 
-		// Cleanup function
 		return () => {
 			if ( debounceTimerRef.current ) {
 				clearTimeout( debounceTimerRef.current );
@@ -155,7 +138,6 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 		};
 	}, [ searchValue, searchCoupons ] );
 
-	// Cleanup abort controller on unmount
 	useEffect( () => {
 		return () => {
 			if ( abortControllerRef.current ) {
@@ -164,13 +146,11 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 		};
 	}, [] );
 
-	// Convert coupons to options format
 	const couponOptions = coupons.map( ( coupon ) => ( {
 		value: coupon.code,
 		label: coupon.code,
 	} ) );
 
-	// If there's a selected coupon code that's not in the search results, add it to the options
 	if (
 		couponCode &&
 		! couponOptions.some( ( option ) => option.value === couponCode )
@@ -180,6 +160,85 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 			label: couponCode,
 		} );
 	}
+
+	return (
+		<PanelBody title={ __( 'Coupon', 'woocommerce' ) } initialOpen={ true }>
+			<div style={ { marginBottom: '16px' } }>
+				<div>
+					{ __( 'Search for an existing coupon', 'woocommerce' ) }
+				</div>
+				<ComboboxControl
+					label={ __( 'Search coupons', 'woocommerce' ) }
+					hideLabelFromVision
+					value={ couponCode }
+					onChange={ ( value ) => {
+						setAttributes( {
+							couponCode: value || '',
+						} );
+					} }
+					onFilterValueChange={ ( value ) => {
+						setSearchValue( value );
+					} }
+					options={ couponOptions }
+					__nextHasNoMarginBottom
+					__next40pxDefaultSize
+					help={ ( () => {
+						if ( isLoading ) {
+							return __( 'Searching coupons…', 'woocommerce' );
+						}
+						if (
+							searchValue.length > 0 &&
+							searchValue.length < 2
+						) {
+							return __(
+								'Type at least 2 characters to search',
+								'woocommerce'
+							);
+						}
+						return null;
+					} )() }
+				/>
+				{ isLoading && (
+					<div
+						style={ {
+							display: 'flex',
+							alignItems: 'center',
+							marginTop: '8px',
+						} }
+					>
+						<Spinner />
+					</div>
+				) }
+			</div>
+			<div>
+				<Button
+					variant="link"
+					onClick={ handleCreateCoupon }
+					style={ { padding: 0, height: 'auto' } }
+				>
+					{ __( 'Create new coupon', 'woocommerce' ) }
+				</Button>
+			</div>
+		</PanelBody>
+	);
+}
+
+/**
+ * Edit component for the Coupon Code block.
+ */
+export default function Edit( props: BlockEditProps ): JSX.Element {
+	const { attributes, setAttributes } = props;
+	const source = attributes.source ?? 'createNew';
+	const couponCode = attributes.couponCode;
+
+	const {
+		className: blockClassName = '',
+		style: blockStyle,
+		...wrapperProps
+	} = useBlockProps();
+
+	const displayCode =
+		source === 'createNew' ? COUPON_CODE_PLACEHOLDER : couponCode || '';
 
 	// Strip block-level background/border styles off the wrapper so we can
 	// fully control visual presentation on the coupon element itself.
@@ -200,11 +259,9 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 		letterSpacing: '1px',
 	};
 
-	// Merge: defaults first, then baseStyle overrides, then forced values.
 	const couponStyles: CSSProperties = {
 		...defaultStyles,
 		...baseStyle,
-		// These values must always be set regardless of baseStyle.
 		display: 'inline-block',
 		boxSizing: 'border-box',
 		textAlign: 'center',
@@ -218,7 +275,7 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 		'start',
 		'end',
 	];
-	const alignAttribute = attributes.align as string | undefined;
+	const alignAttribute = attributes.align;
 	const wrapperTextAlign = supportedAlignments.includes(
 		alignAttribute as CSSProperties[ 'textAlign' ]
 	)
@@ -228,8 +285,6 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 		textAlign: wrapperTextAlign,
 	};
 
-	// Move color/typography utility classes onto the coupon pill so wrapper
-	// layout classes remain unaffected.
 	const classTokens = blockClassName.split( ' ' ).filter( Boolean );
 	const couponClassTokens: string[] = [];
 	const wrapperClassTokens: string[] = [];
@@ -258,72 +313,58 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 		<>
 			<InspectorControls>
 				<PanelBody
-					title={ __( 'Settings', 'woocommerce' ) }
+					title={ __( 'Coupon source', 'woocommerce' ) }
 					initialOpen={ true }
 				>
-					<div style={ { marginBottom: '16px' } }>
-						<div>
-							{ __(
-								'Search for an existing coupon',
-								'woocommerce'
-							) }
-						</div>
-						<ComboboxControl
-							label={ __( 'Search coupons', 'woocommerce' ) }
-							hideLabelFromVision
-							value={ couponCode }
-							onChange={ ( value ) => {
-								setAttributes( {
-									couponCode: value || '',
-								} );
-							} }
-							onFilterValueChange={ ( value ) => {
-								setSearchValue( value );
-							} }
-							options={ couponOptions }
-							__nextHasNoMarginBottom
-							__next40pxDefaultSize
-							help={ ( () => {
-								if ( isLoading ) {
-									return __(
-										'Searching coupons…',
-										'woocommerce'
-									);
-								}
-								if (
-									searchValue.length > 0 &&
-									searchValue.length < 2
-								) {
-									return __(
-										'Type at least 2 characters to search',
-										'woocommerce'
-									);
-								}
-								return null;
-							} )() }
-						/>
-						{ isLoading && (
-							<div
-								style={ {
-									display: 'flex',
-									alignItems: 'center',
-									marginTop: '8px',
-								} }
-							>
-								<Spinner />
-							</div>
-						) }
-					</div>
-					<div>
-						<Button
-							variant="link"
-							onClick={ handleCreateCoupon }
-							style={ { padding: 0, height: 'auto' } }
-						>
-							{ __( 'Create new coupon', 'woocommerce' ) }
-						</Button>
-					</div>
+					<SelectControl
+						label={ __( 'Coupon source', 'woocommerce' ) }
+						hideLabelFromVision
+						value={ source }
+						options={ [
+							{
+								value: 'createNew',
+								label: __( 'Create new', 'woocommerce' ),
+							},
+							{
+								value: 'existing',
+								label: __( 'Use existing', 'woocommerce' ),
+							},
+						] }
+						onChange={ ( value ) => {
+							setAttributes( {
+								source:
+									value === 'existing'
+										? 'existing'
+										: 'createNew',
+							} );
+						} }
+						__nextHasNoMarginBottom
+					/>
 				</PanelBody>
+
+				{ source === 'createNew' && (
+					<>
+						<GeneralSettings
+							attributes={ attributes }
+							setAttributes={ setAttributes }
+						/>
+						<UsageLimits
+							attributes={ attributes }
+							setAttributes={ setAttributes }
+						/>
+						<UsageRestrictions
+							attributes={ attributes }
+							setAttributes={ setAttributes }
+						/>
+					</>
+				) }
+
+				{ source === 'existing' && (
+					<ExistingCouponSettings
+						attributes={ attributes }
+						setAttributes={ setAttributes }
+					/>
+				) }
 			</InspectorControls>
 			<div
 				{ ...wrapperProps }
@@ -334,13 +375,26 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 				} }
 			>
 				<span className={ couponClassName } style={ couponStyles }>
-					{ couponCode
-						? couponCode
-						: __(
-								'Coupon Code block – No coupon selected',
-								'woocommerce'
-						  ) }
+					{ displayCode ||
+						__(
+							'Coupon Code block – No coupon selected',
+							'woocommerce'
+						) }
 				</span>
+				{ source === 'createNew' && (
+					<div
+						style={ {
+							fontSize: '12px',
+							color: '#757575',
+							marginTop: '8px',
+						} }
+					>
+						{ __(
+							'A coupon code will be automatically generated at send time.',
+							'woocommerce'
+						) }
+					</div>
+				) }
 			</div>
 		</>
 	);

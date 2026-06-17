@@ -261,7 +261,7 @@ class WC_Admin_Attributes {
 									</td>
 								</tr>
 								<?php
-							}
+							}//end if
 							?>
 							<tr class="form-field form-required">
 								<th scope="row" valign="top">
@@ -283,7 +283,9 @@ class WC_Admin_Attributes {
 					<p class="submit"><button type="submit" name="save_attribute" id="submit" class="button-primary" value="<?php esc_attr_e( 'Update', 'woocommerce' ); ?>"><?php esc_html_e( 'Update', 'woocommerce' ); ?></button></p>
 					<?php wp_nonce_field( 'woocommerce-save-attribute_' . $edit ); ?>
 				</form>
-			<?php } ?>
+				<?php
+			}//end if
+			?>
 		</div>
 		<?php
 	}
@@ -392,10 +394,10 @@ class WC_Admin_Attributes {
 														} else {
 															/* translators: %s: Total count of terms available for the attribute */
 															echo esc_html( sprintf( __( '%s terms', 'woocommerce' ), $total_count ) );
-														}
+														}//end if
 													} else {
 															echo '<span class="na">&ndash;</span><br />';
-													}
+													}//end if
 													?>
 													<br /><a href="edit-tags.php?taxonomy=<?php echo esc_attr( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="configure-terms"><?php esc_html_e( 'Configure terms', 'woocommerce' ); ?></a>
 												</td>
@@ -403,12 +405,13 @@ class WC_Admin_Attributes {
 											<?php
 										endforeach;
 								} else {
+									$column_count = wc_has_custom_attribute_types() ? '5' : '4';
 									?>
 										<tr>
-											<td colspan="6"><?php esc_html_e( 'No attributes currently exist.', 'woocommerce' ); ?></td>
+											<td colspan="<?php echo esc_attr( $column_count ); ?>"><?php esc_html_e( 'No attributes currently exist.', 'woocommerce' ); ?></td>
 										</tr>
 										<?php
-								}
+								}//end if
 								?>
 							</tbody>
 						</table>
@@ -469,7 +472,7 @@ class WC_Admin_Attributes {
 										<p class="description"><?php esc_html_e( "Determines how this attribute's values are displayed.", 'woocommerce' ); ?></p>
 									</div>
 									<?php
-								}
+								}//end if
 								?>
 
 								<div class="form-field">

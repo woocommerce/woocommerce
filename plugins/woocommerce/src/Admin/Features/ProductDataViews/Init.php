@@ -8,7 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Admin\Features\ProductDataViews;
 
 /**
- * Loads assets related to the product block editor.
+ * Loads assets related to product data views.
  */
 class Init {
 	/**
@@ -26,6 +26,9 @@ class Init {
 					return "$classes";
 				}
 			);
+
+			add_filter( 'admin_footer_text', '__return_empty_string', 20 );
+			add_filter( 'update_footer', '__return_empty_string', 20 );
 		}
 	}
 

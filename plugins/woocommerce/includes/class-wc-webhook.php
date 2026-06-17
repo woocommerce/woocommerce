@@ -416,7 +416,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 *
 	 * @param mixed $resource_id First hook argument, typically the resource ID.
 	 * @return mixed              Payload data.
-	 * @throws \Exception The webhook is configured to use the Legacy REST API, but the Legacy REST API plugin is not available.
+	 * @throws \Exception If the webhook uses an unsupported API version.
 	 * @since  2.2.0
 	 */
 	public function build_payload( $resource_id ) {
@@ -426,27 +426,42 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$current_user = get_current_user_id();
 		wp_set_current_user( $this->get_user_id() );
 
-		$resource = $this->get_resource();
-		$event    = $this->get_event();
+		try {
+			$resource = $this->get_resource();
+			$event    = $this->get_event();
 
-		// If a resource has been deleted, just include the ID.
-		if ( 'deleted' === $event ) {
+			// If a resource has been deleted, just include the ID in the payload.
 			$payload = array(
 				'id' => $resource_id,
 			);
-		} elseif ( in_array( $this->get_api_version(), wc_get_webhook_rest_api_versions(), true ) ) {
-				$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
-		} else {
-			if ( ! WC()->legacy_rest_api_is_available() ) {
-				throw new \Exception( 'The Legacy REST API plugin is not installed on this site. More information: https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/ ' );
+
+			if ( 'deleted' !== $event ) {
+				$api_version = $this->get_api_version();
+
+				if ( in_array( $api_version, wc_get_webhook_rest_api_versions(), true ) ) {
+					$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
+				} elseif ( 'legacy_v3' === $api_version && WC()->legacy_rest_api_is_available() ) {
+					wc_deprecated_function( 'Webhook delivery via the Legacy REST API', '9.0.0', 'editing the webhook to use a current API version' );
+					$payload = wc()->api->get_webhook_api_payload( $resource, $resource_id, $event );
+				} else {
+					throw new \Exception( esc_html__( 'Unsupported webhook API version. Please edit this webhook to use a current REST API version.', 'woocommerce' ) );
+				}
 			}
-			$payload = wc()->api->get_webhook_api_payload( $resource, $resource_id, $event );
+
+			/**
+			 * Filters the webhook payload before delivery.
+			 *
+			 * @since 2.2.0
+			 * @param mixed  $payload     Payload data.
+			 * @param string $resource    Resource type (e.g. 'order').
+			 * @param mixed  $resource_id Resource ID.
+			 * @param int    $webhook_id  Webhook ID.
+			 */
+			return apply_filters( 'woocommerce_webhook_payload', $payload, $resource, $resource_id, $this->get_id() );
+		} finally {
+			// Restore the current user.
+			wp_set_current_user( $current_user );
 		}
-
-		// Restore the current user.
-		wp_set_current_user( $current_user );
-
-		return apply_filters( 'woocommerce_webhook_payload', $payload, $resource, $resource_id, $this->get_id() );
 	}
 
 	/**
@@ -933,6 +948,108 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	*/
 
 	/**
+	 * Get the default topic-hooks map (topic => array of hook names).
+	 *
+	 * Source of truth for which default-resource/default-event webhook topics
+	 * can deliver. Used by `wc_is_webhook_valid_topic()` to derive the
+	 * default-pair allowlist so the validator and the map cannot drift.
+	 *
+	 * The `woocommerce_webhook_topic_hooks` filter is applied here. When called
+	 * statically (without a webhook context, e.g. from the topic validator),
+	 * a fresh, unsaved `WC_Webhook` instance is passed as the filter's second
+	 * argument so callbacks registered with `accepted_args = 2` keep working.
+	 * Those callbacks should not rely on the second argument exposing
+	 * per-webhook state in that call path (`get_id()` returns 0,
+	 * `get_topic()` is empty).
+	 *
+	 * @since 10.9.0
+	 * @param WC_Webhook|null $webhook Optional webhook instance to pass as the
+	 *                                 filter's context argument. A fresh
+	 *                                 unsaved instance is created when omitted.
+	 * @return array
+	 */
+	public static function get_default_topic_hooks( $webhook = null ) {
+		if ( ! $webhook instanceof WC_Webhook ) {
+			$webhook = new self();
+		}
+
+		$topic_hooks = array(
+			'coupon.created'    => array(
+				'woocommerce_process_shop_coupon_meta',
+				'woocommerce_new_coupon',
+			),
+			'coupon.updated'    => array(
+				'woocommerce_process_shop_coupon_meta',
+				'woocommerce_update_coupon',
+			),
+			'coupon.deleted'    => array(
+				'wp_trash_post',
+			),
+			'coupon.restored'   => array(
+				'untrashed_post',
+			),
+			'customer.created'  => array(
+				'user_register',
+				'woocommerce_created_customer',
+				'woocommerce_new_customer',
+			),
+			'customer.updated'  => array(
+				'profile_update',
+				'woocommerce_update_customer',
+			),
+			'customer.deleted'  => array(
+				'delete_user',
+			),
+			'order.created'     => array(
+				'woocommerce_new_order',
+			),
+			'order.updated'     => array(
+				'woocommerce_update_order',
+				'woocommerce_order_refunded',
+			),
+			'order.deleted'     => array(
+				'wp_trash_post',
+				'woocommerce_trash_order',
+			),
+			'order.restored'    => array(
+				'untrashed_post',
+				'woocommerce_untrash_order',
+			),
+			'product.created'   => array(
+				'woocommerce_process_product_meta',
+				'woocommerce_new_product',
+				'woocommerce_new_product_variation',
+			),
+			'product.updated'   => array(
+				'woocommerce_process_product_meta',
+				'woocommerce_update_product',
+				'woocommerce_update_product_variation',
+			),
+			'product.deleted'   => array(
+				'wp_trash_post',
+			),
+			'product.restored'  => array(
+				'untrashed_post',
+			),
+			'product.published' => array(
+				'woocommerce_product_published',
+			),
+		);
+
+		/**
+		 * Filters the map of webhook topics to their registered hook names.
+		 *
+		 * @since 2.2.0
+		 * @param array      $topic_hooks Map of topic name to array of hook names.
+		 * @param WC_Webhook $webhook     The webhook instance. May be a fresh,
+		 *                                unsaved instance when called from
+		 *                                `WC_Webhook::get_default_topic_hooks()`
+		 *                                without a webhook context.
+		 */
+		return apply_filters( 'woocommerce_webhook_topic_hooks', $topic_hooks, $webhook );
+	}
+
+	/**
 	 * Get the associated hook names for a topic.
 	 *
 	 * @since  2.2.0
@@ -940,67 +1057,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return array
 	 */
 	private function get_topic_hooks( $topic ) {
-		$topic_hooks = array(
-			'coupon.created'   => array(
-				'woocommerce_process_shop_coupon_meta',
-				'woocommerce_new_coupon',
-			),
-			'coupon.updated'   => array(
-				'woocommerce_process_shop_coupon_meta',
-				'woocommerce_update_coupon',
-			),
-			'coupon.deleted'   => array(
-				'wp_trash_post',
-			),
-			'coupon.restored'  => array(
-				'untrashed_post',
-			),
-			'customer.created' => array(
-				'user_register',
-				'woocommerce_created_customer',
-				'woocommerce_new_customer',
-			),
-			'customer.updated' => array(
-				'profile_update',
-				'woocommerce_update_customer',
-			),
-			'customer.deleted' => array(
-				'delete_user',
-			),
-			'order.created'    => array(
-				'woocommerce_new_order',
-			),
-			'order.updated'    => array(
-				'woocommerce_update_order',
-				'woocommerce_order_refunded',
-			),
-			'order.deleted'    => array(
-				'wp_trash_post',
-				'woocommerce_trash_order',
-			),
-			'order.restored'   => array(
-				'untrashed_post',
-				'woocommerce_untrash_order',
-			),
-			'product.created'  => array(
-				'woocommerce_process_product_meta',
-				'woocommerce_new_product',
-				'woocommerce_new_product_variation',
-			),
-			'product.updated'  => array(
-				'woocommerce_process_product_meta',
-				'woocommerce_update_product',
-				'woocommerce_update_product_variation',
-			),
-			'product.deleted'  => array(
-				'wp_trash_post',
-			),
-			'product.restored' => array(
-				'untrashed_post',
-			),
-		);
-
-		$topic_hooks = apply_filters( 'woocommerce_webhook_topic_hooks', $topic_hooks, $this );
+		$topic_hooks = self::get_default_topic_hooks( $this );
 
 		return isset( $topic_hooks[ $topic ] ) ? $topic_hooks[ $topic ] : array();
 	}
