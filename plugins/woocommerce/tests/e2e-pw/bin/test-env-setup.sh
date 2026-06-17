@@ -20,15 +20,15 @@ echo -e 'Update URL structure \n'
 wp-env run tests-cli wp rewrite structure '/%postname%/' --hard
 
 echo -e 'Activate Filter Setter utility plugin \n'
-wp-env run tests-cli wp plugin activate filter-setter
+wp-env run tests-cli wp plugin activate e2e-test-helpers/filter-setter.php
 
 # This plugin allows you to process queued scheduled actions immediately.
 # It's used in the analytics e2e tests so that order numbers are shown in Analytics.
 echo -e 'Activate Process Waiting Actions utility plugin \n'
-wp-env run tests-cli wp plugin activate process-waiting-actions
+wp-env run tests-cli wp plugin activate e2e-test-helpers/process-waiting-actions.php
 
 echo -e 'Activate Test Helper APIs utility plugin \n'
-wp-env run tests-cli wp plugin activate test-helper-apis
+wp-env run tests-cli wp plugin activate e2e-test-helpers/test-helper-apis.php
 
 echo -e 'Install Plugin-check utility plugin \n'
 wp-env run tests-cli wp plugin install plugin-check --activate
