@@ -1,0 +1,174 @@
+/* stylelint-disable no-descending-specificity, selector-class-pattern */
+
+#payment .payment_method_woocommerce_payments .woocommerce-error {
+	margin: 1rem 0;
+}
+
+.js-woopayments-copy-test-number {
+	line-height: 1.2;
+	vertical-align: middle;
+	border-radius: 0;
+	border: none !important;
+	background-color: transparent !important;
+	font-weight: 400;
+	display: inline-flex;
+	cursor: pointer;
+	color: inherit !important;
+	font-family: inherit !important;
+	font-size: inherit;
+	padding: 2px 1px !important;
+	align-items: center;
+	box-shadow: none !important;
+
+	span {
+		margin-right: 4px;
+	}
+
+	i {
+		order: 1;
+		display: block;
+		width: 1.2em;
+		height: 1.2em;
+		position: relative;
+
+		&::before,
+		&::after {
+			content: "";
+			position: absolute;
+			box-sizing: border-box;
+			width: 0.7em;
+			height: 0.82em;
+			border: 0.12em solid currentcolor;
+			border-radius: 0.08em;
+		}
+
+		&::before {
+			top: 0.26em;
+			left: 0.14em;
+			opacity: 0.65;
+		}
+
+		&::after {
+			top: 0.08em;
+			left: 0.36em;
+			background-color: currentcolor;
+			box-shadow: inset 0 0 0 0.14em #fff;
+		}
+	}
+
+	&:hover {
+		background-color: transparent;
+		opacity: 0.7;
+
+		i {
+			opacity: 0.7;
+		}
+	}
+
+	&:active i {
+		transform: scale(0.9);
+	}
+
+	&:focus {
+		outline: none;
+	}
+}
+
+#payment .payment_method_woocommerce_payments .testmode-info {
+	margin-bottom: 0.5em;
+}
+
+#wcpay-upe-element,
+.wcpay-upe-element,
+#wcpay-core-payment-element,
+.wcpay-core-payment-element {
+	padding: 7px;
+	margin-bottom: 0.5em;
+
+	&.processing {
+		min-height: 70px;
+	}
+}
+
+#payment .payment_methods {
+
+	li[class*="payment_method_woocommerce_payments"] label {
+		display: inline;
+
+		.payment-methods--logos {
+			float: right;
+			display: inline-flex;
+			align-items: center;
+			gap: 4px;
+
+			img:last-of-type {
+				margin-right: 0;
+			}
+
+			&-count {
+				width: 38px;
+				height: 24px;
+				background-color: rgba(117, 117, 117, 0.1);
+				color: var(--wp--preset--color--contrast, #1e1e1e);
+				text-align: center;
+				line-height: 24px;
+				border-radius: 3px;
+				font-size: 11px;
+				font-weight: 600;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+				overflow: hidden;
+				margin-left: 4px;
+
+				@media ( min-width: 768px ) and ( max-width: 900px ) {
+					margin-left: 0;
+				}
+			}
+		}
+
+		img {
+			float: right;
+			border: 0;
+			padding: 0;
+			width: 38px;
+			height: 24px !important;
+			max-height: 24px !important;
+		}
+	}
+}
+
+.theme-storefront,
+.theme-twentytwenty,
+.theme-twentytwentyone,
+.theme-twentytwentytwo,
+.theme-twentytwentythree {
+
+	#payment {
+
+		.payment_methods {
+
+			> li.wc_payment_method {
+				grid-template-areas: "li-label";
+				grid-template-columns: 1fr;
+
+				> input + label {
+					grid-template-areas: "label-before label-spacer label-inner";
+					grid-template-columns: max-content max-content 1fr;
+
+					&::before {
+						grid-area: label-before;
+					}
+				}
+			}
+
+			li[class*="payment_method_woocommerce_payments"] {
+
+				> input + label {
+					display: block;
+				}
+			}
+		}
+	}
+}
+
+/* stylelint-enable no-descending-specificity, selector-class-pattern */

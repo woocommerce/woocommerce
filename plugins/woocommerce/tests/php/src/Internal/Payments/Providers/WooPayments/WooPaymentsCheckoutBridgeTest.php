@@ -178,6 +178,11 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 			'/assets/js/frontend/woopayments-checkout',
 			wp_scripts()->registered['wc-woopayments-checkout']->src
 		);
+		$this->assertTrue( wp_style_is( 'wc-woopayments-checkout', 'enqueued' ) );
+		$this->assertStringContainsString(
+			'/assets/css/woopayments-checkout.css',
+			wp_styles()->registered['wc-woopayments-checkout']->src
+		);
 	}
 
 	/**

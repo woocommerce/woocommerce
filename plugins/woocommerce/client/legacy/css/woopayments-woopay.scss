@@ -117,3 +117,45 @@
 		outline: 2px solid ButtonText;
 	}
 }
+
+/* stylelint-disable no-descending-specificity, selector-class-pattern */
+#payment .wc_payment_methods.payment_methods.methods + #wcpay-woopay-save-user,
+#wcpay-woopay-save-user + .place-order {
+	margin-top: 24px;
+}
+
+#wcpay-woopay-save-user {
+	margin-top: 16px;
+
+	.form-row {
+		margin: 0 0 16px;
+		padding: 0;
+
+		&::before,
+		&::after {
+			display: none;
+		}
+	}
+
+	label {
+		display: block;
+		margin-bottom: 6px;
+	}
+
+	input[type="checkbox"] {
+		margin-right: 12px;
+	}
+
+	input[type="tel"] {
+		box-sizing: border-box;
+		width: 100%;
+		min-height: 42px;
+		padding: 8px 12px;
+		border: 1px solid #ddd;
+		border-radius: 5px;
+		background: #fff;
+		box-shadow: none;
+		font: inherit;
+	}
+}
+/* stylelint-enable no-descending-specificity, selector-class-pattern */

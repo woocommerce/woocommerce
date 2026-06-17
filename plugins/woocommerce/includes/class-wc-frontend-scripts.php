@@ -475,6 +475,12 @@ class WC_Frontend_Scripts {
 				'version' => $version,
 				'has_rtl' => true,
 			),
+			'wc-woopayments-checkout'     => array(
+				'src'     => self::get_asset_url( 'assets/css/woopayments-checkout.css' ),
+				'deps'    => array(),
+				'version' => $version,
+				'has_rtl' => true,
+			),
 		);
 
 		$register_styles['wc-woopayments-express-checkout'] = array(

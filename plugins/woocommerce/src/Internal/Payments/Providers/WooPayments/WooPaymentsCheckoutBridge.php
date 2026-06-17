@@ -43,6 +43,11 @@ class WooPaymentsCheckoutBridge {
 	private const CLASSIC_SCRIPT_HANDLE = 'wc-woopayments-checkout';
 
 	/**
+	 * Core-owned classic checkout style handle.
+	 */
+	private const CLASSIC_STYLE_HANDLE = 'wc-woopayments-checkout';
+
+	/**
 	 * Stripe.js script handle.
 	 */
 	private const STRIPE_SCRIPT_HANDLE = 'stripe';
@@ -263,6 +268,7 @@ class WooPaymentsCheckoutBridge {
 
 		$this->register_classic_assets();
 		wp_localize_script( self::CLASSIC_SCRIPT_HANDLE, 'wcpay_core_checkout_config', $config );
+		wp_enqueue_style( self::CLASSIC_STYLE_HANDLE );
 		wp_enqueue_script( self::CLASSIC_SCRIPT_HANDLE );
 
 		if ( $this->should_expose_checkout_surface() ) {
@@ -327,19 +333,27 @@ class WooPaymentsCheckoutBridge {
 			wp_register_script( self::STRIPE_SCRIPT_HANDLE, 'https://js.stripe.com/v3/', array(), null, true );
 		}
 
-		if ( wp_script_is( self::CLASSIC_SCRIPT_HANDLE, 'registered' ) ) {
-			return;
-		}
-
 		$suffix = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 
-		wp_register_script(
-			self::CLASSIC_SCRIPT_HANDLE,
-			WC()->plugin_url() . '/assets/js/frontend/woopayments-checkout' . $suffix . '.js',
-			array( 'jquery', 'wc-checkout', self::STRIPE_SCRIPT_HANDLE ),
-			WC_VERSION,
-			true
-		);
+		if ( ! wp_script_is( self::CLASSIC_SCRIPT_HANDLE, 'registered' ) ) {
+			wp_register_script(
+				self::CLASSIC_SCRIPT_HANDLE,
+				WC()->plugin_url() . '/assets/js/frontend/woopayments-checkout' . $suffix . '.js',
+				array( 'jquery', 'wc-checkout', self::STRIPE_SCRIPT_HANDLE ),
+				WC_VERSION,
+				true
+			);
+		}
+
+		if ( ! wp_style_is( self::CLASSIC_STYLE_HANDLE, 'registered' ) ) {
+			wp_register_style(
+				self::CLASSIC_STYLE_HANDLE,
+				WC()->plugin_url() . '/assets/css/woopayments-checkout.css',
+				array(),
+				WC_VERSION
+			);
+			wp_style_add_data( self::CLASSIC_STYLE_HANDLE, 'rtl', 'replace' );
+		}
 	}
 
 	/**
