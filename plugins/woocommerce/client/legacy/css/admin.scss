@@ -8692,8 +8692,8 @@ table.bar_chart {
 			-webkit-font-smoothing: antialiased;
 			-moz-osx-font-smoothing: grayscale;
 			color: currentColor;
-			content: "\f312";
-			content: "\f312" / "";
+			content: "\f180";
+			content: "\f180" / "";
 			display: inline-block;
 			font: normal 20px/1 dashicons;
 			margin-left: -1px;
@@ -8702,8 +8702,8 @@ table.bar_chart {
 			vertical-align: top;
 		}
 
-		#post-visibility-select,
-		#catalog-visibility-select {
+		#post-visibility-select.wc-product-publish-has-select,
+		#catalog-visibility-select.wc-product-publish-has-select {
 			input[type="radio"],
 			label.selectit,
 			br {
@@ -8711,7 +8711,7 @@ table.bar_chart {
 			}
 		}
 
-		#post-visibility-select {
+		#post-visibility-select.wc-product-publish-has-select {
 			#password-span {
 				display: none;
 				margin-top: var(--wc-product-publish-spacing-2);

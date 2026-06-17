@@ -163,13 +163,6 @@ jQuery( function ( $ ) {
 				.addClass( 'button-link wc-product-publish-cancel-link' );
 		},
 
-		update_current_value_visibility: function ( panel_selector, display_selector ) {
-			$( display_selector ).toggleClass(
-				'wc-product-publish-current-value-hidden',
-				$( panel_selector ).is( ':visible' )
-			);
-		},
-
 		hide_current_value: function ( display_selector ) {
 			$( display_selector ).addClass(
 				'wc-product-publish-current-value-hidden'
@@ -182,10 +175,24 @@ jQuery( function ( $ ) {
 			);
 		},
 
+		get_publish_field_label: function ( container_selector ) {
+			return $.trim(
+				$( container_selector )
+					.clone()
+					.children()
+					.remove()
+					.end()
+					.text()
+			).replace( /:$/, '' );
+		},
+
 		init_status: function () {
-			$( '#post-status-select select#post_status' ).addClass(
-				'wc-product-publish-select'
-			);
+			$( '#post-status-select select#post_status' )
+				.addClass( 'wc-product-publish-select' )
+				.attr(
+					'aria-label',
+					this.get_publish_field_label( '.misc-pub-post-status' )
+				);
 
 			const display_selector = '#post-status-display';
 
@@ -220,6 +227,7 @@ jQuery( function ( $ ) {
 			const $select = $( '<select />', {
 				id: 'wc-product-visibility-select',
 				class: 'wc-product-publish-select',
+				'aria-label': this.get_publish_field_label( '#visibility' ),
 			} );
 
 			$radios.each( function () {
@@ -243,6 +251,7 @@ jQuery( function ( $ ) {
 			} );
 
 			$panel.prepend( $select );
+			$panel.addClass( 'wc-product-publish-has-select' );
 
 			const sync_password_field = function () {
 				$( '#password-span' ).toggleClass(
@@ -273,16 +282,11 @@ jQuery( function ( $ ) {
 
 			$( '#visibility' ).on(
 				'click',
-				'.edit-visibility, .save-post-visibility, .cancel-post-visibility',
-				function () {
-					window.setTimeout( sync_select_from_radios, 0 );
-				}
-			);
-
-			$( '#visibility' ).on(
-				'click',
 				'.edit-visibility',
-				() => this.hide_current_value( '#post-visibility-display' )
+				() => {
+					window.setTimeout( sync_select_from_radios, 0 );
+					this.hide_current_value( '#post-visibility-display' );
+				}
 			);
 
 			$( '#visibility' ).on(
@@ -359,6 +363,7 @@ jQuery( function ( $ ) {
 			const $select = $( '<select />', {
 				id: 'wc-product-catalog-visibility-select',
 				class: 'wc-product-publish-select',
+				'aria-label': this.get_publish_field_label( '#catalog-visibility' ),
 			} );
 
 			$radios.each( function () {
@@ -374,6 +379,7 @@ jQuery( function ( $ ) {
 			} );
 
 			$panel.prepend( $select );
+			$panel.addClass( 'wc-product-publish-has-select' );
 
 			const $helper = $panel.children( 'p' ).first();
 
@@ -398,34 +404,19 @@ jQuery( function ( $ ) {
 					.trigger( 'change' );
 			} );
 
-			$( '#catalog-visibility' ).on(
+			$( '#catalog-visibility .edit-catalog-visibility' ).on(
 				'click',
-				'.edit-catalog-visibility, .save-post-visibility, .cancel-post-visibility',
-				function () {
+				() => {
 					window.setTimeout( sync_select_from_radios, 0 );
+					this.hide_current_value( '#catalog-visibility-display' );
 				}
-			);
-
-			$( '#catalog-visibility' ).on(
-				'click',
-				'.edit-catalog-visibility',
-				() => this.hide_current_value( '#catalog-visibility-display' )
-			);
-
-			$( '#catalog-visibility' ).on(
-				'click',
-				'.save-post-visibility, .cancel-post-visibility',
-				() => this.show_current_value( '#catalog-visibility-display' )
-			);
-
-			$( '#catalog-visibility .edit-catalog-visibility' ).on( 'click', () =>
-				this.hide_current_value( '#catalog-visibility-display' )
 			);
 
 			$(
 				'#catalog-visibility .save-post-visibility, #catalog-visibility .cancel-post-visibility'
-			).on( 'click', () =>
-				this.show_current_value( '#catalog-visibility-display' )
+			).on(
+				'click',
+				() => this.show_current_value( '#catalog-visibility-display' )
 			);
 
 			this.show_current_value( '#catalog-visibility-display' );
