@@ -184,15 +184,7 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 	 * @return int
 	 */
 	private function expected_midnight_timestamp(): int {
-		$gmt_offset   = get_option( 'gmt_offset' );
-		$offset_hours = ( $gmt_offset > 0 ? '-' : '+' ) . absint( $gmt_offset ) . ' hours';
-
-		$midnight = strtotime( '00:00 tomorrow ' . $offset_hours );
-		if ( false === $midnight ) {
-			$midnight = strtotime( '00:00 tomorrow' );
-		}
-
-		return $midnight;
+		return ( new DateTimeImmutable( 'tomorrow', wp_timezone() ) )->getTimestamp();
 	}
 
 	/**

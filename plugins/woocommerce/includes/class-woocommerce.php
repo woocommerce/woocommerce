@@ -1681,11 +1681,10 @@ final class WooCommerce {
 		$gmt_offset   = get_option( 'gmt_offset' );
 		$offset_hours = ( $gmt_offset > 0 ? '-' : '+' ) . absint( $gmt_offset ) . ' hours';
 
-		// Schedule daily sales event at midnight tomorrow.
-		$scheduled_sales_time = strtotime( '00:00 tomorrow ' . $offset_hours );
-		if ( false === $scheduled_sales_time ) {
-			$scheduled_sales_time = strtotime( '00:00 tomorrow' );
-		}
+		// Schedule the daily sales event at the next local midnight. Derive it from the site
+		// timezone so stores on fractional offsets (e.g. UTC+5:30) still land exactly on 00:00
+		// local, rather than the truncated whole-hour offset used for the other events above.
+		$scheduled_sales_time = ( new DateTimeImmutable( 'tomorrow', wp_timezone() ) )->getTimestamp();
 
 		// Reschedule if the next run isn't midnight. Installs that scheduled this action before
 		// the midnight run time was introduced keep their original (arbitrary) time of day,
