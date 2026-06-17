@@ -7,7 +7,6 @@
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"editorScript": "wc-block-library",
-	"render": "file:./index.php",
 	"usesContext": [ "postId" ],
 	"textdomain": "woocommerce",
 	"ancestor": [ "woocommerce/product-gallery" ],

@@ -5,11 +5,12 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use WC_Helper_Product;
+use WC_Unit_Test_Case;
 
 /**
- * Tests for the ProductGallery block type
+ * Tests for the Product Gallery block.
  */
-class ProductGallery extends \WP_UnitTestCase {
+class ProductGalleryTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Helper method to create a product with multiple images.
@@ -17,7 +18,7 @@ class ProductGallery extends \WP_UnitTestCase {
 	 * @param int $gallery_count Number of gallery images to create.
 	 * @return array Array containing 'product', 'main_image_id', and 'gallery_image_ids'.
 	 */
-	private function create_product_with_gallery( $gallery_count = 3 ) {
+	private function create_product_with_gallery( $gallery_count = 3 ): array {
 		$product = WC_Helper_Product::create_simple_product();
 
 		// Create and set the main product image.
@@ -58,7 +59,7 @@ class ProductGallery extends \WP_UnitTestCase {
 	 * @param string $gallery_attributes Optional gallery attributes.
 	 * @return string The rendered markup.
 	 */
-	private function render_product_gallery( $product_id, $gallery_attributes = '' ) {
+	private function render_product_gallery( $product_id, $gallery_attributes = '' ): string {
 		return do_blocks(
 			sprintf(
 				'<!-- wp:woocommerce/single-product {"productId":%d} -->
@@ -93,7 +94,7 @@ class ProductGallery extends \WP_UnitTestCase {
 	 *
 	 * @param array|WC_Product $data Product data array or WC_Product instance.
 	 */
-	private function cleanup_product_data( $data ) {
+	private function cleanup_product_data( $data ): void {
 		if ( is_array( $data ) ) {
 			$data['product']->delete( true );
 			wp_delete_attachment( $data['main_image_id'], true );
@@ -106,9 +107,11 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the ProductGallery block renders correctly with multiple images.
+	 * Test product gallery with multiple images.
+	 *
+	 * @testdox Should render product gallery with multiple images.
 	 */
-	public function test_product_gallery_render_with_multiple_images() {
+	public function test_product_gallery_render_with_multiple_images(): void {
 		$data = $this->create_product_with_gallery( 3 );
 
 		$markup = $this->render_product_gallery( $data['product']->get_id() );
@@ -135,9 +138,11 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the ProductGallery block renders correctly with hover zoom enabled.
+	 * Test product gallery with hover zoom enabled.
+	 *
+	 * @testdox Should render product gallery with hover zoom enabled.
 	 */
-	public function test_product_gallery_render_with_hover_zoom() {
+	public function test_product_gallery_render_with_hover_zoom(): void {
 		$data = $this->create_product_with_gallery( 1 );
 
 		$markup = $this->render_product_gallery(
@@ -152,9 +157,11 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the ProductGallery block renders correctly with fullscreen on click enabled.
+	 * Test product gallery with fullscreen on click enabled.
+	 *
+	 * @testdox Should render product gallery with fullscreen on click enabled.
 	 */
-	public function test_product_gallery_render_with_fullscreen_on_click() {
+	public function test_product_gallery_render_with_fullscreen_on_click(): void {
 		$data = $this->create_product_with_gallery( 1 );
 
 		$markup = $this->render_product_gallery(
@@ -169,9 +176,11 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the ProductGallery block handles products without images correctly.
+	 * Test product gallery for products without images.
+	 *
+	 * @testdox Should render product gallery for products without images.
 	 */
-	public function test_product_gallery_render_without_images() {
+	public function test_product_gallery_render_without_images(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->save();
 
@@ -184,9 +193,11 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the ProductGallery block handles invalid product IDs correctly.
+	 * Test product gallery for invalid product IDs.
+	 *
+	 * @testdox Should render empty product gallery for invalid product IDs.
 	 */
-	public function test_product_gallery_render_with_invalid_product() {
+	public function test_product_gallery_render_with_invalid_product(): void {
 		$markup = $this->render_product_gallery( 99999 );
 
 		$this->assertEmpty( $markup );

@@ -91,6 +91,16 @@ class BlockLibraryRegistryTest extends WC_Unit_Test_Case {
 
 		$this->assertNotFalse( $block_type, 'Category title should be registered by its generated PHP file.' );
 		$this->assertContains( 'wc-block-library', $block_type->editor_script_handles, 'Category title should use the registered block-library script handle.' );
+		$this->assert_self_registering_block_is_registered( 'product-gallery' );
+		$this->assert_self_registering_block_is_registered( 'product-gallery-large-image' );
+		$this->assert_self_registering_block_is_registered( 'product-gallery-large-image-next-previous' );
+		$this->assert_self_registering_block_is_registered( 'product-gallery-thumbnails' );
+
+		$product_gallery_large_image = WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce/product-gallery-large-image' );
+		if ( false === $product_gallery_large_image ) {
+			$this->fail( 'Product gallery large image should be registered before checking skip_inner_blocks.' );
+		}
+		$this->assertTrue( $product_gallery_large_image->skip_inner_blocks, 'Product gallery large image should skip default inner block rendering.' );
 
 		$term_id      = self::factory()->term->create(
 			array(
@@ -112,5 +122,22 @@ class BlockLibraryRegistryTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<h3', $html, 'Category title should render with the configured heading level.' );
 		$this->assertStringContainsString( 'has-text-align-center', $html, 'Category title should render with text alignment class.' );
 		$this->assertStringContainsString( 'Hoodies', $html, 'Category title should render the current term name.' );
+	}
+
+	/**
+	 * Assert that a generated block-library block was self-registered.
+	 *
+	 * @param string $block_name Block name without namespace.
+	 */
+	private function assert_self_registering_block_is_registered( string $block_name ): void {
+		$this->assertTrue(
+			WP_Block_Metadata_Registry::has_metadata( $this->package->get_path( 'assets/client/blocks/' . $block_name ) ),
+			ucfirst( $block_name ) . ' metadata should be available from the generated metadata collection.'
+		);
+
+		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce/' . $block_name );
+
+		$this->assertNotFalse( $block_type, ucfirst( $block_name ) . ' should be registered by its generated PHP file.' );
+		$this->assertContains( 'wc-block-library', $block_type->editor_script_handles, ucfirst( $block_name ) . ' should use the registered block-library script handle.' );
 	}
 }

@@ -184,6 +184,18 @@ Keep tests close to the block when they only exercise that block:
 
 Existing blocks may still live under `plugins/woocommerce/client/blocks/assets/js/blocks/` while they are migrated. Follow the local folder pattern for existing blocks, but prefer the `packages/block-library/src/` structure for new wp-build block-library work.
 
+### Block-Library `wp-build` JavaScript Boundaries
+
+Treat `plugins/woocommerce/client/blocks/packages/block-library/src/` as a `wp-build`-safe package boundary. It is bundled by `@wordpress/build`/esbuild, not the legacy Blocks webpack build.
+
+When migrating blocks into this package:
+
+- Avoid imports that pull legacy `assets/js` barrels or webpack-only files.
+- Avoid broad aliases such as `@woocommerce/base-hooks`, `@woocommerce/base-components`, `@woocommerce/shared-hocs`, `@woocommerce/resource-previews`, and root `@woocommerce/atomic-utils`.
+- Prefer small local helpers under `packages/block-library/src/shared/` when a legacy helper is needed.
+- Enforce exceptions through `packages/block-library/.eslintrc.js`.
+- Do not fix boundary failures by adding broad JSX or SCSS support to wp-build.
+
 ### `block.json` Attribute Defaults
 
 Never include styling options such as `fontSize`, `borderColor`, `textColor`... as block attributes. They should only be listed under `supports`.

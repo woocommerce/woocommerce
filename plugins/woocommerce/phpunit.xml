@@ -21,6 +21,7 @@
 		</testsuite>
 		<testsuite name="wc-phpunit-main">
 			<directory suffix=".php">./tests/php</directory>
+			<directory suffix="index.php">./client/blocks/packages/block-library/src/product-gallery/test</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
 			<!-- Enumerated rather than a blanket ./tests/php/src/Api, so a new
@@ -55,6 +56,7 @@
 		<testsuite name="wc-phpunit-default">
 			<directory suffix=".php">./tests/legacy/unit-tests</directory>
 			<directory suffix=".php">./tests/php</directory>
+			<directory suffix="index.php">./client/blocks/packages/block-library/src/product-gallery/test</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
 			<exclude>./tests/php/src/Api/Infrastructure</exclude>
@@ -65,6 +67,7 @@
 		<testsuite name="wc-phpunit-full">
 			<directory suffix=".php">./tests/legacy/unit-tests</directory>
 			<directory suffix=".php">./tests/php</directory>
+			<directory suffix="index.php">./client/blocks/packages/block-library/src/product-gallery/test</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
 		</testsuite>

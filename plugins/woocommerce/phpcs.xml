@@ -111,6 +111,7 @@
 		<include-pattern>src/</include-pattern>
 		<include-pattern>tests/php/src/</include-pattern>
 		<exclude-pattern>plugins/woocommerce/src/Admin/Notes/DeprecatedNotes.php</exclude-pattern>
+		<exclude-pattern>plugins/woocommerce/client/blocks/packages/block-library/src/**/test/index.php</exclude-pattern>
 		<exclude-pattern>plugins/woocommerce/tests/php/src/Proxies/ExampleClasses/</exclude-pattern>
 		<exclude-pattern>plugins/woocommerce/tests/php/src/Internal/DependencyManagement/ExampleClasses/</exclude-pattern>
 		<properties>
@@ -175,6 +176,7 @@
 	<rule ref="Squiz.Classes.ClassFileName">
 		<include-pattern>src/</include-pattern>
 		<include-pattern>tests/php/src/</include-pattern>
+		<exclude-pattern>plugins/woocommerce/client/blocks/packages/block-library/src/**/test/index.php</exclude-pattern>
 	</rule>
 
 	<rule ref="Squiz.Classes.ValidClassName">
