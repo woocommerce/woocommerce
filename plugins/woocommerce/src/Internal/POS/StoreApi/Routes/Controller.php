@@ -107,6 +107,9 @@ class Controller implements RegisterHooksInterface {
 	 * - swaps the permission callback for the route's capability check;
 	 * - adds the `cart_token` URL parameter so mobile clients can carry the cart
 	 *   session without a custom header;
+	 * - on the checkout route only, declares the optional `customer_id` parameter
+	 *   so the order can be attributed to an existing customer account (the
+	 *   account lookup and attachment happen in {@see \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerAccountPolicy});
 	 * - relaxes the schema-level `required` flag on billing/shipping address so
 	 *   POS can submit empty addresses at parse time (the deeper address
 	 *   validation is relaxed separately by the POS policy hooks). This is a
@@ -133,6 +136,18 @@ class Controller implements RegisterHooksInterface {
 					),
 				)
 			);
+
+			// Order attribution only makes sense on the order-creating POST, so
+			// keep `customer_id` off the GET (read) endpoint.
+			$is_post = in_array( 'POST', array_map( 'strtoupper', (array) $endpoint['methods'] ), true );
+			if ( $route instanceof Checkout && $is_post ) {
+				$endpoint['args']['customer_id'] = array(
+					'description' => __( 'ID of an existing customer account to associate the order with. Omit for a guest sale. The order is attributed to the account, but cart pricing, coupons and tax still resolve as a guest.', 'woocommerce' ),
+					'type'        => 'integer',
+					'minimum'     => 1,
+					'context'     => array( 'view', 'edit' ),
+				);
+			}
 
 			foreach ( array( 'billing_address', 'shipping_address' ) as $address_arg ) {
 				if ( isset( $endpoint['args'][ $address_arg ] ) && is_array( $endpoint['args'][ $address_arg ] ) ) {

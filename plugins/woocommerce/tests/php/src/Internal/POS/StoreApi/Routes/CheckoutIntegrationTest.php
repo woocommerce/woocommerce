@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutAddressPoli
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutEmailPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutPaymentMethodPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CurrentUserSwap;
+use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerAccountPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerSwap;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\DefaultPaymentMethodPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\ShippingPolicy;
@@ -37,6 +38,7 @@ use WC_Product_Simple;
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutAddressPolicy
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutEmailPolicy
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CurrentUserSwap
+ * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerAccountPolicy
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerSwap
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\DefaultPaymentMethodPolicy
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\ShippingPolicy
@@ -76,6 +78,15 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 	private $original_user_id;
 
 	/**
+	 * The customer-account policy instance, kept so its action callback can be
+	 * removed precisely in tearDown (the underlying action is shared with core
+	 * handlers, so remove_all_filters would be too broad).
+	 *
+	 * @var CustomerAccountPolicy
+	 */
+	private $customer_account_policy;
+
+	/**
 	 * Setup.
 	 */
 	protected function setUp(): void {
@@ -98,6 +109,8 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		( new TaxLocationPolicy() )->register();
 		( new CurrentUserSwap() )->register();
 		( new CustomerSwap() )->register();
+		$this->customer_account_policy = new CustomerAccountPolicy();
+		$this->customer_account_policy->register();
 
 		$this->admin_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
 
@@ -126,6 +139,7 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		remove_all_filters( 'woocommerce_customer_taxable_address' );
 		remove_all_filters( 'woocommerce_pos_tax_location' );
 		remove_all_filters( 'rest_dispatch_request' );
+		remove_action( 'woocommerce_store_api_checkout_update_order_from_request', array( $this->customer_account_policy, 'attach_customer_account' ) );
 		Context::set_test_override( null );
 		WC()->customer = $this->original_customer;
 		wp_set_current_user( $this->original_user_id );
@@ -149,7 +163,7 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 	 * @testdox billing_address and shipping_address are not schema-required on the POS checkout route.
 	 */
 	public function test_address_fields_are_optional_at_schema_level(): void {
-		$routes  = rest_get_server()->get_routes();
+		$routes   = rest_get_server()->get_routes();
 		$handlers = $routes[ '/' . Controller::REST_NAMESPACE . '/checkout' ] ?? array();
 
 		$post_endpoint = null;
@@ -227,11 +241,11 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		// Run checkout against the same cart with a truly empty body — no
 		// payment_method, no billing_address, no shipping_address. POS legitimately
 		// defers all of these past order creation:
-		//   - payment_method: the existing post-checkout flow records it
-		//     (WooPayments terminal capture for cards, cash mark-paid endpoint).
-		//   - addresses: in-store retail (cash sale of physical goods) often has
-		//     no customer address to capture; the cashier can edit the order
-		//     later via admin if needed for products that genuinely need one.
+		// - payment_method: the existing post-checkout flow records it
+		// (WooPayments terminal capture for cards, cash mark-paid endpoint).
+		// - addresses: in-store retail (cash sale of physical goods) often has
+		// no customer address to capture; the cashier can edit the order
+		// later via admin if needed for products that genuinely need one.
 		$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
 		$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );
 		$checkout_response = rest_get_server()->dispatch( $checkout_request );
@@ -265,9 +279,10 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		 * end to end through the real Store API checkout pipeline, not just
 		 * the per-callback unit tests):
 		 *
-		 *   - CustomerIdPolicy gates `woocommerce_store_api_order_customer_id`
-		 *     in OrderController::update_order_from_cart to 0 for POS, so
-		 *     the cashier's WP user is never attributed.
+		 *   - CurrentUserSwap sets the current WP user to 0 before the route
+		 *     callback runs, so OrderController::update_order_from_cart stamps
+		 *     customer_id = get_current_user_id() = 0 — the cashier's WP user
+		 *     is never attributed (unless an explicit customer_id is supplied).
 		 *   - DefaultPaymentMethodPolicy gates
 		 *     `woocommerce_store_api_order_default_payment_method` to '' so
 		 *     no gateway is stamped before the cashier picks tender.
@@ -279,6 +294,109 @@ class CheckoutIntegrationTest extends ControllerTestCase {
 		$this->assertSame( '', $order->get_billing_first_name() );
 		$this->assertSame( '', $order->get_billing_email() );
 		$this->assertSame( '', $order->get_shipping_first_name() );
+	}
+
+	/**
+	 * @testdox A POS checkout with a valid customer_id attributes the order to that customer account.
+	 */
+	public function test_checkout_with_customer_id_attributes_order_to_customer(): void {
+		$customer_id = $this->factory()->user->create( array( 'role' => 'customer' ) );
+
+		wp_set_current_user( $this->admin_id );
+		$cart_token = $this->seed_cart_token();
+		wp_set_current_user( $this->admin_id );
+
+		$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
+		$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );
+		$checkout_request->set_body_params( array( 'customer_id' => $customer_id ) );
+		$checkout_response = rest_get_server()->dispatch( $checkout_request );
+
+		$this->assertSame(
+			200,
+			$checkout_response->get_status(),
+			'Checkout failed: ' . wp_json_encode( $checkout_response->get_data() )
+		);
+
+		$order = wc_get_order( $checkout_response->get_data()['order_id'] );
+		$this->assertNotFalse( $order );
+		$this->assertSame(
+			$customer_id,
+			$order->get_customer_id(),
+			'The order should be attributed to the supplied customer account.'
+		);
+
+		wp_delete_user( $customer_id );
+	}
+
+	/**
+	 * @testdox A POS checkout with an unknown customer_id is rejected with a clear error.
+	 */
+	public function test_checkout_with_unknown_customer_id_is_rejected(): void {
+		// Create then delete a user so we have an id guaranteed not to exist.
+		$missing_customer_id = $this->factory()->user->create( array( 'role' => 'customer' ) );
+		wp_delete_user( $missing_customer_id );
+
+		wp_set_current_user( $this->admin_id );
+		$cart_token = $this->seed_cart_token();
+		wp_set_current_user( $this->admin_id );
+
+		$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
+		$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );
+		$checkout_request->set_body_params( array( 'customer_id' => $missing_customer_id ) );
+		$response = rest_get_server()->dispatch( $checkout_request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_pos_rest_customer_not_found', $response->get_data()['code'] ?? null );
+	}
+
+	/**
+	 * @testdox A POS checkout rejects a non-positive customer_id at the schema layer.
+	 */
+	public function test_checkout_rejects_non_positive_customer_id(): void {
+		wp_set_current_user( $this->admin_id );
+		$cart_token = $this->seed_cart_token();
+		wp_set_current_user( $this->admin_id );
+
+		$checkout_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/checkout' );
+		$checkout_request->set_query_params( array( 'cart_token' => $cart_token ) );
+		$checkout_request->set_body_params( array( 'customer_id' => 0 ) );
+		$response = rest_get_server()->dispatch( $checkout_request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame(
+			'rest_invalid_param',
+			$response->get_data()['code'] ?? null,
+			'customer_id is declared with minimum 1, so 0 must be rejected by Store API arg validation.'
+		);
+	}
+
+	/**
+	 * Seed the cart with one unit of the test product and return the Cart-Token
+	 * the add-item response emits, for use on a subsequent checkout call.
+	 *
+	 * @return string
+	 */
+	private function seed_cart_token(): string {
+		$add_request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . '/cart/add-item' );
+		$add_request->set_body_params(
+			array(
+				'id'       => $this->product->get_id(),
+				'quantity' => 1,
+			)
+		);
+		$add_response = rest_get_server()->dispatch( $add_request );
+		$this->assertSame( 201, $add_response->get_status() );
+
+		$cart_token = '';
+		foreach ( $add_response->get_headers() as $key => $value ) {
+			if ( strtolower( $key ) === 'cart-token' ) {
+				$cart_token = (string) $value;
+				break;
+			}
+		}
+		$this->assertNotEmpty( $cart_token, 'add-item should emit a Cart-Token header for checkout to use.' );
+
+		return $cart_token;
 	}
 
 	/**
