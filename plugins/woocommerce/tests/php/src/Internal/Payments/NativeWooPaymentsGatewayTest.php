@@ -27,7 +27,10 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_all_actions( 'woocommerce_scheduled_subscription_payment_' . OrderPaymentStore::GATEWAY_ID );
 		remove_all_actions( 'woocommerce_subscription_failing_payment_method_updated_' . OrderPaymentStore::GATEWAY_ID );
+		remove_all_filters( 'woocommerce_native_woopayments_subscriptions_for_renewal_order' );
 		unset( $_POST['wcpay-setup-intent'] );
+		unset( $_POST['wcpay-payment-method'] );
+		unset( $_POST['wcpay-is-platform-payment-method'] );
 		wp_set_current_user( 0 );
 		parent::tearDown();
 	}
@@ -240,6 +243,54 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 			),
 			$service->last_checkout_context->get_payment_data()
 		);
+		$this->assertSame( array( 'scheduled_subscription_payment' => true ), $service->last_checkout_context->get_provider_data() );
+	}
+
+	/**
+	 * @testdox Should use the current subscription customer when processing a scheduled renewal.
+	 */
+	public function test_scheduled_subscription_payment_uses_current_subscription_customer(): void {
+		$user_id      = self::factory()->user->create();
+		$parent_order = $this->create_order();
+		$subscription = $this->create_order();
+		$renewal      = $this->create_order();
+
+		$parent_order->update_meta_data( '_stripe_customer_id', 'cus_parent_stale' );
+		$parent_order->update_meta_data( '_stripe_mandate_id', 'mandate_parent' );
+		$parent_order->save();
+		$subscription->set_parent_id( $parent_order->get_id() );
+		$subscription->update_meta_data( '_stripe_customer_id', 'cus_subscription_current' );
+		$subscription->save();
+		$renewal->set_customer_id( $user_id );
+		$renewal->add_payment_token( $this->create_card_token( $user_id, 'pm_renewal' ) );
+		$renewal->save();
+
+		add_filter(
+			'woocommerce_native_woopayments_subscriptions_for_renewal_order',
+			static function ( array $subscriptions, WC_Order $filtered_order ) use ( $renewal, $subscription ): array {
+				return $renewal->get_id() === $filtered_order->get_id() ? array( $subscription ) : $subscriptions;
+			},
+			10,
+			2
+		);
+
+		$service = new RecordingPaymentProcessingService();
+		$gateway = new NativeWooPaymentsGateway();
+		$gateway->init( $service, new WooPaymentsProvider() );
+
+		$gateway->scheduled_subscription_payment( 12.0, wc_get_order( $renewal->get_id() ) );
+
+		$renewal = wc_get_order( $renewal->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $renewal );
+		$this->assertSame( 'cus_subscription_current', $renewal->get_meta( '_stripe_customer_id', true ) );
+		$this->assertSame(
+			array(
+				'scheduled_subscription_payment' => true,
+				'renewal_mandate'                => 'mandate_parent',
+			),
+			$service->last_checkout_context->get_provider_data()
+		);
 	}
 
 	/**
@@ -398,6 +449,26 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( PaymentContext::class, $service->last_checkout_context );
 		$this->assertSame( $order->get_id(), $service->last_checkout_context->get_order_id() );
 		$this->assertSame( OrderPaymentStore::GATEWAY_ID, $service->last_checkout_context->get_gateway_id() );
+		$this->assertFalse( $service->last_checkout_context->get_provider_data()['is_platform_payment_method'] );
+	}
+
+	/**
+	 * @testdox Should pass platform-created payment method state through provider data.
+	 */
+	public function test_process_payment_passes_platform_payment_method_state_to_provider_data(): void {
+		$order   = $this->create_order();
+		$service = new RecordingPaymentProcessingService();
+		$gateway = new NativeWooPaymentsGateway();
+		$gateway->init( $service, new WooPaymentsProvider() );
+
+		$_POST['wcpay-payment-method']             = 'pm_platform';
+		$_POST['wcpay-is-platform-payment-method'] = 'true';
+
+		$gateway->process_payment( $order->get_id() );
+
+		$this->assertInstanceOf( PaymentContext::class, $service->last_checkout_context );
+		$this->assertSame( 'pm_platform', $service->last_checkout_context->get_payment_method_id() );
+		$this->assertTrue( $service->last_checkout_context->get_provider_data()['is_platform_payment_method'] );
 	}
 
 	/**

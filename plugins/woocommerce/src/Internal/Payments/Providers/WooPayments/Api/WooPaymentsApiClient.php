@@ -147,6 +147,7 @@ class WooPaymentsApiClient {
 	 */
 	public function refund_charge( string $charge_id, ?int $amount, ?string $reason, string $source, string $idempotency_key ): array {
 		$params = array(
+			'charge'          => $charge_id,
 			'idempotency_key' => $idempotency_key,
 			'metadata'        => array(
 				'refund_source' => $source,
@@ -165,7 +166,7 @@ class WooPaymentsApiClient {
 			$params['metadata']['merchant_refund_reason'] = $reason;
 		}
 
-		return $this->request( $params, 'refunds/' . $charge_id, 'POST' );
+		return $this->request( $params, 'refunds', 'POST' );
 	}
 
 	/**

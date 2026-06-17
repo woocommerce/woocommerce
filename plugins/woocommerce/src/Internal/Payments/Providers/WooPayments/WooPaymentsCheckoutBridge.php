@@ -17,6 +17,25 @@ use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
  * @internal Transitional internal component for the native payments runtime.
  */
 class WooPaymentsCheckoutBridge {
+	/**
+	 * WooPayments checkout support features exposed to Checkout Blocks.
+	 *
+	 * @var string[]
+	 */
+	private const BLOCKS_SUPPORTS = array(
+		'products',
+		'subscriptions',
+		'multiple_subscriptions',
+		'subscription_cancellation',
+		'subscription_suspension',
+		'subscription_reactivation',
+		'subscription_amount_changes',
+		'subscription_date_changes',
+		'subscription_payment_method_change',
+		'subscription_payment_method_change_customer',
+		'subscription_payment_method_change_admin',
+	);
+
 
 	/**
 	 * Core-owned classic checkout script handle.
@@ -282,7 +301,7 @@ class WooPaymentsCheckoutBridge {
 			array(
 				'title'       => __( 'Card', 'woocommerce' ),
 				'description' => __( 'Pay securely using WooPayments.', 'woocommerce' ),
-				'supports'    => array( 'products' ),
+				'supports'    => self::BLOCKS_SUPPORTS,
 			)
 		);
 	}
@@ -374,7 +393,7 @@ class WooPaymentsCheckoutBridge {
 				'forceNetworkSavedCards' => $this->should_force_network_saved_cards(),
 				'cardBrandIcons'         => $this->get_card_brand_icons(),
 				'showSaveOption'         => true,
-				'supports'               => array( 'products' ),
+				'supports'               => self::BLOCKS_SUPPORTS,
 				'testingInstructions'    => $this->get_card_testing_instructions(),
 			),
 		);

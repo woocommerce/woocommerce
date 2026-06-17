@@ -167,7 +167,7 @@ class WooPaymentsProviderGatewayAdapter {
 						$idempotency_key
 					);
 
-					return $this->normalize_refund_result( $result );
+					return $this->normalize_refund_result( $result, $context );
 				} catch ( WooPaymentsApiException $exception ) {
 					return $this->failed_transport_outcome( 'refund', $exception );
 				}
@@ -484,14 +484,18 @@ class WooPaymentsProviderGatewayAdapter {
 	 * @return array<string,mixed>
 	 */
 	private function build_native_charge_request_data( PaymentContext $context, string $payment_credential, string $customer_id ): array {
-		$order         = $context->get_order();
-		$payment_data  = $context->get_payment_data();
-		$provider_data = $context->get_provider_data();
-		$request_data  = array(
+		$order                = $context->get_order();
+		$payment_data         = $context->get_payment_data();
+		$provider_data        = $context->get_provider_data();
+		$is_renewal           = ! empty( $provider_data['scheduled_subscription_payment'] );
+		$is_recurring         = $is_renewal || $this->is_recurring_payment( $order );
+		$payment_type         = $is_recurring ? 'recurring' : 'single';
+		$subscription_payment = $is_renewal ? 'renewal' : ( $is_recurring ? 'initial' : 'no' );
+		$request_data         = array(
 			'amount'               => $this->prepare_amount( (float) $order->get_total(), (string) $order->get_currency() ),
 			'currency'             => strtolower( (string) $order->get_currency() ),
 			'customer'             => $customer_id,
-			'metadata'             => $this->build_order_metadata( $order ),
+			'metadata'             => $this->build_order_metadata( $order, $payment_type, $subscription_payment ),
 			'payment_method_types' => array( 'card' ),
 		);
 
@@ -505,7 +509,15 @@ class WooPaymentsProviderGatewayAdapter {
 			$request_data['cvc_confirmation'] = (string) $provider_data['cvc_confirmation'];
 		}
 
-		if ( ! empty( $payment_data['save_payment_method'] ) || $this->is_recurring_payment( $order ) ) {
+		if ( $is_renewal ) {
+			$request_data['off_session'] = true;
+			$renewal_mandate             = isset( $provider_data['renewal_mandate'] ) ? (string) $provider_data['renewal_mandate'] : '';
+			if ( '' !== $renewal_mandate ) {
+				$request_data['mandate'] = $renewal_mandate;
+			}
+		}
+
+		if ( ! $is_renewal && ( ! empty( $payment_data['save_payment_method'] ) || $is_recurring ) ) {
 			$request_data['setup_future_usage'] = 'off_session';
 		}
 
@@ -518,7 +530,7 @@ class WooPaymentsProviderGatewayAdapter {
 			}
 		}
 
-		return $request_data;
+		return WooPaymentsPlatformPaymentMethodContext::from_provider_data( $provider_data )->apply_to_request_data( $request_data );
 	}
 
 	/**
@@ -530,9 +542,11 @@ class WooPaymentsProviderGatewayAdapter {
 	 * @return array<string,mixed>
 	 */
 	private function build_native_setup_intent_request_data( PaymentContext $context, string $payment_credential, string $customer_id ): array {
-		$request_data = array(
+		$payment_type         = $this->is_recurring_payment( $context->get_order() ) ? 'recurring' : 'single';
+		$subscription_payment = 'recurring' === $payment_type ? 'initial' : 'no';
+		$request_data         = array(
 			'customer'             => $customer_id,
-			'metadata'             => $this->build_order_metadata( $context->get_order() ),
+			'metadata'             => $this->build_order_metadata( $context->get_order(), $payment_type, $subscription_payment ),
 			'payment_method_types' => array( 'card' ),
 		);
 
@@ -540,28 +554,36 @@ class WooPaymentsProviderGatewayAdapter {
 			$request_data['payment_method'] = $payment_credential;
 		}
 
-		return $request_data;
+		return WooPaymentsPlatformPaymentMethodContext::from_provider_data( $context->get_provider_data() )->apply_to_request_data( $request_data );
 	}
 
 	/**
 	 * Build the WooPayments metadata payload for an order.
 	 *
-	 * @param WC_Order $order Order being charged.
+	 * @param WC_Order $order                Order being charged.
+	 * @param string   $payment_type         Payment type slug.
+	 * @param string   $subscription_payment Subscription payment type.
 	 * @return array<string,mixed>
 	 */
-	private function build_order_metadata( WC_Order $order ): array {
-		$metadata = array(
+	private function build_order_metadata( WC_Order $order, string $payment_type = 'single', string $subscription_payment = 'no' ): array {
+		$payment_type         = 'recurring' === $payment_type ? 'recurring' : 'single';
+		$subscription_payment = in_array( $subscription_payment, array( 'initial', 'renewal' ), true ) ? $subscription_payment : 'no';
+		$metadata             = array(
 			'customer_name'        => trim( sanitize_text_field( $order->get_billing_first_name() ) . ' ' . sanitize_text_field( $order->get_billing_last_name() ) ),
 			'customer_email'       => sanitize_email( $order->get_billing_email() ),
 			'site_url'             => esc_url( get_site_url() ),
 			'order_id'             => $order->get_id(),
 			'order_number'         => $order->get_order_number(),
 			'order_key'            => $order->get_order_key(),
-			'payment_type'         => 'single',
+			'payment_type'         => $payment_type,
 			'checkout_type'        => $order->get_created_via(),
 			'client_version'       => defined( 'WC_VERSION' ) ? WC_VERSION : '',
-			'subscription_payment' => 'no',
+			'subscription_payment' => $subscription_payment,
 		);
+
+		if ( 'no' !== $subscription_payment ) {
+			$metadata['payment_context'] = 'regular_subscription';
+		}
 
 		/**
 		 * Filters the WooPayments metadata created from an order.
@@ -572,7 +594,7 @@ class WooPaymentsProviderGatewayAdapter {
 		 * @param WC_Order            $order    Order object.
 		 * @param string              $payment_type Payment type slug.
 		 */
-		$metadata = apply_filters( 'wcpay_metadata_from_order', $metadata, $order, 'single' );
+		$metadata = apply_filters( 'wcpay_metadata_from_order', $metadata, $order, $payment_type );
 
 		return is_array( $metadata ) ? $metadata : array();
 	}
@@ -834,6 +856,10 @@ class WooPaymentsProviderGatewayAdapter {
 		$payment_token = isset( $payment_data['payment_token'] ) ? (string) $payment_data['payment_token'] : '';
 
 		if ( '' !== $payment_token && 'new' !== $payment_token ) {
+			if ( ! empty( $context->get_provider_data()['scheduled_subscription_payment'] ) ) {
+				return $this->get_token_service()->resolve_payment_method_id_from_order_token_id( $payment_token, $context->get_order() );
+			}
+
 			return $this->get_token_service()->resolve_payment_method_id_from_token_id( $payment_token, $context->get_order()->get_user_id() );
 		}
 
@@ -1484,14 +1510,123 @@ class WooPaymentsProviderGatewayAdapter {
 	/**
 	 * Normalize a native refund response.
 	 *
-	 * @param array<string,mixed> $result Native refund result.
+	 * @param array<string,mixed> $result  Native refund result.
+	 * @param PaymentContext      $context Payment context.
 	 * @return PaymentOutcome
 	 */
-	private function normalize_refund_result( array $result ): PaymentOutcome {
+	private function normalize_refund_result( array $result, PaymentContext $context ): PaymentOutcome {
+		$refund_id              = isset( $result['id'] ) ? (string) $result['id'] : '';
+		$provider_status        = isset( $result['status'] ) ? (string) $result['status'] : '';
+		$refund_status          = 'pending' === $provider_status ? 'pending' : 'successful';
+		$balance_transaction_id = $this->get_refund_balance_transaction_id( $result['balance_transaction'] ?? null );
+
+		if ( ! in_array( $provider_status, array( '', 'pending', 'succeeded' ), true ) ) {
+			$failure_reason = isset( $result['failure_reason'] ) ? (string) $result['failure_reason'] : '';
+			$error_message  = sprintf(
+				/* translators: %1$s: refund status, %2$s: failure reason. */
+				__( 'The refund returned status "%1$s". Reason: %2$s', 'woocommerce' ),
+				$provider_status,
+				'' !== $failure_reason ? $failure_reason : __( 'No reason provided.', 'woocommerce' )
+			);
+
+			return new PaymentOutcome(
+				PaymentOutcome::STATUS_FAILED,
+				$refund_id,
+				'',
+				'',
+				'',
+				array(
+					'error_code'    => '' !== $failure_reason ? $failure_reason : $provider_status,
+					'error_message' => $error_message,
+					'refund_status' => $provider_status,
+				)
+			);
+		}
+
+		$data = array(
+			'order_meta'    => array( '_wcpay_refund_status' => $refund_status ),
+			'refund_meta'   => array( '_wcpay_refund_id' => $refund_id ),
+			'refund_note'   => $this->get_refund_note( $context, $refund_id, 'pending' === $refund_status ),
+			'refund_status' => $refund_status,
+		);
+
+		if ( '' !== $balance_transaction_id ) {
+			$data['refund_meta']['_wcpay_refund_transaction_id'] = $balance_transaction_id;
+			$data['refund_balance_transaction_id']               = $balance_transaction_id;
+		}
+
 		return new PaymentOutcome(
 			PaymentOutcome::STATUS_COMPLETED,
-			isset( $result['id'] ) ? (string) $result['id'] : ''
+			$refund_id,
+			'',
+			'',
+			'',
+			$data
 		);
+	}
+
+	/**
+	 * Get the refund balance transaction ID from a provider response.
+	 *
+	 * @param mixed $balance_transaction Balance transaction response field.
+	 * @return string
+	 */
+	private function get_refund_balance_transaction_id( $balance_transaction ): string {
+		if ( is_string( $balance_transaction ) ) {
+			return $balance_transaction;
+		}
+
+		if ( is_array( $balance_transaction ) && isset( $balance_transaction['id'] ) ) {
+			return (string) $balance_transaction['id'];
+		}
+
+		return '';
+	}
+
+	/**
+	 * Build a WooPayments-compatible provider refund note.
+	 *
+	 * @param PaymentContext $context    Payment context.
+	 * @param string         $refund_id  Provider refund ID.
+	 * @param bool           $is_pending Whether the provider refund is pending.
+	 * @return string
+	 */
+	private function get_refund_note( PaymentContext $context, string $refund_id, bool $is_pending ): string {
+		$order            = $context->get_order();
+		$payment_data     = $context->get_payment_data();
+		$refund_amount    = isset( $payment_data['amount'] ) ? (float) $payment_data['amount'] : 0.0;
+		$refund_reason    = isset( $payment_data['reason'] ) ? (string) $payment_data['reason'] : '';
+		$formatted_amount = wc_price( $refund_amount, array( 'currency' => $order->get_currency() ) );
+		$status_text      = $is_pending
+			? sprintf(
+				'<a href="https://woocommerce.com/document/woopayments/managing-money/#pending-refunds" target="_blank" rel="noopener noreferrer">%s</a>',
+				esc_html__( 'is pending', 'woocommerce' )
+			)
+			: esc_html__( 'was successfully processed', 'woocommerce' );
+		$refund_id_markup = '<code>' . esc_html( $refund_id ) . '</code>';
+
+		if ( '' === $refund_reason ) {
+			$note = sprintf(
+				/* translators: %1$s: refund amount, %2$s: WooPayments, %3$s: provider refund ID, %4$s: refund status. */
+				__( 'A refund of %1$s %4$s using %2$s (%3$s).', 'woocommerce' ),
+				$formatted_amount,
+				'WooPayments',
+				$refund_id_markup,
+				$status_text
+			);
+		} else {
+			$note = sprintf(
+				/* translators: %1$s: refund amount, %2$s: WooPayments, %3$s: refund reason, %4$s: provider refund ID, %5$s: refund status. */
+				__( 'A refund of %1$s %5$s using %2$s. Reason: %3$s. (%4$s)', 'woocommerce' ),
+				$formatted_amount,
+				'WooPayments',
+				esc_html( $refund_reason ),
+				$refund_id_markup,
+				$status_text
+			);
+		}
+
+		return wp_kses_post( $note );
 	}
 
 	/**

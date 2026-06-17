@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPlatformPaymentMethodContext;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsTokenService;
 use Throwable;
@@ -271,6 +272,18 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 			return;
 		}
 
+		$provider_data = array( 'scheduled_subscription_payment' => true );
+		$mandate       = $this->get_renewal_order_mandate( $renewal_order );
+		if ( '' !== $mandate ) {
+			$provider_data['renewal_mandate'] = $mandate;
+		}
+
+		$customer_id = $this->get_renewal_order_customer_id( $renewal_order );
+		if ( '' !== $customer_id ) {
+			$renewal_order->update_meta_data( '_stripe_customer_id', $customer_id );
+			$renewal_order->save_meta_data();
+		}
+
 		$this->get_processing_service()->process_checkout(
 			PaymentContext::for_checkout(
 				$renewal_order,
@@ -280,10 +293,102 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 					'payment_token'       => (string) $token->get_id(),
 					'save_payment_method' => false,
 				),
-				array( 'scheduled_subscription_payment' => true )
+				$provider_data
 			),
 			$this->get_provider()
 		);
+	}
+
+	/**
+	 * Get the mandate ID from the subscription parent order for a renewal order.
+	 *
+	 * @param WC_Order $renewal_order Renewal order.
+	 * @return string Mandate ID, or an empty string when not available.
+	 */
+	private function get_renewal_order_mandate( WC_Order $renewal_order ): string {
+		$parent_order = $this->get_subscription_parent_order_for_renewal( $renewal_order );
+		if ( ! $parent_order instanceof WC_Order ) {
+			return '';
+		}
+
+		return (string) $parent_order->get_meta( '_stripe_mandate_id', true );
+	}
+
+	/**
+	 * Get the WooPayments customer ID from the renewal order, current subscription, or subscription parent order.
+	 *
+	 * @param WC_Order $renewal_order Renewal order.
+	 * @return string Customer ID, or an empty string when not available.
+	 */
+	private function get_renewal_order_customer_id( WC_Order $renewal_order ): string {
+		$customer_id = (string) $renewal_order->get_meta( '_stripe_customer_id', true );
+		if ( '' !== $customer_id ) {
+			return $customer_id;
+		}
+
+		$subscription = $this->get_subscription_for_renewal_order( $renewal_order );
+		if ( $subscription instanceof WC_Order ) {
+			$customer_id = (string) $subscription->get_meta( '_stripe_customer_id', true );
+			if ( '' !== $customer_id ) {
+				return $customer_id;
+			}
+		}
+
+		$parent_order = $this->get_subscription_parent_order_for_renewal( $renewal_order );
+		if ( ! $parent_order instanceof WC_Order ) {
+			return '';
+		}
+
+		return (string) $parent_order->get_meta( '_stripe_customer_id', true );
+	}
+
+	/**
+	 * Get the subscription parent order associated with a renewal order.
+	 *
+	 * @param WC_Order $renewal_order Renewal order.
+	 * @return WC_Order|null Parent order, or null when not available.
+	 */
+	private function get_subscription_parent_order_for_renewal( WC_Order $renewal_order ): ?WC_Order {
+		$subscription = $this->get_subscription_for_renewal_order( $renewal_order );
+		if ( ! $subscription instanceof WC_Order ) {
+			return null;
+		}
+
+		$parent_order = wc_get_order( (int) $subscription->get_parent_id() );
+		if ( ! $parent_order instanceof WC_Order ) {
+			return null;
+		}
+
+		return $parent_order;
+	}
+
+	/**
+	 * Get the subscription associated with a renewal order.
+	 *
+	 * @param WC_Order $renewal_order Renewal order.
+	 * @return WC_Order|null Subscription order, or null when not available.
+	 */
+	private function get_subscription_for_renewal_order( WC_Order $renewal_order ): ?WC_Order {
+		$subscriptions = array();
+		if ( function_exists( 'wcs_get_subscriptions_for_renewal_order' ) ) {
+			$subscriptions = wcs_get_subscriptions_for_renewal_order( $renewal_order->get_id() );
+		}
+
+		$subscriptions = is_array( $subscriptions ) ? $subscriptions : array();
+
+		/**
+		 * Filters native WooPayments subscriptions related to a renewal order.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param array<int,mixed> $subscriptions Related subscriptions.
+		 * @param WC_Order         $renewal_order Renewal order.
+		 */
+		$subscriptions = apply_filters( 'woocommerce_native_woopayments_subscriptions_for_renewal_order', $subscriptions, $renewal_order );
+		$subscriptions = is_array( $subscriptions ) ? $subscriptions : array();
+		$subscription  = reset( $subscriptions );
+
+		return $subscription instanceof WC_Order ? $subscription : null;
 	}
 
 	/**
@@ -862,12 +967,15 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	private function get_checkout_provider_data(): array {
 		$cvc_key = 'wc-' . $this->id . '-payment-cvc-confirmation';
 
-		return array(
-			'cvc_confirmation'          => $this->sanitize_post_string( $cvc_key ),
-			'fingerprint'               => $this->sanitize_post_string( 'wcpay-fingerprint' ),
-			'payment_method_error'      => $this->sanitize_post_string( 'wcpay-payment-method-error-message' ),
-			'payment_method_error_code' => $this->sanitize_post_string( 'wcpay-payment-method-error-code' ),
-			'is_woopay'                 => ! empty( $_POST['is_woopay'] ), // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		return array_merge(
+			WooPaymentsPlatformPaymentMethodContext::provider_data_from_checkout_value( $this->sanitize_post_string( WooPaymentsPlatformPaymentMethodContext::CHECKOUT_FIELD ) ),
+			array(
+				'cvc_confirmation'          => $this->sanitize_post_string( $cvc_key ),
+				'fingerprint'               => $this->sanitize_post_string( 'wcpay-fingerprint' ),
+				'payment_method_error'      => $this->sanitize_post_string( 'wcpay-payment-method-error-message' ),
+				'payment_method_error_code' => $this->sanitize_post_string( 'wcpay-payment-method-error-code' ),
+				'is_woopay'                 => ! empty( $_POST['is_woopay'] ), // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			)
 		);
 	}
 

@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Payments;
 
 use Throwable;
 use WC_Order;
+use WC_Order_Refund;
 use WP_Error;
 
 /**
@@ -135,6 +136,10 @@ class PaymentProcessingService {
 			} catch ( Throwable $exception ) {
 				$outcome = $this->exception_policy->to_failed_outcome( $exception );
 			}
+
+			if ( $outcome->is_successful() ) {
+				$this->apply_refund_outcome( $order, $outcome, $amount, $reason );
+			}
 		} finally {
 			$this->order_payment_store->unlock_order_payment( $order );
 		}
@@ -148,6 +153,147 @@ class PaymentProcessingService {
 		$error_message = isset( $data['error_message'] ) ? (string) $data['error_message'] : __( 'The refund failed.', 'woocommerce' );
 
 		return new WP_Error( $error_code, $error_message );
+	}
+
+	/**
+	 * Apply provider refund metadata to the matching WooCommerce refund.
+	 *
+	 * @param WC_Order       $order   Parent order.
+	 * @param PaymentOutcome $outcome Provider refund outcome.
+	 * @param float          $amount  Refund amount.
+	 * @param string         $reason  Refund reason.
+	 */
+	private function apply_refund_outcome( WC_Order $order, PaymentOutcome $outcome, float $amount, string $reason ): void {
+		$data        = $outcome->get_data();
+		$refund_meta = isset( $data['refund_meta'] ) && is_array( $data['refund_meta'] ) ? $data['refund_meta'] : array();
+		$order_meta  = isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ? $data['order_meta'] : array();
+		$refund_note = isset( $data['refund_note'] ) && is_string( $data['refund_note'] ) ? $data['refund_note'] : '';
+
+		if ( empty( $refund_meta ) && empty( $order_meta ) && '' === $refund_note ) {
+			return;
+		}
+
+		$matched_refund = $this->find_matching_refund( $order, $amount, $reason, array_map( 'strval', array_keys( $refund_meta ) ) );
+		$reloaded_order = wc_get_order( $order->get_id() );
+		if ( ! $matched_refund instanceof WC_Order_Refund ) {
+			return;
+		}
+		if ( ! $reloaded_order instanceof WC_Order ) {
+			return;
+		}
+
+		foreach ( $refund_meta as $meta_key => $meta_value ) {
+			$matched_refund->update_meta_data( (string) $meta_key, $meta_value );
+		}
+		$matched_refund->save_meta_data();
+
+		foreach ( $order_meta as $meta_key => $meta_value ) {
+			$reloaded_order->update_meta_data( (string) $meta_key, $meta_value );
+		}
+
+		if ( '' !== $refund_note ) {
+			$this->maybe_add_refund_note( $reloaded_order, $refund_note );
+		}
+		$reloaded_order->save_meta_data();
+	}
+
+	/**
+	 * Find the local refund row created before the gateway refund call.
+	 *
+	 * @param WC_Order $order  Parent order.
+	 * @param float    $amount Refund amount.
+	 * @param string   $reason Refund reason.
+	 * @param string[] $provider_refund_meta_keys Provider refund meta keys that mark a refund as linked.
+	 * @return WC_Order_Refund|null
+	 */
+	private function find_matching_refund( WC_Order $order, float $amount, string $reason, array $provider_refund_meta_keys ): ?WC_Order_Refund {
+		$reloaded_order = wc_get_order( $order->get_id() );
+		if ( ! $reloaded_order instanceof WC_Order ) {
+			return null;
+		}
+
+		$expected_amount = wc_format_decimal( $amount );
+		$refunds         = array_reverse( $reloaded_order->get_refunds() );
+
+		foreach ( $refunds as $refund ) {
+			if ( ! $refund instanceof WC_Order_Refund ) {
+				continue;
+			}
+
+			if ( $this->refund_has_any_meta_value( $refund, $provider_refund_meta_keys ) ) {
+				continue;
+			}
+
+			if ( wc_format_decimal( $refund->get_amount() ) !== $expected_amount ) {
+				continue;
+			}
+
+			if ( '' !== $reason && $reason !== (string) $refund->get_reason() ) {
+				continue;
+			}
+
+			return $refund;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Tell whether a refund already has any provider supplied link meta.
+	 *
+	 * @param WC_Order_Refund $refund    Refund object.
+	 * @param string[]        $meta_keys Provider refund meta keys.
+	 * @return bool
+	 */
+	private function refund_has_any_meta_value( WC_Order_Refund $refund, array $meta_keys ): bool {
+		foreach ( $meta_keys as $meta_key ) {
+			if ( '' === $meta_key ) {
+				continue;
+			}
+
+			$meta_value = $refund->get_meta( $meta_key, true );
+			if ( null !== $meta_value && '' !== $meta_value && array() !== $meta_value ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Add a WooPayments-compatible provider refund note if it does not already exist.
+	 *
+	 * @param WC_Order $order Parent order.
+	 * @param string   $note  Provider refund note.
+	 */
+	private function maybe_add_refund_note( WC_Order $order, string $note ): void {
+		if ( ! $this->order_note_exists( $order, $note ) ) {
+			$order->add_order_note( $note );
+		}
+	}
+
+	/**
+	 * Tell whether an order already has a note.
+	 *
+	 * @param WC_Order $order        Order object.
+	 * @param string   $note_content Note content.
+	 * @return bool
+	 */
+	private function order_note_exists( WC_Order $order, string $note_content ): bool {
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'type'     => 'any',
+			)
+		);
+
+		foreach ( $notes as $note ) {
+			if ( $note_content === $note->content ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

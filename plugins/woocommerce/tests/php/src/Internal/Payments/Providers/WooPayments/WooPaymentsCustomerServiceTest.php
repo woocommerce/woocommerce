@@ -60,6 +60,24 @@ class WooPaymentsCustomerServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Orders with WooPayments customer meta should reuse that customer before user storage.
+	 */
+	public function test_get_or_create_customer_id_reuses_order_customer_meta_before_user_storage(): void {
+		$user_id    = $this->factory->user->create( array( 'user_login' => 'renewal-customer' ) );
+		$order      = $this->create_checkout_order( $user_id );
+		$api_client = $this->create_customer_api_client( array( 'cus_new' ) );
+
+		update_user_option( $user_id, '_wcpay_customer_id_live', 'cus_user' );
+		$order->update_meta_data( '_stripe_customer_id', 'cus_order' );
+		$order->save();
+
+		$sut = $this->create_sut( false, $api_client );
+
+		$this->assertSame( 'cus_order', $sut->get_or_create_customer_id_for_order( $order ) );
+		$this->assertSame( 'cus_order', get_user_option( '_wcpay_customer_id_live', $user_id ) );
+	}
+
+	/**
 	 * @testdox Recreating a missing customer should replace the persisted customer ID.
 	 */
 	public function test_recreate_customer_replaces_a_missing_customer_id_and_updates_storage(): void {

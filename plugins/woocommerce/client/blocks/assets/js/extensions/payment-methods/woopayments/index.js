@@ -611,6 +611,8 @@ const WooPaymentsContent = ( {
 				'wcpay-payment-method-error-code': '',
 				'wcpay-payment-method-error-message': '',
 				'wcpay-fingerprint': '',
+				'wcpay-is-platform-payment-method':
+					shouldUsePlatformStripeForCard() ? 'true' : 'false',
 			};
 
 			if ( stripe.current && elements.current ) {
@@ -657,12 +659,20 @@ const WooPaymentsContent = ( {
 					);
 				}
 
-				if ( result.paymentMethod ) {
-					paymentMethodData[ 'wcpay-payment-method' ] =
-						result.paymentMethod.id || '';
-					paymentMethodData[ 'wcpay-fingerprint' ] =
-						result.paymentMethod.card?.fingerprint || '';
+				if ( ! result.paymentMethod ) {
+					return getErrorResponse(
+						emitResponseRef.current,
+						__(
+							'There was a problem validating your payment details.',
+							'woocommerce'
+						)
+					);
 				}
+
+				paymentMethodData[ 'wcpay-payment-method' ] =
+					result.paymentMethod.id || '';
+				paymentMethodData[ 'wcpay-fingerprint' ] =
+					result.paymentMethod.card?.fingerprint || '';
 			}
 
 			return getSuccessResponse(

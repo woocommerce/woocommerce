@@ -41,10 +41,11 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( 're_test', $result['id'] );
-		$this->assertSame( '/sites/123/wcpay/refunds/ch_test', $http_client->last_path );
+		$this->assertSame( '/sites/123/wcpay/refunds', $http_client->last_path );
 		$this->assertSame( 'POST', $http_client->last_method );
 		$this->assertSame( 'idem_test', $http_client->last_headers['Idempotency-Key'] );
 		$this->assertStringNotContainsString( 'idempotency_key', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"charge":"ch_test"', (string) $http_client->last_body );
 		$this->assertStringContainsString( '"filtered":"yes"', (string) $http_client->last_body );
 	}
 

@@ -55,6 +55,32 @@ class WooPaymentsTokenService {
 	}
 
 	/**
+	 * Resolve an order-attached WooCommerce payment token ID to the provider payment method ID.
+	 *
+	 * This is used for WC Subscriptions renewals, where Subscriptions has already attached the token
+	 * to the renewal order and the renewal may not have the same runtime user context as checkout.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param string   $token_id WooCommerce payment token ID.
+	 * @param WC_Order $order    Order that must contain the token.
+	 * @return string Provider payment method ID, or empty string when the token is not attached to the order or is invalid for WooPayments.
+	 */
+	public function resolve_payment_method_id_from_order_token_id( string $token_id, WC_Order $order ): string {
+		$token_id_int = absint( $token_id );
+		if ( 0 >= $token_id_int || ! in_array( $token_id_int, array_map( 'absint', $order->get_payment_tokens() ), true ) ) {
+			return '';
+		}
+
+		$token = WC_Payment_Tokens::get( $token_id_int );
+		if ( ! $token instanceof WC_Payment_Token || OrderPaymentStore::GATEWAY_ID !== $token->get_gateway_id() ) {
+			return '';
+		}
+
+		return (string) $token->get_token();
+	}
+
+	/**
 	 * Get a WooPayments token object by WooCommerce payment token ID.
 	 *
 	 * @since 11.0.0

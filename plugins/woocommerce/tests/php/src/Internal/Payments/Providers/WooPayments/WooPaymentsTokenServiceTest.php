@@ -44,6 +44,28 @@ class WooPaymentsTokenServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should resolve native WooPayments tokens already attached to a renewal order.
+	 */
+	public function test_resolves_payment_method_id_from_order_attached_token(): void {
+		$user_id       = $this->factory()->user->create();
+		$other_user_id = $this->factory()->user->create();
+		$token         = $this->create_card_token( $user_id, OrderPaymentStore::GATEWAY_ID, 'pm_attached' );
+		$unattached    = $this->create_card_token( $user_id, OrderPaymentStore::GATEWAY_ID, 'pm_unattached' );
+		$wrong_gateway = $this->create_card_token( $user_id, 'cheque', 'pm_cheque' );
+		$order         = wc_create_order();
+		$sut           = $this->create_service();
+
+		$order->set_customer_id( $other_user_id );
+		$order->add_payment_token( $token );
+		$order->add_payment_token( $wrong_gateway );
+		$order->save();
+
+		$this->assertSame( 'pm_attached', $sut->resolve_payment_method_id_from_order_token_id( (string) $token->get_id(), $order ) );
+		$this->assertSame( '', $sut->resolve_payment_method_id_from_order_token_id( (string) $unattached->get_id(), $order ), 'Tokens not attached to the order should not resolve.' );
+		$this->assertSame( '', $sut->resolve_payment_method_id_from_order_token_id( (string) $wrong_gateway->get_id(), $order ), 'Non-WooPayments tokens attached to the order should not resolve.' );
+	}
+
+	/**
 	 * @testdox Should create a card token from WooPayments payment method details.
 	 */
 	public function test_creates_card_token_from_payment_method_details(): void {

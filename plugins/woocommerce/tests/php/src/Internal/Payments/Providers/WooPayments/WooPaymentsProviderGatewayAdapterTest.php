@@ -30,6 +30,7 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_native_woopayments_is_recurring_payment' );
 		remove_all_filters( 'woocommerce_native_woopayments_related_subscriptions_for_order' );
+		remove_all_filters( 'wcpay_metadata_from_order' );
 		parent::tearDown();
 	}
 
@@ -377,6 +378,80 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Charge should flag platform-created payment methods for WCPay.
+	 */
+	public function test_charge_flags_platform_created_payment_methods_for_wcpay(): void {
+		$order            = $this->create_woopayments_order( '50.00' );
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Last request data.
+			 *
+			 * @var array<string,mixed>
+			 */
+			public array $last_request_data = array();
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				unset( $idempotency_key );
+				$this->last_request_data = $request_data;
+
+				return array(
+					'id'             => 'pi_platform',
+					'status'         => 'succeeded',
+					'client_secret'  => 'secret_platform',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_connected',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 0,
+						'data'        => array(),
+					),
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_native' );
+
+		$sut     = $this->create_adapter( $gateway, $api_client, $customer_service );
+		$outcome = $sut->charge(
+			PaymentContext::for_checkout(
+				$order,
+				OrderPaymentStore::GATEWAY_ID,
+				'pm_platform',
+				array(),
+				array( 'is_platform_payment_method' => true )
+			),
+			'key_charge'
+		);
+
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertSame( 'pm_platform', $api_client->last_request_data['payment_method'] );
+		$this->assertTrue( $api_client->last_request_data['is_platform_payment_method'] );
+	}
+
+	/**
 	 * @testdox Charge should use the Core-owned account service for native outcome mode metadata.
 	 */
 	public function test_charge_uses_account_service_mode_for_native_outcome_meta(): void {
@@ -569,6 +644,7 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 			->getMock();
 
 		$order->set_customer_id( $user_id );
+		$order->add_payment_token( $saved_token );
 		$order->save();
 
 		$customer_service->expects( $this->once() )
@@ -591,6 +667,109 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
 		$this->assertSame( 'pm_saved', $outcome->get_payment_method_id() );
 		$this->assertContains( $saved_token->get_id(), $order->get_payment_tokens(), 'Existing saved tokens should be linked to the paid order.' );
+	}
+
+	/**
+	 * @testdox Scheduled subscription charges should use merchant-initiated recurring request shape.
+	 */
+	public function test_scheduled_subscription_charge_uses_merchant_initiated_recurring_request_shape(): void {
+		$user_id                = $this->factory()->user->create();
+		$order                  = $this->create_woopayments_order();
+		$gateway                = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$saved_token            = $this->create_card_token( $user_id, 'pm_saved' );
+		$metadata_payment_types = array();
+		$api_client             = new class() extends WooPaymentsApiClient {
+			/**
+			 * Last request data.
+			 *
+			 * @var array<string,mixed>
+			 */
+			public array $last_request_data = array();
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				if ( 'pm_saved' !== $request_data['payment_method'] || 'key_renewal' !== $idempotency_key ) {
+					throw new \RuntimeException( 'Saved token was not resolved before the native renewal request.' );
+				}
+
+				$this->last_request_data = $request_data;
+
+				return array(
+					'id'             => 'pi_renewal',
+					'status'         => 'succeeded',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_saved',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 0,
+						'data'        => array(),
+					),
+				);
+			}
+		};
+		$customer_service       = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+		$metadata_filter        = static function ( array $metadata, WC_Order $filtered_order, string $payment_type ) use ( &$metadata_payment_types, $order ): array {
+			if ( $order->get_id() === $filtered_order->get_id() ) {
+				$metadata_payment_types[] = $payment_type;
+			}
+
+			return $metadata;
+		};
+
+		$order->set_customer_id( $user_id );
+		$order->add_payment_token( $saved_token );
+		$order->save();
+
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_native' );
+
+		add_filter( 'wcpay_metadata_from_order', $metadata_filter, 10, 3 );
+
+		$sut     = $this->create_adapter( $gateway, $api_client, $customer_service );
+		$outcome = $sut->charge(
+			PaymentContext::for_checkout(
+				$order,
+				OrderPaymentStore::GATEWAY_ID,
+				'',
+				array(
+					'payment_token'       => (string) $saved_token->get_id(),
+					'save_payment_method' => false,
+				),
+				array(
+					'scheduled_subscription_payment' => true,
+					'renewal_mandate'                => 'mandate_native',
+				)
+			),
+			'key_renewal'
+		);
+
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertTrue( $api_client->last_request_data['off_session'] );
+		$this->assertSame( 'mandate_native', $api_client->last_request_data['mandate'] );
+		$this->assertSame( 'recurring', $api_client->last_request_data['metadata']['payment_type'] );
+		$this->assertSame( 'renewal', $api_client->last_request_data['metadata']['subscription_payment'] );
+		$this->assertSame( 'regular_subscription', $api_client->last_request_data['metadata']['payment_context'] );
+		$this->assertSame( array( 'recurring' ), $metadata_payment_types );
+		$this->assertArrayNotHasKey( 'setup_future_usage', $api_client->last_request_data );
 	}
 
 	/**
@@ -918,6 +1097,75 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Zero-total card checkout should flag platform-created payment methods for WCPay.
+	 */
+	public function test_zero_total_charge_flags_platform_created_payment_methods_for_wcpay(): void {
+		$order            = $this->create_woopayments_order( '0.00' );
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Last request data.
+			 *
+			 * @var array<string,mixed>
+			 */
+			public array $last_request_data = array();
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a setup intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_setup_intention( array $request_data, string $idempotency_key ): array {
+				unset( $idempotency_key );
+				$this->last_request_data = $request_data;
+
+				return array(
+					'id'             => 'seti_platform',
+					'status'         => 'succeeded',
+					'client_secret'  => 'seti_platform_secret_abc',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_connected',
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_native' );
+
+		$sut     = $this->create_adapter( $gateway, $api_client, $customer_service );
+		$outcome = $sut->charge(
+			PaymentContext::for_checkout(
+				$order,
+				OrderPaymentStore::GATEWAY_ID,
+				'pm_platform',
+				array(),
+				array( 'is_platform_payment_method' => true )
+			),
+			'key_setup'
+		);
+
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertSame( 'pm_platform', $api_client->last_request_data['payment_method'] );
+		$this->assertTrue( $api_client->last_request_data['is_platform_payment_method'] );
+	}
+
+	/**
 	 * @testdox Zero-total recurring charges should copy the saved token and provider metadata to related subscriptions.
 	 */
 	public function test_zero_total_recurring_charge_copies_saved_token_to_related_subscriptions(): void {
@@ -1051,12 +1299,68 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$api_client->expects( $this->once() )
 			->method( 'refund_charge' )
 			->with( 'ch_native', 350, 'Adjustment', $this->isType( 'string' ), 'key_refund' )
-			->willReturn( array( 'id' => 're_native' ) );
+			->willReturn(
+				array(
+					'id'                  => 're_native',
+					'status'              => 'pending',
+					'balance_transaction' => array( 'id' => 'txn_refund' ),
+				)
+			);
 
 		$sut     = $this->create_adapter( $gateway, $api_client );
 		$outcome = $sut->refund( PaymentContext::for_refund( $order, OrderPaymentStore::GATEWAY_ID, 3.50, 'Adjustment' ), 'key_refund' );
 
 		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertSame( 're_native', $outcome->get_provider_payment_id() );
+		$this->assertSame( 'pending', $outcome->get_data()['refund_status'] );
+		$this->assertSame( 'txn_refund', $outcome->get_data()['refund_balance_transaction_id'] );
+		$this->assertSame( 'pending', $outcome->get_data()['order_meta']['_wcpay_refund_status'] );
+		$this->assertSame( 're_native', $outcome->get_data()['refund_meta']['_wcpay_refund_id'] );
+		$this->assertSame( 'txn_refund', $outcome->get_data()['refund_meta']['_wcpay_refund_transaction_id'] );
+		$this->assertStringContainsString( 'is pending', $outcome->get_data()['refund_note'] );
+		$this->assertStringContainsString( 're_native', $outcome->get_data()['refund_note'] );
+		$this->assertNull( $gateway->refund_amount );
+	}
+
+	/**
+	 * @testdox Refund should fail closed when the native transport returns a failed provider status.
+	 */
+	public function test_refund_fails_closed_for_failed_native_refund_status(): void {
+		$order      = $this->create_woopayments_order();
+		$gateway    = new RecordingLegacyGateway( array( 'result' => 'success' ), true );
+		$api_client = $this->getMockBuilder( WooPaymentsApiClient::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_available', 'refund_charge' ) )
+			->getMock();
+
+		$order->update_meta_data( '_charge_id', 'ch_native' );
+		$order->save();
+
+		$api_client->expects( $this->once() )
+			->method( 'is_available' )
+			->willReturn( true );
+		$api_client->expects( $this->once() )
+			->method( 'refund_charge' )
+			->with( 'ch_native', 350, 'Adjustment', $this->isType( 'string' ), 'key_refund' )
+			->willReturn(
+				array(
+					'id'             => 're_failed',
+					'status'         => 'failed',
+					'failure_reason' => 'lost_or_stolen_card',
+				)
+			);
+
+		$sut     = $this->create_adapter( $gateway, $api_client );
+		$outcome = $sut->refund( PaymentContext::for_refund( $order, OrderPaymentStore::GATEWAY_ID, 3.50, 'Adjustment' ), 'key_refund' );
+
+		$this->assertSame( PaymentOutcome::STATUS_FAILED, $outcome->get_status() );
+		$this->assertSame( 're_failed', $outcome->get_provider_payment_id() );
+		$this->assertSame( 'failed', $outcome->get_data()['refund_status'] );
+		$this->assertSame( 'lost_or_stolen_card', $outcome->get_data()['error_code'] );
+		$this->assertStringContainsString( 'failed', $outcome->get_data()['error_message'] );
+		$this->assertStringContainsString( 'lost_or_stolen_card', $outcome->get_data()['error_message'] );
+		$this->assertArrayNotHasKey( 'refund_meta', $outcome->get_data() );
+		$this->assertArrayNotHasKey( 'order_meta', $outcome->get_data() );
 		$this->assertNull( $gateway->refund_amount );
 	}
 

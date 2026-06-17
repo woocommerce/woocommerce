@@ -22,7 +22,7 @@ jest.mock( '@woocommerce/blocks-registry', () => ( {
 jest.mock( '@woocommerce/settings', () => ( {
 	getPaymentMethodData: jest.fn( () => ( {
 		title: 'WooPayments',
-		supports: [ 'products' ],
+		supports: [ 'products', 'subscriptions', 'multiple_subscriptions' ],
 		gatewayId: 'woocommerce_payments',
 		publishableKey: 'pk_test_123',
 		accountId: 'acct_123',
@@ -157,6 +157,7 @@ describe( 'wc-payment-method-woopayments', () => {
 					'wcpay-payment-method-error-code': '',
 					'wcpay-payment-method-error-message': '',
 					'wcpay-fingerprint': '',
+					'wcpay-is-platform-payment-method': 'true',
 				},
 			},
 		} );
@@ -167,7 +168,11 @@ describe( 'wc-payment-method-woopayments', () => {
 
 		expect( registration.supports ).toEqual(
 			expect.objectContaining( {
-				features: [ 'products' ],
+				features: expect.arrayContaining( [
+					'products',
+					'subscriptions',
+					'multiple_subscriptions',
+				] ),
 				showSavedCards: true,
 				showSaveOption: true,
 			} )
@@ -419,6 +424,7 @@ describe( 'wc-payment-method-woopayments', () => {
 				paymentMethodData: {
 					'wcpay-payment-method': 'pm_123',
 					'wcpay-fingerprint': 'fp_123',
+					'wcpay-is-platform-payment-method': 'true',
 				},
 			},
 		} );
@@ -826,6 +832,55 @@ describe( 'wc-payment-method-woopayments', () => {
 		await expect( setupResult ).resolves.toEqual( {
 			type: 'error',
 			message: 'Your card number is incomplete.',
+			messageContext: 'payments',
+		} );
+	} );
+
+	it( 'returns a payment notice when Stripe does not provide a payment method', async () => {
+		window.Stripe = jest.fn( () => ( {
+			elements: jest.fn( () => ( {
+				create: jest.fn( () => ( {
+					mount: jest.fn(),
+				} ) ),
+			} ) ),
+			createPaymentMethod: jest.fn().mockResolvedValue( {} ),
+		} ) );
+
+		const registration = registerWooPayments();
+		let setupResult;
+		const onPaymentSetup = jest.fn( ( callback ) => {
+			setupResult = callback();
+		} );
+		const emitResponse = {
+			responseTypes: {
+				SUCCESS: 'success',
+				ERROR: 'error',
+			},
+			noticeContexts: {
+				PAYMENTS: 'payments',
+			},
+		};
+
+		const content = registration.content;
+
+		render(
+			createElement( content.type, {
+				...content.props,
+				eventRegistration: {
+					onPaymentSetup,
+					onCheckoutSuccess: jest.fn(),
+				},
+				emitResponse,
+			} )
+		);
+
+		await waitFor( () => {
+			expect( onPaymentSetup ).toHaveBeenCalled();
+		} );
+
+		await expect( setupResult ).resolves.toEqual( {
+			type: 'error',
+			message: 'There was a problem validating your payment details.',
 			messageContext: 'payments',
 		} );
 	} );

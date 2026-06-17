@@ -194,6 +194,8 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $data['isWooPayEnabled'] );
 		$this->assertTrue( $data['PRE_CHECK_SAVE_MY_INFO'] );
+		$this->assertContains( 'subscriptions', $data['supports'] );
+		$this->assertContains( 'multiple_subscriptions', $data['paymentMethodsConfig']['card']['supports'] );
 	}
 
 	/**

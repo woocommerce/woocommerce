@@ -74,6 +74,11 @@ class WooPaymentsCustomerService {
 	 * @return string
 	 */
 	public function get_or_create_customer_id_for_order( WC_Order $order ): string {
+		$order_customer_id = (string) $order->get_meta( '_stripe_customer_id', true );
+		if ( '' !== $order_customer_id ) {
+			return $this->update_customer_for_order( $order_customer_id, $order );
+		}
+
 		$user_id     = $this->get_order_user_id( $order );
 		$customer_id = $this->get_customer_id_by_user_id( $user_id );
 

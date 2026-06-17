@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\Payments\PaymentOutcome;
 use Automattic\WooCommerce\Internal\Payments\PaymentProcessingService;
 use Automattic\WooCommerce\Internal\Payments\ProviderContract;
 use WC_Order;
+use WC_Order_Refund;
 use WC_Unit_Test_Case;
 
 /**
@@ -221,6 +222,112 @@ class PaymentProcessingServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should persist provider refund metadata on the matching WC refund.
+	 */
+	public function test_process_refund_persists_provider_refund_metadata(): void {
+		$order  = $this->create_woopayments_order( '10.00' );
+		$refund = wc_create_refund(
+			array(
+				'order_id'       => $order->get_id(),
+				'amount'         => 2.50,
+				'reason'         => 'Adjustment',
+				'refund_payment' => false,
+			)
+		);
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
+
+		$provider = new RecordingProvider(
+			new PaymentOutcome(
+				PaymentOutcome::STATUS_COMPLETED,
+				're_native',
+				'',
+				'',
+				'',
+				array(
+					'order_meta'  => array(
+						'_wcpay_refund_status' => 'successful',
+					),
+					'refund_meta' => array(
+						'_wcpay_refund_id'             => 're_native',
+						'_wcpay_refund_transaction_id' => 'txn_refund',
+					),
+					'refund_note' => 'A refund of $2.50 was successfully processed using WooPayments. Reason: Adjustment. (<code>re_native</code>)',
+				)
+			)
+		);
+
+		$result = $this->sut->process_refund( PaymentContext::for_refund( $order, OrderPaymentStore::GATEWAY_ID, 2.50, 'Adjustment' ), $provider );
+		$order  = wc_get_order( $order->get_id() );
+		$refund = wc_get_order( $refund->get_id() );
+
+		$this->assertTrue( $result );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
+		$this->assertSame( 'successful', $order->get_meta( '_wcpay_refund_status', true ) );
+		$this->assertSame( 're_native', $refund->get_meta( '_wcpay_refund_id', true ) );
+		$this->assertSame( 'txn_refund', $refund->get_meta( '_wcpay_refund_transaction_id', true ) );
+		$this->assertOrderHasNoteContaining( $order, 'A refund of' );
+		$this->assertOrderHasNoteContaining( $order, 'was successfully processed using WooPayments' );
+		$this->assertOrderHasNoteContaining( $order, 'Adjustment' );
+		$this->assertOrderHasNoteContaining( $order, 're_native' );
+	}
+
+	/**
+	 * @testdox Should match the first unlinked refund using provider supplied meta keys.
+	 */
+	public function test_process_refund_skips_refunds_linked_by_provider_meta_keys(): void {
+		$order           = $this->create_woopayments_order( '10.00' );
+		$unlinked_refund = wc_create_refund(
+			array(
+				'order_id'       => $order->get_id(),
+				'amount'         => 2.50,
+				'reason'         => 'Adjustment',
+				'refund_payment' => false,
+			)
+		);
+		$linked_refund   = wc_create_refund(
+			array(
+				'order_id'       => $order->get_id(),
+				'amount'         => 2.50,
+				'reason'         => 'Adjustment',
+				'refund_payment' => false,
+			)
+		);
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $unlinked_refund );
+		$this->assertInstanceOf( WC_Order_Refund::class, $linked_refund );
+
+		$linked_refund->update_meta_data( '_provider_refund_id', 're_existing' );
+		$linked_refund->save_meta_data();
+
+		$provider = new RecordingProvider(
+			new PaymentOutcome(
+				PaymentOutcome::STATUS_COMPLETED,
+				're_native',
+				'',
+				'',
+				'',
+				array(
+					'refund_meta' => array(
+						'_provider_refund_id' => 're_native',
+					),
+				)
+			)
+		);
+
+		$result          = $this->sut->process_refund( PaymentContext::for_refund( $order, OrderPaymentStore::GATEWAY_ID, 2.50, 'Adjustment' ), $provider );
+		$unlinked_refund = wc_get_order( $unlinked_refund->get_id() );
+		$linked_refund   = wc_get_order( $linked_refund->get_id() );
+
+		$this->assertTrue( $result );
+		$this->assertInstanceOf( WC_Order_Refund::class, $unlinked_refund );
+		$this->assertInstanceOf( WC_Order_Refund::class, $linked_refund );
+		$this->assertSame( 're_native', $unlinked_refund->get_meta( '_provider_refund_id', true ) );
+		$this->assertSame( 're_existing', $linked_refund->get_meta( '_provider_refund_id', true ) );
+	}
+
+	/**
 	 * @testdox Should preserve provider refund error codes.
 	 */
 	public function test_process_refund_preserves_provider_error_code(): void {
@@ -420,5 +527,29 @@ class PaymentProcessingServiceTest extends WC_Unit_Test_Case {
 		$order->save();
 
 		return $order;
+	}
+
+	/**
+	 * Assert that an order has a note containing the expected text.
+	 *
+	 * @param WC_Order $order    Order object.
+	 * @param string   $expected Expected note content.
+	 */
+	private function assertOrderHasNoteContaining( WC_Order $order, string $expected ): void {
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'type'     => 'any',
+			)
+		);
+
+		foreach ( $notes as $note ) {
+			if ( str_contains( $note->content, $expected ) ) {
+				$this->addToAssertionCount( 1 );
+				return;
+			}
+		}
+
+		$this->fail( "Missing order note containing: {$expected}" );
 	}
 }
