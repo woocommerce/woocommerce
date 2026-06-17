@@ -408,13 +408,14 @@ class Controller extends AbstractController {
 				return $this->get_route_error_response_from_object( $validation_error, $status );
 			}
 
-			// Convert line items to internal format. Note: refund_total is tax-inclusive
-			// for both auto-computed values (from compute_line_item_refund_total) and
-			// explicit client values — the converter then extracts the tax portion by
-			// splitting the line's own stored total/tax ratio via
-			// DataUtils::split_inclusive_by_stored_ratio(), the same method the preview
-			// uses. Summing across mixed (auto + explicit) entries in
-			// calculate_refund_amount is therefore well-defined.
+			// Convert line items to internal format. refund_total is tax-inclusive when no
+			// explicit refund_tax is supplied (auto-computed values, or client values) — the
+			// converter splits the tax portion out via the line's stored total/tax ratio
+			// (DataUtils::split_inclusive_by_stored_ratio(), the same method the preview uses).
+			// When the client supplies an explicit refund_tax breakdown, refund_total is the
+			// tax-exclusive subtotal and the tax is added on top (core Woo semantics). Either
+			// way calculate_refund_amount sums refund_total + refund_tax to the gross line
+			// amount, so mixing the two forms across line items is well-defined.
 			$line_item_data   = $this->data_utils->convert_line_items_to_internal_format( $line_items, $order );
 			$calculated_total = ! empty( $line_items ) ? $this->data_utils->calculate_refund_amount( $line_items ) : 0;
 			$refund_amount    = ! empty( $request['amount'] ) ? $request['amount'] : $calculated_total;

@@ -804,6 +804,94 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox validate_line_items caps the gross (refund_total + explicit refund_tax) against the line total.
+	 *
+	 * With an explicit refund_tax breakdown, refund_total is the tax-exclusive subtotal
+	 * and the tax is added on top. A refund_total within the line that pushes the gross
+	 * over the line total via refund_tax must be rejected.
+	 */
+	public function test_validate_line_items_gross_with_explicit_tax_exceeds_line_rejected(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => 'US',
+				'tax_rate'         => '10.0000',
+				'tax_rate_name'    => 'VAT',
+				'tax_rate_order'   => '1',
+			)
+		);
+
+		// $50 net + $5 tax = $55 tax-inclusive line.
+		$order = $this->create_order_with_taxes( array( $tax_rate_id ), 50.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$items = $order->get_items( 'line_item' );
+		$item  = reset( $items );
+
+		// Net 51 + tax 5 = gross 56 > 55.
+		$result = $this->data_utils->validate_line_items(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 51.00,
+					'refund_tax'   => array(
+						array(
+							'id'           => $tax_rate_id,
+							'refund_total' => 5.00,
+						),
+					),
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result, 'Gross refund over the line total must be rejected.' );
+		$this->assertEquals( 'refund_total_exceeds_line', $result->get_error_code() );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox validate_line_items accepts a gross (refund_total + explicit refund_tax) equal to the line total.
+	 */
+	public function test_validate_line_items_gross_with_explicit_tax_within_line_passes(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => 'US',
+				'tax_rate'         => '10.0000',
+				'tax_rate_name'    => 'VAT',
+				'tax_rate_order'   => '1',
+			)
+		);
+
+		$order = $this->create_order_with_taxes( array( $tax_rate_id ), 50.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$items = $order->get_items( 'line_item' );
+		$item  = reset( $items );
+
+		// Net 50 + tax 5 = gross 55 == line total.
+		$result = $this->data_utils->validate_line_items(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 50.00,
+					'refund_tax'   => array(
+						array(
+							'id'           => $tax_rate_id,
+							'refund_total' => 5.00,
+						),
+					),
+				),
+			),
+			$order
+		);
+
+		$this->assertTrue( $result, 'A gross equal to the line total must be accepted.' );
+
+		$order->delete( true );
+	}
+
+	/**
 	 * @testdox Should return 0.0 for product line item with zero original quantity.
 	 */
 	public function test_compute_line_item_refund_total_zero_original_quantity(): void {

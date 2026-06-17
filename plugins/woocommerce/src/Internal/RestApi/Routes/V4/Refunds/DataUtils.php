@@ -70,6 +70,11 @@ class DataUtils {
 				continue;
 			}
 
+			// refund_tax presence is the discriminator for how refund_total is interpreted:
+			// when refund_tax is absent, refund_total is tax-inclusive and the tax portion is
+			// split out below; when refund_tax is present, refund_total is the tax-exclusive
+			// subtotal and is stored as-is, with the supplied taxes added on top.
+			//
 			// If no explicit refund_tax provided, extract tax from the tax-inclusive
 			// refund_total. Skip when refund_total is also missing — there's nothing
 			// to extract tax from. The split is by the line's own stored total/tax
@@ -124,7 +129,12 @@ class DataUtils {
 	}
 
 	/**
-	 * Calculate the refund amount from line items.
+	 * Calculate the gross refund amount from line items (schema format).
+	 *
+	 * Sums refund_total plus any explicit refund_tax. This yields the tax-inclusive gross
+	 * for both forms: when refund_tax is omitted, refund_total is already tax-inclusive (and
+	 * there is no refund_tax to add); when refund_tax is supplied, refund_total is the
+	 * tax-exclusive subtotal and the taxes are added on top.
 	 *
 	 * @param array $line_items The line items to calculate the refund amount from.
 	 * @return float|null The refund amount, or null if it can't be calculated.
@@ -341,7 +351,21 @@ class DataUtils {
 				}
 
 				$item_total_with_tax = abs( $signed_line_total );
-				$abs_refund_total    = abs( (float) $line_item['refund_total'] );
+
+				// Cap the GROSS line refund against the line's tax-inclusive total. When an
+				// explicit refund_tax breakdown is supplied, refund_total is the tax-exclusive
+				// (net) subtotal and the tax is added on top (core Woo semantics — see
+				// RefundSchema); without it, refund_total is already tax-inclusive, so the gross
+				// equals refund_total. Capping the net alone would let a client push the overage
+				// into refund_tax and over-refund the line. Preview has no refund_tax field, so
+				// its (refund_total-only) cap stays equivalent for the inclusive form.
+				$line_refund_gross = (float) $line_item['refund_total'];
+				if ( ! empty( $line_item['refund_tax'] ) && is_array( $line_item['refund_tax'] ) ) {
+					foreach ( $line_item['refund_tax'] as $tax ) {
+						$line_refund_gross += (float) ( $tax['refund_total'] ?? 0 );
+					}
+				}
+				$abs_refund_total = abs( $line_refund_gross );
 
 				// Mirror the preview path's three distinct over-refund errors (same
 				// codes, messages, and 422 status) so create and preview reject the
