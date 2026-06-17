@@ -7,10 +7,12 @@ use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\CurrencyRateProvide
 use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistry;
 use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistryFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistrarInterface;
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\MultiCurrencyProviderAccountResolver;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsCurrencyRateProvider;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsCurrencyRateProviderRegistrar;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsLegacyAccountAdapter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsLegacyApiClientAdapter;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsMultiCurrencyProviderBootstrap;
 use WC_Unit_Test_Case;
 
 /**
@@ -28,11 +30,11 @@ class CurrencyRateProviderRegistryFactoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should create a fresh registry with a fail-closed WooPayments provider.
+	 * @testdox Should create a fresh registry with a bootstrap-registered fail-closed WooPayments provider.
 	 */
-	public function test_creates_fresh_registry_with_fail_closed_woopayments_provider(): void {
+	public function test_creates_fresh_registry_with_bootstrap_registered_fail_closed_woopayments_provider(): void {
 		$this->mock_woopayments_runtime( false, null, null );
-		$sut = wc_get_container()->get( CurrencyRateProviderRegistryFactory::class );
+		$sut = $this->create_factory_with_woopayments_bootstrap();
 
 		$first  = $sut->create();
 		$second = $sut->create();
@@ -46,8 +48,7 @@ class CurrencyRateProviderRegistryFactoryTest extends WC_Unit_Test_Case {
 	 * @testdox Should create an empty registry when no provider registrars are configured.
 	 */
 	public function test_creates_empty_registry_when_provider_registrars_are_empty(): void {
-		$sut = $this->create_factory_with_default_registrar();
-		$sut->set_provider_registrars( array() );
+		$sut = new CurrencyRateProviderRegistryFactory();
 
 		$registry = $sut->create();
 
@@ -59,7 +60,7 @@ class CurrencyRateProviderRegistryFactoryTest extends WC_Unit_Test_Case {
 	 * @testdox Should register providers from configured registrars.
 	 */
 	public function test_registers_providers_from_configured_registrars(): void {
-		$sut = $this->create_factory_with_default_registrar();
+		$sut = new CurrencyRateProviderRegistryFactory();
 		$sut->set_provider_registrars( array( $this->create_fake_provider_registrar() ) );
 
 		$registry = $sut->create();
@@ -77,7 +78,7 @@ class CurrencyRateProviderRegistryFactoryTest extends WC_Unit_Test_Case {
 			$this->create_recording_account(),
 			$this->create_recording_api_client()
 		);
-		$sut      = wc_get_container()->get( CurrencyRateProviderRegistryFactory::class );
+		$sut      = $this->create_factory_with_woopayments_bootstrap();
 		$provider = $sut->create()->get_available_provider();
 
 		$this->assertInstanceOf( WooPaymentsCurrencyRateProvider::class, $provider );
@@ -199,16 +200,23 @@ class CurrencyRateProviderRegistryFactoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a standalone factory with the default WooPayments registrar.
+	 * Create a standalone factory configured by the WooPayments provider bootstrap.
 	 *
 	 * @return CurrencyRateProviderRegistryFactory
 	 */
-	private function create_factory_with_default_registrar(): CurrencyRateProviderRegistryFactory {
+	private function create_factory_with_woopayments_bootstrap(): CurrencyRateProviderRegistryFactory {
+		$container          = wc_get_container();
+		$account_adapter    = $container->get( WooPaymentsLegacyAccountAdapter::class );
+		$api_client_adapter = $container->get( WooPaymentsLegacyApiClientAdapter::class );
+
 		$registrar = new WooPaymentsCurrencyRateProviderRegistrar();
-		$registrar->init( new WooPaymentsLegacyAccountAdapter(), new WooPaymentsLegacyApiClientAdapter() );
+		$registrar->init( $account_adapter, $api_client_adapter );
 
 		$sut = new CurrencyRateProviderRegistryFactory();
-		$sut->init( $registrar );
+
+		$bootstrap = new WooPaymentsMultiCurrencyProviderBootstrap();
+		$bootstrap->init( new MultiCurrencyProviderAccountResolver(), $account_adapter, $sut, $registrar );
+		$bootstrap->register();
 
 		return $sut;
 	}

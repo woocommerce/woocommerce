@@ -7,8 +7,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MultiCurrency\Providers;
 
-use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsCurrencyRateProviderRegistrar;
-
 /**
  * Creates native multi-currency automatic-rate provider registries.
  *
@@ -25,20 +23,9 @@ class CurrencyRateProviderRegistryFactory {
 	private array $provider_registrars = array();
 
 	/**
-	 * Initialize the class instance.
-	 *
-	 * @internal
-	 *
-	 * @param WooPaymentsCurrencyRateProviderRegistrar $woo_payments_provider_registrar WooPayments provider registrar.
-	 */
-	final public function init( WooPaymentsCurrencyRateProviderRegistrar $woo_payments_provider_registrar ): void {
-		$this->provider_registrars = array( $woo_payments_provider_registrar );
-	}
-
-	/**
 	 * Set explicit rate-provider registrars.
 	 *
-	 * @internal Used by tests and future explicit provider bootstrap.
+	 * @internal Used by tests and provider bootstrap wiring.
 	 *
 	 * @param CurrencyRateProviderRegistrarInterface[] $provider_registrars Provider registrars.
 	 */

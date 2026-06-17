@@ -80,6 +80,30 @@ class MultiCurrencyDomainMapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep generic admin note account wiring provider-neutral.
+	 */
+	public function test_admin_note_account_wiring_is_provider_neutral(): void {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for domain-boundary regression coverage.
+		$source = (string) file_get_contents( WC()->plugin_path() . '/src/Internal/MultiCurrency/MultiCurrencyAdminNoteController.php' );
+
+		$this->assertStringContainsString( 'MultiCurrencyProviderAccountResolver', $source, 'Admin note controller should use the provider-neutral account resolver.' );
+		$this->assertStringNotContainsString( 'WooPaymentsProvider', $source, 'Admin note controller should not type-hint the WooPayments provider.' );
+		$this->assertStringNotContainsString( 'Internal\\Payments\\Providers\\WooPayments', $source, 'Admin note controller should not import WooPayments provider implementation details.' );
+	}
+
+	/**
+	 * @testdox Should keep generic rate-provider registry factory wiring provider-neutral.
+	 */
+	public function test_rate_provider_registry_factory_wiring_is_provider_neutral(): void {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reads local plugin source for domain-boundary regression coverage.
+		$source = (string) file_get_contents( WC()->plugin_path() . '/src/Internal/MultiCurrency/Providers/CurrencyRateProviderRegistryFactory.php' );
+
+		$this->assertStringContainsString( 'CurrencyRateProviderRegistrarInterface', $source, 'Generic registry factory should expose only the provider-neutral registrar boundary.' );
+		$this->assertStringNotContainsString( 'WooPaymentsCurrencyRateProviderRegistrar', $source, 'Generic registry factory should not type-hint the WooPayments registrar.' );
+		$this->assertStringNotContainsString( 'Internal\\Payments\\Providers\\WooPayments', $source, 'Generic registry factory should not import WooPayments provider implementation details.' );
+	}
+
+	/**
 	 * @testdox Should explicitly bootstrap WooPayments account boundaries before multi-currency settings.
 	 */
 	public function test_woopayments_account_bootstrap_registers_before_multi_currency_settings(): void {

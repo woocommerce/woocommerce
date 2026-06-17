@@ -9,8 +9,8 @@ namespace Automattic\WooCommerce\Internal\MultiCurrency;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\MultiCurrencyProviderAccountResolver;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyAdminNoteProjectionService;
-use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
@@ -31,11 +31,11 @@ class MultiCurrencyAdminNoteController implements RegisterHooksInterface {
 	private MultiCurrencyRuntimeArbiter $arbiter;
 
 	/**
-	 * WooPayments provider.
+	 * Provider account resolver.
 	 *
-	 * @var WooPaymentsProvider
+	 * @var MultiCurrencyProviderAccountResolver
 	 */
-	private WooPaymentsProvider $provider;
+	private MultiCurrencyProviderAccountResolver $account_resolver;
 
 	/**
 	 * Admin request resolver.
@@ -84,12 +84,12 @@ class MultiCurrencyAdminNoteController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param MultiCurrencyRuntimeArbiter $arbiter  Runtime owner arbiter.
-	 * @param WooPaymentsProvider         $provider WooPayments provider.
+	 * @param MultiCurrencyRuntimeArbiter          $arbiter          Runtime owner arbiter.
+	 * @param MultiCurrencyProviderAccountResolver $account_resolver Provider account resolver.
 	 */
-	final public function init( MultiCurrencyRuntimeArbiter $arbiter, WooPaymentsProvider $provider ): void {
-		$this->arbiter  = $arbiter;
-		$this->provider = $provider;
+	final public function init( MultiCurrencyRuntimeArbiter $arbiter, MultiCurrencyProviderAccountResolver $account_resolver ): void {
+		$this->arbiter          = $arbiter;
+		$this->account_resolver = $account_resolver;
 	}
 
 	/**
@@ -128,7 +128,7 @@ class MultiCurrencyAdminNoteController implements RegisterHooksInterface {
 	/**
 	 * Set the provider connected resolver.
 	 *
-	 * @internal Used by tests and future explicit account-boundary wiring.
+	 * @internal Used by tests.
 	 *
 	 * @param callable $provider_connected_resolver Resolver returning whether the provider account is connected.
 	 */
@@ -238,11 +238,7 @@ class MultiCurrencyAdminNoteController implements RegisterHooksInterface {
 			return (bool) call_user_func( $this->provider_connected_resolver );
 		}
 
-		try {
-			return $this->provider->can_process_payments();
-		} catch ( \Throwable $e ) {
-			return false;
-		}
+		return $this->account_resolver->is_provider_connected();
 	}
 
 	/**

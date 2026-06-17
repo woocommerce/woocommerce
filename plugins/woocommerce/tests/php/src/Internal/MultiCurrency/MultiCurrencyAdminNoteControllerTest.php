@@ -3,9 +3,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency;
 
+use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\MultiCurrencyAccountInterface;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyAdminNoteController;
 use Automattic\WooCommerce\Internal\MultiCurrency\MultiCurrencyRuntimeArbiter;
-use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\MultiCurrencyProviderAccountResolver;
 use WC_Unit_Test_Case;
 
 /**
@@ -99,7 +100,6 @@ class MultiCurrencyAdminNoteControllerTest extends WC_Unit_Test_Case {
 		$sut         = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, true );
 		$sut->set_ajax_request_resolver( static fn(): bool => false );
 		$sut->set_wc_version_resolver( static fn(): string => '11.0.0' );
-		$sut->set_provider_connected_resolver( static fn(): bool => true );
 		$sut->set_note_can_be_added_resolver( static fn(): bool => true );
 		$sut->set_note_saver(
 			static function ( array $note ) use ( &$saved_notes ): void {
@@ -120,6 +120,26 @@ class MultiCurrencyAdminNoteControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should use provider-neutral account resolver when no test override is set.
+	 */
+	public function test_uses_provider_account_resolver_when_no_override_is_set(): void {
+		$saved_notes = array();
+		$sut         = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE, true, false );
+		$sut->set_ajax_request_resolver( static fn(): bool => false );
+		$sut->set_wc_version_resolver( static fn(): string => '11.0.0' );
+		$sut->set_note_can_be_added_resolver( static fn(): bool => true );
+		$sut->set_note_saver(
+			static function ( array $note ) use ( &$saved_notes ): void {
+				$saved_notes[] = $note;
+			}
+		);
+
+		$sut->handle_admin_init();
+
+		$this->assertSame( array(), $saved_notes );
+	}
+
+	/**
 	 * Data provider for add-note blockers.
 	 *
 	 * @return array<string,array{0: bool, 1: string, 2: bool, 3: bool}>
@@ -136,16 +156,106 @@ class MultiCurrencyAdminNoteControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Create an admin note controller.
 	 *
-	 * @param string $owner    Runtime owner.
-	 * @param bool   $is_admin Whether the request is admin.
+	 * @param string $owner              Runtime owner.
+	 * @param bool   $is_admin           Whether the request is admin.
+	 * @param bool   $provider_connected Whether the provider account is connected.
 	 * @return MultiCurrencyAdminNoteController
 	 */
-	private function create_controller( string $owner, bool $is_admin ): MultiCurrencyAdminNoteController {
+	private function create_controller( string $owner, bool $is_admin, bool $provider_connected = true ): MultiCurrencyAdminNoteController {
+		$account_resolver = new MultiCurrencyProviderAccountResolver();
+		$account_resolver->set_account( $this->create_account_boundary( $provider_connected ) );
+
 		$controller = new MultiCurrencyAdminNoteController();
-		$controller->init( $this->create_arbiter( $owner ), new WooPaymentsProvider() );
+		$controller->init( $this->create_arbiter( $owner ), $account_resolver );
 		$controller->set_admin_request_resolver( static fn(): bool => $is_admin );
 
 		return $controller;
+	}
+
+	/**
+	 * Create a provider account boundary test double.
+	 *
+	 * @param bool $provider_connected Whether the provider account is connected.
+	 * @return MultiCurrencyAccountInterface
+	 */
+	private function create_account_boundary( bool $provider_connected ): MultiCurrencyAccountInterface {
+		return new class( $provider_connected ) implements MultiCurrencyAccountInterface {
+			/**
+			 * Whether the provider account is connected.
+			 *
+			 * @var bool
+			 */
+			private bool $provider_connected;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param bool $provider_connected Whether the provider account is connected.
+			 */
+			public function __construct( bool $provider_connected ) {
+				$this->provider_connected = $provider_connected;
+			}
+
+			/**
+			 * Tell whether the rate provider account is connected.
+			 *
+			 * @param bool $on_error Value to return on provider errors.
+			 * @return bool
+			 */
+			public function is_provider_connected( bool $on_error = false ): bool {
+				unset( $on_error );
+
+				return $this->provider_connected;
+			}
+
+			/**
+			 * Tell whether the connected account is rejected.
+			 *
+			 * @return bool
+			 */
+			public function is_account_rejected(): bool {
+				return false;
+			}
+
+			/**
+			 * Get cached provider account data.
+			 *
+			 * @param bool $force_refresh Whether to force-refresh provider data.
+			 * @return array<string,mixed>
+			 */
+			public function get_cached_account_data( bool $force_refresh = false ) {
+				unset( $force_refresh );
+
+				return array();
+			}
+
+			/**
+			 * Get account-supported customer currencies.
+			 *
+			 * @return string[]
+			 */
+			public function get_account_customer_supported_currencies(): array {
+				return array();
+			}
+
+			/**
+			 * Get provider-supported countries.
+			 *
+			 * @return string[]
+			 */
+			public function get_supported_countries(): array {
+				return array();
+			}
+
+			/**
+			 * Get the provider onboarding URL.
+			 *
+			 * @return string
+			 */
+			public function get_provider_onboarding_page_url(): string {
+				return '';
+			}
+		};
 	}
 
 	/**

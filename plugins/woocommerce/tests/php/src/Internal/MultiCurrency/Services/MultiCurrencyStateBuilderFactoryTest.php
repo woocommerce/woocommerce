@@ -5,7 +5,9 @@ namespace Automattic\WooCommerce\Tests\Internal\MultiCurrency\Services;
 
 use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\MultiCurrencyCacheInterface;
 use Automattic\WooCommerce\Internal\MultiCurrency\Interfaces\MultiCurrencyLocalizationInterface;
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistryFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Services\MultiCurrencyStateBuilderFactory;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsMultiCurrencyProviderBootstrap;
 use WC_Unit_Test_Case;
 
 /**
@@ -29,6 +31,7 @@ class MultiCurrencyStateBuilderFactoryTest extends WC_Unit_Test_Case {
 		$this->original_currency = get_option( 'woocommerce_currency', 'USD' );
 		update_option( 'woocommerce_currency', 'USD' );
 		$this->delete_options();
+		$this->reset_rate_provider_registry_factory();
 	}
 
 	/**
@@ -36,6 +39,7 @@ class MultiCurrencyStateBuilderFactoryTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->delete_options();
+		$this->reset_rate_provider_registry_factory();
 		$this->reset_legacy_proxy_mocks();
 		update_option( 'woocommerce_currency', $this->original_currency );
 
@@ -50,6 +54,7 @@ class MultiCurrencyStateBuilderFactoryTest extends WC_Unit_Test_Case {
 			$this->create_recording_account(),
 			$this->create_recording_api_client()
 		);
+		$this->register_woopayments_provider_boundaries();
 		update_option( 'wcpay_multi_currency_enabled_currencies', array( 'GBP', 'EUR' ) );
 		update_option( 'wcpay_multi_currency_exchange_rate_gbp', 'automatic' );
 		update_option( 'wcpay_multi_currency_exchange_rate_eur', 'automatic' );
@@ -94,6 +99,20 @@ class MultiCurrencyStateBuilderFactoryTest extends WC_Unit_Test_Case {
 		) {
 			delete_option( $option_key );
 		}
+	}
+
+	/**
+	 * Register WooPayments provider boundaries for tests that exercise provider-backed rates.
+	 */
+	private function register_woopayments_provider_boundaries(): void {
+		wc_get_container()->get( WooPaymentsMultiCurrencyProviderBootstrap::class )->register();
+	}
+
+	/**
+	 * Reset the shared rate-provider registry factory.
+	 */
+	private function reset_rate_provider_registry_factory(): void {
+		wc_get_container()->get( CurrencyRateProviderRegistryFactory::class )->set_provider_registrars( array() );
 	}
 
 	/**
