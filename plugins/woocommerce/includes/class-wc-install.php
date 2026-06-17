@@ -2501,8 +2501,10 @@ $email_unsubscribes_table_schema;
 	/**
 	 * Delete the placeholder image created by create_placeholder_image().
 	 *
-	 * Removes the attachment post, its metadata and the underlying file. The
-	 * woocommerce_placeholder_image option itself is removed along with the rest of the
+	 * Removes the attachment post, its metadata and the underlying file, but only when the stored
+	 * woocommerce_placeholder_image option still points at WooCommerce's own generated placeholder.
+	 * A custom image set by the merchant through the "Placeholder image" setting is left untouched to
+	 * avoid deleting merchant-owned media. The option itself is removed along with the rest of the
 	 * woocommerce_ options during uninstall.
 	 *
 	 * @since 11.0.0
@@ -2512,9 +2514,17 @@ $email_unsubscribes_table_schema;
 	public static function delete_placeholder_image() {
 		$placeholder_image = absint( get_option( 'woocommerce_placeholder_image', 0 ) );
 
-		if ( $placeholder_image ) {
-			wp_delete_attachment( $placeholder_image, true );
+		if ( ! $placeholder_image ) {
+			return;
 		}
+
+		// Only delete WooCommerce's own generated placeholder, never a custom image the merchant may have set.
+		$attached_file = (string) get_post_meta( $placeholder_image, '_wp_attached_file', true );
+		if ( 'woocommerce-placeholder.webp' !== wp_basename( $attached_file ) ) {
+			return;
+		}
+
+		wp_delete_attachment( $placeholder_image, true );
 	}
 
 	/**

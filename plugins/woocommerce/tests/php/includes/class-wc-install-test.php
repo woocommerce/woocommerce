@@ -528,4 +528,28 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			'The placeholder attachment meta should be deleted.'
 		);
 	}
+
+	/**
+	 * @testdox Should not delete a custom image set by the merchant as the placeholder.
+	 */
+	public function test_delete_placeholder_image_keeps_custom_attachment(): void {
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'merchant-logo',
+				'post_mime_type' => 'image/png',
+				'post_status'    => 'inherit',
+				'post_type'      => 'attachment',
+			)
+		);
+		update_post_meta( $attachment_id, '_wp_attached_file', '2026/06/merchant-logo.png' );
+		update_option( 'woocommerce_placeholder_image', $attachment_id );
+
+		WC_Install::delete_placeholder_image();
+
+		$this->assertInstanceOf(
+			WP_Post::class,
+			get_post( $attachment_id ),
+			'A custom merchant placeholder attachment should not be deleted.'
+		);
+	}
 }
