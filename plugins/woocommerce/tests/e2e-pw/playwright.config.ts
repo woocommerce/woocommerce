@@ -152,7 +152,7 @@ export default defineConfig( {
 				'**/api-tests/**',
 				/* Exclude PayPal tests, as they don't run well in parallel - see https://github.com/woocommerce/woocommerce/pull/63068. */
 				'**/tests/paypal/**',
-				/* Blocks specs are run by the blocks-chromium and blocks-legacy-mini-cart projects below. */
+				/* Blocks specs are run by the blocks-chromium project below. */
 				'**/tests/blocks/**',
 			],
 			dependencies: [ 'site setup' ],
@@ -170,22 +170,6 @@ export default defineConfig( {
 		{
 			name: 'blocks-chromium',
 			testDir: `${ TESTS_ROOT_PATH }/tests/blocks`,
-			dependencies: [ 'blocks setup' ],
-			fullyParallel: true,
-			use: {
-				...devices[ 'Desktop Chrome' ],
-				storageState: BLOCKS_ADMIN_STATE,
-			},
-		},
-		{
-			name: 'blocks-legacy-mini-cart',
-			testDir: `${ TESTS_ROOT_PATH }/tests/blocks`,
-			testMatch: [
-				'**/mini-cart/**/*.spec.ts',
-				'**/add-to-cart-with-options/**/*.spec.ts',
-				'**/product-button/**/*.spec.ts',
-				'**/product-collection/**/*.spec.ts',
-			],
 			dependencies: [ 'blocks setup' ],
 			fullyParallel: true,
 			use: {
