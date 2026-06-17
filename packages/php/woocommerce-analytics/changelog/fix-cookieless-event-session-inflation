@@ -1,4 +1,0 @@
-Significance: patch
-Type: fixed
-
-Stop minting throwaway anonymous IDs for events from clients without a persisted visitor cookie (e.g. UA-spoofing crawlers hitting add-to-cart), which inflated session counts. Such events are now skipped instead.
