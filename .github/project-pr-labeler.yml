@@ -58,7 +58,6 @@
 
 'focus: e2e tests':
   - plugins/woocommerce/tests/e2e-pw/**/*
-  - plugins/woocommerce/client/blocks/tests/e2e/**/*
 
 'Documentation':
   - docs/**/*

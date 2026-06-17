@@ -32,7 +32,7 @@
 		"env:performance-init": "./tests/performance/bin/init-environment.sh",
 		"env:restart": "pnpm wp-env destroy && pnpm wp-env start --update",
 		"env:start": "pnpm wp-env start",
-		"env:start:blocks": "pnpm --filter='@woocommerce/block-library' env:start && pnpm playwright install chromium",
+		"env:start:blocks": "pnpm wp-env start && bash ./tests/e2e-pw/bin/blocks/test-env-setup.sh && pnpm playwright install chromium",
 		"env:stop": "pnpm wp-env stop",
 		"env:test": "pnpm env:dev",
 		"env:perf": "pnpm env:dev && pnpm env:performance-init",
@@ -62,7 +62,8 @@
 		"test:e2e": "pnpm test:e2e:default --project=e2e",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
-		"test:e2e:blocks": "pnpm --filter='@woocommerce/block-library' test:e2e",
+		"test:e2e:blocks": "pnpm playwright test --config=tests/e2e-pw/playwright.config.ts --project=blocks-chromium",
+		"test:e2e:blocks:performance": "pnpm playwright test --config=tests/e2e-pw/playwright.performance.config.ts --project=blocks-performance",
 		"test:e2e:email-update-propagation:pr": "pnpm test:e2e:default --project=e2e --grep @pr tests/email-editor/update-propagation",
 		"test:e2e:email-update-propagation:nightly": "pnpm test:e2e:default --project=e2e tests/email-editor/update-propagation",
 		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e-pw/run-tests-with-env.sh",
@@ -73,7 +74,7 @@
 		"test:e2e:gb-nightly": "pnpm test:e2e:with-env gutenberg-nightly",
 		"ci:legacy-minicart-flag-off": "node ./bin/set-legacy-minicart-flag.js && php bin/generate-feature-config.php",
 		"test:e2e:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm test:e2e:default --project=legacy-mini-cart",
-		"test:e2e:blocks:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm --filter='@woocommerce/block-library' test:e2e:legacy-mini-cart",
+		"test:e2e:blocks:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm playwright test --config=tests/e2e-pw/playwright.config.ts --project=blocks-legacy-mini-cart",
 		"test:e2e:paypal-standard": "pnpm test:e2e:default --project=paypal-standard",
 		"test:php:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm test:php:env",
 		"test:env:start": "pnpm env:test",
@@ -733,7 +734,9 @@
 						"src/Blocks/**/*.php",
 						"templates/**/*.php",
 						"templates/**/*.html",
-						"client/blocks/tests/e2e/**",
+						"tests/e2e-pw/bin/blocks/**",
+						"tests/e2e-pw/fixtures/blocks-setup.ts",
+						"tests/e2e-pw/playwright.config.ts",
 						"tests/e2e-pw/content-templates/blocks/**",
 						"tests/e2e-pw/test-data/blocks/**",
 						"tests/e2e-pw/test-plugins/blocks/**",
@@ -745,7 +748,10 @@
 						"@woocommerce/block-library"
 					],
 					"testEnv": {
-						"start": "env:start:blocks"
+						"start": "env:start:blocks",
+						"config": {
+							"phpVersion": "7.4"
+						}
 					},
 					"events": [
 						"pull_request",
@@ -755,7 +761,7 @@
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
-						"resultsPath": "./client/blocks/tests/e2e/artifacts/test-results",
+						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
 				},
@@ -774,7 +780,9 @@
 						"src/Blocks/**/*.php",
 						"templates/**/*.php",
 						"templates/**/*.html",
-						"client/blocks/tests/e2e/**",
+						"tests/e2e-pw/bin/blocks/**",
+						"tests/e2e-pw/fixtures/blocks-setup.ts",
+						"tests/e2e-pw/playwright.config.ts",
 						"tests/e2e-pw/content-templates/blocks/**",
 						"tests/e2e-pw/test-data/blocks/**",
 						"tests/e2e-pw/test-plugins/blocks/**",
@@ -786,7 +794,10 @@
 						"@woocommerce/block-library"
 					],
 					"testEnv": {
-						"start": "env:start:blocks"
+						"start": "env:start:blocks",
+						"config": {
+							"phpVersion": "7.4"
+						}
 					},
 					"events": [
 						"pull_request",
@@ -794,7 +805,7 @@
 					],
 					"report": {
 						"resultsBlobName": "legacy-blocks-e2e-report",
-						"resultsPath": "./client/blocks/tests/e2e/artifacts/test-results",
+						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
 				},
@@ -816,7 +827,9 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"client/blocks/tests/e2e/**",
+						"tests/e2e-pw/bin/blocks/**",
+						"tests/e2e-pw/fixtures/blocks-setup.ts",
+						"tests/e2e-pw/playwright.config.ts",
 						"tests/e2e-pw/content-templates/blocks/**",
 						"tests/e2e-pw/test-data/blocks/**",
 						"tests/e2e-pw/test-plugins/blocks/**",
@@ -828,6 +841,7 @@
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
+							"phpVersion": "7.4",
 							"wpVersion": "prerelease"
 						}
 					},
@@ -839,7 +853,7 @@
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report-wp-pre-release",
-						"resultsPath": "./client/blocks/tests/e2e/artifacts/test-results",
+						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
 				},
@@ -860,7 +874,9 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"client/blocks/tests/e2e/**",
+						"tests/e2e-pw/bin/blocks/**",
+						"tests/e2e-pw/fixtures/blocks-setup.ts",
+						"tests/e2e-pw/playwright.config.ts",
 						"tests/e2e-pw/content-templates/blocks/**",
 						"tests/e2e-pw/test-data/blocks/**",
 						"tests/e2e-pw/test-plugins/blocks/**",
@@ -872,6 +888,7 @@
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
+							"phpVersion": "7.4",
 							"wpVersion": "latest-1"
 						}
 					},
@@ -883,7 +900,7 @@
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report-wp-latest-1",
-						"resultsPath": "./client/blocks/tests/e2e/artifacts/test-results",
+						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
 				},
@@ -972,6 +989,8 @@
 		"eslint-config-wpcalypso": "5.0.0",
 		"eslint-plugin-jest": "23.20.0",
 		"eslint-plugin-playwright": "1.6.0",
+		"fs-extra": "11.1.1",
+		"glob": "^10.3.10",
 		"handlebars": "^4.7.9",
 		"jest": "29.5.x",
 		"playwright-ctrf-json-reporter": "0.0.27",
