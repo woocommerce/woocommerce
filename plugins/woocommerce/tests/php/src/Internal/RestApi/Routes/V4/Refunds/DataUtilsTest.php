@@ -650,6 +650,160 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Build a completed order with a positive product line and a discount fee that carries a
+	 * negative stored tax bucket, for the negative-tax refund_tax cap tests.
+	 *
+	 * @param int $tax_rate_id Tax rate id used for the fee's stored tax bucket.
+	 * @return array{0: WC_Order, 1: int} The order and the fee line item id.
+	 */
+	private function create_order_with_negative_tax_fee( int $tax_rate_id ): array {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Loyalty discount',
+				'total' => -10.00,
+			)
+		);
+		$fee->set_taxes( array( 'total' => array( $tax_rate_id => -1.00 ) ) );
+		$fee->save();
+		$order->add_item( $fee );
+
+		$order->set_total( 39.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$product->delete( true );
+
+		return array( $order, $fee->get_id() );
+	}
+
+	/**
+	 * @testdox validate_line_items accepts a partial negative refund_tax within a negative stored tax bucket.
+	 */
+	public function test_validate_line_items_negative_tax_bucket_partial_refund_passes(): void {
+		$tax_rate_id            = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => 'US',
+				'tax_rate'         => '10.0000',
+				'tax_rate_name'    => 'VAT',
+				'tax_rate_order'   => '1',
+			)
+		);
+		list( $order, $fee_id ) = $this->create_order_with_negative_tax_fee( $tax_rate_id );
+
+		// Refund half of the -$1.00 tax bucket. Same sign, within the magnitude cap.
+		$result = $this->data_utils->validate_line_items(
+			array(
+				array(
+					'line_item_id' => $fee_id,
+					'refund_total' => -5.00,
+					'refund_tax'   => array(
+						array(
+							'id'           => $tax_rate_id,
+							'refund_total' => -0.50,
+						),
+					),
+				),
+			),
+			$order
+		);
+
+		$this->assertTrue( $result, 'A partial negative refund_tax within the bucket must be accepted.' );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox validate_line_items rejects a negative refund_tax that exceeds the negative stored tax bucket magnitude.
+	 */
+	public function test_validate_line_items_negative_tax_bucket_over_refund_rejected(): void {
+		$tax_rate_id            = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => 'US',
+				'tax_rate'         => '10.0000',
+				'tax_rate_name'    => 'VAT',
+				'tax_rate_order'   => '1',
+			)
+		);
+		list( $order, $fee_id ) = $this->create_order_with_negative_tax_fee( $tax_rate_id );
+
+		// -$2.00 exceeds the -$1.00 bucket magnitude.
+		$result = $this->data_utils->validate_line_items(
+			array(
+				array(
+					'line_item_id' => $fee_id,
+					'refund_total' => -5.00,
+					'refund_tax'   => array(
+						array(
+							'id'           => $tax_rate_id,
+							'refund_total' => -2.00,
+						),
+					),
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result, 'A negative refund_tax over the bucket magnitude must be rejected.' );
+		$this->assertEquals( 'invalid_refund_amount', $result->get_error_code() );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox validate_line_items rejects a positive refund_tax against a negative stored tax bucket (wrong sign).
+	 */
+	public function test_validate_line_items_wrong_sign_tax_refund_rejected(): void {
+		$tax_rate_id            = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => 'US',
+				'tax_rate'         => '10.0000',
+				'tax_rate_name'    => 'VAT',
+				'tax_rate_order'   => '1',
+			)
+		);
+		list( $order, $fee_id ) = $this->create_order_with_negative_tax_fee( $tax_rate_id );
+
+		$result = $this->data_utils->validate_line_items(
+			array(
+				array(
+					'line_item_id' => $fee_id,
+					'refund_total' => -5.00,
+					'refund_tax'   => array(
+						array(
+							'id'           => $tax_rate_id,
+							'refund_total' => 0.50,
+						),
+					),
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result, 'A positive refund_tax on a negative bucket must be rejected.' );
+		$this->assertEquals( 'invalid_refund_amount', $result->get_error_code() );
+
+		$order->delete( true );
+	}
+
+	/**
 	 * @testdox Should return 0.0 for product line item with zero original quantity.
 	 */
 	public function test_compute_line_item_refund_total_zero_original_quantity(): void {

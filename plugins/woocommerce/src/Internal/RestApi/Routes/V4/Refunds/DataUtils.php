@@ -406,25 +406,42 @@ class DataUtils {
 							);
 						}
 
-						// Cap against the remaining tax for this bucket, subtracting any
-						// tax already refunded for this tax id on prior refunds — not the
-						// original line tax. Otherwise sequential refunds could each pass
-						// this check and over-refund a single tax bucket.
-						// Round both sides to currency precision before comparing, matching
-						// every other monetary cap in this class. $already_refunded_tax is
-						// accumulated via repeated float additions, so an unrounded compare
-						// could reject (or admit) an exactly-correct amount by a sub-cent
-						// floating-point residue.
-						$price_decimals       = wc_get_price_decimals();
+						$price_decimals = wc_get_price_decimals();
+						$stored_tax     = (float) $item_taxes['total'][ $tax_id ];
+						$requested_tax  = (float) $tax_refund_total;
+
+						// Reject a refund_tax whose sign is opposite the stored tax bucket: you
+						// cannot refund a positive tax from a negative (discount) bucket or vice
+						// versa. Mirrors the refund_total wrong-sign guard. Compare on absolute
+						// magnitudes below so a negative bucket is capped the same way a positive
+						// one is — a signed `<` admits an over-refund of a negative bucket and
+						// rejects a valid partial one. An explicit 0 is allowed (a no-op).
+						if ( $requested_tax * $stored_tax < 0 ) {
+							return new WP_Error(
+								'invalid_refund_amount',
+								__( 'Refund tax total has the wrong sign for this line item.', 'woocommerce' ),
+								array( 'status' => WP_Http::BAD_REQUEST )
+							);
+						}
+
+						// Cap against the remaining tax for this bucket, subtracting any tax
+						// already refunded for this tax id on prior refunds — not the original
+						// line tax — so sequential refunds cannot over-refund a single bucket.
+						// $already_refunded_tax is accumulated as a positive magnitude
+						// (compute_refunded_quantities_and_totals() uses abs()), so compare it
+						// against the stored bucket's magnitude. Round both sides to currency
+						// precision: the accumulator is built from repeated float additions, so
+						// an unrounded compare could reject or admit an exactly-correct amount by
+						// a sub-cent residue.
 						$already_refunded_tax = (float) ( $refund_data['tax_totals'][ $line_item_id ][ $tax_id ] ?? 0.0 );
-						$remaining_tax        = (float) $item_taxes['total'][ $tax_id ] - $already_refunded_tax;
-						if ( NumberUtil::round( $remaining_tax, $price_decimals ) < NumberUtil::round( (float) $tax_refund_total, $price_decimals ) ) {
+						$remaining_tax        = abs( $stored_tax ) - $already_refunded_tax;
+						if ( abs( $requested_tax ) > NumberUtil::round( $remaining_tax, $price_decimals ) ) {
 							return new WP_Error(
 								'invalid_refund_amount',
 								sprintf(
 								/* translators: %s: remaining refundable tax total */
 									__( 'Refund tax total cannot be greater than the remaining refundable tax for this line item (%s).', 'woocommerce' ),
-									wc_format_decimal( $remaining_tax, wc_get_price_decimals() )
+									wc_format_decimal( $remaining_tax, $price_decimals )
 								)
 							);
 						}
