@@ -76,6 +76,8 @@ const decimalPlaces = ( value: number ) => {
 const stepDecimals = ( ...values: number[] ) =>
 	Math.max( ...values.map( decimalPlaces ) );
 
+const MAX_TO_FIXED_PRECISION = 100;
+
 /**
  * A number input with explicit +/- spin buttons, per the settings designs.
  *
@@ -113,13 +115,20 @@ export const NumberSpinControl = ( {
 			next = Math.min( max, next );
 		}
 
-		const precision = stepDecimals(
+		const requiredPrecision = stepDecimals(
 			step,
 			current ?? 0,
 			min ?? 0,
 			max ?? 0
 		);
-		const nextValue = String( Number( next.toFixed( precision ) ) );
+		const precision = Math.min(
+			Math.max( requiredPrecision, 0 ),
+			MAX_TO_FIXED_PRECISION
+		);
+		const nextValue =
+			requiredPrecision > MAX_TO_FIXED_PRECISION
+				? String( next )
+				: String( Number( next.toFixed( precision ) ) );
 
 		onChange( nextValue );
 		// Focus stays on the spin button while the input updates, so the
