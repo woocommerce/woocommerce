@@ -140,6 +140,21 @@ class WooPaymentsOrderDataService {
 	}
 
 	/**
+	 * Convert a decimal amount into provider minor units.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param float  $amount   Decimal amount.
+	 * @param string $currency Currency code.
+	 * @return int
+	 */
+	public function prepare_amount( float $amount, string $currency ): int {
+		$conversion_rate = $this->is_zero_decimal_currency( $currency ) ? 1 : 100;
+
+		return (int) round( $amount * $conversion_rate );
+	}
+
+	/**
 	 * Add a fee-breakdown note if it is not already present.
 	 *
 	 * @param WC_Order $order Order being updated.

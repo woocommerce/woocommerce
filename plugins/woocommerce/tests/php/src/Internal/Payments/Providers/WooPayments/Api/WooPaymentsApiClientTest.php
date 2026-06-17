@@ -866,6 +866,235 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should create terminal connection tokens through the preserved WPCOM endpoint.
+	 */
+	public function test_create_terminal_connection_token_posts_to_terminal_connection_tokens_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'secret' => 'cnctok_test_secret',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$result = $sut->create_terminal_connection_token();
+		$body   = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( '/sites/123/wcpay/terminal/connection_tokens', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertSame( 'cnctok_test_secret', $result['secret'] );
+		$this->assertIsArray( $body );
+		$this->assertTrue( $body['test_mode'] );
+	}
+
+	/**
+	 * @testdox Should create terminal intents through the native intentions endpoint.
+	 */
+	public function test_create_terminal_payment_intention_posts_terminal_payment_payload(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'id'     => 'pi_terminal',
+					'status' => 'requires_capture',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->create_terminal_payment_intention(
+			array(
+				'amount'               => 1234,
+				'currency'             => 'usd',
+				'capture_method'       => 'manual',
+				'metadata'             => array( 'order_number' => '100' ),
+				'payment_method_types' => array( 'card_present' ),
+			)
+		);
+		$body   = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( 'pi_terminal', $result['id'] );
+		$this->assertSame( '/sites/123/wcpay/intentions', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $body );
+		$this->assertSame( 1234, $body['amount'] );
+		$this->assertSame( 'manual', $body['capture_method'] );
+		$this->assertSame( array( 'card_present' ), $body['payment_method_types'] );
+	}
+
+	/**
+	 * @testdox Should prepare terminal payments through the preserved intent subresource.
+	 */
+	public function test_prepare_terminal_payment_posts_to_intent_prepare_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'reader_id' => 'tmr_test',
+					'status'    => 'collecting_payment_method',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->prepare_terminal_payment( 'pi_terminal', 42 );
+		$body   = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( '/sites/123/wcpay/intentions/pi_terminal/prepare_terminal_payment', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $body );
+		$this->assertSame( 42, $body['order_id'] );
+		$this->assertSame( 'collecting_payment_method', $result['status'] );
+	}
+
+	/**
+	 * @testdox Should proxy terminal reader registration and location operations through preserved endpoints.
+	 */
+	public function test_terminal_reader_and_location_methods_use_preserved_endpoints(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'id' => 'tmr_test',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$sut->register_terminal_reader( 'tml_test', 'code_123', 'Counter', array( 'channel' => 'pos' ) );
+		$reader_body = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( '/sites/123/wcpay/terminal/readers', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $reader_body );
+		$this->assertSame( 'tml_test', $reader_body['location'] );
+		$this->assertSame( 'code_123', $reader_body['registration_code'] );
+		$this->assertSame( 'Counter', $reader_body['label'] );
+		$this->assertSame( array( 'channel' => 'pos' ), $reader_body['metadata'] );
+
+		$sut->create_terminal_location(
+			'Store',
+			array(
+				'country' => 'US',
+				'line1'   => '123 Main',
+			),
+			array( 'source' => 'native' )
+		);
+		$location_body = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( '/sites/123/wcpay/terminal/locations', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $location_body );
+		$this->assertSame( 'Store', $location_body['display_name'] );
+		$this->assertSame( 'US', $location_body['address']['country'] );
+		$this->assertSame( array( 'source' => 'native' ), $location_body['metadata'] );
+	}
+
+	/**
+	 * @testdox Should retrieve reader and location resources through preserved GET endpoints.
+	 */
+	public function test_terminal_reader_and_location_read_methods_use_preserved_get_endpoints(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'data' => array(),
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$sut->get_terminal_readers();
+
+		$this->assertSame( '/sites/123/wcpay/terminal/readers?test_mode=1', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$sut->get_terminal_locations();
+
+		$this->assertSame( '/sites/123/wcpay/terminal/locations?test_mode=1', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$sut->get_terminal_location( 'tml_test' );
+
+		$this->assertSame( '/sites/123/wcpay/terminal/locations/tml_test?test_mode=1', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$sut->get_readers_charge_summary( '2026-06-17', 'txn_test' );
+
+		$this->assertStringStartsWith( '/sites/123/wcpay/reader-charges/summary?', $http_client->last_path );
+		$this->assertStringContainsString( 'test_mode=1', $http_client->last_path );
+		$this->assertStringContainsString( 'charge_date=2026-06-17', $http_client->last_path );
+		$this->assertStringContainsString( 'transaction_id=txn_test', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$sut->get_transaction( 'txn_test' );
+
+		$this->assertSame( '/sites/123/wcpay/transactions/txn_test?test_mode=1', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+	}
+
+	/**
+	 * @testdox Should update and delete terminal locations through preserved resource endpoints.
+	 */
+	public function test_terminal_location_mutations_use_preserved_resource_endpoints(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'id' => 'tml_test',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$sut->update_terminal_location( 'tml_test', 'Updated', array( 'line1' => '456 Market' ) );
+		$update_body = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( '/sites/123/wcpay/terminal/locations/tml_test', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $update_body );
+		$this->assertSame( 'Updated', $update_body['display_name'] );
+		$this->assertSame( '456 Market', $update_body['address']['line1'] );
+
+		$sut->delete_terminal_location( 'tml_test' );
+
+		$this->assertSame( '/sites/123/wcpay/terminal/locations/tml_test', $http_client->last_path );
+		$this->assertSame( 'DELETE', $http_client->last_method );
+	}
+
+	/**
 	 * Create a WooPayments account service mock.
 	 *
 	 * @param bool      $test_mode            Whether WooPayments should run in test mode.

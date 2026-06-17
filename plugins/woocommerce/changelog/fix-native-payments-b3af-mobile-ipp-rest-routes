@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Preserve native WooPayments mobile and in-person payments REST contracts.

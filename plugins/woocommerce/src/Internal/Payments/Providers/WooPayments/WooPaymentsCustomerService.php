@@ -8,6 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
 use WC_Customer;
 use WC_Order;
 
@@ -77,13 +78,41 @@ class WooPaymentsCustomerService {
 		$customer_id = $this->get_customer_id_by_user_id( $user_id );
 
 		if ( null !== $customer_id ) {
-			return $customer_id;
+			return $this->update_customer_for_order( $customer_id, $order );
 		}
 
 		$customer_id = $this->api_client->create_customer( $this->map_customer_data( $order ) );
 		$this->persist_customer_id( $user_id, $customer_id );
 
 		return $customer_id;
+	}
+
+	/**
+	 * Update the WooPayments customer associated with an order.
+	 *
+	 * If the remote customer no longer exists, recreate it and update local persistence.
+	 *
+	 * @param string   $customer_id WooPayments customer ID.
+	 * @param WC_Order $order       Order being charged.
+	 * @return string Updated or recreated WooPayments customer ID.
+	 * @throws WooPaymentsApiException When updating the remote customer fails for reasons other than a missing customer.
+	 */
+	public function update_customer_for_order( string $customer_id, WC_Order $order ): string {
+		$user_id       = $this->get_order_user_id( $order );
+		$customer_data = $this->map_customer_data( $order );
+
+		try {
+			$this->api_client->update_customer( $customer_id, $customer_data );
+			$this->persist_customer_id( $user_id, $customer_id );
+
+			return $customer_id;
+		} catch ( WooPaymentsApiException $exception ) {
+			if ( 'resource_missing' === $exception->get_error_code() ) {
+				return $this->recreate_customer_for_order( $order );
+			}
+
+			throw $exception;
+		}
 	}
 
 	/**

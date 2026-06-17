@@ -261,6 +261,19 @@ class WooPaymentsAccountService {
 	}
 
 	/**
+	 * Get a persisted WooPayments gateway setting.
+	 *
+	 * @param string $key      Setting key.
+	 * @param mixed  $fallback Fallback value.
+	 * @return mixed
+	 */
+	public function get_gateway_setting( string $key, $fallback = null ) {
+		$settings = $this->get_gateway_settings();
+
+		return array_key_exists( $key, $settings ) ? $settings[ $key ] : $fallback;
+	}
+
+	/**
 	 * Tell whether WooPayments is in test-mode onboarding.
 	 *
 	 * @return bool

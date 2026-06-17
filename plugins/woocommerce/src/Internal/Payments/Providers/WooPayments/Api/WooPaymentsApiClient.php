@@ -75,6 +75,31 @@ class WooPaymentsApiClient {
 	private const WEBHOOK_FETCH_API = 'webhook/failed_events';
 
 	/**
+	 * WooPayments terminal connection-token API path.
+	 */
+	private const TERMINAL_CONNECTION_TOKENS_API = 'terminal/connection_tokens';
+
+	/**
+	 * WooPayments terminal locations API path.
+	 */
+	private const TERMINAL_LOCATIONS_API = 'terminal/locations';
+
+	/**
+	 * WooPayments terminal readers API path.
+	 */
+	private const TERMINAL_READERS_API = 'terminal/readers';
+
+	/**
+	 * WooPayments reader charge summary API path.
+	 */
+	private const READERS_CHARGE_SUMMARY_API = 'reader-charges/summary';
+
+	/**
+	 * WooPayments transactions API path.
+	 */
+	private const TRANSACTIONS_API = 'transactions';
+
+	/**
 	 * HTTP client.
 	 *
 	 * @var WooPaymentsHttpClient
@@ -384,6 +409,210 @@ class WooPaymentsApiClient {
 	 */
 	public function get_failed_webhook_events(): array {
 		return $this->request( array(), self::WEBHOOK_FETCH_API, 'POST' );
+	}
+
+	/**
+	 * Create a terminal connection token.
+	 *
+	 * @return array<string,mixed>
+	 */
+	public function create_terminal_connection_token(): array {
+		return $this->request( array(), self::TERMINAL_CONNECTION_TOKENS_API, 'POST' );
+	}
+
+	/**
+	 * Create a terminal payment intent.
+	 *
+	 * @param array<string,mixed> $request_data Terminal PaymentIntent payload.
+	 * @return array<string,mixed>
+	 */
+	public function create_terminal_payment_intention( array $request_data ): array {
+		return $this->request( $request_data, 'intentions', 'POST' );
+	}
+
+	/**
+	 * Prepare a terminal payment intent for reader collection.
+	 *
+	 * @param string $intent_id Intent ID.
+	 * @param int    $order_id  Order ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function prepare_terminal_payment( string $intent_id, int $order_id ): array {
+		$this->validate_route_resource_id( $intent_id );
+
+		return $this->request(
+			array(
+				'order_id' => $order_id,
+			),
+			'intentions/' . $intent_id . '/prepare_terminal_payment',
+			'POST'
+		);
+	}
+
+	/**
+	 * Retrieve terminal readers.
+	 *
+	 * @return array<string,mixed>
+	 */
+	public function get_terminal_readers(): array {
+		return $this->request( array(), self::TERMINAL_READERS_API, 'GET' );
+	}
+
+	/**
+	 * Register a terminal reader.
+	 *
+	 * @param string                   $location          Terminal location ID.
+	 * @param string                   $registration_code Reader registration code.
+	 * @param string|null              $label             Optional reader label.
+	 * @param array<string,mixed>|null $metadata          Optional reader metadata.
+	 * @return array<string,mixed>
+	 */
+	public function register_terminal_reader( string $location, string $registration_code, ?string $label = null, ?array $metadata = null ): array {
+		$params = array(
+			'location'          => $location,
+			'registration_code' => $registration_code,
+		);
+
+		if ( null !== $label ) {
+			$params['label'] = $label;
+		}
+
+		if ( null !== $metadata ) {
+			$params['metadata'] = $metadata;
+		}
+
+		return $this->request( $params, self::TERMINAL_READERS_API, 'POST' );
+	}
+
+	/**
+	 * Retrieve reader charge summary data.
+	 *
+	 * @param string      $charge_date    Charge date in Y-m-d format.
+	 * @param string|null $transaction_id Optional transaction ID.
+	 * @return array<string,mixed>
+	 */
+	public function get_readers_charge_summary( string $charge_date, ?string $transaction_id = null ): array {
+		$params = array(
+			'charge_date' => $charge_date,
+		);
+
+		if ( null !== $transaction_id && '' !== $transaction_id ) {
+			$params['transaction_id'] = $transaction_id;
+		}
+
+		return $this->request( $params, self::READERS_CHARGE_SUMMARY_API, 'GET' );
+	}
+
+	/**
+	 * Retrieve terminal locations.
+	 *
+	 * @return array<string,mixed>
+	 */
+	public function get_terminal_locations(): array {
+		return $this->request( array(), self::TERMINAL_LOCATIONS_API, 'GET' );
+	}
+
+	/**
+	 * Retrieve one terminal location.
+	 *
+	 * @param string $location_id Location ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function get_terminal_location( string $location_id ): array {
+		$this->validate_route_resource_id( $location_id );
+
+		return $this->request( array(), self::TERMINAL_LOCATIONS_API . '/' . $location_id, 'GET' );
+	}
+
+	/**
+	 * Create a terminal location.
+	 *
+	 * @param string              $display_name Location display name.
+	 * @param array<string,mixed> $address      Location address.
+	 * @param array<string,mixed> $metadata     Location metadata.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request is missing required address fields.
+	 */
+	public function create_terminal_location( string $display_name, array $address, array $metadata = array() ): array {
+		if ( empty( $address['country'] ) || empty( $address['line1'] ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
+			throw new WooPaymentsApiException( __( 'Address country and line1 are required.', 'woocommerce' ), 'wcpay_invalid_terminal_location_request', 400 );
+		}
+
+		return $this->request(
+			array(
+				'display_name' => $display_name,
+				'address'      => $address,
+				'metadata'     => $metadata,
+			),
+			self::TERMINAL_LOCATIONS_API,
+			'POST'
+		);
+	}
+
+	/**
+	 * Update a terminal location.
+	 *
+	 * @param string                   $location_id  Location ID.
+	 * @param string|null              $display_name Optional display name.
+	 * @param array<string,mixed>|null $address      Optional address.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function update_terminal_location( string $location_id, ?string $display_name = null, ?array $address = null ): array {
+		$this->validate_route_resource_id( $location_id );
+
+		$params = array();
+		if ( null !== $display_name ) {
+			$params['display_name'] = $display_name;
+		}
+
+		if ( null !== $address ) {
+			$params['address'] = $address;
+		}
+
+		return $this->request( $params, self::TERMINAL_LOCATIONS_API . '/' . $location_id, 'POST' );
+	}
+
+	/**
+	 * Delete a terminal location.
+	 *
+	 * @param string $location_id Location ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function delete_terminal_location( string $location_id ): array {
+		$this->validate_route_resource_id( $location_id );
+
+		return $this->request( array(), self::TERMINAL_LOCATIONS_API . '/' . $location_id, 'DELETE' );
+	}
+
+	/**
+	 * Retrieve a WooPayments charge.
+	 *
+	 * @param string $charge_id Charge ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function get_charge( string $charge_id ): array {
+		$this->validate_route_resource_id( $charge_id );
+
+		return $this->request( array(), 'charges/' . $charge_id, 'GET' );
+	}
+
+	/**
+	 * Retrieve a WooPayments transaction.
+	 *
+	 * @param string $transaction_id Transaction ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function get_transaction( string $transaction_id ): array {
+		$this->validate_route_resource_id( $transaction_id );
+
+		return $this->request( array(), self::TRANSACTIONS_API . '/' . $transaction_id, 'GET' );
 	}
 
 	/**
