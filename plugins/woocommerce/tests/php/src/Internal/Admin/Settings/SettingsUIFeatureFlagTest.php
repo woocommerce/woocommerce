@@ -198,16 +198,13 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		global $current_section;
 		$current_section = 'advanced';
-		$page            = $this->get_settings_ui_test_page_with_failing_script_handles();
+		$page            = $this->get_settings_ui_test_page_with_failing_schema();
 
 		try {
-			$GLOBALS['wc_settings_ui_schema_failed']['settings_ui_flag_test']['advanced'] = true;
-
 			ob_start();
 			$page->output();
 			$output = ob_get_clean();
 		} finally {
-			unset( $GLOBALS['wc_settings_ui_schema_failed']['settings_ui_flag_test']['advanced'] );
 			remove_action( 'doing_it_wrong_run', $action, 10 );
 			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 		}
@@ -431,6 +428,62 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 						}
 
 						return array();
+					}
+				};
+			}
+
+			/**
+			 * Get settings for a section.
+			 *
+			 * @param string $section_id Section id.
+			 * @return array
+			 */
+			protected function get_settings_for_section_core( $section_id ) {
+				return array(
+					array(
+						'id'    => 'woocommerce_settings_ui_flag_test',
+						'type'  => 'text',
+						'title' => 'Settings UI flag test',
+					),
+				);
+			}
+		};
+	}
+
+	/**
+	 * Build a settings page whose settings UI adapter cannot provide a schema.
+	 *
+	 * @return \WC_Settings_Page
+	 */
+	private function get_settings_ui_test_page_with_failing_schema(): \WC_Settings_Page {
+		return new class() extends \WC_Settings_Page {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'settings_ui_flag_test';
+				$this->label = 'Settings UI flag test';
+			}
+
+			/**
+			 * Get the settings UI page adapter.
+			 *
+			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
+				return new class( $this ) extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
+					/**
+					 * Build the schema.
+					 *
+					 * @param string $section_id Section id.
+					 * @return array
+					 */
+					public function get_schema( string $section_id ): array {
+						if ( 'advanced' === $section_id ) {
+							throw new \RuntimeException( 'Unable to build settings UI schema.' );
+						}
+
+						return parent::get_schema( $section_id );
 					}
 				};
 			}

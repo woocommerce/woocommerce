@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Admin\Settings\SettingsSection;
 use Automattic\WooCommerce\Admin\Settings\SettingsSectionInterface;
 use Automattic\WooCommerce\Admin\Settings\SettingsSectionRegistry;
 use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
-use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIPageResolver;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
 use WC_Unit_Test_Case;
 
 /**
@@ -40,6 +40,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		$this->original_current_section = $current_section ?? null;
 
 		SettingsSectionRegistry::get_instance()->unregister_all();
+		SettingsUIRequestContext::reset();
 	}
 
 	/**
@@ -51,6 +52,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 		SettingsSectionRegistry::get_instance()->unregister_all();
+		SettingsUIRequestContext::reset();
 
 		parent::tearDown();
 	}
@@ -96,7 +98,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		$page = $this->get_parent_page();
 		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section() );
 
-		$settings_ui_page = SettingsUIPageResolver::get_settings_ui_page( $page, 'acme_payments' );
+		$settings_ui_page = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' )->get_settings_ui_page();
 
 		$this->assertInstanceOf( SettingsUIPageInterface::class, $settings_ui_page );
 		$this->assertSame( 'checkout', $settings_ui_page->get_page_id() );

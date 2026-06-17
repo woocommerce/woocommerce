@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Admin\Settings\SettingsSectionRegistry;
 use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 
 /**
@@ -111,7 +112,7 @@ class SettingsUIRequestContext {
 	private function __construct( \WC_Settings_Page $settings_page, string $section ) {
 		$this->settings_page    = $settings_page;
 		$this->section          = $section;
-		$this->settings_ui_page = SettingsUIPageResolver::get_settings_ui_page( $settings_page, $section );
+		$this->settings_ui_page = self::resolve_settings_ui_page( $settings_page, $section );
 	}
 
 	/**
@@ -170,7 +171,7 @@ class SettingsUIRequestContext {
 	 *
 	 * @return string
 	 */
-	public static function get_current_settings_tab(): string {
+	private static function get_current_settings_tab(): string {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( ! isset( $_GET['tab'] ) ) {
 			return 'general';
@@ -192,7 +193,7 @@ class SettingsUIRequestContext {
 	 *
 	 * @return string
 	 */
-	public static function get_current_settings_section(): string {
+	private static function get_current_settings_section(): string {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( ! isset( $_GET['section'] ) ) {
 			return '';
@@ -210,26 +211,8 @@ class SettingsUIRequestContext {
 	 * @param string $section Section id. Empty string means the default section.
 	 * @return string
 	 */
-	public static function get_section_key( string $section ): string {
+	private static function get_section_key( string $section ): string {
 		return '' === $section ? self::DEFAULT_SECTION_KEY : $section;
-	}
-
-	/**
-	 * Get the settings page.
-	 *
-	 * @return \WC_Settings_Page
-	 */
-	public function get_settings_page(): \WC_Settings_Page {
-		return $this->settings_page;
-	}
-
-	/**
-	 * Get the current section.
-	 *
-	 * @return string
-	 */
-	public function get_section(): string {
-		return $this->section;
 	}
 
 	/**
@@ -328,7 +311,11 @@ class SettingsUIRequestContext {
 	 * @return bool
 	 */
 	public function has_schema_failed(): bool {
-		return $this->schema_failed || ! empty( $GLOBALS['wc_settings_ui_schema_failed'][ $this->get_page_id() ][ $this->get_current_section_key() ] );
+		if ( ! $this->schema_resolved ) {
+			$this->resolve_schema();
+		}
+
+		return $this->schema_failed;
 	}
 
 	/**
@@ -347,6 +334,24 @@ class SettingsUIRequestContext {
 				self::get_section_key( $section ),
 			)
 		);
+	}
+
+	/**
+	 * Resolve the Settings UI adapter for a settings page and section.
+	 *
+	 * @param \WC_Settings_Page $settings_page Settings page.
+	 * @param string            $section Section id. Empty string means the default section.
+	 * @return SettingsUIPageInterface|null
+	 */
+	private static function resolve_settings_ui_page( \WC_Settings_Page $settings_page, string $section ): ?SettingsUIPageInterface {
+		$registered_section = SettingsSectionRegistry::get_instance()->get_registered( $settings_page->get_id(), $section );
+
+		if ( $registered_section ) {
+			return new RegisteredSettingsSectionAdapter( $settings_page, $registered_section );
+		}
+
+		$settings_ui_page = $settings_page->get_settings_ui_page();
+		return $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page : null;
 	}
 
 	/**
@@ -402,7 +407,6 @@ class SettingsUIRequestContext {
 			$this->schema = $this->settings_ui_page->get_schema( $this->section );
 		} catch ( \Throwable $e ) {
 			$this->schema_failed = true;
-			$GLOBALS['wc_settings_ui_schema_failed'][ $this->get_page_id() ][ $this->get_current_section_key() ] = true;
 
 			if ( $e instanceof \Exception ) {
 				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
