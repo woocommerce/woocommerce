@@ -151,6 +151,18 @@ For detailed test commands, see `woocommerce-dev-cycle` skill.
 - Never create standalone functions (always use class methods)
 - Tests require Docker environment
 
+## Block Development
+
+### `block.json` Attribute Defaults
+
+Never include styling options such as `fontSize`, `borderColor`, `textColor`... as block attributes. They should only be listed under `supports`.
+
+Do not add `default` values to block attributes in `block.json`.
+
+- Default attribute values can be indistinguishable from missing attributes when parsed, especially when the default value is not serialized into saved block markup.
+- Defaults can create subtle conflicts with `theme.json`, block supports, editor controls, deprecations, and migrations.
+- During implementation or review, flag any newly inserted `default` in `block.json`.
+
 ## Interactivity API Stores
 
 Most WooCommerce Interactivity API stores are **private by design**. Exception: the `woocommerce/product-filters` store is public for Product Filters inner-block extensibility.
