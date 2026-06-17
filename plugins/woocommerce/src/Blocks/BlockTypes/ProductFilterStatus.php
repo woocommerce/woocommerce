@@ -68,7 +68,7 @@ final class ProductFilterStatus extends AbstractBlock {
 				'type'        => 'status',
 				'value'       => $status,
 				// translators: %s: status.
-				'activeLabel' => sprintf( __( 'Status: %s', 'woocommerce' ), $status_options[ $status ] ),
+				'activeLabel' => sprintf( __( 'Availability: %s', 'woocommerce' ), $status_options[ $status ] ),
 			);
 		}
 
@@ -134,7 +134,7 @@ final class ProductFilterStatus extends AbstractBlock {
 			'items'          => array_values( $filter_options ),
 			'selectionMode'  => 'multiple',
 			'storeNamespace' => 'woocommerce/product-filters',
-			'groupLabel'     => __( 'Status', 'woocommerce' ),
+			'groupLabel'     => __( 'Availability', 'woocommerce' ),
 		);
 
 		$wrapper_attributes = array(
@@ -143,7 +143,7 @@ final class ProductFilterStatus extends AbstractBlock {
 			'data-wp-context'     => wp_json_encode(
 				array(
 					/* translators: {{label}} is the status filter item label. */
-					'activeLabelTemplate' => __( 'Status: {{label}}', 'woocommerce' ),
+					'activeLabelTemplate' => __( 'Availability: {{label}}', 'woocommerce' ),
 					'filterType'          => 'status',
 					'items'               => $filter_context['items'],
 				),
