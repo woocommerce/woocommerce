@@ -15,6 +15,10 @@
 		"./package.json": "./package.json"
 	},
 	"wpScript": true,
+	"wpScriptModuleExports": {
+		"./product-gallery/view": "./build-module/product-gallery/frontend.mjs",
+		"./product-gallery-large-image/view": "./build-module/product-gallery-large-image/frontend.mjs"
+	},
 	"dependencies": {
 		"@wordpress/icons": "wp-bundled"
 	},
