@@ -41,14 +41,6 @@ class BlockLibraryRegistry {
 	final public function init(): void {
 		$this->load_asset_registration();
 
-		add_filter( 'woocommerce_get_block_types', array( $this, 'remove_migrated_block_types' ) );
-		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
-
-		if ( did_action( 'init' ) ) {
-			$this->register_block_types();
-			return;
-		}
-
 		add_action( 'init', array( $this, 'register_block_types' ), 9 );
 	}
 
@@ -62,48 +54,6 @@ class BlockLibraryRegistry {
 		}
 
 		require_once $build_file;
-
-		if ( did_action( 'wp_default_scripts' ) && function_exists( 'woocommerce_blocks_block_library_register_package_scripts' ) ) {
-			woocommerce_blocks_block_library_register_package_scripts( wp_scripts() );
-		}
-	}
-
-	/**
-	 * Enqueue editor assets for migrated block-library blocks.
-	 */
-	public function enqueue_block_editor_assets(): void {
-		foreach ( $this->get_block_names() as $block_name ) {
-			$metadata_path = $this->get_block_metadata_path( $block_name );
-
-			if ( ! $metadata_path ) {
-				continue;
-			}
-
-			$metadata = wp_json_file_decode( $metadata_path . '/block.json', array( 'associative' => true ) );
-			if ( ! is_array( $metadata ) || empty( $metadata['editorScript'] ) ) {
-				continue;
-			}
-
-			$editor_scripts = is_array( $metadata['editorScript'] )
-				? $metadata['editorScript']
-				: array( $metadata['editorScript'] );
-
-			foreach ( $editor_scripts as $editor_script ) {
-				if ( is_string( $editor_script ) && '' !== $editor_script && 0 !== strpos( $editor_script, 'file:' ) ) {
-					wp_enqueue_script( $editor_script );
-				}
-			}
-		}
-	}
-
-	/**
-	 * Remove migrated blocks from the legacy block type controller list.
-	 *
-	 * @param array<int, string> $block_types Legacy block type class names.
-	 * @return array<int, string>
-	 */
-	public function remove_migrated_block_types( array $block_types ): array {
-		return array_values( array_diff( $block_types, $this->get_legacy_block_type_names() ) );
 	}
 
 	/**
@@ -125,16 +75,6 @@ class BlockLibraryRegistry {
 		$metadata_path = $this->get_block_metadata_path( $block_name );
 
 		if ( ! $metadata_path ) {
-			return;
-		}
-
-		$metadata = wp_json_file_decode( $metadata_path . '/block.json', array( 'associative' => true ) );
-		if (
-			is_array( $metadata ) &&
-			isset( $metadata['name'] ) &&
-			is_string( $metadata['name'] ) &&
-			\WP_Block_Type_Registry::get_instance()->is_registered( $metadata['name'] )
-		) {
 			return;
 		}
 
@@ -179,20 +119,6 @@ class BlockLibraryRegistry {
 				},
 				$render_files
 			)
-		);
-	}
-
-	/**
-	 * Get legacy block type class names for migrated block-library blocks.
-	 *
-	 * @return array<int, string>
-	 */
-	private function get_legacy_block_type_names(): array {
-		return array_map(
-			static function ( string $block_name ): string {
-				return str_replace( ' ', '', ucwords( str_replace( '-', ' ', $block_name ) ) );
-			},
-			$this->get_block_names()
 		);
 	}
 }
