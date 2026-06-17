@@ -7,7 +7,6 @@
 	"apiVersion": 3,
 	"textdomain": "woocommerce",
 	"editorScript": "wc-block-library",
-	"render": "file:./index.php",
 	"attributes": {
 		"isLink": {
 			"type": "boolean",
