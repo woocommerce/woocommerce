@@ -75,10 +75,15 @@ class UtilsTest extends WC_Unit_Test_Case {
 			array( $abs_content, 'wp-includes/a.js', 'https://example.com/wpwp-includes/a.js' ),
 			// Absolute content URL is unchanged.
 			array( $abs_content, 'https://example.com/wp-content/x.js', 'https://example.com/wp-content/x.js' ),
+			// An empty src is a degenerate input (callers normally guard against it) and yields the base URL.
+			array( $abs_content, '', 'https://example.com/wp' ),
 			// Empty content URL still prepends the base URL.
 			array( '', '/wp-includes/a.js', 'https://example.com/wp/wp-includes/a.js' ),
 			// With a relative content URL, a content-dir-prefixed src is left untouched (the content_url short-circuit).
 			array( '/wp-content', '/wp-content/plugins/x.js', '/wp-content/plugins/x.js' ),
+			// A name-prefix sibling ("/wp-contentX") also matches the content_url prefix and is left untouched,
+			// mirroring WP_Scripts::do_item()'s str_starts_with() check (a plain prefix, with no segment boundary).
+			array( '/wp-content', '/wp-contentX/plugin.js', '/wp-contentX/plugin.js' ),
 			// A non-content relative src still gets the base URL prepended.
 			array( '/wp-content', '/wp-includes/x.js', 'https://example.com/wp/wp-includes/x.js' ),
 		);
@@ -138,6 +143,9 @@ class UtilsTest extends WC_Unit_Test_Case {
 			array( 'https://example.com/wp-content', 'https://example.com/wp-content/x.js', false ),
 			// Content-dir-prefixed src under a relative content URL: the one case that diverges from the simpler variant.
 			array( '/wp-content', '/wp-content/plugins/x.js', true ),
+			// A name-prefix sibling ("/wp-contentX") also matches the content_url prefix (mirroring core), so it is
+			// left untouched and likewise diverges from the simpler base-URL-prepending variant.
+			array( '/wp-content', '/wp-contentX/plugin.js', true ),
 			// Non-content src under a relative content URL.
 			array( '/wp-content', '/wp-includes/x.js', false ),
 		);
