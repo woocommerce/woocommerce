@@ -307,8 +307,8 @@ class Autoloader {
 	 * degrade-don't-fatal contract whole, mirroring the is_array() guard build() already applies to
 	 * the file-sourced map.
 	 *
-	 * @internal Public only so {@see self::register_woocommerce_psr4_fallback()} and the unit tests
-	 *           can exercise it.
+	 * @internal Public only so the unit tests can reach it; its sole production caller is
+	 *           {@see self::register_woocommerce_psr4_fallback()}.
 	 *
 	 * @since 11.0.0
 	 *
@@ -335,7 +335,8 @@ class Autoloader {
 	 * for getPrefixesPsr4(). Composer's own miss sentinel is `false`, which is not a string and so
 	 * degrades to null here, unchanged. Validating keeps the degrade-don't-fatal contract whole.
 	 *
-	 * @internal Public only so {@see self::find_scoped_file()} and the unit tests can exercise it.
+	 * @internal Public only so the unit tests can reach it; its sole production caller is
+	 *           {@see self::find_scoped_file()}.
 	 *
 	 * @since 11.0.0
 	 *
@@ -359,7 +360,8 @@ class Autoloader {
 	 * file is on disk. Building fresh here guarantees a class missed pre-swap resolves post-swap,
 	 * within the same request.
 	 *
-	 * @internal Public only so the registered autoload handler and the unit tests can drive it.
+	 * @internal Public only so the unit tests can reach it; in production only the registered
+	 *           autoload handler calls it.
 	 *
 	 * @param string                      $class_name   Fully-qualified class name.
 	 * @param array<string, list<string>> $psr4_entries Pre-scoped PSR-4 prefix => dirs map.
