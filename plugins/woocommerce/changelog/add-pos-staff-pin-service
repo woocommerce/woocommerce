@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the POS PIN service (`POSPinService`): PBKDF2-HMAC-SHA-256 storage and verification of 4-digit staff PINs in `woocommerce_pos_pin` user meta (no leading underscore, so core's existing uninstall sweep cleans it up), with per-staff PIN uniqueness and a public hash record for client-side validation. No runtime surface yet; the staff endpoint and admin UI use it in follow-up changes. Part of the off-by-default `point_of_sale_staff` feature.
