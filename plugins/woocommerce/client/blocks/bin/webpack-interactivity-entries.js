@@ -92,8 +92,13 @@ function findInteractivityBlockAssets( dir = [] ) {
 	return results;
 }
 
-const interactivityBlocks = findInteractivityBlockAssets(
-	path.resolve( __dirname, '../assets/js' )
+const interactivityBlockRoots = [
+	path.resolve( __dirname, '../assets/js' ),
+	path.resolve( __dirname, '../packages/block-library/src' ),
+];
+
+const interactivityBlocks = interactivityBlockRoots.flatMap( ( root ) =>
+	fs.existsSync( root ) ? findInteractivityBlockAssets( root ) : []
 );
 
 const scriptModuleEntries = interactivityBlocks.reduce( ( acc, block ) => {

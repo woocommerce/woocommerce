@@ -6,7 +6,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * Internal dependencies
  */
-import { hasInState } from '../utils';
+import hasInState from '../utils/has-in-state';
 import { DEFAULT_EMPTY_ARRAY } from './constants';
 
 const getFromState = ( {

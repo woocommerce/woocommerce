@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /**
  * External dependencies
  */
@@ -7,7 +8,7 @@ import {
 	useBlockProps,
 } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
-import { withProductDataContext } from '@woocommerce/shared-hocs';
+import { withProductDataContext } from '@woocommerce/shared-hocs/with-product-data-context';
 
 /**
  * Internal dependencies

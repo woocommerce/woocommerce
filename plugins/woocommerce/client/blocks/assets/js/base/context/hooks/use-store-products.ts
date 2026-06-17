@@ -1,11 +1,13 @@
 /**
  * External dependencies
  */
-import { Query, ProductResponseItem } from '@woocommerce/types';
+import type { Query } from '@woocommerce/types/type-defs/hooks';
+import type { ProductResponseItem } from '@woocommerce/types/type-defs/product-response';
 /**
  * Internal dependencies
  */
-import { useCollectionHeader, useCollection } from './collections';
+import { useCollection } from './collections/use-collection';
+import { useCollectionHeader } from './collections/use-collection-header';
 
 /**
  * This is a custom hook that is wired up to the `wc/store/collections` data

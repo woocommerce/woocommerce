@@ -85,16 +85,6 @@ const blocks = {
 	'product-collection-no-results': {
 		customDir: 'product-collection/inner-blocks/no-results',
 	},
-	'product-gallery': {},
-	'product-gallery-large-image': {
-		customDir: 'product-gallery/inner-blocks/product-gallery-large-image',
-	},
-	'product-gallery-large-image-next-previous': {
-		customDir: 'next-previous-buttons',
-	},
-	'product-gallery-thumbnails': {
-		customDir: 'product-gallery/inner-blocks/product-gallery-thumbnails',
-	},
 	'product-new': {},
 	'product-on-sale': {},
 	'product-query': {},

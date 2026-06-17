@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
-import { useShallowEqual } from '@woocommerce/base-hooks';
+import { useShallowEqual } from '@woocommerce/base-hooks/use-shallow-equal';
 
 /**
  * Internal dependencies
  */
+import { COLLECTIONS_STORE_KEY as storeKey } from '../../../../data/collections';
 import { useCollectionOptions } from '.';
 
 /**

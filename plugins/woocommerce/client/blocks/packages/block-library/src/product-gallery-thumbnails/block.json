@@ -6,21 +6,20 @@
 	"description": "Display the Thumbnails of a product.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
+	"editorScript": "wc-block-library",
+	"render": "file:./index.php",
 	"usesContext": [ "postId" ],
 	"textdomain": "woocommerce",
 	"ancestor": [ "woocommerce/product-gallery" ],
 	"attributes": {
 		"thumbnailSize": {
-			"type": "string",
-			"default": "25%"
+			"type": "string"
 		},
 		"aspectRatio": {
-			"type": "string",
-			"default": "1"
+			"type": "string"
 		},
 		"activeThumbnailStyle": {
-			"type": "string",
-			"default": "overlay"
+			"type": "string"
 		}
 	},
 	"supports": {

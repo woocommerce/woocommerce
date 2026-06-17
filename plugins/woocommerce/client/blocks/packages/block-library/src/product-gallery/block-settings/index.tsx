@@ -20,7 +20,7 @@ export const ProductGalleryBlockSettings = ( {
 	attributes,
 	setAttributes,
 }: ProductGallerySettingsProps ) => {
-	const { hoverZoom, fullScreenOnClick } = attributes;
+	const { hoverZoom = true, fullScreenOnClick = true } = attributes;
 	return (
 		<InspectorControls>
 			<ToolsPanel

@@ -11,7 +11,7 @@ import { findBlock } from '@woocommerce/utils';
  * Internal dependencies
  */
 import metadata from './block.json';
-import { replaceBlockWithProductGallery } from '../../../../blocks/product-gallery/edit-utils';
+import { replaceBlockWithProductGallery } from '../../../../../../packages/block-library/src/product-gallery/edit-utils';
 
 const upgradeToBlockifiedProductGallery = ( blockClientId: string ) => {
 	const blocks = select( 'core/block-editor' ).getBlocks();

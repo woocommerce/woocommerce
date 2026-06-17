@@ -8,7 +8,7 @@ import {
 	ApiResponse,
 	assertBatchResponseIsValid,
 	assertResponseIsValid,
-} from '@woocommerce/types';
+} from '@woocommerce/types/type-defs/api-response';
 
 const EMPTY_OBJECT = {};
 

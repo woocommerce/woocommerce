@@ -41,6 +41,13 @@ class BlockLibraryRegistry {
 	final public function init(): void {
 		$this->load_asset_registration();
 
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+
+		if ( did_action( 'init' ) ) {
+			$this->register_block_types();
+			return;
+		}
+
 		add_action( 'init', array( $this, 'register_block_types' ), 9 );
 	}
 
@@ -78,7 +85,40 @@ class BlockLibraryRegistry {
 			return;
 		}
 
+		$metadata = $this->get_block_metadata( $block_name );
+		if (
+			is_array( $metadata ) &&
+			! empty( $metadata['name'] ) &&
+			\WP_Block_Type_Registry::get_instance()->is_registered( $metadata['name'] )
+		) {
+			return;
+		}
+
 		register_block_type_from_metadata( $metadata_path );
+	}
+
+	/**
+	 * Remove block types that are registered from the block-library package.
+	 *
+	 * @param array<int, string> $block_types Legacy block type class names.
+	 * @return array<int, string>
+	 */
+	public function remove_migrated_block_types( array $block_types ): array {
+		$migrated_block_types = array_map(
+			array( $this, 'get_legacy_block_type_name' ),
+			$this->get_block_names()
+		);
+
+		return array_values( array_diff( $block_types, $migrated_block_types ) );
+	}
+
+	/**
+	 * Enqueue editor scripts declared by migrated block metadata.
+	 */
+	public function enqueue_block_editor_assets(): void {
+		foreach ( $this->get_block_editor_script_handles() as $script_handle ) {
+			wp_enqueue_script( $script_handle );
+		}
 	}
 
 	/**
@@ -97,6 +137,58 @@ class BlockLibraryRegistry {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get decoded block metadata.
+	 *
+	 * @param string $block_name Block directory name.
+	 * @return array<string, mixed>|null
+	 */
+	private function get_block_metadata( string $block_name ): ?array {
+		$metadata_path = $this->get_block_metadata_path( $block_name );
+
+		if ( ! $metadata_path ) {
+			return null;
+		}
+
+		$metadata = wp_json_file_decode( $metadata_path . '/block.json', array( 'associative' => true ) );
+
+		return is_array( $metadata ) ? $metadata : null;
+	}
+
+	/**
+	 * Get editor script handles declared by migrated block metadata.
+	 *
+	 * @return array<int, string>
+	 */
+	private function get_block_editor_script_handles(): array {
+		$script_handles = array();
+
+		foreach ( $this->get_block_names() as $block_name ) {
+			$metadata = $this->get_block_metadata( $block_name );
+			if ( ! is_array( $metadata ) || empty( $metadata['editorScript'] ) ) {
+				continue;
+			}
+
+			foreach ( (array) $metadata['editorScript'] as $editor_script ) {
+				if ( is_string( $editor_script ) && ! str_starts_with( $editor_script, 'file:' ) ) {
+					$script_handles[] = $editor_script;
+				}
+			}
+		}
+
+		return array_values( array_unique( $script_handles ) );
+	}
+
+	/**
+	 * Convert a block directory name to its legacy block type class name.
+	 *
+	 * @param string $block_name Block directory name.
+	 * @return string Legacy block type class name.
+	 */
+	private function get_legacy_block_type_name( string $block_name ): string {
+		return str_replace( ' ', '', ucwords( str_replace( '-', ' ', $block_name ) ) );
 	}
 
 	/**

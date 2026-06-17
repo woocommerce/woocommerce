@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { createNotice, DEFAULT_ERROR_MESSAGE } from '@woocommerce/base-utils';
+import {
+	createNotice,
+	DEFAULT_ERROR_MESSAGE,
+} from '@woocommerce/base-utils/create-notice';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
 	objectHasProp,

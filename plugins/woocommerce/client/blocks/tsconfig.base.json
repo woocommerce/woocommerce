@@ -43,6 +43,9 @@
 			"@woocommerce/atomic-utils": [
 				"assets/js/atomic/utils"
 			],
+			"@woocommerce/atomic-utils/*": [
+				"assets/js/atomic/utils/*"
+			],
 			"@woocommerce/base-components/*": [
 				"assets/js/base/components/*"
 			],
@@ -127,11 +130,17 @@
 			"@woocommerce/settings": [
 				"assets/js/settings/shared"
 			],
+			"@woocommerce/settings/*": [
+				"assets/js/settings/shared/*"
+			],
 			"@woocommerce/shared-context": [
 				"assets/js/shared/context"
 			],
 			"@woocommerce/shared-hocs": [
 				"assets/js/shared/hocs"
+			],
+			"@woocommerce/shared-hocs/*": [
+				"assets/js/shared/hocs/*"
 			],
 			"@woocommerce/stores/store-notices": [
 				"assets/js/base/stores/store-notices"
@@ -151,6 +160,9 @@
 			"@woocommerce/types": [
 				"assets/js/types"
 			],
+			"@woocommerce/types/*": [
+				"assets/js/types/*"
+			],
 			"@woocommerce/storybook-controls": [
 				"storybook/custom-controls"
 			],
@@ -165,6 +177,9 @@
 			],
 			"@woocommerce/entities": [
 				"assets/js/entities"
+			],
+			"@woocommerce/entities/*": [
+				"assets/js/entities/*"
 			],
 			"@woocommerce/sanitize": [
 				"node_modules/@woocommerce/sanitize/src/index.ts"

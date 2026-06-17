@@ -30,7 +30,11 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 	attributes,
 	setAttributes,
 }: ProductGalleryThumbnailsSettingsProps ) => {
-	const { thumbnailSize, aspectRatio, activeThumbnailStyle } = attributes;
+	const {
+		thumbnailSize = '25%',
+		aspectRatio = '1',
+		activeThumbnailStyle = ProductGalleryActiveThumbnailStyle.OVERLAY,
+	} = attributes;
 
 	const aspectRatioOptions = [
 		{

@@ -12,7 +12,7 @@ import {
 } from '@wordpress/blocks';
 import { subscribe, select } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
-import { isEmpty } from '@woocommerce/types';
+import { isEmpty } from '@woocommerce/types/type-guards/empty';
 
 /**
  * Settings for product block registration.

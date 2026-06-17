@@ -6,6 +6,8 @@
 	"description": "Container for the current gallery image, navigation buttons, zoom functionality and more.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
+	"editorScript": "wc-block-library",
+	"render": "file:./index.php",
 	"usesContext": [ "postId", "hoverZoom", "fullScreenOnClick" ],
 	"supports": {
 		"interactivity": true

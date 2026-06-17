@@ -19,7 +19,7 @@ import {
 } from '../../../../../tests/integration/helpers/integration-test-editor';
 import { LayoutOptions } from '../types';
 import '../';
-import '../../next-previous-buttons';
+import '../../../../../packages/block-library/src/product-gallery-large-image-next-previous';
 import '../../product-template';
 
 jest.mock( '@woocommerce/block-settings', () => ( {

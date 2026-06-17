@@ -6,6 +6,8 @@
 	"description": "Display next and previous buttons.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
+	"editorScript": "wc-block-library",
+	"render": "file:./index.php",
 	"usesContext": [ "iapi/provider" ],
 	"textdomain": "woocommerce",
 	"supports": {

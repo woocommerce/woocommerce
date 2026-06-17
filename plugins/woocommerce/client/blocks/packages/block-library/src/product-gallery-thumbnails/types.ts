@@ -4,9 +4,9 @@ export enum ProductGalleryActiveThumbnailStyle {
 }
 
 export type ProductGalleryThumbnailsBlockAttributes = {
-	thumbnailSize: string;
-	aspectRatio: string;
-	activeThumbnailStyle: ProductGalleryActiveThumbnailStyle;
+	thumbnailSize?: string;
+	aspectRatio?: string;
+	activeThumbnailStyle?: ProductGalleryActiveThumbnailStyle;
 };
 
 export type ProductGalleryThumbnailsSettingsProps = {

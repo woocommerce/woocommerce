@@ -1,12 +1,17 @@
 /**
  * External dependencies
  */
-import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 import { useRef } from '@wordpress/element';
-import { useShallowEqual, useThrowError } from '@woocommerce/base-hooks';
-import { isError } from '@woocommerce/types';
+import { useShallowEqual } from '@woocommerce/base-hooks/use-shallow-equal';
+import { useThrowError } from '@woocommerce/base-hooks/use-throw-error';
+import { isError } from '@woocommerce/types/type-guards/error';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import { COLLECTIONS_STORE_KEY as storeKey } from '../../../../data/collections';
 
 /**
  * This is a custom hook that is wired up to the `wc/store/collections` data

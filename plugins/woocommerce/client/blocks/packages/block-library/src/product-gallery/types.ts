@@ -4,8 +4,8 @@
 import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
 
 export interface ProductGalleryBlockAttributes {
-	hoverZoom: boolean;
-	fullScreenOnClick: boolean;
+	hoverZoom?: boolean;
+	fullScreenOnClick?: boolean;
 }
 
 export interface ProductGallerySettingsProps {

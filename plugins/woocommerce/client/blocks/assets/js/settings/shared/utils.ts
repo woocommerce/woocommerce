@@ -2,7 +2,7 @@
  * External dependencies
  */
 import compareVersions from 'compare-versions';
-import type { SymbolPosition } from '@woocommerce/types';
+import type { SymbolPosition } from '@woocommerce/types/type-defs/currency';
 
 /**
  * Internal dependencies

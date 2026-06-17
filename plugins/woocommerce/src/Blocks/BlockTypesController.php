@@ -63,6 +63,7 @@ final class BlockTypesController {
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
+		add_filter( 'block_type_metadata_settings', array( $this, 'handle_block_type_metadata_settings' ), 10, 2 );
 		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 3 );
 		add_filter( 'block_core_breadcrumbs_items', array( $this, 'apply_woocommerce_breadcrumb_filters' ), 10, 1 );
 	}
@@ -115,6 +116,10 @@ final class BlockTypesController {
 
 		$woo_blocks_wp_build_registered = array(
 			'CategoryTitle',
+			'NextPreviousButtons',
+			'ProductGallery',
+			'ProductGalleryLargeImage',
+			'ProductGalleryThumbnails',
 		);
 
 		foreach ( $block_types as $block_type ) {
@@ -125,6 +130,23 @@ final class BlockTypesController {
 
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
+	}
+
+	/**
+	 * Handle block_type_metadata_settings filter.
+	 *
+	 * @internal
+	 *
+	 * @param array<string, mixed> $settings Array of determined settings for registering a block type.
+	 * @param array<string, mixed> $metadata Metadata provided for registering a block type.
+	 * @return array<string, mixed>
+	 */
+	public function handle_block_type_metadata_settings( array $settings, array $metadata ): array {
+		if ( 'woocommerce/product-gallery-large-image' === ( $metadata['name'] ?? '' ) ) {
+			$settings['skip_inner_blocks'] = true;
+		}
+
+		return $settings;
 	}
 
 	/**

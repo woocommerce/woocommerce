@@ -6,8 +6,8 @@ import { store, getContext as getContextFn } from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
-import type { ProductGalleryContext } from '../../types';
-import type { Store as ProductGallery } from '../../frontend';
+import type { ProductGalleryContext } from '../product-gallery/types';
+import type { Store as ProductGallery } from '../product-gallery/frontend';
 
 type Context = {
 	styles: {

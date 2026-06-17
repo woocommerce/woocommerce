@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import type { Currency, SymbolPosition } from '@woocommerce/types';
+import type {
+	Currency,
+	SymbolPosition,
+} from '@woocommerce/types/type-defs/currency';
 
 /**
  * Internal dependencies

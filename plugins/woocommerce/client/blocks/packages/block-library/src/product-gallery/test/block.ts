@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /**
  * External dependencies
  */
@@ -12,13 +13,13 @@ import { setupServer } from 'msw/node';
  */
 import { initializeEditor } from '../../../../../tests/integration/helpers/integration-test-editor';
 import blockJson from '../block.json';
-import '../';
-import '../inner-blocks/product-gallery-large-image';
-import '../inner-blocks/product-gallery-thumbnails';
-import '../../next-previous-buttons';
-import '../../single-product';
-import '../../../atomic/blocks/product-elements/image';
-import '../../../atomic/blocks/product-elements/sale-badge';
+import '..';
+import '../../product-gallery-large-image';
+import '../../product-gallery-thumbnails';
+import '../../product-gallery-large-image-next-previous';
+import '../../../../../assets/js/blocks/single-product';
+import '../../../../../assets/js/atomic/blocks/product-elements/image';
+import '../../../../../assets/js/atomic/blocks/product-elements/sale-badge';
 
 // Setup MSW
 const handlers = [

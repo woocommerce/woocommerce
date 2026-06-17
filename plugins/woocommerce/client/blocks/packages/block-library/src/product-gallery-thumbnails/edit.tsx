@@ -1,18 +1,19 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /**
  * External dependencies
  */
-import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
-import type { ProductResponseImageItem } from '@woocommerce/types';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { useEffect, useRef, useState } from '@wordpress/element';
-import { useProduct } from '@woocommerce/entities';
 import clsx from 'clsx';
+import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings/default-constants';
+import type { ProductResponseImageItem } from '@woocommerce/types/type-defs/product-response';
+import { useProduct } from '@woocommerce/entities/product/hooks';
 
 /**
  * Internal dependencies
  */
-import { checkOverflow } from '../../utils';
+import { checkOverflow } from '../product-gallery/utils';
 import { ProductGalleryThumbnailsBlockSettings } from './block-settings';
 import type { ProductGalleryThumbnailsBlockAttributes } from './types';
 
@@ -45,7 +46,11 @@ export const Edit = ( {
 		postId?: string;
 	};
 } ) => {
-	const { thumbnailSize, aspectRatio, activeThumbnailStyle } = attributes;
+	const {
+		thumbnailSize = '25%',
+		aspectRatio = '1',
+		activeThumbnailStyle = 'overlay',
+	} = attributes;
 
 	const { product } = useProduct( context.postId );
 

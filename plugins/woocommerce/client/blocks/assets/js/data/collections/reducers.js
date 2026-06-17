@@ -2,7 +2,8 @@
  * Internal dependencies
  */
 import { ACTION_TYPES as types } from './action-types';
-import { hasInState, updateState } from '../utils';
+import hasInState from '../utils/has-in-state';
+import updateState from '../utils/update-state';
 
 /**
  * Reducer for receiving items to a collection.

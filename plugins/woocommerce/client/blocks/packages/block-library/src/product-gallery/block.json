@@ -6,6 +6,8 @@
 	"description": "Showcase your products relevant images and media.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
+	"editorScript": "wc-block-library",
+	"render": "file:./index.php",
 	"supports": {
 		"align": true,
 		"interactivity": true,
@@ -30,12 +32,10 @@
 	"ancestor": [ "woocommerce/single-product" ],
 	"attributes": {
 		"hoverZoom": {
-			"type": "boolean",
-			"default": true
+			"type": "boolean"
 		},
 		"fullScreenOnClick": {
-			"type": "boolean",
-			"default": true
+			"type": "boolean"
 		}
 	},
 	"viewScript": "wc-product-gallery-frontend",
