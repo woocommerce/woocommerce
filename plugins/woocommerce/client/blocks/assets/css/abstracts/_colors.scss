@@ -18,3 +18,6 @@ $universal-border-medium: color-mix(in srgb, currentColor 48%, transparent);
 $universal-border-strong: color-mix(in srgb, currentColor 80%, transparent);
 // Used for low contrast decorative elements background color.
 $universal-background: rgba(17, 17, 17, 0.02);
+
+// Backdrop color for the drawer's screen overlay (mini-cart, etc.).
+$drawer-overlay-background: rgba(0, 0, 0, 0.35);

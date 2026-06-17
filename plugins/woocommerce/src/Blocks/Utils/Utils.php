@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+
 /**
  * Utils class
  */
@@ -27,5 +29,24 @@ class Utils {
 		$version            = preg_replace( '/[^0-9a-zA-Z\.]+/i', '.', $version );
 
 		return version_compare( $current_wp_version, $version, $operator );
+	}
+
+	/**
+	 * Resolve a (possibly relative) script src to an absolute URL the same way
+	 * WordPress core does in WP_Scripts::do_item(): a relative src is resolved
+	 * against the scripts base URL (the site URL), unless it already points at
+	 * the content directory. This keeps the resulting URL consistent with what
+	 * WordPress itself would emit, including on non-default directory layouts
+	 * (e.g. a custom WP_CONTENT_DIR/WP_CONTENT_URL).
+	 *
+	 * @param string $src The script src, which may be relative or absolute.
+	 * @return string The absolute script URL.
+	 */
+	public static function get_absolute_script_url( $src ) {
+		$wp_scripts = wc_get_container()->get( LegacyProxy::class )->call_function( 'wp_scripts' );
+		if ( ! preg_match( '|^(https?:)?//|', $src ) && ! ( $wp_scripts->content_url && 0 === strpos( $src, $wp_scripts->content_url ) ) ) {
+			$src = $wp_scripts->base_url . $src;
+		}
+		return $src;
 	}
 }
