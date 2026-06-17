@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 use Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIPageResolver;
 /**
  * WCAdminAssets Class.
  */
@@ -484,7 +485,7 @@ class WCAdminAssets {
 				continue;
 			}
 
-			$settings_ui_page = $settings_page->get_settings_ui_page();
+			$settings_ui_page = SettingsUIPageResolver::get_settings_ui_page( $settings_page, $this->get_current_settings_section() );
 			return $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page : null;
 		}
 

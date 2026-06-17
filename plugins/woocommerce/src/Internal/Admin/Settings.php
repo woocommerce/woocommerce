@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIPageResolver;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
@@ -465,7 +466,7 @@ class Settings {
 				continue;
 			}
 
-			$settings_ui_page = $settings_page->get_settings_ui_page();
+			$settings_ui_page = SettingsUIPageResolver::get_settings_ui_page( $settings_page, $this->get_current_settings_section() );
 			return $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page : null;
 		}
 
