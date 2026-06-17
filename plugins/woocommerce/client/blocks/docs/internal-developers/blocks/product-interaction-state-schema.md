@@ -31,6 +31,20 @@ state.productInteractionInContext;
 
 Do not expose separate public objects for variation selection, quantity, validation, or shopper input. Those fields belong inside `productInteractionInContext`.
 
+## Store boundaries
+
+The unified `woocommerce` store should not become every block's view model.
+
+It owns:
+
+- Shared source-of-truth state.
+- Contextual selectors that cross product, interaction, and cart data.
+- Shared mutation actions.
+
+Block-specific stores still own UI-specific derived state and UI actions.
+
+For example, `productInteractionInContext` and `cartItemInContext` belong in `woocommerce`, but Quantity block getters like `quantity`, `maxQuantity`, `allowsIncrease`, and `allowsDecrease` should stay in the Quantity block store unless multiple blocks need them.
+
 ## Naming
 
 Use `productInteractionInContext` as the working name.
