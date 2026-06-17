@@ -38,4 +38,20 @@ final class WeightUnit {
 	 * @var string
 	 */
 	public const OUNCE = 'oz';
+
+	/**
+	 * Returns all weight unit values defined in this class.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return string[]
+	 */
+	public static function get_all(): array {
+		return array(
+			self::KILOGRAM,
+			self::GRAM,
+			self::POUND,
+			self::OUNCE,
+		);
+	}
 }
