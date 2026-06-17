@@ -458,21 +458,14 @@ class WC_Analytics_Tracking {
 	}
 
 	/**
-	 * Resolve the visitor id for the current request.
+	 * Get the existing stable visitor id: the `tk_ai` cookie, or an IP-based hash when
+	 * proxy tracking is enabled. Returns null otherwise so the caller skips the event.
 	 *
-	 * Returns a *pre-existing* stable identifier only: the `tk_ai` cookie (set
-	 * client-side by the analytics client on first page view), or — when proxy
-	 * tracking is enabled — a deterministic IP-based hash. When neither is available
-	 * we return null so callers skip the event.
+	 * We never mint a new id here: attributing an event to a brand-new id creates a
+	 * throwaway one-event "visitor" (mostly cookie-less crawlers) that inflates session
+	 * counts. Real browsers already have a `tk_ai` cookie by the time an event fires.
 	 *
-	 * We deliberately do NOT mint a fresh id here. Attributing an event to a brand-new
-	 * id produces a throwaway one-event "visitor"; in practice that traffic is
-	 * overwhelmingly UA-spoofing crawlers that never persist a cookie, and counting them
-	 * inflates Nosara/Tracks session counts. Real browsers already carry a `tk_ai`
-	 * cookie by the time any server-side action event fires, so only non-persisting
-	 * clients reach the null path.
-	 *
-	 * @return string|null The stable visitor id, or null when none can be confirmed.
+	 * @return string|null Stable visitor id, or null when none is available.
 	 */
 	private static function get_visitor_id() {
 		// Return cached result if available.
