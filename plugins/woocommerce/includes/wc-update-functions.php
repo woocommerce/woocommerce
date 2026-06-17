@@ -3547,6 +3547,21 @@ function wc_update_1090_remove_task_list_reminder_bar_hidden_option() {
 }
 
 /**
+ * Set the stored value of the point_of_sale feature flag to enabled.
+ *
+ * The feature is deprecated as of 11.0.0 and always enabled in core, but the WooCommerce
+ * mobile apps read this option via the wc/v3 settings REST API to decide whether POS can
+ * be used, so the stored value must reflect the always-enabled state.
+ *
+ * @since 11.0.0
+ *
+ * @return void
+ */
+function wc_update_1100_enable_point_of_sale_feature() {
+	update_option( 'woocommerce_feature_point_of_sale_enabled', 'yes' );
+}
+
+/**
  * Schedule the per-product Action Scheduler sale events for products that already had
  * future sale dates before those events were introduced, so their sales start/end at the
  * exact scheduled time rather than whenever the daily safety-net cron next runs.

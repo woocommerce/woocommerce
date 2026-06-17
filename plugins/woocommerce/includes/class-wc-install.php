@@ -336,6 +336,7 @@ class WC_Install {
 			'wc_update_1090_remove_task_list_reminder_bar_hidden_option',
 		),
 		'11.0.0'   => array(
+			'wc_update_1100_enable_point_of_sale_feature',
 			'wc_update_1100_schedule_existing_product_sale_events',
 		),
 	);
