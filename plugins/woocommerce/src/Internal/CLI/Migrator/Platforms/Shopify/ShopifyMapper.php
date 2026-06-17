@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Shopify;
 
+use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Interfaces\PlatformMapperInterface;
 
 defined( 'ABSPATH' ) || exit;
@@ -31,10 +32,10 @@ class ShopifyMapper implements PlatformMapperInterface {
 	 * @var array
 	 */
 	private const WEIGHT_UNIT_MAP = array(
-		'GRAMS'     => 'g',
-		'KILOGRAMS' => 'kg',
+		'GRAMS'     => WeightUnit::GRAM,
+		'KILOGRAMS' => WeightUnit::KILOGRAM,
 		'POUNDS'    => 'lb',
-		'OUNCES'    => 'oz',
+		'OUNCES'    => WeightUnit::OUNCE,
 	);
 
 	/**
@@ -44,29 +45,29 @@ class ShopifyMapper implements PlatformMapperInterface {
 	 * @var array
 	 */
 	private const WEIGHT_CONVERSION_FACTORS = array(
-		'kg' => array(
-			'kg' => 1,
-			'g'  => 1000,
-			'lb' => 2.20462,
-			'oz' => 35.274,
+		WeightUnit::KILOGRAM => array(
+			WeightUnit::KILOGRAM => 1,
+			WeightUnit::GRAM     => 1000,
+			'lb'                 => 2.20462,
+			WeightUnit::OUNCE    => 35.274,
 		),
-		'g'  => array(
-			'kg' => 0.001,
-			'g'  => 1,
-			'lb' => 0.00220462,
-			'oz' => 0.035274,
+		WeightUnit::GRAM     => array(
+			WeightUnit::KILOGRAM => 0.001,
+			WeightUnit::GRAM     => 1,
+			'lb'                 => 0.00220462,
+			WeightUnit::OUNCE    => 0.035274,
 		),
-		'lb' => array(
-			'kg' => 0.453592,
-			'g'  => 453.592,
-			'lb' => 1,
-			'oz' => 16,
+		'lb'                 => array(
+			WeightUnit::KILOGRAM => 0.453592,
+			WeightUnit::GRAM     => 453.592,
+			'lb'                 => 1,
+			WeightUnit::OUNCE    => 16,
 		),
-		'oz' => array(
-			'kg' => 0.0283495,
-			'g'  => 28.3495,
-			'lb' => 0.0625,
-			'oz' => 1,
+		WeightUnit::OUNCE    => array(
+			WeightUnit::KILOGRAM => 0.0283495,
+			WeightUnit::GRAM     => 28.3495,
+			'lb'                 => 0.0625,
+			WeightUnit::OUNCE    => 1,
 		),
 	);
 
@@ -298,7 +299,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 
 		$store_weight_unit = get_option( 'woocommerce_weight_unit' );
 
-		if ( 'lbs' === $store_weight_unit ) {
+		if ( WeightUnit::POUND === $store_weight_unit ) {
 			$store_weight_unit = 'lb';
 		}
 
