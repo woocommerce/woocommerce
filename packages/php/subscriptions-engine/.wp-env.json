@@ -1,9 +1,10 @@
 {
-	"phpVersion": "8.1",
+	"phpVersion": "8.3",
 	"plugins": [
 		"."
 	],
 	"config": {
+		"JETPACK_AUTOLOAD_DEV": true,
 		"WP_DEBUG_LOG": true,
 		"WP_DEBUG_DISPLAY": true,
 		"ALTERNATE_WP_CRON": true
@@ -12,10 +13,10 @@
 	},
 	"env": {
 		"development": {
-			"port": 8886
+			"port": 8883
 		},
 		"tests": {
-			"port": 8086,
+			"port": 8083,
 			"plugins": [
 				"."
 			],

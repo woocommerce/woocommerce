@@ -41,11 +41,11 @@
 		"post-update-cmd": [
 			"composer dump-autoload -o"
 		],
-		"env:start": "wp-env start",
-		"env:stop": "wp-env stop",
-		"env:destroy": "wp-env destroy",
+		"env:start": "npx wp-env start",
+		"env:stop": "npx wp-env stop",
+		"env:destroy": "npx wp-env destroy",
 		"test:unit": "phpunit",
-		"test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/subscriptions-engine ./vendor/bin/phpunit --configuration phpunit-integration.xml.dist",
+		"test:integration": "npx wp-env run tests-cli --env-cwd=wp-content/plugins/subscriptions-engine ./vendor/bin/phpunit --configuration phpunit-integration.xml.dist",
 		"phpcs": "phpcs -s -p",
 		"phpcbf": "phpcbf -p"
 	},

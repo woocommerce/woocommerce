@@ -8,5 +8,8 @@
 		"lint:fix:lang:php": "composer run-script phpcbf",
 		"lint:lang:php": "composer run-script phpcs"
 	},
-	"license": "GPL-2.0-or-later"
+	"license": "GPL-2.0-or-later",
+	"devDependencies": {
+		"@wordpress/env": "11.0.1-next.v.20260206T143.0"
+	}
 }
