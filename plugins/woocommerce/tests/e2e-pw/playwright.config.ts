@@ -121,7 +121,7 @@ export default defineConfig( {
 	testDir: `${ TESTS_ROOT_PATH }/tests`,
 	retries: CI ? 1 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
-	workers: 1,
+	// workers: 1,
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	reporter,
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
@@ -154,8 +154,30 @@ export default defineConfig( {
 				'**/tests/paypal/**',
 				/* Blocks specs are run by the blocks-chromium and blocks-legacy-mini-cart projects below. */
 				'**/tests/blocks/**',
+				/* Parallel-safe specs are run by the e2e-parallel-safe project below. */
+				'**/tests/analytics/analytics-access.spec.ts',
+				'**/tests/basic/basic.spec.ts',
+				'**/tests/basic/dashboard-access.spec.ts',
+				'**/tests/js-file-monitor/monitor-js-file-number.spec.ts',
+				'**/tests/marketing/overview.spec.ts',
+				'**/tests/my-account/my-account.spec.ts',
+				'**/tests/user/lost-password.spec.ts',
 			],
 			dependencies: [ 'site setup' ],
+		},
+		{
+			name: 'e2e-parallel-safe',
+			testMatch: [
+				'**/tests/analytics/analytics-access.spec.ts',
+				'**/tests/basic/basic.spec.ts',
+				'**/tests/basic/dashboard-access.spec.ts',
+				'**/tests/js-file-monitor/monitor-js-file-number.spec.ts',
+				'**/tests/marketing/overview.spec.ts',
+				'**/tests/my-account/my-account.spec.ts',
+				'**/tests/user/lost-password.spec.ts',
+			],
+			dependencies: [ 'site setup' ],
+			fullyParallel: true,
 		},
 		{
 			name: 'api',

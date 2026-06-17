@@ -60,6 +60,7 @@
 		"test:api:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=api-hpos-disabled --workers 4",
 		"test:api:object-cache": "pnpm test:e2e:with-env default-object-cache --project=api --workers 4",
 		"test:e2e": "pnpm test:e2e:default --project=e2e",
+		"test:e2e:parallel-safe": "pnpm test:e2e:default --project=e2e-parallel-safe",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
 		"test:e2e:blocks": "pnpm playwright test --config=tests/e2e-pw/playwright.config.ts --project=blocks-chromium",
