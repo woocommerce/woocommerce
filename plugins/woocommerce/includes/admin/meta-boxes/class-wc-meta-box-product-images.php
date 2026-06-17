@@ -31,23 +31,60 @@ class WC_Meta_Box_Product_Images {
 
 		$thepostid      = $post->ID;
 		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product();
-		$all_ids        = $product_object ? $product_object->get_image_ids( 'edit' ) : array();
+		$featured_id    = $product_object ? (int) $product_object->get_image_id( 'edit' ) : 0;
+		$gallery_ids    = $product_object ? $product_object->get_gallery_image_ids( 'edit' ) : array();
 		$rendered_ids   = array();
+		$gallery_ids    = array_filter( array_map( 'absint', $gallery_ids ) );
 
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 
-		// Buffer image tiles so $rendered_ids is fully populated before the wrapper div is emitted.
-		ob_start();
-		if ( ! empty( $all_ids ) ) {
-			foreach ( $all_ids as $attachment_id ) {
-				$img = wp_get_attachment_image( $attachment_id, empty( $rendered_ids ) ? 'medium' : 'thumbnail' );
+		if ( $featured_id ) {
+			$featured_image = wp_get_attachment_image( $featured_id, 'medium' );
 
-				if ( empty( $img ) ) {
+			if ( ! empty( $featured_image ) ) {
+				$rendered_ids[] = $featured_id;
+			}
+		}
+
+		// Render the legacy gallery scaffold first; extension-facing gallery fields remain canonical.
+		ob_start();
+		if ( ! empty( $gallery_ids ) ) {
+			_prime_post_caches( $gallery_ids );
+
+			foreach ( $gallery_ids as $attachment_id ) {
+				$attachment = wp_get_attachment_image( $attachment_id, 'thumbnail' );
+
+				if ( empty( $attachment ) || in_array( (int) $attachment_id, $rendered_ids, true ) ) {
 					continue;
 				}
 
 				$rendered_ids[] = (int) $attachment_id;
-				$is_featured    = ( 1 === count( $rendered_ids ) );
+				?>
+				<li class="image" data-attachment_id="<?php echo esc_attr( (string) $attachment_id ); ?>">
+					<?php echo $attachment; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<ul class="actions">
+						<li>
+							<a href="#" class="delete tips" data-tip="<?php esc_attr_e( 'Remove image', 'woocommerce' ); ?>">
+								<?php esc_html_e( 'Remove image', 'woocommerce' ); ?>
+							</a>
+						</li>
+					</ul>
+				</li>
+				<?php
+			}
+		}
+		$legacy_gallery_items = ob_get_clean();
+
+		// Buffer image tiles so $rendered_ids is fully populated before the wrapper div is emitted.
+		ob_start();
+		if ( ! empty( $rendered_ids ) ) {
+			foreach ( $rendered_ids as $index => $attachment_id ) {
+				$is_featured = ( 0 === $index );
+				$img         = wp_get_attachment_image( $attachment_id, $is_featured ? 'medium' : 'thumbnail' );
+
+				if ( empty( $img ) ) {
+					continue;
+				}
 
 				$modifier = $is_featured ? 'featured' : 'gallery';
 				?>
@@ -77,7 +114,7 @@ class WC_Meta_Box_Product_Images {
 		<div id="wc-product-images__list" class="wc-product-images__list<?php echo ! empty( $rendered_ids ) ? ' wc-product-images__list--has-images' : ''; ?>">
 			<?php echo $image_tiles; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<div id="wc-product-images__add-slot" class="wc-product-images__add-slot wc-product-images__add-slot--<?php echo esc_attr( $slot_modifier ); ?> hide-if-no-js" role="button" tabindex="0" aria-label="<?php esc_attr_e( 'Add product images', 'woocommerce' ); ?>">
-				<span class="wc-product-images__add-label"><?php esc_html_e( 'Add an image', 'woocommerce' ); ?></span>
+				<span class="wc-product-images__add-label"><?php esc_html_e( 'Add images', 'woocommerce' ); ?></span>
 				<?php echo self::get_add_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</div>
 		</div>
@@ -89,8 +126,19 @@ class WC_Meta_Box_Product_Images {
 			</div>
 		</script>
 
+		<div id="product_images_container" class="wc-product-images__legacy-controls" hidden aria-hidden="true">
+			<ul class="product_images">
+				<?php echo $legacy_gallery_items; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</ul>
+			<input type="hidden" id="product_image_gallery" name="product_image_gallery" value="<?php echo esc_attr( implode( ',', array_slice( $rendered_ids, 1 ) ) ); ?>" />
+		</div>
+		<p class="add_product_images wc-product-images__legacy-controls hide-if-no-js" hidden aria-hidden="true">
+			<a href="#" data-choose="<?php esc_attr_e( 'Add images to product gallery', 'woocommerce' ); ?>" data-update="<?php esc_attr_e( 'Add to gallery', 'woocommerce' ); ?>" data-delete="<?php esc_attr_e( 'Remove image', 'woocommerce' ); ?>" data-text="<?php esc_attr_e( 'Remove image', 'woocommerce' ); ?>">
+				<?php esc_html_e( 'Add product gallery images', 'woocommerce' ); ?>
+			</a>
+		</p>
+
 		<input type="hidden" id="wc_product_image_ids" name="wc_product_image_ids" value="<?php echo esc_attr( implode( ',', $rendered_ids ) ); ?>" />
-		<input type="hidden" id="product_image_gallery" name="product_image_gallery" value="<?php echo esc_attr( implode( ',', array_slice( $rendered_ids, 1 ) ) ); ?>" />
 		<div id="wc-product-images__live-region" class="screen-reader-text" aria-live="polite"></div>
 		<?php
 	}
@@ -157,20 +205,20 @@ class WC_Meta_Box_Product_Images {
 		 */
 		$product = new $classname( $post_id );
 
-		if ( isset( $_POST['wc_product_image_ids'] ) ) {
-			// New unified field: first ID is the featured image, remainder are gallery.
-			$raw_ids   = is_scalar( $_POST['wc_product_image_ids'] )
-				? sanitize_text_field( wp_unslash( (string) $_POST['wc_product_image_ids'] ) )
-				: '';
-			$image_ids = '' === $raw_ids ? array() : array_filter( array_map( 'absint', explode( ',', $raw_ids ) ) );
-			$product->set_image_ids( $image_ids );
-		} else {
-			// Legacy field only (e.g. submitted by extensions): update gallery images only, leave featured untouched.
+		if ( isset( $_POST['product_image_gallery'] ) ) {
+			// Legacy gallery field remains canonical. Core handles the featured image via _thumbnail_id.
 			$raw_gallery = isset( $_POST['product_image_gallery'] ) && is_scalar( $_POST['product_image_gallery'] )
 				? sanitize_text_field( wp_unslash( (string) $_POST['product_image_gallery'] ) )
 				: '';
 			$gallery_ids = '' === $raw_gallery ? array() : array_filter( array_map( 'absint', explode( ',', $raw_gallery ) ) );
 			$product->set_gallery_image_ids( $gallery_ids );
+		} else {
+			// Fallback for non-UI callers that submit the unified field only.
+			$raw_ids   = is_scalar( $_POST['wc_product_image_ids'] )
+				? sanitize_text_field( wp_unslash( (string) $_POST['wc_product_image_ids'] ) )
+				: '';
+			$image_ids = '' === $raw_ids ? array() : array_filter( array_map( 'absint', explode( ',', $raw_ids ) ) );
+			$product->set_image_ids( $image_ids );
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 

@@ -109,6 +109,28 @@ class WC_Meta_Box_Product_Images_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should prefer the legacy gallery field when both image fields are posted.
+	 */
+	public function test_save_prefers_legacy_gallery_field_when_both_fields_are_posted(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( 99 );
+		$product->save();
+
+		$saved_product = $this->save_product_images(
+			$product,
+			array(
+				'product-type'          => 'simple',
+				'_thumbnail_id'         => '12',
+				'wc_product_image_ids'  => '12,34,56',
+				'product_image_gallery' => '34,56',
+			)
+		);
+
+		$this->assertEquals( 99, $saved_product->get_image_id( 'edit' ), 'The meta box save handler should leave featured image persistence to WordPress core.' );
+		$this->assertSame( array( 34, 56 ), $saved_product->get_gallery_image_ids( 'edit' ), 'The legacy gallery field should remain the canonical gallery value.' );
+	}
+
+	/**
 	 * Save product images from POST data.
 	 *
 	 * @param WC_Product $product Product to save.

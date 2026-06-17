@@ -157,13 +157,6 @@ class WC_Admin_Meta_Boxes {
 		$current_value = get_user_meta( $user_id, 'meta-box-order_product', true );
 
 		if ( $current_value ) {
-			// Strip stale postimagediv reference from existing user ordering.
-			if ( is_array( $current_value ) && isset( $current_value['side'] ) && is_string( $current_value['side'] ) && false !== strpos( $current_value['side'], 'postimagediv' ) ) {
-				$boxes                 = array_filter( array_map( 'trim', explode( ',', $current_value['side'] ) ) );
-				$boxes                 = array_values( array_diff( $boxes, array( 'postimagediv' ) ) );
-				$current_value['side'] = implode( ',', $boxes );
-				update_user_meta( $user_id, 'meta-box-order_product', $current_value );
-			}
 			return;
 		}
 
@@ -171,7 +164,7 @@ class WC_Admin_Meta_Boxes {
 			$user_id,
 			'meta-box-order_product',
 			array(
-				'side'     => 'submitdiv,woocommerce-product-images,product_catdiv,tagsdiv-product_tag',
+				'side'     => 'submitdiv,postimagediv,woocommerce-product-images,product_catdiv,tagsdiv-product_tag',
 				'normal'   => 'woocommerce-product-data,postcustom,slugdiv,postexcerpt',
 				'advanced' => '',
 			)

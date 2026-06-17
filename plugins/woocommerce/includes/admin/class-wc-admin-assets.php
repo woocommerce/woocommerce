@@ -720,7 +720,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					/* translators: %1$s: maximum file size */
 					'i18n_product_image_tip'                          => sprintf( __( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. The first image will be used as the main product image. Maximum upload file size: %1$s.', 'woocommerce' ), size_format( wp_max_upload_size() ) ),
 					'i18n_add_product_images'                         => __( 'Add product images', 'woocommerce' ),
-					'i18n_add_to_product'                             => __( 'Add to product', 'woocommerce' ),
+					'i18n_add_to_product'                             => __( 'Set product images', 'woocommerce' ),
 					'i18n_remove_product_image'                       => __( 'Remove image', 'woocommerce' ),
 					'i18n_product_image_added'                        => __( 'Image added.', 'woocommerce' ),
 					'i18n_product_images_added'                       => __( 'Images added.', 'woocommerce' ),

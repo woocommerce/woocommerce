@@ -13,7 +13,7 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 async function addImageFromLibrary(
 	page: Page,
 	imageName: string,
-	actionButtonName = 'Add to product'
+	actionButtonName = 'Set product images'
 ) {
 	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
 	await page.getByRole( 'searchbox', { name: 'Search' } ).fill( imageName );
