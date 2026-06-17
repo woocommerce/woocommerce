@@ -160,6 +160,25 @@ class WC_Admin_Attributes {
 	}
 
 	/**
+	 * Build the slug field description shown to users (and served to search engines and
+	 * no-JavaScript clients as the static copy).
+	 *
+	 * States the authoritative byte limit alongside a character estimate tailored to the
+	 * site locale's script, so users on non-Latin sites get a meaningful figure rather
+	 * than a raw byte count they must translate into characters themselves.
+	 *
+	 * @return string
+	 */
+	private static function slug_field_description(): string {
+		return sprintf(
+			/* translators: 1: maximum slug length in bytes, 2: approximate maximum number of characters for the site language. */
+			__( 'Unique slug/reference for the attribute. Limited to %1$d bytes — roughly %2$d characters in your site language; non-ASCII characters use 2–4 bytes each.', 'woocommerce' ),
+			wc_get_attribute_slug_max_byte_length(),
+			wc_get_attribute_slug_character_estimate()
+		);
+	}
+
+	/**
 	 * Output an inline script that shows a live UTF-8 byte count next to the
 	 * slug input and visually warns when the value approaches or exceeds the
 	 * server-side byte limit.
@@ -178,6 +197,17 @@ class WC_Admin_Attributes {
 			// string); skip the counter rather than emit broken inline JavaScript.
 			return;
 		}
+		// Leaner description for JS clients: the live counter below carries the concrete
+		// numbers, so the locale-tailored character estimate becomes redundant noise.
+		$js_description = wp_json_encode(
+			/* translators: %d: maximum slug length in bytes. */
+			sprintf( __( 'Unique slug/reference for the attribute. Non-ASCII characters use 2–4 bytes of the %d-byte limit.', 'woocommerce' ), $max_bytes ),
+			JSON_HEX_TAG | JSON_HEX_AMP
+		);
+		if ( false === $js_description ) {
+			// Keep the server-rendered description if encoding fails.
+			$js_description = 'null';
+		}
 		?>
 		<script type="text/javascript">
 			( function() {
@@ -192,10 +222,16 @@ class WC_Admin_Attributes {
 				}
 				var maxBytes = <?php echo (int) $max_bytes; ?>;
 				var template = <?php echo $template; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode with JSON_HEX_TAG produces JS-safe output. ?>;
+				var jsDescription = <?php echo $js_description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode with JSON_HEX_TAG produces JS-safe output; 'null' fallback is a literal. ?>;
 				var encoder = new TextEncoder();
 				var counter = document.createElement( 'span' );
 				counter.style.display = 'block';
 				counter.style.marginTop = '4px';
+				if ( jsDescription ) {
+					// Swap the verbose server-rendered guidance for the lean note now that
+					// the live counter provides the concrete byte feedback.
+					description.textContent = jsDescription;
+				}
 				description.appendChild( counter );
 				function update() {
 					var bytes = encoder.encode( input.value ).length;
@@ -280,7 +316,7 @@ class WC_Admin_Attributes {
 								</th>
 								<td>
 									<input name="attribute_name" id="attribute_name" type="text" value="<?php echo esc_attr( $att_name ); ?>" maxlength="29" />
-									<p class="description"><?php esc_html_e( 'Unique slug/reference for the attribute. May be up to 29 bytes; non-ASCII characters each count as 2–4 bytes.', 'woocommerce' ); ?></p>
+									<p class="description"><?php echo esc_html( self::slug_field_description() ); ?></p>
 								</td>
 							</tr>
 							<tr class="form-field form-required">
@@ -499,7 +535,7 @@ class WC_Admin_Attributes {
 								<div class="form-field">
 									<label for="attribute_name"><?php esc_html_e( 'Slug', 'woocommerce' ); ?></label>
 									<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="29" />
-									<p class="description"><?php esc_html_e( 'Unique slug/reference for the attribute. May be up to 29 bytes; non-ASCII characters each count as 2–4 bytes.', 'woocommerce' ); ?></p>
+									<p class="description"><?php echo esc_html( self::slug_field_description() ); ?></p>
 								</div>
 
 								<div class="form-field">
