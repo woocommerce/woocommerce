@@ -172,7 +172,12 @@ class WC_Admin_Attributes {
 	private static function slug_byte_counter_script(): void {
 		$max_bytes = 32 - strlen( 'pa_' );
 		/* translators: 1: current byte count, 2: maximum allowed bytes. */
-		$template = wp_json_encode( __( '%1$d / %2$d bytes', 'woocommerce' ) );
+		$template = wp_json_encode( __( '%1$d / %2$d bytes', 'woocommerce' ), JSON_HEX_TAG | JSON_HEX_AMP );
+		if ( false === $template ) {
+			// Encoding the counter template failed (e.g. invalid UTF-8 in the translated
+			// string); skip the counter rather than emit broken inline JavaScript.
+			return;
+		}
 		?>
 		<script type="text/javascript">
 			( function() {
@@ -186,7 +191,7 @@ class WC_Admin_Attributes {
 					return;
 				}
 				var maxBytes = <?php echo (int) $max_bytes; ?>;
-				var template = <?php echo $template; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode is JS-safe. ?>;
+				var template = <?php echo $template; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode with JSON_HEX_TAG produces JS-safe output. ?>;
 				var encoder = new TextEncoder();
 				var counter = document.createElement( 'span' );
 				counter.style.display = 'block';
