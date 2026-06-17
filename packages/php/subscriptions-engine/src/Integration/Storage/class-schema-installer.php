@@ -113,10 +113,7 @@ final class Schema_Installer {
 	public static function uninstall(): void {
 		global $wpdb;
 
-		foreach ( self::get_table_names( $wpdb->prefix ) as $name ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
-			$wpdb->query( "DROP TABLE IF EXISTS {$name}" );
-		}
+		// TODO: Determine what we should do with the tables when uninstalling - WOOSUBS-1718.
 
 		delete_option( self::VERSION_OPTION );
 	}
