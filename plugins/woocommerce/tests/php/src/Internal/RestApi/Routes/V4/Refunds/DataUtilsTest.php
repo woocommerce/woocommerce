@@ -1594,6 +1594,7 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		);
 		$item->save();
 		$order->add_item( $item );
+		$order->set_total( 20.00 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
@@ -1605,7 +1606,7 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$result = $this->data_utils->validate_line_items( array( $line_item ), $order );
 
 		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertEquals( 'invalid_line_item', $result->get_error_code() );
+		$this->assertEquals( 'missing_quantity_or_refund_total', $result->get_error_code() );
 		$this->assertStringContainsString( 'positive integer', $result->get_error_message() );
 
 		$product->delete( true );
@@ -1648,6 +1649,7 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		);
 		$item->save();
 		$order->add_item( $item );
+		$order->set_total( 20.00 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
@@ -1955,6 +1957,9 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		);
 		$item->save();
 		$order->add_item( $item );
+		// A non-zero order total keeps the order from looking fully refunded so the
+		// zero-source-quantity branch is what surfaces.
+		$order->set_total( 10.00 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
@@ -2253,6 +2258,100 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 
 		$product->delete( true );
 		$order->delete( true );
+	}
+
+	/**
+	 * Invoke the protected split_inclusive_by_stored_ratio() via reflection.
+	 *
+	 * @param float $amount Tax-inclusive amount to split.
+	 * @param mixed $item   Order item supplying the stored total/tax ratio.
+	 * @param int   $dp     Price decimal places.
+	 * @return array{subtotal: float, total_tax: float, taxes: array<int, float>}
+	 */
+	private function invoke_split_inclusive( float $amount, $item, int $dp = 2 ): array {
+		$method = ( new \ReflectionClass( DataUtils::class ) )->getMethod( 'split_inclusive_by_stored_ratio' );
+		$method->setAccessible( true );
+		return $method->invoke( $this->data_utils, $amount, $item, $dp );
+	}
+
+	/**
+	 * @testdox split_inclusive_by_stored_ratio rounds per-tax-id amounts and derives the subtotal as the remainder so the invariant holds.
+	 */
+	public function test_split_inclusive_two_rate_rounding_remainder(): void {
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_total( 100.00 );
+		$fee->set_taxes(
+			array(
+				// Two rates: County 1% and State 9%.
+				'total' => array(
+					1 => 1.00,
+					2 => 9.00,
+				),
+			)
+		);
+
+		// Split $33.33 of the $110 tax-inclusive line: forces sub-cent per-id rounding.
+		$result = $this->invoke_split_inclusive( 33.33, $fee );
+
+		$this->assertEqualsWithDelta( 0.30, $result['taxes'][1], 0.0001 );
+		$this->assertEqualsWithDelta( 2.73, $result['taxes'][2], 0.0001 );
+		$this->assertEqualsWithDelta( 3.03, $result['total_tax'], 0.0001 );
+		$this->assertEqualsWithDelta( 30.30, $result['subtotal'], 0.0001 );
+		// Invariant: subtotal + total_tax reconstitutes the requested amount exactly.
+		$this->assertEqualsWithDelta( 33.33, $result['subtotal'] + $result['total_tax'], 0.0001 );
+	}
+
+	/**
+	 * @testdox split_inclusive_by_stored_ratio preserves negative signs for a discount fee with negative tax.
+	 */
+	public function test_split_inclusive_negative_discount_fee(): void {
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_total( -10.00 );
+		$fee->set_taxes(
+			array(
+				'total' => array( 1 => -1.00 ),
+			)
+		);
+
+		// Refund half of the -$11 tax-inclusive discount line.
+		$result = $this->invoke_split_inclusive( -5.50, $fee );
+
+		$this->assertEqualsWithDelta( -0.50, $result['taxes'][1], 0.0001 );
+		$this->assertEqualsWithDelta( -0.50, $result['total_tax'], 0.0001 );
+		$this->assertEqualsWithDelta( -5.00, $result['subtotal'], 0.0001 );
+	}
+
+	/**
+	 * @testdox split_inclusive_by_stored_ratio treats a line with no stored tax as fully net.
+	 */
+	public function test_split_inclusive_zero_tax_line(): void {
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_total( 50.00 );
+
+		$result = $this->invoke_split_inclusive( 25.00, $fee );
+
+		$this->assertSame( array(), $result['taxes'] );
+		$this->assertEqualsWithDelta( 0.0, $result['total_tax'], 0.0001 );
+		$this->assertEqualsWithDelta( 25.00, $result['subtotal'], 0.0001 );
+	}
+
+	/**
+	 * @testdox split_inclusive_by_stored_ratio clamps to net-only when the stored total and tax nearly cancel.
+	 */
+	public function test_split_inclusive_degenerate_ratio_clamps(): void {
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_total( 100.00 );
+		$fee->set_taxes(
+			array(
+				'total' => array( 1 => -99.99 ),
+			)
+		);
+
+		$result = $this->invoke_split_inclusive( 0.01, $fee );
+
+		$this->assertSame( array(), $result['taxes'] );
+		$this->assertEqualsWithDelta( 0.0, $result['total_tax'], 0.0001 );
+		$this->assertEqualsWithDelta( 0.01, $result['subtotal'], 0.0001 );
 	}
 
 	/**

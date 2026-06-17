@@ -410,9 +410,11 @@ class Controller extends AbstractController {
 
 			// Convert line items to internal format. Note: refund_total is tax-inclusive
 			// for both auto-computed values (from compute_line_item_refund_total) and
-			// explicit client values — the converter then extracts the tax portion via
-			// WC_Tax::calc_inclusive_tax. Summing across mixed (auto + explicit) entries
-			// in calculate_refund_amount is therefore well-defined.
+			// explicit client values — the converter then extracts the tax portion by
+			// splitting the line's own stored total/tax ratio via
+			// DataUtils::split_inclusive_by_stored_ratio(), the same method the preview
+			// uses. Summing across mixed (auto + explicit) entries in
+			// calculate_refund_amount is therefore well-defined.
 			$line_item_data   = $this->data_utils->convert_line_items_to_internal_format( $line_items, $order );
 			$calculated_total = ! empty( $line_items ) ? $this->data_utils->calculate_refund_amount( $line_items ) : 0;
 			$refund_amount    = ! empty( $request['amount'] ) ? $request['amount'] : $calculated_total;

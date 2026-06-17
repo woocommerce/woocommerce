@@ -1019,7 +1019,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 400, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'invalid_line_item', $data['code'] );
+		$this->assertEquals( 'duplicate_line_item', $data['code'], 'Create must use the same duplicate_line_item code as the preview path.' );
 		$this->assertStringContainsString( 'only once', $data['message'] );
 	}
 
@@ -1670,7 +1670,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 400, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'invalid_refund_amount', $data['code'] );
+		$this->assertEquals( 'invalid_refund_total', $data['code'], 'Create must use the same invalid_refund_total code as the preview path for a non-positive refund_total.' );
 		$this->assertStringContainsString( 'wrong sign', $data['message'] );
 	}
 
@@ -2269,7 +2269,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 400, $response->get_status(), 'Over-quantity must still be rejected even when refund_total is auto-computed.' );
+		$this->assertEquals( 422, $response->get_status(), 'Over-quantity must still be rejected even when refund_total is auto-computed.' );
+		$this->assertEquals( 'quantity_exceeds_refundable', $response->get_data()['code'], 'Create must use the same quantity_exceeds_refundable code as the preview path.' );
 
 		$product->delete( true );
 	}
@@ -2828,7 +2829,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 400, $response->get_status(), 'Cross-order line_item_id must be rejected, not silently auto-computed.' );
 		$data = $response->get_data();
-		$this->assertEquals( 'invalid_line_item', $data['code'] );
+		$this->assertEquals( 'line_item_not_found', $data['code'], 'Create must use the same line_item_not_found code as the preview path.' );
 
 		$product->delete( true );
 	}
@@ -2962,9 +2963,9 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 		$response2 = $this->server->dispatch( $request2 );
 
-		$this->assertEquals( 400, $response2->get_status() );
+		$this->assertEquals( 422, $response2->get_status(), 'Over-refunding quantity is unprocessable (422), matching the preview path.' );
 		$data2 = $response2->get_data();
-		$this->assertEquals( 'invalid_line_item', $data2['code'] );
+		$this->assertEquals( 'quantity_exceeds_refundable', $data2['code'], 'Create must use the same quantity_exceeds_refundable code as the preview path.' );
 		$this->assertStringContainsString( 'remaining refundable quantity', $data2['message'] );
 
 		$product_a->delete( true );
@@ -3299,7 +3300,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 400, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'invalid_line_item', $data['code'], 'Should fail validation with a specific quantity error, not cascade to invalid_refund_amount.' );
+		$this->assertEquals( 'missing_quantity_or_refund_total', $data['code'], 'Create must use the same missing_quantity_or_refund_total code as the preview path, not cascade to invalid_refund_amount.' );
 		$this->assertStringContainsString( 'positive integer', $data['message'] );
 
 		$product->delete( true );
@@ -3416,5 +3417,694 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->created_refunds[] = $refund->get_id();
 
 		$this->assert_incomplete_meta_data_handled_correctly( $refund );
+	}
+
+	/**
+	 * @testdox Create splits a single-tax partial refund_total into the stored net total and tax, independently of the preview path.
+	 */
+	public function test_refunds_create_partial_amount_single_tax_split_stored(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 10.00 ),
+				'subtotal' => array( $tax_rate_id => 10.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 10.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+
+		$order->set_billing_country( 'US' );
+		$order->set_total( 110.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		// Refund $55 of the $110 tax-inclusive line → $50 net, $5 tax.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'refund_total' => 55.00,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$data                    = $response->get_data();
+		$this->created_refunds[] = $data['id'];
+
+		$this->assertEquals( '55.00', $data['amount'], 'Refund amount must equal the tax-inclusive partial total.' );
+
+		$refund           = wc_get_order( $data['id'] );
+		$refund_items     = $refund->get_items( 'line_item' );
+		$refund_line_item = reset( $refund_items );
+		$refund_taxes     = $refund_line_item->get_taxes();
+
+		$this->assertEquals( -50.00, (float) $refund_line_item->get_total(), 'Stored net total should be half of $100.' );
+		$this->assertEquals( -5.00, (float) $refund_taxes['total'][ $tax_rate_id ], 'Stored tax should be half of $10.' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Create uses an explicit refund_total over quantity for the money split on a multi-quantity line, while storing the requested quantity.
+	 */
+	public function test_refunds_create_partial_amount_multi_quantity_line(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 3,
+				'subtotal' => 30.00,
+				'total'    => 30.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 3.00 ),
+				'subtotal' => array( $tax_rate_id => 3.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 3.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+
+		$order->set_billing_country( 'US' );
+		$order->set_total( 33.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		// Refund half the $33 tax-inclusive line ($16.50) while passing quantity 3:
+		// the money split follows refund_total ($15 net, $1.50 tax), quantity is stored as-is.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'quantity'     => 3,
+						'refund_total' => 16.50,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$data                    = $response->get_data();
+		$this->created_refunds[] = $data['id'];
+
+		$this->assertEquals( '16.50', $data['amount'], 'Refund amount must follow refund_total, not the full quantity total.' );
+
+		$refund           = wc_get_order( $data['id'] );
+		$refund_items     = $refund->get_items( 'line_item' );
+		$refund_line_item = reset( $refund_items );
+		$refund_taxes     = $refund_line_item->get_taxes();
+
+		$this->assertEquals( -15.00, (float) $refund_line_item->get_total(), 'Stored net total should be half of $30.' );
+		$this->assertEquals( -1.50, (float) $refund_taxes['total'][ $tax_rate_id ], 'Stored tax should be half of $3.' );
+		// Refund line items store quantity as a negative, mirroring the negative totals.
+		$this->assertEquals( -3, $refund_line_item->get_quantity(), 'The requested quantity is stored even when refund_total drives the amount.' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Create rounds a partial refund_total split to a zero-decimal currency precision.
+	 */
+	public function test_refunds_create_partial_amount_zero_decimal_currency(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		// Force whole-number currency precision deterministically. update_option on
+		// woocommerce_price_num_decimals does not reliably propagate to
+		// wc_get_price_decimals() within a single request in the test environment.
+		$zero_decimals = static function () {
+			return 0;
+		};
+		add_filter( 'wc_get_price_decimals', $zero_decimals );
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 1000.00 );
+			$product->set_tax_status( 'taxable' );
+			$product->save();
+
+			$order = wc_create_order();
+			$item  = new WC_Order_Item_Product();
+			$item->set_props(
+				array(
+					'product'  => $product,
+					'quantity' => 1,
+					'subtotal' => 1000.00,
+					'total'    => 1000.00,
+				)
+			);
+			$item->set_taxes(
+				array(
+					'total'    => array( $tax_rate_id => 100.00 ),
+					'subtotal' => array( $tax_rate_id => 100.00 ),
+				)
+			);
+			$item->save();
+			$order->add_item( $item );
+
+			$tax_item = new WC_Order_Item_Tax();
+			$tax_item->set_rate( $tax_rate_id );
+			$tax_item->set_tax_total( 100.00 );
+			$tax_item->save();
+			$order->add_item( $tax_item );
+
+			$order->set_billing_country( 'US' );
+			$order->set_total( 1100.00 );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->save();
+			$this->created_orders[] = $order->get_id();
+
+			// Refund 549 of the 1100 tax-inclusive line. The stored ratio gives
+			// 549 * 100/1100 = 49.909..., which rounds to 50 at zero decimals (it would
+			// be 49.91 at two), and the net subtotal becomes 549 - 50 = 499. Asserting
+			// these whole numbers proves the split honours the currency precision.
+			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+			$request->set_body_params(
+				array(
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						array(
+							'line_item_id' => $item->get_id(),
+							'refund_total' => 549,
+						),
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 201, $response->get_status() );
+			$data                    = $response->get_data();
+			$this->created_refunds[] = $data['id'];
+
+			$refund           = wc_get_order( $data['id'] );
+			$refund_items     = $refund->get_items( 'line_item' );
+			$refund_line_item = reset( $refund_items );
+			$refund_taxes     = $refund_line_item->get_taxes();
+
+			$this->assertEquals( -499.0, (float) $refund_line_item->get_total(), 'Net subtotal rounds to a whole number at zero decimals.' );
+			$this->assertEquals( -50.0, (float) $refund_taxes['total'][ $tax_rate_id ], 'Tax rounds to a whole number at zero decimals.' );
+			$this->assertEquals( 549.0, (float) $data['amount'], 'Net + tax must reconstitute the requested amount.' );
+
+			$product->delete( true );
+		} finally {
+			remove_filter( 'wc_get_price_decimals', $zero_decimals );
+		}
+	}
+
+	/**
+	 * @testdox Create absorbs the rounding remainder into the net subtotal when a partial refund_total does not split into clean cents.
+	 */
+	public function test_refunds_create_partial_amount_rounding_remainder(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate'          => '15.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10.00,
+				'total'    => 10.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 1.50 ),
+				'subtotal' => array( $tax_rate_id => 1.50 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 1.50 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+
+		$order->set_billing_country( 'US' );
+		$order->set_total( 11.50 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		// Refund $3.33 of the $11.50 tax-inclusive line. tax = round(3.33 * 1.50 / 11.50, 2) = 0.43,
+		// and the net subtotal absorbs the remainder: 3.33 - 0.43 = 2.90, so subtotal + tax == amount.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'refund_total' => 3.33,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$data                    = $response->get_data();
+		$this->created_refunds[] = $data['id'];
+
+		$refund           = wc_get_order( $data['id'] );
+		$refund_items     = $refund->get_items( 'line_item' );
+		$refund_line_item = reset( $refund_items );
+		$refund_taxes     = $refund_line_item->get_taxes();
+
+		$this->assertEquals( -0.43, (float) $refund_taxes['total'][ $tax_rate_id ], 'Tax rounds to the nearest cent.' );
+		$this->assertEquals( -2.90, (float) $refund_line_item->get_total(), 'Net subtotal absorbs the rounding remainder.' );
+		$this->assertEquals( '3.33', $data['amount'], 'Net + tax must reconstitute the requested amount to the cent.' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Create rejects a partial refund_total that exceeds the remaining refundable amount on a fee line.
+	 */
+	public function test_refunds_create_partial_amount_fee_exceeds_remaining_returns_422(): void {
+		$order = wc_create_order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Handling',
+				'total' => 20.00,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+		$order->set_total( 20.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		// First refund $15 of the $20 fee, leaving $5 remaining.
+		$first_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$first_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $fee->get_id(),
+						'refund_total' => 15.00,
+					),
+				),
+			)
+		);
+		$first_response = $this->server->dispatch( $first_request );
+		$this->assertEquals( 201, $first_response->get_status(), 'First partial fee refund should succeed.' );
+		$this->created_refunds[] = $first_response->get_data()['id'];
+
+		// Second refund of $10 exceeds the $5 remaining on the fee line.
+		$second_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$second_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $fee->get_id(),
+						'refund_total' => 10.00,
+					),
+				),
+			)
+		);
+		$second_response = $this->server->dispatch( $second_request );
+
+		$this->assertEquals( 422, $second_response->get_status() );
+		$this->assertEquals( 'refund_total_exceeds_remaining', $second_response->get_data()['code'] );
+		$this->assertStringContainsString( 'remaining refundable amount', $second_response->get_data()['message'] );
+	}
+
+	/**
+	 * @testdox Create splits a partial refund_total by the stored ratio under a tax-inclusive store, without double-extracting tax.
+	 */
+	public function test_refunds_create_partial_amount_tax_inclusive_store(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 110.00 );
+			$product->set_tax_status( 'taxable' );
+			$product->save();
+
+			$order = wc_create_order();
+			$item  = new WC_Order_Item_Product();
+			$item->set_props(
+				array(
+					'product'  => $product,
+					'quantity' => 1,
+					'subtotal' => 100.00,
+					'total'    => 100.00,
+				)
+			);
+			$item->set_taxes(
+				array(
+					'total'    => array( $tax_rate_id => 10.00 ),
+					'subtotal' => array( $tax_rate_id => 10.00 ),
+				)
+			);
+			$item->save();
+			$order->add_item( $item );
+
+			$tax_item = new WC_Order_Item_Tax();
+			$tax_item->set_rate( $tax_rate_id );
+			$tax_item->set_tax_total( 10.00 );
+			$tax_item->save();
+			$order->add_item( $tax_item );
+
+			$order->set_billing_country( 'US' );
+			$order->set_total( 110.00 );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->save();
+			$this->created_orders[] = $order->get_id();
+
+			// Refund $55 of the $110 tax-inclusive line → $50 net, $5 tax, same split as a tax-exclusive store.
+			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+			$request->set_body_params(
+				array(
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						array(
+							'line_item_id' => $item->get_id(),
+							'refund_total' => 55.00,
+						),
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 201, $response->get_status() );
+			$data                    = $response->get_data();
+			$this->created_refunds[] = $data['id'];
+
+			$this->assertEquals( '55.00', $data['amount'], 'Tax-inclusive store: amount equals the requested tax-inclusive partial.' );
+
+			$refund           = wc_get_order( $data['id'] );
+			$refund_items     = $refund->get_items( 'line_item' );
+			$refund_line_item = reset( $refund_items );
+			$refund_taxes     = $refund_line_item->get_taxes();
+
+			$this->assertEquals( -50.00, (float) $refund_line_item->get_total(), 'Stored net total should be half of $100.' );
+			$this->assertEquals( -5.00, (float) $refund_taxes['total'][ $tax_rate_id ], 'Stored tax should be half of $10, not re-extracted.' );
+
+			$product->delete( true );
+		} finally {
+			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
+		}
+	}
+
+	/**
+	 * @testdox The created refund's per-line split matches build_refund_preview's breakdown for the explicit refund_total form.
+	 *
+	 * Guards the headline guarantee of the partial-amount feature: a previewed
+	 * refund_total matches the created refund to the cent, including the per-tax
+	 * split, not just the grand total.
+	 */
+	public function test_refunds_create_partial_amount_matches_build_refund_preview_breakdown(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 10.00 ),
+				'subtotal' => array( $tax_rate_id => 10.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 10.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+
+		$order->set_billing_country( 'US' );
+		$order->set_total( 110.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		// Partial-amount form: refund $55 of the $110 tax-inclusive line.
+		$line_items = array(
+			array(
+				'line_item_id' => $item->get_id(),
+				'refund_total' => 55.00,
+			),
+		);
+
+		$data_utils = wc_get_container()->get( DataUtils::class );
+		$preview    = $data_utils->build_refund_preview( $order, $line_items );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => $line_items,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$data                    = $response->get_data();
+		$this->created_refunds[] = $data['id'];
+
+		$preview_item = $preview['breakdown']['products']['items'][0];
+
+		// Grand-total parity.
+		$this->assertEquals( $preview['total'], $data['amount'], 'Create amount must match the preview total.' );
+
+		// Per-line split parity: stored refund values are negative, the preview is positive.
+		$refund           = wc_get_order( $data['id'] );
+		$refund_items     = $refund->get_items( 'line_item' );
+		$refund_line_item = reset( $refund_items );
+		$refund_taxes     = $refund_line_item->get_taxes();
+
+		$this->assertEquals(
+			-1 * (float) $preview_item['subtotal'],
+			(float) $refund_line_item->get_total(),
+			'Stored net total must match the previewed subtotal.'
+		);
+		$this->assertEquals(
+			-1 * (float) $preview_item['tax'],
+			(float) $refund_taxes['total'][ $tax_rate_id ],
+			'Stored tax must match the previewed tax.'
+		);
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Two sequential partial-amount refunds that sum to the line total both succeed; a further refund is rejected.
+	 *
+	 * Exercises the rounded remaining-amount boundary in validate_line_items for a
+	 * product line: the second refund hits the exact remaining amount and must be
+	 * accepted, after which the order is fully refunded.
+	 */
+	public function test_refunds_create_partial_amount_product_sequential_to_full(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 10.00 ),
+				'subtotal' => array( $tax_rate_id => 10.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 10.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+
+		$order->set_billing_country( 'US' );
+		$order->set_total( 110.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		$refund_line = function ( float $amount ) use ( $order, $item ) {
+			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+			$request->set_body_params(
+				array(
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						array(
+							'line_item_id' => $item->get_id(),
+							'refund_total' => $amount,
+						),
+					),
+				)
+			);
+			return $this->server->dispatch( $request );
+		};
+
+		// First refund: $40 of the $110 tax-inclusive line.
+		$first = $refund_line( 40.00 );
+		$this->assertEquals( 201, $first->get_status(), 'First partial refund should succeed.' );
+		$this->created_refunds[] = $first->get_data()['id'];
+
+		// Second refund: exactly the $70 remaining — the boundary must be accepted.
+		$second = $refund_line( 70.00 );
+		$this->assertEquals( 201, $second->get_status(), 'Second partial refund at the exact remaining amount should succeed.' );
+		$this->created_refunds[] = $second->get_data()['id'];
+
+		$this->assertEquals(
+			0.0,
+			(float) wc_get_order( $order->get_id() )->get_remaining_refund_amount(),
+			'Order should be fully refunded after both partials.'
+		);
+
+		// A further refund on the now fully-refunded order is rejected.
+		$third = $refund_line( 0.01 );
+		$this->assertEquals( 422, $third->get_status() );
+		$this->assertEquals( 'order_not_refundable', $third->get_data()['code'] );
+
+		$product->delete( true );
 	}
 }
