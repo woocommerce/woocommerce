@@ -49,7 +49,6 @@ declare global {
 			};
 		};
 		wcAdminFeatures: {
-			coupons: boolean;
 			'product-data-views': boolean;
 			'experimental-blocks': boolean;
 			'minified-js': boolean;
