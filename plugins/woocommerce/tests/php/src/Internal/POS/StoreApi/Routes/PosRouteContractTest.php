@@ -142,7 +142,7 @@ class PosRouteContractTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox requires_nonce() honours the cookie-auth seam: true for the web default, false once POS opts out.
+	 * @testdox requires_nonce() honours the cookie-auth seam: true for the web default, false for a non-cookie POS request.
 	 */
 	public function test_requires_nonce_honours_cookie_authentication_seam(): void {
 		$update_request = new WP_REST_Request( 'POST' );
@@ -153,12 +153,38 @@ class PosRouteContractTest extends WC_Unit_Test_Case {
 		);
 		$this->assertFalse(
 			$this->call_requires_nonce( $this->instantiate( CartAddItem::class ), $update_request ),
-			'The POS route opts out via is_cookie_authenticated(), so requires_nonce() must be false.'
+			'A POS request without a validated auth cookie is not a CSRF target, so requires_nonce() must be false.'
 		);
 		$this->assertFalse(
 			$this->call_requires_nonce( $this->instantiate( Checkout::class ), $update_request ),
-			'The POS checkout route opts out via is_cookie_authenticated(), so requires_nonce() must be false.'
+			'A POS checkout request without a validated auth cookie is not a CSRF target, so requires_nonce() must be false.'
 		);
+	}
+
+	/**
+	 * @testdox A genuinely cookie-authenticated POS request still requires a nonce (no CSRF hole).
+	 */
+	public function test_pos_route_requires_nonce_when_request_is_cookie_authenticated(): void {
+		global $wp_rest_auth_cookie;
+		$previous = $wp_rest_auth_cookie;
+
+		// Simulate WordPress having validated an auth cookie for this request,
+		// exactly as core's auth_cookie_valid handler does.
+		$wp_rest_auth_cookie = true;
+		try {
+			$update_request = new WP_REST_Request( 'POST' );
+
+			$this->assertTrue(
+				$this->call_requires_nonce( $this->instantiate( CartAddItem::class ), $update_request ),
+				'A POS request carrying a valid auth cookie is a CSRF target, so the nonce must be required.'
+			);
+			$this->assertTrue(
+				$this->call_requires_nonce( $this->instantiate( Checkout::class ), $update_request ),
+				'A POS checkout request carrying a valid auth cookie is a CSRF target, so the nonce must be required.'
+			);
+		} finally {
+			$wp_rest_auth_cookie = $previous;
+		}
 	}
 
 	/**
