@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
+use Automattic\WooCommerce\Blocks\Utils\Utils;
 
 /**
  * AssetsController class.
@@ -328,7 +329,12 @@ final class AssetsController {
 
 		$src = array();
 		foreach ( $found_dependencies as $handle => $unused ) {
-			$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, $this->get_absolute_url( $wp_scripts->registered[ $handle ]->src ) ) );
+			$script_src = $wp_scripts->registered[ $handle ]->src;
+			if ( ! is_string( $script_src ) ) {
+				// Skip srcless dependencies (e.g. meta-packages), which have no URL to hint.
+				continue;
+			}
+			$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, Utils::get_absolute_script_url( $script_src ) ) );
 		}
 		return $src;
 	}
@@ -355,20 +361,6 @@ final class AssetsController {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Returns an absolute url to relative links for WordPress core scripts.
-	 *
-	 * @param string $src Original src that can be relative.
-	 * @return string Correct full path string.
-	 */
-	private function get_absolute_url( $src ) {
-		$wp_scripts = wp_scripts();
-		if ( ! preg_match( '|^(https?:)?//|', $src ) && ! ( $wp_scripts->content_url && 0 === strpos( $src, $wp_scripts->content_url ) ) ) {
-			$src = $wp_scripts->base_url . $src;
-		}
-		return $src;
 	}
 
 	/**
