@@ -200,7 +200,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		$customer = wc()->customer;
 
 		// Billing address is a required field.
-		$billing  = $request['billing_address'];
+		$billing = $request['billing_address'];
 
 		// If shipping address (optional field) was not provided, set it to the given billing address (required field).
 		$shipping = $request['shipping_address'] ?? $billing;
