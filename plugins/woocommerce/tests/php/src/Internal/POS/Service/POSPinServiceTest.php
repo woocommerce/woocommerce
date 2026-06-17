@@ -179,6 +179,22 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject a record whose iteration count is out of the safe range (DoS guard).
+	 */
+	public function test_verify_pin_rejects_out_of_range_iterations(): void {
+		$this->sut->set_pin( $this->user_id, '4321' );
+		$record = $this->sut->get_public_pin_record( $this->user_id );
+
+		// A corrupted or hostile record could carry a huge iteration count to make PBKDF2 hang.
+		// It must be treated as malformed and rejected before any hashing work is done.
+		$record['iterations'] = POSPinService::MAX_ITERATIONS + 1;
+		$this->assertFalse( $this->sut->verify_pin( '4321', $record ), 'Over-the-cap iterations must be rejected.' );
+
+		$record['iterations'] = 0;
+		$this->assertFalse( $this->sut->verify_pin( '4321', $record ), 'Non-positive iterations must be rejected.' );
+	}
+
+	/**
 	 * @testdox Should return null from get_public_pin_record when no PIN is set.
 	 */
 	public function test_get_public_pin_record_returns_null_when_unset(): void {
@@ -217,18 +233,10 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 		$non_pos_user           = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 		$this->extra_user_ids[] = $non_pos_user;
 
-		// Plant a stale PIN record directly so we don't depend on set_pin's
-		// preset check accepting a non-POS user.
-		update_user_meta(
-			$non_pos_user,
-			POSPinService::PIN_META_KEY,
-			array(
-				'algo'       => POSPinService::ALGO,
-				'iterations' => POSPinService::ITERATIONS,
-				'salt'       => base64_encode( random_bytes( POSPinService::SALT_BYTES ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-				'hash'       => base64_encode( hash_pbkdf2( 'sha256', '1234', random_bytes( POSPinService::SALT_BYTES ), POSPinService::ITERATIONS, POSPinService::HASH_BYTES, true ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-			)
-		);
+		// Plant a *verifiable* stale PIN record (consistent salt/hash) directly, bypassing set_pin's
+		// POS-access check. The record genuinely matches '1234', so this test only passes because the
+		// uniqueness scan is scoped to POS-access users — a non-POS user is invisible to it.
+		$this->plant_pin_meta( $non_pos_user, '1234' );
 
 		$this->assertTrue( $this->sut->set_pin( $this->user_id, '1234' ) );
 	}

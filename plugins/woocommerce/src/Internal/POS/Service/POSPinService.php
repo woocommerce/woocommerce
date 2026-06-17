@@ -25,12 +25,13 @@ use WP_User_Query;
  */
 class POSPinService {
 
-	public const PIN_META_KEY = 'woocommerce_pos_pin';
-	public const ALGO         = 'pbkdf2-sha256';
-	public const ITERATIONS   = 10000;
-	public const SALT_BYTES   = 16;
-	public const HASH_BYTES   = 32;
-	public const PIN_LENGTH   = 4;
+	public const PIN_META_KEY   = 'woocommerce_pos_pin';
+	public const ALGO           = 'pbkdf2-sha256';
+	public const ITERATIONS     = 10000;
+	public const MAX_ITERATIONS = 100000;
+	public const SALT_BYTES     = 16;
+	public const HASH_BYTES     = 32;
+	public const PIN_LENGTH     = 4;
 
 	/**
 	 * Set or replace a user's POS PIN.
@@ -109,7 +110,8 @@ class POSPinService {
 				Capabilities::pos_staff_user_query_args(),
 				array(
 					'fields'  => 'ID',
-					'number'  => -1,
+					// WP_User_Query treats 0 as "no limit" (core WC convention): scan every staff record.
+					'number'  => 0,
 					'exclude' => array( $exclude_user_id ),
 				)
 			)
@@ -199,7 +201,11 @@ class POSPinService {
 		$salt_b64   = (string) ( $record['salt'] ?? '' );
 		$hash_b64   = (string) ( $record['hash'] ?? '' );
 
-		if ( self::ALGO !== $algo || $iterations <= 0 || '' === $salt_b64 || '' === $hash_b64 ) {
+		// The iteration count drives PBKDF2's cost. The record comes from user meta, so a corrupted
+		// or hostile value (e.g. a billion iterations) would make every uniqueness scan hang — bound
+		// it and treat anything out of range as malformed. MAX_ITERATIONS leaves headroom to raise
+		// the cost over time while still verifying historical records.
+		if ( self::ALGO !== $algo || $iterations <= 0 || $iterations > self::MAX_ITERATIONS || '' === $salt_b64 || '' === $hash_b64 ) {
 			return false;
 		}
 
