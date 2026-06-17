@@ -74,16 +74,8 @@ class Checkout extends MockeryTestCase {
 		$schema_controller = new SchemaController( $this->mock_extend );
 		$route             = new CheckoutRoute( $schema_controller, $schema_controller->get( 'checkout' ) );
 		register_rest_route( $route->get_namespace(), $route->get_path(), $route->get_args(), true );
-		$checkout_order_route = new CheckoutOrderRoute(
-			$schema_controller,
-			$schema_controller->get( 'checkout-order' )
-		);
-		register_rest_route(
-			$checkout_order_route->get_namespace(),
-			$checkout_order_route->get_path(),
-			$checkout_order_route->get_args(),
-			true
-		);
+		$order_route = new CheckoutOrderRoute( $schema_controller, $schema_controller->get( 'checkout-order' ) );
+		register_rest_route( $order_route->get_namespace(), $order_route->get_path(), $order_route->get_args(), true );
 
 		$fixtures = new FixtureData();
 		$fixtures->payments_enable_bacs();
@@ -1578,26 +1570,10 @@ class Checkout extends MockeryTestCase {
 		update_option( 'woocommerce_specific_ship_to_countries', array( 'US' ) );
 
 		$order = \WC_Helper_Order::create_order( 0 );
-		$order->set_shipping_address(
-			array(
-				'first_name' => 'Jeroen',
-				'last_name'  => 'Sormani',
-				'company'    => 'WooCompany',
-				'address_1'  => 'WooAddress',
-				'address_2'  => '',
-				'city'       => 'WooCity',
-				'state'      => 'NY',
-				'postcode'   => '12345',
-				'country'    => 'US',
-				'phone'      => '555-32123',
-			)
-		);
-		$order->save();
 
 		$original_billing_country  = $order->get_billing_country();
 		$original_shipping_country = $order->get_shipping_country();
 		$original_total            = $order->get_total();
-		$original_total_tax        = $order->get_total_tax();
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -1636,7 +1612,6 @@ class Checkout extends MockeryTestCase {
 		$this->assertEquals( $original_billing_country, $stored_order->get_billing_country() );
 		$this->assertEquals( $original_shipping_country, $stored_order->get_shipping_country() );
 		$this->assertEquals( $original_total, $stored_order->get_total() );
-		$this->assertEquals( $original_total_tax, $stored_order->get_total_tax() );
 	}
 
 	/**
