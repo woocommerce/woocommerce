@@ -483,4 +483,49 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
 		remove_filter( 'pre_option_' . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, $supply_column_status );
 	}
+
+	/**
+	 * @testdox Should return the four Action Scheduler tables prefixed with the database table prefix.
+	 */
+	public function test_get_action_scheduler_tables_returns_expected_tables(): void {
+		global $wpdb;
+
+		$expected = array(
+			"{$wpdb->prefix}actionscheduler_actions",
+			"{$wpdb->prefix}actionscheduler_claims",
+			"{$wpdb->prefix}actionscheduler_groups",
+			"{$wpdb->prefix}actionscheduler_logs",
+		);
+
+		$this->assertSame(
+			$expected,
+			WC_Install::get_action_scheduler_tables(),
+			'All four Action Scheduler tables should be returned.'
+		);
+	}
+
+	/**
+	 * @testdox Should delete the placeholder image attachment and its meta.
+	 */
+	public function test_delete_placeholder_image_removes_attachment(): void {
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'woocommerce-placeholder',
+				'post_mime_type' => 'image/webp',
+				'post_status'    => 'inherit',
+				'post_type'      => 'attachment',
+			)
+		);
+		update_post_meta( $attachment_id, '_wp_attached_file', 'woocommerce-placeholder.webp' );
+		update_option( 'woocommerce_placeholder_image', $attachment_id );
+
+		WC_Install::delete_placeholder_image();
+
+		$this->assertNull( get_post( $attachment_id ), 'The placeholder attachment post should be deleted.' );
+		$this->assertSame(
+			'',
+			get_post_meta( $attachment_id, '_wp_attached_file', true ),
+			'The placeholder attachment meta should be deleted.'
+		);
+	}
 }

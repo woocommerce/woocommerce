@@ -86,12 +86,30 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Tables.
 	WC_Install::drop_tables();
 
+	/*
+	 * Action Scheduler is a shared library that other active plugins may also use, so its tables are
+	 * kept by default. They are only dropped when the site owner additionally sets the
+	 * WC_REMOVE_ACTION_SCHEDULER constant to true in wp-config.php, confirming that no other plugin
+	 * relies on Action Scheduler (otherwise that plugin would lose its scheduled actions).
+	 */
+	if ( defined( 'WC_REMOVE_ACTION_SCHEDULER' ) && true === WC_REMOVE_ACTION_SCHEDULER ) {
+		foreach ( WC_Install::get_action_scheduler_tables() as $as_table ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->query( "DROP TABLE IF EXISTS {$as_table}" );
+		}
+	}
+
+	// Placeholder image: delete the attachment post, its meta and the file.
+	WC_Install::delete_placeholder_image();
+
 	// Delete options.
 	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce\_%';" );
 	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'widget\_woocommerce\_%';" );
 
-	// Delete usermeta.
-	$wpdb->query( "DELETE FROM $wpdb->usermeta WHERE meta_key LIKE 'woocommerce\_%';" );
+	// Delete usermeta. Covers the woocommerce_, _woocommerce_, wc_ and _wc_ key prefixes used by WooCommerce.
+	$wpdb->query(
+		"DELETE FROM $wpdb->usermeta WHERE meta_key LIKE 'woocommerce\_%' OR meta_key LIKE '\_woocommerce\_%' OR meta_key LIKE 'wc\_%' OR meta_key LIKE '\_wc\_%';"
+	);
 
 	// Delete our data from the post and post meta tables, and remove any additional tables we created.
 	$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation', 'shop_coupon', 'shop_order', 'shop_order_refund' );" );
@@ -103,7 +121,7 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Delete terms if > WP 4.2 (term splitting was added in 4.2).
 	if ( version_compare( $wp_version, '4.2', '>=' ) ) {
 		// Delete term taxonomies.
-		foreach ( array( 'product_cat', 'product_tag', 'product_shipping_class', 'product_type' ) as $_taxonomy ) {
+		foreach ( array( 'product_cat', 'product_tag', 'product_shipping_class', 'product_type', 'product_visibility' ) as $_taxonomy ) {
 			$wpdb->delete(
 				$wpdb->term_taxonomy,
 				array(

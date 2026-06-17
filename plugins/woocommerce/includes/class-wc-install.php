@@ -2212,6 +2212,28 @@ $email_unsubscribes_table_schema;
 	}
 
 	/**
+	 * Get the list of Action Scheduler database tables.
+	 *
+	 * These are intentionally kept out of get_tables(): Action Scheduler is a shared library that
+	 * may be bundled by other active plugins, so its tables are only dropped during a full uninstall
+	 * when the site owner explicitly opts in by setting the WC_REMOVE_ACTION_SCHEDULER constant.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return string[] Action Scheduler table names.
+	 */
+	public static function get_action_scheduler_tables() {
+		global $wpdb;
+
+		return array(
+			"{$wpdb->prefix}actionscheduler_actions",
+			"{$wpdb->prefix}actionscheduler_claims",
+			"{$wpdb->prefix}actionscheduler_groups",
+			"{$wpdb->prefix}actionscheduler_logs",
+		);
+	}
+
+	/**
 	 * Create roles and capabilities.
 	 *
 	 * @return void
@@ -2474,6 +2496,25 @@ $email_unsubscribes_table_schema;
 		// Generate the metadata for the attachment, and update the database record.
 		$attach_data = wp_generate_attachment_metadata( $attach_id, $filename );
 		wp_update_attachment_metadata( $attach_id, $attach_data );
+	}
+
+	/**
+	 * Delete the placeholder image created by create_placeholder_image().
+	 *
+	 * Removes the attachment post, its metadata and the underlying file. The
+	 * woocommerce_placeholder_image option itself is removed along with the rest of the
+	 * woocommerce_ options during uninstall.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return void
+	 */
+	public static function delete_placeholder_image() {
+		$placeholder_image = absint( get_option( 'woocommerce_placeholder_image', 0 ) );
+
+		if ( $placeholder_image ) {
+			wp_delete_attachment( $placeholder_image, true );
+		}
 	}
 
 	/**
