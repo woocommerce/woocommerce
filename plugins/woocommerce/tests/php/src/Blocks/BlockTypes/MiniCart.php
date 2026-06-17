@@ -380,6 +380,60 @@ class MiniCart extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the product count badge includes the configured product count color in its inline style.
+	 *
+	 * @return void
+	 */
+	public function test_badge_contains_configured_product_count_color() {
+		$color = '#ff0000';
+
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountColor":{"color":"' . $color . '"}} /-->' );
+		$output = render_block( $block[0] );
+
+		$processor = new \WP_HTML_Tag_Processor( $output );
+
+		$badge_found = false;
+		while ( $processor->next_tag(
+			array(
+				'tag_name'   => 'span',
+				'class_name' => 'wc-block-mini-cart__badge',
+			)
+		) ) {
+			$badge_found = true;
+			$style       = $processor->get_attribute( 'style' );
+			$this->assertStringContainsString( 'background:' . $color, $style, 'Badge inline style should apply the configured color to the background property.' );
+		}
+
+		$this->assertTrue( $badge_found, 'Badge element should be present in the rendered output.' );
+	}
+
+	/**
+	 * Test that the product count badge does not include a background color when no color is configured.
+	 *
+	 * @return void
+	 */
+	public function test_badge_has_no_background_color_when_not_configured() {
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		$output = render_block( $block[0] );
+
+		$processor = new \WP_HTML_Tag_Processor( $output );
+
+		$badge_found = false;
+		while ( $processor->next_tag(
+			array(
+				'tag_name'   => 'span',
+				'class_name' => 'wc-block-mini-cart__badge',
+			)
+		) ) {
+			$badge_found = true;
+			$style       = $processor->get_attribute( 'style' );
+			$this->assertStringNotContainsString( 'background:', $style, 'Badge inline style should not contain a background color when none is configured.' );
+		}
+
+		$this->assertTrue( $badge_found, 'Badge element should be present in the rendered output.' );
+	}
+
+	/**
 	 * Test that mini-cart renders for logged-out users when site-wide coming soon mode is enabled (not store pages only).
 	 *
 	 * @return void

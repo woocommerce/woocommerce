@@ -27,11 +27,11 @@ class JsonFileFeed implements FeedInterface {
 	public const UPLOAD_DIR = 'product-feeds';
 
 	/**
-	 * Indicates if there are previous entries in the feed.
+	 * The number of entries added to the feed.
 	 *
-	 * @var bool
+	 * @var int
 	 */
-	private $has_entries = false;
+	private $entry_count = 0;
 
 	/**
 	 * The base name of the feed file.
@@ -83,6 +83,13 @@ class JsonFileFeed implements FeedInterface {
 	private $is_temp_filepath = false;
 
 	/**
+	 * Cached upload directory details (path and URL), resolved once per feed instance.
+	 *
+	 * @var array|null
+	 */
+	private $prepared_upload_dir = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $base_name The base name of the feed file.
@@ -98,6 +105,10 @@ class JsonFileFeed implements FeedInterface {
 	 * @throws Exception If the feed directory cannot be created.
 	 */
 	public function start(): void {
+		$this->entry_count    = 0;
+		$this->file_completed = false;
+		$this->file_url       = null;
+
 		/**
 		 * Allows the current time to be overridden before a feed is stored.
 		 *
@@ -154,16 +165,17 @@ class JsonFileFeed implements FeedInterface {
 			return;
 		}
 
-		if ( ! $this->has_entries ) {
-			$this->has_entries = true;
-		} else {
+		$json = wp_json_encode( $entry );
+		if ( false === $json ) {
+			return;
+		}
+
+		if ( $this->entry_count > 0 ) {
 			fwrite( $this->file_handle, ',' );
 		}
 
-		$json = wp_json_encode( $entry );
-		if ( false !== $json ) {
-			fwrite( $this->file_handle, $json );
-		}
+		fwrite( $this->file_handle, $json );
+		++$this->entry_count;
 	}
 
 	/**
@@ -182,6 +194,13 @@ class JsonFileFeed implements FeedInterface {
 
 		// Indicate that we have a complete file.
 		$this->file_completed = true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function get_entry_count(): int {
+		return $this->entry_count;
 	}
 
 	/**
@@ -250,18 +269,22 @@ class JsonFileFeed implements FeedInterface {
 	 * @throws Exception If the upload directory cannot be created.
 	 */
 	private function get_upload_dir(): array {
-		// Only generate everything once.
-		static $prepared;
-		if ( isset( $prepared ) ) {
-			return $prepared;
+		// Resolve once per feed instance.
+		if ( null !== $this->prepared_upload_dir ) {
+			return $this->prepared_upload_dir;
 		}
 
 		$upload_dir     = wp_upload_dir( null, true );
 		$directory_path = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . self::UPLOAD_DIR . DIRECTORY_SEPARATOR;
 
-		// Try to create the directory if it does not exist.
+		// Create the directory if it does not exist, allowing file access so the generated feed
+		// files can be served by URL while directory listing stays disabled. If the directory
+		// already exists, refresh its .htaccess in place so installs created before file access
+		// was enabled also serve feeds correctly.
 		if ( ! is_dir( $directory_path ) ) {
-			FilesystemUtil::mkdir_p_not_indexable( $directory_path );
+			FilesystemUtil::mkdir_p_not_indexable( $directory_path, true );
+		} else {
+			$this->ensure_feed_dir_file_access( $directory_path );
 		}
 
 		// `mkdir_p_not_indexable()` returns `void`, we have to check again.
@@ -280,10 +303,61 @@ class JsonFileFeed implements FeedInterface {
 		$directory_url = $upload_dir['baseurl'] . '/' . self::UPLOAD_DIR . '/';
 
 		// Follow the format, returned by `wp_upload_dir()`.
-		$prepared = array(
+		$this->prepared_upload_dir = array(
 			'path' => $directory_path,
 			'url'  => $directory_url,
 		);
-		return $prepared;
+		return $this->prepared_upload_dir;
+	}
+
+	/**
+	 * Upgrades a legacy `deny from all` .htaccess in an existing feed directory to allow file access.
+	 *
+	 * Installs created before file access was enabled have a `deny from all` .htaccess here, which
+	 * blocks feed downloads. This upgrades only that known legacy directive, in place. Anything else
+	 * — an already-correct directive, custom rules a site or host added, a file we cannot read, or a
+	 * missing file — is left untouched. (The directory's initial .htaccess is written when the
+	 * directory is first created, by `mkdir_p_not_indexable()`.)
+	 *
+	 * Native file functions are used here (like the feed writes elsewhere in this class) rather
+	 * than WP_Filesystem: the directory is local, and routing through a possibly FTP/SSH-backed
+	 * filesystem could fail to initialize and leave the old `deny from all` in place even though
+	 * the feed file itself was written natively. A failure is ignored (and logged) so it can never
+	 * interrupt feed generation.
+	 *
+	 * @param string $directory_path The feed directory path (trailing-slashed).
+	 * @return void
+	 */
+	private function ensure_feed_dir_file_access( string $directory_path ): void {
+		$htaccess_path = $directory_path . '.htaccess';
+
+		// Only act on an existing file. A missing .htaccess does not block downloads, so there is
+		// nothing to fix — and we should not create a file the directory did not already have.
+		if ( ! is_file( $htaccess_path ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		$current_content = @file_get_contents( $htaccess_path );
+
+		// Upgrade only the known legacy `deny from all` directive. Leave anything else — already
+		// correct, custom rules, or a file we cannot read — untouched, never clobbering content
+		// we did not write.
+		if ( false === $current_content || FilesystemUtil::HTACCESS_DENY_ALL !== trim( $current_content ) ) {
+			return;
+		}
+
+		// Best effort: a failure must never interrupt feed generation, but log it — otherwise the
+		// feed would silently stay 403 behind the stale rule.
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		if ( false === @file_put_contents( $htaccess_path, FilesystemUtil::HTACCESS_ALLOW_FILE_ACCESS ) ) {
+			wc_get_logger()->warning(
+				'Could not update the product feed .htaccess to allow file access; generated feeds may remain inaccessible.',
+				array(
+					'source' => 'product-feed',
+					'path'   => $htaccess_path,
+				)
+			);
+		}
 	}
 }

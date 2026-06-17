@@ -412,8 +412,6 @@ class MiniCart extends AbstractBlock {
 			return;
 		}
 
-		$site_url = site_url() ?? wp_guess_url();
-
 		if ( Utils::wp_version_compare( '6.3', '>=' ) ) {
 			$script_before = $wp_scripts->get_inline_script_data( $script->handle, 'before' );
 			$script_after  = $wp_scripts->get_inline_script_data( $script->handle, 'after' );
@@ -423,7 +421,7 @@ class MiniCart extends AbstractBlock {
 		}
 
 		$this->scripts_to_lazy_load[ $script->handle ] = array(
-			'src'          => preg_match( '|^(https?:)?//|', $script->src ) ? $script->src : $site_url . $script->src,
+			'src'          => Utils::get_absolute_script_url( $script->src ),
 			'version'      => $script->ver,
 			'before'       => $script_before,
 			'after'        => $script_after,
@@ -519,8 +517,8 @@ class MiniCart extends AbstractBlock {
 		if ( $cart ) {
 			$classes_styles                   = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$icon_color                       = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-			$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
-			$styles                           = $product_count_color ? 'background:' . $product_count_color : '';
+			$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
+			$styles                           = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
 			$icon                             = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
 			$product_count_visibility         = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
 			$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
@@ -567,6 +565,7 @@ class MiniCart extends AbstractBlock {
 							? sprintf( $button_aria_label_template, $state['totalItemsInCart'] )
 							: sprintf( $button_aria_label_template, $state['totalItemsInCart'], $state['formattedSubtotal'] );
 					},
+					'productCountColor'  => $product_count_color,
 				)
 			);
 
@@ -637,7 +636,7 @@ class MiniCart extends AbstractBlock {
 						<?php endif; ?>
 					</span>
 					<?php if ( $cart_always_shows_price ) : ?>
-						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
+						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" translate="no" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
 						</span>
 						<?php if ( ! empty( $this->tax_label ) ) : ?>
 							<small
@@ -820,8 +819,8 @@ class MiniCart extends AbstractBlock {
 		$wrapper_styles  = $classes_styles['styles'];
 
 		$icon_color          = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-		$product_count_color = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
-		$styles              = $product_count_color ? 'background:' . $product_count_color : '';
+		$product_count_color = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
+		$styles              = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
 		$icon                = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
 
 		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';

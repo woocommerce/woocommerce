@@ -73,6 +73,12 @@
 			"@woocommerce/blocks/*": [
 				"assets/js/blocks/*"
 			],
+			"@woocommerce/blocks-test-utils": [
+				"tests/utils"
+			],
+			"@woocommerce/blocks-test-utils/*": [
+				"tests/utils/*"
+			],
 			"@woocommerce/editor-components/*": [
 				"assets/js/editor-components/*"
 			],
@@ -124,6 +130,9 @@
 			"@woocommerce/stores/woocommerce/products": [
 				"assets/js/base/stores/woocommerce/products"
 			],
+			"@woocommerce/stores/woocommerce/shopper-lists": [
+				"assets/js/base/stores/woocommerce/shopper-lists"
+			],
 			"@woocommerce/type-defs/*": [
 				"assets/js/types/type-defs/*"
 			],
@@ -137,13 +146,7 @@
 				"assets/js/utils"
 			],
 			"@woocommerce/e2e-utils": [
-				"tests/e2e/utils"
-			],
-			"@wordpress/interactivity": [
-				"node_modules/@wordpress/interactivity/src/index.ts"
-			],
-			"@wordpress/interactivity-router": [
-				"node_modules/@wordpress/interactivity-router/src/index.ts"
+				"../../tests/e2e-pw/utils/blocks"
 			],
 			"@woocommerce/test-utils/msw": [
 				"tests/js/config/msw-setup"

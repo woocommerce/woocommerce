@@ -1,0 +1,963 @@
+---
+sidebar_position: 16
+sidebar_label: 'Reports'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Reports
+
+The reports API allows you to view all types of reports available.
+
+## List all reports
+
+This API lets you retrieve and view a simple list of available reports.
+
+```http
+GET /wp-json/wc/v3/reports
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v3/reports \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get( 'reports' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('reports')); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("reports").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("reports").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+	{
+		"slug": "sales",
+		"description": "List of sales reports.",
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports/sales"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			]
+		}
+	},
+	{
+		"slug": "top_sellers",
+		"description": "List of top sellers products.",
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports/top_sellers"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			]
+		}
+	},
+	{
+		"slug": "orders/totals",
+		"description": "Orders totals.",
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports/orders/totals"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			]
+		}
+	},
+	{
+		"slug": "products/totals",
+		"description": "Products totals.",
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports/products/totals"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			]
+		}
+	},
+	{
+		"slug": "customers/totals",
+		"description": "Customers totals.",
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports/customers/totals"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			]
+		}
+	},
+	{
+		"slug": "coupons/totals",
+		"description": "Coupons totals.",
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports/coupons/totals"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			]
+		}
+	},
+	{
+		"slug": "reviews/totals",
+		"description": "Reviews totals.",
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports/reviews/totals"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			]
+		}
+	},
+	{
+		"slug": "categories/totals",
+		"description": "Categories totals.",
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports/categories/totals"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			]
+		}
+	},
+	{
+		"slug": "tags/totals",
+		"description": "Tags totals.",
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports/tags/totals"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			]
+		}
+	},
+	{
+		"slug": "attributes/totals",
+		"description": "Attributes totals.",
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports/attributes/totals"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			]
+		}
+	}
+]
+```
+
+  </TabItem>
+</Tabs>
+
+## Retrieve sales report
+
+This API lets you retrieve and view a sales report.
+
+```http
+GET /wp-json/wc/v3/reports/sales
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v3/reports/sales?date_min=2016-05-03&date_max=2016-05-04 \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get( 'reports/sales', {
+	date_min: '2016-05-03',
+	date_max: '2016-05-04',
+} )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+$query = [
+    'date_min' => '2016-05-03',
+    'date_max' => '2016-05-04'
+];
+
+print_r($woocommerce->get('reports/sales', $query));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("reports/sales?date_min=2016-05-03&date_max=2016-05-04").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+query = {
+  date_min: "2016-05-03",
+  date_max: "2016-05-04"
+}
+
+woocommerce.get("reports/sales", query).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+	{
+		"total_sales": "14.00",
+		"net_sales": "4.00",
+		"average_sales": "2.00",
+		"total_orders": 3,
+		"total_items": 6,
+		"total_tax": "0.00",
+		"total_shipping": "10.00",
+		"total_refunds": 10,
+		"total_discount": "0.00",
+		"totals_grouped_by": "day",
+		"totals": {
+			"2016-05-03": {
+				"sales": "14.00",
+				"orders": 3,
+				"items": 6,
+				"tax": "0.00",
+				"shipping": "10.00",
+				"discount": "0.00",
+				"refunds": "10.00",
+				"customers": 0
+			},
+			"2016-05-04": {
+				"sales": "0.00",
+				"orders": 0,
+				"items": 0,
+				"tax": "0.00",
+				"shipping": "0.00",
+				"discount": "0.00",
+				"refunds": "0.00",
+				"customers": 0
+			}
+		},
+		"total_customers": 0,
+		"_links": {
+			"about": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			]
+		}
+	}
+]
+```
+
+  </TabItem>
+</Tabs>
+
+:::note Per-period `refunds` vs `total_refunds`
+Per-period `refunds` and the top-level `total_refunds` come from different queries and will not always agree. Per-period `refunds` sum each refund record by its own date inside the report range. `total_refunds` instead counts the parent order's full total for any refunded-status order that has *any* refund record falling in the range. When an order's refunds straddle the range boundary (e.g. a partial refund last month and another this month on the same order that ultimately becomes refunded), the two values can diverge. For per-day net sales, prefer `sales - refunds` per bucket.
+:::
+
+#### Sales report properties
+
+| Attribute           | Type    | Description                                                           |
+| ------------------- | ------- | --------------------------------------------------------------------- |
+| `total_sales`       | string  | Gross sales in the period. `READ-ONLY`  |
+| `net_sales`         | string  | Net sales in the period. `READ-ONLY`    |
+| `average_sales`     | string  | Average net daily sales. `READ-ONLY`    |
+| `total_orders`      | integer | Total of orders placed. `READ-ONLY`     |
+| `total_items`       | integer | Total of items purchased. `READ-ONLY`   |
+| `total_tax`         | string  | Total charged for taxes. `READ-ONLY`    |
+| `total_shipping`    | string  | Total charged for shipping. `READ-ONLY` |
+| `total_refunds`     | integer | Total of refunded orders. `READ-ONLY`   |
+| `total_discount`    | integer | Total of coupons used. `READ-ONLY`      |
+| `totals_grouped_by` | string  | Group type. `READ-ONLY`                 |
+| `totals`            | array   | Totals. `READ-ONLY`                     |
+
+#### Available parameters
+
+| Parameter  | Type   | Description                                                                                                       |
+| ---------- | ------ | ----------------------------------------------------------------------------------------------------------------- |
+| `context`  | string | Scope under which the request is made; determines fields present in response. Default is `view`. Options: `view`. |
+| `period`   | string | Report period. Default is today's date. Options: `week`, `month`, `last_month` and `year`                         |
+| `date_min` | string | Return sales for a specific start date, the date need to be in the YYYY-MM-DD format.                             |
+| `date_max` | string | Return sales for a specific end date, the date need to be in the YYYY-MM-DD format.                               |
+
+## Retrieve top sellers report
+
+This API lets you retrieve and view a list of top sellers report.
+
+```http
+GET /wp-json/wc/v3/reports/top_sellers
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v3/reports/top_sellers?period=last_month \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get( 'reports/top_sellers', {
+	period: 'last_month',
+} )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+$query = [
+    'period' => 'last_month'
+];
+
+print_r($woocommerce->get('reports/top_sellers', $query));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("reports/top_sellers?period=last_month").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+query = {
+  period: "last_month"
+}
+
+woocommerce.get("reports/top_sellers", query).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+	{
+		"title": "Happy Ninja",
+		"product_id": 37,
+		"quantity": 1,
+		"_links": {
+			"about": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			],
+			"product": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/37"
+				}
+			]
+		}
+	},
+	{
+		"title": "Woo Album #4",
+		"product_id": 96,
+		"quantity": 1,
+		"_links": {
+			"about": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			],
+			"product": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/96"
+				}
+			]
+		}
+	}
+]
+```
+
+  </TabItem>
+</Tabs>
+
+#### Top sellers report properties
+
+| Attribute    | Type    | Description                                                          |
+| ------------ | ------- | -------------------------------------------------------------------- |
+| `title`      | string  | Product title. `READ-ONLY`             |
+| `product_id` | integer | Product ID. `READ-ONLY`                |
+| `quantity`   | integer | Total number of purchases. `READ-ONLY` |
+
+#### Available parameters
+
+| Parameter  | Type   | Description                                                                                                       |
+| ---------- | ------ | ----------------------------------------------------------------------------------------------------------------- |
+| `context`  | string | Scope under which the request is made; determines fields present in response. Default is `view`. Options: `view`. |
+| `period`   | string | Report period. Default is `week`. Options: `week`, `month`, `last_month` and `year`                               |
+| `date_min` | string | Return sales for a specific start date, the date need to be in the YYYY-MM-DD format.                             |
+| `date_max` | string | Return sales for a specific end date, the date need to be in the YYYY-MM-DD format.                               |
+
+## Retrieve coupons totals
+
+This API lets you retrieve and view coupons totals report.
+
+```http
+GET /wp-json/wc/v3/reports/coupons/totals
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v3/reports/coupons/totals \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get( 'reports/coupons/totals' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+print_r($woocommerce->get('reports/coupons/totals'));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("reports/coupons/totals").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("reports/coupons/totals").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+	{
+		"slug": "percent",
+		"name": "Percentage discount",
+		"total": 2
+	},
+	{
+		"slug": "fixed_cart",
+		"name": "Fixed cart discount",
+		"total": 1
+	},
+	{
+		"slug": "fixed_product",
+		"name": "Fixed product discount",
+		"total": 1
+	}
+]
+```
+
+  </TabItem>
+</Tabs>
+
+#### Coupons totals properties
+
+| Attribute | Type   | Description                                                                            |
+| --------- | ------ | -------------------------------------------------------------------------------------- |
+| `slug`    | string | An alphanumeric identifier for the resource. `READ-ONLY` |
+| `name`    | string | Coupon type name. `READ-ONLY`                            |
+| `total`   | string | Amount of coupons. `READ-ONLY`                           |
+
+## Retrieve customers totals
+
+This API lets you retrieve and view customers totals report.
+
+```http
+GET /wp-json/wc/v3/reports/customers/totals
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v3/reports/customers/totals \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get( 'reports/customers/totals' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+print_r($woocommerce->get('reports/customers/totals'));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("reports/customers/totals").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("reports/customers/totals").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+	{
+		"slug": "paying",
+		"name": "Paying customer",
+		"total": 2
+	},
+	{
+		"slug": "non_paying",
+		"name": "Non-paying customer",
+		"total": 1
+	}
+]
+```
+
+  </TabItem>
+</Tabs>
+
+#### Customers totals properties
+
+| Attribute | Type   | Description                                                                            |
+| --------- | ------ | -------------------------------------------------------------------------------------- |
+| `slug`    | string | An alphanumeric identifier for the resource. `READ-ONLY` |
+| `name`    | string | Customer type name. `READ-ONLY`                          |
+| `total`   | string | Amount of customers. `READ-ONLY`                         |
+
+## Retrieve orders totals
+
+This API lets you retrieve and view orders totals report.
+
+```http
+GET /wp-json/wc/v3/reports/orders/totals
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v3/reports/orders/totals \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get( 'reports/orders/totals' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+print_r($woocommerce->get('reports/orders/totals'));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("reports/orders/totals").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("reports/orders/totals").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+	{
+		"slug": "pending",
+		"name": "Pending payment",
+		"total": 7
+	},
+	{
+		"slug": "processing",
+		"name": "Processing",
+		"total": 2
+	},
+	{
+		"slug": "on-hold",
+		"name": "On hold",
+		"total": 1
+	},
+	{
+		"slug": "completed",
+		"name": "Completed",
+		"total": 3
+	},
+	{
+		"slug": "cancelled",
+		"name": "Cancelled",
+		"total": 0
+	},
+	{
+		"slug": "refunded",
+		"name": "Refunded",
+		"total": 0
+	},
+	{
+		"slug": "failed",
+		"name": "Failed",
+		"total": 0
+	}
+]
+```
+
+  </TabItem>
+</Tabs>
+
+#### Orders totals properties
+
+| Attribute | Type   | Description                                                                            |
+| --------- | ------ | -------------------------------------------------------------------------------------- |
+| `slug`    | string | An alphanumeric identifier for the resource. `READ-ONLY` |
+| `name`    | string | Orders status name. `READ-ONLY`                          |
+| `total`   | string | Amount of orders. `READ-ONLY`                            |
+
+## Retrieve products totals
+
+This API lets you retrieve and view products totals report.
+
+```http
+GET /wp-json/wc/v3/reports/products/totals
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v3/reports/products/totals \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get( 'reports/products/totals' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+print_r($woocommerce->get('reports/products/totals'));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("reports/products/totals").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("reports/products/totals").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+	{
+		"slug": "external",
+		"name": "External/Affiliate product",
+		"total": 1
+	},
+	{
+		"slug": "grouped",
+		"name": "Grouped product",
+		"total": 1
+	},
+	{
+		"slug": "simple",
+		"name": "Simple product",
+		"total": 21
+	},
+	{
+		"slug": "variable",
+		"name": "Variable product",
+		"total": 3
+	}
+]
+```
+
+  </TabItem>
+</Tabs>
+
+#### Products totals properties
+
+| Attribute | Type   | Description                                                                            |
+| --------- | ------ | -------------------------------------------------------------------------------------- |
+| `slug`    | string | An alphanumeric identifier for the resource. `READ-ONLY` |
+| `name`    | string | Product type name. `READ-ONLY`                           |
+| `total`   | string | Amount of products. `READ-ONLY`                          |
+
+## Retrieve reviews totals
+
+This API lets you retrieve and view reviews totals report.
+
+```http
+GET /wp-json/wc/v3/reports/reviews/totals
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v3/reports/reviews/totals \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get( 'reports/reviews/totals' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+print_r($woocommerce->get('reports/reviews/totals'));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("reports/reviews/totals").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("reports/reviews/totals").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+	{
+		"slug": "rated_1_out_of_5",
+		"name": "Rated 1 out of 5",
+		"total": 1
+	},
+	{
+		"slug": "rated_2_out_of_5",
+		"name": "Rated 2 out of 5",
+		"total": 0
+	},
+	{
+		"slug": "rated_3_out_of_5",
+		"name": "Rated 3 out of 5",
+		"total": 3
+	},
+	{
+		"slug": "rated_4_out_of_5",
+		"name": "Rated 4 out of 5",
+		"total": 0
+	},
+	{
+		"slug": "rated_5_out_of_5",
+		"name": "Rated 5 out of 5",
+		"total": 4
+	}
+]
+```
+
+  </TabItem>
+</Tabs>
+
+#### Reviews totals properties
+
+| Attribute | Type   | Description                                                                            |
+| --------- | ------ | -------------------------------------------------------------------------------------- |
+| `slug`    | string | An alphanumeric identifier for the resource. `READ-ONLY` |
+| `name`    | string | Review type name. `READ-ONLY`                            |
+| `total`   | string | Amount of reviews. `READ-ONLY`                           |

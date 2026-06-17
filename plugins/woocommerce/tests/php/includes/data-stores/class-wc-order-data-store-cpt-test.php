@@ -69,16 +69,16 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			)
 		)[0];
 
-		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order->get_id();
-		$cached_refunds   = wp_cache_get( $refund_cache_key, 'orders' );
+		$refund_cache_key  = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $order->get_id();
+		$cached_refund_ids = wp_cache_get( $refund_cache_key, 'orders' );
 
-		$this->assertEquals( $cached_refunds[0]->get_id(), $fetched_order->get_refunds()[0]->get_id() );
+		$this->assertEquals( $cached_refund_ids[0], $fetched_order->get_refunds()[0]->get_id() );
 
 		$refund->delete( true );
 
 		// Cache should be cleared now.
-		$cached_refunds = wp_cache_get( $refund_cache_key, 'orders' );
-		$this->assertEquals( false, $cached_refunds );
+		$cached_refund_ids = wp_cache_get( $refund_cache_key, 'orders' );
+		$this->assertEquals( false, $cached_refund_ids );
 	}
 
 	/**
@@ -301,6 +301,161 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order = wc_get_order( $order_id );
 		$this->assertTrue( $order->untrash(), 'The order was restored from the trash.' );
 		$this->assertEquals( $original_status, $order->get_status(), 'The original order status is restored following untrash.' );
+	}
+
+	/**
+	 * @testdox Restoring a CPT order from trash does not re-fire transactional email dispatch, but still fires the status transition actions.
+	 */
+	public function test_untrash_suspends_email_dispatch_but_keeps_status_actions(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$order->delete();
+		$this->assertEquals( OrderStatus::TRASH, $order->get_status(), 'The order was successfully trashed.' );
+
+		$status_action_count       = 0;
+		$status_notification_count = 0;
+		$status_action             = function ( $id ) use ( $order_id, &$status_action_count ) {
+			if ( $order_id === $id ) {
+				++$status_action_count;
+			}
+		};
+		$notification_action       = function ( $id ) use ( $order_id, &$status_notification_count ) {
+			if ( $order_id === $id ) {
+				++$status_notification_count;
+			}
+		};
+
+		add_action( 'woocommerce_order_status_completed', $status_action );
+		add_action( 'woocommerce_order_status_completed_notification', $notification_action );
+
+		try {
+			$order = wc_get_order( $order_id );
+			$this->assertTrue( $order->untrash(), 'The order was restored from the trash.' );
+		} finally {
+			remove_action( 'woocommerce_order_status_completed', $status_action );
+			remove_action( 'woocommerce_order_status_completed_notification', $notification_action );
+		}
+
+		$this->assertEquals( OrderStatus::COMPLETED, $order->get_status() );
+		// The status transition action still fires so 3rd-party integrations keep working.
+		$this->assertSame( 1, $status_action_count );
+		// The _notification action (which transactional emails listen to) must NOT fire on restore.
+		$this->assertSame( 0, $status_notification_count );
+	}
+
+	/**
+	 * @testdox Restoring an order only suppresses transactional email dispatch for the restored order.
+	 */
+	public function test_untrash_does_not_suppress_email_dispatch_for_other_orders(): void {
+		$restored_order = WC_Helper_Order::create_order();
+		$restored_order->set_status( OrderStatus::COMPLETED );
+		$restored_order->save();
+		$restored_order_id = $restored_order->get_id();
+
+		$other_order = WC_Helper_Order::create_order();
+		$other_order->set_status( OrderStatus::PENDING );
+		$other_order->save();
+		$other_order_id = $other_order->get_id();
+
+		$restored_order->delete();
+		$this->assertEquals( OrderStatus::TRASH, $restored_order->get_status(), 'The restored order was successfully trashed.' );
+
+		$restored_order_notification_count = 0;
+		$other_order_notification_count    = 0;
+		$other_order_status_change_count   = 0;
+		$status_action                     = function ( $order_id ) use ( $restored_order_id, $other_order, &$other_order_status_change_count ) {
+			if ( $restored_order_id !== $order_id ) {
+				return;
+			}
+
+			$other_order->set_status( OrderStatus::COMPLETED );
+			$other_order->save();
+			++$other_order_status_change_count;
+		};
+		$notification_action               = function ( $order_id ) use ( $restored_order_id, $other_order_id, &$restored_order_notification_count, &$other_order_notification_count ) {
+			if ( $restored_order_id === $order_id ) {
+				++$restored_order_notification_count;
+			}
+			if ( $other_order_id === $order_id ) {
+				++$other_order_notification_count;
+			}
+		};
+
+		add_action( 'woocommerce_order_status_completed', $status_action );
+		add_action( 'woocommerce_order_status_completed_notification', $notification_action );
+
+		try {
+			$restored_order = wc_get_order( $restored_order_id );
+			$this->assertTrue( $restored_order->untrash(), 'The order was restored from the trash.' );
+		} finally {
+			remove_action( 'woocommerce_order_status_completed', $status_action );
+			remove_action( 'woocommerce_order_status_completed_notification', $notification_action );
+		}
+
+		$this->assertSame( 1, $other_order_status_change_count );
+		$this->assertSame( 0, $restored_order_notification_count );
+		$this->assertSame( 1, $other_order_notification_count );
+	}
+
+	/**
+	 * No-op listener used as a stable, uniquely-identified probe by
+	 * {@see test_untrash_preserves_email_hook_callback_order()}.
+	 *
+	 * @return void
+	 */
+	public static function untrash_email_hook_order_probe(): void {}
+
+	/**
+	 * @testdox Restoring an order keeps the WC_Emails dispatch listener in its original hook slot rather than removing and re-adding it.
+	 */
+	public function test_untrash_preserves_email_hook_callback_order(): void {
+		global $wp_filter;
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$order_id = $order->get_id();
+		$order->delete();
+
+		// Register a 3rd-party listener after WC_Emails dispatch, at the same priority. A
+		// uniquely-named static method is used so its hook ID is a stable string that nothing
+		// else collides with.
+		$probe = array( self::class, 'untrash_email_hook_order_probe' );
+		add_action( 'woocommerce_order_status_completed', $probe, 10 );
+
+		// Capture the priority 10 listener order at the moment the restore transition fires.
+		// A remove/re-add suspension would leave WC_Emails dispatch absent here (it would be
+		// removed before save() and only re-added afterwards); the in-place wrapper keeps
+		// it registered in its original slot, ahead of the 3rd-party listener.
+		$keys_during = array();
+		$recorder    = function () use ( &$wp_filter, &$keys_during ) {
+			$keys_during = array_keys( $wp_filter['woocommerce_order_status_completed']->callbacks[10] );
+		};
+		add_action( 'woocommerce_order_status_completed', $recorder, 99 );
+
+		try {
+			$order = wc_get_order( $order_id );
+			$this->assertTrue( $order->untrash(), 'The order was restored from the trash.' );
+		} finally {
+			remove_action( 'woocommerce_order_status_completed', $probe, 10 );
+			remove_action( 'woocommerce_order_status_completed', $recorder, 99 );
+		}
+
+		$pos_dispatch = false;
+		foreach ( array( 'WC_Emails::send_transactional_email', 'WC_Emails::queue_transactional_email' ) as $dispatch_key ) {
+			$pos_dispatch = array_search( $dispatch_key, $keys_during, true );
+			if ( false !== $pos_dispatch ) {
+				break;
+			}
+		}
+		$pos_listener = array_search( self::class . '::untrash_email_hook_order_probe', $keys_during, true );
+
+		$this->assertNotFalse( $pos_dispatch, 'WC_Emails dispatch callback stays registered during the restore transition.' );
+		$this->assertNotFalse( $pos_listener, 'The 3rd-party listener stays registered during the restore transition.' );
+		$this->assertLessThan( $pos_listener, $pos_dispatch, 'WC_Emails dispatch keeps its original position ahead of a later listener.' );
 	}
 
 	/**

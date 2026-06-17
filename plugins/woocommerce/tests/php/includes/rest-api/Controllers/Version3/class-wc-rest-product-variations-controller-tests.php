@@ -169,6 +169,131 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 	}
 
 	/**
+	 * @testdox The variation GET endpoint returns typed gallery image IDs.
+	 */
+	public function test_variation_get_returns_gallery_image_ids() {
+		$parent_product = WC_Helper_Product::create_variation_product();
+		$variation      = wc_get_product( $parent_product->get_children()[0] );
+		$image_ids      = array(
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 1',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 2',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+		);
+
+		$variation->set_gallery_image_ids( $image_ids );
+		$variation->save();
+
+		$response = $this->server->dispatch(
+			new WP_REST_Request(
+				'GET',
+				"/wc/v3/products/{$parent_product->get_id()}/variations/{$variation->get_id()}"
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( $image_ids, $response->get_data()['gallery_image_ids'] );
+	}
+
+	/**
+	 * @testdox The variation POST endpoint updates the gallery without touching the featured image (disjoint storage).
+	 */
+	public function test_variation_post_updates_gallery_image_ids() {
+		$parent_product       = WC_Helper_Product::create_variation_product();
+		$variation            = wc_get_product( $parent_product->get_children()[0] );
+		$pre_existing_feature = wp_insert_attachment(
+			array(
+				'post_title'     => 'Pre-existing featured image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$variation->set_image_id( $pre_existing_feature );
+		$variation->save();
+
+		$image_ids = array(
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 1',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 2',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+		);
+
+		$this->update_variation_via_post_request(
+			$variation,
+			array(
+				'gallery_image_ids' => $image_ids,
+			)
+		);
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$this->assertSame( $image_ids, array_map( 'intval', $variation->get_gallery_image_ids() ) );
+		$this->assertSame(
+			$pre_existing_feature,
+			$variation->get_image_id(),
+			'Setting gallery_image_ids must not touch the featured image — they are disjoint, like on parent products.'
+		);
+		// No legacy meta exists, so the core-managed sentinel is intentionally
+		// not written: the legacy fallback would no-op anyway, and skipping the
+		// row keeps postmeta clean on stores that never used the extension.
+		$this->assertFalse(
+			\Automattic\WooCommerce\Internal\VariationGallery\LegacyVariationGalleryCompatibility::is_variation_id_core_managed(
+				$variation->get_id()
+			)
+		);
+	}
+
+	/**
+	 * @testdox The variation POST endpoint can clear a legacy-only variation gallery.
+	 */
+	public function test_variation_post_can_clear_legacy_gallery_image_ids() {
+		$parent_product = WC_Helper_Product::create_variation_product();
+		$variation      = wc_get_product( $parent_product->get_children()[0] );
+
+		update_post_meta(
+			$variation->get_id(),
+			'_wc_additional_variation_images',
+			'101,102'
+		);
+
+		$this->update_variation_via_post_request(
+			$variation,
+			array(
+				'gallery_image_ids' => array(),
+			)
+		);
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$this->assertSame( array(), $variation->get_gallery_image_ids() );
+		$this->assertTrue(
+			\Automattic\WooCommerce\Internal\VariationGallery\LegacyVariationGalleryCompatibility::is_variation_id_core_managed(
+				$variation->get_id()
+			)
+		);
+	}
+
+	/**
 	 * Test that creating a variation with attributes containing special characters in their slug
 	 * properly saves the attributes.
 	 *
@@ -858,5 +983,61 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 		$this->assertEquals( 200, $response->get_status() );
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $variation->get_id() ) );
+	}
+
+	/**
+	 * @testdox Variation batch updates coalesce repeated product transient deletion.
+	 */
+	public function test_batch_update_coalesces_product_transient_deletion(): void {
+		$parent                                = WC_Helper_Product::create_variation_product();
+		$variation_ids                         = array_slice( $parent->get_children(), 0, 2 );
+		$deleted_ids                           = array();
+		$parent_product_children_deletes       = 0;
+		$track_deletes                         = static function ( $product_id ) use ( &$deleted_ids ) {
+			$deleted_ids[] = (int) $product_id;
+		};
+		$track_parent_product_children_deletes = static function () use ( &$parent_product_children_deletes ) {
+			++$parent_product_children_deletes;
+		};
+
+		add_action( 'woocommerce_delete_product_transients', $track_deletes );
+		add_action( 'delete_transient_wc_product_children_' . $parent->get_id(), $track_parent_product_children_deletes );
+		try {
+			$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $parent->get_id() . '/variations/batch' );
+			$request->set_body_params(
+				array(
+					'update' => array(
+						array(
+							'id'            => $variation_ids[0],
+							'regular_price' => '12.99',
+						),
+						array(
+							'id'            => $variation_ids[1],
+							'regular_price' => '13.99',
+						),
+					),
+				)
+			);
+
+			$response = $this->server->dispatch( $request );
+		} finally {
+			remove_action( 'woocommerce_delete_product_transients', $track_deletes );
+			remove_action( 'delete_transient_wc_product_children_' . $parent->get_id(), $track_parent_product_children_deletes );
+		}
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $response->get_data()['update'] );
+
+		$expected_deleted_ids = array_merge( $variation_ids, array( $parent->get_id() ) );
+		$this->assertEqualsCanonicalizing( $expected_deleted_ids, array_unique( $deleted_ids ) );
+
+		foreach ( $expected_deleted_ids as $expected_deleted_id ) {
+			$this->assertSame(
+				1,
+				count( array_keys( $deleted_ids, $expected_deleted_id, true ) ),
+				'Each affected product should have product transients deleted once per batch.'
+			);
+		}
+		$this->assertSame( 1, $parent_product_children_deletes, 'Parent variation transients should be deleted once per batch.' );
 	}
 }

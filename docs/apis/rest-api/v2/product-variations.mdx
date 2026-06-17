@@ -1,0 +1,1528 @@
+---
+sidebar_position: 10
+sidebar_label: 'Product variations'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Product variations
+The product variations API allows you to create, view, update, and delete individual, or a batch, of product variations.
+
+## Product variation properties
+| Attribute               | Type      | Description                                                                                                         |
+|-------------------------|-----------|---------------------------------------------------------------------------------------------------------------------|
+| `id`                    | integer   | Unique identifier for the resource. `READ-ONLY`                                       |
+| `date_created`          | date-time | The date the variation was created, in the site's timezone. `READ-ONLY`               |
+| `date_created_gmt`      | date-time | The date the variation was created, as GMT. `READ-ONLY`                               |
+| `date_modified`         | date-time | The date the variation was last modified, in the site's timezone. `READ-ONLY`         |
+| `date_modified_gmt`     | date-time | The date the variation was last modified, as GMT. `READ-ONLY`                         |
+| `description`           | string    | Variation description.                                                                                              |
+| `permalink`             | string    | Variation URL. `READ-ONLY`                                                            |
+| `sku`                   | string    | Unique identifier.                                                                                                  |
+| `price`                 | string    | Current variation price. `READ-ONLY`                                                  |
+| `regular_price`         | string    | Variation regular price.                                                                                            |
+| `sale_price`            | string    | Variation sale price.                                                                                               |
+| `date_on_sale_from`     | date-time | Start date of sale price, in the site's timezone.                                                                   |
+| `date_on_sale_from_gmt` | date-time | Start date of sale price, as GMT.                                                                                   |
+| `date_on_sale_to`       | date-time | End date of sale price, in the site's timezone.                                                                     |
+| `date_on_sale_to_gmt`   | date-time | End date of sale price, as GMT.                                                                                     |
+| `on_sale`               | boolean   | Shows if the variation is on sale. `READ-ONLY`                                        |
+| `visible`               | boolean   | Define if the attribute is visible on the "Additional information" tab in the product's page. Default is `true`.    |
+| `purchasable`           | boolean   | Shows if the variation can be bought. `READ-ONLY`                                     |
+| `virtual`               | boolean   | If the variation is virtual. Default is `false`.                                                                    |
+| `downloadable`          | boolean   | If the variation is downloadable. Default is `false`.                                                               |
+| `downloads`             | array     | List of downloadable files. See [Product variation - Downloads properties](#product-variation---downloads-properties) |
+| `download_limit`        | integer   | Number of times downloadable files can be downloaded after purchase. Default is `-1`.                               |
+| `download_expiry`       | integer   | Number of days until access to downloadable files expires. Default is `-1`.                                         |
+| `tax_status`            | string    | Tax status. Options: `taxable`, `shipping` and `none`. Default is `taxable`.                                        |
+| `tax_class`             | string    | Tax class.                                                                                                          |
+| `manage_stock`          | boolean, string   | Stock management at variation level. Possible values are either a boolean or `parent`. Default is `false`.  |
+| `stock_quantity`        | integer   | Stock quantity.                                                                                                     |
+| `in_stock`              | boolean   | Controls whether or not the variation is listed as "in stock" or "out of stock" on the frontend. Default is `true`. |
+| `backorders`            | string    | If managing stock, this controls if backorders are allowed. Options: `no`, `notify` and `yes`. Default is `no`.     |
+| `backorders_allowed`    | boolean   | Shows if backorders are allowed. `READ-ONLY`                                          |
+| `backordered`           | boolean   | Shows if the variation is on backordered. `READ-ONLY`                                 |
+| `weight`                | string    | Variation weight.                                                                                                   |
+| `dimensions`            | object    | Variation dimensions. See [Product variation - Dimensions properties](#product-variation---dimensions-properties)     |
+| `shipping_class`        | string    | Shipping class slug.                                                                                                |
+| `shipping_class_id`     | string    | Shipping class ID. `READ-ONLY`                                                        |
+| `image`                 | object    | Variation image data. See [Product variation - Image properties](#product-variation---image-properties)               |
+| `attributes`            | array     | List of attributes. See [Product variation - Attributes properties](#product-variation---attributes-properties)       |
+| `menu_order`            | integer   | Menu order, used to custom sort products.                                                                           |
+| `meta_data`             | array     | Meta data. See [Product variation - Meta data properties](#product-variation---meta-data-properties)                  |
+
+### Product variation - Downloads properties
+| Attribute | Type   | Description |
+|-----------|--------|-------------|
+| `id`      | string | File ID.    |
+| `name`    | string | File name.  |
+| `file`    | string | File URL.   |
+
+### Product variation - Dimensions properties
+| Attribute | Type   | Description       |
+|-----------|--------|-------------------|
+| `length`  | string | Variation length. |
+| `width`   | string | Variation width.  |
+| `height`  | string | Variation height. |
+
+### Product variation - Image properties
+| Attribute           | Type      | Description                                                                                             |
+|---------------------|-----------|---------------------------------------------------------------------------------------------------------|
+| `id`                | integer   | Image ID.                                                                                               |
+| `date_created`      | date-time | The date the image was created, in the site's timezone. `READ-ONLY`       |
+| `date_created_gmt`  | date-time | The date the image was created, as GMT. `READ-ONLY`                       |
+| `date_modified`     | date-time | The date the image was last modified, in the site's timezone. `READ-ONLY` |
+| `date_modified_gmt` | date-time | The date the image was last modified, as GMT. `READ-ONLY`                 |
+| `src`               | string    | Image URL.                                                                                              |
+| `name`              | string    | Image name.                                                                                             |
+| `alt`               | string    | Image alternative text.                                                                                 |
+| `position`          | integer   | Image position. 0 means that the image is featured.                                                     |
+
+### Product variation - Attributes properties
+| Attribute | Type    | Description                   |
+|-----------|---------|-------------------------------|
+| `id`      | integer | Attribute ID.                 |
+| `name`    | string  | Attribute name.               |
+| `option`  | string  | Selected attribute term name. |
+
+### Product variation - Meta data properties
+| Attribute | Type    | Description                                        |
+|-----------|---------|----------------------------------------------------|
+| `id`      | integer | Meta ID. `READ-ONLY` |
+| `key`     | string  | Meta key.                                          |
+| `value`   | string  | Meta value.                                        |
+
+## Create a product variation
+This API helps you to create a new product variation.
+
+```http
+POST /wp-json/wc/v2/products/<product_id>/variations
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X POST https://example.com/wp-json/wc/v2/products/22/variations \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{
+  "regular_price": "9.00",
+  "image": {
+    "id": 423
+  },
+  "attributes": [
+    {
+      "id": 6,
+      "option": "Black"
+    }
+  ]
+}'
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+const data = {
+  regular_price: "9.00",
+  image: {
+    id: 423
+  },
+  attributes: [
+    {
+      id: 9,
+      option: "Black"
+    }
+  ]
+};
+
+WooCommerce.post("products/22/variations", data)
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+$data = [
+    'regular_price' => '9.00',
+    'image' => [
+        'id' => 423
+    ],
+    'attributes' => [
+        [
+            'id' => 9,
+            'option' => 'Black'
+        ]
+    ]
+];
+
+print_r($woocommerce->post('products/22/variations', $data));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+data = {
+    "regular_price": "9.00",
+    "image": {
+        "id": 423
+    },
+    "attributes": [
+        {
+            "id": 9,
+            "option": "Black"
+        }
+    ]
+}
+
+print(wcapi.post("products/22/variations", data).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+data = {
+  regular_price: "9.00",
+  image: {
+    id: 423
+  },
+  attributes: [
+    {
+      id: 9,
+      position: "Black"
+    }
+  ]
+}
+
+woocommerce.post("products/22/variations", data).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 732,
+  "date_created": "2017-03-23T00:36:38",
+  "date_created_gmt": "2017-03-23T03:36:38",
+  "date_modified": "2017-03-23T00:36:38",
+  "date_modified_gmt": "2017-03-23T03:36:38",
+  "description": "",
+  "permalink": "https://example.com/product/ship-your-idea/?attribute_pa_color=black",
+  "sku": "",
+  "price": "9.00",
+  "regular_price": "9.00",
+  "sale_price": "",
+  "date_on_sale_from": null,
+  "date_on_sale_from_gmt": null,
+  "date_on_sale_to": null,
+  "date_on_sale_to_gmt": null,
+  "on_sale": false,
+  "visible": true,
+  "purchasable": true,
+  "virtual": false,
+  "downloadable": false,
+  "downloads": [],
+  "download_limit": -1,
+  "download_expiry": -1,
+  "tax_status": "taxable",
+  "tax_class": "",
+  "manage_stock": false,
+  "stock_quantity": null,
+  "in_stock": true,
+  "backorders": "no",
+  "backorders_allowed": false,
+  "backordered": false,
+  "weight": "",
+  "dimensions": {
+    "length": "",
+    "width": "",
+    "height": ""
+  },
+  "shipping_class": "",
+  "shipping_class_id": 0,
+  "image": {
+    "id": 423,
+    "date_created": "2016-10-19T12:21:14",
+    "date_created_gmt": "2016-10-19T16:21:14",
+    "date_modified": "2016-10-19T12:21:14",
+    "date_modified_gmt": "2016-10-19T16:21:14",
+    "src": "https://example.com/wp-content/uploads/2016/10/T_4_front-12.jpg",
+    "name": "",
+    "alt": "",
+    "position": 0
+  },
+  "attributes": [
+    {
+      "id": 6,
+      "name": "Color",
+      "option": "Black"
+    }
+  ],
+  "menu_order": 0,
+  "meta_data": [],
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v2/products/22/variations/732"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v2/products/22/variations"
+      }
+    ],
+    "up": [
+      {
+        "href": "https://example.com/wp-json/wc/v2/products/22"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Retrieve a product variation
+This API lets you retrieve and view a specific product variation by ID.
+
+```http
+GET /wp-json/wc/v2/products/<product_id>/variations/<id>
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v2/products/22/variations/732 \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get("products/22/variations/732")
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('products/22/variations/732')); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("products/22/variations/732").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("products/22/variations/732").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 732,
+  "date_created": "2017-03-23T00:36:38",
+  "date_created_gmt": "2017-03-23T03:36:38",
+  "date_modified": "2017-03-23T00:36:38",
+  "date_modified_gmt": "2017-03-23T03:36:38",
+  "description": "",
+  "permalink": "https://example.com/product/ship-your-idea/?attribute_pa_color=black",
+  "sku": "",
+  "price": "9.00",
+  "regular_price": "9.00",
+  "sale_price": "",
+  "date_on_sale_from": null,
+  "date_on_sale_from_gmt": null,
+  "date_on_sale_to": null,
+  "date_on_sale_to_gmt": null,
+  "on_sale": false,
+  "visible": true,
+  "purchasable": true,
+  "virtual": false,
+  "downloadable": false,
+  "downloads": [],
+  "download_limit": -1,
+  "download_expiry": -1,
+  "tax_status": "taxable",
+  "tax_class": "",
+  "manage_stock": false,
+  "stock_quantity": null,
+  "in_stock": true,
+  "backorders": "no",
+  "backorders_allowed": false,
+  "backordered": false,
+  "weight": "",
+  "dimensions": {
+    "length": "",
+    "width": "",
+    "height": ""
+  },
+  "shipping_class": "",
+  "shipping_class_id": 0,
+  "image": {
+    "id": 423,
+    "date_created": "2016-10-19T12:21:14",
+    "date_created_gmt": "2016-10-19T16:21:14",
+    "date_modified": "2016-10-19T12:21:14",
+    "date_modified_gmt": "2016-10-19T16:21:14",
+    "src": "https://example.com/wp-content/uploads/2016/10/T_4_front-12.jpg",
+    "name": "",
+    "alt": "",
+    "position": 0
+  },
+  "attributes": [
+    {
+      "id": 6,
+      "name": "Color",
+      "option": "Black"
+    }
+  ],
+  "menu_order": 0,
+  "meta_data": [],
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v2/products/22/variations/732"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v2/products/22/variations"
+      }
+    ],
+    "up": [
+      {
+        "href": "https://example.com/wp-json/wc/v2/products/22"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## List all product variations
+This API helps you to view all the product variations.
+
+```http
+GET /wp-json/wc/v2/products/<product_id>/variations
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v2/products/22/variations \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get("products/22/variations")
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('products/22/variations')); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("products/22/variations").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("products/22/variations").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+  {
+    "id": 733,
+    "date_created": "2017-03-23T00:53:11",
+    "date_created_gmt": "2017-03-23T03:53:11",
+    "date_modified": "2017-03-23T00:53:11",
+    "date_modified_gmt": "2017-03-23T03:53:11",
+    "description": "",
+    "permalink": "https://example.com/product/ship-your-idea/?attribute_pa_color=green",
+    "sku": "",
+    "price": "9.00",
+    "regular_price": "9.00",
+    "sale_price": "",
+    "date_on_sale_from": null,
+    "date_on_sale_from_gmt": null,
+    "date_on_sale_to": null,
+    "date_on_sale_to_gmt": null,
+    "on_sale": false,
+    "visible": true,
+    "purchasable": true,
+    "virtual": false,
+    "downloadable": false,
+    "downloads": [],
+    "download_limit": -1,
+    "download_expiry": -1,
+    "tax_status": "taxable",
+    "tax_class": "",
+    "manage_stock": false,
+    "stock_quantity": null,
+    "in_stock": true,
+    "backorders": "no",
+    "backorders_allowed": false,
+    "backordered": false,
+    "weight": "",
+    "dimensions": {
+      "length": "",
+      "width": "",
+      "height": ""
+    },
+    "shipping_class": "",
+    "shipping_class_id": 0,
+    "image": {
+      "id": 425,
+      "date_created": "2016-10-19T12:21:16",
+      "date_created_gmt": "2016-10-19T16:21:16",
+      "date_modified": "2016-10-19T12:21:16",
+      "date_modified_gmt": "2016-10-19T16:21:16",
+      "src": "https://example.com/wp-content/uploads/2016/10/T_3_front-12.jpg",
+      "name": "",
+      "alt": "",
+      "position": 0
+    },
+    "attributes": [
+      {
+        "id": 6,
+        "name": "Color",
+        "option": "Green"
+      }
+    ],
+    "menu_order": 0,
+    "meta_data": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://example.com/wp-json/wc/v2/products/22/variations/733"
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://example.com/wp-json/wc/v2/products/22/variations"
+        }
+      ],
+      "up": [
+        {
+          "href": "https://example.com/wp-json/wc/v2/products/22"
+        }
+      ]
+    }
+  },
+  {
+    "id": 732,
+    "date_created": "2017-03-23T00:36:38",
+    "date_created_gmt": "2017-03-23T03:36:38",
+    "date_modified": "2017-03-23T00:36:38",
+    "date_modified_gmt": "2017-03-23T03:36:38",
+    "description": "",
+    "permalink": "https://example.com/product/ship-your-idea/?attribute_pa_color=black",
+    "sku": "",
+    "price": "9.00",
+    "regular_price": "9.00",
+    "sale_price": "",
+    "date_on_sale_from": null,
+    "date_on_sale_from_gmt": null,
+    "date_on_sale_to": null,
+    "date_on_sale_to_gmt": null,
+    "on_sale": false,
+    "visible": true,
+    "purchasable": true,
+    "virtual": false,
+    "downloadable": false,
+    "downloads": [],
+    "download_limit": -1,
+    "download_expiry": -1,
+    "tax_status": "taxable",
+    "tax_class": "",
+    "manage_stock": false,
+    "stock_quantity": null,
+    "in_stock": true,
+    "backorders": "no",
+    "backorders_allowed": false,
+    "backordered": false,
+    "weight": "",
+    "dimensions": {
+      "length": "",
+      "width": "",
+      "height": ""
+    },
+    "shipping_class": "",
+    "shipping_class_id": 0,
+    "image": {
+      "id": 423,
+      "date_created": "2016-10-19T12:21:14",
+      "date_created_gmt": "2016-10-19T16:21:14",
+      "date_modified": "2016-10-19T12:21:14",
+      "date_modified_gmt": "2016-10-19T16:21:14",
+      "src": "https://example.com/wp-content/uploads/2016/10/T_4_front-12.jpg",
+      "name": "",
+      "alt": "",
+      "position": 0
+    },
+    "attributes": [
+      {
+        "id": 6,
+        "name": "Color",
+        "option": "Black"
+      }
+    ],
+    "menu_order": 0,
+    "meta_data": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://example.com/wp-json/wc/v2/products/22/variations/732"
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://example.com/wp-json/wc/v2/products/22/variations"
+        }
+      ],
+      "up": [
+        {
+          "href": "https://example.com/wp-json/wc/v2/products/22"
+        }
+      ]
+    }
+  }
+]
+```
+
+  </TabItem>
+</Tabs>
+
+#### Available parameters
+| Parameter        | Type    | Description                                                                                                                             |
+|------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| `context`        | string  | Scope under which the request is made; determines fields present in response. Options: `view` and `edit`. Default is `view`.            |
+| `page`           | integer | Current page of the collection. Default is `1`.                                                                                         |
+| `per_page`       | integer | Maximum number of items to be returned in result set. Default is `10`.                                                                  |
+| `search`         | string  | Limit results to those matching a string.                                                                                               |
+| `after`          | string  | Limit response to resources published after a given ISO8601 compliant date.                                                             |
+| `before`         | string  | Limit response to resources published before a given ISO8601 compliant date.                                                            |
+| `dates_are_gmt`  | boolean | Interpret `after` and `before` as UTC dates when `true`.                                                                                |
+| `exclude`        | array   | Ensure result set excludes specific IDs.                                                                                                |
+| `include`        | array   | Limit result set to specific ids.                                                                                                       |
+| `offset`         | integer | Offset the result set by a specific number of items.                                                                                    |
+| `order`          | string  | Order sort attribute ascending or descending. Options: `asc` and `desc`. Default is `desc`.                                             |
+| `orderby`        | string  | Sort collection by object attribute. Options: `date`, `id`, `include`, `title` and `slug`. Default is `date`.                           |
+| `parent`         | array   | Limit result set to those of particular parent IDs.                                                                                     |
+| `parent_exclude` | array   | Limit result set to all items except those of a particular parent ID.                                                                   |
+| `slug`           | string  | Limit result set to products with a specific slug.                                                                                      |
+| `status`         | string  | Limit result set to products assigned a specific status. Options: `any`, `draft`, `pending`, `private` and `publish`. Default is `any`. |
+| `type`           | string  | Limit result set to products assigned a specific type. Options: `simple`, `grouped`, `external` and `variable`.                         |
+| `sku`            | string  | Limit result set to products with a specific SKU.                                                                                       |
+| `featured`       | boolean | Limit result set to featured products.                                                                                                  |
+| `category`       | string  | Limit result set to products assigned a specific category ID.                                                                           |
+| `tag`            | string  | Limit result set to products assigned a specific tag ID.                                                                                |
+| `shipping_class` | string  | Limit result set to products assigned a specific shipping class ID.                                                                     |
+| `attribute`      | string  | Limit result set to products with a specific attribute.                                                                                 |
+| `attribute_term` | string  | Limit result set to products with a specific attribute term ID (required an assigned attribute).                                        |
+| `tax_class`      | string  | Limit result set to products with a specific tax class. Default options: `standard`, `reduced-rate` and `zero-rate`.                    |
+| `in_stock`       | boolean | Limit result set to products in stock or out of stock.                                                                                  |
+| `on_sale`        | boolean | Limit result set to products on sale.                                                                                                   |
+| `min_price`      | string  | Limit result set to products based on a minimum price.                                                                                  |
+| `max_price`      | string  | Limit result set to products based on a maximum price.                                                                                  |
+| `image_size`     | string  | Use a specific registered image size for the returned variation image `src`. Falls back to the full size if the requested size is not registered. Default is `full`. |
+
+## Update a product variation
+This API lets you make changes to a product variation.
+
+```http
+PUT /wp-json/wc/v2/products/<product_id>/variations/<id>
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X PUT https://example.com/wp-json/wc/v2/products/22/variations/733 \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{
+  "regular_price": "10.00"
+}'
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+const data = {
+  regular_price: "10.00"
+};
+
+WooCommerce.put("products/22/variations/733", data)
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+$data = [
+    'regular_price' => '10.00'
+];
+
+print_r($woocommerce->put('products/22/variations/733', $data));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+data = {
+    "regular_price": "10.00"
+}
+
+print(wcapi.put("products/22/variations/733", data).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+data = {
+  regular_price: "10.00"
+}
+
+woocommerce.put("products/22/variations/733", data).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 733,
+  "date_created": "2017-03-23T00:53:11",
+  "date_created_gmt": "2017-03-23T03:53:11",
+  "date_modified": "2017-03-23T00:53:11",
+  "date_modified_gmt": "2017-03-23T03:53:11",
+  "description": "",
+  "permalink": "https://example.com/product/ship-your-idea/?attribute_pa_color=green",
+  "sku": "",
+  "price": "10.00",
+  "regular_price": "10.00",
+  "sale_price": "",
+  "date_on_sale_from": null,
+  "date_on_sale_from_gmt": null,
+  "date_on_sale_to": null,
+  "date_on_sale_to_gmt": null,
+  "on_sale": false,
+  "visible": true,
+  "purchasable": true,
+  "virtual": false,
+  "downloadable": false,
+  "downloads": [],
+  "download_limit": -1,
+  "download_expiry": -1,
+  "tax_status": "taxable",
+  "tax_class": "",
+  "manage_stock": false,
+  "stock_quantity": null,
+  "in_stock": true,
+  "backorders": "no",
+  "backorders_allowed": false,
+  "backordered": false,
+  "weight": "",
+  "dimensions": {
+    "length": "",
+    "width": "",
+    "height": ""
+  },
+  "shipping_class": "",
+  "shipping_class_id": 0,
+  "image": {
+    "id": 425,
+    "date_created": "2016-10-19T12:21:16",
+    "date_created_gmt": "2016-10-19T16:21:16",
+    "date_modified": "2016-10-19T12:21:16",
+    "date_modified_gmt": "2016-10-19T16:21:16",
+    "src": "https://example.com/wp-content/uploads/2016/10/T_3_front-12.jpg",
+    "name": "",
+    "alt": "",
+    "position": 0
+  },
+  "attributes": [
+    {
+      "id": 6,
+      "name": "Color",
+      "option": "Green"
+    }
+  ],
+  "menu_order": 0,
+  "meta_data": [],
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v2/products/22/variations/733"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v2/products/22/variations"
+      }
+    ],
+    "up": [
+      {
+        "href": "https://example.com/wp-json/wc/v2/products/22"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Delete a product variation
+This API helps you delete a product variation.
+
+```http
+DELETE /wp-json/wc/v2/products/<product_id>/variations/<id>
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X DELETE https://example.com/wp-json/wc/v2/products/22/variations/733?force=true \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.delete("products/22/variations/733", {
+  force: true
+})
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->delete('products/22/variations/733', ['force' => true])); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.delete("products/22/variations/733", params={"force": True}).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.delete("products/22/variations/733", force: true).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 733,
+  "date_created": "2017-03-23T00:53:11",
+  "date_created_gmt": "2017-03-23T03:53:11",
+  "date_modified": "2017-03-23T00:53:11",
+  "date_modified_gmt": "2017-03-23T03:53:11",
+  "description": "",
+  "permalink": "https://example.com/product/ship-your-idea/?attribute_pa_color=green",
+  "sku": "",
+  "price": "10.00",
+  "regular_price": "10.00",
+  "sale_price": "",
+  "date_on_sale_from": null,
+  "date_on_sale_from_gmt": null,
+  "date_on_sale_to": null,
+  "date_on_sale_to_gmt": null,
+  "on_sale": false,
+  "visible": true,
+  "purchasable": true,
+  "virtual": false,
+  "downloadable": false,
+  "downloads": [],
+  "download_limit": -1,
+  "download_expiry": -1,
+  "tax_status": "taxable",
+  "tax_class": "",
+  "manage_stock": false,
+  "stock_quantity": null,
+  "in_stock": true,
+  "backorders": "no",
+  "backorders_allowed": false,
+  "backordered": false,
+  "weight": "",
+  "dimensions": {
+    "length": "",
+    "width": "",
+    "height": ""
+  },
+  "shipping_class": "",
+  "shipping_class_id": 0,
+  "image": {
+    "id": 425,
+    "date_created": "2016-10-19T12:21:16",
+    "date_created_gmt": "2016-10-19T16:21:16",
+    "date_modified": "2016-10-19T12:21:16",
+    "date_modified_gmt": "2016-10-19T16:21:16",
+    "src": "https://example.com/wp-content/uploads/2016/10/T_3_front-12.jpg",
+    "name": "",
+    "alt": "",
+    "position": 0
+  },
+  "attributes": [
+    {
+      "id": 6,
+      "name": "Color",
+      "option": "Green"
+    }
+  ],
+  "menu_order": 0,
+  "meta_data": [],
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v2/products/22/variations/733"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v2/products/22/variations"
+      }
+    ],
+    "up": [
+      {
+        "href": "https://example.com/wp-json/wc/v2/products/22"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+#### Available parameters
+| Parameter | Type   | Description                                                   |
+|-----------|--------|---------------------------------------------------------------|
+| `force`   | string | Required to be `true`, as resource does not support trashing. |
+
+## Batch update product variations
+This API helps you to batch create, update and delete multiple product variations.
+
+:::note
+Note: By default it's limited to up to 100 objects to be created, updated or deleted.
+:::
+
+```http
+POST /wp-json/wc/v2/products/<product_id>/variations/batch
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X POST https://example.com/wp-json/wc/v2/products/22/variations/batch \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{
+  "create": [
+    {
+      "regular_price": "10.00",
+      "attributes": [
+        {
+          "id": 6,
+          "option": "Blue"
+        }
+      ]
+    },
+    {
+      "regular_price": "10.00",
+      "attributes": [
+        {
+          "id": 6,
+          "option": "White"
+        }
+      ]
+    }
+  ],
+  "update": [
+    {
+      "id": 733,
+      "regular_price": "10.00"
+    }
+  ],
+  "delete": [
+    732
+  ]
+}'
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+const data = {
+  create: [
+    {
+      regular_price: "10.00",
+      attributes: [
+        {
+          id: 6,
+          option: "Blue"
+        }
+      ]
+    },
+    {
+      regular_price: "10.00",
+      attributes: [
+        {
+          id: 6,
+          option: "White"
+        }
+      ]
+    }
+  ],
+  update: [
+    {
+      id: 733,
+      regular_price: "10.00"
+    }
+  ],
+  delete: [
+    732
+  ]
+};
+
+WooCommerce.post("products/22/variations/batch", data)
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+$data = [
+    'create' => [
+        [
+            'regular_price' => '10.00',
+            'attributes' => [
+                [
+                    'id' => 6,
+                    'option' => 'Blue'
+                ]
+            ]
+        ],
+        [
+            'regular_price' => '10.00',
+            'attributes' => [
+                [
+                    'id' => 6,
+                    'option' => 'White'
+                ]
+            ]
+        ]
+    ],
+    'update' => [
+        [
+            'id' => 733,
+            'regular_price' => '10.00'
+        ]
+    ],
+    'delete' => [
+        732
+    ]
+];
+
+print_r($woocommerce->post('products/22/variations/batch', $data));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+data = {
+    "create": [
+        {
+            "regular_price": "10.00",
+            "attributes": [
+                {
+                    "id": 6,
+                    "option": "Blue"
+                }
+            ]
+        },
+        {
+            "regular_price": "10.00",
+            "attributes": [
+                {
+                    "id": 6,
+                    "option": "White"
+                }
+            ]
+        }
+    ],
+    "update": [
+        {
+            "id": 733,
+            "regular_price": "10.00"
+        }
+    ],
+    "delete": [
+        732
+    ]
+}
+
+print(wcapi.post("products/22/variations/batch", data).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+data = {
+  create: [
+    {
+      regular_price: "10.00",
+      attributes: [
+        {
+          id: 6,
+          option: "Blue"
+        }
+      ]
+    },
+    {
+      regular_price: "10.00",
+      attributes: [
+        {
+          id: 6,
+          option: "White"
+        }
+      ]
+    }
+  ],
+  update: [
+    {
+      id: 733,
+      regular_price: "10.00"
+    }
+  ],
+  delete: [
+    732
+  ]
+}
+
+woocommerce.post("products/22/variations/batch", data).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "create": [
+    {
+      "id": 735,
+      "date_created": "2017-03-23T01:19:37",
+      "date_created_gmt": "2017-03-23T04:19:37",
+      "date_modified": "2017-03-23T01:19:37",
+      "date_modified_gmt": "2017-03-23T04:19:37",
+      "description": "",
+      "permalink": "https://example.com/product/ship-your-idea/?attribute_pa_color=blue",
+      "sku": "",
+      "price": "10.00",
+      "regular_price": "10.00",
+      "sale_price": "",
+      "date_on_sale_from": null,
+      "date_on_sale_from_gmt": null,
+      "date_on_sale_to": null,
+      "date_on_sale_to_gmt": null,
+      "on_sale": false,
+      "visible": true,
+      "purchasable": true,
+      "virtual": false,
+      "downloadable": false,
+      "downloads": [],
+      "download_limit": -1,
+      "download_expiry": -1,
+      "tax_status": "taxable",
+      "tax_class": "",
+      "manage_stock": false,
+      "stock_quantity": null,
+      "in_stock": true,
+      "backorders": "no",
+      "backorders_allowed": false,
+      "backordered": false,
+      "weight": "",
+      "dimensions": {
+        "length": "",
+        "width": "",
+        "height": ""
+      },
+      "shipping_class": "",
+      "shipping_class_id": 0,
+      "image": {
+        "id": 0,
+        "date_created": "2017-03-22T22:19:40",
+        "date_created_gmt": "2017-03-23T04:19:40",
+        "date_modified": "2017-03-22T22:19:40",
+        "date_modified_gmt": "2017-03-23T04:19:40",
+        "src": "https://example.com/wp-content/plugins/woocommerce/assets/images/placeholder.png",
+        "name": "Placeholder",
+        "alt": "Placeholder",
+        "position": 0
+      },
+      "attributes": [
+        {
+          "id": 6,
+          "name": "Color",
+          "option": "Blue"
+        }
+      ],
+      "menu_order": 0,
+      "meta_data": [],
+      "_links": {
+        "self": [
+          {
+            "href": "https://example.com/wp-json/wc/v2/products/22/variations/735"
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://example.com/wp-json/wc/v2/products/22/variations"
+          }
+        ],
+        "up": [
+          {
+            "href": "https://example.com/wp-json/wc/v2/products/22"
+          }
+        ]
+      }
+    },
+    {
+      "id": 736,
+      "date_created": "2017-03-23T01:19:40",
+      "date_created_gmt": "2017-03-23T04:19:40",
+      "date_modified": "2017-03-23T01:19:40",
+      "date_modified_gmt": "2017-03-23T04:19:40",
+      "description": "",
+      "permalink": "https://example.com/product/ship-your-idea/?attribute_pa_color=white",
+      "sku": "",
+      "price": "10.00",
+      "regular_price": "10.00",
+      "sale_price": "",
+      "date_on_sale_from": null,
+      "date_on_sale_from_gmt": null,
+      "date_on_sale_to": null,
+      "date_on_sale_to_gmt": null,
+      "on_sale": false,
+      "visible": true,
+      "purchasable": true,
+      "virtual": false,
+      "downloadable": false,
+      "downloads": [],
+      "download_limit": -1,
+      "download_expiry": -1,
+      "tax_status": "taxable",
+      "tax_class": "",
+      "manage_stock": false,
+      "stock_quantity": null,
+      "in_stock": true,
+      "backorders": "no",
+      "backorders_allowed": false,
+      "backordered": false,
+      "weight": "",
+      "dimensions": {
+        "length": "",
+        "width": "",
+        "height": ""
+      },
+      "shipping_class": "",
+      "shipping_class_id": 0,
+      "image": {
+        "id": 0,
+        "date_created": "2017-03-22T22:19:42",
+        "date_created_gmt": "2017-03-23T04:19:42",
+        "date_modified": "2017-03-22T22:19:42",
+        "date_modified_gmt": "2017-03-23T04:19:42",
+        "src": "https://example.com/wp-content/plugins/woocommerce/assets/images/placeholder.png",
+        "name": "Placeholder",
+        "alt": "Placeholder",
+        "position": 0
+      },
+      "attributes": [
+        {
+          "id": 6,
+          "name": "Color",
+          "option": "White"
+        }
+      ],
+      "menu_order": 0,
+      "meta_data": [],
+      "_links": {
+        "self": [
+          {
+            "href": "https://example.com/wp-json/wc/v2/products/22/variations/736"
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://example.com/wp-json/wc/v2/products/22/variations"
+          }
+        ],
+        "up": [
+          {
+            "href": "https://example.com/wp-json/wc/v2/products/22"
+          }
+        ]
+      }
+    }
+  ],
+  "update": [
+    {
+      "id": 733,
+      "date_created": "2017-03-23T00:53:11",
+      "date_created_gmt": "2017-03-23T03:53:11",
+      "date_modified": "2017-03-23T00:53:11",
+      "date_modified_gmt": "2017-03-23T03:53:11",
+      "description": "",
+      "permalink": "https://example.com/product/ship-your-idea/?attribute_pa_color=green",
+      "sku": "",
+      "price": "10.00",
+      "regular_price": "10.00",
+      "sale_price": "",
+      "date_on_sale_from": null,
+      "date_on_sale_from_gmt": null,
+      "date_on_sale_to": null,
+      "date_on_sale_to_gmt": null,
+      "on_sale": false,
+      "visible": true,
+      "purchasable": true,
+      "virtual": false,
+      "downloadable": false,
+      "downloads": [],
+      "download_limit": -1,
+      "download_expiry": -1,
+      "tax_status": "taxable",
+      "tax_class": "",
+      "manage_stock": false,
+      "stock_quantity": null,
+      "in_stock": true,
+      "backorders": "no",
+      "backorders_allowed": false,
+      "backordered": false,
+      "weight": "",
+      "dimensions": {
+        "length": "",
+        "width": "",
+        "height": ""
+      },
+      "shipping_class": "",
+      "shipping_class_id": 0,
+      "image": {
+        "id": 425,
+        "date_created": "2016-10-19T12:21:16",
+        "date_created_gmt": "2016-10-19T16:21:16",
+        "date_modified": "2016-10-19T12:21:16",
+        "date_modified_gmt": "2016-10-19T16:21:16",
+        "src": "https://example.com/wp-content/uploads/2016/10/T_3_front-12.jpg",
+        "name": "",
+        "alt": "",
+        "position": 0
+      },
+      "attributes": [
+        {
+          "id": 6,
+          "name": "Color",
+          "option": "Green"
+        }
+      ],
+      "menu_order": 0,
+      "meta_data": [],
+      "_links": {
+        "self": [
+          {
+            "href": "https://example.com/wp-json/wc/v2/products/22/variations/733"
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://example.com/wp-json/wc/v2/products/22/variations"
+          }
+        ],
+        "up": [
+          {
+            "href": "https://example.com/wp-json/wc/v2/products/22"
+          }
+        ]
+      }
+    }
+  ],
+  "delete": [
+    {
+      "id": 732,
+      "date_created": "2017-03-23T00:36:38",
+      "date_created_gmt": "2017-03-23T03:36:38",
+      "date_modified": "2017-03-23T00:36:38",
+      "date_modified_gmt": "2017-03-23T03:36:38",
+      "description": "",
+      "permalink": "https://example.com/product/ship-your-idea/?attribute_pa_color=black",
+      "sku": "",
+      "price": "9.00",
+      "regular_price": "9.00",
+      "sale_price": "",
+      "date_on_sale_from": null,
+      "date_on_sale_from_gmt": null,
+      "date_on_sale_to": null,
+      "date_on_sale_to_gmt": null,
+      "on_sale": false,
+      "visible": true,
+      "purchasable": true,
+      "virtual": false,
+      "downloadable": false,
+      "downloads": [],
+      "download_limit": -1,
+      "download_expiry": -1,
+      "tax_status": "taxable",
+      "tax_class": "",
+      "manage_stock": false,
+      "stock_quantity": null,
+      "in_stock": true,
+      "backorders": "no",
+      "backorders_allowed": false,
+      "backordered": false,
+      "weight": "",
+      "dimensions": {
+        "length": "",
+        "width": "",
+        "height": ""
+      },
+      "shipping_class": "",
+      "shipping_class_id": 0,
+      "image": {
+        "id": 423,
+        "date_created": "2016-10-19T12:21:14",
+        "date_created_gmt": "2016-10-19T16:21:14",
+        "date_modified": "2016-10-19T12:21:14",
+        "date_modified_gmt": "2016-10-19T16:21:14",
+        "src": "https://example.com/wp-content/uploads/2016/10/T_4_front-12.jpg",
+        "name": "",
+        "alt": "",
+        "position": 0
+      },
+      "attributes": [
+        {
+          "id": 6,
+          "name": "Color",
+          "option": "Black"
+        }
+      ],
+      "menu_order": 0,
+      "meta_data": [],
+      "_links": {
+        "self": [
+          {
+            "href": "https://example.com/wp-json/wc/v2/products/22/variations/732"
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://example.com/wp-json/wc/v2/products/22/variations"
+          }
+        ],
+        "up": [
+          {
+            "href": "https://example.com/wp-json/wc/v2/products/22"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+  </TabItem>
+</Tabs>

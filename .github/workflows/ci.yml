@@ -39,6 +39,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   FORCE_COLOR: 1
 
 jobs:
@@ -180,29 +181,13 @@ jobs:
         env:
           RELEASE_TAG: ${{ inputs.refName != '' && inputs.refName || github.ref_name }}
           ARTIFACT_NAME: ${{ inputs.artifactName }}
-          # band-aid to get the path to wp-env.json for blocks e2e tests, until they're migrated to plugins/woocommerce
-          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.testEnv.start == 'env:start:blocks' && 'plugins/woocommerce/client/blocks' || matrix.projectPath  }}
+          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.projectPath }}
         run: node .github/workflows/scripts/override-wp-env-plugins.js
 
       - name: 'Start Test Environment'
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
         run: pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
-
-      - name: 'Determine BuildKite Analytics Message'
-        env:
-          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-        run: |
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
-          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            MESSAGE="$PR_TITLE"
-          else
-            MESSAGE="${{ github.event_name }}"
-          fi
-          echo "BUILDKITE_ANALYTICS_MESSAGE=$MESSAGE" >> "$GITHUB_ENV"
-        shell: bash
 
       - name: 'Resolve artifacts path'
         if: ${{ always() && matrix.report.resultsPath != '' }}
@@ -226,7 +211,6 @@ jobs:
         timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 15 ) ) ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
-          BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
           LAST_FAILED_RUN: ${{ vars.LAST_FAILED_RUN }}
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -527,6 +511,11 @@ jobs:
             done
             echo "Populated filter: $filter"
 
+            if [ -z "$filter" ]; then
+                echo "No touched packages use changelogger; nothing to validate."
+                exit 0
+            fi
+
             pnpm --parallel --workspace-concurrency=10 --stream $filter changelog validate
 
   validate-markdown:
@@ -556,17 +545,19 @@ jobs:
         with:
           node-version-file: .nvmrc
 
+      - name: 'Setup - pnpm'
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+
       - name: 'Validate - lint md-files'
         if: ${{ steps.target-changes.outputs.needs-markdown-linting }}
         shell: bash
-        run: |
-            npm install -g markdownlint-cli
-            markdownlint ${{ steps.target-changes.outputs.needs-markdown-linting_files }}
-          
+        run: pnpm dlx markdownlint-cli -- ${{ steps.target-changes.outputs.needs-markdown-linting_files }}
+
       - name: 'Validate - lint docs-files'
         if: ${{ always() && steps.target-changes.outputs.needs-docs-build-validation }}
         shell: bash
         working-directory: docs/_docu-tools
         run: |
-            npm install
-            npm run build -- --config ./utils/docusaurus-faster.deploy.config.js
+            pnpm install --ignore-workspace
+            pnpm run lint:markdown
+            pnpm exec docusaurus build --config ./utils/docusaurus-faster.deploy.config.js

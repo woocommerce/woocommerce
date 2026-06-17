@@ -206,7 +206,11 @@ export type ProductQuery<
 	on_sale?: boolean;
 	min_price?: string;
 	max_price?: string;
-	stock_status?: 'instock' | 'outofstock' | 'onbackorder';
+	stock_status?:
+		| 'instock'
+		| 'outofstock'
+		| 'onbackorder'
+		| Array< 'instock' | 'outofstock' | 'onbackorder' >;
 };
 
 export type SuggestedProductOptionsKey = string;

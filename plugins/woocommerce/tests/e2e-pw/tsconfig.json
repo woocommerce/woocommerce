@@ -7,7 +7,7 @@
 		"baseUrl": ".",
 		"paths": {
 			"@woocommerce/e2e-utils": [
-				"../../client/blocks/tests/e2e/utils"
+				"./utils/blocks"
 			]
 		},
 		"esModuleInterop": true,
@@ -34,6 +34,10 @@
 	"exclude": [
 		"node_modules",
 		"test-results",
-		"playwright-report"
+		"playwright-report",
+		"tests/blocks/**/*",
+		"utils/blocks/**/*",
+		"fixtures/blocks-setup.ts",
+		"test-data/blocks/**/*"
 	]
 }

@@ -17,6 +17,15 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 	/**
+	 * Reset the variation gallery feature-flag option after each test so
+	 * individual cases that flip it on don't leak global state.
+	 */
+	public function tearDown(): void {
+		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox If 'wc_get_price_excluding_tax' gets an order as argument, it passes the order customer to 'WC_Tax::get_rates'.
 	 *
 	 * @testWith [true, 1, true]
@@ -368,6 +377,112 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		// The timestamp should have changed.
 		$this->assertNotEquals( $original_start, $new_start_action, 'Start action should be rescheduled with new time' );
+	}
+
+	/**
+	 * @testDox Identical pending sale events are not scheduled twice when scheduling runs concurrently.
+	 */
+	public function test_wc_schedule_product_sale_events_skips_identical_pending_actions() {
+		$future_start = time() + 3600;
+		$future_end   = time() + 86400;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', $future_end ) );
+		$product->save();
+
+		// Simulate a concurrent process that already passed the unschedule-all step
+		// by invoking the scheduling function directly, without unscheduling first.
+		wc_schedule_product_sale_events( wc_get_product( $product->get_id() ) );
+
+		$this->assertSame(
+			1,
+			$this->count_pending_sale_actions( 'wc_product_start_scheduled_sale', $product->get_id() ),
+			'Only one start sale action should be pending after concurrent scheduling'
+		);
+		$this->assertSame(
+			1,
+			$this->count_pending_sale_actions( 'wc_product_end_scheduled_sale', $product->get_id() ),
+			'Only one end sale action should be pending after concurrent scheduling'
+		);
+	}
+
+	/**
+	 * @testDox An identical pending sale event is not scheduled twice even when an earlier action is also pending.
+	 */
+	public function test_wc_schedule_product_sale_events_skips_identical_pending_action_behind_an_earlier_one() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+
+		$earlier_ts = time() + 3600;
+		$target_ts  = time() + 7200;
+
+		// Simulate a stale action left behind by a concurrent process that saw older sale dates.
+		as_schedule_single_action( $earlier_ts, 'wc_product_start_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' );
+
+		// Not saved on purpose: saving would trigger the unschedule-all step and remove the stale action.
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $target_ts ) );
+
+		wc_schedule_product_sale_events( $product );
+		wc_schedule_product_sale_events( $product );
+
+		$this->assertSame(
+			2,
+			$this->count_pending_sale_actions( 'wc_product_start_scheduled_sale', $product->get_id() ),
+			'The action at the new time should be scheduled exactly once alongside the stale earlier action'
+		);
+	}
+
+	/**
+	 * @testDox A sale event pending for a different time does not prevent scheduling at the new time.
+	 */
+	public function test_wc_schedule_product_sale_events_schedules_when_pending_action_has_different_timestamp() {
+		$future_start = time() + 3600;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start ) );
+		$product->save();
+
+		$product = wc_get_product( $product->get_id() );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start + 3600 ) );
+		wc_schedule_product_sale_events( $product );
+
+		$this->assertSame(
+			2,
+			$this->count_pending_sale_actions( 'wc_product_start_scheduled_sale', $product->get_id() ),
+			'A start sale action with a different timestamp should still be scheduled'
+		);
+	}
+
+	/**
+	 * Count pending Action Scheduler sale actions for a product.
+	 *
+	 * @param string $hook       Action hook name.
+	 * @param int    $product_id Product ID.
+	 * @return int
+	 */
+	private function count_pending_sale_actions( string $hook, int $product_id ): int {
+		$actions = as_get_scheduled_actions(
+			array(
+				'hook'     => $hook,
+				'args'     => array( 'product_id' => $product_id ),
+				'group'    => 'woocommerce-sales',
+				'status'   => \ActionScheduler_Store::STATUS_PENDING,
+				'per_page' => -1,
+			),
+			'ids'
+		);
+
+		return count( $actions );
 	}
 
 	/**
@@ -1018,5 +1133,63 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		}
 
 		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Variable add-to-cart attaches a pristine gallery snapshot to the variation script when the feature is on.
+	 */
+	public function test_woocommerce_variable_add_to_cart_attaches_gallery_snapshot() {
+		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
+
+		$inline_js = $this->capture_variable_add_to_cart_inline_js();
+
+		$this->assertStringContainsString( 'wc_variation_gallery_defaults', $inline_js );
+
+		// Extract the JSON snapshot from the inline JS and verify it contains gallery markup.
+		preg_match( '/\)\[\d+\]\s*=\s*("(?:\\\\.|[^"])*");/', $inline_js, $matches );
+		$this->assertNotEmpty( $matches, 'Inline JS should expose a JSON-encoded snapshot.' );
+		$decoded_snapshot = json_decode( $matches[1] );
+		$this->assertIsString( $decoded_snapshot );
+		$this->assertStringContainsString( 'woocommerce-product-gallery', $decoded_snapshot );
+	}
+
+	/**
+	 * @testdox Variable add-to-cart skips the gallery snapshot when the feature is off.
+	 */
+	public function test_woocommerce_variable_add_to_cart_skips_gallery_snapshot_when_feature_off() {
+		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+
+		$inline_js = $this->capture_variable_add_to_cart_inline_js();
+
+		$this->assertStringNotContainsString( 'wc_variation_gallery_defaults', $inline_js );
+	}
+
+	/**
+	 * Render the variable add-to-cart template and return the inline JS
+	 * attached to the variation script.
+	 */
+	private function capture_variable_add_to_cart_inline_js(): string {
+		$product = WC_Helper_Product::create_variation_product();
+
+		WC_Frontend_Scripts::load_scripts();
+
+		$wp_scripts = wp_scripts();
+		if ( isset( $wp_scripts->registered['wc-add-to-cart-variation'] ) ) {
+			unset( $wp_scripts->registered['wc-add-to-cart-variation']->extra['before'] );
+		}
+
+		$previous_product   = $GLOBALS['product'] ?? null;
+		$GLOBALS['product'] = $product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		ob_start();
+		woocommerce_variable_add_to_cart();
+		ob_end_clean();
+
+		$before_data = $wp_scripts->registered['wc-add-to-cart-variation']->extra['before'] ?? array();
+
+		$GLOBALS['product'] = $previous_product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		WC_Helper_Product::delete_product( $product->get_id() );
+
+		return implode( "\n", (array) $before_data );
 	}
 }

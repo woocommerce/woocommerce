@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Enums\ProductType;
-use WP_Block;
 
 /**
  * Utility methods used for the Add to Cart + Options block.
@@ -23,7 +22,7 @@ class Utils {
 		while ( $processor->next_tag() ) {
 			if (
 				$processor->get_tag() === 'INPUT' &&
-				$processor->get_attribute( 'name' ) === 'quantity' &&
+				$processor->has_class( 'qty' ) &&
 				$processor->get_attribute( 'type' ) !== 'hidden'
 			) {
 				return true;
@@ -31,6 +30,7 @@ class Utils {
 		}
 		return false;
 	}
+
 	/**
 	 * Add increment and decrement buttons to the quantity input field.
 	 *
@@ -84,7 +84,7 @@ class Utils {
 
 			if (
 				$processor->get_tag() === 'INPUT' &&
-				$processor->get_attribute( 'name' ) === 'quantity' &&
+				$processor->has_class( 'qty' ) &&
 				$processor->get_attribute( 'type' ) !== 'hidden'
 			) {
 				$processor->add_class( 'wc-block-components-quantity-selector__input' );
@@ -116,6 +116,34 @@ class Utils {
 	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array(), $set_product_context = false ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 		global $product;
+
+		if ( $set_product_context && $product instanceof \WC_Product ) {
+			$product_context = array(
+				'productId'   => $product->get_id(),
+				'variationId' => null,
+			);
+
+			$products_context = 'woocommerce/products::' . wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
+
+			// This moves the `woocommerce/products` context to a nested `div`,
+			// as multiple context directives are not supported in the same
+			// element in WordPress 6.8. Once WooCommerce drops support for
+			// WordPress 6.8, this code can be refactored.
+			if (
+				$processor->next_tag(
+					array(
+						'tag_name'   => 'div',
+						'class_name' => 'quantity',
+					)
+				)
+			) {
+				$processor->set_attribute( 'data-wp-context', $products_context );
+			} else {
+				// If filtered markup omits the `div.quantity`, reinitialize the
+				// processor so the input bindings below still execute.
+				$processor = new \WP_HTML_Tag_Processor( $quantity_html );
+			}
+		}
 
 		if (
 			$processor->next_tag( 'input' ) &&
@@ -151,22 +179,10 @@ class Utils {
 
 		$context_attribute = wp_interactivity_data_wp_context( $context );
 
-		$product_context_directive = '';
-		if ( $set_product_context && $product instanceof \WC_Product ) {
-			$product_context = array(
-				'productId'   => $product->get_id(),
-				'variationId' => null,
-			);
-
-			// This should use `wp_interactivity_data_wp_context` as well, but it currently doesn't support unique IDs.
-			$product_context_directive = 'data-wp-context---products="woocommerce/products::' . esc_attr( (string) wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) ) . '"';
-		}
-
 		return sprintf(
-			'<div %1$s %2$s %3$s>%4$s</div>',
+			'<div %1$s %2$s>%3$s</div>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
 			$context_attribute,
-			$product_context_directive,
 			$quantity_html
 		);
 	}
@@ -207,27 +223,6 @@ class Utils {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Renders a new block with custom context
-	 *
-	 * @param WP_Block $block The block instance.
-	 * @param array    $context The context for the new block.
-	 * @return string Rendered block content
-	 */
-	public static function render_block_with_context( $block, $context ) {
-		// Get an instance of the current block.
-		$block_instance = $block->parsed_block;
-
-		// Create new block with custom context.
-		$new_block = new WP_Block(
-			$block_instance,
-			$context
-		);
-
-		// Render with dynamic set to false to prevent calling render_callback.
-		return $new_block->render( array( 'dynamic' => false ) );
 	}
 
 	/**
