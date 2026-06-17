@@ -24,8 +24,10 @@ class WooPaymentsTokenizedCartSessionHandler extends \WC_Session_Handler {
 
 	/**
 	 * Init tokenized session data without binding the request to the shopper's normal WooCommerce session cookie.
+	 *
+	 * @internal
 	 */
-	public function init(): void {
+	final public function init(): void {
 		$this->init_tokenized_session();
 
 		if ( ! $this->is_ephemeral_request() ) {
@@ -71,16 +73,16 @@ class WooPaymentsTokenizedCartSessionHandler extends \WC_Session_Handler {
 	/**
 	 * Return an empty cart for a newly-created isolated session.
 	 *
-	 * @param string $key     Session key.
-	 * @param mixed  $default Default value.
+	 * @param string $key           Session key.
+	 * @param mixed  $default_value Default value.
 	 * @return mixed
 	 */
-	public function get( $key, $default = null ) {
+	public function get( $key, $default_value = null ) {
 		if ( 'cart' === $key && ! array_key_exists( 'cart', $this->_data ) ) {
 			return array();
 		}
 
-		return parent::get( $key, $default );
+		return parent::get( $key, $default_value );
 	}
 
 	/**
@@ -92,7 +94,7 @@ class WooPaymentsTokenizedCartSessionHandler extends \WC_Session_Handler {
 		$session_id = $this->get_session_id_from_header();
 
 		if ( '' === $session_id ) {
-			$session_id = $this->generate_customer_id();
+				$session_id = $this->generate_customer_id();
 		}
 
 		$this->_customer_id = $session_id;
@@ -116,7 +118,7 @@ class WooPaymentsTokenizedCartSessionHandler extends \WC_Session_Handler {
 			return '';
 		}
 
-		$parts = JsonWebToken::get_parts( $token );
+		$parts   = JsonWebToken::get_parts( $token );
 		$payload = is_object( $parts ) && isset( $parts->payload ) ? $parts->payload : null;
 		if ( ! is_object( $payload ) || ! isset( $payload->session_id, $payload->iss ) || self::TOKEN_ISSUER !== $payload->iss ) {
 			return '';
@@ -149,7 +151,7 @@ class WooPaymentsTokenizedCartSessionHandler extends \WC_Session_Handler {
 	 * @return bool
 	 */
 	private function is_ephemeral_request(): bool {
-		return '1' === ( isset( $_SERVER['HTTP_X_WOOPAYMENTS_TOKENIZED_CART_IS_EPHEMERAL_CART'] ) ? (string) $_SERVER['HTTP_X_WOOPAYMENTS_TOKENIZED_CART_IS_EPHEMERAL_CART'] : '' );
+		return '1' === $this->get_server_header( 'HTTP_X_WOOPAYMENTS_TOKENIZED_CART_IS_EPHEMERAL_CART' );
 	}
 
 	/**

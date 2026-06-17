@@ -1017,7 +1017,7 @@ class WooPaymentsTokenizedCartSessionController implements RegisterHooksInterfac
 			return false;
 		}
 
-		$parts = JsonWebToken::get_parts( $token );
+		$parts   = JsonWebToken::get_parts( $token );
 		$payload = is_object( $parts ) && isset( $parts->payload ) ? $parts->payload : null;
 
 		if ( ! is_object( $payload ) || ! isset( $payload->session_id, $payload->iss ) || self::TOKEN_ISSUER !== $payload->iss ) {
@@ -1068,7 +1068,7 @@ class WooPaymentsTokenizedCartSessionController implements RegisterHooksInterfac
 	 * @return bool
 	 */
 	private function is_ephemeral_request(): bool {
-		return '1' === ( isset( $_SERVER[ self::EPHEMERAL_CART_HEADER ] ) ? (string) $_SERVER[ self::EPHEMERAL_CART_HEADER ] : '' );
+		return '1' === $this->get_server_header( self::EPHEMERAL_CART_HEADER );
 	}
 
 	/**
@@ -1077,7 +1077,7 @@ class WooPaymentsTokenizedCartSessionController implements RegisterHooksInterfac
 	 * @return bool
 	 */
 	private function is_custom_session_order_received_request(): bool {
-		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '';
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( (string) $_SERVER['REQUEST_URI'] ) ) : '';
 
 		return false !== strpos( $request_uri, self::RETURN_URL_MARKER . '=1' );
 	}

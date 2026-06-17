@@ -43,7 +43,7 @@ class WooPaymentsTokenizedCartSessionControllerTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->original_session     = WC()->session;
-		$this->original_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : null;
+		$this->original_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( (string) $_SERVER['REQUEST_URI'] ) ) : null;
 	}
 
 	/**
@@ -239,6 +239,10 @@ class WooPaymentsTokenizedCartSessionControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should recover Hong Kong tokenized checkout regions from district values.
 	 * @dataProvider hong_kong_region_recovery_provider
+	 *
+	 * @param string $field           Address field that carries the region candidate.
+	 * @param string $value           Candidate value.
+	 * @param string $expected_region Expected normalized Hong Kong region.
 	 */
 	public function test_recovers_hong_kong_tokenized_checkout_region_from_district( string $field, string $value, string $expected_region ): void {
 		$this->set_store_api_request();
@@ -250,6 +254,7 @@ class WooPaymentsTokenizedCartSessionControllerTest extends WC_Unit_Test_Case {
 			'postcode' => '',
 			'city'     => '',
 		);
+
 		$address[ $field ] = $value;
 		$request->set_param(
 			'billing_address',
@@ -270,7 +275,7 @@ class WooPaymentsTokenizedCartSessionControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function hong_kong_region_recovery_provider(): array {
 		return array(
-			'Tai Po city'            => array( 'city', 'Tai Po', 'NEW TERRITORIES' ),
+			'Tai Po city'           => array( 'city', 'Tai Po', 'NEW TERRITORIES' ),
 			'Happy Valley state'    => array( 'state', 'happy valley', 'HONG KONG' ),
 			'Hung Hom state'        => array( 'state', 'hung hom', 'KOWLOON' ),
 			'Fanling postcode'      => array( 'postcode', 'fanling', 'NEW TERRITORIES' ),
@@ -298,9 +303,9 @@ class WooPaymentsTokenizedCartSessionControllerTest extends WC_Unit_Test_Case {
 		$this->assertNull( $result );
 		$shipping_address = $request->get_param( 'shipping_address' );
 		$this->assertSame( 'N1C000', $shipping_address['postcode'] );
-		$this->assertTrue( apply_filters( 'woocommerce_validate_postcode', false, 'N1C000', 'GB' ) );
-		$this->assertTrue( apply_filters( 'woocommerce_validate_postcode', false, 'N1C 000', 'GB' ) );
-		$this->assertFalse( apply_filters( 'woocommerce_validate_postcode', false, 'SW1000', 'GB' ) );
+		$this->assertTrue( $this->sut->maybe_skip_postcode_validation( false, 'N1C000', 'GB' ) );
+		$this->assertTrue( $this->sut->maybe_skip_postcode_validation( false, 'N1C 000', 'GB' ) );
+		$this->assertFalse( $this->sut->maybe_skip_postcode_validation( false, 'SW1000', 'GB' ) );
 	}
 
 	/**
@@ -320,11 +325,11 @@ class WooPaymentsTokenizedCartSessionControllerTest extends WC_Unit_Test_Case {
 
 		$this->sut->maybe_reject_invalid_tokenized_cart_session( null, null, $request );
 
-		$this->assertTrue( apply_filters( 'woocommerce_validate_postcode', false, 'N1C000', 'GB' ) );
+		$this->assertTrue( $this->sut->maybe_skip_postcode_validation( false, 'N1C000', 'GB' ) );
 
 		$this->sut->clear_tokenized_postcode_validation( new WP_REST_Response( array() ), null, $request );
 
-		$this->assertFalse( apply_filters( 'woocommerce_validate_postcode', false, 'N1C000', 'GB' ) );
+		$this->assertFalse( $this->sut->maybe_skip_postcode_validation( false, 'N1C000', 'GB' ) );
 	}
 
 	/**
@@ -332,10 +337,12 @@ class WooPaymentsTokenizedCartSessionControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_preserves_cart_clear_after_payment_for_tokenized_order_received_redirect(): void {
 		$_SERVER['REQUEST_URI'] = '/checkout/order-received/123/?woopayments-custom-session=1';
+
 		$this->sut = $this->create_controller( true );
 		$this->sut->register();
 
-		$this->assertFalse( apply_filters( 'woocommerce_should_clear_cart_after_payment', true ) );
+		$this->assertSame( 10, has_filter( 'woocommerce_should_clear_cart_after_payment', array( $this->sut, 'preserve_cart_after_tokenized_payment' ) ) );
+		$this->assertFalse( $this->sut->preserve_cart_after_tokenized_payment() );
 	}
 
 	/**
@@ -378,10 +385,16 @@ class WooPaymentsTokenizedCartSessionControllerTest extends WC_Unit_Test_Case {
 	public function test_emits_next_tokenized_session_header(): void {
 		$this->set_store_api_request();
 		WC()->session = new class() {
+			/**
+			 * Get the customer id.
+			 *
+			 * @return string
+			 */
 			public function get_customer_id(): string {
 				return 't_native_product_session';
 			}
 		};
+
 		$this->sut = $this->create_controller( true );
 
 		$response = $this->sut->handle_store_api_response( new WP_REST_Response( array() ), null, new WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
@@ -436,14 +449,17 @@ class WooPaymentsTokenizedCartSessionControllerTest extends WC_Unit_Test_Case {
 	 * @return WP_REST_Request
 	 */
 	private function create_tokenized_store_api_request( string $method, string $route ): WP_REST_Request {
-		$_SERVER['HTTP_X_WOOPAYMENTS_TOKENIZED_CART_SESSION_NONCE'] = wp_create_nonce( 'woopayments_tokenized_cart_session_nonce' );
+		$session_nonce   = wp_create_nonce( 'woopayments_tokenized_cart_session_nonce' );
+		$tokenized_nonce = wp_create_nonce( 'woopayments_tokenized_cart_nonce' );
+
+		$_SERVER['HTTP_X_WOOPAYMENTS_TOKENIZED_CART_SESSION_NONCE'] = $session_nonce;
 		$_SERVER['HTTP_X_WOOPAYMENTS_TOKENIZED_CART']               = 'true';
-		$_SERVER['HTTP_X_WOOPAYMENTS_TOKENIZED_CART_NONCE']         = wp_create_nonce( 'woopayments_tokenized_cart_nonce' );
+		$_SERVER['HTTP_X_WOOPAYMENTS_TOKENIZED_CART_NONCE']         = $tokenized_nonce;
 
 		$request = new WP_REST_Request( $method, $route );
-		$request->set_header( 'X-WooPayments-Tokenized-Cart-Session-Nonce', $_SERVER['HTTP_X_WOOPAYMENTS_TOKENIZED_CART_SESSION_NONCE'] );
+		$request->set_header( 'X-WooPayments-Tokenized-Cart-Session-Nonce', $session_nonce );
 		$request->set_header( 'X-WooPayments-Tokenized-Cart', 'true' );
-		$request->set_header( 'X-WooPayments-Tokenized-Cart-Nonce', $_SERVER['HTTP_X_WOOPAYMENTS_TOKENIZED_CART_NONCE'] );
+		$request->set_header( 'X-WooPayments-Tokenized-Cart-Nonce', $tokenized_nonce );
 
 		return $request;
 	}
