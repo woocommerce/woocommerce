@@ -195,9 +195,14 @@ jobs:
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Set up build environment'
         with:
+          install: '@woocommerce/plugin-woocommerce...'
           pull-package-deps: '@woocommerce/plugin-woocommerce'
 
       - name: 'Build WooCommerce plugin zip'
+        env:
+          BUILD_ZIP_WITH_MAKEPOT: '0'
+          SKIP_INSTALL: '1'
+          ZIP_COMPRESSION_LEVEL: '1'
         run: pnpm --filter='@woocommerce/plugin-woocommerce' build:zip
 
       - name: 'Upload e2e plugin artifact'
@@ -208,6 +213,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
           overwrite: true
+          compression-level: 0
 
   project-test-jobs:
     name: '${{ matrix.name }}'
