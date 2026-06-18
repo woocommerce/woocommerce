@@ -88,7 +88,6 @@ module.exports = {
 		'\\.(scss|css)$': path.resolve( __dirname, 'src/mocks/style-mock.js' ),
 		// Force some modules to resolve with the CJS entry point, because Jest does not support package.json.exports.
 		'lib0/webcrypto': require.resolve( 'lib0/webcrypto' ), // use the CJS entry point so that it uses the node:crypto API as jsdom doesn't have a crypto API
-		uuid: require.resolve( 'uuid' ),
 		memize: require.resolve( 'memize' ),
 		...wpModulesMapper,
 	},

@@ -36,7 +36,11 @@
 }
 
 .product_page_woocommerce-products-dashboard-snackbar {
-	@include snackbar-container;
+	position: fixed;
+	right: var(--wpds-dimension-padding-lg, 16px);
+	bottom: var(--wpds-dimension-padding-lg, 16px);
+	left: var(--wpds-dimension-padding-lg, 16px);
+	width: auto;
 	z-index: 100002;
 }
 
