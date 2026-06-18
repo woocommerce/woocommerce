@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve native WooPayments admin route links and deposits request compatibility.
