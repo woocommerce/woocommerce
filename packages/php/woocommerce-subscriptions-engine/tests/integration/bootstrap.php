@@ -78,7 +78,7 @@ class SubscriptionsEngineTestsBootstrap {
 	 * Load the engine plugin file.
 	 */
 	public function load_plugin(): void {
-		require_once $this->plugin_dir . '/subscriptions-engine.php';
+		require_once $this->plugin_dir . '/woocommerce-subscriptions-engine.php';
 	}
 
 	/**
