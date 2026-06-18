@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Improve cart table accessibility and spacing: announce cart line items as proper table rows in the responsive and mini-cart layouts, give the product row header a concise accessible name, keep every cell aligned with its column header so screen readers announce the correct column, and remove unnecessary cart table edge padding.
+Improve cart table accessibility and spacing so screen readers announce line items as rows with the correct column headers.

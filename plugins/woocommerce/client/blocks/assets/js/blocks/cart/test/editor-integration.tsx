@@ -193,15 +193,9 @@ describe( 'Cart block editor integration', () => {
 		const cartItems = previewCart.items;
 		// Now the product links should be rendered
 		cartItems.forEach( ( item ) => {
-			const productNameElement = screen
-				.getAllByRole( 'link', {
-					name: item.name,
-				} )
-				.find( ( element ) =>
-					element.classList.contains(
-						'wc-block-components-product-name'
-					)
-				);
+			const productNameElement = screen.getByRole( 'link', {
+				name: item.name,
+			} );
 			expect( productNameElement ).toBeVisible();
 			expect( productNameElement ).toHaveTextContent( item.name );
 		} );

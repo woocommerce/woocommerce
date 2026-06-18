@@ -92,8 +92,10 @@ const CartLineItemsTable = ( {
 			</caption>
 			<thead>
 				<tr className="wc-block-cart-items__header">
+					{ /* Decorative image column, hidden from screen readers (see cart-line-item-row.tsx). */ }
 					<th
 						scope="col"
+						aria-hidden="true"
 						className="wc-block-cart-items__header-image"
 					>
 						<span>{ __( 'Product', 'woocommerce' ) }</span>
@@ -102,11 +104,6 @@ const CartLineItemsTable = ( {
 						scope="col"
 						className="wc-block-cart-items__header-product"
 					>
-						{ /* Visually hidden but kept in the accessibility tree so
-						     the product/details column has a programmatic header.
-						     Each row's thumbnail cell is also exposed (see
-						     cart-line-item-row.tsx) so these three headers line up
-						     with the three body cells. */ }
 						<span className="screen-reader-text">
 							{ __( 'Details', 'woocommerce' ) }
 						</span>

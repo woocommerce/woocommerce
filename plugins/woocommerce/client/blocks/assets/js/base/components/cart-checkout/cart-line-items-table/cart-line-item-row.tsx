@@ -3,6 +3,7 @@
  */
 import clsx from 'clsx';
 import { __, sprintf } from '@wordpress/i18n';
+import { decodeEntities } from '@wordpress/html-entities';
 import { speak } from '@wordpress/a11y';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import ProductPrice from '@woocommerce/base-components/product-price';
@@ -163,6 +164,8 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 			extensions,
 			arg,
 		} );
+		// `name` is a raw HTML string; decode entities for screen-reader text (aria-label, speak).
+		const decodedName = decodeEntities( name );
 
 		const regularAmountSingle = dinero( {
 			amount: parseInt( prices.raw_prices.regular_price, 10 ),
@@ -234,11 +237,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 
 		return (
 			<tr
-				// Explicit role="row" is required because the responsive grid
-				// layout sets `display: grid` on this row (see style.scss),
-				// which strips the implicit table-row role and would otherwise
-				// orphan the rowheader cell below. On the desktop table layout
-				// this matches the implicit role, so it's a no-op there.
+				// Restores the row role that `display: grid` strips in the responsive layout.
 				role="row"
 				data-cart-item-key={ lineItem.key }
 				className={ clsx(
@@ -251,13 +250,8 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 				ref={ ref }
 				tabIndex={ tabIndex }
 			>
-				<td className="wc-block-cart-item__image">
-					{ /* The image carries an enforced alt (the product name via
-					     fallbackAlt below), so this cell stays in the
-					     accessibility tree. That keeps each row at three cells,
-					     matching the three column headers, so the Total cell is
-					     announced under "Total" and not the adjacent header. */ }
-					{ /* We don't need to make it focusable, because product name has the same link. */ }
+				{ /* Decorative image, hidden from screen readers so the row isn't announced as an empty "Product" cell. */ }
+				<td className="wc-block-cart-item__image" aria-hidden="true">
 					{ isProductHiddenFromCatalog ? (
 						<ProductImage
 							image={ firstImage }
@@ -278,12 +272,8 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 				</td>
 				<td
 					role="rowheader"
-					// Name the rowheader after the product only. Without this,
-					// the accessible name is computed from the whole cell
-					// (prices, metadata, quantity selector, remove button),
-					// producing a verbose row-header announcement on every
-					// associated data cell.
-					aria-label={ name }
+					// Name the rowheader after the product only, not the whole cell's contents.
+					aria-label={ decodedName }
 					className="wc-block-cart-item__product"
 				>
 					<div className="wc-block-cart-item__wrap">
@@ -337,7 +327,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 											}
 										);
 									} }
-									itemName={ name }
+									itemName={ decodedName }
 								/>
 							) }
 							{ showRemoveItemLink && (
@@ -349,7 +339,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 											'Remove %s from cart',
 											'woocommerce'
 										),
-										name
+										decodedName
 									) }
 									onClick={ () => {
 										onRemove();
@@ -368,7 +358,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 													'%s has been removed from your cart.',
 													'woocommerce'
 												),
-												name
+												decodedName
 											)
 										);
 									} }
@@ -414,7 +404,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 													'%s has been saved for later and removed from your cart.',
 													'woocommerce'
 												),
-												name
+												decodedName
 											)
 										);
 									} }
