@@ -169,6 +169,25 @@ class AsyncGenerator {
 			$feed   = $this->integration->create_feed();
 			$walker = ProductWalker::from_integration( $this->integration, $feed );
 
+			/**
+			 * Filters the per-batch PHP execution time limit (in seconds) for product feed generation.
+			 *
+			 * The execution time limit is reset to this value after each processed batch, so that a low
+			 * `max_execution_time` does not abort generation part-way through a large catalog. Return 0
+			 * to leave the time limit untouched.
+			 *
+			 * This only affects PHP's own execution timeout. It does not extend Action Scheduler's
+			 * failure period (`action_scheduler_failure_period`, 300 seconds by default) nor any hard
+			 * server/host request timeout, so it is a mitigation rather than a guarantee for very large
+			 * catalogs.
+			 *
+			 * @param int $batch_time_limit The per-batch time limit in seconds.
+			 *
+			 * @since 11.0.0
+			 */
+			$batch_time_limit = (int) apply_filters( 'woocommerce_product_feed_batch_time_limit', 5 * MINUTE_IN_SECONDS );
+			$walker->add_time_limit( $batch_time_limit );
+
 			// Add dynamic args to the mapper.
 			$args = $status['args'] ?? array();
 			if (
