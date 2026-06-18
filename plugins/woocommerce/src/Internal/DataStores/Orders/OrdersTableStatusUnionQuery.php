@@ -266,12 +266,11 @@ class OrdersTableStatusUnionQuery {
 		foreach ( $types as $type ) {
 			$counts = $count_cache->get( $type, $statuses );
 
-			// A cold cache for any queried type means we have no confident total, so bail out (count 0, rewrite
-			// disabled) rather than enable on a partial count — hence reset and break, not continue.
-			// OrderCountCache::get() returns null when any of the type's queried statuses is missing from the cache.
+			// A cold count cache for a type (get() returns null when any of its queried statuses is missing)
+			// contributes nothing rather than disqualifying the whole check, so the fast path can kick in off the
+			// counts we already have without waiting for every type's cache to warm.
 			if ( is_null( $counts ) ) {
-				$orders_count = 0;
-				break;
+				continue;
 			}
 
 			$orders_count += array_sum( $counts );
