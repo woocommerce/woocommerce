@@ -395,13 +395,20 @@ final class Plan {
 	 */
 	private static function validate_pricing_policy( Pricing_Policy $pricing_policy ): void {
 		foreach ( $pricing_policy->get_policies() as $index => $entry ) {
-			$type  = $entry['type'] ?? null;
-			$value = $entry['value'] ?? null;
+			if ( ! is_array( $entry ) ) {
+				throw new InvalidArgumentException(
+					sprintf( 'pricing_policy.policies[%d]: must be an array, got %s', (int) $index, gettype( $entry ) )
+				);
+			}
+
+			$type           = $entry['type'] ?? null;
+			$value          = $entry['value'] ?? null;
+			$starting_cycle = $entry['starting_cycle'] ?? null;
 
 			if ( ! is_string( $type ) || ! in_array( $type, self::ALLOWED_POLICY_TYPES, true ) ) {
 				$shown = is_scalar( $type ) ? (string) $type : gettype( $type );
 				throw new InvalidArgumentException(
-					sprintf( 'pricing_policy.policies[%d]: unknown type %s', (int) $index, $shown )
+					sprintf( 'pricing_policy.policies[%d]: invalid type %s', (int) $index, $shown )
 				);
 			}
 
@@ -423,6 +430,20 @@ final class Plan {
 				throw new InvalidArgumentException(
 					sprintf( 'pricing_policy.policies[%d]: percentage must not exceed 100, got %s', (int) $index, $value )
 				);
+			}
+
+			if ( null !== $starting_cycle ) {
+				if ( ! is_int( $starting_cycle ) ) {
+					throw new InvalidArgumentException(
+						sprintf( 'pricing_policy.policies[%d]: starting_cycle must be an integer, got %s', (int) $index, gettype( $starting_cycle ) )
+					);
+				}
+
+				if ( $starting_cycle < 1 ) {
+					throw new InvalidArgumentException(
+						sprintf( 'pricing_policy.policies[%d]: starting_cycle must be at least 1, got %d', (int) $index, $starting_cycle )
+					);
+				}
 			}
 		}
 
