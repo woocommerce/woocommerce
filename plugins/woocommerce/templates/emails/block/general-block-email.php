@@ -93,7 +93,7 @@ if ( 'customer_verify_email' === $email->id ) :
 	// Customer verify email address email.
 	?>
 <p>
-	<a class="link" href="<?php echo esc_url( $verify_url ?? wc_get_page_permalink( 'myaccount' ) ); ?>">
+	<a class="link" href="<?php echo esc_url( ! empty( $verify_url ) ? $verify_url : wc_get_page_permalink( 'myaccount' ) ); ?>">
 		<?php esc_html_e( 'Confirm email address', 'woocommerce' ); ?>
 	</a>
 </p>
