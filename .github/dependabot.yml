@@ -1,0 +1,38 @@
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      # Gutenberg releases every two weeks. Checking weekly catches release
+      # weeks without opening PRs when there are no package updates.
+      interval: "weekly"
+      day: "wednesday"
+      time: "08:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 1
+    allow:
+      - dependency-name: "@wordpress/admin-ui"
+      # Covers the `@wordpress/dataviews/wp` import subpath too.
+      - dependency-name: "@wordpress/dataviews"
+      - dependency-name: "@wordpress/fields"
+      - dependency-name: "@wordpress/grid"
+      - dependency-name: "@wordpress/icons"
+      - dependency-name: "@wordpress/interface"
+      - dependency-name: "@wordpress/style-runtime"
+      - dependency-name: "@wordpress/ui"
+      - dependency-name: "@wordpress/undo-manager"
+      - dependency-name: "@wordpress/views"
+    groups:
+      bundled-wordpress-packages:
+        patterns:
+          - "@wordpress/admin-ui"
+          - "@wordpress/dataviews"
+          - "@wordpress/fields"
+          - "@wordpress/grid"
+          - "@wordpress/icons"
+          - "@wordpress/interface"
+          - "@wordpress/style-runtime"
+          - "@wordpress/ui"
+          - "@wordpress/undo-manager"
+          - "@wordpress/views"
