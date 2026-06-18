@@ -808,17 +808,6 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Known unmigrated WooPayments event types fail closed.
-	 */
-	public function test_known_unhandled_woopayments_event_type_fails_closed(): void {
-		$order = $this->create_woopayments_order();
-
-		$this->expectException( RuntimeException::class );
-
-		$this->sut->process( $this->create_payment_intent_event( 'invoice.paid', $order ) );
-	}
-
-	/**
 	 * @testdox Migrated account and refund webhook event types are no longer cutover blockers.
 	 */
 	public function test_refund_webhook_events_are_not_known_unhandled(): void {
@@ -827,9 +816,99 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 		$this->assertNotContains( 'account.updated', WooPaymentsEventIngestor::KNOWN_UNHANDLED_EVENT_TYPES );
 		$this->assertNotContains( 'account.deleted', WooPaymentsEventIngestor::KNOWN_UNHANDLED_EVENT_TYPES );
 		$this->assertNotContains( 'wcpay.notification', WooPaymentsEventIngestor::KNOWN_UNHANDLED_EVENT_TYPES );
-		$this->assertContains( 'invoice.paid', WooPaymentsEventIngestor::KNOWN_UNHANDLED_EVENT_TYPES );
-		$this->assertContains( 'invoice.payment_failed', WooPaymentsEventIngestor::KNOWN_UNHANDLED_EVENT_TYPES );
-		$this->assertContains( 'invoice.upcoming', WooPaymentsEventIngestor::KNOWN_UNHANDLED_EVENT_TYPES );
+		$this->assertNotContains( 'invoice.paid', WooPaymentsEventIngestor::KNOWN_UNHANDLED_EVENT_TYPES );
+		$this->assertNotContains( 'invoice.payment_failed', WooPaymentsEventIngestor::KNOWN_UNHANDLED_EVENT_TYPES );
+		$this->assertNotContains( 'invoice.upcoming', WooPaymentsEventIngestor::KNOWN_UNHANDLED_EVENT_TYPES );
+	}
+
+	/**
+	 * @testdox Retired Stripe Billing invoice events are alarmed instead of falling through silently.
+	 */
+	public function test_retired_stripe_billing_invoice_event_logs_alarm(): void {
+		$logger = new class() {
+			/**
+			 * Logged entries.
+			 *
+			 * @var array<int,array{0:string,1:array<string,mixed>}>
+			 */
+			public array $entries = array();
+
+			/**
+			 * Record an error message.
+			 *
+			 * @param string              $message Error message.
+			 * @param array<string,mixed> $context Error context.
+			 */
+			public function error( string $message, array $context = array() ): void {
+				$this->entries[] = array( $message, $context );
+			}
+		};
+
+		add_filter( WooPaymentsEventIngestor::FILTER_LIVE_MODE, '__return_false' );
+
+		$runtime = new WooPaymentsLegacyRuntime();
+		$runtime->init( new LegacyRuntimeProxy( true, null, null, null, $logger ) );
+
+		$sut = new WooPaymentsEventIngestor();
+		$sut->init(
+			wc_get_container()->get( OrderPaymentLifecycleService::class ),
+			wc_get_container()->get( LegacyProxy::class ),
+			$runtime,
+			new class() extends WooPaymentsApiClient {
+				/**
+				 * Retrieve a WooPayments PaymentIntent.
+				 *
+				 * @param string $intent_id Intent ID.
+				 * @return array<string,mixed>
+				 */
+				public function get_payment_intention( string $intent_id ): array {
+					return array();
+				}
+			}
+		);
+
+		$hook_calls = array();
+		add_action(
+			'woocommerce_payments_before_webhook_delivery',
+			function ( string $event_type, array $event_body ) use ( &$hook_calls ): void {
+				$hook_calls[] = array( 'before', $event_type, $event_body['id'] );
+			},
+			10,
+			2
+		);
+		add_action(
+			'woocommerce_payments_after_webhook_delivery',
+			function ( string $event_type, array $event_body ) use ( &$hook_calls ): void {
+				$hook_calls[] = array( 'after', $event_type, $event_body['id'] );
+			},
+			10,
+			2
+		);
+
+		$sut->process(
+			array(
+				'id'       => 'evt_invoice_123',
+				'type'     => 'invoice.paid',
+				'livemode' => true,
+				'data'     => array(
+					'object' => array(
+						'id' => 'in_123',
+					),
+				),
+			)
+		);
+
+		$this->assertCount( 1, $logger->entries );
+		$this->assertStringContainsString( 'Retired WooPayments Stripe Billing invoice event reached native webhook processing: invoice.paid', $logger->entries[0][0] );
+		$this->assertSame( 'evt_invoice_123', $logger->entries[0][1]['event_id'] );
+		$this->assertSame( 'native-payments-webhook', $logger->entries[0][1]['source'] );
+		$this->assertSame(
+			array(
+				array( 'before', 'invoice.paid', 'evt_invoice_123' ),
+				array( 'after', 'invoice.paid', 'evt_invoice_123' ),
+			),
+			$hook_calls
+		);
 	}
 
 	/**

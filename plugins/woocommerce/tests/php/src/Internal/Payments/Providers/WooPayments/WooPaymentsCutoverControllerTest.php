@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Subscriptions\WooPaymentsLegacySubscriptionsGuard;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCutoverController;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -69,6 +70,13 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	private array $deactivate_plugin_calls = array();
 
 	/**
+	 * Whether this test registered the subscription order type.
+	 *
+	 * @var bool
+	 */
+	private bool $registered_subscription_order_type = false;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -86,7 +94,8 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 		$this->sut->init(
 			wc_get_container()->get( NativePaymentsRuntimeArbiter::class ),
 			wc_get_container()->get( LegacyProxy::class ),
-			$this->provider
+			$this->provider,
+			new WooPaymentsLegacySubscriptionsGuard()
 		);
 	}
 
@@ -105,6 +114,12 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 		remove_all_filters( WooPaymentsCutoverController::FILTER_MANDATORY_CUTOVER_ENABLED );
 		remove_all_filters( WooPaymentsCutoverController::FILTER_PREFLIGHT_FAILURES );
 		remove_all_filters( 'wp_die_handler' );
+		if ( $this->registered_subscription_order_type ) {
+			global $wc_order_types;
+			unset( $wc_order_types['shop_subscription'] );
+			unregister_post_type( 'shop_subscription' );
+			$this->registered_subscription_order_type = false;
+		}
 		Constants::clear_single_constant( 'WC_ALLOW_MERGED_FEATURE_PLUGINS' );
 		$this->reset_legacy_proxy_mocks();
 
@@ -309,6 +324,7 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 		$this->fake_current_user_caps( true );
 		add_filter( NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED, '__return_true' );
 		add_filter( WooPaymentsCutoverController::FILTER_NATIVE_ADMIN_SURFACES_READY, '__return_true' );
+		add_filter( WooPaymentsCutoverController::FILTER_PROVIDER_EVENT_TYPES_PENDING_CUTOVER, static fn() => array( 'example.event' ) );
 		add_filter( WooPaymentsCutoverController::FILTER_OPERATIONAL_QUEUE_HOOKS_PENDING_CUTOVER, '__return_empty_array' );
 		$this->native_provider_ready = true;
 
@@ -329,6 +345,119 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertContains( 'operational_queue_hooks_undispositioned', $this->sut->get_preflight_failures() );
 		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+	}
+
+	/**
+	 * @testdox Cutover preflight blocks while legacy Stripe Billing subscription markers exist.
+	 */
+	public function test_preflight_blocks_when_legacy_stripe_billing_subscription_marker_exists(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		$this->enable_ready_cutover();
+		$this->create_legacy_stripe_billing_subscription( 'pending' );
+
+		$this->assertContains( 'legacy_stripe_billing_subscriptions_present', $this->sut->get_preflight_failures() );
+		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+	}
+
+	/**
+	 * @testdox Cutover preflight blocks cancelled legacy Stripe Billing subscription markers.
+	 */
+	public function test_preflight_blocks_cancelled_legacy_stripe_billing_subscription_marker(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		$this->enable_ready_cutover();
+		$this->create_legacy_stripe_billing_subscription( 'cancelled' );
+
+		$this->assertContains( 'legacy_stripe_billing_subscriptions_present', $this->sut->get_preflight_failures() );
+		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+	}
+
+	/**
+	 * @testdox Cutover preflight blocks migrated legacy Stripe Billing subscription marker variants.
+	 */
+	public function test_preflight_blocks_migrated_legacy_stripe_billing_subscription_marker(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		$this->enable_ready_cutover();
+		$this->create_legacy_stripe_billing_subscription( 'cancelled', '_migrated_wcpay_subscription_id' );
+
+		$this->assertContains( 'legacy_stripe_billing_subscriptions_present', $this->sut->get_preflight_failures() );
+		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+	}
+
+	/**
+	 * @testdox Cutover preflight filters cannot remove the legacy Stripe Billing marker blocker.
+	 */
+	public function test_preflight_filter_cannot_remove_legacy_stripe_billing_marker_blocker(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		$this->enable_ready_cutover();
+		$this->create_legacy_stripe_billing_subscription( 'active' );
+		add_filter( WooPaymentsCutoverController::FILTER_PREFLIGHT_FAILURES, '__return_empty_array' );
+
+		$this->assertContains( 'legacy_stripe_billing_subscriptions_present', $this->sut->get_preflight_failures() );
+		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+	}
+
+	/**
+	 * @testdox Cutover preflight blocks legacy Stripe Billing invoice order markers.
+	 */
+	public function test_preflight_blocks_legacy_stripe_billing_invoice_order_marker(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		$this->enable_ready_cutover();
+		$order = wc_create_order();
+		$order->update_meta_data( '_migrated_wcpay_billing_invoice_id', 'in_migrated_123' );
+		$order->save();
+
+		$this->assertContains( 'legacy_stripe_billing_subscriptions_present', $this->sut->get_preflight_failures() );
+		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+	}
+
+	/**
+	 * @testdox Cutover preflight allows clean stores without legacy Stripe Billing markers.
+	 */
+	public function test_preflight_allows_clean_store_without_legacy_stripe_billing_markers(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		$this->enable_ready_cutover();
+
+		$this->assertNotContains( 'legacy_stripe_billing_subscriptions_present', $this->sut->get_preflight_failures() );
+		$this->assertTrue( $this->sut->should_show_soft_cutover_notice() );
+	}
+
+	/**
+	 * @testdox Blocked cutover notice signposts the Stripe Billing migration path.
+	 */
+	public function test_blocked_notice_signposts_stripe_billing_migration_path(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		$this->enable_ready_cutover();
+		$this->create_legacy_stripe_billing_subscription( 'active' );
+
+		ob_start();
+		$this->sut->output_blocked_notice();
+		$notice = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'WooCommerce Subscriptions', $notice );
+		$this->assertStringContainsString( 'run the WooPayments Stripe Billing migration from the WooPayments extension', $notice );
+	}
+
+	/**
+	 * @testdox Mandatory auto-deactivation is blocked while legacy Stripe Billing subscription data exists.
+	 */
+	public function test_mandatory_auto_deactivation_blocks_when_legacy_stripe_billing_subscription_marker_exists(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( false );
+		$this->enable_ready_cutover();
+		$this->create_legacy_stripe_billing_subscription( 'on-hold' );
+		add_filter( WooPaymentsCutoverController::FILTER_MANDATORY_CUTOVER_ENABLED, '__return_true' );
+
+		$this->sut->handle_admin_init();
+
+		$this->assertSame( array(), $this->deactivate_plugin_calls, 'Mandatory cutover must not deactivate the plugin while legacy Stripe Billing subscription data exists.' );
+		$this->assertTrue( $this->plugin_active, 'The plugin must keep owning legacy Stripe Billing subscription data.' );
 	}
 
 	/**
@@ -403,6 +532,53 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 					: current_user_can( $capability ),
 			)
 		);
+	}
+
+	/**
+	 * Create a legacy WCPay/Stripe Billing subscription fixture.
+	 *
+	 * @param string $status Subscription status without the wc- prefix.
+	 * @param string $meta_key Legacy marker meta key.
+	 * @return int Subscription post ID.
+	 */
+	private function create_legacy_stripe_billing_subscription( string $status, string $meta_key = '_wcpay_subscription_id' ): int {
+		$this->register_subscription_order_type();
+
+		$post_id = wp_insert_post(
+			array(
+				'post_type'   => 'shop_subscription',
+				'post_status' => 'wc-' . $status,
+				'post_title'  => 'Legacy Stripe Billing subscription',
+			)
+		);
+
+		$this->assertIsInt( $post_id );
+		$this->assertGreaterThan( 0, $post_id );
+		update_post_meta( $post_id, $meta_key, 'sub_legacy_' . $status );
+
+		return $post_id;
+	}
+
+	/**
+	 * Register a lightweight subscription order type for cutover guard tests.
+	 */
+	private function register_subscription_order_type(): void {
+		if ( post_type_exists( 'shop_subscription' ) ) {
+			return;
+		}
+
+		wc_register_order_type(
+			'shop_subscription',
+			array(
+				'label'                      => 'Subscriptions',
+				'public'                     => false,
+				'exclude_from_order_views'   => false,
+				'exclude_from_order_count'   => true,
+				'exclude_from_order_reports' => true,
+				'class_name'                 => 'WC_Order',
+			)
+		);
+		$this->registered_subscription_order_type = true;
 	}
 
 	/**

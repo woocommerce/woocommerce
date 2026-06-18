@@ -143,14 +143,6 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 						return true;
 					}
 
-					/**
-					 * Tell whether Stripe Billing should be used for subscriptions.
-					 *
-					 * @return bool
-					 */
-					protected function should_use_stripe_billing(): bool {
-						return false;
-					}
 				};
 
 				$this->assertContains( 'multiple_subscriptions', $gateway->supports );
@@ -171,37 +163,36 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should expose Stripe Billing support when that subscription mode is active.
+	 * @testdox Should ignore deprecated Stripe Billing flags for native subscription support.
 	 */
-	public function test_subscription_support_tracks_stripe_billing_mode(): void {
-		$this->with_gateway_settings(
-			array( 'saved_cards' => 'yes' ),
-			function (): void {
-				$gateway = new class() extends NativeWooPaymentsGateway {
-					/**
-					 * Tell whether subscriptions support is available.
-					 *
-					 * @return bool
-					 */
-					public function is_subscriptions_enabled(): bool {
-						return true;
-					}
+	public function test_subscription_support_ignores_deprecated_stripe_billing_mode(): void {
+		update_option( '_wcpay_feature_subscriptions', '1' );
+		update_option( '_wcpay_feature_stripe_billing', '1' );
 
-					/**
-					 * Tell whether Stripe Billing should be used for subscriptions.
-					 *
-					 * @return bool
-					 */
-					protected function should_use_stripe_billing(): bool {
-						return true;
-					}
-				};
+		try {
+			$this->with_gateway_settings(
+				array( 'saved_cards' => 'yes' ),
+				function (): void {
+					$gateway = new class() extends NativeWooPaymentsGateway {
+						/**
+						 * Tell whether subscriptions support is available.
+						 *
+						 * @return bool
+						 */
+						public function is_subscriptions_enabled(): bool {
+							return true;
+						}
+					};
 
-				$this->assertContains( 'gateway_scheduled_payments', $gateway->supports );
-				$this->assertNotContains( 'subscription_amount_changes', $gateway->supports );
-				$this->assertNotContains( 'subscription_date_changes', $gateway->supports );
-			}
-		);
+					$this->assertNotContains( 'gateway_scheduled_payments', $gateway->supports );
+					$this->assertContains( 'subscription_amount_changes', $gateway->supports );
+					$this->assertContains( 'subscription_date_changes', $gateway->supports );
+				}
+			);
+		} finally {
+			delete_option( '_wcpay_feature_subscriptions' );
+			delete_option( '_wcpay_feature_stripe_billing' );
+		}
 	}
 
 	/**
@@ -375,6 +366,41 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 			$service->last_checkout_context->get_payment_data()
 		);
 		$this->assertSame( array( 'scheduled_subscription_payment' => true ), $service->last_checkout_context->get_provider_data() );
+	}
+
+	/**
+	 * @testdox Should keep tokenized WC Subscriptions renewals independent of deprecated Stripe Billing flags.
+	 */
+	public function test_scheduled_subscription_payment_uses_tokenized_renewal_when_deprecated_stripe_billing_flags_remain(): void {
+		update_option( '_wcpay_feature_subscriptions', '1' );
+		update_option( '_wcpay_feature_stripe_billing', '1' );
+
+		try {
+			$user_id = self::factory()->user->create();
+			$order   = $this->create_order();
+			$order->set_customer_id( $user_id );
+			$order->add_payment_token( $this->create_card_token( $user_id, 'pm_tokenized_renewal' ) );
+			$order->save();
+
+			$service = new RecordingPaymentProcessingService();
+			$gateway = new NativeWooPaymentsGateway();
+			$gateway->init( $service, new WooPaymentsProvider() );
+
+			$gateway->scheduled_subscription_payment( 12.0, wc_get_order( $order->get_id() ) );
+
+			$this->assertInstanceOf( PaymentContext::class, $service->last_checkout_context );
+			$this->assertSame(
+				array(
+					'payment_token'       => (string) $order->get_payment_tokens()[0],
+					'save_payment_method' => false,
+				),
+				$service->last_checkout_context->get_payment_data()
+			);
+			$this->assertSame( array( 'scheduled_subscription_payment' => true ), $service->last_checkout_context->get_provider_data() );
+		} finally {
+			delete_option( '_wcpay_feature_subscriptions' );
+			delete_option( '_wcpay_feature_stripe_billing' );
+		}
 	}
 
 	/**

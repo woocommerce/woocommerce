@@ -13,7 +13,6 @@ use Automattic\WooCommerce\Internal\Payments\PaymentLifecycleEvent;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use InvalidArgumentException;
-use RuntimeException;
 use Throwable;
 use WC_Order;
 
@@ -33,14 +32,22 @@ class WooPaymentsEventIngestor {
 	const FILTER_LIVE_MODE = 'woocommerce_native_payments_woopayments_live_mode';
 
 	/**
-	 * Known WooPayments event types whose side effects are not migrated in A2.
-	 *
-	 * These must fail closed instead of returning success, otherwise upstream
-	 * webhook delivery would be acknowledged and the side effect would be lost.
+	 * Known WooPayments event types whose side effects still block native cutover.
 	 *
 	 * @var string[]
 	 */
-	const KNOWN_UNHANDLED_EVENT_TYPES = array(
+	const KNOWN_UNHANDLED_EVENT_TYPES = array();
+
+	/**
+	 * Retired Stripe Billing invoice event types.
+	 *
+	 * These are Bucket D events: native WooPayments must not implement their legacy engine.
+	 * If one reaches native, cutover data-safety failed and the event must be alarmed instead
+	 * of silently falling through as an ordinary no-op.
+	 *
+	 * @var string[]
+	 */
+	private const RETIRED_STRIPE_BILLING_INVOICE_EVENT_TYPES = array(
 		'invoice.paid',
 		'invoice.payment_failed',
 		'invoice.upcoming',
@@ -186,6 +193,13 @@ class WooPaymentsEventIngestor {
 		$event_type = $event['type'] ?? null;
 		if ( ! is_string( $event_type ) || '' === $event_type ) {
 			throw new InvalidArgumentException( 'WooPayments webhook event is missing a type.' );
+		}
+
+		if ( $this->is_retired_stripe_billing_invoice_event( $event_type ) ) {
+			$this->run_delivery_hook( 'woocommerce_payments_before_webhook_delivery', $event_type, $event );
+			$this->log_retired_stripe_billing_invoice_event( $event_type, $event );
+			$this->run_delivery_hook( 'woocommerce_payments_after_webhook_delivery', $event_type, $event );
+			return;
 		}
 
 		if ( $this->is_webhook_mode_mismatch( $event ) ) {
@@ -365,7 +379,6 @@ class WooPaymentsEventIngestor {
 	 * @param string              $event_type Event type.
 	 * @param array<string,mixed> $event_object Provider object.
 	 * @return PaymentLifecycleEvent|null
-	 * @throws RuntimeException When the event type is known but not migrated yet.
 	 */
 	private function build_lifecycle_event( string $event_type, array $event_object ): ?PaymentLifecycleEvent {
 		switch ( $event_type ) {
@@ -424,10 +437,6 @@ class WooPaymentsEventIngestor {
 					array(),
 					'Payment authorization expired.'
 				);
-		}
-
-		if ( in_array( $event_type, self::KNOWN_UNHANDLED_EVENT_TYPES, true ) ) {
-			throw new RuntimeException( esc_html( sprintf( 'Native WooPayments webhook handling is not implemented for event type: %s', $event_type ) ) );
 		}
 
 		return null;
@@ -663,6 +672,40 @@ class WooPaymentsEventIngestor {
 		 * @param bool $live Whether native WooPayments is in live mode.
 		 */
 		return (bool) apply_filters( self::FILTER_LIVE_MODE, $live );
+	}
+
+	/**
+	 * Tell whether the event belongs to the retired Stripe Billing subscriptions engine.
+	 *
+	 * @param string $event_type Event type.
+	 * @return bool
+	 */
+	private function is_retired_stripe_billing_invoice_event( string $event_type ): bool {
+		return in_array( $event_type, self::RETIRED_STRIPE_BILLING_INVOICE_EVENT_TYPES, true );
+	}
+
+	/**
+	 * Log an alarm when retired Stripe Billing invoice traffic reaches native WooPayments.
+	 *
+	 * @param string              $event_type Event type.
+	 * @param array<string,mixed> $event      Event payload.
+	 */
+	private function log_retired_stripe_billing_invoice_event( string $event_type, array $event ): void {
+		$logger = $this->legacy_runtime->get_logger();
+		if ( ! is_object( $logger ) || ! is_callable( array( $logger, 'error' ) ) ) {
+			return;
+		}
+
+		$logger->error(
+			sprintf(
+				'Retired WooPayments Stripe Billing invoice event reached native webhook processing: %s',
+				$event_type
+			),
+			array(
+				'event_id' => is_scalar( $event['id'] ?? null ) ? (string) $event['id'] : '',
+				'source'   => 'native-payments-webhook',
+			)
+		);
 	}
 
 	/**

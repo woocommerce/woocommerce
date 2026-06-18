@@ -72,16 +72,6 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	private const RECOMMENDED_PAYMENT_METHODS_CACHE_TTL = DAY_IN_SECONDS;
 
 	/**
-	 * WooPayments subscriptions feature flag option.
-	 */
-	private const WCPAY_SUBSCRIPTIONS_FLAG_NAME = '_wcpay_feature_subscriptions';
-
-	/**
-	 * Stripe Billing feature flag option.
-	 */
-	private const STRIPE_BILLING_FLAG_NAME = '_wcpay_feature_stripe_billing';
-
-	/**
 	 * Payment processing service.
 	 *
 	 * @var PaymentProcessingService
@@ -917,9 +907,7 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 
 			$this->supports = array_merge(
 				$this->supports,
-				$this->should_use_stripe_billing()
-					? array( 'gateway_scheduled_payments' )
-					: array( 'subscription_amount_changes', 'subscription_date_changes' )
+				array( 'subscription_amount_changes', 'subscription_date_changes' )
 			);
 		}
 
@@ -1028,41 +1016,6 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 		}
 
 		return '';
-	}
-
-	/**
-	 * Tell whether Stripe Billing should be used for subscriptions.
-	 *
-	 * @return bool
-	 */
-	protected function should_use_stripe_billing(): bool {
-		if ( $this->is_wcpay_subscriptions_enabled() && ! class_exists( 'WC_Subscriptions' ) ) {
-			return true;
-		}
-
-		if ( $this->is_stripe_billing_enabled() && class_exists( 'WC_Subscriptions' ) ) {
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Tell whether legacy WooPayments Subscriptions is enabled.
-	 *
-	 * @return bool
-	 */
-	private function is_wcpay_subscriptions_enabled(): bool {
-		return '1' === get_option( self::WCPAY_SUBSCRIPTIONS_FLAG_NAME, '0' );
-	}
-
-	/**
-	 * Tell whether Stripe Billing is enabled.
-	 *
-	 * @return bool
-	 */
-	private function is_stripe_billing_enabled(): bool {
-		return '1' === get_option( self::STRIPE_BILLING_FLAG_NAME, '0' );
 	}
 
 	/**

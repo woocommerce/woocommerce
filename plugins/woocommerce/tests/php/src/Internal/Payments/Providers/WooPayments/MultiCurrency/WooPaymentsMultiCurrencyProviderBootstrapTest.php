@@ -3,7 +3,11 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments\MultiCurrency;
 
+use Automattic\WooCommerce\Internal\MultiCurrency\Providers\CurrencyRateProviderRegistryFactory;
 use Automattic\WooCommerce\Internal\MultiCurrency\Providers\MultiCurrencyProviderAccountResolver;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsCurrencyRateProvider;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsCurrencyRateProviderRegistrar;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsLegacyApiClientAdapter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\MultiCurrency\WooPaymentsLegacyAccountAdapter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments\LegacyRuntimeProxy;
@@ -31,13 +35,19 @@ class WooPaymentsMultiCurrencyProviderBootstrapTest extends WC_Unit_Test_Case {
 		$legacy_runtime   = new WooPaymentsLegacyRuntime();
 		$legacy_runtime->init( new LegacyRuntimeProxy( true, null, $this->create_legacy_account() ) );
 		$account_adapter->init( $legacy_runtime );
+		$api_client_adapter = new WooPaymentsLegacyApiClientAdapter();
+		$api_client_adapter->init( $legacy_runtime );
+		$provider_registry_factory = new CurrencyRateProviderRegistryFactory();
+		$provider_registrar        = new WooPaymentsCurrencyRateProviderRegistrar();
+		$provider_registrar->init( $account_adapter, $api_client_adapter );
 
 		$bootstrap = new $bootstrap_class();
-		$bootstrap->init( $account_resolver, $account_adapter );
+		$bootstrap->init( $account_resolver, $account_adapter, $provider_registry_factory, $provider_registrar );
 		$bootstrap->register();
 
 		$this->assertTrue( $account_resolver->is_provider_connected(), 'Resolver should delegate connection checks to the WooPayments adapter.' );
 		$this->assertSame( 'https://example.test/onboarding', $account_resolver->get_provider_onboarding_page_url(), 'Resolver should delegate onboarding URL lookups to the WooPayments adapter.' );
+		$this->assertNotNull( $provider_registry_factory->create()->get_provider( WooPaymentsCurrencyRateProvider::PROVIDER_ID ), 'Provider registry should include the WooPayments rate provider.' );
 	}
 
 	/**

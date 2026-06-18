@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Subscriptions\WooPaymentsLegacySubscriptionsGuard;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
@@ -152,18 +153,27 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	private WooPaymentsProvider $provider;
 
 	/**
+	 * Legacy subscription data guard.
+	 *
+	 * @var WooPaymentsLegacySubscriptionsGuard
+	 */
+	private WooPaymentsLegacySubscriptionsGuard $legacy_subscriptions_guard;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param NativePaymentsRuntimeArbiter $arbiter      Runtime owner arbiter.
-	 * @param LegacyProxy                  $legacy_proxy Legacy proxy.
-	 * @param WooPaymentsProvider          $provider     Native WooPayments provider.
+	 * @param NativePaymentsRuntimeArbiter             $arbiter                    Runtime owner arbiter.
+	 * @param LegacyProxy                              $legacy_proxy               Legacy proxy.
+	 * @param WooPaymentsProvider                      $provider                   Native WooPayments provider.
+	 * @param WooPaymentsLegacySubscriptionsGuard|null $legacy_subscriptions_guard Legacy subscription data guard.
 	 */
-	final public function init( NativePaymentsRuntimeArbiter $arbiter, LegacyProxy $legacy_proxy, WooPaymentsProvider $provider ): void {
-		$this->arbiter      = $arbiter;
-		$this->legacy_proxy = $legacy_proxy;
-		$this->provider     = $provider;
+	final public function init( NativePaymentsRuntimeArbiter $arbiter, LegacyProxy $legacy_proxy, WooPaymentsProvider $provider, ?WooPaymentsLegacySubscriptionsGuard $legacy_subscriptions_guard = null ): void {
+		$this->arbiter                    = $arbiter;
+		$this->legacy_proxy               = $legacy_proxy;
+		$this->provider                   = $provider;
+		$this->legacy_subscriptions_guard = $legacy_subscriptions_guard ?? wc_get_container()->get( WooPaymentsLegacySubscriptionsGuard::class );
 	}
 
 	/**
@@ -351,7 +361,16 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 		 */
 		$failures = apply_filters( self::FILTER_PREFLIGHT_FAILURES, $failures );
 
-		return is_array( $failures ) ? array_values( array_map( 'strval', $failures ) ) : array( 'preflight_filter_invalid' );
+		$failures = is_array( $failures ) ? array_values( array_map( 'strval', $failures ) ) : array( 'preflight_filter_invalid' );
+
+		if (
+			$this->legacy_subscriptions_guard->has_legacy_stripe_billing_subscription_markers() &&
+			! in_array( 'legacy_stripe_billing_subscriptions_present', $failures, true )
+		) {
+			$failures[] = 'legacy_stripe_billing_subscriptions_present';
+		}
+
+		return $failures;
 	}
 
 	/**
@@ -577,9 +596,21 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	 * Output the blocked cutover notice.
 	 */
 	public function output_blocked_notice(): void {
+		$failures = $this->get_preflight_failures();
 		?>
 		<div class="notice notice-error">
 			<p><?php esc_html_e( 'WooPayments could not be disabled because native WooPayments is not ready to process payments yet.', 'woocommerce' ); ?></p>
+			<?php if ( in_array( 'legacy_stripe_billing_subscriptions_present', $failures, true ) ) : ?>
+				<p>
+					<?php
+					printf(
+						/* translators: %s: WooCommerce Subscriptions product name. */
+						esc_html__( 'This store still has legacy Stripe Billing subscription data. Install %s, run the WooPayments Stripe Billing migration from the WooPayments extension, then try again.', 'woocommerce' ),
+						'WooCommerce Subscriptions'
+					);
+					?>
+				</p>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
