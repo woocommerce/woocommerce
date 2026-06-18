@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reject refund IDs in Store API order authorization to prevent a fatal when wc_get_order() returns a WC_Order_Refund.

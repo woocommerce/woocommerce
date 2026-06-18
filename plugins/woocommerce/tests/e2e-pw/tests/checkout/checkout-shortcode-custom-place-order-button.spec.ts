@@ -22,7 +22,9 @@ const test = baseTest.extend( {
 		await createClassicCheckoutPage();
 
 		// Activating the custom place order button test plugin (mapped in .wp-env.json).
-		await wpCLI( 'wp plugin activate custom-place-order-button-test' );
+		await wpCLI(
+			'wp plugin activate woocommerce-blocks-test-plugins/custom-place-order-button-test.php'
+		);
 
 		// The custom plugin comes with a custom gateway - enabling it through CLI to simplify our lives.
 		await wpCLI(

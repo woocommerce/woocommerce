@@ -39,6 +39,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   FORCE_COLOR: 1
 
 jobs:
@@ -308,8 +309,7 @@ jobs:
         env:
           RELEASE_TAG: ${{ inputs.refName != '' && inputs.refName || github.ref_name }}
           ARTIFACT_NAME: ${{ inputs.artifactName }}
-          # band-aid to get the path to wp-env.json for blocks e2e tests, until they're migrated to plugins/woocommerce
-          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.testEnv.start == 'env:start:blocks' && 'plugins/woocommerce/client/blocks' || matrix.projectPath  }}
+          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.projectPath }}
         run: node .github/workflows/scripts/override-wp-env-plugins.js
 
       - name: 'Start Test Environment'
@@ -638,6 +638,11 @@ jobs:
                 filter="$filter --filter $package"
             done
             echo "Populated filter: $filter"
+
+            if [ -z "$filter" ]; then
+                echo "No touched packages use changelogger; nothing to validate."
+                exit 0
+            fi
 
             pnpm --parallel --workspace-concurrency=10 --stream $filter changelog validate
 

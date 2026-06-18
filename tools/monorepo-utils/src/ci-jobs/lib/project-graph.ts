@@ -10,9 +10,9 @@ import path from 'node:path';
 import { CIConfig, parseCIConfig } from './config';
 import { PackageJSON, loadPackage } from './package-file';
 
-const EXEC_SYNC_OPTIONS = {
+const PNPM_COMMAND_OPTIONS = {
 	encoding: 'utf-8',
-	maxBuffer: 50 * 1024 * 1024,
+	maxBuffer: 5 * 1024 * 1024,
 } as const;
 
 /**
@@ -66,13 +66,13 @@ function parseWorkspaceDependencies( packageFile: PackageJSON ): string[] {
 export function buildProjectGraph(): ProjectNode {
 	// Get the root of the monorepo.
 	const monorepoRoot = path.join(
-		execSync( 'pnpm -w root', EXEC_SYNC_OPTIONS ),
+		execSync( 'pnpm -w root', PNPM_COMMAND_OPTIONS ),
 		'..'
 	);
 
 	// PNPM provides us with a flat list of all projects in the workspace.
 	const workspace = JSON.parse(
-		execSync( 'pnpm -r list --only-projects --json', EXEC_SYNC_OPTIONS )
+		execSync( 'pnpm -r list --depth -1 --json', PNPM_COMMAND_OPTIONS )
 	);
 
 	// Unfortunately, PNPM does not provide us with any dependency information
