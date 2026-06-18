@@ -30,7 +30,7 @@ describe( 'WooPaymentsDisputeChallengePage', () => {
 			status: 'needs_response',
 		} );
 
-		render(
+		const { container } = render(
 			<MemoryRouter
 				initialEntries={ [
 					'/woopayments/disputes/challenge?id=dp_test',
@@ -42,10 +42,15 @@ describe( 'WooPaymentsDisputeChallengePage', () => {
 
 		expect( await screen.findByText( 'dp_test' ) ).toBeInTheDocument();
 		expect(
-			screen.getByText(
-				'Dispute evidence submission is not available in this native WooPayments admin surface yet.'
+			container.querySelector(
+				'.woocommerce-woopayments-money-movement__notice p'
 			)
-		).toBeInTheDocument();
+		).toHaveTextContent(
+			'Dispute evidence submission is not available in this native WooPayments admin surface yet.'
+		);
+		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
+			'Dispute evidence submission is not available in this native WooPayments admin surface yet.'
+		);
 		expect( mockGetDispute ).toHaveBeenCalledWith( 'dp_test' );
 	} );
 } );

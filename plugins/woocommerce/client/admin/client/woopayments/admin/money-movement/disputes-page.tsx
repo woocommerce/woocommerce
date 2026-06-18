@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -18,7 +18,7 @@ import {
 	getResourceId,
 	getErrorMessage,
 } from './utils';
-import { EmptyState, StatusMessage } from './table';
+import { EmptyState, LiveStatusMessage, StatusMessage } from './table';
 import { getSettingsPaymentsProviderRouteUrl } from '../overview/utils';
 import '../style.scss';
 
@@ -74,6 +74,15 @@ export const WooPaymentsDisputesPage = () => {
 	}, [] );
 
 	const hasDisputes = ! isLoading && ! errorMessage && disputes.length;
+	let liveStatusMessage = __( 'Disputes loaded.', 'woocommerce' );
+
+	if ( errorMessage ) {
+		liveStatusMessage = errorMessage;
+	} else if ( isLoading ) {
+		liveStatusMessage = __( 'Loading disputes…', 'woocommerce' );
+	} else if ( disputes.length === 0 ) {
+		liveStatusMessage = __( 'No disputes found.', 'woocommerce' );
+	}
 
 	return (
 		<section
@@ -81,14 +90,15 @@ export const WooPaymentsDisputesPage = () => {
 			aria-busy={ isLoading }
 		>
 			<h2>{ __( 'Disputes', 'woocommerce' ) }</h2>
+			<LiveStatusMessage isError={ !! errorMessage }>
+				{ liveStatusMessage }
+			</LiveStatusMessage>
 			{ isLoading && (
 				<StatusMessage>
 					{ __( 'Loading disputes…', 'woocommerce' ) }
 				</StatusMessage>
 			) }
-			{ errorMessage && (
-				<StatusMessage isError>{ errorMessage }</StatusMessage>
-			) }
+			{ errorMessage && <StatusMessage>{ errorMessage }</StatusMessage> }
 			{ ! isLoading && ! errorMessage && disputes.length === 0 && (
 				<EmptyState>
 					{ __( 'No disputes found.', 'woocommerce' ) }
@@ -128,6 +138,15 @@ export const WooPaymentsDisputesPage = () => {
 												`/woopayments/transactions/details?id=${ encodeURIComponent(
 													chargeId || id
 												) }`
+											) }
+											aria-label={ sprintf(
+												/* translators: 1: dispute reason, 2: dispute ID. */
+												__(
+													'View transaction details for %1$s dispute %2$s',
+													'woocommerce'
+												),
+												formatLabel( dispute.reason ),
+												id
 											) }
 											onClick={ () =>
 												recordEvent(

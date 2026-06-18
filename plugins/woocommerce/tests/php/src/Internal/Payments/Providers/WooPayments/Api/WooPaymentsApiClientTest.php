@@ -1378,6 +1378,18 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'search_term=Ada', $http_client->last_path );
 		$this->assertSame( 'GET', $http_client->last_method );
 
+		$sut->get_fraud_outcomes(
+			array(
+				'status'      => 'review',
+				'search_term' => 'Ada',
+			)
+		);
+
+		$this->assertStringStartsWith( '/sites/123/wcpay/fraud_outcomes/status/review?', $http_client->last_path );
+		$this->assertStringContainsString( 'search_term=Ada', $http_client->last_path );
+		$this->assertStringNotContainsString( 'status=review', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
 		$sut->get_transaction( 'txn_test' );
 
 		$this->assertSame( '/sites/123/wcpay/transactions/txn_test?test_mode=1', $http_client->last_path );
@@ -1392,9 +1404,9 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '"deposit_id":"po_test"', (string) $http_client->last_body );
 		$this->assertStringContainsString( '"locale":"en_US"', (string) $http_client->last_body );
 
-		$sut->get_transactions_export_url( 'txexp_test' );
+		$sut->get_transactions_export_url( 'txexp-test.01==' );
 
-		$this->assertSame( '/sites/123/wcpay/transactions/download/txexp_test?test_mode=1', $http_client->last_path );
+		$this->assertSame( '/sites/123/wcpay/transactions/download/txexp-test.01==?test_mode=1', $http_client->last_path );
 		$this->assertSame( 'GET', $http_client->last_method );
 	}
 
@@ -1457,10 +1469,70 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '"user_email":"merchant@example.com"', (string) $http_client->last_body );
 		$this->assertStringContainsString( '"locale":"en_US"', (string) $http_client->last_body );
 
-		$sut->get_disputes_export_url( 'dpexp_test' );
+		$sut->get_disputes_export_url( 'dpexp-test.01==' );
 
-		$this->assertSame( '/sites/123/wcpay/disputes/download/dpexp_test?test_mode=0', $http_client->last_path );
+		$this->assertSame( '/sites/123/wcpay/disputes/download/dpexp-test.01==?test_mode=0', $http_client->last_path );
 		$this->assertSame( 'GET', $http_client->last_method );
+	}
+
+	/**
+	 * @testdox Should reject unsafe transaction export identifiers.
+	 */
+	public function test_get_transactions_export_url_rejects_invalid_route_identifier(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array() ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$this->expectException( WooPaymentsApiException::class );
+
+		$sut->get_transactions_export_url( '../txexp_test' );
+	}
+
+	/**
+	 * @testdox Should reject invalid fraud outcome statuses.
+	 */
+	public function test_get_fraud_outcomes_rejects_invalid_status(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array() ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$this->expectException( WooPaymentsApiException::class );
+
+		$sut->get_fraud_outcomes( array( 'status' => 'invalid' ) );
+	}
+
+	/**
+	 * @testdox Should reject unsafe dispute export identifiers.
+	 */
+	public function test_get_disputes_export_url_rejects_invalid_route_identifier(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array() ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$this->expectException( WooPaymentsApiException::class );
+
+		$sut->get_disputes_export_url( 'dpexp%2Ftest' );
 	}
 
 	/**

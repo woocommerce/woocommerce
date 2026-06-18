@@ -88,6 +88,23 @@ class RecordingMoneyMovementApiClient extends WooPaymentsApiClient {
 	}
 
 	/**
+	 * Get fraud outcomes.
+	 *
+	 * @param array<string,mixed> $query Query params.
+	 * @return array<string|int,mixed>
+	 */
+	public function get_fraud_outcomes( array $query = array() ): array {
+		$this->record( 'get_fraud_outcomes', array( 'query' => $query ) );
+
+		$status = isset( $query['status'] ) && is_scalar( $query['status'] ) ? (string) $query['status'] : '';
+		if ( ! in_array( $status, array( 'allow', 'block', 'review' ), true ) ) {
+			throw new WooPaymentsApiException( 'Invalid fraud outcome status provided.', 'invalid_fraud_outcome_status', 400 );
+		}
+
+		return $this->response;
+	}
+
+	/**
 	 * Export transactions.
 	 *
 	 * @param array<string,mixed> $filters Filters.

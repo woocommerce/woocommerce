@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
+use Throwable;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -25,6 +26,8 @@ use WP_REST_Server;
 class WooPaymentsDisputesRestController implements RegisterHooksInterface {
 
 	private const NAMESPACE = 'wc/v3';
+
+	private const LOG_SOURCE = 'woopayments-disputes';
 
 	private const LIST_QUERY_PARAMS = array(
 		'page'            => true,
@@ -57,16 +60,25 @@ class WooPaymentsDisputesRestController implements RegisterHooksInterface {
 	private WooPaymentsApiClient $api_client;
 
 	/**
+	 * WooPayments local order context service.
+	 *
+	 * @var WooPaymentsMoneyMovementOrderService
+	 */
+	private WooPaymentsMoneyMovementOrderService $order_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param NativePaymentsRuntimeArbiter $arbiter    Runtime owner arbiter.
-	 * @param WooPaymentsApiClient         $api_client Native WooPayments API client.
+	 * @param NativePaymentsRuntimeArbiter         $arbiter       Runtime owner arbiter.
+	 * @param WooPaymentsApiClient                 $api_client    Native WooPayments API client.
+	 * @param WooPaymentsMoneyMovementOrderService $order_service Local order context service.
 	 */
-	final public function init( NativePaymentsRuntimeArbiter $arbiter, WooPaymentsApiClient $api_client ): void {
-		$this->arbiter    = $arbiter;
-		$this->api_client = $api_client;
+	final public function init( NativePaymentsRuntimeArbiter $arbiter, WooPaymentsApiClient $api_client, WooPaymentsMoneyMovementOrderService $order_service ): void {
+		$this->arbiter       = $arbiter;
+		$this->api_client    = $api_client;
+		$this->order_service = $order_service;
 	}
 
 	/**
@@ -119,7 +131,11 @@ class WooPaymentsDisputesRestController implements RegisterHooksInterface {
 	 */
 	public function get_disputes( WP_REST_Request $request ) {
 		try {
-			return new WP_REST_Response( $this->api_client->get_disputes( $this->get_filtered_disputes_list_params( $request ) ) );
+			return new WP_REST_Response(
+				$this->order_service->enrich_disputes_list_response(
+					$this->api_client->get_disputes( $this->get_filtered_disputes_list_params( $request ) )
+				)
+			);
 		} catch ( WooPaymentsApiException $exception ) {
 			return $this->api_exception_to_wp_error( $exception );
 		}
@@ -134,7 +150,7 @@ class WooPaymentsDisputesRestController implements RegisterHooksInterface {
 	 */
 	public function get_disputes_summary( WP_REST_Request $request ) {
 		try {
-			return new WP_REST_Response( $this->api_client->get_disputes_summary( $this->get_allowed_params( $request, self::LIST_QUERY_PARAMS ) ) );
+			return new WP_REST_Response( $this->api_client->get_disputes_summary( $this->get_filtered_disputes_list_params( $request ) ) );
 		} catch ( WooPaymentsApiException $exception ) {
 			return $this->api_exception_to_wp_error( $exception );
 		}
@@ -149,7 +165,11 @@ class WooPaymentsDisputesRestController implements RegisterHooksInterface {
 	 */
 	public function get_dispute( WP_REST_Request $request ) {
 		try {
-			return new WP_REST_Response( $this->api_client->get_dispute( (string) $request->get_param( 'dispute_id' ) ) );
+			return new WP_REST_Response(
+				$this->order_service->enrich_dispute_response(
+					$this->api_client->get_dispute( (string) $request->get_param( 'dispute_id' ) )
+				)
+			);
 		} catch ( WooPaymentsApiException $exception ) {
 			return $this->api_exception_to_wp_error( $exception );
 		}
@@ -163,19 +183,39 @@ class WooPaymentsDisputesRestController implements RegisterHooksInterface {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_dispute( WP_REST_Request $request ) {
+		$dispute_id  = (string) $request->get_param( 'dispute_id' );
+		$submit      = wc_string_to_bool( $request->get_param( 'submit' ) );
+		$log_context = $this->get_dispute_action_log_context( 'update', $dispute_id, $submit );
+
+		$this->log_dispute_action( 'info', __( 'WooPayments dispute update requested.', 'woocommerce' ), $log_context );
+
 		try {
 			$evidence = $request->get_param( 'evidence' );
 			$metadata = $request->get_param( 'metadata' );
 
-			return new WP_REST_Response(
-				$this->api_client->update_dispute(
-					(string) $request->get_param( 'dispute_id' ),
-					is_array( $evidence ) ? $evidence : array(),
-					wc_string_to_bool( $request->get_param( 'submit' ) ),
-					is_array( $metadata ) ? $metadata : array()
+			$response = $this->api_client->update_dispute(
+				$dispute_id,
+				is_array( $evidence ) ? $evidence : array(),
+				$submit,
+				is_array( $metadata ) ? $metadata : array()
+			);
+
+			$this->log_dispute_action( 'info', __( 'WooPayments dispute update completed.', 'woocommerce' ), $log_context );
+
+			return new WP_REST_Response( $this->enrich_dispute_response_after_completed_action( $response, $log_context ) );
+		} catch ( WooPaymentsApiException $exception ) {
+			$this->log_dispute_action(
+				'error',
+				__( 'WooPayments dispute update failed.', 'woocommerce' ),
+				array_merge(
+					$log_context,
+					array(
+						'api_code'    => $exception->get_error_code(),
+						'http_status' => $exception->get_http_code(),
+					)
 				)
 			);
-		} catch ( WooPaymentsApiException $exception ) {
+
 			return $this->api_exception_to_wp_error( $exception );
 		}
 	}
@@ -188,9 +228,30 @@ class WooPaymentsDisputesRestController implements RegisterHooksInterface {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function close_dispute( WP_REST_Request $request ) {
+		$dispute_id  = (string) $request->get_param( 'dispute_id' );
+		$log_context = $this->get_dispute_action_log_context( 'close', $dispute_id );
+
+		$this->log_dispute_action( 'info', __( 'WooPayments dispute close requested.', 'woocommerce' ), $log_context );
+
 		try {
-			return new WP_REST_Response( $this->api_client->close_dispute( (string) $request->get_param( 'dispute_id' ) ) );
+			$response = $this->api_client->close_dispute( $dispute_id );
+
+			$this->log_dispute_action( 'info', __( 'WooPayments dispute close completed.', 'woocommerce' ), $log_context );
+
+			return new WP_REST_Response( $this->enrich_dispute_response_after_completed_action( $response, $log_context ) );
 		} catch ( WooPaymentsApiException $exception ) {
+			$this->log_dispute_action(
+				'error',
+				__( 'WooPayments dispute close failed.', 'woocommerce' ),
+				array_merge(
+					$log_context,
+					array(
+						'api_code'    => $exception->get_error_code(),
+						'http_status' => $exception->get_http_code(),
+					)
+				)
+			);
+
 			return $this->api_exception_to_wp_error( $exception );
 		}
 	}
@@ -206,7 +267,7 @@ class WooPaymentsDisputesRestController implements RegisterHooksInterface {
 		try {
 			return new WP_REST_Response(
 				$this->api_client->get_disputes_export(
-					$this->get_allowed_params( $request, self::LIST_QUERY_PARAMS ),
+					$this->get_filtered_disputes_list_params( $request ),
 					(string) $request->get_param( 'user_email' ),
 					$this->get_optional_string_param( $request, 'locale' )
 				)
@@ -289,23 +350,6 @@ class WooPaymentsDisputesRestController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Extract allowed params from the request without normalizing platform-facing names.
-	 *
-	 * @param WP_REST_Request    $request Request.
-	 * @param array<string,bool> $allowed Allowed param map.
-	 * @phpstan-param WP_REST_Request<array<string,mixed>> $request
-	 * @return array<string,mixed>
-	 */
-	private function get_allowed_params( WP_REST_Request $request, array $allowed ): array {
-		return array_filter(
-			array_intersect_key( $request->get_params(), $allowed ),
-			static function ( $value ): bool {
-				return null !== $value;
-			}
-		);
-	}
-
-	/**
 	 * Get an optional string param.
 	 *
 	 * @param WP_REST_Request $request Request.
@@ -317,6 +361,70 @@ class WooPaymentsDisputesRestController implements RegisterHooksInterface {
 		$value = $request->get_param( $name );
 
 		return null === $value ? null : (string) $value;
+	}
+
+	/**
+	 * Get a safe dispute action log context.
+	 *
+	 * @param string    $action     Action name.
+	 * @param string    $dispute_id Dispute ID.
+	 * @param bool|null $submit     Whether evidence was submitted.
+	 * @return array<string,mixed>
+	 */
+	private function get_dispute_action_log_context( string $action, string $dispute_id, ?bool $submit = null ): array {
+		$context = array(
+			'source'     => self::LOG_SOURCE,
+			'action'     => $action,
+			'dispute_id' => $dispute_id,
+			'user_id'    => get_current_user_id(),
+		);
+
+		if ( null !== $submit ) {
+			$context['submit'] = $submit;
+		}
+
+		return $context;
+	}
+
+	/**
+	 * Log a dispute action event.
+	 *
+	 * @param string              $level   Log level.
+	 * @param string              $message Log message.
+	 * @param array<string,mixed> $context Log context.
+	 */
+	private function log_dispute_action( string $level, string $message, array $context ): void {
+		wc_get_logger()->log( $level, $message, $context );
+	}
+
+	/**
+	 * Add local order context after a platform mutation has already completed.
+	 *
+	 * @param array<string,mixed> $response    Platform response.
+	 * @param array<string,mixed> $log_context Safe dispute action log context.
+	 * @return array<string,mixed>
+	 */
+	private function enrich_dispute_response_after_completed_action( array $response, array $log_context ): array {
+		try {
+			return $this->order_service->enrich_dispute_response( $response );
+		} catch ( Throwable $exception ) {
+			$this->log_dispute_action(
+				'warning',
+				__( 'WooPayments dispute action completed, but local order context enrichment failed.', 'woocommerce' ),
+				array_merge(
+					$log_context,
+					array(
+						'exception' => get_class( $exception ),
+					)
+				)
+			);
+
+			if ( ! array_key_exists( 'order', $response ) ) {
+				$response['order'] = null;
+			}
+
+			return $response;
+		}
 	}
 
 	/**

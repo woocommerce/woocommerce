@@ -47014,36 +47014,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/Tax.php
 
 		-
-			message: '#^Call to method is_account_partially_onboarded\(\) on an unknown class WC_Payments\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/WooCommercePayments.php
-
-		-
-			message: '#^Call to method is_connected\(\) on an unknown class WC_Payments\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/WooCommercePayments.php
-
-		-
-			message: '#^Cannot access property \$id on object\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/WooCommercePayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WooCommercePayments\:\:get_gateway\(\) has invalid return type WC_Payments\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/WooCommercePayments.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WooCommercePayments\:\:\$is_complete_result \(null\) does not accept bool\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/WooCommercePayments.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\PaymentGatewaySuggestions\\DefaultPaymentGateways\:\:get_default_recommendation_priority\(\) should return int but returns null\.$#'
 			identifier: return.type
 			count: 1
@@ -58055,72 +58025,6 @@ parameters:
 			path: src/Internal/Admin/Notes/UnsecuredReportFiles.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Cannot call method get_action\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Cannot call method set_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommercePayments\:\:install_on_action\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommercePayments\:\:is_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommercePayments\:\:is_installed\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommercePayments\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Parameter \#1 \$request of method Automattic\\WooCommerce\\Admin\\API\\Plugins\:\:activate_plugins\(\) expects WP_REST_Request, array\<string, string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Parameter \#1 \$request of method Automattic\\WooCommerce\\Admin\\API\\Plugins\:\:install_plugins\(\) expects WP_REST_Request, array\<string, string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommerceSubscriptions\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note\|null but empty return statement found\.$#'
 			identifier: return.empty
 			count: 2
@@ -60957,60 +60861,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/Admin/WCAdminUser.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/Admin/WCPayPromotion/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\WCPayPromotion\\Init\:\:delete_specs_transient\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/WCPayPromotion/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\WCPayPromotion\\Init\:\:load_payment_method_promotions\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/WCPayPromotion/Init.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\WCPayPromotion\\WCPayPromotionDataSourcePoller\:\:get_instance\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/WCPayPromotion/WCPayPromotionDataSourcePoller.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$content\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/Admin/WCPayPromotion/WCPaymentGatewayPreInstallWCPayPromotion.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$title\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/Admin/WCPayPromotion/WCPaymentGatewayPreInstallWCPayPromotion.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\WCPayPromotion\\WCPaymentGatewayPreInstallWCPayPromotion\:\:init_form_fields\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/WCPayPromotion/WCPaymentGatewayPreInstallWCPayPromotion.php
-
-		-
-			message: '#^PHPDoc tag @extends has invalid value \(\\WC_Payment_Gateway\)\: Unexpected token "\\n ", expected ''\<'' at offset 71 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Internal/Admin/WCPayPromotion/WCPaymentGatewayPreInstallWCPayPromotion.php
-
-		-
-			message: '#^Property WC_Payment_Gateway\:\:\$enabled \(string\) does not accept false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/Admin/WCPayPromotion/WCPaymentGatewayPreInstallWCPayPromotion.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\AssignDefaultCategory\:\:init\(\) has no return type specified\.$#'

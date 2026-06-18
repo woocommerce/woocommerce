@@ -16,7 +16,7 @@ import {
 	formatLabel,
 	getErrorMessage,
 } from './utils';
-import { StatusMessage } from './table';
+import { LiveStatusMessage, StatusMessage } from './table';
 import '../style.scss';
 
 export const WooPaymentsTransactionDetailsPage = () => {
@@ -76,17 +76,25 @@ export const WooPaymentsTransactionDetailsPage = () => {
 		};
 	}, [ transactionId ] );
 
+	const loadingMessage = __( 'Loading transaction details…', 'woocommerce' );
+	let liveStatusMessage = __( 'Transaction details loaded.', 'woocommerce' );
+
+	if ( errorMessage ) {
+		liveStatusMessage = errorMessage;
+	} else if ( isLoading ) {
+		liveStatusMessage = loadingMessage;
+	}
+
 	return (
 		<section
 			className="woocommerce-woopayments-money-movement"
 			aria-busy={ isLoading }
 		>
 			<h2>{ __( 'Transaction details', 'woocommerce' ) }</h2>
-			{ isLoading && (
-				<StatusMessage>
-					{ __( 'Loading transaction details…', 'woocommerce' ) }
-				</StatusMessage>
-			) }
+			<LiveStatusMessage isError={ !! errorMessage }>
+				{ liveStatusMessage }
+			</LiveStatusMessage>
+			{ isLoading && <StatusMessage>{ loadingMessage }</StatusMessage> }
 			{ errorMessage && (
 				<StatusMessage isError>{ errorMessage }</StatusMessage>
 			) }

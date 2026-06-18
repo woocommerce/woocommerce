@@ -11,7 +11,7 @@ import { useLocation } from 'react-router-dom';
 import { getWooPaymentsDispute } from './data';
 import type { WooPaymentsDispute } from './types';
 import { formatLabel, getErrorMessage, getResourceId } from './utils';
-import { StatusMessage } from './table';
+import { LiveStatusMessage, StatusMessage } from './table';
 import '../style.scss';
 
 export const WooPaymentsDisputeChallengePage = () => {
@@ -22,6 +22,20 @@ export const WooPaymentsDisputeChallengePage = () => {
 	const [ errorMessage, setErrorMessage ] = useState< string | null >( null );
 	const location = useLocation();
 	const disputeId = new URLSearchParams( location.search ).get( 'id' ) || '';
+	const failClosedMessage = __(
+		'Dispute evidence submission is not available in this native WooPayments admin surface yet.',
+		'woocommerce'
+	);
+	const loadingMessage = __( 'Loading dispute…', 'woocommerce' );
+	let liveStatusMessage = '';
+
+	if ( errorMessage ) {
+		liveStatusMessage = errorMessage;
+	} else if ( isLoading ) {
+		liveStatusMessage = loadingMessage;
+	} else if ( dispute ) {
+		liveStatusMessage = failClosedMessage;
+	}
 
 	useEffect( () => {
 		let isMounted = true;
@@ -74,22 +88,14 @@ export const WooPaymentsDisputeChallengePage = () => {
 			aria-busy={ isLoading }
 		>
 			<h2>{ __( 'Challenge dispute', 'woocommerce' ) }</h2>
-			{ isLoading && (
-				<StatusMessage>
-					{ __( 'Loading dispute…', 'woocommerce' ) }
-				</StatusMessage>
-			) }
-			{ errorMessage && (
-				<StatusMessage isError>{ errorMessage }</StatusMessage>
-			) }
+			<LiveStatusMessage isError={ !! errorMessage }>
+				{ liveStatusMessage }
+			</LiveStatusMessage>
+			{ isLoading && <StatusMessage>{ loadingMessage }</StatusMessage> }
+			{ errorMessage && <StatusMessage>{ errorMessage }</StatusMessage> }
 			{ dispute && ! errorMessage && (
 				<div className="woocommerce-woopayments-money-movement__notice">
-					<p>
-						{ __(
-							'Dispute evidence submission is not available in this native WooPayments admin surface yet.',
-							'woocommerce'
-						) }
-					</p>
+					<p>{ failClosedMessage }</p>
 					<dl className="woocommerce-woopayments-money-movement__details">
 						<div>
 							<dt>{ __( 'Dispute ID', 'woocommerce' ) }</dt>

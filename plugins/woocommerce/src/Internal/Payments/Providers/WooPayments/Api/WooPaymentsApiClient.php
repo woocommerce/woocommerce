@@ -105,6 +105,11 @@ class WooPaymentsApiClient {
 	private const DISPUTES_API = 'disputes';
 
 	/**
+	 * WooPayments fraud outcomes API path.
+	 */
+	private const FRAUD_OUTCOMES_API = 'fraud_outcomes';
+
+	/**
 	 * WooPayments deposits API path. These endpoints back the merchant-facing payouts surfaces.
 	 */
 	private const DEPOSITS_API = 'deposits';
@@ -700,7 +705,7 @@ class WooPaymentsApiClient {
 	 * @throws WooPaymentsApiException When the route parameter is invalid.
 	 */
 	public function get_transactions_export_url( string $export_id ): array {
-		$this->validate_route_resource_id( $export_id );
+		$this->validate_route_export_id( $export_id );
 
 		return $this->request( array(), self::TRANSACTIONS_API . '/download/' . $export_id, 'GET' );
 	}
@@ -740,6 +745,25 @@ class WooPaymentsApiClient {
 		}
 
 		return $results;
+	}
+
+	/**
+	 * Retrieve WooPayments fraud outcome transactions by status.
+	 *
+	 * @param array<string,mixed> $query Query params.
+	 * @return array<string|int,mixed>
+	 * @throws WooPaymentsApiException When the fraud outcome status is invalid.
+	 */
+	public function get_fraud_outcomes( array $query = array() ): array {
+		$status = isset( $query['status'] ) && is_scalar( $query['status'] ) ? (string) $query['status'] : '';
+		unset( $query['status'] );
+
+		if ( ! in_array( $status, array( 'allow', 'block', 'review' ), true ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
+			throw new WooPaymentsApiException( __( 'Invalid fraud outcome status provided.', 'woocommerce' ), 'invalid_fraud_outcome_status', 400 );
+		}
+
+		return $this->request( $query, self::FRAUD_OUTCOMES_API . '/status/' . $status, 'GET' );
 	}
 
 	/**
@@ -853,7 +877,7 @@ class WooPaymentsApiClient {
 	 * @throws WooPaymentsApiException When the route parameter is invalid.
 	 */
 	public function get_disputes_export_url( string $export_id ): array {
-		$this->validate_route_resource_id( $export_id );
+		$this->validate_route_export_id( $export_id );
 
 		return $this->request( array(), self::DISPUTES_API . '/download/' . $export_id, 'GET' );
 	}
@@ -932,7 +956,7 @@ class WooPaymentsApiClient {
 	 * @throws WooPaymentsApiException When the route parameter is invalid.
 	 */
 	public function get_payouts_export_url( string $export_id ): array {
-		$this->validate_route_resource_id( $export_id );
+		$this->validate_route_export_id( $export_id );
 
 		return $this->request( array(), self::DEPOSITS_API . '/download/' . $export_id, 'GET' );
 	}
@@ -1202,6 +1226,21 @@ class WooPaymentsApiClient {
 	 */
 	private function validate_route_resource_id( string $id ): void {
 		if ( ! preg_match( '/^\w+$/', $id ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
+			throw new WooPaymentsApiException( __( 'Route param validation failed.', 'woocommerce' ), 'wcpay_route_validation_failure', 400 );
+		}
+	}
+
+	/**
+	 * Validate a WooPayments export ID before path interpolation.
+	 *
+	 * Export routes accept opaque IDs from the platform and only exclude path separators and URL-encoded path bytes.
+	 *
+	 * @param string $id Export ID.
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	private function validate_route_export_id( string $id ): void {
+		if ( '' === $id || ! preg_match( '/^[^\/\\\\%]+$/', $id ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
 			throw new WooPaymentsApiException( __( 'Route param validation failed.', 'woocommerce' ), 'wcpay_route_validation_failure', 400 );
 		}
