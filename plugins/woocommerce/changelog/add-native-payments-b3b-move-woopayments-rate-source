@@ -1,3 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Move WooPayments multi-currency rate source implementation under the WooPayments provider namespace.
+
+Move WooPayments multi-currency rate source implementation under the WooPayments provider namespace.

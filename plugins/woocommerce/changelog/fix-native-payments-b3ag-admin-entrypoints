@@ -1,3 +1,4 @@
 Significance: patch
 Type: fix
-Comment: Route WooPayments admin entrypoints through Core-owned native onboarding.
+
+Route WooPayments admin entrypoints through Core-owned native onboarding.

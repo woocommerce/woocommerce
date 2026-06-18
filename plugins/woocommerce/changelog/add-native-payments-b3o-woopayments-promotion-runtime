@@ -1,3 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Route WooPayments promotion active checks through the native payments runtime.
+
+Route WooPayments promotion active checks through the native payments runtime.

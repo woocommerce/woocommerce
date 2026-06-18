@@ -1,3 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Add native WooPayments checkout callback handling for payment and setup intent confirmations.
+
+Add native WooPayments checkout callback handling for payment and setup intent confirmations.

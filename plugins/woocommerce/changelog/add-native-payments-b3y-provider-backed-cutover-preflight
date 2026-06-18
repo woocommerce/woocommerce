@@ -1,3 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Use native WooPayments provider readiness for guarded plugin-to-core cutover preflight.
+
+Use native WooPayments provider readiness for guarded plugin-to-core cutover preflight.

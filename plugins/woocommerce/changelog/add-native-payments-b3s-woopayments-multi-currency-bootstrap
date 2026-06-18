@@ -1,3 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Decouple the generic multi-currency account resolver from WooPayments provider bootstrap.
+
+Decouple the generic multi-currency account resolver from WooPayments provider bootstrap.

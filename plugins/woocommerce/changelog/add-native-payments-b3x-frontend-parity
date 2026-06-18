@@ -1,3 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Preserve native WooPayments frontend parity and remove stale generated assets.
+
+Preserve native WooPayments frontend parity and remove stale generated assets.

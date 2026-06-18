@@ -1,3 +1,4 @@
 Significance: patch
 Type: fix
-Comment: Add native multi-currency admin notice hook registration.
+
+Add native multi-currency admin notice hook registration.

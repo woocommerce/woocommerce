@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Comment: Remove the deprecated WooPayments onboarding task and note surface while preserving legacy redirects to Payments settings.
+Remove the deprecated WooPayments onboarding task and note surface while preserving legacy redirects to Payments settings.

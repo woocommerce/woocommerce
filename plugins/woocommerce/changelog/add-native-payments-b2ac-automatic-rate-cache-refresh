@@ -1,3 +1,4 @@
 Significance: patch
 Type: fix
-Comment: Refresh native multi-currency automatic rate cache from providers.
+
+Refresh native multi-currency automatic rate cache from providers.

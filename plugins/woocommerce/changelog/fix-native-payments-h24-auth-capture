@@ -1,3 +1,4 @@
 Significance: patch
 Type: fix
-Comment: Preserve WooPayments manual authorization and capture handling in native payments.
+
+Preserve WooPayments manual authorization and capture handling in native payments.

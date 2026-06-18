@@ -1,3 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Inject multi-currency projection factory into native controllers.
+
+Inject multi-currency projection factory into native controllers.

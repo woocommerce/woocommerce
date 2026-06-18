@@ -1,3 +1,4 @@
 Significance: patch
 Type: fix
-Comment: Preserve WooPayments subscription renewal authentication handling in native payments.
+
+Preserve WooPayments subscription renewal authentication handling in native payments.
