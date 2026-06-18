@@ -73,14 +73,25 @@ final class Pricing_Policy {
 	 * @param array<string, mixed> $data Decoded pricing_policy row.
 	 */
 	public static function from_array( array $data ): self {
-		$policies = array_map(
-			static function ( array $entry ): array {
-				if ( isset( $entry['value'] ) && is_numeric( $entry['value'] ) ) {
-					$entry['value'] = (float) $entry['value'];
+		$raw_policies = is_array( $data['policies'] ?? null ) ? $data['policies'] : array();
+		$policies = array_values(
+			array_filter(
+				array_map(
+					static function ( $entry ): ?array {
+						if ( ! is_array( $entry ) ) {
+							return null;
+						}
+						if ( isset( $entry['value'] ) && is_numeric( $entry['value'] ) ) {
+							$entry['value'] = (float) $entry['value'];
+						}
+						return $entry;
+					},
+					$raw_policies
+				),
+				static function ( $entry ): bool {
+					return is_array( $entry );
 				}
-				return $entry;
-			},
-			$data['policies'] ?? array()
+			)
 		);
 
 		$fees = array_map(
