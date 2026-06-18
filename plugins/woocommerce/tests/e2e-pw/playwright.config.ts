@@ -124,13 +124,28 @@ const serialRunSpecs = [
 	'**/tests/brands/**/*.spec.ts',
 	'**/tests/cart/**/*.spec.ts',
 	'**/tests/checkout/**/*.spec.ts',
-	'**/tests/coupons/**/*.spec.ts',
+	// Only the cart/checkout coupon specs mutate global store address/currency/tax
+	// settings — they stay serial. `coupons.spec.ts` is a single admin-form test
+	// with unique data and runs in `core-parallel`.
+	'**/tests/coupons/cart-block-coupons.spec.ts',
+	'**/tests/coupons/cart-checkout-coupons.spec.ts',
+	'**/tests/coupons/cart-checkout-restricted-coupons.spec.ts',
 	'**/tests/customer/**/*.spec.ts',
-	'**/tests/editor/**/*.spec.ts',
+	// `editor/command-palette.spec.ts` only navigates admin pages and creates a
+	// uniquely-named product — it runs in `core-parallel`.
 	'**/tests/email/**/*.spec.ts',
 	'**/tests/email-editor/**/*.spec.ts',
 	'**/tests/onboarding/**/*.spec.ts',
-	'**/tests/order/**/*.spec.ts',
+	// Order specs that mutate global state (tax, gateways, settings) stay serial.
+	// `order-status-filter` (asserts only count>0 on its own statuses) and
+	// `order-refund` (scoped to its own order) run in `core-parallel`.
+	'**/tests/order/create-order.spec.ts',
+	'**/tests/order/customer-payment-page.spec.ts',
+	'**/tests/order/order-bulk-edit.spec.ts',
+	'**/tests/order/order-coupon.spec.ts',
+	'**/tests/order/order-edit.spec.ts',
+	'**/tests/order/order-grace-period.spec.ts',
+	'**/tests/order/review-order-page.spec.ts',
 	'**/tests/product/product-import-csv.spec.ts',
 	'**/tests/settings/**/*.spec.ts',
 	'**/tests/shipping/**/*.spec.ts',
@@ -178,7 +193,7 @@ export default defineConfig( {
 		contextOptions: {
 			reducedMotion: 'reduce',
 		},
-		channel: 'chrome',
+		channel: 'chromium',
 		...devices[ 'Desktop Chrome' ],
 	},
 	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
