@@ -8,12 +8,18 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymen
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use WC_Unit_Test_Case;
+use WP_Error;
 use WP_REST_Request;
 
 /**
  * Tests for the WooPaymentsApiClient class.
  */
 class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
+
+	/**
+	 * Preserved WooPayments V1 client capability user agent.
+	 */
+	private const EXPECTED_USER_AGENT = 'WooCommerce Payments/10.8.0';
 
 	/**
 	 * @testdox Should build the site-scoped WPCOM endpoint and lift idempotency_key into the request headers.
@@ -45,10 +51,217 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertSame( 're_test', $result['id'] );
 		$this->assertSame( '/sites/123/wcpay/refunds', $http_client->last_path );
 		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertSame( 'application/json; charset=utf-8', $http_client->last_headers['Content-Type'] );
+		$this->assertSame( self::EXPECTED_USER_AGENT, $http_client->last_headers['User-Agent'] );
 		$this->assertSame( 'idem_test', $http_client->last_headers['Idempotency-Key'] );
+		$this->assertArrayHasKey( 'X-Request-Initiated', $http_client->last_headers );
 		$this->assertStringNotContainsString( 'idempotency_key', (string) $http_client->last_body );
 		$this->assertStringContainsString( '"charge":"ch_test"', (string) $http_client->last_body );
 		$this->assertStringContainsString( '"filtered":"yes"', (string) $http_client->last_body );
+	}
+
+	/**
+	 * @testdox Should generate reference transport headers for non-GET requests without caller idempotency keys.
+	 */
+	public function test_post_request_generates_transport_headers_without_caller_idempotency_key(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'id' => 'cus_test' ) ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->create_customer(
+			array(
+				'name'  => 'Ada Lovelace',
+				'email' => 'ada@example.com',
+			)
+		);
+
+		$this->assertSame( 'cus_test', $result );
+		$this->assertSame( '/sites/123/wcpay/customers', $http_client->last_path );
+		$this->assertStringStartsWith( '/sites/123/wcpay/', $http_client->last_path );
+		$this->assertStringNotContainsString( '/transact/', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertSame( 'application/json; charset=utf-8', $http_client->last_headers['Content-Type'] );
+		$this->assertSame( self::EXPECTED_USER_AGENT, $http_client->last_headers['User-Agent'] );
+		$this->assertNotEmpty( $http_client->last_headers['Idempotency-Key'] ?? '' );
+		$this->assertNotEmpty( $http_client->last_headers['X-Request-Initiated'] ?? '' );
+		$this->assertStringNotContainsString( 'idempotency_key', (string) $http_client->last_body );
+	}
+
+	/**
+	 * @testdox Should not generate idempotency headers for GET requests.
+	 */
+	public function test_get_request_does_not_generate_idempotency_header(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'id' => 'pm_test' ) ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$filter = static function ( array $params ): array {
+			$params['idempotency_key'] = 'ignored_for_get';
+			return $params;
+		};
+
+		add_filter( 'wcpay_api_request_params', $filter, 10, 3 );
+
+		try {
+			$result = $sut->get_payment_method( 'pm_test' );
+		} finally {
+			remove_filter( 'wcpay_api_request_params', $filter, 10 );
+		}
+
+		$this->assertSame( 'pm_test', $result['id'] );
+		$this->assertSame( '/sites/123/wcpay/payment_methods/pm_test?test_mode=0', $http_client->last_path );
+		$this->assertStringNotContainsString( '/transact/', $http_client->last_path );
+		$this->assertStringNotContainsString( 'idempotency_key', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+		$this->assertArrayNotHasKey( 'Idempotency-Key', $http_client->last_headers );
+		$this->assertArrayHasKey( 'X-Request-Initiated', $http_client->last_headers );
+	}
+
+	/**
+	 * @testdox Should retry idempotent write requests when the native transport has no HTTP response.
+	 */
+	public function test_post_request_retries_transport_failure_with_idempotency_key(): void {
+		$http_client            = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id   = 123;
+		$http_client->responses = array(
+			new WP_Error( 'http_request_failed', 'Could not connect to WPCOM.' ),
+			array(
+				'response' => array( 'code' => 200 ),
+				'headers'  => array( 'content-type' => 'application/json' ),
+				'body'     => wp_json_encode( array( 'id' => 'cus_retry' ) ),
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->create_customer(
+			array(
+				'name'  => 'Ada Lovelace',
+				'email' => 'ada@example.com',
+			)
+		);
+
+		$this->assertSame( 'cus_retry', $result );
+		$this->assertSame( 2, $http_client->request_count );
+		$this->assertNotEmpty( $http_client->requests[0]['headers']['Idempotency-Key'] ?? '' );
+		$this->assertSame( $http_client->requests[0]['headers']['Idempotency-Key'], $http_client->requests[1]['headers']['Idempotency-Key'] );
+		$this->assertNotEmpty( $http_client->requests[0]['headers']['X-Request-Initiated'] ?? '' );
+		$this->assertNotEmpty( $http_client->requests[1]['headers']['X-Request-Initiated'] ?? '' );
+	}
+
+	/**
+	 * @testdox Should stop transient transport retries after the reference retry budget.
+	 */
+	public function test_post_request_stops_transient_transport_retries_after_retry_limit(): void {
+		$http_client            = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id   = 123;
+		$http_client->responses = array(
+			new WP_Error( 'http_request_failed', 'Could not connect to WPCOM.' ),
+			new WP_Error( 'http_request_failed', 'Could not connect to WPCOM.' ),
+			new WP_Error( 'http_request_failed', 'Could not connect to WPCOM.' ),
+			new WP_Error( 'http_request_failed', 'Could not connect to WPCOM.' ),
+			array(
+				'response' => array( 'code' => 200 ),
+				'headers'  => array( 'content-type' => 'application/json' ),
+				'body'     => wp_json_encode( array( 'id' => 'cus_after_limit' ) ),
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		try {
+			$sut->create_customer(
+				array(
+					'name'  => 'Ada Lovelace',
+					'email' => 'ada@example.com',
+				)
+			);
+			$this->fail( 'Expected the transient transport error to surface after retry exhaustion.' );
+		} catch ( WooPaymentsApiException $exception ) {
+			$this->assertSame( 'http_request_failed', $exception->get_error_code() );
+		}
+
+		$this->assertSame( 4, $http_client->request_count, 'The retry budget is three retries after the initial attempt.' );
+		$this->assertSame( $http_client->requests[0]['headers']['Idempotency-Key'], $http_client->requests[3]['headers']['Idempotency-Key'] );
+	}
+
+	/**
+	 * @testdox Should not retry deterministic local transport readiness failures.
+	 */
+	public function test_post_request_does_not_retry_local_transport_readiness_failure(): void {
+		$http_client            = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id   = 123;
+		$http_client->responses = array(
+			new WP_Error( 'wcpay_wpcom_not_connected', 'Site is not connected to WordPress.com.' ),
+			array(
+				'response' => array( 'code' => 200 ),
+				'headers'  => array( 'content-type' => 'application/json' ),
+				'body'     => wp_json_encode( array( 'id' => 'cus_should_not_retry' ) ),
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		try {
+			$sut->create_customer(
+				array(
+					'name'  => 'Ada Lovelace',
+					'email' => 'ada@example.com',
+				)
+			);
+			$this->fail( 'Expected the local transport readiness failure to surface.' );
+		} catch ( WooPaymentsApiException $exception ) {
+			$this->assertSame( 'wcpay_wpcom_not_connected', $exception->get_error_code() );
+		}
+
+		$this->assertSame( 1, $http_client->request_count );
+		$this->assertNotEmpty( $http_client->requests[0]['headers']['Idempotency-Key'] ?? '' );
+	}
+
+	/**
+	 * @testdox Should not retry GET requests because they do not carry idempotency headers.
+	 */
+	public function test_get_request_does_not_retry_transport_failure_without_idempotency_key(): void {
+		$http_client            = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id   = 123;
+		$http_client->responses = array(
+			new WP_Error( 'http_request_failed', 'Could not connect to WPCOM.' ),
+			array(
+				'response' => array( 'code' => 200 ),
+				'headers'  => array( 'content-type' => 'application/json' ),
+				'body'     => wp_json_encode( array( 'id' => 'pm_test' ) ),
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		try {
+			$sut->get_payment_method( 'pm_test' );
+			$this->fail( 'Expected the native transport request to surface a WooPaymentsApiException.' );
+		} catch ( WooPaymentsApiException $exception ) {
+			$this->assertSame( 'http_request_failed', $exception->get_error_code() );
+		}
+
+		$this->assertSame( 1, $http_client->request_count );
+		$this->assertArrayNotHasKey( 'Idempotency-Key', $http_client->requests[0]['headers'] );
 	}
 
 	/**
@@ -570,7 +783,7 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertStringStartsWith( 'https://public-api.wordpress.com/wpcom/v2/wcpay/payment_methods/recommended?', $captured_url );
 		$this->assertStringContainsString( 'country_code=GB', $captured_url );
 		$this->assertStringContainsString( 'locale=en_US', $captured_url );
-		$this->assertStringStartsWith( 'WooCommerce Payments/', $captured_args['user-agent'] );
+		$this->assertSame( self::EXPECTED_USER_AGENT, $captured_args['user-agent'] );
 		$this->assertSame( 70, $captured_args['timeout'] );
 		$this->assertTrue( $captured_args['sslverify'] );
 	}
@@ -911,6 +1124,7 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'NATIVE STORE', $body['statement_descriptor'] );
 		$this->assertSame( 'support@example.test', $body['business_support_email'] );
 		$this->assertTrue( $body['test_mode'] );
+		$this->assertTrue( $http_client->last_use_user_token );
 	}
 
 	/**

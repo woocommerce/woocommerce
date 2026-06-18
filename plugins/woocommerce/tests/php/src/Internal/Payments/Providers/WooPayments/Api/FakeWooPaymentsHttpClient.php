@@ -32,6 +32,27 @@ class FakeWooPaymentsHttpClient extends WooPaymentsHttpClient {
 	public $response = null;
 
 	/**
+	 * Queued responses returned by subsequent requests.
+	 *
+	 * @var array<int,mixed>
+	 */
+	public array $responses = array();
+
+	/**
+	 * Recorded requests.
+	 *
+	 * @var array<int,array<string,mixed>>
+	 */
+	public array $requests = array();
+
+	/**
+	 * Number of transport requests.
+	 *
+	 * @var int
+	 */
+	public int $request_count = 0;
+
+	/**
 	 * Last HTTP method.
 	 *
 	 * @var string
@@ -111,6 +132,8 @@ class FakeWooPaymentsHttpClient extends WooPaymentsHttpClient {
 	 * @return mixed
 	 */
 	public function request( string $method, string $path, array $headers = array(), ?string $body = null, int $timeout = 70, bool $use_user_token = false, bool $blocking = true ) {
+		++$this->request_count;
+
 		$this->last_method         = $method;
 		$this->last_path           = $path;
 		$this->last_headers        = $headers;
@@ -118,6 +141,20 @@ class FakeWooPaymentsHttpClient extends WooPaymentsHttpClient {
 		$this->last_timeout        = $timeout;
 		$this->last_use_user_token = $use_user_token;
 		$this->last_blocking       = $blocking;
+
+		$this->requests[] = array(
+			'method'         => $method,
+			'path'           => $path,
+			'headers'        => $headers,
+			'body'           => $body,
+			'timeout'        => $timeout,
+			'use_user_token' => $use_user_token,
+			'blocking'       => $blocking,
+		);
+
+		if ( array() !== $this->responses ) {
+			return array_shift( $this->responses );
+		}
 
 		return $this->response;
 	}

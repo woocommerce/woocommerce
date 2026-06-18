@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Subscriptions\WooPaymentsLegacySubscriptionsGuard;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCanceledAuthorizationFeeRemediationService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCutoverController;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPlatformConnectionService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Unit_Test_Case;
@@ -44,6 +45,13 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	private WooPaymentsCanceledAuthorizationFeeRemediationService $fee_remediation_service;
 
 	/**
+	 * Platform connection readiness service mock.
+	 *
+	 * @var WooPaymentsPlatformConnectionService&\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private WooPaymentsPlatformConnectionService $platform_connection_service;
+
+	/**
 	 * Whether the native provider can process payments.
 	 *
 	 * @var bool
@@ -63,6 +71,13 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	 * @var string
 	 */
 	private string $fee_remediation_schedule_result = 'scheduled';
+
+	/**
+	 * Platform connection preflight failures.
+	 *
+	 * @var string[]
+	 */
+	private array $platform_connection_failures = array();
 
 	/**
 	 * Number of times the cutover asked the remediation service to adopt the queue.
@@ -143,13 +158,22 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 				}
 			);
 
+		$this->platform_connection_service = $this->getMockBuilder( WooPaymentsPlatformConnectionService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_cutover_preflight_failures' ) )
+			->getMock();
+		$this->platform_connection_service
+			->method( 'get_cutover_preflight_failures' )
+			->willReturnCallback( fn() => $this->platform_connection_failures );
+
 		$this->sut = new WooPaymentsCutoverController();
 		$this->sut->init(
 			wc_get_container()->get( NativePaymentsRuntimeArbiter::class ),
 			wc_get_container()->get( LegacyProxy::class ),
 			$this->provider,
 			new WooPaymentsLegacySubscriptionsGuard(),
-			$this->fee_remediation_service
+			$this->fee_remediation_service,
+			$this->platform_connection_service
 		);
 	}
 
@@ -388,6 +412,36 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cutover preflight blocks while platform connection owner user-token readiness is unavailable.
+	 */
+	public function test_preflight_blocks_when_platform_connection_user_token_is_unavailable(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		$this->enable_ready_cutover();
+		$this->platform_connection_failures = array( 'wpcom_connection_owner_user_token_unavailable' );
+
+		$this->assertContains( 'wpcom_connection_owner_user_token_unavailable', $this->sut->get_preflight_failures() );
+		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+		$this->assertFalse( $this->sut->disable_woopayments_plugin() );
+		$this->assertSame( array(), $this->deactivate_plugin_calls, 'The plugin must stay active when owner user-token readiness is unavailable.' );
+	}
+
+	/**
+	 * @testdox Cutover preflight filters cannot remove platform connection blockers.
+	 */
+	public function test_preflight_filter_cannot_remove_platform_connection_blocker(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		$this->enable_ready_cutover();
+		$this->platform_connection_failures = array( 'wpcom_blog_id_unavailable' );
+		add_filter( WooPaymentsCutoverController::FILTER_PREFLIGHT_FAILURES, '__return_empty_array' );
+
+		$this->assertContains( 'wpcom_blog_id_unavailable', $this->sut->get_preflight_failures() );
+		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+		$this->assertFalse( $this->sut->disable_woopayments_plugin() );
+	}
+
+	/**
 	 * @testdox Cutover preflight blocks while native admin surfaces are unavailable.
 	 */
 	public function test_preflight_blocks_when_native_admin_surfaces_are_unavailable(): void {
@@ -400,6 +454,22 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertContains( 'native_admin_surfaces_unavailable', $this->sut->get_preflight_failures() );
 		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+	}
+
+	/**
+	 * @testdox Cutover preflight fails closed until native admin surface parity is explicitly verified.
+	 */
+	public function test_preflight_defaults_to_blocking_until_native_admin_surfaces_are_verified(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		add_filter( NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED, '__return_true' );
+		add_filter( WooPaymentsCutoverController::FILTER_PROVIDER_EVENT_TYPES_PENDING_CUTOVER, '__return_empty_array' );
+		add_filter( WooPaymentsCutoverController::FILTER_OPERATIONAL_QUEUE_HOOKS_PENDING_CUTOVER, '__return_empty_array' );
+		$this->native_provider_ready = true;
+
+		$this->assertContains( 'native_admin_surfaces_unavailable', $this->sut->get_preflight_failures() );
+		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+		$this->assertFalse( $this->sut->disable_woopayments_plugin() );
 	}
 
 	/**
@@ -448,12 +518,13 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Cutover preflight no longer reports admin, event, or queue blockers after A5a disposition.
+	 * @testdox Cutover preflight no longer reports event or queue blockers after A5a disposition.
 	 */
-	public function test_preflight_closes_admin_event_and_queue_blockers_by_default(): void {
+	public function test_preflight_closes_event_and_queue_blockers_by_default(): void {
 		$this->fake_plugin_active();
 		$this->fake_current_user_caps( true );
 		add_filter( NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED, '__return_true' );
+		add_filter( WooPaymentsCutoverController::FILTER_NATIVE_ADMIN_SURFACES_READY, '__return_true' );
 		$this->native_provider_ready = true;
 
 		$failures = $this->sut->get_preflight_failures();

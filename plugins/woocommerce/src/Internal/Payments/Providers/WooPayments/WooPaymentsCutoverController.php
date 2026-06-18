@@ -164,6 +164,13 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	private WooPaymentsCanceledAuthorizationFeeRemediationService $fee_remediation_service;
 
 	/**
+	 * Platform connection readiness service.
+	 *
+	 * @var WooPaymentsPlatformConnectionService
+	 */
+	private WooPaymentsPlatformConnectionService $platform_connection_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
@@ -172,20 +179,23 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	 * @param LegacyProxy                                                $legacy_proxy               Legacy proxy.
 	 * @param WooPaymentsProvider                                        $provider                   Native WooPayments provider.
 	 * @param WooPaymentsLegacySubscriptionsGuard|null                   $legacy_subscriptions_guard Legacy subscription data guard.
-	 * @param WooPaymentsCanceledAuthorizationFeeRemediationService|null $fee_remediation_service Canceled-authorization fee remediation queue owner.
+	 * @param WooPaymentsCanceledAuthorizationFeeRemediationService|null $fee_remediation_service    Canceled-authorization fee remediation queue owner.
+	 * @param WooPaymentsPlatformConnectionService|null                  $platform_connection_service Platform connection readiness service.
 	 */
 	final public function init(
 		NativePaymentsRuntimeArbiter $arbiter,
 		LegacyProxy $legacy_proxy,
 		WooPaymentsProvider $provider,
 		?WooPaymentsLegacySubscriptionsGuard $legacy_subscriptions_guard = null,
-		?WooPaymentsCanceledAuthorizationFeeRemediationService $fee_remediation_service = null
+		?WooPaymentsCanceledAuthorizationFeeRemediationService $fee_remediation_service = null,
+		?WooPaymentsPlatformConnectionService $platform_connection_service = null
 	): void {
-		$this->arbiter                    = $arbiter;
-		$this->legacy_proxy               = $legacy_proxy;
-		$this->provider                   = $provider;
-		$this->legacy_subscriptions_guard = $legacy_subscriptions_guard ?? wc_get_container()->get( WooPaymentsLegacySubscriptionsGuard::class );
-		$this->fee_remediation_service    = $fee_remediation_service ?? wc_get_container()->get( WooPaymentsCanceledAuthorizationFeeRemediationService::class );
+		$this->arbiter                     = $arbiter;
+		$this->legacy_proxy                = $legacy_proxy;
+		$this->provider                    = $provider;
+		$this->legacy_subscriptions_guard  = $legacy_subscriptions_guard ?? wc_get_container()->get( WooPaymentsLegacySubscriptionsGuard::class );
+		$this->fee_remediation_service     = $fee_remediation_service ?? wc_get_container()->get( WooPaymentsCanceledAuthorizationFeeRemediationService::class );
+		$this->platform_connection_service = $platform_connection_service ?? wc_get_container()->get( WooPaymentsPlatformConnectionService::class );
 	}
 
 	/**
@@ -353,6 +363,9 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 			$failures[] = 'native_transport_unavailable';
 		}
 
+		$platform_connection_failures = $this->platform_connection_service->get_cutover_preflight_failures();
+		$failures                     = array_merge( $failures, $platform_connection_failures );
+
 		/**
 		 * Filters whether native WooPayments merchant admin surfaces are ready after deactivation.
 		 *
@@ -360,7 +373,7 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 		 *
 		 * @since 11.0.0
 		 */
-		if ( ! (bool) apply_filters( self::FILTER_NATIVE_ADMIN_SURFACES_READY, true ) ) {
+		if ( ! (bool) apply_filters( self::FILTER_NATIVE_ADMIN_SURFACES_READY, false ) ) {
 			$failures[] = 'native_admin_surfaces_unavailable';
 		}
 
@@ -386,6 +399,13 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 		$failures = apply_filters( self::FILTER_PREFLIGHT_FAILURES, $failures );
 
 		$failures = is_array( $failures ) ? array_values( array_map( 'strval', $failures ) ) : array( 'preflight_filter_invalid' );
+
+		foreach ( $platform_connection_failures as $failure ) {
+			$failure = (string) $failure;
+			if ( '' !== $failure && ! in_array( $failure, $failures, true ) ) {
+				$failures[] = $failure;
+			}
+		}
 
 		if (
 			$this->legacy_subscriptions_guard->has_legacy_stripe_billing_subscription_markers() &&

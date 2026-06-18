@@ -27,6 +27,21 @@ class WooPaymentsApiClient {
 	private const REQUEST_TIMEOUT_SECONDS = 70;
 
 	/**
+	 * Retry attempts after the initial request for idempotent transport failures.
+	 */
+	private const REQUEST_RETRIES_LIMIT = 3;
+
+	/**
+	 * Backoff between transport retries, in microseconds.
+	 */
+	private const REQUEST_RETRIES_BACKOFF_MICROSECONDS = 250;
+
+	/**
+	 * WooPayments V1 client capability version advertised to WPCOM.
+	 */
+	private const WCPAY_V1_CLIENT_CAPABILITY_VERSION = '10.8.0';
+
+	/**
 	 * Public WordPress.com API base preserved for compatibility filters.
 	 */
 	private const WPCOM_ENDPOINT_BASE = 'https://public-api.wordpress.com/wpcom/v2';
@@ -1261,7 +1276,7 @@ class WooPaymentsApiClient {
 			return array();
 		}
 
-		return $this->request( $account_settings, self::ACCOUNTS_API, 'POST' );
+		return $this->request( $account_settings, self::ACCOUNTS_API, 'POST', true, true );
 	}
 
 	/**
@@ -1460,9 +1475,9 @@ class WooPaymentsApiClient {
 		 *
 		 * @since 11.0.0
 		 *
-			 * @param array<int|string,mixed> $params Request parameters.
-	 * @param string              $api    API path.
-	 * @param string              $method HTTP method.
+		 * @param array<int|string,mixed> $params Request parameters.
+		 * @param string                  $api    API path.
+		 * @param string                  $method HTTP method.
 		 */
 		$params = apply_filters( 'wcpay_api_request_params', $params, $api, $method );
 
@@ -1471,9 +1486,14 @@ class WooPaymentsApiClient {
 			'User-Agent'   => $this->get_user_agent(),
 		);
 
+		$caller_idempotency_key = '';
 		if ( isset( $params['idempotency_key'] ) ) {
-			$headers['Idempotency-Key'] = (string) $params['idempotency_key'];
+			$caller_idempotency_key = (string) $params['idempotency_key'];
 			unset( $params['idempotency_key'] );
+		}
+
+		if ( ! in_array( $method, array( 'GET', 'DELETE' ), true ) ) {
+			$headers['Idempotency-Key'] = '' !== $caller_idempotency_key ? $caller_idempotency_key : wp_generate_uuid4();
 		}
 
 		/**
@@ -1481,7 +1501,7 @@ class WooPaymentsApiClient {
 		 *
 		 * @since 11.0.0
 		 *
-	 * @param array<string,string> $headers Request headers.
+		 * @param array<string,string> $headers Request headers.
 		 */
 		$headers    = apply_filters( 'wcpay_api_request_headers', $headers );
 		$site_id    = $this->http_client->get_blog_id();
@@ -1504,27 +1524,43 @@ class WooPaymentsApiClient {
 			}
 		}
 
-		$response = $this->http_client->request(
-			$method,
-			$path,
-			$headers,
-			$body,
-			self::REQUEST_TIMEOUT_SECONDS,
-			$use_user_token,
-			$blocking
-		);
+		$stop_trying_at = time() + self::REQUEST_TIMEOUT_SECONDS;
+		$retries        = 0;
+		$retries_limit  = $blocking && array_key_exists( 'Idempotency-Key', $headers ) ? self::REQUEST_RETRIES_LIMIT : 0;
 
-		/**
-		 * Filters the WooPayments native response after transport dispatch.
-		 *
-		 * @since 11.0.0
-		 *
-		 * @param mixed  $response Transport response.
-		 * @param string $method   HTTP method.
-		 * @param string $url      Public WordPress.com API URL.
-		 * @param string $api      WooPayments API path.
-		 */
-		$response = apply_filters( 'wcpay_api_request_response', $response, $method, $filter_url, $api );
+		while ( true ) {
+			$headers['X-Request-Initiated'] = (string) microtime( true );
+
+			$response = $this->http_client->request(
+				$method,
+				$path,
+				$headers,
+				$body,
+				self::REQUEST_TIMEOUT_SECONDS,
+				$use_user_token,
+				$blocking
+			);
+
+			/**
+			 * Filters the WooPayments native response after transport dispatch.
+			 *
+			 * @since 11.0.0
+			 *
+			 * @param mixed  $response Transport response.
+			 * @param string $method   HTTP method.
+			 * @param string $url      Public WordPress.com API URL.
+			 * @param string $api      WooPayments API path.
+			 */
+			$response      = apply_filters( 'wcpay_api_request_response', $response, $method, $filter_url, $api );
+			$response_code = $response instanceof WP_Error ? 0 : (int) wp_remote_retrieve_response_code( $response );
+
+			if ( ! $this->should_retry_request_response( $response, $response_code, $retries, $retries_limit, $stop_trying_at ) ) {
+				break;
+			}
+
+			usleep( self::REQUEST_RETRIES_BACKOFF_MICROSECONDS * ( 2 ** $retries ) );
+			++$retries;
+		}
 
 		if ( ! $blocking ) {
 			return array();
@@ -1647,14 +1683,46 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Tell whether the transport response should be retried.
+	 *
+	 * @param mixed $response       Transport response.
+	 * @param int   $response_code  HTTP status code.
+	 * @param int   $retries        Retry attempts already made.
+	 * @param int   $retries_limit  Retry attempts limit.
+	 * @param int   $stop_trying_at Epoch timestamp at which retrying must stop.
+	 * @return bool
+	 */
+	private function should_retry_request_response( $response, int $response_code, int $retries, int $retries_limit, int $stop_trying_at ): bool {
+		if ( $response_code || time() >= $stop_trying_at || $retries_limit === $retries ) {
+			return false;
+		}
+
+		return $response instanceof WP_Error && $this->is_retryable_transport_error( $response );
+	}
+
+	/**
+	 * Tell whether a transport error may recover on retry.
+	 *
+	 * @param WP_Error $error Transport error.
+	 * @return bool
+	 */
+	private function is_retryable_transport_error( WP_Error $error ): bool {
+		return in_array(
+			(string) $error->get_error_code(),
+			array(
+				'http_request_failed',
+				'http_request_not_executed',
+			),
+			true
+		);
+	}
+
+	/**
 	 * Build the provider user-agent string.
 	 *
 	 * @return string
 	 */
 	private function get_user_agent(): string {
-		$version = defined( 'WC_VERSION' ) ? preg_replace( '/-dev$/', '', WC_VERSION ) : 'unknown';
-		$version = is_string( $version ) ? $version : 'unknown';
-
-		return 'WooCommerce Payments/' . $version;
+		return 'WooCommerce Payments/' . self::WCPAY_V1_CLIENT_CAPABILITY_VERSION;
 	}
 }
