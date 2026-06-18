@@ -3936,7 +3936,7 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       grunt-contrib-cssmin:
-        specifier: ^4.0.0
+        specifier: 4.0.0
         version: 4.0.0
       grunt-contrib-uglify-es:
         specifier: ^3.3.0
