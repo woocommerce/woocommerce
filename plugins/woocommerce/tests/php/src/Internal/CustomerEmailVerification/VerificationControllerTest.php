@@ -81,20 +81,16 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 
 		// Capture the verify URL emitted by send_verification_email().
 		$captured_url = '';
-		add_action(
-			'woocommerce_customer_verify_email_notification',
-			function ( $uid, $url ) use ( &$captured_url ) {
-				// The $uid arg is unused but required by the two-argument hook signature.
-				unset( $uid );
-				$captured_url = $url;
-			},
-			10,
-			2
-		);
+		$listener     = static function ( $uid, $url ) use ( &$captured_url ) {
+			// The $uid arg is unused but required by the two-argument hook signature.
+			unset( $uid );
+			$captured_url = $url;
+		};
+		add_action( 'woocommerce_customer_verify_email_notification', $listener, 10, 2 );
 
 		$this->ctrl->send_verification_email( $user_id );
 
-		remove_all_actions( 'woocommerce_customer_verify_email_notification' );
+		remove_action( 'woocommerce_customer_verify_email_notification', $listener, 10 );
 
 		$this->assertNotEmpty( $captured_url, 'send_verification_email() should fire the notification action with a URL' );
 
@@ -112,5 +108,41 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 		// Confirm OrderLinker linked the guest order.
 		$linked_order = wc_get_order( $order_id );
 		$this->assertSame( $user_id, $linked_order->get_customer_id(), 'Guest order should be linked to the verified customer' );
+	}
+
+	/**
+	 * @testdox A valid link is rejected without verifying or switching accounts when another user is logged in.
+	 */
+	public function test_verification_rejected_when_logged_in_as_other_user(): void {
+		$link_owner = wc_create_new_customer( 'link-owner@example.com', 'linkowner', 'pw' );
+		$other_user = wc_create_new_customer( 'other-user@example.com', 'otheruser', 'pw' );
+		$key        = $this->service->create_verification_key( $link_owner );
+
+		wp_set_current_user( $other_user );
+
+		// maybe_process_request() reads the verify args from the URL and ends in wp_safe_redirect()/exit;
+		// throw from the redirect filter so the exit is never reached and the test can assert.
+		$_GET['wc_verify_email_key']  = $key;
+		$_GET['wc_verify_email_user'] = (string) $link_owner;
+		$abort                        = static function ( $location ): void {
+			throw new \RuntimeException( (string) $location );
+		};
+		add_filter( 'wp_redirect', $abort );
+		try {
+			$this->ctrl->maybe_process_request();
+		} catch ( \RuntimeException $e ) {
+			unset( $e ); // Expected: the controller redirects and exits.
+		} finally {
+			remove_filter( 'wp_redirect', $abort );
+		}
+
+		$error_notices = wc_get_notices( 'error' );
+
+		unset( $_GET['wc_verify_email_key'], $_GET['wc_verify_email_user'] );
+		wc_clear_notices();
+		wp_set_current_user( 0 );
+
+		$this->assertFalse( $this->service->is_verified( $link_owner ), 'A link opened while logged in as a different user must not verify the link owner' );
+		$this->assertNotEmpty( $error_notices, 'An error notice should explain that verification is blocked while logged in elsewhere' );
 	}
 }
