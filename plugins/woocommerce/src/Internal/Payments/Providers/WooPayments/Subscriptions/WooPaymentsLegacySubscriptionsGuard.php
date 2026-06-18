@@ -112,25 +112,27 @@ class WooPaymentsLegacySubscriptionsGuard {
 	private function query_legacy_marker_exists_from_posts(): bool {
 		global $wpdb;
 
-		$order_type_placeholders = implode( ', ', array_fill( 0, count( self::ORDER_TYPES ), '%s' ) );
-		$meta_key_placeholders   = implode( ', ', array_fill( 0, count( self::LEGACY_POST_META_KEYS ), '%s' ) );
-		$prepare_args            = array_merge(
-			array(
-				$wpdb->posts,
-				$wpdb->postmeta,
-			),
-			self::ORDER_TYPES,
-			self::LEGACY_POST_META_KEYS
-		);
-		$sql                     = $wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholder lists are generated from fixed internal marker lists.
-			"SELECT 1
+		// Keep this placeholder matrix in sync with the fixed marker constants above.
+		$sql = $wpdb->prepare(
+			'SELECT 1
 			FROM %i AS posts
 			INNER JOIN %i AS postmeta ON posts.ID = postmeta.post_id
-			WHERE posts.post_type IN ( $order_type_placeholders )
-				AND postmeta.meta_key IN ( $meta_key_placeholders )
-			LIMIT 1",
-			$prepare_args
+			WHERE posts.post_type IN ( %s, %s )
+				AND postmeta.meta_key IN ( %s, %s, %s, %s, %s, %s, %s, %s, %s )
+			LIMIT 1',
+			$wpdb->posts,
+			$wpdb->postmeta,
+			self::ORDER_TYPES[0],
+			self::ORDER_TYPES[1],
+			self::LEGACY_POST_META_KEYS[0],
+			self::LEGACY_POST_META_KEYS[1],
+			self::LEGACY_POST_META_KEYS[2],
+			self::LEGACY_POST_META_KEYS[3],
+			self::LEGACY_POST_META_KEYS[4],
+			self::LEGACY_POST_META_KEYS[5],
+			self::LEGACY_POST_META_KEYS[6],
+			self::LEGACY_POST_META_KEYS[7],
+			self::LEGACY_POST_META_KEYS[8]
 		);
 
 		return null !== $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
