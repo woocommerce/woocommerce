@@ -103,13 +103,13 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Output should render registered settings sections before gateway settings.
+	 * @testdox Output should render registered checkout settings sections.
 	 */
-	public function test_output_renders_registered_settings_section_before_gateway_settings(): void {
+	public function test_output_renders_registered_checkout_settings_section(): void {
 		global $current_section;
-		$current_section = 'bacs';
+		$current_section = 'acme_payments';
 
-		SettingsSectionRegistry::get_instance()->register( $this->get_registered_payment_section( 'bacs' ) );
+		SettingsSectionRegistry::get_instance()->register( $this->get_registered_payment_section( 'acme_payments' ) );
 		$disable_reactified_sections = static function () {
 			return array();
 		};
@@ -128,7 +128,7 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 			remove_filter( 'experimental_woocommerce_admin_payment_reactify_render_sections', $disable_reactified_sections );
 		}
 
-		$this->assertStringContainsString( 'name="registered_bacs_setting"', $output );
+		$this->assertStringContainsString( 'name="registered_acme_payments_setting"', $output );
 	}
 
 	/**

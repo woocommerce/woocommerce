@@ -285,6 +285,37 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * It does not resolve a current request context when the feature flag is disabled.
+	 */
+	public function test_current_request_context_is_null_when_feature_flag_is_disabled(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
+
+		$_GET['page'] = 'wc-settings';
+		$_GET['tab']  = 'products';
+
+		$this->assertNull( SettingsUIRequestContext::get_current() );
+	}
+
+	/**
+	 * It does not resolve a current request context without the manage_woocommerce capability.
+	 */
+	public function test_current_request_context_is_null_without_manage_woocommerce_capability(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		$_GET['page'] = 'wc-settings';
+		$_GET['tab']  = 'products';
+
+		$original_user_id = get_current_user_id();
+		wp_set_current_user( 0 );
+
+		try {
+			$this->assertNull( SettingsUIRequestContext::get_current() );
+		} finally {
+			wp_set_current_user( $original_user_id );
+		}
+	}
+
+	/**
 	 * It does not add the settings UI body class when the feature flag is disabled.
 	 */
 	public function test_settings_ui_body_class_is_not_added_when_feature_flag_is_disabled(): void {

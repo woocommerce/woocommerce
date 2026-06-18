@@ -87,6 +87,20 @@ final class SettingsSectionRegistry {
 			return false;
 		}
 
+		if ( $this->is_reserved_checkout_section_id( $parent_page_id, $section_id ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: 1: parent settings page id, 2: settings section id. */
+					esc_html__( 'The settings section "%1$s/%2$s" conflicts with an existing payment gateway section.', 'woocommerce' ),
+					esc_html( $parent_page_id ),
+					esc_html( $section_id )
+				),
+				'10.9.0'
+			);
+			return false;
+		}
+
 		$this->sections[ $parent_page_id ][ $section_id ] = $section;
 		return true;
 	}
@@ -149,16 +163,90 @@ final class SettingsSectionRegistry {
 			return;
 		}
 
+		// Mark initialized before firing the action so re-entrant registry lookups do not run it again.
 		$this->initialized = true;
 
-		/**
-		 * Fires when settings sections can be registered.
-		 *
-		 * @param SettingsSectionRegistry $registry Settings section registry.
-		 *
-		 * @since 10.9.0
-		 */
-		do_action( 'woocommerce_settings_sections_registration', $this );
+		try {
+			/**
+			 * Fires when settings sections can be registered.
+			 *
+			 * @param SettingsSectionRegistry $registry Settings section registry.
+			 *
+			 * @since 10.9.0
+			 */
+			do_action( 'woocommerce_settings_sections_registration', $this );
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf(
+					'Settings section registration failed: %1$s: %2$s',
+					get_class( $e ),
+					$e->getMessage()
+				),
+				array( 'source' => 'settings-ui' )
+			);
+
+			if ( $e instanceof \Exception ) {
+				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
+			}
+		}
+	}
+
+	/**
+	 * Check whether a checkout section id is reserved by an existing payment gateway.
+	 *
+	 * @param string $parent_page_id Parent settings page id.
+	 * @param string $section_id Section id.
+	 * @return bool
+	 */
+	private function is_reserved_checkout_section_id( string $parent_page_id, string $section_id ): bool {
+		if ( 'checkout' !== $parent_page_id || ! function_exists( 'WC' ) ) {
+			return false;
+		}
+
+		try {
+			$wc = WC();
+			if ( ! $wc || ! is_callable( array( $wc, 'payment_gateways' ) ) ) {
+				return false;
+			}
+
+			$payment_gateways = $wc->payment_gateways();
+			if ( ! $payment_gateways || ! is_callable( array( $payment_gateways, 'payment_gateways' ) ) ) {
+				return false;
+			}
+
+			foreach ( $payment_gateways->payment_gateways() as $gateway ) {
+				if ( ! is_object( $gateway ) ) {
+					continue;
+				}
+
+				$gateway_id = '';
+				if ( isset( $gateway->id ) && is_scalar( $gateway->id ) ) {
+					$gateway_id = $this->normalize_id( (string) $gateway->id );
+				}
+
+				$gateway_class_id = $this->normalize_id( get_class( $gateway ) );
+				if ( in_array( $section_id, array( $gateway_id, $gateway_class_id ), true ) ) {
+					return true;
+				}
+			}
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->debug(
+				sprintf(
+					'Payment gateway section ids could not be checked while registering settings section "%1$s/%2$s": %3$s: %4$s',
+					$parent_page_id,
+					$section_id,
+					get_class( $e ),
+					$e->getMessage()
+				),
+				array( 'source' => 'settings-ui' )
+			);
+
+			if ( $e instanceof \Exception ) {
+				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
+			}
+		}
+
+		return false;
 	}
 
 	/**

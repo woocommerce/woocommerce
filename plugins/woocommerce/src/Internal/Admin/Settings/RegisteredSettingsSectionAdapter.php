@@ -41,7 +41,7 @@ class RegisteredSettingsSectionAdapter extends LegacySettingsPageAdapter {
 	/**
 	 * Get script handles that must be loaded before the settings UI app mounts.
 	 *
-	 * @param string $section Section id. Empty string means the default section.
+	 * @param string $section Unused. This adapter wraps a single registered section.
 	 * @return string[]
 	 */
 	public function get_script_handles( string $section ): array {
@@ -51,7 +51,7 @@ class RegisteredSettingsSectionAdapter extends LegacySettingsPageAdapter {
 	/**
 	 * Get the default save adapter for fields in this section.
 	 *
-	 * @param string $section Section id. Empty string means the default section.
+	 * @param string $section Unused. This adapter wraps a single registered section.
 	 * @return string
 	 */
 	public function get_save_adapter( string $section ): string {

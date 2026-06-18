@@ -182,6 +182,17 @@ describe( 'settings extension registry', () => {
 		expect(
 			resolveFieldComponent(
 				{
+					id: 'field',
+					label: 'Field',
+					type: 'text',
+					component: 'page-wide',
+				},
+				{ page: 'registry-section-scope', section: '' }
+			)
+		).toBe( pageWideComponent );
+		expect(
+			resolveFieldComponent(
+				{
 					id: 'default_field',
 					label: 'Field',
 					type: 'text',
@@ -199,6 +210,21 @@ describe( 'settings extension registry', () => {
 				{ page: 'registry-section-scope', section: 'advanced' }
 			)
 		).toBeUndefined();
+		const warnSpy = jest
+			.spyOn( console, 'warn' )
+			.mockImplementation( jest.fn() );
+		expect(
+			resolveFieldComponent(
+				{
+					id: 'field',
+					label: 'Field',
+					type: 'text',
+					component: 'named-section',
+				},
+				{ page: 'registry-section-scope', section: '' }
+			)
+		).toBeUndefined();
+		warnSpy.mockRestore();
 		expect(
 			resolveFieldComponent(
 				{

@@ -353,14 +353,15 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 
 			if ( $context->is_rendering_enabled() ) {
 				$settings_ui_page = $context->get_settings_ui_page();
+				assert( $settings_ui_page instanceof SettingsUIPageInterface );
 
-				if ( $settings_ui_page instanceof SettingsUIPageInterface && $context->has_schema_failed() ) {
+				if ( $context->has_schema_failed() ) {
 					$this->log_settings_ui_fallback(
 						$settings_ui_page,
 						$section,
 						__( 'Settings UI schema generation failed.', 'woocommerce' )
 					);
-				} elseif ( $settings_ui_page instanceof SettingsUIPageInterface ) {
+				} else {
 					$script_handles = $context->get_script_handles();
 
 					if ( $context->has_script_handles_failed() ) {

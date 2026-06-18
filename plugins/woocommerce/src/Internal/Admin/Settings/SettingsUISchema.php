@@ -125,7 +125,7 @@ class SettingsUISchema {
 		return array(
 			'id'      => $page_id,
 			'title'   => $decoded_title,
-			'section' => $section,
+			'section' => '' === $section ? self::DEFAULT_GROUP_ID : $section,
 			'save'    => array(
 				'adapter' => $default_save_adapter,
 			),

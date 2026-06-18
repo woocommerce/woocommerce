@@ -127,6 +127,41 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should contain registration action failures.
+	 */
+	public function test_registration_action_failures_are_contained(): void {
+		$calls  = 0;
+		$action = static function () use ( &$calls ): void {
+			++$calls;
+			throw new \Error( 'Broken settings section registration.' );
+		};
+		add_action( 'woocommerce_settings_sections_registration', $action );
+
+		try {
+			$sections      = SettingsSectionRegistry::get_instance()->get_sections_for_page( 'checkout' );
+			$second_lookup = SettingsSectionRegistry::get_instance()->get_sections_for_page( 'checkout' );
+		} finally {
+			remove_action( 'woocommerce_settings_sections_registration', $action );
+		}
+
+		$this->assertSame( array(), $sections );
+		$this->assertSame( array(), $second_lookup );
+		$this->assertSame( 1, $calls, 'The registration action should not be retried after a failure.' );
+	}
+
+	/**
+	 * @testdox Should reject checkout sections that collide with payment gateway ids.
+	 */
+	public function test_rejects_checkout_sections_that_collide_with_payment_gateway_ids(): void {
+		$this->setExpectedIncorrectUsage( SettingsSectionRegistry::class . '::register' );
+
+		$result = SettingsSectionRegistry::get_instance()->register( $this->get_registered_section( 'bacs' ) );
+
+		$this->assertFalse( $result );
+		$this->assertNull( SettingsSectionRegistry::get_instance()->get_registered( 'checkout', 'bacs' ) );
+	}
+
+	/**
 	 * Enable the settings UI feature flag.
 	 *
 	 * @param array $features Feature flags.
@@ -157,10 +192,26 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	/**
 	 * Build a registered test section.
 	 *
+	 * @param string $section_id Section id.
 	 * @return SettingsSectionInterface
 	 */
-	private function get_registered_section(): SettingsSectionInterface {
-		return new class() extends SettingsSection {
+	private function get_registered_section( string $section_id = 'acme_payments' ): SettingsSectionInterface {
+		return new class( $section_id ) extends SettingsSection {
+			/**
+			 * Section id.
+			 *
+			 * @var string
+			 */
+			private string $section_id;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param string $section_id Section id.
+			 */
+			public function __construct( string $section_id ) {
+				$this->section_id = $section_id;
+			}
 
 			/**
 			 * Get the parent page id.
@@ -177,7 +228,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 			 * @return string
 			 */
 			public function get_id(): string {
-				return 'acme_payments';
+				return $this->section_id;
 			}
 
 			/**
@@ -198,7 +249,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 			public function get_settings( \WC_Settings_Page $parent_page ): array {
 				return array(
 					array(
-						'id'    => 'registered_acme_payments_setting',
+						'id'    => 'registered_' . $this->section_id . '_setting',
 						'type'  => 'text',
 						'title' => 'Registered Acme Payments setting',
 					),

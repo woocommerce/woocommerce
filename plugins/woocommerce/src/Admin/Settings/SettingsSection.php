@@ -19,6 +19,8 @@ abstract class SettingsSection implements SettingsSectionInterface {
 	/**
 	 * Get script handles that must be loaded before the settings UI app mounts.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @param \WC_Settings_Page $parent_page Parent settings page.
 	 * @return string[]
 	 */
@@ -28,6 +30,8 @@ abstract class SettingsSection implements SettingsSectionInterface {
 
 	/**
 	 * Get the default save adapter for fields in this section.
+	 *
+	 * @since 10.9.0
 	 *
 	 * @param \WC_Settings_Page $parent_page Parent settings page.
 	 * @return string

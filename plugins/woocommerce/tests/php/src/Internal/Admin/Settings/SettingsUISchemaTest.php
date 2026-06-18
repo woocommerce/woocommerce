@@ -39,7 +39,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			$schema['shell'],
 			'The shell title should use the decoded page title.'
 		);
-		$this->assertSame( '', $schema['section'], 'The default section should remain an empty string in the schema.' );
+		$this->assertSame( 'default', $schema['section'], 'The default section should remain the stable schema value.' );
 	}
 
 	/**

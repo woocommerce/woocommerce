@@ -408,6 +408,17 @@ class SettingsUIRequestContext {
 		} catch ( \Throwable $e ) {
 			$this->schema_failed = true;
 
+			wc_get_logger()->debug(
+				sprintf(
+					'Settings UI schema could not be resolved for page "%1$s" section "%2$s": %3$s: %4$s',
+					$this->get_page_id(),
+					'' === $this->section ? self::DEFAULT_SECTION_KEY : $this->section,
+					get_class( $e ),
+					$e->getMessage()
+				),
+				array( 'source' => 'settings-ui' )
+			);
+
 			if ( $e instanceof \Exception ) {
 				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
 			}

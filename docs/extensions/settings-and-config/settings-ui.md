@@ -135,6 +135,8 @@ add_action(
 
 WooCommerce creates the settings UI adapter for registered sections internally. When the settings UI feature flag is disabled, WooCommerce falls back to the legacy settings returned by `get_settings()`. Saves continue through the existing WooCommerce settings form flow and section-specific hooks such as `woocommerce_update_options_checkout_my_plugin`.
 
+Use a section id that does not conflict with an existing section on the same settings tab. For the `checkout` tab, ids that match existing payment gateway sections are reserved.
+
 ## Native field migration
 
 The legacy adapter converts the existing `get_settings()` array into a canonical schema for React. It supports common settings fields:
