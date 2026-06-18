@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<ruleset name="Custom WordPress Standards">
+	<!-- Set the base standard to WordPress -->
+	<rule ref="WordPress"/>
+
+	<!-- Define files and folders to scan -->
+	<file>.</file>
+
+	<!-- Exclude test files from FileName rules -->
+	<rule ref="WordPress.Files.FileName">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<!-- Test method names are self-documenting; do not require per-method docblocks. -->
+	<rule ref="Squiz.Commenting.FunctionComment.Missing">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Commenting.DocComment.MissingShort">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<!--
+		The Core zone is WordPress-free by design (entities, value objects, the
+		state machine). WordPress-specific output-escaping rules do not apply
+		there: Core throws plain exceptions and never echoes, and pulling
+		esc_*() into Core would violate the zoning rule it exists to enforce.
+		Escaping is the integration layer's responsibility at the boundary.
+	-->
+	<rule ref="WordPress.Security.EscapeOutput">
+		<exclude-pattern>src/Core/*</exclude-pattern>
+	</rule>
+
+	<!--
+		The slow-meta-query heuristic targets wp_postmeta-style tables. The
+		engine's own contract-meta table merely shares the meta_key/meta_value
+		column names; it is always queried by indexed contract_id, so the
+		heuristic does not apply to the storage layer.
+	-->
+	<rule ref="WordPress.DB.SlowDBQuery">
+		<exclude-pattern>src/Integration/Storage/*</exclude-pattern>
+	</rule>
+
+	<!-- Exclude test files from the PSR2.Methods.MethodDeclaration.Underscore rule due to methods _after() and _before() -->
+	<rule ref="PSR2.Methods.MethodDeclaration.Underscore">
+		<exclude-pattern>tests/unit</exclude-pattern>
+	</rule>
+
+	<!-- Skip the vendor directory -->
+	<exclude-pattern>vendor/*</exclude-pattern>
+
+	<!-- Skip the node_modules directory -->
+	<exclude-pattern>node_modules/*</exclude-pattern>
+
+	<!-- Skip the PHPStan temp directory -->
+	<exclude-pattern>tasks/phpstan/temp/*</exclude-pattern>
+
+	<!-- Skip the build directory -->
+	<exclude-pattern>build/*</exclude-pattern>
+</ruleset>
