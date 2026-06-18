@@ -77,8 +77,9 @@ final class Delivery_Policy {
 	 * @param array<string, mixed> $data Decoded delivery_policy row.
 	 */
 	public static function from_array( array $data ): self {
+		$anchors = is_array( $data['anchors'] ?? null ) ? $data['anchors'] : array();
 		return new self(
-			$data['anchors'] ?? array(),
+			$anchors,
 			$data['cutoff'] ?? null,
 			$data['intent'] ?? null
 		);
