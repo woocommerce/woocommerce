@@ -414,10 +414,27 @@ class WC_Frontend_Scripts {
 		$register_scripts = self::get_scripts();
 
 		foreach ( $register_scripts as $name => $props ) {
-			self::register_script( $name, $props['src'], $props['deps'], $props['version'] );
+			$in_footer = array( 'strategy' => 'defer' );
+
+			/*
+			 * Scripts with legacy alias handles must use a blocking strategy.
+			 * WordPress (since 6.3) silently discards loading strategies on alias
+			 * scripts (registered with src=false). If the real script uses defer
+			 * but the alias cannot inherit it, the strategy mismatch breaks
+			 * dependency resolution for third-party code that depends on the
+			 * legacy handle (e.g. payment gateways using 'jquery-payment').
+			 *
+			 * Using blocking for both the real script and its alias ensures
+			 * consistent execution order through the dependency chain.
+			 */
+			if ( isset( $props['legacy_handle'] ) ) {
+				$in_footer = true;
+			}
+
+			self::register_script( $name, $props['src'], $props['deps'], $props['version'], $in_footer );
 
 			if ( isset( $props['legacy_handle'] ) ) {
-				self::register_script( $props['legacy_handle'], false, array( $name ), $props['version'], true );
+				self::register_script( $props['legacy_handle'], false, array( $name ), $props['version'], $in_footer );
 			}
 		}
 	}
