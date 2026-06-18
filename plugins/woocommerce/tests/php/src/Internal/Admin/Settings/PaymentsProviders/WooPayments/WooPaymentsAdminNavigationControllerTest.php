@@ -201,7 +201,7 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function provider_not_ready_account_states(): array {
 		return array(
-			'not connected'     => array(
+			'not connected'   => array(
 				'account_state'  => array(
 					'has_account'                   => false,
 					'is_details_submitted'          => false,
@@ -209,7 +209,7 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 				),
 				'expected_title' => 'Onboarding',
 			),
-			'details missing'   => array(
+			'details missing' => array(
 				'account_state'  => array(
 					'has_account'                   => true,
 					'is_details_submitted'          => false,
