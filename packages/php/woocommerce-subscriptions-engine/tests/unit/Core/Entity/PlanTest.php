@@ -12,16 +12,16 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\Entity;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Billing_Policy;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Pricing_Policy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan
  */
-class Plan_Test extends TestCase {
+class PlanTest extends TestCase {
 
-	private function billing(): Billing_Policy {
-		return Billing_Policy::from_array(
+	private function billing(): BillingPolicy {
+		return BillingPolicy::from_array(
 			array(
 				'period'   => 'month',
 				'interval' => 1,
@@ -50,7 +50,7 @@ class Plan_Test extends TestCase {
 			array(
 				'name'           => 'Discounted',
 				'billing_policy' => $this->billing(),
-				'pricing_policy' => Pricing_Policy::from_array(
+				'pricing_policy' => PricingPolicy::from_array(
 					array(
 						'policies' => array(
 							array(
@@ -86,7 +86,7 @@ class Plan_Test extends TestCase {
 			array(
 				'name'           => 'Bad',
 				'billing_policy' => $this->billing(),
-				'pricing_policy' => Pricing_Policy::from_array(
+				'pricing_policy' => PricingPolicy::from_array(
 					array(
 						'policies' => array(
 							array(
@@ -108,7 +108,7 @@ class Plan_Test extends TestCase {
 			array(
 				'name'           => 'Too much',
 				'billing_policy' => $this->billing(),
-				'pricing_policy' => Pricing_Policy::from_array(
+				'pricing_policy' => PricingPolicy::from_array(
 					array(
 						'policies' => array(
 							array(

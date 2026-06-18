@@ -7,9 +7,9 @@
 	"minimum-stability": "dev",
 	"version": "0.0.1",
 	"autoload": {
-		"classmap": [
-			"src/"
-		]
+		"psr-4": {
+			"Automattic\\WooCommerce\\SubscriptionsEngine\\": "src/"
+		}
 	},
 	"autoload-dev": {
 		"classmap": [
