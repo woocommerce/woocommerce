@@ -1,3 +1,6 @@
+const rulesDirPlugin = require( 'eslint-plugin-rulesdir' );
+rulesDirPlugin.RULES_DIR = `${ __dirname }/rules/blocks`;
+
 module.exports = {
 	extends: [ 'plugin:playwright/recommended' ],
 	rules: {
@@ -38,6 +41,46 @@ module.exports = {
 			},
 			rules: {
 				'@typescript-eslint/no-explicit-any': 'off',
+			},
+		},
+		/*
+		 * Blocks e2e subtree (migrated into the core e2e suite during the
+		 * QAO-185 merge). These files use the blocks alias universe, so they get
+		 * the type-aware parser pointed at tsconfig.blocks.json and the blocks
+		 * lint rules that previously applied to the blocks e2e tree.
+		 */
+		{
+			files: [ 'tests/blocks/**', 'utils/blocks/**' ],
+			parser: '@typescript-eslint/parser',
+			parserOptions: {
+				tsconfigRootDir: __dirname,
+				project: './tsconfig.blocks.json',
+			},
+			plugins: [ 'rulesdir' ],
+			rules: {
+				'rulesdir/no-raw-playwright-test-import': 'error',
+				// Since we're restoring the database for each test, hooks other
+				// than `beforeEach` don't make sense.
+				// See https://github.com/woocommerce/woocommerce/pull/46432.
+				'playwright/no-hooks': [ 'error', { allow: [ 'beforeEach' ] } ],
+				'no-restricted-syntax': [
+					'error',
+					{
+						selector: 'CallExpression[callee.property.name="$"]',
+						message:
+							'`$` is discouraged, please use `locator` instead',
+					},
+					{
+						selector: 'CallExpression[callee.property.name="$$"]',
+						message:
+							'`$$` is discouraged, please use `locator` instead',
+					},
+					{
+						selector:
+							'CallExpression[callee.object.name="page"][callee.property.name="waitForTimeout"]',
+						message: 'Prefer page.locator instead.',
+					},
+				],
 			},
 		},
 	],

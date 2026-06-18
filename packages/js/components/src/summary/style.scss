@@ -343,6 +343,10 @@ $border: $gray-200;
 		height: min-content;
 		background-color: $gray-100;
 		color: $gray-900;
+
+		> * {
+			color: inherit;
+		}
 	}
 
 	&.is-selected {
@@ -359,12 +363,12 @@ $border: $gray-200;
 	}
 
 	&.is-good-trend .woocommerce-summary__item-delta {
-		background-color: $alert-green;
+		background-color: $studio-green-60;
 		color: $white;
 	}
 
 	&.is-bad-trend .woocommerce-summary__item-delta {
-		background-color: $alert-red;
+		background-color: $studio-red-60;
 		color: $white;
 	}
 

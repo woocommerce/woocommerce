@@ -46,7 +46,7 @@ class WC_Brands {
 		add_action( 'wp', array( $this, 'body_class' ) );
 
 		add_action( 'woocommerce_product_meta_end', array( $this, 'show_brand' ) );
-		add_filter( 'woocommerce_structured_data_product', array( $this, 'add_structured_data' ), 20 );
+		add_filter( 'woocommerce_structured_data_product', array( $this, 'add_structured_data' ), 20, 2 );
 
 		// duplicate product brands.
 		add_action( 'woocommerce_product_duplicate_before_save', array( $this, 'duplicate_store_temporary_brands' ), 10, 2 );
@@ -77,9 +77,6 @@ class WC_Brands {
 		// Filter the list of taxonomies overridden for the original term count.
 		add_action( 'woocommerce_product_set_stock_status', array( $this, 'recount_after_stock_change' ) );
 		add_action( 'woocommerce_update_options_products_inventory', array( $this, 'recount_all_brands' ) );
-
-		// Product Editor compatibility.
-		add_action( 'woocommerce_layout_template_after_instantiation', array( $this, 'wc_brands_on_block_template_register' ), 10, 3 );
 
 		// Block theme integration.
 		add_filter( 'hooked_block_types', array( $this, 'hook_product_brand_block' ), 10, 4 );
@@ -478,10 +475,11 @@ class WC_Brands {
 	/**
 	 * Add structured data to product page.
 	 *
-	 * @param  array $markup Markup.
+	 * @param  array           $markup  Markup.
+	 * @param  WC_Product|null $product Product data.
 	 * @return array $markup
 	 */
-	public function add_structured_data( $markup ) {
+	public function add_structured_data( $markup, $product = null ) {
 		global $post;
 
 		if ( ! is_array( $markup ) ) {
@@ -492,7 +490,13 @@ class WC_Brands {
 			return $markup;
 		}
 
-		$brands = get_the_terms( $post->ID, 'product_brand' );
+		$product_id = $product instanceof WC_Product ? $product->get_id() : ( isset( $post->ID ) ? $post->ID : 0 );
+
+		if ( ! $product_id ) {
+			return $markup;
+		}
+
+		$brands = get_the_terms( $product_id, 'product_brand' );
 
 		if ( ! empty( $brands ) && is_array( $brands ) ) {
 			// Can only return one brand, so pick the first.
@@ -1089,35 +1093,6 @@ class WC_Brands {
 	function reset_layered_nav_counts_on_status_change( $new_status, $old_status, $post ) {
 		if ( $post->post_type === 'product' && $old_status !== $new_status ) {
 			$this->invalidate_wc_layered_nav_counts_cache();
-		}
-	}
-
-	/**
-	 * Add a new block to the template.
-	 *
-	 * @param string                 $template_id Template ID.
-	 * @param string                 $template_area Template area.
-	 * @param BlockTemplateInterface $template Template instance.
-	 */
-	public function wc_brands_on_block_template_register( $template_id, $template_area, $template ) {
-
-		if ( 'simple-product' === $template->get_id() ) {
-			$section = $template->get_section_by_id( 'product-catalog-section' );
-			if ( $section !== null ) {
-				$section->add_block(
-					array(
-						'id'         => 'woocommerce-brands-select',
-						'blockName'  => 'woocommerce/product-taxonomy-field',
-						'order'      => 15,
-						'attributes' => array(
-							'label'       => __( 'Brands', 'woocommerce-brands' ),
-							'createTitle' => __( 'Create new brand', 'woocommerce-brands' ),
-							'slug'        => 'product_brand',
-							'property'    => 'brands',
-						),
-					)
-				);
-			}
 		}
 	}
 

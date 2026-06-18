@@ -104,7 +104,6 @@ const OPTIONS_GROUPS = {
 	woocommerce_myaccount_payment_methods_endpoint: 'Advanced',
 	woocommerce_myaccount_lost_password_endpoint: 'Advanced',
 	woocommerce_logout_endpoint: 'Advanced',
-	woocommerce_api_enabled: 'Advanced',
 	woocommerce_allow_tracking: 'Advanced',
 	woocommerce_show_marketplace_suggestions: 'Advanced',
 	woocommerce_custom_orders_table_enabled: 'Advanced',
@@ -116,7 +115,6 @@ const OPTIONS_GROUPS = {
 	woocommerce_feature_remote_logging_enabled: 'Advanced',
 	woocommerce_feature_email_improvements_enabled: 'Advanced',
 	woocommerce_feature_blueprint_enabled: 'Advanced',
-	woocommerce_feature_product_block_editor_enabled: 'Advanced',
 	woocommerce_hpos_fts_index_enabled: 'Advanced',
 	woocommerce_feature_cost_of_goods_sold_enabled: 'Advanced',
 };

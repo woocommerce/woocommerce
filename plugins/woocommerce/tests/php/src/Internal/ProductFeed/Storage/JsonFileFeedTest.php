@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\ProductFeed\Storage;
 
 use Automattic\WooCommerce\Internal\ProductFeed\Storage\JsonFileFeed;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 
 // This file works directly with local files. That's fine.
 // phpcs:disable WordPress.WP.AlternativeFunctions
@@ -17,6 +18,8 @@ if ( ! function_exists( 'WP_Filesystem' ) ) {
  * JsonFileFeedTest class.
  */
 class JsonFileFeedTest extends \WC_Unit_Test_Case {
+	use LoggerSpyTrait;
+
 	/**
 	 * Clean up test fixtures.
 	 */
@@ -84,6 +87,58 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that get_entry_count reflects the number of rows written to the feed.
+	 */
+	public function test_get_entry_count_reflects_added_entries() {
+		$feed = new JsonFileFeed( 'test-feed' );
+		$this->assertSame( 0, $feed->get_entry_count() );
+
+		$feed->start();
+		$this->assertSame( 0, $feed->get_entry_count() );
+
+		$feed->add_entry( array( 'name' => 'First' ) );
+		$feed->add_entry( array( 'name' => 'Second' ) );
+		$this->assertSame( 2, $feed->get_entry_count() );
+
+		$feed->end();
+		$this->assertSame( 2, $feed->get_entry_count() );
+	}
+
+	/**
+	 * Test that add_entry does not count entries added before start().
+	 */
+	public function test_get_entry_count_ignores_entries_added_before_start() {
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->add_entry( array( 'name' => 'dropped' ) );
+		$this->assertSame( 0, $feed->get_entry_count() );
+	}
+
+	/**
+	 * Test that start() resets state from a previous run so the feed can be regenerated.
+	 */
+	public function test_start_resets_state_from_previous_run() {
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->start();
+		$feed->add_entry( array( 'name' => 'First' ) );
+		$feed->add_entry( array( 'name' => 'Second' ) );
+		$feed->end();
+		$this->assertSame( 2, $feed->get_entry_count() );
+
+		$feed->start();
+		$this->assertSame( 0, $feed->get_entry_count() );
+		$this->assertNull( $feed->get_file_path() );
+
+		$feed->add_entry( array( 'name' => 'Only' ) );
+		$feed->end();
+
+		$this->assertSame( 1, $feed->get_entry_count() );
+		$this->assertSame(
+			wp_json_encode( array( array( 'name' => 'Only' ) ) ),
+			file_get_contents( $feed->get_file_path() )
+		);
+	}
+
+	/**
 	 * Test that get_file_url returns null if feed is not completed.
 	 */
 	public function test_get_file_url_returns_null_if_not_completed() {
@@ -137,6 +192,148 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 			if ( file_exists( $block_path ) && is_file( $block_path ) ) {
 				unlink( $block_path );
 			}
+		}
+	}
+
+	/**
+	 * @testdox Should refresh an existing feed directory's .htaccess to allow file access.
+	 */
+	public function test_existing_feed_dir_htaccess_is_refreshed_for_file_access(): void {
+		// Simulate an install created before file access was enabled: the directory already
+		// exists with a `deny from all` .htaccess that would block feed downloads.
+		$directory = wp_upload_dir()['basedir'] . '/product-feeds';
+		wp_mkdir_p( $directory );
+		file_put_contents( $directory . '/.htaccess', 'deny from all' );
+
+		// Drive the public feed API; get_file_url() resolves the upload directory, which refreshes
+		// the .htaccess in place when the directory already exists.
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->start();
+		$feed->end();
+		$feed->get_file_url();
+
+		$this->assertSame(
+			'Options -Indexes',
+			trim( (string) file_get_contents( $directory . '/.htaccess' ) ),
+			'Generating a feed into an existing directory should refresh its .htaccess to allow file access.'
+		);
+	}
+
+	/**
+	 * @testdox Should refresh the feed directory's .htaccess even when WP_Filesystem is unavailable.
+	 *
+	 * Guards the existing-install fix against re-introducing a WP_Filesystem dependency: on installs
+	 * with a broken (e.g. FTP) filesystem, the refresh must still run via native file functions.
+	 */
+	public function test_existing_feed_dir_htaccess_is_refreshed_without_wp_filesystem(): void {
+		$directory = wp_upload_dir()['basedir'] . '/product-feeds';
+		wp_mkdir_p( $directory );
+		file_put_contents( $directory . '/.htaccess', 'deny from all' );
+
+		// Force WP_Filesystem initialization to fail; the refresh must not depend on it.
+		$broken_method = fn() => 'this-method-does-not-exist';
+		add_filter( 'filesystem_method', $broken_method );
+
+		try {
+			$feed = new JsonFileFeed( 'test-feed' );
+			$feed->start();
+			$feed->end();
+			$feed->get_file_url();
+
+			$this->assertSame(
+				'Options -Indexes',
+				trim( (string) file_get_contents( $directory . '/.htaccess' ) ),
+				'The .htaccess refresh must succeed without a usable WP_Filesystem.'
+			);
+		} finally {
+			remove_filter( 'filesystem_method', $broken_method );
+		}
+	}
+
+	/**
+	 * @testdox Should leave a custom .htaccess in the feed directory untouched.
+	 */
+	public function test_existing_feed_dir_custom_htaccess_is_preserved(): void {
+		// A site/host may have placed their own rules in the feed directory; only the known legacy
+		// `deny from all` should be upgraded, never custom content.
+		$directory      = wp_upload_dir()['basedir'] . '/product-feeds';
+		$custom_content = "# Custom rules\nHeader set X-Test 1";
+		wp_mkdir_p( $directory );
+		file_put_contents( $directory . '/.htaccess', $custom_content );
+
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->start();
+		$feed->end();
+		$feed->get_file_url();
+
+		$this->assertSame(
+			$custom_content,
+			file_get_contents( $directory . '/.htaccess' ),
+			'Custom .htaccess content must be preserved, not overwritten by the refresh.'
+		);
+	}
+
+	/**
+	 * @testdox Should leave the feed directory alone when it has no .htaccess.
+	 */
+	public function test_existing_feed_dir_without_htaccess_is_left_alone(): void {
+		// Directory exists but its .htaccess is missing (e.g. it was removed) — the is_file() === false case.
+		// A missing file is not a blocked feed, so the refresh must not create one.
+		$directory = wp_upload_dir()['basedir'] . '/product-feeds';
+		wp_mkdir_p( $directory );
+		if ( file_exists( $directory . '/.htaccess' ) ) {
+			unlink( $directory . '/.htaccess' );
+		}
+
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->start();
+		$feed->end();
+		$feed->get_file_url();
+
+		$this->assertFileDoesNotExist(
+			$directory . '/.htaccess',
+			'A missing .htaccess must be left alone, not created by the refresh.'
+		);
+	}
+
+	/**
+	 * @testdox Should log a warning when an existing legacy .htaccess cannot be overwritten.
+	 */
+	public function test_logs_warning_when_htaccess_cannot_be_written(): void {
+		// Redirect uploads to a container-local path: wp-env's bind-mounted uploads ignore chmod,
+		// so the read-only legacy file must live where file permissions are actually enforced.
+		$base     = get_temp_dir() . uniqid( 'wc-feed-perms-', true );
+		$feed_dir = $base . '/product-feeds';
+		$htaccess = $feed_dir . '/.htaccess';
+		mkdir( $feed_dir, 0755, true );
+		file_put_contents( $htaccess, 'deny from all' );
+		chmod( $htaccess, 0444 );
+
+		$filter = function ( $dir ) use ( $base ) {
+			$dir['basedir'] = $base;
+			$dir['baseurl'] = 'http://example.test/uploads';
+			$dir['error']   = false;
+			return $dir;
+		};
+		add_filter( 'upload_dir', $filter );
+
+		try {
+			$feed = new JsonFileFeed( 'test-feed' );
+			$feed->start();
+			$feed->end();
+			$feed->get_file_url();
+
+			$this->assertLogged(
+				'warning',
+				'Could not update the product feed .htaccess',
+				array( 'source' => 'product-feed' )
+			);
+		} finally {
+			remove_filter( 'upload_dir', $filter );
+			chmod( $htaccess, 0644 );
+			global $wp_filesystem;
+			WP_Filesystem();
+			$wp_filesystem->rmdir( $base, true );
 		}
 	}
 

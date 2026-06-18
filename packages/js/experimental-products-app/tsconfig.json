@@ -1,5 +1,5 @@
 {
-	"extends": "../internal-ts-config/tsconfig.json",
+	"extends": "@woocommerce/internal-build/configs/tsconfig.json",
 	"compilerOptions": {
 		"rootDir": "src",
 		"noCheck": false,
@@ -10,13 +10,26 @@
 		"resolveJsonModule": true,
 		"jsx": "react-jsx",
 		"jsxFactory": null,
-		"jsxFragmentFactory": null
+		"jsxFragmentFactory": null,
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types"
+		],
+		"composite": true
 	},
-	"include": [ "src/**/*" ],
+	"include": [
+		"typings/**/*",
+		"src/**/*"
+	],
 	"exclude": [
 		"**/test/**",
 		"**/stories/**",
 		"**/*.test.ts",
 		"**/*.test.tsx"
+	],
+	"references": [
+		{
+			"path": "../data"
+		}
 	]
 }

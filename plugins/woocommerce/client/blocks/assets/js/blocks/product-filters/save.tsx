@@ -9,17 +9,16 @@ import clsx from 'clsx';
  */
 import './editor.scss';
 import { type BlockAttributes } from './types';
-import { getProductFiltersCss } from './utils/get-product-filters-css';
 
 export const Save = ( {
 	attributes,
 }: {
 	attributes: BlockAttributes;
-	style: Record< string, string >;
 } ): JSX.Element => {
 	const blockProps = useBlockProps.save( {
-		className: clsx( 'wc-block-product-filters' ),
-		style: getProductFiltersCss( attributes ),
+		className: clsx( 'wc-block-product-filters', {
+			'is-filter-drawer-disabled': attributes.showFilterDrawer === false,
+		} ),
 	} );
 	const innerBlocksProps = useInnerBlocksProps.save( blockProps );
 	return <div { ...innerBlocksProps } />;

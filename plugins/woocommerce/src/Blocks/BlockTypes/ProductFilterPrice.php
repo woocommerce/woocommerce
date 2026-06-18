@@ -112,13 +112,10 @@ final class ProductFilterPrice extends AbstractBlock {
 		$formatted_max_price = html_entity_decode( wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ) );
 
 		$filter_context = array(
-			'price'      => array(
-				'minPrice' => $min_price,
-				'maxPrice' => $max_price,
-				'minRange' => $min_range,
-				'maxRange' => $max_range,
-			),
-			'groupLabel' => __( 'Price', 'woocommerce' ),
+			'currentMin' => $min_price,
+			'currentMax' => $max_price,
+			'min'        => $min_range,
+			'max'        => $max_range,
 		);
 
 		$wrapper_attributes = array(
@@ -181,7 +178,7 @@ final class ProductFilterPrice extends AbstractBlock {
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
 				function ( $carry, $parsed_block ) use ( $filter_context ) {
-					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerce/rangeInput' => $filter_context ) ) )->render();
 					return $carry;
 				},
 				''

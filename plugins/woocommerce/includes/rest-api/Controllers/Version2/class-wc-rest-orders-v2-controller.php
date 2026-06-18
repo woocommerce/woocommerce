@@ -329,7 +329,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			'display_value' => $meta_item->value, // Default to original value, in case a formatted value is not available.
 		);
 
-		if ( array_key_exists( $meta_item->id, $formatted_meta_data ) ) {
+		if ( $meta_item->id && array_key_exists( $meta_item->id, $formatted_meta_data ) ) {
 			$formatted_meta_item = $formatted_meta_data[ $meta_item->id ];
 
 			$result['display_key']   = wc_clean( $formatted_meta_item->display_key );

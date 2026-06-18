@@ -3,7 +3,7 @@
  *
  * For more details on the tax rate properties, see:
  *
- * https://woocommerce.github.io/woocommerce-rest-api-docs/#tax-rate-properties
+ * https://developer.woocommerce.com/docs/apis/rest-api/v3/taxes/#tax-rate-properties
  *
  */
 const standardTaxRate = {

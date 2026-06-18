@@ -147,6 +147,7 @@ class WCAdminHelper {
 		 * @param array $store_pages The store pages array. The keys are the page slugs and the values are the page IDs.
 		 */
 		$store_pages = apply_filters( 'woocommerce_store_pages', $store_pages );
+		_prime_post_caches( array_values( array_filter( $store_pages ) ), false, false );
 
 		foreach ( $store_pages as $page_slug => $page_id ) {
 			if ( $page_id > 0 && is_page( $page_id ) ) {
@@ -194,26 +195,6 @@ class WCAdminHelper {
 	public static function is_store_page( $url = '' ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		_deprecated_function( __METHOD__, '9.8.0', 'is_current_page_store_page' );
 		return self::is_current_page_store_page();
-	}
-
-	/**
-	 * Get normalized URL path.
-	 * 1. Only keep the path and query string (if any).
-	 * 2. Remove wp home path from the URL path if WP is installed in a subdirectory.
-	 * 3. Remove leading and trailing slashes.
-	 *
-	 * For example:
-	 *
-	 * - https://example.com/wordpress/shop/uncategorized/test/?add-to-cart=123 => shop/uncategorized/test/?add-to-cart=123
-	 *
-	 * @param string $url URL to normalize.
-	 */
-	private static function get_normalized_url_path( $url ) {
-		$query           = wp_parse_url( $url, PHP_URL_QUERY );
-		$path            = wp_parse_url( $url, PHP_URL_PATH ) . ( $query ? '?' . $query : '' );
-		$home_path       = wp_parse_url( site_url(), PHP_URL_PATH ) ?? '';
-		$normalized_path = trim( substr( $path, strlen( $home_path ) ), '/' );
-		return $normalized_path;
 	}
 
 	/**

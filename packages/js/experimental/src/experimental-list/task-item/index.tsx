@@ -18,7 +18,8 @@ import { sanitizeHTML } from '@woocommerce/sanitize';
 /**
  * Internal dependencies
  */
-import { Text, ListItem } from '../../';
+import { Text } from '../../text';
+import { ExperimentalListItem as ListItem } from '../experimental-list-item';
 import { VerticalCSSTransition } from '../../vertical-css-transition';
 
 const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];

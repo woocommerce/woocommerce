@@ -622,6 +622,86 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_taxes persists cart and shipping tax totals as order tax items, and updates existing items in-place on a second call.
+	 */
+	public function test_update_taxes_persists_cart_and_shipping_tax_totals(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// German standard 19% non-compound VAT rate.
+		$tax_rate    = array(
+			'tax_rate_country'  => 'DE',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '19.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = new WC_Order();
+
+		// Line item carrying $1.00 cart tax for the rate.
+		// WC_Order_Item_Product::set_taxes() requires both 'total' and 'subtotal' to be non-empty.
+		$line_item = new WC_Order_Item_Product();
+		$line_item->set_product( $product );
+		$line_item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => '1.00' ),
+				'subtotal' => array( $tax_rate_id => '1.00' ),
+			)
+		);
+		$order->add_item( $line_item );
+
+		// Shipping item carrying $0.50 shipping tax for the rate.
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_taxes( array( 'total' => array( $tax_rate_id => '0.50' ) ) );
+		$order->add_item( $shipping_item );
+
+		$order->save();
+		$order->update_taxes();
+
+		$tax_items = $order->get_taxes();
+		$this->assertCount( 1, $tax_items );
+
+		/** @var WC_Order_Item_Tax $tax_item */
+		$tax_item = reset( $tax_items );
+		// Confirm the German 19% VAT rate is correctly associated with the tax item.
+		$this->assertSame( 19.0, (float) $tax_item->get_rate_percent() );
+		// Cart and shipping taxes are accumulated from line items and persisted on the tax item.
+		$this->assertSame( 1.00, (float) $tax_item->get_tax_total() );
+		$this->assertSame( 0.50, (float) $tax_item->get_shipping_tax_total() );
+		// Order-level totals are rolled up from all tax items.
+		$this->assertSame( 1.00, (float) $order->get_cart_tax() );
+		$this->assertSame( 0.50, (float) $order->get_shipping_tax() );
+
+		// Second call: update line item taxes and verify existing tax item is updated in-place, not duplicated.
+		foreach ( $order->get_items() as $item ) {
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$item->set_taxes(
+					array(
+						'total'    => array( $tax_rate_id => '2.00' ),
+						'subtotal' => array( $tax_rate_id => '2.00' ),
+					)
+				);
+				$item->save();
+			}
+		}
+
+		$order->update_taxes();
+
+		$tax_items_after = $order->get_taxes();
+		$this->assertCount( 1, $tax_items_after, 'update_taxes() must update the existing tax item, not create a duplicate.' );
+
+		$tax_item_after = reset( $tax_items_after );
+		$this->assertSame( 2.00, (float) $tax_item_after->get_tax_total() );
+		$this->assertSame( 0.50, (float) $tax_item_after->get_shipping_tax_total() );
+	}
+
+	/**
 	 * Get an order object with a fixed total COGS value.
 	 *
 	 * @return WC_Order
@@ -634,5 +714,285 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			}
 		};
 		// phpcs:enable Squiz.Commenting
+	}
+
+	/**
+	 * @testdox Should defer bulk item deletion until save() is called.
+	 */
+	public function test_remove_order_items_defers_db_deletion_until_save() {
+		$order    = WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
+
+		$this->assertGreaterThan( 0, count( wc_get_order( $order_id )->get_items() ), 'Precondition: order should have line items in the DB.' );
+		$this->assertGreaterThan( 0, count( wc_get_order( $order_id )->get_items( 'shipping' ) ), 'Precondition: order should have shipping items in the DB.' );
+
+		$order->remove_order_items();
+
+		$reloaded_before_save = wc_get_order( $order_id );
+		$this->assertNotEmpty( $reloaded_before_save->get_items(), 'Line items should still be present in the DB before save().' );
+		$this->assertNotEmpty( $reloaded_before_save->get_items( 'shipping' ), 'Shipping items should still be present in the DB before save().' );
+
+		$order->save();
+
+		$reloaded_after_save = wc_get_order( $order_id );
+		$this->assertCount( 0, $reloaded_after_save->get_items(), 'Line items should be removed from the DB after save().' );
+		$this->assertCount( 0, $reloaded_after_save->get_items( 'shipping' ), 'Shipping items should be removed from the DB after save().' );
+	}
+
+	/**
+	 * @testdox Should keep original items in the DB if save() never runs after remove_order_items().
+	 */
+	public function test_remove_order_items_preserves_db_items_if_save_not_called() {
+		$order    = WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
+
+		$original_line_item_ids = array_keys( $order->get_items() );
+		$original_shipping_ids  = array_keys( $order->get_items( 'shipping' ) );
+
+		$order->remove_order_items();
+
+		unset( $order );
+		wp_cache_flush();
+
+		$reloaded = wc_get_order( $order_id );
+		$this->assertSame(
+			$original_line_item_ids,
+			array_keys( $reloaded->get_items() ),
+			'Line items should remain intact when remove_order_items() is not followed by save().'
+		);
+		$this->assertSame(
+			$original_shipping_ids,
+			array_keys( $reloaded->get_items( 'shipping' ) ),
+			'Shipping items should remain intact when remove_order_items() is not followed by save().'
+		);
+	}
+
+	/**
+	 * @testdox Should only remove items of the requested type when a type is passed.
+	 */
+	public function test_remove_order_items_by_type_defers_db_deletion() {
+		$order    = WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
+
+		$order->remove_order_items( 'line_item' );
+
+		$before_save = wc_get_order( $order_id );
+		$this->assertNotEmpty( $before_save->get_items(), 'Line items should still be in the DB before save().' );
+		$this->assertNotEmpty( $before_save->get_items( 'shipping' ), 'Shipping items should still be in the DB before save().' );
+
+		$order->save();
+
+		$after_save = wc_get_order( $order_id );
+		$this->assertCount( 0, $after_save->get_items(), 'Line items should be removed after save().' );
+		$this->assertNotEmpty( $after_save->get_items( 'shipping' ), 'Shipping items should not be removed when only line_item was requested.' );
+	}
+
+	/**
+	 * @testdox Pre-hook fires immediately and post-hook fires after the deferred DB delete during save.
+	 */
+	public function test_remove_order_items_action_hooks_fire_at_correct_times() {
+		$order = WC_Helper_Order::create_order();
+
+		$pre_calls    = array();
+		$post_calls   = array();
+		$expected_log = array(
+			array(
+				'order_id' => $order->get_id(),
+				'type'     => 'line_item',
+			),
+		);
+
+		$pre_callback  = function ( $fired_order, $type ) use ( &$pre_calls ) {
+			$pre_calls[] = array(
+				'order_id' => $fired_order->get_id(),
+				'type'     => $type,
+			);
+		};
+		$post_callback = function ( $fired_order, $type ) use ( &$post_calls ) {
+			$post_calls[] = array(
+				'order_id' => $fired_order->get_id(),
+				'type'     => $type,
+			);
+		};
+
+		add_action( 'woocommerce_remove_order_items', $pre_callback, 10, 2 );
+		add_action( 'woocommerce_removed_order_items', $post_callback, 10, 2 );
+
+		try {
+			$order->remove_order_items( 'line_item' );
+
+			$this->assertSame(
+				$expected_log,
+				$pre_calls,
+				'woocommerce_remove_order_items should fire once when removal is requested.'
+			);
+			$this->assertSame(
+				array(),
+				$post_calls,
+				'woocommerce_removed_order_items should not fire until the deferred DB delete runs in save().'
+			);
+
+			$order->save();
+
+			$this->assertSame(
+				$expected_log,
+				$post_calls,
+				'woocommerce_removed_order_items should fire once with the requested type after save() commits the delete.'
+			);
+		} finally {
+			remove_action( 'woocommerce_remove_order_items', $pre_callback, 10 );
+			remove_action( 'woocommerce_removed_order_items', $post_callback, 10 );
+		}//end try
+	}
+
+	/**
+	 * @testdox Post-hook fires once with null type after save() commits a full removal.
+	 */
+	public function test_remove_order_items_post_hook_for_all_types_fires_with_null_after_save() {
+		$order = WC_Helper_Order::create_order();
+
+		$post_calls    = array();
+		$post_callback = function ( $fired_order, $type ) use ( &$post_calls ) {
+			$post_calls[] = array(
+				'order_id' => $fired_order->get_id(),
+				'type'     => $type,
+			);
+		};
+
+		add_action( 'woocommerce_removed_order_items', $post_callback, 10, 2 );
+
+		try {
+			$order->remove_order_items();
+
+			$this->assertSame( array(), $post_calls, 'Post-hook should not fire before save().' );
+
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_removed_order_items', $post_callback, 10 );
+		}
+
+		$this->assertSame(
+			array(
+				array(
+					'order_id' => $order->get_id(),
+					'type'     => null,
+				),
+			),
+			$post_calls,
+			'Post-hook should fire once with a null type after a full remove_order_items() commits in save().'
+		);
+	}
+
+	/**
+	 * @testdox Should retain queued item types when a post-hook callback throws so a subsequent save() can drain them.
+	 */
+	public function test_save_items_preserves_queued_types_when_post_hook_throws() {
+		$order    = WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
+
+		$order->remove_order_items( 'line_item' );
+		$order->remove_order_items( 'shipping' );
+
+		$hook_calls = array();
+		$callback   = function ( $fired_order, $type ) use ( &$hook_calls ) {
+			$hook_calls[] = $type;
+			if ( 'line_item' === $type ) {
+				throw new RuntimeException( 'simulated hook failure' );
+			}
+		};
+
+		add_action( 'woocommerce_removed_order_items', $callback, 10, 2 );
+
+		try {
+			$order->save();
+
+			// Intermediate checkpoint: line_item was processed (its post-hook threw),
+			// shipping should remain queued. Reload from the data store so we're
+			// asserting persisted state rather than the in-memory order.
+			$after_first_save = wc_get_order( $order_id );
+			$this->assertCount( 0, $after_first_save->get_items(), 'Line items should be removed from the DB after the first save().' );
+			$this->assertNotEmpty( $after_first_save->get_items( 'shipping' ), 'Shipping items should remain in the DB until the retry save() drains them.' );
+			$this->assertSame( array( 'line_item' ), $hook_calls, 'Only the line_item post-hook should have fired during the first save().' );
+
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_removed_order_items', $callback, 10 );
+		}
+
+		$reloaded = wc_get_order( $order_id );
+		$this->assertCount( 0, $reloaded->get_items(), 'Line items should be removed from the DB across the two saves.' );
+		$this->assertCount( 0, $reloaded->get_items( 'shipping' ), 'Shipping items should be removed from the DB on the retry save after the first hook threw.' );
+		$this->assertSame(
+			array( 'line_item', 'shipping' ),
+			$hook_calls,
+			'Post-hook should fire for each type exactly once across the two saves, even though the first call threw.'
+		);
+	}
+
+	/**
+	 * @testdox Should ignore non-string item types and trigger _doing_it_wrong.
+	 */
+	public function test_remove_order_items_rejects_non_string_type() {
+		$order = WC_Helper_Order::create_order();
+
+		$this->setExpectedIncorrectUsage( 'WC_Abstract_Order::remove_order_items' );
+
+		$pre_calls = array();
+		$pre_hook  = function ( $fired_order, $type ) use ( &$pre_calls ) {
+			$pre_calls[] = $type;
+		};
+		add_action( 'woocommerce_remove_order_items', $pre_hook, 10, 2 );
+
+		try {
+			$order->remove_order_items( array( 'line_item' ) );
+		} finally {
+			remove_action( 'woocommerce_remove_order_items', $pre_hook, 10 );
+		}
+
+		$this->assertSame(
+			array(),
+			$pre_calls,
+			'Pre-hook should not fire for a non-string type — the guard returns before the hook.'
+		);
+		$this->assertNotEmpty( $order->get_items(), 'Line items should remain in memory since the guard ignored the malformed type.' );
+	}
+
+	/**
+	 * @testdox Should clear in-memory items for extension-registered groups when remove_order_items() is called without a type.
+	 */
+	public function test_remove_order_items_clears_custom_filter_groups() {
+		$order   = WC_Helper_Order::create_order();
+		$adjust  = function ( $type_to_group ) {
+			$type_to_group['custom_unit_test_type'] = 'custom_unit_test_lines';
+			return $type_to_group;
+		};
+		$reflect = new ReflectionClass( $order );
+
+		add_filter( 'woocommerce_order_type_to_group', $adjust );
+
+		try {
+			$items_prop = $reflect->getProperty( 'items' );
+			$items_prop->setAccessible( true );
+			$items = $items_prop->getValue( $order );
+
+			$items['custom_unit_test_lines'] = array( 'sentinel' );
+			$items_prop->setValue( $order, $items );
+
+			$order->remove_order_items();
+
+			$items_after = $items_prop->getValue( $order );
+			$this->assertArrayHasKey(
+				'custom_unit_test_lines',
+				$items_after,
+				'Filter-registered groups should be present as keys after the in-memory clear.'
+			);
+			$this->assertSame(
+				array(),
+				$items_after['custom_unit_test_lines'],
+				'Filter-registered group should be cleared to an empty array — not left with stale entries.'
+			);
+		} finally {
+			remove_filter( 'woocommerce_order_type_to_group', $adjust );
+		}
 	}
 }
