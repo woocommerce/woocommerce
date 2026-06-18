@@ -67,6 +67,12 @@ class SubscriptionsEngineTestsBootstrap {
 
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
+		// Install WooCommerce so its tables and runtime (order classes, logger)
+		// are available to the engine's integration layer.
+		if ( class_exists( \WC_Install::class ) ) {
+			\WC_Install::install();
+		}
+
 		// Install once, outside any test transaction, so the init-hook installer
 		// short-circuits during tests and DDL never breaks rollback isolation.
 		SchemaInstaller::install();
@@ -78,6 +84,14 @@ class SubscriptionsEngineTestsBootstrap {
 	 * Load the engine plugin file.
 	 */
 	public function load_plugin(): void {
+		// WooCommerce first: the engine's integration layer depends on WC (orders,
+		// gateways, logger). Guarded so the bootstrap does not fatal in an
+		// environment that has not mounted WooCommerce.
+		$woocommerce = WP_PLUGIN_DIR . '/woocommerce/woocommerce.php';
+		if ( file_exists( $woocommerce ) ) {
+			require_once $woocommerce;
+		}
+
 		require_once $this->plugin_dir . '/woocommerce-subscriptions-engine.php';
 	}
 
