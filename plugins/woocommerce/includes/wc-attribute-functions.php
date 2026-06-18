@@ -313,11 +313,15 @@ function wc_get_attribute_type_label( $type ) {
  * Check if attribute name is reserved.
  * https://codex.wordpress.org/Function_Reference/register_taxonomy#Reserved_Terms.
  *
- * For custom (per-product) attributes pass 'custom' as the attribute type to also check
- * against WooCommerce-specific structural keys (such as 'variation') that collide with
- * cart and order item array keys when a custom attribute of the same name is stored as
- * order item meta. These extra keys don't apply to global attributes, which are
- * namespaced as 'pa_*' and therefore never collide.
+ * Global attributes (the default) are checked against the WordPress reserved terms, because
+ * they are registered as taxonomies and a reserved name would collide with WordPress query
+ * vars.
+ *
+ * Custom (per-product) attributes are not taxonomies, so the WordPress reserved terms don't
+ * apply to them. Pass 'custom' as the attribute type to check against the WooCommerce-specific
+ * structural keys (such as 'variation') instead: those collide with cart and order item array
+ * keys when a custom attribute of the same name is stored as order item meta, which can corrupt
+ * the variation data read back via ArrayAccess.
  *
  * @since  2.4.0
  * @since  11.0.0 Added the `$attribute_type` parameter.
@@ -326,6 +330,11 @@ function wc_get_attribute_type_label( $type ) {
  * @return bool
  */
 function wc_check_if_attribute_name_is_reserved( $attribute_name, $attribute_type = 'global' ) {
+	if ( 'custom' === $attribute_type ) {
+		// WooCommerce structural keys that collide with cart/order item array keys.
+		return in_array( $attribute_name, array( 'variation', 'variation_id', 'variation_data' ), true );
+	}
+
 	// Forbidden attribute names.
 	$reserved_terms = array(
 		'attachment',
@@ -403,18 +412,6 @@ function wc_check_if_attribute_name_is_reserved( $attribute_name, $attribute_typ
 		'withoutcomments',
 		'year',
 	);
-
-	// WooCommerce-specific structural keys, reserved for custom (per-product) attributes only.
-	if ( 'custom' === $attribute_type ) {
-		$reserved_terms = array_merge(
-			$reserved_terms,
-			array(
-				'variation',
-				'variation_id',
-				'variation_data',
-			)
-		);
-	}
 
 	return in_array( $attribute_name, $reserved_terms, true );
 }
