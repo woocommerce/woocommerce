@@ -37,14 +37,13 @@ class CustomerVerifyEmail extends WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id                     = 'customer_verify_email';
-		$this->customer_email         = true;
-		$this->title                  = __( 'Confirm email address', 'woocommerce' );
-		$this->description            = __( 'Sent to customers with a link to confirm they own their account email address.', 'woocommerce' );
-		$this->template_html          = 'emails/customer-verify-email.php';
-		$this->template_plain         = 'emails/plain/customer-verify-email.php';
-		$this->template_block_content = 'emails/block/customer-verify-email.php';
-		$this->email_group            = 'accounts';
+		$this->id             = 'customer_verify_email';
+		$this->customer_email = true;
+		$this->title          = __( 'Confirm email address', 'woocommerce' );
+		$this->description    = __( 'Sent to customers with a link to confirm they own their account email address.', 'woocommerce' );
+		$this->template_html  = 'emails/customer-verify-email.php';
+		$this->template_plain = 'emails/plain/customer-verify-email.php';
+		$this->email_group    = 'accounts';
 
 		// Trigger.
 		add_action( 'woocommerce_customer_verify_email_notification', array( $this, 'trigger' ), 10, 2 );

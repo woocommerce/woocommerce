@@ -39,7 +39,7 @@ echo sprintf(
 	esc_html( $user_email )
 ) . "\n\n";
 
-echo esc_url( $verify_url ?? wc_get_page_permalink( 'myaccount' ) );
+echo esc_url( ! empty( $verify_url ) ? $verify_url : wc_get_page_permalink( 'myaccount' ) );
 
 echo "\n\n----------------------------------------\n\n";
 

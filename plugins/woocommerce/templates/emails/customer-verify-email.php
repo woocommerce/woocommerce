@@ -59,7 +59,7 @@ echo wp_kses_post(
 wc_get_template(
 	'emails/email-button.php',
 	array(
-		'url'   => $verify_url ?? wc_get_page_permalink( 'myaccount' ),
+		'url'   => ! empty( $verify_url ) ? $verify_url : wc_get_page_permalink( 'myaccount' ),
 		'label' => __( 'Confirm email address', 'woocommerce' ),
 	)
 );

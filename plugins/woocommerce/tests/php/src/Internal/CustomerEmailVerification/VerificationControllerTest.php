@@ -121,18 +121,18 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 		wp_set_current_user( $other_user );
 
 		// maybe_process_request() reads the verify args from the URL and ends in wp_safe_redirect()/exit;
-		// throw from the redirect filter so the exit is never reached and the test can assert.
+		// throw the redirect target from the filter so the exit is never reached and we can assert on it.
 		$_GET['wc_verify_email_key']  = $key;
 		$_GET['wc_verify_email_user'] = (string) $link_owner;
-		$abort                        = static function ( $location ): void {
+		$redirect_to                  = '';
+		$abort                        = static function ( $location ) {
 			throw new \RuntimeException( esc_html( (string) $location ) );
 		};
 		add_filter( 'wp_redirect', $abort );
 		try {
 			$this->ctrl->maybe_process_request();
 		} catch ( \RuntimeException $e ) {
-			// Expected: the controller redirects and exits.
-			unset( $e );
+			$redirect_to = $e->getMessage();
 		} finally {
 			remove_filter( 'wp_redirect', $abort );
 		}
@@ -145,5 +145,6 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $this->service->is_verified( $link_owner ), 'A link opened while logged in as a different user must not verify the link owner' );
 		$this->assertNotEmpty( $error_notices, 'An error notice should explain that verification is blocked while logged in elsewhere' );
+		$this->assertStringContainsString( 'orders', $redirect_to, 'Should redirect back to the Orders endpoint' );
 	}
 }

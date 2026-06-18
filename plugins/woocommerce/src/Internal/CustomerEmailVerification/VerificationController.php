@@ -93,7 +93,9 @@ class VerificationController {
 			wc_add_notice( __( 'This confirmation link is invalid or has expired. Please request a new one.', 'woocommerce' ), 'error' );
 		}
 
-		wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
+		// Land on the Orders endpoint where the linked orders and the verification prompt live,
+		// matching the send/resend flow. The notice added above renders there.
+		wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
 		exit;
 	}
 
