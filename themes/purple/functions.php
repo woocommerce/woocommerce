@@ -152,13 +152,14 @@ endif;
 
 add_action( 'init', 'purple_rename_woocommerce_pattern_category', 99 );
 
-if ( ! function_exists( 'purple_unregister_pattern_categories' ) ) :
+if ( ! function_exists( 'purple_hidden_pattern_categories' ) ) :
 	/**
-	 * Unregister block pattern categories the theme doesn't want to expose
-	 * in the inserter. Hooked late so it runs after core and plugins.
+	 * Block pattern categories the theme doesn't want to expose in the inserter.
+	 *
+	 * @return string[] Category slugs.
 	 */
-	function purple_unregister_pattern_categories() {
-		$categories = array(
+	function purple_hidden_pattern_categories() {
+		return array(
 			'banner',
 			'call-to-action',
 			'featured',
@@ -169,17 +170,53 @@ if ( ! function_exists( 'purple_unregister_pattern_categories' ) ) :
 			'posts',
 			'text',
 		);
-		$registry = \WP_Block_Pattern_Categories_Registry::get_instance();
-		foreach ( $categories as $cat ) {
-			if ( $registry->is_registered( $cat ) ) {
+	}
+
+endif;
+
+if ( ! function_exists( 'purple_unregister_pattern_categories' ) ) :
+	/**
+	 * Hide the pattern categories the theme doesn't want to expose.
+	 *
+	 * Unregistering a category is not enough on its own: the inserter rebuilds
+	 * a category from any pattern still tagged with it (showing the raw slug as
+	 * the label when there is no registered category). So we both unregister the
+	 * category and strip the slug from every pattern that references it.
+	 *
+	 * Hooked late so it runs after core, the theme and plugins (e.g. WooCommerce)
+	 * have registered their patterns and categories.
+	 */
+	function purple_unregister_pattern_categories() {
+		$hidden = purple_hidden_pattern_categories();
+
+		$category_registry = \WP_Block_Pattern_Categories_Registry::get_instance();
+		foreach ( $hidden as $cat ) {
+			if ( $category_registry->is_registered( $cat ) ) {
 				unregister_block_pattern_category( $cat );
 			}
+		}
+
+		$pattern_registry = \WP_Block_Patterns_Registry::get_instance();
+		foreach ( $pattern_registry->get_all_registered() as $pattern ) {
+			$categories = $pattern['categories'] ?? array();
+			if ( empty( $categories ) ) {
+				continue;
+			}
+
+			$kept = array_values( array_diff( $categories, $hidden ) );
+			if ( count( $kept ) === count( $categories ) ) {
+				continue;
+			}
+
+			$pattern['categories'] = $kept;
+			unregister_block_pattern( $pattern['name'] );
+			register_block_pattern( $pattern['name'], $pattern );
 		}
 	}
 
 endif;
 
-add_action( 'init', 'purple_unregister_pattern_categories', 99 );
+add_action( 'init', 'purple_unregister_pattern_categories', 100 );
 
 if ( ! function_exists( 'purple_styles' ) ) :
 	/**
