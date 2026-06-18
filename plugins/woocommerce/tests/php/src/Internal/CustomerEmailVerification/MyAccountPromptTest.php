@@ -57,6 +57,28 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$order->save();
 	}
 
+	/**
+	 * Invoke handle_send_request(), trapping the wp_safe_redirect() + exit it ends with.
+	 *
+	 * handle_send_request() always finishes with wp_safe_redirect() then exit;. A
+	 * '__return_false' filter does NOT prevent that exit — it would terminate the whole
+	 * PHPUnit run, silently skipping every later test. Throwing from the wp_redirect
+	 * filter aborts control flow before exit so the test survives to assert.
+	 */
+	private function dispatch_send_request(): void {
+		$abort = static function (): void {
+			throw new \RuntimeException( 'wp_redirect' );
+		};
+		add_filter( 'wp_redirect', $abort );
+		try {
+			$this->sut->handle_send_request();
+		} catch ( \RuntimeException $e ) {
+			unset( $e ); // Expected: handle_send_request() redirects and exits.
+		} finally {
+			remove_filter( 'wp_redirect', $abort );
+		}
+	}
+
 	// -------------------------------------------------------------------------
 	// should_show_prompt()
 	// -------------------------------------------------------------------------
@@ -184,25 +206,14 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$_GET['_wpnonce'] = wp_create_nonce( 'woocommerce-send-verification-email' );
 
 		$notification_fired = false;
-		add_action(
-			'woocommerce_customer_verify_email_notification',
-			function ( $uid ) use ( &$notification_fired ) {
-				unset( $uid );
-				$notification_fired = true;
-			}
-		);
+		$listener           = static function () use ( &$notification_fired ) {
+			$notification_fired = true;
+		};
+		add_action( 'woocommerce_customer_verify_email_notification', $listener );
 
-		// handle_send_request() calls wp_safe_redirect() and exit; catch the redirect with a filter.
-		add_filter( 'wp_redirect', '__return_false' );
+		$this->dispatch_send_request();
 
-		try {
-			$this->sut->handle_send_request();
-		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			// Swallow exit() equivalents if any slip through.
-		}
-
-		remove_all_filters( 'wp_redirect' );
-		remove_all_actions( 'woocommerce_customer_verify_email_notification' );
+		remove_action( 'woocommerce_customer_verify_email_notification', $listener );
 		unset( $_GET['_wpnonce'] );
 
 		$this->assertTrue( $notification_fired, 'Notification hook should fire for a valid send request' );
@@ -218,22 +229,14 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$_GET['_wpnonce'] = 'not-a-valid-nonce';
 
 		$notification_fired = false;
-		add_action(
-			'woocommerce_customer_verify_email_notification',
-			function () use ( &$notification_fired ) {
-				$notification_fired = true;
-			}
-		);
+		$listener           = static function () use ( &$notification_fired ) {
+			$notification_fired = true;
+		};
+		add_action( 'woocommerce_customer_verify_email_notification', $listener );
 
-		add_filter( 'wp_redirect', '__return_false' );
+		$this->dispatch_send_request();
 
-		try {
-			$this->sut->handle_send_request();
-		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-		}
-
-		remove_all_filters( 'wp_redirect' );
-		remove_all_actions( 'woocommerce_customer_verify_email_notification' );
+		remove_action( 'woocommerce_customer_verify_email_notification', $listener );
 		unset( $_GET['_wpnonce'] );
 
 		$this->assertFalse( $notification_fired, 'Notification hook should not fire when the nonce is invalid' );
@@ -247,31 +250,20 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		wp_set_current_user( $user_id );
 
 		$notification_count = 0;
-		add_action(
-			'woocommerce_customer_verify_email_notification',
-			function () use ( &$notification_count ) {
-				$notification_count++;
-			}
-		);
-
-		add_filter( 'wp_redirect', '__return_false' );
+		$listener           = static function () use ( &$notification_count ) {
+			$notification_count++;
+		};
+		add_action( 'woocommerce_customer_verify_email_notification', $listener );
 
 		// First send (no existing key).
 		$_GET['_wpnonce'] = wp_create_nonce( 'woocommerce-send-verification-email' );
-		try {
-			$this->sut->handle_send_request();
-		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-		}
+		$this->dispatch_send_request();
 
 		// Second send — key was just created (seconds_since_last_key < 60).
 		$_GET['_wpnonce'] = wp_create_nonce( 'woocommerce-send-verification-email' );
-		try {
-			$this->sut->handle_send_request();
-		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-		}
+		$this->dispatch_send_request();
 
-		remove_all_filters( 'wp_redirect' );
-		remove_all_actions( 'woocommerce_customer_verify_email_notification' );
+		remove_action( 'woocommerce_customer_verify_email_notification', $listener );
 		unset( $_GET['_wpnonce'] );
 
 		$this->assertSame( 1, $notification_count, 'Notification should fire exactly once despite two send attempts within the rate-limit window' );
