@@ -64,6 +64,24 @@ class WooPaymentsOrderTrackingServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should skip scheduling when no Sift fraud config is available.
+	 */
+	public function test_skips_scheduling_without_sift_fraud_config(): void {
+		$scheduler = new RecordingActionSchedulerService();
+		$service   = $this->create_service( new StaticNativeRuntimeArbiter( true ), $scheduler );
+		$order     = $this->create_order(
+			OrderPaymentStore::GATEWAY_ID,
+			array(
+				'_payment_method_id' => 'pm_123',
+			)
+		);
+
+		$service->handle_woocommerce_update_order( $order->get_id(), $order );
+
+		$this->assertSame( array(), $scheduler->scheduled_jobs );
+	}
+
+	/**
 	 * @testdox Should schedule a preserved new-order tracking action for untracked WooPayments orders.
 	 */
 	public function test_schedules_new_order_tracking_for_untracked_woopayments_orders(): void {
@@ -76,6 +94,8 @@ class WooPaymentsOrderTrackingServiceTest extends WC_Unit_Test_Case {
 				'_wcpay_mode'        => 'test',
 			)
 		);
+
+		$this->enable_sift_tracking();
 
 		$service->handle_woocommerce_update_order( $order->get_id(), $order );
 
@@ -104,6 +124,8 @@ class WooPaymentsOrderTrackingServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
+		$this->enable_sift_tracking();
+
 		$service->handle_woocommerce_update_order( $order->get_id(), $order );
 
 		$this->assertSame(
@@ -131,6 +153,8 @@ class WooPaymentsOrderTrackingServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
+		$this->enable_sift_tracking();
+
 		$service->handle_woocommerce_update_order( $order->get_id(), $order );
 
 		$this->assertSame(
@@ -157,6 +181,8 @@ class WooPaymentsOrderTrackingServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
+		$this->enable_sift_tracking();
+
 		$service->handle_woocommerce_update_order( $order->get_id(), $order );
 
 		$this->assertSame( array(), $scheduler->scheduled_jobs );
@@ -169,6 +195,8 @@ class WooPaymentsOrderTrackingServiceTest extends WC_Unit_Test_Case {
 		$scheduler = new RecordingActionSchedulerService();
 		$service   = $this->create_service( new StaticNativeRuntimeArbiter( true ), $scheduler );
 		$order     = $this->create_order( OrderPaymentStore::GATEWAY_ID );
+
+		$this->enable_sift_tracking();
 
 		$service->handle_woocommerce_update_order( $order->get_id(), $order );
 
@@ -211,6 +239,8 @@ class WooPaymentsOrderTrackingServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
+		$this->enable_sift_tracking();
+
 		global $wp_current_filter;
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Needed to simulate doing_action() in a unit test.
 		$wp_current_filter[] = 'wcpay_track_new_order';
@@ -222,6 +252,18 @@ class WooPaymentsOrderTrackingServiceTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( array(), $scheduler->scheduled_jobs );
+	}
+
+	/**
+	 * Enable Sift tracking for scheduling tests.
+	 */
+	private function enable_sift_tracking(): void {
+		add_filter(
+			WooPaymentsOrderTrackingService::FILTER_FRAUD_SERVICES_CONFIG,
+			static function (): array {
+				return array( 'sift' => array() );
+			}
+		);
 	}
 
 	/**

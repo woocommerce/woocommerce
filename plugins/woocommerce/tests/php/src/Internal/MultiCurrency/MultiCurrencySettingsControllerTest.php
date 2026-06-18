@@ -311,8 +311,12 @@ class MultiCurrencySettingsControllerTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $registered_assets );
 		$this->assertSame( 'multi-currency-settings', $registered_assets[0]['script']['entry'] );
 		$this->assertSame( 'wc-admin-multi-currency-settings', $registered_assets[0]['script']['handle'] );
+		$this->assertSame( 'multi-currency-settings', $registered_assets[0]['style']['entry'] );
+		$this->assertSame( 'style', $registered_assets[0]['style']['file'] );
+		$this->assertSame( 'wc-admin-multi-currency-settings', $registered_assets[0]['style']['handle'] );
 		$this->assertSame(
 			array(
+				'wc-admin-multi-currency-settings',
 				'wc-admin-multi-currency-settings',
 			),
 			$enqueued_assets

@@ -2150,6 +2150,54 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Capture should preserve authorized payment metadata on native capture failures.
+	 */
+	public function test_capture_preserves_authorized_meta_for_native_failure(): void {
+		$order      = $this->create_woopayments_order();
+		$gateway    = new RecordingLegacyGateway( array( 'result' => 'success' ), true );
+		$api_client = $this->getMockBuilder( WooPaymentsApiClient::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_available', 'capture_intention' ) )
+			->getMock();
+
+		$order->set_transaction_id( 'pi_capture' );
+		$order->save();
+
+		$api_client->expects( $this->once() )
+			->method( 'is_available' )
+			->willReturn( true );
+		$api_client->expects( $this->once() )
+			->method( 'capture_intention' )
+			->with( 'pi_capture', 1000, array() )
+			->willReturn(
+				array(
+					'id'      => 'pi_capture',
+					'status'  => 'requires_capture',
+					'message' => 'The authorization could not be captured.',
+					'charges' => array(
+						'total_count' => 1,
+						'data'        => array(
+							array( 'id' => 'ch_capture' ),
+						),
+					),
+				)
+			);
+
+		$sut     = $this->create_adapter( $gateway, $api_client );
+		$outcome = $sut->capture( PaymentContext::for_capture( $order, OrderPaymentStore::GATEWAY_ID ), 'key_capture' );
+		$data    = $outcome->get_data();
+
+		$this->assertSame( PaymentOutcome::STATUS_FAILED, $outcome->get_status() );
+		$this->assertSame( 'pi_capture', $outcome->get_provider_payment_id() );
+		$this->assertSame( 'requires_capture', $data['meta']['_intention_status'] );
+		$this->assertStringContainsString( 'A capture of', $data['note'] );
+		$this->assertStringContainsString( 'failed', $data['note'] );
+		$this->assertStringContainsString( 'WooPayments', $data['note'] );
+		$this->assertStringContainsString( 'The authorization could not be captured.', $data['note'] );
+		$this->assertSame( '', $gateway->last_idempotency_key );
+	}
+
+	/**
 	 * @testdox Capture should include settlement exchange-rate meta for converted-currency native captures.
 	 */
 	public function test_capture_includes_settlement_exchange_rate_meta_for_converted_currency_native_capture(): void {

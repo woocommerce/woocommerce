@@ -306,7 +306,9 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 		$this->register_admin_assets( $manifest );
 
 		$script = is_array( $manifest['script'] ?? null ) ? $manifest['script'] : array();
+		$style  = is_array( $manifest['style'] ?? null ) ? $manifest['style'] : array();
 		$this->enqueue_admin_asset( (string) ( $script['handle'] ?? '' ) );
+		$this->enqueue_admin_asset( (string) ( $style['handle'] ?? '' ) );
 	}
 
 	/**
@@ -450,11 +452,18 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 			return (bool) call_user_func( $this->asset_available_resolver );
 		}
 
-		$manifest = MultiCurrencySettingsProjectionService::get_admin_asset_manifest();
-		$script   = is_array( $manifest['script'] ?? null ) ? $manifest['script'] : array();
-		$entry    = (string) ( $script['entry'] ?? '' );
+		$manifest    = MultiCurrencySettingsProjectionService::get_admin_asset_manifest();
+		$script      = is_array( $manifest['script'] ?? null ) ? $manifest['script'] : array();
+		$style       = is_array( $manifest['style'] ?? null ) ? $manifest['style'] : array();
+		$entry       = (string) ( $script['entry'] ?? '' );
+		$style_entry = (string) ( $style['entry'] ?? '' );
+		$style_file  = (string) ( $style['file'] ?? 'style' );
 
-		return '' !== $entry && file_exists( WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $entry . '.asset.php' );
+		return '' !== $entry
+			&& file_exists( WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $entry . '.asset.php' )
+			&& '' !== $style_entry
+			&& '' !== $style_file
+			&& file_exists( WC_ADMIN_ABSPATH . WC_ADMIN_DIST_CSS_FOLDER . $style_entry . '/' . $style_file . '.asset.php' );
 	}
 
 	/**
@@ -470,11 +479,53 @@ class MultiCurrencySettingsController implements RegisterHooksInterface {
 
 		$script = is_array( $manifest['script'] ?? null ) ? $manifest['script'] : array();
 		$entry  = (string) ( $script['entry'] ?? '' );
-		if ( '' === $entry ) {
+		if ( '' !== $entry ) {
+			WCAdminAssets::register_script( 'wp-admin-scripts', $entry, true );
+		}
+
+		$style       = is_array( $manifest['style'] ?? null ) ? $manifest['style'] : array();
+		$style_entry = (string) ( $style['entry'] ?? '' );
+		if ( '' !== $style_entry ) {
+			$style_file         = (string) ( $style['file'] ?? 'style' );
+			$style_handle       = (string) ( $style['handle'] ?? '' );
+			$style_dependencies = (array) ( $style['dependencies'] ?? array() );
+
+			$this->register_admin_style( $style_entry, $style_file, $style_handle, $style_dependencies );
+		}
+	}
+
+	/**
+	 * Register and enqueue the admin stylesheet with the provider-specific handle.
+	 *
+	 * @param string       $style_entry        Style asset directory.
+	 * @param string       $style_file         Style asset filename without extension.
+	 * @param string       $style_handle       Style handle.
+	 * @param array<mixed> $style_dependencies Style dependencies.
+	 */
+	private function register_admin_style(
+		string $style_entry,
+		string $style_file,
+		string $style_handle,
+		array $style_dependencies
+	): void {
+		if ( '' === $style_entry || '' === $style_file || '' === $style_handle ) {
 			return;
 		}
 
-		WCAdminAssets::register_script( 'wp-admin-scripts', $entry, true );
+		$style_assets_filename = WCAdminAssets::get_script_asset_filename( $style_entry, $style_file );
+		$style_assets          = require WC_ADMIN_ABSPATH
+			. WC_ADMIN_DIST_CSS_FOLDER
+			. $style_entry
+			. '/'
+			. $style_assets_filename;
+
+		wp_enqueue_style(
+			$style_handle,
+			WCAdminAssets::get_url( $style_entry . '/' . $style_file, 'css' ),
+			$style_dependencies,
+			WCAdminAssets::get_file_version( 'css', $style_assets['version'] )
+		);
+		wp_style_add_data( $style_handle, 'rtl', 'replace' );
 	}
 
 	/**

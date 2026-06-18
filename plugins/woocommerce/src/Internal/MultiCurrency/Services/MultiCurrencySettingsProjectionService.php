@@ -188,6 +188,11 @@ class MultiCurrencySettingsProjectionService {
 				'entry'  => self::ADMIN_SCRIPT_ENTRY,
 				'handle' => self::ADMIN_ASSET_HANDLE,
 			),
+			'style'  => array(
+				'entry'  => self::ADMIN_SCRIPT_ENTRY,
+				'file'   => 'style',
+				'handle' => self::ADMIN_ASSET_HANDLE,
+			),
 		);
 	}
 

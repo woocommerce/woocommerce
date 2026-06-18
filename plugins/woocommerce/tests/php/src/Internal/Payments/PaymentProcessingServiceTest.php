@@ -407,6 +407,39 @@ class PaymentProcessingServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Failed captures should leave authorized orders on hold.
+	 */
+	public function test_capture_failure_preserves_authorized_order_status(): void {
+		$order = $this->create_woopayments_order( '10.00' );
+		$order->set_transaction_id( 'pi_capture' );
+		$order->update_meta_data( '_intent_id', 'pi_capture' );
+		$order->update_meta_data( '_intention_status', 'requires_capture' );
+		$order->save();
+		$order->update_status( 'on-hold' );
+
+		$provider = new RecordingProvider(
+			new PaymentOutcome(
+				PaymentOutcome::STATUS_FAILED,
+				'pi_capture',
+				'',
+				'',
+				'',
+				array( 'note' => 'Capture failed note.' )
+			)
+		);
+
+		$outcome = $this->sut->capture( PaymentContext::for_capture( $order, OrderPaymentStore::GATEWAY_ID ), $provider );
+		$order   = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( PaymentOutcome::STATUS_FAILED, $outcome->get_status() );
+		$this->assertSame( 1, $provider->capture_calls );
+		$this->assertSame( 'on-hold', $order->get_status() );
+		$this->assertSame( 'requires_capture', $order->get_meta( '_intention_status', true ) );
+		$this->assertOrderHasNoteContaining( $order, 'Capture failed note.' );
+	}
+
+	/**
 	 * @testdox Should support non-Stripe redirect providers through neutral outcomes.
 	 */
 	public function test_process_checkout_supports_non_stripe_redirect_provider(): void {

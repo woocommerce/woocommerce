@@ -176,6 +176,11 @@ class MultiCurrencySettingsProjectionServiceTest extends WC_Unit_Test_Case {
 					'entry'  => 'multi-currency-settings',
 					'handle' => 'wc-admin-multi-currency-settings',
 				),
+				'style'  => array(
+					'entry'  => 'multi-currency-settings',
+					'file'   => 'style',
+					'handle' => 'wc-admin-multi-currency-settings',
+				),
 			),
 			$asset_manifest
 		);

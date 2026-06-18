@@ -418,12 +418,41 @@ class PaymentProcessingService {
 				$outcome = $this->exception_policy->to_failed_outcome( $exception );
 			}
 
-			$this->apply_checkout_outcome( $order, $outcome );
+			$this->apply_order_operation_outcome( $order, $outcome, $operation );
 
 			return $outcome;
 		} finally {
 			$this->order_payment_store->unlock_order_payment( $order );
 		}
+	}
+
+	/**
+	 * Apply a provider order-operation outcome to the order lifecycle.
+	 *
+	 * @param WC_Order       $order     Order object.
+	 * @param PaymentOutcome $outcome   Provider outcome.
+	 * @param string         $operation Operation name.
+	 */
+	private function apply_order_operation_outcome( WC_Order $order, PaymentOutcome $outcome, string $operation ): void {
+		if ( 'capture' === $operation && PaymentOutcome::STATUS_FAILED === $outcome->get_status() ) {
+			$meta                      = $this->get_lifecycle_meta( $outcome );
+			$meta['_intention_status'] = 'requires_capture';
+			ksort( $meta );
+
+			$this->lifecycle_service->apply_unlocked(
+				$order,
+				new PaymentLifecycleEvent(
+					PaymentLifecycleEvent::STATUS_STARTED,
+					$this->get_lifecycle_payment_reference( $outcome ),
+					$meta,
+					array(),
+					$this->get_lifecycle_note( $outcome )
+				)
+			);
+			return;
+		}
+
+		$this->apply_checkout_outcome( $order, $outcome );
 	}
 
 	/**

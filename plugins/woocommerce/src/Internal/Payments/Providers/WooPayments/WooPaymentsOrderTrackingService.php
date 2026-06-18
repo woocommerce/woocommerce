@@ -293,7 +293,7 @@ class WooPaymentsOrderTrackingService implements RegisterHooksInterface {
 		 *
 		 * @param array<string,mixed> $config Fraud services config.
 		 */
-		$config = apply_filters( self::FILTER_FRAUD_SERVICES_CONFIG, array( 'sift' => array() ) );
+		$config = apply_filters( self::FILTER_FRAUD_SERVICES_CONFIG, array() );
 
 		return is_array( $config ) && array_key_exists( 'sift', $config );
 	}

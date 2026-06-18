@@ -1,0 +1,104 @@
+.woocommerce-multi-currency-settings {
+	display: grid;
+	gap: 24px;
+	max-width: 960px;
+	margin-top: 16px;
+
+	&__store-settings {
+		display: grid;
+		gap: 16px;
+		padding-bottom: 24px;
+		border-bottom: 1px solid #dcdcde;
+
+		h2 {
+			margin: 0;
+		}
+
+		.components-base-control,
+		.components-radio-control {
+			max-width: 680px;
+		}
+
+		.components-button {
+			justify-self: start;
+		}
+	}
+
+	&__actions {
+		display: flex;
+		gap: 12px;
+		align-items: center;
+		justify-content: space-between;
+
+		h2 {
+			margin: 0;
+		}
+	}
+
+	.widefat {
+		table-layout: fixed;
+
+		th,
+		td {
+			vertical-align: middle;
+			overflow-wrap: anywhere;
+		}
+
+		th:first-child {
+			width: 40%;
+		}
+
+		th:nth-child(2),
+		th:nth-child(3) {
+			width: 20%;
+		}
+
+		th:last-child {
+			width: 20%;
+		}
+	}
+
+	&__currency-settings {
+		display: grid;
+		gap: 16px;
+		min-width: min(420px, 100%);
+
+		.components-radio-control__option {
+			margin-bottom: 12px;
+		}
+
+		.components-base-control__help {
+			margin-bottom: 0;
+		}
+	}
+
+	&__modal-actions {
+		display: flex;
+		gap: 8px;
+		justify-content: flex-end;
+		margin-top: 8px;
+		padding-top: 16px;
+		border-top: 1px solid #dcdcde;
+	}
+
+	.components-spinner {
+		margin-right: 8px;
+		vertical-align: middle;
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.woocommerce-multi-currency-settings {
+		&__actions,
+		&__modal-actions {
+			align-items: stretch;
+			flex-direction: column;
+		}
+
+		&__modal-actions {
+			.components-button {
+				justify-content: center;
+			}
+		}
+	}
+}

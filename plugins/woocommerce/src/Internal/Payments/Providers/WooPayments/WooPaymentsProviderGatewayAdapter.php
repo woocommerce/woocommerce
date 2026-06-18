@@ -240,7 +240,7 @@ class WooPaymentsProviderGatewayAdapter {
 
 					return $this->normalize_capture_result( $result, $context );
 				} catch ( WooPaymentsApiException $exception ) {
-					return $this->failed_transport_outcome( 'capture', $exception );
+					return $this->failed_transport_outcome( 'capture', $exception, $context );
 				}
 			}
 		}
@@ -1153,6 +1153,17 @@ class WooPaymentsProviderGatewayAdapter {
 	}
 
 	/**
+	 * Get legacy-compatible order meta for a failed capture response.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_failed_capture_order_meta(): array {
+		return array(
+			'_intention_status' => 'requires_capture',
+		);
+	}
+
+	/**
 	 * Get WooPayments fraud-outcome order meta from provider metadata.
 	 *
 	 * @param array<string,mixed> $intent Native PaymentIntent response.
@@ -1404,6 +1415,41 @@ class WooPaymentsProviderGatewayAdapter {
 	}
 
 	/**
+	 * Get a WooPayments-compatible capture failure order note.
+	 *
+	 * @param WC_Order $order     Order object.
+	 * @param string   $intent_id Payment intent ID.
+	 * @param string   $charge_id Charge ID.
+	 * @param string   $message   Failure message.
+	 * @return string
+	 */
+	private function get_capture_failed_note( WC_Order $order, string $intent_id, string $charge_id, string $message ): string {
+		$formatted_amount = wc_price( (float) $order->get_total(), array( 'currency' => $order->get_currency() ) ) . ' ' . $order->get_currency();
+		$transaction_id   = '' !== $intent_id ? $intent_id : $charge_id;
+		$transaction_url  = $this->get_transaction_url( $intent_id, $charge_id );
+		$note             = sprintf(
+			$this->get_interpolated_note_text(
+				/* translators: %1$s: authorized amount, %2$s: WooPayments, %3$s: transaction ID, %4$s: transaction URL. */
+				__( 'A capture of %1$s <strong>failed</strong> to complete using %2$s (<a>%3$s</a>).', 'woocommerce' ),
+				array(
+					'strong' => '<strong>',
+					'a'      => '' !== $transaction_url ? '<a href="%4$s" target="_blank" rel="noopener noreferrer">' : '<code>',
+				)
+			),
+			$formatted_amount,
+			'WooPayments',
+			$transaction_id,
+			$transaction_url
+		);
+
+		if ( '' !== $message ) {
+			$note .= ' ' . $message;
+		}
+
+		return $note;
+	}
+
+	/**
 	 * Replace simple interpolation tags with stored note HTML.
 	 *
 	 * @param string               $text        Note text.
@@ -1582,8 +1628,31 @@ class WooPaymentsProviderGatewayAdapter {
 			array(
 				'error_code'    => $error_code,
 				'error_message' => $message,
+				'meta'          => $this->get_failed_capture_order_meta(),
+				'note'          => $this->get_capture_failed_note(
+					$context->get_order(),
+					$intent_id,
+					$this->get_failed_capture_charge_id( $result, $context->get_order() ),
+					$message
+				),
 			)
 		);
+	}
+
+	/**
+	 * Get the charge ID for a failed capture response.
+	 *
+	 * @param array<string,mixed> $result Native or legacy capture result.
+	 * @param WC_Order            $order  Order being captured.
+	 * @return string
+	 */
+	private function get_failed_capture_charge_id( array $result, WC_Order $order ): string {
+		$charge = $this->get_latest_charge( $result );
+		if ( isset( $charge['id'] ) && '' !== (string) $charge['id'] ) {
+			return (string) $charge['id'];
+		}
+
+		return (string) $order->get_meta( '_charge_id', true );
 	}
 
 	/**
@@ -1772,20 +1841,36 @@ class WooPaymentsProviderGatewayAdapter {
 	 *
 	 * @param string                  $operation Operation name.
 	 * @param WooPaymentsApiException $exception Native transport exception.
+	 * @param PaymentContext|null     $context   Payment context.
 	 * @return PaymentOutcome
 	 */
-	private function failed_transport_outcome( string $operation, WooPaymentsApiException $exception ): PaymentOutcome {
+	private function failed_transport_outcome( string $operation, WooPaymentsApiException $exception, ?PaymentContext $context = null ): PaymentOutcome {
+		$provider_payment_id = '';
+		$data                = array(
+			'error_code'    => '' !== $exception->get_error_code() ? $exception->get_error_code() : 'wcpay_native_transport_failed',
+			'error_message' => $exception->getMessage(),
+			'operation'     => $operation,
+		);
+
+		if ( 'capture' === $operation && null !== $context ) {
+			$order               = $context->get_order();
+			$provider_payment_id = $this->get_order_intent_id( $order );
+			$data['meta']        = $this->get_failed_capture_order_meta();
+			$data['note']        = $this->get_capture_failed_note(
+				$order,
+				$provider_payment_id,
+				(string) $order->get_meta( '_charge_id', true ),
+				$exception->getMessage()
+			);
+		}
+
 		return new PaymentOutcome(
 			PaymentOutcome::STATUS_FAILED,
+			$provider_payment_id,
 			'',
 			'',
 			'',
-			'',
-			array(
-				'error_code'    => '' !== $exception->get_error_code() ? $exception->get_error_code() : 'wcpay_native_transport_failed',
-				'error_message' => $exception->getMessage(),
-				'operation'     => $operation,
-			)
+			$data
 		);
 	}
 
