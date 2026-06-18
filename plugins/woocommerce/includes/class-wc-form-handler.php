@@ -21,6 +21,7 @@ class WC_Form_Handler {
 	 */
 	public static function init() {
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_reset_password_link' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'resend_set_password' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_account_details' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'checkout_action' ), 20 );
@@ -74,6 +75,46 @@ class WC_Form_Handler {
 			);
 			exit;
 		}
+	}
+
+	/**
+	 * Resend the change-password link to a logged-in customer who still has a temporary password.
+	 *
+	 * Triggered by the temporary-password notice on the My Account pages. Generates a fresh
+	 * password-reset key for the current user and dispatches the reset-password email, mirroring
+	 * the lost-password flow but for the already-authenticated user.
+	 *
+	 * @since 11.0.0
+	 */
+	public static function resend_set_password(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['wc-resend-set-password'] ) || ! is_user_logged_in() ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$nonce_value = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+
+		if ( ! wp_verify_nonce( $nonce_value, 'wc-resend-set-password' ) ) {
+			return;
+		}
+
+		$user     = wp_get_current_user();
+		$key      = get_password_reset_key( $user );
+		$redirect = wc_get_page_permalink( 'myaccount' );
+
+		if ( is_wp_error( $key ) ) {
+			wc_add_notice( __( 'Sorry, we were unable to resend the link. Please try again.', 'woocommerce' ), 'error' );
+		} else {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Re-fires woocommerce_reset_password_notification, documented in WC_Shortcode_My_Account::retrieve_password().
+			do_action( 'woocommerce_reset_password_notification', $user->user_login, $key );
+			wc_add_notice( __( 'We have emailed you a new link to change your password.', 'woocommerce' ) );
+			// Flag so the temporary-password notice is hidden on the redirect target — the confirmation above covers it.
+			$redirect = add_query_arg( 'password-link-sent', 'true', $redirect );
+		}
+
+		wp_safe_redirect( $redirect );
+		exit;
 	}
 
 	/**

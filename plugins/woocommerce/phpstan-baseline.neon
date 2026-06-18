@@ -31666,12 +31666,6 @@ parameters:
 			path: includes/shortcodes/class-wc-shortcode-my-account.php
 
 		-
-			message: '#^Function wc_add_notice invoked with 4 parameters, 1\-3 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-my-account.php
-
-		-
 			message: '#^Method WC_Shortcode_My_Account\:\:add_payment_method\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
