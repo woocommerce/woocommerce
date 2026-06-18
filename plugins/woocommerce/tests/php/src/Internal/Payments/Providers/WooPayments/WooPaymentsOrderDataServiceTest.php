@@ -141,6 +141,23 @@ class WooPaymentsOrderDataServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox PaymentIntent fee-breakdown refresh is required for a non-FX envelope missing its fee rate.
+	 */
+	public function test_intent_needs_fee_breakdown_refresh_for_non_fx_envelope_without_rate(): void {
+		$intent = $this->get_intent_with_non_fx_fee_breakdown();
+		unset( $intent['charges']['data'][0]['fee_breakdown_v1']['totals']['fee']['rate'] );
+
+		$this->assertTrue( $this->sut->intent_needs_fee_breakdown_refresh( $intent ) );
+	}
+
+	/**
+	 * @testdox PaymentIntent fee-breakdown refresh is not required for a non-FX envelope with its fee rate.
+	 */
+	public function test_intent_does_not_need_fee_breakdown_refresh_for_non_fx_envelope_with_rate(): void {
+		$this->assertFalse( $this->sut->intent_needs_fee_breakdown_refresh( $this->get_intent_with_non_fx_fee_breakdown() ) );
+	}
+
+	/**
 	 * @testdox Fee-breakdown notes are not duplicated on the same order.
 	 */
 	public function test_add_fee_breakdown_note_from_timeline_event_does_not_duplicate_notes(): void {
@@ -236,6 +253,22 @@ class WooPaymentsOrderDataServiceTest extends WC_Unit_Test_Case {
 			'charges' => array(
 				'data' => array(
 					$this->get_charge_with_fee_breakdown(),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Get a PaymentIntent envelope with a non-FX fee breakdown.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function get_intent_with_non_fx_fee_breakdown(): array {
+		return array(
+			'id'      => 'pi_123',
+			'charges' => array(
+				'data' => array(
+					array_diff_key( $this->get_non_fx_captured_timeline_event(), array( 'type' => true ) ),
 				),
 			),
 		);

@@ -440,7 +440,6 @@ class WooPaymentsProviderGatewayAdapter {
 		}
 
 		$this->apply_payment_method_display_details( $order, $result );
-		$this->maybe_add_fee_breakdown_note( $order, $result );
 
 		return $this->normalize_native_charge_result( $result, $context, $customer_id );
 	}
@@ -1200,59 +1199,6 @@ class WooPaymentsProviderGatewayAdapter {
 			: array();
 
 		return 'card' === (string) ( $payment_method_details['type'] ?? '' );
-	}
-
-	/**
-	 * Add the WooPayments fee-breakdown note when the native response includes it.
-	 *
-	 * @param WC_Order            $order  Order being charged.
-	 * @param array<string,mixed> $intent Native PaymentIntent response.
-	 */
-	private function maybe_add_fee_breakdown_note( WC_Order $order, array $intent ): void {
-		$order_data_service = $this->get_order_data_service();
-
-		if ( isset( $intent['id'] ) && ! $order_data_service->intent_has_fee_breakdown_rate( $intent, false ) ) {
-			if ( $this->add_fee_breakdown_note_from_timeline( $order, (string) $intent['id'] ) ) {
-				return;
-			}
-
-			try {
-				$latest_intent = $this->get_api_client()->get_payment_intention( (string) $intent['id'] );
-				if ( $order_data_service->add_fee_breakdown_note_from_intent( $order, $latest_intent, false ) ) {
-					return;
-				}
-			} catch ( Throwable $exception ) {
-				unset( $exception );
-				// Fall back to the original response below.
-			}
-		}
-
-		$order_data_service->add_fee_breakdown_note_from_intent( $order, $intent, false );
-	}
-
-	/**
-	 * Add a fee-breakdown note from the captured timeline event.
-	 *
-	 * @param WC_Order $order     Order being charged.
-	 * @param string   $intent_id Provider intent ID.
-	 * @return bool True when a note was added.
-	 */
-	private function add_fee_breakdown_note_from_timeline( WC_Order $order, string $intent_id ): bool {
-		try {
-			$timeline = $this->get_api_client()->get_timeline( $intent_id );
-		} catch ( Throwable $exception ) {
-			return false;
-		}
-
-		$events = isset( $timeline['data'] ) && is_array( $timeline['data'] ) ? $timeline['data'] : array();
-
-		foreach ( $events as $event ) {
-			if ( is_array( $event ) && $this->get_order_data_service()->add_fee_breakdown_note_from_timeline_event( $order, $event ) ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**

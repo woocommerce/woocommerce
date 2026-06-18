@@ -115,6 +115,33 @@ class WooPaymentsOrderDataService {
 	}
 
 	/**
+	 * Tell whether a PaymentIntent fee-breakdown envelope should be refreshed before writing a persisted note.
+	 *
+	 * Early webhook payloads can include fee and net totals before the provider has attached the display rate. The note is persisted and de-duplicated, so a rate-less non-FX envelope should be refreshed from the latest intent before it is written.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param array<string,mixed> $intent           Native PaymentIntent response.
+	 * @param bool                $use_first_charge Whether to use the first charge in the list.
+	 * @return bool
+	 */
+	public function intent_needs_fee_breakdown_refresh( array $intent, bool $use_first_charge = true ): bool {
+		return $this->charge_like_data_needs_fee_breakdown_refresh( $this->get_charge( $intent, $use_first_charge ) );
+	}
+
+	/**
+	 * Tell whether a captured timeline event should be refreshed before writing a persisted note.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param array<string,mixed> $event Native timeline event.
+	 * @return bool
+	 */
+	public function timeline_event_needs_fee_breakdown_refresh( array $event ): bool {
+		return 'captured' === ( $event['type'] ?? null ) && $this->charge_like_data_needs_fee_breakdown_refresh( $event );
+	}
+
+	/**
 	 * Get the fee breakdown order note from a captured timeline event.
 	 *
 	 * @since 11.0.0
@@ -323,6 +350,26 @@ class WooPaymentsOrderDataService {
 	 */
 	private function fee_breakdown_has_rate( array $fee_breakdown ): bool {
 		return '' !== $this->format_fee_rate_text( $fee_breakdown['totals']['fee']['rate'] ?? null, (string) ( $fee_breakdown['totals']['fee']['currency'] ?? '' ) );
+	}
+
+	/**
+	 * Tell whether charge-shaped fee breakdown data should be refreshed before writing a persisted note.
+	 *
+	 * @param array<string,mixed> $charge Native charge or captured event response.
+	 * @return bool
+	 */
+	private function charge_like_data_needs_fee_breakdown_refresh( array $charge ): bool {
+		$fee_breakdown_v1 = $charge['fee_breakdown_v1'] ?? null;
+
+		if ( ! is_array( $fee_breakdown_v1 ) || ! $this->is_renderable_fee_breakdown( $fee_breakdown_v1 ) ) {
+			return true;
+		}
+
+		if ( $this->fee_breakdown_has_rate( $fee_breakdown_v1 ) ) {
+			return false;
+		}
+
+		return ! is_array( $fee_breakdown_v1['fx'] ?? null );
 	}
 
 	/**

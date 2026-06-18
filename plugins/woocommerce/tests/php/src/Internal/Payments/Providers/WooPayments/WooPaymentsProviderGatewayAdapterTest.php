@@ -399,13 +399,7 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( '_wcpay_fraud_meta_box_type', $outcome_meta );
 		$this->assertSame( 'allow', $outcome_meta['_wcpay_fraud_outcome_status'] );
 		$this->assertSame( 'allow', $outcome_meta['_wcpay_fraud_meta_box_type'] );
-		$this->assertOrderHasNote(
-			$order,
-			'<strong>Fee details:</strong><div class="captured-event-details">' . PHP_EOL
-			. '<p>Fee (2.9% + $0.30): $1.75 USD</p>' . PHP_EOL
-			. '<p>Net payout: $48.25 USD</p>' . PHP_EOL
-			. '</div>'
-		);
+		$this->assertOrderDoesNotHaveNoteStartingWith( $order, '<strong>Fee details:</strong>' );
 	}
 
 	/**
@@ -2605,6 +2599,25 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertGreaterThan( 0, $count, "Missing order note: {$expected}" );
+	}
+
+	/**
+	 * Assert that an order does not have a note with the given prefix.
+	 *
+	 * @param WC_Order $order  Order object.
+	 * @param string   $prefix Note prefix.
+	 */
+	private function assertOrderDoesNotHaveNoteStartingWith( WC_Order $order, string $prefix ): void {
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'type'     => 'any',
+			)
+		);
+
+		foreach ( $notes as $note ) {
+			$this->assertStringStartsNotWith( $prefix, (string) $note->content );
+		}
 	}
 
 	/**

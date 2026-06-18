@@ -223,6 +223,13 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 			public array $requested_intents = array();
 
 			/**
+			 * Requested timeline IDs.
+			 *
+			 * @var string[]
+			 */
+			public array $requested_timelines = array();
+
+			/**
 			 * Retrieve a WooPayments PaymentIntent.
 			 *
 			 * @param string $intent_id Intent ID.
@@ -291,6 +298,157 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 			. '<p>&nbsp;&nbsp;&nbsp;&nbsp;Base fee: 2.9% + $0.30</p>' . PHP_EOL
 			. '<p>&nbsp;&nbsp;&nbsp;&nbsp;Currency conversion fee: 1%</p>' . PHP_EOL
 			. '<p>Net payout: $64.21 USD</p>' . PHP_EOL
+			. '</div>'
+		);
+	}
+
+	/**
+	 * @testdox payment_intent.succeeded refreshes non-FX fee-breakdown details when the webhook envelope is missing the fee rate.
+	 */
+	public function test_payment_intent_succeeded_fetches_non_fx_fee_rate_when_webhook_envelope_is_stale(): void {
+		$order = $this->create_woopayments_order();
+		$order->set_payment_method_title( 'Visa credit card' );
+		$order->set_transaction_id( 'pi_123' );
+		$order->set_status( 'processing' );
+		$order->update_meta_data( '_intent_id', 'pi_123' );
+		$order->update_meta_data( '_intention_status', 'succeeded' );
+		$order->save();
+
+		$api_client = new class() extends WooPaymentsApiClient {
+			/**
+			 * Requested intent IDs.
+			 *
+			 * @var string[]
+			 */
+			public array $requested_intents = array();
+
+			/**
+			 * Retrieve a WooPayments PaymentIntent.
+			 *
+			 * @param string $intent_id Intent ID.
+			 * @return array<string,mixed>
+			 */
+			public function get_payment_intention( string $intent_id ): array {
+				$this->requested_intents[] = $intent_id;
+
+				return array(
+					'id'      => $intent_id,
+					'charges' => array(
+						'data' => array(
+							array(
+								'id'               => 'ch_123',
+								'fee_breakdown_v1' => array(
+									'totals' => array(
+										'fee'         => array(
+											'amount'   => 175,
+											'currency' => 'usd',
+										),
+										'net'         => array(
+											'amount'   => 4825,
+											'currency' => 'usd',
+										),
+										'capture_net' => array(
+											'amount'   => 4825,
+											'currency' => 'usd',
+										),
+									),
+								),
+							),
+						),
+					),
+				);
+			}
+
+			/**
+			 * Retrieve a WooPayments timeline.
+			 *
+			 * @param string $id Payment intent ID.
+			 * @return array<string,mixed>
+			 */
+			public function get_timeline( string $id ): array {
+				$this->requested_timelines[] = $id;
+
+				return array(
+					'data' => array(
+						array(
+							'type'             => 'captured',
+							'fee_breakdown_v1' => array(
+								'totals' => array(
+									'fee'         => array(
+										'amount'   => 175,
+										'currency' => 'usd',
+										'rate'     => array(
+											'percentage' => 0.029,
+											'fixed'      => 30,
+											'fixed_currency' => 'usd',
+										),
+									),
+									'net'         => array(
+										'amount'   => 4825,
+										'currency' => 'usd',
+									),
+									'capture_net' => array(
+										'amount'   => 4825,
+										'currency' => 'usd',
+									),
+								),
+							),
+						),
+					),
+				);
+			}
+		};
+
+		$sut = new WooPaymentsEventIngestor();
+		$sut->init(
+			wc_get_container()->get( OrderPaymentLifecycleService::class ),
+			new LegacyProxy(),
+			new WooPaymentsLegacyRuntime(),
+			$api_client
+		);
+
+		$sut->process(
+			$this->create_payment_intent_event(
+				'payment_intent.succeeded',
+				$order,
+				array(
+					'charges' => array(
+						'data' => array(
+							array(
+								'id'               => 'ch_123',
+								'fee_breakdown_v1' => array(
+									'totals' => array(
+										'fee'         => array(
+											'amount'   => 175,
+											'currency' => 'usd',
+										),
+										'net'         => array(
+											'amount'   => 4825,
+											'currency' => 'usd',
+										),
+										'capture_net' => array(
+											'amount'   => 4825,
+											'currency' => 'usd',
+										),
+									),
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( array( 'pi_123' ), $api_client->requested_intents );
+		$this->assertSame( array( 'pi_123' ), $api_client->requested_timelines );
+		$this->assertOrderHasNote(
+			$order,
+			'<strong>Fee details:</strong><div class="captured-event-details">' . PHP_EOL
+			. '<p>Fee (2.9% + $0.30): $1.75 USD</p>' . PHP_EOL
+			. '<p>Net payout: $48.25 USD</p>' . PHP_EOL
 			. '</div>'
 		);
 	}
