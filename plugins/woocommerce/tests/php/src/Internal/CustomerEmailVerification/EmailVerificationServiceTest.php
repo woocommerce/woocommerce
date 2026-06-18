@@ -45,7 +45,7 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 		$hook_arg   = null;
 
 		$listener = static function ( $id ) use ( &$hook_calls, &$hook_arg ) {
-			$hook_calls++;
+			++$hook_calls;
 			$hook_arg = $id;
 		};
 		add_action( 'woocommerce_customer_email_verified', $listener );

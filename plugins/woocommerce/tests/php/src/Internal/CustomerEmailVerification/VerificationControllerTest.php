@@ -125,13 +125,14 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 		$_GET['wc_verify_email_key']  = $key;
 		$_GET['wc_verify_email_user'] = (string) $link_owner;
 		$abort                        = static function ( $location ): void {
-			throw new \RuntimeException( (string) $location );
+			throw new \RuntimeException( esc_html( (string) $location ) );
 		};
 		add_filter( 'wp_redirect', $abort );
 		try {
 			$this->ctrl->maybe_process_request();
 		} catch ( \RuntimeException $e ) {
-			unset( $e ); // Expected: the controller redirects and exits.
+			// Expected: the controller redirects and exits.
+			unset( $e );
 		} finally {
 			remove_filter( 'wp_redirect', $abort );
 		}

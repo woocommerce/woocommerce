@@ -209,6 +209,8 @@ class EmailVerificationService {
 			return null;
 		}
 
-		return time() - $parsed[0];
+		// Clamp to zero so a future timestamp (clock skew, migrations) can't report negative
+		// elapsed time and wedge the resend rate-limit / "recently sent" notice logic.
+		return max( 0, time() - $parsed[0] );
 	}
 }
