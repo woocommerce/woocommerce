@@ -298,4 +298,32 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 			'Externally-chosen pickup should be preserved (treated as manual)'
 		);
 	}
+
+	/**
+	 * Regression: when the auto-defaulter runs and the sticky-pickup path preserves a
+	 * manually-chosen Local Pickup, `wc_get_chosen_shipping_method_for_package()` must not
+	 * overwrite the recorded origin back to 'auto'. Otherwise a subsequent re-evaluation
+	 * would treat the deliberate pickup as auto-defaulted and un-stick it — the inverse of
+	 * the bug this change fixes.
+	 *
+	 * @testdox Auto-defaulter preserves a manual origin when it keeps the customer's chosen pickup.
+	 */
+	public function test_manual_origin_survives_auto_defaulter_recalculation(): void {
+		// Customer explicitly chose Local Pickup.
+		$chosen    = WC()->session->get( 'chosen_shipping_methods', array() );
+		$chosen[0] = 'local_pickup:1';
+		WC()->session->set( 'chosen_shipping_methods', $chosen );
+		wc_set_chosen_shipping_method_origin( 0, 'manual', 'local_pickup:1' );
+
+		// A non-pickup rate is now available, forcing the auto-defaulter to re-evaluate.
+		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
+		$result  = wc_get_chosen_shipping_method_for_package( 0, $package );
+
+		$this->assertSame( 'local_pickup:1', $result, 'Manually chosen pickup should be preserved' );
+		$this->assertSame(
+			'manual',
+			wc_get_chosen_shipping_method_origin( 0 ),
+			'Preserving a manual choice must not overwrite the origin back to auto'
+		);
+	}
 }

@@ -473,13 +473,25 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 
 	// If not set, not available, or available methods have changed, set to the DEFAULT option.
 	if ( ! $chosen_method || $changed || ! isset( $package['rates'][ $chosen_method ] ) || count( $package['rates'] ) !== $method_count ) {
+		// Capture the previous choice and its origin before the auto-defaulter runs, so we can tell
+		// whether it computed a new default or simply preserved an existing customer choice.
+		$previous_chosen_method = $chosen_method;
+		$previous_origin        = wc_get_chosen_shipping_method_origin( $key );
+
 		$chosen_method          = wc_get_default_shipping_method_for_package( $key, $package, $chosen_method );
 		$chosen_methods[ $key ] = $chosen_method;
 		$method_counts[ $key ]  = count( $package['rates'] );
 
 		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
 		WC()->session->set( 'shipping_method_counts', $method_counts );
-		wc_set_chosen_shipping_method_origin( $key, 'auto', $chosen_method );
+
+		// Only record the choice as auto-defaulted when the auto-defaulter actually assigned a method
+		// the customer didn't pick. If it kept the customer's existing manual choice (sticky pickup),
+		// preserve that 'manual' origin — otherwise the next re-evaluation would treat it as auto and
+		// could un-stick a deliberately chosen Local Pickup.
+		if ( ! ( $chosen_method === $previous_chosen_method && 'manual' === $previous_origin ) ) {
+			wc_set_chosen_shipping_method_origin( $key, 'auto', $chosen_method );
+		}
 
 		/**
 		 * Fires when a shipping method is chosen.
