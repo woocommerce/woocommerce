@@ -250,6 +250,7 @@ class WooPaymentsDisputeEventHandler {
 	 * @param string              $charge_id       Charge ID.
 	 * @param string              $dispute_id      Dispute ID.
 	 * @param string              $status          Dispute status.
+	 * @throws RuntimeException When the local refund cannot be created.
 	 */
 	private function create_dispute_lost_refund( WC_Order $order, array $dispute_summary, string $charge_id, string $dispute_id, string $status ): void {
 		$refund_amount = (float) $order->get_remaining_refund_amount();
@@ -509,6 +510,7 @@ class WooPaymentsDisputeEventHandler {
 	 * @param array<string,mixed> $items Items to read from.
 	 * @param string              $key   Property key.
 	 * @return string
+	 * @throws RuntimeException When the property is missing or invalid.
 	 */
 	private function get_required_string( array $items, string $key ): string {
 		$value = $this->get_required_value( $items, $key );
@@ -525,6 +527,7 @@ class WooPaymentsDisputeEventHandler {
 	 * @param array<string,mixed> $items Items to read from.
 	 * @param string              $key   Property key.
 	 * @return int
+	 * @throws RuntimeException When the property is missing or invalid.
 	 */
 	private function get_required_int( array $items, string $key ): int {
 		$value = $this->get_required_value( $items, $key );
@@ -541,6 +544,7 @@ class WooPaymentsDisputeEventHandler {
 	 * @param array<string,mixed> $items Items to read from.
 	 * @param string              $key   Property key.
 	 * @return array<string,mixed>
+	 * @throws RuntimeException When the property is missing or invalid.
 	 */
 	private function get_required_array( array $items, string $key ): array {
 		$value = $this->get_required_value( $items, $key );
@@ -557,6 +561,7 @@ class WooPaymentsDisputeEventHandler {
 	 * @param array<string,mixed> $items Items to read from.
 	 * @param string              $key   Property key.
 	 * @return mixed
+	 * @throws RuntimeException When the property is missing.
 	 */
 	private function get_required_value( array $items, string $key ) {
 		if ( ! isset( $items[ $key ] ) ) {
