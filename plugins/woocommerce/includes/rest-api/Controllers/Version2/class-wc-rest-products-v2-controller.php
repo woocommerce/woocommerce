@@ -1691,6 +1691,71 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Save an object data.
+	 *
+	 * @since 3.0.0
+	 * @param WP_REST_Request $request  Full details about the request.
+	 * @param bool            $creating If is creating a new object.
+	 * @return WC_Data|WP_Error
+	 */
+	protected function save_object( $request, $creating = false ) {
+		$previous_status = null;
+
+		if ( ! $creating && isset( $request['status'] ) ) {
+			$existing_product = $this->get_object( (int) $request['id'] );
+
+			if ( $existing_product && 0 !== $existing_product->get_id() && $existing_product->is_type( ProductType::VARIABLE ) ) {
+				$previous_status = $existing_product->get_status( 'edit' );
+			}
+		}
+
+		$object = parent::save_object( $request, $creating );
+
+		if ( is_wp_error( $object ) ) {
+			return $object;
+		}
+
+		if ( $this->maybe_sync_variable_product_status_to_variations( $object, $previous_status ) ) {
+			$object = $this->get_object( $object->get_id() );
+		}
+
+		return $object;
+	}
+
+	/**
+	 * Sync variation trash state when a variable product REST status update enters or leaves trash.
+	 *
+	 * @param WC_Data     $product         Product object.
+	 * @param string|null $previous_status Product status before the REST update.
+	 * @return bool True when variation status was synced.
+	 */
+	protected function maybe_sync_variable_product_status_to_variations( $product, $previous_status ) {
+		if ( null === $previous_status || ! $product instanceof WC_Product || ! $product->is_type( ProductType::VARIABLE ) ) {
+			return false;
+		}
+
+		$current_status = $product->get_status( 'edit' );
+
+		if ( $previous_status === $current_status ) {
+			return false;
+		}
+
+		$data_store = WC_Data_Store::load( 'product-variable' );
+
+		if ( ProductStatus::TRASH === $current_status ) {
+			$data_store->delete_variations( $product->get_id(), false );
+			return true;
+		}
+
+		if ( ProductStatus::TRASH === $previous_status ) {
+			$data_store->untrash_variations( $product->get_id() );
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Clear caches here so in sync with any new variations/children.
 	 *
 	 * @param WC_Data $object Object data.

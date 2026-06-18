@@ -1877,10 +1877,89 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that updating a variable product status to trash via REST also trashes variations.
+	 */
+	public function test_update_variable_product_status_to_trash_trashes_variations() {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+
+		try {
+			$this->assertNotEmpty( $variation_ids );
+
+			$this->update_product_via_post_request(
+				$product,
+				array(
+					'status' => ProductStatus::TRASH,
+				)
+			);
+
+			foreach ( $variation_ids as $variation_id ) {
+				$this->assertSame( ProductStatus::TRASH, get_post_status( $variation_id ) );
+			}
+		} finally {
+			$this->delete_variable_product_posts( $product->get_id(), $variation_ids );
+		}
+	}
+
+	/**
+	 * Test that restoring a trashed variable product via REST also restores variations.
+	 */
+	public function test_update_variable_product_status_from_trash_restores_variations() {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+
+		try {
+			$this->assertNotEmpty( $variation_ids );
+
+			$delete_request = new WP_REST_Request( 'DELETE', '/wc/v3/products/' . $product->get_id() );
+			$delete_request->set_param( 'force', false );
+
+			$delete_response = $this->server->dispatch( $delete_request );
+			$this->assertEquals( 200, $delete_response->get_status() );
+
+			foreach ( $variation_ids as $variation_id ) {
+				$this->assertSame( ProductStatus::TRASH, get_post_status( $variation_id ) );
+			}
+
+			$update_response = $this->update_product_via_post_request(
+				$product,
+				array(
+					'status' => ProductStatus::DRAFT,
+				)
+			);
+
+			$updated_product_data = $update_response->get_data();
+
+			foreach ( $variation_ids as $variation_id ) {
+				$this->assertSame( ProductStatus::PUBLISH, get_post_status( $variation_id ) );
+			}
+
+			$this->assertEqualsCanonicalizing( $variation_ids, $updated_product_data['variations'] );
+		} finally {
+			$this->delete_variable_product_posts( $product->get_id(), $variation_ids );
+		}
+	}
+
+	/**
+	 * Delete a variable product and its variations by post ID.
+	 *
+	 * @param int   $product_id    Product ID.
+	 * @param int[] $variation_ids Variation IDs.
+	 */
+	private function delete_variable_product_posts( $product_id, array $variation_ids ) {
+		foreach ( $variation_ids as $variation_id ) {
+			wp_delete_post( $variation_id, true );
+		}
+
+		wp_delete_post( $product_id, true );
+	}
+
+	/**
 	 * Perform a REST POST request to update a product.
 	 *
 	 * @param WC_Product $product The product to update.
 	 * @param array      $request_body Data to be sent (JSON-encoded) as the body of the request.
+	 * @return WP_REST_Response Response object.
 	 */
 	private function update_product_via_post_request( WC_Product $product, array $request_body ) {
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() );
@@ -1889,6 +1968,8 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
+
+		return $response;
 	}
 
 	/**
