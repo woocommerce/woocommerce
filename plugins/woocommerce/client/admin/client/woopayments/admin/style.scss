@@ -89,9 +89,88 @@
 	text-align: right;
 }
 
+.woocommerce-woopayments-money-movement {
+	display: grid;
+	gap: 16px;
+	max-width: 960px;
+}
+
+.woocommerce-woopayments-money-movement h2 {
+	margin: 0;
+}
+
+.woocommerce-woopayments-money-movement__status,
+.woocommerce-woopayments-money-movement__empty,
+.woocommerce-woopayments-money-movement__notice {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	margin: 0;
+	padding: 16px;
+}
+
+.woocommerce-woopayments-money-movement__notice {
+	border-left: 4px solid #dba617;
+}
+
+.woocommerce-woopayments-money-movement__table {
+	background: #fff;
+	border-collapse: collapse;
+	border: 1px solid #dcdcde;
+	width: 100%;
+}
+
+.woocommerce-woopayments-money-movement__table th,
+.woocommerce-woopayments-money-movement__table td {
+	border-bottom: 1px solid #dcdcde;
+	padding: 12px;
+	text-align: left;
+	vertical-align: top;
+}
+
+.woocommerce-woopayments-money-movement__table th:last-child,
+.woocommerce-woopayments-money-movement__table td:last-child {
+	text-align: right;
+}
+
+.woocommerce-woopayments-money-movement__details {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	display: grid;
+	gap: 0;
+	margin: 0;
+}
+
+.woocommerce-woopayments-money-movement__details div {
+	border-bottom: 1px solid #dcdcde;
+	display: grid;
+	gap: 8px;
+	grid-template-columns: 180px minmax(0, 1fr);
+	padding: 12px 16px;
+}
+
+.woocommerce-woopayments-money-movement__details div:last-child {
+	border-bottom: 0;
+}
+
+.woocommerce-woopayments-money-movement__details dt {
+	color: #646970;
+	font-weight: 600;
+}
+
+.woocommerce-woopayments-money-movement__details dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
 @media screen and (max-width: 782px) {
 	.woocommerce-woopayments-overview__cards,
 	.woocommerce-woopayments-overview__balance-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.woocommerce-woopayments-money-movement__details div {
 		grid-template-columns: 1fr;
 	}
 }

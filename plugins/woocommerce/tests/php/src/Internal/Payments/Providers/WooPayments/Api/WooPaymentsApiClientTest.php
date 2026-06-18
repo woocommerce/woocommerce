@@ -1322,6 +1322,148 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve transactions list, summary, search, detail, and export endpoints.
+	 */
+	public function test_transactions_admin_methods_use_preserved_endpoints(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'data'        => array(),
+					'total_count' => 0,
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$sut->get_transactions(
+			array(
+				'page'       => 2,
+				'pagesize'   => 25,
+				'deposit_id' => 'po_test',
+			)
+		);
+
+		$this->assertStringStartsWith( '/sites/123/wcpay/transactions?', $http_client->last_path );
+		$this->assertStringContainsString( 'test_mode=1', $http_client->last_path );
+		$this->assertStringContainsString( 'page=2', $http_client->last_path );
+		$this->assertStringContainsString( 'pagesize=25', $http_client->last_path );
+		$this->assertStringContainsString( 'deposit_id=po_test', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$sut->get_transactions_summary( array( 'store_currency_is' => 'usd' ), 'po_test' );
+
+		$this->assertStringStartsWith( '/sites/123/wcpay/transactions/summary?', $http_client->last_path );
+		$this->assertStringContainsString( 'store_currency_is=usd', $http_client->last_path );
+		$this->assertStringContainsString( 'deposit_id=po_test', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$http_client->response['body'] = wp_json_encode(
+			array(
+				array(
+					'customer_name'  => 'Ada Lovelace',
+					'customer_email' => 'ada@example.com',
+				),
+			)
+		);
+
+		$sut->get_transactions_search_autocomplete( 'Ada' );
+
+		$this->assertStringStartsWith( '/sites/123/wcpay/transactions/search?', $http_client->last_path );
+		$this->assertStringContainsString( 'search_term=Ada', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$sut->get_transaction( 'txn_test' );
+
+		$this->assertSame( '/sites/123/wcpay/transactions/txn_test?test_mode=1', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$sut->get_transactions_export( array( 'type_is' => 'charge' ), 'merchant@example.com', 'po_test', 'en_US' );
+
+		$this->assertSame( '/sites/123/wcpay/transactions/download', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertStringContainsString( '"type_is":"charge"', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"user_email":"merchant@example.com"', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"deposit_id":"po_test"', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"locale":"en_US"', (string) $http_client->last_body );
+
+		$sut->get_transactions_export_url( 'txexp_test' );
+
+		$this->assertSame( '/sites/123/wcpay/transactions/download/txexp_test?test_mode=1', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+	}
+
+	/**
+	 * @testdox Should preserve disputes list, summary, detail, update, close, and export endpoints.
+	 */
+	public function test_disputes_admin_methods_use_preserved_endpoints(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'id'     => 'dp_test',
+					'reason' => 'fraudulent',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$sut->get_disputes( array( 'status_is' => 'needs_response' ) );
+
+		$this->assertStringStartsWith( '/sites/123/wcpay/disputes?', $http_client->last_path );
+		$this->assertStringContainsString( 'test_mode=0', $http_client->last_path );
+		$this->assertStringContainsString( 'status_is=needs_response', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$sut->get_disputes_summary( array( 'currency_is' => 'usd' ) );
+
+		$this->assertStringStartsWith( '/sites/123/wcpay/disputes/summary?', $http_client->last_path );
+		$this->assertStringContainsString( '0%5Bcurrency_is%5D=usd', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$sut->get_dispute( 'dp_test' );
+
+		$this->assertSame( '/sites/123/wcpay/disputes/dp_test?test_mode=0', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$sut->update_dispute( 'dp_test', array( 'customer_name' => 'Ada' ), true, array( 'order_id' => 123 ) );
+
+		$this->assertSame( '/sites/123/wcpay/disputes/dp_test', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertStringContainsString( '"customer_name":"Ada"', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"submit":true', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"order_id":123', (string) $http_client->last_body );
+
+		$sut->close_dispute( 'dp_test' );
+
+		$this->assertSame( '/sites/123/wcpay/disputes/dp_test/close', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+
+		$sut->get_disputes_export( array( 'status_is' => 'needs_response' ), 'merchant@example.com', 'en_US' );
+
+		$this->assertSame( '/sites/123/wcpay/disputes/download', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertStringContainsString( '"status_is":"needs_response"', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"user_email":"merchant@example.com"', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"locale":"en_US"', (string) $http_client->last_body );
+
+		$sut->get_disputes_export_url( 'dpexp_test' );
+
+		$this->assertSame( '/sites/123/wcpay/disputes/download/dpexp_test?test_mode=0', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+	}
+
+	/**
 	 * @testdox Should reject unsafe payout export identifiers.
 	 */
 	public function test_get_payouts_export_url_rejects_invalid_route_identifier(): void {

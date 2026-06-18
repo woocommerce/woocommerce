@@ -100,6 +100,11 @@ class WooPaymentsApiClient {
 	private const TRANSACTIONS_API = 'transactions';
 
 	/**
+	 * WooPayments disputes API path.
+	 */
+	private const DISPUTES_API = 'disputes';
+
+	/**
 	 * WooPayments deposits API path. These endpoints back the merchant-facing payouts surfaces.
 	 */
 	private const DEPOSITS_API = 'deposits';
@@ -635,6 +640,225 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Retrieve WooPayments transactions.
+	 *
+	 * @param array<string,mixed> $query Query params.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_transactions( array $query = array() ): array {
+		return $this->request( $query, self::TRANSACTIONS_API, 'GET' );
+	}
+
+	/**
+	 * Retrieve WooPayments transactions summary.
+	 *
+	 * @param array<string,mixed> $filters    Summary filters.
+	 * @param string|null         $deposit_id Optional payout/deposit ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_transactions_summary( array $filters = array(), ?string $deposit_id = null ): array {
+		if ( null !== $deposit_id && '' !== $deposit_id ) {
+			$filters['deposit_id'] = $deposit_id;
+		}
+
+		return $this->request( $filters, self::TRANSACTIONS_API . '/summary', 'GET' );
+	}
+
+	/**
+	 * Initiate a WooPayments transactions export.
+	 *
+	 * @param array<string,mixed> $filters    Export filters.
+	 * @param string              $user_email User email for the export.
+	 * @param string|null         $deposit_id Optional payout/deposit ID.
+	 * @param string|null         $locale     Site locale.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_transactions_export( array $filters = array(), string $user_email = '', ?string $deposit_id = null, ?string $locale = null ): array {
+		if ( '' !== $user_email ) {
+			$filters['user_email'] = $user_email;
+		}
+
+		if ( null !== $deposit_id && '' !== $deposit_id ) {
+			$filters['deposit_id'] = $deposit_id;
+		}
+
+		if ( null !== $locale && '' !== $locale ) {
+			$filters['locale'] = $locale;
+		}
+
+		return $this->request( $filters, self::TRANSACTIONS_API . '/download', 'POST' );
+	}
+
+	/**
+	 * Retrieve a WooPayments transactions export URL.
+	 *
+	 * @param string $export_id Export ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function get_transactions_export_url( string $export_id ): array {
+		$this->validate_route_resource_id( $export_id );
+
+		return $this->request( array(), self::TRANSACTIONS_API . '/download/' . $export_id, 'GET' );
+	}
+
+	/**
+	 * Retrieve WooPayments transaction search autocomplete results.
+	 *
+	 * @param string $search_term Search term.
+	 * @return array<int,array<string,string>>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_transactions_search_autocomplete( string $search_term ): array {
+		$search_results = $this->request( array( 'search_term' => $search_term ), self::TRANSACTIONS_API . '/search', 'GET' );
+		$results        = array_values(
+			array_map(
+				static function ( array $result ): array {
+					$customer_name  = isset( $result['customer_name'] ) ? (string) $result['customer_name'] : '';
+					$customer_email = isset( $result['customer_email'] ) ? (string) $result['customer_email'] : '';
+
+					return array(
+						'label' => trim( sprintf( '%s (%s)', $customer_name, $customer_email ) ),
+					);
+				},
+				$search_results
+			)
+		);
+
+		$order = wc_get_order( $search_term );
+		if ( $order ) {
+			$is_subscription = function_exists( 'wcs_is_subscription' ) && wcs_is_subscription( $order );
+			array_unshift(
+				$results,
+				array(
+					'label' => ( $is_subscription ? __( 'Subscription #', 'woocommerce' ) : __( 'Order #', 'woocommerce' ) ) . $search_term,
+				)
+			);
+		}
+
+		return $results;
+	}
+
+	/**
+	 * Retrieve WooPayments disputes.
+	 *
+	 * @param array<string,mixed> $filters Query filters.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_disputes( array $filters = array() ): array {
+		return $this->request( $filters, self::DISPUTES_API, 'GET' );
+	}
+
+	/**
+	 * Retrieve WooPayments disputes summary.
+	 *
+	 * @param array<string,mixed> $filters Summary filters.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_disputes_summary( array $filters = array() ): array {
+		return $this->request( array( '0' => $filters ), self::DISPUTES_API . '/summary', 'GET' );
+	}
+
+	/**
+	 * Retrieve a WooPayments dispute.
+	 *
+	 * @param string $dispute_id Dispute ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function get_dispute( string $dispute_id ): array {
+		$this->validate_route_resource_id( $dispute_id );
+
+		return $this->request( array(), self::DISPUTES_API . '/' . $dispute_id, 'GET' );
+	}
+
+	/**
+	 * Update a WooPayments dispute.
+	 *
+	 * @param string              $dispute_id Dispute ID.
+	 * @param array<string,mixed> $evidence   Evidence payload.
+	 * @param bool                $submit     Whether to submit the evidence.
+	 * @param array<string,mixed> $metadata   Metadata payload.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function update_dispute( string $dispute_id, array $evidence, bool $submit, array $metadata ): array {
+		$this->validate_route_resource_id( $dispute_id );
+
+		$request = array(
+			'evidence' => $evidence,
+			'submit'   => $submit,
+			'metadata' => $metadata,
+		);
+
+		$dispute_details = $this->get_dispute( $dispute_id );
+		if ( isset( $dispute_details['reason'] ) && 'noncompliant' === $dispute_details['reason'] ) {
+			$request['evidence']['enhanced_evidence'] = array_merge(
+				isset( $request['evidence']['enhanced_evidence'] ) && is_array( $request['evidence']['enhanced_evidence'] ) ? $request['evidence']['enhanced_evidence'] : array(),
+				array(
+					'visa_compliance' => array(
+						'fee_acknowledged' => 'true',
+					),
+				)
+			);
+		}
+
+		return $this->request( $request, self::DISPUTES_API . '/' . $dispute_id, 'POST' );
+	}
+
+	/**
+	 * Close a WooPayments dispute.
+	 *
+	 * @param string $dispute_id Dispute ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function close_dispute( string $dispute_id ): array {
+		$this->validate_route_resource_id( $dispute_id );
+
+		return $this->request( array(), self::DISPUTES_API . '/' . $dispute_id . '/close', 'POST' );
+	}
+
+	/**
+	 * Initiate a WooPayments disputes export.
+	 *
+	 * @param array<string,mixed> $filters    Export filters.
+	 * @param string              $user_email User email for the export.
+	 * @param string|null         $locale     Site locale.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_disputes_export( array $filters = array(), string $user_email = '', ?string $locale = null ): array {
+		if ( '' !== $user_email ) {
+			$filters['user_email'] = $user_email;
+		}
+
+		if ( null !== $locale && '' !== $locale ) {
+			$filters['locale'] = $locale;
+		}
+
+		return $this->request( $filters, self::DISPUTES_API . '/download', 'POST' );
+	}
+
+	/**
+	 * Retrieve a WooPayments disputes export URL.
+	 *
+	 * @param string $export_id Export ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function get_disputes_export_url( string $export_id ): array {
+		$this->validate_route_resource_id( $export_id );
+
+		return $this->request( array(), self::DISPUTES_API . '/download/' . $export_id, 'GET' );
+	}
+
+	/**
 	 * Retrieve WooPayments payout overviews.
 	 *
 	 * @return array<string,mixed>
@@ -763,7 +987,7 @@ class WooPaymentsApiClient {
 		 *
 		 * @since 11.0.0
 		 *
-		 * @param array<string,string> $headers Request headers.
+	 * @param array<string,string> $headers Request headers.
 		 */
 		$headers = apply_filters(
 			'wcpay_api_request_headers',
@@ -963,7 +1187,7 @@ class WooPaymentsApiClient {
 		 *
 		 * @since 11.0.0
 		 *
-		 * @param array<string,mixed> $request_args Onboarding request payload.
+	 * @param array<string,mixed> $request_args Onboarding request payload.
 		 */
 		$filtered_args = apply_filters( 'wc_payments_get_onboarding_data_args', $request_args );
 
@@ -986,12 +1210,12 @@ class WooPaymentsApiClient {
 	/**
 	 * Send a request through the provider transport.
 	 *
-	 * @param array<string,mixed> $params         Request params.
-	 * @param string              $api            API path.
-	 * @param string              $method         HTTP method.
-	 * @param bool                $is_site_scoped Whether to include the WPCOM site ID in the API path.
-	 * @param bool                $use_user_token Whether to sign with the connection-owner user token.
-	 * @param bool                $blocking       Whether to block for the transport response.
+	 * @param array<int|string,mixed> $params        Request params.
+	 * @param string                  $api           API path.
+	 * @param string                  $method        HTTP method.
+	 * @param bool                    $is_site_scoped Whether to include the WPCOM site ID in the API path.
+	 * @param bool                    $use_user_token Whether to sign with the connection-owner user token.
+	 * @param bool                    $blocking      Whether to block for the transport response.
 	 * @return array<string,mixed>
 	 * @throws WooPaymentsApiException When the request fails.
 	 */
@@ -1013,9 +1237,9 @@ class WooPaymentsApiClient {
 		 *
 		 * @since 11.0.0
 		 *
-		 * @param array<string,mixed> $params Request parameters.
-		 * @param string              $api    API path.
-		 * @param string              $method HTTP method.
+			 * @param array<int|string,mixed> $params Request parameters.
+	 * @param string              $api    API path.
+	 * @param string              $method HTTP method.
 		 */
 		$params = apply_filters( 'wcpay_api_request_params', $params, $api, $method );
 
@@ -1034,7 +1258,7 @@ class WooPaymentsApiClient {
 		 *
 		 * @since 11.0.0
 		 *
-		 * @param array<string,string> $headers Request headers.
+	 * @param array<string,string> $headers Request headers.
 		 */
 		$headers = apply_filters( 'wcpay_api_request_headers', $headers );
 		$site_id = $this->http_client->get_blog_id();

@@ -1,6 +1,6 @@
 <?php
 /**
- * WooPaymentsDepositsListRequest class file.
+ * WooPaymentsPaginatedListRequest class file.
  */
 
 declare( strict_types = 1 );
@@ -10,12 +10,12 @@ namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments;
 use WP_REST_Request;
 
 /**
- * Compatibility request object for the preserved WooPayments deposits list filter.
+ * Compatibility request object base for preserved WooPayments paginated list filters.
  *
  * @since 11.0.0
  * @internal Transitional internal component for the native payments runtime.
  */
-class WooPaymentsDepositsListRequest extends WooPaymentsPaginatedListRequest {
+abstract class WooPaymentsPaginatedListRequest {
 
 	protected const DEFAULT_PARAMS = array(
 		'page'      => 0,
@@ -33,13 +33,18 @@ class WooPaymentsDepositsListRequest extends WooPaymentsPaginatedListRequest {
 	private array $params = array();
 
 	/**
-	 * Register the legacy request FQCN as an alias when the WooPayments extension is absent.
+	 * Constructor.
 	 */
-	public static function register_legacy_alias(): void {
-		self::register_legacy_base_aliases();
+	final public function __construct() {
+	}
 
+	/**
+	 * Register legacy base request aliases when the WooPayments extension is absent.
+	 */
+	protected static function register_legacy_base_aliases(): void {
 		$legacy_classes = array(
-			'WCPay\Core\Server\Request\List_Deposits',
+			'WCPay\Core\Server\Request',
+			'WCPay\Core\Server\Request\Paginated',
 		);
 
 		foreach ( $legacy_classes as $legacy_class ) {
@@ -54,37 +59,24 @@ class WooPaymentsDepositsListRequest extends WooPaymentsPaginatedListRequest {
 	 *
 	 * @param WP_REST_Request $request REST request.
 	 * @phpstan-param WP_REST_Request<array<string,mixed>> $request
-	 * @return self
+	 * @return static
 	 */
-	public static function from_rest_request( WP_REST_Request $request ): self {
-		$deposits_request = new self();
-		$deposits_request->set_page( (int) $request->get_param( 'page' ) );
-		$deposits_request->set_page_size( (int) ( $request->get_param( 'pagesize' ) ?? 25 ) );
+	public static function from_rest_request( WP_REST_Request $request ) {
+		$list_request = new static();
+		$list_request->set_page( (int) $request->get_param( 'page' ) );
+		$list_request->set_page_size( (int) ( $request->get_param( 'pagesize' ) ?? 25 ) );
 
 		$sort = $request->get_param( 'sort' );
 		if ( null !== $sort ) {
-			$deposits_request->set_sort_by( (string) $sort );
+			$list_request->set_sort_by( (string) $sort );
 		}
 
 		$direction = $request->get_param( 'direction' );
 		if ( null !== $direction ) {
-			$deposits_request->set_sort_direction( (string) $direction );
+			$list_request->set_sort_direction( (string) $direction );
 		}
 
-		$date_between = $request->get_param( 'date_between' );
-		$deposits_request->set_filters(
-			array(
-				'match'             => $request->get_param( 'match' ),
-				'store_currency_is' => $request->get_param( 'store_currency_is' ),
-				'date_before'       => $request->get_param( 'date_before' ),
-				'date_after'        => $request->get_param( 'date_after' ),
-				'date_between'      => null === $date_between ? null : (array) $date_between,
-				'status_is'         => $request->get_param( 'status_is' ),
-				'status_is_not'     => $request->get_param( 'status_is_not' ),
-			)
-		);
-
-		return $deposits_request;
+		return $list_request;
 	}
 
 	/**
@@ -153,33 +145,6 @@ class WooPaymentsDepositsListRequest extends WooPaymentsPaginatedListRequest {
 	}
 
 	/**
-	 * Set store currency filter.
-	 *
-	 * @param string $store_currency Store currency.
-	 */
-	public function set_store_currency_is( string $store_currency ): void {
-		$this->set_param( 'store_currency_is', $store_currency );
-	}
-
-	/**
-	 * Set status filter.
-	 *
-	 * @param string $status Status.
-	 */
-	public function set_status_is( string $status ): void {
-		$this->set_param( 'status_is', $status );
-	}
-
-	/**
-	 * Set excluded status filter.
-	 *
-	 * @param string $status Status.
-	 */
-	public function set_status_is_not( string $status ): void {
-		$this->set_param( 'status_is_not', $status );
-	}
-
-	/**
 	 * Set date after filter.
 	 *
 	 * @param string $date_after Date after.
@@ -213,9 +178,7 @@ class WooPaymentsDepositsListRequest extends WooPaymentsPaginatedListRequest {
 	 *
 	 * @return string
 	 */
-	public function get_api(): string {
-		return 'deposits';
-	}
+	abstract public function get_api(): string;
 
 	/**
 	 * Returns the request's HTTP method.
@@ -275,7 +238,7 @@ class WooPaymentsDepositsListRequest extends WooPaymentsPaginatedListRequest {
 	 * @return array<string,mixed>
 	 */
 	public function get_params(): array {
-		$params = array_merge( self::DEFAULT_PARAMS, $this->params );
+		$params = array_merge( static::DEFAULT_PARAMS, $this->params );
 
 		foreach ( $params as $key => $value ) {
 			if ( true === $value ) {

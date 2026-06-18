@@ -20,19 +20,53 @@ describe( 'WooPayments Settings Payments routes', () => {
 
 		const routes = getSettingsPaymentsProviderRoutes();
 
-		expect( routes ).toHaveLength( 2 );
-		expect( routes[ 0 ] ).toMatchObject( {
-			id: 'woopayments-overview',
-			path: '/woopayments/overview',
-			order: 100,
+		expect( routes ).toHaveLength( 7 );
+		expect(
+			routes.map( ( { id, path, order } ) => ( {
+				id,
+				path,
+				order,
+			} ) )
+		).toEqual( [
+			{
+				id: 'woopayments-overview',
+				path: '/woopayments/overview',
+				order: 100,
+			},
+			{
+				id: 'woopayments-payouts',
+				path: '/woopayments/payouts',
+				order: 110,
+			},
+			{
+				id: 'woopayments-transactions',
+				path: '/woopayments/transactions',
+				order: 120,
+			},
+			{
+				id: 'woopayments-transaction-details',
+				path: '/woopayments/transactions/details',
+				order: 121,
+			},
+			{
+				id: 'woopayments-disputes',
+				path: '/woopayments/disputes',
+				order: 122,
+			},
+			{
+				id: 'woopayments-dispute-details',
+				path: '/woopayments/disputes/details',
+				order: 123,
+			},
+			{
+				id: 'woopayments-dispute-challenge',
+				path: '/woopayments/disputes/challenge',
+				order: 124,
+			},
+		] );
+		routes.forEach( ( route ) => {
+			expect( route.element ).toBeDefined();
 		} );
-		expect( routes[ 1 ] ).toMatchObject( {
-			id: 'woopayments-payouts',
-			path: '/woopayments/payouts',
-			order: 110,
-		} );
-		expect( routes[ 0 ].element ).toBeDefined();
-		expect( routes[ 1 ].element ).toBeDefined();
 		expect(
 			routes.some( ( route ) => /^\/payments\//.test( route.path ) )
 		).toBe( false );
