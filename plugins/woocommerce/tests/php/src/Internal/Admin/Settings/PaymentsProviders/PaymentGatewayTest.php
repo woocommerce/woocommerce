@@ -912,6 +912,9 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => 'admin.php?page=wc-settings&tab=checkout&section=bogus_settings' ) );
 		$this->assertEquals( $test_site_wp_admin_url . 'admin.php?page=wc-settings&tab=checkout&section=bogus_settings&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
 
+		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => 'admin.php?page=wc-settings&tab=checkout&path=/third-party/settings' ) );
+		$this->assertEquals( $test_site_wp_admin_url . 'admin.php?page=wc-settings&tab=checkout&path=%2Fthird-party%2Fsettings&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
+
 		// Test invalid relative URLs.
 		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => 'not_good_url/admin.php?page=wc-settings&tab=checkout&section=bogus_settings' ) );
 		$this->assertEquals( $test_site_wp_admin_url . 'admin.php?page=wc-settings&tab=checkout&section=gateway2&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );

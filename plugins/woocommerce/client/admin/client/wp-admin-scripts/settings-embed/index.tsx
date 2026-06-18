@@ -32,6 +32,7 @@ import { registerSettingsEmailPreviewFill } from '~/settings-email/settings-emai
 import { registerSettingsEmailFeedbackFill } from '~/settings-email/settings-email-feedback-slotfill';
 import { registerSettingsEmailListingFill } from '~/settings-email/settings-email-listing-slotfill';
 import { registerSettingsUIScreens } from '~/settings/settings-ui-registry';
+import '~/settings-payments/register-provider-routes';
 
 const renderPaymentsSettings = () => {
 	const pages = [

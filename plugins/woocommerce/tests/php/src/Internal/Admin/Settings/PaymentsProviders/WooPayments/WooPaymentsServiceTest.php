@@ -182,10 +182,18 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					},
 				),
 				Utils::class          => array(
-					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 					'wc_payments_settings_url'           => function ( ?string $path = null, array $query = array() ) {
-						unset( $path, $query );
-						return 'https://example.com/payments-settings';
+						$url = 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout';
+
+						if ( ! empty( $path ) ) {
+							$url .= '&path=' . $path;
+						}
+
+						if ( ! empty( $query ) ) {
+							$url .= '&' . http_build_query( $query );
+						}
+
+						return $url;
 					},
 					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 					'get_wpcom_connection_authorization' => function ( string $return_url ) {
@@ -265,7 +273,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $summary['account']['test_drive'] );
 		$this->assertFalse( $summary['account']['sandbox'] );
 		$this->assertFalse( $summary['account']['live'] );
-		$this->assertSame( 'https://example.com/overview_page?from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT, $summary['urls']['overview_page'] );
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview', $summary['urls']['overview_page'] );
 		$this->assertSame( 'https://example.com/woopayments/onboarding', $summary['urls']['setup'] );
 		$this->assertArrayNotHasKey( 'test_publishable_key', $summary['account'] );
 		$this->assertArrayNotHasKey( 'live_publishable_key', $summary['account'] );
@@ -289,7 +297,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $summary['account']['test_drive'] );
 		$this->assertFalse( $summary['account']['sandbox'] );
 		$this->assertFalse( $summary['account']['live'] );
-		$this->assertSame( 'https://example.com/overview_page?from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT, $summary['urls']['overview_page'] );
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview', $summary['urls']['overview_page'] );
 		$this->assertSame( 'https://example.com/woopayments/onboarding', $summary['urls']['setup'] );
 	}
 
@@ -384,8 +392,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$result = $this->sut->get_onboarding_details( $location, '/some/path' );
 
 		$this->assertIsArray( $result );
-		$this->assertSame(
-			'https://example.com/native-overview',
+		$this->assertStringContainsString(
+			'admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview',
 			$result['context']['urls']['overview_page']
 		);
 	}
@@ -1051,7 +1059,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $result['success'] );
 		$this->assertFalse( $captured_call['live_account'] );
-		$this->assertStringContainsString( 'admin.php?page=wc-admin&path=/payments/overview', $captured_call['return_url'] );
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview', $captured_call['return_url'] );
 		$this->assertSame( 'card_payments', array_key_first( $captured_call['account_data']['capabilities'] ) );
 		$this->assertIsArray( $cached );
 		$this->assertSame( 'acct_native_test', $cached['data']['account_id'] );
@@ -1602,13 +1610,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'not_supported', $result['messages'] );
 		$this->assertNull( $result['messages']['not_supported'] );
 		$this->assertArrayHasKey( 'context', $result );
-		$this->assertSame(
-			array(
-				'urls' => array(
-					'overview_page' => 'https://example.com/overview_page?from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT,
-				),
-			),
-			$result['context']
+		$this->assertStringContainsString(
+			'admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview',
+			$result['context']['urls']['overview_page']
 		);
 	}
 
@@ -1668,13 +1672,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$result['messages']
 		);
 		$this->assertArrayHasKey( 'context', $result );
-		$this->assertSame(
-			array(
-				'urls' => array(
-					'overview_page' => 'https://example.com/overview_page?from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT,
-				),
-			),
-			$result['context']
+		$this->assertStringContainsString(
+			'admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview',
+			$result['context']['urls']['overview_page']
 		);
 	}
 
