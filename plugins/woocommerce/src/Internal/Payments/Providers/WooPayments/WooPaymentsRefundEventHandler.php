@@ -122,7 +122,7 @@ class WooPaymentsRefundEventHandler {
 			return;
 		}
 
-		if ( ! (bool) ( $charge['captured'] ?? false ) ) {
+		if ( ! $this->get_required_bool( $charge, 'captured' ) ) {
 			return;
 		}
 
@@ -143,6 +143,10 @@ class WooPaymentsRefundEventHandler {
 
 		if ( $charge_amount < 0 || $refund_amount < 0 || $refunded_amount > (float) $order->get_total() ) {
 			throw new RuntimeException( esc_html( sprintf( 'The refund amount is not valid for charge ID: %s', $charge_id ) ) );
+		}
+
+		if ( $existing_refund instanceof WC_Order_Refund && $is_pending_refund && 'successful' === $order->get_meta( '_wcpay_refund_status', true ) ) {
+			return;
 		}
 
 		$this->claim_refund_lock( $order, $refund_id );
@@ -698,6 +702,23 @@ class WooPaymentsRefundEventHandler {
 		}
 
 		return (int) $value;
+	}
+
+	/**
+	 * Get a required boolean field.
+	 *
+	 * @param array<string,mixed> $data Data array.
+	 * @param string              $key  Field key.
+	 * @return bool
+	 * @throws RuntimeException When the field is missing or not boolean.
+	 */
+	private function get_required_bool( array $data, string $key ): bool {
+		$value = $data[ $key ] ?? null;
+		if ( ! is_bool( $value ) ) {
+			throw new RuntimeException( esc_html( sprintf( 'WooPayments refund event is missing required field: %s', $key ) ) );
+		}
+
+		return $value;
 	}
 
 	/**

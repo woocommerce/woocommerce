@@ -883,6 +883,30 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox charge.refunded does not downgrade successful duplicate refunds to pending.
+	 */
+	public function test_charge_refunded_duplicate_pending_retry_does_not_downgrade_successful_refund(): void {
+		$order  = $this->create_refundable_woopayments_order( '10.00' );
+		$refund = $this->create_local_refund( $order, 4.00, 'Existing refund' );
+		$refund->update_meta_data( '_wcpay_refund_id', 're_123' );
+		$refund->update_meta_data( '_wcpay_refund_transaction_id', 'txn_existing' );
+		$refund->save_meta_data();
+		$order->update_meta_data( '_wcpay_refund_status', 'successful' );
+		$order->save();
+
+		$this->sut->process( $this->create_charge_refunded_event( $order, 1000, 400, 'pending' ) );
+
+		$order  = wc_get_order( $order->get_id() );
+		$refund = wc_get_order( $refund->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
+		$this->assertSame( 'successful', $order->get_meta( '_wcpay_refund_status', true ) );
+		$this->assertSame( 'txn_existing', $refund->get_meta( '_wcpay_refund_transaction_id', true ) );
+		$this->assertOrderLacksNoteContaining( $order, array( 'is pending', 're_123' ) );
+	}
+
+	/**
 	 * @testdox charge.refunded accepts split-UPE WooPayments gateway IDs.
 	 */
 	public function test_charge_refunded_accepts_split_upe_gateway_ids(): void {
@@ -927,6 +951,32 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( WC_Order::class, $order );
 		$this->assertCount( 0, $order->get_refunds(), 'Uncaptured charges should not create local refunds.' );
 		$this->assertSame( '', $order->get_meta( '_wcpay_refund_status', true ) );
+	}
+
+	/**
+	 * @testdox charge.refunded fails closed when the captured field is missing.
+	 */
+	public function test_charge_refunded_fails_closed_for_missing_captured_field(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+		$event = $this->create_charge_refunded_event( $order, 1000, 400, 'succeeded' );
+		unset( $event['data']['object']['captured'] );
+
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( 'missing required field: captured' );
+
+		$this->sut->process( $event );
+	}
+
+	/**
+	 * @testdox charge.refunded fails closed when the captured field is malformed.
+	 */
+	public function test_charge_refunded_fails_closed_for_malformed_captured_field(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( 'missing required field: captured' );
+
+		$this->sut->process( $this->create_charge_refunded_event( $order, 1000, 400, 'succeeded', array( 'captured' => 'yes' ) ) );
 	}
 
 	/**
