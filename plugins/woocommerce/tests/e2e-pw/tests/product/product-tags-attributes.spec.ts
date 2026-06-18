@@ -13,10 +13,11 @@ import {
 /**
  * Internal dependencies
  */
-import { tags, test, expect } from '../../fixtures/fixtures';
+import { tags, test, expect, request } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { fillPageTitle } from '../../utils/editor';
 import { getFakeProduct, getFakeTag, getFakeAttribute } from '../../utils/data';
+import { setOption } from '../../utils/options';
 
 const pageTitle = 'Product Showcase';
 
@@ -231,6 +232,7 @@ test.describe(
 
 		test( 'should see and sort attributes page with all its products', async ( {
 			page,
+			baseURL,
 		} ) => {
 			// the api setting for enabling attribute term page doesn't apply for some reason
 			// workaround for the change to take effect is to just update via the settings ui.
@@ -256,7 +258,22 @@ test.describe(
 
 			await expect( attributeLookupCheckbox ).toBeChecked();
 
+			// wc_create_attribute() only queues the attribute-archive rewrite
+			// rules flush as a WP-Cron event, which doesn't run in the test env,
+			// so the term archive 404s. Set WooCommerce's own flush flag; it is
+			// applied on the next request's `init` (the product page load below).
+			await setOption(
+				request,
+				baseURL || '',
+				'woocommerce_queue_flush_rewrite_rules',
+				'yes'
+			);
+
 			await page.goto( `product/${ product1Slug }` );
+
+			await page
+				.getByRole( 'tab', { name: 'Additional information' } )
+				.click();
 			await page
 				.locator(
 					'.woocommerce-product-attributes-item__value > p > a',
