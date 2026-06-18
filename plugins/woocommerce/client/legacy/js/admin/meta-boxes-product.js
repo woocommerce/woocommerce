@@ -331,7 +331,6 @@ jQuery( function ( $ ) {
 				.siblings( '.edit-timestamp' )
 				.on( 'click', () => {
 					normalize_timestamp_label();
-					this.hide_current_value( selected_value_selector );
 				} );
 
 			$( '#timestampdiv .save-timestamp, #timestampdiv .cancel-timestamp' ).on(
