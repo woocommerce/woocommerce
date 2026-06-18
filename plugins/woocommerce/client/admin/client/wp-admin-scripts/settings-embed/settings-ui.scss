@@ -163,8 +163,10 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 
 		&--error {
-			background: var(--Alias-bg-bg-surface-error, #fce4e4);
-			color: var(--Alias-text-text-error, #5a0000);
+			// No `--Alias-*-error` token is defined in the admin design-token set,
+			// so use a direct color until one ships.
+			background: #fce4e4;
+			color: #5a0000;
 		}
 	}
 
