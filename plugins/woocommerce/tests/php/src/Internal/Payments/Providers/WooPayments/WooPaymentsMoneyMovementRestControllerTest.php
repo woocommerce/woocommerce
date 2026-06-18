@@ -551,6 +551,44 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox Dispute update forwards draft evidence clearing fields unchanged.
+	 */
+	public function test_dispute_update_forwards_draft_evidence_clearing_fields(): void {
+		$this->create_disputes_controller( true )->register_routes();
+
+		$this->api_client->response = array(
+			'id' => 'dp_test',
+		);
+
+		$evidence = array(
+			'receipt'                  => '',
+			'customer_communication'   => '',
+			'shipping_carrier'         => '',
+			'shipping_tracking_number' => '',
+			'product_description'      => 'Physical goods shipped to the customer.',
+		);
+		$metadata = array(
+			'__product_type' => 'physical_product',
+		);
+		$request  = new WP_REST_Request( 'POST', '/wc/v3/payments/disputes/dp_test' );
+		$request->set_body_params(
+			array(
+				'evidence' => $evidence,
+				'submit'   => 'false',
+				'metadata' => $metadata,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'update_dispute', $this->api_client->last_call['method'] );
+		$this->assertSame( $evidence, $this->api_client->last_call['evidence'] );
+		$this->assertFalse( $this->api_client->last_call['submit'] );
+		$this->assertSame( $metadata, $this->api_client->last_call['metadata'] );
+	}
+
+	/**
 	 * @testdox Dispute detail adds legacy detail order context and formatted charge addresses.
 	 */
 	public function test_dispute_detail_enriches_order_and_charge_address(): void {

@@ -1,0 +1,119 @@
+.woocommerce-woopayments-dispute-evidence {
+	display: grid;
+	gap: 16px;
+}
+
+.woocommerce-woopayments-dispute-evidence__summary {
+	display: grid;
+	gap: 12px;
+}
+
+.woocommerce-woopayments-dispute-evidence__readonly,
+.woocommerce-woopayments-dispute-evidence__notice {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	margin: 0;
+	padding: 12px 16px;
+}
+
+.woocommerce-woopayments-dispute-evidence__notice:focus {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+}
+
+.woocommerce-woopayments-dispute-evidence__readonly {
+	border-left: 4px solid #72aee6;
+}
+
+.woocommerce-woopayments-dispute-evidence__notice.is-success {
+	border-left: 4px solid #00a32a;
+}
+
+.woocommerce-woopayments-dispute-evidence__notice.is-error {
+	border-left: 4px solid #d63638;
+}
+
+.woocommerce-woopayments-dispute-evidence__form {
+	display: grid;
+	gap: 16px;
+}
+
+.woocommerce-woopayments-dispute-evidence__section {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	display: grid;
+	gap: 16px;
+	margin: 0;
+	min-inline-size: 0;
+	padding: 16px;
+}
+
+.woocommerce-woopayments-dispute-evidence__section legend {
+	font-weight: 600;
+	padding: 0 4px;
+}
+
+.woocommerce-woopayments-dispute-evidence-file {
+	align-items: center;
+	border-top: 1px solid #f0f0f1;
+	display: grid;
+	gap: 12px;
+	grid-template-columns: minmax(0, 1fr) minmax(220px, max-content);
+	padding-top: 12px;
+}
+
+.woocommerce-woopayments-dispute-evidence-file:first-of-type {
+	border-top: 0;
+	padding-top: 0;
+}
+
+.woocommerce-woopayments-dispute-evidence-file__main {
+	display: grid;
+	gap: 4px;
+	min-width: 0;
+}
+
+.woocommerce-woopayments-dispute-evidence-file__main label,
+.woocommerce-woopayments-dispute-evidence-file__label {
+	font-weight: 600;
+}
+
+.woocommerce-woopayments-dispute-evidence-file__name,
+.woocommerce-woopayments-dispute-evidence-file__empty,
+.woocommerce-woopayments-dispute-evidence-file__readonly {
+	color: #646970;
+	overflow-wrap: anywhere;
+}
+
+.woocommerce-woopayments-dispute-evidence-file__controls {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	justify-content: flex-end;
+}
+
+.woocommerce-woopayments-dispute-evidence-file__controls input[type="file"] {
+	max-width: 240px;
+}
+
+.woocommerce-woopayments-dispute-evidence__actions {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	justify-content: flex-end;
+}
+
+@media screen and (max-width: 782px) {
+	.woocommerce-woopayments-dispute-evidence-file {
+		grid-template-columns: 1fr;
+	}
+
+	.woocommerce-woopayments-dispute-evidence-file__controls,
+	.woocommerce-woopayments-dispute-evidence__actions {
+		justify-content: flex-start;
+	}
+}

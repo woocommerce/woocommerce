@@ -84,7 +84,7 @@ describe( 'WooPayments money movement pages', () => {
 		);
 	} );
 
-	it( 'announces loaded disputes and gives row links clear purpose', async () => {
+	it( 'announces loaded disputes and routes actionable rows to challenge evidence', async () => {
 		mockGetDisputes.mockResolvedValue( {
 			data: [
 				{
@@ -96,14 +96,30 @@ describe( 'WooPayments money movement pages', () => {
 					amount: 5000,
 					currency: 'usd',
 				},
+				{
+					id: 'dp_closed',
+					charge_id: 'ch_closed',
+					reason: 'fraudulent',
+					status: 'won',
+					date: '2026-06-18',
+					amount: 5000,
+					currency: 'usd',
+				},
 			],
 		} );
 
 		render( <WooPaymentsDisputesPage /> );
 
+		const challengeLink = await screen.findByRole( 'link', {
+			name: 'Challenge Fraudulent dispute dp_test',
+		} );
+		expect( challengeLink ).toHaveAttribute(
+			'href',
+			'http://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Fdisputes%2Fchallenge&id=dp_test'
+		);
 		expect(
-			await screen.findByRole( 'link', {
-				name: 'View transaction details for Fraudulent dispute dp_test',
+			screen.getByRole( 'link', {
+				name: 'View transaction details for Fraudulent dispute dp_closed',
 			} )
 		).toBeInTheDocument();
 		expect( screen.getByRole( 'status' ) ).toHaveTextContent(

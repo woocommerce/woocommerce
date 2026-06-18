@@ -10,12 +10,13 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { getWooPaymentsDisputes } from './data';
 import type { WooPaymentsDispute } from './types';
+import { isDisputeActionable } from './dispute-evidence-fields';
 import {
 	formatAmount,
 	formatDate,
 	formatLabel,
 	getChargeId,
-	getResourceId,
+	getDisputeId,
 	getErrorMessage,
 } from './utils';
 import { EmptyState, LiveStatusMessage, StatusMessage } from './table';
@@ -122,8 +123,42 @@ export const WooPaymentsDisputesPage = () => {
 					</thead>
 					<tbody>
 						{ disputes.map( ( dispute ) => {
-							const id = getResourceId( dispute );
+							const id = getDisputeId( dispute );
 							const chargeId = getChargeId( dispute );
+							const isActionable = isDisputeActionable( dispute );
+							const rowHref = isActionable
+								? getSettingsPaymentsProviderRouteUrl(
+										`/woopayments/disputes/challenge?id=${ encodeURIComponent(
+											id
+										) }`
+								  )
+								: getSettingsPaymentsProviderRouteUrl(
+										`/woopayments/transactions/details?id=${ encodeURIComponent(
+											chargeId || id
+										) }`
+								  );
+							const ariaLabel = isActionable
+								? sprintf(
+										/* translators: 1: dispute reason, 2: dispute ID. */
+										__(
+											'Challenge %1$s dispute %2$s',
+											'woocommerce'
+										),
+										formatLabel( dispute.reason ),
+										id
+								  )
+								: sprintf(
+										/* translators: 1: dispute reason, 2: dispute ID. */
+										__(
+											'View transaction details for %1$s dispute %2$s',
+											'woocommerce'
+										),
+										formatLabel( dispute.reason ),
+										id
+								  );
+							const action = isActionable
+								? 'challenge'
+								: 'view_transaction';
 
 							return (
 								<tr key={ id }>
@@ -134,25 +169,13 @@ export const WooPaymentsDisputesPage = () => {
 									</td>
 									<td>
 										<a
-											href={ getSettingsPaymentsProviderRouteUrl(
-												`/woopayments/transactions/details?id=${ encodeURIComponent(
-													chargeId || id
-												) }`
-											) }
-											aria-label={ sprintf(
-												/* translators: 1: dispute reason, 2: dispute ID. */
-												__(
-													'View transaction details for %1$s dispute %2$s',
-													'woocommerce'
-												),
-												formatLabel( dispute.reason ),
-												id
-											) }
+											href={ rowHref }
+											aria-label={ ariaLabel }
 											onClick={ () =>
 												recordEvent(
 													'wcpay_disputes_row_action_click',
 													{
-														action: 'view_transaction',
+														action,
 														dispute_id: id,
 													}
 												)

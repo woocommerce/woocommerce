@@ -52,6 +52,9 @@ export const getResourceId = ( item: {
 } ) =>
 	item.id || item.transaction_id || item.dispute_id || item.charge_id || '';
 
+export const getDisputeId = ( item: { id?: string; dispute_id?: string } ) =>
+	item.dispute_id || item.id || '';
+
 export const getChargeId = ( item: {
 	id?: string;
 	charge_id?: string;

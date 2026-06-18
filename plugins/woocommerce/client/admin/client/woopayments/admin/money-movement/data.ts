@@ -8,6 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import type {
 	WooPaymentsDispute,
+	WooPaymentsDisputeFile,
 	WooPaymentsListResponse,
 	WooPaymentsMoneyMovementQuery,
 	WooPaymentsTransaction,
@@ -120,6 +121,25 @@ export const updateWooPaymentsDispute = (
 		) }`,
 		method: 'POST',
 		data,
+	} );
+
+export const uploadWooPaymentsDisputeFile = (
+	body: FormData
+): Promise< WooPaymentsDisputeFile > =>
+	apiFetch< WooPaymentsDisputeFile >( {
+		path: `${ PAYMENTS_PATH }/file`,
+		method: 'POST',
+		body,
+	} );
+
+export const getWooPaymentsDisputeFileDetails = (
+	fileId: string
+): Promise< WooPaymentsDisputeFile > =>
+	apiFetch< WooPaymentsDisputeFile >( {
+		path: `${ PAYMENTS_PATH }/file/${ encodeURIComponent(
+			fileId
+		) }/details`,
+		method: 'GET',
 	} );
 
 export const closeWooPaymentsDispute = (

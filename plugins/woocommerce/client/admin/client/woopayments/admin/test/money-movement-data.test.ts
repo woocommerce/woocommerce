@@ -9,6 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
 import {
 	closeWooPaymentsDispute,
 	getWooPaymentsDispute,
+	getWooPaymentsDisputeFileDetails,
 	getWooPaymentsDisputes,
 	getWooPaymentsTransaction,
 	getWooPaymentsTransactionSearch,
@@ -16,6 +17,7 @@ import {
 	requestWooPaymentsDisputesExport,
 	requestWooPaymentsTransactionsExport,
 	updateWooPaymentsDispute,
+	uploadWooPaymentsDisputeFile,
 } from '../money-movement/data';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
@@ -101,6 +103,55 @@ describe( 'WooPayments money movement data helpers', () => {
 		expect( mockApiFetch ).toHaveBeenNthCalledWith( 5, {
 			path: '/wc/v3/payments/disputes/download?status_is=needs_response',
 			method: 'POST',
+		} );
+	} );
+
+	it( 'posts dispute evidence file uploads as form data', async () => {
+		const formData = new FormData();
+		formData.append(
+			'file',
+			new File( [ 'receipt' ], 'receipt.pdf', {
+				type: 'application/pdf',
+			} )
+		);
+		formData.append( 'purpose', 'dispute_evidence' );
+		mockApiFetch.mockResolvedValueOnce( {
+			id: 'file_test',
+			filename: 'receipt.pdf',
+			size: 7,
+		} );
+
+		const response = await uploadWooPaymentsDisputeFile( formData );
+
+		expect( response ).toMatchObject( {
+			id: 'file_test',
+			filename: 'receipt.pdf',
+			size: 7,
+		} );
+		expect( mockApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc/v3/payments/file',
+			method: 'POST',
+			body: formData,
+		} );
+	} );
+
+	it( 'fetches dispute evidence file details by file ID', async () => {
+		mockApiFetch.mockResolvedValueOnce( {
+			id: 'file_test',
+			filename: 'receipt.pdf',
+			size: 7,
+		} );
+
+		const response = await getWooPaymentsDisputeFileDetails( 'file_test' );
+
+		expect( response ).toMatchObject( {
+			id: 'file_test',
+			filename: 'receipt.pdf',
+			size: 7,
+		} );
+		expect( mockApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc/v3/payments/file/file_test/details',
+			method: 'GET',
 		} );
 	} );
 } );
