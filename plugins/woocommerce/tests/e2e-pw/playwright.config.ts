@@ -157,8 +157,6 @@ const serialRunSpecs = [
 	// Select-all → bulk "Change status to completed" flips every other worker's
 	// orders on the shared orders list.
 	'**/tests/order/order-bulk-edit.spec.ts',
-	// Creates a fixed `5off` coupon code that collides with concurrent creators.
-	'**/tests/order/order-coupon.spec.ts',
 	// Toggles the global `woocommerce_downloads_grant_access_after_payment` setting.
 	'**/tests/order/order-edit.spec.ts',
 	// Submits and deletes product reviews via the Review Order form while it runs;
@@ -171,11 +169,9 @@ const serialRunSpecs = [
 	'**/tests/product/product-import-csv.spec.ts',
 	// Mutate global WooCommerce settings (store address/currency/country, tax,
 	// feature flags) that other workers' cart/checkout/storefront specs depend on.
-	'**/tests/settings/colour-picker-swatch-height.spec.ts',
 	'**/tests/settings/settings-general.spec.ts',
 	'**/tests/settings/settings-tax.spec.ts',
 	'**/tests/settings/settings-ui-feature-flag.spec.ts',
-	'**/tests/settings/settings-woo-com.spec.ts',
 	// Mutate global shipping classes, zones and methods.
 	'**/tests/shipping/**/*.spec.ts',
 	// Toggles the global `woocommerce_cart_redirect_after_add` setting, which
