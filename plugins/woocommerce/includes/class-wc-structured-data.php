@@ -15,6 +15,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -247,7 +248,7 @@ class WC_Structured_Data {
 						'validThrough'  => $price_valid_until,
 					);
 					if ( wc_tax_enabled() ) {
-						$unit_price_spec['valueAddedTaxIncluded'] = 'incl' === get_option( 'woocommerce_tax_display_shop' );
+						$unit_price_spec['valueAddedTaxIncluded'] = TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_shop' );
 					}
 					$markup_offer = array(
 						'@type'              => 'Offer',
@@ -283,7 +284,7 @@ class WC_Structured_Data {
 							'validThrough'  => $sale_price_valid_until ?? $price_valid_until,
 						);
 						if ( wc_tax_enabled() ) {
-							$sale_unit_price_spec['valueAddedTaxIncluded'] = 'incl' === get_option( 'woocommerce_tax_display_shop' );
+							$sale_unit_price_spec['valueAddedTaxIncluded'] = TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_shop' );
 						}
 						$markup_offer['priceSpecification'] = array( $sale_unit_price_spec );
 					}
@@ -293,7 +294,7 @@ class WC_Structured_Data {
 				$child_ids        = $product->get_children();
 				_prime_post_caches( $child_ids );
 				$children       = array_filter( array_map( 'wc_get_product', $child_ids ), 'wc_products_array_filter_visible_grouped' );
-				$price_function = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
+				$price_function = TaxDisplayMode::INCLUSIVE === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
 
 				foreach ( $children as $child ) {
 					if ( '' !== $child->get_regular_price() ) {
@@ -321,7 +322,7 @@ class WC_Structured_Data {
 					'validThrough'  => $price_valid_until,
 				);
 				if ( wc_tax_enabled() ) {
-					$unit_price_specification['valueAddedTaxIncluded'] = 'incl' === $tax_display_mode;
+					$unit_price_specification['valueAddedTaxIncluded'] = TaxDisplayMode::INCLUSIVE === $tax_display_mode;
 				}
 				if ( $product->is_on_sale() && $min_price !== $min_sale_price ) {
 					// `priceType` should only be specified in prices which are not the current offer.
@@ -349,13 +350,13 @@ class WC_Structured_Data {
 						'validThrough'  => $sale_price_valid_until ?? $price_valid_until,
 					);
 					if ( wc_tax_enabled() ) {
-						$grouped_sale_spec['valueAddedTaxIncluded'] = 'incl' === $tax_display_mode;
+						$grouped_sale_spec['valueAddedTaxIncluded'] = TaxDisplayMode::INCLUSIVE === $tax_display_mode;
 					}
 					array_unshift( $markup_offer['priceSpecification'], $grouped_sale_spec );
 				}
 			} else {
 				$tax_display_mode         = get_option( 'woocommerce_tax_display_shop' );
-				$regular_price            = 'incl' === $tax_display_mode
+				$regular_price            = TaxDisplayMode::INCLUSIVE === $tax_display_mode
 					? wc_get_price_including_tax( $product, array( 'price' => $product->get_regular_price() ) )
 					: wc_get_price_excluding_tax( $product, array( 'price' => $product->get_regular_price() ) );
 				$unit_price_specification = array(
@@ -365,7 +366,7 @@ class WC_Structured_Data {
 					'validThrough'  => $price_valid_until,
 				);
 				if ( wc_tax_enabled() ) {
-					$unit_price_specification['valueAddedTaxIncluded'] = 'incl' === $tax_display_mode;
+					$unit_price_specification['valueAddedTaxIncluded'] = TaxDisplayMode::INCLUSIVE === $tax_display_mode;
 				}
 				if ( $product->is_on_sale() ) {
 					// `priceType` should only be specified in prices which are not the current offer.
@@ -380,7 +381,7 @@ class WC_Structured_Data {
 				);
 
 				if ( $product->is_on_sale() ) {
-					$sale_price = 'incl' === $tax_display_mode
+					$sale_price = TaxDisplayMode::INCLUSIVE === $tax_display_mode
 						? wc_get_price_including_tax( $product, array( 'price' => $product->get_sale_price() ) )
 						: wc_get_price_excluding_tax( $product, array( 'price' => $product->get_sale_price() ) );
 					if ( $product->get_date_on_sale_to() ) {
@@ -396,7 +397,7 @@ class WC_Structured_Data {
 						'validThrough'  => $sale_price_valid_until ?? $price_valid_until,
 					);
 					if ( wc_tax_enabled() ) {
-						$simple_sale_spec['valueAddedTaxIncluded'] = 'incl' === $tax_display_mode;
+						$simple_sale_spec['valueAddedTaxIncluded'] = TaxDisplayMode::INCLUSIVE === $tax_display_mode;
 					}
 					array_unshift( $markup_offer['priceSpecification'], $simple_sale_spec );
 				}
