@@ -1842,7 +1842,7 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertEquals( 'refund_total_exceeds_remaining', $result->get_error_code() );
+		$this->assertEquals( 'quantity_exceeds_refundable', $result->get_error_code() );
 
 		$order->delete( true );
 	}
@@ -1902,7 +1902,7 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertEquals( 'quantity_exceeds_refundable', $result->get_error_code() );
+		$this->assertEquals( 'refund_total_exceeds_remaining', $result->get_error_code() );
 
 		$product->delete( true );
 		$order->delete( true );

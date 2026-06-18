@@ -320,11 +320,12 @@ class DataUtils {
 						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 					);
 				}
-			} elseif ( isset( $line_item['quantity'] ) && $item->get_quantity() < $line_item['quantity'] ) {
-				// Shipping/fees: fall back to the simple original-quantity check
-				// (they don't track per-unit refund history in `qtys`).
-				/* translators: %s: item quantity */
-				return new WP_Error( 'invalid_line_item', sprintf( __( 'Line item quantity cannot be greater than the item quantity (%s).', 'woocommerce' ), $item->get_quantity() ) );
+			} elseif ( isset( $line_item['quantity'] ) && $line_item['quantity'] > 1 ) {
+				return new WP_Error(
+					'invalid_quantity',
+					__( 'Shipping and fee line items must be refunded with quantity of 1.', 'woocommerce' ),
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
 			}
 
 			// Validate refund total against the remaining refundable amount for this
