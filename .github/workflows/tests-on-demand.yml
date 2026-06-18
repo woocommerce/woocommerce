@@ -32,13 +32,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Validate input'
+        env:
+          INPUT_TRIGGER: ${{ inputs.trigger }}
+          INPUT_CUSTOM_TRIGGER: ${{ inputs.custom-trigger }}
+          INPUT_ARTIFACT_NAME: ${{ inputs.artifact-name }}
+          INPUT_RELEASE_TAG: ${{ inputs.release-tag }}
         run: |
-          if [ "${{ inputs.trigger }}" == "custom" ] && [ -z "${{ inputs.custom-trigger }}" ]; then
-            echo "Custom event name is required when event name choice `custom`."
+          if [ "$INPUT_TRIGGER" = "custom" ] && [ -z "$INPUT_CUSTOM_TRIGGER" ]; then
+            echo "Custom event name is required when event name choice \`custom\`."
             exit 1
           fi
 
-          if [ -n "${{ inputs.artifact-name }}" ] && [ -z "${{ inputs.release-tag }}" ]; then
+          if [ -n "$INPUT_ARTIFACT_NAME" ] && [ -z "$INPUT_RELEASE_TAG" ]; then
             echo "Input \`release-tag\` is required when \`artifact-name\` is provided."
             exit 1
           fi
