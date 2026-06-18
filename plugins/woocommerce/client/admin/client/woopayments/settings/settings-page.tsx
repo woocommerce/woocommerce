@@ -21,6 +21,10 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { getWooPaymentsSettingsBootstrap } from './bootstrap';
+import {
+	saveOption,
+	updateDismissedDuplicatePaymentMethodNotices,
+} from './data/actions';
 import { WooPaymentsPaymentMethodsList } from './payment-methods-list';
 import {
 	useAccountBusinessSupportEmail,
@@ -44,9 +48,12 @@ import {
 	useDepositScheduleWeeklyAnchor,
 	useDepositStatus,
 	useDevMode,
+	useDismissedDuplicatePaymentMethodNotices,
 	useEnabledPaymentMethodIds,
 	useExpressCheckoutInPaymentMethodsEnabledSettings,
+	useGetAccountFees,
 	useGetAvailablePaymentMethodIds,
+	useGetDuplicatedPaymentMethodIds,
 	useGetPaymentMethodStatuses,
 	useGetSavingError,
 	useGetSettings,
@@ -103,6 +110,8 @@ type PaymentMethodStatus = {
 	status?: string;
 	requirements?: unknown[];
 };
+type AccountFees = Record< string, Record< string, unknown > | undefined >;
+type DuplicatePaymentMethodNotices = Record< string, string[] | undefined >;
 type PaymentRequestButtonType = 'default' | 'buy' | 'donate' | 'book';
 type PaymentRequestButtonSize = 'small' | 'medium' | 'large';
 type PaymentRequestButtonTheme = 'dark' | 'light' | 'light-outline';
@@ -140,6 +149,16 @@ const asFraudProtectionLevel = ( value: string ): FraudProtectionLevel =>
 
 const asSettingsRecord = ( value: unknown ): SettingsRecord =>
 	value && typeof value === 'object' ? ( value as SettingsRecord ) : {};
+
+const asAccountFees = ( value: unknown ): AccountFees =>
+	value && typeof value === 'object' ? ( value as AccountFees ) : {};
+
+const asDuplicatePaymentMethodNotices = (
+	value: unknown
+): DuplicatePaymentMethodNotices =>
+	value && typeof value === 'object'
+		? ( value as DuplicatePaymentMethodNotices )
+		: {};
 
 const getLiteralValue = < T extends string >(
 	value: string,
@@ -321,6 +340,17 @@ const PaymentMethodsSettingsSection = () => {
 			! STANDARD_PAYMENT_METHOD_EXCLUDED_IDS.includes( methodId )
 	);
 	const statuses = asSettingsRecord( useGetPaymentMethodStatuses() );
+	const accountFees = asAccountFees( useGetAccountFees() );
+	const duplicatedPaymentMethodIds = asDuplicatePaymentMethodNotices(
+		useGetDuplicatedPaymentMethodIds()
+	);
+	const [
+		dismissedDuplicatePaymentMethodNotices,
+		setDismissedDuplicatePaymentMethodNotices,
+	] = useDismissedDuplicatePaymentMethodNotices() as [
+		DuplicatePaymentMethodNotices,
+		typeof updateDismissedDuplicatePaymentMethodNotices
+	];
 	const standardPaymentMethodIds = availablePaymentMethodIds.filter(
 		( methodId ) => ! BNPL_METHOD_IDS.includes( methodId )
 	);
@@ -336,6 +366,15 @@ const PaymentMethodsSettingsSection = () => {
 	];
 	const [ isManualCaptureEnabled ] = useManualCapture() as BooleanSetting;
 	const accountCountry = asString( settings.account_country );
+	const onDismissDuplicateNotice = (
+		notices: Record< string, string[] >
+	) => {
+		setDismissedDuplicatePaymentMethodNotices( notices );
+		saveOption(
+			'wcpay_duplicate_payment_method_notices_dismissed',
+			notices
+		);
+	};
 
 	return (
 		<SettingsSection
@@ -372,10 +411,16 @@ const PaymentMethodsSettingsSection = () => {
 							PaymentMethodStatus | undefined
 						>
 					}
+					accountFees={ accountFees }
+					duplicatedPaymentMethodIds={ duplicatedPaymentMethodIds }
+					dismissedDuplicatePaymentMethodNotices={
+						dismissedDuplicatePaymentMethodNotices
+					}
 					isManualCaptureEnabled={ Boolean( isManualCaptureEnabled ) }
 					accountCountry={ accountCountry }
 					onEnable={ addPaymentMethod }
 					onDisable={ removePaymentMethod }
+					onDismissDuplicateNotice={ onDismissDuplicateNotice }
 				/>
 			</FieldGroup>
 		</SettingsSection>
@@ -388,6 +433,17 @@ const BuyNowPayLaterSettingsSection = () => {
 		useGetAvailablePaymentMethodIds()
 	);
 	const statuses = asSettingsRecord( useGetPaymentMethodStatuses() );
+	const accountFees = asAccountFees( useGetAccountFees() );
+	const duplicatedPaymentMethodIds = asDuplicatePaymentMethodNotices(
+		useGetDuplicatedPaymentMethodIds()
+	);
+	const [
+		dismissedDuplicatePaymentMethodNotices,
+		setDismissedDuplicatePaymentMethodNotices,
+	] = useDismissedDuplicatePaymentMethodNotices() as [
+		DuplicatePaymentMethodNotices,
+		typeof updateDismissedDuplicatePaymentMethodNotices
+	];
 	const availableBuyNowPayLaterMethodIds = availablePaymentMethodIds.filter(
 		( methodId ) => BNPL_METHOD_IDS.includes( methodId )
 	);
@@ -403,6 +459,15 @@ const BuyNowPayLaterSettingsSection = () => {
 	];
 	const [ isManualCaptureEnabled ] = useManualCapture() as BooleanSetting;
 	const accountCountry = asString( settings.account_country );
+	const onDismissDuplicateNotice = (
+		notices: Record< string, string[] >
+	) => {
+		setDismissedDuplicatePaymentMethodNotices( notices );
+		saveOption(
+			'wcpay_duplicate_payment_method_notices_dismissed',
+			notices
+		);
+	};
 
 	return availableBuyNowPayLaterMethodIds.length === 0 ? null : (
 		<SettingsSection
@@ -427,10 +492,16 @@ const BuyNowPayLaterSettingsSection = () => {
 							PaymentMethodStatus | undefined
 						>
 					}
+					accountFees={ accountFees }
+					duplicatedPaymentMethodIds={ duplicatedPaymentMethodIds }
+					dismissedDuplicatePaymentMethodNotices={
+						dismissedDuplicatePaymentMethodNotices
+					}
 					isManualCaptureEnabled={ Boolean( isManualCaptureEnabled ) }
 					accountCountry={ accountCountry }
 					onEnable={ addPaymentMethod }
 					onDisable={ removePaymentMethod }
+					onDismissDuplicateNotice={ onDismissDuplicateNotice }
 				/>
 			</FieldGroup>
 		</SettingsSection>
@@ -525,7 +596,7 @@ const ExpressCheckoutSettingsSection = () => {
 		];
 	const buttonType = getLiteralValue< PaymentRequestButtonType >(
 		paymentRequestButtonType,
-		[ 'default', 'buy', 'donate' ],
+		[ 'default', 'buy', 'donate', 'book' ],
 		'default'
 	);
 	const buttonSize = getLiteralValue< PaymentRequestButtonSize >(

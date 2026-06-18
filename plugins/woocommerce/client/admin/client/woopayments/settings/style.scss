@@ -298,6 +298,75 @@
 		line-height: 18px;
 	}
 
+	&__fee-wrapper {
+		position: relative;
+		display: inline-flex;
+	}
+
+	&__fee-pill,
+	&__discount-badge {
+		display: inline-flex;
+		align-items: center;
+		min-height: 20px;
+		padding: 1px 8px;
+		border-radius: 2px;
+		font-size: 12px;
+		line-height: 18px;
+	}
+
+	&__fee-pill {
+		border: 1px solid $gray-300;
+		appearance: none;
+		background: $white;
+		color: $gray-900;
+		cursor: help;
+		font-family: inherit;
+	}
+
+	&__discount-badge {
+		background: #e8f7f0;
+		color: #005c3a;
+		font-weight: 500;
+	}
+
+	&__fees-tooltip {
+		position: absolute;
+		z-index: 20;
+		left: 0;
+		top: calc(100% + 6px);
+		display: grid;
+		gap: 8px;
+		min-width: 260px;
+		max-width: 320px;
+		padding: 12px;
+		border-radius: 2px;
+		background: $gray-900;
+		color: $white;
+		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+		font-size: 12px;
+		line-height: 18px;
+		opacity: 0;
+		pointer-events: auto;
+		transform: translateY(-4px);
+		transition: opacity 120ms ease, transform 120ms ease;
+
+		> span {
+			display: flex;
+			justify-content: space-between;
+			gap: 16px;
+		}
+
+		strong {
+			color: $white;
+		}
+	}
+
+	&__fee-wrapper:hover &__fees-tooltip,
+	&__fee-wrapper:focus-within &__fees-tooltip {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
 	&__chip {
 		display: inline-flex;
 		align-items: center;
@@ -331,6 +400,14 @@
 
 	&__notice.components-notice {
 		margin: 12px 0 0;
+	}
+
+	&__duplicate-notice.components-notice {
+		margin: 12px 0 0 48px;
+
+		@include breakpoint("<782px") {
+			margin-left: 0;
+		}
 	}
 }
 

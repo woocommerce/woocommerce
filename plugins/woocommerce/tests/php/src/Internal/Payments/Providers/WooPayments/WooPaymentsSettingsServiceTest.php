@@ -57,6 +57,11 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'wcpay_dev_mode' );
 		remove_all_filters( 'wcpay_test_mode' );
 		remove_all_filters( 'wcpay_test_mode_onboarding' );
+		remove_all_actions( 'wc_payment_gateways_initialized' );
+		if ( function_exists( 'WC' ) && WC()->payment_gateways() ) {
+			WC()->payment_gateways()->payment_gateways = array();
+			WC()->payment_gateways()->init();
+		}
 
 		parent::tearDown();
 	}
@@ -129,10 +134,41 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 						'link_payments' => array( 'currently_due' => array( 'tos_acceptance.date' ) ),
 					),
 					'fees'                    => array(
-						'card'   => array(),
-						'link'   => array(),
-						'affirm' => array(),
-						'ideal'  => array(),
+						'card'           => array(
+							'base'       => array(
+								'percentage_rate' => 0.029,
+								'fixed_rate'      => 30,
+								'currency'        => 'USD',
+							),
+							'additional' => array(
+								'percentage_rate' => 0.01,
+								'fixed_rate'      => 0,
+								'currency'        => 'USD',
+							),
+							'fx'         => array(
+								'percentage_rate' => 0.01,
+								'fixed_rate'      => 0,
+								'currency'        => 'USD',
+							),
+							'discount'   => array(
+								array(
+									'percentage_rate' => 0.0261,
+									'fixed_rate'      => 27,
+									'currency'        => 'USD',
+									'discount'        => 0.1,
+								),
+							),
+						),
+						'link'           => array(),
+						'affirm'         => array(),
+						'ideal'          => array(),
+						'invalid_method' => array(
+							'base' => array(
+								'percentage_rate' => 0.099,
+								'fixed_rate'      => 99,
+								'currency'        => 'USD',
+							),
+						),
 					),
 					'store_currencies'        => array(
 						'default'   => 'usd',
@@ -141,6 +177,12 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 				),
 				'fetched' => time(),
 				'errored' => false,
+			)
+		);
+		update_option(
+			'wcpay_duplicate_payment_method_notices_dismissed',
+			array(
+				'card' => array( 'legacy-gateway' ),
 			)
 		);
 
@@ -170,10 +212,129 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'active', $settings['payment_method_statuses']['card_payments']['status'] );
 		$this->assertSame( 'unrequested', $settings['payment_method_statuses']['link_payments']['status'] );
 		$this->assertSame( array( 'currently_due' => array( 'tos_acceptance.date' ) ), $settings['payment_method_statuses']['link_payments']['requirements'] );
+		$this->assertSame( array( 'legacy-gateway' ), $settings['dismissed_duplicate_payment_method_notices']['card'] );
+		$this->assertSame( array(), $settings['pm_promotions'] );
+		$this->assertSame(
+			array(
+				'base'       => array(
+					'percentage_rate' => 0.029,
+					'fixed_rate'      => 30,
+					'currency'        => 'USD',
+				),
+				'additional' => array(
+					'percentage_rate' => 0.01,
+					'fixed_rate'      => 0,
+					'currency'        => 'USD',
+				),
+				'fx'         => array(
+					'percentage_rate' => 0.01,
+					'fixed_rate'      => 0,
+					'currency'        => 'USD',
+				),
+				'discount'   => array(
+					array(
+						'percentage_rate' => 0.0261,
+						'fixed_rate'      => 27,
+						'currency'        => 'USD',
+						'discount'        => 0.1,
+					),
+				),
+			),
+			$settings['account_fees']['card']
+		);
+		$this->assertArrayNotHasKey( 'invalid_method', $settings['account_fees'] );
 		$this->assertArrayNotHasKey( 'is_stripe_billing_enabled', $settings );
 		$this->assertArrayNotHasKey( 'is_migrating_stripe_billing', $settings );
 		$this->assertArrayNotHasKey( 'stripe_billing_subscription_count', $settings );
 		$this->assertArrayNotHasKey( 'stripe_billing_migrated_count', $settings );
+	}
+
+	/**
+	 * @testdox Should expose duplicate payment method clusters from enabled WooPayments and third-party gateways.
+	 */
+	public function test_get_settings_exposes_duplicate_payment_method_clusters(): void {
+		$this->mock_payment_gateways(
+			array(
+				$this->create_gateway( 'woocommerce_payments', 'yes' ),
+				$this->create_gateway( 'legacy_card_gateway', 'yes' ),
+				$this->create_gateway( 'disabled_card_gateway', 'no' ),
+			)
+		);
+
+		$settings = $this->sut->get_settings();
+
+		$this->assertSame(
+			array( 'woocommerce_payments', 'legacy_card_gateway' ),
+			$settings['duplicated_payment_method_ids']['card']
+		);
+	}
+
+	/**
+	 * @testdox Should classify split WooPayments duplicate gateway IDs by payment method suffix.
+	 */
+	public function test_get_settings_classifies_split_woopayments_duplicate_gateways_by_suffix(): void {
+		$this->mock_payment_gateways(
+			array(
+				$this->create_gateway( 'woocommerce_payments', 'yes' ),
+				$this->create_gateway( 'woocommerce_payments_klarna', 'yes' ),
+				$this->create_gateway( 'legacy_klarna_gateway', 'yes' ),
+			)
+		);
+
+		$settings = $this->sut->get_settings();
+
+		$this->assertSame(
+			array( 'woocommerce_payments_klarna', 'legacy_klarna_gateway' ),
+			$settings['duplicated_payment_method_ids']['klarna']
+		);
+		$this->assertArrayNotHasKey( 'card', $settings['duplicated_payment_method_ids'] );
+	}
+
+	/**
+	 * @testdox Should omit duplicate payment method clusters without an enabled WooPayments gateway.
+	 */
+	public function test_get_settings_omits_duplicate_clusters_without_woopayments_gateway(): void {
+		$this->mock_payment_gateways(
+			array(
+				$this->create_gateway( 'legacy_card_gateway', 'yes' ),
+				$this->create_gateway( 'another_card_gateway', 'yes' ),
+			)
+		);
+
+		$settings = $this->sut->get_settings();
+
+		$this->assertSame( array(), $settings['duplicated_payment_method_ids'] );
+	}
+
+	/**
+	 * @testdox Should fail closed when duplicate payment method gateway inspection fails.
+	 */
+	public function test_get_settings_fails_closed_when_duplicate_gateway_inspection_fails(): void {
+		$this->mock_payment_gateways(
+			array(
+				new class() {
+					/**
+					 * Tell whether a property exists.
+					 *
+					 * @param string $name Property name.
+					 * @return bool
+					 *
+					 * @throws \RuntimeException When gateway inspection is not available.
+					 */
+					public function __isset( string $name ): bool {
+						if ( 'enabled' === $name ) {
+							throw new \RuntimeException( 'Gateway inspection unavailable' );
+						}
+
+						return false;
+					}
+				},
+			)
+		);
+
+		$settings = $this->sut->get_settings();
+
+		$this->assertSame( array(), $settings['duplicated_payment_method_ids'] );
 	}
 
 	/**
@@ -240,6 +401,12 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 				),
 				'fetched' => time(),
 				'errored' => false,
+			)
+		);
+		update_option(
+			'wcpay_duplicate_payment_method_notices_dismissed',
+			array(
+				'card' => array( 'legacy-gateway' ),
 			)
 		);
 
@@ -742,6 +909,74 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Mock WooCommerce payment gateways.
+	 *
+	 * @param array<int,object> $gateways Gateways.
+	 */
+	private function mock_payment_gateways( array $gateways ): void {
+		add_action(
+			'wc_payment_gateways_initialized',
+			static function ( \WC_Payment_Gateways $wc_payment_gateways ) use ( $gateways ): void {
+				$wc_payment_gateways->payment_gateways = array();
+				$order                                 = 1000;
+				foreach ( $gateways as $gateway ) {
+					$wc_payment_gateways->payment_gateways[ $order++ ] = $gateway;
+				}
+			},
+			100
+		);
+
+		WC()->payment_gateways()->payment_gateways = array();
+		WC()->payment_gateways()->init();
+	}
+
+	/**
+	 * Create a lightweight gateway fixture.
+	 *
+	 * @param string $id      Gateway ID.
+	 * @param string $enabled Gateway enabled state.
+	 * @return object
+	 */
+	private function create_gateway( string $id, string $enabled ): object {
+		return new class( $id, $enabled ) {
+			/**
+			 * Gateway ID.
+			 *
+			 * @var string
+			 */
+			public string $id;
+
+			/**
+			 * Gateway enabled state.
+			 *
+			 * @var string
+			 */
+			public string $enabled;
+
+			/**
+			 * Initialize gateway fixture.
+			 *
+			 * @param string $id      Gateway ID.
+			 * @param string $enabled Gateway enabled state.
+			 */
+			public function __construct( string $id, string $enabled ) {
+				$this->id      = $id;
+				$this->enabled = $enabled;
+			}
+
+			/**
+			 * Get a gateway option.
+			 *
+			 * @param string $key Option key.
+			 * @return string
+			 */
+			public function get_option( string $key ): string {
+				return 'no';
+			}
+		};
+	}
+
+	/**
 	 * Get the settings keys required by the hoisted settings store.
 	 *
 	 * @return string[]
@@ -752,6 +987,9 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 			'available_payment_method_ids',
 			'payment_method_statuses',
 			'duplicated_payment_method_ids',
+			'dismissed_duplicate_payment_method_notices',
+			'account_fees',
+			'pm_promotions',
 			'is_wcpay_enabled',
 			'is_manual_capture_enabled',
 			'is_test_mode_enabled',

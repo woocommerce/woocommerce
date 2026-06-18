@@ -86,6 +86,14 @@ export function updateEnabledPaymentMethodIds( methodIds: string[] ) {
 	} );
 }
 
+export function updateDismissedDuplicatePaymentMethodNotices(
+	notices: Record< string, string[] >
+) {
+	return updateSettingsValues( {
+		dismissed_duplicate_payment_method_notices: { ...notices },
+	} );
+}
+
 export function updateIsSavingSettings( isSaving: boolean, error?: unknown ) {
 	return {
 		type: ACTION_TYPES.SET_IS_SAVING_SETTINGS,

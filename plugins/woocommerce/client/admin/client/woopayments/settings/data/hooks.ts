@@ -208,6 +208,19 @@ export const useGetDuplicatedPaymentMethodIds = () =>
 		select( STORE_NAME ).getDuplicatedPaymentMethodIds()
 	);
 
+export const useDismissedDuplicatePaymentMethodNotices = () => {
+	const { updateDismissedDuplicatePaymentMethodNotices } =
+		useDispatch( STORE_NAME );
+	const dismissedNotices = useSelect( ( select ) =>
+		select( STORE_NAME ).getDismissedDuplicatePaymentMethodNotices()
+	);
+
+	return [ dismissedNotices, updateDismissedDuplicatePaymentMethodNotices ];
+};
+
+export const useGetAccountFees = () =>
+	useSelect( ( select ) => select( STORE_NAME ).getAccountFees() );
+
 export const useGetSettings = () =>
 	useSelect( ( select ) => select( STORE_NAME ).getSettings() );
 

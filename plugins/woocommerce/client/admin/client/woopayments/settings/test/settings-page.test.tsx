@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
+import apiFetch from '@wordpress/api-fetch';
 import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -9,6 +11,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { WooPaymentsSettingsPage } from '../settings-page';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+
+const mockApiFetch = apiFetch as jest.MockedFunction< typeof apiFetch >;
 
 const mockSaveSettings = jest.fn();
 const mockUseSettings = jest.fn();
@@ -55,6 +59,8 @@ const mockUseDepositRestrictions = jest.fn();
 const mockUseGetAvailablePaymentMethodIds = jest.fn();
 const mockUseGetPaymentMethodStatuses = jest.fn();
 const mockUseGetDuplicatedPaymentMethodIds = jest.fn();
+const mockUseGetAccountFees = jest.fn();
+const mockUseDismissedDuplicatePaymentMethodNotices = jest.fn();
 const mockUsePaymentRequestLocations = jest.fn();
 const mockUseWooPayLocations = jest.fn();
 const mockUseAmazonPayLocations = jest.fn();
@@ -118,6 +124,9 @@ jest.mock( '../data/hooks', () => ( {
 	useGetPaymentMethodStatuses: () => mockUseGetPaymentMethodStatuses(),
 	useGetDuplicatedPaymentMethodIds: () =>
 		mockUseGetDuplicatedPaymentMethodIds(),
+	useGetAccountFees: () => mockUseGetAccountFees(),
+	useDismissedDuplicatePaymentMethodNotices: () =>
+		mockUseDismissedDuplicatePaymentMethodNotices(),
 	usePaymentRequestLocations: () => mockUsePaymentRequestLocations(),
 	useWooPayLocations: () => mockUseWooPayLocations(),
 	useAmazonPayLocations: () => mockUseAmazonPayLocations(),
@@ -229,6 +238,11 @@ const setHookDefaults = () => {
 		amazon_pay_payments: { status: 'active' },
 	} );
 	mockUseGetDuplicatedPaymentMethodIds.mockReturnValue( [] );
+	mockUseGetAccountFees.mockReturnValue( {} );
+	mockUseDismissedDuplicatePaymentMethodNotices.mockReturnValue( [
+		{},
+		noop,
+	] );
 	mockUsePaymentRequestLocations.mockReturnValue( [
 		[ 'product', 'cart', 'checkout' ],
 		noop,
@@ -247,6 +261,7 @@ const setHookDefaults = () => {
 describe( 'WooPaymentsSettingsPage', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		mockApiFetch.mockResolvedValue( {} );
 		setHookDefaults();
 	} );
 
@@ -342,6 +357,208 @@ describe( 'WooPaymentsSettingsPage', () => {
 		expect(
 			screen.getByRole( 'img', { name: 'Cartes Bancaires' } )
 		).toBeInTheDocument();
+	} );
+
+	it( 'renders reference fee and discount details on payment method rows', async () => {
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'alipay',
+			'affirm',
+			'amazon_pay',
+			'apple_pay',
+			'google_pay',
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active' },
+			alipay_payments: { status: 'active' },
+			affirm_payments: { status: 'active' },
+			amazon_pay_payments: { status: 'active' },
+		} );
+		mockUseGetAccountFees.mockReturnValue( {
+			card: {
+				base: {
+					percentage_rate: 0.029,
+					fixed_rate: 30,
+					currency: 'USD',
+				},
+				additional: {
+					percentage_rate: 0.01,
+					fixed_rate: 0,
+					currency: 'USD',
+				},
+				fx: {
+					percentage_rate: 0.01,
+					fixed_rate: 0,
+					currency: 'USD',
+				},
+				discount: [
+					{
+						currency: 'USD',
+						discount: 0.1,
+						end_time: '2026-02-27 04:20:49',
+						volume_allowance: 100000,
+						volume_currency: 'USD',
+					},
+				],
+			},
+			alipay: {
+				base: {
+					percentage_rate: 0,
+					fixed_rate: 300,
+					currency: 'JPY',
+				},
+				additional: {
+					percentage_rate: 0,
+					fixed_rate: 0,
+					currency: 'JPY',
+				},
+				fx: {
+					percentage_rate: 0,
+					fixed_rate: 0,
+					currency: 'JPY',
+				},
+				discount: [],
+			},
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const cardFeeButton = screen.getByRole( 'button', {
+			name: 'From 2.61% + $0.27 fee details',
+		} );
+		const zeroDecimalFeeButton = screen.getByRole( 'button', {
+			name: 'From 0% + ¥300 fee details',
+		} );
+		const discountBadge = screen.getByText( /10% off fees through/ );
+
+		expect( cardFeeButton ).toBeInTheDocument();
+		expect( zeroDecimalFeeButton ).toBeInTheDocument();
+		expect( discountBadge ).not.toHaveAttribute( 'title' );
+		expect( discountBadge ).toHaveAccessibleDescription(
+			expect.stringContaining(
+				'first $1,000.00 of total payment volume or through'
+			)
+		);
+
+		await userEvent.click( cardFeeButton );
+		expect(
+			screen.getAllByText( 'Base fee' ).length
+		).toBeGreaterThanOrEqual( 1 );
+		expect( screen.getByText( '2.61% + $0.27' ) ).toBeInTheDocument();
+		expect( screen.getByText( '0.9%' ) ).toBeInTheDocument();
+		expect( screen.getAllByText( '1%' ).length ).toBeGreaterThanOrEqual(
+			1
+		);
+		expect(
+			screen.getAllByText( 'Total per transaction' ).length
+		).toBeGreaterThanOrEqual( 1 );
+		expect( screen.getByText( '4.51% + $0.27' ) ).toBeInTheDocument();
+
+		await userEvent.keyboard( '{Escape}' );
+		expect( cardFeeButton ).toHaveAttribute( 'aria-expanded', 'false' );
+	} );
+
+	it( 'renders and dismisses duplicate payment method notices', async () => {
+		const updateDismissedDuplicateNotices = jest.fn();
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'alipay',
+			'affirm',
+			'amazon_pay',
+			'apple_pay',
+			'google_pay',
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active' },
+			alipay_payments: { status: 'active' },
+			affirm_payments: { status: 'active' },
+			amazon_pay_payments: { status: 'active' },
+		} );
+		mockUseGetDuplicatedPaymentMethodIds.mockReturnValue( {
+			alipay: [ 'woocommerce_payments_alipay', 'legacy_alipay_gateway' ],
+		} );
+		mockUseDismissedDuplicatePaymentMethodNotices.mockReturnValue( [
+			{},
+			updateDismissedDuplicateNotices,
+		] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getAllByText( ( _content, element ) =>
+				Boolean(
+					element?.textContent?.includes(
+						'This payment method is enabled by other extensions.'
+					)
+				)
+			).length
+		).toBeGreaterThan( 0 );
+		expect(
+			screen.getByRole( 'link', { name: 'Review extensions' } )
+		).toHaveAttribute( 'href', 'admin.php?page=wc-settings&tab=checkout' );
+
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Close' } )
+		);
+
+		expect( updateDismissedDuplicateNotices ).toHaveBeenCalledWith( {
+			alipay: [ 'woocommerce_payments_alipay', 'legacy_alipay_gateway' ],
+		} );
+		expect( mockApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc/v3/payments/settings/wcpay_duplicate_payment_method_notices_dismissed',
+			method: 'post',
+			data: {
+				value: {
+					alipay: [
+						'woocommerce_payments_alipay',
+						'legacy_alipay_gateway',
+					],
+				},
+			},
+		} );
+		expect(
+			screen.getByRole( 'checkbox', { name: 'Alipay' } )
+		).toHaveFocus();
+	} );
+
+	it( 'does not stack duplicate payment method notices with status notices', () => {
+		mockUseGetDuplicatedPaymentMethodIds.mockReturnValue( {
+			affirm: [ 'woocommerce_payments_affirm', 'legacy_affirm_gateway' ],
+		} );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active' },
+			affirm_payments: {
+				status: 'inactive',
+				requirements: [ 'business_profile.url' ],
+			},
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByText(
+				'More information is needed to finish setting up this payment method.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText( ( _content, element ) =>
+				Boolean(
+					element?.textContent?.includes(
+						'This payment method is enabled by other extensions.'
+					)
+				)
+			)
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'preserves the Book express checkout button type option', () => {
+		mockUsePaymentRequestButtonType.mockReturnValue( [ 'book', noop ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByRole( 'combobox', { name: 'Button type' } )
+		).toHaveValue( 'book' );
 	} );
 
 	it( 'shows the manual-capture conflict banner and disables incompatible methods', () => {

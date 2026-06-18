@@ -28,6 +28,19 @@ export const getDuplicatedPaymentMethodIds = ( state: SettingsRootState ) => {
 	return getSettings( state ).duplicated_payment_method_ids || EMPTY_OBJ;
 };
 
+export const getDismissedDuplicatePaymentMethodNotices = (
+	state: SettingsRootState
+) => {
+	return (
+		getSettings( state ).dismissed_duplicate_payment_method_notices ||
+		EMPTY_OBJ
+	);
+};
+
+export const getAccountFees = ( state: SettingsRootState ) => {
+	return getSettings( state ).account_fees || EMPTY_OBJ;
+};
+
 export const getIsWCPayEnabled = ( state: SettingsRootState ) => {
 	return getSettings( state ).is_wcpay_enabled || false;
 };

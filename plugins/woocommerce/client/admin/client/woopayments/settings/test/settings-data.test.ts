@@ -170,6 +170,62 @@ describe( 'WooPayments settings data store', () => {
 		} );
 	} );
 
+	it( 'reads account fees and dismissed duplicate notices from settings state', async () => {
+		const selectors = await import( '../data/selectors' );
+		const state = {
+			settings: {
+				data: {
+					account_fees: {
+						card: {
+							base: {
+								percentage_rate: 0.029,
+								fixed_rate: 30,
+								currency: 'USD',
+							},
+						},
+					},
+					dismissed_duplicate_payment_method_notices: {
+						card: [ 'legacy_card_gateway' ],
+					},
+				},
+			},
+		};
+
+		expect( selectors.getAccountFees( state ) ).toEqual( {
+			card: {
+				base: {
+					percentage_rate: 0.029,
+					fixed_rate: 30,
+					currency: 'USD',
+				},
+			},
+		} );
+		expect(
+			selectors.getDismissedDuplicatePaymentMethodNotices( state )
+		).toEqual( {
+			card: [ 'legacy_card_gateway' ],
+		} );
+	} );
+
+	it( 'updates dismissed duplicate notices in the settings store', async () => {
+		const { updateDismissedDuplicatePaymentMethodNotices } = await import(
+			'../data/actions'
+		);
+
+		expect(
+			updateDismissedDuplicatePaymentMethodNotices( {
+				card: [ 'woocommerce_payments', 'legacy_card_gateway' ],
+			} )
+		).toEqual( {
+			type: 'SET_SETTINGS_VALUES',
+			payload: {
+				dismissed_duplicate_payment_method_notices: {
+					card: [ 'woocommerce_payments', 'legacy_card_gateway' ],
+				},
+			},
+		} );
+	} );
+
 	it( 'does not export Stripe Billing migration actions, selectors, or hooks', async () => {
 		const [ actions, selectors, hooks ] = await Promise.all( [
 			import( '../data/actions' ),
