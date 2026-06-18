@@ -58,11 +58,17 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 	<?php
 	if ( $password_generated && $set_password_url ) {
-		$button_url   = $set_password_url;
-		$button_label = __( 'Confirm email address and set password', 'woocommerce' );
+		$button_url    = $set_password_url;
+		$button_label  = __( 'Set your new password', 'woocommerce' );
+		$link_message  = esc_html__( "Once you've clicked the link and set your new password, we'll link any past orders to your account.", 'woocommerce' );
 	} else {
 		$button_url   = $verify_url ?? wc_get_page_permalink( 'myaccount' );
 		$button_label = __( 'Confirm email address', 'woocommerce' );
+		$link_message = sprintf(
+			/* translators: %s: the customer's email address. */
+			esc_html__( "Once you've confirmed that %s is your email address, we'll link any past orders to your account.", 'woocommerce' ),
+			'<strong>' . esc_html( $user_email ) . '</strong>'
+		);
 	}
 	wc_get_template(
 		'emails/email-button.php',
@@ -73,17 +79,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 	);
 	?>
 
-	<p>
-	<?php
-	echo wp_kses_post(
-		sprintf(
-		/* translators: %s: the customer's email address. */
-			__( "Once you've confirmed that %s is your email address, we'll link any past orders to your account.", 'woocommerce' ),
-			'<strong>' . esc_html( $user_email ) . '</strong>'
-		)
-	);
-	?>
-	</p>
+	<p><?php echo wp_kses_post( $link_message ); ?></p>
 
 	<div class="hr hr-bottom"></div>
 

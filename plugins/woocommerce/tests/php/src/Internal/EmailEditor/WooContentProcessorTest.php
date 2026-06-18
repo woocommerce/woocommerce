@@ -88,7 +88,7 @@ class WooContentProcessorTest extends \WC_Unit_Test_Case {
 		$content = $this->woo_content_processor->get_woo_content( $wc_email );
 
 		$this->assertNotEmpty( $content );
-		$this->assertStringContainsString( 'Confirm email address and set password', $content );
+		$this->assertStringContainsString( 'Set your new password', $content );
 		$this->assertStringNotContainsString( 'Test email header', $content );
 		$this->assertStringNotContainsString( 'Test email footer', $content );
 		$this->assertStringNotContainsString( '<body>', $content );

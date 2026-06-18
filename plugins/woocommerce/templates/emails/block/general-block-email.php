@@ -75,16 +75,17 @@ endif;
 if ( 'customer_new_account' === $email->id ) :
 	if ( $password_generated && $set_password_url ) :
 		?>
-		<p><a href="<?php echo esc_url( $set_password_url ); ?>"><?php esc_html_e( 'Confirm email address and set password', 'woocommerce' ); ?></a></p>
+		<p><a href="<?php echo esc_url( $set_password_url ); ?>"><?php esc_html_e( 'Set your new password', 'woocommerce' ); ?></a></p>
+		<p><?php esc_html_e( "Once you've clicked the link and set your new password, we'll link any past orders to your account.", 'woocommerce' ); ?></p>
 		<?php
 	else :
 		?>
 		<p><a href="<?php echo esc_url( $verify_url ?? wc_get_page_permalink( 'myaccount' ) ); ?>"><?php esc_html_e( 'Confirm email address', 'woocommerce' ); ?></a></p>
+		<?php /* translators: %s: the customer's email address. */ ?>
+		<p><?php echo wp_kses_post( sprintf( __( "Once you've confirmed that %s is your email address, we'll link any past orders to your account.", 'woocommerce' ), '<strong>' . esc_html( $user_email ) . '</strong>' ) ); ?></p>
 		<?php
 	endif;
 	?>
-	<?php /* translators: %s: the customer's email address. */ ?>
-	<p><?php echo wp_kses_post( sprintf( __( "Once you've confirmed that %s is your email address, we'll link any past orders to your account.", 'woocommerce' ), '<strong>' . esc_html( $user_email ) . '</strong>' ) ); ?></p>
 	<?php
 endif;
 
