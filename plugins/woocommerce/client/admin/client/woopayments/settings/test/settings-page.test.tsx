@@ -298,7 +298,7 @@ describe( 'WooPaymentsSettingsPage', () => {
 
 		expect(
 			screen.getByRole( 'checkbox', {
-				name: /Credit card \/ debit card/,
+				name: /Credit \/ Debit Cards/,
 			} )
 		).toBeInTheDocument();
 		expect(
@@ -315,6 +315,164 @@ describe( 'WooPaymentsSettingsPage', () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole( 'checkbox', { name: 'Enable Link by Stripe' } )
+		).toBeDisabled();
+	} );
+
+	it( 'renders payment methods with the reference row content', () => {
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByText(
+				'Let your customers pay with major credit and debit cards without leaving your store.'
+			)
+		).toBeInTheDocument();
+		expect( screen.getByText( '(Required)' ) ).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'img', { name: 'Credit / Debit Cards logo' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'img', { name: 'Visa' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'img', { name: 'Mastercard' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'img', { name: 'American Express' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'img', { name: 'Cartes Bancaires' } )
+		).toBeInTheDocument();
+	} );
+
+	it( 'shows the manual-capture conflict banner and disables incompatible methods', () => {
+		mockUseManualCapture.mockReturnValue( [ true, noop ] );
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'affirm',
+			'klarna',
+		] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getAllByText(
+				"Manual capture is enabled, so any payment methods that don't support it have been automatically disabled."
+			).length
+		).toBeGreaterThanOrEqual( 1 );
+		expect(
+			screen.getByRole( 'checkbox', { name: /Affirm/ } )
+		).toBeDisabled();
+		expect(
+			screen.getByRole( 'checkbox', { name: /Klarna/ } )
+		).toBeDisabled();
+		expect(
+			screen.getAllByText( 'Unavailable with manual capture' )
+		).toHaveLength( 2 );
+		expect(
+			screen.queryByRole( 'button', { name: 'Dismiss this notice' } )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'uses account-country branding for Afterpay and Clearpay settings rows', () => {
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'afterpay_clearpay',
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			afterpay_clearpay_payments: {
+				status: 'active',
+				requirements: [],
+			},
+		} );
+
+		const { rerender } = render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByRole( 'checkbox', { name: 'Cash App Afterpay' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'Allow customers to pay over time with Cash App Afterpay.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'img', { name: 'Cash App Afterpay logo' } )
+		).toBeInTheDocument();
+
+		mockUseGetSettings.mockReturnValue( {
+			account_country: 'GB',
+		} );
+
+		rerender( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByRole( 'checkbox', { name: 'Clearpay' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'Allow customers to pay over time with Clearpay.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'confirms unrequested payment method activation before enabling the method', () => {
+		const selectPaymentMethod = jest.fn();
+		mockUseEnabledPaymentMethodIds.mockReturnValue( [ [ 'card' ], noop ] );
+		mockUseSelectedPaymentMethod.mockReturnValue( [
+			[ 'card' ],
+			selectPaymentMethod,
+		] );
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'affirm',
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			affirm_payments: {
+				status: 'unrequested',
+				requirements: [ 'business_profile.mcc' ],
+			},
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		fireEvent.click( screen.getByRole( 'checkbox', { name: /Affirm/ } ) );
+
+		expect( selectPaymentMethod ).not.toHaveBeenCalled();
+		expect(
+			screen.getByRole( 'heading', {
+				name: 'One more step to enable Affirm',
+			} )
+		).toBeInTheDocument();
+
+		fireEvent.click( screen.getByRole( 'button', { name: 'Continue' } ) );
+
+		expect( selectPaymentMethod ).toHaveBeenCalledWith( 'affirm' );
+	} );
+
+	it( 'renders disabled notices for payment methods that need account information', () => {
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'alipay',
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			alipay_payments: { status: 'inactive', requirements: [] },
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByText( 'More information needed' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'More information is needed to finish setting up this payment method.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'checkbox', { name: 'Alipay' } )
 		).toBeDisabled();
 	} );
 

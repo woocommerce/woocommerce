@@ -193,32 +193,172 @@
 	}
 }
 
-.woopayments-settings-payment-method {
-	display: flex;
-	align-items: flex-start;
-	justify-content: space-between;
-	gap: 16px;
-	padding: 12px 0;
+.woopayments-settings-payment-methods-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	border-top: 1px solid $gray-100;
+}
+
+.woopayments-settings-payment-method-item {
+	margin: 0;
+	padding: 24px 0;
 	border-bottom: 1px solid $gray-100;
 
-	&:last-child {
-		border-bottom: 0;
+	&__main {
+		display: grid;
+		grid-template-columns: 32px 72px minmax(0, 1fr);
+		gap: 16px;
+		align-items: flex-start;
+
+		@include breakpoint("<782px") {
+			grid-template-columns: 32px minmax(0, 1fr);
+			gap: 12px;
+		}
 	}
 
 	.components-base-control {
 		margin-bottom: 0;
 	}
 
-	&__status {
-		flex: 0 0 auto;
-		min-height: 22px;
-		padding: 1px 8px;
-		border: 1px solid $gray-300;
-		border-radius: 2px;
-		background: $gray-100;
+	.components-base-control__field {
+		margin: 0;
+	}
+
+	.components-checkbox-control__label {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		border: 0;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
+	&__icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 48px;
+		height: 32px;
+		border: 1px solid $gray-200;
+		border-radius: 4px;
+		object-fit: contain;
+		background: $white;
+
+		@include breakpoint("<782px") {
+			grid-column: 2;
+			grid-row: 1;
+		}
+	}
+
+	&__icon--fallback {
+		color: $gray-700;
+		font-size: 13px;
+		font-weight: 600;
+		line-height: 1;
+	}
+
+	&__body {
+		min-width: 0;
+
+		@include breakpoint("<782px") {
+			grid-column: 2;
+		}
+
+		p {
+			margin: 4px 0 0;
+			color: $gray-700;
+			font-size: 13px;
+			line-height: 20px;
+		}
+	}
+
+	&__heading {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 6px;
+
+		h4 {
+			margin: 0;
+			color: $gray-900;
+			font-size: 14px;
+			line-height: 20px;
+			font-weight: 600;
+		}
+	}
+
+	&__required {
 		color: $gray-700;
 		font-size: 12px;
 		line-height: 18px;
+	}
+
+	&__chip {
+		display: inline-flex;
+		align-items: center;
+		min-height: 20px;
+		padding: 1px 8px;
+		border-radius: 2px;
+		background: #fcf9e8;
+		color: $gray-900;
+		font-size: 12px;
+		line-height: 18px;
+
+		&.is-error {
+			background: #f7ebec;
+			color: $alert-red;
+		}
+	}
+
+	&__card-brands {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin-top: 12px;
+
+		img {
+			width: 32px;
+			height: 20px;
+			object-fit: contain;
+		}
+	}
+
+	&__notice.components-notice {
+		margin: 12px 0 0;
+	}
+}
+
+.woopayments-settings-payment-methods__manual-capture-notice.components-notice {
+	margin: 0 0 16px;
+	background: #fcf9e8;
+	border-left: 0;
+}
+
+.woopayments-settings-payment-method-activation-modal {
+	&__body {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+
+		p,
+		ul {
+			margin: 0;
+		}
+
+		ul {
+			padding-left: 20px;
+		}
+	}
+
+	.woopayments-settings-payment-method-item__icon {
+		width: 64px;
+		height: 42px;
 	}
 }
 

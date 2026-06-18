@@ -21,6 +21,7 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { getWooPaymentsSettingsBootstrap } from './bootstrap';
+import { WooPaymentsPaymentMethodsList } from './payment-methods-list';
 import {
 	useAccountBusinessSupportEmail,
 	useAccountBusinessSupportPhone,
@@ -106,17 +107,6 @@ type PaymentRequestButtonType = 'default' | 'buy' | 'donate' | 'book';
 type PaymentRequestButtonSize = 'small' | 'medium' | 'large';
 type PaymentRequestButtonTheme = 'dark' | 'light' | 'light-outline';
 
-const PAYMENT_METHOD_LABELS: Record< string, string > = {
-	card: __( 'Credit card / debit card', 'woocommerce' ),
-	affirm: __( 'Affirm', 'woocommerce' ),
-	afterpay_clearpay: __( 'Afterpay / Clearpay', 'woocommerce' ),
-	klarna: __( 'Klarna', 'woocommerce' ),
-	amazon_pay: __( 'Amazon Pay', 'woocommerce' ),
-	link: __( 'Link by Stripe', 'woocommerce' ),
-	apple_pay: __( 'Apple Pay', 'woocommerce' ),
-	google_pay: __( 'Google Pay', 'woocommerce' ),
-};
-
 const BNPL_METHOD_IDS = [ 'affirm', 'afterpay_clearpay', 'klarna' ];
 const EXPRESS_METHOD_IDS = [ 'payment_request', 'woopay', 'amazon_pay' ];
 const STANDARD_PAYMENT_METHOD_EXCLUDED_IDS = [
@@ -125,24 +115,6 @@ const STANDARD_PAYMENT_METHOD_EXCLUDED_IDS = [
 	'google_pay',
 	'link',
 ];
-const PAYMENT_METHOD_CAPABILITY_KEYS: Record< string, string > = {
-	amazon_pay: 'amazon_pay_payments',
-	apple_pay: 'card_payments',
-	google_pay: 'card_payments',
-	card: 'card_payments',
-	link: 'link_payments',
-	affirm: 'affirm_payments',
-	afterpay_clearpay: 'afterpay_clearpay_payments',
-	klarna: 'klarna_payments',
-};
-
-const getPaymentMethodLabel = ( methodId: string ) =>
-	PAYMENT_METHOD_LABELS[ methodId ] ||
-	methodId
-		.split( '_' )
-		.map( ( part ) => part.charAt( 0 ).toUpperCase() + part.slice( 1 ) )
-		.join( ' ' );
-
 const asString = ( value: unknown, fallback = '' ) =>
 	typeof value === 'string' ? value : fallback;
 
@@ -340,76 +312,8 @@ const GeneralSettingsSection = () => {
 	);
 };
 
-const getPaymentMethodStatusLabel = ( status?: PaymentMethodStatus ) => {
-	switch ( status?.status ) {
-		case 'active':
-			return __( 'Active', 'woocommerce' );
-		case 'pending':
-			return __( 'Pending', 'woocommerce' );
-		case 'inactive':
-			return __( 'Inactive', 'woocommerce' );
-		default:
-			return __( 'Available', 'woocommerce' );
-	}
-};
-
-const PaymentMethodStatusBadge = ( {
-	id,
-	status,
-}: {
-	id: string;
-	status?: PaymentMethodStatus;
-} ) => {
-	const statusLabel = getPaymentMethodStatusLabel( status );
-
-	return (
-		<span id={ id } className="woopayments-settings-payment-method__status">
-			{ statusLabel }
-		</span>
-	);
-};
-
-const PaymentMethodToggle = ( {
-	methodId,
-	status,
-}: {
-	methodId: string;
-	status?: PaymentMethodStatus;
-} ) => {
-	const [ selectedMethods, addPaymentMethod ] =
-		getSelectedPaymentMethodSetting() as [
-			string[],
-			( id: string ) => void
-		];
-	const [ , removePaymentMethod ] = getUnselectedPaymentMethodSetting() as [
-		string[],
-		( id: string ) => void
-	];
-	const isEnabled = selectedMethods.includes( methodId );
-	const statusId = `woopayments-settings-payment-method-${ methodId }-status`;
-
-	return (
-		<div className="woopayments-settings-payment-method">
-			<CheckboxControl
-				checked={ isEnabled }
-				aria-describedby={ statusId }
-				label={ getPaymentMethodLabel( methodId ) }
-				onChange={ ( value ) => {
-					if ( value ) {
-						addPaymentMethod( methodId );
-						return;
-					}
-
-					removePaymentMethod( methodId );
-				} }
-				__nextHasNoMarginBottom
-			/>
-			<PaymentMethodStatusBadge id={ statusId } status={ status } />
-		</div>
-	);
-};
-
 const PaymentMethodsSettingsSection = () => {
+	const settings = asSettingsRecord( useGetSettings() );
 	const availablePaymentMethodIds = asStringArray(
 		useGetAvailablePaymentMethodIds()
 	).filter(
@@ -420,6 +324,18 @@ const PaymentMethodsSettingsSection = () => {
 	const standardPaymentMethodIds = availablePaymentMethodIds.filter(
 		( methodId ) => ! BNPL_METHOD_IDS.includes( methodId )
 	);
+	const [ enabledMethodIds ] =
+		useEnabledPaymentMethodIds() as StringArraySetting;
+	const [ , addPaymentMethod ] = getSelectedPaymentMethodSetting() as [
+		string[],
+		( id: string ) => void
+	];
+	const [ , removePaymentMethod ] = getUnselectedPaymentMethodSetting() as [
+		string[],
+		( id: string ) => void
+	];
+	const [ isManualCaptureEnabled ] = useManualCapture() as BooleanSetting;
+	const accountCountry = asString( settings.account_country );
 
 	return (
 		<SettingsSection
@@ -435,34 +351,39 @@ const PaymentMethodsSettingsSection = () => {
 			}
 		>
 			<FieldGroup title={ __( 'Payment methods', 'woocommerce' ) }>
-				{ standardPaymentMethodIds.length > 0 ? (
-					standardPaymentMethodIds.map( ( methodId ) => (
-						<PaymentMethodToggle
-							key={ methodId }
-							methodId={ methodId }
-							status={
-								statuses[
-									PAYMENT_METHOD_CAPABILITY_KEYS[
-										methodId
-									] || methodId
-								] as PaymentMethodStatus | undefined
-							}
-						/>
-					) )
-				) : (
-					<p className="woopayments-settings-muted">
+				{ isManualCaptureEnabled && (
+					<Notice
+						status="warning"
+						isDismissible={ false }
+						className="woopayments-settings-payment-methods__manual-capture-notice"
+					>
 						{ __(
-							'No additional checkout payment methods are available for this account.',
+							"Manual capture is enabled, so any payment methods that don't support it have been automatically disabled.",
 							'woocommerce'
 						) }
-					</p>
+					</Notice>
 				) }
+				<WooPaymentsPaymentMethodsList
+					methodIds={ standardPaymentMethodIds }
+					enabledMethodIds={ enabledMethodIds }
+					statuses={
+						statuses as Record<
+							string,
+							PaymentMethodStatus | undefined
+						>
+					}
+					isManualCaptureEnabled={ Boolean( isManualCaptureEnabled ) }
+					accountCountry={ accountCountry }
+					onEnable={ addPaymentMethod }
+					onDisable={ removePaymentMethod }
+				/>
 			</FieldGroup>
 		</SettingsSection>
 	);
 };
 
 const BuyNowPayLaterSettingsSection = () => {
+	const settings = asSettingsRecord( useGetSettings() );
 	const availablePaymentMethodIds = asStringArray(
 		useGetAvailablePaymentMethodIds()
 	);
@@ -470,6 +391,18 @@ const BuyNowPayLaterSettingsSection = () => {
 	const availableBuyNowPayLaterMethodIds = availablePaymentMethodIds.filter(
 		( methodId ) => BNPL_METHOD_IDS.includes( methodId )
 	);
+	const [ enabledMethodIds ] =
+		useEnabledPaymentMethodIds() as StringArraySetting;
+	const [ , addPaymentMethod ] = getSelectedPaymentMethodSetting() as [
+		string[],
+		( id: string ) => void
+	];
+	const [ , removePaymentMethod ] = getUnselectedPaymentMethodSetting() as [
+		string[],
+		( id: string ) => void
+	];
+	const [ isManualCaptureEnabled ] = useManualCapture() as BooleanSetting;
+	const accountCountry = asString( settings.account_country );
 
 	return availableBuyNowPayLaterMethodIds.length === 0 ? null : (
 		<SettingsSection
@@ -485,18 +418,20 @@ const BuyNowPayLaterSettingsSection = () => {
 			}
 		>
 			<FieldGroup title={ __( 'Installment options', 'woocommerce' ) }>
-				{ availableBuyNowPayLaterMethodIds.map( ( methodId ) => (
-					<PaymentMethodToggle
-						key={ methodId }
-						methodId={ methodId }
-						status={
-							statuses[
-								PAYMENT_METHOD_CAPABILITY_KEYS[ methodId ] ||
-									methodId
-							] as PaymentMethodStatus | undefined
-						}
-					/>
-				) ) }
+				<WooPaymentsPaymentMethodsList
+					methodIds={ availableBuyNowPayLaterMethodIds }
+					enabledMethodIds={ enabledMethodIds }
+					statuses={
+						statuses as Record<
+							string,
+							PaymentMethodStatus | undefined
+						>
+					}
+					isManualCaptureEnabled={ Boolean( isManualCaptureEnabled ) }
+					accountCountry={ accountCountry }
+					onEnable={ addPaymentMethod }
+					onDisable={ removePaymentMethod }
+				/>
 			</FieldGroup>
 		</SettingsSection>
 	);
