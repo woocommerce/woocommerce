@@ -362,18 +362,16 @@ export default compose( [
 			isRequesting,
 		};
 	} ),
-	withDispatch( ( dispatch, props ) => {
+	withDispatch( ( dispatch ) => {
 		const { deleteReview, updateReview, invalidateResolution } =
 			dispatch( reviewsStore );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		const clearReviewsCache = () => {
 			invalidateResolution( 'getReviews', [ reviewsQuery ] );
-			if ( props.reviews && props.reviews.length < 2 ) {
-				invalidateResolution( 'getReviewsTotalCount', [
-					unapprovedReviewsQuery,
-				] );
-			}
+			invalidateResolution( 'getReviewsTotalCount', [
+				unapprovedReviewsQuery,
+			] );
 		};
 
 		return {
