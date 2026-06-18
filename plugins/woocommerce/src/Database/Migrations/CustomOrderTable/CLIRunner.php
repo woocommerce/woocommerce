@@ -218,7 +218,8 @@ class CLIRunner {
 					__( 'Beginning batch #%1$d (%2$d orders/batch).', 'woocommerce' ),
 					$batch_count,
 					$batch_size
-				)
+				),
+				'wc'
 			);
 			$batch_start_time = microtime( true );
 			$order_ids        = $this->synchronizer->get_next_batch_to_process( $batch_size );
@@ -235,7 +236,8 @@ class CLIRunner {
 					$batch_count,
 					count( $order_ids ),
 					$batch_total_time
-				)
+				),
+				'wc'
 			);
 
 			++$batch_count;
@@ -411,7 +413,8 @@ class CLIRunner {
 					__( 'Beginning verification for batch #%1$d (%2$d orders/batch).', 'woocommerce' ),
 					$batch_count,
 					$batch_size
-				)
+				),
+				'wc'
 			);
 
 			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Inputs are prepared.
@@ -510,7 +513,8 @@ class CLIRunner {
 					$batch_count,
 					count( $order_ids ),
 					$batch_total_time
-				)
+				),
+				'wc'
 			);
 
 			$order_id_start  = max( $order_ids ) + 1;
@@ -980,7 +984,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 					++$count;
 
 					// translators: %d is an order ID.
-					WP_CLI::debug( sprintf( __( 'Cleanup completed for order %d.', 'woocommerce' ), $order_id ) );
+					WP_CLI::debug( sprintf( __( 'Cleanup completed for order %d.', 'woocommerce' ), $order_id ), 'wc' );
 				} catch ( \Exception $e ) {
 					// translators: %1$d is an order ID, %2$s is an error message.
 					WP_CLI::warning( sprintf( __( 'An error occurred while cleaning up order %1$d: %2$s', 'woocommerce' ), $order_id, $e->getMessage() ) );

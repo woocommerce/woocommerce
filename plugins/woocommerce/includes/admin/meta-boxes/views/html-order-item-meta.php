@@ -10,23 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$hidden_order_itemmeta = apply_filters(
-	'woocommerce_hidden_order_itemmeta',
-	array(
-		'_qty',
-		'_tax_class',
-		'_product_id',
-		'_variation_id',
-		'_line_subtotal',
-		'_line_subtotal_tax',
-		'_line_total',
-		'_line_tax',
-		'method_id',
-		'cost',
-		'_reduced_stock',
-		'_restock_refunded_items',
-	)
-);
+$hidden_order_itemmeta = \Automattic\WooCommerce\Internal\Utilities\OrderItemMetaUtil::get_hidden_keys();
 ?><div class="view">
 	<?php
 	$meta_data = $item->get_all_formatted_meta_data( '' );

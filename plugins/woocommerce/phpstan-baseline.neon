@@ -2863,12 +2863,6 @@ parameters:
 			path: includes/admin/class-wc-admin-settings.php
 
 		-
-			message: '#^Method WC_Admin_Settings\:\:reset_settings_pages_on_feature_change\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-wc-admin-settings.php
-
-		-
 			message: '#^Method WC_Admin_Settings\:\:save\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -35590,12 +35584,6 @@ parameters:
 			path: includes/wc-stock-functions.php
 
 		-
-			message: '#^Cannot call method get_low_stock_amount\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-stock-functions.php
-
-		-
 			message: '#^Cannot call method get_stock_quantity\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -49564,26 +49552,8 @@ parameters:
 			path: src/Admin/WCAdminHelper.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\WCAdminHelper\:\:get_normalized_url_path\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/WCAdminHelper.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\WCAdminHelper\:\:get_url_from_wp\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/WCAdminHelper.php
-
-		-
-			message: '#^Parameter \#1 \$string of function strlen expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/WCAdminHelper.php
-
-		-
-			message: '#^Static method Automattic\\WooCommerce\\Admin\\WCAdminHelper\:\:get_normalized_url_path\(\) is unused\.$#'
-			identifier: method.unused
 			count: 1
 			path: src/Admin/WCAdminHelper.php
 
@@ -49818,12 +49788,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:update_block_style_dependencies\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/AssetsController.php
-
-		-
-			message: '#^Parameter \#1 \$src of method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:get_absolute_url\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/AssetsController.php
 
@@ -68152,24 +68116,6 @@ parameters:
 		-
 			message: '#^Call to static method get_order_item\(\) on an unknown class Automattic\\WooCommerce\\Internal\\WC_Order_Factory\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestockRefundedItemsAdjuster.php
-
-		-
-			message: '#^Cannot call method get_qty_refunded_for_item\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestockRefundedItemsAdjuster.php
-
-		-
-			message: '#^Cannot call method get_refunds\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestockRefundedItemsAdjuster.php
-
-		-
-			message: '#^Cannot call method get_version\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Internal/RestockRefundedItemsAdjuster.php
 

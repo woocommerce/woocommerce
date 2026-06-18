@@ -34,11 +34,6 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 		baseURL,
 	} ) => {
 		await setBlockEmailEditorFeatureFlag( baseURL, 'yes' );
-		await setFeatureFlag(
-			baseURL,
-			'woocommerce_feature_point_of_sale_enabled',
-			'no'
-		);
 
 		// Navigate to WooCommerce Email Settings page
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
@@ -74,14 +69,16 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 		// Check that Actions column exists
 		await expect( listViewLocator.getByText( 'Actions' ) ).toBeVisible();
 
-		// Check that first row shows Active status
-		const firstRow = listViewLocator.locator( 'tr' ).nth( 1 ); // nth(1) because nth(0) is header row
-		await expect( firstRow.locator( 'td' ).nth( 2 ) ).toHaveText(
+		// Target the "New order" row explicitly so the test is independent of list ordering.
+		const newOrderRow = listViewLocator.locator( 'tr', {
+			hasText: 'New order',
+		} );
+		await expect( newOrderRow.locator( 'td' ).nth( 2 ) ).toHaveText(
 			'Active'
 		);
 
-		// Open the first row more actions menu
-		await firstRow.locator( '.dataviews-all-actions-button' ).click();
+		// Open the row's more actions menu
+		await newOrderRow.locator( '.dataviews-all-actions-button' ).click();
 
 		// Check that the "Deactivate email" option is present and clickable
 		await expect(
@@ -92,12 +89,12 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 			.click();
 
 		// Check that the email status is now Draft
-		await expect( firstRow.locator( 'td' ).nth( 2 ) ).toHaveText(
+		await expect( newOrderRow.locator( 'td' ).nth( 2 ) ).toHaveText(
 			'Inactive'
 		);
 
-		// Open the first row more actions menu again
-		await firstRow.locator( '.dataviews-all-actions-button' ).click();
+		// Open the row's more actions menu again
+		await newOrderRow.locator( '.dataviews-all-actions-button' ).click();
 
 		// Check that the "Activate email" option is present and clickable
 		await expect(
@@ -106,7 +103,7 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 		await page.getByRole( 'menuitem', { name: 'Activate email' } ).click();
 
 		// Check that the email status is now Active again
-		await expect( firstRow.locator( 'td' ).nth( 2 ) ).toHaveText(
+		await expect( newOrderRow.locator( 'td' ).nth( 2 ) ).toHaveText(
 			'Active'
 		);
 

@@ -249,7 +249,9 @@ const handleCoreProfilerCompletedSteps = assign( {
 } );
 
 const getCurrentUserEmail = fromPromise( async () => {
-	const currentUser = await resolveSelect( userStore ).getCurrentUser();
+	const currentUser = ( await resolveSelect(
+		userStore
+	).getCurrentUser() ) as WCUser | undefined;
 	return currentUser?.email;
 } );
 
@@ -1822,7 +1824,6 @@ export const CoreProfilerController = ( {
 				},
 				userHasNoInstallPluginsPermission: ( { context } ) => {
 					return (
-						// @ts-expect-error TODO: react-18-upgrade: This comparison appears to be unintentional because the types 'string | undefined' and 'boolean' have no overlap.ts(2367). Need to check if this is a valid comparison.
 						context?.currentUser?.capabilities.install_plugins !==
 						true
 					);
