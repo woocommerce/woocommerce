@@ -45,7 +45,7 @@ export const Header = ( {
 				/* translators: 1: document title. 2: page title */
 				__( '%1$s &lsaquo; %2$s &#8212; WooCommerce', 'woocommerce' ),
 				documentTitle,
-				siteTitle
+				siteTitle as string
 			)
 		);
 

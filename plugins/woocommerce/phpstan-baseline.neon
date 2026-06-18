@@ -35584,12 +35584,6 @@ parameters:
 			path: includes/wc-stock-functions.php
 
 		-
-			message: '#^Cannot call method get_low_stock_amount\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-stock-functions.php
-
-		-
 			message: '#^Cannot call method get_stock_quantity\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -68134,24 +68128,6 @@ parameters:
 		-
 			message: '#^Call to static method get_order_item\(\) on an unknown class Automattic\\WooCommerce\\Internal\\WC_Order_Factory\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestockRefundedItemsAdjuster.php
-
-		-
-			message: '#^Cannot call method get_qty_refunded_for_item\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestockRefundedItemsAdjuster.php
-
-		-
-			message: '#^Cannot call method get_refunds\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestockRefundedItemsAdjuster.php
-
-		-
-			message: '#^Cannot call method get_version\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Internal/RestockRefundedItemsAdjuster.php
 
