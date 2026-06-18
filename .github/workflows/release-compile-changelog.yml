@@ -32,7 +32,7 @@ env:
 jobs:
   build-prep:
     name: Create changelog PR
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON('{"group":"WooCommerce Release Checks"}') }}
     permissions:
       contents: write
       pull-requests: write
