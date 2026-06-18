@@ -3,6 +3,7 @@
  * Title: WooCommerce Order Confirmation
  * Slug: purple/woocommerce-order-confirmation
  * Categories: page, purple
+ * Keywords: woo-commerce, order, confirmation, checkout, page
  * Post Types: page, wp_template
  * Viewport width: 1400
  * Description: A page template for the WooCommerce order confirmation page.

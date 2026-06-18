@@ -3,6 +3,7 @@
  * Title: New Arrivals Collection
  * Slug: purple/woocommerce-new-arrivals
  * Categories: purple
+ * Keywords: woo-commerce, products, new arrivals, collection
  * Block Types: woocommerce/product-collection
  * Description: A section with a heading and a 4 column product grid.
  */

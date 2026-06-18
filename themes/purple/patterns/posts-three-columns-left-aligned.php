@@ -3,6 +3,7 @@
  * Title: List of posts with left aligned heading
  * Slug: purple/posts-three-columns-left-aligned
  * Categories: purple
+ * Keywords: posts, blog, query, columns, grid
  * Block Types: core/query
  */
 ?>

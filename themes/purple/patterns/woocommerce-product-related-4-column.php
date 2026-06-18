@@ -3,6 +3,7 @@
  * Title: Products, 4 column with Heading
  * Slug: purple/product-related-4-column
  * Categories: purple
+ * Keywords: woo-commerce, products, related, collection
  * Block Types: woocommerce/product-collection
  * Description: A section with a heading and a 4 column product grid.
  */

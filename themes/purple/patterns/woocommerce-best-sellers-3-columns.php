@@ -3,6 +3,7 @@
  * Title: Best Sellers Collection
  * Slug: purple/woocommerce-best-sellers-3-columns
  * Categories: woo-commerce, purple
+ * Keywords: woo-commerce, products, best sellers, collection
  * Block Types: woocommerce/product-collection
  * Description: A section with a heading and a 3 column product grid.
  */

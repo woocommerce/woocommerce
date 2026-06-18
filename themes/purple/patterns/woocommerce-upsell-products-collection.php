@@ -2,7 +2,8 @@
 /**
  * Title: Upsell products collection
  * Slug: purple/upsell-products-collection
- * Categories: call-to-action, Featured, featured-selling, woo-commerce
+ * Categories: purple
+ * Keywords: woo-commerce, products, upsell, collection
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Upsell products collection"},"align":"full","className":"is-style-default","style":{"spacing":{"blockGap":"0","margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}},"layout":{"type":"default"}} -->

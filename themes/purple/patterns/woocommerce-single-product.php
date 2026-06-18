@@ -3,6 +3,7 @@
  * Title: WooCommerce Single Product
  * Slug: purple/woocommerce-single-product
  * Categories: page, purple
+ * Keywords: woo-commerce, single product, product, page
  * Post Types: page, wp_template
  * Viewport width: 1400
  * Description: A page template for the WooCommerce single product page.

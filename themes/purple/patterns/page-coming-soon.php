@@ -3,6 +3,7 @@
  * Title: Coming Soon
  * Slug: purple/coming-soon
  * Categories: purple
+ * Keywords: coming soon, starter, landing
  * Block Types: core/post-content
  * Post Types: page, wp_template
  * Viewport width: 1400

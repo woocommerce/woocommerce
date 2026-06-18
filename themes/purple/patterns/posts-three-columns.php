@@ -3,6 +3,7 @@
  * Title: List of posts in three columns
  * Slug: purple/posts-three-columns
  * Categories: purple
+ * Keywords: posts, blog, query, columns, grid
  * Description: A list of posts, 3 columns, with featured image, post date and title.
  * Block Types: core/query
  */
