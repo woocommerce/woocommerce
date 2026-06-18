@@ -142,6 +142,80 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the native WooPayments account summary for users with permission.
+	 */
+	public function test_get_account_summary_by_manager() {
+		$summary = array(
+			'account' => array(
+				'id'                   => 'acct_native_test',
+				'mode'                 => 'test',
+				'default_currency'     => 'usd',
+				'connected'            => true,
+				'working'              => true,
+				'can_process_payments' => true,
+				'test_mode'            => true,
+				'test_drive'           => true,
+				'sandbox'              => false,
+				'live'                 => false,
+			),
+			'urls'    => array(
+				'overview_page' => 'https://example.com/overview',
+			),
+		);
+
+		$this->mock_woopayments_service
+			->expects( $this->once() )
+			->method( 'get_account_summary' )
+			->willReturn( $summary );
+
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/account' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $summary, $response->get_data() );
+	}
+
+	/**
+	 * @testdox Should block the native WooPayments account summary for users without permission.
+	 */
+	public function test_get_account_summary_by_user_without_caps() {
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		$filter_callback = fn( $caps ) => array(
+			'manage_woocommerce' => false,
+			'install_plugins'    => true,
+		);
+		add_filter( 'user_has_cap', $filter_callback );
+
+		$this->mock_woopayments_service
+			->expects( $this->never() )
+			->method( 'get_account_summary' );
+
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/account' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
+
+		remove_filter( 'user_has_cap', $filter_callback );
+	}
+
+	/**
+	 * @testdox Should return an account summary error when the service throws.
+	 */
+	public function test_get_account_summary_with_exception() {
+		$this->mock_woopayments_service
+			->expects( $this->once() )
+			->method( 'get_account_summary' )
+			->willThrowException( new \Exception( 'Account summary unavailable.' ) );
+
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/account' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_woopayments_account_error', $response->get_data()['code'] );
+		$this->assertSame( 'Account summary unavailable.', $response->get_data()['message'] );
+	}
+
+	/**
 	 * Test getting onboarding details without specifying a location.
 	 *
 	 * It should default to the providers stored location.

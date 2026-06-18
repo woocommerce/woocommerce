@@ -228,6 +228,51 @@ class WooPaymentsService {
 	}
 
 	/**
+	 * Get a safe read-only account summary for the native WooPayments settings surface.
+	 *
+	 * @return array<string,array<string,mixed>>
+	 */
+	public function get_account_summary(): array {
+		$account_service = $this->get_native_account_service();
+
+		return array(
+			'account' => array(
+				'id'                   => $account_service->get_account_id(),
+				'mode'                 => $account_service->get_mode(),
+				'default_currency'     => $account_service->get_account_default_currency(),
+				'connected'            => $account_service->has_account(),
+				'working'              => $account_service->has_working_account(),
+				'can_process_payments' => $account_service->can_process_payments(),
+				'test_mode'            => $account_service->is_test_mode_enabled(),
+				'test_drive'           => $account_service->has_test_account(),
+				'sandbox'              => $account_service->has_sandbox_account(),
+				'live'                 => $account_service->has_live_account(),
+			),
+			'urls'    => array(
+				'overview_page' => $this->get_overview_page_url(),
+				'setup'         => $this->get_setup_page_url(),
+			),
+		);
+	}
+
+	/**
+	 * Get the setup URL for the native WooPayments settings surface.
+	 *
+	 * @return string Setup URL.
+	 */
+	private function get_setup_page_url(): string {
+		return $this->provider->get_onboarding_url(
+			$this->get_payment_gateway(),
+			Utils::wc_payments_settings_url(
+				self::ONBOARDING_PATH_BASE,
+				array(
+					'from' => self::FROM_PAYMENT_SETTINGS,
+				)
+			)
+		);
+	}
+
+	/**
 	 * Check if the given onboarding step ID is valid.
 	 *
 	 * @param string $step_id The ID of the onboarding step.

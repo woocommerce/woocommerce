@@ -90,6 +90,73 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render WooPayments settings as a React section by default.
+	 */
+	public function test_woopayments_section_is_reactified_by_default() {
+		$sut = new WC_Settings_Payment_Gateways();
+
+		$this->assertTrue( $sut->should_render_react_section( 'woocommerce_payments' ) );
+	}
+
+	/**
+	 * @testdox Should render the WooPayments React root for the WooPayments settings section.
+	 */
+	public function test_woopayments_section_outputs_react_root() {
+		global $current_section;
+		$current_section = 'woocommerce_payments';
+		$sut             = new WC_Settings_Payment_Gateways();
+
+		ob_start();
+		$sut->output();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'id="experimental_wc_settings_payments_woocommerce_payments"', $output );
+	}
+
+	/**
+	 * @testdox Should preserve classic WooPayments settings field extensions.
+	 */
+	public function test_woopayments_section_preserves_classic_settings_field_extensions() {
+		$filter_callback = static function ( $fields ) {
+			$fields['custom_extension_field'] = array(
+				'title' => 'Custom extension field',
+				'type'  => 'text',
+			);
+
+			return $fields;
+		};
+		add_filter( 'woocommerce_settings_api_form_fields_woocommerce_payments', $filter_callback );
+
+		try {
+			$sut = new WC_Settings_Payment_Gateways();
+
+			$this->assertFalse( $sut->should_render_react_section( 'woocommerce_payments' ) );
+		} finally {
+			remove_filter( 'woocommerce_settings_api_form_fields_woocommerce_payments', $filter_callback );
+		}
+	}
+
+	/**
+	 * @testdox Should allow the WooPayments React section to be removed through the optional sections filter.
+	 */
+	public function test_woopayments_section_can_be_removed_from_optional_reactified_sections() {
+		$filter_callback = static function () {
+			return array(
+				WC_Settings_Payment_Gateways::COD_SECTION_NAME,
+				WC_Settings_Payment_Gateways::BACS_SECTION_NAME,
+				WC_Settings_Payment_Gateways::CHEQUE_SECTION_NAME,
+			);
+		};
+		add_filter( 'experimental_woocommerce_admin_payment_reactify_render_sections', $filter_callback );
+
+		$sut = new WC_Settings_Payment_Gateways();
+
+		$this->assertFalse( $sut->should_render_react_section( 'woocommerce_payments' ) );
+
+		remove_filter( 'experimental_woocommerce_admin_payment_reactify_render_sections', $filter_callback );
+	}
+
+	/**
 	 * @testDox 'save' will trigger 'init' (and 'process_admin_options' if current section is the name of an existing gateway), and the appropriate actions.
 	 *
 	 * @testWith ["bacs", false]

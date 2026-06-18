@@ -99,9 +99,12 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 									)
 									->getMock();
 
-		$this->mock_provider = $this->getMockBuilder( PaymentGateway::class )
-									->disableOriginalConstructor()
-									->getMock();
+			$this->mock_provider = $this->getMockBuilder( PaymentGateway::class )
+										->disableOriginalConstructor()
+										->getMock();
+			$this->mock_provider
+				->method( 'get_onboarding_url' )
+				->willReturn( 'https://example.com/woopayments/onboarding' );
 
 		$this->mock_providers
 			->expects( $this->any() )
@@ -218,6 +221,76 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$this->create_unavailable_api_client(),
 			$this->create_native_account_service()
 		);
+	}
+
+	/**
+	 * @testdox Should expose a safe native account summary for the WooPayments settings surface.
+	 */
+	public function test_get_account_summary_returns_safe_native_account_state(): void {
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => array(
+					'account_id'           => 'acct_native_test',
+					'test_publishable_key' => 'pk_test_secret',
+					'live_publishable_key' => 'pk_live_secret',
+					'payments_enabled'     => true,
+					'details_submitted'    => true,
+					'is_test_drive'        => true,
+					'is_live'              => false,
+					'store_currencies'     => array(
+						'default' => 'eur',
+					),
+				),
+			)
+		);
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'enabled'   => 'yes',
+				'test_mode' => 'yes',
+			)
+		);
+		update_option( 'wcpay_onboarding_test_mode', 'yes' );
+
+		$summary = $this->sut->get_account_summary();
+
+		$this->assertSame( 'acct_native_test', $summary['account']['id'] );
+		$this->assertSame( 'test', $summary['account']['mode'] );
+		$this->assertSame( 'eur', $summary['account']['default_currency'] );
+		$this->assertTrue( $summary['account']['connected'] );
+		$this->assertTrue( $summary['account']['working'] );
+		$this->assertTrue( $summary['account']['can_process_payments'] );
+		$this->assertTrue( $summary['account']['test_mode'] );
+		$this->assertTrue( $summary['account']['test_drive'] );
+		$this->assertFalse( $summary['account']['sandbox'] );
+		$this->assertFalse( $summary['account']['live'] );
+		$this->assertSame( 'https://example.com/overview_page?from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT, $summary['urls']['overview_page'] );
+		$this->assertSame( 'https://example.com/woopayments/onboarding', $summary['urls']['setup'] );
+		$this->assertArrayNotHasKey( 'test_publishable_key', $summary['account'] );
+		$this->assertArrayNotHasKey( 'live_publishable_key', $summary['account'] );
+	}
+
+	/**
+	 * @testdox Should expose a safe no-account summary for stores that still need setup.
+	 */
+	public function test_get_account_summary_returns_no_account_state(): void {
+		update_option( 'wcpay_account_data', array( 'data' => array() ) );
+
+		$summary = $this->sut->get_account_summary();
+
+		$this->assertSame( '', $summary['account']['id'] );
+		$this->assertSame( 'live', $summary['account']['mode'] );
+		$this->assertSame( 'usd', $summary['account']['default_currency'] );
+		$this->assertFalse( $summary['account']['connected'] );
+		$this->assertFalse( $summary['account']['working'] );
+		$this->assertFalse( $summary['account']['can_process_payments'] );
+		$this->assertFalse( $summary['account']['test_mode'] );
+		$this->assertFalse( $summary['account']['test_drive'] );
+		$this->assertFalse( $summary['account']['sandbox'] );
+		$this->assertFalse( $summary['account']['live'] );
+		$this->assertSame( 'https://example.com/overview_page?from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT, $summary['urls']['overview_page'] );
+		$this->assertSame( 'https://example.com/woopayments/onboarding', $summary['urls']['setup'] );
 	}
 
 	/**

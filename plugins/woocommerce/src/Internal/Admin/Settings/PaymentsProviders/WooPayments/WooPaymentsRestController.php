@@ -417,6 +417,19 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
+			'/' . $this->rest_base . '/account',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'get_account_summary' ),
+					'validation_callback' => 'rest_validate_request_arg',
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+				),
+			),
+			$override
+		);
+		register_rest_route(
+			$this->route_namespace,
 			'/' . $this->rest_base . '/woopay-eligibility',
 			array(
 				array(
@@ -853,6 +866,21 @@ class WooPaymentsRestController extends RestApiControllerBase {
 				'success' => true,
 			)
 		);
+	}
+
+	/**
+	 * Get a safe read-only account summary for the native WooPayments settings surface.
+	 *
+	 * @return WP_Error|WP_REST_Response The response or error.
+	 */
+	protected function get_account_summary() {
+		try {
+			$summary = $this->woopayments->get_account_summary();
+		} catch ( Exception $e ) {
+			return new WP_Error( 'woocommerce_rest_woopayments_account_error', $e->getMessage(), array( 'status' => WP_Http::INTERNAL_SERVER_ERROR ) );
+		}
+
+		return rest_ensure_response( $summary );
 	}
 
 	/**

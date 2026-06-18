@@ -1,14 +1,10 @@
 /**
  * Internal dependencies
  */
-import './settings-payments-woopayments.scss';
+import { WooPaymentsAccountSettings } from '~/woopayments/settings/account-settings';
 
 export const SettingsPaymentsWoopayments = () => {
-	return (
-		<div className="settings-payments-woopayments__container">
-			<h1>WooPayments settings</h1>
-		</div>
-	);
+	return <WooPaymentsAccountSettings />;
 };
 
 export default SettingsPaymentsWoopayments;
