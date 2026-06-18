@@ -189,7 +189,7 @@ class VerificationController {
 			'%1$s <a href="%2$s" class="button wc-forward">%3$s</a>',
 			esc_html__( 'Confirm your email address to view past orders.', 'woocommerce' ),
 			esc_url( $send_url ),
-			esc_html__( 'Confirm your email address', 'woocommerce' )
+			esc_html__( 'Confirm email address', 'woocommerce' )
 		);
 
 		wc_add_notice( $notice, 'notice' );

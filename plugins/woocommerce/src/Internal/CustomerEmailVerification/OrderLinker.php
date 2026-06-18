@@ -16,21 +16,8 @@ class OrderLinker {
 	 * Constructor. Registers hooks.
 	 */
 	public function __construct() {
-		add_action( 'woocommerce_customer_email_verified', array( $this, 'link_past_orders' ) );
-	}
-
-	/**
-	 * Link the verified customer's matching guest orders to their account.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @param int $user_id The verified user's ID.
-	 */
-	public function link_past_orders( int $user_id ): void {
-		// ponytail: link inline; re-add an Action Scheduler job if a store with thousands of guest orders times out here.
-		if ( get_user_by( 'id', $user_id ) ) {
-			wc_update_new_customer_past_orders( $user_id );
-		}
+		// wc_update_new_customer_past_orders() already no-ops on an invalid/guest user ID.
+		add_action( 'woocommerce_customer_email_verified', 'wc_update_new_customer_past_orders' );
 	}
 
 	/**
