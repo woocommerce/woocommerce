@@ -14,6 +14,8 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCh
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsExpressPaymentMethodTypes;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPlatformPaymentMethodContext;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Subscriptions\WooPaymentsFailedAuthenticationRetryEmail;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Subscriptions\WooPaymentsFailedRenewalAuthenticationEmail;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsTokenService;
 use Throwable;
 use WC_Order;
@@ -285,7 +287,7 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 			$renewal_order->save_meta_data();
 		}
 
-		$this->get_processing_service()->process_checkout(
+		$outcome = $this->get_processing_service()->process_checkout_outcome(
 			PaymentContext::for_checkout(
 				$renewal_order,
 				$this->id,
@@ -298,6 +300,112 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 			),
 			$this->get_provider()
 		);
+
+		$this->maybe_handle_subscription_customer_action_required( $renewal_order, $outcome );
+	}
+
+	/**
+	 * Handle a scheduled renewal that requires customer authentication.
+	 *
+	 * @param WC_Order       $renewal_order Renewal order.
+	 * @param PaymentOutcome $outcome       Provider payment outcome.
+	 * @return void
+	 */
+	private function maybe_handle_subscription_customer_action_required( WC_Order $renewal_order, PaymentOutcome $outcome ): void {
+		if ( PaymentOutcome::STATUS_REQUIRES_CUSTOMER_ACTION !== $outcome->get_status() ) {
+			return;
+		}
+
+		$data      = $outcome->get_data();
+		$meta      = isset( $data['meta'] ) && is_array( $data['meta'] ) ? $data['meta'] : array();
+		$charge_id = isset( $data['charge_id'] ) ? (string) $data['charge_id'] : ( isset( $meta['_charge_id'] ) ? (string) $meta['_charge_id'] : '' );
+
+		try {
+			/**
+			 * Fires when a native WooPayments payment requires customer authentication.
+			 *
+			 * @param WC_Order $renewal_order     The renewal order that requires authentication.
+			 * @param string   $intent_id         The provider payment intent ID.
+			 * @param string   $payment_method_id The provider payment method ID.
+			 * @param string   $customer_id       The provider customer ID.
+			 * @param string   $charge_id         The provider charge ID.
+			 * @param string   $currency          The order currency.
+			 *
+			 * @since 11.0.0
+			 */
+			do_action(
+				'woocommerce_woocommerce_payments_payment_requires_action',
+				$renewal_order,
+				$outcome->get_provider_payment_id(),
+				$outcome->get_payment_method_id(),
+				$outcome->get_customer_id(),
+				$charge_id,
+				$renewal_order->get_currency()
+			);
+		} catch ( Throwable $exception ) {
+			wc_get_logger()->error(
+				'Failed to run WooPayments subscription renewal authentication hooks: ' . $exception->getMessage(),
+				array( 'source' => 'woopayments-subscriptions' )
+			);
+		}
+
+		if ( ! $renewal_order->has_status( 'failed' ) ) {
+			$renewal_order->update_status( 'failed' );
+		}
+
+		$failure_note = $this->get_subscription_customer_action_failure_note( $renewal_order, $outcome, $charge_id );
+		if ( '' !== $failure_note && ! $this->order_has_note_containing( $renewal_order, $failure_note ) ) {
+			$renewal_order->add_order_note( $failure_note );
+		}
+	}
+
+	/**
+	 * Get the failed-renewal note for customer-action-required outcomes.
+	 *
+	 * @param WC_Order       $renewal_order Renewal order.
+	 * @param PaymentOutcome $outcome       Provider payment outcome.
+	 * @param string         $charge_id     Provider charge ID.
+	 * @return string Order note.
+	 */
+	private function get_subscription_customer_action_failure_note( WC_Order $renewal_order, PaymentOutcome $outcome, string $charge_id ): string {
+		$transaction_id = '' !== $charge_id ? $charge_id : $outcome->get_provider_payment_id();
+		if ( '' === $transaction_id ) {
+			return '';
+		}
+
+		return wp_kses_post(
+			sprintf(
+				/* translators: %1$s: the failed payment amount, %2$s: WooPayments, %3$s: transaction ID. */
+				__( 'A payment of %1$s <strong>failed</strong> using %2$s (<code>%3$s</code>).', 'woocommerce' ),
+				wc_price( $renewal_order->get_total(), array( 'currency' => $renewal_order->get_currency() ) ),
+				'WooPayments',
+				esc_html( $transaction_id )
+			)
+		);
+	}
+
+	/**
+	 * Tell whether an order already has a note containing the expected text.
+	 *
+	 * @param WC_Order $order         Order object.
+	 * @param string   $expected_note Expected note text.
+	 * @return bool
+	 */
+	private function order_has_note_containing( WC_Order $order, string $expected_note ): bool {
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'type'     => 'any',
+			)
+		);
+
+		foreach ( $notes as $note ) {
+			if ( str_contains( (string) $note->content, $expected_note ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -837,6 +945,10 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 		$scheduled_hook = 'woocommerce_scheduled_subscription_payment_' . $this->id;
 		$failing_hook   = 'woocommerce_subscription_failing_payment_method_updated_' . $this->id;
 
+		if ( false === has_filter( 'woocommerce_email_classes', array( self::class, 'add_subscription_emails' ) ) ) {
+			add_filter( 'woocommerce_email_classes', array( self::class, 'add_subscription_emails' ), 20 );
+		}
+
 		if ( false === has_action( $scheduled_hook, array( $this, 'scheduled_subscription_payment' ) ) ) {
 			add_action( $scheduled_hook, array( $this, 'scheduled_subscription_payment' ), 10, 2 );
 		}
@@ -844,6 +956,30 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 		if ( false === has_action( $failing_hook, array( $this, 'update_failing_payment_method' ) ) ) {
 			add_action( $failing_hook, array( $this, 'update_failing_payment_method' ), 10, 2 );
 		}
+	}
+
+	/**
+	 * Add WooPayments subscription emails to WooCommerce.
+	 *
+	 * @internal
+	 *
+	 * @param array<string,mixed> $email_classes WooCommerce email classes.
+	 * @return array<string,mixed>
+	 */
+	public static function add_subscription_emails( array $email_classes ): array {
+		if ( ! class_exists( 'WC_Email_Failed_Order' ) ) {
+			require_once WC_ABSPATH . 'includes/emails/class-wc-email-failed-order.php';
+		}
+
+		$failed_renewal_authentication = new WooPaymentsFailedRenewalAuthenticationEmail( $email_classes );
+		$failed_renewal_authentication->init_hooks();
+		$email_classes['WC_Payments_Email_Failed_Renewal_Authentication'] = $failed_renewal_authentication;
+
+		$failed_authentication_retry = new WooPaymentsFailedAuthenticationRetryEmail();
+		$failed_authentication_retry->init_hooks();
+		$email_classes['WC_Payments_Email_Failed_Authentication_Retry'] = $failed_authentication_retry;
+
+		return $email_classes;
 	}
 
 	/**

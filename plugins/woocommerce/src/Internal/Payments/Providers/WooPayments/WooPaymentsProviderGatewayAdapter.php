@@ -696,6 +696,9 @@ class WooPaymentsProviderGatewayAdapter {
 		}
 
 		$outcome_data = array( 'meta' => $meta );
+		if ( '' !== $charge_id ) {
+			$outcome_data['charge_id'] = $charge_id;
+		}
 
 		if ( 'succeeded' === $status ) {
 			$outcome_data['note'] = $this->get_payment_success_note( $context->get_order(), $intent_id, $charge_id );
@@ -706,10 +709,10 @@ class WooPaymentsProviderGatewayAdapter {
 				return new PaymentOutcome( PaymentOutcome::STATUS_COMPLETED, $intent_id, '', $payment_method_id, $customer_id, $outcome_data );
 
 			case 'requires_capture':
-				return new PaymentOutcome( PaymentOutcome::STATUS_AUTHORIZED, $intent_id, '', $payment_method_id, $customer_id, array( 'meta' => $meta ) );
+				return new PaymentOutcome( PaymentOutcome::STATUS_AUTHORIZED, $intent_id, '', $payment_method_id, $customer_id, $outcome_data );
 
 			case 'processing':
-				return new PaymentOutcome( PaymentOutcome::STATUS_PENDING_ASYNC, $intent_id, '', $payment_method_id, $customer_id, array( 'meta' => $meta ) );
+				return new PaymentOutcome( PaymentOutcome::STATUS_PENDING_ASYNC, $intent_id, '', $payment_method_id, $customer_id, $outcome_data );
 
 			case 'requires_action':
 			case 'requires_confirmation':
@@ -719,14 +722,16 @@ class WooPaymentsProviderGatewayAdapter {
 					$this->build_confirmation_redirect( $context->get_order(), $client_secret ),
 					$payment_method_id,
 					$customer_id,
-					array( 'meta' => $meta )
+					$outcome_data
 				);
 
 			case 'canceled':
-				return new PaymentOutcome( PaymentOutcome::STATUS_CANCELED, $intent_id, '', $payment_method_id, $customer_id, array( 'meta' => $meta ) );
+				return new PaymentOutcome( PaymentOutcome::STATUS_CANCELED, $intent_id, '', $payment_method_id, $customer_id, $outcome_data );
 		}
 
-		$error = is_array( $result['last_payment_error'] ?? null ) ? $result['last_payment_error'] : array();
+		$error                         = is_array( $result['last_payment_error'] ?? null ) ? $result['last_payment_error'] : array();
+		$outcome_data['error_code']    = isset( $error['code'] ) ? (string) $error['code'] : 'wcpay_native_charge_failed';
+		$outcome_data['error_message'] = isset( $error['message'] ) ? (string) $error['message'] : '';
 
 		return new PaymentOutcome(
 			PaymentOutcome::STATUS_FAILED,
@@ -734,11 +739,7 @@ class WooPaymentsProviderGatewayAdapter {
 			'',
 			$payment_method_id,
 			$customer_id,
-			array(
-				'meta'          => $meta,
-				'error_code'    => isset( $error['code'] ) ? (string) $error['code'] : 'wcpay_native_charge_failed',
-				'error_message' => isset( $error['message'] ) ? (string) $error['message'] : '',
-			)
+			$outcome_data
 		);
 	}
 

@@ -80,16 +80,36 @@ class PaymentProcessingService {
 	 * @return array<string,string>
 	 */
 	public function process_checkout( PaymentContext $context, ProviderContract $provider ): array {
+		$outcome = $this->process_checkout_outcome( $context, $provider );
+
+		return $this->format_checkout_result( $context, $context->get_order(), $outcome );
+	}
+
+	/**
+	 * Process checkout payment through a provider and return the neutral outcome.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param PaymentContext   $context  Payment context.
+	 * @param ProviderContract $provider Provider.
+	 * @return PaymentOutcome
+	 */
+	public function process_checkout_outcome( PaymentContext $context, ProviderContract $provider ): PaymentOutcome {
 		$order           = $context->get_order();
 		$amount          = (float) $order->get_total();
 		$currency        = (string) $order->get_currency();
 		$idempotency_key = $this->idempotency->derive_key( $order, $provider->get_id(), 'charge', $amount, $currency );
 
 		if ( ! $this->order_payment_store->claim_order_payment_lock( $order, $idempotency_key ) ) {
-			return array(
-				'result'         => 'fail',
-				'redirect'       => '',
-				'payment_method' => '',
+			return new PaymentOutcome(
+				PaymentOutcome::STATUS_FAILED,
+				'',
+				'',
+				'',
+				'',
+				array(
+					'error_message' => __( 'A payment operation is already in progress for this order.', 'woocommerce' ),
+				)
 			);
 		}
 
@@ -100,7 +120,7 @@ class PaymentProcessingService {
 
 			$this->apply_checkout_outcome( $order, $outcome );
 
-			return $this->format_checkout_result( $context, $order, $outcome );
+			return $outcome;
 		} finally {
 			$this->order_payment_store->unlock_order_payment( $order );
 		}

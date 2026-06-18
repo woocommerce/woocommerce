@@ -121,6 +121,39 @@ class PaymentProcessingServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the checkout outcome while applying lifecycle changes.
+	 */
+	public function test_process_checkout_outcome_returns_outcome_after_lifecycle_application(): void {
+		$order   = $this->create_woopayments_order( '15.00' );
+		$outcome = new PaymentOutcome(
+			PaymentOutcome::STATUS_REQUIRES_CUSTOMER_ACTION,
+			'pi_requires_action',
+			'#wcpay-confirm-pi:1:secret:nonce',
+			'pm_requires_action',
+			'cus_requires_action',
+			array(
+				'meta' => array(
+					'_charge_id'             => 'ch_requires_action',
+					'_wcpay_intent_currency' => 'usd',
+				),
+			)
+		);
+
+		$provider = new RecordingProvider( $outcome );
+		$result   = $this->sut->process_checkout_outcome( PaymentContext::for_checkout( $order, OrderPaymentStore::GATEWAY_ID, 'pm_requires_action' ), $provider );
+		$order    = wc_get_order( $order->get_id() );
+
+		$this->assertSame( $outcome, $result );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'pending', $order->get_status() );
+		$this->assertSame( 'pi_requires_action', $order->get_meta( '_intent_id', true ) );
+		$this->assertSame( 'requires_action', $order->get_meta( '_intention_status', true ) );
+		$this->assertSame( 'pm_requires_action', $order->get_meta( '_payment_method_id', true ) );
+		$this->assertSame( 'cus_requires_action', $order->get_meta( '_stripe_customer_id', true ) );
+		$this->assertSame( 'ch_requires_action', $order->get_meta( '_charge_id', true ) );
+	}
+
+	/**
 	 * @testdox Should preserve a provider supplied empty checkout redirect.
 	 */
 	public function test_process_checkout_preserves_empty_checkout_redirect_override(): void {

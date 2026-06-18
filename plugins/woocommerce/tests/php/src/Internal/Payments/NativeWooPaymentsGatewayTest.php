@@ -7,6 +7,8 @@ use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\Payments\NativeWooPaymentsGateway;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
 use Automattic\WooCommerce\Internal\Payments\PaymentContext;
+use Automattic\WooCommerce\Internal\Payments\PaymentOutcome;
+use Automattic\WooCommerce\Internal\Payments\ProviderContract;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCheckoutBridge;
@@ -28,7 +30,10 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_all_actions( 'woocommerce_scheduled_subscription_payment_' . OrderPaymentStore::GATEWAY_ID );
 		remove_all_actions( 'woocommerce_subscription_failing_payment_method_updated_' . OrderPaymentStore::GATEWAY_ID );
+		remove_all_actions( 'woocommerce_woocommerce_payments_payment_requires_action' );
 		remove_all_filters( 'woocommerce_native_woopayments_subscriptions_for_renewal_order' );
+		remove_all_filters( 'woocommerce_email_classes' );
+		remove_all_filters( 'wcs_get_retry_rule_raw' );
 		unset( $_POST['wcpay-setup-intent'] );
 		unset( $_POST['wcpay-payment-method'] );
 		unset( $_POST['wcpay-is-platform-payment-method'] );
@@ -222,6 +227,129 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should register WooPayments failed-renewal authentication emails when subscriptions are supported.
+	 */
+	public function test_subscription_support_registers_failed_renewal_authentication_emails(): void {
+		new class() extends NativeWooPaymentsGateway {
+			/**
+			 * Tell whether subscriptions support is available.
+			 *
+			 * @return bool
+			 */
+			public function is_subscriptions_enabled(): bool {
+				return true;
+			}
+		};
+
+		/**
+		 * Filters the registered WooCommerce email classes.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param array $emails Email classes.
+		 */
+		$emails = apply_filters( 'woocommerce_email_classes', array() );
+
+		$this->assertArrayHasKey( 'WC_Payments_Email_Failed_Renewal_Authentication', $emails );
+		$this->assertSame( 'failed_renewal_authentication', $emails['WC_Payments_Email_Failed_Renewal_Authentication']->id );
+		$this->assertSame( 'failed-renewal-authentication.php', $emails['WC_Payments_Email_Failed_Renewal_Authentication']->template_html );
+		$this->assertSame( 'plain/failed-renewal-authentication.php', $emails['WC_Payments_Email_Failed_Renewal_Authentication']->template_plain );
+		$this->assertSame( 10, has_action( 'woocommerce_woocommerce_payments_payment_requires_action', array( $emails['WC_Payments_Email_Failed_Renewal_Authentication'], 'trigger' ) ) );
+		$this->assertArrayHasKey( 'WC_Payments_Email_Failed_Authentication_Retry', $emails );
+		$this->assertSame( 'failed_authentication_requested', $emails['WC_Payments_Email_Failed_Authentication_Retry']->id );
+		$this->assertSame( 'failed-renewal-authentication-requested.php', $emails['WC_Payments_Email_Failed_Authentication_Retry']->template_html );
+		$this->assertSame( 'plain/failed-renewal-authentication-requested.php', $emails['WC_Payments_Email_Failed_Authentication_Retry']->template_plain );
+	}
+
+	/**
+	 * @testdox Should register WooPayments failed-renewal authentication emails only once across gateway instances.
+	 */
+	public function test_subscription_email_registration_is_idempotent_across_gateway_instances(): void {
+		new class() extends NativeWooPaymentsGateway {
+			/**
+			 * Tell whether subscriptions support is available.
+			 *
+			 * @return bool
+			 */
+			public function is_subscriptions_enabled(): bool {
+				return true;
+			}
+		};
+		new class() extends NativeWooPaymentsGateway {
+			/**
+			 * Tell whether subscriptions support is available.
+			 *
+			 * @return bool
+			 */
+			public function is_subscriptions_enabled(): bool {
+				return true;
+			}
+		};
+
+		global $wp_filter;
+		$callbacks = $wp_filter['woocommerce_email_classes']->callbacks[20] ?? array();
+		$matches   = array_filter(
+			$callbacks,
+			static function ( array $callback ): bool {
+				return is_array( $callback['function'] ?? null )
+					&& NativeWooPaymentsGateway::class === ( $callback['function'][0] ?? null )
+					&& 'add_subscription_emails' === ( $callback['function'][1] ?? null );
+			}
+		);
+
+		$this->assertCount( 1, $matches );
+	}
+
+	/**
+	 * @testdox Should update retry rules for failed renewals that need authentication.
+	 */
+	public function test_failed_renewal_authentication_email_updates_retry_rules(): void {
+		new class() extends NativeWooPaymentsGateway {
+			/**
+			 * Tell whether subscriptions support is available.
+			 *
+			 * @return bool
+			 */
+			public function is_subscriptions_enabled(): bool {
+				return true;
+			}
+		};
+
+		/**
+		 * Filters the registered WooCommerce email classes.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param array $emails Email classes.
+		 */
+		$emails = apply_filters( 'woocommerce_email_classes', array() );
+		$order  = $this->create_order();
+		$email  = $emails['WC_Payments_Email_Failed_Renewal_Authentication'];
+
+		$email->object = $order;
+
+		$customer_rule = $email->prevent_retry_notification_email(
+			array(
+				'email_template_customer' => 'WCS_Email_Customer_Renewal_Invoice',
+				'email_template_admin'    => 'WCS_Email_Payment_Retry',
+			),
+			1,
+			$order->get_id()
+		);
+		$admin_rule    = $email->set_store_owner_custom_email(
+			array(
+				'email_template_customer' => 'WCS_Email_Customer_Renewal_Invoice',
+				'email_template_admin'    => 'WCS_Email_Payment_Retry',
+			),
+			1,
+			$order->get_id()
+		);
+
+		$this->assertSame( '', $customer_rule['email_template_customer'] );
+		$this->assertSame( 'WC_Payments_Email_Failed_Authentication_Retry', $admin_rule['email_template_admin'] );
+	}
+
+	/**
 	 * @testdox Should process scheduled subscription payments with the saved renewal token.
 	 */
 	public function test_scheduled_subscription_payment_uses_saved_renewal_token(): void {
@@ -294,6 +422,139 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 			),
 			$service->last_checkout_context->get_provider_data()
 		);
+	}
+
+	/**
+	 * @testdox Should fail scheduled renewals and fire the preserved action when customer authentication is required.
+	 */
+	public function test_scheduled_subscription_payment_fails_and_fires_requires_action_hook(): void {
+		$user_id = self::factory()->user->create();
+		$order   = $this->create_order();
+		$order->set_customer_id( $user_id );
+		$order->set_currency( 'USD' );
+		$order->add_payment_token( $this->create_card_token( $user_id, 'pm_requires_action' ) );
+		$order->save();
+
+		$service  = new class( new PaymentOutcome(
+			PaymentOutcome::STATUS_REQUIRES_CUSTOMER_ACTION,
+			'pi_requires_action',
+			'#wcpay-confirm-pi:' . $order->get_id() . ':secret:nonce',
+			'pm_requires_action',
+			'cus_requires_action',
+			array(
+				'charge_id' => 'ch_requires_action',
+				'meta'      => array(
+					'_charge_id' => 'ch_legacy_meta',
+				),
+			)
+		) ) extends RecordingPaymentProcessingService {
+			/**
+			 * Outcome returned by process_checkout_outcome.
+			 *
+			 * @var PaymentOutcome
+			 */
+			private PaymentOutcome $outcome;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param PaymentOutcome $outcome Outcome returned by process_checkout_outcome.
+			 */
+			public function __construct( PaymentOutcome $outcome ) {
+				$this->outcome = $outcome;
+			}
+
+			/**
+			 * Process checkout payment and return the neutral outcome.
+			 *
+			 * @param PaymentContext   $context  Payment context.
+			 * @param ProviderContract $provider Provider.
+			 * @return PaymentOutcome
+			 */
+			public function process_checkout_outcome( PaymentContext $context, ProviderContract $provider ): PaymentOutcome {
+				$this->last_checkout_context = $context;
+
+				return $this->outcome;
+			}
+		};
+		$received = array();
+		add_action(
+			'woocommerce_woocommerce_payments_payment_requires_action',
+			static function ( WC_Order $hook_order, string $intent_id, string $payment_method_id, string $customer_id, string $charge_id, string $currency ) use ( &$received ): void {
+				$received = array(
+					'hook_order'        => $hook_order,
+					'intent_id'         => $intent_id,
+					'payment_method_id' => $payment_method_id,
+					'customer_id'       => $customer_id,
+					'charge_id'         => $charge_id,
+					'currency'          => $currency,
+				);
+			},
+			10,
+			6
+		);
+
+		$gateway = new NativeWooPaymentsGateway();
+		$gateway->init( $service, new WooPaymentsProvider() );
+
+		$gateway->scheduled_subscription_payment( 12.0, wc_get_order( $order->get_id() ) );
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'failed', $order->get_status() );
+		$this->assertSame( $order->get_id(), $received['hook_order']->get_id() );
+		$this->assertSame( 'pi_requires_action', $received['intent_id'] );
+		$this->assertSame( 'pm_requires_action', $received['payment_method_id'] );
+		$this->assertSame( 'cus_requires_action', $received['customer_id'] );
+		$this->assertSame( 'ch_requires_action', $received['charge_id'] );
+		$this->assertSame( 'USD', $received['currency'] );
+	}
+
+	/**
+	 * @testdox Should still fail scheduled renewals when a customer-action hook callback throws.
+	 */
+	public function test_scheduled_subscription_payment_fails_when_requires_action_hook_throws(): void {
+		$user_id = self::factory()->user->create();
+		$order   = $this->create_order();
+		$order->set_customer_id( $user_id );
+		$order->set_currency( 'USD' );
+		$order->add_payment_token( $this->create_card_token( $user_id, 'pm_requires_action' ) );
+		$order->save();
+
+		$service                   = new RecordingPaymentProcessingService();
+		$service->checkout_outcome = new PaymentOutcome(
+			PaymentOutcome::STATUS_REQUIRES_CUSTOMER_ACTION,
+			'pi_requires_action',
+			'#wcpay-confirm-pi:' . $order->get_id() . ':secret:nonce',
+			'pm_requires_action',
+			'cus_requires_action',
+			array(
+				'meta' => array(
+					'_charge_id' => 'ch_requires_action',
+				),
+			)
+		);
+
+		add_action(
+			'woocommerce_woocommerce_payments_payment_requires_action',
+			static function (): void {
+				throw new \RuntimeException( 'email callback failed' );
+			}
+		);
+
+		$gateway = new NativeWooPaymentsGateway();
+		$gateway->init( $service, new WooPaymentsProvider() );
+
+		try {
+			$gateway->scheduled_subscription_payment( 12.0, wc_get_order( $order->get_id() ) );
+		} catch ( \RuntimeException $exception ) {
+			$this->fail( 'Requires-action hook exceptions should not prevent renewal failure handling.' );
+		}
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'failed', $order->get_status() );
 	}
 
 	/**
