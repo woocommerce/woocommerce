@@ -86,7 +86,7 @@ final class Billing_Policy {
 		$this->interval       = $interval;
 		$this->min_cycles     = $min_cycles;
 		$this->max_cycles     = $max_cycles;
-		$this->trial_duration = $trial_duration;
+		$this->trial_duration = self::normalize_trial_duration( $trial_duration );
 	}
 
 	/**
@@ -97,15 +97,27 @@ final class Billing_Policy {
 	 * @param array<string, mixed> $data Decoded billing_policy row.
 	 */
 	public static function from_array( array $data ): self {
-		$trial = $data['trial_duration'] ?? null;
-		if ( is_array( $trial ) ) {
-			$trial = array(
-				'length' => (int) $trial['length'],
-				'unit'   => (string) $trial['unit'],
-			);
-		} elseif ( null !== $trial ) {
-			$trial = null;
+		if ( ! array_key_exists( 'period', $data ) ) {
+			throw new DomainException( 'Billing_Policy: period is required, but not supplied.' );
 		}
+		if ( ! array_key_exists( 'interval', $data ) ) {
+			throw new DomainException( 'Billing_Policy: interval is required, but not supplied.' );
+		}
+		if ( ! is_string( $data['period'] ) ) {
+			throw new DomainException( 'Billing_Policy: period must be a string, got ' . gettype( $data['period'] ) . '.' );
+		}
+		if ( ! is_int( $data['interval'] ) ) {
+			throw new DomainException( 'Billing_Policy: interval must be an integer, got ' . gettype( $data['interval'] ) . '.' );
+		}
+
+		$trial = $data['trial_duration'] ?? null;
+		if ( null !== $trial && ! is_array( $trial ) ) {
+			throw new DomainException(
+				sprintf( 'Billing_Policy: trial_duration must be null or an array, got %s.', json_encode( $trial ) )
+			);
+		}
+
+		$trial = self::normalize_trial_duration( $trial );
 
 		return new self(
 			(string) $data['period'],
@@ -234,7 +246,7 @@ final class Billing_Policy {
 	private function normalize_unit( string $unit, string $label ): string {
 		if ( ! in_array( $unit, array( 'day', 'week', 'month', 'year' ), true ) ) {
 			throw new DomainException(
-				sprintf( 'Billing_Policy: unknown %s "%s".', $label, $unit )
+				sprintf( 'Billing_Policy: invalid %s "%s".', $label, $unit )
 			);
 		}
 
@@ -266,5 +278,40 @@ final class Billing_Policy {
 				sprintf( 'Billing_Policy: min_cycles cannot exceed max_cycles, got %d and %d.', $min_cycles, $max_cycles )
 			);
 		}
+	}
+
+	/**
+	 * Normalize the trial duration.
+	 *
+	 * @param array{length: int, unit: string}|null $trial_duration The trial duration.
+	 * @return array{length: int, unit: string}|null The normalized trial duration.
+	 * @throws DomainException If the trial duration is not valid.
+	 */
+	private static function normalize_trial_duration( ?array $trial_duration ): ?array {
+		if ( null === $trial_duration ) {
+			return null;
+		}
+
+		if ( ! array_key_exists( 'length', $trial_duration ) ) {
+			throw new DomainException( "Billing_Policy: trial_duration['length'] is required." );
+		}
+		if ( ! array_key_exists( 'unit', $trial_duration ) ) {
+			throw new DomainException( "Billing_Policy: trial_duration['unit'] is required." );
+		}
+		if ( ! is_int( $trial_duration['length'] ) ) {
+			throw new DomainException(
+				sprintf( "Billing_Policy: trial_duration['length'] must be an integer, got %s.", gettype( $trial_duration['length'] ) )
+			);
+		}
+		if ( ! is_string( $trial_duration['unit'] ) ) {
+			throw new DomainException(
+				sprintf( "Billing_Policy: trial_duration['unit'] must be a string, got %s.", gettype( $trial_duration['unit'] ) )
+			);
+		}
+
+		return array(
+			'length' => (int) $trial_duration['length'],
+			'unit'   => (string) $trial_duration['unit'],
+		);
 	}
 }
