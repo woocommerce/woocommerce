@@ -408,14 +408,32 @@ class HposLegacyOrderReportQueryBuilder {
 	 * @return string WHERE fragment.
 	 */
 	private function build_filter_range_where_clause( $start_date, $end_date ) {
-		$schema    = $this->get_report_schema();
-		$start_gmt = $start_date - $schema['gmt_offset'];
-		$end_gmt   = strtotime( '+1 DAY', $end_date ) - $schema['gmt_offset'];
+		$start_gmt = $this->local_timestamp_to_gmt( (int) $start_date );
+		$end_gmt   = $this->local_timestamp_to_gmt( (int) strtotime( '+1 DAY', $end_date ) );
 
 		return "
-			AND 	orders.date_created_gmt >= '" . gmdate( 'Y-m-d H:i:s', $start_gmt ) . "'
-			AND 	orders.date_created_gmt < '" . gmdate( 'Y-m-d H:i:s', $end_gmt ) . "'
+			AND 	orders.date_created_gmt >= '{$start_gmt}'
+			AND 	orders.date_created_gmt < '{$end_gmt}'
 		";
+	}
+
+	/**
+	 * Convert a WordPress "local" timestamp (one that reads as site-local wall-clock time
+	 * when formatted with {@see gmdate()}) into the equivalent GMT datetime string.
+	 *
+	 * Uses the site timezone via {@see wp_timezone()} so the offset is resolved for that
+	 * specific date. On timezones that observe DST this yields the correct UTC instant for
+	 * the boundary even when the report range spans a different offset period than "now",
+	 * unlike a single cached `gmt_offset`.
+	 *
+	 * @param int $local_ts Local timestamp to convert.
+	 *
+	 * @return string GMT datetime in `Y-m-d H:i:s` format.
+	 */
+	private function local_timestamp_to_gmt( int $local_ts ): string {
+		$local = new \DateTimeImmutable( gmdate( 'Y-m-d H:i:s', $local_ts ), wp_timezone() );
+
+		return $local->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
 	}
 
 	/**
@@ -618,10 +636,26 @@ class HposLegacyOrderReportQueryBuilder {
 	/**
 	 * Build a MySQL expression that converts `orders.date_created_gmt` into site-local time.
 	 *
+	 * For sites configured with a named timezone (e.g. `Europe/Berlin`) the conversion is done
+	 * per row with `CONVERT_TZ()` so DST is honoured and rows near midnight bucket into the
+	 * correct day/month. `CONVERT_TZ()` returns NULL when the server's timezone tables are not
+	 * loaded, so it falls back to a fixed-offset shift. Sites using a manual UTC offset have no
+	 * DST, so the fixed-offset shift is exact and is used directly.
+	 *
 	 * @return string SQL fragment that produces a local DATETIME.
 	 */
 	private function hpos_local_date_expr(): string {
-		$schema = $this->get_report_schema();
-		return "DATE_ADD(orders.date_created_gmt, INTERVAL {$schema['gmt_offset']} SECOND)";
+		$schema       = $this->get_report_schema();
+		$fixed_offset = "DATE_ADD(orders.date_created_gmt, INTERVAL {$schema['gmt_offset']} SECOND)";
+
+		$timezone_string = get_option( 'timezone_string' );
+		if ( '' === $timezone_string ) {
+			return $fixed_offset;
+		}
+
+		global $wpdb;
+		$convert = $wpdb->prepare( 'CONVERT_TZ(orders.date_created_gmt, %s, %s)', '+00:00', $timezone_string );
+
+		return "IFNULL({$convert}, {$fixed_offset})";
 	}
 }
