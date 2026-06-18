@@ -44,13 +44,11 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 		$hook_calls = 0;
 		$hook_arg   = null;
 
-		add_action(
-			'woocommerce_customer_email_verified',
-			function ( $id ) use ( &$hook_calls, &$hook_arg ) {
-				$hook_calls++;
-				$hook_arg = $id;
-			}
-		);
+		$listener = static function ( $id ) use ( &$hook_calls, &$hook_arg ) {
+			$hook_calls++;
+			$hook_arg = $id;
+		};
+		add_action( 'woocommerce_customer_email_verified', $listener );
 
 		$this->sut->mark_verified( $user_id );
 
@@ -58,7 +56,7 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $hook_calls, 'Hook should fire exactly once' );
 		$this->assertSame( $user_id, $hook_arg, 'Hook should receive the correct user ID' );
 
-		remove_all_actions( 'woocommerce_customer_email_verified' );
+		remove_action( 'woocommerce_customer_email_verified', $listener );
 	}
 
 	/**
