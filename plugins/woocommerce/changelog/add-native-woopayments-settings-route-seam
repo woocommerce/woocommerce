@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add Core-owned Payments settings provider sub-routes for native WooPayments admin surfaces.
