@@ -537,7 +537,7 @@ class OrdersTableQuery {
 
 		// Add top-level date parameters to the date_query.
 		$tl_query = array();
-		foreach ( array( 'hour', 'minute', 'second', 'year', 'monthnum', 'week', 'day', 'year' ) as $tl_key ) {
+		foreach ( array( 'hour', 'minute', 'second', 'year', 'monthnum', 'week', 'day' ) as $tl_key ) {
 			if ( $this->arg_isset( $tl_key ) ) {
 				$tl_query[ $tl_key ] = $this->args[ $tl_key ];
 				unset( $this->args[ $tl_key ] );
