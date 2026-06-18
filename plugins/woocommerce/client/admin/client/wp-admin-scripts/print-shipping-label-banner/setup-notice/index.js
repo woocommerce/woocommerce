@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Icon, warning } from '@wordpress/icons';
+import { Icon, cautionFilled } from '@wordpress/icons';
 
 export const setupErrorTypes = {
 	DOWNLOAD: 'download',
@@ -44,7 +44,7 @@ export default function SetupNotice( { isSetupError, errorReason } ) {
 
 	return (
 		<div className="wc-admin-shipping-banner-install-error">
-			<Icon icon={ warning } className="warning-icon" />
+			<Icon icon={ cautionFilled } className="warning-icon" />
 			{ getErrorMessage( errorReason ) }
 		</div>
 	);

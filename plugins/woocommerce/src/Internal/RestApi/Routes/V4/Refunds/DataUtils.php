@@ -147,9 +147,8 @@ class DataUtils {
 		$amount = 0;
 
 		foreach ( $line_items as $line_item ) {
-			// is_numeric() (not !empty) — an explicit refund_total of 0 is a valid
-			// "zero refund for this line" value and must round-trip cleanly, not
-			// be silently dropped from the sum.
+			// is_numeric() (not !empty) — an explicit refund_total of 0 can be part
+			// of a valid tax-only refund and must be included in the gross sum.
 			if ( isset( $line_item['refund_total'] ) && is_numeric( $line_item['refund_total'] ) ) {
 				$amount += $line_item['refund_total'];
 			}
@@ -675,12 +674,12 @@ class DataUtils {
 	 * the order item's unit price × quantity via compute_line_item_refund_total().
 	 *
 	 * Items that already have refund_total (including an explicit 0) are left
-	 * untouched, so existing v3-style clients keep working. Items where refund_total
-	 * is omitted OR is explicitly null are treated as "compute it for me". Items
-	 * that can't be resolved (missing line_item_id, item not on order, invalid
-	 * quantity, unsupported item type, product with zero source quantity) are
-	 * also left untouched — validate_line_items surfaces the right error for
-	 * those cases.
+	 * untouched so validation can decide whether the explicit amount is valid.
+	 * Items where refund_total is omitted OR is explicitly null are treated as
+	 * "compute it for me". Items that can't be resolved (missing line_item_id,
+	 * item not on order, invalid quantity, unsupported item type, product with
+	 * zero source quantity) are also left untouched — validate_line_items surfaces
+	 * the right error for those cases.
 	 *
 	 * Auto-computed values are tax-inclusive, matching the convention enforced by
 	 * the existing converter (convert_line_items_to_internal_format extracts tax
@@ -702,9 +701,8 @@ class DataUtils {
 
 		foreach ( $line_items as $key => $line_item ) {
 			// Treat a missing key and an explicit `null` value the same — both mean
-			// "compute it for me". An explicit `0` is treated as a zero refund for
-			// that line (existing behaviour: calculate_refund_amount skips it from
-			// the sum, the under-refund check may then trip).
+			// "compute it for me". An explicit `0` is caller-supplied input, so leave
+			// it untouched and let validation decide whether the gross line refund is valid.
 			if ( array_key_exists( 'refund_total', $line_item ) && null !== $line_item['refund_total'] ) {
 				continue;
 			}

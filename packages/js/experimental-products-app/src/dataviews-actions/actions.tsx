@@ -400,7 +400,7 @@ export const moveToTrashAction = (): Action< ProductEntityRecord > => ( {
 								successfulItems.length,
 								'woocommerce'
 							),
-							successfulItems.length
+							successfulItems.length.toString()
 					  ),
 				{
 					type: 'snackbar',
@@ -467,7 +467,7 @@ export const restoreAction = (): Action< ProductEntityRecord > => ( {
 								successfulItems.length,
 								'woocommerce'
 							),
-							successfulItems.length
+							successfulItems.length.toString()
 					  ),
 				{ type: 'snackbar' }
 			);
@@ -534,7 +534,7 @@ export const permanentlyDeleteAction = (): Action< ProductEntityRecord > => ( {
 									successfulItems.length,
 									'woocommerce'
 								),
-								successfulItems.length
+								successfulItems.length.toString()
 						  ),
 					{ type: 'snackbar' }
 				);
@@ -573,7 +573,7 @@ export const permanentlyDeleteAction = (): Action< ProductEntityRecord > => ( {
 									items.length,
 									'woocommerce'
 								),
-								items.length
+								items.length.toString()
 						  ) }
 				</Text>
 				<HStack justify="flex-end">

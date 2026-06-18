@@ -97,6 +97,7 @@ function createValidationRuleForCommaSeparatedEmailsField(
 				getWooCommerceData()?.[ fieldName ] ?? ''
 			);
 
+			// @ts-expect-error - The type isn't correct. We need to update @wordpress/i18n to a newer version to fix it.
 			return sprintf( message, invalidEmails.join( ',' ) );
 		},
 		actions: [],
