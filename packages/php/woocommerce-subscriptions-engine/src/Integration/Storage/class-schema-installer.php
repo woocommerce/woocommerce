@@ -33,7 +33,7 @@ final class Schema_Installer {
 	 * Schema version. Bump when the CREATE TABLE statements change so the
 	 * version-gated install runs dbDelta again.
 	 *
-	 * 1.0.0 - baseline plan and contract tables, including the nullable `owner`
+	 * 1.0.0 - baseline plan and contract tables, including the nullable `extension_slug`
 	 *         column on plans and contracts.
 	 */
 	const VERSION = '1.0.0';
@@ -181,7 +181,7 @@ final class Schema_Installer {
   KEY app_id (app_id)
 ) {$collate};";
 
-		// `owner` records the registered slug of the extension that created the
+		// `extension_slug` records the registered slug of the extension that created the
 		// plan. Nullable while owner identifier/registration semantics are still
 		// open; tightened additively once decided.
 		$plans_sql = "CREATE TABLE {$plans} (
@@ -195,19 +195,19 @@ final class Schema_Installer {
   inventory_policy JSON NULL,
   pricing_policy JSON NULL,
   category VARCHAR(32) NOT NULL DEFAULT 'SUBSCRIPTION',
-  owner VARCHAR(64) NULL,
+  extension_slug VARCHAR(64) NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
   KEY group_id (group_id),
   KEY category (category),
-  KEY owner (owner)
+  KEY extension_slug (extension_slug)
 ) {$collate};";
 
 		// `currency` is first-class (forward-compat for multi-currency recurring;
 		// today always the store base currency). `schedule_source` distinguishes
 		// contracts whose renewals this engine owns from gateway-owned schedules.
-		// `owner` mirrors the plans column. Totals follow the order PHP-property
+		// `extension_slug` mirrors the plans column. Totals follow the order PHP-property
 		// naming rather than the HPOS storage-column names.
 		$contracts_sql = "CREATE TABLE {$contracts} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -216,7 +216,7 @@ final class Schema_Installer {
   currency CHAR(3) NOT NULL,
   selling_plan_id BIGINT UNSIGNED NOT NULL,
   origin_order_id BIGINT UNSIGNED NOT NULL,
-  owner VARCHAR(64) NULL,
+  extension_slug VARCHAR(64) NULL,
   payment_method VARCHAR(100) NULL,
   payment_method_title VARCHAR(200) NULL,
   payment_token_id BIGINT UNSIGNED NULL,
@@ -238,7 +238,7 @@ final class Schema_Installer {
   KEY customer_status (customer_id, status),
   KEY due (next_payment_gmt, status),
   KEY origin_order (origin_order_id),
-  KEY owner (owner)
+  KEY extension_slug (extension_slug)
 ) {$collate};";
 
 		$contract_items_sql = "CREATE TABLE {$contract_items} (

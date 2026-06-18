@@ -66,25 +66,25 @@ class Schema_Installer_Test extends Engine_Integration_Test_Case {
 		Schema_Installer::get_table_name( 'not_a_table' );
 	}
 
-	public function test_plans_table_has_owner_column(): void {
+	public function test_plans_table_has_extension_slug_column(): void {
 		global $wpdb;
 
 		$table = Schema_Installer::get_table_name( Schema_Installer::TABLE_PLANS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$column = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'owner' ) );
+		$column = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'extension_slug' ) );
 
-		$this->assertSame( 'owner', $column );
+		$this->assertSame( 'extension_slug', $column );
 	}
 
-	public function test_contracts_table_has_owner_column(): void {
+	public function test_contracts_table_has_extension_slug_column(): void {
 		global $wpdb;
 
 		$table = Schema_Installer::get_table_name( Schema_Installer::TABLE_CONTRACTS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$column = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'owner' ) );
+		$column = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'extension_slug' ) );
 
-		$this->assertSame( 'owner', $column );
+		$this->assertSame( 'extension_slug', $column );
 	}
 }

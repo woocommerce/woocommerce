@@ -29,7 +29,7 @@ class Plan_Test extends TestCase {
 		);
 	}
 
-	public function test_create_defaults_category_and_owner(): void {
+	public function test_create_defaults_category_and_extension_slug(): void {
 		$plan = Plan::create(
 			5,
 			array(
@@ -41,7 +41,7 @@ class Plan_Test extends TestCase {
 		$this->assertNull( $plan->get_id() );
 		$this->assertSame( 5, $plan->get_group_id() );
 		$this->assertSame( Plan::DEFAULT_CATEGORY, $plan->get_category() );
-		$this->assertNull( $plan->get_owner() );
+		$this->assertNull( $plan->get_extension_slug() );
 	}
 
 	public function test_calculate_price_delegates_to_pricing_policy(): void {
@@ -122,19 +122,19 @@ class Plan_Test extends TestCase {
 		);
 	}
 
-	public function test_to_storage_exposes_owner_and_decoded_policies(): void {
+	public function test_to_storage_exposes_extension_slug_and_decoded_policies(): void {
 		$plan = Plan::create(
 			3,
 			array(
 				'name'           => 'Owned',
 				'billing_policy' => $this->billing(),
-				'owner'          => 'lite',
+				'extension_slug' => 'lite',
 			)
 		);
 
 		$storage = $plan->to_storage();
 
-		$this->assertSame( 'lite', $storage['owner'] );
+		$this->assertSame( 'lite', $storage['extension_slug'] );
 		$this->assertSame( 3, $storage['group_id'] );
 		$this->assertIsArray( $storage['billing_policy'] );
 	}

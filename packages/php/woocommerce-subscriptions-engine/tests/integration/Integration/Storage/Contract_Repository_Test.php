@@ -26,7 +26,7 @@ class Contract_Repository_Test extends Engine_Integration_Test_Case {
 				'currency'             => 'USD',
 				'selling_plan_id'      => 7,
 				'origin_order_id'      => 1001,
-				'owner'                => 'lite',
+				'extension_slug'       => 'lite',
 				'payment_method'       => 'woocommerce_payments',
 				'payment_method_title' => 'Credit card',
 				'payment_token_id'     => 55,
@@ -75,7 +75,7 @@ class Contract_Repository_Test extends Engine_Integration_Test_Case {
 		$this->assertSame( $id, $fetched->get_id() );
 		$this->assertSame( 42, $fetched->get_customer_id() );
 		$this->assertSame( 'USD', $fetched->get_currency() );
-		$this->assertSame( 'lite', $fetched->get_owner() );
+		$this->assertSame( 'lite', $fetched->get_extension_slug() );
 		$this->assertSame( Contract_Status::ACTIVE, $fetched->get_status() );
 		$this->assertSame( '2026-07-15 00:00:00', $fetched->get_next_payment_gmt() );
 
@@ -99,7 +99,7 @@ class Contract_Repository_Test extends Engine_Integration_Test_Case {
 		$this->assertSame( 'pdp', $fetched->get_meta()['source_channel'] );
 	}
 
-	public function test_owner_defaults_to_null_when_unset(): void {
+	public function test_extension_slug_defaults_to_null_when_unset(): void {
 		$repo = new Contract_Repository();
 
 		$id = $repo->insert(
@@ -114,7 +114,7 @@ class Contract_Repository_Test extends Engine_Integration_Test_Case {
 			)
 		);
 
-		$this->assertNull( $repo->find( $id )->get_owner() );
+		$this->assertNull( $repo->find( $id )->get_extension_slug() );
 	}
 
 	public function test_delete_removes_contract_and_children(): void {

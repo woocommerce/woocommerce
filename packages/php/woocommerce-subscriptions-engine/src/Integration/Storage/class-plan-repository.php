@@ -51,7 +51,7 @@ final class Plan_Repository {
 				'inventory_policy' => null,
 				'pricing_policy'   => null !== $data['pricing_policy'] ? wp_json_encode( $data['pricing_policy'] ) : null,
 				'category'         => $data['category'],
-				'owner'            => $data['owner'],
+				'extension_slug'   => $data['extension_slug'],
 				'date_created_gmt' => $now,
 				'date_updated_gmt' => $now,
 			)
@@ -120,7 +120,7 @@ final class Plan_Repository {
 				'delivery_policy'  => null !== $data['delivery_policy'] ? wp_json_encode( $data['delivery_policy'] ) : null,
 				'pricing_policy'   => null !== $data['pricing_policy'] ? wp_json_encode( $data['pricing_policy'] ) : null,
 				'category'         => $data['category'],
-				'owner'            => $data['owner'],
+				'extension_slug'   => $data['extension_slug'],
 				'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ),
 			),
 			array( 'id' => $id )

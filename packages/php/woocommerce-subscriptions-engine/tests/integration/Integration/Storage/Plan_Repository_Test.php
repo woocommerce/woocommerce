@@ -58,7 +58,7 @@ class Plan_Repository_Test extends Engine_Integration_Test_Case {
 		$this->assertSame( array( array( 'name' => 'Size' ) ), $fetched->get_options_display() );
 	}
 
-	public function test_plan_round_trips_with_policies_and_owner(): void {
+	public function test_plan_round_trips_with_policies_and_extension_slug(): void {
 		$group_id = $this->make_group();
 		$repo     = new Plan_Repository();
 
@@ -90,7 +90,7 @@ class Plan_Repository_Test extends Engine_Integration_Test_Case {
 						),
 					)
 				),
-				'owner'          => 'lite',
+				'extension_slug' => 'lite',
 			)
 		);
 
@@ -104,7 +104,7 @@ class Plan_Repository_Test extends Engine_Integration_Test_Case {
 		$this->assertSame( 'Monthly', $fetched->get_name() );
 		$this->assertSame( 'A monthly plan', $fetched->get_description() );
 		$this->assertSame( $group_id, $fetched->get_group_id() );
-		$this->assertSame( 'lite', $fetched->get_owner() );
+		$this->assertSame( 'lite', $fetched->get_extension_slug() );
 		$this->assertSame( 'month', $fetched->get_billing_policy()->get_period() );
 		$this->assertSame( 12, $fetched->get_billing_policy()->get_max_cycles() );
 		$this->assertNotNull( $fetched->get_pricing_policy() );
@@ -135,7 +135,7 @@ class Plan_Repository_Test extends Engine_Integration_Test_Case {
 		$this->assertInstanceOf( Plan::class, $fetched );
 		$this->assertNull( $fetched->get_pricing_policy() );
 		$this->assertNull( $fetched->get_delivery_policy() );
-		$this->assertNull( $fetched->get_owner() );
+		$this->assertNull( $fetched->get_extension_slug() );
 	}
 
 	public function test_update_persists_changes(): void {

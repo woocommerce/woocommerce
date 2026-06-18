@@ -81,7 +81,7 @@ final class Contract {
 	 *
 	 * @var string|null
 	 */
-	private $owner;
+	private $extension_slug;
 
 	/**
 	 * Gateway code, or null.
@@ -221,7 +221,7 @@ final class Contract {
 		$this->currency             = $fields['currency'];
 		$this->selling_plan_id      = $fields['selling_plan_id'];
 		$this->origin_order_id      = $fields['origin_order_id'];
-		$this->owner                = $fields['owner'];
+		$this->extension_slug       = $fields['extension_slug'];
 		$this->payment_method       = $fields['payment_method'];
 		$this->payment_method_title = $fields['payment_method_title'];
 		$this->payment_token_id     = $fields['payment_token_id'];
@@ -252,7 +252,7 @@ final class Contract {
 	 *     origin_order_id: int,
 	 *     start_gmt: string,
 	 *     status?: string,
-	 *     owner?: string,
+	 *     extension_slug?: string,
 	 *     payment_method?: string,
 	 *     payment_method_title?: string,
 	 *     payment_token_id?: int,
@@ -291,7 +291,7 @@ final class Contract {
 				'currency'             => (string) $args['currency'],
 				'selling_plan_id'      => (int) $args['selling_plan_id'],
 				'origin_order_id'      => (int) $args['origin_order_id'],
-				'owner'                => $args['owner'] ?? null,
+				'extension_slug'       => $args['extension_slug'] ?? null,
 				'payment_method'       => $args['payment_method'] ?? null,
 				'payment_method_title' => $args['payment_method_title'] ?? null,
 				'payment_token_id'     => isset( $args['payment_token_id'] ) ? (int) $args['payment_token_id'] : null,
@@ -331,7 +331,7 @@ final class Contract {
 				'currency'             => (string) $row['currency'],
 				'selling_plan_id'      => (int) $row['selling_plan_id'],
 				'origin_order_id'      => (int) $row['origin_order_id'],
-				'owner'                => isset( $row['owner'] ) ? (string) $row['owner'] : null,
+				'extension_slug'       => isset( $row['extension_slug'] ) ? (string) $row['extension_slug'] : null,
 				'payment_method'       => isset( $row['payment_method'] ) ? (string) $row['payment_method'] : null,
 				'payment_method_title' => isset( $row['payment_method_title'] ) ? (string) $row['payment_method_title'] : null,
 				'payment_token_id'     => isset( $row['payment_token_id'] ) ? (int) $row['payment_token_id'] : null,
@@ -428,8 +428,8 @@ final class Contract {
 	/**
 	 * Owning extension slug, or null.
 	 */
-	public function get_owner(): ?string {
-		return $this->owner;
+	public function get_extension_slug(): ?string {
+		return $this->extension_slug;
 	}
 
 	/**
@@ -533,7 +533,7 @@ final class Contract {
 			'currency'             => $this->currency,
 			'selling_plan_id'      => $this->selling_plan_id,
 			'origin_order_id'      => $this->origin_order_id,
-			'owner'                => $this->owner,
+			'extension_slug'       => $this->extension_slug,
 			'payment_method'       => $this->payment_method,
 			'payment_method_title' => $this->payment_method_title,
 			'payment_token_id'     => $this->payment_token_id,

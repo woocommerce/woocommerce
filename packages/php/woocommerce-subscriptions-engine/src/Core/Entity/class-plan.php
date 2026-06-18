@@ -97,7 +97,7 @@ final class Plan {
 	 *
 	 * @var string|null
 	 */
-	private $owner;
+	private $extension_slug;
 
 	/**
 	 * Use {@see self::create()} or {@see self::from_storage()}.
@@ -111,7 +111,7 @@ final class Plan {
 	 * @param Delivery_Policy|null $delivery_policy Optional delivery policy.
 	 * @param Pricing_Policy|null  $pricing_policy  Optional pricing policy.
 	 * @param string               $category        Plan category.
-	 * @param string|null          $owner           Owning extension slug.
+	 * @param string|null          $extension_slug  Owning extension slug.
 	 */
 	private function __construct(
 		?int $id,
@@ -123,7 +123,7 @@ final class Plan {
 		?Delivery_Policy $delivery_policy,
 		?Pricing_Policy $pricing_policy,
 		string $category,
-		?string $owner
+		?string $extension_slug
 	) {
 		$this->id              = $id;
 		$this->group_id        = $group_id;
@@ -134,7 +134,7 @@ final class Plan {
 		$this->delivery_policy = $delivery_policy;
 		$this->pricing_policy  = $pricing_policy;
 		$this->category        = $category;
-		$this->owner           = $owner;
+		$this->extension_slug  = $extension_slug;
 	}
 
 	/**
@@ -149,7 +149,7 @@ final class Plan {
 	 *     delivery_policy?: Delivery_Policy,
 	 *     pricing_policy?: Pricing_Policy,
 	 *     category: string,
-	 *     owner?: string,
+	 *     extension_slug?: string,
 	 * } $args     Plan attributes.
 	 * @throws InvalidArgumentException If pricing_policy entries fail validation.
 	 */
@@ -169,7 +169,7 @@ final class Plan {
 			$args['delivery_policy'] ?? null,
 			$pricing_policy,
 			$args['category'] ?? self::DEFAULT_CATEGORY,
-			$args['owner'] ?? null
+			$args['extension_slug'] ?? null
 		);
 	}
 
@@ -189,7 +189,7 @@ final class Plan {
 			isset( $row['delivery_policy'] ) && is_array( $row['delivery_policy'] ) ? Delivery_Policy::from_array( $row['delivery_policy'] ) : null,
 			isset( $row['pricing_policy'] ) && is_array( $row['pricing_policy'] ) ? Pricing_Policy::from_array( $row['pricing_policy'] ) : null,
 			(string) ( $row['category'] ?? self::DEFAULT_CATEGORY ),
-			isset( $row['owner'] ) ? (string) $row['owner'] : null
+			isset( $row['extension_slug'] ) ? (string) $row['extension_slug'] : null
 		);
 	}
 
@@ -337,8 +337,8 @@ final class Plan {
 	/**
 	 * Owning extension slug, or null.
 	 */
-	public function get_owner(): ?string {
-		return $this->owner;
+	public function get_extension_slug(): ?string {
+		return $this->extension_slug;
 	}
 
 	/**
@@ -374,7 +374,7 @@ final class Plan {
 			'delivery_policy' => null !== $this->delivery_policy ? $this->delivery_policy->to_array() : null,
 			'pricing_policy'  => null !== $this->pricing_policy ? $this->pricing_policy->to_array() : null,
 			'category'        => $this->category,
-			'owner'           => $this->owner,
+			'extension_slug'  => $this->extension_slug,
 		);
 	}
 
