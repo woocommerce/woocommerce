@@ -116,7 +116,24 @@ class OrderController {
 		$order->set_customer_id( get_current_user_id() );
 		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
 		$order->set_customer_user_agent( wc_get_user_agent() );
-		$order->set_payment_method( PaymentUtils::get_default_payment_method() );
+
+		// NOTE (POS spike): land this filter as a standalone trunk PR,
+		// separate from the POS spike.
+		/**
+		 * Filters the default payment_method stamped onto a draft order built from cart.
+		 *
+		 * The default ({@see PaymentUtils::get_default_payment_method()}) returns
+		 * the first enabled gateway, which fits web checkout. Trusted-actor callers
+		 * that defer payment selection past order creation (e.g. POS) can return
+		 * an empty string.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param string    $payment_method The default payment method id. Defaults to the first enabled gateway.
+		 * @param \WC_Order $order          Order object being updated.
+		 */
+		$payment_method = (string) apply_filters( 'woocommerce_store_api_order_default_payment_method', PaymentUtils::get_default_payment_method(), $order );
+		$order->set_payment_method( $payment_method );
 		$order->update_meta_data( 'is_vat_exempt', wc_bool_to_string( wc()->cart->get_customer()->get_is_vat_exempt() ) );
 		$order->calculate_totals();
 	}
@@ -339,6 +356,26 @@ class OrderController {
 	protected function validate_email( \WC_Order $order ) {
 		$email = $order->get_billing_email();
 
+		// NOTE (POS spike): land this filter as a standalone trunk PR,
+		// separate from the POS spike.
+		/**
+		 * Filters whether billing_email is required on a Store API order.
+		 *
+		 * Defaults to true (web checkout: every order has a customer email for
+		 * confirmations). Trusted-actor callers that omit a customer email —
+		 * e.g. anonymous in-store POS sales — can return false to skip both the
+		 * empty and format checks.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param bool      $require Whether to require an email on the order. Default true.
+		 * @param \WC_Order $order   Order object being validated.
+		 */
+		$require_email = (bool) apply_filters( 'woocommerce_store_api_require_billing_email', true, $order );
+		if ( ! $require_email ) {
+			return;
+		}
+
 		if ( empty( $email ) ) {
 			throw new RouteException(
 				'woocommerce_rest_missing_email_address',
@@ -368,6 +405,32 @@ class OrderController {
 	 * @param bool      $needs_shipping Whether the order needs shipping.
 	 */
 	protected function validate_addresses( \WC_Order $order, bool $needs_shipping ) {
+		// NOTE (POS spike): land this filter as a standalone trunk PR,
+		// separate from the POS spike. Mirrors the
+		// `woocommerce_store_api_checkout_require_payment_method` opt-out pattern.
+
+		/**
+		 * Filters whether the Store API runs address validation on a Checkout
+		 * request. Returning false short-circuits the address field-presence
+		 * checks (country, postcode, phone, etc.) for trusted-actor callers that
+		 * accept orders with incomplete or missing address data.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param bool      $validate         Whether to run validation. Default true.
+		 * @param \WC_Order $order            The order being validated.
+		 * @param bool      $needs_shipping   Whether the order needs shipping.
+		 */
+		$validate = (bool) apply_filters(
+			'woocommerce_store_api_validate_addresses',
+			true,
+			$order,
+			$needs_shipping
+		);
+		if ( ! $validate ) {
+			return;
+		}
+
 		$errors           = new \WP_Error();
 		$billing_country  = $order->get_billing_country();
 		$shipping_country = $order->get_shipping_country();

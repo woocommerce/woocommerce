@@ -17,6 +17,18 @@ use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 
 /**
  * Abstract Cart Route
+ *
+ * Heads up: this base class and its concrete cart/checkout routes are reused
+ * almost unchanged by other first-party clients. Agentic commerce subclasses
+ * them under its own namespace (`wc/agentic/v1`, see
+ * {@see \Automattic\WooCommerce\StoreApi\Routes\V1\Agentic}); POS instead runs
+ * over these very routes and reshapes their behaviour through the POS policy
+ * hooks (see {@see \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks}).
+ * Either way, behavioural changes here — new required fields, validation rules,
+ * nonce/session handling, etc. — flow through to those clients, where they may
+ * not be appropriate (an in-person POS sale, for example, has no shipping
+ * contact). Where a behaviour should be opt-out, prefer adding a seam or filter
+ * (e.g. {@see self::is_cookie_authenticated()}) over hard-coding it.
  */
 abstract class AbstractCartRoute extends AbstractRoute {
 	use DraftOrderTrait;
@@ -215,6 +227,29 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	}
 
 	/**
+	 * Whether this route authenticates the request via the WordPress auth cookie.
+	 *
+	 * The Store API nonce exists to protect cookie-authenticated requests against
+	 * CSRF. Routes that authenticate by other means — a Jetpack blog token, an
+	 * application password, a POS capability check, etc. — are not a CSRF target,
+	 * so they can opt out of the nonce requirement by returning false here. This
+	 * is the intended extension point for that: override this single method rather
+	 * than re-implementing {@see self::requires_nonce()} and duplicating the
+	 * cart-token / update-request logic.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return bool
+	 */
+	protected function is_cookie_authenticated( \WP_REST_Request $request ) {
+		unset( $request );
+		return true;
+	}
+
+	/**
 	 * Checks if a nonce is required for the route.
 	 *
 	 * @param \WP_REST_Request $request Request.
@@ -222,6 +257,9 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return bool
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
+		if ( ! $this->is_cookie_authenticated( $request ) ) {
+			return false;
+		}
 		return $this->is_update_request( $request ) && ! $this->has_cart_token( $request );
 	}
 

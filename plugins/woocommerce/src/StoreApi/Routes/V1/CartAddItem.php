@@ -5,6 +5,11 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 
 /**
  * CartAddItem class.
+ *
+ * Also serves POS, which runs over this same `wc/store/v1` route and adjusts
+ * behaviour through the POS policy hooks rather than a subclass. Behavioural
+ * changes here therefore affect POS too; prefer a seam or filter for anything
+ * POS should be able to opt out of.
  */
 class CartAddItem extends AbstractCartRoute {
 	/**

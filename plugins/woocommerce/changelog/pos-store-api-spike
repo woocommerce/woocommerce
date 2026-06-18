@@ -1,0 +1,3 @@
+Significance: patch
+Type: add
+Comment: Architectural spike routing mobile POS through the shared WooCommerce Store API cart/checkout routes (wc/store/v1) rather than a dedicated POS namespace. POS context is derived from auth (a manage_woocommerce caller on a cart/checkout route) and request-scoped policy hooks switch behaviour (stock, shipping, tax location, identity, payment method, address, email, custom fees). Adds a single manager-gated cart/add-fee route and exempts POS from rate limiting. Gated on the point_of_sale feature and not yet user-facing.

@@ -405,6 +405,22 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\SessionHandlerSwap::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\StockPolicy::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutPaymentMethodPolicy::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutAddressPolicy::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CartPersistencePolicy::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutEmailPolicy::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomFeesPolicy::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CurrentUserSwap::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerSwap::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerAccountPolicy::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\DefaultPaymentMethodPolicy::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\ShippingPolicy::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\TaxLocationPolicy::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\RateLimitPolicy::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\NoncePolicy::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CartTokenParamPolicy::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.

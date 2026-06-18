@@ -71580,11 +71580,6 @@ parameters:
 			count: 1
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessions.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Agentic\\CheckoutSessions\:\:requires_nonce\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessions.php
 
 		-
 			message: '#^Parameter \#1 \$cart of method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\CartSchema\:\:get_item_response\(\) expects WC_Cart, Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Agentic\\AgenticCheckoutSession given\.$#'
@@ -71700,11 +71695,6 @@ parameters:
 			count: 1
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Agentic\\CheckoutSessionsComplete\:\:requires_nonce\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Agentic\\CheckoutSessionsComplete\:\:update_order_from_request\(\) has no return type specified\.$#'

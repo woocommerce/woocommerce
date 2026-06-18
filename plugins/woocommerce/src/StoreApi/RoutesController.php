@@ -89,6 +89,13 @@ class RoutesController {
 				Routes\V1\Agentic\CheckoutSessionsUpdate::IDENTIFIER   => Routes\V1\Agentic\CheckoutSessionsUpdate::class,
 				Routes\V1\Agentic\CheckoutSessionsComplete::IDENTIFIER => Routes\V1\Agentic\CheckoutSessionsComplete::class,
 			],
+			'pos'           => [
+				// Registered only when the `point_of_sale` feature is enabled. POS reuses
+				// the shared cart/checkout routes; the only route it needs to add is an
+				// ad-hoc fee writer, which has no public Store API counterpart. The route
+				// itself is gated to `manage_woocommerce`.
+				Routes\V1\CartAddFee::IDENTIFIER => Routes\V1\CartAddFee::class,
+			],
 		];
 	}
 
@@ -106,6 +113,10 @@ class RoutesController {
 
 		if ( FeaturesUtil::feature_is_enabled( 'agentic_checkout' ) ) {
 			$this->register_routes( 'agentic', 'wc/agentic/v1' );
+		}
+
+		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
+			$this->register_routes( 'pos', self::$api_namespace . '/v1' );
 		}
 	}
 

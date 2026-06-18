@@ -116,13 +116,19 @@ class CheckoutSessions extends AbstractCartRoute {
 	}
 
 	/**
-	 * Check if a nonce is required for the route.
+	 * Agentic routes authenticate with the Jetpack blog token via
+	 * {@see self::is_authorized()}, not the WordPress auth cookie, so they are
+	 * not a CSRF target and opt out of the Store API nonce requirement through
+	 * the base-class seam.
+	 *
+	 * @see \Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute::is_cookie_authenticated()
 	 *
 	 * @param \WP_REST_Request $request Request object.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @return bool False, Jetpack blog token auth used instead.
 	 */
-	protected function requires_nonce( \WP_REST_Request $request ) {
-		// Uses Jetpack blog token authentication via is_authorized().
+	protected function is_cookie_authenticated( \WP_REST_Request $request ) {
+		unset( $request );
 		return false;
 	}
 
