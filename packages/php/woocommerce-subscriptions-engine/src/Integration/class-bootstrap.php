@@ -41,7 +41,11 @@ final class Bootstrap {
 
 		self::$initialized = true;
 
-		add_action( 'init', array( __CLASS__, 'maybe_install_schema' ) );
+		if ( did_action( 'init' ) ) {
+			self::maybe_install_schema();
+		} else {
+			add_action( 'init', array( __CLASS__, 'maybe_install_schema' ) );
+		}
 	}
 
 	/**
