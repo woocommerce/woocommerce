@@ -166,15 +166,17 @@ class AsyncGenerator {
 		update_option( $option_key, $status );
 
 		try {
-			$feed   = $this->integration->create_feed();
-			$walker = ProductWalker::from_integration( $this->integration, $feed );
+			// Large catalogs are memory heavy, so give the process as much headroom as the
+			// host allows before the heavy lifting begins. This only raises the limit for the
+			// current process and never lowers an already higher limit.
+			wp_raise_memory_limit( 'admin' );
 
 			/**
 			 * Filters the per-batch PHP execution time limit (in seconds) for product feed generation.
 			 *
-			 * The execution time limit is reset to this value after each processed batch, so that a low
-			 * `max_execution_time` does not abort generation part-way through a large catalog. Return 0
-			 * to leave the time limit untouched.
+			 * The execution time limit is set to this value up front and reset to it after each processed
+			 * batch, so that a low `max_execution_time` does not abort generation part-way through a large
+			 * catalog. Return 0 to leave the time limit untouched.
 			 *
 			 * This only affects PHP's own execution timeout. It does not extend Action Scheduler's
 			 * failure period (`action_scheduler_failure_period`, 300 seconds by default) nor any hard
@@ -186,6 +188,16 @@ class AsyncGenerator {
 			 * @since 11.0.0
 			 */
 			$batch_time_limit = (int) apply_filters( 'woocommerce_product_feed_batch_time_limit', 5 * MINUTE_IN_SECONDS );
+
+			// Raise the time limit up front too: the walker only resets it after each batch, so the
+			// initial product query and the first batch would otherwise run under whatever (possibly
+			// very low) limit the Action Scheduler request started with.
+			if ( $batch_time_limit > 0 ) {
+				wc_set_time_limit( $batch_time_limit );
+			}
+
+			$feed   = $this->integration->create_feed();
+			$walker = ProductWalker::from_integration( $this->integration, $feed );
 			$walker->add_time_limit( $batch_time_limit );
 
 			// Add dynamic args to the mapper.
