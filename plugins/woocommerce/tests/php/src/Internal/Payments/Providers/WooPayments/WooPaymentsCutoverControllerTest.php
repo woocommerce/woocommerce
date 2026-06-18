@@ -11,6 +11,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Subscriptions\WooPaymentsLegacySubscriptionsGuard;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCanceledAuthorizationFeeRemediationService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCutoverController;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -36,11 +37,39 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	private WooPaymentsProvider $provider;
 
 	/**
+	 * Canceled-authorization fee remediation service mock.
+	 *
+	 * @var WooPaymentsCanceledAuthorizationFeeRemediationService&\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private WooPaymentsCanceledAuthorizationFeeRemediationService $fee_remediation_service;
+
+	/**
 	 * Whether the native provider can process payments.
 	 *
 	 * @var bool
 	 */
 	private bool $native_provider_ready = false;
+
+	/**
+	 * Whether canceled-authorization fee remediation can be scheduled during cutover.
+	 *
+	 * @var bool
+	 */
+	private bool $fee_remediation_schedulable = true;
+
+	/**
+	 * Whether canceled-authorization fee remediation scheduling succeeds after deactivation.
+	 *
+	 * @var string
+	 */
+	private string $fee_remediation_schedule_result = 'scheduled';
+
+	/**
+	 * Number of times the cutover asked the remediation service to adopt the queue.
+	 *
+	 * @var int
+	 */
+	private int $fee_remediation_schedule_calls = 0;
 
 	/**
 	 * Whether the WooPayments plugin should appear active.
@@ -98,12 +127,29 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 			->method( 'can_process_payments' )
 			->willReturnCallback( fn() => $this->native_provider_ready );
 
+		$this->fee_remediation_service = $this->getMockBuilder( WooPaymentsCanceledAuthorizationFeeRemediationService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'can_schedule_cutover_remediation', 'ensure_scheduled' ) )
+			->getMock();
+		$this->fee_remediation_service
+			->method( 'can_schedule_cutover_remediation' )
+			->willReturnCallback( fn() => $this->fee_remediation_schedulable );
+		$this->fee_remediation_service
+			->method( 'ensure_scheduled' )
+			->willReturnCallback(
+				function (): string {
+					++$this->fee_remediation_schedule_calls;
+					return $this->fee_remediation_schedule_result;
+				}
+			);
+
 		$this->sut = new WooPaymentsCutoverController();
 		$this->sut->init(
 			wc_get_container()->get( NativePaymentsRuntimeArbiter::class ),
 			wc_get_container()->get( LegacyProxy::class ),
 			$this->provider,
-			new WooPaymentsLegacySubscriptionsGuard()
+			new WooPaymentsLegacySubscriptionsGuard(),
+			$this->fee_remediation_service
 		);
 	}
 
@@ -180,6 +226,36 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 			'The soft cutover should deactivate the per-site WooPayments plugin.'
 		);
 		$this->assertFalse( $this->plugin_active, 'The plugin active signal should be removed after deactivation.' );
+	}
+
+	/**
+	 * @testdox Disable action asks native to adopt canceled-authorization fee remediation before deactivation.
+	 */
+	public function test_disable_action_schedules_fee_remediation_before_deactivation(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		$this->enable_ready_cutover();
+
+		$this->assertTrue( $this->sut->disable_woopayments_plugin() );
+
+		$this->assertSame( 1, $this->fee_remediation_schedule_calls, 'Cutover should adopt preserved financial remediation jobs before deactivation.' );
+	}
+
+	/**
+	 * @testdox Disable action blocks deactivation when financial remediation cannot be adopted.
+	 */
+	public function test_disable_action_blocks_when_fee_remediation_adoption_fails(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		$this->enable_ready_cutover();
+		$this->fee_remediation_schedule_result = 'unavailable';
+
+		$result = $this->sut->disable_woopayments_plugin();
+
+		$this->assertFalse( $result, 'Cutover must fail closed when financial remediation cannot be scheduled.' );
+		$this->assertSame( 1, $this->fee_remediation_schedule_calls, 'Cutover should attempt to adopt financial remediation before blocking.' );
+		$this->assertSame( array(), $this->deactivate_plugin_calls, 'The plugin must stay active when financial remediation cannot be adopted.' );
+		$this->assertTrue( $this->plugin_active, 'WooPayments should continue owning runtime until financial remediation is safely queued.' );
 	}
 
 	/**
@@ -355,6 +431,19 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 		$this->native_provider_ready = true;
 
 		$this->assertContains( 'operational_queue_hooks_undispositioned', $this->sut->get_preflight_failures() );
+		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+	}
+
+	/**
+	 * @testdox Cutover preflight blocks while required financial migrations cannot be scheduled.
+	 */
+	public function test_preflight_blocks_when_financial_migrations_cannot_be_scheduled(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		$this->enable_ready_cutover();
+		$this->fee_remediation_schedulable = false;
+
+		$this->assertContains( 'financial_migrations_unavailable', $this->sut->get_preflight_failures() );
 		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
 	}
 

@@ -278,6 +278,11 @@ class WooPaymentsCanceledAuthorizationFeeRemediationService implements RegisterH
 	 * @return WC_Order[] Array of order objects.
 	 */
 	public function get_affected_orders( int $limit ): array {
+		$limit = absint( $limit );
+		if ( 0 === $limit ) {
+			return array();
+		}
+
 		if ( $this->is_hpos_enabled() ) {
 			return $this->get_affected_orders_hpos( $limit );
 		}
@@ -307,8 +312,6 @@ class WooPaymentsCanceledAuthorizationFeeRemediationService implements RegisterH
 		if ( $this->is_complete() ) {
 			return;
 		}
-
-		$this->remove_legacy_cancel_authorization_status_handler();
 
 		$start_time = microtime( true );
 		$batch_size = $this->get_batch_size();
@@ -460,7 +463,7 @@ class WooPaymentsCanceledAuthorizationFeeRemediationService implements RegisterH
 					return false;
 				}
 
-					$this->delete_refund_order_stats( $refund_id );
+				$this->delete_refund_order_stats( $refund_id );
 
 				/**
 				 * Fires after a refund is deleted during WooPayments canceled-authorization fee remediation.
@@ -530,6 +533,62 @@ class WooPaymentsCanceledAuthorizationFeeRemediationService implements RegisterH
 	 */
 	public function has_affected_orders(): bool {
 		return ! empty( $this->get_affected_orders( 1 ) );
+	}
+
+	/**
+	 * Tell whether cutover can safely hand off canceled-authorization fee remediation.
+	 *
+	 * @return bool True when there is no affected data or Action Scheduler can run the migration.
+	 */
+	public function can_schedule_cutover_remediation(): bool {
+		if ( $this->is_complete() || ! $this->has_affected_orders() ) {
+			return true;
+		}
+
+		return $this->is_action_scheduler_available();
+	}
+
+	/**
+	 * Ensure native owns a live remediation job after WooPayments plugin cutover.
+	 *
+	 * @return string Scheduling status: completed, not_needed, unavailable, already_scheduled, or scheduled.
+	 */
+	public function ensure_scheduled(): string {
+		if ( $this->is_complete() ) {
+			return 'completed';
+		}
+
+		if ( $this->is_dry_run() || $this->has_scheduled_job( self::DRY_RUN_ACTION_HOOK ) ) {
+			$this->cancel_scheduled_jobs( self::DRY_RUN_ACTION_HOOK );
+			$this->reset_live_processing_state();
+		}
+
+		if ( ! $this->has_affected_orders() ) {
+			update_option( self::CHECK_STATE_OPTION_KEY, 'no_affected_orders', true );
+			return 'not_needed';
+		}
+
+		update_option( self::CHECK_STATE_OPTION_KEY, 'has_affected_orders', true );
+
+		if ( ! $this->is_action_scheduler_available() ) {
+			wc_get_logger()->error(
+				'WooPayments canceled-authorization fee remediation is required after cutover, but Action Scheduler is unavailable.',
+				array( 'source' => 'wcpay-fee-remediation' )
+			);
+			return 'unavailable';
+		}
+
+		if ( $this->has_scheduled_job( self::ACTION_HOOK ) ) {
+			return 'already_scheduled';
+		}
+
+		$this->disable_dry_run();
+		if ( ! $this->schedule_job( self::ACTION_HOOK, time() + 10 ) ) {
+			return 'unavailable';
+		}
+
+		$this->mark_running();
+		return 'scheduled';
 	}
 
 	/**
@@ -672,6 +731,11 @@ class WooPaymentsCanceledAuthorizationFeeRemediationService implements RegisterH
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$order_ids = $wpdb->get_col( $wpdb->prepare( $sql, $params ) );
 
+		if ( ! empty( $order_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( array_map( 'absint', $order_ids ) );
+		}
+
 		return $this->convert_ids_to_orders( $order_ids );
 	}
 
@@ -734,7 +798,6 @@ class WooPaymentsCanceledAuthorizationFeeRemediationService implements RegisterH
 	 * Delete order stats from WooCommerce Analytics.
 	 *
 	 * @param int $order_id Refund ID.
-	 * @throws Exception When the database delete fails.
 	 */
 	protected function delete_refund_order_stats( int $order_id ): void {
 		if ( ! class_exists( 'Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore' ) ) {
@@ -747,18 +810,22 @@ class WooPaymentsCanceledAuthorizationFeeRemediationService implements RegisterH
 			$table_name = \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::get_db_table_name();
 			$result     = $wpdb->delete( $table_name, array( 'order_id' => $order_id ), array( '%d' ) );
 			if ( false === $result ) {
-				throw new Exception( 'Database delete failed.' );
+				wc_get_logger()->warning(
+					sprintf( 'Failed to delete stats for refund %d: Database delete failed.', $order_id ),
+					array( 'source' => 'wcpay-fee-remediation' )
+				);
+				return;
 			}
 
-				/**
-				 * Fires when the refund stats row is deleted during WooPayments canceled-authorization fee remediation.
-				 *
-				 * @since 11.0.0
-				 *
-				 * @param int $order_id    Deleted refund ID.
-				 * @param int $customer_id Customer ID. Always 0 because the refund object has already been deleted.
-				 */
-				do_action( 'woocommerce_analytics_delete_order_stats', $order_id, 0 );
+			/**
+			 * Fires when the refund stats row is deleted during WooPayments canceled-authorization fee remediation.
+			 *
+			 * @since 11.0.0
+			 *
+			 * @param int $order_id    Deleted refund ID.
+			 * @param int $customer_id Customer ID. Always 0 because the refund object has already been deleted.
+			 */
+			do_action( 'woocommerce_analytics_delete_order_stats', $order_id, 0 );
 			if ( class_exists( ReportsCache::class ) ) {
 				ReportsCache::invalidate();
 			}
@@ -793,17 +860,71 @@ class WooPaymentsCanceledAuthorizationFeeRemediationService implements RegisterH
 	 *
 	 * @param string $hook      Hook name.
 	 * @param int    $timestamp Scheduled timestamp.
+	 * @return bool True when the action was scheduled.
 	 */
-	private function schedule_job( string $hook, int $timestamp ): void {
-		if ( ! function_exists( 'as_schedule_single_action' ) ) {
+	private function schedule_job( string $hook, int $timestamp ): bool {
+		if ( ! $this->is_action_scheduler_available() ) {
 			wc_get_logger()->warning(
 				sprintf( 'Action Scheduler is not available. Cannot schedule %s.', $hook ),
 				array( 'source' => 'wcpay-fee-remediation' )
 			);
-			return;
+			return false;
 		}
 
-		as_schedule_single_action( $timestamp, $hook, array(), self::ACTION_SCHEDULER_GROUP_ID );
+		$action_id = as_schedule_single_action( $timestamp, $hook, array(), self::ACTION_SCHEDULER_GROUP_ID );
+		if ( empty( $action_id ) ) {
+			wc_get_logger()->error(
+				sprintf( 'Action Scheduler failed to schedule %s for WooPayments canceled-authorization fee remediation.', $hook ),
+				array( 'source' => 'wcpay-fee-remediation' )
+			);
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Tell whether Action Scheduler queue functions are available.
+	 *
+	 * @return bool True when native can schedule and inspect remediation jobs.
+	 */
+	protected function is_action_scheduler_available(): bool {
+		return function_exists( 'as_schedule_single_action' ) && function_exists( 'as_has_scheduled_action' );
+	}
+
+	/**
+	 * Tell whether a remediation action is already scheduled.
+	 *
+	 * @param string $hook Hook name.
+	 * @return bool True when an action is already scheduled.
+	 */
+	private function has_scheduled_job( string $hook ): bool {
+		if ( ! function_exists( 'as_has_scheduled_action' ) ) {
+			return false;
+		}
+
+		return false !== as_has_scheduled_action( $hook, array(), self::ACTION_SCHEDULER_GROUP_ID );
+	}
+
+	/**
+	 * Cancel scheduled remediation jobs for a hook.
+	 *
+	 * @param string $hook Hook name.
+	 */
+	private function cancel_scheduled_jobs( string $hook ): void {
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			as_unschedule_all_actions( $hook, array(), self::ACTION_SCHEDULER_GROUP_ID );
+		}
+	}
+
+	/**
+	 * Reset dry-run processing state before cutover starts live remediation.
+	 */
+	private function reset_live_processing_state(): void {
+		delete_option( self::LAST_ORDER_ID_OPTION_KEY );
+		delete_option( self::BATCH_SIZE_OPTION_KEY );
+		delete_option( self::STATS_OPTION_KEY );
+		delete_option( self::DRY_RUN_OPTION_KEY );
 	}
 
 	/**
@@ -834,19 +955,5 @@ class WooPaymentsCanceledAuthorizationFeeRemediationService implements RegisterH
 			),
 			array( 'source' => 'wcpay-fee-remediation' )
 		);
-	}
-
-	/**
-	 * Remove legacy cancel-authorization status handler if the plugin runtime is still loaded.
-	 */
-	private function remove_legacy_cancel_authorization_status_handler(): void {
-		if ( ! class_exists( 'WC_Payments' ) || ! is_callable( array( 'WC_Payments', 'get_order_service' ) ) ) {
-			return;
-		}
-
-		$order_service = \WC_Payments::get_order_service();
-		if ( is_object( $order_service ) ) {
-			remove_action( 'woocommerce_order_status_cancelled', array( $order_service, 'cancel_authorizations_on_order_status_change' ) );
-		}
 	}
 }

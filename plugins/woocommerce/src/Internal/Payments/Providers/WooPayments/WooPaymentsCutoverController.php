@@ -157,20 +157,35 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	private WooPaymentsLegacySubscriptionsGuard $legacy_subscriptions_guard;
 
 	/**
+	 * Canceled-authorization fee remediation queue owner.
+	 *
+	 * @var WooPaymentsCanceledAuthorizationFeeRemediationService
+	 */
+	private WooPaymentsCanceledAuthorizationFeeRemediationService $fee_remediation_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param NativePaymentsRuntimeArbiter             $arbiter                    Runtime owner arbiter.
-	 * @param LegacyProxy                              $legacy_proxy               Legacy proxy.
-	 * @param WooPaymentsProvider                      $provider                   Native WooPayments provider.
-	 * @param WooPaymentsLegacySubscriptionsGuard|null $legacy_subscriptions_guard Legacy subscription data guard.
+	 * @param NativePaymentsRuntimeArbiter                               $arbiter                    Runtime owner arbiter.
+	 * @param LegacyProxy                                                $legacy_proxy               Legacy proxy.
+	 * @param WooPaymentsProvider                                        $provider                   Native WooPayments provider.
+	 * @param WooPaymentsLegacySubscriptionsGuard|null                   $legacy_subscriptions_guard Legacy subscription data guard.
+	 * @param WooPaymentsCanceledAuthorizationFeeRemediationService|null $fee_remediation_service Canceled-authorization fee remediation queue owner.
 	 */
-	final public function init( NativePaymentsRuntimeArbiter $arbiter, LegacyProxy $legacy_proxy, WooPaymentsProvider $provider, ?WooPaymentsLegacySubscriptionsGuard $legacy_subscriptions_guard = null ): void {
+	final public function init(
+		NativePaymentsRuntimeArbiter $arbiter,
+		LegacyProxy $legacy_proxy,
+		WooPaymentsProvider $provider,
+		?WooPaymentsLegacySubscriptionsGuard $legacy_subscriptions_guard = null,
+		?WooPaymentsCanceledAuthorizationFeeRemediationService $fee_remediation_service = null
+	): void {
 		$this->arbiter                    = $arbiter;
 		$this->legacy_proxy               = $legacy_proxy;
 		$this->provider                   = $provider;
 		$this->legacy_subscriptions_guard = $legacy_subscriptions_guard ?? wc_get_container()->get( WooPaymentsLegacySubscriptionsGuard::class );
+		$this->fee_remediation_service    = $fee_remediation_service ?? wc_get_container()->get( WooPaymentsCanceledAuthorizationFeeRemediationService::class );
 	}
 
 	/**
@@ -270,6 +285,14 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
+		if ( 'unavailable' === $this->fee_remediation_service->ensure_scheduled() ) {
+			wc_get_logger()->error(
+				'WooPayments could not be deactivated because native WooPayments could not schedule canceled-authorization fee remediation.',
+				array( 'source' => 'woocommerce-woopayments-cutover' )
+			);
+			return false;
+		}
+
 		$this->legacy_proxy->call_function(
 			'deactivate_plugins',
 			NativePaymentsRuntimeArbiter::PLUGIN_FILE,
@@ -347,6 +370,10 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 
 		if ( array() !== $this->get_pending_operational_queue_hooks() ) {
 			$failures[] = 'operational_queue_hooks_undispositioned';
+		}
+
+		if ( ! $this->fee_remediation_service->can_schedule_cutover_remediation() ) {
+			$failures[] = 'financial_migrations_unavailable';
 		}
 
 		/**
