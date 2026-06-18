@@ -2589,6 +2589,88 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Simplified form rejects a second refund of already-fully-refunded fee and shipping lines.
+	 */
+	public function test_refunds_create_simplified_form_rejects_already_refunded_fee_and_shipping(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 50.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Service fee',
+				'total' => 7.50,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+
+		$shipping = new \WC_Order_Item_Shipping();
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat rate',
+				'method_id'    => 'flat_rate',
+				'total'        => 5.00,
+			)
+		);
+		$shipping->save();
+		$order->add_item( $shipping );
+
+		$order->set_total( 62.50 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		foreach ( array( $fee, $shipping ) as $non_product_item ) {
+			$first_response = $this->dispatch_refund_request(
+				$order->get_id(),
+				array(
+					array(
+						'line_item_id' => $non_product_item->get_id(),
+						'quantity'     => 1,
+					),
+				)
+			);
+			$this->assertEquals( 201, $first_response->get_status() );
+			$this->created_refunds[] = $first_response->get_data()['id'];
+
+			$second_response = $this->dispatch_refund_request(
+				$order->get_id(),
+				array(
+					array(
+						'line_item_id' => $non_product_item->get_id(),
+						'quantity'     => 1,
+					),
+				)
+			);
+			if ( 201 === $second_response->get_status() ) {
+				$this->created_refunds[] = $second_response->get_data()['id'];
+			}
+
+			$this->assertEquals( 400, $second_response->get_status(), 'A fee or shipping line must not be refunded twice using other order lines remaining balance.' );
+			$data = $second_response->get_data();
+			$this->assertEquals( 'invalid_line_item', $data['code'] );
+			$this->assertStringContainsString( 'already been fully refunded', $data['message'] );
+		}
+
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox Simplified form rejects auto-computed refund_total combined with explicit refund_tax.
 	 *
 	 * Codex regression guard: with refund_total omitted and refund_tax

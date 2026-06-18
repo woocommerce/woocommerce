@@ -282,11 +282,37 @@ class DataUtils {
 						)
 					);
 				}
-			} elseif ( isset( $line_item['quantity'] ) && $item->get_quantity() < $line_item['quantity'] ) {
-				// Shipping/fees: fall back to the simple original-quantity check
-				// (they don't track per-unit refund history in `qtys`).
-				/* translators: %s: item quantity */
-				return new WP_Error( 'invalid_line_item', sprintf( __( 'Line item quantity cannot be greater than the item quantity (%s).', 'woocommerce' ), $item->get_quantity() ) );
+			} elseif ( isset( $line_item['quantity'] ) ) {
+				if ( $item->get_quantity() < $line_item['quantity'] ) {
+					/* translators: %s: item quantity */
+					return new WP_Error( 'invalid_line_item', sprintf( __( 'Line item quantity cannot be greater than the item quantity (%s).', 'woocommerce' ), $item->get_quantity() ) );
+				}
+
+				$price_decimals      = wc_get_price_decimals();
+				$item_total_with_tax = abs( (float) $item->get_total() + (float) $item->get_total_tax() );
+				$refunded_total      = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
+				$remaining_total     = $item_total_with_tax - $refunded_total;
+				$requested_total     = isset( $line_item['refund_total'] )
+					? abs( (float) $line_item['refund_total'] )
+					: abs( $this->compute_line_item_refund_total( $item, $line_item['quantity'] ) );
+
+				if ( $remaining_total <= 0 ) {
+					return new WP_Error(
+						'invalid_line_item',
+						__( 'This line item has already been fully refunded.', 'woocommerce' )
+					);
+				}
+
+				if ( $requested_total > NumberUtil::round( $remaining_total, $price_decimals ) ) {
+					return new WP_Error(
+						'invalid_line_item',
+						sprintf(
+							/* translators: %s: remaining refundable amount */
+							__( 'Line item refund total cannot be greater than the remaining refundable amount (%s).', 'woocommerce' ),
+							wc_format_decimal( $remaining_total, $price_decimals )
+						)
+					);
+				}
 			}
 
 			// Validate refund total is not greater than the item total (including tax).
