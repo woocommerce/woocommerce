@@ -33,8 +33,12 @@ if ( $return_code !== 0 ) {
 }
 $repo_root = current( $output );
 
-// Execute git diff command to get changes between branches for includes/ and src/ directories only
-$diff_command = "git diff $compare_branch..$pr_branch -- {$repo_root}/plugins/woocommerce/includes/ {$repo_root}/plugins/woocommerce/src/";
+// Execute git diff command to get changes between branches for includes/ and src/ directories only.
+// Use the three-dot form so we diff against the merge-base (the point where the PR branch
+// diverged from the compare branch) rather than comparing branch tips. This prevents false
+// positives when the PR branch is behind the compare branch: a two-dot diff would otherwise
+// report functions that the compare branch removed/changed as if the PR had added them.
+$diff_command = "git diff $compare_branch...$pr_branch -- {$repo_root}/plugins/woocommerce/includes/ {$repo_root}/plugins/woocommerce/src/";
 $output       = array();
 $return_code  = 0;
 
@@ -55,6 +59,14 @@ if ( empty( $output ) ) {
 $added_function_file_map = array();
 $deleted_functions       = array();
 
+// Files that are allowed to define standalone functions and are therefore not checked.
+// WooCommerce database updates must be global functions: they are registered by name in
+// WC_Install::$db_updates and invoked dynamically, so they cannot be class methods.
+$excluded_files = array(
+	'plugins/woocommerce/includes/wc-update-functions.php',
+	'plugins/woocommerce/includes/react-admin/wc-admin-update-functions.php',
+);
+
 $current_file = '';
 foreach ( $output as $line ) {
 	// Track current file being processed
@@ -64,16 +76,72 @@ foreach ( $output as $line ) {
 		$current_file = $matches[1]; // Alternative way to get file path
 	}
 
-	// Look for added functions (lines starting with +)
-	if ( preg_match( '/^\+.*?function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/', $line, $matches ) ) {
+	// Skip files that are allowed to define standalone functions.
+	if ( in_array( $current_file, $excluded_files, true ) ) {
+		continue;
+	}
+
+	// Look for added functions (lines starting with +).
+	// "function" must be the first token on the line (after the diff "+" and any indentation),
+	// so this matches standalone functions and methods declared without a visibility modifier,
+	// but not properly declared methods (public/private/protected ...) nor comment/docblock lines.
+	// Candidates are confirmed to be real PHP declarations (not embedded JavaScript) further below.
+	if ( preg_match( '/^\+\s*function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/', $line, $matches ) ) {
 		$function_name                             = $matches[1];
 		$added_function_file_map[ $function_name ] = $current_file;
 	}
 
-	// Look for deleted functions (lines starting with -)
-	if ( preg_match( '/^\-.*?function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/', $line, $matches ) ) {
+	// Look for deleted functions (lines starting with -), using the same definition as above.
+	if ( preg_match( '/^\-\s*function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/', $line, $matches ) ) {
 		$function_name       = $matches[1];
 		$deleted_functions[] = $function_name;
+	}
+}
+
+// Confirm that each candidate is a real PHP function declaration and not JavaScript that happens to
+// live inside a PHP file (for example inside an inline <script> block, or a string passed to
+// wp_add_inline_script()). The PHP tokenizer reports such JavaScript as inline HTML or string
+// tokens, never as a T_FUNCTION declaration, so it tells the two apart reliably, regardless of
+// indentation or how the script is embedded.
+$php_functions_by_file = array();
+foreach ( array_unique( array_values( $added_function_file_map ) ) as $file ) {
+	$file_lines  = array();
+	$return_code = 0;
+	exec( 'git show ' . escapeshellarg( "$pr_branch:$file" ), $file_lines, $return_code );
+
+	// If the file cannot be read, keep its candidates rather than risk hiding a real function.
+	if ( 0 !== $return_code ) {
+		continue;
+	}
+
+	$names  = array();
+	$tokens = token_get_all( implode( "\n", $file_lines ) );
+	$count  = count( $tokens );
+	for ( $i = 0; $i < $count; $i++ ) {
+		if ( ! is_array( $tokens[ $i ] ) || T_FUNCTION !== $tokens[ $i ][0] ) {
+			continue;
+		}
+		// The function name is the first meaningful token after "function".
+		for ( $j = $i + 1; $j < $count; $j++ ) {
+			$token = $tokens[ $j ];
+			if ( is_array( $token ) && T_WHITESPACE === $token[0] ) {
+				continue;
+			}
+			if ( '&' === $token ) {
+				continue; // Return-by-reference functions.
+			}
+			if ( is_array( $token ) && T_STRING === $token[0] ) {
+				$names[] = $token[1];
+			}
+			break; // Name found, or this is an anonymous function.
+		}
+	}
+	$php_functions_by_file[ $file ] = $names;
+}
+
+foreach ( $added_function_file_map as $function => $file ) {
+	if ( isset( $php_functions_by_file[ $file ] ) && ! in_array( $function, $php_functions_by_file[ $file ], true ) ) {
+		unset( $added_function_file_map[ $function ] );
 	}
 }
 
@@ -86,8 +154,9 @@ foreach ( $added_function_file_map as $function => $file_path ) {
 	}
 
 	// Remove "plugins/woocommerce/" prefix from file path
-	if ( strpos( $file_path, 'plugins/woocommerce/' ) === 0 ) {
-		$file_path = substr( $file_path, 19 ); // Remove "plugins/woocommerce/" (19 characters)
+	$plugin_path_prefix = 'plugins/woocommerce/';
+	if ( strpos( $file_path, $plugin_path_prefix ) === 0 ) {
+		$file_path = substr( $file_path, strlen( $plugin_path_prefix ) );
 	}
 	$net_function_file_map[ $function ] = $file_path;
 }
