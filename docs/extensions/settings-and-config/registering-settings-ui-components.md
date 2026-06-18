@@ -31,10 +31,10 @@ The `component` value is a name, not a script handle. It lets the PHP schema say
 
 ## Register JavaScript components
 
-Register components with `registerSettingsExtension()` from `@woocommerce/settings-ui-sdk`:
+Register components with `registerSettingsExtension()` from `@woocommerce/settings-ui`:
 
 ```ts
-import { registerSettingsExtension } from '@woocommerce/settings-ui-sdk';
+import { registerSettingsExtension } from '@woocommerce/settings-ui';
 import { PaymentMethodPicker } from './payment-method-picker';
 
 registerSettingsExtension( {
@@ -77,12 +77,12 @@ type SettingsFieldComponentProps = {
 };
 ```
 
-Call `onChange()` with the next field value. The SDK handles hidden input serialization for the field's save adapter.
+Call `onChange()` with the next field value. The settings UI handles hidden input serialization for the field's save adapter.
 
 ## Example component
 
 ```tsx
-import type { SettingsFieldComponentProps } from '@woocommerce/settings-ui-sdk';
+import type { SettingsFieldComponentProps } from '@woocommerce/settings-ui';
 
 export const PaymentMethodPicker = ( {
 	field,
@@ -159,7 +159,7 @@ Resolution order is:
 1. `field.component`
 2. `fieldOverrides[ field.id ]`
 3. `typeRenderers[ field.type ]`
-4. Native SDK field renderer
+4. Native field renderer
 
 ## Enqueue the component script
 
@@ -176,4 +176,4 @@ final class My_Plugin_Settings_UI_Page extends LegacySettingsPageAdapter {
 }
 ```
 
-WooCommerce loads the SDK first, then your script, then mounts the settings app.
+WooCommerce loads the settings UI package first, then your script, then mounts the settings app.

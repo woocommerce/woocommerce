@@ -183,4 +183,37 @@ class WC_Product_Download_Test extends WC_Unit_Test_Case {
 			'We use the same error message when the file does not exist as when the directory is invalid.'
 		);
 	}
+
+	/**
+	 * @testdox get_absolute_file_path() resolves real content-dir paths but matches the content dir only at a path-segment boundary.
+	 */
+	public function test_get_absolute_file_path_matches_content_dir_only_at_a_boundary() {
+		$download = new WC_Product_Download();
+
+		// get_absolute_file_path() is private and reads the raw WP_CONTENT_DIR/ABSPATH constants,
+		// so we invoke it directly to assert its boundary matching deterministically.
+		$resolve = new ReflectionMethod( WC_Product_Download::class, 'get_absolute_file_path' );
+		$resolve->setAccessible( true );
+
+		$content_name = wp_basename( WP_CONTENT_DIR );
+
+		// A genuine path into the content directory is treated as content-relative: it is resolved
+		// against WP_CONTENT_DIR (realpath() of a non-existent file yields false), not returned as-is.
+		$content_path = '/' . $content_name . '/uploads/does-not-exist.zip';
+		$this->assertNotSame(
+			$content_path,
+			$resolve->invoke( $download, $content_path ),
+			'A genuine content-directory path should be resolved against WP_CONTENT_DIR, not returned unchanged.'
+		);
+
+		// A sibling whose name merely starts with the content-dir name (e.g. "/app" vs "/application")
+		// must NOT be treated as content-relative; the reference is returned unchanged rather than being
+		// mis-mapped under WP_CONTENT_DIR.
+		$prefix_sibling = '/' . $content_name . 'X/decoy.zip';
+		$this->assertSame(
+			$prefix_sibling,
+			$resolve->invoke( $download, $prefix_sibling ),
+			'A path that only shares the content-dir name prefix must not be mapped under WP_CONTENT_DIR.'
+		);
+	}
 }
