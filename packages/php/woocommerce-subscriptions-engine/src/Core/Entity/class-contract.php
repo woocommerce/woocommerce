@@ -269,10 +269,24 @@ final class Contract {
 	 * } $args Contract attributes.
 	 */
 	public static function create( array $args ): self {
+		$status = (string) ( $args['status'] ?? Contract_Status::ACTIVE );
+		if ( ! Contract_Status::is_valid( $status ) ) {
+			throw new DomainException(
+				sprintf( 'Contract: invalid status "%s".', $status )
+			);
+		}
+
+		$schedule_source = (string) ( $args['schedule_source'] ?? self::SCHEDULE_SOURCE_PRIMITIVE );
+		if ( ! in_array( $schedule_source, array( self::SCHEDULE_SOURCE_PRIMITIVE, self::SCHEDULE_SOURCE_GATEWAY ), true ) ) {
+			throw new DomainException(
+				sprintf( 'Contract: invalid schedule source "%s".', $schedule_source )
+			);
+		}
+
 		return new self(
 			array(
 				'id'                   => null,
-				'status'               => $args['status'] ?? Contract_Status::ACTIVE,
+				'status'               => $status,
 				'customer_id'          => (int) $args['customer_id'],
 				'currency'             => (string) $args['currency'],
 				'selling_plan_id'      => (int) $args['selling_plan_id'],
@@ -292,7 +306,7 @@ final class Contract {
 				'trial_end_gmt'        => $args['trial_end_gmt'] ?? null,
 				'end_gmt'              => null,
 				'cycle_count'          => 0,
-				'schedule_source'      => $args['schedule_source'] ?? self::SCHEDULE_SOURCE_PRIMITIVE,
+				'schedule_source'      => $schedule_source,
 				'items'                => $args['items'] ?? array(),
 				'addresses'            => $args['addresses'] ?? array(),
 				'meta'                 => $args['meta'] ?? array(),
