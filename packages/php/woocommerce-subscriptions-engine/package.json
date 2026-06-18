@@ -1,5 +1,5 @@
 {
-	"name": "@woocommerce/subscriptions-engine",
+	"name": "@automattic/woocommerce-subscriptions-engine",
 	"description": "Subscriptions engine for WooCommerce.",
 	"scripts": {
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
