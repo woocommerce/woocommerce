@@ -66,25 +66,6 @@ class WooPaymentsApiRequest extends WooPaymentsPaginatedListRequest {
 	}
 
 	/**
-	 * Get request params.
-	 *
-	 * @return array<string,mixed>
-	 */
-	public function get_params(): array {
-		return parent::get_params();
-	}
-
-	/**
-	 * Set one request param.
-	 *
-	 * @param string $key   Param key.
-	 * @param mixed      $value Param value.
-	 */
-	public function set_param( string $key, $value ): void {
-		parent::set_param( $key, $value );
-	}
-
-	/**
 	 * Get the WooPayments API path.
 	 *
 	 * @return string

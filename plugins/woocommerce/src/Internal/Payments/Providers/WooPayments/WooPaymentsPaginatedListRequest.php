@@ -255,7 +255,7 @@ abstract class WooPaymentsPaginatedListRequest {
 	 * @param string $key   Param key.
 	 * @param mixed  $value Param value.
 	 */
-	protected function set_param( string $key, $value ): void {
+	public function set_param( string $key, $value ): void {
 		$this->params[ $key ] = $value;
 	}
 }
