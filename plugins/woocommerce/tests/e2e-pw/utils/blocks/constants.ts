@@ -18,11 +18,12 @@ export const CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG = `${ CLASSI
 export const CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SLUG = `${ CLASSIC_THEME_SLUG }-child__with-block-template-part`;
 export const CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SUPPORT_SLUG = `${ CLASSIC_THEME_SLUG }-child__with-block-template-part-support`;
 export const BASE_URL =
-	'http://localhost:' + ( process.env.WP_ENV_TESTS_PORT || '8889' );
+	process.env.BASE_URL ||
+	'http://localhost:' + ( process.env.WP_ENV_TESTS_PORT || '8086' );
 
 export const WP_ARTIFACTS_PATH =
 	process.env.WP_ARTIFACTS_PATH ||
-	path.join( process.cwd(), 'tests/e2e/artifacts' );
+	path.join( process.cwd(), 'tests/e2e-pw/.state' );
 
 export const STORAGE_STATE_PATH =
 	process.env.STORAGE_STATE_PATH ||

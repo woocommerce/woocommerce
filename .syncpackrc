@@ -488,7 +488,7 @@
 			"isIgnored": true
 		},
 		{
-			"label": "@wordpress/* bundled runtime-dependencies",
+			"label": "@wordpress/* dependencies that WooCommerce bundles instead of externalizing to WordPress",
 			"dependencyTypes": [
 				"prod",
 				"dev"

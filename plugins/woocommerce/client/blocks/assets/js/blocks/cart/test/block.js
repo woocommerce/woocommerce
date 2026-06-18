@@ -211,9 +211,9 @@ describe( 'Testing cart', () => {
 		render( <CartBlock /> );
 
 		await waitFor( () =>
-			expect( screen.getAllByRole( 'cell' )[ 1 ] ).toHaveTextContent(
-				'16€'
-			)
+			expect(
+				document.querySelector( '.wc-block-cart-item__total' )
+			).toHaveTextContent( '16€' )
 		);
 	} );
 
