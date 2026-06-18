@@ -106,7 +106,8 @@ class WC_Form_Handler {
 		if ( is_wp_error( $key ) ) {
 			wc_add_notice( __( 'Sorry, we were unable to resend the link. Please try again.', 'woocommerce' ), 'error' );
 		} else {
-			WC()->mailer(); // Load email classes so the reset-password notification has a listener.
+			// Load email classes so the reset-password notification has a listener.
+			WC()->mailer();
 			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Re-fires woocommerce_reset_password_notification, documented in WC_Shortcode_My_Account::retrieve_password().
 			do_action( 'woocommerce_reset_password_notification', $user->user_login, $key );
 			wc_add_notice( __( 'We have emailed you a new link to change your password.', 'woocommerce' ) );
