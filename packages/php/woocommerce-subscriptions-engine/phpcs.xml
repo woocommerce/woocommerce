@@ -12,10 +12,8 @@
 	</rule>
 
 	<!--
-		The src/ tree is PSR-4 (PascalCase file = class short-name), matching
-		WooCommerce core's own src/ setup. The WordPress hyphenated-lowercase and
-		class-file-name rules do not apply there; the Squiz PSR-4 equivalents below
-		enforce the file-name-matches-class-name invariant instead.
+		Enforce PSR-4 naming for src/  with PascalCase filenames matching the class short-names.
+		This also requires excluding src/ from the default WordPress file name and class name rules.
 	-->
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
 		<exclude-pattern>src/</exclude-pattern>
