@@ -11,10 +11,6 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { getInstalledWordPressVersion } from '../../utils/wordpress';
 
-// need to figure out whether tests are being run on a mac
-const macOS = process.platform === 'darwin';
-const cmdKeyCombo = macOS ? 'Meta+k' : 'Control+k';
-
 const clickOnCommandPaletteOption = async ( {
 	page,
 	optionName,
@@ -22,15 +18,30 @@ const clickOnCommandPaletteOption = async ( {
 	page: Page;
 	optionName: string;
 } ) => {
-	// Press `Ctrl` + `K` to open the command palette.
+	// Using a regex here because Gutenberg changes the text of the placeholder
+	const searchBox = page.getByPlaceholder(
+		/Search (?:commands(?: and settings)?|for commands)/
+	);
+
+	// Playwright's browser reports a non-Apple platform even on macOS, so picking the combo from
+	// reports a non-Apple platform even on macOS, so picking the combo from
+	// `process.platform` would send Meta+K while WordPress listens for Ctrl+K and
+	// the palette would never open. Derive the modifier from the page instead.
+	const isApplePlatform = await page.evaluate( () =>
+		/Mac|iPhone|iPod|iPad/i.test(
+			(
+				navigator as Navigator & {
+					userAgentData?: { platform?: string };
+				}
+			 ).userAgentData?.platform || navigator.platform
+		)
+	);
+	const cmdKeyCombo = isApplePlatform ? 'Meta+k' : 'Control+k';
+
+	// Press `Ctrl`/`Cmd` + `K` to open the command palette.
 	await page.keyboard.press( cmdKeyCombo );
 
-	// Using a regex here because Gutenberg changes the text of the placeholder
-	await page
-		.getByPlaceholder(
-			/Search (?:commands(?: and settings)?|for commands)/
-		)
-		.fill( optionName );
+	await searchBox.fill( optionName );
 
 	// TODO: WP 7.0 compat - WP 7.0 appends "Action" to command palette option
 	// accessible names. Simplify when WP 7.0 is the minimum supported version.
