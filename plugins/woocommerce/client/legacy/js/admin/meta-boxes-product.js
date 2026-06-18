@@ -161,13 +161,23 @@ jQuery( function ( $ ) {
 			const label_node = Array.prototype.find.call(
 				timestamp.childNodes,
 				function ( node ) {
-					return 3 === node.nodeType;
+					return (
+						3 === node.nodeType &&
+						node.nodeValue &&
+						node.nodeValue.trim()
+					);
 				}
 			);
 
-			return label_node
-				? label_node.nodeValue.replace( /:$/, '' ).trim()
-				: '';
+			if ( ! label_node ) {
+				return '';
+			}
+
+			const label_text = label_node.nodeValue.trim();
+
+			return label_text.endsWith( ':' )
+				? label_text.slice( 0, -1 ).trim()
+				: label_text;
 		},
 
 		render_field: function () {
@@ -267,9 +277,8 @@ jQuery( function ( $ ) {
 		},
 
 		sync_to_core_fields: function () {
-			const value = this.$datetime_input.val();
-			const parts = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(
-				value
+			const parts = this.parse_datetime_value(
+				this.$datetime_input.val()
 			);
 
 			if ( ! parts || ! this.is_valid_datetime( parts ) ) {
@@ -284,6 +293,66 @@ jQuery( function ( $ ) {
 			$( '#mn' ).val( parts[ 5 ] );
 
 			this.clear_invalid_state();
+			return true;
+		},
+
+		parse_datetime_value: function ( value ) {
+			const date_time_parts = ( value || '' ).split( 'T' );
+
+			if ( 2 !== date_time_parts.length ) {
+				return false;
+			}
+
+			const date_parts = date_time_parts[ 0 ].split( '-' );
+			const time_parts = date_time_parts[ 1 ].split( ':' );
+
+			if ( 3 !== date_parts.length || 2 !== time_parts.length ) {
+				return false;
+			}
+
+			const parts = [
+				null,
+				date_parts[ 0 ],
+				date_parts[ 1 ],
+				date_parts[ 2 ],
+				time_parts[ 0 ],
+				time_parts[ 1 ],
+			];
+
+			if (
+				4 !== parts[ 1 ].length ||
+				2 !== parts[ 2 ].length ||
+				2 !== parts[ 3 ].length ||
+				2 !== parts[ 4 ].length ||
+				2 !== parts[ 5 ].length ||
+				! this.is_numeric_string( parts[ 1 ] ) ||
+				! this.is_numeric_string( parts[ 2 ] ) ||
+				! this.is_numeric_string( parts[ 3 ] ) ||
+				! this.is_numeric_string( parts[ 4 ] ) ||
+				! this.is_numeric_string( parts[ 5 ] )
+			) {
+				return false;
+			}
+
+			return parts;
+		},
+
+		is_numeric_string: function ( value ) {
+			let index = 0;
+
+			if ( ! value ) {
+				return false;
+			}
+
+			for ( ; index < value.length; index++ ) {
+				if (
+					value.charAt( index ) < '0' ||
+					value.charAt( index ) > '9'
+				) {
+					return false;
+				}
+			}
+
 			return true;
 		},
 
