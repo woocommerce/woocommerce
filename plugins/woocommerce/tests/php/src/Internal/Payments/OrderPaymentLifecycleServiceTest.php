@@ -123,6 +123,7 @@ class OrderPaymentLifecycleServiceTest extends WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( WC_Order::class, $order );
 		$this->assertSame( 'on-hold', $order->get_status() );
+		$this->assertSame( 'pi_auth', $order->get_transaction_id() );
 		$this->assertSame( 'requires_capture', $order->get_meta( '_intention_status', true ) );
 		$this->assertOrderHasNote( $order, 'Payment authorized.' );
 	}

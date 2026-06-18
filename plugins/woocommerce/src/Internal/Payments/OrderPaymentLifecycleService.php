@@ -122,6 +122,9 @@ class OrderPaymentLifecycleService {
 				return (bool) $order->payment_complete( (string) $event->get_payment_reference() );
 
 			case PaymentLifecycleEvent::STATUS_AUTHORIZED:
+				if ( null !== $event->get_payment_reference() && '' !== (string) $event->get_payment_reference() ) {
+					$order->set_transaction_id( (string) $event->get_payment_reference() );
+				}
 				$order->update_status( 'on-hold' );
 				return true;
 

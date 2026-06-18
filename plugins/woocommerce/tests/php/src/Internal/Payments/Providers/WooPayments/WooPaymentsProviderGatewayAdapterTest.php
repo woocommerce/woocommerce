@@ -455,6 +455,163 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Charge should send manual capture mode to native payment intents when enabled.
+	 */
+	public function test_charge_sends_manual_capture_method_to_native_payment_intents_when_enabled(): void {
+		$order            = $this->create_woopayments_order( '50.00' );
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Last request data.
+			 *
+			 * @var array<string,mixed>
+			 */
+			public array $last_request_data = array();
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				unset( $idempotency_key );
+				$this->last_request_data = $request_data;
+
+				return array(
+					'id'             => 'pi_manual_native',
+					'status'         => 'requires_capture',
+					'customer'       => 'cus_manual_native',
+					'payment_method' => 'pm_manual_native',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 1,
+						'data'        => array(
+							array(
+								'id'       => 'ch_manual_native',
+								'captured' => false,
+							),
+						),
+					),
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_manual_native' );
+
+		$sut     = $this->create_adapter(
+			$gateway,
+			$api_client,
+			$customer_service,
+			null,
+			$this->create_account_service( false, array( 'manual_capture' => 'yes' ) )
+		);
+		$outcome = $sut->charge( PaymentContext::for_checkout( $order, OrderPaymentStore::GATEWAY_ID, 'pm_manual_native' ), 'key_charge' );
+
+		$this->assertSame( 'manual', $api_client->last_request_data['capture_method'] ?? null );
+		$this->assertSame( PaymentOutcome::STATUS_AUTHORIZED, $outcome->get_status() );
+	}
+
+	/**
+	 * @testdox Scheduled renewal charges should stay automatic when manual capture is enabled.
+	 */
+	public function test_charge_keeps_scheduled_renewal_capture_method_automatic_when_manual_capture_is_enabled(): void {
+		$order            = $this->create_woopayments_order( '50.00' );
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Last request data.
+			 *
+			 * @var array<string,mixed>
+			 */
+			public array $last_request_data = array();
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				unset( $idempotency_key );
+				$this->last_request_data = $request_data;
+
+				return array(
+					'id'             => 'pi_renewal_native',
+					'status'         => 'succeeded',
+					'customer'       => 'cus_renewal_native',
+					'payment_method' => 'pm_renewal_native',
+					'currency'       => 'usd',
+					'charges'        => array(
+						'total_count' => 1,
+						'data'        => array(
+							array(
+								'id'       => 'ch_renewal_native',
+								'captured' => true,
+							),
+						),
+					),
+				);
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+
+		$customer_service->expects( $this->once() )
+			->method( 'get_or_create_customer_id_for_order' )
+			->willReturn( 'cus_renewal_native' );
+
+		$sut     = $this->create_adapter(
+			$gateway,
+			$api_client,
+			$customer_service,
+			null,
+			$this->create_account_service( false, array( 'manual_capture' => 'yes' ) )
+		);
+		$outcome = $sut->charge(
+			PaymentContext::for_checkout(
+				$order,
+				OrderPaymentStore::GATEWAY_ID,
+				'pm_renewal_native',
+				array(),
+				array( 'scheduled_subscription_payment' => true )
+			),
+			'key_charge'
+		);
+
+		$this->assertSame( 'automatic', $api_client->last_request_data['capture_method'] ?? null );
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+	}
+
+	/**
 	 * @testdox Charge should use the Core-owned account service for native outcome mode metadata.
 	 */
 	public function test_charge_uses_account_service_mode_for_native_outcome_meta(): void {
@@ -1874,6 +2031,40 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Capture should fall back to intent meta when the transaction id is missing.
+	 */
+	public function test_capture_uses_intent_meta_when_transaction_id_is_missing(): void {
+		$order      = $this->create_woopayments_order();
+		$gateway    = new RecordingLegacyGateway( array( 'result' => 'success' ), true );
+		$api_client = $this->getMockBuilder( WooPaymentsApiClient::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_available', 'capture_intention' ) )
+			->getMock();
+
+		$order->update_meta_data( '_intent_id', 'pi_capture_meta' );
+		$order->save();
+
+		$api_client->expects( $this->once() )
+			->method( 'is_available' )
+			->willReturn( true );
+		$api_client->expects( $this->once() )
+			->method( 'capture_intention' )
+			->with( 'pi_capture_meta', 1000, array() )
+			->willReturn(
+				array(
+					'id'     => 'pi_capture_meta',
+					'status' => 'succeeded',
+				)
+			);
+
+		$sut     = $this->create_adapter( $gateway, $api_client );
+		$outcome = $sut->capture( PaymentContext::for_capture( $order, OrderPaymentStore::GATEWAY_ID ), 'key_capture' );
+
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertSame( '', $gateway->last_idempotency_key );
+	}
+
+	/**
 	 * @testdox Cancel should normalize legacy canceled authorizations.
 	 */
 	public function test_cancel_normalizes_legacy_canceled_authorization(): void {
@@ -1919,6 +2110,40 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 			->willReturn(
 				array(
 					'id'     => 'pi_cancel',
+					'status' => 'canceled',
+				)
+			);
+
+		$sut     = $this->create_adapter( $gateway, $api_client );
+		$outcome = $sut->cancel( PaymentContext::for_cancel( $order, OrderPaymentStore::GATEWAY_ID ), 'key_cancel' );
+
+		$this->assertSame( PaymentOutcome::STATUS_CANCELED, $outcome->get_status() );
+		$this->assertSame( '', $gateway->last_idempotency_key );
+	}
+
+	/**
+	 * @testdox Cancel should fall back to intent meta when the transaction id is missing.
+	 */
+	public function test_cancel_uses_intent_meta_when_transaction_id_is_missing(): void {
+		$order      = $this->create_woopayments_order();
+		$gateway    = new RecordingLegacyGateway( array( 'result' => 'success' ), true );
+		$api_client = $this->getMockBuilder( WooPaymentsApiClient::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_available', 'cancel_intention' ) )
+			->getMock();
+
+		$order->update_meta_data( '_intent_id', 'pi_cancel_meta' );
+		$order->save();
+
+		$api_client->expects( $this->once() )
+			->method( 'is_available' )
+			->willReturn( true );
+		$api_client->expects( $this->once() )
+			->method( 'cancel_intention' )
+			->with( 'pi_cancel_meta' )
+			->willReturn(
+				array(
+					'id'     => 'pi_cancel_meta',
 					'status' => 'canceled',
 				)
 			);

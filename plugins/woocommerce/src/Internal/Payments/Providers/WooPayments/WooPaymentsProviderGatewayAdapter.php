@@ -229,7 +229,7 @@ class WooPaymentsProviderGatewayAdapter {
 	public function capture( PaymentContext $context, string $idempotency_key ): PaymentOutcome {
 		$order = $context->get_order();
 		if ( $this->get_api_client()->is_available() ) {
-			$intent_id = (string) $order->get_transaction_id();
+			$intent_id = $this->get_order_intent_id( $order );
 			if ( '' !== $intent_id ) {
 				try {
 					$result = $this->get_api_client()->capture_intention(
@@ -272,7 +272,7 @@ class WooPaymentsProviderGatewayAdapter {
 	public function cancel( PaymentContext $context, string $idempotency_key ): PaymentOutcome {
 		$order = $context->get_order();
 		if ( $this->get_api_client()->is_available() ) {
-			$intent_id = (string) $order->get_transaction_id();
+			$intent_id = $this->get_order_intent_id( $order );
 			if ( '' !== $intent_id ) {
 				try {
 					$result = $this->get_api_client()->cancel_intention( $intent_id );
@@ -297,6 +297,21 @@ class WooPaymentsProviderGatewayAdapter {
 		);
 
 		return $this->normalize_cancel_result( is_array( $result ) ? $result : array() );
+	}
+
+	/**
+	 * Get the PaymentIntent id stored on an order.
+	 *
+	 * @param WC_Order $order Order.
+	 * @return string
+	 */
+	private function get_order_intent_id( WC_Order $order ): string {
+		$intent_id = (string) $order->get_transaction_id();
+		if ( '' === $intent_id ) {
+			$intent_id = (string) $order->get_meta( '_intent_id', true );
+		}
+
+		return $intent_id;
 	}
 
 	/**
@@ -493,6 +508,7 @@ class WooPaymentsProviderGatewayAdapter {
 		$subscription_payment = $is_renewal ? 'renewal' : ( $is_recurring ? 'initial' : 'no' );
 		$request_data         = array(
 			'amount'               => $this->prepare_amount( (float) $order->get_total(), (string) $order->get_currency() ),
+			'capture_method'       => ! $is_renewal && 'yes' === $this->get_account_service()->get_gateway_setting( 'manual_capture', 'no' ) ? 'manual' : 'automatic',
 			'currency'             => strtolower( (string) $order->get_currency() ),
 			'customer'             => $customer_id,
 			'metadata'             => $this->build_order_metadata( $order, $payment_type, $subscription_payment ),
