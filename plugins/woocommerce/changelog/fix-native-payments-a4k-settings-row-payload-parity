@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve native WooPayments settings fee and duplicate payment method row parity.
