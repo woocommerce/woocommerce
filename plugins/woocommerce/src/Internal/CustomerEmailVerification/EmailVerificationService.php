@@ -92,7 +92,7 @@ class EmailVerificationService {
 	/**
 	 * Clear the email-verification status for the given user.
 	 *
-	 * Removes both the verified-timestamp meta and any pending verification key,
+	 * Removes both the verified-email meta and any pending verification key,
 	 * effectively resetting the user to an unverified state.
 	 *
 	 * @since 11.0.0

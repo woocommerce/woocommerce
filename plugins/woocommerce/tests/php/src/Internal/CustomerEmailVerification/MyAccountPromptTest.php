@@ -66,8 +66,8 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	 * filter aborts control flow before exit so the test survives to assert.
 	 */
 	private function dispatch_send_request(): void {
-		$abort = static function (): void {
-			throw new \RuntimeException( 'wp_redirect' );
+		$abort = static function ( $location ): void {
+			throw new \RuntimeException( (string) $location );
 		};
 		add_filter( 'wp_redirect', $abort );
 		try {

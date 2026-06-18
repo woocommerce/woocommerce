@@ -17,11 +17,13 @@ class OrderLinker {
 	 */
 	public function __construct() {
 		// wc_update_new_customer_past_orders() already no-ops on an invalid/guest user ID.
-		// Wrapped in a void closure because the function returns a count that an action callback must not return.
+		// Wrapped in a void closure because the function returns a count that an action callback must not
+		// return. The argument is left untyped and cast here: under strict_types a third party firing this
+		// hook with a numeric string would otherwise throw a TypeError.
 		add_action(
 			'woocommerce_customer_email_verified',
-			static function ( int $user_id ): void {
-				wc_update_new_customer_past_orders( $user_id );
+			static function ( $user_id ): void {
+				wc_update_new_customer_past_orders( absint( $user_id ) );
 			}
 		);
 	}

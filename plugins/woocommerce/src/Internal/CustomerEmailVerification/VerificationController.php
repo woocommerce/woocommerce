@@ -77,8 +77,15 @@ class VerificationController {
 		$user_id = absint( wp_unslash( $_GET['wc_verify_email_user'] ) );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-		if ( $this->process_verification( $user_id, $key ) ) {
-			if ( get_current_user_id() !== $user_id ) {
+		$current_user_id = get_current_user_id();
+
+		// Refuse to verify (and silently switch accounts) when signed in as someone else. The link
+		// authenticates as its owner, so honouring it here would log the current user out of their
+		// own account. Only the link's owner, or a logged-out visitor, may complete verification.
+		if ( $current_user_id && $current_user_id !== $user_id ) {
+			wc_add_notice( __( 'Unable to confirm this email while you are logged in to a different account. Please log out and open the link again.', 'woocommerce' ), 'error' );
+		} elseif ( $this->process_verification( $user_id, $key ) ) {
+			if ( 0 === $current_user_id ) {
 				wc_set_customer_auth_cookie( $user_id );
 			}
 			wc_add_notice( __( 'Your email address has been confirmed.', 'woocommerce' ) );
