@@ -120,11 +120,15 @@ export const setupProjects = [
  * `core-parallel` by default, except the other-project folders in `nonCoreSpecs`.
  */
 const serialRunSpecs = [
-	// `analytics-data` drains the whole store's Action Scheduler queue via
-	// `?process-waiting-actions` (other workers' order/product churn floods it past
-	// the 10s timeout) and asserts exact store-wide totals; `analytics-access`
-	// asserts store-wide `$0.00 / Orders 0`. Both are polluted by concurrent orders.
-	'**/tests/analytics/**/*.spec.ts',
+	// Drains the whole store's Action Scheduler queue via `?process-waiting-actions`
+	// (other workers' order/product churn floods it past the 10s timeout) and asserts
+	// exact store-wide totals, polluted by concurrent orders.
+	'**/tests/analytics/analytics-data.spec.ts',
+	// Asserts store-wide `$0.00 / Orders 0`, polluted by concurrent orders.
+	'**/tests/analytics/analytics-access.spec.ts',
+	// Mutates the shared admin's `woocommerce_meta.dashboard_sections` and flips the
+	// global `woocommerce_analytics_scheduled_import` option (racing analytics-settings).
+	'**/tests/analytics/analytics-overview.spec.ts',
 	// Mutate global tax, default customer location, AJAX add-to-cart and payment
 	// gateway settings, plus the shared cart page behavior.
 	'**/tests/cart/**/*.spec.ts',
@@ -138,8 +142,10 @@ const serialRunSpecs = [
 	// Toggle email feature flags and global WooCommerce email settings, and depend
 	// on shared Mailpit inbox state.
 	'**/tests/email/**/*.spec.ts',
-	// Toggle email-editor feature flags and mutate shared email-template posts,
-	// settings and helper-plugin/Tracks state.
+	// Each spec toggles the global `woocommerce_feature_block_email_editor_enabled`
+	// flag in beforeAll/afterAll; running the files concurrently races on that option
+	// (`e2e-options/update` returns 400 "Update option FAILED") and the first file's
+	// afterAll disables the editor mid-test for the others. Proven not parallel-safe.
 	'**/tests/email-editor/**/*.spec.ts',
 	// Mutate the global onboarding profile/options, site-visibility options and
 	// the active theme.
@@ -155,14 +161,21 @@ const serialRunSpecs = [
 	'**/tests/order/order-coupon.spec.ts',
 	// Toggles the global `woocommerce_downloads_grant_access_after_payment` setting.
 	'**/tests/order/order-edit.spec.ts',
-	// Enables the global `woocommerce_feature_customer_review_request_enabled` flag.
+	// Submits and deletes product reviews via the Review Order form while it runs;
+	// that concurrent churn on the shared reviews list makes `product-reviews`'
+	// trash/undo/re-trash flow intermittently fail (proven by bisect: moving it
+	// serial turns 3 consecutive product-reviews failures green).
 	'**/tests/order/review-order-page.spec.ts',
 	// Imports a fixed-content CSV (fixed SKUs/names) and asserts the imported rows
 	// on the store-wide product list — collides with concurrently created products.
 	'**/tests/product/product-import-csv.spec.ts',
 	// Mutate global WooCommerce settings (store address/currency/country, tax,
-	// REST API keys, webhooks, feature flags).
-	'**/tests/settings/**/*.spec.ts',
+	// feature flags) that other workers' cart/checkout/storefront specs depend on.
+	'**/tests/settings/colour-picker-swatch-height.spec.ts',
+	'**/tests/settings/settings-general.spec.ts',
+	'**/tests/settings/settings-tax.spec.ts',
+	'**/tests/settings/settings-ui-feature-flag.spec.ts',
+	'**/tests/settings/settings-woo-com.spec.ts',
 	// Mutate global shipping classes, zones and methods.
 	'**/tests/shipping/**/*.spec.ts',
 	// Toggles the global `woocommerce_cart_redirect_after_add` setting, which
