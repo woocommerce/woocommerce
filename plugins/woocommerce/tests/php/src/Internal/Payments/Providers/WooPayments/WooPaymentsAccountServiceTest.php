@@ -62,6 +62,48 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should expose the account default currency from the preserved account cache.
+	 */
+	public function test_exposes_account_default_currency_from_account_cache(): void {
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => array(
+					'account_id'       => 'acct_123',
+					'is_live'          => true,
+					'store_currencies' => array(
+						'default'   => 'eur',
+						'supported' => array( 'eur' ),
+					),
+				),
+			)
+		);
+
+		$sut = $this->create_service();
+
+		$this->assertSame( 'eur', $sut->get_account_default_currency() );
+	}
+
+	/**
+	 * @testdox Should fall back to USD when the preserved account cache does not include a default currency.
+	 */
+	public function test_account_default_currency_falls_back_to_usd_when_account_cache_omits_currency(): void {
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => array(
+					'account_id' => 'acct_123',
+					'is_live'    => true,
+				),
+			)
+		);
+
+		$sut = $this->create_service();
+
+		$this->assertSame( 'usd', $sut->get_account_default_currency() );
+	}
+
+	/**
 	 * @testdox Should fail closed for invalid or incomplete account cache payloads.
 	 */
 	public function test_fails_closed_for_invalid_or_incomplete_account_cache_payloads(): void {

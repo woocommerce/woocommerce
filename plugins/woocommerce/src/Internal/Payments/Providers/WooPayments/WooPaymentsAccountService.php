@@ -404,6 +404,21 @@ class WooPaymentsAccountService implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Get the connected WooPayments account default currency.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return string Lowercase account default currency, or usd when unavailable.
+	 */
+	public function get_account_default_currency(): string {
+		$account_data     = $this->get_cached_account_data();
+		$store_currencies = is_array( $account_data['store_currencies'] ?? null ) ? $account_data['store_currencies'] : array();
+		$default_currency = $store_currencies['default'] ?? 'usd';
+
+		return is_scalar( $default_currency ) ? strtolower( trim( (string) $default_currency ) ) : 'usd';
+	}
+
+	/**
 	 * Get the mode-specific publishable key.
 	 *
 	 * @return string

@@ -64,6 +64,7 @@ class MultiCurrencyStateBuilderTest extends WC_Unit_Test_Case {
 	 */
 	public function tear_down(): void {
 		$this->delete_options();
+		remove_all_filters( 'woocommerce_currency' );
 		remove_all_filters( 'wcpay_multi_currency_override_selected_currency' );
 		remove_all_filters( 'wcpay_multi_currency_should_return_store_currency' );
 		update_option( 'woocommerce_currency', $this->original_currency );
@@ -209,6 +210,32 @@ class MultiCurrencyStateBuilderTest extends WC_Unit_Test_Case {
 		$state = $this->create_builder()->build();
 
 		$this->assertSame( 'GBP', $state->get_selected_currency()->get_code() );
+	}
+
+	/**
+	 * @testdox Should keep store default currency when WooCommerce currency is already filtered.
+	 */
+	public function test_keeps_store_default_currency_when_woocommerce_currency_is_filtered(): void {
+		$user_id = self::factory()->user->create();
+		wp_set_current_user( $user_id );
+		update_user_meta( $user_id, 'wcpay_currency', 'GBP' );
+		update_option( 'wcpay_multi_currency_enabled_currencies', array( 'GBP' ) );
+		update_option( 'wcpay_multi_currency_exchange_rate_gbp', 'manual' );
+		update_option( 'wcpay_multi_currency_manual_rate_gbp', '0.8' );
+		add_filter(
+			'woocommerce_currency',
+			static function () {
+				return 'GBP';
+			},
+			900
+		);
+
+		$state = $this->create_builder()->build();
+
+		$this->assertSame( 'USD', $state->get_default_currency()->get_code() );
+		$this->assertSame( 'GBP', $state->get_selected_currency()->get_code() );
+		$this->assertSame( 0.8, $state->get_selected_currency()->get_rate() );
+		$this->assertSame( array( 'USD', 'GBP' ), array_keys( $state->get_enabled_currencies() ) );
 	}
 
 	/**

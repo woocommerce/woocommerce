@@ -26,6 +26,21 @@ use WP_Error;
 class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Original store currency.
+	 *
+	 * @var string
+	 */
+	private string $original_currency;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->original_currency = (string) get_option( 'woocommerce_currency', 'USD' );
+	}
+
+	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
@@ -34,6 +49,7 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'wcpay_metadata_from_order' );
 		delete_option( 'woocommerce_tax_based_on' );
 		delete_option( 'woocommerce_calc_taxes' );
+		update_option( 'woocommerce_currency', $this->original_currency );
 		parent::tearDown();
 	}
 
@@ -378,6 +394,109 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 			. '<p>Net payout: $48.25 USD</p>' . PHP_EOL
 			. '</div>'
 		);
+	}
+
+	/**
+	 * @testdox Charge should include settlement exchange-rate meta for converted-currency native charges.
+	 */
+	public function test_charge_includes_settlement_exchange_rate_meta_for_converted_currency_native_charge(): void {
+		update_option( 'woocommerce_currency', 'USD' );
+		$order = $this->create_woopayments_order( '40.00' );
+		$order->set_currency( 'GBP' );
+		$order->save();
+
+		$gateway          = new RecordingLegacyGateway( array( 'result' => 'success' ) );
+		$api_client       = new class() extends WooPaymentsApiClient {
+			/**
+			 * Create and confirm a payment intention.
+			 *
+			 * @param array<string,mixed> $request_data Request data.
+			 * @param string              $idempotency_key Idempotency key.
+			 * @return array<string,mixed>
+			 */
+			public function create_and_confirm_payment_intention( array $request_data, string $idempotency_key ): array {
+				if ( 4000 !== $request_data['amount'] || 'gbp' !== $request_data['currency'] || 'key_charge' !== $idempotency_key ) {
+					throw new \RuntimeException( 'Unexpected converted-currency charge request payload.' );
+				}
+
+				return array(
+					'id'             => 'pi_converted',
+					'status'         => 'succeeded',
+					'client_secret'  => 'secret_converted',
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_native',
+					'currency'       => 'gbp',
+					'charges'        => array(
+						'total_count' => 1,
+						'data'        => array(
+							array(
+								'id'                     => 'ch_converted',
+								'payment_method'         => 'pm_native',
+								'balance_transaction'    => array(
+									'id'            => 'txn_converted',
+									'exchange_rate' => 1.33127,
+								),
+								'amount'                 => 4000,
+								'currency'               => 'gbp',
+								'application_fee_amount' => 156,
+								'fee_breakdown_v1'       => array(
+									'totals' => array(
+										'fee' => array(
+											'amount'   => 156,
+											'currency' => 'usd',
+											'rate'     => array(
+												'percentage' => 0.039,
+												'fixed' => 30,
+												'fixed_currency' => 'usd',
+											),
+										),
+										'net' => array(
+											'amount'   => 5170,
+											'currency' => 'usd',
+										),
+									),
+								),
+							),
+						),
+					),
+				);
+			}
+
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+		};
+		$customer_service = $this->getMockBuilder( WooPaymentsCustomerService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_or_create_customer_id_for_order' ) )
+			->getMock();
+
+		$customer_service->method( 'get_or_create_customer_id_for_order' )->willReturn( 'cus_native' );
+
+		$sut     = $this->create_adapter(
+			$gateway,
+			$api_client,
+			$customer_service,
+			null,
+			$this->create_account_service(
+				true,
+				array(),
+				array(
+					'store_currencies' => array(
+						'default' => 'usd',
+					),
+				)
+			)
+		);
+		$outcome = $sut->charge( PaymentContext::for_checkout( $order, OrderPaymentStore::GATEWAY_ID, 'pm_request' ), 'key_charge' );
+
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertSame( '1.33127', $outcome->get_data()['meta']['_wcpay_multi_currency_stripe_exchange_rate'] );
 	}
 
 	/**
@@ -2031,6 +2150,86 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Capture should include settlement exchange-rate meta for converted-currency native captures.
+	 */
+	public function test_capture_includes_settlement_exchange_rate_meta_for_converted_currency_native_capture(): void {
+		update_option( 'woocommerce_currency', 'USD' );
+		$order = $this->create_woopayments_order( '40.00' );
+		$order->set_currency( 'GBP' );
+		$order->set_transaction_id( 'pi_capture_converted' );
+		$order->save();
+
+		$gateway    = new RecordingLegacyGateway( array( 'result' => 'success' ), true );
+		$api_client = $this->getMockBuilder( WooPaymentsApiClient::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_available', 'capture_intention' ) )
+			->getMock();
+
+		$api_client->expects( $this->once() )
+			->method( 'is_available' )
+			->willReturn( true );
+		$api_client->expects( $this->once() )
+			->method( 'capture_intention' )
+			->with( 'pi_capture_converted', 4000, array() )
+			->willReturn(
+				array(
+					'id'      => 'pi_capture_converted',
+					'status'  => 'succeeded',
+					'charges' => array(
+						'total_count' => 1,
+						'data'        => array(
+							array(
+								'id'                  => 'ch_capture_converted',
+								'currency'            => 'gbp',
+								'balance_transaction' => array(
+									'id'            => 'txn_capture_converted',
+									'exchange_rate' => 1.33127,
+								),
+								'fee_breakdown_v1'    => array(
+									'totals' => array(
+										'fee' => array(
+											'amount'   => 156,
+											'currency' => 'usd',
+										),
+										'net' => array(
+											'amount'   => 5170,
+											'currency' => 'usd',
+										),
+									),
+								),
+							),
+						),
+					),
+				)
+			);
+
+		$sut     = $this->create_adapter(
+			$gateway,
+			$api_client,
+			null,
+			null,
+			$this->create_account_service(
+				true,
+				array(),
+				array(
+					'store_currencies' => array(
+						'default' => 'usd',
+					),
+				)
+			)
+		);
+		$outcome = $sut->capture( PaymentContext::for_capture( $order, OrderPaymentStore::GATEWAY_ID ), 'key_capture' );
+
+		$this->assertSame( PaymentOutcome::STATUS_COMPLETED, $outcome->get_status() );
+		$this->assertSame( '1.33127', $outcome->get_data()['meta']['_wcpay_multi_currency_stripe_exchange_rate'] );
+		$this->assertSame( '1.56', $outcome->get_data()['meta']['_wcpay_transaction_fee'] );
+		$this->assertSame( '51.7', $outcome->get_data()['meta']['_wcpay_net'] );
+		$this->assertSame( 'ch_capture_converted', $outcome->get_data()['meta']['_charge_id'] );
+		$this->assertSame( 'txn_capture_converted', $outcome->get_data()['meta']['_wcpay_payment_transaction_id'] );
+		$this->assertSame( 'gbp', $outcome->get_data()['meta']['_wcpay_intent_currency'] );
+	}
+
+	/**
 	 * @testdox Capture should fall back to intent meta when the transaction id is missing.
 	 */
 	public function test_capture_uses_intent_meta_when_transaction_id_is_missing(): void {
@@ -2229,7 +2428,7 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 	private function create_account_service( bool $test_mode, array $settings = array(), array $account_data = array() ): WooPaymentsAccountService {
 		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
 			->disableOriginalConstructor()
-			->onlyMethods( array( 'is_test_mode_enabled', 'get_mode', 'get_gateway_setting', 'get_cached_account_data' ) )
+			->onlyMethods( array( 'is_test_mode_enabled', 'get_mode', 'get_gateway_setting', 'get_cached_account_data', 'get_account_default_currency' ) )
 			->getMock();
 
 		$account_service->method( 'is_test_mode_enabled' )->willReturn( $test_mode );
@@ -2256,6 +2455,8 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 				$account_data
 			)
 		);
+		$store_currencies = is_array( $account_data['store_currencies'] ?? null ) ? $account_data['store_currencies'] : array();
+		$account_service->method( 'get_account_default_currency' )->willReturn( (string) ( $store_currencies['default'] ?? 'usd' ) );
 
 		return $account_service;
 	}

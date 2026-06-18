@@ -20,11 +20,27 @@ class WooPaymentsOrderDataServiceTest extends WC_Unit_Test_Case {
 	private WooPaymentsOrderDataService $sut;
 
 	/**
+	 * Original store currency.
+	 *
+	 * @var string
+	 */
+	private string $original_currency;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = wc_get_container()->get( WooPaymentsOrderDataService::class );
+		$this->original_currency = (string) get_option( 'woocommerce_currency', 'USD' );
+		$this->sut               = wc_get_container()->get( WooPaymentsOrderDataService::class );
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		update_option( 'woocommerce_currency', $this->original_currency );
+		parent::tearDown();
 	}
 
 	/**
@@ -141,6 +157,72 @@ class WooPaymentsOrderDataServiceTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertCount( 1, $matching_notes );
+	}
+
+	/**
+	 * @testdox Settlement exchange-rate meta should preserve Stripe conversion rates for converted-currency orders.
+	 * @dataProvider settlement_exchange_rate_provider
+	 *
+	 * @param string $store_currency Store default currency.
+	 * @param string $order_currency Order presentment currency.
+	 * @param string $account_currency WooPayments account default currency.
+	 * @param float  $provider_exchange_rate Stripe exchange rate.
+	 * @param string $expected_exchange_rate Expected order meta exchange rate.
+	 */
+	public function test_get_settlement_exchange_rate_order_meta_preserves_provider_rate_for_converted_order( string $store_currency, string $order_currency, string $account_currency, float $provider_exchange_rate, string $expected_exchange_rate ): void {
+		update_option( 'woocommerce_currency', $store_currency );
+		$order = $this->create_order_with_currency( $order_currency );
+
+		$meta = $this->sut->get_settlement_exchange_rate_order_meta(
+			$order,
+			array(
+				'balance_transaction' => array(
+					'exchange_rate' => $provider_exchange_rate,
+				),
+			),
+			$account_currency
+		);
+
+		$this->assertSame(
+			array(
+				'_wcpay_multi_currency_stripe_exchange_rate' => $expected_exchange_rate,
+			),
+			$meta
+		);
+	}
+
+	/**
+	 * Data provider for settlement exchange-rate meta tests.
+	 *
+	 * @return array<string,array{string,string,string,float,string}>
+	 */
+	public function settlement_exchange_rate_provider(): array {
+		return array(
+			'two-decimal presentment and account currencies' => array( 'USD', 'GBP', 'usd', 1.33127, '1.33127' ),
+			'zero-decimal presentment currency' => array( 'USD', 'JPY', 'usd', 0.63, '0.0063' ),
+			'integer interpreted rate'          => array( 'USD', 'JPY', 'usd', 1000.0, '10' ),
+			'zero-decimal account currency'     => array( 'JPY', 'USD', 'jpy', 0.0063, '0.63' ),
+		);
+	}
+
+	/**
+	 * @testdox Settlement exchange-rate meta should be omitted when store and account default currencies differ.
+	 */
+	public function test_get_settlement_exchange_rate_order_meta_skips_provider_rate_when_store_and_account_defaults_differ(): void {
+		update_option( 'woocommerce_currency', 'EUR' );
+		$order = $this->create_order_with_currency( 'GBP' );
+
+		$meta = $this->sut->get_settlement_exchange_rate_order_meta(
+			$order,
+			array(
+				'balance_transaction' => array(
+					'exchange_rate' => 1.33127,
+				),
+			),
+			'usd'
+		);
+
+		$this->assertSame( array(), $meta );
 	}
 
 	/**
@@ -268,5 +350,20 @@ class WooPaymentsOrderDataServiceTest extends WC_Unit_Test_Case {
 			. '<p>&nbsp;&nbsp;&nbsp;&nbsp;Currency conversion fee: 1%</p>' . PHP_EOL
 			. '<p>Net payout: $64.22 USD</p>' . PHP_EOL
 			. '</div>';
+	}
+
+	/**
+	 * Create an order in the given currency.
+	 *
+	 * @param string $currency Currency code.
+	 * @return WC_Order
+	 */
+	private function create_order_with_currency( string $currency ): WC_Order {
+		$order = wc_create_order();
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$order->set_currency( $currency );
+		$order->save();
+
+		return $order;
 	}
 }

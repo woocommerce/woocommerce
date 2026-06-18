@@ -238,7 +238,7 @@ class WooPaymentsProviderGatewayAdapter {
 						array()
 					);
 
-					return $this->normalize_capture_result( $result );
+					return $this->normalize_capture_result( $result, $context );
 				} catch ( WooPaymentsApiException $exception ) {
 					return $this->failed_transport_outcome( 'capture', $exception );
 				}
@@ -257,7 +257,7 @@ class WooPaymentsProviderGatewayAdapter {
 			}
 		);
 
-		return $this->normalize_capture_result( is_array( $result ) ? $result : array() );
+		return $this->normalize_capture_result( is_array( $result ) ? $result : array(), $context );
 	}
 
 	/**
@@ -700,7 +700,7 @@ class WooPaymentsProviderGatewayAdapter {
 		}
 
 		if ( 'succeeded' === $status ) {
-			$meta = array_merge( $meta, $this->get_completed_charge_order_meta( $result, $charge ) );
+			$meta = array_merge( $meta, $this->get_completed_charge_order_meta( $result, $charge, $context->get_order() ) );
 		}
 
 		if ( $this->is_authorized_native_intent_status( $status ) ) {
@@ -1092,9 +1092,10 @@ class WooPaymentsProviderGatewayAdapter {
 	 *
 	 * @param array<string,mixed> $intent Native PaymentIntent response.
 	 * @param array<string,mixed> $charge Native Charge response.
+	 * @param WC_Order            $order  Order being charged.
 	 * @return array<string,string>
 	 */
-	private function get_completed_charge_order_meta( array $intent, array $charge ): array {
+	private function get_completed_charge_order_meta( array $intent, array $charge, WC_Order $order ): array {
 		$meta = array();
 
 		$transaction_fee = $this->get_transaction_fee_from_charge( $intent, $charge );
@@ -1107,9 +1108,48 @@ class WooPaymentsProviderGatewayAdapter {
 			$meta['_wcpay_net'] = $net;
 		}
 
+		$meta = array_merge(
+			$meta,
+			$this->get_order_data_service()->get_settlement_exchange_rate_order_meta(
+				$order,
+				$charge,
+				$this->get_account_service()->get_account_default_currency()
+			)
+		);
+
 		$meta = array_merge( $meta, $this->get_fraud_outcome_order_meta( $intent ) );
 
 		return $meta;
+	}
+
+	/**
+	 * Get lifecycle meta from a completed capture response.
+	 *
+	 * @param array<string,mixed> $intent Native PaymentIntent response.
+	 * @param WC_Order            $order  Order being captured.
+	 * @return array<string,string>
+	 */
+	private function get_completed_capture_order_meta( array $intent, WC_Order $order ): array {
+		$charge = $this->get_latest_charge( $intent );
+		if ( empty( $charge ) ) {
+			return array();
+		}
+
+		$meta = array(
+			'_wcpay_intent_currency' => strtolower( isset( $intent['currency'] ) ? (string) $intent['currency'] : (string) $order->get_currency() ),
+			'_wcpay_mode'            => $this->get_account_service()->get_mode(),
+		);
+
+		$charge_id = isset( $charge['id'] ) ? (string) $charge['id'] : '';
+		if ( '' !== $charge_id ) {
+			$meta['_charge_id'] = $charge_id;
+		}
+
+		if ( isset( $charge['balance_transaction']['id'] ) ) {
+			$meta['_wcpay_payment_transaction_id'] = (string) $charge['balance_transaction']['id'];
+		}
+
+		return array_merge( $meta, $this->get_completed_charge_order_meta( $intent, $charge, $order ) );
 	}
 
 	/**
@@ -1512,17 +1552,21 @@ class WooPaymentsProviderGatewayAdapter {
 	/**
 	 * Normalize a capture result.
 	 *
-	 * @param array<string,mixed> $result Legacy capture result.
+	 * @param array<string,mixed> $result  Legacy or native capture result.
+	 * @param PaymentContext      $context Payment context.
 	 * @return PaymentOutcome
 	 */
-	private function normalize_capture_result( array $result ): PaymentOutcome {
+	private function normalize_capture_result( array $result, PaymentContext $context ): PaymentOutcome {
 		$status     = isset( $result['status'] ) ? (string) $result['status'] : 'failed';
 		$intent_id  = isset( $result['id'] ) ? (string) $result['id'] : '';
 		$error_code = isset( $result['error_code'] ) ? (string) $result['error_code'] : '';
 		$message    = isset( $result['message'] ) ? (string) $result['message'] : '';
 
 		if ( 'succeeded' === $status ) {
-			return new PaymentOutcome( PaymentOutcome::STATUS_COMPLETED, $intent_id );
+			$meta = $this->get_completed_capture_order_meta( $result, $context->get_order() );
+			$data = empty( $meta ) ? array() : array( 'meta' => $meta );
+
+			return new PaymentOutcome( PaymentOutcome::STATUS_COMPLETED, $intent_id, '', '', '', $data );
 		}
 
 		if ( 'requires_capture' === $status && '' === $message ) {

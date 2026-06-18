@@ -23,6 +23,21 @@ use WC_Unit_Test_Case;
 class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Original store currency.
+	 *
+	 * @var string
+	 */
+	private string $original_currency;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->original_currency = (string) get_option( 'woocommerce_currency', 'USD' );
+	}
+
+	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
@@ -32,6 +47,7 @@ class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_native_woopayments_is_recurring_payment' );
 		remove_all_filters( 'woocommerce_native_woopayments_related_subscriptions_for_order' );
 		wp_set_current_user( 0 );
+		update_option( 'woocommerce_currency', $this->original_currency );
 		parent::tearDown();
 	}
 
@@ -215,6 +231,78 @@ class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 		$this->assert_order_has_note_containing( $order, 'A test payment of' );
 		$this->assert_order_has_note_containing( $order, 'was processed using WooPayments in <strong>test mode</strong>' );
 		$this->assert_order_has_note_containing( $order, 'pi_native' );
+	}
+
+	/**
+	 * @testdox Order-status callback should persist settlement exchange-rate meta for converted-currency native charges.
+	 */
+	public function test_update_order_status_persists_settlement_exchange_rate_meta_for_converted_currency_charge(): void {
+		update_option( 'woocommerce_currency', 'USD' );
+		$order = $this->create_woopayments_order( '40.00' );
+		$order->set_currency( 'GBP' );
+		$order->update_meta_data( '_intent_id', 'pi_converted' );
+		$order->save();
+
+		$api_client = new class() extends WooPaymentsApiClient {
+			/**
+			 * Tell whether the transport is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Retrieve a PaymentIntent.
+			 *
+			 * @param string $intent_id PaymentIntent ID.
+			 * @return array<string,mixed>
+			 */
+			public function get_payment_intention( string $intent_id ): array {
+				if ( 'pi_converted' !== $intent_id ) {
+					throw new \RuntimeException( 'Unexpected payment intent ID.' );
+				}
+
+				return array(
+					'id'             => 'pi_converted',
+					'status'         => 'succeeded',
+					'currency'       => 'gbp',
+					'amount'         => 4000,
+					'customer'       => 'cus_native',
+					'payment_method' => 'pm_native',
+					'charges'        => array(
+						'total_count' => 1,
+						'data'        => array(
+							array(
+								'id'                  => 'ch_converted',
+								'payment_method'      => 'pm_native',
+								'balance_transaction' => array(
+									'id'            => 'txn_converted',
+									'exchange_rate' => 1.33127,
+								),
+								'amount'              => 4000,
+								'currency'            => 'gbp',
+							),
+						),
+					),
+				);
+			}
+		};
+		$sut        = $this->create_controller( $api_client, null, null, $this->create_account_service( true, 'usd' ) );
+
+		$response = $sut->get_update_order_status_response(
+			array(
+				'_ajax_nonce' => wp_create_nonce( 'wcpay_update_order_status_nonce' ),
+				'order_id'    => $order->get_id(),
+				'intent_id'   => 'pi_converted',
+			)
+		);
+		$order    = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 200, $response['status_code'] );
+		$this->assertSame( '1.33127', $order->get_meta( '_wcpay_multi_currency_stripe_exchange_rate', true ) );
 	}
 
 	/**
@@ -693,17 +781,19 @@ class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Create a WooPayments account service mock.
 	 *
-	 * @param bool $test_mode Whether WooPayments should run in test mode.
+	 * @param bool   $test_mode                Whether WooPayments should run in test mode.
+	 * @param string $account_default_currency Account default currency.
 	 * @return WooPaymentsAccountService
 	 */
-	private function create_account_service( bool $test_mode ): WooPaymentsAccountService {
+	private function create_account_service( bool $test_mode, string $account_default_currency = 'usd' ): WooPaymentsAccountService {
 		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
 			->disableOriginalConstructor()
-			->onlyMethods( array( 'get_mode', 'is_test_mode_enabled' ) )
+			->onlyMethods( array( 'get_mode', 'is_test_mode_enabled', 'get_account_default_currency' ) )
 			->getMock();
 
 		$account_service->method( 'get_mode' )->willReturn( $test_mode ? 'test' : 'live' );
 		$account_service->method( 'is_test_mode_enabled' )->willReturn( $test_mode );
+		$account_service->method( 'get_account_default_currency' )->willReturn( $account_default_currency );
 
 		return $account_service;
 	}

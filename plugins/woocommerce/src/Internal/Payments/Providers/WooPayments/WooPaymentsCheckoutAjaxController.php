@@ -88,16 +88,24 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 	private WooPaymentsAccountService $account_service;
 
 	/**
+	 * WooPayments order data service.
+	 *
+	 * @var WooPaymentsOrderDataService|null
+	 */
+	private ?WooPaymentsOrderDataService $order_data_service = null;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param NativePaymentsRuntimeArbiter $arbiter           Runtime owner arbiter.
-	 * @param WooPaymentsApiClient         $api_client        Native WooPayments API client.
-	 * @param WooPaymentsCustomerService   $customer_service  WooPayments customer service.
-	 * @param OrderPaymentLifecycleService $lifecycle_service Order lifecycle service.
-	 * @param WooPaymentsTokenService      $token_service     WooPayments token service.
-	 * @param WooPaymentsAccountService    $account_service   WooPayments account service.
+	 * @param NativePaymentsRuntimeArbiter     $arbiter            Runtime owner arbiter.
+	 * @param WooPaymentsApiClient             $api_client         Native WooPayments API client.
+	 * @param WooPaymentsCustomerService       $customer_service   WooPayments customer service.
+	 * @param OrderPaymentLifecycleService     $lifecycle_service  Order lifecycle service.
+	 * @param WooPaymentsTokenService          $token_service      WooPayments token service.
+	 * @param WooPaymentsAccountService        $account_service    WooPayments account service.
+	 * @param WooPaymentsOrderDataService|null $order_data_service WooPayments order data service.
 	 */
 	final public function init(
 		NativePaymentsRuntimeArbiter $arbiter,
@@ -105,14 +113,16 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 		WooPaymentsCustomerService $customer_service,
 		OrderPaymentLifecycleService $lifecycle_service,
 		WooPaymentsTokenService $token_service,
-		WooPaymentsAccountService $account_service
+		WooPaymentsAccountService $account_service,
+		?WooPaymentsOrderDataService $order_data_service = null
 	): void {
-		$this->arbiter           = $arbiter;
-		$this->api_client        = $api_client;
-		$this->customer_service  = $customer_service;
-		$this->lifecycle_service = $lifecycle_service;
-		$this->token_service     = $token_service;
-		$this->account_service   = $account_service;
+		$this->arbiter            = $arbiter;
+		$this->api_client         = $api_client;
+		$this->customer_service   = $customer_service;
+		$this->lifecycle_service  = $lifecycle_service;
+		$this->token_service      = $token_service;
+		$this->account_service    = $account_service;
+		$this->order_data_service = $order_data_service;
 	}
 
 	/**
@@ -342,7 +352,7 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 		}
 
 		if ( 'succeeded' === $status ) {
-			$meta = array_merge( $meta, $this->get_completed_charge_order_meta( $intent, $charge ) );
+			$meta = array_merge( $meta, $this->get_completed_charge_order_meta( $intent, $charge, $order ) );
 		}
 
 		return new PaymentLifecycleEvent(
@@ -407,6 +417,19 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 
 		$order->set_payment_method_title( $this->get_payment_method_title( $payment_method_details ) );
 		$order->save();
+	}
+
+	/**
+	 * Get the WooPayments order data service.
+	 *
+	 * @return WooPaymentsOrderDataService
+	 */
+	private function get_order_data_service(): WooPaymentsOrderDataService {
+		if ( null === $this->order_data_service ) {
+			$this->order_data_service = wc_get_container()->get( WooPaymentsOrderDataService::class );
+		}
+
+		return $this->order_data_service;
 	}
 
 	/**
@@ -729,9 +752,10 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 	 *
 	 * @param array<string,mixed> $intent Native PaymentIntent response.
 	 * @param array<string,mixed> $charge Native Charge response.
+	 * @param WC_Order            $order  Order being charged.
 	 * @return array<string,string>
 	 */
-	private function get_completed_charge_order_meta( array $intent, array $charge ): array {
+	private function get_completed_charge_order_meta( array $intent, array $charge, WC_Order $order ): array {
 		$meta = array();
 
 		$transaction_fee = $this->get_transaction_fee_from_charge( $intent, $charge );
@@ -743,6 +767,15 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 		if ( '' !== $net ) {
 			$meta['_wcpay_net'] = $net;
 		}
+
+		$meta = array_merge(
+			$meta,
+			$this->get_order_data_service()->get_settlement_exchange_rate_order_meta(
+				$order,
+				$charge,
+				$this->account_service->get_account_default_currency()
+			)
+		);
 
 		$meta = array_merge( $meta, $this->get_fraud_outcome_order_meta( $intent ) );
 

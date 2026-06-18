@@ -71,7 +71,7 @@ class MultiCurrencyStateBuilder {
 	 * @return MultiCurrencyState
 	 */
 	public function build(): MultiCurrencyState {
-		$default_code  = strtoupper( get_woocommerce_currency() );
+		$default_code  = strtoupper( (string) get_option( 'woocommerce_currency', 'USD' ) );
 		$default       = new MultiCurrencyCurrency( $this->localization_service, $default_code, 1.0, true );
 		$available     = array_merge(
 			array( $default_code => $default ),
