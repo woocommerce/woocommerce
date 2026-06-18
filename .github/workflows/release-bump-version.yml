@@ -41,7 +41,8 @@ env:
 jobs:
   bump-version:
     name: Bump WooCommerce Version
-    runs-on: ${{ fromJSON('{"group":"WooCommerce Release Checks"}') }}
+    runs-on:
+      group: WooCommerce Release Checks
     steps:
       - name: Normalize branch input
         id: normalize-branch

@@ -32,7 +32,8 @@ env:
 jobs:
   build-prep:
     name: Create changelog PR
-    runs-on: ${{ fromJSON('{"group":"WooCommerce Release Checks"}') }}
+    runs-on:
+      group: WooCommerce Release Checks
     permissions:
       contents: write
       pull-requests: write

@@ -29,7 +29,8 @@ env:
 
 jobs:
   validate-release:
-    runs-on: ${{ fromJSON('{"group":"WooCommerce Release Checks"}') }}
+    runs-on:
+      group: WooCommerce Release Checks
     outputs:
       version: ${{ steps.extract-version.outputs.version }}
       branch: ${{ steps.extract-version.outputs.branch }}
@@ -193,7 +194,8 @@ jobs:
           fi
 
   update-wporg-stable-tag:
-    runs-on: ${{ fromJSON('{"group":"WooCommerce Release Checks"}') }}
+    runs-on:
+      group: WooCommerce Release Checks
     needs: validate-release
     steps:
       - name: Install SVN
@@ -232,7 +234,8 @@ jobs:
           fi
 
   update-gh-stable-tag:
-    runs-on: ${{ fromJSON('{"group":"WooCommerce Release Checks"}') }}
+    runs-on:
+      group: WooCommerce Release Checks
     needs: [validate-release, update-wporg-stable-tag]
     strategy:
       fail-fast: false
@@ -306,7 +309,8 @@ jobs:
           fi
 
   notify-release:
-    runs-on: ${{ fromJSON('{"group":"WooCommerce Release Checks"}') }}
+    runs-on:
+      group: WooCommerce Release Checks
     needs: [validate-release, update-wporg-stable-tag, update-gh-stable-tag]
     if: ${{ github.event.inputs.allow-revert != 'true' }}
     steps:
