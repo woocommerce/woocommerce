@@ -40,7 +40,7 @@ See also [the README file for the `Internal` folder](Internal/README.md).
 
 Composer is used to generate autoload class-maps for the files here. The stable release of WooCommerce comes with the autoloader, however, if you're running a development version you'll need to use Composer.
 
-If you don't have Composer installed, go and check how to [install Composer](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment) and then continue here.
+If you don't have Composer installed, go and check how to [install Composer](https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment) and then continue here.
 
 ### Updating the autoloader class maps
 

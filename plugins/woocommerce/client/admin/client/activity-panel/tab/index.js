@@ -36,13 +36,13 @@ export const Tab = ( {
 			key={ tabKey }
 			id={ tabKey }
 			data-testid={ tabKey }
-			aria-label={ ariaLabel }
+			label={ title || ariaLabel }
+			showTooltip
 			onClick={ () => {
 				onTabClick( name );
 			} }
 		>
 			{ icon }
-			{ title }{ ' ' }
 			{ unread && (
 				<span className="screen-reader-text">
 					{ __( 'unread activity', 'woocommerce' ) }

@@ -37,9 +37,12 @@ jest.mock( '@woocommerce/blocks-components', () => {
 	return {
 		__esModule: true,
 		...originalModule,
-		RadioControlAccordion: ( { onChange } ) => (
+		RadioControlAccordion: ( { onChange, className = '' } ) => (
 			<>
 				<span>Payment method options</span>
+				<span data-testid="payment-method-options-class-name">
+					{ className }
+				</span>
 				<button onClick={ () => onChange( 'credit-card' ) }>
 					Select new payment
 				</button>
@@ -80,8 +83,8 @@ jest.mock( '@wordpress/data', () => {
 	};
 } );
 
-const registerMockPaymentMethods = () => {
-	[ 'cod', 'credit-card' ].forEach( ( name ) => {
+const registerMockPaymentMethodsByName = ( names ) => {
+	names.forEach( ( name ) => {
 		registerPaymentMethod( {
 			name,
 			label: name,
@@ -100,6 +103,10 @@ const registerMockPaymentMethods = () => {
 	dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
 };
 
+const registerMockPaymentMethods = () => {
+	registerMockPaymentMethodsByName( [ 'cod', 'credit-card' ] );
+};
+
 const registerMockExpressPaymentMethods = () => {
 	registerExpressPaymentMethod( {
 		name: 'dummy-express',
@@ -111,10 +118,22 @@ const registerMockExpressPaymentMethods = () => {
 	dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
 };
 
-const resetMockPaymentMethods = () => {
-	[ 'cod', 'credit-card' ].forEach( ( name ) => {
+const registerMockSinglePaymentMethod = () => {
+	registerMockPaymentMethodsByName( [ 'cod' ] );
+};
+
+const resetMockPaymentMethodsByName = ( names ) => {
+	names.forEach( ( name ) => {
 		__experimentalDeRegisterPaymentMethod( name );
 	} );
+};
+
+const resetMockPaymentMethods = () => {
+	resetMockPaymentMethodsByName( [ 'cod', 'credit-card' ] );
+};
+
+const resetMockSinglePaymentMethod = () => {
+	resetMockPaymentMethodsByName( [ 'cod' ] );
 };
 
 const resetMockExpressPaymentMethods = () => {
@@ -263,5 +282,37 @@ describe( 'PaymentMethods', () => {
 		} );
 
 		act( () => resetMockPaymentMethods() );
+	} );
+
+	test( 'should not apply single-method radio disable class when only one payment method is available', async () => {
+		act( () => {
+			registerMockSinglePaymentMethod();
+		} );
+
+		wpDataFunctions.dispatch( CART_STORE_KEY ).receiveCart( {
+			...previewCart,
+			payment_methods: [ 'cod' ],
+		} );
+
+		await waitFor( () => {
+			expect(
+				wpDataFunctions.select( paymentStore ).getActivePaymentMethod()
+			).toBe( 'cod' );
+		} );
+
+		render( <PaymentMethods /> );
+
+		await waitFor( () => {
+			const paymentMethodOptions = screen.queryByText(
+				/Payment method options/
+			);
+			expect( paymentMethodOptions ).not.toBeNull();
+		} );
+
+		expect(
+			screen.getByTestId( 'payment-method-options-class-name' )
+		).not.toHaveTextContent( /disable-radio-control/ );
+
+		act( () => resetMockSinglePaymentMethod() );
 	} );
 } );

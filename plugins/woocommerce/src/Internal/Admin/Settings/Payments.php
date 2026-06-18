@@ -136,9 +136,10 @@ class Payments {
 
 		foreach ( $payment_gateways as $payment_gateway ) {
 			// Determine the gateway's order value.
-			// If we don't have an order for it, add it to the end.
+			// If we don't have an order for it, place it above offline PMs if the offline group
+			// is still at the bottom (default ordering). Otherwise, add to the end.
 			if ( ! isset( $providers_order_map[ $payment_gateway->id ] ) ) {
-				$providers_order_map = Utils::order_map_add_at_order( $providers_order_map, $payment_gateway->id, count( $payment_providers ) );
+				$providers_order_map = $this->providers->order_map_add_gateway( $providers_order_map, $payment_gateway->id );
 			}
 
 			$payment_providers[] = $this->providers->get_payment_gateway_details(

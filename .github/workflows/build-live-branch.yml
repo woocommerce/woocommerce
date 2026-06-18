@@ -3,22 +3,23 @@ on:
     push:
         branches:
             - trunk
-        paths-ignore:
-            - 'docs/**'
-            - 'packages/php/**'
-            - 'tools/**'
-            - '**/changelog/**'
-            - '**/changelog.txt'
-            - '**/readme.txt'
-            - '.gitignore'
-            - '.coderabbit.yml'
-            - 'CODEOWNERS'
-            - '**/tests/**'
-            - '**/*.md'
-            - '.husky/**'
-            - '.cursor/**'
-            - '.github/**'
-            - '!.github/workflows/build-live-branch.yml'
+        paths:
+            - '**'
+            - '!docs/**'
+            - '!packages/php/**'
+            - '!tools/**'
+            - '!**/changelog/**'
+            - '!**/changelog.txt'
+            - '!**/readme.txt'
+            - '!.gitignore'
+            - '!.coderabbit.yml'
+            - '!CODEOWNERS'
+            - '!**/tests/**'
+            - '!**/*.md'
+            - '!.husky/**'
+            - '!.cursor/**'
+            - '!.github/**'
+            - '.github/workflows/build-live-branch.yml'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}

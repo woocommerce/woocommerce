@@ -13,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postproce
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Blocks_Width_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Cleanup_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Context_Aware_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Spacing_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Typography_Preprocessor;
@@ -60,9 +61,12 @@ class Process_Manager {
 		Border_Style_Postprocessor $border_style_postprocessor
 	) {
 		$this->register_preprocessor( $cleanup_preprocessor );
+		// Spacing must run before Width: it sets root-padding-left/right in
+		// email_attrs, which the Width preprocessor reads to subtract root
+		// padding only from blocks that actually receive it.
+		$this->register_preprocessor( $spacing_preprocessor );
 		$this->register_preprocessor( $blocks_width_preprocessor );
 		$this->register_preprocessor( $typography_preprocessor );
-		$this->register_preprocessor( $spacing_preprocessor );
 		$this->register_preprocessor( $quote_preprocessor );
 		$this->register_postprocessor( $highlighting_postprocessor );
 		$this->register_postprocessor( $border_style_postprocessor );
@@ -72,14 +76,17 @@ class Process_Manager {
 	/**
 	 * Method to preprocess blocks
 	 *
-	 * @param array                                                                                                             $parsed_blocks Parsed blocks.
-	 * @param array{contentSize: string, wideSize?: string, allowEditing?: bool, allowCustomContentAndWideSize?: bool}          $layout Layout.
-	 * @param array{spacing: array{padding: array{bottom: string, left: string, right: string, top: string}, blockGap: string}} $styles Styles.
+	 * @param array                                                                                                               $parsed_blocks Parsed blocks.
+	 * @param array{contentSize: string, wideSize?: string, allowEditing?: bool, allowCustomContentAndWideSize?: bool}            $layout Layout.
+	 * @param array{spacing: array{padding: array{bottom: string, left?: string, right?: string, top: string}, blockGap: string}} $styles Styles.
+	 * @param Rendering_Context|null                                                                                              $rendering_context Rendering context.
 	 * @return array
 	 */
-	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {
+	public function preprocess( array $parsed_blocks, array $layout, array $styles, ?Rendering_Context $rendering_context = null ): array {
 		foreach ( $this->preprocessors as $preprocessor ) {
-			$parsed_blocks = $preprocessor->preprocess( $parsed_blocks, $layout, $styles );
+			$parsed_blocks = $preprocessor instanceof Context_Aware_Preprocessor
+				? $preprocessor->preprocess_with_context( $parsed_blocks, $layout, $styles, $rendering_context )
+				: $preprocessor->preprocess( $parsed_blocks, $layout, $styles );
 		}
 		return $parsed_blocks;
 	}

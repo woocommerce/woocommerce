@@ -8,7 +8,6 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import { store as coreStore } from '@wordpress/core-data';
 import { PanelBody, ToggleControl } from '@wordpress/components';
 import {
-	// @ts-expect-error AlignmentControl is not exported from @wordpress/block-editor
 	AlignmentControl,
 	BlockControls,
 	InspectorControls,

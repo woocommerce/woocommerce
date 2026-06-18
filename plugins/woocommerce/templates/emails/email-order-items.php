@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.4.0
+ * @version 10.8.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -23,6 +23,7 @@ $margin_side = is_rtl() ? 'left' : 'right';
 
 $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 $price_text_align           = $email_improvements_enabled ? 'right' : 'left';
+$block_email_editor_enabled = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
 
 foreach ( $items as $item_id => $item ) :
 	$product       = $item->get_product();
@@ -42,7 +43,7 @@ foreach ( $items as $item_id => $item ) :
 
 	?>
 	<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
-		<td class="td font-family text-align-left" style="vertical-align: middle; word-wrap:break-word;">
+		<td class="td font-family text-align-left" style="vertical-align: <?php echo $block_email_editor_enabled ? 'top' : 'middle'; ?>; word-wrap:break-word;">
 			<?php if ( $email_improvements_enabled ) { ?>
 				<table class="order-item-data" role="presentation">
 					<tr>
@@ -56,7 +57,7 @@ foreach ( $items as $item_id => $item ) :
 							 * @param WC_Order_Item_Product $item  The item being displayed.
 							 * @since 2.1.0
 							 */
-							echo '<td>' . wp_kses_post( apply_filters( 'woocommerce_order_item_thumbnail', $image, $item ) ) . '</td>';
+							echo '<td style="vertical-align: top;">' . wp_kses_post( apply_filters( 'woocommerce_order_item_thumbnail', $image, $item ) ) . '</td>';
 						}
 						?>
 						<td>
@@ -192,7 +193,6 @@ foreach ( $items as $item_id => $item ) :
 		</td>
 		<td class="td font-family text-align-<?php echo esc_attr( $price_text_align ); ?>" style="vertical-align:middle;">
 			<?php
-			echo $email_improvements_enabled ? '&times;' : '';
 			$qty          = $item->get_quantity();
 			$refunded_qty = $order->get_qty_refunded_for_item( $item_id );
 
@@ -201,7 +201,19 @@ foreach ( $items as $item_id => $item ) :
 			} else {
 				$qty_display = esc_html( $qty );
 			}
-			echo wp_kses_post( apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item ) );
+			/**
+			 * Email Order Item Quantity hook.
+			 *
+			 * @since 2.4.0
+			 * @param string                $qty_display Item quantity.
+			 * @param WC_Order_Item_Product $item        Item object.
+			 * @return string
+			 */
+			$quantity = apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item );
+			if ( '' !== $quantity ) {
+				$quantity_prefix = $email_improvements_enabled ? '&times;' : '';
+				echo wp_kses_post( $quantity_prefix . $quantity );
+			}
 			?>
 		</td>
 		<td class="td font-family text-align-<?php echo esc_attr( $price_text_align ); ?>" style="vertical-align:middle;">

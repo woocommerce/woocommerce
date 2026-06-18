@@ -296,6 +296,100 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox delete_version returns true when wp_cache_delete returns a non-boolean value.
+	 */
+	public function test_delete_version_returns_true_for_non_bool_cache_delete(): void {
+		global $wp_object_cache;
+		$original_cache = $wp_object_cache;
+
+		try {
+			$mock_cache = $this->createMock( \WP_Object_Cache::class );
+			$mock_cache->method( 'delete' )->willReturn( null );
+			$wp_object_cache = $mock_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+			$result = $this->sut->delete_version( 'some-id' );
+
+			$this->assertTrue( $result, 'delete_version should return true when wp_cache_delete returns non-boolean' );
+		} finally {
+			$wp_object_cache = $original_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+	}
+
+	/**
+	 * @testdox store_version succeeds when wp_cache_set returns non-boolean but the value is correctly stored.
+	 */
+	public function test_store_version_succeeds_for_non_bool_cache_set_with_correct_value(): void {
+		global $wp_object_cache;
+		$original_cache = $wp_object_cache;
+
+		try {
+			// Mock that returns null from set() but delegates get() to the real cache,
+			// simulating a non-standard cache that stores correctly but returns null.
+			$mock_cache = $this->createMock( \WP_Object_Cache::class );
+			$mock_cache->method( 'set' )->willReturnCallback(
+				function ( $key, $data, $group, $expire ) use ( $original_cache ) {
+					$original_cache->set( $key, $data, $group, $expire );
+					return null;
+				}
+			);
+			$mock_cache->method( 'get' )->willReturnCallback(
+				function ( $key, $group, $force, &$found ) use ( $original_cache ) {
+					return $original_cache->get( $key, $group, $force, $found );
+				}
+			);
+			$wp_object_cache = $mock_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+			$version = $this->sut->generate_version( 'test-store-ok' );
+
+			$this->assertNotEmpty( $version, 'generate_version should return a version even when wp_cache_set returns non-boolean' );
+		} finally {
+			$wp_object_cache = $original_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+	}
+
+	/**
+	 * @testdox store_version fails and cleans up when wp_cache_set returns non-boolean and the stored value doesn't match.
+	 */
+	public function test_store_version_fails_for_non_bool_cache_set_with_wrong_value(): void {
+		global $wp_object_cache;
+		$original_cache = $wp_object_cache;
+
+		try {
+			$mock_cache = $this->createMock( \WP_Object_Cache::class );
+			$mock_cache->method( 'set' )->willReturnCallback(
+				function ( $key, $data, $group, $expire ) use ( $original_cache ) {
+					// Store a wrong value to simulate a corrupted write.
+					$original_cache->set( $key, 'wrong-value', $group, $expire );
+					return null;
+				}
+			);
+			$mock_cache->method( 'get' )->willReturnCallback(
+				function ( $key, $group, $force, &$found ) use ( $original_cache ) {
+					return $original_cache->get( $key, $group, $force, $found );
+				}
+			);
+			$mock_cache->method( 'delete' )->willReturnCallback(
+				function ( $key, $group ) use ( $original_cache ) {
+					return $original_cache->delete( $key, $group );
+				}
+			);
+			$wp_object_cache = $mock_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+			$version = $this->sut->generate_version( 'test-store-fail' );
+
+			// generate_version still returns a UUID string, but the store failed silently.
+			$this->assertNotEmpty( $version );
+		} finally {
+			$wp_object_cache = $original_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		// The corrupted value should have been cleaned up.
+		$cache_key    = 'wc_version_string_' . md5( 'test-store-fail' );
+		$cached_value = wp_cache_get( $cache_key, $this->get_cache_group() );
+		$this->assertFalse( $cached_value, 'Mismatched cached value should have been deleted' );
+	}
+
+	/**
 	 * @testdox Negative TTL from filter is converted to 0 and cache operations still succeed.
 	 */
 	public function test_negative_ttl_is_converted_to_zero() {

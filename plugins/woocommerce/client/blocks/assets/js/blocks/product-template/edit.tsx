@@ -32,6 +32,7 @@ import {
 	parseTemplateSlug,
 } from './utils';
 import { getDefaultStockStatuses } from '../product-collection/constants';
+import { usePlaceholderProducts } from './use-placeholder-products';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
 
@@ -45,9 +46,9 @@ const ProductTemplateInnerBlocks = () => {
 
 type ProductTemplateBlockPreviewProps = {
 	blocks: object[];
-	blockContextId: string;
+	blockContextId: string | number;
 	isHidden: boolean;
-	setActiveBlockContextId: ( blockContextId: string ) => void;
+	setActiveBlockContextId: ( blockContextId: string | number ) => void;
 };
 
 const ProductTemplateBlockPreview = ( {
@@ -87,14 +88,14 @@ const ProductTemplateBlockPreview = ( {
 const MemoizedProductTemplateBlockPreview = memo( ProductTemplateBlockPreview );
 
 type ProductContentProps = {
-	attributes: { productId: string };
+	attributes: { productId: string | number };
 	displayTemplate: boolean;
 	blocks: BlockInstance[];
 	blockContext: {
 		postType: string;
-		postId: string;
+		postId: string | number;
 	};
-	setActiveBlockContextId: ( id: string ) => void;
+	setActiveBlockContextId: ( id: string | number ) => void;
 };
 
 const ProductContent = ( {
@@ -234,8 +235,9 @@ const ProductTemplateEdit = (
 	const location = useGetLocation( props.context, props.clientId );
 
 	const [ { page } ] = queryContext;
-	const [ activeBlockContextId, setActiveBlockContextId ] =
-		useState< string >();
+	const [ activeBlockContextId, setActiveBlockContextId ] = useState<
+		string | number
+	>();
 	const postType = 'product';
 	const loopShopPerPage = getSettingWithCoercion(
 		'loopShopPerPage',
@@ -396,8 +398,25 @@ const ProductTemplateEdit = (
 	const hasLayoutFlex = layoutType === 'flex' && columns > 1;
 	let customClassName = '';
 
-	// We don't want to apply layout styles if there's no products.
-	if ( products && products.length && hasLayoutFlex ) {
+	const isPreviewWithNoProducts =
+		!! __privateProductCollectionPreviewState?.isPreview &&
+		!! products &&
+		! products.length;
+
+	const {
+		blockContexts: placeholderContexts,
+		placeholderProductMap,
+		isReady: placeholdersReady,
+	} = usePlaceholderProducts( {
+		isPreviewWithNoProducts,
+		count: perPage ?? 4,
+	} );
+
+	// Apply layout styles when products are present or when showing preview placeholders.
+	if (
+		( ( products && products.length ) || isPreviewWithNoProducts ) &&
+		hasLayoutFlex
+	) {
 		const dynamicGrid = `wc-block-product-template__responsive columns-${ columns }`;
 		const staticGrid = `is-flex-container columns-${ columns }`;
 
@@ -413,6 +432,10 @@ const ProductTemplateEdit = (
 		),
 	} );
 
+	const ProductContentComponent = isInSingleProductBlock
+		? ProductContentWithProduct
+		: ProductContent;
+
 	if ( ! products ) {
 		return (
 			<p { ...blockProps }>
@@ -422,6 +445,57 @@ const ProductTemplateEdit = (
 	}
 
 	if ( ! products.length ) {
+		if (
+			isPreviewWithNoProducts &&
+			placeholdersReady &&
+			placeholderContexts
+		) {
+			return (
+				<ul { ...blockProps }>
+					{ placeholderContexts.map( ( blockContext ) => {
+						const displayTemplate =
+							blockContext.postId ===
+							( activeBlockContextId ||
+								placeholderContexts[ 0 ]?.postId );
+
+						return (
+							<ProductDataContextProvider
+								key={ blockContext.postId }
+								product={
+									placeholderProductMap.get(
+										blockContext.postId as number
+									) ?? null
+								}
+								isLoading={ false }
+							>
+								{ /* Always use ProductContent for placeholders to avoid
+								   withProduct HOC making failing API calls for negative IDs. */ }
+								<ProductContent
+									attributes={ {
+										productId: blockContext.postId,
+									} }
+									blocks={ blocks }
+									displayTemplate={ displayTemplate }
+									blockContext={ blockContext }
+									setActiveBlockContextId={
+										setActiveBlockContextId
+									}
+								/>
+							</ProductDataContextProvider>
+						);
+					} ) }
+				</ul>
+			);
+		}
+
+		if ( isPreviewWithNoProducts && ! placeholdersReady ) {
+			return (
+				<p { ...blockProps }>
+					<Spinner className="wc-block-product-template__spinner" />
+				</p>
+			);
+		}
+
 		return (
 			<p { ...blockProps }>
 				{ ' ' }
@@ -432,10 +506,6 @@ const ProductTemplateEdit = (
 			</p>
 		);
 	}
-
-	const ProductContentComponent = isInSingleProductBlock
-		? ProductContentWithProduct
-		: ProductContent;
 
 	// To avoid flicker when switching active block contexts, a preview is rendered
 	// for each block context, but the preview for the active block context is hidden.

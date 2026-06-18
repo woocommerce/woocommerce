@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/e2e-utils-playwright",
-	"version": "0.4.0",
+	"version": "0.5.0",
 	"description": "End-To-End (E2E) test Playwright utils for WooCommerce",
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-utils-playwright/README.md",
 	"repository": {
@@ -9,55 +9,92 @@
 	},
 	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
+	},
+	"exports": {
+		".": {
+			"wc-source": "./src/index.ts",
+			"types": "./build-types/index.d.ts",
+			"import": "./build-module/index.js",
+			"require": "./build/index.js"
+		}
 	},
 	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"types": "build-types/index.d.ts",
+	"files": [
+		"build",
+		"build-module",
+		"build-types"
+	],
 	"scripts": {
+		"build": "pnpm build:project",
+		"build:project": "pnpm --stream '/^build:project:.*$/'",
+		"build:project:cjs": "node build.mjs --commonjs",
+		"build:project:esm": "node build.mjs",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
-		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "eslint --ext=js,ts,tsx src",
 		"lint:fix": "eslint --ext=js,ts,tsx src --fix",
+		"lint:lang:types": "tsc --build --emitDeclarationOnly",
+		"build:publish:project": "pnpm --stream '/^build:publish:project:.*$/'",
+		"build:publish:project:types": "tsc --build --emitDeclarationOnly",
+		"build:publish:project:runtime": "pnpm build:project",
+		"prepack": "pnpm build:publish:project",
 		"test": "jest --passWithNoTests",
-		"prepack": "pnpm build",
-		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
-		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:esm": "wireit"
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
+		"watch:build": "pnpm watch:build:project",
+		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
+		"watch:build:project:cjs": "node build.mjs --commonjs --watch",
+		"watch:build:project:esm": "node build.mjs --watch"
 	},
 	"config": {
 		"ci": {
 			"lint": {
 				"command": "lint",
 				"changes": "src/**/*.{js,ts,tsx}"
-			}
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test",
+					"changes": [
+						"jest.config.json",
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
 		}
 	},
 	"devDependencies": {
-		"@babel/cli": "7.25.7",
-		"@babel/core": "7.25.7",
-		"@wordpress/babel-preset-default": "next",
+		"@playwright/test": "^1.57.0",
+		"@types/jest": "29.5.x",
+		"@types/node": "^24.1.0",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-build": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
+		"eslint": "^8.55.0",
 		"jest": "29.5.x",
-		"wireit": "0.14.12"
+		"jest-cli": "29.5.x",
+		"ts-jest": "29.1.x",
+		"typescript": "5.7.x"
 	},
 	"dependencies": {
 		"axios": "^1.6.0",
 		"oauth-1.0a": "^2.2.6"
 	},
 	"publishConfig": {
-		"access": "public"
-	},
-	"wireit": {
-		"build:project:esm": {
-			"command": "babel src --out-dir build --copy-files --no-copy-ignored --ignore '**/test/**'",
-			"clean": "if-file-deleted",
-			"files": [
-				"babel.config.js",
-				"src/**/*.{js,jsx,ts,tsx}",
-				"typings/**/*.ts"
-			],
-			"output": [
-				"build"
-			],
-			"dependencies": []
+		"access": "public",
+		"exports": {
+			".": {
+				"types": "./build-types/index.d.ts",
+				"import": "./build-module/index.js",
+				"require": "./build/index.js"
+			}
 		}
 	}
 }

@@ -575,6 +575,20 @@ class Html_Processing_Helper {
 	}
 
 	/**
+	 * Extract the first HTTP/HTTPS URL from a text string.
+	 *
+	 * @param string $text Text to search for URLs.
+	 * @return string Extracted URL or empty string if not found.
+	 */
+	public static function extract_url_from_text( string $text ): string {
+		if ( preg_match( '/(?<![a-zA-Z0-9.-])https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[a-zA-Z0-9\/?=&%_.~+#-]*(?![a-zA-Z0-9._~+#-])/', $text, $matches ) ) {
+			return $matches[0];
+		}
+
+		return '';
+	}
+
+	/**
 	 * Sanitize inline styles for image elements - only allow safe properties for email rendering.
 	 *
 	 * @param string $style_value Raw style value.

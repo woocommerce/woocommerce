@@ -10,10 +10,7 @@ import {
 	useState,
 	useMemo,
 } from '@wordpress/element';
-import {
-	emptyHiddenAddressFields,
-	removeAllNotices,
-} from '@woocommerce/base-utils';
+import { removeAllNotices } from '@woocommerce/base-utils';
 import { useDispatch, useSelect, select as selectStore } from '@wordpress/data';
 import {
 	checkoutStore,
@@ -257,13 +254,11 @@ const CheckoutProcessor = () => {
 			  }
 			: {};
 
-		const billingAddressData = emptyHiddenAddressFields(
-			currentBillingAddress.current
-		);
+		const billingAddressData = currentBillingAddress.current;
 
 		const shippingAddressData = useBillingAsShipping
 			? billingAddressData
-			: emptyHiddenAddressFields( currentShippingAddress.current );
+			: currentShippingAddress.current;
 
 		const data = {
 			additional_fields: additionalFields,

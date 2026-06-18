@@ -216,7 +216,7 @@ class EmailPreview {
 		} else {
 			$object = $this->get_dummy_order();
 			if ( 'WC_Email_Customer_Note' === $email_type ) {
-				$this->email->customer_note = $object->get_customer_note();
+				$this->email->customer_note = __( "This is an order note sent from the Admin to the customer during fulfillment when you add a new Order Note and choose to send it to the customer.\n\nIt can be multiple lines.", 'woocommerce' );
 			}
 			if ( 'WC_Email_Customer_Refunded_Order' === $email_type ) {
 				$this->email->partial_refund = false;
@@ -372,8 +372,9 @@ class EmailPreview {
 		$variation            = $this->get_dummy_product_variation();
 		$downloadable_product = $this->get_dummy_downloadable_product();
 
-		$order = new WC_Order();
-		$order->set_id( 12345 );
+		// PreviewOrder keeps its id at 0 so it can never read from or write to a
+		// real order. It surfaces a display number via get_order_number() instead.
+		$order = new PreviewOrder();
 
 		// Create and add product items manually without saving to database.
 		// Use add_item() instead of add_product() to avoid immediate database writes.

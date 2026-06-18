@@ -36,7 +36,7 @@ class Packages {
 	/**
 	 * Array of package names and their main package classes.
 	 *
-	 * One a package has been merged into WooCommerce Core it should be moved from the package list and placed in
+	 * Once a package has been merged into WooCommerce Core it should be moved from the package list and placed in
 	 * this list. This will ensure that the feature plugin is disabled as well as provide the class to handle
 	 * initialization for the now-merged feature plugin.
 	 *
@@ -60,7 +60,8 @@ class Packages {
 	 * @var array Key is the package name/directory, value is the main package class which handles init.
 	 */
 	protected static $merged_packages = array(
-		'woocommerce-brands' => '\\Automattic\\WooCommerce\\Internal\\Brands',
+		'woocommerce-brands'                      => '\\Automattic\\WooCommerce\\Internal\\Brands',
+		'woocommerce-additional-variation-images' => '\\Automattic\\WooCommerce\\Internal\\VariationGallery\\Package',
 	);
 
 
@@ -90,7 +91,7 @@ class Packages {
 	}
 
 	/**
-	 * Checks a package exists by looking for it's directory.
+	 * Checks a package exists by looking for its directory.
 	 *
 	 * @param string $package Package name.
 	 * @return boolean
@@ -100,7 +101,7 @@ class Packages {
 	}
 
 	/**
-	 * Checks a package exists by looking for it's directory.
+	 * Checks if a class name corresponds to a merged package and should be loaded.
 	 *
 	 * @param string $class_name Class name.
 	 * @return boolean
@@ -330,7 +331,7 @@ class Packages {
 					/* Translators: %s package name. */
 					esc_html__( 'Missing the WooCommerce %s package', 'woocommerce' ),
 					'<code>' . esc_html( $package ) . '</code>'
-				) . ' - ' . esc_html__( 'Your installation of WooCommerce is incomplete. If you installed WooCommerce from GitHub, please refer to this document to set up your development environment: https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment', 'woocommerce' )
+				) . ' - ' . esc_html__( 'Your installation of WooCommerce is incomplete. If you installed WooCommerce from GitHub, please refer to this document to set up your development environment: https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment', 'woocommerce' )
 			);
 		}
 		add_action(
@@ -353,7 +354,7 @@ class Packages {
 						printf(
 							/* translators: 1: is a link to a support document. 2: closing link */
 							esc_html__( 'Your installation of WooCommerce is incomplete. If you installed WooCommerce from GitHub, %1$splease refer to this document%2$s to set up your development environment.', 'woocommerce' ),
-							'<a href="' . esc_url( 'https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment' ) . '" target="_blank" rel="noopener noreferrer">',
+							'<a href="' . esc_url( 'https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment' ) . '" target="_blank" rel="noopener noreferrer">',
 							'</a>'
 						);
 						?>

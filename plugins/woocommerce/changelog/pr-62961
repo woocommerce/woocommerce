@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Add relevant version strings support to the RestApiCache trait

@@ -12,17 +12,15 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.6.0
+ * @version 10.8.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
-$text_align = is_rtl() ? 'right' : 'left';
-
 $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
-
+$block_email_editor_enabled = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
 /**
  * Filter whether to display the section divider in the email body.
  *
@@ -50,43 +48,81 @@ if ( $email_improvements_enabled ) {
  */
 do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text, $email ); ?>
 
-<h2 class="<?php echo esc_attr( $heading_class ); ?>">
-	<?php
-	if ( $email_improvements_enabled ) {
-		echo wp_kses_post( __( 'Order summary', 'woocommerce' ) );
-	}
-	if ( $sent_to_admin ) {
-		$before = '<a class="link" href="' . esc_url( $order->get_edit_order_url() ) . '">';
-		$after  = '</a>';
-	} else {
-		$before = '';
-		$after  = '';
-	}
-	if ( $email_improvements_enabled ) {
-		echo '<br><span>';
-	}
-	/* translators: %s: Order ID. */
-	$order_number_string = __( '[Order #%s]', 'woocommerce' );
-	if ( $email_improvements_enabled ) {
-		/* translators: %s: Order ID. */
-		$order_number_string = __( 'Order #%s', 'woocommerce' );
-	}
-	echo wp_kses_post( $before . sprintf( $order_number_string . $after . ' (<time datetime="%s">%s</time>)', $order->get_order_number(), $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ) );
-	if ( $email_improvements_enabled ) {
-		echo '</span>';
-	}
+<?php
+$order_details_heading = '';
+if ( $email_improvements_enabled ) {
+	/**
+	 * Filter the heading text shown in the order details section of emails.
+	 *
+	 * @since 10.8.0
+	 * @param string   $heading The heading text.
+	 * @param WC_Order $order   Order object.
+	 * @param WC_Email $email   Email object.
+	 */
+	$order_details_heading = apply_filters( 'woocommerce_email_order_details_heading', __( 'Order summary', 'woocommerce' ), $order, $email );
+}
+
+/**
+ * Filter whether to display the order number in the order details heading of emails.
+ *
+ * @since 10.8.0
+ * @param bool     $display Whether to display the order number. Default true.
+ * @param WC_Order $order   Order object.
+ * @param WC_Email $email   Email object.
+ */
+$display_order_number = (bool) apply_filters( 'woocommerce_email_display_order_number', true, $order, $email );
+
+if ( $order_details_heading || $display_order_number ) :
 	?>
-</h2>
+	<h2 class="<?php echo esc_attr( $heading_class ); ?>">
+		<?php
+		if ( $order_details_heading ) {
+			echo wp_kses_post( $order_details_heading );
+		}
+		if ( $display_order_number ) {
+			if ( $sent_to_admin ) {
+				$before = '<a class="link" href="' . esc_url( $order->get_edit_order_url() ) . '"' . ( $block_email_editor_enabled ? ' style="text-decoration: none;"' : '' ) . '>';
+				$after  = '</a>';
+			} else {
+				$before = '';
+				$after  = '';
+			}
+			if ( $email_improvements_enabled ) {
+				// Only output <br> when both a heading and order number are shown; otherwise, avoid leading line break.
+				if ( $order_details_heading ) {
+					echo '<br><span>';
+				} else {
+					echo '<span>';
+				}
+			}
+			/* translators: %s: Order ID. */
+			$order_number_string = __( '[Order #%s]', 'woocommerce' );
+			if ( $email_improvements_enabled ) {
+				/* translators: %s: Order ID. */
+				$order_number_string = __( 'Order #%s', 'woocommerce' );
+			}
+			echo wp_kses_post( $before . sprintf( $order_number_string . $after . ' (<time datetime="%s">%s</time>)', $order->get_order_number(), $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ) );
+			if ( $email_improvements_enabled ) {
+				echo '</span>';
+			}
+		}
+		?>
+	</h2>
+	<?php
+endif;
+?>
 
 <div style="margin-bottom: <?php echo $email_improvements_enabled ? '24px' : '40px'; ?>;">
 	<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1">
+		<?php if ( ! $block_email_editor_enabled ) : ?>
 		<thead>
 			<tr>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $order_quantity_text_align ); ?>;"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $order_total_text_align ); ?>;"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
+				<th class="td text-align-left" scope="col"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
+				<th class="td text-align-<?php echo esc_attr( $order_quantity_text_align ); ?>" scope="col"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
+				<th class="td text-align-<?php echo esc_attr( $order_total_text_align ); ?>" scope="col"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
+		<?php endif; ?>
 		<tbody>
 			<?php
 			$image_size = $email_improvements_enabled ? 48 : 32;

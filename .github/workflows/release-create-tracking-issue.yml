@@ -37,10 +37,13 @@ permissions:
   contents: read
   issues: read
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   create-tracking-issue:
     name: Create Release Tracking Issue
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
       - name: Parse version and determine template
         id: parse-version
@@ -193,6 +196,7 @@ jobs:
             console.log( `Looking for parent issue: "${ parentTitle }"` );
 
             const parentIssues = await linearClient.issues( {
+              includeArchived: true,
               filter: {
                 team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
                 title: { eq: parentTitle }

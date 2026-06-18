@@ -186,6 +186,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'description' => 'WooPay express checkout',
 							'icon'        => '', // The icon with an invalid URL is ignored.
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+							'notice'      => array(
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
+							),
 						),
 						array(
 							'id'          => 'card',
@@ -196,6 +202,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'description' => '<strong>Accepts</strong> <b>all major</b><em>credit</em> and <a href="#" target="_blank">debit cards</a>.',
 							'icon'        => 'https://example.com/card-icon.png',
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+							'notice'      => array(
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
+							),
 						),
 						array(
 							'id'          => 'basic2',
@@ -206,6 +218,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'description' => '',
 							'icon'        => '',
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+							'notice'      => array(
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
+							),
 						),
 						array(
 							'id'          => 'basic',
@@ -216,6 +234,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'description' => '',
 							'icon'        => '',
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
+							'notice'      => array(
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
+							),
 						),
 					),
 				),
@@ -1898,6 +1922,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					'description' => 'WooPay express checkout',
 					'icon'        => 'https://example.com/icon.png',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 				array(
 					'id'          => 'card',
@@ -1908,6 +1938,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					'description' => 'Accepts all major credit and debit cards.',
 					'icon'        => 'https://example.com/card-icon.png',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 			),
 			$this->sut->get_recommended_payment_methods( $fake_gateway )
@@ -1962,6 +1998,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 					// No icon.
 					'icon'        => '',
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 			),
 			$this->sut->get_recommended_payment_methods( $fake_gateway )
@@ -1978,6 +2020,102 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 			array(),
 			$this->sut->get_recommended_payment_methods( $fake_gateway )
 		);
+	}
+
+	/**
+	 * Test that recommended payment methods with a notice are standardized correctly.
+	 */
+	public function test_get_recommended_payment_methods_with_notice() {
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'recommended_payment_methods' => array(
+					array(
+						'id'      => 'p24',
+						'title'   => 'Przelewy24',
+						'enabled' => false,
+						'notice'  => array(
+							'badge'     => 'Additional verification required',
+							'message'   => 'Przelewy24 has strict requirements.',
+							'link_text' => 'Review requirements',
+							'link_url'  => 'https://woocommerce.com/document/woopayments/payment-methods/local-payment-methods/#p24-additional-requirements',
+						),
+					),
+				),
+			)
+		);
+
+		$result = $this->sut->get_recommended_payment_methods( $fake_gateway );
+
+		$this->assertCount( 1, $result );
+		$this->assertArrayHasKey( 'notice', $result[0] );
+		$this->assertSame( 'Additional verification required', $result[0]['notice']['badge'] );
+		$this->assertSame( 'Przelewy24 has strict requirements.', $result[0]['notice']['message'] );
+		$this->assertSame( 'Review requirements', $result[0]['notice']['link_text'] );
+		$this->assertSame(
+			'https://woocommerce.com/document/woopayments/payment-methods/local-payment-methods/#p24-additional-requirements',
+			$result[0]['notice']['link_url']
+		);
+	}
+
+	/**
+	 * Test that recommended payment methods without a notice have an empty notice.
+	 */
+	public function test_get_recommended_payment_methods_without_notice() {
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'recommended_payment_methods' => array(
+					array(
+						'id'    => 'card',
+						'title' => 'Card',
+					),
+				),
+			)
+		);
+
+		$result = $this->sut->get_recommended_payment_methods( $fake_gateway );
+
+		$this->assertCount( 1, $result );
+		$this->assertArrayHasKey( 'notice', $result[0] );
+		$this->assertSame( '', $result[0]['notice']['badge'] );
+		$this->assertSame( '', $result[0]['notice']['message'] );
+		$this->assertSame( '', $result[0]['notice']['link_text'] );
+		$this->assertSame( '', $result[0]['notice']['link_url'] );
+	}
+
+	/**
+	 * Test that notice fields are sanitized (HTML stripped from text, URL sanitized).
+	 */
+	public function test_get_recommended_payment_methods_notice_sanitization() {
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'recommended_payment_methods' => array(
+					array(
+						'id'     => 'p24',
+						'title'  => 'Przelewy24',
+						'notice' => array(
+							'badge'     => '<script>alert("xss")</script>Badge text',
+							'message'   => '<b>Bold</b> message with <script>xss</script>',
+							'link_text' => '<em>Link</em> text',
+							'link_url'  => 'javascript:alert(1)',
+						),
+					),
+				),
+			)
+		);
+
+		$result = $this->sut->get_recommended_payment_methods( $fake_gateway );
+
+		$this->assertCount( 1, $result );
+		// All text fields use sanitize_text_field() which calls wp_strip_all_tags()
+		// which removes all HTML tags and their content for script tags.
+		$this->assertSame( 'Badge text', $result[0]['notice']['badge'] );
+		$this->assertSame( 'Link text', $result[0]['notice']['link_text'] );
+		$this->assertSame( 'Bold message with', $result[0]['notice']['message'] );
+		// javascript: URLs should be sanitized away by wc_is_valid_url().
+		$this->assertSame( '', $result[0]['notice']['link_url'] );
 	}
 
 	/**

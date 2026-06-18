@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 
@@ -8,9 +9,9 @@ use Automattic\WooCommerce\Admin\Notes\Note;
 class WC_Install_Test extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test if verify base table can detect missing table and adds/remove a notice.
+	 * Test if verify base table can detect missing tables and clear the stored missing table list.
 	 */
-	public function test_verify_base_tables_adds_and_remove_notice() {
+	public function test_verify_base_tables_stores_and_removes_missing_tables() {
 		global $wpdb;
 
 		// Remove drop filter because we do want to drop temp table if it exists.
@@ -38,13 +39,13 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 
 		$this->assertContains( $original_table_name, $missing_tables );
-		$this->assertContains( 'base_tables_missing', \WC_Admin_Notices::get_notices() );
+		$this->assertContains( $original_table_name, get_option( 'woocommerce_schema_missing_tables', array() ) );
 
 		// Ideally, no missing table anymore because we have switched back table name.
 		$missing_tables = \WC_Install::verify_base_tables();
 
 		$this->assertNotContains( $original_table_name, $missing_tables );
-		$this->assertNotContains( 'base_tables_missing', \WC_Admin_Notices::get_notices() );
+		$this->assertSame( array(), get_option( 'woocommerce_schema_missing_tables', array() ) );
 	}
 
 
@@ -81,7 +82,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 		// Ideally, no missing table because verify base tables created the table as well.
 		$this->assertNotContains( $original_table_name, $missing_tables );
-		$this->assertNotContains( 'base_tables_missing', \WC_Admin_Notices::get_notices() );
+		$this->assertSame( array(), get_option( 'woocommerce_schema_missing_tables', array() ) );
 	}
 
 	/**
@@ -127,7 +128,6 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		WC_Install::delete_obsolete_notes();
 
 		$this->assertEmpty( $data_store->get_notes_with_name( $note_name ) );
-
 	}
 
 	/**
@@ -354,6 +354,9 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_order_stats_schema_does_not_include_fulfillment_status_for_new_install_without_fulfillments_feature_enabled(): void {
+		// Ensure the fulfillments feature is disabled (a prior test class may have enabled it).
+		delete_option( 'woocommerce_feature_fulfillments_enabled' );
+
 		// Mock is_new_install to return true.
 		$version = null;
 		$shop_id = null;

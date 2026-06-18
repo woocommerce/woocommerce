@@ -12,7 +12,7 @@ import { getTotalBlockingTime, median } from '../utils';
 
 // See https://github.com/WordPress/gutenberg/issues/51383#issuecomment-1613460429
 const BROWSER_IDLE_WAIT = 1000;
-const HOME = '/';
+const SHOP = '/shop/';
 
 const results = {
 	totalBlockingTime: [],
@@ -47,10 +47,10 @@ test.describe( 'Frontend Performance', () => {
 				page,
 				metrics,
 			} ) => {
-				await page.goto( HOME );
+				await page.goto( SHOP );
 
-				// Wait for the site title to load.
-				await page.locator( '[aria-current="page"]' ).first().waitFor();
+				// Wait for the products to load.
+				await page.locator( '[id="main"]' ).first().waitFor();
 
 				// Get the durations.
 				const loadingDurations = await metrics.getLoadingDurations();

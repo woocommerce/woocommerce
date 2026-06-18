@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.1.0
+ * @version 10.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -54,7 +54,7 @@ $notes = $order->get_customer_order_notes();
 				<div class="comment-text">
 					<p class="meta"><?php echo date_i18n( esc_html__( 'l jS \o\f F Y, h:ia', 'woocommerce' ), strtotime( $note->comment_date ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
 					<div class="description">
-						<?php echo wpautop( wptexturize( $note->comment_content ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php echo wp_kses_post( wpautop( wptexturize( $note->comment_content ) ) ); ?>
 					</div>
 					<div class="clear"></div>
 				</div>

@@ -888,7 +888,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * @testdox Should create zone without required locations.
+	 * @testdox Should create zone without locations (e.g. "Everywhere" zone).
 	 */
 	public function test_create_item_missing_locations() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -901,9 +901,9 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 400, $response->get_status() );
-		$this->assertArrayHasKey( 'code', $data );
-		$this->assertEquals( 'rest_missing_callback_param', $data['code'] );
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEquals( 'Test Zone', $data['name'] );
+		$this->assertEmpty( $data['locations'] );
 	}
 
 	/**

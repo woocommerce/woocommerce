@@ -22,7 +22,7 @@ export default function ProductListContent( props: {
 	className?: string;
 	searchTerm?: string;
 	category?: string;
-} ): JSX.Element {
+} ): React.JSX.Element {
 	const wccomHelperSettings = getAdminSetting( 'wccomHelper', {} );
 
 	const [ productsToShow, setProductsToShow ] = useState( props.products );

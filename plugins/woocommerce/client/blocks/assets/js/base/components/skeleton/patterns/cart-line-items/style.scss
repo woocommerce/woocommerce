@@ -10,6 +10,9 @@
 
 .wc-block-components-order-summary {
 	.wc-block-components-skeleton--cart-line-items-checkout {
+		.wc-block-components-order-summary-item__image {
+			margin-top: $gap-smallest;
+		}
 		.wc-block-components-order-summary-item__description {
 			flex-grow: 1;
 			.wc-block-components-skeleton__element {

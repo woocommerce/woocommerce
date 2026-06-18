@@ -195,6 +195,11 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 		$this->product_ids_titles = array();
 
+		if ( ! empty( $this->product_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $this->product_ids );
+		}
+
 		foreach ( $this->product_ids as $product_id ) {
 
 			$product = wc_get_product( $product_id );

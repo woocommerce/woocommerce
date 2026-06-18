@@ -100,6 +100,12 @@ export const setTemplateToPost =
 			} );
 	};
 
+export function setTemplateSelected() {
+	return {
+		type: 'SET_TEMPLATE_SELECTED',
+	} as const;
+}
+
 export function* requestSendingNewsletterPreview( email: string ) {
 	// If preview is already sending do nothing
 	const previewState = select( storeName ).getPreviewState();

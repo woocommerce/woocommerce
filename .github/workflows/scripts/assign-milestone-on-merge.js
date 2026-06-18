@@ -1,3 +1,5 @@
+const { getAutoAssignMilestoneSelection } = require('./milestone-selection');
+
 /**
  * Assigns a milestone to a merged PR based on the checkbox selection.
  *
@@ -21,16 +23,14 @@ module.exports = async ({ github, context, core }) => {
         return;
     }
 
-    const nextVersionMatch = body.match(/- \[([ xX])\].*\*\*.*next WooCommerce version.*\*\*/);
+    const nextVersionSelection = getAutoAssignMilestoneSelection(body);
 
-    if (!nextVersionMatch) {
+    if (!nextVersionSelection.found) {
         core.setFailed('Milestone selection checkbox not found in PR description. Cannot assign milestone.');
         return;
     }
 
-    const nextVersionChecked = nextVersionMatch[1].toLowerCase() === 'x';
-
-    if (!nextVersionChecked) {
+    if (!nextVersionSelection.checked) {
         core.setFailed('Auto-assign checkbox not selected. Cannot assign milestone.');
         return;
     }
@@ -51,13 +51,22 @@ module.exports = async ({ github, context, core }) => {
     }
 
     let version = versionMatch[1].trim().replace(/-dev$/, '');
-    const versionParts = version.split('.').map(Number);
-    const major = versionParts[0];
-    const minor = versionParts[1];
+    const [major, minor] = version.split('.').map(Number);
 
     core.info(`Parsed version: ${versionMatch[1].trim()} -> ${major}.${minor}`);
 
-    const targetMilestone = `${major}.${minor}.0`;
+    // If the release branch for this version already exists, the version in trunk
+    // hasn't been bumped yet — target the next milestone instead.
+    version = `${major}.${minor}`;
+    try {
+        await github.rest.repos.getBranch({ owner: owner, repo: repo, branch: `release/${version}` });
+        core.info(`Branch release/${version} exists, advancing to next version`);
+        version = (Number(version) + 0.1).toFixed(1);
+    } catch (error) {
+        if (error.status !== 404) throw error;
+    }
+
+    const targetMilestone = `${version}.0`;
 
     core.info(`PR #${prNumber} targets next main release`);
     core.info(`Looking for milestone: ${targetMilestone}`);

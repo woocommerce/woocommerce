@@ -67,8 +67,8 @@ const createGroupRight = ( innerBlocks: BlockInstance[] ) =>
  *   - Add Next/Previous Buttons block
  * - Remove Pagination block (if exists)
  *
- * @param {BlockInstance} productCollectionBlock - The product collection block.
- * @param {ReturnType<typeof useDispatch>} actions - The actions to use.
+ * @param {BlockInstance}                  productCollectionBlock - The product collection block.
+ * @param {ReturnType<typeof useDispatch>} actions                - The actions to use.
  */
 const handleTransitionToCarouselLayout = (
 	productCollectionBlock: BlockInstance,
@@ -104,7 +104,6 @@ const handleTransitionToCarouselLayout = (
 	} );
 
 	if ( headingBlock ) {
-		// @ts-expect-error getBlockIndex is not typed.
 		const headingBlockIndex = selectData( blockEditorStore ).getBlockIndex(
 			headingBlock.clientId
 		);
@@ -151,9 +150,9 @@ const handleTransitionToCarouselLayout = (
  * - Remove Row block (if empty)
  * - Add Pagination block for default collection (if needed)
  *
- * @param {BlockInstance} productCollectionBlock - The product collection block.
- * @param {ReturnType<typeof useDispatch>} actions - The actions to use.
- * @param {string} collection - The collection.
+ * @param {BlockInstance}                  productCollectionBlock - The product collection block.
+ * @param {ReturnType<typeof useDispatch>} actions                - The actions to use.
+ * @param {string}                         collection             - The collection.
  */
 const handleTransitionFromCarouselLayout = (
 	productCollectionBlock: BlockInstance,
@@ -198,7 +197,6 @@ const handleTransitionFromCarouselLayout = (
 			if ( headingBlock && groupBlock.innerBlocks.length === 2 ) {
 				const headingBlockIndex = selectData(
 					blockEditorStore
-					// @ts-expect-error getBlockIndex is not typed.
 				).getBlockIndex( headingBlock.clientId );
 				removeBlock( groupBlock.clientId, false );
 				insertBlock(
@@ -249,7 +247,6 @@ const useCarouselLayoutAdjustments = (
 	const { productCollectionBlock } = useSelect(
 		( select ) => ( {
 			productCollectionBlock:
-				// @ts-expect-error getBlock is not typed.
 				select( blockEditorStore ).getBlock( clientId ),
 		} ),
 		[ clientId ]

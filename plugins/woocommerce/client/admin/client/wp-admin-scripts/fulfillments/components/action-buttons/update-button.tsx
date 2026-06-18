@@ -5,6 +5,7 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, select } from '@wordpress/data';
 import { useState } from 'react';
+import { useInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -23,9 +24,19 @@ export default function UpdateButton( {
 	setError: ( message: string | null ) => void;
 } ) {
 	const { setIsEditing } = useFulfillmentDrawerContext();
-	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
+	const {
+		order,
+		fulfillment,
+		notifyCustomer,
+		customerNote,
+		setCustomerNote,
+	} = useFulfillmentContext();
 	const { updateFulfillment } = useDispatch( FulfillmentStore );
 	const [ isExecuting, setIsExecuting ] = useState< boolean >( false );
+	const descriptionId = useInstanceId(
+		UpdateButton,
+		'update-button-description'
+	) as string;
 
 	const handleUpdateFulfillment = async () => {
 		if ( ! fulfillment || ! order ) {
@@ -44,11 +55,17 @@ export default function UpdateButton( {
 
 		setError( null );
 		setIsExecuting( true );
-		await updateFulfillment( order.id, fulfillment, notifyCustomer );
+		await updateFulfillment(
+			order.id,
+			fulfillment,
+			notifyCustomer,
+			notifyCustomer ? customerNote : ''
+		);
 		const error = select( FulfillmentStore ).getError( order.id );
 		if ( error ) {
 			setError( error );
 		} else {
+			setCustomerNote( '' );
 			refreshOrderFulfillmentStatus( order.id );
 			setIsEditing( false );
 		}
@@ -56,14 +73,25 @@ export default function UpdateButton( {
 	};
 
 	return (
-		<Button
-			variant="primary"
-			onClick={ handleUpdateFulfillment }
-			disabled={ isExecuting }
-			isBusy={ isExecuting }
-			__next40pxDefaultSize
-		>
-			{ __( 'Update', 'woocommerce' ) }
-		</Button>
+		<>
+			<Button
+				variant="primary"
+				onClick={ handleUpdateFulfillment }
+				disabled={ isExecuting }
+				isBusy={ isExecuting }
+				__next40pxDefaultSize
+				aria-describedby={ descriptionId }
+			>
+				{ isExecuting
+					? __( 'Updating…', 'woocommerce' )
+					: __( 'Update', 'woocommerce' ) }
+			</Button>
+			<span id={ descriptionId } className="screen-reader-text">
+				{ __(
+					'Applies changes to the existing fulfillment',
+					'woocommerce'
+				) }
+			</span>
+		</>
 	);
 }

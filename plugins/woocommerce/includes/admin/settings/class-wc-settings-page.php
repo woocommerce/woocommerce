@@ -9,7 +9,7 @@
 declare( strict_types = 1);
 
 use Automattic\WooCommerce\Admin\Features\Features;
-
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -71,61 +71,11 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		const TYPE_SLOTFILL_PLACEHOLDER           = 'slotfill_placeholder';
 
 		/**
-		 * Settings field types which are known.
-		 *
-		 * @var string[]
-		 */
-		protected $types = array(
-			self::TYPE_TITLE,
-			self::TYPE_INFO,
-			self::TYPE_SECTIONEND,
-			self::TYPE_TEXT,
-			self::TYPE_PASSWORD,
-			self::TYPE_DATETIME,
-			self::TYPE_DATETIME_LOCAL,
-			self::TYPE_DATE,
-			self::TYPE_MONTH,
-			self::TYPE_TIME,
-			self::TYPE_WEEK,
-			self::TYPE_NUMBER,
-			self::TYPE_EMAIL,
-			self::TYPE_URL,
-			self::TYPE_TEL,
-			self::TYPE_COLOR,
-			self::TYPE_TEXTAREA,
-			self::TYPE_SELECT,
-			self::TYPE_MULTISELECT,
-			self::TYPE_RADIO,
-			self::TYPE_CHECKBOX,
-			self::TYPE_IMAGE_WIDTH,
-			self::TYPE_SINGLE_SELECT_PAGE,
-			self::TYPE_SINGLE_SELECT_PAGE_WITH_SEARCH,
-			self::TYPE_SINGLE_SELECT_COUNTRY,
-			self::TYPE_MULTI_SELECT_COUNTRIES,
-			self::TYPE_RELATIVE_DATE_SELECTOR,
-			self::TYPE_SLOTFILL_PLACEHOLDER,
-		);
-
-		/**
 		 * Setting page label.
 		 *
 		 * @var string
 		 */
 		protected $label = '';
-
-		/**
-		 * Setting page is modern.
-		 *
-		 * @var bool
-		 */
-		protected $is_modern = false;
-
-		/**
-		 * Whether the output method has been called.
-		 *
-		 * @var bool
-		 */
-		private $output_called = false;
 
 		/**
 		 * Constructor.
@@ -136,6 +86,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
 			add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
 			add_action( 'woocommerce_admin_field_add_settings_slot', array( $this, 'add_settings_slot' ) );
+			add_filter( 'admin_body_class', array( $this, 'add_settings_ui_body_class' ) );
 		}
 
 		/**
@@ -159,6 +110,68 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		}
 
 		/**
+		 * Get the settings UI page adapter for this settings page.
+		 *
+		 * Settings pages can override this to opt in to the settings UI renderer
+		 * while retaining the classic WooCommerce settings page route and save flow.
+		 *
+		 * @since 10.9.0
+		 * @return SettingsUIPageInterface|null
+		 */
+		public function get_settings_ui_page(): ?SettingsUIPageInterface {
+			return null;
+		}
+
+		/**
+		 * Add a body class for settings pages rendered through the settings UI.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param string $classes The existing body classes for the admin area.
+		 * @return string The modified body classes for the admin area.
+		 */
+		public function add_settings_ui_body_class( $classes ) {
+			global $current_tab;
+
+			if ( ! is_string( $classes ) || $this->id !== $current_tab ) {
+				return $classes;
+			}
+
+			if ( ! Features::is_enabled( 'settings-ui' ) || ! $this->get_settings_ui_page() instanceof SettingsUIPageInterface ) {
+				return $classes;
+			}
+
+			if ( str_contains( $classes, 'woocommerce-settings-ui-page' ) ) {
+				return $classes;
+			}
+
+			return "$classes woocommerce-settings-ui-page";
+		}
+
+		/**
+		 * Log a developer-facing notice when settings UI rendering falls back to the legacy renderer.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param SettingsUIPageInterface $settings_ui_page Settings UI page adapter.
+		 * @param string                  $section_id Section id.
+		 * @param string                  $reason Fallback reason.
+		 */
+		private function log_settings_ui_fallback( SettingsUIPageInterface $settings_ui_page, string $section_id, string $reason ): void {
+			wc_doing_it_wrong(
+				'WC_Settings_Page::output',
+				sprintf(
+					/* translators: 1: settings page id, 2: settings section id, 3: fallback reason. */
+					__( 'Settings UI rendering for page "%1$s" section "%2$s" fell back to the legacy settings renderer. Reason: %3$s', 'woocommerce' ),
+					$settings_ui_page->get_page_id(),
+					'' === $section_id ? 'default' : $section_id,
+					$reason
+				),
+				'10.9.0'
+			);
+		}
+
+		/**
 		 * Creates the React mount point for settings slot.
 		 */
 		public function add_settings_slot() {
@@ -178,187 +191,6 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$pages[ $this->id ] = $this->label;
 
 			return $pages;
-		}
-
-		/**
-		 * Get page settings data to populate the settings editor.
-		 *
-		 * @param array $pages The settings array where we'll add data.
-		 *
-		 * @return array
-		 */
-		public function add_settings_page_data( $pages ) {
-			global $current_section;
-
-			$saved_current_section = $current_section;
-			$sections              = $this->get_sections();
-			$sections_data         = array();
-
-			// Loop through each section and get the settings for that section.
-			foreach ( $sections as $section_id => $section_label ) {
-				$current_section       = $section_id;
-				$section_settings_data = $this->get_section_settings_data( $section_id, $sections );
-
-				// Replace empty string section ids with 'default'.
-				$normalized_section_id                   = '' === $section_id ? 'default' : $section_id;
-				$sections_data[ $normalized_section_id ] = array(
-					'label'    => html_entity_decode( esc_html( $section_label ) ),
-					'settings' => $section_settings_data,
-				);
-			}
-
-			// Reset the current section to the saved current section.
-			$current_section = $saved_current_section;
-
-			$pages[ $this->id ] = array(
-				'label'     => html_entity_decode( $this->label ),
-				'slug'      => $this->id,
-				'icon'      => $this->icon,
-				'sections'  => $sections_data,
-				'is_modern' => $this->is_modern,
-			);
-
-			$pages[ $this->id ]['start'] = $this->get_custom_view( 'woocommerce_before_settings_' . $this->id );
-			$pages[ $this->id ]['end']   = $this->get_custom_view( 'woocommerce_after_settings_' . $this->id );
-
-			return $pages;
-		}
-
-		/**
-		 * Get settings data for a specific section.
-		 *
-		 * @param string $section_id The ID of the section.
-		 * @param array  $sections   All sections available.
-		 * @return array Settings data for the section.
-		 */
-		protected function get_section_settings_data( $section_id, $sections ) {
-			$section_settings_data = array();
-
-			$custom_view = $this->get_custom_view( 'woocommerce_settings_' . $this->id, $section_id );
-			// We only want to loop through the settings object if the parent class's output method is being rendered during the get_custom_view call.
-			if ( $this->output_called ) {
-				$section_settings = count( $sections ) > 1
-					? $this->get_settings_for_section( $section_id )
-					: $this->get_settings();
-
-				// Loop through each setting in the section and add the value to the settings data.
-				foreach ( $section_settings as $section_setting ) {
-					// Add custom views for sectionend.
-					if ( 'sectionend' === $section_setting['type'] && ! empty( $section_setting['id'] ) ) {
-						$section_settings_data[] = $this->get_custom_view( 'woocommerce_settings_' . $section_setting['id'] . '_end' );
-						$section_settings_data[] = $this->get_custom_view( 'woocommerce_settings_' . $section_setting['id'] . '_after' );
-					}
-
-					$section_settings_data[] = $this->populate_setting_value( $section_setting );
-
-					// Add custom views for title.
-					if ( 'title' === $section_setting['type'] && ! empty( $section_setting['id'] ) ) {
-						$section_settings_data[] = $this->get_custom_view( 'woocommerce_settings_' . $section_setting['id'] );
-					}
-				}
-			}
-
-			// If the custom view has output, add it to the settings data.
-			if ( ! empty( $custom_view ) ) {
-				$section_settings_data[] = $custom_view;
-			}
-
-			// Reset the output_called property.
-			$this->output_called = false;
-
-			return $section_settings_data;
-		}
-
-		/**
-		 * Populate the value for a given section setting.
-		 *
-		 * @param array $section_setting The setting array to populate.
-		 * @return array The setting array with populated value.
-		 */
-		protected function populate_setting_value( $section_setting ) {
-			if ( isset( $section_setting['id'] ) ) {
-				$section_setting['value'] = isset( $section_setting['default'] )
-					// Fallback to the default value if it exists.
-					? get_option( $section_setting['id'], $section_setting['default'] )
-					// Otherwise, fallback to false.
-					: get_option( $section_setting['id'] );
-			}
-
-			$type = $section_setting['type'];
-			if ( ! in_array( $type, $this->types, true ) ) {
-				$section_setting = $this->get_custom_type_field( 'woocommerce_admin_field_' . $type, $section_setting );
-			}
-
-			return $section_setting;
-		}
-
-		/**
-		 * Get the custom view given the current tab and section.
-		 *
-		 * @param string $action The action to call.
-		 * @param string $section_id The section id.
-		 * @return string The custom view. HTML output.
-		 */
-		public function get_custom_view( $action, $section_id = false ) {
-			global $current_section;
-
-			if ( $section_id ) {
-				// Make sure the current section is set to the sectionid here. Reset it at the end of the function.
-				$saved_current_section = $current_section;
-				// set global current_section to the section_id.
-				$current_section = $section_id;
-			}
-
-			ob_start();
-			/**
-			 * Output the custom view given the current tab and section by calling the action.
-			 *
-			 * @since 2.1.0
-			 */
-			do_action( $action );
-			$html = ob_get_contents();
-			ob_end_clean();
-
-			// Reset the global variable.
-			if ( $section_id ) {
-				$current_section = $saved_current_section;
-			}
-
-			$content = trim( $html );
-
-			if ( empty( $content ) ) {
-				return null;
-			}
-
-			return array(
-				'id'      => wp_unique_prefixed_id( 'settings_custom_view' ),
-				'type'    => 'custom',
-				'content' => $content,
-			);
-		}
-
-		/**
-		 * Get the custom type field by calling the action and returning the setting with the content, id, and type.
-		 *
-		 * @param string $action  The action to call.
-		 * @param array  $setting The setting to pass to the action.
-		 * @return array The setting with the content, id, and type.
-		 */
-		public function get_custom_type_field( $action, $setting ) {
-			ob_start();
-			/**
-			 * Output the custom type field by calling the action.
-			 *
-			 * @since 3.3.0
-			 */
-			do_action( $action, $setting );
-			$html = ob_get_contents();
-			ob_end_clean();
-			$setting['content'] = trim( $html );
-			$setting['id']      = isset( $setting['id'] ) ? $setting['id'] : wp_unique_prefixed_id( 'settings_custom_view' );
-			$setting['type']    = 'custom';
-
-			return $setting;
 		}
 
 		/**
@@ -497,13 +329,77 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * Output the HTML for the settings.
 		 */
 		public function output() {
-			$this->output_called = true;
-
-			if ( Features::is_enabled( 'settings' ) ) {
-				return;
-			}
-
 			global $current_section;
+
+			$settings_ui_page = $this->get_settings_ui_page();
+			$section_key      = '' === $current_section ? 'default' : $current_section;
+			$page_id          = $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page->get_page_id() : '';
+			$schema_failed    = ! empty( $GLOBALS['wc_settings_ui_schema_failed'][ $page_id ][ $section_key ] );
+
+			if ( Features::is_enabled( 'settings-ui' ) && $settings_ui_page instanceof SettingsUIPageInterface ) {
+				if ( $schema_failed ) {
+					$this->log_settings_ui_fallback(
+						$settings_ui_page,
+						$current_section,
+						__( 'Settings UI schema generation failed.', 'woocommerce' )
+					);
+				} else {
+					$render_settings_ui = true;
+
+					try {
+						$script_handles = $settings_ui_page->get_script_handles( $current_section );
+					} catch ( \Throwable $e ) {
+						$script_handles     = array();
+						$render_settings_ui = false;
+						$reason             = __( 'Settings UI script handles could not be resolved.', 'woocommerce' );
+
+						wc_get_logger()->debug(
+							sprintf(
+								'Settings UI script handles could not be resolved for page "%1$s" section "%2$s": %3$s: %4$s',
+								$settings_ui_page->get_page_id(),
+								'' === $current_section ? 'default' : $current_section,
+								get_class( $e ),
+								$e->getMessage()
+							),
+							array( 'source' => 'settings-ui' )
+						);
+
+						if ( $e instanceof \Exception ) {
+							$reason = sprintf(
+								/* translators: %s: exception message. */
+								__( 'Settings UI script handles could not be resolved: %s', 'woocommerce' ),
+								$e->getMessage()
+							);
+							wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
+						}
+
+						$this->log_settings_ui_fallback( $settings_ui_page, $current_section, $reason );
+					}
+
+					if ( $render_settings_ui ) {
+						/**
+						 * Extension-provided handles may violate the interface contract.
+						 *
+						 * @var mixed[] $script_handles
+						 */
+						foreach ( $script_handles as $script_handle ) {
+							if ( is_string( $script_handle ) && '' !== $script_handle ) {
+								wp_enqueue_script( $script_handle );
+							}
+						}
+
+						$GLOBALS['hide_save_button'] = true;
+
+						printf(
+							'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
+							esc_attr( 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $current_section ? 'default' : $current_section ) ),
+							esc_attr( $settings_ui_page->get_page_id() ),
+							esc_attr( $current_section )
+						);
+						return;
+					}
+				}
+			}
 
 			// We can't use "get_settings_for_section" here
 			// for compatibility with derived classes overriding "get_settings".

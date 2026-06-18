@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Enums\OrderItemType;
 
 /**
  * Totals class.
@@ -100,7 +101,7 @@ class Totals extends AbstractOrderConfirmationBlock {
 		$return      = '';
 		$order_items = array_filter(
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			$order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) ),
+			$order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', OrderItemType::LINE_ITEM ) ),
 			function( $item ) {
                 // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 				return apply_filters( 'woocommerce_order_item_visible', true, $item );

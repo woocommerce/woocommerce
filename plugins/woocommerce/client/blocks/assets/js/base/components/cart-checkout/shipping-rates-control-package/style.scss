@@ -51,6 +51,7 @@
 		flex: 1;
 		display: flex;
 		flex-direction: column;
+		gap: $gap-smallest;
 
 		.wc-block-components-shipping-rates-control__package-header:last-child {
 			margin-bottom: 0;

@@ -12,12 +12,14 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderItemSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderFeeSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderTaxSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderShippingSchema;
+use WC_Order_Refund;
 use WP_REST_Request;
 
 /**
@@ -227,19 +229,16 @@ class RefundSchema extends AbstractSchema {
 							'validate_callback' => 'rest_validate_request_arg',
 						),
 						'quantity'     => array(
-							'description'       => __( 'Quantity refunded.', 'woocommerce' ),
+							'description'       => __( 'Quantity refunded. Required when refund_total is omitted (the backend computes the total from unit price × quantity); optional when refund_total is provided explicitly.', 'woocommerce' ),
 							'type'              => 'integer',
 							'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
-							'default'           => 0,
 							'sanitize_callback' => 'wc_stock_amount',
 							'validate_callback' => 'rest_validate_request_arg',
 						),
 						'refund_total' => array(
-							'description'       => __( 'Total refunded for this item.', 'woocommerce' ),
-							'type'              => 'number',
+							'description'       => __( 'Total amount refunded for this item (including tax). If omitted or set to null, the backend computes it from the order line item\'s unit price multiplied by quantity. An explicit 0 is treated as a zero refund for this line item.', 'woocommerce' ),
+							'type'              => array( 'number', 'null' ),
 							'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
-							'default'           => 0,
-							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 						),
 						'refund_tax'   => array(
@@ -342,9 +341,9 @@ class RefundSchema extends AbstractSchema {
 
 		if ( in_array( 'line_items', $include_fields, true ) ) {
 			$data['line_items'] = array_merge(
-				$this->get_line_items_response( $refund->get_items( 'line_item' ), $request ),
-				$this->get_line_items_response( $refund->get_items( 'fee' ), $request ),
-				$this->get_line_items_response( $refund->get_items( 'shipping' ), $request ),
+				$this->get_line_items_response( $refund->get_items( OrderItemType::LINE_ITEM ), $request ),
+				$this->get_line_items_response( $refund->get_items( OrderItemType::FEE ), $request ),
+				$this->get_line_items_response( $refund->get_items( OrderItemType::SHIPPING ), $request ),
 			);
 		}
 

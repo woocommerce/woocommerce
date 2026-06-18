@@ -35,9 +35,5 @@ export const metadata: BlockConfiguration = {
 			width: true,
 		},
 	},
-	example: {
-		attributes: {
-			isPreview: true,
-		},
-	},
+	example: {},
 };

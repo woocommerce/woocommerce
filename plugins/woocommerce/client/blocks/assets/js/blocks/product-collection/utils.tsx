@@ -523,6 +523,56 @@ export const getDefaultProductCollection = () =>
 		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )
 	);
 
+/**
+ * Sets preview state for product collections in the email editor context.
+ * When the email editor store is present, activates preview mode so that
+ * the collection shows sample products instead of "No products to display".
+ *
+ * When NOT in the email editor, explicitly resets preview state so the
+ * default archive-template fallback behavior in useSetPreviewState is
+ * preserved (providing setPreviewState suppresses the generic fallback).
+ */
+export const setEmailEditorPreviewState: SetPreviewState = ( {
+	setState,
+	location,
+	attributes,
+} ) => {
+	let isEmailEditor = false;
+	try {
+		// Detect the email editor by checking for its store.
+		// Depending on @wordpress/data version, select() may throw
+		// or return undefined for unregistered stores — handle both.
+		isEmailEditor = !! select( 'email-editor/editor' );
+	} catch {
+		// Not in email editor context.
+	}
+
+	if ( isEmailEditor ) {
+		setState( {
+			isPreview: true,
+			previewMessage: __(
+				'Sample products shown for preview. Actual products will be based on store inventory.',
+				'woocommerce'
+			),
+		} );
+	} else {
+		// Replicate the generic archive-template fallback: show preview
+		// label only when inheriting query in a generic archive template.
+		const isGenericArchiveTemplate =
+			location.type === LocationType.Archive &&
+			! location.sourceData?.termId;
+		setState( {
+			isPreview: isGenericArchiveTemplate
+				? !! attributes?.query?.inherit
+				: false,
+			previewMessage: __(
+				'Actual products will vary depending on the page being viewed.',
+				'woocommerce'
+			),
+		} );
+	}
+};
+
 export const useGetProduct = ( productId: number | undefined ) => {
 	const [ product, setProduct ] = useState< ProductResponseItem | null >(
 		null

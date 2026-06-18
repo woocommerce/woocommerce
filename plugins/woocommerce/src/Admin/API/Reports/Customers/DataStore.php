@@ -111,6 +111,45 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( __CLASS__, 'anonymize_customer' ) );
 
 		add_action( 'woocommerce_analytics_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 15, 2 );
+
+		add_action( 'woocommerce_created_customer', array( __CLASS__, 'merge_guest_customer_on_delayed_account_creation' ), 5, 2 );
+	}
+
+	/**
+	 * When a customer registers via delayed account creation (order confirmation page),
+	 * merge the existing guest lookup row instead of creating a duplicate.
+	 *
+	 * This runs on woocommerce_created_customer at priority 5, before the analytics
+	 * hooks (woocommerce_new_customer) that call update_registered_customer(). It updates
+	 * the guest row's user_id so that update_registered_customer() finds it via
+	 * get_customer_id_by_user_id() and updates in place rather than inserting a new row.
+	 *
+	 * @param int   $customer_id       New WP user ID.
+	 * @param array $new_customer_data Customer data including 'source'.
+	 */
+	public static function merge_guest_customer_on_delayed_account_creation( $customer_id, $new_customer_data ): void {
+		if ( empty( $new_customer_data['source'] ) || 'delayed-account-creation' !== $new_customer_data['source'] ) {
+			return;
+		}
+
+		$email = $new_customer_data['user_email'] ?? '';
+		if ( empty( $email ) ) {
+			return;
+		}
+
+		$guest_customer_id = self::get_guest_id_by_email( $email );
+		if ( ! $guest_customer_id ) {
+			return;
+		}
+
+		global $wpdb;
+		$wpdb->update(
+			self::get_db_table_name(),
+			array( 'user_id' => $customer_id ),
+			array( 'customer_id' => $guest_customer_id ),
+			array( '%d' ),
+			array( '%d' )
+		);
 	}
 
 	/**
@@ -309,29 +348,25 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$having_clauses = array();
 
 		$exact_match_params = array(
-			'name',
-			'username',
-			'email',
-			'country',
+			'name'     => "CONCAT_WS( ' ', {$customer_lookup_table}.first_name, {$customer_lookup_table}.last_name )",
+			'username' => "{$customer_lookup_table}.username",
+			'email'    => "{$customer_lookup_table}.email",
+			'country'  => "{$customer_lookup_table}.country",
 		);
 
-		foreach ( $exact_match_params as $exact_match_param ) {
+		foreach ( $exact_match_params as $exact_match_param => $column_expression ) {
 			if ( ! empty( $query_args[ $exact_match_param . '_includes' ] ) ) {
 				$exact_match_arguments         = $query_args[ $exact_match_param . '_includes' ];
 				$exact_match_arguments_escaped = array_map( 'esc_sql', explode( ',', $exact_match_arguments ) );
 				$included                      = implode( "','", $exact_match_arguments_escaped );
-				// 'country_includes' is a list of country codes, the others will be a list of customer ids.
-				$table_column    = 'country' === $exact_match_param ? $exact_match_param : 'customer_id';
-				$where_clauses[] = "{$customer_lookup_table}.{$table_column} IN ('{$included}')";
+				$where_clauses[]               = "{$column_expression} IN ('{$included}')";
 			}
 
 			if ( ! empty( $query_args[ $exact_match_param . '_excludes' ] ) ) {
 				$exact_match_arguments         = $query_args[ $exact_match_param . '_excludes' ];
 				$exact_match_arguments_escaped = array_map( 'esc_sql', explode( ',', $exact_match_arguments ) );
 				$excluded                      = implode( "','", $exact_match_arguments_escaped );
-				// 'country_includes' is a list of country codes, the others will be a list of customer ids.
-				$table_column    = 'country' === $exact_match_param ? $exact_match_param : 'customer_id';
-				$where_clauses[] = "{$customer_lookup_table}.{$table_column} NOT IN ('{$excluded}')";
+				$where_clauses[]               = "{$column_expression} NOT IN ('{$excluded}')";
 			}
 		}
 
@@ -384,6 +419,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( ! empty( $query_args['customers'] ) ) {
 			$included_customers = $this->get_filtered_ids( $query_args, 'customers' );
 			$where_clauses[]    = "{$customer_lookup_table}.customer_id IN ({$included_customers})";
+		}
+
+		// Allow a list of customer IDs to be excluded.
+		if ( ! empty( $query_args['customers_exclude'] ) ) {
+			$excluded_customers = $this->get_filtered_ids( $query_args, 'customers_exclude' );
+			$where_clauses[]    = "{$customer_lookup_table}.customer_id NOT IN ({$excluded_customers})";
 		}
 
 		// Allow a list of user IDs to be specified.
@@ -931,6 +972,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function update_registered_customer_via_last_active( $meta_id, $user_id, $meta_key ) {
 		if ( 'wc_last_active' === $meta_key ) {
+			// Optimization note related to guarded updates in `wc_update_user_last_active`: the meta update will trigger
+			// this method execution. We evaluated adding `! doing_action( 'wp' )` here, but the performance gain lays
+			// in the micro-optimization area while exposing the Analytics to certain edge-cases.
 			self::update_registered_customer( $user_id );
 		}
 	}

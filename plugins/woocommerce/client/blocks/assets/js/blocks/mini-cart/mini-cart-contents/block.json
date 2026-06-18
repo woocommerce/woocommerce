@@ -22,10 +22,6 @@
 		}
 	},
 	"attributes": {
-		"isPreview": {
-			"type": "boolean",
-			"default": false
-		},
 		"lock": {
 			"type": "object",
 			"default": {

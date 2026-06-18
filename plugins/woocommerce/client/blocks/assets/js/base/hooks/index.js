@@ -11,3 +11,4 @@ export * from './use-style-props';
 export * from './use-observed-viewport';
 export * from './use-schema-parser';
 export * from './use-query-loop-product-context-validation';
+export * from './use-preview-mode';

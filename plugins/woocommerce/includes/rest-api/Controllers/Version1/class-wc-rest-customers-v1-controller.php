@@ -42,7 +42,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	 * Register the routes for customers.
 	 */
 	public function register_routes() {
-		// Preload the options which will be used in this method (reduces the number of SQL-queries).
+		// Prime caches to reduce future queries.
 		wp_prime_option_caches(
 			array(
 				'woocommerce_registration_generate_username',

@@ -14,6 +14,12 @@ import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useState } from '@wordpress/element';
+import {
+	EmailActionsFill,
+	TemplateSelection,
+	recordEvent as emailEditorRecordEvent,
+} from '@woocommerce/email-editor';
+import { registerPlugin } from '@wordpress/plugins';
 
 /**
  * Internal dependencies
@@ -45,11 +51,9 @@ const SidebarSettings = ( {
 	recordEvent,
 	debouncedRecordEvent,
 }: SidebarSettings ) => {
-	const [ woocommerce_email_data ] = useEntityProp(
-		'postType',
-		'woo_email',
-		'woocommerce_data'
-	);
+	const [ woocommerce_email_data ] = useEntityProp<
+		EmailWooCommerceData | undefined
+	>( 'postType', 'woo_email', 'woocommerce_data' );
 
 	// Initialize toggle control state
 	const [ addBCC, setAddBCC ] = useState( !! woocommerce_email_data?.bcc );
@@ -109,36 +113,42 @@ const SidebarSettings = ( {
 				<>
 					<RichTextWithButton
 						attributeName="subject_full"
-						attributeValue={ woocommerce_email_data.subject_full }
+						attributeValue={
+							woocommerce_email_data.subject_full ?? ''
+						}
 						updateProperty={ updateWooMailProperty }
 						label={ __( 'Full Refund Subject', 'woocommerce' ) }
-						placeholder={ woocommerce_email_data.default_subject }
+						placeholder={
+							woocommerce_email_data.default_subject ?? ''
+						}
 					/>
 					<br />
 					<RichTextWithButton
 						attributeName="subject_partial"
 						attributeValue={
-							woocommerce_email_data.subject_partial
+							woocommerce_email_data.subject_partial ?? ''
 						}
 						updateProperty={ updateWooMailProperty }
 						label={ __( 'Partial Refund Subject', 'woocommerce' ) }
-						placeholder={ woocommerce_email_data.default_subject }
+						placeholder={
+							woocommerce_email_data.default_subject ?? ''
+						}
 					/>
 				</>
 			) : (
 				<RichTextWithButton
 					attributeName="subject"
-					attributeValue={ woocommerce_email_data.subject }
+					attributeValue={ woocommerce_email_data.subject ?? '' }
 					updateProperty={ updateWooMailProperty }
 					label={ __( 'Subject', 'woocommerce' ) }
-					placeholder={ woocommerce_email_data.default_subject }
+					placeholder={ woocommerce_email_data.default_subject ?? '' }
 				/>
 			) }
 
 			<br />
 			<RichTextWithButton
 				attributeName="preheader"
-				attributeValue={ woocommerce_email_data.preheader }
+				attributeValue={ woocommerce_email_data.preheader ?? '' }
 				updateProperty={ updateWooMailProperty }
 				label={ __( 'Preview text', 'woocommerce' ) }
 				help={
@@ -286,13 +296,24 @@ const SidebarSettings = ( {
 };
 
 export function modifySidebar() {
-	addFilter(
-		'woocommerce_email_editor_setting_sidebar_email_status_component',
-		NAME_SPACE,
-		( _originalComponent, tracking ) => {
-			return () => <EmailStatus recordEvent={ tracking.recordEvent } />;
-		}
-	);
+	registerPlugin( 'woocommerce-email-editor-email-status', {
+		scope: 'woocommerce-email-editor',
+		render: () => (
+			<EmailActionsFill>
+				<EmailStatus recordEvent={ emailEditorRecordEvent } />
+			</EmailActionsFill>
+		),
+	} );
+
+	registerPlugin( 'woocommerce-email-editor-template-selection', {
+		scope: 'woocommerce-email-editor',
+		render: () => (
+			<EmailActionsFill>
+				<TemplateSelection />
+			</EmailActionsFill>
+		),
+	} );
+
 	addFilter(
 		'woocommerce_email_editor_setting_sidebar_extension_component',
 		NAME_SPACE,

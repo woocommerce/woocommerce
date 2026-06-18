@@ -13,9 +13,11 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Css_Inliner;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Post_Content;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Block_Template;
 use WP_Block_Type_Registry;
 use WP_Post;
+use WP_Style_Engine;
 
 /**
  * Class Content_Renderer
@@ -43,13 +45,6 @@ class Content_Renderer {
 	 * @var WP_Block_Type_Registry
 	 */
 	private WP_Block_Type_Registry $block_type_registry;
-
-	/**
-	 * CSS inliner
-	 *
-	 * @var Css_Inliner
-	 */
-	private Css_Inliner $css_inliner;
 
 	/**
 	 * Property to store the backup of the current template content.
@@ -101,10 +96,47 @@ class Content_Renderer {
 	private $backup_post_content_callback;
 
 	/**
+	 * Post-content block's calculated width from the first preprocessing pass.
+	 *
+	 * When this is narrower than contentSize, it means root padding was applied
+	 * to a container above post-content. In that case, the second preprocessing
+	 * pass (user blocks) must skip root padding to prevent double application.
+	 * When equal to contentSize, the template delegates root padding and user
+	 * blocks should receive it directly.
+	 *
+	 * @var string|null
+	 */
+	private ?string $post_content_width = null;
+
+	/**
+	 * Container padding from the template group wrapping post-content.
+	 *
+	 * Stored during the first preprocessing pass and passed to user blocks
+	 * in the second pass so they receive the container padding per-block.
+	 *
+	 * @var array{left?: string, right?: string}
+	 */
+	private array $container_padding = array();
+
+	/**
+	 * CSS inliner
+	 *
+	 * @var Css_Inliner
+	 */
+	private Css_Inliner $css_inliner;
+
+	/**
+	 * Render-scoped context shared across all blocks in the current content render.
+	 *
+	 * @var Rendering_Context|null
+	 */
+	private ?Rendering_Context $rendering_context = null;
+
+	/**
 	 * Content_Renderer constructor.
 	 *
 	 * @param Process_Manager     $preprocess_manager Preprocess manager.
-	 * @param Css_Inliner         $css_inliner Css inliner.
+	 * @param Css_Inliner         $css_inliner CSS inliner.
 	 * @param Theme_Controller    $theme_controller Theme controller.
 	 * @param Email_Editor_Logger $logger Logger instance.
 	 */
@@ -115,8 +147,8 @@ class Content_Renderer {
 		Email_Editor_Logger $logger
 	) {
 		$this->process_manager     = $preprocess_manager;
-		$this->theme_controller    = $theme_controller;
 		$this->css_inliner         = $css_inliner;
+		$this->theme_controller    = $theme_controller;
 		$this->logger              = $logger;
 		$this->block_type_registry = WP_Block_Type_Registry::get_instance();
 		$this->fallback_renderer   = new Fallback();
@@ -147,19 +179,76 @@ class Content_Renderer {
 	}
 
 	/**
-	 * Render the content
+	 * Set a rendering context resolved by the full email renderer.
+	 *
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return void
+	 */
+	public function set_rendering_context( Rendering_Context $rendering_context ): void {
+		$this->rendering_context = $rendering_context;
+	}
+
+	/**
+	 * Get the current rendering context without creating a fallback context.
+	 *
+	 * @return Rendering_Context|null
+	 */
+	public function get_current_rendering_context(): ?Rendering_Context {
+		return $this->rendering_context;
+	}
+
+	/**
+	 * Restore a previously active rendering context.
+	 *
+	 * @param Rendering_Context|null $rendering_context Rendering context.
+	 * @return void
+	 */
+	public function restore_rendering_context( ?Rendering_Context $rendering_context ): void {
+		$this->rendering_context = $rendering_context;
+	}
+
+	/**
+	 * Render the content with inlined CSS styles.
 	 *
 	 * @param WP_Post           $post Post object.
 	 * @param WP_Block_Template $template Block template.
-	 * @return string
+	 * @return string Rendered HTML content with inlined styles.
 	 */
 	public function render( WP_Post $post, WP_Block_Template $template ): string {
+		$result = $this->render_without_css_inline( $post, $template );
+		$styles = '<style>' . $result['styles'] . '</style>';
+		$html   = $this->css_inliner->from_html( $styles . $result['html'] )->inline_css()->render();
+
+		return $this->process_manager->postprocess( $html );
+	}
+
+	/**
+	 * Render the content and collect CSS styles without inlining them.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param WP_Post           $post Post object.
+	 * @param WP_Block_Template $template Block template.
+	 * @return array{html: string, styles: string} Rendered HTML and collected CSS.
+	 */
+	public function render_without_css_inline( WP_Post $post, WP_Block_Template $template ): array {
+		if ( null === $this->rendering_context ) {
+			$this->rendering_context = $this->create_rendering_context( null, $post, $template );
+		}
+
 		$this->set_template_globals( $post, $template );
 		$this->initialize();
-		$rendered_html = get_the_block_template_html();
-		$this->reset();
+		try {
+			do_action( 'woocommerce_email_editor_render_start' );
+			$rendered_html = get_the_block_template_html();
+		} finally {
+			$this->reset();
+		}
 
-		return $this->process_manager->postprocess( $this->inline_styles( $rendered_html, $post, $template ) );
+		return array(
+			'html'   => $rendered_html,
+			'styles' => $this->collect_styles( $post, $template ),
+		);
 	}
 
 	/**
@@ -172,13 +261,121 @@ class Content_Renderer {
 	}
 
 	/**
-	 * Preprocess parsed blocks
+	 * Preprocess parsed blocks.
+	 *
+	 * Called for both template blocks and post-content user blocks. The
+	 * Spacing_Preprocessor handles root padding distribution: container
+	 * blocks (groups wrapping post-content) are transparent, delegating
+	 * padding to their children so user blocks get individual padding.
 	 *
 	 * @param array $parsed_blocks Parsed blocks.
 	 * @return array
 	 */
 	public function preprocess_parsed_blocks( array $parsed_blocks ): array {
-		return $this->process_manager->preprocess( $parsed_blocks, $this->theme_controller->get_layout_settings(), $this->theme_controller->get_styles() );
+		$styles = $this->theme_controller->get_styles();
+		$layout = $this->theme_controller->get_layout_settings();
+
+		// Pass the CSS variables map so preprocessors can resolve preset
+		// references (e.g. var:preset|spacing|20) in block attributes.
+		$styles['__variables_map'] = $this->theme_controller->get_variables_values_map();
+
+		// Second pass (user blocks inside post-content): if root padding was
+		// applied to a container above post-content in the first pass (indicated
+		// by post_content_width < contentSize), remove root padding from styles
+		// to prevent double application. If the template delegates root padding
+		// (post_content_width == contentSize), keep it for user blocks.
+		if ( null !== $this->post_content_width ) {
+			$post_content_num = (float) str_replace( 'px', '', $this->post_content_width );
+			$content_size_num = (float) str_replace( 'px', '', $layout['contentSize'] );
+			// Use epsilon tolerance for floating-point comparison since width
+			// calculations involve round() and division that may produce imprecision.
+			if ( $post_content_num < $content_size_num - 0.01 ) {
+				unset( $styles['spacing']['padding']['left'], $styles['spacing']['padding']['right'] );
+			}
+
+			// Pass container padding from the first pass so the
+			// Spacing_Preprocessor can distribute it to user blocks.
+			if ( ! empty( $this->container_padding ) ) {
+				$styles['__container_padding'] = $this->container_padding;
+			}
+		}
+
+		$result = $this->process_manager->preprocess( $parsed_blocks, $layout, $styles, $this->get_rendering_context() );
+
+		// After the first pass: find the post-content block's width and container padding.
+		if ( null === $this->post_content_width ) {
+			$this->post_content_width = $this->find_post_content_width( $result );
+			$this->container_padding  = $this->find_container_padding( $result );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Recursively find the post-content block's width in preprocessed blocks.
+	 *
+	 * @param array      $blocks Preprocessed blocks.
+	 * @param array|null $post_content_block_names Cached block names for recursion.
+	 * @return string|null The post-content block's width or null if not found.
+	 */
+	private function find_post_content_width( array $blocks, ?array $post_content_block_names = null ): ?string {
+		if ( null === $post_content_block_names ) {
+			$post_content_block_names = (array) apply_filters(
+				'woocommerce_email_editor_post_content_block_names',
+				array( 'core/post-content' )
+			);
+		}
+
+		foreach ( $blocks as $block ) {
+			$block_name = $block['blockName'] ?? '';
+			if ( in_array( $block_name, $post_content_block_names, true ) ) {
+				return $block['email_attrs']['width'] ?? null;
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$found = $this->find_post_content_width( $block['innerBlocks'], $post_content_block_names );
+				if ( null !== $found ) {
+					return $found;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Find the container padding from blocks with suppress-horizontal-padding flag.
+	 *
+	 * Searches the preprocessed template blocks for a container that wraps
+	 * post-content and had its horizontal padding distributed per-block.
+	 *
+	 * @param array $blocks Preprocessed blocks.
+	 * @return array{left?: string, right?: string} Container padding values, or empty array.
+	 */
+	private function find_container_padding( array $blocks ): array {
+		$variables_map = $this->theme_controller->get_variables_values_map();
+
+		foreach ( $blocks as $block ) {
+			$email_attrs = $block['email_attrs'] ?? array();
+			if ( ! empty( $email_attrs['suppress-horizontal-padding'] ) ) {
+				$padding = $block['attrs']['style']['spacing']['padding'] ?? array();
+				$result  = array();
+				if ( isset( $padding['left'] ) && is_string( $padding['left'] ) ) {
+					$result['left'] = Preset_Variable_Resolver::resolve( $padding['left'], $variables_map );
+				}
+				if ( isset( $padding['right'] ) && is_string( $padding['right'] ) ) {
+					$result['right'] = Preset_Variable_Resolver::resolve( $padding['right'], $variables_map );
+				}
+				if ( ! empty( $result ) ) {
+					return $result;
+				}
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$found = $this->find_container_padding( $block['innerBlocks'] );
+				if ( ! empty( $found ) ) {
+					return $found;
+				}
+			}
+		}
+		return array();
 	}
 
 	/**
@@ -190,34 +387,13 @@ class Content_Renderer {
 	 * @return string
 	 */
 	public function render_block( string $block_content, array $parsed_block ): string {
-		/**
-		 * Filter the email-specific context data passed to block renderers.
-		 *
-		 * This allows email sending systems to provide context data such as user ID,
-		 * email address, order information, etc., that can be used by blocks during rendering.
-		 *
-		 * Blocks that need cart product information can derive it from the user_id or recipient_email
-		 * using CartCheckoutUtils::get_cart_product_ids_for_user().
-		 *
-		 * @since 1.9.0
-		 *
-		 * @param array $email_context {
-		 *     Email-specific context data.
-		 *
-		 *     @type int    $user_id         The ID of the user receiving the email.
-		 *     @type string $recipient_email The recipient's email address.
-		 *     @type int    $order_id        The order ID (for order-related emails).
-		 *     @type string $email_type      The type of email being rendered.
-		 * }
-		 */
-		$email_context = apply_filters( 'woocommerce_email_editor_rendering_email_context', array() );
-
-		$context = new Rendering_Context( $this->theme_controller->get_theme(), $email_context );
+		$context = $this->get_rendering_context();
 
 		$block_type = $this->block_type_registry->get_registered( $parsed_block['blockName'] );
+		$result     = null;
 		try {
 			if ( $block_type && isset( $block_type->render_email_callback ) && is_callable( $block_type->render_email_callback ) ) {
-				return call_user_func( $block_type->render_email_callback, $block_content, $parsed_block, $context );
+				$result = call_user_func( $block_type->render_email_callback, $block_content, $parsed_block, $context );
 			}
 		} catch ( \Exception $error ) {
 			$this->logger->error(
@@ -233,7 +409,87 @@ class Content_Renderer {
 			return $block_content;
 		}
 
-		return $this->fallback_renderer->render( $block_content, $parsed_block, $context );
+		if ( null === $result ) {
+			$result = $this->fallback_renderer->render( $block_content, $parsed_block, $context );
+		}
+
+		return $this->add_root_horizontal_padding( $result, $parsed_block['email_attrs'] ?? array() );
+	}
+
+	/**
+	 * Wrap block output with horizontal padding (root + container).
+	 *
+	 * Root padding is distributed by the Spacing_Preprocessor from the outer
+	 * email container to individual blocks. Container padding comes from
+	 * template groups wrapping post-content. Both are combined into a single
+	 * CSS padding wrapper. This method applies padding uniformly to all blocks
+	 * regardless of whether they use Abstract_Block_Renderer or a custom
+	 * render_email_callback.
+	 *
+	 * @param string $content The rendered block content.
+	 * @param array  $email_attrs The email attributes from the parsed block.
+	 * @return string The content wrapped with horizontal padding, or unchanged if no padding.
+	 */
+	private function add_root_horizontal_padding( string $content, array $email_attrs ): string {
+		$padding_left  = $this->sum_padding_values(
+			$email_attrs['root-padding-left'] ?? null,
+			$email_attrs['container-padding-left'] ?? null
+		);
+		$padding_right = $this->sum_padding_values(
+			$email_attrs['root-padding-right'] ?? null,
+			$email_attrs['container-padding-right'] ?? null
+		);
+
+		$css_attrs = array();
+		if ( $padding_left > 0 ) {
+			$css_attrs['padding-left'] = $padding_left . 'px';
+		}
+		if ( $padding_right > 0 ) {
+			$css_attrs['padding-right'] = $padding_right . 'px';
+		}
+		if ( empty( $css_attrs ) ) {
+			return $content;
+		}
+
+		$padding_style = WP_Style_Engine::compile_css( $css_attrs, '' );
+		if ( empty( $padding_style ) ) {
+			return $content;
+		}
+
+		$table_attrs = array(
+			'align' => $this->get_rendering_context()->get_default_text_align(),
+			'width' => '100%',
+		);
+
+		$cell_attrs = array(
+			'style' => $padding_style,
+		);
+
+		$div_content = sprintf(
+			'<div class="email-root-padding" style="%1$s">%2$s</div>',
+			esc_attr( $padding_style ),
+			$content
+		);
+
+		return Table_Wrapper_Helper::render_outlook_table_wrapper( $div_content, $table_attrs, $cell_attrs );
+	}
+
+	/**
+	 * Sum two CSS pixel padding values.
+	 *
+	 * @param string|null $value1 First padding value (e.g., '20px').
+	 * @param string|null $value2 Second padding value (e.g., '10px').
+	 * @return float The sum in pixels.
+	 */
+	private function sum_padding_values( ?string $value1, ?string $value2 ): float {
+		$sum = 0.0;
+		if ( null !== $value1 ) {
+			$sum += (float) str_replace( 'px', '', $value1 );
+		}
+		if ( null !== $value2 ) {
+			$sum += (float) str_replace( 'px', '', $value2 );
+		}
+		return $sum;
 	}
 
 	/**
@@ -268,6 +524,10 @@ class Content_Renderer {
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
 
+		$this->post_content_width = null;
+		$this->container_padding  = array();
+		$this->rendering_context  = null;
+
 		// Restore the original core/post-content render callback.
 		// Note: We always restore it, even if it was null originally.
 		$post_content_type = $this->block_type_registry->get_registered( 'core/post-content' );
@@ -286,14 +546,65 @@ class Content_Renderer {
 	}
 
 	/**
-	 * Method to inline styles into the HTML
+	 * Get the current rendering context, lazily creating one for direct render_block() usage.
 	 *
-	 * @param string                 $html HTML content.
+	 * @return Rendering_Context
+	 */
+	private function get_rendering_context(): Rendering_Context {
+		if ( null === $this->rendering_context ) {
+			$this->rendering_context = $this->create_rendering_context();
+		}
+		return $this->rendering_context;
+	}
+
+	/**
+	 * Create a rendering context from filtered email context.
+	 *
+	 * @param string|null            $language Optional email language.
+	 * @param WP_Post|null           $post Optional email post.
+	 * @param WP_Block_Template|null $template Optional block template.
+	 * @return Rendering_Context
+	 */
+	public function create_rendering_context( ?string $language = null, ?WP_Post $post = null, ?WP_Block_Template $template = null ): Rendering_Context {
+		/**
+		 * Filter the email-specific context data passed to block renderers.
+		 *
+		 * This allows email sending systems to provide context data such as user ID,
+		 * email address, order information, etc., that can be used by blocks during rendering.
+		 *
+		 * Blocks that need cart product information can derive it from the user_id or recipient_email
+		 * using CartCheckoutUtils::get_cart_product_ids_for_user().
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param array $email_context {
+		 *     Email-specific context data.
+		 *
+		 *     @type int    $user_id         The ID of the user receiving the email.
+		 *     @type string $recipient_email The recipient's email address.
+		 *     @type int    $order_id        The order ID (for order-related emails).
+		 *     @type string $email_type      The type of email being rendered.
+		 *     @type bool   $is_rtl          Optional. Whether this email render should use RTL direction.
+		 * }
+		 * @param WP_Post|null           $post     Email post being rendered.
+		 * @param WP_Block_Template|null $template Block template being rendered.
+		 */
+		$email_context = apply_filters( 'woocommerce_email_editor_rendering_email_context', array(), $post, $template );
+		if ( ! is_array( $email_context ) ) {
+			$email_context = array();
+		}
+
+		return new Rendering_Context( $this->theme_controller->get_theme(), $email_context, $language );
+	}
+
+	/**
+	 * Collects CSS for the rendered content without inlining it.
+	 *
 	 * @param WP_Post                $post Post object.
 	 * @param WP_Block_Template|null $template Block template.
-	 * @return string
+	 * @return string The collected CSS string (without <style> wrapper).
 	 */
-	private function inline_styles( $html, WP_Post $post, $template = null ) {
+	private function collect_styles( WP_Post $post, $template = null ): string {
 		$styles  = (string) file_get_contents( __DIR__ . '/' . self::CONTENT_STYLES_FILE );
 		$styles .= (string) file_get_contents( __DIR__ . '/../../content-shared.css' );
 
@@ -313,7 +624,7 @@ class Content_Renderer {
       }
       ',
 			$layout['contentSize'],
-			$layout['wideSize']
+			$layout['wideSize'] ?? $layout['contentSize']
 		);
 
 		// Get styles from theme.
@@ -342,15 +653,6 @@ class Content_Renderer {
 
 		$styles .= $block_support_styles;
 
-		/*
-		 * Debugging for content styles. Remember these get inlined.
-		 * echo '<pre>';
-		 * var_dump($styles);
-		 * echo '</pre>';
-		 */
-
-		$styles = '<style>' . wp_strip_all_tags( (string) apply_filters( 'woocommerce_email_content_renderer_styles', $styles, $post ) ) . '</style>';
-
-		return $this->css_inliner->from_html( $styles . $html )->inline_css()->render();
+		return wp_strip_all_tags( (string) apply_filters( 'woocommerce_email_content_renderer_styles', $styles, $post ) );
 	}
 }

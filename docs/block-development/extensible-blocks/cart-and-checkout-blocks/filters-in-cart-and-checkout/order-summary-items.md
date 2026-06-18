@@ -10,6 +10,7 @@ The following Order Summary Items filters are available:
 
 -   `cartItemClass`
 -   `cartItemPrice`
+-   `cartItemScreenReaderPrice`
 -   `itemName`
 -   `subtotalPriceFormat`
 
@@ -95,9 +96,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/ff555a84-8d07-4889-97e1-8f7d50d47350) |![After applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/183809d8-03dc-466d-a415-d8d2062d880f) |
+| Before                                                                                                                                               | After                                                                                                                                               |
+|:----------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------:|
+| ![Before applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/ff555a84-8d07-4889-97e1-8f7d50d47350) | ![After applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/183809d8-03dc-466d-a415-d8d2062d880f) |
 
 ## `cartItemPrice`
 
@@ -173,9 +174,98 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/58137fc4-884d-4783-9275-5f78abec1473) |![After applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/fb502b74-6447-49a8-8d35-241e738f089d) |
+| Before                                                                                                                                               | After                                                                                                                                               |
+|:----------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------:|
+| ![Before applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/58137fc4-884d-4783-9275-5f78abec1473) | ![After applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/fb502b74-6447-49a8-8d35-241e738f089d) |
+
+## `cartItemScreenReaderPrice`
+
+### Description
+
+The `cartItemScreenReaderPrice` filter allows for formatting the order summary item price announced to screen reader and assistive technology users. There are no visual changes on the screen. The code changes can be seen in the `<span class="screen-reader-text">` included for each item in the cart.
+
+### Parameters
+
+-   _defaultValue_ `string` (default: `Total price for <quantity/> <productName/> item: <price/>` for purchases of a single item; `Total price for <quantity/> <productName/> items: <price/>` for purchases of multiple items) - The default order summary screen reader text.
+-   _extensions_ `object` (default: `{}`) - The extensions object.
+-   _args_ `object` - The arguments object with the following keys:
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
+    -   _cartItem_ `object` - The order summary item object from `wc/store/cart`, see [order summary item object](#cart-item-object).
+    -   _context_ `string` (`summary`) - The context of the item, fixed to match the context of other filters in the mini-cart summary.
+-   _validation_ `boolean` - Checks if the return value contains the substrings `<quantity/>`, `<productName/>` and `<price/>`.
+
+### Returns
+
+-   `string` - The modified format of the order summary item price, which must contain the substrings `<quantity/>`, `<productName/>` and `<price/>`.
+
+### Code examples
+
+#### Basic example
+
+```tsx
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+const { _n } = window.wp.i18n;
+
+const modifyCartItemScreenReaderPrice = ( defaultValue, extensions, args, validation ) => {
+	const isOrderSummaryContext = args?.context === 'summary';
+
+	if ( ! isOrderSummaryContext ) {
+		return defaultValue;
+	}
+
+	return _n(
+		'<quantity/> <productName/> item will cost <price/>',
+		'<quantity/> <productName/> items will cost <price/>',
+		args?.cartItem?.quantity ?? 1,
+		'example-extension'
+	);
+};
+
+registerCheckoutFilters( 'example-extension', {
+	cartItemScreenReaderPrice: modifyCartItemScreenReaderPrice,
+} );
+```
+
+#### Advanced example
+
+```tsx
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+const { _n } = window.wp.i18n;
+
+const modifyCartItemScreenReaderPrice = ( defaultValue, extensions, args, validation ) => {
+	const isOrderSummaryContext = args?.context === 'summary';
+
+	if ( ! isOrderSummaryContext ) {
+		return defaultValue;
+	}
+
+	if ( args?.cartItem?.name === 'Beanie with Logo' ) {
+		return _n(
+			'Total price for <quantity/> <productName/> item: <price/> to keep you warm',
+			'Total price for <quantity/> <productName/> items: <price/> to keep you warm',
+			args?.cartItem?.quantity ?? 1,
+			'example-extension'
+		);
+	}
+
+	if ( args?.cartItem?.name === 'Sunglasses' ) {
+		return _n(
+			'Total price for <quantity/> <productName/> item: <price/> to keep you cool',
+			'Total price for <quantity/> <productName/> items: <price/> to keep you cool',
+			args?.cartItem?.quantity ?? 1,
+			'example-extension'
+		);
+	}
+
+	return defaultValue;
+};
+
+registerCheckoutFilters( 'example-extension', {
+	cartItemScreenReaderPrice: modifyCartItemScreenReaderPrice,
+} );
+```
+
+> Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
 ## `itemName`
 
@@ -250,9 +340,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3dc0bda7-fccf-4f35-a2e2-aa04e616563a) |![After applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/c96b8394-03a7-45f6-813b-5335f4bf83b5) |
+| Before                                                                                                                                         | After                                                                                                                                         |
+|:----------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------:|
+| ![Before applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3dc0bda7-fccf-4f35-a2e2-aa04e616563a) | ![After applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/c96b8394-03a7-45f6-813b-5335f4bf83b5) |
 
 ## `subtotalPriceFormat`
 
@@ -338,9 +428,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3574e7ae-9857-4651-ac9e-e6b597e3a589) |![After applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/94e18439-6d6b-44a4-ade1-8302c5984641) |
+| Before                                                                                                                                                     | After                                                                                                                                                     |
+|:----------------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| ![Before applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3574e7ae-9857-4651-ac9e-e6b597e3a589) | ![After applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/94e18439-6d6b-44a4-ade1-8302c5984641) |
 
 ## Cart object
 

@@ -96,7 +96,11 @@ PHPStan configuration is stored in `phpstan.neon` at the root of the plugin dire
 -   [WooCommerce Documentation](https://woocommerce.com/)
 -   [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
 -   [WooCommerce Code Reference](https://woocommerce.com/wc-apidocs/)
--   [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
+-   [WooCommerce REST API Docs](https://developer.woocommerce.com/docs/apis/rest-api/)
+
+## A Note for Extension Developers
+
+If you're building a WooCommerce extension, be aware that not all code in this plugin is intended for external use. Classes in the `Automattic\WooCommerce\Internal` namespace and code marked with `@internal` annotations are internal infrastructure: backwards compatibility between WooCommerce releases is not guaranteed. See [src/Internal/README.md](src/Internal/README.md) for details.
 
 ## Reporting Security Issues
 

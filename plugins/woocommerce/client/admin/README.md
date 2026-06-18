@@ -4,7 +4,7 @@ This is a javascript-driven, React-based admin interface for WooCommerce.
 
 ## Development
 
-Please refer to the [WooCommerce Admin Development](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment#wooCommerce-admin-development).
+Please refer to the [WooCommerce Admin Development](https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment).
 
 ## End-to-end tests
 

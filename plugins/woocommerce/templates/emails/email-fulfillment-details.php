@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.1.0
+ * @version 10.7.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -39,7 +39,7 @@ if ( null === $fulfillment->get_date_deleted() ) {
 	echo wp_kses_post(
 		sprintf(
 			/* translators: %s: Link to My Account > Orders page. */
-			__( 'You can access to more details of your order by visiting <a href="%s" target="_blank">My Account > Orders</a> and select the order you wish to see the latest status of the delivery.', 'woocommerce' ),
+			__( 'You can access more details of your order by visiting <a href="%s" target="_blank">My Account > Orders</a>, and selecting the order you wish to see the latest status for.', 'woocommerce' ),
 			site_url( 'my-account/orders/' )
 		)
 	);

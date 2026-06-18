@@ -76,8 +76,6 @@ const Edit = ( {
 					// @ts-expect-error method exists but not typed
 					select( blockEditorStore ).wasBlockJustInserted( clientId ),
 				isInProductGallery:
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-expect-error method exists but not typed
 					select( blockEditorStore ).getBlockParentsByBlockName(
 						clientId,
 						'woocommerce/product-gallery'
@@ -173,6 +171,7 @@ const Edit = ( {
 							isShownByDefault
 						>
 							<ToggleControl
+								__nextHasNoMarginBottom
 								label={ __(
 									'Link to Product Page',
 									'woocommerce'
@@ -202,6 +201,8 @@ const Edit = ( {
 							isShownByDefault
 						>
 							<ToggleGroupControl
+								__next40pxDefaultSize
+								__nextHasNoMarginBottom
 								label={ __( 'Resolution', 'woocommerce' ) }
 								isBlock
 								help={

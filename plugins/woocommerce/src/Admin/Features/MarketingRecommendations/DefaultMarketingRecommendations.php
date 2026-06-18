@@ -57,12 +57,64 @@ class DefaultMarketingRecommendations {
 		return array(
 			array(
 				'title'          => 'Google for WooCommerce',
-				'description'    => __( 'Get in front of shoppers and drive traffic so you can grow your business with Smart Shopping Campaigns and free listings.', 'woocommerce' ),
+				'description'    => __( 'Reach millions of active shoppers across Google by creating ads for your products straight from your dashboard.', 'woocommerce' ),
 				'url'            => "https://woocommerce.com/products/google-listings-and-ads/{$utm_string}",
 				'direct_install' => true,
 				'icon'           => "{$icon_dir_url}/google.svg",
 				'product'        => 'google-listings-and-ads',
 				'plugin'         => 'google-listings-and-ads/google-listings-and-ads.php',
+				'categories'     => array(
+					$marketing,
+				),
+				'subcategories'  => array(
+					$sales_channels,
+				),
+				'tags'           => array(
+					$built_by_woocommerce,
+				),
+			),
+			array(
+				'title'          => 'Reddit for WooCommerce',
+				'description'    => __( 'Seamlessly sync your products to find new customers using Reddit Ads.', 'woocommerce' ),
+				'url'            => "https://woocommerce.com/products/reddit/{$utm_string}",
+				'direct_install' => true,
+				'icon'           => WC_ADMIN_IMAGES_FOLDER_URL . '/core-profiler/logo-reddit.svg',
+				'product'        => 'reddit-for-woocommerce',
+				'plugin'         => 'reddit-for-woocommerce/reddit-for-woocommerce.php',
+				'categories'     => array(
+					$marketing,
+				),
+				'subcategories'  => array(
+					$sales_channels,
+				),
+				'tags'           => array(
+					$built_by_woocommerce,
+				),
+			),
+			array(
+				'title'          => 'TikTok for WooCommerce',
+				'description'    => __( 'Create advertising campaigns and reach one billion global users with TikTok for WooCommerce.', 'woocommerce' ),
+				'url'            => "https://woocommerce.com/products/tiktok-for-woocommerce/{$utm_string}",
+				'direct_install' => true,
+				'icon'           => "{$icon_dir_url}/tiktok.jpg",
+				'product'        => 'tiktok-for-business',
+				'plugin'         => 'tiktok-for-business/tiktok-for-woocommerce.php',
+				'categories'     => array(
+					$marketing,
+				),
+				'subcategories'  => array(
+					$sales_channels,
+				),
+				'tags'           => array(),
+			),
+			array(
+				'title'          => 'Snapchat for WooCommerce',
+				'description'    => __( 'Find new customers by reaching an untapped audience using Snapchat for WooCommerce.', 'woocommerce' ),
+				'url'            => "https://woocommerce.com/products/snapchat/{$utm_string}",
+				'direct_install' => true,
+				'icon'           => WC_ADMIN_IMAGES_FOLDER_URL . '/core-profiler/logo-snapchat.svg',
+				'product'        => 'snapchat-for-woocommerce',
+				'plugin'         => 'snapchat-for-woocommerce/snapchat-for-woocommerce.php',
 				'categories'     => array(
 					$marketing,
 				),
@@ -92,22 +144,6 @@ class DefaultMarketingRecommendations {
 				),
 			),
 			array(
-				'title'          => 'TikTok for WooCommerce',
-				'description'    => __( 'Create advertising campaigns and reach one billion global users with TikTok for WooCommerce.', 'woocommerce' ),
-				'url'            => "https://woocommerce.com/products/tiktok-for-woocommerce/{$utm_string}",
-				'direct_install' => true,
-				'icon'           => "{$icon_dir_url}/tiktok.jpg",
-				'product'        => 'tiktok-for-business',
-				'plugin'         => 'tiktok-for-business/tiktok-for-woocommerce.php',
-				'categories'     => array(
-					$marketing,
-				),
-				'subcategories'  => array(
-					$sales_channels,
-				),
-				'tags'           => array(),
-			),
-			array(
 				'title'          => 'Blaze Ads',
 				'description'    => __(
 					'The quickest way to grow your business by advertising to over 100 million users across Tumblr and WordPress, starting at just \$5/day.',
@@ -127,38 +163,6 @@ class DefaultMarketingRecommendations {
 				'tags'           => array(
 					$built_by_woocommerce,
 				),
-			),
-			array(
-				'title'          => 'Facebook for WooCommerce',
-				'description'    => __( 'List products and create ads on Facebook and Instagram.', 'woocommerce' ),
-				'url'            => "https://woocommerce.com/products/facebook/{$utm_string}",
-				'direct_install' => true,
-				'icon'           => "{$icon_dir_url}/facebook.svg",
-				'product'        => 'facebook-for-woocommerce',
-				'plugin'         => 'facebook-for-woocommerce/facebook-for-woocommerce.php',
-				'categories'     => array(
-					$marketing,
-				),
-				'subcategories'  => array(
-					$sales_channels,
-				),
-				'tags'           => array(),
-			),
-			array(
-				'title'          => 'Meta Ads and Pixel by Kliken',
-				'description'    => __( 'Automate Facebook & Instagram marketing with Kliken. Launch ads and schedule a month of posts in 5 minutes—first 5 free! Plans start at just $20/mo.', 'woocommerce' ),
-				'url'            => "https://woocommerce.com/products/meta-ads-and-pixel/{$utm_string}",
-				'direct_install' => true,
-				'icon'           => "{$icon_dir_url}/kliken.svg",
-				'product'        => 'kliken-ads-pixel-for-meta',
-				'plugin'         => 'kliken-ads-pixel-for-meta/kliken-ads-pixel-for-meta.php',
-				'categories'     => array(
-					$marketing,
-				),
-				'subcategories'  => array(
-					$sales_channels,
-				),
-				'tags'           => array(),
 			),
 			array(
 				'title'          => 'MailPoet',

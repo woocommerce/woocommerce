@@ -49,4 +49,4 @@ Hook name example (actions or filters):
 
 ## CSS and SASS
 
-See [CSS SASS coding guidelines and naming conventions](https://github.com/woocommerce/woocommerce/wiki/CSS-SASS-coding-guidelines-and-naming-conventions).
+See [CSS SASS coding guidelines and naming conventions](/docs/contribution/contributing/CSS-SASS-coding-guidelines-and-naming-conventions/).

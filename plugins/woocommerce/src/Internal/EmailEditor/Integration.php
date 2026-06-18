@@ -9,6 +9,10 @@ use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateAutoApplier;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplateApiController;
@@ -78,6 +82,11 @@ class Integration {
 		}
 
 		add_action( 'woocommerce_init', array( $this, 'initialize' ) );
+
+		// Register the post deletion cleanup hook early and unconditionally so it works in
+		// both admin and non-admin contexts (e.g. WP-CLI). This only needs $wpdb and the
+		// posts manager singleton — it must not depend on the full editor init chain.
+		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_email_editor_post' ), 10, 2 );
 	}
 
 	/**
@@ -133,12 +142,29 @@ class Integration {
 		add_filter( 'woocommerce_email_editor_post_types', array( $this, 'add_email_post_type' ) );
 		add_filter( 'woocommerce_is_email_editor_page', array( $this, 'is_editor_page' ), 10, 1 );
 		add_filter( 'replace_editor', array( $this, 'replace_editor' ), 10, 2 );
-		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_email_editor_post' ), 10, 2 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_send_preview_email_rendered_data' ), 10, 2 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_personalizer_context', array( $this, 'update_send_preview_email_personalizer_context' ) );
 		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_preview_post_template_html_data' ), 100, 1 );
 		add_action( 'woocommerce_email_editor_send_preview_email_before_wp_mail', array( $this, 'send_preview_email_before_wp_mail' ), 10 );
 		add_action( 'woocommerce_email_editor_send_preview_email_after_wp_mail', array( $this, 'send_preview_email_after_wp_mail' ), 10 );
+		add_filter( 'woocommerce_email_editor_send_preview_email_subject', array( $this, 'update_email_subject_for_send_preview_email' ), 10, 2 );
+		add_action( 'rest_api_init', array( $this->email_api_controller, 'register_routes' ) );
+		// Priority 11 ensures the email editor's `init` bootstrap (default priority 10)
+		// has registered the `woo_email` post type before we register meta against it.
+		add_action( 'init', array( WCEmailTemplateDivergenceDetector::class, 'register_meta' ), 11 );
+		add_action( 'woocommerce_updated', array( WCEmailTemplateDivergenceDetector::class, 'run_sweep' ), 20 );
+		add_action( WCEmailTemplateSyncBackfill::BACKFILL_COMPLETE_ACTION, array( WCEmailTemplateDivergenceDetector::class, 'run_sweep' ), 10 );
+		// Fresh installs never cross the 10.8 db-update boundary, so the RSM-149
+		// backfill never runs and `BACKFILL_COMPLETE_OPTION` is never written.
+		// Stamp it from the `woocommerce_newly_installed` action so `run_sweep()`
+		// doesn't sit dormant forever on new sites.
+		add_action( 'woocommerce_newly_installed', array( WCEmailTemplateDivergenceDetector::class, 'mark_backfill_complete_on_fresh_install' ), 20 );
+		add_action( WCEmailTemplateAutoApplier::AUTO_APPLY_AS_HOOK, array( WCEmailTemplateAutoApplier::class, 'run' ), 10 );
+		add_action( 'woocommerce_email_template_divergence_sweep_complete', array( WCEmailTemplateAutoApplier::class, 'schedule' ), 10 );
+		// RSM-145 Tracks instrumentation: fire `_backfill_completed` once when the
+		// RSM-149 sync-meta backfill finalises. The backfill class itself is in the
+		// 10.8 feature freeze, so we hook the existing action it already publishes.
+		add_action( WCEmailTemplateSyncBackfill::BACKFILL_COMPLETE_ACTION, array( WCEmailTemplateSyncTracker::class, 'on_backfill_complete' ), 20 );
 	}
 
 	/**
@@ -167,6 +193,7 @@ class Integration {
 						'default-mode' => 'template-locked',
 					),
 					'excerpt',
+					'custom-fields',
 				),
 				'capability_type' => self::EMAIL_POST_TYPE,
 				'capabilities'    => array(
@@ -414,5 +441,42 @@ class Integration {
 	public function send_preview_email_after_wp_mail() {
 		remove_filter( 'wp_mail_from', array( $this->wc_email_instance, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this->wc_email_instance, 'get_from_name' ) );
+	}
+
+	/**
+	 * Update the email subject for the send preview email.
+	 *
+	 * @param string  $subject The email subject.
+	 * @param WP_Post $post    The post object.
+	 * @return string The updated email subject.
+	 */
+	public function update_email_subject_for_send_preview_email( $subject, $post ) {
+		if ( ! $post instanceof \WP_Post || self::EMAIL_POST_TYPE !== $post->post_type ) {
+			return $subject;
+		}
+
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+
+		$email_type_class_name = $post_manager->get_email_type_class_name_from_post_id( $post->ID );
+
+		if ( empty( $email_type_class_name ) ) {
+			return $subject;
+		}
+
+		/**
+		 * Validate the email type class name.
+		 *
+		 * @var EmailPreview $email_preview
+		 */
+		$email_preview = wc_get_container()->get( EmailPreview::class );
+
+		try {
+			$email_preview->set_email_type( $email_type_class_name );
+			return $email_preview->get_subject();
+		} catch ( \InvalidArgumentException $e ) {
+			return $subject;
+		} catch ( \Throwable $e ) {
+			return $subject;
+		}
 	}
 }

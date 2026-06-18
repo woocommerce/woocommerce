@@ -1,8 +1,4 @@
 {
     "label": "Settings and config",
-    "position": 3,
-    "link": {
-      "type": "generated-index",
-      "title": "Settings and config"
-    }
+    "position": 3
 }

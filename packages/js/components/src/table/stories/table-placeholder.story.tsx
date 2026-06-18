@@ -12,8 +12,7 @@ import { headers } from './index';
 
 export const Basic = () => {
 	return (
-		/* @ts-expect-error: size must be one of small, medium, largel, xSmall, extraSmall. */
-		<Card size={ null }>
+		<Card size="none">
 			<TablePlaceholder caption="Revenue last week" headers={ headers } />
 		</Card>
 	);

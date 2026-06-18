@@ -11,7 +11,7 @@ import * as selectors from './selectors';
 import * as actions from './actions';
 import * as resolvers from './resolvers';
 import controls from '../controls';
-import reducer, { State } from './reducer';
+import reducer, { type State } from './reducer';
 
 export * from './types';
 export type { State };
@@ -27,3 +27,9 @@ export const store = createReduxStore( STORE_NAME, {
 register( store );
 
 export const REVIEWS_STORE_NAME = STORE_NAME;
+
+declare module '@wordpress/data' {
+	interface StoreRegistry {
+		[ STORE_NAME ]: typeof store;
+	}
+}

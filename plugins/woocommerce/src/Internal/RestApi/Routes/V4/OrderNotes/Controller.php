@@ -287,7 +287,7 @@ class Controller extends AbstractController {
 		}
 
 		$order   = $this->get_order_by_id( (int) $request['order_id'] );
-		$note_id = $order ? $order->add_order_note( $request['note'], $request['is_customer_note'], true ) : null;
+		$note_id = $order ? $order->add_order_note( wp_kses_post( $request['note'] ), $request['is_customer_note'], true ) : null;
 
 		if ( ! $note_id ) {
 			return $this->get_route_error_by_code( self::CANNOT_CREATE );

@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Refactor `getQuantityConstraints` and `normalizeProductFromStore` in iAPI cart store

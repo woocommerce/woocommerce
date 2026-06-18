@@ -22,6 +22,32 @@ import {
 	PluginInstallError,
 } from '../services/installAndActivatePlugins';
 import { getPluginTrackKey, getTimeFrame } from '~/utils';
+import { getPluginSlug } from '~/utils/plugins';
+import { getCountryCode } from '~/dashboard/utils';
+
+const SHIPPING_PLUGIN_SLUGS = new Set( [
+	'woocommerce-shipping',
+	'woocommerce-shipstation-integration',
+	'packlink-pro-shipping',
+] );
+
+const isShippingPlugin = ( pluginKey: string ) =>
+	SHIPPING_PLUGIN_SLUGS.has( getPluginSlug( pluginKey ) );
+
+const getShippingPartnerTrackingBase = (
+	context: CoreProfilerStateMachineContext
+) => {
+	const shippingPlugins = context.pluginsAvailable
+		.filter( ( plugin ) => isShippingPlugin( plugin.key ) )
+		.map( ( plugin ) => getPluginSlug( plugin.key ) )
+		.join( ',' );
+
+	return {
+		context: 'core-profiler' as const,
+		country: getCountryCode( context.businessInfo.location ) ?? '',
+		plugins: shippingPlugins,
+	};
+};
 
 const recordTracksStepViewed = ( _: unknown, params: { step: string } ) => {
 	recordEvent( 'coreprofiler_step_view', {
@@ -138,9 +164,30 @@ const recordTracksBusinessInfoCompleted = ( {
 	} );
 };
 
+let shippingPartnerImpressionRecorded = false;
+
+const recordShippingPartnerImpression = ( {
+	context,
+}: {
+	context: CoreProfilerStateMachineContext;
+} ) => {
+	if ( shippingPartnerImpressionRecorded ) {
+		return;
+	}
+
+	const trackingBase = getShippingPartnerTrackingBase( context );
+
+	if ( trackingBase.plugins.length > 0 ) {
+		shippingPartnerImpressionRecorded = true;
+		recordEvent( 'shipping_partner_impression', trackingBase );
+	}
+};
+
 const recordTracksPluginsInstallationRequest = ( {
+	context,
 	event,
 }: {
+	context: CoreProfilerStateMachineContext;
 	event: Extract<
 		PluginsInstallationRequestedEvent,
 		{ type: 'PLUGINS_INSTALLATION_REQUESTED' }
@@ -150,6 +197,18 @@ const recordTracksPluginsInstallationRequest = ( {
 		shown: event.payload.pluginsShown || [],
 		selected: event.payload.pluginsSelected || [],
 		unselected: event.payload.pluginsUnselected || [],
+	} );
+
+	const trackingBase = getShippingPartnerTrackingBase( context );
+	const selectedShippingPlugins = (
+		event.payload.pluginsSelected || []
+	).filter( ( slug ) => SHIPPING_PLUGIN_SLUGS.has( getPluginSlug( slug ) ) );
+
+	selectedShippingPlugins.forEach( ( pluginSlug ) => {
+		recordEvent( 'shipping_partner_click', {
+			...trackingBase,
+			selected_plugin: getPluginSlug( pluginSlug ),
+		} );
 	} );
 };
 
@@ -167,8 +226,10 @@ const recordTracksPluginsInstallationNoPermissionError = () =>
 	recordEvent( 'coreprofiler_store_extensions_no_permission_error' );
 
 const recordFailedPluginInstallations = ( {
+	context,
 	event,
 }: {
+	context: CoreProfilerStateMachineContext;
 	event: PluginsInstallationCompletedWithErrorsEvent;
 } ) => {
 	const failedExtensions = event.payload.errors.map(
@@ -180,18 +241,30 @@ const recordFailedPluginInstallations = ( {
 		failed_extensions: failedExtensions,
 	} );
 
+	const trackingBase = getShippingPartnerTrackingBase( context );
+
 	event.payload.errors.forEach( ( error: PluginInstallError ) => {
 		recordEvent( 'coreprofiler_store_extension_installed_and_activated', {
 			success: false,
 			extension: getPluginTrackKey( error.plugin ),
 			error_message: error.error,
 		} );
+
+		if ( isShippingPlugin( error.plugin ) ) {
+			recordEvent( 'shipping_partner_install', {
+				...trackingBase,
+				selected_plugin: getPluginSlug( error.plugin ),
+				success: false,
+			} );
+		}
 	} );
 };
 
 const recordSuccessfulPluginInstallation = ( {
+	context,
 	event,
 }: {
+	context: CoreProfilerStateMachineContext;
 	event: PluginsInstallationCompletedEvent;
 } ) => {
 	const installationCompletedResult =
@@ -211,6 +284,8 @@ const recordSuccessfulPluginInstallation = ( {
 		total_time: getTimeFrame( installationCompletedResult.totalTime ),
 	};
 
+	const trackingBase = getShippingPartnerTrackingBase( context );
+
 	for ( const installedPlugin of installationCompletedResult.installedPlugins ) {
 		const pluginKey = getPluginTrackKey( installedPlugin.plugin );
 		const installTime = getTimeFrame( installedPlugin.installTime );
@@ -221,12 +296,30 @@ const recordSuccessfulPluginInstallation = ( {
 			extension: pluginKey,
 			install_time: installTime,
 		} );
+
+		if ( isShippingPlugin( installedPlugin.plugin ) ) {
+			const slug = getPluginSlug( installedPlugin.plugin );
+			recordEvent( 'shipping_partner_install', {
+				...trackingBase,
+				selected_plugin: slug,
+				success: true,
+			} );
+			recordEvent( 'shipping_partner_activate', {
+				...trackingBase,
+				selected_plugin: slug,
+				success: true,
+			} );
+		}
 	}
 
 	recordEvent(
 		'coreprofiler_store_extensions_installed_and_activated',
 		trackData
 	);
+};
+
+export const resetShippingPartnerImpressionFlag = () => {
+	shippingPartnerImpressionRecorded = false;
 };
 
 export default {
@@ -243,4 +336,5 @@ export default {
 	recordSuccessfulPluginInstallation,
 	recordTracksPluginsInstallationRequest,
 	recordTracksIsEmailChanged,
+	recordShippingPartnerImpression,
 };

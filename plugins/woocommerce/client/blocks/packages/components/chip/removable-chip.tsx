@@ -102,7 +102,6 @@ export const RemovableChip = ( {
 				className="wc-block-components-chip__remove"
 				{ ...removeProps }
 			>
-				{ /* @ts-expect-error - TS wants the Icon component to define svg specific props, but it's not always SVG */ }
 				<Icon
 					className="wc-block-components-chip__remove-icon"
 					icon={ closeSmall }

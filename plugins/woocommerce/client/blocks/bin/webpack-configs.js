@@ -4,11 +4,10 @@
 const path = require( 'path' );
 const fs = require( 'fs' );
 const { paramCase } = require( 'change-case' );
+const webpack = require( 'webpack' );
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
-const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
-const WebpackRTLPlugin = require( './webpack-rtl-plugin' );
 const CircularDependencyPlugin = require( 'circular-dependency-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
@@ -16,6 +15,11 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 /**
  * Internal dependencies
  */
+const DependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
+const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
+const {
+	WebpackRTLPlugin,
+} = require( '@woocommerce/internal-build/style-build' );
 const { getEntryConfig, genericBlocks } = require( './webpack-entries' );
 const {
 	ASSET_CHECK,
@@ -25,12 +29,16 @@ const {
 	requestToHandle,
 	getProgressBarPluginConfig,
 	getCacheGroups,
+	getResolve,
 } = require( './webpack-helpers' );
 const AddSplitChunkDependencies = require( './add-split-chunk-dependencies' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 
 const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
-const BUILD_DIR = path.resolve( __dirname, '../build/' );
+// Blocks' webpack writes directly to the WooCommerce plugin's
+// `assets/client/blocks/` so PHP can enqueue files from their final location
+// without an intermediate rsync step.
+const BUILD_DIR = path.resolve( __dirname, '../../../assets/client/blocks' );
 const BABEL_CACHE_DIR = path.join(
 	ROOT_DIR,
 	'node_modules/.cache/babel-loader'
@@ -67,6 +75,14 @@ const getSharedPlugins = ( {
 			requestToExternal,
 			requestToHandle,
 		} ),
+		// Substitute the `__i18n_text_domain__` identifier used by the
+		// @woocommerce/email-editor package with the WooCommerce text
+		// domain so strings extract and translate under `woocommerce`.
+		new webpack.DefinePlugin( {
+			__i18n_text_domain__: JSON.stringify( 'woocommerce' ),
+		} ),
+		// Suppress file system cache warnings (unsupported serialization related).
+		new FilesystemCacheWarningsPlugin(),
 	].filter( Boolean );
 
 /**
@@ -76,14 +92,7 @@ const getSharedPlugins = ( {
  */
 const getCoreConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
-	const resolve = alias
-		? {
-				alias,
-				plugins: resolvePlugins,
-		  }
-		: {
-				plugins: resolvePlugins,
-		  };
+	const resolve = getResolve( { alias, resolvePlugins } );
 	return {
 		entry: getEntryConfig( 'core', options.exclude || [] ),
 		output: {
@@ -150,14 +159,7 @@ const getCoreConfig = ( options = {} ) => {
 const getMainConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
 
-	const resolve = alias
-		? {
-				alias,
-				plugins: resolvePlugins,
-		  }
-		: {
-				plugins: resolvePlugins,
-		  };
+	const resolve = getResolve( { alias, resolvePlugins } );
 	return {
 		entry: getEntryConfig( 'main', options.exclude || [] ),
 		output: {
@@ -272,14 +274,7 @@ const getMainConfig = ( options = {} ) => {
  */
 const getFrontConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
-	const resolve = alias
-		? {
-				alias,
-				plugins: resolvePlugins,
-		  }
-		: {
-				plugins: resolvePlugins,
-		  };
+	const resolve = getResolve( { alias, resolvePlugins } );
 	return {
 		entry: getEntryConfig( 'frontend', options.exclude || [] ),
 		output: {
@@ -382,14 +377,7 @@ const getFrontConfig = ( options = {} ) => {
  */
 const getPaymentsConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
-	const resolve = alias
-		? {
-				alias,
-				plugins: resolvePlugins,
-		  }
-		: {
-				plugins: resolvePlugins,
-		  };
+	const resolve = getResolve( { alias, resolvePlugins } );
 	return {
 		entry: getEntryConfig( 'payments', options.exclude || [] ),
 		output: {
@@ -470,14 +458,7 @@ const getPaymentsConfig = ( options = {} ) => {
  */
 const getExtensionsConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
-	const resolve = alias
-		? {
-				alias,
-				plugins: resolvePlugins,
-		  }
-		: {
-				plugins: resolvePlugins,
-		  };
+	const resolve = getResolve( { alias, resolvePlugins } );
 	return {
 		entry: getEntryConfig( 'extensions', options.exclude || [] ),
 		output: {
@@ -558,14 +539,7 @@ const getExtensionsConfig = ( options = {} ) => {
  */
 const getSiteEditorConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
-	const resolve = alias
-		? {
-				alias,
-				plugins: resolvePlugins,
-		  }
-		: {
-				plugins: resolvePlugins,
-		  };
+	const resolve = getResolve( { alias, resolvePlugins } );
 	return {
 		entry: getEntryConfig( 'editor', options.exclude || [] ),
 		output: {
@@ -647,14 +621,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 const getStylingConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
 
-	const resolve = alias
-		? {
-				alias,
-				plugins: resolvePlugins,
-		  }
-		: {
-				plugins: resolvePlugins,
-		  };
+	const resolve = getResolve( { alias, resolvePlugins } );
 	return {
 		entry: getEntryConfig( 'styling', options.exclude || [] ),
 		output: {
@@ -790,11 +757,9 @@ const getStylingConfig = ( options = {} ) => {
 			new MiniCssExtractPlugin( {
 				filename: '[name].css',
 			} ),
-			new WebpackRTLPlugin( {
-				filenameSuffix: '-rtl.css',
-			} ),
+			new WebpackRTLPlugin(),
 			// Remove JS files generated by MiniCssExtractPlugin.
-			new RemoveFilesPlugin( './build/*style.js' ),
+			new RemoveFilesPlugin( path.join( BUILD_DIR, '*style.js' ) ),
 		],
 		resolve: {
 			...resolve,
@@ -806,14 +771,7 @@ const getStylingConfig = ( options = {} ) => {
 const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
 
-	const resolve = alias
-		? {
-				alias,
-				plugins: resolvePlugins,
-		  }
-		: {
-				plugins: resolvePlugins,
-		  };
+	const resolve = getResolve( { alias, resolvePlugins } );
 	return {
 		entry: getEntryConfig(
 			'cartAndCheckoutFrontend',

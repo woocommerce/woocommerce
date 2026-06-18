@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Monorepo: complete migration to @woocommerce/internal-style-build/webpack-rtl-plugin

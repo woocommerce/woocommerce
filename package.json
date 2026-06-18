@@ -3,9 +3,9 @@
 	"title": "WooCommerce Monorepo",
 	"description": "Monorepo for the WooCommerce ecosystem",
 	"homepage": "https://woocommerce.com/",
-	"packageManager": "pnpm@9.15.0",
+	"packageManager": "pnpm@10.33.0",
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"private": true,
 	"repository": {
@@ -22,21 +22,31 @@
 		"test": "pnpm -r test",
 		"lint": "pnpm -r lint",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
-		"clean": "rimraf -g '**/node_modules' '**/.wireit' 'packages/*/*/vendor' 'plugins/*/vendor' && pnpm store prune",
-		"clean:build": "rimraf -g 'packages/js/*/build' 'packages/js/*/build-*' 'packages/js/*/dist' 'plugins/*/build' 'plugins/woocommerce/client/*/build' && git clean --force -d -X --quiet ./plugins/woocommerce/assets",
+		"clean": "rimraf -g '**/node_modules' 'packages/*/*/vendor' 'plugins/*/vendor' && pnpm store prune",
+		"clean:build": "rimraf -g '**/node_modules/.cache' '**/*.tsbuildinfo' 'packages/js/*/build' 'packages/js/*/build-*' 'packages/js/*/dist' 'plugins/*/build' 'plugins/woocommerce/client/*/build' && git clean --force -d -X --quiet ./plugins/woocommerce/assets",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "husky",
 		"run-canonical-extensions-tests": "bash bin/run-canonical-extensions-tests.sh",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
-		"utils": "./tools/monorepo-utils/bin/run"
+		"utils": "./tools/monorepo-utils/bin/run",
+		"wc:build": "pnpm --filter='@woocommerce/plugin-woocommerce' build",
+		"wc:build:admin": "pnpm --filter='@woocommerce/plugin-woocommerce' build:admin",
+		"wc:build:blocks": "pnpm --filter='@woocommerce/plugin-woocommerce' build:blocks",
+		"wc:build:classic-assets": "pnpm --filter='@woocommerce/plugin-woocommerce' build:classic-assets",
+		"wc:env": "pnpm --filter='@woocommerce/plugin-woocommerce' env:dev",
+		"wc:env:restart": "pnpm --filter='@woocommerce/plugin-woocommerce' env:restart",
+		"wc:env:stop": "pnpm --filter='@woocommerce/plugin-woocommerce' env:stop",
+		"wc:watch": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build",
+		"wc:watch:admin": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:admin",
+		"wc:watch:blocks": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:blocks",
+		"wc:watch:classic-assets": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:classic-assets"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "7.25.7",
 		"@babel/runtime": "7.25.7",
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/monorepo-utils": "workspace:*",
-		"@wordpress/data": "wp-6.6",
 		"@wordpress/eslint-plugin": "14.7.0",
 		"@wordpress/prettier-config": "2.17.0",
 		"babel-loader": "9.2.x",
@@ -71,12 +81,16 @@
 	"pnpm": {
 		"overrides": {
 			"@types/react": "18.3.x",
-			"@wordpress/data": "wp-6.6",
-			"react-resize-aware": "3.1.1"
+			"@typescript-eslint/eslint-plugin": "^5.62.0",
+			"@typescript-eslint/parser": "^5.62.0",
+			"eslint-plugin-jsdoc": "39.9.1",
+			"@wordpress/data-controls>@wordpress/api-fetch": "catalog:wp-min",
+			"@wordpress/private-apis": "catalog:wp-min",
+			"react-resize-aware": "3.1.1",
+			"sass": "1.69.5"
 		},
 		"patchedDependencies": {
-			"@wordpress/edit-site@5.15.0": "bin/patches/@wordpress__edit-site@5.15.0.patch",
-			"@wordpress/data@10.0.2": "bin/patches/@wordpress__data@10.0.2.patch"
+			"@wordpress/edit-site@5.15.0": "bin/patches/@wordpress__edit-site@5.15.0.patch"
 		}
 	}
 }

@@ -1087,7 +1087,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product2->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
-		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&euro;</span>68,50</bdi></span>';
+		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&euro;</span>68,50</bdi></span>';
 		$this->assertEquals( $expected_price, WC()->cart->get_total() );
 		$this->assertEquals( '12.36', wc_round_tax_total( WC()->cart->get_total_tax( 'edit' ) ) );
 
@@ -1096,7 +1096,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product4->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
-		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&euro;</span>112,00</bdi></span>';
+		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&euro;</span>112,00</bdi></span>';
 		$this->assertEquals( $expected_price, WC()->cart->get_total() );
 		$this->assertEquals( '20.19', wc_round_tax_total( WC()->cart->get_total_tax( 'edit' ) ) );
 
@@ -1107,7 +1107,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product6->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
-		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&euro;</span>239,00</bdi></span>';
+		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&euro;</span>239,00</bdi></span>';
 		$this->assertEquals( $expected_price, WC()->cart->get_total() );
 		$this->assertEquals( '43.09', wc_round_tax_total( WC()->cart->get_total_tax( 'edit' ) ) );
 	}
@@ -1999,6 +1999,51 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that get_taxes_total excludes compound rates when $compound is false.
+	 */
+	public function test_get_taxes_total_excludes_compound_rates(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// Standard (non-compound) 10% rate.
+		$standard_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $standard_rate );
+
+		// Compound 5% rate applied on top.
+		$compound_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '5.0000',
+			'tax_rate_name'     => 'COMPOUND',
+			'tax_rate_priority' => '2',
+			'tax_rate_compound' => '1',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '2',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $compound_rate );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->customer->set_is_vat_exempt( false );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// $compound = false: only the standard 10% rate included → $10 × 10% = $1.00.
+		$this->assertSame( 1.0, WC()->cart->get_taxes_total( false, false ) );
+
+		// $compound = true: both rates included → $1.00 + ($10 + $1.00) × 5% = $1.55.
+		$this->assertSame( 1.55, WC()->cart->get_taxes_total( true, false ) );
+	}
+
+	/**
 	 * Check subtotals align when using filters. Ref: 23340
 	 */
 	public function test_changing_tax_class_via_filter_issue_23340() {
@@ -2006,7 +2051,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
-		// 5% tax.
+		// 5% non-compound rate for the standard (default) tax class.
 		$tax_rate = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
@@ -2020,7 +2065,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		);
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
-		// 20% tax.
+		// 20% non-compound rate for the reduced-rate class (switched to via filter below).
 		$tax_rate = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
@@ -2042,6 +2087,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product1->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
+		// Standard class (5%): price is tax-inclusive, subtotal is the ex-tax base, total matches the entered price.
 		$this->assertEquals( '5.71', WC()->cart->get_subtotal() );
 		$this->assertEquals( '6.00', WC()->cart->get_total( 'edit' ) );
 
@@ -2049,6 +2095,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_product_variation_get_tax_class', array( $this, 'change_tax_class_filter' ) );
 
 		WC()->cart->calculate_totals();
+		// Reduced-rate class (20%) applied via filter: ex-tax subtotal is unchanged, total rises to reflect higher rate.
 		$this->assertEquals( '5.71', WC()->cart->get_subtotal() );
 		$this->assertEquals( '6.85', WC()->cart->get_total( 'edit' ) );
 

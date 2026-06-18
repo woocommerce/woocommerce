@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Enums\OrderItemType;
 
 /**
  * API\Reports\Coupons\DataStore.
@@ -405,7 +406,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			)
 		);
 		$existing_items     = array_flip( $existing_items );
-		$coupon_items       = $order->get_items( 'coupon' );
+		$coupon_items       = $order->get_items( OrderItemType::COUPON );
 		$coupon_items_count = count( $coupon_items );
 		$num_updated        = 0;
 		$num_deleted        = 0;

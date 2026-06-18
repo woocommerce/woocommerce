@@ -68,7 +68,7 @@ export const shouldAutomateNoChangelog = ( body: string ) => {
  * @return {void|string} changelog significance.
  */
 export const getChangelogSignificance = ( body: string ) => {
-	const regex = /\[(?:x|X)\] (Patch|Minor|Major)\r\n/gm;
+	const regex = /\[(?:x|X)\] (Patch|Minor|Major)\r?\n/gm;
 	const matches = body.match( regex );
 
 	if ( matches === null ) {

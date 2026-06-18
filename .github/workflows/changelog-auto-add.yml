@@ -2,14 +2,15 @@ name: 'Changelog Auto Add'
 on:
     pull_request_target:
         types: [opened, synchronize, reopened, edited]
-        paths-ignore:
-          - 'docs/**'
-          - '**/changelog/**'
-          - '**/changelog.txt'
-          - '.husky/**'
-          - '.cursor/**'
-          - '.github/**'
-          - '!.github/workflows/changelog-auto-add.yml'
+        paths:
+          - '**'
+          - '!docs/**'
+          - '!**/changelog/**'
+          - '!**/changelog.txt'
+          - '!.husky/**'
+          - '!.cursor/**'
+          - '!.github/**'
+          - '.github/workflows/changelog-auto-add.yml'
     workflow_dispatch:
         inputs:
             prNumber:

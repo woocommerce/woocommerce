@@ -24,11 +24,55 @@ if ( class_exists( 'WC_Admin_Reports', false ) ) {
 class WC_Admin_Reports {
 
 	/**
-	 * Register the proper hook handlers.
+	 * Register the hook handlers for integrating with admin.
 	 */
 	public static function register_hook_handlers() {
 		add_filter( 'woocommerce_after_dashboard_status_widget_parameter', array( __CLASS__, 'get_report_instance' ) );
 		add_filter( 'woocommerce_dashboard_status_widget_reports', array( __CLASS__, 'replace_dashboard_status_widget_reports' ) );
+	}
+
+	/**
+	 * Register the hook handlers for integrating with orders.
+	 *
+	 * @internal
+	 * @since 10.6.0
+	 */
+	public static function register_orders_hook_handlers(): void {
+		add_action( 'woocommerce_delete_shop_order_transients', array( __CLASS__, 'delete_legacy_reports_transients' ), 10, 1 );
+		add_action( 'woocommerce_delete_legacy_report_transients', array( __CLASS__, 'delete_legacy_reports_transients' ), 10, 2 );
+	}
+
+	/**
+	 * Execute legacy reports transient deletion (sync or async depending on the context)
+	 *
+	 * @internal
+	 * @since 10.6.0
+	 *
+	 * @param int  $order_id Order ID (unused, exists for compatibility between the hooks we are integrating with).
+	 * @param bool $defer    Whether to defer the deletion or execute.
+	 * @return void
+	 */
+	public static function delete_legacy_reports_transients( int $order_id, bool $defer = true ): void {
+		// Deferring is only making sense on sites without object cache enabled (if enabled, no SQLs being executed).
+		if ( $defer && ! wp_using_ext_object_cache() ) {
+			static $skip_consequent;
+
+			// Schedule the deletion, cap the execution to single pending event at any given time.
+			$schedule = ! $skip_consequent && ! as_has_scheduled_action( 'woocommerce_delete_legacy_report_transients', null, 'woocommerce' );
+			if ( $schedule ) {
+				as_schedule_single_action( time() + MINUTE_IN_SECONDS, 'woocommerce_delete_legacy_report_transients', array( $order_id, false ), 'woocommerce' );
+			}
+			$skip_consequent = true;
+
+			return;
+		}
+
+		delete_transient( 'wc_admin_report' );
+		foreach ( self::get_reports() as $report_group ) {
+			foreach ( $report_group['reports'] as $report_key => $report ) {
+				delete_transient( 'wc_report_' . $report_key );
+			}
+		}
 	}
 
 	/**

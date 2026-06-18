@@ -15,8 +15,28 @@ jest.mock( '@wordpress/data', () => ( {
 } ) );
 
 describe( 'createNoticesFromResponse', () => {
+	let originalOnLine;
+
+	beforeAll( () => {
+		originalOnLine = Object.getOwnPropertyDescriptor(
+			window.navigator,
+			'onLine'
+		);
+	} );
+
 	beforeEach( () => {
 		jest.clearAllMocks();
+	} );
+
+	afterEach( () => {
+		if ( originalOnLine ) {
+			Object.defineProperty( window.navigator, 'onLine', originalOnLine );
+		} else {
+			// When `onLine` lives on the prototype (e.g. jsdom), the own
+			// descriptor is undefined. Delete any own override a test
+			// defined so inherited prototype behavior is restored.
+			delete window.navigator.onLine;
+		}
 	} );
 
 	const { createNotice } = dispatch( 'core/notices' );
@@ -66,5 +86,31 @@ describe( 'createNoticesFromResponse', () => {
 
 		createNoticesFromResponse( response );
 		expect( createNotice ).not.toHaveBeenCalled();
+	} );
+
+	test( 'should surface a friendly offline notice when response is a raw TypeError', () => {
+		const response = new TypeError( 'Failed to fetch' );
+
+		createNoticesFromResponse( response );
+		expect( createNotice ).toHaveBeenCalledWith(
+			'error',
+			'Updating failed. You are probably offline.'
+		);
+		expect( createNotice ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	test( 'should surface a friendly offline notice for an empty rejection while navigator is offline', () => {
+		Object.defineProperty( window.navigator, 'onLine', {
+			configurable: true,
+			value: false,
+		} );
+
+		createNoticesFromResponse( {} );
+		expect( createNotice ).toHaveBeenCalledWith(
+			'error',
+			'Updating failed. You are probably offline.'
+		);
+		expect( createNotice ).toHaveBeenCalledTimes( 1 );
+		// afterEach restores navigator.onLine.
 	} );
 } );

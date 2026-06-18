@@ -63,7 +63,6 @@ const Panel = ( {
 				className="wc-block-components-panel__button"
 				onClick={ () => setIsOpen( ! isOpen ) }
 			>
-				{ /* @ts-expect-error - TS wants the Icon component to define svg specific props, but it's not always SVG */ }
 				<Icon
 					aria-hidden="true"
 					className="wc-block-components-panel__button-icon"

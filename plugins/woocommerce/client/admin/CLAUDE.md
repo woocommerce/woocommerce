@@ -560,7 +560,7 @@ Before marking a component as complete:
 ### Common Violations to Avoid
 
 | Issue | Wrong | Correct |
-|-------|-------|---------|
+| ------- | ------- | --------- |
 | **Missing button label** | `<button><Icon /></button>` | `<button aria-label="Save"><Icon /></button>` |
 | **Non-semantic click** | `<div onClick={...}>Click</div>` | `<button onClick={...}>Click</button>` |
 | **Missing form label** | `<input placeholder="Name" />` | `<label>Name<input /></label>` |
@@ -727,7 +727,7 @@ This uses Composer's changelogger to manage changelog entries.
 
 ## Environment Requirements
 
-- **Node.js**: ^20.11.1 (specified in `engines.node`)
+- **Node.js**: ^24.15.0 (specified in `engines.node`)
 - **pnpm**: Latest stable version
 - **PHP**: Required for feature config generation
 

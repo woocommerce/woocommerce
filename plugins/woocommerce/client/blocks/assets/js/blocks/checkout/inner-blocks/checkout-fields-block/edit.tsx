@@ -25,7 +25,6 @@ export const Edit = ( {
 	clientId: string;
 	attributes: {
 		className?: string;
-		isPreview?: boolean;
 	};
 } ): JSX.Element => {
 	const blockProps = useBlockProps( {

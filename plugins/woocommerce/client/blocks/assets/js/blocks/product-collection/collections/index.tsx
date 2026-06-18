@@ -3,11 +3,7 @@
  */
 import { select } from '@wordpress/data';
 import { __experimentalRegisterProductCollection as registerProductCollection } from '@woocommerce/blocks-registry';
-import {
-	// @ts-expect-error Type definition is missing
-	store as blocksStore,
-	type BlockVariation,
-} from '@wordpress/blocks';
+import { store as blocksStore, type BlockVariation } from '@wordpress/blocks';
 
 /**
  * Internal dependencies

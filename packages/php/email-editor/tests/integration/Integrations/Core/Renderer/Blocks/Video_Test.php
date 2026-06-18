@@ -235,6 +235,24 @@ class Video_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that video URLs with underscores are not truncated
+	 */
+	public function test_video_urls_with_underscores_are_not_truncated(): void {
+		$parsed_video_underscore = array(
+			'blockName' => 'core/video',
+			'attrs'     => array(
+				'poster' => 'https://example.com/poster.jpg',
+			),
+			'innerHTML' => '<figure class="wp-block-video wp-block-embed is-type-video is-provider-youtube"><div class="wp-block-embed__wrapper">https://www.youtube.com/watch?v=dQw4w9_WgXcQ</div></figure>',
+		);
+
+		$rendered = $this->video_renderer->render( '', $parsed_video_underscore, $this->rendering_context );
+
+		// The play button link should contain the full YouTube URL with the underscore intact.
+		$this->assertStringContainsString( 'dQw4w9_WgXcQ', $rendered, 'URL should not be truncated at underscore' );
+	}
+
+	/**
 	 * Test that poster URLs with query parameters work correctly
 	 */
 	public function test_poster_urls_with_query_parameters_work_correctly(): void {

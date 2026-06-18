@@ -117,6 +117,14 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		}
 
 		$customer->set_id( $id );
+
+		// Sync back the user data from the created WP user in case it was auto-generated.
+		$wp_user = new WP_User( $id );
+		if ( $wp_user->exists() ) {
+			$customer->set_username( $wp_user->user_login );
+			$customer->set_date_created( $wp_user->user_registered );
+		}
+
 		$this->update_user_meta( $customer );
 
 		// Prevent wp_update_user calls in the same request and customer trigger the 'Notice of Password Changed' email.
@@ -133,8 +141,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				$customer
 			)
 		);
-		$wp_user = new WP_User( $customer->get_id() );
-		$customer->set_date_created( $wp_user->user_registered );
 		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
 		$customer->save_meta_data();
 		$customer->apply_changes();
@@ -265,7 +271,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				continue;
 			}
 
-			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
+			$value = $customer->{"get_$prop"}( 'edit' );
+			$value = is_string( $value ) ? wp_slash( $value ) : $value;
+
+			if ( update_user_meta( $customer->get_id(), $meta_key, $value ) ) {
 				$updated_props[] = $prop;
 			}
 		}
@@ -291,7 +300,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				continue;
 			}
 
-			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
+			$value = $customer->{"get_$prop"}( 'edit' );
+			$value = is_string( $value ) ? wp_slash( $value ) : $value;
+
+			if ( update_user_meta( $customer->get_id(), $meta_key, $value ) ) {
 				$updated_props[] = $prop;
 			}
 		}
@@ -316,7 +328,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				continue;
 			}
 
-			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
+			$value = $customer->{"get_$prop"}( 'edit' );
+			$value = is_string( $value ) ? wp_slash( $value ) : $value;
+
+			if ( update_user_meta( $customer->get_id(), $meta_key, $value ) ) {
 				$updated_props[] = $prop;
 			}
 		}

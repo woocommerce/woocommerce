@@ -111,7 +111,6 @@ describe( 'AddressLineFields', () => {
 				<AddressLineFields
 					formId="a"
 					address1={ {
-						// @ts-expect-error -- No need to pass validation for this test
 						field: {
 							index: 0,
 							key: 'address_1',
@@ -125,7 +124,6 @@ describe( 'AddressLineFields', () => {
 						value: '',
 					} }
 					address2={ {
-						// @ts-expect-error -- No need to pass validation for this test
 						field: {
 							index: 1,
 							key: 'address_2',

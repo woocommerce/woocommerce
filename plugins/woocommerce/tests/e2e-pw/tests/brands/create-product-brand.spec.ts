@@ -1,0 +1,200 @@
+/**
+ * External dependencies
+ */
+import { test, expect } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+
+interface Brand {
+	name: string;
+	slug: string;
+	parentBrand: string;
+	description: string;
+	thumbnailFileName: string;
+}
+
+test.use( { storageState: ADMIN_STATE_PATH } );
+
+test( 'Merchant can add brands', async ( { page } ) => {
+	/**
+	 * Go to the Brands page.
+	 *
+	 * This will visit the Products page first, and then click on the Brands link.
+	 * This is to workaround the hover menu for now.
+	 */
+	const goToBrandsPage = async () => {
+		await page.goto(
+			'wp-admin/edit-tags.php?taxonomy=product_brand&post_type=product'
+		);
+
+		// Wait for the Brands page to load.
+		// This is needed so that checking for existing brands would work.
+		await page.waitForSelector( '.wp-list-table' );
+	};
+
+	const createBrandIfNotExist = async ( brand: Brand ) => {
+		// Create "WooCommerce" brand if it does not exist.
+		const cellVisible = await page
+			.locator( '#posts-filter' )
+			.getByRole( 'cell', { name: brand.slug, exact: true } )
+			.isVisible();
+
+		if ( cellVisible ) {
+			return;
+		}
+
+		await page.getByRole( 'textbox', { name: 'Name' } ).click();
+		await page.getByRole( 'textbox', { name: 'Name' } ).fill( brand.name );
+		await page.getByRole( 'textbox', { name: 'Slug' } ).click();
+		await page.getByRole( 'textbox', { name: 'Slug' } ).fill( brand.slug );
+
+		await page
+			.getByRole( 'combobox', { name: 'Parent Brand' } )
+			.selectOption( { label: brand.parentBrand } );
+
+		await page.getByRole( 'textbox', { name: 'Description' } ).click();
+		await page
+			.getByRole( 'textbox', { name: 'Description' } )
+			.fill( brand.description );
+		await page.getByRole( 'button', { name: 'Upload/Add image' } ).click();
+		await page.getByRole( 'tab', { name: 'Media Library' } ).click();
+		await page
+			.getByRole( 'checkbox', { name: brand.thumbnailFileName } )
+			.click();
+		await page.getByRole( 'button', { name: 'Use image' } ).click();
+		await page.getByRole( 'button', { name: 'Add New Brand' } ).click();
+
+		// We should see an "Item added." notice message at the top of the page.
+		await expect(
+			page.locator( '#ajax-response' ).getByText( 'Item added.' )
+		).toBeVisible();
+
+		// We should see the newly created brand in the Brands table.
+		await expect(
+			page
+				.locator( '#posts-filter' )
+				.getByRole( 'cell', { name: brand.slug, exact: true } )
+		).toHaveCount( 1 );
+	};
+
+	/**
+	 * Edit a brand.
+	 *
+	 * You must be in the Brands page before calling this function.
+	 * To do so, call `goToBrandsPage()` first.
+	 *
+	 * After a brand is edited, you will be redirected to the Brands page.
+	 */
+	const editBrand = async ( currentName: string, brand: Brand ) => {
+		await page
+			.locator( '#posts-filter .row-title' )
+			.filter( { hasText: currentName } )
+			.first()
+			.click();
+		await page.getByLabel( 'Name' ).fill( brand.name );
+		await page.getByLabel( 'Slug' ).fill( brand.slug );
+		await page
+			.getByLabel( 'Parent Brand' )
+			.selectOption( { label: brand.parentBrand } );
+		await page.getByLabel( 'Description' ).fill( brand.description );
+
+		await page.getByRole( 'button', { name: 'Upload/Add image' } ).click();
+		await page.getByRole( 'tab', { name: 'Media Library' } ).click();
+		await page.getByLabel( brand.thumbnailFileName ).click();
+		await page.getByRole( 'button', { name: 'Use image' } ).click();
+
+		await page.getByRole( 'button', { name: 'Update' } ).click();
+
+		// We should see an "Item updated." notice message at the top of the page.
+		await expect(
+			page.locator( '#message' ).getByText( 'Item updated.' )
+		).toBeVisible();
+
+		// navigate back to Brands page.
+		await page.getByRole( 'link', { name: '← Go to Brands' } ).click();
+
+		// confirm that the brand has been updated.
+		await expect(
+			page
+				.locator( '#posts-filter' )
+				.getByRole( 'cell', { name: brand.slug, exact: true } )
+		).toHaveCount( 1 );
+	};
+
+	/**
+	 * Delete a brand.
+	 *
+	 * You must be in the Brands page before calling this function.
+	 * To do so, call `goToBrandsPage()` first.
+	 *
+	 * After a brand is deleted, you will be redirected to the Brands page.
+	 */
+	const deleteBrand = async ( name: string ) => {
+		await page
+			.locator( '#posts-filter .row-title' )
+			.filter( { hasText: name } )
+			.first()
+			.click();
+
+		// After clicking the "Delete" button, there will be a confirmation dialog.
+		page.once( 'dialog', ( dialog ) => {
+			// Click "OK" to confirm the deletion.
+			dialog.accept();
+		} );
+
+		// Click on the "Delete" button.
+		await page.getByRole( 'link', { name: 'Delete', exact: true } ).click();
+
+		// We should now be in the Brands page.
+		// Confirm that the brand has been deleted and is no longer in the Brands table.
+		await expect(
+			page
+				.locator( '#posts-filter' )
+				.getByRole( 'cell', { name, exact: true } )
+		).toHaveCount( 0 );
+	};
+
+	await goToBrandsPage();
+	await createBrandIfNotExist( {
+		name: 'WooCommerce',
+		slug: 'woocommerce',
+		parentBrand: 'None',
+		description: 'All things WooCommerce!',
+		thumbnailFileName: 'image-01',
+	} );
+
+	// Create child brand under the "WooCommerce" parent brand.
+	await createBrandIfNotExist( {
+		name: 'WooCommerce Apparels',
+		slug: 'woocommerce-apparels',
+		parentBrand: 'WooCommerce',
+		description: 'Cool WooCommerce clothings!',
+		thumbnailFileName: 'image-02',
+	} );
+
+	// Create a dummy child brand called "WooCommerce Dummy" under the "WooCommerce" parent brand.
+	await createBrandIfNotExist( {
+		name: 'WooCommerce Dummy',
+		slug: 'woocommerce-dummy',
+		parentBrand: 'WooCommerce',
+		description: 'Dummy WooCommerce brand!',
+		thumbnailFileName: 'image-02',
+	} );
+
+	// Edit the dummy child brand from "WooCommerce Dummy" to "WooCommerce Dummy Edited".
+	await editBrand( 'WooCommerce Dummy', {
+		name: 'WooCommerce Dummy Edited',
+		slug: 'woocommerce-dummy-edited',
+		parentBrand: 'WooCommerce',
+		description: 'Dummy WooCommerce brand edited!',
+		thumbnailFileName: 'image-03',
+	} );
+
+	// Delete brands.
+	await deleteBrand( 'WooCommerce Dummy Edited' );
+	await deleteBrand( 'WooCommerce Apparels' );
+	await deleteBrand( 'WooCommerce' );
+} );

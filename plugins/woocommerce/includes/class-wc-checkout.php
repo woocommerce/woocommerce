@@ -11,8 +11,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
-use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
+use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -21,6 +20,17 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Checkout {
 	use CogsAwareTrait;
+
+	/**
+	 * Checkout/order-level shipping fields that should not be persisted as generic meta.
+	 *
+	 * @var string[]
+	 */
+	private const SHIPPING_FIELDS_EXCLUDED_FROM_META = array(
+		'shipping_method',
+		'shipping_total',
+		'shipping_tax',
+	);
 
 	/**
 	 * The single instance of the class.
@@ -422,19 +432,15 @@ class WC_Checkout {
 				'billing'  => true,
 			);
 
-			$shipping_fields = array(
-				'shipping_method' => true,
-				'shipping_total'  => true,
-				'shipping_tax'    => true,
-			);
 			foreach ( $data as $key => $value ) {
 				if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 					$order->{"set_{$key}"}( $value );
 					// Store custom fields prefixed with either shipping_ or billing_. This is for backwards compatibility with 2.6.x.
-				} elseif ( isset( $fields_prefix[ current( explode( '_', $key ) ) ] ) ) {
-					if ( ! isset( $shipping_fields[ $key ] ) ) {
-						$order->update_meta_data( '_' . $key, $value );
-					}
+				} elseif (
+					isset( $fields_prefix[ current( explode( '_', $key ) ) ] )
+					&& ! in_array( $key, self::SHIPPING_FIELDS_EXCLUDED_FROM_META, true )
+				) {
+					$order->update_meta_data( '_' . $key, $value );
 				}
 			}
 
@@ -471,6 +477,23 @@ class WC_Checkout {
 
 			// Save the order.
 			$order_id = $order->save();
+
+			// Defense-in-depth: if the cart still has items but the persisted order has none,
+			// the save silently dropped every line item (e.g. a $wpdb->insert() returning false
+			// in save_items()). Re-read the order from the data store so we check DB state, not
+			// the in-memory copy that save_items() populated. Bail out so the caller can retry
+			// rather than completing a paid-but-empty order.
+			//
+			// This is intentionally narrow: it catches the catastrophic "no items at all" case,
+			// not partial item loss where some inserts succeed and some fail. Wider parity checks
+			// would need to reconcile quantities across products, bundles, fees, shipping, etc.,
+			// which is out of scope for the silent-failure guard.
+			if ( WC()->cart->get_cart_contents_count() > 0 ) {
+				$persisted_order = wc_get_order( $order_id );
+				if ( ! $persisted_order || 0 === count( $persisted_order->get_items() ) ) {
+					throw new Exception( __( 'Order items could not be saved. Please try again.', 'woocommerce' ) );
+				}
+			}
 
 			/**
 			 * Action hook fired after an order is created used to add custom meta to the order.
@@ -549,6 +572,8 @@ class WC_Checkout {
 					'subtotal_tax' => $values['line_subtotal_tax'],
 					'total_tax'    => $values['line_tax'],
 					'taxes'        => $values['line_tax_data'],
+					// Order model compositions: set the order instance (early one, for `set_backorder_meta`).
+					'order'        => $order,
 				)
 			);
 
@@ -663,7 +688,10 @@ class WC_Checkout {
 	 * @param WC_Cart  $cart  Cart instance.
 	 */
 	public function create_order_tax_lines( &$order, $cart ) {
-		foreach ( array_keys( $cart->get_cart_contents_taxes() + $cart->get_shipping_taxes() + $cart->get_fee_taxes() ) as $tax_rate_id ) {
+		$tax_rate_ids     = array_keys( $cart->get_cart_contents_taxes() + $cart->get_shipping_taxes() + $cart->get_fee_taxes() );
+		$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( $tax_rate_ids );
+
+		foreach ( $tax_rate_ids as $tax_rate_id ) {
 			/**
 			 * Controls the zero rate tax ID.
 			 *
@@ -674,16 +702,17 @@ class WC_Checkout {
 			 * @param string $tax_rate_id The ID of the zero rate tax.
 			 */
 			if ( $tax_rate_id && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
-				$item = new WC_Order_Item_Tax();
+				$tax_rate_object_or_id = $tax_rate_objects[ $tax_rate_id ] ?? $tax_rate_id;
+				$item                  = new WC_Order_Item_Tax();
 				$item->set_props(
 					array(
 						'rate_id'            => $tax_rate_id,
 						'tax_total'          => $cart->get_tax_amount( $tax_rate_id ),
 						'shipping_tax_total' => $cart->get_shipping_tax_amount( $tax_rate_id ),
-						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_id ),
-						'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
-						'compound'           => WC_Tax::is_compound( $tax_rate_id ),
-						'rate_percent'       => WC_Tax::get_rate_percent_value( $tax_rate_id ),
+						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_object_or_id ),
+						'label'              => WC_Tax::get_rate_label( $tax_rate_object_or_id ),
+						'compound'           => WC_Tax::is_compound( $tax_rate_object_or_id ),
+						'rate_percent'       => WC_Tax::get_rate_percent_value( $tax_rate_object_or_id ),
 					)
 				);
 
@@ -959,8 +988,17 @@ class WC_Checkout {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
 			} elseif ( ! in_array( $shipping_country, array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
 				if ( WC()->countries->country_exists( $shipping_country ) ) {
-					/* translators: %s: shipping location (prefix e.g. 'to' + ISO 3166-1 alpha-2 country code) */
-					$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix( $shipping_country ) . ' ' . $shipping_country ) );
+					$countries             = WC()->countries->get_countries();
+					$shipping_country_name = $countries[ $shipping_country ] ?? $shipping_country;
+					$errors->add(
+						'shipping',
+						sprintf(
+							/* translators: %1$s: shipping location prefix 'to' or 'to the', %2$s: shipping location country name */
+							__( 'Unfortunately, <strong>we do not ship %1$s %2$s</strong>. Please enter an alternative shipping address.', 'woocommerce' ),
+							WC()->countries->shipping_to_prefix( $shipping_country ),
+							$shipping_country_name
+						)
+					);
 				}
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
@@ -1102,15 +1140,6 @@ class WC_Checkout {
 				true
 			);
 
-			// Track successful order placement.
-			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-				$fp_order = wc_get_order( $order_id );
-				if ( $fp_order instanceof \WC_Order ) {
-					wc_get_container()->get( CheckoutEventTracker::class )
-						->track_order_placed( $order_id, $fp_order );
-				}
-			}
-
 			if ( ! wp_doing_ajax() ) {
 				// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 				wp_redirect( $result['redirect'] );
@@ -1141,12 +1170,6 @@ class WC_Checkout {
 			),
 			true
 		);
-
-		// Track successful order placement.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() && $order instanceof \WC_Order ) {
-			wc_get_container()->get( CheckoutEventTracker::class )
-				->track_order_placed( $order_id, $order );
-		}
 
 		if ( ! wp_doing_ajax() ) {
 			wp_safe_redirect(
@@ -1241,7 +1264,10 @@ class WC_Checkout {
 					$customer->{"set_{$key}"}( $value );
 
 					// Store custom fields prefixed with either shipping_ or billing_.
-				} elseif ( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) ) {
+				} elseif (
+					( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) )
+					&& ! in_array( $key, self::SHIPPING_FIELDS_EXCLUDED_FROM_META, true )
+				) {
 					$customer->update_meta_data( $key, $value );
 				}
 			}

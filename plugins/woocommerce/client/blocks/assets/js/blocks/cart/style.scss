@@ -94,10 +94,7 @@
 	display: flex;
 	flex-direction: column;
 	align-items: flex-end;
-
-	.wc-block-components-sale-badge {
-		margin-top: $gap-smallest;
-	}
+	gap: $gap-smallest;
 }
 
 .wc-block-components-sidebar-layout.wc-block-cart {

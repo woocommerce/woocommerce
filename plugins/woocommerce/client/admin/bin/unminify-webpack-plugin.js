@@ -12,7 +12,6 @@
  */
 const path = require( 'path' );
 const ModuleFilenameHelpers = require( 'webpack/lib/ModuleFilenameHelpers' );
-const webpack = require( 'webpack' );
 
 const getFileName = ( name, ext, opts ) => {
 	if ( name.match( /([-_.]min)[-_.]/ ) ) {
@@ -47,7 +46,7 @@ class UnminifyWebpackPlugin {
 				compilation.hooks.processAssets.tap(
 					{
 						name: 'UnminifyWebpackPlugin',
-						stage: webpack.Compilation.PROCESS_ASSETS_STAGE_DERIVED,
+						stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_DERIVED,
 					},
 					( assets ) => {
 						Object.entries( assets ).forEach(
@@ -105,7 +104,7 @@ class UnminifyWebpackPlugin {
 						) ) {
 							compilation.emitAsset(
 								value.filename,
-								new webpack.sources.RawSource( value.content )
+								new compiler.webpack.sources.RawSource( value.content )
 							);
 							// Reset the outputNormal object to avoid writing to file that only differs in casing or query string from already written file.
 							outputNormal = {};

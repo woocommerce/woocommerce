@@ -1015,6 +1015,38 @@ class PaymentsRestController extends RestApiControllerBase {
 										'context'     => array( 'view', 'edit' ),
 										'readonly'    => true,
 									),
+									'notice'      => array(
+										'type'        => 'object',
+										'description' => esc_html__( 'An optional notice to display for this payment method (e.g., verification requirements).', 'woocommerce' ),
+										'context'     => array( 'view', 'edit' ),
+										'readonly'    => true,
+										'properties'  => array(
+											'badge'     => array(
+												'type'     => 'string',
+												'description' => esc_html__( 'Short text for a badge/chip displayed next to the payment method title.', 'woocommerce' ),
+												'context'  => array( 'view', 'edit' ),
+												'readonly' => true,
+											),
+											'message'   => array(
+												'type'     => 'string',
+												'description' => esc_html__( 'Warning message displayed when the payment method is enabled. Plain text only.', 'woocommerce' ),
+												'context'  => array( 'view', 'edit' ),
+												'readonly' => true,
+											),
+											'link_text' => array(
+												'type'     => 'string',
+												'description' => esc_html__( 'Text for the call-to-action link in the notice.', 'woocommerce' ),
+												'context'  => array( 'view', 'edit' ),
+												'readonly' => true,
+											),
+											'link_url'  => array(
+												'type'     => 'string',
+												'description' => esc_html__( 'URL for the call-to-action link in the notice.', 'woocommerce' ),
+												'context'  => array( 'view', 'edit' ),
+												'readonly' => true,
+											),
+										),
+									),
 								),
 							),
 						),

@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal;
 
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 defined( 'ABSPATH' ) || exit;
@@ -39,7 +40,10 @@ class RestockRefundedItemsAdjuster {
 	 * @param array $items Order items to save.
 	 */
 	public function initialize_restock_refunded_items( $order_id, $items ) {
-		$order         = wc_get_order( $order_id );
+		$order = wc_get_order( $order_id );
+		if ( ! $order instanceof \WC_Order ) {
+			return;
+		}
 		$order_version = $order->get_version();
 
 		if ( version_compare( $order_version, '5.5', '>=' ) ) {
@@ -59,7 +63,7 @@ class RestockRefundedItemsAdjuster {
 					continue;
 				}
 
-				if ( 'line_item' !== $item->get_type() ) {
+				if ( OrderItemType::LINE_ITEM !== $item->get_type() ) {
 					continue;
 				}
 

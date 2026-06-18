@@ -74,6 +74,7 @@ class SelectFilter extends Component {
 			title: <span className={ className } />,
 			rule: (
 				<SelectControl
+					__next40pxDefaultSize
 					className={ clsx(
 						className,
 						'woocommerce-filters-advanced__rule'
@@ -91,6 +92,7 @@ class SelectFilter extends Component {
 			),
 			filter: options ? (
 				<SelectControl
+					__next40pxDefaultSize
 					className={ clsx(
 						className,
 						'woocommerce-filters-advanced__input'
