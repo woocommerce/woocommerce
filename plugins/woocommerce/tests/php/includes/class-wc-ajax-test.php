@@ -648,7 +648,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	public function test_save_attributes_grandfathers_existing_reserved_name(): void {
 		$this->_setRole( 'administrator' );
 
-		$product   = new WC_Product_Variable();
+		$product = new WC_Product_Variable();
 		$product->set_name( 'AJAX grandfathered attribute' );
 		$attribute = new WC_Product_Attribute();
 		$attribute->set_name( 'variation' );

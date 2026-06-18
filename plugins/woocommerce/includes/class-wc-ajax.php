@@ -904,6 +904,7 @@ class WC_AJAX {
 	 *
 	 * @param  array $data Attribute data.
 	 * @return mixed Product class.
+	 * @throws Exception When an attribute uses a reserved name.
 	 */
 	private static function create_product_with_attributes( $data ) {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
