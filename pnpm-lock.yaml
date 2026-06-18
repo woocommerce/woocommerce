@@ -2949,8 +2949,8 @@ importers:
         specifier: catalog:wp-bundled
         version: 14.0.0(react@18.3.1)
       '@wordpress/interface':
-        specifier: catalog:wp-bundled
-        version: 9.33.0(@date-fns/tz@1.4.1)(@emotion/is-prop-valid@1.4.0)(date-fns@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@14.16.1)
+        specifier: ^5.24.0
+        version: 5.35.0(@emotion/is-prop-valid@1.4.0)(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/keycodes':
         specifier: catalog:wp-min
         version: 4.33.1
