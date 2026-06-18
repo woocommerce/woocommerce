@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Build native WooPayments multi-currency settings styles and preserve capture-failure parity.
