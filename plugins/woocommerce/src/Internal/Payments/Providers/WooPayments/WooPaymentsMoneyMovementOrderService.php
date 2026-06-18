@@ -301,10 +301,11 @@ class WooPaymentsMoneyMovementOrderService {
 			return null;
 		}
 
-		$outcome['payment_intent']           = array();
-		$outcome['payment_intent']['id']     = isset( $outcome['payment_intent_id'] ) && is_scalar( $outcome['payment_intent_id'] )
+		$payment_intent_id                   = isset( $outcome['payment_intent_id'] ) && is_scalar( $outcome['payment_intent_id'] )
 			? (string) $outcome['payment_intent_id']
-			: ( (string) $order->get_meta( '_intent_id' ) ?: $order->get_transaction_id() );
+			: (string) $order->get_meta( '_intent_id' );
+		$outcome['payment_intent']           = array();
+		$outcome['payment_intent']['id']     = '' !== $payment_intent_id ? $payment_intent_id : $order->get_transaction_id();
 		$outcome['payment_intent']['status'] = (string) $order->get_meta( '_intention_status' );
 
 		$outcome['amount']              = $this->order_data_service->prepare_amount( (float) $order->get_total(), (string) $order->get_currency() );
