@@ -33,6 +33,7 @@ class Contract_Status_Test extends TestCase {
 
 		foreach ( Contract_Status::all() as $target ) {
 			$this->assertFalse( Contract_Status::can_transition( Contract_Status::CANCELLED, $target ) );
+			$this->assertFalse( Contract_Status::can_transition( Contract_Status::EXPIRED, $target ) );
 		}
 	}
 
