@@ -192,15 +192,16 @@ for ( const productType of Object.keys( productData ) ) {
 				await page
 					.getByRole( 'button', { name: 'Add', exact: true } )
 					.click();
+
 				await expect(
-					page
-						.locator( '#tagsdiv-product_tag li' )
-						.getByText( productTag1, { exact: true } )
+					page.getByRole( 'button', {
+						name: `Remove term: ${ productTag1 }`,
+					} )
 				).toBeVisible();
 				await expect(
-					page
-						.locator( '#tagsdiv-product_tag li' )
-						.getByText( productTag2, { exact: true } )
+					page.getByRole( 'button', {
+						name: `Remove term: ${ productTag2 }`,
+					} )
 				).toBeVisible();
 			} );
 

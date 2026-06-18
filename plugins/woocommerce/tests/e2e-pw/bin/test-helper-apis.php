@@ -109,6 +109,18 @@ function enable_experimental_features( $features ) {
 add_filter( 'woocommerce_admin_get_feature_config', 'enable_experimental_features' );
 
 /**
+ * Disable WordPress comment flood protection during E2E runs.
+ *
+ * Parallel specs post comments and reviews as the shared customer account.
+ * WordPress' 15-second flood throttle ("You are posting comments too quickly")
+ * then rejects whichever request lands second, causing cross-spec flakes that
+ * have nothing to do with the behaviour under test. Override core's
+ * `wp_throttle_comment_flood` (priority 10) with a later filter that always
+ * allows the comment.
+ */
+add_filter( 'comment_flood_filter', '__return_false', 99 );
+
+/**
  * Update a WordPress option.
  * @param WP_REST_Request $request
  * @return WP_REST_Response
