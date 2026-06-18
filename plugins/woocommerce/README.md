@@ -14,7 +14,7 @@ If you are not a developer, please use the [WooCommerce plugin page](https://wor
 
 ### Quick start
 
-Ensure your system meets [the requirements](../../README.md#getting-started) (TLDR: NVM, PNPM, PHP 7.4+, Composer are required for development).
+Ensure your system meets [the requirements](../../README.md#getting-started) (TLDR: Node.js, PNPM, PHP 7.4+, and Composer are required for development; NVM is optional, since PNPM uses the pinned Node version automatically).
 
 Depending on the preferred environment for running the development instance of WooCommerce, you might need [Docker](https://docs.docker.com/get-docker/) as well. You can learn more about supported environments [here in the developer docs](https://developer.woocommerce.com/docs/setting-up-your-development-environment/).
 

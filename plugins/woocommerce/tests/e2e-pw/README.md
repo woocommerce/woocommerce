@@ -33,8 +33,7 @@ End-to-end tests are powered by Playwright. By default, the test site is spun up
 
 Start in the repository root folder:
 
-- `nvm use` (uses the default node version you have set in NVM)
-- `pnpm install` (installs dependencies)
+- `pnpm install` (installs dependencies; PNPM uses the pinned Node version automatically)
 - `pnpm --filter='@woocommerce/plugin-woocommerce' build` (builds WooCommerce locally)
 - `cd plugins/woocommerce` (changes into the WooCommerce plugin folder)
 - `pnpm env:start` (starts the `wp-env` based local environment)
