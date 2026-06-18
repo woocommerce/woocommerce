@@ -2282,15 +2282,26 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get the items subtotal amount to display in the admin order screen.
 	 *
 	 * For stores with fixed end-prices (prices entered including tax with the
-	 * woocommerce_adjust_non_base_location_prices adjustment disabled), the cart
-	 * tax is removed so the displayed subtotal matches the ex-tax cart display.
+	 * woocommerce_adjust_non_base_location_prices adjustment disabled), the
+	 * line-item subtotal tax is removed so the displayed subtotal matches the
+	 * ex-tax cart display. Only line-item taxes are subtracted, not the fee tax
+	 * that get_cart_tax() would also include.
 	 *
 	 * @return float
 	 */
 	public function get_subtotal_amount_to_display() {
-		return $this->has_fixed_end_prices()
-			? (float) $this->get_subtotal() - (float) $this->get_cart_tax()
-			: (float) $this->get_subtotal();
+		if ( ! $this->has_fixed_end_prices() ) {
+			return (float) $this->get_subtotal();
+		}
+
+		$subtotal_tax = 0;
+		foreach ( $this->get_items() as $item ) {
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$subtotal_tax += self::round_line_tax( (float) $item->get_subtotal_tax(), false );
+			}
+		}
+
+		return (float) $this->get_subtotal() - wc_round_tax_total( $subtotal_tax );
 	}
 
 	/**
