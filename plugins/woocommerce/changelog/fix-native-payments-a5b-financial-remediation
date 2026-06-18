@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve WooPayments canceled-authorization fee remediation during native cutover.
