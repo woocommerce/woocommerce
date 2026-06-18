@@ -907,6 +907,96 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Refund creation accepts a tax-only explicit tax array.
+	 */
+	public function test_refunds_create_with_tax_only_explicit_tax_array(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 10.00 ),
+				'subtotal' => array( $tax_rate_id => 10.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 10.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+
+		$order->set_billing_country( 'US' );
+		$order->set_total( 110.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'refund_total' => 0.00,
+						'refund_tax'   => array(
+							array(
+								'id'           => $tax_rate_id,
+								'refund_total' => 10.00,
+							),
+						),
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status(), 'Tax-only explicit refunds should be accepted.' );
+		$response_data = $response->get_data();
+		$this->assertEquals( '10.00', $response_data['amount'], 'Refund amount should include the explicit tax.' );
+
+		$refund           = wc_get_order( $response_data['id'] );
+		$refund_items     = $refund->get_items( 'line_item' );
+		$refund_line_item = reset( $refund_items );
+		$refund_taxes     = $refund_line_item->get_taxes();
+
+		$this->assertEquals( 0.00, (float) $refund_line_item->get_total(), 'Line item total should stay zero for a tax-only refund.' );
+		$this->assertEquals( -10.00, (float) $refund_taxes['total'][ $tax_rate_id ], 'Explicit tax should be stored on the refund line.' );
+
+		$this->created_refunds[] = $response_data['id'];
+		$product->delete( true );
+	}
+
+	/**
 	 * Test refund creation fails when refund_total exceeds line item total.
 	 */
 	public function test_refunds_create_validation_error_exceeds_total(): void {

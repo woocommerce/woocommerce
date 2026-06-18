@@ -341,8 +341,9 @@ class DataUtils {
 				// a positive amount from a discount line, or a negative amount from a normal
 				// line. Without this, abs() in the cap below would let a wrong-sign value
 				// pass and be stored (e.g. a negative refund_total on a positive line in a
-				// mixed-line request whose total stays positive). Values that round to 0 are
-				// rejected by the next check, so create and preview stay aligned.
+				// mixed-line request whose total stays positive). A gross line refund that
+				// rounds to 0 is rejected below, so create and preview stay aligned for the
+				// tax-inclusive form while explicit tax-only create requests remain valid.
 				if ( (float) $line_item['refund_total'] * $signed_line_total < 0 ) {
 					return new WP_Error(
 						'invalid_refund_total',
@@ -351,11 +352,24 @@ class DataUtils {
 					);
 				}
 
-				// Reject a refund_total that rounds to zero. A zero line refund is a
-				// no-op that would otherwise be stored as an empty qty:0 refund line,
-				// and it is what the preview path already rejects — keep create and
-				// preview consistent for the same input.
-				if ( 0.0 === (float) NumberUtil::round( (float) $line_item['refund_total'], $price_decimals ) ) {
+				// Cap and zero-check the GROSS line refund against the line's tax-inclusive
+				// total. When an explicit refund_tax breakdown is supplied, refund_total is
+				// the tax-exclusive (net) subtotal and the tax is added on top (core Woo
+				// semantics — see RefundSchema); without it, refund_total is already
+				// tax-inclusive, so the gross equals refund_total. Capping the net alone
+				// would let a client push the overage into refund_tax and over-refund the
+				// line. Preview has no refund_tax field, so its (refund_total-only) cap stays
+				// equivalent for the inclusive form.
+				$line_refund_gross = (float) $line_item['refund_total'];
+				if ( ! empty( $line_item['refund_tax'] ) && is_array( $line_item['refund_tax'] ) ) {
+					foreach ( $line_item['refund_tax'] as $tax ) {
+						$line_refund_gross += (float) ( $tax['refund_total'] ?? 0 );
+					}
+				}
+
+				// Reject a gross line refund that rounds to zero. A zero line refund is a
+				// no-op that would otherwise be stored as an empty qty:0 refund line.
+				if ( 0.0 === (float) NumberUtil::round( $line_refund_gross, $price_decimals ) ) {
 					return new WP_Error(
 						'invalid_refund_total',
 						__( 'refund_total must be a number greater than zero.', 'woocommerce' ),
@@ -364,21 +378,7 @@ class DataUtils {
 				}
 
 				$item_total_with_tax = abs( $signed_line_total );
-
-				// Cap the GROSS line refund against the line's tax-inclusive total. When an
-				// explicit refund_tax breakdown is supplied, refund_total is the tax-exclusive
-				// (net) subtotal and the tax is added on top (core Woo semantics — see
-				// RefundSchema); without it, refund_total is already tax-inclusive, so the gross
-				// equals refund_total. Capping the net alone would let a client push the overage
-				// into refund_tax and over-refund the line. Preview has no refund_tax field, so
-				// its (refund_total-only) cap stays equivalent for the inclusive form.
-				$line_refund_gross = (float) $line_item['refund_total'];
-				if ( ! empty( $line_item['refund_tax'] ) && is_array( $line_item['refund_tax'] ) ) {
-					foreach ( $line_item['refund_tax'] as $tax ) {
-						$line_refund_gross += (float) ( $tax['refund_total'] ?? 0 );
-					}
-				}
-				$abs_refund_total = abs( $line_refund_gross );
+				$abs_refund_total    = abs( $line_refund_gross );
 
 				// Mirror the preview path's three distinct over-refund errors (same
 				// codes, messages, and 422 status) so create and preview reject the
