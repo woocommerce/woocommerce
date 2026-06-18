@@ -97,6 +97,13 @@ class SiteHealth {
 		}
 
 		$data        = $is_good ? $test['good'] : $test['fail'];
+		$label       = is_callable( $data['label'] )
+			? ( $data['label'] )( $context )
+			: $data['label'];
+		$status      = $is_good ? 'good' : ( $data['status'] ?? 'recommended' );
+		$status      = is_callable( $status )
+			? $status( $context )
+			: $status;
 		$description = is_callable( $data['description'] )
 			? ( $data['description'] )( $context )
 			: $data['description'];
@@ -110,8 +117,8 @@ class SiteHealth {
 		}
 
 		return array(
-			'label'       => $data['label'],
-			'status'      => $is_good ? 'good' : ( $data['status'] ?? 'recommended' ),
+			'label'       => $label,
+			'status'      => $status,
 			'badge'       => array(
 				'label' => 'security' === $test['badge'] ? __( 'Security', 'woocommerce' ) : __( 'Performance', 'woocommerce' ),
 				'color' => 'blue',
@@ -131,6 +138,7 @@ class SiteHealth {
 	 *   - check: callable returning bool (true = good) or array (empty = good, otherwise context for description/actions).
 	 *   - good: result data when the check passes (label, description).
 	 *   - fail: result data when the check fails (status defaults to 'recommended', label, description, optional actions).
+	 *     Label, status, and description may be callables that receive the check context.
 	 *
 	 * @return array<string, array>
 	 */
@@ -166,9 +174,19 @@ class SiteHealth {
 					'description' => __( 'The directory used for downloadable product files is not browsable from the web.', 'woocommerce' ),
 				),
 				'fail'  => array(
-					'status'      => 'critical',
-					'label'       => __( 'WooCommerce uploads directory is browsable from the web', 'woocommerce' ),
-					'description' => __( 'Directory browsing can expose downloadable product files. Configure your web server to prevent directory indexing for the WooCommerce uploads directory.', 'woocommerce' ),
+					'status'      => function ( ?array $context ) {
+						return ! empty( $context['unverified'] ) ? 'recommended' : 'critical';
+					},
+					'label'       => function ( ?array $context ) {
+						return ! empty( $context['unverified'] )
+							? __( 'WooCommerce could not verify uploads directory protection', 'woocommerce' )
+							: __( 'WooCommerce uploads directory is browsable from the web', 'woocommerce' );
+					},
+					'description' => function ( ?array $context ) {
+						return ! empty( $context['unverified'] )
+							? __( 'A loopback request to the WooCommerce uploads directory failed, so WooCommerce could not confirm whether directory browsing is disabled. Check your server configuration or try again later.', 'woocommerce' )
+							: __( 'Directory browsing can expose downloadable product files. Configure your web server to prevent directory indexing for the WooCommerce uploads directory.', 'woocommerce' );
+					},
 					'actions'     => array(
 						array(
 							'url'     => 'https://woocommerce.com/document/digital-downloadable-product-handling/#protecting-your-uploads-directory',
@@ -501,13 +519,17 @@ class SiteHealth {
 	/**
 	 * Check if the WooCommerce uploads directory is protected from directory browsing.
 	 *
-	 * @return bool
+	 * @return bool|array{unverified: true}
 	 */
 	private function is_uploads_directory_protected() {
 		$cache_key = '_woocommerce_upload_directory_status';
 		$status    = get_transient( $cache_key );
 
 		if ( false !== $status ) {
+			if ( 'unverified' === $status ) {
+				return array( 'unverified' => true );
+			}
+
 			return 'protected' === $status;
 		}
 
@@ -520,13 +542,15 @@ class SiteHealth {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			return false;
+			set_transient( $cache_key, 'unverified', HOUR_IN_SECONDS );
+			return array( 'unverified' => true );
 		}
 
 		$response_code = intval( wp_remote_retrieve_response_code( $response ) );
 
 		if ( 0 === $response_code ) {
-			return false;
+			set_transient( $cache_key, 'unverified', HOUR_IN_SECONDS );
+			return array( 'unverified' => true );
 		}
 
 		$response_content = wp_remote_retrieve_body( $response );

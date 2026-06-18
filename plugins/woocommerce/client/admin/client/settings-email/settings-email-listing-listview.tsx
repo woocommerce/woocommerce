@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useState, useMemo } from '@wordpress/element';
-import { edit, external } from '@wordpress/icons';
+import { pencil, external } from '@wordpress/icons';
 import { Icon } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
@@ -139,7 +139,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			{
 				id: 'edit',
 				label: __( 'Edit', 'woocommerce' ),
-				icon: <Icon icon={ edit } />,
+				icon: <Icon icon={ pencil } />,
 				supportsBulk: false,
 				callback: ( items: EmailType[] ) => {
 					const email = items[ 0 ];
