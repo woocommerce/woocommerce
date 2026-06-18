@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsExpressCheckoutService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsFrontendTrackingController;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use WC_Unit_Test_Case;
 
@@ -248,11 +249,29 @@ class WooPaymentsExpressCheckoutServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( '55', $params['button']['height'] );
 		$this->assertSame( '6', $params['button']['radius'] );
 		$this->assertSame( 'large', $params['button']['size'] );
+		$this->assertTrue( $params['isShopperTrackingEnabled'] );
+		$this->assertTrue( $params['is_shopper_tracking_enabled'] );
 		$this->assertArrayHasKey( 'platform_tracker', $params['nonce'] );
 		$this->assertArrayHasKey( 'tokenized_cart_nonce', $params['nonce'] );
 		$this->assertArrayHasKey( 'tokenized_cart_session_nonce', $params['nonce'] );
 		$this->assertArrayHasKey( 'store_api_nonce', $params['nonce'] );
 		$this->assertArrayHasKey( 'isEceUsingConfirmationTokens', $params['flags'] );
+	}
+
+	/**
+	 * @testdox Should expose disabled shopper tracking to express checkout clients.
+	 */
+	public function test_express_checkout_params_expose_disabled_shopper_tracking(): void {
+		$params = $this->create_service(
+			array(),
+			true,
+			array(),
+			true,
+			false
+		)->get_express_checkout_params( 'checkout' );
+
+		$this->assertFalse( $params['isShopperTrackingEnabled'] );
+		$this->assertFalse( $params['is_shopper_tracking_enabled'] );
 	}
 
 	/**
@@ -505,9 +524,10 @@ class WooPaymentsExpressCheckoutServiceTest extends WC_Unit_Test_Case {
 	 * @param bool                $can_process_payments Whether the provider can process native payments.
 	 * @param array<string,mixed> $account_data         Account data.
 	 * @param bool                $merge_defaults       Whether to merge default gateway settings.
+	 * @param bool                $shopper_tracking     Whether shopper tracking is enabled.
 	 * @return WooPaymentsExpressCheckoutService
 	 */
-	private function create_service( array $settings = array(), bool $can_process_payments = true, array $account_data = array(), bool $merge_defaults = true ): WooPaymentsExpressCheckoutService {
+	private function create_service( array $settings = array(), bool $can_process_payments = true, array $account_data = array(), bool $merge_defaults = true, bool $shopper_tracking = true ): WooPaymentsExpressCheckoutService {
 		$default_settings = array(
 			'manual_capture'                       => 'no',
 			'payment_request'                      => 'yes',
@@ -557,8 +577,14 @@ class WooPaymentsExpressCheckoutServiceTest extends WC_Unit_Test_Case {
 			->getMock();
 		$provider->method( 'can_process_payments' )->willReturn( $can_process_payments );
 
+		$tracking_controller = $this->getMockBuilder( WooPaymentsFrontendTrackingController::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_shopper_tracking_enabled' ) )
+			->getMock();
+		$tracking_controller->method( 'is_shopper_tracking_enabled' )->willReturn( $shopper_tracking );
+
 		$sut = new WooPaymentsExpressCheckoutService();
-		$sut->init( $account_service, $provider );
+		$sut->init( $account_service, $provider, $tracking_controller );
 
 		return $sut;
 	}

@@ -30,16 +30,25 @@ class WooPaymentsExpressCheckoutService {
 	private WooPaymentsProvider $provider;
 
 	/**
+	 * Frontend tracking controller.
+	 *
+	 * @var WooPaymentsFrontendTrackingController
+	 */
+	private WooPaymentsFrontendTrackingController $frontend_tracking_controller;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsAccountService $account_service WooPayments account service.
-	 * @param WooPaymentsProvider       $provider        WooPayments provider.
+	 * @param WooPaymentsAccountService             $account_service              WooPayments account service.
+	 * @param WooPaymentsProvider                   $provider                     WooPayments provider.
+	 * @param WooPaymentsFrontendTrackingController $frontend_tracking_controller Frontend tracking controller.
 	 */
-	final public function init( WooPaymentsAccountService $account_service, WooPaymentsProvider $provider ): void {
-		$this->account_service = $account_service;
-		$this->provider        = $provider;
+	final public function init( WooPaymentsAccountService $account_service, WooPaymentsProvider $provider, WooPaymentsFrontendTrackingController $frontend_tracking_controller ): void {
+		$this->account_service              = $account_service;
+		$this->provider                     = $provider;
+		$this->frontend_tracking_controller = $frontend_tracking_controller;
 	}
 
 	/**
@@ -77,17 +86,18 @@ class WooPaymentsExpressCheckoutService {
 		$context_currency = $this->get_context_currency( $context );
 		$currency         = strtolower( '' === $context_currency ? get_woocommerce_currency() : $context_currency );
 		$decimals         = function_exists( 'wc_get_price_decimals' ) ? wc_get_price_decimals() : 2;
+		$tracking_enabled = $this->get_frontend_tracking_controller()->is_shopper_tracking_enabled();
 
 		$params = array(
-			'ajax_url'             => admin_url( 'admin-ajax.php' ),
-			'wc_ajax_url'          => \WC_AJAX::get_endpoint( '%%endpoint%%' ),
-			'nonce'                => array(
+			'ajax_url'                    => admin_url( 'admin-ajax.php' ),
+			'wc_ajax_url'                 => \WC_AJAX::get_endpoint( '%%endpoint%%' ),
+			'nonce'                       => array(
 				'platform_tracker'             => wp_create_nonce( 'platform_tracks_nonce' ),
 				'tokenized_cart_nonce'         => wp_create_nonce( 'woopayments_tokenized_cart_nonce' ),
 				'tokenized_cart_session_nonce' => wp_create_nonce( 'woopayments_tokenized_cart_session_nonce' ),
 				'store_api_nonce'              => wp_create_nonce( 'wc_store_api' ),
 			),
-			'checkout'             => array(
+			'checkout'                    => array(
 				'currency_code'              => $currency,
 				'currency_decimals'          => $decimals,
 				'stripe_minor_unit'          => 10 ** $decimals,
@@ -97,27 +107,42 @@ class WooPaymentsExpressCheckoutService {
 				'allowed_shipping_countries' => function_exists( 'WC' ) && WC() && WC()->countries ? array_keys( WC()->countries->get_shipping_countries() ?? array() ) : array(),
 				'display_prices_with_tax'    => 'incl' === get_option( 'woocommerce_tax_display_cart' ),
 			),
-			'has_subscription'     => class_exists( '\WC_Subscriptions_Cart' ) && is_callable( array( '\WC_Subscriptions_Cart', 'cart_contains_subscription' ) ) && \WC_Subscriptions_Cart::cart_contains_subscription(),
-			'is_manual_capture'    => $this->is_truthy_gateway_setting( 'manual_capture' ),
-			'button'               => $this->get_button_settings( $context ),
-			'login_confirmation'   => false,
-			'button_context'       => $context,
-			'has_block'            => has_block( 'woocommerce/cart' ) || has_block( 'woocommerce/checkout' ),
-			'product'              => 'product' === $context ? $this->get_product_data() : array(),
-			'store_name'           => get_bloginfo( 'name' ),
-			'enabled_methods'      => $this->get_enabled_methods_for_context( $context, $context_currency ),
-			'payment_method_types' => $this->get_allowed_payment_method_types_for_context( $context, $context_currency ),
-			'stripe'               => array(
+			'has_subscription'            => class_exists( '\WC_Subscriptions_Cart' ) && is_callable( array( '\WC_Subscriptions_Cart', 'cart_contains_subscription' ) ) && \WC_Subscriptions_Cart::cart_contains_subscription(),
+			'is_manual_capture'           => $this->is_truthy_gateway_setting( 'manual_capture' ),
+			'isShopperTrackingEnabled'    => $tracking_enabled,
+			'is_shopper_tracking_enabled' => $tracking_enabled,
+			'button'                      => $this->get_button_settings( $context ),
+			'login_confirmation'          => false,
+			'button_context'              => $context,
+			'has_block'                   => has_block( 'woocommerce/cart' ) || has_block( 'woocommerce/checkout' ),
+			'product'                     => 'product' === $context ? $this->get_product_data() : array(),
+			'store_name'                  => get_bloginfo( 'name' ),
+			'enabled_methods'             => $this->get_enabled_methods_for_context( $context, $context_currency ),
+			'payment_method_types'        => $this->get_allowed_payment_method_types_for_context( $context, $context_currency ),
+			'stripe'                      => array(
 				'publishableKey' => $this->account_service->get_publishable_key(),
 				'accountId'      => $this->account_service->get_account_id(),
 				'locale'         => $this->get_stripe_locale(),
 			),
-			'flags'                => array(
+			'flags'                       => array(
 				'isEceUsingConfirmationTokens' => true,
 			),
 		);
 
 		return 'pay_for_order' === $context ? array_merge( $params, $this->get_pay_for_order_params() ) : $params;
+	}
+
+	/**
+	 * Get the frontend tracking controller.
+	 *
+	 * @return WooPaymentsFrontendTrackingController
+	 */
+	private function get_frontend_tracking_controller(): WooPaymentsFrontendTrackingController {
+		if ( ! isset( $this->frontend_tracking_controller ) ) {
+			$this->frontend_tracking_controller = wc_get_container()->get( WooPaymentsFrontendTrackingController::class );
+		}
+
+		return $this->frontend_tracking_controller;
 	}
 
 	/**

@@ -43,6 +43,14 @@ const METHOD_CONFIG = {
 const availabilityCache = new Map();
 let availabilityStripe = null;
 
+const getTrackingSettings = () => ( {
+	...settings,
+	ajaxUrl: params.ajax_url,
+	isShopperTrackingEnabled: params.isShopperTrackingEnabled,
+	is_shopper_tracking_enabled: params.is_shopper_tracking_enabled,
+	platformTrackerNonce: params?.nonce?.platform_tracker,
+} );
+
 const clampButtonHeight = ( height ) => {
 	const parsedHeight = Number.parseInt( height, 10 );
 
@@ -424,13 +432,12 @@ const ExpressCheckoutContent = ( {
 		);
 
 		expressElementRef.current.on( 'ready', ( event ) => {
-			if ( event?.availablePaymentMethods && methodConfig.loadEvent ) {
+			if (
+				event?.availablePaymentMethods?.[ method ] &&
+				methodConfig.loadEvent
+			) {
 				recordWooPaymentsUserEvent(
-					{
-						...settings,
-						ajaxUrl: params.ajax_url,
-						platformTrackerNonce: params?.nonce?.platform_tracker,
-					},
+					getTrackingSettings(),
 					methodConfig.loadEvent,
 					{ source: params.button_context || 'checkout' }
 				);
@@ -441,11 +448,7 @@ const ExpressCheckoutContent = ( {
 			onClick?.();
 			if ( methodConfig.clickEvent ) {
 				recordWooPaymentsUserEvent(
-					{
-						...settings,
-						ajaxUrl: params.ajax_url,
-						platformTrackerNonce: params?.nonce?.platform_tracker,
-					},
+					getTrackingSettings(),
 					methodConfig.clickEvent,
 					{ source: params.button_context || 'checkout' }
 				);

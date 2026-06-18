@@ -18,6 +18,7 @@ jest.mock( '@woocommerce/settings', () => ( {
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 
 const baseExpressCheckoutParams = {
+	ajax_url: 'https://example.test/admin-ajax.php',
 	enabled_methods: [ 'payment_request' ],
 	button_context: 'checkout',
 	store_name: 'Test Store',
@@ -94,8 +95,10 @@ describe( 'wc-payment-method-woopayments-express-checkout', () => {
 	let elements;
 	let availablePaymentMethods;
 	let shouldLoadError;
+	let originalFetch;
 
 	beforeAll( () => {
+		originalFetch = window.fetch;
 		mockGetPaymentMethodData.mockReturnValue( {
 			expressCheckoutParams: baseExpressCheckoutParams,
 		} );
@@ -106,6 +109,8 @@ describe( 'wc-payment-method-woopayments-express-checkout', () => {
 		jest.clearAllMocks();
 		baseExpressCheckoutParams.enabled_methods = [ 'payment_request' ];
 		baseExpressCheckoutParams.payment_method_types = [ 'card' ];
+		delete baseExpressCheckoutParams.isShopperTrackingEnabled;
+		delete baseExpressCheckoutParams.is_shopper_tracking_enabled;
 		apiFetch.mockResolvedValue( {
 			payment_result: {
 				payment_status: 'success',
@@ -147,8 +152,32 @@ describe( 'wc-payment-method-woopayments-express-checkout', () => {
 
 	afterEach( () => {
 		delete window.Stripe;
+		window.fetch = originalFetch;
 		document.body.innerHTML = '';
 	} );
+
+	const getRegistration = ( name ) =>
+		registerExpressPaymentMethod.mock.calls.find(
+			( [ registration ] ) => registration.name === name
+		)?.[ 0 ];
+
+	const renderExpressPaymentMethod = ( registration, props = {} ) =>
+		render(
+			createElement( registration.content.type, {
+				...registration.content.props,
+				billing,
+				onClick: jest.fn(),
+				onClose: jest.fn(),
+				setExpressPaymentError: jest.fn(),
+				...props,
+			} )
+		);
+
+	const getPlatformTracksRequests = () =>
+		( window.fetch?.mock?.calls || [] ).filter(
+			( [ , options ] ) =>
+				options?.body?.get?.( 'action' ) === 'platform_tracks'
+		);
 
 	it( 'registers separate Apple Pay and Google Pay express methods', () => {
 		registerExpressCheckout();
@@ -219,22 +248,11 @@ describe( 'wc-payment-method-woopayments-express-checkout', () => {
 
 	it( 'mounts Stripe ECE with method-specific button options', async () => {
 		registerExpressCheckout();
-		const applePayRegistration =
-			registerExpressPaymentMethod.mock.calls.find(
-				( [ registration ] ) =>
-					registration.name ===
-					'woocommerce_payments_express_checkout_applePay'
-			)[ 0 ];
-
-		render(
-			createElement( applePayRegistration.content.type, {
-				...applePayRegistration.content.props,
-				billing,
-				onClick: jest.fn(),
-				onClose: jest.fn(),
-				setExpressPaymentError: jest.fn(),
-			} )
+		const applePayRegistration = getRegistration(
+			'woocommerce_payments_express_checkout_applePay'
 		);
+
+		renderExpressPaymentMethod( applePayRegistration );
 
 		await waitFor( () => {
 			expect( expressElement.mount ).toHaveBeenCalled();
@@ -275,18 +293,12 @@ describe( 'wc-payment-method-woopayments-express-checkout', () => {
 
 	it( 'probes Stripe wallet availability before exposing each Blocks express method', async () => {
 		registerExpressCheckout();
-		const applePayRegistration =
-			registerExpressPaymentMethod.mock.calls.find(
-				( [ registration ] ) =>
-					registration.name ===
-					'woocommerce_payments_express_checkout_applePay'
-			)[ 0 ];
-		const googlePayRegistration =
-			registerExpressPaymentMethod.mock.calls.find(
-				( [ registration ] ) =>
-					registration.name ===
-					'woocommerce_payments_express_checkout_googlePay'
-			)[ 0 ];
+		const applePayRegistration = getRegistration(
+			'woocommerce_payments_express_checkout_applePay'
+		);
+		const googlePayRegistration = getRegistration(
+			'woocommerce_payments_express_checkout_googlePay'
+		);
 
 		baseExpressCheckoutParams.enabled_methods = [];
 
@@ -346,12 +358,9 @@ describe( 'wc-payment-method-woopayments-express-checkout', () => {
 			'amazon_pay',
 		];
 		registerExpressCheckout();
-		const amazonPayRegistration =
-			registerExpressPaymentMethod.mock.calls.find(
-				( [ registration ] ) =>
-					registration.name ===
-					'woocommerce_payments_express_checkout_amazonPay'
-			)[ 0 ];
+		const amazonPayRegistration = getRegistration(
+			'woocommerce_payments_express_checkout_amazonPay'
+		);
 
 		availablePaymentMethods = {
 			amazonPay: true,
@@ -380,22 +389,11 @@ describe( 'wc-payment-method-woopayments-express-checkout', () => {
 
 	it( 'places the Blocks order with a confirmation token through Store API', async () => {
 		registerExpressCheckout();
-		const googlePayRegistration =
-			registerExpressPaymentMethod.mock.calls.find(
-				( [ registration ] ) =>
-					registration.name ===
-					'woocommerce_payments_express_checkout_googlePay'
-			)[ 0 ];
-
-		render(
-			createElement( googlePayRegistration.content.type, {
-				...googlePayRegistration.content.props,
-				billing,
-				onClick: jest.fn(),
-				onClose: jest.fn(),
-				setExpressPaymentError: jest.fn(),
-			} )
+		const googlePayRegistration = getRegistration(
+			'woocommerce_payments_express_checkout_googlePay'
 		);
+
+		renderExpressPaymentMethod( googlePayRegistration );
 
 		await waitFor( () => {
 			expect( expressHandlers.confirm ).toBeDefined();
@@ -459,22 +457,11 @@ describe( 'wc-payment-method-woopayments-express-checkout', () => {
 			'amazon_pay',
 		];
 		registerExpressCheckout();
-		const amazonPayRegistration =
-			registerExpressPaymentMethod.mock.calls.find(
-				( [ registration ] ) =>
-					registration.name ===
-					'woocommerce_payments_express_checkout_amazonPay'
-			)[ 0 ];
-
-		render(
-			createElement( amazonPayRegistration.content.type, {
-				...amazonPayRegistration.content.props,
-				billing,
-				onClick: jest.fn(),
-				onClose: jest.fn(),
-				setExpressPaymentError: jest.fn(),
-			} )
+		const amazonPayRegistration = getRegistration(
+			'woocommerce_payments_express_checkout_amazonPay'
 		);
+
+		renderExpressPaymentMethod( amazonPayRegistration );
 
 		await waitFor( () => {
 			expect( expressHandlers.confirm ).toBeDefined();
@@ -503,5 +490,86 @@ describe( 'wc-payment-method-woopayments-express-checkout', () => {
 				},
 			] )
 		);
+	} );
+
+	it( 'records only available method load tracking events', async () => {
+		window.fetch = jest.fn().mockResolvedValue( {} );
+		availablePaymentMethods = {
+			applePay: false,
+			googlePay: true,
+		};
+		registerExpressCheckout();
+		const applePayRegistration = getRegistration(
+			'woocommerce_payments_express_checkout_applePay'
+		);
+
+		renderExpressPaymentMethod( applePayRegistration );
+
+		await waitFor( () => {
+			expect( expressElement.mount ).toHaveBeenCalled();
+		} );
+
+		expect( getPlatformTracksRequests() ).toHaveLength( 0 );
+	} );
+
+	it( 'records Google Pay load and click tracking events', async () => {
+		const onClick = jest.fn();
+		window.fetch = jest.fn().mockResolvedValue( {} );
+		availablePaymentMethods = {
+			googlePay: true,
+		};
+		registerExpressCheckout();
+		const googlePayRegistration = getRegistration(
+			'woocommerce_payments_express_checkout_googlePay'
+		);
+
+		renderExpressPaymentMethod( googlePayRegistration, { onClick } );
+
+		await waitFor( () => {
+			expect( expressElement.mount ).toHaveBeenCalled();
+		} );
+
+		act( () => {
+			expressHandlers.click( { resolve: jest.fn() } );
+		} );
+
+		const requests = getPlatformTracksRequests();
+
+		expect( requests ).toHaveLength( 2 );
+		expect(
+			requests.map( ( [ , options ] ) =>
+				options.body.get( 'tracksEventName' )
+			)
+		).toEqual( [ 'gpay_button_load', 'gpay_button_click' ] );
+		expect(
+			requests.map( ( [ , options ] ) =>
+				JSON.parse( options.body.get( 'tracksEventProp' ) )
+			)
+		).toEqual( [ { source: 'checkout' }, { source: 'checkout' } ] );
+		expect( onClick ).toHaveBeenCalled();
+	} );
+
+	it( 'does not record Blocks express checkout tracking when shopper tracking is disabled', async () => {
+		window.fetch = jest.fn().mockResolvedValue( {} );
+		baseExpressCheckoutParams.is_shopper_tracking_enabled = false;
+		availablePaymentMethods = {
+			googlePay: true,
+		};
+		registerExpressCheckout();
+		const googlePayRegistration = getRegistration(
+			'woocommerce_payments_express_checkout_googlePay'
+		);
+
+		renderExpressPaymentMethod( googlePayRegistration );
+
+		await waitFor( () => {
+			expect( expressElement.mount ).toHaveBeenCalled();
+		} );
+
+		act( () => {
+			expressHandlers.click( { resolve: jest.fn() } );
+		} );
+
+		expect( getPlatformTracksRequests() ).toHaveLength( 0 );
 	} );
 } );

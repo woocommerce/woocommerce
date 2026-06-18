@@ -146,6 +146,19 @@ describe( 'WooPayments express checkout', () => {
 		};
 	}
 
+	function getPlatformTracksRequests() {
+		return (
+			( window.fetch && window.fetch.mock && window.fetch.mock.calls ) ||
+			[]
+		).filter(
+			( [ , options ] ) =>
+				options &&
+				options.body &&
+				options.body.get &&
+				options.body.get( 'action' ) === 'platform_tracks'
+		);
+	}
+
 	beforeEach( () => {
 		jest.resetModules();
 		bodyEventHandlers = {};
@@ -186,6 +199,7 @@ describe( 'WooPayments express checkout', () => {
 			} ),
 		};
 		window.Stripe = jest.fn( () => stripe );
+		window.fetch = jest.fn().mockResolvedValue( {} );
 	} );
 
 	afterEach( () => {
@@ -195,6 +209,7 @@ describe( 'WooPayments express checkout', () => {
 		delete window.$;
 		delete window.wp;
 		delete window.Stripe;
+		delete window.fetch;
 		delete window.wcpayExpressCheckoutParams;
 		document.body.innerHTML = '';
 	} );
@@ -254,6 +269,91 @@ describe( 'WooPayments express checkout', () => {
 		expect( expressElement.mount ).toHaveBeenCalledWith(
 			'#wcpay-express-checkout-element'
 		);
+	} );
+
+	test( 'records only available Apple Pay load tracking events', async () => {
+		require( '../woopayments-express-checkout' );
+
+		await bodyEventHandlers.updated_checkout();
+		await flushPromises();
+
+		expressHandlers.ready( {
+			availablePaymentMethods: {
+				applePay: true,
+				googlePay: false,
+			},
+		} );
+
+		const requests = getPlatformTracksRequests();
+
+		expect( requests ).toHaveLength( 1 );
+		expect( requests[ 0 ][ 0 ] ).toBe(
+			'https://example.test/admin-ajax.php'
+		);
+		expect( requests[ 0 ][ 1 ].body.get( 'tracksNonce' ) ).toBe(
+			'tracks-nonce'
+		);
+		expect( requests[ 0 ][ 1 ].body.get( 'tracksEventName' ) ).toBe(
+			'applepay_button_load'
+		);
+		expect(
+			JSON.parse( requests[ 0 ][ 1 ].body.get( 'tracksEventProp' ) )
+		).toEqual( {
+			source: 'checkout',
+		} );
+	} );
+
+	test( 'records only the selected Google Pay click tracking event', async () => {
+		const resolveClick = jest.fn();
+
+		require( '../woopayments-express-checkout' );
+
+		await bodyEventHandlers.updated_checkout();
+		await flushPromises();
+
+		await expressHandlers.click( {
+			expressPaymentType: 'google_pay',
+			resolve: resolveClick,
+		} );
+
+		const requests = getPlatformTracksRequests();
+
+		expect( requests ).toHaveLength( 1 );
+		expect( requests[ 0 ][ 1 ].body.get( 'tracksEventName' ) ).toBe(
+			'gpay_button_click'
+		);
+		expect(
+			JSON.parse( requests[ 0 ][ 1 ].body.get( 'tracksEventProp' ) )
+		).toEqual( {
+			source: 'checkout',
+		} );
+		expect( resolveClick ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				emailRequired: true,
+			} )
+		);
+	} );
+
+	test( 'does not record express checkout tracking when shopper tracking is disabled', async () => {
+		window.wcpayExpressCheckoutParams.is_shopper_tracking_enabled = false;
+
+		require( '../woopayments-express-checkout' );
+
+		await bodyEventHandlers.updated_checkout();
+		await flushPromises();
+
+		expressHandlers.ready( {
+			availablePaymentMethods: {
+				applePay: true,
+				googlePay: true,
+			},
+		} );
+		await expressHandlers.click( {
+			expressPaymentType: 'apple_pay',
+			resolve: jest.fn(),
+		} );
+
+		expect( getPlatformTracksRequests() ).toHaveLength( 0 );
 	} );
 
 	test( 'mounts Stripe ECE with Amazon Pay when server config enables it', async () => {
@@ -572,10 +672,10 @@ describe( 'WooPayments express checkout', () => {
 		window.wp.apiFetch.mockResolvedValue( {
 			needs_shipping: false,
 			totals: {
-						total_price: '3000',
-						total_refund: '0',
-						currency_code: 'USD',
-					},
+				total_price: '3000',
+				total_refund: '0',
+				currency_code: 'USD',
+			},
 		} );
 
 		require( '../woopayments-express-checkout' );
@@ -610,12 +710,12 @@ describe( 'WooPayments express checkout', () => {
 		);
 	} );
 
-		test( 'resolves product page click before the isolated cart request completes', async () => {
-			const resolveClick = jest.fn();
-			const addToCart = createDeferred();
-			document.body.innerHTML =
-				'<div class="woocommerce-notices-wrapper"></div>' +
-				'<form class="cart">' +
+	test( 'resolves product page click before the isolated cart request completes', async () => {
+		const resolveClick = jest.fn();
+		const addToCart = createDeferred();
+		document.body.innerHTML =
+			'<div class="woocommerce-notices-wrapper"></div>' +
+			'<form class="cart">' +
 			'<button type="submit" name="add-to-cart" value="123">Add to cart</button>' +
 			'</form>' +
 			'<div class="wcpay-express-checkout-wrapper">' +
@@ -628,49 +728,49 @@ describe( 'WooPayments express checkout', () => {
 			total: { label: 'Express Widget', amount: 2500, pending: true },
 			needs_shipping: false,
 			currency: 'usd',
-				country_code: 'US',
-				product_type: 'simple',
-			};
-			window.wp.apiFetch.mockReturnValue( addToCart.promise );
+			country_code: 'US',
+			product_type: 'simple',
+		};
+		window.wp.apiFetch.mockReturnValue( addToCart.promise );
 
-			require( '../woopayments-express-checkout' );
-			await flushPromises();
+		require( '../woopayments-express-checkout' );
+		await flushPromises();
 
-			expressHandlers.click( { resolve: resolveClick } );
-			await flushPromises();
+		expressHandlers.click( { resolve: resolveClick } );
+		await flushPromises();
 
-			expect( window.wp.apiFetch ).toHaveBeenCalledWith(
-				expect.objectContaining( {
-					method: 'POST',
-					path: '/wc/store/v1/cart/add-item',
-				} )
-			);
-			expect( resolveClick ).toHaveBeenCalledWith(
-				expect.objectContaining( {
-					shippingAddressRequired: false,
-				} )
-			);
+		expect( window.wp.apiFetch ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				method: 'POST',
+				path: '/wc/store/v1/cart/add-item',
+			} )
+		);
+		expect( resolveClick ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				shippingAddressRequired: false,
+			} )
+		);
 
-			addToCart.resolve(
-				getStoreApiResponse(
-					{
-						needs_shipping: false,
-						totals: {
-							total_price: '3000',
-							total_refund: '0',
-							currency_code: 'USD',
-						},
+		addToCart.resolve(
+			getStoreApiResponse(
+				{
+					needs_shipping: false,
+					totals: {
+						total_price: '3000',
+						total_refund: '0',
+						currency_code: 'USD',
 					},
-					{
-						'X-WooPayments-Tokenized-Cart-Session':
-							'cart-session-token',
-					}
-				)
-			);
-			await flushPromises();
+				},
+				{
+					'X-WooPayments-Tokenized-Cart-Session':
+						'cart-session-token',
+				}
+			)
+		);
+		await flushPromises();
 
-			expect( elements.update ).toHaveBeenCalledWith( { amount: 3000 } );
-		} );
+		expect( elements.update ).toHaveBeenCalledWith( { amount: 3000 } );
+	} );
 
 	test( 'carries the product tokenized cart session into checkout', async () => {
 		const resolveClick = jest.fn();
@@ -699,7 +799,7 @@ describe( 'WooPayments express checkout', () => {
 					{
 						needs_shipping: false,
 						totals: {
-								total_price: '3000',
+							total_price: '3000',
 							total_refund: '0',
 							currency_code: 'USD',
 						},
@@ -738,20 +838,20 @@ describe( 'WooPayments express checkout', () => {
 		} );
 
 		expect( elements.update ).toHaveBeenCalledWith( { amount: 3000 } );
-			expect( window.wp.apiFetch ).toHaveBeenLastCalledWith(
-				expect.objectContaining( {
-					method: 'POST',
-					path: '/wc/store/v1/checkout',
-					parse: false,
-					data: expect.objectContaining( {
-						billing_address: expect.objectContaining( {
-							first_name: 'Ada',
-							last_name: 'Lovelace',
-						} ),
+		expect( window.wp.apiFetch ).toHaveBeenLastCalledWith(
+			expect.objectContaining( {
+				method: 'POST',
+				path: '/wc/store/v1/checkout',
+				parse: false,
+				data: expect.objectContaining( {
+					billing_address: expect.objectContaining( {
+						first_name: 'Ada',
+						last_name: 'Lovelace',
 					} ),
-					headers: expect.objectContaining( {
-						Nonce: 'store-api-nonce-2',
-						'X-WooPayments-Tokenized-Cart': true,
+				} ),
+				headers: expect.objectContaining( {
+					Nonce: 'store-api-nonce-2',
+					'X-WooPayments-Tokenized-Cart': true,
 					'X-WooPayments-Tokenized-Cart-Session-Nonce':
 						'cart-session-nonce',
 					'X-WooPayments-Tokenized-Cart-Session':
@@ -826,8 +926,7 @@ describe( 'WooPayments express checkout', () => {
 				headers: expect.objectContaining( {
 					'X-WooPayments-Tokenized-Cart-Session':
 						'cart-session-token',
-					'X-WooPayments-Tokenized-Cart-Is-Ephemeral-Cart':
-						'1',
+					'X-WooPayments-Tokenized-Cart-Is-Ephemeral-Cart': '1',
 				} ),
 			} )
 		);
@@ -870,9 +969,7 @@ describe( 'WooPayments express checkout', () => {
 					}
 				)
 			)
-			.mockResolvedValueOnce(
-				getStoreApiResponse( { items: [] }, {} )
-			);
+			.mockResolvedValueOnce( getStoreApiResponse( { items: [] }, {} ) );
 		elements.update.mockRejectedValue( new Error( 'update failed' ) );
 
 		require( '../woopayments-express-checkout' );
@@ -881,20 +978,19 @@ describe( 'WooPayments express checkout', () => {
 		await flushPromises();
 		await flushPromises();
 
-			expect( resolveClick ).toHaveBeenCalledWith(
-				expect.objectContaining( {
-					emailRequired: true,
-				} )
-			);
-			expect( window.wp.apiFetch ).toHaveBeenLastCalledWith(
-				expect.objectContaining( {
+		expect( resolveClick ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				emailRequired: true,
+			} )
+		);
+		expect( window.wp.apiFetch ).toHaveBeenLastCalledWith(
+			expect.objectContaining( {
 				method: 'GET',
 				path: '/wc/store/v1/cart',
 				headers: expect.objectContaining( {
 					'X-WooPayments-Tokenized-Cart-Session':
 						'cart-session-token',
-					'X-WooPayments-Tokenized-Cart-Is-Ephemeral-Cart':
-						'1',
+					'X-WooPayments-Tokenized-Cart-Is-Ephemeral-Cart': '1',
 				} ),
 			} )
 		);
@@ -937,9 +1033,7 @@ describe( 'WooPayments express checkout', () => {
 				)
 			)
 			.mockRejectedValueOnce( new Error( 'checkout failed' ) )
-			.mockResolvedValueOnce(
-				getStoreApiResponse( { items: [] }, {} )
-			);
+			.mockResolvedValueOnce( getStoreApiResponse( { items: [] }, {} ) );
 
 		require( '../woopayments-express-checkout' );
 		await flushPromises();
@@ -960,8 +1054,7 @@ describe( 'WooPayments express checkout', () => {
 				headers: expect.objectContaining( {
 					'X-WooPayments-Tokenized-Cart-Session':
 						'cart-session-token',
-					'X-WooPayments-Tokenized-Cart-Is-Ephemeral-Cart':
-						'1',
+					'X-WooPayments-Tokenized-Cart-Is-Ephemeral-Cart': '1',
 				} ),
 			} )
 		);
@@ -1056,9 +1149,9 @@ describe( 'WooPayments express checkout', () => {
 			address: {
 				recipient: 'Ada Lovelace',
 				addressLine: [ '1 Test Street', 'Unit 2' ],
-					city: 'San Francisco',
-					state: 'CA',
-					postal_code: '94107',
+				city: 'San Francisco',
+				state: 'CA',
+				postal_code: '94107',
 				country: 'US',
 			},
 			resolve: resolveShipping,
@@ -1071,19 +1164,19 @@ describe( 'WooPayments express checkout', () => {
 		await shippingPromise;
 		await flushPromises();
 
-			expect( window.wp.apiFetch ).toHaveBeenLastCalledWith(
-				expect.objectContaining( {
+		expect( window.wp.apiFetch ).toHaveBeenLastCalledWith(
+			expect.objectContaining( {
 				method: 'POST',
 				path: '/wc/store/v1/cart/update-customer',
 				data: expect.objectContaining( {
 					shipping_address: expect.objectContaining( {
-							first_name: 'Ada',
-							last_name: 'Lovelace',
-							address_1: '1 Test Street',
-							address_2: 'Unit 2',
-							city: 'San Francisco',
-							state: 'CA',
-							postcode: '94107',
+						first_name: 'Ada',
+						last_name: 'Lovelace',
+						address_1: '1 Test Street',
+						address_2: 'Unit 2',
+						city: 'San Francisco',
+						state: 'CA',
+						postcode: '94107',
 						country: 'US',
 					} ),
 				} ),
@@ -1175,7 +1268,9 @@ describe( 'WooPayments express checkout', () => {
 					: defaultValue
 			),
 		};
-		elements.update.mockResolvedValueOnce( {} ).mockReturnValue( update.promise );
+		elements.update
+			.mockResolvedValueOnce( {} )
+			.mockReturnValue( update.promise );
 
 		require( '../woopayments-express-checkout' );
 		await flushPromises();
@@ -1190,29 +1285,29 @@ describe( 'WooPayments express checkout', () => {
 		} );
 		await flushPromises();
 
-			expect( window.wp.apiFetch ).toHaveBeenLastCalledWith(
-				expect.objectContaining( {
+		expect( window.wp.apiFetch ).toHaveBeenLastCalledWith(
+			expect.objectContaining( {
 				method: 'POST',
-					path: '/wc/store/v1/cart/select-shipping-rate',
-					data: {
-						package_id: 2,
-						rate_id: 'local_pickup:2',
-					},
-				} )
-			);
-			expect( window.wp.hooks.applyFilters ).toHaveBeenCalledWith(
-				'wcpay.express-checkout.shipping-package-id',
-				0,
-				expect.any( Object ),
-				'local_pickup:2'
-			);
-			expect( resolveRate ).not.toHaveBeenCalled();
-			update.resolve();
-			await shippingRatePromise;
-			await flushPromises();
-			expect( resolveRate ).toHaveBeenCalledWith(
-				expect.objectContaining( {
-					lineItems: expect.any( Array ),
+				path: '/wc/store/v1/cart/select-shipping-rate',
+				data: {
+					package_id: 2,
+					rate_id: 'local_pickup:2',
+				},
+			} )
+		);
+		expect( window.wp.hooks.applyFilters ).toHaveBeenCalledWith(
+			'wcpay.express-checkout.shipping-package-id',
+			0,
+			expect.any( Object ),
+			'local_pickup:2'
+		);
+		expect( resolveRate ).not.toHaveBeenCalled();
+		update.resolve();
+		await shippingRatePromise;
+		await flushPromises();
+		expect( resolveRate ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				lineItems: expect.any( Array ),
 			} )
 		);
 	} );

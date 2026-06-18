@@ -15,7 +15,11 @@
 	}
 
 	function getButtonContext() {
-		return config.button_context || ( config.button && config.button.context ) || 'checkout';
+		return (
+			config.button_context ||
+			( config.button && config.button.context ) ||
+			'checkout'
+		);
 	}
 
 	function isProduct() {
@@ -57,7 +61,10 @@
 		return paymentMethodTypes.length ? paymentMethodTypes : [ 'card' ];
 	}
 
-	function getStoreApiHeaders( includeSessionNonce, includeTokenizedCartNonce ) {
+	function getStoreApiHeaders(
+		includeSessionNonce,
+		includeTokenizedCartNonce
+	) {
 		var nonce = config.nonce || {};
 		var headers = {};
 
@@ -65,7 +72,10 @@
 			headers.Nonce = nonce.store_api_nonce;
 		}
 
-		if ( includeTokenizedCartNonce !== false && nonce.tokenized_cart_nonce ) {
+		if (
+			includeTokenizedCartNonce !== false &&
+			nonce.tokenized_cart_nonce
+		) {
 			headers[ 'X-WooPayments-Tokenized-Cart-Nonce' ] =
 				nonce.tokenized_cart_nonce;
 		}
@@ -119,7 +129,11 @@
 	function addQueryArgs( path, args ) {
 		var query = Object.keys( args )
 			.filter( function ( key ) {
-				return args[ key ] !== undefined && args[ key ] !== null && args[ key ] !== '';
+				return (
+					args[ key ] !== undefined &&
+					args[ key ] !== null &&
+					args[ key ] !== ''
+				);
 			} )
 			.map( function ( key ) {
 				return (
@@ -202,9 +216,7 @@
 		return (
 			( cartData && cartData.currency ) ||
 			( cartData && cartData.total && cartData.total.currency ) ||
-			( cartData &&
-				cartData.totals &&
-				cartData.totals.currency_code ) ||
+			( cartData && cartData.totals && cartData.totals.currency_code ) ||
 			( config.checkout && config.checkout.currency_code ) ||
 			'usd'
 		).toLowerCase();
@@ -255,7 +267,9 @@
 
 	function getButtonOptions() {
 		return {
-			buttonHeight: clampButtonHeight( config.button && config.button.height ),
+			buttonHeight: clampButtonHeight(
+				config.button && config.button.height
+			),
 			buttonTheme: {
 				applePay: getButtonTheme( 'applePay' ),
 				googlePay: getButtonTheme( 'googlePay' ),
@@ -339,13 +353,66 @@
 		body.append( 'tracksNonce', nonce );
 		body.append( 'action', 'platform_tracks' );
 		body.append( 'tracksEventName', eventName );
-		body.append( 'tracksEventProp', JSON.stringify( eventProperties || {} ) );
+		body.append(
+			'tracksEventProp',
+			JSON.stringify( eventProperties || {} )
+		);
 
-		window.fetch( ajaxUrl, {
-			method: 'POST',
-			credentials: 'same-origin',
-			body: body,
-		} ).catch( function () {} );
+		window
+			.fetch( ajaxUrl, {
+				method: 'POST',
+				credentials: 'same-origin',
+				body: body,
+			} )
+			.catch( function () {} );
+	}
+
+	function getExpressCheckoutLoadTrackingEvent( paymentMethod ) {
+		var eventNames = {
+			applePay: 'applepay_button_load',
+			googlePay: 'gpay_button_load',
+		};
+
+		return eventNames[ paymentMethod ];
+	}
+
+	function getExpressCheckoutClickTrackingEvent( expressPaymentType ) {
+		var eventNames = {
+			apple_pay: 'applepay_button_click',
+			google_pay: 'gpay_button_click',
+		};
+
+		return eventNames[ expressPaymentType ];
+	}
+
+	function recordExpressCheckoutLoadEvents( availablePaymentMethods ) {
+		Object.keys( availablePaymentMethods || {} ).forEach( function (
+			paymentMethod
+		) {
+			var eventName;
+
+			if ( ! availablePaymentMethods[ paymentMethod ] ) {
+				return;
+			}
+
+			eventName = getExpressCheckoutLoadTrackingEvent( paymentMethod );
+			if ( eventName ) {
+				recordUserEvent( eventName, {
+					source: getButtonContext(),
+				} );
+			}
+		} );
+	}
+
+	function recordExpressCheckoutClickEvent( expressPaymentType ) {
+		var eventName =
+			getExpressCheckoutClickTrackingEvent( expressPaymentType );
+
+		if ( eventName ) {
+			recordUserEvent( eventName, {
+				source: getButtonContext(),
+			} );
+		}
 	}
 
 	function showExpressButton() {
@@ -413,11 +480,17 @@
 			first_name: address.first_name || fallback.first_name || '',
 			last_name: address.last_name || fallback.last_name || '',
 			company: address.company || fallback.company || '',
-			address_1: address.address_1 || address.line1 || fallback.address_1 || '',
-			address_2: address.address_2 || address.line2 || fallback.address_2 || '',
+			address_1:
+				address.address_1 || address.line1 || fallback.address_1 || '',
+			address_2:
+				address.address_2 || address.line2 || fallback.address_2 || '',
 			city: address.city || fallback.city || '',
 			state: address.state || fallback.state || '',
-			postcode: address.postcode || address.postal_code || fallback.postcode || '',
+			postcode:
+				address.postcode ||
+				address.postal_code ||
+				fallback.postcode ||
+				'',
 			country: address.country || fallback.country || '',
 			email: address.email || fallback.email || '',
 			phone: address.phone || fallback.phone || '',
@@ -708,7 +781,8 @@
 		productAddToCartErrorMessage = '';
 
 		if ( ! product ) {
-			productAddToCartErrorMessage = 'Unable to add this product to the cart.';
+			productAddToCartErrorMessage =
+				'Unable to add this product to the cart.';
 			return false;
 		}
 
@@ -910,28 +984,27 @@
 			expressElement.unmount();
 		}
 
-		elements = stripe.elements( getStripeElementsOptions( cachedCartData ) );
-		expressElement = elements.create( 'expressCheckout', getButtonOptions() );
+		elements = stripe.elements(
+			getStripeElementsOptions( cachedCartData )
+		);
+		expressElement = elements.create(
+			'expressCheckout',
+			getButtonOptions()
+		);
 
 		expressElement.on( 'ready', function ( event ) {
 			if ( event && event.availablePaymentMethods ) {
 				showExpressButton();
-				recordUserEvent( 'applepay_button_load', {
-					source: getButtonContext(),
-				} );
-				recordUserEvent( 'gpay_button_load', {
-					source: getButtonContext(),
-				} );
+				recordExpressCheckoutLoadEvents(
+					event.availablePaymentMethods
+				);
 			}
 		} );
 
 		expressElement.on( 'click', async function ( event ) {
-			recordUserEvent( 'applepay_button_click', {
-				source: getButtonContext(),
-			} );
-			recordUserEvent( 'gpay_button_click', {
-				source: getButtonContext(),
-			} );
+			recordExpressCheckoutClickEvent(
+				event && event.expressPaymentType
+			);
 
 			try {
 				if ( isProduct() ) {
