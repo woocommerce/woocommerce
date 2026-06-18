@@ -91,6 +91,8 @@ const baseSchema = (
 describe( 'settings UI shell header fields', () => {
 	afterEach( () => {
 		__resetRegistry();
+		// Safety net for failures between render and the inline `container.remove()`.
+		document.body.innerHTML = '';
 	} );
 
 	it( 'renders the shell subtitle', () => {

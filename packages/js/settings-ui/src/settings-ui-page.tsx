@@ -40,16 +40,6 @@ import type {
 	SettingsValues,
 } from './types';
 
-// Runtime allowlist for badge intents — TS unions erase at compile time,
-// so guard the className interpolation against unexpected strings from PHP-supplied schemas.
-const VALID_BADGE_INTENTS = new Set( [
-	'default',
-	'info',
-	'success',
-	'warning',
-	'error',
-] );
-
 type SaveNotice = {
 	status: 'success' | 'error';
 	message: string;
@@ -107,6 +97,15 @@ const getActionVariant = ( variant?: string ) =>
 	( [ 'primary', 'secondary', 'tertiary', 'link' ].includes( variant || '' )
 		? variant
 		: 'secondary' ) as 'primary' | 'secondary' | 'tertiary' | 'link';
+
+// TS unions erase at runtime, so guard the className interpolation against unexpected
+// strings from PHP-supplied schemas.
+const getBadgeIntent = ( intent?: string ) =>
+	[ 'default', 'info', 'success', 'warning', 'error' ].includes(
+		intent || ''
+	)
+		? intent
+		: 'default';
 
 const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
 	schema.save || { adapter: 'form_post' };
@@ -398,19 +397,16 @@ const ShellHeader = ( {
 		) : undefined;
 
 	const badges = shell.badges?.length
-		? shell.badges.map( ( badge, index ) => {
-				const intent = VALID_BADGE_INTENTS.has( badge.intent as string )
-					? badge.intent
-					: 'default';
-				return (
-					<span
-						className={ `wc-settings-ui-shell__badge wc-settings-ui-shell__badge--${ intent }` }
-						key={ `${ badge.label }-${ index }` }
-					>
-						{ badge.label }
-					</span>
-				);
-		  } )
+		? shell.badges.map( ( badge, index ) => (
+				<span
+					className={ `wc-settings-ui-shell__badge wc-settings-ui-shell__badge--${ getBadgeIntent(
+						badge.intent
+					) }` }
+					key={ `${ badge.label }-${ index }` }
+				>
+					{ badge.label }
+				</span>
+		  ) )
 		: undefined;
 
 	const saveButtonLabel = __( 'Save', 'woocommerce' );
