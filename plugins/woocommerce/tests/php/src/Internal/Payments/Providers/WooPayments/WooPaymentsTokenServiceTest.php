@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPaymentMethodDetailsService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsTokenService;
+use RuntimeException;
 use WC_Order;
 use WC_Payment_Token_CC;
 use WC_Unit_Test_Case;
@@ -14,6 +15,17 @@ use WC_Unit_Test_Case;
  * Tests for the WooPaymentsTokenService class.
  */
 class WooPaymentsTokenServiceTest extends WC_Unit_Test_Case {
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		delete_option( 'wcpay_pm_customer_1' );
+		delete_option( 'wcpay_pm_customer_2' );
+		delete_option( 'not_wcpay_pm_customer' );
+		remove_all_filters( 'pre_option_wcpay_pm_customer_1' );
+		parent::tearDown();
+	}
 
 	/**
 	 * @testdox Should resolve a WooCommerce payment token ID to its provider payment method ID.
@@ -169,6 +181,49 @@ class WooPaymentsTokenServiceTest extends WC_Unit_Test_Case {
 		$order = wc_get_order( $order->get_id() );
 		$this->assertInstanceOf( WC_Order::class, $order );
 		$this->assertContains( $token->get_id(), $order->get_payment_tokens(), 'The order should store the attached token ID.' );
+	}
+
+	/**
+	 * @testdox Should clear preserved WooPayments payment method caches for all users.
+	 */
+	public function test_clear_all_cached_payment_methods_removes_preserved_cache_entries(): void {
+		$user_id       = $this->factory()->user->create();
+		$other_user_id = $this->factory()->user->create();
+		update_user_meta( $user_id, '_wcpay_payment_methods', array( 'pm_user' ) );
+		update_user_meta( $other_user_id, '_wcpay_payment_methods', array( 'pm_other' ) );
+		update_user_meta( $user_id, '_not_wcpay_payment_methods', array( 'pm_keep' ) );
+		update_option( 'wcpay_pm_customer_1', array( 'pm_cached_1' ) );
+		update_option( 'wcpay_pm_customer_2', array( 'pm_cached_2' ) );
+		update_option( 'not_wcpay_pm_customer', 'keep' );
+
+		$sut = $this->create_service();
+		$sut->clear_all_cached_payment_methods();
+
+		$this->assertSame( '', get_user_meta( $user_id, '_wcpay_payment_methods', true ) );
+		$this->assertSame( '', get_user_meta( $other_user_id, '_wcpay_payment_methods', true ) );
+		$this->assertSame( array( 'pm_keep' ), get_user_meta( $user_id, '_not_wcpay_payment_methods', true ) );
+		$this->assertFalse( get_option( 'wcpay_pm_customer_1' ) );
+		$this->assertFalse( get_option( 'wcpay_pm_customer_2' ) );
+		$this->assertSame( 'keep', get_option( 'not_wcpay_pm_customer' ) );
+	}
+
+	/**
+	 * @testdox Should fail closed when a selected cached payment-method option cannot be deleted.
+	 */
+	public function test_clear_all_cached_payment_methods_fails_closed_when_option_delete_does_not_stick(): void {
+		update_option( 'wcpay_pm_customer_1', array( 'pm_cached_1' ) );
+		add_filter(
+			'pre_option_wcpay_pm_customer_1',
+			static function () {
+				return array( 'pm_cached_1' );
+			}
+		);
+
+		$sut = $this->create_service();
+
+		$this->expectException( RuntimeException::class );
+
+		$sut->clear_all_cached_payment_methods();
 	}
 
 	/**

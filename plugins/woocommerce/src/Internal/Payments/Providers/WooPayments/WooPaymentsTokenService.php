@@ -8,6 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
+use RuntimeException;
 use WC_Order;
 use WC_Payment_Token;
 use WC_Payment_Token_CC;
@@ -20,6 +21,15 @@ use WC_Payment_Tokens;
  * @internal Transitional internal component for the native payments runtime.
  */
 class WooPaymentsTokenService {
+
+	/**
+	 * Preserved WooPayments cached payment-method user meta key.
+	 *
+	 * @var string
+	 */
+	private const CACHED_PAYMENT_METHODS_META_KEY = '_wcpay_payment_methods';
+
+	private const CACHE_CLEAR_BATCH_SIZE = 500;
 
 	/**
 	 * Payment method details service.
@@ -184,6 +194,64 @@ class WooPaymentsTokenService {
 		$order->save();
 
 		return true;
+	}
+
+	/**
+	 * Clear preserved WooPayments cached payment methods for all users.
+	 *
+	 * @since 11.0.0
+	 * @return void
+	 * @throws RuntimeException When cache cleanup cannot complete.
+	 */
+	public function clear_all_cached_payment_methods(): void {
+		global $wpdb;
+
+		$deleted_meta_rows = $wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name comes from WordPress.
+				"DELETE FROM {$wpdb->usermeta} WHERE meta_key = %s LIMIT %d",
+				self::CACHED_PAYMENT_METHODS_META_KEY,
+				self::CACHE_CLEAR_BATCH_SIZE
+			)
+		);
+		$this->throw_on_database_error( false === $deleted_meta_rows, 'Failed to clear cached WooPayments payment methods.' );
+
+		$option_names = $wpdb->get_col(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name comes from WordPress.
+				"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s LIMIT %d",
+				$wpdb->esc_like( 'wcpay_pm_' ) . '%',
+				self::CACHE_CLEAR_BATCH_SIZE
+			)
+		);
+		$this->throw_on_database_error( ! is_array( $option_names ), 'Failed to read cached WooPayments payment-method options.' );
+
+		foreach ( $option_names as $option_name ) {
+			delete_option( $option_name );
+			if ( false !== get_option( $option_name, false ) ) {
+				throw new RuntimeException( 'Failed to delete cached WooPayments payment-method option.' );
+			}
+		}
+
+		if ( self::CACHE_CLEAR_BATCH_SIZE <= (int) $deleted_meta_rows || self::CACHE_CLEAR_BATCH_SIZE <= count( $option_names ) ) {
+			throw new RuntimeException( 'WooPayments payment-method cache cleanup partially completed and should be retried.' );
+		}
+	}
+
+	/**
+	 * Throw when the last database operation failed.
+	 *
+	 * @param bool   $failed  Whether the operation failed by return value.
+	 * @param string $message Error message.
+	 * @return void
+	 * @throws RuntimeException When the database operation failed.
+	 */
+	private function throw_on_database_error( bool $failed, string $message ): void {
+		global $wpdb;
+
+		if ( $failed || '' !== $wpdb->last_error ) {
+			throw new RuntimeException( esc_html( $message ) );
+		}
 	}
 
 	/**

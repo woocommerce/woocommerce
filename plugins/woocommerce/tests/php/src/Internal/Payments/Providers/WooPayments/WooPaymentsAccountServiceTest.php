@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymen
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use RuntimeException;
 use WC_Unit_Test_Case;
 
 /**
@@ -21,6 +22,23 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 		delete_option( 'wcpay_account_data' );
 		delete_option( 'woocommerce_woocommerce_payments_settings' );
 		delete_option( 'wcpay_onboarding_test_mode' );
+		delete_option( '_wcpay_onboarding_stripe_connected' );
+		delete_option( 'wcpay_connection_success_modal_dismissed' );
+		delete_option( 'wcpay_onboarding_embedded_kyc_in_progress' );
+		delete_option( 'wcpay_test_mode_enabled_date' );
+		delete_option( 'woocommerce_woopayments_nox_profile' );
+		delete_option( 'woocommerce_woopayments_nox_onboarding_locked' );
+		delete_option( 'wcpay_account_deletion_pending_id' );
+		foreach ( $this->get_preserved_database_cache_keys() as $cache_key ) {
+			delete_option( $cache_key );
+		}
+		delete_transient( 'wcpay_stripe_onboarding_state' );
+		delete_transient( 'woopay_enabled_by_default' );
+		delete_transient( 'wcpay_onboarding_init_in_progress' );
+		delete_transient( 'wcpay_test_to_live_eligible' );
+		delete_transient( 'wcpay_post_kyc_activation_eligible' );
+		remove_all_filters( 'pre_option_wcpay_account_data' );
+		remove_all_filters( 'pre_option_wcpay_account_deletion_pending_id' );
 		remove_all_filters( 'wcpay_dev_mode' );
 		remove_all_filters( 'wcpay_test_mode' );
 		remove_all_filters( 'wcpay_test_mode_onboarding' );
@@ -271,6 +289,83 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reset preserved gateway, onboarding, and NOX state after an account deletion.
+	 */
+	public function test_cleanup_after_account_reset_resets_preserved_state(): void {
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'enabled'                        => 'yes',
+				'test_mode'                      => 'yes',
+				'upe_enabled_payment_method_ids' => array( 'card', 'link' ),
+				'payment_request_button_size'    => 'large',
+			)
+		);
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => array(
+					'account_id' => 'acct_123',
+					'is_live'    => false,
+				),
+			)
+		);
+		update_option( '_wcpay_onboarding_stripe_connected', array( 'acct_123' => true ) );
+		update_option( 'wcpay_onboarding_test_mode', 'yes' );
+		update_option( 'wcpay_connection_success_modal_dismissed', 'yes' );
+		update_option( 'wcpay_onboarding_embedded_kyc_in_progress', 'yes' );
+		update_option( 'wcpay_test_mode_enabled_date', 123 );
+		update_option( 'woocommerce_woopayments_nox_profile', array( 'id' => 'nox_profile' ) );
+		update_option( 'woocommerce_woopayments_nox_onboarding_locked', 'yes' );
+		set_transient( 'wcpay_stripe_onboarding_state', 'state', DAY_IN_SECONDS );
+		set_transient( 'woopay_enabled_by_default', true, DAY_IN_SECONDS );
+		set_transient( 'wcpay_onboarding_init_in_progress', 'yes', DAY_IN_SECONDS );
+		set_transient( 'wcpay_test_to_live_eligible', true, DAY_IN_SECONDS );
+		set_transient( 'wcpay_post_kyc_activation_eligible', true, DAY_IN_SECONDS );
+
+		$sut = $this->create_service();
+		$sut->cleanup_after_account_reset();
+
+		$settings = get_option( 'woocommerce_woocommerce_payments_settings' );
+		$this->assertIsArray( $settings );
+		$this->assertSame( 'no', $settings['enabled'] );
+		$this->assertSame( 'no', $settings['test_mode'] );
+		$this->assertSame( array( 'card' ), $settings['upe_enabled_payment_method_ids'] );
+		$this->assertSame( 'large', $settings['payment_request_button_size'], 'Unrelated gateway settings should be preserved.' );
+		$this->assertSame( array(), get_option( '_wcpay_onboarding_stripe_connected' ) );
+		$this->assertSame( 'no', get_option( 'wcpay_onboarding_test_mode' ) );
+		$this->assertFalse( get_option( 'wcpay_account_data' ) );
+		$this->assertFalse( get_option( 'wcpay_connection_success_modal_dismissed' ) );
+		$this->assertFalse( get_option( 'wcpay_onboarding_embedded_kyc_in_progress' ) );
+		$this->assertFalse( get_option( 'wcpay_test_mode_enabled_date' ) );
+		$this->assertFalse( get_option( 'woocommerce_woopayments_nox_profile' ) );
+		$this->assertFalse( get_option( 'woocommerce_woopayments_nox_onboarding_locked' ) );
+		$this->assertFalse( get_transient( 'wcpay_stripe_onboarding_state' ) );
+		$this->assertFalse( get_transient( 'woopay_enabled_by_default' ) );
+		$this->assertFalse( get_transient( 'wcpay_onboarding_init_in_progress' ) );
+		$this->assertFalse( get_transient( 'wcpay_test_to_live_eligible' ) );
+		$this->assertFalse( get_transient( 'wcpay_post_kyc_activation_eligible' ) );
+	}
+
+	/**
+	 * @testdox Should clear all preserved WooPayments database cache keys after an account reset.
+	 */
+	public function test_cleanup_after_account_reset_clears_preserved_database_cache_keys(): void {
+		foreach ( $this->get_preserved_database_cache_keys() as $cache_key ) {
+			update_option( $cache_key, array( 'stale' => true ), false );
+			wp_cache_set( $cache_key, array( 'stale' => true ), 'options' );
+		}
+
+		$sut = $this->create_service();
+		$sut->cleanup_after_account_reset();
+
+		foreach ( $this->get_preserved_database_cache_keys() as $cache_key ) {
+			$this->assertFalse( get_option( $cache_key, false ), "Expected {$cache_key} option to be deleted." );
+			$this->assertFalse( wp_cache_get( $cache_key, 'options' ), "Expected {$cache_key} object-cache entry to be deleted." );
+		}
+	}
+
+	/**
 	 * @testdox Should refresh account data from the native API client and persist the full account payload.
 	 */
 	public function test_refresh_account_data_fetches_and_caches_full_account_payload(): void {
@@ -432,6 +527,123 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( $stale_account, $cached['data'] );
 		$this->assertTrue( $cached['errored'] );
 		$this->assertSame( 2, $cached['consecutive_errors'] );
+	}
+
+	/**
+	 * @testdox Should fail closed when a strict account refresh cannot fetch fresh provider data.
+	 */
+	public function test_refresh_account_data_strict_fails_when_refresh_falls_back_to_stale_data(): void {
+		$stale_account = $this->get_valid_live_account_payload(
+			array(
+				'account_id' => 'acct_stale',
+			)
+		);
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data'               => $stale_account,
+				'fetched'            => time() - DAY_IN_SECONDS,
+				'errored'            => false,
+				'consecutive_errors' => 0,
+			)
+		);
+
+		$api_client = new class() extends WooPaymentsApiClient {
+			/**
+			 * Tell whether the fake client is available.
+			 *
+			 * @return bool
+			 */
+			public function is_available(): bool {
+				return true;
+			}
+
+			/**
+			 * Throw a transient account-fetch failure.
+			 *
+			 * @param string $woocommerce_store_id WooCommerce store ID.
+			 * @throws WooPaymentsApiException Always throws a transient account-fetch failure.
+			 */
+			public function get_account( string $woocommerce_store_id = '' ): array {
+				throw new WooPaymentsApiException( 'Temporary failure.', 'wcpay_temporary_failure', 500 );
+			}
+		};
+		$sut        = $this->create_service_with_api_client( $api_client );
+
+		$this->expectException( WooPaymentsApiException::class );
+
+		$sut->refresh_account_data_strict();
+	}
+
+	/**
+	 * @testdox Should fail closed when a strict account refresh cannot persist fresh account data.
+	 */
+	public function test_refresh_account_data_strict_fails_when_cache_write_does_not_stick(): void {
+		$stale_cache   = array(
+			'data'               => $this->get_valid_live_account_payload(
+				array(
+					'account_id' => 'acct_stale',
+				)
+			),
+			'fetched'            => time() - DAY_IN_SECONDS,
+			'errored'            => false,
+			'consecutive_errors' => 0,
+		);
+		$fresh_account = $this->get_valid_live_account_payload(
+			array(
+				'account_id' => 'acct_fresh',
+			)
+		);
+		$sut           = $this->create_service_with_api_client( $this->create_counting_account_api_client( $fresh_account ) );
+
+		add_filter(
+			'pre_option_wcpay_account_data',
+			static function () use ( $stale_cache ) {
+				return $stale_cache;
+			}
+		);
+
+		$this->expectException( WooPaymentsApiException::class );
+
+		$sut->refresh_account_data_strict();
+	}
+
+	/**
+	 * @testdox Should fail closed when the pending account-deletion marker cannot be written.
+	 */
+	public function test_mark_account_deletion_pending_fails_when_marker_write_does_not_stick(): void {
+		$sut = $this->create_service();
+
+		add_filter(
+			'pre_option_wcpay_account_deletion_pending_id',
+			static function () {
+				return '';
+			}
+		);
+
+		$this->expectException( RuntimeException::class );
+
+		$sut->mark_account_deletion_pending( 'acct_123' );
+	}
+
+	/**
+	 * @testdox Should fail closed when the pending account-deletion marker cannot be cleared.
+	 */
+	public function test_clear_pending_account_deletion_fails_when_marker_delete_does_not_stick(): void {
+		update_option( 'wcpay_account_deletion_pending_id', 'acct_123', false );
+
+		$sut = $this->create_service();
+
+		add_filter(
+			'pre_option_wcpay_account_deletion_pending_id',
+			static function () {
+				return 'acct_123';
+			}
+		);
+
+		$this->expectException( RuntimeException::class );
+
+		$sut->clear_pending_account_deletion();
 	}
 
 	/**
@@ -758,6 +970,29 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 				'details_submitted'    => true,
 			),
 			$overrides
+		);
+	}
+
+	/**
+	 * Get preserved WooPayments database cache keys cleared on account reset.
+	 *
+	 * @return string[]
+	 */
+	private function get_preserved_database_cache_keys(): array {
+		return array(
+			'wcpay_account_data',
+			'wcpay_address_autocomplete_jwt',
+			'wcpay_onboarding_fields_data',
+			'wcpay_business_types_data',
+			'wcpay_fraud_services_data',
+			'wcpay_recommended_payment_methods',
+			'wcpay_dispute_status_counts_cache',
+			'wcpay_test_dispute_status_counts_cache',
+			'wcpay_active_dispute_cache',
+			'wcpay_authorization_summary_cache',
+			'wcpay_test_authorization_summary_cache',
+			'wcpay_connect_incentive',
+			'wcpay_tracking_info_cache',
 		);
 	}
 }

@@ -41,12 +41,9 @@ class WooPaymentsEventIngestor {
 	 * @var string[]
 	 */
 	const KNOWN_UNHANDLED_EVENT_TYPES = array(
-		'account.deleted',
-		'account.updated',
 		'invoice.paid',
 		'invoice.payment_failed',
 		'invoice.upcoming',
-		'wcpay.notification',
 	);
 
 	/**
@@ -115,6 +112,20 @@ class WooPaymentsEventIngestor {
 	private WooPaymentsRefundEventHandler $refund_event_handler;
 
 	/**
+	 * Account event handler.
+	 *
+	 * @var WooPaymentsAccountEventHandler
+	 */
+	private WooPaymentsAccountEventHandler $account_event_handler;
+
+	/**
+	 * Notification event handler.
+	 *
+	 * @var WooPaymentsNotificationEventHandler
+	 */
+	private WooPaymentsNotificationEventHandler $notification_event_handler;
+
+	/**
 	 * WooPayments order data service.
 	 *
 	 * @var WooPaymentsOrderDataService|null
@@ -132,8 +143,11 @@ class WooPaymentsEventIngestor {
 	 * @param WooPaymentsApiClient                $api_client            Native WooPayments API client.
 	 * @param WooPaymentsOrderDataService|null    $order_data_service    WooPayments order data service.
 	 * @param WooPaymentsDisputeCacheService|null $dispute_cache_service Dispute cache service.
+	 * @param WooPaymentsAccountService|null      $account_service       Account service.
+	 * @param WooPaymentsTokenService|null        $token_service         Token service.
+	 * @param WooPaymentsRemoteNoteService|null   $remote_note_service   Remote note service.
 	 */
-	final public function init( OrderPaymentLifecycleService $lifecycle_service, LegacyProxy $legacy_proxy, WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsApiClient $api_client, ?WooPaymentsOrderDataService $order_data_service = null, ?WooPaymentsDisputeCacheService $dispute_cache_service = null ): void {
+	final public function init( OrderPaymentLifecycleService $lifecycle_service, LegacyProxy $legacy_proxy, WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsApiClient $api_client, ?WooPaymentsOrderDataService $order_data_service = null, ?WooPaymentsDisputeCacheService $dispute_cache_service = null, ?WooPaymentsAccountService $account_service = null, ?WooPaymentsTokenService $token_service = null, ?WooPaymentsRemoteNoteService $remote_note_service = null ): void {
 		$this->lifecycle_service  = $lifecycle_service;
 		$this->legacy_proxy       = $legacy_proxy;
 		$this->legacy_runtime     = $legacy_runtime;
@@ -149,6 +163,15 @@ class WooPaymentsEventIngestor {
 
 		$this->refund_event_handler = new WooPaymentsRefundEventHandler();
 		$this->refund_event_handler->init( $legacy_runtime, wc_get_container()->get( OrderPaymentStore::class ) );
+
+		$this->account_event_handler = new WooPaymentsAccountEventHandler();
+		$this->account_event_handler->init(
+			$account_service ?? wc_get_container()->get( WooPaymentsAccountService::class ),
+			$token_service ?? wc_get_container()->get( WooPaymentsTokenService::class )
+		);
+
+		$this->notification_event_handler = new WooPaymentsNotificationEventHandler();
+		$this->notification_event_handler->init( $remote_note_service ?? wc_get_container()->get( WooPaymentsRemoteNoteService::class ) );
 	}
 
 	/**
@@ -171,6 +194,12 @@ class WooPaymentsEventIngestor {
 
 		$this->run_delivery_hook( 'woocommerce_payments_before_webhook_delivery', $event_type, $event );
 
+		if ( $this->notification_event_handler->is_supported_event( $event_type ) ) {
+			$this->notification_event_handler->process( $event );
+			$this->run_delivery_hook( 'woocommerce_payments_after_webhook_delivery', $event_type, $event );
+			return;
+		}
+
 		$event_object = $this->get_event_object( $event );
 		if ( $this->dispute_event_handler->is_supported_event( $event_type ) ) {
 			$this->dispute_event_handler->process( $event_type, $event_object );
@@ -180,6 +209,12 @@ class WooPaymentsEventIngestor {
 
 		if ( $this->refund_event_handler->is_supported_event( $event_type ) ) {
 			$this->refund_event_handler->process( $event_type, $event_object );
+			$this->run_delivery_hook( 'woocommerce_payments_after_webhook_delivery', $event_type, $event );
+			return;
+		}
+
+		if ( $this->account_event_handler->is_supported_event( $event_type ) ) {
+			$this->account_event_handler->process( $event_type, $event_object );
 			$this->run_delivery_hook( 'woocommerce_payments_after_webhook_delivery', $event_type, $event );
 			return;
 		}
