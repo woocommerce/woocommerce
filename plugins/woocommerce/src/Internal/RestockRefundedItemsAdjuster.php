@@ -41,7 +41,7 @@ class RestockRefundedItemsAdjuster {
 	 */
 	public function initialize_restock_refunded_items( $order_id, $items ) {
 		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
+		if ( ! $order instanceof \WC_Order ) {
 			return;
 		}
 		$order_version = $order->get_version();
