@@ -43,8 +43,6 @@ class WooPaymentsEventIngestor {
 	const KNOWN_UNHANDLED_EVENT_TYPES = array(
 		'account.deleted',
 		'account.updated',
-		'charge.refund.updated',
-		'charge.refunded',
 		'invoice.paid',
 		'invoice.payment_failed',
 		'invoice.upcoming',
@@ -110,6 +108,13 @@ class WooPaymentsEventIngestor {
 	private WooPaymentsDisputeEventHandler $dispute_event_handler;
 
 	/**
+	 * Refund event handler.
+	 *
+	 * @var WooPaymentsRefundEventHandler
+	 */
+	private WooPaymentsRefundEventHandler $refund_event_handler;
+
+	/**
 	 * WooPayments order data service.
 	 *
 	 * @var WooPaymentsOrderDataService|null
@@ -141,6 +146,9 @@ class WooPaymentsEventIngestor {
 			$api_client,
 			$dispute_cache_service ?? wc_get_container()->get( WooPaymentsDisputeCacheService::class )
 		);
+
+		$this->refund_event_handler = new WooPaymentsRefundEventHandler();
+		$this->refund_event_handler->init( $legacy_runtime, wc_get_container()->get( OrderPaymentStore::class ) );
 	}
 
 	/**
@@ -166,6 +174,12 @@ class WooPaymentsEventIngestor {
 		$event_object = $this->get_event_object( $event );
 		if ( $this->dispute_event_handler->is_supported_event( $event_type ) ) {
 			$this->dispute_event_handler->process( $event_type, $event_object );
+			$this->run_delivery_hook( 'woocommerce_payments_after_webhook_delivery', $event_type, $event );
+			return;
+		}
+
+		if ( $this->refund_event_handler->is_supported_event( $event_type ) ) {
+			$this->refund_event_handler->process( $event_type, $event_object );
 			$this->run_delivery_hook( 'woocommerce_payments_after_webhook_delivery', $event_type, $event );
 			return;
 		}

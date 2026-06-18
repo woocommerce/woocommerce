@@ -13,6 +13,7 @@ use Exception;
 use InvalidArgumentException;
 use RuntimeException;
 use WC_Order;
+use WC_Order_Refund;
 use WC_Unit_Test_Case;
 
 /**
@@ -28,11 +29,19 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Last refund charge ID created by the refundable order fixture.
+	 *
+	 * @var string
+	 */
+	private string $last_refund_charge_id = 'ch_123';
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = wc_get_container()->get( WooPaymentsEventIngestor::class );
+		$this->sut                   = wc_get_container()->get( WooPaymentsEventIngestor::class );
+		$this->last_refund_charge_id = 'ch_123';
 	}
 
 	/**
@@ -43,6 +52,8 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 		remove_all_actions( 'woocommerce_payments_before_webhook_delivery' );
 		remove_all_actions( 'woocommerce_payments_after_webhook_delivery' );
 		$this->delete_dispute_cache_options();
+		delete_option( 'wcpay_account_data' );
+		delete_option( 'wcpay_multi_currency_enabled_currencies' );
 		parent::tearDown();
 	}
 
@@ -793,7 +804,570 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 
 		$this->expectException( RuntimeException::class );
 
-		$this->sut->process( $this->create_payment_intent_event( 'charge.refunded', $order ) );
+		$this->sut->process( $this->create_payment_intent_event( 'account.updated', $order ) );
+	}
+
+	/**
+	 * @testdox Migrated refund webhook event types are no longer cutover blockers.
+	 */
+	public function test_refund_webhook_events_are_not_known_unhandled(): void {
+		$this->assertNotContains( 'charge.refunded', WooPaymentsEventIngestor::KNOWN_UNHANDLED_EVENT_TYPES );
+		$this->assertNotContains( 'charge.refund.updated', WooPaymentsEventIngestor::KNOWN_UNHANDLED_EVENT_TYPES );
+		$this->assertContains( 'account.updated', WooPaymentsEventIngestor::KNOWN_UNHANDLED_EVENT_TYPES );
+	}
+
+	/**
+	 * @testdox charge.refunded creates a full local refund with WooPayments metadata.
+	 */
+	public function test_charge_refunded_creates_full_local_refund_with_wcpay_metadata(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+
+		$this->sut->process( $this->create_charge_refunded_event( $order, 1000, 1000, 'succeeded' ) );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$refunds = $order->get_refunds();
+		$this->assertCount( 1, $refunds );
+		$this->assertInstanceOf( WC_Order_Refund::class, $refunds[0] );
+		$this->assertSame( '-10.00', $refunds[0]->get_total() );
+		$this->assertCount( 1, $refunds[0]->get_items(), 'Full external refunds should preserve refunded line items.' );
+		$this->assertSame( 'requested_by_customer', $refunds[0]->get_reason() );
+		$this->assertSame( 'successful', $order->get_meta( '_wcpay_refund_status', true ) );
+		$this->assertSame( 're_123', $refunds[0]->get_meta( '_wcpay_refund_id', true ) );
+		$this->assertSame( 'txn_123', $refunds[0]->get_meta( '_wcpay_refund_transaction_id', true ) );
+		$this->assertOrderHasNoteContaining( $order, array( 'A refund of', 'was successfully processed using WooPayments', 'requested_by_customer', 're_123' ) );
+	}
+
+	/**
+	 * @testdox charge.refunded creates a pending partial local refund.
+	 */
+	public function test_charge_refunded_creates_pending_partial_refund(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+
+		$this->sut->process( $this->create_charge_refunded_event( $order, 1000, 400, 'pending' ) );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$refunds = $order->get_refunds();
+		$this->assertCount( 1, $refunds );
+		$this->assertInstanceOf( WC_Order_Refund::class, $refunds[0] );
+		$this->assertSame( '-4.00', $refunds[0]->get_total() );
+		$this->assertCount( 0, $refunds[0]->get_items(), 'Partial external refunds should not synthesize line-item refunds.' );
+		$this->assertSame( 'pending', $order->get_meta( '_wcpay_refund_status', true ) );
+		$this->assertSame( 're_123', $refunds[0]->get_meta( '_wcpay_refund_id', true ) );
+		$this->assertOrderHasNoteContaining( $order, array( 'A refund of', 'is pending', 'WooPayments', 're_123' ) );
+	}
+
+	/**
+	 * @testdox charge.refunded ignores already persisted WooPayments refund IDs.
+	 */
+	public function test_charge_refunded_ignores_duplicate_provider_refund_id(): void {
+		$order  = $this->create_refundable_woopayments_order( '10.00' );
+		$refund = $this->create_local_refund( $order, 4.00, 'Existing refund' );
+		$refund->update_meta_data( '_wcpay_refund_id', 're_123' );
+		$refund->save_meta_data();
+
+		$this->sut->process( $this->create_charge_refunded_event( $order, 1000, 400, 'succeeded' ) );
+
+		$order  = wc_get_order( $order->get_id() );
+		$refund = wc_get_order( $refund->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
+		$this->assertCount( 1, $order->get_refunds() );
+		$this->assertSame( 'successful', $order->get_meta( '_wcpay_refund_status', true ) );
+		$this->assertSame( 'txn_123', $refund->get_meta( '_wcpay_refund_transaction_id', true ) );
+		$this->assertOrderHasNoteContaining( $order, array( 'A refund of', 'was successfully processed using WooPayments', 're_123' ) );
+	}
+
+	/**
+	 * @testdox charge.refunded accepts split-UPE WooPayments gateway IDs.
+	 */
+	public function test_charge_refunded_accepts_split_upe_gateway_ids(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+		$order->set_payment_method( OrderPaymentStore::GATEWAY_ID_PREFIX . 'sepa_debit' );
+		$order->save();
+
+		$this->sut->process( $this->create_charge_refunded_event( $order, 1000, 400, 'succeeded' ) );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertCount( 1, $order->get_refunds() );
+		$this->assertSame( 'successful', $order->get_meta( '_wcpay_refund_status', true ) );
+	}
+
+	/**
+	 * @testdox charge.refunded notes include explicit currency when native multi-currency has additional currencies.
+	 */
+	public function test_charge_refunded_uses_explicit_currency_in_created_refund_notes(): void {
+		update_option( 'wcpay_multi_currency_enabled_currencies', array( 'EUR' ) );
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+
+		$this->sut->process( $this->create_charge_refunded_event( $order, 1000, 400, 'succeeded' ) );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertOrderHasNoteContaining( $order, array( 'A refund of', 'USD', 'WooPayments', 're_123' ) );
+	}
+
+	/**
+	 * @testdox charge.refunded ignores canceled authorizations.
+	 */
+	public function test_charge_refunded_ignores_uncaptured_charges(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+
+		$this->sut->process( $this->create_charge_refunded_event( $order, 1000, 400, 'succeeded', array( 'captured' => false ) ) );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertCount( 0, $order->get_refunds(), 'Uncaptured charges should not create local refunds.' );
+		$this->assertSame( '', $order->get_meta( '_wcpay_refund_status', true ) );
+	}
+
+	/**
+	 * @testdox charge.refunded fails closed for invalid refund amounts.
+	 */
+	public function test_charge_refunded_fails_closed_for_invalid_amount(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+
+		try {
+			$this->sut->process( $this->create_charge_refunded_event( $order, 1000, 1500, 'succeeded' ) );
+			$this->fail( 'Expected invalid external refund amount to fail closed.' );
+		} catch ( RuntimeException $exception ) {
+			$this->assertStringContainsString( 'refund amount is not valid', $exception->getMessage() );
+		}
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertCount( 0, $order->get_refunds() );
+		$this->assertSame( '', $order->get_meta( '_wcpay_refund_status', true ) );
+	}
+
+	/**
+	 * @testdox charge.refunded fails closed for negative refund amounts.
+	 */
+	public function test_charge_refunded_fails_closed_for_negative_refund_amount(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+
+		try {
+			$this->sut->process( $this->create_charge_refunded_event( $order, 1000, -400, 'succeeded' ) );
+			$this->fail( 'Expected negative external refund amount to fail closed.' );
+		} catch ( RuntimeException $exception ) {
+			$this->assertStringContainsString( 'refund amount is not valid', $exception->getMessage() );
+		}
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertCount( 0, $order->get_refunds() );
+		$this->assertSame( '', $order->get_meta( '_wcpay_refund_status', true ) );
+	}
+
+	/**
+	 * @testdox charge.refunded fails closed for missing refund data.
+	 */
+	public function test_charge_refunded_fails_closed_for_missing_refund_data(): void {
+		$order                                      = $this->create_refundable_woopayments_order( '10.00' );
+		$event                                      = $this->create_charge_refunded_event( $order, 1000, 400, 'succeeded' );
+		$event['data']['object']['refunds']['data'] = array();
+
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( 'missing refund data' );
+
+		$this->sut->process( $event );
+	}
+
+	/**
+	 * @testdox charge.refunded fails closed for missing refund IDs.
+	 */
+	public function test_charge_refunded_fails_closed_for_missing_refund_id(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+		$event = $this->create_charge_refunded_event(
+			$order,
+			1000,
+			400,
+			'succeeded',
+			array(
+				'refunds' => array(
+					'data' => array(
+						array(
+							'id' => '',
+						),
+					),
+				),
+			)
+		);
+
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( 'missing required field: id' );
+
+		$this->sut->process( $event );
+	}
+
+	/**
+	 * @testdox charge.refunded fails closed for unknown charge IDs.
+	 */
+	public function test_charge_refunded_fails_closed_for_unknown_charge_id(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+		$event = $this->create_charge_refunded_event( $order, 1000, 400, 'succeeded', array( 'id' => 'ch_unknown' ) );
+
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( 'Could not find WooPayments order via charge ID' );
+
+		$this->sut->process( $event );
+	}
+
+	/**
+	 * @testdox charge.refunded fails closed when the event order key mismatches.
+	 */
+	public function test_charge_refunded_fails_closed_for_mismatched_order_key(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+		$event = $this->create_charge_refunded_event(
+			$order,
+			1000,
+			400,
+			'succeeded',
+			array(
+				'metadata' => array(
+					'order_id'  => (string) $order->get_id(),
+					'order_key' => 'wc_order_wrong_key',
+				),
+			)
+		);
+
+		try {
+			$this->sut->process( $event );
+			$this->fail( 'Expected mismatched order key to fail closed.' );
+		} catch ( RuntimeException $exception ) {
+			$this->assertStringContainsString( 'Could not find WooPayments order via charge ID', $exception->getMessage() );
+		}
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertCount( 0, $order->get_refunds() );
+	}
+
+	/**
+	 * @testdox charge.refunded uses the shared order payment lock.
+	 */
+	public function test_charge_refunded_fails_closed_when_order_payment_is_locked(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+		$store = wc_get_container()->get( OrderPaymentStore::class );
+		$store->lock_order_payment( $order, 'existing_operation' );
+
+		try {
+			$this->sut->process( $this->create_charge_refunded_event( $order, 1000, 400, 'succeeded' ) );
+			$this->fail( 'Expected locked order refund webhook to fail closed.' );
+		} catch ( RuntimeException $exception ) {
+			$this->assertStringContainsString( 'Could not claim WooPayments refund webhook lock', $exception->getMessage() );
+		} finally {
+			$store->unlock_order_payment( $order );
+		}
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertCount( 0, $order->get_refunds() );
+	}
+
+	/**
+	 * @testdox charge.refund.updated marks matched failed refunds failed and deletes the local refund.
+	 */
+	public function test_charge_refund_updated_failed_marks_order_failed_and_deletes_refund(): void {
+		$order     = $this->create_refundable_woopayments_order( '10.00' );
+		$refund    = $this->create_local_refund( $order, 4.00, 'Existing refund' );
+		$refund_id = $refund->get_id();
+		$refund->update_meta_data( '_wcpay_refund_id', 're_123' );
+		$refund->save_meta_data();
+		$order->set_status( 'refunded' );
+		$order->save();
+
+		$this->sut->process(
+			$this->create_refund_updated_event(
+				array(
+					'status'         => 'failed',
+					'failure_reason' => 'lost_or_stolen_card',
+				)
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'failed', $order->get_status() );
+		$this->assertFalse( wc_get_order( $refund_id ), 'The matched local refund object should be deleted after the provider marks it failed.' );
+		$this->assertNull( get_post( $refund_id ), 'The matched local refund post should be deleted after the provider marks it failed.' );
+		$this->assertSame( 'failed', $order->get_meta( '_wcpay_refund_status', true ) );
+		$this->assertOrderHasNoteContaining( $order, array( 'A refund of', 'unsuccessful', 'WooPayments', 're_123', 'lost or stolen' ) );
+	}
+
+	/**
+	 * @testdox charge.refund.updated fires the refund deleted hook when deleting a matched local refund.
+	 */
+	public function test_charge_refund_updated_failed_fires_refund_deleted_hook(): void {
+		$order      = $this->create_refundable_woopayments_order( '10.00' );
+		$refund     = $this->create_local_refund( $order, 4.00, 'Existing refund' );
+		$refund_id  = $refund->get_id();
+		$hook_calls = array();
+		$refund->update_meta_data( '_wcpay_refund_id', 're_123' );
+		$refund->save_meta_data();
+		$refund_deleted_callback = function ( int $deleted_refund_id, int $deleted_order_id ) use ( &$hook_calls ): void {
+			$hook_calls[] = array( $deleted_refund_id, $deleted_order_id );
+		};
+
+		add_action(
+			'woocommerce_refund_deleted',
+			$refund_deleted_callback,
+			10,
+			2
+		);
+
+		try {
+			$this->sut->process(
+				$this->create_refund_updated_event(
+					array(
+						'status'         => 'failed',
+						'failure_reason' => 'lost_or_stolen_card',
+					)
+				)
+			);
+		} finally {
+			remove_action( 'woocommerce_refund_deleted', $refund_deleted_callback, 10 );
+		}
+
+		$this->assertSame( array( array( $refund_id, $order->get_id() ) ), $hook_calls );
+	}
+
+	/**
+	 * @testdox charge.refund.updated repairs status metadata when a failed-refund note already exists.
+	 */
+	public function test_charge_refund_updated_failed_reconciles_existing_note_without_returning_early(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+		$event = $this->create_refund_updated_event(
+			array(
+				'status'         => 'failed',
+				'failure_reason' => 'lost_or_stolen_card',
+			)
+		);
+
+		$this->sut->process( $event );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$order->delete_meta_data( '_wcpay_refund_status' );
+		$order->set_status( 'refunded' );
+		$order->save();
+
+		$this->sut->process( $event );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'failed', $order->get_status() );
+		$this->assertSame( 'failed', $order->get_meta( '_wcpay_refund_status', true ) );
+	}
+
+	/**
+	 * @testdox charge.refund.updated fails closed when the order payment lock is already held.
+	 */
+	public function test_charge_refund_updated_fails_closed_when_order_payment_is_locked(): void {
+		$order  = $this->create_refundable_woopayments_order( '10.00' );
+		$refund = $this->create_local_refund( $order, 4.00, 'Existing refund' );
+		$refund->update_meta_data( '_wcpay_refund_id', 're_123' );
+		$refund->save_meta_data();
+		$store = wc_get_container()->get( OrderPaymentStore::class );
+		$store->lock_order_payment( $order, 'existing_operation' );
+
+		try {
+			$this->sut->process(
+				$this->create_refund_updated_event(
+					array(
+						'status'         => 'failed',
+						'failure_reason' => 'lost_or_stolen_card',
+					)
+				)
+			);
+			$this->fail( 'Expected locked order refund update webhook to fail closed.' );
+		} catch ( RuntimeException $exception ) {
+			$this->assertStringContainsString( 'Could not claim WooPayments refund webhook lock', $exception->getMessage() );
+		} finally {
+			$store->unlock_order_payment( $order );
+		}
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertCount( 1, $order->get_refunds() );
+		$this->assertSame( '', $order->get_meta( '_wcpay_refund_status', true ) );
+	}
+
+	/**
+	 * @testdox charge.refund.updated records failed refunds without a matched local refund.
+	 */
+	public function test_charge_refund_updated_failed_without_matched_refund_adds_note(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+		$this->set_woopayments_account_country( 'US' );
+
+		$this->sut->process(
+			$this->create_refund_updated_event(
+				array(
+					'status'         => 'failed',
+					'failure_reason' => 'insufficient_funds',
+				)
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertCount( 0, $order->get_refunds() );
+		$this->assertSame( 'failed', $order->get_meta( '_wcpay_refund_status', true ) );
+		$this->assertOrderHasNoteContaining( $order, array( 'Refund of', 'failed', 'insufficient funds in your WooPayments balance', 'Future Refunds or Disputes (FROD) balance' ) );
+	}
+
+	/**
+	 * @testdox charge.refund.updated uses the non-FROD insufficient-balance note for unsupported countries.
+	 */
+	public function test_charge_refund_updated_insufficient_funds_without_frod_support_uses_short_note(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+		$this->set_woopayments_account_country( 'HK' );
+
+		$this->sut->process(
+			$this->create_refund_updated_event(
+				array(
+					'status'         => 'failed',
+					'failure_reason' => 'insufficient_funds',
+				)
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'failed', $order->get_meta( '_wcpay_refund_status', true ) );
+		$this->assertOrderHasNoteContaining( $order, array( 'Refund of', 'failed', 'insufficient funds in your WooPayments balance' ) );
+		$this->assertOrderLacksNoteContaining( $order, array( 'Future Refunds or Disputes (FROD) balance' ) );
+	}
+
+	/**
+	 * @testdox charge.refund.updated records canceled refunds and deletes the local refund.
+	 */
+	public function test_charge_refund_updated_canceled_marks_order_failed_and_deletes_refund(): void {
+		$order     = $this->create_refundable_woopayments_order( '10.00' );
+		$refund    = $this->create_local_refund( $order, 4.00, 'Existing refund' );
+		$refund_id = $refund->get_id();
+		$refund->update_meta_data( '_wcpay_refund_id', 're_123' );
+		$refund->save_meta_data();
+		$order->set_status( 'refunded' );
+		$order->save();
+
+		$this->sut->process( $this->create_refund_updated_event( array( 'status' => 'canceled' ) ) );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'failed', $order->get_status() );
+		$this->assertFalse( wc_get_order( $refund_id ), 'The matched local refund object should be deleted after the provider marks it canceled.' );
+		$this->assertNull( get_post( $refund_id ), 'The matched local refund post should be deleted after the provider marks it canceled.' );
+		$this->assertSame( 'failed', $order->get_meta( '_wcpay_refund_status', true ) );
+		$this->assertOrderHasNoteContaining( $order, array( 'A refund of', 'cancelled', 'WooPayments', 're_123' ) );
+	}
+
+	/**
+	 * @testdox charge.refund.updated notes include explicit currency when native multi-currency has additional currencies.
+	 */
+	public function test_charge_refund_updated_uses_explicit_currency_in_failed_refund_notes(): void {
+		update_option( 'wcpay_multi_currency_enabled_currencies', array( 'EUR' ) );
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+
+		$this->sut->process(
+			$this->create_refund_updated_event(
+				array(
+					'status'         => 'failed',
+					'failure_reason' => 'lost_or_stolen_card',
+				)
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertOrderHasNoteContaining( $order, array( 'A refund of', 'USD', 'WooPayments', 're_123', 'lost or stolen' ) );
+	}
+
+	/**
+	 * @testdox charge.refund.updated writes success metadata only for matched refunds.
+	 */
+	public function test_charge_refund_updated_succeeded_updates_matched_refund(): void {
+		$order  = $this->create_refundable_woopayments_order( '10.00' );
+		$refund = $this->create_local_refund( $order, 4.00, 'Existing refund' );
+		$refund->update_meta_data( '_wcpay_refund_id', 're_123' );
+		$refund->save_meta_data();
+
+		$this->sut->process(
+			$this->create_refund_updated_event(
+				array(
+					'status'              => 'succeeded',
+					'balance_transaction' => 'txn_updated',
+				)
+			)
+		);
+
+		$order  = wc_get_order( $order->get_id() );
+		$refund = wc_get_order( $refund->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
+		$this->assertSame( 'successful', $order->get_meta( '_wcpay_refund_status', true ) );
+		$this->assertSame( 'txn_updated', $refund->get_meta( '_wcpay_refund_transaction_id', true ) );
+		$this->assertOrderHasNoteContaining( $order, array( 'A refund of', 'was successfully processed using WooPayments', 're_123' ) );
+	}
+
+	/**
+	 * @testdox charge.refund.updated ignores succeeded updates without matched refunds.
+	 */
+	public function test_charge_refund_updated_succeeded_without_matched_refund_is_noop(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+
+		$this->sut->process( $this->create_refund_updated_event( array( 'status' => 'succeeded' ) ) );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertCount( 0, $order->get_refunds() );
+		$this->assertSame( '', $order->get_meta( '_wcpay_refund_status', true ) );
+		$this->assertOrderLacksNoteContaining( $order, array( 'A refund of', 're_123' ) );
+	}
+
+	/**
+	 * @testdox charge.refund.updated fails closed for unknown statuses.
+	 */
+	public function test_charge_refund_updated_fails_closed_for_unknown_status(): void {
+		$order = $this->create_refundable_woopayments_order( '10.00' );
+
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( 'Invalid refund update status' );
+
+		$this->sut->process( $this->create_refund_updated_event( array( 'status' => 'requires_action' ) ) );
+	}
+
+	/**
+	 * @testdox charge.refund.updated fails closed for missing required fields.
+	 */
+	public function test_charge_refund_updated_fails_closed_for_missing_required_fields(): void {
+		$this->create_refundable_woopayments_order( '10.00' );
+
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( 'missing required field: status' );
+
+		$this->sut->process( $this->create_refund_updated_event( array( 'status' => '' ) ) );
 	}
 
 	/**
@@ -983,6 +1557,78 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a WooPayments order with a captured charge for refund webhook tests.
+	 *
+	 * @param string $total Order total.
+	 * @return WC_Order
+	 */
+	private function create_refundable_woopayments_order( string $total ): WC_Order {
+		$order   = $this->create_woopayments_order();
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( $total );
+		$product->set_price( $total );
+		$product->save();
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => (float) $total,
+				'total'    => (float) $total,
+			)
+		);
+		$charge_id = 'ch_' . $order->get_id();
+		$order->set_total( $total );
+		$order->set_status( 'processing' );
+		$order->update_meta_data( '_charge_id', $charge_id );
+		$order->save();
+		$this->last_refund_charge_id = $charge_id;
+
+		return $order;
+	}
+
+	/**
+	 * Create a local refund fixture.
+	 *
+	 * @param WC_Order $order  Order object.
+	 * @param float    $amount Refund amount.
+	 * @param string   $reason Refund reason.
+	 * @return WC_Order_Refund
+	 */
+	private function create_local_refund( WC_Order $order, float $amount, string $reason ): WC_Order_Refund {
+		$refund = wc_create_refund(
+			array(
+				'order_id'       => $order->get_id(),
+				'amount'         => $amount,
+				'reason'         => $reason,
+				'refund_payment' => false,
+			)
+		);
+
+		if ( ! $refund instanceof WC_Order_Refund ) {
+			$this->fail( 'Expected local refund creation to return a WC_Order_Refund.' );
+		}
+
+		return $refund;
+	}
+
+	/**
+	 * Set cached WooPayments account country data.
+	 *
+	 * @param string $country Account country.
+	 */
+	private function set_woopayments_account_country( string $country ): void {
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => array(
+					'account_id' => 'acct_123',
+					'country'    => $country,
+				),
+			)
+		);
+	}
+
+	/**
 	 * Assert that an order has a note with the expected exact content.
 	 *
 	 * @param WC_Order $order    Order object.
@@ -1145,6 +1791,80 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 		return array(
 			'id'   => 'evt_dispute',
 			'type' => $type,
+			'data' => array(
+				'object' => $object,
+			),
+		);
+	}
+
+	/**
+	 * Create a charge.refunded event.
+	 *
+	 * @param WC_Order            $order         Order object.
+	 * @param int                 $charge_amount Charge amount in provider minor units.
+	 * @param int                 $refund_amount Refund amount in provider minor units.
+	 * @param string              $refund_status Provider refund status.
+	 * @param array<string,mixed> $overrides     Charge object overrides.
+	 * @return array<string,mixed>
+	 */
+	private function create_charge_refunded_event( WC_Order $order, int $charge_amount, int $refund_amount, string $refund_status, array $overrides = array() ): array {
+		$object = array_replace_recursive(
+			array(
+				'id'       => (string) $order->get_meta( '_charge_id', true ),
+				'status'   => 'succeeded',
+				'amount'   => $charge_amount,
+				'currency' => 'usd',
+				'captured' => true,
+				'metadata' => array(
+					'order_id'  => (string) $order->get_id(),
+					'order_key' => $order->get_order_key(),
+				),
+				'refunds'  => array(
+					'data' => array(
+						array(
+							'id'                  => 're_123',
+							'status'              => $refund_status,
+							'amount'              => $refund_amount,
+							'currency'            => 'usd',
+							'reason'              => 'requested_by_customer',
+							'balance_transaction' => 'txn_123',
+						),
+					),
+				),
+			),
+			$overrides
+		);
+
+		return array(
+			'id'   => 'evt_refunded',
+			'type' => 'charge.refunded',
+			'data' => array(
+				'object' => $object,
+			),
+		);
+	}
+
+	/**
+	 * Create a charge.refund.updated event.
+	 *
+	 * @param array<string,mixed> $overrides Refund object overrides.
+	 * @return array<string,mixed>
+	 */
+	private function create_refund_updated_event( array $overrides = array() ): array {
+		$object = array_replace_recursive(
+			array(
+				'id'       => 're_123',
+				'charge'   => $this->last_refund_charge_id,
+				'amount'   => 400,
+				'currency' => 'usd',
+				'status'   => 'failed',
+			),
+			$overrides
+		);
+
+		return array(
+			'id'   => 'evt_refund_updated',
+			'type' => 'charge.refund.updated',
 			'data' => array(
 				'object' => $object,
 			),
